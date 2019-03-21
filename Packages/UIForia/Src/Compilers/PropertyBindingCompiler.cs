@@ -19,23 +19,17 @@ namespace UIForia.Compilers {
 
         private static readonly Dictionary<Type, List<IAliasSource>> aliasMap = new Dictionary<Type, List<IAliasSource>>();
 
-        public static readonly string EvtArgDefaultName = "$event";
-
         private static readonly Dictionary<Type, Dictionary<string, LightList<object>>> m_TypeMap = new Dictionary<Type, Dictionary<string, LightList<object>>>();
 
         public const string k_BindTo = "bindTo";
         public const string k_Once = "once";
         public const string k_Initialize = "initialize";
+        public const string k_Read = "read";
+        public const string k_Write = "write";
+        public const string k_ReadWrite = "readwrite";
 
         private Type rootType;
         private Type elementType;
-
-        public static readonly string[] EvtArgNames = {
-            "$eventArg0",
-            "$eventArg1",
-            "$eventArg2",
-            "$eventArg3"
-        };
 
         private ExpressionCompiler compiler;
 
@@ -159,10 +153,13 @@ namespace UIForia.Compilers {
             }
 
             if (attrKey.IndexOf(".", StringComparison.Ordinal) != -1) {
+                // todo -- don't allocated, use span or something similar
                 string[] parts = attrKey.Split('.');
                 string property = parts[0];
                 string modifier = parts[1];
 
+                // todo support multiple event modifiers
+                
                 switch (modifier) {
                     case k_BindTo: {
                         Binding binding = CompileBoundProperty(property, attrValue);
@@ -191,6 +188,15 @@ namespace UIForia.Compilers {
                         binding.bindingType = BindingType.Once;
                         return binding;
                     }
+                    case k_Read: {
+                        return CompileBinding(attrKey, attrValue);
+                    }
+
+                    case k_Write:
+                        return CompileWriteBinding(parts[0], attrValue);
+
+                    case k_ReadWrite:
+                        break;
                 }
 
                 if (property == "style") return null;
@@ -199,6 +205,63 @@ namespace UIForia.Compilers {
             }
 
             return CompileBinding(attrKey, attrValue);
+        }
+
+        private Binding CompileWriteBinding(string attrKey, string attrValue) {
+            FieldInfo fieldInfo = ReflectionUtil.GetFieldInfo(elementType, attrKey);
+            
+            if (fieldInfo != null) {
+                
+                ReflectionUtil.LinqAccessor accessor = ReflectionUtil.GetLinqFieldAccessors(elementType, fieldInfo.FieldType, attrKey);
+
+                WriteTargetExpression expression = compiler.CompileWriteTarget(rootType, fieldInfo.FieldType, attrValue);
+
+                Binding writeBinding = (Binding)ReflectionUtil.CreateGenericInstanceFromOpenType(typeof(WriteBinding<,>),
+                    new GenericArguments(),
+                    new ConstructorArguments(attrKey, expression, accessor.getter)
+                );
+
+                return writeBinding;
+
+//                ReflectionUtil.LinqAccessor accessor = ReflectionUtil.GetLinqFieldAccessors(elementType, fieldInfo.FieldType, attrKey);
+//
+//                ReflectionUtil.TypeArray2[0] = elementType;
+//                ReflectionUtil.TypeArray2[1] = fieldInfo.FieldType;
+//
+//                if (!fieldInfo.FieldType.IsAssignableFrom(expression.YieldedType)) {
+//                    UnityEngine.Debug.Log($"Error compiling binding: {attrKey}={attrValue}, Type {fieldInfo.FieldType} is not assignable from {expression.YieldedType}");
+//                    return null;
+//                }
+//
+//                Dictionary<string, LightList<object>> actionMap = GetActionMap(elementType);
+//
+//                LightList<object> list = actionMap?.GetOrDefault(attrKey);
+//                if (list != null) {
+//                    ReflectionUtil.ObjectArray5[0] = attrKey;
+//                    ReflectionUtil.ObjectArray5[1] = expression;
+//                    ReflectionUtil.ObjectArray5[2] = accessor.getter;
+//                    ReflectionUtil.ObjectArray5[3] = accessor.setter;
+//                    ReflectionUtil.ObjectArray5[4] = list;
+//
+//                    return (Binding) ReflectionUtil.CreateGenericInstanceFromOpenType(
+//                        typeof(FieldSetterBinding_WithCallbacks<,>),
+//                        ReflectionUtil.TypeArray2,
+//                        ReflectionUtil.ObjectArray5
+//                    );
+//                }
+//
+//                ReflectionUtil.ObjectArray4[0] = attrKey;
+//                ReflectionUtil.ObjectArray4[1] = expression;
+//                ReflectionUtil.ObjectArray4[2] = accessor.getter;
+//                ReflectionUtil.ObjectArray4[3] = accessor.setter;
+//                return (Binding) ReflectionUtil.CreateGenericInstanceFromOpenType(
+//                    typeof(FieldSetterBinding<,>),
+//                    ReflectionUtil.TypeArray2,
+//                    ReflectionUtil.ObjectArray4
+//                );
+            }
+            
+            throw new ParseException(attrKey + " is a not a field or property on type " + elementType);
         }
 
         private Binding CompileBinding(string attrKey, string attrValue) {

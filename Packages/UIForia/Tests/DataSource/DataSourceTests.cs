@@ -1,9 +1,7 @@
 using System;
-using System.Threading;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using UIForia.DataSource;
-using UIForia.Util;
 
 [TestFixture]
 public class DataSourceTests {

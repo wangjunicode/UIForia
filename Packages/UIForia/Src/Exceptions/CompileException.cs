@@ -7,7 +7,8 @@ namespace UIForia.Exceptions {
     public class CompileException : Exception {
 
         private string fileName = "";
-
+        public string expression = "";
+        
         public CompileException(string message = null) : base(message) {
         }
 
@@ -24,7 +25,22 @@ namespace UIForia.Exceptions {
             this.fileName = "Error in file " + name + ": ";
         }
 
-        public override string Message => fileName + base.Message;
+        public override string Message {
+            get {
+                string retn = fileName + base.Message;
+
+                if (!string.IsNullOrEmpty(expression)) {
+                    retn += "\nExpression was: " + expression;
+                }
+
+                return retn;
+            }
+        }
+
+        public void SetExpression(string input) {
+            expression = input;
+        }
+
     }
 
     public static class CompileExceptions {

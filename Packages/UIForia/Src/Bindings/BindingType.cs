@@ -6,7 +6,9 @@ namespace UIForia.Bindings {
         Once,
         OnEnable,
         Debounced,
-        Normal
+        Normal,
+        Read,
+        Write
 
     }
 

@@ -59,7 +59,7 @@ public class InputSystem_DragTests {
         [OnDragCreate]
         public void CreateDragEvent() {}
 
-    }
+    } 
 
     [Test]
     public void DragCreate_CreateFromAnnotation() {

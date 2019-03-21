@@ -68,6 +68,8 @@ namespace UIForia.UIInput {
 
     }
 
+    // todo -- allow a generic type for DragEvent since reflection complains if the func type is not exact
+    //ie allow void HandleDragMove(MyDragType evt);
     public class DragEventCreator_WithEvent<T> : DragEventCreator {
 
         private readonly Func<T, MouseInputEvent, DragEvent> handler;

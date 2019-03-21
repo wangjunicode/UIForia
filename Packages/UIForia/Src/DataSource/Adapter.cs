@@ -8,7 +8,7 @@ namespace UIForia.DataSource {
         public virtual Task Configure() {
             return null;
         }
-        
+
         public virtual async Task<T> AddRecord(T record) {
             return record;
         }
@@ -21,8 +21,8 @@ namespace UIForia.DataSource {
             return newRecord;
         }
 
-        public virtual async Task<IList<T>> LoadRecords(IList<T> localRecords) { 
-            return localRecords ?? new List<T>();
+        public virtual async Task<ICollection<T>> LoadRecords(IRecordStore<T> store, ICollection<T> output) {
+            return store.GetAllRecords(output);
         }
 
         public virtual bool RecordChanged(T recordA, T recordB) {

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Reflection;
 using NUnit.Framework;
 using UIForia.Util;
@@ -148,4 +149,26 @@ public class ReflectionUtilTests {
         Assert.AreEqual("extends", d1(two));
 
     }
+
+    [Test]
+    public void GenerateArrayGetterSetter() {
+        float[] array = new float[4];
+        Func<float[], int, float, float> callback = (Func<float[], int, float, float>) ReflectionUtil.CreateArraySetter(typeof(float[]));
+        callback.Invoke(array, 1, 5f);
+        Func<float[], int, float> getter = (Func<float[], int, float>) ReflectionUtil.CreateArrayGetter(typeof(float[]));
+        Assert.AreEqual(5f, getter(array, 1), 5f);
+    }
+
+    [Test]
+    public void GenerateIndexSetterGetter() {
+        List<string> list = new List<string>();
+        list.Add("hello");
+        list.Add("world");
+        var y = (Func<List<string>,int, string, string>)ReflectionUtil.CreateIndexSetter(typeof(List<string>));
+        var z = (Func<List<string>,int, string>)ReflectionUtil.CreateIndexGetter(typeof(List<string>));
+        y.Invoke(list, 0, "hallochen");
+        Assert.AreEqual(list[0], "hallochen");
+        Assert.AreEqual(z.Invoke(list, 0), "hallochen");
+    }
+    
 }

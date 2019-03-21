@@ -20,7 +20,7 @@
         <!--<Group style="button" onMouseClick="SetText('two')">Two</Group>-->
         <!--<Group style="button" onMouseClick="SetText('three')">Three</Group>-->
 
-        <InputElement/>
+        <InputElement value.read="textValueToRead" value.write="textValueToWrite"/>
         
     </Contents>
     

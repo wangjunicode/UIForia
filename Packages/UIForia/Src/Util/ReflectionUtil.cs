@@ -132,8 +132,18 @@ namespace UIForia.Util {
             return type.GetField(fieldName, InstanceBindFlags) != null;
         }
 
+        public static bool IsField(Type type, string fieldName, out FieldInfo fieldInfo) {
+            fieldInfo = type.GetField(fieldName, InstanceBindFlags);
+            return fieldInfo != null;
+        }
+        
         public static bool IsProperty(Type type, string propertyName) {
             return type.GetProperty(propertyName, InstanceBindFlags) != null;
+        }
+
+        public static bool IsProperty(Type type, string propertyName, out PropertyInfo propertyInfo) {
+            propertyInfo = type.GetProperty(propertyName, InstanceBindFlags);
+            return propertyInfo != null;
         }
 
         public static Type GetFieldType(Type type, string fieldName) {
@@ -643,7 +653,7 @@ namespace UIForia.Util {
 
         private static Delegate CreateFieldSetter(Type baseType, Type fieldType, string fieldName) {
             FieldInfo fieldInfo = baseType.GetField(fieldName);
-            
+
             if (fieldInfo == null) {
                 PropertyInfo propertyInfo = baseType.GetProperty(fieldName);
                 if (propertyInfo == null || !propertyInfo.CanWrite) {
@@ -654,12 +664,12 @@ namespace UIForia.Util {
             if (fieldInfo.IsInitOnly) {
                 return null;
             }
+
             ParameterExpression paramExpression0 = Expression.Parameter(baseType);
             ParameterExpression paramExpression1 = Expression.Parameter(fieldType, fieldName);
             MemberExpression fieldGetter = Expression.Field(paramExpression0, fieldName);
 
             try {
-
                 return Expression.Lambda(
                     Expression.Assign(fieldGetter, paramExpression1),
                     paramExpression0,
@@ -773,6 +783,78 @@ namespace UIForia.Util {
             return Expression.Lambda(propertyGetterExpression, paramExpression).Compile();
         }
 
+        public static Delegate CreateArraySetter(Type arrayType) {
+            
+            ParameterExpression arrayExpr = Expression.Parameter(arrayType, "array");
+            ParameterExpression indexExpr = Expression.Parameter(typeof(int), "idx");
+            ParameterExpression valueExpr = Expression.Parameter(arrayType.GetElementType(), "value");
+            
+            Expression  arrayAccess = Expression.ArrayAccess(arrayExpr, indexExpr);
+
+            return Expression.Lambda(
+                Expression.Assign(arrayAccess, valueExpr),
+                arrayExpr,
+                indexExpr,
+                valueExpr
+            ).Compile();
+            
+        }
+
+        public static Delegate CreateIndexGetter(Type type) {
+            PropertyInfo info = type.GetProperty("Item");
+            
+            if (info == null) {
+                return null;
+            }
+            
+            ParameterInfo[] parameters = info.GetIndexParameters();
+            if (parameters.Length != 1) {
+                return null;
+            }
+            
+            ParameterExpression  targetExpr = Expression.Parameter(type);
+            ParameterExpression keyExpr = Expression.Parameter(parameters[0].ParameterType);
+            
+            IndexExpression indexExpr = Expression.Property(targetExpr, info, keyExpr);
+            return Expression.Lambda(indexExpr, targetExpr, keyExpr).Compile();
+        }
+
+        public static Delegate CreateIndexSetter(Type type) {
+            PropertyInfo info = type.GetProperty("Item");
+            
+            if (info == null) {
+                return null;
+            }
+            
+            ParameterInfo[] parameters = info.GetIndexParameters();
+            if (parameters.Length != 1) {
+                return null;
+            }
+            
+            ParameterExpression  targetExpr = Expression.Parameter(type);
+            ParameterExpression keyExpr = Expression.Parameter(parameters[0].ParameterType);
+            ParameterExpression valueExpr = Expression.Parameter(info.PropertyType);
+            
+            IndexExpression indexExpr = Expression.Property(targetExpr, info, keyExpr);
+            BinaryExpression assign = Expression.Assign(indexExpr, valueExpr);
+            return Expression.Lambda(assign, targetExpr, keyExpr, valueExpr).Compile();
+        }
+        
+        public static Delegate CreateArrayGetter(Type arrayType) {
+            
+            ParameterExpression arrayExpr = Expression.Parameter(arrayType, "array");
+            ParameterExpression indexExpr = Expression.Parameter(typeof(int), "idx");
+            
+            Expression  arrayAccess = Expression.ArrayAccess(arrayExpr, indexExpr);
+
+            return Expression.Lambda(
+                arrayAccess,
+                arrayExpr,
+                indexExpr
+            ).Compile();
+            
+        }
+        
         // todo -- need some parameter matching at least
         public static MethodInfo GetMethodInfo(Type type, string methodName) {
             return type.GetMethod(methodName, StaticFlags | InstanceBindFlags);
@@ -1094,4 +1176,5 @@ namespace UIForia.Util {
         }
 
     }
+
 }

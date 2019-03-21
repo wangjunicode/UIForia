@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using UIForia.Util;
 
 namespace UIForia.DataSource {
 
@@ -23,8 +22,36 @@ namespace UIForia.DataSource {
 
         public int RecordCount => recordStore.Count;
 
-        public void LoadRecords(Action<List<T>> onComplete) {
-            // adapter.LoadRecords();
+        public async Task<ICollection<T>> LoadRecords(ICollection<T> output = null) {
+            if (config != null) {
+                await config;
+                config = null;
+            }
+
+            output = await adapter.LoadRecords(recordStore, output);
+
+            if (output == null) {
+                return null;
+            }
+
+            foreach (T returned in output) {
+                if (returned == null) {
+                    continue;
+                }
+
+                T local = recordStore.GetRecord(returned.Id);
+
+                if (local == null) {
+                    onRecordAdded?.Invoke(returned);
+                }
+                else if (adapter.RecordChanged(local, returned)) {
+                    onRecordChanged?.Invoke(returned);
+                }
+
+                recordStore.SetRecord(returned);
+            }
+
+            return output;
         }
 
         public async Task<T> AddRecord(T record) {
@@ -50,7 +77,6 @@ namespace UIForia.DataSource {
         }
 
         public async Task<T> SetRecord(int id, T record) {
-
             if (record == null) {
                 return await RemoveRecord(id);
             }
@@ -92,12 +118,14 @@ namespace UIForia.DataSource {
                 await config;
                 config = null;
             }
+
             T localRecord = recordStore.GetRecord(id);
             T returnedRecord = await adapter.RemoveRecord(id, localRecord);
             localRecord = recordStore.RemoveRecord(id);
             if (localRecord != null) {
                 onRecordRemoved?.Invoke(returnedRecord);
             }
+
             return returnedRecord;
         }
 

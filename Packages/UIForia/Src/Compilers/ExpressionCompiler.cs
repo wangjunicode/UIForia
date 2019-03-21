@@ -121,6 +121,23 @@ namespace UIForia.Compilers {
             return Compile<T>(rootType, rootType, input);
         }
 
+        public WriteTargetExpression<T> CompileWriteTarget<T>(Type rootType, string input) {
+            return (WriteTargetExpression<T>) CompileWriteTarget(rootType, typeof(T), input);
+        }
+
+        public WriteTargetExpression CompileWriteTarget(Type rootType, Type valueType, string input) {
+            this.targetType = valueType;
+            this.rootType = rootType;
+            ASTNode astRoot = ExpressionParser.Parse(input);
+            try {
+                return VisitWriteTarget(astRoot);
+            }
+            catch (CompileException ex) {
+                ex.SetExpression(input);
+                throw;
+            }
+        }
+
         public Expression Compile(Type rootType, string input, Type targetType) {
             this.targetType = targetType;
             this.rootType = rootType;
@@ -169,7 +186,7 @@ namespace UIForia.Compilers {
                     return VisitTypeOf((TypeNode) node);
 
                 case ASTNodeType.Identifier:
-                    return VisitSimpleRootAccess((IdentifierNode) node);
+                    return VisitSimpleRootAccess((IdentifierNode) node, false);
 
                 case ASTNodeType.UnaryNot:
                     return VisitUnaryNot((UnaryExpressionNode) node);
@@ -195,11 +212,129 @@ namespace UIForia.Compilers {
             }
         }
 
+        private WriteTargetExpression VisitWriteTarget(ASTNode node) {
+            switch (node.type) {
+                case ASTNodeType.Identifier: {
+                    IdentifierNode idNode = (IdentifierNode) node;
+                    string fieldName = idNode.name;
+                    if (ReflectionUtil.IsField(rootType, fieldName, out FieldInfo fieldInfo)) {
+                        if (fieldInfo.IsInitOnly) {
+                            throw new CompileException("Cannot write to a readonly or const field");
+                        }
+
+                        if (fieldInfo.IsStatic) {
+                            throw new CompileException("Cannot write to a static field");
+                        }
+
+                        return (WriteTargetExpression) ReflectionUtil.CreateGenericInstanceFromOpenType(
+                            typeof(FieldPropertyTargetExpression<,>),
+                            new GenericArguments(rootType, fieldInfo.FieldType),
+                            new ConstructorArguments(fieldInfo, null)
+                        );
+                    }
+                    else if (ReflectionUtil.IsProperty(rootType, fieldName, out PropertyInfo propertyInfo)) {
+                        if (!propertyInfo.CanWrite) {
+                            throw new CompileException("Cannot write to a non writable property");
+                        }
+
+                        if (propertyInfo.SetMethod.IsStatic || propertyInfo.GetMethod.IsStatic) {
+                            throw new CompileException("Cannot write to a static property");
+                        }
+
+                        return (WriteTargetExpression) ReflectionUtil.CreateGenericInstanceFromOpenType(
+                            typeof(FieldPropertyTargetExpression<,>),
+                            new GenericArguments(rootType, propertyInfo.PropertyType),
+                            new ConstructorArguments(null, propertyInfo)
+                        );
+                    }
+
+                    throw new CompileException("Invalid write target expression");
+                }
+                case ASTNodeType.AccessExpression: {
+                    MemberAccessExpressionNode memberNode = (MemberAccessExpressionNode) node;
+                    if (memberNode.identifier[0] == '$') {
+                        throw new CompileException("Write Access Expressions don't support aliases");
+                    }
+
+                    LightList<AccessInfo> accessInfos = GetAccessInfoList(rootType, memberNode);
+
+                    if (accessInfos == null) {
+                        throw new CompileException("Invalid write access express");
+                    }
+
+                    AccessExpressionPart retn = MakeAccessPartFromInfo(accessInfos, 0, true);
+
+                    Expression fetcher = (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
+                        typeof(AccessExpression<,>),
+                        new GenericArguments(retn.YieldedType, rootType),
+                        new ConstructorArguments(retn)
+                    );
+
+                    if (accessInfos.Last.type == AccessInfoType.Index) {
+                        if (accessInfos.Last.arguments.Count != 1) {
+                            throw new CompileException("Unable to compile write target expressions with multiple index parameters");
+                        }
+
+                        return (WriteTargetExpression) ReflectionUtil.CreateGenericInstanceFromOpenType(
+                            typeof(IndexedWriteTargetExpression<,,>),
+                            new GenericArguments(targetType, accessInfos.Last.inputType, accessInfos.Last.arguments[0].YieldedType),
+                            new ConstructorArguments(fetcher, accessInfos.Last.arguments[0])
+                        );
+                    }
+                    else if (accessInfos.Last.type == AccessInfoType.Field) {
+                        if (accessInfos.Last.inputType.IsValueType) {
+                            throw new CompileException("cannot use struct types as a write assignment targets");
+                        }
+
+                        FieldInfo fieldInfo = accessInfos.Last.fieldInfo;
+                        if (fieldInfo.IsInitOnly) {
+                            throw new CompileException("Cannot write to a readonly or const field");
+                        }
+
+                        if (fieldInfo.IsStatic) {
+                            throw new CompileException("Cannot write to a static field");
+                        }
+
+                        return (WriteTargetExpression) ReflectionUtil.CreateGenericInstanceFromOpenType(
+                            typeof(MemberWriteTargetExpression<,>),
+                            new GenericArguments(accessInfos.Last.inputType, targetType),
+                            new ConstructorArguments(fetcher, fieldInfo, null)
+                        );
+                    }
+                    else if (accessInfos.Last.type == AccessInfoType.Property) {
+                        if (accessInfos.Last.inputType.IsValueType) {
+                            throw new CompileException("cannot use struct types as a write assignment targets");
+                        }
+
+                        PropertyInfo propertyInfo = accessInfos.Last.propertyInfo;
+
+                        if (!propertyInfo.CanWrite) {
+                            throw new CompileException("Cannot write to a non writable property");
+                        }
+
+                        if (propertyInfo.SetMethod.IsStatic || propertyInfo.GetMethod.IsStatic) {
+                            throw new CompileException("Cannot write to a static property");
+                        }
+
+                        return (WriteTargetExpression) ReflectionUtil.CreateGenericInstanceFromOpenType(
+                            typeof(MemberWriteTargetExpression<,>),
+                            new GenericArguments(accessInfos.Last.inputType, targetType),
+                            new ConstructorArguments(fetcher, null, propertyInfo)
+                        );
+                    }
+
+                    return null;
+                }
+
+                default:
+                    throw new CompileException("Unable to treat " + node.type + " as a write target expression");
+            }
+        }
+
         private Expression VisitListExpression(ListInitializerNode node) {
             // todo if we have a target type, try to cast all nodes to that type's element type
             // otherwise use a base type
             Type targetElementType = null;
-
             if (targetType != null && typeof(IList).IsAssignableFrom(targetType)) {
                 if (targetType.IsArray) {
                     targetElementType = targetType.GetElementType();
@@ -210,31 +345,30 @@ namespace UIForia.Compilers {
             }
 
             LightList<Expression> exprList = LightListPool<Expression>.Get();
-            LightList<Type> typeList = LightListPool<Type>.Get();
 
-            for (int i = 0; i < node.list.Count; i++) {
+            LightList<Type> typeList = LightListPool<Type>.Get();
+            for (int i = 0;
+                i < node.list.Count;
+                i++) {
                 Expression expr = Visit(targetElementType, node.list[i]);
                 exprList.Add(expr);
                 typeList.Add(expr.YieldedType);
             }
 
             Type commonBase = ReflectionUtil.GetCommonBaseClass(typeList);
-
-
             if (commonBase == null || commonBase == typeof(ValueType) || commonBase == typeof(object)) {
                 throw new Exception("Types in list literal don't match, common base type was: " + commonBase);
             }
 
             Type expressionType = ReflectionUtil.CreateGenericType(typeof(Expression<>), commonBase);
 
-            IList retnValue = null;
             Expression retnExpr = null;
-            
             if (targetType == null || targetType.IsArray) {
-                retnValue = Array.CreateInstance(expressionType, node.list.Count);
+                IList retnValue = Array.CreateInstance(expressionType, node.list.Count);
                 for (int i = 0; i < retnValue.Count; i++) {
                     retnValue[i] = exprList[i];
                 }
+
                 retnExpr = (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
                     typeof(ArrayLiteralExpression<>),
                     new GenericArguments(targetElementType),
@@ -244,22 +378,20 @@ namespace UIForia.Compilers {
 
             LightListPool<Expression>.Release(ref exprList);
             LightListPool<Type>.Release(ref typeList);
-
             return retnExpr;
-      
-            
         }
 
         private LightList<AccessInfo> GetAccessInfoList(Type rootType, MemberAccessExpressionNode node, bool injectHead = true) {
             LightList<AccessInfo> accessInfoList = LightListPool<AccessInfo>.Get();
 
             Type lastType = rootType;
-
             if (injectHead) {
                 node.parts.Insert(0, ASTNode.DotAccessNode(node.identifier));
             }
 
-            for (int i = 0; i < node.parts.Count; i++) {
+            for (int i = 0;
+                i < node.parts.Count;
+                i++) {
                 ASTNode part = node.parts[i];
                 AccessInfo accessInfo = new AccessInfo();
                 switch (part) {
@@ -336,11 +468,8 @@ namespace UIForia.Compilers {
 
         private Expression VisitStaticAccessExpression(Type headType, MemberAccessExpressionNode node) {
             LightList<AccessInfo> accessInfos = GetAccessInfoList(headType, node, false);
-
-            AccessExpressionPart retn = MakeAccessPartFromInfo(accessInfos, 0);
-
+            AccessExpressionPart retn = MakeAccessPartFromInfo(accessInfos, 0, false);
             LightListPool<AccessInfo>.Release(ref accessInfos);
-
             return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
                 typeof(AccessExpression_Static<,>),
                 new GenericArguments(retn.YieldedType, headType),
@@ -351,8 +480,7 @@ namespace UIForia.Compilers {
         public Expression CompileRestOfChain(Expression root, CompilerContext context) {
             Type yieldedType = root.YieldedType;
             LightList<AccessInfo> accessInfos = GetAccessInfoList(yieldedType, context.firstNode as MemberAccessExpressionNode, false);
-
-            AccessExpressionPart retn = MakeAccessPartFromInfo(accessInfos, 0);
+            AccessExpressionPart retn = MakeAccessPartFromInfo(accessInfos, 0, false);
 
             AccessExpressionPart bridge = (AccessExpressionPart) ReflectionUtil.CreateGenericInstanceFromOpenType(
                 typeof(AliasAccessBridge<,,>),
@@ -365,21 +493,18 @@ namespace UIForia.Compilers {
                 new GenericArguments(retn.YieldedType, rootType),
                 new ConstructorArguments(bridge)
             );
-
             return GetImplicitCast(expr, targetType);
         }
 
         private Expression VisitAliasAccessExpression(MemberAccessExpressionNode node) {
             ExpressionAliasResolver resolver = GetResolver(node.identifier);
-
             if (resolver == null) {
                 throw new CompileException("Unable to find a resolver for alias " + node.identifier);
             }
 
-            // find the return type to find the head type
-            // access info list needs to replace first node with 
+// find the return type to find the head type
+// access info list needs to replace first node with 
             CompilerContext context = new CompilerContext(this, rootType, currentType, targetType, node);
-
             if (node.parts[0] is InvokeNode invokeNode) {
                 return resolver.CompileAsMethodExpression(context, invokeNode.parameters);
             }
@@ -407,13 +532,11 @@ namespace UIForia.Compilers {
 
         private List<Expression> VisitFuncArguments(Type funcType, List<ASTNode> arguments, out Type outputType) {
             Type[] funcParameterTypes = funcType.GetGenericArguments();
-
             if (arguments.Count + 1 != funcParameterTypes.Length) {
                 throw new CompileException($"parameter count mismatch when compiling func invocation {funcType}");
             }
 
             List<Expression> expressionArguments = new List<Expression>();
-
             for (int i = 0; i < arguments.Count; i++) {
                 Expression argument = Visit(funcParameterTypes[i], arguments[i]);
                 if (argument != null) {
@@ -431,7 +554,6 @@ namespace UIForia.Compilers {
         private List<Expression> VisitMethodArguments(Type originType, string methodName, List<ASTNode> arguments, out MethodInfo methodInfo) {
             List<MethodInfo> infos = ReflectionUtil.GetMethodsWithName(originType, methodName);
             List<Expression> expressionArguments = new List<Expression>();
-
             for (int i = 0; i < infos.Count; i++) {
                 ParameterInfo[] parameterInfos = infos[i].GetParameters();
                 if (parameterInfos.Length != arguments.Count) {
@@ -467,7 +589,6 @@ namespace UIForia.Compilers {
             }
 
             LightList<AccessInfo> accessInfos = GetAccessInfoList(rootType, node);
-
             if (accessInfos == null) {
                 Type staticType = TypeProcessor.ResolveType(rootType, node.identifier, namespaces);
                 if (staticType == null) {
@@ -477,8 +598,7 @@ namespace UIForia.Compilers {
                 return VisitStaticAccessExpression(staticType, node);
             }
 
-            AccessExpressionPart retn = MakeAccessPartFromInfo(accessInfos, 0);
-
+            AccessExpressionPart retn = MakeAccessPartFromInfo(accessInfos, 0, false);
             return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
                 typeof(AccessExpression<,>),
                 new GenericArguments(retn.YieldedType, rootType),
@@ -486,24 +606,24 @@ namespace UIForia.Compilers {
             );
         }
 
-        private AccessExpressionPart MakeAccessPartFromInfo(LightList<AccessInfo> infos, int index) {
-            if (index == infos.Count) {
+        private AccessExpressionPart MakeAccessPartFromInfo(LightList<AccessInfo> infos, int index, bool writeTarget) {
+            if (writeTarget && index == infos.Count - 1) {
+                return null;
+            }
+            else if (index == infos.Count) {
                 return null;
             }
 
-            Type finalOutputType = infos[infos.Count - 1].outputType;
-
+            Type finalOutputType = writeTarget ? infos[infos.Count - 2].outputType : infos[infos.Count - 1].outputType;
             if (finalOutputType == typeof(void)) {
                 finalOutputType = typeof(Terminal);
             }
 
-            AccessExpressionPart next = MakeAccessPartFromInfo(infos, index + 1);
+            AccessExpressionPart next = MakeAccessPartFromInfo(infos, index + 1, writeTarget);
             AccessInfo info = infos[index];
-
             switch (info.type) {
                 case AccessInfoType.Invalid:
                     return null;
-
                 case AccessInfoType.MethodInvoke:
                     Expression expr = MethodExpressionFactory.CreateMethodExpression(info.methodInfo, info.arguments);
                     return (AccessExpressionPart) ReflectionUtil.CreateGenericInstanceFromOpenType(
@@ -511,7 +631,6 @@ namespace UIForia.Compilers {
                         new GenericArguments(finalOutputType, info.inputType, info.outputType),
                         new ConstructorArguments(expr, next)
                     );
-
                 case AccessInfoType.FuncInvoke:
                     Type t0 = info.arguments.Count > 0 ? info.arguments[0].YieldedType : typeof(Terminal);
                     Type t1 = info.arguments.Count > 1 ? info.arguments[1].YieldedType : typeof(Terminal);
@@ -522,31 +641,26 @@ namespace UIForia.Compilers {
                         new[] {finalOutputType, info.inputType, info.outputType, t0, t1, t2, t3},
                         new ConstructorArguments(info.arguments, next)
                     );
-
                 case AccessInfoType.ActionInvoke:
                     throw new NotImplementedException();
-
                 case AccessInfoType.Field:
                     return (AccessExpressionPart) ReflectionUtil.CreateGenericInstanceFromOpenType(
                         typeof(AccessExpressionPart_FieldProperty_Field<,,>),
                         new GenericArguments(finalOutputType, info.inputType, info.outputType),
                         new ConstructorArguments(info.fieldInfo, next)
                     );
-
                 case AccessInfoType.Property:
                     return (AccessExpressionPart) ReflectionUtil.CreateGenericInstanceFromOpenType(
                         typeof(AccessExpressionPart_FieldProperty_Property<,,>),
                         new GenericArguments(finalOutputType, info.inputType, info.outputType),
                         new ConstructorArguments(info.propertyInfo, next)
                     );
-
                 case AccessInfoType.Index:
                     return (AccessExpressionPart) ReflectionUtil.CreateGenericInstanceFromOpenType(
                         typeof(AccessExpressionPart_Index<,,>),
                         new GenericArguments(finalOutputType, info.inputType, info.outputType),
                         new ConstructorArguments(next, info.arguments[0])
                     );
-
                 default:
                     throw new ArgumentOutOfRangeException();
             }
@@ -554,13 +668,11 @@ namespace UIForia.Compilers {
 
         private AccessExpressionPart MakeAccessPart(int u, List<ASTNode> parts, Type outputType, LightList<Type> inputTypes) {
             AccessExpressionPart retn = null;
-
             retn = MakeFieldAccessor(u, parts, outputType, inputTypes); // todo -- field could be a func / action 
             retn = retn ?? MakePropertyAccessor(u, parts, outputType, inputTypes);
             retn = retn ?? MakeMethodAccessor(u, parts, outputType, inputTypes);
 //            retn = retn ?? MakeFuncActionAccessor(u, parts, outputType, inputTypes);
             retn = retn ?? MakeIndexAccessor(u, parts, outputType, inputTypes);
-
             return retn;
         }
 
@@ -573,10 +685,10 @@ namespace UIForia.Compilers {
             if (dotAccessNode == null) {
                 return null;
             }
-            // next needs to be an invoke node
 
+// next needs to be an invoke node
             if ((parts[u + 1] is InvokeNode invokeNode)) {
-                // find method info for type and make method
+// find method info for type and make method
                 MethodInfo info = ReflectionUtil.GetMethodInfo(inputTypes[u], dotAccessNode.propertyName);
             }
 
@@ -589,11 +701,9 @@ namespace UIForia.Compilers {
             }
 
             AccessExpressionPart next = MakeAccessPart(u + 1, parts, outputType, inputTypes);
-            // todo -- this should handle dictionary indexing as well, pick up target type 
-
+// todo -- this should handle dictionary indexing as well, pick up target type 
             IndexNode indexNode = (IndexNode) parts[u];
             Expression indexExpr = Visit(typeof(int), indexNode.expression);
-
             return (AccessExpressionPart) ReflectionUtil.CreateGenericInstanceFromOpenType(
                 typeof(AccessExpressionPart_Index<,,>),
                 new GenericArguments(outputType, inputTypes[u], inputTypes[u + 1]),
@@ -607,7 +717,6 @@ namespace UIForia.Compilers {
             }
 
             string propertyName = ((DotAccessNode) parts[u]).propertyName;
-
             PropertyInfo propertyInfo = ReflectionUtil.GetInstanceOrStaticPropertyInfo(inputTypes[u], propertyName);
             if (propertyInfo != null) {
                 AccessExpressionPart next = MakeAccessPart(u + 1, parts, outputType, inputTypes);
@@ -645,7 +754,12 @@ namespace UIForia.Compilers {
             }
 
             if (!typeof(System.Collections.IList).IsAssignableFrom(type)) {
-                throw new CompileException($"{type} is not a list or array but is being used as in indexer");
+                PropertyInfo propertyInfo = type.GetProperty("Item");
+                if (propertyInfo != null) {
+                    return propertyInfo.PropertyType;
+                }
+
+                throw new CompileException($"{type} is not indexable but is being used as in indexer");
             }
 
             return type.GetGenericArguments()[0];
@@ -656,7 +770,6 @@ namespace UIForia.Compilers {
             targetType = null;
             Expression expr = Visit(node.expression);
             targetType = oldTargetType;
-
             Type yieldedType = expr.YieldedType;
             if (IsNumericType(yieldedType)) {
                 return UnaryExpression_MinusFactory.Create(expr);
@@ -679,9 +792,7 @@ namespace UIForia.Compilers {
             targetType = null;
             Expression expr = Visit(node.expression);
             targetType = oldTargetType;
-
             Type yieldedType = expr.YieldedType;
-
             if (yieldedType == typeof(bool)) {
                 return new UnaryExpression_Boolean((Expression<bool>) expr);
             }
@@ -715,8 +826,6 @@ namespace UIForia.Compilers {
         private Expression VisitOperator(OperatorNode node) {
             Type oldTarget = targetType;
             targetType = null;
-
-
             if (node.operatorType == OperatorType.TernaryCondition) {
                 return VisitOperator_TernaryCondition(node);
             }
@@ -724,14 +833,9 @@ namespace UIForia.Compilers {
             Expression left = Visit(node.left);
             Type leftType = left.YieldedType;
             Expression right = Visit(node.right);
-
             Type rightType = right.YieldedType;
-
-
             targetType = oldTarget;
-
             Expression retn = null;
-
             switch (node.operatorType) {
                 case OperatorType.Plus:
                 case OperatorType.Minus:
@@ -746,7 +850,6 @@ namespace UIForia.Compilers {
                     }
 
                     MethodInfo info = ReflectionUtil.GetBinaryOperator(GetOpMethodName(node.operatorType), left.YieldedType, right.YieldedType);
-
                     if (info != null) {
                         retn = (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(typeof(OperatorOverloadExpression<,,>),
                             new GenericArguments(leftType, rightType, leftType),
@@ -766,15 +869,12 @@ namespace UIForia.Compilers {
 
                     throw new CompileException($"Invalid expression types ({leftType}, {rightType}) for arithmetic operator {node.operatorType}");
                 }
-
                 case OperatorType.TernaryCondition:
                 case OperatorType.TernarySelection:
                     break;
-
                 case OperatorType.Equals:
                 case OperatorType.NotEquals: {
                     MethodInfo info = ReflectionUtil.GetComparisonOperator(GetOpMethodName(node.operatorType), left.YieldedType, right.YieldedType);
-
                     if (info != null) {
                         retn = (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(typeof(OperatorOverloadExpression<,,>),
                             new GenericArguments(leftType, rightType, typeof(bool)),
@@ -790,15 +890,13 @@ namespace UIForia.Compilers {
                         }
                     }
 
-                    // only use the crappy version if we actually end up needing to
-                    // this version sucks because boxing is involved for structs
-
+// only use the crappy version if we actually end up needing to
+// this version sucks because boxing is involved for structs
                     retn = (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
                         typeof(OperatorExpression_Equality<,>),
                         new GenericArguments(leftType, rightType),
                         new ConstructorArguments(node.operatorType, left, right)
                     );
-
                     break;
                 }
                 case OperatorType.GreaterThan:
@@ -813,7 +911,6 @@ namespace UIForia.Compilers {
                     }
 
                     MethodInfo info = ReflectionUtil.GetComparisonOperator(GetOpMethodName(node.operatorType), left.YieldedType, right.YieldedType);
-
                     if (info != null) {
                         retn = (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(typeof(OperatorOverloadExpression<,,>),
                             new GenericArguments(leftType, rightType, typeof(bool)),
@@ -832,9 +929,8 @@ namespace UIForia.Compilers {
                     }
 
                     MethodInfo info = ReflectionUtil.GetComparisonOperator(GetOpMethodName(node.operatorType), left.YieldedType, right.YieldedType);
-
                     if (info != null) {
-                        // todo maybe dont force the return type to be leftType, allow other types
+// todo maybe dont force the return type to be leftType, allow other types
                         retn = (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(typeof(OperatorOverloadExpression<,,>),
                             new GenericArguments(leftType, rightType, leftType),
                             new ConstructorArguments(left, right, info)
@@ -871,12 +967,10 @@ namespace UIForia.Compilers {
 
                     throw new CompileException($"Invalid expression types ({leftType}, {rightType}) for comparison operator {node.operatorType}");
                 }
-
                 case OperatorType.As:
                 case OperatorType.Is:
-                    // todo -- implement these when type resolution works
+// todo -- implement these when type resolution works
                     break;
-
                 default:
                     throw new ArgumentOutOfRangeException();
             }
@@ -887,7 +981,7 @@ namespace UIForia.Compilers {
                     return cast;
                 }
 
-                //return HandleCasting(retn, targetType);
+//return HandleCasting(retn, targetType);
             }
 
             return retn;
@@ -965,7 +1059,6 @@ namespace UIForia.Compilers {
             }
 
             Expression retn = GetImplicitCastConstant(node.rawValue, targetType);
-
             return retn ?? HandleCasting(new ConstantExpression<string>(node.rawValue), targetType);
         }
 
@@ -1015,7 +1108,6 @@ namespace UIForia.Compilers {
             }
 
             string floatString = node.rawValue.Replace("f", "");
-
             if (float.TryParse(floatString, NumberStyles.Float, CultureInfo.InvariantCulture, out float fVal)) {
                 return targetType == null ? new ConstantExpression<float>(fVal) : GetImplicitCastConstant(fVal, targetType);
             }
@@ -1026,9 +1118,8 @@ namespace UIForia.Compilers {
         private Expression VisitTypeOf(TypeNode typeNode) {
             TypePath typePath = typeNode.typePath;
 
-            // todo this method isn't fully working
+// todo this method isn't fully working
             string constructedTypePath = typePath.GetConstructedPath();
-
             Type[] generics = rootType.GetGenericArguments();
             for (int i = 0; i < generics.Length; i++) {
                 if (generics[i].Name == constructedTypePath) {
@@ -1041,15 +1132,14 @@ namespace UIForia.Compilers {
                 return new ConstantExpression<Type>(t);
             }
 
-            // todo -- need to load ups from using path
-            // todo -- support generics 
+// todo -- need to load ups from using path
+// todo -- support generics 
             throw new NotImplementedException();
         }
 
         private Expression VisitOperator_TernaryCondition(OperatorNode node) {
             Expression<bool> condition = (Expression<bool>) Visit(typeof(bool), node.left);
             OperatorNode select = (OperatorNode) node.right;
-
             if (select.operatorType != OperatorType.TernarySelection) {
                 throw new Exception("Bad ternary");
             }
@@ -1057,9 +1147,8 @@ namespace UIForia.Compilers {
             Expression right = Visit(select.right);
             Expression left = Visit(select.left);
 
-            // todo -- need to assert a type match here
+// todo -- need to assert a type match here
             Type commonBase = ReflectionUtil.GetCommonBaseClass(right.YieldedType, left.YieldedType);
-
             if (commonBase == null || commonBase == typeof(ValueType) || commonBase == typeof(object)) {
                 throw new Exception(
                     $"Types in ternary don't match: {right.YieldedType.Name} is not {left.YieldedType.Name}");
@@ -1112,14 +1201,13 @@ namespace UIForia.Compilers {
             return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(openType, commonBase, ReflectionUtil.ObjectArray3);
         }
 
-        private Expression VisitSimpleRootAccess(IdentifierNode node) {
+        private Expression VisitSimpleRootAccess(IdentifierNode node, bool isWriteTarget) {
             string fieldName = node.name;
             Expression retn = null;
-
             if (node.IsAlias) {
                 for (int i = 0; i < aliasResolvers.Count; i++) {
                     if (aliasResolvers[i].aliasName == fieldName) {
-                        // root type, target type, element type
+// root type, target type, element type
                         CompilerContext context = new CompilerContext(this, rootType, targetType, currentType, node);
                         retn = aliasResolvers[i].CompileAsValueExpression(context);
                         if (retn == null) {
@@ -1132,6 +1220,22 @@ namespace UIForia.Compilers {
 
                 if (retn == null) {
                     throw new ParseException($"Unknown alias {fieldName}");
+                }
+            }
+            else if (isWriteTarget) {
+                if (ReflectionUtil.IsField(rootType, fieldName, out FieldInfo fieldInfo)) {
+                    return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
+                        typeof(FieldPropertyTargetExpression<,>),
+                        new GenericArguments(rootType, fieldInfo.FieldType),
+                        new ConstructorArguments(fieldInfo, null)
+                    );
+                }
+                else if (ReflectionUtil.IsProperty(rootType, fieldName, out PropertyInfo propertyInfo)) {
+                    return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
+                        typeof(FieldPropertyTargetExpression<,>),
+                        new GenericArguments(rootType, propertyInfo.PropertyType),
+                        new ConstructorArguments(null, propertyInfo)
+                    );
                 }
             }
             else {
@@ -1226,13 +1330,11 @@ namespace UIForia.Compilers {
 
         private static Expression HandleCasting(Expression input, Type requiredType) {
             Type yieldedType = input.YieldedType;
-
             if (requiredType == null || yieldedType == requiredType || requiredType.IsAssignableFrom(yieldedType)) {
                 return input;
             }
 
             MethodInfo info = ReflectionUtil.GetImplicitConversion(requiredType, input.YieldedType);
-
             for (int i = 0; i < builtInCastHandlers.Count; i++) {
                 if (builtInCastHandlers[i].CanHandle(requiredType, yieldedType)) {
                     return builtInCastHandlers[i].Cast(requiredType, input);

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UIForia.Util;
 
 namespace UIForia.DataSource {
@@ -11,6 +12,17 @@ namespace UIForia.DataSource {
         }
 
         public int Count => store.Count;
+
+        public ICollection<T> GetAllRecords(ICollection<T> list) {
+            if (list == null) list = new List<T>();
+            int count = store.Count;
+            T[] array = store.Array;
+            for (int i = 0; i < count; i++) {
+                list.Add(array[i]);
+            }
+
+            return list;
+        }
 
         public T RemoveRecord(int id) {
             int count = store.Count;

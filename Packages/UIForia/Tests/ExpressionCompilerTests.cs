@@ -1,1307 +1,1198 @@
-//using System;
-//using System.Collections.Generic;
-//using System.Reflection;
-//using JetBrains.Annotations;
-//using NUnit.Framework;
-//using UIForia;
-//using UIForia.Compilers.AliasSource;
-//using UIForia.Compilers.AliasSources;
-//using Tests;
-//using UIForia.Compilers;
-//using UnityEngine;
-//
-//[TestFixture]
-//public class ExpressionCompilerTests {
-//
-//    private struct ValueContainer {
-//
-//        public float x;
-//        public ValueContainer[] values;
-//
-//    }
-//
-//    private class EmptyTarget { }
-//
-//    private class TestRoot {
-//
-//        public float value;
-//        public string stringVal;
-//        public object objectVal;
-//        public ValueContainer valueContainer;
-//        public List<int> someArray;
-//        public MethodThing methodThing;
-//
-//        public float valueProperty {
-//            get { return value; }
-//            set { this.value = value; }
-//        }
-//
-//        public float GetValue() {
-//            return value;
-//        }
-//
-//        public float GetValue1(float multiple) {
-//            return value * multiple;
-//        }
-//
-//        public float RetnMethod0() {
-//            return value;
-//        }
-//
-//        public float RetnMethod1(float arg0) {
-//            return value + arg0;
-//        }
-//
-//        public float RetnMethod2(float arg0, float arg1) {
-//            return value + arg0 + arg1;
-//        }
-//
-//        public float RetnMethod3(float arg0, float arg1, float arg2) {
-//            return value + arg0 + arg1 + arg2;
-//        }
-//
-//        public float RetnMethod4(float arg0, float arg1, float arg2, float arg3) {
-//            return value + arg0 + arg1 + arg2 + arg3;
-//        }
-//
-//        [UsedImplicitly]
-//        public void VoidMethod0() {
-//            value = 0;
-//        }
-//
-//        [UsedImplicitly]
-//        public void VoidMethod1(float one) {
-//            value = one;
-//        }
-//
-//        [UsedImplicitly]
-//        public void VoidMethod2(float one, float two) {
-//            value = one + two;
-//        }
-//
-//        [UsedImplicitly]
-//        public void VoidMethod3(float one, float two, float three) {
-//            value = one + two + three;
-//        }
-//
-//        [UsedImplicitly]
-//        public void VoidMethod4(float one, float two, float x, float y) {
-//            value = one + two + x + y;
-//        }
-//
-//        public static string staticStringValue;
-//        public TestRoot objectVal2;
-//
-//        public static void StaticVoid0() {
-//            staticStringValue = "CalledStaticVoid0";
-//        }
-//
-//        public static void StaticVoid1(string arg0) {
-//            staticStringValue = "CalledStaticVoid1_" + arg0;
-//        }
-//
-//        public static void StaticVoid2(string arg0, string arg1) {
-//            staticStringValue = "CalledStaticVoid2_" + arg0 + arg1;
-//        }
-//
-//        public static void StaticVoid3(string arg0, string arg1, string arg2) {
-//            staticStringValue = "CalledStaticVoid3_" + arg0 + arg1 + arg2;
-//        }
-//
-//        public static void StaticVoid4(string arg0, string arg1, string arg2, string arg3) {
-//            staticStringValue = "CalledStaticVoid4_" + arg0 + arg1 + arg2 + arg3;
-//        }
-//
-//        public static string StaticNonVoid0() {
-//            return "StaticNonVoid0";
-//        }
-//
-//        public static string StaticNonVoid1(string arg0) {
-//            return "StaticNonVoid1" + arg0;
-//        }
-//
-//        public static string StaticNonVoid2(string arg0, string arg1) {
-//            return "StaticNonVoid2" + arg0 + arg1;
-//        }
-//
-//        public static string StaticNonVoid3(string arg0, string arg1, string arg2) {
-//            return "StaticNonVoid3" + arg0 + arg1 + arg2;
-//        }
-//
-//        public static string StaticNonVoid4(string arg0, string arg1, string arg2, string arg3) {
-//            return "StaticNonVoid4" + arg0 + arg1 + arg2 + arg3;
-//        }
-//
-//        public int UniqueId => 0;
-//
-//    }
-//
-//    private static ContextDefinition testContextDef = new ContextDefinition(typeof(TestRoot));
-//    private static ContextDefinition nullContext = new ContextDefinition(typeof(EmptyTarget));
-//
-//    [SetUp]
-//    public void Setup() {
-//        testContextDef = new ContextDefinition(typeof(TestRoot));
-//        nullContext = new ContextDefinition(typeof(EmptyTarget));
-//        TestRoot.staticStringValue = string.Empty;
-//    }
-//
-//    [Test]
-//    public void ConstantExpression_BoolTrue() {
-//        Expression expression = GetLiteralExpression("true");
-//        Assert.IsInstanceOf<ConstantExpression<bool>>(expression);
-//        Assert.AreEqual(true, expression.Evaluate(null));
-//    }
-//
-//    [Test]
-//    public void ConstantExpression_BoolFalse() {
-//        Expression expression = GetLiteralExpression("false");
-//
-//        Assert.IsInstanceOf<ConstantExpression<bool>>(expression);
-//        Assert.AreEqual(false, expression.Evaluate(null));
-//    }
-//
-//    [Test]
-//    public void LiteralExpression_Numeric() {
-//        Expression expression = GetLiteralExpression("114.5");
-//
-//        Assert.IsInstanceOf<ConstantExpression<double>>(expression);
-//        Assert.AreEqual(114.5, expression.Evaluate(null));
-//    }
-//
-//    [Test]
-//    public void LiteralExpression_NegativeNumeric() {
-//        Expression expression = GetLiteralExpression("-114.5f");
-//
-//        Assert.IsInstanceOf<ConstantExpression<float>>(expression);
-//        Assert.AreEqual(-114.5f, expression.Evaluate(null));
-//    }
-//
-//    [Test]
-//    public void ConstantExpression_String() {
-//        Expression expression = GetLiteralExpression("'some string here'");
-//
-//        Assert.IsInstanceOf<ConstantExpression<string>>(expression);
-//        Assert.AreEqual("some string here", expression.Evaluate(null));
-//    }
-//
-//    [Test]
-//    public void UnaryBoolean_WithLiteral_True() {
-//        Expression expression = GetLiteralExpression("!true");
-//        Assert.IsInstanceOf<ConstantExpression<bool>>(expression);
-//        Assert.AreEqual(false, expression.Evaluate(null));
-//    }
-//
-//    [Test]
-//    public void UnaryBoolean_WithLiteral_False() {
-//        Expression expression = GetLiteralExpression("!false");
-//        Assert.IsInstanceOf<ConstantExpression<bool>>(expression);
-//        Assert.AreEqual(true, expression.Evaluate(null));
-//    }
-//
-//    [Test]
-//    public void LiteralOperatorExpression_Add_IntInt_Fold() {
-//        Expression expression = GetLiteralExpression("64 + 5");
-//        Assert.IsInstanceOf<ConstantExpression<int>>(expression);
-//        Assert.AreEqual(69, expression.Evaluate(null));
-//        Assert.IsInstanceOf<int>(expression.Evaluate(null));
-//    }
-//
-//    [Test]
-//    public void LiteralOperatorExpression_Add_IntFloat_Fold() {
-//        Expression expression = GetLiteralExpression("64 + 5f");
-//        Assert.IsInstanceOf<ConstantExpression<float>>(expression);
-//        Assert.AreEqual(69f, expression.Evaluate(null));
-//        Assert.IsInstanceOf<float>(expression.Evaluate(null));
-//    }
-//
-//    [Test]
-//    public void LiteralOperatorExpression_Add_IntDouble_Fold() {
-//        Expression expression = GetLiteralExpression("64 + 5.0");
-//        Assert.IsInstanceOf<ConstantExpression<double>>(expression);
-//        Assert.AreEqual(69.0, expression.Evaluate(null));
-//        Assert.IsInstanceOf<double>(expression.Evaluate(null));
-//    }
-//
-//    [Test]
-//    public void LiteralOperatorExpression_Add_FloatInt_Fold() {
-//        Expression expression = GetLiteralExpression("64f + 5");
-//        Assert.IsInstanceOf<ConstantExpression<float>>(expression);
-//        Assert.AreEqual(69f, expression.Evaluate(null));
-//        Assert.IsInstanceOf<float>(expression.Evaluate(null));
-//    }
-//
-//    [Test]
-//    public void LiteralOperatorExpression_Add_FloatFloat_Fold() {
-//        Expression expression = GetLiteralExpression("64f + 5.8f");
-//        Assert.IsInstanceOf<ConstantExpression<float>>(expression);
-//        Assert.AreEqual(69.8f, expression.Evaluate(null));
-//        Assert.IsInstanceOf<float>(expression.Evaluate(null));
-//    }
-//
-//    [Test]
-//    public void LiteralOperatorExpression_Add_DoubleInt_Fold() {
-//        Expression expression = GetLiteralExpression("64.8 + 5");
-//        Assert.IsInstanceOf<ConstantExpression<double>>(expression);
-//        Assert.AreEqual(69.8, expression.Evaluate(null));
-//        Assert.IsInstanceOf<double>(expression.Evaluate(null));
-//    }
-//
-//    [Test]
-//    public void LiteralOperatorExpression_Add_DoubleFloat_Fold() {
-//        Expression expression = GetLiteralExpression("64.8 + 5f");
-//        Assert.IsInstanceOf<ConstantExpression<double>>(expression);
-//        Assert.AreEqual(69.8, expression.Evaluate(null));
-//        Assert.IsInstanceOf<double>(expression.Evaluate(null));
-//    }
-//
-//    [Test]
-//    public void LiteralOperatorExpression_Add_DoubleDouble_Fold() {
-//        Expression expression = GetLiteralExpression("64.8 + 5.0");
-//        Assert.IsInstanceOf<ConstantExpression<double>>(expression);
-//        Assert.AreEqual(69.8, expression.Evaluate(null));
-//        Assert.IsInstanceOf<double>(expression.Evaluate(null));
-//    }
-//
-//    [Test]
-//    public void UnaryExpression_Minus_Literal() {
-//        Expression expression = GetLiteralExpression("-(64.8)");
-//        Assert.IsInstanceOf<UnaryExpression_Minus_Double>(expression);
-//        Assert.AreEqual(-64.8, expression.Evaluate(null));
-//        Assert.IsInstanceOf<double>(expression.Evaluate(null));
-//    }
-//
-//    [Test]
-//    public void UnaryExpression_Plus_Literal() {
-//        Expression expression = GetLiteralExpression("+(-64.8)");
-//        Assert.IsInstanceOf<UnaryExpression_Plus_Double>(expression);
-//        Assert.AreEqual(-64.8, expression.Evaluate(null));
-//        Assert.IsInstanceOf<double>(expression.Evaluate(null));
-//    }
-//
-//    [Test]
-//    public void AccessExpression_RootContext_FieldLevel0() {
-//        TestRoot target = new TestRoot();
-//        target.value = 1234.5f;
-//
-//        ExpressionContext ctx = new ExpressionContext(target);
-//        ExpressionParser parser = new ExpressionParser("{value}");
-//        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
-//        Expression expression = compiler.Compile(parser.Parse());
-//
-//        Assert.IsInstanceOf<AccessExpression_RootField<float>>(expression);
-//        Assert.AreEqual(1234.5f, expression.Evaluate(ctx));
-//    }
-//
-//    [Test]
-//    public void AccessExpression_RootContext_PropertyLevel0() {
-//        TestRoot target = new TestRoot();
-//        target.value = 1234.5f;
-//
-//        ExpressionContext ctx = new ExpressionContext(target);
-//        ExpressionParser parser = new ExpressionParser("{valueProperty}");
-//        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
-//        Expression expression = compiler.Compile(parser.Parse());
-//
-//        Assert.IsInstanceOf<AccessExpression_RootProperty<float>>(expression);
-//        Assert.AreEqual(1234.5f, expression.Evaluate(ctx));
-//    }
-//
-//    [Test]
-//    public void AccessExpression_RootContext_Level1() {
-//        TestRoot target = new TestRoot();
-//        target.value = 1234.5f;
-//        target.valueContainer = new ValueContainer();
-//        target.valueContainer.x = 123f;
-//
-//        ExpressionContext ctx = new ExpressionContext(target);
-//        ExpressionParser parser = new ExpressionParser("{valueContainer.x}");
-//        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
-//        Expression expression = compiler.Compile(parser.Parse());
-//
-//        Assert.IsInstanceOf<AccessExpression<float, TestRoot>>(expression);
-//        Assert.AreEqual(123f, expression.Evaluate(ctx));
-//    }
-//
-//    [Test]
-//    public void AccessExpression_RootContext_Level1_List() {
-//        TestRoot target = new TestRoot();
-//        target.value = 1234.5f;
-//        target.someArray = new List<int>();
-//        target.someArray.Add(1);
-//        target.someArray.Add(11);
-//        target.someArray.Add(111);
-//
-//        ExpressionContext ctx = new ExpressionContext(target);
-//        ExpressionParser parser = new ExpressionParser("{someArray[1]}");
-//        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
-//        Expression expression = compiler.Compile(parser.Parse());
-//
-//        Assert.IsInstanceOf<AccessExpression<int, TestRoot>>(expression);
-//        Assert.AreEqual(11, expression.Evaluate(ctx));
-//    }
-//
-//    [Test]
-//    public void AccessExpression_RootContext_MixedArrayField() {
-//        TestRoot target = new TestRoot();
-//        target.value = 1234.5f;
-//        target.valueContainer = new ValueContainer();
-//        target.valueContainer.values = new ValueContainer[3];
-//        target.valueContainer.values[0].x = 12;
-//        target.valueContainer.values[1].x = 13;
-//        target.valueContainer.values[2].x = 14;
-//        ExpressionContext ctx = new ExpressionContext(target);
-//        ExpressionParser parser = new ExpressionParser("{valueContainer.values[1].x}");
-//        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
-//        Expression expression = compiler.Compile(parser.Parse());
-//        Assert.IsInstanceOf<AccessExpression<float, TestRoot>>(expression);
-//        Assert.AreEqual(13, expression.Evaluate(ctx));
-//    }
-//
-//    [Test]
-//    public void AccessExpression_InnerContext_Field() {
-//        TestRoot target = new TestRoot();
-//        target.valueContainer.x = 13;
-//
-//        ExpressionContext ctx = new ExpressionContext(target);
-//        ExpressionParser parser = new ExpressionParser("{$item.x}");
-//        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
-//        compiler.AddExpressionResolver(new ValueResolver<ValueContainer>("$item", target.valueContainer));
-//        Expression expression = compiler.Compile(parser.Parse());
-//        Assert.IsInstanceOf<AccessExpression<float, ValueContainer>>(expression);
-//        Assert.AreEqual(13, expression.Evaluate(ctx));
-//    }
-//
-//    [Test]
-//    public void AccessExpression_ArrayIndexAsAlias() {
-//        TestRoot target = new TestRoot();
-//        target.someArray = new List<int>();
-//        target.someArray.Add(1);
-//        target.someArray.Add(11);
-//        target.someArray.Add(111);
-//        ExpressionContext ctx = new ExpressionContext(target);
-//        
-//        // testContextDef.AddRuntimeAlias("$i", typeof(int));
-//        // ctx.SetContextValue(target, "$i", 2);
-//
-//        ExpressionParser parser = new ExpressionParser("{someArray[$i]}");
-//        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
-//        compiler.AddExpressionResolver(new ValueResolver<int>("$i", 2));
-//        Expression expression = compiler.Compile(parser.Parse());
-//        Assert.IsInstanceOf<AccessExpression<int, TestRoot>>(expression);
-//        Assert.AreEqual(111, expression.Evaluate(ctx));
-//    }
-//
-//    [Test]
-//    public void AccessExpression_ArrayIndexAsAlias_WithOffset() {
-//        TestRoot target = new TestRoot();
-//        target.someArray = new List<int>();
-//        target.someArray.Add(1);
-//        target.someArray.Add(11);
-//        target.someArray.Add(111);
-//        ExpressionContext ctx = new ExpressionContext(target);
-//
-//        ExpressionParser parser = new ExpressionParser("{someArray[$i - 1]}");
-//        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
-//        compiler.AddExpressionResolver(new ValueResolver<int>("$i", 2));
-//        Expression expression = compiler.Compile(parser.Parse());
-//        Assert.IsInstanceOf<AccessExpression<int, TestRoot>>(expression);
-//        Assert.AreEqual(11, expression.Evaluate(ctx));
-//    }
-//
-//    [Test]
-//    public void TernaryExpression_Literals() {
-//        TestRoot target = new TestRoot();
-//
-//        ExpressionContext ctx = new ExpressionContext(target);
-//
-//        ExpressionParser parser = new ExpressionParser("{ 1 > 2 ? 5 : 6}");
-//        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
-//        Expression expression = compiler.Compile(parser.Parse());
-//        Assert.IsInstanceOf<OperatorExpression_Ternary<int>>(expression);
-//        Assert.AreEqual(6, expression.Evaluate(ctx));
-//    }
-//
-//    [Test]
-//    public void TernaryExpression_Lookup() {
-//        TestRoot target = new TestRoot();
-//        target.value = 12;
-//
-//        ExpressionContext ctx = new ExpressionContext(target);
-//
-//        ExpressionParser parser = new ExpressionParser("{ value > 2 ? 5 : 6}");
-//        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
-//        Expression expression = compiler.Compile(parser.Parse());
-//        Assert.IsInstanceOf<OperatorExpression_Ternary<int>>(expression);
-//        Assert.AreEqual(5, expression.Evaluate(ctx));
-//    }
-//
-//    [Test]
-//    public void StringExpression_ConcatLiterals() {
-//        TestRoot target = new TestRoot();
-//        ExpressionContext ctx = new ExpressionContext(target);
-//
-//        ExpressionParser parser = new ExpressionParser("{ 'my' + ' ' + 'string'}");
-//        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
-//        Expression expression = compiler.Compile(parser.Parse());
-//        Assert.AreEqual("my string", expression.Evaluate(ctx));
-//    }
-//
-//    [Test]
-//    public void MethodCallExpression_CallsMethod() {
-//        TestRoot target = new TestRoot();
-//        target.value = 124;
-//
-//        ExpressionContext ctx = new ExpressionContext(target);
-//
-//        ExpressionParser parser = new ExpressionParser("{GetValue()}");
-//        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
-//        Expression expression = compiler.Compile(parser.Parse());
-//        Assert.AreEqual(124, expression.Evaluate(ctx));
-//    }
-//
-//    [Test]
-//    public void MethodCallExpression_CallsMethod_WithArg() {
-//        TestRoot target = new TestRoot();
-//        target.value = 124;
-//
-//        ExpressionContext ctx = new ExpressionContext(target);
-//
-//        ExpressionParser parser = new ExpressionParser("{GetValue1(5f)}");
-//        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
-//        Expression expression = compiler.Compile(parser.Parse());
-//        Assert.AreEqual(124 * 5, expression.Evaluate(ctx));
-//    }
-//
-//    [Test]
-//    public void MethodCallExpression_CallsMethod_CallsNestedMethod_WithArg() {
-//        TestRoot target = new TestRoot();
-//        target.value = 124;
-//
-//        ExpressionContext ctx = new ExpressionContext(target);
-//
-//        ExpressionParser parser = new ExpressionParser("{GetValue1(GetValue())}");
-//        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
-//        Expression expression = compiler.Compile(parser.Parse());
-//        Assert.AreEqual(124 * 124, expression.Evaluate(ctx));
-//    }
-//
-//    [Test]
-//    public void MethodCallExpression_AliasedMethod() {
-//        TestRoot target = new TestRoot();
-//        target.value = 124;
-//
-//        ExpressionContext ctx = new ExpressionContext(target);
-//        MethodInfo info = typeof(Mathf).GetMethod("Max", new[] {
-//            typeof(float), typeof(float)
-//        });
-//
-//        MethodAliasSource methodSource = new MethodAliasSource("AliasedMethod", info);
-//
-////        testContextDef.AddConstAliasSource(methodSource);
-//
-//        ExpressionParser parser = new ExpressionParser("{$AliasedMethod(1f, 2f)}");
-//        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
-//        compiler.AddExpressionResolver(new MethodResolver("$AliasedMethod", info));
-//        Expression expression = compiler.Compile(parser.Parse());
-//
-//        Assert.AreEqual(2, expression.Evaluate(ctx));
-//    }
-//
-//    [Test]
-//    public void MethodCallExpression_CallVoidReturnInstance() {
-//        TestRoot target = new TestRoot();
-//        target.value = 124;
-//
-//        ExpressionContext ctx = new ExpressionContext(target);
-//
-//        ExpressionParser parser = new ExpressionParser("{VoidMethod0()}");
-//        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
-//        Expression expression = compiler.Compile(parser.Parse());
-//        object retn = expression.Evaluate(ctx);
-//        Assert.IsNull(retn);
-//        Assert.AreEqual(0, target.value);
-//    }
-//
-//    [Test]
-//    public void MethodCallExpression_CallVoidReturnInstance_1Arg() {
-//        TestRoot target = new TestRoot();
-//        target.value = 124;
-//
-//        ExpressionContext ctx = new ExpressionContext(target);
-//
-//        ExpressionParser parser = new ExpressionParser("{VoidMethod1(1)}");
-//        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
-//        Expression expression = compiler.Compile(parser.Parse());
-//        object retn = expression.Evaluate(ctx);
-//        Assert.IsNull(retn);
-//        Assert.AreEqual(1, target.value);
-//    }
-//
-//    [Test]
-//    public void MethodCallExpression_CallVoidReturnInstance_2Arg() {
-//        TestRoot target = new TestRoot();
-//        target.value = 124;
-//
-//        ExpressionContext ctx = new ExpressionContext(target);
-//
-//        ExpressionParser parser = new ExpressionParser("{VoidMethod2(1, 2)}");
-//        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
-//        Expression expression = compiler.Compile(parser.Parse());
-//        object retn = expression.Evaluate(ctx);
-//        Assert.IsNull(retn);
-//        Assert.AreEqual(3, target.value);
-//    }
-//
-//    [Test]
-//    public void MethodCallExpression_CallVoidReturnInstance_3Arg() {
-//        TestRoot target = new TestRoot();
-//        target.value = 124;
-//
-//        ExpressionContext ctx = new ExpressionContext(target);
-//
-//        ExpressionParser parser = new ExpressionParser("{VoidMethod3(1, 2, 3)}");
-//        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
-//        Expression expression = compiler.Compile(parser.Parse());
-//        object retn = expression.Evaluate(ctx);
-//        Assert.IsNull(retn);
-//        Assert.AreEqual(6, target.value);
-//    }
-//
-//    [Test]
-//    public void MethodCallExpression_CallVoidReturnInstance_4Arg() {
-//        TestRoot target = new TestRoot();
-//        target.value = 124;
-//
-//        ExpressionContext ctx = new ExpressionContext(target);
-//
-//        ExpressionParser parser = new ExpressionParser("{VoidMethod4(1, 2, 3, 4)}");
-//        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
-//        Expression expression = compiler.Compile(parser.Parse());
-//        object retn = expression.Evaluate(ctx);
-//        Assert.IsNull(retn);
-//        Assert.AreEqual(10, target.value);
-//    }
-//
-//    [Test]
-//    public void MethodCallExpression_CallVoidReturnStatic_0Arg() {
-//        TestRoot target = new TestRoot();
-//        target.value = 124;
-//
-//        ExpressionContext ctx = new ExpressionContext(target);
-//
-//        ExpressionParser parser = new ExpressionParser("{StaticVoid0()}");
-//        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
-//        Expression expression = compiler.Compile(parser.Parse());
-//        object retn = expression.Evaluate(ctx);
-//        Assert.IsNull(retn);
-//        Assert.AreEqual("CalledStaticVoid0", TestRoot.staticStringValue);
-//    }
-//
-//    [Test]
-//    public void MethodCallExpression_CallVoidReturnStatic_1Arg() {
-//        TestRoot target = new TestRoot();
-//        target.value = 124;
-//
-//        ExpressionContext ctx = new ExpressionContext(target);
-//
-//        ExpressionParser parser = new ExpressionParser("{StaticVoid1('yes')}");
-//        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
-//        Expression expression = compiler.Compile(parser.Parse());
-//        object retn = expression.Evaluate(ctx);
-//        Assert.IsNull(retn);
-//        Assert.AreEqual("CalledStaticVoid1_yes", TestRoot.staticStringValue);
-//    }
-//
-//    [Test]
-//    public void MethodCallExpression_CallVoidReturnStatic_2Arg() {
-//        TestRoot target = new TestRoot();
-//        target.value = 124;
-//
-//        ExpressionContext ctx = new ExpressionContext(target);
-//
-//        ExpressionParser parser = new ExpressionParser("{StaticVoid2('yes','no')}");
-//        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
-//        Expression expression = compiler.Compile(parser.Parse());
-//        object retn = expression.Evaluate(ctx);
-//        Assert.IsNull(retn);
-//        Assert.AreEqual("CalledStaticVoid2_yesno", TestRoot.staticStringValue);
-//    }
-//
-//    [Test]
-//    public void MethodCallExpression_CallVoidReturnStatic_3Arg() {
-//        TestRoot target = new TestRoot();
-//        target.value = 124;
-//
-//        ExpressionContext ctx = new ExpressionContext(target);
-//
-//        ExpressionParser parser = new ExpressionParser("{StaticVoid3('yes','no', 'maybe')}");
-//        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
-//        Expression expression = compiler.Compile(parser.Parse());
-//        object retn = expression.Evaluate(ctx);
-//        Assert.IsNull(retn);
-//        Assert.AreEqual("CalledStaticVoid3_yesnomaybe", TestRoot.staticStringValue);
-//    }
-//
-//    [Test]
-//    public void MethodCallExpression_CallVoidReturnStatic_4Arg() {
-//        TestRoot target = new TestRoot();
-//        target.value = 124;
-//
-//        ExpressionContext ctx = new ExpressionContext(target);
-//
-//        ExpressionParser parser = new ExpressionParser("{StaticVoid4('yes','no', 'maybe', 'def')}");
-//        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
-//        Expression expression = compiler.Compile(parser.Parse());
-//        object retn = expression.Evaluate(ctx);
-//        Assert.IsNull(retn);
-//        Assert.AreEqual("CalledStaticVoid4_yesnomaybedef", TestRoot.staticStringValue);
-//    }
-//
-//    [Test]
-//    public void MethodCallExpression_CallNonVoidReturnInstance_0Arg() {
-//        TestRoot target = new TestRoot();
-//        target.value = 1;
-//
-//        ExpressionContext ctx = new ExpressionContext(target);
-//
-//        ExpressionParser parser = new ExpressionParser("{RetnMethod0()}");
-//        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
-//        Expression expression = compiler.Compile(parser.Parse());
-//        Assert.AreEqual(1, expression.Evaluate(ctx));
-//    }
-//
-//    [Test]
-//    public void MethodCallExpression_CallNonVoidReturnInstance_1Arg() {
-//        TestRoot target = new TestRoot();
-//        target.value = 1;
-//
-//        ExpressionContext ctx = new ExpressionContext(target);
-//
-//        ExpressionParser parser = new ExpressionParser("{RetnMethod1(1f)}");
-//        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
-//        Expression expression = compiler.Compile(parser.Parse());
-//        Assert.AreEqual(2, expression.Evaluate(ctx));
-//    }
-//
-//    [Test]
-//    public void MethodCallExpression_CallNonVoidReturnInstance_2Arg() {
-//        TestRoot target = new TestRoot();
-//        target.value = 1;
-//
-//        ExpressionContext ctx = new ExpressionContext(target);
-//
-//        ExpressionParser parser = new ExpressionParser("{RetnMethod2(1f, 2f)}");
-//        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
-//        Expression expression = compiler.Compile(parser.Parse());
-//        Assert.AreEqual(4, expression.Evaluate(ctx));
-//    }
-//
-//    [Test]
-//    public void MethodCallExpression_CallNonVoidReturnInstance_3Arg() {
-//        TestRoot target = new TestRoot();
-//        target.value = 1;
-//
-//        ExpressionContext ctx = new ExpressionContext(target);
-//
-//        ExpressionParser parser = new ExpressionParser("{RetnMethod3(1f, 2f, 3f)}");
-//        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
-//        Expression expression = compiler.Compile(parser.Parse());
-//        Assert.AreEqual(7, expression.Evaluate(ctx));
-//    }
-//
-//    [Test]
-//    public void MethodCallExpression_CallNonVoidReturnInstance_4Arg() {
-//        TestRoot target = new TestRoot();
-//        target.value = 1;
-//
-//        ExpressionContext ctx = new ExpressionContext(target);
-//
-//        ExpressionParser parser = new ExpressionParser("{RetnMethod4(1f, 2f, 3f, 4f)}");
-//        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
-//        Expression expression = compiler.Compile(parser.Parse());
-//        Assert.AreEqual(11, expression.Evaluate(ctx));
-//    }
-//
-//    [Test]
-//    public void MethodCallExpression_CallNonVoidReturnStatic_0Arg() {
-//        TestRoot target = new TestRoot();
-//
-//        ExpressionContext ctx = new ExpressionContext(target);
-//
-//        ExpressionParser parser = new ExpressionParser("{StaticNonVoid0()}");
-//        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
-//        Expression expression = compiler.Compile(parser.Parse());
-//        Assert.AreEqual("StaticNonVoid0", expression.Evaluate(ctx));
-//    }
-//
-//    [Test]
-//    public void MethodCallExpression_CallNonVoidReturnStatic_1Arg() {
-//        TestRoot target = new TestRoot();
-//
-//        ExpressionContext ctx = new ExpressionContext(target);
-//
-//        ExpressionParser parser = new ExpressionParser("{StaticNonVoid1('hello')}");
-//        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
-//        Expression expression = compiler.Compile(parser.Parse());
-//        Assert.AreEqual("StaticNonVoid1hello", expression.Evaluate(ctx));
-//    }
-//
-//    [Test]
-//    public void MethodCallExpression_CallNonVoidReturnStatic_2Arg() {
-//        TestRoot target = new TestRoot();
-//
-//        ExpressionContext ctx = new ExpressionContext(target);
-//
-//        ExpressionParser parser = new ExpressionParser("{StaticNonVoid2('hi','there')}");
-//        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
-//        Expression expression = compiler.Compile(parser.Parse());
-//        Assert.AreEqual("StaticNonVoid2hithere", expression.Evaluate(ctx));
-//    }
-//
-//    [Test]
-//    public void MethodCallExpression_CallNonVoidReturnStatic_3Arg() {
-//        TestRoot target = new TestRoot();
-//
-//        ExpressionContext ctx = new ExpressionContext(target);
-//
-//        ExpressionParser parser = new ExpressionParser("{StaticNonVoid3('hi','there', 'how')}");
-//        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
-//        Expression expression = compiler.Compile(parser.Parse());
-//        Assert.AreEqual("StaticNonVoid3hitherehow", expression.Evaluate(ctx));
-//    }
-//
-//    [Test]
-//    public void MethodCallExpression_CallNonVoidReturnStatic_4Arg() {
-//        TestRoot target = new TestRoot();
-//
-//        ExpressionContext ctx = new ExpressionContext(target);
-//
-//        ExpressionParser parser = new ExpressionParser("{StaticNonVoid4('hi','there', 'how', 'areya')}");
-//        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
-//        Expression expression = compiler.Compile(parser.Parse());
-//        Assert.AreEqual("StaticNonVoid4hitherehowareya", expression.Evaluate(ctx));
-//    }
-//
-//    [Test]
-//    public void ResolveConstantEnumAlias() {
-//        TestRoot target = new TestRoot();
-////        testContextDef.AddConstAliasSource(new EnumAliasSource<TestUtils.TestEnum>());
-//        ExpressionContext ctx = new ExpressionContext(target);
-//        ExpressionParser parser = new ExpressionParser("{$TestEnum.One}");
-//        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
-//        compiler.AddExpressionResolver(new EnumResolver<TestUtils.TestEnum>("$TestEnum"));
-//        Expression expression = compiler.Compile(parser.Parse());
-//        Assert.IsInstanceOf<ConstantExpression<TestUtils.TestEnum>>(expression);
-//        Assert.AreEqual(TestUtils.TestEnum.One, expression.Evaluate(ctx));
-//    }
-//
-//    [Test]
-//    public void ResolveConstantEnumAliasFromExternalReference() {
-//        TestRoot target = new TestRoot();
-//     //   testContextDef.AddConstAliasSource(new ExternalReferenceAliasSource("@TestEnum", typeof(TestUtils.TestEnum)));
-//        ExpressionContext ctx = new ExpressionContext(target);
-//        ExpressionParser parser = new ExpressionParser("{@TestEnum.One}");
-//        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
-//    //    compiler.AddExternalResolver();
-//        Expression expression = compiler.Compile(parser.Parse());
-//        Assert.IsInstanceOf<ConstantExpression<TestUtils.TestEnum>>(expression);
-//        Assert.AreEqual(TestUtils.TestEnum.One, expression.Evaluate(ctx));
-//    }
-//
-//    [Test]
-//    public void ResolveStaticPropertyAliasFromExternalReference() {
-//        TestRoot target = new TestRoot();
-//      //  testContextDef.AddConstAliasSource(new ExternalReferenceAliasSource("@Color", typeof(Color)));
-//        ExpressionContext ctx = new ExpressionContext(target);
-//        ExpressionParser parser = new ExpressionParser("{@Color.blue}");
-//        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
-//        Expression expression = compiler.Compile(parser.Parse());
-//        Assert.AreEqual(Color.blue, expression.Evaluate(ctx));
-//    }
-//
-//    [Test]
-//    public void ResolveStaticPropertyAliasFromExternalReferenceChained() {
-//        TestRoot target = new TestRoot();
-//       // testContextDef.AddConstAliasSource(new ExternalReferenceAliasSource("@Color", typeof(Color)));
-//        ExpressionContext ctx = new ExpressionContext(target);
-//        ExpressionParser parser = new ExpressionParser("{@Color.blue.b}");
-//        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
-//        Expression expression = compiler.Compile(parser.Parse());
-//        Assert.AreEqual(1f, expression.Evaluate(ctx));
-//    }
-//
-//    public class MyClass {
-//
-//        public static Color blue = Color.blue;
-//
-//    }
-//
-//    [Test]
-//    public void ResolveStaticFieldAliasFromExternalReference() {
-//        TestRoot target = new TestRoot();
-//     //   testContextDef.AddConstAliasSource(new ExternalReferenceAliasSource("@Color", typeof(MyClass)));
-//        ExpressionContext ctx = new ExpressionContext(target);
-//        ExpressionParser parser = new ExpressionParser("{@Color.blue}");
-//        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
-//        Expression expression = compiler.Compile(parser.Parse());
-//        Assert.AreEqual(Color.blue, expression.Evaluate(ctx));
-//    }
-//
-//    [Test]
-//    public void ResolveStaticFieldAliasFromExternalReferenceChained() {
-//        TestRoot target = new TestRoot();
-//     //   testContextDef.AddConstAliasSource(new ExternalReferenceAliasSource("@Color", typeof(MyClass)));
-//        ExpressionContext ctx = new ExpressionContext(target);
-//        ExpressionParser parser = new ExpressionParser("{@Color.blue.b}");
-//        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
-//        Expression expression = compiler.Compile(parser.Parse());
-//        Assert.AreEqual(1f, expression.Evaluate(ctx));
-//    }
-//
-//    [Test]
-//    public void ResolveNonStandardAliasType() {
-//        TestRoot target = new TestRoot();
-//        Color color = Color.red;
-//     //   testContextDef.AddConstAliasSource(new TestUtils.TestAliasSource(color));
-//        ExpressionContext ctx = new ExpressionContext(target);
-//        ExpressionParser parser = new ExpressionParser("{NonStandard}");
-//        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
-//        Expression expression = compiler.Compile(parser.Parse());
-//        Assert.IsInstanceOf<ConstantExpression<Color>>(expression);
-//        Assert.AreEqual(Color.red, expression.Evaluate(ctx));
-//    }
-//
-//    [Test]
-//    public void StringNotWithNull() {
-//        TestRoot target = new TestRoot();
-//        target.stringVal = null;
-//        ExpressionContext ctx = new ExpressionContext(target);
-//        ExpressionParser parser = new ExpressionParser("{!stringVal}");
-//        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
-//        Expression expression = compiler.Compile(parser.Parse());
-//        Assert.IsInstanceOf<UnaryExpression_StringBoolean>(expression);
-//        Assert.AreEqual(true, expression.Evaluate(ctx));
-//    }
-//
-//    [Test]
-//    public void StringNotWithEmpty() {
-//        TestRoot target = new TestRoot();
-//        target.stringVal = string.Empty;
-//        ExpressionContext ctx = new ExpressionContext(target);
-//        ExpressionParser parser = new ExpressionParser("{!stringVal}");
-//        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
-//        Expression expression = compiler.Compile(parser.Parse());
-//        Assert.IsInstanceOf<UnaryExpression_StringBoolean>(expression);
-//        Assert.AreEqual(true, expression.Evaluate(ctx));
-//    }
-//
-//    [Test]
-//    public void StringNotWithValue() {
-//        TestRoot target = new TestRoot();
-//        target.stringVal = "yup";
-//        ExpressionContext ctx = new ExpressionContext(target);
-//        ExpressionParser parser = new ExpressionParser("{!stringVal}");
-//        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
-//        Expression expression = compiler.Compile(parser.Parse());
-//        Assert.IsInstanceOf<UnaryExpression_StringBoolean>(expression);
-//        Assert.AreEqual(false, expression.Evaluate(ctx));
-//    }
-//
-//    [Test]
-//    public void ObjectNotWithNull() {
-//        TestRoot target = new TestRoot();
-//        target.objectVal = null;
-//        ExpressionContext ctx = new ExpressionContext(target);
-//        ExpressionParser parser = new ExpressionParser("{!objectVal}");
-//        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
-//        Expression expression = compiler.Compile(parser.Parse());
-//        Assert.IsInstanceOf<UnaryExpression_ObjectBoolean>(expression);
-//        Assert.AreEqual(true, expression.Evaluate(ctx));
-//    }
-//
-//    [Test]
-//    public void ObjectNotWithValue() {
-//        TestRoot target = new TestRoot();
-//        target.objectVal = new TestRoot();
-//        ExpressionContext ctx = new ExpressionContext(target);
-//        ExpressionParser parser = new ExpressionParser("{!objectVal}");
-//        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
-//        Expression expression = compiler.Compile(parser.Parse());
-//        Assert.IsInstanceOf<UnaryExpression_ObjectBoolean>(expression);
-//        Assert.AreEqual(false, expression.Evaluate(ctx));
-//    }
-//
-//    [Test]
-//    public void AndOrBoolBool() {
-//        TestRoot target = new TestRoot();
-//        target.objectVal = new TestRoot();
-//        ExpressionContext ctx = new ExpressionContext(target);
-//        ExpressionParser parser = new ExpressionParser("{true && true}");
-//        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
-//        Expression expression = compiler.Compile(parser.Parse());
-//        Assert.IsInstanceOf<OperatorExpression_AndOrBool>(expression);
-//        Assert.AreEqual(true, expression.Evaluate(ctx));
-//
-//        expression = compiler.Compile(parser.Parse("{true && false}"));
-//        Assert.IsInstanceOf<OperatorExpression_AndOrBool>(expression);
-//        Assert.AreEqual(false, expression.Evaluate(ctx));
-//
-//        expression = compiler.Compile(parser.Parse("{false && true}"));
-//        Assert.IsInstanceOf<OperatorExpression_AndOrBool>(expression);
-//        Assert.AreEqual(false, expression.Evaluate(ctx));
-//
-//        expression = compiler.Compile(parser.Parse("{false && false}"));
-//        Assert.IsInstanceOf<OperatorExpression_AndOrBool>(expression);
-//        Assert.AreEqual(false, expression.Evaluate(ctx));
-//
-//        expression = compiler.Compile(parser.Parse("{true || true}"));
-//        Assert.IsInstanceOf<OperatorExpression_AndOrBool>(expression);
-//        Assert.AreEqual(true, expression.Evaluate(ctx));
-//
-//        expression = compiler.Compile(parser.Parse("{true || false}"));
-//        Assert.IsInstanceOf<OperatorExpression_AndOrBool>(expression);
-//        Assert.AreEqual(true, expression.Evaluate(ctx));
-//
-//        expression = compiler.Compile(parser.Parse("{false || true}"));
-//        Assert.IsInstanceOf<OperatorExpression_AndOrBool>(expression);
-//        Assert.AreEqual(true, expression.Evaluate(ctx));
-//
-//        expression = compiler.Compile(parser.Parse("{false || false}"));
-//        Assert.IsInstanceOf<OperatorExpression_AndOrBool>(expression);
-//        Assert.AreEqual(false, expression.Evaluate(ctx));
-//    }
-//
-//    [Test]
-//    public void AndOrObjectBool() {
-//        TestRoot target = new TestRoot();
-//        target.objectVal = new TestRoot();
-//        ExpressionContext ctx = new ExpressionContext(target);
-//        ExpressionParser parser = new ExpressionParser("{objectVal && true}");
-//        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
-//        Expression expression = compiler.Compile(parser.Parse());
-//        Assert.IsInstanceOf<OperatorExpression_AndOrObjectBool<object>>(expression);
-//        Assert.AreEqual(true, expression.Evaluate(ctx));
-//
-//        target.objectVal = new TestRoot();
-//        expression = compiler.Compile(parser.Parse("{objectVal && false}"));
-//        Assert.IsInstanceOf<OperatorExpression_AndOrObjectBool<object>>(expression);
-//        Assert.AreEqual(false, expression.Evaluate(ctx));
-//
-//        target.objectVal = null;
-//        expression = compiler.Compile(parser.Parse("{objectVal && true}"));
-//        Assert.IsInstanceOf<OperatorExpression_AndOrObjectBool<object>>(expression);
-//        Assert.AreEqual(false, expression.Evaluate(ctx));
-//
-//        target.objectVal = null;
-//        expression = compiler.Compile(parser.Parse("{objectVal && false}"));
-//        Assert.IsInstanceOf<OperatorExpression_AndOrObjectBool<object>>(expression);
-//        Assert.AreEqual(false, expression.Evaluate(ctx));
-//
-//        target.objectVal = new TestRoot();
-//        expression = compiler.Compile(parser.Parse("{objectVal || true}"));
-//        Assert.IsInstanceOf<OperatorExpression_AndOrObjectBool<object>>(expression);
-//        Assert.AreEqual(true, expression.Evaluate(ctx));
-//
-//        target.objectVal = new TestRoot();
-//        expression = compiler.Compile(parser.Parse("{objectVal || false}"));
-//        Assert.IsInstanceOf<OperatorExpression_AndOrObjectBool<object>>(expression);
-//        Assert.AreEqual(true, expression.Evaluate(ctx));
-//
-//        target.objectVal = null;
-//        expression = compiler.Compile(parser.Parse("{objectVal || true}"));
-//        Assert.IsInstanceOf<OperatorExpression_AndOrObjectBool<object>>(expression);
-//        Assert.AreEqual(true, expression.Evaluate(ctx));
-//
-//        target.objectVal = null;
-//        expression = compiler.Compile(parser.Parse("{objectVal || false}"));
-//        Assert.IsInstanceOf<OperatorExpression_AndOrObjectBool<object>>(expression);
-//        Assert.AreEqual(false, expression.Evaluate(ctx));
-//    }
-//
-//    [Test]
-//    public void AndOrBoolObject() {
-//        TestRoot target = new TestRoot();
-//        target.objectVal = new TestRoot();
-//        ExpressionContext ctx = new ExpressionContext(target);
-//        ExpressionParser parser = new ExpressionParser("{true && objectVal}");
-//        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
-//        Expression expression = compiler.Compile(parser.Parse());
-//        Assert.IsInstanceOf<OperatorExpression_AndOrBoolObject<object>>(expression);
-//        Assert.AreEqual(true, expression.Evaluate(ctx));
-//
-//        target.objectVal = null;
-//        expression = compiler.Compile(parser.Parse("{true && objectVal}"));
-//        Assert.IsInstanceOf<OperatorExpression_AndOrBoolObject<object>>(expression);
-//        Assert.AreEqual(false, expression.Evaluate(ctx));
-//
-//        target.objectVal = new TestRoot();
-//        expression = compiler.Compile(parser.Parse("{false && objectVal}"));
-//        Assert.IsInstanceOf<OperatorExpression_AndOrBoolObject<object>>(expression);
-//        Assert.AreEqual(false, expression.Evaluate(ctx));
-//
-//        target.objectVal = null;
-//        expression = compiler.Compile(parser.Parse("{false && objectVal}"));
-//        Assert.IsInstanceOf<OperatorExpression_AndOrBoolObject<object>>(expression);
-//        Assert.AreEqual(false, expression.Evaluate(ctx));
-//
-//        target.objectVal = new TestRoot();
-//        expression = compiler.Compile(parser.Parse("{true || objectVal}"));
-//        Assert.IsInstanceOf<OperatorExpression_AndOrBoolObject<object>>(expression);
-//        Assert.AreEqual(true, expression.Evaluate(ctx));
-//
-//        target.objectVal = null;
-//        expression = compiler.Compile(parser.Parse("{true || objectVal}"));
-//        Assert.IsInstanceOf<OperatorExpression_AndOrBoolObject<object>>(expression);
-//        Assert.AreEqual(true, expression.Evaluate(ctx));
-//
-//        target.objectVal = new TestRoot();
-//        expression = compiler.Compile(parser.Parse("{false || objectVal}"));
-//        Assert.IsInstanceOf<OperatorExpression_AndOrBoolObject<object>>(expression);
-//        Assert.AreEqual(true, expression.Evaluate(ctx));
-//
-//        target.objectVal = null;
-//        expression = compiler.Compile(parser.Parse("{false || objectVal}"));
-//        Assert.IsInstanceOf<OperatorExpression_AndOrBoolObject<object>>(expression);
-//        Assert.AreEqual(false, expression.Evaluate(ctx));
-//    }
-//
-//    [Test]
-//    public void AndOrObjectObject() {
-//        TestRoot target = new TestRoot();
-//        target.objectVal = new TestRoot();
-//        target.objectVal2 = new TestRoot();
-//        ExpressionContext ctx = new ExpressionContext(target);
-//        ExpressionParser parser = new ExpressionParser("{objectVal && objectVal2}");
-//        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
-//        Expression expression = compiler.Compile(parser.Parse());
-//        Assert.IsInstanceOf<OperatorExpression_AndOrObject<object, TestRoot>>(expression);
-//        Assert.AreEqual(true, expression.Evaluate(ctx));
-//
-//        target.objectVal = new TestRoot();
-//        target.objectVal2 = null;
-//        expression = compiler.Compile(parser.Parse("{objectVal && objectVal2}"));
-//        Assert.IsInstanceOf<OperatorExpression_AndOrObject<object, TestRoot>>(expression);
-//        Assert.AreEqual(false, expression.Evaluate(ctx));
-//
-//        target.objectVal = null;
-//        target.objectVal2 = new TestRoot();
-//        expression = compiler.Compile(parser.Parse("{objectVal && objectVal2}"));
-//        Assert.IsInstanceOf<OperatorExpression_AndOrObject<object, TestRoot>>(expression);
-//        Assert.AreEqual(false, expression.Evaluate(ctx));
-//
-//        target.objectVal = null;
-//        target.objectVal2 = null;
-//        expression = compiler.Compile(parser.Parse("{objectVal && objectVal2}"));
-//        Assert.IsInstanceOf<OperatorExpression_AndOrObject<object, TestRoot>>(expression);
-//        Assert.AreEqual(false, expression.Evaluate(ctx));
-//
-//        target.objectVal = new TestRoot();
-//        target.objectVal2 = new TestRoot();
-//        expression = compiler.Compile(parser.Parse("{objectVal || objectVal2}"));
-//        Assert.IsInstanceOf<OperatorExpression_AndOrObject<object, TestRoot>>(expression);
-//        Assert.AreEqual(true, expression.Evaluate(ctx));
-//
-//        target.objectVal = new TestRoot();
-//        target.objectVal2 = null;
-//        expression = compiler.Compile(parser.Parse("{objectVal || objectVal2}"));
-//        Assert.IsInstanceOf<OperatorExpression_AndOrObject<object, TestRoot>>(expression);
-//        Assert.AreEqual(true, expression.Evaluate(ctx));
-//
-//        target.objectVal = null;
-//        target.objectVal2 = new TestRoot();
-//        expression = compiler.Compile(parser.Parse("{objectVal || objectVal2}"));
-//        Assert.IsInstanceOf<OperatorExpression_AndOrObject<object, TestRoot>>(expression);
-//        Assert.AreEqual(true, expression.Evaluate(ctx));
-//
-//        target.objectVal = null;
-//        target.objectVal2 = null;
-//        expression = compiler.Compile(parser.Parse("{objectVal || objectVal2}"));
-//        Assert.IsInstanceOf<OperatorExpression_AndOrObject<object, TestRoot>>(expression);
-//        Assert.AreEqual(false, expression.Evaluate(ctx));
-//    }
-//
-//    public class MethodThing {
-//
-//        public Action action0;
-//        public Action<int> action1;
-//        public Action<int, string> action2;
-//        public Action<int, float, string> action3;
-//        public Action<int, float, string, string> action4;
-//        public Func<int> func1;
-//        public Func<int, int> func2;
-//        public Func<int, int, int> func3;
-//        public Func<int, int, int, int> func4;
-//        public Func<int, int, int, int, int> func5;
-//
-//
-//    }
-//    
-//    [Test]
-//    public void AccessExpression_Action_NoArg() {
-//        TestRoot target = new TestRoot();
-//        bool didCall = false;
-//        target.methodThing = new MethodThing();
-//        target.methodThing.action0 = () => { didCall = true; };
-//        ExpressionContext ctx = new ExpressionContext(target);
-//        ExpressionParser parser = new ExpressionParser("{methodThing.action0()}");
-//        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
-//        Expression expression = compiler.Compile(parser.Parse());
-//        expression.Evaluate(ctx);
-//        Assert.IsTrue(didCall);
-//    }
-//    
-//    [Test]
-//    public void AccessExpression_Func_NoArg() {
-//        TestRoot target = new TestRoot();
-//        target.methodThing = new MethodThing();
-//        target.methodThing.func1 = () => { return 5; };
-//        ExpressionContext ctx = new ExpressionContext(target);
-//        ExpressionParser parser = new ExpressionParser("{methodThing.func1()}");
-//        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
-//        Expression expression = compiler.Compile(parser.Parse());
-//        expression.Evaluate(ctx);
-//        Assert.AreEqual(5, expression.Evaluate(ctx));
-//    }
-//
-//    [Test]
-//    public void AccessExpression_Func_OneArg() {
-//        TestRoot target = new TestRoot();
-//        target.methodThing = new MethodThing();
-//        target.methodThing.func2 = (int x) => { return x + 5; };
-//        ExpressionContext ctx = new ExpressionContext(target);
-//        ExpressionParser parser = new ExpressionParser("{methodThing.func2(5)}");
-//        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
-//        Expression expression = compiler.Compile(parser.Parse());
-//        expression.Evaluate(ctx);
-//        Assert.AreEqual(10, expression.Evaluate(ctx));
-//    }
-//    
-//    [Test]
-//    public void AccessExpression_Func_TwoArgs() {
-//        TestRoot target = new TestRoot();
-//        target.methodThing = new MethodThing();
-//        target.methodThing.func3 = (int x, int y) => { return x + y + 5; };
-//        ExpressionContext ctx = new ExpressionContext(target);
-//        ExpressionParser parser = new ExpressionParser("{methodThing.func3(5, 5)}");
-//        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
-//        Expression expression = compiler.Compile(parser.Parse());
-//        expression.Evaluate(ctx);
-//        Assert.AreEqual(15, expression.Evaluate(ctx));
-//    }
-//    
-//        
-//    [Test]
-//    public void AccessExpression_Func_ThreeArgs() {
-//        TestRoot target = new TestRoot();
-//        target.methodThing = new MethodThing();
-//        target.methodThing.func4 = (int x, int y, int z) => { return x + y + z + 5; };
-//        ExpressionContext ctx = new ExpressionContext(target);
-//        ExpressionParser parser = new ExpressionParser("{methodThing.func4(5, 5, 5)}");
-//        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
-//        Expression expression = compiler.Compile(parser.Parse());
-//        expression.Evaluate(ctx);
-//        Assert.AreEqual(20, expression.Evaluate(ctx));
-//    }
-//    
-//    [Test]
-//    public void AccessExpression_Func_FourArgs() {
-//        TestRoot target = new TestRoot();
-//        target.methodThing = new MethodThing();
-//        target.methodThing.func5 = (int x, int y, int z, int w) => { return x + y + z + 5 + w; };
-//        ExpressionContext ctx = new ExpressionContext(target);
-//        ExpressionParser parser = new ExpressionParser("{methodThing.func5(5, 5, 5, 1)}");
-//        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
-//        Expression expression = compiler.Compile(parser.Parse());
-//        expression.Evaluate(ctx);
-//        Assert.AreEqual(21, expression.Evaluate(ctx));
-//    }
-//
-//    
-//    [Test]
-//    public void AccessExpression_Action_OneArg() {
-//        TestRoot target = new TestRoot();
-//        int val = 0;
-//        target.methodThing = new MethodThing();
-//        target.methodThing.action1 = (int v) => { val = v; };
-//        ExpressionContext ctx = new ExpressionContext(target);
-//        ExpressionParser parser = new ExpressionParser("{methodThing.action1(5)}");
-//        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
-//        Expression expression = compiler.Compile(parser.Parse());
-//        expression.Evaluate(ctx);
-//        Assert.AreEqual(5, val);
-//    }
-//    
-//    [Test]
-//    public void AccessExpression_Action_TwoArgs() {
-//        TestRoot target = new TestRoot();
-//        int val = 0;
-//        string strVal = "";
-//        target.methodThing = new MethodThing();
-//        target.methodThing.action2 = (int v, string x) => {
-//            val = v;
-//            strVal = x;
-//        };
-//        ExpressionContext ctx = new ExpressionContext(target);
-//        ExpressionParser parser = new ExpressionParser("{methodThing.action2(5, 'str')}");
-//        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
-//        Expression expression = compiler.Compile(parser.Parse());
-//        expression.Evaluate(ctx);
-//        Assert.AreEqual(5, val);
-//        Assert.AreEqual("str", strVal);
-//    }
-//    
-//    [Test]
-//    public void AccessExpression_Action_ThreeArgs() {
-//        TestRoot target = new TestRoot();
-//        int val = 0;
-//        float fVal = 0;
-//        string strVal = "";
-//        target.methodThing = new MethodThing();
-//        target.methodThing.action3 = (int v, float f, string x) => {
-//            val = v;
-//            strVal = x;
-//            fVal = f;
-//        };
-//        ExpressionContext ctx = new ExpressionContext(target);
-//        ExpressionParser parser = new ExpressionParser("{methodThing.action3(5, 7.6f, 'str')}");
-//        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
-//        Expression expression = compiler.Compile(parser.Parse());
-//        expression.Evaluate(ctx);
-//        Assert.AreEqual(5, val);
-//        Assert.AreEqual("str", strVal);
-//        Assert.AreEqual(7.6f, fVal);
-//    }
-//    
-//    [Test]
-//    public void AccessExpression_Action_FourArgs() {
-//        TestRoot target = new TestRoot();
-//        int val = 0;
-//        float fVal = 0;
-//        string strVal = "";
-//        string strVal2 = "";
-//        target.methodThing = new MethodThing();
-//        target.methodThing.action4 = (int v, float f, string x, string y) => {
-//            val = v;
-//            strVal = x;
-//            strVal2 = y;
-//            fVal = f;
-//        };
-//        ExpressionContext ctx = new ExpressionContext(target);
-//        ExpressionParser parser = new ExpressionParser("{methodThing.action4(5, 7.6f, 'str', 'str2')}");
-//        ExpressionCompiler compiler = new ExpressionCompiler(testContextDef);
-//        Expression expression = compiler.Compile(parser.Parse());
-//        expression.Evaluate(ctx);
-//        Assert.AreEqual(5, val);
-//        Assert.AreEqual(7.6f, fVal);
-//        Assert.AreEqual("str", strVal);
-//        Assert.AreEqual("str2", strVal2);
-//    }
-//    
-//    private static Expression GetLiteralExpression(string input) {
-//        ExpressionParser parser = new ExpressionParser(input);
-//        ExpressionCompiler compiler = new ExpressionCompiler(nullContext);
-//        return compiler.Compile(parser.Parse());
-//    }
-//
-//}
+using System;
+using System.Collections.Generic;
+using NUnit.Framework;
+using UIForia;
+using UIForia.Compilers;
+using UIForia.Compilers.ExpressionResolvers;
+using UIForia.Exceptions;
+using UIForia.Expressions;
+using UIForia.Util;
+using UnityEditor;
+using UnityEngine;
+
+[TestFixture]
+public class ExpressionCompilerTests {
+
+    public class Thing {
+
+        public float value;
+
+        public Thing(float value) {
+            this.value = value;
+        }
+
+        public string Stuff() {
+            return value.ToString();
+        }
+
+        public override string ToString() {
+            return value.ToString();
+        }
+
+    }
+
+    public class Indexable {
+
+        public string[] val;
+        public string this[int i] {
+            get => val[i];
+            set => val[i] = value;
+        }
+
+    }
+
+    private class TestType0 {
+
+        public const string ConstantFieldValue = "some constant value";
+        public ConvertThing convertThing;
+        public string value;
+        public int ValueProp { get; set; }
+        public object obj1;
+        public object obj2;
+        public List<Vector3> vectors;
+        public List<Thing> things;
+        public float[] floats;
+        public Indexable indexable;
+        public Thing thing;
+        
+        public Thing thingProp { get; set; }
+        
+        public Vector3 structThing;
+        public readonly float notWritable;
+
+        public float nonWritableProper {
+            set {
+                
+            }
+        }
+        
+        public string StringValueProp => value;
+
+        public string GetValue() {
+            return value;
+        }
+
+        public string GetValue(string val) {
+            return value + val;
+        }
+
+        public string GetValue(string val, string val1) {
+            return value + val + val1;
+        }
+
+        public string GetValue(string val, string val1, string val2) {
+            return value + val + val1 + val2;
+        }
+
+
+        public string GetValue(string val, string val1, string val2, string val3) {
+            return value + val + val1 + val2 + val3;
+        }
+
+        public string GetValue(string val, string val1, string val2, string val3, string val4) {
+            return value + val + val1 + val2 + val3 + val4;
+        }
+
+        public Func<string, string> GetSomeFunc() {
+            return (string str) => str;
+        }
+
+        public ConvertThing ConvertThingProperty {
+            get => convertThing;
+            set => convertThing = value;
+        }
+
+    }
+
+    public class TestType1 {
+
+        public static float s_FloatVal;
+
+    }
+
+    [Test]
+    public void Compile_BasicField() {
+        ExpressionCompiler compiler = new ExpressionCompiler();
+        Expression<string> expr = compiler.Compile<string>(typeof(TestType0), "value");
+        Assert.AreEqual("Matt", expr.Evaluate(new ExpressionContext(new TestType0() {value = "Matt"})));
+    }
+
+    [Test]
+    public void Compile_BasicField_Linq() {
+        ExpressionCompiler compiler = new ExpressionCompiler(allowLinq: true);
+        Expression<string> expr = compiler.Compile<string>(typeof(TestType0), "value");
+        Assert.AreEqual("Matt", expr.Evaluate(new ExpressionContext(new TestType0() {value = "Matt"})));
+    }
+
+    [Test]
+    public void Compile_BasicProperty() {
+        ExpressionCompiler compiler = new ExpressionCompiler();
+        Expression<int> expr = compiler.Compile<int>(typeof(TestType0), "ValueProp");
+        int value = expr.Evaluate(
+            new ExpressionContext(
+                new TestType0() {
+                    ValueProp = 11
+                }
+            )
+        );
+        Assert.AreEqual(11, value);
+    }
+
+    [Test]
+    public void Compile_BasicProperty_Linq() {
+        ExpressionCompiler compiler = new ExpressionCompiler(true);
+        Expression<int> expr = compiler.Compile<int>(typeof(TestType0), "ValueProp");
+        int value = expr.Evaluate(
+            new ExpressionContext(
+                new TestType0() {
+                    ValueProp = 11
+                }
+            )
+        );
+        Assert.AreEqual(11, value);
+    }
+
+    [Test]
+    public void Compile_ImplicitlyCastProperty() {
+        ExpressionCompiler compiler = new ExpressionCompiler();
+        Expression<float> expr = compiler.Compile<float>(typeof(TestType0), "ValueProp");
+        float value = expr.Evaluate(
+            new ExpressionContext(
+                new TestType0() {
+                    ValueProp = 11
+                }
+            )
+        );
+        Assert.AreEqual(11, value);
+    }
+
+    private class TestAliasResolver<T> : ExpressionAliasResolver {
+
+        public T value;
+
+        public TestAliasResolver(string aliasName, T value) : base(aliasName) {
+            this.value = value;
+        }
+
+        public override Expression CompileAsValueExpression(CompilerContext context) {
+            return new ConstantExpression<T>(value);
+        }
+
+    }
+
+    private struct ConvertThing {
+
+        public float floatVal;
+        public int intVal;
+        public double doubleVal;
+        public string stringVal;
+        public bool boolVal;
+        public static float s_StaticVal = 0;
+
+        public Vector3 vectorProp { get; set; }
+
+        public static implicit operator ConvertThing(bool f) {
+            return new ConvertThing() {boolVal = f};
+        }
+
+        public static implicit operator ConvertThing(string f) {
+            return new ConvertThing() {stringVal = f};
+        }
+
+        public static implicit operator ConvertThing(float f) {
+            return new ConvertThing() {floatVal = f};
+        }
+
+        public static implicit operator ConvertThing(int f) {
+            return new ConvertThing() {intVal = f};
+        }
+
+        public static implicit operator ConvertThing(double f) {
+            return new ConvertThing() {doubleVal = f};
+        }
+
+        public static ConvertThing operator +(ConvertThing a, float b) {
+            a.floatVal += b;
+            return a;
+        }
+
+        public static bool operator >(ConvertThing a, int b) {
+            return a.intVal > b;
+        }
+
+        public static bool operator <(ConvertThing a, int b) {
+            return a.intVal < b;
+        }
+
+
+        public static bool operator >(ConvertThing a, float b) {
+            return a.floatVal > b;
+        }
+
+        public static bool operator <(ConvertThing a, float b) {
+            return a.floatVal < b;
+        }
+
+        public static bool operator ==(ConvertThing a, float b) {
+            return a.floatVal == b;
+        }
+
+        public static bool operator !=(ConvertThing a, float b) {
+            return !(a == b);
+        }
+
+        public static string operator !(ConvertThing a) {
+            return a.intVal + a.stringVal;
+        }
+
+        public static float operator -(ConvertThing a) {
+            return -a.floatVal;
+        }
+
+    }
+
+    [Test]
+    public void Compile_AliasAsValue() {
+        ExpressionCompiler compiler = new ExpressionCompiler();
+        compiler.AddAliasResolver(new TestAliasResolver<float>("$alias", 5f));
+        Expression<float> expr = compiler.Compile<float>(typeof(TestType0), "$alias");
+        float value = expr.Evaluate(new ExpressionContext(null));
+        Assert.AreEqual(5f, value);
+    }
+
+    [Test]
+    public void Compile_AliasAsValue_Cast() {
+        ExpressionCompiler compiler = new ExpressionCompiler();
+        compiler.AddAliasResolver(new TestAliasResolver<int>("$alias", 5));
+        Expression<float> expr = compiler.Compile<float>(typeof(TestType0), "$alias");
+        float value = expr.Evaluate(new ExpressionContext(null));
+        Assert.AreEqual(5f, value);
+    }
+
+    [Test]
+    public void Compile_IntConstant() {
+        ExpressionCompiler compiler = new ExpressionCompiler();
+        Expression<int> expr = compiler.Compile<int>(typeof(TestType0), "5");
+        int value = expr.Evaluate(new ExpressionContext(null));
+        Assert.AreEqual(5, value);
+    }
+
+    [Test]
+    public void Compile_FloatConstant() {
+        ExpressionCompiler compiler = new ExpressionCompiler();
+        Expression<float> expr = compiler.Compile<float>(typeof(TestType0), "5");
+        float value = expr.Evaluate(new ExpressionContext(null));
+        Assert.AreEqual(5f, value);
+    }
+
+    [Test]
+    public void Compile_DoubleConstant() {
+        ExpressionCompiler compiler = new ExpressionCompiler();
+        Expression<double> expr = compiler.Compile<double>(typeof(TestType0), "5");
+        double value = expr.Evaluate(new ExpressionContext(null));
+        Assert.AreEqual(5.0, value);
+    }
+
+    [Test]
+    public void Compile_StringConstant() {
+        ExpressionCompiler compiler = new ExpressionCompiler();
+        Expression<string> expr = compiler.Compile<string>(typeof(TestType0), "'matt'");
+        string value = expr.Evaluate(new ExpressionContext(null));
+        Assert.AreEqual("matt", value);
+    }
+
+    [Test]
+    public void Compile_BooleanConstant() {
+        ExpressionCompiler compiler = new ExpressionCompiler();
+        Expression<bool> expr = compiler.Compile<bool>(typeof(TestType0), "false");
+        bool value = expr.Evaluate(new ExpressionContext(null));
+        Assert.AreEqual(false, value);
+        expr = compiler.Compile<bool>(typeof(TestType0), "true");
+        value = expr.Evaluate(new ExpressionContext(null));
+        Assert.AreEqual(true, value);
+    }
+
+    [Test]
+    public void Compile_ImplicitlyConvertibleStringConstant() {
+        ExpressionCompiler compiler = new ExpressionCompiler();
+        Expression<ConvertThing> expr = compiler.Compile<ConvertThing>(typeof(TestType0), "'matt'");
+        ConvertThing value = expr.Evaluate(new ExpressionContext(null));
+        Assert.AreEqual("matt", value.stringVal);
+    }
+
+    [Test]
+    public void Compile_ImplicitlyConvertibleFloatConst() {
+        ExpressionCompiler compiler = new ExpressionCompiler();
+        Expression<ConvertThing> expr = compiler.Compile<ConvertThing>(typeof(TestType0), "5.1f");
+        ConvertThing value = expr.Evaluate(new ExpressionContext(null));
+        Assert.AreEqual(5.1f, value.floatVal);
+    }
+
+    [Test]
+    public void Compile_ImplicitlyConvertibleBoolConst() {
+        ExpressionCompiler compiler = new ExpressionCompiler();
+        Expression<ConvertThing> expr = compiler.Compile<ConvertThing>(typeof(TestType0), "true");
+        ConvertThing value = expr.Evaluate(new ExpressionContext(null));
+        Assert.AreEqual(true, value.boolVal);
+    }
+
+    [Test]
+    public void Compile_ImplicitlyConvertibleIntConst() {
+        ExpressionCompiler compiler = new ExpressionCompiler();
+        Expression<ConvertThing> expr = compiler.Compile<ConvertThing>(typeof(TestType0), "5");
+        ConvertThing value = expr.Evaluate(new ExpressionContext(null));
+        Assert.AreEqual(5, value.intVal);
+    }
+
+    [Test]
+    public void Compile_ImplicitlyConvertibleDoubleConst() {
+        ExpressionCompiler compiler = new ExpressionCompiler();
+        Expression<ConvertThing> expr = compiler.Compile<ConvertThing>(typeof(TestType0), "5.12");
+        ConvertThing value = expr.Evaluate(new ExpressionContext(null));
+        Assert.AreEqual(5.12, value.doubleVal);
+    }
+
+    [Test]
+    public void Compile_BasicTypeOf() {
+        ExpressionCompiler compiler = new ExpressionCompiler();
+        Expression<Type> expr = compiler.Compile<Type>(typeof(TestType0), "typeof(string)");
+        Type value = expr.Evaluate(new ExpressionContext(null));
+        Assert.AreEqual(typeof(string), value);
+    }
+
+    [Test]
+    public void Compile_SimpleBinaryAddition() {
+        ExpressionCompiler compiler = new ExpressionCompiler();
+        Expression<float> expr = compiler.Compile<float>(typeof(TestType0), "5f + 5f");
+        float value = expr.Evaluate(new ExpressionContext(null));
+        Assert.AreEqual(10f, value);
+        expr = compiler.Compile<float>(typeof(TestType0), "5f + 5");
+        value = expr.Evaluate(new ExpressionContext(null));
+        Assert.AreEqual(10f, value);
+    }
+
+    [Test]
+    public void Compile_ImplicitCastBinaryAddition() {
+        ExpressionCompiler compiler = new ExpressionCompiler();
+        Expression<ConvertThing> expr = compiler.Compile<ConvertThing>(typeof(TestType0), "5f + 5f");
+        ConvertThing value = expr.Evaluate(new ExpressionContext(null));
+        Assert.AreEqual(10, value.floatVal);
+    }
+
+    [Test]
+    public void Compile_ImplicitCastOverloadedAddition() {
+        ExpressionCompiler compiler = new ExpressionCompiler();
+        Expression<ConvertThing> expr = compiler.Compile<ConvertThing>(typeof(TestType0), "convertThing + 5f");
+        TestType0 t0 = new TestType0();
+        t0.convertThing = 5f;
+        ConvertThing value = expr.Evaluate(new ExpressionContext(t0));
+        Assert.AreEqual(10, value.floatVal);
+    }
+
+    [Test]
+    public void Compile_LiteralStringConcat() {
+        ExpressionCompiler compiler = new ExpressionCompiler();
+        Expression<string> expr = compiler.Compile<string>(null, "'string1' + 'string2'");
+        string value = expr.Evaluate(new ExpressionContext(null));
+        Assert.AreEqual("string1string2", value);
+        Assert.IsTrue(expr.IsConstant());
+    }
+
+    [Test]
+    public void Compile_FieldStringConcat() {
+        ExpressionCompiler compiler = new ExpressionCompiler();
+        Expression<string> expr = compiler.Compile<string>(typeof(TestType0), "value + 'string2'");
+        TestType0 t0 = new TestType0();
+        t0.value = "string1";
+        string value = expr.Evaluate(new ExpressionContext(t0));
+        Assert.AreEqual("string1string2", value);
+    }
+
+    [Test]
+    public void Compile_NumericComparison() {
+        ExpressionCompiler compiler = new ExpressionCompiler();
+        Expression<bool> expr = compiler.Compile<bool>(typeof(TestType0), "5 > 6");
+        Assert.IsFalse(expr.Evaluate(new ExpressionContext(null)));
+
+        expr = compiler.Compile<bool>(typeof(TestType0), "5 >= 6");
+        Assert.IsFalse(expr.Evaluate(new ExpressionContext(null)));
+
+        expr = compiler.Compile<bool>(typeof(TestType0), "5 < 6");
+        Assert.IsTrue(expr.Evaluate(new ExpressionContext(null)));
+
+        expr = compiler.Compile<bool>(typeof(TestType0), "5 <= 6");
+        Assert.IsTrue(expr.Evaluate(new ExpressionContext(null)));
+
+        expr = compiler.Compile<bool>(typeof(TestType0), "5 <= 5");
+        Assert.IsTrue(expr.Evaluate(new ExpressionContext(null)));
+
+        expr = compiler.Compile<bool>(typeof(TestType0), "5 <= 3");
+        Assert.IsFalse(expr.Evaluate(new ExpressionContext(null)));
+    }
+
+    [Test]
+    public void Compile_ComparisonOverload() {
+        ExpressionCompiler compiler = new ExpressionCompiler();
+        TestType0 t0 = new TestType0();
+        t0.convertThing.intVal = 41;
+        Expression<bool> expr = compiler.Compile<bool>(typeof(TestType0), "convertThing > 6");
+        Assert.IsTrue(expr.Evaluate(new ExpressionContext(t0)));
+
+        expr = compiler.Compile<bool>(typeof(TestType0), "convertThing > 6");
+        t0.convertThing.intVal = -1;
+        Assert.IsFalse(expr.Evaluate(new ExpressionContext(t0)));
+
+        t0.convertThing.floatVal = 81.5f;
+        expr = compiler.Compile<bool>(typeof(TestType0), "convertThing > 6f");
+        Assert.IsTrue(expr.Evaluate(new ExpressionContext(t0)));
+
+        t0.convertThing.floatVal = -41;
+        expr = compiler.Compile<bool>(typeof(TestType0), "convertThing > 6f");
+        Assert.IsFalse(expr.Evaluate(new ExpressionContext(t0)));
+    }
+
+    [Test]
+    public void Compile_BooleanEquality() {
+        ExpressionCompiler compiler = new ExpressionCompiler();
+        Expression<bool> expr = compiler.Compile<bool>(typeof(TestType0), "true == true");
+        Assert.IsTrue(expr.Evaluate(new ExpressionContext(null)));
+    }
+
+    [Test]
+    public void Compile_NumericEquality() {
+        ExpressionCompiler compiler = new ExpressionCompiler();
+        Expression<bool> expr = compiler.Compile<bool>(typeof(TestType0), "5 == 5");
+        Assert.IsTrue(expr.Evaluate(new ExpressionContext(null)));
+    }
+
+    [Test]
+    public void Compile_StringEquality() {
+        ExpressionCompiler compiler = new ExpressionCompiler();
+        Expression<bool> expr = compiler.Compile<bool>(typeof(TestType0), "'x' == 'x'");
+        Assert.IsTrue(expr.Evaluate(new ExpressionContext(null)));
+    }
+
+    [Test]
+    public void Compile_ObjectEquality() {
+        ExpressionCompiler compiler = new ExpressionCompiler();
+        TestType0 t0 = new TestType0();
+        t0.obj1 = new object[0];
+        t0.obj2 = t0.obj1;
+        Expression<bool> expr = compiler.Compile<bool>(typeof(TestType0), "obj1 == obj2");
+        Assert.IsTrue(expr.Evaluate(new ExpressionContext(t0)));
+    }
+
+    [Test]
+    public void Compile_BooleanInequality() {
+        ExpressionCompiler compiler = new ExpressionCompiler();
+        Expression<bool> expr = compiler.Compile<bool>(typeof(TestType0), "false != true");
+        Assert.IsTrue(expr.Evaluate(new ExpressionContext(null)));
+    }
+
+    [Test]
+    public void Compile_NumericInequality() {
+        ExpressionCompiler compiler = new ExpressionCompiler();
+        Expression<bool> expr = compiler.Compile<bool>(typeof(TestType0), "5 != 5");
+        Assert.IsFalse(expr.Evaluate(new ExpressionContext(null)));
+    }
+
+    [Test]
+    public void Compile_StringInequality() {
+        ExpressionCompiler compiler = new ExpressionCompiler();
+        Expression<bool> expr = compiler.Compile<bool>(typeof(TestType0), "'x' != 'x'");
+        Assert.IsFalse(expr.Evaluate(new ExpressionContext(null)));
+    }
+
+    [Test]
+    public void Compile_ObjectInequality() {
+        ExpressionCompiler compiler = new ExpressionCompiler();
+        TestType0 t0 = new TestType0();
+        t0.obj1 = new object[0];
+        t0.obj2 = t0.obj1;
+        Expression<bool> expr = compiler.Compile<bool>(typeof(TestType0), "obj1 != obj2");
+        Assert.IsFalse(expr.Evaluate(new ExpressionContext(t0)));
+    }
+
+    [Test]
+    public void Compile_OverloadedEquality() {
+        ExpressionCompiler compiler = new ExpressionCompiler();
+        TestType0 t0 = new TestType0();
+        t0.convertThing.floatVal = 10f;
+        Expression<bool> expr = compiler.Compile<bool>(typeof(TestType0), "convertThing == 10f");
+        Assert.IsTrue(expr.Evaluate(new ExpressionContext(t0)));
+    }
+
+    [Test]
+    public void Compile_OverloadedInequality() {
+        ExpressionCompiler compiler = new ExpressionCompiler();
+        TestType0 t0 = new TestType0();
+        t0.convertThing.floatVal = 10f;
+        Expression<bool> expr = compiler.Compile<bool>(typeof(TestType0), "convertThing != 90f");
+        Assert.IsTrue(expr.Evaluate(new ExpressionContext(t0)));
+    }
+
+    [Test]
+    public void Compile_EqualNull() {
+        ExpressionCompiler compiler = new ExpressionCompiler();
+        TestType0 t0 = new TestType0();
+        Expression<bool> expr = compiler.Compile<bool>(typeof(TestType0), "value == null");
+        Assert.IsTrue(expr.Evaluate(new ExpressionContext(t0)));
+    }
+
+    [Test]
+    public void Compile_NotEqualNull() {
+        ExpressionCompiler compiler = new ExpressionCompiler();
+        TestType0 t0 = new TestType0();
+        t0.value = "hello";
+        Expression<bool> expr = compiler.Compile<bool>(typeof(TestType0), "value != null");
+        Assert.IsTrue(expr.Evaluate(new ExpressionContext(t0)));
+    }
+
+    [Test]
+    public void Compile_AndOrBoolBool() {
+        TestType0 target = new TestType0();
+        target.obj1 = new TestType0();
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionCompiler compiler = new ExpressionCompiler();
+        Expression<bool> expression = compiler.Compile<bool>(typeof(TestType0), "true && true");
+        Assert.IsInstanceOf<OperatorExpression_AndOrBool>(expression);
+        Assert.AreEqual(true, expression.Evaluate(ctx));
+
+        expression = compiler.Compile<bool>(typeof(TestType0), "true && false");
+        Assert.IsInstanceOf<OperatorExpression_AndOrBool>(expression);
+        Assert.AreEqual(false, expression.Evaluate(ctx));
+
+        expression = compiler.Compile<bool>(typeof(TestType0), "false && true");
+        Assert.IsInstanceOf<OperatorExpression_AndOrBool>(expression);
+        Assert.AreEqual(false, expression.Evaluate(ctx));
+
+        expression = compiler.Compile<bool>(typeof(TestType0), "false && false");
+        Assert.IsInstanceOf<OperatorExpression_AndOrBool>(expression);
+        Assert.AreEqual(false, expression.Evaluate(ctx));
+
+        expression = compiler.Compile<bool>(typeof(TestType0), "true || true");
+        Assert.IsInstanceOf<OperatorExpression_AndOrBool>(expression);
+        Assert.AreEqual(true, expression.Evaluate(ctx));
+
+        expression = compiler.Compile<bool>(typeof(TestType0), "true || false");
+        Assert.IsInstanceOf<OperatorExpression_AndOrBool>(expression);
+        Assert.AreEqual(true, expression.Evaluate(ctx));
+
+        expression = compiler.Compile<bool>(typeof(TestType0), "false || true");
+        Assert.IsInstanceOf<OperatorExpression_AndOrBool>(expression);
+        Assert.AreEqual(true, expression.Evaluate(ctx));
+
+        expression = compiler.Compile<bool>(typeof(TestType0), "false || false");
+        Assert.IsInstanceOf<OperatorExpression_AndOrBool>(expression);
+        Assert.AreEqual(false, expression.Evaluate(ctx));
+    }
+
+    [Test]
+    public void Compile_AndOrObjectBool() {
+        TestType0 target = new TestType0();
+        target.obj1 = new TestType0();
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionCompiler compiler = new ExpressionCompiler();
+        Expression<bool> expression = compiler.Compile<bool>(typeof(TestType0), "obj1 && true");
+        Assert.IsInstanceOf<OperatorExpression_AndOrObjectBool<object>>(expression);
+        Assert.AreEqual(true, expression.Evaluate(ctx));
+
+        target.obj1 = new TestType0();
+        expression = compiler.Compile<bool>(typeof(TestType0), "obj1 && false");
+        Assert.IsInstanceOf<OperatorExpression_AndOrObjectBool<object>>(expression);
+        Assert.AreEqual(false, expression.Evaluate(ctx));
+
+        target.obj1 = null;
+        expression = compiler.Compile<bool>(typeof(TestType0), "obj1 && true");
+        Assert.IsInstanceOf<OperatorExpression_AndOrObjectBool<object>>(expression);
+        Assert.AreEqual(false, expression.Evaluate(ctx));
+
+        target.obj1 = null;
+        expression = compiler.Compile<bool>(typeof(TestType0), "obj1 && false");
+        Assert.IsInstanceOf<OperatorExpression_AndOrObjectBool<object>>(expression);
+        Assert.AreEqual(false, expression.Evaluate(ctx));
+
+        target.obj1 = new TestType0();
+        expression = compiler.Compile<bool>(typeof(TestType0), "obj1 || true");
+        Assert.IsInstanceOf<OperatorExpression_AndOrObjectBool<object>>(expression);
+        Assert.AreEqual(true, expression.Evaluate(ctx));
+
+        target.obj1 = new TestType0();
+        expression = compiler.Compile<bool>(typeof(TestType0), "obj1 || false");
+        Assert.IsInstanceOf<OperatorExpression_AndOrObjectBool<object>>(expression);
+        Assert.AreEqual(true, expression.Evaluate(ctx));
+
+        target.obj1 = null;
+        expression = compiler.Compile<bool>(typeof(TestType0), "obj1 || true");
+        Assert.IsInstanceOf<OperatorExpression_AndOrObjectBool<object>>(expression);
+        Assert.AreEqual(true, expression.Evaluate(ctx));
+
+        target.obj1 = null;
+        expression = compiler.Compile<bool>(typeof(TestType0), "obj1 || false");
+        Assert.IsInstanceOf<OperatorExpression_AndOrObjectBool<object>>(expression);
+        Assert.AreEqual(false, expression.Evaluate(ctx));
+    }
+
+    [Test]
+    public void Compile_AndOrBoolObject() {
+        TestType0 target = new TestType0();
+        target.obj1 = new TestType0();
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionCompiler compiler = new ExpressionCompiler();
+        Expression<bool> expression = compiler.Compile<bool>(typeof(TestType0), "true && obj1");
+        Assert.IsInstanceOf<OperatorExpression_AndOrBoolObject<object>>(expression);
+        Assert.AreEqual(true, expression.Evaluate(ctx));
+
+        target.obj1 = null;
+        expression = compiler.Compile<bool>(typeof(TestType0), ("true && obj1"));
+        Assert.IsInstanceOf<OperatorExpression_AndOrBoolObject<object>>(expression);
+        Assert.AreEqual(false, expression.Evaluate(ctx));
+
+        target.obj1 = new TestType0();
+        expression = compiler.Compile<bool>(typeof(TestType0), ("false && obj1"));
+        Assert.IsInstanceOf<OperatorExpression_AndOrBoolObject<object>>(expression);
+        Assert.AreEqual(false, expression.Evaluate(ctx));
+
+        target.obj1 = null;
+        expression = compiler.Compile<bool>(typeof(TestType0), ("false && obj1"));
+        Assert.IsInstanceOf<OperatorExpression_AndOrBoolObject<object>>(expression);
+        Assert.AreEqual(false, expression.Evaluate(ctx));
+
+        target.obj1 = new TestType0();
+        expression = compiler.Compile<bool>(typeof(TestType0), ("true || obj1"));
+        Assert.IsInstanceOf<OperatorExpression_AndOrBoolObject<object>>(expression);
+        Assert.AreEqual(true, expression.Evaluate(ctx));
+
+        target.obj1 = null;
+        expression = compiler.Compile<bool>(typeof(TestType0), ("true || obj1"));
+        Assert.IsInstanceOf<OperatorExpression_AndOrBoolObject<object>>(expression);
+        Assert.AreEqual(true, expression.Evaluate(ctx));
+
+        target.obj1 = new TestType0();
+        expression = compiler.Compile<bool>(typeof(TestType0), ("false || obj1"));
+        Assert.IsInstanceOf<OperatorExpression_AndOrBoolObject<object>>(expression);
+        Assert.AreEqual(true, expression.Evaluate(ctx));
+
+        target.obj1 = null;
+        expression = compiler.Compile<bool>(typeof(TestType0), ("false || obj1"));
+        Assert.IsInstanceOf<OperatorExpression_AndOrBoolObject<object>>(expression);
+        Assert.AreEqual(false, expression.Evaluate(ctx));
+    }
+
+    [Test]
+    public void Compile_AndOrObjectObject() {
+        TestType0 target = new TestType0();
+        target.obj1 = new TestType0();
+        target.obj2 = new TestType0();
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionCompiler compiler = new ExpressionCompiler();
+        Expression<bool> expression = compiler.Compile<bool>(typeof(TestType0), "obj1 && obj2");
+        Assert.IsInstanceOf<OperatorExpression_AndOrObject<object, object>>(expression);
+        Assert.AreEqual(true, expression.Evaluate(ctx));
+
+        target.obj1 = new TestType0();
+        target.obj2 = null;
+        expression = compiler.Compile<bool>(typeof(TestType0), ("obj1 && obj2"));
+        Assert.IsInstanceOf<OperatorExpression_AndOrObject<object, object>>(expression);
+        Assert.AreEqual(false, expression.Evaluate(ctx));
+
+        target.obj1 = null;
+        target.obj2 = new TestType0();
+        expression = compiler.Compile<bool>(typeof(TestType0), ("obj1 && obj2"));
+        Assert.IsInstanceOf<OperatorExpression_AndOrObject<object, object>>(expression);
+        Assert.AreEqual(false, expression.Evaluate(ctx));
+
+        target.obj1 = null;
+        target.obj2 = null;
+        expression = compiler.Compile<bool>(typeof(TestType0), ("obj1 && obj2"));
+        Assert.IsInstanceOf<OperatorExpression_AndOrObject<object, object>>(expression);
+        Assert.AreEqual(false, expression.Evaluate(ctx));
+
+        target.obj1 = new TestType0();
+        target.obj2 = new TestType0();
+        expression = compiler.Compile<bool>(typeof(TestType0), ("obj1 || obj2"));
+        Assert.IsInstanceOf<OperatorExpression_AndOrObject<object, object>>(expression);
+        Assert.AreEqual(true, expression.Evaluate(ctx));
+
+        target.obj1 = new TestType0();
+        target.obj2 = null;
+        expression = compiler.Compile<bool>(typeof(TestType0), ("obj1 || obj2"));
+        Assert.IsInstanceOf<OperatorExpression_AndOrObject<object, object>>(expression);
+        Assert.AreEqual(true, expression.Evaluate(ctx));
+
+        target.obj1 = null;
+        target.obj2 = new TestType0();
+        expression = compiler.Compile<bool>(typeof(TestType0), ("obj1 || obj2"));
+        Assert.IsInstanceOf<OperatorExpression_AndOrObject<object, object>>(expression);
+        Assert.AreEqual(true, expression.Evaluate(ctx));
+
+        target.obj1 = null;
+        target.obj2 = null;
+        expression = compiler.Compile<bool>(typeof(TestType0), ("obj1 || obj2"));
+        Assert.IsInstanceOf<OperatorExpression_AndOrObject<object, object>>(expression);
+        Assert.AreEqual(false, expression.Evaluate(ctx));
+    }
+
+
+    [Test]
+    public void Compile_StringNotWithNull() {
+        TestType0 target = new TestType0();
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionCompiler compiler = new ExpressionCompiler();
+        Expression<bool> expression = compiler.Compile<bool>(typeof(TestType0), "!value");
+        Assert.IsInstanceOf<UnaryExpression_StringBoolean>(expression);
+        Assert.AreEqual(true, expression.Evaluate(ctx));
+    }
+
+    [Test]
+    public void Compile_StringNotWithEmpty() {
+        TestType0 target = new TestType0();
+        target.value = string.Empty;
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionCompiler compiler = new ExpressionCompiler();
+        Expression<bool> expression = compiler.Compile<bool>(typeof(TestType0), "!value");
+        Assert.IsInstanceOf<UnaryExpression_StringBoolean>(expression);
+        Assert.AreEqual(true, expression.Evaluate(ctx));
+    }
+
+    [Test]
+    public void Compile_StringNotWithValue() {
+        TestType0 target = new TestType0();
+        target.value = "yup";
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionCompiler compiler = new ExpressionCompiler();
+        Expression<bool> expression = compiler.Compile<bool>(typeof(TestType0), "!value");
+        Assert.IsInstanceOf<UnaryExpression_StringBoolean>(expression);
+        Assert.AreEqual(false, expression.Evaluate(ctx));
+    }
+
+    [Test]
+    public void Compile_ObjectNotWithNull() {
+        TestType0 target = new TestType0();
+        target.obj1 = null;
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionCompiler compiler = new ExpressionCompiler();
+        Expression<bool> expression = compiler.Compile<bool>(typeof(TestType0), "!obj1");
+        Assert.IsInstanceOf<UnaryExpression_ObjectBoolean>(expression);
+        Assert.AreEqual(true, expression.Evaluate(ctx));
+    }
+
+    [Test]
+    public void Compile_ObjectNotWithValue() {
+        TestType0 target = new TestType0();
+        target.obj1 = new TestType0();
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionCompiler compiler = new ExpressionCompiler();
+        Expression<bool> expression = compiler.Compile<bool>(typeof(TestType0), "!obj1");
+        Assert.IsInstanceOf<UnaryExpression_ObjectBoolean>(expression);
+        Assert.AreEqual(false, expression.Evaluate(ctx));
+    }
+
+    [Test]
+    public void Compile_OverloadedNot() {
+        TestType0 target = new TestType0();
+        target.convertThing.intVal = 5;
+        target.convertThing.stringVal = "times";
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionCompiler compiler = new ExpressionCompiler();
+        Expression<string> expression = compiler.Compile<string>(typeof(TestType0), "!convertThing");
+        Assert.AreEqual("5times", expression.Evaluate(ctx));
+    }
+
+    [Test]
+    public void Compile_UnaryMinusNumeric() {
+        TestType0 target = new TestType0();
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionCompiler compiler = new ExpressionCompiler();
+        Expression<float> expression = compiler.Compile<float>(typeof(TestType0), "-(5f)");
+        Assert.IsInstanceOf<UnaryExpression_Minus_Float>(expression);
+        Assert.AreEqual(-5f, expression.Evaluate(ctx));
+
+        Expression<double> expressionD = compiler.Compile<double>(typeof(TestType0), "-(5.0)");
+        Assert.IsInstanceOf<UnaryExpression_Minus_Double>(expressionD);
+        Assert.AreEqual(-5.0, expressionD.Evaluate(ctx));
+
+        Expression<int> expressionI = compiler.Compile<int>(typeof(TestType0), "-(5)");
+        Assert.IsInstanceOf<UnaryExpression_Minus_Int>(expressionI);
+        Assert.AreEqual(-5, expressionI.Evaluate(ctx));
+    }
+
+    [Test]
+    public void Compile_UnaryMinusOverload() {
+        TestType0 target = new TestType0();
+        target.convertThing.floatVal = 5;
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionCompiler compiler = new ExpressionCompiler();
+        Expression<float> expression = compiler.Compile<float>(typeof(TestType0), "-convertThing");
+        Assert.AreEqual(-5f, expression.Evaluate(ctx));
+    }
+
+    [Test]
+    public void Compile_AccessExpression_Field() {
+        TestType0 target = new TestType0();
+        target.convertThing.floatVal = 5;
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionCompiler compiler = new ExpressionCompiler();
+        Expression<float> expression = compiler.Compile<float>(typeof(TestType0), "convertThing.floatVal");
+        Assert.AreEqual(5f, expression.Evaluate(ctx));
+    }
+
+    [Test]
+    public void Compile_AccessExpression_Property() {
+        TestType0 target = new TestType0();
+        target.convertThing.vectorProp = new Vector3(5, 5, 5);
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionCompiler compiler = new ExpressionCompiler();
+        Expression<Vector3> expression = compiler.Compile<Vector3>(typeof(TestType0), "convertThing.vectorProp");
+        Assert.AreEqual(new Vector3(5, 5, 5), expression.Evaluate(ctx));
+    }
+
+    [Test]
+    public void Compile_AccessExpression_PropertyHead() {
+        TestType0 target = new TestType0();
+        target.convertThing.vectorProp = new Vector3(5, 5, 5);
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionCompiler compiler = new ExpressionCompiler();
+        Expression<float> expression = compiler.Compile<float>(typeof(TestType0), "ConvertThingProperty.vectorProp.x");
+        Assert.AreEqual(5f, expression.Evaluate(ctx));
+    }
+
+    [Test]
+    public void Compile_AccessExpression_StaticField() {
+        TestType0 target = new TestType0();
+        ConvertThing.s_StaticVal = 11f;
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionCompiler compiler = new ExpressionCompiler();
+        compiler.AddNamespace("UnityEngine");
+        Expression<float> expression = compiler.Compile<float>(typeof(TestType0), "ConvertThingProperty.s_StaticVal");
+        Assert.AreEqual(11f, expression.Evaluate(ctx));
+    }
+
+    [Test]
+    public void Compile_AccessExpression_StaticTypeRefProperty() {
+        TestType0 target = new TestType0();
+        ConvertThing.s_StaticVal = 11f;
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionCompiler compiler = new ExpressionCompiler();
+        compiler.AddNamespace("UnityEngine");
+        Expression<Vector3> expression = compiler.Compile<Vector3>(typeof(TestType0), "Vector3.up");
+        Assert.AreEqual(new Vector3(0, 1, 0), expression.Evaluate(ctx));
+    }
+
+    [Test]
+    public void Compile_AccessExpression_StaticTypeRefField() {
+        TestType0 target = new TestType0();
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionCompiler compiler = new ExpressionCompiler();
+        TestType1.s_FloatVal = 6;
+        Expression<float> expression = compiler.Compile<float>(typeof(TestType0), "TestType1.s_FloatVal");
+        Assert.AreEqual(6f, expression.Evaluate(ctx));
+    }
+
+    [Test]
+    public void Compile_AccessExpression_ListIndex() {
+        TestType0 target = new TestType0();
+        target.vectors = new List<Vector3>();
+        target.vectors.Add(Vector2.up);
+        target.vectors.Add(Vector2.down);
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionCompiler compiler = new ExpressionCompiler();
+        Expression<Vector3> expression = compiler.Compile<Vector3>(typeof(TestType0), "vectors[1]");
+        Assert.AreEqual(new Vector3(0, -1, 0), expression.Evaluate(ctx));
+    }
+
+    [Test]
+    public void Compile_AccessExpression_ArrayIndex() {
+        TestType0 target = new TestType0();
+        target.floats = new float[2];
+        target.floats[0] = 11f;
+        target.floats[1] = 12f;
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionCompiler compiler = new ExpressionCompiler();
+        Expression<float> expression = compiler.Compile<float>(typeof(TestType0), "floats[1]");
+        Assert.AreEqual(12f, expression.Evaluate(ctx));
+    }
+
+    [Test]
+    public void Compile_AccessExpression_IndexList_Field() {
+        TestType0 target = new TestType0();
+        target.vectors = new List<Vector3>();
+        target.vectors.Add(Vector2.up);
+        target.vectors.Add(Vector2.down);
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionCompiler compiler = new ExpressionCompiler();
+        Expression<float> expression = compiler.Compile<float>(typeof(TestType0), "vectors[1].y");
+        Assert.AreEqual(-1f, expression.Evaluate(ctx));
+    }
+
+    [Test]
+    public void Compile_AccessExpression_IndexList_ExpressionIndex() {
+        TestType0 target = new TestType0();
+        target.convertThing.intVal = 2;
+        target.vectors = new List<Vector3>();
+        target.vectors.Add(Vector2.up);
+        target.vectors.Add(Vector2.down);
+        target.vectors.Add(Vector2.right);
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionCompiler compiler = new ExpressionCompiler();
+        Expression<float> expression = compiler.Compile<float>(typeof(TestType0), "vectors[convertThing.intVal].x");
+        Assert.AreEqual(1f, expression.Evaluate(ctx));
+    }
+
+    [Test]
+    public void Compile_AccessExpression_IndexList_ExpressionIndexOutOfBounds() {
+        TestType0 target = new TestType0();
+        target.convertThing.intVal = 2;
+        target.vectors = new List<Vector3>();
+        target.vectors.Add(Vector2.up);
+        target.vectors.Add(Vector2.down);
+        target.vectors.Add(Vector2.right);
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionCompiler compiler = new ExpressionCompiler();
+        Expression<float> expression = compiler.Compile<float>(typeof(TestType0), "vectors[10].x");
+        Assert.AreEqual(0f, expression.Evaluate(ctx));
+    }
+
+    [Test]
+    public void Compile_TernaryExpression_Literals() {
+        TestType0 target = new TestType0();
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionCompiler compiler = new ExpressionCompiler();
+        Expression<int> expression = compiler.Compile<int>(typeof(TestType0), " 1 > 2 ? 5 : 6");
+        Assert.IsInstanceOf<OperatorExpression_Ternary<int>>(expression);
+        Assert.AreEqual(6, expression.Evaluate(ctx));
+    }
+
+    [Test]
+    public void Compile_TernaryExpression_Lookup() {
+        TestType0 target = new TestType0();
+        target.value = "matt";
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionCompiler compiler = new ExpressionCompiler();
+        Expression<int> expression = compiler.Compile<int>(typeof(TestType0), " value.Length > 2 ? 5 : 6");
+        Assert.IsInstanceOf<OperatorExpression_Ternary<int>>(expression);
+        Assert.AreEqual(5, expression.Evaluate(ctx));
+    }
+
+    [Test]
+    public void Compile_AccessExpression_Method0Args() {
+        TestType0 target = new TestType0();
+        target.value = "0";
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionCompiler compiler = new ExpressionCompiler();
+        Expression<string> expression = compiler.Compile<string>(typeof(TestType0), "GetValue()");
+        Assert.IsInstanceOf<AccessExpression<string, TestType0>>(expression);
+        Assert.AreEqual("0", expression.Evaluate(ctx));
+    }
+
+    [Test]
+    public void Compile_AccessExpression_Method1Arg() {
+        TestType0 target = new TestType0();
+        target.value = "0";
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionCompiler compiler = new ExpressionCompiler();
+        Expression<string> expression = compiler.Compile<string>(typeof(TestType0), "GetValue('1')");
+        Assert.IsInstanceOf<AccessExpression<string, TestType0>>(expression);
+        Assert.AreEqual("01", expression.Evaluate(ctx));
+    }
+
+    [Test]
+    public void Compile_AccessExpression_Method2Args() {
+        TestType0 target = new TestType0();
+        target.value = "0";
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionCompiler compiler = new ExpressionCompiler();
+        Expression<string> expression = compiler.Compile<string>(typeof(TestType0), "GetValue('1', '2')");
+        Assert.IsInstanceOf<AccessExpression<string, TestType0>>(expression);
+        Assert.AreEqual("012", expression.Evaluate(ctx));
+    }
+
+    [Test]
+    public void Compile_AccessExpression_Method3Args() {
+        TestType0 target = new TestType0();
+        target.value = "0";
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionCompiler compiler = new ExpressionCompiler();
+        Expression<string> expression = compiler.Compile<string>(typeof(TestType0), "GetValue('1', '2', '3')");
+        Assert.IsInstanceOf<AccessExpression<string, TestType0>>(expression);
+        Assert.AreEqual("0123", expression.Evaluate(ctx));
+    }
+
+    [Test]
+    public void Compile_AccessExpression_Method4Args() {
+        TestType0 target = new TestType0();
+        target.value = "0";
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionCompiler compiler = new ExpressionCompiler();
+        Expression<string> expression = compiler.Compile<string>(typeof(TestType0), "GetValue('1', '2', '3', '4')");
+        Assert.IsInstanceOf<AccessExpression<string, TestType0>>(expression);
+        Assert.AreEqual("01234", expression.Evaluate(ctx));
+    }
+
+    [Test]
+    public void Compile_AccessExpression_Method5Args() {
+        CompileException ex = Assert.Throws<CompileException>(() => { new ExpressionCompiler().Compile<string>(typeof(TestType0), "GetValue('1', '2', '3', '4', '5')"); });
+        Assert.AreEqual(CompileExceptions.TooManyArgumentsException("GetValue", 5).Message, ex.Message);
+    }
+
+    [Test]
+    public void Compile_AccessExpression_MethodChained() {
+        TestType0 target = new TestType0();
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionCompiler compiler = new ExpressionCompiler();
+        Expression<string> expression = compiler.Compile<string>(typeof(TestType0), "GetSomeFunc()('funky')");
+        Assert.IsInstanceOf<AccessExpression<string, TestType0>>(expression);
+        Assert.AreEqual("funky", expression.Evaluate(ctx));
+    }
+
+    [Test]
+    public void Compile_AccessExpression_MethodOnField() {
+        TestType0 target = new TestType0();
+        target.value = "matt";
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionCompiler compiler = new ExpressionCompiler();
+        Expression<string> expression = compiler.Compile<string>(typeof(TestType0), "value.ToString()");
+        Assert.IsInstanceOf<AccessExpression<string, TestType0>>(expression);
+        Assert.AreEqual("matt", expression.Evaluate(ctx));
+    }
+
+    [Test]
+    public void Compile_AccessExpression_MethodOnProperty() {
+        TestType0 target = new TestType0();
+        target.value = "matt";
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionCompiler compiler = new ExpressionCompiler();
+        Expression<string> expression = compiler.Compile<string>(typeof(TestType0), "StringValueProp.ToString()");
+        Assert.IsInstanceOf<AccessExpression<string, TestType0>>(expression);
+        Assert.AreEqual("matt", expression.Evaluate(ctx));
+    }
+
+    [Test]
+    public void Compile_AccessExpression_MethodOnIndex() {
+        TestType0 target = new TestType0();
+        target.things = new List<Thing>();
+        target.things.Add(new Thing(5));
+        target.things.Add(new Thing(6));
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionCompiler compiler = new ExpressionCompiler();
+        Expression<string> expression = compiler.Compile<string>(typeof(TestType0), "things[1].Stuff()");
+        Assert.IsInstanceOf<AccessExpression<string, TestType0>>(expression);
+        Assert.AreEqual((6f).ToString(), expression.Evaluate(ctx));
+    }
+
+    [Test]
+    public void Compile_AccessExpression_ConstantValue() {
+        TestType0 target = new TestType0();
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionCompiler compiler = new ExpressionCompiler();
+        Expression<string> expression = compiler.Compile<string>(typeof(TestType0), "ConstantFieldValue");
+        Assert.IsInstanceOf<ConstantExpression<string>>(expression);
+        Assert.AreEqual(TestType0.ConstantFieldValue, expression.Evaluate(ctx));
+    }
+
+    [Test]
+    public void Compile_ListLiteral() {
+        TestType0 target = new TestType0();
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionCompiler compiler = new ExpressionCompiler();
+        Expression<string[]> expression = compiler.Compile<string[]>(typeof(TestType0), "['a', 'b', 'c']");
+        Assert.IsInstanceOf<ArrayLiteralExpression<string>>(expression);
+        Assert.AreEqual(new[] {"a", "b", "c"}, expression.Evaluate(ctx));
+    }
+
+    [Test]
+    public void CompileWriteTarget_RootField() {
+        TestType0 target = new TestType0();
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionCompiler compiler = new ExpressionCompiler();
+        WriteTargetExpression<string> expression = compiler.CompileWriteTarget<string>(typeof(TestType0), "value");
+        expression.Assign(ctx, "this is a new value");
+        Assert.AreEqual(target.value, "this is a new value");
+    }
+
+    [Test]
+    public void CompileWriteTarget_RootProperty() {
+        TestType0 target = new TestType0();
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionCompiler compiler = new ExpressionCompiler();
+        WriteTargetExpression<int> expression = compiler.CompileWriteTarget<int>(typeof(TestType0), "ValueProp");
+        Assert.AreEqual(target.ValueProp, 0);
+        expression.Assign(ctx, 1111);
+        Assert.AreEqual(target.ValueProp, 1111);
+    }
+
+    [Test]
+    public void CompileWriteTarget_ArrayIndexedField() {
+        TestType0 target = new TestType0();
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionCompiler compiler = new ExpressionCompiler();
+        target.floats = new float[3];
+        WriteTargetExpression<float> expression = compiler.CompileWriteTarget<float>(typeof(TestType0), "floats[1]");
+        Assert.AreEqual(target.floats[1], 0f);
+        expression.Assign(ctx, 3f);
+        Assert.AreEqual(target.floats[1], 3f);
+    }
+    
+    [Test]
+    public void CompileWriteTarget_IndexedField() {
+        TestType0 target = new TestType0();
+        target.indexable = new Indexable();
+        target.indexable.val = new string[] {"hi", "there", "guten tag"};
+        
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionCompiler compiler = new ExpressionCompiler();
+        WriteTargetExpression<string> expression = compiler.CompileWriteTarget<string>(typeof(TestType0), "indexable[1]");
+        Assert.AreEqual("there", target.indexable[1]);
+        expression.Assign(ctx, "here");
+        Assert.AreEqual("here", target.indexable[1]);
+    }
+    
+    [Test]
+    public void CompileWriteTarget_DotFieldAccess() {
+        TestType0 target = new TestType0();
+        target.thing = new Thing(0);
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionCompiler compiler = new ExpressionCompiler();
+        WriteTargetExpression<float> expression = compiler.CompileWriteTarget<float>(typeof(TestType0), "thing.value");
+        Assert.AreEqual(0, target.thing.value);
+        expression.Assign(ctx, 12f);
+        Assert.AreEqual(12f, target.thing.value);
+    }
+    
+    [Test]
+    public void CompileWriteTarget_DotPropertyAccess() {
+        TestType0 target = new TestType0();
+        target.thingProp = new Thing(0);
+        ExpressionContext ctx = new ExpressionContext(target);
+        ExpressionCompiler compiler = new ExpressionCompiler();
+        WriteTargetExpression<float> expression = compiler.CompileWriteTarget<float>(typeof(TestType0), "thingProp.value");
+        Assert.AreEqual(0, target.thingProp.value);
+        expression.Assign(ctx, 12f);
+        Assert.AreEqual(12f, target.thingProp.value);
+    }
+    
+    [Test]
+    public void CompileWriteTarget_ThrowsForStructTargets() {
+        CompileException ex = Assert.Throws<CompileException>(() => {
+            ExpressionCompiler compiler = new ExpressionCompiler();
+            compiler.CompileWriteTarget<float>(typeof(TestType0), "structThing.x");
+        });
+        Assert.AreEqual("structThing.x", ex.expression);
+    }
+    
+    [Test]
+    public void CompileWriteTarget_ErrorOnNonWritable() {
+        CompileException ex0 = Assert.Throws<CompileException>(() => {
+            ExpressionCompiler compiler = new ExpressionCompiler();
+            compiler.CompileWriteTarget<float>(typeof(TestType0), "notWritable");
+        });
+        Assert.AreEqual("notWritable", ex0.expression);
+        
+        CompileException ex1 = Assert.Throws<CompileException>(() => {
+            ExpressionCompiler compiler = new ExpressionCompiler();
+            compiler.CompileWriteTarget<float>(typeof(TestType0), "notWritableProp");
+        });
+        Assert.AreEqual("notWritableProp", ex1.expression);
+    }
+
+}

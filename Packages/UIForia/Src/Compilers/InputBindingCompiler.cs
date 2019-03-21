@@ -344,12 +344,18 @@ namespace UIForia.Compilers {
                             break;
                         }
                         case 1: {
-                            Debug.Assert(parameters[0].ParameterType == typeof(MouseInputEvent));
+                            if (typeof(DragEvent) != parameters[0].ParameterType) {
+                                throw new Exception($"Method with attribute {attr.GetType().Name} in type {targetType} must take 0 arguments or 1 argument of type {nameof(DragEvent)}");
+                            }
+                            // todo -- the following is the desired behavior long term
+//                            if (!(typeof(DragEvent).IsAssignableFrom(parameters[0].ParameterType))) {
+//                                throw new Exception($"Method with attribute {attr.GetType().Name} in type {targetType} must take 0 arguments or 1 argument of a type assignable from {nameof(DragEvent)}");
+//                            }
                             handlerType = ReflectionUtil.CreateGenericType(typeof(DragEventHandler_WithEvent<>), targetType);
                             break;
                         }
                         default:
-                            throw new Exception("Method with attribute " + attr.GetType().Name + " must take 0 arguments or 1 argument of type " + nameof(MouseInputEvent));
+                            throw new Exception($"Method with attribute {attr.GetType().Name} in type {targetType} must take 0 arguments or 1 argument of type {nameof(DragEvent)}");
                     }
 
                     handler = (DragEventHandler) ReflectionUtil.CreateGenericInstance(handlerType, ReflectionUtil.ObjectArray5);

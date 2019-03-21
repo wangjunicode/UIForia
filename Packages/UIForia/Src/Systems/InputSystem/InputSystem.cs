@@ -229,7 +229,9 @@ namespace UIForia.Systems {
 
         private void ProcessDragEvents() {
             if (IsDragging) {
-                if (m_MouseState.isLeftMouseUpThisFrame) {
+                if (m_MouseState.isLeftMouseDrag && m_MouseState.isLeftMouseUpThisFrame
+                     || m_MouseState.isMiddleMouseDrag && m_MouseState.isMiddleMouseUpThisFrame
+                     || m_MouseState.isRightMouseDrag && m_MouseState.isRightMouseUpThisFrame) {
                     EndDrag(InputEventType.DragDrop);
                     m_MouseDownElements.Clear();
                 }
@@ -240,7 +242,10 @@ namespace UIForia.Systems {
                 return;
             }
 
-            if (m_MouseState.isLeftMouseDown) {
+            if (m_MouseState.AnyMouseDown) {
+                m_MouseState.isLeftMouseDrag = m_MouseState.isLeftMouseDown;
+                m_MouseState.isMiddleMouseDrag = m_MouseState.isMiddleMouseDown;
+                m_MouseState.isRightMouseDrag = m_MouseState.isRightMouseDown;
                 if (Vector2.Distance(m_MouseState.mouseDownPosition, m_MouseState.mousePosition) >= k_DragThreshold) {
                     BeginDrag();
                 }

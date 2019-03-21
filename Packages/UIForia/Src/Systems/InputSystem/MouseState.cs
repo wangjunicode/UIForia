@@ -3,7 +3,7 @@ using UnityEngine;
 namespace UIForia.Systems.Input {
 
     public struct MouseState {
-
+        
         public bool isLeftMouseDown;
         public bool isLeftMouseDownThisFrame;
         public bool isLeftMouseUpThisFrame;
@@ -15,6 +15,10 @@ namespace UIForia.Systems.Input {
         public bool isMiddleMouseDown;
         public bool isMiddleMouseDownThisFrame;
         public bool isMiddleMouseUpThisFrame;
+
+        public bool isLeftMouseDrag;
+        public bool isMiddleMouseDrag;
+        public bool isRightMouseDrag;
 
         public Vector2 mousePosition;
         public Vector2 mouseDownPosition;
@@ -39,6 +43,7 @@ namespace UIForia.Systems.Input {
 
         public Vector2 MouseDelta => previousMousePosition - mousePosition;
         public bool DidMove => MouseDelta.sqrMagnitude > 0;
+        public bool AnyMouseDown => isLeftMouseDown || isRightMouseDown || isMiddleMouseDown;
 
     }
 }

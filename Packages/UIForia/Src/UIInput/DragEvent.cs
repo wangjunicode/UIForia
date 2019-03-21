@@ -28,6 +28,37 @@ namespace UIForia.UIInput {
 
         public bool IsConsumed => source.isConsumed;
 
+        public Vector2 DragDelta => source.mouseState.MouseDelta;
+        
+        public bool Alt => (Modifiers & KeyboardModifiers.Alt) != 0;
+
+        public bool Shift => (Modifiers & KeyboardModifiers.Shift) != 0;
+
+        public bool Ctrl => (Modifiers & KeyboardModifiers.Control) != 0;
+
+        public bool OnlyControl => Ctrl && !Alt && !Shift;
+
+        public bool Command => (Modifiers & KeyboardModifiers.Command) != 0;
+
+        public bool NumLock => (Modifiers & KeyboardModifiers.NumLock) != 0;
+
+        public bool CapsLock => (Modifiers & KeyboardModifiers.CapsLock) != 0;
+
+        public bool Windows => (Modifiers & KeyboardModifiers.Windows) != 0;
+
+        public bool IsMouseLeftDown => source.mouseState.isLeftMouseDown;
+        public bool IsMouseLeftDownThisFrame => source.mouseState.isLeftMouseDownThisFrame;
+        public bool IsMouseLeftUpThisFrame => source.mouseState.isLeftMouseUpThisFrame;
+
+        public bool IsMouseRightDown => source.mouseState.isRightMouseDown;
+        public bool IsMouseRightDownThisFrame => source.mouseState.isRightMouseDownThisFrame;
+        public bool IsMouseRightUpThisFrame => source.mouseState.isRightMouseUpThisFrame;
+        
+        public bool IsMouseMiddleDown => source.mouseState.isMiddleMouseDown;
+        public bool IsMouseMiddleDownThisFrame => source.mouseState.isMiddleMouseDownThisFrame;
+        public bool IsMouseMiddleUpThisFrame => source.mouseState.isMiddleMouseUpThisFrame;
+
+
         public void StopPropagation() {
             if (source != null) {
                 source.shouldStopPropagation = true;

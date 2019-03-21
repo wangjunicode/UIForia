@@ -60,6 +60,8 @@ namespace UIForia.UIInput {
 
         public Vector2 MousePosition => source.mouseState.mousePosition;
         public Vector2 MouseDownPosition => source.mouseState.mouseDownPosition;
+        public Vector2 DragDelta => source.mouseState.MouseDelta;
+        
     }
 
 }

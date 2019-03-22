@@ -17,7 +17,7 @@ namespace UIForia.DataSource {
         public DataSource(Adapter<T> adapter = null, IRecordStore<T> store = null) {
             this.adapter = adapter ?? new Adapter<T>();
             this.recordStore = store ?? new ListRecordStore<T>();
-            this.config = this.adapter.Configure();
+            this.config = this.adapter.Configure(recordStore);
         }
 
         public int RecordCount => recordStore.Count;
@@ -28,7 +28,7 @@ namespace UIForia.DataSource {
                 config = null;
             }
 
-            output = await adapter.LoadRecords(recordStore, output);
+            output = await adapter.LoadRecords(output);
 
             if (output == null) {
                 return null;
@@ -75,7 +75,7 @@ namespace UIForia.DataSource {
             return record;
         }
 
-        public async Task<T> SetRecord(int id, T record) {
+        public async Task<T> SetRecord(long id, T record) {
             if (record == null) {
                 return await RemoveRecord(id);
             }
@@ -112,7 +112,7 @@ namespace UIForia.DataSource {
             return newRecord;
         }
 
-        public async Task<T> RemoveRecord(int id) {
+        public async Task<T> RemoveRecord(long id) {
             if (config != null) {
                 await config;
                 config = null;
@@ -137,7 +137,7 @@ namespace UIForia.DataSource {
             return await SetRecord(record.Id, record);
         }
 
-        public async Task<T> GetRecord(int id) {
+        public async Task<T> GetRecord(long id) {
             T returnedRecord = await adapter.GetRecord(id, recordStore.GetRecord(id));
 
             if (returnedRecord == null) {

@@ -24,7 +24,7 @@ namespace UIForia.DataSource {
             return list;
         }
 
-        public T RemoveRecord(int id) {
+        public T RemoveRecord(long id) {
             int count = store.Count;
             T[] array = store.Array;
             for (int i = 0; i < count; i++) {
@@ -39,7 +39,7 @@ namespace UIForia.DataSource {
         }
 
         public void SetRecord(T record) {
-            int id = record.Id;
+            long id = record.Id;
             int count = store.Count;
             T[] array = store.Array;
             for (int i = 0; i < count; i++) {
@@ -52,7 +52,7 @@ namespace UIForia.DataSource {
             store.Add(record);
         }
 
-        public T GetRecord(int id) {
+        public T GetRecord(long id) {
             int count = store.Count;
             T[] array = store.Array;
             for (int i = 0; i < count; i++) {

@@ -12,19 +12,19 @@ public class DataSourceTests {
 
         public string data;
 
-        public TestData(int id, string data) {
+        public TestData(long id, string data) {
             Id = id;
             this.data = data;
         }
 
-        public int Id { get; set; }
+        public long Id { get; set; }
 
     }
 
     private class TestAdapter<T> : Adapter<T> where T : class, IRecord {
 
         public Action<T> addRecordHandler;
-        public Action<int, T> getRecordHandler;
+        public Action<long, T> getRecordHandler;
         public Func<T, T, bool> recordChanged;
        
         public override async Task<T> AddRecord(T record) {
@@ -32,7 +32,7 @@ public class DataSourceTests {
             return record;
         }
 
-        public override async Task<T> GetRecord(int id, T currentRecord) {
+        public override async Task<T> GetRecord(long id, T currentRecord) {
             getRecordHandler?.Invoke(id, currentRecord);
             return currentRecord;
         }
@@ -40,16 +40,6 @@ public class DataSourceTests {
         public override bool RecordChanged(T a, T b) {
             if (recordChanged == null) return base.RecordChanged(a, b);
             return recordChanged.Invoke(a, b);
-        }
-
-    }
-
-    private class TestAdapterWithConfig<T> : Adapter<T> where T : class, IRecord {
-
-        public int configureCount = 0;
-        
-        public override Task Configure() {
-            return null;
         }
 
     }
@@ -67,7 +57,7 @@ public class DataSourceTests {
     public void AddRecord_UseInternalStore() {
         TestAdapter<TestData> adapter = new TestAdapter<TestData>();
         int getCall = 0;
-        adapter.getRecordHandler = (int id, TestData record) => {
+        adapter.getRecordHandler = (long id, TestData record) => {
             if (getCall == 0) {
                 Assert.IsNull(record);
             }

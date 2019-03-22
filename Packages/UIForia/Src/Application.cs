@@ -469,6 +469,26 @@ namespace UIForia {
             onUpdate?.Invoke();
         }
 
+        /// <summary>
+        /// Note: you don't need to remove tasks from the system. Any canceled or otherwise completed task gets removed
+        /// from the system automatically.
+        /// </summary>
+        /// <param name="task"></param>
+        /// <returns></returns>
+        public UITask RegisterBeforeUpdateTask(UITask task) {
+            return m_BeforeUpdateTaskSystem.AddTask(task);
+        }
+
+        /// <summary>
+        /// Note: you don't need to remove tasks from the system. Any canceled or otherwise completed task gets removed
+        /// from the system automatically.
+        /// </summary>
+        /// <param name="task"></param>
+        /// <returns></returns>
+        public UITask RegisterAfterUpdatetask(UITask task) {
+            return m_AfterUpdateTaskSystem.AddTask(task);
+        }
+        
         public static void EnableElement(UIElement element) {
             element.view.Application.DoEnableElement(element);
         }

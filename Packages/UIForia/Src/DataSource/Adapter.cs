@@ -5,23 +5,30 @@ namespace UIForia.DataSource {
 
     public class Adapter<T> where T : class, IRecord {
 
-        public virtual Task Configure() {
+        protected IRecordStore<T> store;
+        
+        public virtual Task Configure(IRecordStore<T> store) {
+            this.store = store;
             return null;
+        }
+
+        public virtual void SetStore(IRecordStore<T> store) {
+            this.store = store;
         }
 
         public virtual async Task<T> AddRecord(T record) {
             return record;
         }
 
-        public virtual async Task<T> GetRecord(int id, T currentRecord) {
+        public virtual async Task<T> GetRecord(long id, T currentRecord) {
             return currentRecord;
         }
 
-        public virtual async Task<T> SetRecord(int id, T newRecord, T oldRecord) {
+        public virtual async Task<T> SetRecord(long id, T newRecord, T oldRecord) {
             return newRecord;
         }
 
-        public virtual async Task<ICollection<T>> LoadRecords(IRecordStore<T> store, ICollection<T> output) {
+        public virtual async Task<ICollection<T>> LoadRecords(ICollection<T> output) {
             return store.GetAllRecords(output);
         }
 
@@ -29,8 +36,11 @@ namespace UIForia.DataSource {
             return recordA != recordB;
         }
 
-        public async Task<T> RemoveRecord(int id, T localRecord) {
+        public async Task<T> RemoveRecord(long id, T localRecord) {
             return localRecord;
+        }
+
+        public virtual void Serialize() {
         }
 
     }

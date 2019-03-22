@@ -17,6 +17,7 @@ namespace UIForia.UIInput {
 
         KeyDown = 1 << 8,
         KeyUp = 1 << 9,
+        KeyHeldDown = 1 << 20,
 
         Focus = 1 << 10,
         Blur = 1 << 11,
@@ -31,6 +32,7 @@ namespace UIForia.UIInput {
 
         DragUpdate = DragMove | DragHover,
         MouseUpdate = MouseMove | MouseHover,
+
 
 
     }

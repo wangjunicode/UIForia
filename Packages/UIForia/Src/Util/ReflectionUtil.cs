@@ -652,7 +652,7 @@ namespace UIForia.Util {
         }
 
         private static Delegate CreateFieldSetter(Type baseType, Type fieldType, string fieldName) {
-            FieldInfo fieldInfo = baseType.GetField(fieldName);
+            FieldInfo fieldInfo = baseType.GetField(fieldName, InstanceBindFlags);
 
             if (fieldInfo == null) {
                 PropertyInfo propertyInfo = baseType.GetProperty(fieldName);

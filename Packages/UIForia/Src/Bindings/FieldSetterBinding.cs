@@ -45,7 +45,6 @@ namespace UIForia.Bindings {
 
     }
 
-    // todo make overloads for numeric types, value types, and class type to avoid boxing
     public class WriteBinding<U, T> : Binding where U : UIElement {
 
         private readonly Func<U, T> getter;

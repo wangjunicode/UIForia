@@ -107,8 +107,8 @@ namespace UIForia.Layout.LayoutTypes {
             get {
                 float x = PaddingLeft + BorderLeft;
                 float y = PaddingTop + BorderTop;
-                float width = allocatedWidth;
-                float height = allocatedHeight;
+                float width = allocatedWidth - PaddingBorderHorizontal;
+                float height = allocatedHeight - PaddingBorderVertical;
                 return new Rect(x, y, Mathf.Max(0, width), Mathf.Max(0, height));
             }
         }

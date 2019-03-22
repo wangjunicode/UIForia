@@ -140,6 +140,8 @@ namespace UIForia.Compilers {
                                      $"Unable to find field or property called {property} on type {rootType.FullName}");
         }
 
+        // todo ensure each binding has at most one .read and one .write and that both are different values
+        // ie disallow <Input value.read="someValue" value.write="someValue"/> as this would make no sense unless / until we have pre-post update binding
         public Binding CompileAttribute(Type rootType, Type elementType, AttributeDefinition attributeDefinition) {
             this.rootType = rootType;
             this.elementType = elementType;
@@ -189,14 +191,12 @@ namespace UIForia.Compilers {
                         return binding;
                     }
                     case k_Read: {
-                        return CompileBinding(attrKey, attrValue);
+                        return CompileBinding(parts[0], attrValue);
                     }
 
                     case k_Write:
                         return CompileWriteBinding(parts[0], attrValue);
 
-                    case k_ReadWrite:
-                        break;
                 }
 
                 if (property == "style") return null;
@@ -208,60 +208,51 @@ namespace UIForia.Compilers {
         }
 
         private Binding CompileWriteBinding(string attrKey, string attrValue) {
-            FieldInfo fieldInfo = ReflectionUtil.GetFieldInfo(elementType, attrKey);
             
-            if (fieldInfo != null) {
+            if (ReflectionUtil.IsField(elementType, attrKey, out FieldInfo fieldInfo)) {
                 
                 ReflectionUtil.LinqAccessor accessor = ReflectionUtil.GetLinqFieldAccessors(elementType, fieldInfo.FieldType, attrKey);
 
                 WriteTargetExpression expression = compiler.CompileWriteTarget(rootType, fieldInfo.FieldType, attrValue);
 
-                Binding writeBinding = (Binding)ReflectionUtil.CreateGenericInstanceFromOpenType(typeof(WriteBinding<,>),
-                    new GenericArguments(),
-                    new ConstructorArguments(attrKey, expression, accessor.getter)
-                );
+                try {
+                    Binding writeBinding = (Binding) ReflectionUtil.CreateGenericInstanceFromOpenType(typeof(WriteBinding<,>),
+                        new GenericArguments(elementType, fieldInfo.FieldType),
+                        new ConstructorArguments(attrKey, expression, accessor.getter)
+                    );
 
-                return writeBinding;
+                    return writeBinding;
+                }
+                catch (Exception ex) {
+                    // todo improve error message
+                    UnityEngine.Debug.Log("Unable to create a write binding for expression: " + attrKey + ".write='" + attrValue + "'. Ensure that the expression is a valid property path");
+                    throw;
+                }
 
-//                ReflectionUtil.LinqAccessor accessor = ReflectionUtil.GetLinqFieldAccessors(elementType, fieldInfo.FieldType, attrKey);
-//
-//                ReflectionUtil.TypeArray2[0] = elementType;
-//                ReflectionUtil.TypeArray2[1] = fieldInfo.FieldType;
-//
-//                if (!fieldInfo.FieldType.IsAssignableFrom(expression.YieldedType)) {
-//                    UnityEngine.Debug.Log($"Error compiling binding: {attrKey}={attrValue}, Type {fieldInfo.FieldType} is not assignable from {expression.YieldedType}");
-//                    return null;
-//                }
-//
-//                Dictionary<string, LightList<object>> actionMap = GetActionMap(elementType);
-//
-//                LightList<object> list = actionMap?.GetOrDefault(attrKey);
-//                if (list != null) {
-//                    ReflectionUtil.ObjectArray5[0] = attrKey;
-//                    ReflectionUtil.ObjectArray5[1] = expression;
-//                    ReflectionUtil.ObjectArray5[2] = accessor.getter;
-//                    ReflectionUtil.ObjectArray5[3] = accessor.setter;
-//                    ReflectionUtil.ObjectArray5[4] = list;
-//
-//                    return (Binding) ReflectionUtil.CreateGenericInstanceFromOpenType(
-//                        typeof(FieldSetterBinding_WithCallbacks<,>),
-//                        ReflectionUtil.TypeArray2,
-//                        ReflectionUtil.ObjectArray5
-//                    );
-//                }
-//
-//                ReflectionUtil.ObjectArray4[0] = attrKey;
-//                ReflectionUtil.ObjectArray4[1] = expression;
-//                ReflectionUtil.ObjectArray4[2] = accessor.getter;
-//                ReflectionUtil.ObjectArray4[3] = accessor.setter;
-//                return (Binding) ReflectionUtil.CreateGenericInstanceFromOpenType(
-//                    typeof(FieldSetterBinding<,>),
-//                    ReflectionUtil.TypeArray2,
-//                    ReflectionUtil.ObjectArray4
-//                );
+            }
+
+            if (ReflectionUtil.IsProperty(elementType, attrKey, out PropertyInfo propertyInfo)) {
+                ReflectionUtil.LinqAccessor accessor = ReflectionUtil.GetLinqPropertyAccessors(elementType, propertyInfo.PropertyType, attrKey);
+
+                WriteTargetExpression expression = compiler.CompileWriteTarget(rootType, propertyInfo.PropertyType, attrValue);
+
+                try {
+                    Binding writeBinding = (Binding) ReflectionUtil.CreateGenericInstanceFromOpenType(typeof(WriteBinding<,>),
+                        new GenericArguments(elementType, propertyInfo.PropertyType),
+                        new ConstructorArguments(attrKey, expression, accessor.getter)
+                    );
+
+                    return writeBinding;
+                }
+                catch (Exception ex) {
+                    // todo improve error message
+                    UnityEngine.Debug.Log("Unable to create a write binding for expression: " + attrKey + ".write='" + attrValue + "'. Ensure that the expression is a valid property path");
+                    throw;
+                }
+
             }
             
-            throw new ParseException(attrKey + " is a not a field or property on type " + elementType);
+            throw new ParseException(attrKey + " is a not a field or property on type " + elementType + " that can be written to with a .write binding");
         }
 
         private Binding CompileBinding(string attrKey, string attrValue) {

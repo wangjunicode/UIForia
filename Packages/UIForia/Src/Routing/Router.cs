@@ -89,6 +89,7 @@ namespace UIForia.Routing {
             LightList<RouteParameter> routeParameters = LightListPool<RouteParameter>.Get();
 
             // note: /test/url does not match /test/url/
+            
             string[] pathSegments = path.Split('/');
             string[] destinationPathSegments = matchPath.Split('/');
 

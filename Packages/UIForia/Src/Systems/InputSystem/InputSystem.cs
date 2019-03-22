@@ -13,6 +13,18 @@ namespace UIForia.Systems {
 
     public abstract class InputSystem : IInputSystem {
 
+        private struct PressedKey {
+
+            public readonly KeyCode keyCode;
+            public readonly char character;
+
+            public PressedKey(KeyCode keyCode, char character) {
+                this.keyCode = keyCode;
+                this.character = character;
+            }
+
+        }
+
         private const float k_DragThreshold = 5f;
 
         private readonly ILayoutSystem m_LayoutSystem;
@@ -34,14 +46,16 @@ namespace UIForia.Systems {
         private readonly List<UIElement> m_ExitedElements;
         private readonly List<UIElement> m_EnteredElements;
         private readonly List<UIElement> m_MouseDownElements;
+
         private readonly Dictionary<KeyCode, KeyState> m_KeyStates;
         private readonly Dictionary<int, MouseHandlerGroup> m_MouseHandlerMap;
         private readonly Dictionary<int, DragHandlerGroup> m_DragHandlerMap;
         private readonly Dictionary<int, DragCreatorGroup> m_DragCreatorMap;
         private readonly SkipTree<KeyboardEventTreeNode> m_KeyboardEventTree;
 
-        private readonly List<KeyCode> m_DownThisFrame;
-        private readonly List<KeyCode> m_UpThisFrame;
+        private readonly LightList<KeyCode> m_DownThisFrame;
+        private readonly LightList<KeyCode> m_UpThisFrame;
+        private readonly LightList<PressedKey> m_PressedKeys;
 
         private readonly EventPropagator m_EventPropagator;
         private readonly List<ValueTuple<MouseEventHandler, UIElement, ExpressionContext>> m_MouseEventCaptureList;
@@ -50,8 +64,6 @@ namespace UIForia.Systems {
         private static readonly Event s_Event = new Event();
 
         public KeyboardModifiers KeyboardModifiers => modifiersThisFrame;
-
-        private static readonly ExpressionContext s_DummyContext = new ExpressionContext(null);
 
         protected InputSystem(ILayoutSystem layoutSystem) {
             this.m_LayoutSystem = layoutSystem;
@@ -66,10 +78,12 @@ namespace UIForia.Systems {
             this.m_DragCreatorMap = new Dictionary<int, DragCreatorGroup>();
             this.m_DragHandlerMap = new Dictionary<int, DragHandlerGroup>();
 
-            this.m_UpThisFrame = new List<KeyCode>();
-            this.m_DownThisFrame = new List<KeyCode>();
+            this.m_PressedKeys = new LightList<PressedKey>(16);
+            this.m_UpThisFrame = new LightList<KeyCode>();
+            this.m_DownThisFrame = new LightList<KeyCode>();
             this.m_KeyStates = new Dictionary<KeyCode, KeyState>();
             this.m_KeyboardEventTree = new SkipTree<KeyboardEventTreeNode>();
+
             this.m_EventPropagator = new EventPropagator();
             this.m_MouseEventCaptureList = new List<ValueTuple<MouseEventHandler, UIElement, ExpressionContext>>();
             this.m_DragEventCaptureList = new List<ValueTuple<DragEventHandler, UIElement, ExpressionContext>>();
@@ -227,7 +241,6 @@ namespace UIForia.Systems {
             }
 
             if (m_MouseState.AnyMouseDown) {
-           
                 if (Vector2.Distance(m_MouseState.MouseDownPosition, m_MouseState.mousePosition) >= k_DragThreshold) {
                     BeginDrag();
                 }
@@ -270,7 +283,7 @@ namespace UIForia.Systems {
             m_MouseState.leftMouseButtonState.isDrag = m_MouseState.isLeftMouseDown;
             m_MouseState.rightMouseButtonState.isDrag = m_MouseState.isRightMouseDown;
             m_MouseState.middleMouseButtonState.isDrag = m_MouseState.isMiddleMouseDown;
-            
+
             IsDragging = true;
             m_EventPropagator.Reset(m_MouseState);
             MouseInputEvent mouseEvent = new MouseInputEvent(m_EventPropagator, InputEventType.DragCreate, modifiersThisFrame);
@@ -507,6 +520,16 @@ namespace UIForia.Systems {
             KeyboardInputEvent keyEvent = new KeyboardInputEvent(eventType, keyCode, character, modifiers, m_FocusedElement != null);
             m_CurrentKeyboardEvent = keyEvent;
 
+            if (eventType == InputEventType.KeyDown) {
+                if (UnityEngine.Input.GetKeyDown(keyCode)) {
+                    m_PressedKeys.Add(new PressedKey(keyCode, character));
+                }
+            }
+            else if (eventType == InputEventType.KeyUp) {
+                m_PressedKeys.Remove(character, (pressed, c) => pressed.character == c);
+                m_PressedKeys.Remove(keyCode, (pressed, c) => pressed.keyCode == c);
+            }
+            
             if (m_FocusedElement == null) {
                 m_KeyboardEventTree.ConditionalTraversePreOrder(keyEvent, (item, evt) => {
                     if (evt.stopPropagation) return false;
@@ -603,6 +626,17 @@ namespace UIForia.Systems {
 
                 ProcessKeyEvent(s_Event.rawType, s_Event.keyCode, s_Event.character);
             }
+
+            for (int i = 0; i < m_PressedKeys.Count; i++) {
+                if (!m_DownThisFrame.Contains(m_PressedKeys[i].keyCode, (k, p) => k != p)) {
+                    if (UnityEngine.Input.GetKey(m_PressedKeys[i].keyCode)) {
+                        ProcessKeyboardEvent(m_PressedKeys[i].keyCode, InputEventType.KeyHeldDown, m_PressedKeys[i].character, modifiersThisFrame);
+                    }
+                    else {
+                        m_PressedKeys.Remove(m_PressedKeys[i].keyCode, ((pressed, code) => pressed.keyCode == code));
+                    }
+                }
+            }
         }
 
         private void ProcessKeyEvent(EventType evtType, KeyCode keyCode, char character) {
@@ -627,6 +661,9 @@ namespace UIForia.Systems {
 
                 case EventType.KeyUp:
                     m_UpThisFrame.Add(keyCode);
+
+                    m_PressedKeys.Remove(character, (pressed, c) => pressed.character == c);
+
                     m_KeyStates[keyCode] = KeyState.UpThisFrame;
                     ProcessKeyboardEvent(keyCode, InputEventType.KeyUp, character, modifiersThisFrame);
                     HandleModifierUp(keyCode);
@@ -772,7 +809,7 @@ namespace UIForia.Systems {
                         return;
                     }
                 }
-                
+
                 if (!m_MouseHandlerMap.TryGetValue(element.id, out mouseHandlerGroup)) {
                     continue;
                 }

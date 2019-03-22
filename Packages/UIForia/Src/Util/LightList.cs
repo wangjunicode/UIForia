@@ -110,6 +110,13 @@ namespace UIForia.Util {
             }
         }
 
+        public void Remove<U>(U closureArg, Func<T, U, bool> fn) {
+            int idx = FindIndex(closureArg, fn);
+            if (idx != -1) {
+                RemoveAt(idx);
+            }
+        }
+        
         // todo -- remove boxing
         public bool Remove(T item) {
             for (int i = 0; i < size; i++) {
@@ -416,6 +423,8 @@ namespace UIForia.Util {
             }
 
         }
+
+     
 
     }
 

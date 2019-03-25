@@ -345,11 +345,18 @@ namespace UIForia.Parsing.Style {
                         url = ParseLiteralOrReference(StyleTokenType.Identifier);
                     }
 
-                    while (tokenStream.HasMoreTokens && !AdvanceIfTokenType(StyleTokenType.ParenClose)) {
-                        StyleIdentifierNode urlIdentifier = (StyleIdentifierNode) url;
-                        // advancing tokens no matter the type. We want to concatenate all identifiers and slashes of a path again.
-                        urlIdentifier.name += tokenStream.Current.value;
-                        tokenStream.Advance();
+                    if (url is StyleIdentifierNode urlIdentifier) {
+                        while (tokenStream.HasMoreTokens && !AdvanceIfTokenType(StyleTokenType.ParenClose)) {
+                            // advancing tokens no matter the type. We want to concatenate all identifiers and slashes of a path again.
+                            urlIdentifier.name += tokenStream.Current.value;
+                            tokenStream.Advance();
+                        }
+                    }
+                    else if (url is StyleLiteralNode urlLiteralNode) {
+                        AssertTokenTypeAndAdvance(StyleTokenType.ParenClose);
+                    }
+                    else {
+                        throw new CompileException(url, "URL could not be parsed.");
                     }
 
                     propertyValue = StyleASTNodeFactory.UrlNode(url);

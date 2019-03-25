@@ -159,7 +159,7 @@ namespace UIForia.DataSource {
             }
 
             recordStore.SetRecord(returnedRecord);
-            return localRecord;
+            return returnedRecord;
         }
 
     }

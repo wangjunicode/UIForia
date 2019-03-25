@@ -63,6 +63,10 @@ namespace UIForia.Parsing.Expression {
             ProcessedType processedType = TypeProcessor.GetType(type);
 
             string template = processedType.GetTemplate(app.TemplateRootPath);
+            if (template == null) {
+                throw new InvalidTemplateException(processedType.GetTemplatePath());
+            }
+
             XDocument doc = XDocument.Parse(template);
             ParsedTemplate parsedTemplate;
 

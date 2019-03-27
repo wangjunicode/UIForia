@@ -17,14 +17,20 @@ namespace UIForia.DataSource {
         }
 
         public virtual async Task<T> AddRecord(T record) {
+            store.SetRecord(record);
             return record;
         }
 
         public virtual async Task<T> GetRecord(long id, T currentRecord) {
+            T record = store.GetRecord(id);
+            if (record != null) {
+                return record;
+            }
             return currentRecord;
         }
 
         public virtual async Task<T> SetRecord(long id, T newRecord, T oldRecord) {
+            store.SetRecord(newRecord);
             return newRecord;
         }
 
@@ -37,6 +43,7 @@ namespace UIForia.DataSource {
         }
 
         public async Task<T> RemoveRecord(long id, T localRecord) {
+            store.RemoveRecord(id);
             return localRecord;
         }
 

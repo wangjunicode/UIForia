@@ -90,7 +90,7 @@ namespace UIForia.DataSource {
             T newRecord = await adapter.SetRecord(id, record, localRecord);
 
             // something might have changed since we issued an await
-            localRecord = recordStore.GetRecord(id);
+//            localRecord = recordStore.GetRecord(id);
 
             if (newRecord == null) {
                 T current = recordStore.RemoveRecord(record.Id);

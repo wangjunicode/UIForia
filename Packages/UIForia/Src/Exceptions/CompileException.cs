@@ -27,7 +27,7 @@ namespace UIForia.Exceptions {
 
         public override string Message {
             get {
-                string retn = fileName + base.Message;
+                string retn = fileName + "\n" + base.Message;
 
                 if (!string.IsNullOrEmpty(expression)) {
                     retn += "\nExpression was: " + expression;

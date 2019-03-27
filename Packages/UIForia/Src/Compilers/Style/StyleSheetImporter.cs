@@ -25,7 +25,7 @@ namespace UIForia.Compilers.Style {
             }
 
             try {
-                StyleSheet styleSheet = m_Compiler.Compile(id, StyleParser2.Parse(literalTemplate));
+                StyleSheet styleSheet = m_Compiler.Compile(id, StyleParser.Parse(literalTemplate));
                 if (id != null) {
                     m_CachedStyleSheets.Add(id, styleSheet);
                 }

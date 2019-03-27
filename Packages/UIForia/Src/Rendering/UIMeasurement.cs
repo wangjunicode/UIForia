@@ -45,7 +45,7 @@ namespace UIForia.Rendering {
         
         //public bool IsContentRelative => (unit & (UIUnit.Content | UIUnit.FitContent | UIUnit.MaxContent | UIUnit.MinContent)) != 0;
 
-        public static UIMeasurement ContentArea => new UIMeasurement(1f, UIMeasurementUnit.ParentContentArea);
+        public static UIMeasurement ParentContentArea => new UIMeasurement(1f, UIMeasurementUnit.ParentContentArea);
         public static UIMeasurement Parent100 => new UIMeasurement(1f, UIMeasurementUnit.ParentSize);
         public static UIMeasurement Content100 => new UIMeasurement(1f, UIMeasurementUnit.Content);
         public static UIMeasurement Unset => new UIMeasurement(FloatUtil.UnsetValue);

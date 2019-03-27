@@ -1,15 +1,14 @@
 using NUnit.Framework;
-using UIForia;
 using UIForia.Exceptions;
 using UIForia.Parsing.Style;
 using UIForia.Parsing.Style.AstNodes;
 
 [TestFixture]
-public class StyleParser2Tests {
+public class StyleParserTests {
 
     [Test]
     public void ParseSimpleStyle() {
-        var nodes = StyleParser2.Parse(@"
+        var nodes = StyleParser.Parse(@"
             style simple {
                 MarginTop = 10px;
             }
@@ -31,7 +30,7 @@ public class StyleParser2Tests {
 
     [Test]
     public void ParseColorProperty() {
-        var nodes = StyleParser2.Parse(@"
+        var nodes = StyleParser.Parse(@"
             style withBg {
                 BackgroundColor = rgba(10, 20, 30, 40);
             }
@@ -57,7 +56,7 @@ public class StyleParser2Tests {
 
     [Test]
     public void ParseRgbColorProperty() {
-        var nodes = StyleParser2.Parse(@"
+        var nodes = StyleParser.Parse(@"
             style withBg {
                 BackgroundColor = rgb(10, 20, 30);
             }
@@ -82,7 +81,7 @@ public class StyleParser2Tests {
 
     [Test]
     public void ParseUrl() {
-        var nodes = StyleParser2.Parse(@"
+        var nodes = StyleParser.Parse(@"
             style withBg {
                 Background = url(path/to/image);
             }
@@ -105,7 +104,7 @@ public class StyleParser2Tests {
 
     [Test]
     public void ParsePropertyWithReference() {
-        var nodes = StyleParser2.Parse(@"
+        var nodes = StyleParser.Parse(@"
             style hasReferenceToBackgroundImagePath {
                 Background = url(@pathRef);
             }
@@ -123,7 +122,7 @@ public class StyleParser2Tests {
 
     [Test]
     public void ParseStyleState() {
-        var nodes = StyleParser2.Parse(@"
+        var nodes = StyleParser.Parse(@"
             style hasBackgroundOnHover {
                 [hover] { Background = url(@pathRef.member); }
             }
@@ -149,7 +148,7 @@ public class StyleParser2Tests {
 
     [Test]
     public void ParseAttributeGroup() {
-        var nodes = StyleParser2.Parse(@"
+        var nodes = StyleParser.Parse(@"
             style hasBackgroundOnHover {
                 [attr:attrName] { Background = url(@pathRef); }
             }
@@ -169,7 +168,7 @@ public class StyleParser2Tests {
     
     [Test]
     public void ParseEmptyGroups() {
-        var nodes = StyleParser2.Parse(@"
+        var nodes = StyleParser.Parse(@"
             style hasBackgroundOnHover {
                 [attr:attrName] { }
                 [hover] {}
@@ -190,7 +189,7 @@ public class StyleParser2Tests {
 
     [Test]
     public void ParseAttributeGroupWithStateGroup() {
-        var nodes = StyleParser2.Parse(@"
+        var nodes = StyleParser.Parse(@"
             style mixingItAllUp {
                 TextColor = green;
                 [attr:attrName] { 
@@ -270,7 +269,7 @@ public class StyleParser2Tests {
 
     [Test]
     public void ParseExportKeyword() {
-        var nodes = StyleParser2.Parse(@"
+        var nodes = StyleParser.Parse(@"
             export const color0 = rgba(1, 0, 0, 1);
         ");
         
@@ -285,7 +284,7 @@ public class StyleParser2Tests {
     
     [Test]
     public void ParseMultipleAttributes() {
-        var nodes = StyleParser2.Parse(@"
+        var nodes = StyleParser.Parse(@"
             style hasBackgroundOnHover {
                 not [attr:attrName1] and not [attr:attrName2] and [attr:attrName3]{ }
             }
@@ -311,7 +310,7 @@ public class StyleParser2Tests {
 
     [Test]
     public void ImportFromFile() {
-        var nodes = StyleParser2.Parse(@"
+        var nodes = StyleParser.Parse(@"
             import ""mypath/to/myfile"" as myconsts;
         ");
         
@@ -324,7 +323,7 @@ public class StyleParser2Tests {
     [Test]
     public void ParseBrokenStyle() {
         try {
-            StyleParser2.Parse(@"
+            StyleParser.Parse(@"
 style s { BrokenUrl = url() }
             ".Trim());
             Assert.Fail("This should not have parsed!");

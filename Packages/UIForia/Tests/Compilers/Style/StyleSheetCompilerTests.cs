@@ -30,7 +30,7 @@ public class StyleSheetCompilerTests {
 
     [Test]
     public void CompileBackgroundImage() {
-        var nodes = StyleParser2.Parse(@"
+        var nodes = StyleParser.Parse(@"
 
 const path = ""testimg/cat"";
 export const img1 = url(@path);
@@ -53,7 +53,7 @@ style image3 { BackgroundImage = url(testimg/cat); }
 
     [Test]
     public void CompileCursor() {
-        var nodes = StyleParser2.Parse(@"
+        var nodes = StyleParser.Parse(@"
 
 const path = ""testimg/Cursor1"";
 export const cursor1 = url(@path);
@@ -81,7 +81,7 @@ style image3 { Cursor = url(testimg/Cursor1); }
 
     [Test]
     public void CompileVisibility() {
-        var nodes = StyleParser2.Parse(@"
+        var nodes = StyleParser.Parse(@"
 
 const v1 = Visible;
 export const v2 = hidden;
@@ -104,7 +104,7 @@ style visi3 { Visibility = Visible; }
 
     [Test]
     public void CompileOverflow() {
-        var nodes = StyleParser2.Parse(@"
+        var nodes = StyleParser.Parse(@"
 
 const o1 = hidden;
 const o2 = Scroll;
@@ -143,7 +143,7 @@ style overflow5 {
 
     [Test]
     public void CompileBackgroundColor() {
-        var nodes = StyleParser2.Parse(@"
+        var nodes = StyleParser.Parse(@"
             
 const alpha = 255;
 const redChannel = 255.000;
@@ -166,7 +166,7 @@ style myStyle {
 
     [Test]
     public void CreateAttributeGroupsWithMeasurements() {
-        var nodes = StyleParser2.Parse(@"
+        var nodes = StyleParser.Parse(@"
 
 export const m1 = 10%;
 
@@ -196,7 +196,7 @@ style myStyle {
 
     [Test]
     public void UseMarginPropertyShorthand() {
-        var nodes = StyleParser2.Parse(@"
+        var nodes = StyleParser.Parse(@"
             
 export const m1 = 10pca;
 export const m2 = @m3;
@@ -226,7 +226,7 @@ style myStyle {
 
     [Test]
     public void UsePaddingPropertyShorthand() {
-        var nodes = StyleParser2.Parse(@"
+        var nodes = StyleParser.Parse(@"
 
 export const p1 = 10%;
 export const p2 = @p3;
@@ -256,7 +256,7 @@ style myStyle {
 
     [Test]
     public void UseBorderPropertyShorthand() {
-        var nodes = StyleParser2.Parse(@"
+        var nodes = StyleParser.Parse(@"
 
 export const b1 = 10%;
 export const b2 = @b3;
@@ -289,7 +289,7 @@ style myStyle {
 
     [Test]
     public void CompileVisibilty() {
-        var nodes = StyleParser2.Parse(@"
+        var nodes = StyleParser.Parse(@"
 
 const v = hidden;
 
@@ -317,7 +317,7 @@ style myStyle {
 
     [Test]
     public void CompileGridItemColAndRowProperties() {
-        var nodes = StyleParser2.Parse(@"
+        var nodes = StyleParser.Parse(@"
 
 const rowStart = 2;
 
@@ -343,7 +343,7 @@ style myStyle {
 
     [Test]
     public void CompileGridAxisAlignmentProperties() {
-        var nodes = StyleParser2.Parse(@"
+        var nodes = StyleParser.Parse(@"
 
 const colSelfAlignment = Center;
 
@@ -369,7 +369,7 @@ style myStyle {
 
     [Test]
     public void CompileGridLayoutDensity() {
-        var nodes = StyleParser2.Parse(@"
+        var nodes = StyleParser.Parse(@"
 
 const density = dense;
 
@@ -391,7 +391,7 @@ style myStyle {
 
     [Test]
     public void CompileGridLayoutDirection() {
-        var nodes = StyleParser2.Parse(@"
+        var nodes = StyleParser.Parse(@"
 
 const dir = Horizontal;
 
@@ -410,7 +410,7 @@ style myStyle {
 
     [Test]
     public void CompileFlexLayoutDirection() {
-        var nodes = StyleParser2.Parse(@"
+        var nodes = StyleParser.Parse(@"
 
 const dir = Vertical;
 
@@ -429,7 +429,7 @@ style myStyle {
 
     [Test]
     public void CompileGridLayoutColTemplate() {
-        var nodes = StyleParser2.Parse(@"
+        var nodes = StyleParser.Parse(@"
 
 const colOne = 1mx;
 
@@ -453,7 +453,7 @@ style myStyle {
 
     [Test]
     public void CompileGridLayoutRowTemplate() {
-        var nodes = StyleParser2.Parse(@"
+        var nodes = StyleParser.Parse(@"
 
 const colOne = 1mx;
 
@@ -477,7 +477,7 @@ style myStyle {
 
     [Test]
     public void CompileGridLayoutAxisAutoSize() {
-        var nodes = StyleParser2.Parse(@"
+        var nodes = StyleParser.Parse(@"
 const main = 1fr;
 
 style myStyle {
@@ -497,7 +497,7 @@ style myStyle {
 
     [Test]
     public void CompileGridLayoutGaps() {
-        var nodes = StyleParser2.Parse(@"
+        var nodes = StyleParser.Parse(@"
 const colGap = 9;
 
 style myStyle {
@@ -517,7 +517,7 @@ style myStyle {
 
     [Test]
     public void CompileFlexAlignments() {
-        var nodes = StyleParser2.Parse(@"
+        var nodes = StyleParser.Parse(@"
 const axis = Stretch;
 
 style myStyle {
@@ -539,7 +539,7 @@ style myStyle {
 
     [Test]
     public void CompileFlexProperties() {
-        var nodes = StyleParser2.Parse(@"
+        var nodes = StyleParser.Parse(@"
 export const wrap = WrapReverse;
 export const grow = 1;
 
@@ -564,7 +564,7 @@ style myStyle {
 
     [Test]
     public void CompileBorder() {
-        var nodes = StyleParser2.Parse(@"
+        var nodes = StyleParser.Parse(@"
 export const brtl = 1px;
 export const brtr = 2%;
 export const brbr = 3vw;
@@ -626,7 +626,7 @@ style border5 {
 
     [Test]
     public void CompilBorderRadius() {
-        var nodes = StyleParser2.Parse(@"
+        var nodes = StyleParser.Parse(@"
 export const brtl = 1px;
 export const brtr = 2%;
 export const brbr = 3vw;
@@ -688,7 +688,7 @@ style border5 {
 
     [Test]
     public void CompileTransformPosition() {
-        var nodes = StyleParser2.Parse(@"
+        var nodes = StyleParser.Parse(@"
 export const x = 20sw;
 export const y = 10cah;
 
@@ -719,7 +719,7 @@ style trans4 { TransformPositionY = 15ah; }
 
     [Test]
     public void CompileTransformProperties() {
-        var nodes = StyleParser2.Parse(@"
+        var nodes = StyleParser.Parse(@"
 export const x = 1;
 export const y = 2;
 
@@ -782,7 +782,7 @@ style transBeh4 { TransformBehaviorY = AnchorMaxOffset; }
 
     [Test]
     public void CompileSizes() {
-        var nodes = StyleParser2.Parse(@"
+        var nodes = StyleParser.Parse(@"
 export const x = 1pca;
 export const y = 2;
 
@@ -821,7 +821,7 @@ style size2 {
 
     [Test]
     public void CompileAnchoring() {
-        var nodes = StyleParser2.Parse(@"
+        var nodes = StyleParser.Parse(@"
 export const layout = Fixed;
 export const anchorRight = 20%;
 
@@ -858,7 +858,7 @@ style anchoring {
     public void CompileText() {
         
         // note: because of possible spaces in paths we have to support string values for urls
-        var nodes = StyleParser2.Parse(@"
+        var nodes = StyleParser.Parse(@"
 export const red = red;
 
 style teXt { 
@@ -891,7 +891,7 @@ style teXt {
     public void CompileImport() {
         
         // note: because of possible spaces in paths we have to support string values for urls
-        var nodes = StyleParser2.Parse(@"
+        var nodes = StyleParser.Parse(@"
 import ""Tests/Styles/ImportFromMe.style"" as importedThings;
 
 style xyz {
@@ -906,7 +906,7 @@ style xyz {
 
     [Test]
     public void StyleSheetContainers() {
-        LightList<StyleASTNode> nodes = StyleParser2.Parse(@"
+        LightList<StyleASTNode> nodes = StyleParser.Parse(@"
           export const red = red;
 
           style styleRoot {

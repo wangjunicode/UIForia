@@ -7,7 +7,7 @@ using UIForia.Util;
 
 namespace UIForia.Parsing.Style {
 
-    public struct StyleParser2 {
+    public struct StyleParser {
 
         private StyleTokenStream tokenStream;
 
@@ -21,7 +21,7 @@ namespace UIForia.Parsing.Style {
         private Stack<AttributeGroupContainer> groupExpressionStack;
         private Stack<StyleOperatorType> groupOperatorStack;
 
-        private StyleParser2(StyleTokenStream stream) {
+        private StyleParser(StyleTokenStream stream) {
             tokenStream = stream;
             nodes = LightListPool<StyleASTNode>.Get();
             operatorStack = StackPool<StyleOperatorNode>.Get();
@@ -35,7 +35,7 @@ namespace UIForia.Parsing.Style {
         }
 
         public static LightList<StyleASTNode> Parse(string input) {
-            return new StyleParser2(FromString(input)).Parse();
+            return new StyleParser(FromString(input)).Parse();
         }
 
         private void Release() {
@@ -352,7 +352,7 @@ namespace UIForia.Parsing.Style {
                             tokenStream.Advance();
                         }
                     }
-                    else if (url is StyleLiteralNode urlLiteralNode) {
+                    else if (url is StyleLiteralNode || url is ReferenceNode) {
                         AssertTokenTypeAndAdvance(StyleTokenType.ParenClose);
                     }
                     else {

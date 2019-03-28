@@ -194,7 +194,7 @@ public class ChatWindow_Styles {
     [ExportStyle("text-style")]
     public static UIStyle Text() {
         return new UIStyle() {
-            PreferredWidth = UIMeasurement.ContentArea
+            PreferredWidth = UIMeasurement.ParentContentArea
         };
     }
 

@@ -212,3 +212,34 @@ style vertical-button-group {
     PreferredSize = 300px, 1cnt;
     FlexItemSelfAlignment = Stretch;
 }
+
+style big-ignored {
+    FlexLayoutDirection = Column;
+    FlexLayoutCrossAxisAlignment = End;
+    LayoutBehavior = Ignored;
+    PreferredSize = 1vw 1vh;
+}
+
+style position-bottom {
+    FlexLayoutDirection = Row;
+    FlexLayoutMainAxisAlignment = Start;
+    Border = 2px;
+    BorderColor = rgb(200, 50, 50);
+}
+
+style bottom-first {
+    
+    BorderColor = rgb(50, 250, 50);
+    PreferredWidth = 350px;
+    BackgroundColor = white;
+    Padding = 20px 10px 10px 10px;
+    MarginBottom = 30px;
+}
+style bottom-second {
+    
+    BorderColor = rgb(50, 50, 200);
+    PreferredWidth = 350px;
+    BackgroundColor = rgba(90, 90, 90, 240);
+    Padding = 20px 10px 10px 10px;
+    MarginBottom = 30px;
+}

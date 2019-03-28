@@ -246,7 +246,7 @@ namespace UIForia.Templates {
 
             AttributeDefinition styleAttr = GetAttribute("style");
             if (styleAttr != null) {
-                if (styleAttr.value[0] == '[') {
+                if (!char.IsWhiteSpace(styleAttr.value[0]) && styleAttr.value[0] == '[') {
                     Expression<string[]> styleExpressions = template.compiler.Compile<string[]>(template.RootType, styleAttr.value);
 
                     if (styleExpressions is ArrayLiteralExpression<string> arrayExpr) {

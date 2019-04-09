@@ -9,6 +9,7 @@ namespace SVGX {
         Circle = 4,
         Ellipse = 5,
         Text = 6,
+        Sector = 7
 
     }
 

@@ -21,7 +21,6 @@ namespace SVGX {
         [Range(0, 360f)] public float rotation;
         public float dot;
 
-
         public Texture2D texture;
 
         public float strokeWidth = 5;
@@ -68,6 +67,11 @@ namespace SVGX {
         [Range(1, 128)] public int fontSize;
         private TextInfo2 textInfo;
 
+        [Range(-360, 360)] public float startAngle = 0;
+        [Range(-360, 360)] public float endAngle = 180f;
+        public float stepSize = 2f;
+        public float radius = 100f;
+
         public void Start() {
             ctx = new ImmediateRenderContext();
             gfx = new GFX(camera);
@@ -76,42 +80,50 @@ namespace SVGX {
             textInfo = new TextInfo2(new TextSpan("Hello World"));
         }
 
+        public bool counterClockwise = false;
+
         public void Update() {
             camera.orthographic = true;
             camera.orthographicSize = Screen.height * 0.5f;
 
             ctx.Clear();
+            
+            ctx.SetStrokeWidth(strokeWidth);
 
-            if (enableScissor) {
-                ctx.EnableScissorRect(new Rect(100, 100, 300, 300));
+            Vector2 center = new Vector2(400, 400);
+
+            stepSize = Mathf.Max(1, stepSize);
+
+            float _start = MathUtil.WrapAngleDeg(startAngle);
+            float _end = MathUtil.WrapAngleDeg(endAngle);
+
+     
+            if (_start > _end) {
+                float tmp = _end;
+                _end = _start;
+                _start = tmp;
+            }
+            
+            if (Mathf.Abs(_start - _end) == 0) {
+                _start = 0;
+                _end = 359.9f;
             }
 
-            ctx.SetFill(Color.green);
-            ctx.RoundedRect(new Rect(100, 100, 300, 100), 200, 200, 200, 200);
-            ctx.Fill();
-            ctx.BeginPath();
-            ctx.SetFill(Color.green);
-            ctx.RoundedRect(new Rect(100, 200, 300, 100), 20, 20, 20, 20);
-            ctx.Fill();
-            
-//            ctx.Rect(new Rect(200, 200, 200, 200));
-//            ctx.Rect(new Rect(200, 400, 200, 200));
-            ctx.Fill();
-            
-            textInfo.SetSpanStyle(0, new SVGXTextStyle() {
-                fontSize = fontSize
-            });
+            float x0 = radius * Mathf.Cos(_start * Mathf.Deg2Rad);
+            float y0 = radius * Mathf.Sin(_start * Mathf.Deg2Rad);
+            ctx.MoveTo(center.x + x0, center.y + y0);
 
-//            textInfo.Layout();
-//
-//            ctx.Text(100 + offset.x, 100 + offset.y, textInfo);
-//            ctx.SetFill(Color.black);
-//            ctx.Fill();
-//
-//            ctx.SetFill(new Color(0, 255, 0, 255));
-//            ctx.FillRect(100, 100, 200, 200);
-//            ctx.SetFill(new Color32(255, 0, 0, 100));
-//            ctx.FillRect(150, 150, 200, 200);
+            for (float theta = _start + stepSize; theta < _end; theta += stepSize) {
+                float x = radius * Mathf.Cos(theta * Mathf.Deg2Rad);
+                float y = radius * Mathf.Sin(theta * Mathf.Deg2Rad);
+                ctx.LineTo(center.x + x, center.y + y);
+            }
+
+            float x1 = radius * Mathf.Cos(_end * Mathf.Deg2Rad);
+            float y1 = radius * Mathf.Sin(_end * Mathf.Deg2Rad);
+            ctx.LineTo(center.x + x1, center.y + y1);
+
+            ctx.Stroke();
             gfx.Render(ctx);
         }
 

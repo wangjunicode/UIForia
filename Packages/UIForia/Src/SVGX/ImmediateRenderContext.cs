@@ -40,15 +40,15 @@ namespace SVGX {
         private SVGXMatrix currentMatrix;
         private SVGXStyle currentStyle;
         private RangeInt currentShapeRange;
-        
+
         private SVGXGradient currentFillGradient;
         private Texture2D currentFillTexture;
-        
+
         private Texture2D currentStrokeTexture;
         private SVGXGradient currentStrokeGradient;
-        
+
         private Rect currentScissorRect;
-        
+
         public ImmediateRenderContext() {
             points = new LightList<Vector2>(128);
             styles = new LightList<SVGXStyle>();
@@ -105,14 +105,14 @@ namespace SVGX {
             currentStyle.strokeColorMode = ColorMode.Gradient;
             currentStrokeGradient = gradient;
         }
-        
+
         public void SetStroke(Texture2D texture, SVGXGradient gradient) {
             currentStyle.strokeColorMode = ColorMode.TextureGradient;
             currentStyle.strokeGradientId = gradient.id;
             currentStrokeTexture = texture;
             currentStrokeGradient = gradient;
         }
-        
+
         public void SetStroke(Texture2D texture) {
             currentStyle.strokeColorMode = ColorMode.Texture;
             currentStyle.strokeTintColor = Color.white;
@@ -127,7 +127,7 @@ namespace SVGX {
                 shapes.Add(new SVGXShape(SVGXShapeType.Unset));
             }
         }
-        
+
         public void MoveTo(Vector2 position) {
             lastPoint = position;
             SVGXShape currentShape = shapes[shapes.Count - 1];
@@ -152,14 +152,14 @@ namespace SVGX {
 
             currentShapeRange.length++;
             lastPoint = new Vector2(x, y);
-            
+
             points.Add(lastPoint);
         }
 
         public void LineTo(Vector2 position) {
-            LineTo(position.x, position.y);    
+            LineTo(position.x, position.y);
         }
-        
+
         public void LineTo(float x, float y) {
             SVGXShape currentShape = shapes[shapes.Count - 1];
 
@@ -203,6 +203,29 @@ namespace SVGX {
             int pointCount = SVGXBezier.Arc(points, lastPoint, rx, ry, angle, isLargeArc, isSweepArc, end);
             UpdateShape(pointStart, pointCount);
             lastPoint = end;
+        }
+
+        public void SectorFromCenter(float cx, float cy, float radius, float startAngle, float endAngle, bool counterClockwise) {
+            SVGXShapeType lastType = shapes[shapes.Count - 1].type;
+
+            int pointRangeStart = points.Count;
+
+            points.Add(new Vector2(cx, cy));
+            points.Add(new Vector2(startAngle, endAngle));
+            points.Add(new Vector2(radius, counterClockwise ? 1 : -1));
+            
+            RangeInt pointRange = new RangeInt(pointRangeStart, points.Count - pointRangeStart);
+            SVGXShape currentShape = new SVGXShape(SVGXShapeType.RoundedRect, pointRange, new SVGXBounds(), true);
+
+            if (lastType != SVGXShapeType.Unset) {
+                shapes.Add(currentShape);
+            }
+            else {
+                shapes[shapes.Count - 1] = currentShape;
+            }
+
+            lastPoint = points[points.Count - 1];
+            currentShapeRange.length++;
         }
 
         public void ClosePath() {
@@ -343,11 +366,11 @@ namespace SVGX {
         public void DisableScissorRect() {
             currentScissorRect = new Rect(-float.MaxValue * 0.5f, -float.MaxValue * 0.5f, float.MaxValue, float.MaxValue);
         }
-        
+
         public void Rect(float x, float y, float width, float height) {
             SimpleShape(SVGXShapeType.Rect, x, y, width, height);
         }
-        
+
         public void Rect(Rect rect) {
             SimpleShape(SVGXShapeType.Rect, rect.x, rect.y, rect.width, rect.height);
         }
@@ -363,7 +386,7 @@ namespace SVGX {
         public void CircleFromCenter(float cx, float cy, float radius) {
             SimpleShape(SVGXShapeType.Circle, cx - radius, cy - radius, radius * 2f, radius * 2f);
         }
-        
+
         public void CircleFromCenter(Vector2 position, float radius) {
             SimpleShape(SVGXShapeType.Circle, position.x - radius, position.y - radius, radius * 2f, radius * 2f);
         }

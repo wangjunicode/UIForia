@@ -215,6 +215,28 @@ namespace SVGX {
                 case SVGXShapeType.Unset:
                     return;
 
+                case SVGXShapeType.Sector: {
+                    int renderData = BitUtil.SetHighLowBits((int) SVGXShapeType.Path, RenderTypeStrokeShape);
+                    Vector2 center = points[start + 0];
+                    float startAngle = points[start + 1].x;
+                    float endAngle = points[start + 1].y;
+                    float radius = points[start + 2].x;
+                    float direction = points[start + 2].y;
+
+                    // todo -- in arbeit
+                    int idx = 0;
+                    for (float theta = startAngle; theta < endAngle; theta++) {
+                        float x = radius * Mathf.Cos(theta);
+                        float y = radius * Mathf.Sin(theta);
+                        AddVertex(new Vector2(center.x + x, center.y + y), Color.white, ++idx);
+                        AddVertex(new Vector2(center.x + x, center.y + y), Color.white, ++idx);
+                        AddVertex(new Vector2(center.x + x, center.y + y), Color.white, ++idx);
+                        CompleteTriangle();
+                    }
+                    
+                    
+                    break;
+                }
                 case SVGXShapeType.RoundedRect: {
                     int renderData = BitUtil.SetHighLowBits((int) renderShape.shape.type, RenderTypeStrokeShape);
 

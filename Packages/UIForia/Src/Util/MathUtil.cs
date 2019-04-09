@@ -45,6 +45,10 @@ namespace UIForia.Util {
             return true;
         }
 
+        public static float WrapAngleDeg(float angleDeg) {
+            return angleDeg % 360f;
+        }
+
     }
 
 }

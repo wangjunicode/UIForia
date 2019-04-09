@@ -6,6 +6,30 @@ using UnityEngine;
 
 namespace UIForia.Animation {
 
+    public struct AnimationTrigger {
+
+        public readonly float time;
+        public readonly Action fn;
+        
+        public AnimationTrigger(float time, Action fn) {
+            this.time = time;
+            this.fn = fn;
+        }
+
+    }
+
+    public struct AnimationVariable {
+
+        public object value;
+        public string name;
+
+        public AnimationVariable(string name, object value) {
+            this.name = name;
+            this.value = value;
+        }
+        
+    }
+
     public abstract class StyleAnimation {
 
         public enum AnimationStatus {

@@ -17,7 +17,7 @@ namespace UIForia.Elements {
         internal TextInfo2 textInfo;
         internal string text;
         internal string placeholder;
-        
+
         private float holdDebounce = 0.05f;
         private float timestamp;
         private string value;
@@ -49,8 +49,9 @@ namespace UIForia.Elements {
         public override void OnCreate() {
             this.text = "overflow me please thats great"; //"This is kinda overflow even more";
             style.SetPainter("self", StyleState.Normal);
-            textInfo = FindFirstByType<UITextElement>().textInfo;
+            textInfo = new TextInfo2(new TextSpan(text));
             textInfo.UpdateSpan(0, text);
+            textInfo.Layout(default);
         }
 
         public override string GetDisplayName() {
@@ -58,8 +59,6 @@ namespace UIForia.Elements {
         }
 
         private void HandleTextChanged() {
-            if (textInfo.CharCount == 0) { }
-
             onValueChanged?.Invoke(textInfo.GetAllText());
         }
 
@@ -144,6 +143,7 @@ namespace UIForia.Elements {
             selectionRange = textInfo.DeleteTextBackwards(selectionRange);
             blinkStartTime = Time.unscaledTime;
             HandleTextChanged();
+            ScrollToCursor();
             evt.StopPropagation();
         }
 
@@ -153,6 +153,7 @@ namespace UIForia.Elements {
             selectionRange = textInfo.DeleteTextForwards(selectionRange);
             blinkStartTime = Time.unscaledTime;
             HandleTextChanged();
+            ScrollToCursor();
             evt.StopPropagation();
         }
 
@@ -176,6 +177,7 @@ namespace UIForia.Elements {
             if (Time.unscaledTime - timestamp < holdDebounce) {
                 return;
             }
+
             timestamp = Time.unscaledTime;
             selectionRange = textInfo.MoveCursorRight(selectionRange, evt.shift);
             blinkStartTime = Time.unscaledTime;
@@ -238,7 +240,12 @@ namespace UIForia.Elements {
             bool blinkState = (Time.unscaledTime - blinkStartTime) % blinkPeriod < blinkPeriod / 2;
 
             Rect contentRect = layoutResult.ContentRect;
-//           ctx.EnableScissorRect(VisibleTextRect);
+//            ctx.EnableScissorRect(new Rect(VisibleTextRect) {
+//                x = layoutResult.screenPosition.x - contentRect.x,
+//                y = layoutResult.screenPosition.y - contentRect.y,
+//                width = contentRect.width,
+//                height = contentRect.height
+//            });
             ctx.DisableScissorRect();
             if (isSelecting) {
                 ctx.BeginPath();
@@ -294,7 +301,7 @@ namespace UIForia.Elements {
             ctx.Rect(VisibleTextRect);
             ctx.SetFill(new Color32(0, 255, 0, 125));
             ctx.Fill();
-            
+
             ctx.BeginPath();
             ctx.SetFill(style.TextColor);
             ctx.Text(contentRect.x - textScroll.x, contentRect.y, textInfo);
@@ -302,15 +309,7 @@ namespace UIForia.Elements {
         }
 
         private Rect VisibleTextRect {
-            get {
-                Rect contentRect = layoutResult.ContentRect;
-                return new Rect(
-                    layoutResult.screenPosition.x - contentRect.x,
-                    layoutResult.screenPosition.y - contentRect.y,
-                    contentRect.width,
-                    contentRect.height
-                );
-            }
+            get { return layoutResult.ContentRect; }
         }
 
         public void Focus() {

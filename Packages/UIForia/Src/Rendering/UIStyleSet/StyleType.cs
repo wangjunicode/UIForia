@@ -12,7 +12,11 @@ namespace UIForia.Rendering {
         Shared = 1 << 2,
 
         /// Set only on one element, like inline styles, overrides all other styles
-        Instance = 1 << 3
+        Instance = 1 << 3,
+        
+        Default = 1 << 4,
+        
+        Important = 1 << 5
 
     }
 

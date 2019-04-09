@@ -104,6 +104,16 @@ namespace UIForia.Compilers {
             aliasResolvers.Add(resolver);
         }
 
+        public void SetAliasResolver(ExpressionAliasResolver resolver) {
+            for (int i = 0; i < aliasResolvers.Count; i++) {
+                if (aliasResolvers[i].aliasName == resolver.aliasName) {
+                    aliasResolvers[i] = resolver;
+                }
+            }
+
+            aliasResolvers.Add(resolver);
+        }
+
         public void RemoveAliasResolver(ExpressionAliasResolver resolver) {
             aliasResolvers.Remove(resolver);
         }

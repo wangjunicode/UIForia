@@ -2,18 +2,27 @@ using UIForia.Rendering;
 
 namespace UIForia.Animation {
 
+    public enum AnimationPlaybackType {
+
+        KeyFrame,
+        Parallel,
+        Sequential
+
+    }
+    
     public struct AnimationOptions {      
 
-        public float loopTime;
-        public int iterations;
-        public float delay;
-        public float duration;
-        public float forwardStartDelay;
-        public float reverseStartDelay;
-        public AnimationDirection direction;
-        public AnimationLoopType loopType;
-        public EasingFunction timingFunction;
-
+        public float? loopTime;
+        public int? iterations;
+        public float? delay;
+        public float? duration;
+        public float? forwardStartDelay;
+        public float? reverseStartDelay;
+        public AnimationDirection? direction;
+        public AnimationLoopType? loopType;
+        public EasingFunction? timingFunction;
+        public AnimationPlaybackType playbackType;
+        
         public AnimationOptions(AnimationOptions copy) {
             this.duration = copy.duration;
             this.loopTime = copy.loopTime;
@@ -24,6 +33,7 @@ namespace UIForia.Animation {
             this.reverseStartDelay = copy.reverseStartDelay;
             this.timingFunction = copy.timingFunction;
             this.loopType = loopType = AnimationLoopType.PingPong;
+            this.playbackType = AnimationPlaybackType.KeyFrame;
         }
         
         public AnimationOptions(float duration, float loopTime = -1) {
@@ -36,6 +46,7 @@ namespace UIForia.Animation {
             this.reverseStartDelay = 0f;
             this.timingFunction = EasingFunction.Linear;
             this.loopType = loopType = AnimationLoopType.PingPong;
+            this.playbackType = AnimationPlaybackType.KeyFrame;
         }
 
         public AnimationOptions(float duration, EasingFunction easing) {
@@ -48,7 +59,10 @@ namespace UIForia.Animation {
             this.timingFunction = easing;
             this.direction = AnimationDirection.Forward;
             this.loopType = loopType = AnimationLoopType.PingPong;
+            this.playbackType = AnimationPlaybackType.KeyFrame;
         }
+
+        public const int InfiniteIterations = -1;
 
         public bool Equals(AnimationOptions other) {
             return this == other;
@@ -76,7 +90,7 @@ namespace UIForia.Animation {
         public override int GetHashCode() {
             unchecked {
                 int hashCode = loopTime.GetHashCode();
-                hashCode = (hashCode * 397) ^ iterations;
+                hashCode = (hashCode * 397) ^ iterations.Value;
                 hashCode = (hashCode * 397) ^ delay.GetHashCode();
                 hashCode = (hashCode * 397) ^ duration.GetHashCode();
                 hashCode = (hashCode * 397) ^ forwardStartDelay.GetHashCode();

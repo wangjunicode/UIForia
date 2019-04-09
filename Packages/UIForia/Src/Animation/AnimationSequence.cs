@@ -15,9 +15,9 @@ namespace UIForia.Animation {
         
         public override AnimationStatus Update(UIStyleSet styleSet, Rect viewport, float deltaTime) {
 
-            float progress = 1f / m_Options.duration;
+            float progress = 1f / m_Options.duration.Value;
             int count = animations.Length;
-            float slice = count / m_Options.duration;
+            float slice = count / m_Options.duration.Value;
             int currentIndex = 0;
             float smallestDist = float.MaxValue;
 

@@ -20,3 +20,17 @@ style child1 {
     BackgroundColor = blue;
     AnchorRight = 200px;
 }
+
+style wrapper {
+    PreferredSize = 300px;
+    BackgroundColor = yellow;
+    MarginLeft = 200px;
+    MarginTop = 200px;
+    FlexLayoutDirection = Column;
+}
+
+style tooltip {
+    TransformBehaviorX = AnchorMaxOffset;
+    TransformPositionX = -1cw;
+    MarginRight = 250px;
+}

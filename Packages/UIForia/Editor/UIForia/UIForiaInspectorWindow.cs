@@ -71,6 +71,7 @@ namespace UIForia.Editor {
                 if (app != null) {
                     app.RenderSystem.DrawDebugOverlay += DrawDebugOverlay;
                 }
+
                 m_ExpandedMap.Clear();
             }
 
@@ -244,8 +245,7 @@ namespace UIForia.Editor {
             }
 
             if (selectedElement != null) {
-                
-               // RenderData data = drawList.Find((d) => d.element == selectedElement);
+                // RenderData data = drawList.Find((d) => d.element == selectedElement);
                 //if (data == null) {
                 //    return;
                 //}
@@ -302,7 +302,7 @@ namespace UIForia.Editor {
 
                 float x = result.screenPosition.x;
                 float y = result.screenPosition.y;
-                
+
                 ctx.DisableScissorRect();
                 ctx.SetTransform(SVGXMatrix.identity);
                 ctx.SetFill(contentColor);
@@ -314,7 +314,7 @@ namespace UIForia.Editor {
 
                 float paddingHorizontalWidth = width - padding.Horizontal - border.left;
                 float paddingVerticalHeight = height - border.Vertical;
-                
+
                 ctx.SetFill(paddingColor);
                 if (padding.top > 0) {
                     ctx.BeginPath();
@@ -324,7 +324,7 @@ namespace UIForia.Editor {
 
                 if (padding.right > 0) {
                     ctx.BeginPath();
-                    ctx.Rect(x + margin.left + width - padding.right - border.right, y + border.top, padding.right, paddingVerticalHeight);
+                    ctx.Rect(x + width - padding.right - border.right, y + border.top, padding.right, paddingVerticalHeight);
                     ctx.Fill();
                 }
 
@@ -339,9 +339,9 @@ namespace UIForia.Editor {
                     ctx.Rect(x + border.left + padding.left, y - border.top + height - padding.bottom, paddingHorizontalWidth, padding.bottom);
                     ctx.Fill();
                 }
-                
+
                 ctx.SetFill(borderColor);
-                
+
                 if (border.top > 0) {
                     ctx.BeginPath();
                     ctx.Rect(x + border.left, y, width - border.Horizontal, border.top);
@@ -365,14 +365,14 @@ namespace UIForia.Editor {
                     ctx.Rect(x + border.left, y + height - border.bottom, width - border.Horizontal, border.bottom);
                     ctx.Fill();
                 }
-                
+
                 ctx.SetFill(marginColor);
                 if (margin.left > 0) {
                     ctx.BeginPath();
                     ctx.Rect(x - margin.left, y, margin.left, height);
                     ctx.Fill();
                 }
-                
+
                 if (margin.right > 0) {
                     ctx.BeginPath();
                     ctx.Rect(x + width, y, margin.right, height);
@@ -384,13 +384,38 @@ namespace UIForia.Editor {
                     ctx.Rect(x - margin.left, y - margin.top, width + margin.Horizontal, margin.top);
                     ctx.Fill();
                 }
-                
+
                 if (margin.bottom > 0) {
                     ctx.BeginPath();
                     ctx.Rect(x - margin.left, y + height, width + margin.Horizontal, margin.bottom);
                     ctx.Fill();
                 }
 
+
+                LayoutBox box = selectedElement.Application.LayoutSystem.GetBoxForElement(selectedElement);
+
+                ctx.BeginPath();
+
+                switch (selectedElement.style.AnchorTarget) {
+                    case AnchorTarget.Unset:
+                        break;
+                    case AnchorTarget.Parent:
+                        ctx.SetStroke(Color.red);
+                        ctx.CircleFromCenter(box.AnchorLeft, 200, 5f);
+                        ctx.CircleFromCenter(box.AnchorRight, 200, 5f);
+                        break;
+                    case AnchorTarget.ParentContentArea:
+                        break;
+                    case AnchorTarget.Viewport:
+                        break;
+                    case AnchorTarget.Screen:
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+                
+                ctx.Stroke();
+                
                 if (selectedElement.style.LayoutType != LayoutType.Grid) {
                     return;
                 }
@@ -400,15 +425,15 @@ namespace UIForia.Editor {
                 }
 
                 Rect contentRect = selectedElement.layoutResult.ContentRect;
-                
+
                 ctx.SetTransform(SVGXMatrix.TRS(selectedElement.layoutResult.screenPosition + selectedElement.layoutResult.ContentRect.min, 0, Vector2.one));
                 ctx.BeginPath();
                 ctx.SetStrokeWidth(1);
                 ctx.SetStroke(Color.black);
-                
+
                 LightList<GridTrack> rows = layoutBox.GetRowTracks();
                 LightList<GridTrack> cols = layoutBox.GetColTracks();
-                
+
                 for (int i = 0; i < rows.Count; i++) {
                     ctx.MoveTo(0, rows[i].position);
                     ctx.LineTo(contentRect.width, rows[i].position);
@@ -418,7 +443,7 @@ namespace UIForia.Editor {
                     ctx.MoveTo(cols[i].position, 0);
                     ctx.LineTo(cols[i].position, contentRect.height);
                 }
-                
+
                 ctx.Stroke();
             }
         }
@@ -931,7 +956,7 @@ namespace UIForia.Editor {
             // unclear if output is a value or an index, I suspect index
             GUI.enabled = true;
             return isEditable ? new StyleProperty(property.propertyId, values[output]) : property;
-        }       
+        }
 
         private static StyleProperty DrawColor(StyleProperty property, bool isEditable) {
             s_Content.text = StyleUtil.GetPropertyName(property);

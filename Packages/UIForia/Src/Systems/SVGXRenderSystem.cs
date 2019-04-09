@@ -91,7 +91,7 @@ namespace UIForia.Systems {
                 Vector2 pivot = layoutResult.pivot;
 
                 Vector2 offset = new Vector2(layoutResult.allocatedSize.width * pivot.x, layoutResult.allocatedSize.height * pivot.y);
-                SVGXMatrix matrix = SVGXMatrix.TRS(layoutResult.screenPosition + offset, layoutResult.rotation, Vector2.one);
+                SVGXMatrix matrix = SVGXMatrix.TRS(layoutResult.screenPosition + offset, layoutResult.rotation, layoutResult.scale);
 
                 string painterName = current.style.Painter;
                 if (painterName != string.Empty) {

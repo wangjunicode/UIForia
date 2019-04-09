@@ -46,6 +46,10 @@ namespace UIForia.Rendering {
             return name;
         }
 
+        public static Type GetPropertyType(StylePropertyId propertyId) {
+            return typeof(UIFixedLength);
+        }
+
     }
 
 }

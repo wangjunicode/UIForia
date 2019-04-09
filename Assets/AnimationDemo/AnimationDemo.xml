@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UITemplate>
+
+    <Style path="AnimationDemo/AnimationDemo.style"/>
+
+    <Contents style="container">
+
+        <Div style="one-container">
+            <Div style="circle circle-blue"/>
+            
+            <Div style="orbit-container">
+                <Div style="circle orbit"/>
+                <Div style="circle orbit"/>
+                <Div style="circle orbit"/>
+                <Div style="circle orbit"/>
+                <Div style="circle orbit"/>
+            </Div>
+            
+        </Div>
+
+        <Div style="two-container">
+
+            <Div x-id="two_red-bg" style="circle circle-red-bg"/>
+            <Div x-id="two_yellow-bg" style="circle circle-yellow-bg"/>
+            
+        </Div>
+    </Contents>
+
+</UITemplate>

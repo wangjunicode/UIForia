@@ -47,7 +47,7 @@ public class UIView {
             this.RootElement = Application.templateParser.GetParsedTemplate(m_ElementType).Create();
         }
 
-        this.RootElement.view = this;
+        this.RootElement.View = this;
     }
 
     public void Destroy() { }

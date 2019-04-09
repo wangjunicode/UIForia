@@ -57,7 +57,7 @@ namespace UIForia.Layout.LayoutTypes {
             this.children = ListPool<LayoutBox>.Get();
             this.cachedPreferredWidth = -1;
             Debug.Assert(element != null, nameof(this.element) + " != null");
-            this.view = element.view;
+            this.view = element.View;
         }
 
         public abstract void RunLayout();
@@ -593,7 +593,7 @@ namespace UIForia.Layout.LayoutTypes {
                     }
 
                     // needs to be allocated width not actualWidth because we might not know the actual width yet
-                    return parent.element.layoutResult.screenPosition.x + parent.allocatedWidth - ResolveAnchorValue(view.Viewport.width, anchor);
+                    return parent.element.layoutResult.screenPosition.x + ResolveAnchorValue(parent.actualWidth, anchor);
 
                 case AnchorTarget.ParentContentArea:
                     if (parent == null) {
@@ -861,6 +861,7 @@ namespace UIForia.Layout.LayoutTypes {
 
                 case TransformUnit.Pixel:
                     return transformOffset.value;
+                
                 case TransformUnit.Em:
                     return style.EmSize * transformOffset.value * view.ScaleFactor;
 

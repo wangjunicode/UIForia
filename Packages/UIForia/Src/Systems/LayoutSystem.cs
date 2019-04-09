@@ -148,7 +148,7 @@ namespace UIForia.Systems {
                 root.BorderBottom,
                 root.BorderLeft
             );
-            
+
             layoutResult.padding = new OffsetRect(
                 root.PaddingTop,
                 root.PaddingRight,
@@ -229,7 +229,7 @@ namespace UIForia.Systems {
                         box.PaddingBottom,
                         box.PaddingLeft
                     );
-     
+
                     // should be able to sort by view
                     Rect clipRect = new Rect(0, 0, viewportRect.width, viewportRect.height);
                     UIElement ptr = element.parent;
@@ -370,7 +370,7 @@ namespace UIForia.Systems {
                             localPosition.x = box.TransformX;
                             break;
                         case TransformBehavior.AnchorMaxOffset:
-                            localPosition.x = box.TransformX;
+                            localPosition.x = box.AnchorRight - box.parent.element.layoutResult.screenPosition.x - box.TransformX - box.actualWidth;
                             break;
                         case TransformBehavior.LayoutOffset:
                             localPosition.x = box.TransformX;
@@ -403,7 +403,8 @@ namespace UIForia.Systems {
                             localPosition.x = box.TransformX;
                             break;
                         case TransformBehavior.AnchorMaxOffset:
-                            localPosition.x = box.TransformX;
+                            localPosition.x = box.AnchorRight - box.parent.element.layoutResult.screenPosition.x - box.TransformX - box.actualWidth;
+
                             break;
                         case TransformBehavior.LayoutOffset:
                             localPosition.x = box.localX + box.TransformX;

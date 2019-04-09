@@ -29,7 +29,7 @@ namespace UIForia.Bindings {
             // root object isn't being assigned. make it assigned 
             newItem.templateContext.rootObject = element.templateContext.rootObject;
             element.children.Insert(index, newItem);
-            element.view.Application.RegisterElement(newItem);
+            element.View.Application.RegisterElement(newItem);
         }
 
         private void OnItemRemoved(U item, int index) {
@@ -41,7 +41,7 @@ namespace UIForia.Bindings {
         }
 
         private void OnClear() {
-            element.view.Application.DestroyChildren(element);
+            element.View.Application.DestroyChildren(element);
         }
 
         public void CreateOrDestroyChildren() {
@@ -59,7 +59,7 @@ namespace UIForia.Bindings {
 
                 repeat.listBecameEmpty = previousReference.Count > 0;
                 previousReference = null;
-                element.view.Application.DestroyChildren(element);
+                element.View.Application.DestroyChildren(element);
                 return;
             }
 
@@ -72,7 +72,7 @@ namespace UIForia.Bindings {
                 previousReference.onItemMoved -= OnItemMoved;
                 previousReference.onItemRemoved -= OnItemRemoved;
                 previousReference.onClear -= OnClear;
-                element.view.Application.DestroyChildren(element);
+                element.View.Application.DestroyChildren(element);
             }
 
             previousReference = list;
@@ -88,7 +88,7 @@ namespace UIForia.Bindings {
                 // root object isn't being assigned. make it assigned 
                 newItem.templateContext.rootObject = element.templateContext.rootObject;
                 element.children.Insert(i, newItem);
-                element.view.Application.RegisterElement(newItem);
+                element.View.Application.RegisterElement(newItem);
             }
 
             repeat.listBecamePopulated = list.Count > 0;

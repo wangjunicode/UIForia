@@ -52,7 +52,7 @@ namespace UIForia.Animation {
         
         public override AnimationStatus Update(UIStyleSet styleSet, Rect viewport, float deltaTime) {
             elapsedTime += deltaTime;
-            float progress = Mathf.Clamp01(elapsedTime / options.duration);
+            float progress = Mathf.Clamp01(elapsedTime / options.duration.Value);
           
             UIElement element = styleSet.element;
             // todo - insert an implicit frame for 0% and 100% if not provided
@@ -79,7 +79,7 @@ namespace UIForia.Animation {
 
                 float v0;
                 float v1;
-                float t = (((elapsedTime / options.duration) - prev.key) / (next.key - prev.key));
+                float t = (((elapsedTime / options.duration.Value) - prev.key) / (next.key - prev.key));
                 
                 switch (propertyId) {
                     case StylePropertyId.TransformPivotX:

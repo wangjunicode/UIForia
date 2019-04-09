@@ -42,7 +42,7 @@ namespace UIForia.Elements {
             get { return s_ColdDataMap.GetOrDefault(id).view.Application; }
         }
         
-        public UIView view {
+        public UIView View {
             get { return s_ColdDataMap.GetOrDefault(id).view; }
             internal set {
                 ElementColdData coldData = s_ColdDataMap.GetOrDefault(id);
@@ -75,7 +75,7 @@ namespace UIForia.Elements {
         public int depth { get; internal set; }
         public int siblingIndex { get; internal set; }
 
-        public IInputProvider Input => view.Application.InputSystem;
+        public IInputProvider Input => View.Application.InputSystem;
 
         public int ChildCount => children?.Count ?? 0;
 
@@ -123,7 +123,7 @@ namespace UIForia.Elements {
             child.parent = this;
             child.templateContext.rootObject = templateContext.rootObject;
             children.Add(child);
-            view.Application.RegisterElement(child);
+            View.Application.RegisterElement(child);
             return child;
         }
 
@@ -137,16 +137,16 @@ namespace UIForia.Elements {
             child.parent = this;
             child.templateContext.rootObject = templateContext.rootObject;
             children.Add(child);
-            view.Application.RegisterElement(child);
+            View.Application.RegisterElement(child);
             return child as T;
         }
 
         public void SetEnabled(bool active) {
             if (active && isSelfDisabled) {
-                view.Application.DoEnableElement(this);
+                View.Application.DoEnableElement(this);
             }
             else if (!active && isSelfEnabled) {
-                view.Application.DoDisableElement(this);
+                View.Application.DoDisableElement(this);
             }
         }
 

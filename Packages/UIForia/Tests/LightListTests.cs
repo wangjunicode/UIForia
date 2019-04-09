@@ -5,6 +5,20 @@ using UIForia.Util;
 public class LightListTests {
 
     [Test]
+    public void Insert() {
+        LightList<int> ints = new LightList<int>();
+        ints.Add(0);
+        ints.Add(1);
+        ints.Add(3);
+        ints.Add(4);
+        ints.Insert(2, 2);
+        Assert.AreEqual(5, ints.Count);
+        for (int i = 0; i < ints.Count; i++) {
+            Assert.AreEqual(i, ints[i]);
+        }
+    }
+    
+    [Test]
     public void InsertRange() {
         LightList<int> ints = new LightList<int>();
         ints.Add(0);

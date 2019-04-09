@@ -112,7 +112,7 @@ namespace UIForia.Animation {
                 case StylePropertyId.MarginLeft:
                 case StylePropertyId.MarginRight:
                     return new AnimationState(ResolveFixedWidth(element, viewport, startProperty.AsUIFixedLength));
-                
+
                 case StylePropertyId.TransformPositionX:
                     return new AnimationState(ResolveTransformOffset(element, viewport, startProperty.AsTransformOffset));
 
@@ -154,10 +154,10 @@ namespace UIForia.Animation {
 
                 case StylePropertyId.BackgroundColor:
                     return new AnimationState(0, new StyleColor(startProperty.AsColor));
-                
+
                 case StylePropertyId.BorderColor:
                 case StylePropertyId.TextColor:
-                    // todo gradient works differently now
+                // todo gradient works differently now
 //                    if (startProperty.IsGradient) {
 //                        return new AnimationStatus((int) ColorType.Gradient, startProperty.AsGradient);
 //                    }
@@ -184,7 +184,7 @@ namespace UIForia.Animation {
                 return AnimationStatus.Completed;
             }
 
-            float duration = (m_Options.duration - m_Options.delay) / Mathf.Max(1, m_Options.iterations);
+            float duration = (m_Options.duration.Value - m_Options.delay.Value) / Mathf.Max(1, m_Options.iterations.Value);
 
             AnimationState status = m_StatusList[idx].Item2;
             status.elapsedTime += deltaTime;
@@ -227,7 +227,7 @@ namespace UIForia.Animation {
                 }
             }
 
-            float t = Mathf.Clamp01(Easing.Interpolate(status.elapsedTime / duration, m_Options.timingFunction));
+            float t = Mathf.Clamp01(Easing.Interpolate(status.elapsedTime / duration, m_Options.timingFunction.Value));
             float v;
 
             float adjustedT = t;
@@ -247,12 +247,12 @@ namespace UIForia.Animation {
                     v = Mathf.Lerp(status.floatValue, ResolveFixedWidth(element, viewport, m_TargetValue.AsUIFixedLength), adjustedT);
                     element.style.SetAnimatedProperty(new StyleProperty(propertyId, new UIFixedLength(v)));
                     break;
-                
+
                 case StylePropertyId.TransformPositionX:
                     v = Mathf.Lerp(status.floatValue, ResolveTransformOffset(element, viewport, m_TargetValue.AsTransformOffset), adjustedT);
                     element.style.SetAnimatedProperty(new StyleProperty(propertyId, new TransformOffset(v)));
                     break;
-                
+
                 case StylePropertyId.TransformPivotY:
                 case StylePropertyId.TransformPositionY:
                 case StylePropertyId.PaddingTop:
@@ -312,7 +312,7 @@ namespace UIForia.Animation {
 
                 case StylePropertyId.BorderColor:
                 case StylePropertyId.TextColor:
-                    
+
                     break;
 
                 default:
@@ -344,7 +344,7 @@ namespace UIForia.Animation {
             }
 
             m_StatusList[idx] = ValueTuple.Create(element.id, status);
-            return status.iterationCount == Mathf.Max(1, m_Options.iterations) && t == 1 ? AnimationStatus.Completed : AnimationStatus.Running;
+            return status.iterationCount == Mathf.Max(1, m_Options.iterations.Value) && t == 1 ? AnimationStatus.Completed : AnimationStatus.Running;
         }
 
         public override void OnEnd(UIStyleSet styleSet) {

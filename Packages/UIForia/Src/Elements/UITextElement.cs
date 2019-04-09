@@ -11,7 +11,8 @@ namespace UIForia.Elements {
 
         internal string text;
         internal TextInfo2 textInfo;
-
+        private bool shouldUpdateSpanStyle;
+        private SVGXTextStyle spanStyle;
         public UITextElement(string text = "") {
             this.text = text ?? string.Empty;
             this.textInfo = new TextInfo2(new TextSpan(string.Empty));
@@ -427,8 +428,7 @@ namespace UIForia.Elements {
             return new SelectionRange(selectIdx, selectEdge, selectIdx, selectEdge);
         }
 
-        private bool shouldUpdateSpanStyle;
-        private SVGXTextStyle spanStyle;
+
 
         // size, font, style, whitespace, transform, alignment
         public void OnStylePropertyChanged(in StyleProperty property) {

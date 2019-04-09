@@ -22,7 +22,7 @@ namespace UIForia.Compilers.ExpressionResolvers {
 
             public override KeyboardInputEvent Evaluate(ExpressionContext context) {
                 UIElement element = (UIElement) context.currentObject;
-                return element.view.Application.InputSystem.CurrentKeyboardEvent;
+                return element.View.Application.InputSystem.CurrentKeyboardEvent;
             }
 
             public override bool IsConstant() {

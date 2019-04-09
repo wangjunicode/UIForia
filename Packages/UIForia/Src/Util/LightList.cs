@@ -116,7 +116,7 @@ namespace UIForia.Util {
                 RemoveAt(idx);
             }
         }
-        
+
         // todo -- remove boxing
         public bool Remove(T item) {
             for (int i = 0; i < size; i++) {
@@ -149,11 +149,11 @@ namespace UIForia.Util {
             }
 
             size++;
-            index = Mathf.Clamp(index, 0, size - 1);
-            for (int i = index; i < size; i++) {
-                array[i + 1] = array[i];
+            if (index < 0 || index > array.Length) {
+                throw new IndexOutOfRangeException();
             }
-
+            
+            System.Array.Copy(array, index, array, index + 1, size - index);
             array[index] = item;
         }
 
@@ -174,7 +174,7 @@ namespace UIForia.Util {
                 int count = objs.Count;
                 if (count > 0) {
                     this.EnsureCapacity(size + count);
-                    
+
                     if (index < size) {
                         System.Array.Copy(array, index, array, index + count, size - index);
                     }
@@ -210,15 +210,15 @@ namespace UIForia.Util {
         public void ShiftRight(int startIndex, int count) {
             if (count <= 0) return;
             if (startIndex < 0) startIndex = 0;
-            EnsureCapacity(startIndex + count + count);
+            EnsureCapacity(startIndex + count + count); // I think this is too big
             System.Array.Copy(array, startIndex, array, startIndex + count, count);
             System.Array.Clear(array, startIndex, count);
             size += count;
         }
-        
+
         public void ShiftLeft(int startIndex, int count) {
             if (count <= 0) return;
-            if (startIndex < 0) startIndex = 0; 
+            if (startIndex < 0) startIndex = 0;
             System.Array.Copy(array, startIndex, array, startIndex - count, size - startIndex);
             System.Array.Clear(array, size - count, count);
             size -= count;
@@ -423,8 +423,6 @@ namespace UIForia.Util {
             }
 
         }
-
-     
 
     }
 

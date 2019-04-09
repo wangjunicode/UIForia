@@ -3,27 +3,27 @@
     
     <Style>
         
+        style &lt;this&gt; {
+            PreferredSize = 300px, 30px;
+        }
+        
         style input-element {
-            PreferredSize = 300px, 1cnt;
             Border = 5px;
             BorderColor = blue;
-            Margin = 20px;
             TextFontSize = 48;
             Padding = 5px;
-            overflow= hidden;
+            overflow = hidden;
         }
         
         style input-text {
-            Painter = "none";
+            //Painter = "none";
         }
-        
         
     </Style>
     
     <Contents style="input-element">
 
-        <InputElementText style="input-text"/>
-        
+<!--        <InputElementText style="input-text"/>-->
         <!--<Slot placeholder-visible="true" placeholder="">-->
             <!--<Text>default placeholder</Text>-->
         <!--</Slot>-->

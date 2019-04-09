@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using SVGX;
+using UIForia.Animation;
 using UIForia.AttributeProcessors;
 using UIForia.Bindings;
 using UIForia.Compilers.Style;
@@ -15,8 +17,24 @@ using UIForia.Templates;
 using UIForia.Util;
 using UnityEngine;
 
-namespace UIForia {
 
+namespace UIForia {
+    // temp
+    public class ArcPainter : ISVGXElementPainter {
+
+        public void Paint(UIElement element, ImmediateRenderContext ctx, SVGXMatrix matrix) {
+            ctx.SetTransform(matrix);
+            ctx.SetStrokeWidth(6);
+            ctx.SetStroke(Color.red);
+            // todo arc sucks, make this better
+            ctx.ArcTo(1, 1, 0, false, false, 0, 0f);
+            ctx.Stroke();
+//            ctx.Rect(0, 0, 100, 100);
+//            ctx.SetFill(Color.white);
+//            ctx.Fill();
+        }
+
+    }
     public abstract class Application {
 
         public readonly string id;
@@ -29,6 +47,7 @@ namespace UIForia {
         protected IRenderSystem m_RenderSystem;
         protected IInputSystem m_InputSystem;
         protected RoutingSystem m_RoutingSystem;
+        protected AnimationSystem m_AnimationSystem;
 
         public readonly StyleSheetImporter styleImporter;
 
@@ -59,17 +78,17 @@ namespace UIForia {
 
         public static readonly List<IAttributeProcessor> s_AttributeProcessors;
         private static readonly Dictionary<Type, bool> s_RequiresUpdateMap;
-        
+
         internal static readonly Dictionary<string, ISVGXElementPainter> s_CustomPainters;
         internal static readonly Dictionary<string, Scrollbar> s_Scrollbars;
-        
+
         public readonly TemplateParser templateParser;
 
         private static readonly LightList<Application> s_ApplicationList;
-        
+
         private readonly UITaskSystem m_BeforeUpdateTaskSystem;
         private readonly UITaskSystem m_AfterUpdateTaskSystem;
-        
+
         static Application() {
             ArrayPool<UIElement>.SetMaxPoolSize(64);
             s_RequiresUpdateMap = new Dictionary<Type, bool>();
@@ -77,6 +96,7 @@ namespace UIForia {
             s_ApplicationList = new LightList<Application>();
             s_CustomPainters = new Dictionary<string, ISVGXElementPainter>();
             s_CustomPainters.Add("UIForia.InputElement", new InputPainter());
+            s_CustomPainters.Add("HalfCirclePainter", new ArcPainter());
             s_Scrollbars = new Dictionary<string, Scrollbar>();
             s_Scrollbars.Add("UIForia.Default", new DefaultScrollbar());
         }
@@ -84,13 +104,13 @@ namespace UIForia {
         protected Application(string id, string templateRootPath = null) {
             this.id = id;
             this.templateRootPath = templateRootPath;
-            
+
             if (s_ApplicationList.Find(id, (app, _id) => app.id == _id) != null) {
                 throw new Exception($"Applications must have a unique id. Id {id} was already taken.");
             }
 
             s_ApplicationList.Add(this);
-            
+
             this.m_Systems = new List<ISystem>();
             this.m_ElementTree = new SkipTree<UIElement>();
             this.m_Views = new List<UIView>();
@@ -99,9 +119,10 @@ namespace UIForia {
             m_StyleSystem = new StyleSystem();
             m_BindingSystem = new BindingSystem();
             m_LayoutSystem = new LayoutSystem(m_StyleSystem);
-            m_InputSystem = new GameInputSystem(m_LayoutSystem);//new DefaultInputSystem(m_LayoutSystem);
+            m_InputSystem = new GameInputSystem(m_LayoutSystem); //new DefaultInputSystem(m_LayoutSystem);
             m_RenderSystem = new SVGXRenderSystem(null, m_LayoutSystem);
             m_RoutingSystem = new RoutingSystem();
+            m_AnimationSystem = new AnimationSystem();
 
             styleImporter = new StyleSheetImporter(this);
             templateParser = new TemplateParser(this);
@@ -110,16 +131,17 @@ namespace UIForia {
             m_Systems.Add(m_BindingSystem);
             m_Systems.Add(m_RoutingSystem);
             m_Systems.Add(m_InputSystem);
+            m_Systems.Add(m_AnimationSystem);
             m_Systems.Add(m_LayoutSystem);
             m_Systems.Add(m_RenderSystem);
-            
+
             m_BeforeUpdateTaskSystem = new UITaskSystem();
             m_AfterUpdateTaskSystem = new UITaskSystem();
             onApplicationCreated?.Invoke(this);
-            
         }
 
         private string templateRootPath;
+
         public string TemplateRootPath {
             get {
                 if (templateRootPath == null) {
@@ -183,7 +205,7 @@ namespace UIForia {
 
         internal void RegisterElement(UIElement element) {
             if (element.parent == null) {
-                Debug.Assert(element.view.RootElement == element, nameof(element.view.RootElement) + " must be null if providing a null parent");
+                Debug.Assert(element.View.RootElement == element, nameof(element.View.RootElement) + " must be null if providing a null parent");
 
                 element.flags |= UIElementFlags.AncestorEnabled;
                 element.depth = 0;
@@ -232,7 +254,7 @@ namespace UIForia {
 
             m_AfterUpdateTaskSystem.OnReset();
             m_BeforeUpdateTaskSystem.OnReset();
-            
+
             for (int i = 0; i < m_Views.Count; i++) {
                 m_Views[i].Refresh();
                 RegisterElement(m_Views[i].RootElement);
@@ -284,7 +306,7 @@ namespace UIForia {
                     element.flags |= UIElementFlags.AncestorEnabled;
                 }
 
-                element.view = element.parent.view;
+                element.View = element.parent.View;
                 element.depth = element.parent.depth + 1;
             }
 
@@ -363,7 +385,7 @@ namespace UIForia {
         }
 
         public static void DestroyElement(UIElement element) {
-            element.view.Application.DoDestroyElement(element);
+            element.View.Application.DoDestroyElement(element);
         }
 
         protected void DoDestroyElement(UIElement element) {
@@ -450,9 +472,9 @@ namespace UIForia {
             m_StyleSystem.OnUpdate();
             m_LayoutSystem.OnUpdate();
             m_InputSystem.OnUpdate();
-            
+
             m_BeforeUpdateTaskSystem.OnUpdate();
-            
+            m_AnimationSystem.OnUpdate();
             m_RenderSystem.OnUpdate();
 
             m_RoutingSystem.OnUpdate();
@@ -485,16 +507,16 @@ namespace UIForia {
         /// </summary>
         /// <param name="task"></param>
         /// <returns></returns>
-        public UITask RegisterAfterUpdatetask(UITask task) {
+        public UITask RegisterAfterUpdateTask(UITask task) {
             return m_AfterUpdateTaskSystem.AddTask(task);
         }
-        
+
         public static void EnableElement(UIElement element) {
-            element.view.Application.DoEnableElement(element);
+            element.View.Application.DoEnableElement(element);
         }
 
         public static void DisableElement(UIElement element) {
-            element.view.Application.DoDisableElement(element);
+            element.View.Application.DoDisableElement(element);
         }
 
         private static void RunEnableBinding(UIElement element) {
@@ -570,11 +592,12 @@ namespace UIForia {
 
 
             foreach (ISystem system in m_Systems) {
-                system.OnElementDisabled(element);
+                system.OnElementDisabled(element); // todo consider changing this behavior so we don't need multiple traversals of heirarchy
+                // maybe split into 2, system.OnElementDisabled(root), system.OnElementAsChildDisabled(element)
             }
 
             if ((element.flags & UIElementFlags.Initialized) != 0) {
-                element.view.InvokeElementDisabled(element);
+                element.View.InvokeElementDisabled(element);
                 onElementDisabled?.Invoke(element);
             }
         }
@@ -624,9 +647,14 @@ namespace UIForia {
             if (string.IsNullOrEmpty(name)) {
                 return s_Scrollbars["UIForia.Default"];
             }
+
             return s_Scrollbars.GetOrDefault(name);
         }
-        
+
+        public void Animate(UIElement element, StyleAnimationData animation) {
+            m_AnimationSystem.Animate(element, animation);
+        }
+
     }
 
 }

@@ -96,8 +96,13 @@ namespace UIForia.Templates {
             }
 
             CompileStep(rootElementTemplate);
+            if (rootElementTemplate != null && implicitRootStyle != null) {
+                Array.Resize(ref rootElementTemplate.baseStyles, rootElementTemplate.baseStyles.Length + 1);
+                rootElementTemplate.baseStyles[rootElementTemplate.baseStyles.Length - 1] = implicitRootStyle;
+            }
         }
 
+        private UIStyleGroupContainer implicitRootStyle;
         private void CompileStyles() {
             if (styleDefinitions == null || styleDefinitions.Count == 0) {
                 return;
@@ -121,6 +126,12 @@ namespace UIForia.Templates {
                         UIStyleGroupContainer container = sheet.styleGroupContainers[j];
 
                         if (container.styleType == StyleType.Implicit) {
+                            // this lets us style the root element in a template implicitly
+                            // this should be improved with better style system support for default & important styles
+                            if (container.name == "this") {
+                                implicitRootStyle = container;
+                                continue;
+                            }
                             // we only take the first implicit style. This could be improved by doing a merge of some sort
                             implicitStyleMap = implicitStyleMap ?? new Dictionary<string, UIStyleGroupContainer>();
                             if (!implicitStyleMap.ContainsKey(container.name)) {

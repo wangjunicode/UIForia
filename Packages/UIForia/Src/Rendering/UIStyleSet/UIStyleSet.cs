@@ -8,6 +8,7 @@ using UIForia.Systems;
 using UIForia.Templates;
 using UIForia.Util;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 namespace UIForia.Rendering {
 

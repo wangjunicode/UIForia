@@ -1,0 +1,40 @@
+style container {
+    PreferredSize = 100vw 100vh;
+    BackgroundColor = black;
+    Padding = 50px;
+    FlexLayoutDirection = Column;
+}
+
+style circle {
+    BorderRadius = 50%;
+    TransformPivot = 0.5 0.5;
+}
+
+style half-circle {
+    painter = "HalfCirclePainter";
+    PreferredSize = 48px; 
+}
+
+style circle-blue {
+    BackgroundColor = #1565C0;
+    PreferredSize = 48px; 
+}
+
+style circle-yellow-bg {
+    BackgroundColor = #FFEB3BFF;
+    PreferredSize = 12px; 
+    FlexItemSelfAlignment = Center;
+}
+
+style circle-red-bg {
+    BackgroundColor = #B71C1CFF;
+    PreferredSize = 48px;
+    LayoutBehavior = Ignored;
+}
+
+style two-container {
+    PreferredSize = 48px;
+    MarginLeft = 50px;
+    FlexLayoutMainAxisAlignment = Center;
+    FlexLayoutCrossAxisAlignment = Center;
+}

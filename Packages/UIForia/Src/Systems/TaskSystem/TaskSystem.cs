@@ -68,7 +68,7 @@ namespace UIForia.Systems {
                     time = 0;
                 }
 
-                if ((state & UITaskState.Running | UITaskState.Restarting) != 0) {
+                if ((state & (UITaskState.Running | UITaskState.Restarting)) != 0) {
                     task.FrameCount++;
                     task.ElapsedTime += time;
                     UITaskResult result = task.Run(time);

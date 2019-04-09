@@ -34,9 +34,9 @@ namespace UIForia.Elements {
                 }
             }
             
-            view.Application.DestroyChildren(this);
+            View.Application.DestroyChildren(this);
             
-            if (data != null && view.Application.CreateChildElement(this, data.ElementType) is IDynamicElement child) {
+            if (data != null && View.Application.CreateChildElement(this, data.ElementType) is IDynamicElement child) {
                 child.SetData(data);
             }
 

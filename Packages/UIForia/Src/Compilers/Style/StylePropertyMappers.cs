@@ -128,7 +128,7 @@ namespace UIForia.Compilers.Style {
                 {"textcolor", (targetStyle, property, context) => targetStyle.TextColor = MapColor(property, context)},
                 {"textfontasset", (targetStyle, property, context) => targetStyle.TextFontAsset = MapFont(property.children[0], context)},
                 {"textfontstyle", (targetStyle, property, context) => targetStyle.TextFontStyle = MapTextFontStyle(property, context)},
-                {"textfontsize", (targetStyle, property, context) => targetStyle.TextFontSize = (int) MapNumber(property.children[0], context)},
+                {"textfontsize", (targetStyle, property, context) => targetStyle.TextFontSize = MapFixedLength(property.children[0], context)},
                 {"textalignment", (targetStyle, property, context) => targetStyle.TextAlignment = MapEnum<UIForia.Text.TextAlignment>(property.children[0], context)},
                 {"textoutlinewidth", (targetStyle, property, context) => targetStyle.TextOutlineWidth = MapNumber(property.children[0], context)},
                 {"textoutlinecolor", (targetStyle, property, context) => targetStyle.TextOutlineColor = MapColor(property, context)},

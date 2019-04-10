@@ -26,7 +26,8 @@ namespace UIForia.Layout {
         public OffsetRect border;
         public OffsetRect padding;
         public OffsetRect margin;
-
+        public ResolvedBorderRadius borderRadius;
+        
         public Size scrollbarHorizontalSize;
         public Size scrollbarVerticalSize;
         

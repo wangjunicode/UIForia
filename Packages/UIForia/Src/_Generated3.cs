@@ -80,7 +80,7 @@ namespace UIForia.Rendering {
 		public static readonly UIFixedLength PaddingLeft = new UIFixedLength(0, UIFixedUnit.Pixel);
 		public static readonly Color TextColor = new Color(0f, 0f, 0f, 1f);
 		public static readonly TMP_FontAsset TextFontAsset = TMP_FontAsset.defaultFontAsset;
-		public const int TextFontSize = 18;
+		public static readonly UIFixedLength TextFontSize = new UIFixedLength(18, UIFixedUnit.Pixel);
 		public const FontStyle TextFontStyle = UIForia.Text.FontStyle.Normal;
 		public const TextAlignment TextAlignment = UIForia.Text.TextAlignment.Left;
 		public const float TextOutlineWidth = 0f;
@@ -257,7 +257,7 @@ namespace UIForia.Rendering {
 				case StylePropertyId.TextFontAsset:
 					 return new StyleProperty(StylePropertyId.TextFontAsset, 0, 0, TMP_FontAsset.defaultFontAsset);
 				case StylePropertyId.TextFontSize:
-					 return new StyleProperty(StylePropertyId.TextFontSize, 18);
+					 return new StyleProperty(StylePropertyId.TextFontSize, new UIFixedLength(18, UIFixedUnit.Pixel));
 				case StylePropertyId.TextFontStyle:
 					 return new StyleProperty(StylePropertyId.TextFontStyle, (int)UIForia.Text.FontStyle.Normal);
 				case StylePropertyId.TextAlignment:

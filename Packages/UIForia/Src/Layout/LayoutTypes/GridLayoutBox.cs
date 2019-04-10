@@ -45,11 +45,11 @@ namespace UIForia.Layout.LayoutTypes {
         internal LightList<GridTrack> GetRowTracks() {
             return m_RowTracks;
         }
-        
+
         internal LightList<GridTrack> GetColTracks() {
             return m_ColTracks;
         }
-        
+
         public override void OnInitialize() {
             m_IsPlacementDirty = true;
         }
@@ -71,7 +71,7 @@ namespace UIForia.Layout.LayoutTypes {
                     minSize = layoutBoxSize.minSize,
                     maxSize = layoutBoxSize.maxSize,
                     marginStart = marginStart,
-                    marginEnd =  marginEnd,
+                    marginEnd = marginEnd,
                     outputSize = layoutBoxSize.clampedSize + marginStart + marginEnd
                 };
             }
@@ -114,7 +114,7 @@ namespace UIForia.Layout.LayoutTypes {
                 LayoutBoxSize layoutBoxSize = layoutBox.GetHeights(m_Widths[i].outputSize);
                 float marginStart = layoutBox.GetMarginTop(m_Widths[i].outputSize);
                 float marginEnd = layoutBox.GetMarginBottom(m_Widths[i].outputSize);
-                
+
                 m_Heights[i] = new GridItemSizes() {
                     minSize = layoutBoxSize.minSize,
                     maxSize = layoutBoxSize.maxSize,
@@ -425,7 +425,7 @@ namespace UIForia.Layout.LayoutTypes {
         private float ApplyColumnCrossAxisAlignment(bool applySize) {
             GridAxisAlignment colAlignment = style.GridLayoutColAlignment;
             float paddingBorderLeft = PaddingLeft + BorderLeft;
-            
+
             float maxXPlusWidth = 0;
 
             for (int i = 0; i < m_Placements.Count; i++) {
@@ -485,7 +485,7 @@ namespace UIForia.Layout.LayoutTypes {
                         break;
                 }
 
-                
+
                 if (applySize) {
                     child.SetAllocatedXAndWidth(finalX + paddingBorderLeft, finalWidth);
                 }
@@ -560,9 +560,8 @@ namespace UIForia.Layout.LayoutTypes {
                 }
 
                 float paddingBorderTop = PaddingTop + BorderTop;
-                
+
                 if (applySizes) {
-                    
                     child.SetAllocatedYAndHeight(finalY + paddingBorderTop, finalHeight);
                 }
 
@@ -667,7 +666,7 @@ namespace UIForia.Layout.LayoutTypes {
                 case GridTemplateUnit.Pixel:
                     return value;
                 case GridTemplateUnit.Em:
-                    return value * style.EmSize;
+                    return value * style.GetResolvedFontSize();
                 case GridTemplateUnit.ViewportWidth:
                     return value * view.Viewport.width;
                 case GridTemplateUnit.ViewportHeight:
@@ -700,13 +699,17 @@ namespace UIForia.Layout.LayoutTypes {
                 case GridTemplateUnit.Pixel:
                     return value;
                 case GridTemplateUnit.Em:
-                    return value * style.EmSize;
+                    return value * style.GetResolvedFontSize();
+                
                 case GridTemplateUnit.ViewportWidth:
                     return value * view.Viewport.width;
+                
                 case GridTemplateUnit.ViewportHeight:
                     return value * view.Viewport.height;
+                
                 case GridTemplateUnit.ParentSize:
                     return parent.allocatedHeight * value;
+                
                 case GridTemplateUnit.ParentContentArea:
                     return (parent.allocatedHeight - parent.PaddingVertical - parent.BorderVertical) * value;
 
@@ -1007,7 +1010,7 @@ namespace UIForia.Layout.LayoutTypes {
             if (child.element.isDisabled) {
                 return;
             }
-            
+
             if ((child.style.LayoutBehavior & LayoutBehavior.Ignored) == 0) {
                 children.Add(child);
                 int colStart = child.style.GridItemColStart;

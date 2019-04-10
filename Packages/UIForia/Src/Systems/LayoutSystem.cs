@@ -217,12 +217,21 @@ namespace UIForia.Systems {
                     layoutResult.scale = new Vector2(box.style.TransformScaleX, box.style.TransformScaleY); // only set if changed
                     layoutResult.rotation = parentBox.style.TransformRotation + box.style.TransformRotation; // only set if changed
                     layoutResult.pivot = box.Pivot; // only set if changed
+                    
+                    layoutResult.borderRadius = new ResolvedBorderRadius(
+                        box.BorderRadiusTopLeft,
+                        box.BorderRadiusTopRight,
+                        box.BorderRadiusBottomRight,
+                        box.BorderRadiusBottomLeft
+                    );
+                    
                     layoutResult.border = new OffsetRect( // only set if changed
                         box.BorderTop,
                         box.BorderRight,
                         box.BorderBottom,
                         box.BorderLeft
                     );
+                    
                     layoutResult.padding = new OffsetRect(
                         box.PaddingTop,
                         box.PaddingRight,

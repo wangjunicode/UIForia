@@ -403,7 +403,7 @@ namespace UIForia.Animation {
                     return viewport.width * anchor.value;
 
                 case UIFixedUnit.Em:
-                    return element.style.EmSize;
+                    return element.style.GetResolvedFontSize();
 
                 default:
                     return 0;
@@ -425,7 +425,7 @@ namespace UIForia.Animation {
                     return viewport.width * anchor.value;
 
                 case UIFixedUnit.Em:
-                    return element.style.EmSize;
+                    return element.style.GetResolvedFontSize();
 
                 default:
                     return 0;

@@ -110,7 +110,7 @@ namespace UIForia.Editor {
             // Text
             new AnimatedPropertyGenerator<Color>(StylePropertyId.TextColor, Color.black, InheritanceType.Inherited),
             new PropertyGenerator<TMP_FontAsset>(StylePropertyId.TextFontAsset, null, InheritanceType.Inherited, "TMP_FontAsset.defaultFontAsset"),
-            new AnimatedPropertyGenerator<int>(StylePropertyId.TextFontSize, 18, InheritanceType.Inherited),
+            new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.TextFontSize, 18, InheritanceType.Inherited),
             new PropertyGenerator<Text.FontStyle>(StylePropertyId.TextFontStyle, Text.FontStyle.Normal, InheritanceType.Inherited),
             new PropertyGenerator<Text.TextAlignment>(StylePropertyId.TextAlignment, Text.TextAlignment.Left, InheritanceType.Inherited),
             new AnimatedPropertyGenerator<float>(StylePropertyId.TextOutlineWidth, 0, InheritanceType.Inherited),

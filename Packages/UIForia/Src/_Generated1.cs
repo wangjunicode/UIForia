@@ -453,9 +453,9 @@ namespace UIForia.Rendering {
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.TextFontAsset, 0, 0, value), state); }
         }
         
-        public int TextFontSize {
+        public UIForia.UIFixedLength TextFontSize {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.TextFontSize, state).AsInt; }
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.TextFontSize, state).AsUIFixedLength; }
             [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.TextFontSize, value), state); }
         }
@@ -839,7 +839,7 @@ namespace UIForia.Rendering {
                     case StylePropertyId.PaddingLeft: return !FloatUtil.IsDefined(floatValue) || valuePart1 == 0;
                     case StylePropertyId.TextColor: return valuePart1 == 0;
                     case StylePropertyId.TextFontAsset: return objectField == null;
-                    case StylePropertyId.TextFontSize: return !IntUtil.IsDefined(valuePart0);
+                    case StylePropertyId.TextFontSize: return !FloatUtil.IsDefined(floatValue) || valuePart1 == 0;
                     case StylePropertyId.TextFontStyle: return valuePart0 == 0 || IntUtil.UnsetValue == valuePart0;
                     case StylePropertyId.TextAlignment: return valuePart0 == 0 || IntUtil.UnsetValue == valuePart0;
                     case StylePropertyId.TextOutlineWidth: return !FloatUtil.IsDefined(floatValue);
@@ -1343,9 +1343,9 @@ namespace UIForia.Rendering {
             set { SetProperty(new StyleProperty(StylePropertyId.TextFontAsset, 0, 0, value)); }
         }
             
-        public int TextFontSize {
+        public UIForia.UIFixedLength TextFontSize {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return FindIntProperty(StylePropertyId.TextFontSize); }
+            get { return FindUIFixedLengthProperty(StylePropertyId.TextFontSize); }
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.TextFontSize, value)); }
         }
@@ -1367,10 +1367,8 @@ namespace UIForia.Rendering {
         public float TextOutlineWidth {
             [System.Diagnostics.DebuggerStepThrough]
             get { return FindFloatProperty(StylePropertyId.TextOutlineWidth); }
-//            [System.Diagnostics.DebuggerStepThrough]
-            set {
-                SetProperty(new StyleProperty(StylePropertyId.TextOutlineWidth, value));
-            }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.TextOutlineWidth, value)); }
         }
             
         public UnityEngine.Color TextOutlineColor {
@@ -2245,12 +2243,12 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public int TextFontSize { 
+            public UIForia.UIFixedLength TextFontSize { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.TextFontSize, out property)) return property.AsInt;
-                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.TextFontSize), out property)) return property.AsInt;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.TextFontSize, out property)) return property.AsUIFixedLength;
+                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.TextFontSize), out property)) return property.AsUIFixedLength;
                     return DefaultStyleValues_Generated.TextFontSize;
                 }
             }
@@ -3180,12 +3178,12 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.TextFontAsset, state).AsFont;
         }
         
-        public void SetTextFontSize(int value, StyleState state) {
+        public void SetTextFontSize(UIForia.UIFixedLength value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.TextFontSize, value), state);
         }
 
-        public int GetTextFontSize(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.TextFontSize, state).AsInt;
+        public UIForia.UIFixedLength GetTextFontSize(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.TextFontSize, state).AsUIFixedLength;
         }
         
         public void SetTextFontStyle(UIForia.Text.FontStyle value, StyleState state) {

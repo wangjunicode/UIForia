@@ -177,6 +177,11 @@ namespace UIForia.Systems {
                     continue;
                 }
 
+                // todo -- we might want to cache font size lookups for em values, this would be the place 
+                // if (property.propertyId == StylePropertyId.TextFontSize) {
+                    // do caching    
+                // }
+                
                 AddToChangeSet(descendent, property);
 
                 if (descendent.children == null) {

@@ -45,7 +45,7 @@ namespace UIForia.Elements {
             this.text = newText;
             
             spanStyle.font = style.TextFontAsset;
-            spanStyle.fontSize = style.TextFontSize;
+            spanStyle.fontSize = style.GetResolvedFontSize();
             spanStyle.fontStyle = style.TextFontStyle;
             spanStyle.textTransform = style.TextTransform;
             spanStyle.whitespaceMode = WhitespaceMode.CollapseWhitespace | WhitespaceMode.PreserveNewLines;

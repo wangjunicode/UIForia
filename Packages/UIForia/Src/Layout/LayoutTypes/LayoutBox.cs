@@ -83,6 +83,11 @@ namespace UIForia.Layout.LayoutTypes {
         public float BorderBottom => ResolveFixedHeight(style.BorderBottom);
         public float BorderRight => ResolveFixedWidth(style.BorderRight);
 
+        public float BorderRadiusTopRight => ResolveFixedWidth(style.BorderRadiusTopRight);
+        public float BorderRadiusTopLeft => ResolveFixedWidth(style.BorderRadiusTopLeft);
+        public float BorderRadiusBottomRight => ResolveFixedWidth(style.BorderRadiusBottomRight);
+        public float BorderRadiusBottomLeft => ResolveFixedWidth(style.BorderRadiusBottomLeft);
+        
         public bool IsInitialized { get; set; }
         public bool IsIgnored => (style.LayoutBehavior & LayoutBehavior.Ignored) != 0;
 
@@ -262,7 +267,7 @@ namespace UIForia.Layout.LayoutTypes {
                     return view.Viewport.width * width.value;
 
                 case UIFixedUnit.Em:
-                    return style.EmSize * width.value * view.ScaleFactor;
+                    return style.GetResolvedFontSize() * width.value;
 
                 case UIFixedUnit.LineHeight:
                     return style.LineHeightSize * width.value;
@@ -288,7 +293,7 @@ namespace UIForia.Layout.LayoutTypes {
                     return view.Viewport.width * height.value;
 
                 case UIFixedUnit.Em:
-                    return style.EmSize * height.value * view.ScaleFactor;
+                    return style.GetResolvedFontSize() * height.value;
 
                 case UIFixedUnit.LineHeight:
                     return style.LineHeightSize * height.value;
@@ -329,7 +334,7 @@ namespace UIForia.Layout.LayoutTypes {
                            (parent.style == null ? 0 : parent.PaddingBorderVertical);
 
                 case UIMeasurementUnit.Em:
-                    return style.EmSize * margin.value * view.ScaleFactor;
+                    return style.GetResolvedFontSize() * margin.value;
 
                 case UIMeasurementUnit.AnchorWidth:
                     anchorTarget = style.AnchorTarget;
@@ -516,7 +521,8 @@ namespace UIForia.Layout.LayoutTypes {
                     return Mathf.Max(0, parent.allocatedWidth - parent.PaddingBorderHorizontal) * widthMeasurement.value;
 
                 case UIMeasurementUnit.Em:
-                    return Math.Max(0, style.EmSize * widthMeasurement.value) * view.ScaleFactor;
+                    return Math.Max(0, style.GetResolvedFontSize() * widthMeasurement.value);
+
 
                 case UIMeasurementUnit.AnchorWidth:
                     anchorTarget = style.AnchorTarget;
@@ -563,7 +569,7 @@ namespace UIForia.Layout.LayoutTypes {
                     return width * anchor.value;
 
                 case UIFixedUnit.Em:
-                    return style.EmSize * anchor.value * view.ScaleFactor;
+                    return style.GetResolvedFontSize() * anchor.value;
 
                 case UIFixedUnit.LineHeight:
                     return 0;
@@ -747,7 +753,7 @@ namespace UIForia.Layout.LayoutTypes {
                         (parent.style == null ? 0 : parent.PaddingBorderVertical));
 
                 case UIMeasurementUnit.Em:
-                    return Mathf.Max(0, style.EmSize * height.value);
+                    return Mathf.Max(0, style.GetResolvedFontSize() * height.value);
 
                 case UIMeasurementUnit.AnchorWidth:
                     anchorTarget = style.AnchorTarget;
@@ -782,7 +788,7 @@ namespace UIForia.Layout.LayoutTypes {
                     return margin.value * view.ScaleFactor;
 
                 case UIMeasurementUnit.Em:
-                    return style.EmSize * margin.value * view.ScaleFactor;
+                    return style.GetResolvedFontSize() * margin.value;
 
                 case UIMeasurementUnit.Content:
                     return GetContentWidth() * margin.value;
@@ -843,7 +849,7 @@ namespace UIForia.Layout.LayoutTypes {
                     return transformOffset.value;
 
                 case TransformUnit.Em:
-                    return style.EmSize * transformOffset.value * view.ScaleFactor;
+                    return style.GetResolvedFontSize() * transformOffset.value; 
 
                 case TransformUnit.ActualWidth:
                     return transformOffset.value * actualWidth;
@@ -959,7 +965,7 @@ namespace UIForia.Layout.LayoutTypes {
                             : parent.PaddingHorizontal - parent.BorderHorizontal));
 
                 case UIMeasurementUnit.Em:
-                    return Math.Max(0, style.EmSize * widthMeasurement.value);
+                    return Math.Max(0, style.GetResolvedFontSize() * widthMeasurement.value);
 
                 case UIMeasurementUnit.AnchorWidth:
                     anchorTarget = style.AnchorTarget;
@@ -1018,7 +1024,7 @@ namespace UIForia.Layout.LayoutTypes {
                             : parent.PaddingVertical - parent.BorderVertical));
 
                 case UIMeasurementUnit.Em:
-                    return Mathf.Max(0, style.EmSize * heightMeasurement.value);
+                    return Mathf.Max(0, style.GetResolvedFontSize() * heightMeasurement.value);
 
                 case UIMeasurementUnit.AnchorWidth:
                     anchorTarget = style.AnchorTarget;

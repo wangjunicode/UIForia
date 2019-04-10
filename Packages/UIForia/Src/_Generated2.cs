@@ -1235,7 +1235,7 @@ case "overflowx":
                 case "textfontasset":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_TMP_FontAsset("TextFontAsset", UIForia.Rendering.StylePropertyId.TextFontAsset, targetState.state, Compile<TMPro.TMP_FontAsset>(value, fontUrlSource));                
                 case "textfontsize":
-                    return new UIForia.Bindings.StyleBindings.StyleBinding_int("TextFontSize", UIForia.Rendering.StylePropertyId.TextFontSize, targetState.state, Compile<int>(value, null));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_UIFixedLength("TextFontSize", UIForia.Rendering.StylePropertyId.TextFontSize, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
                 case "textfontstyle":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_FontStyle("TextFontStyle", UIForia.Rendering.StylePropertyId.TextFontStyle, targetState.state, Compile<UIForia.Text.FontStyle>(value, s_EnumSource_FontStyle));                
                 case "textalignment":

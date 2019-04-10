@@ -168,8 +168,8 @@ namespace UIForia.Systems {
             Vector2 pivot = layoutResult.pivot;
             Vector2 offset = new Vector2(layoutResult.allocatedSize.width * pivot.x, layoutResult.allocatedSize.height * pivot.y);
 
-            Vector4 border = current.style.ResolvedBorder;
-            Vector4 resolveBorderRadius = current.style.ResolvedBorderRadius;
+            Vector4 border = layoutResult.border;
+            Vector4 resolveBorderRadius = layoutResult.borderRadius;
             float width = layoutResult.allocatedSize.width;
             float height = layoutResult.allocatedSize.height;
             bool hasUniformBorder = border.x == border.y && border.z == border.x && border.w == border.x;

@@ -1,3 +1,5 @@
+using UnityEngine;
+
 namespace UIForia.Util {
 
     public struct OffsetRect {
@@ -18,6 +20,9 @@ namespace UIForia.Util {
 
         public float Vertical => top + bottom;
 
+        public static implicit operator Vector4(OffsetRect rect) {
+            return new Vector4(rect.top, rect.right, rect.bottom, rect.left);
+        }
     }
 
 }

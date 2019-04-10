@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using SVGX;
 using UIForia.Animation;
 using UIForia.Compilers.Style;
 using UIForia.Elements;
@@ -8,7 +9,6 @@ using UIForia.Systems;
 using UIForia.Templates;
 using UIForia.Util;
 using UnityEngine;
-using Debug = UnityEngine.Debug;
 
 namespace UIForia.Rendering {
 
@@ -20,7 +20,7 @@ namespace UIForia.Rendering {
         private StyleState currentState;
         private UIStyleGroup instanceStyle;
         private StyleState containedStates;
-        private UIStyleGroupContainer implicitStyleContainer;
+        //private UIStyleGroupContainer implicitStyleContainer;
         private readonly LightList<StyleEntry> availableStyles;
         private readonly LightList<UIStyleGroupContainer> styleGroupContainers; // probably only need to store the names
         internal readonly IntMap<StyleProperty> propertyMap;
@@ -171,9 +171,9 @@ namespace UIForia.Rendering {
                 CreateStyleEntry(toUpdate, instanceStyle, instanceStyle.active, StyleType.Instance, StyleState.Active, 0);
             }
 
-            if (implicitStyleContainer != null) {
-                CreateStyleGroups(implicitStyleContainer, toUpdate);
-            }
+//            if (implicitStyleContainer != null) {
+//                CreateStyleGroups(implicitStyleContainer, toUpdate);
+//            }
 
             for (int i = 0; i < count; i++) {
                 CreateStyleGroups(updatedStyleArray[i], toUpdate);
@@ -357,94 +357,59 @@ namespace UIForia.Rendering {
         }
 
         public bool HasBaseStyles => styleGroupContainers.Count > 0;
-        public float EmSize => 16f; // todo -- wrong
+        
         public float LineHeightSize => 16f; // todo -- wrong
-
-        public bool HasBorderRadius =>
-            BorderRadiusTopLeft.value > 0 ||
-            BorderRadiusBottomLeft.value > 0 ||
-            BorderRadiusTopRight.value > 0 ||
-            BorderRadiusBottomLeft.value > 0;
-
-        private static string GetBaseStyleNames(UIStyleSet styleSet) {
-            string output = string.Empty;
-
-            for (int i = 0; i < styleSet.styleGroupContainers.Count; i++) {
-                output += styleSet.styleGroupContainers[i].name;
-                if (i != styleSet.styleGroupContainers.Count - 1) {
-                    output += ", ";
-                }
-            }
-
-            return output;
-        }
-
-        public BorderRadius BorderRadius => new BorderRadius(BorderRadiusTopLeft, BorderRadiusTopRight, BorderRadiusBottomRight, BorderRadiusBottomLeft);
-
-        public Vector4 ResolvedBorderRadius => new Vector4(
-            ResolveHorizontalFixedLength(BorderRadiusTopLeft),
-            ResolveHorizontalFixedLength(BorderRadiusTopRight),
-            ResolveHorizontalFixedLength(BorderRadiusBottomRight),
-            ResolveHorizontalFixedLength(BorderRadiusBottomLeft)
-        );
-
-        public Vector4 ResolvedBorder => new Vector4(
-            ResolveVerticalFixedLength(BorderTop),
-            ResolveHorizontalFixedLength(BorderRight),
-            ResolveVerticalFixedLength(BorderBottom),
-            ResolveHorizontalFixedLength(BorderLeft)
-        );
 
         // todo -- handle inherited?
         public bool IsDefined(StylePropertyId propertyId) {
             return propertyMap.ContainsKey((int) propertyId);
         }
 
-        // I don't love having this here, make accessible on layout result
-        private float ResolveHorizontalFixedLength(UIFixedLength length) {
-            switch (length.unit) {
-                case UIFixedUnit.Pixel:
-                    return length.value;
-
-                case UIFixedUnit.Percent:
-                    return element.layoutResult.AllocatedWidth * length.value;
-
-                case UIFixedUnit.Em:
-                    return EmSize * length.value;
-
-                case UIFixedUnit.ViewportWidth:
-                    return 0;
-
-                case UIFixedUnit.ViewportHeight:
-                    return 0;
-
-                default:
-                    return 0;
-            }
-        }
-
-        // I don't love having this here
-        private float ResolveVerticalFixedLength(UIFixedLength length) {
-            switch (length.unit) {
-                case UIFixedUnit.Pixel:
-                    return length.value;
-
-                case UIFixedUnit.Percent:
-                    return element.layoutResult.AllocatedHeight * length.value;
-
-                case UIFixedUnit.Em:
-                    return EmSize * length.value;
-
-                case UIFixedUnit.ViewportWidth:
-                    return 0;
-
-                case UIFixedUnit.ViewportHeight:
-                    return 0;
-
-                default:
-                    return 0;
-            }
-        }
+//        // I don't love having this here, make accessible on layout result
+//        private float ResolveHorizontalFixedLength(UIFixedLength length) {
+//            switch (length.unit) {
+//                case UIFixedUnit.Pixel:
+//                    return length.value;
+//
+//                case UIFixedUnit.Percent:
+//                    return element.layoutResult.AllocatedWidth * length.value;
+//
+//                case UIFixedUnit.Em:
+//                    return EmSize * length.value;
+//
+//                case UIFixedUnit.ViewportWidth:
+//                    return 0;
+//
+//                case UIFixedUnit.ViewportHeight:
+//                    return 0;
+//
+//                default:
+//                    return 0;
+//            }
+//        }
+//
+//        // I don't love having this here
+//        private float ResolveVerticalFixedLength(UIFixedLength length) {
+//            switch (length.unit) {
+//                case UIFixedUnit.Pixel:
+//                    return length.value;
+//
+//                case UIFixedUnit.Percent:
+//                    return element.layoutResult.AllocatedHeight * length.value;
+//
+//                case UIFixedUnit.Em:
+//                    return EmSize * length.value;
+//
+//                case UIFixedUnit.ViewportWidth:
+//                    return 0;
+//
+//                case UIFixedUnit.ViewportHeight:
+//                    return 0;
+//
+//                default:
+//                    return 0;
+//            }
+//        }
 
         internal void AddStyleGroupContainer(UIStyleGroupContainer container) {
             if (styleGroupContainers.Contains(container)) {
@@ -895,6 +860,54 @@ namespace UIForia.Rendering {
             }
 
             return retn;
+        }
+
+        // todo -- explore caching this value
+        public float GetResolvedFontSize() {
+            UIFixedLength fontSize = TextFontSize;
+            switch (fontSize.unit) {
+                
+                case UIFixedUnit.Unset:
+                    return 0;
+                
+                case UIFixedUnit.Pixel:
+                    return fontSize.value;
+                
+                case UIFixedUnit.Em:
+                case UIFixedUnit.Percent:
+                    if (element.parent != null) {
+                        return element.parent.style.GetResolvedFontSize() * fontSize.value;
+                    }
+                    return DefaultStyleValues_Generated.TextFontSize.value * fontSize.value;
+                
+                case UIFixedUnit.LineHeight:
+                    throw new NotImplementedException();
+                
+                case UIFixedUnit.ViewportWidth:
+                    return element.View.Viewport.width * fontSize.value;
+                
+                case UIFixedUnit.ViewportHeight:
+                    return element.View.Viewport.height * fontSize.value;
+                
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        public SVGXTextStyle GetTextStyle() {
+            return new SVGXTextStyle() {
+                fontSize =  GetResolvedFontSize(),
+                alignment = TextAlignment,
+                font = TextFontAsset,
+                fontStyle = TextFontStyle,
+                glowOffset = TextGlowOffset,
+                glowOuter = TextGlowOuter,
+                outlineColor = TextOutlineColor,
+                outlineSoftness = 0, // todo 
+                outlineWidth = TextOutlineWidth,
+                textTransform = TextTransform,
+                whitespaceMode = 0 // todo
+            };
         }
 
     }

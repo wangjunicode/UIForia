@@ -5,6 +5,32 @@ using UnityEngine;
 
 namespace UIForia.Rendering {
 
+    public struct ResolvedBorderRadius {
+
+        public readonly float topLeft;
+        public readonly float topRight;
+        public readonly float bottomLeft;
+        public readonly float bottomRight;
+
+        public ResolvedBorderRadius(float topLeft, float topRight, float bottomLeft, float bottomRight) {
+            this.topLeft = topLeft;
+            this.topRight = topRight;
+            this.bottomRight = bottomRight;
+            this.bottomLeft = bottomLeft;
+        }
+        
+        [DebuggerStepThrough]
+        public static implicit operator Vector4(ResolvedBorderRadius radius) {
+            return new Vector4(
+                FloatUtil.IsDefined(radius.topLeft) ? radius.topLeft : 0,
+                FloatUtil.IsDefined(radius.topRight) ? radius.topRight : 0,
+                FloatUtil.IsDefined(radius.bottomRight) ? radius.bottomRight : 0,
+                FloatUtil.IsDefined(radius.bottomLeft) ? radius.bottomLeft : 0
+            );
+        }
+
+    }
+
     public struct BorderRadius {
 
         public readonly UIFixedLength topLeft;
@@ -39,7 +65,7 @@ namespace UIForia.Rendering {
             this.bottomRight = bottomRight;
             this.bottomLeft = bottomLeft;
         }
-        
+
         [PublicAPI]
         public bool HasTopLeft => topLeft.IsDefined();
 
@@ -52,11 +78,11 @@ namespace UIForia.Rendering {
         [PublicAPI]
         public bool HasBottomRight => bottomRight.IsDefined();
 
-//        [PublicAPI]
-//        [DebuggerStepThrough]
-//        public bool IsDefined() {
-//            return HasTopLeft || HasTopRight || HasBottomRight || HasBottomLeft;
-//        }
+        [PublicAPI]
+        [DebuggerStepThrough]
+        public bool IsDefined() {
+            return HasTopLeft || HasTopRight || HasBottomRight || HasBottomLeft;
+        }
 
         [PublicAPI]
         [DebuggerStepThrough]
@@ -89,7 +115,7 @@ namespace UIForia.Rendering {
         public static implicit operator BorderRadius(Vector4 vec4) {
             return new BorderRadius(vec4.x, vec4.y, vec4.z, vec4.w);
         }
-        
+
         [DebuggerStepThrough]
         public static implicit operator BorderRadius(float val) {
             return new BorderRadius(val);
@@ -98,10 +124,10 @@ namespace UIForia.Rendering {
 //        [DebuggerStepThrough]
 //        public static implicit operator Vector4(BorderRadius radius) {
 //            return new Vector4(
-//                rad ? radius.topLeft : 0,
-//                FloatUtil.IsDefined(radius.topRight) ? radius.topRight : 0,
-//                FloatUtil.IsDefined(radius.bottomRight) ? radius.bottomRight : 0,
-//                FloatUtil.IsDefined(radius.bottomLeft) ? radius.bottomLeft : 0
+//                FloatUtil.IsDefined(radius.topLeft.value) ? radius.topLeft : 0,
+//                FloatUtil.IsDefined(radius.topRight.value) ? radius.topRight : 0,
+//                FloatUtil.IsDefined(radius.bottomRight.value) ? radius.bottomRight : 0,
+//                FloatUtil.IsDefined(radius.bottomLeft.value) ? radius.bottomLeft : 0
 //            );
 //        }
 
@@ -114,10 +140,6 @@ namespace UIForia.Rendering {
         public static bool operator !=(BorderRadius self, BorderRadius other) {
             return !self.Equals(other);
         }
-
-//        public float[] ToFloatArray() {
-//            return new [] {topLeft, topRight, bottomRight, bottomLeft};
-//        }
 
     }
 

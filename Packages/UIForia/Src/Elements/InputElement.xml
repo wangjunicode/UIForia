@@ -1,34 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <UITempalate>
-    
+
     <Style>
-        
+
         style &lt;this&gt; {
-            PreferredSize = 300px, 30px;
-        }
-        
-        style input-element {
-            Border = 5px;
+            TextFontSize = 48px;
+            PreferredSize = 300px, 1cnt;
+            Padding = 0em;
+            Border = 15px;
             BorderColor = blue;
-            TextFontSize = 48;
-            Padding = 5px;
             overflow = hidden;
         }
-        
-        style input-text {
-            //Painter = "none";
+
+        style input-element-text {
+            Painter = "none";
+            PreferredSize = 1pca, 1.15em;
         }
-        
+
     </Style>
-    
+
     <Contents style="input-element">
 
-<!--        <InputElementText style="input-text"/>-->
-        <!--<Slot placeholder-visible="true" placeholder="">-->
-            <!--<Text>default placeholder</Text>-->
-        <!--</Slot>-->
+        <Group style="input-element-text"/>
         
+        <!--<Slot placeholder-visible="true" placeholder="">-->
+        <!--<Text>default placeholder</Text>-->
+        <!--</Slot>-->
+
     </Contents>
-    
+
 </UITempalate>
 

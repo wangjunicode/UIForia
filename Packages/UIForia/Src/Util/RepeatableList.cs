@@ -14,22 +14,22 @@ namespace UIForia.Util {
         event Action onClear;
 
     }
-    
+        
     public class RepeatableList<T> : IList<T>, IRepeatableList {
         
         public event Action<T, int> onItemInserted;
         public event Action<T, int> onItemRemoved;
-        public event Action<T, int, int> onItemMoved; // todo
+      //  public event Action<T, int, int> onItemMoved; // todo
         public event Action onClear;
 
         private readonly IList<T> backingStore;
         
         public RepeatableList() {
-            backingStore =  new List<T>();
+            backingStore =  new LightList<T>();
         }
         
         public RepeatableList(IList<T> list = null) {
-            backingStore = list == null ? new List<T>() : new List<T>(list);
+            backingStore = list == null ? new LightList<T>() : new LightList<T>(list);
         }
         
         public bool IsReadOnly => false;

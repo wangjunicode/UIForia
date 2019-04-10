@@ -12,9 +12,11 @@ namespace Demo {
     [Template("AnimationDemo/AnimationDemo.xml")]
     public class AnimationDemo : UIElement {
 
-        private UIElement first;
+        private UIElement one_Blue;
+        private UIElement one_BlueOrbit;
         private UIElement two_YellowBg;
         private UIElement two_RedBg;
+        private UIElement bouncer;
 
         private static Color32 c1 = new Color32(0x15, 0x65, 0xc0, 0xff);
         private static Color32 c2 = new Color32(0xb7, 0x1c, 0x1c, 0xff);
@@ -24,13 +26,16 @@ namespace Demo {
         private static Color32 c6 = new Color32(0xef, 0x6c, 0x00, 0xff);
 
         public override void OnCreate() {
-            first = GetChild(0);
+            one_Blue = FindById("one_blue");
+            one_BlueOrbit = FindById("one_blueOrbit");
             two_YellowBg = FindById("two_yellow-bg");
             two_RedBg = FindById("two_red-bg");
-
-            Application.Animate(first, ScaleAnim());
+            bouncer = FindById("bouncer");
+            
+            Application.Animate(one_Blue, ScaleAnim());
             Application.Animate(two_RedBg, RedBgAnim());
             Application.Animate(two_YellowBg, YellowBgAnim());
+            
         }
 
         public StyleAnimationData RedBgAnim() {
@@ -102,17 +107,15 @@ namespace Demo {
             return new StyleAnimationData(options, frames);
         }
 
-       
-        
         public StyleAnimationData OrbitFadeAnim() {
-            
+
             AnimationOptions options = new AnimationOptions() {
                 duration = 1000,
                 iterations = 1,
             };
-            
+
             AnimationKeyFrame2[] frames = {
-                new AnimationKeyFrame2(0f, 
+                new AnimationKeyFrame2(0f,
                     new StyleKeyFrameValue(StylePropertyId.TransformRotation, "$startVal")
                 ),
                 new AnimationKeyFrame2(1f,
@@ -122,7 +125,7 @@ namespace Demo {
 
             return new StyleAnimationData(options, frames);
         }
-        
+
         public StyleAnimationData YellowBgAnim() {
             AnimationOptions options = new AnimationOptions() {
                 duration = 3200,
@@ -206,7 +209,10 @@ namespace Demo {
             };
 
             AnimationTrigger[] triggers = {
-                new AnimationTrigger(0.3f, () => { first.GetChild(0).SetEnabled(true); }),
+                new AnimationTrigger(0.65f, () => {
+                    one_BlueOrbit.SetEnabled(true);
+                    Application.Animate(one_BlueOrbit, OrbitFadeAnim());
+                }),
                 new AnimationTrigger(),
                 new AnimationTrigger(),
             };

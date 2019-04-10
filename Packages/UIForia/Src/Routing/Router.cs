@@ -148,7 +148,6 @@ namespace UIForia.Routing {
 
         private Route activeRoute;
         private Route targetRoute;
-        private RouteMatch targetRouteMatch;
 
         private string targetUrl;
         public string defaultRoute { set; get; }
@@ -241,7 +240,7 @@ namespace UIForia.Routing {
             }
 
             if (m_ActiveTransitions.Count == 0) {
-                EnterRoute(targetRouteMatch);
+             //   EnterRoute(targetRouteMatch);
             }
 
             tickElapsed += Time.deltaTime;

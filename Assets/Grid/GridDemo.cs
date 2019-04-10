@@ -1,13 +1,14 @@
 using UIForia.Attributes;
 using UIForia.Elements;
 
+#pragma warning disable 0414
 namespace UnityEngine {
-    
+
     [Template("Grid/GridDemo.xml")]
     public class GridDemo : UIElement {
 
         public string variableStyle = "varStyle0";
-        
+
         private string backgroundStyleName = "background";
         private bool hover;
 
@@ -28,6 +29,7 @@ namespace UnityEngine {
                 variableStyle = string.Empty;
             }
         }
-    }  
-  
+
+    }
+
 }

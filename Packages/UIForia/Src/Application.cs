@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using JetBrains.Annotations;
 using SVGX;
 using UIForia.Animation;
 using UIForia.AttributeProcessors;
@@ -17,8 +18,8 @@ using UIForia.Templates;
 using UIForia.Util;
 using UnityEngine;
 
-
 namespace UIForia {
+
     // temp
     public class ArcPainter : ISVGXElementPainter {
 
@@ -35,6 +36,7 @@ namespace UIForia {
         }
 
     }
+
     public abstract class Application {
 
         public readonly string id;
@@ -182,6 +184,18 @@ namespace UIForia {
             return view;
         }
 
+        public UIView RemoveView(UIView view) {
+            
+            if (!m_Views.Remove(view)) return null;
+            
+            for (int i = 0; i < m_Systems.Count; i++) {
+                m_Systems[i].OnViewRemoved(view);
+            }
+
+            onViewRemoved?.Invoke(view);
+            return view;
+        }
+
         internal UIElement CreateChildElement(UIElement parent, Type type) {
             if (type == null) {
                 return null;
@@ -267,6 +281,7 @@ namespace UIForia {
             onRefresh?.Invoke();
             onNextRefresh?.Invoke();
             onNextRefresh = null;
+            onReady?.Invoke();
         }
 
         public void Destroy() {
@@ -452,7 +467,6 @@ namespace UIForia {
                 m_ElementTree.TraversePostOrder(child, (node) => node.OnDestroy(), true);
             }
 
-
             for (int i = 0; i < element.children.Count; i++) {
                 for (int j = 0; j < m_Systems.Count; j++) {
                     m_Systems[j].OnElementDestroyed(element.children[i]);
@@ -589,7 +603,6 @@ namespace UIForia {
 
                 return true;
             });
-
 
             foreach (ISystem system in m_Systems) {
                 system.OnElementDisabled(element); // todo consider changing this behavior so we don't need multiple traversals of heirarchy

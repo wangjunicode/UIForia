@@ -48,6 +48,10 @@ namespace UIForia.Rendering {
         FlexItemGrow = 402,
         FlexItemShrink = 403,
 
+        RadialLayoutStartAngle = 1801,
+        RadialLayoutEndAngle = 1802,
+        RadialLayoutRadius = 1803,
+        
         MarginTop = 500,
         MarginRight = 501,
         MarginBottom = 502,

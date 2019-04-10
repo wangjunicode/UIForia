@@ -24,6 +24,15 @@ namespace UIForia.Util {
             this.array = items;
             this.size = items.Length;
         }
+        
+        [DebuggerStepThrough]
+        public LightList(IList<T> items) {
+            this.array = new T[items.Count];
+            this.size = items.Count;
+            for (int i = 0; i < items.Count; i++) {
+                array[i] = items[i];
+            }
+        }
 
         public T[] Array => array;
 

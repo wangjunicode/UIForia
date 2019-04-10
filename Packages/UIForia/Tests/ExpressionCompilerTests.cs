@@ -1,14 +1,15 @@
 using System;
 using System.Collections.Generic;
 using NUnit.Framework;
-using UIForia;
 using UIForia.Compilers;
 using UIForia.Compilers.ExpressionResolvers;
 using UIForia.Exceptions;
 using UIForia.Expressions;
-using UIForia.Util;
-using UnityEditor;
 using UnityEngine;
+
+#pragma warning disable 0660
+#pragma warning disable 0661
+#pragma warning disable 0649
 
 [TestFixture]
 public class ExpressionCompilerTests {

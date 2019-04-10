@@ -97,7 +97,6 @@ namespace SVGX {
             float _start = MathUtil.WrapAngleDeg(startAngle);
             float _end = MathUtil.WrapAngleDeg(endAngle);
 
-     
             if (_start > _end) {
                 float tmp = _end;
                 _end = _start;

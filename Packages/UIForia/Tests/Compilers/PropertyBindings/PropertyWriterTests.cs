@@ -3,6 +3,8 @@ using Tests.Mocks;
 using UIForia.Attributes;
 using UIForia.Elements;
 
+#pragma warning disable 0649
+
 [TestFixture]
 public class PropertyWriterTests {
 
@@ -76,21 +78,6 @@ public class PropertyWriterTests {
     private class ThingWrittenTo_NestedProperty : UIElement {
 
         public NestedWriteTarget writeTarget = new NestedWriteTarget();
-
-    }
-    
-    [Template(TemplateType.String, @"
-
-        <UITemplate>
-            <Contents>
-                <ThingThatWrites value.readwrite='readWriteMe'/>
-            </Contents>
-        </UITemplate>
-
-    ")]
-    private class ThingReadWrite : UIElement {
-
-        public string readWriteMe;
 
     }
 

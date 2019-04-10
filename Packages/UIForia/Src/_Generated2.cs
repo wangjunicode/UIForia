@@ -1184,6 +1184,12 @@ case "overflowx":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_GridAxisAlignment("GridLayoutColAlignment", UIForia.Rendering.StylePropertyId.GridLayoutColAlignment, targetState.state, Compile<UIForia.Layout.GridAxisAlignment>(value, s_EnumSource_GridAxisAlignment));                
                 case "gridlayoutrowalignment":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_GridAxisAlignment("GridLayoutRowAlignment", UIForia.Rendering.StylePropertyId.GridLayoutRowAlignment, targetState.state, Compile<UIForia.Layout.GridAxisAlignment>(value, s_EnumSource_GridAxisAlignment));                
+                case "radiallayoutstartangle":
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_float("RadialLayoutStartAngle", UIForia.Rendering.StylePropertyId.RadialLayoutStartAngle, targetState.state, Compile<float>(value, null));                
+                case "radiallayoutendangle":
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_float("RadialLayoutEndAngle", UIForia.Rendering.StylePropertyId.RadialLayoutEndAngle, targetState.state, Compile<float>(value, null));                
+                case "radiallayoutradius":
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_UIFixedLength("RadialLayoutRadius", UIForia.Rendering.StylePropertyId.RadialLayoutRadius, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
                 case "minwidth":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_UIMeasurement("MinWidth", UIForia.Rendering.StylePropertyId.MinWidth, targetState.state, Compile<UIForia.Rendering.UIMeasurement>(value, measurementSources));                
                 case "maxwidth":

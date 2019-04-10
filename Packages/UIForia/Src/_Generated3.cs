@@ -55,6 +55,9 @@ namespace UIForia.Rendering {
 		public const float GridLayoutRowGap = 0f;
 		public const GridAxisAlignment GridLayoutColAlignment = UIForia.Layout.GridAxisAlignment.Grow;
 		public const GridAxisAlignment GridLayoutRowAlignment = UIForia.Layout.GridAxisAlignment.Grow;
+		public const float RadialLayoutStartAngle = 0f;
+		public const float RadialLayoutEndAngle = 360f;
+		public static readonly UIFixedLength RadialLayoutRadius = new UIFixedLength(0.5f, UIFixedUnit.Percent);
 		public static readonly UIMeasurement MinWidth = new UIMeasurement(0, UIMeasurementUnit.Pixel);
 		public static readonly UIMeasurement MaxWidth = new UIMeasurement(3.402823E+38, UIMeasurementUnit.Pixel);
 		public static readonly UIMeasurement PreferredWidth = new UIMeasurement(1, UIMeasurementUnit.Content);
@@ -206,6 +209,12 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.GridLayoutColAlignment, (int)UIForia.Layout.GridAxisAlignment.Grow);
 				case StylePropertyId.GridLayoutRowAlignment:
 					 return new StyleProperty(StylePropertyId.GridLayoutRowAlignment, (int)UIForia.Layout.GridAxisAlignment.Grow);
+				case StylePropertyId.RadialLayoutStartAngle:
+					 return new StyleProperty(StylePropertyId.RadialLayoutStartAngle, 0f);
+				case StylePropertyId.RadialLayoutEndAngle:
+					 return new StyleProperty(StylePropertyId.RadialLayoutEndAngle, 360f);
+				case StylePropertyId.RadialLayoutRadius:
+					 return new StyleProperty(StylePropertyId.RadialLayoutRadius, new UIFixedLength(0.5f, UIFixedUnit.Percent));
 				case StylePropertyId.MinWidth:
 					 return new StyleProperty(StylePropertyId.MinWidth, new UIMeasurement(0, UIMeasurementUnit.Pixel));
 				case StylePropertyId.MaxWidth:

@@ -45,8 +45,7 @@ namespace Packages.UIForia.Src.VectorGraphics {
         internal readonly LightList<SVGXShape> shapes;
         
         private RangeInt currentShapeRange;
-        private RangeInt currentPointRange;
-        
+     //   private RangeInt currentPointRange;
         private Vector2 lastPoint;
         private GFX2 gfx;
         
@@ -158,7 +157,7 @@ namespace Packages.UIForia.Src.VectorGraphics {
             points.QuickClear();
             states.QuickClear();
             lastPoint = new Vector2();
-            currentPointRange = new RangeInt();
+      //      currentPointRange = new RangeInt();
             currentShapeRange = new RangeInt();
             shapes.Add(SVGXShape.Unset);
             states.Add(State.Create());

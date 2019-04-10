@@ -1,5 +1,3 @@
-using UIForia.Elements;
-using UIForia.Layout.LayoutTypes;
 using UIForia.Systems;
 
 namespace Tests.Mocks {
@@ -8,12 +6,6 @@ namespace Tests.Mocks {
 
         public MockLayoutSystem(IStyleSystem styleSystem)
             : base(styleSystem) {
-        }
-
-        public LayoutBox GetBoxForElement(UIElement element) {
-            LayoutBox box;
-            m_LayoutBoxMap.TryGetValue(element.id, out box);
-            return box;
         }
 
     }

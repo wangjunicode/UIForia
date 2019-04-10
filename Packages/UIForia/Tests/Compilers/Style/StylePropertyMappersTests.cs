@@ -24,7 +24,7 @@ public class StylePropertyMappersTests {
                 StylePropertyMappers.MapProperty(target, propertyNode, new StyleCompileContext());
                 Assert.Fail($"Property {propId} is probably not mapped. Have a look!");
             }
-            catch (CompileException e) {
+            catch (CompileException) {
                 // expected that
             }
         }

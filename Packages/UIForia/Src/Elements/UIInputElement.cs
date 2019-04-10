@@ -1,4 +1,5 @@
 using System;
+using JetBrains.Annotations;
 using SVGX;
 using UIForia.Attributes;
 using UIForia.Rendering;
@@ -7,10 +8,11 @@ using UIForia.Text;
 using UIForia.UIInput;
 using UnityEngine;
 
+#pragma warning disable 0649
 namespace UIForia.Elements {
 
     [Template(TemplateType.Internal, "Elements/InputElement.xml")]
-    public class InputElement : UIElement, IFocusable, ISVGXPaintable, IStylePropertiesDidChangeHandler {
+    public class UIInputElement : UIElement, IFocusable, ISVGXPaintable, IStylePropertiesDidChangeHandler {
 
         internal TextInfo2 textInfo;
         internal string text;
@@ -36,7 +38,7 @@ namespace UIForia.Elements {
 
         private float keyLockTimestamp;
 
-        public InputElement() {
+        public UIInputElement() {
             flags |= UIElementFlags.BuiltIn;
             selectionRange = new SelectionRange(0, TextEdge.Left);
         }
@@ -63,6 +65,7 @@ namespace UIForia.Elements {
             onValueChanged?.Invoke(textInfo.GetAllText());
         }
 
+        [UsedImplicitly]
         [OnMouseClick]
         private void OnMouseClick(MouseInputEvent evt) {
             bool hadFocus = hasFocus;
@@ -93,6 +96,7 @@ namespace UIForia.Elements {
             evt.StopPropagation();
         }
 
+        [UsedImplicitly]
         [OnKeyDownWithFocus]
         private void EnterText(KeyboardInputEvent evt) {
             evt.StopPropagation();
@@ -121,6 +125,7 @@ namespace UIForia.Elements {
             }
         }
 
+        [UsedImplicitly]
         [OnKeyDownWithFocus(KeyCode.Home)]
         private void HandleHome(KeyboardInputEvent evt) {
             evt.StopPropagation();
@@ -130,6 +135,7 @@ namespace UIForia.Elements {
             ScrollToCursor();
         }
 
+        [UsedImplicitly]
         [OnKeyDownWithFocus(KeyCode.End)]
         private void HandleEnd(KeyboardInputEvent evt) {
             evt.StopPropagation();
@@ -139,6 +145,7 @@ namespace UIForia.Elements {
             blinkStartTime = Time.unscaledTime;
         }
 
+        [UsedImplicitly]
         [OnKeyDownWithFocus(KeyCode.Backspace)]
         private void HandleBackspace(KeyboardInputEvent evt) {
             evt.StopPropagation();
@@ -152,6 +159,7 @@ namespace UIForia.Elements {
             ScrollToCursor();
         }
 
+        [UsedImplicitly]
         [OnKeyHeldWithFocus(KeyCode.Backspace)]
         private void HandleBackspaceHeld(KeyboardInputEvent evt) {
             evt.StopPropagation();
@@ -164,6 +172,7 @@ namespace UIForia.Elements {
             ScrollToCursor();
         }
 
+        [UsedImplicitly]
         [OnKeyHeldWithFocus(KeyCode.Delete)]
         private void HandleDeleteHeld(KeyboardInputEvent evt) {
             evt.StopPropagation();
@@ -176,6 +185,7 @@ namespace UIForia.Elements {
             ScrollToCursor();
         }
 
+        [UsedImplicitly]
         [OnKeyDownWithFocus(KeyCode.Delete)]
         private void HandleDelete(KeyboardInputEvent evt) {
             evt.StopPropagation();
@@ -189,6 +199,7 @@ namespace UIForia.Elements {
             ScrollToCursor();
         }
 
+        [UsedImplicitly]
         [OnKeyHeldWithFocus(KeyCode.LeftArrow)]
         private void HandleLeftArrowHeld(KeyboardInputEvent evt) {
             evt.StopPropagation();
@@ -200,6 +211,7 @@ namespace UIForia.Elements {
             ScrollToCursor();
         }
 
+        [UsedImplicitly]
         [OnKeyDownWithFocus(KeyCode.LeftArrow)]
         private void HandleLeftArrowDown(KeyboardInputEvent evt) {
             evt.StopPropagation();
@@ -212,6 +224,7 @@ namespace UIForia.Elements {
             ScrollToCursor();
         }
 
+        [UsedImplicitly]
         [OnKeyHeldWithFocus(KeyCode.RightArrow)]
         private void HandleRightArrowHeld(KeyboardInputEvent evt) {
             evt.StopPropagation();
@@ -225,6 +238,7 @@ namespace UIForia.Elements {
             ScrollToCursor();
         }
 
+        [UsedImplicitly]
         [OnKeyDownWithFocus(KeyCode.RightArrow)]
         private void HandleRightArrow(KeyboardInputEvent evt) {
             evt.StopPropagation();
@@ -238,6 +252,7 @@ namespace UIForia.Elements {
             ScrollToCursor();
         }
 
+        [UsedImplicitly]
         [OnKeyDownWithFocus(KeyCode.C, KeyboardModifiers.Control)]
         private void HandleCopy(KeyboardInputEvent evt) {
             if (evt.onlyControl && selectionRange.HasSelection) {
@@ -246,6 +261,7 @@ namespace UIForia.Elements {
             }
         }
 
+        [UsedImplicitly]
         [OnKeyDownWithFocus(KeyCode.X, KeyboardModifiers.Control)]
         private void HandleCut(KeyboardInputEvent evt) {
             if (GetAttribute("disabled") != null) return;
@@ -257,6 +273,7 @@ namespace UIForia.Elements {
             }
         }
 
+        [UsedImplicitly]
         [OnKeyDownWithFocus(KeyCode.V, KeyboardModifiers.Control)]
         private void HandlePaste(KeyboardInputEvent evt) {
             if (GetAttribute("disabled") != null) return;
@@ -267,6 +284,7 @@ namespace UIForia.Elements {
             }
         }
 
+        [UsedImplicitly]
         [OnKeyDownWithFocus(KeyCode.A, KeyboardModifiers.Control)]
         private void HandleSelectAll(KeyboardInputEvent evt) {
             if (GetAttribute("disabled") != null) return;
@@ -294,6 +312,7 @@ namespace UIForia.Elements {
             return true;
         }
 
+        [UsedImplicitly]
         [OnDragCreate]
         private TextSelectDragEvent CreateDragEvent(MouseInputEvent evt) {
             TextSelectDragEvent retn = new TextSelectDragEvent(this);
@@ -403,22 +422,22 @@ namespace UIForia.Elements {
 
         private class TextSelectDragEvent : DragEvent {
 
-            private readonly InputElement inputElement;
+            private readonly UIInputElement _uiInputElement;
 
-            public TextSelectDragEvent(InputElement origin) : base(origin) {
-                this.inputElement = origin;
-                inputElement.isSelecting = true;
+            public TextSelectDragEvent(UIInputElement origin) : base(origin) {
+                this._uiInputElement = origin;
+                _uiInputElement.isSelecting = true;
             }
 
             public override void Update() {
-                Vector2 mouse = MousePosition - inputElement.layoutResult.screenPosition - inputElement.layoutResult.ContentRect.position;
-                mouse += inputElement.textScroll;
-                inputElement.selectionRange = inputElement.textInfo.SelectToPoint(inputElement.selectionRange, mouse);
+                Vector2 mouse = MousePosition - _uiInputElement.layoutResult.screenPosition - _uiInputElement.layoutResult.ContentRect.position;
+                mouse += _uiInputElement.textScroll;
+                _uiInputElement.selectionRange = _uiInputElement.textInfo.SelectToPoint(_uiInputElement.selectionRange, mouse);
             }
 
             public override void OnComplete() {
-                inputElement.isSelecting = false;
-                inputElement.selectionRange = inputElement.selectionRange.Invert();
+                _uiInputElement.isSelecting = false;
+                _uiInputElement.selectionRange = _uiInputElement.selectionRange.Invert();
             }
 
         }

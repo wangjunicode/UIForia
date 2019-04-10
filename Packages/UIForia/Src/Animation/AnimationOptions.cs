@@ -15,7 +15,7 @@ namespace UIForia.Animation {
         public float? loopTime;
         public int? iterations;
         public float? delay;
-        public float? duration;
+        public int? duration;
         public float? forwardStartDelay;
         public float? reverseStartDelay;
         public AnimationDirection? direction;
@@ -36,7 +36,7 @@ namespace UIForia.Animation {
             this.playbackType = AnimationPlaybackType.KeyFrame;
         }
         
-        public AnimationOptions(float duration, float loopTime = -1) {
+        public AnimationOptions(int duration, float loopTime = -1) {
             this.duration = duration;
             this.loopTime = loopTime;
             this.iterations = 1;
@@ -49,7 +49,7 @@ namespace UIForia.Animation {
             this.playbackType = AnimationPlaybackType.KeyFrame;
         }
 
-        public AnimationOptions(float duration, EasingFunction easing) {
+        public AnimationOptions(int duration, EasingFunction easing) {
             this.duration = duration;
             this.iterations = 1;
             this.loopTime = 0f;

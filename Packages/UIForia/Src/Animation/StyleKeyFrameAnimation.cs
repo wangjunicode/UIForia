@@ -181,78 +181,129 @@ namespace UIForia.Animation {
                 float t = Mathf.Clamp01(Easing.Interpolate(MathUtil.PercentOfRange(progress, prev.time, next.time), options.timingFunction.Value));
 
                 switch (propertyId) {
-//                    case StylePropertyId.TransformPivotX:
-//                    case StylePropertyId.TransformPositionX:
-//                    case StylePropertyId.PaddingLeft:
-//                    case StylePropertyId.PaddingRight:
-//                    case StylePropertyId.BorderLeft:
-//                    case StylePropertyId.BorderRight:
-//                    case StylePropertyId.MarginLeft:
-//                    case StylePropertyId.MarginRight: {
-//                        if (prev.value.IsCalculated) {
-//                            UIFixedLength length0 = prev.value.Evaluate<UIFixedLength>(ctx);
-//                        }
-//                        else {
-//                            float v0 = ResolveFixedWidth(target, viewport, prev.value.styleProperty.AsUIFixedLength);
-//                            float v1 = ResolveFixedWidth(target, viewport, next.value.styleProperty.AsUIFixedLength);
-//                            target.style.SetAnimatedProperty(new StyleProperty(propertyId, new UIFixedLength(Mathf.Lerp(v0, v1, t))));
-//                        }
-//
-//                        break;
-//                    }
-//
-//                    case StylePropertyId.TransformPivotY:
-//                    case StylePropertyId.TransformPositionY:
-//                    case StylePropertyId.PaddingTop:
-//                    case StylePropertyId.PaddingBottom:
-//                    case StylePropertyId.BorderTop:
-//                    case StylePropertyId.BorderBottom:
-//                    case StylePropertyId.MarginTop:
-//                    case StylePropertyId.MarginBottom: {
-//                        float v0 = ResolveFixedHeight(target, viewport, prev.value.AsUIFixedLength);
-//                        float v1 = ResolveFixedHeight(target, viewport, next.value.AsUIFixedLength);
-//                        target.style.SetAnimatedProperty(new StyleProperty(propertyId, new UIFixedLength(Mathf.Lerp(v0, v1, t))));
-//                        break;
-//                    }
-//
-//                    case StylePropertyId.PreferredWidth:
-//                    case StylePropertyId.MinWidth:
-//                    case StylePropertyId.MaxWidth: {
-//                        float v0 = ResolveWidthMeasurement(target, viewport, prev.value.AsUIMeasurement);
-//                        float v1 = ResolveWidthMeasurement(target, viewport, next.value.AsUIMeasurement);
-//                        target.style.SetAnimatedProperty(new StyleProperty(propertyId, new UIMeasurement(Mathf.Lerp(v0, v1, t))));
-//                        break;
-//                    }
-//
-//                    case StylePropertyId.PreferredHeight:
-//                    case StylePropertyId.MinHeight:
-//                    case StylePropertyId.MaxHeight: {
-//                        float v0 = ResolveHeightMeasurement(target, viewport, prev.value.AsUIMeasurement);
-//                        float v1 = ResolveHeightMeasurement(target, viewport, next.value.AsUIMeasurement);
-//                        target.style.SetAnimatedProperty(new StyleProperty(propertyId, new UIMeasurement(Mathf.Lerp(v0, v1, t))));
-//                        break;
-//                    }
-//
-//                    case StylePropertyId.Opacity:
-//                    case StylePropertyId.TransformScaleX:
-//                    case StylePropertyId.TransformScaleY:
-//                    case StylePropertyId.TransformRotation:
-//                    case StylePropertyId.GridLayoutColGap:
-//                    case StylePropertyId.GridLayoutRowGap: {
-//                        float v0 = prev.value.AsFloat;
-//                        float v1 = next.value.AsFloat;
-//                        target.style.SetAnimatedProperty(new StyleProperty(propertyId, Mathf.Lerp(v0, v1, t)));
-//                        break;
-//                    }
-//
-//                    case StylePropertyId.BorderColor:
-//                    case StylePropertyId.BackgroundColor:
-//                    case StylePropertyId.TextColor: {
-//                        Color c0 = prev.value.AsColor;
-//                        Color c1 = next.value.AsColor;
-//                        target.style.SetAnimatedProperty(new StyleProperty(propertyId, Color.Lerp(c0, c1, t)));
-//                        break;
-//                    }
+                    case StylePropertyId.TransformPivotX:
+                    case StylePropertyId.TransformPositionX:
+                    case StylePropertyId.PaddingLeft:
+                    case StylePropertyId.PaddingRight:
+                    case StylePropertyId.BorderLeft:
+                    case StylePropertyId.BorderRight:
+                    case StylePropertyId.MarginLeft:
+                    case StylePropertyId.MarginRight: {
+
+                        float v0 = ResolveFixedWidth(target, viewport, prev.value.IsCalculated
+                            ? prev.value.Evaluate<UIFixedLength>(null)
+                            : prev.value.styleProperty.AsUIFixedLength
+                        );
+
+                        float v1 = ResolveFixedWidth(target, viewport, next.value.IsCalculated
+                            ? next.value.Evaluate<UIFixedLength>(null)
+                            : next.value.styleProperty.AsUIFixedLength
+                        );
+                        target.style.SetAnimatedProperty(new StyleProperty(propertyId, new UIFixedLength(Mathf.Lerp(v0, v1, t))));
+                        break;
+                    }
+
+                    case StylePropertyId.TransformPivotY:
+                    case StylePropertyId.TransformPositionY:
+                    case StylePropertyId.PaddingTop:
+                    case StylePropertyId.PaddingBottom:
+                    case StylePropertyId.BorderTop:
+                    case StylePropertyId.BorderBottom:
+                    case StylePropertyId.MarginTop:
+                    case StylePropertyId.MarginBottom: {
+                        float v0 = ResolveFixedHeight(target, viewport, prev.value.IsCalculated
+                            ? prev.value.Evaluate<UIFixedLength>(null)
+                            : prev.value.styleProperty.AsUIFixedLength
+                        );
+
+                        float v1 = ResolveFixedHeight(target, viewport, next.value.IsCalculated
+                            ? next.value.Evaluate<UIFixedLength>(null)
+                            : next.value.styleProperty.AsUIFixedLength
+                        );
+                        target.style.SetAnimatedProperty(new StyleProperty(propertyId, new UIFixedLength(Mathf.Lerp(v0, v1, t))));
+                        break;
+                    }
+
+                    case StylePropertyId.PreferredWidth:
+                    case StylePropertyId.MinWidth:
+                    case StylePropertyId.MaxWidth: {
+
+                        float v0 = ResolveWidthMeasurement(target, viewport, prev.value.IsCalculated
+                            ? prev.value.Evaluate<UIMeasurement>(null)
+                            : prev.value.styleProperty.AsUIMeasurement
+                        );
+
+                        float v1 = ResolveWidthMeasurement(target, viewport, next.value.IsCalculated
+                            ? next.value.Evaluate<UIMeasurement>(null)
+                            : next.value.styleProperty.AsUIMeasurement
+                        );
+
+                        target.style.SetAnimatedProperty(new StyleProperty(propertyId, new UIMeasurement(Mathf.Lerp(v0, v1, t))));
+                        break;
+                    }
+
+                    case StylePropertyId.PreferredHeight:
+                    case StylePropertyId.MinHeight:
+                    case StylePropertyId.MaxHeight: {
+                        float v0 = ResolveHeightMeasurement(target, viewport, prev.value.IsCalculated
+                            ? prev.value.Evaluate<UIMeasurement>(null)
+                            : prev.value.styleProperty.AsUIMeasurement
+                        );
+
+                        float v1 = ResolveHeightMeasurement(target, viewport, next.value.IsCalculated
+                            ? next.value.Evaluate<UIMeasurement>(null)
+                            : next.value.styleProperty.AsUIMeasurement
+                        );
+
+                        target.style.SetAnimatedProperty(new StyleProperty(propertyId, new UIMeasurement(Mathf.Lerp(v0, v1, t))));
+                        break;
+                    }
+
+                    case StylePropertyId.Opacity:
+                    case StylePropertyId.TransformScaleX:
+                    case StylePropertyId.TransformScaleY:
+                    case StylePropertyId.TransformRotation:
+                    case StylePropertyId.GridLayoutColGap:
+                    case StylePropertyId.GridLayoutRowGap: {
+
+                        float v0 = prev.value.IsCalculated
+                            ? prev.value.Evaluate<float>(null)
+                            : prev.value.styleProperty.AsFloat;
+
+                        float v1 = next.value.IsCalculated
+                            ? next.value.Evaluate<float>(null)
+                            : next.value.styleProperty.AsFloat;
+
+                        target.style.SetAnimatedProperty(new StyleProperty(propertyId, Mathf.Lerp(v0, v1, t)));
+                        break;
+                    }
+
+                    case StylePropertyId.BorderColor:
+                    case StylePropertyId.BackgroundColor:
+                    case StylePropertyId.TextColor: {
+
+                        float v0 = ResolveHeightMeasurement(target, viewport, prev.value.IsCalculated
+                            ? prev.value.Evaluate<UIMeasurement>(null)
+                            : prev.value.styleProperty.AsUIMeasurement
+                        );
+
+                        float v1 = ResolveHeightMeasurement(target, viewport, next.value.IsCalculated
+                            ? next.value.Evaluate<UIMeasurement>(null)
+                            : next.value.styleProperty.AsUIMeasurement
+                        );
+
+                        target.style.SetAnimatedProperty(new StyleProperty(propertyId, new UIMeasurement(Mathf.Lerp(v0, v1, t))));
+
+                        Color c0 = prev.value.IsCalculated
+                            ? prev.value.Evaluate<Color>(null)
+                            : prev.value.styleProperty.AsColor;
+
+                        Color c1 = next.value.IsCalculated
+                            ? next.value.Evaluate<Color>(null)
+                            : next.value.styleProperty.AsColor;
+                        target.style.SetAnimatedProperty(new StyleProperty(propertyId, Color.Lerp(c0, c1, t)));
+                        break;
+                    }
 
                     default:
                         if (StyleUtil.CanAnimate(propertyId)) {

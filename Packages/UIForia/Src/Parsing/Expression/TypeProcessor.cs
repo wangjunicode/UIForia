@@ -79,7 +79,7 @@ namespace UIForia.Parsing.Expression {
 
                     }
                 }
-                catch (ReflectionTypeLoadException e) {
+                catch (ReflectionTypeLoadException) {
                     Debug.Log($"{assembly.FullName}");
                     throw;
                 }

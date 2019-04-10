@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Shapes2D;
 using SVGX;
 using TMPro;
 using UIForia.Compilers.Style;
@@ -390,31 +389,6 @@ namespace UIForia.Editor {
                     ctx.Rect(x - margin.left, y + height, width + margin.Horizontal, margin.bottom);
                     ctx.Fill();
                 }
-
-
-                LayoutBox box = selectedElement.Application.LayoutSystem.GetBoxForElement(selectedElement);
-
-                ctx.BeginPath();
-
-                switch (selectedElement.style.AnchorTarget) {
-                    case AnchorTarget.Unset:
-                        break;
-                    case AnchorTarget.Parent:
-                        ctx.SetStroke(Color.red);
-                        ctx.CircleFromCenter(box.AnchorLeft, 200, 5f);
-                        ctx.CircleFromCenter(box.AnchorRight, 200, 5f);
-                        break;
-                    case AnchorTarget.ParentContentArea:
-                        break;
-                    case AnchorTarget.Viewport:
-                        break;
-                    case AnchorTarget.Screen:
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-                
-                ctx.Stroke();
                 
                 if (selectedElement.style.LayoutType != LayoutType.Grid) {
                     return;

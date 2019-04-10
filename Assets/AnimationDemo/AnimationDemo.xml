@@ -6,14 +6,16 @@
     <Contents style="container">
 
         <Div style="one-container">
-            <Div style="circle circle-blue"/>
             
-            <Div style="orbit-container">
-                <Div style="circle orbit"/>
-                <Div style="circle orbit"/>
-                <Div style="circle orbit"/>
-                <Div style="circle orbit"/>
-                <Div style="circle orbit"/>
+            <Div x-id="one_blue" style="circle circle-blue"/>
+            
+            <Div x-id="one_blueOrbit" style="orbit-container">
+                <Div style="circle orbit orbit-0"/>
+                <Div style="circle orbit orbit-1"/>
+                <Div style="circle orbit orbit-2"/>
+                <Div style="circle orbit orbit-3"/>
+                <Div style="circle orbit orbit-4"/>
+                <Div style="circle orbit orbit-5"/>
             </Div>
             
         </Div>

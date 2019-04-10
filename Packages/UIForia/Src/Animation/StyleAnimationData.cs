@@ -7,7 +7,7 @@ namespace UIForia.Animation {
 
         public IList<AnimationKeyFrame2> frames;
 
-        public StyleAnimationData(AnimationOptions options, IList<AnimationKeyFrame2> frames, IList<AnimationTrigger> triggers = null) {
+        public StyleAnimationData(AnimationOptions options, IList<AnimationKeyFrame2> frames, IList<AnimationTrigger> triggers = null) : base(options) {
             this.frames = frames;
         }
 

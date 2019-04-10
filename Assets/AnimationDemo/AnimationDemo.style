@@ -38,3 +38,42 @@ style two-container {
     FlexLayoutMainAxisAlignment = Center;
     FlexLayoutCrossAxisAlignment = Center;
 }
+
+style orbit-container {
+    LayoutType = Radial;
+    LayoutBehavior = Ignored;
+    PreferredSize = 48px;
+    RadialLayoutEndAngle = 130;
+    RadialLayoutRadius = 28;
+    TransformRotation = 45;
+    BackgroundColor = red;
+    TransformPivot = 0.5 0.5;
+}
+
+style orbit {
+    BackgroundColor = #00BCD4;
+}
+
+style orbit-0 {
+    PreferredSize = 0.28pca;
+}
+
+style orbit-1 {
+    PreferredSize = 0.25pca;
+}
+
+style orbit-2 {
+    PreferredSize = 0.22pca;
+}
+
+style orbit-3 {
+    PreferredSize = 0.19pca;
+}
+ 
+style orbit-4 {
+    PreferredSize = 0.16pca;
+}
+
+style orbit-5 {
+    PreferredSize = 0.13pca;
+}

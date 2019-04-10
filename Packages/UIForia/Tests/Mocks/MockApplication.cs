@@ -40,7 +40,9 @@ namespace Tests.Mocks {
 
         public void OnReset() { }
 
-        public void OnUpdate() { }
+        public void OnUpdate() {
+            DrawDebugOverlay?.Invoke(null);
+        }
 
         public void OnDestroy() { }
 

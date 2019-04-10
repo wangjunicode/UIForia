@@ -74,6 +74,11 @@ namespace UIForia.Editor {
             new PropertyGenerator<GridAxisAlignment>(StylePropertyId.GridLayoutColAlignment, GridAxisAlignment.Grow),
             new PropertyGenerator<GridAxisAlignment>(StylePropertyId.GridLayoutRowAlignment, GridAxisAlignment.Grow),
 
+            // Radial Layout
+            new AnimatedPropertyGenerator<float>(StylePropertyId.RadialLayoutStartAngle, 0f),
+            new AnimatedPropertyGenerator<float>(StylePropertyId.RadialLayoutEndAngle, 360f),
+            new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.RadialLayoutRadius, new UIFixedLength(0.5f, UIFixedUnit.Percent)),
+
             // Size
             new AnimatedPropertyGenerator<UIMeasurement>(StylePropertyId.MinWidth, new UIMeasurement(0)),
             new AnimatedPropertyGenerator<UIMeasurement>(StylePropertyId.MaxWidth, new UIMeasurement(float.MaxValue)),

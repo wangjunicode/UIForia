@@ -223,7 +223,7 @@ namespace UIForia.Compilers {
 
                     return writeBinding;
                 }
-                catch (Exception ex) {
+                catch (Exception) {
                     // todo improve error message
                     UnityEngine.Debug.Log("Unable to create a write binding for expression: " + attrKey + ".write='" + attrValue + "'. Ensure that the expression is a valid property path");
                     throw;
@@ -244,7 +244,7 @@ namespace UIForia.Compilers {
 
                     return writeBinding;
                 }
-                catch (Exception ex) {
+                catch (Exception) {
                     // todo improve error message
                     UnityEngine.Debug.Log("Unable to create a write binding for expression: " + attrKey + ".write='" + attrValue + "'. Ensure that the expression is a valid property path");
                     throw;
@@ -288,8 +288,6 @@ namespace UIForia.Compilers {
                 UnityEngine.Debug.Log($"Error compiling binding: {attrKey}={attrValue}, Type {propertyInfo.PropertyType} is not assignable from {expression.YieldedType}");
                 return null;
             }
-
-            Dictionary<string, LightList<object>> actionMap = GetActionMap(elementType);
 
             // todo -- with callbacks
 
@@ -423,7 +421,6 @@ namespace UIForia.Compilers {
                         argTypes,
                         ReflectionUtil.ObjectArray2
                     );
-                    ;
                 case 3:
                     return (Binding) ReflectionUtil.CreateGenericInstanceFromOpenType(
                         typeof(CallbackBinding<,,>),

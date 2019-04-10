@@ -47,7 +47,7 @@ namespace UIForia.Util {
         private static readonly List<DelegateEntry> staticDelegates = new List<DelegateEntry>();
         private static readonly List<DelegateEntry> openDelegates = new List<DelegateEntry>();
 
-        private static Dictionary<Type, List<LinqAccessor>> linqDelegates = new Dictionary<Type, List<LinqAccessor>>();
+        private static readonly Dictionary<Type, List<LinqAccessor>> linqDelegates = new Dictionary<Type, List<LinqAccessor>>();
 
         public static readonly object[] ObjectArray0 = new object[0];
         public static readonly object[] ObjectArray1 = new object[1];
@@ -659,6 +659,8 @@ namespace UIForia.Util {
                 if (propertyInfo == null || !propertyInfo.CanWrite) {
                     return null;
                 }
+
+                return null;
             }
 
             if (fieldInfo.IsInitOnly) {
@@ -676,7 +678,7 @@ namespace UIForia.Util {
                     paramExpression1
                 ).Compile();
             }
-            catch (ArgumentException e) {
+            catch (ArgumentException) {
                 Debug.Log($"baseType: {baseType}, fieldType: {fieldType}, fieldName: {fieldName}");
                 throw;
             }
@@ -762,7 +764,7 @@ namespace UIForia.Util {
                     paramExpression1
                 ).Compile();
             }
-            catch (Exception ex) {
+            catch (Exception) {
                 return null;
             }
         }

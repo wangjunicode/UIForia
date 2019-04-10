@@ -69,7 +69,7 @@ namespace UIForia.Bindings {
 
             if (previousReference != null) {
                 previousReference.onItemInserted -= OnItemInserted;
-                previousReference.onItemMoved -= OnItemMoved;
+               // previousReference.onItemMoved -= OnItemMoved;
                 previousReference.onItemRemoved -= OnItemRemoved;
                 previousReference.onClear -= OnClear;
                 element.View.Application.DestroyChildren(element);
@@ -78,7 +78,7 @@ namespace UIForia.Bindings {
             previousReference = list;
 
             list.onItemInserted += OnItemInserted;
-            list.onItemMoved += OnItemMoved;
+          //  list.onItemMoved += OnItemMoved;
             list.onItemRemoved += OnItemRemoved;
             list.onClear += OnClear;
 

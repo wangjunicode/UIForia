@@ -30,7 +30,8 @@ namespace UIForia.Layout {
         
         public Size scrollbarHorizontalSize;
         public Size scrollbarVerticalSize;
-        
+        public float totalRotation;
+
         public Rect ScreenRect => new Rect(screenPosition, new Vector2(actualSize.width, actualSize.height));
         public Rect AllocatedRect => new Rect(screenPosition, new Vector2(allocatedSize.width, allocatedSize.height));
         

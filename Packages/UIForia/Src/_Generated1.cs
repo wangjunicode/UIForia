@@ -278,6 +278,27 @@ namespace UIForia.Rendering {
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.GridLayoutRowAlignment, (int)value), state); }
         }
         
+        public float RadialLayoutStartAngle {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.RadialLayoutStartAngle, state).AsFloat; }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.RadialLayoutStartAngle, value), state); }
+        }
+        
+        public float RadialLayoutEndAngle {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.RadialLayoutEndAngle, state).AsFloat; }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.RadialLayoutEndAngle, value), state); }
+        }
+        
+        public UIForia.UIFixedLength RadialLayoutRadius {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.RadialLayoutRadius, state).AsUIFixedLength; }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.RadialLayoutRadius, value), state); }
+        }
+        
         public UIForia.Rendering.UIMeasurement MinWidth {
             [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.MinWidth, state).AsUIMeasurement; }
@@ -814,6 +835,9 @@ namespace UIForia.Rendering {
                     case StylePropertyId.GridLayoutRowGap: return !FloatUtil.IsDefined(floatValue);
                     case StylePropertyId.GridLayoutColAlignment: return valuePart0 == 0 || IntUtil.UnsetValue == valuePart0;
                     case StylePropertyId.GridLayoutRowAlignment: return valuePart0 == 0 || IntUtil.UnsetValue == valuePart0;
+                    case StylePropertyId.RadialLayoutStartAngle: return !FloatUtil.IsDefined(floatValue);
+                    case StylePropertyId.RadialLayoutEndAngle: return !FloatUtil.IsDefined(floatValue);
+                    case StylePropertyId.RadialLayoutRadius: return !FloatUtil.IsDefined(floatValue) || valuePart1 == 0;
                     case StylePropertyId.MinWidth: return !FloatUtil.IsDefined(floatValue) || valuePart1 == 0;
                     case StylePropertyId.MaxWidth: return !FloatUtil.IsDefined(floatValue) || valuePart1 == 0;
                     case StylePropertyId.PreferredWidth: return !FloatUtil.IsDefined(floatValue) || valuePart1 == 0;
@@ -1166,6 +1190,27 @@ namespace UIForia.Rendering {
             get { return (UIForia.Layout.GridAxisAlignment)FindEnumProperty(StylePropertyId.GridLayoutRowAlignment); }
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.GridLayoutRowAlignment, (int)value)); }
+        }
+            
+        public float RadialLayoutStartAngle {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return FindFloatProperty(StylePropertyId.RadialLayoutStartAngle); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.RadialLayoutStartAngle, value)); }
+        }
+            
+        public float RadialLayoutEndAngle {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return FindFloatProperty(StylePropertyId.RadialLayoutEndAngle); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.RadialLayoutEndAngle, value)); }
+        }
+            
+        public UIForia.UIFixedLength RadialLayoutRadius {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return FindUIFixedLengthProperty(StylePropertyId.RadialLayoutRadius); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.RadialLayoutRadius, value)); }
         }
             
         public UIForia.Rendering.UIMeasurement MinWidth {
@@ -2013,6 +2058,33 @@ namespace UIForia.Rendering {
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.GridLayoutRowAlignment, out property)) return property.AsGridAxisAlignment;
                     return DefaultStyleValues_Generated.GridLayoutRowAlignment;
+                }
+            }
+
+            public float RadialLayoutStartAngle { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.RadialLayoutStartAngle, out property)) return property.AsFloat;
+                    return DefaultStyleValues_Generated.RadialLayoutStartAngle;
+                }
+            }
+
+            public float RadialLayoutEndAngle { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.RadialLayoutEndAngle, out property)) return property.AsFloat;
+                    return DefaultStyleValues_Generated.RadialLayoutEndAngle;
+                }
+            }
+
+            public UIForia.UIFixedLength RadialLayoutRadius { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.RadialLayoutRadius, out property)) return property.AsUIFixedLength;
+                    return DefaultStyleValues_Generated.RadialLayoutRadius;
                 }
             }
 
@@ -2978,6 +3050,30 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.GridLayoutRowAlignment, state).AsGridAxisAlignment;
         }
         
+        public void SetRadialLayoutStartAngle(float value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.RadialLayoutStartAngle, value), state);
+        }
+
+        public float GetRadialLayoutStartAngle(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.RadialLayoutStartAngle, state).AsFloat;
+        }
+        
+        public void SetRadialLayoutEndAngle(float value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.RadialLayoutEndAngle, value), state);
+        }
+
+        public float GetRadialLayoutEndAngle(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.RadialLayoutEndAngle, state).AsFloat;
+        }
+        
+        public void SetRadialLayoutRadius(UIForia.UIFixedLength value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.RadialLayoutRadius, value), state);
+        }
+
+        public UIForia.UIFixedLength GetRadialLayoutRadius(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.RadialLayoutRadius, state).AsUIFixedLength;
+        }
+        
         public void SetMinWidth(UIForia.Rendering.UIMeasurement value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.MinWidth, value), state);
         }
@@ -3619,6 +3715,12 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.GridLayoutColAlignment, (int)GridLayoutColAlignment);
 				case StylePropertyId.GridLayoutRowAlignment:
 					 return new StyleProperty(StylePropertyId.GridLayoutRowAlignment, (int)GridLayoutRowAlignment);
+				case StylePropertyId.RadialLayoutStartAngle:
+					 return new StyleProperty(StylePropertyId.RadialLayoutStartAngle, RadialLayoutStartAngle);
+				case StylePropertyId.RadialLayoutEndAngle:
+					 return new StyleProperty(StylePropertyId.RadialLayoutEndAngle, RadialLayoutEndAngle);
+				case StylePropertyId.RadialLayoutRadius:
+					 return new StyleProperty(StylePropertyId.RadialLayoutRadius, RadialLayoutRadius);
 				case StylePropertyId.MinWidth:
 					 return new StyleProperty(StylePropertyId.MinWidth, MinWidth);
 				case StylePropertyId.MaxWidth:
@@ -3784,6 +3886,9 @@ namespace UIForia.Rendering {
                     case StylePropertyId.FlexItemShrink: return true;
                     case StylePropertyId.GridLayoutColGap: return true;
                     case StylePropertyId.GridLayoutRowGap: return true;
+                    case StylePropertyId.RadialLayoutStartAngle: return true;
+                    case StylePropertyId.RadialLayoutEndAngle: return true;
+                    case StylePropertyId.RadialLayoutRadius: return true;
                     case StylePropertyId.MinWidth: return true;
                     case StylePropertyId.MaxWidth: return true;
                     case StylePropertyId.PreferredWidth: return true;

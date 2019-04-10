@@ -15,6 +15,10 @@ namespace UIForia.Animation {
         public Action<AnimationState2> onCompleted;
         public Action<AnimationState2> onTick;
 
+        protected AnimationData(AnimationOptions options) {
+            this.options = options;
+        }
+        
         public void SetVariable(string variableName, Type type, object value) {
             
         }

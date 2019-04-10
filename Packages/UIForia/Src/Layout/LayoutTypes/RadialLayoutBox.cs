@@ -5,79 +5,75 @@ using UnityEngine;
 
 namespace UIForia.Layout.LayoutTypes {
 
+    public enum RadialItemRotation {
+
+        None,
+        Natural,
+        Vertical
+
+    }
+
+    public enum RadialSpacing {
+
+        Uniform,
+        Width,
+        Height,
+        DiagonalBoxSize
+
+    }
+
+    public enum RadialOffset {
+
+        Left,
+        Right,
+        Center
+
+    }
+
     public class RadialLayoutBox : LayoutBox {
 
-        public enum RadialItemRotation {
-
-            None,
-            Natural,
-            Vertical
-
-        }
-
-        public enum RadialSpacing {
-
-            Uniform,
-            Width,
-            Height,
-            BoxSize
-
-        }
-
-        public enum RadialOffset {
-
-            Left,
-            Right,
-            Center
-
-        }
+        private List<float> widths;
+        private List<float> heights;
 
         public RadialLayoutBox(UIElement element) : base(element) { }
 
+        protected override float ComputeContentWidth() {
+            return base.ComputeContentWidth(); // todo 
+        }
+
+        protected override float ComputeContentHeight(float width) {
+            return base.ComputeContentHeight(width); // todo 
+        }
+
         public override void RunLayout() {
-            List<float> widths = new List<float>();
-            List<float> heights = new List<float>();
+
+            float dist = ResolveFixedWidth(style.RadialLayoutRadius);
+
+            float startAngle = style.RadialLayoutStartAngle;
+            float maxAngle = style.RadialLayoutEndAngle;
+
+            // todo support radial offsets
+            // todo handle edge cases
+
+            float step = ((maxAngle - startAngle)) / (children.Count - 1);
+            Vector2 center = new Vector2(allocatedWidth * 0.5f, allocatedHeight * 0.5f);
 
             for (int i = 0; i < children.Count; i++) {
-                widths.Add(children[i].GetWidths().clampedSize);
-                heights.Add(children[i].GetHeights(widths[i]).clampedSize);
+
+                float width = children[i].GetWidths().clampedSize;
+                float height = children[i].GetHeights(width).clampedSize;
+
+                float x = dist * Mathf.Cos(startAngle * Mathf.Deg2Rad);
+                float y = dist * Mathf.Sin(startAngle * Mathf.Deg2Rad);
+
+                Vector2 vPos = new Vector2(center.x + x, center.y + y);
+
+                children[i].SetAllocatedRect(vPos.x - (width * 0.5f), vPos.y - (height * 0.5f), width, height);
+                startAngle += step;
             }
 
-            float offsetAngle = 0f;
-
-            RadialOffset horizontalOffset = RadialOffset.Center;
-            RadialOffset verticalOffset = RadialOffset.Center;
-
-            for (int i = 0; i < children.Count; i++) {
-                Vector3 vPos = new Vector3(Mathf.Cos(offsetAngle * Mathf.Deg2Rad), Mathf.Sin(offsetAngle * Mathf.Deg2Rad), 0) * 100f;
-
-                switch (horizontalOffset) {
-                    case RadialOffset.Left:
-                        break;
-                    case RadialOffset.Right:
-                        break;
-                    case RadialOffset.Center:
-                        //vPos.x += (widths[i] * 0.5f);
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-
-                switch (verticalOffset) {
-                    case RadialOffset.Left:
-                        break;
-                    case RadialOffset.Right:
-                        break;
-                    case RadialOffset.Center:
-                        vPos.y -= (heights[i] * 0.5f);
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-
-                children[i].SetAllocatedRect(vPos.x, vPos.y, widths[i], heights[i]);
-                offsetAngle += 24f;
-            }
+            actualWidth = allocatedWidth;
+            actualHeight = allocatedHeight;
         }
 
     }

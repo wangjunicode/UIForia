@@ -217,6 +217,7 @@ namespace UIForia.Systems {
                     layoutResult.scale = new Vector2(box.style.TransformScaleX, box.style.TransformScaleY); // only set if changed
                     layoutResult.rotation = parentBox.style.TransformRotation + box.style.TransformRotation; // only set if changed
                     layoutResult.pivot = box.Pivot; // only set if changed
+                    layoutResult.totalRotation = parentBox.element.layoutResult.totalRotation + layoutResult.rotation;
                     
                     layoutResult.borderRadius = new ResolvedBorderRadius(
                         box.BorderRadiusTopLeft,

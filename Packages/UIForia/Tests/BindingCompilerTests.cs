@@ -9,6 +9,8 @@ using UIForia.Expressions;
 using UIForia.Parsing.Expression;
 using static Tests.TestUtils;
 
+#pragma warning disable 0649
+
 [TestFixture]
 public class BindingCompilerTests {
 

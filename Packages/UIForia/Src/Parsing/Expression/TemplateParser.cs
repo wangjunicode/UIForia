@@ -14,14 +14,6 @@ namespace UIForia.Parsing.Expression {
     public class TemplateParser {
 
         private readonly Dictionary<Type, ParsedTemplate> parsedTemplates = new Dictionary<Type, ParsedTemplate>();
-
-        private static readonly string[] RepeatAttributes = {"if", "style", "x-id", "list", "as", "filter", "onItemAdded", "onItemRemoved"};
-        private static readonly string[] CaseAttributes = {"when"};
-        private static readonly string[] SwitchAttributes = {"if", "value"};
-        private static readonly string[] DefaultAttributes = { };
-        private static readonly string[] ChildrenAttributes = {"style"};
-        private static readonly string[] TextAttributes = { };
-
         public readonly Application app;
         
         public TemplateParser(Application app) {
@@ -42,7 +34,7 @@ namespace UIForia.Parsing.Expression {
                 parsedTemplates[elementType] = parsedTemplate;
                 return parsedTemplate;
             }
-            catch (Exception e) {
+            catch (Exception) {
                 // todo -- make this a better error message
                 Debug.Log($"Cannot parse file {elementType}, you might be missing a template attribute");
                 throw;
@@ -210,33 +202,8 @@ namespace UIForia.Parsing.Expression {
             return value;
         }
 
-        private UITemplate ParseCaseElement(XElement element) {
-            EnsureAttribute(element, "when");
-            EnsureOnlyAttributes(element, CaseAttributes);
-
-            UISwitchCaseTemplate template = new UISwitchCaseTemplate(
-                app,
-                ParseNodes(element.Nodes()),
-                ParseAttributes(element.Attributes())
-            );
-
-            return template;
-        }
-
-        private UITemplate ParseDefaultElement(XElement element) {
-            EnsureOnlyAttributes(element, DefaultAttributes);
-
-            UISwitchDefaultTemplate template = new UISwitchDefaultTemplate(
-                app,
-                ParseNodes(element.Nodes()),
-                ParseAttributes(element.Attributes())
-            );
-            return template;
-        }
-
         private UITemplate ParseRepeatElement(XElement element) {
             EnsureAttribute(element, "list");
-//            EnsureOnlyAttributes(element, RepeatAttributes);
 
             UIRepeatTemplate template = new UIRepeatTemplate(
                 app,
@@ -286,40 +253,6 @@ namespace UIForia.Parsing.Expression {
             EnsureEmpty(element);
             EnsureNotInsideTagName(element, "Repeat");
             return new UIChildrenTemplate(app, null, ParseAttributes(element.Attributes()));
-        }
-
-        private UITemplate ParseSwitchElement(XElement element) {
-            EnsureAttribute(element, "value");
-            EnsureOnlyAttributes(element, SwitchAttributes);
-
-            // can only contain <Case> and <Default>
-            UISwitchTemplate template = new UISwitchTemplate(
-                app,
-                ParseNodes(element.Nodes()),
-                ParseAttributes(element.Attributes())
-            );
-
-            if (template.childTemplates.Count == 0) {
-                throw Abort("<Switch> cannot be empty");
-            }
-
-            bool hasDefault = false;
-            for (int i = 0; i < template.childTemplates.Count; i++) {
-                Type templateType = template.childTemplates[i].GetType();
-                if (templateType == typeof(UISwitchDefaultTemplate)) {
-                    if (hasDefault) {
-                        throw Abort("<Switch> can only contain one <Default> element");
-                    }
-
-                    hasDefault = true;
-                }
-
-                if (templateType != typeof(UISwitchDefaultTemplate) && templateType != typeof(UISwitchCaseTemplate)) {
-                    throw Abort("<Switch> can only contain <Case> and <Default> elements");
-                }
-            }
-
-            return template;
         }
 
         private UITextTemplate ParseTextNode(XText node) {
@@ -393,7 +326,7 @@ namespace UIForia.Parsing.Expression {
         private UITemplate ParseInputElement(XElement element) {
             return new UIElementTemplate(
                 app,
-                typeof(UIInputFieldElement),
+                typeof(UIInputElement),
                 ParseNodes(element.Nodes()),
                 ParseAttributes(element.Attributes())
             );
@@ -422,18 +355,6 @@ namespace UIForia.Parsing.Expression {
 
             if (element.Name == "SlotContent") {
                 return ParseSlotContentElement(element);
-            }
-
-            if (element.Name == "Switch") {
-                return ParseSwitchElement(element);
-            }
-
-            if (element.Name == "Default") {
-                return ParseDefaultElement(element);
-            }
-
-            if (element.Name == "Case") {
-                return ParseCaseElement(element);
             }
 
             if (element.Name == "Input") {
@@ -521,21 +442,6 @@ namespace UIForia.Parsing.Expression {
             if (element.GetAttribute(attrName) == null) {
                 throw new InvalidTemplateException(
                     $"<{element.Name.LocalName}> is missing required attribute '{attrName}'");
-            }
-        }
-
-        private void EnsureMissingAttribute(XElement element, string attrName) {
-            if (element.GetAttribute(attrName) != null) {
-                throw new InvalidTemplateException(
-                    $"<{element.Name.LocalName}> is not allowed to have attribute '{attrName}'");
-            }
-        }
-
-        private void EnsureOnlyAttributes(XElement element, string[] attrs) {
-            foreach (XAttribute attr in element.Attributes()) {
-                if (!attrs.Contains(attr.Name.LocalName)) {
-                    throw Abort($"<{element.Name.LocalName}> cannot have attribute: '{attr.Name.LocalName}");
-                }
             }
         }
 

@@ -3,6 +3,8 @@ using System.Threading.Tasks;
 using NUnit.Framework;
 using UIForia.DataSource;
 
+#pragma warning disable 1998,0649
+
 [TestFixture]
 public class DataSourceTests {
 

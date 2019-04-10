@@ -43,10 +43,10 @@ namespace UIForia.Parsing.Expression {
             try {
                 return File.ReadAllText(path);
             }
-            catch (FileNotFoundException e) {
-                throw e;
+            catch (FileNotFoundException) {
+                throw;
             }
-            catch (Exception e) {
+            catch (Exception) {
                 return null;
             }
         }
@@ -58,18 +58,6 @@ namespace UIForia.Parsing.Expression {
         // path from Assets directory
         public string GetTemplatePath() {
             return !HasTemplatePath() ? rawType.AssemblyQualifiedName : templateAttr.template;
-        }
-
-        public string GetTemplateName() {
-            if (templateAttr == null) {
-                return "Null";
-            }
-
-            if (templateAttr.templateType == TemplateType.File) {
-                return Path.GetFileName(templateAttr.template);
-            }
-
-            return "InlineTemplate: " + rawType.Name;
         }
 
     }

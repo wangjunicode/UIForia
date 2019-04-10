@@ -57,7 +57,7 @@ namespace UIForia.Animation {
 
         private static AnimationOptions EnsureDefaultOptionValues(AnimationData data) {
             AnimationOptions options = new AnimationOptions();
-            options.duration = data.options.duration ?? 1f;
+            options.duration = data.options.duration ?? 1000;
             options.iterations = data.options.iterations ?? 1;
             options.timingFunction = data.options.timingFunction ?? EasingFunction.Linear;
             options.delay = data.options.delay ?? 0f;

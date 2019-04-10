@@ -400,7 +400,7 @@ namespace UIForia.Systems {
                 case LayoutBehavior.Normal:
                     switch (transformBehaviorX) {
                         case TransformBehavior.AnchorMinOffset:
-                            localPosition.x = box.TransformX;
+                            localPosition.x = box.AnchorLeft - box.parent.element.layoutResult.screenPosition.x + box.TransformX;
                             break;
                         case TransformBehavior.AnchorMaxOffset:
                             localPosition.x = box.AnchorRight - box.parent.element.layoutResult.screenPosition.x - box.TransformX - box.actualWidth;
@@ -416,7 +416,7 @@ namespace UIForia.Systems {
 
                     switch (transformBehaviorY) {
                         case TransformBehavior.AnchorMinOffset:
-                            localPosition.y = box.TransformY;
+                            localPosition.y = box.AnchorTop - box.parent.element.layoutResult.screenPosition.y + box.TransformY;
                             break;
                         case TransformBehavior.AnchorMaxOffset:
                             localPosition.y = box.AnchorBottom - box.parent.element.layoutResult.screenPosition.y - box.TransformY - box.actualHeight;

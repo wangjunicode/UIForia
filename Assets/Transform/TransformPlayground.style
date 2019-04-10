@@ -27,11 +27,14 @@ style wrapper {
     MarginLeft = 200px;
     MarginTop = 200px;
     FlexLayoutDirection = Column;
+    BorderColor = red;
+    Border = 30px;
 }
 
 style tooltip {
+    AnchorTarget = ParentContentArea;
     TransformBehaviorX = AnchorMaxOffset;
     TransformBehaviorY = AnchorMaxOffset;
     TransformPositionX = 0cw;
-    TransformPositionY = 1ch;
+    TransformPositionY = 0ch;
 }

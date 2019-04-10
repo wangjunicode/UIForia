@@ -43,7 +43,7 @@ namespace UIForia.Layout.LayoutTypes {
 
         // todo -- stop looking up style properties, cache everything locally so we dont' have to look into the Style object
         // Padding, Margin, Border, Anchors, AnchorTarget, TransformPosition, TransformPivot, Pref/Min/Max Width + Height
-        
+
         private static readonly Dictionary<int, WidthCache> s_HeightForWidthCache = new Dictionary<int, WidthCache>();
 
         /*
@@ -185,7 +185,7 @@ namespace UIForia.Layout.LayoutTypes {
                 RequestContentSizeChangeLayout();
             }
         }
- 
+
         protected void AdoptChildren(LayoutBox box) {
             for (int i = 0; i < box.children.Count; i++) {
                 OnChildAdded(box.children[i]);
@@ -356,13 +356,9 @@ namespace UIForia.Layout.LayoutTypes {
         }
 
 
-        public virtual void OnStylePropertyChanged(LightList<StyleProperty> property) {
-            
-        }
+        public virtual void OnStylePropertyChanged(LightList<StyleProperty> property) { }
 
-        public virtual void OnChildStylePropertyChanged(LayoutBox child, LightList<StyleProperty> property) {
-
-        }
+        public virtual void OnChildStylePropertyChanged(LayoutBox child, LightList<StyleProperty> property) { }
 
         protected static int FindLayoutSiblingIndex(UIElement element) {
             // if parent is not in layout
@@ -600,21 +596,16 @@ namespace UIForia.Layout.LayoutTypes {
                         return view.Viewport.x + ResolveAnchorValue(view.Viewport.width, anchor);
                     }
 
-                    Rect parentContentRect = parent.ContentRect;
-                    return parentContentRect.x +
-                           parentContentRect.width - ResolveAnchorValue(parentContentRect.width, anchor);
+                    LayoutResult parentResult = parent.element.layoutResult;
+                    float offset = parentResult.padding.right + parentResult.border.right;
+                    return parent.element.layoutResult.screenPosition.x + ResolveAnchorValue(parent.actualWidth, anchor) - offset;
 
                 case AnchorTarget.Viewport:
                     return view.Viewport.x +
                            view.Viewport.width - ResolveAnchorValue(view.Viewport.width, anchor);
 
                 case AnchorTarget.Screen:
-                    if (parent == null) {
-                        return -view.Viewport.x + ResolveAnchorValue(Screen.width, anchor);
-                    }
-
-                    return -parent.element.layoutResult.screenPosition.x +
-                           Screen.width - ResolveAnchorValue(Screen.width, anchor);
+                    return ResolveAnchorValue(Screen.width, anchor);
 
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -637,18 +628,15 @@ namespace UIForia.Layout.LayoutTypes {
                         return view.Viewport.xMax + ResolveAnchorValue(view.Viewport.width, anchor);
                     }
 
-                    Rect parentContentRect = parent.ContentRect;
-                    return parentContentRect.xMax + ResolveAnchorValue(parentContentRect.width, anchor);
+                    LayoutResult parentResult = parent.element.layoutResult;
+                    float offset = parentResult.padding.left + parentResult.border.left;
+                    return parent.element.layoutResult.screenPosition.x + ResolveAnchorValue(parent.actualWidth, anchor) + offset;
 
                 case AnchorTarget.Viewport:
                     return view.Viewport.xMax + ResolveAnchorValue(view.Viewport.width, anchor);
 
                 case AnchorTarget.Screen:
-                    if (parent == null) {
-                        return -(view.Viewport.xMax) + ResolveAnchorValue(Screen.width, anchor);
-                    }
-
-                    return -parent.element.layoutResult.screenPosition.x + Screen.width + ResolveAnchorValue(Screen.width, anchor.value);
+                    return ResolveAnchorValue(Screen.width, anchor.value);
 
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -671,19 +659,15 @@ namespace UIForia.Layout.LayoutTypes {
                         return view.Viewport.y + ResolveAnchorValue(view.Viewport.height, anchor);
                     }
 
-                    Rect parentContentRect = parent.ContentRect;
-                    return parentContentRect.y + ResolveAnchorValue(parentContentRect.height, anchor);
+                    LayoutResult parentResult = parent.element.layoutResult;
+                    float offset = parentResult.padding.top + parentResult.border.top;
+                    return parent.element.layoutResult.screenPosition.y + ResolveAnchorValue(parent.actualHeight, anchor) + offset;
 
                 case AnchorTarget.Viewport:
                     return view.Viewport.y + ResolveAnchorValue(view.Viewport.height, anchor);
 
                 case AnchorTarget.Screen:
-                    if (parent == null) {
-                        return -view.Viewport.y + ResolveAnchorValue(Screen.height, anchor);
-                    }
-
-                    // todo -- need screen position here but might not have it correctly if parent moved this frame. maybe flag for later adjustment in layout?
-                    return -parent.element.layoutResult.screenPosition.y + ResolveAnchorValue(Screen.height, anchor.value);
+                    return ResolveAnchorValue(Screen.height, anchor);
 
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -703,22 +687,18 @@ namespace UIForia.Layout.LayoutTypes {
 
                 case AnchorTarget.ParentContentArea:
                     if (parent == null) {
-                        return view.Viewport.yMax + ResolveAnchorValue(view.Viewport.height, anchor) - actualHeight;
+                        return view.Viewport.yMax + ResolveAnchorValue(view.Viewport.height, anchor);
                     }
 
-                    Rect parentContentRect = parent.ContentRect;
-                    return parentContentRect.yMax + ResolveAnchorValue(parentContentRect.height, anchor) - actualHeight;
+                    LayoutResult parentResult = parent.element.layoutResult;
+                    float offset = parentResult.padding.bottom + parentResult.border.bottom;
+                    return parent.element.layoutResult.screenPosition.y + ResolveAnchorValue(parent.actualHeight, anchor) - offset;
 
                 case AnchorTarget.Viewport:
-                    return view.Viewport.yMax + ResolveAnchorValue(view.Viewport.height, anchor) - actualHeight;
+                    return view.Viewport.yMax + ResolveAnchorValue(view.Viewport.height, anchor);
 
                 case AnchorTarget.Screen:
-                    if (parent == null) {
-                        return -(view.Viewport.yMax) + ResolveAnchorValue(Screen.height, anchor) - actualHeight;
-                    }
-
-                    return -parent.element.layoutResult.screenPosition.y + Screen.height + ResolveAnchorValue(Screen.height, anchor.value) - actualHeight;
-
+                    return ResolveAnchorValue(Screen.height, anchor);
                 default:
                     throw new ArgumentOutOfRangeException();
             }
@@ -861,7 +841,7 @@ namespace UIForia.Layout.LayoutTypes {
 
                 case TransformUnit.Pixel:
                     return transformOffset.value;
-                
+
                 case TransformUnit.Em:
                     return style.EmSize * transformOffset.value * view.ScaleFactor;
 
@@ -907,6 +887,7 @@ namespace UIForia.Layout.LayoutTypes {
 
                     return ResolveAnchorWidth(transformOffset.value);
                 }
+
                 case TransformUnit.AnchorHeight: {
                     AnchorTarget anchorTarget = style.AnchorTarget;
                     if (parent.style.PreferredHeight.IsContentBased && anchorTarget == AnchorTarget.Parent ||
@@ -916,6 +897,7 @@ namespace UIForia.Layout.LayoutTypes {
 
                     return ResolveAnchorHeight(transformOffset.value);
                 }
+
                 case TransformUnit.ParentWidth:
                     if (parent == null) return 0;
                     return parent.actualWidth * transformOffset.value;

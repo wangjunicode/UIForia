@@ -31,6 +31,7 @@ style wrapper {
 
 style tooltip {
     TransformBehaviorX = AnchorMaxOffset;
-    TransformPositionX = -1cw;
-    MarginRight = 250px;
+    TransformBehaviorY = AnchorMaxOffset;
+    TransformPositionX = 0cw;
+    TransformPositionY = 1ch;
 }

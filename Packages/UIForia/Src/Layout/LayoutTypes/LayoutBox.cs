@@ -696,10 +696,10 @@ namespace UIForia.Layout.LayoutTypes {
                 case AnchorTarget.Unset:
                 case AnchorTarget.Parent:
                     if (parent == null) {
-                        return view.Viewport.yMax + ResolveAnchorValue(view.Viewport.height, anchor) - actualHeight;
+                        return view.Viewport.yMax + ResolveAnchorValue(view.Viewport.height, anchor);
                     }
 
-                    return parent.element.layoutResult.screenPosition.y + parent.actualHeight - ResolveAnchorValue(parent.actualHeight, anchor) - actualHeight;
+                    return parent.element.layoutResult.screenPosition.y + ResolveAnchorValue(parent.actualHeight, anchor);
 
                 case AnchorTarget.ParentContentArea:
                     if (parent == null) {

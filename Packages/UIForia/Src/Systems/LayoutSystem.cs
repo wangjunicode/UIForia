@@ -385,7 +385,7 @@ namespace UIForia.Systems {
                             localPosition.y = box.TransformY;
                             break;
                         case TransformBehavior.AnchorMaxOffset:
-                            localPosition.y = box.TransformY;
+                            localPosition.y = box.AnchorBottom - box.parent.element.layoutResult.screenPosition.y - box.TransformY - box.actualHeight;
                             break;
                         case TransformBehavior.LayoutOffset:
                             localPosition.y = box.TransformY;
@@ -419,7 +419,7 @@ namespace UIForia.Systems {
                             localPosition.y = box.TransformY;
                             break;
                         case TransformBehavior.AnchorMaxOffset:
-                            localPosition.y = box.TransformY;
+                            localPosition.y = box.AnchorBottom - box.parent.element.layoutResult.screenPosition.y - box.TransformY - box.actualHeight;
                             break;
                         case TransformBehavior.LayoutOffset:
                             localPosition.y = box.localY + box.TransformY;

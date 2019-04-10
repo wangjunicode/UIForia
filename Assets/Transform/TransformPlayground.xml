@@ -9,9 +9,6 @@
             <Group style="tooltip">
                 I am a tooltip an long
             </Group>
-            <Group>
-                sibling
-            </Group>
         </Group>
 
     </Contents>

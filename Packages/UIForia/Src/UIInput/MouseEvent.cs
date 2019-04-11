@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using UIForia.Elements;
+using UnityEngine;
 
 namespace UIForia.UIInput {
 
@@ -22,6 +23,8 @@ namespace UIForia.UIInput {
         public void StopPropagation() {
             source.shouldStopPropagation = true;
         }
+
+        public UIElement Origin => source.origin;
 
         public bool IsConsumed => source.isConsumed;
         
@@ -59,6 +62,7 @@ namespace UIForia.UIInput {
         public Vector2 ScrollDelta => source.mouseState.scrollDelta;
 
         public Vector2 MousePosition => source.mouseState.mousePosition;
+        public Vector2 MousePositionInvertY => new Vector2(source.mouseState.mousePosition.x, Screen.height - source.mouseState.mousePosition.y);
         public Vector2 MouseDownPosition => source.mouseState.leftMouseButtonState.downPosition;
         public Vector2 DragDelta => source.mouseState.MouseDelta;
         

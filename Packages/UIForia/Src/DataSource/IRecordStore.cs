@@ -12,6 +12,8 @@ namespace UIForia.DataSource {
         
         int Count { get; }
 
+        void Clear();
+
     }
 
 }

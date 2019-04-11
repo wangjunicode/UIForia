@@ -31,6 +31,7 @@ namespace UIForia.Elements {
                 }
             }
 
+            textInfo.UpdateSpan(0, new TextSpan(text, style.GetTextStyle()));
         }
 
         public string GetText() {
@@ -41,16 +42,8 @@ namespace UIForia.Elements {
             if (this.text == newText) {
                 return;
             }
-
             this.text = newText;
-            
-            spanStyle.font = style.TextFontAsset;
-            spanStyle.fontSize = style.GetResolvedFontSize();
-            spanStyle.fontStyle = style.TextFontStyle;
-            spanStyle.textTransform = style.TextTransform;
-            spanStyle.whitespaceMode = WhitespaceMode.CollapseWhitespace | WhitespaceMode.PreserveNewLines;
-            textInfo.UpdateSpan(0, text, spanStyle);
-            
+            textInfo.UpdateSpan(0, text, style.GetTextStyle());
         }
 
         public void SetText(int spanIndex, string text) {
@@ -77,9 +70,6 @@ namespace UIForia.Elements {
 
             return new string(chars);
         }
-
-
-
 
         // size, font, style, whitespace, transform, alignment
         public void OnStylePropertyChanged(in StyleProperty property) {
@@ -115,7 +105,7 @@ namespace UIForia.Elements {
 
         public void OnStylePropertiesDidChange() {
             if (shouldUpdateSpanStyle) {
-                textInfo.UpdateSpanStyle(0, spanStyle);
+                textInfo.UpdateSpanStyle(0, style.GetTextStyle());
                 shouldUpdateSpanStyle = false;
             }
         }

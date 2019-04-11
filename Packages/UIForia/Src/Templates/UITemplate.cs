@@ -27,9 +27,10 @@ namespace UIForia.Templates {
 
         public Binding[] perFrameBindings;
         public Binding[] triggeredBindings;
+        public Binding[] writeBindings;
 
         public UIStyleGroupContainer[] baseStyles; // todo convert this to a string array
-        
+
         public DragEventCreator[] dragEventCreators;
         public DragEventHandler[] dragEventHandlers;
         public MouseEventHandler[] mouseEventHandlers;
@@ -39,14 +40,18 @@ namespace UIForia.Templates {
         protected static readonly StyleBindingCompiler s_StyleCompiler = new StyleBindingCompiler();
         protected static readonly InputBindingCompiler s_InputCompiler = new InputBindingCompiler();
         protected static readonly PropertyBindingCompiler s_PropCompiler = new PropertyBindingCompiler();
-        
+
         public readonly Application app;
+
         protected UITemplate(Application app, List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null) {
             this.app = app;
             this.childTemplates = childTemplates;
             this.attributes = attributes;
+
             this.perFrameBindings = Binding.EmptyArray;
             this.triggeredBindings = Binding.EmptyArray;
+            this.writeBindings = Binding.EmptyArray;
+
             this.baseStyles = ArrayPool<UIStyleGroupContainer>.Empty;
             this.dragEventCreators = ArrayPool<DragEventCreator>.Empty;
             this.dragEventHandlers = ArrayPool<DragEventHandler>.Empty;
@@ -55,7 +60,7 @@ namespace UIForia.Templates {
         }
 
         public ParsedTemplate SourceTemplate { get; protected internal set; }
-        
+
         protected abstract Type elementType { get; }
 
         public abstract UIElement CreateScoped(TemplateScope inputScope);
@@ -63,10 +68,14 @@ namespace UIForia.Templates {
         protected void BuildBindings() {
             int triggeredCount = 0;
             int perFrameCount = 0;
+            int writeCount = 0;
 
             for (int i = 0; i < s_BindingList.Count; i++) {
-                if (s_BindingList[i].IsTriggered) {
+                if (s_BindingList[i].IsOnEnable) {
                     triggeredCount++;
+                }
+                else if (s_BindingList[i].IsWrite) {
+                    writeCount++;
                 }
                 else {
                     perFrameCount++;
@@ -81,12 +90,20 @@ namespace UIForia.Templates {
                 perFrameBindings = new Binding[perFrameCount];
             }
 
+            if (writeCount > 0) {
+                writeBindings = new Binding[writeCount];
+            }
+
             perFrameCount = 0;
             triggeredCount = 0;
+            writeCount = 0;
 
             for (int i = 0; i < s_BindingList.Count; i++) {
-                if (s_BindingList[i].IsTriggered) {
+                if (s_BindingList[i].IsOnEnable) {
                     triggeredBindings[triggeredCount++] = s_BindingList[i];
+                }
+                else if (s_BindingList[i].IsWrite) {
+                    writeBindings[writeCount++] = s_BindingList[i];
                 }
                 else {
                     // swap enabled binding to the front
@@ -182,7 +199,7 @@ namespace UIForia.Templates {
                 templateAttributes = new List<ElementAttribute>();
                 foreach (AttributeDefinition s in realAttributes) {
                     templateAttributes.Add(new ElementAttribute(s.key.Substring(k_SpecialAttrPrefix.Length), s.value));
-                }                
+                }
             }
         }
 
@@ -225,14 +242,8 @@ namespace UIForia.Templates {
                     }
 
                     attributes[i].isCompiled = true;
-                    Binding binding = s_PropCompiler.CompileAttribute(template.rootElementTemplate.RootType, elementType, attributes[i]);
-                    if (binding != null) {
-                        if (binding.IsConstant()) {
-                            binding.bindingType = BindingType.Constant;
-                        }
 
-                        s_BindingList.Add(binding);
-                    }
+                    s_PropCompiler.CompileAttribute(template.rootElementTemplate.RootType, elementType, attributes[i], s_BindingList);
                 }
             }
             catch (Exception e) {
@@ -240,7 +251,7 @@ namespace UIForia.Templates {
             }
         }
 
-        
+
         protected void ResolveBaseStyles(ParsedTemplate template) {
             List<UIStyleGroupContainer> list = ListPool<UIStyleGroupContainer>.Get();
 
@@ -254,17 +265,13 @@ namespace UIForia.Templates {
                         if (styleBinding.IsConstant()) {
                             styleBinding.bindingType = BindingType.Constant;
                         }
-                        else {
-                            styleBinding.bindingType = BindingType.Normal;
-                        }
-
                         s_BindingList.Add(styleBinding);
                     }
 
                     return;
                 }
 
-                
+
                 // a list of styles has been defined
                 if (styleAttr.value.IndexOf(' ') != -1) {
                     // todo -- would be great to get rid of this allocation

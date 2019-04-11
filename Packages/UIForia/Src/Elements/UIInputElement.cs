@@ -49,7 +49,7 @@ namespace UIForia.Elements {
         }
 
         public override void OnCreate() {
-            this.text = "overflow me please thats great"; //"This is kinda overflow even more";
+            text = text ?? string.Empty;
             style.SetPainter("self", StyleState.Normal);
             textInfo = new TextInfo2(new TextSpan(text));
             textInfo.UpdateSpan(0, text);
@@ -61,6 +61,16 @@ namespace UIForia.Elements {
         }
 
         private void HandleTextChanged() {
+            value = textInfo.GetAllText();
+            textInfo.Layout();
+            onValueChanged?.Invoke(value);
+        }
+
+        [OnPropertyChanged(nameof(value))]
+        private void OnInputValueChanged(string name) {
+            if (value == text) return;
+            text = value;
+            textInfo.UpdateSpan(0, text);
             textInfo.Layout();
             onValueChanged?.Invoke(textInfo.GetAllText());
         }
@@ -330,13 +340,13 @@ namespace UIForia.Elements {
             bool blinkState = (Time.unscaledTime - blinkStartTime) % blinkPeriod < blinkPeriod / 2;
 
             Rect contentRect = layoutResult.ContentRect;
-            ctx.EnableScissorRect(new Rect(VisibleTextRect) {
-                x = layoutResult.screenPosition.x - contentRect.x,
-                y = layoutResult.screenPosition.y - contentRect.y,
-                width = contentRect.width,
-                height = contentRect.height
+            
+            ctx.EnableScissorRect(new Rect(contentRect) {
+                x = contentRect.x + layoutResult.screenPosition.x,
+                y = contentRect.y + layoutResult.screenPosition.y
             });
-            ctx.DisableScissorRect();
+            
+            // ctx.DisableScissorRect();
             if (isSelecting) {
                 ctx.BeginPath();
                 ctx.SetStroke(caretColor);
@@ -397,6 +407,8 @@ namespace UIForia.Elements {
 
             ctx.Text(contentRect.x - textScroll.x, contentRect.y, textInfo);
             ctx.Fill();
+            ctx.DisableScissorRect();
+
         }
 
         private Rect VisibleTextRect {

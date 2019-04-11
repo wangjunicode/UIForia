@@ -118,6 +118,13 @@ namespace UIForia.Systems {
                 ctx.SetTransform(matrix);
 
                 if (current is UITextElement textElement) {
+                    
+                    //if (current.style.OverflowY != Overflow.Visible) {
+                        Vector2 screenPos = current.layoutResult.screenPosition;
+                        Size allocated = current.layoutResult.allocatedSize;
+                        ctx.EnableScissorRect(new Rect(screenPos.x, screenPos.y, allocated.width, allocated.height));
+                   // }
+                    
                     ctx.BeginPath();
                     ctx.Text(-offset.x, -offset.y, textElement.textInfo);
                     ctx.SetFill(textElement.style.TextColor);

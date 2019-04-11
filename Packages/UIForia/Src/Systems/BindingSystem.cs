@@ -7,28 +7,32 @@ namespace UIForia.Systems {
 
     public class BindingSystem : ISystem {
 
-        private readonly SkipTree<BindingNode> m_BindingTree;
+        private readonly SkipTree<BindingNode> m_ReadBindingTree;
+        private readonly SkipTree<BindingNode> m_WriteBindingTree;
 
         public BindingSystem() {
-            this.m_BindingTree = new SkipTree<BindingNode>();
+            this.m_ReadBindingTree = new SkipTree<BindingNode>();
+            this.m_WriteBindingTree = new SkipTree<BindingNode>();
         }
 
         public void OnReset() {
-            m_BindingTree.Clear();
+            m_ReadBindingTree.Clear();
+            m_WriteBindingTree.Clear();
         }
 
         public void OnUpdate() {
-            m_BindingTree.TraversePreOrder((node) => { node.OnUpdate(); });
+            m_ReadBindingTree.TraversePreOrder((node) => { node.OnUpdate(); });
         }
 
-        public void OnDestroy() {
+        public void OnLateUpdate() {
+            m_WriteBindingTree.TraversePreOrder((node) => { node.OnUpdate(); });
         }
 
-        public void OnViewAdded(UIView view) {
-        }
+        public void OnDestroy() { }
 
-        public void OnViewRemoved(UIView view) {
-        }
+        public void OnViewAdded(UIView view) { }
+
+        public void OnViewRemoved(UIView view) { }
 
         public void OnElementCreated(UIElement element) {
             UITemplate template = element.OriginTemplate;
@@ -56,7 +60,7 @@ namespace UIForia.Systems {
                 node.element = repeat;
                 node.template = repeat.template;
                 node.context = repeat.templateContext;
-                m_BindingTree.AddItem(node);
+                m_ReadBindingTree.AddItem(node);
             }
             else {
                 if (template.perFrameBindings.Length > 0) {
@@ -64,9 +68,17 @@ namespace UIForia.Systems {
                     node.bindings = template.perFrameBindings;
                     node.element = element;
                     node.context = element.templateContext;
-                    m_BindingTree.AddItem(node);
+                    m_ReadBindingTree.AddItem(node);
                 }
 
+                if (template.writeBindings != null && template.writeBindings.Length > 0) {
+                    BindingNode node = new BindingNode();
+                    node.bindings = template.writeBindings;
+                    node.element = element;
+                    node.context = element.templateContext;
+                    m_WriteBindingTree.AddItem(node);
+                }
+                
                 if (element.children != null) {
                     for (int i = 0; i < element.children.Count; i++) {
                         OnElementCreated(element.children[i]);
@@ -76,17 +88,17 @@ namespace UIForia.Systems {
         }
 
         public void OnElementDestroyed(UIElement element) {
-            m_BindingTree.RemoveHierarchy(element);
+            m_ReadBindingTree.RemoveHierarchy(element);
+            m_WriteBindingTree.RemoveHierarchy(element);
         }
 
         public void OnElementEnabled(UIElement element) {
+            
         }
 
-        public void OnElementDisabled(UIElement element) {
-        }
+        public void OnElementDisabled(UIElement element) { }
 
-        public void OnAttributeSet(UIElement element, string attributeName, string currentValue, string attributeValue) {
-        }
+        public void OnAttributeSet(UIElement element, string attributeName, string currentValue, string attributeValue) { }
 
     }
 

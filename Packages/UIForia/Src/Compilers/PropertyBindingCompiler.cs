@@ -21,12 +21,9 @@ namespace UIForia.Compilers {
 
         private static readonly Dictionary<Type, Dictionary<string, LightList<object>>> m_TypeMap = new Dictionary<Type, Dictionary<string, LightList<object>>>();
 
-        public const string k_BindTo = "bindTo";
-        public const string k_Once = "once";
-        public const string k_Initialize = "initialize";
+        public const string k_Enable = "enabled";
         public const string k_Read = "read";
         public const string k_Write = "write";
-        public const string k_ReadWrite = "readwrite";
 
         private Type rootType;
         private Type elementType;
@@ -142,75 +139,83 @@ namespace UIForia.Compilers {
 
         // todo ensure each binding has at most one .read and one .write and that both are different values
         // ie disallow <Input value.read="someValue" value.write="someValue"/> as this would make no sense unless / until we have pre-post update binding
-        public Binding CompileAttribute(Type rootType, Type elementType, AttributeDefinition attributeDefinition) {
+        public void CompileAttribute(Type rootType, Type elementType, AttributeDefinition attributeDefinition, LightList<Binding> output) {
             this.rootType = rootType;
             this.elementType = elementType;
             string attrKey = attributeDefinition.key;
             string attrValue = attributeDefinition.value;
-
+            
             EventInfo eventInfo = elementType.GetEvent(attrKey);
 
             if (eventInfo != null) {
-                return CompileCallbackAttribute(attrValue, eventInfo);
+                output.Add(CompileCallbackAttribute(attrValue, eventInfo));
             }
 
             if (attrKey.IndexOf(".", StringComparison.Ordinal) != -1) {
                 // todo -- don't allocated, use span or something similar
                 string[] parts = attrKey.Split('.');
                 string property = parts[0];
-                string modifier = parts[1];
 
-                // todo support multiple event modifiers
-                
-                switch (modifier) {
-                    case k_BindTo: {
-                        Binding binding = CompileBoundProperty(property, attrValue);
-                        if (binding == null) {
-                            return null;
+                bool hasRead = false;
+                bool hasWrite = false;
+                bool hasEnabled = false;
+
+                for (int i = 1; i < parts.Length; i++) {
+                    string modifier = parts[i];
+                    Binding binding = null;
+                    switch (modifier) {
+                        case k_Enable: {
+                            if (hasEnabled) continue;
+                            hasEnabled = true;
+                            binding = CompileBinding(property, attrValue);
+                            if (binding != null) {
+                                binding.bindingType = BindingType.OnEnable;
+                            }
+
+                            break;
                         }
 
-                        binding.bindingType = BindingType.Constant;
-                        return binding;
-                    }
-                    case k_Initialize: {
-                        Binding binding = CompileBinding(property, attrValue);
-                        if (binding == null) {
-                            return null;
+                        case k_Read: {
+                            if (hasRead) continue;
+                            hasRead = true;
+                            binding = CompileBinding(parts[0], attrValue);
+                            break;
                         }
 
-                        binding.bindingType = BindingType.OnEnable;
-                        return binding;
+                        case k_Write:
+                            if (hasWrite) continue;
+                            hasWrite = true;
+                            binding = CompileWriteBinding(parts[0], attrValue);
+                            if (binding != null) binding.bindingType = BindingType.Write;
+                            break;
+                        
+                        default:
+                            throw new ParseException($"Unsupported attribute binding extension: '{modifier}' in attribute chain: {attrKey}");
                     }
-                    case k_Once: {
-                        Binding binding = CompileBinding(property, attrValue);
-                        if (binding == null) {
-                            return null;
+
+                    if (binding != null) {
+                        if (binding.IsConstant()) {
+                            binding.bindingType = BindingType.Constant;
                         }
 
-                        binding.bindingType = BindingType.Once;
-                        return binding;
+                        output.Add(binding);
                     }
-                    case k_Read: {
-                        return CompileBinding(parts[0], attrValue);
-                    }
-
-                    case k_Write:
-                        return CompileWriteBinding(parts[0], attrValue);
-
                 }
-
-                if (property == "style") return null;
-
-                throw new ParseException($"Unsupported attribute binding extension: '{attrKey}'");
             }
 
-            return CompileBinding(attrKey, attrValue);
+            else {
+                Binding binding = CompileBinding(attrKey, attrValue);
+                if(binding == null) return;
+                
+                if (binding.IsConstant()) {
+                    binding.bindingType = BindingType.Constant;
+                }
+                output.Add(binding);
+            }
         }
 
         private Binding CompileWriteBinding(string attrKey, string attrValue) {
-            
             if (ReflectionUtil.IsField(elementType, attrKey, out FieldInfo fieldInfo)) {
-                
                 ReflectionUtil.LinqAccessor accessor = ReflectionUtil.GetLinqFieldAccessors(elementType, fieldInfo.FieldType, attrKey);
 
                 WriteTargetExpression expression = compiler.CompileWriteTarget(rootType, fieldInfo.FieldType, attrValue);
@@ -228,7 +233,6 @@ namespace UIForia.Compilers {
                     UnityEngine.Debug.Log("Unable to create a write binding for expression: " + attrKey + ".write='" + attrValue + "'. Ensure that the expression is a valid property path");
                     throw;
                 }
-
             }
 
             if (ReflectionUtil.IsProperty(elementType, attrKey, out PropertyInfo propertyInfo)) {
@@ -249,9 +253,8 @@ namespace UIForia.Compilers {
                     UnityEngine.Debug.Log("Unable to create a write binding for expression: " + attrKey + ".write='" + attrValue + "'. Ensure that the expression is a valid property path");
                     throw;
                 }
-
             }
-            
+
             throw new ParseException(attrKey + " is a not a field or property on type " + elementType + " that can be written to with a .write binding");
         }
 
@@ -382,8 +385,9 @@ namespace UIForia.Compilers {
                             GetHandlerList(actionMap, attr.propertyName).Add(ReflectionUtil.GetDelegate(a, info));
                         }
                     }
-
-                    UnityEngine.Debug.LogWarning($"Trying to compile 'OnPropertyChanged' attribute on method {info.Name} of type {info.DeclaringType} but the method did not have the required signature of 1 parameter of type string");
+                    else {
+                        UnityEngine.Debug.LogWarning($"Trying to compile 'OnPropertyChanged' attribute on method {info.Name} of type {info.DeclaringType} but the method did not have the required signature of 1 parameter of type string");
+                    }
                 }
 
                 // use null as a marker in the dictionary regardless of whether or not we have actions registered

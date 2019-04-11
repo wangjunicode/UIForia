@@ -884,7 +884,7 @@ style teXt {
                         | FontStyle.Highlight
                         | FontStyle.SmallCaps, styleGroup[0].groups[0].normal.TextFontStyle);
         Assert.AreEqual(TextAlignment.Center, styleGroup[0].groups[0].normal.TextAlignment);
-        Assert.AreEqual(14, styleGroup[0].groups[0].normal.TextFontSize);
+        Assert.AreEqual(new UIFixedLength(14), styleGroup[0].groups[0].normal.TextFontSize);
     }
     
     [Test]

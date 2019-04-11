@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using JetBrains.Annotations;
 using SVGX;
 using UIForia.Animation;
 using UIForia.AttributeProcessors;
@@ -482,13 +481,18 @@ namespace UIForia {
         }
 
         public void Update() {
+            
             m_BindingSystem.OnUpdate();
+            
             m_StyleSystem.OnUpdate();
             m_LayoutSystem.OnUpdate();
             m_InputSystem.OnUpdate();
 
             m_BeforeUpdateTaskSystem.OnUpdate();
             m_AnimationSystem.OnUpdate();
+
+            m_BindingSystem.OnLateUpdate();
+
             m_RenderSystem.OnUpdate();
 
             m_RoutingSystem.OnUpdate();

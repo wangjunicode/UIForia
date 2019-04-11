@@ -14,7 +14,7 @@ namespace UIForia.Bindings {
 
     }
 
-    // todo make overloads for numeric types, value types, and class type to avoid boxing
+    // todo make overloads for numeric types, value types, and class type to avoid boxing or just use linq expression
     public class FieldSetterBinding<U, T> : Binding where U : UIElement {
 
         private readonly Expression<T> expression;
@@ -56,6 +56,7 @@ namespace UIForia.Bindings {
         }
 
         public override void Execute(UIElement element, ExpressionContext context) {
+            
             writeTargetExpression.Assign(context, getter((U)element));
         }
 

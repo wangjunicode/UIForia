@@ -10,14 +10,13 @@ namespace UIForia.Bindings {
         
         protected Binding(string bindingId) {
             this.bindingId = bindingId;
-            this.bindingType = BindingType.Normal;
+            this.bindingType = BindingType.Read;
         }
 
-        public bool IsOnce => bindingType == BindingType.Once;
         public bool IsOnEnable => bindingType == BindingType.OnEnable;
-        public bool IsNormal => bindingType == BindingType.Normal;
-        public bool IsTriggered => bindingType != BindingType.Normal;
-        
+        public bool IsWrite => bindingType == BindingType.Write;
+        public bool IsRead => bindingType == BindingType.Read;
+
         public abstract void Execute(UIElement element, ExpressionContext context);
 
         public abstract bool IsConstant();

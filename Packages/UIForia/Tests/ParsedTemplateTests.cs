@@ -1,5 +1,6 @@
 using NUnit.Framework;
 using Tests.Mocks;
+using UIForia;
 using UIForia.Attributes;
 using UIForia.Elements;
 using UIForia.Extensions;
@@ -65,9 +66,9 @@ public class ParsedTemplateTests {
         Assert.AreEqual("Group", template.implicitStyleMap.GetOrDefault("Group").name);
         Assert.AreEqual("Other", template.implicitStyleMap.GetOrDefault("Other").name);
 
-        Assert.AreEqual(1, template.implicitStyleMap.GetOrDefault("Div").groups[0].normal.TextFontSize);
-        Assert.AreEqual(2, template.implicitStyleMap.GetOrDefault("Group").groups[0].normal.TextFontSize);
-        Assert.AreEqual(3, template.implicitStyleMap.GetOrDefault("Other").groups[0].normal.TextFontSize);
+        Assert.AreEqual(new UIFixedLength(1), template.implicitStyleMap.GetOrDefault("Div").groups[0].normal.TextFontSize);
+        Assert.AreEqual(new UIFixedLength(2), template.implicitStyleMap.GetOrDefault("Group").groups[0].normal.TextFontSize);
+        Assert.AreEqual(new UIFixedLength(3), template.implicitStyleMap.GetOrDefault("Other").groups[0].normal.TextFontSize);
     }
 
 }

@@ -3,24 +3,22 @@
 
     <Style>
         
-        style button {
-            PreferredSize = 100px, 1cnt;
+        style text {
             BackgroundColor = Green;
+            TextFontSize = 24px;
         }
 
     </Style>
     
+    <Using namespace="UnityEngine"/>
+    
     <Contents>
 
-        <!--<Text>-->
-            <!--Render me please {textBinding}-->
-        <!--</Text>-->
-
-        <!--<Group style="button" onMouseClick="SetText('one')">One</Group>-->
-        <!--<Group style="button" onMouseClick="SetText('two')">Two</Group>-->
-        <!--<Group style="button" onMouseClick="SetText('three')">Three</Group>-->
-
-        <InputElement value.read="textValueToRead" value.write="textValueToWrite"/>
+        <Input value.read.write="textValue"/>
+        
+        <Input value.read.write="textValue"/>
+        
+        <Text style="text">{textValue}</Text>
         
     </Contents>
     

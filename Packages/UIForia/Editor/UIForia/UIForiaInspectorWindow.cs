@@ -830,7 +830,7 @@ namespace UIForia.Editor {
                     return DrawFontAsset(property, isEditable);
 
                 case StylePropertyId.TextFontSize:
-                    return DrawInt(property, isEditable);
+                    return DrawFixedLength(property, isEditable);
 
                 case StylePropertyId.TextFontStyle:
                     // todo -- this needs to be an EnumFlags popup

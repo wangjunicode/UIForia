@@ -3,6 +3,7 @@ using System.Reflection;
 using NUnit.Framework;
 using Tests.Mocks;
 using TMPro;
+using UIForia;
 using UIForia.Attributes;
 using UIForia.Compilers.Style;
 using UIForia.Elements;
@@ -49,11 +50,6 @@ public class StyleTests {
     }
 
     private void RunIntTests(Action<string, string, string> TestBody) {
-        TestBody(
-            nameof(UIStyleSet.SetTextFontSize),
-            nameof(UIStyleSet.TextFontSize),
-            nameof(DefaultStyleValues_Generated.TextFontSize)
-        );
 
         TestBody(
             nameof(UIStyleSet.SetFlexItemGrow),
@@ -445,16 +441,16 @@ public class StyleTests {
         UIStyleSetStateProxy normal = root.style.Normal;
         normal.TextFontSize = 8;
         app.Update();
-        Assert.AreEqual(8, root.FindById("group1").style.TextFontSize);
-        Assert.AreEqual(8, root.FindById("group2").style.TextFontSize);
+        Assert.AreEqual(new UIFixedLength(8), root.FindById("group1").style.TextFontSize);
+        Assert.AreEqual(new UIFixedLength(8), root.FindById("group2").style.TextFontSize);
         root.FindById("group1").style.SetTextFontSize(12, StyleState.Normal);
         app.Update();
-        Assert.AreEqual(12, root.FindById("group1").style.TextFontSize);
-        Assert.AreEqual(12, root.FindById("group2").style.TextFontSize);
-        root.FindById("group1").style.SetTextFontSize(IntUtil.UnsetValue, StyleState.Normal);
+        Assert.AreEqual(new UIFixedLength(12), root.FindById("group1").style.TextFontSize);
+        Assert.AreEqual(new UIFixedLength(12), root.FindById("group2").style.TextFontSize);
+        root.FindById("group1").style.SetTextFontSize(new UIFixedLength(FloatUtil.UnsetValue), StyleState.Normal);
         app.Update();
-        Assert.AreEqual(8, root.FindById("group1").style.TextFontSize);
-        Assert.AreEqual(8, root.FindById("group2").style.TextFontSize);
+        Assert.AreEqual(new UIFixedLength(8), root.FindById("group1").style.TextFontSize);
+        Assert.AreEqual(new UIFixedLength(8), root.FindById("group2").style.TextFontSize);
     }
 
     [Test]
@@ -521,6 +517,6 @@ public class StyleTests {
         MockApplication app = new MockApplication(typeof(HeadingStyleElement));
         HeadingStyleElement root = (HeadingStyleElement) app.RootElement;
         app.Update();
-        Assert.AreEqual(100, root.FindById("myHeading").style.TextFontSize);
+        Assert.AreEqual(new UIFixedLength(100), root.FindById("myHeading").style.TextFontSize);
     }
 }

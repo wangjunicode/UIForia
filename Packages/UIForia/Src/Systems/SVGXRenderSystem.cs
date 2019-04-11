@@ -122,7 +122,7 @@ namespace UIForia.Systems {
                     //if (current.style.OverflowY != Overflow.Visible) {
                         Vector2 screenPos = current.layoutResult.screenPosition;
                         Size allocated = current.layoutResult.allocatedSize;
-                        ctx.EnableScissorRect(new Rect(screenPos.x, screenPos.y, allocated.width, allocated.height));
+//                        ctx.EnableScissorRect(new Rect(screenPos.x, screenPos.y, allocated.width, allocated.height));
                    // }
                     
                     ctx.BeginPath();

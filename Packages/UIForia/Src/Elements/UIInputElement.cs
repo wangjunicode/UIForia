@@ -69,7 +69,7 @@ namespace UIForia.Elements {
         [OnPropertyChanged(nameof(value))]
         private void OnInputValueChanged(string name) {
             if (value == text) return;
-            text = value;
+            text = value ?? string.Empty;
             textInfo.UpdateSpan(0, text);
             textInfo.Layout();
             onValueChanged?.Invoke(textInfo.GetAllText());
@@ -341,12 +341,12 @@ namespace UIForia.Elements {
 
             Rect contentRect = layoutResult.ContentRect;
             
-            ctx.EnableScissorRect(new Rect(contentRect) {
-                x = contentRect.x + layoutResult.screenPosition.x,
-                y = contentRect.y + layoutResult.screenPosition.y
-            });
+//            ctx.EnableScissorRect(new Rect(contentRect) {
+//                x = contentRect.x + layoutResult.screenPosition.x,
+//                y = contentRect.y + layoutResult.screenPosition.y
+//            });
             
-            // ctx.DisableScissorRect();
+            ctx.DisableScissorRect();
             if (isSelecting) {
                 ctx.BeginPath();
                 ctx.SetStroke(caretColor);

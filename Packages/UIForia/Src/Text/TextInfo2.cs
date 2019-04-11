@@ -133,6 +133,11 @@ namespace UIForia.Text {
             // todo this can be optimized to not re-compute the whole text metrics
             SpanInfo2 spanInfo = spanList.Array[0];
 
+            if (spanInfo.inputText.Length == 0) {
+                UpdateSpan(0, c);
+                return new SelectionRange(0, TextEdge.Right);
+            }
+
             if (selectionRange.HasSelection) {
                 selectionRange = DeleteTextForwards(selectionRange);
                 spanInfo = spanList.Array[0];

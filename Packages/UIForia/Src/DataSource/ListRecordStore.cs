@@ -64,6 +64,10 @@ namespace UIForia.DataSource {
             return null;
         }
 
+        public void Clear() {
+            store.Clear();
+        }
+
     }
 
 }

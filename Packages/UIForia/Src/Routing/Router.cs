@@ -240,7 +240,7 @@ namespace UIForia.Routing {
             }
 
             if (m_ActiveTransitions.Count == 0) {
-             //   EnterRoute(targetRouteMatch);
+                EnterRoute(default);
             }
 
             tickElapsed += Time.deltaTime;

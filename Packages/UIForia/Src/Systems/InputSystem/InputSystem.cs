@@ -794,7 +794,10 @@ namespace UIForia.Systems {
         }
 
         private void RunMouseEvents(List<UIElement> elements, InputEventType eventType) {
+            if (elements.Count == 0) return;
+            
             m_EventPropagator.Reset(m_MouseState);
+            m_EventPropagator.origin = elements[0];
             MouseInputEvent mouseEvent = new MouseInputEvent(m_EventPropagator, eventType, modifiersThisFrame);
             m_CurrentMouseEvent = mouseEvent;
 

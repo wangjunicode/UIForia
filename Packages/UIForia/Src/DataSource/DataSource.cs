@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using UIForia.Util;
 
 namespace UIForia.DataSource {
 
@@ -162,6 +163,24 @@ namespace UIForia.DataSource {
             return returnedRecord;
         }
 
+        public void ClearStore() {
+
+            if (onRecordRemoved == null) {
+                recordStore.Clear();
+                return;
+            }
+            
+            LightList<T> records = LightListPool<T>.Get();
+            records.EnsureCapacity(recordStore.Count);
+            recordStore.GetAllRecords(records);
+            T[] recordsArray = records.Array;
+            recordStore.Clear();
+            for (int i = 0; i < records.Count; i++) {
+                onRecordRemoved.Invoke(recordsArray[i]);
+            }
+
+            LightListPool<T>.Release(ref records);
+        }
     }
 
 }

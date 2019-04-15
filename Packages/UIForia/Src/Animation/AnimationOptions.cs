@@ -22,7 +22,7 @@ namespace UIForia.Animation {
         public AnimationLoopType? loopType;
         public EasingFunction? timingFunction;
         public AnimationPlaybackType playbackType;
-        
+
         public AnimationOptions(AnimationOptions copy) {
             this.duration = copy.duration;
             this.loopTime = copy.loopTime;

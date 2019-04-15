@@ -16,7 +16,7 @@
 
 #define StrokePlacement_Center 0
 #define StrokePlacement_Inside 1
-#define StrokePlacement_Center 2
+#define StrokePlacement_Outside 2
 
 #define LineCap_Butt 0
 #define LineCap_Square 1

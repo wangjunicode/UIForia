@@ -150,7 +150,7 @@ Shader "UIForia/BatchedTransparent" {
                 o.color = v.color;
                 o.flags = float4(renderType, shapeType, v.uv1.yz);
                 o.fragData1 = float4(v.vertex.xy, v.uv3.xy);
-                o.fragData2 = float4(texFlag, gradientFlag, tintFlag, gradientTintFlag);;
+                o.fragData2 = float4(texFlag, gradientFlag, tintFlag, gradientTintFlag);
                 o.fragData3 = v.uv2;
                 
                 return o;
@@ -161,6 +161,11 @@ Shader "UIForia/BatchedTransparent" {
                #define ShapeType i.flags.y
                #define GradientId i.flags.z
                #define GradientDirection i.flags.w
+               
+               #define UseTexture i.fragData2.x
+               #define UseGradient i.fragData2.y
+               #define UseTint i.fragData2.z
+               #define UseColor UseTexture + UseGradient == 0
                
                fixed4 color = SDFShape(i, ShapeType, strokeShape);
                
@@ -174,16 +179,17 @@ Shader "UIForia/BatchedTransparent" {
                
                fixed4 textureColor = tex2Dlod(_MainTex, float4(i.uv.xy, 0, 0));
                fixed4 gradientColor = tex2Dlod(_globalGradientAtlas, float4(t, y, 0, 0));
-               // fixed4 tintColor = lerp(fixed4(i.color.rgb, 0), i.color.rgba, i.fragData2.z);                
+               fixed4 tintColor = i.color;             
                
-               textureColor = lerp(color, textureColor, i.fragData2.x);
+               textureColor = lerp(color, textureColor, UseTexture);
+               textureColor = lerp(textureColor, textureColor * tintColor, UseTint);
                gradientColor = lerp(White, gradientColor, i.fragData2.y);
-               // tintColor = lerp(tintColor, gradientColor, i.fragData2.w);
                
-               // fixed4 tintedTextureColor = lerp(textureColor, textureColor * tintColor, tintColor.a);
-           
+               fixed4 mainColor = lerp(textureColor, gradientColor, UseGradient);
+               mainColor = lerp(mainColor, color, UseColor);
+                                             
                // todo -- fix blend artifacts by not tinting. be sure to use fixed4(input.rgb, 0) instead of clear or white
-               color = lerp(textureColor, gradientColor, 0);
+               color = mainColor; //lerp(fixed4(c.rgb, 0), tintedTextureColor, tintedTextureColor.a);
         
                // todo -- see if we can drop the discard statement
                if(color.a - 0.001 <= 0) {

@@ -87,42 +87,49 @@ namespace SVGX {
             camera.orthographicSize = Screen.height * 0.5f;
 
             ctx.Clear();
+            ctx.Rect(200, 200, 400, 400);
+            ctx.SetFill(texture, Color.black);
+            ctx.Fill();
+            ctx.BeginPath();
+            ctx.SetFill(Color.red);
+            ctx.Rect(500, 500, 200, 200);
+            ctx.Fill();
             
-            ctx.SetStrokeWidth(strokeWidth);
-
-            Vector2 center = new Vector2(400, 400);
-
-            stepSize = Mathf.Max(1, stepSize);
-
-            float _start = MathUtil.WrapAngleDeg(startAngle);
-            float _end = MathUtil.WrapAngleDeg(endAngle);
-
-            if (_start > _end) {
-                float tmp = _end;
-                _end = _start;
-                _start = tmp;
-            }
-            
-            if (Mathf.Abs(_start - _end) == 0) {
-                _start = 0;
-                _end = 359.9f;
-            }
-
-            float x0 = radius * Mathf.Cos(_start * Mathf.Deg2Rad);
-            float y0 = radius * Mathf.Sin(_start * Mathf.Deg2Rad);
-            ctx.MoveTo(center.x + x0, center.y + y0);
-
-            for (float theta = _start + stepSize; theta < _end; theta += stepSize) {
-                float x = radius * Mathf.Cos(theta * Mathf.Deg2Rad);
-                float y = radius * Mathf.Sin(theta * Mathf.Deg2Rad);
-                ctx.LineTo(center.x + x, center.y + y);
-            }
-
-            float x1 = radius * Mathf.Cos(_end * Mathf.Deg2Rad);
-            float y1 = radius * Mathf.Sin(_end * Mathf.Deg2Rad);
-            ctx.LineTo(center.x + x1, center.y + y1);
-
-            ctx.Stroke();
+//            ctx.SetStrokeWidth(strokeWidth);
+//
+//            Vector2 center = new Vector2(400, 400);
+//
+//            stepSize = Mathf.Max(1, stepSize);
+//
+//            float _start = MathUtil.WrapAngleDeg(startAngle);
+//            float _end = MathUtil.WrapAngleDeg(endAngle);
+//
+//            if (_start > _end) {
+//                float tmp = _end;
+//                _end = _start;
+//                _start = tmp;
+//            }
+//            
+//            if (Mathf.Abs(_start - _end) == 0) {
+//                _start = 0;
+//                _end = 359.9f;
+//            }
+//
+//            float x0 = radius * Mathf.Cos(_start * Mathf.Deg2Rad);
+//            float y0 = radius * Mathf.Sin(_start * Mathf.Deg2Rad);
+//            ctx.MoveTo(center.x + x0, center.y + y0);
+//
+//            for (float theta = _start + stepSize; theta < _end; theta += stepSize) {
+//                float x = radius * Mathf.Cos(theta * Mathf.Deg2Rad);
+//                float y = radius * Mathf.Sin(theta * Mathf.Deg2Rad);
+//                ctx.LineTo(center.x + x, center.y + y);
+//            }
+//
+//            float x1 = radius * Mathf.Cos(_end * Mathf.Deg2Rad);
+//            float y1 = radius * Mathf.Sin(_end * Mathf.Deg2Rad);
+//            ctx.LineTo(center.x + x1, center.y + y1);
+//
+//            ctx.Stroke();
             gfx.Render(ctx);
         }
 

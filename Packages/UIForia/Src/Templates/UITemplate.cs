@@ -71,7 +71,7 @@ namespace UIForia.Templates {
             int writeCount = 0;
 
             for (int i = 0; i < s_BindingList.Count; i++) {
-                if (s_BindingList[i].IsOnEnable) {
+                if (s_BindingList[i].IsOnEnable || s_BindingList[i].IsConstant()) {
                     triggeredCount++;
                 }
                 else if (s_BindingList[i].IsWrite) {
@@ -99,7 +99,7 @@ namespace UIForia.Templates {
             writeCount = 0;
 
             for (int i = 0; i < s_BindingList.Count; i++) {
-                if (s_BindingList[i].IsOnEnable) {
+                if (s_BindingList[i].IsOnEnable || s_BindingList[i].IsConstant()) {
                     triggeredBindings[triggeredCount++] = s_BindingList[i];
                 }
                 else if (s_BindingList[i].IsWrite) {

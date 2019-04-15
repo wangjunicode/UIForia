@@ -20,6 +20,7 @@ namespace UIForia.Templates {
         // todo: write custom comparer 
         internal Dictionary<string, AliasedUIStyleGroupContainer> sharedStyleMap;
         internal Dictionary<string, UIStyleGroupContainer> implicitStyleMap;
+        private UIStyleGroupContainer implicitRootStyle;
 
         private readonly List<string> usings;
         private readonly List<UISlotContentTemplate> inheritedContent;
@@ -102,7 +103,6 @@ namespace UIForia.Templates {
             }
         }
 
-        private UIStyleGroupContainer implicitRootStyle;
         private void CompileStyles() {
             if (styleDefinitions == null || styleDefinitions.Count == 0) {
                 return;
@@ -129,7 +129,7 @@ namespace UIForia.Templates {
                             // this lets us style the root element in a template implicitly
                             // this should be improved with better style system support for default & important styles
                             if (container.name == "this") {
-                                implicitRootStyle = container;
+                                implicitRootStyle = container;  
                                 continue;
                             }
                             // we only take the first implicit style. This could be improved by doing a merge of some sort
@@ -139,7 +139,7 @@ namespace UIForia.Templates {
                             }
                             continue;
                         }
-                        
+                           
                         if (alias == null) {
                             sharedStyleMap[container.name] = new AliasedUIStyleGroupContainer() {
                                 alias = null,

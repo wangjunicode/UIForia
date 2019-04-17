@@ -634,10 +634,9 @@ namespace UIForia.Systems {
             if (box == null) return; // can happen if disable is called in binding before layout system gets the create call
 
             if (box.parent != null) {
-                UpdateChildren(box.parent);
+                UpdateChildrenRecursive(box.parent.element);
             }
 
-            UpdateChildren(box);
         }
 
         public void OnElementDisabled(UIElement element) {
@@ -648,6 +647,20 @@ namespace UIForia.Systems {
             }
 
             m_VisibleElementList.Remove(element);
+        }
+
+        private void UpdateChildrenRecursive(UIElement element) {
+            
+            if(element.children == null) return;
+            
+            LayoutBox box = m_LayoutBoxMap.GetOrDefault(element.id);
+
+            for (int i = 0; i < element.children.Count; i++) {
+                UpdateChildrenRecursive(element.children[i]);
+            }
+
+            UpdateChildren(box);
+            box.UpdateChildren();
         }
 
         public void OnElementDestroyed(UIElement element) {
@@ -778,6 +791,10 @@ namespace UIForia.Systems {
             UIElement element = box.element;
 
             if (box.style.LayoutBehavior == LayoutBehavior.TranscludeChildren) {
+                return;
+            }
+
+            if (element.children == null || element.children.Count == 0) {
                 return;
             }
 

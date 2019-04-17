@@ -68,7 +68,7 @@ namespace UIForia.Animation {
                     // task.OnPaused();
                     // task.OnCancel?(); handle restoring to start state?
                     // styleAnimation.state = UITaskState.Pending;
-                    continue;
+                    //continue;
                 }
 
                 if (styleAnimation.state == UITaskState.Uninitialized) {

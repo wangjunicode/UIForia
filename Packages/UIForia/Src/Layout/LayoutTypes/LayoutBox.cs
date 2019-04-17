@@ -169,11 +169,6 @@ namespace UIForia.Layout.LayoutTypes {
         }
 
         public void RequestContentSizeChangeLayout() {
-            // not 100% sure this is safe
-            if (markedForLayout) {
-            //    return;
-            }
-
             markedForLayout = true;
             InvalidatePreferredSizeCache();
             LayoutBox ptr = parent;

@@ -268,32 +268,6 @@ namespace UIForia.Bindings {
         }
 
     }
-
-    public class EventBinding<T, U> : Binding {
-
-        public readonly EventInfo info;
-        public EventBinding(string bindingId) : base(bindingId) { }
-        public Action<T> oldValue;
-        
-        public override void Execute(UIElement element, ExpressionContext context) {
-            // get write target
-            // read value 
-            // if value changed, unsubscribe
-            // if value is not null, subscribe
-//            
-//            Action<T> v = getter((U) element);
-//            if (v != oldV) {
-//                
-//            }
-//            info.AddEventHandler(element, );
-//            info.RemoveEventHandler(element, );
-        }
-
-        public override bool IsConstant() {
-            return false;
-        }
-
-    }
     
     public class CallbackBinding<T> : Binding {
 
@@ -329,12 +303,7 @@ namespace UIForia.Bindings {
 
             [UsedImplicitly]
             public void Run(T evtArg0) {
-               // ctx.SetContextValue(target, PropertyBindingCompiler.EvtArgDefaultName, evtArg0);
-              //  ctx.SetContextValue(target, PropertyBindingCompiler.EvtArgNames[0], evtArg0);
-
                 expression.Evaluate(ctx);
-               // ctx.RemoveContextValue<T>(target, PropertyBindingCompiler.EvtArgDefaultName);
-               // ctx.RemoveContextValue<T>(target, PropertyBindingCompiler.EvtArgNames[0]);
             }
 
         }

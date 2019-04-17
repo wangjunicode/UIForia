@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Security.Authentication.ExtendedProtection;
 using UIForia.Exceptions;
 using UIForia.Parsing.Style.AstNodes;
 using UIForia.Parsing.Style.Tokenizer;

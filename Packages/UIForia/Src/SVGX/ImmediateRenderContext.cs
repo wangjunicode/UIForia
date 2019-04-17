@@ -196,15 +196,6 @@ namespace SVGX {
             LineTo(lastPoint.x, y);
         }
 
-//        public void ArcTo(float rx, float ry, float angle, bool isLargeArc, bool isSweepArc, float endX, float endY) {
-//            Vector2 end = new Vector2(endX, endY);
-//
-//            int pointStart = points.Count;
-//            int pointCount = SVGXBezier.Arc(points, lastPoint, rx, ry, angle, isLargeArc, isSweepArc, end);
-//            UpdateShape(pointStart, pointCount);
-//            lastPoint = end;
-//        }
-//        
         public void ArcTo(float cx, float cy, float radius, float startAngle, float endAngle, float stepSize = 5) {
             float _start = MathUtil.WrapAngleDeg(startAngle);
             float _end = MathUtil.WrapAngleDeg(endAngle);
@@ -238,30 +229,7 @@ namespace SVGX {
             LineTo(cx + x1, cy + y1);
             
         }
-
-        public void SectorFromCenter(float cx, float cy, float radius, float startAngle, float endAngle, bool counterClockwise) {
-            SVGXShapeType lastType = shapes[shapes.Count - 1].type;
-
-            int pointRangeStart = points.Count;
-
-            points.Add(new Vector2(cx, cy));
-            points.Add(new Vector2(startAngle, endAngle));
-            points.Add(new Vector2(radius, counterClockwise ? 1 : -1));
-
-            RangeInt pointRange = new RangeInt(pointRangeStart, points.Count - pointRangeStart);
-            SVGXShape currentShape = new SVGXShape(SVGXShapeType.RoundedRect, pointRange, new SVGXBounds(), true);
-
-            if (lastType != SVGXShapeType.Unset) {
-                shapes.Add(currentShape);
-            }
-            else {
-                shapes[shapes.Count - 1] = currentShape;
-            }
-
-            lastPoint = points[points.Count - 1];
-            currentShapeRange.length++;
-        }
-
+        
         public void ClosePath() {
             SVGXShape currentShape = shapes[shapes.Count - 1];
             if (currentShape.type != SVGXShapeType.Path) {

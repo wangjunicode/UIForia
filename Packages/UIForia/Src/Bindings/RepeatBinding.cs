@@ -18,9 +18,16 @@ namespace UIForia.Bindings {
         private readonly Expression<T> listExpression;
         private T previousReference;
 
+        private readonly Action<U, int> onInserted;
+        private readonly Action<U, int> onRemoved;
+        private readonly Action onClear;
+        
         public RepeatBindingNode(UIRepeatElement<U> repeat, Expression<T> listExpression) {
             this.repeat = repeat;
             this.listExpression = listExpression;
+            this.onInserted = OnItemInserted;
+            this.onRemoved = OnItemRemoved;
+            this.onClear = OnClear;
         }
 
         private void OnItemInserted(U item, int index) {
@@ -58,7 +65,16 @@ namespace UIForia.Bindings {
                 }
 
                 repeat.listBecameEmpty = previousReference.Count > 0;
-                previousReference = null;
+                
+                if (previousReference != null) {
+                    previousReference.onItemInserted -= onInserted;
+                    // previousReference.onItemMoved -= OnItemMoved;
+                    previousReference.onItemRemoved -= onRemoved;
+                    previousReference.onClear -= onClear;
+                    element.View.Application.DestroyChildren(element);
+                    previousReference = null;
+                }
+                
                 element.View.Application.DestroyChildren(element);
                 return;
             }
@@ -68,19 +84,19 @@ namespace UIForia.Bindings {
             }
 
             if (previousReference != null) {
-                previousReference.onItemInserted -= OnItemInserted;
+                previousReference.onItemInserted -= onInserted;
                // previousReference.onItemMoved -= OnItemMoved;
-                previousReference.onItemRemoved -= OnItemRemoved;
-                previousReference.onClear -= OnClear;
+                previousReference.onItemRemoved -= onRemoved;
+                previousReference.onClear -= onClear;
                 element.View.Application.DestroyChildren(element);
             }
 
             previousReference = list;
 
-            list.onItemInserted += OnItemInserted;
+            list.onItemInserted += onInserted;
           //  list.onItemMoved += OnItemMoved;
-            list.onItemRemoved += OnItemRemoved;
-            list.onClear += OnClear;
+            list.onItemRemoved += onRemoved;
+            list.onClear += onClear;
 
             for (int i = 0; i < list.Count; i++) {
                 UIElement newItem = template.CreateScoped(repeat.scope);

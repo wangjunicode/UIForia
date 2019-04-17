@@ -88,10 +88,8 @@ namespace UIForia.Systems {
 
                 // todo -- opacity will need to be inherited
 
-                Vector2 pivot = layoutResult.pivot;
-
-                Vector2 offset = new Vector2(); //new Vector2(layoutResult.allocatedSize.width * pivot.x, layoutResult.allocatedSize.height * pivot.y));new Vector2(layoutResult.allocatedSize.width * pivot.x, layoutResult.allocatedSize.height * pivot.y);
-                SVGXMatrix matrix = layoutResult.matrix; //SVGXMatrix.TRS(layoutResult.screenPosition + offset, layoutResult.totalRotation, layoutResult.scale);
+                Vector2 offset = new Vector2();
+                SVGXMatrix matrix = layoutResult.matrix;
 
                 string painterName = current.style.Painter;
                 if (painterName != string.Empty) {
@@ -118,13 +116,6 @@ namespace UIForia.Systems {
                 ctx.SetTransform(matrix);
 
                 if (current is UITextElement textElement) {
-                    
-                    //if (current.style.OverflowY != Overflow.Visible) {
-                        Vector2 screenPos = current.layoutResult.screenPosition;
-                        Size allocated = current.layoutResult.allocatedSize;
-//                        ctx.EnableScissorRect(new Rect(screenPos.x, screenPos.y, allocated.width, allocated.height));
-                   // }
-                    
                     ctx.BeginPath();
                     ctx.Text(-offset.x, -offset.y, textElement.textInfo);
                     ctx.SetFill(textElement.style.TextColor);
@@ -171,8 +162,6 @@ namespace UIForia.Systems {
 
             LayoutResult layoutResult = current.layoutResult;
             OffsetRect borderRect = layoutResult.border;
-            Vector2 pivot = layoutResult.pivot;
-            Vector2 offset = new Vector2(); //new Vector2(layoutResult.allocatedSize.width * pivot.x, layoutResult.allocatedSize.height * pivot.y));new Vector2(layoutResult.allocatedSize.width * pivot.x, layoutResult.allocatedSize.height * pivot.y);
 
             Vector4 border = layoutResult.border;
             Vector4 resolveBorderRadius = layoutResult.borderRadius;
@@ -191,7 +180,7 @@ namespace UIForia.Systems {
             }
 
             if (resolveBorderRadius == Vector4.zero) {
-                ctx.Rect(borderRect.left - offset.x, borderRect.top - offset.y, layoutResult.allocatedSize.width - borderRect.Horizontal, layoutResult.allocatedSize.height - borderRect.Vertical);
+                ctx.Rect(borderRect.left, borderRect.top, layoutResult.allocatedSize.width - borderRect.Horizontal, layoutResult.allocatedSize.height - borderRect.Vertical);
 
                 if (!hasBorder) {
                     DrawNormalFill(ctx, current);
@@ -244,7 +233,7 @@ namespace UIForia.Systems {
             // todo -- might need to special case non uniform border with border radius
             else {
                 ctx.BeginPath();
-                ctx.RoundedRect(new Rect(borderRect.left - offset.x, borderRect.top - offset.y, width - borderRect.Horizontal, height - borderRect.Vertical), resolveBorderRadius.x, resolveBorderRadius.y, resolveBorderRadius.z, resolveBorderRadius.w);
+                ctx.RoundedRect(new Rect(borderRect.left, borderRect.top, width - borderRect.Horizontal, height - borderRect.Vertical), resolveBorderRadius.x, resolveBorderRadius.y, resolveBorderRadius.z, resolveBorderRadius.w);
                 DrawNormalFill(ctx, current);
                 if (hasBorder) {
                     ctx.SetStrokeWidth(borderRect.top);

@@ -139,7 +139,7 @@ namespace UIForia.Systems {
             );
 
             layoutResult.matrix = SVGXMatrix.identity;
-            
+
             CreateOrDestroyScrollbars(root);
 
             while (stack.Count > 0) {
@@ -225,7 +225,6 @@ namespace UIForia.Systems {
                     );
 
                     SVGXMatrix m = SVGXMatrix.TRS(layoutResult.localPosition, layoutResult.rotation, layoutResult.scale);
-                    SVGXMatrix p = SVGXMatrix.identity;
                     Vector2 pivot = box.Pivot;
                     Vector2 offset = new Vector2(layoutResult.allocatedSize.width * pivot.x, layoutResult.allocatedSize.height * pivot.y);
                     SVGXMatrix parentMatrix = box.parent.element.layoutResult.matrix;
@@ -233,11 +232,9 @@ namespace UIForia.Systems {
                     SVGXMatrix minusPivotMat = pivotMat.Inverse();
 
                     m = pivotMat * m * minusPivotMat;
-//                    m = minusPivotMat * m * pivotMat;
-//                    m *= parentMatrix;
                     m = parentMatrix * m;
                     layoutResult.matrix = m;
-                    
+
                     // should be able to sort by view
                     Rect clipRect = new Rect(0, 0, viewportRect.width, viewportRect.height);
                     UIElement ptr = element.parent;
@@ -504,11 +501,6 @@ namespace UIForia.Systems {
 //            }
         }
 
-        private void LayoutSticky() {
-            // only sticky within the parent
-            // TransformPositionXBehavior =  Sticky;
-        }
-
         public void OnDestroy() { }
 
         public void OnViewAdded(UIView view) {
@@ -534,21 +526,8 @@ namespace UIForia.Systems {
 
                 switch (property.propertyId) {
                     case StylePropertyId.LayoutBehavior:
-                        LayoutBehavior behavior = property.AsLayoutBehavior;
-                        switch (behavior) {
-                            case LayoutBehavior.Unset:
-                            case LayoutBehavior.Normal:
-                                //box.parent?.OnChildEnabled(box);
-                                break;
-                            case LayoutBehavior.Ignored:
-                                //box.parent?.OnChildDisabled(box);
-                                break;
-                            case LayoutBehavior.TranscludeChildren:
-                                //  box.parent?.TranscludeChildren(box);
-                                break;
-                            default:
-                                throw new ArgumentOutOfRangeException();
-                        }
+                        // todo -- implement this
+                        box.UpdateChildren();
 
                         break;
                     case StylePropertyId.LayoutType:

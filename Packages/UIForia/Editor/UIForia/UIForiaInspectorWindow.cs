@@ -26,6 +26,7 @@ namespace UIForia.Editor {
         private Color overlayBorderColor;
 
         private Color contentColor = new Color32(140, 182, 193, 175);
+        private Color allocatedContentColor = new Color32(90, 212, 193, 175);
         private Color borderColor = new Color32(253, 221, 155, 175);
         private Color marginColor = new Color32(249, 204, 157, 175);
         private Color paddingColor = new Color32(196, 208, 139, 175);
@@ -309,7 +310,12 @@ namespace UIForia.Editor {
                 float contentY = (result.screenPosition.y) + border.top + padding.top;
                 float contentWidth = result.actualSize.width - border.Horizontal - padding.Horizontal;
                 float contentHeight = result.actualSize.height - border.Vertical - padding.Vertical;
+                float allocatedWidth = result.allocatedSize.width - border.Horizontal - padding.Horizontal;
+                float allocatedHeight = result.allocatedSize.height - border.Vertical - padding.Vertical;
                 ctx.FillRect(contentX, contentY, contentWidth, contentHeight);
+                
+                ctx.SetFill(allocatedContentColor);
+                ctx.FillRect(contentX, contentY, allocatedWidth, allocatedHeight);
 
                 float paddingHorizontalWidth = width - padding.Horizontal - border.left;
                 float paddingVerticalHeight = height - border.Vertical;

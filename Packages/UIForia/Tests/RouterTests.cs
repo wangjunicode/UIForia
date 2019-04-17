@@ -41,6 +41,40 @@ public class RouterTests {
         Assert.True(uiElement2.isDisabled);
     }
 
+    [Template(TemplateType.String, @"
+    <UITemplate>
+        <Contents x-router=""game"" x-defaultRoute=""/user/1"">
+             
+            <Group x-route=""/user/:id"">
+                This is you
+                <Div x-id=""inner-route"" x-route=""/something/:id2"">NEST1</Div>
+            </Group>
+            <Group x-id=""friends"" x-route=""/user/:id/friends"">These are your Friends</Group>
+        </Contents>
+    </UITemplate>
+    ")]
+    private class DeeplyNestedRouters : UIElement { }
+   
+    [Test]
+    public void DeeplyNestedRoutersShouldWork() {
+        MockApplication app = new MockApplication(typeof(DeeplyNestedRouters));
+        app.Update();
+        
+        var uiElement1 = app.RootElement.GetChild(0);
+        var uiElement2 = app.RootElement.GetChild(1);
+        
+        Assert.IsInstanceOf<UIGroupElement>(uiElement1);
+        Assert.IsInstanceOf<UIGroupElement>(uiElement2);
+        
+        Router router = app.RootElement.Application.RoutingSystem.FindRouter("game");
+        string id = router.GetParameter("id");
+        
+        Assert.True(uiElement1.isEnabled);
+        Assert.AreEqual("1", id);
+        
+        Assert.True(uiElement2.isDisabled);
+    }
+
     [Test]
     public void ParseInnerRouteWithParameter() {
         MockApplication app = new MockApplication(typeof(ParsersRouterNestedThing));

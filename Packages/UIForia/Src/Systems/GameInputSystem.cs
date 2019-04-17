@@ -26,8 +26,8 @@ namespace UIForia.Systems.Input {
             retn.middleMouseButtonState.isUpThisFrame = UnityEngine.Input.GetMouseButtonUp(2);
             
             retn.leftMouseButtonState.downPosition = m_MouseState.leftMouseButtonState.downPosition;
-            retn.rightMouseButtonState.downPosition = m_MouseState.leftMouseButtonState.downPosition;
-            retn.middleMouseButtonState.downPosition = m_MouseState.leftMouseButtonState.downPosition;
+            retn.rightMouseButtonState.downPosition = m_MouseState.rightMouseButtonState.downPosition;
+            retn.middleMouseButtonState.downPosition = m_MouseState.middleMouseButtonState.downPosition;
             
             retn.leftMouseButtonState.isDrag = m_MouseState.leftMouseButtonState.isDrag;
             retn.rightMouseButtonState.isDrag = m_MouseState.rightMouseButtonState.isDrag;

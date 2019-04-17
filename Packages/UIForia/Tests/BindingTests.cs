@@ -1,9 +1,11 @@
+using System;
 using System.Collections.Generic;
 using NUnit.Framework;
 using Tests.Mocks;
 using UIForia.Attributes;
 using UIForia.Elements;
 using UIForia.Util;
+using UnityEngine.Experimental.UIElements;
 
 [TestFixture]
 public class BindingTests {
@@ -22,6 +24,14 @@ public class BindingTests {
 
     }
 
+    public class Thing {
+        public string name;
+
+        public Thing(string name) {
+            this.name = name;
+        }
+    }
+
     [Template(TemplateType.String, @"
         <UITemplate>
             <Contents>
@@ -38,6 +48,59 @@ public class BindingTests {
 
     }
 
+    [Template(TemplateType.String, @"
+        <UITemplate>
+            <Contents>
+                <Repeat list='thelist'>
+                    <Group style='[GetStyle($item)]'>
+                        <Div />
+                        <Div > {$item.name}</Div>
+                    </Group>
+                </Repeat>
+            </Contents>
+        </UITemplate>
+    ")]
+    public class RepeatBindingChecker : UIElement {
+
+        public RepeatableList<Thing> thelist;
+
+        public override void OnCreate() {
+            thelist = new RepeatableList<Thing>() {
+                new Thing("a"),
+                new Thing("b"),
+                new Thing("c"),
+            };
+        }
+
+        public string GetStyle(Thing thing) {
+            return thing.name;
+        }
+                
+        [OnMouseUp]
+        public void OnMouseUp() {
+            
+            thelist.RemoveAt(0);
+
+            if (thelist.Count == 0) {
+                int count = thelist.Count;
+                for (int i = 0; i < count + 3; i++) {
+                    thelist.Add(new Thing("index" + i));
+                }
+            }
+        }
+    }
+
+    [Test]
+    public void CreateAndDeleteRepeatableListItems() {
+        MockApplication app = new MockApplication(typeof(RepeatBindingChecker));
+
+        for (int i = 0; i < 1000; i++) {
+            app.InputSystem.MouseUp();
+            app.Update();
+            app.InputSystem.MouseUp();
+        }
+    }
+    
     [Test]
     public void RunAnActiveBinding() {
         MockApplication app = new MockApplication(typeof(BindingTestThing));

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UITemplate>
+
+    <Contents>
+        <Heading1>UIForia Documentation</Heading1>
+        <Group style="main-container">
+            
+            <Div style="navigation">
+                
+                
+                
+            </Div>
+            
+            <Div style="demo-panel">
+                
+                
+                
+            </Div>
+            
+        </Group>
+    </Contents>
+
+</UITemplate>

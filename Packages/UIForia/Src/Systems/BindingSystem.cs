@@ -100,6 +100,10 @@ namespace UIForia.Systems {
 
         public void OnAttributeSet(UIElement element, string attributeName, string currentValue, string attributeValue) { }
 
+        // todo -- expose to editor but not user
+        public SkipTree<BindingNode> GetReadTree() {
+            return m_ReadBindingTree;
+        }
     }
 
 }

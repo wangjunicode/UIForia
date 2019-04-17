@@ -148,8 +148,9 @@ namespace UIForia.Systems {
         }
 
         public virtual void OnUpdate() {
-            m_MouseState = GetMouseState();
 
+            m_MouseState = GetMouseState();
+            
             ProcessKeyboardEvents();
             ProcessMouseInput();
 
@@ -159,10 +160,15 @@ namespace UIForia.Systems {
 
             ProcessDragEvents();
 
-
             List<UIElement> temp = m_ElementsLastFrame;
             m_ElementsLastFrame = m_ElementsThisFrame;
             m_ElementsThisFrame = temp;
+
+            for (int i = 0; i < m_ElementsLastFrame.Count; i++) {
+                if (m_ElementsLastFrame[i].isDisabled || m_ElementsLastFrame[i].isDestroyed) {
+                    m_ElementsLastFrame.RemoveAt(i--);
+                }
+            }
 
             m_ElementsThisFrame.Clear();
             m_EnteredElements.Clear();
@@ -194,7 +200,7 @@ namespace UIForia.Systems {
                     m_ElementsLastFrame[i].style?.ExitState(StyleState.Hover);
                 }
             }
-
+            
             m_EnteredElements.Sort(s_DepthComparer);
             m_ElementsThisFrame.Sort(s_DepthComparer);
 
@@ -291,6 +297,9 @@ namespace UIForia.Systems {
 
             for (int i = 0; i < m_MouseDownElements.Count; i++) {
                 UIElement element = m_MouseDownElements[i];
+                if (element.isDestroyed || element.isDisabled) {
+                    continue;
+                }
 
                 if (element.layoutResult.HasScrollbarVertical || element.layoutResult.HasScrollbarHorizontal) {
                     Scrollbar scrollbar = Application.GetCustomScrollbar(element.style.Scrollbar);
@@ -353,6 +362,10 @@ namespace UIForia.Systems {
 
             for (int i = 0; i < elements.Count; i++) {
                 UIElement element = elements[i];
+                if (element.isDestroyed || element.isDisabled) {
+                    continue;
+                }
+                
                 DragHandlerGroup dragHandlerGroup;
 
                 if (!m_DragHandlerMap.TryGetValue(element.id, out dragHandlerGroup)) {
@@ -533,6 +546,11 @@ namespace UIForia.Systems {
             if (m_FocusedElement == null) {
                 m_KeyboardEventTree.ConditionalTraversePreOrder(keyEvent, (item, evt) => {
                     if (evt.stopPropagation) return false;
+
+                    UIElement element = (UIElement) item.Element;  
+                    if (element.isDestroyed || element.isDisabled) {
+                        return false;
+                    }
 
                     IReadOnlyList<KeyboardEventHandler> handlers = item.handlers;
                     for (int i = 0; i < handlers.Count; i++) {
@@ -803,6 +821,9 @@ namespace UIForia.Systems {
 
             for (int i = 0; i < elements.Count; i++) {
                 UIElement element = elements[i];
+                if (element.isDestroyed || element.isDisabled) {
+                    continue;
+                }
                 MouseHandlerGroup mouseHandlerGroup;
 
                 if (element.layoutResult.HasScrollbarVertical) {

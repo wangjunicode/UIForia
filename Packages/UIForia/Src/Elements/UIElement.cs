@@ -270,8 +270,8 @@ namespace UIForia.Elements {
             ElementColdData coldData = s_ColdDataMap.GetOrDefault(id);
             string oldValue = coldData.GetAttribute(name).value;
             coldData.SetAttribute(name, value);
-            Application.OnAttributeSet(this, name, value, oldValue);
             s_ColdDataMap[id] = coldData;
+            Application.OnAttributeSet(this, name, value, oldValue);
         }
 
         public string GetAttribute(string attr) {

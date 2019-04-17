@@ -44,17 +44,13 @@ namespace UIForia.Layout.LayoutTypes {
         public FlexLayoutBox(UIElement element) : base(element) {
             this.items = new LightList<Item>(4);
             this.tracks = new LightList<Track>(4);
-            crossAxisAlignment = style.FlexLayoutCrossAxisAlignment;
-            mainAxisAlignment = style.FlexLayoutMainAxisAlignment;
+            this.crossAxisAlignment = style.FlexLayoutCrossAxisAlignment;
+            this.mainAxisAlignment = style.FlexLayoutMainAxisAlignment;
         }
 
-        protected override void OnChildAdded(LayoutBox child) {
-            OnChildEnabled(child);
-        }
-
-        public override void OnChildEnabled(LayoutBox enabledChild) {
-            children.Add(enabledChild); // todo -- insert in sort order
-            items.Add(new Item());
+        protected override void OnChildrenChanged() {
+            items.Clear();
+            items.EnsureCapacity(children.Count);
             Item[] itemList = items.Array;
             for (int i = 0; i < children.Count; i++) {
                 LayoutBox child = children[i];
@@ -68,25 +64,6 @@ namespace UIForia.Layout.LayoutTypes {
                 itemList[i].crossAxisAlignment = childCrossAlignment;
             }
 
-            RequestContentSizeChangeLayout();
-        }
-
-        public override void OnChildDisabled(LayoutBox disabledChild) {
-            children.Remove(disabledChild);
-            Item[] itemList = items.Array;
-            for (int i = 0; i < children.Count; i++) {
-                LayoutBox child = children[i];
-                CrossAxisAlignment childCrossAlignment = children[i].style.FlexItemSelfAlignment;
-                if (childCrossAlignment == CrossAxisAlignment.Unset) {
-                    childCrossAlignment = crossAxisAlignment;
-                }
-
-                itemList[i].growFactor = child.style.FlexItemGrow;
-                itemList[i].shrinkFactor = child.style.FlexItemShrink;
-                itemList[i].crossAxisAlignment = childCrossAlignment;
-            }
-
-            RequestContentSizeChangeLayout();
         }
 
         public override void OnStylePropertyChanged(LightList<StyleProperty> properties) {

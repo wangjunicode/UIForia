@@ -40,6 +40,7 @@ namespace UIForia.Layout.LayoutTypes {
             this.m_ColTracks = new LightList<GridTrack>();
             this.m_Occupied = new HashSet<int>();
             this.m_Placements = new List<GridPlacement>();
+            this.m_IsPlacementDirty = true;
         }
 
         internal LightList<GridTrack> GetRowTracks() {
@@ -48,10 +49,6 @@ namespace UIForia.Layout.LayoutTypes {
 
         internal LightList<GridTrack> GetColTracks() {
             return m_ColTracks;
-        }
-
-        public override void OnInitialize() {
-            m_IsPlacementDirty = true;
         }
 
         protected override float ComputeContentWidth() {
@@ -700,16 +697,16 @@ namespace UIForia.Layout.LayoutTypes {
                     return value;
                 case GridTemplateUnit.Em:
                     return value * style.GetResolvedFontSize();
-                
+
                 case GridTemplateUnit.ViewportWidth:
                     return value * view.Viewport.width;
-                
+
                 case GridTemplateUnit.ViewportHeight:
                     return value * view.Viewport.height;
-                
+
                 case GridTemplateUnit.ParentSize:
                     return parent.allocatedHeight * value;
-                
+
                 case GridTemplateUnit.ParentContentArea:
                     return (parent.allocatedHeight - parent.PaddingVertical - parent.BorderVertical) * value;
 
@@ -1006,23 +1003,27 @@ namespace UIForia.Layout.LayoutTypes {
             return total;
         }
 
-        protected override void OnChildAdded(LayoutBox child) {
-            if (child.element.isDisabled) {
-                return;
-            }
-
-            if ((child.style.LayoutBehavior & LayoutBehavior.Ignored) == 0) {
-                children.Add(child);
+        protected override void OnChildrenChanged() {
+            m_Placements.Clear();
+            m_Widths.Clear();
+            m_Heights.Clear();
+            for (int i = 0; i < children.Count; i++) {
+                LayoutBox child = children[i];
                 int colStart = child.style.GridItemColStart;
                 int colSpan = child.style.GridItemColSpan;
                 int rowStart = child.style.GridItemRowStart;
                 int rowSpan = child.style.GridItemRowSpan;
-                m_Placements.Add(new GridPlacement(child.element.id, m_Placements.Count, new GridItem(colStart, colSpan), new GridItem(rowStart, rowSpan)));
-                RequestContentSizeChangeLayout();
                 m_Widths.Add(new GridItemSizes());
                 m_Heights.Add(new GridItemSizes());
-                m_IsPlacementDirty = true;
+                m_Placements.Add(new GridPlacement(
+                    child.element.id,
+                    m_Placements.Count,
+                    new GridItem(colStart, colSpan),
+                    new GridItem(rowStart, rowSpan))
+                );
             }
+
+            m_IsPlacementDirty = true;
         }
 
         public override void OnStylePropertyChanged(LightList<StyleProperty> properties) {

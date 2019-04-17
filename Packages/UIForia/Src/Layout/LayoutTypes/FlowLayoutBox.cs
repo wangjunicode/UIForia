@@ -9,10 +9,10 @@ namespace UIForia.Layout.LayoutTypes {
 
     public class FlowLayoutBox : LayoutBox {
 
-        private readonly LightList<FlexItem> items;
+        private readonly LightList<FlowItem> items;
 
         public FlowLayoutBox(UIElement element) : base(element) {
-            items = new LightList<FlexItem>();
+            items = new LightList<FlowItem>();
         }
 
         public override void RunLayout() {
@@ -27,7 +27,7 @@ namespace UIForia.Layout.LayoutTypes {
                 actualWidth = size.width;
                 actualHeight = size.height;
                 for (int i = 0; i < children.Count; i++) {
-                    FlexItem item = items[i];
+                    FlowItem item = items[i];
 
                     children[i].SetAllocatedRect(
                         item.mainAxisStart,
@@ -42,7 +42,7 @@ namespace UIForia.Layout.LayoutTypes {
                 actualWidth = size.width;
                 actualHeight = size.height;
                 for (int i = 0; i < children.Count; i++) {
-                    FlexItem item = items[i];
+                    FlowItem item = items[i];
 
                     children[i].SetAllocatedRect(
                         item.crossAxisStart,
@@ -97,11 +97,11 @@ namespace UIForia.Layout.LayoutTypes {
 
             items.Clear();
 
-            FlexTrack track = new FlexTrack(adjustedWidth);
+            FlowTrack track = new FlowTrack(adjustedWidth);
 
             for (int i = 0; i < children.Count; i++) {
                 LayoutBox child = children[i];
-                FlexItem item = new FlexItem();
+                FlowItem item = new FlowItem();
                 LayoutBoxSize widthSize = child.GetWidths();
                 CrossAxisAlignment childAlignment = child.style.FlexItemSelfAlignment;
 
@@ -136,12 +136,12 @@ namespace UIForia.Layout.LayoutTypes {
             CrossAxisAlignment crossAxisAlignment = style.FlexLayoutCrossAxisAlignment;
             items.Clear();
 
-            FlexTrack track = new FlexTrack(adjustedWidth);
+            FlowTrack track = new FlowTrack(adjustedWidth);
             float maxWidth = 0f;
 
             for (int i = 0; i < children.Count; i++) {
                 LayoutBox child = children[i];
-                FlexItem item = new FlexItem();
+                FlowItem item = new FlowItem();
                 LayoutBoxSize widthSize = child.GetWidths();
                 CrossAxisAlignment childAlignment = child.style.FlexItemSelfAlignment;
 
@@ -161,7 +161,7 @@ namespace UIForia.Layout.LayoutTypes {
 
             for (int i = 0; i < children.Count; i++) {
                 LayoutBox child = children[i];
-                FlexItem item = items[i];
+                FlowItem item = items[i];
 
                 if (item.crossAxisAlignment == CrossAxisAlignment.Stretch) {
                     item.crossSize = maxWidth;
@@ -188,9 +188,9 @@ namespace UIForia.Layout.LayoutTypes {
         private float PositionCrossAxis(float offsetTop, float offsetBottom, float targetSize) {
             float maxHeight = 0;
             targetSize -= (offsetTop + offsetBottom);
-            FlexItem[] itemArray = items.Array;
+            FlowItem[] itemArray = items.Array;
             for (int i = 0; i < items.Count; i++) {
-                FlexItem item = itemArray[i];
+                FlowItem item = itemArray[i];
                 switch (itemArray[i].crossAxisAlignment) {
                     case CrossAxisAlignment.Center:
                         item.crossAxisStart = (targetSize * 0.5f) - (item.crossSize * 0.5f);
@@ -226,7 +226,7 @@ namespace UIForia.Layout.LayoutTypes {
             return maxHeight;
         }
 
-        private float AlignMainAxis(FlexTrack track, float mainAxisOffset) {
+        private float AlignMainAxis(FlowTrack track, float mainAxisOffset) {
             MainAxisAlignment mainAxisAlignment = style.FlexLayoutMainAxisAlignment;
             float spacerSize = 0;
             float offset = items[0].margin.left;
@@ -269,7 +269,7 @@ namespace UIForia.Layout.LayoutTypes {
                 }
             }
 
-            FlexItem[] itemArray = items.Array;
+            FlowItem[] itemArray = items.Array;
             for (int i = 0; i < itemCount; i++) {
                 itemArray[i].mainAxisStart = mainAxisOffset + offset;
                 offset += itemArray[i].mainSize + spacerSize;
@@ -278,41 +278,13 @@ namespace UIForia.Layout.LayoutTypes {
             return track.mainSize;
         }
 
-        protected override void OnChildAdded(LayoutBox child) {
-            if (!child.element.isEnabled || child.IsIgnored) {
-                return;
-            }
-
-            int idx = FindLayoutSiblingIndex(child.element);
-
-            if (idx <= children.Count) {
-                children.Insert(idx, child);
-            }
-            else {
-                children.Add(child);
-            }
-
-            if (child.element.isEnabled) {
-                RequestContentSizeChangeLayout();
-            }
-        }
-
-        public override void OnChildEnabled(LayoutBox child) {
-            OnChildAdded(child);
-        }
-
-        public override void OnChildDisabled(LayoutBox child) {
-            children.Remove(child);
-            RequestContentSizeChangeLayout();
-        }
-        
-        private struct FlexTrack {
+        private struct FlowTrack {
 
             public float mainSize;
             public float crossSize;
             public float remainingSpace;
 
-            public FlexTrack(float totalSize) {
+            public FlowTrack(float totalSize) {
                 this.remainingSpace = totalSize;
                 this.mainSize = 0;
                 this.crossSize = 0;
@@ -320,7 +292,7 @@ namespace UIForia.Layout.LayoutTypes {
 
         }
 
-        private struct FlexItem {
+        private struct FlowItem {
 
             public float mainAxisStart;
             public float crossAxisStart;

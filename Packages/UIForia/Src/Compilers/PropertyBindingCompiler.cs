@@ -138,7 +138,6 @@ namespace UIForia.Compilers {
         }
 
         // todo ensure each binding has at most one .read and one .write and that both are different values
-        // ie disallow <Input value.read="someValue" value.write="someValue"/> as this would make no sense unless / until we have pre-post update binding
         public void CompileAttribute(Type rootType, Type elementType, AttributeDefinition attributeDefinition, LightList<Binding> output) {
             this.rootType = rootType;
             this.elementType = elementType;
@@ -148,7 +147,8 @@ namespace UIForia.Compilers {
             EventInfo eventInfo = elementType.GetEvent(attrKey);
 
             if (eventInfo != null) {
-                output.Add(CompileCallbackAttribute(attrValue, eventInfo));
+                output.Add(CompileEventBinding(attrKey, attrValue, eventInfo));
+                return;
             }
 
             if (attrKey.IndexOf(".", StringComparison.Ordinal) != -1) {
@@ -358,88 +358,75 @@ namespace UIForia.Compilers {
 
         private static Dictionary<string, LightList<object>> GetActionMap(Type elementType) {
             Dictionary<string, LightList<object>> actionMap;
-            if (!m_TypeMap.TryGetValue(elementType, out actionMap)) {
-                MethodInfo[] methods = elementType.GetMethods(ReflectionUtil.InstanceBindFlags);
+            
+            if (m_TypeMap.TryGetValue(elementType, out actionMap)) {
+                return actionMap;
+            }
+            
+            MethodInfo[] methods = elementType.GetMethods(ReflectionUtil.InstanceBindFlags);
 
-                for (int i = 0; i < methods.Length; i++) {
-                    MethodInfo info = methods[i];
-                    object[] customAttributes = info.GetCustomAttributes(typeof(OnPropertyChanged), true);
+            for (int i = 0; i < methods.Length; i++) {
+                MethodInfo info = methods[i];
+                object[] customAttributes = info.GetCustomAttributes(typeof(OnPropertyChanged), true);
 
-                    if (customAttributes.Length == 0) continue;
+                if (customAttributes.Length == 0) continue;
 
-                    ParameterInfo[] parameterInfos = info.GetParameters();
+                ParameterInfo[] parameterInfos = info.GetParameters();
 
-                    if (!info.IsStatic && parameterInfos.Length == 1 && parameterInfos[0].ParameterType == typeof(string)) {
-                        if (actionMap == null) {
-                            actionMap = m_TypeMap.GetOrDefault(elementType);
-                        }
-
-                        if (actionMap == null) {
-                            actionMap = new Dictionary<string, LightList<object>>();
-                            m_TypeMap.Add(elementType, actionMap);
-                        }
-
-                        for (int j = 0; j < customAttributes.Length; j++) {
-                            OnPropertyChanged attr = (OnPropertyChanged) customAttributes[j];
-                            Type a = ReflectionUtil.GetOpenDelegateType(info);
-                            GetHandlerList(actionMap, attr.propertyName).Add(ReflectionUtil.GetDelegate(a, info));
-                        }
+                if (!info.IsStatic && parameterInfos.Length == 1 && parameterInfos[0].ParameterType == typeof(string)) {
+                    if (actionMap == null) {
+                        actionMap = m_TypeMap.GetOrDefault(elementType);
                     }
-                    else {
-                        UnityEngine.Debug.LogWarning($"Trying to compile 'OnPropertyChanged' attribute on method {info.Name} of type {info.DeclaringType} but the method did not have the required signature of 1 parameter of type string");
+
+                    if (actionMap == null) {
+                        actionMap = new Dictionary<string, LightList<object>>();
+                        m_TypeMap.Add(elementType, actionMap);
+                    }
+
+                    for (int j = 0; j < customAttributes.Length; j++) {
+                        OnPropertyChanged attr = (OnPropertyChanged) customAttributes[j];
+                        Type a = ReflectionUtil.GetOpenDelegateType(info);
+                        GetHandlerList(actionMap, attr.propertyName).Add(ReflectionUtil.GetDelegate(a, info));
                     }
                 }
-
-                // use null as a marker in the dictionary regardless of whether or not we have actions registered
-                m_TypeMap[elementType] = actionMap;
+                else {
+                    UnityEngine.Debug.LogWarning($"Trying to compile 'OnPropertyChanged' attribute on method {info.Name} of type {info.DeclaringType} but the method did not have the required signature of 1 parameter of type string");
+                }
             }
+
+            // use null as a marker in the dictionary regardless of whether or not we have actions registered
+            m_TypeMap[elementType] = actionMap;
 
             return actionMap;
         }
 
-        private Binding CompileCallbackAttribute(string value, EventInfo eventInfo) {
+        private Binding CompileEventBinding(string attrKey, string attrValue, EventInfo eventInfo) {
             MethodInfo info = eventInfo.EventHandlerType.GetMethod("Invoke");
             Debug.Assert(info != null, nameof(info) + " != null");
 
             ParameterInfo[] delegateParameters = info.GetParameters();
 
             Type[] argTypes = new Type[delegateParameters.Length];
-
-            Expression<Terminal> expression = compiler.Compile<Terminal>(rootType, elementType, value);
-
-            ReflectionUtil.ObjectArray2[0] = expression;
-            ReflectionUtil.ObjectArray2[1] = eventInfo;
-
-            switch (argTypes.Length) {
-                case 0:
-                    return new CallbackBinding(expression, eventInfo);
-                case 1:
-                    return (Binding) ReflectionUtil.CreateGenericInstanceFromOpenType(
-                        typeof(CallbackBinding<>),
-                        argTypes,
-                        ReflectionUtil.ObjectArray2
-                    );
-                case 2:
-                    return (Binding) ReflectionUtil.CreateGenericInstanceFromOpenType(
-                        typeof(CallbackBinding<,>),
-                        argTypes,
-                        ReflectionUtil.ObjectArray2
-                    );
-                case 3:
-                    return (Binding) ReflectionUtil.CreateGenericInstanceFromOpenType(
-                        typeof(CallbackBinding<,,>),
-                        argTypes,
-                        ReflectionUtil.ObjectArray2
-                    );
-                case 4:
-                    return (Binding) ReflectionUtil.CreateGenericInstanceFromOpenType(
-                        typeof(CallbackBinding<,,,>),
-                        argTypes,
-                        ReflectionUtil.ObjectArray2
-                    );
+            for (int i = 0; i < argTypes.Length; i++) {
+                argTypes[i] = delegateParameters[i].ParameterType;
             }
 
-            throw new Exception("Can't handle callbacks with more than four parameters");
+            Expression expression = compiler.Compile(rootType, attrValue, eventInfo.EventHandlerType);
+            
+            // todo -- this only works for the root type, if we have $item.xxx it will not work yet
+            
+            ReflectionUtil.LinqAccessor accessor = ReflectionUtil.GetLinqFieldAccessors(elementType, eventInfo.EventHandlerType, attrKey);
+
+            ReflectionUtil.ObjectArray3[0] = eventInfo;
+            ReflectionUtil.ObjectArray3[1] = expression;
+            ReflectionUtil.ObjectArray3[2] = accessor.getter;
+            
+            return (Binding) ReflectionUtil.CreateGenericInstanceFromOpenType(
+                typeof(EventSetterBinding_Delegate<,>),
+                new GenericArguments(elementType, eventInfo.EventHandlerType),
+                new ConstructorArguments(eventInfo, expression, accessor.getter)
+            );
+     
         }
 
     }

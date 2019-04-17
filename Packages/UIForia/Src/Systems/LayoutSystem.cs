@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using SVGX;
 using UIForia.Elements;
 using UIForia.Extensions;
 using UIForia.Layout;
@@ -7,6 +8,7 @@ using UIForia.Layout.LayoutTypes;
 using UIForia.Rendering;
 using UIForia.Util;
 using UnityEngine;
+using UnityEngine.Experimental.PlayerLoop;
 
 namespace UIForia.Systems {
 
@@ -26,7 +28,6 @@ namespace UIForia.Systems {
 
         protected readonly IStyleSystem m_StyleSystem;
         protected readonly IntMap<LayoutBox> m_LayoutBoxMap;
-        protected readonly LightList<LayoutBox> m_PendingInitialization;
         protected readonly LightList<TextLayoutBox> m_TextLayoutBoxes;
 
         private Size m_ScreenSize;
@@ -38,7 +39,6 @@ namespace UIForia.Systems {
         public LayoutSystem(IStyleSystem styleSystem) {
             this.m_StyleSystem = styleSystem;
             this.m_LayoutBoxMap = new IntMap<LayoutBox>();
-            this.m_PendingInitialization = new LightList<LayoutBox>();
             this.m_Views = new LightList<ViewRect>();
             this.m_VisibleElementList = new LightList<UIElement>();
             this.m_TextLayoutBoxes = new LightList<TextLayoutBox>(64);
@@ -47,29 +47,11 @@ namespace UIForia.Systems {
 
         public void OnReset() {
             m_LayoutBoxMap.Clear();
-            m_PendingInitialization.Clear();
             m_VisibleElementList.Clear();
             m_Views.Clear();
         }
 
-        protected void InitializeLayoutBoxes() {
-            if (m_PendingInitialization.Count == 0) {
-                return;
-            }
-
-            for (int i = 0; i < m_PendingInitialization.Count; i++) {
-                LayoutBox box = m_PendingInitialization[i];
-                box.OnInitialize();
-                box.IsInitialized = true;
-                box.markedForLayout = true;
-            }
-
-            m_PendingInitialization.Clear();
-        }
-
         public void OnUpdate() {
-            InitializeLayoutBoxes();
-
             // todo -- should this be a list per-view?
             m_VisibleElementList.Clear();
 
@@ -156,6 +138,8 @@ namespace UIForia.Systems {
                 root.PaddingLeft
             );
 
+            layoutResult.matrix = SVGXMatrix.identity;
+            
             CreateOrDestroyScrollbars(root);
 
             while (stack.Count > 0) {
@@ -205,6 +189,7 @@ namespace UIForia.Systems {
                     layoutResult = element.layoutResult;
 
                     LayoutBox parentBox = box.parent;
+
                     Vector2 scrollOffset = new Vector2();
                     scrollOffset.x = (parentBox.actualWidth - parentBox.allocatedWidth) * parentBox.element.scrollOffset.x;
                     scrollOffset.y = (parentBox.actualHeight - parentBox.allocatedHeight) * parentBox.element.scrollOffset.y;
@@ -213,26 +198,25 @@ namespace UIForia.Systems {
                     layoutResult.ContentRect = box.ContentRect;
                     layoutResult.actualSize = new Size(box.actualWidth, box.actualHeight);
                     layoutResult.allocatedSize = new Size(box.allocatedWidth, box.allocatedHeight);
-                    layoutResult.screenPosition = box.parent.element.layoutResult.screenPosition + layoutResult.localPosition;
+                    layoutResult.screenPosition = parentBox.element.layoutResult.screenPosition + layoutResult.localPosition;
                     layoutResult.scale = new Vector2(box.style.TransformScaleX, box.style.TransformScaleY); // only set if changed
                     layoutResult.rotation = parentBox.style.TransformRotation + box.style.TransformRotation; // only set if changed
                     layoutResult.pivot = box.Pivot; // only set if changed
-                    layoutResult.totalRotation = parentBox.element.layoutResult.totalRotation + layoutResult.rotation;
-                    
+
                     layoutResult.borderRadius = new ResolvedBorderRadius(
                         box.BorderRadiusTopLeft,
                         box.BorderRadiusTopRight,
                         box.BorderRadiusBottomRight,
                         box.BorderRadiusBottomLeft
                     );
-                    
+
                     layoutResult.border = new OffsetRect( // only set if changed
                         box.BorderTop,
                         box.BorderRight,
                         box.BorderBottom,
                         box.BorderLeft
                     );
-                    
+
                     layoutResult.padding = new OffsetRect(
                         box.PaddingTop,
                         box.PaddingRight,
@@ -240,6 +224,20 @@ namespace UIForia.Systems {
                         box.PaddingLeft
                     );
 
+                    SVGXMatrix m = SVGXMatrix.TRS(layoutResult.localPosition, layoutResult.rotation, layoutResult.scale);
+                    SVGXMatrix p = SVGXMatrix.identity;
+                    Vector2 pivot = box.Pivot;
+                    Vector2 offset = new Vector2(layoutResult.allocatedSize.width * pivot.x, layoutResult.allocatedSize.height * pivot.y);
+                    SVGXMatrix parentMatrix = box.parent.element.layoutResult.matrix;
+                    SVGXMatrix pivotMat = SVGXMatrix.identity.Translate(offset);
+                    SVGXMatrix minusPivotMat = pivotMat.Inverse();
+
+                    m = pivotMat * m * minusPivotMat;
+//                    m = minusPivotMat * m * pivotMat;
+//                    m *= parentMatrix;
+                    m = parentMatrix * m;
+                    layoutResult.matrix = m;
+                    
                     // should be able to sort by view
                     Rect clipRect = new Rect(0, 0, viewportRect.width, viewportRect.height);
                     UIElement ptr = element.parent;
@@ -306,8 +304,6 @@ namespace UIForia.Systems {
 
                     // todo -- can i get rid of clip vector here?
                     Rect screenRect = layoutResult.ScreenRect;
-//                    float clipX = Mathf.Clamp01(MathUtil.PercentOfRange(clipRect.x, screenRect.xMin, screenRect.xMax));
-//                    float clipY = Mathf.Clamp01(MathUtil.PercentOfRange(clipRect.y, screenRect.yMin, screenRect.yMax));
                     float clipW = Mathf.Clamp01(MathUtil.PercentOfRange(clipRect.xMax, screenRect.xMin, screenRect.xMax)) - clipWAdjustment;
                     float clipH = Mathf.Clamp01(MathUtil.PercentOfRange(clipRect.yMax, screenRect.yMin, screenRect.yMax)) - clipHAdjustment;
 
@@ -316,7 +312,6 @@ namespace UIForia.Systems {
                     }
 
                     layoutResult.cullState = cullResult;
-//                    layoutResult.clipVector = new Vector4(clipX, clipY, clipW, clipH);
 
                     // todo actually use this
                     // if layout result size or position changed -> update the query grid
@@ -373,6 +368,10 @@ namespace UIForia.Systems {
             TransformBehavior transformBehaviorY = box.style.TransformBehaviorY;
 
             switch (layoutBehavior) {
+                case LayoutBehavior.TranscludeChildren:
+                    localPosition = new Vector2(0, 0);
+                    break;
+
                 case LayoutBehavior.Ignored:
 
                     switch (transformBehaviorX) {
@@ -535,11 +534,20 @@ namespace UIForia.Systems {
 
                 switch (property.propertyId) {
                     case StylePropertyId.LayoutBehavior:
-                        if (property.AsLayoutBehavior == LayoutBehavior.Ignored) {
-                            box.parent?.OnChildDisabled(box);
-                        }
-                        else {
-                            box.parent?.OnChildEnabled(box);
+                        LayoutBehavior behavior = property.AsLayoutBehavior;
+                        switch (behavior) {
+                            case LayoutBehavior.Unset:
+                            case LayoutBehavior.Normal:
+                                //box.parent?.OnChildEnabled(box);
+                                break;
+                            case LayoutBehavior.Ignored:
+                                //box.parent?.OnChildDisabled(box);
+                                break;
+                            case LayoutBehavior.TranscludeChildren:
+                                //  box.parent?.TranscludeChildren(box);
+                                break;
+                            default:
+                                throw new ArgumentOutOfRangeException();
                         }
 
                         break;
@@ -583,15 +591,6 @@ namespace UIForia.Systems {
 
             if (notifyParent) {
                 box.parent.OnChildStylePropertyChanged(box, properties);
-            }
-        }
-
-        // todo -- remove, let textbox handle this
-        private void HandleTextContentChanged(UIElement element, string content) {
-            LayoutBox box;
-            if (m_LayoutBoxMap.TryGetValue(element.id, out box)) {
-                TextLayoutBox textBox = box as TextLayoutBox;
-                textBox?.OnTextContentUpdated(); // todo -- remove this
             }
         }
 
@@ -652,90 +651,30 @@ namespace UIForia.Systems {
         }
 
         public void OnElementEnabled(UIElement element) {
-            LayoutBox child = m_LayoutBoxMap.GetOrDefault(element.id);
-            Stack<UIElement> elements = StackPool<UIElement>.Get();
-            LightList<LayoutBox> boxes = LightListPool<LayoutBox>.Get();
+            LayoutBox box = m_LayoutBoxMap.GetOrDefault(element.id);
+            if (box == null) return; // can happen if disable is called in binding before layout system gets the create call
 
-
-            elements.Push(element);
-            while (elements.Count != 0) {
-                UIElement current = elements.Pop();
-
-                LayoutBox box = m_LayoutBoxMap.GetOrDefault(current.id);
-
-                if (box == null) continue;
-
-                if (box is TextLayoutBox textLayout) {
-                    m_TextLayoutBoxes.Add(textLayout);
-                }
-
-                box.markedForLayout = true;
-
-                if (current.children == null) {
-                    continue;
-                }
-
-                box.InvalidatePreferredSizeCache();
-                boxes.Clear();
-                boxes.EnsureCapacity(current.children.Count);
-                for (int i = 0; i < current.children.Count; i++) {
-                    UIElement childElement = current.children[i];
-                    elements.Push(childElement);
-                    if (childElement.isDisabled || childElement.style.LayoutBehavior == LayoutBehavior.Ignored) {
-                        continue;
-                    }
-
-                    LayoutBox childBox = m_LayoutBoxMap.GetOrDefault(childElement.id);
-                    boxes.AddUnchecked(childBox);
-                }
-
-                box.SetChildren(boxes);
+            if (box.parent != null) {
+                UpdateChildren(box.parent);
             }
 
-            if (child.parent != null && child.element.style.LayoutBehavior != LayoutBehavior.Ignored) {
-                child.parent.OnChildEnabled(child);
-                child.parent.RequestContentSizeChangeLayout();
-            }
-
-            LightListPool<LayoutBox>.Release(ref boxes);
+            UpdateChildren(box);
         }
 
-
         public void OnElementDisabled(UIElement element) {
-            LayoutBox child = m_LayoutBoxMap.GetOrDefault(element.id);
-            if (child is TextLayoutBox textLayout) {
-                m_TextLayoutBoxes.Remove(textLayout);
+            LayoutBox box = m_LayoutBoxMap.GetOrDefault(element.id);
+            if (box == null) return; // can happen if disable is called in binding before layout system gets the create call 
+            if (box.parent != null) {
+                UpdateChildren(box.parent);
             }
 
-            if (child?.parent != null) {
-                child.parent.OnChildDisabled(child);
-                child.parent.RequestContentSizeChangeLayout();
-            }
+            m_VisibleElementList.Remove(element);
         }
 
         public void OnElementDestroyed(UIElement element) {
-            LayoutBox child = m_LayoutBoxMap.GetOrDefault(element.id);
-            if (child is TextLayoutBox textLayout) {
-                m_TextLayoutBoxes.Remove(textLayout);
-            }
-
-            // todo destroy scroll bars
-
-            if (child?.parent != null) {
-                child.parent.OnChildDisabled(child);
-                child.parent.RequestContentSizeChangeLayout();
-            }
-
-            m_PendingInitialization.Remove(child);
+            UpdateChildren(m_LayoutBoxMap.GetOrDefault(element.id));
+            m_VisibleElementList.Remove(element);
             m_LayoutBoxMap.Remove(element.id);
-
-            // todo -- maybe recycle the layout box
-
-            if (element.children != null) {
-                for (int i = 0; i < element.children.Count; i++) {
-                    OnElementDestroyed(element.children[i]);
-                }
-            }
         }
 
         public void OnAttributeSet(UIElement element, string attributeName, string currentValue, string previousValue) { }
@@ -776,31 +715,21 @@ namespace UIForia.Systems {
         public void OnElementCreated(UIElement element) {
             LayoutBox layoutBox = CreateLayoutBox(element);
             Stack<ValueTuple<UIElement, LayoutBox>> stack = StackPool<ValueTuple<UIElement, LayoutBox>>.Get();
+            LightList<LayoutBox> toUpdateList = LightListPool<LayoutBox>.Get();
 
             if (element.parent != null) {
-                layoutBox.SetParent(m_LayoutBoxMap.GetOrDefault(element.parent.id));
+                layoutBox.parent = m_LayoutBoxMap.GetOrDefault(element.parent.id);
             }
 
             m_LayoutBoxMap.Add(element.id, layoutBox);
             stack.Push(ValueTuple.Create(element, layoutBox));
-
-            m_PendingInitialization.Add(layoutBox);
 
             while (stack.Count > 0) {
                 ValueTuple<UIElement, LayoutBox> item = stack.Pop();
                 UIElement parentElement = item.Item1;
                 LayoutBox parentBox = item.Item2;
 
-                if (parentBox == null) {
-                    LayoutBox ptr = null;
-                    UIElement e = parentElement;
-                    while (ptr == null) {
-                        e = e.parent;
-                        ptr = m_LayoutBoxMap.GetOrDefault(e.id);
-                    }
-
-                    parentBox = ptr;
-                }
+                toUpdateList.Add(parentBox);
 
                 if (parentElement.children == null) {
                     continue;
@@ -809,14 +738,82 @@ namespace UIForia.Systems {
                 for (int i = 0; i < parentElement.children.Count; i++) {
                     UIElement child = parentElement.children[i];
                     LayoutBox childBox = CreateLayoutBox(child);
-                    childBox.SetParent(parentBox);
+                    childBox.parent = parentBox; // will get overridden for transcluded behaviors
                     m_LayoutBoxMap.Add(child.id, childBox);
                     stack.Push(ValueTuple.Create(child, childBox));
-                    m_PendingInitialization.Add(childBox);
                 }
             }
 
+            int count = toUpdateList.Count;
+            LayoutBox[] toUpdate = toUpdateList.Array;
+
+            for (int i = 0; i < count; i++) {
+                UpdateChildren(toUpdate[i]);
+            }
+
+            LightListPool<LayoutBox>.Release(ref toUpdateList);
             StackPool<ValueTuple<UIElement, LayoutBox>>.Release(stack);
+
+            if (element.parent != null) {
+                LayoutBox ptr = layoutBox.parent;
+                while (ptr != null) {
+                    if (ptr.style.LayoutBehavior != LayoutBehavior.TranscludeChildren) {
+                        UpdateChildren(ptr);
+                        break;
+                    }
+
+                    ptr = ptr.parent;
+                }
+            }
+        }
+
+        private void GetChildBoxes(LayoutBox box, LightList<LayoutBox> list) {
+            UIElement element = box.element;
+            UIElement[] children = element.children.Array;
+            int count = element.children.Count;
+
+            for (int i = 0; i < count; i++) {
+                LayoutBox childBox = m_LayoutBoxMap[children[i].id];
+                if (childBox.element.isDisabled) {
+                    continue;
+                }
+
+                LayoutBehavior behavior = childBox.style.LayoutBehavior;
+                switch (behavior) {
+                    case LayoutBehavior.Unset:
+                    case LayoutBehavior.Normal:
+                        list.Add(childBox);
+                        break;
+                    case LayoutBehavior.Ignored:
+                        break;
+                    case LayoutBehavior.TranscludeChildren:
+                        GetChildBoxes(childBox, list);
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
+        }
+
+        private void UpdateChildren(LayoutBox box) {
+            UIElement element = box.element;
+
+            if (box.style.LayoutBehavior == LayoutBehavior.TranscludeChildren) {
+                return;
+            }
+
+            LightList<LayoutBox> boxes = LightListPool<LayoutBox>.Get();
+            boxes.EnsureCapacity(element.children.Count);
+
+            box.children.Clear();
+            GetChildBoxes(box, boxes);
+            box.children.AddRange(boxes);
+            for (int i = 0; i < boxes.Count; i++) {
+                boxes[i].parent = box;
+            }
+
+            LightListPool<LayoutBox>.Release(ref boxes);
+            box.UpdateChildren();
         }
 
         public List<UIElement> QueryPoint(Vector2 point, List<UIElement> retn) {

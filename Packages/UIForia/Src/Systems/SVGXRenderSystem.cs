@@ -90,8 +90,8 @@ namespace UIForia.Systems {
 
                 Vector2 pivot = layoutResult.pivot;
 
-                Vector2 offset = new Vector2(layoutResult.allocatedSize.width * pivot.x, layoutResult.allocatedSize.height * pivot.y);
-                SVGXMatrix matrix = SVGXMatrix.TRS(layoutResult.screenPosition + offset, layoutResult.totalRotation, layoutResult.scale);
+                Vector2 offset = new Vector2(); //new Vector2(layoutResult.allocatedSize.width * pivot.x, layoutResult.allocatedSize.height * pivot.y));new Vector2(layoutResult.allocatedSize.width * pivot.x, layoutResult.allocatedSize.height * pivot.y);
+                SVGXMatrix matrix = layoutResult.matrix; //SVGXMatrix.TRS(layoutResult.screenPosition + offset, layoutResult.totalRotation, layoutResult.scale);
 
                 string painterName = current.style.Painter;
                 if (painterName != string.Empty) {
@@ -172,7 +172,7 @@ namespace UIForia.Systems {
             LayoutResult layoutResult = current.layoutResult;
             OffsetRect borderRect = layoutResult.border;
             Vector2 pivot = layoutResult.pivot;
-            Vector2 offset = new Vector2(layoutResult.allocatedSize.width * pivot.x, layoutResult.allocatedSize.height * pivot.y);
+            Vector2 offset = new Vector2(); //new Vector2(layoutResult.allocatedSize.width * pivot.x, layoutResult.allocatedSize.height * pivot.y));new Vector2(layoutResult.allocatedSize.width * pivot.x, layoutResult.allocatedSize.height * pivot.y);
 
             Vector4 border = layoutResult.border;
             Vector4 resolveBorderRadius = layoutResult.borderRadius;

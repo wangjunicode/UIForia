@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using UIForia.Animation;
 using UIForia.Compilers.Style;
 using UIForia.Elements;
 using UIForia.Rendering;
@@ -14,22 +13,20 @@ namespace UIForia.Systems {
         void OnStylePropertiesWillChange();
 
     }
-    
+
     public interface IStylePropertiesDidChangeHandler {
 
         void OnStylePropertiesDidChange();
 
     }
-    
+
     public interface IStyleChangeHandler {
 
         void OnStylePropertyChanged(in StyleProperty property);
 
     }
-    
-    public class StyleSystem : IStyleSystem {
 
-        protected readonly StyleAnimator animator;
+    public class StyleSystem : IStyleSystem {
 
         public event Action<UIElement, LightList<StyleProperty>> onStylePropertyChanged;
 
@@ -38,24 +35,14 @@ namespace UIForia.Systems {
         private readonly IntMap<ChangeSet> m_ChangeSets;
 
         public StyleSystem() {
-            this.animator = new StyleAnimator();
             this.m_ChangeSets = new IntMap<ChangeSet>();
         }
 
-        public void PlayAnimation(UIStyleSet styleSet, StyleAnimation animation, AnimationOptions overrideOptions = default(AnimationOptions)) {
-            int animationId = animator.PlayAnimation(styleSet, animation, overrideOptions);
-        }
+        public void SetViewportRect(Rect viewport) { }
 
-        public void SetViewportRect(Rect viewport) {
-            animator.SetViewportRect(viewport);
-        }
-
-        public void OnReset() {
-            animator.Reset();
-        }
+        public void OnReset() { }
 
         public void OnElementCreated(UIElement element) {
-
             UIStyleGroupContainer[] baseStyles = element.OriginTemplate.baseStyles;
 
             element.style.styleSystem = this;
@@ -63,26 +50,24 @@ namespace UIForia.Systems {
             element.style.Initialize(baseStyles);
 
             if (element.children != null) {
-                for (int i = 0; i < element.children.Count; i++) { 
+                for (int i = 0; i < element.children.Count; i++) {
                     OnElementCreated(element.children[i]);
                 }
             }
+
             // todo need to trickle inherited properties into newly created elements (repeat children, etc)
         }
 
         public void OnUpdate() {
-            animator.OnUpdate();
-
             if (onStylePropertyChanged == null) {
                 return;
             }
 
             m_ChangeSets.ForEach(this, (id, changeSet, self) => {
-
                 if (changeSet.element is IStylePropertiesWillChangeHandler willChangeHandler) {
                     willChangeHandler.OnStylePropertiesWillChange();
                 }
-                
+
                 if (changeSet.element.isEnabled) {
                     self.onStylePropertyChanged.Invoke(changeSet.element, changeSet.changes);
                 }
@@ -98,7 +83,7 @@ namespace UIForia.Systems {
                 if (changeSet.element is IStylePropertiesDidChangeHandler didChangeHandler) {
                     didChangeHandler.OnStylePropertiesDidChange();
                 }
-                
+
                 LightListPool<StyleProperty>.Release(ref changeSet.changes);
                 changeSet.element = null;
             });
@@ -106,23 +91,17 @@ namespace UIForia.Systems {
             m_ChangeSets.Clear();
         }
 
-        public void OnDestroy() {
-        }
+        public void OnDestroy() { }
 
-        public void OnViewAdded(UIView view) {
-        }
+        public void OnViewAdded(UIView view) { }
 
-        public void OnViewRemoved(UIView view) {
-        }
+        public void OnViewRemoved(UIView view) { }
 
-        public void OnElementEnabled(UIElement element) {
-        }
+        public void OnElementEnabled(UIElement element) { }
 
-        public void OnElementDisabled(UIElement element) {
-        }
+        public void OnElementDisabled(UIElement element) { }
 
-        public void OnElementDestroyed(UIElement element) {
-        }
+        public void OnElementDestroyed(UIElement element) { }
 
         public void OnAttributeSet(UIElement element, string attributeName, string currentValue, string attributeValue) {
             element.style.UpdateApplicableAttributeRules(attributeName, attributeValue);
@@ -179,9 +158,9 @@ namespace UIForia.Systems {
 
                 // todo -- we might want to cache font size lookups for em values, this would be the place 
                 // if (property.propertyId == StylePropertyId.TextFontSize) {
-                    // do caching    
+                // do caching    
                 // }
-                
+
                 AddToChangeSet(descendent, property);
 
                 if (descendent.children == null) {

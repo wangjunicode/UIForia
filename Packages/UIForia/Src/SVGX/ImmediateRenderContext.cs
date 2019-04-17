@@ -196,13 +196,47 @@ namespace SVGX {
             LineTo(lastPoint.x, y);
         }
 
-        public void ArcTo(float rx, float ry, float angle, bool isLargeArc, bool isSweepArc, float endX, float endY) {
-            Vector2 end = new Vector2(endX, endY);
+//        public void ArcTo(float rx, float ry, float angle, bool isLargeArc, bool isSweepArc, float endX, float endY) {
+//            Vector2 end = new Vector2(endX, endY);
+//
+//            int pointStart = points.Count;
+//            int pointCount = SVGXBezier.Arc(points, lastPoint, rx, ry, angle, isLargeArc, isSweepArc, end);
+//            UpdateShape(pointStart, pointCount);
+//            lastPoint = end;
+//        }
+//        
+        public void ArcTo(float cx, float cy, float radius, float startAngle, float endAngle, float stepSize = 5) {
+            float _start = MathUtil.WrapAngleDeg(startAngle);
+            float _end = MathUtil.WrapAngleDeg(endAngle);
 
-            int pointStart = points.Count;
-            int pointCount = SVGXBezier.Arc(points, lastPoint, rx, ry, angle, isLargeArc, isSweepArc, end);
-            UpdateShape(pointStart, pointCount);
-            lastPoint = end;
+            if (_start > _end) {
+                float tmp = _end;
+                _end = _start;
+                _start = tmp;
+            }
+
+            if (Mathf.Abs(_start - _end) == 0) {
+                _start = 0;
+                _end = 359.9f;
+            }
+
+            float x0 = radius * Mathf.Cos(_start * Mathf.Deg2Rad);
+            float y0 = radius * Mathf.Sin(_start * Mathf.Deg2Rad);
+
+            MoveTo(cx + x0, cy + y0);
+
+            stepSize = Mathf.Max(1, stepSize);
+
+            for (float theta = _start + stepSize; theta < _end; theta += stepSize) {
+                float x = radius * Mathf.Cos(theta * Mathf.Deg2Rad);
+                float y = radius * Mathf.Sin(theta * Mathf.Deg2Rad);
+                LineTo(cx + x, cy + y);
+            }
+
+            float x1 = radius * Mathf.Cos(_end * Mathf.Deg2Rad);
+            float y1 = radius * Mathf.Sin(_end * Mathf.Deg2Rad);
+            LineTo(cx + x1, cy + y1);
+            
         }
 
         public void SectorFromCenter(float cx, float cy, float radius, float startAngle, float endAngle, bool counterClockwise) {
@@ -213,7 +247,7 @@ namespace SVGX {
             points.Add(new Vector2(cx, cy));
             points.Add(new Vector2(startAngle, endAngle));
             points.Add(new Vector2(radius, counterClockwise ? 1 : -1));
-            
+
             RangeInt pointRange = new RangeInt(pointRangeStart, points.Count - pointRangeStart);
             SVGXShape currentShape = new SVGXShape(SVGXShapeType.RoundedRect, pointRange, new SVGXBounds(), true);
 

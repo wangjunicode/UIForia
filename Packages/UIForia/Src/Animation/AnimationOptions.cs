@@ -10,6 +10,28 @@ namespace UIForia.Animation {
 
     }
     
+    public enum AnimationDirection {
+
+        Forward,
+        Reverse,
+
+    }
+
+    public enum AnimationLoopType {
+
+        Constant,
+        PingPong
+
+    }
+
+    public struct AnimationProgress {
+
+        public float elapsedTime;
+        public int iterationCount;
+        public AnimationDirection currentDirection;
+
+    }
+    
     public struct AnimationOptions {      
 
         public float? loopTime;

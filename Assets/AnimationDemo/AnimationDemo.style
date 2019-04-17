@@ -5,14 +5,19 @@ style container {
     FlexLayoutDirection = Column;
 }
 
+style one-container {
+    TransformPivot = 0.5 0.5;
+}
+
 style circle {
     BorderRadius = 50%;
     TransformPivot = 0.5 0.5;
 }
 
-style half-circle {
+style arc-blue {
     painter = "HalfCirclePainter";
     PreferredSize = 48px; 
+    LayoutBehavior = Ignored;
 }
 
 style circle-blue {
@@ -45,8 +50,7 @@ style orbit-container {
     PreferredSize = 48px;
     RadialLayoutEndAngle = 130;
     RadialLayoutRadius = 28;
-    TransformRotation = 45;
-    BackgroundColor = red;
+    TransformRotation = 0;
     TransformPivot = 0.5 0.5;
 }
 

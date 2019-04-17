@@ -305,6 +305,7 @@ namespace UIForia.Elements {
             return s_ColdDataMap.GetOrDefault(id).GetAttribute(name).value != null;
         }
 
+        // todo -- remove
         public IRouterElement GetNearestRouter() {
             UIElement ptr = this;
             ElementColdData coldData = s_ColdDataMap.GetOrDefault(id);
@@ -325,7 +326,7 @@ namespace UIForia.Elements {
             return null;
         }
 
-        // todo improve this
+        // todo remove
         public RouteParameter GetRouteParameter(string name) {
             UIElement ptr = this;
 

@@ -145,6 +145,11 @@ namespace UIForia.Util {
             propertyInfo = type.GetProperty(propertyName, InstanceBindFlags);
             return propertyInfo != null;
         }
+        
+        public static bool IsMethod(Type type, string methodName, out MethodInfo methodInfo) {
+            methodInfo = type.GetMethod(methodName, InstanceBindFlags);
+            return methodInfo != null;
+        }
 
         public static Type GetFieldType(Type type, string fieldName) {
             return GetFieldInfoOrThrow(type, fieldName).FieldType;
@@ -1011,6 +1016,8 @@ namespace UIForia.Util {
         public static FieldInfo GetConstantField(Type rootType, string fieldName) {
             return rootType.GetField(fieldName, BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy);
         }
+
+     
 
     }
 

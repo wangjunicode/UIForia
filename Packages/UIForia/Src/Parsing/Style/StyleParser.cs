@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Security.Authentication.ExtendedProtection;
 using UIForia.Exceptions;
 using UIForia.Parsing.Style.AstNodes;
 using UIForia.Parsing.Style.Tokenizer;
@@ -77,9 +78,7 @@ namespace UIForia.Parsing.Style {
 
                 case StyleTokenType.Animation:
                     tokenStream.Advance();
-                    // ParseAnimation
-                    AssertTokenTypeAndAdvance(StyleTokenType.BracesOpen);
-                    AssertTokenTypeAndAdvance(StyleTokenType.BracesClose);
+                    ParseAnimation();
                     tokenStream.Advance();
                     break;
 
@@ -144,6 +143,17 @@ namespace UIForia.Parsing.Style {
             // - expression with constants
             ParseStyleGroupBody(styleRootNode);
         }
+
+        private void ParseAnimation() {
+            throw new NotImplementedException();
+//            StyleToken initialStyleToken = tokenStream.Current;
+//            tokenStream.Advance();
+//            AnimationRootNode animRoot = new AnimationRootNode(initialStyleToken);
+//            AssertTokenTypeAndAdvance(StyleTokenType.BracesOpen);
+//            AnimationParseLoop();
+//            AssertTokenTypeAndAdvance(StyleTokenType.BracesClose);
+        }
+        
 
         private void ParseExportNode() {
             StyleToken exportToken = tokenStream.Current;
@@ -233,6 +243,7 @@ namespace UIForia.Parsing.Style {
 
                         break;
                     }
+
                     default:
                         throw new ParseException(tokenStream.Current, "Expected either a boolean group operator (not / and), the start" +
                                                                       " of a group (an open bracket) or a regular property identifier but found " +

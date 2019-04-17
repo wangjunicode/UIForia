@@ -15,6 +15,10 @@ namespace UIForia.Systems {
         public int ResetCount { get; internal set; }
         public int FrameCount { get; internal set; }
 
+        protected UITask() {
+            this.state = UITaskState.Uninitialized;
+        }
+
         public void Complete() {
             owner?.CompleteTask(this);
         }

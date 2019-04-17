@@ -54,12 +54,25 @@ namespace Tests {
             public string[] arg3Params;
             public string[] arg4Params;
 
+            public Action<string> evt1Handler;
+            public Func<string, string> evt1Handler_Func;
+
+            public FakeRootElement() {
+                evt1Handler = HandleSomeEventArg1;
+                evt1Handler_Func = HandleSomeFuncEventArg1;
+            }
+
             public void HandleSomeEventArg0() {
                 arg0CallCount++;
             }
 
             public void HandleSomeEventArg1(string val) {
                 arg1Params = new[] {val};
+            }
+
+            public string HandleSomeFuncEventArg1(string val) {
+                arg1Params = new[] {val};
+                return val;
             }
 
             public void HandleSomeEventArg2(string arg0, string arg1) {
@@ -77,7 +90,14 @@ namespace Tests {
         }
 
         public class FakeElement : UIElement {
+            
+            public event Func<string, string> onFuncEvt1;
 
+            public event Action<string> onEvt1;
+//            public event Action<string, string> onEvt2;
+//            public event Action<string, string, string> onEvt3;
+//            public event Action<string, string, string, string> onEvt4;
+            
             public delegate void SomeDelegateArg0();
 
             public delegate void SomeDelegateArg1(string arg0);
@@ -89,7 +109,7 @@ namespace Tests {
             public delegate void SomeDelegateArg4(string arg0, string arg1, string arg2, string arg3);
 
             public event SomeDelegateArg0 onSomeEventArg0;
-            public event SomeDelegateArg1 onSomeEventArg1;
+//            public event SomeDelegateArg1 onSomeEventArg1;
             public event SomeDelegateArg2 onSomeEventArg2;
             public event SomeDelegateArg3 onSomeEventArg3;
             public event SomeDelegateArg4 onSomeEventArg4;
@@ -100,7 +120,7 @@ namespace Tests {
             }
 
             public void InvokeEvtArg1(string arg0) {
-                onSomeEventArg1?.Invoke(arg0);
+                onEvt1?.Invoke(arg0);
             }
 
             public void InvokeEvtArg2(string arg0, string arg1) {
@@ -113,6 +133,10 @@ namespace Tests {
 
             public void InvokeEvtArg4(string arg0, string arg1, string arg2, string arg3) {
                 onSomeEventArg4?.Invoke(arg0, arg1, arg2, arg3);
+            }
+
+            public void InvokeFuncEvtArg1(string str) {
+                onFuncEvt1?.Invoke(str);
             }
 
         }

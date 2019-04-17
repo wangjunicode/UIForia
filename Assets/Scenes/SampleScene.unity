@@ -363,7 +363,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 35f2b5d632fd4d64b9acedec5215cda2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  typeName: Demo.TextDemo, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+  typeName: UnityEngine.GridDemo, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+    PublicKeyToken=null
   camera: {fileID: 534669904}
   applicationId: Game App
 --- !u!114 &1506585480
@@ -460,7 +461,7 @@ MonoBehaviour:
   camera: {fileID: 534669904}
   rotation: 0
   dot: 0
-  texture: {fileID: 2800000, guid: 99d6c5e6d36afca42bb3ceae665890c4, type: 3}
+  texture: {fileID: 2800000, guid: 555107cdc4763ae40ba8a3c1a0c04462, type: 3}
   strokeWidth: 5
   tintColor: {r: 0.2924528, g: 0.017933436, b: 0.22865911, a: 0.35686275}
   strokeOpacity: 0

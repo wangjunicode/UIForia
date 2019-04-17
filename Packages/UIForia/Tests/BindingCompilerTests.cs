@@ -15,6 +15,10 @@ using static Tests.TestUtils;
 [TestFixture]
 public class BindingCompilerTests {
 
+    private class TestThing {
+        
+    }
+    
     [Test]
     public void CreatesBinding_FieldSetter() {
         PropertyBindingCompiler compiler = new PropertyBindingCompiler();
@@ -29,7 +33,7 @@ public class BindingCompilerTests {
     }
 
     [Test]
-    public void CreatesBinding_Event_0Args() {
+    public void CreatesBinding_ActionEvent_1Args() {
         // <RootElement>
         //     <FakeElement onSomething="{HandleSomething($event)}"/>
         // </RootElement>
@@ -39,111 +43,67 @@ public class BindingCompilerTests {
         FakeElement childElement = new FakeElement();
         ExpressionContext ctx = new ExpressionContext(rootElement);
 
-        AttributeDefinition attrDef = new AttributeDefinition("onSomeEventArg0", "{HandleSomeEventArg0()}");
+        AttributeDefinition attrDef = new AttributeDefinition("onEvt1", "evt1Handler");
 
         var list = new LightList<Binding>();
 
         compiler.CompileAttribute(typeof(FakeRootElement), typeof(FakeElement), attrDef, list);
         Binding binding = list[0];
         binding.Execute(childElement, ctx);
+        Assert.IsNull(rootElement.arg1Params);
 
-        childElement.InvokeEvtArg0();
-        Assert.AreEqual(1, rootElement.arg0CallCount);
+        childElement.InvokeEvtArg1("str");
+        Assert.AreEqual(new [] {"str"}, rootElement.arg1Params);
     }
-// todo -- the below was confusing, find a better way to handle it 
+    
+    [Test]
+    public void CreatesBinding_FuncEvent_1Args() {
+        // <RootElement>
+        //     <FakeElement onSomething="{HandleSomething($event)}"/>
+        // </RootElement>
 
-//    [Test]
-//    public void CreatesBinding_Event_1Args() {
-//        // <RootElement>
-//        //     <FakeElement onSomething="{HandleSomething($event)}"/>
-//        // </RootElement>
-//
-//        PropertyBindingCompiler compiler = new PropertyBindingCompiler();
-//        FakeRootElement rootElement = new FakeRootElement();
-//        FakeElement childElement = new FakeElement();
-//        UITemplateContext ctx = new UITemplateContext(null);
-//
-//        ctx.rootObject = rootElement;
-//
-//        AttributeDefinition attrDef = new AttributeDefinition("onSomeEventArg1", "{HandleSomeEventArg1($eventArg0)}");
-//
-//        Binding binding = compiler.CompileAttribute(typeof(FakeRootElement), typeof(FakeElement), attrDef);
-//
-//        binding.Execute(childElement, ctx);
-//
-//        childElement.InvokeEvtArg1("hello");
-//        Assert.AreEqual(new[] {"hello"}, rootElement.arg1Params);
-//    }
-//
-//    [Test]
-//    public void CreatesBinding_Event_2Args() {
-//        // <RootElement>
-//        //     <FakeElement onSomething="{HandleSomething($event)}"/>
-//        // </RootElement>
-//
-//        PropertyBindingCompiler compiler = new PropertyBindingCompiler();
-//        FakeRootElement rootElement = new FakeRootElement();
-//        FakeElement childElement = new FakeElement();
-//        UITemplateContext ctx = new UITemplateContext(null);
-//
-//        ctx.rootObject = rootElement;
-//
-//        AttributeDefinition attrDef = new AttributeDefinition("onSomeEventArg2", "{HandleSomeEventArg2($eventArg0, $eventArg1)}");
-//
-//        Binding binding = compiler.CompileAttribute(typeof(FakeElement), typeof(FakeElement), attrDef);
-//
-//        binding.Execute(childElement, ctx);
-//
-//        childElement.InvokeEvtArg2("hello", "there");
-//        Assert.AreEqual(new[] {"hello", "there"}, rootElement.arg2Params);
-//    }
-//
-//    [Test]
-//    public void CreatesBinding_Event_3Args() {
-//        // <RootElement>
-//        //     <FakeElement onSomething="{HandleSomething($event)}"/>
-//        // </RootElement>
-//
-//        PropertyBindingCompiler compiler = new PropertyBindingCompiler();
-//        FakeRootElement rootElement = new FakeRootElement();
-//        FakeElement childElement = new FakeElement();
-//        UITemplateContext ctx = new UITemplateContext(null);
-//
-//        ctx.rootObject = rootElement;
-//
-//        AttributeDefinition attrDef = new AttributeDefinition("onSomeEventArg3", "{HandleSomeEventArg3($eventArg0, $eventArg1, $eventArg2)}");
-//
-//        Binding binding = compiler.CompileAttribute(typeof(FakeElement),typeof(FakeElement), attrDef);
-//
-//        binding.Execute(childElement, ctx);
-//
-//        childElement.InvokeEvtArg3("hello", "there", "buddy");
-//        Assert.AreEqual(new[] {"hello", "there", "buddy"}, rootElement.arg3Params);
-//    }
-//
-//    [Test]
-//    public void CreatesBinding_Event_4Args() {
-//        // <RootElement>
-//        //     <FakeElement onSomething="{HandleSomething($event)}"/>
-//        // </RootElement>
-//
-//        PropertyBindingCompiler compiler = new PropertyBindingCompiler();
-//        FakeRootElement rootElement = new FakeRootElement();
-//        FakeElement childElement = new FakeElement();
-//        UITemplateContext ctx = new UITemplateContext(null);
-//
-//        ctx.rootObject = rootElement;
-//
-//        AttributeDefinition attrDef = new AttributeDefinition("onSomeEventArg4", "{HandleSomeEventArg4($eventArg0, $eventArg1, $eventArg2, $eventArg3)}");
-//
-//        Binding binding = compiler.CompileAttribute(typeof(FakeElement), typeof(FakeElement), attrDef);
-//
-//        binding.Execute(childElement, ctx);
-//
-//        childElement.InvokeEvtArg4("hello", "there", "buddy", "boy");
-//        Assert.AreEqual(new[] {"hello", "there", "buddy", "boy"}, rootElement.arg4Params);
-//    }
+        PropertyBindingCompiler compiler = new PropertyBindingCompiler();
+        FakeRootElement rootElement = new FakeRootElement();
+        FakeElement childElement = new FakeElement();
+        ExpressionContext ctx = new ExpressionContext(rootElement);
 
+        AttributeDefinition attrDef = new AttributeDefinition("onFuncEvt1", "evt1Handler_Func");
+
+        var list = new LightList<Binding>();
+
+        compiler.CompileAttribute(typeof(FakeRootElement), typeof(FakeElement), attrDef, list);
+        Binding binding = list[0];
+        binding.Execute(childElement, ctx);
+        Assert.IsNull(rootElement.arg1Params);
+
+        childElement.InvokeFuncEvtArg1("str");
+        Assert.AreEqual(new [] {"str"}, rootElement.arg1Params);
+    }
+    
+    [Test]
+    public void CreatesBinding_FuncEvent_Prop_1Args() {
+        // <RootElement>
+        //     <FakeElement onSomething="{HandleSomething($event)}"/>
+        // </RootElement>
+
+        PropertyBindingCompiler compiler = new PropertyBindingCompiler();
+        FakeRootElement rootElement = new FakeRootElement();
+        FakeElement childElement = new FakeElement();
+        ExpressionContext ctx = new ExpressionContext(rootElement);
+
+        AttributeDefinition attrDef = new AttributeDefinition("onFuncEvt1", "evt1Handler_Func");
+
+        var list = new LightList<Binding>();
+
+        compiler.CompileAttribute(typeof(FakeRootElement), typeof(FakeElement), attrDef, list);
+        Binding binding = list[0];
+        binding.Execute(childElement, ctx);
+        Assert.IsNull(rootElement.arg1Params);
+
+        childElement.InvokeFuncEvtArg1("str");
+        Assert.AreEqual(new [] {"str"}, rootElement.arg1Params);
+    }
+ 
     private class TestedThing1 : UIElement {
 
         public string prop0;
@@ -177,100 +137,5 @@ public class BindingCompilerTests {
         Assert.IsFalse(t.didProp0Change);
     }
 
-    [TemplateTagName("EventedThing")]
-    private class EventedThing : UIContainerElement {
-
-        public event Action<string> onValueChanged;
-
-        public void Invoke(string value) {
-            onValueChanged?.Invoke(value);
-        }
-
-    }
-
-    [Template(TemplateType.String, @"
-    <UITemplate>
-        <Contents>
-            <EventedThing textValue.bindTo='onValueChanged'/>
-        </Contents>
-    </UITemplate>
-    ")]
-    private class TestedThing2 : UIElement {
-
-        public string textValue;
-
-        public bool didProp0Change;
-
-        [OnPropertyChanged(nameof(textValue))]
-        public void OnProp0Changed(string prop) {
-            didProp0Change = true;
-        }
-
-    }
-
-    [Template(TemplateType.String, @"
-    <UITemplate>
-        <Contents>
-            <EventedThing textValue.bindTo='onValueChanged'/>
-        </Contents>
-    </UITemplate>
-    ")]
-    private class TestedThing3 : UIElement {
-
-        public string textValue { get; set; }
-
-        public bool didProp0Change;
-
-        [OnPropertyChanged(nameof(textValue))]
-        public void OnProp0Changed(string prop) {
-            didProp0Change = true;
-        }
-
-    }
-
-    [Template(TemplateType.String, @"
-    <UITemplate>
-        <Contents>
-            <EventedThing textValue.bindTo='onValueChanged'/>
-        </Contents>
-    </UITemplate>
-    ")]
-    private class TestedThing4 : UIElement {
-
-        public string textValue;
-
-    }
-
-//    [Test]
-//    public void BindTo_Field() {
-//        MockApplication app = new MockApplication(typeof(TestedThing4));
-//        TestedThing4 thing = (TestedThing4) app.RootElement;
-//        EventedThing evtThing = (EventedThing) thing.GetChild(0);
-//        Assert.AreEqual(null, thing.textValue);
-//        evtThing.Invoke("some value");
-//        Assert.AreEqual("some value", thing.textValue);
-//    }
-//
-//    [Test]
-//    public void BindTo_Field_Callbacks() {
-//        MockApplication app = new MockApplication(typeof(TestedThing2));
-//        TestedThing2 thing2 = (TestedThing2) app.RootElement;
-//        EventedThing evtThing = (EventedThing) thing2.GetChild(0);
-//        Assert.AreEqual(null, thing2.textValue);
-//        evtThing.Invoke("some value");
-//        Assert.AreEqual("some value", thing2.textValue);
-//        Assert.IsTrue(thing2.didProp0Change);
-//    }
-//
-//    [Test]
-//    public void BindTo_Property() {
-//        MockApplication app = new MockApplication(typeof(TestedThing3));
-//        TestedThing3 thing3 = (TestedThing3) app.RootElement;
-//        EventedThing evtThing = (EventedThing) thing3.GetChild(0);
-//        Assert.AreEqual(null, thing3.textValue);
-//        evtThing.Invoke("some value");
-//        Assert.AreEqual("some value", thing3.textValue);
-//        Assert.IsTrue(thing3.didProp0Change);
-//    }
-
+   
 }

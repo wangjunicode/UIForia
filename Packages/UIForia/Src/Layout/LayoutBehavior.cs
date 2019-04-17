@@ -8,6 +8,7 @@ namespace UIForia.Layout {
         Unset = 0,
         Normal = 1 << 0,
         Ignored = 1 << 1,
+        TranscludeChildren = 1 << 2
 
     }
 

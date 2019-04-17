@@ -351,11 +351,7 @@ namespace UIForia.Rendering {
         public bool IsInState(StyleState state) {
             return (currentState & state) != 0;
         }
-
-        public void PlayAnimation(StyleAnimation animation) {
-            styleSystem.PlayAnimation(this, animation, default(AnimationOptions));
-        }
-
+       
         public bool HasBaseStyles => styleGroupContainers.Count > 0;
         
         public float LineHeightSize => 16f; // todo -- wrong
@@ -364,52 +360,6 @@ namespace UIForia.Rendering {
         public bool IsDefined(StylePropertyId propertyId) {
             return propertyMap.ContainsKey((int) propertyId);
         }
-
-//        // I don't love having this here, make accessible on layout result
-//        private float ResolveHorizontalFixedLength(UIFixedLength length) {
-//            switch (length.unit) {
-//                case UIFixedUnit.Pixel:
-//                    return length.value;
-//
-//                case UIFixedUnit.Percent:
-//                    return element.layoutResult.AllocatedWidth * length.value;
-//
-//                case UIFixedUnit.Em:
-//                    return EmSize * length.value;
-//
-//                case UIFixedUnit.ViewportWidth:
-//                    return 0;
-//
-//                case UIFixedUnit.ViewportHeight:
-//                    return 0;
-//
-//                default:
-//                    return 0;
-//            }
-//        }
-//
-//        // I don't love having this here
-//        private float ResolveVerticalFixedLength(UIFixedLength length) {
-//            switch (length.unit) {
-//                case UIFixedUnit.Pixel:
-//                    return length.value;
-//
-//                case UIFixedUnit.Percent:
-//                    return element.layoutResult.AllocatedHeight * length.value;
-//
-//                case UIFixedUnit.Em:
-//                    return EmSize * length.value;
-//
-//                case UIFixedUnit.ViewportWidth:
-//                    return 0;
-//
-//                case UIFixedUnit.ViewportHeight:
-//                    return 0;
-//
-//                default:
-//                    return 0;
-//            }
-//        }
 
         internal void AddStyleGroupContainer(UIStyleGroupContainer container) {
             if (styleGroupContainers.Contains(container)) {

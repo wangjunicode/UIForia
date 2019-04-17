@@ -1,32 +1,32 @@
 using System;
-using UIForia.Util;
+using System.Collections.Generic;
 
 namespace UIForia.Animation {
 
-    public abstract class AnimationData {
+    public struct AnimationData {
 
         public AnimationOptions options;
-        public LightList<Action> triggers;
-        public LightList<AnimationVariable> variables;  
-        
-        public Action<AnimationState2> onStart;
-        public Action<AnimationState2> onEnd;
-        public Action<AnimationState2> onCanceled;
-        public Action<AnimationState2> onCompleted;
-        public Action<AnimationState2> onTick;
+        public IList<AnimationKeyFrame> frames;
+        public IList<AnimationTrigger> triggers;
 
-        protected AnimationData(AnimationOptions options) {
+        public Action<StyleAnimationEvent> onStart;
+        public Action<StyleAnimationEvent> onEnd;
+        public Action<StyleAnimationEvent> onCanceled;
+        public Action<StyleAnimationEvent> onCompleted;
+        public Action<StyleAnimationEvent> onTick;
+
+        public AnimationData(AnimationOptions options, IList<AnimationKeyFrame> frames = null, IList<AnimationTrigger> triggers = null) {
             this.options = options;
-        }
-        
-        public void SetVariable(string variableName, Type type, object value) {
-            
+            this.triggers = null;
+            this.onStart = null;
+            this.onEnd = null;
+            this.onCanceled = null;
+            this.onCompleted = null;
+            this.onTick = null;
+            this.frames = frames;
+            this.triggers = triggers;
         }
 
-        public void SetVariable<T>(string variableName, T value) {
-            
-        }
-        
     }
 
 }

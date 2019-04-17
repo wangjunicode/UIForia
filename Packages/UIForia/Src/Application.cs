@@ -26,12 +26,10 @@ namespace UIForia {
             ctx.SetTransform(matrix);
             ctx.SetStrokeWidth(6);
             ctx.SetStroke(Color.red);
-            // todo arc sucks, make this better
-            ctx.ArcTo(1, 1, 0, false, false, 0, 0f);
+            float width = element.layoutResult.actualSize.width * 0.5f;
+            width -= 3f;
+            ctx.ArcTo(width + 3, width + 3, width, 0, 180);
             ctx.Stroke();
-//            ctx.Rect(0, 0, 100, 100);
-//            ctx.SetFill(Color.white);
-//            ctx.Fill();
         }
 
     }
@@ -668,7 +666,7 @@ namespace UIForia {
             return s_Scrollbars.GetOrDefault(name);
         }
 
-        public void Animate(UIElement element, StyleAnimationData animation) {
+        public void Animate(UIElement element, AnimationData animation) {
             m_AnimationSystem.Animate(element, animation);
         }
 

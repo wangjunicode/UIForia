@@ -1,7 +1,7 @@
 using UIForia.Util;
 
 namespace UIForia.Parsing.Style.AstNodes {
-
+    
     internal static partial class StyleASTNodeFactory {
 
         internal static readonly ObjectPool<StyleRootNode> s_StyleRootNodePool = new ObjectPool<StyleRootNode>();

@@ -17,30 +17,11 @@ namespace UIForia.Animation {
             nextFrame = new LightList<AnimationTask>();
         }
 
-        public void Animate(GenericAnimationData animationData) {
-//            AnimationTask task = null;
-//            switch (animationData.options.playbackType) {
-//                case AnimationPlaybackType.KeyFrame:
-//                    task = new GenericKeyFrameAnimation(animationData);
-//                    thisFrame.Add(task);
-//                    break;
-//                case AnimationPlaybackType.Parallel:
-//                    break;
-//                case AnimationPlaybackType.Sequential:
-//                    break;
-//                default:
-//                    throw new ArgumentOutOfRangeException();
-//            }
-        }
-
-        public void Animate(UIElement element, StyleAnimationData styleAnimation) {
+        public void Animate(UIElement element, AnimationData styleAnimation) {
             styleAnimation.options = EnsureDefaultOptionValues(styleAnimation);
             switch (styleAnimation.options.playbackType) {
                 case AnimationPlaybackType.KeyFrame: {
-                    StyleKeyFrameAnimation task = new StyleKeyFrameAnimation(element, styleAnimation);
-                    task.SetVariable("target", element);
-                    task.ProcessKeyFrames(styleAnimation.frames);
-                    thisFrame.Add(task);
+                    thisFrame.Add(new StyleKeyFrameAnimation(element, styleAnimation));
                     break;
                 }
 
@@ -52,7 +33,6 @@ namespace UIForia.Animation {
                 default:
                     throw new ArgumentOutOfRangeException();
             }
-
         }
 
         private static AnimationOptions EnsureDefaultOptionValues(AnimationData data) {
@@ -74,48 +54,91 @@ namespace UIForia.Animation {
 
             // todo handle generics in a different function / list set
 
-            for (int i = 0; i < count; i++) {
-                AnimationTask task = animations[i];
+            for (int i = 0; i < thisFrame.Count; i++) {
+                AnimationTask task = thisFrame[i];
 
-                StyleAnimation2 styleAnimation = (StyleAnimation2) task;
+                StyleAnimation styleAnimation = (StyleAnimation) task;
 
                 if (styleAnimation.target.isDestroyed) {
-                    task.state = UITaskState.Failed;
+                    styleAnimation.state = UITaskState.Failed;
                     continue;
                 }
                 else if (styleAnimation.target.isDisabled) {
                     // if stop on disable
                     // task.OnPaused();
                     // task.OnCancel?(); handle restoring to start state?
-                    task.state = UITaskState.Pending;
+                    // styleAnimation.state = UITaskState.Pending;
                     continue;
                 }
 
+                if (styleAnimation.state == UITaskState.Uninitialized) {
+                    styleAnimation.data.onStart?.Invoke(new StyleAnimationEvent(
+                        AnimationEventType.Start,
+                        styleAnimation.target,
+                        styleAnimation.status,
+                        styleAnimation.data.options)
+                    );
+                }
+                
                 UITaskResult status = styleAnimation.Run(Time.deltaTime);
 
                 switch (status) {
                     case UITaskResult.Running:
-                        styleAnimation.data.onTick?.Invoke(styleAnimation.status);
+                        styleAnimation.RunTriggers();
+
+                        styleAnimation.data.onTick?.Invoke(new StyleAnimationEvent(
+                            AnimationEventType.Tick,
+                            styleAnimation.target,
+                            styleAnimation.status,
+                            styleAnimation.data.options)
+                        );
+
                         nextFrame.Add(styleAnimation);
                         break;
+
                     case UITaskResult.Completed:
+                        styleAnimation.RunTriggers();
                         styleAnimation.status.currentIteration++;
                         styleAnimation.status.elapsedIterationTime = 0f;
+                        styleAnimation.state = UITaskState.Completed;
+
                         if (styleAnimation.status.currentIteration == styleAnimation.data.options.iterations) {
-                            styleAnimation.data.onCompleted?.Invoke(styleAnimation.status);
+                            styleAnimation.data.onCompleted?.Invoke(new StyleAnimationEvent(
+                                AnimationEventType.Complete,
+                                styleAnimation.target,
+                                styleAnimation.status,
+                                styleAnimation.data.options)
+                            );
+                            styleAnimation.data.onEnd?.Invoke(new StyleAnimationEvent(
+                                AnimationEventType.End,
+                                styleAnimation.target,
+                                styleAnimation.status,
+                                styleAnimation.data.options)
+                            );
                             continue;
                         }
+                        
+                        styleAnimation.state = UITaskState.Pending;
 
+                        styleAnimation.ResetTriggers();
                         // todo -- if direction != oldDirection -> invoke direction change
                         nextFrame.Add(styleAnimation);
                         break;
+
                     case UITaskResult.Restarted:
                         // todo -- if direction != oldDirection -> invoke direction change
                         nextFrame.Add(styleAnimation);
                         break;
+
                     case UITaskResult.Failed:
                     case UITaskResult.Cancelled:
-                        styleAnimation.data.onCanceled?.Invoke(styleAnimation.status);
+                        styleAnimation.state = UITaskState.Failed;
+                        styleAnimation.data.onCanceled?.Invoke(new StyleAnimationEvent(
+                            AnimationEventType.Cancel,
+                            styleAnimation.target,
+                            styleAnimation.status,
+                            styleAnimation.data.options)
+                        );
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();

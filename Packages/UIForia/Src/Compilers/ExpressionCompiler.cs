@@ -126,7 +126,8 @@ namespace UIForia.Compilers {
             ASTNode astRoot = ExpressionParser.Parse(input);
             try {
                 return (Expression<T>) Visit(astRoot);
-            } catch (CompileException e) {
+            }
+            catch (CompileException e) {
                 e.SetFileName(rootType.FullName);
                 e.SetExpression(input);
                 throw;
@@ -263,9 +264,13 @@ namespace UIForia.Compilers {
                             new ConstructorArguments(null, propertyInfo)
                         );
                     }
+                    else if (ReflectionUtil.IsMethod(rootType, fieldName, out MethodInfo info)) {
+                        
+                    }
 
                     throw new CompileException("Invalid write target expression");
                 }
+
                 case ASTNodeType.AccessExpression: {
                     MemberAccessExpressionNode memberNode = (MemberAccessExpressionNode) node;
                     if (memberNode.identifier[0] == '$') {
@@ -885,6 +890,7 @@ namespace UIForia.Compilers {
 
                     throw new CompileException($"Invalid expression types ({leftType}, {rightType}) for arithmetic operator {node.operatorType}");
                 }
+
                 case OperatorType.TernaryCondition:
                 case OperatorType.TernarySelection:
                     break;
@@ -915,6 +921,7 @@ namespace UIForia.Compilers {
                     );
                     break;
                 }
+
                 case OperatorType.GreaterThan:
                 case OperatorType.GreaterThanEqualTo:
                 case OperatorType.LessThan:
@@ -937,6 +944,7 @@ namespace UIForia.Compilers {
 
                     throw new CompileException($"Invalid expression types ({leftType}, {rightType}) for comparison operator {node.operatorType}");
                 }
+
                 case OperatorType.And:
                 case OperatorType.Or: {
                     if (leftType == typeof(bool) && rightType == typeof(bool)) {
@@ -983,6 +991,7 @@ namespace UIForia.Compilers {
 
                     throw new CompileException($"Invalid expression types ({leftType}, {rightType}) for comparison operator {node.operatorType}");
                 }
+
                 case OperatorType.As:
                 case OperatorType.Is:
 // todo -- implement these when type resolution works

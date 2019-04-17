@@ -9,7 +9,9 @@
             
             <Div x-id="one_blue" style="circle circle-blue"/>
             
-            <Div x-id="one_blueOrbit" style="orbit-container">
+            <Div x-id="one_blue_arc" style="circle arc-blue"/>
+            
+            <Div if="false" x-id="one_blueOrbit" style="orbit-container">
                 <Div style="circle orbit orbit-0"/>
                 <Div style="circle orbit orbit-1"/>
                 <Div style="circle orbit orbit-2"/>
@@ -20,12 +22,12 @@
             
         </Div>
 
-        <Div style="two-container">
+<!--        <Div style="two-container">-->
 
-            <Div x-id="two_red-bg" style="circle circle-red-bg"/>
-            <Div x-id="two_yellow-bg" style="circle circle-yellow-bg"/>
-            
-        </Div>
+<!--            <Div x-id="two_red-bg" style="circle circle-red-bg"/>-->
+<!--            <Div x-id="two_yellow-bg" style="circle circle-yellow-bg"/>-->
+<!--            -->
+<!--        </Div>-->
     </Contents>
 
 </UITemplate>

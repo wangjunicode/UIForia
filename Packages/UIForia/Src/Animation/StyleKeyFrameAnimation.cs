@@ -26,7 +26,7 @@ namespace UIForia.Animation {
 
     }
 
-    public class StyleKeyFrameAnimation : StyleAnimation2 {
+    public class StyleKeyFrameAnimation : StyleAnimation {
 
         private readonly LightList<ProcessedKeyFrameGroup> processedFrameGroups;
         private static readonly ExpressionCompiler expressionCompiler;
@@ -35,16 +35,17 @@ namespace UIForia.Animation {
             expressionCompiler = new ExpressionCompiler(true);
         }
 
-        public StyleKeyFrameAnimation(UIElement target, StyleAnimationData data) : base(target, data) {
+        public StyleKeyFrameAnimation(UIElement target, AnimationData data) : base(target, data) {
             processedFrameGroups = new LightList<ProcessedKeyFrameGroup>();
+            ProcessKeyFrames(data.frames);
         }
 
-        public void ProcessKeyFrames(IList<AnimationKeyFrame2> frames) {
+        public void ProcessKeyFrames(IList<AnimationKeyFrame> frames) {
             // todo -- ensure we release lists where we need to
             // todo -- dont use a list each processed frame group, use a single list sorted sensibly
             processedFrameGroups.QuickClear();
             for (int i = 0; i < frames.Count; i++) {
-                AnimationKeyFrame2 f = frames[i];
+                AnimationKeyFrame f = frames[i];
                 StyleKeyFrameValue[] properties = f.properties.Array;
                 for (int j = 0; j < f.properties.Count; j++) {
                     AddKeyFrame(f.key, properties[j]);
@@ -161,6 +162,9 @@ namespace UIForia.Animation {
 
             float progress = Mathf.Clamp01(status.elapsedIterationTime / duration);
 
+            status.iterationProgress = progress;
+            status.frameCount++;
+            
             ProcessedKeyFrameGroup[] groups = processedFrameGroups.Array;
             for (int i = 0; i < processedFrameGroups.Count; i++) {
                 StylePropertyId propertyId = groups[i].propertyId;

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using JetBrains.Annotations;
 using UIForia.Elements;
 using UIForia.Layout;
 using UIForia.Rendering;
@@ -51,13 +52,13 @@ namespace UIForia.Layout.LayoutTypes {
          * Figure out if parent needs to re-layout instead of assuming it does when child properties change
          * Don't always re-calculate preferred width
          */
-        protected LayoutBox(UIElement element) {
+        protected LayoutBox([NotNull] UIElement element) {
             this.element = element;
-            this.style = element?.style;
-            this.children = ListPool<LayoutBox>.Get();
+            this.style = element.style;
+            this.children = new List<LayoutBox>(4);
             this.cachedPreferredWidth = -1;
-            Debug.Assert(element != null, nameof(this.element) + " != null");
             this.view = element.View;
+            this.markedForLayout = true;
         }
 
         public abstract void RunLayout();
@@ -87,8 +88,7 @@ namespace UIForia.Layout.LayoutTypes {
         public float BorderRadiusTopLeft => ResolveFixedWidth(style.BorderRadiusTopLeft);
         public float BorderRadiusBottomRight => ResolveFixedWidth(style.BorderRadiusBottomRight);
         public float BorderRadiusBottomLeft => ResolveFixedWidth(style.BorderRadiusBottomLeft);
-        
-        public bool IsInitialized { get; set; }
+
         public bool IsIgnored => (style.LayoutBehavior & LayoutBehavior.Ignored) != 0;
 
         public float AnchorLeft => ResolveAnchorLeft();
@@ -139,16 +139,6 @@ namespace UIForia.Layout.LayoutTypes {
             return ResolveMarginHorizontal(style.MarginRight);
         }
 
-        public virtual void OnInitialize() { }
-
-        public void SetParent(LayoutBox parent) {
-            this.parent?.OnChildRemoved(this);
-            this.parent = parent;
-            if (element.isEnabled && style.LayoutBehavior != LayoutBehavior.Ignored) {
-                this.parent?.OnChildAdded(this);
-            }
-        }
-
         // need layout when
         /*
          * - Child Add / Remove / Move / Enable / Disable
@@ -162,47 +152,26 @@ namespace UIForia.Layout.LayoutTypes {
          */
 
         public void ReplaceChild(LayoutBox toReplace, LayoutBox newChild) {
-            int index = children.IndexOf(toReplace);
-            if (index == -1) {
-                throw new Exception("Cannot replace child");
-            }
-
-            newChild.SetParent(this);
-            children[index] = newChild;
-            newChild.AdoptChildren(toReplace);
+//            int index = children.IndexOf(toReplace);
+//            if (index == -1) {
+//                throw new Exception("Cannot replace child");
+//            }
+//
+//            newChild.SetParent(this);
+//            children[index] = newChild;
+//            newChild.AdoptChildren(toReplace);
         }
-
-        protected virtual void OnChildAdded(LayoutBox child) {
-            if (child.element.isEnabled) {
-                if ((child.style.LayoutBehavior & LayoutBehavior.Ignored) == 0) {
-                    children.Add(child);
-                    RequestContentSizeChangeLayout();
-                }
-            }
-        }
-
-        protected void OnChildRemoved(LayoutBox child) {
-            if (!children.Remove(child)) {
-                return;
-            }
-
-            if ((child.style.LayoutBehavior & LayoutBehavior.Ignored) == 0) {
-                RequestContentSizeChangeLayout();
-            }
-        }
-
-        protected void AdoptChildren(LayoutBox box) {
-            for (int i = 0; i < box.children.Count; i++) {
-                OnChildAdded(box.children[i]);
-            }
-
+        
+        public void UpdateChildren() {
+            InvalidatePreferredSizeCache();
             RequestContentSizeChangeLayout();
+            OnChildrenChanged();
         }
 
         public void RequestContentSizeChangeLayout() {
             // not 100% sure this is safe
             if (markedForLayout) {
-                return;
+            //    return;
             }
 
             markedForLayout = true;
@@ -240,17 +209,7 @@ namespace UIForia.Layout.LayoutTypes {
                 markedForLayout = true; // todo might not need it, delegate to virtual fn 
             }
         }
-
-        public virtual void OnChildEnabled(LayoutBox child) {
-            children.Add(child);
-            RequestContentSizeChangeLayout();
-        }
-
-        public virtual void OnChildDisabled(LayoutBox child) {
-            children.Remove(child);
-            RequestContentSizeChangeLayout();
-        }
-
+        
         [DebuggerStepThrough]
         protected float ResolveFixedWidth(UIFixedLength width) {
             switch (width.unit) {
@@ -849,7 +808,7 @@ namespace UIForia.Layout.LayoutTypes {
                     return transformOffset.value;
 
                 case TransformUnit.Em:
-                    return style.GetResolvedFontSize() * transformOffset.value; 
+                    return style.GetResolvedFontSize() * transformOffset.value;
 
                 case TransformUnit.ActualWidth:
                     return transformOffset.value * actualWidth;
@@ -1099,13 +1058,8 @@ namespace UIForia.Layout.LayoutTypes {
                 GetMarginLeft()
             );
         }
-
-        public void SetChildren(LightList<LayoutBox> boxes) {
-            children.Clear();
-            for (int i = 0; i < boxes.Count; i++) {
-                OnChildAdded(boxes[i]);
-            }
-        }
+        
+        protected virtual void OnChildrenChanged() { }
 
     }
 

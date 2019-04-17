@@ -269,6 +269,32 @@ namespace UIForia.Bindings {
 
     }
 
+    public class EventBinding<T, U> : Binding {
+
+        public readonly EventInfo info;
+        public EventBinding(string bindingId) : base(bindingId) { }
+        public Action<T> oldValue;
+        
+        public override void Execute(UIElement element, ExpressionContext context) {
+            // get write target
+            // read value 
+            // if value changed, unsubscribe
+            // if value is not null, subscribe
+//            
+//            Action<T> v = getter((U) element);
+//            if (v != oldV) {
+//                
+//            }
+//            info.AddEventHandler(element, );
+//            info.RemoveEventHandler(element, );
+        }
+
+        public override bool IsConstant() {
+            return false;
+        }
+
+    }
+    
     public class CallbackBinding<T> : Binding {
 
         private readonly EventInfo evtInfo;
@@ -284,7 +310,7 @@ namespace UIForia.Bindings {
         }
 
         public override void Execute(UIElement element, ExpressionContext context) {
-            evtInfo.AddEventHandler(element, Delegate.CreateDelegate(evtInfo.EventHandlerType, new Handler(expression, context, element), runInfo));
+            evtInfo.AddEventHandler(element, Delegate.CreateDelegate(evtInfo.EventHandlerType, new Handler(expression, context), runInfo));
         }
 
         public override bool IsConstant() {
@@ -295,12 +321,10 @@ namespace UIForia.Bindings {
 
             private readonly ExpressionContext ctx;
             private readonly Expression<Terminal> expression;
-            private readonly object target;
 
-            public Handler(Expression<Terminal> expression, ExpressionContext ctx, object target) {
+            public Handler(Expression<Terminal> expression, ExpressionContext ctx) {
                 this.expression = expression;
                 this.ctx = ctx;
-                this.target = target;
             }
 
             [UsedImplicitly]
@@ -309,7 +333,6 @@ namespace UIForia.Bindings {
               //  ctx.SetContextValue(target, PropertyBindingCompiler.EvtArgNames[0], evtArg0);
 
                 expression.Evaluate(ctx);
-
                // ctx.RemoveContextValue<T>(target, PropertyBindingCompiler.EvtArgDefaultName);
                // ctx.RemoveContextValue<T>(target, PropertyBindingCompiler.EvtArgNames[0]);
             }

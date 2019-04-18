@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UITemplate>
+
+    <Style path="KlangWindow/KlangWindow.style"/>
+    
+    <Block id="quote">
+        
+        <Variable type="string" name="heading"/>
+        <Variable type="string" name="text"/>
+        
+        <Contents style="quote-container">
+            
+            <Heading4>{heading}</Heading4>
+            
+            <Group style="quote">
+                {text}
+            </Group>
+            
+        </Contents>
+        
+    </Block>
+    
+    <Contents style="window-container">
+
+        <Group style="title-bar">
+
+<!--            <Slot name="TitleBar">-->
+             
+                <Heading3>
+                    Window Title
+                </Heading3>
+
+                <Group style="close-button" onMouseClick="Close()"/>
+<!--            </Slot>-->
+
+        </Group>
+
+        <Group style="side-bar">
+
+        </Group>
+
+        <Group style="body">
+            <Group style="body-container">
+                
+                <Group style="colony-info-body">
+                    
+                    <Group style="colony-info-head-section">
+                        <Image src="'icon_2'"/>
+                        <Group style="colony-info-header-text">
+                            
+                            <Heading1 style="colony-name">Klang Gang</Heading1>
+                            
+                            <Text>Founder</Text>
+                            <Text>Weichselbaum</Text>
+                            
+                            <Text>Age</Text>
+                            <Text>2 years, 4 months</Text>
+                            
+                            <Text>Population</Text>
+                            <Text>238</Text>
+                            
+                        </Group>
+                        <Image src="'icon_2'"/>
+
+                    </Group>
+                    
+                    <Group style="quote-container">
+                        <Heading4>Motto</Heading4>
+                        <Group style="quote">
+                            Cut once, then measure twice
+                        </Group>
+                    </Group>
+                    
+<!--                    <RenderBlock.Quote>-->
+<!--                        <Parameter name="val" value="string"/>-->
+<!--                    </RenderBlock.Quote>-->
+                    
+<!--                    <RenderBlock blockId="quote" style="xxxx" heading="'motto'" text="'Cut once, then measure twice'"/>-->
+<!--                    <RenderBlock blockId="quote" heading="'Main Language'" text="'English'"/>-->
+<!--                    <RenderBlock id="quote" heading="'Description'" text="'Klang strives to develop....'"/>-->
+<!--                    <RenderBlock id="quote" heading="'Join Colony Password'" text="'Klang strives to develop....'"/>-->
+<!--                    -->
+<!--                    <Thing tooltip="$block['quote1]')"/>-->
+<!--                    -->
+<!--                    <RenderBlockDeferred id="quote" as="quote1"/>-->
+\                    
+                </Group>
+                
+                <Group style="colony-info-sidebar">
+                    
+                </Group>
+                
+            </Group>
+        </Group>
+
+    </Contents>
+
+</UITemplate>

@@ -1,5 +1,7 @@
-﻿using UIForia.Bindings;
+﻿using System;
+using UIForia.Bindings;
 using UIForia.Elements;
+using UIForia.Expressions;
 using UIForia.Templates;
 using UIForia.Util;
 
@@ -61,6 +63,17 @@ namespace UIForia.Systems {
                 node.template = repeat.template;
                 node.context = repeat.templateContext;
                 m_ReadBindingTree.AddItem(node);
+            }
+            else if (element is RenderBlockElement renderBlock) {
+                // find the binding for the render block id
+                // if binding is constant we don't need to register a binding node unless 
+                // if binding is dynamic we need to run a binding that will replace the block with what it should be
+                throw new NotImplementedException("<RenderBlock> is not yet supported, need to figure out how to handle bindings");
+//                RenderBlockIdBinding node = new RenderBlockIdBinding();
+//                node.bindings = template.perFrameBindings;
+//                node.element = renderBlock;
+//                node.context = element.templateContext;
+//                m_ReadBindingTree.AddItem(node);
             }
             else {
                 if (template.perFrameBindings.Length > 0) {

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using JetBrains.Annotations;
 using UIForia.Compilers;
 using UIForia.Compilers.ExpressionResolvers;
 using UIForia.Compilers.Style;
@@ -8,7 +9,7 @@ using UIForia.Parsing.Expression;
 using UIForia.Rendering;
 
 namespace UIForia.Templates {
-
+    
     /// <summary>
     /// This represents the result of a parsed UITemplate. Invoking 'Create()' will create an instance of the
     /// template that was parsed. 
@@ -26,11 +27,28 @@ namespace UIForia.Templates {
         private readonly List<UISlotContentTemplate> inheritedContent;
         private readonly List<StyleDefinition> styleDefinitions;
         public readonly UIElementTemplate rootElementTemplate;
-        public readonly ExpressionCompiler compiler; // todo -- static?
         public readonly ParsedTemplate baseTemplate;
         public readonly Application app;
         public readonly string templatePath;
+        
+        public readonly ExpressionCompiler compiler = new ExpressionCompiler(true);
 
+        public static readonly ExpressionAliasResolver s_ElementResolver = new ElementResolver("element");
+        public static readonly ExpressionAliasResolver s_ParentResolver = new ParentElementResolver("parent");
+        public static readonly ExpressionAliasResolver s_RouteResolver = new RouteResolver("route");
+        
+        // todo -- I don't think these are used
+        public static readonly ExpressionAliasResolver s_RouteParameterResolver = new RouteParameterResolver("$routeParams");
+        public static readonly ExpressionAliasResolver s_ContentSizeResolver = new ContentSizeResolver();
+        public static readonly ExpressionAliasResolver s_UrlResolver = new UrlResolver("$url");
+        public static readonly ExpressionAliasResolver s_RgbResolver = new ColorResolver("$rgb");
+        public static readonly ExpressionAliasResolver s_SizeResolver = new SizeResolver("$size");
+        public static readonly ExpressionAliasResolver s_FixedLengthResolver = new LengthResolver("$fixedLength");
+
+        static ParsedTemplate() {
+          // todo -- try to make compiler shared or at least pooled, will need to manage using and import contexts
+        }
+       
         public ParsedTemplate(Application app, Type type, string templatePath, List<UITemplate> contents, List<AttributeDefinition> attributes, List<string> usings, List<StyleDefinition> styleDefinitions, List<ImportDeclaration> imports) : this(null, type, usings, null, styleDefinitions, imports) {
             this.app = app;
             this.templatePath = templatePath;
@@ -45,8 +63,20 @@ namespace UIForia.Templates {
             this.inheritedContent = contentTemplates;
             this.styleDefinitions = styleDefinitions;
             this.Imports = imports;
-            this.compiler = new ExpressionCompiler();
             ValidateStyleDefinitions();
+            compiler.AddNamespace("UIForia.Rendering");
+            compiler.AddNamespace("UIForia.Layout");
+            compiler.AddNamespace("UIForia");
+
+            compiler.AddAliasResolver(s_ElementResolver);
+            compiler.AddAliasResolver(s_ParentResolver);
+            compiler.AddAliasResolver(s_RouteResolver);
+            compiler.AddAliasResolver(s_RouteParameterResolver);
+            compiler.AddAliasResolver(s_ContentSizeResolver);
+            compiler.AddAliasResolver(s_UrlResolver);
+            compiler.AddAliasResolver(s_RgbResolver);
+            compiler.AddAliasResolver(s_SizeResolver);
+            compiler.AddAliasResolver(s_FixedLengthResolver);
         }
 
         public List<UITemplate> childTemplates => rootElementTemplate.childTemplates;
@@ -68,24 +98,9 @@ namespace UIForia.Templates {
             isCompiled = true;
 
             CompileStyles();
-
-            // todo -- remove allocations
-
+            
+            //todo  might cause problems w/ nested usings
             compiler.AddNamespaces(usings);
-            compiler.AddNamespace("UIForia.Rendering");
-            compiler.AddNamespace("UIForia.Layout");
-            compiler.AddNamespace("UIForia");
-
-            compiler.AddAliasResolver(new ElementResolver("element"));
-            compiler.AddAliasResolver(new ParentElementResolver("parent"));
-            compiler.AddAliasResolver(new RouteResolver("route"));
-            compiler.AddAliasResolver(new RouteParameterResolver("$routeParams"));
-            compiler.AddAliasResolver(new ContentSizeResolver());
-            compiler.AddAliasResolver(new UrlResolver("$url"));
-            compiler.AddAliasResolver(new ColorResolver("$rgb"));
-            compiler.AddAliasResolver(new SizeResolver("$size"));
-            compiler.AddAliasResolver(new LengthResolver("$fixedLength"));
-            compiler.AddAliasResolver(new MethodResolver("$px", typeof(StyleBindingCompiler).GetMethod(nameof(StyleBindingCompiler.PixelLength), new[] {typeof(float)})));
 
             if (baseTemplate != null) {
                 baseTemplate.Compile();
@@ -101,6 +116,9 @@ namespace UIForia.Templates {
                 Array.Resize(ref rootElementTemplate.baseStyles, rootElementTemplate.baseStyles.Length + 1);
                 rootElementTemplate.baseStyles[rootElementTemplate.baseStyles.Length - 1] = implicitRootStyle;
             }
+            
+            compiler.RemoveNamespaces(usings);
+
         }
 
         private void CompileStyles() {

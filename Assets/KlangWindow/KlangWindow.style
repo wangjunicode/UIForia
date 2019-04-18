@@ -1,0 +1,82 @@
+
+style window-container {
+
+    MinWidth = 300px;
+    MinHeight = 300px;
+    PreferredSize = 800px, 600px;
+    
+}
+
+style title-bar {
+    BackgroundColor = Black;
+    PreferredSize = 1pca, 40px;
+    TextColor = White;
+    TextFontAsset = url("Gotham-Bold SDF");
+    TextTransform = UpperCase;
+    FlexLayoutDirection = Column;
+    FlexLayoutCrossAxisAlignment = Center;
+    TextFontSize = 1.1em;
+    FlexLayoutMainAxisAlignment = SpaceBetween;
+    PaddingLeft = 1em;
+    PaddingRight = 1em;
+}
+
+style close-button {
+    PreferredSize = 24px;
+    Border = 2px;
+    BorderRadius = 50%;
+    BorderColor = #F3514E;
+    [hover] {
+        BackgroundColor = #F3514E;
+    }
+}
+
+style body {
+    PreferredSize = 1pca;
+}
+
+style body-container {
+    PreferredSize = 1pca;
+}
+
+style colony-info-body {
+    Padding = 2em;
+    PreferredWidth = 1pca;
+    PreferredHeight = 1pca;
+    BackgroundColor = White;
+}
+
+style colony-info-head-section {
+    PreferredSize = 1pca, 1cnt;
+    FlexLayoutDirection = Column;
+}
+
+style colony-info-header-text {
+    FlexItemGrow = 1;
+    LayoutType = Grid;
+    GridLayoutColTemplate = 1fr 1fr;
+    GridLayoutCrossAxisAutoSize = 1mx;
+    Padding = 1em;
+    TextFontSize = 1.1em;
+    TextFontAsset = url("GothamNarrow-Medium SDF");
+    GridLayoutRowGap = 8;
+}
+
+style colony-name {
+    TextFontSize = 3em;
+    GridItemColStart = 0;
+    GridItemColSpan = 2;
+    GridItemRowStart = 0;
+    MarginBottom = 0.25em;
+    TextFontAsset = url("GothamNarrow-Book SDF");
+}
+
+style quote-container {
+    PreferredWidth = 1pca;
+}
+
+style quote {
+    PreferredWidth = 1pca;
+    BackgroundColor = #F2F2F2;
+    Padding = 0.5em;
+}

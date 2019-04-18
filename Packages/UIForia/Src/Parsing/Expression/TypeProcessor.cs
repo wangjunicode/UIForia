@@ -224,6 +224,28 @@ namespace UIForia.Parsing.Expression {
             throw new ParseException("Unable to find type for tag name: " + tagName);
         }
 
+        public static Type ResolveTypeName(string typeName) {
+            switch (typeName) {
+                case "bool": return typeof(bool);
+                case "byte": return typeof(byte);
+                case "sbyte": return typeof(sbyte);
+                case "char": return typeof(char);
+                case "decimal": return typeof(decimal);
+                case "double": return typeof(double);
+                case "float": return typeof(float);
+                case "int": return typeof(int);
+                case "uint": return typeof(uint);
+                case "long": return typeof(long);
+                case "ulong": return typeof(ulong);
+                case "object": return typeof(object);
+                case "short": return typeof(short);
+                case "ushort": return typeof(ushort);
+                case "string": return typeof(string);
+            }
+
+            return GetRuntimeType(typeName);
+        }
+        
         public static Type GetRuntimeType(string typeName) {
             FilterAssemblies();
 

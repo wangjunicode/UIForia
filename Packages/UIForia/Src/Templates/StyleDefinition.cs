@@ -1,4 +1,3 @@
-
 namespace UIForia.Templates {
 
     public struct StyleDefinition {

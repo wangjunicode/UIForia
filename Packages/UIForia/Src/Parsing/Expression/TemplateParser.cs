@@ -15,11 +15,11 @@ namespace UIForia.Parsing.Expression {
 
         private readonly Dictionary<Type, ParsedTemplate> parsedTemplates = new Dictionary<Type, ParsedTemplate>();
         public readonly Application app;
-        
+
         public TemplateParser(Application app) {
             this.app = app;
         }
-        
+
         public void Reset() {
             parsedTemplates.Clear();
         }
@@ -129,10 +129,12 @@ namespace UIForia.Parsing.Expression {
 
             List<ImportDeclaration> imports = new List<ImportDeclaration>();
             List<StyleDefinition> styleTemplates = new List<StyleDefinition>();
+            List<BlockDefinition> blockTemplates = new List<BlockDefinition>();
 
             IEnumerable<XElement> importElements = doc.Root.GetChildren("Import");
             IEnumerable<XElement> styleElements = doc.Root.GetChildren("Style");
             IEnumerable<XElement> usingElements = doc.Root.GetChildren("Using");
+            IEnumerable<XElement> blockElements = doc.Root.GetChildren("Block");
             XElement contentElement = doc.Root.GetChild("Contents");
 
             // todo -- we can't use any bindings on the <Content/> tag because then the binding system
@@ -166,6 +168,10 @@ namespace UIForia.Parsing.Expression {
                 styleTemplates.Add(ParseStyleSheet(templatePath, styleElement));
             }
 
+            foreach (XElement block in blockElements) {
+                blockTemplates.Add(ParseBlock(block));
+            }
+
             List<UITemplate> children = ParseNodes(contentElement.Nodes());
             List<AttributeDefinition> attributes = ParseAttributes(contentElement.Attributes());
 
@@ -188,8 +194,63 @@ namespace UIForia.Parsing.Expression {
             return new ParsedTemplate(app, type, templatePath, children, attributes, usings, styleTemplates, imports);
         }
 
+        private BlockDefinition ParseBlock(XElement element) {
+            XAttribute idAttr = element.GetAttribute("id");
+
+            if (idAttr == null) throw new ParseException("<Block> elements require a `id` attribute");
+
+            IEnumerable<XElement> variableElements = element.GetChildren("Variable");
+
+            LightList<ReflectionUtil.FieldDefinition> fields = LightListPool<ReflectionUtil.FieldDefinition>.Get();
+            
+            foreach (var variableElement in variableElements) {
+                XAttribute typeAttr = variableElement.GetAttribute("type");
+                XAttribute nameAttr = variableElement.GetAttribute("name");
+
+                if (nameAttr == null) throw new ParseException("<Variable> definitions need to provide a unique `name` attribute");
+                if (typeAttr == null) throw new ParseException("<Variable> definitions need to provide a `type` attribute");
+
+                // todo -- validate that name is a legal identifier
+                // todo -- validate that no fields are duplicated
+
+                Type type = TypeProcessor.ResolveTypeName(typeAttr.Value.Trim());
+
+                if (type == null) {
+                    throw new ParseException($"Unable to resolve type with name `{typeAttr}` in <Variable> definition");
+                }
+                
+                string fieldName = nameAttr.Value.Trim();
+                
+                fields.Add(new ReflectionUtil.FieldDefinition(type, fieldName));
+                
+            }
+
+            Type generatedType = ReflectionUtil.CreateType(ReflectionUtil.GetGeneratedTypeName("GeneratedBlockElementType"), typeof(UIElement), fields);
+
+            LightListPool<ReflectionUtil.FieldDefinition>.Release(ref fields);
+            
+            XElement contents = element.GetChild("Contents");
+            
+//            ParsedTemplate template = new ParsedTemplate(
+//                app,
+//                generatedType,
+//                null,
+//                ParseAttributes(contents.Attributes()),
+//                null,
+//                null
+//            );
+
+            return default;
+//            return new BlockDefinition(
+//                idAttr.Name.LocalName,
+//                null,
+//                null,
+//                template
+//            );
+        }
+
         private string ParseUsing(XElement element) {
-            var namespaceAttr = element.GetAttribute("namespace");
+            XAttribute namespaceAttr = element.GetAttribute("namespace");
             if (namespaceAttr == null) {
                 throw new ParseException("<Using/> tags require a 'namespace' attribute");
             }

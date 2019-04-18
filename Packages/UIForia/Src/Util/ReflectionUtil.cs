@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Reflection.Emit;
+using UIForia.Elements;
 using UIForia.Parsing.Expression;
 using UnityEngine;
 
@@ -136,7 +138,7 @@ namespace UIForia.Util {
             fieldInfo = type.GetField(fieldName, InstanceBindFlags);
             return fieldInfo != null;
         }
-        
+
         public static bool IsProperty(Type type, string propertyName) {
             return type.GetProperty(propertyName, InstanceBindFlags) != null;
         }
@@ -145,7 +147,7 @@ namespace UIForia.Util {
             propertyInfo = type.GetProperty(propertyName, InstanceBindFlags);
             return propertyInfo != null;
         }
-        
+
         public static bool IsMethod(Type type, string methodName, out MethodInfo methodInfo) {
             methodInfo = type.GetMethod(methodName, InstanceBindFlags);
             return methodInfo != null;
@@ -226,6 +228,7 @@ namespace UIForia.Util {
                         case TypeCode.Single: return true;
                         default: return false;
                     }
+
                 case TypeCode.Int16:
                     switch (Type.GetTypeCode(right)) {
                         case TypeCode.Byte: return false;
@@ -236,6 +239,7 @@ namespace UIForia.Util {
                         case TypeCode.Single: return true;
                         default: return false;
                     }
+
                 case TypeCode.Int32:
                     switch (Type.GetTypeCode(right)) {
                         case TypeCode.Byte: return false;
@@ -246,6 +250,7 @@ namespace UIForia.Util {
                         case TypeCode.Single: return true;
                         default: return false;
                     }
+
                 case TypeCode.Int64:
                     switch (Type.GetTypeCode(right)) {
                         case TypeCode.Byte: return false;
@@ -256,6 +261,7 @@ namespace UIForia.Util {
                         case TypeCode.Single: return true;
                         default: return false;
                     }
+
                 case TypeCode.Double:
                     switch (Type.GetTypeCode(right)) {
                         case TypeCode.Byte: return false;
@@ -266,6 +272,7 @@ namespace UIForia.Util {
                         case TypeCode.Single: return true;
                         default: return false;
                     }
+
                 case TypeCode.Single:
                     switch (Type.GetTypeCode(right)) {
                         case TypeCode.Byte: return false;
@@ -276,6 +283,7 @@ namespace UIForia.Util {
                         case TypeCode.Single: return true;
                         default: return false;
                     }
+
                 default:
                     return false;
             }
@@ -791,12 +799,11 @@ namespace UIForia.Util {
         }
 
         public static Delegate CreateArraySetter(Type arrayType) {
-            
             ParameterExpression arrayExpr = Expression.Parameter(arrayType, "array");
             ParameterExpression indexExpr = Expression.Parameter(typeof(int), "idx");
             ParameterExpression valueExpr = Expression.Parameter(arrayType.GetElementType(), "value");
-            
-            Expression  arrayAccess = Expression.ArrayAccess(arrayExpr, indexExpr);
+
+            Expression arrayAccess = Expression.ArrayAccess(arrayExpr, indexExpr);
 
             return Expression.Lambda(
                 Expression.Assign(arrayAccess, valueExpr),
@@ -804,64 +811,61 @@ namespace UIForia.Util {
                 indexExpr,
                 valueExpr
             ).Compile();
-            
         }
 
         public static Delegate CreateIndexGetter(Type type) {
             PropertyInfo info = type.GetProperty("Item");
-            
+
             if (info == null) {
                 return null;
             }
-            
+
             ParameterInfo[] parameters = info.GetIndexParameters();
             if (parameters.Length != 1) {
                 return null;
             }
-            
-            ParameterExpression  targetExpr = Expression.Parameter(type);
+
+            ParameterExpression targetExpr = Expression.Parameter(type);
             ParameterExpression keyExpr = Expression.Parameter(parameters[0].ParameterType);
-            
+
             IndexExpression indexExpr = Expression.Property(targetExpr, info, keyExpr);
             return Expression.Lambda(indexExpr, targetExpr, keyExpr).Compile();
         }
 
         public static Delegate CreateIndexSetter(Type type) {
             PropertyInfo info = type.GetProperty("Item");
-            
+
             if (info == null) {
                 return null;
             }
-            
+
             ParameterInfo[] parameters = info.GetIndexParameters();
             if (parameters.Length != 1) {
                 return null;
             }
-            
-            ParameterExpression  targetExpr = Expression.Parameter(type);
+
+            ParameterExpression targetExpr = Expression.Parameter(type);
             ParameterExpression keyExpr = Expression.Parameter(parameters[0].ParameterType);
             ParameterExpression valueExpr = Expression.Parameter(info.PropertyType);
-            
+
             IndexExpression indexExpr = Expression.Property(targetExpr, info, keyExpr);
             BinaryExpression assign = Expression.Assign(indexExpr, valueExpr);
             return Expression.Lambda(assign, targetExpr, keyExpr, valueExpr).Compile();
         }
-        
+
         public static Delegate CreateArrayGetter(Type arrayType) {
-            
             ParameterExpression arrayExpr = Expression.Parameter(arrayType, "array");
             ParameterExpression indexExpr = Expression.Parameter(typeof(int), "idx");
-            
-            Expression  arrayAccess = Expression.ArrayAccess(arrayExpr, indexExpr);
+
+            Expression arrayAccess = Expression.ArrayAccess(arrayExpr, indexExpr);
 
             return Expression.Lambda(
                 arrayAccess,
                 arrayExpr,
                 indexExpr
             ).Compile();
-            
         }
-        
+
         // todo -- need some parameter matching at least
         public static MethodInfo GetMethodInfo(Type type, string methodName) {
             return type.GetMethod(methodName, StaticFlags | InstanceBindFlags);
@@ -1017,7 +1021,106 @@ namespace UIForia.Util {
             return rootType.GetField(fieldName, BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy);
         }
 
-     
+        private static ClassBuilder classBuilder;
+
+        public static Type CreateType(string id, Type baseType, IList<ReflectionUtil.FieldDefinition> fields) {
+            if (classBuilder == null) classBuilder = new ClassBuilder();
+            return classBuilder.CreateRuntimeType(id, baseType, fields);
+        }
+
+        public static bool TryCreateInstance<T>(string id, out T instance) {
+            if (classBuilder == null) {
+                instance = default;
+                return false;
+            }
+
+            return classBuilder.TryCreateInstance(id, out instance);
+        }
+
+        public struct FieldDefinition {
+
+            public readonly string fieldName;
+            public readonly Type fieldType;
+
+            public FieldDefinition(Type fieldType, string fieldName) {
+                this.fieldType = fieldType;
+                this.fieldName = fieldName;
+            }
+
+        }
+
+        private class ClassBuilder {
+
+            private readonly AssemblyName assemblyName;
+            private readonly AssemblyBuilder assemblyBuilder;
+            private readonly ModuleBuilder moduleBuilder;
+            private readonly Dictionary<string, Type> typeMap;
+
+            public ClassBuilder() {
+                this.assemblyName = new AssemblyName("ReflectionUtil.Dynamic");
+                this.assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Run);
+                this.moduleBuilder = assemblyBuilder.DefineDynamicModule("MainModule");
+                this.typeMap = new Dictionary<string, Type>();
+            }
+
+            public void Reset() {
+                typeMap.Clear();
+            }
+
+            public Type CreateRuntimeType(string id, Type baseType, IList<FieldDefinition> fields) {
+                if (typeMap.ContainsKey(id)) {
+                    return null; //todo -- exception
+                }
+
+                TypeBuilder typeBuilder = moduleBuilder.DefineType(
+                    assemblyName.FullName + "_" + id,
+                    TypeAttributes.Public |
+                    TypeAttributes.Class |
+                    TypeAttributes.AutoClass |
+                    TypeAttributes.AnsiClass |
+                    TypeAttributes.BeforeFieldInit |
+                    TypeAttributes.AutoLayout,
+                    baseType
+                );
+
+                typeBuilder.DefineDefaultConstructor(MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName);
+
+                // todo -- ensure no duplicate field names
+                for (int i = 0; i < fields.Count; i++) {
+                    if (IsField(typeof(UIElement), fields[i].fieldName)) {
+                        throw new Exception($"Cannot create field {fields[i].fieldName} because it is already defined on nameof(UIElement)");
+                    }
+
+                    typeBuilder.DefineField(fields[i].fieldName, fields[i].fieldType, FieldAttributes.Public);
+                }
+
+                Type retn = typeBuilder.CreateType();
+                typeMap[id] = retn;
+                return retn;
+            }
+
+            public Type GetCreatedType(string id) {
+                Type type = null;
+                typeMap.TryGetValue(id, out type);
+                return type;
+            }
+
+            public bool TryCreateInstance<T>(string id, out T instance) {
+                if (typeMap.TryGetValue(id, out Type toCreate)) {
+                    instance = (T) Activator.CreateInstance(toCreate);
+                    return true;
+                }
+
+                instance = default;
+                return false;
+            }
+
+        }
+
+        private static int typeIdGenerator = 0;
+        public static string GetGeneratedTypeName(string name) {
+            return name + typeIdGenerator;
+        }
 
     }
 
@@ -1114,6 +1217,7 @@ namespace UIForia.Util {
         }
 
     }
+
 
     public struct GenericArguments {
 

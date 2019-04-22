@@ -270,6 +270,14 @@ namespace UIForia.Systems {
         }
 
         public void SetCamera(Camera camera) {
+            if (!camera.orthographic) {
+                throw new Exception("The camera used to render the UI must be marked as orthographic");
+            }
+
+            if (camera.farClipPlane < 50000) {
+                Debug.LogWarning("The camera used to render the UI should have a far clip plane set to at least 50000");
+            }
+            
             m_Camera = camera;
             gfx.SetCamera(camera);
         }

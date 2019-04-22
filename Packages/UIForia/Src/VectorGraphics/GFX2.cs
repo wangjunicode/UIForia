@@ -28,7 +28,6 @@ namespace Packages.UIForia.Src.VectorGraphics {
 
         public void Render() {
             vertexDataPool.FlushReleaseQueue();
-            vertexDataPool.FlushReleaseQueue();
 
             Matrix4x4 origin = OriginMatrix;
             

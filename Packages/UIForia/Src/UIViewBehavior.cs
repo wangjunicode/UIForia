@@ -39,16 +39,13 @@ namespace UIForia {
             type = Type.GetType(typeName);
 
             if (type == null) return;
-            application = new GameApplication(applicationId);
-            view = application.AddView(new Rect(0, 0, Screen.width, Screen.height), type);
-            application.SetCamera(camera);
+            application = GameApplication.Create(applicationId, type, camera);
             Application.RegisterCustomPainter("Painter0", new Painter());
             Application.RegisterCustomPainter("Painter1", new MyPainter());
         }
 
         private void Update() {
             if (type == null) return;
-            application.GetView(0).Viewport = new Rect(0, 0, Screen.width, Screen.height);
             application.Update();
         }
 

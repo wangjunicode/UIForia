@@ -80,20 +80,55 @@ namespace SVGX {
             textInfo = new TextInfo2(new TextSpan("Hello World"));
         }
 
-        public bool counterClockwise = false;
-
         public void Update() {
             camera.orthographic = true;
             camera.orthographicSize = Screen.height * 0.5f;
 
             ctx.Clear();
-            ctx.Rect(200, 200, 400, 400);
-            ctx.SetFill(texture, Color.black);
-            ctx.Fill();
-            ctx.BeginPath();
-            ctx.SetFill(Color.red);
-            ctx.Rect(500, 500, 200, 200);
-            ctx.Fill();
+            ctx.SetStroke(Color.red);
+            float sWidth = 1f;
+            ctx.SetStrokeWidth(sWidth);
+            ctx.FillRect(100, 100, 100, 100);
+
+//            Vector2 p0 = new Vector2(500, 100);
+////            Vector2 p0 = new Vector2(450, 450);
+//            Vector2 p1 = new Vector2(100, 300);
+////            Vector2 p1 = new Vector2(600, 600);
+//            p1 = p1.Rotate(p0, rotation);
+//            Vector2 p2 = new Vector2(400, 500);
+////            Vector2 p2 = new Vector2(700, 700);
+//            Vector2 p3 = new Vector2(600, 600);
+//
+//            ctx.MoveTo(p0);
+//            ctx.LineTo(p1);
+//            ctx.LineTo(p2);
+//
+////            ctx.Stroke();
+//
+//            ctx.BeginPath();
+//            Vector2 toCurr = (p1 - p0).normalized;
+//            Vector2 toNext = (p2 - p1).normalized;
+//            Vector2 toCurrPerp = new Vector2(-toCurr.y, toCurr.x);
+//            Vector2 toNextPerp = new Vector2(-toNext.y, toNext.x);
+//
+//            Vector2 miter = (toCurrPerp + toNextPerp).normalized;
+////
+//            ctx2.BeginPath();
+//            ctx2.MoveTo(p0);
+//            //ctx2.LineTo(p1);
+//            ctx2.LineTo(p2);
+//            ctx2.LineTo(p3);
+//            ctx2.Stroke();
+//
+//            gfx2.Render();
+            
+//            ctx.Rect(200, 200, 400, 400);
+//            ctx.SetFill(texture, Color.black);
+//            ctx.Fill();
+//            ctx.BeginPath();
+//            ctx.SetFill(Color.red);
+//            ctx.Rect(500, 500, 200, 200);
+//            ctx.Fill();
             
 //            ctx.SetStrokeWidth(strokeWidth);
 //

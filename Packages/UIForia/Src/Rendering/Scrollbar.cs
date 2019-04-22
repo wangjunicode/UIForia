@@ -89,11 +89,17 @@ namespace UIForia {
 
     }
 
+    [CustomScrollbar("UIForia.Default")]
     public class DefaultScrollbar : Scrollbar {
 
         protected float verticalHandleWidth;
         protected float horizontalHandleHeight;
-        
+
+        public DefaultScrollbar() {
+            this.horizontalHandleHeight = 10f;
+            this.verticalHandleWidth = 10f;
+        }
+
         public DefaultScrollbar(float horizontalHandleHeight = 10f, float verticalHandleWidth = 10f) {
             this.horizontalHandleHeight = horizontalHandleHeight;
             this.verticalHandleWidth = verticalHandleWidth;

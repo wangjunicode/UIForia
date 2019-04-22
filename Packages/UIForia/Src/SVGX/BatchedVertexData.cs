@@ -671,10 +671,10 @@ namespace SVGX {
                     uv1List.Add(new Vector4(renderData, fillColorModes, gradientId, gradientDirection));
                     uv1List.Add(new Vector4(renderData, fillColorModes, gradientId, gradientDirection));
 
-                    uv2List.Add(new Vector4());
-                    uv2List.Add(new Vector4());
-                    uv2List.Add(new Vector4());
-                    uv2List.Add(new Vector4());
+                    uv2List.Add(new Vector4(0, 0, 0, 0));
+                    uv2List.Add(new Vector4(0, 0, 0, 0));
+                    uv2List.Add(new Vector4(0, 0, 0, 0));
+                    uv2List.Add(new Vector4(0, 0, 0, 0));
 
                     uv3List.Add(new Vector4());
                     uv3List.Add(new Vector4());
@@ -970,10 +970,10 @@ namespace SVGX {
             if (didIntersect) {
                 anchor = pintersect - p1;
                 anchorLength = anchor.magnitude;
-                var ctx = SVGXRoot.CTX;
-                ctx.CircleFromCenter(pintersect, 5f);
-                ctx.SetStroke(Color.black);
-                ctx.Stroke();
+//                var ctx = SVGXRoot.CTX;
+//                ctx.CircleFromCenter(pintersect, 5f);
+//                ctx.SetStroke(Color.black);
+//                ctx.Stroke();
             }
 
             int limit = (int) (anchorLength / strokeWidth);

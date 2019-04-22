@@ -1,5 +1,6 @@
 using System;
 using UIForia.Elements;
+using UIForia.Layout;
 using UnityEngine;
 using Application = UIForia.Application;
 
@@ -19,6 +20,15 @@ public class UIView {
     public UIElement RootElement { get; private set; }
     public float ScaleFactor { get; set; } = 1f;
 
+    internal Matrix4x4 matrix;
+    internal Size size;
+    
+    internal Vector3 position;
+    internal Vector3 scale;
+    internal Quaternion rotation;
+
+    internal bool is2D;
+    
     public readonly Application Application;
 
     internal UIView(Application app, Rect rect, int depth, Type elementType, string template = null) {
@@ -27,6 +37,11 @@ public class UIView {
         this.Depth = depth;
         this.m_Template = template;
         this.m_ElementType = elementType;
+        this.rotation  = Quaternion.identity;
+        this.scale = Vector3.one;
+        this.position = Vector3.zero;
+        this.size = new Size(Screen.width, Screen.height);
+        this.Viewport = new Rect(position.x, position.y, size.width, size.height);
         Refresh();
     }
 
@@ -66,6 +81,14 @@ public class UIView {
 
     internal void InvokeElementDestroyed(UIElement element) {
         onElementDestroyed?.Invoke(element);
+    }
+
+    public void SetPosition(Vector3 position) {
+        Viewport = new Rect(position.x, position.y, Viewport.width, Viewport.height);
+    }
+
+    public void SetSize(int width, int height) {
+        Viewport = new Rect(Viewport.x, Viewport.y, width, height);
     }
 
 }

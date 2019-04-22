@@ -1,13 +1,17 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using System.Reflection;
 using UIForia.Attributes;
 using UIForia.Elements;
 using UIForia.Exceptions;
 using UIForia.Extensions;
+using UIForia.Rendering;
 using UIForia.Util;
 using UnityEngine;
 using UnityEngine.Assertions;
+using Debug = UnityEngine.Debug;
 
 namespace UIForia.Parsing.Expression {
 
@@ -32,26 +36,29 @@ namespace UIForia.Parsing.Expression {
         }
 
         private static readonly Dictionary<string, ProcessedType> typeMap = new Dictionary<string, ProcessedType>();
-        private static List<Assembly> filteredAssemblies;
-        private static List<Type> loadedTypes;
+        private static LightList<Assembly> filteredAssemblies;
+        private static LightList<Type> loadedTypes;
         private static TypeData[] templateTypes;
         private static readonly Dictionary<string, ProcessedType> templateTypeMap = new Dictionary<string, ProcessedType>();
         private static readonly Dictionary<string, LightList<Assembly>> s_NamespaceMap = new Dictionary<string, LightList<Assembly>>();
 
         private static void FilterAssemblies() {
             if (filteredAssemblies != null) return;
+            Stopwatch watch = new Stopwatch();
+            watch.Start();
 
             Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
-            filteredAssemblies = new List<Assembly>();
-            loadedTypes = new List<Type>();
+            filteredAssemblies = new LightList<Assembly>();
+            loadedTypes = new LightList<Type>();
 
+            
             for (int i = 0; i < assemblies.Length; i++) {
                 Assembly assembly = assemblies[i];
 
                 if (assembly == null) {
                     continue;
                 }
-                                
+
                 if (!FilterAssembly(assembly)) continue;
 
                 filteredAssemblies.Add(assembly);
@@ -60,17 +67,23 @@ namespace UIForia.Parsing.Expression {
                     Type[] types = assembly.GetTypes();
 
                     for (int j = 0; j < types.Length; j++) {
+
+                        Type currentType = types[j];
                         // can be null if assembly referenced is unavailable
                         // ReSharper disable once ConditionIsAlwaysTrueOrFalse
-                        if (types[j] == null) {
+                        if (currentType == null) {
                             continue;
                         }
 
-                        loadedTypes.Add(types[j]);
+                        loadedTypes.Add(currentType);
 
-                        if (!s_NamespaceMap.TryGetValue(types[j].Namespace ?? "null", out LightList<Assembly> list)) {
+                        IEnumerable<Attribute> attrs = currentType.GetCustomAttributes();
+
+                        Application.ProcessClassAttributes(currentType, attrs);
+
+                        if (!s_NamespaceMap.TryGetValue(currentType.Namespace ?? "null", out LightList<Assembly> list)) {
                             list = new LightList<Assembly>();
-                            s_NamespaceMap.Add(types[j].Namespace ?? "null", list);
+                            s_NamespaceMap.Add(currentType.Namespace ?? "null", list);
                         }
 
                         if (!list.Contains(assembly)) {
@@ -86,13 +99,16 @@ namespace UIForia.Parsing.Expression {
             }
 
             loadedTypes.Add(typeof(Color));
+            watch.Stop();
+            Debug.Log("Types loaded in: " + watch.ElapsedMilliseconds + "ms");
+            GC.Collect();
         }
 
         public static bool IsNamespace(string name) {
             return s_NamespaceMap.ContainsKey(name);
         }
 
-        private static Dictionary<string, Type> typeCache = new Dictionary<string, Type>();
+        private static readonly Dictionary<string, Type> typeCache = new Dictionary<string, Type>();
 
         public static bool TryFindType(string typeName, out Type t) {
             if (!typeCache.TryGetValue(typeName, out t)) {
@@ -116,11 +132,11 @@ namespace UIForia.Parsing.Expression {
             string subtypeName = originType.FullName + "+" + name;
             subtypeName = subtypeName + ", " + originType.Assembly.FullName;
             Type retn = Type.GetType(subtypeName);
-            
+
             if (retn != null) {
                 return retn;
             }
-            
+
             FilterAssemblies();
 
             LightList<Assembly> assemblies = s_NamespaceMap.GetOrDefault(originType.Namespace ?? "null");
@@ -136,7 +152,7 @@ namespace UIForia.Parsing.Expression {
                         return retn;
                     }
                 }
-                
+
             }
 
             if (originType.FullName.Contains("+")) {
@@ -152,12 +168,12 @@ namespace UIForia.Parsing.Expression {
                         return retn;
                     }
                 }
-                
+
             }
 
             return ResolveType(name, namespaces);
         }
-        
+
         // todo -- handle generics too 
         // todo -- handle nested types
         public static Type ResolveType(string name, IList<string> namespaces) {
@@ -172,15 +188,15 @@ namespace UIForia.Parsing.Expression {
                 string typeName = namespaces[i] + "." + name + ", ";
                 foreach (Assembly assembly in assemblies) {
                     string fullTypeName = typeName + assembly.FullName;
-                    
+
                     Type retn = Type.GetType(fullTypeName);
-                    
+
                     if (retn != null) {
                         return retn;
                     }
                 }
-            }          
-            
+            }
+
             return null;
         }
 
@@ -245,7 +261,7 @@ namespace UIForia.Parsing.Expression {
 
             return GetRuntimeType(typeName);
         }
-        
+
         public static Type GetRuntimeType(string typeName) {
             FilterAssemblies();
 

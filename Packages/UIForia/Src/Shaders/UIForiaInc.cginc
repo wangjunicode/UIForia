@@ -35,6 +35,19 @@
 #define Black fixed4(0, 0, 0, 1)
 #define Clear fixed4(1, 1, 1, 0)
 
+// doesn't handle alpha, might need the input to use uint not int
+inline float4 FloatToFixed4(float value) {
+    uint input = asuint(value);
+    return float4(
+        uint((input >> 0) & 0xff) / float(0xff),
+        uint((input >> 8) & 0xff) / float(0xff),
+        uint((input >> 16) & 0xff) / float(0xff),
+        1       
+    );
+    
+}
+
+
  // 0.5 is to target center of texel, otherwise we get bad neighbor blending
 inline float GetPixelInRowUV(int targetY, float textureHeight) {
     return (targetY + 0.5) / textureHeight;

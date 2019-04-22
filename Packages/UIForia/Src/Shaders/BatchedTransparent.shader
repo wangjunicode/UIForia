@@ -7,7 +7,7 @@ Shader "UIForia/BatchedTransparent" {
     SubShader {
 
         Tags { "RenderType"="Opaque" "DisableBatching"="True" }
-        Cull Back 
+        Cull Off 
         Lighting Off
 	    Fog { Mode Off }
 	    // todo -- read and apply this https://limnu.com/webgl-blending-youre-probably-wrong/

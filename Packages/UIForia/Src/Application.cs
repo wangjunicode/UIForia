@@ -6,7 +6,6 @@ using UIForia.AttributeProcessors;
 using UIForia.Bindings;
 using UIForia.Compilers.Style;
 using UIForia.Elements;
-using UIForia.Elements.Painters;
 using UIForia.Extensions;
 using UIForia.Parsing.Expression;
 using UIForia.Rendering;
@@ -19,17 +18,48 @@ using UnityEngine;
 
 namespace UIForia {
 
-    // temp
-    public class ArcPainter : ISVGXElementPainter {
+    [AttributeUsage(AttributeTargets.Class)]
+    public class CustomPainterAttribute : Attribute {
 
-        public void Paint(UIElement element, ImmediateRenderContext ctx, SVGXMatrix matrix) {
-            ctx.SetTransform(matrix);
-            ctx.SetStrokeWidth(6);
-            ctx.SetStroke(Color.red);
-            float width = element.layoutResult.actualSize.width * 0.5f;
-            width -= 3f;
-            ctx.ArcTo(width + 3, width + 3, width, 0, 180);
-            ctx.Stroke();
+        public readonly string name;
+
+        public CustomPainterAttribute(string name) {
+            this.name = name;
+        }
+
+    }
+
+    [AttributeUsage(AttributeTargets.Class)]
+    public class CustomScrollbarAttribute : Attribute {
+
+        public readonly string name;
+
+        public CustomScrollbarAttribute(string name) {
+            this.name = name;
+        }
+
+    }
+
+    public class PerformanceMetric {
+
+        public readonly string name;
+        public int frames;
+        public float averageFrameTime;
+        public float minFrameTime;
+        public float maxFrameTime;
+        public float averageFrameTimeLastSecond;
+        private readonly System.Diagnostics.Stopwatch stopWatch;
+
+        public void Start() {
+            stopWatch.Start();
+        }
+
+        public void Stop() {
+            stopWatch.Stop();
+        }
+
+        public void Restart() {
+            stopWatch.Restart();
         }
 
     }
@@ -39,6 +69,7 @@ namespace UIForia {
         public readonly string id;
         private static int ElementIdGenerator;
         public static int NextElementId => ElementIdGenerator++;
+        private string templateRootPath;
 
         protected readonly BindingSystem m_BindingSystem;
         protected readonly IStyleSystem m_StyleSystem;
@@ -88,22 +119,22 @@ namespace UIForia {
         private readonly UITaskSystem m_BeforeUpdateTaskSystem;
         private readonly UITaskSystem m_AfterUpdateTaskSystem;
 
+        protected virtual void Bootstrap() { }
+
         static Application() {
             ArrayPool<UIElement>.SetMaxPoolSize(64);
             s_RequiresUpdateMap = new Dictionary<Type, bool>();
             s_AttributeProcessors = new List<IAttributeProcessor>();
             s_ApplicationList = new LightList<Application>();
             s_CustomPainters = new Dictionary<string, ISVGXElementPainter>();
-            s_CustomPainters.Add("UIForia.InputElement", new InputPainter());
-            s_CustomPainters.Add("HalfCirclePainter", new ArcPainter());
             s_Scrollbars = new Dictionary<string, Scrollbar>();
-            s_Scrollbars.Add("UIForia.Default", new DefaultScrollbar());
         }
 
         protected Application(string id, string templateRootPath = null) {
             this.id = id;
             this.templateRootPath = templateRootPath;
 
+            // todo -- exceptions in constructors aren't good practice
             if (s_ApplicationList.Find(id, (app, _id) => app.id == _id) != null) {
                 throw new Exception($"Applications must have a unique id. Id {id} was already taken.");
             }
@@ -118,7 +149,7 @@ namespace UIForia {
             m_StyleSystem = new StyleSystem();
             m_BindingSystem = new BindingSystem();
             m_LayoutSystem = new LayoutSystem(m_StyleSystem);
-            m_InputSystem = new GameInputSystem(m_LayoutSystem); //new DefaultInputSystem(m_LayoutSystem);
+            m_InputSystem = new GameInputSystem(m_LayoutSystem);
             m_RenderSystem = new SVGXRenderSystem(null, m_LayoutSystem);
             m_RoutingSystem = new RoutingSystem();
             m_AnimationSystem = new AnimationSystem();
@@ -139,7 +170,33 @@ namespace UIForia {
             onApplicationCreated?.Invoke(this);
         }
 
-        private string templateRootPath;
+        internal static void ProcessClassAttributes(Type type, IEnumerable<Attribute> attrs) {
+            foreach (Attribute attr in attrs) {
+
+                if (attr is CustomPainterAttribute paintAttr) {
+                    if (type.GetConstructor(Type.EmptyTypes) == null || type.GetInterface(nameof(ISVGXElementPainter)) == null) {
+                        throw new Exception($"Classes marked with [{nameof(CustomPainterAttribute)}] must provide a parameterless constructor" +
+                                            $" and the class must implement {nameof(ISVGXElementPainter)}. Ensure that {type.FullName} conforms to these rules");
+                    }
+
+                    if (s_CustomPainters.ContainsKey(paintAttr.name)) {
+                        throw new Exception($"Failed to register a custom painter with the name {paintAttr.name} from type {type.FullName} because it was already registered.");
+                    }
+                    s_CustomPainters.Add(paintAttr.name, (ISVGXElementPainter)Activator.CreateInstance(type));
+                }
+                else if (attr is CustomScrollbarAttribute scrollbarAttr) {
+                    if (type.GetConstructor(Type.EmptyTypes) == null || !(typeof(Scrollbar)).IsAssignableFrom(type)) {
+                        throw new Exception($"Classes marked with [{nameof(CustomScrollbarAttribute)}] must provide a parameterless constructor" +
+                                            $" and the class must extend {nameof(Scrollbar)}. Ensure that {type.FullName} conforms to these rules");
+                    }
+
+                    if (s_Scrollbars.ContainsKey(scrollbarAttr.name)) {
+                        throw new Exception($"Failed to register a custom scrollbar with the name {scrollbarAttr.name} from type {type.FullName} because it was already registered.");
+                    }
+                    s_Scrollbars.Add(scrollbarAttr.name, (Scrollbar)Activator.CreateInstance(type));
+                }
+            }
+        }
 
         public string TemplateRootPath {
             get {
@@ -182,9 +239,9 @@ namespace UIForia {
         }
 
         public UIView RemoveView(UIView view) {
-            
+
             if (!m_Views.Remove(view)) return null;
-            
+
             for (int i = 0; i < m_Systems.Count; i++) {
                 m_Systems[i].OnViewRemoved(view);
             }
@@ -479,9 +536,9 @@ namespace UIForia {
         }
 
         public void Update() {
-            
+
             m_BindingSystem.OnUpdate();
-            
+
             m_StyleSystem.OnUpdate();
             m_LayoutSystem.OnUpdate();
             m_InputSystem.OnUpdate();

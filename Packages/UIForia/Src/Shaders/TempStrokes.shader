@@ -11,7 +11,7 @@ Shader "UIForia/TempStrokes" {
         Lighting Off
 	    Fog { Mode Off }
         Blend SrcAlpha OneMinusSrcAlpha
-        ZWrite On
+        ZWrite Off
         ColorMask RGBA
 
         Pass {
@@ -22,7 +22,7 @@ Shader "UIForia/TempStrokes" {
            #include "UnityCG.cginc"
            #include "UIForiaInc.cginc"
            
-           #define antialias 2
+           #define antialias 0
            
            uniform sampler2D _MainTex;
                                
@@ -41,9 +41,7 @@ Shader "UIForia/TempStrokes" {
                 fixed4 color : COLOR;
                 float4 flags : TEXCOORD0;
                 float4 uv : TEXCOORD1;
-                float4 fragData1 : TEXCOORD2;
-                float4 fragData2 : TEXCOORD3;
-                float4 fragData3 : TEXCOORD4;
+
            };
 
          
@@ -57,6 +55,7 @@ Shader "UIForia/TempStrokes" {
            }
 
            fixed4 frag (v2f i) : SV_Target {
+           return fixed4(1, 0, 0, 1);
                 if(i.flags.x == LineCap_Round && i.uv.y < 0.5) {
                      float dist = length(i.uv.xy - 0.5);
                      float pwidth = length(float2(ddx(dist), ddy(dist)));

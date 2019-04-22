@@ -25,9 +25,9 @@ public class InputSystemTests {
                 }
             </Style>
             <Contents style='container'>
-                <Group onMouseDown='{HandleClickedChild(0)}' style.translation='$fixedLength(0)'      style='cell' />
-                <Group onMouseDown='{HandleClickedChild(1)}' style.translation='$fixedLength(100, 0)' style='cell' />
-                <Group onMouseDown='{HandleClickedChild(2)}' style.translation='$fixedLength(200, 0)' style='cell' />
+                <Group onMouseDown='{HandleClickedChild(0)}' style='cell' />
+                <Group onMouseDown='{HandleClickedChild(1)}' style='cell' />
+                <Group onMouseDown='{HandleClickedChild(2)}' style='cell' />
             </Contents>
         </UITemplate>
 

@@ -21,7 +21,7 @@ namespace UIForia.Templates {
 
         public bool isCompiled;
 
-        public readonly List<UITemplate> childTemplates;
+        public List<UITemplate> childTemplates;
         public readonly List<AttributeDefinition> attributes; // all attributes
         public List<ElementAttribute> templateAttributes; // actual attributes
 

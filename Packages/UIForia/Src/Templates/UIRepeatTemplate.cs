@@ -4,7 +4,9 @@ using UIForia.Compilers.ExpressionResolvers;
 using UIForia.Elements;
 using UIForia.Exceptions;
 using UIForia.Expressions;
+using UIForia.Layout;
 using UIForia.Parsing.Expression;
+using UIForia.Rendering;
 using UIForia.Util;
 
 namespace UIForia.Templates {
@@ -29,14 +31,19 @@ namespace UIForia.Templates {
         private RepeatLengthAliasResolver lengthResolver;
 
         public UIRepeatTemplate(Application app, List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null)
-            : base(app, childTemplates, attributes) { }
+            : base(app, childTemplates, attributes) {
+            if (childTemplates.Count > 1) {
+                RepeatMultiChildContainerTemplate container = new RepeatMultiChildContainerTemplate(app, childTemplates);
+                childTemplates = new List<UITemplate>(1);
+                childTemplates.Add(container);
+            }
+        }
 
         protected override Type elementType {
             get { return typeof(UIRepeatElement); }
         }
 
         public override UIElement CreateScoped(TemplateScope inputScope) {
-            // todo -- support multiple children?
 
             ReflectionUtil.ObjectArray2[0] = childTemplates[0];
             ReflectionUtil.ObjectArray2[1] = inputScope;
@@ -120,4 +127,5 @@ namespace UIForia.Templates {
 
     }
 
+   
 }

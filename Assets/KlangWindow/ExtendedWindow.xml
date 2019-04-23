@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UITemplate>
+
+    <Contents x-inherit="path/to/template">
+
+        <SlotContent name="Header">
+
+        </SlotContent>
+
+        <SlotContent name="ButtonBar">
+
+        </SlotContent>
+
+        <SlotContent name="TitleBar">
+
+        </SlotContent>
+
+        <SlotContent name="Body">
+
+        </SlotContent>
+
+    </Contents>
+
+</UITemplate>

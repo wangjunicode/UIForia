@@ -541,6 +541,12 @@ namespace UIForia.Editor {
 
             GUILayout.Space(16);
 
+            DrawEnumWithValue<LayoutType>(selectedElement.style.GetComputedStyleProperty(StylePropertyId.LayoutType), false);
+            DrawMeasurement(selectedElement.style.GetComputedStyleProperty(StylePropertyId.PreferredWidth), false);
+            DrawMeasurement(selectedElement.style.GetComputedStyleProperty(StylePropertyId.PreferredHeight), false);
+            
+            GUILayout.Space(16);
+            
             OffsetRect margin = app.LayoutSystem.GetMarginRect(selectedElement);
             DrawLabel("Margin Top", margin.top.ToString());
             DrawLabel("Margin Right", margin.right.ToString());

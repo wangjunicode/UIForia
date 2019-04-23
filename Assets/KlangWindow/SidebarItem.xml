@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UITemplate>
+    
+    <Style>
+        style side-bar-item {
+            PreferredSize = 64px;
+            Padding = 4px;
+            FlexLayoutMainAxisAlignment = Center;
+            FlexLayoutCrossAxisAlignment = Center;
+        }
+        
+        style side-bar-icon {
+            PreferredSize = 48px;
+        }
+        
+    </Style>
+    
+    <Contents style="side-bar-item">
+        
+        <Image style="side-bar-icon" src="icon"/>
+        
+    </Contents>
+    
+</UITemplate>

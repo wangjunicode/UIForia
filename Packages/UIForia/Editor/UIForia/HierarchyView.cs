@@ -17,20 +17,19 @@ public class HierarchyView : TreeView {
 
     }
 
-    public UIView view;
-    public UIElement rootElement;
-    
+    public UIView[] views;
+
     private readonly IntMap<ViewState> m_ViewState;
 
     public bool needsReload;
     public event Action<UIElement> onSelectionChanged;
-    
+
     private static readonly GUIStyle s_ElementNameStyle;
     private static readonly GUIStyle s_ElementTemplateRootStyle;
     private static readonly GUIContent s_Content = new GUIContent();
 
     public bool showChildrenAndId = false;
-    
+
     static HierarchyView() {
         s_ElementNameStyle = new GUIStyle();
         GUIStyleState elementNameNormal = new GUIStyleState();
@@ -40,8 +39,8 @@ public class HierarchyView : TreeView {
         s_ElementNameStyle.normal = elementNameNormal;
     }
 
-    public HierarchyView(UIElement rootElement, TreeViewState state) : base(state) {
-        this.rootElement = rootElement;
+    public HierarchyView(UIView[] views, TreeViewState state) : base(state) {
+        this.views = views;
         m_ViewState = new IntMap<ViewState>();
         needsReload = true;
     }
@@ -56,32 +55,35 @@ public class HierarchyView : TreeView {
         // todo -- maybe pool tree items
 
         TreeViewItem root = new TreeViewItem(-9999, -1);
-        ElementTreeItem firstChild = new ElementTreeItem(rootElement);
-        firstChild.displayName = rootElement.ToString();
-        stack.Push(firstChild);
 
-        while (stack.Count > 0) {
-            ElementTreeItem current = stack.Pop();
-            UIElement element = current.element;
+        foreach (UIView uiView in views) {
+            ElementTreeItem firstChild = new ElementTreeItem(uiView.RootElement);
+            firstChild.displayName = uiView.RootElement.ToString();
+            stack.Push(firstChild);
 
-            List<UIElement> ownChildren = element.GetChildren();
+            while (stack.Count > 0) {
+                ElementTreeItem current = stack.Pop();
+                UIElement element = current.element;
 
-            if (ownChildren.Count == 0) {
-                ListPool<UIElement>.Release(ref ownChildren);
-                continue;
+                List<UIElement> ownChildren = element.GetChildren();
+
+                if (ownChildren.Count == 0) {
+                    ListPool<UIElement>.Release(ref ownChildren);
+                    continue;
+                }
+
+                for (int i = 0; i < ownChildren.Count; i++) {
+                    ElementTreeItem childItem = new ElementTreeItem(ownChildren[i]);
+                    childItem.displayName = ownChildren[i].ToString();
+                    current.AddChild(childItem);
+                    stack.Push(childItem);
+                }
             }
 
-            for (int i = 0; i < ownChildren.Count; i++) {
-                ElementTreeItem childItem = new ElementTreeItem(ownChildren[i]);
-                childItem.displayName = ownChildren[i].ToString();
-                current.AddChild(childItem);
-                stack.Push(childItem);
-            }
+            root.AddChild(firstChild);
         }
 
-        root.displayName = rootElement.ToString();
-        root.AddChild(firstChild);
-
+        root.displayName = "ROOT";
         SetupDepthsFromParentsAndChildren(root);
         needsReload = false;
         return root;
@@ -140,17 +142,17 @@ public class HierarchyView : TreeView {
         GUI.Label(args.rowRect, s_Content, s_ElementNameStyle);
         r.x += v.x + 5f;
         r.width -= v.x + 5f;
-        LayoutBox box = view.Application.LayoutSystem.GetBoxForElement(item.element);
+        LayoutBox box = item.element.Application.LayoutSystem.GetBoxForElement(item.element);
 
         List<string> names = ListPool<string>.Get();
-        
+
         item.element.style.GetStyleNames(names);
         string styleName = string.Empty;
-        
+
         for (int i = 0; i < names.Count; i++) {
             styleName += names[i] + " ";
         }
-        
+
         ListPool<string>.Release(ref names);
 
         if (styleName.Length > 0) {
@@ -162,7 +164,7 @@ public class HierarchyView : TreeView {
         if (showChildrenAndId) {
             s_Content.text += "(children: " + box.children.Count + ", id: " + item.element.id + ")";
         }
-        
+
         textStyle.textColor = AdjustColor(Color.yellow, item.element);
 
         GUI.Label(r, s_Content, s_ElementNameStyle);

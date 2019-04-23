@@ -1,10 +1,41 @@
 using System;
 using UIForia.Elements;
+using UIForia.Layout;
+using UIForia.Parsing.Expression;
+using UIForia.Rendering;
+using UIForia.Templates;
+using UIForia.Util;
 using UnityEngine;
 
 namespace UIForia {
 
     public class GameApplication : Application {
+
+        private readonly LightList<UIElement> windowStack = new LightList<UIElement>();
+        
+        public T CreateWindow<T>(Vector2 position, Size size) where T : UIElement {
+            
+            ParsedTemplate template = templateParser.GetParsedTemplate(typeof(T));
+            
+            UIElement windowRoot = template.Create();
+            
+            windowRoot.style.SetTransformPositionX(position.x, StyleState.Normal);
+            windowRoot.style.SetTransformPositionY(position.y, StyleState.Normal);
+            windowRoot.style.SetPreferredWidth(size.width, StyleState.Normal);
+            windowRoot.style.SetPreferredHeight(size.height, StyleState.Normal);
+            windowRoot.parent = m_Views[0].RootElement;
+            windowRoot.children.Add(windowRoot);
+            
+            RegisterElement(windowRoot);
+            
+            windowStack.Add(windowRoot);
+            
+            return (T) windowRoot;
+        }
+
+        public void HideWindow(UIElement window) {
+            
+        }
 
         protected GameApplication(string id, string templateRootPath = null) : base(id, templateRootPath) { }
 

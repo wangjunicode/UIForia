@@ -14,6 +14,7 @@ using UIForia.Systems;
 using UIForia.Systems.Input;
 using UIForia.Templates;
 using UIForia.Util;
+using UnityEditor.IMGUI.Controls;
 using UnityEngine;
 
 namespace UIForia {
@@ -725,6 +726,10 @@ namespace UIForia {
 
         public void Animate(UIElement element, AnimationData animation) {
             m_AnimationSystem.Animate(element, animation);
+        }
+
+        public UIView[] GetViews() {
+            return m_Views.ToArray();
         }
 
     }

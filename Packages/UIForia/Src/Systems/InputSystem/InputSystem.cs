@@ -294,7 +294,11 @@ namespace UIForia.Systems {
             m_EventPropagator.Reset(m_MouseState);
             MouseInputEvent mouseEvent = new MouseInputEvent(m_EventPropagator, InputEventType.DragCreate, modifiersThisFrame);
             m_CurrentMouseEvent = mouseEvent;
-
+            
+            if (m_MouseDownElements.Count == 0) return;
+            
+            m_EventPropagator.origin = m_MouseDownElements[0];
+            
             for (int i = 0; i < m_MouseDownElements.Count; i++) {
                 UIElement element = m_MouseDownElements[i];
                 if (element.isDestroyed || element.isDisabled) {

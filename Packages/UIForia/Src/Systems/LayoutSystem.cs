@@ -138,7 +138,11 @@ namespace UIForia.Systems {
                 root.PaddingLeft
             );
 
-            layoutResult.matrix = SVGXMatrix.identity;
+            layoutResult.matrix = SVGXMatrix.TRS(
+                new Vector2(root.TransformX, root.TransformY),
+                root.style.TransformRotation,
+                new Vector2(root.style.TransformScaleX, root.style.TransformScaleY)
+            );
 
             CreateOrDestroyScrollbars(root);
 
@@ -172,6 +176,7 @@ namespace UIForia.Systems {
                         float currentHeight = box.allocatedHeight;
                         box.allocatedWidth = box.GetWidths().clampedSize;
                         box.allocatedHeight = box.GetHeights(box.actualHeight).clampedSize;
+
                         if (box.allocatedWidth != currentWidth || box.allocatedHeight != currentHeight) {
                             box.markedForLayout = true;
                         }
@@ -636,7 +641,6 @@ namespace UIForia.Systems {
             if (box.parent != null) {
                 UpdateChildrenRecursive(box.parent.element);
             }
-
         }
 
         public void OnElementDisabled(UIElement element) {
@@ -650,9 +654,8 @@ namespace UIForia.Systems {
         }
 
         private void UpdateChildrenRecursive(UIElement element) {
-            
-            if(element.children == null) return;
-            
+            if (element.children == null) return;
+
             LayoutBox box = m_LayoutBoxMap.GetOrDefault(element.id);
 
             for (int i = 0; i < element.children.Count; i++) {
@@ -825,7 +828,16 @@ namespace UIForia.Systems {
                 LayoutResult layoutResult = element.layoutResult;
 
                 // todo make this better
-                if (element.isDisabled || !layoutResult.ScreenRect.ContainOrOverlap(point)) {
+                if (element.isDisabled) {
+                    continue;
+                }
+
+                if (element is IPointerQueryHandler handler) {
+                    if (!handler.ContainsPoint(point)) {
+                        continue;
+                    }
+                }
+                else if (!layoutResult.ScreenRect.ContainOrOverlap(point)) {
                     continue;
                 }
 

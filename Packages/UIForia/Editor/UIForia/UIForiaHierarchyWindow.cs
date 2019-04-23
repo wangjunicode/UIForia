@@ -63,9 +63,11 @@ namespace UIForia.Editor {
             applications.Remove(app);
         }
 
-        private void HandleDrawCallback(LightList<RenderData> renderData, LightList<RenderData> didDrawList, Vector3 origin, Camera camera) { }
-
-        private void OnElementCreatedOrDestroyed(UIElement element) {
+        private void Refresh(UIElement element) {
+            needsReload = true;
+        }
+        
+        private void Refresh(UIView view) {
             needsReload = true;
         }
 
@@ -77,9 +79,9 @@ namespace UIForia.Editor {
 
             if (app == null) return;
 
-            treeView = new HierarchyView(app.GetView(0).RootElement, state);
+            treeView = new HierarchyView(app.GetViews(), state);
             treeView.onSelectionChanged += OnElementSelectionChanged;
-            treeView.view = app.GetView(0);
+//            treeView.view = app.GetView(0);
         }
 
         private void Update() {
@@ -95,8 +97,9 @@ namespace UIForia.Editor {
             Application oldApp = Application.Find(inspectedAppId);
 
             if (oldApp != null) {
-                oldApp.onElementCreated -= OnElementCreatedOrDestroyed;
-                oldApp.onElementDestroyed -= OnElementCreatedOrDestroyed;
+                oldApp.onElementCreated -= Refresh;
+                oldApp.onElementDestroyed -= Refresh;
+                oldApp.onViewAdded -= Refresh;
                 oldApp.onRefresh -= OnRefresh;
             }
 
@@ -110,12 +113,12 @@ namespace UIForia.Editor {
             if (app != null) {
                 needsReload = true;
 
-                treeView = new HierarchyView(app.GetView(0).RootElement, state);
+                treeView = new HierarchyView(app.GetViews(), state);
                 treeView.onSelectionChanged += OnElementSelectionChanged;
-                treeView.view = app.GetView(0);
 
-                app.onElementCreated += OnElementCreatedOrDestroyed;
-                app.onElementDestroyed += OnElementCreatedOrDestroyed;
+                app.onElementCreated += Refresh;
+                app.onElementDestroyed += Refresh;
+                app.onViewAdded += Refresh;
                 app.onRefresh += OnRefresh;
             }
 
@@ -166,6 +169,7 @@ namespace UIForia.Editor {
             
             if (needsReload) {
                 needsReload = false;
+                treeView.views = s_SelectedApplication.GetViews();
                 treeView.Reload();
                 treeView.ExpandAll();
             }

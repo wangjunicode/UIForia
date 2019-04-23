@@ -44,9 +44,9 @@ namespace UIForia.Systems {
 
             LightList<UIElement> visibleElements = layoutSystem.GetVisibleElements();
 
-            for (int i = 0; i < views.Count; i++) {
-                RenderView(views[i], visibleElements);
-            }
+                RenderView(views[0], visibleElements);
+//            for (int i = 0; i < views.Count; i++) {
+//            }
 
             gfx.Render(ctx);
         }
@@ -264,11 +264,7 @@ namespace UIForia.Systems {
         public void OnElementCreated(UIElement element) { }
 
         public event Action<ImmediateRenderContext> DrawDebugOverlay;
-
-        public RenderData GetRenderData(UIElement element) {
-            return new RenderData(element);
-        }
-
+        
         public void SetCamera(Camera camera) {
             if (!camera.orthographic) {
                 throw new Exception("The camera used to render the UI must be marked as orthographic");

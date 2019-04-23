@@ -1,15 +1,19 @@
 
+
 style window-container {
 
-    MinWidth = 300px;
-    MinHeight = 300px;
-    PreferredSize = 800px, 600px;
-    
+//    MinWidth = 1cnt;
+//    MinHeight = 600px;
+    PreferredSize = 1cnt, 600px;
+    GridLayoutColTemplate = 1mx, 1fr;
+    GridLayoutRowTemplate = 64px, 1mx;
+    GridLayoutRowAlignment = Grow;
+    LayoutType = Grid; 
 }
 
 style title-bar {
     BackgroundColor = Black;
-    PreferredSize = 1pca, 40px;
+    PreferredHeight = 64px;
     TextColor = White;
     TextFontAsset = url("Gotham-Bold SDF");
     TextTransform = UpperCase;
@@ -19,6 +23,33 @@ style title-bar {
     FlexLayoutMainAxisAlignment = SpaceBetween;
     PaddingLeft = 1em;
     PaddingRight = 1em;
+    GridItemColStart = 1;
+    GridItemRowStart = 0;
+}
+
+style side-bar-runner {
+    PreferredWidth = 8px;
+    PreferredHeight = 48px;
+    LayoutBehavior = Ignored;
+}
+
+style side-bar-runner-display {
+    BackgroundColor = white;
+    PreferredSize = 1pca;
+    MarginTop = 8px;
+}
+
+style side-bar-slot {
+    PreferredWidth = 76px;
+    FlexLayoutCrossAxisAlignment = End;
+}
+
+style colony-info-sidebar {
+    BackgroundColor = Black;   
+    GridItemColStart = 0;
+    GridItemRowStart = 0;
+    PaddingTop = 64px;
+    PaddingBottom = 20px;
 }
 
 style close-button {
@@ -32,28 +63,39 @@ style close-button {
 }
 
 style body {
-    PreferredSize = 1pca;
+    GridItemColStart = 1;
+    GridItemRowStart = 1;
+    BackgroundColor = White;
+    LayoutType = Grid;
+    GridLayoutColTemplate = 1mx, 1mn;
+    GridLayoutRowTemplate = 1mx;
 }
 
-style body-container {
-    PreferredSize = 1pca;
+style body-main {
+    Padding = 2em;
+}
+
+style body-sidebar {
+    PreferredWidth = 300px;
+    PreferredHeight = 1pca;
+    BackgroundColor = #F2F2F2;
 }
 
 style colony-info-body {
     Padding = 2em;
     PreferredWidth = 1pca;
     PreferredHeight = 1pca;
-    BackgroundColor = White;
 }
 
 style colony-info-head-section {
-    PreferredSize = 1pca, 1cnt;
     FlexLayoutDirection = Column;
+    FlexItemGrow = 1;
 }
 
 style colony-info-header-text {
-    FlexItemGrow = 1;
+//    FlexItemGrow = 1;
     LayoutType = Grid;
+//    PreferredWidth = 800px;
     GridLayoutColTemplate = 1fr 1fr;
     GridLayoutCrossAxisAutoSize = 1mx;
     Padding = 1em;

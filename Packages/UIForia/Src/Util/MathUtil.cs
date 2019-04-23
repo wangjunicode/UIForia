@@ -49,6 +49,10 @@ namespace UIForia.Util {
             return angleDeg % 360f;
         }
 
+        public static bool Between(float val, float min, float max) {
+            return val >= min && val <= max;
+        }
+
     }
 
 }

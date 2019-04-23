@@ -14,6 +14,12 @@ using UnityEngine;
 
 namespace UIForia.Elements {
 
+    public interface IPointerQueryHandler {
+
+        bool ContainsPoint(Vector2 point);
+
+    }
+    
     [DebuggerDisplay("{" + nameof(ToString) + "()}")]
     public class UIElement : IHierarchical {
 
@@ -440,6 +446,22 @@ namespace UIForia.Elements {
             s_ColdDataMap.Remove(id);
             LightListPool<UIElement>.Release(ref children);
             parent = null;
+        }
+
+        public bool IsAncestorOf(UIElement potentialParent) {
+            if (potentialParent == this || potentialParent == null) {
+                return false;
+            }
+
+            UIElement ptr = this;
+            while (ptr != null) {
+                if (ptr.parent == potentialParent) {
+                    return true;
+                }
+                ptr = ptr.parent;
+            }
+
+            return false;
         }
 
     }

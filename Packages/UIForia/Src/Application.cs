@@ -120,8 +120,6 @@ namespace UIForia {
         private readonly UITaskSystem m_BeforeUpdateTaskSystem;
         private readonly UITaskSystem m_AfterUpdateTaskSystem;
 
-        protected virtual void Bootstrap() { }
-
         static Application() {
             ArrayPool<UIElement>.SetMaxPoolSize(64);
             s_RequiresUpdateMap = new Dictionary<Type, bool>();

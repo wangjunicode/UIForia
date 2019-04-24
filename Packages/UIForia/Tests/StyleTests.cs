@@ -9,6 +9,7 @@ using UIForia.Compilers.Style;
 using UIForia.Elements;
 using UIForia.Rendering;
 using UIForia.Util;
+using UnityEditor.VersionControl;
 using UnityEngine;
 
 [TestFixture]
@@ -519,4 +520,37 @@ public class StyleTests {
         app.Update();
         Assert.AreEqual(new UIFixedLength(100), root.FindById("myHeading").style.TextFontSize);
     }
+
+    [Template(TemplateType.String, @"
+        <UITemplate>
+            <Style>
+                style root {
+                    TextFontSize = 100;
+                }
+            </Style>
+            <Contents style=""root"">
+                <Repeat list=""list"">
+                    <Text>{$item}</Text>
+                </Repeat>
+            </Contents>
+        </UITemplate>
+    ")]
+    public class InheritStyleElement : UIElement {
+
+        public RepeatableList<string> list;
+
+    }
+
+    [Test]
+    public void StylesAreInheritedForDynamicallyCreatedElements() {
+        MockApplication app = new MockApplication(typeof(InheritStyleElement));
+        InheritStyleElement target = app.GetView(0).RootElement as InheritStyleElement;
+        target.list = new RepeatableList<string>(new [] {
+            "one", "two", "three"
+        });
+        app.Update();
+        StyleProperty fontSize = target.GetChild(0).GetChild(0).style.GetComputedStyleProperty(StylePropertyId.TextFontSize);
+        Assert.AreEqual(100, fontSize.AsUIFixedLength.value);
+    }
+    
 }

@@ -5,6 +5,7 @@ using UIForia.Elements;
 using UIForia.Rendering;
 using UIForia.Util;
 using UnityEngine;
+using UnityEngine.Profiling;
 
 namespace UIForia.Systems {
 
@@ -43,19 +44,74 @@ namespace UIForia.Systems {
         public void OnReset() { }
 
         public void OnElementCreated(UIElement element) {
+
+            Profiler.BeginSample("Style System [OnElementCreated]");
+            
+            if (element.parent != null) {
+                int count = StyleUtil.InheritedProperties.Count;
+                UIStyleSet parentStyle = element.parent.style;
+                LightList<StyleProperty> inheritedProperties = LightListPool<StyleProperty>.Get();
+                inheritedProperties.EnsureCapacity(count);
+                StyleProperty[] inheritedPropertiesArray = inheritedProperties.Array;
+
+                for (int i = 0; i < count; i++) {
+                    inheritedPropertiesArray[i] = parentStyle.GetComputedStyleProperty(StyleUtil.InheritedProperties[i]);
+                }
+
+                inheritedProperties.Count = count;
+                OnElementCreatedStep(element, inheritedProperties);
+                LightListPool<StyleProperty>.Release(ref inheritedProperties);
+            }
+            else {
+                
+                LightList<StyleProperty> inheritedProperties = LightListPool<StyleProperty>.Get();
+                inheritedProperties.EnsureCapacity(StyleUtil.InheritedProperties.Count);
+                StyleProperty[] inheritedPropertiesArray = inheritedProperties.Array;
+
+                for (int i = 0; i < inheritedProperties.Count; i++) {
+                    inheritedPropertiesArray[i] = DefaultStyleValues_Generated.GetPropertyValue(StyleUtil.InheritedProperties[i]);
+                }
+
+                OnElementCreatedStep(element, inheritedProperties);
+                LightListPool<StyleProperty>.Release(ref inheritedProperties);
+            }
+            
+            Profiler.EndSample();
+
+        }
+
+        private void OnElementCreatedStep(UIElement element, LightList<StyleProperty> parentProperties) {
             UIStyleGroupContainer[] baseStyles = element.OriginTemplate.baseStyles;
 
             element.style.styleSystem = this;
 
             element.style.Initialize(baseStyles);
 
-            if (element.children != null) {
-                for (int i = 0; i < element.children.Count; i++) {
-                    OnElementCreated(element.children[i]);
+            int count = parentProperties.Count;
+            StyleProperty[] parentPropertiesArray = parentProperties.Array;
+
+            if (element.children == null || element.children.Count == 0) {
+                for (int i = 0; i < count; i++) {
+                    element.style.SetInheritedStyle(parentPropertiesArray[i]);
                 }
+
+                return;
             }
 
-            // todo need to trickle inherited properties into newly created elements (repeat children, etc)
+            LightList<StyleProperty> inheritedProperties = LightListPool<StyleProperty>.Get();
+            inheritedProperties.EnsureCapacity(count);
+            StyleProperty[] inheritedPropertiesArray = inheritedProperties.Array;
+
+            for (int i = 0; i < count; i++) {
+                inheritedPropertiesArray[i] = element.style.GetComputedStyleProperty(StyleUtil.InheritedProperties[i]);
+            }
+            inheritedProperties.Count = count;
+
+            for (int i = 0; i < element.children.Count; i++) {
+                OnElementCreatedStep(element.children[i], inheritedProperties);
+            }
+
+            LightListPool<StyleProperty>.Release(ref inheritedProperties);
         }
 
         public void OnUpdate() {
@@ -117,7 +173,6 @@ namespace UIForia.Systems {
             changeSet.changes.Add(property);
         }
 
-        // todo -- buffer & flush these instead of doing it all at once
         public void SetStyleProperty(UIElement element, StyleProperty property) {
             AddToChangeSet(element, property);
 

@@ -47,10 +47,12 @@ namespace UIForia.Layout.LayoutTypes {
             this.crossAxisAlignment = style.FlexLayoutCrossAxisAlignment;
             this.mainAxisAlignment = style.FlexLayoutMainAxisAlignment;
         }
-
+        
         protected override void OnChildrenChanged() {
             items.Clear();
             items.EnsureCapacity(children.Count);
+            this.crossAxisAlignment = style.FlexLayoutCrossAxisAlignment;
+            this.mainAxisAlignment = style.FlexLayoutMainAxisAlignment;
             Item[] itemList = items.Array;
             for (int i = 0; i < children.Count; i++) {
                 LayoutBox child = children[i];
@@ -63,7 +65,6 @@ namespace UIForia.Layout.LayoutTypes {
                 itemList[i].shrinkFactor = child.style.FlexItemShrink;
                 itemList[i].crossAxisAlignment = childCrossAlignment;
             }
-
         }
 
         public override void OnStylePropertyChanged(LightList<StyleProperty> properties) {
@@ -75,16 +76,16 @@ namespace UIForia.Layout.LayoutTypes {
                     case StylePropertyId.FlexLayoutMainAxisAlignment:
                         crossAxisAlignment = style.FlexLayoutCrossAxisAlignment;
                         mainAxisAlignment = style.FlexLayoutMainAxisAlignment;
+                        Item[] itemList = items.Array;
                         for (int i = 0; i < children.Count; i++) {
-                            Item[] itemList = items.Array;
                             CrossAxisAlignment childCrossAlignment = children[i].style.FlexItemSelfAlignment;
                             if (childCrossAlignment == CrossAxisAlignment.Unset) {
                                 childCrossAlignment = crossAxisAlignment;
                             }
-    
+
                             itemList[i].crossAxisAlignment = childCrossAlignment;
                         }
-    
+
                         break;
                 }
             }
@@ -98,9 +99,10 @@ namespace UIForia.Layout.LayoutTypes {
                     case StylePropertyId.FlexItemGrow:
                     case StylePropertyId.FlexItemShrink:
                     case StylePropertyId.FlexItemSelfAlignment:
+                        
+                        Item[] itemList = items.Array;
                         for (int i = 0; i < children.Count; i++) {
                             if (children[i] == child) {
-                                Item[] itemList = items.Array;
                                 CrossAxisAlignment childCrossAlignment = child.style.FlexItemSelfAlignment;
                                 if (childCrossAlignment == CrossAxisAlignment.Unset) {
                                     childCrossAlignment = crossAxisAlignment;
@@ -167,7 +169,6 @@ namespace UIForia.Layout.LayoutTypes {
             else {
                 actualHeight = size.height + padding.Vertical + border.Vertical;
             }
-            
         }
 
         protected override float ComputeContentWidth() {

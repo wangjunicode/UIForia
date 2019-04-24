@@ -3,11 +3,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using JetBrains.Annotations;
 using UIForia.Elements;
-using UIForia.Layout;
 using UIForia.Rendering;
 using UIForia.Util;
 using UnityEngine;
-using Debug = System.Diagnostics.Debug;
 
 namespace UIForia.Layout.LayoutTypes {
 

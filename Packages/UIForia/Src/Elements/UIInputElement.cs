@@ -352,7 +352,7 @@ namespace UIForia.Elements {
                 ctx.SetStroke(caretColor);
                 ctx.SetStrokeWidth(1f);
                 Vector2 p = textInfo.GetSelectionPosition(selectionRange) - textScroll;
-                ctx.MoveTo(layoutResult.ContentRect.min + p + new Vector2(0, 4f)); // todo remove + 4 on y
+                ctx.MoveTo(layoutResult.ContentRect.min + p + new Vector2(0, -4f)); // todo remove + 4 on y
                 ctx.VerticalLineTo(layoutResult.ContentRect.y + p.y + style.GetResolvedFontSize());
                 ctx.Stroke();
             }
@@ -362,7 +362,7 @@ namespace UIForia.Elements {
                 ctx.SetStroke(caretColor);
                 ctx.SetStrokeWidth(1f);
                 Vector2 p = textInfo.GetCursorPosition(selectionRange) - textScroll;
-                ctx.MoveTo(layoutResult.ContentRect.min + p + new Vector2(0, 4f)); // todo remove + 4 on y
+                ctx.MoveTo(layoutResult.ContentRect.min + p + new Vector2(0, -4f)); // todo remove + 4 on y
                 ctx.VerticalLineTo(layoutResult.ContentRect.y + p.y + style.GetResolvedFontSize());
                 ctx.Stroke();
             }

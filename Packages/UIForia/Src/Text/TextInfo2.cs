@@ -711,6 +711,11 @@ namespace UIForia.Text {
                     TMP_Glyph glyph;
                     TMP_FontAsset fontForGlyph = TMP_FontUtilities.SearchForGlyph(spanInfo.textStyle.font, charInfos[i].character, out glyph);
 
+                    if (glyph == null) {
+                        Debug.Log($"The character {charInfos[i].character} isn't available in font {spanInfo.textStyle.font.name}.");
+                        continue;
+                    }
+                    
                     KerningPair adjustmentPair;
                     GlyphValueRecord glyphAdjustments = new GlyphValueRecord();
 

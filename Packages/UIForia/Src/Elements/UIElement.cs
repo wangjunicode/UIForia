@@ -14,12 +14,6 @@ using UnityEngine;
 
 namespace UIForia.Elements {
 
-    public interface IPointerQueryHandler {
-
-        bool ContainsPoint(Vector2 point);
-
-    }
-    
     [DebuggerDisplay("{" + nameof(ToString) + "()}")]
     public class UIElement : IHierarchical {
 
@@ -36,7 +30,7 @@ namespace UIForia.Elements {
         public readonly LayoutResult layoutResult;
 
         internal static IntMap<ElementColdData> s_ColdDataMap = new IntMap<ElementColdData>();
-        
+
         protected internal UIElement() {
             this.id = Application.NextElementId;
             this.style = new UIStyleSet(this);
@@ -47,7 +41,7 @@ namespace UIForia.Elements {
         public Application Application {
             get { return s_ColdDataMap.GetOrDefault(id).view.Application; }
         }
-        
+
         public UIView View {
             get { return s_ColdDataMap.GetOrDefault(id).view; }
             internal set {
@@ -98,7 +92,7 @@ namespace UIForia.Elements {
         public bool isDestroyed => (flags & UIElementFlags.Destroyed) != 0;
 
         public bool isBuiltIn => (flags & UIElementFlags.BuiltIn) != 0;
-        
+
         internal bool isPrimitive => (flags & UIElementFlags.Primitive) != 0;
 
         public virtual void OnCreate() { }
@@ -129,7 +123,7 @@ namespace UIForia.Elements {
             child.parent = this;
             child.templateContext.rootObject = templateContext.rootObject;
             children.Add(child);
-            View.Application.RegisterElement(child);
+            Application.RegisterElement(child);
             return child;
         }
 
@@ -257,7 +251,7 @@ namespace UIForia.Elements {
             }
 
             if (style != null && style.HasBaseStyles) {
-                return "<" + GetDisplayName() + ">";// + style.BaseStyleNames;
+                return "<" + GetDisplayName() + ">"; // + style.BaseStyleNames;
             }
             else {
                 return "<" + GetDisplayName() + " " + id + ">";
@@ -458,6 +452,7 @@ namespace UIForia.Elements {
                 if (ptr.parent == potentialParent) {
                     return true;
                 }
+
                 ptr = ptr.parent;
             }
 

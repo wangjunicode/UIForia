@@ -222,8 +222,11 @@ namespace UIForia {
             RenderSystem.SetCamera(camera);
         }
 
-        public UIView AddView(Rect rect, Type type, string template = null) {
-            UIView view = new UIView(this, rect, m_Views.Count, type, template);
+        private int nextViewId = 0;
+        
+        public UIView AddView(string name, Rect rect, Type type, string template = null) {
+            
+            UIView view = new UIView(nextViewId++ , name, this, rect, m_Views.Count, type, template);
 
             m_Views.Add(view);
 

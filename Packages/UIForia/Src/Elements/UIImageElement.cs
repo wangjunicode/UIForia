@@ -5,14 +5,13 @@ using UnityEngine;
 
 namespace UIForia.Elements {
 
-    public class UIImageElement : UIElement, IMeshProvider {
+    public class UIImageElement : UIElement {
 
         public string src;
         public Texture2D texture;
         private Mesh mesh;
         
         public UIImageElement() {
-            flags |= UIElementFlags.Image;
             flags |= UIElementFlags.Primitive;
         }
         
@@ -24,11 +23,6 @@ namespace UIForia.Elements {
 
         public override string GetDisplayName() {
             return "Image";
-        }
-
-        public Mesh GetMesh() {
-            mesh = MeshUtil.ResizeStandardUIMesh(mesh, layoutResult.actualSize);
-            return mesh;
         }
 
     }

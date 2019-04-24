@@ -8,10 +8,49 @@ using UIForia.Layout.LayoutTypes;
 using UIForia.Rendering;
 using UIForia.Util;
 using UnityEngine;
-using UnityEngine.Experimental.PlayerLoop;
 
 namespace UIForia.Systems {
 
+    public struct LayoutData {
+
+        public UIFixedLength paddingTop;
+        public UIFixedLength paddingRight;
+        public UIFixedLength paddingBottom;
+        public UIFixedLength paddingLeft;
+        
+        public UIFixedLength borderTop;
+        public UIFixedLength borderRight;
+        public UIFixedLength borderBottom;
+        public UIFixedLength borderLeft;
+        
+        public UIMeasurement marginTop;
+        public UIMeasurement marginRight;
+        public UIMeasurement marginBottom;
+        public UIMeasurement marginLeft;
+
+        public Vector3 localPosition;
+        public Quaternion localRotation;
+        public Vector3 localScale;
+
+        public Matrix4x4 matrix;
+        public RenderLayer renderLayer;
+        public int zIndex;
+
+        public UIMeasurement prefWidth;
+        public UIMeasurement minWidth;
+        public UIMeasurement maxWidth;
+
+        public UIMeasurement prefHeight;
+        public UIMeasurement minHeight;
+        public UIMeasurement maxHeight;
+
+        public Vector2 pivot;
+        public Vector2 transformPosition;
+        public TransformBehavior transformBehaviorX;
+        public TransformBehavior transformBehaviorY;
+
+    }
+    
     public class LayoutSystem : ILayoutSystem {
 
         public struct ViewRect {

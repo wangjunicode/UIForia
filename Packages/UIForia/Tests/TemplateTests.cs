@@ -1,9 +1,11 @@
 using NUnit.Framework;
+using Tests.Mocks;
 using UIForia.Attributes;
 using UIForia.Bindings;
 using UIForia.Elements;
 using UIForia.Expressions;
 using UIForia.Templates;
+using UIForia.Util;
 using static Tests.TestUtils;
 
 [TestFixture]
@@ -11,7 +13,7 @@ public class TemplateTests {
 
     public ParsedTemplate dummyTemplate;
 
-    class TestTarget  {
+    class TestTarget {
 
         public string stringValue;
 
@@ -52,10 +54,9 @@ public class TemplateTests {
         ExpressionContext ctx = new ExpressionContext(target);
 
         target.stringValue = "world";
-        UITextTemplate template = new UITextTemplate(null,"'hello {stringValue}!'");
+        UITextTemplate template = new UITextTemplate(null, "'hello {stringValue}!'");
         template.Compile(dummyTemplate);
         UIElement element = template.CreateScoped(new TemplateScope());
-//        MetaData data = template.GetCreationData(new UITextElement(), ctx);
         Assert.IsNotEmpty(template.perFrameBindings);
         Assert.AreEqual(1, template.perFrameBindings.Length);
         Assert.IsInstanceOf<TextBinding_Multiple>(template.perFrameBindings[0]);
@@ -63,65 +64,48 @@ public class TemplateTests {
         Assert.AreEqual("hello world!", As<UITextElement>(element).GetText());
     }
 
-//    [Test]
-//    public void TextElement_EventOnChange() {
-//        TestTarget target = new TestTarget();
-//        ExpressionContext ctx = new ExpressionContext(target);
-//        target.stringValue = "world";
-//        UITextTemplate template = new UITextTemplate(null, "'hello {stringValue}!'");
-//        template.Compile(dummyTemplate);
-//        UIElement el = template.CreateScoped(new TemplateScope());
-//        int callCount = 0;
-//        As<UITextElement>(el).onTextChanged += (element, text) => callCount++;
-//        template.perFrameBindings[0].Execute(el, ctx);
-//        Assert.AreEqual(1, callCount);
-//    }
-//
-//    [Test]
-//    public void TextElement_NoEventWithoutChange() {
-//        TestTarget target = new TestTarget();
-//        ExpressionContext ctx = new ExpressionContext(target);
-//
-//        target.stringValue = "world";
-//        UITextTemplate template = new UITextTemplate(null, "'hello {stringValue}!'");
-//        template.Compile(dummyTemplate);
-//        UIElement el = template.CreateScoped(new TemplateScope());
-//        int callCount = 0;
-//        As<UITextElement>(el).onTextChanged += (element, text) => callCount++;
-//        template.perFrameBindings[0].Execute(el, ctx);
-//        template.perFrameBindings[0].Execute(el, ctx);
-//        Assert.AreEqual(1, callCount);
-//    }
-
-    [Template(TemplateType.String, @"
-        <UITemplate>
-            <Style>
-                style x {}
-                style y {}
-            </Style>
-            <Contents>
-              <Div style='x' x-id='child0'/>
-              <Div x-id='child1'>
-                <Div style='y' x-id='child2'/>
-              </Div>
-              <ThingBlerg2 x-id='child3'/>
-            </Contents>
-        </UITemplate>
-    ")]
-    public class Thing : UIElement {
-
-    }
-
     [Template(TemplateType.String, @"
     <UITemplate>
         <Contents>
-            <Div x-id='child4'/>
-            <Div x-id='child5'>
-                <Div x-id='child6'/>
-            </Div>
+            <Repeat list=""values"">
+                <Text>The value is</Text>
+                <Text>{$item}</Text>
+            </Repeat>
         </Contents>
     </UITemplate>
     ")]
-    public class ThingBlerg2 : UIElement { }
+    private class MultipleRepeatThing : UIElement {
+
+        public RepeatableList<int> values;
+
+    }
+
+    [Test]
+    public void RepeatElementCanHaveMultipleChildren() {
+        MockApplication app = new MockApplication(typeof(MultipleRepeatThing));
+        MultipleRepeatThing target = app.GetView(0).RootElement as MultipleRepeatThing;
+
+        target.values = new RepeatableList<int>(new[] {
+            1, 2, 3
+        });
+
+        app.Update();
+        UIRepeatElement<int> repeatElement = target.FindFirstByType<UIRepeatElement<int>>();
+        Assert.NotNull(repeatElement);
+
+        void AssertChildren(UIElement child, int i) {
+            Assert.IsInstanceOf<RepeatMultiChildContainerElement>(child);
+            Assert.AreEqual(2, child.ChildCount);
+            Assert.IsInstanceOf<UITextElement>(child.GetChild(0));
+            UITextElement text0 = child.GetChild(0) as UITextElement;
+            UITextElement text1 = child.GetChild(1) as UITextElement;
+            Assert.AreEqual("The value is", text0.text);
+            Assert.AreEqual(i.ToString(), text1.text);
+        }
+
+        AssertChildren(repeatElement.GetChild(0), 1);
+        AssertChildren(repeatElement.GetChild(1), 2);
+        AssertChildren(repeatElement.GetChild(2), 3);
+    }
 
 }

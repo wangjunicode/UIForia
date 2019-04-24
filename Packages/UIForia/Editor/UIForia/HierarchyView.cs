@@ -173,7 +173,7 @@ public class HierarchyView : TreeView {
         r.x += v.x + 5f;
         r.width -= v.x + 5f;
 
-        r = DrawAdditionalInfo(item.element, default, r);
+        r = DrawAdditionalInfo(item.element, r);
 
         if (!isTemplateRoot) {
             return;
@@ -196,7 +196,7 @@ public class HierarchyView : TreeView {
         }
     }
 
-    private static Rect DrawAdditionalInfo(UIElement element, RenderData renderData, Rect rect) {
+    private static Rect DrawAdditionalInfo(UIElement element, Rect rect) {
         if (element is UITextElement textElement) {
             if (!string.IsNullOrEmpty(textElement.text)) {
                 if (textElement.text.Length <= 20) {
@@ -213,16 +213,7 @@ public class HierarchyView : TreeView {
                 rect.width -= size.x;
             }
         }
-
-        if (renderData != null && renderData.CullResult != CullResult.NotCulled) {
-            s_Content.text = GetCullText(renderData.CullResult);
-            s_ElementNameStyle.normal.textColor = AdjustColor(Color.red, element);
-            GUI.Label(rect, s_Content, s_ElementNameStyle);
-            Vector2 size = s_ElementNameStyle.CalcSize(s_Content);
-            rect.x += size.x;
-            rect.width -= size.x;
-        }
-
+        
         return rect;
     }
 

@@ -24,7 +24,7 @@ namespace Tests.Mocks {
             m_RenderSystem = renderSystem;
             m_LayoutSystem = layoutSystem;
 
-            AddView(new Rect(), elementType, template);
+            AddView("Test View", new Rect(), elementType, template);
         }
 
         public new MockInputSystem InputSystem => (MockInputSystem) m_InputSystem;
@@ -61,10 +61,6 @@ namespace Tests.Mocks {
         public void OnAttributeSet(UIElement element, string attributeName, string currentValue, string attributeValue) {}
         
         public event Action<ImmediateRenderContext> DrawDebugOverlay;
-
-        public RenderData GetRenderData(UIElement element) {
-            return null;
-        }
 
         public void SetCamera(Camera camera) { }
 

@@ -363,7 +363,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 35f2b5d632fd4d64b9acedec5215cda2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  typeName: UI.KlangWindow, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+  typeName: UI.WindowSample, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
   camera: {fileID: 534669904}
   applicationId: Game App
 --- !u!114 &1506585480
@@ -501,7 +501,6 @@ MonoBehaviour:
   endAngle: 180
   stepSize: 2
   radius: 100
-  counterClockwise: 1
 --- !u!222 &1506585485
 CanvasRenderer:
   m_ObjectHideFlags: 0

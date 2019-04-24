@@ -34,8 +34,8 @@ namespace UIForia.Templates {
             : base(app, childTemplates, attributes) {
             if (childTemplates.Count > 1) {
                 RepeatMultiChildContainerTemplate container = new RepeatMultiChildContainerTemplate(app, childTemplates);
-                childTemplates = new List<UITemplate>(1);
-                childTemplates.Add(container);
+                this.childTemplates = new List<UITemplate>(1);
+                this.childTemplates.Add(container);
             }
         }
 

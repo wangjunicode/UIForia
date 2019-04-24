@@ -3,11 +3,81 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Linq.Expressions;
 
 namespace UIForia.Extensions {
 
+    public struct ListAccessor<T> {
+
+        private static readonly Func<List<T>, T[]> arrayGetter;
+        private static readonly Func<List<T>, T[], T[]> arraySetter;
+        private static readonly Func<List<T>, int> sizeGetter;
+        private static readonly Func<List<T>, int, int> sizeSetter;
+
+        static ListAccessor() {
+            arrayGetter = (Func<List<T>, T[]>) CreateFieldGetter("_items");
+            arraySetter = (Func<List<T>, T[], T[]>) CreateFieldSetter(typeof(T[]), "_items");
+            sizeGetter = (Func<List<T>, int>) CreateFieldGetter("_size");
+            sizeSetter = (Func<List<T>, int, int>) CreateFieldSetter(typeof(int), "_size");
+        }
+
+        public static void SetArray(List<T> list, T[] array, int count) {
+            if (count < 0) count = array.Length;
+            arraySetter(list, array);
+            sizeSetter(list, count);
+        }
+
+        public static void SetArray(List<T> list, T[] array) {
+            arraySetter(list, array);
+            sizeSetter(list, array.Length);
+        }
+
+        public static T[] GetArray(List<T> list) {
+            return arrayGetter(list);
+        }
+
+        public static void SetCount(List<T> list, int count) {
+            sizeSetter(list, count);
+        }
+
+        public static int GetSize(List<T> list) {
+            return sizeGetter(list);
+        }
+
+        private static Delegate CreateFieldGetter(string fieldName) {
+            ParameterExpression paramExpression = Expression.Parameter(typeof(List<T>));
+            Expression fieldGetterExpression = Expression.Field(paramExpression, fieldName);
+            return Expression.Lambda(fieldGetterExpression, paramExpression).Compile();
+        }
+
+        private static Delegate CreateFieldSetter(Type fieldType, string fieldName) {
+            ParameterExpression paramExpression0 = Expression.Parameter(typeof(List<T>));
+            ParameterExpression paramExpression1 = Expression.Parameter(fieldType, fieldName);
+            MemberExpression fieldGetter = Expression.Field(paramExpression0, fieldName);
+
+            return Expression.Lambda(
+                Expression.Assign(fieldGetter, paramExpression1),
+                paramExpression0,
+                paramExpression1
+            ).Compile();
+        }
+
+    }
+
     public static class ListExtensions {
 
+        public static void SetArray<T>(this List<T> list, T[] array, int count) {
+            ListAccessor<T>.SetArray(list, array, count);
+        }
+
+        public static T[] GetArray<T>(this List<T> list) {
+            return ListAccessor<T>.GetArray(list);
+        }
+
+        public static void SetCount<T>(this List<T> list, int count) {
+            ListAccessor<T>.SetCount(list, count);
+        }
+        
         public static T UnstableRemove<T>(this List<T> list, int index) {
             T value = list[list.Count - 1];
             list[index] = value;
@@ -33,7 +103,7 @@ namespace UIForia.Extensions {
 
             return default(T);
         }
-        
+
         public static int FindIndex<T, U>(this List<T> list, U target, Func<T, U, bool> predicate) {
             for (int i = 0; i < list.Count; i++) {
                 if (predicate(list[i], target)) {

@@ -29,9 +29,14 @@ public class UIView {
 
     internal bool is2D;
     
+    public readonly int id;
     public readonly Application Application;
-
-    internal UIView(Application app, Rect rect, int depth, Type elementType, string template = null) {
+    public readonly string name;
+    public RenderTexture renderTexture;
+    
+    internal UIView(int id, string name, Application app, Rect rect, int depth, Type elementType, string template = null) {
+        this.id = id;
+        this.name = name;
         this.Application = app;
         this.Viewport = rect;
         this.Depth = depth;
@@ -45,6 +50,20 @@ public class UIView {
         Refresh();
     }
 
+    public bool clipOverflow;
+
+    public void SetZIndex() {
+        
+    }
+
+    public void SetCamera(Camera camera) {
+        
+    }
+
+    public void SetRenderTexture(RenderTexture texture) {
+        
+    }
+    
     public void EnableElement(UIElement element) {
         Application.DoEnableElement(element);
     }

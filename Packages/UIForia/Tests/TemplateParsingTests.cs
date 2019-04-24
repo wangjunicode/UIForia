@@ -151,9 +151,9 @@ public class TemplateParsingTests {
         ParsedTemplate parsedTemplate = new TemplateParser(null).ParseTemplateFromString<Test1>(@"
                 <UITemplate>
                     <Contents>
-                        <Thing>
+                        <Group>
                             <SlotContent name=""slot0""/>
-                        </Thing>
+                        </Group>
                     </Contents>
                 </UITemplate>
             ");

@@ -370,16 +370,7 @@ namespace UIForia.Parsing.Expression {
 
             return new UITextTemplate(app, type, rawText, ParseAttributes(element.Attributes()));
         }
-
-        private UITemplate ParseGraphicElement(XElement element) {
-            UITemplate template = new UIGraphicTemplate(
-                app,
-                ParseNodes(element.Nodes()),
-                ParseAttributes(element.Attributes())
-            );
-            return template;
-        }
-
+        
         private UITemplate ParseImageElement(XElement element) {
             return new UIImageTemplate(app, null, ParseAttributes(element.Attributes()));
         }
@@ -396,10 +387,6 @@ namespace UIForia.Parsing.Expression {
         private UITemplate ParseElement(XElement element) {
             if (element.Name == "Children") {
                 return ParseChildrenElement(element);
-            }
-
-            if (element.Name == "Graphic") {
-                return ParseGraphicElement(element);
             }
 
             if (element.Name == "Image") {

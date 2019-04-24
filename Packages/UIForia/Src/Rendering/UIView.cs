@@ -51,6 +51,7 @@ public class UIView {
     }
 
     public bool clipOverflow;
+    public bool focusOnMouseDown;
 
     public void SetZIndex() {
         
@@ -73,7 +74,6 @@ public class UIView {
     }
 
     public void Refresh() {
-        // todo allow hooks for custom context expressions here
         if (m_Template != null) {
             this.RootElement = Application.templateParser.ParseTemplateFromString(m_ElementType, m_Template).Create();
         }

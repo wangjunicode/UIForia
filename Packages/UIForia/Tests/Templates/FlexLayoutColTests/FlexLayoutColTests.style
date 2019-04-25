@@ -16,3 +16,20 @@ style w90h90mc10 {
     PreferredWidth = 90f;
     PreferredHeight = 90f;
 }
+
+style button-style {
+   PreferredWidth = 500px;
+   FlexLayoutMainAxisAlignment = Center;
+   FlexLayoutCrossAxisAlignment = Center;
+}
+
+style button-text {
+    TextFontSize = 20px;
+}
+
+style button {
+    PreferredSize = 30px;
+}
+
+style outer-start {
+}

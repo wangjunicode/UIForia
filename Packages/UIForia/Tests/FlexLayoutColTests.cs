@@ -5,6 +5,7 @@ using UIForia.Elements;
 using UIForia.Layout;
 using UIForia.Rendering;
 using UnityEngine;
+using UnityEngine.UI;
 
 [TestFixture]
 public class FlexLayoutColTests {
@@ -20,10 +21,21 @@ public class FlexLayoutColTests {
         public UIGroupElement child1;
         public UIGroupElement child2;
 
+        public bool isDivEnabled { get; set; }
+
         public override void OnCreate() {
             child0 = FindById<UIGroupElement>("child0");
             child1 = FindById<UIGroupElement>("child1");
             child2 = FindById<UIGroupElement>("child2");
+        }
+
+        [OnMouseDown]
+        public void Activate() {
+            isDivEnabled = true;
+        }
+
+        public string GetButtonStyle() {
+            return "button-style";
         }
     }
 
@@ -602,6 +614,46 @@ public class FlexLayoutColTests {
         app.Update();
         Assert.AreEqual(300, root.layoutResult.ActualWidth);
         Assert.AreEqual(100, root.layoutResult.ActualHeight);
+    }
+
+
+    [Test]
+    public void CentersButtonEvenIfStyleIsDynamic() {
+        string template = @"
+        <UITemplate>
+            <Style path='\\Templates\\FlexLayoutColTests\\FlexLayoutColTests.style'/>
+            <Contents>
+                <Div if='isDivEnabled'>
+                    <Group style='[GetButtonStyle()]'>
+                        <Text style='button-text'>button text</Text>
+                    </Group>
+                </Div>
+                <Group style='button' x-id='button' onMouseDown='Activate()' />
+            </Contents>
+        </UITemplate>
+        ";
+        MockApplication app = new MockApplication(typeof(FlexColLayoutThing), template);
+        app.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
+        FlexColLayoutThing root = (FlexColLayoutThing) app.RootElement;
+        app.Update();
+
+        UIElement group = root.FindFirstByType<UIGroupElement>();
+        UIElement div = root.FindFirstByType<UIDivElement>();
+        app.Update();
+        // disabled
+        Assert.AreEqual(0, group.layoutResult.ActualWidth);
+
+        app.InputSystem.MouseDown(new Vector2(15, 15));
+        app.Update();
+        app.InputSystem.MouseUp();
+
+        app.Update();
+
+        // enabled
+        Assert.AreEqual(MainAxisAlignment.Center, group.style.FlexLayoutMainAxisAlignment);
+        Assert.AreEqual(CrossAxisAlignment.Center, group.style.FlexLayoutCrossAxisAlignment);
+        Assert.AreEqual(true, div.isEnabled);
+       
     }
 
 }

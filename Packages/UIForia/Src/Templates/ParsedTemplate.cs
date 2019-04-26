@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
-using JetBrains.Annotations;
 using UIForia.Compilers;
 using UIForia.Compilers.ExpressionResolvers;
 using UIForia.Compilers.Style;
 using UIForia.Elements;
+using UIForia.Exceptions;
 using UIForia.Parsing.Expression;
 using UIForia.Rendering;
 
@@ -205,10 +205,10 @@ namespace UIForia.Templates {
 
                     if (styleDefinitions[j].alias == current.alias) {
                         if (current.alias == StyleDefinition.k_EmptyAliasName) {
-                            throw new Exception("You cannot provide multiple style tags with a default alias");
+                            throw new ParseException(templatePath, "You cannot provide multiple style tags with a default alias");
                         }
 
-                        throw new Exception("Duplicate style alias: " + current.alias);
+                        throw new ParseException(templatePath, "Duplicate style alias: " + current.alias);
                     }
                 }
             }

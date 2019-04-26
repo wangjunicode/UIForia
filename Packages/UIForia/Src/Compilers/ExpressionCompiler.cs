@@ -123,9 +123,13 @@ namespace UIForia.Compilers {
             this.rootType = rootType;
             this.currentType = currentType;
 
-            ASTNode astRoot = ExpressionParser.Parse(input);
             try {
+                ASTNode astRoot = ExpressionParser.Parse(input);
                 return (Expression<T>) Visit(astRoot);
+            }
+            catch (ParseException e) {
+                e.SetFileName(this.rootType.FullName);
+                throw;
             }
             catch (CompileException e) {
                 e.SetFileName(rootType.FullName);

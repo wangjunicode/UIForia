@@ -8,6 +8,10 @@ namespace UIForia.Exceptions {
 
         public readonly StyleToken token;
         
+        public ParseException(string fileName, string message = null) : base(message) {
+            this.fileName = fileName;
+        }
+        
         public ParseException(StyleToken token, string message = null) : 
             base($"Parse error at line {token.line}, column {token.column}, token type '{token.styleTokenType}' -> {token.value}\n{message}") {
             this.token = token;

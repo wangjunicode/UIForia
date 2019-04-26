@@ -56,6 +56,14 @@ namespace UIForia.Elements {
             textInfo.Layout();
         }
 
+        public override void OnDestroy() {
+            Blur();
+        }
+
+        public override void OnDisable() {
+            Blur();
+        }
+
         public override string GetDisplayName() {
             return "InputElement";
         }
@@ -113,6 +121,19 @@ namespace UIForia.Elements {
             if (HasDisabledAttr()) return;
 
             char c = evt.character;
+
+            if (evt.keyCode == KeyCode.Return) {
+                TriggerEvent(new SubmitEvent());
+                return;
+            }
+
+            if (evt.keyCode == KeyCode.Tab) {
+                // todo: find next IFocusable; implement tab index
+                TriggerEvent(new TabNavigationEvent());
+                return;
+            }
+
+            if (c == '\n' || c == '\t') return;
 
             if (!textInfo.spanList[0].textStyle.font.characterDictionary.ContainsKey(c)) {
                 return;

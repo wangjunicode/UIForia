@@ -24,7 +24,9 @@ namespace UIForia.Systems {
             }
 
         }
-
+        
+        public event Action<IFocusable> onFocusChanged;
+        
         private const float k_DragThreshold = 5f;
 
         private readonly ILayoutSystem m_LayoutSystem;
@@ -115,6 +117,10 @@ namespace UIForia.Systems {
 
         protected abstract MouseState GetMouseState();
 
+        public IFocusable GetFocusedElement() {
+            return (IFocusable) m_FocusedElement;
+        }
+
         public bool RequestFocus(IFocusable target) {
             if (!(target is UIElement)) {
                 return false;
@@ -129,11 +135,13 @@ namespace UIForia.Systems {
                 IFocusable focusable = (IFocusable) m_FocusedElement;
                 m_FocusedElement.style.ExitState(StyleState.Focused);
                 focusable.Blur();
+                onFocusChanged?.Invoke(target);
             }
 
             m_FocusedElement = (UIElement) target;
             target.Focus();
             m_FocusedElement.style.EnterState(StyleState.Focused);
+            onFocusChanged?.Invoke(target);
             return true;
         }
 
@@ -144,6 +152,7 @@ namespace UIForia.Systems {
                 focusable.Blur();
                 // todo -- if focus handlers added via template invoke them
                 m_FocusedElement = null;
+                onFocusChanged?.Invoke(target);
             }
         }
 
@@ -448,9 +457,13 @@ namespace UIForia.Systems {
 
         public void OnElementEnabled(UIElement element) { }
 
-        public void OnElementDisabled(UIElement element) { }
+        public void OnElementDisabled(UIElement element) {
+            BlurOnDisableOrDestroy();
+        }
 
         public void OnElementDestroyed(UIElement element) {
+            BlurOnDisableOrDestroy();
+
             m_ElementsLastFrame.Remove(element);
             m_ElementsThisFrame.Remove(element);
             m_MouseDownElements.Remove(element);
@@ -459,6 +472,12 @@ namespace UIForia.Systems {
             m_MouseHandlerMap.Remove(element.id);
             m_DragCreatorMap.Remove(element.id);
             m_DragHandlerMap.Remove(element.id);
+        }
+
+        private void BlurOnDisableOrDestroy() {
+            if (m_FocusedElement != null && (m_FocusedElement.isDisabled || m_FocusedElement.isDestroyed)) {
+                ReleaseFocus((IFocusable) m_FocusedElement);
+            }
         }
 
         public void OnElementCreated(UIElement element) {

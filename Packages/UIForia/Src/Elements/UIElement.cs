@@ -107,6 +107,17 @@ namespace UIForia.Elements {
 
         public virtual void OnDestroy() { }
 
+        public virtual void HandleUIEvent(UIEvent evt) { }
+
+        public void TriggerEvent(UIEvent evt) {
+            evt.origin = this;
+            UIElement ptr = this.parent;
+            while (evt.IsPropagating() && ptr != null) {
+                ptr.HandleUIEvent(evt);
+                ptr = ptr.parent;
+            }
+        }
+        
         public UIElement CreateChild(Type type) {
             // todo -- ensure we can accept children
 

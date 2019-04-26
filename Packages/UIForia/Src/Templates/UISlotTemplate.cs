@@ -44,10 +44,11 @@ namespace UIForia.Templates {
             UISlotElement element = new UISlotElement(slotNameAttr.value);
 
             element.children = new LightList<UIElement>(content.Count);
-            element.templateContext = new ExpressionContext(inputScope.rootElement, element);
+            TemplateScope s = new TemplateScope(inputScope.rootElement.templateContext.rootObject as UIElement);
+            element.templateContext = new ExpressionContext(s.rootElement, element);
 
             for (int i = 0; i < content.Count; i++) {
-                element.children.Add(content[i].CreateScoped(inputScope));
+                element.children.Add(content[i].CreateScoped(s));
                 element.children[i].parent = element;
             }
 

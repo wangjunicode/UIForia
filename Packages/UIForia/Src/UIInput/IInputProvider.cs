@@ -32,6 +32,7 @@ namespace UIForia.UIInput {
         
         bool IsDragging { get; }
 
+        IFocusable GetFocusedElement();
         bool RequestFocus(IFocusable target);
         void ReleaseFocus(IFocusable target);
 

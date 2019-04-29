@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UITemplate>
+    <Style path="Documentation/Features/GridDemo.style"/>
+    <Using namespace="UnityEngine"/>
+
+    <Contents>
+        
+        <Group style="[variableStyle]"/>
+        
+        <!-- Creates a grid with a fixed amount of columns. More columns will align horizontally and break vertically -->
+        <Group style="grid0 grid-horizontal col3layout">
+            <Div style="cell cell-end m10 size100">Col 1</Div>
+            <Div style="cell m10">Col 2</Div>
+            <Div style="cell m10">Col 3</Div>
+
+            <Div style="cell m10">Col 4 Row 2</Div>
+            <Div style="cell m10">Col 5 Row 2</Div>
+        </Group>
+
+        <!-- Creates a grid with a fixed number of columns. One item does not have margin -->
+        <Group style="grid1 grid-horizontal col3layout">
+            <Div style="cell">Col 1</Div>
+            <Div style="cell m10 cell-start">Col 2</Div>
+            <Div style="cell m10 cell-end">Col 3</Div>
+
+            <Div style="cell m10 size100 cell-center">Col 4 Row 2</Div>
+            <Div style="cell m10">Col 5 Row 2</Div>
+        </Group>
+
+        <!-- Create a grid where some items must shrink to fit -->
+        <Group style="grid2 grid-horizontal">
+
+            <Div style="cell cell-shrink" style.preferredWidth="500f" style.backgroundColor="Color.yellow">
+                <Text>I Shrink to fit.</Text>
+                <Text>
+                    My preferredWidth is {$parent.style.PreferredWidth.value}
+                </Text>
+                <Text>
+                    My actual width is {$parent.layoutResult.actualSize.width}
+                </Text>
+            </Div>
+
+            <Div style="cell cell-grow size100">
+                <Text>I grow to fit.</Text>
+                <Text>My preferredWidth is {$parent.style.PreferredWidth.value}</Text>
+                <Text>My actual width is {$parent.layoutResult.actualSize.width}</Text>
+            </Div>
+            
+            <Div style="cell cell-end">
+                I align at the end
+            </Div>
+
+            <Div style="cell m10 size100 cell-center">I am centered</Div>
+            <Div style="cell m10 cell-fit">I will grow or shrink to fit</Div>
+            <Div style="cell  cell-start">
+                I align at the start
+            </Div>
+        </Group>
+
+        <!--&lt;!&ndash; Creates a grid with a fixed amount of columns. More columns will align horizontally and break vertically &ndash;&gt;-->
+        <!--<Group style="grid-horizontal col3layout mb50 oddPadding cell-center">-->
+        <!--<Div style="cell m10">Col1</Div>-->
+        <!--<Div style="cell m10">Col2</Div>-->
+        <!--<Div style="cell m10">Col3</Div>-->
+
+        <!--<Div style="cell m10">Col4 Row 2</Div>-->
+        <!--<Div style="cell m10">Col5 Row 2</Div>-->
+        <!--</Group>-->
+
+        <!--<Group style="grid-horizontal col3layout mb50 oddPadding ">-->
+        <!--<Div style="cell m10">Col1</Div>-->
+        <!--<Div style="cell m10">Col2</Div>-->
+        <!--<Div style="cell m10">Col3</Div>-->
+
+        <!--<Div style="cell m10">Col4 Row 2</Div>-->
+        <!--<Div style="cell m10">Col5 Row 2</Div>-->
+        <!--</Group>-->
+        <!---->
+        <!--<Group style="grid-vertical row3layout mb50 oddPadding">-->
+        <!--<Div style="cell m10">Col1</Div>-->
+        <!--<Div style="cell m10">Col2</Div>-->
+        <!--<Div style="cell m10">Col3</Div>-->
+
+        <!--<Div style="cell m10">Col4 Row 2</Div>-->
+        <!--<Div style="cell m10">Col5 Row 2</Div>-->
+        <!--</Group>-->
+
+        <!--<Div style="grid-container">-->
+
+        <!--<Group style="grid-cell logo" />-->
+        <!--<Group style="grid-cell thead">Home</Group>-->
+        <!--<Group style="grid-cell thead" onMouseEnter="OnHover()" >-->
+        <!--Concept-->
+        <!--<Group x-id="concept-menu" if="hover" style="concept-hover" onMouseEnter="OnHover()" >-->
+        <!--<Group>Features</Group>-->
+        <!--<Group>Theory</Group>-->
+        <!--<Group>Context</Group>-->
+        <!--</Group>-->
+        <!--</Group>-->
+        <!--<Group style="grid-cell thead seedlogo" onMouseEnter="OnHoverEnd()" />-->
+        <!--<Group style="grid-cell thead">Dev Blog</Group>-->
+        <!--<Group style="grid-cell thead">Community</Group>-->
+
+        <!--&lt;!&ndash; the red background should not be visible, instead the grid's background should! &ndash;&gt;-->
+        <!--<Group style="[backgroundStyleName, 'borderRadiusTest']"/>-->
+        <!--</Div>-->
+
+    </Contents>
+</UITemplate>

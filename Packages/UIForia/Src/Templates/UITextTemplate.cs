@@ -74,7 +74,7 @@ namespace UIForia.Templates {
         public override UIElement CreateScoped(TemplateScope inputScope) {
             UITextElement element = null;
             if (elementType == typeof(UILabelElement)) {
-                throw new NotImplementedException();
+                element = new UILabelElement(RawText);
             }
             else if (elementType == typeof(UIParagraphElement)) {
                 element = new UIParagraphElement(RawText);

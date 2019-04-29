@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UITemplate>
+    
+    <Style path="Documentation/Features/ScrollDemo.style"/>
+    
+    <Contents>
+        
+        <Repeat style="scroll-container" list="list">
+            <Text>This is content {$index}</Text>
+        </Repeat>
+        
+    </Contents>
+</UITemplate>

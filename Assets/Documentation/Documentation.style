@@ -1,0 +1,76 @@
+style main-container {
+    LayoutType = Grid;
+    PreferredSize = 1vw 1vh;
+    GridLayoutColTemplate = 300px 1fr;
+    GridLayoutRowTemplate = 1fr;
+    GridLayoutRowAlignment = Grow;    
+    GridLayoutColAlignment = Grow;    
+    TextFontAsset = url("GothamNarrow-Medium SDF");
+}
+
+style <Heading1> {
+    TextFontSize = 1.6em;
+    MarginBottom = 1em;
+} 
+
+style <Heading2> {
+    TextFontSize = 1.3em;
+    MarginBottom = 0.6em;
+}
+
+style <Anchor> {
+
+    MarginBottom = 6px;
+    Padding = 4px;
+    BorderLeft = 2px;
+    BorderColor = white;
+    PreferredWidth = 280px;
+
+    [hover] {
+        Cursor = url("Cursors/hand");
+        BorderColor = black;
+        BackgroundColor = rgba(190, 190, 190, 120);
+    }
+}
+
+style navigation {
+    Padding = 20px;
+    BackgroundColor = white;
+}
+
+style demo-panel {
+    Padding = 20px;
+    BorderLeft = 2px;
+    BorderColor = #2c2e53;
+    BackgroundColor = #8c8faf;
+    PreferredSize = 1pca;
+}
+
+style mb20 {
+    MarginBottom = 20px;
+}
+
+style parameter-list {
+    LayoutType = Grid;
+    PreferredSize = 0.7vw 1cnt;
+    GridLayoutColTemplate = 300px 300px 1fr; 
+    GridLayoutCrossAxisAutoSize = 1mx;
+    BackgroundColor = rgba(20, 20, 20, 120);
+    GridLayoutRowGap = 20;
+    Padding = 20px;
+    MarginBottom = 20px;
+    TextColor = rgb(235, 235, 235);
+}
+
+style caption {
+    GridItemColSpan = 3;
+    MarginBottom = 20px;
+}
+
+style parameter-list-header {
+    TextFontSize = 1.2em;
+    PaddingBottom = 5px;
+    MarginBottom = 20px;
+    BorderBottom = 1px;
+    BorderColor = white;
+}

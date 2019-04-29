@@ -1,0 +1,83 @@
+style container {
+    PreferredSize = 100vw 100vh;
+    BackgroundColor = black;
+    Padding = 50px;
+    FlexLayoutDirection = Column;
+}
+
+style one-container {
+    TransformPivot = 0.5 0.5;
+}
+
+style circle {
+    BorderRadius = 50%;
+    TransformPivot = 0.5 0.5;
+}
+
+style arc-blue {
+    painter = "HalfCirclePainter";
+    PreferredSize = 48px; 
+    LayoutBehavior = Ignored;
+}
+
+style circle-blue {
+    BackgroundColor = #1565C0;
+    PreferredSize = 48px; 
+}
+
+style circle-yellow-bg {
+    BackgroundColor = #FFEB3BFF;
+    PreferredSize = 12px; 
+    FlexItemSelfAlignment = Center;
+}
+
+style circle-red-bg {
+    BackgroundColor = #B71C1CFF;
+    PreferredSize = 48px;
+    LayoutBehavior = Ignored;
+}
+
+style two-container {
+    PreferredSize = 48px;
+    MarginLeft = 50px;
+    FlexLayoutMainAxisAlignment = Center;
+    FlexLayoutCrossAxisAlignment = Center;
+}
+
+style orbit-container {
+    LayoutType = Radial;
+    LayoutBehavior = Ignored;
+    PreferredSize = 48px;
+    RadialLayoutEndAngle = 130;
+    RadialLayoutRadius = 28;
+    TransformRotation = 0;
+    TransformPivot = 0.5 0.5;
+}
+
+style orbit {
+    BackgroundColor = #00BCD4;
+}
+
+style orbit-0 {
+    PreferredSize = 0.28pca;
+}
+
+style orbit-1 {
+    PreferredSize = 0.25pca;
+}
+
+style orbit-2 {
+    PreferredSize = 0.22pca;
+}
+
+style orbit-3 {
+    PreferredSize = 0.19pca;
+}
+ 
+style orbit-4 {
+    PreferredSize = 0.16pca;
+}
+
+style orbit-5 {
+    PreferredSize = 0.13pca;
+}

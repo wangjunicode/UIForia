@@ -15,6 +15,10 @@ namespace UIForia.Compilers {
         }
 
         public override T Evaluate(ExpressionContext context) {
+            if (context == null) {
+                return headExpression.Execute(default, null);
+            }
+            
             if (context.rootObject is U input) {
                 return headExpression.Execute(input, context);
             }

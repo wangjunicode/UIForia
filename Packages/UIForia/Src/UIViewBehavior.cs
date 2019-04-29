@@ -19,7 +19,7 @@ namespace UIForia {
 
         public void Paint(UIElement element, ImmediateRenderContext ctx, SVGXMatrix matrix) {
             ctx.SetStroke(Color.magenta);
-            ctx.MoveTo(element.layoutResult.ActualWidth * 0.5f, 0);
+            ctx.MoveTo(element.layoutResult.screenPosition.x + element.layoutResult.ActualWidth * 0.5f, 0);
             ctx.VerticalLineTo(element.layoutResult.ActualHeight);
             ctx.Stroke();
         }

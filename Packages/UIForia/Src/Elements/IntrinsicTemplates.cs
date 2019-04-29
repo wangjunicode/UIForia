@@ -1,4 +1,7 @@
-﻿namespace UIForia.Elements {
+﻿using UIForia.Attributes;
+using UIForia.UIInput;
+
+namespace UIForia.Elements {
 
     public class UIGroupElement : UIContainerElement {
 
@@ -74,8 +77,18 @@
 
     public class UILabelElement : UITextElement {
 
+        public string forElement;
+        
         public UILabelElement(string text = "") : base(text) {
             flags |= UIElementFlags.BuiltIn;
+        }
+
+        [OnMouseClick]
+        public void OnClick() {
+            UIElement forEl = parent.FindById(forElement);
+            if (forEl is IFocusable focusable) {
+                Application.InputSystem.RequestFocus(focusable);
+            }
         }
 
         public override string GetDisplayName() {

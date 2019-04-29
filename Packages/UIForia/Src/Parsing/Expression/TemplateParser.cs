@@ -81,7 +81,7 @@ namespace UIForia.Parsing.Expression {
 
         private StyleDefinition ParseStyleSheet(string templateId, XElement styleElement) {
             XAttribute aliasAttr = styleElement.GetAttribute("alias");
-            XAttribute importPathAttr = styleElement.GetAttribute("path");
+            XAttribute importPathAttr = styleElement.GetAttribute("path") ?? styleElement.GetAttribute("src");
 
             string rawText = string.Empty;
             // styles can have either a class path or a body
@@ -110,7 +110,7 @@ namespace UIForia.Parsing.Expression {
             // if we have a body, expect import path to be null
             if (!string.IsNullOrEmpty(rawText) && !string.IsNullOrWhiteSpace(rawText)) {
                 if (importPathAttr != null && !string.IsNullOrEmpty(importPathAttr.Value)) {
-                    throw new ParseException("Expected 'path' to be null when a body is provided to a style tag");
+                    throw new ParseException("Expected 'path' or 'src' to be null when a body is provided to a style tag");
                 }
 
                 return new StyleDefinition(alias, templateId, rawText);
@@ -118,7 +118,7 @@ namespace UIForia.Parsing.Expression {
 
             // if we have no body then expect path to be set
             if (importPathAttr == null || string.IsNullOrEmpty(importPathAttr.Value)) {
-                throw new ParseException("Expected 'path' to be provided when a body is not provided in a style tag");
+                throw new ParseException("Expected 'path' or 'src' to be provided when a body is not provided in a style tag");
             }
 
             return new StyleDefinition(alias, importPathAttr.Value.Trim());

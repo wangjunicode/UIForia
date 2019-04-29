@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UITemplate>
+    <Style path="Documentation/Features/Cursors.style" />
+    <Contents style="container">
+        <Group style="red"/>
+        <Group style="blue"/>
+    </Contents>
+</UITemplate>

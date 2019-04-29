@@ -591,9 +591,10 @@ namespace UIForia.Systems {
             else {
                 KeyboardEventTreeNode focusedNode = m_KeyboardEventTree.GetItem(m_FocusedElement);
                 IReadOnlyList<KeyboardEventHandler> handlers = focusedNode.handlers;
+                ExpressionContext context = ((UIElement)focusedNode.Element).templateContext;
                 for (int i = 0; i < handlers.Count; i++) {
                     if (keyEvent.stopPropagationImmediately) break;
-                    handlers[i].Invoke(focusedNode.Element, default, keyEvent);
+                    handlers[i].Invoke(focusedNode.Element, context, keyEvent);
                 }
             }
         }

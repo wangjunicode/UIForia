@@ -1,9 +1,0 @@
-style container {
-
-}
-
-style scroll-container {
-    PreferredSize = 200px;
-    BackgroundColor = yellow;
-    OverflowY = Scroll;
-}

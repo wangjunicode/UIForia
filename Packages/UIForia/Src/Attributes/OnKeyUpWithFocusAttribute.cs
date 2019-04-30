@@ -8,8 +8,8 @@ namespace UIForia.Attributes {
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
     public class OnKeyUpWithFocusAttribute : KeyboardInputBindingAttribute {
 
-        public OnKeyUpWithFocusAttribute(KeyCode key = KeyCodeUtil.AnyKey, KeyboardModifiers modifiers = KeyboardModifiers.None)
-            : base(key, '\0', modifiers, InputEventType.KeyUp, true) { }
+        public OnKeyUpWithFocusAttribute(KeyCode key = KeyCodeUtil.AnyKey, KeyboardModifiers modifiers = KeyboardModifiers.None, KeyEventPhase keyEventPhase = KeyEventPhase.Early)
+            : base(key, '\0', modifiers, InputEventType.KeyUp, true, keyEventPhase) { }
 
     }
 }

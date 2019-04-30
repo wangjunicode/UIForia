@@ -1233,6 +1233,10 @@ namespace UIForia.Text {
             return new SelectionRange(i, TextEdge.Left);
         }
 
+        public SelectionRange MoveToEndOfText() {
+            return new SelectionRange(CharCount - 1, TextEdge.Right);    
+        }
+        
         public SelectionRange MoveToEndOfLine(SelectionRange selectionRange) {
             CharInfo charInfo = charInfoList.Array[selectionRange.cursorIndex];
             int lineIdx = charInfo.lineIndex;

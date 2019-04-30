@@ -152,7 +152,7 @@ namespace UIForia.Compilers {
             }
 
             if (attrKey.IndexOf(".", StringComparison.Ordinal) != -1) {
-                // todo -- don't allocated, use span or something similar
+                // todo -- don't allocate, use span or something similar
                 string[] parts = attrKey.Split('.');
                 string property = parts[0];
 

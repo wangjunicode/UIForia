@@ -76,10 +76,10 @@ namespace UIForia.Elements {
 
         [OnPropertyChanged(nameof(value))]
         private void OnInputValueChanged(string name) {
-            if (value == text) return;
             text = value ?? string.Empty;
             textInfo.UpdateSpan(0, text);
             textInfo.Layout();
+            selectionRange = textInfo.MoveToEndOfText();
             onValueChanged?.Invoke(textInfo.GetAllText());
         }
 
@@ -123,13 +123,13 @@ namespace UIForia.Elements {
             char c = evt.character;
 
             if (evt.keyCode == KeyCode.Return) {
-                TriggerEvent(new SubmitEvent());
+                Input.DelayEvent(this, new SubmitEvent());
                 return;
             }
 
             if (evt.keyCode == KeyCode.Tab) {
                 // todo: find next IFocusable; implement tab index
-                TriggerEvent(new TabNavigationEvent());
+                Input.DelayEvent(this, new TabNavigationEvent(evt));
                 return;
             }
 

@@ -1,0 +1,17 @@
+style container {
+    PreferredSize = 1pca;
+}
+
+style dict {
+    LayoutBehavior = Ignored;
+    TransformBehaviorY = AnchorMinOffset;
+    TransformPositionY = 0;
+    PreferredSize = 1pca 1cnt;
+}
+
+style entry {
+    PreferredSize = 1pca 30px;
+    LayoutType = Grid;
+    GridLayoutColTemplate = 600px 600px;
+    GridLayoutColGap = 50;
+}

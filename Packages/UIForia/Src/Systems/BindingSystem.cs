@@ -113,9 +113,23 @@ namespace UIForia.Systems {
 
         public void OnAttributeSet(UIElement element, string attributeName, string currentValue, string attributeValue) { }
 
-        // todo -- expose to editor but not user
-        public SkipTree<BindingNode> GetReadTree() {
+        internal SkipTree<BindingNode> GetReadTree() {
             return m_ReadBindingTree;
+        }
+
+        public bool UpdateReadBinding(UIElement element, string bindingId) {
+            BindingNode node = m_ReadBindingTree.GetItem(element.id);
+            if (node != null) {
+                Binding[] bindings = node.bindings;
+                for (int i = 0; i < bindings.Length; i++) {
+                    if (bindings[i].bindingId == bindingId) {
+                        bindings[i].Execute(element, node.context);
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
     }
 

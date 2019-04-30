@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UITemplate>
+    <Style src="Documentation/Features/RepeatExample.style" />
+    <Contents style="container">
+        <Group style="container">
+            <Repeat list="dictionary" style="dict">
+                <Div style="['entry', GetAStyle()]">
+                    <Text>{$item.Item1}</Text>
+                    <Text>{$item.Item2}</Text>
+                </Div>
+            </Repeat>
+        </Group>
+    </Contents>
+</UITemplate>

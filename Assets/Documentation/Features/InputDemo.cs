@@ -1,5 +1,6 @@
 using UIForia.Attributes;
 using UIForia.Elements;
+using UIForia.UIInput;
 using UIForia.Util;
 
 namespace Documentation {
@@ -33,10 +34,17 @@ namespace Documentation {
 
         public override void OnCreate() {
             autocompleteList = new RepeatableList<string>();
-            Autocomplete();
+            Autocomplete(null);
         }
 
-        public void Autocomplete() {
+        public override void HandleUIEvent(UIEvent evt) {
+            if (evt is SubmitEvent && autocompleteList.Count > 0) {
+                rwValue = autocompleteList[0];
+                evt.StopPropagation();
+            }
+        }
+
+        public void Autocomplete(KeyboardInputEvent evt) {
             autocompleteList.Clear();
 
             if (rwValue == null) {

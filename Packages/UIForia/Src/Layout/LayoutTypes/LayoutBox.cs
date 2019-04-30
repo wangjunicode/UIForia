@@ -150,14 +150,11 @@ namespace UIForia.Layout.LayoutTypes {
          */
 
         public void ReplaceChild(LayoutBox toReplace, LayoutBox newChild) {
-//            int index = children.IndexOf(toReplace);
-//            if (index == -1) {
-//                throw new Exception("Cannot replace child");
-//            }
-//
-//            newChild.SetParent(this);
-//            children[index] = newChild;
-//            newChild.AdoptChildren(toReplace);
+            newChild.parent = this;
+            newChild.UpdateChildren();
+            newChild.allocatedWidth = toReplace.allocatedWidth;
+            newChild.allocatedHeight = toReplace.allocatedHeight;
+            UpdateChildren();
         }
         
         public void UpdateChildren() {

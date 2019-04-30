@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using UIForia.Elements;
+using UnityEngine;
 
 namespace UIForia.UIInput {
 
@@ -35,6 +36,8 @@ namespace UIForia.UIInput {
         IFocusable GetFocusedElement();
         bool RequestFocus(IFocusable target);
         void ReleaseFocus(IFocusable target);
+
+        void DelayEvent(UIElement origin, UIEvent evt);
 
     }
 

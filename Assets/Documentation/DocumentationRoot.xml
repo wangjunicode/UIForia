@@ -19,6 +19,7 @@
                 <Anchor href="'/ScrollDemo'">Scrolling</Anchor>
                 <Anchor href="'/TransclusionDemo'">Transclusion</Anchor>
                 <Anchor href="'/TransformPlayground'">Transform Playground</Anchor>
+                <Anchor href="'/RepeatExample'">Repeat Example</Anchor>
                 
             </Div>
             
@@ -41,6 +42,7 @@
                 <ScrollDemo x-route="/ScrollDemo" />
                 <TransclusionDemo x-route="/TransclusionDemo" />
                 <TransformPlayground x-route="/TransformPlayground" />
+                <RepeatExample x-route="/RepeatExample" />
             </Div>
             
         </Group>

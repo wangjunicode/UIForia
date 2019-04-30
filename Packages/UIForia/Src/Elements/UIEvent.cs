@@ -1,3 +1,5 @@
+using UIForia.UIInput;
+
 namespace UIForia.Elements {
     public class UIEvent {
 
@@ -7,8 +9,16 @@ namespace UIForia.Elements {
         
         private bool propagating;
 
+        public readonly KeyboardInputEvent keyboardInputEvent;
+
         protected UIEvent(string eventType) {
             this.eventType = eventType;
+            propagating = true;
+        }
+        
+        protected UIEvent(string eventType, KeyboardInputEvent keyboardInputEvent) {
+            this.eventType = eventType;
+            this.keyboardInputEvent = keyboardInputEvent;
             propagating = true;
         }
 

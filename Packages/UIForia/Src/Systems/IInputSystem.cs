@@ -8,7 +8,7 @@ namespace UIForia.Systems {
         event Action<IFocusable> onFocusChanged;
         MouseInputEvent CurrentMouseEvent { get; }
         KeyboardInputEvent CurrentKeyboardEvent { get; }
-
+        void OnLateUpdate();
     }
 
 }

@@ -13,6 +13,7 @@ namespace UIForia.UIInput {
         public KeyboardModifiers requiredModifiers;
         public KeyCode keyCode;
         public char character;
+        public KeyEventPhase keyEventPhase;
 #if DEBUG
         public MethodInfo methodInfo;
 #endif
@@ -76,13 +77,14 @@ namespace UIForia.UIInput {
 
         private readonly Expression<Terminal> expression;
 
-        public KeyboardEventHandler_Expression(InputEventType eventType, Expression<Terminal> expression) {
+        public KeyboardEventHandler_Expression(InputEventType eventType, Expression<Terminal> expression, KeyEventPhase keyEventPhase = KeyEventPhase.Early) {
             this.expression = expression;
             this.eventType = eventType;
             this.character = '\0';
             this.requiredModifiers = KeyboardModifiers.None;
             this.requiresFocus = false;
             this.keyCode = KeyCodeUtil.AnyKey;
+            this.keyEventPhase = keyEventPhase;
         }
 
         public override void Invoke(object target, ExpressionContext context, KeyboardInputEvent evt) {

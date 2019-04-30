@@ -67,6 +67,9 @@ namespace UIForia.Systems {
 
         public KeyboardModifiers KeyboardModifiers => modifiersThisFrame;
 
+        private LightList<KeyboardEventHandlerInvocation> lateHandlers = new LightList<KeyboardEventHandlerInvocation>();
+        private LightList<UIEvent> lateTriggers = new LightList<UIEvent>();
+
         protected InputSystem(ILayoutSystem layoutSystem) {
             this.m_LayoutSystem = layoutSystem;
 
@@ -186,6 +189,28 @@ namespace UIForia.Systems {
             if (IsMouseLeftUpThisFrame) {
                 m_MouseDownElements.Clear();
             }
+        }
+
+        public virtual void DelayEvent(UIElement origin, UIEvent evt) {
+            evt.origin = origin;
+            lateTriggers.Add(evt);
+        }
+
+        public virtual void OnLateUpdate() {
+            int lateHandlersCount = lateHandlers.Count;
+            KeyboardEventHandlerInvocation[] invocations = lateHandlers.Array;
+            for (int index = 0; index < lateHandlersCount; index++) {
+                KeyboardEventHandlerInvocation invocation = invocations[index];
+                invocation.handler.Invoke(invocation.target, invocation.context, invocation.evt);
+            }
+            lateHandlers.Clear();
+
+            for (int index = 0; index < lateTriggers.Count; index++) {
+                UIEvent uiEvent = lateTriggers[index];
+                uiEvent.origin.TriggerEvent(uiEvent);
+            }
+            
+            lateTriggers.Clear();
         }
 
         private void ProcessMouseInput() {
@@ -578,7 +603,7 @@ namespace UIForia.Systems {
                     IReadOnlyList<KeyboardEventHandler> handlers = item.handlers;
                     for (int i = 0; i < handlers.Count; i++) {
                         if (evt.stopPropagationImmediately) break;
-                        handlers[i].Invoke(item.Element, default, evt);
+                        InvokeHandler(handlers[i], item.Element, default, evt);
                     }
 
                     if (evt.stopPropagationImmediately) {
@@ -594,8 +619,22 @@ namespace UIForia.Systems {
                 ExpressionContext context = ((UIElement)focusedNode.Element).templateContext;
                 for (int i = 0; i < handlers.Count; i++) {
                     if (keyEvent.stopPropagationImmediately) break;
-                    handlers[i].Invoke(focusedNode.Element, context, keyEvent);
+                    InvokeHandler(handlers[i], focusedNode.Element, context, keyEvent);
                 }
+            }
+        }
+
+        private void InvokeHandler(KeyboardEventHandler handler, IHierarchical target, ExpressionContext context, KeyboardInputEvent keyEvent) {
+            if (handler.keyEventPhase == KeyEventPhase.Late) {
+                lateHandlers.Add(new KeyboardEventHandlerInvocation {
+                    handler = handler,
+                    target = target,
+                    context = context,
+                    evt = keyEvent
+                });
+            }
+            else {
+                handler.Invoke(target, context, keyEvent);
             }
         }
 
@@ -929,6 +968,13 @@ namespace UIForia.Systems {
             RunMouseEvents(m_ElementsThisFrame, m_MouseState.DidMove ? InputEventType.MouseMove : InputEventType.MouseHover);
         }
 
+    }
+
+    public struct KeyboardEventHandlerInvocation {
+        public KeyboardEventHandler handler { get; set; }
+        public IHierarchical target { get; set; }
+        public ExpressionContext context { get; set; }
+        public KeyboardInputEvent evt { get; set; }
     }
 
 }

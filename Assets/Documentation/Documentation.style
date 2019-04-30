@@ -42,7 +42,7 @@ style demo-panel {
     Padding = 20px;
     BorderLeft = 2px;
     BorderColor = #2c2e53;
-    BackgroundColor = #8c8faf;
+    BackgroundColor = rgb(240, 230, 240);
     PreferredSize = 1pca;
 }
 

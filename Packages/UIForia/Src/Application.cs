@@ -549,6 +549,7 @@ namespace UIForia {
             m_AnimationSystem.OnUpdate();
 
             m_BindingSystem.OnLateUpdate();
+            m_InputSystem.OnLateUpdate();
 
             m_RenderSystem.OnUpdate();
 

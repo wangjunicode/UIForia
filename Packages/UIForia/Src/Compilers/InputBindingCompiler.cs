@@ -113,6 +113,7 @@ namespace UIForia.Compilers {
                     handler.character = attr.character;
                     handler.requiredModifiers = attr.modifiers;
                     handler.requiresFocus = attr.requiresFocus;
+                    handler.keyEventPhase = attr.keyEventPhase;
 
                     retn.Add(handler);
                 }
@@ -150,7 +151,7 @@ namespace UIForia.Compilers {
 
         private KeyboardEventHandler CompileKeyboardTemplateAttribute(Type rootType, Type elementType, AttributeDefinition attr) {
             for (int i = 0; i < s_KeyboardAttributeDefs.Length; i++) {
-                if (attr.key == s_KeyboardAttributeDefs[i].attrName) {
+                if (attr.key.StartsWith(s_KeyboardAttributeDefs[i].attrName)) {
                     InputAttributeTuple tuple = s_KeyboardAttributeDefs[i];
 
                     string source = attr.value;
@@ -158,7 +159,7 @@ namespace UIForia.Compilers {
                     if (source[0] != '{') {
                         source = '{' + attr.value + '}';
                     }
-
+                    
                     compiler.AddAliasResolver(s_KeyboardEventResolver);
                     
                     Expression<Terminal> expression = compiler.Compile<Terminal>(rootType, elementType, source);
@@ -166,7 +167,10 @@ namespace UIForia.Compilers {
                     compiler.RemoveAliasResolver(s_KeyboardEventResolver);
                     
                     attr.isCompiled = true;
-                    return new KeyboardEventHandler_Expression(tuple.eventType, expression);
+
+                    KeyEventPhase keyEventPhase = attr.key.Contains(".late") ? KeyEventPhase.Late : KeyEventPhase.Early;
+                    
+                    return new KeyboardEventHandler_Expression(tuple.eventType, expression, keyEventPhase);
                 }
             }
 

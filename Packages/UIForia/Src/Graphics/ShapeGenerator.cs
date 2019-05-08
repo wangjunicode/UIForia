@@ -211,12 +211,13 @@ namespace Vertigo {
             shapes.Add(shapeDef);
         }
 
-        public void Rhombus(float x, float y, float width, float height) {
+        public int Rhombus(float x, float y, float width, float height) {
             ShapeDef shapeDef = new ShapeDef(ShapeType.Rhombus);
             shapeDef.p0 = new Vector2(x, y);
             shapeDef.p1 = new Vector2(width, height);
             shapeDef.bounds = new Rect(x, y, width, height);
             shapes.Add(shapeDef);
+            return shapes.size - 1;
         }
 
         // equallateral triangle & iso triangle should be simple once triangle is done

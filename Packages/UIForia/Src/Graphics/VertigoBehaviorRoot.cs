@@ -41,15 +41,21 @@ public class VertigoBehaviorRoot : MonoBehaviour {
         ctx.Clear();
         shapeGen.Clear();
 
-        ctx.SetFillColor(Color.green);
-        ctx.FillRoundedRect(0, 0, width, height, radii.x, radii.y, radii.z, radii.w);
+//        ctx.SetFillColor(Color.green);
+//        ctx.FillRoundedRect(0, 0, width, height, radii.x, radii.y, radii.z, radii.w);
+//
+//        ctx.SetFillColor(Color.green);
+//        ctx.FillRoundedRect(0, 200, width, height, radii.x, radii.y, radii.z, radii.w);
+//
+//        ctx.SetFillColor(Color.yellow);
+//        ctx.FillCircle(-200, -200, 100);
+//        ctx.SetFillColor(Color.red);
+//
+//        ctx.FillEllipse(-200, -300, 100, 50);
 
-        ctx.SetFillColor(Color.green);
-        ctx.FillRoundedRect(0, 200, width, height, radii.x, radii.y, radii.z, radii.w);
-
-        ctx.SetFillColor(Color.yellow);
-        ctx.FillCircle(-200, -200, 100);
+        ctx.FillRhombus(-200, 100, width, height);//100, 50);
         
+//        ctx.StrokeCircle()
         // PushRenderTexture();
         // ctx.SaveState();
         // ctx.SetColorMask(ColorMask.Alpha);

@@ -91,6 +91,14 @@ namespace Vertigo {
             this.strokeMaterial = material;
         }
 
+        public void FillRhombus(float x, float y, float width, float height, VertigoMaterial material = null) {
+            material = material ?? fillMaterial;
+            if (material == null) return;
+            int pathId = shapeGenerator.Rhombus(x, y, width, height);
+            geometryGenerator.Fill(shapeGenerator, new RangeInt(pathId, 1), defaultShapeMode, geometryCache);
+            batcher.AddDrawCall(geometryCache, new RangeInt(geometryCache.shapeCount - 1, 1), material, renderState);
+        }
+        
         public void FillCircle(float x, float y, float radius, VertigoMaterial material = null) {
             material = material ?? fillMaterial;
             if (material == null) return;

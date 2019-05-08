@@ -114,12 +114,10 @@ inline float4 UnpackSDFRadii(float packed) {
 #define ShapeType_RoundedRect (1 << 1)
 #define ShapeType_Circle (1 << 2)
 #define ShapeType_Ellipse (1 << 3)
-#define ShapeType_Path (1 << 4)
-#define ShapeType_ClosedPath (1 << 5)
-#define ShapeType_Triangle (1 << 6)
-#define ShapeType_RegularPolygon (1 << 7)
-#define ShapeType_Rhombus (1 << 8)
-#define ShapeType_Sprite (1 << 9)
+#define ShapeType_Rhombus (1 << 4)
+#define ShapeType_Triangle (1 << 5)
+#define ShapeType_RegularPolygon (1 << 6)
+
 #define ShapeType_RectLike (ShapeType_Rect | ShapeType_RoundedRect | ShapeType_Circle)
 
 SDFData UnpackSDFData(float4 packedData, float4 coords) {
@@ -151,60 +149,61 @@ SDFData UnpackSDFData(float4 packedData, float4 coords) {
             
 fixed4 SDFColor(SDFData sdfData, fixed4 color) {
     float fDist = 0;
-    float halfStrokeWidth = 0;// sdfData.strokeWidth * 0.5;
+    float halfStrokeWidth = sdfData.strokeWidth * 0.5;
     fixed4 fromColor = color;
     fixed4 toColor = fixed4(color.rgb, 0);
-    
-    float2 size = sdfData.size;//float2(200, 200);
+    float2 size = sdfData.size;
+    float minSize = min(size.x, size.y);
     float2 halfShapeSize = (size * 0.5) - halfStrokeWidth;
-        
-    float radius = size * sdfData.radius;
-    
-    radius = clamp(radius, 0, min(size.x * 0.5, size.y * 0.5));
-    
-    float2 center = sdfData.uv.xy - 0.5;
-    // triangle points 3 points between [0, 1] need to get clever about where they live, 2 in radii, 1 in meta data?
-    
-    fDist = RectSDF((center * size) - float2(0, 0.5), halfShapeSize, radius - halfStrokeWidth);
-    /*if(sdfData.shapeType & ShapeType_RectLike != 0) {
-        // not sure why the + 0.5 is needed, maybe pixel alignment
+    float radius = clamp(size * sdfData.radius, 0, minSize);
+    float2 center = (sdfData.uv.xy - 0.5) * size;   
+    float fBlendAmount = 0;
+
+    if((sdfData.shapeType & ShapeType_RectLike) != 0) {
+        fDist = RectSDF(center, halfShapeSize, radius - halfStrokeWidth);
+        float s = lerp(0, -1, radius / minSize);
+        float e = lerp(1, 0, radius / minSize);
+        fBlendAmount = smoothstep(s, e, fDist);
     }
-    else if(sdfData.shapeType == ShapeType_Ellipse) {
-        // todo - lerp on shape type & use if def   
+    
+    if(sdfData.shapeType == ShapeType_Ellipse) {
+        fDist = EllipseSDF(center - float2(0, 0.5), halfShapeSize);
+        fBlendAmount = smoothstep(-1, 1, fDist);
     }
-    else if(sdfData.shapeType == ShapeType_Rhombus) {
-        //fDist = RhombusSDF();
-    }*/
-     //   fDist = EllipseSDF((center * sdfData.size) + float2(0, -0.5), halfShapeSize);
     
-      
-     //fDist = DiamondSDF(center, float2(1,1));
-    //fDist = TriangleSDF(float2(0.3, 0.2), float2(0.2, 0.5), float2(1, 1), center);
+    if(sdfData.shapeType == ShapeType_Triangle) {
+        fDist = abs(TriangleSDF(sdfData.uv * size, float2(0, 0) * size, float2(0.6, 1) * size, float2(1, 0.8) * size)) - 1;
+    }
     
-    //float fBlendAmount = smoothstep(-1, 1, fDist);
-     
-    halfStrokeWidth = 10;//.125; 
+    if(sdfData.shapeType == ShapeType_Rhombus) {
+        fDist = RhombusSDF(center, halfShapeSize - halfStrokeWidth);
+        // for stroke try this:
+        //float distanceChange = fwidth(fDist);
+        //fBlendAmount = smoothstep(-distanceChange, distanceChange, fDist);
+        fBlendAmount = smoothstep(-1, 1, fDist);
+    }
+    
+   /* halfStrokeWidth = 10;
     fDist = RhombusSDF(center * (size + halfStrokeWidth * 0.5), halfShapeSize - halfStrokeWidth);
     float innerDist = abs(RhombusSDF(center * (size + halfStrokeWidth * 0.5), halfShapeSize - halfStrokeWidth)) - halfStrokeWidth;
     
     halfStrokeWidth = 0;
     float shape1 = RhombusSDF(center * (size + halfStrokeWidth * 0.5), halfShapeSize - halfStrokeWidth);;
-    halfStrokeWidth = 10;
+    halfStrokeWidth = 0;
     
     float shape2 = RhombusSDF(center * (size + halfStrokeWidth * 0.5), halfShapeSize - halfStrokeWidth);;
     float retn = max(shape1, -shape2); // gives a hard outline
-    
+    */
     //float distanceChange = fwidth(fDist);
     //float fBlendAmount = smoothstep(distanceChange, -distanceChange, fDist);
-    // larger range (like -10, 10) leads to nice blur result
     
-    retn = abs(TriangleSDF(sdfData.uv * size, float2(0, 0) * size, float2(0.6, 1) * size, float2(1, 0.8) * size)) - 1;
     
-    float distanceChange = fwidth(retn);
-    retn = RectSDF((center * size) - float2(0, 0), halfShapeSize, radius - halfStrokeWidth);
     //float fBlendAmount = smoothstep(-1, 1, 1 - retn);
-    float fBlendAmount = smoothstep(-1, 1,  retn);
-    if(radius == 0) return fromColor;
+    
+    //using -1 to 1 gives slightly better aa but all edges have alpha which is bad when two shapes share an edge
+    // use larger negative to get nice blur effect
+    // smoothstep(-1, 0, fDist) gives the best aa but there is a gap between shapes that should touch
+    // smoothstep(0, 1, fDist) fixes the gap perfectly but causes rounded shapes to be slightly cut off at the bottom and right edges
 
     return lerp(fromColor, toColor, fBlendAmount);
 }

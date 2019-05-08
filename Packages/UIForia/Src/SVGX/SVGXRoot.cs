@@ -1,9 +1,5 @@
-using System.Collections.Generic;
-using Packages.UIForia.Src.VectorGraphics;
-using TMPro;
-using UIForia.Extensions;
 using UIForia.Text;
-using UIForia.Util;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace SVGX {
@@ -56,8 +52,7 @@ namespace SVGX {
         public Vector2 shadowOffset;
         public Rect shadowRect = new Rect(400, 340, 200, 200);
 
-        private GFX2 gfx2;
-        private VectorContext ctx2;
+
 
         public static ImmediateRenderContext CTX;
         public bool enableScissor = true;
@@ -75,21 +70,18 @@ namespace SVGX {
         public void Start() {
             ctx = new ImmediateRenderContext();
             gfx = new GFX(camera);
-            gfx2 = new GFX2(camera);
-            ctx2 = gfx2.CreateContext();
             textInfo = new TextInfo2(new TextSpan("Hello World"));
         }
 
+        public Vector4 radii = new Vector4(100, 100, 100, 100);
         public void Update() {
             camera.orthographic = true;
             camera.orthographicSize = Screen.height * 0.5f;
 
             ctx.Clear();
-            ctx.SetStroke(Color.red);
-            float sWidth = 1f;
-            ctx.SetStrokeWidth(sWidth);
-            ctx.FillRect(100, 100, 100, 100);
-
+            ctx.SetFill(Color.red);
+            ctx.RoundedRect(new Rect(0, 0, 200, 200), radii.x, radii.y, radii.z, radii.w);
+            ctx.Fill();
 //            Vector2 p0 = new Vector2(500, 100);
 ////            Vector2 p0 = new Vector2(450, 450);
 //            Vector2 p1 = new Vector2(100, 300);

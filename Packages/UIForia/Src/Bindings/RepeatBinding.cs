@@ -122,5 +122,14 @@ namespace UIForia.Bindings {
             }
         }
 
+        public override void OnReset() {
+
+            if (previousReference != null) {
+                previousReference.onItemInserted -= onInserted;
+                previousReference.onItemRemoved -= onRemoved;
+                previousReference.onClear -= onClear;
+                previousReference = null;
+            }
+        }
     }
 }

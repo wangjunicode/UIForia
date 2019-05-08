@@ -18,6 +18,7 @@ namespace UIForia.Systems {
         }
 
         public void OnReset() {
+            m_ReadBindingTree.TraversePreOrder((node) => { node.OnReset(); }, true);
             m_ReadBindingTree.Clear();
             m_WriteBindingTree.Clear();
         }

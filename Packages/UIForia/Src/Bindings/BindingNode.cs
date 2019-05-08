@@ -20,5 +20,6 @@ namespace UIForia.Bindings {
         public IHierarchical Element => element;
         public IHierarchical Parent => element.parent;
 
+        public virtual void OnReset() {}
     }
 }

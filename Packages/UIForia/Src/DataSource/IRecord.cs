@@ -2,7 +2,7 @@ namespace UIForia.DataSource {
 
     public interface IRecord {
 
-        long Id { get; }
+        long Id { get; set; }
 
     }
 

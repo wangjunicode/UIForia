@@ -149,30 +149,30 @@ public class DataSourceTests {
         Assert.AreEqual(1, ex.InnerExceptions.Count);
         Assert.IsInstanceOf<TestException>(ex.InnerExceptions[0]);
     }
-
-    [Test]
-    public void UpsertRecord() {
-        
-        TestAdapter<TestData> adapter = new TestAdapter<TestData>();
-        
-        adapter.recordChanged = (a, b) => a.data != b.data;
-        
-        DataSource<TestData> ds = new DataSource<TestData>(adapter);
-        
-        int addCalls = 0;
-        int changeCalls = 0;
-        
-        ds.onRecordAdded += (record) => { addCalls++; };
-        ds.onRecordChanged += (record) => { changeCalls++; };
-        
-        TestData result = ds.UpsertRecord(new TestData(0, "value0")).Result;
-        Assert.AreEqual(1, addCalls);
-        result = ds.UpsertRecord(new TestData(0, "value1")).Result;
-        Assert.AreEqual(1, addCalls);
-        result = ds.GetRecord(0).Result;
-        Assert.AreEqual("value1", result.data);
-        Assert.AreEqual(1, changeCalls);
-    }
+//
+//    [Test]
+//    public void UpsertRecord() {
+//        
+//        TestAdapter<TestData> adapter = new TestAdapter<TestData>();
+//        
+//        adapter.recordChanged = (a, b) => a.data != b.data;
+//        
+//        DataSource<TestData> ds = new DataSource<TestData>(adapter);
+//        
+//        int addCalls = 0;
+//        int changeCalls = 0;
+//        
+//        ds.onRecordAdded += (record) => { addCalls++; };
+//        ds.onRecordChanged += (record) => { changeCalls++; };
+//        
+//        TestData result = ds.UpsertRecord(new TestData(0, "value0")).Result;
+//        Assert.AreEqual(1, addCalls);
+//        result = ds.UpsertRecord(new TestData(0, "value1")).Result;
+//        Assert.AreEqual(1, addCalls);
+//        result = ds.GetRecord(0).Result;
+//        Assert.AreEqual("value1", result.data);
+//        Assert.AreEqual(1, changeCalls);
+//    }
 
     [Test]
     public void SetRecord_RemoveIfValueIsNull() {

@@ -21,7 +21,16 @@ namespace UIForia.DataSource {
             return record;
         }
 
+        public virtual T SyncAddRecord(T record) {
+            return record;
+        }
+
         public virtual async Task<T> GetRecord(long id, T currentRecord) {
+            return currentRecord;
+        }
+
+
+        public virtual T SyncGetRecord(long id, T currentRecord) {
             return currentRecord;
         }
 
@@ -29,7 +38,15 @@ namespace UIForia.DataSource {
             return newRecord;
         }
 
+        public virtual T SyncSetRecord(long id, T newRecord, T oldRecord) {
+            return newRecord;
+        }
+
         public virtual async Task<ICollection<T>> LoadRecords(ICollection<T> output) {
+            return store.GetAllRecords(output);
+        }
+
+        public virtual ICollection<T> SyncLoadRecords(ICollection<T> output) {
             return store.GetAllRecords(output);
         }
 
@@ -41,9 +58,9 @@ namespace UIForia.DataSource {
             return localRecord;
         }
 
-        public virtual void Serialize() {
+        public T SyncRemoveRecord(long id, T localRecord) {
+            return localRecord;
         }
-
     }
 
 }

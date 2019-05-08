@@ -3,7 +3,6 @@ using UIForia.Rendering;
 using UIForia.Systems;
 using UIForia.Text;
 using UnityEngine;
-using WhitespaceMode = UIForia.Text.WhitespaceMode;
 
 namespace UIForia.Elements {
 

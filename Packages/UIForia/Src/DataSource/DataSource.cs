@@ -29,12 +29,18 @@ namespace UIForia.DataSource {
                 config = null;
             }
 
-            output = await adapter.LoadRecords(output);
+            return AddRecordsToStore(await adapter.LoadRecords(output));
+        }
 
-            if (output == null) {
-                return null;
-            }
+        public ICollection<T> SyncLoadRecords(ICollection<T> output = null) {
+            WaitForConfig();
+           
+            return AddRecordsToStore(adapter.SyncLoadRecords(output));
+        }
 
+        private ICollection<T> AddRecordsToStore(ICollection<T> output) {
+            if (output == null) return output;
+            
             foreach (T returned in output) {
                 if (returned == null) {
                     continue;
@@ -45,7 +51,7 @@ namespace UIForia.DataSource {
                 if (local == null) {
                     onRecordAdded?.Invoke(returned);
                 }
-                else if (adapter.RecordChanged(local, returned)) {
+                else {
                     onRecordChanged?.Invoke(returned);
                 }
 
@@ -53,6 +59,14 @@ namespace UIForia.DataSource {
             }
 
             return output;
+        }
+
+        private void WaitForConfig() {
+            if (config != null) {
+                // this blocks but is only executed once
+                config.Wait();
+                config = null;
+            }
         }
 
         public async Task<T> AddRecord(T record) {
@@ -76,6 +90,24 @@ namespace UIForia.DataSource {
             return record;
         }
 
+        public T SyncAddRecord(T record) {
+            if (record == null) {
+                return null;
+            }
+
+            WaitForConfig();
+
+            T result = adapter.SyncAddRecord(record);
+
+            if (result == null) {
+                return null;
+            }
+
+            recordStore.SetRecord(record);
+            this.onRecordAdded?.Invoke(record);
+            return record;
+        }
+
         public async Task<T> SetRecord(long id, T record) {
             if (record == null) {
                 return await RemoveRecord(id);
@@ -87,12 +119,29 @@ namespace UIForia.DataSource {
             }
 
             T localRecord = recordStore.GetRecord(id);
-
             T newRecord = await adapter.SetRecord(id, record, localRecord);
 
-            // something might have changed since we issued an await
-//            localRecord = recordStore.GetRecord(id);
+            UpdateRecordStore(record, newRecord, localRecord);
 
+            return newRecord;
+        }
+
+        public T SyncSetRecord(long id, T record) {
+            if (record == null) {
+                return SyncRemoveRecord(id);
+            }
+
+            WaitForConfig();
+            
+            T localRecord = recordStore.GetRecord(id);
+            T newRecord = adapter.SyncSetRecord(id, record, localRecord);
+
+            UpdateRecordStore(record, newRecord, localRecord);
+
+            return newRecord;
+        }
+
+        private void UpdateRecordStore(T record, T newRecord, T localRecord) {
             if (newRecord == null) {
                 T current = recordStore.RemoveRecord(record.Id);
                 if (current != null) {
@@ -105,12 +154,8 @@ namespace UIForia.DataSource {
             }
             else {
                 recordStore.SetRecord(record);
-                if (adapter.RecordChanged(newRecord, localRecord)) {
-                    onRecordChanged?.Invoke(record);
-                }
+                onRecordChanged?.Invoke(record);
             }
-
-            return newRecord;
         }
 
         public async Task<T> RemoveRecord(long id) {
@@ -129,25 +174,45 @@ namespace UIForia.DataSource {
             return returnedRecord;
         }
 
-        public async Task<T> RemoveRecord(T record) {
-            return await RemoveRecord(record.Id);
+        public T SyncRemoveRecord(long id) {
+            WaitForConfig();
+            
+            T localRecord = recordStore.GetRecord(id);
+            T returnedRecord = adapter.SyncRemoveRecord(id, localRecord);
+            localRecord = recordStore.RemoveRecord(id);
+            if (localRecord != null) {
+                onRecordRemoved?.Invoke(returnedRecord);
+            }
+
+            return returnedRecord;
         }
 
-        public async Task<T> UpsertRecord(T record) {
-            if (record == null) return null;
-            return await SetRecord(record.Id, record);
+        public async Task<T> RemoveRecord(T record) {
+            return await RemoveRecord(record.Id);
         }
 
         public async Task<T> GetRecord(long id) {
             T returnedRecord = await adapter.GetRecord(id, recordStore.GetRecord(id));
 
+            if (GetRecordInternal(id, returnedRecord)) return null;
+            return returnedRecord;
+        }
+
+        public T SyncGetRecord(long id) {
+            T returnedRecord = adapter.SyncGetRecord(id, recordStore.GetRecord(id));
+
+            if (GetRecordInternal(id, returnedRecord)) return null;
+            return returnedRecord;
+        }
+
+        private bool GetRecordInternal(long id, T returnedRecord) {
             if (returnedRecord == null) {
                 T removed = recordStore.RemoveRecord(id);
                 if (removed != null) {
                     onRecordRemoved?.Invoke(removed);
                 }
 
-                return null;
+                return true;
             }
 
             T localRecord = recordStore.GetRecord(id);
@@ -156,11 +221,11 @@ namespace UIForia.DataSource {
                 onRecordAdded?.Invoke(returnedRecord);
             }
             else if (adapter.RecordChanged(localRecord, returnedRecord)) {
-               onRecordChanged?.Invoke(returnedRecord);
+                onRecordChanged?.Invoke(returnedRecord);
             }
 
             recordStore.SetRecord(returnedRecord);
-            return returnedRecord;
+            return false;
         }
 
         public void ClearStore() {

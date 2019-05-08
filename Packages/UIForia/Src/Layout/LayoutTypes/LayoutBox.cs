@@ -731,7 +731,6 @@ namespace UIForia.Layout.LayoutTypes {
             }
         }
 
-
         public float ResolveMarginHorizontal(UIMeasurement margin) {
             AnchorTarget anchorTarget;
 

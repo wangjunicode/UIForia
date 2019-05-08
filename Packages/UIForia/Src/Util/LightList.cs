@@ -71,6 +71,28 @@ namespace UIForia.Util {
                 return;
             }
 
+            if (collection is LightList<T> list) {
+                EnsureAdditionalCapacity(list.size);
+                System.Array.Copy(list.array, 0, array, size, list.size);
+                size += list.size;
+                return;
+            }
+            
+            if (collection is List<T> l) {
+                EnsureAdditionalCapacity(l.Count);
+                T[] a = ListAccessor<T>.GetArray(l);
+                System.Array.Copy(a, 0, array, size, l.Count);
+                size += l.Count;
+                return;
+            }
+            
+            if (collection is T[] cArray) {
+                EnsureAdditionalCapacity(cArray.Length);
+                System.Array.Copy(cArray, 0, array, size, cArray.Length);
+                size += cArray.Length;
+                return;
+            }
+            
             foreach (var item in collection) {
                 Add(item);
             }

@@ -414,10 +414,11 @@ namespace UIForia.Systems {
                     break;
 
                 case LayoutBehavior.Ignored:
-
+                    
+                    // todo verify these visually something is wrong
                     switch (transformBehaviorX) {
                         case TransformBehavior.AnchorMinOffset:
-                            localPosition.x = box.TransformX;
+                            localPosition.x = box.AnchorLeft + box.TransformX;
                             break;
                         case TransformBehavior.AnchorMaxOffset:
                             localPosition.x = box.AnchorRight - box.parent.element.layoutResult.screenPosition.x - box.TransformX - box.actualWidth;

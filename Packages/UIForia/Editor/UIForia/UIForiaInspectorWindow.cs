@@ -815,7 +815,7 @@ namespace UIForia.Editor {
 
                 case StylePropertyId.TransformPositionX:
                 case StylePropertyId.TransformPositionY:
-                    return DrawFixedLength(property, isEditable);
+                    return DrawTransformOffset(property, isEditable);
 
                 case StylePropertyId.TransformScaleX:
                 case StylePropertyId.TransformScaleY:
@@ -985,6 +985,17 @@ namespace UIForia.Editor {
             GUI.enabled = true;
             GUILayout.EndHorizontal();
             return isEditable ? new StyleProperty(property.propertyId, new UIFixedLength(value, unit)) : property;
+        }
+
+        private static StyleProperty DrawTransformOffset(StyleProperty property, bool isEditable) {
+            s_Content.text = StyleUtil.GetPropertyName(property);
+            GUILayout.BeginHorizontal();
+            GUI.enabled = isEditable;
+            float value = EditorGUILayout.FloatField(s_Content, property.AsTransformOffset.value);
+            TransformUnit unit = (TransformUnit) EditorGUILayout.EnumPopup(property.AsTransformOffset.unit);
+            GUI.enabled = true;
+            GUILayout.EndHorizontal();
+            return isEditable ? new StyleProperty(property.propertyId, new TransformOffset(value, unit)) : property;
         }
 
         private static StyleProperty DrawGridTrackSize(StyleProperty property, bool isEditable) {

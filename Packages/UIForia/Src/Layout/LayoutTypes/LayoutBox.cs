@@ -547,7 +547,7 @@ namespace UIForia.Layout.LayoutTypes {
                     }
 
                     // needs to be allocated width not actualWidth because we might not know the actual width yet
-                    return parent.element.layoutResult.screenPosition.x + ResolveAnchorValue(parent.actualWidth, anchor);
+                    return parent.actualWidth - ResolveAnchorValue(parent.actualWidth, anchor);
 
                 case AnchorTarget.ParentContentArea:
                     if (parent == null) {
@@ -555,15 +555,16 @@ namespace UIForia.Layout.LayoutTypes {
                     }
 
                     LayoutResult parentResult = parent.element.layoutResult;
-                    float offset = parentResult.padding.right + parentResult.border.right;
-                    return parent.element.layoutResult.screenPosition.x + ResolveAnchorValue(parent.actualWidth, anchor) - offset;
+                    float offset = parentResult.padding.right + parentResult.border.right + parentResult.border.left + parentResult.padding.left;
+                    return parent.actualWidth - (ResolveAnchorValue(parent.actualWidth - offset, anchor) + parentResult.padding.right + parentResult.border.right);
 
                 case AnchorTarget.Viewport:
                     return view.Viewport.x +
                            view.Viewport.width - ResolveAnchorValue(view.Viewport.width, anchor);
 
                 case AnchorTarget.Screen:
-                    return ResolveAnchorValue(Screen.width, anchor);
+                    float parentX = parent?.element.layoutResult.screenPosition.x ?? 0;
+                    return Screen.width - parentX - ResolveAnchorValue(Screen.width, anchor);
 
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -576,10 +577,10 @@ namespace UIForia.Layout.LayoutTypes {
                 case AnchorTarget.Unset:
                 case AnchorTarget.Parent:
                     if (parent == null) {
-                        return view.Viewport.xMax + ResolveAnchorValue(view.Viewport.width, anchor);
+                        return view.Viewport.xMin + ResolveAnchorValue(view.Viewport.width, anchor);
                     }
 
-                    return parent.element.layoutResult.screenPosition.x + ResolveAnchorValue(parent.actualWidth, anchor);
+                    return ResolveAnchorValue(parent.actualWidth, anchor);
 
                 case AnchorTarget.ParentContentArea:
                     if (parent == null) {
@@ -587,14 +588,15 @@ namespace UIForia.Layout.LayoutTypes {
                     }
 
                     LayoutResult parentResult = parent.element.layoutResult;
-                    float offset = parentResult.padding.left + parentResult.border.left;
-                    return parent.element.layoutResult.screenPosition.x + ResolveAnchorValue(parent.actualWidth, anchor) + offset;
+                    float offset = parentResult.padding.left + parentResult.border.left + parentResult.padding.right + parentResult.border.right;
+                    return ResolveAnchorValue(parent.actualWidth - offset, anchor) + parentResult.padding.left + parentResult.border.left;
 
                 case AnchorTarget.Viewport:
                     return view.Viewport.xMax + ResolveAnchorValue(view.Viewport.width, anchor);
 
                 case AnchorTarget.Screen:
-                    return ResolveAnchorValue(Screen.width, anchor.value);
+                    float parentX = parent?.element.layoutResult.screenPosition.x ?? 0;
+                    return ResolveAnchorValue(Screen.width, anchor) - parentX;
 
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -610,7 +612,7 @@ namespace UIForia.Layout.LayoutTypes {
                         return view.Viewport.y + ResolveAnchorValue(view.Viewport.height, anchor);
                     }
 
-                    return ResolveAnchorValue(parent.actualWidth, anchor);
+                    return ResolveAnchorValue(parent.actualHeight, anchor);
 
                 case AnchorTarget.ParentContentArea:
                     if (parent == null) {
@@ -618,14 +620,15 @@ namespace UIForia.Layout.LayoutTypes {
                     }
 
                     LayoutResult parentResult = parent.element.layoutResult;
-                    float offset = parentResult.padding.top + parentResult.border.top;
-                    return parent.element.layoutResult.screenPosition.y + ResolveAnchorValue(parent.actualHeight, anchor) + offset;
+                    float offset = parentResult.padding.top + parentResult.border.top + parentResult.border.bottom + parentResult.padding.bottom;
+                    return ResolveAnchorValue(parent.actualHeight - offset, anchor) + parentResult.padding.top + parentResult.border.top;
 
                 case AnchorTarget.Viewport:
                     return view.Viewport.y + ResolveAnchorValue(view.Viewport.height, anchor);
 
                 case AnchorTarget.Screen:
-                    return ResolveAnchorValue(Screen.height, anchor);
+                    float parentY = parent?.element.layoutResult.screenPosition.y ?? 0;
+                    return ResolveAnchorValue(Screen.height, anchor) - parentY;
 
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -641,7 +644,7 @@ namespace UIForia.Layout.LayoutTypes {
                         return view.Viewport.yMax + ResolveAnchorValue(view.Viewport.height, anchor);
                     }
 
-                    return parent.element.layoutResult.screenPosition.y + ResolveAnchorValue(parent.actualHeight, anchor);
+                    return parent.actualHeight - ResolveAnchorValue(parent.actualHeight, anchor);
 
                 case AnchorTarget.ParentContentArea:
                     if (parent == null) {
@@ -649,14 +652,15 @@ namespace UIForia.Layout.LayoutTypes {
                     }
 
                     LayoutResult parentResult = parent.element.layoutResult;
-                    float offset = parentResult.padding.bottom + parentResult.border.bottom;
-                    return parent.element.layoutResult.screenPosition.y + ResolveAnchorValue(parent.actualHeight, anchor) - offset;
+                    float offset = parentResult.padding.top + parentResult.border.top + parentResult.border.bottom + parentResult.padding.bottom;
+                    return parent.actualHeight - (ResolveAnchorValue(parent.actualHeight - offset, anchor) +  parentResult.border.bottom + parentResult.padding.bottom);
 
                 case AnchorTarget.Viewport:
                     return view.Viewport.yMax + ResolveAnchorValue(view.Viewport.height, anchor);
 
                 case AnchorTarget.Screen:
-                    return ResolveAnchorValue(Screen.height, anchor);
+                    float parentY = parent?.element.layoutResult.screenPosition.y ?? 0;
+                    return Screen.height - parentY - ResolveAnchorValue(Screen.height, anchor);
                 default:
                     throw new ArgumentOutOfRangeException();
             }

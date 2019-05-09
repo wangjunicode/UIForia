@@ -23,7 +23,7 @@
                 
             </Div>
             
-            <Div style="demo-panel" x-router="demo" x-defaultRoute="/index">
+            <Div style="demo-panel" x-router="demo" x-defaultRoute="/TransformPlayground">
                 
                 <Group x-route="/index">
                     <Heading1>UIForia Documentation</Heading1>

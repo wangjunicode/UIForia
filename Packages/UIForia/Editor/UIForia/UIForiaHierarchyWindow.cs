@@ -100,6 +100,8 @@ namespace UIForia.Editor {
                 oldApp.onElementCreated -= Refresh;
                 oldApp.onElementDestroyed -= Refresh;
                 oldApp.onViewAdded -= Refresh;
+                oldApp.onElementDisabled -= Refresh;
+                oldApp.onElementEnabled -= Refresh;
                 oldApp.onRefresh -= OnRefresh;
             }
 
@@ -119,6 +121,8 @@ namespace UIForia.Editor {
                 app.onElementCreated += Refresh;
                 app.onElementDestroyed += Refresh;
                 app.onViewAdded += Refresh;
+                app.onElementDisabled += Refresh;
+                app.onElementEnabled += Refresh;
                 app.onRefresh += OnRefresh;
             }
 
@@ -166,7 +170,11 @@ namespace UIForia.Editor {
             }
 
             treeView.showChildrenAndId = EditorGUILayout.Toggle("Show Meta Data", treeView.showChildrenAndId);
-            
+            bool wasShowingDisabled = treeView.showDisabled;
+            treeView.showDisabled = EditorGUILayout.Toggle("Show Disabled", treeView.showDisabled);
+            if (treeView.showDisabled != wasShowingDisabled) {
+                needsReload = true;
+            }
             if (needsReload) {
                 needsReload = false;
                 treeView.views = s_SelectedApplication.GetViews();

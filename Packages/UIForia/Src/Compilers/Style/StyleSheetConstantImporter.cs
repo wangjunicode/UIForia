@@ -77,11 +77,11 @@ namespace UIForia.Compilers.Style {
                 }
             }
 
-            if (constant.referenceNode.children.Count > 0) {
-                if (context.importedStyleConstants.ContainsKey(constant.referenceNode.referenceName)) {
-                    DotAccessNode importedConstant = (DotAccessNode) constant.referenceNode.children[0];
+            if (constant.constReferenceNode.children.Count > 0) {
+                if (context.importedStyleConstants.ContainsKey(constant.constReferenceNode.identifier)) {
+                    DotAccessNode importedConstant = (DotAccessNode) constant.constReferenceNode.children[0];
 
-                    StyleConstant importedStyleConstant = context.importedStyleConstants[constant.referenceNode.referenceName]
+                    StyleConstant importedStyleConstant = context.importedStyleConstants[constant.constReferenceNode.identifier]
                         .Find(importedConstant.propertyName, s_FindStyleConstant);
 
                     if (importedStyleConstant.name == null) {
@@ -89,11 +89,11 @@ namespace UIForia.Compilers.Style {
                     }
                 }
 
-                throw new CompileException(constant.referenceNode,
+                throw new CompileException(constant.constReferenceNode,
                     "Constants cannot reference members of other constants.");
             }
 
-            StyleConstant referencedConstant = ResolveReference(context, constant.referenceNode);
+            StyleConstant referencedConstant = ResolveReference(context, constant.constReferenceNode);
 
             StyleConstant styleConstant = new StyleConstant {
                 name = constant.name,
@@ -105,13 +105,13 @@ namespace UIForia.Compilers.Style {
             return styleConstant;
         }
 
-        private StyleConstant ResolveReference(StyleCompileContext context, ReferenceNode reference) {
-            if (currentlyResolvingConstants.Contains(reference.referenceName)) {
-                throw new CompileException(reference, "Circular dependency detected!");
+        private StyleConstant ResolveReference(StyleCompileContext context, ConstReferenceNode constReference) {
+            if (currentlyResolvingConstants.Contains(constReference.identifier)) {
+                throw new CompileException(constReference, "Circular dependency detected!");
             }
 
             foreach (var constant in context.constants) {
-                if (constant.name == reference.referenceName) {
+                if (constant.name == constReference.identifier) {
                     // reference resolved
                     return constant;
                 }
@@ -121,22 +121,22 @@ namespace UIForia.Compilers.Style {
             // const x: string = @y; // we're here...
             // const y: string = @z: // ....referencing this
             // const z: string = "whatup"; // ...which will resolve to this.
-            if (context.constantsWithReferences.ContainsKey(reference.referenceName)) {
-                currentlyResolvingConstants.Add(reference.referenceName);
-                StyleConstant resolvedConstant = Resolve(context, context.constantsWithReferences[reference.referenceName]);
-                currentlyResolvingConstants.Remove(reference.referenceName);
+            if (context.constantsWithReferences.ContainsKey(constReference.identifier)) {
+                currentlyResolvingConstants.Add(constReference.identifier);
+                StyleConstant resolvedConstant = Resolve(context, context.constantsWithReferences[constReference.identifier]);
+                currentlyResolvingConstants.Remove(constReference.identifier);
                 return resolvedConstant;
             }
 
-            throw new CompileException(reference, $"Could not resolve reference {reference}. "
+            throw new CompileException(constReference, $"Could not resolve reference {constReference}. "
              + "Known references are: " + context.PrintConstants());
         }
 
         private void TransformConstNode(StyleCompileContext context, ConstNode constNode, bool exported) {
-            if (constNode.value is ReferenceNode) {
+            if (constNode.value is ConstReferenceNode) {
                 context.constantsWithReferences.Add(constNode.constName, new StyleConstant {
                     name = constNode.constName,
-                    referenceNode = (ReferenceNode) constNode.value,
+                    constReferenceNode = (ConstReferenceNode) constNode.value,
                     exported = exported
                 });
             }

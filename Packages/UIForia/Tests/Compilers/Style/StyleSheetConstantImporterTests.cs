@@ -30,8 +30,8 @@ public class StyleSheetConstantImporterTests {
     [Test]
     public void CreateContextWithReferences() {
         LightList<StyleASTNode> nodes = new LightList<StyleASTNode>();
-        nodes.Add(StyleASTNodeFactory.ExportNode(StyleASTNodeFactory.ConstNode("x", StyleASTNodeFactory.ReferenceNode("y"))));
-        nodes.Add(StyleASTNodeFactory.ExportNode(StyleASTNodeFactory.ConstNode("y", StyleASTNodeFactory.ReferenceNode("z"))));
+        nodes.Add(StyleASTNodeFactory.ExportNode(StyleASTNodeFactory.ConstNode("x", StyleASTNodeFactory.ConstReferenceNode("y"))));
+        nodes.Add(StyleASTNodeFactory.ExportNode(StyleASTNodeFactory.ConstNode("y", StyleASTNodeFactory.ConstReferenceNode("z"))));
         var stringValue = StyleASTNodeFactory.StringLiteralNode("you win!");
         nodes.Add(StyleASTNodeFactory.ExportNode(StyleASTNodeFactory.ConstNode("z", stringValue)));
 

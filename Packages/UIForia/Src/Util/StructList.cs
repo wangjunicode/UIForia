@@ -102,6 +102,23 @@ namespace UIForia.Util {
             size = count;
         }
 
+        public void ShiftRight(int startIndex, int count) {
+            if (count <= 0) return;
+            if (startIndex < 0) startIndex = 0;
+            EnsureCapacity(startIndex + count + count); // I think this is too big
+            System.Array.Copy(array, startIndex, array, startIndex + count, count);
+            System.Array.Clear(array, startIndex, count);
+            size += count;
+        }
+
+        public void ShiftLeft(int startIndex, int count) {
+            if (count <= 0) return;
+            if (startIndex < 0) startIndex = 0;
+            System.Array.Copy(array, startIndex, array, startIndex - count, size - startIndex);
+            System.Array.Clear(array, size - count, count);
+            size -= count;
+        }
+        
         private static readonly LightList<StructList<T>> s_Pool = new LightList<StructList<T>>();
 
         public static StructList<T> Get() {

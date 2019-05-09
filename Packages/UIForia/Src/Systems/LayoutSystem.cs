@@ -466,7 +466,7 @@ namespace UIForia.Systems {
                     }
 
                     switch (transformBehaviorY) {
-                        case TransformBehavior.AnchorMinOffset:
+                        case TransformBehavior.AnchorMinOffset:  
                             localPosition.y = box.AnchorTop - box.parent.element.layoutResult.screenPosition.y + box.TransformY;
                             break;
                         case TransformBehavior.AnchorMaxOffset:

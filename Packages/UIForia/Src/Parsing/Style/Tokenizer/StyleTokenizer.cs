@@ -239,7 +239,7 @@ namespace UIForia.Parsing.Style.Tokenizer {
                 TryReadCharacters(context, "==", StyleTokenType.Equals, output);
                 TryReadCharacters(context, "!=", StyleTokenType.NotEquals, output);
                 TryReadCharacters(context, "!", StyleTokenType.BooleanNot, output);
-                TryReadCharacters(context, "=", StyleTokenType.Equal, output);
+                TryReadCharacters(context, "=", StyleTokenType.EqualSign, output);
                 TryReadCharacters(context, ">", StyleTokenType.GreaterThan, output);
                 TryReadCharacters(context, "<", StyleTokenType.LessThan, output);
                 TryReadCharacters(context, "&&", StyleTokenType.BooleanAnd, output);

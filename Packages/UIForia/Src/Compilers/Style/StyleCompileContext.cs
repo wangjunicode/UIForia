@@ -33,19 +33,19 @@ namespace UIForia.Compilers.Style {
         /// <returns>The referenced node or the node itself if it's a regular one.</returns>
         /// <exception cref="CompileException">thrown in case a reference cannot be resolved.</exception>
         public StyleASTNode GetValueForReference(StyleASTNode node) {
-            if (node is ReferenceNode referenceNode) {
+            if (node is ConstReferenceNode referenceNode) {
                 for (int index = 0; index < constants.Count; index++) {
                     StyleConstant c = constants[index];
-                    if (c.name == referenceNode.referenceName) {
+                    if (c.name == referenceNode.identifier) {
                         return c.value;
                     }
                 }
                 
                 if (referenceNode.children.Count > 0) {
-                    if (importedStyleConstants.ContainsKey(referenceNode.referenceName)) {
+                    if (importedStyleConstants.ContainsKey(referenceNode.identifier)) {
                         DotAccessNode importedConstant = (DotAccessNode) referenceNode.children[0];
 
-                        StyleConstant importedStyleConstant = importedStyleConstants[referenceNode.referenceName]
+                        StyleConstant importedStyleConstant = importedStyleConstants[referenceNode.identifier]
                             .Find(importedConstant.propertyName, s_FindStyleConstant);
 
                         if (importedStyleConstant.name == null) {

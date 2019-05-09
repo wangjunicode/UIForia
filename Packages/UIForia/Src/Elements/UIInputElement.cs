@@ -14,7 +14,7 @@ namespace UIForia.Elements {
     [Template(TemplateType.Internal, "Elements/InputElement.xml")]
     public class UIInputElement : UIElement, IFocusable, ISVGXPaintable, IStylePropertiesDidChangeHandler {
 
-        internal TextInfo2 textInfo;
+        internal TextInfo textInfo;
         internal string text;
         internal string placeholder;
 
@@ -51,7 +51,7 @@ namespace UIForia.Elements {
         public override void OnCreate() {
             text = text ?? string.Empty;
             style.SetPainter("self", StyleState.Normal);
-            textInfo = new TextInfo2(new TextSpan(text));
+            textInfo = new TextInfo(new TextSpan(text));
             textInfo.UpdateSpan(0, text);
             textInfo.Layout();
         }

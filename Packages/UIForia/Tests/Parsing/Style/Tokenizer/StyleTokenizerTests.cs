@@ -12,7 +12,7 @@ public class StyleTokenizerTests {
             StyleTokenType.Export,
             StyleTokenType.Const,
             StyleTokenType.Identifier,
-            StyleTokenType.Equal,
+            StyleTokenType.EqualSign,
             StyleTokenType.Rgba,
             StyleTokenType.ParenOpen,
             StyleTokenType.Number,
@@ -32,7 +32,7 @@ public class StyleTokenizerTests {
         List<StyleToken> tokens = StyleTokenizer.Tokenize(@"BackgrundColor = #1A2B3C4D");
         AssertTokenTypes(new List<StyleTokenType>() {
                 StyleTokenType.Identifier,
-                StyleTokenType.Equal,
+                StyleTokenType.EqualSign,
                 StyleTokenType.HashColor,
         }, tokens);
     }
@@ -76,7 +76,7 @@ public class StyleTokenizerTests {
             StyleTokenType.AttributeSpecifier,
             StyleTokenType.Colon,
             StyleTokenType.Identifier,
-            StyleTokenType.Equal,
+            StyleTokenType.EqualSign,
             StyleTokenType.String,
             StyleTokenType.BracketClose,
         }, tokens);
@@ -142,7 +142,7 @@ public class StyleTokenizerTests {
             StyleTokenType.Identifier,
             StyleTokenType.BracesOpen,
             StyleTokenType.Identifier,
-            StyleTokenType.Equal,
+            StyleTokenType.EqualSign,
             StyleTokenType.Number,
             StyleTokenType.Identifier,
             StyleTokenType.EndStatement,
@@ -163,7 +163,7 @@ public class StyleTokenizerTests {
             StyleTokenType.Identifier,
             StyleTokenType.BracesOpen,
             StyleTokenType.Identifier,
-            StyleTokenType.Equal,
+            StyleTokenType.EqualSign,
             StyleTokenType.Number,
             StyleTokenType.Identifier,
             StyleTokenType.EndStatement,

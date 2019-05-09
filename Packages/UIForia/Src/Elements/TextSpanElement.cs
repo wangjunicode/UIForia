@@ -6,7 +6,7 @@ namespace UIForia.Elements {
 
         private string text;
         private int spanIndex;
-        private TextInfo2 textInfo;
+        private TextInfo textInfo;
         
         public TextSpanElement(string text = "") {
             this.text = text ?? string.Empty;
@@ -16,7 +16,7 @@ namespace UIForia.Elements {
                           | UIElementFlags.Primitive;
         }
 
-        internal void Initialize(TextInfo2 textInfo) {
+        internal void Initialize(TextInfo textInfo) {
             this.textInfo = textInfo;
             spanIndex = textInfo.spanList.Count;
             textInfo.AppendSpan(new TextSpan(text));

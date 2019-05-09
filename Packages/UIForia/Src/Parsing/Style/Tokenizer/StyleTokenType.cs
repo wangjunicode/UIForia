@@ -11,7 +11,7 @@ namespace UIForia.Parsing.Style.Tokenizer {
         Export,
         ExportAs,
         Const,
-        Equal,
+        EqualSign,
         Value,
         
         AttributeSpecifier,

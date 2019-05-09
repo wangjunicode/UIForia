@@ -9,18 +9,18 @@ namespace UIForia.Elements {
     public class UITextElement : UIElement, IStyleChangeHandler, IStylePropertiesWillChangeHandler, IStylePropertiesDidChangeHandler {
 
         internal string text;
-        internal TextInfo2 textInfo;
+        internal TextInfo textInfo;
         private bool shouldUpdateSpanStyle;
         private SVGXTextStyle spanStyle;
         public UITextElement(string text = "") {
             this.text = text ?? string.Empty;
-            this.textInfo = new TextInfo2(new TextSpan(string.Empty));
+            this.textInfo = new TextInfo(new TextSpan(string.Empty));
             this.flags = flags | UIElementFlags.TextElement
                                | UIElementFlags.BuiltIn
                                | UIElementFlags.Primitive;
         }
 
-        internal TextInfo2 TextInfo => textInfo;
+        internal TextInfo TextInfo => textInfo;
 
         public override void OnCreate() {
             if (children != null) {

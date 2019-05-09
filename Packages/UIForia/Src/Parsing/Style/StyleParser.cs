@@ -1,9 +1,12 @@
 using System;
 using System.Collections.Generic;
+using UIForia.Animation;
 using UIForia.Exceptions;
 using UIForia.Parsing.Style.AstNodes;
 using UIForia.Parsing.Style.Tokenizer;
+using UIForia.Rendering;
 using UIForia.Util;
+using UnityEngine;
 
 namespace UIForia.Parsing.Style {
 
@@ -18,7 +21,7 @@ namespace UIForia.Parsing.Style {
 
         private Stack<StyleASTNode> expressionStack;
         private Stack<StyleOperatorNode> operatorStack;
-        private Stack<AttributeGroupContainer> groupExpressionStack;
+        private Stack<AttributeNodeContainer> groupExpressionStack;
         private Stack<StyleOperatorType> groupOperatorStack;
 
         private StyleParser(StyleTokenStream stream) {
@@ -26,7 +29,7 @@ namespace UIForia.Parsing.Style {
             nodes = LightListPool<StyleASTNode>.Get();
             operatorStack = StackPool<StyleOperatorNode>.Get();
             expressionStack = StackPool<StyleASTNode>.Get();
-            groupExpressionStack = StackPool<AttributeGroupContainer>.Get();
+            groupExpressionStack = StackPool<AttributeNodeContainer>.Get();
             groupOperatorStack = StackPool<StyleOperatorType>.Get();
         }
 
@@ -144,15 +147,150 @@ namespace UIForia.Parsing.Style {
         }
 
         private void ParseAnimation() {
-            throw new NotImplementedException();
-//            StyleToken initialStyleToken = tokenStream.Current;
-//            tokenStream.Advance();
-//            AnimationRootNode animRoot = new AnimationRootNode(initialStyleToken);
-//            AssertTokenTypeAndAdvance(StyleTokenType.BracesOpen);
-//            AnimationParseLoop();
-//            AssertTokenTypeAndAdvance(StyleTokenType.BracesClose);
+            StyleToken initialStyleToken = tokenStream.Current;
+            AnimationRootNode animRoot = new AnimationRootNode(initialStyleToken);
+            animRoot.WithLocation(initialStyleToken);
+            tokenStream.Advance();
+            AssertTokenTypeAndAdvance(StyleTokenType.BracesOpen);
+            AnimationParseLoop(animRoot);
+            nodes.Add(animRoot);
         }
-        
+
+        private void AnimationParseLoop(AnimationRootNode rootNode) {
+            while (tokenStream.HasMoreTokens && !AdvanceIfTokenType(StyleTokenType.BracesClose)) {
+                AssertTokenTypeAndAdvance(StyleTokenType.BracketOpen);
+
+                string identifier = AssertTokenTypeAndAdvance(StyleTokenType.Identifier);
+                AssertTokenTypeAndAdvance(StyleTokenType.BracketClose);
+                AssertTokenTypeAndAdvance(StyleTokenType.BracesOpen);
+                if (identifier == "variables") {
+                    ParseAnimationVariables(rootNode);
+                }
+                else if (identifier == "keyframes") {
+                    ParseAnimationKeyFrames(rootNode);
+                }
+                else if (identifier == "options") {
+                    ParseAnimationOptions(rootNode);
+                }
+            }
+        }
+
+        public static readonly ValueTuple<string, Type>[] s_SupportedVariableTypes = {
+            ValueTuple.Create("float", typeof(float)),
+            ValueTuple.Create("int", typeof(int)),
+            ValueTuple.Create("Color", typeof(Color)),
+            ValueTuple.Create("UIMeasurement", typeof(UIMeasurement)),
+            ValueTuple.Create("Measurement", typeof(UIMeasurement)),
+            ValueTuple.Create("UIFixedLength", typeof(UIFixedLength)),
+            ValueTuple.Create("FixedLength", typeof(UIFixedLength)),
+            ValueTuple.Create("TransformOffset", typeof(TransformOffset)),
+            ValueTuple.Create("Offset", typeof(TransformOffset)),
+        };
+
+        public static readonly ValueTuple<string, string>[] s_AnimationOptionNames = {
+            ValueTuple.Create(nameof(AnimationOptions.loopTime).ToLower(), nameof(AnimationOptions.loopTime)),
+            ValueTuple.Create(nameof(AnimationOptions.iterations).ToLower(), nameof(AnimationOptions.iterations)),
+            ValueTuple.Create(nameof(AnimationOptions.delay).ToLower(), nameof(AnimationOptions.delay)),
+            ValueTuple.Create(nameof(AnimationOptions.duration).ToLower(), nameof(AnimationOptions.duration)),
+            ValueTuple.Create(nameof(AnimationOptions.forwardStartDelay).ToLower(), nameof(AnimationOptions.forwardStartDelay)),
+            ValueTuple.Create(nameof(AnimationOptions.reverseStartDelay).ToLower(), nameof(AnimationOptions.reverseStartDelay)),
+            ValueTuple.Create(nameof(AnimationOptions.direction).ToLower(), nameof(AnimationOptions.direction)),
+            ValueTuple.Create(nameof(AnimationOptions.loopType).ToLower(), nameof(AnimationOptions.loopType)),
+            ValueTuple.Create(nameof(AnimationOptions.timingFunction).ToLower(), nameof(AnimationOptions.timingFunction)),
+            ValueTuple.Create(nameof(AnimationOptions.playbackType).ToLower(), nameof(AnimationOptions.playbackType))
+        };
+
+        private void ParseAnimationVariables(AnimationRootNode rootNode) {
+            while (tokenStream.HasMoreTokens && !AdvanceIfTokenType(StyleTokenType.BracesClose)) {
+                StyleToken typeToken = tokenStream.Current;
+                string typeIdentifier = AssertTokenTypeAndAdvance(StyleTokenType.Identifier);
+                bool typeFound = false;
+                for (int index = 0; index < s_SupportedVariableTypes.Length; index++) {
+                    (string name, Type type) = s_SupportedVariableTypes[index];
+                    if (name == typeIdentifier) {
+                        string variableName = AssertTokenTypeAndAdvance(StyleTokenType.Identifier);
+                        AssertTokenTypeAndAdvance(StyleTokenType.EqualSign);
+                        StyleToken variableToken = tokenStream.Current;
+
+                        VariableDefinitionNode varNode = new VariableDefinitionNode();
+                        varNode.name = variableName;
+                        varNode.variableType = type;
+                        varNode.value = ParsePropertyValue();
+                        varNode.WithLocation(variableToken);
+
+                        rootNode.AddVariableNode(varNode);
+
+                        typeFound = true;
+
+                        break;
+                    }
+                }
+
+                if (!typeFound) {
+                    throw new ParseException(typeToken, "Unsupported Type; please read the manual!");
+                }
+
+                AssertTokenTypeAndAdvance(StyleTokenType.EndStatement);
+            }
+        }
+
+        private void ParseAnimationOptions(AnimationRootNode rootNode) {
+            while (tokenStream.HasMoreTokens && !AdvanceIfTokenType(StyleTokenType.BracesClose)) {
+                StyleToken typeToken = tokenStream.Current;
+                string optionName = AssertTokenTypeAndAdvance(StyleTokenType.Identifier).ToLower();
+                bool typeFound = false;
+                for (int index = 0; index < s_AnimationOptionNames.Length; index++) {
+                    string name = s_AnimationOptionNames[index].Item1;
+                    if (name == optionName) {
+                        AssertTokenTypeAndAdvance(StyleTokenType.EqualSign);
+                        StyleToken variableToken = tokenStream.Current;
+
+                        AnimationOptionNode optionNode = new AnimationOptionNode();
+                        optionNode.optionName = s_AnimationOptionNames[index].Item2;
+                        optionNode.value = ParsePropertyValue();
+                        optionNode.WithLocation(variableToken);
+
+                        rootNode.AddOptionNode(optionNode);
+
+                        typeFound = true;
+
+                        break;
+                    }
+                }
+
+                if (!typeFound) {
+                    throw new ParseException(typeToken, $"{optionName} is not a supported animation option. Valid values are: {FormatOptionList(s_AnimationOptionNames)}\n");
+                }
+
+                AssertTokenTypeAndAdvance(StyleTokenType.EndStatement);
+            }
+        }
+
+        private string FormatOptionList(ValueTuple<string, string>[] values) {
+            string retn = "";
+            for (int i = 0; i < values.Length; i++) {
+                retn += "\n" + values[i].Item2;
+            }
+
+            return retn;
+        }
+
+        private void ParseAnimationKeyFrames(AnimationRootNode rootNode) {
+            while (tokenStream.HasMoreTokens && !AdvanceIfTokenType(StyleTokenType.BracesClose)) {
+                string value = AssertTokenTypeAndAdvance(StyleTokenType.Number);
+                AssertTokenTypeAndAdvance(StyleTokenType.Mod);
+                AssertTokenTypeAndAdvance(StyleTokenType.BracesOpen);
+
+                KeyFrameNode keyFrameNode = new KeyFrameNode();
+                keyFrameNode.identifier = value;
+
+                while (tokenStream.HasMoreTokens && !AdvanceIfTokenType(StyleTokenType.BracesClose)) {
+                    ParseProperties(keyFrameNode);
+                }
+
+                rootNode.AddKeyFrameNode(keyFrameNode);
+            }
+        }
 
         private void ParseExportNode() {
             StyleToken exportToken = tokenStream.Current;
@@ -169,7 +307,7 @@ namespace UIForia.Parsing.Style {
             AssertTokenTypeAndAdvance(StyleTokenType.Const);
             // const name
             string variableName = AssertTokenTypeAndAdvance(StyleTokenType.Identifier);
-            AssertTokenTypeAndAdvance(StyleTokenType.Equal);
+            AssertTokenTypeAndAdvance(StyleTokenType.EqualSign);
 
             ConstNode constNode = StyleASTNodeFactory.ConstNode(variableName, ParsePropertyValue());
             constNode.WithLocation(constToken);
@@ -188,7 +326,7 @@ namespace UIForia.Parsing.Style {
             nodes.Add(StyleASTNodeFactory.ImportNode(alias, source).WithLocation(importToken));
         }
 
-        private void ParseStyleGroupBody(StyleGroupContainer styleRootNode) {
+        private void ParseStyleGroupBody(StyleNodeContainer styleRootNode) {
             AssertTokenTypeAndAdvance(StyleTokenType.BracesOpen);
 
             while (tokenStream.HasMoreTokens && !AdvanceIfTokenType(StyleTokenType.BracesClose)) {
@@ -232,9 +370,9 @@ namespace UIForia.Parsing.Style {
                         }
 
                         if (groupExpressionStack.Count == 1) {
-                            AttributeGroupContainer attributeGroupContainer = groupExpressionStack.Pop();
-                            ParseStyleGroupBody(attributeGroupContainer);
-                            styleRootNode.AddChildNode(attributeGroupContainer);
+                            AttributeNodeContainer attributeNodeContainer = groupExpressionStack.Pop();
+                            ParseStyleGroupBody(attributeNodeContainer);
+                            styleRootNode.AddChildNode(attributeNodeContainer);
                         }
                         else {
                             throw new ParseException(tokenStream.Current, "Expected an attribute style group body. Braces are in a weird position!");
@@ -251,7 +389,7 @@ namespace UIForia.Parsing.Style {
             }
         }
 
-        private void ParseStateOrAttributeGroup(StyleGroupContainer styleRootNode) {
+        private void ParseStateOrAttributeGroup(StyleNodeContainer styleRootNode) {
             switch (tokenStream.Current.styleTokenType) {
                 // this is the state group
                 case StyleTokenType.Identifier:
@@ -277,13 +415,13 @@ namespace UIForia.Parsing.Style {
             }
         }
 
-        private void ParseProperties(StyleGroupContainer styleRootNode) {
+        private void ParseProperties(StyleNodeContainer styleRootNode) {
             while (tokenStream.HasMoreTokens && tokenStream.Current.styleTokenType != StyleTokenType.BracesClose) {
                 ParseProperty(styleRootNode);
             }
         }
 
-        private void ParseProperty(StyleGroupContainer styleRootNode) {
+        private void ParseProperty(StyleNodeContainer styleRootNode) {
             StyleToken propertyNodeToken = tokenStream.Current;
             string propertyName;
             if (AdvanceIfTokenType(StyleTokenType.Cursor)) {
@@ -293,7 +431,7 @@ namespace UIForia.Parsing.Style {
                 propertyName = AssertTokenTypeAndAdvance(StyleTokenType.Identifier);
             }
 
-            AssertTokenTypeAndAdvance(StyleTokenType.Equal);
+            AssertTokenTypeAndAdvance(StyleTokenType.EqualSign);
 
             PropertyNode propertyNode = StyleASTNodeFactory.PropertyNode(propertyName);
             propertyNode.WithLocation(propertyNodeToken);
@@ -362,7 +500,7 @@ namespace UIForia.Parsing.Style {
                             tokenStream.Advance();
                         }
                     }
-                    else if (url is StyleLiteralNode || url is ReferenceNode) {
+                    else if (url is StyleLiteralNode || url is ConstReferenceNode) {
                         AssertTokenTypeAndAdvance(StyleTokenType.ParenClose);
                     }
                     else {
@@ -372,6 +510,9 @@ namespace UIForia.Parsing.Style {
                     propertyValue = StyleASTNodeFactory.UrlNode(url);
                     break;
                 case StyleTokenType.At:
+                    propertyValue = ParseConstReference();
+                    break;
+                case StyleTokenType.Dollar:
                     propertyValue = ParseVariableReference();
                     break;
                 default:
@@ -397,19 +538,30 @@ namespace UIForia.Parsing.Style {
             }
         }
 
-        private StyleASTNode ParseVariableReference() {
+        private StyleASTNode ParseConstReference() {
             AdvanceIfTokenType(StyleTokenType.At);
-            ReferenceNode referenceNode = StyleASTNodeFactory.ReferenceNode(AssertTokenTypeAndAdvance(StyleTokenType.Identifier));
+            ConstReferenceNode constReferenceNode = StyleASTNodeFactory.ConstReferenceNode(AssertTokenTypeAndAdvance(StyleTokenType.Identifier));
 
             while (tokenStream.HasMoreTokens && AdvanceIfTokenType(StyleTokenType.Dot)) {
-                referenceNode.AddChildNode(
-                    StyleASTNodeFactory.DotAccessNode(
-                        AssertTokenTypeAndAdvance(StyleTokenType.Identifier)
-                    ).WithLocation(tokenStream.Previous)
+                constReferenceNode.AddChildNode(
+                    StyleASTNodeFactory.DotAccessNode(AssertTokenTypeAndAdvance(StyleTokenType.Identifier)).WithLocation(tokenStream.Previous)
                 );
             }
 
-            return referenceNode;
+            return constReferenceNode;
+        }
+
+        private StyleASTNode ParseVariableReference() {
+            AdvanceIfTokenType(StyleTokenType.Dollar);
+            VariableReferenceNode refNode = new VariableReferenceNode(AssertTokenTypeAndAdvance(StyleTokenType.Identifier));
+
+            while (tokenStream.HasMoreTokens && AdvanceIfTokenType(StyleTokenType.Dot)) {
+                refNode.AddChildNode(
+                    StyleASTNodeFactory.DotAccessNode(AssertTokenTypeAndAdvance(StyleTokenType.Identifier)).WithLocation(tokenStream.Previous)
+                );
+            }
+
+            return refNode;
         }
 
         private StyleASTNode ParseRgba() {
@@ -450,7 +602,7 @@ namespace UIForia.Parsing.Style {
         private StyleASTNode ParseLiteralOrReference(StyleTokenType literalType) {
             StyleToken currentToken = tokenStream.Current;
             if (AdvanceIfTokenType(StyleTokenType.At)) {
-                return ParseVariableReference().WithLocation(currentToken);
+                return ParseConstReference().WithLocation(currentToken);
             }
 
             string value = AssertTokenTypeAndAdvance(literalType);
@@ -513,19 +665,19 @@ namespace UIForia.Parsing.Style {
             string attributeIdentifier = AssertTokenTypeAndAdvance(StyleTokenType.Identifier);
             string attributeValue = null;
 
-            if (AdvanceIfTokenType(StyleTokenType.Equal)) {
+            if (AdvanceIfTokenType(StyleTokenType.EqualSign)) {
                 attributeValue = tokenStream.Current.value;
                 tokenStream.Advance();
             }
 
             bool invert = groupOperatorStack.Count > 0 && groupOperatorStack.Pop() == StyleOperatorType.Not;
 
-            AttributeGroupContainer andAttribute = groupExpressionStack.Count > 0 ? groupExpressionStack.Pop() : null;
-            AttributeGroupContainer attributeGroupContainer =
+            AttributeNodeContainer andAttribute = groupExpressionStack.Count > 0 ? groupExpressionStack.Pop() : null;
+            AttributeNodeContainer attributeNodeContainer =
                 StyleASTNodeFactory.AttributeGroupRootNode(attributeIdentifier, attributeValue, invert, andAttribute);
-            attributeGroupContainer.WithLocation(attributeToken);
+            attributeNodeContainer.WithLocation(attributeToken);
 
-            groupExpressionStack.Push(attributeGroupContainer);
+            groupExpressionStack.Push(attributeNodeContainer);
 
             AssertTokenTypeAndAdvance(StyleTokenType.BracketClose);
         }

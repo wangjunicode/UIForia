@@ -2,12 +2,12 @@ using UIForia.Util;
 
 namespace UIForia.Parsing.Style.AstNodes {
 
-    public abstract class StyleGroupContainer : StyleASTNode {
+    public abstract class StyleNodeContainer : StyleASTNode {
 
         public string identifier;
-        public readonly LightList<StyleASTNode> children;
+        public LightList<StyleASTNode> children;
 
-        public StyleGroupContainer() {
+        public StyleNodeContainer() {
             this.children = new LightList<StyleASTNode>(2);
         }
 

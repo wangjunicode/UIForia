@@ -10,7 +10,7 @@ namespace UIForia.Layout.LayoutTypes {
 
         public TextLayoutBox(UIElement element) : base(element) { }
 
-        public TextInfo2 TextInfo => ((UITextElement) element).textInfo;
+        public TextInfo TextInfo => ((UITextElement) element).textInfo;
 
         protected override float ComputeContentWidth() {
             return ((UITextElement) element).TextInfo.ComputeWidth();
@@ -21,7 +21,7 @@ namespace UIForia.Layout.LayoutTypes {
         }
 
         public override void RunLayout() {
-            TextInfo2 textInfo = ((UITextElement) element).TextInfo;
+            TextInfo textInfo = ((UITextElement) element).TextInfo;
             float topOffset = PaddingTop + BorderTop;
             float leftOffset = PaddingLeft + BorderLeft;
 

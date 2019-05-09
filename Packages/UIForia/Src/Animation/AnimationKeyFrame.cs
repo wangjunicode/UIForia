@@ -6,11 +6,16 @@ namespace UIForia.Animation {
     public struct AnimationKeyFrame {
 
         public readonly float key;
-        public LightList<StyleKeyFrameValue> properties; // todo -- to IList<T>
+        public StructList<StyleKeyFrameValue> properties; // todo -- to IList<T>
+        
+        public AnimationKeyFrame(float key) {
+            this.key = key;
+            this.properties = null;
+        }
         
         public AnimationKeyFrame(float key, StyleKeyFrameValue p0) {
             this.key = key;
-            this.properties = LightListPool<StyleKeyFrameValue>.Get();
+            this.properties = StructList<StyleKeyFrameValue>.Get();
             this.properties.EnsureCapacity(1);
             this.properties[0] = p0;
             this.properties.Count = 1;
@@ -18,7 +23,7 @@ namespace UIForia.Animation {
 
         public AnimationKeyFrame(float key, StyleKeyFrameValue p0, StyleKeyFrameValue p1) {
             this.key = key;
-            this.properties = LightListPool<StyleKeyFrameValue>.Get();
+            this.properties = StructList<StyleKeyFrameValue>.Get();
             this.properties.EnsureCapacity(2);
             this.properties[0] = p0;
             this.properties[1] = p1;
@@ -27,7 +32,7 @@ namespace UIForia.Animation {
         
         public AnimationKeyFrame(float key, StyleKeyFrameValue p0, StyleKeyFrameValue p1, StyleKeyFrameValue p2) {
             this.key = key;
-            this.properties = LightListPool<StyleKeyFrameValue>.Get();
+            this.properties = StructList<StyleKeyFrameValue>.Get();
             this.properties.EnsureCapacity(3);
             this.properties[0] = p0;
             this.properties[1] = p1;
@@ -37,7 +42,7 @@ namespace UIForia.Animation {
         
         public AnimationKeyFrame(float key, StyleKeyFrameValue p0, StyleKeyFrameValue p1, StyleKeyFrameValue p2, StyleKeyFrameValue p3) {
             this.key = key;
-            this.properties = LightListPool<StyleKeyFrameValue>.Get();
+            this.properties = StructList<StyleKeyFrameValue>.Get();
             this.properties.EnsureCapacity(4);
             this.properties[0] = p0;
             this.properties[1] = p1;
@@ -48,7 +53,7 @@ namespace UIForia.Animation {
         
         public AnimationKeyFrame(float key, params StyleKeyFrameValue[] properties) {
             this.key = key;
-            this.properties = LightListPool<StyleKeyFrameValue>.Get();
+            this.properties = StructList<StyleKeyFrameValue>.Get();
             this.properties.EnsureCapacity(properties.Length);
             for (int i = 0; i < properties.Length; i++) {
                 this.properties[i] = properties[i];
@@ -59,7 +64,7 @@ namespace UIForia.Animation {
         
         public AnimationKeyFrame(float key, IList<StyleKeyFrameValue> properties) {
             this.key = key;
-            this.properties = LightListPool<StyleKeyFrameValue>.Get();
+            this.properties = StructList<StyleKeyFrameValue>.Get();
             this.properties.EnsureCapacity(properties.Count);
             for (int i = 0; i < properties.Count; i++) {
                 this.properties[i] = properties[i];
@@ -68,7 +73,7 @@ namespace UIForia.Animation {
         }
 
         public void Release() {
-            LightListPool<StyleKeyFrameValue>.Release(ref properties);
+            StructList<StyleKeyFrameValue>.Release(ref properties);
         }
         
     }

@@ -494,7 +494,7 @@ namespace SVGX {
                     Vector2 p0 = matrix.Transform(points[start]);
                     renderData = BitUtil.SetHighLowBits((int) renderShape.shape.type, RenderTypeText);
 
-                    TextInfo2 textInfo = renderShape.textInfo;
+                    TextInfo textInfo = renderShape.textInfo;
 //   UIForia doesn't want this to do layout but raw system probably does
 //                    if (textInfo.layoutBeforeRender && textInfo.LayoutDirty) {
 //                        textInfo.Layout(Vector2.zero);

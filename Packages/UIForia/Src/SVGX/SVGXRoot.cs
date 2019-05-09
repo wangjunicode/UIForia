@@ -60,7 +60,7 @@ namespace SVGX {
         public Vector2 offset;
 
         [Range(1, 128)] public int fontSize;
-        private TextInfo2 textInfo;
+        private TextInfo textInfo;
 
         [Range(-360, 360)] public float startAngle = 0;
         [Range(-360, 360)] public float endAngle = 180f;
@@ -70,7 +70,7 @@ namespace SVGX {
         public void Start() {
             ctx = new ImmediateRenderContext();
             gfx = new GFX(camera);
-            textInfo = new TextInfo2(new TextSpan("Hello World"));
+            textInfo = new TextInfo(new TextSpan("Hello World"));
         }
 
         public Vector4 radii = new Vector4(100, 100, 100, 100);

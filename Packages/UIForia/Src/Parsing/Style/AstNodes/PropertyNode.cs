@@ -13,7 +13,7 @@ namespace UIForia.Parsing.Style.AstNodes {
         }
     }
     
-    public class PropertyNode : StyleGroupContainer {
+    public class PropertyNode : StyleNodeContainer {
 
         public PropertyNode() {
             type = StyleASTNodeType.Property;

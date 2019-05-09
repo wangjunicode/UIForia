@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using UIForia.Animation;
 using UIForia.Exceptions;
 using UIForia.Parsing.Style.AstNodes;
 using UIForia.Rendering;
@@ -10,6 +11,7 @@ namespace UIForia.Compilers.Style {
     public class StyleSheetCompiler {
 
         private readonly StyleSheetImporter styleSheetImporter;
+        private static readonly UIStyle s_ScratchStyle = new UIStyle();
 
         private StyleCompileContext context;
 
@@ -32,22 +34,38 @@ namespace UIForia.Compilers.Style {
             // todo add imported style groups
 
             int containerCount = 0;
+            int animationCount = 0;
             for (int index = 0; index < rootNodes.Count; index++) {
                 switch (rootNodes[index]) {
                     case StyleRootNode _:
                         containerCount++;
                         break;
+                    case AnimationRootNode _:
+                        animationCount++;
+                        break;
                 }
             }
 
-            StyleSheet styleSheet = new StyleSheet(context.constants.ToArray(), new UIStyleGroupContainer[containerCount]);
+            StyleSheet styleSheet = new StyleSheet(
+                context.constants.ToArray(),
+                containerCount > 0 
+                    ? new UIStyleGroupContainer[containerCount]
+                    : ArrayPool<UIStyleGroupContainer>.Empty,
+                animationCount > 0
+                    ? new AnimationData[animationCount]
+                    : ArrayPool<AnimationData>.Empty
+            );
 
             int containerIndex = 0;
+            int animationIndex = 0;
             for (int index = 0; index < rootNodes.Count; index++) {
                 switch (rootNodes[index]) {
                     case StyleRootNode styleRoot:
                         styleSheet.styleGroupContainers[containerIndex] = CompileStyleGroup(styleRoot);
                         containerIndex++;
+                        break;
+                    case AnimationRootNode animNode:
+                        styleSheet.animations[animationIndex] = CompileAnimation(animNode);
                         break;
                 }
             }
@@ -55,6 +73,88 @@ namespace UIForia.Compilers.Style {
             context.Release();
 
             return styleSheet;
+        }
+
+        private AnimationData CompileAnimation(AnimationRootNode animNode) {
+            AnimationData data = new AnimationData();
+            data.name = animNode.animName;
+            data.fileName = context.fileName;
+            data.frames = CompileKeyFrames(animNode);
+            data.options = CompileAnimationOptions(animNode);
+            return data;
+        }
+
+        private AnimationKeyFrame[] CompileKeyFrames(AnimationRootNode animNode) {
+            AnimationKeyFrame[] frames = new AnimationKeyFrame[animNode.keyFrameNodes.Count];
+            for (int i = 0; i < animNode.keyFrameNodes.Count; i++) {
+                KeyFrameNode keyFrameNode = animNode.keyFrameNodes[i];
+                float time = float.Parse(keyFrameNode.identifier) / 100;
+
+                for (int j = 0; j < keyFrameNode.children.Count; j++) {
+                    PropertyNode propertyNode = (PropertyNode) keyFrameNode.children[j];
+                    StylePropertyMappers.MapProperty(s_ScratchStyle, propertyNode, context);
+                }
+
+                int count = s_ScratchStyle.m_StyleProperties.Count;
+                StyleProperty[] properties = s_ScratchStyle.m_StyleProperties.Array;
+                StructList<StyleKeyFrameValue> keyValues = new StructList<StyleKeyFrameValue>(count);
+
+                for (int j = 0; j < count; j++) {
+                    keyValues[j] = new StyleKeyFrameValue(properties[j]);
+                }
+
+                keyValues.size = count;
+                frames[i] = new AnimationKeyFrame(time);
+                frames[i].properties = keyValues;
+                s_ScratchStyle.m_StyleProperties.Count = 0;
+            }
+
+            return frames;
+        }
+
+        private AnimationOptions CompileAnimationOptions(AnimationRootNode animNode) {
+            AnimationOptions options = new AnimationOptions();
+            LightList<AnimationOptionNode> optionNodes = animNode.optionNodes;
+            for (int i = 0; i < optionNodes.Count; i++) {
+                string optionName = optionNodes[i].optionName;
+                StyleASTNode value = optionNodes[i].value;
+                
+                if (optionName == nameof(AnimationOptions.duration)) {
+                    options.duration = (int) StylePropertyMappers.MapNumber(value, context);
+                }
+                else if (optionName == nameof(AnimationOptions.iterations)) {
+                    options.iterations = (int) StylePropertyMappers.MapNumber(value, context);
+                }
+                else if (optionName == nameof(AnimationOptions.loopTime)) {
+                    options.loopTime = StylePropertyMappers.MapNumber(value, context);
+                }
+                else if (optionName == nameof(AnimationOptions.delay)) {
+                    options.delay = StylePropertyMappers.MapNumber(value, context);
+                }
+                else if (optionName == nameof(AnimationOptions.direction)) {
+                    options.direction = StylePropertyMappers.MapEnum<AnimationDirection>(value, context);
+                }
+                else if (optionName == nameof(AnimationOptions.loopType)) {
+                    options.loopType = StylePropertyMappers.MapEnum<AnimationLoopType>(value, context);
+                }
+                else if (optionName == nameof(AnimationOptions.playbackType)) {
+                    options.playbackType = StylePropertyMappers.MapEnum<AnimationPlaybackType>(value, context);
+                }
+                else if (optionName == nameof(AnimationOptions.forwardStartDelay)) {
+                    options.forwardStartDelay = (int)StylePropertyMappers.MapNumber(value, context);
+                }
+                else if (optionName == nameof(AnimationOptions.reverseStartDelay)) {
+                    options.reverseStartDelay = (int)StylePropertyMappers.MapNumber(value, context);
+                }
+                else if (optionName == nameof(AnimationOptions.timingFunction)) {
+                    options.timingFunction = StylePropertyMappers.MapEnum<EasingFunction>(value, context);
+                }
+                else {
+                    throw new CompileException(optionNodes[i], "Invalid option argument for animation");
+                }
+            }
+
+            return options;
         }
 
         private UIStyleGroupContainer CompileStyleGroup(StyleRootNode styleRoot) {
@@ -71,7 +171,7 @@ namespace UIForia.Compilers.Style {
             return new UIStyleGroupContainer(defaultGroup.name, styleType, styleGroups);
         }
 
-        private void CompileStyleGroups(StyleGroupContainer root, StyleType styleType, LightList<UIStyleGroup> groups, UIStyleGroup targetGroup) {
+        private void CompileStyleGroups(StyleNodeContainer root, StyleType styleType, LightList<UIStyleGroup> groups, UIStyleGroup targetGroup) {
             for (int index = 0; index < root.children.Count; index++) {
                 StyleASTNode node = root.children[index];
                 switch (node) {
@@ -79,8 +179,8 @@ namespace UIForia.Compilers.Style {
                         // add to normal ui style set
                         StylePropertyMappers.MapProperty(targetGroup.normal, propertyNode, context);
                         break;
-                    case AttributeGroupContainer attribute:
-                        if (root is AttributeGroupContainer) {
+                    case AttributeNodeContainer attribute:
+                        if (root is AttributeNodeContainer) {
                             throw new CompileException(attribute, "You cannot nest attribute group definitions.");
                         }
 
@@ -129,17 +229,18 @@ namespace UIForia.Compilers.Style {
             }
         }
 
-        private UIStyleRule MapAttributeContainerToRule(ChainableGroupContainer groupContainer) {
-            if (groupContainer == null) return null;
+        private UIStyleRule MapAttributeContainerToRule(ChainableNodeContainer nodeContainer) {
+            if (nodeContainer == null) return null;
 
-            if (groupContainer is AttributeGroupContainer attribute) {
+            if (nodeContainer is AttributeNodeContainer attribute) {
                 return new UIStyleRule(attribute.invert, attribute.identifier, attribute.value, MapAttributeContainerToRule(attribute.next));
             }
 
-            if (groupContainer is ExpressionGroupContainer expression) {
-            }
+            if (nodeContainer is ExpressionNodeContainer expression) { }
 
             throw new NotImplementedException("Sorry this feature experiences a slight delay.");
         }
+
     }
+
 }

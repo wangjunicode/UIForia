@@ -1,5 +1,6 @@
 using NUnit.Framework;
 using UIForia;
+using UIForia.Animation;
 using UIForia.Compilers.Style;
 using UIForia.Layout;
 using UIForia.Layout.LayoutTypes;
@@ -931,6 +932,97 @@ style xyz {
         StyleSheet styleSheet = NewStyleSheetCompiler().Compile("test", nodes);
         Assert.AreEqual(1, styleSheet.styleGroupContainers.Length);     
         Assert.AreEqual(2, styleSheet.styleGroupContainers[0].groups.Count);     
+    }
+
+    [Test]
+    public void CompileAnimation() {
+        var nodes = StyleParser.Parse(@"
+            animation anim1 {
+                [keyframes] {
+                    0% { 
+                        BackgroundColor = red; 
+                        BackgroundColor = red; 
+                    }
+                    50% {
+                        TextFontSize = 11;
+                        BackgroundColor = green; 
+                    }
+                    60% {
+                        PreferredSize = 40px, 30px;
+                    }
+                    100% {
+                         BackgroundColor = green; 
+                    }
+                }
+            }
+        ".Trim());
+        StyleSheet styleSheet = NewStyleSheetCompiler().Compile("test", nodes);
+        Assert.AreEqual(1, styleSheet.animations.Length);
+        AnimationData animationData = styleSheet.animations[0];
+        Assert.AreEqual("anim1", animationData.name);
+        Assert.AreEqual(4, animationData.frames.Count);
+        AnimationKeyFrame frame0 = animationData.frames[0];
+        Assert.AreEqual(1, frame0.properties.Count);
+        Assert.AreEqual(0, frame0.key);
+        Assert.AreEqual(StylePropertyId.BackgroundColor, frame0.properties[0].propertyId);
+        Assert.AreEqual(Color.red, frame0.properties[0].styleProperty.AsColor);
+        
+        AnimationKeyFrame frame1 = animationData.frames[1];
+        Assert.AreEqual(2, frame1.properties.Count);
+        Assert.AreEqual(0.5f, frame1.key);
+        Assert.AreEqual(StylePropertyId.TextFontSize, frame1.properties[0].propertyId);
+        Assert.AreEqual(StylePropertyId.BackgroundColor, frame1.properties[1].propertyId);
+        
+        AnimationKeyFrame frame2 = animationData.frames[2];
+        Assert.AreEqual(2, frame2.properties.Count);
+        Assert.AreEqual(0.6f, frame2.key);
+        Assert.AreEqual(StylePropertyId.PreferredWidth, frame2.properties[0].propertyId);
+        Assert.AreEqual(StylePropertyId.PreferredHeight, frame2.properties[1].propertyId);
+        
+        AnimationKeyFrame frame3 = animationData.frames[3];
+        Assert.AreEqual(1, frame3.properties.Count);
+        Assert.AreEqual(1, frame3.key);
+        Assert.AreEqual(StylePropertyId.BackgroundColor, frame3.properties[0].propertyId);
+        
+    }
+    
+     [Test]
+    public void CompileAnimationOptions() {
+        var nodes = StyleParser.Parse(@"
+            animation anim1 {
+
+                [options] {
+                    delay = 1000;
+                    duration = 3000;
+                    timingFunction = SineEaseOut;
+                }
+
+                [keyframes] {
+                    0% { 
+                        BackgroundColor = red; 
+                        BackgroundColor = red; 
+                    }
+                    50% {
+                        TextFontSize = 11;
+                        BackgroundColor = green; 
+                    }
+                    60% {
+                        PreferredSize = 40px, 30px;
+                    }
+                    100% {
+                         BackgroundColor = green; 
+                    }
+                }
+            }
+        ".Trim());
+        StyleSheet styleSheet = NewStyleSheetCompiler().Compile("test", nodes);
+        Assert.AreEqual(1, styleSheet.animations.Length);
+        AnimationData animationData = styleSheet.animations[0];
+        Assert.AreEqual(1000, animationData.options.delay);
+        Assert.AreEqual(3000, animationData.options.duration);
+        Assert.AreEqual(EasingFunction.SineEaseOut, animationData.options.timingFunction);
+       
+        
     }
     
 }

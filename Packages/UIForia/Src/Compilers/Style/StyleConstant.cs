@@ -8,7 +8,7 @@ namespace UIForia.Compilers.Style {
 
         public StyleASTNode value;
 
-        public ReferenceNode referenceNode;
+        public ConstReferenceNode constReferenceNode;
 
         public bool exported;
     }

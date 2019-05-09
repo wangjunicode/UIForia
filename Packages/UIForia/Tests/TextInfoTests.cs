@@ -7,7 +7,7 @@ public class TextInfoTests {
 
     [Test]
     public void CreateTextInfo_OneSpan() {
-        TextInfo2 t = new TextInfo2(new TextSpan("hello", new SVGX.SVGXTextStyle()));
+        TextInfo t = new TextInfo(new TextSpan("hello", new SVGX.SVGXTextStyle()));
         Assert.AreEqual("hello".Length, t.characterList.Count);
         Assert.AreEqual("hello".Length, t.charInfoList.Count);
         Assert.AreEqual(1, t.wordInfoList.Count);
@@ -16,7 +16,7 @@ public class TextInfoTests {
 
     [Test]
     public void CreateTextInfo_TwoSpans() {
-        TextInfo2 t = new TextInfo2(
+        TextInfo t = new TextInfo(
             new TextSpan("hello "),
             new TextSpan("world")
         );
@@ -30,7 +30,7 @@ public class TextInfoTests {
     public void UpdateTextInfo_FirstSpanLarger() {
         const string newValue = "this is a longer string ";
 
-        TextInfo2 t = new TextInfo2(
+        TextInfo t = new TextInfo(
             new TextSpan("hello "),
             new TextSpan("world")
         );
@@ -51,7 +51,7 @@ public class TextInfoTests {
     public void UpdateTextInfo_FirstSpanSmaller() {
         const string newValue = "this is less ";
 
-        TextInfo2 t = new TextInfo2(
+        TextInfo t = new TextInfo(
             new TextSpan("this is a longer string "),
             new TextSpan("world")
         );
@@ -71,7 +71,7 @@ public class TextInfoTests {
     public void UpdateTextInfo_LastSpanLarger() {
         const string newValue = "this is a longer string";
 
-        TextInfo2 t = new TextInfo2(
+        TextInfo t = new TextInfo(
             new TextSpan("hello "),
             new TextSpan("world")
         );
@@ -93,7 +93,7 @@ public class TextInfoTests {
     public void UpdateTextInfo_LastSpanSmaller() {
         const string newValue = "this is less";
 
-        TextInfo2 t = new TextInfo2(
+        TextInfo t = new TextInfo(
             new TextSpan("some words here "),
             new TextSpan("some other stuff "),
             new TextSpan("this is a longer string")
@@ -119,7 +119,7 @@ public class TextInfoTests {
     public void UpdateTextInfo_MiddleSpanLarger() {
         const string newValue = "this is a longer string ";
 
-        TextInfo2 t = new TextInfo2(
+        TextInfo t = new TextInfo(
             new TextSpan("hello "),
             new TextSpan("old stuff "),
             new TextSpan("world")
@@ -143,7 +143,7 @@ public class TextInfoTests {
     public void UpdateTextInfo_MiddleSpanSmaller() {
         const string newValue = "this is less ";
 
-        TextInfo2 t = new TextInfo2(
+        TextInfo t = new TextInfo(
             new TextSpan("some words here "),
             new TextSpan("this is a longer string"),
             new TextSpan("some other stuff")
@@ -169,7 +169,7 @@ public class TextInfoTests {
     public void UpdateTextInfo_SameCharacterCount() {
         const string newValue = "this is the same ";
 
-        TextInfo2 t = new TextInfo2(
+        TextInfo t = new TextInfo(
             new TextSpan("some words here "),
             new TextSpan("this is the word "),
             new TextSpan("some other stuff")
@@ -196,7 +196,7 @@ public class TextInfoTests {
     public void UpdateTextInfo_SameWordCount_FewerCharacters() {
         const string newValue = "this is the s ";
 
-        TextInfo2 t = new TextInfo2(
+        TextInfo t = new TextInfo(
             new TextSpan("some words here "),
             new TextSpan("this is the word "),
             new TextSpan("some other stuff")
@@ -223,7 +223,7 @@ public class TextInfoTests {
     public void UpdateTextInfo_SameWordCount_MoveCharacters() {
         const string newValue = "this is the alotofcharactershere ";
 
-        TextInfo2 t = new TextInfo2(
+        TextInfo t = new TextInfo(
             new TextSpan("some words here "),
             new TextSpan("this is the word "),
             new TextSpan("some other stuff")
@@ -247,11 +247,11 @@ public class TextInfoTests {
     }
 
 
-    public static string GetWord(TextInfo2 textInfo2, int word) {
+    public static string GetWord(TextInfo textInfo, int word) {
         string retn = "";
-        WordInfo wordInfo = textInfo2.wordInfoList[word];
+        WordInfo wordInfo = textInfo.wordInfoList[word];
         for (int i = wordInfo.startChar; i < wordInfo.startChar + wordInfo.charCount; i++) {
-            retn += textInfo2.charInfoList[i].character;
+            retn += textInfo.charInfoList[i].character;
         }
 
         return retn;

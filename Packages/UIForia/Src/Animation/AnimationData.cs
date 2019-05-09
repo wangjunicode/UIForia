@@ -5,6 +5,8 @@ namespace UIForia.Animation {
 
     public struct AnimationData {
 
+        public string name;
+        public string fileName;
         public AnimationOptions options;
         public IList<AnimationKeyFrame> frames;
         public IList<AnimationTrigger> triggers;
@@ -25,6 +27,8 @@ namespace UIForia.Animation {
             this.onTick = null;
             this.frames = frames;
             this.triggers = triggers;
+            this.name = null;
+            this.fileName = null;
         }
 
     }

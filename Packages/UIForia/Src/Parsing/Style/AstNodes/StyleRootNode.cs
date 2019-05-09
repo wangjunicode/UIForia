@@ -18,7 +18,7 @@ namespace UIForia.Parsing.Style.AstNodes {
     /// <summary>
     /// Container for all the things inside a style node: 'style xy { children... }'
     /// </summary>
-    public class StyleRootNode : StyleGroupContainer {
+    public class StyleRootNode : StyleNodeContainer {
 
         public string tagName;
 

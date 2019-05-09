@@ -4,17 +4,17 @@ namespace UIForia.Parsing.Style.AstNodes {
     
     internal static partial class StyleASTNodeFactory {
     
-        internal static readonly ObjectPool<ExpressionGroupContainer> s_ExpressionGroupContainerNodePool = new ObjectPool<ExpressionGroupContainer>();
+        internal static readonly ObjectPool<ExpressionNodeContainer> s_ExpressionGroupContainerNodePool = new ObjectPool<ExpressionNodeContainer>();
 
-        internal static ExpressionGroupContainer ExpressionGroupRootNode(string identifier, bool invert, AttributeGroupContainer next) {
-            ExpressionGroupContainer rootNode = s_ExpressionGroupContainerNodePool.Get();
+        internal static ExpressionNodeContainer ExpressionGroupRootNode(string identifier, bool invert, AttributeNodeContainer next) {
+            ExpressionNodeContainer rootNode = s_ExpressionGroupContainerNodePool.Get();
             rootNode.type = StyleASTNodeType.ExpressionGroup;
             rootNode.identifier = identifier;
             return rootNode;
         }
     }
     
-    public class ExpressionGroupContainer : ChainableGroupContainer {
+    public class ExpressionNodeContainer : ChainableNodeContainer {
 
         // TODO add expression node
         

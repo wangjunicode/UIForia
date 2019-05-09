@@ -34,7 +34,7 @@ namespace SVGX {
         internal readonly Stack<int> clipStack;
         internal readonly LightList<SVGXGradient> gradients;
         internal readonly LightList<Texture2D> textures;
-        internal readonly LightList<TextInfo2> textInfos;
+        internal readonly LightList<TextInfo> textInfos;
 
         private Vector2 lastPoint;
         private SVGXMatrix currentMatrix;
@@ -61,7 +61,7 @@ namespace SVGX {
             shapes.Add(new SVGXShape(SVGXShapeType.Unset));
             textures = new LightList<Texture2D>();
             clipStack = new Stack<int>();
-            textInfos = new LightList<TextInfo2>();
+            textInfos = new LightList<TextInfo>();
             currentStyle = SVGXStyle.Default();
             currentScissorRect = new Rect(-float.MaxValue * 0.5f, -float.MaxValue * 0.5f, float.MaxValue, float.MaxValue);
         }
@@ -136,7 +136,7 @@ namespace SVGX {
             }
         }
 
-        public void Text(float x, float y, TextInfo2 text) {
+        public void Text(float x, float y, TextInfo text) {
             SVGXShape currentShape = shapes[shapes.Count - 1];
 
             // todo -- bounds will depend on text layout, should we just do it here?

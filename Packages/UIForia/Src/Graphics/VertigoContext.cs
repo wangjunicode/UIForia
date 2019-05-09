@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using UIForia.Text;
 using UIForia.Util;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -90,6 +91,8 @@ namespace Vertigo {
         public void SetStrokeMaterial(VertigoMaterial material) {
             this.strokeMaterial = material;
         }
+
+        public void FillText(float x, float y, TextInfo textInfo) { }
 
         public void FillRhombus(float x, float y, float width, float height, VertigoMaterial material = null) {
             material = material ?? fillMaterial;

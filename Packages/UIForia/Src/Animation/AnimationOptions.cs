@@ -38,12 +38,12 @@ namespace UIForia.Animation {
         public int? iterations;
         public float? delay;
         public int? duration;
-        public float? forwardStartDelay;
-        public float? reverseStartDelay;
+        public int? forwardStartDelay;
+        public int? reverseStartDelay;
         public AnimationDirection? direction;
-        public AnimationLoopType? loopType;
-        public EasingFunction? timingFunction;
-        public AnimationPlaybackType playbackType;
+        public AnimationLoopType? loopType;            
+        public EasingFunction? timingFunction;      // todo add Easing.Custom?
+        public AnimationPlaybackType playbackType; // todo remove
 
         public AnimationOptions(AnimationOptions copy) {
             this.duration = copy.duration;
@@ -64,8 +64,8 @@ namespace UIForia.Animation {
             this.iterations = 1;
             this.direction = AnimationDirection.Forward;
             this.delay = 0f;
-            this.forwardStartDelay = 0f;
-            this.reverseStartDelay = 0f;
+            this.forwardStartDelay = 0;
+            this.reverseStartDelay = 0;
             this.timingFunction = EasingFunction.Linear;
             this.loopType = loopType = AnimationLoopType.PingPong;
             this.playbackType = AnimationPlaybackType.KeyFrame;
@@ -76,8 +76,8 @@ namespace UIForia.Animation {
             this.iterations = 1;
             this.loopTime = 0f;
             this.delay = 0f;
-            this.forwardStartDelay = 0f;
-            this.reverseStartDelay = 0f;
+            this.forwardStartDelay = 0;
+            this.reverseStartDelay = 0;
             this.timingFunction = easing;
             this.direction = AnimationDirection.Forward;
             this.loopType = loopType = AnimationLoopType.PingPong;

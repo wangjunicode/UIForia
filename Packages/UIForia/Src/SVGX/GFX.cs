@@ -357,7 +357,7 @@ namespace SVGX {
                         case DrawCallType.StandardStroke: {
                             for (int k = call.shapeRange.start; k < call.shapeRange.end; k++) {
                                 int z = ushort.MaxValue - k;
-                                TextInfo2 textInfo = null;
+                                TextInfo textInfo = null;
                                 if (ctx.shapes[k].type == SVGXShapeType.Text) {
                                     textInfo = ctx.textInfos[ctx.shapes[k].textInfoId];
                                 }
@@ -370,7 +370,7 @@ namespace SVGX {
                         case DrawCallType.StandardFill: {
                             for (int k = call.shapeRange.start; k < call.shapeRange.end; k++) {
                                 int z = ushort.MaxValue - k;
-                                TextInfo2 textInfo = null;
+                                TextInfo textInfo = null;
                                 if (ctx.shapes[k].type == SVGXShapeType.Text) {
                                     textInfo = ctx.textInfos[ctx.shapes[k].textInfoId];
                                 }
@@ -384,7 +384,7 @@ namespace SVGX {
                         case DrawCallType.Shadow:
                             for (int k = call.shapeRange.start; k < call.shapeRange.end; k++) {
                                 int z = ushort.MaxValue - k;
-                                TextInfo2 textInfo = null;
+                                TextInfo textInfo = null;
 
                                 if (ctx.shapes[k].type == SVGXShapeType.Text) {
                                     textInfo = ctx.textInfos[ctx.shapes[k].textInfoId];
@@ -542,7 +542,7 @@ namespace SVGX {
 
             for (int i = 0; i < count; i++) {
                 SVGXRenderShape renderShape = renderShapeArray[i];
-                TextInfo2 textInfo = renderShape.textInfo;
+                TextInfo textInfo = renderShape.textInfo;
                 int currentTextureId = styles[renderShape.styleId].fillTextureId;
 
                 bool fontChanged = false;

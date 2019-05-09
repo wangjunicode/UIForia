@@ -813,7 +813,7 @@ namespace UIForia.Compilers.Style {
             return new Color32(red, green, blue, 255);
         }
 
-        private static float MapNumber(StyleASTNode node, StyleCompileContext context) {
+        internal static float MapNumber(StyleASTNode node, StyleCompileContext context) {
             node = context.GetValueForReference(node);
             if (node is StyleIdentifierNode identifierNode) {
                 if (TryParseFloat(identifierNode.name, out float number)) {
@@ -859,7 +859,7 @@ namespace UIForia.Compilers.Style {
             if (action == null) Debug.LogWarning($"{propertyKey} at column {node.column} line {node.line} in file {context.fileName} is an unknown style property.");
         }
 
-        private static T MapEnum<T>(StyleASTNode node, StyleCompileContext context) where T : struct {
+        internal static T MapEnum<T>(StyleASTNode node, StyleCompileContext context) where T : struct {
             node = context.GetValueForReference(node);
 
             if (node is StyleIdentifierNode identifierNode) {

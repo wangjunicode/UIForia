@@ -16,7 +16,7 @@ namespace UIForia.Parsing.Style.AstNodes {
         }
     }
 
-    public class StyleStateContainer : StyleGroupContainer {
+    public class StyleStateContainer : StyleNodeContainer {
         public override void Release() {
             base.Release();
             StyleASTNodeFactory.s_StyleContainerNodePool.Release(this);

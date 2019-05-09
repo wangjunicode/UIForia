@@ -4,10 +4,10 @@ namespace UIForia.Parsing.Style.AstNodes {
 
     internal static partial class StyleASTNodeFactory {
 
-        internal static readonly ObjectPool<AttributeGroupContainer> s_AttributeGroupContainerNodePool = new ObjectPool<AttributeGroupContainer>();
+        internal static readonly ObjectPool<AttributeNodeContainer> s_AttributeGroupContainerNodePool = new ObjectPool<AttributeNodeContainer>();
 
-        internal static AttributeGroupContainer AttributeGroupRootNode(string identifier, string value, bool invert, AttributeGroupContainer next) {
-            AttributeGroupContainer rootNode = s_AttributeGroupContainerNodePool.Get();
+        internal static AttributeNodeContainer AttributeGroupRootNode(string identifier, string value, bool invert, AttributeNodeContainer next) {
+            AttributeNodeContainer rootNode = s_AttributeGroupContainerNodePool.Get();
             rootNode.type = StyleASTNodeType.AttributeGroup;
             rootNode.identifier = identifier;
             rootNode.value = value;
@@ -17,7 +17,7 @@ namespace UIForia.Parsing.Style.AstNodes {
         }
     }
 
-    public class AttributeGroupContainer : ChainableGroupContainer {
+    public class AttributeNodeContainer : ChainableNodeContainer {
 
         public override void Release() {
             base.Release();

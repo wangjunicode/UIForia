@@ -6,9 +6,9 @@ namespace Vertigo {
 
     public interface IDrawCallBatcher {
 
-        void AddDrawCall(GeometryCache cache, RangeInt shapeRange, VertigoMaterial material, in VertigoState state);
+        void AddDrawCall(GeometryCache cache, RangeInt shapeRange, VertigoMaterial material, in Matrix4x4 transform);
 
-        void AddDrawCall(Mesh mesh, VertigoMaterial material, in VertigoState state);
+        void AddDrawCall(Mesh mesh, VertigoMaterial material, in Matrix4x4 transform);
 
         void Bake(int width, int height, in Matrix4x4 cameraMatrix, StructList<BatchDrawCall> output);
 
@@ -37,7 +37,7 @@ namespace Vertigo {
 
             public VertigoMaterial material;
             public VertigoMesh mesh;
-            public VertigoState renderState;
+            public Matrix4x4 transform;
 
         }
 
@@ -50,13 +50,13 @@ namespace Vertigo {
             drawCallList.QuickClear();
         }
 
-        public void AddDrawCall(GeometryCache cache, RangeInt shapeRange, VertigoMaterial material, in VertigoState state) {
+        public void AddDrawCall(GeometryCache cache, RangeInt shapeRange, VertigoMaterial material, in Matrix4x4 transform) {
             for (int i = shapeRange.start; i < shapeRange.end; i++) {
-                AddDrawCallInternal(cache, cache.shapes[i], material, state);
+                AddDrawCallInternal(cache, cache.shapes[i], material, transform);
             }
         }
 
-        private void AddDrawCallInternal(GeometryCache cache, in GeometryShape shape, VertigoMaterial material, in VertigoState state) {
+        private void AddDrawCallInternal(GeometryCache cache, in GeometryShape shape, VertigoMaterial material, in Matrix4x4 transform) {
             int vertexStart = shape.vertexStart;
             int vertexCount = shape.vertexCount;
             int triangleStart = shape.triangleStart;
@@ -101,11 +101,11 @@ namespace Vertigo {
             drawCallList.Add(new DrawCall() {
                 mesh = vertigoMesh,
                 material = material,
-                renderState = state
+                transform = transform
             });
         }
 
-        public void AddDrawCall(Mesh mesh, VertigoMaterial material, in VertigoState state) { }
+        public void AddDrawCall(Mesh mesh, VertigoMaterial material, in Matrix4x4 transform) { }
 
         public void Bake(int width, int height, in Matrix4x4 cameraMatrix, StructList<BatchDrawCall> output) {
             int drawCallCount = drawCallList.Count;
@@ -116,7 +116,7 @@ namespace Vertigo {
                 output.AddUnsafe(new BatchDrawCall() {
                     material = call.material,
                     mesh = call.mesh,
-                    state = call.renderState
+                    transform = call.transform
                 });
             }
         }

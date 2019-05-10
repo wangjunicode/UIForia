@@ -282,12 +282,12 @@ namespace Vertigo {
                         float height = shape.p1.y;
                         Vector2 pos = shape.p0;
                         Vector2 wh = shape.p1;
-                        
+
                         float halfWidth = width * 0.5f;
                         float halfHeight = height * 0.5f;
 
                         Vector3 n0 = new Vector3(0, 0, -1);
-                       
+
                         Vector4 uv0 = new Vector4(0, 1, wh.x, wh.y);
                         Vector4 uv1 = new Vector4(1, 1, wh.x, wh.y);
                         Vector4 uv2 = new Vector4(1, 0, wh.x, wh.y);
@@ -315,10 +315,10 @@ namespace Vertigo {
                         Vector2 p2 = new Vector2(pos.x + wh.x, -(pos.y + wh.y));
                         Vector2 p3 = new Vector2(pos.x, -(pos.y + wh.y));
 
-                        positions[startVert + 0] = p0;//new Vector3(x + halfWidth, -y);
-                        positions[startVert + 1] = p1;//new Vector3(x + width, -(y + halfHeight));
-                        positions[startVert + 2] = p2;//new Vector3(x + halfWidth, -(y + height));
-                        positions[startVert + 3] = p3;//new Vector3(x, -(y + halfHeight));
+                        positions[startVert + 0] = p0; //new Vector3(x + halfWidth, -y);
+                        positions[startVert + 1] = p1; //new Vector3(x + width, -(y + halfHeight));
+                        positions[startVert + 2] = p2; //new Vector3(x + halfWidth, -(y + height));
+                        positions[startVert + 3] = p3; //new Vector3(x, -(y + halfHeight));
 
 
                         normals[startVert + 0] = n0;
@@ -377,6 +377,83 @@ namespace Vertigo {
             return new RangeInt(geometryShapeStart, geometryShapeCount);
         }
 
+        public int FillRect(GeometryCache retn, float x, float y, float width, float height) {
+            Color color = renderState.fillColor;
+            retn.EnsureAdditionalCapacity(4, 6);
+
+            Vector3 p0 = new Vector3(x, -y);
+            Vector3 p1 = new Vector3(x + width, -y);
+            Vector3 p2 = new Vector3(x + width, -(y + height));
+            Vector3 p3 = new Vector3(x, -(y + height));
+
+            Vector3 n0 = new Vector3(0, 0, -1);
+
+            Vector4 uv0 = new Vector4(0, 1);
+            Vector4 uv1 = new Vector4(1, 1);
+            Vector4 uv2 = new Vector4(1, 0);
+            Vector4 uv3 = new Vector4(0, 0);
+
+            int startVert = retn.vertexCount;
+            int startTriangle = retn.triangleCount;
+
+            Vector3[] positions = retn.positions.array;
+            Vector3[] normals = retn.normals.array;
+            Color[] colors = retn.colors.array;
+            Vector4[] texCoord0 = retn.texCoord0.array;
+            int[] triangles = retn.triangles.array;
+
+            positions[startVert + 0] = p0;
+            positions[startVert + 1] = p1;
+            positions[startVert + 2] = p2;
+            positions[startVert + 3] = p3;
+
+            normals[startVert + 0] = n0;
+            normals[startVert + 1] = n0;
+            normals[startVert + 2] = n0;
+            normals[startVert + 3] = n0;
+
+            colors[startVert + 0] = color;
+            colors[startVert + 1] = color;
+            colors[startVert + 2] = color;
+            colors[startVert + 3] = color;
+
+            texCoord0[startVert + 0] = uv0;
+            texCoord0[startVert + 1] = uv1;
+            texCoord0[startVert + 2] = uv2;
+            texCoord0[startVert + 3] = uv3;
+
+            retn.shapes.Add(new GeometryShape() {
+                geometryType = GeometryType.Physical,
+                shapeType = ShapeType.Rect,
+                vertexStart = startVert,
+                vertexCount = 4,
+                triangleStart = startTriangle,
+                triangleCount = 6
+            });
+
+            triangles[startTriangle + 0] = startVert + 0;
+            triangles[startTriangle + 1] = startVert + 1;
+            triangles[startTriangle + 2] = startVert + 2;
+            triangles[startTriangle + 3] = startVert + 2;
+            triangles[startTriangle + 4] = startVert + 3;
+            triangles[startTriangle + 5] = startVert + 0;
+          
+            UpdateSizes(retn, 4, 6);
+            
+            return 0;
+        }
+
+        private static void UpdateSizes(GeometryCache cache, int vertices, int triangles) {
+            cache.positions.size += vertices;
+            cache.normals.size += vertices;
+            cache.colors.size += vertices;
+            cache.texCoord0.size += vertices;
+            cache.texCoord1.size += vertices;
+            cache.texCoord2.size += vertices;
+            cache.texCoord3.size += vertices;
+            cache.triangles.size += triangles;
+        }
+
         public RangeInt Fill(ShapeGenerator shapeGenerator, RangeInt shapeRange, ShapeMode shapeMode, GeometryCache retn) {
             if (retn == null) {
                 return default;
@@ -397,77 +474,12 @@ namespace Vertigo {
 
                 switch (shapes[i].shapeType) {
                     case ShapeType.Rect: {
-                        Color color = renderState.fillColor;
-                        retn.EnsureAdditionalCapacity(4, 6);
-
                         float x = shape.p0.x;
                         float y = shape.p0.y;
                         float width = shape.p1.x;
                         float height = shape.p1.y;
 
-                        Vector3 p0 = new Vector3(x, -y);
-                        Vector3 p1 = new Vector3(x + width, -y);
-                        Vector3 p2 = new Vector3(x + width, -(y + height));
-                        Vector3 p3 = new Vector3(x, -(y + height));
-
-                        Vector3 n0 = new Vector3(0, 0, -1);
-
-                        Vector4 uv0 = new Vector4(0, 1);
-                        Vector4 uv1 = new Vector4(1, 1);
-                        Vector4 uv2 = new Vector4(1, 0);
-                        Vector4 uv3 = new Vector4(0, 0);
-
-                        int startVert = retn.vertexCount;
-                        int startTriangle = retn.triangleCount;
-
-                        Vector3[] positions = retn.positions.array;
-                        Vector3[] normals = retn.normals.array;
-                        Color[] colors = retn.colors.array;
-                        Vector4[] texCoord0 = retn.texCoord0.array;
-                        int[] triangles = retn.triangles.array;
-
-                        positions[startVert + 0] = p0;
-                        positions[startVert + 1] = p1;
-                        positions[startVert + 2] = p2;
-                        positions[startVert + 3] = p3;
-
-                        normals[startVert + 0] = n0;
-                        normals[startVert + 1] = n0;
-                        normals[startVert + 2] = n0;
-                        normals[startVert + 3] = n0;
-
-                        colors[startVert + 0] = color;
-                        colors[startVert + 1] = color;
-                        colors[startVert + 2] = color;
-                        colors[startVert + 3] = color;
-
-                        texCoord0[startVert + 0] = uv0;
-                        texCoord0[startVert + 1] = uv1;
-                        texCoord0[startVert + 2] = uv2;
-                        texCoord0[startVert + 3] = uv3;
-
-                        retn.shapes.Add(new GeometryShape() {
-                            geometryType = GeometryType.Physical,
-                            shapeType = ShapeType.Rect,
-                            vertexStart = startVert,
-                            vertexCount = 4,
-                            triangleStart = startTriangle,
-                            triangleCount = 6
-                        });
-
-                        triangles[startTriangle + 0] = startVert + 0;
-                        triangles[startTriangle + 1] = startVert + 1;
-                        triangles[startTriangle + 2] = startVert + 2;
-                        triangles[startTriangle + 3] = startVert + 2;
-                        triangles[startTriangle + 4] = startVert + 3;
-                        triangles[startTriangle + 5] = startVert + 0;
-
-                        retn.positions.size += 4;
-                        retn.normals.size += 4;
-                        retn.colors.size += 4;
-                        retn.texCoord0.size += 4;
-                        retn.texCoord1.size += 4;
-                        retn.triangles.size += 6;
+                        FillRect(retn, x, y, width, height);
                         geometryShapeCount++;
                         break;
                     }
@@ -1644,7 +1656,7 @@ namespace Vertigo {
             int triIdx = geometryCache.triangleCount;
             int vertStart = vertIdx;
             int triangleStart = triIdx;
-            
+
             geometryCache.EnsureAdditionalCapacity(charCount * 4, charCount * 6);
 
             int[] triangles = geometryCache.triangles.array;
@@ -1653,27 +1665,26 @@ namespace Vertigo {
             Vector4[] texCoord0 = geometryCache.texCoord0.array;
             Vector4[] texCoord1 = geometryCache.texCoord1.array;
             Color[] colors = geometryCache.colors.array;
-            
+
             Vector3 normal = DefaultNormal;
             Color color = renderState.fillColor;
-            
+
             textInfo.Layout(); // todo -- dont call this
-            
+
             for (int i = 0; i < charCount; i++) {
-                
                 if (charInfos[i].character == ' ') continue;
-                
+
                 Vector2 topLeft = charInfos[i].layoutTopLeft;
                 Vector2 bottomRight = charInfos[i].layoutBottomRight;
 
                 Vector2 uvTopLeft = charInfos[i].uv0;
                 Vector2 uvBottomRight = charInfos[i].uv1;
-                
-                float x = uvTopLeft.x; 
-                float y = uvTopLeft.y; 
-                float x1 = uvBottomRight.x; 
+
+                float x = uvTopLeft.x;
+                float y = uvTopLeft.y;
+                float x1 = uvBottomRight.x;
                 float y1 = uvBottomRight.y;
-                
+
                 positions[vertIdx + 0] = new Vector3(position.x + topLeft.x, -(position.y + bottomRight.y), position.z);
                 positions[vertIdx + 1] = new Vector3(position.x + topLeft.x, -(position.y + topLeft.y), position.z);
                 positions[vertIdx + 2] = new Vector3(position.x + bottomRight.x, -(position.y + topLeft.y), position.z);
@@ -1693,18 +1704,18 @@ namespace Vertigo {
                 colors[vertIdx + 1] = color;
                 colors[vertIdx + 2] = color;
                 colors[vertIdx + 3] = color;
-                
+
                 triangles[triIdx + 0] = vertIdx + 0;
                 triangles[triIdx + 1] = vertIdx + 1;
                 triangles[triIdx + 2] = vertIdx + 2;
                 triangles[triIdx + 3] = vertIdx + 2;
                 triangles[triIdx + 4] = vertIdx + 3;
                 triangles[triIdx + 5] = vertIdx + 0;
-                
+
                 vertIdx += 4;
                 triIdx += 6;
             }
-            
+
             geometryCache.shapes.Add(new GeometryShape() {
                 geometryType = GeometryType.Physical,
                 shapeType = ShapeType.Text,
@@ -1713,14 +1724,13 @@ namespace Vertigo {
                 triangleStart = triangleStart,
                 triangleCount = triIdx - triangleStart
             });
-            
+
             geometryCache.positions.size = vertIdx;
             geometryCache.normals.size = vertIdx;
             geometryCache.colors.size = vertIdx;
             geometryCache.texCoord0.size = vertIdx;
             geometryCache.texCoord1.size = vertIdx;
             geometryCache.triangles.size = triIdx;
-            
         }
 
     }

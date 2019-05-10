@@ -3,6 +3,7 @@ using UIForia.Elements;
 using UIForia.Layout;
 using UIForia.Util;
 using UnityEngine;
+using UnityEngine.Rendering;
 using Application = UIForia.Application;
 
 // the idea behind a view is that it is a flat plane that can be oriented in 3d space and show content
@@ -35,6 +36,7 @@ public class UIView {
     public readonly string name;
     public RenderTexture renderTexture;
     
+    internal LightList<UIElement> elements;
     internal LightList<UIElement> visibleElements;
     
     internal UIView(int id, string name, Application app, Rect rect, int depth, Type elementType, string template = null) {
@@ -50,6 +52,7 @@ public class UIView {
         this.position = Vector3.zero;
         this.size = new Size(Screen.width, Screen.height);
         this.Viewport = new Rect(position.x, position.y, size.width, size.height);
+        this.elements = new LightList<UIElement>(32);
         this.visibleElements = new LightList<UIElement>(32);
         Refresh();
     }
@@ -61,7 +64,7 @@ public class UIView {
         
     }
 
-    public void SetCamera(Camera camera) {
+    public void SetCamera(Camera camera, CameraEvent renderHook) {
         
     }
 

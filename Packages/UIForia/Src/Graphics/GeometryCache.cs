@@ -13,10 +13,24 @@ namespace Vertigo {
 
     }
 
+    [Flags]
+    public enum VertexChannel {
+
+        TextureCoord0 = 1 << 0,
+        TextureCoord1 = 1 << 1,
+        TextureCoord2 = 1 << 2,
+        TextureCoord3 = 1 << 3,
+        Color = 1 << 4,
+        Normal = 1 << 5
+
+    }
+    
     public struct GeometryShape {
 
         public ShapeType shapeType;
         public GeometryType geometryType;
+        public VertexChannel vertexChannels;
+        public Bounds bounds;
         public int vertexStart;
         public int vertexCount;
         public int triangleStart;
@@ -33,20 +47,24 @@ namespace Vertigo {
         public StructList<Color> colors;
         public StructList<Vector4> texCoord0;
         public StructList<Vector4> texCoord1;
+        public StructList<Vector4> texCoord2;
+        public StructList<Vector4> texCoord3;
         public StructList<int> triangles;
 
         public int shapeCount => shapes.size;
         public int vertexCount => positions.size;
         public int triangleCount => triangles.size;
 
-        public GeometryCache() {
+        public GeometryCache(int capacity = 8) {
             shapes = new StructList<GeometryShape>();
-            positions = new StructList<Vector3>(32);
-            normals = new StructList<Vector3>(32);
-            colors = new StructList<Color>(32);
-            texCoord0 = new StructList<Vector4>(32);
-            texCoord1 = new StructList<Vector4>(32);
-            triangles = new StructList<int>(64);
+            positions = new StructList<Vector3>(capacity);
+            normals = new StructList<Vector3>(capacity);
+            colors = new StructList<Color>(capacity);
+            texCoord0 = new StructList<Vector4>(capacity);
+            texCoord1 = new StructList<Vector4>(capacity);
+            texCoord2 = new StructList<Vector4>(capacity);
+            texCoord3 = new StructList<Vector4>(capacity);
+            triangles = new StructList<int>(capacity * 2);
         }
 
         public void EnsureAdditionalCapacity(int vertCount, int triCount) {
@@ -55,6 +73,8 @@ namespace Vertigo {
             colors.EnsureAdditionalCapacity(vertCount);
             texCoord0.EnsureAdditionalCapacity(vertCount);
             texCoord1.EnsureAdditionalCapacity(vertCount);
+            texCoord2.EnsureAdditionalCapacity(vertCount);
+            texCoord3.EnsureAdditionalCapacity(vertCount);
             triangles.EnsureAdditionalCapacity(triCount);
         }
 
@@ -63,7 +83,8 @@ namespace Vertigo {
                 return false;
             }
 
-            GeometryShape shape = shapes[shapeIdx];
+            GeometryShape shape = shapes.array[shapeIdx];
+            shapes.array[shapeIdx].vertexChannels |= VertexChannel.Color;
             int start = shape.vertexStart;
             int end = start + shape.vertexCount;
             Color[] c = this.colors.array;
@@ -79,7 +100,8 @@ namespace Vertigo {
                 return false;
             }
 
-            GeometryShape shape = shapes[shapeIdx];
+            GeometryShape shape = shapes.array[shapeIdx];
+            shapes.array[shapeIdx].vertexChannels |= VertexChannel.Normal;
             int start = shape.vertexStart;
             int end = start + shape.vertexCount;
             Vector3[] c = this.normals.array;
@@ -90,6 +112,14 @@ namespace Vertigo {
             return true;
         }
 
+        public bool SetVertexChannels(int shapeIdx, VertexChannel channel) {
+            if (shapeIdx < 0 || shapeIdx > shapes.size) {
+                return false;
+            }
+            shapes.array[shapeIdx].vertexChannels = channel;
+            return true;
+        }
+
         public void Clear() {
             shapes.QuickClear();
             positions.QuickClear();
@@ -97,6 +127,8 @@ namespace Vertigo {
             colors.QuickClear();
             texCoord0.QuickClear();
             texCoord1.QuickClear();
+            texCoord2.QuickClear();
+            texCoord3.QuickClear();
             triangles.QuickClear();
         }
 
@@ -169,6 +201,16 @@ namespace Vertigo {
             Array.Copy(uvs.array, 0, texCoord1.array, shape.vertexStart, shape.vertexCount);
         }
 
+
+        public void GetTextureCoord2() {
+            throw new NotImplementedException();
+        }
+
+        public void GetTextureCoord3() {
+            throw new NotImplementedException();
+        }
+
+        
     }
 
 }

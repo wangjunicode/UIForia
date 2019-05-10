@@ -11,7 +11,8 @@ namespace UIForia.Util {
         private int freeList;
         private int freeCount;
         private int capacity;
-        
+        public int geometryId;
+
         public IntMap() : this(7) { }
 
         public IntMap(int capacity) {

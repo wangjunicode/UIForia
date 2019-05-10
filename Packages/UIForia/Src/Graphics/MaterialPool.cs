@@ -9,7 +9,7 @@ namespace Vertigo {
 
         public VertigoMesh mesh;
         public VertigoMaterial material;
-        public VertigoState state;
+        public Matrix4x4 transform;
 
     }
 

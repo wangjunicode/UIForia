@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using SVGX;
+using System.Diagnostics;
 using UIForia.Animation;
 using UIForia.AttributeProcessors;
 using UIForia.Bindings;
@@ -14,8 +14,8 @@ using UIForia.Systems;
 using UIForia.Systems.Input;
 using UIForia.Templates;
 using UIForia.Util;
-using UnityEditor.IMGUI.Controls;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 namespace UIForia {
 
@@ -40,31 +40,7 @@ namespace UIForia {
         }
 
     }
-
-    public class PerformanceMetric {
-
-        public readonly string name;
-        public int frames;
-        public float averageFrameTime;
-        public float minFrameTime;
-        public float maxFrameTime;
-        public float averageFrameTimeLastSecond;
-        private readonly System.Diagnostics.Stopwatch stopWatch;
-
-        public void Start() {
-            stopWatch.Start();
-        }
-
-        public void Stop() {
-            stopWatch.Stop();
-        }
-
-        public void Restart() {
-            stopWatch.Restart();
-        }
-
-    }
-
+    
     public abstract class Application {
 
         public readonly string id;

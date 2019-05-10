@@ -1,4 +1,7 @@
 
+using System;
+using Vertigo;
+
 namespace UIForia.Util {
 
     public class StructList<T> where T : struct {
@@ -132,6 +135,20 @@ namespace UIForia.Util {
         public static void Release(ref StructList<T> toPool) {
             toPool.Clear();
             s_Pool.Add(toPool);
+        }
+
+        public void Insert(int index, in T item) {
+            if (size + 1 >= array.Length) {
+                ArrayPool<T>.Resize(ref array, (size + 1) * 2);
+            }
+
+            size++;
+            if (index < 0 || index > array.Length) {
+                throw new IndexOutOfRangeException();
+            }
+            
+            System.Array.Copy(array, index, array, index + 1, size - index);
+            array[index] = item;
         }
 
     }

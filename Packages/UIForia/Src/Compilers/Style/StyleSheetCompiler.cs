@@ -85,6 +85,10 @@ namespace UIForia.Compilers.Style {
         }
 
         private AnimationKeyFrame[] CompileKeyFrames(AnimationRootNode animNode) {
+            if (animNode.keyFrameNodes == null) {
+                // todo throw error or log warning?
+                return new AnimationKeyFrame[0];
+            }
             AnimationKeyFrame[] frames = new AnimationKeyFrame[animNode.keyFrameNodes.Count];
             for (int i = 0; i < animNode.keyFrameNodes.Count; i++) {
                 KeyFrameNode keyFrameNode = animNode.keyFrameNodes[i];
@@ -115,6 +119,10 @@ namespace UIForia.Compilers.Style {
         private AnimationOptions CompileAnimationOptions(AnimationRootNode animNode) {
             AnimationOptions options = new AnimationOptions();
             LightList<AnimationOptionNode> optionNodes = animNode.optionNodes;
+            if (optionNodes == null) {
+                return options;
+            }
+
             for (int i = 0; i < optionNodes.Count; i++) {
                 string optionName = optionNodes[i].optionName;
                 StyleASTNode value = optionNodes[i].value;

@@ -100,10 +100,10 @@ namespace UIForia.Rendering {
 		public const float TextShadowSoftness = 0.5f;
 		public const ShadowType TextShadowType = UIForia.Rendering.ShadowType.Unset;
 		public const TextTransform TextTransform = UIForia.Text.TextTransform.None;
-		public static readonly UIFixedLength AnchorTop = new UIFixedLength(0, UIFixedUnit.Percent);
-		public static readonly UIFixedLength AnchorRight = new UIFixedLength(1, UIFixedUnit.Percent);
-		public static readonly UIFixedLength AnchorBottom = new UIFixedLength(1, UIFixedUnit.Percent);
-		public static readonly UIFixedLength AnchorLeft = new UIFixedLength(0, UIFixedUnit.Percent);
+		public static readonly UIFixedLength AnchorTop = new UIFixedLength(0, UIFixedUnit.Pixel);
+		public static readonly UIFixedLength AnchorRight = new UIFixedLength(0, UIFixedUnit.Pixel);
+		public static readonly UIFixedLength AnchorBottom = new UIFixedLength(0, UIFixedUnit.Pixel);
+		public static readonly UIFixedLength AnchorLeft = new UIFixedLength(0, UIFixedUnit.Pixel);
 		public const AnchorTarget AnchorTarget = UIForia.Rendering.AnchorTarget.Parent;
 		public static readonly TransformOffset TransformPositionX = new TransformOffset(0, TransformUnit.Pixel);
 		public static readonly TransformOffset TransformPositionY = new TransformOffset(0, TransformUnit.Pixel);
@@ -300,13 +300,13 @@ namespace UIForia.Rendering {
 				case StylePropertyId.TextTransform:
 					 return new StyleProperty(StylePropertyId.TextTransform, (int)UIForia.Text.TextTransform.None);
 				case StylePropertyId.AnchorTop:
-					 return new StyleProperty(StylePropertyId.AnchorTop, new UIFixedLength(0, UIFixedUnit.Percent));
+					 return new StyleProperty(StylePropertyId.AnchorTop, new UIFixedLength(0, UIFixedUnit.Pixel));
 				case StylePropertyId.AnchorRight:
-					 return new StyleProperty(StylePropertyId.AnchorRight, new UIFixedLength(1, UIFixedUnit.Percent));
+					 return new StyleProperty(StylePropertyId.AnchorRight, new UIFixedLength(0, UIFixedUnit.Pixel));
 				case StylePropertyId.AnchorBottom:
-					 return new StyleProperty(StylePropertyId.AnchorBottom, new UIFixedLength(1, UIFixedUnit.Percent));
+					 return new StyleProperty(StylePropertyId.AnchorBottom, new UIFixedLength(0, UIFixedUnit.Pixel));
 				case StylePropertyId.AnchorLeft:
-					 return new StyleProperty(StylePropertyId.AnchorLeft, new UIFixedLength(0, UIFixedUnit.Percent));
+					 return new StyleProperty(StylePropertyId.AnchorLeft, new UIFixedLength(0, UIFixedUnit.Pixel));
 				case StylePropertyId.AnchorTarget:
 					 return new StyleProperty(StylePropertyId.AnchorTarget, (int)UIForia.Rendering.AnchorTarget.Parent);
 				case StylePropertyId.TransformPositionX:

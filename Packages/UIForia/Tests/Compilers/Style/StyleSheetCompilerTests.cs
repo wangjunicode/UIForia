@@ -811,7 +811,7 @@ style size2 {
         Assert.AreEqual(new UIMeasurement(1000), styleContainer[0].groups[0].normal.PreferredHeight);
         Assert.AreEqual(new UIMeasurement(400), styleContainer[0].groups[0].normal.MaxWidth);
         Assert.AreEqual(new UIMeasurement(2), styleContainer[0].groups[0].normal.MaxHeight);
-        
+
         Assert.AreEqual(new UIMeasurement(1000), styleContainer[1].groups[0].normal.PreferredWidth);
         Assert.AreEqual(new UIMeasurement(1111), styleContainer[1].groups[0].normal.PreferredHeight);
         Assert.AreEqual(new UIMeasurement(200), styleContainer[1].groups[0].normal.MinWidth);
@@ -857,7 +857,6 @@ style anchoring {
 
     [Test]
     public void CompileText() {
-        
         // note: because of possible spaces in paths we have to support string values for urls
         var nodes = StyleParser.Parse(@"
 export const red = red;
@@ -887,10 +886,9 @@ style teXt {
         Assert.AreEqual(TextAlignment.Center, styleGroup[0].groups[0].normal.TextAlignment);
         Assert.AreEqual(new UIFixedLength(14), styleGroup[0].groups[0].normal.TextFontSize);
     }
-    
+
     [Test]
     public void CompileImport() {
-        
         // note: because of possible spaces in paths we have to support string values for urls
         var nodes = StyleParser.Parse(@"
 import ""Tests/Styles/ImportFromMe.style"" as importedThings;
@@ -930,8 +928,8 @@ style xyz {
 
         ".Trim());
         StyleSheet styleSheet = NewStyleSheetCompiler().Compile("test", nodes);
-        Assert.AreEqual(1, styleSheet.styleGroupContainers.Length);     
-        Assert.AreEqual(2, styleSheet.styleGroupContainers[0].groups.Count);     
+        Assert.AreEqual(1, styleSheet.styleGroupContainers.Length);
+        Assert.AreEqual(2, styleSheet.styleGroupContainers[0].groups.Count);
     }
 
     [Test]
@@ -966,27 +964,26 @@ style xyz {
         Assert.AreEqual(0, frame0.key);
         Assert.AreEqual(StylePropertyId.BackgroundColor, frame0.properties[0].propertyId);
         Assert.AreEqual(Color.red, frame0.properties[0].styleProperty.AsColor);
-        
+
         AnimationKeyFrame frame1 = animationData.frames[1];
         Assert.AreEqual(2, frame1.properties.Count);
         Assert.AreEqual(0.5f, frame1.key);
         Assert.AreEqual(StylePropertyId.TextFontSize, frame1.properties[0].propertyId);
         Assert.AreEqual(StylePropertyId.BackgroundColor, frame1.properties[1].propertyId);
-        
+
         AnimationKeyFrame frame2 = animationData.frames[2];
         Assert.AreEqual(2, frame2.properties.Count);
         Assert.AreEqual(0.6f, frame2.key);
         Assert.AreEqual(StylePropertyId.PreferredWidth, frame2.properties[0].propertyId);
         Assert.AreEqual(StylePropertyId.PreferredHeight, frame2.properties[1].propertyId);
-        
+
         AnimationKeyFrame frame3 = animationData.frames[3];
         Assert.AreEqual(1, frame3.properties.Count);
         Assert.AreEqual(1, frame3.key);
         Assert.AreEqual(StylePropertyId.BackgroundColor, frame3.properties[0].propertyId);
-        
     }
-    
-     [Test]
+
+    [Test]
     public void CompileAnimationOptions() {
         var nodes = StyleParser.Parse(@"
             animation anim1 {
@@ -1021,8 +1018,20 @@ style xyz {
         Assert.AreEqual(1000, animationData.options.delay);
         Assert.AreEqual(3000, animationData.options.duration);
         Assert.AreEqual(EasingFunction.SineEaseOut, animationData.options.timingFunction);
-       
-        
     }
-    
+
+    [Test]
+    public void CompileBackgroundImageFromSpriteAtlas() {
+        var nodes = StyleParser.Parse(@"
+            style fromatlas {
+                BackgroundImage = url(""/some/image"", ""spriteName1""); 
+            }
+        ".Trim());
+        
+        
+        StyleSheet styleSheet = NewStyleSheetCompiler().Compile("test", nodes);
+        
+        var styleContainer = styleSheet.styleGroupContainers;
+        Assert.IsInstanceOf<Sprite>(styleContainer[0].groups[0].normal.BackgroundImage);
+    }
 }

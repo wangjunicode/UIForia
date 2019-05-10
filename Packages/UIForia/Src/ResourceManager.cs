@@ -1,6 +1,7 @@
 using TMPro;
 using UIForia.Util;
 using UnityEngine;
+using UnityEngine.U2D;
 
 namespace UIForia {
 
@@ -16,17 +17,20 @@ namespace UIForia {
 
         // todo -- add cursors / animations / maybe style sheets
         private static readonly IntMap<AssetEntry<Texture2D>> s_TextureMap;
+        private static readonly IntMap<AssetEntry<SpriteAtlas>> s_SpriteAtlasMap;
         private static readonly IntMap<AssetEntry<TMP_FontAsset>> s_FontMap;
         private static readonly IntMap<AssetEntry<AudioClip>> s_AudioMap;
 
         static ResourceManager() {
             s_TextureMap = new IntMap<AssetEntry<Texture2D>>();
+            s_SpriteAtlasMap = new IntMap<AssetEntry<SpriteAtlas>>();
             s_FontMap = new IntMap<AssetEntry<TMP_FontAsset>>();
             s_AudioMap = new IntMap<AssetEntry<AudioClip>>();
         }
 
         public static void Reset() {
             s_TextureMap.Clear();
+            s_SpriteAtlasMap.Clear();
             s_FontMap.Clear();
             s_AudioMap.Clear();
         }

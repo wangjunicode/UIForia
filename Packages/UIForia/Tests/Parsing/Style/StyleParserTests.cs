@@ -482,11 +482,11 @@ style s { BrokenUrl = url() }
         Assert.AreEqual(StyleASTNodeType.NumericLiteral, opt0.value.type);
         
         AnimationOptionNode opt1 = rootNode.optionNodes[1];
-        Assert.AreEqual("looptype", opt1.optionName);
+        Assert.AreEqual("loopType", opt1.optionName);
         Assert.AreEqual(StyleASTNodeType.Identifier, opt1.value.type);
         
         AnimationOptionNode opt2 = rootNode.optionNodes[2];
-        Assert.AreEqual("looptime", opt2.optionName);
+        Assert.AreEqual("loopTime", opt2.optionName);
         Assert.AreEqual(StyleASTNodeType.NumericLiteral, opt2.value.type);
         
         AnimationOptionNode opt3 = rootNode.optionNodes[3];
@@ -498,11 +498,11 @@ style s { BrokenUrl = url() }
         Assert.AreEqual(StyleASTNodeType.NumericLiteral, opt4.value.type);
         
         AnimationOptionNode opt5 = rootNode.optionNodes[5];
-        Assert.AreEqual("forwardstartdelay", opt5.optionName);
+        Assert.AreEqual("forwardStartDelay", opt5.optionName);
         Assert.AreEqual(StyleASTNodeType.NumericLiteral, opt5.value.type);
         
         AnimationOptionNode opt6 = rootNode.optionNodes[6];
-        Assert.AreEqual("reversestartdelay", opt6.optionName);
+        Assert.AreEqual("reverseStartDelay", opt6.optionName);
         Assert.AreEqual(StyleASTNodeType.NumericLiteral, opt6.value.type);
         
         AnimationOptionNode opt7 = rootNode.optionNodes[7];
@@ -510,11 +510,11 @@ style s { BrokenUrl = url() }
         Assert.AreEqual(StyleASTNodeType.Identifier, opt7.value.type);
         
         AnimationOptionNode opt8 = rootNode.optionNodes[8];
-        Assert.AreEqual("timingfunction", opt8.optionName);
+        Assert.AreEqual("timingFunction", opt8.optionName);
         Assert.AreEqual(StyleASTNodeType.Identifier, opt8.value.type);
         
         AnimationOptionNode opt9 = rootNode.optionNodes[9];
-        Assert.AreEqual("playbacktype", opt9.optionName);
+        Assert.AreEqual("playbackType", opt9.optionName);
         Assert.AreEqual(StyleASTNodeType.Identifier, opt9.value.type);
         
     }

@@ -498,6 +498,7 @@ namespace UIForia.Text {
         }
 
         public Size Layout(Vector2 offset = default, float width = float.MaxValue) {
+            
             if (spanList.Count == 0) return default;
 
             lineInfoList.Clear();

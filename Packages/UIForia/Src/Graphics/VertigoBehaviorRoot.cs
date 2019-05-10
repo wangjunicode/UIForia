@@ -1,6 +1,8 @@
 ﻿using System;
 using System.IO;
+using SVGX;
 using TreeEditor;
+using UIForia.Text;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.U2D;
@@ -25,11 +27,15 @@ public class VertigoBehaviorRoot : MonoBehaviour {
     
     private CommandBuffer commandBuffer;
 
+    private TextInfo textInfo;
     public void Start() {
         ctx = new VertigoContext();
         
         ctx.SetFillMaterial(ctx.materialPool.GetShared("Materials/VertigoDefault"));
         ctx.SetStrokeMaterial(ctx.materialPool.GetShared("Materials/VertigoDefault"));
+        textInfo = new TextInfo(new TextSpan("Hello + World", new SVGXTextStyle() {
+            fontSize =  15
+        }));
         
         commandBuffer = new CommandBuffer();
         camera.AddCommandBuffer(CameraEvent.AfterEverything, commandBuffer);
@@ -41,6 +47,13 @@ public class VertigoBehaviorRoot : MonoBehaviour {
         ctx.Clear();
         shapeGen.Clear();
 
+        VertigoMaterial textMaterial = ctx.materialPool.GetShared("Materials/VertigoText");
+        textMaterial.SetMainTexture(textInfo.spanList[0].textStyle.font.atlas);
+        
+        ctx.SetFillColor(Color.black);
+        ctx.SetTextMaterial(textMaterial);
+        ctx.FillText(0, 0, textInfo);
+        
 //        ctx.SetFillColor(Color.green);
 //        ctx.FillRoundedRect(0, 0, width, height, radii.x, radii.y, radii.z, radii.w);
 //
@@ -53,7 +66,7 @@ public class VertigoBehaviorRoot : MonoBehaviour {
 //
 //        ctx.FillEllipse(-200, -300, 100, 50);
 
-        ctx.FillRhombus(-200, 100, width, height);//100, 50);
+//        ctx.FillRhombus(-200, 100, width, height);//100, 50);
         
 //        ctx.StrokeCircle()
         // PushRenderTexture();

@@ -13,7 +13,7 @@ namespace Vertigo {
         SDF
 
     }
-    
+
     public class VertigoContext {
 
         public static readonly int shaderKey_StencilRef;
@@ -51,6 +51,7 @@ namespace Vertigo {
         private ShapeMode defaultShapeMode;
         private VertigoMaterial strokeMaterial;
         private VertigoMaterial fillMaterial;
+        private VertigoMaterial textMaterial;
         public static MaterialPool DefaultMaterialPool { get; }
 
         public VertigoContext(ShapeMode shapeMode = ShapeMode.SDF, IDrawCallBatcher batcher = null, MaterialPool materialPool = null) {
@@ -82,17 +83,27 @@ namespace Vertigo {
         public void SetMaterial(VertigoMaterial material) {
             this.fillMaterial = material;
             this.strokeMaterial = material;
+            this.textMaterial = material;
         }
-        
+
+        public void SetTextMaterial(VertigoMaterial material) {
+            this.textMaterial = material;
+        }
+
         public void SetFillMaterial(VertigoMaterial material) {
             this.fillMaterial = material;
         }
-        
+
         public void SetStrokeMaterial(VertigoMaterial material) {
             this.strokeMaterial = material;
         }
 
-        public void FillText(float x, float y, TextInfo textInfo) { }
+        public void FillText(float x, float y, TextInfo textInfo, VertigoMaterial material = null) {
+            material = material ?? textMaterial;
+            if (material == null) return;
+            geometryGenerator.FillText(new Vector3(x, y, 0), textInfo, geometryCache);
+            batcher.AddDrawCall(geometryCache, new RangeInt(geometryCache.shapeCount - 1, 1), material, renderState);
+        }
 
         public void FillRhombus(float x, float y, float width, float height, VertigoMaterial material = null) {
             material = material ?? fillMaterial;
@@ -101,7 +112,7 @@ namespace Vertigo {
             geometryGenerator.Fill(shapeGenerator, new RangeInt(pathId, 1), defaultShapeMode, geometryCache);
             batcher.AddDrawCall(geometryCache, new RangeInt(geometryCache.shapeCount - 1, 1), material, renderState);
         }
-        
+
         public void FillCircle(float x, float y, float radius, VertigoMaterial material = null) {
             material = material ?? fillMaterial;
             if (material == null) return;
@@ -109,7 +120,7 @@ namespace Vertigo {
             geometryGenerator.Fill(shapeGenerator, new RangeInt(pathId, 1), defaultShapeMode, geometryCache);
             batcher.AddDrawCall(geometryCache, new RangeInt(geometryCache.shapeCount - 1, 1), material, renderState);
         }
-        
+
         public void FillEllipse(float x, float y, float rw, float rh, VertigoMaterial material = null) {
             material = material ?? fillMaterial;
             if (material == null) return;
@@ -125,7 +136,7 @@ namespace Vertigo {
             geometryGenerator.Fill(shapeGenerator, new RangeInt(pathId, 1), defaultShapeMode, geometryCache);
             batcher.AddDrawCall(geometryCache, new RangeInt(geometryCache.shapeCount - 1, 1), material, renderState);
         }
-        
+
         public void SaveState() {
             stateStack.Push(renderState);
         }
@@ -314,8 +325,8 @@ namespace Vertigo {
                     UpdateMaterialPropertyBlock(calls[j].state);
                     int passCount = material.passCount;
                     // todo -- only render specified passes
+                        commandBuffer.DrawMesh(mesh, calls[j].state.transform, material, 0, 0, s_PropertyBlock);
                     for (int k = 0; k < passCount; k++) {
-                        commandBuffer.DrawMesh(mesh, calls[j].state.transform, material, 0, k, s_PropertyBlock);
                     }
                 }
             }
@@ -357,7 +368,7 @@ namespace Vertigo {
             s_PropertyBlock.SetInt(shaderKey_BlendArgSrc, (int) state.renderSettings.blendArgSrc);
             s_PropertyBlock.SetInt(shaderKey_BlendArgDst, (int) state.renderSettings.blendArgDst);
 //            s_PropertyBlock.SetTexture(shaderKey_MaskTexture, ReferenceEquals(state.renderSettings.mask, null) ? Texture2D.whiteTexture : state.renderSettings.mask);
-           // s_PropertyBlock.SetFloat(shaderKey_MaskSoftness, state.renderSettings.maskSoftness);
+            // s_PropertyBlock.SetFloat(shaderKey_MaskSoftness, state.renderSettings.maskSoftness);
         }
 
         public void Clear() {

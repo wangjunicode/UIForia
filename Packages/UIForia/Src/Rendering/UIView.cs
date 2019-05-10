@@ -1,6 +1,7 @@
 using System;
 using UIForia.Elements;
 using UIForia.Layout;
+using UIForia.Util;
 using UnityEngine;
 using Application = UIForia.Application;
 
@@ -34,6 +35,8 @@ public class UIView {
     public readonly string name;
     public RenderTexture renderTexture;
     
+    internal LightList<UIElement> visibleElements;
+    
     internal UIView(int id, string name, Application app, Rect rect, int depth, Type elementType, string template = null) {
         this.id = id;
         this.name = name;
@@ -47,6 +50,7 @@ public class UIView {
         this.position = Vector3.zero;
         this.size = new Size(Screen.width, Screen.height);
         this.Viewport = new Rect(position.x, position.y, size.width, size.height);
+        this.visibleElements = new LightList<UIElement>(32);
         Refresh();
     }
 

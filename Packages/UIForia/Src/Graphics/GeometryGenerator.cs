@@ -1,4 +1,5 @@
 using System;
+using UIForia.Text;
 using UIForia.Util;
 using Unity.Mathematics;
 using UnityEngine;
@@ -1630,10 +1631,96 @@ namespace Vertigo {
                 shapeType = ShapeType.Sprite,
                 geometryType = GeometryType.Physical,
                 vertexStart = vertexStart,
-                vertexCount = vertIdx,
+                vertexCount = vertIdx - vertexStart,
                 triangleStart = triangleStart,
-                triangleCount = triIdx
+                triangleCount = triIdx - triangleStart
             });
+        }
+
+        public void FillText(Vector3 position, TextInfo textInfo, GeometryCache geometryCache) {
+            CharInfo[] charInfos = textInfo.charInfoList.array;
+            int charCount = textInfo.characterList.size;
+            int vertIdx = geometryCache.vertexCount;
+            int triIdx = geometryCache.triangleCount;
+            int vertStart = vertIdx;
+            int triangleStart = triIdx;
+            
+            geometryCache.EnsureAdditionalCapacity(charCount * 4, charCount * 6);
+
+            int[] triangles = geometryCache.triangles.array;
+            Vector3[] positions = geometryCache.positions.array;
+            Vector3[] normals = geometryCache.normals.array;
+            Vector4[] texCoord0 = geometryCache.texCoord0.array;
+            Vector4[] texCoord1 = geometryCache.texCoord1.array;
+            Color[] colors = geometryCache.colors.array;
+            
+            Vector3 normal = DefaultNormal;
+            Color color = renderState.fillColor;
+            
+            textInfo.Layout(); // todo -- dont call this
+            
+            for (int i = 0; i < charCount; i++) {
+                
+                if (charInfos[i].character == ' ') continue;
+                
+                Vector2 topLeft = charInfos[i].layoutTopLeft;
+                Vector2 bottomRight = charInfos[i].layoutBottomRight;
+
+                Vector2 uvTopLeft = charInfos[i].uv0;
+                Vector2 uvBottomRight = charInfos[i].uv1;
+                
+                float x = uvTopLeft.x; 
+                float y = uvTopLeft.y; 
+                float x1 = uvBottomRight.x; 
+                float y1 = uvBottomRight.y;
+                
+                positions[vertIdx + 0] = new Vector3(position.x + topLeft.x, -(position.y + bottomRight.y), position.z);
+                positions[vertIdx + 1] = new Vector3(position.x + topLeft.x, -(position.y + topLeft.y), position.z);
+                positions[vertIdx + 2] = new Vector3(position.x + bottomRight.x, -(position.y + topLeft.y), position.z);
+                positions[vertIdx + 3] = new Vector3(position.x + bottomRight.x, -(position.y + bottomRight.y), position.z);
+
+                texCoord0[vertIdx + 0] = new Vector4(x, y);
+                texCoord0[vertIdx + 1] = new Vector4(x, y1);
+                texCoord0[vertIdx + 2] = new Vector4(x1, y1);
+                texCoord0[vertIdx + 3] = new Vector4(x1, y);
+
+                normals[vertIdx + 0] = normal;
+                normals[vertIdx + 1] = normal;
+                normals[vertIdx + 2] = normal;
+                normals[vertIdx + 3] = normal;
+
+                colors[vertIdx + 0] = color;
+                colors[vertIdx + 1] = color;
+                colors[vertIdx + 2] = color;
+                colors[vertIdx + 3] = color;
+                
+                triangles[triIdx + 0] = vertIdx + 0;
+                triangles[triIdx + 1] = vertIdx + 1;
+                triangles[triIdx + 2] = vertIdx + 2;
+                triangles[triIdx + 3] = vertIdx + 2;
+                triangles[triIdx + 4] = vertIdx + 3;
+                triangles[triIdx + 5] = vertIdx + 0;
+                
+                vertIdx += 4;
+                triIdx += 6;
+            }
+            
+            geometryCache.shapes.Add(new GeometryShape() {
+                geometryType = GeometryType.Physical,
+                shapeType = ShapeType.Text,
+                vertexStart = vertStart,
+                vertexCount = vertIdx - vertStart,
+                triangleStart = triangleStart,
+                triangleCount = triIdx - triangleStart
+            });
+            
+            geometryCache.positions.size = vertIdx;
+            geometryCache.normals.size = vertIdx;
+            geometryCache.colors.size = vertIdx;
+            geometryCache.texCoord0.size = vertIdx;
+            geometryCache.texCoord1.size = vertIdx;
+            geometryCache.triangles.size = triIdx;
+            
         }
 
     }

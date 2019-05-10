@@ -29,6 +29,7 @@ public class HierarchyView : TreeView {
     private static readonly GUIContent s_Content = new GUIContent();
 
     public bool showChildrenAndId = false;
+    public bool showDisabled = false;
 
     static HierarchyView() {
         s_ElementNameStyle = new GUIStyle();
@@ -63,6 +64,10 @@ public class HierarchyView : TreeView {
 
             while (stack.Count > 0) {
                 ElementTreeItem current = stack.Pop();
+                if (current.element.isDisabled && !showDisabled) {
+                    continue;
+                }
+
                 UIElement element = current.element;
 
                 List<UIElement> ownChildren = element.GetChildren();
@@ -74,6 +79,9 @@ public class HierarchyView : TreeView {
 
                 for (int i = 0; i < ownChildren.Count; i++) {
                     ElementTreeItem childItem = new ElementTreeItem(ownChildren[i]);
+                    if (childItem.element.isDisabled && !showDisabled) {
+                        continue;
+                    }
                     childItem.displayName = ownChildren[i].ToString();
                     current.AddChild(childItem);
                     stack.Push(childItem);

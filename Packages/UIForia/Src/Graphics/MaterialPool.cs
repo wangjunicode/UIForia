@@ -5,13 +5,7 @@ using UnityEngine;
 
 namespace Vertigo {
 
-    public struct BatchDrawCall {
-
-        public VertigoMesh mesh;
-        public VertigoMaterial material;
-        public Matrix4x4 transform;
-
-    }
+   
 
     public class MaterialPool {
 
@@ -77,7 +71,7 @@ namespace Vertigo {
             if (sharedMaterialMap.TryGetValue(materialName, out LightList<VertigoMaterial> materials)) {
                 for (int i = 0; i < materials.Count; i++) {
                     if (KeywordsMatch(keywords, materials[i])) {
-                        return materials[i].GetInstance();
+                        return null;// materials[i].GetInstance();
                     }
                 }
 
@@ -87,7 +81,7 @@ namespace Vertigo {
                 }
 
                 materials.Add(retn);
-                return retn.GetInstance();
+                return null;//retn.GetInstance();
             }
             else {
                 VertigoMaterial retn = CreateMaterial(materialName, keywords);
@@ -97,7 +91,7 @@ namespace Vertigo {
                 materials = new LightList<VertigoMaterial>();
                 materials.Add(retn);
                 sharedMaterialMap.Add(materialName, materials);
-                return retn.GetInstance();
+                return null;//retn.GetInstance();
             }
         }
 

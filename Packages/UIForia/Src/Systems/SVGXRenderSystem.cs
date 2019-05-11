@@ -101,13 +101,13 @@ namespace UIForia.Systems {
                         }
                         else {
                             ctx.SetTransform(SVGXMatrix.identity);
-                            painter.Paint(ctx, matrix);
+                            //painter.Paint(ctx, matrix);
                         }
                     }
                     else if (painterName != "none") {
                         ISVGXElementPainter painter = Application.GetCustomPainter(painterName);
                         ctx.SetTransform(SVGXMatrix.identity);
-                        painter?.Paint(current, ctx, matrix);
+                       // painter?.Paint(current, ctx, matrix);
                     }
 
                     continue;

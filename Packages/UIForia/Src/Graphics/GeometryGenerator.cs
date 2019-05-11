@@ -1733,6 +1733,22 @@ namespace Vertigo {
             geometryCache.triangles.size = triIdx;
         }
 
+        public int FillRectSDF(GeometryCache retn, float x, float y, float width, float height, TextureCoordChannel channels) {
+           throw new NotImplementedException(); 
+        }
+
+        public void SetUVTiling(TextureCoordChannel textureCoord0, int i, int i1) {
+            throw new NotImplementedException();
+        }
+
+        public void SetUVOffset(TextureCoordChannel textureCoord1, int i, int i1) {
+            throw new NotImplementedException();
+        }
+
+        public void SetDefaultChannels(TextureCoordChannel color) {
+            throw new NotImplementedException();
+        }
+
     }
 
 }

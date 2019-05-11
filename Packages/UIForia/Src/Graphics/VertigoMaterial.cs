@@ -18,9 +18,12 @@ namespace Vertigo {
         internal readonly LightList<VertigoMaterial> instances;
         internal bool isActive;
 
-        public VertigoMaterial(Material material) {
+        public bool isShared { get; set; }
+
+        public VertigoMaterial(Material material, bool isShared) {
             this.properties = new StructList<MaterialProperty>();
             this.material = material;
+            this.isShared = isShared;
             this.keywords = null;
             this.isActive = true;
             this.parent = null;
@@ -53,9 +56,9 @@ namespace Vertigo {
                 WriteToMaterial(this.material);
             }
             else {
-                material = MaterialPool.Get(shaderName, keywords);
+                // material = MaterialPool.Get(shaderName, keywords);
             }
-            
+
             WriteToMaterial(material);
             return material;
         }
@@ -206,17 +209,30 @@ namespace Vertigo {
             return retn;
         }
 
-        public VertigoMaterial GetInstance() {
-            VertigoMaterial retn = null;
-            if (instances.Count > 0) {
-                retn = instances.RemoveLast();
-            }
-            else {
-                retn = new VertigoMaterial(this);
-            }
+        private static IntMap<MaterialSettings> settingsMap;
 
-            retn.isActive = true;
-            return retn;
+        public struct MaterialSettings {
+
+            public Material materialBase;
+            public string[] keywords;
+
+        }
+
+        public static VertigoMaterial GetInstance(Material material) {
+            if (settingsMap.TryGetValue(material.shader.GetInstanceID(), out MaterialSettings settings)) { }
+
+            material.CopyPropertiesFromMaterial(material);
+//            VertigoMaterial retn = null;
+//            if (instances.Count > 0) {
+//                retn = instances.RemoveLast();
+//            }
+//            else {
+//                retn = new VertigoMaterial(this);
+//            }
+//
+//            retn.isActive = true;
+//            return retn;
+            return null;
         }
 
         public void Release() {

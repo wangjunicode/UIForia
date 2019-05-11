@@ -14,14 +14,12 @@ namespace Vertigo {
     }
 
     [Flags]
-    public enum VertexChannel {
+    public enum TextureCoordChannel {
 
         TextureCoord0 = 1 << 0,
         TextureCoord1 = 1 << 1,
         TextureCoord2 = 1 << 2,
-        TextureCoord3 = 1 << 3,
-        Color = 1 << 4,
-        Normal = 1 << 5
+        TextureCoord3 = 1 << 3
 
     }
     
@@ -29,7 +27,7 @@ namespace Vertigo {
 
         public ShapeType shapeType;
         public GeometryType geometryType;
-        public VertexChannel vertexChannels;
+        public TextureCoordChannel textureCoordChannels;
         public Bounds bounds;
         public int vertexStart;
         public int vertexCount;
@@ -67,6 +65,13 @@ namespace Vertigo {
             triangles = new StructList<int>(capacity * 2);
         }
 
+        public void Compress() {
+            // for each shape
+            // if shape is active
+            // copy to new buffer
+            // release old buffers
+        }
+        
         public void EnsureAdditionalCapacity(int vertCount, int triCount) {
             positions.EnsureAdditionalCapacity(vertCount);
             normals.EnsureAdditionalCapacity(vertCount);
@@ -84,7 +89,7 @@ namespace Vertigo {
             }
 
             GeometryShape shape = shapes.array[shapeIdx];
-            shapes.array[shapeIdx].vertexChannels |= VertexChannel.Color;
+            //shapes.array[shapeIdx].textureCoordChannels |= TextureCoordChannel.Color;
             int start = shape.vertexStart;
             int end = start + shape.vertexCount;
             Color[] c = this.colors.array;
@@ -101,7 +106,7 @@ namespace Vertigo {
             }
 
             GeometryShape shape = shapes.array[shapeIdx];
-            shapes.array[shapeIdx].vertexChannels |= VertexChannel.Normal;
+            //shapes.array[shapeIdx].textureCoordChannels |= TextureCoordChannel.Normal;
             int start = shape.vertexStart;
             int end = start + shape.vertexCount;
             Vector3[] c = this.normals.array;
@@ -112,11 +117,11 @@ namespace Vertigo {
             return true;
         }
 
-        public bool SetVertexChannels(int shapeIdx, VertexChannel channel) {
+        public bool SetVertexChannels(int shapeIdx, TextureCoordChannel channel) {
             if (shapeIdx < 0 || shapeIdx > shapes.size) {
                 return false;
             }
-            shapes.array[shapeIdx].vertexChannels = channel;
+            shapes.array[shapeIdx].textureCoordChannels = channel;
             return true;
         }
 

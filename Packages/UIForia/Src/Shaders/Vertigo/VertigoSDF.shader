@@ -58,8 +58,6 @@
                 SDFData sdfData = UnpackSDFData(i.texCoord1, i.sdfCoord);
                 fixed4 mainColor = SDFColor(sdfData, i.color);
                 
-              
-                
                 //fixed maskAlpha = saturate(tex2D(_MaskTexture, i.texCoord0.xy).a / _MaskSoftness);
                 //maskAlpha = lerp(1 - maskAlpha, maskAlpha, _InvertMask);
                // mainColor.a *= maskAlpha;

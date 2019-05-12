@@ -3,80 +3,68 @@ using UnityEngine;
 
 namespace Vertigo {
 
-    public class UIForiaShader {
+    internal struct UIForiaMaterial {
 
-        public string shaderName;
-        private StructList<MaterialProperty> properties;
-        internal UIForiaShader origin;
-        internal Material material;
-        internal bool isPooled;
-        internal bool isRoot;
+        public Material material;
+        public LightList<Material> pool;
 
-        private LightList<UIForiaShader> instances;
-
-        public UIForiaShader(Material material) {
-            this.material = new Material(material);
-            this.shaderName = material.shader.name;
-        }
-        
-        internal UIForiaShader(UIForiaShader toClone) {
-            this.material = new Material(toClone.material);
-            this.shaderName = toClone.shaderName;
+        public UIForiaMaterial(Material material, LightList<Material> pool) {
+            this.material = material;
+            this.pool = pool;
         }
 
-        private static UIForiaShader defaultShader;
-        
-        public static UIForiaShader Default {
-            get {
-                if (defaultShader != null) {
-                    return defaultShader;
-                }
-                Material material = new Material(Shader.Find("Vertigo/VertigoSDF"));
-                defaultShader = CreateRootShader(material);
-                return defaultShader;
-            }
+        public void Release() {
+            pool.Add(material);
         }
 
-        private static UIForiaShader CreateRootShader(Material material) {
-            UIForiaShader retn = new UIForiaShader(material);
-            retn.instances = new LightList<UIForiaShader>();
-            retn.isRoot = true;
-            return retn;
-        }
-
-        public UIForiaShader GetInstance() {
-            if (instances.Count > 0) {
-                return instances.RemoveLast();
-            }
-
-            UIForiaShader instance = new UIForiaShader(this);
-            instance.origin = this;
-            return instance;
-        }
-
-        internal void Release() {
-            isPooled = false;
-            if (isRoot) return;
-            origin.instances.Add(this);
-        }
-
-        public void SetFloatProperty(int key, float value) {
-            throw new System.NotImplementedException();
-        }
-
-        public UIForiaShader Clone() {
-            if (!isRoot) {
-                UIForiaShader shader = origin.GetInstance();
-                shader.material.CopyPropertiesFromMaterial(material);
-                return shader;
+        public UIForiaMaterial Clone() {
+            if (pool.Count > 0) {
+                Material retn = pool.RemoveLast();
+                retn.CopyPropertiesFromMaterial(material);
+                return new UIForiaMaterial(retn, pool);
             }
             else {
-                UIForiaShader shader = GetInstance();
-                shader.material.CopyPropertiesFromMaterial(material);
-                return shader;
+                Material retn = new Material(material);
+                return new UIForiaMaterial(retn, pool);
             }
         }
-        
+
+    }
+
+    internal struct ShaderPool {
+
+        public Material defaultMaterial;
+        public LightList<Material> pool;
+
+        public ShaderPool(Shader shader) {
+            this.pool = new LightList<Material>();
+            this.defaultMaterial = new Material(shader);
+        }
+
+        public UIForiaMaterial GetClonedInstance(Material material) {
+            if (pool.Count > 0) {
+                Material retn = pool.RemoveLast();
+                retn.CopyPropertiesFromMaterial(material);
+                return new UIForiaMaterial(retn, pool);
+            }
+            else {
+                Material retn = new Material(material);
+                return new UIForiaMaterial(retn, pool);
+            }
+        }
+
+        public UIForiaMaterial GetDefaultInstance() {
+            if (pool.Count > 0) {
+                Material retn = pool.RemoveLast();
+                retn.CopyPropertiesFromMaterial(defaultMaterial);
+                return new UIForiaMaterial(retn, pool);
+            }
+            else {
+                Material retn = new Material(defaultMaterial);
+                return new UIForiaMaterial(retn, pool);
+            }
+        }
+
     }
 
 }

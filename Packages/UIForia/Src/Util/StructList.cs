@@ -1,4 +1,3 @@
-
 using System;
 using Vertigo;
 
@@ -121,19 +120,21 @@ namespace UIForia.Util {
             System.Array.Clear(array, size - count, count);
             size -= count;
         }
-        
+
         private static readonly LightList<StructList<T>> s_Pool = new LightList<StructList<T>>();
 
         public static StructList<T> Get() {
-            if (s_Pool.Count > 0) {
-                return s_Pool.RemoveLast();
-            }
-
-            return new StructList<T>();
+            StructList<T> retn = s_Pool.Count > 0 ? s_Pool.RemoveLast() : new StructList<T>();
+            retn.isInPool = false;
+            return retn;
         }
+
+        private bool isInPool;
 
         public static void Release(ref StructList<T> toPool) {
             toPool.Clear();
+            if (toPool.isInPool) return;
+            toPool.isInPool = true;
             s_Pool.Add(toPool);
         }
 
@@ -146,7 +147,7 @@ namespace UIForia.Util {
             if (index < 0 || index > array.Length) {
                 throw new IndexOutOfRangeException();
             }
-            
+
             System.Array.Copy(array, index, array, index + 1, size - index);
             array[index] = item;
         }

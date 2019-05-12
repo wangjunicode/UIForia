@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.U2D;
 
 public static class VertigoUtil {
 
@@ -44,22 +45,84 @@ public static class VertigoUtil {
 
     internal struct SpriteData {
 
+        public string name;
         public Rect uvBounds;
         public Vector2[] uvs;
         public Vector2[] vertices;
         public ushort[] triangles;
+        public Texture2D texture;
 
     }
 
-    private static Dictionary<int, SpriteData> s_SpriteUVMap;
+    private static Dictionary<int, SpriteData> s_SpriteDataMap;
+    private static Dictionary<int, SpriteData[]> s_SpriteAtlasMap;
+    
+    internal static SpriteData GetSpriteData(SpriteAtlas atlas, string spriteName) {
+        if (s_SpriteAtlasMap == null) {
+            s_SpriteAtlasMap = new Dictionary<int, SpriteData[]>();
+        }
 
+        if (s_SpriteAtlasMap.TryGetValue(atlas.GetInstanceID(), out SpriteData[] list)) {
+            for (int i = 0; i < list.Length; i++) {
+                if (list[i].name == spriteName) {
+                    return list[i];
+                }
+            }
+
+            return default;
+        }
+
+        SpriteData[] spriteDataList = new SpriteData[atlas.spriteCount];
+        Sprite[] spriteList = new Sprite[atlas.spriteCount];
+        atlas.GetSprites(spriteList);
+        for (int i = 0; i < spriteDataList.Length; i++) {
+            Sprite sprite = spriteList[i];
+            
+        
+            Vector2[] uvs = sprite.uv;
+
+            float minX = float.MaxValue;
+            float minY = float.MaxValue;
+            float maxX = float.MinValue;
+            float maxY = float.MinValue;
+
+            for (int j = 0; j < uvs.Length; j++) {
+                if (uvs[j].x < minX) minX = uvs[j].x;
+                if (uvs[j].y < minY) minY = uvs[j].y;
+                if (uvs[j].x > maxX) maxX = uvs[j].x;
+                if (uvs[j].y > maxY) maxY = uvs[j].y;
+            }
+
+            Rect uvBounds = new Rect(minX, minY, maxX - minX, maxY - minY);
+            spriteDataList[i].name = sprite.name.Replace("(Clone)", "");
+            spriteDataList[i].uvBounds = uvBounds;
+            spriteDataList[i].vertices = sprite.vertices;
+            spriteDataList[i].uvs = uvs;
+            spriteDataList[i].triangles = sprite.triangles;
+            spriteDataList[i].texture = sprite.texture;
+
+        }
+
+        s_SpriteAtlasMap.Add(atlas.GetInstanceID(), spriteDataList);
+        for (int i = 0; i < spriteDataList.Length; i++) {
+            if (spriteDataList[i].name == spriteName) {
+                spriteDataList[i].texture.filterMode = FilterMode.Bilinear;
+                spriteDataList[i].texture.wrapMode = TextureWrapMode.Repeat;
+                spriteDataList[i].texture.Apply();
+                return spriteDataList[i];
+            }
+        }
+
+        return default;
+    }
+    
     internal static SpriteData GetSpriteData(Sprite sprite) {
-        if (s_SpriteUVMap == null) {
-            s_SpriteUVMap = new Dictionary<int, SpriteData>();
+        if (s_SpriteDataMap == null) {
+            s_SpriteDataMap = new Dictionary<int, SpriteData>();
         }
 
         SpriteData retn = new SpriteData();
-        if (s_SpriteUVMap.TryGetValue(sprite.GetInstanceID(), out retn)) {
+        if (s_SpriteDataMap.TryGetValue(sprite.GetInstanceID(), out retn)) {
             return retn;
         }
 
@@ -82,7 +145,7 @@ public static class VertigoUtil {
         retn.vertices = sprite.vertices;
         retn.uvs = uvs;
         retn.triangles = sprite.triangles;
-        s_SpriteUVMap.Add(sprite.GetInstanceID(), retn);
+        s_SpriteDataMap.Add(sprite.GetInstanceID(), retn);
         return retn;
     }
 

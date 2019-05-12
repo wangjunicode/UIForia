@@ -10,9 +10,10 @@ namespace Vertigo {
         public Vector2 uvTiling;
         public Vector2 uvOffset;
         public float uvRotation;
+        public Vector2 uvPivot;
         public TextureCoordChannel sdfDataChannel;
         public TextureCoordChannel texCoordChannel;
-        // public float4x4 transform;
+        public float defaultZ;
             
     }
 

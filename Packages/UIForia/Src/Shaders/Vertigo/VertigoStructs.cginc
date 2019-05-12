@@ -5,6 +5,8 @@ struct appdata {
     float4 vertex : POSITION;
     float4 texCoord0 : TEXCOORD0;
     float4 texCoord1 : TEXCOORD1;
+    float4 texCoord2 : TEXCOORD2;
+    float4 texCoord3 : TEXCOORD3;
     fixed4 color : COLOR;
 };
 
@@ -13,7 +15,9 @@ struct v2f {
     float4 texCoord0 : TEXCOORD0;
     nointerpolation 
     float4 texCoord1 : TEXCOORD1;
-    float4 sdfCoord  : TEXCOORD2;
+    float4 texCoord2 : TEXCOORD2;
+    float4 texCoord3 : TEXCOORD3;
+    float4 sdfCoord  : TEXCOORD4;
     fixed4 color : COLOR0;
 };
 

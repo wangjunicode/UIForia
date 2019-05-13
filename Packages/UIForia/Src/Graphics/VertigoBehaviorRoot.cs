@@ -48,7 +48,6 @@ public class VertigoBehaviorRoot : MonoBehaviour {
         gfx = new UIForiaRenderContext();
     }
     
-
     public void Update() {
         camera.orthographicSize = Screen.height * 0.5f;
 
@@ -83,7 +82,6 @@ public class VertigoBehaviorRoot : MonoBehaviour {
         // copying prevents mistaken batch breaks or non breaks from when the material changes externally
         // maybe don't bother with checking render state, if material doesn't have it, ignore it
         // property blocks still break batching they just don't swap shader since its cbuffer only that must change
-        
         
         // scale ratio a, b, c
         // outline color

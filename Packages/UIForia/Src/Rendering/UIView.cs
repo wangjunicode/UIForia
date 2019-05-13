@@ -1,10 +1,23 @@
 using System;
+using System.Collections.Generic;
 using UIForia.Elements;
 using UIForia.Layout;
+using UIForia.Templates;
 using UIForia.Util;
 using UnityEngine;
 using UnityEngine.Rendering;
 using Application = UIForia.Application;
+
+public class UIViewRootElement : UIElement {
+
+    public UIViewRootElement() {
+        flags |= UIElementFlags.BuiltIn;
+        flags |= UIElementFlags.ImplicitElement;
+        flags |= UIElementFlags.Created;
+        flags |= UIElementFlags.Ready;
+    }
+
+}
 
 // the idea behind a view is that it is a flat plane that can be oriented in 3d space and show content
 public class UIView {
@@ -13,6 +26,8 @@ public class UIView {
     public event Action<UIElement> onElementDestroyed;
     public event Action<UIElement> onElementEnabled;
     public event Action<UIElement> onElementDisabled;
+    public event Action<IReadOnlyList<UIElement>> onElementsAdded;
+    public event Action<UIElement> onElementRemoved;
 
     private readonly Type m_ElementType;
     private readonly string m_Template;
@@ -24,21 +39,20 @@ public class UIView {
 
     internal Matrix4x4 matrix;
     internal Size size;
-    
+
     internal Vector3 position;
     internal Vector3 scale;
     internal Quaternion rotation;
 
-    internal bool is2D;
-    
     public readonly int id;
     public readonly Application Application;
     public readonly string name;
     public RenderTexture renderTexture;
-    
+
     internal LightList<UIElement> elements;
     internal LightList<UIElement> visibleElements;
-    
+    private UIViewRootElement rootElement;
+
     internal UIView(int id, string name, Application app, Rect rect, int depth, Type elementType, string template = null) {
         this.id = id;
         this.name = name;
@@ -47,7 +61,7 @@ public class UIView {
         this.Depth = depth;
         this.m_Template = template;
         this.m_ElementType = elementType;
-        this.rotation  = Quaternion.identity;
+        this.rotation = Quaternion.identity;
         this.scale = Vector3.one;
         this.position = Vector3.zero;
         this.size = new Size(Screen.width, Screen.height);
@@ -57,21 +71,38 @@ public class UIView {
         Refresh();
     }
 
+    internal UIView(int id, string name, Application app, Rect rect, int depth) {
+        this.id = id;
+        this.name = name;
+        this.Application = app;
+        this.Viewport = rect;
+        this.Depth = depth;
+        this.rotation = Quaternion.identity;
+        this.scale = Vector3.one;
+        this.position = Vector3.zero;
+        this.size = new Size(Screen.width, Screen.height);
+        this.Viewport = new Rect(position.x, position.y, size.width, size.height);
+        this.rootElement = new UIViewRootElement();
+        this.rootElement.flags |= UIElementFlags.Enabled;
+        this.rootElement.flags |= UIElementFlags.AncestorEnabled;
+        this.rootElement.View = this;
+    }
+
+
+    public UIElement AddChild(UIElement element) {
+        Application.InsertChild(rootElement, element, (uint)rootElement.children.Count);
+        return element;
+    }
+
     public bool clipOverflow;
     public bool focusOnMouseDown;
 
-    public void SetZIndex() {
-        
-    }
+    public void SetZIndex() { }
 
-    public void SetCamera(Camera camera, CameraEvent renderHook) {
-        
-    }
+    public void SetCamera(Camera camera, CameraEvent renderHook) { }
 
-    public void SetRenderTexture(RenderTexture texture) {
-        
-    }
-    
+    public void SetRenderTexture(RenderTexture texture) { }
+
     public void EnableElement(UIElement element) {
         Application.DoEnableElement(element);
     }
@@ -93,10 +124,6 @@ public class UIView {
 
     public void Destroy() { }
 
-    internal void InvokeElementAdded(UIElement element) {
-        onElementCreated?.Invoke(element);
-    }
-
     internal void InvokeElementEnabled(UIElement element) {
         onElementEnabled?.Invoke(element);
     }
@@ -115,6 +142,31 @@ public class UIView {
 
     public void SetSize(int width, int height) {
         Viewport = new Rect(Viewport.x, Viewport.y, width, height);
+    }
+
+    public UIElement CreateElement<T>() {
+        ParsedTemplate parsedTemplate = Application.templateParser.GetParsedTemplate(typeof(T));
+        if (parsedTemplate == null) {
+            return null;
+        }
+
+        try {
+            // todo -- shouldn't auto - add to child list
+            UIElement element = parsedTemplate.Create();
+            rootElement.AddChild(element);
+            return element;
+        }
+        catch {
+            throw;
+        }
+    }
+
+    internal void InvokeAddElements(IReadOnlyList<UIElement> addedElements) {
+        onElementsAdded?.Invoke(addedElements);
+    }
+    
+    public void RemoveElement(UIElement current) {
+        // todo -- event
     }
 
 }

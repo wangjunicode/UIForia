@@ -51,7 +51,6 @@ namespace UIForia {
             onBootstrap?.Invoke(retn);
             retn.SetCamera(camera);
             UIView view = retn.AddView("Default View", new Rect(0, 0, Screen.width, Screen.height), type);
-            view.is2D = true;
             retn.onUpdate += () => {
                 // todo if view was destroyed return or remove auto-update handler
                 view.SetSize(Screen.width, Screen.height);

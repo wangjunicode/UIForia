@@ -17,12 +17,12 @@ namespace UIForia.Systems {
         public UIFixedLength paddingRight;
         public UIFixedLength paddingBottom;
         public UIFixedLength paddingLeft;
-        
+
         public UIFixedLength borderTop;
         public UIFixedLength borderRight;
         public UIFixedLength borderBottom;
         public UIFixedLength borderLeft;
-        
+
         public UIMeasurement marginTop;
         public UIMeasurement marginRight;
         public UIMeasurement marginBottom;
@@ -50,7 +50,7 @@ namespace UIForia.Systems {
         public TransformBehavior transformBehaviorY;
 
     }
-    
+
     public class LayoutSystem : ILayoutSystem {
 
         public struct ViewRect {
@@ -101,6 +101,15 @@ namespace UIForia.Systems {
                 forceLayout = true;
             }
 
+            // todo -- this probably isn't totally correct
+            // remove on disable & n shit
+
+            for (int i = 0; i < toInit.Count; i++) {
+                toInit[i].UpdateFromStyle();
+            }
+
+            toInit.Clear();
+
             TextLayoutBox[] textLayouts = m_TextLayoutBoxes.Array;
             for (int i = 0; i < m_TextLayoutBoxes.Count; i++) {
                 if (textLayouts[i].TextInfo.LayoutDirty) {
@@ -112,6 +121,57 @@ namespace UIForia.Systems {
                 RunLayout(forceLayout, m_Views[i]);
                 m_Views[i] = new ViewRect(m_Views[i].view, m_Views[i].view.Viewport);
             }
+        }
+
+        /*
+         * for each view
+         *     gather list of elements to consider for layout
+         *     
+         *     if element children exceed width bounds
+         *     if overflow y is scroll & scroll layout is push content
+         *     run scrollbar vertical layout
+         *     run layout again w/ width - scroll bar width
+         *     set clip rect x - width to 0 -> scroll bar x (or invert if scroll position inverted)
+         * 
+         */
+
+        private StructList<SVGXMatrix> matrixList = new StructList<SVGXMatrix>(128);
+        private LightList<LayoutBox> toLayout = new LightList<LayoutBox>(128);
+
+        
+        public void RunLayout2(UIView view) {
+            UIElement element = view.RootElement;
+            LayoutBox box = m_LayoutBoxMap.GetOrDefault(element.id);
+
+            LightStack<UIElement> stack = LightStack<UIElement>.Get();
+
+            stack.Push(element);
+            
+            SVGXMatrix[] matrixArray = matrixList.array;
+            LayoutBox[] toLayoutArray = toLayout.Array;
+            int idx = 0;
+            
+            while (stack.Count > 0) {
+                UIElement currentElement = stack.Pop();
+                LayoutBox currentBox = m_LayoutBoxMap.GetOrDefault(currentElement.id);
+                if (currentElement.isDisabled) {
+                    continue;
+                }
+
+                toLayoutArray[idx++] = currentBox;
+
+                if (currentElement.children == null) {
+                    continue;
+                }
+
+                UIElement[] childArray = currentElement.children.Array;
+                int childCount = currentElement.children.Count;
+                for (int i = 0; i < childCount; i++) {
+                    stack.Push(childArray[i]);
+                }
+            }
+
+            LightStack<UIElement>.Release(ref stack);
         }
 
         public void RunLayout(bool forceLayout, ViewRect viewRect) {
@@ -158,11 +218,12 @@ namespace UIForia.Systems {
 
             layoutResult.ContentRect = root.ContentRect;
 
-            layoutResult.scale = new Vector2(root.style.TransformScaleX, root.style.TransformScaleY);
+            layoutResult.scale = new Vector2(root.transformScaleX, root.transformScaleY);
             layoutResult.localPosition = ResolveLocalPosition(root);
             layoutResult.screenPosition = layoutResult.localPosition;
-            layoutResult.rotation = root.style.TransformRotation;
+            layoutResult.rotation = root.transformRotation;
             layoutResult.clipRect = new Rect(0, 0, viewportRect.width, viewportRect.height);
+
             layoutResult.border = new OffsetRect(
                 root.BorderTop,
                 root.BorderRight,
@@ -179,8 +240,8 @@ namespace UIForia.Systems {
 
             layoutResult.matrix = SVGXMatrix.TRS(
                 new Vector2(root.TransformX, root.TransformY),
-                root.style.TransformRotation,
-                new Vector2(root.style.TransformScaleX, root.style.TransformScaleY)
+                root.transformRotation,
+                new Vector2(root.transformScaleX, root.transformScaleY)
             );
 
             CreateOrDestroyScrollbars(root);
@@ -215,7 +276,8 @@ namespace UIForia.Systems {
                         float currentHeight = box.allocatedHeight;
                         box.allocatedWidth = box.GetWidths().clampedSize;
                         box.allocatedHeight = box.GetHeights(box.actualHeight).clampedSize;
-
+                        box.localX = 0;
+                        box.localY = 0;
                         if (box.allocatedWidth != currentWidth || box.allocatedHeight != currentHeight) {
                             box.markedForLayout = true;
                         }
@@ -242,9 +304,13 @@ namespace UIForia.Systems {
                     layoutResult.ContentRect = box.ContentRect;
                     layoutResult.actualSize = new Size(box.actualWidth, box.actualHeight);
                     layoutResult.allocatedSize = new Size(box.allocatedWidth, box.allocatedHeight);
+                    // wrong -- use matrix result
                     layoutResult.screenPosition = parentBox.element.layoutResult.screenPosition + layoutResult.localPosition;
-                    layoutResult.scale = new Vector2(box.style.TransformScaleX, box.style.TransformScaleY); // only set if changed
-                    layoutResult.rotation = parentBox.style.TransformRotation + box.style.TransformRotation; // only set if changed
+                    layoutResult.scale = new Vector2(box.transformScaleX, box.transformScaleY); // only set if changed
+
+                    // wrong -- use matrix result
+                    layoutResult.rotation = parentBox.transformRotation + box.transformRotation; // only set if changed
+
                     layoutResult.pivot = box.Pivot; // only set if changed
 
                     layoutResult.borderRadius = new ResolvedBorderRadius(
@@ -405,8 +471,8 @@ namespace UIForia.Systems {
             Vector2 localPosition = Vector2.zero;
 
             LayoutBehavior layoutBehavior = box.style.LayoutBehavior;
-            TransformBehavior transformBehaviorX = box.style.TransformBehaviorX;
-            TransformBehavior transformBehaviorY = box.style.TransformBehaviorY;
+            TransformBehavior transformBehaviorX = box.transformBehaviorX;
+            TransformBehavior transformBehaviorY = box.transformBehaviorY;
 
             switch (layoutBehavior) {
                 case LayoutBehavior.TranscludeChildren:
@@ -414,48 +480,14 @@ namespace UIForia.Systems {
                     break;
 
                 case LayoutBehavior.Ignored:
-                    
-                    // todo verify these visually something is wrong
+                case LayoutBehavior.Normal:
+
                     switch (transformBehaviorX) {
                         case TransformBehavior.AnchorMinOffset:
                             localPosition.x = box.AnchorLeft + box.TransformX;
                             break;
                         case TransformBehavior.AnchorMaxOffset:
                             localPosition.x = box.AnchorRight - box.TransformX - box.actualWidth;
-                            break;
-                        case TransformBehavior.LayoutOffset:
-                            localPosition.x = box.TransformX;
-                            break;
-                        default:
-                            localPosition.x = box.TransformX;
-                            break;
-                    }
-
-                    switch (transformBehaviorY) {
-                        case TransformBehavior.AnchorMinOffset:
-                            localPosition.y = box.AnchorTop + box.TransformY;
-                            break;
-                        case TransformBehavior.AnchorMaxOffset:
-                            localPosition.y = box.AnchorBottom - box.TransformY - box.actualHeight;
-                            break;
-                        case TransformBehavior.LayoutOffset:
-                            localPosition.y = box.TransformY;
-                            break;
-                        default:
-                            localPosition.y = box.localY;
-                            break;
-                    }
-
-                    break;
-
-                case LayoutBehavior.Normal:
-                    switch (transformBehaviorX) {
-                        case TransformBehavior.AnchorMinOffset:
-                            localPosition.x = box.AnchorLeft - box.parent.element.layoutResult.screenPosition.x + box.TransformX;
-                            break;
-                        case TransformBehavior.AnchorMaxOffset:
-                            localPosition.x = box.AnchorRight - box.parent.element.layoutResult.screenPosition.x - box.TransformX - box.actualWidth;
-
                             break;
                         case TransformBehavior.LayoutOffset:
                             localPosition.x = box.localX + box.TransformX;
@@ -466,11 +498,11 @@ namespace UIForia.Systems {
                     }
 
                     switch (transformBehaviorY) {
-                        case TransformBehavior.AnchorMinOffset:  
-                            localPosition.y = box.AnchorTop - box.parent.element.layoutResult.screenPosition.y + box.TransformY;
+                        case TransformBehavior.AnchorMinOffset:
+                            localPosition.y = box.AnchorTop + box.TransformY;
                             break;
                         case TransformBehavior.AnchorMaxOffset:
-                            localPosition.y = box.AnchorBottom - box.parent.element.layoutResult.screenPosition.y - box.TransformY - box.actualHeight;
+                            localPosition.y = box.AnchorBottom - box.TransformY - box.actualHeight;
                             break;
                         case TransformBehavior.LayoutOffset:
                             localPosition.y = box.localY + box.TransformY;
@@ -570,6 +602,135 @@ namespace UIForia.Systems {
                 StyleProperty property = properties[i];
 
                 switch (property.propertyId) {
+                    case StylePropertyId.PaddingLeft:
+                        box.paddingLeft = property.AsUIFixedLength;
+                        break;
+
+                    case StylePropertyId.PaddingRight:
+                        box.paddingRight = property.AsUIFixedLength;
+                        break;
+
+                    case StylePropertyId.PaddingTop:
+                        box.paddingTop = property.AsUIFixedLength;
+                        break;
+
+                    case StylePropertyId.PaddingBottom:
+                        box.paddingBottom = property.AsUIFixedLength;
+                        break;
+
+                    case StylePropertyId.BorderLeft:
+                        box.borderLeft = property.AsUIFixedLength;
+                        break;
+
+                    case StylePropertyId.BorderRight:
+                        box.borderRight = property.AsUIFixedLength;
+                        break;
+
+                    case StylePropertyId.BorderTop:
+                        box.borderTop = property.AsUIFixedLength;
+                        break;
+
+                    case StylePropertyId.BorderBottom:
+                        box.borderBottom = property.AsUIFixedLength;
+                        break;
+
+                    case StylePropertyId.BorderRadiusTopLeft:
+                        box.borderRadiusTopLeft = property.AsUIFixedLength;
+                        break;
+
+                    case StylePropertyId.BorderRadiusTopRight:
+                        box.borderRadiusTopRight = property.AsUIFixedLength;
+                        break;
+
+                    case StylePropertyId.BorderRadiusBottomLeft:
+                        box.borderRadiusBottomLeft = property.AsUIFixedLength;
+                        break;
+
+                    case StylePropertyId.BorderRadiusBottomRight:
+                        box.borderRadiusBottomRight = property.AsUIFixedLength;
+                        break;
+
+                    // todo -- margin should be a fixed measurement probably
+                    case StylePropertyId.MarginLeft:
+                        box.marginLeft = property.AsUIMeasurement;
+                        break;
+
+                    case StylePropertyId.MarginRight:
+                        box.marginRight = property.AsUIMeasurement;
+                        break;
+
+                    case StylePropertyId.MarginTop:
+                        box.marginTop = property.AsUIMeasurement;
+                        break;
+
+                    case StylePropertyId.MarginBottom:
+                        box.marginBottom = property.AsUIMeasurement;
+                        break;
+
+                    case StylePropertyId.TransformPivotX:
+                        box.transformPivotX = property.AsUIFixedLength;
+                        break;
+
+                    case StylePropertyId.TransformPivotY:
+                        box.transformPivotY = property.AsUIFixedLength;
+                        break;
+
+                    case StylePropertyId.TransformPositionX:
+                        box.transformPositionX = property.AsTransformOffset;
+                        break;
+
+                    case StylePropertyId.TransformPositionY:
+                        box.transformPositionY = property.AsTransformOffset;
+                        break;
+
+                    case StylePropertyId.TransformBehaviorX:
+                        box.transformBehaviorX = property.AsTransformBehavior;
+                        break;
+
+                    case StylePropertyId.TransformBehaviorY:
+                        box.transformBehaviorY = property.AsTransformBehavior;
+                        break;
+
+                    case StylePropertyId.TransformRotation:
+                        box.transformRotation = property.AsFloat;
+                        break;
+
+                    case StylePropertyId.TransformScaleX:
+                        box.transformScaleX = property.AsFloat;
+                        break;
+
+                    case StylePropertyId.TransformScaleY:
+                        box.transformScaleY = property.AsFloat;
+                        break;
+
+                    case StylePropertyId.PreferredWidth:
+                        box.prefWidth = property.AsUIMeasurement;
+                        break;
+
+                    case StylePropertyId.PreferredHeight:
+                        box.prefHeight = property.AsUIMeasurement;
+                        break;
+
+                    case StylePropertyId.MinWidth:
+                        box.minWidth = property.AsUIMeasurement;
+                        break;
+
+                    case StylePropertyId.MinHeight:
+                        box.minHeight = property.AsUIMeasurement;
+                        break;
+
+                    case StylePropertyId.MaxWidth:
+                        box.maxWidth = property.AsUIMeasurement;
+                        break;
+
+                    case StylePropertyId.MaxHeight:
+                        box.maxHeight = property.AsUIMeasurement;
+                        break;
+
+                    case StylePropertyId.ZIndex:
+                        box.zIndex = property.AsInt;
+                        break;
+
                     case StylePropertyId.LayoutBehavior:
                         // todo -- implement this
                         box.UpdateChildren();
@@ -678,6 +839,8 @@ namespace UIForia.Systems {
             LayoutBox box = m_LayoutBoxMap.GetOrDefault(element.id);
             if (box == null) return; // can happen if disable is called in binding before layout system gets the create call
 
+            box.UpdateFromStyle();
+
             if (box.parent != null) {
                 UpdateChildrenRecursive(box.parent.element);
             }
@@ -707,6 +870,8 @@ namespace UIForia.Systems {
         }
 
         public void OnElementDestroyed(UIElement element) {
+            LayoutBox box = m_LayoutBoxMap.GetOrDefault(element.id);
+            if (box == null) return; // can happen if destroyed before first enable call
             UpdateChildren(m_LayoutBoxMap.GetOrDefault(element.id));
             m_VisibleElementList.Remove(element);
             m_LayoutBoxMap.Remove(element.id);
@@ -747,8 +912,11 @@ namespace UIForia.Systems {
             }
         }
 
+        public LightList<LayoutBox> toInit = new LightList<LayoutBox>();
+
         public void OnElementCreated(UIElement element) {
             LayoutBox layoutBox = CreateLayoutBox(element);
+            layoutBox.UpdateFromStyle();
             Stack<ValueTuple<UIElement, LayoutBox>> stack = StackPool<ValueTuple<UIElement, LayoutBox>>.Get();
             LightList<LayoutBox> toUpdateList = LightListPool<LayoutBox>.Get();
 
@@ -773,6 +941,7 @@ namespace UIForia.Systems {
                 for (int i = 0; i < parentElement.children.Count; i++) {
                     UIElement child = parentElement.children[i];
                     LayoutBox childBox = CreateLayoutBox(child);
+                    toInit.Add(childBox);
                     childBox.parent = parentBox; // will get overridden for transcluded behaviors
                     m_LayoutBoxMap.Add(child.id, childBox);
                     stack.Push(ValueTuple.Create(child, childBox));

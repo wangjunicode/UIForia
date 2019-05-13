@@ -38,13 +38,12 @@ namespace UIForia.Systems {
         public StyleSystem() {
             this.m_ChangeSets = new IntMap<ChangeSet>();
         }
-
-        public void SetViewportRect(Rect viewport) { }
-
+        
         public void OnReset() { }
 
         public void OnElementCreated(UIElement element) {
 
+            // this should really be on enable and stop for disabled elements
             Profiler.BeginSample("Style System [OnElementCreated]");
             
             if (element.parent != null) {
@@ -80,6 +79,10 @@ namespace UIForia.Systems {
 
         }
 
+        // constructor
+        // created
+        // --> all systems have run
+        // ready 
         private void OnElementCreatedStep(UIElement element, LightList<StyleProperty> parentProperties) {
             UIStyleGroupContainer[] baseStyles = element.OriginTemplate.baseStyles;
 
@@ -159,6 +162,18 @@ namespace UIForia.Systems {
 
         public void OnElementDestroyed(UIElement element) { }
 
+        public void OnElementReady(UIElement element) { }
+
+        public void OnElementHierarchyAdded(UIElement element) {
+            // update queries
+            // update inherited properties
+            
+        }
+
+        public void OnElementParentChanged() { }
+        
+        public void OnElementHierarchyRemoved() { }
+
         public void OnAttributeSet(UIElement element, string attributeName, string currentValue, string attributeValue) {
             element.style.UpdateApplicableAttributeRules(attributeName, attributeValue);
         }
@@ -205,9 +220,9 @@ namespace UIForia.Systems {
             }
 
             while (s_ElementStack.Count > 0) {
-                UIElement descendent = s_ElementStack.Pop();
+                UIElement descendant = s_ElementStack.Pop();
 
-                if (!descendent.style.SetInheritedStyle(property)) {
+                if (!descendant.style.SetInheritedStyle(property)) {
                     continue;
                 }
 
@@ -216,14 +231,14 @@ namespace UIForia.Systems {
                 // do caching    
                 // }
 
-                AddToChangeSet(descendent, property);
+                AddToChangeSet(descendant, property);
 
-                if (descendent.children == null) {
+                if (descendant.children == null) {
                     continue;
                 }
 
-                for (int i = 0; i < descendent.children.Count; i++) {
-                    s_ElementStack.Push(descendent.children[i]);
+                for (int i = 0; i < descendant.children.Count; i++) {
+                    s_ElementStack.Push(descendant.children[i]);
                 }
             }
         }

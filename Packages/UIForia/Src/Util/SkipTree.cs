@@ -42,7 +42,6 @@ namespace UIForia.Util {
         private static readonly List<SkipTreeNode> scratchNodeList = new List<SkipTreeNode>();
 
         public event TreeChanged onTreeChanged;
-        public event ParentChanged onItemParentChanged;
 
         public SkipTree() {
             root = new SkipTreeNode(default(T));
@@ -283,7 +282,6 @@ namespace UIForia.Util {
             while (ptr != null) {
                 ptr.parent = node.parent;
                 node.parent.childCount++;
-                onItemParentChanged?.Invoke(ptr.item, ptr.parent.item, node.parent.item);
                 lastChild = ptr;
                 ptr = ptr.nextSibling;
             }
@@ -305,7 +303,7 @@ namespace UIForia.Util {
             nodeMap.Remove(element.UniqueId);
             onTreeChanged?.Invoke(TreeChangeType.ItemRemoved);
         }
-
+        
         [PublicAPI]
         public void EnableHierarchy(IHierarchical item) {
             TraverseNodes(false, item, (isDisabled, n) => n.isDisabled = isDisabled, true);
@@ -858,7 +856,6 @@ namespace UIForia.Util {
                     ptr.parent.childCount--;
                     ptr.parent = inserted;
                     inserted.childCount++;
-                    onItemParentChanged?.Invoke(ptr.item, inserted.item, ptr.parent.item);
                     ptr.nextSibling = null;
                     insertedLastChild = ptr;
                     ptr = next;
@@ -874,7 +871,6 @@ namespace UIForia.Util {
             inserted.isDisabled = parent.isDisabled;
             inserted.nextSibling = parent.firstChild;
             parent.firstChild = inserted;
-            onItemParentChanged?.Invoke(inserted.item, parent.item, null);
         }
 
         private SkipTreeNode FindParent(IHierarchical element) {

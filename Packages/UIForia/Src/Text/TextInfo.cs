@@ -99,18 +99,18 @@ namespace UIForia.Text {
             }
 
             Material material = spanInfo.textStyle.font.material;
-            FontAssetData fontAssetData = new FontAssetData();
-            fontAssetData.texture = spanInfo.textStyle.font.atlas;
-            fontAssetData.textureWidth = fontAssetData.texture.width;
-            fontAssetData.textureWidth = fontAssetData.texture.height;
-            fontAssetData.gradientScale = material.GetFloat("_GradientScale"); 
-            fontAssetData.scaleRatioA = material.GetFloat("_ScaleRatioA"); 
-            fontAssetData.scaleRatioB = material.GetFloat("_ScaleRatioB"); 
-            fontAssetData.scaleRatioC = material.GetFloat("_ScaleRatioC");
-            fontAssetData.scaleX = material.GetFloat("_ScaleX");
-            fontAssetData.scaleX = material.GetFloat("_ScaleY");
-            fontAssetData.fontWeightBold = material.GetFloat("_FontWeightBold");
-            fontAssetData.fontWeightNormal = material.GetFloat("_FontWeightNormal");
+//            FontAssetData fontAssetData = new FontAssetData();
+//            fontAssetData.texture = spanInfo.textStyle.font.atlas;
+//            fontAssetData.textureWidth = fontAssetData.texture.width;
+//            fontAssetData.textureWidth = fontAssetData.texture.height;
+//            fontAssetData.gradientScale = material.GetFloat("_GradientScale"); 
+//            fontAssetData.scaleRatioA = material.GetFloat("_ScaleRatioA"); 
+//            fontAssetData.scaleRatioB = material.GetFloat("_ScaleRatioB"); 
+//            fontAssetData.scaleRatioC = material.GetFloat("_ScaleRatioC");
+//            fontAssetData.scaleX = material.GetFloat("_ScaleX");
+//            fontAssetData.scaleX = material.GetFloat("_ScaleY");
+//            fontAssetData.fontWeightBold = material.GetFloat("_FontWeightBold");
+//            fontAssetData.fontWeightNormal = material.GetFloat("_FontWeightNormal");
          //  span.fontAssetData = fontAssetData;
             // textInfo.SetContent(<Text>'Hello There'</Text><Text style=''/>more text</Text>);
             return spanInfo;

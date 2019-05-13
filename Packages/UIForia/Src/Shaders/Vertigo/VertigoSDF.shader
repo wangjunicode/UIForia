@@ -15,7 +15,7 @@
         LOD 100
         Cull Off
         Blend One OneMinusSrcAlpha
-        
+         
         // this stencil setting solves self-blending
         // does mean we have to issue the draw call twice probably
         // if we want to reset the stencil
@@ -42,7 +42,7 @@
             float _Radius;
             float _MaskSoftness;
             float _InvertMask;
-            
+             
             // todo -- set as vector4s instead of floats
             sampler2D _FontTexture;
             float _FontScaleRatioA;

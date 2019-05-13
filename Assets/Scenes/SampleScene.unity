@@ -359,7 +359,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1506585478}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 35f2b5d632fd4d64b9acedec5215cda2, type: 3}
   m_Name: 
@@ -519,7 +519,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1506585478}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 748cf370d09742c469531bc3f48ffa59, type: 3}
   m_Name: 
@@ -528,10 +528,11 @@ MonoBehaviour:
   bgImage: {fileID: 2800000, guid: e9eae51770a2bbd4fae9e93128eb7d11, type: 3}
   lightFrame: {fileID: 0}
   softness: 0
-  atlas: {fileID: 4343727234628468602, guid: de107010d6947a742a67ed9d451f566c, type: 2}
+  atlas: {fileID: 4343727234628468602, guid: 0a12ef407585f404fa6ce6bf591ce0cc, type: 2}
   width: 200
   height: 200
   radii: {x: 0, y: 0, z: 0, w: 0}
+  color: {r: 1, g: 1, b: 1, a: 1}
   tiling: {x: 1, y: 1}
   offset: {x: 0, y: 0}
   pivot: {x: 0, y: 0}

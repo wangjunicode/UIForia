@@ -305,6 +305,7 @@ namespace UIForia.Util {
         }
 
         public static bool IsOverride(MethodInfo m) {
+            // todo verify this works w/o passing in a type explicitly for base type
             return m.GetBaseDefinition().DeclaringType != m.DeclaringType;
         }
 

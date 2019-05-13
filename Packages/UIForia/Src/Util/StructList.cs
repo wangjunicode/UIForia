@@ -7,6 +7,7 @@ namespace UIForia.Util {
 
         public T[] array;
         public int size;
+        private bool isInPool;
 
         public T[] Array => array;
 
@@ -129,7 +130,6 @@ namespace UIForia.Util {
             return retn;
         }
 
-        private bool isInPool;
 
         public static void Release(ref StructList<T> toPool) {
             toPool.Clear();

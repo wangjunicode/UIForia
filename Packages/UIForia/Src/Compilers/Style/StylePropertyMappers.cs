@@ -562,8 +562,8 @@ namespace UIForia.Compilers.Style {
             switch (unitNode.value) {
                 case "px":
                     return UIMeasurementUnit.Pixel;
-                case "fr":
-                    return UIMeasurementUnit.FractionalRemaining;
+//                case "fr":
+//                    return UIMeasurementUnit.FractionalRemaining;
                 case "pca":
                     return UIMeasurementUnit.ParentContentArea;
                 case "psz":

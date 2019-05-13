@@ -1,3 +1,4 @@
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace SVGX {
@@ -152,6 +153,44 @@ namespace SVGX {
                 (d * ca - b * sa) * scale.y,
                 a * position.x + c * position.y + e,
                 b * position.x + d * position.y + f
+            );
+        }
+
+        public static SVGXMatrix TRS(float positionX, float positionY, float rotation, float scaleX, float scaleY) {
+            const float a = 1;
+            const float b = 0;
+            const float c = 0;
+            const float d = 1;
+            const float e = 0;
+            const float f = 0;
+            float ca = math.cos(rotation * Mathf.Deg2Rad);
+            float sa = math.sin(rotation * Mathf.Deg2Rad);
+            return new SVGXMatrix(
+                (a * ca + c * sa) * scaleX,
+                (b * ca + d * sa) * scaleX,
+                (c * ca - a * sa) * scaleY,
+                (d * ca - b * sa) * scaleY,
+                a * positionX + c * positionY + e,
+                b * positionX + d * positionY + f
+            );
+        }
+
+        public static SVGXMatrix TranslateScale(float positionX, float positionY, float scaleX, float scaleY) {
+            const float a = 1;
+            const float b = 0;
+            const float c = 0;
+            const float d = 1;
+            const float e = 0;
+            const float f = 0;
+            const float ca = 1;
+            const float sa = 0;
+            return new SVGXMatrix(
+                (a * ca + c * sa) * scaleX,
+                (b * ca + d * sa) * scaleX,
+                (c * ca - a * sa) * scaleY,
+                (d * ca - b * sa) * scaleY,
+                a * positionX + c * positionY + e,
+                b * positionX + d * positionY + f
             );
         }
 

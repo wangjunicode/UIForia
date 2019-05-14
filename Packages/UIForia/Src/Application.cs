@@ -57,9 +57,7 @@ namespace UIForia {
         protected AnimationSystem m_AnimationSystem;
 
         public readonly StyleSheetImporter styleImporter;
-
-        protected readonly SkipTree<UIElement> m_ElementTree;
-
+        private readonly IntMap<UIElement> elementMap;
         protected readonly List<ISystem> m_Systems;
 
         public event Action<UIElement> onElementRegistered;
@@ -94,11 +92,6 @@ namespace UIForia {
         private readonly UITaskSystem m_BeforeUpdateTaskSystem;
         private readonly UITaskSystem m_AfterUpdateTaskSystem;
 
-        protected readonly SkipTree<UIElement> createTree;
-        protected readonly SkipTree<UIElement> enableTree;
-        protected readonly SkipTree<UIElement> disableTree;
-        protected readonly SkipTree<UIElement> destroyTree;
-        protected readonly SkipTree<UIElement> readyTree;
         protected readonly SkipTree<UIElement> updateTree;
 
         static Application() {
@@ -121,14 +114,8 @@ namespace UIForia {
             s_ApplicationList.Add(this);
 
             this.m_Systems = new List<ISystem>();
-            this.m_ElementTree = new SkipTree<UIElement>();
             this.m_Views = new List<UIView>();
             this.updateTree = new SkipTree<UIElement>();
-            this.createTree = new SkipTree<UIElement>();
-            this.enableTree = new SkipTree<UIElement>();
-            this.disableTree = new SkipTree<UIElement>();
-            this.destroyTree = new SkipTree<UIElement>();
-            this.readyTree = new SkipTree<UIElement>();
 
             m_StyleSystem = new StyleSystem();
             m_BindingSystem = new BindingSystem();
@@ -140,6 +127,8 @@ namespace UIForia {
 
             styleImporter = new StyleSheetImporter(this);
             templateParser = new TemplateParser(this);
+
+            elementMap = new IntMap<UIElement>();
 
             m_Systems.Add(m_StyleSystem);
             m_Systems.Add(m_BindingSystem);
@@ -215,7 +204,7 @@ namespace UIForia {
 
             m_Views.Add(view);
 
-            RegisterElement(view.RootElement);
+//            RegisterElement(view.RootElement);
 
             for (int i = 0; i < m_Systems.Count; i++) {
                 m_Systems[i].OnViewAdded(view);
@@ -249,7 +238,7 @@ namespace UIForia {
             return view;
         }
 
-        internal UIElement CreateChildElement(UIElement parent, Type type) {
+        public UIElement CreateElement(Type type) {
             if (type == null) {
                 return null;
             }
@@ -262,15 +251,17 @@ namespace UIForia {
 
             UIElement retn = template.Create();
 
-            retn.templateContext.rootObject = parent;
-            retn.parent = parent;
-            parent.children.Add(retn);
-            RegisterElement(retn);
 
             return retn;
         }
+        
+        internal UIElement CreateChildElement(UIElement parent, Type type) {
+            throw new NotImplementedException();
+           
+        }
 
         internal void RegisterElement(UIElement element) {
+            throw new NotImplementedException();
             if (element.parent == null) {
                 Debug.Assert(element.View.RootElement == element, nameof(element.View.RootElement) + " must be null if providing a null parent");
 
@@ -304,6 +295,7 @@ namespace UIForia {
 
         public void Refresh() {
             onWillRefresh?.Invoke();
+
             foreach (ISystem system in m_Systems) {
                 system.OnReset();
             }
@@ -311,10 +303,7 @@ namespace UIForia {
             onReady = null;
             onUpdate = null;
 
-            m_ElementTree.TraversePreOrder((el) => el.OnDestroy());
-
-            m_ElementTree.Clear();
-
+            elementMap.Clear();
             templateParser.Reset();
             styleImporter.Reset();
             ResourceManager.Reset(); // todo use 1 instance per application
@@ -349,7 +338,6 @@ namespace UIForia {
                 view.Destroy();
             }
 
-            m_ElementTree.Clear();
             onRefresh = null;
             onNextRefresh = null;
             onReady = null;
@@ -366,30 +354,11 @@ namespace UIForia {
         protected void AddElementToLifeCycleTrees(UIElement element) {
             UIElement.UIElementTypeData typeData = element.GetTypeData();
 
-            m_ElementTree.AddItem(element);
             if (typeData.requiresUpdate) {
                 updateTree.AddItem(element);
             }
 
-            if (typeData.requiresCreate && !element.isCreated) {
-                createTree.AddItem(element);
-            }
-
-            if (typeData.requiresReady && !element.isReady) {
-                readyTree.AddItem(element);
-            }
-
-            if (typeData.requiresDestroy) {
-                destroyTree.AddItem(element);
-            }
-
-            if (typeData.requiresEnable) {
-                enableTree.AddItem(element);
-            }
-
-            if (typeData.requiresDisable) {
-                disableTree.AddItem(element);
-            }
+            elementMap[element.id] = element;
         }
 
         protected void InitHierarchy(UIElement element) {
@@ -490,25 +459,24 @@ namespace UIForia {
         }
 
         internal void DoDestroyElement(UIElement element) {
-            
             if ((element.flags & UIElementFlags.Destroyed) != 0) {
                 return;
             }
 
             LightStack<UIElement> stack = new LightStack<UIElement>();
             LightList<UIElement> toInternalDestroy = LightListPool<UIElement>.Get();
-            
+
             stack.Push(element);
-            
+
             while (stack.Count > 0) {
                 UIElement current = stack.PopUnchecked();
-                
+
                 UIElement[] children = current.children.Array;
                 int childCount = current.children.Count;
                 for (int i = childCount - 1; i >= 0; i--) {
                     stack.Push(children[i]);
                 }
-                
+
                 if (!current.isDestroyed) {
                     current.flags |= UIElementFlags.Destroyed;
                     current.OnDestroy();
@@ -516,22 +484,25 @@ namespace UIForia {
                 }
             }
 
-            for (int i = 0; i < toInternalDestroy.Count; i++) {
-                toInternalDestroy[i].InternalDestroy();
-            }
             
-            LightListPool<UIElement>.Release(ref toInternalDestroy);
-            
-            for (int i = 0; i < m_Systems.Count; i++) {
-                m_Systems[i].OnElementDestroyed(element);
-            }
-
             if (element.parent != null) {
                 element.parent.children.Remove(element);
                 for (int i = 0; i < element.parent.children.Count; i++) {
                     element.parent.children[i].siblingIndex = i;
                 }
             }
+            
+            for (int i = 0; i < toInternalDestroy.Count; i++) {
+                toInternalDestroy[i].InternalDestroy();
+                elementMap.Remove(toInternalDestroy[i].id);
+            }
+
+            LightListPool<UIElement>.Release(ref toInternalDestroy);
+
+            for (int i = 0; i < m_Systems.Count; i++) {
+                m_Systems[i].OnElementDestroyed(element);
+            }
+
 
             onElementDestroyed?.Invoke(element);
 
@@ -541,9 +512,7 @@ namespace UIForia {
         }
 
         internal void DestroyChildren(UIElement element) {
-            // todo - handle template parent :(
-
-            if ((element.flags & UIElementFlags.Destroyed) != 0) {
+            if (element.isDestroyed) {
                 return;
             }
 
@@ -551,31 +520,48 @@ namespace UIForia {
                 return;
             }
 
-            for (int i = 0; i < element.children.Count; i++) {
-                UIElement child = element.children[i];
-                child.flags |= UIElementFlags.Destroyed;
-                child.flags &= ~(UIElementFlags.Enabled);
+            LightStack<UIElement> stack = LightStack<UIElement>.Get();
+            LightList<UIElement> toInternalDestroy = LightListPool<UIElement>.Get();
 
-                m_ElementTree.TraversePostOrder(child, (node) => {
-                    node.flags |= UIElementFlags.Destroyed;
-                    node.flags &= ~(UIElementFlags.Enabled);
-                }, true);
+            int childCount = element.children.Count;
+            UIElement[] children = element.children.Array;
 
-                m_ElementTree.TraversePostOrder(child, (node) => node.OnDestroy(), true);
+            for (int i = 0; i < childCount; i++) {
+                stack.Push(children[i]);
+                updateTree.RemoveHierarchy(children[i]);
             }
+
+            while (stack.Count > 0) {
+                UIElement current = stack.PopUnchecked();
+
+                if (!current.isDestroyed) {
+                    current.flags &= ~(UIElementFlags.Enabled);
+                    current.flags |= UIElementFlags.Destroyed;
+                    current.OnDestroy();
+                    toInternalDestroy.Add(current);
+                }
+
+                childCount = current.children.Count;
+                children = current.children.Array;
+
+                for (int i = childCount - 1; i >= 0; i--) {
+                    stack.Push(children[i]);
+                }
+            }
+
+            for (int i = 0; i < toInternalDestroy.Count; i++) {
+                toInternalDestroy[i].InternalDestroy();
+                elementMap.Remove(toInternalDestroy[i].id);
+            }
+
+
+            element.children.Clear();
 
             for (int i = 0; i < element.children.Count; i++) {
                 for (int j = 0; j < m_Systems.Count; j++) {
                     m_Systems[j].OnElementDestroyed(element.children[i]);
                 }
             }
-
-            for (int i = 0; i < element.children.Count; i++) {
-                m_ElementTree.TraversePostOrder(element.children[i], (node) => { LightListPool<UIElement>.Release(ref node.children); }, true);
-                m_ElementTree.RemoveHierarchy(element.children[i]);
-            }
-
-            element.children.Clear();
         }
 
         public void Update() {
@@ -599,6 +585,7 @@ namespace UIForia {
             m_StyleSystem.OnUpdate();
 
             m_LayoutSystem.OnUpdate();
+
             m_InputSystem.OnUpdate();
 
             m_BeforeUpdateTaskSystem.OnUpdate();
@@ -657,11 +644,10 @@ namespace UIForia {
         }
 
         public void DoEnableElement(UIElement element) {
-            
             if (element.isDestroyed) {
                 return;
             }
-            
+
             element.flags |= UIElementFlags.Enabled;
 
             int targetPhase = -1;
@@ -676,22 +662,9 @@ namespace UIForia {
                     ptr = ptr.parent;
                 }
             }
-//
-//            // if element is not enabled (ie has a disabled ancestor), no-op 
+
+            // if element is not enabled (ie has a disabled ancestor), no-op 
             if (!element.isEnabled) return;
-
-//            element.OnEnable();
-//
-//            if (!element.isEnabled) {
-//                return;
-//            }
-//
-//            RunEnableBinding(element);
-//
-//            if (!element.isEnabled) {
-//                return;
-//            }
-
 
             LightStack<UIElement> stack = LightStack<UIElement>.Get();
             UIElement[] children;
@@ -702,16 +675,20 @@ namespace UIForia {
             element.enablePhase = 1;
             while (stack.Count > 0) {
                 UIElement child = stack.PopUnchecked();
-                
+
                 if (child.isDestroyed) {
                     continue;
                 }
-                
+
                 if (child.parent.isEnabled) {
                     child.flags |= UIElementFlags.AncestorEnabled;
                 }
-                
+
                 if (child.isEnabled && !child.isCreated) {
+                    for (int i = 0; i < m_Systems.Count; i++) {
+                        m_Systems[i].OnElementCreated(child);
+                    }
+
                     child.flags |= UIElementFlags.Created;
                     child.OnCreate();
                 }
@@ -737,7 +714,7 @@ namespace UIForia {
                 LightStack<UIElement>.Release(ref stack);
                 return;
             }
-            
+
             while (stack.Count > 0) {
                 UIElement child = stack.PopUnchecked();
                 child.flags |= UIElementFlags.AncestorEnabled;
@@ -765,13 +742,13 @@ namespace UIForia {
             }
 
             element.enablePhase = 3;
-            
+
             if (targetPhase != -1 && targetPhase <= 3) {
                 element.enablePhase = 0;
                 LightStack<UIElement>.Release(ref stack);
                 return;
             }
-            
+
             if (element.isEnabled) {
                 foreach (ISystem system in m_Systems) {
                     system.OnElementEnabled(element);
@@ -783,11 +760,11 @@ namespace UIForia {
 
                 while (stack.Count > 0) {
                     UIElement child = stack.PopUnchecked();
-                    
+
                     if (child.isDestroyed) {
                         continue;
                     }
-                    
+
                     if (child.isEnabled && !child.isReady) {
                         child.flags |= UIElementFlags.Ready;
                         child.OnReady();
@@ -813,7 +790,10 @@ namespace UIForia {
 
         public void DoDisableElement(UIElement element) {
             // no-op for already disabled elements
-            if (!element.isCreated || element.isDisabled) return;
+            if (!element.isCreated || element.isDisabled) {
+                element.flags &= ~(UIElementFlags.Enabled);
+                return;
+            }
 
             element.flags &= ~(UIElementFlags.Enabled);
 
@@ -871,7 +851,7 @@ namespace UIForia {
         }
 
         public UIElement GetElement(int elementId) {
-            return m_ElementTree.GetItem(elementId);
+            return elementMap.GetOrDefault(elementId);
         }
 
         public void OnAttributeSet(UIElement element, string attributeName, string currentValue, string previousValue) {
@@ -895,20 +875,12 @@ namespace UIForia {
             return s_ApplicationList.Find(appId, (app, _id) => app.id == _id);
         }
 
-        public static void RegisterCustomPainter(string name, ISVGXElementPainter painter) {
-            s_CustomPainters[name] = painter;
-        }
-
         public static bool HasCustomPainter(string name) {
             return s_CustomPainters.ContainsKey(name);
         }
 
         public static ISVGXElementPainter GetCustomPainter(string name) {
             return s_CustomPainters.GetOrDefault(name);
-        }
-
-        public static void RegisterCustomScrollbar(string name, Scrollbar scrollbar) {
-            s_Scrollbars.Add(name, scrollbar);
         }
 
         public static Scrollbar GetCustomScrollbar(string name) {
@@ -929,31 +901,22 @@ namespace UIForia {
 
         internal void InsertChild(UIElement parent, UIElement child, uint index) {
             if (child.parent != null) {
-                updateTree.RemoveHierarchy(child);
+                throw new NotImplementedException("Reparenting is not supported");
             }
-
-            // todo -- check if parent is in orphan hierarchy
-            // todo -- element.onHierarchyChanged fn
-            // todo -- element.onParentChanged
-            // todo -- handle element changing views
 
             bool hasView = child.View != null;
 
             // we don't know the hierarchy at this point.
             // could be made up of a mix of elements in various states
 
-
             child.parent = parent;
             parent.children.Insert((int) index, child);
 
             if (hasView) {
-                // need to deal with changed view / parent    
-                return;
+                throw new NotImplementedException("Changing views is not supported");
             }
 
-            bool parentCreated = parent.isCreated;
             bool parentEnabled = parent.isEnabled;
-            bool parentReady = parent.isReady;
 
             LightStack<UIElement> stack = LightStack<UIElement>.Get();
             UIView view = parent.View;
@@ -966,6 +929,7 @@ namespace UIForia {
 
                 current.depth = current.parent.depth + 1;
 
+                // todo -- we don't support changing views or any sort of re-parenting
                 if (current.View != view) {
                     if (current.View != null) {
                         current.View.RemoveElement(current);
@@ -976,7 +940,6 @@ namespace UIForia {
                 }
 
                 current.View = view;
-                // assume application doesn't change for now
 
                 if (current.parent.isEnabled) {
                     current.flags |= UIElementFlags.AncestorEnabled;
@@ -985,7 +948,7 @@ namespace UIForia {
                     current.flags &= ~UIElementFlags.AncestorEnabled;
                 }
 
-//                AddElementToLifeCycleTrees(current);
+                AddElementToLifeCycleTrees(current);
 
                 UIElement[] children = current.children.Array;
                 int childCount = current.children.Count;
@@ -1007,64 +970,6 @@ namespace UIForia {
                 child.flags &= ~UIElementFlags.Enabled;
                 DoEnableElement(child);
             }
-        }
-
-        public void SetParent(UIElement element, UIElement parent) {
-            if (parent == null) {
-                // add to orphan list & remove existing binding n stuff    
-            }
-
-            if (element.parent == parent) {
-                return;
-            }
-
-            if (element.parent != null) {
-                // remove hierarchy any from trees
-                // remove hierarchy any per frame bindings
-            }
-
-            // adjust template root?
-            element.parent = parent;
-            parent.children.Add(element);
-            LightStack<UIElement> stack = LightStack<UIElement>.Get();
-
-            element.depth = 0;
-            bool ancestorEnabled = parent.isEnabled;
-            stack.Push(element);
-
-            if (parent.isEnabled) {
-                element.flags |= UIElementFlags.AncestorEnabled;
-            }
-            else {
-                element.flags &= ~UIElementFlags.AncestorEnabled;
-            }
-
-            while (stack.Count > 0) {
-                UIElement current = stack.Pop();
-
-                current.depth = current.parent.depth + 1;
-                bool enabled = current.isEnabled;
-                UIElement[] children = element.children.Array;
-                int childCount = element.children.Count;
-
-                for (int i = 0; i < childCount; i++) {
-                    UIElement child = children[i];
-                    if (enabled) {
-                        child.flags |= UIElementFlags.AncestorEnabled;
-                    }
-
-                    stack.Push(child);
-                }
-            }
-
-            LightStack<UIElement>.Release(ref stack);
-            // update enabled / disabled
-            // update depth 
-            // events
-            // life cycle
-
-            // ready & create only get fired when attached
-            // update selector map
         }
 
     }

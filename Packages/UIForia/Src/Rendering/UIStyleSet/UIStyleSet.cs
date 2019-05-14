@@ -104,16 +104,25 @@ namespace UIForia.Rendering {
             LightListPool<StyleProperty>.Release(ref inherited);
         }
 
-        internal void Initialize(IList<UIStyleGroupContainer> baseStyles) {
+        internal void Initialize() {
+
+            UITemplate originTemplate = element.OriginTemplate;
+            
+            if (originTemplate == null) {
+                return;
+            }
+            
+            UIStyleGroupContainer[] baseStyles = originTemplate.baseStyles;
+
             containedStates = 0;
             hasAttributeStyles = false;
 
-            ParsedTemplate template = element.OriginTemplate.SourceTemplate;
+            ParsedTemplate template = originTemplate.SourceTemplate;
 
             LightList<StylePropertyId> toUpdate = LightListPool<StylePropertyId>.Get();
-            styleGroupContainers.EnsureCapacity(baseStyles.Count);
+            styleGroupContainers.EnsureCapacity(baseStyles.Length);
 
-            for (int i = 0; i < baseStyles.Count; i++) {
+            for (int i = 0; i < baseStyles.Length; i++) {
                 styleGroupContainers.AddUnchecked(baseStyles[i]);
                 CreateStyleGroups(baseStyles[i], toUpdate);
             }
@@ -587,7 +596,7 @@ namespace UIForia.Rendering {
             return "Unknown";
         }
 
-        public void SetProperty(StyleProperty property, StyleState state) {
+        public void SetProperty(in StyleProperty property, StyleState state) {
             UIStyle style = GetOrCreateInstanceStyle(state);
             if ((state & currentState) == 0) {
                 style.SetProperty(property);
@@ -602,12 +611,12 @@ namespace UIForia.Rendering {
             if (TryGetPropertyValueInState(property.propertyId, currentState, out currentValue)) {
                 if (oldValue != currentValue) {
                     propertyMap[(int) property.propertyId] = currentValue;
-                    styleSystem.SetStyleProperty(element, currentValue);
+                    styleSystem?.SetStyleProperty(element, currentValue);
                 }
             }
             else {
                 propertyMap.Remove((int) property.propertyId);
-                styleSystem.SetStyleProperty(element, property);
+                styleSystem?.SetStyleProperty(element, property);
             }
         }
 
@@ -699,7 +708,7 @@ namespace UIForia.Rendering {
                 if (TryGetPropertyValueInState(propertyId, currentState, out StyleProperty property)) {
                     if (oldValue != property) {
                         propertyMap[(int) property.propertyId] = property;
-                        styleSystem.SetStyleProperty(element, property);
+                        styleSystem?.SetStyleProperty(element, property);
                     }
                 }
                 else {

@@ -8,10 +8,10 @@ using UIForia.Elements;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
 
-namespace Layout {
+namespace LifeCycle {
 
     [TestFixture]
-    public class BaseLayoutTests {
+    public class LifeCycleTests {
 
         [Template(TemplateType.String, @"
         <UITemplate>
@@ -27,7 +27,7 @@ namespace Layout {
             </Contents>
         </UITemplate>
     ")]
-        public class LayoutTestThing : UIElement {
+        public class LifeCycleTestThing : UIElement {
 
             public UIGroupElement child0;
             public UIGroupElement child1;
@@ -44,11 +44,11 @@ namespace Layout {
 
         [Test]
         public void ViewInvokesAddedEvents() {
-            MockApplication app = new MockApplication(typeof(LayoutTestThing));
+            MockApplication app = new MockApplication(typeof(LifeCycleTestThing));
             UIView view = app.AddView("View0", new Rect(0, 0, 500, 500));
             int count = 0;
             view.onElementsAdded += (elements) => { count = elements.Count; };
-            UIElement root = view.CreateElement<LayoutTestThing>();
+            UIElement root = view.CreateElement<LifeCycleTestThing>();
             Assert.AreEqual(4, count);
         }
 
@@ -119,7 +119,7 @@ namespace Layout {
 
         [Test]
         public void CallsLifeCycleInProperOrderOnCreate() {
-            MockApplication app = new MockApplication(typeof(LayoutTestThing));
+            MockApplication app = new MockApplication(typeof(LifeCycleTestThing));
             UIView view = app.AddView("View0", new Rect(0, 0, 500, 500));
 
             List<string> list = new List<string>();
@@ -135,7 +135,7 @@ namespace Layout {
 
         [Test]
         public void CallsLifeCycleInProperOrderOnCreateForChildren() {
-            MockApplication app = new MockApplication(typeof(LayoutTestThing));
+            MockApplication app = new MockApplication(typeof(LifeCycleTestThing));
             UIView view = app.AddView("View0", new Rect(0, 0, 500, 500));
 
             List<string> list = new List<string>();
@@ -166,7 +166,7 @@ namespace Layout {
 
         [Test]
         public void CallsLifeCycleInProperOrderOnCreateForChildrenDisabled() {
-            MockApplication app = new MockApplication(typeof(LayoutTestThing));
+            MockApplication app = new MockApplication(typeof(LifeCycleTestThing));
             UIView view = app.AddView("View0", new Rect(0, 0, 500, 500));
 
             List<string> list = new List<string>();
@@ -194,7 +194,7 @@ namespace Layout {
 
         [Test]
         public void LifeCycleDisableOnCreate() {
-            MockApplication app = new MockApplication(typeof(LayoutTestThing));
+            MockApplication app = new MockApplication(typeof(LifeCycleTestThing));
             UIView view = app.AddView("View0", new Rect(0, 0, 500, 500));
 
             List<string> list = new List<string>();
@@ -237,7 +237,7 @@ namespace Layout {
 
         [Test]
         public void LifeCycleDisableOnEnable() {
-            MockApplication app = new MockApplication(typeof(LayoutTestThing));
+            MockApplication app = new MockApplication(typeof(LifeCycleTestThing));
             UIView view = app.AddView("View0", new Rect(0, 0, 500, 500));
 
             List<string> list = new List<string>();
@@ -268,7 +268,7 @@ namespace Layout {
 
         [Test]
         public void LifeCycleDisableOnReadyThenEnable() {
-            MockApplication app = new MockApplication(typeof(LayoutTestThing));
+            MockApplication app = new MockApplication(typeof(LifeCycleTestThing));
             UIView view = app.AddView("View0", new Rect(0, 0, 500, 500));
 
             List<string> list = new List<string>();
@@ -312,7 +312,7 @@ namespace Layout {
 
         [Test]
         public void LifeCycleMultipleChildLayers() {
-            MockApplication app = new MockApplication(typeof(LayoutTestThing));
+            MockApplication app = new MockApplication(typeof(LifeCycleTestThing));
             UIView view = app.AddView("View0", new Rect(0, 0, 500, 500));
 
             List<string> list = new List<string>();
@@ -354,7 +354,7 @@ namespace Layout {
 
         [Test]
         public void CreateChildrenOnCreate() {
-            MockApplication app = new MockApplication(typeof(LayoutTestThing));
+            MockApplication app = new MockApplication(typeof(LifeCycleTestThing));
             UIView view = app.AddView("View0", new Rect(0, 0, 500, 500));
 
             List<string> list = new List<string>();
@@ -390,7 +390,7 @@ namespace Layout {
 
         [Test]
         public void CreateChildrenOnReady() {
-            MockApplication app = new MockApplication(typeof(LayoutTestThing));
+            MockApplication app = new MockApplication(typeof(LifeCycleTestThing));
             UIView view = app.AddView("View0", new Rect(0, 0, 500, 500));
 
             List<string> list = new List<string>();
@@ -426,7 +426,7 @@ namespace Layout {
 
         [Test]
         public void CreateDisabledChildrenOnReady() {
-            MockApplication app = new MockApplication(typeof(LayoutTestThing));
+            MockApplication app = new MockApplication(typeof(LifeCycleTestThing));
             UIView view = app.AddView("View0", new Rect(0, 0, 500, 500));
 
             List<string> list = new List<string>();
@@ -471,7 +471,7 @@ namespace Layout {
 
         [Test]
         public void LifeCycleDestroyChildOnCreate() {
-            MockApplication app = new MockApplication(typeof(LayoutTestThing));
+            MockApplication app = new MockApplication(typeof(LifeCycleTestThing));
             UIView view = app.AddView("View0", new Rect(0, 0, 500, 500));
 
             List<string> list = new List<string>();
@@ -504,7 +504,7 @@ namespace Layout {
         // todo -- test depth & sibling index after hierarchy manipulation
         [Test]
         public void AddSiblingElement() {
-            MockApplication app = new MockApplication(typeof(LayoutTestThing));
+            MockApplication app = new MockApplication(typeof(LifeCycleTestThing));
             UIView view = app.AddView("View0", new Rect(0, 0, 500, 500));
 
             List<string> list = new List<string>();
@@ -549,7 +549,7 @@ namespace Layout {
         
         [Test]
         public void AddSiblingElementToRoot() {
-            MockApplication app = new MockApplication(typeof(LayoutTestThing));
+            MockApplication app = new MockApplication(typeof(LifeCycleTestThing));
             UIView view = app.AddView("View0", new Rect(0, 0, 500, 500));
 
             List<string> list = new List<string>();
@@ -594,25 +594,23 @@ namespace Layout {
 
         }
 
-        [Test]
-        public void GathersProperLayoutElements() {
-            MockApplication app = new MockApplication(typeof(LayoutTestThing));
-            UIView view = app.AddView("View0", new Rect(0, 0, 500, 500));
-
-            UIElement root = view.CreateElement<LayoutTestThing>();
-
-            view.AddChild(root);
-
-            root.AddChild(new UIGroupElement());
-            root.AddChild(new UIGroupElement());
-            root.AddChild(new UIGroupElement());
-
-            Assert.AreEqual(root.View, view);
-            Assert.AreEqual(6, root.children.Count);
-            for (int i = 0; i < root.children.Count; i++) {
-                Assert.AreEqual(view, root.children[i].View);
-            }
-        }
+//        [Test]
+//        public void GathersProperLayoutElements() {
+//            MockApplication app = new MockApplication(typeof(LifeCycleTestThing));
+//            UIView view = app.AddView("View0", new Rect(0, 0, 500, 500));
+//
+//            UIElement root = view.CreateElement<LifeCycleTestThing>();
+//
+//            root.AddChild(new UIGroupElement());
+//            root.AddChild(new UIGroupElement());
+//            root.AddChild(new UIGroupElement());
+//
+//            Assert.AreEqual(root.View, view);
+//            Assert.AreEqual(6, root.children.Count);
+//            for (int i = 0; i < root.children.Count; i++) {
+//                Assert.AreEqual(view, root.children[i].View);
+//            }
+//        }
 
     }
 

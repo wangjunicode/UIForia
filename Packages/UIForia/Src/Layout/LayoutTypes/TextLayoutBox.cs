@@ -8,8 +8,6 @@ namespace UIForia.Layout.LayoutTypes {
 
     public class TextLayoutBox : LayoutBox {
 
-        public TextLayoutBox(UIElement element) : base(element) { }
-
         public TextInfo TextInfo => ((UITextElement) element).textInfo;
 
         protected override float ComputeContentWidth() {
@@ -19,6 +17,8 @@ namespace UIForia.Layout.LayoutTypes {
         protected override float ComputeContentHeight(float width) {
             return ((UITextElement) element).TextInfo.ComputeHeight(width - PaddingHorizontal - BorderHorizontal);
         }
+
+        protected override void OnChildrenChanged() { }
 
         public override void RunLayout() {
             TextInfo textInfo = ((UITextElement) element).TextInfo;

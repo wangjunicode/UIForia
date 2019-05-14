@@ -552,5 +552,11 @@ public class StyleTests {
         StyleProperty fontSize = target.GetChild(0).GetChild(0).style.GetComputedStyleProperty(StylePropertyId.TextFontSize);
         Assert.AreEqual(100, fontSize.AsUIFixedLength.value);
     }
+
+    [Test]
+    public void StylesAreInheritedWhenEnabled() {
+        Assert.IsTrue(false );
+    }
     
+
 }

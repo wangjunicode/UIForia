@@ -44,38 +44,37 @@ namespace UIForia.Systems {
         public void OnElementCreated(UIElement element) {
 
             // this should really be on enable and stop for disabled elements
-            Profiler.BeginSample("Style System [OnElementCreated]");
+            element.style.styleSystem = this;
             
-            if (element.parent != null) {
-                int count = StyleUtil.InheritedProperties.Count;
-                UIStyleSet parentStyle = element.parent.style;
-                LightList<StyleProperty> inheritedProperties = LightListPool<StyleProperty>.Get();
-                inheritedProperties.EnsureCapacity(count);
-                StyleProperty[] inheritedPropertiesArray = inheritedProperties.Array;
-
-                for (int i = 0; i < count; i++) {
-                    inheritedPropertiesArray[i] = parentStyle.GetComputedStyleProperty(StyleUtil.InheritedProperties[i]);
-                }
-
-                inheritedProperties.Count = count;
-                OnElementCreatedStep(element, inheritedProperties);
-                LightListPool<StyleProperty>.Release(ref inheritedProperties);
-            }
-            else {
-                
-                LightList<StyleProperty> inheritedProperties = LightListPool<StyleProperty>.Get();
-                inheritedProperties.EnsureCapacity(StyleUtil.InheritedProperties.Count);
-                StyleProperty[] inheritedPropertiesArray = inheritedProperties.Array;
-
-                for (int i = 0; i < inheritedProperties.Count; i++) {
-                    inheritedPropertiesArray[i] = DefaultStyleValues_Generated.GetPropertyValue(StyleUtil.InheritedProperties[i]);
-                }
-
-                OnElementCreatedStep(element, inheritedProperties);
-                LightListPool<StyleProperty>.Release(ref inheritedProperties);
-            }
-            
-            Profiler.EndSample();
+//            if (element.parent != null) {
+//                int count = StyleUtil.InheritedProperties.Count;
+//                UIStyleSet parentStyle = element.parent.style;
+//                LightList<StyleProperty> inheritedProperties = LightListPool<StyleProperty>.Get();
+//                inheritedProperties.EnsureCapacity(count);
+//                StyleProperty[] inheritedPropertiesArray = inheritedProperties.Array;
+//
+//                for (int i = 0; i < count; i++) {
+//                    inheritedPropertiesArray[i] = parentStyle.GetComputedStyleProperty(StyleUtil.InheritedProperties[i]);
+//                }
+//
+//                inheritedProperties.Count = count;
+//                OnElementCreatedStep(element, inheritedProperties);
+//                LightListPool<StyleProperty>.Release(ref inheritedProperties);
+//            }
+//            else {
+//                
+//                LightList<StyleProperty> inheritedProperties = LightListPool<StyleProperty>.Get();
+//                inheritedProperties.EnsureCapacity(StyleUtil.InheritedProperties.Count);
+//                StyleProperty[] inheritedPropertiesArray = inheritedProperties.Array;
+//
+//                for (int i = 0; i < inheritedProperties.Count; i++) {
+//                    inheritedPropertiesArray[i] = DefaultStyleValues_Generated.GetPropertyValue(StyleUtil.InheritedProperties[i]);
+//                }
+//
+//                OnElementCreatedStep(element, inheritedProperties);
+//                LightListPool<StyleProperty>.Release(ref inheritedProperties);
+//            }
+//            
 
         }
 
@@ -84,11 +83,10 @@ namespace UIForia.Systems {
         // --> all systems have run
         // ready 
         private void OnElementCreatedStep(UIElement element, LightList<StyleProperty> parentProperties) {
-            UIStyleGroupContainer[] baseStyles = element.OriginTemplate.baseStyles;
 
             element.style.styleSystem = this;
 
-            element.style.Initialize(baseStyles);
+//            element.style.Initialize();
 
             int count = parentProperties.Count;
             StyleProperty[] parentPropertiesArray = parentProperties.Array;
@@ -162,14 +160,6 @@ namespace UIForia.Systems {
 
         public void OnElementDestroyed(UIElement element) { }
 
-        public void OnElementReady(UIElement element) { }
-
-        public void OnElementHierarchyAdded(UIElement element) {
-            // update queries
-            // update inherited properties
-            
-        }
-
         public void OnElementParentChanged() { }
         
         public void OnElementHierarchyRemoved() { }
@@ -189,6 +179,9 @@ namespace UIForia.Systems {
         }
 
         public void SetStyleProperty(UIElement element, StyleProperty property) {
+            
+            if (element.isDisabled || element.isDestroyed || !element.isReady) return;
+            
             AddToChangeSet(element, property);
 
             if (!StyleUtil.IsInherited(property.propertyId) || element.children == null || element.children.Count == 0) {

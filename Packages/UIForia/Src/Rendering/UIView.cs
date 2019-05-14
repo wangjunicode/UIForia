@@ -34,7 +34,9 @@ public class UIView {
 
     public int Depth { get; set; }
     public Rect Viewport { get; set; }
-    public UIElement RootElement { get; private set; }
+    // this might want to be changed but so many test expect this that I dont' want to right now
+    
+    public UIElement RootElement => rootElement.GetChild(0);
     public float ScaleFactor { get; set; } = 1f;
 
     internal Matrix4x4 matrix;
@@ -68,6 +70,19 @@ public class UIView {
         this.Viewport = new Rect(position.x, position.y, size.width, size.height);
         this.elements = new LightList<UIElement>(32);
         this.visibleElements = new LightList<UIElement>(32);
+        this.rootElement = new UIViewRootElement();
+        this.rootElement.flags |= UIElementFlags.Enabled;
+        this.rootElement.flags |= UIElementFlags.AncestorEnabled;
+        this.rootElement.View = this;
+        UIElement child = null;
+        if (m_Template != null) {
+            child = Application.templateParser.ParseTemplateFromString(m_ElementType, m_Template).Create();
+        }
+        else {
+            child = Application.templateParser.GetParsedTemplate(m_ElementType).Create();
+        }
+
+        this.rootElement.AddChild(child);
         Refresh();
     }
 
@@ -82,19 +97,21 @@ public class UIView {
         this.position = Vector3.zero;
         this.size = new Size(Screen.width, Screen.height);
         this.Viewport = new Rect(position.x, position.y, size.width, size.height);
+        this.elements = new LightList<UIElement>(32);
+        this.visibleElements = new LightList<UIElement>(32);
         this.rootElement = new UIViewRootElement();
         this.rootElement.flags |= UIElementFlags.Enabled;
         this.rootElement.flags |= UIElementFlags.AncestorEnabled;
         this.rootElement.View = this;
     }
 
-
     public UIElement AddChild(UIElement element) {
-        Application.InsertChild(rootElement, element, (uint)rootElement.children.Count);
+        Application.InsertChild(rootElement, element, (uint) rootElement.children.Count);
         return element;
     }
 
     public bool clipOverflow;
+
     public bool focusOnMouseDown;
 
     public void SetZIndex() { }
@@ -103,23 +120,21 @@ public class UIView {
 
     public void SetRenderTexture(RenderTexture texture) { }
 
-    public void EnableElement(UIElement element) {
-        Application.DoEnableElement(element);
-    }
-
-    public void DisableElement(UIElement element) {
-        Application.DoDisableElement(element);
-    }
-
     public void Refresh() {
-        if (m_Template != null) {
-            this.RootElement = Application.templateParser.ParseTemplateFromString(m_ElementType, m_Template).Create();
-        }
-        else {
-            this.RootElement = Application.templateParser.GetParsedTemplate(m_ElementType).Create();
-        }
+//        
+//        this.rootElement = new UIViewRootElement();
+//        this.rootElement.flags |= UIElementFlags.Enabled;
+//        this.rootElement.flags |= UIElementFlags.AncestorEnabled;
+//        this.rootElement.View = this;
 
-        this.RootElement.View = this;
+//        if (m_Template != null) {
+//            this.RootElement = Application.templateParser.ParseTemplateFromString(m_ElementType, m_Template).Create();
+//        }
+//        else {
+//            this.RootElement = Application.templateParser.GetParsedTemplate(m_ElementType).Create();
+//        }
+//
+//        this.RootElement.View = this;
     }
 
     public void Destroy() { }
@@ -164,7 +179,7 @@ public class UIView {
     internal void InvokeAddElements(IReadOnlyList<UIElement> addedElements) {
         onElementsAdded?.Invoke(addedElements);
     }
-    
+
     public void RemoveElement(UIElement current) {
         // todo -- event
     }

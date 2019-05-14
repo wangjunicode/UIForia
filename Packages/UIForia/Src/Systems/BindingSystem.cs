@@ -40,6 +40,8 @@ namespace UIForia.Systems {
         public void OnElementCreated(UIElement element) {
             UITemplate template = element.OriginTemplate;
 
+            if (template == null) return;
+
             for (int i = 0; i < template.triggeredBindings.Length; i++) {
                 if (template.triggeredBindings[i].bindingType == BindingType.Constant) {
                     template.triggeredBindings[i].Execute(element, element.templateContext);
@@ -92,12 +94,7 @@ namespace UIForia.Systems {
                     node.context = element.templateContext;
                     m_WriteBindingTree.AddItem(node);
                 }
-                
-                if (element.children != null) {
-                    for (int i = 0; i < element.children.Count; i++) {
-                        OnElementCreated(element.children[i]);
-                    }
-                }
+ 
             }
         }
 
@@ -110,7 +107,9 @@ namespace UIForia.Systems {
             
         }
 
-        public void OnElementDisabled(UIElement element) { }
+        public void OnElementDisabled(UIElement element) {
+            
+        }
 
         public void OnAttributeSet(UIElement element, string attributeName, string currentValue, string attributeValue) { }
 

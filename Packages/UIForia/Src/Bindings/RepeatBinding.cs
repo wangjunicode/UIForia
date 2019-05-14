@@ -32,11 +32,9 @@ namespace UIForia.Bindings {
 
         private void OnItemInserted(U item, int index) {
             UIElement newItem = template.CreateScoped(repeat.scope);
-            newItem.parent = element;
             // root object isn't being assigned. make it assigned 
             newItem.templateContext.rootObject = element.templateContext.rootObject;
-            element.children.Insert(index, newItem);
-            element.View.Application.RegisterElement(newItem);
+            element.InsertChild((uint)index, newItem);
         }
 
         private void OnItemRemoved(U item, int index) {
@@ -99,12 +97,7 @@ namespace UIForia.Bindings {
             list.onClear += onClear;
 
             for (int i = 0; i < list.Count; i++) {
-                UIElement newItem = template.CreateScoped(repeat.scope);
-                newItem.parent = element;
-                // root object isn't being assigned. make it assigned 
-                newItem.templateContext.rootObject = element.templateContext.rootObject;
-                element.children.Insert(i, newItem);
-                element.View.Application.RegisterElement(newItem);
+                OnItemInserted(list[i], i);
             }
 
             repeat.listBecamePopulated = list.Count > 0;

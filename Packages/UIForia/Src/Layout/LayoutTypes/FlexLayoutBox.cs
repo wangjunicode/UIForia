@@ -1,12 +1,11 @@
 using System;
-using UIForia.Elements;
 using UIForia.Rendering;
 using UIForia.Util;
 using UnityEngine;
 
 namespace UIForia.Layout.LayoutTypes {
 
-    public class FlexLayoutBox : LayoutBox {
+    public class FlexLayoutBox : LayoutBox, IPoolableLayoutBox {
 
         public LightList<Item> items;
         public LightList<Track> tracks;
@@ -41,11 +40,17 @@ namespace UIForia.Layout.LayoutTypes {
 
         }
 
-        public FlexLayoutBox(UIElement element) : base(element) {
+        public FlexLayoutBox() {
             this.items = new LightList<Item>(4);
             this.tracks = new LightList<Track>(4);
-            this.crossAxisAlignment = style.FlexLayoutCrossAxisAlignment;
-            this.mainAxisAlignment = style.FlexLayoutMainAxisAlignment;
+        }
+        
+        public bool IsInPool { get; set; }
+        
+        public override void OnRelease() {
+            base.OnRelease();
+            this.items.QuickClear();
+            this.tracks.QuickClear();
         }
         
         protected override void OnChildrenChanged() {
@@ -555,6 +560,8 @@ namespace UIForia.Layout.LayoutTypes {
             track.remainingSpace = overflow;
             return track;
         }
+
+       
 
     }
 

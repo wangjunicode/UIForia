@@ -112,9 +112,23 @@ namespace UIForia.Elements {
             View.Application.DoDestroyElement(this);
         }
 
-        public void RemoveChild(int childIdx) { }
+        public UIElement InsertChild(uint idx, UIElement element) {
+            if (element == null || element == this || element.isDestroyed) {
+                return null;
+            }
+            if (View == null) {
+                element.parent = this;
+                element.View = null;
+                element.siblingIndex = children.Count;
+                element.depth = depth + 1;
+                children.Insert((int)idx, element);
+            }
+            else {
+                Application.InsertChild(this, element, (uint) children.Count);
+            }
 
-        public void InsertChild(int idx, UIElement element) { }
+            return element;
+        }
         
         public UIElement AddChild(UIElement element) {
             if (element == null || element == this || element.isDestroyed) {
@@ -508,11 +522,6 @@ namespace UIForia.Elements {
             }
             else {
                 typeData.requiresUpdate = ReflectionUtil.IsOverride(elementType.GetMethod(nameof(OnUpdate)));
-                typeData.requiresEnable = ReflectionUtil.IsOverride(elementType.GetMethod(nameof(OnEnable)));
-                typeData.requiresDisable = ReflectionUtil.IsOverride(elementType.GetMethod(nameof(OnDisable)));
-                typeData.requiresCreate = ReflectionUtil.IsOverride(elementType.GetMethod(nameof(OnCreate)));
-                typeData.requiresReady = ReflectionUtil.IsOverride(elementType.GetMethod(nameof(OnReady)));
-                typeData.requiresDestroy = ReflectionUtil.IsOverride(elementType.GetMethod(nameof(OnDestroy)));
                //typeData.attributes = elementType.GetCustomAttributes();
                 s_TypeDataMap[elementType] = typeData;
                 return typeData;
@@ -525,11 +534,6 @@ namespace UIForia.Elements {
         internal struct UIElementTypeData {
 
             public bool requiresUpdate;
-            public bool requiresEnable;
-            public bool requiresDisable;
-            public bool requiresReady;
-            public bool requiresCreate;
-            public bool requiresDestroy;
            // public Attribute[] attributes;
 
         }

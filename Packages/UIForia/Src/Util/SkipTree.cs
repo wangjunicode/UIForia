@@ -320,7 +320,7 @@ namespace UIForia.Util {
         public void RemoveHierarchy(IHierarchical item) {
             SkipTreeNode node;
             IHierarchical element = item.Element;
-            Stack<SkipTreeNode> stack = StackPool<SkipTreeNode>.Get();
+            LightStack<SkipTreeNode> stack = LightStack<SkipTreeNode>.Get();
             SkipTreeNode parent = FindParent(item) ?? root;
 
             if (!nodeMap.TryGetValue(element.UniqueId, out node)) {
@@ -361,11 +361,11 @@ namespace UIForia.Util {
             while (stack.Count > 0) {
                 SkipTreeNode current = stack.Pop();
                 nodeMap.Remove(current.item.UniqueId);
-                AddChildrenToStack(stack, current, true);
+                AddChildrenToLightStack(stack, current, true);
             }
 
             onTreeChanged?.Invoke(TreeChangeType.HierarchyRemoved);
-            StackPool<SkipTreeNode>.Release(stack);
+            LightStack<SkipTreeNode>.Release(ref stack);
         }
 
         public IList<T> GetAncestors(T start, IList<T> outputList = null) {
@@ -494,31 +494,31 @@ namespace UIForia.Util {
         }
 
         private void ConditionalTraversePreOrderStep(SkipTreeNode node, Func<T, bool> traverseFn) {
-            Stack<SkipTreeNode> stack = StackPool<SkipTreeNode>.Get();
-            AddChildrenToStack(stack, node, true);
+            LightStack<SkipTreeNode> stack = LightStack<SkipTreeNode>.Get();
+            AddChildrenToLightStack(stack, node, true);
 
             while (stack.Count > 0) {
                 SkipTreeNode current = stack.Pop();
                 if (traverseFn(current.item)) {
-                    AddChildrenToStack(stack, current, true);
+                    AddChildrenToLightStack(stack, current, true);
                 }
             }
 
-            StackPool<SkipTreeNode>.Release(stack);
+            LightStack<SkipTreeNode>.Release(ref stack);
         }
 
         private void ConditionalTraversePreOrderStep<U>(SkipTreeNode node, U closureArg, Func<T, U, bool> traverseFn) {
-            Stack<SkipTreeNode> stack = StackPool<SkipTreeNode>.Get();
-            AddChildrenToStack(stack, node, true);
+            LightStack<SkipTreeNode> stack = LightStack<SkipTreeNode>.Get();
+            AddChildrenToLightStack(stack, node, true);
 
             while (stack.Count > 0) {
                 SkipTreeNode current = stack.Pop();
                 if (traverseFn(current.item, closureArg)) {
-                    AddChildrenToStack(stack, current, true);
+                    AddChildrenToLightStack(stack, current, true);
                 }
             }
 
-            StackPool<SkipTreeNode>.Release(stack);
+            LightStack<SkipTreeNode>.Release(ref stack);
         }
 
         public void TraversePreOrder(Action<T> traverseFn, bool includeDisabled = false) {
@@ -701,20 +701,20 @@ namespace UIForia.Util {
 
             if (startNode.firstChild == null) return;
 
-            Stack<SkipTreeNode> stack = StackPool<SkipTreeNode>.Get();
+            LightStack<SkipTreeNode> stack = LightStack<SkipTreeNode>.Get();
 
-            AddChildrenToStack(stack, startNode, includeDisabled);
+            AddChildrenToLightStack(stack, startNode, includeDisabled);
 
             while (stack.Count > 0) {
                 SkipTreeNode current = stack.Pop();
                 traverseFn(closureArg, current);
-                AddChildrenToStack(stack, current, includeDisabled);
+                AddChildrenToLightStack(stack, current, includeDisabled);
             }
 
-            StackPool<SkipTreeNode>.Release(stack);
+            LightStack<SkipTreeNode>.Release(ref stack);
         }
 
-        private static void AddChildrenToStack(Stack<SkipTreeNode> stack, SkipTreeNode parent, bool includeDisabled) {
+        private static void AddChildrenToLightStack(LightStack<SkipTreeNode> stack, SkipTreeNode parent, bool includeDisabled) {
             SkipTreeNode ptr = parent.firstChild;
             while (ptr != null) {
                 if (includeDisabled || !ptr.isDisabled) {
@@ -780,30 +780,30 @@ namespace UIForia.Util {
                 return;
             }
 
-            Stack<SkipTreeNode> stack = StackPool<SkipTreeNode>.Get();
+            LightStack<SkipTreeNode> stack = LightStack<SkipTreeNode>.Get();
 
-            AddChildrenToStack(stack, startNode, includeDisabled);
+            AddChildrenToLightStack(stack, startNode, includeDisabled);
 
             while (stack.Count > 0) {
                 SkipTreeNode current = stack.Pop();
                 traverseFn(current.item);
-                AddChildrenToStack(stack, current, includeDisabled);
+                AddChildrenToLightStack(stack, current, includeDisabled);
             }
 
-            StackPool<SkipTreeNode>.Release(stack);
+            LightStack<SkipTreeNode>.Release(ref stack);
         }
 
         private void TraversePreOrderCallbackStep<U>(SkipTreeNode startNode, U closureArg, Action<U, T> traverseFn, bool includeDisabled) {
-            Stack<SkipTreeNode> stack = StackPool<SkipTreeNode>.Get();
+            LightStack<SkipTreeNode> stack = LightStack<SkipTreeNode>.Get();
 
-            AddChildrenToStack(stack, startNode, includeDisabled);
+            AddChildrenToLightStack(stack, startNode, includeDisabled);
             while (stack.Count > 0) {
                 SkipTreeNode current = stack.Pop();
                 traverseFn(closureArg, current.item);
-                AddChildrenToStack(stack, current, includeDisabled);
+                AddChildrenToLightStack(stack, current, includeDisabled);
             }
 
-            StackPool<SkipTreeNode>.Release(stack);
+            LightStack<SkipTreeNode>.Release(ref stack);
         }
 
         private static SkipTreeNode FindPreviousSibling(SkipTreeNode node) {

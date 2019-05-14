@@ -507,6 +507,9 @@ namespace UIForia.Systems {
 
         public void OnElementCreated(UIElement element) {
             UITemplate template = element.OriginTemplate;
+            
+            if (template == null) return;
+            
             MouseEventHandler[] mouseHandlers = template.mouseEventHandlers;
             DragEventCreator[] dragEventCreators = template.dragEventCreators;
             DragEventHandler[] dragEventHandlers = template.dragEventHandlers;
@@ -540,13 +543,13 @@ namespace UIForia.Systems {
                 m_DragCreatorMap[element.id] = new DragCreatorGroup(element.templateContext, dragEventCreators);
             }
 
-            if (element.children == null) {
-                return;
-            }
+//            if (element.children == null) {
+//                return;
+//            }
 
-            for (int i = 0; i < element.children.Count; i++) {
-                OnElementCreated(element.children[i]);
-            }
+//            for (int i = 0; i < element.children.Count; i++) {
+//                OnElementCreated(element.children[i]);
+//            }
         }
 
         public void OnAttributeSet(UIElement element, string attributeName, string currentValue, string attributeValue) { }

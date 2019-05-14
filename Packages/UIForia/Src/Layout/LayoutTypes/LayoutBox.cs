@@ -72,6 +72,8 @@ namespace UIForia.Layout.LayoutTypes {
         internal TransformBehavior transformBehaviorX;
         internal TransformBehavior transformBehaviorY;
 
+        internal bool isInPool;
+        internal LayoutBoxPool pool;
 #if DEBUG
         public int layoutCalls;
         public int contentSizeCacheHits;
@@ -91,13 +93,8 @@ namespace UIForia.Layout.LayoutTypes {
          * Figure out if parent needs to re-layout instead of assuming it does when child properties change
          * Don't always re-calculate preferred width
          */
-        protected LayoutBox([NotNull] UIElement element) {
-            this.element = element;
-            this.style = element.style;
-            this.children = new List<LayoutBox>(4);
-            this.cachedPreferredWidth = -1;
-            this.view = element.View;
-            this.markedForLayout = true;
+        protected LayoutBox() {
+         
         }
 
         public abstract void RunLayout();
@@ -479,13 +476,9 @@ namespace UIForia.Layout.LayoutTypes {
             return -1;
         }
 
-        protected virtual float ComputeContentWidth() {
-            return 0f;
-        }
+        protected abstract float ComputeContentWidth();
 
-        protected virtual float ComputeContentHeight(float width) {
-            return 0f;
-        }
+        protected abstract float ComputeContentHeight(float width);
 
         private float GetContentWidth() {
             // todo -- get some stats on this
@@ -1130,7 +1123,30 @@ namespace UIForia.Layout.LayoutTypes {
             );
         }
 
-        protected virtual void OnChildrenChanged() { }
+        protected abstract void OnChildrenChanged();
+
+        public virtual void OnSpawn(UIElement element) {
+            this.element = element;
+            this.style = element.style;
+            this.children = children ?? new List<LayoutBox>(4);
+            this.cachedPreferredWidth = -1;
+            this.view = element.View;
+            this.markedForLayout = true;
+            UpdateFromStyle();
+        }
+
+        public virtual void OnRelease() {
+            this.element = null;
+            this.style = null;
+            this.children.Clear();
+            this.cachedPreferredWidth = -1;
+            this.view = null;
+            this.markedForLayout = true;
+        }
+
+        internal void Release() {
+            pool?.Release(this);
+        }
 
     }
 

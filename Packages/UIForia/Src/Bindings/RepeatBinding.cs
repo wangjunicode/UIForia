@@ -31,6 +31,7 @@ namespace UIForia.Bindings {
         }
 
         private void OnItemInserted(U item, int index) {
+            if (template == null) return;
             UIElement newItem = template.CreateScoped(repeat.scope);
             newItem.parent = element;
             // root object isn't being assigned. make it assigned 
@@ -40,6 +41,7 @@ namespace UIForia.Bindings {
         }
 
         private void OnItemRemoved(U item, int index) {
+            if (template == null) return;
             Application.DestroyElement(element.children[index]);
         }
 
@@ -48,10 +50,12 @@ namespace UIForia.Bindings {
         }
 
         private void OnClear() {
+            if (template == null) return;
             element.View.Application.DestroyChildren(element);
         }
 
         public void CreateOrDestroyChildren() {
+            if (template == null) return;
             T list = listExpression.Evaluate(context);
             repeat.list = list;
 

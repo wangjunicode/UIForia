@@ -44,8 +44,8 @@ namespace UIForia.Templates {
         }
 
         public override UIElement CreateScoped(TemplateScope inputScope) {
-
-            ReflectionUtil.ObjectArray2[0] = childTemplates[0];
+ 
+            ReflectionUtil.ObjectArray2[0] = childTemplates.Count == 0 ? null : childTemplates[0];
             ReflectionUtil.ObjectArray2[1] = inputScope;
 
             UIRepeatElement element = (UIRepeatElement) ReflectionUtil.CreateGenericInstanceFromOpenType(

@@ -21,7 +21,7 @@ namespace UIForia.Bindings {
         private readonly Action<U, int> onInserted;
         private readonly Action<U, int> onRemoved;
         private readonly Action onClear;
-        
+
         public RepeatBindingNode(UIRepeatElement<U> repeat, Expression<T> listExpression) {
             this.repeat = repeat;
             this.listExpression = listExpression;
@@ -34,7 +34,7 @@ namespace UIForia.Bindings {
             UIElement newItem = template.CreateScoped(repeat.scope);
             // root object isn't being assigned. make it assigned 
             newItem.templateContext.rootObject = element.templateContext.rootObject;
-            element.InsertChild((uint)index, newItem);
+            element.InsertChild((uint) index, newItem);
         }
 
         private void OnItemRemoved(U item, int index) {
@@ -63,7 +63,7 @@ namespace UIForia.Bindings {
                 }
 
                 repeat.listBecameEmpty = previousReference.Count > 0;
-                
+
                 if (previousReference != null) {
                     previousReference.onItemInserted -= onInserted;
                     // previousReference.onItemMoved -= OnItemMoved;
@@ -72,7 +72,7 @@ namespace UIForia.Bindings {
                     element.View.Application.DestroyChildren(element);
                     previousReference = null;
                 }
-                
+
                 element.View.Application.DestroyChildren(element);
                 return;
             }
@@ -83,7 +83,7 @@ namespace UIForia.Bindings {
 
             if (previousReference != null) {
                 previousReference.onItemInserted -= onInserted;
-               // previousReference.onItemMoved -= OnItemMoved;
+                // previousReference.onItemMoved -= OnItemMoved;
                 previousReference.onItemRemoved -= onRemoved;
                 previousReference.onClear -= onClear;
                 element.View.Application.DestroyChildren(element);
@@ -92,7 +92,7 @@ namespace UIForia.Bindings {
             previousReference = list;
 
             list.onItemInserted += onInserted;
-          //  list.onItemMoved += OnItemMoved;
+            //  list.onItemMoved += OnItemMoved;
             list.onItemRemoved += onRemoved;
             list.onClear += onClear;
 
@@ -103,20 +103,18 @@ namespace UIForia.Bindings {
             repeat.listBecamePopulated = list.Count > 0;
         }
 
-        public override void OnUpdate() {
+        public override bool OnUpdate() {
+            if (element.isDisabled) return false;
             CreateOrDestroyChildren();
-
-            if (!element.isEnabled || element.children == null || previousReference == null) {
-                return;
-            }
 
             for (int i = 0; i < bindings.Length; i++) {
                 bindings[i].Execute(element, context);
             }
+
+            return element.isEnabled;
         }
 
         public override void OnReset() {
-
             if (previousReference != null) {
                 previousReference.onItemInserted -= onInserted;
                 previousReference.onItemRemoved -= onRemoved;
@@ -124,5 +122,7 @@ namespace UIForia.Bindings {
                 previousReference = null;
             }
         }
+
     }
+
 }

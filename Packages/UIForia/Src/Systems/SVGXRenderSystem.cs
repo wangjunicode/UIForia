@@ -42,6 +42,7 @@ namespace UIForia.Systems {
         public void OnUpdate() {
             ctx.Clear();
 
+            //todo -- use non alloc version
             LightList<UIElement> visibleElements = layoutSystem.GetVisibleElements();
 
                 RenderView(views[0], visibleElements);

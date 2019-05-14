@@ -24,7 +24,7 @@ namespace UIForia.Util {
             this.array = items;
             this.size = items.Length;
         }
-        
+
         [DebuggerStepThrough]
         public LightList(IList<T> items) {
             this.array = new T[items.Count];
@@ -77,7 +77,7 @@ namespace UIForia.Util {
                 size += list.size;
                 return;
             }
-            
+
             if (collection is List<T> l) {
                 EnsureAdditionalCapacity(l.Count);
                 T[] a = ListAccessor<T>.GetArray(l);
@@ -85,14 +85,14 @@ namespace UIForia.Util {
                 size += l.Count;
                 return;
             }
-            
+
             if (collection is T[] cArray) {
                 EnsureAdditionalCapacity(cArray.Length);
                 System.Array.Copy(cArray, 0, array, size, cArray.Length);
                 size += cArray.Length;
                 return;
             }
-            
+
             foreach (var item in collection) {
                 Add(item);
             }
@@ -183,7 +183,7 @@ namespace UIForia.Util {
             if (index < 0 || index > array.Length) {
                 throw new IndexOutOfRangeException();
             }
-            
+
             System.Array.Copy(array, index, array, index + 1, size - index);
             array[index] = item;
         }
@@ -344,24 +344,98 @@ namespace UIForia.Util {
             }
         }
 
-        public void Sort(int start, int end, IComparer<T> comparison) {
-            System.Array.Sort(array, start, end, comparison);
+        private void QuickSort(Comparison<T> comparison, int low, int high) {
+            while (true) {
+                if (low < high) {
+                    int partition = Partition(comparison, low, high);
+                    QuickSort(comparison, low, partition - 1);
+                    low = partition + 1;
+                    continue;
+                }
+
+                break;
+            }
         }
 
-        public void Sort(int start, int end, Comparison<T> comparison) {
-            s_Compare.comparison = comparison;
-            System.Array.Sort(array, start, end, s_Compare);
-            s_Compare.comparison = null;
+        private void QuickSort(IComparer<T> comparison, int low, int high) {
+            while (true) {
+                if (low < high) {
+                    int partition = Partition(comparison, low, high);
+                    QuickSort(comparison, low, partition - 1);
+                    low = partition + 1;
+                    continue;
+                }
+
+                break;
+            }
+        }
+        
+        private int Partition(Comparison<T> comparison, int low, int high) {
+            T temp;
+            T pivot = array[high];
+
+            int i = (low - 1);
+            for (int j = low; j <= high - 1; j++) {
+                if (comparison(array[j], pivot) <= 0) {
+                    i++;
+
+                    temp = array[i];
+                    array[i] = array[j];
+                    array[j] = temp;
+                }
+            }
+            temp = array[i + 1];
+            array[i + 1] = array[high];
+            array[high] = temp;
+
+            return i + 1;
+        }
+        
+        private int Partition(IComparer<T> comparison, int low, int high) {
+            T temp;
+            T pivot = array[high];
+
+            int i = (low - 1);
+            for (int j = low; j <= high - 1; j++) {
+                if (comparison.Compare(array[j], pivot) <= 0) {
+                    i++;
+
+                    temp = array[i];
+                    array[i] = array[j];
+                    array[j] = temp;
+                }
+            }
+            temp = array[i + 1];
+            array[i + 1] = array[high];
+            array[high] = temp;
+
+            return i + 1;
         }
 
         public void Sort(Comparison<T> comparison) {
-            s_Compare.comparison = comparison;
-            System.Array.Sort(array, 0, size, s_Compare);
-            s_Compare.comparison = null;
+            if (size < 2) return;
+            QuickSort(comparison, 0, size - 1);
+        }
+
+        public void Sort(Comparison<T> comparison, int start, int end) {
+            if (size < 2) return;
+            if (start < 0) start = 0;
+            if (start >= size) start = size - 1;
+            if (end >= size) end = size - 1;
+            QuickSort(comparison, start, end);
+        }
+
+        public void Sort(IComparer<T> comparison, int start, int end) {
+            if (size < 2) return;
+            if (start < 0) start = 0;
+            if (start >= size) start = size - 1;
+            if (end >= size) end = size - 1;
+            QuickSort(comparison, start, end);
         }
 
         public void Sort(IComparer<T> comparison) {
-            System.Array.Sort(array, 0, size, comparison);
+            if (size < 2) return;
+            QuickSort(comparison, 0, size - 1);
         }
 
         public int BinarySearch(T value, IComparer<T> comparer) {
@@ -393,19 +467,7 @@ namespace UIForia.Util {
 
             return ~num1;
         }
-
-        private static readonly FunctorComparer s_Compare = new FunctorComparer();
-
-        private sealed class FunctorComparer : IComparer<T> {
-
-            public Comparison<T> comparison;
-
-            public int Compare(T x, T y) {
-                return this.comparison(x, y);
-            }
-
-        }
-
+        
         public Enumerator GetEnumerator() {
             return new Enumerator(this);
         }

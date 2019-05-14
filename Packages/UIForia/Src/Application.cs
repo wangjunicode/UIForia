@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using UIForia.Animation;
 using UIForia.AttributeProcessors;
 using UIForia.Bindings;
@@ -12,10 +11,8 @@ using UIForia.Rendering;
 using UIForia.Routing;
 using UIForia.Systems;
 using UIForia.Systems.Input;
-using UIForia.Templates;
 using UIForia.Util;
 using UnityEngine;
-using Debug = UnityEngine.Debug;
 
 namespace UIForia {
 
@@ -243,55 +240,9 @@ namespace UIForia {
                 return null;
             }
 
-            ParsedTemplate template = templateParser.GetParsedTemplate(type);
-
-            if (template == null) {
-                return null;
-            }
-
-            UIElement retn = template.Create();
-
-
-            return retn;
-        }
-        
-        internal UIElement CreateChildElement(UIElement parent, Type type) {
-            throw new NotImplementedException();
-           
+            return templateParser.GetParsedTemplate(type)?.Create();
         }
 
-        internal void RegisterElement(UIElement element) {
-            throw new NotImplementedException();
-            if (element.parent == null) {
-                Debug.Assert(element.View.RootElement == element, nameof(element.View.RootElement) + " must be null if providing a null parent");
-
-                element.flags |= UIElementFlags.AncestorEnabled;
-                element.depth = 0;
-            }
-            else {
-                if (element.parent.isEnabled) {
-                    element.flags |= UIElementFlags.AncestorEnabled;
-                }
-
-                // todo -- doesn't handle disabled index
-                element.siblingIndex = element.parent.children.IndexOf(element);
-
-                element.depth = element.parent.depth + 1;
-            }
-
-            InitHierarchy(element);
-
-            for (int i = 0; i < m_Systems.Count; i++) {
-                m_Systems[i].OnElementCreated(element);
-            }
-
-            onElementRegistered?.Invoke(element);
-
-            InvokeAttributeProcessors(element);
-            InvokeOnCreate(element);
-            InvokeOnReady(element);
-            onElementCreated?.Invoke(element);
-        }
 
         public void Refresh() {
             onWillRefresh?.Invoke();
@@ -311,9 +262,10 @@ namespace UIForia {
             m_AfterUpdateTaskSystem.OnReset();
             m_BeforeUpdateTaskSystem.OnReset();
 
+            // todo -- store root view, rehydrate. kill the rest
             for (int i = 0; i < m_Views.Count; i++) {
                 m_Views[i].Refresh();
-                RegisterElement(m_Views[i].RootElement);
+                // RegisterElement(m_Views[i].RootElement);
 
                 for (int j = 0; j < m_Systems.Count; j++) {
                     m_Systems[j].OnViewAdded(m_Views[i]);
@@ -351,44 +303,6 @@ namespace UIForia {
             onElementRegistered = null;
         }
 
-        protected void AddElementToLifeCycleTrees(UIElement element) {
-            UIElement.UIElementTypeData typeData = element.GetTypeData();
-
-            if (typeData.requiresUpdate) {
-                updateTree.AddItem(element);
-            }
-
-            elementMap[element.id] = element;
-        }
-
-        protected void InitHierarchy(UIElement element) {
-            if (element.parent == null) {
-                element.flags |= UIElementFlags.AncestorEnabled;
-                element.depth = 0;
-            }
-            else {
-                if (element.parent.isEnabled) {
-                    element.flags |= UIElementFlags.AncestorEnabled;
-                }
-                else {
-                    element.flags &= ~UIElementFlags.AncestorEnabled;
-                }
-
-                element.View = element.parent.View;
-                element.depth = element.parent.depth + 1;
-            }
-
-            AddElementToLifeCycleTrees(element);
-
-            UIElement[] children = element.children.Array;
-            int childCount = element.children.Count;
-
-            for (int i = 0; i < childCount; i++) {
-                children[i].siblingIndex = i;
-                InitHierarchy(children[i]);
-            }
-        }
-
         private static void InvokeAttributeProcessors(UIElement element) {
             List<ElementAttribute> attributes = element.GetAttributes();
 
@@ -402,55 +316,6 @@ namespace UIForia {
 
             for (int i = 0; i < element.children.Count; i++) {
                 InvokeAttributeProcessors(element.children[i]);
-            }
-        }
-
-        private static void InvokeOnCreate(UIElement element) {
-            if (element.children != null) {
-                for (int i = 0; i < element.children.Count; i++) {
-                    InvokeOnCreate(element.children[i]);
-                }
-            }
-
-            element.flags |= UIElementFlags.Created;
-            element.OnCreate();
-        }
-
-        private static void InvokeEnable(UIElement element) {
-            if (element.children != null) {
-                for (int i = 0; i < element.children.Count; i++) {
-                    InvokeOnReady(element.children[i]);
-                }
-            }
-
-            // when creating new children in create or read, this can be called twice
-            if ((element.flags & UIElementFlags.HasBeenEnabled) == 0) {
-                element.flags |= UIElementFlags.HasBeenEnabled;
-                element.OnReady();
-            }
-
-            Binding[] enabledBindings = element.OriginTemplate?.triggeredBindings;
-
-            if (enabledBindings != null) {
-                for (int i = 0; i < enabledBindings.Length; i++) {
-                    if (enabledBindings[i].bindingType != BindingType.Constant) {
-                        enabledBindings[i].Execute(element, element.templateContext);
-                    }
-                }
-            }
-        }
-
-        private static void InvokeOnReady(UIElement element) {
-            if (element.children != null) {
-                for (int i = 0; i < element.children.Count; i++) {
-                    InvokeOnReady(element.children[i]);
-                }
-            }
-
-            // when creating new children in create or read, this can be called twice
-            if ((element.flags & UIElementFlags.HasBeenEnabled) == 0) {
-                element.flags |= UIElementFlags.HasBeenEnabled;
-                element.OnReady();
             }
         }
 
@@ -484,14 +349,20 @@ namespace UIForia {
                 }
             }
 
-            
+
             if (element.parent != null) {
                 element.parent.children.Remove(element);
                 for (int i = 0; i < element.parent.children.Count; i++) {
                     element.parent.children[i].siblingIndex = i;
                 }
             }
-            
+
+            updateTree.RemoveHierarchy(element);
+
+            for (int i = 0; i < m_Systems.Count; i++) {
+                m_Systems[i].OnElementDestroyed(element);
+            }
+
             for (int i = 0; i < toInternalDestroy.Count; i++) {
                 toInternalDestroy[i].InternalDestroy();
                 elementMap.Remove(toInternalDestroy[i].id);
@@ -499,15 +370,9 @@ namespace UIForia {
 
             LightListPool<UIElement>.Release(ref toInternalDestroy);
 
-            for (int i = 0; i < m_Systems.Count; i++) {
-                m_Systems[i].OnElementDestroyed(element);
-            }
-
-
             onElementDestroyed?.Invoke(element);
 
             // todo -- if element is poolable, pool it here
-            updateTree.RemoveHierarchy(element);
             LightStack<UIElement>.Release(ref stack);
         }
 
@@ -549,19 +414,18 @@ namespace UIForia {
                 }
             }
 
-            for (int i = 0; i < toInternalDestroy.Count; i++) {
-                toInternalDestroy[i].InternalDestroy();
-                elementMap.Remove(toInternalDestroy[i].id);
-            }
-
-
-            element.children.Clear();
-
             for (int i = 0; i < element.children.Count; i++) {
                 for (int j = 0; j < m_Systems.Count; j++) {
                     m_Systems[j].OnElementDestroyed(element.children[i]);
                 }
             }
+
+            for (int i = 0; i < toInternalDestroy.Count; i++) {
+                toInternalDestroy[i].InternalDestroy();
+                elementMap.Remove(toInternalDestroy[i].id);
+            }
+
+            element.children.Clear();
         }
 
         public void Update() {
@@ -570,11 +434,7 @@ namespace UIForia {
                 if (element == null) return true; // when would element be null? root?
                 if (element.isDisabled) return false;
                 if (!element.isReady) return true;
-                if (element.updateFrameId != frameId) {
-                    element.updateFrameId = frameId;
-                    element.OnUpdate();
-                }
-
+                element.OnUpdate();
                 return true;
             });
 
@@ -685,10 +545,6 @@ namespace UIForia {
                 }
 
                 if (child.isEnabled && !child.isCreated) {
-                    for (int i = 0; i < m_Systems.Count; i++) {
-                        m_Systems[i].OnElementCreated(child);
-                    }
-
                     child.flags |= UIElementFlags.Created;
                     child.OnCreate();
                 }
@@ -948,16 +804,30 @@ namespace UIForia {
                     current.flags &= ~UIElementFlags.AncestorEnabled;
                 }
 
-                AddElementToLifeCycleTrees(current);
+                UIElement.UIElementTypeData typeData = current.GetTypeData();
+
+                if (typeData.requiresUpdate) {
+                    updateTree.AddItem(current);
+                }
+
+                elementMap[current.id] = current;
+
+                if (!current.isRegistered) {
+                    current.flags |= UIElementFlags.Registered;
+                    for (int i = 0; i < m_Systems.Count; i++) {
+                        m_Systems[i].OnElementCreated(current);
+                    }
+                }
 
                 UIElement[] children = current.children.Array;
                 int childCount = current.children.Count;
                 for (int i = 0; i < childCount; i++) {
+                    children[i].siblingIndex = i;
                     stack.Push(children[i]);
                 }
             }
 
-            for (int i = (int) index; i < parent.children.Count; i++) {
+            for (int i = 0; i < parent.children.Count; i++) {
                 parent.children[i].siblingIndex = i;
             }
 

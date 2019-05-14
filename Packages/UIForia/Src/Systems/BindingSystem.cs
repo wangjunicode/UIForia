@@ -1,7 +1,6 @@
 ﻿using System;
 using UIForia.Bindings;
 using UIForia.Elements;
-using UIForia.Expressions;
 using UIForia.Templates;
 using UIForia.Util;
 
@@ -24,7 +23,13 @@ namespace UIForia.Systems {
         }
 
         public void OnUpdate() {
-            m_ReadBindingTree.TraversePreOrder((node) => { node.OnUpdate(); });
+            // fast iteration
+            // reasonable add remove-hierarchy performance
+            // low memory
+            // handles adding / removing while running
+            // linked list makes sense since we're traversing elements anyway
+            
+            m_ReadBindingTree.ConditionalTraversePreOrder((node) => node.OnUpdate());
         }
 
         public void OnLateUpdate() {

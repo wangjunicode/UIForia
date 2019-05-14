@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UIForia.Elements;
 using UIForia.Layout.LayoutTypes;
 using UIForia.Util;
@@ -18,9 +19,10 @@ namespace UIForia.Layout {
             box.isInPool = false;
             pool.Add(box);
         }
+
     }
 
-    internal class LayoutBoxPool<T> : LayoutBoxPool where T: LayoutBox, new() {
+    internal class LayoutBoxPool<T> : LayoutBoxPool where T : LayoutBox, new() {
 
         public override LayoutBox Get(UIElement element) {
             LayoutBox retn = null;
@@ -30,7 +32,15 @@ namespace UIForia.Layout {
             else {
                 retn = new T();
             }
+
             retn.isInPool = false;
+            retn.element = element;
+            retn.style = element.style;
+            retn.children = retn.children ?? new List<LayoutBox>(4);
+            retn.cachedPreferredWidth = -1;
+            retn.view = element.View;
+            retn.markedForLayout = true;
+            retn.UpdateFromStyle();
             retn.OnSpawn(element);
             return retn;
         }

@@ -53,8 +53,7 @@ public class BindingTests {
             <Contents>
                 <Repeat list='thelist'>
                     <Group style='[GetStyle($item)]'>
-                        <Div />
-                        <Div > {$item.name}</Div>
+                    
                     </Group>
                 </Repeat>
             </Contents>
@@ -62,6 +61,8 @@ public class BindingTests {
     ")]
     public class RepeatBindingChecker : UIElement {
 
+//        <Div />
+//        <Div > {$item.name}</Div>
         public RepeatableList<Thing> thelist;
 
         public override void OnCreate() {

@@ -10,10 +10,14 @@ namespace UIForia.Bindings {
         public UIElement element;
         public ExpressionContext context;
 
-        public virtual void OnUpdate() {
+        public virtual bool OnUpdate() {
+            if (element.isDisabled) return false;
+            
             for (int i = 0; i < bindings.Length; i++) {
                 bindings[i].Execute(element, context);
             }
+
+            return element.isEnabled;
         }
 
         public int UniqueId => element.id;

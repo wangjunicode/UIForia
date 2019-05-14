@@ -19,5 +19,7 @@ internal enum UIElementFlags {
     SelfAndAncestorEnabled = Enabled | AncestorEnabled,
 
     Ready = 1 << 13,
+    
+    Registered = 1 << 14
 
 }

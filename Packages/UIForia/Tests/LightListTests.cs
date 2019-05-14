@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using NUnit.Framework;
 using UIForia.Util;
 
@@ -157,5 +159,25 @@ public class LightListTests {
         Assert.AreEqual(5, ints[3]);
         Assert.AreEqual(6, ints[4]);
         Assert.AreEqual(7, ints[5]);
+    }
+
+
+    [Test]
+    public void Sort() {
+        LightList<int> ints = new LightList<int>();
+        ints.Add(4);
+        ints.Add(0);
+        ints.Add(2);
+        ints.Add(6);
+        ints.Add(3);
+        ints.Add(1);
+        ints.Add(7);
+        ints.Add(5);
+        Comparison<int> cmp = (a, b) => a > b ? 1 : -1;
+        ints.Sort(cmp);
+        
+        for (int i = 0; i < ints.Count; i++) {
+            Assert.AreEqual(i, ints[i]);
+        }
     }
 }

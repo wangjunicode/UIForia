@@ -5,7 +5,6 @@ using JetBrains.Annotations;
 using UIForia.Elements.Routing;
 using UIForia.Expressions;
 using UIForia.Layout;
-using UIForia.Layout.LayoutTypes;
 using UIForia.Rendering;
 using UIForia.Routing;
 using UIForia.Templates;
@@ -93,6 +92,8 @@ namespace UIForia.Elements {
         public bool isCreated => (flags & UIElementFlags.Created) != 0;
 
         public bool isReady => (flags & UIElementFlags.Ready) != 0;
+        
+        public bool isRegistered => (flags & UIElementFlags.Registered) != 0;
 
         public virtual void OnCreate() { }
 
@@ -131,6 +132,7 @@ namespace UIForia.Elements {
         }
         
         public UIElement AddChild(UIElement element) {
+            // todo -- if <Children/> is defined in the template, attach child to that element instead
             if (element == null || element == this || element.isDestroyed) {
                 return null;
             }
@@ -156,41 +158,7 @@ namespace UIForia.Elements {
                 ptr = ptr.parent;
             }
         }
-
-        public UIElement CreateChild(Type type) {
-            // todo -- ensure we can accept children
-
-            if (!typeof(UIElement).IsAssignableFrom(type)) {
-                throw new Exception("Can't create child from non UIElement type");
-            }
-
-            ParsedTemplate template = Application.templateParser.GetParsedTemplate(type);
-            if (template == null) {
-                throw new Exception("failed creating child");
-            }
-
-            UIElement child = template.Create();
-            child.parent = this;
-            child.templateContext.rootObject = templateContext.rootObject;
-            children.Add(child);
-            Application.RegisterElement(child);
-            return child;
-        }
-
-        public T CreateChild<T>() where T : UIElement {
-            ParsedTemplate template = Application.templateParser.GetParsedTemplate(typeof(T));
-            if (template == null) {
-                throw new Exception("failed creating child");
-            }
-
-            UIElement child = template.Create();
-            child.parent = this;
-            child.templateContext.rootObject = templateContext.rootObject;
-            children.Add(child);
-            View.Application.RegisterElement(child);
-            return child as T;
-        }
-
+        
         public void SetEnabled(bool active) {
             if (View == null) {
                 flags &= ~UIElementFlags.Enabled;
@@ -529,7 +497,6 @@ namespace UIForia.Elements {
         }
 
         private static readonly Dictionary<Type, UIElementTypeData> s_TypeDataMap = new Dictionary<Type, UIElementTypeData>();
-        internal int updateFrameId;
 
         internal struct UIElementTypeData {
 

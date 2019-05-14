@@ -29,7 +29,7 @@ namespace UIForia.Layout.LayoutTypes {
         public Scrollbar horizontalScrollbar;
         public Scrollbar verticalScrollbar;
 
-        protected UIView view;
+        protected internal UIView view;
 
         internal UIFixedLength paddingTop;
         internal UIFixedLength paddingRight;
@@ -81,7 +81,7 @@ namespace UIForia.Layout.LayoutTypes {
 
         // todo compress w/ flags
         public bool markedForLayout;
-        protected float cachedPreferredWidth;
+        protected internal float cachedPreferredWidth;
 
         // todo -- stop looking up style properties, cache everything locally so we dont' have to look into the Style object
         // Padding, Margin, Border, Anchors, AnchorTarget, TransformPosition, TransformPivot, Pref/Min/Max Width + Height
@@ -1126,13 +1126,7 @@ namespace UIForia.Layout.LayoutTypes {
         protected abstract void OnChildrenChanged();
 
         public virtual void OnSpawn(UIElement element) {
-            this.element = element;
-            this.style = element.style;
-            this.children = children ?? new List<LayoutBox>(4);
-            this.cachedPreferredWidth = -1;
-            this.view = element.View;
-            this.markedForLayout = true;
-            UpdateFromStyle();
+
         }
 
         public virtual void OnRelease() {

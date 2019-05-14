@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Vertigo;
 
 namespace UIForia.Util {
@@ -122,6 +123,102 @@ namespace UIForia.Util {
             size -= count;
         }
 
+       
+
+        private void QuickSort(Comparison<T> comparison, int low, int high) {
+            while (true) {
+                if (low < high) {
+                    int partition = Partition(comparison, low, high);
+                    QuickSort(comparison, low, partition - 1);
+                    low = partition + 1;
+                    continue;
+                }
+
+                break;
+            }
+        }
+
+        private void QuickSort(IComparer<T> comparison, int low, int high) {
+            while (true) {
+                if (low < high) {
+                    int partition = Partition(comparison, low, high);
+                    QuickSort(comparison, low, partition - 1);
+                    low = partition + 1;
+                    continue;
+                }
+
+                break;
+            }
+        }
+        
+        private int Partition(Comparison<T> comparison, int low, int high) {
+            T temp;
+            T pivot = array[high];
+
+            int i = (low - 1);
+            for (int j = low; j <= high - 1; j++) {
+                if (comparison(array[j], pivot) <= 0) {
+                    i++;
+
+                    temp = array[i];
+                    array[i] = array[j];
+                    array[j] = temp;
+                }
+            }
+            temp = array[i + 1];
+            array[i + 1] = array[high];
+            array[high] = temp;
+
+            return i + 1;
+        }
+        
+        private int Partition(IComparer<T> comparison, int low, int high) {
+            T temp;
+            T pivot = array[high];
+
+            int i = (low - 1);
+            for (int j = low; j <= high - 1; j++) {
+                if (comparison.Compare(array[j], pivot) <= 0) {
+                    i++;
+
+                    temp = array[i];
+                    array[i] = array[j];
+                    array[j] = temp;
+                }
+            }
+            temp = array[i + 1];
+            array[i + 1] = array[high];
+            array[high] = temp;
+
+            return i + 1;
+        }
+
+        public void Sort(Comparison<T> comparison) {
+            if (size < 2) return;
+            QuickSort(comparison, 0, size - 1);
+        }
+
+        public void Sort(Comparison<T> comparison, int start, int end) {
+            if (size < 2) return;
+            if (start < 0) start = 0;
+            if (start >= size) start = size - 1;
+            if (end >= size) end = size - 1;
+            QuickSort(comparison, start, end);
+        }
+
+        public void Sort(IComparer<T> comparison, int start, int end) {
+            if (size < 2) return;
+            if (start < 0) start = 0;
+            if (start >= size) start = size - 1;
+            if (end >= size) end = size - 1;
+            QuickSort(comparison, start, end);
+        }
+
+        public void Sort(IComparer<T> comparison) {
+            if (size < 2) return;
+            QuickSort(comparison, 0, size - 1);
+        }
+        
         private static readonly LightList<StructList<T>> s_Pool = new LightList<StructList<T>>();
 
         public static StructList<T> Get() {

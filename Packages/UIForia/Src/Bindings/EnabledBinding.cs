@@ -14,7 +14,6 @@ namespace UIForia.Bindings {
 
         public override void Execute(UIElement element, ExpressionContext context) {
             element.SetEnabled(expression.Evaluate(context));
-            Debug.Log("Running Disable for " + element.ToString());
         }
 
         public override bool IsConstant() {

@@ -666,15 +666,16 @@ namespace UIForia {
 
             int targetPhase = -1;
             UIElement ptr = element.parent;
-            while (ptr != null) {
-                if (ptr.enablePhase != 0) {
-                    targetPhase = ptr.enablePhase;
-                    break;
+            if (!ptr.isReady) {
+                while (ptr != null) {
+                    if (ptr.enablePhase != 0) {
+                        targetPhase = ptr.enablePhase;
+                        break;
+                    }
+
+                    ptr = ptr.parent;
                 }
-                ptr = ptr.parent;
             }
-            
-            
 //
 //            // if element is not enabled (ie has a disabled ancestor), no-op 
             if (!element.isEnabled) return;

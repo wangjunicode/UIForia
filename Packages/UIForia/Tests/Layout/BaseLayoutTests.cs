@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using NUnit.Framework;
 using Tests.Mocks;
 using UIForia.Attributes;
 using UIForia.Elements;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 namespace Layout {
 
@@ -50,6 +52,7 @@ namespace Layout {
             Assert.AreEqual(4, count);
         }
 
+        [DebuggerDisplay("{name}")]
         public class LifeCycleElement : UIElement {
 
             public string name;
@@ -499,7 +502,98 @@ namespace Layout {
         }
 
         // todo -- test depth & sibling index after hierarchy manipulation
+        [Test]
+        public void AddSiblingElement() {
+            MockApplication app = new MockApplication(typeof(LayoutTestThing));
+            UIView view = app.AddView("View0", new Rect(0, 0, 500, 500));
+
+            List<string> list = new List<string>();
+            LifeCycleElement.output = list;
+
+            LifeCycleElement root = new LifeCycleElement("root",
+                new LifeCycleElement("child0")
+            );
+
+            LifeCycleElement uiElement = (LifeCycleElement) root.GetChild(0);
+            uiElement.onCreate = (e) => {
+                LifeCycleElement lifeCycleElement = new LifeCycleElement("s1");
+                root.AddChild(lifeCycleElement);
+
+                lifeCycleElement.onReady = s1e => { uiElement.AddChild(new LifeCycleElement("child0_sub1")); };
+            };
+            
+            view.AddChild(root);
+
+            Debug.ClearDeveloperConsole();
+            for (int i = 0; i < list.Count; i++) {
+                Debug.Log(list[i]);
+            }
+
+            Assert.AreEqual(new[] {
+                "root.create",
+                "child0.create",
+                "s1.create",
+                "root.enable",
+                "child0.enable",
+                "s1.enable",
+                "root.ready",
+                "child0.ready",
+                "s1.ready",
+                "child0_sub1.create",
+                "child0_sub1.enable",
+                "child0_sub1.ready",
+            }, list.ToArray());
+
+        }
+
         
+        [Test]
+        public void AddSiblingElementToRoot() {
+            MockApplication app = new MockApplication(typeof(LayoutTestThing));
+            UIView view = app.AddView("View0", new Rect(0, 0, 500, 500));
+
+            List<string> list = new List<string>();
+            LifeCycleElement.output = list;
+
+            LifeCycleElement root = new LifeCycleElement("root",
+                new LifeCycleElement("child0")
+            );
+
+            LifeCycleElement uiElement = (LifeCycleElement) root.GetChild(0);
+            uiElement.onCreate = (e) => {
+                LifeCycleElement lifeCycleElement = new LifeCycleElement("child1");
+                root.AddChild(lifeCycleElement);
+
+                lifeCycleElement.onEnable = s1e => { view.AddChild(new LifeCycleElement("root1", new LifeCycleElement("root1_child0"))); };
+            };
+            
+            view.AddChild(root);
+
+            Debug.ClearDeveloperConsole();
+            for (int i = 0; i < list.Count; i++) {
+                Debug.Log(list[i]);
+            }
+
+            Assert.AreEqual(new[] {
+                "root.create",
+                "child0.create",
+                "child1.create",
+                "root.enable",
+                "child0.enable",
+                "child1.enable",
+                "root1.create",
+                "root1_child0.create",
+                "root1.enable",
+                "root1_child0.enable",
+                "root1.ready",
+                "root1_child0.ready",
+                "root.ready",
+                "child0.ready",
+                "child1.ready",
+            }, list.ToArray());
+
+        }
+
         [Test]
         public void GathersProperLayoutElements() {
             MockApplication app = new MockApplication(typeof(LayoutTestThing));

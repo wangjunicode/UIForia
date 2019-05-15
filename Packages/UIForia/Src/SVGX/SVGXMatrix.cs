@@ -91,6 +91,10 @@ namespace SVGX {
             );
         }
 
+        public static SVGXMatrix Translation(Vector2 translation) {
+            return new SVGXMatrix(1, 0, 0, 1, translation.x, translation.y);
+        }
+
         public SVGXMatrix Scale(float scaleFactor) {
             return new SVGXMatrix(m0 * scaleFactor, m1 * scaleFactor, m2 * scaleFactor, m3 * scaleFactor, m4, m5);
         }

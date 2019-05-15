@@ -2634,6 +2634,7 @@ namespace UIForia.Rendering {
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.ZIndex, out property)) return property.AsInt;
+                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.ZIndex), out property)) return property.AsInt;
                     return DefaultStyleValues_Generated.ZIndex;
                 }
             }
@@ -3974,6 +3975,7 @@ namespace UIForia.Rendering {
                     case StylePropertyId.TextShadowSoftness: return true;
                     case StylePropertyId.TextShadowType: return true;
                     case StylePropertyId.TextTransform: return true;
+                    case StylePropertyId.ZIndex: return true;
 
             }
 

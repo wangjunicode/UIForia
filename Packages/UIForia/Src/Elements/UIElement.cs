@@ -27,7 +27,7 @@ namespace UIForia.Elements {
         public int enablePhase;
         
         internal UIElementFlags flags;
-        internal UIElement parent;
+        public UIElement parent;
   
         public readonly LayoutResult layoutResult;
 
@@ -367,80 +367,6 @@ namespace UIForia.Elements {
         public int UniqueId => id;
         public IHierarchical Element => this;
         public IHierarchical Parent => parent;
-
-        // todo this needs to be optimized, we want to remove the recursion and if possible the style lookup
-        public class RenderLayerComparerAscending : IComparer<UIElement> {
-
-            private static RenderLayer GetRenderLayer(UIElement e) {
-                while (true) {
-                    if (e == null) return RenderLayer.Default;
-                    if (e.style.IsDefined(StylePropertyId.RenderLayer)) {
-                        return e.style.RenderLayer;
-                    }
-
-                    e = e.parent;
-                }
-            }
-
-            private static int GetZIndex(UIElement e) {
-                while (true) {
-                    if (e == null) return 0;
-                    if (e.style.IsDefined(StylePropertyId.ZIndex)) {
-                        return e.style.ZIndex;
-                    }
-
-                    e = e.parent;
-                }
-            }
-
-            public int Compare(UIElement a, UIElement b) {
-                // todo do we need null checks? seems like elements should never be null
-                if (a == null) {
-                    if (b == null) return 0;
-                    return 1;
-                }
-
-                if (b == null) {
-                    return -1;
-                }
-
-                RenderLayer renderLayerA = GetRenderLayer(a);
-                RenderLayer renderLayerB = GetRenderLayer(b);
-
-                if (renderLayerA > renderLayerB) {
-                    return -1;
-                }
-
-                if (renderLayerB > renderLayerA) {
-                    return 1;
-                }
-
-                int zIndexA = GetZIndex(a);
-                int zIndexB = GetZIndex(b);
-
-                if (zIndexA > zIndexB) {
-                    return -1;
-                }
-
-                if (zIndexB > zIndexA) {
-                    return 1;
-                }
-
-                if (a.depth != b.depth) {
-                    return a.depth > b.depth ? -1 : 1;
-                }
-
-                if (a.parent == b.parent) {
-                    return a.siblingIndex > b.siblingIndex ? -1 : 1;
-                }
-
-                if (a.parent == null) return -1;
-                if (b.parent == null) return 1;
-
-                return a.parent.siblingIndex > b.parent.siblingIndex ? -1 : 1;
-            }
-
-        }
 
         public List<UIElement> GetChildren(List<UIElement> retn = null) {
             retn = ListPool<UIElement>.Get();

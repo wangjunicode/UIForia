@@ -8,7 +8,7 @@ namespace UI {
     public class WindowSample : UIElement {
 
         public void SpawnWindow() {
-            Application.AddView("Window", new Rect(0, 0, 300, 300), typeof(KlangWindow));
+            Application.CreateView("Window", new Rect(0, 0, 300, 300), typeof(KlangWindow));
         }
 
     }

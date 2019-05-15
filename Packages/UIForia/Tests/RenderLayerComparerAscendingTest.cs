@@ -67,7 +67,7 @@ public class RenderLayerComparerAscendingTest {
         mockView.Update();
 
         List<UIElement> ordered = root.FindByType<UIElement>();
-        ordered.Sort(new UIElement.RenderLayerComparerAscending());
+        ordered.Sort(new ZIndexComparerAscending());
         
         Assert.AreEqual("c11", ordered[0].GetAttribute("id"));
         Assert.AreEqual("c13", ordered[1].GetAttribute("id"));

@@ -23,19 +23,20 @@ public class UIViewRootElement : UIElement {
 public class UIView {
 
     public event Action<UIElement> onElementCreated;
+    public event Action<UIElement> onElementReady;
+    public event Action<UIElement> onElementRegistered;
     public event Action<UIElement> onElementDestroyed;
-    public event Action<UIElement> onElementEnabled;
-    public event Action<UIElement> onElementDisabled;
-    public event Action<IReadOnlyList<UIElement>> onElementsAdded;
-    public event Action<UIElement> onElementRemoved;
+    public event Action<UIElement> onElementHierarchyEnabled;
+    public event Action<UIElement> onElementHierarchyDisabled;
 
     private readonly Type m_ElementType;
     private readonly string m_Template;
 
     public int Depth { get; set; }
+
     public Rect Viewport { get; set; }
     // this might want to be changed but so many test expect this that I dont' want to right now
-    
+
     public UIElement RootElement => rootElement.GetChild(0);
     public float ScaleFactor { get; set; } = 1f;
 
@@ -53,7 +54,8 @@ public class UIView {
 
     internal LightList<UIElement> elements;
     internal LightList<UIElement> visibleElements;
-    private UIViewRootElement rootElement;
+    internal UIViewRootElement rootElement;
+    private int elementCount;
 
     internal UIView(int id, string name, Application app, Rect rect, int depth, Type elementType, string template = null) {
         this.id = id;
@@ -74,16 +76,7 @@ public class UIView {
         this.rootElement.flags |= UIElementFlags.Enabled;
         this.rootElement.flags |= UIElementFlags.AncestorEnabled;
         this.rootElement.View = this;
-        UIElement child = null;
-        if (m_Template != null) {
-            child = Application.templateParser.ParseTemplateFromString(m_ElementType, m_Template).Create();
-        }
-        else {
-            child = Application.templateParser.GetParsedTemplate(m_ElementType).Create();
-        }
-
-        this.rootElement.AddChild(child);
-        Refresh();
+        this.sizeChanged = true;
     }
 
     internal UIView(int id, string name, Application app, Rect rect, int depth) {
@@ -103,6 +96,7 @@ public class UIView {
         this.rootElement.flags |= UIElementFlags.Enabled;
         this.rootElement.flags |= UIElementFlags.AncestorEnabled;
         this.rootElement.View = this;
+        this.sizeChanged = true;
     }
 
     public UIElement AddChild(UIElement element) {
@@ -110,9 +104,35 @@ public class UIView {
         return element;
     }
 
+    internal void Initialize() {
+        elementCount = 1;
+        sizeChanged = true;
+        rootElement.children.Clear();
+        if (m_ElementType == null) {
+            return;
+        }
+        
+        UIElement child = null;
+        if (m_Template != null) {
+            child = Application.templateParser.ParseTemplateFromString(m_ElementType, m_Template).Create();
+        }
+        else {
+            child = Application.templateParser.GetParsedTemplate(m_ElementType).Create();
+        }
+
+        if (child != null) {
+            this.rootElement.AddChild(child);
+        }
+    }
+    
+    public int GetElementCount() {
+        return elementCount;
+    }
+
     public bool clipOverflow;
 
     public bool focusOnMouseDown;
+    public bool sizeChanged;
 
     public void SetZIndex() { }
 
@@ -120,35 +140,36 @@ public class UIView {
 
     public void SetRenderTexture(RenderTexture texture) { }
 
-    public void Refresh() {
-//        
-//        this.rootElement = new UIViewRootElement();
-//        this.rootElement.flags |= UIElementFlags.Enabled;
-//        this.rootElement.flags |= UIElementFlags.AncestorEnabled;
-//        this.rootElement.View = this;
-
-//        if (m_Template != null) {
-//            this.RootElement = Application.templateParser.ParseTemplateFromString(m_ElementType, m_Template).Create();
-//        }
-//        else {
-//            this.RootElement = Application.templateParser.GetParsedTemplate(m_ElementType).Create();
-//        }
-//
-//        this.RootElement.View = this;
-    }
-
     public void Destroy() { }
 
-    internal void InvokeElementEnabled(UIElement element) {
-        onElementEnabled?.Invoke(element);
+    public void BeginAddingElements() { }
+
+    public void EndAddingElements() { }
+
+    internal void ElementRegistered(UIElement element) {
+        elementCount++;
+        onElementRegistered?.Invoke(element);
     }
 
-    internal void InvokeElementDisabled(UIElement element) {
-        onElementDisabled?.Invoke(element);
+    internal void ElementCreated(UIElement element) {
+        onElementCreated?.Invoke(element);
     }
 
-    internal void InvokeElementDestroyed(UIElement element) {
+    internal void ElementDestroyed(UIElement element) {
+        elementCount--;
         onElementDestroyed?.Invoke(element);
+    }
+
+    internal void ElementReady(UIElement element) {
+        onElementReady?.Invoke(element);
+    }
+
+    internal void ElementHierarchyEnabled(UIElement element) {
+        onElementHierarchyEnabled?.Invoke(element);
+    }
+
+    internal void ElementHierarchyDisabled(UIElement element) {
+        onElementHierarchyDisabled?.Invoke(element);
     }
 
     public void SetPosition(Vector3 position) {
@@ -156,6 +177,9 @@ public class UIView {
     }
 
     public void SetSize(int width, int height) {
+        if (width != Viewport.width || height != Viewport.height) {
+            sizeChanged = true;
+        }
         Viewport = new Rect(Viewport.x, Viewport.y, width, height);
     }
 
@@ -174,14 +198,6 @@ public class UIView {
         catch {
             throw;
         }
-    }
-
-    internal void InvokeAddElements(IReadOnlyList<UIElement> addedElements) {
-        onElementsAdded?.Invoke(addedElements);
-    }
-
-    public void RemoveElement(UIElement current) {
-        // todo -- event
     }
 
 }

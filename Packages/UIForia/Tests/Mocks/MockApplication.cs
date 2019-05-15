@@ -24,7 +24,7 @@ namespace Tests.Mocks {
             m_RenderSystem = renderSystem;
             m_LayoutSystem = layoutSystem;
 
-            AddView("Test View", new Rect(), elementType, template);
+            CreateView("Test View", new Rect(), elementType, template);
         }
 
         public new MockInputSystem InputSystem => (MockInputSystem) m_InputSystem;

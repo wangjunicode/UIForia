@@ -817,6 +817,7 @@ namespace UIForia {
                     for (int i = 0; i < m_Systems.Count; i++) {
                         m_Systems[i].OnElementCreated(current);
                     }
+                    onElementRegistered?.Invoke(current);
                 }
 
                 UIElement[] children = current.children.Array;

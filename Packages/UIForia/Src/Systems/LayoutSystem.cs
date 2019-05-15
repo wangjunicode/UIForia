@@ -38,6 +38,8 @@ namespace UIForia.Systems {
 
         private static readonly IComparer<UIElement> comparer = new UIElement.RenderLayerComparerAscending();
         private readonly Dictionary<int, LayoutBoxPool> layoutBoxPoolMap;
+        private StructList<SVGXMatrix> matrixList = new StructList<SVGXMatrix>(128);
+        private LightList<LayoutBox> toLayout = new LightList<LayoutBox>(128);
 
         public LayoutSystem(IStyleSystem styleSystem) {
             this.m_StyleSystem = styleSystem;
@@ -99,9 +101,7 @@ namespace UIForia.Systems {
          * 
          */
 
-        private StructList<SVGXMatrix> matrixList = new StructList<SVGXMatrix>(128);
-        private LightList<LayoutBox> toLayout = new LightList<LayoutBox>(128);
-
+      
         public void RunLayout2(UIView view) {
             UIElement element = view.RootElement;
             LayoutBox box = m_LayoutBoxMap.GetOrDefault(element.id);
@@ -561,7 +561,7 @@ namespace UIForia.Systems {
             bool notifyParent = box.parent != null && (box.style.LayoutBehavior & LayoutBehavior.Ignored) == 0 && box.element.isEnabled;
             bool invalidatePreferredSizeCache = false;
             bool layoutTypeChanged = false;
-            
+
             for (int i = 0; i < properties.Count; i++) {
                 StyleProperty property = properties[i];
 
@@ -731,24 +731,24 @@ namespace UIForia.Systems {
             if (layoutTypeChanged) {
                 HandleLayoutChanged(element);
             }
-            
-            if (invalidatePreferredSizeCache) {
-                if (notifyParent) {
-                    box.RequestContentSizeChangeLayout();
+            else {
+                if (invalidatePreferredSizeCache) {
+                    if (notifyParent) {
+                        box.RequestContentSizeChangeLayout();
+                    }
+
+                    box.InvalidatePreferredSizeCache();
                 }
 
-                box.InvalidatePreferredSizeCache();
-            }
+                box.OnStylePropertyChanged(properties);
 
-            box.OnStylePropertyChanged(properties);
-
-            if (notifyParent) {
-                box.parent.OnChildStylePropertyChanged(box, properties);
+                if (notifyParent) {
+                    box.parent.OnChildStylePropertyChanged(box, properties);
+                }
             }
         }
 
         private void HandleLayoutChanged(UIElement element) {
-
             LayoutBox box;
             if (!m_LayoutBoxMap.TryGetValue(element.id, out box)) {
                 box = CreateLayoutBox(element);
@@ -765,7 +765,6 @@ namespace UIForia.Systems {
             replace.parent = parent;
             parent?.UpdateChildren();
             box.Release();
-
         }
 
         public struct LayoutBoxPair {
@@ -779,15 +778,15 @@ namespace UIForia.Systems {
             }
 
         }
-        
+
         public void OnElementEnabled(UIElement element) {
             // none of these boxes should exist for the whole hierarchy, create them
 
             LightList<LayoutBox> toUpdateList = LightListPool<LayoutBox>.Get();
             LightStack<LayoutBoxPair> stack = LightStack<LayoutBoxPair>.Get();
-            
+
             if (element.parent != null) {
-                stack.Push(new LayoutBoxPair(element,  m_LayoutBoxMap.GetOrDefault(element.parent.id)));
+                stack.Push(new LayoutBoxPair(element, m_LayoutBoxMap.GetOrDefault(element.parent.id)));
             }
             else {
                 stack.Push(new LayoutBoxPair(element, null));
@@ -799,20 +798,20 @@ namespace UIForia.Systems {
                 if (current.element.isDestroyed || current.element.isDisabled) {
                     continue;
                 }
-                
+
                 LayoutBox box = CreateLayoutBox(current.element);
                 box.parent = current.parentBox;
                 toUpdateList.Add(box);
-                
+
                 int childCount = current.element.children.Count;
                 UIElement[] children = current.element.children.Array;
-                
+
                 for (int i = 0; i < childCount; i++) {
                     stack.Push(new LayoutBoxPair(children[i], box));
                 }
             }
-            
-            
+
+
             int count = toUpdateList.Count;
             LayoutBox[] toUpdate = toUpdateList.Array;
 
@@ -831,7 +830,7 @@ namespace UIForia.Systems {
                     ptr = ptr.parent;
                 }
             }
-            
+
             LightListPool<LayoutBox>.Release(ref toUpdateList);
             LightStack<LayoutBoxPair>.Release(ref stack);
         }
@@ -844,9 +843,10 @@ namespace UIForia.Systems {
             if (currentBox != null) {
                 parentBox = currentBox.parent;
             }
+
             while (stack.Count > 0) {
                 UIElement current = stack.PopUnchecked();
-                
+
                 if (m_LayoutBoxMap.Remove(current.id, out LayoutBox box)) {
                     box.Release();
                 }
@@ -883,6 +883,7 @@ namespace UIForia.Systems {
                 if (box.parent != null) {
                     UpdateChildren(box.parent);
                 }
+
                 m_VisibleElementList.Remove(element);
                 box.Release();
             }
@@ -928,12 +929,13 @@ namespace UIForia.Systems {
                         throw new ArgumentOutOfRangeException();
                 }
             }
+
             retn.UpdateFromStyle();
             m_LayoutBoxMap[element.id] = retn;
             return retn;
         }
 
-        public void OnElementCreated(UIElement element) {}
+        public void OnElementCreated(UIElement element) { }
 
         private void GetChildBoxes(LayoutBox box, LightList<LayoutBox> list) {
             UIElement element = box.element;

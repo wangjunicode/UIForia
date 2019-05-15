@@ -28,7 +28,7 @@ namespace UIForia.Elements {
         
         internal UIElementFlags flags;
         internal UIElement parent;
-
+  
         public readonly LayoutResult layoutResult;
 
         internal static IntMap<ElementColdData> s_ColdDataMap = new IntMap<ElementColdData>();

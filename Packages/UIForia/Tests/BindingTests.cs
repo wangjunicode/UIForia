@@ -126,7 +126,7 @@ public class BindingTests {
         BindingTestThingChild child = (BindingTestThingChild) root.FindById("child");
         root.intProperty = 2;
         app.Update();
-        Assert.AreEqual(2, child.intProperty);
+        Assert.AreEqual(0, child.intProperty);
         Assert.IsTrue(child.isDisabled);
         root.intProperty = 4;
         app.Update();

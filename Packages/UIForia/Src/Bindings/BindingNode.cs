@@ -9,11 +9,17 @@ namespace UIForia.Bindings {
         public Binding[] bindings;
         public UIElement element;
         public ExpressionContext context;
+        public int enableBindingCount;
 
         public virtual bool OnUpdate() {
+            
+            for (int i = 0; i < enableBindingCount; i++) {
+                bindings[i].Execute(element, context);
+            }
+            
             if (element.isDisabled) return false;
             
-            for (int i = 0; i < bindings.Length; i++) {
+            for (int i = enableBindingCount; i < bindings.Length; i++) {
                 bindings[i].Execute(element, context);
             }
 

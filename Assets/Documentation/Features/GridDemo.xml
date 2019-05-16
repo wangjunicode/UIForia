@@ -4,9 +4,6 @@
     <Using namespace="UnityEngine"/>
 
     <Contents>
-        
-<!--        <Group style="[variableStyle]"/>-->
-        
         <!-- Creates a grid with a fixed amount of columns. More columns will align horizontally and break vertically -->
         <Group style="grid0 grid-horizontal col3layout">
             <Div style="cell cell-end m10 size100">Col 1</Div>

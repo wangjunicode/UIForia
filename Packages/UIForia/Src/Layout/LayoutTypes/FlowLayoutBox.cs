@@ -87,7 +87,7 @@ namespace UIForia.Layout.LayoutTypes {
         }
 
         protected override void OnChildrenChanged() {
-            throw new NotImplementedException();
+//            throw new NotImplementedException();
         }
 
         protected Size RunColumnLayout() {

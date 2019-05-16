@@ -115,12 +115,11 @@ namespace UIForia.Systems {
                 stack.Push(rootElement.children[i]);
             }
 
-            LayoutBox[] toLayoutArray = toLayout.Array;
-            int idx = 0;
-
             int elementCount = view.GetElementCount();
             toLayout.EnsureCapacity(elementCount);
 
+            LayoutBox[] toLayoutArray = toLayout.Array;
+            int idx = 0;
             while (stack.Count > 0) {
                 UIElement currentElement = stack.PopUnchecked();
 
@@ -871,6 +870,7 @@ namespace UIForia.Systems {
 
             if (layoutTypeChanged) {
                 HandleLayoutChanged(element);
+                box.parent?.OnChildStylePropertyChanged(box, properties);
             }
             else {
                 if (invalidatePreferredSizeCache) {
@@ -892,19 +892,19 @@ namespace UIForia.Systems {
         private void HandleLayoutChanged(UIElement element) {
             LayoutBox box;
             if (!m_LayoutBoxMap.TryGetValue(element.id, out box)) {
-                box = CreateLayoutBox(element);
+                CreateLayoutBox(element);
                 return;
             }
 
             LayoutBox parent = box.parent;
-            LayoutBox replace = box;
-
-            replace = CreateLayoutBox(element);
+            LayoutBox replace = CreateLayoutBox(element);
+            
             replace.allocatedWidth = box.allocatedWidth;
             replace.allocatedHeight = box.allocatedHeight;
-            replace.UpdateChildren();
+            
             replace.parent = parent;
-            parent?.UpdateChildren();
+            UpdateChildren(replace);
+            UpdateChildren(parent);
             box.Release();
         }
 

@@ -70,17 +70,6 @@
                 <Div style="flex-item">Grow 0</Div>
             </Div>
         </Div>
-        
-        <Div style="flex-demo">
-            <Group style="toggle" onMouseClick="OnToggle($event)">
-                <Group x-id="toggle-container" style="toggle-container">
-                    <Text style="toggle-text">ON</Text>
-                    <Group style="toggle-knob"/>
-                    <Text style="toggle-text">OFF</Text>   
-                </Group>
-
-            </Group>
-        </Div>
 
         <!--        <Div style="flex-demo">-->
         <!--            <Heading3>Flex-End</Heading3>-->

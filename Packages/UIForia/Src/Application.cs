@@ -196,22 +196,22 @@ namespace UIForia {
 
         private int nextViewId = 0;
 
-        public UIView AddView(string name, Rect rect, Type type, string template = null) {
+        public UIView CreateView(string name, Rect rect, Type type, string template = null) {
             UIView view = new UIView(nextViewId++, name, this, rect, m_Views.Count, type, template);
 
             m_Views.Add(view);
 
-//            RegisterElement(view.RootElement);
-
             for (int i = 0; i < m_Systems.Count; i++) {
                 m_Systems[i].OnViewAdded(view);
             }
-
+            
+            view.Initialize();
+            
             onViewAdded?.Invoke(view);
             return view;
         }
 
-        public UIView AddView(string name, Rect rect) {
+        public UIView CreateView(string name, Rect rect) {
             UIView view = new UIView(nextViewId++, name, this, rect, m_Views.Count);
 
             m_Views.Add(view);
@@ -219,7 +219,9 @@ namespace UIForia {
             for (int i = 0; i < m_Systems.Count; i++) {
                 m_Systems[i].OnViewAdded(view);
             }
-
+            
+            view.Initialize();
+            
             onViewAdded?.Invoke(view);
             return view;
         }
@@ -264,12 +266,14 @@ namespace UIForia {
 
             // todo -- store root view, rehydrate. kill the rest
             for (int i = 0; i < m_Views.Count; i++) {
-                m_Views[i].Refresh();
+               
                 // RegisterElement(m_Views[i].RootElement);
 
                 for (int j = 0; j < m_Systems.Count; j++) {
                     m_Systems[j].OnViewAdded(m_Views[i]);
                 }
+                
+                m_Views[i].Initialize();
             }
 
             onRefresh?.Invoke();
@@ -363,9 +367,13 @@ namespace UIForia {
                 m_Systems[i].OnElementDestroyed(element);
             }
 
-            for (int i = 0; i < toInternalDestroy.Count; i++) {
-                toInternalDestroy[i].InternalDestroy();
-                elementMap.Remove(toInternalDestroy[i].id);
+            if (toInternalDestroy.Count > 0) {
+                UIView view = toInternalDestroy[0].View;
+                for (int i = 0; i < toInternalDestroy.Count; i++) {
+                    view.ElementDestroyed(toInternalDestroy[i]);
+                    toInternalDestroy[i].InternalDestroy();
+                    elementMap.Remove(toInternalDestroy[i].id);
+                }
             }
 
             LightListPool<UIElement>.Release(ref toInternalDestroy);
@@ -420,11 +428,16 @@ namespace UIForia {
                 }
             }
 
-            for (int i = 0; i < toInternalDestroy.Count; i++) {
-                toInternalDestroy[i].InternalDestroy();
-                elementMap.Remove(toInternalDestroy[i].id);
+            if (toInternalDestroy.Count > 0) {
+                UIView view = toInternalDestroy[0].View;
+                for (int i = 0; i < toInternalDestroy.Count; i++) {
+                    view.ElementDestroyed(toInternalDestroy[i]);
+                    toInternalDestroy[i].InternalDestroy();
+                    elementMap.Remove(toInternalDestroy[i].id);
+                }
             }
 
+            LightListPool<UIElement>.Release(ref toInternalDestroy);
             element.children.Clear();
         }
 
@@ -509,6 +522,8 @@ namespace UIForia {
             }
 
             element.flags |= UIElementFlags.Enabled;
+            // if element is not enabled (ie has a disabled ancestor), no-op 
+            if (!element.isEnabled) return;
 
             int targetPhase = -1;
             UIElement ptr = element.parent;
@@ -522,9 +537,6 @@ namespace UIForia {
                     ptr = ptr.parent;
                 }
             }
-
-            // if element is not enabled (ie has a disabled ancestor), no-op 
-            if (!element.isEnabled) return;
 
             LightStack<UIElement> stack = LightStack<UIElement>.Get();
             UIElement[] children;
@@ -547,6 +559,7 @@ namespace UIForia {
                 if (child.isEnabled && !child.isCreated) {
                     child.flags |= UIElementFlags.Created;
                     child.OnCreate();
+                    child.View.ElementCreated(child);
                 }
 
                 if (child.isDisabled) {
@@ -610,6 +623,7 @@ namespace UIForia {
                     system.OnElementEnabled(element);
                 }
 
+                element.View.ElementHierarchyEnabled(element);
                 onElementEnabled?.Invoke(element);
 
                 stack.Push(element);
@@ -624,6 +638,7 @@ namespace UIForia {
                     if (child.isEnabled && !child.isReady) {
                         child.flags |= UIElementFlags.Ready;
                         child.OnReady();
+                        child.View.ElementReady(element);
                     }
 
                     if (child.isDisabled) {
@@ -701,7 +716,7 @@ namespace UIForia {
                     system.OnElementDisabled(element);
                 }
 
-                element.View.InvokeElementDisabled(element);
+                element.View.ElementHierarchyDisabled(element);
                 onElementDisabled?.Invoke(element);
             }
         }
@@ -778,7 +793,7 @@ namespace UIForia {
             UIView view = parent.View;
             stack.Push(child);
 
-            LightList<UIElement> viewAddEvents = LightListPool<UIElement>.Get();
+            view.BeginAddingElements();
 
             while (stack.Count > 0) {
                 UIElement current = stack.Pop();
@@ -786,14 +801,6 @@ namespace UIForia {
                 current.depth = current.parent.depth + 1;
 
                 // todo -- we don't support changing views or any sort of re-parenting
-                if (current.View != view) {
-                    if (current.View != null) {
-                        current.View.RemoveElement(current);
-                    }
-                    else {
-                        viewAddEvents.Add(current);
-                    }
-                }
 
                 current.View = view;
 
@@ -806,6 +813,7 @@ namespace UIForia {
 
                 UIElement.UIElementTypeData typeData = current.GetTypeData();
 
+                // todo -- build tree subsection & add it all at once
                 if (typeData.requiresUpdate) {
                     updateTree.AddItem(current);
                 }
@@ -817,11 +825,14 @@ namespace UIForia {
                     for (int i = 0; i < m_Systems.Count; i++) {
                         m_Systems[i].OnElementCreated(current);
                     }
+
+                    view.ElementRegistered(current);
                     onElementRegistered?.Invoke(current);
                 }
 
                 UIElement[] children = current.children.Array;
                 int childCount = current.children.Count;
+                // reverse this?
                 for (int i = 0; i < childCount; i++) {
                     children[i].siblingIndex = i;
                     stack.Push(children[i]);
@@ -832,9 +843,8 @@ namespace UIForia {
                 parent.children[i].siblingIndex = i;
             }
 
-            view.InvokeAddElements(viewAddEvents);
+            view.EndAddingElements();
 
-            LightListPool<UIElement>.Release(ref viewAddEvents);
             LightStack<UIElement>.Release(ref stack);
 
             if (parentEnabled && child.isEnabled) {

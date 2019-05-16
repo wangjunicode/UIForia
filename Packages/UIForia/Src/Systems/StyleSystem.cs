@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using UIForia.Compilers.Style;
 using UIForia.Elements;
 using UIForia.Rendering;
 using UIForia.Util;
-using UnityEngine;
-using UnityEngine.Profiling;
 
 namespace UIForia.Systems {
 
@@ -63,6 +60,10 @@ namespace UIForia.Systems {
                 return;
             }
 
+            for (int i = 0; i < count; i++) {
+                element.style.SetInheritedStyle(parentPropertiesArray[i]);
+            }
+            
             LightList<StyleProperty> inheritedProperties = LightListPool<StyleProperty>.Get();
             inheritedProperties.EnsureCapacity(count);
             StyleProperty[] inheritedPropertiesArray = inheritedProperties.Array;

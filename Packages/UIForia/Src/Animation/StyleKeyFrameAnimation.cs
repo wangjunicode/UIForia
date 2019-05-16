@@ -286,17 +286,17 @@ namespace UIForia.Animation {
                     case StylePropertyId.BackgroundColor:
                     case StylePropertyId.TextColor: {
 
-                        float v0 = ResolveHeightMeasurement(target, viewport, prev.value.IsCalculated
-                            ? prev.value.Evaluate<UIMeasurement>(null)
-                            : prev.value.styleProperty.AsUIMeasurement
-                        );
-
-                        float v1 = ResolveHeightMeasurement(target, viewport, next.value.IsCalculated
-                            ? next.value.Evaluate<UIMeasurement>(null)
-                            : next.value.styleProperty.AsUIMeasurement
-                        );
-
-                        target.style.SetAnimatedProperty(new StyleProperty(propertyId, new UIMeasurement(Mathf.Lerp(v0, v1, t))));
+//                        float v0 = ResolveHeightMeasurement(target, viewport, prev.value.IsCalculated
+//                            ? prev.value.Evaluate<UIMeasurement>(null)
+//                            : prev.value.styleProperty.AsUIMeasurement
+//                        );
+//
+//                        float v1 = ResolveHeightMeasurement(target, viewport, next.value.IsCalculated
+//                            ? next.value.Evaluate<UIMeasurement>(null)
+//                            : next.value.styleProperty.AsUIMeasurement
+//                        );
+//
+//                        target.style.SetAnimatedProperty(new StyleProperty(propertyId, new UIMeasurement(Mathf.Lerp(v0, v1, t))));
 
                         Color c0 = prev.value.IsCalculated
                             ? prev.value.Evaluate<Color>(null)

@@ -3,26 +3,107 @@
 
     <Style path="Documentation/Features/FlexDemo.style"/>
 
-    <Contents style="container vertical-center">
+    <Contents style="container">
 
-        <Heading3 style="head">
-            C
-        </Heading3>
-
-        <Div style="blue medium mt3 m1">Join existing colony</Div>
-        <Div style="mb3">Recommended for new players</Div>
-        <Div style="blue medium mt3 m1">Join existing colony</Div>
-        
-        <Div style="big-ignored">
-            <Group style="position-bottom">
-
-                <Group style="bottom-first" onMouseClick="ClickFirst()">First</Group>
-                <Group>
-                    <Group style="bottom-second" if="renderSecond">Second</Group>
-                    <Group style="bottom-second" if="!renderSecond">Third</Group>
-                </Group>
-                
+        <Div style="flex-demo">
+            <Heading3>Flex-Start</Heading3>
+            <Group style="flex-demo-content flex-start col">
+                <Div style="flex-item">Item 1</Div>
+                <Div style="flex-item">Item 2</Div>
+                <Div style="flex-item">Item 3</Div>
+                <Div style="flex-item">Item 4</Div>
+                <Div style="flex-item">Item 5</Div>
             </Group>
         </Div>
+
+        <Div style="flex-demo">
+            <Heading3>Flex-End</Heading3>
+            <Div style="flex-demo-content flex-end col">
+                <Div style="flex-item">Item 1</Div>
+                <Div style="flex-item">Item 2</Div>
+                <Div style="flex-item">Item 3</Div>
+                <Div style="flex-item">Item 4</Div>
+                <Div style="flex-item">Item 5</Div>
+            </Div>
+        </Div>
+
+        <Div style="flex-demo">
+            <Heading3>Flex-Center</Heading3>
+            <Div style="flex-demo-content flex-center col">
+                <Div style="flex-item">Item 1</Div>
+                <Div style="flex-item">Item 2</Div>
+                <Div style="flex-item">Item 3</Div>
+                <Div style="flex-item">Item 4</Div>
+                <Div style="flex-item">Item 5</Div>
+            </Div>
+        </Div>
+
+        <Div style="flex-demo">
+            <Heading3>Flex-Space-Between</Heading3>
+            <Div style="flex-demo-content flex-space-between col">
+                <Div style="flex-item">Item 1</Div>
+                <Div style="flex-item">Item 2</Div>
+                <Div style="flex-item">Item 3</Div>
+                <Div style="flex-item">Item 4</Div>
+                <Div style="flex-item">Item 5</Div>
+            </Div>
+        </Div>
+
+        <Div style="flex-demo">
+            <Heading3>Flex-Space-Around</Heading3>
+            <Div style="flex-demo-content flex-space-around col">
+                <Div style="flex-item">Item 1</Div>
+                <Div style="flex-item">Item 2</Div>
+                <Div style="flex-item">Item 3</Div>
+                <Div style="flex-item">Item 4</Div>
+                <Div style="flex-item">Item 5</Div>
+            </Div>
+        </Div>
+
+        <Div style="flex-demo">
+            <Heading3>Flex-Grow</Heading3>
+            <Div style="flex-demo-content flex-stretch col">
+                <Div style="flex-item">Grow 0</Div>
+                <Div style="flex-item flex-grow-1">Grow 1</Div>
+                <Div style="flex-item flex-grow-2">Grow 2</Div>
+                <Div style="flex-item flex-grow-1">Grow 1</Div>
+                <Div style="flex-item">Grow 0</Div>
+            </Div>
+        </Div>
+        
+        <Div style="flex-demo">
+            <Group style="toggle" onMouseClick="OnToggle($event)">
+                <Group x-id="toggle-container" style="toggle-container">
+                    <Text style="toggle-text">ON</Text>
+                    <Group style="toggle-knob"/>
+                    <Text style="toggle-text">OFF</Text>   
+                </Group>
+
+            </Group>
+        </Div>
+
+        <!--        <Div style="flex-demo">-->
+        <!--            <Heading3>Flex-End</Heading3>-->
+        <!--        </Div>-->
+
+        <!--        <Heading3 style="head">-->
+        <!--            header content-->
+        <!--        </Heading3>-->
+
+        <!--        <Div style="blue medium mt3 m1">Join existing colony</Div>-->
+        <!--        <Div style="mb3">Recommended for new players</Div>-->
+        <!--        <Div style="blue medium mt3 m1">Join existing colony</Div>-->
+        <!--        -->
+        <!--        <Div style="big-ignored">-->
+        <!--            <Group style="position-bottom">-->
+
+        <!--                <Group style="bottom-first" onMouseClick="ClickFirst()">First</Group>-->
+        <!--                <Group>-->
+        <!--                    <Group style="bottom-second" if="renderSecond">Second</Group>-->
+        <!--                    <Group style="bottom-second" if="!renderSecond">Third</Group>-->
+        <!--                </Group>-->
+        <!--                -->
+        <!--            </Group>-->
+        <!--        </Div>-->
     </Contents>
 </UITemplate>

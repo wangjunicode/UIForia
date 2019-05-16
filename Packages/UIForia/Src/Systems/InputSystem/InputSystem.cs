@@ -62,7 +62,7 @@ namespace UIForia.Systems {
         private readonly EventPropagator m_EventPropagator;
         private readonly List<ValueTuple<MouseEventHandler, UIElement, ExpressionContext>> m_MouseEventCaptureList;
         private readonly List<ValueTuple<DragEventHandler, UIElement, ExpressionContext>> m_DragEventCaptureList;
-        protected static readonly UIElement.RenderLayerComparerAscending s_DepthComparer = new UIElement.RenderLayerComparerAscending();
+        protected static readonly ZIndexComparerAscending s_DepthComparer = new ZIndexComparerAscending();
         private static readonly Event s_Event = new Event();
 
         public KeyboardModifiers KeyboardModifiers => modifiersThisFrame;

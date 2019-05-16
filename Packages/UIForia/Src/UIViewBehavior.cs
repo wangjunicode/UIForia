@@ -1,9 +1,5 @@
 ﻿using System;
-using SVGX;
-using UIForia.Elements;
-using UIForia.Rendering;
 using UnityEngine;
-using Vertigo;
 
 namespace UIForia {
 
@@ -28,11 +24,7 @@ namespace UIForia {
             if (type == null) return;
             application.Update();
         }
-
-        public void RefreshView() {
-            if (type == null) return;
-            view?.Refresh();
-        }
+        
 
     }
 

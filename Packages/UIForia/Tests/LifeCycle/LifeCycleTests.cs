@@ -45,9 +45,9 @@ namespace LifeCycle {
         [Test]
         public void ViewInvokesAddedEvents() {
             MockApplication app = new MockApplication(typeof(LifeCycleTestThing));
-            UIView view = app.AddView("View0", new Rect(0, 0, 500, 500));
+            UIView view = app.CreateView("View0", new Rect(0, 0, 500, 500));
             int count = 0;
-            view.onElementsAdded += (elements) => { count = elements.Count; };
+            view.onElementCreated += (elements) => { count++; };
             UIElement root = view.CreateElement<LifeCycleTestThing>();
             Assert.AreEqual(4, count);
         }
@@ -120,7 +120,7 @@ namespace LifeCycle {
         [Test]
         public void CallsLifeCycleInProperOrderOnCreate() {
             MockApplication app = new MockApplication(typeof(LifeCycleTestThing));
-            UIView view = app.AddView("View0", new Rect(0, 0, 500, 500));
+            UIView view = app.CreateView("View0", new Rect(0, 0, 500, 500));
 
             List<string> list = new List<string>();
             LifeCycleElement.output = list;
@@ -136,7 +136,7 @@ namespace LifeCycle {
         [Test]
         public void CallsLifeCycleInProperOrderOnCreateForChildren() {
             MockApplication app = new MockApplication(typeof(LifeCycleTestThing));
-            UIView view = app.AddView("View0", new Rect(0, 0, 500, 500));
+            UIView view = app.CreateView("View0", new Rect(0, 0, 500, 500));
 
             List<string> list = new List<string>();
             LifeCycleElement.output = list;
@@ -146,10 +146,6 @@ namespace LifeCycle {
                 new LifeCycleElement("child1")
             ));
 
-            Debug.ClearDeveloperConsole();
-            for (int i = 0; i < list.Count; i++) {
-                Debug.Log(list[i]);
-            }
 
             Assert.AreEqual(new[] {
                 "root.create",
@@ -167,7 +163,7 @@ namespace LifeCycle {
         [Test]
         public void CallsLifeCycleInProperOrderOnCreateForChildrenDisabled() {
             MockApplication app = new MockApplication(typeof(LifeCycleTestThing));
-            UIView view = app.AddView("View0", new Rect(0, 0, 500, 500));
+            UIView view = app.CreateView("View0", new Rect(0, 0, 500, 500));
 
             List<string> list = new List<string>();
             LifeCycleElement.output = list;
@@ -177,10 +173,6 @@ namespace LifeCycle {
                 new LifeCycleElement("child1")
             ));
 
-            Debug.ClearDeveloperConsole();
-            for (int i = 0; i < list.Count; i++) {
-                Debug.Log(list[i]);
-            }
 
             Assert.AreEqual(new[] {
                 "root.create",
@@ -195,7 +187,7 @@ namespace LifeCycle {
         [Test]
         public void LifeCycleDisableOnCreate() {
             MockApplication app = new MockApplication(typeof(LifeCycleTestThing));
-            UIView view = app.AddView("View0", new Rect(0, 0, 500, 500));
+            UIView view = app.CreateView("View0", new Rect(0, 0, 500, 500));
 
             List<string> list = new List<string>();
             LifeCycleElement.output = list;
@@ -216,11 +208,6 @@ namespace LifeCycle {
 
             root.SetEnabled(true);
 
-            Debug.ClearDeveloperConsole();
-            for (int i = 0; i < list.Count; i++) {
-                Debug.Log(list[i]);
-            }
-
             Assert.AreEqual(new[] {
                 "root.create",
                 "root.disable",
@@ -238,7 +225,7 @@ namespace LifeCycle {
         [Test]
         public void LifeCycleDisableOnEnable() {
             MockApplication app = new MockApplication(typeof(LifeCycleTestThing));
-            UIView view = app.AddView("View0", new Rect(0, 0, 500, 500));
+            UIView view = app.CreateView("View0", new Rect(0, 0, 500, 500));
 
             List<string> list = new List<string>();
             LifeCycleElement.output = list;
@@ -251,12 +238,7 @@ namespace LifeCycle {
             root.onEnable = (e) => e.SetEnabled(false);
 
             view.AddChild(root);
-
-            Debug.ClearDeveloperConsole();
-            for (int i = 0; i < list.Count; i++) {
-                Debug.Log(list[i]);
-            }
-
+            
             Assert.AreEqual(new[] {
                 "root.create",
                 "child0.create",
@@ -269,7 +251,7 @@ namespace LifeCycle {
         [Test]
         public void LifeCycleDisableOnReadyThenEnable() {
             MockApplication app = new MockApplication(typeof(LifeCycleTestThing));
-            UIView view = app.AddView("View0", new Rect(0, 0, 500, 500));
+            UIView view = app.CreateView("View0", new Rect(0, 0, 500, 500));
 
             List<string> list = new List<string>();
             LifeCycleElement.output = list;
@@ -285,11 +267,6 @@ namespace LifeCycle {
             };
 
             view.AddChild(root);
-
-            Debug.ClearDeveloperConsole();
-            for (int i = 0; i < list.Count; i++) {
-                Debug.Log(list[i]);
-            }
 
             Assert.AreEqual(new[] {
                 "root.create",
@@ -313,7 +290,7 @@ namespace LifeCycle {
         [Test]
         public void LifeCycleMultipleChildLayers() {
             MockApplication app = new MockApplication(typeof(LifeCycleTestThing));
-            UIView view = app.AddView("View0", new Rect(0, 0, 500, 500));
+            UIView view = app.CreateView("View0", new Rect(0, 0, 500, 500));
 
             List<string> list = new List<string>();
             LifeCycleElement.output = list;
@@ -327,11 +304,6 @@ namespace LifeCycle {
             );
 
             view.AddChild(root);
-
-            Debug.ClearDeveloperConsole();
-            for (int i = 0; i < list.Count; i++) {
-                Debug.Log(list[i]);
-            }
 
             Assert.AreEqual(new[] {
                 "root.create",
@@ -355,7 +327,7 @@ namespace LifeCycle {
         [Test]
         public void CreateChildrenOnCreate() {
             MockApplication app = new MockApplication(typeof(LifeCycleTestThing));
-            UIView view = app.AddView("View0", new Rect(0, 0, 500, 500));
+            UIView view = app.CreateView("View0", new Rect(0, 0, 500, 500));
 
             List<string> list = new List<string>();
             LifeCycleElement.output = list;
@@ -369,12 +341,7 @@ namespace LifeCycle {
             };
 
             view.AddChild(root);
-
-            Debug.ClearDeveloperConsole();
-            for (int i = 0; i < list.Count; i++) {
-                Debug.Log(list[i]);
-            }
-
+            
             Assert.AreEqual(new[] {
                 "root.create",
                 "child0.create",
@@ -391,7 +358,7 @@ namespace LifeCycle {
         [Test]
         public void CreateChildrenOnReady() {
             MockApplication app = new MockApplication(typeof(LifeCycleTestThing));
-            UIView view = app.AddView("View0", new Rect(0, 0, 500, 500));
+            UIView view = app.CreateView("View0", new Rect(0, 0, 500, 500));
 
             List<string> list = new List<string>();
             LifeCycleElement.output = list;
@@ -405,12 +372,7 @@ namespace LifeCycle {
             };
 
             view.AddChild(root);
-
-            Debug.ClearDeveloperConsole();
-            for (int i = 0; i < list.Count; i++) {
-                Debug.Log(list[i]);
-            }
-
+            
             Assert.AreEqual(new[] {
                 "root.create",
                 "root.enable",
@@ -427,7 +389,7 @@ namespace LifeCycle {
         [Test]
         public void CreateDisabledChildrenOnReady() {
             MockApplication app = new MockApplication(typeof(LifeCycleTestThing));
-            UIView view = app.AddView("View0", new Rect(0, 0, 500, 500));
+            UIView view = app.CreateView("View0", new Rect(0, 0, 500, 500));
 
             List<string> list = new List<string>();
             LifeCycleElement.output = list;
@@ -442,11 +404,6 @@ namespace LifeCycle {
             };
 
             view.AddChild(root);
-
-            Debug.ClearDeveloperConsole();
-            for (int i = 0; i < list.Count; i++) {
-                Debug.Log(list[i]);
-            }
 
             Assert.AreEqual(new[] {
                 "root.create",
@@ -472,7 +429,7 @@ namespace LifeCycle {
         [Test]
         public void LifeCycleDestroyChildOnCreate() {
             MockApplication app = new MockApplication(typeof(LifeCycleTestThing));
-            UIView view = app.AddView("View0", new Rect(0, 0, 500, 500));
+            UIView view = app.CreateView("View0", new Rect(0, 0, 500, 500));
 
             List<string> list = new List<string>();
             LifeCycleElement.output = list;
@@ -481,31 +438,23 @@ namespace LifeCycle {
                 new LifeCycleElement("child0")
             );
 
-            root.onCreate = (el) => {
-                el.GetChild(0).Destroy();
-            };
+            root.onCreate = (el) => { el.GetChild(0).Destroy(); };
 
             view.AddChild(root);
-
-            Debug.ClearDeveloperConsole();
-            for (int i = 0; i < list.Count; i++) {
-                Debug.Log(list[i]);
-            }
-
+            
             Assert.AreEqual(new[] {
                 "root.create",
                 "child0.destroy",
                 "root.enable",
                 "root.ready",
             }, list.ToArray());
-           
         }
 
         // todo -- test depth & sibling index after hierarchy manipulation
         [Test]
         public void AddSiblingElement() {
             MockApplication app = new MockApplication(typeof(LifeCycleTestThing));
-            UIView view = app.AddView("View0", new Rect(0, 0, 500, 500));
+            UIView view = app.CreateView("View0", new Rect(0, 0, 500, 500));
 
             List<string> list = new List<string>();
             LifeCycleElement.output = list;
@@ -521,13 +470,8 @@ namespace LifeCycle {
 
                 lifeCycleElement.onReady = s1e => { uiElement.AddChild(new LifeCycleElement("child0_sub1")); };
             };
-            
-            view.AddChild(root);
 
-            Debug.ClearDeveloperConsole();
-            for (int i = 0; i < list.Count; i++) {
-                Debug.Log(list[i]);
-            }
+            view.AddChild(root);
 
             Assert.AreEqual(new[] {
                 "root.create",
@@ -543,14 +487,13 @@ namespace LifeCycle {
                 "child0_sub1.enable",
                 "child0_sub1.ready",
             }, list.ToArray());
-
         }
 
-        
+
         [Test]
         public void AddSiblingElementToRoot() {
             MockApplication app = new MockApplication(typeof(LifeCycleTestThing));
-            UIView view = app.AddView("View0", new Rect(0, 0, 500, 500));
+            UIView view = app.CreateView("View0", new Rect(0, 0, 500, 500));
 
             List<string> list = new List<string>();
             LifeCycleElement.output = list;
@@ -566,13 +509,8 @@ namespace LifeCycle {
 
                 lifeCycleElement.onEnable = s1e => { view.AddChild(new LifeCycleElement("root1", new LifeCycleElement("root1_child0"))); };
             };
-            
-            view.AddChild(root);
 
-            Debug.ClearDeveloperConsole();
-            for (int i = 0; i < list.Count; i++) {
-                Debug.Log(list[i]);
-            }
+            view.AddChild(root);
 
             Assert.AreEqual(new[] {
                 "root.create",
@@ -591,7 +529,6 @@ namespace LifeCycle {
                 "child0.ready",
                 "child1.ready",
             }, list.ToArray());
-
         }
 
 //        [Test]

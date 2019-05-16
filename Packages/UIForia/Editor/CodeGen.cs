@@ -154,23 +154,22 @@ namespace UIForia.Editor {
             // Layout
             new PropertyGenerator<LayoutType>(StylePropertyId.LayoutType, LayoutType.Flex),
             new PropertyGenerator<LayoutBehavior>(StylePropertyId.LayoutBehavior, LayoutBehavior.Normal),
-            new AnimatedPropertyGenerator<int>(StylePropertyId.ZIndex, 0),
+            new AnimatedPropertyGenerator<int>(StylePropertyId.ZIndex, 0, InheritanceType.Inherited),
             new AnimatedPropertyGenerator<int>(StylePropertyId.RenderLayerOffset, 0),
             new AnimatedPropertyGenerator<RenderLayer>(StylePropertyId.RenderLayer, RenderLayer.Default),
-            
+
             // Scrollbar
             new PropertyGenerator<string>(StylePropertyId.Scrollbar, string.Empty),
             new PropertyGenerator<UIMeasurement>(StylePropertyId.ScrollbarSize, new UIMeasurement(15f)),
             new AnimatedPropertyGenerator<Color>(StylePropertyId.ScrollbarColor, Color.black),
 
             // Shadow
-            new PropertyGenerator<ShadowType>(StylePropertyId.ShadowType, ShadowType.Unset), 
+            new PropertyGenerator<ShadowType>(StylePropertyId.ShadowType, ShadowType.Unset),
             new AnimatedPropertyGenerator<float>(StylePropertyId.ShadowOffsetX, 0),
             new AnimatedPropertyGenerator<float>(StylePropertyId.ShadowOffsetY, 0),
             new AnimatedPropertyGenerator<float>(StylePropertyId.ShadowSoftnessX, 0.1f),
             new AnimatedPropertyGenerator<float>(StylePropertyId.ShadowSoftnessY, 0.1f),
             new AnimatedPropertyGenerator<float>(StylePropertyId.ShadowIntensity, 0.7f),
-            
         };
 
         [MenuItem("UIForia/Regenerate Style Stuff")]
@@ -300,10 +299,10 @@ __REPLACE_StyleBindingCompiler_DoCompile
 
             template = template.Replace("__REPLACE__UIStyleSet_Methods", retn);
             retn = GetComputedStyle();
-            
+
             template = template.Replace("__REPLACE_UIStyleSet_GetComputed", retn);
             retn = "";
-            
+
             for (int i = 0; i < properties.Length; i++) {
                 if (properties[i].inheritanceType == InheritanceType.Inherited) {
                     retn += $"                    case StylePropertyId.{properties[i].propertyIdName}: return true;\n";
@@ -338,7 +337,7 @@ __REPLACE_StyleBindingCompiler_DoCompile
             template = template.Replace("__REPLACE_StyleBindingCompiler_EnumSources", retn);
 
             File.WriteAllText(generatedPath2, template);
-            
+
             string code = @"using Shapes2D;
 using UIForia.Layout;
 using UIForia.Layout.LayoutTypes;
@@ -558,7 +557,7 @@ namespace UIForia.Rendering {
             code += "\t\t\t\tdefault: throw new System.ArgumentOutOfRangeException(nameof(propertyId), propertyId, null);\n";
             code += "\t\t\t\t}\n}";
             return code;
-        }       
+        }
 
         private static string UIStyle_Property(PropertyGenerator propertyGenerator) {
             string template = $@"
@@ -623,7 +622,7 @@ namespace UIForia.Rendering {
             else if (typeof(string) == propertyGenerator.type) {
                 return $"GetProperty(StylePropertyId.{propertyGenerator.propertyIdName}).AsString;";
             }
-            
+
 
             throw new ArgumentOutOfRangeException();
         }

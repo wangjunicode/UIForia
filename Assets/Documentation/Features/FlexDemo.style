@@ -1,245 +1,62 @@
-export const lightButtonHover = rgba(235, 235, 230, 255);
-export const blackButtonHover = rgba(20, 20, 20, 255);
-
-export const whiteHover = rgba(200, 200, 200, 255);
-export const whiteFocus = rgba(210, 210, 210, 255);
-export const whiteActive = rgba(150, 150, 150, 255);
-export const whiteDisabled = rgba(150, 150, 150, 255);
-
-style roundInputBig {
-    PreferredSize = 350px 62px;
-    BackgroundColor = white;
-    BorderRadius = 30px;
-    Margin = 10px;
-    Padding = 10px 15px;
-    [hover] {
-        BackgroundColor = @whiteHover;
-    }
-    [focus] {
-        BackgroundColor = @whiteFocus;
-    }
-    [active] {
-        BackgroundColor = @whiteActive;
-    }
-
-    [attr:disabled] {
-        BackgroundColor = @whiteDisabled;
-    }
-}
-
-style roundInputSmall {
-    PreferredSize = 150px 42px;
-    BackgroundColor = white;
-    BorderRadius = 20px;
-    Margin = 5px;
-    Padding = 10px 15px;
-    [hover] {
-        BackgroundColor = @whiteHover;
-    }
-    [focus] {
-        BackgroundColor = @whiteFocus;
-    }
-    [active] {
-        BackgroundColor = @whiteActive;
-    }
-
-    [attr:disabled="true"] {
-        BackgroundColor = @whiteDisabled;
-    }
-}
-
-style mv1 { 
-    MarginTop = 10px;
-    MarginBottom = 10px;
-}
-
-style mv2 { 
-    MarginTop = 20px;
-    MarginBottom = 20px;
-}
-
-style mv3 { 
-    MarginTop = 30px;
-    MarginBottom = 30px;
-}
-
-style mv4 { 
-    MarginTop = 40px;
-    MarginBottom = 40px;
-}
-
-style mv5 { 
-    MarginTop = 50px;
-    MarginBottom = 50px;
-}
-
-style mb1 { 
-    MarginBottom = 10px;
-}
-
-style mb2 { 
-    MarginBottom = 20px;
-}
-
-style mb3 { 
-    MarginBottom = 30px;
-}
-
-style mb4 { 
-    MarginBottom = 40px;
-}
-
-style mb5 { 
-    MarginBottom = 50px;
-}
-
-style mt1 { 
-    MarginTop = 10px;
-}
-
-style mt2 { 
-    MarginTop = 20px;
-}
-
-style mt3 { 
-    MarginTop = 30px;
-}
-
-style mt4 { 
-    MarginTop = 40px;
-}
-
-style mt5 { 
-    MarginTop = 50px;
-}
-
 style container {
     PreferredSize = 1pca;
+    Padding = 1em;
 }
 
-style head {
-    TextFontSize = 32;
-}
-
-style baseButton {
-    MinWidth = 32px;
-    MinHeight = 32px;
-    TextFontSize = 36;
-    BackgroundColor = white;
-    BorderRadius = 30px;
-    Padding = 10px 60px;
-    PreferredSize = 1cnt;
+style flex-demo {
+    PreferredSize = 1pca, 1cnt;
+    Padding = 1em;
     FlexLayoutMainAxisAlignment = Center;
-    FlexLayoutCrossAxisAlignment = Center;
-    BorderColor = white;
-    Border = 0;
-    [hover] {
-        BackgroundColor = @lightButtonHover;
-    }
-}
-
-style black {
-    BackgroundColor = black;
-    TextColor = white;
-    [hover] {
-        BackgroundColor = @blackButtonHover;
-    }
-}
-
-style grey {
-    BackgroundColor = rgba(50, 50, 50, 255);
-}
-
-style blue {
-    TextColor = white;
-    BackgroundColor = rgba(0, 181, 217, 255);
-    Padding = 24px;
-    BorderRadius = 60px;
-    TextFontSize = 32;
-}
-
-style outline {
+    Border = 2px;
     BorderColor = black;
     BorderRadius = 20px;
-    Border = 3px;
-    BackgroundColor = rgba(0, 0, 0, 0);
+    BackgroundColor = yellow;
+    Margin = 0.5em 0;
 }
 
-style small {
-    TextFontSize = 18;
+style flex-demo-content {
+    PreferredSize = 1.5cnt, 1cnt;
+    TextColor = White;
+    BackgroundColor = blue;
 }
 
-style medium {
-    PreferredWidth = 330px;
-    TextAlignment = Center;
-    FlexLayoutCrossAxisAlignment = Center;
-
-}
-
-style horizontal {
+style col {
     FlexLayoutDirection = Column;
-    LayoutType = Flow;
 }
 
-style horizontal-center {
-    FlexLayoutDirection = Column;
-    LayoutType = Flow;
-    FlexLayoutMainAxisAlignment = Center;
-    FlexLayoutCrossAxisAlignment = Center;
-}
-
-style vertical-center {
-    FlexLayoutDirection = Row;
-    FlexLayoutMainAxisAlignment = Center;
-    FlexLayoutCrossAxisAlignment = Center;
-}
-
-style fill-parent {
-    PreferredSize = 1pca, 1pca;
-}
-
-style content-size {
-    PreferredSize = 1cnt;
-}
-
-style vertical-padded48 {
-    PaddingTop = 48px;
-    PaddingBottom = 48px;
-}
-
-style vertical-button-group {
-    FlexLayoutCrossAxisAlignment = Center;
-    PreferredSize = 300px, 1cnt;
-    FlexItemSelfAlignment = Stretch;
-}
-
-style big-ignored {
-    FlexLayoutDirection = Column;
-    FlexLayoutCrossAxisAlignment = End;
-    LayoutBehavior = Ignored;
-    PreferredSize = 1vw 1vh;
-}
-
-style position-bottom {
-    FlexLayoutDirection = Row;
+style flex-start {
     FlexLayoutMainAxisAlignment = Start;
-    Border = 2px;
-    BorderColor = rgb(200, 50, 50);
 }
 
-style bottom-first {
-    
-    BorderColor = rgb(50, 250, 50);
-    PreferredWidth = 350px;
-    BackgroundColor = white;
-    Padding = 20px 10px 10px 10px;
-    MarginBottom = 30px;
+style flex-end {
+    FlexLayoutMainAxisAlignment = End;
 }
-style bottom-second {
-    
-    BorderColor = rgb(50, 50, 200);
-    PreferredWidth = 350px;
-    BackgroundColor = rgba(90, 90, 90, 240);
-    Padding = 20px 10px 10px 10px;
-    MarginBottom = 30px;
+
+style flex-center {
+    FlexLayoutMainAxisAlignment = Center;
+}
+
+style flex-space-between {
+    FlexLayoutMainAxisAlignment = SpaceBetween;
+}
+
+style flex-space-around {
+    FlexLayoutMainAxisAlignment = SpaceAround;
+}
+
+style flex-grow-1 {
+    FlexItemGrow = 1;
+}
+
+style flex-grow-2 {
+    FlexItemGrow = 2;
+}
+
+style flex-item {
+    PreferredSize = 50px 1cnt;
+    MinWidth = 1cnt;
+    Padding = 0.5em;
+    BackgroundColor = red;
+    Margin = 0.25em;
+    TextAlignment = Center;
 }

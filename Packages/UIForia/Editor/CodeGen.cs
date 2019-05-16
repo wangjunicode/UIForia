@@ -157,6 +157,7 @@ namespace UIForia.Editor {
             new AnimatedPropertyGenerator<int>(StylePropertyId.ZIndex, 0, InheritanceType.Inherited),
             new AnimatedPropertyGenerator<int>(StylePropertyId.RenderLayerOffset, 0),
             new AnimatedPropertyGenerator<RenderLayer>(StylePropertyId.RenderLayer, RenderLayer.Default),
+            new AnimatedPropertyGenerator<int>(StylePropertyId.Layer, 0, InheritanceType.Inherited),
 
             // Scrollbar
             new PropertyGenerator<string>(StylePropertyId.Scrollbar, string.Empty),

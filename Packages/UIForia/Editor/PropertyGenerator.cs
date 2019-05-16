@@ -184,23 +184,23 @@ namespace UIForia.Editor {
 
             if (defaultValue is UIMeasurement) {
                 UIMeasurement measurement = (UIMeasurement) defaultValue;
-                return $"new {nameof(UIMeasurement)}({measurement.value.ToString(CultureInfo.InvariantCulture)}, {nameof(UIMeasurementUnit)}.{Enum.GetName(typeof(UIMeasurementUnit), measurement.unit)})";
+                return $"new {nameof(UIMeasurement)}({measurement.value.ToString(CultureInfo.InvariantCulture)}f, {nameof(UIMeasurementUnit)}.{Enum.GetName(typeof(UIMeasurementUnit), measurement.unit)})";
             }
             
             if (defaultValue is TransformOffset) {
                 TransformOffset measurement = (TransformOffset) defaultValue;
-                return $"new {nameof(TransformOffset)}({measurement.value.ToString(CultureInfo.InvariantCulture)}, {nameof(TransformUnit)}.{Enum.GetName(typeof(TransformUnit), measurement.unit)})";
+                return $"new {nameof(TransformOffset)}({measurement.value.ToString(CultureInfo.InvariantCulture)}f, {nameof(TransformUnit)}.{Enum.GetName(typeof(TransformUnit), measurement.unit)})";
             }
 
             if (defaultValue is UIFixedLength) {
                 UIFixedLength length = (UIFixedLength) defaultValue;
                 string v = Enum.GetName(typeof(UIFixedUnit), length.unit);
-                return $"new {nameof(UIFixedLength)}({length.value.ToString(CultureInfo.InvariantCulture)}, {nameof(UIFixedUnit)}.{v})";
+                return $"new {nameof(UIFixedLength)}({length.value.ToString(CultureInfo.InvariantCulture)}f, {nameof(UIFixedUnit)}.{v})";
             }
 
             if (defaultValue is GridTrackSize) {
                 GridTrackSize size = (GridTrackSize) defaultValue;
-                return $"new {nameof(GridTrackSize)}({size.minValue.ToString(CultureInfo.InvariantCulture)}, {nameof(GridTemplateUnit)}.{Enum.GetName(typeof(GridTemplateUnit), size.minUnit)})";
+                return $"new {nameof(GridTrackSize)}({size.minValue.ToString(CultureInfo.InvariantCulture)}f, {nameof(GridTemplateUnit)}.{Enum.GetName(typeof(GridTemplateUnit), size.minUnit)})";
             }
 
             if (defaultValue is Color) {

@@ -726,6 +726,13 @@ namespace UIForia.Rendering {
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.RenderLayer, (int)value), state); }
         }
         
+        public int Layer {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.Layer, state).AsInt; }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.Layer, value), state); }
+        }
+        
         public string Scrollbar {
             [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.Scrollbar, state).AsString; }
@@ -899,6 +906,7 @@ namespace UIForia.Rendering {
                     case StylePropertyId.ZIndex: return !IntUtil.IsDefined(valuePart0);
                     case StylePropertyId.RenderLayerOffset: return !IntUtil.IsDefined(valuePart0);
                     case StylePropertyId.RenderLayer: return valuePart0 == 0 || IntUtil.UnsetValue == valuePart0;
+                    case StylePropertyId.Layer: return !IntUtil.IsDefined(valuePart0);
                     case StylePropertyId.Scrollbar: return objectField == null;
                     case StylePropertyId.ScrollbarSize: return !FloatUtil.IsDefined(floatValue) || valuePart1 == 0;
                     case StylePropertyId.ScrollbarColor: return valuePart1 == 0;
@@ -1638,6 +1646,13 @@ namespace UIForia.Rendering {
             get { return (UIForia.Rendering.RenderLayer)FindEnumProperty(StylePropertyId.RenderLayer); }
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.RenderLayer, (int)value)); }
+        }
+            
+        public int Layer {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return FindIntProperty(StylePropertyId.Layer); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.Layer, value)); }
         }
             
         public string Scrollbar {
@@ -2657,6 +2672,16 @@ namespace UIForia.Rendering {
                 }
             }
 
+            public int Layer { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.Layer, out property)) return property.AsInt;
+                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.Layer), out property)) return property.AsInt;
+                    return DefaultStyleValues_Generated.Layer;
+                }
+            }
+
             public string Scrollbar { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
@@ -3563,6 +3588,14 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.RenderLayer, state).AsRenderLayer;
         }
         
+        public void SetLayer(int value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.Layer, value), state);
+        }
+
+        public int GetLayer(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.Layer, state).AsInt;
+        }
+        
         public void SetScrollbar(string value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.Scrollbar, 0, 0, value), state);
         }
@@ -3844,6 +3877,8 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.RenderLayerOffset, RenderLayerOffset);
 				case StylePropertyId.RenderLayer:
 					 return new StyleProperty(StylePropertyId.RenderLayer, (int)RenderLayer);
+				case StylePropertyId.Layer:
+					 return new StyleProperty(StylePropertyId.Layer, Layer);
 				case StylePropertyId.Scrollbar:
 					 return new StyleProperty(StylePropertyId.Scrollbar, 0, 0, Scrollbar);
 				case StylePropertyId.ScrollbarSize:
@@ -3941,6 +3976,7 @@ namespace UIForia.Rendering {
                     case StylePropertyId.ZIndex: return true;
                     case StylePropertyId.RenderLayerOffset: return true;
                     case StylePropertyId.RenderLayer: return true;
+                    case StylePropertyId.Layer: return true;
                     case StylePropertyId.ScrollbarColor: return true;
                     case StylePropertyId.ShadowOffsetX: return true;
                     case StylePropertyId.ShadowOffsetY: return true;
@@ -3976,6 +4012,7 @@ namespace UIForia.Rendering {
                     case StylePropertyId.TextShadowType: return true;
                     case StylePropertyId.TextTransform: return true;
                     case StylePropertyId.ZIndex: return true;
+                    case StylePropertyId.Layer: return true;
 
             }
 

@@ -7,7 +7,8 @@ namespace UIForia.Rendering {
 
         Unset = 0,
         Visible = 1,
-        Hidden = 2
+        Hidden = 2,
+        Always = 3
 
     }
 

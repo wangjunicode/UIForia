@@ -1312,6 +1312,8 @@ case "overflowx":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_int("RenderLayerOffset", UIForia.Rendering.StylePropertyId.RenderLayerOffset, targetState.state, Compile<int>(value, null));                
                 case "renderlayer":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_RenderLayer("RenderLayer", UIForia.Rendering.StylePropertyId.RenderLayer, targetState.state, Compile<UIForia.Rendering.RenderLayer>(value, s_EnumSource_RenderLayer));                
+                case "layer":
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_int("Layer", UIForia.Rendering.StylePropertyId.Layer, targetState.state, Compile<int>(value, null));                
                 case "scrollbar":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_string("Scrollbar", UIForia.Rendering.StylePropertyId.Scrollbar, targetState.state, Compile<string>(value, null));                
                 case "scrollbarsize":

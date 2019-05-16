@@ -56,6 +56,7 @@ namespace UIForia.Layout.LayoutTypes {
         internal float transformScaleY;
 
         internal int zIndex;
+        internal int layer;
 
         internal UIMeasurement prefWidth;
         internal UIMeasurement minWidth;
@@ -74,6 +75,10 @@ namespace UIForia.Layout.LayoutTypes {
 
         internal bool isInPool;
         internal LayoutBoxPool pool;
+        
+        internal int traversalIndex;
+        internal int viewDepthIdx;
+        
 #if DEBUG
         public int layoutCalls;
         public int contentSizeCacheHits;
@@ -87,6 +92,7 @@ namespace UIForia.Layout.LayoutTypes {
         // Padding, Margin, Border, Anchors, AnchorTarget, TransformPosition, TransformPivot, Pref/Min/Max Width + Height
 
         private static readonly Dictionary<int, WidthCache> s_HeightForWidthCache = new Dictionary<int, WidthCache>();
+        public Rect clipRect;
 
         /*
          * Todo -- When layout happens can probably be optimized a bit
@@ -219,6 +225,7 @@ namespace UIForia.Layout.LayoutTypes {
             minHeight = style.MinHeight;
             maxHeight = style.MaxHeight;
             zIndex = style.ZIndex;
+            layer = style.Layer;
         }
 
         public void UpdateChildren() {

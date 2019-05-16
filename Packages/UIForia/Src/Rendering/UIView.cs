@@ -133,6 +133,7 @@ public class UIView {
 
     public bool focusOnMouseDown;
     public bool sizeChanged;
+    public int depth;
 
     public void SetZIndex() { }
 

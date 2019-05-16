@@ -15,7 +15,6 @@ style circle {
 }
 
 style arc-blue {
-    painter = "HalfCirclePainter";
     PreferredSize = 48px; 
     LayoutBehavior = Ignored;
 }

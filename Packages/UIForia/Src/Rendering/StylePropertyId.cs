@@ -127,6 +127,7 @@ namespace UIForia.Rendering {
         ZIndex = 1401,
         RenderLayer = 1402,
         RenderLayerOffset = 1403,
+        Layer = 1404,
         
         Scrollbar = 1501,
         ScrollbarSize = 1502,

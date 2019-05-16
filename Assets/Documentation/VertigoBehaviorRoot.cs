@@ -1,7 +1,4 @@
-﻿using System;
-using System.IO;
-using TreeEditor;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.U2D;
 using Vertigo;

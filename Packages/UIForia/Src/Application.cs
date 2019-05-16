@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using SVGX;
 using UIForia.Animation;
 using UIForia.AttributeProcessors;
 using UIForia.Bindings;
@@ -14,7 +13,6 @@ using UIForia.Systems;
 using UIForia.Systems.Input;
 using UIForia.Templates;
 using UIForia.Util;
-using UnityEditor.IMGUI.Controls;
 using UnityEngine;
 
 namespace UIForia {

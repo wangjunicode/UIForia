@@ -411,8 +411,8 @@ namespace UIForia.Editor {
                 ctx.SetStrokeWidth(1);
                 ctx.SetStroke(Color.black);
 
-                LightList<GridTrack> rows = layoutBox.GetRowTracks();
-                LightList<GridTrack> cols = layoutBox.GetColTracks();
+                StructList<GridTrack> rows = layoutBox.GetRowTracks();
+                StructList<GridTrack> cols = layoutBox.GetColTracks();
 
                 for (int i = 0; i < rows.Count; i++) {
                     ctx.MoveTo(0, rows[i].position);

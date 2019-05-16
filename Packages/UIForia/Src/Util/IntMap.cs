@@ -11,7 +11,8 @@ namespace UIForia.Util {
         private int freeList;
         private int freeCount;
         private int capacity;
-        
+        public int geometryId;
+
         public IntMap() : this(7) { }
 
         public IntMap(int capacity) {
@@ -67,6 +68,35 @@ namespace UIForia.Util {
                 }
             }
 
+            return false;
+        }
+        
+        public bool Remove(int key, out T retn) {
+
+            int hashCode = key & 0x7FFFFFFF;
+            int bucket = hashCode % capacity;
+            int last = -1;
+            for (int i = buckets[bucket]; i >= 0; last = i, i = entries[i].next) {
+                if (entries[i].hashCode == hashCode && entries[i].key == key) {
+                    if (last < 0) {
+                        buckets[bucket] = entries[i].next;
+                    }
+                    else {
+                        entries[last].next = entries[i].next;
+                    }
+
+                    retn = entries[i].value;
+                    entries[i].hashCode = -1;
+                    entries[i].next = freeList;
+                    entries[i].key = 0;
+                    entries[i].value = default(T);
+                    freeList = i;
+                    freeCount++;
+                    return true;
+                }
+            }
+
+            retn = default;
             return false;
         }
 

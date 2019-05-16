@@ -126,7 +126,7 @@ namespace UIForia.Rendering {
             return property.IsUnset ?  ColorUtil.UnsetValue :(Color) new StyleColor(property.valuePart0);
         }
         
-        internal void SetProperty(StyleProperty property) {
+        internal void SetProperty(in StyleProperty property) {
             StylePropertyId propertyId = property.propertyId;
             if (property.IsUnset) {
                 for (int i = 0; i < m_StyleProperties.Count; i++) {

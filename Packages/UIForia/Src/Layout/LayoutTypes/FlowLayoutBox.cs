@@ -11,7 +11,7 @@ namespace UIForia.Layout.LayoutTypes {
 
         private readonly LightList<FlowItem> items;
 
-        public FlowLayoutBox(UIElement element) : base(element) {
+        public FlowLayoutBox(){
             items = new LightList<FlowItem>();
         }
 
@@ -84,6 +84,10 @@ namespace UIForia.Layout.LayoutTypes {
             }
             allocatedWidth = cachedWidth;
             return size.height;
+        }
+
+        protected override void OnChildrenChanged() {
+            throw new NotImplementedException();
         }
 
         protected Size RunColumnLayout() {

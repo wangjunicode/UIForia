@@ -14,7 +14,7 @@ namespace SVGX {
         public TextAlignment alignment;
         public TextTransform textTransform;
         public WhitespaceMode whitespaceMode;
-        public Color32 outlineColor; // todo -- remove outline and make that a stroke
+        public Color32 outlineColor;
         public float outlineWidth;
         public float outlineSoftness;
         public float glowOuter;

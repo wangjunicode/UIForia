@@ -6,9 +6,11 @@ namespace UIForia.Layout.LayoutTypes {
 
     public class ImageLayoutBox : LayoutBox {
 
-        private readonly UIImageElement image;
+        private UIImageElement image;
 
-        public ImageLayoutBox(UIElement element) : base(element) {
+        protected override void OnChildrenChanged() { }
+
+        public override void OnSpawn(UIElement element) {
             image = (UIImageElement) element;
         }
 

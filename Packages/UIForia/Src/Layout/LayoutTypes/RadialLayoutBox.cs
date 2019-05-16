@@ -34,16 +34,16 @@ namespace UIForia.Layout.LayoutTypes {
 
         private List<float> widths;
         private List<float> heights;
-
-        public RadialLayoutBox(UIElement element) : base(element) { }
-
+        
         protected override float ComputeContentWidth() {
-            return base.ComputeContentWidth(); // todo 
+            return 0; // todo
         }
 
         protected override float ComputeContentHeight(float width) {
-            return base.ComputeContentHeight(width); // todo 
+            return 0;  // todo 
         }
+
+        protected override void OnChildrenChanged() { }
 
         public override void RunLayout() {
 

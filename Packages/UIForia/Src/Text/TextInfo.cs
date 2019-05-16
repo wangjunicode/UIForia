@@ -10,16 +10,44 @@ namespace UIForia.Text {
 
     public class TextInfo {
 
-        public StructList<SpanInfo2> spanList;
+        public StructList<SpanInfo> spanList;
         public StructList<LineInfo> lineInfoList;
         public StructList<WordInfo> wordInfoList;
         public StructList<CharInfo> charInfoList;
         public StructList<char> characterList;
 
+        // todo -- separate out the position & uv into another array
+        // public StructList<TextGeometry> geometryList;
+        // struct TextGeometry {
+        //     public Vector2 topLeft;
+        //     public Vector2 bottomRight;
+        //     public Vector2 topLeftUV;
+        //     public Vector2 bottomRightUV;
+        //     public float scale;
+        //}
+        
         private Size metrics;
         private bool metricsDirty;
         private bool layoutDirty;
         private float layoutWidth;
+
+        public struct FontAssetData {
+
+            public Texture2D texture;
+            public float scaleRatioA;
+            public float scaleRatioB;
+            public float scaleRatioC;
+            public float gradientScale;
+            public float textureWidth;
+            public float textureHeight;
+            public float fontWeightBold;
+            public float fontWeightNormal;
+            public float scaleX;
+            public float scaleY;
+
+        }
+
+        internal FontAssetData fontAssetData;
 
         public bool LayoutDirty => layoutDirty;
 
@@ -36,7 +64,7 @@ namespace UIForia.Text {
         public static TMP_FontAsset DefaultFont => TMP_FontAsset.defaultFontAsset;
 
         public TextInfo(TextSpan span) {
-            spanList = new StructList<SpanInfo2>(2);
+            spanList = new StructList<SpanInfo>(2);
             lineInfoList = new StructList<LineInfo>(2);
             wordInfoList = new StructList<WordInfo>();
             charInfoList = new StructList<CharInfo>();
@@ -47,7 +75,7 @@ namespace UIForia.Text {
         }
 
         public TextInfo(params TextSpan[] spans) {
-            spanList = new StructList<SpanInfo2>(spans.Length);
+            spanList = new StructList<SpanInfo>(spans.Length);
             lineInfoList = new StructList<LineInfo>(2);
             wordInfoList = new StructList<WordInfo>();
             charInfoList = new StructList<CharInfo>();
@@ -60,8 +88,8 @@ namespace UIForia.Text {
             layoutDirty = true;
         }
 
-        private static SpanInfo2 CreateSpanInfo(TextSpan span) {
-            SpanInfo2 spanInfo = new SpanInfo2(span.text, span.style);
+        private static SpanInfo CreateSpanInfo(TextSpan span) {
+            SpanInfo spanInfo = new SpanInfo(span.text, span.style);
             if (spanInfo.textStyle.font == null) {
                 spanInfo.textStyle.font = DefaultFont;
             }
@@ -70,6 +98,21 @@ namespace UIForia.Text {
                 spanInfo.textStyle.fontSize = 24;
             }
 
+            Material material = spanInfo.textStyle.font.material;
+//            FontAssetData fontAssetData = new FontAssetData();
+//            fontAssetData.texture = spanInfo.textStyle.font.atlas;
+//            fontAssetData.textureWidth = fontAssetData.texture.width;
+//            fontAssetData.textureWidth = fontAssetData.texture.height;
+//            fontAssetData.gradientScale = material.GetFloat("_GradientScale"); 
+//            fontAssetData.scaleRatioA = material.GetFloat("_ScaleRatioA"); 
+//            fontAssetData.scaleRatioB = material.GetFloat("_ScaleRatioB"); 
+//            fontAssetData.scaleRatioC = material.GetFloat("_ScaleRatioC");
+//            fontAssetData.scaleX = material.GetFloat("_ScaleX");
+//            fontAssetData.scaleX = material.GetFloat("_ScaleY");
+//            fontAssetData.fontWeightBold = material.GetFloat("_FontWeightBold");
+//            fontAssetData.fontWeightNormal = material.GetFloat("_FontWeightNormal");
+         //  span.fontAssetData = fontAssetData;
+            // textInfo.SetContent(<Text>'Hello There'</Text><Text style=''/>more text</Text>);
             return spanInfo;
         }
 
@@ -131,7 +174,7 @@ namespace UIForia.Text {
 
         public SelectionRange InsertText(SelectionRange selectionRange, string c) {
             // todo this can be optimized to not re-compute the whole text metrics
-            SpanInfo2 spanInfo = spanList.Array[0];
+            SpanInfo spanInfo = spanList.Array[0];
 
             if (spanInfo.inputText.Length == 0) {
                 UpdateSpan(0, c);
@@ -244,7 +287,7 @@ namespace UIForia.Text {
                 return new SelectionRange(0, TextEdge.Left);
             }
 
-            SpanInfo2 spanInfo = spanList.Array[0];
+            SpanInfo spanInfo = spanList.Array[0];
 
             int cursorIndex = range.cursorIndex;
 
@@ -316,7 +359,7 @@ namespace UIForia.Text {
                 return;
             }
 
-            SpanInfo2 old = spanList.Array[spanIdx];
+            SpanInfo old = spanList.Array[spanIdx];
 
             spanList.Array[spanIdx] = CreateSpanInfo(span);
 
@@ -345,7 +388,7 @@ namespace UIForia.Text {
 
             int charDiff = bufferSize - old.CharCount;
             int wordDiff = tempWordList.Count - old.WordCount;
-            SpanInfo2[] spans = spanList.Array;
+            SpanInfo[] spans = spanList.Array;
 
             if (wordDiff > 0) {
                 wordInfoList.ShiftRight(old.wordEnd, wordDiff);
@@ -498,6 +541,7 @@ namespace UIForia.Text {
         }
 
         public Size Layout(Vector2 offset = default, float width = float.MaxValue) {
+            
             if (spanList.Count == 0) return default;
 
             lineInfoList.Clear();
@@ -560,14 +604,14 @@ namespace UIForia.Text {
         private StructList<LineInfo> RunLayout(float width = float.MaxValue, StructList<LineInfo> lineInfos = null) {
             int spanCount = spanList.Count;
             WordInfo[] wordInfos = wordInfoList.Array;
-            SpanInfo2[] spanInfos = spanList.Array;
+            SpanInfo[] spanInfos = spanList.Array;
 
             LineInfo currentLine = new LineInfo();
 
             lineInfos = lineInfos ?? StructList<LineInfo>.Get();
 
             for (int i = 0; i < spanCount; i++) {
-                SpanInfo2 spanInfo = spanInfos[i];
+                SpanInfo spanInfo = spanInfos[i];
                 TMP_FontAsset asset = spanInfo.textStyle.font;
 
                 float scale = (spanInfo.textStyle.fontSize / asset.fontInfo.PointSize) * asset.fontInfo.Scale;
@@ -646,7 +690,7 @@ namespace UIForia.Text {
             WordInfo[] wordInfos = wordInfoList.Array;
             CharInfo[] charInfos = charInfoList.Array;
 
-            SpanInfo2 spanInfo = spanList[spanIdx];
+            SpanInfo spanInfo = spanList[spanIdx];
             TMP_FontAsset fontAsset = spanInfo.textStyle.font;
             Material fontAssetMaterial = fontAsset.material;
 
@@ -760,6 +804,8 @@ namespace UIForia.Text {
                     bottomRight.x = topLeft.x + (glyph.width + padding * 2) * currentElementScale;
                     bottomRight.y = topLeft.y + (glyph.height + padding * 2 + stylePadding * 2) * currentElementScale;
 
+                    charInfos[i].scale = currentElementScale;
+                    
                     if (currentWord.startChar + currentWord.VisibleCharCount >= i) {
                         if (topLeft.y > currentWord.maxCharTop) {
                             currentWord.maxCharTop = topLeft.y;

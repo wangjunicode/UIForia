@@ -118,6 +118,11 @@ namespace UIForia.Compilers.Style {
 
         private AnimationOptions CompileAnimationOptions(AnimationRootNode animNode) {
             AnimationOptions options = new AnimationOptions();
+            
+            if (animNode.optionNodes == null) {
+                return options;
+            }
+            
             LightList<AnimationOptionNode> optionNodes = animNode.optionNodes;
             if (optionNodes == null) {
                 return options;

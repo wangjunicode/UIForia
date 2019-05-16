@@ -7,6 +7,7 @@ using UIForia.Systems;
 using UIForia.Text;
 using UIForia.UIInput;
 using UnityEngine;
+using Vertigo;
 
 #pragma warning disable 0649
 namespace UIForia.Elements {
@@ -352,83 +353,83 @@ namespace UIForia.Elements {
             return retn;
         }
 
-        public void Paint(ImmediateRenderContext ctx, in SVGXMatrix matrix) {
-            ctx.SetTransform(matrix);
-            SVGXRenderSystem.PaintElement(ctx, this);
-
-            float blinkPeriod = 1f / caretBlinkRate;
-
-            bool blinkState = (Time.unscaledTime - blinkStartTime) % blinkPeriod < blinkPeriod / 2;
-
-            Rect contentRect = layoutResult.ContentRect;
-            
-//            ctx.EnableScissorRect(new Rect(contentRect) {
-//                x = contentRect.x + layoutResult.screenPosition.x,
-//                y = contentRect.y + layoutResult.screenPosition.y
-//            });
-            
-            ctx.DisableScissorRect();
-            if (isSelecting) {
-                ctx.BeginPath();
-                ctx.SetStroke(caretColor);
-                ctx.SetStrokeWidth(1f);
-                Vector2 p = textInfo.GetSelectionPosition(selectionRange) - textScroll;
-                ctx.MoveTo(layoutResult.ContentRect.min + p + new Vector2(0, -4f)); // todo remove + 4 on y
-                ctx.VerticalLineTo(layoutResult.ContentRect.y + p.y + style.GetResolvedFontSize());
-                ctx.Stroke();
-            }
-
-            if (!isSelecting && hasFocus && blinkState) {
-                ctx.BeginPath();
-                ctx.SetStroke(caretColor);
-                ctx.SetStrokeWidth(1f);
-                Vector2 p = textInfo.GetCursorPosition(selectionRange) - textScroll;
-                ctx.MoveTo(layoutResult.ContentRect.min + p + new Vector2(0, -4f)); // todo remove + 4 on y
-                ctx.VerticalLineTo(layoutResult.ContentRect.y + p.y + style.GetResolvedFontSize());
-                ctx.Stroke();
-            }
-
-            if (selectionRange.HasSelection) {
-                RangeInt lineRange = new RangeInt(0, 1); //textInfo.GetLineRange(selectionRange));textInfo.GetLineRange(selectionRange);
-                ctx.BeginPath();
-                ctx.SetFill(new Color(0.5f, 0, 0, 0.5f));
-
-                if (lineRange.length > 1) {
-                    // todo this doesn't really work yet
-                    for (int i = lineRange.start + 1; i < lineRange.end - 1; i++) {
-                        Rect rect = textInfo.GetLineRect(i);
-                        rect.x += contentRect.x;
-                        rect.y += contentRect.y;
-                        ctx.Rect(rect);
-                    }
-                }
-                else {
-                    // todo the highlight is wrong when scrolled
-                    Rect rect = textInfo.GetLineRect(lineRange.start);
-                    Vector2 cursorPosition = textInfo.GetCursorPosition(selectionRange) - textScroll;
-                    Vector2 selectPosition = textInfo.GetSelectionPosition(selectionRange) - textScroll;
-                    float minX = Mathf.Min(cursorPosition.x, selectPosition.x);
-                    float maxX = Mathf.Max(cursorPosition.x, selectPosition.x);
-                    minX += contentRect.x;
-                    maxX += contentRect.x;
-                    rect.y += contentRect.y;
-                    ctx.Rect(minX, rect.y, maxX - minX, rect.height);
-                }
-
-                ctx.Fill();
-            }
-
+        public void Paint(VertigoContext ctx, in SVGXMatrix matrix) {
+//            ctx.SetTransform(matrix);
+//            SVGXRenderSystem.PaintElement(ctx, this);
+//
+//            float blinkPeriod = 1f / caretBlinkRate;
+//
+//            bool blinkState = (Time.unscaledTime - blinkStartTime) % blinkPeriod < blinkPeriod / 2;
+//
+//            Rect contentRect = layoutResult.ContentRect;
+//            
+////            ctx.EnableScissorRect(new Rect(contentRect) {
+////                x = contentRect.x + layoutResult.screenPosition.x,
+////                y = contentRect.y + layoutResult.screenPosition.y
+////            });
+//            
+//            ctx.DisableScissorRect();
+//            if (isSelecting) {
+//                ctx.BeginPath();
+//                ctx.SetStroke(caretColor);
+//                ctx.SetStrokeWidth(1f);
+//                Vector2 p = textInfo.GetSelectionPosition(selectionRange) - textScroll;
+//                ctx.MoveTo(layoutResult.ContentRect.min + p + new Vector2(0, -4f)); // todo remove + 4 on y
+//                ctx.VerticalLineTo(layoutResult.ContentRect.y + p.y + style.GetResolvedFontSize());
+//                ctx.Stroke();
+//            }
+//
+//            if (!isSelecting && hasFocus && blinkState) {
+//                ctx.BeginPath();
+//                ctx.SetStroke(caretColor);
+//                ctx.SetStrokeWidth(1f);
+//                Vector2 p = textInfo.GetCursorPosition(selectionRange) - textScroll;
+//                ctx.MoveTo(layoutResult.ContentRect.min + p + new Vector2(0, -4f)); // todo remove + 4 on y
+//                ctx.VerticalLineTo(layoutResult.ContentRect.y + p.y + style.GetResolvedFontSize());
+//                ctx.Stroke();
+//            }
+//
+//            if (selectionRange.HasSelection) {
+//                RangeInt lineRange = new RangeInt(0, 1); //textInfo.GetLineRange(selectionRange));textInfo.GetLineRange(selectionRange);
+//                ctx.BeginPath();
+//                ctx.SetFill(new Color(0.5f, 0, 0, 0.5f));
+//
+//                if (lineRange.length > 1) {
+//                    // todo this doesn't really work yet
+//                    for (int i = lineRange.start + 1; i < lineRange.end - 1; i++) {
+//                        Rect rect = textInfo.GetLineRect(i);
+//                        rect.x += contentRect.x;
+//                        rect.y += contentRect.y;
+//                        ctx.Rect(rect);
+//                    }
+//                }
+//                else {
+//                    // todo the highlight is wrong when scrolled
+//                    Rect rect = textInfo.GetLineRect(lineRange.start);
+//                    Vector2 cursorPosition = textInfo.GetCursorPosition(selectionRange) - textScroll;
+//                    Vector2 selectPosition = textInfo.GetSelectionPosition(selectionRange) - textScroll;
+//                    float minX = Mathf.Min(cursorPosition.x, selectPosition.x);
+//                    float maxX = Mathf.Max(cursorPosition.x, selectPosition.x);
+//                    minX += contentRect.x;
+//                    maxX += contentRect.x;
+//                    rect.y += contentRect.y;
+//                    ctx.Rect(minX, rect.y, maxX - minX, rect.height);
+//                }
+//
+//                ctx.Fill();
+//            }
+//
+////            ctx.BeginPath();
+////            ctx.Rect(VisibleTextRect);
+////            ctx.SetFill(new Color32(0, 255, 0, 125));
+////            ctx.Fill();
+//
 //            ctx.BeginPath();
-//            ctx.Rect(VisibleTextRect);
-//            ctx.SetFill(new Color32(0, 255, 0, 125));
+//            ctx.SetFill(style.TextColor);
+//
+//            ctx.Text(contentRect.x - textScroll.x, contentRect.y, textInfo);
 //            ctx.Fill();
-
-            ctx.BeginPath();
-            ctx.SetFill(style.TextColor);
-
-            ctx.Text(contentRect.x - textScroll.x, contentRect.y, textInfo);
-            ctx.Fill();
-            ctx.DisableScissorRect();
+//            ctx.DisableScissorRect();
 
         }
 
@@ -473,6 +474,10 @@ namespace UIForia.Elements {
                 _uiInputElement.selectionRange = _uiInputElement.selectionRange.Invert();
             }
 
+        }
+
+        public void Paint(VertigoContext ctx, in Matrix4x4 matrix) {
+            throw new NotImplementedException();
         }
 
     }

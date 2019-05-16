@@ -8,7 +8,7 @@ namespace UIForia.Elements {
         Type ElementType { get; }
 
     }
-    
+
     public interface IDynamicElement {
 
         void SetData(IDynamicData data);
@@ -33,12 +33,21 @@ namespace UIForia.Elements {
                     return;
                 }
             }
-            
+
             View.Application.DestroyChildren(this);
-            
-            if (data != null && View.Application.CreateChildElement(this, data.ElementType) is IDynamicElement child) {
-                child.SetData(data);
+
+            if (data != null) {
+                if (!typeof(IDynamicElement).IsAssignableFrom(data.ElementType)) {
+                    return;
+                }
+
+                UIElement child = View.Application.CreateElement(data.ElementType);
+                if (child != null) {
+                    ((IDynamicElement)child).SetData(data);
+                    AddChild(child);
+                }
             }
+
 
             previousData = data;
         }

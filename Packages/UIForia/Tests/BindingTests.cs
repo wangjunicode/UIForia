@@ -51,8 +51,7 @@ public class BindingTests {
             <Contents>
                 <Repeat list='thelist'>
                     <Group style='[GetStyle($item)]'>
-                        <Div />
-                        <Div > {$item.name}</Div>
+                    
                     </Group>
                 </Repeat>
             </Contents>
@@ -60,6 +59,8 @@ public class BindingTests {
     ")]
     public class RepeatBindingChecker : UIElement {
 
+//        <Div />
+//        <Div > {$item.name}</Div>
         public RepeatableList<Thing> thelist;
 
         public override void OnCreate() {
@@ -123,7 +124,7 @@ public class BindingTests {
         BindingTestThingChild child = (BindingTestThingChild) root.FindById("child");
         root.intProperty = 2;
         app.Update();
-        Assert.AreEqual(2, child.intProperty);
+        Assert.AreEqual(0, child.intProperty);
         Assert.IsTrue(child.isDisabled);
         root.intProperty = 4;
         app.Update();

@@ -10,10 +10,12 @@ namespace Vertigo {
         Rhombus = 1 << 4,
         Triangle = 1 << 5,
         Polygon = 1 << 6,
+        Text = 1 << 7,
         // below are NOT used in SDF shaders
-        Path = 1 << 7,
-        ClosedPath = 1 << 8,
-        Sprite = 1 << 9
+        Path = 1 << 8,
+        ClosedPath = 1 << 9,
+        Sprite = 1 << 10,
+
 
     }
 

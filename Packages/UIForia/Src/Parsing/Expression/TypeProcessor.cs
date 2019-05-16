@@ -315,7 +315,12 @@ namespace UIForia.Parsing.Expression {
                 name.StartsWith("System.") ||
                 name.StartsWith("Microsoft.") ||
                 name.StartsWith("Mono") ||
+                name.StartsWith("Unity.") ||
+                name.StartsWith("ExCSS.") ||
                 name.Contains("mscorlib") ||
+                name.Contains("JetBrains") ||
+                name.Contains("UnityEngine.") ||
+                name.Contains("UnityEditor") ||
                 name.Contains("Jetbrains")) {
                 return false;
             }

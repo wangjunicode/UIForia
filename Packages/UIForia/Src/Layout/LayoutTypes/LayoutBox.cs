@@ -29,8 +29,51 @@ namespace UIForia.Layout.LayoutTypes {
         public Scrollbar horizontalScrollbar;
         public Scrollbar verticalScrollbar;
 
-        protected UIView view;
+        protected internal UIView view;
 
+        internal UIFixedLength paddingTop;
+        internal UIFixedLength paddingRight;
+        internal UIFixedLength paddingBottom;
+        internal UIFixedLength paddingLeft;
+
+        internal UIFixedLength borderTop;
+        internal UIFixedLength borderRight;
+        internal UIFixedLength borderBottom;
+        internal UIFixedLength borderLeft;
+
+        internal UIFixedLength borderRadiusTopLeft;
+        internal UIFixedLength borderRadiusTopRight;
+        internal UIFixedLength borderRadiusBottomLeft;
+        internal UIFixedLength borderRadiusBottomRight;
+
+        internal UIMeasurement marginTop;
+        internal UIMeasurement marginRight;
+        internal UIMeasurement marginBottom;
+        internal UIMeasurement marginLeft;
+
+        internal float transformRotation;
+        internal float transformScaleX;
+        internal float transformScaleY;
+
+        internal int zIndex;
+
+        internal UIMeasurement prefWidth;
+        internal UIMeasurement minWidth;
+        internal UIMeasurement maxWidth;
+
+        internal UIMeasurement prefHeight;
+        internal UIMeasurement minHeight;
+        internal UIMeasurement maxHeight;
+
+        internal UIFixedLength transformPivotX;
+        internal UIFixedLength transformPivotY;
+        internal TransformOffset transformPositionX;
+        internal TransformOffset transformPositionY;
+        internal TransformBehavior transformBehaviorX;
+        internal TransformBehavior transformBehaviorY;
+
+        internal bool isInPool;
+        internal LayoutBoxPool pool;
 #if DEBUG
         public int layoutCalls;
         public int contentSizeCacheHits;
@@ -38,7 +81,7 @@ namespace UIForia.Layout.LayoutTypes {
 
         // todo compress w/ flags
         public bool markedForLayout;
-        protected float cachedPreferredWidth;
+        protected internal float cachedPreferredWidth;
 
         // todo -- stop looking up style properties, cache everything locally so we dont' have to look into the Style object
         // Padding, Margin, Border, Anchors, AnchorTarget, TransformPosition, TransformPivot, Pref/Min/Max Width + Height
@@ -50,42 +93,37 @@ namespace UIForia.Layout.LayoutTypes {
          * Figure out if parent needs to re-layout instead of assuming it does when child properties change
          * Don't always re-calculate preferred width
          */
-        protected LayoutBox([NotNull] UIElement element) {
-            this.element = element;
-            this.style = element.style;
-            this.children = new List<LayoutBox>(4);
-            this.cachedPreferredWidth = -1;
-            this.view = element.View;
-            this.markedForLayout = true;
+        protected LayoutBox() {
+         
         }
 
         public abstract void RunLayout();
 
-        public float TransformX => ResolveTransform(style.TransformPositionX);
-        public float TransformY => ResolveTransform(style.TransformPositionY);
+        public float TransformX => ResolveTransform(transformPositionX);
+        public float TransformY => ResolveTransform(transformPositionY);
 
-        public float PaddingHorizontal => ResolveFixedWidth(style.PaddingLeft) + ResolveFixedWidth(style.PaddingRight);
-        public float BorderHorizontal => ResolveFixedWidth(style.BorderLeft) + ResolveFixedWidth(style.BorderRight);
+        public float PaddingHorizontal => ResolveFixedWidth(paddingLeft) + ResolveFixedWidth(paddingRight);
+        public float BorderHorizontal => ResolveFixedWidth(borderLeft) + ResolveFixedWidth(borderRight);
 
-        public float PaddingVertical => ResolveFixedHeight(style.PaddingTop) + ResolveFixedHeight(style.PaddingBottom);
-        public float BorderVertical => ResolveFixedHeight(style.BorderTop) + ResolveFixedHeight(style.BorderBottom);
+        public float PaddingVertical => ResolveFixedHeight(paddingTop) + ResolveFixedHeight(paddingBottom);
+        public float BorderVertical => ResolveFixedHeight(borderTop) + ResolveFixedHeight(borderBottom);
 
-        public float PaddingLeft => ResolveFixedWidth(style.PaddingLeft);
-        public float BorderLeft => ResolveFixedWidth(style.BorderLeft);
+        public float PaddingLeft => ResolveFixedWidth(paddingLeft);
+        public float BorderLeft => ResolveFixedWidth(borderLeft);
 
-        public float PaddingTop => ResolveFixedHeight(style.PaddingTop);
-        public float BorderTop => ResolveFixedHeight(style.BorderTop);
+        public float PaddingTop => ResolveFixedHeight(paddingTop);
+        public float BorderTop => ResolveFixedHeight(borderTop);
 
-        public float PaddingBottom => ResolveFixedHeight(style.PaddingBottom);
-        public float PaddingRight => ResolveFixedWidth(style.PaddingRight);
+        public float PaddingBottom => ResolveFixedHeight(paddingBottom);
+        public float PaddingRight => ResolveFixedWidth(paddingRight);
 
-        public float BorderBottom => ResolveFixedHeight(style.BorderBottom);
-        public float BorderRight => ResolveFixedWidth(style.BorderRight);
+        public float BorderBottom => ResolveFixedHeight(borderBottom);
+        public float BorderRight => ResolveFixedWidth(borderRight);
 
-        public float BorderRadiusTopRight => ResolveFixedWidth(style.BorderRadiusTopRight);
-        public float BorderRadiusTopLeft => ResolveFixedWidth(style.BorderRadiusTopLeft);
-        public float BorderRadiusBottomRight => ResolveFixedWidth(style.BorderRadiusBottomRight);
-        public float BorderRadiusBottomLeft => ResolveFixedWidth(style.BorderRadiusBottomLeft);
+        public float BorderRadiusTopRight => ResolveFixedWidth(borderRadiusTopRight);
+        public float BorderRadiusTopLeft => ResolveFixedWidth(borderRadiusTopLeft);
+        public float BorderRadiusBottomRight => ResolveFixedWidth(borderRadiusBottomRight);
+        public float BorderRadiusBottomLeft => ResolveFixedWidth(borderRadiusBottomLeft);
 
         public bool IsIgnored => (style.LayoutBehavior & LayoutBehavior.Ignored) != 0;
 
@@ -95,16 +133,16 @@ namespace UIForia.Layout.LayoutTypes {
         public float AnchorBottom => ResolveAnchorBottom();
 
         public float PaddingBorderHorizontal =>
-            ResolveFixedWidth(style.PaddingLeft) +
-            ResolveFixedWidth(style.PaddingRight) +
-            ResolveFixedWidth(style.BorderRight) +
-            ResolveFixedWidth(style.BorderLeft);
+            ResolveFixedWidth(paddingLeft) +
+            ResolveFixedWidth(paddingRight) +
+            ResolveFixedWidth(borderRight) +
+            ResolveFixedWidth(borderLeft);
 
         public float PaddingBorderVertical =>
-            ResolveFixedHeight(style.PaddingTop) +
-            ResolveFixedHeight(style.PaddingBottom) +
-            ResolveFixedHeight(style.BorderBottom) +
-            ResolveFixedHeight(style.BorderTop);
+            ResolveFixedHeight(paddingTop) +
+            ResolveFixedHeight(paddingBottom) +
+            ResolveFixedHeight(borderBottom) +
+            ResolveFixedHeight(borderTop);
 
         public Rect ContentRect {
             get {
@@ -117,24 +155,24 @@ namespace UIForia.Layout.LayoutTypes {
         }
 
         public Vector2 Pivot => new Vector2(
-            ResolveFixedWidth(style.TransformPivotX),
-            ResolveFixedHeight(style.TransformPivotY)
+            ResolveFixedWidth(transformPivotX),
+            ResolveFixedHeight(transformPivotY)
         );
 
         public float GetMarginTop(float width) {
-            return ResolveMarginVertical(width, style.MarginTop);
+            return ResolveMarginVertical(width, marginTop);
         }
 
         public float GetMarginBottom(float width) {
-            return ResolveMarginVertical(width, style.MarginBottom);
+            return ResolveMarginVertical(width, marginBottom);
         }
 
         public float GetMarginLeft() {
-            return ResolveMarginHorizontal(style.MarginLeft);
+            return ResolveMarginHorizontal(marginLeft);
         }
 
         public float GetMarginRight() {
-            return ResolveMarginHorizontal(style.MarginRight);
+            return ResolveMarginHorizontal(marginRight);
         }
 
         // need layout when
@@ -149,14 +187,40 @@ namespace UIForia.Layout.LayoutTypes {
          * - Layout property changes
          */
 
-        public void ReplaceChild(LayoutBox toReplace, LayoutBox newChild) {
-            newChild.parent = this;
-            newChild.UpdateChildren();
-            newChild.allocatedWidth = toReplace.allocatedWidth;
-            newChild.allocatedHeight = toReplace.allocatedHeight;
-            UpdateChildren();
+        public void UpdateFromStyle() {
+            paddingLeft = style.PaddingLeft;
+            paddingTop = style.PaddingTop;
+            paddingBottom = style.PaddingBottom;
+            paddingRight = style.PaddingRight;
+            borderLeft = style.BorderLeft;
+            borderTop = style.BorderTop;
+            borderBottom = style.BorderBottom;
+            borderRight = style.BorderRight;
+            marginLeft = style.MarginLeft;
+            marginTop = style.MarginTop;
+            marginBottom = style.MarginBottom;
+            marginRight = style.MarginRight;
+            borderRadiusTopLeft = style.BorderRadiusTopLeft;
+            borderRadiusTopRight = style.BorderRadiusTopRight;
+            borderRadiusBottomLeft = style.BorderRadiusBottomLeft;
+            borderRadiusBottomRight = style.BorderRadiusBottomRight;
+            transformPositionX = style.TransformPositionX;
+            transformPositionY = style.TransformPositionY;
+            transformBehaviorX = style.TransformBehaviorX;
+            transformBehaviorY = style.TransformBehaviorY;
+            transformPivotX = style.TransformPivotX;
+            transformPivotY = style.TransformPivotY;
+            transformScaleX = style.TransformScaleX;
+            transformScaleY = style.TransformScaleY;
+            prefWidth = style.PreferredWidth;
+            minWidth = style.MinWidth;
+            maxWidth = style.MaxWidth;
+            prefHeight = style.PreferredHeight;
+            minHeight = style.MinHeight;
+            maxHeight = style.MaxHeight;
+            zIndex = style.ZIndex;
         }
-        
+
         public void UpdateChildren() {
             InvalidatePreferredSizeCache();
             RequestContentSizeChangeLayout();
@@ -199,7 +263,7 @@ namespace UIForia.Layout.LayoutTypes {
                 markedForLayout = true; // todo might not need it, delegate to virtual fn 
             }
         }
-        
+
         [DebuggerStepThrough]
         protected float ResolveFixedWidth(UIFixedLength width) {
             switch (width.unit) {
@@ -262,7 +326,7 @@ namespace UIForia.Layout.LayoutTypes {
                     return GetContentHeight(width) * margin.value;
 
                 case UIMeasurementUnit.ParentSize:
-                    if (parent.style.PreferredWidth.IsContentBased) {
+                    if (parent.prefWidth.IsContentBased) {
                         return 0f;
                     }
 
@@ -275,7 +339,7 @@ namespace UIForia.Layout.LayoutTypes {
                     return view.Viewport.height * margin.value;
 
                 case UIMeasurementUnit.ParentContentArea:
-                    if (parent.style.PreferredHeight.IsContentBased) {
+                    if (parent.prefHeight.IsContentBased) {
                         return 0f;
                     }
 
@@ -287,7 +351,7 @@ namespace UIForia.Layout.LayoutTypes {
 
                 case UIMeasurementUnit.AnchorWidth:
                     anchorTarget = style.AnchorTarget;
-                    if (parent.style.PreferredHeight.IsContentBased && anchorTarget == AnchorTarget.Parent ||
+                    if (parent.prefHeight.IsContentBased && anchorTarget == AnchorTarget.Parent ||
                         anchorTarget == AnchorTarget.ParentContentArea) {
                         return 0f;
                     }
@@ -296,7 +360,7 @@ namespace UIForia.Layout.LayoutTypes {
 
                 case UIMeasurementUnit.AnchorHeight:
                     anchorTarget = style.AnchorTarget;
-                    if (parent.style.PreferredHeight.IsContentBased && anchorTarget == AnchorTarget.Parent ||
+                    if (parent.prefHeight.IsContentBased && anchorTarget == AnchorTarget.Parent ||
                         anchorTarget == AnchorTarget.ParentContentArea) {
                         return 0f;
                     }
@@ -404,13 +468,9 @@ namespace UIForia.Layout.LayoutTypes {
             return -1;
         }
 
-        protected virtual float ComputeContentWidth() {
-            return 0f;
-        }
+        protected abstract float ComputeContentWidth();
 
-        protected virtual float ComputeContentHeight(float width) {
-            return 0f;
-        }
+        protected abstract float ComputeContentHeight(float width);
 
         private float GetContentWidth() {
             // todo -- get some stats on this
@@ -439,7 +499,7 @@ namespace UIForia.Layout.LayoutTypes {
 
         public float GetPreferredWidth() {
             AnchorTarget anchorTarget;
-            UIMeasurement widthMeasurement = style.PreferredWidth;
+            UIMeasurement widthMeasurement = prefWidth;
             switch (widthMeasurement.unit) {
                 case UIMeasurementUnit.Pixel:
                     return view.ScaleFactor * Mathf.Max(0, widthMeasurement.value);
@@ -449,7 +509,7 @@ namespace UIForia.Layout.LayoutTypes {
 
                 case UIMeasurementUnit.ParentSize:
                     if (parent == null) return view.Viewport.width;
-                    if (parent.style.PreferredWidth.IsContentBased) {
+                    if (parent.prefWidth.IsContentBased) {
                         return 0f;
                     }
 
@@ -463,7 +523,7 @@ namespace UIForia.Layout.LayoutTypes {
 
                 case UIMeasurementUnit.ParentContentArea:
                     if (parent == null) return view.Viewport.width;
-                    if (parent.style.PreferredWidth.IsContentBased) {
+                    if (parent.prefWidth.IsContentBased) {
                         // todo there are cases where this is not true
                         // if we hit the paradox -> size = own content size
                         // ie parent is layout that can grow and parent is growing
@@ -479,7 +539,7 @@ namespace UIForia.Layout.LayoutTypes {
                 case UIMeasurementUnit.AnchorWidth:
                     anchorTarget = style.AnchorTarget;
                     if (parent == null) return view.Viewport.width;
-                    if (parent.style.PreferredWidth.IsContentBased && anchorTarget == AnchorTarget.Parent ||
+                    if (parent.prefWidth.IsContentBased && anchorTarget == AnchorTarget.Parent ||
                         anchorTarget == AnchorTarget.ParentContentArea) {
                         return 0f;
                     }
@@ -489,7 +549,7 @@ namespace UIForia.Layout.LayoutTypes {
                 case UIMeasurementUnit.AnchorHeight:
                     anchorTarget = style.AnchorTarget;
                     if (parent == null) return view.Viewport.height;
-                    if (parent.style.PreferredWidth.IsContentBased && anchorTarget == AnchorTarget.Parent ||
+                    if (parent.prefWidth.IsContentBased && anchorTarget == AnchorTarget.Parent ||
                         anchorTarget == AnchorTarget.ParentContentArea) {
                         return 0f;
                     }
@@ -653,7 +713,7 @@ namespace UIForia.Layout.LayoutTypes {
 
                     LayoutResult parentResult = parent.element.layoutResult;
                     float offset = parentResult.padding.top + parentResult.border.top + parentResult.border.bottom + parentResult.padding.bottom;
-                    return parent.actualHeight - (ResolveAnchorValue(parent.actualHeight - offset, anchor) +  parentResult.border.bottom + parentResult.padding.bottom);
+                    return parent.actualHeight - (ResolveAnchorValue(parent.actualHeight - offset, anchor) + parentResult.border.bottom + parentResult.padding.bottom);
 
                 case AnchorTarget.Viewport:
                     return view.Viewport.yMax + ResolveAnchorValue(view.Viewport.height, anchor);
@@ -668,7 +728,7 @@ namespace UIForia.Layout.LayoutTypes {
 
         public float GetPreferredHeight(float contentWidth) {
             AnchorTarget anchorTarget;
-            UIMeasurement height = style.PreferredHeight;
+            UIMeasurement height = prefHeight;
             switch (height.unit) {
                 case UIMeasurementUnit.Pixel:
                     return Mathf.Max(0, height.value * view.ScaleFactor);
@@ -686,7 +746,7 @@ namespace UIForia.Layout.LayoutTypes {
 
                 case UIMeasurementUnit.ParentSize:
                     if (parent == null) return view.Viewport.height;
-                    if (parent.style.PreferredHeight.IsContentBased) {
+                    if (parent.prefHeight.IsContentBased) {
                         return 0f;
                     }
 
@@ -700,7 +760,7 @@ namespace UIForia.Layout.LayoutTypes {
 
                 case UIMeasurementUnit.ParentContentArea:
                     if (parent == null) return view.Viewport.height;
-                    if (parent.style.PreferredHeight.IsContentBased) {
+                    if (parent.prefHeight.IsContentBased) {
                         return 0f;
                     }
 
@@ -714,7 +774,7 @@ namespace UIForia.Layout.LayoutTypes {
                 case UIMeasurementUnit.AnchorWidth:
                     anchorTarget = style.AnchorTarget;
                     if (parent == null) return view.Viewport.width;
-                    if (parent.style.PreferredHeight.IsContentBased && anchorTarget == AnchorTarget.Parent ||
+                    if (parent.prefHeight.IsContentBased && anchorTarget == AnchorTarget.Parent ||
                         anchorTarget == AnchorTarget.ParentContentArea) {
                         return 0f;
                     }
@@ -724,7 +784,7 @@ namespace UIForia.Layout.LayoutTypes {
                 case UIMeasurementUnit.AnchorHeight:
                     anchorTarget = style.AnchorTarget;
                     if (parent == null) return view.Viewport.height;
-                    if (parent.style.PreferredHeight.IsContentBased && anchorTarget == AnchorTarget.Parent ||
+                    if (parent.prefHeight.IsContentBased && anchorTarget == AnchorTarget.Parent ||
                         anchorTarget == AnchorTarget.ParentContentArea) {
                         return 0f;
                     }
@@ -749,7 +809,7 @@ namespace UIForia.Layout.LayoutTypes {
                     return GetContentWidth() * margin.value;
 
                 case UIMeasurementUnit.ParentSize:
-                    if (parent.style.PreferredWidth.IsContentBased) {
+                    if (parent.prefWidth.IsContentBased) {
                         return 0f;
                     }
 
@@ -762,7 +822,7 @@ namespace UIForia.Layout.LayoutTypes {
                     return view.Viewport.height * margin.value;
 
                 case UIMeasurementUnit.ParentContentArea:
-                    if (parent.style.PreferredWidth.IsContentBased) {
+                    if (parent.prefWidth.IsContentBased) {
                         return 0f;
                     }
 
@@ -772,7 +832,7 @@ namespace UIForia.Layout.LayoutTypes {
 
                 case UIMeasurementUnit.AnchorWidth:
                     anchorTarget = style.AnchorTarget;
-                    if (parent.style.PreferredWidth.IsContentBased && anchorTarget == AnchorTarget.Parent ||
+                    if (parent.prefWidth.IsContentBased && anchorTarget == AnchorTarget.Parent ||
                         anchorTarget == AnchorTarget.ParentContentArea) {
                         return 0f;
                     }
@@ -781,7 +841,7 @@ namespace UIForia.Layout.LayoutTypes {
 
                 case UIMeasurementUnit.AnchorHeight:
                     anchorTarget = style.AnchorTarget;
-                    if (parent.style.PreferredWidth.IsContentBased && anchorTarget == AnchorTarget.Parent ||
+                    if (parent.prefWidth.IsContentBased && anchorTarget == AnchorTarget.Parent ||
                         anchorTarget == AnchorTarget.ParentContentArea) {
                         return 0f;
                     }
@@ -841,7 +901,7 @@ namespace UIForia.Layout.LayoutTypes {
 
                 case TransformUnit.AnchorWidth: {
                     AnchorTarget anchorTarget = style.AnchorTarget;
-                    if (parent.style.PreferredWidth.IsContentBased && anchorTarget == AnchorTarget.Parent ||
+                    if (parent.prefWidth.IsContentBased && anchorTarget == AnchorTarget.Parent ||
                         anchorTarget == AnchorTarget.ParentContentArea) {
                         return 0f;
                     }
@@ -851,7 +911,7 @@ namespace UIForia.Layout.LayoutTypes {
 
                 case TransformUnit.AnchorHeight: {
                     AnchorTarget anchorTarget = style.AnchorTarget;
-                    if (parent.style.PreferredHeight.IsContentBased && anchorTarget == AnchorTarget.Parent ||
+                    if (parent.prefHeight.IsContentBased && anchorTarget == AnchorTarget.Parent ||
                         anchorTarget == AnchorTarget.ParentContentArea) {
                         return 0f;
                     }
@@ -886,7 +946,7 @@ namespace UIForia.Layout.LayoutTypes {
             }
         }
 
-        [DebuggerStepThrough]
+     //   [DebuggerStepThrough]
         protected float ResolveMinOrMaxWidth(UIMeasurement widthMeasurement) {
             AnchorTarget anchorTarget;
             switch (widthMeasurement.unit) {
@@ -897,7 +957,7 @@ namespace UIForia.Layout.LayoutTypes {
                     return Mathf.Max(0, PaddingBorderHorizontal + (GetContentWidth() * widthMeasurement.value));
 
                 case UIMeasurementUnit.ParentSize:
-                    if (parent.style.PreferredWidth.IsContentBased) {
+                    if (parent.prefWidth.IsContentBased) {
                         return 0f;
                     }
 
@@ -910,7 +970,7 @@ namespace UIForia.Layout.LayoutTypes {
                     return Mathf.Max(0, view.Viewport.height * widthMeasurement.value);
 
                 case UIMeasurementUnit.ParentContentArea:
-                    if (parent.style.PreferredWidth.IsContentBased) {
+                    if (parent.prefWidth.IsContentBased) {
                         return 0f;
                     }
 
@@ -924,7 +984,7 @@ namespace UIForia.Layout.LayoutTypes {
 
                 case UIMeasurementUnit.AnchorWidth:
                     anchorTarget = style.AnchorTarget;
-                    if (parent.style.PreferredWidth.IsContentBased && anchorTarget == AnchorTarget.Parent ||
+                    if (parent.prefWidth.IsContentBased && anchorTarget == AnchorTarget.Parent ||
                         anchorTarget == AnchorTarget.ParentContentArea) {
                         return 0f;
                     }
@@ -933,7 +993,7 @@ namespace UIForia.Layout.LayoutTypes {
 
                 case UIMeasurementUnit.AnchorHeight:
                     anchorTarget = style.AnchorTarget;
-                    if (parent.style.PreferredWidth.IsContentBased && anchorTarget == AnchorTarget.Parent ||
+                    if (parent.prefWidth.IsContentBased && anchorTarget == AnchorTarget.Parent ||
                         anchorTarget == AnchorTarget.ParentContentArea) {
                         return 0f;
                     }
@@ -956,7 +1016,7 @@ namespace UIForia.Layout.LayoutTypes {
                     return Mathf.Max(0, PaddingBorderVertical + (GetContentHeight(width) * heightMeasurement.value));
 
                 case UIMeasurementUnit.ParentSize:
-                    if (parent.style.PreferredHeight.IsContentBased) {
+                    if (parent.prefHeight.IsContentBased) {
                         return 0f;
                     }
 
@@ -969,7 +1029,7 @@ namespace UIForia.Layout.LayoutTypes {
                     return Mathf.Max(0, view.Viewport.height * heightMeasurement.value);
 
                 case UIMeasurementUnit.ParentContentArea:
-                    if (parent.style.PreferredHeight.IsContentBased) {
+                    if (parent.prefHeight.IsContentBased) {
                         return 0f;
                     }
 
@@ -983,7 +1043,7 @@ namespace UIForia.Layout.LayoutTypes {
 
                 case UIMeasurementUnit.AnchorWidth:
                     anchorTarget = style.AnchorTarget;
-                    if (parent.style.PreferredHeight.IsContentBased && anchorTarget == AnchorTarget.Parent ||
+                    if (parent.prefHeight.IsContentBased && anchorTarget == AnchorTarget.Parent ||
                         anchorTarget == AnchorTarget.ParentContentArea) {
                         return 0f;
                     }
@@ -992,7 +1052,7 @@ namespace UIForia.Layout.LayoutTypes {
 
                 case UIMeasurementUnit.AnchorHeight:
                     anchorTarget = style.AnchorTarget;
-                    if (parent.style.PreferredHeight.IsContentBased && anchorTarget == AnchorTarget.Parent ||
+                    if (parent.prefHeight.IsContentBased && anchorTarget == AnchorTarget.Parent ||
                         anchorTarget == AnchorTarget.ParentContentArea) {
                         return 0f;
                     }
@@ -1004,18 +1064,18 @@ namespace UIForia.Layout.LayoutTypes {
         }
 
         public LayoutBoxSize GetHeights(float width) {
-            float prfHeight = GetPreferredHeight(width);
-            float minHeight = ResolveMinOrMaxHeight(style.MinHeight, width);
-            float maxHeight = ResolveMinOrMaxHeight(style.MaxHeight, width);
-            return new LayoutBoxSize(minHeight, maxHeight, prfHeight);
+            float prf = GetPreferredHeight(width);
+            float min = ResolveMinOrMaxHeight(minHeight, width);
+            float max = ResolveMinOrMaxHeight(maxHeight, width);
+            return new LayoutBoxSize(min, max, prf);
         }
 
         public LayoutBoxSize GetWidths() {
-            float prfWidth = GetPreferredWidth();
-            float minWidth = ResolveMinOrMaxWidth(style.MinWidth);
-            float maxWidth = ResolveMinOrMaxWidth(style.MaxWidth);
+            float prf = GetPreferredWidth();
+            float min = ResolveMinOrMaxWidth(minWidth);
+            float max = ResolveMinOrMaxWidth(maxWidth);
 
-            return new LayoutBoxSize(minWidth, maxWidth, prfWidth);
+            return new LayoutBoxSize(min, max, prf);
         }
 
         public struct LayoutBoxSize {
@@ -1054,8 +1114,25 @@ namespace UIForia.Layout.LayoutTypes {
                 GetMarginLeft()
             );
         }
-        
-        protected virtual void OnChildrenChanged() { }
+
+        protected abstract void OnChildrenChanged();
+
+        public virtual void OnSpawn(UIElement element) {
+
+        }
+
+        public virtual void OnRelease() {
+            this.element = null;
+            this.style = null;
+            this.children.Clear();
+            this.cachedPreferredWidth = -1;
+            this.view = null;
+            this.markedForLayout = true;
+        }
+
+        internal void Release() {
+            pool?.Release(this);
+        }
 
     }
 

@@ -7,11 +7,10 @@ using UnityEngine;
 namespace UIForia.Layout.LayoutTypes {
 
     public class FixedLayoutBox : LayoutBox {
+        
         private OffsetRect padding;
         private OffsetRect border;
-
-        public FixedLayoutBox(UIElement element): base(element) { }
-
+        
         protected override float ComputeContentWidth() {
             float minX = 0;
             float maxX = 0;
@@ -41,6 +40,8 @@ namespace UIForia.Layout.LayoutTypes {
 
             return Mathf.Max(0, maxY - minY);
         }
+
+        protected override void OnChildrenChanged() { }
 
         public override void RunLayout() {
             float minX = 0;

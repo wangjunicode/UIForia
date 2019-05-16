@@ -344,6 +344,7 @@ GameObject:
   - component: {fileID: 1506585485}
   - component: {fileID: 1506585479}
   - component: {fileID: 1506585484}
+  - component: {fileID: 1506585486}
   m_Layer: 5
   m_Name: Canvas
   m_TagString: Untagged
@@ -502,6 +503,7 @@ MonoBehaviour:
   endAngle: 180
   stepSize: 2
   radius: 100
+  radii: {x: 100, y: 100, z: 100, w: 100}
 --- !u!222 &1506585485
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -510,3 +512,34 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1506585478}
   m_CullTransparentMesh: 0
+--- !u!114 &1506585486
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1506585478}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 748cf370d09742c469531bc3f48ffa59, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  camera: {fileID: 534669904}
+  bgImage: {fileID: 2800000, guid: e9eae51770a2bbd4fae9e93128eb7d11, type: 3}
+  lightFrame: {fileID: 0}
+  softness: 0
+  atlas: {fileID: 4343727234628468602, guid: 0a12ef407585f404fa6ce6bf591ce0cc, type: 2}
+  width: 200
+  height: 200
+  radii: {x: 0, y: 0, z: 0, w: 0}
+  color: {r: 0, g: 0, b: 0, a: 0}
+  tiling: {x: 1, y: 1}
+  offset: {x: 0, y: 0}
+  pivot: {x: 0, y: 0}
+  rotation: 0
+  uvRect:
+    serializedVersion: 2
+    x: 0
+    y: 0
+    width: 1
+    height: 1

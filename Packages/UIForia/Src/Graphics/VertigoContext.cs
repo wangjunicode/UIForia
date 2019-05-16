@@ -13,28 +13,30 @@ namespace Vertigo {
         SDF
 
     }
-    
+
+    [Flags]
+    public enum ShaderSlot {
+
+        Text = 1 << 0,
+        FillSDF = 1 << 1,
+        FillPhysical = 1 << 2,
+        StrokeSDF = 1 << 3,
+        StrokePhysical = 1 << 4,
+        Fill = FillSDF | FillPhysical,
+        Stroke = StrokeSDF | StrokePhysical,
+        All = Text | Fill | Stroke
+
+    }
+
+
     public class VertigoContext {
 
-        public static readonly int shaderKey_StencilRef;
-        public static readonly int shaderKey_StencilReadMask;
-        public static readonly int shaderKey_StencilWriteMask;
-        public static readonly int shaderKey_StencilComp;
-        public static readonly int shaderKey_StencilPassOp;
-        public static readonly int shaderKey_StencilFailOp;
-        public static readonly int shaderKey_ColorMask;
-        public static readonly int shaderKey_Culling;
-        public static readonly int shaderKey_ZWrite;
-        public static readonly int shaderKey_BlendArgSrc;
-        public static readonly int shaderKey_BlendArgDst;
-        public static readonly int shaderKey_MaskTexture;
-        public static readonly int shaderKey_MaskSoftness;
         private static readonly MaterialPropertyBlock s_PropertyBlock;
 
         public readonly MaterialPool materialPool;
-        private readonly IDrawCallBatcher batcher;
-        private VertigoState renderState;
-        private Stack<VertigoState> stateStack;
+    //    private readonly IDrawCallBatcher batcher;
+        private Matrix4x4 transform;
+        private Stack<Matrix4x4> stateStack;
 
         private Vector3 position;
         private Quaternion rotation;
@@ -51,11 +53,19 @@ namespace Vertigo {
         private ShapeMode defaultShapeMode;
         private VertigoMaterial strokeMaterial;
         private VertigoMaterial fillMaterial;
+        private VertigoMaterial textMaterial;
         public static MaterialPool DefaultMaterialPool { get; }
 
-        public VertigoContext(ShapeMode shapeMode = ShapeMode.SDF, IDrawCallBatcher batcher = null, MaterialPool materialPool = null) {
+        private bool needsNewMaterialInstance;
+        private bool transformChangedSinceLastDrawCall;
+        private int drawCallWithCurrentMaterial;
+        private bool passChangedSinceLastDrawCall;
+        private bool renderStateChangedSinceLastDrawCall;
+        private bool materialChangedSinceLastDrawCall;
+        
+        public VertigoContext(ShapeMode shapeMode = ShapeMode.SDF, string batcher = null, MaterialPool materialPool = null) {
             if (batcher == null) {
-                batcher = new DefaultDrawCallBatcher();
+             //   batcher = new DefaultDrawCallBatcher();
             }
 
             if (materialPool == null) {
@@ -68,9 +78,9 @@ namespace Vertigo {
             this.renderCalls = new StructList<RenderCall>();
             this.renderTexturesToRelease = new LightList<RenderTexture>();
 
-            this.batcher = batcher;
+          //  this.batcher = batcher;
             this.materialPool = materialPool;
-            this.stateStack = new Stack<VertigoState>();
+            this.stateStack = new Stack<Matrix4x4>();
             this.position = Vector3.zero;
             this.rotation = Quaternion.identity;
             this.scale = Vector3.one;
@@ -79,43 +89,129 @@ namespace Vertigo {
             this.geometryCache = new GeometryCache();
         }
 
+        public enum MaterialUsage {
+
+            Instance,
+            Shared
+
+        }
+
+        private Dictionary<string, Shader> shaderMap = new Dictionary<string, Shader>();
+
+        private VertigoMaterial FindMaterial(string shaderName) {
+            shaderMap.TryGetValue(shaderName, out Shader shader);
+            return materialPool.GetInstance(shaderName);
+        }
+
+
+        public void SetFloatProperty(int key, float value) {
+            needsNewMaterialInstance = drawCallWithCurrentMaterial != 0;
+            fillMaterial.SetFloatProperty(key, value);
+        }
+
+        public void SetShader(ShaderSlot slot, string shaderName, string[] keywords = null) {
+            if (fillMaterial.shaderName == shaderName) {
+//                if (fillMaterial.KeywordsMatch(keywords)) {
+//                    return;
+//                }
+            }
+
+            VertigoMaterial material = FindMaterial(shaderName);
+
+            if (slot == ShaderSlot.All) { }
+            else if (slot == ShaderSlot.Fill) {
+                fillMaterial = material;
+            }
+            else if (slot == ShaderSlot.Stroke) { }
+            else if (slot == ShaderSlot.Text) { }
+        }
+
+        public void SetMainTexture(Texture texture) { }
+
+        public void SetColorSpace(ColorSpace colorSpace) { }
+
+        public void SetUVRect(Rect rect) { }
+
+        public void EnableUVTilingOffset(Vector2 uvTiling, Vector2 uvOffset) { }
+
+        private MaterialUsage materialUsage = MaterialUsage.Instance;
+
+        public void SetMaterialUsageType(MaterialUsage materialUsage) { }
+
+        public void SetMaterial(Material material) {
+            fillMaterial = VertigoMaterial.GetInstance(material);
+        }
+
+        public void SetMaterial(MaterialUsage materialUsage, Material material) {
+            if (material.shader) {
+                if (material.shaderKeywords != null) { }
+
+                // if we haven't registered this shader before, update our keyword check
+            }
+
+            material.HasProperty(ShaderKey.Culling);
+            material.HasProperty(ShaderKey.Culling);
+            material.HasProperty(ShaderKey.Culling);
+            material.HasProperty(ShaderKey.Culling);
+            material.HasProperty(ShaderKey.Culling);
+            material.HasProperty(ShaderKey.Culling);
+        }
+
         public void SetMaterial(VertigoMaterial material) {
             this.fillMaterial = material;
             this.strokeMaterial = material;
+            this.textMaterial = material;
         }
-        
+
+        public void SetTextMaterial(VertigoMaterial material) {
+            this.textMaterial = material;
+        }
+
         public void SetFillMaterial(VertigoMaterial material) {
             this.fillMaterial = material;
         }
-        
+
         public void SetStrokeMaterial(VertigoMaterial material) {
             this.strokeMaterial = material;
         }
 
-        public void FillText(float x, float y, TextInfo textInfo) { }
+        public void FillText(float x, float y, TextInfo textInfo, VertigoMaterial material = null) {
+            material = material ?? textMaterial;
+            if (material == null) return;
+            geometryGenerator.FillText(new Vector3(x, y, 0), textInfo, geometryCache);
+            //batcher.AddDrawCall(geometryCache, new RangeInt(geometryCache.shapeCount - 1, 1), material, transform);
+        }
+
+        public void FillRect(float x, float y, float width, float height, VertigoMaterial material = null) {
+            material = material ?? fillMaterial;
+            if (material == null) return;
+            shapeGenerator.Rect(x, y, width, height);
+            geometryGenerator.Fill(shapeGenerator, new RangeInt(shapeGenerator.shapes.Count - 1, 1), defaultShapeMode, geometryCache);
+            //batcher.AddDrawCall(geometryCache, new RangeInt(geometryCache.shapeCount - 1, 1), material, transform);
+        }
 
         public void FillRhombus(float x, float y, float width, float height, VertigoMaterial material = null) {
             material = material ?? fillMaterial;
             if (material == null) return;
             int pathId = shapeGenerator.Rhombus(x, y, width, height);
             geometryGenerator.Fill(shapeGenerator, new RangeInt(pathId, 1), defaultShapeMode, geometryCache);
-            batcher.AddDrawCall(geometryCache, new RangeInt(geometryCache.shapeCount - 1, 1), material, renderState);
+            //batcher.AddDrawCall(geometryCache, new RangeInt(geometryCache.shapeCount - 1, 1), material, transform);
         }
-        
+
         public void FillCircle(float x, float y, float radius, VertigoMaterial material = null) {
             material = material ?? fillMaterial;
             if (material == null) return;
             int pathId = shapeGenerator.Circle(x, y, radius);
             geometryGenerator.Fill(shapeGenerator, new RangeInt(pathId, 1), defaultShapeMode, geometryCache);
-            batcher.AddDrawCall(geometryCache, new RangeInt(geometryCache.shapeCount - 1, 1), material, renderState);
+            //batcher.AddDrawCall(geometryCache, new RangeInt(geometryCache.shapeCount - 1, 1), material, transform);
         }
-        
+
         public void FillEllipse(float x, float y, float rw, float rh, VertigoMaterial material = null) {
             material = material ?? fillMaterial;
             if (material == null) return;
             int pathId = shapeGenerator.Ellipse(x, y, rw, rh);
             geometryGenerator.Fill(shapeGenerator, new RangeInt(pathId, 1), defaultShapeMode, geometryCache);
-            batcher.AddDrawCall(geometryCache, new RangeInt(geometryCache.shapeCount - 1, 1), material, renderState);
+            //batcher.AddDrawCall(geometryCache, new RangeInt(geometryCache.shapeCount - 1, 1), material, transform);
         }
 
         public void FillRoundedRect(float x, float y, float width, float height, float rTL, float rTR, float rBL, float rBR, VertigoMaterial material = null) {
@@ -123,11 +219,11 @@ namespace Vertigo {
             if (material == null) return;
             int pathId = shapeGenerator.RoundedRect(x, y, width, height, rTL, rTR, rBL, rBR);
             geometryGenerator.Fill(shapeGenerator, new RangeInt(pathId, 1), defaultShapeMode, geometryCache);
-            batcher.AddDrawCall(geometryCache, new RangeInt(geometryCache.shapeCount - 1, 1), material, renderState);
+            //batcher.AddDrawCall(geometryCache, new RangeInt(geometryCache.shapeCount - 1, 1), material, transform);
         }
-        
+
         public void SaveState() {
-            stateStack.Push(renderState);
+            stateStack.Push(transform);
         }
 
         public void RestoreState() {
@@ -135,15 +231,30 @@ namespace Vertigo {
                 return;
             }
 
-            renderState = stateStack.Pop();
+            transform = stateStack.Pop();
         }
 
         public void Draw(GeometryCache cache, VertigoMaterial material) {
-            batcher.AddDrawCall(cache, new RangeInt(0, cache.shapes.size), material, renderState);
+            //batcher.AddDrawCall(cache, new RangeInt(0, cache.shapes.size), material, transform);
         }
 
-        public void SetStencilState(byte stencilRef, byte readMask, byte writeMask, CompareFunction compFn,
-            StencilOp pass, StencilOp fail = StencilOp.Keep) { }
+        public void Draw(GeometryCache cache, RangeInt range, VertigoMaterial material) {
+            //batcher.AddDrawCall(cache, range, material, transform);
+        }
+
+        public void Draw(GeometryCache cache, int idx, VertigoMaterial material) {
+            if (transformChangedSinceLastDrawCall) {
+                // multiply vertices by current transform matrix    
+            }
+
+            if (needsNewMaterialInstance) {
+                material = material.Clone(material);
+            }
+
+            if (passChangedSinceLastDrawCall) { }
+
+            //batcher.AddDrawCall(cache, new RangeInt(idx, 1), material, transform);
+        }
 
         public void SetStrokeColor(Color32 color) {
             geometryGenerator.SetStrokeColor(color);
@@ -200,13 +311,13 @@ namespace Vertigo {
         public void DrawSprite(Sprite sprite, Rect rect, VertigoMaterial material) {
             int start = geometryCache.shapeCount;
             geometryGenerator.FillSprite(sprite, rect, geometryCache);
-            batcher.AddDrawCall(geometryCache, new RangeInt(start, 1), material, renderState);
+            //batcher.AddDrawCall(geometryCache, new RangeInt(start, 1), material, transform);
         }
 
         public void DrawSprite(Sprite sprite, VertigoMaterial material) {
             int start = geometryCache.shapeCount;
             geometryGenerator.FillSprite(sprite, default, geometryCache);
-            batcher.AddDrawCall(geometryCache, new RangeInt(start, 1), material, renderState);
+           // batcher.AddDrawCall(geometryCache, new RangeInt(start, 1), material, transform);
         }
 
         private Rect uvRect = new Rect(0, 0, 1, 1);
@@ -236,9 +347,8 @@ namespace Vertigo {
                 geometryCache.SetTexCoord0(start, s_ScratchVector4);
             }
 
-            batcher.AddDrawCall(geometryCache, new RangeInt(start, count), material, renderState);
+         //   batcher.AddDrawCall(geometryCache, new RangeInt(start, count), material, transform);
         }
-
 
         public RenderTexture Render() {
             RenderTexture targetTexture = RenderTexture.active;
@@ -257,15 +367,15 @@ namespace Vertigo {
 
             Matrix4x4 cameraMatrix = Matrix4x4.identity;
 
-            StructList<BatchDrawCall> drawCalls = StructList<BatchDrawCall>.Get();
+         //   StructList<BatchDrawCall> drawCalls = StructList<BatchDrawCall>.Get();
 //            Matrix4x4 rootMat = Matrix4x4.TRS(new Vector3(-(width / 2), height / 2), Quaternion.identity, Vector3.one);
-            batcher.Bake(width, height, cameraMatrix, drawCalls);
-            batcher.Clear();
+         //   batcher.Bake(width, height, cameraMatrix, drawCalls);
+         //   batcher.Clear();
 
             renderCalls.Add(new RenderCall() {
                 // matrix?
                 texture = targetTexture,
-                drawCalls = drawCalls
+       //         drawCalls = drawCalls
             });
 
             return targetTexture;
@@ -303,61 +413,28 @@ namespace Vertigo {
                 else { // use screen
                     commandBuffer.SetViewProjectionMatrices(cameraMatrix, camera.projectionMatrix);
                 }
-
-//                Render(renderCalls[i].drawCalls);
-                int count = renderCalls[i].drawCalls.size;
-                BatchDrawCall[] calls = renderCalls[i].drawCalls.array;
-
-                for (int j = 0; j < count; j++) {
-                    Mesh mesh = calls[j].mesh.mesh;
-                    Material material = calls[j].material.material;
-                    UpdateMaterialPropertyBlock(calls[j].state);
-                    int passCount = material.passCount;
-                    // todo -- only render specified passes
-                    for (int k = 0; k < passCount; k++) {
-                        commandBuffer.DrawMesh(mesh, calls[j].state.transform, material, 0, k, s_PropertyBlock);
-                    }
-                }
+//
+////                Render(renderCalls[i].drawCalls);
+//                int count = renderCalls[i].drawCalls.size;
+//        //        BatchDrawCall[] calls = renderCalls[i].drawCalls.array;
+//
+//                for (int j = 0; j < count; j++) {
+//                    Mesh mesh = calls[j].mesh.mesh;
+//                    Material material = calls[j].material.material;
+//                    // UpdateMaterialPropertyBlock(calls[j].state);
+//                    int passCount = material.passCount;
+//                    // todo -- only render specified passes
+//                    commandBuffer.DrawMesh(mesh, calls[j].transform, material, 0, 0, s_PropertyBlock);
+//                    for (int k = 0; k < passCount; k++) { }
+//                }
             }
         }
 
-        public void SetMask(Texture texture, float softness) {
-            renderState.renderSettings.mask = texture;
-            renderState.renderSettings.maskSoftness = softness;
-        }
+        public void SetMask(Texture texture, float softness) { }
 
         static VertigoContext() {
             s_PropertyBlock = new MaterialPropertyBlock();
             DefaultMaterialPool = new MaterialPool();
-            shaderKey_StencilRef = Shader.PropertyToID("_Stencil");
-            shaderKey_StencilReadMask = Shader.PropertyToID("_StencilReadMask");
-            shaderKey_StencilWriteMask = Shader.PropertyToID("_StencilWriteMask");
-            shaderKey_StencilComp = Shader.PropertyToID("_StencilComp");
-            shaderKey_StencilPassOp = Shader.PropertyToID("_StencilOp");
-            shaderKey_StencilFailOp = Shader.PropertyToID("_StencilOpFail");
-            shaderKey_ColorMask = Shader.PropertyToID("_ColorMask");
-            shaderKey_Culling = Shader.PropertyToID("_Culling");
-            shaderKey_ZWrite = Shader.PropertyToID("_ZWrite");
-            shaderKey_BlendArgSrc = Shader.PropertyToID("_SrcBlend ");
-            shaderKey_BlendArgDst = Shader.PropertyToID("_DstBlend ");
-            shaderKey_MaskTexture = Shader.PropertyToID("_MaskTexture");
-            shaderKey_MaskSoftness = Shader.PropertyToID("_MaskSoftness");
-        }
-
-        private static void UpdateMaterialPropertyBlock(in VertigoState state) {
-            s_PropertyBlock.SetInt(shaderKey_StencilRef, state.renderSettings.stencilRefValue);
-            s_PropertyBlock.SetInt(shaderKey_StencilReadMask, state.renderSettings.stencilReadMask);
-            s_PropertyBlock.SetInt(shaderKey_StencilWriteMask, state.renderSettings.stencilWriteMask);
-            s_PropertyBlock.SetInt(shaderKey_StencilComp, (int) state.renderSettings.stencilComp);
-            s_PropertyBlock.SetInt(shaderKey_StencilPassOp, (int) state.renderSettings.stencilPassOp);
-            s_PropertyBlock.SetInt(shaderKey_StencilFailOp, (int) state.renderSettings.stencilFailOp);
-            s_PropertyBlock.SetInt(shaderKey_ColorMask, state.renderSettings.colorMask);
-            s_PropertyBlock.SetInt(shaderKey_Culling, state.renderSettings.cullMode);
-            s_PropertyBlock.SetInt(shaderKey_ZWrite, state.renderSettings.zWrite ? 1 : 0);
-            s_PropertyBlock.SetInt(shaderKey_BlendArgSrc, (int) state.renderSettings.blendArgSrc);
-            s_PropertyBlock.SetInt(shaderKey_BlendArgDst, (int) state.renderSettings.blendArgDst);
-//            s_PropertyBlock.SetTexture(shaderKey_MaskTexture, ReferenceEquals(state.renderSettings.mask, null) ? Texture2D.whiteTexture : state.renderSettings.mask);
-           // s_PropertyBlock.SetFloat(shaderKey_MaskSoftness, state.renderSettings.maskSoftness);
         }
 
         public void Clear() {
@@ -369,16 +446,16 @@ namespace Vertigo {
             shapeGenerator.Clear();
             geometryCache.Clear();
             geometryGenerator.ResetRenderState();
-            renderState.transform = Matrix4x4.identity;
+            transform = Matrix4x4.identity;
 
             for (int i = 0; i < renderCalls.Count; i++) {
-                StructList<BatchDrawCall> drawCalls = renderCalls[i].drawCalls;
-                for (int j = 0; j < drawCalls.Count; j++) {
-                    drawCalls[j].material.Release();
-                    drawCalls[j].mesh.Release();
-                }
+        //        StructList<BatchDrawCall> drawCalls = renderCalls[i].drawCalls;
+        //        for (int j = 0; j < drawCalls.Count; j++) {
+                    //drawCalls[j].material.Release();
+       //             drawCalls[j].mesh.Release();
+        //        }
 
-                StructList<BatchDrawCall>.Release(ref drawCalls);
+         //       StructList<BatchDrawCall>.Release(ref drawCalls);
             }
 
             renderCalls.Clear();
@@ -388,17 +465,17 @@ namespace Vertigo {
 
         public void SetPosition(Vector3 position) {
             this.position = position;
-            renderState.transform = Matrix4x4.TRS(position, rotation, scale);
+            transform = Matrix4x4.TRS(position, rotation, scale);
         }
 
         public void SetPosition(Vector2 position) {
             this.position = new Vector3(position.x, position.y, this.position.z);
-            renderState.transform = Matrix4x4.TRS(position, rotation, scale);
+            transform = Matrix4x4.TRS(position, rotation, scale);
         }
 
         public void SetRotation(float angle) {
             rotation = Quaternion.Euler(0, 0, angle);
-            renderState.transform = Matrix4x4.TRS(position, rotation, scale);
+            transform = Matrix4x4.TRS(position, rotation, scale);
         }
 
         public void SetFillColor(Color32 color) {
@@ -408,8 +485,14 @@ namespace Vertigo {
         private struct RenderCall {
 
             public RenderTexture texture;
-            public StructList<BatchDrawCall> drawCalls;
+        //    public StructList<BatchDrawCall> drawCalls;
 
+        }
+
+        public void StrokeRect(float x, float y, float width, float height) {
+            shapeGenerator.Rect(x, y, width, height);
+            geometryGenerator.Stroke(shapeGenerator, geometryCache);
+        //    batcher.AddDrawCall(geometryCache, strokeMaterial, transform);
         }
 
     }

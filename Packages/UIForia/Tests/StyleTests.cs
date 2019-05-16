@@ -552,5 +552,22 @@ public class StyleTests {
         StyleProperty fontSize = target.GetChild(0).GetChild(0).style.GetComputedStyleProperty(StylePropertyId.TextFontSize);
         Assert.AreEqual(100, fontSize.AsUIFixedLength.value);
     }
+
+    [Test]
+    public void StylesAreInheritedWhenEnabled() {
+        MockApplication app = new MockApplication(typeof(InheritStyleElement));
+        InheritStyleElement target = app.GetView(0).RootElement as InheritStyleElement;
+        target.list = new RepeatableList<string>(new [] {
+            "one", "two", "three"
+        });
+        app.Update();
+        UIElement group = new UIGroupElement();
+        StyleProperty fontSize = target.GetChild(0).GetChild(0).style.GetComputedStyleProperty(StylePropertyId.TextFontSize);
+        Assert.AreNotEqual(fontSize.AsUIFixedLength.value, group.style.TextFontSize);
+        target.AddChild(group);
+        Assert.AreEqual(fontSize.AsUIFixedLength, group.style.TextFontSize);
+
+    }
     
+
 }

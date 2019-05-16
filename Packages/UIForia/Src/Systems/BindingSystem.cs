@@ -1,7 +1,6 @@
 ﻿using System;
 using UIForia.Bindings;
 using UIForia.Elements;
-using UIForia.Expressions;
 using UIForia.Templates;
 using UIForia.Util;
 
@@ -24,7 +23,13 @@ namespace UIForia.Systems {
         }
 
         public void OnUpdate() {
-            m_ReadBindingTree.TraversePreOrder((node) => { node.OnUpdate(); });
+            // fast iteration
+            // reasonable add remove-hierarchy performance
+            // low memory
+            // handles adding / removing while running
+            // linked list makes sense since we're traversing elements anyway
+            
+            m_ReadBindingTree.ConditionalTraversePreOrder((node) => node.OnUpdate());
         }
 
         public void OnLateUpdate() {
@@ -39,6 +44,8 @@ namespace UIForia.Systems {
 
         public void OnElementCreated(UIElement element) {
             UITemplate template = element.OriginTemplate;
+
+            if (template == null) return;
 
             for (int i = 0; i < template.triggeredBindings.Length; i++) {
                 if (template.triggeredBindings[i].bindingType == BindingType.Constant) {
@@ -82,6 +89,16 @@ namespace UIForia.Systems {
                     node.bindings = template.perFrameBindings;
                     node.element = element;
                     node.context = element.templateContext;
+                    int enabledBindingCount = 0;
+                    for (int i = 0; i < node.bindings.Length; i++) {
+                        if (!(node.bindings[i] is EnabledBinding)) {
+                            break;
+                        }
+
+                        enabledBindingCount++;
+                    }
+
+                    node.enableBindingCount = enabledBindingCount;
                     m_ReadBindingTree.AddItem(node);
                 }
 
@@ -92,12 +109,7 @@ namespace UIForia.Systems {
                     node.context = element.templateContext;
                     m_WriteBindingTree.AddItem(node);
                 }
-                
-                if (element.children != null) {
-                    for (int i = 0; i < element.children.Count; i++) {
-                        OnElementCreated(element.children[i]);
-                    }
-                }
+ 
             }
         }
 
@@ -110,7 +122,9 @@ namespace UIForia.Systems {
             
         }
 
-        public void OnElementDisabled(UIElement element) { }
+        public void OnElementDisabled(UIElement element) {
+            
+        }
 
         public void OnAttributeSet(UIElement element, string attributeName, string currentValue, string attributeValue) { }
 

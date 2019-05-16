@@ -20,6 +20,7 @@ namespace UIForia.Text {
         public float descender;
         public int lineIndex;
         public int wordIndex;
+        public float scale;
 
         public float Width => bottomRight.x - topLeft.x;
         public float Height => bottomRight.y - topLeft.y;

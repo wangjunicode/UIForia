@@ -14,7 +14,7 @@ namespace UIForia {
         private readonly LightList<UIElement> windowStack = new LightList<UIElement>();
         
         public T CreateWindow<T>(Vector2 position, Size size) where T : UIElement {
-            
+            throw new NotImplementedException();
             ParsedTemplate template = templateParser.GetParsedTemplate(typeof(T));
             
             UIElement windowRoot = template.Create();
@@ -25,8 +25,6 @@ namespace UIForia {
             windowRoot.style.SetPreferredHeight(size.height, StyleState.Normal);
             windowRoot.parent = m_Views[0].RootElement;
             windowRoot.children.Add(windowRoot);
-            
-            RegisterElement(windowRoot);
             
             windowStack.Add(windowRoot);
             
@@ -51,7 +49,6 @@ namespace UIForia {
             onBootstrap?.Invoke(retn);
             retn.SetCamera(camera);
             UIView view = retn.AddView("Default View", new Rect(0, 0, Screen.width, Screen.height), type);
-            view.is2D = true;
             retn.onUpdate += () => {
                 // todo if view was destroyed return or remove auto-update handler
                 view.SetSize(Screen.width, Screen.height);

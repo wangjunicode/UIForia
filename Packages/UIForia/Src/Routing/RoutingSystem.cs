@@ -45,12 +45,6 @@ namespace UIForia.Routing {
             element.GetAttributes(m_ScratchAttrList);
 
             if (m_ScratchAttrList.Count == 0) {
-                if (element.children != null) {
-                    UIElement[] children = element.children.Array;
-                    for (int i = 0; i < element.children.Count; i++) {
-                        OnElementCreated(children[i]);
-                    }
-                }
                 return;
             }
             
@@ -95,13 +89,6 @@ namespace UIForia.Routing {
                 router.AddRoute(route);
 
                 element.SetEnabled(false);
-            }
-            
-            if (element.children != null) {
-                UIElement[] children = element.children.Array;
-                for (int i = 0; i < element.children.Count; i++) {
-                    OnElementCreated(children[i]);
-                }
             }
             
         }

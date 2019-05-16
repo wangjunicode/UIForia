@@ -24,32 +24,26 @@ namespace UIForia.Elements {
 
         public ExpressionContext templateContext;
 
+        public int enablePhase;
+        
         internal UIElementFlags flags;
         internal UIElement parent;
-
+  
         public readonly LayoutResult layoutResult;
 
         internal static IntMap<ElementColdData> s_ColdDataMap = new IntMap<ElementColdData>();
 
+        public UIView View { get; internal set; }
+        
         protected internal UIElement() {
             this.id = Application.NextElementId;
             this.style = new UIStyleSet(this);
             this.layoutResult = new LayoutResult();
             this.flags = UIElementFlags.Enabled;
+            this.children = LightListPool<UIElement>.Get();
         }
 
-        public Application Application {
-            get { return s_ColdDataMap.GetOrDefault(id).view.Application; }
-        }
-
-        public UIView View {
-            get { return s_ColdDataMap.GetOrDefault(id).view; }
-            internal set {
-                ElementColdData coldData = s_ColdDataMap.GetOrDefault(id);
-                coldData.view = value;
-                s_ColdDataMap[id] = coldData;
-            }
-        }
+        public Application Application => View.Application;
 
         public UIChildrenElement TranscludedChildren {
             get { return s_ColdDataMap.GetOrDefault(id).transcludedChildren; }
@@ -83,9 +77,9 @@ namespace UIForia.Elements {
 
         public bool isSelfDisabled => (flags & UIElementFlags.Enabled) == 0;
 
-        public bool isEnabled => (flags & UIElementFlags.SelfAndAncestorEnabled) == UIElementFlags.SelfAndAncestorEnabled;
+        public bool isEnabled => !isDestroyed && (flags & UIElementFlags.SelfAndAncestorEnabled) == UIElementFlags.SelfAndAncestorEnabled;
 
-        public bool isDisabled => (flags & UIElementFlags.Enabled) == 0 || (flags & UIElementFlags.AncestorEnabled) == 0;
+        public bool isDisabled => isDestroyed || (flags & UIElementFlags.Enabled) == 0 || (flags & UIElementFlags.AncestorEnabled) == 0;
 
         public bool hasDisabledAncestor => (flags & UIElementFlags.AncestorEnabled) == 0;
 
@@ -94,6 +88,12 @@ namespace UIForia.Elements {
         public bool isBuiltIn => (flags & UIElementFlags.BuiltIn) != 0;
 
         internal bool isPrimitive => (flags & UIElementFlags.Primitive) != 0;
+                
+        public bool isCreated => (flags & UIElementFlags.Created) != 0;
+
+        public bool isReady => (flags & UIElementFlags.Ready) != 0;
+        
+        public bool isRegistered => (flags & UIElementFlags.Registered) != 0;
 
         public virtual void OnCreate() { }
 
@@ -109,6 +109,47 @@ namespace UIForia.Elements {
 
         public virtual void HandleUIEvent(UIEvent evt) { }
 
+        public void Destroy() {
+            View.Application.DoDestroyElement(this);
+        }
+
+        public UIElement InsertChild(uint idx, UIElement element) {
+            if (element == null || element == this || element.isDestroyed) {
+                return null;
+            }
+            if (View == null) {
+                element.parent = this;
+                element.View = null;
+                element.siblingIndex = children.Count;
+                element.depth = depth + 1;
+                children.Insert((int)idx, element);
+            }
+            else {
+                Application.InsertChild(this, element, (uint) children.Count);
+            }
+
+            return element;
+        }
+        
+        public UIElement AddChild(UIElement element) {
+            // todo -- if <Children/> is defined in the template, attach child to that element instead
+            if (element == null || element == this || element.isDestroyed) {
+                return null;
+            }
+            if (View == null) {
+                element.parent = this;
+                element.View = null;
+                element.siblingIndex = children.Count;
+                element.depth = depth + 1;
+                children.Add(element);
+            }
+            else {
+                Application.InsertChild(this, element, (uint) children.Count);
+            }
+
+            return element;
+        }
+
         public void TriggerEvent(UIEvent evt) {
             evt.origin = this;
             UIElement ptr = this.parent;
@@ -118,41 +159,12 @@ namespace UIForia.Elements {
             }
         }
         
-        public UIElement CreateChild(Type type) {
-            // todo -- ensure we can accept children
-
-            if (!typeof(UIElement).IsAssignableFrom(type)) {
-                throw new Exception("Can't create child from non UIElement type");
-            }
-
-            ParsedTemplate template = Application.templateParser.GetParsedTemplate(type);
-            if (template == null) {
-                throw new Exception("failed creating child");
-            }
-
-            UIElement child = template.Create();
-            child.parent = this;
-            child.templateContext.rootObject = templateContext.rootObject;
-            children.Add(child);
-            Application.RegisterElement(child);
-            return child;
-        }
-
-        public T CreateChild<T>() where T : UIElement {
-            ParsedTemplate template = Application.templateParser.GetParsedTemplate(typeof(T));
-            if (template == null) {
-                throw new Exception("failed creating child");
-            }
-
-            UIElement child = template.Create();
-            child.parent = this;
-            child.templateContext.rootObject = templateContext.rootObject;
-            children.Add(child);
-            View.Application.RegisterElement(child);
-            return child as T;
-        }
-
         public void SetEnabled(bool active) {
+            if (View == null) {
+                flags &= ~UIElementFlags.Enabled;
+                return;
+            }
+            
             if (active && isSelfDisabled) {
                 View.Application.DoEnableElement(this);
             }
@@ -468,6 +480,29 @@ namespace UIForia.Elements {
             }
 
             return false;
+        }
+
+        internal UIElementTypeData GetTypeData() {
+            UIElementTypeData typeData = default;
+            Type elementType = GetType(); 
+            if (s_TypeDataMap.TryGetValue(elementType, out typeData)) {
+                return typeData;
+            }
+            else {
+                typeData.requiresUpdate = ReflectionUtil.IsOverride(elementType.GetMethod(nameof(OnUpdate)));
+               //typeData.attributes = elementType.GetCustomAttributes();
+                s_TypeDataMap[elementType] = typeData;
+                return typeData;
+            }
+        }
+
+        private static readonly Dictionary<Type, UIElementTypeData> s_TypeDataMap = new Dictionary<Type, UIElementTypeData>();
+
+        internal struct UIElementTypeData {
+
+            public bool requiresUpdate;
+           // public Attribute[] attributes;
+
         }
 
     }

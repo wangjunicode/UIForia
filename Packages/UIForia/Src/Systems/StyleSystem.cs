@@ -38,55 +38,20 @@ namespace UIForia.Systems {
         public StyleSystem() {
             this.m_ChangeSets = new IntMap<ChangeSet>();
         }
-
-        public void SetViewportRect(Rect viewport) { }
-
+        
         public void OnReset() { }
 
         public void OnElementCreated(UIElement element) {
 
-            Profiler.BeginSample("Style System [OnElementCreated]");
-            
-            if (element.parent != null) {
-                int count = StyleUtil.InheritedProperties.Count;
-                UIStyleSet parentStyle = element.parent.style;
-                LightList<StyleProperty> inheritedProperties = LightListPool<StyleProperty>.Get();
-                inheritedProperties.EnsureCapacity(count);
-                StyleProperty[] inheritedPropertiesArray = inheritedProperties.Array;
-
-                for (int i = 0; i < count; i++) {
-                    inheritedPropertiesArray[i] = parentStyle.GetComputedStyleProperty(StyleUtil.InheritedProperties[i]);
-                }
-
-                inheritedProperties.Count = count;
-                OnElementCreatedStep(element, inheritedProperties);
-                LightListPool<StyleProperty>.Release(ref inheritedProperties);
-            }
-            else {
-                
-                LightList<StyleProperty> inheritedProperties = LightListPool<StyleProperty>.Get();
-                inheritedProperties.EnsureCapacity(StyleUtil.InheritedProperties.Count);
-                StyleProperty[] inheritedPropertiesArray = inheritedProperties.Array;
-
-                for (int i = 0; i < inheritedProperties.Count; i++) {
-                    inheritedPropertiesArray[i] = DefaultStyleValues_Generated.GetPropertyValue(StyleUtil.InheritedProperties[i]);
-                }
-
-                OnElementCreatedStep(element, inheritedProperties);
-                LightListPool<StyleProperty>.Release(ref inheritedProperties);
-            }
-            
-            Profiler.EndSample();
-
-        }
-
-        private void OnElementCreatedStep(UIElement element, LightList<StyleProperty> parentProperties) {
-            UIStyleGroupContainer[] baseStyles = element.OriginTemplate.baseStyles;
-
             element.style.styleSystem = this;
+        }
+        
+        private void OnElementEnabledStep(UIElement element, LightList<StyleProperty> parentProperties) {
 
-            element.style.Initialize(baseStyles);
-
+            if (element.isDisabled) {
+                return;
+            }
+            
             int count = parentProperties.Count;
             StyleProperty[] parentPropertiesArray = parentProperties.Array;
 
@@ -108,7 +73,7 @@ namespace UIForia.Systems {
             inheritedProperties.Count = count;
 
             for (int i = 0; i < element.children.Count; i++) {
-                OnElementCreatedStep(element.children[i], inheritedProperties);
+                OnElementEnabledStep(element.children[i], inheritedProperties);
             }
 
             LightListPool<StyleProperty>.Release(ref inheritedProperties);
@@ -153,11 +118,46 @@ namespace UIForia.Systems {
 
         public void OnViewRemoved(UIView view) { }
 
-        public void OnElementEnabled(UIElement element) { }
+        public void OnElementEnabled(UIElement element) {
+            if (element.parent != null) {
+                int count = StyleUtil.InheritedProperties.Count;
+                UIStyleSet parentStyle = element.parent.style;
+                LightList<StyleProperty> inheritedProperties = LightListPool<StyleProperty>.Get();
+                inheritedProperties.EnsureCapacity(count);
+                StyleProperty[] inheritedPropertiesArray = inheritedProperties.Array;
 
-        public void OnElementDisabled(UIElement element) { }
+                for (int i = 0; i < count; i++) {
+                    inheritedPropertiesArray[i] = parentStyle.GetComputedStyleProperty(StyleUtil.InheritedProperties[i]);
+                }
 
-        public void OnElementDestroyed(UIElement element) { }
+                inheritedProperties.Count = count;
+                OnElementEnabledStep(element, inheritedProperties);
+                LightListPool<StyleProperty>.Release(ref inheritedProperties);
+            }
+            else {
+                
+                LightList<StyleProperty> inheritedProperties = LightListPool<StyleProperty>.Get();
+                inheritedProperties.EnsureCapacity(StyleUtil.InheritedProperties.Count);
+                StyleProperty[] inheritedPropertiesArray = inheritedProperties.Array;
+
+                for (int i = 0; i < inheritedProperties.Count; i++) {
+                    inheritedPropertiesArray[i] = DefaultStyleValues_Generated.GetPropertyValue(StyleUtil.InheritedProperties[i]);
+                }
+
+                OnElementEnabledStep(element, inheritedProperties);
+                LightListPool<StyleProperty>.Release(ref inheritedProperties);
+            }
+
+        }
+
+        public void OnElementDisabled(UIElement element) {
+            m_ChangeSets.Remove(element.id);
+        }
+
+        public void OnElementDestroyed(UIElement element) {
+            element.style.styleSystem = null;
+            m_ChangeSets.Remove(element.id);
+        }
 
         public void OnAttributeSet(UIElement element, string attributeName, string currentValue, string attributeValue) {
             element.style.UpdateApplicableAttributeRules(attributeName, attributeValue);
@@ -174,6 +174,9 @@ namespace UIForia.Systems {
         }
 
         public void SetStyleProperty(UIElement element, StyleProperty property) {
+            
+            if (element.isDisabled || !element.isReady) return;
+            
             AddToChangeSet(element, property);
 
             if (!StyleUtil.IsInherited(property.propertyId) || element.children == null || element.children.Count == 0) {
@@ -205,9 +208,9 @@ namespace UIForia.Systems {
             }
 
             while (s_ElementStack.Count > 0) {
-                UIElement descendent = s_ElementStack.Pop();
+                UIElement descendant = s_ElementStack.Pop();
 
-                if (!descendent.style.SetInheritedStyle(property)) {
+                if (!descendant.style.SetInheritedStyle(property)) {
                     continue;
                 }
 
@@ -216,14 +219,14 @@ namespace UIForia.Systems {
                 // do caching    
                 // }
 
-                AddToChangeSet(descendent, property);
+                AddToChangeSet(descendant, property);
 
-                if (descendent.children == null) {
+                if (descendant.children == null) {
                     continue;
                 }
 
-                for (int i = 0; i < descendent.children.Count; i++) {
-                    s_ElementStack.Push(descendent.children[i]);
+                for (int i = 0; i < descendant.children.Count; i++) {
+                    s_ElementStack.Push(descendant.children[i]);
                 }
             }
         }

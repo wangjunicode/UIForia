@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+using Vertigo;
 
 namespace UIForia.Util {
 
@@ -5,6 +8,7 @@ namespace UIForia.Util {
 
         public T[] array;
         public int size;
+        private bool isInPool;
 
         public T[] Array => array;
 
@@ -118,20 +122,131 @@ namespace UIForia.Util {
             System.Array.Clear(array, size - count, count);
             size -= count;
         }
+
+       
+
+        private void QuickSort(Comparison<T> comparison, int low, int high) {
+            while (true) {
+                if (low < high) {
+                    int partition = Partition(comparison, low, high);
+                    QuickSort(comparison, low, partition - 1);
+                    low = partition + 1;
+                    continue;
+                }
+
+                break;
+            }
+        }
+
+        private void QuickSort(IComparer<T> comparison, int low, int high) {
+            while (true) {
+                if (low < high) {
+                    int partition = Partition(comparison, low, high);
+                    QuickSort(comparison, low, partition - 1);
+                    low = partition + 1;
+                    continue;
+                }
+
+                break;
+            }
+        }
+        
+        private int Partition(Comparison<T> comparison, int low, int high) {
+            T temp;
+            T pivot = array[high];
+
+            int i = (low - 1);
+            for (int j = low; j <= high - 1; j++) {
+                if (comparison(array[j], pivot) <= 0) {
+                    i++;
+
+                    temp = array[i];
+                    array[i] = array[j];
+                    array[j] = temp;
+                }
+            }
+            temp = array[i + 1];
+            array[i + 1] = array[high];
+            array[high] = temp;
+
+            return i + 1;
+        }
+        
+        private int Partition(IComparer<T> comparison, int low, int high) {
+            T temp;
+            T pivot = array[high];
+
+            int i = (low - 1);
+            for (int j = low; j <= high - 1; j++) {
+                if (comparison.Compare(array[j], pivot) <= 0) {
+                    i++;
+
+                    temp = array[i];
+                    array[i] = array[j];
+                    array[j] = temp;
+                }
+            }
+            temp = array[i + 1];
+            array[i + 1] = array[high];
+            array[high] = temp;
+
+            return i + 1;
+        }
+
+        public void Sort(Comparison<T> comparison) {
+            if (size < 2) return;
+            QuickSort(comparison, 0, size - 1);
+        }
+
+        public void Sort(Comparison<T> comparison, int start, int end) {
+            if (size < 2) return;
+            if (start < 0) start = 0;
+            if (start >= size) start = size - 1;
+            if (end >= size) end = size - 1;
+            QuickSort(comparison, start, end);
+        }
+
+        public void Sort(IComparer<T> comparison, int start, int end) {
+            if (size < 2) return;
+            if (start < 0) start = 0;
+            if (start >= size) start = size - 1;
+            if (end >= size) end = size - 1;
+            QuickSort(comparison, start, end);
+        }
+
+        public void Sort(IComparer<T> comparison) {
+            if (size < 2) return;
+            QuickSort(comparison, 0, size - 1);
+        }
         
         private static readonly LightList<StructList<T>> s_Pool = new LightList<StructList<T>>();
 
         public static StructList<T> Get() {
-            if (s_Pool.Count > 0) {
-                return s_Pool.RemoveLast();
-            }
-
-            return new StructList<T>();
+            StructList<T> retn = s_Pool.Count > 0 ? s_Pool.RemoveLast() : new StructList<T>();
+            retn.isInPool = false;
+            return retn;
         }
+
 
         public static void Release(ref StructList<T> toPool) {
             toPool.Clear();
+            if (toPool.isInPool) return;
+            toPool.isInPool = true;
             s_Pool.Add(toPool);
+        }
+
+        public void Insert(int index, in T item) {
+            if (size + 1 >= array.Length) {
+                ArrayPool<T>.Resize(ref array, (size + 1) * 2);
+            }
+
+            size++;
+            if (index < 0 || index > array.Length) {
+                throw new IndexOutOfRangeException();
+            }
+
+            System.Array.Copy(array, index, array, index + 1, size - index);
+            array[index] = item;
         }
 
     }

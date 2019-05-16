@@ -223,8 +223,8 @@ SubShader {
 		}
 
 
-		fixed4 PixShader(pixel_t input) : SV_Target		{
-		    
+		fixed4 PixShader(pixel_t input) : SV_Target
+		{
 			float c = tex2D(_MainTex, input.atlas).a;
 		
 		#ifndef UNDERLAY_ON
@@ -255,7 +255,7 @@ SubShader {
 
 			float3 bump = UnpackNormal(tex2D(_BumpMap, input.textures.xy + float2(_FaceUVSpeedX, _FaceUVSpeedY) * _Time.y)).xyz;
 			bump *= lerp(_BumpFace, _BumpOutline, saturate(sd + outline * 0.5));
-			n = normalize(n - bump);
+			n = normalize(n- bump);
 
 			float3 light = normalize(float3(sin(_LightAngle), cos(_LightAngle), -1.0));
 
@@ -293,7 +293,7 @@ SubShader {
 			clip(faceColor.a - 0.001);
 		#endif
 
-  		    return faceColor * input.color.a;
+  		return faceColor * input.color.a;
 		}
 
 		ENDCG

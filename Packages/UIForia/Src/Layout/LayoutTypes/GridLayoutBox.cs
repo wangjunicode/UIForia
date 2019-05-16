@@ -21,8 +21,8 @@ namespace UIForia.Layout.LayoutTypes {
 
         }
 
-        private readonly LightList<GridTrack> m_RowTracks;
-        private readonly LightList<GridTrack> m_ColTracks;
+        private readonly StructList<GridTrack> m_RowTracks;
+        private readonly StructList<GridTrack> m_ColTracks;
         private readonly List<GridPlacement> m_Placements;
 
         private readonly HashSet<int> m_Occupied;
@@ -32,22 +32,38 @@ namespace UIForia.Layout.LayoutTypes {
 
         private bool m_IsPlacementDirty;
 
-        public GridLayoutBox(UIElement element) : base(element) {
+        public GridLayoutBox() {
             this.m_IsPlacementDirty = true;
             this.m_Widths = new LightList<GridItemSizes>(4);
             this.m_Heights = new LightList<GridItemSizes>(4);
-            this.m_RowTracks = new LightList<GridTrack>();
-            this.m_ColTracks = new LightList<GridTrack>();
+            this.m_RowTracks = new StructList<GridTrack>();
+            this.m_ColTracks = new StructList<GridTrack>();
             this.m_Occupied = new HashSet<int>();
             this.m_Placements = new List<GridPlacement>();
             this.m_IsPlacementDirty = true;
         }
 
-        internal LightList<GridTrack> GetRowTracks() {
+        public override void OnSpawn(UIElement element) {
+            base.OnSpawn(element);
+            this.m_IsPlacementDirty = true;
+        }
+
+        public override void OnRelease() {
+            base.OnRelease();
+            m_Widths.QuickClear();
+            m_Heights.QuickClear();
+            m_RowTracks.QuickClear();
+            m_ColTracks.QuickClear();
+            m_Occupied.Clear();
+            m_Placements.Clear();
+            m_IsPlacementDirty = true;
+        }
+
+        internal StructList<GridTrack> GetRowTracks() {
             return m_RowTracks;
         }
 
-        internal LightList<GridTrack> GetColTracks() {
+        internal StructList<GridTrack> GetColTracks() {
             return m_ColTracks;
         }
 
@@ -719,7 +735,7 @@ namespace UIForia.Layout.LayoutTypes {
             }
         }
 
-        private static void ClearGridTracks(LightList<GridTrack> tracks) {
+        private static void ClearGridTracks(StructList<GridTrack> tracks) {
             GridTrack[] array = tracks.Array;
             for (int i = 0; i < tracks.Count; i++) {
                 ListPool<int>.Release(ref array[i].spanningItems);
@@ -994,7 +1010,7 @@ namespace UIForia.Layout.LayoutTypes {
             }
         }
 
-        private static int CreateTracks(LightList<GridTrack> tracks, int count, GridTrackSize size) {
+        private static int CreateTracks(StructList<GridTrack> tracks, int count, GridTrackSize size) {
             int total = count - tracks.Count;
             for (int i = 0; i < total; i++) {
                 tracks.Add(new GridTrack(size));

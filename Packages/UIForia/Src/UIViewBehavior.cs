@@ -3,28 +3,10 @@ using SVGX;
 using UIForia.Elements;
 using UIForia.Rendering;
 using UnityEngine;
+using Vertigo;
 
 namespace UIForia {
 
-    public class Painter : ISVGXElementPainter {
-
-        public void Paint(UIElement element, ImmediateRenderContext ctx, SVGXMatrix matrix) {
-            ctx.SetFill(Color.red);
-            ctx.FillRect(400, 400, 200, 200);
-        }
-
-    }
-    
-    public class MyPainter : ISVGXElementPainter {
-
-        public void Paint(UIElement element, ImmediateRenderContext ctx, SVGXMatrix matrix) {
-            ctx.SetStroke(Color.magenta);
-            ctx.MoveTo(element.layoutResult.screenPosition.x + element.layoutResult.ActualWidth * 0.5f, 0);
-            ctx.VerticalLineTo(element.layoutResult.ActualHeight);
-            ctx.Stroke();
-        }
-    } 
-    
     public class UIViewBehavior : MonoBehaviour {
 
         public UIView view;
@@ -40,8 +22,6 @@ namespace UIForia {
 
             if (type == null) return;
             application = GameApplication.Create(applicationId, type, camera);
-            Application.RegisterCustomPainter("Painter0", new Painter());
-            Application.RegisterCustomPainter("Painter1", new MyPainter());
         }
 
         private void Update() {

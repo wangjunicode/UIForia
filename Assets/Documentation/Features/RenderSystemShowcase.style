@@ -1,6 +1,7 @@
 
 style container {
     PreferredSize = 1pca;
+    BackgroundColor = white;
 }
 
 style header {
@@ -37,4 +38,31 @@ style column-orange-hourglass {
     PreferredSize = 128px;
     BorderRadius = 50%;
     BackgroundColor = white;
+}
+
+style box {
+    PreferredSize = 100px;
+}
+
+style uniform-border-no-fill {
+    Border = 10px;
+    BorderColor = Red;
+}
+
+style mixed-border-no-fill {
+    Border = 10px, 15px, 20px, 25px;
+    BorderColor = Red;
+}
+
+style no-border-color-fill {
+    BackgroundColor = blue;
+}
+
+style no-border-texture-fill {
+    BackgroundImage = url("icon_2");
+}
+
+style no-border-texture-tint-fill {
+    BackgroundImage = url("icon_2");
+    BackgroundTint = rgba(255, 0, 0, 0.5);
 }

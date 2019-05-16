@@ -6,6 +6,22 @@ using UnityEngine.Rendering;
 
 namespace Vertigo {
 
+    public struct OffsetStrokeRect {
+
+        public float topSize;
+        public Color topColor;
+
+        public float bottomSize;
+        public Color bottomColor;
+
+        public float rightSize;
+        public Color rightColor;
+
+        public float leftSize;
+        public Color leftColor;
+
+    }
+    
     public class UIForiaRenderContext {
 
         private UIForiaMaterial activeShader;
@@ -29,7 +45,12 @@ namespace Vertigo {
         private static ushort s_ContextIdGen;
 
         private RenderState renderState;
+        private Vector3 position;
+        private Quaternion rotation;
+        private Vector3 scale;
 
+        private readonly LightList<MaterialPropertyBlock> materialPropertyBlockPool;
+        
         public UIForiaRenderContext(Material defaultMaterial = null) {
             this.contextId = s_ContextIdGen++;
             this.shaderMap = new Dictionary<string, ShaderPool>();
@@ -40,9 +61,13 @@ namespace Vertigo {
             this.transformList = new StructList<Matrix4x4>();
             this.meshPool = new VertigoMesh.MeshPool();
 
+            this.position = default;
+            this.rotation = Quaternion.identity;
+            this.scale = Vector3.one;
             this.renderCalls = new StructList<RenderCall>(); // list of draw calls + a texture to draw to
             this.pendingDrawCalls = new StructList<ShapeMeshData>(); // shapes we might draw 
             this.pendingBatches = new StructList<PendingBatch>(); // 
+            this.materialPropertyBlockPool = new LightList<MaterialPropertyBlock>();
             renderState.texCoordChannel = TextureCoordChannel.TextureCoord0;
             ResetUVState();
 
@@ -52,9 +77,23 @@ namespace Vertigo {
 
             this.activeShader = CloneMaterial(defaultMaterial);
 
-            transformList.Add(Matrix4x4.identity);
+            transformList.Add(Matrix4x4.TRS(position, rotation, scale));
         }
 
+        private MaterialPropertyBlock GetPropertyBlock() {
+            if (materialPropertyBlockPool.Count > 0) {
+                return materialPropertyBlockPool.RemoveLast();
+            }
+            else {
+                return new MaterialPropertyBlock();
+            }
+        }
+
+        private void ReleaseMaterialPropertyBlock(MaterialPropertyBlock block) {
+            block.Clear();
+            materialPropertyBlockPool.Add(block);
+        }
+        
         private UIForiaMaterial CloneMaterial(Material material) {
             string shaderName = material.shader.name;
             if (shaderMap.TryGetValue(shaderName, out ShaderPool pool)) {
@@ -88,9 +127,9 @@ namespace Vertigo {
         }
 
         public void Clear() {
+            transform = transformList[0];
             transformList.QuickClear();
             transformChanged = false;
-            transform = Matrix4x4.identity;
             transformList.Add(transform);
 
             for (int i = 0; i < materialsToRelease.Count; i++) {
@@ -109,7 +148,7 @@ namespace Vertigo {
             for (int i = 0; i < pendingBatches.size; i++) {
                 StructList<ShapeMeshData>.Release(ref pendingBatchArray[i].renderedShapes);
             }
-            
+
             geometryGenerator.Clear();
             materialsToRelease.QuickClear();
             pendingBatches.QuickClear();
@@ -117,6 +156,33 @@ namespace Vertigo {
             renderCalls.QuickClear();
             renderTextures.Clear();
             renderTexturesToRelease.Clear();
+        }
+
+        public void SetBaseTransform(Matrix4x4 matrix4X4) {
+            transformList[0] = matrix4X4;
+        }
+
+        public void SetTranslation(Vector3 position) {
+            transformChanged = true;
+            transform = Matrix4x4.TRS(position, rotation, scale);
+            transformList.Add(transform);
+        }
+
+        public void SetRotation(float angle) {
+            transformChanged = true;
+            rotation = Quaternion.Euler(0, 0, angle);
+            transform = Matrix4x4.TRS(position, rotation, scale);
+            transformList.Add(transform);
+        }
+
+        public void SetPosition(Vector3 position) {
+            this.position = position;
+            transform = Matrix4x4.TRS(position, rotation, scale);
+        }
+
+        public void SetPosition(Vector2 position) {
+            this.position = new Vector3(position.x, position.y, this.position.z);
+            transform = Matrix4x4.TRS(position, rotation, scale);
         }
 
         public void SetMaterial(Material material) {
@@ -135,8 +201,12 @@ namespace Vertigo {
             }
         }
 
-        public void SetFillColor(Color color) {
+        public void SetFillColor(in Color color) {
             renderState.fillColor = color;
+        }
+
+        public void SetStrokeColor(in Color color) {
+            renderState.strokeColor = color;
         }
 
         public void SetTexCoordChannel(TextureCoordChannel channel) {
@@ -145,8 +215,9 @@ namespace Vertigo {
 
         public void SetMainTexture(Texture texture) {
             FinalizeCurrentBatch();
-            activeShader.material.SetTexture(ShaderKey.MainTexture, texture);
-        }
+            activeShader.block.SetTexture(ShaderKey.MainTexture, texture);
+//            activeShader.material.SetTexture(ShaderKey.MainTexture, texture);
+        } 
 
         public void SetFloatProperty(int key, float value) {
             FinalizeCurrentBatch();
@@ -169,8 +240,50 @@ namespace Vertigo {
             // geometryGenerator.AddGeometry(geometryCache, shapeIndex);
         }
 
+        public void Draw(ShapeDataCache cache, RangeInt range) {
+            if (transformChanged) {
+                transformList.Add(transform);
+                transformChanged = false;
+            }
+            
+            // todo -- copy other cache data in & draw it
+
+//            geometryGenerator.CopyShapeRange(cache, range);
+//            
+//            for (int i = range.start; i < range.end; i++) {
+//                pendingDrawCalls.Add(new ShapeMeshData(shape, transformList.size - 1));
+//            }
+            
+        }
+
         public ShapeId FillRect(float x, float y, float width, float height) {
             GeometryShape shape = geometryGenerator.FillRect(x, y, width, height, renderState);
+
+            if (transformChanged) {
+                transformList.Add(transform);
+                transformChanged = false;
+            }
+
+            pendingDrawCalls.Add(new ShapeMeshData(shape, transformList.size - 1));
+
+            return new ShapeId(contextId, (ushort) (geometryGenerator.shapes.size - 1));
+        }
+        
+        public ShapeId StrokeRect(float x, float y, float width, float height) {
+            GeometryShape shape = geometryGenerator.StrokeRect(x, y, width, height, renderState);
+
+            if (transformChanged) {
+                transformList.Add(transform);
+                transformChanged = false;
+            }
+
+            pendingDrawCalls.Add(new ShapeMeshData(shape, transformList.size - 1));
+
+            return new ShapeId(contextId, (ushort) (geometryGenerator.shapes.size - 1));
+        }
+        
+        public ShapeId StrokeRectNonUniform(float x, float y, float width, float height, in OffsetStrokeRect offsetRect) {
+            GeometryShape shape = geometryGenerator.StrokeRectNonUniform(x, y, width, height, renderState, offsetRect);
 
             if (transformChanged) {
                 transformList.Add(transform);
@@ -255,6 +368,10 @@ namespace Vertigo {
             return targetTexture;
         }
 
+        public void Save() { }
+
+        public void Restore() { }
+
         private static readonly StructList<Vector3> s_PositionList = new StructList<Vector3>(64);
         private static readonly StructList<Vector3> s_NormalList = new StructList<Vector3>(64);
         private static readonly StructList<Color> s_ColorList = new StructList<Color>(64);
@@ -275,6 +392,7 @@ namespace Vertigo {
 
             VertigoMesh mesh = meshPool.GetDynamic();
 
+            int totalVertStart = shapeList[0].shape.vertexStart;
             if (transformVertices) {
                 for (int i = 0; i < shapeList.size; i++) {
                     ShapeMeshData meshData = shapeList[i];
@@ -301,11 +419,13 @@ namespace Vertigo {
                     s_TexCoordList3.AddRange(geometryGenerator.texCoordList3, vertexStart, vertexCount);
                     s_TriangleList.AddRange(geometryGenerator.triangleList, triangleStart, triangleCount);
 
-                    int[] tris = s_TriangleList.array;
-                    for (int j = idxStart; j < s_TriangleList.size; j++) {
-                        tris[j] -= vertexStart;
+                    // only do this if this is a new draw call, maybe for all calls in run?
+                    if (totalVertStart != 0) {
+                        int[] tris = s_TriangleList.array;
+                        for (int j = idxStart; j < s_TriangleList.size; j++) {
+                            tris[j] -= totalVertStart;
+                        }
                     }
-                    
                 }
             }
 
@@ -326,10 +446,12 @@ namespace Vertigo {
                     s_TexCoordList2.AddRange(geometryGenerator.texCoordList2, vertexStart, vertexCount);
                     s_TexCoordList3.AddRange(geometryGenerator.texCoordList3, vertexStart, vertexCount);
                     s_TriangleList.AddRange(geometryGenerator.triangleList, triangleStart, triangleCount);
-                    
-                    int[] tris = s_TriangleList.array;
-                    for (int j = idxStart; j < s_TriangleList.size; j++) {
-                        tris[j] -= vertexStart;
+
+                    if (totalVertStart != 0) {
+                        int[] tris = s_TriangleList.array;
+                        for (int j = idxStart; j < s_TriangleList.size; j++) {
+                            tris[j] -= totalVertStart;
+                        }
                     }
                 }
             }
@@ -413,6 +535,7 @@ namespace Vertigo {
                     // UpdateMaterialPropertyBlock(calls[j].state);
                     int passCount = material.passCount;
                     // todo -- only render specified passes
+
                     commandBuffer.DrawMesh(mesh, meshCalls[j].transform, material, 0, 0, null);
                     for (int k = 0; k < passCount; k++) { }
                 }
@@ -606,6 +729,10 @@ namespace Vertigo {
             for (int i = start; i < end; i++) {
                 positions[i] = vertices[idx++];
             }
+        }
+
+        public void SetStrokeWidth(float strokeWidth) {
+            renderState.strokeWidth = strokeWidth;
         }
 
     }

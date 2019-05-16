@@ -7,7 +7,7 @@ namespace UIForia.Systems {
 
     public interface IStyleSystem : ISystem {
 
-        event Action<UIElement, LightList<StyleProperty>> onStylePropertyChanged;
+        event Action<UIElement, StructList<StyleProperty>> onStylePropertyChanged;
 
         void SetStyleProperty(UIElement element, StyleProperty propertyValue);
         

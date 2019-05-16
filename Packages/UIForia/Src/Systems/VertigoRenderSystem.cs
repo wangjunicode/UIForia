@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using SVGX;
 using UIForia.Elements;
+using UIForia.Layout;
 using UIForia.Rendering;
 using UIForia.Systems;
 using UIForia.Text;
@@ -9,78 +11,102 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using Vertigo;
 
-namespace Packages.UIForia.Src.Systems {
+namespace Src.Systems {
+
+    [Flags]
+    public enum RenderMethod {
+
+        None = 0,
+        Text = 1 << 0,
+        Painter = 1 << 1,
+        SelfPainter = 1 << 2,
+
+        Border = 1 << 3,
+        BorderRadius = 1 << 4,
+        Fill = 1 << 5,
+        UniformBorder = 1 << 6,
+        UniformBorderRadius = 1 << 7,
+        Color = 1 << 8,
+        Texture = 1 << 9,
+        UniformBorderFill = Border | UniformBorder | Fill,
+        UniformBorderNoFill = Border | UniformBorder,
+        UniformBorderRadiusUniformBorderFill = Border | UniformBorder | BorderRadius | UniformBorderRadius | Fill,
+        UniformBorderRadiusUniformBorderNoFill,
+        MixedBorderFill,
+        NoBorderTextureFill = Fill | Texture,
+        NoBorderTextureColorFill = Fill | Texture | Color,
+        NoBorderColorFill = Color | Fill,
+        MixedBorderNoFill = Border,
+        NoBorderFilled
+
+    }
+
+    public struct RenderInfo {
+
+        public int elementId;
+        public Color32 backgroundColor;
+        public Color32 backgroundTint;
+        public Color32 textColor;
+        public Color32 borderColorTop;
+        public Color32 borderColorRight;
+        public Color32 borderColorBottom;
+        public Color32 borderColorLeft;
+        public float opacity;
+
+        // todo -- some / all of these can be packed 
+
+        public Rect uvRect;
+        public Vector2 uvTiling;
+        public Vector2 uvOffset;
+        public Vector2 backgroundScale;
+        public float backgroundRotation;
+        public Vector4 borderRadius;
+        public Vector4 borderSize;
+
+        // todo -- border style
+
+        public Color32 textOutlineColor;
+        public Color32 textGlowColor;
+        public Vector4 clipRect;
+        public Visibility visibility;
+        public ISVGXPaintable painter;
+        public ISVGXElementPainter selfPainter;
+        public RenderMethod renderMethod;
+        public int geometryId;
+        public Texture backgroundImage;
+        public VertigoMaterial material;
+        public bool isText;
+
+    }
+
 
     public class VertigoRenderSystem : IRenderSystem {
 
-        private VertigoContext ctx;
+        private UIForiaRenderContext ctx;
         private Camera camera;
         private ILayoutSystem layoutSystem;
         private CommandBuffer commandBuffer;
         private LightList<UIView> views;
-
-        // todo -- per view
+        private IStyleSystem styleSystem;
         private IntMap<RenderInfo> renderInfos;
+        private LightList<UIElement> elementsToRender;
 
-        public VertigoRenderSystem(Camera camera, ILayoutSystem layoutSystem) {
+        public VertigoRenderSystem(Camera camera, ILayoutSystem layoutSystem, IStyleSystem styleSystem) {
             this.camera = camera;
-            this.ctx = new VertigoContext();
+            this.ctx = new UIForiaRenderContext();
             this.layoutSystem = layoutSystem;
             this.views = new LightList<UIView>();
             this.commandBuffer = new CommandBuffer(); // todo -- per view
+            this.styleSystem = styleSystem;
+            this.styleSystem.onStylePropertyChanged += HandleStylePropertyChanged;
+            this.renderInfos = new IntMap<RenderInfo>();
+            this.elementsToRender = new LightList<UIElement>(0);
+            this.camera?.AddCommandBuffer(CameraEvent.AfterEverything, commandBuffer);
         }
 
-        public struct RenderInfo {
-
-            public int elementId;
-            public Color32 backgroundColor;
-            public Color32 backgroundTint;
-            public Color32 textColor;
-            public Color32 borderColorTop;
-            public Color32 borderColorRight;
-            public Color32 borderColorBottom;
-            public Color32 borderColorLeft;
-            public float opacity;
-
-            // todo -- some / all of these can be packed 
-
-            public Rect uvRect;
-            public Vector2 uvTiling;
-            public Vector2 uvOffset;
-            public Vector2 backgroundScale;
-            public float backgroundRotation;
-            public Vector4 borderRadius;
-            public Vector4 borderSize;
-
-            // todo -- border style
-
-            public Color32 textOutlineColor;
-            public Color32 textGlowColor;
-            public Vector4 clipRect;
-            public Visibility visibility;
-            public ISVGXPaintable painter;
-            public bool isSelfPainting;
-            public bool hasUniformBorder;
-            public bool requiresRendering;
-            public RenderMethod renderMethod;
-            public int geometryId;
-            public Texture backgroundImage;
-            public VertigoMaterial material;
-
-        }
-
-        public enum RenderMethod {
-
-            None,
-            Text,
-            Painter,
-            SelfPainter,
-            UniformBorder,
-            UniformBorderRadius,
-            MixedBorder,
-            MixedBorderRadius,
-            NoBorderFilled
-
+        private void HandleStylePropertyChanged(UIElement element, StructList<StyleProperty> propertyList) {
+            // todo -- only update changed things
+            UpdateElementStyles(element);
         }
 
         public event Action<ImmediateRenderContext> DrawDebugOverlay;
@@ -90,240 +116,184 @@ namespace Packages.UIForia.Src.Systems {
         public void OnUpdate() {
             ctx.Clear();
 
+            // todo -- per view
+            ctx.SetTranslation(new Vector3(-(Screen.width / 2), (Screen.height / 2), 0));
+            camera.orthographicSize = Screen.height * 0.5f;
+
             for (int i = 0; i < views.Count; i++) {
                 RenderView(views[i]);
             }
 
+            ctx.Render();
             ctx.Flush(camera, commandBuffer);
         }
 
-        private VertigoMaterial fillMaterial;
-        private GeometryCache geometryCache;
-
         private void RenderView(UIView view) {
-            UIElement[] visibleElements = view.visibleElements.Array;
-            int count = view.visibleElements.Count;
+            // todo -- figure out per view rendering, probably want per view render & layout systems & maybe input too 
+
+            layoutSystem.GetVisibleElements(elementsToRender);
+
+            UIElement[] visibleElements = elementsToRender.Array;
+            int count = elementsToRender.Count;
 
             if (count == 0) return;
-            
-            ctx.SetShader(ShaderSlot.FillSDF, "Vertigo/VertigoSDF");
-//            ctx.SetShader(ShaderSlot.FillPath, "Vertigo/VertigoDefault");
-//            ctx.SetShader(ShaderSlot.StrokePath, "Vertigo/VertigoStrokePath");
-//            ctx.fillMaterial.SetMainTexture();
-//            ctx.fillMaterial = fillMaterial;
-            
-            for (int i = 0; i < count; i++) {
+
+            for (int i = count - 1; i >= 0; i--) {
                 UIElement element = visibleElements[i];
-                renderInfos.TryGetValue(element.id, out RenderInfo renderInfo);
+
+                UpdateElementStyles(element);
+
+                if (!renderInfos.TryGetValue(element.id, out RenderInfo renderInfo)) {
+                    continue;
+                }
+
 
                 if (renderInfo.renderMethod == RenderMethod.None) {
                     continue;
                 }
 
-                // todo -- support using elements as masks and optionally also render the element
+                LayoutResult layoutResult = element.layoutResult;
 
-                float x = element.layoutResult.screenPosition.x;
-                float y = element.layoutResult.screenPosition.y;
-                float width = element.layoutResult.actualSize.width;
-                float height = element.layoutResult.actualSize.height;
-
-                // if must render
-                // material.SetTexture(currentTexture);
-
-                // batcher.SetTexture();
-                // if material is the same
-                // if material is same shader w/ different keywords
-                // if all keywords are additive -> a-ok
-                // if material
-
-                // ctx.GetSharedMaterial("MaterialName");
-                // material.SetStencilState(stencil);
-                // material.SetBlendState(blend);
-                // material.GetMaterialProperties(MaterialPropertyBlock block);
-                // material.GetMaterialInstance();
-                // material.SetTexture("texture", texture);
+                Vector2 position = layoutResult.screenPosition;
+                Size size = layoutResult.allocatedSize;
 
                 switch (renderInfo.renderMethod) {
-                    case RenderMethod.None:
-                        break;
-
-                    case RenderMethod.Text:
-                        TextInfo textInfo = ((UITextElement) element).textInfo;
-                        fillMaterial.SetTextureProperty(ShaderKey.FontAtlas, textInfo.spanList[0].textStyle.font.atlas);
-                        break;
-
                     case RenderMethod.Painter:
-                        ctx.SaveState();
-                        // renderInfo.painter.Paint(element, ctx, SVGXMatrix.identity);
-                        ctx.RestoreState();
+                        ctx.Save();
+//                        renderInfo.painter.Paint();
+                        ctx.Restore();
                         break;
 
-                    case RenderMethod.NoBorderFilled:
-                        
+                    case RenderMethod.SelfPainter:
+                        ctx.Save();
+//                        renderInfo.painter.Paint();
+                        ctx.Restore();
+                        break;
+
+                    case RenderMethod.NoBorderColorFill:
                         ctx.SetFillColor(renderInfo.backgroundColor);
-                        ctx.SetFillMaterial(fillMaterial);
-//                        RangeInt range = ctx.FillRect(x, y, width, height);
-//                        ctx.SetTextureCoord2(range, new Vector4(clipRect));
+                        ctx.FillRect(position.x, position.y, size.width, size.height);
                         break;
-
-                    // need new geometry when layout changes
-                    // need new geometry when values stored in geometry change
-
-                    case RenderMethod.UniformBorder:
-                        if (renderInfo.backgroundImage != null) {
-
-                            fillMaterial.SetTextureProperty(ShaderKey.MainTexture, renderInfo.backgroundImage);
-                            ctx.SetMainTexture(renderInfo.backgroundImage);
-                            ctx.SetFillColor(Color.red);
-                            ctx.EnableUVTilingOffset(renderInfo.uvTiling, renderInfo.uvOffset);
-                            ctx.SetColorSpace(ColorSpace.Gamma);
-                            //ctx.FillRect(x, y, width, height, TextureCoordChannel.TextureCoord0 | TextureCoordChannel.Color);
-                            // ctx.SetTexCoord2(new Vector4(1, 1, 1, 1)); // sets for last draw call only
-                            
-                            ctx.SetStrokeWidth(renderInfo.borderSize.x);
-                            ctx.StrokeRect(x, y, width, height);
-                            
-                            // VertigoMaterial.GetPooledMaterial("Vertigo/Default");
-
-                            ShapeGenerator shapeGenerator = new ShapeGenerator();
-                            GeometryGenerator geometryGenerator = new GeometryGenerator();
-
-                            geometryGenerator.SetFillColor(renderInfo.backgroundColor);
-                            //geometryGenerator.SetUVChannel(VertexChannel.TextureCoord0, renderInfo.uvRect, renderInfo.uvTiling, renderInfo.uvOffset);
-                            //int idx = geometryGenerator.FillRectSDF(geometryCache, x, y, width, height, TextureCoordChannel.TextureCoord0 | TextureCoordChannel.Color | TextureCoordChannel.Normal);
-                            
-                            geometryGenerator.Fill(shapeGenerator, new RangeInt(0, 1), ShapeMode.SDF, geometryCache);
-                            
-                            geometryGenerator.SetFillColor(Color.red);
-                            
-                            geometryGenerator.SetUVTiling(TextureCoordChannel.TextureCoord0, 1, 1);
-                            geometryGenerator.SetUVOffset(TextureCoordChannel.TextureCoord1, 1, 1);
-                         //   geometryGenerator.SetDefaultChannels(TextureCoordChannel.Color);
-                            
-                          //  geometryGenerator.FillRectSDF(geometryCache, x, y, width, height, TextureCoordChannel.Color | TextureCoordChannel.Normal | TextureCoordChannel.TextureCoord0);
-                            // how do i handle pooling materials
-                            // accept user materials
-                            // respect the moment they drew something
-                            // either ignore changes
-                            // or clone material 
-                            
-//                            if (renderInfo.hasBackgroundTransform) {
-//                                fillMaterial.EnableKeyword("BackgroundTransform");
-//                                fillMaterial.SetFloatProperty(ShaderKey.BackgroundRotation, renderInfo.backgroundRotation);
-//                                fillMaterial.SetFloatProperty(ShaderKey.BackgroundTiling, renderInfo.backgroundRotation);
-//                                fillMaterial.SetFloatProperty(ShaderKey.BackgroundOffset, renderInfo.backgroundRotation);
-                            // tiling & offset is a vector4, can probably do this cpu side when we need to for standard shapes (ie rects)
-//                            }
-
-
-                            // if shader is the same
-                            ctx.Draw(geometryCache, fillMaterial);
-
-//                            ctx.GetMaterial(unitymaterial | materialName | shader);
-//                            ctx.GetSharedMaterial(unitymaterial | materialName | shader, keyword[]); //looks in pool for given material, creates if not there, mark shared
-//                            // shared materials are not cloned when passed into draw methods
-//                            ctx.GetMaterialInstance(unitymaterial | materialName | shader); // instance materials are cloned when passed to draw methods
-//                            
-//                            fillMaterial.SetStencil(1, 0, 1, CompareFunction.Always);
-//                            fillMaterial.EnableKeyword(keyword);
-//                            fillMaterial.SetMainTexture(null);
-//
-//                            ctx.Draw(geometryCache, 0, fillMaterial);
-//                            ctx.Draw(geometryCache, 0, shineMaterial);
-//
-//                            if (material.isShared) {
-////                                use material
-//                            }
-//                            
-//                            fillMaterial.Reset();
-//                            fillMaterial.SetShader("shaderName");
-//                            fillMaterial.EnableKeyword("");
-//                            fillMaterial.EnableOptionalKeyword("");
-//                            fillMaterial.SetMainTexture(null);
-//
-//                            ctx.SetMaterial(material);
-//                            ctx.SetStrokeMaterial(material);
-//                            fillMaterial.SetMainTexture(null);
-//
-//                           // geometryGenerator.ComputeTextureCoord0(new Vector2(), new Vector2());
-//                            
-//                            ctx.Draw(cache, idx, fillMaterial);
-//                            
-//                           // cache.Clear();
-//                            
-//                            ctx.SetShader();
-//                            ctx.EnableKeyword();
-//                            ctx.SetKeywords();
-//                            ctx.SetMainTexture();
-//                            ctx.SetFloatProperty();
-//
-//                            ctx.ClearMaterial();
-
-                            ctx.FillRect(100, 100, 200, 200);
-
-                            //ctx.SetUVRect();
-//                            ctx.EnableUVTiling();
-//                            ctx.DisableUVTiling();
-
-                            geometryCache.GetTextureCoord2();
-                        }
-
-                        ctx.FillRect(x, y, width, height, fillMaterial);
-                        ctx.SetStrokeWidth(renderInfo.borderSize.x);
-                        ctx.StrokeRect(x, y, width, height);
+                    case RenderMethod.UniformBorderNoFill:
+                        ctx.SetStrokeColor(renderInfo.borderColorTop);
+                        ctx.SetStrokeWidth(layoutResult.border.top);
+                        ctx.StrokeRect(position.x, position.y, size.width, size.height);
                         break;
-
-                    case RenderMethod.UniformBorderRadius:
-                        ctx.FillRoundedRect(0, 0, 100, 100, 0, 0, 0, 0);
+                    case RenderMethod.MixedBorderNoFill:
+                        // todo -- take border color properly
+                        ctx.SetStrokeColor(renderInfo.borderColorTop);
+                        ctx.StrokeRectNonUniform(position.x, position.y, size.width, size.height, new OffsetStrokeRect() {
+                            topSize = layoutResult.border.top,
+                            rightSize = layoutResult.border.right,
+                            bottomSize = layoutResult.border.bottom,
+                            leftSize = layoutResult.border.left,
+                        });
                         break;
-
-                    case RenderMethod.MixedBorder:
+                    case RenderMethod.NoBorderTextureFill:
+                        ctx.SetMainTexture(renderInfo.backgroundImage);
+                        ShapeId shapeId = ctx.FillRect(position.x, position.y, size.width, size.height);
+                        Vector4 renderData = new Vector4((int) ColorType.TextureOnly, 0, 0, 0);
+                        float packedBorderRadius = 0;
+                        float strokeWidth = 0;
+                        ctx.SetTexCoord1(shapeId, new Vector4(packedBorderRadius, (int) ShapeType.Rect, 0, 0));
+                        ctx.SetTexCoord2(shapeId, new Vector4((int) ColorType.TextureOnly, 0, 0, 0));
                         break;
-
-                    case RenderMethod.MixedBorderRadius:
-                        ctx.FillRoundedRect(0, 0, 100, 100, 0, 0, 0, 0);
-                        break;
-
-                    default:
-                        throw new ArgumentOutOfRangeException();
                 }
             }
         }
 
-        private bool CanUseSharedMaterial(in RenderInfo info) {
-            // if info.material != default return false;
+        public enum ColorType {
 
-            if (info.renderMethod == RenderMethod.Painter) {
-                return false;
-            }
+            TextureOnly = 1,
+            TextureTint = 2,
+            TextureColor = 3,
+            TextureColorTint = 4
 
-            if (info.backgroundImage != null) {
-                if (info.backgroundRotation != 0 || info.backgroundScale.x != 1 || info.backgroundScale.y != 1) {
-                    return false;
-                }
-            }
+        }
 
-            if (info.uvOffset.x != 0 || info.uvOffset.y != 0) {
-                return false;
-            }
+        struct RenderData {
 
-            return true;
+            public ColorType colorType;
+
         }
 
         public void OnDestroy() { }
 
         public void OnViewAdded(UIView view) {
+            views.Add(view);
             // todo -- each view can take its own camera
             // each view has its own camera origin
             // each view can attach to a different camera event
         }
 
-        public void OnViewRemoved(UIView view) { }
+        public void OnViewRemoved(UIView view) {
+            views.Remove(view);
+        }
 
-        public void OnElementEnabled(UIElement element) {
+        private static RenderMethod ComputeRenderType(UIElement element, in RenderInfo info) {
+            LayoutResult layoutResult = element.layoutResult;
+
+            if (info.visibility == Visibility.Hidden || info.opacity <= 0) {
+                return RenderMethod.None;
+            }
+
+            if (info.painter != null) {
+                return RenderMethod.Painter;
+            }
+            else if (info.selfPainter != null) {
+                return RenderMethod.SelfPainter;
+            }
+            else if (info.isText) {
+                return RenderMethod.Text;
+            }
+
+            Texture bg = info.backgroundImage;
+            Color32 bgColor = info.backgroundColor;
+
+            bool hasBorderRadius = !layoutResult.borderRadius.IsZero;
+            bool hasBorderColor = info.borderColorTop.a + info.borderColorBottom.a + info.borderColorRight.a + info.borderColorLeft.a == 0;
+            bool hasBorder = !layoutResult.border.IsZero;
+
+//            if ((bg == null && bgColor.a == 0 && (!hasBorderRadius && !hasBorderColor))) {
+//                return RenderMethod.None;
+//            }
+
+            RenderMethod retn = 0;
+
+            if (bgColor.a > 0) {
+                retn |= RenderMethod.Color;
+            }
+
+            if (bg != null) {
+                retn |= RenderMethod.Texture;
+            }
+
+            if (bg != null || bgColor.a != 0) {
+                retn |= RenderMethod.Fill;
+            }
+
+            if (hasBorderRadius) {
+                retn |= RenderMethod.BorderRadius;
+                if (layoutResult.borderRadius.IsUniform) {
+                    retn |= RenderMethod.UniformBorderRadius;
+                }
+            }
+
+            if (hasBorder) {
+                retn |= RenderMethod.Border;
+                if (layoutResult.border.IsUniform) {
+                    retn |= RenderMethod.UniformBorder;
+                }
+            }
+
+            return retn;
+        }
+
+        private void UpdateElementStyles(UIElement element) {
             RenderInfo renderInfo = new RenderInfo();
             UIStyleSet style = element.style;
             renderInfo.backgroundColor = style.BackgroundColor;
+            renderInfo.backgroundImage = style.BackgroundImage;
             renderInfo.backgroundRotation = style.BackgroundImageRotation.value; // todo -- resolve this to a float
             renderInfo.opacity = style.Opacity;
             // todo resolve to float
@@ -342,48 +312,52 @@ namespace Packages.UIForia.Src.Systems {
             renderInfo.borderColorRight = Color.black;
             renderInfo.borderColorBottom = Color.black;
             renderInfo.borderColorLeft = Color.black;
-            renderInfo.requiresRendering = true;
             renderInfos.geometryId = -1;
+
+            renderInfo.renderMethod = ComputeRenderType(element, renderInfo);
+
             renderInfos[element.id] = renderInfo;
         }
 
-        public readonly Action PaintElement;
+        public void OnElementEnabled(UIElement element) {
+            LightStack<UIElement> stack = LightStack<UIElement>.Get();
+            stack.Push(element);
+            while (stack.Count > 0) {
+                UIElement current = stack.PopUnchecked();
 
-        public void OnElementDisabled(UIElement element) { }
+                if (current.isDisabled) {
+                    continue;
+                }
 
-        public void OnElementDestroyed(UIElement element) { }
+                // todo -- only if render-relevant style
+                UpdateElementStyles(current);
+
+                int childCount = current.children.Count;
+                UIElement[] children = current.children.Array;
+                for (int i = 0; i < childCount; i++) {
+                    stack.Push(children[i]);
+                }
+            }
+
+            LightStack<UIElement>.Release(ref stack);
+        }
+
+        public void OnElementDisabled(UIElement element) {
+            renderInfos.Remove(element.id);
+        }
+
+        public void OnElementDestroyed(UIElement element) {
+            renderInfos.Remove(element.id);
+        }
 
         public void OnAttributeSet(UIElement element, string attributeName, string currentValue, string previousValue) { }
 
         public void OnElementCreated(UIElement element) { }
 
-        private void OnStylePropertiesWillChange() { }
-
-        private VertigoMaterial sharedMaterial;
-
-        private void OnStylePropertiesDidChanged(UIElement element) {
-            RenderInfo info = renderInfos[element.id];
-
-            // recompute render info here
-            bool canUseDefaultShared = CanUseSharedMaterial(info);
-            if (!canUseDefaultShared) {
-                // see if we can use a non shared one w/o creating a new one
-                // if not get new material from the pool & set properties on it as needed
-            }
-
-            if (info.material != sharedMaterial && CanUseSharedMaterial(info)) {
-                // materialPool.Release(info.material);
-                info.material = sharedMaterial;
-            }
-        }
-
-        private void OnStylePropertyChanged() {
-            // recompute render type 
-            // maybe update geometry
-        }
-
         public void SetCamera(Camera camera) {
+            this.camera?.RemoveCommandBuffer(CameraEvent.AfterEverything, commandBuffer);
             this.camera = camera; // todo -- should be handled by the view
+            this.camera?.AddCommandBuffer(CameraEvent.AfterEverything, commandBuffer);
         }
 
     }

@@ -1042,7 +1042,7 @@ namespace UIForia.Layout.LayoutTypes {
             m_IsPlacementDirty = true;
         }
 
-        public override void OnStylePropertyChanged(LightList<StyleProperty> properties) {
+        public override void OnStylePropertyChanged(StructList<StyleProperty> properties) {
             for (int i = 0; i < properties.Count; i++) {
                 StyleProperty property = properties[i];
                 switch (property.propertyId) {
@@ -1075,7 +1075,7 @@ namespace UIForia.Layout.LayoutTypes {
             }
         }
 
-        public override void OnChildStylePropertyChanged(LayoutBox child, LightList<StyleProperty> properties) {
+        public override void OnChildStylePropertyChanged(LayoutBox child, StructList<StyleProperty> properties) {
             // int idx = GetPlacementIndexForId(child.element.id); // what was this intended for?
             for (int i = 0; i < properties.Count; i++) {
                 StyleProperty property = properties[i];

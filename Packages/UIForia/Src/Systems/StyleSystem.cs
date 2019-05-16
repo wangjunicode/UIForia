@@ -26,7 +26,7 @@ namespace UIForia.Systems {
 
     public class StyleSystem : IStyleSystem {
 
-        public event Action<UIElement, LightList<StyleProperty>> onStylePropertyChanged;
+        public event Action<UIElement, StructList<StyleProperty>> onStylePropertyChanged;
 
         private static readonly Stack<UIElement> s_ElementStack = new Stack<UIElement>();
 
@@ -43,7 +43,7 @@ namespace UIForia.Systems {
             element.style.styleSystem = this;
         }
         
-        private void OnElementEnabledStep(UIElement element, LightList<StyleProperty> parentProperties) {
+        private void OnElementEnabledStep(UIElement element, StructList<StyleProperty> parentProperties) {
 
             if (element.isDisabled) {
                 return;
@@ -64,7 +64,7 @@ namespace UIForia.Systems {
                 element.style.SetInheritedStyle(parentPropertiesArray[i]);
             }
             
-            LightList<StyleProperty> inheritedProperties = LightListPool<StyleProperty>.Get();
+            StructList<StyleProperty> inheritedProperties = StructList<StyleProperty>.Get();
             inheritedProperties.EnsureCapacity(count);
             StyleProperty[] inheritedPropertiesArray = inheritedProperties.Array;
 
@@ -77,7 +77,7 @@ namespace UIForia.Systems {
                 OnElementEnabledStep(element.children[i], inheritedProperties);
             }
 
-            LightListPool<StyleProperty>.Release(ref inheritedProperties);
+            StructList<StyleProperty>.Release(ref inheritedProperties);
         }
 
         public void OnUpdate() {
@@ -106,7 +106,7 @@ namespace UIForia.Systems {
                     didChangeHandler.OnStylePropertiesDidChange();
                 }
 
-                LightListPool<StyleProperty>.Release(ref changeSet.changes);
+                StructList<StyleProperty>.Release(ref changeSet.changes);
                 changeSet.element = null;
             });
 
@@ -123,7 +123,7 @@ namespace UIForia.Systems {
             if (element.parent != null) {
                 int count = StyleUtil.InheritedProperties.Count;
                 UIStyleSet parentStyle = element.parent.style;
-                LightList<StyleProperty> inheritedProperties = LightListPool<StyleProperty>.Get();
+                StructList<StyleProperty> inheritedProperties = StructList<StyleProperty>.Get();
                 inheritedProperties.EnsureCapacity(count);
                 StyleProperty[] inheritedPropertiesArray = inheritedProperties.Array;
 
@@ -133,11 +133,11 @@ namespace UIForia.Systems {
 
                 inheritedProperties.Count = count;
                 OnElementEnabledStep(element, inheritedProperties);
-                LightListPool<StyleProperty>.Release(ref inheritedProperties);
+                StructList<StyleProperty>.Release(ref inheritedProperties);
             }
             else {
                 
-                LightList<StyleProperty> inheritedProperties = LightListPool<StyleProperty>.Get();
+                StructList<StyleProperty> inheritedProperties = StructList<StyleProperty>.Get();
                 inheritedProperties.EnsureCapacity(StyleUtil.InheritedProperties.Count);
                 StyleProperty[] inheritedPropertiesArray = inheritedProperties.Array;
 
@@ -146,7 +146,7 @@ namespace UIForia.Systems {
                 }
 
                 OnElementEnabledStep(element, inheritedProperties);
-                LightListPool<StyleProperty>.Release(ref inheritedProperties);
+                StructList<StyleProperty>.Release(ref inheritedProperties);
             }
 
         }
@@ -167,7 +167,7 @@ namespace UIForia.Systems {
         private void AddToChangeSet(UIElement element, StyleProperty property) {
             ChangeSet changeSet;
             if (!m_ChangeSets.TryGetValue(element.id, out changeSet)) {
-                changeSet = new ChangeSet(element, LightListPool<StyleProperty>.Get());
+                changeSet = new ChangeSet(element, StructList<StyleProperty>.Get());
                 m_ChangeSets[element.id] = changeSet;
             }
 
@@ -235,9 +235,9 @@ namespace UIForia.Systems {
         private struct ChangeSet {
 
             public UIElement element;
-            public LightList<StyleProperty> changes;
+            public StructList<StyleProperty> changes;
 
-            public ChangeSet(UIElement element, LightList<StyleProperty> changes) {
+            public ChangeSet(UIElement element, StructList<StyleProperty> changes) {
                 this.element = element;
                 this.changes = changes;
             }

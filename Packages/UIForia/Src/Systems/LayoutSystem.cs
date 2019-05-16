@@ -801,7 +801,7 @@ namespace UIForia.Systems {
 //            m_Views.Remove(view);
         }
 
-        private void HandleStylePropertyChanged(UIElement element, LightList<StyleProperty> properties) {
+        private void HandleStylePropertyChanged(UIElement element, StructList<StyleProperty> properties) {
             // todo early-out if we haven't had a layout pass for the element yet
             LayoutBox box = m_LayoutBoxMap.GetOrDefault(element.id);
             if (box == null) {
@@ -1118,19 +1118,6 @@ namespace UIForia.Systems {
                 UpdateChildren(parentBox);
                 parentBox.UpdateChildren();
             }
-        }
-
-        private void UpdateChildrenRecursive(UIElement element) {
-            if (element.children == null) return;
-
-            LayoutBox box = m_LayoutBoxMap.GetOrDefault(element.id);
-
-            for (int i = 0; i < element.children.Count; i++) {
-                UpdateChildrenRecursive(element.children[i]);
-            }
-
-            UpdateChildren(box);
-            box.UpdateChildren();
         }
 
         public void OnElementDestroyed(UIElement element) {

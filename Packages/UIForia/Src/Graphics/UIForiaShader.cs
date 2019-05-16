@@ -6,10 +6,12 @@ namespace Vertigo {
     internal struct UIForiaMaterial {
 
         public Material material;
+        public MaterialPropertyBlock block;
         public LightList<Material> pool;
 
-        public UIForiaMaterial(Material material, LightList<Material> pool) {
+        public UIForiaMaterial(Material material, MaterialPropertyBlock block, LightList<Material> pool) {
             this.material = material;
+            this.block = block;
             this.pool = pool;
         }
 

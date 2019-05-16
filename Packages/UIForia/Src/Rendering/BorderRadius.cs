@@ -18,7 +18,7 @@ namespace UIForia.Rendering {
             this.bottomRight = bottomRight;
             this.bottomLeft = bottomLeft;
         }
-        
+
         [DebuggerStepThrough]
         public static implicit operator Vector4(ResolvedBorderRadius radius) {
             return new Vector4(
@@ -28,6 +28,12 @@ namespace UIForia.Rendering {
                 FloatUtil.IsDefined(radius.bottomLeft) ? radius.bottomLeft : 0
             );
         }
+
+        public bool IsUniform {
+            get { return topLeft == topRight && topLeft == bottomLeft && topLeft == bottomRight; }
+        }
+
+        public bool IsZero => topLeft + topRight + bottomLeft + bottomRight == 0;
 
     }
 

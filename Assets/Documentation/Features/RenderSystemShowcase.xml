@@ -3,31 +3,37 @@
     <Style path="Documentation/Features/RenderSystemShowcase.style"/>
         
     <Contents style="container">
+<!--        <Group style="box mixed-border-no-fill"/>-->
+<!--        <Group style="box uniform-border-no-fill"/>-->
+<!--        <Group style="box no-border-color-fill"/>-->
+        <Group style="box no-border-texture-fill"/>
+<!--        <Group style="box no-border-texture-tint-fill"/>-->
+<!--        <Group style="box c"></Group>-->
         
-        <Group style="header">
-            
-            <Group style="column-navy">
-                This is UIForia
-                <Group style="crossed-lines-header">
-                    <Div style="crossed-line-0"/>
-                    <Div style="crossed-line-1"/>
-                    <Div style="crossed-line-2"/>
-                </Group>
-            </Group>
+<!--        <Group style="header">-->
+<!--            -->
+<!--            <Group style="column-navy">-->
+<!--                This is UIForia-->
+<!--                <Group style="crossed-lines-header">-->
+<!--                    <Div style="crossed-line-0"/>-->
+<!--                    <Div style="crossed-line-1"/>-->
+<!--                    <Div style="crossed-line-2"/>-->
+<!--                </Group>-->
+<!--            </Group>-->
 
-            <Group style="column-orange-hourglass">
-                <Group style="crossed-lines-header"/>
-            </Group>
+<!--            <Group style="column-orange-hourglass">-->
+<!--                <Group style="crossed-lines-header"/>-->
+<!--            </Group>-->
 
-            <Group style="column-blue-circles">
-                <Group style="crossed-lines-header"/>
-            </Group>
+<!--            <Group style="column-blue-circles">-->
+<!--                <Group style="crossed-lines-header"/>-->
+<!--            </Group>-->
 
-            <Group style="column-orange-rings">
-                <Group style="crossed-lines-header"/>
-            </Group>
-            
-        </Group>
+<!--            <Group style="column-orange-rings">-->
+<!--                <Group style="crossed-lines-header"/>-->
+<!--            </Group>-->
+<!--            -->
+<!--        </Group>-->
         
     </Contents>
     

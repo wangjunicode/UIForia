@@ -19,6 +19,11 @@ namespace UIForia.Util {
         public float Horizontal => left + right;
 
         public float Vertical => top + bottom;
+        public bool IsZero => left + right + top + bottom == 0;
+
+        public bool IsUniform {
+            get { return top == right && top == left && top == bottom; }
+        }
 
         public static implicit operator Vector4(OffsetRect rect) {
             return new Vector4(rect.top, rect.right, rect.bottom, rect.left);

@@ -72,7 +72,7 @@ namespace UIForia.Layout.LayoutTypes {
             }
         }
 
-        public override void OnStylePropertyChanged(LightList<StyleProperty> properties) {
+        public override void OnStylePropertyChanged(StructList<StyleProperty> properties) {
             for (var index = 0; index < properties.Count; index++) {
                 StyleProperty property = properties[index];
                 switch (property.propertyId) {
@@ -96,7 +96,7 @@ namespace UIForia.Layout.LayoutTypes {
             }
         }
 
-        public override void OnChildStylePropertyChanged(LayoutBox child, LightList<StyleProperty> properties) {
+        public override void OnChildStylePropertyChanged(LayoutBox child, StructList<StyleProperty> properties) {
             for (var index = 0; index < properties.Count; index++) {
                 StyleProperty property = properties[index];
                 switch (property.propertyId) {

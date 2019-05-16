@@ -55,7 +55,6 @@ namespace Vertigo {
                 else {
                     retn = new VertigoMesh(this, true);
                 }
-
                 retn.isActive = true;
                 return retn;
             }

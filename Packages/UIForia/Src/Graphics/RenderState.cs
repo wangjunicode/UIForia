@@ -6,6 +6,7 @@ namespace Vertigo {
 
         public Color32 fillColor;
         public Color32 strokeColor;
+        public float strokeWidth;
         public Rect uvRect;
         public Vector2 uvTiling;
         public Vector2 uvOffset;

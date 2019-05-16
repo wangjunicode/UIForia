@@ -32,7 +32,7 @@ namespace UIForia.Layout.LayoutTypes {
             actualHeight = size.height + PaddingBottom + BorderBottom;
         }
 
-        public override void OnStylePropertyChanged(LightList<StyleProperty> property) {
+        public override void OnStylePropertyChanged(StructList<StyleProperty> property) {
             base.OnStylePropertyChanged(property);
             for (int i = 0; i < property.Count; i++) {
                 if (property[i].propertyId == StylePropertyId.TextFontSize) {

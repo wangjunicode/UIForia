@@ -381,9 +381,9 @@ namespace UIForia.Layout.LayoutTypes {
         }
 
 
-        public virtual void OnStylePropertyChanged(LightList<StyleProperty> property) { }
+        public virtual void OnStylePropertyChanged(StructList<StyleProperty> property) { }
 
-        public virtual void OnChildStylePropertyChanged(LayoutBox child, LightList<StyleProperty> property) { }
+        public virtual void OnChildStylePropertyChanged(LayoutBox child, StructList<StyleProperty> property) { }
 
         protected static int FindLayoutSiblingIndex(UIElement element) {
             // if parent is not in layout

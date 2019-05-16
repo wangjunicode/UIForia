@@ -103,17 +103,24 @@
                 return o;
             }
             
+            #define TextureMode_TextureOnly 1
+            #define TextureMode_TextureTint 2
+            #define TextureMode_TextureColor 3
+            #define TextureMode_TextureColorTint 4
+            
             fixed4 frag (v2f i) : SV_Target {
                 SDFData sdfData = UnpackSDFData(i.texCoord1, i.sdfCoord);
                 fixed4 mainColor = SDFColor(sdfData, i.color);
                 fixed4 textureColor = tex2D(_MainTex, i.texCoord0.xy);
-                
+                textureColor.rgb *= textureColor.a;
                 fixed4 bgColor = mainColor;
+                
+                fixed4 outputColor;
+                
                 // clip(textureColor.a - 0.01);
                 //fixed maskAlpha = saturate(tex2D(_MaskTexture, i.texCoord0.xy).a / _MaskSoftness);
                 //maskAlpha = lerp(1 - maskAlpha, maskAlpha, _InvertMask);
                // mainColor.a *= maskAlpha;
-                textureColor.rgb *= textureColor.a;
                 return textureColor;// * fixed4(bgColor.rgb, 1) * 2; 
 //                return lerp(textureColor, bgColor, 1 - textureColor.a);
             }

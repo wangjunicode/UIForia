@@ -87,7 +87,7 @@ namespace UIForia.Layout.LayoutTypes {
             }
         }
 
-        public override void OnStylePropertyChanged(LightList<StyleProperty> properties) {
+        public override void OnStylePropertyChanged(StructList<StyleProperty> properties) {
             for (int i = 0; i < properties.Count; i++) {
                 StyleProperty property = properties[i];
 

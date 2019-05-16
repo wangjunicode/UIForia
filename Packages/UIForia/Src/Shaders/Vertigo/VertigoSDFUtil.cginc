@@ -146,6 +146,21 @@ SDFData UnpackSDFData(float4 packedData, float4 coords) {
     
     return retn;
 }
+          
+fixed4 SDFRectColor(SDFData sdfData, fixed4 color) {
+    float halfStrokeWidth = sdfData.strokeWidth * 0.5;
+    float minSize = min(sdfData.size.x, sdfData.size.y);
+    float2 halfShapeSize = (sdfData.size * 0.5) - halfStrokeWidth;
+    float radius = clamp(sdfData.size * sdfData.radius, 0, minSize);
+    float2 center = (sdfData.uv.xy - 0.5) * sdfData.size;   
+   
+    float fDist = RectSDF(center, halfShapeSize, radius - halfStrokeWidth);
+    float s = lerp(0, -1, radius / minSize);
+    float e = lerp(1, 0, radius / minSize);
+    float fBlendAmount = smoothstep(s, e, fDist);
+    
+    return lerp(color, fixed4(color.rgb, 0), fBlendAmount);
+}
             
 fixed4 SDFColor(SDFData sdfData, fixed4 color) {
     float fDist = 0;
@@ -159,6 +174,7 @@ fixed4 SDFColor(SDFData sdfData, fixed4 color) {
     float2 center = (sdfData.uv.xy - 0.5) * size;   
     float fBlendAmount = 0;
 
+    // UIForia will only every use Rect, painters might use others
     if((sdfData.shapeType & ShapeType_RectLike) != 0) {
         fDist = RectSDF(center, halfShapeSize, radius - halfStrokeWidth);
         float s = lerp(0, -1, radius / minSize);

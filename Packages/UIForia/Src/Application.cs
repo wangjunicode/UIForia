@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Src.Systems;
 using UIForia.Animation;
 using UIForia.AttributeProcessors;
 using UIForia.Bindings;
@@ -118,7 +119,8 @@ namespace UIForia {
             m_BindingSystem = new BindingSystem();
             m_LayoutSystem = new LayoutSystem(m_StyleSystem);
             m_InputSystem = new GameInputSystem(m_LayoutSystem);
-            m_RenderSystem = new SVGXRenderSystem(null, m_LayoutSystem);
+            m_RenderSystem = new VertigoRenderSystem(Camera.current, m_LayoutSystem, m_StyleSystem); 
+//            m_RenderSystem = new SVGXRenderSystem(null, m_LayoutSystem);
             m_RoutingSystem = new RoutingSystem();
             m_AnimationSystem = new AnimationSystem();
 

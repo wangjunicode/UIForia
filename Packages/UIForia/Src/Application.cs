@@ -593,6 +593,11 @@ namespace UIForia {
                 }
 
                 child.flags |= UIElementFlags.HasBeenEnabled;
+                
+                foreach (ISystem system in m_Systems) {
+                    system.OnElementEnabled(element);
+                }
+                
                 child.OnEnable();
 
                 if (child.isEnabled) {
@@ -619,9 +624,7 @@ namespace UIForia {
             }
 
             if (element.isEnabled) {
-                foreach (ISystem system in m_Systems) {
-                    system.OnElementEnabled(element);
-                }
+              
 
                 element.View.ElementHierarchyEnabled(element);
                 onElementEnabled?.Invoke(element);

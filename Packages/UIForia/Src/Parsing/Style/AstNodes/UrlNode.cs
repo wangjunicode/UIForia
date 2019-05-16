@@ -6,9 +6,10 @@ namespace UIForia.Parsing.Style.AstNodes {
         
         internal static readonly ObjectPool<UrlNode> s_UrlNodePool = new ObjectPool<UrlNode>();
 
-        internal static UrlNode UrlNode(StyleASTNode url) {
+        internal static UrlNode UrlNode(StyleASTNode url, StyleASTNode spriteName) {
             UrlNode retn = s_UrlNodePool.Get();
             retn.url = url;
+            retn.spriteName = spriteName;
             return retn;
         }
     }
@@ -16,6 +17,8 @@ namespace UIForia.Parsing.Style.AstNodes {
     public class UrlNode : StyleASTNode {
 
         public StyleASTNode url;
+
+        public StyleASTNode spriteName;
 
         public UrlNode() {
             type = StyleASTNodeType.Url;

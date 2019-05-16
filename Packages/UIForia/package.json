@@ -1,8 +1,8 @@
 {
     "name": "com.klang.uiforia",
-    "displayName": "Klang UI",
+    "displayName": "UIForia",
     "version": "0.0.1",
-    "unity": "2018.2",
+    "unity": "2018.3",
     "description": "",
     "keywords": ["UI"],
     "category": "UI",

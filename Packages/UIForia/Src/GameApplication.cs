@@ -5,7 +5,7 @@ using UnityEngine;
 namespace UIForia {
 
     public class GameApplication : Application {
-        
+
         protected GameApplication(string id, string templateRootPath = null) : base(id, templateRootPath) { }
 
         public static GameApplication Create<T>(string applicationId, Camera camera, string templateRootPath = null, Action<Application> onBootstrap = null) where T : UIElement {

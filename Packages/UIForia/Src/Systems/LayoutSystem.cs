@@ -62,7 +62,6 @@ namespace UIForia.Systems {
 
             // todo -- profile caching the pointer lookups, either in layout box or as a struct w/ relevant data
             public int Compare(LayoutBox a, LayoutBox b) {
-                
                 if (a.layer != b.layer) {
                     return a.layer > b.layer ? -1 : 1;
                 }
@@ -76,7 +75,7 @@ namespace UIForia.Systems {
                 }
 
                 return a.traversalIndex > b.traversalIndex ? -1 : 1;
-                
+
 //                if (a.element.depth != b.element.depth) {
 //                    return a.element.depth > b.element.depth ? -1 : 1;
 //                }
@@ -95,8 +94,6 @@ namespace UIForia.Systems {
 //                }
 //                
 //                return a.element.siblingIndex > b.element.siblingIndex ? -1 : 1;
-
-                
             }
 
         }
@@ -166,18 +163,18 @@ namespace UIForia.Systems {
             LayoutBox[] toLayoutArray = toLayout.Array;
 
             int viewDepth = view.depth;
-            
+
             while (stack.Count > 0) {
                 UIElement currentElement = stack.PopUnchecked();
-                
+
                 if (currentElement.isDisabled) {
                     continue;
                 }
-                
+
                 LayoutBox currentBox = m_LayoutBoxMap.GetOrDefault(currentElement.id);
                 currentBox.traversalIndex = idx;
                 currentBox.viewDepthIdx = viewDepth;
-                
+
                 toLayoutArray[idx++] = currentBox;
 
                 UIElement[] childArray = currentElement.children.Array;
@@ -189,6 +186,18 @@ namespace UIForia.Systems {
 
             toLayout.Count = idx;
             LightStack<UIElement>.Release(ref stack);
+        }
+
+        // todo -- build quad tree for queries
+        private unsafe struct QuadTreeNode {
+
+            public fixed int ids[12]; // index into visibility list
+            public fixed int children[4];
+            public int x;
+            public int y;
+            public int width;
+            public int height;
+
         }
 
         public void RunLayout2(UIView view) {
@@ -235,21 +244,12 @@ namespace UIForia.Systems {
                 if (box.markedForLayout) {
                     box.RunLayout();
                     box.markedForLayout = false;
-
-                    if (box.style.OverflowY == Overflow.Scroll) {
-                        // if needs to scroll
-                        // if scroll behavior pushes content
-
-                        // Size vScrollSize = box.style.GetVerticalScrollbar().RunLayout(box.actualSize);
-                        // Size hScrollSize = box.style.GetHorizontalScrollbar().RunLayout(box.actualSize);
-
-                        // scrollbar join point?
-
-                        // box.allocatedWidth -= vScrollSize.width;
-                        // box.allocatedHeight -= hScrollSize.height;
-                        // box.RunLayout();
-                    }
                 }
+                
+            }
+
+            for (int i = 0; i < toLayoutCount; i++) {
+                LayoutBox box = toLayoutArray[i];
 
                 Vector2 scrollOffset = new Vector2();
 
@@ -300,34 +300,60 @@ namespace UIForia.Systems {
             }
 
             for (int i = 0; i < toLayoutCount; i++) {
+                // if height or width is zero
+                // if parent overflow is hidden & parent clip bounds ! contains or intersects children
+                // if parent overflow is h
                 m_VisibleBoxList.Add(toLayoutArray[i]);
             }
-            
+
             for (int i = 0; i < toLayoutCount; i++) {
                 LayoutBox box = toLayoutArray[i];
                 Rect clipRect = box.parent.clipRect;
+
+                Vector2 p0 = box.element.layoutResult.screenPosition;
+                // rotate + scale :/
+                Vector2 p1 = p0 + new Vector2(box.element.layoutResult.actualSize.width, box.element.layoutResult.actualSize.height);
+
                 // painter -> no fucking clue
                 // rect
                 // rounded rect
                 // partly rounded rect
                 // circle
                 // clip-shape(s)
-                
             }
-            
+
+            // overflow hidden works with rects
+            // do layout culling on a rect level
+            // if element fully outside its parent's bounds (transformed)
+            // don't add to list? what about containshandlers?
+
+            // culling & clipping mean different things to input & rendering
+
+            // if element overflow is hidden
+            // push clip shape
+            // keep rendering
+            // for each shape in current clip stack
+            // if shape is rect
+            // if !item in clip shape
+            //     dont render
+            // if item overlaps clip shape
+            //     
+            // pop clip shape
+
+
             // for every layout box
             // clipRect = ViewRect
             // for each child
-                // parentPosition & parentAllocatedWidth & Height
+            // parentPosition & parentAllocatedWidth & Height
             // what clip bounds do we use? if shape is a non rotated rect, can do easily w/ cpu and gpu handle overlap case 
             // clipRectAligned or not
             // if rotated (world space) takes custom code based on shape, clipping gets complicated and graphics has to use polygon clipping or a mask texture
             // if not rotated takes position & scale like normal
             m_VisibleBoxList.Sort(comparer);
 
-            
+
             // LayoutBox[] boxes = m_VisibleElementList.Array;
-            
+
             //for (int i = 0; i < m_VisibleElementList.Count; i++) {
             //    boxes[i].element.layoutResult.zIndex = i + 1;
             //}
@@ -336,6 +362,19 @@ namespace UIForia.Systems {
             // might mean we handle rotated & scaled stuff, get 4 points from box
 
             // if box has a z index higher than its parent then it is not clipped by the parent? 
+        }
+
+        public bool IsMouseOver(UIElement element, in Vector2 point) {
+            if (element is IPointerQueryHandler handler) {
+                return handler.ContainsPoint(point);
+            }
+            else {
+                // if clip bounds are aligned 
+                // if parent clip bounds contains point
+                // if inside 
+            }
+
+            return true;
         }
 
         public void RunLayout(bool forceLayout, ViewRect viewRect) {
@@ -371,7 +410,7 @@ namespace UIForia.Systems {
             LayoutResult layoutResult = element.layoutResult;
             stack.Push(element);
 
-           // m_VisibleBoxList.Add(element);
+            // m_VisibleBoxList.Add(element);
 
             if (root.IsIgnored) {
                 root.allocatedWidth = root.GetWidths().clampedSize;
@@ -909,7 +948,7 @@ namespace UIForia.Systems {
                     case StylePropertyId.Layer:
                         box.layer = property.AsInt;
                         break;
-                    
+
                     case StylePropertyId.LayoutBehavior:
                         // todo -- implement this
                         box.UpdateChildren();
@@ -945,6 +984,7 @@ namespace UIForia.Systems {
 
             if (layoutTypeChanged) {
                 HandleLayoutChanged(element);
+                box.parent?.OnChildStylePropertyChanged(box, properties);
             }
             else {
                 if (invalidatePreferredSizeCache) {
@@ -966,19 +1006,19 @@ namespace UIForia.Systems {
         private void HandleLayoutChanged(UIElement element) {
             LayoutBox box;
             if (!m_LayoutBoxMap.TryGetValue(element.id, out box)) {
-                box = CreateLayoutBox(element);
+                CreateLayoutBox(element);
                 return;
             }
 
             LayoutBox parent = box.parent;
-            LayoutBox replace = box;
+            LayoutBox replace = CreateLayoutBox(element);
 
-            replace = CreateLayoutBox(element);
             replace.allocatedWidth = box.allocatedWidth;
             replace.allocatedHeight = box.allocatedHeight;
-            replace.UpdateChildren();
+
             replace.parent = parent;
-            parent?.UpdateChildren();
+            UpdateChildren(replace);
+            UpdateChildren(parent);
             box.Release();
         }
 
@@ -1307,7 +1347,7 @@ namespace UIForia.Systems {
             for (int i = 0; i < m_VisibleBoxList.Count; i++) {
                 elements[i] = boxes[i].element;
             }
-            
+
             retn.Count = m_VisibleBoxList.Count;
             return retn;
         }

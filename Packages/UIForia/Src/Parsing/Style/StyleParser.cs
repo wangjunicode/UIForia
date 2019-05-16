@@ -486,6 +486,7 @@ namespace UIForia.Parsing.Style {
                     AssertTokenTypeAndAdvance(StyleTokenType.ParenOpen);
 
                     StyleASTNode url;
+                    StyleASTNode spriteName = null;
                     if (tokenStream.Current.styleTokenType == StyleTokenType.String) {
                         url = ParseLiteralOrReference(StyleTokenType.String);
                     }
@@ -497,17 +498,19 @@ namespace UIForia.Parsing.Style {
                         while (tokenStream.HasMoreTokens && !AdvanceIfTokenType(StyleTokenType.ParenClose)) {
                             // advancing tokens no matter the type. We want to concatenate all identifiers and slashes of a path again.
                             urlIdentifier.name += tokenStream.Current.value;
+                            spriteName = ParseSpriteName();
                             tokenStream.Advance();
                         }
                     }
                     else if (url is StyleLiteralNode || url is ConstReferenceNode) {
+                        spriteName = ParseSpriteName();
                         AssertTokenTypeAndAdvance(StyleTokenType.ParenClose);
                     }
                     else {
                         throw new CompileException(url, "URL could not be parsed.");
                     }
 
-                    propertyValue = StyleASTNodeFactory.UrlNode(url);
+                    propertyValue = StyleASTNodeFactory.UrlNode(url, spriteName);
                     break;
                 case StyleTokenType.At:
                     propertyValue = ParseConstReference();
@@ -520,6 +523,14 @@ namespace UIForia.Parsing.Style {
             }
 
             return propertyValue.WithLocation(propertyToken);
+        }
+
+        private StyleASTNode ParseSpriteName() {
+            if (AdvanceIfTokenType(StyleTokenType.Comma)) {
+                return ParseLiteralOrReference(StyleTokenType.String);
+            }
+
+            return null;
         }
 
         private UnitNode ParseUnit() {

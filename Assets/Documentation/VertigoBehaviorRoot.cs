@@ -2,7 +2,6 @@
 using SVGX;
 using TMPro;
 using UIForia.Text;
-using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.U2D;

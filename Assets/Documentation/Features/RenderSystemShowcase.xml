@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UITemplate>
+    <Style path="Documentation/Features/RenderSystemShowcase.style"/>
+        
+    <Contents style="container">
+        
+        <Group style="header">
+            
+            <Group style="column-navy">
+                This is UIForia
+                <Group style="crossed-lines-header">
+                    <Div style="crossed-line-0"/>
+                    <Div style="crossed-line-1"/>
+                    <Div style="crossed-line-2"/>
+                </Group>
+            </Group>
+
+            <Group style="column-orange-hourglass">
+                <Group style="crossed-lines-header"/>
+            </Group>
+
+            <Group style="column-blue-circles">
+                <Group style="crossed-lines-header"/>
+            </Group>
+
+            <Group style="column-orange-rings">
+                <Group style="crossed-lines-header"/>
+            </Group>
+            
+        </Group>
+        
+    </Contents>
+    
+</UITemplate>

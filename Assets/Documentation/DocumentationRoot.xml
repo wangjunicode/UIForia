@@ -20,10 +20,11 @@
                 <Anchor href="'/TransclusionDemo'">Transclusion</Anchor>
                 <Anchor href="'/TransformPlayground'">Transform Playground</Anchor>
                 <Anchor href="'/RepeatExample'">Repeat Example</Anchor>
+                <Anchor href="'/RenderSystemShowcase'">Render System</Anchor>
                 
             </Div>
             
-            <Div style="demo-panel" x-router="demo" x-defaultRoute="/TransformPlayground">
+            <Div style="demo-panel" x-router="demo" x-defaultRoute="/RenderSystemShowcase">
                 
                 <Group x-route="/index">
                     <Heading1>UIForia Documentation</Heading1>
@@ -43,6 +44,7 @@
                 <TransclusionDemo x-route="/TransclusionDemo" />
                 <TransformPlayground x-route="/TransformPlayground" />
                 <RepeatExample x-route="/RepeatExample" />
+                <RenderSystemShowcase x-route="/RenderSystemShowcase" />
             </Div>
             
         </Group>

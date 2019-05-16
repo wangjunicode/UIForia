@@ -33,6 +33,10 @@ namespace UIForia.Elements {
             textInfo.UpdateSpan(0, new TextSpan(text, style.GetTextStyle()));
         }
 
+        public override void OnEnable() {
+            textInfo.UpdateSpan(0, new TextSpan(text, style.GetTextStyle())); 
+        }
+
         public string GetText() {
             return text;
         }

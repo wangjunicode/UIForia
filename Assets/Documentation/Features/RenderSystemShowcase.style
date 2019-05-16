@@ -1,0 +1,40 @@
+
+style container {
+    PreferredSize = 1pca;
+}
+
+style header {
+    TextColor = White;
+    TextFontSize = 44;
+    FlexLayoutDirection = Column;
+}
+
+style column-navy {
+    BackgroundColor = #0D2C40;
+}
+
+style crossed-lines-header {
+    PreferredSize = 128px;
+    BorderRadius = 50%;
+    BackgroundColor = white;
+}
+
+style crossed-line-0 {
+
+    PreferredSize = 0.5pca, 3px;
+    BackgroundColor = #F15B30;
+    LayoutBehavior = Ignored;
+    AnchorLeft = 50%;
+    AnchorTop = 50%;
+    TransformBehaviorX = AnchorMinOffset;
+    TransformBehaviorY = AnchorMinOffset;
+    TransformPositionX = -0.5w;
+    TransformPositionY = 0;
+    TransformRotation = 45;
+}
+
+style column-orange-hourglass {
+    PreferredSize = 128px;
+    BorderRadius = 50%;
+    BackgroundColor = white;
+}

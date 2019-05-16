@@ -10,6 +10,7 @@ using UIForia.Rendering;
 using UIForia.Text;
 using UIForia.Util;
 using UnityEngine;
+using UnityEngine.U2D;
 using FontStyle = UIForia.Text.FontStyle;
 
 namespace UIForia.Compilers.Style {
@@ -735,7 +736,11 @@ namespace UIForia.Compilers.Style {
             node = context.GetValueForReference(node);
             switch (node) {
                 case UrlNode urlNode:
-                    return ResourceManager.GetTexture(TransformUrlNode(urlNode, context));
+                    AssetInfo assetInfo = TransformUrlNode(urlNode, context);
+                    if (assetInfo.SpriteName != null) {
+                        throw new CompileException(urlNode, "SpriteAtlas access is coming soon!");
+                    }
+                    return ResourceManager.GetTexture(assetInfo.Path);
                 case StyleLiteralNode literalNode:
                     string value = literalNode.rawValue;
                     if (value == "unset" || value == "default" || value == "null") {
@@ -752,7 +757,11 @@ namespace UIForia.Compilers.Style {
             node = context.GetValueForReference(node);
             switch (node) {
                 case UrlNode urlNode:
-                    return Resources.Load<TMP_FontAsset>(TransformUrlNode(urlNode, context));
+                    AssetInfo assetInfo = TransformUrlNode(urlNode, context);
+                    if (assetInfo.SpriteName != null) {
+                        throw new CompileException(urlNode, "SpriteAtlas access is coming soon!");
+                    }
+                    return Resources.Load<TMP_FontAsset>(assetInfo.Path);
                     // return ResourceManager.GetFont(TransformUrlNode(urlNode, context));
                 case StyleLiteralNode literalNode:
                     string value = literalNode.rawValue;
@@ -766,15 +775,26 @@ namespace UIForia.Compilers.Style {
             throw new CompileException(context.fileName, node, $"Expected url(path/to/font) but found {node}.");
         }
 
-        private static string TransformUrlNode(UrlNode urlNode, StyleCompileContext context) {
+        private static AssetInfo TransformUrlNode(UrlNode urlNode, StyleCompileContext context) {
             StyleASTNode url = context.GetValueForReference(urlNode.url);
+            StyleASTNode spriteNameNode = context.GetValueForReference(urlNode.spriteName);
+            string spriteName = null;
+            if (spriteNameNode != null && spriteNameNode is StyleLiteralNode stringNode) {
+                spriteName = stringNode.rawValue;
+            }
 
             if (url.type == StyleASTNodeType.Identifier) {
-                return ((StyleIdentifierNode) url).name;
+                return new AssetInfo {
+                    Path = ((StyleIdentifierNode) url).name,
+                    SpriteName = spriteName
+                };
             }
 
             if (url.type == StyleASTNodeType.StringLiteral) {
-                return ((StyleLiteralNode) url).rawValue;
+                return new AssetInfo {
+                    Path = ((StyleLiteralNode) url).rawValue,
+                    SpriteName = spriteName
+                };
             }
 
             throw new CompileException(url, "Invalid url value.");
@@ -881,6 +901,11 @@ namespace UIForia.Compilers.Style {
             if (propertyValues.Count > 1) {
                 throw new CompileException(context.fileName, propertyValues[1], "Found too many values.");
             }
+        }
+
+        public struct AssetInfo {
+            public string Path;
+            public string SpriteName;
         }
     }
 }

@@ -8,6 +8,7 @@ namespace UIForia.Rendering {
     public interface ISVGXElementPainter {
 
         void Paint(UIElement element, VertigoContext ctx, in Matrix4x4 matrix);
+        void Paint(UIElement element, ImmediateRenderContext ctx, SVGXMatrix matrix);
 
     }
 

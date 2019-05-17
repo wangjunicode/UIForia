@@ -1112,6 +1112,16 @@ case "overflowx":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_Overflow("OverflowY", UIForia.Rendering.StylePropertyId.OverflowY, targetState.state, Compile<UIForia.Rendering.Overflow>(value, s_EnumSource_Overflow));                
                 case "backgroundcolor":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_Color("BackgroundColor", UIForia.Rendering.StylePropertyId.BackgroundColor, targetState.state, Compile<UnityEngine.Color>(value, colorSources));                
+                case "backgroundtint":
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_Color("BackgroundTint", UIForia.Rendering.StylePropertyId.BackgroundTint, targetState.state, Compile<UnityEngine.Color>(value, colorSources));                
+                case "bordercolortop":
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_Color("BorderColorTop", UIForia.Rendering.StylePropertyId.BorderColorTop, targetState.state, Compile<UnityEngine.Color>(value, colorSources));                
+                case "bordercolorright":
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_Color("BorderColorRight", UIForia.Rendering.StylePropertyId.BorderColorRight, targetState.state, Compile<UnityEngine.Color>(value, colorSources));                
+                case "bordercolorbottom":
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_Color("BorderColorBottom", UIForia.Rendering.StylePropertyId.BorderColorBottom, targetState.state, Compile<UnityEngine.Color>(value, colorSources));                
+                case "bordercolorleft":
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_Color("BorderColorLeft", UIForia.Rendering.StylePropertyId.BorderColorLeft, targetState.state, Compile<UnityEngine.Color>(value, colorSources));                
                 case "backgroundimageoffsetx":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_UIFixedLength("BackgroundImageOffsetX", UIForia.Rendering.StylePropertyId.BackgroundImageOffsetX, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
                 case "backgroundimageoffsety":

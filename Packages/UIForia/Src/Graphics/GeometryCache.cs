@@ -65,12 +65,6 @@ namespace Vertigo {
             triangles = new StructList<int>(capacity * 2);
         }
 
-        public void Compress() {
-            // for each shape
-            // if shape is active
-            // copy to new buffer
-            // release old buffers
-        }
         
         public void EnsureAdditionalCapacity(int vertCount, int triCount) {
             positions.EnsureAdditionalCapacity(vertCount);

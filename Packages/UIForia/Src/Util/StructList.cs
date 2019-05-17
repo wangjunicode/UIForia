@@ -40,7 +40,16 @@ namespace UIForia.Util {
                 System.Array.Resize(ref array, size + collection.Length * 2);
             }
 
-            System.Array.Copy(collection, 0, array, size, collection.Length);
+            if (collection.Length < HandCopyThreshold) {
+                int idx = size;
+                for (int i = 0; i < collection.Length; i++) {
+                    array[idx++] = collection[i];
+                }
+            }
+            else {
+                System.Array.Copy(collection, 0, array, size, collection.Length);
+            }
+
             size += collection.Length;
         }
 
@@ -49,7 +58,16 @@ namespace UIForia.Util {
                 System.Array.Resize(ref array, size + count * 2);
             }
 
-            System.Array.Copy(collection, start, array, size, count);
+            if (count < HandCopyThreshold) {
+                int idx = size;
+                for (int i = start; i < count; i++) {
+                    array[idx++] = collection[i];
+                }
+            }
+            else {
+                System.Array.Copy(collection, start, array, size, count);
+            }
+
             size += count;
         }
 
@@ -58,16 +76,38 @@ namespace UIForia.Util {
                 System.Array.Resize(ref array, size + collection.size * 2);
             }
 
-            System.Array.Copy(collection.array, 0, array, size, collection.size);
+            if (collection.size < HandCopyThreshold) {
+                T[] src = collection.array;
+                int count = collection.size;
+                for (int i = 0; i < count; i++) {
+                    array[size + i] = src[i];
+                }
+            }
+            else {
+                System.Array.Copy(collection.array, 0, array, size, collection.size);
+            }
+
             size += collection.size;
         }
 
+        private const int HandCopyThreshold = 8;
+
         public void AddRange(StructList<T> collection, int start, int count) {
-            if (size + collection.size >= array.Length) {
+            if (size + count >= array.Length) {
                 System.Array.Resize(ref array, size + count * 2);
             }
 
-            System.Array.Copy(collection.array, start, array, size, count);
+            if (collection.size < HandCopyThreshold) {
+                T[] src = collection.array;
+                int idx = size;
+                for (int i = start; i < count; i++) {
+                    array[idx++] = src[i];
+                }
+            }
+            else {
+                System.Array.Copy(collection.array, start, array, size, count);
+            }
+
             size += count;
         }
 
@@ -123,7 +163,6 @@ namespace UIForia.Util {
             size -= count;
         }
 
-       
 
         private void QuickSort(Comparison<T> comparison, int low, int high) {
             while (true) {
@@ -150,7 +189,7 @@ namespace UIForia.Util {
                 break;
             }
         }
-        
+
         private int Partition(Comparison<T> comparison, int low, int high) {
             T temp;
             T pivot = array[high];
@@ -165,13 +204,14 @@ namespace UIForia.Util {
                     array[j] = temp;
                 }
             }
+
             temp = array[i + 1];
             array[i + 1] = array[high];
             array[high] = temp;
 
             return i + 1;
         }
-        
+
         private int Partition(IComparer<T> comparison, int low, int high) {
             T temp;
             T pivot = array[high];
@@ -186,6 +226,7 @@ namespace UIForia.Util {
                     array[j] = temp;
                 }
             }
+
             temp = array[i + 1];
             array[i + 1] = array[high];
             array[high] = temp;
@@ -218,7 +259,7 @@ namespace UIForia.Util {
             if (size < 2) return;
             QuickSort(comparison, 0, size - 1);
         }
-        
+
         private static readonly LightList<StructList<T>> s_Pool = new LightList<StructList<T>>();
 
         public static StructList<T> Get() {

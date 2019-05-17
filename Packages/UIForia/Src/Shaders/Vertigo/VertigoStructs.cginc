@@ -7,7 +7,7 @@ struct appdata {
     float4 texCoord1 : TEXCOORD1;
     float4 texCoord2 : TEXCOORD2;
     float4 texCoord3 : TEXCOORD3;
-    fixed4 color : COLOR;
+    float4 color : COLOR;
 };
 
 struct v2f {
@@ -18,7 +18,7 @@ struct v2f {
     float4 texCoord2 : TEXCOORD2;
     float4 texCoord3 : TEXCOORD3;
     float4 sdfCoord  : TEXCOORD4;
-    fixed4 color : COLOR0;
+    float4 color : COLOR0;
 };
 
 struct SDFData {

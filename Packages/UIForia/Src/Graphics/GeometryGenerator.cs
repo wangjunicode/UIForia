@@ -320,7 +320,6 @@ namespace Vertigo {
                         positions[startVert + 2] = p2; //new Vector3(x + halfWidth, -(y + height));
                         positions[startVert + 3] = p3; //new Vector3(x, -(y + halfHeight));
 
-
                         normals[startVert + 0] = n0;
                         normals[startVert + 1] = n0;
                         normals[startVert + 2] = n0;

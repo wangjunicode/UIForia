@@ -19,11 +19,12 @@ namespace UIForia.Rendering {
         Opacity = 122,
         Cursor = 123,
         Visibility = 124, 
-//        BorderColorTop = 125,
-//        BorderColorRight = 126,
-//        BorderColorBottom = 127,
-//        BorderColorLeft = 128,
-
+        BorderColorTop = 125,
+        BorderColorRight = 126,
+        BorderColorBottom = 127,
+        BorderColorLeft = 128,
+        BackgroundTint = 129, 
+        
         GridItemColStart = 200,
         GridItemColSpan = 201,
         GridItemRowStart = 202,

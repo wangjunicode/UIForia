@@ -1,15 +1,14 @@
 using System;
-using System.Collections.Generic;
 using SVGX;
 using UIForia.Elements;
 using UIForia.Layout;
 using UIForia.Rendering;
 using UIForia.Systems;
-using UIForia.Text;
 using UIForia.Util;
 using UnityEngine;
 using UnityEngine.Rendering;
 using Vertigo;
+using Random = System.Random;
 
 namespace Src.Systems {
 
@@ -78,11 +77,9 @@ namespace Src.Systems {
         public bool isText;
 
     }
-
-
+    
     public class VertigoRenderSystem : IRenderSystem {
 
-        private UIForiaRenderContext ctx;
         private Camera camera;
         private ILayoutSystem layoutSystem;
         private CommandBuffer commandBuffer;
@@ -90,10 +87,11 @@ namespace Src.Systems {
         private IStyleSystem styleSystem;
         private IntMap<RenderInfo> renderInfos;
         private LightList<UIElement> elementsToRender;
+        private readonly GraphicsContext gfx;
 
+     
         public VertigoRenderSystem(Camera camera, ILayoutSystem layoutSystem, IStyleSystem styleSystem) {
             this.camera = camera;
-            this.ctx = new UIForiaRenderContext();
             this.layoutSystem = layoutSystem;
             this.views = new LightList<UIView>();
             this.commandBuffer = new CommandBuffer(); // todo -- per view
@@ -102,6 +100,8 @@ namespace Src.Systems {
             this.renderInfos = new IntMap<RenderInfo>();
             this.elementsToRender = new LightList<UIElement>(0);
             this.camera?.AddCommandBuffer(CameraEvent.AfterEverything, commandBuffer);
+            this.gfx = new GraphicsContext();
+           
         }
 
         private void HandleStylePropertyChanged(UIElement element, StructList<StyleProperty> propertyList) {
@@ -114,22 +114,30 @@ namespace Src.Systems {
         public void OnReset() { }
 
         public void OnUpdate() {
-            ctx.Clear();
 
-            // todo -- per view
-            ctx.SetTranslation(new Vector3(-(Screen.width / 2), (Screen.height / 2), 0));
             camera.orthographicSize = Screen.height * 0.5f;
 
             for (int i = 0; i < views.Count; i++) {
                 RenderView(views[i]);
             }
-
-            ctx.Render();
-            ctx.Flush(camera, commandBuffer);
+            
         }
+
+        private readonly Material defaultMaterial = new Material(Shader.Find("Vertigo/VertigoSDF"));
+        ShapeCache geometry = new ShapeCache();
 
         private void RenderView(UIView view) {
             // todo -- figure out per view rendering, probably want per view render & layout systems & maybe input too 
+            geometry.ClearGeometryData();
+            gfx.BeginFrame();
+            gfx.SetMaterial(defaultMaterial);
+
+        
+
+            UIForiaGraphicsInterface ctx = gfx.GetRenderInterface<UIForiaGraphicsInterface>();
+           
+
+            gfx.SetTransform(Matrix4x4.TRS(new Vector3(-Screen.width * 0.5f, Screen.height * 0.5f), Quaternion.identity, Vector3.one));
 
             layoutSystem.GetVisibleElements(elementsToRender);
 
@@ -147,7 +155,6 @@ namespace Src.Systems {
                     continue;
                 }
 
-
                 if (renderInfo.renderMethod == RenderMethod.None) {
                     continue;
                 }
@@ -157,6 +164,21 @@ namespace Src.Systems {
                 Vector2 position = layoutResult.screenPosition;
                 Size size = layoutResult.allocatedSize;
 
+                RenderMethod renderMethod = renderInfo.renderMethod;
+
+                if (renderMethod == RenderMethod.None) {
+                    continue;
+                }
+
+                if ((renderMethod & RenderMethod.Border) != 0) {
+                    // border radius
+                    // different border sizes
+                    // different border colors
+                    
+                }
+                ctx.SetTexture(ShaderKey.MainTexture, renderInfo.backgroundImage);
+                ctx.fillColor = renderInfo.backgroundColor;
+                ctx.FillRect(position.x, position.y, size.width, size.height, renderInfo);
                 switch (renderInfo.renderMethod) {
                     case RenderMethod.Painter:
                         ctx.Save();
@@ -171,35 +193,50 @@ namespace Src.Systems {
                         break;
 
                     case RenderMethod.NoBorderColorFill:
-                        ctx.SetFillColor(renderInfo.backgroundColor);
-                        ctx.FillRect(position.x, position.y, size.width, size.height);
+                        ctx.fillColor = renderInfo.backgroundColor;
+                        ctx.FillRect(position.x, position.y, size.width, size.height, renderInfo);
                         break;
+                    
                     case RenderMethod.UniformBorderNoFill:
-                        ctx.SetStrokeColor(renderInfo.borderColorTop);
-                        ctx.SetStrokeWidth(layoutResult.border.top);
-                        ctx.StrokeRect(position.x, position.y, size.width, size.height);
+                        
+                        // maskSoftness, shapeType, color flags, line data?
+                        // sdf data                 texcoord 1
+                        // border colors (packed)   texcoord 2
+                        // clip rect                texcoord 3
+                        
+//                        ctx.SetStrokeColor(renderInfo.borderColorTop);
+//                        ctx.SetStrokeWidth(layoutResult.border.top);
+//                        ctx.StrokeRect(position.x, position.y, size.width, size.height);
                         break;
+                    
                     case RenderMethod.MixedBorderNoFill:
                         // todo -- take border color properly
-                        ctx.SetStrokeColor(renderInfo.borderColorTop);
-                        ctx.StrokeRectNonUniform(position.x, position.y, size.width, size.height, new OffsetStrokeRect() {
-                            topSize = layoutResult.border.top,
-                            rightSize = layoutResult.border.right,
-                            bottomSize = layoutResult.border.bottom,
-                            leftSize = layoutResult.border.left,
-                        });
+//                        ctx.SetStrokeColor(renderInfo.borderColorTop);
+//                        ctx.StrokeRectNonUniform(position.x, position.y, size.width, size.height, new OffsetStrokeRect() {
+//                            topSize = layoutResult.border.top,
+//                            rightSize = layoutResult.border.right,
+//                            bottomSize = layoutResult.border.bottom,
+//                            leftSize = layoutResult.border.left,
+//                        });
                         break;
+                    
                     case RenderMethod.NoBorderTextureFill:
-                        ctx.SetMainTexture(renderInfo.backgroundImage);
-                        ShapeId shapeId = ctx.FillRect(position.x, position.y, size.width, size.height);
-                        Vector4 renderData = new Vector4((int) ColorType.TextureOnly, 0, 0, 0);
-                        float packedBorderRadius = 0;
-                        float strokeWidth = 0;
-                        ctx.SetTexCoord1(shapeId, new Vector4(packedBorderRadius, (int) ShapeType.Rect, 0, 0));
-                        ctx.SetTexCoord2(shapeId, new Vector4((int) ColorType.TextureOnly, 0, 0, 0));
+//                        ctx.SetTexture(ShaderKey.MainTexture, renderInfo.backgroundImage);
+////                        
+//                        ctx.FillRect(position.x, position.y, size.width, size.height, renderInfo);
+//                        Vector4 renderData = new Vector4((int) ColorType.TextureOnly, 0, 0, 0);
+//                        int metaDta = 10;
+//                        float packedBorderRadius = 0;
+//                        float strokeWidth = 0;
+//                        
+//                        ctx.SetTexCoord1(shapeId, new Vector4(packedBorderRadius, (int) ShapeType.Rect, 0, 0));
+//                        ctx.SetTexCoord2(shapeId, new Vector4((int) ColorType.TextureOnly, 0, 0, 0));
                         break;
                 }
             }
+
+            gfx.EndFrame(commandBuffer, camera.worldToCameraMatrix, camera.projectionMatrix);
+
         }
 
         public enum ColorType {
@@ -302,7 +339,7 @@ namespace Src.Systems {
             renderInfo.uvRect = new Rect(0, 0, 1, 1);
             renderInfo.uvOffset = new Vector2(0, 0);
             renderInfo.uvTiling = new Vector2(1, 1);
-            renderInfo.backgroundTint = new Color32(255, 255, 255, 255);
+            renderInfo.backgroundTint = style.BackgroundTint;
 //            renderInfo.borderRadius = new Vector4(element.layoutResult.style.BorderRadiusTopRight, style.BorderRadiusTopLeft, style.BorderRadiusBottomLeft, style.BorderRadiusBottomRight);
             renderInfo.clipRect = Vector4.zero;
             renderInfo.borderSize = element.layoutResult.border;

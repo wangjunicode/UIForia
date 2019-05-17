@@ -89,13 +89,6 @@ namespace Vertigo {
             this.geometryCache = new GeometryCache();
         }
 
-        public enum MaterialUsage {
-
-            Instance,
-            Shared
-
-        }
-
         private Dictionary<string, Shader> shaderMap = new Dictionary<string, Shader>();
 
         private VertigoMaterial FindMaterial(string shaderName) {

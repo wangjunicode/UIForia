@@ -1,7 +1,9 @@
 
 style container {
     PreferredSize = 1pca;
-    BackgroundColor = white;
+    BackgroundColor = yellow;
+    BackgroundTint = rgba(255, 255, 85, 255);
+    BackgroundImage = url("icon_2");
 }
 
 style header {

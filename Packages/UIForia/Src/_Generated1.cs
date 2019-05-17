@@ -26,6 +26,41 @@ namespace UIForia.Rendering {
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.BackgroundColor, value), state); }
         }
         
+        public UnityEngine.Color BackgroundTint {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.BackgroundTint, state).AsColor; }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.BackgroundTint, value), state); }
+        }
+        
+        public UnityEngine.Color BorderColorTop {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.BorderColorTop, state).AsColor; }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.BorderColorTop, value), state); }
+        }
+        
+        public UnityEngine.Color BorderColorRight {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.BorderColorRight, state).AsColor; }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.BorderColorRight, value), state); }
+        }
+        
+        public UnityEngine.Color BorderColorBottom {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.BorderColorBottom, state).AsColor; }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.BorderColorBottom, value), state); }
+        }
+        
+        public UnityEngine.Color BorderColorLeft {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.BorderColorLeft, state).AsColor; }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.BorderColorLeft, value), state); }
+        }
+        
         public UIForia.UIFixedLength BackgroundImageOffsetX {
             [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.BackgroundImageOffsetX, state).AsUIFixedLength; }
@@ -806,6 +841,11 @@ namespace UIForia.Rendering {
                                         case StylePropertyId.OverflowX: return valuePart0 == 0 || IntUtil.UnsetValue == valuePart0;
                     case StylePropertyId.OverflowY: return valuePart0 == 0 || IntUtil.UnsetValue == valuePart0;
                     case StylePropertyId.BackgroundColor: return valuePart1 == 0;
+                    case StylePropertyId.BackgroundTint: return valuePart1 == 0;
+                    case StylePropertyId.BorderColorTop: return valuePart1 == 0;
+                    case StylePropertyId.BorderColorRight: return valuePart1 == 0;
+                    case StylePropertyId.BorderColorBottom: return valuePart1 == 0;
+                    case StylePropertyId.BorderColorLeft: return valuePart1 == 0;
                     case StylePropertyId.BackgroundImageOffsetX: return !FloatUtil.IsDefined(floatValue) || valuePart1 == 0;
                     case StylePropertyId.BackgroundImageOffsetY: return !FloatUtil.IsDefined(floatValue) || valuePart1 == 0;
                     case StylePropertyId.BackgroundImageScaleX: return !FloatUtil.IsDefined(floatValue) || valuePart1 == 0;
@@ -946,6 +986,41 @@ namespace UIForia.Rendering {
             get { return FindColorProperty(StylePropertyId.BackgroundColor); }
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.BackgroundColor, value)); }
+        }
+            
+        public UnityEngine.Color BackgroundTint {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return FindColorProperty(StylePropertyId.BackgroundTint); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.BackgroundTint, value)); }
+        }
+            
+        public UnityEngine.Color BorderColorTop {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return FindColorProperty(StylePropertyId.BorderColorTop); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.BorderColorTop, value)); }
+        }
+            
+        public UnityEngine.Color BorderColorRight {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return FindColorProperty(StylePropertyId.BorderColorRight); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.BorderColorRight, value)); }
+        }
+            
+        public UnityEngine.Color BorderColorBottom {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return FindColorProperty(StylePropertyId.BorderColorBottom); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.BorderColorBottom, value)); }
+        }
+            
+        public UnityEngine.Color BorderColorLeft {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return FindColorProperty(StylePropertyId.BorderColorLeft); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.BorderColorLeft, value)); }
         }
             
         public UIForia.UIFixedLength BackgroundImageOffsetX {
@@ -1749,6 +1824,51 @@ namespace UIForia.Rendering {
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.BackgroundColor, out property)) return property.AsColor;
                     return DefaultStyleValues_Generated.BackgroundColor;
+                }
+            }
+
+            public UnityEngine.Color BackgroundTint { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.BackgroundTint, out property)) return property.AsColor;
+                    return DefaultStyleValues_Generated.BackgroundTint;
+                }
+            }
+
+            public UnityEngine.Color BorderColorTop { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.BorderColorTop, out property)) return property.AsColor;
+                    return DefaultStyleValues_Generated.BorderColorTop;
+                }
+            }
+
+            public UnityEngine.Color BorderColorRight { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.BorderColorRight, out property)) return property.AsColor;
+                    return DefaultStyleValues_Generated.BorderColorRight;
+                }
+            }
+
+            public UnityEngine.Color BorderColorBottom { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.BorderColorBottom, out property)) return property.AsColor;
+                    return DefaultStyleValues_Generated.BorderColorBottom;
+                }
+            }
+
+            public UnityEngine.Color BorderColorLeft { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.BorderColorLeft, out property)) return property.AsColor;
+                    return DefaultStyleValues_Generated.BorderColorLeft;
                 }
             }
 
@@ -2788,6 +2908,46 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.BackgroundColor, state).AsColor;
         }
         
+        public void SetBackgroundTint(UnityEngine.Color value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.BackgroundTint, value), state);
+        }
+
+        public UnityEngine.Color GetBackgroundTint(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.BackgroundTint, state).AsColor;
+        }
+        
+        public void SetBorderColorTop(UnityEngine.Color value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.BorderColorTop, value), state);
+        }
+
+        public UnityEngine.Color GetBorderColorTop(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.BorderColorTop, state).AsColor;
+        }
+        
+        public void SetBorderColorRight(UnityEngine.Color value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.BorderColorRight, value), state);
+        }
+
+        public UnityEngine.Color GetBorderColorRight(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.BorderColorRight, state).AsColor;
+        }
+        
+        public void SetBorderColorBottom(UnityEngine.Color value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.BorderColorBottom, value), state);
+        }
+
+        public UnityEngine.Color GetBorderColorBottom(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.BorderColorBottom, state).AsColor;
+        }
+        
+        public void SetBorderColorLeft(UnityEngine.Color value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.BorderColorLeft, value), state);
+        }
+
+        public UnityEngine.Color GetBorderColorLeft(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.BorderColorLeft, state).AsColor;
+        }
+        
         public void SetBackgroundImageOffsetX(UIForia.UIFixedLength value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.BackgroundImageOffsetX, value), state);
         }
@@ -3677,6 +3837,16 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.OverflowY, (int)OverflowY);
 				case StylePropertyId.BackgroundColor:
 					 return new StyleProperty(StylePropertyId.BackgroundColor, BackgroundColor);
+				case StylePropertyId.BackgroundTint:
+					 return new StyleProperty(StylePropertyId.BackgroundTint, BackgroundTint);
+				case StylePropertyId.BorderColorTop:
+					 return new StyleProperty(StylePropertyId.BorderColorTop, BorderColorTop);
+				case StylePropertyId.BorderColorRight:
+					 return new StyleProperty(StylePropertyId.BorderColorRight, BorderColorRight);
+				case StylePropertyId.BorderColorBottom:
+					 return new StyleProperty(StylePropertyId.BorderColorBottom, BorderColorBottom);
+				case StylePropertyId.BorderColorLeft:
+					 return new StyleProperty(StylePropertyId.BorderColorLeft, BorderColorLeft);
 				case StylePropertyId.BackgroundImageOffsetX:
 					 return new StyleProperty(StylePropertyId.BackgroundImageOffsetX, BackgroundImageOffsetX);
 				case StylePropertyId.BackgroundImageOffsetY:
@@ -3909,6 +4079,11 @@ namespace UIForia.Rendering {
                 switch (propertyId) {
     
                     case StylePropertyId.BackgroundColor: return true;
+                    case StylePropertyId.BackgroundTint: return true;
+                    case StylePropertyId.BorderColorTop: return true;
+                    case StylePropertyId.BorderColorRight: return true;
+                    case StylePropertyId.BorderColorBottom: return true;
+                    case StylePropertyId.BorderColorLeft: return true;
                     case StylePropertyId.BackgroundImageOffsetX: return true;
                     case StylePropertyId.BackgroundImageOffsetY: return true;
                     case StylePropertyId.BackgroundImageScaleX: return true;

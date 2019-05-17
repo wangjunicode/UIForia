@@ -19,6 +19,11 @@ namespace UIForia.Rendering {
 		public const Overflow OverflowX = UIForia.Rendering.Overflow.Visible;
 		public const Overflow OverflowY = UIForia.Rendering.Overflow.Visible;
 		public static readonly Color BackgroundColor = new Color(-1f, -1f, -1f, -1f);
+		public static readonly Color BackgroundTint = new Color(-1f, -1f, -1f, -1f);
+		public static readonly Color BorderColorTop = new Color(-1f, -1f, -1f, -1f);
+		public static readonly Color BorderColorRight = new Color(-1f, -1f, -1f, -1f);
+		public static readonly Color BorderColorBottom = new Color(-1f, -1f, -1f, -1f);
+		public static readonly Color BorderColorLeft = new Color(-1f, -1f, -1f, -1f);
 		public static readonly UIFixedLength BackgroundImageOffsetX = new UIFixedLength(0f, UIFixedUnit.Pixel);
 		public static readonly UIFixedLength BackgroundImageOffsetY = new UIFixedLength(0f, UIFixedUnit.Pixel);
 		public static readonly UIFixedLength BackgroundImageScaleX = new UIFixedLength(0f, UIFixedUnit.Pixel);
@@ -100,10 +105,10 @@ namespace UIForia.Rendering {
 		public const float TextShadowSoftness = 0.5f;
 		public const ShadowType TextShadowType = UIForia.Rendering.ShadowType.Unset;
 		public const TextTransform TextTransform = UIForia.Text.TextTransform.None;
-		public static readonly UIFixedLength AnchorTop = new UIFixedLength(0f, UIFixedUnit.Percent);
-		public static readonly UIFixedLength AnchorRight = new UIFixedLength(1f, UIFixedUnit.Percent);
-		public static readonly UIFixedLength AnchorBottom = new UIFixedLength(1f, UIFixedUnit.Percent);
-		public static readonly UIFixedLength AnchorLeft = new UIFixedLength(0f, UIFixedUnit.Percent);
+		public static readonly UIFixedLength AnchorTop = new UIFixedLength(0f, UIFixedUnit.Pixel);
+		public static readonly UIFixedLength AnchorRight = new UIFixedLength(0f, UIFixedUnit.Pixel);
+		public static readonly UIFixedLength AnchorBottom = new UIFixedLength(0f, UIFixedUnit.Pixel);
+		public static readonly UIFixedLength AnchorLeft = new UIFixedLength(0f, UIFixedUnit.Pixel);
 		public const AnchorTarget AnchorTarget = UIForia.Rendering.AnchorTarget.Parent;
 		public static readonly TransformOffset TransformPositionX = new TransformOffset(0f, TransformUnit.Pixel);
 		public static readonly TransformOffset TransformPositionY = new TransformOffset(0f, TransformUnit.Pixel);
@@ -138,6 +143,16 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.OverflowY, (int)UIForia.Rendering.Overflow.Visible);
 				case StylePropertyId.BackgroundColor:
 					 return new StyleProperty(StylePropertyId.BackgroundColor, new Color(-1f, -1f, -1f, -1f));
+				case StylePropertyId.BackgroundTint:
+					 return new StyleProperty(StylePropertyId.BackgroundTint, new Color(-1f, -1f, -1f, -1f));
+				case StylePropertyId.BorderColorTop:
+					 return new StyleProperty(StylePropertyId.BorderColorTop, new Color(-1f, -1f, -1f, -1f));
+				case StylePropertyId.BorderColorRight:
+					 return new StyleProperty(StylePropertyId.BorderColorRight, new Color(-1f, -1f, -1f, -1f));
+				case StylePropertyId.BorderColorBottom:
+					 return new StyleProperty(StylePropertyId.BorderColorBottom, new Color(-1f, -1f, -1f, -1f));
+				case StylePropertyId.BorderColorLeft:
+					 return new StyleProperty(StylePropertyId.BorderColorLeft, new Color(-1f, -1f, -1f, -1f));
 				case StylePropertyId.BackgroundImageOffsetX:
 					 return new StyleProperty(StylePropertyId.BackgroundImageOffsetX, new UIFixedLength(0f, UIFixedUnit.Pixel));
 				case StylePropertyId.BackgroundImageOffsetY:
@@ -301,13 +316,13 @@ namespace UIForia.Rendering {
 				case StylePropertyId.TextTransform:
 					 return new StyleProperty(StylePropertyId.TextTransform, (int)UIForia.Text.TextTransform.None);
 				case StylePropertyId.AnchorTop:
-					 return new StyleProperty(StylePropertyId.AnchorTop, new UIFixedLength(0f, UIFixedUnit.Percent));
+					 return new StyleProperty(StylePropertyId.AnchorTop, new UIFixedLength(0f, UIFixedUnit.Pixel));
 				case StylePropertyId.AnchorRight:
-					 return new StyleProperty(StylePropertyId.AnchorRight, new UIFixedLength(1f, UIFixedUnit.Percent));
+					 return new StyleProperty(StylePropertyId.AnchorRight, new UIFixedLength(0f, UIFixedUnit.Pixel));
 				case StylePropertyId.AnchorBottom:
-					 return new StyleProperty(StylePropertyId.AnchorBottom, new UIFixedLength(1f, UIFixedUnit.Percent));
+					 return new StyleProperty(StylePropertyId.AnchorBottom, new UIFixedLength(0f, UIFixedUnit.Pixel));
 				case StylePropertyId.AnchorLeft:
-					 return new StyleProperty(StylePropertyId.AnchorLeft, new UIFixedLength(0f, UIFixedUnit.Percent));
+					 return new StyleProperty(StylePropertyId.AnchorLeft, new UIFixedLength(0f, UIFixedUnit.Pixel));
 				case StylePropertyId.AnchorTarget:
 					 return new StyleProperty(StylePropertyId.AnchorTarget, (int)UIForia.Rendering.AnchorTarget.Parent);
 				case StylePropertyId.TransformPositionX:

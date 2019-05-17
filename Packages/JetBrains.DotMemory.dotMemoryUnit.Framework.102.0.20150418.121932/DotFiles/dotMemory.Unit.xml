@@ -1,0 +1,425 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>dotMemory.Unit</name>
+    </assembly>
+    <members>
+        <member name="T:JetBrains.dotMemoryUnit.Properties.Resources">
+            <summary>
+              A strongly-typed resource class, for looking up localized strings, etc.
+            </summary>
+        </member>
+        <member name="P:JetBrains.dotMemoryUnit.Properties.Resources.ResourceManager">
+            <summary>
+              Returns the cached ResourceManager instance used by this class.
+            </summary>
+        </member>
+        <member name="P:JetBrains.dotMemoryUnit.Properties.Resources.Culture">
+            <summary>
+              Overrides the current thread's CurrentUICulture property for all
+              resource lookups using this strongly typed resource class.
+            </summary>
+        </member>
+        <member name="P:JetBrains.dotMemoryUnit.Properties.Resources.AssertTraffic_Allocated">
+            <summary>
+              Looks up a localized string similar to Allocated.
+            </summary>
+        </member>
+        <member name="P:JetBrains.dotMemoryUnit.Properties.Resources.AssertTraffic_Collected">
+            <summary>
+              Looks up a localized string similar to Collected.
+            </summary>
+        </member>
+        <member name="P:JetBrains.dotMemoryUnit.Properties.Resources.AssertTraffic_Failure_Template">
+             <summary>
+               Looks up a localized string similar to {0} {1}
+                
+            Expected: {2}
+            But was: {3}
+            
+            .
+             </summary>
+        </member>
+        <member name="P:JetBrains.dotMemoryUnit.Properties.Resources.AssertTraffic_MemoryAmount">
+            <summary>
+              Looks up a localized string similar to memory amount.
+            </summary>
+        </member>
+        <member name="P:JetBrains.dotMemoryUnit.Properties.Resources.AssertTraffic_ObjectsCount">
+            <summary>
+              Looks up a localized string similar to objects count.
+            </summary>
+        </member>
+        <member name="P:JetBrains.dotMemoryUnit.Properties.Resources.AssertTrafic_Invalid_Template">
+            <summary>
+              Looks up a localized string similar to {0} or {1} should be set on {2}. If set value should be greater or equal to zero..
+            </summary>
+        </member>
+        <member name="P:JetBrains.dotMemoryUnit.Properties.Resources.Attribute_NotResolved_Template">
+            <summary>
+              Looks up a localized string similar to {0} is not resolved..
+            </summary>
+        </member>
+        <member name="P:JetBrains.dotMemoryUnit.Properties.Resources.dmu_IsFailed">
+            <summary>
+              Looks up a localized string similar to disabled due to internal error.
+            </summary>
+        </member>
+        <member name="P:JetBrains.dotMemoryUnit.Properties.Resources.dmu_RunWithoutUs">
+            <summary>
+              Looks up a localized string similar to The test was run without dotMemory Unit support. All dotMemory Unit calls were ignored..
+            </summary>
+        </member>
+        <member name="P:JetBrains.dotMemoryUnit.Properties.Resources.DotMemoryUnitAttribute_Invalid">
+            <summary>
+              Looks up a localized string similar to At least one property of DotMemoryUnitAttribute should be set..
+            </summary>
+        </member>
+        <member name="P:JetBrains.dotMemoryUnit.Properties.Resources.DotMemoryUnitAttribute_SavingStrategy_NotSet">
+            <summary>
+              Looks up a localized string similar to NotSet is invalid value.
+            </summary>
+        </member>
+        <member name="P:JetBrains.dotMemoryUnit.Properties.Resources.InProcessServer_InitializationFailed">
+            <summary>
+              Looks up a localized string similar to initialization failed.
+            </summary>
+        </member>
+        <member name="P:JetBrains.dotMemoryUnit.Properties.Resources.InProcessServer_InvalidCtor">
+            <summary>
+              Looks up a localized string similar to Failed to obtain server constructor.
+            </summary>
+        </member>
+        <member name="P:JetBrains.dotMemoryUnit.Properties.Resources.InProcessServer_InvalidFormat">
+            <summary>
+              Looks up a localized string similar to Incorrect in-process server location format.
+            </summary>
+        </member>
+        <member name="P:JetBrains.dotMemoryUnit.Properties.Resources.InterfaceProperty_InvalidTypeException">
+            <summary>
+              Looks up a localized string similar to InterfaceProperty supports only interfaces, neither types or open generic definition.
+            </summary>
+        </member>
+        <member name="P:JetBrains.dotMemoryUnit.Properties.Resources.QuerySet_Exception">
+            <summary>
+              Looks up a localized string similar to One of query is null.
+            </summary>
+        </member>
+        <member name="P:JetBrains.dotMemoryUnit.Properties.Resources.SaveWorkspace_Completed_Template">
+            <summary>
+              Looks up a localized string similar to The workspace is saved to &quot;{0}&quot;. (File size: {1}).
+            </summary>
+        </member>
+        <member name="P:JetBrains.dotMemoryUnit.Properties.Resources.TestOutput_Prefix">
+            <summary>
+              Looks up a localized string similar to [dotMemory Unit]: .
+            </summary>
+        </member>
+        <member name="P:JetBrains.dotMemoryUnit.Properties.Resources.TypeProperty_NotTypeException">
+            <summary>
+              Looks up a localized string similar to TypeProperty supports only instantiatable types, neither interfaces neither abstract types or open generic definition.
+            </summary>
+        </member>
+        <member name="P:JetBrains.dotMemoryUnit.Properties.Resources.UseIsEnabled">
+            <summary>
+              Looks up a localized string similar to Use dotMemoryApi.IsEnabled to guard memory assertions.
+            </summary>
+        </member>
+        <member name="T:JetBrains.dotMemoryUnit.Client.Interface.Query">
+            <summary>
+            Defines syntax sugar for operations over sets, union and intersection
+            </summary>
+        </member>
+        <member name="M:JetBrains.dotMemoryUnit.Kernel.dotMemoryApi.GetSnapshot">
+            <summary>
+            Gets a memory snapshot. See the <see cref="M:JetBrains.dotMemoryUnit.FluentQueries.GetObjects(JetBrains.dotMemoryUnit.Sugar.ObjectSet,System.Func{JetBrains.dotMemoryUnit.Properties.ObjectProperty,JetBrains.dotMemoryUnit.Client.Interface.Query})"/> extension method for details.
+            </summary>
+        </member>
+        <member name="M:JetBrains.dotMemoryUnit.Kernel.dotMemoryApi.GetDifference(JetBrains.dotMemoryUnit.Kernel.Snapshot,JetBrains.dotMemoryUnit.Kernel.Snapshot)">
+            <summary>
+            Gets difference between two snapshots. The result contains data about objects that were allocated 
+            and collected in the timeframe between getting the snapshots.
+            </summary>
+        </member>
+        <member name="M:JetBrains.dotMemoryUnit.Kernel.dotMemoryApi.GetTrafficBetween(JetBrains.dotMemoryUnit.Kernel.Snapshot,JetBrains.dotMemoryUnit.Kernel.Snapshot)">
+            <summary>
+            Gets data about memory traffic in the timeframe between getting the snapshots.
+            </summary>
+        </member>
+        <member name="M:JetBrains.dotMemoryUnit.Kernel.dotMemoryApi.SaveCollectedData(System.String)">
+            <summary>
+            Saves the workspace containing all memory snapshots collected during unit test run to the specified directory. 
+            Use the <see cref="T:JetBrains.dotMemoryUnit.DotMemoryUnitAttribute"/> attribute if you want dotMemory Unit to automatically save workspaces. 
+            To view the collected snapshots, open the workspace in the standalone dotMemory profiler using the File | Import Workspace menu.
+            </summary>
+            <param name="directoryFullPath">Full path to the directory where workspace files should be saved.</param>
+        </member>
+        <member name="P:JetBrains.dotMemoryUnit.Kernel.dotMemoryApi.IsEnabled">
+            <summary>
+            Checks whether a test is run under dotMemory Unit.
+            Use it before calling the assert statements.
+            However, we recommend that you use <see cref="!:dotMemory.Check(Action&lt;T&gt;)"/> method for assertions.
+            </summary>
+            <remarks>However, we recommend that you use the <see cref="M:JetBrains.dotMemoryUnit.dotMemory.Check(System.Action{JetBrains.dotMemoryUnit.Memory})"/> method for this purpose.</remarks>
+        </member>
+        <member name="T:JetBrains.dotMemoryUnit.Kernel.SnapshotDifference">
+            <summary>
+            Representes a difference between two memory snapshots.
+            </summary>
+        </member>
+        <member name="M:JetBrains.dotMemoryUnit.Kernel.SnapshotDifference.GetNewObjects">
+            <summary>
+            Gets a set of new objects - the ones that were created and not collected in the timeframe between getting the snapshots.     
+            </summary>
+        </member>
+        <member name="M:JetBrains.dotMemoryUnit.Kernel.SnapshotDifference.GetDeadObjects">
+            <summary>
+            Gets a set of dead objects - the ones that were collected in the timeframe between getting the snapshots.     
+            </summary>
+        </member>
+        <member name="M:JetBrains.dotMemoryUnit.Kernel.SnapshotDifference.GetSurvivedObjects(JetBrains.dotMemoryUnit.Origin)">
+            <summary>
+            Gets a set of survived objects - the ones that were created before getting the base snapshot and not collected 
+            in the timeframe between getting the snapshots.
+            </summary>
+            <param name="from">Specifies whether the newer or older snapshot should be used to get data about survived objects.</param>
+        </member>
+        <member name="T:JetBrains.dotMemoryUnit.AssertTrafficAttribute">
+            <summary>
+            Allows you to assert that a test allocates less than a specific number of objects or memory amount. Apply it to test method.
+            </summary>
+        </member>
+        <member name="P:JetBrains.dotMemoryUnit.AssertTrafficAttribute.AllocatedSizeInBytes">
+            <summary>
+            Asserts the size of allocated objects in bytes.
+            </summary>
+        </member>
+        <member name="P:JetBrains.dotMemoryUnit.AssertTrafficAttribute.AllocatedObjectsCount">
+            <summary>
+            Asserts the number of allocated objects.
+            </summary>
+        </member>
+        <member name="P:JetBrains.dotMemoryUnit.AssertTrafficAttribute.Types">
+            <summary>
+            Allows selecting objects by type.
+            </summary>
+        </member>
+        <member name="P:JetBrains.dotMemoryUnit.AssertTrafficAttribute.Interfaces">
+            <summary>
+            Allows selecting objects by implemented interface.
+            </summary>
+        </member>
+        <member name="P:JetBrains.dotMemoryUnit.AssertTrafficAttribute.Namespaces">
+            <summary>
+            Allows selecting objects by namespace.
+            </summary>
+        </member>
+        <member name="M:JetBrains.dotMemoryUnit.dotMemory.Check">
+            <summary>
+            Gets a reference memory in this execution point. This point can be used to get difference and memory traffic with <see cref="M:JetBrains.dotMemoryUnit.dotMemory.Check(System.Action{JetBrains.dotMemoryUnit.Memory})"/> method
+            Gets a reference to memory data in the current execution point. 
+            Use this reference as a base for comparison with memory data taken in other points. 
+            For example, you can get data about objects that were allocated / collected between two points. 
+            See the <see cref="M:JetBrains.dotMemoryUnit.dotMemory.Check(System.Action{JetBrains.dotMemoryUnit.Memory})"/> method for details. 
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:JetBrains.dotMemoryUnit.dotMemory.Check(System.Action{JetBrains.dotMemoryUnit.Memory})">
+            <summary>
+            Gets a reference to memory data in the current execution point and checks these data using assert statements.
+            An assertion must be passed to the method in a lambda expression. By default, if the assertion fails, dotMemory Unit will auto-save 
+            the workspace with all collected snapshots. Use this workspace to analyze why the test fails.
+            Use <see cref="T:JetBrains.dotMemoryUnit.DotMemoryUnitAttribute"/> to change the default auto-save behavior.
+            </summary>
+            <param name="check">Lambda expression that is called if the test is run under dotMemory Unit.</param>
+            <returns>Returns a reference to memory data in the current execution point. Use this reference to compare memory data with the data taken in other points 
+            using the <see cref="M:JetBrains.dotMemoryUnit.dotMemory.Check"/> method. 
+            For example, you can get data about objects that were allocated / collected between two points. 
+            </returns>
+        </member>
+        <member name="T:JetBrains.dotMemoryUnit.Memory">
+            <summary>
+            Represents a reference to memory data at some execution point. 
+            </summary>
+        </member>
+        <member name="T:JetBrains.dotMemoryUnit.Kernel.Snapshot">
+            <summary>
+            Represents a memory snapshot. This is a low-level implementation of the <see cref="T:JetBrains.dotMemoryUnit.Memory"/> type.
+            </summary>
+        </member>
+        <member name="T:JetBrains.dotMemoryUnit.Sugar.ObjectSet">
+            <summary>
+            Represents a set of objects in memory.
+            </summary>
+        </member>
+        <member name="P:JetBrains.dotMemoryUnit.Sugar.ObjectSet.ObjectsCount">
+            <summary>
+            Returns a number of objects in the set.
+            </summary>
+        </member>
+        <member name="P:JetBrains.dotMemoryUnit.Sugar.ObjectSet.SizeInBytes">
+            <summary>
+            Returns total size of all objects in the set.
+            </summary>
+        </member>
+        <member name="M:JetBrains.dotMemoryUnit.Memory.GetDifference(JetBrains.dotMemoryUnit.MemoryCheckPoint)">
+            <summary>
+            Gets difference between this memory snapshot and the snapshot passed in <paramref name="memoryCheckPoint"/>.     
+            </summary>
+            <returns>Returns an instance of the SnapshotDifference type that allows you to get data about new, dead, and survived objects.  </returns>
+        </member>
+        <member name="M:JetBrains.dotMemoryUnit.Memory.GetTrafficFrom(JetBrains.dotMemoryUnit.MemoryCheckPoint)">
+            <summary>
+            Gets data about memory traffic in the timeframe between this memory snapshot and the snapshot passed in <paramref name="memoryCheckPoint"/>.
+            </summary>
+            <returns>Returns an instance of the Traffic type that allows you to get data about objects that were allocated
+            and collected during the specified timeframe.  </returns>
+        </member>
+        <member name="T:JetBrains.dotMemoryUnit.MemoryCheckPoint">
+            <summary>
+            Represents a reference to memory data in some execution point. 
+            Use this reference to get data about objects in memory, compare it with data taken in another execution point,
+            get traffic data between two execution points. For all these purposes, use the <see cref="M:JetBrains.dotMemoryUnit.dotMemory.Check(System.Action{JetBrains.dotMemoryUnit.Memory})"/> method.
+            </summary>
+        </member>
+        <member name="T:JetBrains.dotMemoryUnit.QueryBuilder">
+            <summary>
+            Allows creating and reusing queries.
+            </summary>
+        </member>
+        <member name="M:JetBrains.dotMemoryUnit.QueryBuilder.GetObjects(System.Func{JetBrains.dotMemoryUnit.Properties.ObjectProperty,JetBrains.dotMemoryUnit.Client.Interface.Query})">
+            <summary>
+            Gets a subset of objects that matches the passed query.
+            </summary>
+        </member>
+        <member name="M:JetBrains.dotMemoryUnit.QueryBuilder.GetObjects(JetBrains.dotMemoryUnit.ObjectSetQuery,System.Func{JetBrains.dotMemoryUnit.Properties.ObjectProperty,JetBrains.dotMemoryUnit.Client.Interface.Query})">
+            <summary>
+            Gets a subset of objects that matches the passed query.
+            </summary>
+        </member>
+        <member name="M:JetBrains.dotMemoryUnit.QueryBuilder.TrafficQuery(System.Func{JetBrains.dotMemoryUnit.Properties.TrafficProperty,JetBrains.dotMemoryUnit.Client.Interface.Query})">
+            <summary>
+            Gets memory traffic data for objects that match the passed query. 
+            </summary>
+        </member>
+        <member name="M:JetBrains.dotMemoryUnit.QueryBuilder.Where(JetBrains.dotMemoryUnit.TrafficQuery,System.Func{JetBrains.dotMemoryUnit.Properties.TrafficProperty,JetBrains.dotMemoryUnit.Client.Interface.Query})">
+            <summary>
+            Gets memory traffic data for objects that match the passed query. 
+            </summary>
+        </member>
+        <member name="P:JetBrains.dotMemoryUnit.DotMemoryUnitAttribute.SavingStrategy">
+            <summary>
+            Sets workspace auto-save conditions. See <see cref="P:JetBrains.dotMemoryUnit.DotMemoryUnitAttribute.SavingStrategy"/> for details.
+            The default value is <see cref="F:JetBrains.dotMemoryUnit.SavingStrategy.OnCheckFail"/>
+            </summary>
+        </member>
+        <member name="P:JetBrains.dotMemoryUnit.DotMemoryUnitAttribute.WorkspaceNumberLimit">
+            <summary>
+            Maximum number of workspaces that can be saved upon test failures.
+            The default value is 5.
+            </summary>
+        </member>
+        <member name="P:JetBrains.dotMemoryUnit.DotMemoryUnitAttribute.DiskSpaceLimit">
+            <summary>
+            Maximum disk size in bytes that can be used for storing workspaces. 
+            The default value is 200 MB.
+            If <see cref="P:JetBrains.dotMemoryUnit.DotMemoryUnitAttribute.WorkspaceNumberLimit"/> is greater than 0, the first saved workspace wich exceed this limit will be saved. 
+            </summary>
+        </member>
+        <member name="P:JetBrains.dotMemoryUnit.DotMemoryUnitAttribute.Directory">
+            <summary>
+            Full path of the directory where the data should be saved.
+            </summary>
+        </member>
+        <member name="T:JetBrains.dotMemoryUnit.Client.Interface.QueryExpression">
+            <summary>
+            QueryExpression is applied to an object set in order to get a subset of objects
+            Inherits Query is used just for syntax sugar reasons, this is not "is a" inheritance
+            </summary>
+        </member>
+        <member name="M:JetBrains.dotMemoryUnit.FluentQueries.GetObjects(JetBrains.dotMemoryUnit.Sugar.ObjectSet,System.Func{JetBrains.dotMemoryUnit.Properties.ObjectProperty,JetBrains.dotMemoryUnit.Client.Interface.Query})">
+            <summary>
+            Gets a subset of objects that matches the passed query.
+            </summary>
+            <param name="objectSet">Initial set of objects.</param>
+            <param name="query">Syntax sugar used to make a query.</param>
+        </member>
+        <member name="M:JetBrains.dotMemoryUnit.FluentQueries.GetObjects(JetBrains.dotMemoryUnit.Sugar.ObjectSet,JetBrains.dotMemoryUnit.ObjectSetQuery)">
+            <summary>
+            Gets a subset of objects that matches the passed query.
+            </summary>
+            <param name="objectSet">Initial set of objects.</param>
+            <param name="objectSetQuery">Query created by <see cref="T:JetBrains.dotMemoryUnit.QueryBuilder"/></param>
+        </member>
+        <member name="M:JetBrains.dotMemoryUnit.FluentQueries.GetExclusivelyRetainedObjects(JetBrains.dotMemoryUnit.ObjectSet)">
+            <summary>
+            Gets a set of objects that are exclusively retained by the specified object set.
+            </summary>
+        </member>
+        <member name="M:JetBrains.dotMemoryUnit.FluentQueries.Where(JetBrains.dotMemoryUnit.Kernel.Traffic,System.Func{JetBrains.dotMemoryUnit.Properties.TrafficProperty,JetBrains.dotMemoryUnit.Client.Interface.Query})">
+            <summary>
+            Gets memory traffic data that match the passed query. 
+            </summary>
+            <param name="traffic">Traffic data provided by <see cref="M:JetBrains.dotMemoryUnit.Memory.GetTrafficFrom(JetBrains.dotMemoryUnit.MemoryCheckPoint)"/> or <see cref="!:dotMemory.GetTrafficBetween(Snapshot, Snapshot)"/>.</param>
+            <param name="query">Query.</param>
+        </member>
+        <member name="M:JetBrains.dotMemoryUnit.FluentQueries.Where(JetBrains.dotMemoryUnit.Kernel.Traffic,JetBrains.dotMemoryUnit.TrafficQuery)">
+            <summary>
+            Gets memory traffic data that match the passed query. 
+            </summary>
+            <param name="traffic">Traffic data provided by <see cref="M:JetBrains.dotMemoryUnit.Memory.GetTrafficFrom(JetBrains.dotMemoryUnit.MemoryCheckPoint)"/> or <see cref="!:dotMemory.GetTrafficBetween(Snapshot, Snapshot)"/>.</param>
+            <param name="predicate">Query created by <see cref="T:JetBrains.dotMemoryUnit.QueryBuilder"/></param>
+        </member>
+        <member name="F:JetBrains.dotMemoryUnit.Properties.Generation.Gen1">
+            <summary>
+            Garbage collector generation 1
+            </summary>
+        </member>
+        <member name="F:JetBrains.dotMemoryUnit.Properties.Generation.Gen2">
+            <summary>
+            Garbage collector generation 2
+            </summary>
+        </member>
+        <member name="F:JetBrains.dotMemoryUnit.Properties.Generation.LOH">
+            <summary>
+            Large Object Heap
+            </summary>
+        </member>
+        <member name="T:JetBrains.dotMemoryUnit.Origin">
+            <summary>
+            Specifies whether the newer or older snapshot should be used to get data about survived objects. 
+            This is required as survived objects exist in both newer and older snapshots.
+            </summary>
+        </member>
+        <member name="F:JetBrains.dotMemoryUnit.SavingStrategy.OnCheckFail">
+            <summary>
+            Save workspaces only if the test fails on assertion passed into the guarded <see cref="M:JetBrains.dotMemoryUnit.dotMemory.Check"/> method.
+            </summary>
+        </member>
+        <member name="F:JetBrains.dotMemoryUnit.SavingStrategy.OnAnyFail">
+            <summary>
+            Save workspaces in case of any test failure.
+            </summary>
+        </member>
+        <member name="F:JetBrains.dotMemoryUnit.SavingStrategy.Never">
+            <summary>
+            Do not save workspaces.
+            </summary>
+        </member>
+        <member name="T:JetBrains.dotMemoryUnit.Kernel.Traffic">
+            <summary>
+            Represents memory traffic data.
+            </summary>
+        </member>
+        <member name="P:JetBrains.dotMemoryUnit.Kernel.Traffic.AllocatedMemory">
+            <summary>
+            Data on allocated objects: objects count and total size.
+            </summary>
+        </member>
+        <member name="P:JetBrains.dotMemoryUnit.Kernel.Traffic.CollectedMemory">
+            <summary>
+            Data on collected objects: objects count and total size.
+            </summary>
+        </member>
+    </members>
+</doc>

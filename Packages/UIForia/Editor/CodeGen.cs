@@ -28,6 +28,11 @@ namespace UIForia.Editor {
 
             // Background
             new AnimatedPropertyGenerator<Color>(StylePropertyId.BackgroundColor, ColorUtil.UnsetValue),
+            new AnimatedPropertyGenerator<Color>(StylePropertyId.BackgroundTint, ColorUtil.UnsetValue),
+            new AnimatedPropertyGenerator<Color>(StylePropertyId.BorderColorTop, ColorUtil.UnsetValue),
+            new AnimatedPropertyGenerator<Color>(StylePropertyId.BorderColorRight, ColorUtil.UnsetValue),
+            new AnimatedPropertyGenerator<Color>(StylePropertyId.BorderColorBottom, ColorUtil.UnsetValue),
+            new AnimatedPropertyGenerator<Color>(StylePropertyId.BorderColorLeft, ColorUtil.UnsetValue),
             new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.BackgroundImageOffsetX, new UIFixedLength(0)),
             new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.BackgroundImageOffsetY, new UIFixedLength(0)),
             new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.BackgroundImageScaleX, new UIFixedLength(0)),

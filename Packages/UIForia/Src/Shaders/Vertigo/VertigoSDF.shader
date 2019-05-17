@@ -88,7 +88,7 @@
 //                    
 //                    float4 underlayColor = _UnderlayColor;
 //                    underlayColor.rgb *= underlayColor.a;
-//                    
+//                    9
 //                    float bScale = scale;
 //                    bScale /= 1 + ((_UnderlaySoftness * _FontScaleRatioC) * bScale);
 //                    float bBias = (0.5 - weight) * bScale - 0.5 - ((_UnderlayDilate *  _FontScaleRatioC) * 0.5 * bScale);
@@ -103,26 +103,52 @@
                 return o;
             }
             
-            #define TextureMode_TextureOnly 1
-            #define TextureMode_TextureTint 2
-            #define TextureMode_TextureColor 3
-            #define TextureMode_TextureColorTint 4
+            float4 UnpackColor(uint input) {
+                return fixed4(
+                    uint((input >> 0) & 0xff) / float(0xff),
+                    uint((input >> 8) & 0xff) / float(0xff),
+                    uint((input >> 16) & 0xff) / float(0xff),
+                    uint((input >> 24) & 0xff) / float(0xff)
+                );
+            }
+
+            #define TextureMode_TextureOnly 1 << 1
+            #define TextureMode_TextureTint 1 << 2
+            #define TextureMode_TextureColor 1 << 0
             
             fixed4 frag (v2f i) : SV_Target {
+            
                 SDFData sdfData = UnpackSDFData(i.texCoord1, i.sdfCoord);
                 fixed4 mainColor = SDFColor(sdfData, i.color);
+                
                 fixed4 textureColor = tex2D(_MainTex, i.texCoord0.xy);
                 textureColor.rgb *= textureColor.a;
-                fixed4 bgColor = mainColor;
+                
+                fixed4 bgColor = UnpackColor(asuint(i.color.r));
+                fixed4 tintColor = UnpackColor(asuint(i.color.g));
+                uint colorMode = 1 << 0; //asuint(i.color.b) | (1 << 2);
+                int useColor = (colorMode & TextureMode_TextureColor) != 0;
+                int useTexture = (colorMode & TextureMode_TextureOnly) != 0;
+                int mix = useColor && useTexture;
                 
                 fixed4 outputColor;
+                textureColor = lerp(textureColor, textureColor * tintColor, (colorMode & TextureMode_TextureTint) != 0);
+                
+                if(mix) {
+                    return lerp(textureColor, bgColor, 1 - textureColor.a);
+                }
+                
+                outputColor =  lerp(textureColor, bgColor, (colorMode & TextureMode_TextureOnly) != 0);
+                fixed mixTextureAndColor = (colorMode & TextureMode_TextureColor) != 0 && (colorMode & TextureMode_TextureOnly) != 0;
+                
+                return outputColor;
                 
                 // clip(textureColor.a - 0.01);
-                //fixed maskAlpha = saturate(tex2D(_MaskTexture, i.texCoord0.xy).a / _MaskSoftness);
-                //maskAlpha = lerp(1 - maskAlpha, maskAlpha, _InvertMask);
-               // mainColor.a *= maskAlpha;
-                return textureColor;// * fixed4(bgColor.rgb, 1) * 2; 
-//                return lerp(textureColor, bgColor, 1 - textureColor.a);
+                // fixed maskAlpha = saturate(tex2D(_MaskTexture, i.texCoord0.xy).a / _MaskSoftness);
+                // maskAlpha = lerp(1 - maskAlpha, maskAlpha, _InvertMask);
+                // mainColor.a *= maskAlpha;
+                // return textureColor;// * fixed4(bgColor.rgb, 1) * 2;
+                return lerp(textureColor * tintColor, bgColor, 1 - textureColor.a);
             }
 
             ENDCG

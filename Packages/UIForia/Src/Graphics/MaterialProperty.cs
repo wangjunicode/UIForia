@@ -8,8 +8,8 @@ namespace Vertigo {
 
         [FieldOffset(0)] public readonly MaterialPropertyType type;
         [FieldOffset(4)] public readonly int key;
-        [FieldOffset(8)] public readonly Texture textureValue;
-        [FieldOffset(12)] public readonly Color32 colorValue;
+        [FieldOffset(8)] public readonly Texture textureValue; // maybe map to id, ref type w/ field offset might be dangerous
+        [FieldOffset(12)] public readonly Color colorValue;
         [FieldOffset(12)] public readonly float floatVal;
         [FieldOffset(12)] public readonly int intVal;
         [FieldOffset(12)] public readonly Vector4 vectorValue;
@@ -44,7 +44,7 @@ namespace Vertigo {
             this.intVal = value;
         }
 
-        public MaterialProperty(int key, Color32 value) {
+        public MaterialProperty(int key, in Color value) {
             this.type = MaterialPropertyType.Color;
             this.key = key;
             this.floatVal = default;
@@ -54,7 +54,7 @@ namespace Vertigo {
             this.colorValue = value;
         }
 
-        public MaterialProperty(int key, Vector4 value) {
+        public MaterialProperty(int key, in Vector4 value) {
             this.type = MaterialPropertyType.Vector;
             this.key = key;
             this.colorValue = default;

@@ -25,6 +25,7 @@ namespace UIForia.Compilers.Style {
 
                 // Background
                 {"backgroundcolor", (targetStyle, property, context) => targetStyle.BackgroundColor = MapColor(property, context)},
+                {"backgroundtint", (targetStyle, property, context) => targetStyle.BackgroundTint = MapColor(property, context)},
                 {"backgroundimageoffsetx", (targetStyle, property, context) => targetStyle.BackgroundImageOffsetX = MapFixedLength(property.children[0], context)},
                 {"backgroundimageoffsety", (targetStyle, property, context) => targetStyle.BackgroundImageOffsetY = MapFixedLength(property.children[0], context)},
                 {"backgroundimagescalex", (targetStyle, property, context) => targetStyle.BackgroundImageScaleX = MapFixedLength(property.children[0], context)},
@@ -50,7 +51,12 @@ namespace UIForia.Compilers.Style {
                 {"paddingbottom", (targetStyle, property, context) => targetStyle.PaddingBottom = MapFixedLength(property.children[0], context)},
                 {"paddingleft", (targetStyle, property, context) => targetStyle.PaddingLeft = MapFixedLength(property.children[0], context)},
 
+                // todo -- border color goes way and becomes a setter for all 4 sides
                 {"bordercolor", (targetStyle, property, context) => targetStyle.BorderColor = MapColor(property, context)},
+                {"bordercolortop", (targetStyle, property, context) => targetStyle.BorderColor = MapColor(property, context)},
+                {"bordercolorright", (targetStyle, property, context) => targetStyle.BorderColor = MapColor(property, context)},
+                {"bordercolorbottom", (targetStyle, property, context) => targetStyle.BorderColor = MapColor(property, context)},
+                {"bordercolorleft", (targetStyle, property, context) => targetStyle.BorderColor = MapColor(property, context)},
 
                 {"border", (targetStyle, property, context) => MapBorders(targetStyle, property, context)},
                 {"bordertop", (targetStyle, property, context) => targetStyle.BorderTop = MapFixedLength(property.children[0], context)},
@@ -360,6 +366,42 @@ namespace UIForia.Compilers.Style {
             }
         }
 
+        private static void MapBorderColor(UIStyle targetStyle, PropertyNode property, StyleCompileContext context) {
+            throw new ImFeelingLazyException();
+//            Color value1 = MapColor(property.children[0], context);
+//
+//            if (property.children.Count == 1) {
+//                targetStyle.BorderTop = value1;
+//                targetStyle.BorderRight = value1;
+//                targetStyle.BorderBottom = value1;
+//                targetStyle.BorderLeft = value1;
+//            }
+//            else if (property.children.Count == 2) {
+//                UIFixedLength value2 = MapFixedLength(property.children[1], context);
+//                targetStyle.BorderTop = value1;
+//                targetStyle.BorderRight = value2;
+//                targetStyle.BorderBottom = value1;
+//                targetStyle.BorderLeft = value2;
+//            }
+//            else if (property.children.Count == 3) {
+//                UIFixedLength value2 = MapFixedLength(property.children[1], context);
+//                UIFixedLength value3 = MapFixedLength(property.children[2], context);
+//                targetStyle.BorderTop = value1;
+//                targetStyle.BorderRight = value2;
+//                targetStyle.BorderBottom = value3;
+//                targetStyle.BorderLeft = value2;
+//            }
+//            else if (property.children.Count > 3) {
+//                UIFixedLength value2 = MapFixedLength(property.children[1], context);
+//                UIFixedLength value3 = MapFixedLength(property.children[2], context);
+//                UIFixedLength value4 = MapFixedLength(property.children[3], context);
+//                targetStyle.BorderTop = value1;
+//                targetStyle.BorderRight = value2;
+//                targetStyle.BorderBottom = value3;
+//                targetStyle.BorderLeft = value4;
+//            }
+        }
+        
         private static void MapBorders(UIStyle targetStyle, PropertyNode property, StyleCompileContext context) {
             UIFixedLength value1 = MapFixedLength(property.children[0], context);
 
@@ -908,4 +950,7 @@ namespace UIForia.Compilers.Style {
             public string SpriteName;
         }
     }
+
+    internal class ImFeelingLazyException : Exception { }
+
 }

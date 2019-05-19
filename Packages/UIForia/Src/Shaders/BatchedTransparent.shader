@@ -113,7 +113,7 @@ Shader "UIForia/BatchedTransparent" {
                    if(fDist <= 0) {
                        toColor = fixed4(i.color.rgb, 0);//Clear;
                    }
-                   fDist = abs(fDist) - halfStrokeWidth;
+                   fDist = abs(fDist) - halfStrokeWidth; // stroke only but with rounding. can also use a subtract sdf operator for stroke
                }
                else {
                    // HACK this fixes an issue with blend mode for rects which is our common case

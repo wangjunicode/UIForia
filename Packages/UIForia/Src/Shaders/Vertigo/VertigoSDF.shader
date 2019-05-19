@@ -63,7 +63,7 @@
                 o.color = v.color;
                 o.texCoord0 = v.texCoord0;
                 o.texCoord1 = v.texCoord1;
-                o.sdfCoord = UnpackSDFCoordinates(v.texCoord1.z, v.texCoord1.w);
+                o.sdfCoord = UnpackToHalf2(v.texCoord1.w);
                 
 //                if(v.texCoord2.x == 1) {
 //                    float outlineWidth = input.uv2.x;
@@ -116,29 +116,19 @@
             #define PaintMode_Texture 1 << 1
             #define PaintMode_TextureTint 1 << 2
             
-            fixed4 frag (v2f i) : SV_Target {
-                // todo -- vertex decode
-                uint colorMode = i.color.b;
+            inline fixed4 ComputeColor(float4 packedColor, float2 texCoord) {
+                uint colorMode = packedColor.b;
+
                 int useColor = (colorMode & PaintMode_Color) != 0;
                 int useTexture = (colorMode & PaintMode_Texture) != 0;
                 int tintTexture = (colorMode & PaintMode_TextureTint) != 0;
                 
-                fixed4 bgColor = UnpackColor(asuint(i.color.r));
-                fixed4 tintColor = UnpackColor(asuint(i.color.g));
-                
-                SDFData sdfData = UnpackSDFData(i.texCoord1, i.sdfCoord);
-                sdfData.uv.x = i.texCoord0.x;
-                sdfData.uv.y = i.texCoord0.y;
-//                sdfData.size.x = 500;
-//                sdfData.size.y = 200;
-               // return fixed4(sdfData.uv.y, sdfData.uv.y, sdfData.uv.y, 1);
-                //sdfData.radius = 0.5;
-                
-                fixed4 mainColor = SDFColor(sdfData, bgColor);
-                
-                return mainColor;
-                
-                fixed4 textureColor = tex2D(_MainTex, i.texCoord0.xy);
+                fixed4 bgColor = UnpackColor(asuint(packedColor.r));
+                fixed4 tintColor = UnpackColor(asuint(packedColor.g));
+                fixed4 textureColor = tex2D(_MainTex, texCoord);
+
+                bgColor.rgb *= bgColor.a;
+                tintColor.rgb *= tintColor.a;
                 textureColor.rgb *= textureColor.a;
                 
                 textureColor = lerp(textureColor, textureColor * tintColor, tintTexture);
@@ -148,6 +138,22 @@
                 }
                 
                 return lerp(bgColor, textureColor, useTexture);
+            }
+             
+            fixed4 frag (v2f i) : SV_Target {
+                           
+                SDFData sdfData = UnpackSDFData(i.texCoord1, i.sdfCoord);
+                sdfData.strokeWidth = 30;
+                sdfData.shapeType = ShapeType_RectLike;
+                // todo -- to combat cut off of edges, constraint texcoords to 0.1 - 0.99 or something similiar
+                fixed4 alpha = SDFColor(sdfData, fixed4(1, 0, 0, 1));
+                alpha.rgb *= alpha.a;
+                return alpha;
+                
+                fixed4 mainColor = ComputeColor(i.color, i.texCoord0.xy);
+                mainColor.a = alpha;
+                mainColor.rgb *=  mainColor.a;
+                return mainColor;
                 
                 // clip(textureColor.a - 0.01);
                 // fixed maskAlpha = saturate(tex2D(_MaskTexture, i.texCoord0.xy).a / _MaskSoftness);

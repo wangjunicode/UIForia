@@ -69,7 +69,7 @@ float PolygonSDF(float2 p, int vertexCount, float radius) {
     return inside + outside;
 }
 
-half2 UnpackToVec2(float value) {
+half2 UnpackToHalf2(float value) {
 	const int PACKER_STEP = 4096;
 	const int PRECISION = PACKER_STEP - 1;
 	half2 unpacked;
@@ -79,15 +79,6 @@ half2 UnpackToVec2(float value) {
 
 	unpacked.y = (value % PACKER_STEP) / (PACKER_STEP - 1);
 	return unpacked;
-}
-
-float4 UnpackSDFCoordinates(float packedSize, float packedUVs) {
-    uint intSize = asuint(packedSize);
-
-    float width = ((intSize >> 16) & (1 << 16) - 1) / 10;
-    float height = ( intSize & 0xffff) / 10;
-    
-    return float4(UnpackToVec2(packedUVs), width, height);
 }
 
 inline int and(int a, int b) {
@@ -120,7 +111,7 @@ inline float4 UnpackSDFRadii(float packed) {
 
 #define ShapeType_RectLike (ShapeType_Rect | ShapeType_RoundedRect | ShapeType_Circle)
 
-SDFData UnpackSDFData(float4 packedData, float4 coords) {
+SDFData UnpackSDFData(float4 packedData, float2 coords) {
     
     float left = step(coords.x, 0.5); // 1 if left
     float bottom = step(coords.y, 0.5); // 1 if bottom
@@ -130,16 +121,21 @@ SDFData UnpackSDFData(float4 packedData, float4 coords) {
     float4 radii = UnpackSDFRadii(packedData.x);
     
     float r = 0;
-    r += and(top, left) * radii.x;
-    r += and(top, right) * radii.y;
-    r += and(bottom, left) * radii.z;
-    r += and(bottom, right) * radii.w;
+    r += (top * left)* radii.x;
+    r += (top * right) * radii.y;
+    r += (bottom * left) * radii.z;
+    r += (bottom * right) * radii.w;
     
     float radius = (r * 2) / 1000;
+    float borderSize = 0;
+    uint intSize = asuint(packedData.z);
+
+    float width = ((intSize >> 16) & (1 << 16) - 1) / 10;
+    float height = ( intSize & 0xffff) / 10;
     
     SDFData retn;
     retn.uv = coords.xy;
-    retn.size = abs(coords.zw);
+    retn.size = float2(width, height);
     retn.radius = radius;
     retn.strokeWidth = 0;
     retn.shapeType = asuint(packedData.y) & 0xff;
@@ -164,24 +160,29 @@ fixed4 SDFRectColor(SDFData sdfData, fixed4 color) {
             
 fixed4 SDFColor(SDFData sdfData, fixed4 color) {
     float fDist = 0;
-    float halfStrokeWidth = sdfData.strokeWidth * 0.5;
-    fixed4 fromColor = color;
-    fixed4 toColor = fixed4(color.rgb, 0);
+    float halfStrokeWidth = 0;// sdfData.strokeWidth * 0.5;
+    fixed4 strokeColor = fixed4(color.rgb, 0);
+    fixed4 fillColor = fixed4(color.rgb, 1);
     float2 size = sdfData.size;
     float minSize = min(size.x, size.y);
-    float2 halfShapeSize = (size * 0.5) - halfStrokeWidth;
-    float radius = clamp(size * sdfData.radius, 0, minSize);
+    float2 halfShapeSize = (size * 0.5);
+    float radius = clamp(minSize * sdfData.radius, 0, minSize);
     float2 center = (sdfData.uv.xy - 0.5) * size;   
     float fBlendAmount = 0;
 
-    // UIForia will only every use Rect, painters might use others
-    if((sdfData.shapeType & ShapeType_RectLike) != 0) {
-        fDist = RectSDF(center, halfShapeSize, radius - halfStrokeWidth);
-        float s = lerp(0, -1, radius / minSize);
-        float e = lerp(1, 0, radius / minSize);
-        fBlendAmount = smoothstep(s, e, fDist);
-    }
-    
+        
+    float2 sizeForStroke = halfShapeSize - halfStrokeWidth;
+    minSize = min(sizeForStroke.x, sizeForStroke.y) * 2;
+    radius = clamp(minSize * sdfData.radius, 0, minSize);
+    float shape1 = RectSDF(center, halfShapeSize, radius);
+    float shape2 = RectSDF(center, sizeForStroke, radius);
+    float retn = lerp(shape1, max(shape1, -shape2), halfStrokeWidth > 0);
+
+    fBlendAmount = smoothstep(-1, 1, retn);
+
+        
+    //}
+    /*
     if(sdfData.shapeType == ShapeType_Ellipse) {
         fDist = EllipseSDF(center - float2(0, 0.5), halfShapeSize);
         fBlendAmount = smoothstep(-1, 1, fDist);
@@ -198,7 +199,7 @@ fixed4 SDFColor(SDFData sdfData, fixed4 color) {
         //fBlendAmount = smoothstep(-distanceChange, distanceChange, fDist);
         fBlendAmount = smoothstep(-1, 1, fDist);
     }
-    
+    */
    /* halfStrokeWidth = 10;
     fDist = RhombusSDF(center * (size + halfStrokeWidth * 0.5), halfShapeSize - halfStrokeWidth);
     float innerDist = abs(RhombusSDF(center * (size + halfStrokeWidth * 0.5), halfShapeSize - halfStrokeWidth)) - halfStrokeWidth;
@@ -220,8 +221,7 @@ fixed4 SDFColor(SDFData sdfData, fixed4 color) {
     // use larger negative to get nice blur effect
     // smoothstep(-1, 0, fDist) gives the best aa but there is a gap between shapes that should touch
     // smoothstep(0, 1, fDist) fixes the gap perfectly but causes rounded shapes to be slightly cut off at the bottom and right edges
-
-    return lerp(fromColor, toColor, fBlendAmount);
+    return lerp(strokeColor, fillColor, 1 - fBlendAmount); // do not pre-multiply alpha here!
 }
          
 #endif // VERTIGO_SDF_INCLUDE

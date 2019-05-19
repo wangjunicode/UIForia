@@ -60,7 +60,7 @@ namespace Src.Systems {
         public Vector2 backgroundScale;
         public float backgroundRotation;
         public ResolvedBorderRadius borderRadius;
-        public Vector4 borderSize;
+        public OffsetRect borderSize;
 
         // todo -- border style
 
@@ -71,7 +71,6 @@ namespace Src.Systems {
         public ISVGXPaintable painter;
         public ISVGXElementPainter selfPainter;
         public RenderMethod renderMethod;
-        public int geometryId;
         public Texture backgroundImage;
         public VertigoMaterial material;
         public bool isText;
@@ -137,7 +136,7 @@ namespace Src.Systems {
             UIForiaGraphicsInterface ctx = gfx.GetRenderInterface<UIForiaGraphicsInterface>();
            
 
-            gfx.SetTransform(Matrix4x4.TRS(new Vector3(-Screen.width * 0.5f, Screen.height * 0.5f), Quaternion.identity, Vector3.one));
+            gfx.SetTransform(Matrix4x4.TRS(new Vector3(10 + (-Screen.width * 0.5f), (Screen.height * 0.5f) - 10), Quaternion.identity, Vector3.one));
 
             layoutSystem.GetVisibleElements(elementsToRender);
 
@@ -179,6 +178,9 @@ namespace Src.Systems {
                 ctx.SetTextureProperty(ShaderKey.MainTexture, renderInfo.backgroundImage);
                 ctx.fillColor = renderInfo.backgroundColor;
                 ctx.FillRect(position.x, position.y, size.width, size.height, renderInfo);
+
+                ctx.FillMixedBorderRect(position.x, position.y, size.width, size.height, renderInfo);
+                
                 switch (renderInfo.renderMethod) {
                     case RenderMethod.Painter:
                         ctx.Save();

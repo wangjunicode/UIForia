@@ -1,10 +1,12 @@
 
 style container {
-    PreferredSize = 1pca;
+    PreferredSize = 300px 200px;
     BackgroundColor = yellow;
-    BackgroundTint = rgba(255, 0, 85, 255);
-    BackgroundImage = url("icon_2");
+    BackgroundTint = rgba(100, 0, 85, 255);
+    BackgroundImage = url("image");
     BorderRadius = 50%;
+    BorderRadiusTopRight = 25px;
+    Border
 }
 
 style header {

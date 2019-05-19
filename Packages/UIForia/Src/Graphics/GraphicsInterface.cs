@@ -188,8 +188,6 @@ namespace Vertigo {
             colors[startVert + 1] = color;
             colors[startVert + 2] = color;
             colors[startVert + 3] = color;
-
-
             
             texCoord0[startVert + 0] = uv0;
             texCoord0[startVert + 1] = uv1;
@@ -198,8 +196,8 @@ namespace Vertigo {
 
             uv0.x = borderRadii;
             uv0.y = 0;
-            uv1.z = packedSize;
-            uv1.w = packedUV0;
+            uv0.z = packedSize;
+            uv0.w = packedUV0;
             
             uv1.x = borderRadii;
             uv1.y = 0;
@@ -229,6 +227,36 @@ namespace Vertigo {
             triangles[startTriangle + 5] = startVert + 0;
 
             gfx.UpdateSizes(4, 6);
+        }
+
+        public void FillMixedBorderRect(float x, float y, float width, float height, in RenderInfo renderInfo) {
+            Vector3 p0 = new Vector3(x, -y);
+            Vector3 p1 = new Vector3(x + width, -y);
+            Vector3 p2 = new Vector3(x + width, -(y + height));
+            Vector3 p3 = new Vector3(x, -(y + height));
+            
+            float leftSize = renderInfo.borderSize.left;
+            float rightSize = renderInfo.borderSize.right;
+            float topSize = renderInfo.borderSize.top;
+            float bottomSize = renderInfo.borderSize.bottom;
+            
+            Vector3 p0Inset = p0 + new Vector3(leftSize, -topSize);
+            Vector3 p1Inset = p1 + new Vector3(-rightSize, -topSize);
+            Vector3 p2Inset = p2 + new Vector3(-rightSize, bottomSize);
+            Vector3 p3Inset = p3 + new Vector3(leftSize, bottomSize);
+
+            if (topSize > 0) {
+                
+                if (leftSize > 0) {
+                    
+                }
+
+                if (rightSize > 0) {
+                    
+                }
+                
+            }
+            
         }
 
     }

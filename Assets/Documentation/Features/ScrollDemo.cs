@@ -11,7 +11,7 @@ namespace Demo {
 
         public override void OnCreate() {
             list = new RepeatableList<int>();
-            for (int i = 0; i < 100; i++) {
+            for (int i = 0; i < 20; i++) {
                 list.Add(i);
             }
         }

@@ -45,11 +45,10 @@ namespace UIForia.Systems {
             //todo -- use non alloc version
             LightList<UIElement> visibleElements = layoutSystem.GetVisibleElements();
 
-                RenderView(views[0], visibleElements);
-//            for (int i = 0; i < views.Count; i++) {
-//            }
+            RenderView(views[0], visibleElements);
 
             gfx.Render(ctx);
+            
         }
 
         private static void DrawNormalFill(ImmediateRenderContext ctx, UIElement element) {
@@ -126,17 +125,16 @@ namespace UIForia.Systems {
                     PaintElement(ctx, current);
                 }
 
-                Size scrollbarVerticalSize = current.layoutResult.scrollbarVerticalSize;
-                if (scrollbarVerticalSize.IsDefined()) {
-                    Scrollbar scrollbar = Application.GetCustomScrollbar(null);
-                    Vector2 screenPosition = current.layoutResult.screenPosition;
-                    float width = current.layoutResult.allocatedSize.width;
-                    Vector2 pos = new Vector2(screenPosition.x + width - scrollbarVerticalSize.width, screenPosition.y);
-                    matrix = SVGXMatrix.TRS(pos, 0, Vector2.one);
-                    scrollbar.Paint(current, scrollbarVerticalSize, ctx, matrix);
-                }
+//                Size scrollbarVerticalSize = current.layoutResult.scrollbarVerticalSize;
+//                if (scrollbarVerticalSize.IsDefined()) {
+//                    Scrollbar scrollbar = Application.GetCustomScrollbar(null);
+//                    Vector2 screenPosition = current.layoutResult.screenPosition;
+//                    float width = current.layoutResult.allocatedSize.width;
+//                    Vector2 pos = new Vector2(screenPosition.x + width - scrollbarVerticalSize.width, screenPosition.y);
+//                    matrix = SVGXMatrix.TRS(pos, 0, Vector2.one);
+//                    scrollbar.Paint(current, scrollbarVerticalSize, ctx, matrix);
+//                }
 
-                if (current.layoutResult.HasScrollbarHorizontal) { }
             }
 
             DrawDebugOverlay?.Invoke(ctx);
@@ -178,6 +176,9 @@ namespace UIForia.Systems {
             if (current.style.OverflowY != Overflow.Visible) {
                 Size allocated = current.layoutResult.allocatedSize;
                 ctx.EnableScissorRect(new Rect(screenPos.x, screenPos.y, allocated.width, allocated.height));
+            }
+            else {
+                ctx.DisableScissorRect();
             }
 
             if (resolveBorderRadius == Vector4.zero) {
@@ -265,7 +266,7 @@ namespace UIForia.Systems {
         public void OnElementCreated(UIElement element) { }
 
         public event Action<ImmediateRenderContext> DrawDebugOverlay;
-        
+
         public void SetCamera(Camera camera) {
             if (!camera.orthographic) {
                 throw new Exception("The camera used to render the UI must be marked as orthographic");
@@ -274,7 +275,7 @@ namespace UIForia.Systems {
             if (camera.farClipPlane < 50000) {
                 Debug.LogWarning("The camera used to render the UI should have a far clip plane set to at least 50000");
             }
-            
+
             m_Camera = camera;
             gfx.SetCamera(camera);
         }

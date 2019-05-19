@@ -233,7 +233,7 @@ namespace UIForia.Systems {
                     float currentWidth = box.allocatedWidth;
                     float currentHeight = box.allocatedHeight;
                     box.allocatedWidth = box.GetWidths().clampedSize;
-                    box.allocatedHeight = box.GetHeights(box.actualHeight).clampedSize;
+                    box.allocatedHeight = box.GetHeights(box.allocatedWidth).clampedSize;
                     box.localX = 0;
                     box.localY = 0;
                     if (box.allocatedWidth != currentWidth || box.allocatedHeight != currentHeight) {

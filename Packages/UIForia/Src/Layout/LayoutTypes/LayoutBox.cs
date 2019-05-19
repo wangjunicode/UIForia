@@ -516,7 +516,7 @@ namespace UIForia.Layout.LayoutTypes {
 
                 case UIMeasurementUnit.ParentSize:
                     if (parent == null) return view.Viewport.width;
-                    if (parent.prefWidth.IsContentBased) {
+                    if (style.LayoutBehavior != LayoutBehavior.Ignored && parent.prefWidth.IsContentBased) {
                         return 0f;
                     }
 
@@ -530,7 +530,7 @@ namespace UIForia.Layout.LayoutTypes {
 
                 case UIMeasurementUnit.ParentContentArea:
                     if (parent == null) return view.Viewport.width;
-                    if (parent.prefWidth.IsContentBased) {
+                    if (style.LayoutBehavior != LayoutBehavior.Ignored && parent.prefWidth.IsContentBased) {
                         // todo there are cases where this is not true
                         // if we hit the paradox -> size = own content size
                         // ie parent is layout that can grow and parent is growing
@@ -753,7 +753,7 @@ namespace UIForia.Layout.LayoutTypes {
 
                 case UIMeasurementUnit.ParentSize:
                     if (parent == null) return view.Viewport.height;
-                    if (parent.prefHeight.IsContentBased) {
+                    if (style.LayoutBehavior != LayoutBehavior.Ignored && parent.prefHeight.IsContentBased) {
                         return 0f;
                     }
 
@@ -767,7 +767,7 @@ namespace UIForia.Layout.LayoutTypes {
 
                 case UIMeasurementUnit.ParentContentArea:
                     if (parent == null) return view.Viewport.height;
-                    if (parent.prefHeight.IsContentBased) {
+                    if (style.LayoutBehavior != LayoutBehavior.Ignored && parent.prefHeight.IsContentBased) {
                         return 0f;
                     }
 
@@ -977,7 +977,7 @@ namespace UIForia.Layout.LayoutTypes {
                     return Mathf.Max(0, view.Viewport.height * widthMeasurement.value);
 
                 case UIMeasurementUnit.ParentContentArea:
-                    if (parent.prefWidth.IsContentBased) {
+                    if (style.LayoutBehavior != LayoutBehavior.Ignored && parent.prefWidth.IsContentBased) {
                         return 0f;
                     }
 
@@ -1036,7 +1036,7 @@ namespace UIForia.Layout.LayoutTypes {
                     return Mathf.Max(0, view.Viewport.height * heightMeasurement.value);
 
                 case UIMeasurementUnit.ParentContentArea:
-                    if (parent.prefHeight.IsContentBased) {
+                    if (style.LayoutBehavior != LayoutBehavior.Ignored && parent.prefHeight.IsContentBased) {
                         return 0f;
                     }
 

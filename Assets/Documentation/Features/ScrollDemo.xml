@@ -5,9 +5,13 @@
     
     <Contents>
         
-        <Repeat style="scroll-container" list="list">
-            <Text>This is content {$index}</Text>
-        </Repeat>
+        <ScrollView>
+            
+            <Repeat style="scroll-container" list="list">
+                <Text>This is content {$index}</Text>
+            </Repeat>
+            
+        </ScrollView>
         
     </Contents>
 </UITemplate>

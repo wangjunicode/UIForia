@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using JetBrains.Annotations;
 using Src.Systems;
 using UIForia.Util;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
 
@@ -25,6 +26,13 @@ namespace Vertigo {
 
         public override void BeginFrame() {
             geometry.ClearGeometryData();
+        }
+
+        public override void SetTextureProperty(int key, Texture texture) {
+            if (ReferenceEquals(texture, null)) {
+                return;
+            }
+            gfx.SetTextureProperty(key, texture);
         }
         
         public void EnableUVTransform(in UVTransform uvTransform) {
@@ -53,11 +61,19 @@ namespace Vertigo {
             }
             
             // resolve to percentage of width / height, input will be resolved pixel value
+            float min = math.min(width, height);
+            if (min <= 0) min = 0.0001f;
+            float halfMin = min * 0.5f;
+
+            float r0 = math.clamp(info.borderRadius.topLeft, 0, halfMin) / min;
+            float r1 = math.clamp(info.borderRadius.topRight, 0, halfMin) / min;
+            float r2 = math.clamp(info.borderRadius.bottomLeft, 0, halfMin) / min;
+            float r3 = math.clamp(info.borderRadius.bottomRight, 0, halfMin) / min;
             
-            byte b0 = (byte) (((info.borderRadius.x * 1000)) * 0.5f);
-            byte b1 = (byte) (((info.borderRadius.y * 1000)) * 0.5f);
-            byte b2 = (byte) (((info.borderRadius.z * 1000)) * 0.5f);
-            byte b3 = (byte) (((info.borderRadius.w * 1000)) * 0.5f);
+            byte b0 = (byte) (((r0 * 1000)) * 0.5f);
+            byte b1 = (byte) (((r1 * 1000)) * 0.5f);
+            byte b2 = (byte) (((r2 * 1000)) * 0.5f);
+            byte b3 = (byte) (((r3 * 1000)) * 0.5f);
             
             float borderRadii = VertigoUtil.BytesToFloat(b0, b1, b2, b3);
             float borderColorTop = VertigoUtil.ColorToFloat(info.borderColorTop);
@@ -65,10 +81,8 @@ namespace Vertigo {
             float borderColorBottom = VertigoUtil.ColorToFloat(info.borderColorBottom);
             float borderColorLeft = VertigoUtil.ColorToFloat(info.borderColorLeft);
 
-            Color color = info.backgroundColor;
-            Color tint = info.backgroundTint;
-            float packedBackgroundColor = VertigoUtil.ColorToFloat(color);
-            float packedBackgroundTint = VertigoUtil.ColorToFloat(tint);
+            float packedBackgroundColor = VertigoUtil.ColorToFloat(info.backgroundColor);
+            float packedBackgroundTint = VertigoUtil.ColorToFloat(info.backgroundTint);
             
             PaintMode colorMode = PaintMode.None;
             
@@ -84,7 +98,8 @@ namespace Vertigo {
                 colorMode |= PaintMode.Color;
             }
 
-            float encodedColorMode = FloatUtil.DecodeToFloat((int) (PaintMode.Texture));
+            Color color = new Color(packedBackgroundColor, packedBackgroundTint, (int) (colorMode), 0);
+
             
             // texcoord 0 xy = uv zw = size
             // texcoord 1 x = border radius, y = border sizes z = (fill color mode | shape type)
@@ -92,6 +107,37 @@ namespace Vertigo {
            
             gfx.EnsureAdditionalCapacity(4, 6);
 
+            Vector4 uv0;
+            Vector4 uv1;
+            Vector4 uv2;
+            Vector4 uv3;
+            
+            uv0.x = 0;
+            uv0.y = 1;
+            uv0.z = width;
+            uv0.w = height;
+            
+            uv1.x = 1;
+            uv1.y = 1;
+            uv1.z = width;
+            uv1.w = height;
+            
+            uv2.x = 1;
+            uv2.y = 0;
+            uv2.z = width;
+            uv2.w = height;
+            
+            uv3.x = 0;
+            uv3.y = 0;
+            uv3.z = width;
+            uv3.w = height;
+            
+            float packedSize = VertigoUtil.PackSizeVector(new Vector2(width, height));
+            float packedUV0 = VertigoUtil.Vector2ToFloat(uv0);
+            float packedUV1 = VertigoUtil.Vector2ToFloat(uv1);
+            float packedUV2 = VertigoUtil.Vector2ToFloat(uv2);
+            float packedUV3 = VertigoUtil.Vector2ToFloat(uv3);
+            
             Vector3 p0;
             Vector3 p1;
             Vector3 p2;
@@ -127,7 +173,7 @@ namespace Vertigo {
             Vector4[] texCoord0 = gfx.texCoordList0.array;
             Vector4[] texCoord1 = gfx.texCoordList1.array;
             int[] triangles = gfx.triangleList.array;
-
+            
             positions[startVert + 0] = p0;
             positions[startVert + 1] = p1;
             positions[startVert + 2] = p2;
@@ -138,47 +184,12 @@ namespace Vertigo {
             normals[startVert + 2] = n0;
             normals[startVert + 3] = n0;
 
-            colors[startVert + 0].r = packedBackgroundColor;
-            colors[startVert + 0].g = packedBackgroundTint;
-            colors[startVert + 0].b = encodedColorMode;
-            
-            colors[startVert + 1].r = packedBackgroundColor;
-            colors[startVert + 1].g = packedBackgroundTint;
-            colors[startVert + 1].b = encodedColorMode;
-            
-            colors[startVert + 2].r = packedBackgroundColor;
-            colors[startVert + 2].g = packedBackgroundTint;
-            colors[startVert + 2].b = encodedColorMode;
-            
-            colors[startVert + 3].r = packedBackgroundColor;
-            colors[startVert + 3].g = packedBackgroundTint;
-            colors[startVert + 3].b = encodedColorMode;
-            
+            colors[startVert + 0] = color;
+            colors[startVert + 1] = color;
+            colors[startVert + 2] = color;
+            colors[startVert + 3] = color;
 
-            Vector4 uv0;
-            Vector4 uv1;
-            Vector4 uv2;
-            Vector4 uv3;
-            
-            uv0.x = 0;
-            uv0.y = 1;
-            uv0.z = width;
-            uv0.w = height;
-            
-            uv1.x = 1;
-            uv1.y = 1;
-            uv1.z = width;
-            uv1.w = height;
-            
-            uv2.x = 1;
-            uv2.y = 0;
-            uv2.z = width;
-            uv2.w = height;
-            
-            uv3.x = 0;
-            uv3.y = 0;
-            uv3.z = width;
-            uv3.w = height;
+
             
             texCoord0[startVert + 0] = uv0;
             texCoord0[startVert + 1] = uv1;
@@ -186,13 +197,24 @@ namespace Vertigo {
             texCoord0[startVert + 3] = uv3;
 
             uv0.x = borderRadii;
-            uv0.y = encodedColorMode;
+            uv0.y = 0;
+            uv1.z = packedSize;
+            uv1.w = packedUV0;
+            
             uv1.x = borderRadii;
-            uv1.y = encodedColorMode;
+            uv1.y = 0;
+            uv1.z = packedSize;
+            uv1.w = packedUV1;
+            
             uv2.x = borderRadii;
-            uv2.y = encodedColorMode;
+            uv2.y = 0;
+            uv2.z = packedSize;
+            uv2.w = packedUV2;
+            
             uv3.x = borderRadii;
-            uv3.y = encodedColorMode;
+            uv3.y = 0;
+            uv3.z = packedSize;
+            uv3.w = packedUV3;
             
             texCoord1[startVert + 0] = uv0;
             texCoord1[startVert + 1] = uv1;
@@ -233,8 +255,8 @@ namespace Vertigo {
 
         public virtual void EndFrame() { }
 
-        public virtual void SetTexture(int key, Texture value) {
-            gfx.SetTexture(key, value);
+        public virtual void SetTextureProperty(int key, Texture value) {
+            gfx.SetTextureProperty(key, value);
         }
 
         public virtual void SetFloatProperty(int key, float value) {

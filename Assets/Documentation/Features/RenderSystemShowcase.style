@@ -2,8 +2,9 @@
 style container {
     PreferredSize = 1pca;
     BackgroundColor = yellow;
-    BackgroundTint = rgba(255, 255, 85, 255);
+    BackgroundTint = rgba(255, 0, 85, 255);
     BackgroundImage = url("icon_2");
+    BorderRadius = 50%;
 }
 
 style header {

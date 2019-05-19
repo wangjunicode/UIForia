@@ -59,7 +59,7 @@ namespace Src.Systems {
         public Vector2 uvOffset;
         public Vector2 backgroundScale;
         public float backgroundRotation;
-        public Vector4 borderRadius;
+        public ResolvedBorderRadius borderRadius;
         public Vector4 borderSize;
 
         // todo -- border style
@@ -176,7 +176,7 @@ namespace Src.Systems {
                     // different border colors
                     
                 }
-                ctx.SetTexture(ShaderKey.MainTexture, renderInfo.backgroundImage);
+                ctx.SetTextureProperty(ShaderKey.MainTexture, renderInfo.backgroundImage);
                 ctx.fillColor = renderInfo.backgroundColor;
                 ctx.FillRect(position.x, position.y, size.width, size.height, renderInfo);
                 switch (renderInfo.renderMethod) {
@@ -340,7 +340,7 @@ namespace Src.Systems {
             renderInfo.uvOffset = new Vector2(0, 0);
             renderInfo.uvTiling = new Vector2(1, 1);
             renderInfo.backgroundTint = style.BackgroundTint;
-//            renderInfo.borderRadius = new Vector4(element.layoutResult.style.BorderRadiusTopRight, style.BorderRadiusTopLeft, style.BorderRadiusBottomLeft, style.BorderRadiusBottomRight);
+            renderInfo.borderRadius = element.layoutResult.borderRadius;
             renderInfo.clipRect = Vector4.zero;
             renderInfo.borderSize = element.layoutResult.border;
             renderInfo.textGlowColor = style.TextGlowColor;

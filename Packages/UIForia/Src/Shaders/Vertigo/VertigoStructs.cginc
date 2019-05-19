@@ -18,7 +18,7 @@ struct v2f {
     float4 texCoord2 : TEXCOORD2;
     float4 texCoord3 : TEXCOORD3;
     float4 sdfCoord  : TEXCOORD4;
-    float4 color : COLOR0;
+    nointerpolation float4 color : COLOR0;
 };
 
 struct SDFData {

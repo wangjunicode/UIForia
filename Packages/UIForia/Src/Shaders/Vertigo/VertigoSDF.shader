@@ -112,43 +112,49 @@
                 );
             }
 
-            #define TextureMode_TextureOnly 1 << 1
-            #define TextureMode_TextureTint 1 << 2
-            #define TextureMode_TextureColor 1 << 0
+            #define PaintMode_Color 1 << 0
+            #define PaintMode_Texture 1 << 1
+            #define PaintMode_TextureTint 1 << 2
             
             fixed4 frag (v2f i) : SV_Target {
-            
+                // todo -- vertex decode
+                uint colorMode = i.color.b;
+                int useColor = (colorMode & PaintMode_Color) != 0;
+                int useTexture = (colorMode & PaintMode_Texture) != 0;
+                int tintTexture = (colorMode & PaintMode_TextureTint) != 0;
+                
+                fixed4 bgColor = UnpackColor(asuint(i.color.r));
+                fixed4 tintColor = UnpackColor(asuint(i.color.g));
+                
                 SDFData sdfData = UnpackSDFData(i.texCoord1, i.sdfCoord);
-                fixed4 mainColor = SDFColor(sdfData, i.color);
+                sdfData.uv.x = i.texCoord0.x;
+                sdfData.uv.y = i.texCoord0.y;
+//                sdfData.size.x = 500;
+//                sdfData.size.y = 200;
+               // return fixed4(sdfData.uv.y, sdfData.uv.y, sdfData.uv.y, 1);
+                //sdfData.radius = 0.5;
+                
+                fixed4 mainColor = SDFColor(sdfData, bgColor);
+                
+                return mainColor;
                 
                 fixed4 textureColor = tex2D(_MainTex, i.texCoord0.xy);
                 textureColor.rgb *= textureColor.a;
                 
-                fixed4 bgColor = UnpackColor(asuint(i.color.r));
-                fixed4 tintColor = UnpackColor(asuint(i.color.g));
-                uint colorMode = 1 << 0; //asuint(i.color.b) | (1 << 2);
-                int useColor = (colorMode & TextureMode_TextureColor) != 0;
-                int useTexture = (colorMode & TextureMode_TextureOnly) != 0;
-                int mix = useColor && useTexture;
+                textureColor = lerp(textureColor, textureColor * tintColor, tintTexture);
                 
-                fixed4 outputColor;
-                textureColor = lerp(textureColor, textureColor * tintColor, (colorMode & TextureMode_TextureTint) != 0);
-                
-                if(mix) {
+                if(useTexture && useColor) {
                     return lerp(textureColor, bgColor, 1 - textureColor.a);
                 }
                 
-                outputColor =  lerp(textureColor, bgColor, (colorMode & TextureMode_TextureOnly) != 0);
-                fixed mixTextureAndColor = (colorMode & TextureMode_TextureColor) != 0 && (colorMode & TextureMode_TextureOnly) != 0;
-                
-                return outputColor;
+                return lerp(bgColor, textureColor, useTexture);
                 
                 // clip(textureColor.a - 0.01);
                 // fixed maskAlpha = saturate(tex2D(_MaskTexture, i.texCoord0.xy).a / _MaskSoftness);
                 // maskAlpha = lerp(1 - maskAlpha, maskAlpha, _InvertMask);
                 // mainColor.a *= maskAlpha;
                 // return textureColor;// * fixed4(bgColor.rgb, 1) * 2;
-                return lerp(textureColor * tintColor, bgColor, 1 - textureColor.a);
+
             }
 
             ENDCG

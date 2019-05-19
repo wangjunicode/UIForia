@@ -69,7 +69,7 @@ namespace Vertigo {
             return activeMaterial.material.IsKeywordEnabled(keyword);
         }
 
-        public void SetTexture(int key, Texture value) {
+        public void SetTextureProperty(int key, Texture value) {
             FinalizeCurrentBatch();
             materialProperties.Add(new MaterialProperty(key, value));
             currentBatch.propertyRange.length++;

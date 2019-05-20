@@ -98,6 +98,7 @@ namespace UIForia.Templates {
             perFrameCount = 0;
             triggeredCount = 0;
             writeCount = 0;
+            EventInfo[] evtInfos = null;
 
             for (int i = 0; i < s_BindingList.Count; i++) {
                 if (s_BindingList[i].IsOnEnable || s_BindingList[i].IsConstant()) {
@@ -105,9 +106,10 @@ namespace UIForia.Templates {
                 }
                 else if (s_BindingList[i].IsWrite) {
                     WriteBinding writeBinding = (WriteBinding) s_BindingList[i];
-                    EventInfo[] evtInfos = elementType.GetEvents();
+                    evtInfos = evtInfos ?? elementType.GetEvents();
 
                     foreach (EventInfo eventInfo in evtInfos) {
+                        // todo -- some wasted reflection calls here but probably not a big deal, we won't have too many write binding
                         WriteBindingAttribute attr = eventInfo.GetCustomAttributes<WriteBindingAttribute>().FirstOrDefault();
                         if (attr != null) {
                             if (attr.propertyName == writeBinding.bindingId) {
@@ -115,9 +117,7 @@ namespace UIForia.Templates {
                                 writeBinding.genericArguments = eventInfo.EventHandlerType.GetGenericArguments();
                                 writeBindings[writeCount++] = writeBinding;
                             }
-                            // else error
                         }
-                      
                     }
                 }
                 else {
@@ -134,7 +134,6 @@ namespace UIForia.Templates {
             s_BindingList.Clear();
         }
 
-        
 
         protected static void CreateChildren(UIElement element, IList<UITemplate> templates, TemplateScope inputScope) {
             for (int i = 0; i < templates.Count; i++) {

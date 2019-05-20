@@ -102,30 +102,56 @@ namespace UIForia.Systems {
                     Type elementType = element.GetType();
                     for (int i = 0; i < template.writeBindings.Length; i++) {
                         WriteBinding writeBinding = (WriteBinding) template.writeBindings[i];
+                        Type actionType = null;
+                        Type wrapperType = null;
+                        switch (writeBinding.genericArguments.Length) {
+                            case 0: {
+                                wrapperType = typeof(WriteBindingWrapper);
+                                actionType = typeof(Action);
+                                break;
+                            }
+                            case 1: {
+                                wrapperType = typeof(WriteBindingWrapper<>);
+                                actionType = typeof(Action<>);
+                                break;
+                            }
+
+                            case 2: {
+                                wrapperType = typeof(WriteBindingWrapper<,>);
+                                actionType = typeof(Action<,>);
+                                break;
+                            }
+
+                            case 3: {
+                                wrapperType = typeof(WriteBindingWrapper<,,>);
+                                actionType = typeof(Action<,,>);
+                                break;
+                            }
+
+                            case 4: {
+                                wrapperType = typeof(WriteBindingWrapper<,,,>);
+                                actionType = typeof(Action<,,,>);
+                                break;
+                            }
+                            default: 
+                                throw new Exception("Write bindings only support up to 4 arguments");
+                        }
 
                         WriteBindingWrapper wrapper = (WriteBindingWrapper) ReflectionUtil.CreateGenericInstanceFromOpenType(
-                            typeof(WriteBindingWrapper<>),
+                            wrapperType,
                             writeBinding.genericArguments,
                             new ConstructorArguments(writeBinding, element)
                         );
 
-                        // todo -- support more generic arg types
                         Delegate del = Delegate.CreateDelegate(
-                            ReflectionUtil.CreateGenericType(typeof(Action<>), writeBinding.genericArguments),
+                            ReflectionUtil.CreateGenericType(actionType, writeBinding.genericArguments),
                             wrapper,
-                            wrapper.GetType().GetMethod("Invoke")
+                            wrapper.GetType().GetMethod("Invoke", writeBinding.genericArguments)
                         );
 
                         elementType.GetEvent(writeBinding.eventName).AddEventHandler(element, del);
+                       
                     }
-//                    
-//                    BindingNode node = new BindingNode();
-//                    node.bindings = template.writeBindings;
-//                    node.element = element;
-//                    node.context = element.templateContext;
-
-//                    element.GetType().GetEvent(m_WriteBindingTree.evtname).AddMethod.Invoke((values) => writeBinding.Execute(context));
-                    // m_WriteBindingTree.AddItem(node);
                 }
             }
         }
@@ -141,6 +167,10 @@ namespace UIForia.Systems {
                 this.element = element;
                 this.context = element.templateContext;
             }
+            
+            public void Invoke() {
+                writeBinding.Execute(element, context);
+            }
 
         }
 
@@ -150,7 +180,36 @@ namespace UIForia.Systems {
 
             public void Invoke(T val) {
                 writeBinding.Execute(element, context);
-                Debug.Log("Writing");
+            }
+
+        }
+        
+        private class WriteBindingWrapper<T, U> : WriteBindingWrapper {
+
+            public WriteBindingWrapper(WriteBinding binding, UIElement element) : base(binding, element) { }
+
+            public void Invoke(T val, U val2) {
+                writeBinding.Execute(element, context);
+            }
+
+        }
+        
+        private class WriteBindingWrapper<T, U, V> : WriteBindingWrapper {
+
+            public WriteBindingWrapper(WriteBinding binding, UIElement element) : base(binding, element) { }
+
+            public void Invoke(T val, U val2, V val3) {
+                writeBinding.Execute(element, context);
+            }
+
+        }
+        
+        private class WriteBindingWrapper<T, U, V, W> : WriteBindingWrapper {
+
+            public WriteBindingWrapper(WriteBinding binding, UIElement element) : base(binding, element) { }
+
+            public void Invoke(T val, U val2, V val3, W val4) {
+                writeBinding.Execute(element, context);
             }
 
         }

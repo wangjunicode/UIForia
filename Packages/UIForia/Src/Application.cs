@@ -824,10 +824,12 @@ namespace UIForia {
                 elementMap[current.id] = current;
 
                 if (!current.isRegistered) {
-                      current.flags |= UIElementFlags.Registered;
+                    current.style.Initialize();
+                    current.flags |= UIElementFlags.Registered;
                     for (int i = 0; i < m_Systems.Count; i++) {
                         m_Systems[i].OnElementCreated(current);
                     }
+
                     view.ElementRegistered(current);
                     onElementRegistered?.Invoke(current);
                 }

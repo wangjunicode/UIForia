@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using JetBrains.Annotations;
 using UIForia.Bindings;
 using UIForia.Bindings.StyleBindings;
@@ -103,7 +104,21 @@ namespace UIForia.Templates {
                     triggeredBindings[triggeredCount++] = s_BindingList[i];
                 }
                 else if (s_BindingList[i].IsWrite) {
-                    writeBindings[writeCount++] = s_BindingList[i];
+                    WriteBinding writeBinding = (WriteBinding) s_BindingList[i];
+                    EventInfo[] evtInfos = elementType.GetEvents();
+
+                    foreach (EventInfo eventInfo in evtInfos) {
+                        WriteBindingAttribute attr = eventInfo.GetCustomAttributes<WriteBindingAttribute>().FirstOrDefault();
+                        if (attr != null) {
+                            if (attr.propertyName == writeBinding.bindingId) {
+                                writeBinding.eventName = eventInfo.Name;
+                                writeBinding.genericArguments = eventInfo.EventHandlerType.GetGenericArguments();
+                                writeBindings[writeCount++] = writeBinding;
+                            }
+                            // else error
+                        }
+                      
+                    }
                 }
                 else {
                     // swap enabled binding to the front
@@ -118,6 +133,8 @@ namespace UIForia.Templates {
 
             s_BindingList.Clear();
         }
+
+        
 
         protected static void CreateChildren(UIElement element, IList<UITemplate> templates, TemplateScope inputScope) {
             for (int i = 0; i < templates.Count; i++) {
@@ -270,6 +287,7 @@ namespace UIForia.Templates {
                         if (styleBinding.IsConstant()) {
                             styleBinding.bindingType = BindingType.Constant;
                         }
+
                         s_BindingList.Add(styleBinding);
                     }
 

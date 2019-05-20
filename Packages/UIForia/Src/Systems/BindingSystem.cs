@@ -1,25 +1,24 @@
 ﻿using System;
 using UIForia.Bindings;
 using UIForia.Elements;
+using UIForia.Expressions;
 using UIForia.Templates;
 using UIForia.Util;
+using UnityEngine;
 
 namespace UIForia.Systems {
 
     public class BindingSystem : ISystem {
 
         private readonly SkipTree<BindingNode> m_ReadBindingTree;
-        private readonly SkipTree<BindingNode> m_WriteBindingTree;
 
         public BindingSystem() {
             this.m_ReadBindingTree = new SkipTree<BindingNode>();
-            this.m_WriteBindingTree = new SkipTree<BindingNode>();
         }
 
         public void OnReset() {
             m_ReadBindingTree.TraversePreOrder((node) => { node.OnReset(); }, true);
             m_ReadBindingTree.Clear();
-            m_WriteBindingTree.Clear();
         }
 
         public void OnUpdate() {
@@ -28,13 +27,10 @@ namespace UIForia.Systems {
             // low memory
             // handles adding / removing while running
             // linked list makes sense since we're traversing elements anyway
-            
+
             m_ReadBindingTree.ConditionalTraversePreOrder((node) => node.OnUpdate());
         }
 
-        public void OnLateUpdate() {
-            m_WriteBindingTree.TraversePreOrder((node) => { node.OnUpdate(); });
-        }
 
         public void OnDestroy() { }
 
@@ -103,28 +99,69 @@ namespace UIForia.Systems {
                 }
 
                 if (template.writeBindings != null && template.writeBindings.Length > 0) {
-                    BindingNode node = new BindingNode();
-                    node.bindings = template.writeBindings;
-                    node.element = element;
-                    node.context = element.templateContext;
-                    m_WriteBindingTree.AddItem(node);
+                    Type elementType = element.GetType();
+                    for (int i = 0; i < template.writeBindings.Length; i++) {
+                        WriteBinding writeBinding = (WriteBinding) template.writeBindings[i];
+
+                        WriteBindingWrapper wrapper = (WriteBindingWrapper) ReflectionUtil.CreateGenericInstanceFromOpenType(
+                            typeof(WriteBindingWrapper<>),
+                            writeBinding.genericArguments,
+                            new ConstructorArguments(writeBinding, element)
+                        );
+
+                        // todo -- support more generic arg types
+                        Delegate del = Delegate.CreateDelegate(
+                            ReflectionUtil.CreateGenericType(typeof(Action<>), writeBinding.genericArguments),
+                            wrapper,
+                            wrapper.GetType().GetMethod("Invoke")
+                        );
+
+                        elementType.GetEvent(writeBinding.eventName).AddEventHandler(element, del);
+                    }
+//                    
+//                    BindingNode node = new BindingNode();
+//                    node.bindings = template.writeBindings;
+//                    node.element = element;
+//                    node.context = element.templateContext;
+
+//                    element.GetType().GetEvent(m_WriteBindingTree.evtname).AddMethod.Invoke((values) => writeBinding.Execute(context));
+                    // m_WriteBindingTree.AddItem(node);
                 }
- 
             }
+        }
+
+        private class WriteBindingWrapper {
+
+            public readonly UIElement element;
+            public readonly ExpressionContext context;
+            public readonly WriteBinding writeBinding;
+
+            public WriteBindingWrapper(WriteBinding binding, UIElement element) {
+                this.writeBinding = binding;
+                this.element = element;
+                this.context = element.templateContext;
+            }
+
+        }
+
+        private class WriteBindingWrapper<T> : WriteBindingWrapper {
+
+            public WriteBindingWrapper(WriteBinding binding, UIElement element) : base(binding, element) { }
+
+            public void Invoke(T val) {
+                writeBinding.Execute(element, context);
+                Debug.Log("Writing");
+            }
+
         }
 
         public void OnElementDestroyed(UIElement element) {
             m_ReadBindingTree.RemoveHierarchy(element);
-            m_WriteBindingTree.RemoveHierarchy(element);
         }
 
-        public void OnElementEnabled(UIElement element) {
-            
-        }
+        public void OnElementEnabled(UIElement element) { }
 
-        public void OnElementDisabled(UIElement element) {
-            
-        }
+        public void OnElementDisabled(UIElement element) { }
 
         public void OnAttributeSet(UIElement element, string attributeName, string currentValue, string attributeValue) { }
 
@@ -146,6 +183,7 @@ namespace UIForia.Systems {
 
             return false;
         }
+
     }
 
 }

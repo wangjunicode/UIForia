@@ -7,7 +7,6 @@
             BackgroundColor = white;
             LayoutBehavior = Ignored;
             TransformBehaviorX = AnchorMaxOffset;
-            TransformPositionX = -1cw;
         }
         
         style scroll-handle-vertical {
@@ -15,26 +14,31 @@
             BackgroundColor = red;
             PreferredWidth = 1pca;
         }
+
+
+        style scroll-handle-horizontal {
+            BorderRadius = 50%;
+            BackgroundColor = red;
+            PreferredHeight = 1pca;
+        }
         
         style scroll-track-horizontal {
             PreferredSize = 1pca, 10px;
             BackgroundColor = white;
             LayoutBehavior = Ignored;
             TransformBehaviorY = AnchorMaxOffset;
-            TransformPositionY = -1ch;
         }
-        
         
     </Style>
     <Contents>
         
         <Children/>
         
-        <Group x-id="scroll-track-vertical" style="scroll-track-vertical">
+        <Group onMouseClick="OnClickVertical($event)" onMouseHover="OnHoverVertical($event)" x-id="scroll-track-vertical" style="scroll-track-vertical">
             <Div onDragCreate="OnCreateVerticalDrag($event)" x-id="scroll-handle-vertical" style="scroll-handle-vertical"/>
         </Group>
 
-        <Group x-id="scroll-track-horizontal" style="scroll-track-horizontal">
+        <Group onMouseHover="OnHoverHorizontal($event)" x-id="scroll-track-horizontal" style="scroll-track-horizontal">
             <Div onDragCreate="OnCreateHorizontalDrag($event)" x-id="scroll-handle-horizontal" style="scroll-handle-horizontal"/>
         </Group>
         

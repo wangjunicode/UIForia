@@ -123,7 +123,7 @@ namespace UIForia {
             m_RenderSystem = new SVGXRenderSystem(null, m_LayoutSystem);
             m_RoutingSystem = new RoutingSystem();
             m_AnimationSystem = new AnimationSystem();
-
+            
             styleImporter = new StyleSheetImporter(this);
             templateParser = new TemplateParser(this);
 
@@ -261,7 +261,7 @@ namespace UIForia {
             elementMap.Clear();
             templateParser.Reset();
             styleImporter.Reset();
-            ResourceManager.Reset(); // todo use 1 instance per application
+            ResourceManager.Reset(); 
 
             m_AfterUpdateTaskSystem.OnReset();
             m_BeforeUpdateTaskSystem.OnReset();

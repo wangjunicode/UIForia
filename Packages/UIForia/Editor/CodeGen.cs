@@ -43,7 +43,7 @@ namespace UIForia.Editor {
             new PropertyGenerator<Texture2D>(StylePropertyId.BackgroundImage, null),
             new PropertyGenerator<string>(StylePropertyId.Painter, string.Empty),
 
-            new AnimatedPropertyGenerator<float>(StylePropertyId.Opacity, 1),
+            new AnimatedPropertyGenerator<float>(StylePropertyId.Opacity, 1, InheritanceType.Inherited),
             new PropertyGenerator<CursorStyle>(StylePropertyId.Cursor, null),
             new PropertyGenerator<Visibility>(StylePropertyId.Visibility, Visibility.Visible),
 

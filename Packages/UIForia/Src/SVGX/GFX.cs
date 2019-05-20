@@ -552,7 +552,7 @@ namespace SVGX {
                 if (renderShape.shape.type == SVGXShapeType.Text) {
                     // if we have a current font and stuff to render with it, draw it
                     // set current font to this text element's font
-                    fontChanged = fontMaterial != textInfo.spanList[0].textStyle.font.material;
+                    fontChanged = fontMaterial != textInfo.spanList[0].textStyle.fontAsset.material;
                 }
 
                 if (fontChanged || textureChanged) {
@@ -565,7 +565,7 @@ namespace SVGX {
                     lastTextureId = currentTextureId;
 
                     if (fontChanged) {
-                        fontMaterial = textInfo.spanList[0].textStyle.font.material;
+                        fontMaterial = textInfo.spanList[0].textStyle.fontAsset.material;
                     }
                 }
 

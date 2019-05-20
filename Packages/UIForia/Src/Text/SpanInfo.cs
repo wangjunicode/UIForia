@@ -21,7 +21,7 @@ namespace UIForia.Text {
             this.wordEnd = 0;
         }
 
-        public Texture2D fontTexture => textStyle.font.atlas;
+        public Texture2D fontTexture => textStyle.fontAsset.atlas;
         public int CharCount => charEnd - charStart;
         public int WordCount => wordEnd - wordStart;
 

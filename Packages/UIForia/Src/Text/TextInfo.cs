@@ -90,15 +90,15 @@ namespace UIForia.Text {
 
         private static SpanInfo CreateSpanInfo(TextSpan span) {
             SpanInfo spanInfo = new SpanInfo(span.text, span.style);
-            if (spanInfo.textStyle.font == null) {
-                spanInfo.textStyle.font = DefaultFont;
+            if (spanInfo.textStyle.fontAsset == null) {
+                spanInfo.textStyle.fontAsset = DefaultFont;
             }
 
             if (spanInfo.textStyle.fontSize <= 0) {
                 spanInfo.textStyle.fontSize = 24;
             }
 
-            Material material = spanInfo.textStyle.font.material;
+            Material material = spanInfo.textStyle.fontAsset.material;
 //            FontAssetData fontAssetData = new FontAssetData();
 //            fontAssetData.texture = spanInfo.textStyle.font.atlas;
 //            fontAssetData.textureWidth = fontAssetData.texture.width;
@@ -612,7 +612,7 @@ namespace UIForia.Text {
 
             for (int i = 0; i < spanCount; i++) {
                 SpanInfo spanInfo = spanInfos[i];
-                TMP_FontAsset asset = spanInfo.textStyle.font;
+                TMP_FontAsset asset = spanInfo.textStyle.fontAsset;
 
                 float scale = (spanInfo.textStyle.fontSize / asset.fontInfo.PointSize) * asset.fontInfo.Scale;
                 float lh = (asset.fontInfo.Ascender - asset.fontInfo.Descender) * scale;
@@ -691,14 +691,14 @@ namespace UIForia.Text {
             CharInfo[] charInfos = charInfoList.Array;
 
             SpanInfo spanInfo = spanList[spanIdx];
-            TMP_FontAsset fontAsset = spanInfo.textStyle.font;
+            TMP_FontAsset fontAsset = spanInfo.textStyle.fontAsset;
             Material fontAssetMaterial = fontAsset.material;
 
             bool isUsingAltTypeface = false;
             float boldAdvanceMultiplier = 1;
 
             if ((spanInfo.textStyle.fontStyle & FontStyle.Bold) != 0) {
-                fontAsset = GetFontAssetForWeight(spanInfo.textStyle.fontStyle, spanInfo.textStyle.font, 700);
+                fontAsset = GetFontAssetForWeight(spanInfo.textStyle.fontStyle, spanInfo.textStyle.fontAsset, 700);
                 isUsingAltTypeface = true;
                 boldAdvanceMultiplier = 1 + fontAsset.boldSpacing * 0.01f;
             }
@@ -753,10 +753,10 @@ namespace UIForia.Text {
                     int current = charInfos[i].character;
 
                     TMP_Glyph glyph;
-                    TMP_FontAsset fontForGlyph = TMP_FontUtilities.SearchForGlyph(spanInfo.textStyle.font, charInfos[i].character, out glyph);
+                    TMP_FontAsset fontForGlyph = TMP_FontUtilities.SearchForGlyph(spanInfo.textStyle.fontAsset, charInfos[i].character, out glyph);
 
                     if (glyph == null) {
-                        Debug.Log($"The character {charInfos[i].character} isn't available in font {spanInfo.textStyle.font.name}.");
+                        Debug.Log($"The character {charInfos[i].character} isn't available in font {spanInfo.textStyle.fontAsset.name}.");
                         continue;
                     }
 
@@ -881,8 +881,8 @@ namespace UIForia.Text {
 
         public void SetSpanStyle(int index, SVGXTextStyle svgxTextStyle) {
             spanList.Array[index].textStyle = svgxTextStyle;
-            if (spanList.Array[index].textStyle.font == null) {
-                spanList.Array[index].textStyle.font = DefaultFont;
+            if (spanList.Array[index].textStyle.fontAsset == null) {
+                spanList.Array[index].textStyle.fontAsset = DefaultFont;
             }
 
             if (spanList.Array[index].textStyle.fontSize <= 0) {
@@ -899,7 +899,7 @@ namespace UIForia.Text {
             bool whitespaceChanged = oldStyle.whitespaceMode != spanStyle.whitespaceMode;
             bool transformChanged = oldStyle.textTransform != spanStyle.textTransform;
             bool fontStyleChanged = oldStyle.fontStyle != spanStyle.fontStyle;
-            bool needsGlyphUpdate = fontStyleChanged || oldStyle.font != spanStyle.font || oldStyle.fontSize != spanStyle.fontSize || transformChanged;
+            bool needsGlyphUpdate = fontStyleChanged || oldStyle.fontAsset != spanStyle.fontAsset || oldStyle.fontSize != spanStyle.fontSize || transformChanged;
 
 
             if (whitespaceChanged || transformChanged) {
@@ -907,8 +907,8 @@ namespace UIForia.Text {
                 return;
             }
 
-            if (spanStyle.font == null) {
-                spanStyle.font = DefaultFont;
+            if (spanStyle.fontAsset == null) {
+                spanStyle.fontAsset = DefaultFont;
             }
 
             if (spanStyle.fontSize <= 0) {

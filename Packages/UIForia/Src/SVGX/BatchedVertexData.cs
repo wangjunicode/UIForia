@@ -516,10 +516,9 @@ namespace SVGX {
 
                     int isStroke = 0;
 
-                    Vector4 outline = new Vector4(outlineWidth, outlineSoftness, 0, 0);
+                    Vector4 outline = new Vector4(outlineWidth, outlineSoftness, VertigoUtil.ColorToFloat(textStyle.outlineColor), 0);
 
                     Color textColor = style.fillColor;
-                    Color outlineColor = textStyle.outlineColor;
 
                     // todo -- clip smarter using layout lines
                     for (int i = 0; i < charCount; i++) {
@@ -558,10 +557,10 @@ namespace SVGX {
                         uv2List.Add(outline);
                         uv2List.Add(outline);
 
-                        uv3List.Add(outlineColor);
-                        uv3List.Add(outlineColor);
-                        uv3List.Add(outlineColor);
-                        uv3List.Add(outlineColor);
+                        uv3List.Add(default);
+                        uv3List.Add(default);
+                        uv3List.Add(default);
+                        uv3List.Add(default);
                         
                         uv4List.Add(scissorVector);
                         uv4List.Add(scissorVector);

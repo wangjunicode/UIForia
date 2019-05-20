@@ -117,6 +117,8 @@ namespace UIForia.Systems {
 
                 if (current is UITextElement textElement) {
                     ctx.BeginPath();
+                    ctx.SetFillOpacity(textElement.style.Opacity);
+                    ctx.SetStrokeOpacity(textElement.style.Opacity);
                     ctx.Text(-offset.x, -offset.y, textElement.textInfo);
                     ctx.SetFill(textElement.style.TextColor);
                     ctx.Fill();
@@ -181,6 +183,8 @@ namespace UIForia.Systems {
                 ctx.DisableScissorRect();
             }
 
+            ctx.SetFillOpacity(current.style.Opacity);
+            ctx.SetStrokeOpacity(current.style.Opacity);
             if (resolveBorderRadius == Vector4.zero) {
                 ctx.Rect(borderRect.left, borderRect.top, layoutResult.allocatedSize.width - borderRect.Horizontal, layoutResult.allocatedSize.height - borderRect.Vertical);
 

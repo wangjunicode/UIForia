@@ -352,11 +352,11 @@ namespace UIForia.Systems {
             m_VisibleBoxList.Sort(comparer);
 
 
-            // LayoutBox[] boxes = m_VisibleElementList.Array;
+             LayoutBox[] boxes = m_VisibleBoxList.Array;
 
-            //for (int i = 0; i < m_VisibleElementList.Count; i++) {
-            //    boxes[i].element.layoutResult.zIndex = i + 1;
-            //}
+            for (int i = 0; i < m_VisibleBoxList.Count; i++) {
+                boxes[i].element.layoutResult.zIndex = i + 1;
+            }
 
             // compute a clip shape for parent using transform
             // might mean we handle rotated & scaled stuff, get 4 points from box

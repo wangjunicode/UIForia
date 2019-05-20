@@ -1958,6 +1958,7 @@ namespace UIForia.Rendering {
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.Opacity, out property)) return property.AsFloat;
+                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.Opacity), out property)) return property.AsFloat;
                     return DefaultStyleValues_Generated.Opacity;
                 }
             }
@@ -4167,6 +4168,7 @@ namespace UIForia.Rendering {
         public static bool IsInherited(StylePropertyId propertyId) {
             switch (propertyId) {
 
+                    case StylePropertyId.Opacity: return true;
                     case StylePropertyId.TextColor: return true;
                     case StylePropertyId.TextFontAsset: return true;
                     case StylePropertyId.TextFontSize: return true;

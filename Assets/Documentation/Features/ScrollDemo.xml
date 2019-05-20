@@ -3,7 +3,7 @@
     
     <Style path="Documentation/Features/ScrollDemo.style"/>
     
-    <Contents>
+    <Contents style="container">
         
         <ScrollView>
             
@@ -12,6 +12,8 @@
             </Repeat>
             
         </ScrollView>
+        
+        content
         
     </Contents>
 </UITemplate>

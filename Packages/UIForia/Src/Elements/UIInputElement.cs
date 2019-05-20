@@ -136,7 +136,7 @@ namespace UIForia.Elements {
 
             if (c == '\n' || c == '\t') return;
 
-            if (!textInfo.spanList[0].textStyle.font.characterDictionary.ContainsKey(c)) {
+            if (!textInfo.spanList[0].textStyle.fontAsset.HasCharacter(c)) {
                 return;
             }
 

@@ -1,9 +1,11 @@
 style container {
-
+    FlexLayoutDirection = Column;
 }
 
 style scroll-container {
     PreferredSize = 200px;
     BackgroundColor = yellow;
     OverflowY = Scroll;
+    TextFontSize = 15;
+    TextOutlineWidth = 0.3;
 }

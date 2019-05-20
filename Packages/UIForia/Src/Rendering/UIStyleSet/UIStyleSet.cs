@@ -857,7 +857,7 @@ namespace UIForia.Rendering {
             return new SVGXTextStyle() {
                 fontSize =  GetResolvedFontSize(),
                 alignment = TextAlignment,
-                font = TextFontAsset,
+                fontAsset = TextFontAsset,
                 fontStyle = TextFontStyle,
                 glowOffset = TextGlowOffset,
                 glowOuter = TextGlowOuter,

@@ -91,7 +91,7 @@ namespace UIForia.Elements {
                     break;
                 case StylePropertyId.TextFontAsset:
                     shouldUpdateSpanStyle = true;
-                    spanStyle.font = property.AsFont;
+                    spanStyle.fontAsset = property.AsFont;
                     break;
                 case StylePropertyId.TextTransform:
                     shouldUpdateSpanStyle = true;

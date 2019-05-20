@@ -1,4 +1,5 @@
 using TMPro;
+using UIForia;
 using UIForia.Text;
 using UnityEngine;
 using FontStyle = UIForia.Text.FontStyle;
@@ -19,7 +20,12 @@ namespace SVGX {
         public float outlineSoftness;
         public float glowOuter;
         public float glowOffset;
-        public TMP_FontAsset font;
+        public TMP_FontAsset fontAsset;
+        public float underlayX;
+        public float underlayY;
+        public float underlayDilate;
+        public float underlaySoftness;
+        public float faceDilate;
 
         public SVGXTextStyle(SVGXTextStyle toClone) {
             this.fontSize = toClone.fontSize;
@@ -32,7 +38,12 @@ namespace SVGX {
             this.outlineSoftness = toClone.outlineSoftness;
             this.glowOuter = toClone.glowOuter;
             this.glowOffset = toClone.glowOffset;
-            this.font = toClone.font;
+            this.underlayX = toClone.underlayX;
+            this.underlayY = toClone.underlayY;
+            this.underlayDilate = toClone.underlayDilate;
+            this.underlaySoftness = toClone.underlaySoftness;
+            this.fontAsset = toClone.fontAsset;
+            this.faceDilate = toClone.faceDilate;
         }
     }
 

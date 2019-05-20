@@ -134,6 +134,7 @@ namespace UIForia.Compilers.Style {
                 {"zindex", (targetStyle, property, context) => targetStyle.ZIndex = (int) MapNumber(property.children[0], context)},
                 {"renderlayer", (targetStyle, property, context) => targetStyle.RenderLayer = MapEnum<RenderLayer>(property.children[0], context)},
                 {"renderlayeroffset", (targetStyle, property, context) => targetStyle.RenderLayerOffset = (int) MapNumber(property.children[0], context)},
+                {"layer", (targetStyle, property, context) => targetStyle.Layer = (int) MapNumber(property.children[0], context)},
 
                 // Text
                 {"textcolor", (targetStyle, property, context) => targetStyle.TextColor = MapColor(property, context)},

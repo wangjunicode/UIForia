@@ -52,7 +52,7 @@ namespace UIForia.Elements {
         public override void OnCreate() {
             text = text ?? string.Empty;
             style.SetPainter("self", StyleState.Normal);
-            textInfo = new TextInfo(new TextSpan(text));
+            textInfo = new TextInfo(new TextSpan(text, style.GetTextStyle()));
             textInfo.UpdateSpan(0, text);
             textInfo.Layout();
         }

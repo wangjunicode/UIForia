@@ -95,20 +95,20 @@ namespace UIForia.Templates {
                 retn = baseTemplate.rootElementTemplate.CreateUnscoped(RootType, inheritedContent);
             }
 
-            LightStack<UIElement> stack = LightStack<UIElement>.Get();
-            stack.Push(retn);
-            while (stack.Count > 0) {
-                UIElement current = stack.PopUnchecked();
-                
-                current.style.Initialize();
-                
-                int childCount = current.children.Count;
-                UIElement[] children = current.children.Array;
-                for (int i = 0; i < childCount; i++) {
-                    stack.Push(children[i]);
-                }
-            }
-            LightStack<UIElement>.Release(ref stack);
+//            LightStack<UIElement> stack = LightStack<UIElement>.Get();
+//            stack.Push(retn);
+//            while (stack.Count > 0) {
+//                UIElement current = stack.PopUnchecked();
+//                
+//                current.style.Initialize();
+//                
+//                int childCount = current.children.Count;
+//                UIElement[] children = current.children.Array;
+//                for (int i = 0; i < childCount; i++) {
+//                    stack.Push(children[i]);
+//                }
+//            }
+//            LightStack<UIElement>.Release(ref stack);
             return retn;
         }
 

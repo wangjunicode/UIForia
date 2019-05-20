@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using SVGX;
-using UIForia.Animation;
 using UIForia.Compilers.Style;
 using UIForia.Elements;
 using UIForia.Systems;

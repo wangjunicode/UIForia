@@ -1,4 +1,4 @@
-## Styles
+# Styles
     
 #### Overflow
    Overflow denotes how content that spills outside of a containing box is treated.
@@ -14,9 +14,56 @@
     OverflowX = Hidden;  // set x axis to hidden
     OverflowY = Visible; // set y axis to hidden
     Overflow = Scroll; // Set both axes to scroll
+}
+````
+#### Background Color
+Background Color paints the background of the element. It will accept color values in the following forms:
+* rgba(byte, byte, byte, byte) 
+* rgb(byte, byte, byte) 
+* #AABBCCDD (hex form by channel r, g, b, a)
+* any of the following color names: `black`, `blue`, `clear`, `cyan`, `gray`, `grey`, `green`, `magenta`, `red`, `white`, `yellow`
+
+#### Background Tint : Color
+Tints the background image without affecting the background color. Accepts a color value.
+
+#### BackgroundImageOffset : float
+Offset the texture coordinates used for the background image
+````c#
+style MyStyle {
+     BackgroundImageOffsetX = 10; // set for x axis
+     BackgroundImageOffsetY = 10; // set for y axis
+     BackgroundImageOffset = 32; // set for both axes
+}
 ````
 
-### Expressions
+#### BackgroundImageScale : float
+Scale the texture coordinates used for the background image. Can be used to tile the image if not part of a sprite sheet
+````c#
+style MyStyle {
+     BackgroundImageScaleX = 2.3; // set for x axis
+     BackgroundImageScaleY = 1.4; // set for y axis
+     BackgroundImageScale = 0.5; // set for both axes
+}
+````
+#### BackgroundImageRotation : float
+Rotate the texture coordinates used for the background image, in degrees.
+````c#
+style MyStyle {
+     BackgroundImageRotation = 45;
+}
+````
+
+#### BackgroundImage : Texture
+Sets the background image used.
+````c#
+style MyStyle {
+     BackgroundImage = url("path/to/texture"); // set a texture
+     BackgroundImage = url("path/to/sprite/atlas", "spriteName"); // set a texture from a sprte atlas
+}
+````
+
+
+# Expressions
 Expressions in templates drive the entire data binding system. They can support literal values as well as much more complicated
 structures like property access, method calls, comparison operators, math operators, boolean logic and pretty much
 any other operator you might use in C#.

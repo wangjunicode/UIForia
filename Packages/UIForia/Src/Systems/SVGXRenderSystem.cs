@@ -48,7 +48,6 @@ namespace UIForia.Systems {
             RenderView(views[0], visibleElements);
 
             gfx.Render(ctx);
-            
         }
 
         private static void DrawNormalFill(ImmediateRenderContext ctx, UIElement element) {
@@ -136,7 +135,6 @@ namespace UIForia.Systems {
 //                    matrix = SVGXMatrix.TRS(pos, 0, Vector2.one);
 //                    scrollbar.Paint(current, scrollbarVerticalSize, ctx, matrix);
 //                }
-
             }
 
             ctx.DisableScissorRect();
@@ -176,13 +174,14 @@ namespace UIForia.Systems {
 
             // todo -- implement background scrolling style properties
 
-            if (current.style.OverflowX != Overflow.Visible) {
-                Size allocated = current.layoutResult.allocatedSize;
-                ctx.EnableScissorRect(new Rect(screenPos.x, screenPos.y, allocated.width, allocated.height));
-            }
-            else {
-                ctx.DisableScissorRect();
-            }
+//            if (current.style.OverflowX != Overflow.Visible) {
+//                Size allocated = current.layoutResult.allocatedSize;
+//            }
+//            else {
+//                ctx.DisableScissorRect();
+//            }
+
+            ctx.EnableScissorRect(current.layoutResult.clipRect);
 
             ctx.SetFillOpacity(current.style.Opacity);
             ctx.SetStrokeOpacity(current.style.Opacity);

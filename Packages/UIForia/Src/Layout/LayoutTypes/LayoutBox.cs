@@ -95,6 +95,7 @@ namespace UIForia.Layout.LayoutTypes {
 
         private static readonly Dictionary<int, WidthCache> s_HeightForWidthCache = new Dictionary<int, WidthCache>();
         public Rect clipRect;
+        public Rect selfClipRect;
 
         /*
          * Todo -- When layout happens can probably be optimized a bit

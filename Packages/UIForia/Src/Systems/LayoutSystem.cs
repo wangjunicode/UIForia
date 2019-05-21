@@ -211,6 +211,8 @@ namespace UIForia.Systems {
             rootBox.prefWidth = new UIMeasurement(1, UIMeasurementUnit.ViewportWidth);
             rootBox.prefHeight = new UIMeasurement(1, UIMeasurementUnit.ViewportHeight);
 
+            rootBox.clipRect = new Rect(0, 0, Screen.width, Screen.height);
+            
             rootBox.allocatedWidth = view.Viewport.width;
             rootBox.allocatedHeight = view.Viewport.height;
             rootBox.actualWidth = rootBox.allocatedWidth;
@@ -225,13 +227,13 @@ namespace UIForia.Systems {
             CollectLayoutBoxes(view);
 
             LightList<LayoutBox> leaves = new LightList<LayoutBox>();
-            
+
             LayoutBox[] toLayoutArray = toLayout.Array;
             int toLayoutCount = toLayout.Count;
 
             for (int i = 0; i < toLayoutCount; i++) {
                 LayoutBox box = toLayoutArray[i];
-       
+
                 if (box.IsIgnored) {
                     float currentWidth = box.allocatedWidth;
                     float currentHeight = box.allocatedHeight;
@@ -252,28 +254,29 @@ namespace UIForia.Systems {
                 if (box.children.Count == 0) {
                     leaves.Add(box);
                 }
-                
             }
 
             int leafCount = leaves.Count;
             LayoutBox[] leafArray = leaves.Array;
-            
+
             for (int i = 0; i < leafCount; i++) {
                 LayoutBox current = leafArray[i];
                 LayoutBox ptr = current.parent;
 
                 current.xMax = current.localX + current.actualWidth;
                 current.yMax = current.localY + current.actualHeight;
-                
-                while (ptr != null && ptr.style.LayoutBehavior != LayoutBehavior.Ignored) {
+
+                // each element needs a clip rect
+                // how do I find it?
+
+                while (ptr != null) {
                     ptr.xMax = math.max(ptr.xMax, ptr.localX + current.xMax);
                     ptr.yMax = math.max(ptr.yMax, ptr.localY + current.yMax);
                     current = ptr;
-                    ptr = ptr.parent; 
+                    ptr = ptr.parent;
                 }
-                
             }
-            
+
             for (int i = 0; i < toLayoutCount; i++) {
                 LayoutBox box = toLayoutArray[i];
 
@@ -285,10 +288,24 @@ namespace UIForia.Systems {
                     scrollOffset.x = (parentBox.xMax - parentBox.allocatedWidth) * parentBox.element.scrollOffset.x;
                     scrollOffset.y = (parentBox.yMax - parentBox.allocatedHeight) * parentBox.element.scrollOffset.y;
                 }
+
+                // clip rect is nearest ancestor w/ overflow handling on a given axis
+                // can pass down top to bottom so that parents clip their children according to their parent's clip bounds
+                LayoutResult layoutResult = box.element.layoutResult;
+
+                box.clipRect = parentBox.clipRect;
+                layoutResult.clipRect = parentBox.clipRect;
+
+                if (box.style.OverflowX != Overflow.Visible) {
+                    // use own value for children
+                    box.clipRect.x = // todo -- this
+                    box.clipRect.width = box.allocatedWidth;
+                }
+
+
                 Vector2 localPosition = ResolveLocalPosition(box) - scrollOffset;
                 Vector2 localScale = new Vector2(box.transformScaleX, box.transformScaleY);
- 
-                LayoutResult layoutResult = box.element.layoutResult;
+
 
                 Vector2 pivot = box.Pivot;
                 SVGXMatrix m;
@@ -302,6 +319,10 @@ namespace UIForia.Systems {
 
                 Vector2 offset = new Vector2(box.allocatedWidth * pivot.x, box.allocatedHeight * pivot.y);
                 SVGXMatrix parentMatrix = box.parent.element.layoutResult.matrix;
+                // if(pivot.x != 0 || pivot.y != 0) {
+                //    compute pivot mat
+                //}
+
                 SVGXMatrix pivotMat = SVGXMatrix.Translation(offset);
 
                 m = pivotMat * m * pivotMat.Inverse();
@@ -380,7 +401,7 @@ namespace UIForia.Systems {
             m_VisibleBoxList.Sort(comparer);
 
 
-             LayoutBox[] boxes = m_VisibleBoxList.Array;
+            LayoutBox[] boxes = m_VisibleBoxList.Array;
 
             for (int i = 0; i < m_VisibleBoxList.Count; i++) {
                 boxes[i].element.layoutResult.zIndex = i + 1;

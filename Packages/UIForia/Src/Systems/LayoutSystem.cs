@@ -7,6 +7,7 @@ using UIForia.Layout;
 using UIForia.Layout.LayoutTypes;
 using UIForia.Rendering;
 using UIForia.Util;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace UIForia.Systems {
@@ -223,12 +224,14 @@ namespace UIForia.Systems {
 
             CollectLayoutBoxes(view);
 
+            LightList<LayoutBox> leaves = new LightList<LayoutBox>();
+            
             LayoutBox[] toLayoutArray = toLayout.Array;
             int toLayoutCount = toLayout.Count;
 
             for (int i = 0; i < toLayoutCount; i++) {
                 LayoutBox box = toLayoutArray[i];
-
+       
                 if (box.IsIgnored) {
                     float currentWidth = box.allocatedWidth;
                     float currentHeight = box.allocatedHeight;
@@ -245,9 +248,32 @@ namespace UIForia.Systems {
                     box.RunLayout();
                     box.markedForLayout = false;
                 }
+
+                if (box.children.Count == 0) {
+                    leaves.Add(box);
+                }
                 
             }
 
+            int leafCount = leaves.Count;
+            LayoutBox[] leafArray = leaves.Array;
+            
+            for (int i = 0; i < leafCount; i++) {
+                LayoutBox current = leafArray[i];
+                LayoutBox ptr = current.parent;
+
+                current.xMax = current.localX + current.actualWidth;
+                current.yMax = current.localY + current.actualHeight;
+                
+                while (ptr != null && ptr.style.LayoutBehavior != LayoutBehavior.Ignored) {
+                    ptr.xMax = math.max(ptr.xMax, ptr.localX + current.xMax);
+                    ptr.yMax = math.max(ptr.yMax, ptr.localY + current.yMax);
+                    current = ptr;
+                    ptr = ptr.parent; 
+                }
+                
+            }
+            
             for (int i = 0; i < toLayoutCount; i++) {
                 LayoutBox box = toLayoutArray[i];
 
@@ -255,12 +281,13 @@ namespace UIForia.Systems {
 
                 LayoutBox parentBox = box.parent;
 
-                scrollOffset.x = (parentBox.actualWidth - parentBox.allocatedWidth) * parentBox.element.scrollOffset.x;
-                scrollOffset.y = (parentBox.actualHeight - parentBox.allocatedHeight) * parentBox.element.scrollOffset.y;
-
+                if (!box.IsIgnored) {
+                    scrollOffset.x = (parentBox.xMax - parentBox.allocatedWidth) * parentBox.element.scrollOffset.x;
+                    scrollOffset.y = (parentBox.yMax - parentBox.allocatedHeight) * parentBox.element.scrollOffset.y;
+                }
                 Vector2 localPosition = ResolveLocalPosition(box) - scrollOffset;
                 Vector2 localScale = new Vector2(box.transformScaleX, box.transformScaleY);
-
+ 
                 LayoutResult layoutResult = box.element.layoutResult;
 
                 Vector2 pivot = box.Pivot;
@@ -281,6 +308,7 @@ namespace UIForia.Systems {
                 m = parentMatrix * m;
                 layoutResult.matrix = m;
 
+                layoutResult.overflowSize = new Size(box.xMax, box.yMax);
                 layoutResult.localPosition = localPosition;
                 layoutResult.ContentRect = box.ContentRect;
 

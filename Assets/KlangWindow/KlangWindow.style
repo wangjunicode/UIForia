@@ -1,14 +1,12 @@
 
 
 style window-container {
-
-//    MinWidth = 1cnt;
-//    MinHeight = 600px;
-    PreferredSize = 1cnt, 600px;
+    PreferredSize = 300px, 600px;
     GridLayoutColTemplate = 1mx, 1fr;
-    GridLayoutRowTemplate = 64px, 1mx;
+    GridLayoutRowTemplate = 64px, 1fr;
     GridLayoutRowAlignment = Grow;
     LayoutType = Grid; 
+    LayoutBehavior = Ignored;
 }
 
 style title-bar {
@@ -67,7 +65,7 @@ style body {
     GridItemRowStart = 1;
     BackgroundColor = White;
     LayoutType = Grid;
-    GridLayoutColTemplate = 1mx, 1mn;
+    GridLayoutColTemplate = 1fr, 1mn;
     GridLayoutRowTemplate = 1mx;
 }
 

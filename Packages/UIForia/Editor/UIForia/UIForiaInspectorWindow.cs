@@ -240,6 +240,9 @@ namespace UIForia.Editor {
 
         private void DrawDebugOverlay(ImmediateRenderContext ctx) {
             if (!drawDebugBox) return;
+            ctx.DisableScissorRect();
+            ctx.SetFillOpacity(1);
+            ctx.SetStrokeOpacity(1);
             if (material == null) {
                 material = new Material(Resources.Load<Material>("UIForia/Materials/UIForiaDebug"));
             }

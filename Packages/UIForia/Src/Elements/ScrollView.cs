@@ -25,7 +25,7 @@ namespace UIForia.Elements {
         // todo -- without layout system integration this is an overlay scroll bar only
 
         public override void OnReady() {
-            targetElement = FindFirstByType<UIChildrenElement>().GetChild(0);
+            targetElement = this;//FindFirstByType<UIChildrenElement>().GetChild(0);
             verticalHandle = FindById("scroll-handle-vertical");
             verticalTrack = FindById("scroll-track-vertical");
             horizontalHandle = FindById("scroll-handle-horizontal");
@@ -54,7 +54,7 @@ namespace UIForia.Elements {
         }
         
         public override void OnUpdate() {
-            Size actualSize = targetElement.layoutResult.actualSize;
+            Size actualSize = targetElement.layoutResult.overflowSize;
             Size allocatedSize = targetElement.layoutResult.allocatedSize;
 
             if (actualSize.width <= allocatedSize.width) {

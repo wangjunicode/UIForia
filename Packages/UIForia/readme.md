@@ -1,3 +1,21 @@
+## Styles
+    
+#### Overflow
+   Overflow denotes how content that spills outside of a containing box is treated.
+   The options are
+   * `Hidden` Never show overflowing content
+   * `Visible` (default) Always show overflowing content
+   * `Scroll` Hide overflowing content and create a scroll bar
+   
+   Overflow can be set independently on the X and Y axes.
+  
+````C#
+ style MyStyle {
+    OverflowX = Hidden;  // set x axis to hidden
+    OverflowY = Visible; // set y axis to hidden
+    Overflow = Scroll; // Set both axes to scroll
+````
+
 ### Expressions
 Expressions in templates drive the entire data binding system. They can support literal values as well as much more complicated
 structures like property access, method calls, comparison operators, math operators, boolean logic and pretty much
@@ -6,23 +24,23 @@ any other operator you might use in C#.
 
 #### Literal values
 ````C#
-    <SomeElement literalIntValue="{1}"/>
-    <SomeElement literalFloatValue="{1f}"/>
-    <SomeElement literalDoubleValue="{1.0}"/>
-    <SomeElement literalBooleanValue="{true}"/>
-    <SomeElement literalStringValue="{'string value'}"/>
+    <SomeElement literalIntValue="1"/>
+    <SomeElement literalFloatValue="1}"/>
+    <SomeElement literalDoubleValue="1.0"/>
+    <SomeElement literalBooleanValue="true"/>
+    <SomeElement literalStringValue="'string value'"/>
     
 ````
 
 #### Math operators
 ````C#
-     <SomeElement addition="{10f + 4}"/>
-     <SomeElement subtraction="{10f - 4}"/>
-     <SomeElement multiplication="{10f * 4}"/>
-     <SomeElement division="{10f / 4}"/>
-     <SomeElement modulus="{10f % 4}"/>
-     <SomeElement complexOperators="{50f * 3 - 4f / 25}"/>
-     <SomeElement parenOperator="{50f * (3 - 4f) / 25}"/>
+     <SomeElement addition="10f + 4"/>
+     <SomeElement subtraction="10f - 4"/>
+     <SomeElement multiplication="10f * 4"/>
+     <SomeElement division="10f / 4"/>
+     <SomeElement modulus="10f % 4"/>
+     <SomeElement complexOperators="50f * 3 - 4f / 25"/>
+     <SomeElement parenOperator="50f * (3 - 4f) / 25"/>
 ````
 
 #### String concat
@@ -35,39 +53,39 @@ any other operator you might use in C#.
     
 #### Comparisons
 ````C#
-    {50 > 14} 
-    {255 < 25}
-    {67 + 25 <= 1}
-    {52 * 5 >= 67 * 3}
-    {67 != 41}
-    {88 == 88}
+    50 > 14 
+    255 < 25
+    67 + 25 <= 1
+    52 * 5 >= 67 * 3
+    67 != 41
+    88 == 88
 ````
 
 #### Ternary
 ````C#
-    <SomeElement someValue="{76 > 18 ? 'string one' : 'string two'}"/>
+    <SomeElement someValue="76 > 18 ? 'string one' : 'string two'"/>
 ````
 
 #### Unaries
 ````C#
-    <SomeElement someBoolValue="{!(1 > 2)}"/>
-    <SomeElement someIntValue="{-(1 + 2)}"/>
+    <SomeElement someBoolValue="!(1 > 2)"/>
+    <SomeElement someIntValue="-(1 + 2)"/>
 ````
 
 #### Property Access
 Any property on an element can be accessed. 
 ````C#
-    <SomeElement someValue="{someFieldOnTheType}"/>
-    <SomeElement someValue="{someArrayField[6]}"/>
-    <SomeElement someValue="{some.nested.array[6].some.other.property}"/>
-    <SomeElement someValue="{some.nested.array[6 + 1 * 2 / 5].some.other.property}"/>
+    <SomeElement someValue="someFieldOnTheType"/>
+    <SomeElement someValue="someArrayField[6]"/>
+    <SomeElement someValue="some.nested.array[6].some.other.property"/>
+    <SomeElement someValue="some.nested.array[6 + 1 * 2 / 5].some.other.property"/>
 ````
 
 #### Method References
 Methods can also be referenced directly and their output used. They are special in that their arguments 
 can take computed expressions as well as literal values
 ````C#
-    <SomeElement someValue="{myMethod(45, true, someField.nested.value + something)}"/>
+    <SomeElement someValue="myMethod(45, true, someField.nested.value + something)"/>
 ````
 
 #### Aliases
@@ -76,5 +94,5 @@ are within <Repeat> tags. Aliases are defined by the context in which the expres
 can be an alias, the syntax is simply $ + some identifier. Important to note is that aliases are 
 type checked just like all expressions, so you won't be able to accidentally mis-use them
 ````C#
-    <SomeElement intValue="{$intAlias}"/>
+    <SomeElement intValue="$intAlias"/>
 ````

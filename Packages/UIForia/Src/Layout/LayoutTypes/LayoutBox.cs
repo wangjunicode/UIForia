@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using JetBrains.Annotations;
 using UIForia.Elements;
 using UIForia.Rendering;
 using UIForia.Util;
@@ -19,7 +18,10 @@ namespace UIForia.Layout.LayoutTypes {
 
         public float actualWidth;
         public float actualHeight;
-
+        
+        public float xMax;
+        public float yMax;
+        
         public UIElement element;
         public UIStyleSet style;
 

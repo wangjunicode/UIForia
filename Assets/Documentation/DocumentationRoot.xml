@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <UITemplate>
-    <Style src="Documentation/Documentation.style" />
+    <Style src="Documentation/Documentation.style"/>
     <Contents style="main-container">
         <Group style="main-container">
-            
+
             <Div style="navigation">
-                
+
                 <Heading1>Choose a feature</Heading1>
                 <Anchor href="'/index'">Home</Anchor>
                 <Anchor href="'/AnimationDemo'">Animation</Anchor>
@@ -21,32 +21,35 @@
                 <Anchor href="'/TransformPlayground'">Transform Playground</Anchor>
                 <Anchor href="'/RepeatExample'">Repeat Example</Anchor>
                 <Anchor href="'/RenderSystemShowcase'">Render System</Anchor>
-                
+                <Anchor href="'/Window'">Window System</Anchor>
+
             </Div>
-            
+
             <Div style="demo-panel" x-router="demo" x-defaultRoute="/RenderSystemShowcase">
-                
+
                 <Group x-route="/index">
                     <Heading1>UIForia Documentation</Heading1>
                     <Heading2>Hi, this is the demo.</Heading2>
                     <Paragraph>Choose a demo from the menu on the left.</Paragraph>
                 </Group>
+
+                <AnimationDemo x-route="/AnimationDemo"/>
+                <InputDemo x-route="/input"/>
+                <Cursors x-route="/cursors"/>
+                <DynamicDemo x-route="/DynamicDemo"/>
+                <FlexDemo x-route="/FlexDemo"/>
+                <GridDemo x-route="/GridDemo"/>
+                <OrderOrder x-route="/OrderOrder"/>
+                <RepeatALot x-route="/RepeatALot"/>
+                <ScrollDemo x-route="/ScrollDemo"/>
+                <TransclusionDemo x-route="/TransclusionDemo"/>
+                <TransformPlayground x-route="/TransformPlayground"/>
+                <RepeatExample x-route="/RepeatExample"/>
+                <RenderSystemShowcase x-route="/RenderSystemShowcase"/>
+                <WindowDemo x-route="/Window"/>
                 
-                <AnimationDemo x-route="/AnimationDemo" />
-                <InputDemo x-route="/input" />
-                <Cursors x-route="/cursors" />
-                <DynamicDemo x-route="/DynamicDemo" />
-                <FlexDemo x-route="/FlexDemo" />
-                <GridDemo x-route="/GridDemo" />
-                <OrderOrder x-route="/OrderOrder" />
-                <RepeatALot x-route="/RepeatALot" />
-                <ScrollDemo x-route="/ScrollDemo" />
-                <TransclusionDemo x-route="/TransclusionDemo" />
-                <TransformPlayground x-route="/TransformPlayground" />
-                <RepeatExample x-route="/RepeatExample" />
-                <RenderSystemShowcase x-route="/RenderSystemShowcase" />
             </Div>
-            
+
         </Group>
     </Contents>
 

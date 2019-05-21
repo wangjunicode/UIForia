@@ -24,7 +24,7 @@ namespace UIForia.Compilers.Style {
                 {"overflowy", (targetStyle, property, context) => targetStyle.OverflowY = MapEnum<Overflow>(property.children[0], context)},
 
                 // Background
-                {"backgroundcolor", (targetStyle, property, context) => targetStyle.BackgroundColor = MapColor(property, context)},
+                {"`````", (targetStyle, property, context) => targetStyle.BackgroundColor = MapColor(property, context)},
                 {"backgroundtint", (targetStyle, property, context) => targetStyle.BackgroundTint = MapColor(property, context)},
                 {"backgroundimageoffsetx", (targetStyle, property, context) => targetStyle.BackgroundImageOffsetX = MapFixedLength(property.children[0], context)},
                 {"backgroundimageoffsety", (targetStyle, property, context) => targetStyle.BackgroundImageOffsetY = MapFixedLength(property.children[0], context)},
@@ -52,7 +52,7 @@ namespace UIForia.Compilers.Style {
                 {"paddingleft", (targetStyle, property, context) => targetStyle.PaddingLeft = MapFixedLength(property.children[0], context)},
 
                 // todo -- border color goes way and becomes a setter for all 4 sides
-                {"bordercolor", (targetStyle, property, context) => targetStyle.BorderColor = MapColor(property, context)},
+                {"bordercolor", (targetStyle, property, context) => MapBorderColors(targetStyle, property, context)},
                 {"bordercolortop", (targetStyle, property, context) => targetStyle.BorderColor = MapColor(property, context)},
                 {"bordercolorright", (targetStyle, property, context) => targetStyle.BorderColor = MapColor(property, context)},
                 {"bordercolorbottom", (targetStyle, property, context) => targetStyle.BorderColor = MapColor(property, context)},
@@ -518,6 +518,10 @@ namespace UIForia.Compilers.Style {
                 targetStyle.MarginLeft = value4;
             }
         }
+        
+        private static void MapBorderColors(UIStyle targetStyle, PropertyNode property, StyleCompileContext context) {
+            throw new NotImplementedException();
+        }
 
         private static void MapPaddings(UIStyle targetStyle, PropertyNode property, StyleCompileContext context) {
             UIFixedLength value1 = MapFixedLength(property.children[0], context);
@@ -843,6 +847,7 @@ namespace UIForia.Compilers.Style {
             throw new CompileException(url, "Invalid url value.");
         }
 
+        
         private static Color MapColor(PropertyNode property, StyleCompileContext context) {
             AssertSingleValue(property.children, context);
             var styleAstNode = context.GetValueForReference(property.children[0]);

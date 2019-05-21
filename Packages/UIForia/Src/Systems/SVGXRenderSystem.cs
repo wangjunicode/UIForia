@@ -139,6 +139,7 @@ namespace UIForia.Systems {
 
             }
 
+            ctx.DisableScissorRect();
             DrawDebugOverlay?.Invoke(ctx);
 
             // if requires stencil clip -> do stencil clip true if overflow is not hidden and shape is not rect. not sure how to handle z order here
@@ -175,7 +176,7 @@ namespace UIForia.Systems {
 
             // todo -- implement background scrolling style properties
 
-            if (current.style.OverflowY != Overflow.Visible) {
+            if (current.style.OverflowX != Overflow.Visible) {
                 Size allocated = current.layoutResult.allocatedSize;
                 ctx.EnableScissorRect(new Rect(screenPos.x, screenPos.y, allocated.width, allocated.height));
             }

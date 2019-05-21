@@ -10,6 +10,7 @@ namespace UIForia.Layout {
         public float localRotation;
         public Vector2 localScale;
         public Vector2 localPosition;
+
         
         public Vector2 scale;
         public Vector2 screenPosition;
@@ -32,7 +33,8 @@ namespace UIForia.Layout {
         
         public Size scrollbarHorizontalSize;
         public Size scrollbarVerticalSize;
-
+        public Size overflowSize;
+        
         public Rect ScreenRect => new Rect(screenPosition, new Vector2(actualSize.width, actualSize.height));
         public Rect AllocatedRect => new Rect(screenPosition, new Vector2(allocatedSize.width, allocatedSize.height));
         

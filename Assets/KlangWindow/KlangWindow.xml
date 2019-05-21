@@ -12,7 +12,7 @@
 
             <Heading4>{heading}</Heading4>
 
-            <Group style="quote">
+            <Group style="quote">.
                 {text}
             </Group>
 
@@ -53,26 +53,25 @@
 
         </Group>
 
-        <Group style="body">
+        <ScrollView style="body">
 
             <Group style="body-main">
                 <Group style="colony-info-head-section">
-                    <Image src="'icon_2'"/>
+                    <Image style="rounded-image" src="'icon_2'"/>
                     <Group style="colony-info-header-text">
 
-                        <Heading1 style="colony-name">Klang Gang</Heading1>
+                        <Heading1 style="colony-name">UIForia Gang</Heading1>
 
                         <Text>Founder</Text>
                         <Text>Weichselbaum</Text>
 
                         <Text>Age</Text>
-                        <Text>2 years, 4 months</Text>
+                        <Text>10 months</Text>
 
                         <Text>Population</Text>
-                        <Text>238</Text>
+                        <Text>2</Text>
 
                     </Group>
-                    <Image src="'icon_2'"/>
 
                 </Group>
 
@@ -84,9 +83,9 @@
                 </Group>
             </Group>
 
-            <Group style="body-sidebar">
-                
-            </Group>
+<!--            <Group style="body-sidebar">-->
+
+<!--            </Group>-->
 
             <!--                    <RenderBlock.Quote>-->
             <!--                        <Parameter name="val" value="string"/>-->
@@ -100,7 +99,7 @@
             <!--                    <Thing tooltip="$block['quote1]')"/>-->
             <!--                    -->
             <!--                    <RenderBlockDeferred id="quote" as="quote1"/>-->
-        </Group>
+        </ScrollView>
 
     </Contents>
 

@@ -296,13 +296,7 @@ namespace UIForia.Systems {
                 box.clipRect = parentBox.clipRect;
                 layoutResult.clipRect = parentBox.clipRect;
 
-                if (box.style.OverflowX != Overflow.Visible) {
-                    // use own value for children
-                    box.clipRect.x = // todo -- this
-                    box.clipRect.width = box.allocatedWidth;
-                }
-
-
+             
                 Vector2 localPosition = ResolveLocalPosition(box) - scrollOffset;
                 Vector2 localScale = new Vector2(box.transformScaleX, box.transformScaleY);
 
@@ -317,15 +311,13 @@ namespace UIForia.Systems {
                     m = SVGXMatrix.TranslateScale(localPosition.x, localPosition.y, localScale.x, localScale.y);
                 }
 
-                Vector2 offset = new Vector2(box.allocatedWidth * pivot.x, box.allocatedHeight * pivot.y);
                 SVGXMatrix parentMatrix = box.parent.element.layoutResult.matrix;
-                // if(pivot.x != 0 || pivot.y != 0) {
-                //    compute pivot mat
-                //}
 
-                SVGXMatrix pivotMat = SVGXMatrix.Translation(offset);
+                if (pivot.x != 0 || pivot.y != 0) {
+                    SVGXMatrix pivotMat = SVGXMatrix.Translation(new Vector2(box.allocatedWidth * pivot.x, box.allocatedHeight * pivot.y));
+                    m = pivotMat * m * pivotMat.Inverse();
+                }
 
-                m = pivotMat * m * pivotMat.Inverse();
                 m = parentMatrix * m;
                 layoutResult.matrix = m;
 
@@ -346,6 +338,17 @@ namespace UIForia.Systems {
                 layoutResult.borderRadius = new ResolvedBorderRadius(box.BorderRadiusTopLeft, box.BorderRadiusTopRight, box.BorderRadiusBottomRight, box.BorderRadiusBottomLeft);
                 layoutResult.border = new OffsetRect(box.BorderTop, box.BorderRight, box.BorderBottom, box.BorderLeft);
                 layoutResult.padding = new OffsetRect(box.PaddingTop, box.PaddingRight, box.PaddingBottom, box.PaddingLeft);
+                
+                if (box.style.OverflowX != Overflow.Visible) {
+                    // use own value for children
+                    box.clipRect.x = m.position.x;
+                    box.clipRect.width = box.allocatedWidth;
+                }
+
+                if (box.style.OverflowY != Overflow.Visible) {
+                    box.clipRect.y = m.position.y;
+                    box.clipRect.height = box.allocatedHeight;
+                }
             }
 
             for (int i = 0; i < toLayoutCount; i++) {

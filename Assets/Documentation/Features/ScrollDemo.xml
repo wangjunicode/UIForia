@@ -7,7 +7,6 @@
         style level-0 {
             PreferredSize = 400px;
             BackgroundColor = red;
-             
             FlexLayoutDirection = Column;
         }
         

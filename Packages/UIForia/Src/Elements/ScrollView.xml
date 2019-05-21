@@ -4,13 +4,14 @@
 
         style scrollview {
             OverflowX = scroll;
+            OverflowY = scroll;
         }
 
         style scroll-track-vertical {
             PreferredSize = 10px, 1pca;
             BackgroundColor = white;
             LayoutBehavior = Ignored;
-            TransformBehaviorX = AnchorMaxOffset;
+            TransformBehaviorX = AnchorMinOffset;
         }
 
         style scroll-handle-vertical {
@@ -29,7 +30,7 @@
             PreferredSize = 1pca, 10px;
             BackgroundColor = white;
             LayoutBehavior = Ignored;
-            TransformBehaviorY = AnchorMaxOffset;
+            TransformBehaviorY = AnchorMinOffset;
         }
 
     </Style>
@@ -42,7 +43,7 @@
             <Div onDragCreate="OnCreateVerticalDrag($event)" x-id="scroll-handle-vertical" style="scroll-handle-vertical"/>
         </Group>
 
-        <Group onMouseHover="OnHoverHorizontal($event)" x-id="scroll-track-horizontal" style="scroll-track-horizontal">
+        <Group onMouseClick="OnClickHorizontal($event)" onMouseHover="OnHoverHorizontal($event)" x-id="scroll-track-horizontal" style="scroll-track-horizontal">
             <Div onDragCreate="OnCreateHorizontalDrag($event)" x-id="scroll-handle-horizontal" style="scroll-handle-horizontal"/>
         </Group>
 

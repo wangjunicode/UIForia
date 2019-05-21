@@ -66,6 +66,7 @@ namespace UIForia.Elements {
                 float opacity =  1 - Mathf.Clamp01(Easing.Interpolate((Time.realtimeSinceStartup - lastScrollHorizontalTimestamp) / fadeTime, EasingFunction.CubicEaseInOut));
                 horizontalHandle.style.SetPreferredWidth(width, StyleState.Normal);
                 horizontalTrack.style.SetOpacity(opacity, StyleState.Normal);
+                horizontalTrack.style.SetTransformPositionY(layoutResult.allocatedSize.height - horizontalTrack.layoutResult.actualSize.height, StyleState.Normal);
             }
 
             if (actualSize.height <= allocatedSize.height) {
@@ -77,6 +78,7 @@ namespace UIForia.Elements {
                 float opacity = 1 - Mathf.Clamp01(Easing.Interpolate((Time.realtimeSinceStartup - lastScrollVerticalTimestamp) / fadeTime, EasingFunction.CubicEaseInOut));
                 verticalHandle.style.SetPreferredHeight(height, StyleState.Normal);
                 verticalTrack.style.SetOpacity(opacity, StyleState.Normal);
+                verticalTrack.style.SetTransformPositionX(layoutResult.allocatedSize.width - verticalTrack.layoutResult.actualSize.width, StyleState.Normal);
             }
         }
 
@@ -100,6 +102,29 @@ namespace UIForia.Elements {
             float offset = Mathf.Clamp(targetElement.scrollOffset.y + (direction * (pageSize / targetHeight)), 0, 1);
             targetElement.scrollOffset = new Vector2(targetElement.scrollOffset.x, offset);
             verticalHandle.style.SetTransformPositionY(offset * (max), StyleState.Normal);
+            evt.StopPropagation();
+        }
+        
+        public void OnClickHorizontal(MouseInputEvent evt) {
+            if (!horizontalTrack.isEnabled) return;
+            lastScrollVerticalTimestamp = Time.realtimeSinceStartup;
+            float trackRectWidth = horizontalTrack.layoutResult.allocatedSize.width;
+            float targetWidth = targetElement.layoutResult.actualSize.width;
+            float handleLeft = horizontalHandle.layoutResult.screenPosition.x;
+            float handleRight = handleLeft + horizontalHandle.layoutResult.allocatedSize.width;
+            float pageSize = trackRectWidth;
+            float direction = 0;
+            if (evt.MousePosition.x < handleLeft) {
+                direction = -1;
+            }
+            else if (evt.MousePosition.x > handleRight) {
+                direction = 1;
+            }
+            float handleWidth = horizontalHandle.layoutResult.allocatedSize.width;
+            float max = trackRectWidth - handleWidth;
+            float offset = Mathf.Clamp(targetElement.scrollOffset.x + (direction * (pageSize / targetWidth)), 0, 1);
+            targetElement.scrollOffset = new Vector2(offset, targetElement.scrollOffset.y);
+            horizontalHandle.style.SetTransformPositionX(offset * (max), StyleState.Normal);
             evt.StopPropagation();
         }
         

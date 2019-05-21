@@ -24,7 +24,7 @@ namespace UIForia.Compilers.Style {
                 {"overflowy", (targetStyle, property, context) => targetStyle.OverflowY = MapEnum<Overflow>(property.children[0], context)},
 
                 // Background
-                {"`````", (targetStyle, property, context) => targetStyle.BackgroundColor = MapColor(property, context)},
+                {"backgroundcolor", (targetStyle, property, context) => targetStyle.BackgroundColor = MapColor(property, context)},
                 {"backgroundtint", (targetStyle, property, context) => targetStyle.BackgroundTint = MapColor(property, context)},
                 {"backgroundimageoffsetx", (targetStyle, property, context) => targetStyle.BackgroundImageOffsetX = MapFixedLength(property.children[0], context)},
                 {"backgroundimageoffsety", (targetStyle, property, context) => targetStyle.BackgroundImageOffsetY = MapFixedLength(property.children[0], context)},

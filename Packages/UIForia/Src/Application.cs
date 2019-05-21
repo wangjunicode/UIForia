@@ -464,9 +464,7 @@ namespace UIForia {
             m_InputSystem.OnUpdate();
 
             m_BeforeUpdateTaskSystem.OnUpdate();
-
-            m_BindingSystem.OnLateUpdate();
-
+            
             m_InputSystem.OnLateUpdate();
 
             m_RoutingSystem.OnUpdate();

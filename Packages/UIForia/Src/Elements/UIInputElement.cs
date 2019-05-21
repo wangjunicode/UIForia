@@ -12,6 +12,17 @@ using Vertigo;
 #pragma warning disable 0649
 namespace UIForia.Elements {
 
+    [AttributeUsage(AttributeTargets.Event)]
+    public class WriteBindingAttribute : System.Attribute {
+
+        public string propertyName;
+
+        public WriteBindingAttribute(string propertyName) {
+            this.propertyName = propertyName;
+        }
+        
+    }
+    
     [Template(TemplateType.Internal, "Elements/InputElement.xml")]
     public class UIInputElement : UIElement, IFocusable, ISVGXPaintable, IStylePropertiesDidChangeHandler {
 
@@ -35,6 +46,7 @@ namespace UIForia.Elements {
 
         private Vector2 textScroll = new Vector2(0, 0);
 
+        [WriteBinding(nameof(value))]
         public event Action<string> onValueChanged;
 
         private float keyLockTimestamp;

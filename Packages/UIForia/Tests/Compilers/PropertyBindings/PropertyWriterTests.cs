@@ -1,3 +1,4 @@
+using System;
 using NUnit.Framework;
 using Tests.Mocks;
 using UIForia.Attributes;
@@ -12,6 +13,13 @@ public class PropertyWriterTests {
 
         public string value;
 
+        [WriteBinding(nameof(value))]
+        public event Action<string> onValueChanged;
+        
+        public void SetValue(string value) {
+            this.value = value;
+            onValueChanged.Invoke(value);
+        }
     }
 
     [Template(TemplateType.String, @"
@@ -86,7 +94,7 @@ public class PropertyWriterTests {
         MockApplication app = new MockApplication(typeof(ThingWrittenTo));
         ThingWrittenTo root = (ThingWrittenTo) app.RootElement;
         ThingThatWrites writer = root.FindFirstByType<ThingThatWrites>();
-        writer.value = "this is a value";
+        writer.SetValue("this is a value");
 
         app.Update();
 
@@ -100,7 +108,7 @@ public class PropertyWriterTests {
         ThingWrittenToNested root = (ThingWrittenToNested) app.RootElement;
         ThingThatWrites writer = root.FindFirstByType<ThingThatWrites>();
         
-        writer.value = "this is a value";
+        writer.SetValue("this is a value");
         app.Update();
 
         Assert.AreEqual(writer.value, "this is a value");
@@ -112,7 +120,7 @@ public class PropertyWriterTests {
         MockApplication app = new MockApplication(typeof(ThingWrittenTo_Property));
         ThingWrittenTo_Property root = (ThingWrittenTo_Property) app.RootElement;
         ThingThatWrites writer = root.FindFirstByType<ThingThatWrites>();
-        writer.value = "this is a value";
+        writer.SetValue("this is a value");
 
         app.Update();
 
@@ -125,7 +133,7 @@ public class PropertyWriterTests {
         MockApplication app = new MockApplication(typeof(ThingWrittenTo_NestedProperty));
         ThingWrittenTo_NestedProperty root = (ThingWrittenTo_NestedProperty) app.RootElement;
         ThingThatWrites writer = root.FindFirstByType<ThingThatWrites>();
-        writer.value = "this is a value";
+        writer.SetValue("this is a value");
 
         app.Update();
 

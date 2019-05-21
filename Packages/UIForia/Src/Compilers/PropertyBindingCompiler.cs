@@ -55,88 +55,7 @@ namespace UIForia.Compilers {
 
             list.Add(aliasSource);
         }
-
-        private Binding CompileBoundProperty(string property, string value) {
-            // bind pointer is a field or property on the target element
-            // target field/property type must match bind type
-            EventInfo eventInfo = elementType.GetEvent(value);
-            if (eventInfo == null) {
-                throw new ParseException("Error compiling 'bindTo' expression. Tried to find an event with " +
-                                         $"the name {value} on type {elementType.FullName} but none was found");
-            }
-
-            MethodInfo info = eventInfo.EventHandlerType.GetMethod("Invoke");
-            Debug.Assert(info != null, nameof(info) + " != null");
-
-            ParameterInfo[] parameters = info.GetParameters();
-            if (parameters.Length != 1) {
-                throw new ParseException($"Error compiling 'bindTo' expression on type {elementType.FullName}. " +
-                                         "The bind target must be an event of type Action<T>, actual event type " +
-                                         "has more than one parameter.");
-            }
-
-            Type genericArgument = parameters[0].ParameterType;
-
-            FieldInfo fieldInfo = ReflectionUtil.GetFieldInfo(rootType, property);
-
-            Dictionary<string, LightList<object>> actionMap = GetActionMap(rootType);
-
-            if (fieldInfo != null) {
-                LightList<object> list = actionMap?.GetOrDefault(property);
-                if (list != null) {
-                    ReflectionUtil.ObjectArray3[0] = fieldInfo;
-                    ReflectionUtil.ObjectArray3[1] = eventInfo;
-                    ReflectionUtil.ObjectArray3[2] = list;
-
-                    ReflectionUtil.TypeArray2[0] = genericArgument;
-                    ReflectionUtil.TypeArray2[1] = rootType;
-                    return (Binding) ReflectionUtil.CreateGenericInstanceFromOpenType(
-                        typeof(AssignmentCallbackBinding_Root_Field_WithCallbacks<,>),
-                        ReflectionUtil.TypeArray2,
-                        ReflectionUtil.ObjectArray3
-                    );
-                }
-
-                ReflectionUtil.ObjectArray2[0] = fieldInfo;
-                ReflectionUtil.ObjectArray2[1] = eventInfo;
-                return (Binding) ReflectionUtil.CreateGenericInstanceFromOpenType(
-                    typeof(AssignmentCallbackBinding_Root_Field<>),
-                    genericArgument,
-                    ReflectionUtil.ObjectArray2
-                );
-            }
-
-            PropertyInfo propertyInfo = ReflectionUtil.GetPropertyInfo(rootType, property);
-            if (propertyInfo != null) {
-                LightList<object> list = actionMap?.GetOrDefault(property);
-                if (list != null) {
-                    ReflectionUtil.ObjectArray3[0] = propertyInfo;
-                    ReflectionUtil.ObjectArray3[1] = eventInfo;
-                    ReflectionUtil.ObjectArray3[2] = list;
-
-                    ReflectionUtil.TypeArray2[0] = genericArgument;
-                    ReflectionUtil.TypeArray2[1] = rootType;
-                    return (Binding) ReflectionUtil.CreateGenericInstanceFromOpenType(
-                        typeof(AssignmentCallbackBinding_Root_Property_WithCallbacks<,>),
-                        ReflectionUtil.TypeArray2,
-                        ReflectionUtil.ObjectArray3
-                    );
-                }
-
-                ReflectionUtil.ObjectArray2[0] = propertyInfo;
-                ReflectionUtil.ObjectArray2[1] = eventInfo;
-
-                return (Binding) ReflectionUtil.CreateGenericInstanceFromOpenType(
-                    typeof(AssignmentCallbackBinding_Root_Property<>),
-                    genericArgument,
-                    ReflectionUtil.ObjectArray2
-                );
-            }
-
-            throw new ParseException($"Error compiling 'bindTo' expression on type {elementType.FullName}. " +
-                                     $"Unable to find field or property called {property} on type {rootType.FullName}");
-        }
-
+      
         // todo ensure each binding has at most one .read and one .write and that both are different values
         public void CompileAttribute(Type rootType, Type elementType, AttributeDefinition attributeDefinition, LightList<Binding> output) {
             this.rootType = rootType;
@@ -220,6 +139,7 @@ namespace UIForia.Compilers {
 
                 WriteTargetExpression expression = compiler.CompileWriteTarget(rootType, fieldInfo.FieldType, attrValue);
 
+                
                 try {
                     Binding writeBinding = (Binding) ReflectionUtil.CreateGenericInstanceFromOpenType(typeof(WriteBinding<,>),
                         new GenericArguments(elementType, fieldInfo.FieldType),

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using JetBrains.Annotations;
 using UIForia.Bindings;
 using UIForia.Bindings.StyleBindings;
@@ -97,13 +98,27 @@ namespace UIForia.Templates {
             perFrameCount = 0;
             triggeredCount = 0;
             writeCount = 0;
+            EventInfo[] evtInfos = null;
 
             for (int i = 0; i < s_BindingList.Count; i++) {
                 if (s_BindingList[i].IsOnEnable || s_BindingList[i].IsConstant()) {
                     triggeredBindings[triggeredCount++] = s_BindingList[i];
                 }
                 else if (s_BindingList[i].IsWrite) {
-                    writeBindings[writeCount++] = s_BindingList[i];
+                    WriteBinding writeBinding = (WriteBinding) s_BindingList[i];
+                    evtInfos = evtInfos ?? elementType.GetEvents();
+
+                    foreach (EventInfo eventInfo in evtInfos) {
+                        // todo -- some wasted reflection calls here but probably not a big deal, we won't have too many write binding
+                        WriteBindingAttribute attr = eventInfo.GetCustomAttributes<WriteBindingAttribute>().FirstOrDefault();
+                        if (attr != null) {
+                            if (attr.propertyName == writeBinding.bindingId) {
+                                writeBinding.eventName = eventInfo.Name;
+                                writeBinding.genericArguments = eventInfo.EventHandlerType.GetGenericArguments();
+                                writeBindings[writeCount++] = writeBinding;
+                            }
+                        }
+                    }
                 }
                 else {
                     // swap enabled binding to the front
@@ -118,6 +133,7 @@ namespace UIForia.Templates {
 
             s_BindingList.Clear();
         }
+
 
         protected static void CreateChildren(UIElement element, IList<UITemplate> templates, TemplateScope inputScope) {
             for (int i = 0; i < templates.Count; i++) {
@@ -270,6 +286,7 @@ namespace UIForia.Templates {
                         if (styleBinding.IsConstant()) {
                             styleBinding.bindingType = BindingType.Constant;
                         }
+
                         s_BindingList.Add(styleBinding);
                     }
 

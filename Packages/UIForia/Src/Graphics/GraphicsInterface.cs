@@ -36,7 +36,7 @@ namespace Vertigo {
         }
         
         public void EnableUVTransform(in UVTransform uvTransform) {
-            this.uvTransform = this.uvTransform;
+            this.uvTransform = uvTransform;
         }
 
         public void DisableUVTransform() {
@@ -50,7 +50,6 @@ namespace Vertigo {
         public void FillRect(float x, float y, float width, float height, in RenderInfo info) {
             
             if (info.backgroundImage != null) {
-                UVTransform uvTransform;
                 uvTransform.enabled = true;
                 uvTransform.rotation = info.backgroundRotation;
                 uvTransform.tilingX = info.backgroundScale.x;

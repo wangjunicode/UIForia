@@ -6,7 +6,6 @@ style container {
     BackgroundImage = url("image");
     BorderRadius = 50%;
     BorderRadiusTopRight = 25px;
-    Border
 }
 
 style header {

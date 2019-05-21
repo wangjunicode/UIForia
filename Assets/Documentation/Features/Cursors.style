@@ -18,5 +18,4 @@ style blue {
         BackgroundColor = yellow;
         Cursor = url("testimg/Cursor1") 15;
     }
-    [attr:attrName]
 }

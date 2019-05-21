@@ -1,0 +1,13 @@
+style dynamic-style-inner {
+    BackgroundColor = red;
+}
+style dynamic-style {
+    BackgroundColor = Green;
+    TextColor = yellow;
+    Padding = 20px;
+    TextFontAsset = url("Fonts/DIGITALDREAMFAT SDF");
+    TextFontSize = 1.4em;
+}
+style entry {
+    TextColor = black;
+}

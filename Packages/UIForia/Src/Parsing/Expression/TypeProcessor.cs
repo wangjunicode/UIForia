@@ -236,6 +236,10 @@ namespace UIForia.Parsing.Expression {
             if (templateTypeMap.TryGetValue(tagName, out processedType)) {
                 return processedType;
             }
+            
+            if (templateTypeMap.TryGetValue(typeof(UIGroupElement).Name, out processedType)){
+                return processedType;
+            }
 
             throw new ParseException("Unable to find type for tag name: " + tagName);
         }

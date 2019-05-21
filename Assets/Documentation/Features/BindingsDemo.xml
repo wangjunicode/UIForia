@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UITemplate>
+    <Style src="Documentation/Documentation.style" alias="theme" />
+    <Style path="Documentation/Features/BindingsDemo.style" />
+    <Contents style="container">
+        <Group>{simpleBinding}</Group>
+        <Group style="[GetDynamicStyle()]">
+            {GetThing().ThingValue}
+            <Repeat list="numbers">
+                <Group style="['entry', GetDynamicStyle() + '-inner']">
+                    Count {$item}
+                </Group>
+            </Repeat>
+        </Group>
+    </Contents>
+</UITemplate>

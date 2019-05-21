@@ -22,6 +22,10 @@ namespace UIForia {
 
         private void Update() {
             if (type == null) return;
+            if (application == null) {
+
+                return;
+            }
             application.Update();
         }
         

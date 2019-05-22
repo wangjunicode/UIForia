@@ -65,7 +65,7 @@ namespace UIForia.Systems {
             }
 
             for (int i = 0; i < application.m_Views.Count; i++) {
-                RunLayout2(application.m_Views[i]);
+                RunLayout(application.m_Views[i]);
             }
         }
 
@@ -140,7 +140,7 @@ namespace UIForia.Systems {
 
         }
 
-        public void RunLayout2(UIView view) {
+        public void RunLayout(UIView view) {
             m_VisibleBoxList.QuickClear();
             view.visibleElements.QuickClear();
 
@@ -258,12 +258,29 @@ namespace UIForia.Systems {
                     m = pivotMat * m * pivotMat.Inverse();
                 }
 
+                float paddingLeft = box.PaddingLeft;
+                float paddingRight = box.PaddingRight;
+                float paddingBottom = box.PaddingBottom;
+                float paddingTop = box.PaddingTop;
+
+                float borderLeft = box.BorderLeft;
+                float borderRight = box.BorderRight;
+                float borderBottom = box.BorderBottom;
+                float borderTop = box.BorderTop;
+
+
                 m = parentMatrix * m;
                 layoutResult.matrix = m;
 
                 layoutResult.overflowSize = new Size(box.xMax, box.yMax);
                 layoutResult.localPosition = localPosition;
-                layoutResult.ContentRect = box.ContentRect;
+
+                layoutResult.ContentRect = new Rect(
+                    paddingLeft + borderLeft,
+                    paddingTop + borderTop,
+                    box.allocatedWidth - paddingLeft - borderLeft - paddingRight - borderRight,
+                    box.allocatedHeight - paddingTop - borderTop - paddingBottom - borderBottom
+                );
 
                 layoutResult.actualSize = new Size(box.actualWidth, box.actualHeight);
                 layoutResult.allocatedSize = new Size(box.allocatedWidth, box.allocatedHeight);
@@ -276,8 +293,8 @@ namespace UIForia.Systems {
                 layoutResult.pivot = pivot;
 
                 layoutResult.borderRadius = new ResolvedBorderRadius(box.BorderRadiusTopLeft, box.BorderRadiusTopRight, box.BorderRadiusBottomRight, box.BorderRadiusBottomLeft);
-                layoutResult.border = new OffsetRect(box.BorderTop, box.BorderRight, box.BorderBottom, box.BorderLeft);
-                layoutResult.padding = new OffsetRect(box.PaddingTop, box.PaddingRight, box.PaddingBottom, box.PaddingLeft);
+                layoutResult.border = new OffsetRect(borderTop, borderRight, borderBottom, borderLeft);
+                layoutResult.padding = new OffsetRect(paddingTop, paddingRight, paddingBottom, paddingLeft);
 
                 if (box.style.OverflowX != Overflow.Visible) {
                     // use own value for children
@@ -291,20 +308,21 @@ namespace UIForia.Systems {
                 }
             }
 
+            m_VisibleBoxList.EnsureAdditionalCapacity(toLayoutCount);
             for (int i = 0; i < toLayoutCount; i++) {
                 // if height or width is zero
                 // if parent overflow is hidden & parent clip bounds ! contains or intersects children
                 // if parent overflow is h
-                m_VisibleBoxList.Add(toLayoutArray[i]);
+                m_VisibleBoxList.AddUnchecked(toLayoutArray[i]);
             }
 
             m_VisibleBoxList.Sort(comparer);
 
             LayoutBox[] boxes = m_VisibleBoxList.Array;
-
+            view.visibleElements.EnsureCapacity(m_VisibleBoxList.Count);
             for (int i = 0; i < m_VisibleBoxList.Count; i++) {
                 boxes[i].element.layoutResult.zIndex = i + 1;
-                view.visibleElements.Add(boxes[i].element);
+                view.visibleElements.AddUnchecked(boxes[i].element);
             }
         }
 
@@ -359,65 +377,6 @@ namespace UIForia.Systems {
             return localPosition;
         }
 
-        private void CreateOrDestroyScrollbars(LayoutBox box) {
-            UIElement element = box.element;
-
-            if (box.actualHeight <= box.allocatedHeight) {
-                LayoutResult lr = box.element.layoutResult;
-                lr.scrollbarVerticalSize = Size.Unset;
-            }
-            else {
-                Overflow verticalOverflow = box.style.OverflowY;
-                if (verticalOverflow == Overflow.Scroll || verticalOverflow == Overflow.ScrollAndAutoHide) {
-                    Scrollbar vertical = Application.GetCustomScrollbar(null);
-
-                    Extents childExtents = GetLocalExtents(box.children);
-                    float offsetY = (childExtents.min.y < 0) ? -childExtents.min.y / box.allocatedHeight : 0f;
-                    element.scrollOffset = new Vector2(element.scrollOffset.x, offsetY);
-
-                    Size originalAllocatedSize = new Size(box.allocatedWidth, box.allocatedHeight);
-                    element.layoutResult.actualSize = new Size(box.actualWidth, box.actualHeight);
-                    element.layoutResult.allocatedSize = new Size(box.allocatedWidth, box.allocatedHeight);
-
-                    Size verticalScrollbarSize = vertical.RunLayout(element);
-
-                    // this is the push-content case
-                    box.allocatedWidth -= (Mathf.Clamp(verticalScrollbarSize.width, 0, box.allocatedWidth));
-
-                    box.RunLayout();
-
-                    element.layoutResult.allocatedSize = originalAllocatedSize;
-                    element.layoutResult.scrollbarVerticalSize = verticalScrollbarSize;
-                }
-            }
-
-//            if (box.actualWidth <= box.allocatedWidth) {
-//                if (horizontal != null) {
-//                    onDestroyVirtualScrollbar?.Invoke(horizontal);
-//                    m_Elements.Remove(horizontal);
-//                    m_VirtualElements.Remove(horizontal);
-//                    box.horizontalScrollbar = null; // todo -- pool
-//                }
-//            }
-//            else {
-//                Overflow horizontalOverflow = box.style.OverflowX;
-//                if (horizontal == null && horizontalOverflow == Overflow.Scroll || horizontalOverflow == Overflow.ScrollAndAutoHide) {
-//                    horizontal = new VirtualScrollbar(element, ScrollbarOrientation.Horizontal);
-//                    // todo -- depth index needs to be set
-//
-//                    m_Elements.Add(horizontal);
-//
-//                    m_VirtualElements.Add(horizontal);
-//
-//                    Extents childExtents = GetLocalExtents(box.children);
-//                    float offsetX = (childExtents.min.x < 0) ? -childExtents.min.x / box.allocatedWidth : 0f;
-//                    element.scrollOffset = new Vector2(element.scrollOffset.y, offsetX);
-//
-//                    onCreateVirtualScrollbar?.Invoke(horizontal);
-//                    box.horizontalScrollbar = horizontal;
-//                }
-//            }
-        }
 
         public void OnDestroy() { }
 

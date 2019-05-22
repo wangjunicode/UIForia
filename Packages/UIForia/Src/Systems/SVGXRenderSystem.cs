@@ -187,7 +187,7 @@ namespace UIForia.Systems {
                         DrawNormalFill(ctx, current);
                         ctx.SetStrokePlacement(StrokePlacement.Outside);
                         ctx.SetStrokeWidth(border.x);
-                        ctx.SetStroke(current.style.BorderColor);
+                        ctx.SetStroke(current.style.BorderColorTop);
                         ctx.Stroke();
                     }
                     else {
@@ -195,32 +195,39 @@ namespace UIForia.Systems {
 
                         ctx.SetStrokeOpacity(1f);
                         ctx.SetStrokePlacement(StrokePlacement.Inside);
-                        ctx.SetStroke(current.style.BorderColor);
-                        ctx.SetFill(current.style.BorderColor);
+     
 
                         // todo this isn't really working correctly,
                         // compute single stroke path on cpu. current implementation has weird blending overlap artifacts with transparent border color
 
                         if (borderRect.top > 0) {
                             ctx.BeginPath();
+                            ctx.SetStroke(current.style.BorderColorTop);
+                            ctx.SetFill(current.style.BorderColorTop);
                             ctx.Rect(borderRect.left, 0, width - borderRect.Horizontal, borderRect.top);
                             ctx.Fill();
                         }
 
                         if (borderRect.right > 0) {
                             ctx.BeginPath();
+                            ctx.SetStroke(current.style.BorderColorRight);
+                            ctx.SetFill(current.style.BorderColorRight);
                             ctx.Rect(width - borderRect.right, 0, borderRect.right, height);
                             ctx.Fill();
                         }
 
                         if (borderRect.left > 0) {
                             ctx.BeginPath();
+                            ctx.SetStroke(current.style.BorderColorLeft);
+                            ctx.SetFill(current.style.BorderColorLeft);
                             ctx.Rect(0, 0, borderRect.left, height);
                             ctx.Fill();
                         }
 
                         if (borderRect.bottom > 0) {
                             ctx.BeginPath();
+                            ctx.SetStroke(current.style.BorderColorBottom);
+                            ctx.SetFill(current.style.BorderColorBottom);
                             ctx.Rect(borderRect.left, height - borderRect.bottom, width - borderRect.Horizontal, borderRect.bottom);
                             ctx.Fill();
                         }
@@ -234,7 +241,7 @@ namespace UIForia.Systems {
                 DrawNormalFill(ctx, current);
                 if (hasBorder) {
                     ctx.SetStrokeWidth(borderRect.top);
-                    ctx.SetStroke(current.style.BorderColor);
+                    ctx.SetStroke(current.style.BorderColorTop);
                     ctx.Stroke();
                 }
             }

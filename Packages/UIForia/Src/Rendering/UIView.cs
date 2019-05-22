@@ -141,7 +141,9 @@ public class UIView {
 
     public void SetRenderTexture(RenderTexture texture) { }
 
-    public void Destroy() { }
+    public void Destroy() {
+        this.Application.RemoveView(this);
+    }
 
     public void BeginAddingElements() { }
 

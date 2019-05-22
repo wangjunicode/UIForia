@@ -104,6 +104,11 @@ namespace UIForia.Systems {
                         WriteBinding writeBinding = (WriteBinding) template.writeBindings[i];
                         Type actionType = null;
                         Type wrapperType = null;
+                        
+                        if (writeBinding?.genericArguments == null) {
+                            continue;
+                        }
+                        
                         switch (writeBinding.genericArguments.Length) {
                             case 0: {
                                 wrapperType = typeof(WriteBindingWrapper);

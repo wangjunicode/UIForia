@@ -1,10 +1,11 @@
 
 
 style window-container {
-    PreferredSize = 300px, 600px;
+    PreferredSize = 600px, 400px;
     GridLayoutColTemplate = 1mx, 1fr;
     GridLayoutRowTemplate = 64px, 1fr;
     GridLayoutRowAlignment = Grow;
+    GridLayoutColAlignment = Fit;
     LayoutType = Grid; 
     LayoutBehavior = Ignored;
 }
@@ -23,9 +24,6 @@ style title-bar {
     PaddingRight = 1em;
     GridItemColStart = 1;
     GridItemRowStart = 0;
-    [hover] {
-        BackgroundColor = magenta;
-    }
 }
 
 style side-bar-runner {

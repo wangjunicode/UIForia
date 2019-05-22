@@ -19,6 +19,11 @@ namespace Documentation.Features {
             
             KlangWindow window = Application.CreateElement<KlangWindow>();
 
+            window.onClose += () => {
+                windowViews.Remove(view);
+                view.Destroy();
+            };
+            
             windowViews.Add(view);
             
             view.AddChild(window);

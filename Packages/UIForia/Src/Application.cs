@@ -236,6 +236,7 @@ namespace UIForia {
             }
 
             onViewRemoved?.Invoke(view);
+            DestroyElement(view.rootElement);
             return view;
         }
 

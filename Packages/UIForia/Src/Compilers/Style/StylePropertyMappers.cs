@@ -627,7 +627,7 @@ namespace UIForia.Compilers.Style {
             }
 
             Debug.LogWarning($"You used a {unitNode.value} in line {unitNode.line} column {unitNode.column} in file {context.fileName} but this unit isn't supported. " +
-                             "Try px, fr, pca, pcz, em, cnt, aw, ah, vw, vh or lh instead (see UIMeasurementUnit). Will fall back to px.");
+                             "Try px, pca, pcz, em, cnt, aw, ah, vw, vh or lh instead (see UIMeasurementUnit). Will fall back to px.");
 
             return UIMeasurementUnit.Pixel;
         }

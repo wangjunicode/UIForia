@@ -12,7 +12,7 @@
 
             <Heading4>{heading}</Heading4>
 
-            <Group style="quote">.
+            <Group style="quote">
                 {text}
             </Group>
 
@@ -58,20 +58,22 @@
             <Group style="body-main">
                 <Group style="colony-info-head-section">
                     <Image style="rounded-image" src="'icon_2'"/>
-                    <Group style="colony-info-header-text">
+<!--                    <Group style="colony-info-header-text">-->
 
-                        <Heading1 style="colony-name">UIForia Gang</Heading1>
+<!--                        <Heading1 style="colony-name">UIForia Gang</Heading1>-->
 
-                        <Text>Founder</Text>
-                        <Text>Weichselbaum</Text>
+<!--                        <Text>Founder</Text>-->
+<!--                        <Text>Weichselbaum</Text>-->
 
-                        <Text>Age</Text>
-                        <Text>10 months</Text>
+<!--                        <Text>Age</Text>-->
+<!--                        <Text>10 months</Text>-->
 
-                        <Text>Population</Text>
-                        <Text>2</Text>
+<!--                        <Text>Population</Text>-->
+<!--                        <Text>2</Text>-->
 
-                    </Group>
+<!--                    </Group>-->
+                    
+                    super long string here oh my god its so long how do you even fit all that inside of me?
 
                 </Group>
 

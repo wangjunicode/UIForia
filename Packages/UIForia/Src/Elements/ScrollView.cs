@@ -54,27 +54,27 @@ namespace UIForia.Elements {
         }
 
         public override void OnUpdate() {
-            Size actualSize = targetElement.layoutResult.overflowSize;
+            Size overflowSize = targetElement.layoutResult.overflowSize;
             Size allocatedSize = targetElement.layoutResult.allocatedSize;
 
-            if (actualSize.width <= allocatedSize.width) {
+            if (overflowSize.width <= allocatedSize.width) {
                 horizontalTrack.SetEnabled(false);
             }
             else {
                 horizontalTrack.SetEnabled(true);
-                float width = (allocatedSize.width / actualSize.width) * allocatedSize.width;
+                float width = (allocatedSize.width / overflowSize.width) * allocatedSize.width;
                 float opacity = 1 - Mathf.Clamp01(Easing.Interpolate((Time.realtimeSinceStartup - lastScrollHorizontalTimestamp) / fadeTime, EasingFunction.CubicEaseInOut));
                 horizontalHandle.style.SetPreferredWidth(width, StyleState.Normal);
                 horizontalTrack.style.SetOpacity(opacity, StyleState.Normal);
                 horizontalTrack.style.SetTransformPositionY(layoutResult.allocatedSize.height - horizontalTrack.layoutResult.actualSize.height, StyleState.Normal);
             }
 
-            if (actualSize.height <= allocatedSize.height) {
+            if (overflowSize.height <= allocatedSize.height) {
                 verticalTrack.SetEnabled(false);
             }
             else {
                 verticalTrack.SetEnabled(true);
-                float height = (allocatedSize.height / actualSize.height) * allocatedSize.height;
+                float height = (allocatedSize.height / overflowSize.height) * allocatedSize.height;
                 float opacity = 1 - Mathf.Clamp01(Easing.Interpolate((Time.realtimeSinceStartup - lastScrollVerticalTimestamp) / fadeTime, EasingFunction.CubicEaseInOut));
                 verticalHandle.style.SetPreferredHeight(height, StyleState.Normal);
                 verticalTrack.style.SetOpacity(opacity, StyleState.Normal);
@@ -135,15 +135,25 @@ namespace UIForia.Elements {
             if (!evt.IsMouseMiddleDown) {
                 return null;
             }
-            lastScrollVerticalTimestamp = Time.realtimeSinceStartup;
-            lastScrollHorizontalTimestamp = Time.realtimeSinceStartup;
 
-            Vector2 baseOffset = new Vector2(
-                evt.MousePosition.x - horizontalHandle.layoutResult.screenPosition.x,  
-                evt.MousePosition.y - verticalHandle.layoutResult.screenPosition.y
-            );
+            Size overflowSize = targetElement.layoutResult.overflowSize;
+            Size allocatedSize = targetElement.layoutResult.allocatedSize;
+            Vector2 baseOffset = new Vector2();
+            ScrollbarOrientation orientation = 0;
 
-            return new ScrollbarDragEvent(ScrollbarOrientation.Vertical | ScrollbarOrientation.Horizontal, baseOffset, this);
+            if (overflowSize.width > allocatedSize.width) {
+                lastScrollHorizontalTimestamp = Time.realtimeSinceStartup;
+                baseOffset.x = evt.MousePosition.x - horizontalHandle.layoutResult.screenPosition.x;
+                orientation |= ScrollbarOrientation.Horizontal;
+            }
+
+            if (overflowSize.height > allocatedSize.height) {
+                lastScrollVerticalTimestamp = Time.realtimeSinceStartup;
+                baseOffset.y = evt.MousePosition.y - verticalHandle.layoutResult.screenPosition.y;
+                orientation |= ScrollbarOrientation.Vertical;
+            }
+
+            return new ScrollbarDragEvent(orientation, baseOffset, this);
         }
 
         protected virtual DragEvent OnCreateVerticalDrag(MouseInputEvent evt) {
@@ -151,7 +161,7 @@ namespace UIForia.Elements {
             lastScrollVerticalTimestamp = Time.realtimeSinceStartup;
             float handlePosition = verticalHandle.layoutResult.screenPosition.y;
             float baseOffset = evt.MousePosition.y - handlePosition;
-            return new ScrollbarDragEvent(ScrollbarOrientation.Vertical, new Vector2(0,  baseOffset), this);
+            return new ScrollbarDragEvent(ScrollbarOrientation.Vertical, new Vector2(0, baseOffset), this);
         }
 
         protected virtual DragEvent OnCreateHorizontalDrag(MouseInputEvent evt) {

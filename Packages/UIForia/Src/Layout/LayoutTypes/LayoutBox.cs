@@ -18,10 +18,10 @@ namespace UIForia.Layout.LayoutTypes {
 
         public float actualWidth;
         public float actualHeight;
-        
+
         public float xMax;
         public float yMax;
-        
+
         public UIElement element;
         public UIStyleSet style;
 
@@ -78,34 +78,16 @@ namespace UIForia.Layout.LayoutTypes {
         internal LayoutBehavior layoutBehavior;
         internal bool isInPool;
         internal LayoutBoxPool pool;
-        
+
         internal int traversalIndex;
         internal int viewDepthIdx;
-        
-#if DEBUG
-        public int layoutCalls;
-        public int contentSizeCacheHits;
-#endif
 
-        // todo compress w/ flags
         public bool markedForLayout;
         protected internal float cachedPreferredWidth;
 
-        // todo -- stop looking up style properties, cache everything locally so we dont' have to look into the Style object
-        // Padding, Margin, Border, Anchors, AnchorTarget, TransformPosition, TransformPivot, Pref/Min/Max Width + Height
-
         private static readonly Dictionary<int, WidthCache> s_HeightForWidthCache = new Dictionary<int, WidthCache>();
-        public Rect clipRect;
-        public Rect selfClipRect;
 
-        /*
-         * Todo -- When layout happens can probably be optimized a bit
-         * Figure out if parent needs to re-layout instead of assuming it does when child properties change
-         * Don't always re-calculate preferred width
-         */
-        protected LayoutBox() {
-         
-        }
+        public Rect clipRect;
 
         public abstract void RunLayout();
 
@@ -454,23 +436,14 @@ namespace UIForia.Layout.LayoutTypes {
             int intWidth = (int) width;
             if (s_HeightForWidthCache.TryGetValue(element.id, out retn)) {
                 if (retn.width0 == intWidth) {
-#if DEBUG
-                    contentSizeCacheHits++;
-#endif
                     return retn.height0;
                 }
 
                 if (retn.width1 == intWidth) {
-#if DEBUG
-                    contentSizeCacheHits++;
-#endif
                     return retn.height1;
                 }
 
                 if (retn.width2 == intWidth) {
-#if DEBUG
-                    contentSizeCacheHits++;
-#endif
                     return retn.height2;
                 }
 
@@ -485,15 +458,9 @@ namespace UIForia.Layout.LayoutTypes {
         protected abstract float ComputeContentHeight(float width);
 
         private float GetContentWidth() {
-            // todo -- get some stats on this
             if (cachedPreferredWidth == -1) {
                 cachedPreferredWidth = ComputeContentWidth();
             }
-#if DEBUG
-            else {
-                contentSizeCacheHits++;
-            }
-#endif
 
             return cachedPreferredWidth;
         }
@@ -521,7 +488,7 @@ namespace UIForia.Layout.LayoutTypes {
 
                 case UIMeasurementUnit.ParentSize:
                     if (parent == null) return view.Viewport.width;
-                    if (style.LayoutBehavior != LayoutBehavior.Ignored && parent.prefWidth.IsContentBased) {
+                    if (!IsIgnored && parent.prefWidth.IsContentBased) {
                         return 0f;
                     }
 
@@ -535,7 +502,7 @@ namespace UIForia.Layout.LayoutTypes {
 
                 case UIMeasurementUnit.ParentContentArea:
                     if (parent == null) return view.Viewport.width;
-                    if (style.LayoutBehavior != LayoutBehavior.Ignored && parent.prefWidth.IsContentBased) {
+                    if (!IsIgnored && parent.prefWidth.IsContentBased) {
                         // todo there are cases where this is not true
                         // if we hit the paradox -> size = own content size
                         // ie parent is layout that can grow and parent is growing
@@ -758,7 +725,7 @@ namespace UIForia.Layout.LayoutTypes {
 
                 case UIMeasurementUnit.ParentSize:
                     if (parent == null) return view.Viewport.height;
-                    if (style.LayoutBehavior != LayoutBehavior.Ignored && parent.prefHeight.IsContentBased) {
+                    if (!IsIgnored && parent.prefHeight.IsContentBased) {
                         return 0f;
                     }
 
@@ -772,7 +739,7 @@ namespace UIForia.Layout.LayoutTypes {
 
                 case UIMeasurementUnit.ParentContentArea:
                     if (parent == null) return view.Viewport.height;
-                    if (style.LayoutBehavior != LayoutBehavior.Ignored && parent.prefHeight.IsContentBased) {
+                    if (!IsIgnored && parent.prefHeight.IsContentBased) {
                         return 0f;
                     }
 
@@ -958,7 +925,7 @@ namespace UIForia.Layout.LayoutTypes {
             }
         }
 
-     //   [DebuggerStepThrough]
+        //   [DebuggerStepThrough]
         protected float ResolveMinOrMaxWidth(UIMeasurement widthMeasurement) {
             AnchorTarget anchorTarget;
             switch (widthMeasurement.unit) {
@@ -982,7 +949,7 @@ namespace UIForia.Layout.LayoutTypes {
                     return Mathf.Max(0, view.Viewport.height * widthMeasurement.value);
 
                 case UIMeasurementUnit.ParentContentArea:
-                    if (style.LayoutBehavior != LayoutBehavior.Ignored && parent.prefWidth.IsContentBased) {
+                    if (!IsIgnored && parent.prefWidth.IsContentBased) {
                         return 0f;
                     }
 
@@ -1041,7 +1008,7 @@ namespace UIForia.Layout.LayoutTypes {
                     return Mathf.Max(0, view.Viewport.height * heightMeasurement.value);
 
                 case UIMeasurementUnit.ParentContentArea:
-                    if (style.LayoutBehavior != LayoutBehavior.Ignored && parent.prefHeight.IsContentBased) {
+                    if (!IsIgnored && parent.prefHeight.IsContentBased) {
                         return 0f;
                     }
 
@@ -1129,9 +1096,7 @@ namespace UIForia.Layout.LayoutTypes {
 
         protected abstract void OnChildrenChanged();
 
-        public virtual void OnSpawn(UIElement element) {
-
-        }
+        public virtual void OnSpawn(UIElement element) { }
 
         public virtual void OnRelease() {
             this.element = null;

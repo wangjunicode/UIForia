@@ -44,15 +44,15 @@ namespace UIForia.Layout.LayoutTypes {
             this.items = new LightList<Item>(4);
             this.tracks = new LightList<Track>(4);
         }
-        
+
         public bool IsInPool { get; set; }
-        
+
         public override void OnRelease() {
             base.OnRelease();
             this.items.QuickClear();
             this.tracks.QuickClear();
         }
-        
+
         protected override void OnChildrenChanged() {
             items.Clear();
             items.EnsureCapacity(children.Count);
@@ -100,11 +100,10 @@ namespace UIForia.Layout.LayoutTypes {
             for (var index = 0; index < properties.Count; index++) {
                 StyleProperty property = properties[index];
                 switch (property.propertyId) {
-                    // case StylePropertyId.FlexItemOrder:
                     case StylePropertyId.FlexItemGrow:
                     case StylePropertyId.FlexItemShrink:
                     case StylePropertyId.FlexItemSelfAlignment:
-                        
+
                         Item[] itemList = items.Array;
                         for (int i = 0; i < children.Count; i++) {
                             if (children[i] == child) {
@@ -386,6 +385,7 @@ namespace UIForia.Layout.LayoutTypes {
                         offset = 0;
                         break;
                     }
+
                     case MainAxisAlignment.SpaceAround: {
                         if (itemCount == 1) {
                             offset = track.remainingSpace * 0.5f;
@@ -396,6 +396,7 @@ namespace UIForia.Layout.LayoutTypes {
                         offset = spacerSize * 0.5f;
                         break;
                     }
+
                     default:
                         throw new ArgumentOutOfRangeException(nameof(mainAxisAlignment), mainAxisAlignment, null);
                 }
@@ -560,8 +561,6 @@ namespace UIForia.Layout.LayoutTypes {
             track.remainingSpace = overflow;
             return track;
         }
-
-       
 
     }
 

@@ -58,6 +58,8 @@ public class HierarchyView : TreeView {
         TreeViewItem root = new TreeViewItem(-9999, -1);
 
         foreach (UIView uiView in views) {
+            if (uiView.RootElement == null) continue;
+
             ElementTreeItem firstChild = new ElementTreeItem(uiView.RootElement);
             firstChild.displayName = uiView.RootElement.ToString();
             stack.Push(firstChild);

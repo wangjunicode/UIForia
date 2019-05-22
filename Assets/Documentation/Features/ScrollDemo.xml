@@ -34,6 +34,15 @@
             BackgroundColor = black;
             FlexLayoutDirection = Column;
         }
+        style level-2-ignored {
+            BackgroundImage = url("image");
+            PreferredSize = 140px;
+            LayoutBehavior = Ignored;
+            AnchorTop = 100px;
+            TransformBehaviorY = AnchorMinOffset;
+            TransformPositionY = 30px;
+            ZIndex = 1;
+        }
         
     </Style>
     <Contents style="container">
@@ -54,11 +63,18 @@
 
                 <Div style="level-2-b"/>
                 
-                <Div style="level-2-c"/>
+                <Div style="level-2-c">
+                    <Div style="level-2-ignored"/>
+                </Div>
 
             </Div>
             
+            <Div style="level-2-ignored"/>
         </ScrollView>
+
+        <Paragraph>
+                    
+        </Paragraph>
         
 <!--        <ScrollView>-->
 <!--            -->

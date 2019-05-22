@@ -266,7 +266,7 @@ export const b4 = @b2;
 
 style myStyle {
     Border = @b1 @b2 20px @b4;
-    BorderColor = black;
+    BorderColor = black red rgba(100,200,20,250) #ffffff;
 }
 
         ".Trim());
@@ -285,7 +285,10 @@ style myStyle {
         Assert.AreEqual(UIFixedUnit.Pixel, containers[0].groups[0].normal.BorderBottom.unit);
         Assert.AreEqual(UIFixedUnit.Percent, containers[0].groups[0].normal.BorderLeft.unit);
 
-        Assert.AreEqual(Color.black, containers[0].groups[0].normal.BorderColor);
+        Assert.AreEqual(Color.black, containers[0].groups[0].normal.BorderColorTop);
+        Assert.AreEqual(Color.red, containers[0].groups[0].normal.BorderColorRight);
+        Assert.AreEqual(new Color( 100f / 255f, 200f / 255f,20f / 255f,250f / 255f), containers[0].groups[0].normal.BorderColorBottom);
+        Assert.AreEqual(Color.white, containers[0].groups[0].normal.BorderColorLeft);
     }
 
     [Test]

@@ -25,7 +25,7 @@ namespace UIForia.Elements {
         // todo -- without layout system integration this is an overlay scroll bar only
 
         public override void OnReady() {
-            targetElement = this;//FindFirstByType<UIChildrenElement>().GetChild(0);
+            targetElement = this; //FindFirstByType<UIChildrenElement>().GetChild(0);
             verticalHandle = FindById("scroll-handle-vertical");
             verticalTrack = FindById("scroll-track-vertical");
             horizontalHandle = FindById("scroll-handle-horizontal");
@@ -52,7 +52,7 @@ namespace UIForia.Elements {
         public void OnHoverVertical(MouseInputEvent evt) {
             lastScrollVerticalTimestamp = Time.realtimeSinceStartup;
         }
-        
+
         public override void OnUpdate() {
             Size actualSize = targetElement.layoutResult.overflowSize;
             Size allocatedSize = targetElement.layoutResult.allocatedSize;
@@ -63,7 +63,7 @@ namespace UIForia.Elements {
             else {
                 horizontalTrack.SetEnabled(true);
                 float width = (allocatedSize.width / actualSize.width) * allocatedSize.width;
-                float opacity =  1 - Mathf.Clamp01(Easing.Interpolate((Time.realtimeSinceStartup - lastScrollHorizontalTimestamp) / fadeTime, EasingFunction.CubicEaseInOut));
+                float opacity = 1 - Mathf.Clamp01(Easing.Interpolate((Time.realtimeSinceStartup - lastScrollHorizontalTimestamp) / fadeTime, EasingFunction.CubicEaseInOut));
                 horizontalHandle.style.SetPreferredWidth(width, StyleState.Normal);
                 horizontalTrack.style.SetOpacity(opacity, StyleState.Normal);
                 horizontalTrack.style.SetTransformPositionY(layoutResult.allocatedSize.height - horizontalTrack.layoutResult.actualSize.height, StyleState.Normal);
@@ -97,6 +97,7 @@ namespace UIForia.Elements {
             else if (evt.MousePosition.y > handleBottom) {
                 direction = 1;
             }
+
             float handleHeight = verticalHandle.layoutResult.allocatedSize.height;
             float max = trackRectHeight - handleHeight;
             float offset = Mathf.Clamp(targetElement.scrollOffset.y + (direction * (pageSize / targetHeight)), 0, 1);
@@ -104,7 +105,7 @@ namespace UIForia.Elements {
             verticalHandle.style.SetTransformPositionY(offset * (max), StyleState.Normal);
             evt.StopPropagation();
         }
-        
+
         public void OnClickHorizontal(MouseInputEvent evt) {
             if (!horizontalTrack.isEnabled) return;
             lastScrollVerticalTimestamp = Time.realtimeSinceStartup;
@@ -120,6 +121,7 @@ namespace UIForia.Elements {
             else if (evt.MousePosition.x > handleRight) {
                 direction = 1;
             }
+
             float handleWidth = horizontalHandle.layoutResult.allocatedSize.width;
             float max = trackRectWidth - handleWidth;
             float offset = Mathf.Clamp(targetElement.scrollOffset.x + (direction * (pageSize / targetWidth)), 0, 1);
@@ -127,53 +129,70 @@ namespace UIForia.Elements {
             horizontalHandle.style.SetTransformPositionX(offset * (max), StyleState.Normal);
             evt.StopPropagation();
         }
-        
-        protected virtual DragEvent OnCreateVerticalDrag(MouseInputEvent evt) {
+
+        [OnDragCreate]
+        public DragEvent OnMiddleMouseDrag(MouseInputEvent evt) {
+            if (!evt.IsMouseMiddleDown) {
+                return null;
+            }
             lastScrollVerticalTimestamp = Time.realtimeSinceStartup;
-            float trackRectY = verticalTrack.layoutResult.screenPosition.y;
+            lastScrollHorizontalTimestamp = Time.realtimeSinceStartup;
+
+            Vector2 baseOffset = new Vector2(
+                evt.MousePosition.x - horizontalHandle.layoutResult.screenPosition.x,  
+                evt.MousePosition.y - verticalHandle.layoutResult.screenPosition.y
+            );
+
+            return new ScrollbarDragEvent(ScrollbarOrientation.Vertical | ScrollbarOrientation.Horizontal, baseOffset, this);
+        }
+
+        protected virtual DragEvent OnCreateVerticalDrag(MouseInputEvent evt) {
+            if (evt.IsMouseRightDown) return null;
+            lastScrollVerticalTimestamp = Time.realtimeSinceStartup;
             float handlePosition = verticalHandle.layoutResult.screenPosition.y;
-            float baseOffset = evt.MouseDownPosition.y - (trackRectY + handlePosition);
-            return new ScrollbarDragEvent(ScrollbarOrientation.Vertical, baseOffset, this);
+            float baseOffset = evt.MousePosition.y - handlePosition;
+            return new ScrollbarDragEvent(ScrollbarOrientation.Vertical, new Vector2(0,  baseOffset), this);
         }
 
         protected virtual DragEvent OnCreateHorizontalDrag(MouseInputEvent evt) {
+            if (evt.IsMouseRightDown) return null;
             lastScrollHorizontalTimestamp = Time.realtimeSinceStartup;
-            float trackRectX = horizontalTrack.layoutResult.screenPosition.x;
             float handlePosition = horizontalHandle.layoutResult.screenPosition.x;
-            float baseOffset = evt.MouseDownPosition.x - (trackRectX + handlePosition);
-            return new ScrollbarDragEvent(ScrollbarOrientation.Horizontal, baseOffset, this);
+            float baseOffset = evt.MousePosition.x - handlePosition;
+            return new ScrollbarDragEvent(ScrollbarOrientation.Horizontal, new Vector2(baseOffset, 0), this);
         }
 
         public class ScrollbarDragEvent : DragEvent {
 
-            public readonly float baseOffset;
+            public readonly Vector2 baseOffset;
             public readonly ScrollView scrollbar;
             public readonly ScrollbarOrientation orientation;
 
-            public ScrollbarDragEvent(ScrollbarOrientation orientation, float baseOffset, ScrollView scrollbar) : base(scrollbar.targetElement) {
+            public ScrollbarDragEvent(ScrollbarOrientation orientation, Vector2 baseOffset, ScrollView scrollbar) : base(scrollbar.targetElement) {
                 this.orientation = orientation;
                 this.baseOffset = baseOffset;
                 this.scrollbar = scrollbar;
             }
 
             public override void Update() {
-                if (orientation == ScrollbarOrientation.Vertical) {
+                if ((orientation & ScrollbarOrientation.Vertical) != 0) {
                     scrollbar.lastScrollVerticalTimestamp = Time.realtimeSinceStartup;
                     float trackRectY = scrollbar.verticalTrack.layoutResult.screenPosition.y;
                     float trackRectHeight = scrollbar.verticalTrack.layoutResult.allocatedSize.height;
                     float handleHeight = scrollbar.verticalHandle.layoutResult.allocatedSize.height;
                     float max = trackRectHeight - handleHeight;
-                    float offset = Mathf.Clamp(MousePosition.y - trackRectY - baseOffset, 0, max);
+                    float offset = Mathf.Clamp(MousePosition.y - trackRectY - baseOffset.y, 0, max);
                     scrollbar.targetElement.scrollOffset = new Vector2(scrollbar.targetElement.scrollOffset.x, offset / max);
                     scrollbar.verticalHandle.style.SetTransformPositionY(offset, StyleState.Normal);
                 }
-                else {
+
+                if ((orientation & ScrollbarOrientation.Horizontal) != 0) {
                     scrollbar.lastScrollHorizontalTimestamp = Time.realtimeSinceStartup;
                     float trackRectX = scrollbar.horizontalTrack.layoutResult.screenPosition.x;
                     float trackRectWidth = scrollbar.horizontalTrack.layoutResult.allocatedSize.width;
                     float handleWidth = scrollbar.horizontalHandle.layoutResult.allocatedSize.width;
                     float max = trackRectWidth - handleWidth;
-                    float offset = Mathf.Clamp(MousePosition.x - trackRectX - baseOffset, 0, max);
+                    float offset = Mathf.Clamp(MousePosition.x - trackRectX - baseOffset.x, 0, max);
                     scrollbar.targetElement.scrollOffset = new Vector2(offset / max, scrollbar.targetElement.scrollOffset.y);
                     scrollbar.horizontalHandle.style.SetTransformPositionX(offset, StyleState.Normal);
                 }

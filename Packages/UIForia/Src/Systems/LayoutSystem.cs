@@ -266,9 +266,6 @@ namespace UIForia.Systems {
                 current.xMax = current.localX + current.actualWidth;
                 current.yMax = current.localY + current.actualHeight;
 
-                // each element needs a clip rect
-                // how do I find it?
-
                 while (ptr != null) {
                     ptr.xMax = math.max(ptr.xMax, ptr.localX + current.xMax);
                     ptr.yMax = math.max(ptr.yMax, ptr.localY + current.yMax);
@@ -296,10 +293,8 @@ namespace UIForia.Systems {
                 box.clipRect = parentBox.clipRect;
                 layoutResult.clipRect = parentBox.clipRect;
 
-             
                 Vector2 localPosition = ResolveLocalPosition(box) - scrollOffset;
                 Vector2 localScale = new Vector2(box.transformScaleX, box.transformScaleY);
-
 
                 Vector2 pivot = box.Pivot;
                 SVGXMatrix m;
@@ -311,15 +306,12 @@ namespace UIForia.Systems {
                     m = SVGXMatrix.TranslateScale(localPosition.x, localPosition.y, localScale.x, localScale.y);
                 }
 
-                SVGXMatrix parentMatrix = box.parent.element.layoutResult.matrix;
-
                 if (pivot.x != 0 || pivot.y != 0) {
                     SVGXMatrix pivotMat = SVGXMatrix.Translation(new Vector2(box.allocatedWidth * pivot.x, box.allocatedHeight * pivot.y));
                     m = pivotMat * m * pivotMat.Inverse();
                 }
 
-                m = parentMatrix * m;
-                layoutResult.matrix = m;
+                layoutResult.matrix = box.parent.element.layoutResult.matrix * m;
 
                 layoutResult.overflowSize = new Size(box.xMax, box.yMax);
                 layoutResult.localPosition = localPosition;

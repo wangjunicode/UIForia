@@ -17,34 +17,22 @@ namespace UIForia.Systems {
         public const int TextLayoutPoolKey = 100;
         public const int ImageLayoutPoolKey = 200;
 
-        public struct ViewRect {
-
-            public readonly UIView view;
-            public readonly Rect previousViewport;
-
-            public ViewRect(UIView view, Rect previousViewport) {
-                this.view = view;
-                this.previousViewport = previousViewport;
-            }
-
-        }
-
         protected readonly IStyleSystem m_StyleSystem;
         protected readonly IntMap<LayoutBox> m_LayoutBoxMap;
         protected readonly LightList<TextLayoutBox> m_TextLayoutBoxes;
 
         private Size m_ScreenSize;
-        private readonly LightList<ViewRect> m_Views;
         private readonly LightList<LayoutBox> m_VisibleBoxList;
 
         private static readonly IComparer<LayoutBox> comparer = new DepthComparer();
         private readonly Dictionary<int, LayoutBoxPool> layoutBoxPoolMap;
         private readonly LightList<LayoutBox> toLayout = new LightList<LayoutBox>(128);
+        private readonly Application application;
 
-        public LayoutSystem(IStyleSystem styleSystem) {
+        public LayoutSystem(Application application, IStyleSystem styleSystem) {
+            this.application = application;
             this.m_StyleSystem = styleSystem;
             this.m_LayoutBoxMap = new IntMap<LayoutBox>();
-            this.m_Views = new LightList<ViewRect>();
             this.m_VisibleBoxList = new LightList<LayoutBox>();
             this.m_TextLayoutBoxes = new LightList<TextLayoutBox>(64);
             this.m_StyleSystem.onStylePropertyChanged += HandleStylePropertyChanged;
@@ -59,62 +47,15 @@ namespace UIForia.Systems {
             this.layoutBoxPoolMap[ImageLayoutPoolKey] = new LayoutBoxPool<ImageLayoutBox>();
         }
 
-        public class DepthComparer : IComparer<LayoutBox> {
-
-            // todo -- profile caching the pointer lookups, either in layout box or as a struct w/ relevant data
-            public int Compare(LayoutBox a, LayoutBox b) {
-                if (a.layer != b.layer) {
-                    return a.layer > b.layer ? -1 : 1;
-                }
-
-                if (a.viewDepthIdx != b.viewDepthIdx) {
-                    return a.viewDepthIdx > b.viewDepthIdx ? -1 : 1;
-                }
-
-                if (a.zIndex != b.zIndex) {
-                    return a.zIndex > b.zIndex ? -1 : 1;
-                }
-
-                return a.traversalIndex > b.traversalIndex ? -1 : 1;
-
-//                if (a.element.depth != b.element.depth) {
-//                    return a.element.depth > b.element.depth ? -1 : 1;
-//                }
-//
-//                if (a.element.parent != b.element.parent) {
-//                    // loop until parents are the same
-//                    UIElement ptrA = a.element.parent;
-//                    UIElement ptrB = b.element.parent;
-//                    
-//                    while (ptrA != ptrB) {
-//                        ptrA = ptrA.parent;
-//                        ptrB = ptrB.parent;
-//                    }
-//
-//                    return ptrA.siblingIndex > ptrB.siblingIndex ? -1 : 1;
-//                }
-//                
-//                return a.element.siblingIndex > b.element.siblingIndex ? -1 : 1;
-            }
-
-        }
-
         public void OnReset() {
             m_LayoutBoxMap.Clear();
             m_VisibleBoxList.Clear();
-            m_Views.Clear();
         }
 
         public void OnUpdate() {
             // todo -- should this be a list per-view?
             m_VisibleBoxList.Clear();
 
-            bool forceLayout = false;
-            Size screen = new Size(Screen.width, Screen.height);
-            if (m_ScreenSize != screen) {
-                m_ScreenSize = screen;
-                forceLayout = true;
-            }
 
             TextLayoutBox[] textLayouts = m_TextLayoutBoxes.Array;
             for (int i = 0; i < m_TextLayoutBoxes.Count; i++) {
@@ -123,10 +64,8 @@ namespace UIForia.Systems {
                 }
             }
 
-            for (int i = 0; i < m_Views.Count; i++) {
-                //RunLayout(forceLayout, m_Views[i]);
-                RunLayout2(m_Views[i].view);
-                m_Views[i] = new ViewRect(m_Views[i].view, m_Views[i].view.Viewport);
+            for (int i = 0; i < application.m_Views.Count; i++) {
+                RunLayout2(application.m_Views[i]);
             }
         }
 
@@ -203,6 +142,7 @@ namespace UIForia.Systems {
 
         public void RunLayout2(UIView view) {
             m_VisibleBoxList.QuickClear();
+            view.visibleElements.QuickClear();
 
             UIElement rootElement = view.rootElement;
 
@@ -212,7 +152,7 @@ namespace UIForia.Systems {
             rootBox.prefHeight = new UIMeasurement(1, UIMeasurementUnit.ViewportHeight);
 
             rootBox.clipRect = new Rect(0, 0, Screen.width, Screen.height);
-            
+
             rootBox.allocatedWidth = view.Viewport.width;
             rootBox.allocatedHeight = view.Viewport.height;
             rootBox.actualWidth = rootBox.allocatedWidth;
@@ -266,6 +206,9 @@ namespace UIForia.Systems {
                 current.xMax = current.localX + current.actualWidth;
                 current.yMax = current.localY + current.actualHeight;
 
+                // each element needs a clip rect
+                // how do I find it?
+
                 while (ptr != null) {
                     ptr.xMax = math.max(ptr.xMax, ptr.localX + current.xMax);
                     ptr.yMax = math.max(ptr.yMax, ptr.localY + current.yMax);
@@ -293,8 +236,10 @@ namespace UIForia.Systems {
                 box.clipRect = parentBox.clipRect;
                 layoutResult.clipRect = parentBox.clipRect;
 
+
                 Vector2 localPosition = ResolveLocalPosition(box) - scrollOffset;
                 Vector2 localScale = new Vector2(box.transformScaleX, box.transformScaleY);
+
 
                 Vector2 pivot = box.Pivot;
                 SVGXMatrix m;
@@ -306,12 +251,15 @@ namespace UIForia.Systems {
                     m = SVGXMatrix.TranslateScale(localPosition.x, localPosition.y, localScale.x, localScale.y);
                 }
 
+                SVGXMatrix parentMatrix = box.parent.element.layoutResult.matrix;
+
                 if (pivot.x != 0 || pivot.y != 0) {
                     SVGXMatrix pivotMat = SVGXMatrix.Translation(new Vector2(box.allocatedWidth * pivot.x, box.allocatedHeight * pivot.y));
                     m = pivotMat * m * pivotMat.Inverse();
                 }
 
-                layoutResult.matrix = box.parent.element.layoutResult.matrix * m;
+                m = parentMatrix * m;
+                layoutResult.matrix = m;
 
                 layoutResult.overflowSize = new Size(box.xMax, box.yMax);
                 layoutResult.localPosition = localPosition;
@@ -330,7 +278,7 @@ namespace UIForia.Systems {
                 layoutResult.borderRadius = new ResolvedBorderRadius(box.BorderRadiusTopLeft, box.BorderRadiusTopRight, box.BorderRadiusBottomRight, box.BorderRadiusBottomLeft);
                 layoutResult.border = new OffsetRect(box.BorderTop, box.BorderRight, box.BorderBottom, box.BorderLeft);
                 layoutResult.padding = new OffsetRect(box.PaddingTop, box.PaddingRight, box.PaddingBottom, box.PaddingLeft);
-                
+
                 if (box.style.OverflowX != Overflow.Visible) {
                     // use own value for children
                     box.clipRect.x = m.position.x;
@@ -350,377 +298,14 @@ namespace UIForia.Systems {
                 m_VisibleBoxList.Add(toLayoutArray[i]);
             }
 
-            for (int i = 0; i < toLayoutCount; i++) {
-                LayoutBox box = toLayoutArray[i];
-                Rect clipRect = box.parent.clipRect;
-
-                Vector2 p0 = box.element.layoutResult.screenPosition;
-                // rotate + scale :/
-                Vector2 p1 = p0 + new Vector2(box.element.layoutResult.actualSize.width, box.element.layoutResult.actualSize.height);
-
-                // painter -> no fucking clue
-                // rect
-                // rounded rect
-                // partly rounded rect
-                // circle
-                // clip-shape(s)
-            }
-
-            // overflow hidden works with rects
-            // do layout culling on a rect level
-            // if element fully outside its parent's bounds (transformed)
-            // don't add to list? what about containshandlers?
-
-            // culling & clipping mean different things to input & rendering
-
-            // if element overflow is hidden
-            // push clip shape
-            // keep rendering
-            // for each shape in current clip stack
-            // if shape is rect
-            // if !item in clip shape
-            //     dont render
-            // if item overlaps clip shape
-            //     
-            // pop clip shape
-
-
-            // for every layout box
-            // clipRect = ViewRect
-            // for each child
-            // parentPosition & parentAllocatedWidth & Height
-            // what clip bounds do we use? if shape is a non rotated rect, can do easily w/ cpu and gpu handle overlap case 
-            // clipRectAligned or not
-            // if rotated (world space) takes custom code based on shape, clipping gets complicated and graphics has to use polygon clipping or a mask texture
-            // if not rotated takes position & scale like normal
             m_VisibleBoxList.Sort(comparer);
-
 
             LayoutBox[] boxes = m_VisibleBoxList.Array;
 
             for (int i = 0; i < m_VisibleBoxList.Count; i++) {
                 boxes[i].element.layoutResult.zIndex = i + 1;
+                view.visibleElements.Add(boxes[i].element);
             }
-
-            // compute a clip shape for parent using transform
-            // might mean we handle rotated & scaled stuff, get 4 points from box
-
-            // if box has a z index higher than its parent then it is not clipped by the parent? 
-        }
-
-        public bool IsMouseOver(UIElement element, in Vector2 point) {
-            if (element is IPointerQueryHandler handler) {
-                return handler.ContainsPoint(point);
-            }
-            else {
-                // if clip bounds are aligned 
-                // if parent clip bounds contains point
-                // if inside 
-            }
-
-            return true;
-        }
-
-        public void RunLayout(bool forceLayout, ViewRect viewRect) {
-            Rect rect = viewRect.previousViewport;
-            UIView view = viewRect.view;
-            Rect viewportRect = view.Viewport;
-
-            LayoutBox realRoot = m_LayoutBoxMap.GetOrDefault(view.rootElement.id);
-
-            realRoot.element.layoutResult.matrix = SVGXMatrix.identity;
-            realRoot.prefWidth = new UIMeasurement(1, UIMeasurementUnit.ViewportWidth);
-            realRoot.prefHeight = new UIMeasurement(1, UIMeasurementUnit.ViewportHeight);
-
-            realRoot.allocatedWidth = view.Viewport.width;
-            realRoot.allocatedHeight = view.Viewport.height;
-            realRoot.actualWidth = realRoot.allocatedWidth;
-            realRoot.actualHeight = realRoot.allocatedHeight;
-
-            LayoutBox root = m_LayoutBoxMap.GetOrDefault(view.RootElement.id);
-
-            //if (rect != view.Viewport) {
-            root.allocatedWidth = Mathf.Min(root.GetWidths().clampedSize, view.Viewport.width);
-            root.allocatedHeight = Mathf.Min(root.GetHeights(root.allocatedWidth).clampedSize, view.Viewport.height);
-            root.markedForLayout = true;
-            //  }
-
-            Stack<UIElement> stack = StackPool<UIElement>.Get();
-
-            // if we don't allow reparenting, could just use a flat sorted list
-            // as long as the parent is laid out before the child that should be fine
-
-            UIElement element = view.RootElement;
-            LayoutResult layoutResult = element.layoutResult;
-            stack.Push(element);
-
-            // m_VisibleBoxList.Add(element);
-
-            if (root.IsIgnored) {
-                root.allocatedWidth = root.GetWidths().clampedSize;
-                root.allocatedHeight = root.GetHeights(root.allocatedWidth).clampedSize;
-            }
-
-            if (forceLayout || root.markedForLayout) {
-                root.RunLayout();
-                root.markedForLayout = false;
-#if DEBUG
-                root.layoutCalls++;
-#endif
-            }
-
-            // actual size should probably be the root containing all children, ignored or not
-
-            layoutResult.actualSize = new Size(root.actualWidth, root.actualHeight);
-            layoutResult.allocatedSize = new Size(root.allocatedWidth, root.allocatedHeight);
-
-            layoutResult.ContentRect = root.ContentRect;
-
-            layoutResult.scale = new Vector2(root.transformScaleX, root.transformScaleY);
-            layoutResult.localPosition = ResolveLocalPosition(root);
-            layoutResult.screenPosition = layoutResult.localPosition;
-            layoutResult.rotation = root.transformRotation;
-            layoutResult.clipRect = new Rect(0, 0, viewportRect.width, viewportRect.height);
-
-            layoutResult.border = new OffsetRect(
-                root.BorderTop,
-                root.BorderRight,
-                root.BorderBottom,
-                root.BorderLeft
-            );
-
-            layoutResult.padding = new OffsetRect(
-                root.PaddingTop,
-                root.PaddingRight,
-                root.PaddingBottom,
-                root.PaddingLeft
-            );
-
-            layoutResult.matrix = SVGXMatrix.TRS(
-                new Vector2(root.TransformX, root.TransformY),
-                root.transformRotation,
-                new Vector2(root.transformScaleX, root.transformScaleY)
-            );
-
-            CreateOrDestroyScrollbars(root);
-
-            while (stack.Count > 0) {
-                UIElement current = stack.Pop();
-
-                if (!current.isEnabled) {
-                    continue;
-                }
-
-                if (current.children == null) {
-                    continue;
-                }
-
-                for (int i = 0; i < current.children.Count; i++) {
-                    element = current.children[i];
-
-                    LayoutBox box = m_LayoutBoxMap.GetOrDefault(element.id);
-
-                    if (!element.isEnabled) {
-                        continue;
-                    }
-
-                    if (box == null) {
-                        stack.Push(element);
-                        continue;
-                    }
-
-                    if (box.IsIgnored) {
-                        float currentWidth = box.allocatedWidth;
-                        float currentHeight = box.allocatedHeight;
-                        box.allocatedWidth = box.GetWidths().clampedSize;
-                        box.allocatedHeight = box.GetHeights(box.actualHeight).clampedSize;
-                        box.localX = 0;
-                        box.localY = 0;
-                        if (box.allocatedWidth != currentWidth || box.allocatedHeight != currentHeight) {
-                            box.markedForLayout = true;
-                        }
-                    }
-
-                    if (forceLayout || box.markedForLayout) {
-                        box.RunLayout();
-                        box.markedForLayout = false;
-                        CreateOrDestroyScrollbars(box);
-                    }
-
-                    layoutResult = element.layoutResult;
-
-                    LayoutBox parentBox = box.parent;
-
-                    Vector2 scrollOffset = new Vector2();
-                    scrollOffset.x = (parentBox.actualWidth - parentBox.allocatedWidth) * parentBox.element.scrollOffset.x;
-                    scrollOffset.y = (parentBox.actualHeight - parentBox.allocatedHeight) * parentBox.element.scrollOffset.y;
-
-                    layoutResult.localPosition = ResolveLocalPosition(box) - scrollOffset;
-                    layoutResult.ContentRect = box.ContentRect;
-                    layoutResult.actualSize = new Size(box.actualWidth, box.actualHeight);
-                    layoutResult.allocatedSize = new Size(box.allocatedWidth, box.allocatedHeight);
-                    // wrong -- use matrix result
-                    layoutResult.screenPosition = parentBox.element.layoutResult.screenPosition + layoutResult.localPosition;
-                    layoutResult.scale = new Vector2(box.transformScaleX, box.transformScaleY); // only set if changed
-
-                    // wrong -- use matrix result
-                    layoutResult.rotation = parentBox.transformRotation + box.transformRotation; // only set if changed
-
-                    layoutResult.pivot = box.Pivot; // only set if changed
-
-                    layoutResult.borderRadius = new ResolvedBorderRadius(
-                        box.BorderRadiusTopLeft,
-                        box.BorderRadiusTopRight,
-                        box.BorderRadiusBottomRight,
-                        box.BorderRadiusBottomLeft
-                    );
-
-                    layoutResult.border = new OffsetRect( // only set if changed
-                        box.BorderTop,
-                        box.BorderRight,
-                        box.BorderBottom,
-                        box.BorderLeft
-                    );
-
-                    layoutResult.padding = new OffsetRect(
-                        box.PaddingTop,
-                        box.PaddingRight,
-                        box.PaddingBottom,
-                        box.PaddingLeft
-                    );
-
-                    SVGXMatrix m = SVGXMatrix.TRS(layoutResult.localPosition, layoutResult.rotation, layoutResult.scale);
-                    Vector2 pivot = box.Pivot;
-                    Vector2 offset = new Vector2(layoutResult.allocatedSize.width * pivot.x, layoutResult.allocatedSize.height * pivot.y);
-                    SVGXMatrix parentMatrix = box.parent.element.layoutResult.matrix;
-                    SVGXMatrix pivotMat = SVGXMatrix.identity.Translate(offset);
-                    SVGXMatrix minusPivotMat = pivotMat.Inverse();
-
-                    m = pivotMat * m * minusPivotMat;
-                    m = parentMatrix * m;
-                    layoutResult.matrix = m;
-                    layoutResult.screenPosition = m.position; //parentBox.element.layoutResult.screenPosition + layoutResult.localPosition;
-
-//
-//                    // should be able to sort by view
-//                    Rect clipRect = new Rect(0, 0, viewportRect.width, viewportRect.height);
-//                    UIElement ptr = element.parent;
-//                    // find ancestor where layer is higher, might not be our parent
-//
-//                    // todo -- handle non rect clip shapes: ie circle / ellipse
-//
-//                    if (ptr != null) {
-//                        bool handlesHorizontal = ptr.style.OverflowX != Overflow.Visible;
-//                        bool handlesVertical = ptr.style.OverflowY != Overflow.Visible;
-//                        if (handlesHorizontal && handlesVertical) {
-//                            Rect r = new Rect(ptr.layoutResult.screenPosition, ptr.layoutResult.allocatedSize);
-//                            clipRect = clipRect.Intersect(r.Intersect(ptr.layoutResult.clipRect));
-//                        }
-//                        else if (handlesHorizontal) {
-//                            Rect r = new Rect(
-//                                ptr.layoutResult.screenPosition.x,
-//                                ptr.layoutResult.clipRect.y,
-//                                ptr.layoutResult.AllocatedWidth,
-//                                ptr.layoutResult.clipRect.height
-//                            );
-//                            clipRect = r.Intersect(clipRect);
-//                        }
-//                        else if (handlesVertical) {
-//                            Rect r = new Rect(
-//                                ptr.layoutResult.clipRect.x,
-//                                ptr.layoutResult.screenPosition.y,
-//                                ptr.layoutResult.clipRect.width,
-//                                ptr.layoutResult.AllocatedHeight
-//                            );
-//                            clipRect = r.Intersect(clipRect);
-//                        }
-//                        else {
-//                            clipRect = ptr.layoutResult.clipRect;
-//                        }
-//                    }
-//
-//                    layoutResult.clipRect = clipRect;
-//
-//                    Rect intersectedClipRect = layoutResult.clipRect.Intersect(layoutResult.ScreenRect);
-//                    CullResult cullResult = CullResult.NotCulled;
-//
-//                    float clipWAdjustment = 0;
-//                    float clipHAdjustment = 0;
-//
-//                    if (intersectedClipRect.width <= 0 || intersectedClipRect.height <= 0) {
-//                        cullResult = CullResult.ClipRectIsZero;
-//                    }
-//                    else if (layoutResult.actualSize.width * layoutResult.actualSize.height <= 0) {
-//                        cullResult = CullResult.ActualSizeZero;
-//                    }
-//                    else if (layoutResult.allocatedSize.height < layoutResult.actualSize.height) {
-//                        clipHAdjustment = 1 - (layoutResult.allocatedSize.height / layoutResult.actualSize.height);
-//                        if (clipHAdjustment >= 1) {
-//                            cullResult = CullResult.ClipRectIsZero;
-//                        }
-//                    }
-//                    else if (layoutResult.allocatedSize.width < layoutResult.actualSize.width) {
-//                        clipWAdjustment = 1 - (layoutResult.allocatedSize.width / layoutResult.actualSize.width);
-//                        if (clipWAdjustment >= 1) {
-//                            cullResult = CullResult.ClipRectIsZero;
-//                        }
-//                    }
-//
-//                    // todo -- can i get rid of clip vector here?
-//                    Rect screenRect = layoutResult.ScreenRect;
-//                    float clipW = Mathf.Clamp01(MathUtil.PercentOfRange(clipRect.xMax, screenRect.xMin, screenRect.xMax)) - clipWAdjustment;
-//                    float clipH = Mathf.Clamp01(MathUtil.PercentOfRange(clipRect.yMax, screenRect.yMin, screenRect.yMax)) - clipHAdjustment;
-//
-//                    if (clipH <= 0 || clipW <= 0) {
-//                        cullResult = CullResult.ClipRectIsZero;
-//                    }
-//
-//                    layoutResult.cullState = cullResult;
-
-                    // todo actually use this
-                    // if layout result size or position changed -> update the query grid
-                    // if (layoutResult.PositionChanged || layoutResult.SizeChanged) {
-                    //     UpdateQueryGrid(element, oldScreenRect);
-                    // }
-
-                    stack.Push(element);
-//                    if (cullResult == CullResult.NotCulled) {
-//                    m_VisibleBoxList.Add(element);
-//                    }
-                }
-            }
-
-
-            m_VisibleBoxList.Sort(comparer);
-
-//            UIElement[] elements = m_VisibleBoxList.Array;
-//            for (int i = 0; i < m_VisibleBoxList.Count; i++) {
-//                elements[i].layoutResult.zIndex = i + 1;
-//            }
-
-            StackPool<UIElement>.Release(stack);
-        }
-
-        private void UpdateQueryGrid(UIElement element, Rect oldRect) {
-            // todo this should replace the brute force search for querying
-            int x = (int) oldRect.x;
-            int y = (int) oldRect.y;
-            int w = (int) oldRect.width;
-            int h = (int) oldRect.height;
-            x = (x / 100) * 100;
-            y = (y / 100) * 100;
-            w = (w / 100) * 100;
-            h = (h / 100) * 100;
-            int horizontalBlockCount = w / 100;
-            int verticalBlockCount = h / 100;
-            // note: x and y can be negative!
-            // round to nearest 100
-            // assume screen divided into n blocks of 100
-            // each block addressable by x/y in single int
-            // each block has set of members
-            // shift as needed
-            int start = BitUtil.SetHighLowBits((int) oldRect.x, (int) oldRect.y);
-            int end = BitUtil.SetHighLowBits((int) (oldRect.x + oldRect.width), (int) (oldRect.y + oldRect.height));
         }
 
         private static Vector2 ResolveLocalPosition(LayoutBox box) {
@@ -838,11 +423,10 @@ namespace UIForia.Systems {
 
         public void OnViewAdded(UIView view) {
             CreateLayoutBox(view.rootElement);
-            m_Views.Add(new ViewRect(view, new Rect()));
         }
 
         public void OnViewRemoved(UIView view) {
-//            m_Views.Remove(view);
+            m_LayoutBoxMap.GetOrDefault(view.rootElement.id)?.Release();
         }
 
         private void HandleStylePropertyChanged(UIElement element, StructList<StyleProperty> properties) {
@@ -994,7 +578,7 @@ namespace UIForia.Systems {
                         break;
 
                     case StylePropertyId.LayoutBehavior:
-                        // todo -- implement this
+                        box.layoutBehavior = property.AsLayoutBehavior;
                         box.UpdateChildren();
 
                         break;
@@ -1277,15 +861,23 @@ namespace UIForia.Systems {
         }
 
         public List<UIElement> QueryPoint(Vector2 point, List<UIElement> retn) {
-            // todo if point is same as last point or point is off screen, do no work
+            // todo convert to quad tree
             if (retn == null) {
                 retn = ListPool<UIElement>.Get();
             }
 
-            LayoutBox[] layoutBoxes = m_VisibleBoxList.Array;
-            int elementCount = m_VisibleBoxList.Count;
+            for (int i = 0; i < application.m_Views.Count; i++) {
+                QueryPointInView(point, application.m_Views[i], retn);
+            }
+
+            return retn;
+        }
+
+        private static void QueryPointInView(Vector2 point, UIView view, List<UIElement> retn) {
+            UIElement[] elements = view.visibleElements.Array;
+            int elementCount = view.visibleElements.Count;
             for (int i = 0; i < elementCount; i++) {
-                UIElement element = layoutBoxes[i].element;
+                UIElement element = elements[i];
                 LayoutResult layoutResult = element.layoutResult;
 
                 // todo make this better
@@ -1324,8 +916,6 @@ namespace UIForia.Systems {
                     retn.Add(element);
                 }
             }
-
-            return retn;
         }
 
         public OffsetRect GetPaddingRect(UIElement element) {

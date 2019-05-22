@@ -76,7 +76,7 @@ namespace UIForia {
         public static event Action<Application> onApplicationCreated;
         public static event Action<Application> onApplicationDestroyed;
 
-        protected readonly List<UIView> m_Views;
+        protected internal readonly List<UIView> m_Views;
 
         public static readonly List<IAttributeProcessor> s_AttributeProcessors;
 
@@ -117,7 +117,7 @@ namespace UIForia {
 
             m_StyleSystem = new StyleSystem();
             m_BindingSystem = new BindingSystem();
-            m_LayoutSystem = new LayoutSystem(m_StyleSystem);
+            m_LayoutSystem = new LayoutSystem(this, m_StyleSystem);
             m_InputSystem = new GameInputSystem(m_LayoutSystem);
 //            m_RenderSystem = new VertigoRenderSystem(Camera.current, m_LayoutSystem, m_StyleSystem); 
             m_RenderSystem = new SVGXRenderSystem(null, m_LayoutSystem);
@@ -246,7 +246,10 @@ namespace UIForia {
 
             return templateParser.GetParsedTemplate(type)?.Create();
         }
-
+        
+        public T CreateElement<T>() where T : UIElement {
+            return templateParser.GetParsedTemplate(typeof(T))?.Create() as T;
+        }
 
         public void Refresh() {
             onWillRefresh?.Invoke();
@@ -444,6 +447,7 @@ namespace UIForia {
         }
 
         public void Update() {
+            
             // todo -- if parent changed we don't want to double update, best to iterate to array & diff a frame id
             updateTree.ConditionalTraversePreOrder(Time.frameCount, (element, frameId) => {
                 if (element == null) return true; // when would element be null? root?
@@ -472,7 +476,7 @@ namespace UIForia {
             m_RenderSystem.OnUpdate();
 
             m_AfterUpdateTaskSystem.OnUpdate();
-
+            
             onUpdate?.Invoke();
         }
 
@@ -772,7 +776,7 @@ namespace UIForia {
         public UIView[] GetViews() {
             return m_Views.ToArray();
         }
-
+        
         internal void InsertChild(UIElement parent, UIElement child, uint index) {
             if (child.parent != null) {
                 throw new NotImplementedException("Reparenting is not supported");

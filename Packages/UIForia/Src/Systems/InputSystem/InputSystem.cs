@@ -24,9 +24,9 @@ namespace UIForia.Systems {
             }
 
         }
-        
+
         public event Action<IFocusable> onFocusChanged;
-        
+
         private const float k_DragThreshold = 5f;
 
         private readonly ILayoutSystem m_LayoutSystem;
@@ -160,9 +160,8 @@ namespace UIForia.Systems {
         }
 
         public virtual void OnUpdate() {
-
             m_MouseState = GetMouseState();
-            
+
             ProcessKeyboardEvents();
             ProcessMouseInput();
 
@@ -203,13 +202,14 @@ namespace UIForia.Systems {
                 KeyboardEventHandlerInvocation invocation = invocations[index];
                 invocation.handler.Invoke(invocation.target, invocation.context, invocation.evt);
             }
+
             lateHandlers.Clear();
 
             for (int index = 0; index < lateTriggers.Count; index++) {
                 UIEvent uiEvent = lateTriggers[index];
                 uiEvent.origin.TriggerEvent(uiEvent);
             }
-            
+
             lateTriggers.Clear();
         }
 
@@ -224,7 +224,9 @@ namespace UIForia.Systems {
 
                 if (!m_ElementsLastFrame.Contains(element)) {
                     m_EnteredElements.Add(element);
-                    element.style?.EnterState(StyleState.Hover);
+                    if (!IsDragging) {
+                        element.style?.EnterState(StyleState.Hover);
+                    }
                 }
             }
 
@@ -234,34 +236,36 @@ namespace UIForia.Systems {
                     m_ElementsLastFrame[i].style?.ExitState(StyleState.Hover);
                 }
             }
-            
+
             m_EnteredElements.Sort(s_DepthComparer);
             m_ElementsThisFrame.Sort(s_DepthComparer);
 
-            CursorStyle newCursor = null;
-            if (m_ElementsThisFrame.Count > 0) {
-                for (int i = 0; i < m_ElementsThisFrame.Count; i++) {
-                    UIElement element = m_ElementsThisFrame[i];
+            if (!IsDragging) {
+                CursorStyle newCursor = null;
+                if (m_ElementsThisFrame.Count > 0) {
+                    for (int i = 0; i < m_ElementsThisFrame.Count; i++) {
+                        UIElement element = m_ElementsThisFrame[i];
 
-                    if (element.style.IsDefined(StylePropertyId.Cursor)) {
-                        newCursor = element.style.Cursor;
-                        if (!newCursor.Equals(currentCursor)) {
-                            Cursor.SetCursor(newCursor.texture, newCursor.hotSpot, CursorMode.Auto);
+                        if (element.style.IsDefined(StylePropertyId.Cursor)) {
+                            newCursor = element.style.Cursor;
+                            if (!newCursor.Equals(currentCursor)) {
+                                Cursor.SetCursor(newCursor.texture, newCursor.hotSpot, CursorMode.Auto);
+                            }
+
+                            break;
                         }
-
-                        break;
                     }
                 }
-            }
 
-            if (currentCursor != null && newCursor == null) {
-                Cursor.SetCursor(null, new Vector2(0, 0), CursorMode.Auto);
-            }
+                if (currentCursor != null && newCursor == null) {
+                    Cursor.SetCursor(null, new Vector2(0, 0), CursorMode.Auto);
+                }
 
-            currentCursor = newCursor;
+                currentCursor = newCursor;
 
-            if (m_MouseState.AnyMouseDownThisFrame) {
-                m_MouseDownElements.AddRange(m_ElementsThisFrame);
+                if (m_MouseState.AnyMouseDownThisFrame) {
+                    m_MouseDownElements.AddRange(m_ElementsThisFrame);
+                }
             }
 
             ListPool<UIElement>.Release(ref queryResults);
@@ -276,19 +280,12 @@ namespace UIForia.Systems {
                 else {
                     UpdateDrag();
                 }
-
-                return;
             }
-
-            if (m_MouseState.AnyMouseDown) {
+            else if (m_MouseState.AnyMouseDown) {
                 if (Vector2.Distance(m_MouseState.MouseDownPosition, m_MouseState.mousePosition) >= k_DragThreshold) {
                     BeginDrag();
                 }
-
-                return;
             }
-
-            IsDragging = false;
         }
 
         private void UpdateDrag(bool firstFrame = false) {
@@ -328,11 +325,11 @@ namespace UIForia.Systems {
             m_EventPropagator.Reset(m_MouseState);
             MouseInputEvent mouseEvent = new MouseInputEvent(m_EventPropagator, InputEventType.DragCreate, modifiersThisFrame);
             m_CurrentMouseEvent = mouseEvent;
-            
+
             if (m_MouseDownElements.Count == 0) return;
-            
+
             m_EventPropagator.origin = m_MouseDownElements[0];
-            
+
             for (int i = 0; i < m_MouseDownElements.Count; i++) {
                 UIElement element = m_MouseDownElements[i];
                 if (element.isDestroyed || element.isDisabled) {
@@ -403,7 +400,7 @@ namespace UIForia.Systems {
                 if (element.isDestroyed || element.isDisabled) {
                     continue;
                 }
-                
+
                 DragHandlerGroup dragHandlerGroup;
 
                 if (!m_DragHandlerMap.TryGetValue(element.id, out dragHandlerGroup)) {
@@ -507,9 +504,9 @@ namespace UIForia.Systems {
 
         public void OnElementCreated(UIElement element) {
             UITemplate template = element.OriginTemplate;
-            
+
             if (template == null) return;
-            
+
             MouseEventHandler[] mouseHandlers = template.mouseEventHandlers;
             DragEventCreator[] dragEventCreators = template.dragEventCreators;
             DragEventHandler[] dragEventHandlers = template.dragEventHandlers;
@@ -593,12 +590,12 @@ namespace UIForia.Systems {
                 m_PressedKeys.Remove(character, (pressed, c) => pressed.character == c);
                 m_PressedKeys.Remove(keyCode, (pressed, c) => pressed.keyCode == c);
             }
-            
+
             if (m_FocusedElement == null) {
                 m_KeyboardEventTree.ConditionalTraversePreOrder(keyEvent, (item, evt) => {
                     if (evt.stopPropagation) return false;
 
-                    UIElement element = (UIElement) item.Element;  
+                    UIElement element = (UIElement) item.Element;
                     if (element.isDestroyed || element.isDisabled) {
                         return false;
                     }
@@ -619,7 +616,7 @@ namespace UIForia.Systems {
             else {
                 KeyboardEventTreeNode focusedNode = m_KeyboardEventTree.GetItem(m_FocusedElement);
                 IReadOnlyList<KeyboardEventHandler> handlers = focusedNode.handlers;
-                ExpressionContext context = ((UIElement)focusedNode.Element).templateContext;
+                ExpressionContext context = ((UIElement) focusedNode.Element).templateContext;
                 for (int i = 0; i < handlers.Count; i++) {
                     if (keyEvent.stopPropagationImmediately) break;
                     InvokeHandler(handlers[i], focusedNode.Element, context, keyEvent);
@@ -879,7 +876,7 @@ namespace UIForia.Systems {
 
         private void RunMouseEvents(List<UIElement> elements, InputEventType eventType) {
             if (elements.Count == 0) return;
-            
+
             m_EventPropagator.Reset(m_MouseState);
             m_EventPropagator.origin = elements[0];
             MouseInputEvent mouseEvent = new MouseInputEvent(m_EventPropagator, eventType, modifiersThisFrame);
@@ -890,6 +887,7 @@ namespace UIForia.Systems {
                 if (element.isDestroyed || element.isDisabled) {
                     continue;
                 }
+
                 MouseHandlerGroup mouseHandlerGroup;
 
                 if (element.layoutResult.HasScrollbarVertical) {
@@ -974,10 +972,12 @@ namespace UIForia.Systems {
     }
 
     public struct KeyboardEventHandlerInvocation {
+
         public KeyboardEventHandler handler { get; set; }
         public IHierarchical target { get; set; }
         public ExpressionContext context { get; set; }
         public KeyboardInputEvent evt { get; set; }
+
     }
 
 }

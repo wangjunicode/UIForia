@@ -75,6 +75,7 @@ namespace UIForia.Layout.LayoutTypes {
         internal TransformBehavior transformBehaviorX;
         internal TransformBehavior transformBehaviorY;
 
+        internal LayoutBehavior layoutBehavior;
         internal bool isInPool;
         internal LayoutBoxPool pool;
         
@@ -134,7 +135,7 @@ namespace UIForia.Layout.LayoutTypes {
         public float BorderRadiusBottomRight => ResolveFixedWidth(borderRadiusBottomRight);
         public float BorderRadiusBottomLeft => ResolveFixedWidth(borderRadiusBottomLeft);
 
-        public bool IsIgnored => (style.LayoutBehavior & LayoutBehavior.Ignored) != 0;
+        public bool IsIgnored => (layoutBehavior & LayoutBehavior.Ignored) != 0;
 
         public float AnchorLeft => ResolveAnchorLeft();
         public float AnchorRight => ResolveAnchorRight();
@@ -229,6 +230,7 @@ namespace UIForia.Layout.LayoutTypes {
             maxHeight = style.MaxHeight;
             zIndex = style.ZIndex;
             layer = style.Layer;
+            layoutBehavior = style.LayoutBehavior;
         }
 
         public void UpdateChildren() {

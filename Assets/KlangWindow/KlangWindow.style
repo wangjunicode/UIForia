@@ -23,6 +23,9 @@ style title-bar {
     PaddingRight = 1em;
     GridItemColStart = 1;
     GridItemRowStart = 0;
+    [hover] {
+        BackgroundColor = magenta;
+    }
 }
 
 style side-bar-runner {

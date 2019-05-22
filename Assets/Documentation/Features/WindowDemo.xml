@@ -1,12 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <UITemplate>
-    
+
+    <Style path="Documentation/Features/WindowDemo.style"/>
+
     <Contents style="window-demo-container">
-            
-        <KlangWindow/>
+
+        <Div style="create-button-row">
+            <Group onMouseClick="OnButtonClick()" style="button">Create Window</Group>
+        </Div>
+
+        <!--        <KlangWindow/>-->
         
-<!--        <KlangWindow/>-->
-        
+        <!--        <KlangWindow/>-->
+
     </Contents>
-    
+
 </UITemplate>

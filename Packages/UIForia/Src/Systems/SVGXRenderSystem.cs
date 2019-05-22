@@ -41,11 +41,11 @@ namespace UIForia.Systems {
 
         public void OnUpdate() {
             ctx.Clear();
+            
 
-            //todo -- use non alloc version
-            LightList<UIElement> visibleElements = layoutSystem.GetVisibleElements();
-
-            RenderView(views[0], visibleElements);
+            for (int i = 0; i < views.Count; i++) {
+                RenderView(views[i]);
+            }
 
             gfx.Render(ctx);
         }
@@ -68,10 +68,12 @@ namespace UIForia.Systems {
             }
         }
 
-        private void RenderView(UIView view, LightList<UIElement> visibleElements) {
+        private void RenderView(UIView view) {
             m_Camera.orthographic = true;
             m_Camera.orthographicSize = Screen.height * 0.5f;
-            visibleElements.Reverse(); // todo -- dont' do this, also don't get a reference directly to the layout system's visible elements
+            
+            LightList<UIElement> visibleElements = view.visibleElements;
+            visibleElements.Reverse();
 
             UIElement[] elementArray = visibleElements.Array;
             for (int i = 0; i < visibleElements.Count; i++) {
@@ -169,17 +171,6 @@ namespace UIForia.Systems {
             float height = layoutResult.allocatedSize.height;
             bool hasUniformBorder = border.x == border.y && border.z == border.x && border.w == border.x;
             bool hasBorder = border.x > 0 || border.y > 0 || border.z > 0 || border.w > 0;
-
-            Vector2 screenPos = current.layoutResult.screenPosition;
-
-            // todo -- implement background scrolling style properties
-
-//            if (current.style.OverflowX != Overflow.Visible) {
-//                Size allocated = current.layoutResult.allocatedSize;
-//            }
-//            else {
-//                ctx.DisableScissorRect();
-//            }
 
             ctx.EnableScissorRect(current.layoutResult.clipRect);
 

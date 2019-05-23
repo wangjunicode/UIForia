@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using Shapes2D;
-using TMPro;
 using UIForia.Layout;
 using UIForia.Layout.LayoutTypes;
 using UIForia.Text;
@@ -122,7 +121,7 @@ namespace UIForia.Rendering {
         public Overflow AsOverflow => (Overflow) valuePart0;
         public Color AsColor => valuePart1 == 0 ? ColorUtil.UnsetValue : (Color)new StyleColor(valuePart0);
 
-        public TMP_FontAsset AsFont => (TMP_FontAsset) objectField;
+        public FontAsset AsFont => (FontAsset) objectField;
         public Texture2D AsTexture => (Texture2D) objectField;
 
         public FontStyle AsFontStyle => (FontStyle) valuePart0;
@@ -442,7 +441,7 @@ namespace UIForia.Rendering {
             return new StyleProperty(StylePropertyId.RenderLayer, (int) renderLayer);
         }
 
-        public static StyleProperty Font(TMP_FontAsset fontAsset) {
+        public static StyleProperty Font(FontAsset fontAsset) {
             return new StyleProperty(StylePropertyId.TextFontAsset, 0, 0, fontAsset);
         }
 

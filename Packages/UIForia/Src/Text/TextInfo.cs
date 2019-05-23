@@ -61,7 +61,7 @@ namespace UIForia.Text {
 
         public int CharCount => charInfoList.Count;
 
-        public static TMP_FontAsset DefaultFont => TMP_FontAsset.defaultFontAsset;
+        public static FontAsset DefaultFont => FontAsset.defaultFontAsset;
 
         public TextInfo(TextSpan span) {
             spanList = new StructList<SpanInfo>(2);
@@ -98,7 +98,7 @@ namespace UIForia.Text {
                 spanInfo.textStyle.fontSize = 24;
             }
 
-            Material material = spanInfo.textStyle.fontAsset.material;
+           // Material material = spanInfo.textStyle.fontAsset.material;
 //            FontAssetData fontAssetData = new FontAssetData();
 //            fontAssetData.texture = spanInfo.textStyle.font.atlas;
 //            fontAssetData.textureWidth = fontAssetData.texture.width;
@@ -612,10 +612,10 @@ namespace UIForia.Text {
 
             for (int i = 0; i < spanCount; i++) {
                 SpanInfo spanInfo = spanInfos[i];
-                TMP_FontAsset asset = spanInfo.textStyle.fontAsset;
+                FontAsset asset = spanInfo.textStyle.fontAsset;
 
-                float scale = (spanInfo.textStyle.fontSize / asset.fontInfo.PointSize) * asset.fontInfo.Scale;
-                float lh = (asset.fontInfo.Ascender - asset.fontInfo.Descender) * scale;
+                float scale = (spanInfo.textStyle.fontSize / asset.faceInfo.PointSize) * asset.faceInfo.Scale;
+                float lh = (asset.faceInfo.Ascender - asset.faceInfo.Descender) * scale;
                 float lineOffset = 0;
 
                 currentLine.height = currentLine.height > lh ? currentLine.height : lh;
@@ -687,196 +687,196 @@ namespace UIForia.Text {
         }
 
         private void ComputeCharacterAndWordSizes(int spanIdx) {
-            WordInfo[] wordInfos = wordInfoList.Array;
-            CharInfo[] charInfos = charInfoList.Array;
-
-            SpanInfo spanInfo = spanList[spanIdx];
-            TMP_FontAsset fontAsset = spanInfo.textStyle.fontAsset;
-            Material fontAssetMaterial = fontAsset.material;
-
-            bool isUsingAltTypeface = false;
-            float boldAdvanceMultiplier = 1;
-
-            if ((spanInfo.textStyle.fontStyle & FontStyle.Bold) != 0) {
-                fontAsset = GetFontAssetForWeight(spanInfo.textStyle.fontStyle, spanInfo.textStyle.fontAsset, 700);
-                isUsingAltTypeface = true;
-                boldAdvanceMultiplier = 1 + fontAsset.boldSpacing * 0.01f;
-            }
-
-            float smallCapsMultiplier = (spanInfo.textStyle.fontStyle & FontStyle.SmallCaps) == 0 ? 1.0f : 0.8f;
-            float fontScale = spanInfo.textStyle.fontSize * smallCapsMultiplier / fontAsset.fontInfo.PointSize * fontAsset.fontInfo.Scale;
-
-            //float yAdvance = fontAsset.fontInfo.Baseline * fontScale * fontAsset.fontInfo.Scale;
-            //float monoAdvance = 0;
-
-            float minWordSize = float.MaxValue;
-            float maxWordSize = float.MinValue;
-
-            float padding = ShaderUtilities.GetPadding(fontAsset.material, enableExtraPadding: false, isBold: false);
-            float stylePadding = 0;
-
-            if (!isUsingAltTypeface && (spanInfo.textStyle.fontStyle & FontStyle.Bold) == FontStyle.Bold) {
-                if (fontAssetMaterial.HasProperty(ShaderUtilities.ID_GradientScale)) {
-                    float gradientScale = fontAssetMaterial.GetFloat(ShaderUtilities.ID_GradientScale);
-                    stylePadding = fontAsset.boldStyle / 4.0f * gradientScale * fontAssetMaterial.GetFloat(ShaderUtilities.ID_ScaleRatio_A);
-
-                    // Clamp overall padding to Gradient Scale size.
-                    if (stylePadding + padding > gradientScale) {
-                        padding = gradientScale - stylePadding;
-                    }
-                }
-
-                boldAdvanceMultiplier = 1 + fontAsset.boldSpacing * 0.01f;
-            }
-            else if (fontAssetMaterial.HasProperty(ShaderUtilities.ID_GradientScale)) {
-                float gradientScale = fontAssetMaterial.GetFloat(ShaderUtilities.ID_GradientScale);
-                stylePadding = fontAsset.normalStyle / 4.0f * gradientScale *
-                               fontAssetMaterial.GetFloat(ShaderUtilities.ID_ScaleRatio_A);
-
-                // Clamp overall padding to Gradient Scale size.
-                if (stylePadding + padding > gradientScale) {
-                    padding = gradientScale - stylePadding;
-                }
-            }
-
-            // todo -- handle tab
-            // todo -- handle sprites
-
-            int charCount = charInfoList.Count;
-
-            for (int w = spanInfo.wordStart; w < spanInfo.wordEnd; w++) {
-                WordInfo currentWord = wordInfos[w];
-                float xAdvance = 0;
-                // new lines are their own words (idea: give them an xAdvance of some huge number so they always get their own lines)
-
-                for (int i = currentWord.startChar; i < currentWord.startChar + currentWord.charCount; i++) {
-                    int current = charInfos[i].character;
-
-                    TMP_Glyph glyph;
-                    TMP_FontAsset fontForGlyph = TMP_FontUtilities.SearchForGlyph(spanInfo.textStyle.fontAsset, charInfos[i].character, out glyph);
-
-                    if (glyph == null) {
-                        Debug.Log($"The character {charInfos[i].character} isn't available in font {spanInfo.textStyle.fontAsset.name}.");
-                        continue;
-                    }
-
-                    KerningPair adjustmentPair;
-                    GlyphValueRecord glyphAdjustments = new GlyphValueRecord();
-
-                    // todo -- if we end up doing character wrapping we probably want to ignore prev x kerning for line start
-                    if (i != charCount - 1) {
-                        int next = charInfos[i + 1].character;
-                        fontAsset.kerningDictionary.TryGetValue((next << 16) + current, out adjustmentPair);
-                        if (adjustmentPair != null) {
-                            glyphAdjustments = adjustmentPair.firstGlyphAdjustments;
-                        }
-                    }
-
-                    if (i != 0) {
-                        int prev = charInfos[i - 1].character;
-                        fontAsset.kerningDictionary.TryGetValue((current << 16) + prev, out adjustmentPair);
-                        if (adjustmentPair != null) {
-                            glyphAdjustments += adjustmentPair.secondGlyphAdjustments;
-                        }
-                    }
-
-                    float currentElementScale = fontScale * glyph.scale;
-                    float topShear = 0;
-                    float bottomShear = 0;
-
-                    if (!isUsingAltTypeface && ((spanInfo.textStyle.fontStyle & FontStyle.Italic) != 0)) {
-                        float shearValue = fontAsset.italicStyle * 0.01f;
-                        topShear = glyph.yOffset * shearValue;
-                        bottomShear = (glyph.yOffset - glyph.height) * shearValue;
-                    }
-
-                    Vector2 topLeft;
-                    Vector2 bottomRight;
-
-                    // idea for auto sizing: multiply scale later on and just save base unscaled vertices
-//                        topLeft.x = xAdvance + (glyph.xOffset - padding - stylePadding + glyphAdjustments.xPlacement) * currentElementScale;
-//                        topLeft.y = yAdvance + (glyph.yOffset + padding + glyphAdjustments.yPlacement) * currentElementScale;
-//                        bottomRight.x = topLeft.x + (glyph.width + padding * 2) * currentElementScale;
-//                        bottomRight.y = topLeft.y - (glyph.height + padding * 2 + stylePadding * 2) * currentElementScale;
-
-                    topLeft.x = xAdvance + (glyph.xOffset - padding - stylePadding + glyphAdjustments.xPlacement) * currentElementScale;
-                    topLeft.y = ((fontAsset.fontInfo.Ascender) - (glyph.yOffset + padding)) * currentElementScale;
-                    bottomRight.x = topLeft.x + (glyph.width + padding * 2) * currentElementScale;
-                    bottomRight.y = topLeft.y + (glyph.height + padding * 2 + stylePadding * 2) * currentElementScale;
-
-                    charInfos[i].scale = currentElementScale;
-                    
-                    if (currentWord.startChar + currentWord.VisibleCharCount >= i) {
-                        if (topLeft.y > currentWord.maxCharTop) {
-                            currentWord.maxCharTop = topLeft.y;
-                        }
-
-                        if (bottomRight.y < currentWord.minCharBottom) {
-                            currentWord.minCharBottom = bottomRight.y;
-                        }
-                    }
-
-                    FaceInfo faceInfo = fontAsset.fontInfo;
-                    Vector2 uv0;
-
-                    uv0.x = (glyph.x - padding - stylePadding) / faceInfo.AtlasWidth;
-                    uv0.y = 1 - (glyph.y + padding + stylePadding + glyph.height) / faceInfo.AtlasHeight;
-
-                    Vector2 uv1;
-                    uv1.x = (glyph.x + padding + stylePadding + glyph.width) / faceInfo.AtlasWidth;
-                    uv1.y = 1 - (glyph.y - padding - stylePadding) / faceInfo.AtlasHeight;
-
-                    charInfos[i].topLeft = topLeft;
-                    charInfos[i].bottomRight = bottomRight;
-                    charInfos[i].shearValues = new Vector2(topShear, bottomShear);
-
-                    charInfos[i].uv0 = uv0;
-                    charInfos[i].uv1 = uv1;
-
-                    charInfos[i].uv2 = new Vector2(currentElementScale, 0); // todo -- compute uv2s
-                    charInfos[i].uv3 = Vector2.one;
-
-                    float elementAscender = fontAsset.fontInfo.Ascender * currentElementScale / smallCapsMultiplier;
-                    float elementDescender = fontAsset.fontInfo.Descender * currentElementScale / smallCapsMultiplier;
-
-                    charInfos[i].ascender = elementAscender;
-                    charInfos[i].descender = elementDescender;
-
-                    currentWord.ascender = elementAscender > currentWord.ascender
-                        ? elementAscender
-                        : currentWord.ascender;
-                    currentWord.descender = elementDescender < currentWord.descender
-                        ? elementDescender
-                        : currentWord.descender;
-
-                    if ((spanInfo.textStyle.fontStyle & (FontStyle.Superscript | FontStyle.Subscript)) != 0) {
-                        float baseAscender = elementAscender / fontAsset.fontInfo.SubSize;
-                        float baseDescender = elementDescender / fontAsset.fontInfo.SubSize;
-
-                        currentWord.ascender = baseAscender > currentWord.ascender
-                            ? baseAscender
-                            : currentWord.ascender;
-                        currentWord.descender = baseDescender < currentWord.descender
-                            ? baseDescender
-                            : currentWord.descender;
-                    }
-
-                    if (i < currentWord.startChar + currentWord.spaceStart) {
-                        currentWord.characterSize = charInfos[i].bottomRight.x;
-                    }
-
-                    xAdvance += (glyph.xAdvance
-                                 * boldAdvanceMultiplier
-                                 + fontAsset.normalSpacingOffset
-                                 + glyphAdjustments.xAdvance) * currentElementScale;
-                }
-
-                currentWord.xAdvance = xAdvance;
-                currentWord.size = new Vector2(xAdvance, currentWord.ascender); // was ascender - descender
-                minWordSize = Mathf.Min(minWordSize, currentWord.size.x);
-                maxWordSize = Mathf.Max(maxWordSize, currentWord.size.x);
-                wordInfos[w] = currentWord;
-            }
+//            WordInfo[] wordInfos = wordInfoList.Array;
+//            CharInfo[] charInfos = charInfoList.Array;
+//
+//            SpanInfo spanInfo = spanList[spanIdx];
+//            FontAsset fontAsset = spanInfo.textStyle.fontAsset;
+//            Material fontAssetMaterial = fontAsset.material;
+//
+//            bool isUsingAltTypeface = false;
+//            float boldAdvanceMultiplier = 1;
+//
+//            if ((spanInfo.textStyle.fontStyle & FontStyle.Bold) != 0) {
+//                fontAsset = GetFontAssetForWeight(spanInfo.textStyle.fontStyle, spanInfo.textStyle.fontAsset, 700);
+//                isUsingAltTypeface = true;
+//                boldAdvanceMultiplier = 1 + fontAsset.boldSpacing * 0.01f;
+//            }
+//
+//            float smallCapsMultiplier = (spanInfo.textStyle.fontStyle & FontStyle.SmallCaps) == 0 ? 1.0f : 0.8f;
+//            float fontScale = spanInfo.textStyle.fontSize * smallCapsMultiplier / fontAsset.fontInfo.PointSize * fontAsset.fontInfo.Scale;
+//
+//            //float yAdvance = fontAsset.fontInfo.Baseline * fontScale * fontAsset.fontInfo.Scale;
+//            //float monoAdvance = 0;
+//
+//            float minWordSize = float.MaxValue;
+//            float maxWordSize = float.MinValue;
+//
+//            float padding = ShaderUtilities.GetPadding(fontAsset.material, enableExtraPadding: false, isBold: false);
+//            float stylePadding = 0;
+//
+//            if (!isUsingAltTypeface && (spanInfo.textStyle.fontStyle & FontStyle.Bold) == FontStyle.Bold) {
+//                if (fontAssetMaterial.HasProperty(ShaderUtilities.ID_GradientScale)) {
+//                    float gradientScale = fontAssetMaterial.GetFloat(ShaderUtilities.ID_GradientScale);
+//                    stylePadding = fontAsset.boldStyle / 4.0f * gradientScale * fontAssetMaterial.GetFloat(ShaderUtilities.ID_ScaleRatio_A);
+//
+//                    // Clamp overall padding to Gradient Scale size.
+//                    if (stylePadding + padding > gradientScale) {
+//                        padding = gradientScale - stylePadding;
+//                    }
+//                }
+//
+//                boldAdvanceMultiplier = 1 + fontAsset.boldSpacing * 0.01f;
+//            }
+//            else if (fontAssetMaterial.HasProperty(ShaderUtilities.ID_GradientScale)) {
+//                float gradientScale = fontAssetMaterial.GetFloat(ShaderUtilities.ID_GradientScale);
+//                stylePadding = fontAsset.normalStyle / 4.0f * gradientScale *
+//                               fontAssetMaterial.GetFloat(ShaderUtilities.ID_ScaleRatio_A);
+//
+//                // Clamp overall padding to Gradient Scale size.
+//                if (stylePadding + padding > gradientScale) {
+//                    padding = gradientScale - stylePadding;
+//                }
+//            }
+//
+//            // todo -- handle tab
+//            // todo -- handle sprites
+//
+//            int charCount = charInfoList.Count;
+//
+//            for (int w = spanInfo.wordStart; w < spanInfo.wordEnd; w++) {
+//                WordInfo currentWord = wordInfos[w];
+//                float xAdvance = 0;
+//                // new lines are their own words (idea: give them an xAdvance of some huge number so they always get their own lines)
+//
+//                for (int i = currentWord.startChar; i < currentWord.startChar + currentWord.charCount; i++) {
+//                    int current = charInfos[i].character;
+//
+//                    TMP_Glyph glyph;
+//                    TMP_FontAsset fontForGlyph = TMP_FontUtilities.SearchForGlyph(spanInfo.textStyle.fontAsset, charInfos[i].character, out glyph);
+//
+//                    if (glyph == null) {
+//                        Debug.Log($"The character {charInfos[i].character} isn't available in font {spanInfo.textStyle.fontAsset.name}.");
+//                        continue;
+//                    }
+//
+//                    KerningPair adjustmentPair;
+//                    GlyphValueRecord glyphAdjustments = new GlyphValueRecord();
+//
+//                    // todo -- if we end up doing character wrapping we probably want to ignore prev x kerning for line start
+//                    if (i != charCount - 1) {
+//                        int next = charInfos[i + 1].character;
+//                        fontAsset.kerningDictionary.TryGetValue((next << 16) + current, out adjustmentPair);
+//                        if (adjustmentPair != null) {
+//                            glyphAdjustments = adjustmentPair.firstGlyphAdjustments;
+//                        }
+//                    }
+//
+//                    if (i != 0) {
+//                        int prev = charInfos[i - 1].character;
+//                        fontAsset.kerningDictionary.TryGetValue((current << 16) + prev, out adjustmentPair);
+//                        if (adjustmentPair != null) {
+//                            glyphAdjustments += adjustmentPair.secondGlyphAdjustments;
+//                        }
+//                    }
+//
+//                    float currentElementScale = fontScale * glyph.scale;
+//                    float topShear = 0;
+//                    float bottomShear = 0;
+//
+//                    if (!isUsingAltTypeface && ((spanInfo.textStyle.fontStyle & FontStyle.Italic) != 0)) {
+//                        float shearValue = fontAsset.italicStyle * 0.01f;
+//                        topShear = glyph.yOffset * shearValue;
+//                        bottomShear = (glyph.yOffset - glyph.height) * shearValue;
+//                    }
+//
+//                    Vector2 topLeft;
+//                    Vector2 bottomRight;
+//
+//                    // idea for auto sizing: multiply scale later on and just save base unscaled vertices
+////                        topLeft.x = xAdvance + (glyph.xOffset - padding - stylePadding + glyphAdjustments.xPlacement) * currentElementScale;
+////                        topLeft.y = yAdvance + (glyph.yOffset + padding + glyphAdjustments.yPlacement) * currentElementScale;
+////                        bottomRight.x = topLeft.x + (glyph.width + padding * 2) * currentElementScale;
+////                        bottomRight.y = topLeft.y - (glyph.height + padding * 2 + stylePadding * 2) * currentElementScale;
+//
+//                    topLeft.x = xAdvance + (glyph.xOffset - padding - stylePadding + glyphAdjustments.xPlacement) * currentElementScale;
+//                    topLeft.y = ((fontAsset.fontInfo.Ascender) - (glyph.yOffset + padding)) * currentElementScale;
+//                    bottomRight.x = topLeft.x + (glyph.width + padding * 2) * currentElementScale;
+//                    bottomRight.y = topLeft.y + (glyph.height + padding * 2 + stylePadding * 2) * currentElementScale;
+//
+//                    charInfos[i].scale = currentElementScale;
+//                    
+//                    if (currentWord.startChar + currentWord.VisibleCharCount >= i) {
+//                        if (topLeft.y > currentWord.maxCharTop) {
+//                            currentWord.maxCharTop = topLeft.y;
+//                        }
+//
+//                        if (bottomRight.y < currentWord.minCharBottom) {
+//                            currentWord.minCharBottom = bottomRight.y;
+//                        }
+//                    }
+//
+//                    FaceInfo faceInfo = fontAsset.fontInfo;
+//                    Vector2 uv0;
+//
+//                    uv0.x = (glyph.x - padding - stylePadding) / faceInfo.AtlasWidth;
+//                    uv0.y = 1 - (glyph.y + padding + stylePadding + glyph.height) / faceInfo.AtlasHeight;
+//
+//                    Vector2 uv1;
+//                    uv1.x = (glyph.x + padding + stylePadding + glyph.width) / faceInfo.AtlasWidth;
+//                    uv1.y = 1 - (glyph.y - padding - stylePadding) / faceInfo.AtlasHeight;
+//
+//                    charInfos[i].topLeft = topLeft;
+//                    charInfos[i].bottomRight = bottomRight;
+//                    charInfos[i].shearValues = new Vector2(topShear, bottomShear);
+//
+//                    charInfos[i].uv0 = uv0;
+//                    charInfos[i].uv1 = uv1;
+//
+//                    charInfos[i].uv2 = new Vector2(currentElementScale, 0); // todo -- compute uv2s
+//                    charInfos[i].uv3 = Vector2.one;
+//
+//                    float elementAscender = fontAsset.fontInfo.Ascender * currentElementScale / smallCapsMultiplier;
+//                    float elementDescender = fontAsset.fontInfo.Descender * currentElementScale / smallCapsMultiplier;
+//
+//                    charInfos[i].ascender = elementAscender;
+//                    charInfos[i].descender = elementDescender;
+//
+//                    currentWord.ascender = elementAscender > currentWord.ascender
+//                        ? elementAscender
+//                        : currentWord.ascender;
+//                    currentWord.descender = elementDescender < currentWord.descender
+//                        ? elementDescender
+//                        : currentWord.descender;
+//
+//                    if ((spanInfo.textStyle.fontStyle & (FontStyle.Superscript | FontStyle.Subscript)) != 0) {
+//                        float baseAscender = elementAscender / fontAsset.fontInfo.SubSize;
+//                        float baseDescender = elementDescender / fontAsset.fontInfo.SubSize;
+//
+//                        currentWord.ascender = baseAscender > currentWord.ascender
+//                            ? baseAscender
+//                            : currentWord.ascender;
+//                        currentWord.descender = baseDescender < currentWord.descender
+//                            ? baseDescender
+//                            : currentWord.descender;
+//                    }
+//
+//                    if (i < currentWord.startChar + currentWord.spaceStart) {
+//                        currentWord.characterSize = charInfos[i].bottomRight.x;
+//                    }
+//
+//                    xAdvance += (glyph.xAdvance
+//                                 * boldAdvanceMultiplier
+//                                 + fontAsset.normalSpacingOffset
+//                                 + glyphAdjustments.xAdvance) * currentElementScale;
+//                }
+//
+//                currentWord.xAdvance = xAdvance;
+//                currentWord.size = new Vector2(xAdvance, currentWord.ascender); // was ascender - descender
+//                minWordSize = Mathf.Min(minWordSize, currentWord.size.x);
+//                maxWordSize = Mathf.Max(maxWordSize, currentWord.size.x);
+//                wordInfos[w] = currentWord;
+//            }
         }
 
         public void SetSpanStyle(int index, SVGXTextStyle svgxTextStyle) {

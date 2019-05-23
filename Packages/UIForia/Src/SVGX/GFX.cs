@@ -536,7 +536,7 @@ namespace SVGX {
             }
 
             Material material = batchedTransparentPool.GetAndQueueForRelease();
-            Material fontMaterial = null;
+            FontAsset fontAsset = null;
 
             // todo -- support stroke textures, right now we only set texture for fill
 
@@ -552,11 +552,11 @@ namespace SVGX {
                 if (renderShape.shape.type == SVGXShapeType.Text) {
                     // if we have a current font and stuff to render with it, draw it
                     // set current font to this text element's font
-                    fontChanged = fontMaterial != textInfo.spanList[0].textStyle.fontAsset.material;
+                    fontChanged = fontAsset != textInfo.spanList[0].textStyle.fontAsset;
                 }
 
                 if (fontChanged || textureChanged) {
-                    UpdateFontAtlas(material, fontMaterial);
+                    UpdateFontAtlas(material, fontAsset);
                     material.SetTexture(s_MainTexKey, textureMap.GetOrDefault(lastTextureId));
                     DrawMesh(batchedVertexData.FillMesh(), originMatrix, material);
                     batchedVertexData = vertexDataPool.GetAndQueueForRelease();
@@ -565,7 +565,7 @@ namespace SVGX {
                     lastTextureId = currentTextureId;
 
                     if (fontChanged) {
-                        fontMaterial = textInfo.spanList[0].textStyle.fontAsset.material;
+                        fontAsset = textInfo.spanList[0].textStyle.fontAsset;
                     }
                 }
 
@@ -598,29 +598,29 @@ namespace SVGX {
             }
 
             material.SetTexture(s_MainTexKey, textureMap.GetOrDefault(lastTextureId));
-            UpdateFontAtlas(material, fontMaterial);
+            UpdateFontAtlas(material, fontAsset);
             DrawMesh(batchedVertexData.FillMesh(), originMatrix, material);
         }
 
-        private static void UpdateFontAtlas(Material renderMaterial, Material fontMaterial) {
+        private static void UpdateFontAtlas(Material renderMaterial, FontAsset fontMaterial) {
             if (fontMaterial == null) return;
-            renderMaterial.SetTexture(s_GlobalFontTextureKey, fontMaterial.mainTexture);
+            renderMaterial.SetTexture(s_GlobalFontTextureKey, fontMaterial.atlas);
 
             // if we group fonts by channel (4 fonts per texture) then these need to be vectors 
             // where each channel is the value for the corresponding texture
             renderMaterial.SetVector(s_GlobalFontData1Key, new Vector4(
-                fontMaterial.GetFloat(ShaderUtilities.ID_WeightNormal),
-                fontMaterial.GetFloat(ShaderUtilities.ID_WeightBold),
-                fontMaterial.mainTexture.width,
-                fontMaterial.mainTexture.height)
+                fontMaterial.weightNormal,
+                fontMaterial.weightBold,
+                fontMaterial.atlas.width,
+                fontMaterial.atlas.height)
             );
 
             renderMaterial.SetVector(s_GlobalFontData2Key, new Vector4(
-                fontMaterial.GetFloat(ShaderUtilities.ID_GradientScale),
-                fontMaterial.GetFloat(ShaderUtilities.ID_ScaleRatio_A),
-                fontMaterial.GetFloat(ShaderUtilities.ID_ScaleRatio_B),
-                fontMaterial.GetFloat(ShaderUtilities.ID_ScaleRatio_C))
-            );
+                fontMaterial.gradientScale, 0, 0, 0
+//                fontMaterial.GetFloat(ShaderUtilities.ID_ScaleRatio_A),
+//                fontMaterial.GetFloat(ShaderUtilities.ID_ScaleRatio_B),
+//                fontMaterial.GetFloat(ShaderUtilities.ID_ScaleRatio_C))
+            ));
         }
 
         private void DrawClip(SVGXDrawWave wave) {

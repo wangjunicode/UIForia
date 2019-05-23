@@ -1,10 +1,8 @@
-using TMPro;
 using UIForia;
 using UIForia.Text;
 using UnityEngine;
 using FontStyle = UIForia.Text.FontStyle;
 using TextAlignment = UIForia.Text.TextAlignment;
-using WhitespaceMode = UIForia.Text.WhitespaceMode;
 
 namespace SVGX {
 
@@ -20,7 +18,7 @@ namespace SVGX {
         public float outlineSoftness;
         public float glowOuter;
         public float glowOffset;
-        public TMP_FontAsset fontAsset;
+        public FontAsset fontAsset;
         public float underlayX;
         public float underlayY;
         public float underlayDilate;

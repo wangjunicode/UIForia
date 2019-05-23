@@ -53,7 +53,8 @@ namespace UIForia {
         protected IInputSystem m_InputSystem;
         protected RoutingSystem m_RoutingSystem;
         protected AnimationSystem m_AnimationSystem;
-
+        protected ResourceManager resourceManager;
+        
         public readonly StyleSheetImporter styleImporter;
         private readonly IntMap<UIElement> elementMap;
         protected readonly List<ISystem> m_Systems;
@@ -100,7 +101,7 @@ namespace UIForia {
             s_Scrollbars = new Dictionary<string, Scrollbar>();
         }
 
-        protected Application(string id, string templateRootPath = null) {
+        protected Application(string id, string templateRootPath = null, ResourceManager resourceManager = null) {
             this.id = id;
             this.templateRootPath = templateRootPath;
 
@@ -111,6 +112,9 @@ namespace UIForia {
 
             s_ApplicationList.Add(this);
 
+
+            this.resourceManager = resourceManager ?? new ResourceManager();
+            
             this.m_Systems = new List<ISystem>();
             this.m_Views = new List<UIView>();
             this.updateTree = new SkipTree<UIElement>();
@@ -190,6 +194,8 @@ namespace UIForia {
         public RoutingSystem RoutingSystem => m_RoutingSystem;
 
         public Camera Camera { get; private set; }
+        
+        public ResourceManager ResourceManager => resourceManager;
 
         public void SetCamera(Camera camera) {
             Camera = camera;
@@ -265,7 +271,7 @@ namespace UIForia {
             elementMap.Clear();
             templateParser.Reset();
             styleImporter.Reset();
-            ResourceManager.Reset(); 
+            resourceManager.Reset(); 
 
             m_AfterUpdateTaskSystem.OnReset();
             m_BeforeUpdateTaskSystem.OnReset();

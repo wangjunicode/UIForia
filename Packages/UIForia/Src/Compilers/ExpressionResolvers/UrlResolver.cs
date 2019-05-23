@@ -1,70 +1,110 @@
+using System;
 using System.Collections.Generic;
-using System.Reflection;
-using JetBrains.Annotations;
 using TMPro;
+using UIForia.Elements;
 using UIForia.Expressions;
 using UIForia.Parsing.Expression.AstNodes;
-using UIForia.Util;
 using UnityEngine;
 
 namespace UIForia.Compilers.ExpressionResolvers {
 
     public class UrlResolver : ExpressionAliasResolver {
 
-        private static readonly MethodInfo s_TextureUrl;
-        private static readonly MethodInfo s_FontUrl;
-        private static readonly MethodInfo s_AudioClipUrl;
-        private static readonly Expression[] s_Expressions;
-
-        static UrlResolver() {
-            s_TextureUrl = ReflectionUtil.GetMethodInfo(typeof(UrlResolver), nameof(TextureUrl));
-            s_FontUrl = ReflectionUtil.GetMethodInfo(typeof(UrlResolver), nameof(FontUrl));
-            s_AudioClipUrl = ReflectionUtil.GetMethodInfo(typeof(UrlResolver), nameof(AudioUrl));
-
-            s_Expressions = new Expression[1];
-        }
-
         public UrlResolver(string aliasName) : base(aliasName) { }
 
         public override Expression CompileAsMethodExpression(CompilerContext context, List<ASTNode> parameters) {
             if (parameters.Count == 1) {
                 Expression expression = context.Visit(typeof(string), parameters[0]);
-                s_Expressions[0] = expression;
 
-                if (expression == null) {
+                if (!(expression is Expression<string> stringExpression)) {
                     return null;
                 }
-
+                
                 if (typeof(Texture2D) == context.targetType) {
-                    return new MethodCallExpression_Static<string, Texture2D>(s_TextureUrl, s_Expressions);
+                    return new TextureResolver(stringExpression);
                 }
 
                 if (typeof(TMP_FontAsset) == context.targetType) {
-                    return new MethodCallExpression_Static<string, TMP_FontAsset>(s_FontUrl, s_Expressions);
+                    return new FontResolver(stringExpression);
                 }
 
                 if (typeof(AudioClip) == context.targetType) {
-                    return new MethodCallExpression_Static<string, AudioClip>(s_AudioClipUrl, s_Expressions);
+                    return new AudioResolver(stringExpression);
                 }
             }
 
             return null;
         }
 
-        [Pure]
-        private static Texture2D TextureUrl(string path) {
-            return ResourceManager.GetTexture(path);
+        public class TextureResolver : Expression<Texture2D> {
+
+            private readonly bool isConstant;
+            private readonly Expression<string> argument0;
+
+            public TextureResolver(Expression<string> argument0) {
+                this.argument0 = argument0;
+                this.isConstant = argument0.IsConstant();
+            }
+
+            public override Type YieldedType => typeof(Texture2D);
+
+            public override Texture2D Evaluate(ExpressionContext context) {
+                UIElement element = (UIElement) context.rootObject;
+                return element.Application.ResourceManager.GetTexture(argument0.Evaluate(context));
+            }
+
+            public override bool IsConstant() {
+                return isConstant; // todo -- maybe not constant if resource manager is dynamic
+            }
+
+        }
+        
+        public class FontResolver : Expression<FontAsset> {
+
+            private readonly bool isConstant;
+            private readonly Expression<string> argument0;
+
+            public FontResolver(Expression<string> argument0) {
+                this.argument0 = argument0;
+                this.isConstant = argument0.IsConstant();
+            }
+
+            public override Type YieldedType => typeof(FontAsset);
+
+            public override FontAsset Evaluate(ExpressionContext context) {
+                UIElement element = (UIElement) context.rootObject;
+                return element.Application.ResourceManager.GetFont(argument0.Evaluate(context));
+            }
+
+            public override bool IsConstant() {
+                return isConstant; // todo -- maybe not constant if resource manager is dynamic
+            }
+
+        }
+        
+        public class AudioResolver : Expression<AudioClip> {
+
+            private readonly bool isConstant;
+            private readonly Expression<string> argument0;
+
+            public AudioResolver(Expression<string> argument0) {
+                this.argument0 = argument0;
+                this.isConstant = argument0.IsConstant();
+            }
+
+            public override Type YieldedType => typeof(AudioClip);
+
+            public override AudioClip Evaluate(ExpressionContext context) {
+                UIElement element = (UIElement) context.rootObject;
+                return element.Application.ResourceManager.GetAudioClip(argument0.Evaluate(context));
+            }
+
+            public override bool IsConstant() {
+                return isConstant; // todo -- maybe not constant if resource manager is dynamic
+            }
+
         }
 
-        [Pure]
-        private static TMP_FontAsset FontUrl(string path) {
-            return ResourceManager.GetFont(path);
-        }
-
-        [Pure]
-        private static AudioClip AudioUrl(string path) {
-            return ResourceManager.GetAudioClip(path);
-        }
 
     }
 

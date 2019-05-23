@@ -502,7 +502,7 @@ namespace UIForia.Rendering {
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.TextColor, value), state); }
         }
         
-        public TMPro.TMP_FontAsset TextFontAsset {
+        public FontAsset TextFontAsset {
             [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.TextFontAsset, state).AsFont; }
             [System.Diagnostics.DebuggerStepThrough]
@@ -1464,7 +1464,7 @@ namespace UIForia.Rendering {
             set { SetProperty(new StyleProperty(StylePropertyId.TextColor, value)); }
         }
             
-        public TMPro.TMP_FontAsset TextFontAsset {
+        public FontAsset TextFontAsset {
             [System.Diagnostics.DebuggerStepThrough]
             get { return GetProperty(StylePropertyId.TextFontAsset).AsFont; }
             [System.Diagnostics.DebuggerStepThrough]
@@ -2441,7 +2441,7 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public TMPro.TMP_FontAsset TextFontAsset { 
+            public FontAsset TextFontAsset { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
@@ -3453,11 +3453,11 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.TextColor, state).AsColor;
         }
         
-        public void SetTextFontAsset(TMPro.TMP_FontAsset value, StyleState state) {
+        public void SetTextFontAsset(FontAsset value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.TextFontAsset, 0, 0, value), state);
         }
 
-        public TMPro.TMP_FontAsset GetTextFontAsset(StyleState state) {
+        public FontAsset GetTextFontAsset(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.TextFontAsset, state).AsFont;
         }
         

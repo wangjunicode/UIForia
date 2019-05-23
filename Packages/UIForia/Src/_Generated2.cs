@@ -673,10 +673,10 @@ namespace UIForia.Bindings.StyleBindings {
         
     public class StyleBinding_TMP_FontAsset : StyleBinding {
 
-        public readonly Expression<TMPro.TMP_FontAsset> expression;
+        public readonly Expression<FontAsset> expression;
         public readonly StylePropertyId propertyId;
         
-        public StyleBinding_TMP_FontAsset(string propertyName, StylePropertyId propertyId, StyleState state, Expression<TMPro.TMP_FontAsset> expression)
+        public StyleBinding_TMP_FontAsset(string propertyName, StylePropertyId propertyId, StyleState state, Expression<FontAsset> expression)
             : base(propertyName, state) {
             this.propertyId = propertyId;
             this.expression = expression;
@@ -1249,7 +1249,7 @@ case "overflowx":
                 case "textcolor":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_Color("TextColor", UIForia.Rendering.StylePropertyId.TextColor, targetState.state, Compile<UnityEngine.Color>(value, colorSources));                
                 case "textfontasset":
-                    return new UIForia.Bindings.StyleBindings.StyleBinding_TMP_FontAsset("TextFontAsset", UIForia.Rendering.StylePropertyId.TextFontAsset, targetState.state, Compile<TMPro.TMP_FontAsset>(value, fontUrlSource));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_TMP_FontAsset("TextFontAsset", UIForia.Rendering.StylePropertyId.TextFontAsset, targetState.state, Compile<FontAsset>(value, fontUrlSource));                
                 case "textfontsize":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_UIFixedLength("TextFontSize", UIForia.Rendering.StylePropertyId.TextFontSize, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
                 case "textfontstyle":

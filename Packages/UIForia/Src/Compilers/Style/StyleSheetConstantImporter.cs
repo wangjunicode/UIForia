@@ -17,13 +17,15 @@ namespace UIForia.Compilers.Style {
 
         private List<string> currentlyResolvingConstants = new List<string>();
 
+        
         public StyleSheetConstantImporter(StyleSheetImporter styleSheetImporter) {
             this.styleSheetImporter = styleSheetImporter;
         }
 
-        public StyleCompileContext CreateContext(LightList<StyleASTNode> rootNodes) {
-            StyleCompileContext context = new StyleCompileContext();
+        public Application application => styleSheetImporter.app;
 
+        public StyleCompileContext CreateContext(LightList<StyleASTNode> rootNodes) {
+            StyleCompileContext context = new StyleCompileContext(styleSheetImporter.app);
             // first all imports must be collected as they can be referenced in exports and consts
             for (int index = 0; index < rootNodes.Count; index++) {
                 switch (rootNodes[index]) {

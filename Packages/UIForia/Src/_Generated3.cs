@@ -87,7 +87,7 @@ namespace UIForia.Rendering {
 		public static readonly UIFixedLength PaddingBottom = new UIFixedLength(0f, UIFixedUnit.Pixel);
 		public static readonly UIFixedLength PaddingLeft = new UIFixedLength(0f, UIFixedUnit.Pixel);
 		public static readonly Color TextColor = new Color(0f, 0f, 0f, 1f);
-		public static readonly TMP_FontAsset TextFontAsset = TMP_FontAsset.defaultFontAsset;
+		public static readonly FontAsset TextFontAsset = FontAsset.defaultFontAsset;
 		public static readonly UIFixedLength TextFontSize = new UIFixedLength(18f, UIFixedUnit.Pixel);
 		public const FontStyle TextFontStyle = UIForia.Text.FontStyle.Normal;
 		public const TextAlignment TextAlignment = UIForia.Text.TextAlignment.Left;

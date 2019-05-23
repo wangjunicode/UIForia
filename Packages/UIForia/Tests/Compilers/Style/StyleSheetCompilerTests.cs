@@ -1,4 +1,5 @@
 using NUnit.Framework;
+using Tests.Mocks;
 using UIForia;
 using UIForia.Animation;
 using UIForia.Compilers.Style;
@@ -16,7 +17,7 @@ using TextAlignment = UIForia.Text.TextAlignment;
 public class StyleSheetCompilerTests {
 
     public static StyleSheetCompiler NewStyleSheetCompiler() {
-        return new StyleSheetCompiler(new StyleSheetImporter(null));
+        return new StyleSheetCompiler(new StyleSheetImporter(new MockApplication(typeof(ViewTestThing))));
     }
 
     [Test]
@@ -894,7 +895,7 @@ style teXt {
     public void CompileImport() {
         // note: because of possible spaces in paths we have to support string values for urls
         var nodes = StyleParser.Parse(@"
-import ""Tests/Styles/ImportFromMe.style"" as importedThings;
+import ""Data/Styles/ImportFromMe.style"" as importedThings;
 
 style xyz {
     BackgroundColor = @importedThings.colorRed;

@@ -230,7 +230,7 @@ namespace UIForia.Expressions {
         }
 
     }
-
+    
     // used for methods with 1 arguments, U = context type, V = arg0 type, T = return type
     public class MethodCallExpression_Static<U, V, T> : Expression<T> {
 

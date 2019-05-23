@@ -781,7 +781,7 @@ namespace UIForia.Compilers.Style {
                     if (assetInfo.SpriteName != null) {
                         throw new CompileException(urlNode, "SpriteAtlas access is coming soon!");
                     }
-                    return ResourceManager.GetTexture(assetInfo.Path);
+                    return context.application.ResourceManager.GetTexture(assetInfo.path);
                 case StyleLiteralNode literalNode:
                     string value = literalNode.rawValue;
                     if (value == "unset" || value == "default" || value == "null") {
@@ -794,7 +794,7 @@ namespace UIForia.Compilers.Style {
             throw new CompileException(context.fileName, node, $"Expected url(path/to/texture) but found {node}.");
         }
 
-        private static TMP_FontAsset MapFont(StyleASTNode node, StyleCompileContext context) {
+        private static FontAsset MapFont(StyleASTNode node, StyleCompileContext context) {
             node = context.GetValueForReference(node);
             switch (node) {
                 case UrlNode urlNode:
@@ -802,7 +802,8 @@ namespace UIForia.Compilers.Style {
                     if (assetInfo.SpriteName != null) {
                         throw new CompileException(urlNode, "SpriteAtlas access is coming soon!");
                     }
-                    return Resources.Load<TMP_FontAsset>(assetInfo.Path);
+
+                    return context.application.ResourceManager.GetFont(TransformUrlNode(urlNode, context).path);
                     // return ResourceManager.GetFont(TransformUrlNode(urlNode, context));
                 case StyleLiteralNode literalNode:
                     string value = literalNode.rawValue;
@@ -826,14 +827,14 @@ namespace UIForia.Compilers.Style {
 
             if (url.type == StyleASTNodeType.Identifier) {
                 return new AssetInfo {
-                    Path = ((StyleIdentifierNode) url).name,
+                    path = ((StyleIdentifierNode) url).name,
                     SpriteName = spriteName
                 };
             }
 
             if (url.type == StyleASTNodeType.StringLiteral) {
                 return new AssetInfo {
-                    Path = ((StyleLiteralNode) url).rawValue,
+                    path = ((StyleLiteralNode) url).rawValue,
                     SpriteName = spriteName
                 };
             }
@@ -950,7 +951,7 @@ namespace UIForia.Compilers.Style {
         }
 
         public struct AssetInfo {
-            public string Path;
+            public string path;
             public string SpriteName;
         }
     }

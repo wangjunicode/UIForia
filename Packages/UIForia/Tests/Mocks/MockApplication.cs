@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using SVGX;
+using UIForia;
 using UIForia.Elements;
 using UIForia.Rendering;
 using UnityEditor;
@@ -11,7 +12,7 @@ namespace Tests.Mocks {
 
     public class MockApplication : Application {
 
-        public MockApplication(Type elementType, string template = null) : base(GUID.Generate().ToString()) {
+        public MockApplication(Type elementType, string template = null, ResourceManager resourceManager = null) : base(GUID.Generate().ToString(), null, resourceManager) {
             
             TemplateRootPath = Path.GetFullPath(Path.Combine(UnityEngine.Application.dataPath, "../Packages/UIForia/Tests"));
             MockLayoutSystem layoutSystem = new MockLayoutSystem(this, m_StyleSystem);

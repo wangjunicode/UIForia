@@ -119,7 +119,7 @@ namespace UIForia.Editor {
 
             // Text
             new AnimatedPropertyGenerator<Color>(StylePropertyId.TextColor, Color.black, InheritanceType.Inherited),
-            new PropertyGenerator<TMP_FontAsset>(StylePropertyId.TextFontAsset, null, InheritanceType.Inherited, "TMP_FontAsset.defaultFontAsset"),
+            new PropertyGenerator<FontAsset>(StylePropertyId.TextFontAsset, FontAsset.defaultFontAsset, InheritanceType.Inherited, "FontAsset.defaultFontAsset"),
             new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.TextFontSize, 18, InheritanceType.Inherited),
             new PropertyGenerator<Text.FontStyle>(StylePropertyId.TextFontStyle, Text.FontStyle.Normal, InheritanceType.Inherited),
             new PropertyGenerator<Text.TextAlignment>(StylePropertyId.TextAlignment, Text.TextAlignment.Left, InheritanceType.Inherited),
@@ -347,7 +347,6 @@ __REPLACE_StyleBindingCompiler_DoCompile
             string code = @"using Shapes2D;
 using UIForia.Layout;
 using UIForia.Layout.LayoutTypes;
-using TMPro;
 using UIForia.Bindings.StyleBindings;
 using System.Collections.Generic;
 using UnityEngine;
@@ -613,7 +612,7 @@ namespace UIForia.Rendering {
             else if (typeof(GridTrackSize) == propertyGenerator.type) {
                 return $"FindGridTrackSizeProperty(StylePropertyId.{propertyGenerator.propertyIdName});";
             }
-            else if (typeof(TMP_FontAsset) == propertyGenerator.type) {
+            else if (typeof(FontAsset) == propertyGenerator.type) {
                 return $"GetProperty(StylePropertyId.{propertyGenerator.propertyIdName}).AsFont;";
             }
             else if (typeof(Texture2D) == propertyGenerator.type) {

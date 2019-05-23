@@ -1041,14 +1041,14 @@ namespace UIForia.Editor {
         private static StyleProperty DrawFontAsset(StyleProperty property, bool isEditable) {
             GUI.enabled = isEditable;
             GUILayout.BeginHorizontal();
-            TMP_FontAsset fontAsset = property.AsFont;
+            FontAsset fontAsset = property.AsFont;
 
-            TMP_FontAsset newFont = (TMP_FontAsset) EditorGUILayout.ObjectField(StyleUtil.GetPropertyName(property),
-                fontAsset, typeof(TMP_FontAsset), false);
+            string newFontName = EditorGUILayout.TextField(StyleUtil.GetPropertyName(property), fontAsset.name);
 
             GUI.enabled = true;
             GUILayout.EndHorizontal();
-            return isEditable ? new StyleProperty(property.propertyId, 0, 0, newFont) : property;
+            // todo -- need element ref to resolve font
+            return isEditable ? new StyleProperty(property.propertyId, 0, 0, null) : property;
         }
 
         private static StyleProperty DrawGridTemplate(StyleProperty property, bool isEditable) {

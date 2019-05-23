@@ -51,7 +51,7 @@ namespace UIForia.Compilers.Style {
 
             
             // null check is for test cases without an app so that the importer can be used stand-alone
-            string path = app == null ? UnityEngine.Application.dataPath + "/" + fileName : app.TemplateRootPath + "/" + fileName;
+            string path = app.TemplateRootPath + "/" + fileName;
 
             if (File.Exists(path)) {
                 string contents = File.ReadAllText(path);

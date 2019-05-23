@@ -17,7 +17,7 @@ namespace UIForia.Elements {
         
         [OnPropertyChanged(nameof(src))]
         public void OnSrcChanged(string name) {
-            texture = ResourceManager.GetTexture(src);
+            texture = Application.ResourceManager.GetTexture(src);
             style.SetBackgroundImage(texture, StyleState.Normal);
         }
 

@@ -478,8 +478,8 @@ public class StyleTests {
         MockApplication app = new MockApplication(typeof(StyleSetTestThing));
         StyleSetTestThing root = (StyleSetTestThing) app.RootElement;
         UIStyleSetStateProxy normal = root.style.Normal;
-        var font0 = ScriptableObject.CreateInstance<TMP_FontAsset>();
-        var font1 = ScriptableObject.CreateInstance<TMP_FontAsset>();
+        var font0 = new FontAsset(ScriptableObject.CreateInstance<TMP_FontAsset>());
+        var font1 = new FontAsset(ScriptableObject.CreateInstance<TMP_FontAsset>());
         normal.TextFontAsset = font0;
         app.Update();
         Assert.AreEqual(font0, root.FindById("group1").style.TextFontAsset);

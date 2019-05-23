@@ -8,21 +8,27 @@ using UIForia.Util;
 namespace UIForia.Compilers.Style {
 
     public class StyleCompileContext {
+
         private static readonly Func<StyleConstant, string, bool> s_FindStyleConstant = (element, name) => element.name == name;
 
         public string fileName;
-        public Dictionary<string, ConstNode> constNodes = new Dictionary<string, ConstNode>();
-        public Dictionary<string, LightList<StyleConstant>> importedStyleConstants = new Dictionary<string, LightList<StyleConstant>>();
 
-        public Dictionary<string, StyleConstant> constantsWithReferences = new Dictionary<string, StyleConstant>();
-        public LightList<StyleConstant> constants = LightListPool<StyleConstant>.Get();
-        public LightList<UIStyleGroup> importedGroups = LightListPool<UIStyleGroup>.Get();
+        public Dictionary<string, LightList<StyleConstant>> importedStyleConstants;
+        public Dictionary<string, StyleConstant> constantsWithReferences;
+        public LightList<StyleConstant> constants;
+        public Application application;
+
+        public StyleCompileContext(Application application) {
+            this.application = application;
+            this.importedStyleConstants = new Dictionary<string, LightList<StyleConstant>>();
+            this.constantsWithReferences = new Dictionary<string, StyleConstant>();
+            this.constants = new LightList<StyleConstant>();
+        }
 
         public void Release() {
-            LightListPool<StyleConstant>.Release(ref constants);
-            LightListPool<UIStyleGroup>.Release(ref importedGroups);
-            constNodes.Clear();
+            importedStyleConstants.Clear();
             constantsWithReferences.Clear();
+            constants.Clear();
         }
 
         /// <summary>
@@ -40,13 +46,12 @@ namespace UIForia.Compilers.Style {
                         return c.value;
                     }
                 }
-                
+
                 if (referenceNode.children.Count > 0) {
-                    if (importedStyleConstants.ContainsKey(referenceNode.identifier)) {
+                    if (importedStyleConstants.TryGetValue(referenceNode.identifier, out LightList<StyleConstant> constantList)) {
                         DotAccessNode importedConstant = (DotAccessNode) referenceNode.children[0];
 
-                        StyleConstant importedStyleConstant = importedStyleConstants[referenceNode.identifier]
-                            .Find(importedConstant.propertyName, s_FindStyleConstant);
+                        StyleConstant importedStyleConstant = constantList.Find(importedConstant.propertyName, s_FindStyleConstant);
 
                         if (importedStyleConstant.name == null) {
                             throw new CompileException(importedConstant, "Could not find referenced property in imported scope.");
@@ -58,7 +63,7 @@ namespace UIForia.Compilers.Style {
                     throw new CompileException(referenceNode,
                         "Constants cannot reference members of other constants.");
                 }
-                
+
 
                 throw new CompileException(referenceNode, $"Couldn't resolve reference {referenceNode}. Known references are: {PrintConstants()}");
             }
@@ -76,5 +81,7 @@ namespace UIForia.Compilers.Style {
 
             return result;
         }
+
     }
+
 }

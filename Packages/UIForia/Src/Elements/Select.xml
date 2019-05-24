@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UITemplate>
+
+    <Alias name="$option" value=""/>
+
+    <Contents>
+
+        <Slot if="selectedIndex >= 0" name="select-display">
+            {options[selectedIndex].Label}
+        </Slot>
+
+        <Slot if="selectedIndex &lt; 0" name="select-placeholder">
+            Placeholder
+        </Slot>
+
+        <Children x-type="template">
+            <Group>Option from select.xml {$option.Label}</Group>
+        </Children>
+
+    </Contents>
+
+</UITemplate>

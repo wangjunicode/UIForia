@@ -1,20 +1,37 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using UIForia.Attributes;
+using UIForia.Compilers;
+using UIForia.Elements;
 
 namespace UIForia.Parsing.Expression {
 
     [DebuggerDisplay("{rawType.Name}")]
     public struct ProcessedType {
 
+        private static readonly Type[] s_Signature = {typeof(ExpressionCompiler)};
         public readonly Type rawType;
-        private readonly TemplateAttribute templateAttr;
-        
+        public readonly TemplateAttribute templateAttr;
+        public readonly Action<ExpressionCompiler> beforeCompileChildren;
+
         public ProcessedType(Type rawType) {
             this.rawType = rawType;
-            templateAttr = rawType.GetCustomAttribute<TemplateAttribute>();
+            this.templateAttr = rawType.GetCustomAttribute<TemplateAttribute>();
+            this.beforeCompileChildren = null;
+            IEnumerable<TemplateCompilePlugin> plugins = rawType.GetCustomAttributes<TemplateCompilePlugin>();
+
+            foreach (TemplateCompilePlugin plugin in plugins) {
+                MethodInfo info = rawType.GetMethod(plugin.methodName, BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic, null, s_Signature, null);
+                if (info != null) {
+                    this.beforeCompileChildren = (Action<ExpressionCompiler>) Delegate.CreateDelegate(typeof(Action<ExpressionCompiler>), info);
+                }
+                else {
+                    UnityEngine.Debug.Log($"Tried to find method {plugin.methodName} on type {rawType.Name} but could not find a valid compile plugin method");
+                }
+            }
         }
 
         public string GetTemplate(string templateRoot) {
@@ -37,7 +54,7 @@ namespace UIForia.Parsing.Expression {
             if (!path.EndsWith(".xml")) {
                 path += ".xml";
             }
-            
+
             // todo should probably be cached, but be careful about reloading
 
             try {

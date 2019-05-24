@@ -7,9 +7,9 @@ using UIForia.Util;
 
 namespace UIForia.Templates {
 
-    public class RepeatMultiChildContainerTemplate : UITemplate {
+    public class MultiChildContainerTemplate : UITemplate {
 
-        public RepeatMultiChildContainerTemplate(Application app, List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null) 
+        public MultiChildContainerTemplate(Application app, List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null) 
             : base(app, childTemplates, attributes) { }
 
         protected override Type elementType => typeof(RepeatMultiChildContainerElement);

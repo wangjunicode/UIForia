@@ -12,6 +12,9 @@ namespace UIForia.Elements {
             this.slotId = slotId;
         }
 
+        public override string GetDisplayName() {
+            return "Slot::" + slotId;
+        }
     }
 
 }

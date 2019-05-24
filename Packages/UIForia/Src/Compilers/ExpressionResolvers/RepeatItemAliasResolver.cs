@@ -55,4 +55,50 @@ namespace UIForia.Compilers.ExpressionResolvers {
 
     }
 
+    public class SelectOptionAliasResolver<T> : ExpressionAliasResolver {
+
+        public SelectOptionAliasResolver(string itemAlias) : base(itemAlias) { }
+
+        public override Expression CompileAsValueExpression(CompilerContext context) {
+            ReflectionUtil.ObjectArray1[0] = aliasName;
+            return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
+                typeof(SelectOptionExpression<>),
+                new GenericArguments(typeof(T)),
+                ReflectionUtil.ObjectArray1
+            );
+        }
+
+    }
+
+    public class SelectOptionExpression<T> : Expression<ISelectOption<T>> {
+
+        public readonly string itemAlias;
+
+        public SelectOptionExpression(string itemAlias) {
+            this.itemAlias = itemAlias;
+        }
+
+        public override Type YieldedType => typeof(ISelectOption<T>);
+
+        public override ISelectOption<T> Evaluate(ExpressionContext context) {
+            UIElement trail = (UIElement) context.currentObject;
+            UIElement ptr = trail.parent;
+            while (ptr != null) {
+                if (ptr is Select<T> select) {
+                    return select.options[trail.siblingIndex];
+                }
+
+                trail = ptr;
+                ptr = ptr.parent;
+            }
+
+            throw new Exception($"Invalid select: could not find select of type {typeof(T)} with alias: {itemAlias}");
+        }
+
+        public override bool IsConstant() {
+            return false;
+        }
+
+    }
+
 }

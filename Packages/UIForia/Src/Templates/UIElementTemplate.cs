@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UIForia.Attributes;
 using UIForia.Bindings;
+using UIForia.Compilers;
 using UIForia.Elements;
 using UIForia.Expressions;
 using UIForia.Parsing.Expression;
@@ -47,7 +48,10 @@ namespace UIForia.Templates {
             }
 
             templateToExpand = app.templateParser.GetParsedTemplate(rootType);
-                        
+                      
+            Action<ExpressionCompiler> beforeCompileChildren = TypeProcessor.GetType(elementType).beforeCompileChildren;
+            beforeCompileChildren?.Invoke(template.compiler);
+            
             ResolveBaseStyles(template);
             CompileStyleBindings(template);
             CompileInputBindings(template, templateToExpand.rootElementTemplate != this);
@@ -74,7 +78,7 @@ namespace UIForia.Templates {
         }
 
         public override void PostCompile(ParsedTemplate template) {
-              
+            base.PostCompile(template);  
             for (int i = 0; i < childTemplates.Count; i++) {
                 if (childTemplates[i] is UISlotContentTemplate slotContent) {
                     childTemplates.RemoveAt(i--);
@@ -179,8 +183,7 @@ namespace UIForia.Templates {
 
             UIChildrenElement childrenElement = element.TranscludedChildren;
 
-            if (childrenElement != null) {
-                childrenElement.children = LightListPool<UIElement>.Get();
+            if (childrenElement != null && childrenElement.template == null) {
                 for (int i = 0; i < childTemplates.Count; i++) {
                     childrenElement.children.Add(childTemplates[i].CreateScoped(inputScope));
                     childrenElement.children[i].parent = childrenElement;

@@ -202,7 +202,7 @@ namespace UIForia.Parsing.Expression {
             IEnumerable<XElement> variableElements = element.GetChildren("Variable");
 
             LightList<ReflectionUtil.FieldDefinition> fields = LightListPool<ReflectionUtil.FieldDefinition>.Get();
-            
+
             foreach (var variableElement in variableElements) {
                 XAttribute typeAttr = variableElement.GetAttribute("type");
                 XAttribute nameAttr = variableElement.GetAttribute("name");
@@ -218,19 +218,18 @@ namespace UIForia.Parsing.Expression {
                 if (type == null) {
                     throw new ParseException($"Unable to resolve type with name `{typeAttr}` in <Variable> definition");
                 }
-                
+
                 string fieldName = nameAttr.Value.Trim();
-                
+
                 fields.Add(new ReflectionUtil.FieldDefinition(type, fieldName));
-                
             }
 
             Type generatedType = ReflectionUtil.CreateType(ReflectionUtil.GetGeneratedTypeName("GeneratedBlockElementType"), typeof(UIElement), fields);
 
             LightListPool<ReflectionUtil.FieldDefinition>.Release(ref fields);
-            
+
             XElement contents = element.GetChild("Contents");
-            
+
 //            ParsedTemplate template = new ParsedTemplate(
 //                app,
 //                generatedType,
@@ -311,9 +310,12 @@ namespace UIForia.Parsing.Expression {
         }
 
         private UITemplate ParseChildrenElement(XElement element) {
-            EnsureEmpty(element);
+            // todo -- ensure only used once in a given template
             EnsureNotInsideTagName(element, "Repeat");
-            return new UIChildrenTemplate(app, null, ParseAttributes(element.Attributes()));
+            return new UIChildrenTemplate(app,
+                ParseNodes(element.Nodes()),
+                ParseAttributes(element.Attributes())
+            );
         }
 
         private UITextTemplate ParseTextNode(XText node) {
@@ -321,8 +323,42 @@ namespace UIForia.Parsing.Expression {
             return new UITextTemplate(null, "'" + node.Value.Trim() + "'");
         }
 
+        private static readonly char[] s_GenericSplitter = new char[] {'-', '-'};
+
         private UITemplate ParseTemplateElement(XElement element) {
-            ProcessedType elementType = TypeProcessor.GetTemplateType(element.Name.LocalName);
+            string tagName = element.Name.LocalName;
+
+            if (tagName.Contains("--")) {
+                string[] nameParts = tagName.Split(s_GenericSplitter, StringSplitOptions.RemoveEmptyEntries);
+                tagName = nameParts[0];
+                string[] genericNames = nameParts[1].Split('_');
+                if (genericNames.Length == 0) {
+                    throw new Exception("Expected generic type defs after -- for tag name: " + element.Name.LocalName);
+                }
+
+                Type[] genericArguments = new Type[genericNames.Length];
+                for (int i = 0; i < genericNames.Length; i++) {
+                    Type type = TypeProcessor.ResolveTypeName(genericNames[i]);
+                    if (type != null) {
+                        genericArguments[i] = type;
+                    }
+                    else {
+                        throw new Exception("Unable to resolve type '" + genericNames[i] + "'");
+                    }
+                }
+
+                Type genericType = TypeProcessor.ResolveTypeName(tagName + '`' + genericArguments.Length);
+                Type createdElementType = ReflectionUtil.CreateGenericType(genericType, genericArguments);
+
+                return new UIElementTemplate(
+                    app,
+                    createdElementType,
+                    ParseNodes(element.Nodes()),
+                    ParseAttributes(element.Attributes())
+                );
+            }
+
+            ProcessedType elementType = TypeProcessor.GetTemplateType(tagName);
             if (typeof(UIContainerElement).IsAssignableFrom(elementType.rawType)) {
                 return new UIContainerTemplate(
                     app,
@@ -336,18 +372,13 @@ namespace UIForia.Parsing.Expression {
                 return ParseTextElement(elementType.rawType, element);
             }
 
-//            if (typeof(UIPrimitiveElement).IsAssignableFrom(elementType.rawType)) {
-//                return ParsePrimitiveElement(elementType.rawType, element);
-//            }
-
-            UITemplate template = new UIElementTemplate(
+            return new UIElementTemplate(
                 app,
                 element.Name.LocalName,
                 ParseNodes(element.Nodes()),
                 ParseAttributes(element.Attributes())
             );
-
-            return template;
+            ;
         }
 
         private UITemplate ParseTextElement(Type type, XElement element) {
@@ -370,7 +401,7 @@ namespace UIForia.Parsing.Expression {
 
             return new UITextTemplate(app, type, rawText, ParseAttributes(element.Attributes()));
         }
-        
+
         private UITemplate ParseImageElement(XElement element) {
             return new UIImageTemplate(app, null, ParseAttributes(element.Attributes()));
         }

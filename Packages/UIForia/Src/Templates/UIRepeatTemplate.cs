@@ -4,9 +4,7 @@ using UIForia.Compilers.ExpressionResolvers;
 using UIForia.Elements;
 using UIForia.Exceptions;
 using UIForia.Expressions;
-using UIForia.Layout;
 using UIForia.Parsing.Expression;
-using UIForia.Rendering;
 using UIForia.Util;
 
 namespace UIForia.Templates {
@@ -33,7 +31,7 @@ namespace UIForia.Templates {
         public UIRepeatTemplate(Application app, List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null)
             : base(app, childTemplates, attributes) {
             if (childTemplates.Count > 1) {
-                RepeatMultiChildContainerTemplate container = new RepeatMultiChildContainerTemplate(app, childTemplates);
+                MultiChildContainerTemplate container = new MultiChildContainerTemplate(app, childTemplates);
                 this.childTemplates = new List<UITemplate>(1);
                 this.childTemplates.Add(container);
             }

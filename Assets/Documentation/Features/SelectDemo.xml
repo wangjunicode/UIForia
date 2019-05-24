@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UITemplate>
+
+    <Style path="Documentation/Features/SelectDemo.style"/>
+
+    <Contents style="select-demo-root">
+
+        <Select--int selectedIndex="0" options="intList">
+
+<!--            <Group>this is a template {$option.Label}</Group>-->
+
+        </Select--int>
+
+    </Contents>
+
+</UITemplate>

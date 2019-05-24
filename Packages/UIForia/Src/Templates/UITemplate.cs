@@ -162,6 +162,9 @@ namespace UIForia.Templates {
                 return;
             }
 
+            Action<ExpressionCompiler> beforeCompileChildren = TypeProcessor.GetType(elementType).beforeCompileChildren;
+            beforeCompileChildren?.Invoke(template.compiler);
+
             ResolveBaseStyles(template);
             CompileStyleBindings(template);
             CompileInputBindings(template, false);
@@ -320,7 +323,9 @@ namespace UIForia.Templates {
             ListPool<UIStyleGroupContainer>.Release(ref list);
         }
 
-        public virtual void PostCompile(ParsedTemplate template) { }
+        public virtual void PostCompile(ParsedTemplate template) {
+            ProcessedType processedType = TypeProcessor.GetType(elementType);
+        }
 
     }
 

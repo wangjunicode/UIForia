@@ -1,6 +1,7 @@
 using UIForia.Attributes;
 using UIForia.Elements;
 using UIForia.Util;
+using UnityEngine;
 
 namespace Documentation.Features {
 
@@ -18,6 +19,10 @@ namespace Documentation.Features {
             }
 
         }
+
+        public int selectedInt;
+        public string selectedString = "3";
+        public int selectedStringIndex = 3;
         
         public RepeatableList<ISelectOption<int>> intList;
         public RepeatableList<ISelectOption<string>> stringList;
@@ -28,11 +33,22 @@ namespace Documentation.Features {
             
             for (int i = 0; i < 10; i++) {
                 intList.Add(new SelectOption<int>(i.ToString(), i));
-                stringList.Add(new SelectOption<string>("this is label for option number: " + i, "value is : " + i));
+                stringList.Add(new SelectOption<string>("this is label for option number: " + i, i.ToString()));
             }
             
         }
 
+        private void SetRandomString() {
+            selectedString = Random.Range(0, stringList.Count - 1).ToString();
+        }
+        
+        private void SetRandomIndex() {
+            selectedStringIndex = Random.Range(0, stringList.Count - 1);
+        }
+
+        private void SetEmpty() {
+            selectedStringIndex = -1;
+        }
     }
 
 }

@@ -950,11 +950,11 @@ namespace UIForia.Systems {
 
             if (m_MouseState.isLeftMouseDownThisFrame || m_MouseState.isRightMouseDownThisFrame || m_MouseState.isMiddleMouseDownThisFrame) {
                 
-//                if (m_FocusedElement != null) {
-//                    if (!m_FocusedElement.layoutResult.ScreenRect.Contains(m_MouseState.MouseDownPosition)) {
-//                        ReleaseFocus((IFocusable)m_FocusedElement);
-//                    }
-//                }
+                if (m_FocusedElement != null) {
+                    if (!m_FocusedElement.layoutResult.ScreenRect.Contains(m_MouseState.MouseDownPosition)) {
+                        ReleaseFocus((IFocusable)m_FocusedElement);
+                    }
+                }
                 RunMouseEvents(m_ElementsThisFrame, InputEventType.MouseDown);
             }
             else if (m_MouseState.isLeftMouseUpThisFrame || m_MouseState.isRightMouseUpThisFrame || m_MouseState.isMiddleMouseUpThisFrame) {

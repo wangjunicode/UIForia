@@ -103,7 +103,7 @@ namespace UIForia.Templates {
 //                current.style.Initialize();
 //                
 //                int childCount = current.children.Count;
-//                UIElement[] children = current.children.Array;
+//                UIElemNent[] children = current.children.Array;
 //                for (int i = 0; i < childCount; i++) {
 //                    stack.Push(children[i]);
 //                }

@@ -5,18 +5,37 @@
 
     <Contents style="select-demo-root">
 
-        <Select--int selectedIndex="3" options="intList">
+        Selected string = {selectedString}
+        Selected index = {selectedStringIndex}
 
-            <Group>this is a template {$option.Label}</Group>
+        <Select--string selectedIndex.read.write="selectedStringIndex" selectedValue.read.write="selectedString" options="stringList">
 
-        </Select--int>
+            <SlotContent name="select-placeholder">
+                Placeholder 2
+            </SlotContent>
 
-
-        <Select--string selectedIndex="3" options="stringList">
-
+            <SlotContent name="select-display">
+                Selected override: {$option.Label}
+            </SlotContent>
+            
             <Group>this is a template {$option.Label}</Group>
 
         </Select--string>
+
+        <Group style="button-group">
+
+            <Group style="button" onMouseClick="SetRandomString()">
+                Set a random selected string
+            </Group>
+
+            <Group style="button" onMouseClick="SetRandomIndex()">
+                Set a random selected index
+            </Group>
+
+            <Group style="button" onMouseClick="SetEmpty()">
+                Set to empty
+            </Group>
+        </Group>
 
     </Contents>
 

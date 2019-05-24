@@ -14,7 +14,7 @@ namespace UIForia.Templates {
         
         public UIChildrenTemplate(Application app, List<UITemplate> childTemplates = null, List<AttributeDefinition> attributes = null)
             : base(app, childTemplates, attributes) {
-            if (childTemplates != null) {
+            if (childTemplates != null && childTemplates.Count > 0) {
                 if (childTemplates.Count > 1) {
                     defaultContent = new MultiChildContainerTemplate(app, childTemplates);
                 }

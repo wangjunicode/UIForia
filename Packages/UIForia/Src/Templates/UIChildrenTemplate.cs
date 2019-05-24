@@ -28,12 +28,14 @@ namespace UIForia.Templates {
 
         public override void Compile(ParsedTemplate template) {
             AttributeDefinition typeAttr = GetAttribute("x-type");
+            CompileInputBindings(template, false);
             CompileStyleBindings(template);
             ResolveBaseStyles(template);
+            CompilePropertyBindings(template);
             BuildBindings();
             
             if (typeAttr != null && typeAttr.value == "template") {
-                   
+                isTemplate = true;
             }
             
         }

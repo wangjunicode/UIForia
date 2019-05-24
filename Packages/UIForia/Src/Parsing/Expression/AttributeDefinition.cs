@@ -5,7 +5,7 @@ namespace UIForia.Parsing.Expression {
     [DebuggerDisplay("{key}={value}")]
     public class AttributeDefinition {
 
-        public bool isCompiled;
+        internal bool isCompiled;
         public readonly string key;
         public readonly string value;
         public readonly bool isRealAttribute;

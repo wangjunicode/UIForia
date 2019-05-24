@@ -204,6 +204,7 @@ namespace UIForia.Layout.LayoutTypes {
             transformPivotY = style.TransformPivotY;
             transformScaleX = style.TransformScaleX;
             transformScaleY = style.TransformScaleY;
+            transformRotation = style.TransformRotation;
             prefWidth = style.PreferredWidth;
             minWidth = style.MinWidth;
             maxWidth = style.MaxWidth;

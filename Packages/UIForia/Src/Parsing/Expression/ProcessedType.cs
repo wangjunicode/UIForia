@@ -4,33 +4,33 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using UIForia.Attributes;
-using UIForia.Compilers;
-using UIForia.Elements;
+using UIForia.Compilers.ExpressionResolvers;
+using UIForia.Templates;
 
 namespace UIForia.Parsing.Expression {
 
     [DebuggerDisplay("{rawType.Name}")]
     public struct ProcessedType {
 
-        private static readonly Type[] s_Signature = {typeof(ExpressionCompiler)};
+        private static readonly Type[] s_Signature = {
+            typeof(IList<ExpressionAliasResolver>),
+            typeof(AttributeList)
+        };
+
         public readonly Type rawType;
         public readonly TemplateAttribute templateAttr;
-        public readonly Action<ExpressionCompiler> beforeCompileChildren;
+        public readonly Action<IList<ExpressionAliasResolver>, AttributeList> getResolvers;
 
         public ProcessedType(Type rawType) {
             this.rawType = rawType;
             this.templateAttr = rawType.GetCustomAttribute<TemplateAttribute>();
-            this.beforeCompileChildren = null;
-            IEnumerable<TemplateCompilePlugin> plugins = rawType.GetCustomAttributes<TemplateCompilePlugin>();
+            this.getResolvers = null;
+            MethodInfo info = rawType.GetMethod("GetAliasResolvers", BindingFlags.Static | BindingFlags.NonPublic, null, s_Signature, null);
 
-            foreach (TemplateCompilePlugin plugin in plugins) {
-                MethodInfo info = rawType.GetMethod(plugin.methodName, BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic, null, s_Signature, null);
-                if (info != null) {
-                    this.beforeCompileChildren = (Action<ExpressionCompiler>) Delegate.CreateDelegate(typeof(Action<ExpressionCompiler>), info);
-                }
-                else {
-                    UnityEngine.Debug.Log($"Tried to find method {plugin.methodName} on type {rawType.Name} but could not find a valid compile plugin method");
-                }
+            if (info != null) {
+                this.getResolvers = (Action<IList<ExpressionAliasResolver>, AttributeList>) Delegate.CreateDelegate(
+                    typeof(Action<IList<ExpressionAliasResolver>, AttributeList>), info
+                );
             }
         }
 

@@ -83,8 +83,9 @@ namespace UIForia.Compilers.ExpressionResolvers {
         public override ISelectOption<T> Evaluate(ExpressionContext context) {
             UIElement trail = (UIElement) context.currentObject;
             UIElement ptr = trail.parent;
+            Select<T> select = (Select<T>) context.rootObject;
             while (ptr != null) {
-                if (ptr is Select<T> select) {
+                if (ptr is UIChildrenElement) {
                     return select.options[trail.siblingIndex];
                 }
 

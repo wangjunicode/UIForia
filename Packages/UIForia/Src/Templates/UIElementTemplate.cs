@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UIForia.Attributes;
 using UIForia.Bindings;
-using UIForia.Compilers;
+using UIForia.Compilers.ExpressionResolvers;
 using UIForia.Elements;
 using UIForia.Expressions;
 using UIForia.Parsing.Expression;
@@ -10,6 +10,26 @@ using UIForia.Util;
 using UnityEngine;
 
 namespace UIForia.Templates {
+
+    public struct AttributeList {
+
+        private readonly List<AttributeDefinition> attributeDefinitions;
+
+        public AttributeList(List<AttributeDefinition> attributeDefinitions) {
+            this.attributeDefinitions = attributeDefinitions;
+        }
+
+        public AttributeDefinition GetAttribute(string name) {
+            for (int i = 0; i < attributeDefinitions.Count; i++) {
+                if (attributeDefinitions[i].key == name) {
+                    return attributeDefinitions[i];
+                }
+            }
+
+            return null;
+        }
+
+    }
 
     // wraps a ParsedTemplate, this is what is created by parent templates
     // properties need to be merged from the parsed template <Content/> tag (root)
@@ -20,7 +40,7 @@ namespace UIForia.Templates {
         private ParsedTemplate templateToExpand;
         private TemplateType templateType;
         private List<UISlotContentTemplate> slotContentTemplates;
-        
+
         public UIElementTemplate(Application app, string typeName, List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null)
             : base(app, childTemplates, attributes) {
             this.typeName = typeName;
@@ -33,6 +53,7 @@ namespace UIForia.Templates {
 
         public Type RootType => rootType;
         protected override Type elementType => rootType;
+
 
         public override void Compile(ParsedTemplate template) {
             if (isCompiled) return;
@@ -48,23 +69,30 @@ namespace UIForia.Templates {
             }
 
             templateToExpand = app.templateParser.GetParsedTemplate(rootType);
-                      
-            Action<ExpressionCompiler> beforeCompileChildren = TypeProcessor.GetType(elementType).beforeCompileChildren;
-            beforeCompileChildren?.Invoke(template.compiler);
-            
+
+            Action<IList<ExpressionAliasResolver>, AttributeList> getResolvers = TypeProcessor.GetType(elementType).getResolvers;
+
+            if (getResolvers != null) {
+                resolvers = ListPool<ExpressionAliasResolver>.Get();
+                getResolvers.Invoke(resolvers, new AttributeList(attributes));
+                for (int i = 0; i < resolvers.Count; i++) {
+                    template.compiler.AddAliasResolver(resolvers[i]);
+                }
+            }
+
             ResolveBaseStyles(template);
             CompileStyleBindings(template);
             CompileInputBindings(template, templateToExpand.rootElementTemplate != this);
             CompilePropertyBindings(template);
             ResolveActualAttributes(); // todo combine with <Contents/> attrs
-            BuildBindings();            
+            BuildBindings();
 
             if (templateToExpand.rootElementTemplate == this) {
                 return;
             }
 
             templateToExpand.Compile();
-            
+
             UITemplate expandedRoot = templateToExpand.rootElementTemplate;
 
             triggeredBindings = MergeBindingArray(triggeredBindings, expandedRoot.triggeredBindings);
@@ -78,7 +106,7 @@ namespace UIForia.Templates {
         }
 
         public override void PostCompile(ParsedTemplate template) {
-            base.PostCompile(template);  
+            base.PostCompile(template);
             for (int i = 0; i < childTemplates.Count; i++) {
                 if (childTemplates[i] is UISlotContentTemplate slotContent) {
                     childTemplates.RemoveAt(i--);
@@ -87,7 +115,7 @@ namespace UIForia.Templates {
                 }
             }
         }
-        
+
         private static Binding[] MergeBindingArray(Binding[] a, Binding[] b) {
             int startCount = a.Length;
             a = ResizeToMerge(a, b);
@@ -175,10 +203,10 @@ namespace UIForia.Templates {
 
             //int childCount = templateToExpand.childTemplates.Count;
 
-            element.children =  LightListPool<UIElement>.Get();
+            element.children = LightListPool<UIElement>.Get();
             element.templateContext = new ExpressionContext(inputScope.rootElement, element);
             scope.slotContents = slotContentTemplates;
-            
+
             CreateChildren(element, templateToExpand.childTemplates, scope); // recycle scope here?
 
             UIChildrenElement childrenElement = element.TranscludedChildren;

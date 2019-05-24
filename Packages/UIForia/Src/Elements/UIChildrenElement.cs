@@ -14,7 +14,9 @@ namespace UIForia.Elements {
         }
 
         public override void OnCreate() {
-            style.SetLayoutBehavior(LayoutBehavior.TranscludeChildren, StyleState.Normal);
+            if (template == null) {
+                style.SetLayoutBehavior(LayoutBehavior.TranscludeChildren, StyleState.Normal);
+            }
         }
 
         public UIElement InstantiateTemplate() {

@@ -1,2 +1,4 @@
 style select-demo-root {
+    PreferredSize = 1pca;
+    Padding = 32px;
 }

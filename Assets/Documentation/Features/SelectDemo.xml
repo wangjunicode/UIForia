@@ -5,11 +5,18 @@
 
     <Contents style="select-demo-root">
 
-        <Select--int selectedIndex="0" options="intList">
+        <Select--int selectedIndex="3" options="intList">
 
-<!--            <Group>this is a template {$option.Label}</Group>-->
+            <Group>this is a template {$option.Label}</Group>
 
         </Select--int>
+
+
+        <Select--string selectedIndex="3" options="stringList">
+
+            <Group>this is a template {$option.Label}</Group>
+
+        </Select--string>
 
     </Contents>
 

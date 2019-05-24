@@ -1,20 +1,81 @@
 <?xml version="1.0" encoding="utf-8"?>
 <UITemplate>
 
-    <Alias name="$option" value=""/>
+    <Style>
 
-    <Contents>
+        style select {
+        
+            BackgroundColor = white;
+            BorderRadius = 4px;
+            BorderColor = black;
+            Border = 2px;
+            Padding = 0.25em 0.5em;
+            PreferredWidth = 1pca;
+        
+            [hover] {
+                BorderColor = rgba(38, 128, 255, 255);
+            }
+        
+        }
+        
+        style select-option {
+            PreferredWidth = 1pca;
+            TextColor = black;
 
-        <Slot if="selectedIndex >= 0" name="select-display">
-            {options[selectedIndex].Label}
-        </Slot>
+            [hover] {
+                TextColor = white;
+                BackgroundColor = rgba(38, 128, 255, 255);
+            }
+        }
 
-        <Slot if="selectedIndex &lt; 0" name="select-placeholder">
-            Placeholder
-        </Slot>
+        style option-list {
+            AnchorTarget = Parent;
+            LayoutBehavior = ignored;
+            TransformBehaviorY = AnchorMaxOffset;
+            TransformPositionY = -1h;
+            BackgroundColor = white;
+            PreferredWidth = 1psz;
+            BorderRadius = 4px;
+            Padding = 0.25em, 0.5em;
+            BorderColor = black;
+            Border = 2px;
+            ZIndex = 30;
+        }
+        
+        style chevron {
+            PreferredSize = 24px;
+            TransformPivot = 0.5;
+            TransformRotation = -90;
+        }
 
-        <Children x-type="template">
-            <Group>Option from select.xml {$option.Label}</Group>
+        style content-area {
+            PreferredWidth = 1pca;
+            FlexLayoutDirection = Column;
+            FlexLayoutMainAxisAlignment = SpaceBetween;
+            FlexLayoutCrossAxisAlignment = Center;
+        }
+        
+    </Style>
+
+    <Contents style="select">
+
+        <Group onMouseDown="BeginSelecting($event)" style="content-area">
+            <Slot if="selectedIndex >= 0" name="select-display">
+                Selected: {options[selectedIndex].Label}
+            </Slot>
+
+            <Slot if="selectedIndex &lt; 0" name="select-placeholder">
+                Placeholder
+            </Slot>
+
+            <Image style="chevron" src="'arrow_right'"/>
+        </Group>
+
+
+        <Children onMouseDown="SelectElement($event)" if="selecting" style="option-list" x-type="template">
+            
+            <Group style="select-option">Option from select.xml {$option.Label}</Group>
+            
         </Children>
 
     </Contents>

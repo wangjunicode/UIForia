@@ -33,7 +33,7 @@ public class InputSystem_DragTests {
     public class DragTestThing : UIElement {
 
         public bool ignoreChildDrag;
-        
+
         [OnDragCreate]
         public DragEvent CreateDragEvent() {
             return new TestDragEvent("root");
@@ -45,7 +45,7 @@ public class InputSystem_DragTests {
         }
 
     }
-    
+
     [Template(TemplateType.String, @"
     
         <UITemplate>
@@ -55,11 +55,12 @@ public class InputSystem_DragTests {
 
     ")]
     public class FailDragTestThing : UIElement {
-      
-        [OnDragCreate]
-        public void CreateDragEvent() {}
 
-    } 
+        [OnDragCreate]
+        public void CreateDragEvent() {
+        }
+
+    }
 
     [Test]
     public void DragCreate_CreateFromAnnotation() {
@@ -78,7 +79,7 @@ public class InputSystem_DragTests {
         Assert.IsInstanceOf<TestDragEvent>(testView.InputSystem.CurrentDragEvent);
         Assert.AreEqual("root", As<TestDragEvent>(testView.InputSystem.CurrentDragEvent).sourceName);
     }
-    
+
     [Test]
     public void DragCreate_CreateFromChildTemplate() {
         MockApplication testView = new MockApplication(typeof(DragTestThing));
@@ -94,14 +95,11 @@ public class InputSystem_DragTests {
 
         Assert.IsInstanceOf<TestDragEvent>(testView.InputSystem.CurrentDragEvent);
         Assert.AreEqual("child0", As<TestDragEvent>(testView.InputSystem.CurrentDragEvent).sourceName);
-
     }
-    
+
     [Test]
     public void DragCreate_MustReturnDragEvent() {
-        var exception = Assert.Throws<Exception>(() => {
-            new MockApplication(typeof(FailDragTestThing));
-        });
+        var exception = Assert.Throws<Exception>(() => { new MockApplication(typeof(FailDragTestThing)); });
         /*
          * Unfortunately some broken state is left if the application crashes because of an exception.
          * The next thing that renders will be rendered incorrectly but clears some of that mysterious broken state
@@ -152,7 +150,7 @@ public class InputSystem_DragTests {
         public List<string> dragList = new List<string>();
         public bool ignoreEnter;
         public bool ignoreExit;
-        
+
         public void HandleDragEnterChild(UIElement el, int index) {
             if (ignoreEnter) return;
             dragList.Add("enter:child" + index);
@@ -184,15 +182,14 @@ public class InputSystem_DragTests {
 
         testView.InputSystem.MouseDragMove(new Vector2(30, 30));
         testView.Update();
-        
+
         Assert.AreEqual(new[] {"enter:child0"}, root.dragList.ToArray());
-        
+
         testView.InputSystem.MouseDragMove(new Vector2(130, 30));
         testView.Update();
-        
+
         Assert.AreEqual(2, root.dragList.Count);
         Assert.AreEqual(new[] {"enter:child0", "enter:child1"}, root.dragList.ToArray());
-
     }
 
     [Test]
@@ -209,15 +206,14 @@ public class InputSystem_DragTests {
 
         testView.InputSystem.MouseDragMove(new Vector2(30, 30));
         testView.Update();
-        
+
         testView.InputSystem.MouseDragMove(new Vector2(30, 30));
         testView.Update();
-        
+
         Assert.AreEqual(1, root.dragList.Count);
         Assert.AreEqual(new[] {"enter:child0"}, root.dragList.ToArray());
-
     }
-    
+
     [Test]
     public void DragEnter_DoesNotFireAgainForPositionSameElement() {
         MockApplication testView = new MockApplication(typeof(DragHandlerTestThing));
@@ -232,10 +228,10 @@ public class InputSystem_DragTests {
 
         testView.InputSystem.MouseDragMove(new Vector2(30, 30));
         testView.Update();
-        
+
         testView.InputSystem.MouseDragMove(new Vector2(30, 30));
         testView.Update();
-        
+
         Assert.AreEqual(1, root.dragList.Count);
         Assert.AreEqual(new[] {"enter:child0"}, root.dragList.ToArray());
     }
@@ -251,14 +247,14 @@ public class InputSystem_DragTests {
         root.ignoreExit = true;
 
         testView.InputSystem.MouseDown(new Vector2(10, 10));
-        testView.Update();        
-        
+        testView.Update();
+
         testView.InputSystem.MouseDragMove(new Vector2(30, 30));
         testView.Update();
-        
+
         testView.InputSystem.MouseDragMove(new Vector2(130, 30));
         testView.Update();
-        
+
         Assert.AreEqual(2, root.dragList.Count);
         Assert.AreEqual(new[] {"enter:child0", "enter:child1"}, root.dragList.ToArray());
     }
@@ -268,44 +264,44 @@ public class InputSystem_DragTests {
         MockApplication testView = new MockApplication(typeof(DragHandlerTestThing));
         testView.SetViewportRect(new Rect(0, 0, 1000, 1000));
         DragHandlerTestThing root = (DragHandlerTestThing) testView.RootElement;
-        
+
         Assert.AreEqual(0, root.dragList.Count);
         root.ignoreExit = true;
 
         testView.InputSystem.MouseDown(new Vector2(10, 10));
-        testView.Update();        
-        
+        testView.Update();
+
         testView.InputSystem.MouseDragMove(new Vector2(30, 30));
         testView.Update();
-        
+
         testView.InputSystem.MouseDragMove(new Vector2(130, 30));
         testView.Update();
-        
+
         testView.InputSystem.MouseDragMove(new Vector2(30, 30));
         testView.Update();
-        
+
         Assert.AreEqual(3, root.dragList.Count);
         Assert.AreEqual(new[] {"enter:child0", "enter:child1", "enter:child0"}, root.dragList.ToArray());
     }
-    
+
     [Test]
     public void DragExit_FiresAndPropagates() {
         MockApplication testView = new MockApplication(typeof(DragHandlerTestThing));
         testView.SetViewportRect(new Rect(0, 0, 1000, 1000));
         DragHandlerTestThing root = (DragHandlerTestThing) testView.RootElement;
-        
+
         testView.InputSystem.MouseDown(new Vector2(10, 10));
         testView.Update();
 
         testView.InputSystem.MouseDragMove(new Vector2(30, 30));
         testView.Update();
-        
+
         Assert.AreEqual(1, root.dragList.Count);
         Assert.AreEqual(new[] {"enter:child0"}, root.dragList.ToArray());
-        
+
         testView.InputSystem.MouseDragMove(new Vector2(130, 30));
         testView.Update();
-        
+
         Assert.AreEqual(3, root.dragList.Count);
         Assert.AreEqual(new[] {"enter:child0", "exit:child0", "enter:child1"}, root.dragList.ToArray());
     }
@@ -315,19 +311,19 @@ public class InputSystem_DragTests {
         MockApplication testView = new MockApplication(typeof(DragHandlerTestThing));
         testView.SetViewportRect(new Rect(0, 0, 1000, 1000));
         DragHandlerTestThing root = (DragHandlerTestThing) testView.RootElement;
-        
+
         testView.InputSystem.MouseDown(new Vector2(10, 10));
         testView.Update();
 
         testView.InputSystem.MouseDragMove(new Vector2(30, 30));
         testView.Update();
-        
+
         Assert.AreEqual(1, root.dragList.Count);
         Assert.AreEqual(new[] {"enter:child0"}, root.dragList.ToArray());
-        
+
         testView.InputSystem.MouseDragMove(new Vector2(40, 30));
         testView.Update();
-        
+
         Assert.AreEqual(1, root.dragList.Count);
         Assert.AreEqual(new[] {"enter:child0"}, root.dragList.ToArray());
     }
@@ -337,19 +333,19 @@ public class InputSystem_DragTests {
         MockApplication testView = new MockApplication(typeof(DragHandlerTestThing));
         testView.SetViewportRect(new Rect(0, 0, 1000, 1000));
         DragHandlerTestThing root = (DragHandlerTestThing) testView.RootElement;
-        
+
         testView.InputSystem.MouseDown(new Vector2(10, 10));
         testView.Update();
 
         testView.InputSystem.MouseDragMove(new Vector2(30, 30));
         testView.Update();
-                
+
         testView.InputSystem.MouseDragMove(new Vector2(130, 30));
         testView.Update();
-        
+
         testView.InputSystem.MouseDragMove(new Vector2(30, 30));
         testView.Update();
-        
+
         Assert.AreEqual(5, root.dragList.Count);
         Assert.AreEqual(new[] {"enter:child0", "exit:child0", "enter:child1", "exit:child1", "enter:child0"}, root.dragList.ToArray());
     }
@@ -387,7 +383,7 @@ public class InputSystem_DragTests {
         public void HandleDragHoverChild(int index) {
             dragList.Add("hover:child" + index);
         }
-        
+
         [OnDragCreate]
         public TestDragEvent OnDragCreate() {
             return new TestDragEvent("root");
@@ -403,15 +399,15 @@ public class InputSystem_DragTests {
 
         testView.InputSystem.MouseDown(new Vector2(10, 10));
         testView.Update();
-        
+
         testView.InputSystem.MouseDragMove(new Vector2(30, 30));
         testView.Update();
 
         Assert.AreEqual(new string[0], root.dragList.ToArray());
-        
+
         testView.InputSystem.MouseDragMove(new Vector2(30, 20));
         testView.Update();
-        
+
         Assert.AreEqual(new[] {"move:child0"}, root.dragList.ToArray());
     }
 
@@ -423,16 +419,16 @@ public class InputSystem_DragTests {
 
         testView.InputSystem.MouseDown(new Vector2(10, 10));
         testView.Update();
-        
+
         testView.InputSystem.MouseDragMove(new Vector2(30, 30));
         testView.Update();
-        
+
         testView.InputSystem.MouseDragMove(new Vector2(30, 20));
         testView.Update();
-        
+
         testView.InputSystem.MouseDragMove(new Vector2(31, 20));
         testView.Update();
-        
+
         Assert.AreEqual(new[] {"move:child0", "move:child0"}, root.dragList.ToArray());
     }
 
@@ -444,17 +440,78 @@ public class InputSystem_DragTests {
 
         testView.InputSystem.MouseDown(new Vector2(10, 10));
         testView.Update();
-        
+
         testView.InputSystem.MouseDragMove(new Vector2(30, 30));
         testView.Update();
-        
+
         testView.InputSystem.MouseDragMove(new Vector2(31, 20));
         testView.Update();
-        
+
         testView.InputSystem.MouseDragMove(new Vector2(31, 20));
         testView.Update();
-        
+
         Assert.AreEqual(new[] {"move:child0", "hover:child0"}, root.dragList.ToArray());
+    }
+
+    [Template(TemplateType.String, @"
+    
+        <UITemplate>
+            <Style>
+                style container {
+                    LayoutType = Flex;
+                    FlexLayoutDirection = Column;
+                    PreferredSize = 300px, 100px;
+                }
+        
+                style cell {
+                    PreferredSize = 100px;
+                }
+            </Style>
+            <Contents style='container'>
+                <Group onDragMove='{HandleDragMoveChild($event, 0)}' onDragHover='{HandleDragHoverChild($event, 0)}' style='cell c0'/>
+                <Group onDragMove='{HandleDragMoveChild($event, 1)}' onDragHover='{HandleDragHoverChild($event, 1)}' style='cell c1'/>
+                <Group onDragMove='{HandleDragMoveChild($event, 2)}' onDragHover='{HandleDragHoverChild($event, 2)}' style='cell c2'/>
+            </Contents>
+        </UITemplate>
+
+    ")]
+    public class DragHandlerTestThing_MoveWithDragEvent : UIElement {
+
+        public List<string> dragList = new List<string>();
+
+        public void HandleDragMoveChild(DragEvent evt, int index) {
+            if (evt is TestDragEvent textEvt) dragList.Add($"move:child{index}:{textEvt.sourceName}");
+        }
+
+        public void HandleDragHoverChild(DragEvent evt, int index) {
+            if (evt is TestDragEvent textEvt) dragList.Add($"hover:child{index}:{textEvt.sourceName}");
+        }
+
+        [OnDragCreate]
+        public TestDragEvent OnDragCreate() {
+            return new TestDragEvent("root");
+        }
+
+    }
+
+    [Test]
+    public void DragMove_FiresAndPropagatesWithDragEvent() {
+        MockApplication testView = new MockApplication(typeof(DragHandlerTestThing_MoveWithDragEvent));
+        testView.SetViewportRect(new Rect(0, 0, 1000, 1000));
+        DragHandlerTestThing_MoveWithDragEvent root = (DragHandlerTestThing_MoveWithDragEvent) testView.RootElement;
+
+        testView.InputSystem.MouseDown(new Vector2(10, 10));
+        testView.Update();
+
+        testView.InputSystem.MouseDragMove(new Vector2(30, 30));
+        testView.Update();
+
+        Assert.AreEqual(new string[0], root.dragList.ToArray());
+
+        testView.InputSystem.MouseDragMove(new Vector2(30, 20));
+        testView.Update();
+
+        Assert.AreEqual(new[] {"move:child0:root"}, root.dragList.ToArray());
     }
 
 }

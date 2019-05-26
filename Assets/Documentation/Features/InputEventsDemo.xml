@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UITemplate>
+
+    <Style src="Documentation/Documentation.style" alias="theme" />
+    <Style src="Documentation/Features/InputEventsDemo.style" />
+
+    <Contents>
+        <Group x-id="startZone" style="start-zone" onDragDrop="DropDrag($event, $element)">
+            <Div if="IsInStartZone" style="dragme" onDragCreate="StartDrag($element)">Dragme</Div>
+        </Group>
+        <Group x-id="dropZone" style="drop-zone" onDragDrop="DropDrag($event, $element)">
+            <Div if="IsInDropZone" style="dragme" onDragCreate="StartDrag($element)">Dragme</Div>
+        </Group>
+    </Contents>
+</UITemplate>

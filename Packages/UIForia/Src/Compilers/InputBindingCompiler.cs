@@ -21,6 +21,7 @@ namespace UIForia.Compilers {
         private static readonly Dictionary<Type, List<DragEventHandler>> s_DragHandlerCache = new Dictionary<Type, List<DragEventHandler>>();
 
         private static readonly MouseEventResolver s_MouseEventResolver = new MouseEventResolver("$event");
+        private static readonly DragEventResolver s_DragEventResolver = new DragEventResolver("$event");
         private static readonly KeyboardEventResolver s_KeyboardEventResolver = new KeyboardEventResolver("$event");
         
         public InputBindingCompiler() {
@@ -426,11 +427,11 @@ namespace UIForia.Compilers {
                     source = '{' + attr.value + '}';
                 }
 
-                compiler.AddAliasResolver(s_MouseEventResolver);
+                compiler.AddAliasResolver(s_DragEventResolver);
                 
                 Expression<Terminal> expression = compiler.Compile<Terminal>(rootType, elementType, source);
                 
-                compiler.RemoveAliasResolver(s_MouseEventResolver);
+                compiler.RemoveAliasResolver(s_DragEventResolver);
                 
                 
                 attr.isCompiled = true;
@@ -602,6 +603,7 @@ namespace UIForia.Compilers {
         }
 
         private static readonly ValueTuple<string, Type> s_MouseEventAlias = ValueTuple.Create("$event", typeof(MouseInputEvent));
+        private static readonly ValueTuple<string, Type> s_DragEventEventAlias = ValueTuple.Create("$event", typeof(DragEvent));
         private static readonly ValueTuple<string, Type> s_KeyboardEventAlias = ValueTuple.Create("$event", typeof(KeyboardInputEvent));
         private static readonly ValueTuple<string, Type> s_FocusEventAlias = ValueTuple.Create("$event", typeof(FocusEvent));
 
@@ -618,12 +620,12 @@ namespace UIForia.Compilers {
         };
 
         private static readonly InputAttributeTuple[] s_DragAttributeDefs = {
-            new InputAttributeTuple("onDragMove", InputEventType.DragMove, s_MouseEventAlias),
-            new InputAttributeTuple("onDragHover", InputEventType.DragHover, s_MouseEventAlias),
-            new InputAttributeTuple("onDragEnter", InputEventType.DragEnter, s_MouseEventAlias),
-            new InputAttributeTuple("onDragExit", InputEventType.DragExit, s_MouseEventAlias),
-            new InputAttributeTuple("onDragDrop", InputEventType.DragDrop, s_MouseEventAlias),
-            new InputAttributeTuple("onDragCancel", InputEventType.DragCancel, s_MouseEventAlias),
+            new InputAttributeTuple("onDragMove", InputEventType.DragMove, s_DragEventEventAlias),
+            new InputAttributeTuple("onDragHover", InputEventType.DragHover, s_DragEventEventAlias),
+            new InputAttributeTuple("onDragEnter", InputEventType.DragEnter, s_DragEventEventAlias),
+            new InputAttributeTuple("onDragExit", InputEventType.DragExit, s_DragEventEventAlias),
+            new InputAttributeTuple("onDragDrop", InputEventType.DragDrop, s_DragEventEventAlias),
+            new InputAttributeTuple("onDragCancel", InputEventType.DragCancel, s_DragEventEventAlias),
         };
 
         private static readonly InputAttributeTuple[] s_KeyboardAttributeDefs = {

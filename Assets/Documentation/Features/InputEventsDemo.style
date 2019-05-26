@@ -1,0 +1,29 @@
+style start-zone {
+    PreferredSize = 200px;
+    BackgroundColor = green;
+    [hover] {
+        BackgroundColor = rgb(20, 200, 20);
+    }
+    Padding = 40px;
+}
+
+style drop-zone {
+    PreferredSize = 200px;
+    BackgroundColor = red;
+    [hover] {
+        BackgroundColor = rgb(200, 20, 20);
+    }
+    Padding = 40px;
+}
+
+style dragme {
+    PreferredSize = 90px 50px;
+    Border = 2px;
+    BorderColor = black;
+    Padding = 10px;
+    BackgroundColor = rgb(200, 120, 120);
+    ZIndex = 10;
+    [hover] {
+        BackgroundColor = rgb(200, 120, 220);
+    }
+}

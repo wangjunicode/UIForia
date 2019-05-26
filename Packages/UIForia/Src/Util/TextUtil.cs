@@ -1,3 +1,212 @@
+using UIForia.Util;
+
+namespace UIForia.Text {
+
+    public struct WordInfo2 {
+
+        public WordType type;
+        public int charStart;
+        public int charEnd;
+
+    }
+
+    public enum WordType {
+
+        Whitespace,
+        NewLine,
+        Normal,
+        SoftHyphen
+
+    }
+
+    public static class TextUtil {
+
+        // whitespace processing needs to happen in two phases. the first is where we collapse whitespace and handle new lines
+        // the second is what to do with trailing space and wrapping.
+        public static int ProcessWhitespace(WhitespaceMode whitespaceMode, ref char[] buffer, char[] input, int inputSize = -1) {
+            if (inputSize < 0) inputSize = input.Length;
+
+            bool collapseSpaceAndTab = (whitespaceMode & WhitespaceMode.CollapseWhitespace) != 0;
+            bool preserveNewLine = (whitespaceMode & WhitespaceMode.PreserveNewLines) != 0;
+            bool trimStart = (whitespaceMode & WhitespaceMode.TrimStart) != 0;
+            bool trimEnd = (whitespaceMode & WhitespaceMode.TrimEnd) != 0;
+
+            bool collapsing = collapseSpaceAndTab;
+
+            if (buffer == null) {
+                buffer = ArrayPool<char>.GetMinSize(inputSize);
+            }
+
+            if (buffer.Length < input.Length) {
+                ArrayPool<char>.Resize(ref buffer, inputSize);
+            }
+
+            int writeIndex = 0;
+            int start = 0;
+            int end = input.Length;
+
+            if (trimStart) {
+                for (int i = 0; i < end; i++) {
+                    char c = input[i];
+
+                    bool isWhiteSpace = c == ' ' || c >= '\t' && c <= '\r' || (c == ' ' || c == '\x0085');
+
+                    if (!isWhiteSpace) {
+                        start = i;
+                        break;
+                    }
+                }
+            }
+
+            if (trimEnd) {
+                for (int i = end - 1; i >= start; i--) {
+                    char c = input[i];
+
+                    bool isWhiteSpace = c == ' ' || c >= '\t' && c <= '\r' || (c == ' ' || c == '\x0085');
+
+                    if (!isWhiteSpace) {
+                        end = i + 1;
+                        break;
+                    }
+                }
+            }
+
+            for (int i = start; i < end; i++) {
+                char c = input[i];
+
+                if (c == '\n' && !preserveNewLine) {
+                    continue;
+                }
+
+                bool isWhiteSpace = c == ' ' || c >= '\t' && c <= '\r' || (c == ' ' || c == '\x0085');
+
+                if (c == '\n') {
+                    if (preserveNewLine) {
+                        buffer[writeIndex++] = c;
+                        continue;
+                    }
+                }
+
+                if (collapsing) {
+                    if (!isWhiteSpace) {
+                        buffer[writeIndex++] = c;
+                        collapsing = false;
+                    }
+                }
+                else if (isWhiteSpace) {
+                    collapsing = collapseSpaceAndTab;
+                    buffer[writeIndex++] = ' ';
+                }
+                else {
+                    buffer[writeIndex++] = c;
+                }
+            }
+
+
+            return writeIndex;
+        }
+
+        public static StructList<WordInfo2> BreakIntoWords(char[] buffer, int bufferSize = -1) {
+            if (bufferSize < 0) bufferSize = buffer.Length;
+
+            StructList<WordInfo2> retn = StructList<WordInfo2>.Get();
+            WordInfo2 currentWord = new WordInfo2();
+            WordType previousType = WordType.Normal;
+
+            char c = buffer[0];
+
+            if (c == '\n') {
+                previousType = WordType.NewLine;
+            }
+            else if (c == ' ' || c >= '\t' && c <= '\r' || (c == ' ' || c == '\x0085')) {
+                previousType = WordType.Whitespace;
+            }
+            else if (c == 0xAD) {
+                previousType = WordType.SoftHyphen;
+            }
+            else {
+                previousType = WordType.Normal;
+            }
+
+            currentWord.type = previousType;
+            currentWord.charStart = 0;
+            currentWord.charEnd = 1;
+
+            for (int i = 1; i < bufferSize; i++) {
+                c = buffer[i];
+
+                WordType type = WordType.Normal;
+
+                if (c == '\n') {
+                    type = WordType.NewLine;
+                }
+                else if (c == ' ' || c >= '\t' && c <= '\r' || (c == ' ' || c == '\x0085')) {
+                    type = WordType.Whitespace;
+                }
+                else if (c == 0xAD) {
+                    type = WordType.SoftHyphen;
+                }
+
+                if (type == previousType) {
+                    if (type == WordType.NewLine) {
+                        retn.Add(currentWord);
+                        currentWord.type = type;
+                        currentWord.charStart = i;
+                        currentWord.charEnd = i + 1;
+                    }
+                    else {
+                        currentWord.charEnd++;
+                    }
+                }
+                else {
+                    retn.Add(currentWord);
+                    currentWord.type = type;
+                    currentWord.charStart = i;
+                    currentWord.charEnd = i + 1;
+                }
+
+                previousType = type;
+            }
+
+            if (currentWord.charEnd > 0) {
+                retn.Add(currentWord);
+            }
+
+            return retn;
+        }
+        
+        public static void TransformText(TextTransform transform, char[] buffer, int count = -1) {
+            if (count < 0) count = buffer.Length;
+
+            switch (transform) {
+                case TextTransform.UpperCase:
+                case TextTransform.SmallCaps:
+                    for (int i = 0; i < count; i++) {
+                        buffer[i] = char.ToUpper(buffer[i]);
+                    }
+
+                    break;
+                case TextTransform.LowerCase:
+                    for (int i = 0; i < count; i++) {
+                        buffer[i] = char.ToLower(buffer[i]);
+                    }
+
+                    break;
+                case TextTransform.TitleCase:
+                    for (int i = 0; i < count - 1; i++) {
+                        if (char.IsLetter(buffer[i]) && char.IsWhiteSpace(buffer[i - 1])) {
+                            buffer[i] = char.ToUpper(buffer[i]);
+                        }
+                    }
+
+                    break;
+            }
+        }
+
+
+    }
+
+}
 //using System.Collections.Generic;
 //using System.Text;
 //using SVGX;

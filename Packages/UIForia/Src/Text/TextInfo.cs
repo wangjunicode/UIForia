@@ -4,6 +4,7 @@ using SVGX;
 using TMPro;
 using UIForia.Layout;
 using UIForia.Util;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace UIForia.Text {
@@ -25,29 +26,11 @@ namespace UIForia.Text {
         //     public Vector2 bottomRightUV;
         //     public float scale;
         //}
-        
+
         private Size metrics;
         private bool metricsDirty;
         private bool layoutDirty;
         private float layoutWidth;
-
-        public struct FontAssetData {
-
-            public Texture2D texture;
-            public float scaleRatioA;
-            public float scaleRatioB;
-            public float scaleRatioC;
-            public float gradientScale;
-            public float textureWidth;
-            public float textureHeight;
-            public float fontWeightBold;
-            public float fontWeightNormal;
-            public float scaleX;
-            public float scaleY;
-
-        }
-
-        internal FontAssetData fontAssetData;
 
         public bool LayoutDirty => layoutDirty;
 
@@ -98,21 +81,6 @@ namespace UIForia.Text {
                 spanInfo.textStyle.fontSize = 24;
             }
 
-           // Material material = spanInfo.textStyle.fontAsset.material;
-//            FontAssetData fontAssetData = new FontAssetData();
-//            fontAssetData.texture = spanInfo.textStyle.font.atlas;
-//            fontAssetData.textureWidth = fontAssetData.texture.width;
-//            fontAssetData.textureWidth = fontAssetData.texture.height;
-//            fontAssetData.gradientScale = material.GetFloat("_GradientScale"); 
-//            fontAssetData.scaleRatioA = material.GetFloat("_ScaleRatioA"); 
-//            fontAssetData.scaleRatioB = material.GetFloat("_ScaleRatioB"); 
-//            fontAssetData.scaleRatioC = material.GetFloat("_ScaleRatioC");
-//            fontAssetData.scaleX = material.GetFloat("_ScaleX");
-//            fontAssetData.scaleX = material.GetFloat("_ScaleY");
-//            fontAssetData.fontWeightBold = material.GetFloat("_FontWeightBold");
-//            fontAssetData.fontWeightNormal = material.GetFloat("_FontWeightNormal");
-         //  span.fontAssetData = fontAssetData;
-            // textInfo.SetContent(<Text>'Hello There'</Text><Text style=''/>more text</Text>);
             return spanInfo;
         }
 
@@ -541,7 +509,6 @@ namespace UIForia.Text {
         }
 
         public Size Layout(Vector2 offset = default, float width = float.MaxValue) {
-            
             if (spanList.Count == 0) return default;
 
             lineInfoList.Clear();
@@ -676,6 +643,85 @@ namespace UIForia.Text {
             }
 
             return lineInfos;
+        }
+
+        private Vector3 ComputeRatios(FontAsset fontAsset, in SVGXTextStyle textStyle) {
+            float gradientScale = fontAsset.gradientScale;
+            float faceDilate = 0f; // todo -- from style
+            float outlineThickness = textStyle.outlineWidth;
+            float outlineSoftness = textStyle.outlineSoftness;
+            float weight = (fontAsset.weightNormal > fontAsset.weightBold ? fontAsset.weightNormal : fontAsset.weightBold) / 4f;
+            float ratioA_t = weight + faceDilate + outlineThickness + outlineSoftness;
+            ratioA_t = ratioA_t > 1 ? 1 : ratioA_t;
+            float ratioA = (gradientScale - 1f) / (gradientScale * ratioA_t);
+
+            float glowOffset = textStyle.glowOffset;
+            float glowOuter = textStyle.glowOuter;
+            float ratioBRange = (weight + faceDilate) * (gradientScale - 1f);
+
+            float ratioB_t = Mathf.Max(1, glowOffset + glowOuter);
+            float ratioB = Mathf.Max(0, gradientScale - 1 - ratioBRange) / (gradientScale * ratioB_t);
+            float underlayOffsetX = textStyle.underlayX;
+            float underlayOffsetY = textStyle.underlayY;
+            float underlayDilate = textStyle.underlayDilate;
+            float underlaySoftness = textStyle.underlaySoftness;
+
+            float ratioCRange = (weight = faceDilate) * (gradientScale - 1);
+            float ratioC_t = Mathf.Max(1, Mathf.Max(Mathf.Abs(underlayOffsetX), Mathf.Abs(underlayOffsetY)) + underlayDilate + underlaySoftness);
+
+            float ratioC = Mathf.Max(0, gradientScale - 1f - ratioCRange) / (gradientScale * ratioC_t);
+
+            return new Vector3(ratioA, ratioB, ratioC);
+        }
+
+        private float GetPadding(FontAsset fontAsset, in SVGXTextStyle textStyle) {
+            float4 padding = Vector4.zero;
+
+            Vector3 ratios = ComputeRatios(fontAsset, textStyle);
+            float scaleRatio_A = ratios.x;
+            float scaleRatio_B = ratios.y;
+            float scaleRatio_C = ratios.z;
+            
+            float faceDilate = textStyle.faceDilate * scaleRatio_A;
+            float faceSoftness = textStyle.outlineSoftness * scaleRatio_A;
+            float outlineThickness = textStyle.outlineWidth * scaleRatio_A;
+
+            float uniformPadding = outlineThickness + faceSoftness + faceDilate;
+
+            float glowOffset = textStyle.glowOffset * scaleRatio_B;
+            float glowOuter = textStyle.glowOuter * scaleRatio_B;
+
+            uniformPadding = math.max(uniformPadding, faceDilate + glowOffset + glowOuter);
+
+            float offsetX = textStyle.underlayX * scaleRatio_C;
+            float offsetY = textStyle.underlayY * scaleRatio_C;
+            float dilate = textStyle.underlayDilate * scaleRatio_C;
+            float softness = textStyle.underlaySoftness * scaleRatio_C;
+
+            // tmp does a max check here with 0, I don't think we need it though
+            padding.x = faceDilate + dilate + softness - offsetX;
+            padding.y = faceDilate + dilate + softness - offsetY;
+            padding.z = faceDilate + dilate + softness + offsetX;
+            padding.w = faceDilate + dilate + softness + offsetY;
+
+            padding.x = math.max(padding.x, uniformPadding);
+            padding.y = math.max(padding.y, uniformPadding);
+            padding.z = math.max(padding.z, uniformPadding);
+            padding.w = math.max(padding.w, uniformPadding);
+
+            padding.x = math.min(padding.x, 1);
+            padding.y = math.min(padding.y, 1);
+            padding.z = math.min(padding.z, 1);
+            padding.w = math.min(padding.w, 1);
+            
+            padding *= fontAsset.gradientScale;
+
+            // Set UniformPadding to the maximum value of any of its components.
+            uniformPadding = math.max(padding.x, padding.y);
+            uniformPadding = math.max(padding.z, uniformPadding);
+            uniformPadding = math.max(padding.w, uniformPadding);
+
+            return uniformPadding + 0.5f;
         }
 
         private static TMP_FontAsset GetFontAssetForWeight(FontStyle fontStyle, TMP_FontAsset font, int fontWeight) {

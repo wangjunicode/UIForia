@@ -123,6 +123,12 @@ namespace UIForia.Util {
             }
         }
 
+        public void EnsureAdditionalCapacity(int capacity, int extraSpace) {
+            if (array.Length < size + capacity) {
+                System.Array.Resize(ref array, (size + capacity) + extraSpace);
+            }
+        }
+
         public void QuickClear() {
             size = 0;
         }

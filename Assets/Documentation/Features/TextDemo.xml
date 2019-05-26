@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UITemplate>
+    
+    <Style>
+        
+        style text-demo {
+            
+        }
+        
+    </Style>
+    
+    <Contents style="text-demo">
+
+        <Text>Normal Text</Text>
+
+        <Text>Bold Text</Text>
+
+        <Text>Italic Text</Text>
+
+    </Contents>
+</UITemplate>

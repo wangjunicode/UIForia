@@ -80,6 +80,7 @@ namespace UIForia {
         }
 
         private static FontAsset defaultAsset;
+
         public static FontAsset defaultFontAsset {
             get {
                 if (defaultAsset != null) return defaultAsset;

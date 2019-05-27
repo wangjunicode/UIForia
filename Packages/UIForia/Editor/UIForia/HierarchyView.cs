@@ -4,7 +4,6 @@ using UIForia.Editor;
 using UIForia.Elements;
 using UIForia.Layout.LayoutTypes;
 using UIForia.Rendering;
-using UIForia.Systems;
 using UIForia.Util;
 using UnityEditor.IMGUI.Controls;
 using UnityEngine;
@@ -35,8 +34,8 @@ public class HierarchyView : TreeView {
         s_ElementNameStyle = new GUIStyle();
         GUIStyleState elementNameNormal = new GUIStyleState();
         GUIStyleState elementStyleNormal = new GUIStyleState();
-        elementNameNormal.textColor = Color.white;
-        elementStyleNormal.textColor = Color.yellow;
+        elementNameNormal.textColor = UIForiaEditorTheme.elementNameNormal;
+        elementStyleNormal.textColor = UIForiaEditorTheme.elementStyleNormal;
         s_ElementNameStyle.normal = elementNameNormal;
     }
 
@@ -135,9 +134,12 @@ public class HierarchyView : TreeView {
 
         bool isChildren = item.element is UIChildrenElement;
 
-        Color mainColor = isTemplateRoot ? Color.green : Color.white;
+        Color mainColor = isTemplateRoot
+            ? UIForiaEditorTheme.mainColorTemplateRoot 
+            : UIForiaEditorTheme.mainColorRegularChild;
+
         if (isChildren) {
-            mainColor = new Color32(255, 0, 99, 255);
+            mainColor = UIForiaEditorTheme.mainColorChildrenElement;
         }
 
         textStyle.textColor = AdjustColor(mainColor, item.element);
@@ -172,10 +174,10 @@ public class HierarchyView : TreeView {
         s_Content.text = styleName; // + "(children: " + box.children.Count + ", id: " + item.element.id + ")";
 
         if (showChildrenAndId) {
-            s_Content.text += "(children: " + box.children.Count + ", id: " + item.element.id + ")";
+            s_Content.text += "(children: " + box?.children.Count + ", id: " + item.element?.id + ")";
         }
 
-        textStyle.textColor = AdjustColor(Color.yellow, item.element);
+        textStyle.textColor = AdjustColor(UIForiaEditorTheme.elementStyleNormal, item.element);
 
         GUI.Label(r, s_Content, s_ElementNameStyle);
 
@@ -216,7 +218,7 @@ public class HierarchyView : TreeView {
                     s_Content.text = '"' + textElement.text.Substring(0, 20) + "...\"";
                 }
 
-                s_ElementNameStyle.normal.textColor = AdjustColor(Color.white, element);
+                s_ElementNameStyle.normal.textColor = AdjustColor(UIForiaEditorTheme.elementNameNormal, element);
                 GUI.Label(rect, s_Content, s_ElementNameStyle);
                 Vector2 size = s_ElementNameStyle.CalcSize(s_Content);
                 rect.x += size.x;

@@ -7,15 +7,19 @@ namespace UIForia.Parsing.Expression.Tokenizer {
 
         public readonly ExpressionTokenType expressionTokenType;
         public readonly string value;
+        public readonly int line;
+        public readonly int column;
 
-        public ExpressionToken(ExpressionTokenType expressionTokenType) {
-            this.expressionTokenType = expressionTokenType;
-            value = string.Empty;
+
+        public ExpressionToken(ExpressionTokenType expressionTokenType, int line, int column) :
+            this(expressionTokenType, string.Empty, line, column) {
         }
 
-        public ExpressionToken(ExpressionTokenType expressionTokenType, string value) {
+        public ExpressionToken(ExpressionTokenType expressionTokenType, string value, int line, int column) {
             this.expressionTokenType = expressionTokenType;
             this.value = value;
+            this.line = line;
+            this.column = column;
         }
 
         [DebuggerStepThrough]
@@ -71,7 +75,7 @@ namespace UIForia.Parsing.Expression.Tokenizer {
             IsArithmeticOperator ||
             IsComparator;
 
-        public static ExpressionToken Invalid => new ExpressionToken(ExpressionTokenType.Invalid, string.Empty);
+        public static ExpressionToken Invalid => new ExpressionToken(ExpressionTokenType.Invalid, string.Empty, -1, -1);
 
     }
 

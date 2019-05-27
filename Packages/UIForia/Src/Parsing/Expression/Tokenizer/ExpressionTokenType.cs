@@ -1,5 +1,3 @@
-using System;
-
 namespace UIForia.Parsing.Expression.Tokenizer {
 
     public enum ExpressionTokenType {

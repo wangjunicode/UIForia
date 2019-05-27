@@ -1,111 +1,152 @@
 using System;
 using System.Collections.Generic;
 using UIForia.Exceptions;
+using UnityEngine;
 
 namespace UIForia.Parsing.Expression.Tokenizer {
 
     public static class ExpressionTokenizer {
+        
+        private readonly static char stringCharacter = '\'';
 
-        public static int ConsumeWhiteSpace(int start, string input) {
-            int ptr = start;
-            if (ptr >= input.Length) return input.Length;
-            while (ptr < input.Length && char.IsWhiteSpace(input[ptr])) {
-                ptr++;
-            }
-
-            return ptr;
-        }
-
-        public static int TryReadCharacters(int ptr, string input, string match, ExpressionTokenType expressionTokenType, List<ExpressionToken> output) {
-            if (ptr + match.Length > input.Length) return ptr;
+        private static void TryReadCharacters(TokenizerContext context, string match, ExpressionTokenType expressionTokenType, List<ExpressionToken> output) {
+            if (context.ptr + match.Length > context.input.Length) return;
             for (int i = 0; i < match.Length; i++) {
-                if (input[ptr + i] != match[i]) {
-                    return ptr;
+                if (context.input[context.ptr + i] != match[i]) {
+                    return;
                 }
             }
-            
-            output.Add(new ExpressionToken(expressionTokenType, match));
-            return TryConsumeWhiteSpace(ptr + match.Length, input);
+
+            output.Add(new ExpressionToken(expressionTokenType, match, context.line, context.column));
+            TryConsumeWhiteSpace(context.Advance(match.Length));
+        }
+        
+        private static void TryConsumeWhiteSpace(TokenizerContext context) {
+            if (context.IsConsumed()) {
+                return;
+            }
+
+            while (context.HasMore() && char.IsWhiteSpace(context.input[context.ptr])) {
+                context.Advance();
+            }
         }
 
-        public static int TryConsumeWhiteSpace(int ptr, string input) {
-            return ConsumeWhiteSpace(ptr, input);
+        private static void TryConsumeComment(TokenizerContext context) {
+            if (context.ptr + 1 >= context.input.Length) {
+                return;
+            }
+
+            if (context.input[context.ptr] == '/' && context.input[context.ptr + 1] == '/') {
+
+                while (context.HasMore()) {
+                    char current = context.input[context.ptr];
+                    if (current == '\n') {
+                        TryConsumeWhiteSpace(context);
+                        TryConsumeComment(context);
+                        return;
+                    }
+
+                    context.Advance();
+                }
+                
+                return;
+            }
+
+            if (context.input[context.ptr] != '/' || context.input[context.ptr + 1] != '*') {
+                return;
+            }
+
+            context.Advance(2);
+            while (context.HasMore()) {
+
+                if (context.input[context.ptr] == '*' && context.input[context.ptr + 1] == '/') {
+                    context.Advance(2);
+                    TryConsumeWhiteSpace(context);
+                    TryConsumeComment(context);
+                    return;
+                }
+                
+                context.Advance();
+                
+            }
         }
 
-        public static int TryReadDigit(int ptr, string input, List<ExpressionToken> output) {
+        private static void TryReadDigit(TokenizerContext context, List<ExpressionToken> output) {
+            if (context.IsConsumed()) return;
             bool foundDot = false;
-            int startIndex = ptr;
-            if (ptr >= input.Length) return input.Length;
+            int startIndex = context.ptr;
 
-            if (!char.IsDigit(input[ptr])) return ptr;
+            context.Save();
+            if (context.input[context.ptr] == '-') {
+                context.Advance();
+            }
 
-            // 1
-            // 1.4
-            // 1.4f
+            if (!char.IsDigit(context.input[context.ptr])) {
+                context.Restore();
+                return;
+            }
 
-            while (ptr < input.Length && (char.IsDigit(input[ptr]) || (!foundDot && input[ptr] == '.'))) {
-                if (input[ptr] == '.') {
+            while (context.HasMore() && (char.IsDigit(context.input[context.ptr]) || (!foundDot && context.input[context.ptr] == '.'))) {
+                if (context.input[context.ptr] == '.') {
                     foundDot = true;
                 }
 
-                ptr++;
+                context.Advance();
+            }
+            
+            if (context.HasMore() && context.input[context.ptr] == 'f' && context.input[context.ptr - 1] != '.') {
+                context.Advance();
             }
 
-            if (ptr < input.Length && input[ptr] == 'f') {
-                ptr++;
-            }
+            int length = context.ptr - startIndex;
+            string digit = context.input.Substring(startIndex, length);
 
-            output.Add(new ExpressionToken(ExpressionTokenType.Number, input.Substring(startIndex, ptr - startIndex)));
-            return TryConsumeWhiteSpace(ptr, input);
+            context.Restore();
+            output.Add(new ExpressionToken(ExpressionTokenType.Number, digit, context.line, context.column));
+            context.Advance(length);
+
+            TryConsumeWhiteSpace(context);
         }
 
-        private static int TryReadIdentifier(int ptr, string input, List<ExpressionToken> output) {
-            int start = ptr;
-            if (ptr >= input.Length) return input.Length;
-            char first = input[ptr];
-            if (!char.IsLetter(first) && first != '_' && first != '$') return ptr;
+        private static void TryReadIdentifier(TokenizerContext context, List<ExpressionToken> output) {
+            if (context.IsConsumed()) return;
+            int start = context.ptr;
+            char first = context.input[context.ptr];
+            if (!char.IsLetter(first) && first != '_' && first != '$') return;
 
-            while (ptr < input.Length && (char.IsLetterOrDigit(input[ptr]) || input[ptr] == '_' || input[ptr] == '$')) {
-                ptr++;
-            }
-//            ptr = TryReadCharacters(ptr, input, "true", TokenType.Boolean, output, true);
-//            ptr = TryReadCharacters(ptr, input, "false", TokenType.Boolean, output, true);
-//            ptr = TryReadCharacters(ptr, input, "as", TokenType.As, output, true);
-//            ptr = TryReadCharacters(ptr, input, "is", TokenType.Is, output, true);
-//            ptr = TryReadCharacters(ptr, input, "new", TokenType.New, output, true);
-//            ptr = TryReadCharacters(ptr, input, "typeof", TokenType.TypeOf, output, true);
-//            ptr = TryReadCharacters(ptr, input, "default", TokenType.Default, output, true);
-//            ptr = TryReadCharacters(ptr, input, "null", TokenType.Null, output, true);
-            string identifier = input.Substring(start, ptr - start);
-            if (identifier == "null") {
-                output.Add(new ExpressionToken(ExpressionTokenType.Null, "null"));
-            }
-            else if (identifier == "true") {
-                output.Add(new ExpressionToken(ExpressionTokenType.Boolean, "true"));
-            }
-            else if (identifier == "false") {
-                output.Add(new ExpressionToken(ExpressionTokenType.Boolean, "false"));
-            }
-            else if (identifier == "as") {
-                output.Add(new ExpressionToken(ExpressionTokenType.As, "as"));
-            }
-            else if (identifier == "is") {
-                output.Add(new ExpressionToken(ExpressionTokenType.Is, "is"));
-            }
-            else if (identifier == "new") {
-                output.Add(new ExpressionToken(ExpressionTokenType.New, "new"));
-            }
-            else if (identifier == "typeof") {
-                output.Add(new ExpressionToken(ExpressionTokenType.TypeOf, "typeof"));
-            }
-            else if (identifier == "default") {
-                output.Add(new ExpressionToken(ExpressionTokenType.Default, "default"));
-            }
-            else {
-                output.Add(new ExpressionToken(ExpressionTokenType.Identifier, identifier));
+            context.Save();
+            while (context.HasMore()
+                   && (char.IsLetterOrDigit(context.input[context.ptr])
+                       || context.input[context.ptr] == '_'
+                       || context.input[context.ptr] == '-'
+                       || context.input[context.ptr] == '$')) {
+                context.Advance();
             }
 
-            return TryConsumeWhiteSpace(ptr, input);
+            int length = context.ptr - start;
+            string identifier = context.input.Substring(start, length);
+            context.Restore();
+            output.Add(TransformIdentifierToTokenType(context, identifier));
+            context.Advance(length);
+            TryConsumeWhiteSpace(context);
+        }
+        
+        private static ExpressionToken TransformIdentifierToTokenType(TokenizerContext context, string identifier) {
+            string identifierLowerCase = identifier.ToLower();
+            switch (identifierLowerCase) {
+                case "null": return new ExpressionToken(ExpressionTokenType.Null, identifierLowerCase, context.line, context.column);
+                case "true": return new ExpressionToken(ExpressionTokenType.Boolean, identifierLowerCase, context.line, context.column);
+                case "false": return new ExpressionToken(ExpressionTokenType.Boolean, identifierLowerCase, context.line, context.column);
+                case "as": return new ExpressionToken(ExpressionTokenType.As, identifierLowerCase, context.line, context.column);
+                case "is": return new ExpressionToken(ExpressionTokenType.Is, identifierLowerCase, context.line, context.column);
+                case "new": return new ExpressionToken(ExpressionTokenType.New, identifierLowerCase, context.line, context.column);
+                case "typeof": return new ExpressionToken(ExpressionTokenType.TypeOf, identifierLowerCase, context.line, context.column);
+                case "default": return new ExpressionToken(ExpressionTokenType.Default, identifierLowerCase, context.line, context.column);
+
+                default: {
+                    return new ExpressionToken(ExpressionTokenType.Identifier, identifier, context.line, context.column);
+                }
+            }
         }
 
         // todo handle {} inside of strings
@@ -114,93 +155,99 @@ namespace UIForia.Parsing.Expression.Tokenizer {
         // add token for string 0 to index({)
         // add + token
         // run parse loop on contents of {}
-        private static int TryReadString(int ptr, string input, List<ExpressionToken> output) {
-            int start = ptr;
-            if (ptr >= input.Length) return input.Length;
-            if (input[ptr] != '\'') return ptr;
 
-            ptr++;
+        private static void TryReadString(TokenizerContext context, List<ExpressionToken> output) {
+            if (context.IsConsumed()) return;
+            if (context.input[context.ptr] != stringCharacter) return;
+            int start = context.ptr;
 
-            while (ptr < input.Length && input[ptr] != '\'') {
-                ptr++;
+            context.Save();
+            context.Advance();
+
+            while (context.HasMore() && context.input[context.ptr] != stringCharacter) {
+                context.Advance();
             }
 
-            if (ptr >= input.Length) {
-                return start;
+            if (context.IsConsumed()) {
+                context.Restore();
+                return;
             }
 
-            if (input[ptr] != '\'') {
-                return start;
+            if (context.input[context.ptr] != stringCharacter) {
+                context.Restore();
+                return;
             }
 
-            ptr++;
+            context.Advance();
 
             // strip the quotes
-            output.Add(new ExpressionToken(ExpressionTokenType.String, input.Substring(start + 1, ptr - start - 2)));
+            // "abc" 
+            // 01234
+            int length = context.ptr - start;
+            string substring = context.input.Substring(start + 1, length - 2);
+            context.Restore();
+            output.Add(new ExpressionToken(ExpressionTokenType.String, substring, context.line, context.column));
+            context.Advance(length);
 
-            return TryConsumeWhiteSpace(ptr, input);
+            TryConsumeWhiteSpace(context);
         }
 
         // todo take optional file / line number for error message
         public static List<ExpressionToken> Tokenize(string input, List<ExpressionToken> retn = null) {
             List<ExpressionToken> output = retn ?? new List<ExpressionToken>();
+            TokenizerContext context = new TokenizerContext(input);
+            TryConsumeWhiteSpace(context);
+            
+            TryConsumeWhiteSpace(context);
+            while (context.ptr < input.Length) {
+                int start = context.ptr;
 
-            int ptr = TryConsumeWhiteSpace(0, input);
-            while (ptr < input.Length) {
-                int start = ptr;
+                TryConsumeComment(context);
 
-                ptr = TryReadCharacters(ptr, input, "@", ExpressionTokenType.At, output);
-                ptr = TryReadCharacters(ptr, input, "&&", ExpressionTokenType.And, output);
-                ptr = TryReadCharacters(ptr, input, "||", ExpressionTokenType.Or, output);
-                ptr = TryReadCharacters(ptr, input, "==", ExpressionTokenType.Equals, output);
-                ptr = TryReadCharacters(ptr, input, "!=", ExpressionTokenType.NotEquals, output);
-                ptr = TryReadCharacters(ptr, input, ">=", ExpressionTokenType.GreaterThanEqualTo, output);
-                ptr = TryReadCharacters(ptr, input, "<=", ExpressionTokenType.LessThanEqualTo, output);
-                ptr = TryReadCharacters(ptr, input, ">", ExpressionTokenType.GreaterThan, output);
-                ptr = TryReadCharacters(ptr, input, "<", ExpressionTokenType.LessThan, output);
+                TryReadCharacters(context, "@", ExpressionTokenType.At, output);
+                TryReadCharacters(context, "&&", ExpressionTokenType.And, output);
+                TryReadCharacters(context, "||", ExpressionTokenType.Or, output);
+                TryReadCharacters(context, "==", ExpressionTokenType.Equals, output);
+                TryReadCharacters(context, "!=", ExpressionTokenType.NotEquals, output);
+                TryReadCharacters(context, ">=", ExpressionTokenType.GreaterThanEqualTo, output);
+                TryReadCharacters(context, "<=", ExpressionTokenType.LessThanEqualTo, output);
+                TryReadCharacters(context, ">", ExpressionTokenType.GreaterThan, output);
+                TryReadCharacters(context, "<", ExpressionTokenType.LessThan, output);
 
-                ptr = TryReadCharacters(ptr, input, "!", ExpressionTokenType.Not, output);
-                ptr = TryReadCharacters(ptr, input, "+", ExpressionTokenType.Plus, output);
-                ptr = TryReadCharacters(ptr, input, "-", ExpressionTokenType.Minus, output);
-                ptr = TryReadCharacters(ptr, input, "/", ExpressionTokenType.Divide, output);
-                ptr = TryReadCharacters(ptr, input, "*", ExpressionTokenType.Times, output);
-                ptr = TryReadCharacters(ptr, input, "%", ExpressionTokenType.Mod, output);
-                ptr = TryReadCharacters(ptr, input, "?", ExpressionTokenType.QuestionMark, output);
-                ptr = TryReadCharacters(ptr, input, ":", ExpressionTokenType.Colon, output);
+                TryReadCharacters(context, "!", ExpressionTokenType.Not, output);
+                TryReadCharacters(context, "+", ExpressionTokenType.Plus, output);
+                TryReadCharacters(context, "-", ExpressionTokenType.Minus, output);
+                TryReadCharacters(context, "/", ExpressionTokenType.Divide, output);
+                TryReadCharacters(context, "*", ExpressionTokenType.Times, output);
+                TryReadCharacters(context, "%", ExpressionTokenType.Mod, output);
+                TryReadCharacters(context, "?", ExpressionTokenType.QuestionMark, output);
+                TryReadCharacters(context, ":", ExpressionTokenType.Colon, output);
 
-                ptr = TryReadCharacters(ptr, input, ".", ExpressionTokenType.Dot, output);
-                ptr = TryReadCharacters(ptr, input, ",", ExpressionTokenType.Comma, output);
-                ptr = TryReadCharacters(ptr, input, "(", ExpressionTokenType.ParenOpen, output);
-                ptr = TryReadCharacters(ptr, input, ")", ExpressionTokenType.ParenClose, output);
-                ptr = TryReadCharacters(ptr, input, "[", ExpressionTokenType.ArrayAccessOpen, output);
-                ptr = TryReadCharacters(ptr, input, "]", ExpressionTokenType.ArrayAccessClose, output);
-                ptr = TryReadCharacters(ptr, input, "{", ExpressionTokenType.ExpressionOpen, output);
-                ptr = TryReadCharacters(ptr, input, "}", ExpressionTokenType.ExpressionClose, output);
+                TryReadCharacters(context, ".", ExpressionTokenType.Dot, output);
+                TryReadCharacters(context, ",", ExpressionTokenType.Comma, output);
+                TryReadCharacters(context, "(", ExpressionTokenType.ParenOpen, output);
+                TryReadCharacters(context, ")", ExpressionTokenType.ParenClose, output);
+                TryReadCharacters(context, "[", ExpressionTokenType.ArrayAccessOpen, output);
+                TryReadCharacters(context, "]", ExpressionTokenType.ArrayAccessClose, output);
+                TryReadCharacters(context, "{", ExpressionTokenType.ExpressionOpen, output);
+                TryReadCharacters(context, "}", ExpressionTokenType.ExpressionClose, output);
 
-                ptr = TryReadDigit(ptr, input, output);
-                ptr = TryReadString(ptr, input, output);
-                ptr = TryReadIdentifier(ptr, input, output);
-                ptr = TryConsumeWhiteSpace(ptr, input);
+                TryReadDigit(context, output);
+                TryReadString(context, output);
+                TryReadIdentifier(context, output);
+                TryConsumeWhiteSpace(context);
 
-                if (ptr == start && ptr < input.Length) {
-                    throw new ParseException($"Tokenizer failed on string: {input}." +
-                                        $" Processed {input.Substring(0, ptr)} as ({PrintTokenList(output)})" +
-                                        $" but then got stuck on {input.Substring(ptr)}");
+                if (context.ptr == start && context.ptr < input.Length) {
+                    int nextNewLine = input.IndexOf("\n", context.ptr + 1, input.Length - context.ptr - 1, StringComparison.Ordinal);
+                    nextNewLine = Mathf.Clamp(nextNewLine, context.ptr + 1, input.Length - 1);
+                    string errorLine = input.Substring(context.ptr, nextNewLine - context.ptr);
+                    throw new ParseException($"Tokenizer failed at line {context.line}, column {context.column}.\n" +
+                                             $" Processed {input.Substring(0, context.ptr)}\n" +
+                                             $" ...but then got stuck on {errorLine}.\n");
                 }
             }
 
             return output;
-        }
-
-        private static string PrintTokenList(List<ExpressionToken> tokens) {
-            string retn = "";
-            for (int i = 0; i < tokens.Count; i++) {
-                retn += tokens[i].ToString();
-                if (i != tokens.Count - 1) {
-                    retn += ", ";
-                }
-            }
-            return retn;
         }
 
     }

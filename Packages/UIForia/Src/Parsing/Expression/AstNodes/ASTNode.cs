@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using UIForia.Parsing.Expression.Tokenizer;
 using UIForia.Util;
 
 namespace UIForia.Parsing.Expression.AstNodes {
@@ -30,6 +31,16 @@ namespace UIForia.Parsing.Expression.AstNodes {
                 return false;
             }
         }
+        
+        public int line;
+        public int column;
+
+        public ASTNode WithLocation(ExpressionToken token) {
+            this.line = token.line;
+            this.column = token.column;
+            return this;
+        }
+
 
         public abstract void Release();
 

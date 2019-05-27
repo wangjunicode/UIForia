@@ -559,4 +559,11 @@ public class ExpressionParserTests2 {
         MemberAccessExpressionNode left = AssertInstanceOfAndReturn<MemberAccessExpressionNode>(node.left);
     }
     
+    [Test]
+    public void Parse_Comments() {
+        ASTNode root = ExpressionParser.Parse("$item /* yes, I really need to put comments in expressions in templates!! */");
+        IdentifierNode node = AssertInstanceOfAndReturn<IdentifierNode>(root);
+        Assert.AreEqual("$item", node.name);
+    }
+    
 }

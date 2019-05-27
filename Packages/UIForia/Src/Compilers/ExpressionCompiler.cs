@@ -117,6 +117,15 @@ namespace UIForia.Compilers {
         public void RemoveAliasResolver(ExpressionAliasResolver resolver) {
             aliasResolvers.Remove(resolver);
         }
+        
+        public void RemoveAliasResolver(string resolverName) {
+            for (int i = 0; i < aliasResolvers.Count; i++) {
+                if (aliasResolvers[i].aliasName == resolverName) {
+                    aliasResolvers.RemoveAt(i);
+                    return;
+                }
+            }
+        }
 
         public Expression<T> Compile<T>(Type rootType, Type currentType, string input) {
             this.targetType = typeof(T);

@@ -92,4 +92,38 @@ public class ElementTests {
         Assert.AreEqual(1, root.g2_2.siblingIndex);
     }
 
+    [Template(TemplateType.String, @"
+    <UITemplate>
+        <Contents>
+           <GenericThing--int/>
+        </Contents>
+    </UITemplate>
+    ")]
+    public class GenericWrapper : UIElement {}
+    
+    [Template(TemplateType.String, @"
+    <UITemplate>
+        <Contents>
+           
+        </Contents>
+    </UITemplate>
+    ")]
+    public class GenericThing<T> : UIElement {
+
+
+    }
+    
+    [Test]
+    public void HandleGenericElementTypes() {
+        string template = @"
+            <UITemplate>
+                <Contents>
+                    <GenericThing--int/>
+                </Contents>
+            </UITemplate>
+        ";
+        MockApplication app = new MockApplication(typeof(GenericWrapper), template);
+        Assert.IsInstanceOf<GenericThing<int>>(app.RootElement.GetChild(0));
+    }
+    
 }

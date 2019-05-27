@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using UIForia.Elements;
 using UIForia.Expressions;
 using UIForia.Parsing.Expression;
-using UIForia.Util;
 
 namespace UIForia.Templates {
 
@@ -24,12 +23,11 @@ namespace UIForia.Templates {
         }
 
         public override UIElement CreateScoped(TemplateScope inputScope) {
-           throw new Exception("Should never call CreateScoped on a UISlotTemplate");
+            throw new Exception("Should never call CreateScoped on a UISlotTemplate");
         }
 
         public UIElement CreateWithDefault(TemplateScope inputScope) {
             UISlotElement element = new UISlotElement(slotNameAttr.value);
-            element.children =  LightListPool<UIElement>.Get();
             element.templateContext = new ExpressionContext(inputScope.rootElement, element);
             for (int i = 0; i < childTemplates.Count; i++) {
                 element.children.Add(childTemplates[i].CreateScoped(inputScope));
@@ -43,7 +41,6 @@ namespace UIForia.Templates {
         public UIElement CreateWithContent(TemplateScope inputScope, List<UITemplate> content) {
             UISlotElement element = new UISlotElement(slotNameAttr.value);
 
-            element.children = new LightList<UIElement>(content.Count);
             TemplateScope s = new TemplateScope(inputScope.rootElement.templateContext.rootObject as UIElement);
             element.templateContext = new ExpressionContext(s.rootElement, element);
 

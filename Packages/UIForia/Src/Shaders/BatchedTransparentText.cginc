@@ -84,7 +84,7 @@ fixed4 TextFragment(v2f input) {
    half4 outlineColor = half4(0, 0, 0, 0); //_OutlineColor;
    
    // enable this line for premul alpha
-   // faceColor.rgb *= input.color.rgb;
+   faceColor.rgb *= input.color.rgb;
    
    faceColor = GetColor(sd, faceColor, outlineColor, outline, softness);
    return faceColor * input.color.a;

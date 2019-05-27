@@ -6,6 +6,7 @@ using JetBrains.Annotations;
 using UIForia.Bindings;
 using UIForia.Bindings.StyleBindings;
 using UIForia.Compilers;
+using UIForia.Compilers.ExpressionResolvers;
 using UIForia.Compilers.Style;
 using UIForia.Elements;
 using UIForia.Expressions;
@@ -44,6 +45,8 @@ namespace UIForia.Templates {
 
         public readonly Application app;
 
+        protected List<ExpressionAliasResolver> resolvers;
+        
         protected UITemplate(Application app, List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null) {
             this.app = app;
             this.childTemplates = childTemplates;
@@ -160,6 +163,16 @@ namespace UIForia.Templates {
             if (!(typeof(UIElement).IsAssignableFrom(elementType))) {
                 Debug.Log($"{elementType} must be a subclass of {typeof(UIElement)} in order to be used in templates");
                 return;
+            }
+
+            Action<IList<ExpressionAliasResolver>, AttributeList> getResolvers = TypeProcessor.GetType(elementType).getResolvers;
+
+            if (getResolvers != null) {
+                resolvers = ListPool<ExpressionAliasResolver>.Get();
+                getResolvers.Invoke(resolvers, new AttributeList(attributes));
+                for (int i = 0; i < resolvers.Count; i++) {
+                    template.compiler.AddAliasResolver(resolvers[i]);
+                }
             }
 
             ResolveBaseStyles(template);
@@ -320,7 +333,14 @@ namespace UIForia.Templates {
             ListPool<UIStyleGroupContainer>.Release(ref list);
         }
 
-        public virtual void PostCompile(ParsedTemplate template) { }
+        public virtual void PostCompile(ParsedTemplate template) {
+            if (resolvers != null) {
+                for (int i = 0; i < resolvers.Count; i++) {
+                    template.compiler.RemoveAliasResolver(resolvers[i]);
+                }
+                ListPool<ExpressionAliasResolver>.Release(ref resolvers);
+            }
+        }
 
     }
 

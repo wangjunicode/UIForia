@@ -73,20 +73,6 @@ public class TemplateParsingTests {
         Assert.AreEqual("<Children> cannot be inside <Repeat>", x.Message);
     }
 
-    [Test]
-    public void Children_MustBeEmpty() {
-        var x = Assert.Throws<InvalidTemplateException>(() => {
-            new TemplateParser(null).ParseTemplateFromString<Test1>(@"
-                <UITemplate>
-                    <Contents>
-                            <Children>text</Children>
-                    </Contents>
-                </UITemplate>
-            ");
-        });
-        Assert.AreEqual("<Children> tags cannot have children", x.Message);
-    }
-
    
     [Test]
     public void Text_Parses() {

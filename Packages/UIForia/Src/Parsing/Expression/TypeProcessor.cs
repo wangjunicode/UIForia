@@ -237,9 +237,9 @@ namespace UIForia.Parsing.Expression {
                 return processedType;
             }
             
-            if (templateTypeMap.TryGetValue(typeof(UIGroupElement).Name, out processedType)){
-                return processedType;
-            }
+//            if (templateTypeMap.TryGetValue(typeof(UIGroupElement).Name, out processedType)){
+//                return processedType;
+//            }
 
             throw new ParseException("Unable to find type for tag name: " + tagName);
         }
@@ -338,11 +338,6 @@ namespace UIForia.Parsing.Expression {
                 List<Type> types = new List<Type>();
                 for (int i = 0; i < loadedTypes.Count; i++) {
                     if (typeof(UIElement).IsAssignableFrom(loadedTypes[i])) {
-//                        
-//                        if (loadedTypes[i].Assembly.FullName.StartsWith("UIForia")) {
-//                            continue;
-//                        }
-
                         types.Add(loadedTypes[i]);
                     }
                 }
@@ -356,12 +351,7 @@ namespace UIForia.Parsing.Expression {
 
             return templateTypes;
         }
-
-        public static void FindNamespace(string namespaceName) { }
-
-        public static bool IsTypeName(string name) {
-            return Type.GetType(name) != null;
-        }
+        
 
     }
 

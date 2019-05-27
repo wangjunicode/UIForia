@@ -1,0 +1,16 @@
+style select-demo-root {
+    PreferredSize = 1pca;
+    Padding = 32px;
+}
+
+style button-group {
+    FlexLayoutDirection = Column;
+    MarginTop = 12px;
+}
+
+style button {
+    BackgroundColor = white;
+    BorderRadius = 8px;
+    Padding = 0.5em, 1em;
+    MarginRight = 1em;
+}

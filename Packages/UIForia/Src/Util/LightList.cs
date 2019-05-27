@@ -375,7 +375,7 @@ namespace UIForia.Util {
             T pivot = array[high];
 
             int i = (low - 1);
-            for (int j = low; j <= high - 1; j++) {
+            for (int j = low; j < high; j++) {
                 if (comparison(array[j], pivot) <= 0) {
                     i++;
 
@@ -414,7 +414,7 @@ namespace UIForia.Util {
 
         public void Sort(Comparison<T> comparison) {
             if (size < 2) return;
-            QuickSort(comparison, 0, size - 1);
+            System.Array.Sort(array, comparison);
         }
 
         public void Sort(Comparison<T> comparison, int start, int end) {
@@ -430,12 +430,14 @@ namespace UIForia.Util {
             if (start < 0) start = 0;
             if (start >= size) start = size - 1;
             if (end >= size) end = size - 1;
-            QuickSort(comparison, start, end);
+            System.Array.Sort(array, start, end, comparison);
+//            QuickSort(comparison, start, end);
         }
 
         public void Sort(IComparer<T> comparison) {
             if (size < 2) return;
-            QuickSort(comparison, 0, size - 1);
+            System.Array.Sort(array, 0, size, comparison);
+//            QuickSort(comparison, 0, size - 1);
         }
 
         public int BinarySearch(T value, IComparer<T> comparer) {

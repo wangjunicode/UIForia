@@ -8,166 +8,6 @@ namespace UIForia.Text {
 
     // only recompute text stuff when character to left or right changed
 
-    public class TextSpan2 {
-
-        internal int characterCount;
-        internal SVGXTextStyle textStyle;
-        internal float scaleRatioA;
-        internal float scaleRatioB;
-        internal float scaleRatioC;
-        internal float padding;
-        internal TextSpan2 parent;
-        internal LightList<TextSpan2> children;
-
-        internal TextInfo2 textInfo;
-        internal int index;
-
-        internal char[] rawContent;
-        internal int rawContentSize;
-
-        public void SetText(char[] characters) {
-            if (textInfo == null) return;
-
-            if (characters.Length > rawContent.Length) {
-                Array.Resize(ref rawContent, characters.Length * 2);
-            }
-
-            Array.Copy(characters, 0, rawContent, 0, characters.Length);
-            StructList<CharInfo2> charInfoList = StructList<CharInfo2>.Get();
-
-            rawContentSize = characters.Length;
-
-            char[] buffer = null;
-
-            int bufferSize = ProcessWhitespace(rawContent, textStyle.whitespaceMode, ref buffer);
-
-            for (int i = 0; i < bufferSize; i++) {
-                if (buffer[i] == '&') {
-                    // c# provides System.Net.WebUtility.HtmlDecode("&eacute;");
-                    // returns a string not a character and allocates a lot, better not to use it
-
-                    int advance = TryParseSymbol(buffer, i);
-                    if (advance != 0) {
-                        i += advance;
-                        // adjust buffer size? not sure how to handle these yet
-                    }
-                }
-            }
-
-            // handle all kerning within a span as if there were no other spans. text info will handle 'gluing' spans together
-            charInfoList.size = bufferSize;
-
-
-            TextUtil.TransformText(textStyle.textTransform, buffer, bufferSize);
-
-            CharInfo2[] charInfos = charInfoList.array;
-            charInfoList.size = bufferSize;
-            
-            for (int i = 0; i < bufferSize; i++) {
-                charInfos[i].character = buffer[i];
-                charInfos[i].spanIndex = index;
-            }
-
-            FindGlyphs(textStyle.fontAsset, charInfos, bufferSize);
-            FindKerningInfo(textStyle.fontAsset, charInfos, bufferSize);
-
-            // textInfo.UpdateSpan(index, charInfoList);
-
-            StructList<CharInfo2>.Release(ref charInfoList);
-            ArrayPool<char>.Release(ref buffer);
-        }
-
-
-        
-        private static int TryParseSymbol(char[] characters, int index) {
-            return 0;
-        }
-
-        private static readonly string[] s_Symbols = {
-            "&shy;",
-            "&nbsp;"
-        };
-
-        private static void FindGlyphs(FontAsset fontAsset, CharInfo2[] charInfos, int count) {
-            IntMap<TextGlyph> fontAssetCharacterDictionary = fontAsset.characterDictionary;
-            for (int i = 0; i < count; i++) {
-                charInfos[i].glyph = fontAssetCharacterDictionary.GetOrDefault(charInfos[i].character);
-            }
-        }
-
-        private static void FindKerningInfo(FontAsset fontAsset, CharInfo2[] charInfos, int count) {
-            IntMap<TextKerningPair> kerningDictionary = fontAsset.kerningDictionary;
-            if (count < 2) {
-                return;
-            }
-
-            GlyphValueRecord glyphAdjustments = default;
-            int idx = 0;
-
-            glyphAdjustments = kerningDictionary.GetOrDefault(((charInfos[1].character) << 16) + charInfos[0].character).firstGlyphAdjustments;
-            charInfos[idx++].glyphAdjustment = glyphAdjustments;
-
-            for (int i = 1; i < count - 1; i++) {
-                int current = charInfos[i].character;
-                int next = charInfos[i + 1].character;
-                int prev = charInfos[i - 1].character;
-
-                glyphAdjustments = kerningDictionary.GetOrDefault((next << 16) + current).firstGlyphAdjustments;
-                glyphAdjustments += kerningDictionary.GetOrDefault((current << 16) + prev).secondGlyphAdjustments;
-
-                charInfos[idx++].glyphAdjustment = glyphAdjustments;
-            }
-
-            glyphAdjustments = kerningDictionary.GetOrDefault(((charInfos[count - 1].character) << 16) + charInfos[count - 2].character).firstGlyphAdjustments;
-            charInfos[idx++].glyphAdjustment = glyphAdjustments;
-        }
-
-        // whitespace between spans?
-        private static int ProcessWhitespace(char[] input, WhitespaceMode whitespaceMode, ref char[] buffer) {
-            bool collapseSpaceAndTab = (whitespaceMode & WhitespaceMode.CollapseWhitespace) != 0;
-            bool preserveNewLine = (whitespaceMode & WhitespaceMode.PreserveNewLines) != 0;
-
-            bool collapsing = collapseSpaceAndTab;
-
-            if (buffer == null) {
-                buffer = ArrayPool<char>.GetMinSize(input.Length);
-            }
-
-            if (buffer.Length < input.Length) {
-                ArrayPool<char>.Resize(ref buffer, input.Length);
-            }
-
-            int writeIndex = 0;
-
-            for (int i = 0; i < input.Length; i++) {
-                char current = input[i];
-
-                if (current == '\n' && !preserveNewLine) {
-                    continue;
-                }
-
-                bool isWhiteSpace = current == '\t' || current == ' ';
-
-                if (collapsing) {
-                    if (!isWhiteSpace) {
-                        buffer[writeIndex++] = current;
-                        collapsing = false;
-                    }
-                }
-                else if (isWhiteSpace) {
-                    collapsing = collapseSpaceAndTab;
-                    buffer[writeIndex++] = ' ';
-                }
-                else {
-                    buffer[writeIndex++] = current;
-                }
-            }
-
-            return writeIndex;
-        }
-
-    }
-
     // sequence of letters or whitespace w/ a type
     // also handles softhyphens
     public struct CharacterGroup {
@@ -202,36 +42,127 @@ namespace UIForia.Text {
 
         internal StructList<CharInfo2> characterInfoList;
         internal StructList<TextGeometry> geometryList;
+        internal StructList<WordInfo2> wordInfoList;
+        internal StructList<LineInfo> lineInfoList;
 
         public int AppendSpan(string content, in SVGXTextStyle style) {
-            TextSpan2 textSpan = new TextSpan2();
+            TextSpan2 textSpan = new TextSpan2(); // pool?
             textSpan.index = spanCount;
-
-            FontAsset fontAsset = style.fontAsset; // todo -- search if not defined
 
             if (spanCount + 1 >= spans.Length) {
                 Array.Resize(ref spans, spanCount + 4);
             }
 
             characterInfoList.EnsureAdditionalCapacity(content.Length, 10);
-
-            float ascender = fontAsset.faceInfo.Ascender;
-
-            int charCount = characterInfoList.size;
-
-            // shift arrays to accomodate new data
-//
-//            FindGlyphs(content, fontAsset, charCount - content.Length);
-//            FindKerningInfo(content, fontAsset, charCount - content.Length);
-//            StructList<CharacterGroup> characterGroups = BreakIntoCharacterGroups(content);
-//            MergeCharacterGroups(insertIndex, characterGroups);
-//            StructList<CharacterGroup>.Release(ref characterGroups);
-
-            spanCount++;
+            spans[spanCount++] = textSpan;
+            textSpan.SetText(content.ToCharArray());
             return s_SpanIdGenerator++;
         }
 
+        internal void InternalUpdateSpan(int index, StructList<CharInfo2> charInfos, StructList<WordInfo2> wordGroups) {
+            if (spanCount == 1) {
+                
+                wordInfoList.EnsureCapacity(wordGroups.size);
+                characterInfoList.EnsureCapacity(charInfos.size);
+                
+                Array.Copy(wordGroups.array, 0, wordInfoList.array, 0, wordGroups.size);
+                Array.Copy(charInfos.array, 0, characterInfoList.array, 0, charInfos.size);
+                
+                wordInfoList.size = wordGroups.size;
+                characterInfoList.size = charInfos.size;
 
+            }
+            
+            if (index == spanCount - 1) {
+                
+            }
+        }
+
+        private bool requiresLayout;
+
+        public abstract class TextLayoutPolygon {
+
+            public abstract bool LineCast(float y, out Vector2 intersection);
+
+            public abstract Rect GetBounds();
+
+        }
+        
+        public void RunLayout(float width = float.MaxValue) {
+            
+            if (!requiresLayout) return;
+            
+            StructList<LineInfo> lines = StructList<LineInfo>.Get();
+            LineInfo currentLine = new LineInfo();
+            
+            // cast line through shape from top bottom and center of current line
+            // find right-most intersection point use that as result
+
+            WordInfo2[] wordInfos = wordInfoList.array;
+            
+            TextLayoutPolygon[] polygons = new TextLayoutPolygon[0]; // sorted by max y
+
+            TextLayoutPolygon GetNearestPolygon(float x, float y) {
+                return null;
+            }
+            
+            for (int i = 0; i < spanCount; i++) {
+                TextSpan2 span = spans[i];
+                FontAsset asset = span.textStyle.fontAsset;
+
+                float scale = (span.textStyle.fontSize / asset.faceInfo.PointSize) * asset.faceInfo.Scale;
+                float lh = (asset.faceInfo.Ascender - asset.faceInfo.Descender) * scale;
+
+                int start = span.wordStart;
+                int end = span.wordEnd;
+                
+                for (int w = start; w < end; w++) {
+
+                    WordInfo2 wordInfo = wordInfos[w];
+
+                    switch (wordInfo.type) {
+                        
+                        case WordType.Whitespace:
+                            break;
+                        
+                        case WordType.NewLine:
+                            break;
+                        
+                        case WordType.Normal:
+                            
+                            TextLayoutPolygon polygon = GetNearestPolygon(0, 0);
+                            if (polygon != null) {
+                                // line cast
+                            }
+                            
+                            // GetNearestTextPolygon(x ,y);
+                            // try to fit word on current line
+                            if (wordInfo.width > width) {
+                                // can't fit on current line, maybe break the word
+                            }
+                            
+                            
+                            
+                            break;
+                        case WordType.SoftHyphen:
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
+                    
+                }  
+                
+            }
+
+            void CompleteLine() {
+                // compute max ascender / descender
+                // do line offset
+                // apply geometry offset to words (if not size only pass)
+                // 
+            }
+            
+        }
+        
         // positions are not transformed by xAdvance or line position
         public void UpdateGeometry() {
             int characterCount = characterInfoList.size;
@@ -319,7 +250,7 @@ namespace UIForia.Text {
     public struct CharInfo2 {
 
         public Vector2 topLeft;
-        public Vector2 bottomLeft;
+        public Vector2 bottomRight;
         public int wordIndex;
         public int lineIndex;
         public float scale;
@@ -328,6 +259,7 @@ namespace UIForia.Text {
         public TextGlyph glyph;
         public GlyphValueRecord glyphAdjustment;
         public int spanIndex;
+        public Vector2 texCoord;
 
     }
 

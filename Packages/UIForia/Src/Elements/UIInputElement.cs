@@ -439,7 +439,7 @@ namespace UIForia.Elements {
             ctx.BeginPath();
             ctx.SetFill(style.TextColor);
 
-            ctx.Text(contentRect.x - textScroll.x, contentRect.y, textInfo);
+            // ctx.Text(contentRect.x - textScroll.x, contentRect.y, textInfo);
             ctx.Fill();
             ctx.DisableScissorRect();
 

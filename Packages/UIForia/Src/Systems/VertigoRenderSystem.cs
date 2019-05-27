@@ -351,7 +351,6 @@ namespace Src.Systems {
             renderInfo.borderColorRight = Color.black;
             renderInfo.borderColorBottom = Color.black;
             renderInfo.borderColorLeft = Color.black;
-            renderInfos.geometryId = -1;
 
             renderInfo.renderMethod = ComputeRenderType(element, renderInfo);
 

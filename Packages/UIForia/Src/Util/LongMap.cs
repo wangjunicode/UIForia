@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace UIForia.Util {
-    public class IntMap<T> {
+    public class LongMap<T> {
 
         private int[] buckets;
         private Entry[] entries;
@@ -12,9 +12,9 @@ namespace UIForia.Util {
         private int freeCount;
         private int capacity;
 
-        public IntMap() : this(7) { }
+        public LongMap() : this(7) { }
 
-        public IntMap(int capacity) {
+        public LongMap(int capacity) {
             int size = HashHelpers.GetPrime(capacity);
             this.capacity = size;
             buckets = ArrayPool<int>.GetMinSize(size);
@@ -28,12 +28,12 @@ namespace UIForia.Util {
         public int Count => count - freeCount;
 
         [DebuggerStepThrough]
-        public void Add(int key, T value) {
+        public void Add(long key, T value) {
             Insert(key, value, true);
         }
 
         [DebuggerStepThrough]
-        public bool TryGetValue(int key, out T value) {
+        public bool TryGetValue(long key, out T value) {
             int i = FindEntry(key);
             if (i >= 0) {
                 value = entries[i].value;
@@ -44,9 +44,9 @@ namespace UIForia.Util {
         }
 
         [DebuggerStepThrough]
-        public bool Remove(int key) {
+        public bool Remove(long key) {
 
-            int hashCode = key & 0x7FFFFFFF;
+            int hashCode = (int) key & 0x7FFFFFFF;
             int bucket = hashCode % capacity;
             int last = -1;
             for (int i = buckets[bucket]; i >= 0; last = i, i = entries[i].next) {
@@ -70,9 +70,9 @@ namespace UIForia.Util {
             return false;
         }
         
-        public bool Remove(int key, out T retn) {
+        public bool Remove(long key, out T retn) {
 
-            int hashCode = key & 0x7FFFFFFF;
+            int hashCode = (int) key & 0x7FFFFFFF;
             int bucket = hashCode % capacity;
             int last = -1;
             for (int i = buckets[bucket]; i >= 0; last = i, i = entries[i].next) {
@@ -99,7 +99,7 @@ namespace UIForia.Util {
             return false;
         }
 
-        public T this[int key] {
+        public T this[long key] {
             [DebuggerStepThrough]
             get {
                 int i = FindEntry(key);
@@ -113,7 +113,7 @@ namespace UIForia.Util {
         }
 
         [DebuggerStepThrough]
-        public T GetOrDefault(int key, T defaultValue = default(T)) {
+        public T GetOrDefault(long key, T defaultValue = default(T)) {
             int i = FindEntry(key);
             if (i >= 0) {
                 return entries[i].value;
@@ -135,7 +135,7 @@ namespace UIForia.Util {
         }
 
         [DebuggerStepThrough]
-        public bool ContainsKey(int key) {
+        public bool ContainsKey(long key) {
             return FindEntry(key) >= 0;
         }
 
@@ -149,7 +149,7 @@ namespace UIForia.Util {
             Array.Copy(entries, 0, newEntries, 0, count);
             for (int i = 0; i < count; i++) {
                 if (newEntries[i].key >= 0) {
-                    int bucket = newEntries[i].key % capacity;
+                    int bucket = (int) newEntries[i].key % capacity;
                     newEntries[i].next = newBuckets[bucket];
                     newBuckets[bucket] = i;
                 }
@@ -161,8 +161,8 @@ namespace UIForia.Util {
         }
 
         [DebuggerStepThrough]
-        private int FindEntry(int key) {
-            int hashCode = key & 0x7FFFFFFF;
+        private int FindEntry(long key) {
+            long hashCode = key & 0x7FFFFFFF;
             for (int i = buckets[hashCode % capacity]; i >= 0; i = entries[i].next) {
                 if (entries[i].hashCode == hashCode && entries[i].key == key) {
                     return i;
@@ -172,10 +172,10 @@ namespace UIForia.Util {
         }
 
         [DebuggerStepThrough]
-        private void Insert(int key, T value, bool add) {
+        private void Insert(long key, T value, bool add) {
 
-            int hashCode = key & 0x7FFFFFFF;
-            int targetBucket = hashCode % capacity;
+            int hashCode = key.GetHashCode() & 0x7FFFFFFF;
+            long targetBucket = hashCode % capacity;
 
             for (int i = buckets[targetBucket]; i >= 0; i = entries[i].next) {
                 if (entries[i].hashCode == hashCode && entries[i].key == key) {
@@ -209,23 +209,23 @@ namespace UIForia.Util {
         }
 
         [DebuggerStepThrough]
-        public int CopyKeyValuesToArray(ref KeyValuePair<int, T>[] array, int index = 0) {
+        public int CopyKeyValuesToArray(ref KeyValuePair<long, T>[] array, int index = 0) {
             if (array == null) {
-                array = ArrayPool<KeyValuePair<int, T>>.GetMinSize(Count);
+                array = ArrayPool<KeyValuePair<long, T>>.GetMinSize(Count);
             }  
             if (index < 0) {
                 index = 0;
             }
             
             if (index + Count > array.Length ) {
-                ArrayPool<KeyValuePair<int, T>>.Resize(ref array, index + Count);
+                ArrayPool<KeyValuePair<long, T>>.Resize(ref array, index + Count);
             }
            
             // count not Count -> we don't know if there are holes in the array
             // hashcode will be < 0 if empty
             for (int i = 0; i < count; i++) {
                 if (entries[i].hashCode >= 0) {
-                    array[index++] = new KeyValuePair<int, T>(entries[i].key, entries[i].value);
+                    array[index++] = new KeyValuePair<long, T>(entries[i].key, entries[i].value);
                 }
             }
             
@@ -256,9 +256,9 @@ namespace UIForia.Util {
             return index + Count;
         }
         
-        private int CopyTo(ref KeyValuePair<int, T>[] array, int index = 0) {
+        private int CopyTo(ref KeyValuePair<long, T>[] array, int index = 0) {
             if (array == null) {
-                array = ArrayPool<KeyValuePair<int, T>>.GetExactSize(Count);
+                array = ArrayPool<KeyValuePair<long, T>>.GetExactSize(Count);
             }
             
             if (index < 0) {
@@ -266,12 +266,12 @@ namespace UIForia.Util {
             }
             
             if (index + Count > array.Length ) {
-                ArrayPool<KeyValuePair<int, T>>.Resize(ref array, index + Count);
+                ArrayPool<KeyValuePair<long, T>>.Resize(ref array, index + Count);
             }
            
             for (int i = 0; i < count; i++) {
                 if (entries[i].hashCode >= 0) {
-                    array[index++] = new KeyValuePair<int, T>(entries[i].key, entries[i].value);
+                    array[index++] = new KeyValuePair<long, T>(entries[i].key, entries[i].value);
                 }
             }
             return index + Count;
@@ -280,13 +280,13 @@ namespace UIForia.Util {
         private struct Entry {
 
             public int next;
-            public int key;
+            public long key;
             public T value;
             public int hashCode;
 
         }
 
-        public void ForEach(Action<int, T> action) {
+        public void ForEach(Action<long, T> action) {
             for (int i = 0; i < count; i++) {
                 if (entries[i].hashCode >= 0) {
                     action.Invoke(entries[i].key, entries[i].value);
@@ -294,7 +294,7 @@ namespace UIForia.Util {
             }
         }
         
-        public void ForEach<U>(U closureArg, Action<int, T, U> action) {
+        public void ForEach<U>(U closureArg, Action<long, T, U> action) {
             for (int i = 0; i < count; i++) {
                 if (entries[i].hashCode >= 0) {
                     action.Invoke(entries[i].key, entries[i].value, closureArg);
@@ -303,125 +303,6 @@ namespace UIForia.Util {
         }
     }
 
-    internal static class HashHelpers {
-
-        private const int MaxPrimeArrayLength = 0x7FEFFFFD;
-
-        public static int ExpandPrime(int oldSize) {
-            int newSize = 2 * oldSize;
-
-            if ((uint) newSize > MaxPrimeArrayLength && MaxPrimeArrayLength > oldSize) {
-                return MaxPrimeArrayLength;
-            }
-
-            return GetPrime(newSize);
-        }
-
-        public static int GetPrime(int min) {
-            for (int index = 0; index < s_Primes.Length; ++index) {
-                int prime = s_Primes[index];
-                if (prime >= min) {
-                    return prime;
-                }
-            }
-            int candidate = min | 1;
-            while (candidate < int.MaxValue) {
-                if (IsPrime(candidate) && (candidate - 1) % 101 != 0) {
-                    return candidate;
-                }
-                candidate += 2;
-            }
-            return min;
-        }
-
-        private static bool IsPrime(int candidate) {
-            if ((candidate & 1) != 0) {
-                int limit = (int) Math.Sqrt(candidate);
-                for (int divisor = 3; divisor <= limit; divisor += 2) {
-                    if ((candidate % divisor) == 0) {
-                        return false;
-                    }
-                }
-                return true;
-            }
-            return candidate == 2;
-        }
-
-        private static readonly int[] s_Primes = new int[72] {
-            3,
-            7,
-            11,
-            17,
-            23,
-            29,
-            37,
-            47,
-            59,
-            71,
-            89,
-            107,
-            131,
-            163,
-            197,
-            239,
-            293,
-            353,
-            431,
-            521,
-            631,
-            761,
-            919,
-            1103,
-            1327,
-            1597,
-            1931,
-            2333,
-            2801,
-            3371,
-            4049,
-            4861,
-            5839,
-            7013,
-            8419,
-            10103,
-            12143,
-            14591,
-            17519,
-            21023,
-            25229,
-            30293,
-            36353,
-            43627,
-            52361,
-            62851,
-            75431,
-            90523,
-            108631,
-            130363,
-            156437,
-            187751,
-            225307,
-            270371,
-            324449,
-            389357,
-            467237,
-            560689,
-            672827,
-            807403,
-            968897,
-            1162687,
-            1395263,
-            1674319,
-            2009191,
-            2411033,
-            2893249,
-            3471899,
-            4166287,
-            4999559,
-            5999471,
-            7199369
-        };
-
-    }
+    
 
 }

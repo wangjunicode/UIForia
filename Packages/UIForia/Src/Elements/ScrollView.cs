@@ -34,15 +34,29 @@ namespace UIForia.Elements {
 
         [OnMouseWheel]
         public void OnMouseWheel(MouseInputEvent evt) {
-            if (!verticalTrack.isEnabled) return;
-            lastScrollVerticalTimestamp = Time.realtimeSinceStartup;
-            float trackRectHeight = verticalTrack.layoutResult.allocatedSize.height;
-            float handleHeight = verticalHandle.layoutResult.allocatedSize.height;
-            float max = trackRectHeight - handleHeight;
-            float offset = Mathf.Clamp(targetElement.scrollOffset.y - (scrollSpeed * evt.ScrollDelta.y), 0, 1);
-            targetElement.scrollOffset = new Vector2(targetElement.scrollOffset.x, offset);
-            verticalHandle.style.SetTransformPositionY(offset * (max), StyleState.Normal);
-            evt.StopPropagation();
+
+            if (verticalTrack.isEnabled) {
+                lastScrollVerticalTimestamp = Time.realtimeSinceStartup;
+                float trackRectHeight = verticalTrack.layoutResult.allocatedSize.height;
+                float handleHeight = verticalHandle.layoutResult.allocatedSize.height;
+                float max = trackRectHeight - handleHeight;
+                float offset = Mathf.Clamp(targetElement.scrollOffset.y - (scrollSpeed * evt.ScrollDelta.y), 0, 1);
+                targetElement.scrollOffset = new Vector2(targetElement.scrollOffset.x, offset);
+                verticalHandle.style.SetTransformPositionY(offset * (max), StyleState.Normal);
+                evt.StopPropagation();
+            }
+
+            if (horizontalTrack.isEnabled) {
+                
+                lastScrollHorizontalTimestamp = Time.realtimeSinceStartup;
+                float trackRectWidth = horizontalTrack.layoutResult.allocatedSize.width;
+                float handleWidth = horizontalHandle.layoutResult.allocatedSize.width;
+                float max = trackRectWidth - handleWidth;
+                float offset = Mathf.Clamp(targetElement.scrollOffset.x - (scrollSpeed * evt.ScrollDelta.x), 0, 1);
+                targetElement.scrollOffset = new Vector2(offset, targetElement.scrollOffset.y);
+                horizontalHandle.style.SetTransformPositionX(offset * (max), StyleState.Normal);
+                evt.StopPropagation();
+            }
         }
 
         public void OnHoverHorizontal(MouseInputEvent evt) {

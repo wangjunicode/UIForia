@@ -105,6 +105,7 @@ namespace UIForia.Rendering {
 		public const float TextShadowSoftness = 0.5f;
 		public const ShadowType TextShadowType = UIForia.Rendering.ShadowType.Unset;
 		public const TextTransform TextTransform = UIForia.Text.TextTransform.None;
+		public const WhitespaceMode TextWhitespaceMode = UIForia.Text.WhitespaceMode.CollapseWhitespace;
 		public static readonly UIFixedLength AnchorTop = new UIFixedLength(0f, UIFixedUnit.Pixel);
 		public static readonly UIFixedLength AnchorRight = new UIFixedLength(0f, UIFixedUnit.Pixel);
 		public static readonly UIFixedLength AnchorBottom = new UIFixedLength(0f, UIFixedUnit.Pixel);
@@ -315,6 +316,8 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.TextShadowType, (int)UIForia.Rendering.ShadowType.Unset);
 				case StylePropertyId.TextTransform:
 					 return new StyleProperty(StylePropertyId.TextTransform, (int)UIForia.Text.TextTransform.None);
+				case StylePropertyId.TextWhitespaceMode:
+					 return new StyleProperty(StylePropertyId.TextWhitespaceMode, (int)UIForia.Text.WhitespaceMode.CollapseWhitespace);
 				case StylePropertyId.AnchorTop:
 					 return new StyleProperty(StylePropertyId.AnchorTop, new UIFixedLength(0f, UIFixedUnit.Pixel));
 				case StylePropertyId.AnchorRight:

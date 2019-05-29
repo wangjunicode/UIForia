@@ -533,6 +533,7 @@ namespace UIForia.Editor {
             DrawVector2Value("Scale", layoutResult.scale);
             DrawSizeValue("Allocated Size", layoutResult.allocatedSize);
             DrawSizeValue("Actual Size", layoutResult.actualSize);
+            DrawSizeValue("Overflow Size", layoutResult.overflowSize);
 
             DrawLabel("Rotation", layoutResult.rotation.ToString());
             DrawLabel("Clip Rect", $"X: {clipRect.x}, Y: {clipRect.y}, W: {clipRect.width}, H: {clipRect.height}");

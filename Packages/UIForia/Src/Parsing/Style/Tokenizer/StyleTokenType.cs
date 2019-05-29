@@ -78,5 +78,7 @@ namespace UIForia.Parsing.Style.Tokenizer {
         GreaterThanEqualTo,
         LessThanEqualTo,
         QuestionMark,
+
+        Run,
     }
 }

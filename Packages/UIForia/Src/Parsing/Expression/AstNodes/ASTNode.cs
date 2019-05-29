@@ -246,6 +246,10 @@ namespace UIForia.Parsing.Expression.AstNodes {
             }
             ListPool<ASTNode>.Release(ref parts);
         }
+        
+        public override string ToString() {
+            return $"{identifier} with parts: {string.Join(".", parts)}";
+        }
 
     }
 
@@ -334,6 +338,9 @@ namespace UIForia.Parsing.Expression.AstNodes {
             s_IndexExpressionPool.Release(this);
         }
 
+        public override string ToString() {
+            return expression.ToString();
+        }
     }
 
     public class DotAccessNode : ASTNode {
@@ -348,6 +355,9 @@ namespace UIForia.Parsing.Expression.AstNodes {
             s_DotAccessPool.Release(this);
         }
 
+        public override string ToString() {
+            return propertyName;
+        }
     }
     
     

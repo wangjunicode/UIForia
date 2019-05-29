@@ -1,3 +1,18 @@
+const regularColor = rgb(120, 140, 190);
+
+animation flash {
+    [options] {
+        duration = 500;
+    }
+
+    [keyframes] {
+        0% { BackgroundColor = @regularColor; }
+        20% { BackgroundColor = yellow; }
+        80% { BackgroundColor = yellow; }
+        100% { BackgroundColor = @regularColor;}
+    }
+}
+
 style start-zone {
     PreferredSize = 200px;
     BackgroundColor = green;
@@ -26,4 +41,46 @@ style dragme {
     [hover] {
         BackgroundColor = rgb(200, 120, 220);
     }
+}
+
+style section {
+    LayoutType = Flex;
+    FlexLayoutDirection = Column;
+    MarginBottom = 20px;
+}
+
+style code {
+    BackgroundColor = rgba(20, 20, 20, 40);
+    TextColor = rgb(30, 30, 30);
+    Border = 1px;
+    BorderColor = rgb(30, 30, 30);
+    Padding = 6px;
+}
+
+style active-event {
+    BackgroundColor = rgba(20, 220, 20, 40);
+}
+
+style regular-zone {
+    BackgroundColor = @regularColor;
+    Padding = 20px;
+    PreferredSize = 200px;
+    run animation(flash);
+    [hover] {
+        run animation(flash);
+    }
+}
+
+style demo-box {
+    Padding = 10px;
+    BackgroundColor = green;
+    PreferredSize = 1cnt 40px;
+    BorderColor = black;
+    Border = 2px;
+}
+
+style tell {
+    Padding = 0 20px;
+    MaxWidth = 400px;
+    TextWhitespaceMode = CollapseWhitespace PreserveNewLines;
 }

@@ -8,7 +8,7 @@
         }
 
         style scroll-track-vertical {
-            PreferredSize = 10px, 1pca;
+            PreferredSize = 10px, 1psz;
             BackgroundColor = white;
             LayoutBehavior = Ignored;
             TransformBehaviorX = AnchorMinOffset;
@@ -27,7 +27,7 @@
         }
 
         style scroll-track-horizontal {
-            PreferredSize = 1pca, 10px;
+            PreferredSize = 1psz, 10px;
             BackgroundColor = white;
             LayoutBehavior = Ignored;
             TransformBehaviorY = AnchorMinOffset;

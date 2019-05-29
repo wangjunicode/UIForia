@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using Packages.UIForia.Src.Rendering;
 using TMPro;
 using UIForia.Exceptions;
 using UIForia.Layout;
@@ -10,7 +11,6 @@ using UIForia.Rendering;
 using UIForia.Text;
 using UIForia.Util;
 using UnityEngine;
-using UnityEngine.U2D;
 using FontStyle = UIForia.Text.FontStyle;
 
 namespace UIForia.Compilers.Style {
@@ -155,6 +155,16 @@ namespace UIForia.Compilers.Style {
                 {"textshadowsoftness", (targetStyle, property, context) => targetStyle.TextShadowSoftness = MapNumber(property.children[0], context)},
                 {"textshadowtype", (targetStyle, property, context) => targetStyle.TextShadowType = MapEnum<ShadowType>(property.children[0], context)},
                 {"texttransform", (targetStyle, property, context) => targetStyle.TextTransform = MapEnum<TextTransform>(property.children[0], context)},
+                {"textwhitespacemode", (targetStyle, property, context) => {
+                    // couldn't find a generic version for merging a list of enum flags... just one that involves boxing: https://stackoverflow.com/questions/987607/c-flags-enum-generic-function-to-look-for-a-flag
+                    WhitespaceMode result = MapEnum<WhitespaceMode>(property.children[0], context);
+                    if (property.children.Count > 1) {
+                        for (int index = 1; index < property.children.Count; index++) {
+                            result |= MapEnum<WhitespaceMode>(property.children[index], context);
+                        }
+                    }
+                    targetStyle.TextWhitespaceMode = result;
+                }},
 
                 {"painter", (targetStyle, property, context) => targetStyle.Painter = MapPainter(property, context)},
 

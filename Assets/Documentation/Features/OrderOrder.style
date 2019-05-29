@@ -54,6 +54,8 @@ style c31 {
 }
 style c32 {
     BackgroundColor = rgba(211, 0, 0, 255);
+    TransformPositionX = -100px;
+   
 }
 style c33 {
     BackgroundColor = rgba(211, 56, 54, 255);

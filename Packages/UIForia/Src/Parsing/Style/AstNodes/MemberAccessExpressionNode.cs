@@ -32,6 +32,5 @@ namespace UIForia.Parsing.Style.AstNodes {
 
             ListPool<StyleASTNode>.Release(ref parts);
         }
-
     }
 }

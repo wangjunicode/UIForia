@@ -42,13 +42,20 @@ namespace UIForia.Parsing.Expression {
         }
 
         public ParsedTemplate ParseTemplateFromString<T>(string input) where T : UIElement {
-            XDocument doc = XDocument.Parse(input);
+            XDocument doc = Parse(typeof(T), input);
             return ParseTemplate(null, typeof(T), doc);
         }
 
         public ParsedTemplate ParseTemplateFromString(Type rootType, string input) {
-            XDocument doc = XDocument.Parse(input);
-            return ParseTemplate(rootType.AssemblyQualifiedName, rootType, doc);
+                
+            XDocument doc = Parse(rootType, input);
+            
+            try {
+                return ParseTemplate(rootType.AssemblyQualifiedName, rootType, doc);
+            } catch (TemplateParseException pe) {
+                pe.SetFileName(rootType.AssemblyQualifiedName);
+                throw;
+            }
         }
 
         private ParsedTemplate ParseTemplateFromType(Type type) {
@@ -56,27 +63,27 @@ namespace UIForia.Parsing.Expression {
 
             string template = processedType.GetTemplate(app.TemplateRootPath);
             if (template == null) {
-                throw new InvalidTemplateException(processedType.GetTemplatePath());
+                throw new TemplateParseException(processedType.GetTemplatePath(), "Template not found");
             }
 
-            XDocument doc = XDocument.Parse(template);
-            ParsedTemplate parsedTemplate;
 
+            XDocument doc = Parse(type, template);
+            
             try {
-                parsedTemplate = ParseTemplate(processedType.GetTemplatePath(), processedType.rawType, doc);
+                return ParseTemplate(processedType.GetTemplatePath(), processedType.rawType, doc);
             }
-            catch (InvalidTemplateException ex) {
-                if (ex.templatePath == null) {
-                    ex.templatePath = processedType.GetTemplatePath();
-                }
-
+            catch (TemplateParseException pe) {
+                pe.SetFileName(processedType.GetTemplatePath());
                 throw;
             }
-            catch (ParseException pe) {
-                throw new InvalidTemplateException(processedType.GetTemplatePath(), pe);
-            }
+        }
 
-            return parsedTemplate;
+        private XDocument Parse(Type rootType, string template) {
+            try {
+                return XDocument.Parse(template);
+            } catch (Exception e) {
+                throw new TemplateParseException(rootType.AssemblyQualifiedName, e.Message, e);   
+            }
         }
 
         private StyleDefinition ParseStyleSheet(string templateId, XElement styleElement) {
@@ -92,13 +99,13 @@ namespace UIForia.Parsing.Expression {
                         continue;
 
                     case XmlNodeType.Element:
-                        throw new Exception("<Style> can only have text children, no elements");
+                        throw new TemplateParseException(node, "<Style> can only have text children, no elements");
 
                     case XmlNodeType.Comment:
                         continue;
                 }
 
-                throw new InvalidTemplateException("Unable to handle node type: " + node.NodeType);
+                throw new TemplateParseException(node, $"Unable to handle node type: {node.NodeType}");
             }
 
             string alias = StyleDefinition.k_EmptyAliasName;
@@ -110,7 +117,7 @@ namespace UIForia.Parsing.Expression {
             // if we have a body, expect import path to be null
             if (!string.IsNullOrEmpty(rawText) && !string.IsNullOrWhiteSpace(rawText)) {
                 if (importPathAttr != null && !string.IsNullOrEmpty(importPathAttr.Value)) {
-                    throw new ParseException("Expected 'path' or 'src' to be null when a body is provided to a style tag");
+                    throw new TemplateParseException(styleElement, "Expected 'path' or 'src' to be null when a body is provided to a style tag");
                 }
 
                 return new StyleDefinition(alias, templateId, rawText);
@@ -118,7 +125,7 @@ namespace UIForia.Parsing.Expression {
 
             // if we have no body then expect path to be set
             if (importPathAttr == null || string.IsNullOrEmpty(importPathAttr.Value)) {
-                throw new ParseException("Expected 'path' or 'src' to be provided when a body is not provided in a style tag");
+                throw new TemplateParseException(styleElement, "Expected 'path' or 'src' to be provided when a body is not provided in a style tag");
             }
 
             return new StyleDefinition(alias, importPathAttr.Value.Trim());
@@ -147,11 +154,11 @@ namespace UIForia.Parsing.Expression {
                 XAttribute aliasAttr = xElement.GetAttribute("as");
 
                 if (valueAttr == null || string.IsNullOrEmpty(valueAttr.Value)) {
-                    throw new InvalidTemplateException(templatePath, "Import node without a 'value' attribute");
+                    throw new TemplateParseException(templatePath, xElement, "Import node without a 'value' attribute");
                 }
 
                 if (aliasAttr == null || string.IsNullOrEmpty(aliasAttr.Value)) {
-                    throw new InvalidTemplateException(templatePath, "Import node without an 'as' attribute");
+                    throw new TemplateParseException(templatePath, xElement, "Import node without an 'as' attribute");
                 }
 
                 string alias = aliasAttr.Value;
@@ -173,7 +180,7 @@ namespace UIForia.Parsing.Expression {
             }
 
             List<UITemplate> children = ParseNodes(contentElement.Nodes());
-            List<AttributeDefinition> attributes = ParseAttributes(contentElement.Attributes());
+            List<AttributeDefinition> attributes = ParseAttributes(contentElement);
 
             if (contentElement.GetAttribute("x-inherited") != null) {
                 // todo -- validate base type
@@ -182,7 +189,7 @@ namespace UIForia.Parsing.Expression {
 
                 for (int i = 0; i < children.Count; i++) {
                     if (!(children[i] is UISlotContentTemplate)) {
-                        throw new ParseException("When using inherited templates, all children must be <SlotContent/> elements");
+                        throw new TemplateParseException(contentElement, "When using inherited templates, all children must be <SlotContent/> elements");
                     }
 
                     contentTemplates.Add((UISlotContentTemplate) children[i]);
@@ -197,7 +204,7 @@ namespace UIForia.Parsing.Expression {
         private BlockDefinition ParseBlock(XElement element) {
             XAttribute idAttr = element.GetAttribute("id");
 
-            if (idAttr == null) throw new ParseException("<Block> elements require a `id` attribute");
+            if (idAttr == null) throw new TemplateParseException(element, "<Block> elements require a `id` attribute");
 
             IEnumerable<XElement> variableElements = element.GetChildren("Variable");
 
@@ -207,8 +214,8 @@ namespace UIForia.Parsing.Expression {
                 XAttribute typeAttr = variableElement.GetAttribute("type");
                 XAttribute nameAttr = variableElement.GetAttribute("name");
 
-                if (nameAttr == null) throw new ParseException("<Variable> definitions need to provide a unique `name` attribute");
-                if (typeAttr == null) throw new ParseException("<Variable> definitions need to provide a `type` attribute");
+                if (nameAttr == null) throw new TemplateParseException(variableElement, "<Variable> definitions need to provide a unique `name` attribute");
+                if (typeAttr == null) throw new TemplateParseException(variableElement, "<Variable> definitions need to provide a `type` attribute");
 
                 // todo -- validate that name is a legal identifier
                 // todo -- validate that no fields are duplicated
@@ -216,7 +223,7 @@ namespace UIForia.Parsing.Expression {
                 Type type = TypeProcessor.ResolveTypeName(typeAttr.Value.Trim());
 
                 if (type == null) {
-                    throw new ParseException($"Unable to resolve type with name `{typeAttr}` in <Variable> definition");
+                    throw new TemplateParseException(variableElement, $"Unable to resolve type with name `{typeAttr}` in <Variable> definition");
                 }
 
                 string fieldName = nameAttr.Value.Trim();
@@ -251,12 +258,12 @@ namespace UIForia.Parsing.Expression {
         private string ParseUsing(XElement element) {
             XAttribute namespaceAttr = element.GetAttribute("namespace");
             if (namespaceAttr == null) {
-                throw new ParseException("<Using/> tags require a 'namespace' attribute");
+                throw new TemplateParseException(element, "<Using/> tags require a 'namespace' attribute");
             }
 
             string value = namespaceAttr.Value.Trim();
             if (string.IsNullOrEmpty(value)) {
-                throw new ParseException("<Using/> tags require a 'namespace' attribute with a value");
+                throw new TemplateParseException(element, "<Using/> tags require a 'namespace' attribute with a value");
             }
 
             return value;
@@ -268,7 +275,7 @@ namespace UIForia.Parsing.Expression {
             UIRepeatTemplate template = new UIRepeatTemplate(
                 app,
                 ParseNodes(element.Nodes()),
-                ParseAttributes(element.Attributes())
+                ParseAttributes(element)
             );
 
             return template;
@@ -280,7 +287,7 @@ namespace UIForia.Parsing.Expression {
                 element.Name.LocalName,
                 type,
                 ParseNodes(element.Nodes()),
-                ParseAttributes(element.Attributes())
+                ParseAttributes(element)
             );
             return template;
         }
@@ -293,7 +300,7 @@ namespace UIForia.Parsing.Expression {
             return new UISlotTemplate(
                 app,
                 ParseNodes(element.Nodes()),
-                ParseAttributes(element.Attributes())
+                ParseAttributes(element)
             );
         }
 
@@ -305,7 +312,7 @@ namespace UIForia.Parsing.Expression {
             return new UISlotContentTemplate(
                 app,
                 ParseNodes(element.Nodes()),
-                ParseAttributes(element.Attributes())
+                ParseAttributes(element)
             );
         }
 
@@ -314,7 +321,7 @@ namespace UIForia.Parsing.Expression {
             EnsureNotInsideTagName(element, "Repeat");
             return new UIChildrenTemplate(app,
                 ParseNodes(element.Nodes()),
-                ParseAttributes(element.Attributes())
+                ParseAttributes(element)
             );
         }
 
@@ -354,7 +361,7 @@ namespace UIForia.Parsing.Expression {
                     app,
                     createdElementType,
                     ParseNodes(element.Nodes()),
-                    ParseAttributes(element.Attributes())
+                    ParseAttributes(element)
                 );
             }
 
@@ -364,7 +371,7 @@ namespace UIForia.Parsing.Expression {
                     app,
                     elementType.rawType,
                     ParseNodes(element.Nodes()),
-                    ParseAttributes(element.Attributes())
+                    ParseAttributes(element)
                 );
             }
 
@@ -376,9 +383,9 @@ namespace UIForia.Parsing.Expression {
                 app,
                 element.Name.LocalName,
                 ParseNodes(element.Nodes()),
-                ParseAttributes(element.Attributes())
+                ParseAttributes(element)
             );
-            ;
+
         }
 
         private UITemplate ParseTextElement(Type type, XElement element) {
@@ -390,20 +397,20 @@ namespace UIForia.Parsing.Expression {
                         continue;
 
                     case XmlNodeType.Element:
-                        throw new Exception("<Text> can only have text children, no elements");
+                        throw new TemplateParseException(node, "<Text> can only have text children, no elements");
 
                     case XmlNodeType.Comment:
                         continue;
                 }
 
-                throw new InvalidTemplateException("Unable to handle node type: " + node.NodeType);
+                throw new TemplateParseException(node, "Unable to handle node type: " + node.NodeType);
             }
 
-            return new UITextTemplate(app, type, rawText, ParseAttributes(element.Attributes()));
+            return new UITextTemplate(app, type, rawText, ParseAttributes(element));
         }
 
         private UITemplate ParseImageElement(XElement element) {
-            return new UIImageTemplate(app, null, ParseAttributes(element.Attributes()));
+            return new UIImageTemplate(app, null, ParseAttributes(element));
         }
 
         private UITemplate ParseInputElement(XElement element) {
@@ -411,7 +418,7 @@ namespace UIForia.Parsing.Expression {
                 app,
                 typeof(UIInputElement),
                 ParseNodes(element.Nodes()),
-                ParseAttributes(element.Attributes())
+                ParseAttributes(element)
             );
         }
 
@@ -445,9 +452,8 @@ namespace UIForia.Parsing.Expression {
                     if (IntrinsicElementTypes[i].isContainer) {
                         return ParseContainerElement(IntrinsicElementTypes[i].type, element);
                     }
-                    else {
-                        return ParseTextElement(IntrinsicElementTypes[i].type, element);
-                    }
+
+                    return ParseTextElement(IntrinsicElementTypes[i].type, element);
                 }
             }
 
@@ -503,30 +509,35 @@ namespace UIForia.Parsing.Expression {
                         continue;
                 }
 
-                throw new InvalidTemplateException("Unable to handle node type: " + node.NodeType);
+                throw new TemplateParseException(node, $"Unable to handle node type: {node.NodeType}");
             }
 
             return retn;
         }
 
-        private List<AttributeDefinition> ParseAttributes(IEnumerable<XAttribute> attributes) {
-            return attributes.Select(attr => new AttributeDefinition(attr.Name.LocalName, attr.Value.Trim())).ToList();
-        }
+        private static List<AttributeDefinition> ParseAttributes(XElement element) {
+            
+            int line = ((IXmlLineInfo)element).LineNumber;
+            int column = ((IXmlLineInfo)element).LinePosition;
 
-        private InvalidTemplateException Abort(string message) {
-            return new InvalidTemplateException(message);
+            List<AttributeDefinition> attributeDefinitions = new List<AttributeDefinition>();
+            foreach (var attr in element.Attributes()) {
+                attributeDefinitions.Add(new AttributeDefinition(attr.Name.LocalName, attr.Value.Trim(), line, column));
+            }
+
+            return attributeDefinitions;
         }
 
         private void EnsureAttribute(XElement element, string attrName) {
             if (element.GetAttribute(attrName) == null) {
-                throw new InvalidTemplateException(
+                throw new TemplateParseException(element,
                     $"<{element.Name.LocalName}> is missing required attribute '{attrName}'");
             }
         }
 
         private void EnsureEmpty(XElement element) {
             if (!element.IsEmpty) {
-                throw new InvalidTemplateException(
+                throw new TemplateParseException(element,
                     $"<{element.Name.LocalName}> tags cannot have children");
             }
         }
@@ -536,7 +547,7 @@ namespace UIForia.Parsing.Expression {
 
             while (ptr.Parent != null) {
                 if (ptr.Parent.Name.LocalName == tagName) {
-                    throw new InvalidTemplateException(
+                    throw new TemplateParseException(element,
                         $"<{element.Name.LocalName}> cannot be inside <{tagName}>");
                 }
 

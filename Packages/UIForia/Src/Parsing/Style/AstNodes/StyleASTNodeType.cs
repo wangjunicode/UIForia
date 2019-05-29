@@ -27,12 +27,15 @@ namespace UIForia.Parsing.Style.AstNodes {
         StateGroup,
         ExpressionGroup,
         Color,
-        StyleGroup,
         Measurement,
-        Export,
-        Import,
-        Const,
         Reference,
+        
+        // the integers define the sort order. see the style compiler for more details
+        Import = 100,
+        Const = 110,
+        Export = 120,
+        AnimationDeclaration = 130,
+        StyleGroup = 140,
     }
 
 }

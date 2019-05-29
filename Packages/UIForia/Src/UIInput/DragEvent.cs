@@ -9,6 +9,7 @@ namespace UIForia.UIInput {
         public readonly Type type;
         internal EventPropagator source;
         public readonly UIElement origin;
+        public UIElement target { get; internal set; }
         
         protected DragEvent(UIElement origin) {
             this.type = GetType();
@@ -77,28 +78,6 @@ namespace UIForia.UIInput {
         public virtual void Cancel() { }
 
         public virtual void OnComplete() { }
-
-    }
-
-    public class CallbackDragEvent : DragEvent {
-
-        public event Action<DragEvent> onUpdate;
-        
-        public CallbackDragEvent(UIElement origin) : base(origin) { }
-
-        public override void Update() {
-            onUpdate?.Invoke(this);
-        }
-
-        public override void Drop(bool success) {
-            onUpdate = null;
-        }
-
-        public override void Cancel() {
-            IsCanceled = true;
-            onUpdate = null;
-        }
-
 
     }
 

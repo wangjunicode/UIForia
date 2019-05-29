@@ -6,6 +6,7 @@ using UIForia.Parsing.Style.AstNodes;
 using UIForia.Parsing.Style.Tokenizer;
 using UIForia.Rendering;
 using UIForia.Util;
+using UnityEditor.Experimental.UIElements.GraphView;
 using UnityEngine;
 
 namespace UIForia.Parsing.Style {
@@ -81,7 +82,6 @@ namespace UIForia.Parsing.Style {
                 case StyleTokenType.Animation:
                     tokenStream.Advance();
                     ParseAnimation();
-                    tokenStream.Advance();
                     break;
 
                 case StyleTokenType.Import:
@@ -361,7 +361,9 @@ namespace UIForia.Parsing.Style {
                     case StyleTokenType.Identifier:
                         ParseProperty(styleRootNode);
                         break;
-
+                    case StyleTokenType.Run:
+                        styleRootNode.AddChildNode(ParseRunNode());
+                        break;
                     case StyleTokenType.BracesOpen: {
                         // At this point only unconsumed attribute/expression group bodies are allowed
 
@@ -426,8 +428,10 @@ namespace UIForia.Parsing.Style {
             string propertyName;
             if (AdvanceIfTokenType(StyleTokenType.Cursor)) {
                 propertyName = propertyNodeToken.value;
-            }
-            else {
+            } else if (tokenStream.Current.styleTokenType == StyleTokenType.Run) {
+                styleRootNode.AddChildNode(ParseRunNode());
+                return;
+            } else {
                 propertyName = AssertTokenTypeAndAdvance(StyleTokenType.Identifier);
             }
 
@@ -443,6 +447,57 @@ namespace UIForia.Parsing.Style {
             }
 
             styleRootNode.AddChildNode(propertyNode);
+        }
+
+        private RunNode ParseRunNode() {
+            
+            StyleToken runNodeToken = tokenStream.Current;
+            tokenStream.Advance();
+
+            CommandNode command;
+
+            string identifier = tokenStream.Current.value;
+            tokenStream.Advance();
+
+            switch (identifier) {
+                case "animation": 
+                    command = new AnimationCommandNode() {
+                            animationName = ParseIdentifierInParentheses()
+                    };
+                    command.WithLocation(tokenStream.Current);
+                    break;
+                default: throw new ParseException(tokenStream.Current, "Please specify 'animation' as run command.");
+            }
+            
+            AssertTokenTypeAndAdvance(StyleTokenType.EndStatement);
+
+            RunNode runNode = new RunNode {commmand = command};
+            runNode.WithLocation(runNodeToken);
+            return runNode;
+        }
+
+        private StyleASTNode ParseIdentifierInParentheses() {
+
+            AssertTokenTypeAndAdvance(StyleTokenType.ParenOpen);
+
+            StyleASTNode identifier;
+            switch (tokenStream.Current.styleTokenType) {
+                case StyleTokenType.Identifier:
+                    identifier = StyleASTNodeFactory.IdentifierNode(tokenStream.Current.value);
+                    break;
+                case StyleTokenType.At:
+                    identifier = ParseConstReference();
+                    break;
+                default:
+                    throw new ParseException(tokenStream.Current, "Was expecting an identifier or a reference.");
+            }
+
+            tokenStream.Advance();
+            // todo: add support for parameters here
+            
+            AssertTokenTypeAndAdvance(StyleTokenType.ParenClose);
+            
+            return identifier;
         }
 
         private StyleASTNode ParsePropertyValue() {

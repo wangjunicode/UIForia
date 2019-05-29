@@ -1,6 +1,7 @@
 using System;
 using System.Reflection;
 using NUnit.Framework;
+using Packages.UIForia.Src.Rendering;
 using Tests.Mocks;
 using TMPro;
 using UIForia;
@@ -193,9 +194,12 @@ public class StyleTests {
             UIStyle baseStyle = new UIStyle();
             SetStyleValue(baseStyle, propName, 5);
 
-            UIStyleGroup group = new UIStyleGroup();
-            group.name = "Name";
-            group.normal = baseStyle;
+            UIStyleGroup group = new UIStyleGroup() {
+                    name = "Name",
+                    normal = new UIStyleRunCommand() {
+                            style = baseStyle
+                    }
+            };
             UIStyleGroupContainer container = new UIStyleGroupContainer("Name", StyleType.Shared, new[] {group});
             root.style.AddStyleGroupContainer(container);
 
@@ -219,9 +223,12 @@ public class StyleTests {
             SetStyleValue(baseStyle, propName, 5);
 
             CallMethod(root.style, setFnName, 15, StyleState.Normal);
-            UIStyleGroup group = new UIStyleGroup();
-            group.name = "Name";
-            group.normal = baseStyle;
+            UIStyleGroup group = new UIStyleGroup() {
+                    name = "Name",
+                    normal = new UIStyleRunCommand() {
+                            style = baseStyle
+                    }
+            };
             group.styleType = StyleType.Shared;
 
             UIStyleGroupContainer container = new UIStyleGroupContainer("Name", StyleType.Shared, new[] {group});
@@ -246,9 +253,12 @@ public class StyleTests {
             SetStyleValue(baseStyle, propName, 5);
 
             CallMethod(root.style, setFnName, 15, StyleState.Hover);
-            UIStyleGroup group = new UIStyleGroup();
-            group.name = "Name";
-            group.normal = baseStyle;
+            UIStyleGroup group = new UIStyleGroup() {
+                    name = "Name",
+                    normal = new UIStyleRunCommand() {
+                            style = baseStyle
+                    }
+            };
             UIStyleGroupContainer container = new UIStyleGroupContainer("Name", StyleType.Shared, new[] {group});
             root.style.AddStyleGroupContainer(container);
             
@@ -366,9 +376,12 @@ public class StyleTests {
             UIStyle baseStyle = new UIStyle();
             SetStyleValue(baseStyle, propName, new UIMeasurement(5000));
 
-            UIStyleGroup group = new UIStyleGroup();
-            group.name = "Name";
-            group.normal = baseStyle;
+            UIStyleGroup group = new UIStyleGroup() {
+                    name = "Name",
+                    normal = new UIStyleRunCommand() {
+                            style = baseStyle
+                    }
+            };
             UIStyleGroupContainer container = new UIStyleGroupContainer("Name", StyleType.Shared, new[] {group});
             root.style.AddStyleGroupContainer(container);
             Assert.AreEqual(new UIMeasurement(5000), ComputedValue<UIMeasurement>(root, propName));
@@ -391,9 +404,12 @@ public class StyleTests {
             SetStyleValue(baseStyle, propName, new UIMeasurement(5000));
 
             CallMethod(root.style, setFnName, new UIMeasurement(1500), StyleState.Normal);
-            UIStyleGroup group = new UIStyleGroup();
-            group.name = "Name";
-            group.normal = baseStyle;
+            UIStyleGroup group = new UIStyleGroup() {
+                    name = "Name",
+                    normal = new UIStyleRunCommand() {
+                        style = baseStyle
+                    }
+            };
             UIStyleGroupContainer container = new UIStyleGroupContainer("Name", StyleType.Shared, new[] {group});
             root.style.AddStyleGroupContainer(container);
             Assert.AreEqual(new UIMeasurement(1500), ComputedValue<UIMeasurement>(root, propName));
@@ -415,9 +431,12 @@ public class StyleTests {
             SetStyleValue(baseStyle, propName, new UIMeasurement(500));
 
             CallMethod(root.style, setFnName, new UIMeasurement(1500), StyleState.Hover);
-            UIStyleGroup group = new UIStyleGroup();
-            group.name = "Name";
-            group.normal = baseStyle;
+            UIStyleGroup group = new UIStyleGroup() {
+                    name = "Name",
+                    normal = new UIStyleRunCommand() {
+                            style = baseStyle
+                    }
+            };
             UIStyleGroupContainer container = new UIStyleGroupContainer("Name", StyleType.Shared, new[] {group});
             root.style.AddStyleGroupContainer(container);
             Assert.AreEqual(new UIMeasurement(500), ComputedValue<UIMeasurement>(root, propName));

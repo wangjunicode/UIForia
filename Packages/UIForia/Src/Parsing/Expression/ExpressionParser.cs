@@ -503,7 +503,7 @@ namespace UIForia.Parsing.Expression {
                     break;
                 }
 
-                retn = ASTNode.MemberAccessExpressionNode(identifier, parts);
+                retn = ASTNode.MemberAccessExpressionNode(identifier, parts).WithLocation(tokenStream.Peek());
                 return true;
             }
 
@@ -643,38 +643,38 @@ namespace UIForia.Parsing.Expression {
             // todo if we support bitwise not, add it here
             if (tokenStream.Current == ExpressionTokenType.Not && tokenStream.Next == ExpressionTokenType.Boolean) {
                 bool value = bool.Parse(tokenStream.Next.value);
-                retn = ASTNode.BooleanLiteralNode((!value).ToString());
+                retn = ASTNode.BooleanLiteralNode((!value).ToString()).WithLocation(tokenStream.Current);
                 tokenStream.Advance(2);
                 return true;
             }
 
             if (tokenStream.Current == ExpressionTokenType.Minus && tokenStream.Next == ExpressionTokenType.Number && (tokenStream.Previous.IsOperator || !tokenStream.HasPrevious)) {
-                retn = ASTNode.NumericLiteralNode("-" + tokenStream.Next.value);
+                retn = ASTNode.NumericLiteralNode("-" + tokenStream.Next.value).WithLocation(tokenStream.Current);
                 tokenStream.Advance(2);
                 return true;
             }
 
             if (tokenStream.Current == ExpressionTokenType.Plus && tokenStream.Next == ExpressionTokenType.Number && (tokenStream.Previous.IsOperator || !tokenStream.HasPrevious)) {
-                retn = ASTNode.NumericLiteralNode(tokenStream.Next.value);
+                retn = ASTNode.NumericLiteralNode(tokenStream.Next.value).WithLocation(tokenStream.Current);
                 tokenStream.Advance(2);
                 return true;
             }
 
             switch (tokenStream.Current.expressionTokenType) {
                 case ExpressionTokenType.Null:
-                    retn = ASTNode.NullLiteralNode(tokenStream.Current.value);
+                    retn = ASTNode.NullLiteralNode(tokenStream.Current.value).WithLocation(tokenStream.Current);
                     break;
                 case ExpressionTokenType.String:
-                    retn = ASTNode.StringLiteralNode(tokenStream.Current.value);
+                    retn = ASTNode.StringLiteralNode(tokenStream.Current.value).WithLocation(tokenStream.Current);
                     break;
                 case ExpressionTokenType.Boolean:
-                    retn = ASTNode.BooleanLiteralNode(tokenStream.Current.value);
+                    retn = ASTNode.BooleanLiteralNode(tokenStream.Current.value).WithLocation(tokenStream.Current);
                     break;
                 case ExpressionTokenType.Number:
-                    retn = ASTNode.NumericLiteralNode(tokenStream.Current.value);
+                    retn = ASTNode.NumericLiteralNode(tokenStream.Current.value).WithLocation(tokenStream.Current);
                     break;
                 case ExpressionTokenType.Default:
-                    retn = ASTNode.DefaultLiteralNode(tokenStream.Current.value);
+                    retn = ASTNode.DefaultLiteralNode(tokenStream.Current.value).WithLocation(tokenStream.Current);
                     break;
                 default:
                     return false;

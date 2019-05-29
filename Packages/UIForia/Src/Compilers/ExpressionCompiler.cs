@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using UIForia.Compilers.CastHandlers;
 using UIForia.Compilers.ExpressionResolvers;
 using UIForia.Exceptions;
@@ -131,19 +132,19 @@ namespace UIForia.Compilers {
             this.targetType = typeof(T);
             this.rootType = rootType;
             this.currentType = currentType;
-
+            ASTNode astRoot = null;
             try {
-                ASTNode astRoot = ExpressionParser.Parse(input);
-                return (Expression<T>) Visit(astRoot);
-            }
-            catch (ParseException e) {
+                astRoot = ExpressionParser.Parse(input);
+                return (Expression<T>)Visit(astRoot);
+            } catch (ParseException e) {
                 e.SetFileName(this.rootType.FullName);
                 throw;
-            }
-            catch (CompileException e) {
+            } catch (CompileException e) {
                 e.SetFileName(rootType.FullName);
                 e.SetExpression(input);
                 throw;
+            } catch (Exception e) {
+                throw new TemplateParseException(rootType.AssemblyQualifiedName, e.Message, e, astRoot);                
             }
         }
 

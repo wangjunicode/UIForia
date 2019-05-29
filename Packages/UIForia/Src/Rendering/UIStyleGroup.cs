@@ -1,13 +1,15 @@
-namespace UIForia.Rendering {
+using Packages.UIForia.Src.Rendering;
 
+namespace UIForia.Rendering {
+    
     public class UIStyleGroup {
 
         public string name { get; internal set; }
         public StyleType styleType { get; internal set; }
-        public UIStyle hover { get; internal set; }
-        public UIStyle normal { get; internal set; }
-        public UIStyle active { get; internal set; }
-        public UIStyle focused { get; internal set; }
+        public UIStyleRunCommand hover { get; internal set; }
+        public UIStyleRunCommand normal { get; internal set; }
+        public UIStyleRunCommand active { get; internal set; }
+        public UIStyleRunCommand focused { get; internal set; }
         public UIStyleRule rule { get; internal set; }
 
         public bool isExported { get; internal set; }

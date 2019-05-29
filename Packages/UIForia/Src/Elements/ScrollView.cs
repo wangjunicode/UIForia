@@ -59,6 +59,7 @@ namespace UIForia.Elements {
 
             if (overflowSize.width <= allocatedSize.width) {
                 horizontalTrack.SetEnabled(false);
+                targetElement.scrollOffset = new Vector2(0, targetElement.scrollOffset.y);
             }
             else {
                 horizontalTrack.SetEnabled(true);
@@ -71,6 +72,7 @@ namespace UIForia.Elements {
 
             if (overflowSize.height <= allocatedSize.height) {
                 verticalTrack.SetEnabled(false);
+                targetElement.scrollOffset = new Vector2(targetElement.scrollOffset.x, 0);
             }
             else {
                 verticalTrack.SetEnabled(true);

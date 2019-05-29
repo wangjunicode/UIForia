@@ -424,7 +424,9 @@ namespace UIForia.Systems {
                         continue;
                     }
 
+                    CurrentDragEvent.target = element;
                     handler.Invoke(element, dragHandlerGroup.context, m_CurrentDragEvent);
+                    CurrentDragEvent.target = null;
 
                     if (m_CurrentDragEvent.IsCanceled || m_EventPropagator.shouldStopPropagation) {
                         break;

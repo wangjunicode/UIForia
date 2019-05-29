@@ -856,6 +856,43 @@ namespace UIForia.Bindings.StyleBindings {
 
     }
         
+    public class StyleBinding_WhitespaceMode : StyleBinding {
+
+        public readonly Expression<UIForia.Text.WhitespaceMode> expression;
+        public readonly StylePropertyId propertyId;
+        
+        public StyleBinding_WhitespaceMode(string propertyName, StylePropertyId propertyId, StyleState state, Expression<UIForia.Text.WhitespaceMode> expression)
+            : base(propertyName, state) {
+            this.propertyId = propertyId;
+            this.expression = expression;
+        }
+
+        public override void Execute(UIElement element, ExpressionContext context) {
+            if (!element.style.IsInState(state)) return;
+
+            var oldValue = element.style.propertyMap[(int)propertyId].AsWhitespaceMode;
+            var value = expression.Evaluate(context);
+            if (value != oldValue) {
+                element.style.SetProperty(new StyleProperty(propertyId, (int)value), state);
+            }
+        }
+
+        public override bool IsConstant() {
+            return expression.IsConstant();
+        }
+
+        public override void Apply(UIStyle style, ExpressionContext context) {
+            var value = expression.Evaluate(context);
+            style.SetProperty(new StyleProperty(propertyId, (int)value));
+        }
+
+        public override void Apply(UIStyleSet styleSet, ExpressionContext context) {
+            var value = expression.Evaluate(context);
+            styleSet.SetProperty(new StyleProperty(propertyId, (int)value), state);
+        }
+
+    }
+        
     public class StyleBinding_AnchorTarget : StyleBinding {
 
         public readonly Expression<UIForia.Rendering.AnchorTarget> expression;
@@ -1096,6 +1133,7 @@ namespace UIForia.Compilers {
         private static readonly EnumAliasSource<UIForia.Text.TextAlignment> s_EnumSource_TextAlignment = new EnumAliasSource<UIForia.Text.TextAlignment>();
         private static readonly EnumAliasSource<UIForia.Rendering.ShadowType> s_EnumSource_ShadowType = new EnumAliasSource<UIForia.Rendering.ShadowType>();
         private static readonly EnumAliasSource<UIForia.Text.TextTransform> s_EnumSource_TextTransform = new EnumAliasSource<UIForia.Text.TextTransform>();
+        private static readonly EnumAliasSource<UIForia.Text.WhitespaceMode> s_EnumSource_WhitespaceMode = new EnumAliasSource<UIForia.Text.WhitespaceMode>();
         private static readonly EnumAliasSource<UIForia.Rendering.AnchorTarget> s_EnumSource_AnchorTarget = new EnumAliasSource<UIForia.Rendering.AnchorTarget>();
         private static readonly EnumAliasSource<UIForia.Rendering.TransformBehavior> s_EnumSource_TransformBehavior = new EnumAliasSource<UIForia.Rendering.TransformBehavior>();
         private static readonly EnumAliasSource<UIForia.Layout.LayoutType> s_EnumSource_LayoutType = new EnumAliasSource<UIForia.Layout.LayoutType>();
@@ -1284,6 +1322,8 @@ case "overflowx":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_ShadowType("TextShadowType", UIForia.Rendering.StylePropertyId.TextShadowType, targetState.state, Compile<UIForia.Rendering.ShadowType>(value, s_EnumSource_ShadowType));                
                 case "texttransform":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_TextTransform("TextTransform", UIForia.Rendering.StylePropertyId.TextTransform, targetState.state, Compile<UIForia.Text.TextTransform>(value, s_EnumSource_TextTransform));                
+                case "textwhitespacemode":
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_WhitespaceMode("TextWhitespaceMode", UIForia.Rendering.StylePropertyId.TextWhitespaceMode, targetState.state, Compile<UIForia.Text.WhitespaceMode>(value, s_EnumSource_WhitespaceMode));                
                 case "anchortop":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_UIFixedLength("AnchorTop", UIForia.Rendering.StylePropertyId.AnchorTop, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
                 case "anchorright":

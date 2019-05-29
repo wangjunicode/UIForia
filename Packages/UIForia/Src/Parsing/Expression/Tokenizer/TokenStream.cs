@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using UIForia.Util;
 using UnityEngine;
 
@@ -53,6 +54,10 @@ namespace UIForia.Parsing.Expression.Tokenizer {
         [DebuggerStepThrough]
         public void Save() {
             stack.Push(ptr);
+        }
+
+        public ExpressionToken Peek() {
+            return tokens[stack.Peek()];
         }
 
         [DebuggerStepThrough]

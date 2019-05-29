@@ -7,7 +7,7 @@ namespace UIForia.Parsing.Style.AstNodes {
 
     public abstract class StyleASTNode {
 
-        public StyleASTNodeType type;
+        public StyleASTNodeType type = StyleASTNodeType.None;
 
         public int line;
         public int column;

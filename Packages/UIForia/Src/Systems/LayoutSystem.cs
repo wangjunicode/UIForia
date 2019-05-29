@@ -38,11 +38,11 @@ namespace UIForia.Systems {
             this.m_StyleSystem.onStylePropertyChanged += HandleStylePropertyChanged;
             this.layoutBoxPoolMap = new Dictionary<int, LayoutBoxPool>();
 
-            this.layoutBoxPoolMap[(int) LayoutType.Flex] = new LayoutBoxPool<FlexLayoutBox>();
-            this.layoutBoxPoolMap[(int) LayoutType.Grid] = new LayoutBoxPool<GridLayoutBox>();
-            this.layoutBoxPoolMap[(int) LayoutType.Radial] = new LayoutBoxPool<RadialLayoutBox>();
-            this.layoutBoxPoolMap[(int) LayoutType.Fixed] = new LayoutBoxPool<FixedLayoutBox>();
-            this.layoutBoxPoolMap[(int) LayoutType.Flow] = new LayoutBoxPool<FlowLayoutBox>();
+            this.layoutBoxPoolMap[(int)LayoutType.Flex] = new LayoutBoxPool<FlexLayoutBox>();
+            this.layoutBoxPoolMap[(int)LayoutType.Grid] = new LayoutBoxPool<GridLayoutBox>();
+            this.layoutBoxPoolMap[(int)LayoutType.Radial] = new LayoutBoxPool<RadialLayoutBox>();
+            this.layoutBoxPoolMap[(int)LayoutType.Fixed] = new LayoutBoxPool<FixedLayoutBox>();
+            this.layoutBoxPoolMap[(int)LayoutType.Flow] = new LayoutBoxPool<FlowLayoutBox>();
             this.layoutBoxPoolMap[TextLayoutPoolKey] = new LayoutBoxPool<TextLayoutBox>();
             this.layoutBoxPoolMap[ImageLayoutPoolKey] = new LayoutBoxPool<ImageLayoutBox>();
         }
@@ -55,7 +55,6 @@ namespace UIForia.Systems {
         public void OnUpdate() {
             // todo -- should this be a list per-view?
             m_VisibleBoxList.Clear();
-
 
             TextLayoutBox[] textLayouts = m_TextLayoutBoxes.Array;
             for (int i = 0; i < m_TextLayoutBoxes.Count; i++) {
@@ -174,6 +173,7 @@ namespace UIForia.Systems {
             for (int i = 0; i < toLayoutCount; i++) {
                 LayoutBox box = toLayoutArray[i];
 
+      
                 if (box.IsIgnored) {
                     float currentWidth = box.allocatedWidth;
                     float currentHeight = box.allocatedHeight;
@@ -194,6 +194,10 @@ namespace UIForia.Systems {
                 if (box.children.Count == 0) {
                     leaves.Add(box);
                 }
+                
+                box.xMax = box.actualWidth;
+                box.yMax = box.actualHeight;
+
             }
 
             int leafCount = leaves.Count;
@@ -210,8 +214,25 @@ namespace UIForia.Systems {
                 // how do I find it?
 
                 while (ptr != null) {
-                    ptr.xMax = math.max(ptr.xMax, ptr.localX + current.xMax);
-                    ptr.yMax = math.max(ptr.yMax, ptr.localY + current.yMax);
+                    // todo -- dont look up overflow values, cache them
+                    if (current.style.OverflowX != Overflow.Visible) {
+                        ptr.xMax = math.max(ptr.xMax, current.actualWidth);
+                    }
+                    else if (ptr.style.OverflowX != Overflow.Visible) {
+                        ptr.xMax = math.max(ptr.xMax, current.xMax);
+                    } 
+                    else {
+                        ptr.xMax = math.max(ptr.xMax, ptr.localX + current.xMax);
+                    }
+
+                    if (current.style.OverflowY != Overflow.Visible) {
+                        ptr.yMax = math.max(ptr.yMax, current.actualHeight);
+                    } else if (ptr.style.OverflowY != Overflow.Visible) {
+                        ptr.yMax = math.max(ptr.yMax, current.yMax);
+                    } else {
+                        ptr.yMax = math.max(ptr.yMax, ptr.localY + current.yMax);
+                    }
+
                     current = ptr;
                     ptr = ptr.parent;
                 }
@@ -236,18 +257,15 @@ namespace UIForia.Systems {
                 box.clipRect = parentBox.clipRect;
                 layoutResult.clipRect = parentBox.clipRect;
 
-
                 Vector2 localPosition = ResolveLocalPosition(box) - scrollOffset;
                 Vector2 localScale = new Vector2(box.transformScaleX, box.transformScaleY);
-
 
                 Vector2 pivot = box.Pivot;
                 SVGXMatrix m;
 
                 if (box.transformRotation != 0) {
                     m = SVGXMatrix.TRS(localPosition, layoutResult.rotation, layoutResult.scale);
-                }
-                else {
+                } else {
                     m = SVGXMatrix.TranslateScale(localPosition.x, localPosition.y, localScale.x, localScale.y);
                 }
 
@@ -268,19 +286,13 @@ namespace UIForia.Systems {
                 float borderBottom = box.BorderBottom;
                 float borderTop = box.BorderTop;
 
-
                 m = parentMatrix * m;
                 layoutResult.matrix = m;
 
                 layoutResult.overflowSize = new Size(box.xMax, box.yMax);
                 layoutResult.localPosition = localPosition;
 
-                layoutResult.ContentRect = new Rect(
-                    paddingLeft + borderLeft,
-                    paddingTop + borderTop,
-                    box.allocatedWidth - paddingLeft - borderLeft - paddingRight - borderRight,
-                    box.allocatedHeight - paddingTop - borderTop - paddingBottom - borderBottom
-                );
+                layoutResult.ContentRect = new Rect(paddingLeft + borderLeft, paddingTop + borderTop, box.allocatedWidth - paddingLeft - borderLeft - paddingRight - borderRight, box.allocatedHeight - paddingTop - borderTop - paddingBottom - borderBottom);
 
                 layoutResult.actualSize = new Size(box.actualWidth, box.actualHeight);
                 layoutResult.allocatedSize = new Size(box.allocatedWidth, box.allocatedHeight);
@@ -377,8 +389,8 @@ namespace UIForia.Systems {
             return localPosition;
         }
 
-
-        public void OnDestroy() { }
+        public void OnDestroy() {
+        }
 
         public void OnViewAdded(UIView view) {
             CreateLayoutBox(view.rootElement);
@@ -572,8 +584,7 @@ namespace UIForia.Systems {
             if (layoutTypeChanged) {
                 HandleLayoutChanged(element);
                 box.parent?.OnChildStylePropertyChanged(box, properties);
-            }
-            else {
+            } else {
                 if (invalidatePreferredSizeCache) {
                     if (notifyParent) {
                         box.RequestContentSizeChangeLayout();
@@ -629,8 +640,7 @@ namespace UIForia.Systems {
 
             if (element.parent != null) {
                 stack.Push(new LayoutBoxPair(element, m_LayoutBoxMap.GetOrDefault(element.parent.id)));
-            }
-            else {
+            } else {
                 stack.Push(new LayoutBoxPair(element, null));
             }
 
@@ -652,7 +662,6 @@ namespace UIForia.Systems {
                     stack.Push(new LayoutBoxPair(children[i], box));
                 }
             }
-
 
             int count = toUpdateList.Count;
             LayoutBox[] toUpdate = toUpdateList.Array;
@@ -718,40 +727,37 @@ namespace UIForia.Systems {
             }
         }
 
-        public void OnAttributeSet(UIElement element, string attributeName, string currentValue, string previousValue) { }
+        public void OnAttributeSet(UIElement element, string attributeName, string currentValue, string previousValue) {
+        }
 
         private LayoutBox CreateLayoutBox(UIElement element) {
             LayoutBox retn = null;
             if ((element is UITextElement)) {
-                TextLayoutBox textLayout = (TextLayoutBox) layoutBoxPoolMap[TextLayoutPoolKey].Get(element);
+                TextLayoutBox textLayout = (TextLayoutBox)layoutBoxPoolMap[TextLayoutPoolKey].Get(element);
                 m_TextLayoutBoxes.Add(textLayout);
                 retn = textLayout;
-            }
-
-            else if ((element is UIImageElement)) {
+            } else if ((element is UIImageElement)) {
                 retn = layoutBoxPoolMap[ImageLayoutPoolKey].Get(element);
-            }
-
-            else {
+            } else {
                 switch (element.style.LayoutType) {
                     case LayoutType.Flex:
-                        retn = layoutBoxPoolMap[(int) LayoutType.Flex].Get(element);
+                        retn = layoutBoxPoolMap[(int)LayoutType.Flex].Get(element);
                         break;
 
                     case LayoutType.Flow:
-                        retn = layoutBoxPoolMap[(int) LayoutType.Flow].Get(element);
+                        retn = layoutBoxPoolMap[(int)LayoutType.Flow].Get(element);
                         break;
 
                     case LayoutType.Fixed:
-                        retn = layoutBoxPoolMap[(int) LayoutType.Fixed].Get(element);
+                        retn = layoutBoxPoolMap[(int)LayoutType.Fixed].Get(element);
                         break;
 
                     case LayoutType.Grid:
-                        retn = layoutBoxPoolMap[(int) LayoutType.Grid].Get(element);
+                        retn = layoutBoxPoolMap[(int)LayoutType.Grid].Get(element);
                         break;
 
                     case LayoutType.Radial:
-                        retn = layoutBoxPoolMap[(int) LayoutType.Radial].Get(element);
+                        retn = layoutBoxPoolMap[(int)LayoutType.Radial].Get(element);
                         break;
 
                     default:
@@ -764,7 +770,8 @@ namespace UIForia.Systems {
             return retn;
         }
 
-        public void OnElementCreated(UIElement element) { }
+        public void OnElementCreated(UIElement element) {
+        }
 
         private void GetChildBoxes(LayoutBox box, LightList<LayoutBox> list) {
             UIElement element = box.element;
@@ -848,8 +855,7 @@ namespace UIForia.Systems {
                     if (!handler.ContainsPoint(point)) {
                         continue;
                     }
-                }
-                else if (!layoutResult.ScreenRect.ContainOrOverlap(point)) {
+                } else if (!layoutResult.ScreenRect.ContainOrOverlap(point)) {
                     continue;
                 }
 
@@ -879,35 +885,23 @@ namespace UIForia.Systems {
 
         public OffsetRect GetPaddingRect(UIElement element) {
             LayoutBox box = m_LayoutBoxMap.GetOrDefault(element.id);
-            if (box == null) return new OffsetRect();
-            return new OffsetRect(
-                box.PaddingTop,
-                box.PaddingRight,
-                box.PaddingBottom,
-                box.PaddingLeft
-            );
+            if (box == null)
+                return new OffsetRect();
+            return new OffsetRect(box.PaddingTop, box.PaddingRight, box.PaddingBottom, box.PaddingLeft);
         }
 
         public OffsetRect GetMarginRect(UIElement element) {
             LayoutBox box = m_LayoutBoxMap.GetOrDefault(element.id);
-            if (box == null) return new OffsetRect();
-            return new OffsetRect(
-                box.GetMarginTop(box.actualWidth),
-                box.GetMarginRight(),
-                box.GetMarginBottom(box.actualWidth),
-                box.GetMarginLeft()
-            );
+            if (box == null)
+                return new OffsetRect();
+            return new OffsetRect(box.GetMarginTop(box.actualWidth), box.GetMarginRight(), box.GetMarginBottom(box.actualWidth), box.GetMarginLeft());
         }
 
         public OffsetRect GetBorderRect(UIElement element) {
             LayoutBox box = m_LayoutBoxMap.GetOrDefault(element.id);
-            if (box == null) return new OffsetRect();
-            return new OffsetRect(
-                box.BorderTop,
-                box.BorderRight,
-                box.BorderBottom,
-                box.BorderLeft
-            );
+            if (box == null)
+                return new OffsetRect();
+            return new OffsetRect(box.BorderTop, box.BorderRight, box.BorderBottom, box.BorderLeft);
         }
 
         public LayoutBox GetBoxForElement(UIElement itemElement) {
@@ -917,8 +911,7 @@ namespace UIForia.Systems {
         public LightList<UIElement> GetVisibleElements(LightList<UIElement> retn = null) {
             if (retn == null) {
                 retn = new LightList<UIElement>(m_VisibleBoxList.Count);
-            }
-            else {
+            } else {
                 retn.EnsureCapacity(m_VisibleBoxList.Count);
             }
 
@@ -939,7 +932,8 @@ namespace UIForia.Systems {
             for (int i = 0; i < children.Count; i++) {
                 LayoutBox child = children[i];
 
-                if (child.element.isDisabled) continue;
+                if (child.element.isDisabled)
+                    continue;
 
                 Rect rect = child.element.layoutResult.LocalRect;
                 Vector2 localPosition = new Vector2(rect.x, rect.y);

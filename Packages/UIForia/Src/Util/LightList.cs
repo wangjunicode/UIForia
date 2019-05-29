@@ -412,9 +412,24 @@ namespace UIForia.Util {
             return i + 1;
         }
 
+        private class Cmp : IComparer<T> {
+
+            public Comparison<T> cmp;
+            
+            public int Compare(T x, T y) {
+                return cmp.Invoke(x, y);
+            }
+            
+        }
+
+        private static Cmp s_Comparer = new Cmp();
+        
+        // NOT FUCKING THREAD SAFE
         public void Sort(Comparison<T> comparison) {
             if (size < 2) return;
-            System.Array.Sort(array, comparison);
+            s_Comparer.cmp = comparison;
+            System.Array.Sort(array, 0, size, s_Comparer);
+            s_Comparer.cmp = null;
         }
 
         public void Sort(Comparison<T> comparison, int start, int end) {
@@ -422,7 +437,9 @@ namespace UIForia.Util {
             if (start < 0) start = 0;
             if (start >= size) start = size - 1;
             if (end >= size) end = size - 1;
-            QuickSort(comparison, start, end);
+            s_Comparer.cmp = comparison;
+            System.Array.Sort(array, start, end, s_Comparer);
+            s_Comparer.cmp = null;
         }
 
         public void Sort(IComparer<T> comparison, int start, int end) {

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Packages.UIForia.Src.Rendering;
 using SVGX;
 using UIForia.Compilers.Style;
 using UIForia.Elements;
@@ -68,16 +69,17 @@ namespace UIForia.Rendering {
             return false;
         }
 
-        private void CreateStyleEntry(LightList<StylePropertyId> toUpdate, UIStyleGroup group, UIStyle style, StyleType styleType, StyleState styleState, int ruleCount) {
-            if (style == null) return;
+        private void CreateStyleEntry(LightList<StylePropertyId> toUpdate, UIStyleGroup group, UIStyleRunCommand styleRunCommand, StyleType styleType, StyleState styleState, int ruleCount) {
+            if (styleRunCommand.style == null) return;
 
             containedStates |= styleState;
 
             if ((currentState & styleState) != 0) {
-                AddMissingProperties(toUpdate, style.m_StyleProperties);
+                AddMissingProperties(toUpdate, styleRunCommand.style.m_StyleProperties);
+                RunCommands(styleRunCommand.runCommands);
             }
 
-            availableStyles.Add(new StyleEntry(group, style, styleType, styleState, availableStyles.Count, ruleCount));
+            availableStyles.Add(new StyleEntry(group, styleRunCommand, styleType, styleState, availableStyles.Count, ruleCount));
         }
 
         internal void ClearPropertyMap() {
@@ -289,6 +291,7 @@ namespace UIForia.Rendering {
             }
 
             LightList<StylePropertyId> toUpdate = LightListPool<StylePropertyId>.Get();
+            LightList<IRunCommand> toRun = LightListPool<IRunCommand>.Get();
 
             StyleEntry[] styleEntries = availableStyles.Array;
             for (int i = 0; i < availableStyles.Count; i++) {
@@ -296,13 +299,24 @@ namespace UIForia.Rendering {
 
                 // if this is a state we had not been in before, mark it's properties for update
                 if ((entry.state & oldState) == 0 && (entry.state & state) != 0) {
-                    AddMissingProperties(toUpdate, entry.style.m_StyleProperties);
+                    AddMissingProperties(toUpdate, entry.styleRunCommand.style.m_StyleProperties);
+                    RunCommands(entry.styleRunCommand.runCommands);
                 }
             }
 
             UpdatePropertyMap(toUpdate);
 
             LightListPool<StylePropertyId>.Release(ref toUpdate);
+            LightListPool<IRunCommand>.Release(ref toRun);
+        }
+
+        private void RunCommands(LightList<IRunCommand> runCommands) {
+            if (runCommands == null) {
+                return;
+            }
+            for (int index = 0; index < runCommands.Count; index++) {
+                runCommands[index].Run(element);
+            }
         }
 
         public void ExitState(StyleState state) {
@@ -326,7 +340,7 @@ namespace UIForia.Rendering {
 
                 // if this a state we were in that is now invalid, mark it's properties for update
                 if ((entry.state & oldState) != 0 && (entry.state & state) != 0) {
-                    AddMissingProperties(toUpdate, entry.style.m_StyleProperties);
+                    AddMissingProperties(toUpdate, entry.styleRunCommand.style.m_StyleProperties);
                 }
             }
 
@@ -400,7 +414,8 @@ namespace UIForia.Rendering {
                 for (int j = 0; j < availableStyles.Count; j++) {
                     if (availableStyles[j].sourceGroup == group) {
                         if ((availableStyles[j].state & currentState) != 0) {
-                            AddMissingProperties(toUpdate, availableStyles[j].style.m_StyleProperties);
+                            AddMissingProperties(toUpdate, availableStyles[j].styleRunCommand.style.m_StyleProperties);
+                            RunCommands(availableStyles[j].styleRunCommand.runCommands);
                         }
 
                         availableStyles.RemoveAt(j--);
@@ -440,7 +455,7 @@ namespace UIForia.Rendering {
                 }
 
                 StyleProperty property;
-                if (availableStyles[i].style.TryGetProperty(propertyId, out property)) {
+                if (availableStyles[i].styleRunCommand.style.TryGetProperty(propertyId, out property)) {
                     return property;
                 }
             }
@@ -455,7 +470,7 @@ namespace UIForia.Rendering {
                     continue;
                 }
 
-                if (availableStyles[i].style.TryGetProperty(propertyId, out property)) {
+                if (availableStyles[i].styleRunCommand.style.TryGetProperty(propertyId, out property)) {
                     return true;
                 }
             }
@@ -474,44 +489,44 @@ namespace UIForia.Rendering {
 
             switch (state) {
                 case StyleState.Normal:
-                    if (instanceStyle.normal == null) {
-                        instanceStyle.normal = new UIStyle();
+                    if (instanceStyle.normal.style == null) {
+                        instanceStyle.normal = UIStyleRunCommand.CreateInstance();
                         availableStyles.Add(new StyleEntry(instanceStyle, instanceStyle.normal, StyleType.Instance, StyleState.Normal, byte.MaxValue, byte.MaxValue));
                         containedStates |= StyleState.Normal;
                         SortStyles();
                     }
 
-                    return instanceStyle.normal;
+                    return instanceStyle.normal.style;
 
                 case StyleState.Hover:
-                    if (instanceStyle.hover == null) {
-                        instanceStyle.hover = new UIStyle();
+                    if (instanceStyle.hover.style == null) {
+                        instanceStyle.hover = UIStyleRunCommand.CreateInstance();
                         availableStyles.Add(new StyleEntry(instanceStyle, instanceStyle.hover, StyleType.Instance, StyleState.Hover, byte.MaxValue, byte.MaxValue));
                         containedStates |= StyleState.Hover;
                         SortStyles();
                     }
 
-                    return instanceStyle.hover;
+                    return instanceStyle.hover.style;
 
                 case StyleState.Active:
-                    if (instanceStyle.active == null) {
-                        instanceStyle.active = new UIStyle();
+                    if (instanceStyle.active.style == null) {
+                        instanceStyle.active = UIStyleRunCommand.CreateInstance();
                         availableStyles.Add(new StyleEntry(instanceStyle, instanceStyle.active, StyleType.Instance, StyleState.Active, byte.MaxValue, byte.MaxValue));
                         containedStates |= StyleState.Active;
                         SortStyles();
                     }
 
-                    return instanceStyle.active;
+                    return instanceStyle.active.style;
 
                 case StyleState.Focused:
-                    if (instanceStyle.focused == null) {
-                        instanceStyle.focused = new UIStyle();
+                    if (instanceStyle.focused.style == null) {
+                        instanceStyle.focused = UIStyleRunCommand.CreateInstance();
                         availableStyles.Add(new StyleEntry(instanceStyle, instanceStyle.focused, StyleType.Instance, StyleState.Focused, byte.MaxValue, byte.MaxValue));
                         containedStates |= StyleState.Focused;
                         SortStyles();
                     }
 
-                    return instanceStyle.focused;
+                    return instanceStyle.focused.style;
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(state), state, null);
@@ -540,7 +555,7 @@ namespace UIForia.Rendering {
                     continue;
                 }
 
-                if (availableStyles[i].style.DefinesProperty(propertyId)) {
+                if (availableStyles[i].styleRunCommand.style.DefinesProperty(propertyId)) {
                     if (availableStyles[i].type == StyleType.Instance) {
                         switch (availableStyles[i].state) {
                             case StyleState.Normal:
@@ -664,7 +679,8 @@ namespace UIForia.Rendering {
                                 bool isActive = (availableStyles[nextIdx].state & currentState) != 0;
 
                                 if (isActive) {
-                                    AddMissingProperties(toUpdate, availableStyles[nextIdx].style.m_StyleProperties);
+                                    AddMissingProperties(toUpdate, availableStyles[nextIdx].styleRunCommand.style.m_StyleProperties);
+                                    RunCommands(availableStyles[nextIdx].styleRunCommand.runCommands);
                                 }
 
                                 availableStyles.RemoveAt(nextIdx);
@@ -864,7 +880,9 @@ namespace UIForia.Rendering {
                 outlineSoftness = 0, // todo 
                 outlineWidth = TextOutlineWidth,
                 textTransform = TextTransform,
-                whitespaceMode = 0 // todo
+                whitespaceMode = TextWhitespaceMode
+                
+                // style.whitespace = Preserve Collapse
             };
         }
 

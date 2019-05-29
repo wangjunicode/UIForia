@@ -19,6 +19,10 @@ namespace UIForia.Parsing.Style.AstNodes {
         public string alias;
         public string source;
 
+        public ImportNode() {
+            type = StyleASTNodeType.Import;
+        }
+
         public override void Release() {
             StyleASTNodeFactory.s_ImportNodePool.Release(this);
         }

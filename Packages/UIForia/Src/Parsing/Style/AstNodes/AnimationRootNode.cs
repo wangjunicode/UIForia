@@ -12,6 +12,7 @@ namespace UIForia.Parsing.Style.AstNodes {
             
         public AnimationRootNode(string animName) {
             this.animName = animName;
+            type = StyleASTNodeType.AnimationDeclaration;
         }
 
         public void AddVariableNode(VariableDefinitionNode node) {

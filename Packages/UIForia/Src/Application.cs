@@ -479,6 +479,9 @@ namespace UIForia {
             m_AfterUpdateTaskSystem.OnUpdate();
             
             onUpdate?.Invoke();
+
+            m_Views[0].SetSize(Screen.width, Screen.height);
+            
         }
 
         /// <summary>

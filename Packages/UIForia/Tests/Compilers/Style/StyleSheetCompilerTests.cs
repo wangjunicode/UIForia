@@ -47,9 +47,9 @@ style image3 { BackgroundImage = url(testimg/cat); }
         var containers = styleSheet.styleGroupContainers;
         Assert.AreEqual(3, containers.Length);
 
-        Assert.AreEqual("cat", containers[0].groups[0].normal.BackgroundImage.name);
-        Assert.AreEqual("cat", containers[1].groups[0].normal.BackgroundImage.name);
-        Assert.AreEqual("cat", containers[2].groups[0].normal.BackgroundImage.name);
+        Assert.AreEqual("cat", containers[0].groups[0].normal.style.BackgroundImage.name);
+        Assert.AreEqual("cat", containers[1].groups[0].normal.style.BackgroundImage.name);
+        Assert.AreEqual("cat", containers[2].groups[0].normal.style.BackgroundImage.name);
     }
 
     [Test]
@@ -70,14 +70,14 @@ style image3 { Cursor = url(testimg/Cursor1); }
         var containers = styleSheet.styleGroupContainers;
         Assert.AreEqual(3, containers.Length);
 
-        Assert.AreEqual("Cursor1", containers[0].groups[0].normal.Cursor.texture.name);
-        Assert.AreEqual(new Vector2(1, 2), containers[0].groups[0].normal.Cursor.hotSpot);
+        Assert.AreEqual("Cursor1", containers[0].groups[0].normal.style.Cursor.texture.name);
+        Assert.AreEqual(new Vector2(1, 2), containers[0].groups[0].normal.style.Cursor.hotSpot);
 
-        Assert.AreEqual("Cursor1", containers[1].groups[0].normal.Cursor.texture.name);
-        Assert.AreEqual(new Vector2(20, 20), containers[1].groups[0].normal.Cursor.hotSpot);
+        Assert.AreEqual("Cursor1", containers[1].groups[0].normal.style.Cursor.texture.name);
+        Assert.AreEqual(new Vector2(20, 20), containers[1].groups[0].normal.style.Cursor.hotSpot);
 
-        Assert.AreEqual("Cursor1", containers[2].groups[0].normal.Cursor.texture.name);
-        Assert.AreEqual(new Vector2(0, 0), containers[2].groups[0].normal.Cursor.hotSpot);
+        Assert.AreEqual("Cursor1", containers[2].groups[0].normal.style.Cursor.texture.name);
+        Assert.AreEqual(new Vector2(0, 0), containers[2].groups[0].normal.style.Cursor.hotSpot);
     }
 
     [Test]
@@ -98,9 +98,9 @@ style visi3 { Visibility = Visible; }
         var containers = styleSheet.styleGroupContainers;
         Assert.AreEqual(3, containers.Length);
 
-        Assert.AreEqual(Visibility.Visible, containers[0].groups[0].normal.Visibility);
-        Assert.AreEqual(Visibility.Hidden, containers[1].groups[0].normal.Visibility);
-        Assert.AreEqual(Visibility.Visible, containers[2].groups[0].normal.Visibility);
+        Assert.AreEqual(Visibility.Visible, containers[0].groups[0].normal.style.Visibility);
+        Assert.AreEqual(Visibility.Hidden, containers[1].groups[0].normal.style.Visibility);
+        Assert.AreEqual(Visibility.Visible, containers[2].groups[0].normal.style.Visibility);
     }
 
     [Test]
@@ -126,20 +126,20 @@ style overflow5 {
         var containers = styleSheet.styleGroupContainers;
         Assert.AreEqual(5, containers.Length);
 
-        Assert.AreEqual(Overflow.Hidden, containers[0].groups[0].normal.OverflowX);
-        Assert.AreEqual(Overflow.Scroll, containers[0].groups[0].normal.OverflowY);
+        Assert.AreEqual(Overflow.Hidden, containers[0].groups[0].normal.style.OverflowX);
+        Assert.AreEqual(Overflow.Scroll, containers[0].groups[0].normal.style.OverflowY);
 
-        Assert.AreEqual(Overflow.Scroll, containers[1].groups[0].normal.OverflowX);
-        Assert.AreEqual(Overflow.Scroll, containers[1].groups[0].normal.OverflowY);
+        Assert.AreEqual(Overflow.Scroll, containers[1].groups[0].normal.style.OverflowX);
+        Assert.AreEqual(Overflow.Scroll, containers[1].groups[0].normal.style.OverflowY);
 
-        Assert.AreEqual(Overflow.Scroll, containers[2].groups[0].normal.OverflowX);
-        Assert.AreEqual(Overflow.Unset, containers[2].groups[0].normal.OverflowY);
+        Assert.AreEqual(Overflow.Scroll, containers[2].groups[0].normal.style.OverflowX);
+        Assert.AreEqual(Overflow.Unset, containers[2].groups[0].normal.style.OverflowY);
 
-        Assert.AreEqual(Overflow.Unset, containers[3].groups[0].normal.OverflowX);
-        Assert.AreEqual(Overflow.Hidden, containers[3].groups[0].normal.OverflowY);
+        Assert.AreEqual(Overflow.Unset, containers[3].groups[0].normal.style.OverflowX);
+        Assert.AreEqual(Overflow.Hidden, containers[3].groups[0].normal.style.OverflowY);
 
-        Assert.AreEqual(Overflow.Hidden, containers[4].groups[0].normal.OverflowX);
-        Assert.AreEqual(Overflow.Scroll, containers[4].groups[0].normal.OverflowY);
+        Assert.AreEqual(Overflow.Hidden, containers[4].groups[0].normal.style.OverflowX);
+        Assert.AreEqual(Overflow.Scroll, containers[4].groups[0].normal.style.OverflowY);
     }
 
     [Test]
@@ -162,7 +162,7 @@ style myStyle {
         var containers = styleSheet.styleGroupContainers;
         Assert.AreEqual(1, containers.Length);
 
-        Assert.AreEqual(Color.red, containers[0].groups[0].normal.BackgroundColor);
+        Assert.AreEqual(Color.red, containers[0].groups[0].normal.style.BackgroundColor);
     }
 
     [Test]
@@ -189,10 +189,10 @@ style myStyle {
         Assert.AreEqual(1, containers.Length);
         Assert.AreEqual(2, containers[0].groups.Count);
 
-        Assert.AreEqual(10, containers[0].groups[0].normal.MarginTop.value);
-        Assert.AreEqual(UIMeasurementUnit.Pixel, containers[0].groups[0].normal.MarginTop.unit);
-        Assert.AreEqual(20, containers[0].groups[0].hover.MarginLeft.value);
-        Assert.AreEqual(20, containers[0].groups[1].normal.MarginTop.value);
+        Assert.AreEqual(10, containers[0].groups[0].normal.style.MarginTop.value);
+        Assert.AreEqual(UIMeasurementUnit.Pixel, containers[0].groups[0].normal.style.MarginTop.unit);
+        Assert.AreEqual(20, containers[0].groups[0].hover.style.MarginLeft.value);
+        Assert.AreEqual(20, containers[0].groups[1].normal.style.MarginTop.value);
     }
 
     [Test]
@@ -215,14 +215,14 @@ style myStyle {
         var containers = styleSheet.styleGroupContainers;
         Assert.AreEqual(1, containers.Length);
 
-        Assert.AreEqual(10, containers[0].groups[0].normal.MarginTop.value);
-        Assert.AreEqual(10, containers[0].groups[0].normal.MarginRight.value);
-        Assert.AreEqual(10, containers[0].groups[0].normal.MarginBottom.value);
-        Assert.AreEqual(10, containers[0].groups[0].normal.MarginLeft.value);
-        Assert.AreEqual(UIMeasurementUnit.ParentContentArea, containers[0].groups[0].normal.MarginTop.unit);
-        Assert.AreEqual(UIMeasurementUnit.ParentContentArea, containers[0].groups[0].normal.MarginRight.unit);
-        Assert.AreEqual(UIMeasurementUnit.Pixel, containers[0].groups[0].normal.MarginBottom.unit);
-        Assert.AreEqual(UIMeasurementUnit.ParentContentArea, containers[0].groups[0].normal.MarginLeft.unit);
+        Assert.AreEqual(10, containers[0].groups[0].normal.style.MarginTop.value);
+        Assert.AreEqual(10, containers[0].groups[0].normal.style.MarginRight.value);
+        Assert.AreEqual(10, containers[0].groups[0].normal.style.MarginBottom.value);
+        Assert.AreEqual(10, containers[0].groups[0].normal.style.MarginLeft.value);
+        Assert.AreEqual(UIMeasurementUnit.ParentContentArea, containers[0].groups[0].normal.style.MarginTop.unit);
+        Assert.AreEqual(UIMeasurementUnit.ParentContentArea, containers[0].groups[0].normal.style.MarginRight.unit);
+        Assert.AreEqual(UIMeasurementUnit.Pixel, containers[0].groups[0].normal.style.MarginBottom.unit);
+        Assert.AreEqual(UIMeasurementUnit.ParentContentArea, containers[0].groups[0].normal.style.MarginLeft.unit);
     }
 
     [Test]
@@ -245,14 +245,14 @@ style myStyle {
         var containers = styleSheet.styleGroupContainers;
         Assert.AreEqual(1, containers.Length);
 
-        Assert.AreEqual(10 * 0.01f, containers[0].groups[0].normal.PaddingTop.value);
-        Assert.AreEqual(10 * 0.01f, containers[0].groups[0].normal.PaddingRight.value);
-        Assert.AreEqual(20, containers[0].groups[0].normal.PaddingBottom.value);
-        Assert.AreEqual(10 * 0.01f, containers[0].groups[0].normal.PaddingLeft.value);
-        Assert.AreEqual(UIFixedUnit.Percent, containers[0].groups[0].normal.PaddingTop.unit);
-        Assert.AreEqual(UIFixedUnit.Percent, containers[0].groups[0].normal.PaddingRight.unit);
-        Assert.AreEqual(UIFixedUnit.Pixel, containers[0].groups[0].normal.PaddingBottom.unit);
-        Assert.AreEqual(UIFixedUnit.Percent, containers[0].groups[0].normal.PaddingLeft.unit);
+        Assert.AreEqual(10 * 0.01f, containers[0].groups[0].normal.style.PaddingTop.value);
+        Assert.AreEqual(10 * 0.01f, containers[0].groups[0].normal.style.PaddingRight.value);
+        Assert.AreEqual(20, containers[0].groups[0].normal.style.PaddingBottom.value);
+        Assert.AreEqual(10 * 0.01f, containers[0].groups[0].normal.style.PaddingLeft.value);
+        Assert.AreEqual(UIFixedUnit.Percent, containers[0].groups[0].normal.style.PaddingTop.unit);
+        Assert.AreEqual(UIFixedUnit.Percent, containers[0].groups[0].normal.style.PaddingRight.unit);
+        Assert.AreEqual(UIFixedUnit.Pixel, containers[0].groups[0].normal.style.PaddingBottom.unit);
+        Assert.AreEqual(UIFixedUnit.Percent, containers[0].groups[0].normal.style.PaddingLeft.unit);
     }
 
     [Test]
@@ -276,19 +276,19 @@ style myStyle {
         var containers = styleSheet.styleGroupContainers;
         Assert.AreEqual(1, containers.Length);
 
-        Assert.AreEqual(10 * 0.01f, containers[0].groups[0].normal.BorderTop.value);
-        Assert.AreEqual(10 * 0.01f, containers[0].groups[0].normal.BorderRight.value);
-        Assert.AreEqual(20, containers[0].groups[0].normal.BorderBottom.value);
-        Assert.AreEqual(10 * 0.01f, containers[0].groups[0].normal.BorderLeft.value);
-        Assert.AreEqual(UIFixedUnit.Percent, containers[0].groups[0].normal.BorderTop.unit);
-        Assert.AreEqual(UIFixedUnit.Percent, containers[0].groups[0].normal.BorderRight.unit);
-        Assert.AreEqual(UIFixedUnit.Pixel, containers[0].groups[0].normal.BorderBottom.unit);
-        Assert.AreEqual(UIFixedUnit.Percent, containers[0].groups[0].normal.BorderLeft.unit);
+        Assert.AreEqual(10 * 0.01f, containers[0].groups[0].normal.style.BorderTop.value);
+        Assert.AreEqual(10 * 0.01f, containers[0].groups[0].normal.style.BorderRight.value);
+        Assert.AreEqual(20, containers[0].groups[0].normal.style.BorderBottom.value);
+        Assert.AreEqual(10 * 0.01f, containers[0].groups[0].normal.style.BorderLeft.value);
+        Assert.AreEqual(UIFixedUnit.Percent, containers[0].groups[0].normal.style.BorderTop.unit);
+        Assert.AreEqual(UIFixedUnit.Percent, containers[0].groups[0].normal.style.BorderRight.unit);
+        Assert.AreEqual(UIFixedUnit.Pixel, containers[0].groups[0].normal.style.BorderBottom.unit);
+        Assert.AreEqual(UIFixedUnit.Percent, containers[0].groups[0].normal.style.BorderLeft.unit);
 
-        Assert.AreEqual(Color.black, containers[0].groups[0].normal.BorderColorTop);
-        Assert.AreEqual(Color.red, containers[0].groups[0].normal.BorderColorRight);
-        Assert.AreEqual(new Color( 100f / 255f, 200f / 255f,20f / 255f,250f / 255f), containers[0].groups[0].normal.BorderColorBottom);
-        Assert.AreEqual(Color.white, containers[0].groups[0].normal.BorderColorLeft);
+        Assert.AreEqual(Color.black, containers[0].groups[0].normal.style.BorderColorTop);
+        Assert.AreEqual(Color.red, containers[0].groups[0].normal.style.BorderColorRight);
+        Assert.AreEqual(new Color( 100f / 255f, 200f / 255f,20f / 255f,250f / 255f), containers[0].groups[0].normal.style.BorderColorBottom);
+        Assert.AreEqual(Color.white, containers[0].groups[0].normal.style.BorderColorLeft);
     }
 
     [Test]
@@ -312,8 +312,8 @@ style myStyle {
         Assert.AreEqual(1, containers.Length);
         Assert.AreEqual(2, containers[0].groups.Count);
 
-        Assert.AreEqual(Visibility.Visible, containers[0].groups[0].normal.Visibility);
-        Assert.AreEqual(Visibility.Hidden, containers[0].groups[1].normal.Visibility);
+        Assert.AreEqual(Visibility.Visible, containers[0].groups[0].normal.style.Visibility);
+        Assert.AreEqual(Visibility.Hidden, containers[0].groups[1].normal.style.Visibility);
         Assert.AreEqual("disabled", containers[0].groups[1].rule.attributeName);
         Assert.AreEqual("disabled", containers[0].groups[1].rule.attributeValue);
         Assert.AreEqual(false, containers[0].groups[1].rule.invert);
@@ -339,10 +339,10 @@ style myStyle {
         var containers = styleSheet.styleGroupContainers;
         Assert.AreEqual(1, containers.Length);
 
-        Assert.AreEqual(0, containers[0].groups[0].normal.GridItemColStart);
-        Assert.AreEqual(4, containers[0].groups[0].normal.GridItemColSpan);
-        Assert.AreEqual(2, containers[0].groups[0].normal.GridItemRowStart);
-        Assert.AreEqual(5, containers[0].groups[0].normal.GridItemRowSpan);
+        Assert.AreEqual(0, containers[0].groups[0].normal.style.GridItemColStart);
+        Assert.AreEqual(4, containers[0].groups[0].normal.style.GridItemColSpan);
+        Assert.AreEqual(2, containers[0].groups[0].normal.style.GridItemRowStart);
+        Assert.AreEqual(5, containers[0].groups[0].normal.style.GridItemRowSpan);
     }
 
     [Test]
@@ -365,10 +365,10 @@ style myStyle {
         var containers = styleSheet.styleGroupContainers;
         Assert.AreEqual(1, containers.Length);
 
-        Assert.AreEqual(GridAxisAlignment.Center, containers[0].groups[0].normal.GridItemColSelfAlignment);
-        Assert.AreEqual(GridAxisAlignment.End, containers[0].groups[0].normal.GridItemRowSelfAlignment);
-        Assert.AreEqual(GridAxisAlignment.Shrink, containers[0].groups[0].normal.GridLayoutColAlignment);
-        Assert.AreEqual(GridAxisAlignment.Fit, containers[0].groups[0].normal.GridLayoutRowAlignment);
+        Assert.AreEqual(GridAxisAlignment.Center, containers[0].groups[0].normal.style.GridItemColSelfAlignment);
+        Assert.AreEqual(GridAxisAlignment.End, containers[0].groups[0].normal.style.GridItemRowSelfAlignment);
+        Assert.AreEqual(GridAxisAlignment.Shrink, containers[0].groups[0].normal.style.GridLayoutColAlignment);
+        Assert.AreEqual(GridAxisAlignment.Fit, containers[0].groups[0].normal.style.GridLayoutRowAlignment);
     }
 
     [Test]
@@ -389,8 +389,8 @@ style myStyle {
         var containers = styleSheet.styleGroupContainers;
         Assert.AreEqual(1, containers.Length);
 
-        Assert.AreEqual(GridLayoutDensity.Dense, containers[0].groups[0].normal.GridLayoutDensity);
-        Assert.AreEqual(GridLayoutDensity.Sparse, containers[0].groups[0].hover.GridLayoutDensity);
+        Assert.AreEqual(GridLayoutDensity.Dense, containers[0].groups[0].normal.style.GridLayoutDensity);
+        Assert.AreEqual(GridLayoutDensity.Sparse, containers[0].groups[0].hover.style.GridLayoutDensity);
     }
 
     [Test]
@@ -409,7 +409,7 @@ style myStyle {
 
         var styleGroup = styleSheet.styleGroupContainers;
         Assert.AreEqual(1, styleGroup.Length);
-        Assert.AreEqual(LayoutDirection.Horizontal, styleGroup[0].groups[0].normal.GridLayoutDirection);
+        Assert.AreEqual(LayoutDirection.Horizontal, styleGroup[0].groups[0].normal.style.GridLayoutDirection);
     }
 
     [Test]
@@ -428,7 +428,7 @@ style myStyle {
 
         var styleGroup = styleSheet.styleGroupContainers;
         Assert.AreEqual(1, styleGroup.Length);
-        Assert.AreEqual(LayoutDirection.Vertical, styleGroup[0].groups[0].normal.FlexLayoutDirection);
+        Assert.AreEqual(LayoutDirection.Vertical, styleGroup[0].groups[0].normal.style.FlexLayoutDirection);
     }
 
     [Test]
@@ -448,11 +448,11 @@ style myStyle {
         var styleGroup = styleSheet.styleGroupContainers;
         Assert.AreEqual(1, styleGroup.Length);
 
-        Assert.AreEqual(4, styleGroup[0].groups[0].normal.GridLayoutColTemplate.Count);
-        Assert.AreEqual(new GridTrackSize(1, GridTemplateUnit.MaxContent), styleGroup[0].groups[0].normal.GridLayoutColTemplate[0]);
-        Assert.AreEqual(new GridTrackSize(1, GridTemplateUnit.MaxContent), styleGroup[0].groups[0].normal.GridLayoutColTemplate[1]);
-        Assert.AreEqual(new GridTrackSize(2, GridTemplateUnit.FractionalRemaining), styleGroup[0].groups[0].normal.GridLayoutColTemplate[2]);
-        Assert.AreEqual(new GridTrackSize(480, GridTemplateUnit.Pixel), styleGroup[0].groups[0].normal.GridLayoutColTemplate[3]);
+        Assert.AreEqual(4, styleGroup[0].groups[0].normal.style.GridLayoutColTemplate.Count);
+        Assert.AreEqual(new GridTrackSize(1, GridTemplateUnit.MaxContent), styleGroup[0].groups[0].normal.style.GridLayoutColTemplate[0]);
+        Assert.AreEqual(new GridTrackSize(1, GridTemplateUnit.MaxContent), styleGroup[0].groups[0].normal.style.GridLayoutColTemplate[1]);
+        Assert.AreEqual(new GridTrackSize(2, GridTemplateUnit.FractionalRemaining), styleGroup[0].groups[0].normal.style.GridLayoutColTemplate[2]);
+        Assert.AreEqual(new GridTrackSize(480, GridTemplateUnit.Pixel), styleGroup[0].groups[0].normal.style.GridLayoutColTemplate[3]);
     }
 
     [Test]
@@ -472,11 +472,11 @@ style myStyle {
         var styleGroup = styleSheet.styleGroupContainers;
         Assert.AreEqual(1, styleGroup.Length);
 
-        Assert.AreEqual(4, styleGroup[0].groups[0].normal.GridLayoutRowTemplate.Count);
-        Assert.AreEqual(new GridTrackSize(1, GridTemplateUnit.MaxContent), styleGroup[0].groups[0].normal.GridLayoutRowTemplate[0]);
-        Assert.AreEqual(new GridTrackSize(1, GridTemplateUnit.MaxContent), styleGroup[0].groups[0].normal.GridLayoutRowTemplate[1]);
-        Assert.AreEqual(new GridTrackSize(2, GridTemplateUnit.FractionalRemaining), styleGroup[0].groups[0].normal.GridLayoutRowTemplate[2]);
-        Assert.AreEqual(new GridTrackSize(480, GridTemplateUnit.Pixel), styleGroup[0].groups[0].normal.GridLayoutRowTemplate[3]);
+        Assert.AreEqual(4, styleGroup[0].groups[0].normal.style.GridLayoutRowTemplate.Count);
+        Assert.AreEqual(new GridTrackSize(1, GridTemplateUnit.MaxContent), styleGroup[0].groups[0].normal.style.GridLayoutRowTemplate[0]);
+        Assert.AreEqual(new GridTrackSize(1, GridTemplateUnit.MaxContent), styleGroup[0].groups[0].normal.style.GridLayoutRowTemplate[1]);
+        Assert.AreEqual(new GridTrackSize(2, GridTemplateUnit.FractionalRemaining), styleGroup[0].groups[0].normal.style.GridLayoutRowTemplate[2]);
+        Assert.AreEqual(new GridTrackSize(480, GridTemplateUnit.Pixel), styleGroup[0].groups[0].normal.style.GridLayoutRowTemplate[3]);
     }
 
     [Test]
@@ -495,8 +495,8 @@ style myStyle {
         var styleGroup = styleSheet.styleGroupContainers;
         Assert.AreEqual(1, styleGroup.Length);
 
-        Assert.AreEqual(new GridTrackSize(1, GridTemplateUnit.FractionalRemaining), styleGroup[0].groups[0].normal.GridLayoutMainAxisAutoSize);
-        Assert.AreEqual(new GridTrackSize(42, GridTemplateUnit.Pixel), styleGroup[0].groups[0].normal.GridLayoutCrossAxisAutoSize);
+        Assert.AreEqual(new GridTrackSize(1, GridTemplateUnit.FractionalRemaining), styleGroup[0].groups[0].normal.style.GridLayoutMainAxisAutoSize);
+        Assert.AreEqual(new GridTrackSize(42, GridTemplateUnit.Pixel), styleGroup[0].groups[0].normal.style.GridLayoutCrossAxisAutoSize);
     }
 
     [Test]
@@ -515,8 +515,8 @@ style myStyle {
         var styleGroup = styleSheet.styleGroupContainers;
         Assert.AreEqual(1, styleGroup.Length);
 
-        Assert.AreEqual(9, styleGroup[0].groups[0].normal.GridLayoutColGap);
-        Assert.AreEqual(42.01f, styleGroup[0].groups[0].normal.GridLayoutRowGap);
+        Assert.AreEqual(9, styleGroup[0].groups[0].normal.style.GridLayoutColGap);
+        Assert.AreEqual(42.01f, styleGroup[0].groups[0].normal.style.GridLayoutRowGap);
     }
 
     [Test]
@@ -536,9 +536,9 @@ style myStyle {
         var styleGroup = styleSheet.styleGroupContainers;
         Assert.AreEqual(1, styleGroup.Length);
 
-        Assert.AreEqual(CrossAxisAlignment.Center, styleGroup[0].groups[0].normal.FlexItemSelfAlignment);
-        Assert.AreEqual(CrossAxisAlignment.Stretch, styleGroup[0].groups[0].normal.FlexLayoutCrossAxisAlignment);
-        Assert.AreEqual(MainAxisAlignment.SpaceAround, styleGroup[0].groups[0].normal.FlexLayoutMainAxisAlignment);
+        Assert.AreEqual(CrossAxisAlignment.Center, styleGroup[0].groups[0].normal.style.FlexItemSelfAlignment);
+        Assert.AreEqual(CrossAxisAlignment.Stretch, styleGroup[0].groups[0].normal.style.FlexLayoutCrossAxisAlignment);
+        Assert.AreEqual(MainAxisAlignment.SpaceAround, styleGroup[0].groups[0].normal.style.FlexLayoutMainAxisAlignment);
     }
 
     [Test]
@@ -560,10 +560,10 @@ style myStyle {
         var styleGroup = styleSheet.styleGroupContainers;
         Assert.AreEqual(1, styleGroup.Length);
 
-        Assert.AreEqual(2, styleGroup[0].groups[0].normal.FlexItemOrder);
-        Assert.AreEqual(1, styleGroup[0].groups[0].normal.FlexItemGrow);
-        Assert.AreEqual(0, styleGroup[0].groups[0].normal.FlexItemShrink);
-        Assert.AreEqual(LayoutWrap.WrapReverse, styleGroup[0].groups[0].normal.FlexLayoutWrap);
+        Assert.AreEqual(2, styleGroup[0].groups[0].normal.style.FlexItemOrder);
+        Assert.AreEqual(1, styleGroup[0].groups[0].normal.style.FlexItemGrow);
+        Assert.AreEqual(0, styleGroup[0].groups[0].normal.style.FlexItemShrink);
+        Assert.AreEqual(LayoutWrap.WrapReverse, styleGroup[0].groups[0].normal.style.FlexLayoutWrap);
     }
 
     [Test]
@@ -602,30 +602,30 @@ style border5 {
         var styleGroup = styleSheet.styleGroupContainers;
         Assert.AreEqual(5, styleGroup.Length);
 
-        Assert.AreEqual(new UIFixedLength(1), styleGroup[0].groups[0].normal.BorderTop);
-        Assert.AreEqual(new UIFixedLength(0.02f, UIFixedUnit.Percent), styleGroup[0].groups[0].normal.BorderRight);
-        Assert.AreEqual(new UIFixedLength(3, UIFixedUnit.ViewportWidth), styleGroup[0].groups[0].normal.BorderBottom);
-        Assert.AreEqual(new UIFixedLength(4, UIFixedUnit.Em), styleGroup[0].groups[0].normal.BorderLeft);
+        Assert.AreEqual(new UIFixedLength(1), styleGroup[0].groups[0].normal.style.BorderTop);
+        Assert.AreEqual(new UIFixedLength(0.02f, UIFixedUnit.Percent), styleGroup[0].groups[0].normal.style.BorderRight);
+        Assert.AreEqual(new UIFixedLength(3, UIFixedUnit.ViewportWidth), styleGroup[0].groups[0].normal.style.BorderBottom);
+        Assert.AreEqual(new UIFixedLength(4, UIFixedUnit.Em), styleGroup[0].groups[0].normal.style.BorderLeft);
 
-        Assert.AreEqual(new UIFixedLength(1), styleGroup[1].groups[0].normal.BorderTop);
-        Assert.AreEqual(new UIFixedLength(20), styleGroup[1].groups[0].normal.BorderRight);
-        Assert.AreEqual(new UIFixedLength(3, UIFixedUnit.ViewportWidth), styleGroup[1].groups[0].normal.BorderBottom);
-        Assert.AreEqual(new UIFixedLength(20), styleGroup[1].groups[0].normal.BorderLeft);
+        Assert.AreEqual(new UIFixedLength(1), styleGroup[1].groups[0].normal.style.BorderTop);
+        Assert.AreEqual(new UIFixedLength(20), styleGroup[1].groups[0].normal.style.BorderRight);
+        Assert.AreEqual(new UIFixedLength(3, UIFixedUnit.ViewportWidth), styleGroup[1].groups[0].normal.style.BorderBottom);
+        Assert.AreEqual(new UIFixedLength(20), styleGroup[1].groups[0].normal.style.BorderLeft);
 
-        Assert.AreEqual(new UIFixedLength(1), styleGroup[2].groups[0].normal.BorderTop);
-        Assert.AreEqual(new UIFixedLength(0.02f, UIFixedUnit.Percent), styleGroup[2].groups[0].normal.BorderRight);
-        Assert.AreEqual(new UIFixedLength(1), styleGroup[2].groups[0].normal.BorderBottom);
-        Assert.AreEqual(new UIFixedLength(0.02f, UIFixedUnit.Percent), styleGroup[2].groups[0].normal.BorderLeft);
+        Assert.AreEqual(new UIFixedLength(1), styleGroup[2].groups[0].normal.style.BorderTop);
+        Assert.AreEqual(new UIFixedLength(0.02f, UIFixedUnit.Percent), styleGroup[2].groups[0].normal.style.BorderRight);
+        Assert.AreEqual(new UIFixedLength(1), styleGroup[2].groups[0].normal.style.BorderBottom);
+        Assert.AreEqual(new UIFixedLength(0.02f, UIFixedUnit.Percent), styleGroup[2].groups[0].normal.style.BorderLeft);
 
-        Assert.AreEqual(new UIFixedLength(5), styleGroup[3].groups[0].normal.BorderTop);
-        Assert.AreEqual(new UIFixedLength(5), styleGroup[3].groups[0].normal.BorderRight);
-        Assert.AreEqual(new UIFixedLength(5), styleGroup[3].groups[0].normal.BorderBottom);
-        Assert.AreEqual(new UIFixedLength(5), styleGroup[3].groups[0].normal.BorderLeft);
+        Assert.AreEqual(new UIFixedLength(5), styleGroup[3].groups[0].normal.style.BorderTop);
+        Assert.AreEqual(new UIFixedLength(5), styleGroup[3].groups[0].normal.style.BorderRight);
+        Assert.AreEqual(new UIFixedLength(5), styleGroup[3].groups[0].normal.style.BorderBottom);
+        Assert.AreEqual(new UIFixedLength(5), styleGroup[3].groups[0].normal.style.BorderLeft);
 
-        Assert.AreEqual(new UIFixedLength(1), styleGroup[4].groups[0].normal.BorderTop);
-        Assert.AreEqual(new UIFixedLength(20, UIFixedUnit.ViewportHeight), styleGroup[4].groups[0].normal.BorderRight);
-        Assert.AreEqual(new UIFixedLength(2, UIFixedUnit.Em), styleGroup[4].groups[0].normal.BorderBottom);
-        Assert.AreEqual(new UIFixedLength(4), styleGroup[4].groups[0].normal.BorderLeft);
+        Assert.AreEqual(new UIFixedLength(1), styleGroup[4].groups[0].normal.style.BorderTop);
+        Assert.AreEqual(new UIFixedLength(20, UIFixedUnit.ViewportHeight), styleGroup[4].groups[0].normal.style.BorderRight);
+        Assert.AreEqual(new UIFixedLength(2, UIFixedUnit.Em), styleGroup[4].groups[0].normal.style.BorderBottom);
+        Assert.AreEqual(new UIFixedLength(4), styleGroup[4].groups[0].normal.style.BorderLeft);
     }
 
     [Test]
@@ -664,30 +664,30 @@ style border5 {
         var styleGroup = styleSheet.styleGroupContainers;
         Assert.AreEqual(5, styleGroup.Length);
 
-        Assert.AreEqual(new UIFixedLength(1), styleGroup[0].groups[0].normal.BorderRadiusTopLeft);
-        Assert.AreEqual(new UIFixedLength(0.02f, UIFixedUnit.Percent), styleGroup[0].groups[0].normal.BorderRadiusTopRight);
-        Assert.AreEqual(new UIFixedLength(3, UIFixedUnit.ViewportWidth), styleGroup[0].groups[0].normal.BorderRadiusBottomRight);
-        Assert.AreEqual(new UIFixedLength(4, UIFixedUnit.Em), styleGroup[0].groups[0].normal.BorderRadiusBottomLeft);
+        Assert.AreEqual(new UIFixedLength(1), styleGroup[0].groups[0].normal.style.BorderRadiusTopLeft);
+        Assert.AreEqual(new UIFixedLength(0.02f, UIFixedUnit.Percent), styleGroup[0].groups[0].normal.style.BorderRadiusTopRight);
+        Assert.AreEqual(new UIFixedLength(3, UIFixedUnit.ViewportWidth), styleGroup[0].groups[0].normal.style.BorderRadiusBottomRight);
+        Assert.AreEqual(new UIFixedLength(4, UIFixedUnit.Em), styleGroup[0].groups[0].normal.style.BorderRadiusBottomLeft);
 
-        Assert.AreEqual(new UIFixedLength(1), styleGroup[1].groups[0].normal.BorderRadiusTopLeft);
-        Assert.AreEqual(new UIFixedLength(20), styleGroup[1].groups[0].normal.BorderRadiusTopRight);
-        Assert.AreEqual(new UIFixedLength(3, UIFixedUnit.ViewportWidth), styleGroup[1].groups[0].normal.BorderRadiusBottomRight);
-        Assert.AreEqual(new UIFixedLength(20), styleGroup[1].groups[0].normal.BorderRadiusBottomLeft);
+        Assert.AreEqual(new UIFixedLength(1), styleGroup[1].groups[0].normal.style.BorderRadiusTopLeft);
+        Assert.AreEqual(new UIFixedLength(20), styleGroup[1].groups[0].normal.style.BorderRadiusTopRight);
+        Assert.AreEqual(new UIFixedLength(3, UIFixedUnit.ViewportWidth), styleGroup[1].groups[0].normal.style.BorderRadiusBottomRight);
+        Assert.AreEqual(new UIFixedLength(20), styleGroup[1].groups[0].normal.style.BorderRadiusBottomLeft);
 
-        Assert.AreEqual(new UIFixedLength(1), styleGroup[2].groups[0].normal.BorderRadiusTopLeft);
-        Assert.AreEqual(new UIFixedLength(0.02f, UIFixedUnit.Percent), styleGroup[2].groups[0].normal.BorderRadiusTopRight);
-        Assert.AreEqual(new UIFixedLength(1), styleGroup[2].groups[0].normal.BorderRadiusBottomRight);
-        Assert.AreEqual(new UIFixedLength(0.02f, UIFixedUnit.Percent), styleGroup[2].groups[0].normal.BorderRadiusBottomLeft);
+        Assert.AreEqual(new UIFixedLength(1), styleGroup[2].groups[0].normal.style.BorderRadiusTopLeft);
+        Assert.AreEqual(new UIFixedLength(0.02f, UIFixedUnit.Percent), styleGroup[2].groups[0].normal.style.BorderRadiusTopRight);
+        Assert.AreEqual(new UIFixedLength(1), styleGroup[2].groups[0].normal.style.BorderRadiusBottomRight);
+        Assert.AreEqual(new UIFixedLength(0.02f, UIFixedUnit.Percent), styleGroup[2].groups[0].normal.style.BorderRadiusBottomLeft);
 
-        Assert.AreEqual(new UIFixedLength(5), styleGroup[3].groups[0].normal.BorderRadiusTopLeft);
-        Assert.AreEqual(new UIFixedLength(5), styleGroup[3].groups[0].normal.BorderRadiusTopRight);
-        Assert.AreEqual(new UIFixedLength(5), styleGroup[3].groups[0].normal.BorderRadiusBottomRight);
-        Assert.AreEqual(new UIFixedLength(5), styleGroup[3].groups[0].normal.BorderRadiusBottomLeft);
+        Assert.AreEqual(new UIFixedLength(5), styleGroup[3].groups[0].normal.style.BorderRadiusTopLeft);
+        Assert.AreEqual(new UIFixedLength(5), styleGroup[3].groups[0].normal.style.BorderRadiusTopRight);
+        Assert.AreEqual(new UIFixedLength(5), styleGroup[3].groups[0].normal.style.BorderRadiusBottomRight);
+        Assert.AreEqual(new UIFixedLength(5), styleGroup[3].groups[0].normal.style.BorderRadiusBottomLeft);
 
-        Assert.AreEqual(new UIFixedLength(1), styleGroup[4].groups[0].normal.BorderRadiusTopLeft);
-        Assert.AreEqual(new UIFixedLength(20, UIFixedUnit.ViewportHeight), styleGroup[4].groups[0].normal.BorderRadiusTopRight);
-        Assert.AreEqual(new UIFixedLength(2, UIFixedUnit.Em), styleGroup[4].groups[0].normal.BorderRadiusBottomRight);
-        Assert.AreEqual(new UIFixedLength(4), styleGroup[4].groups[0].normal.BorderRadiusBottomLeft);
+        Assert.AreEqual(new UIFixedLength(1), styleGroup[4].groups[0].normal.style.BorderRadiusTopLeft);
+        Assert.AreEqual(new UIFixedLength(20, UIFixedUnit.ViewportHeight), styleGroup[4].groups[0].normal.style.BorderRadiusTopRight);
+        Assert.AreEqual(new UIFixedLength(2, UIFixedUnit.Em), styleGroup[4].groups[0].normal.style.BorderRadiusBottomRight);
+        Assert.AreEqual(new UIFixedLength(4), styleGroup[4].groups[0].normal.style.BorderRadiusBottomLeft);
     }
 
     [Test]
@@ -708,17 +708,17 @@ style trans4 { TransformPositionY = 15ah; }
         var styleGroup = styleSheet.styleGroupContainers;
         Assert.AreEqual(4, styleGroup.Length);
 
-        Assert.AreEqual(new TransformOffset(20, TransformUnit.ScreenWidth), styleGroup[0].groups[0].normal.TransformPositionX);
-        Assert.AreEqual(new TransformOffset(10, TransformUnit.ContentAreaHeight), styleGroup[0].groups[0].normal.TransformPositionY);
+        Assert.AreEqual(new TransformOffset(20, TransformUnit.ScreenWidth), styleGroup[0].groups[0].normal.style.TransformPositionX);
+        Assert.AreEqual(new TransformOffset(10, TransformUnit.ContentAreaHeight), styleGroup[0].groups[0].normal.style.TransformPositionY);
 
-        Assert.AreEqual(new TransformOffset(20, TransformUnit.ScreenWidth), styleGroup[1].groups[0].normal.TransformPositionX);
-        Assert.AreEqual(new TransformOffset(20, TransformUnit.ScreenWidth), styleGroup[1].groups[0].normal.TransformPositionY);
+        Assert.AreEqual(new TransformOffset(20, TransformUnit.ScreenWidth), styleGroup[1].groups[0].normal.style.TransformPositionX);
+        Assert.AreEqual(new TransformOffset(20, TransformUnit.ScreenWidth), styleGroup[1].groups[0].normal.style.TransformPositionY);
 
-        Assert.AreEqual(new TransformOffset(20, TransformUnit.ScreenWidth), styleGroup[2].groups[0].normal.TransformPositionX);
-        Assert.AreEqual(TransformOffset.Unset, styleGroup[2].groups[0].normal.TransformPositionY);
+        Assert.AreEqual(new TransformOffset(20, TransformUnit.ScreenWidth), styleGroup[2].groups[0].normal.style.TransformPositionX);
+        Assert.AreEqual(TransformOffset.Unset, styleGroup[2].groups[0].normal.style.TransformPositionY);
 
-        Assert.AreEqual(TransformOffset.Unset, styleGroup[3].groups[0].normal.TransformPositionX);
-        Assert.AreEqual(new TransformOffset(15, TransformUnit.AnchorHeight), styleGroup[3].groups[0].normal.TransformPositionY);
+        Assert.AreEqual(TransformOffset.Unset, styleGroup[3].groups[0].normal.style.TransformPositionX);
+        Assert.AreEqual(new TransformOffset(15, TransformUnit.AnchorHeight), styleGroup[3].groups[0].normal.style.TransformPositionY);
     }
 
     [Test]
@@ -751,37 +751,37 @@ style transBeh4 { TransformBehaviorY = AnchorMaxOffset; }
         StyleSheet styleSheet = NewStyleSheetCompiler().Compile("test", nodes);
 
         var styleGroup = styleSheet.styleGroupContainers;
-        Assert.AreEqual(1, styleGroup[0].groups[0].normal.TransformScaleX);
-        Assert.AreEqual(2, styleGroup[0].groups[0].normal.TransformScaleY);
+        Assert.AreEqual(1, styleGroup[0].groups[0].normal.style.TransformScaleX);
+        Assert.AreEqual(2, styleGroup[0].groups[0].normal.style.TransformScaleY);
 
-        Assert.AreEqual(3, styleGroup[1].groups[0].normal.TransformScaleX);
-        Assert.AreEqual(0, styleGroup[1].groups[0].normal.TransformScaleY);
+        Assert.AreEqual(3, styleGroup[1].groups[0].normal.style.TransformScaleX);
+        Assert.AreEqual(0, styleGroup[1].groups[0].normal.style.TransformScaleY);
 
-        Assert.AreEqual(0, styleGroup[2].groups[0].normal.TransformScaleX);
-        Assert.AreEqual(4, styleGroup[2].groups[0].normal.TransformScaleY);
+        Assert.AreEqual(0, styleGroup[2].groups[0].normal.style.TransformScaleX);
+        Assert.AreEqual(4, styleGroup[2].groups[0].normal.style.TransformScaleY);
 
-        Assert.AreEqual(new UIFixedLength(0.1f, UIFixedUnit.Percent), styleGroup[3].groups[0].normal.TransformPivotX);
-        Assert.AreEqual(new UIFixedLength(10), styleGroup[3].groups[0].normal.TransformPivotY);
+        Assert.AreEqual(new UIFixedLength(0.1f, UIFixedUnit.Percent), styleGroup[3].groups[0].normal.style.TransformPivotX);
+        Assert.AreEqual(new UIFixedLength(10), styleGroup[3].groups[0].normal.style.TransformPivotY);
 
-        Assert.AreEqual(new UIFixedLength(0.1f, UIFixedUnit.Percent), styleGroup[4].groups[0].normal.TransformPivotX);
-        Assert.AreEqual(UIFixedLength.Unset, styleGroup[4].groups[0].normal.TransformPivotY);
+        Assert.AreEqual(new UIFixedLength(0.1f, UIFixedUnit.Percent), styleGroup[4].groups[0].normal.style.TransformPivotX);
+        Assert.AreEqual(UIFixedLength.Unset, styleGroup[4].groups[0].normal.style.TransformPivotY);
 
-        Assert.AreEqual(UIFixedLength.Unset, styleGroup[5].groups[0].normal.TransformPivotX);
-        Assert.AreEqual(new UIFixedLength(20), styleGroup[5].groups[0].normal.TransformPivotY);
+        Assert.AreEqual(UIFixedLength.Unset, styleGroup[5].groups[0].normal.style.TransformPivotX);
+        Assert.AreEqual(new UIFixedLength(20), styleGroup[5].groups[0].normal.style.TransformPivotY);
 
-        Assert.AreEqual(90, styleGroup[6].groups[0].normal.TransformRotation);
+        Assert.AreEqual(90, styleGroup[6].groups[0].normal.style.TransformRotation);
 
-        Assert.AreEqual(TransformBehavior.LayoutOffset, styleGroup[7].groups[0].normal.TransformBehaviorX);
-        Assert.AreEqual(TransformBehavior.AnchorMinOffset, styleGroup[7].groups[0].normal.TransformBehaviorY);
+        Assert.AreEqual(TransformBehavior.LayoutOffset, styleGroup[7].groups[0].normal.style.TransformBehaviorX);
+        Assert.AreEqual(TransformBehavior.AnchorMinOffset, styleGroup[7].groups[0].normal.style.TransformBehaviorY);
 
-        Assert.AreEqual(TransformBehavior.PivotOffset, styleGroup[8].groups[0].normal.TransformBehaviorX);
-        Assert.AreEqual(TransformBehavior.PivotOffset, styleGroup[8].groups[0].normal.TransformBehaviorY);
+        Assert.AreEqual(TransformBehavior.PivotOffset, styleGroup[8].groups[0].normal.style.TransformBehaviorX);
+        Assert.AreEqual(TransformBehavior.PivotOffset, styleGroup[8].groups[0].normal.style.TransformBehaviorY);
 
-        Assert.AreEqual(TransformBehavior.PivotOffset, styleGroup[9].groups[0].normal.TransformBehaviorX);
-        Assert.AreEqual(TransformBehavior.Unset, styleGroup[9].groups[0].normal.TransformBehaviorY);
+        Assert.AreEqual(TransformBehavior.PivotOffset, styleGroup[9].groups[0].normal.style.TransformBehaviorX);
+        Assert.AreEqual(TransformBehavior.Unset, styleGroup[9].groups[0].normal.style.TransformBehaviorY);
 
-        Assert.AreEqual(TransformBehavior.Unset, styleGroup[10].groups[0].normal.TransformBehaviorX);
-        Assert.AreEqual(TransformBehavior.AnchorMaxOffset, styleGroup[10].groups[0].normal.TransformBehaviorY);
+        Assert.AreEqual(TransformBehavior.Unset, styleGroup[10].groups[0].normal.style.TransformBehaviorX);
+        Assert.AreEqual(TransformBehavior.AnchorMaxOffset, styleGroup[10].groups[0].normal.style.TransformBehaviorY);
     }
 
     [Test]
@@ -808,19 +808,19 @@ style size2 {
 
         StyleSheet styleSheet = NewStyleSheetCompiler().Compile("test", nodes);
         var styleContainer = styleSheet.styleGroupContainers;
-        Assert.AreEqual(new UIMeasurement(1, UIMeasurementUnit.ParentContentArea), styleContainer[0].groups[0].normal.MinWidth);
-        Assert.AreEqual(new UIMeasurement(300), styleContainer[0].groups[0].normal.MinHeight);
-        Assert.AreEqual(new UIMeasurement(20), styleContainer[0].groups[0].normal.PreferredWidth);
-        Assert.AreEqual(new UIMeasurement(1000), styleContainer[0].groups[0].normal.PreferredHeight);
-        Assert.AreEqual(new UIMeasurement(400), styleContainer[0].groups[0].normal.MaxWidth);
-        Assert.AreEqual(new UIMeasurement(2), styleContainer[0].groups[0].normal.MaxHeight);
+        Assert.AreEqual(new UIMeasurement(1, UIMeasurementUnit.ParentContentArea), styleContainer[0].groups[0].normal.style.MinWidth);
+        Assert.AreEqual(new UIMeasurement(300), styleContainer[0].groups[0].normal.style.MinHeight);
+        Assert.AreEqual(new UIMeasurement(20), styleContainer[0].groups[0].normal.style.PreferredWidth);
+        Assert.AreEqual(new UIMeasurement(1000), styleContainer[0].groups[0].normal.style.PreferredHeight);
+        Assert.AreEqual(new UIMeasurement(400), styleContainer[0].groups[0].normal.style.MaxWidth);
+        Assert.AreEqual(new UIMeasurement(2), styleContainer[0].groups[0].normal.style.MaxHeight);
 
-        Assert.AreEqual(new UIMeasurement(1000), styleContainer[1].groups[0].normal.PreferredWidth);
-        Assert.AreEqual(new UIMeasurement(1111), styleContainer[1].groups[0].normal.PreferredHeight);
-        Assert.AreEqual(new UIMeasurement(200), styleContainer[1].groups[0].normal.MinWidth);
-        Assert.AreEqual(new UIMeasurement(200), styleContainer[1].groups[0].normal.MinHeight);
-        Assert.AreEqual(new UIMeasurement(1500), styleContainer[1].groups[0].normal.MaxWidth);
-        Assert.AreEqual(new UIMeasurement(1200), styleContainer[1].groups[0].normal.MaxHeight);
+        Assert.AreEqual(new UIMeasurement(1000), styleContainer[1].groups[0].normal.style.PreferredWidth);
+        Assert.AreEqual(new UIMeasurement(1111), styleContainer[1].groups[0].normal.style.PreferredHeight);
+        Assert.AreEqual(new UIMeasurement(200), styleContainer[1].groups[0].normal.style.MinWidth);
+        Assert.AreEqual(new UIMeasurement(200), styleContainer[1].groups[0].normal.style.MinHeight);
+        Assert.AreEqual(new UIMeasurement(1500), styleContainer[1].groups[0].normal.style.MaxWidth);
+        Assert.AreEqual(new UIMeasurement(1200), styleContainer[1].groups[0].normal.style.MaxHeight);
     }
 
     [Test]
@@ -846,16 +846,16 @@ style anchoring {
 
         StyleSheet styleSheet = NewStyleSheetCompiler().Compile("test", nodes);
         var styleGroup = styleSheet.styleGroupContainers;
-        Assert.AreEqual(LayoutType.Fixed, styleGroup[0].groups[0].normal.LayoutType);
-        Assert.AreEqual(LayoutBehavior.Ignored, styleGroup[0].groups[0].normal.LayoutBehavior);
-        Assert.AreEqual(AnchorTarget.Viewport, styleGroup[0].groups[0].normal.AnchorTarget);
-        Assert.AreEqual(new UIFixedLength(10), styleGroup[0].groups[0].normal.AnchorTop);
-        Assert.AreEqual(new UIFixedLength(0.2f, UIFixedUnit.Percent), styleGroup[0].groups[0].normal.AnchorRight);
-        Assert.AreEqual(new UIFixedLength(400), styleGroup[0].groups[0].normal.AnchorBottom);
-        Assert.AreEqual(new UIFixedLength(90, UIFixedUnit.ViewportHeight), styleGroup[0].groups[0].normal.AnchorLeft);
-        Assert.AreEqual(3, styleGroup[0].groups[0].normal.ZIndex);
-        Assert.AreEqual(RenderLayer.Screen, styleGroup[0].groups[0].normal.RenderLayer);
-        Assert.AreEqual(22, styleGroup[0].groups[0].normal.RenderLayerOffset);
+        Assert.AreEqual(LayoutType.Fixed, styleGroup[0].groups[0].normal.style.LayoutType);
+        Assert.AreEqual(LayoutBehavior.Ignored, styleGroup[0].groups[0].normal.style.LayoutBehavior);
+        Assert.AreEqual(AnchorTarget.Viewport, styleGroup[0].groups[0].normal.style.AnchorTarget);
+        Assert.AreEqual(new UIFixedLength(10), styleGroup[0].groups[0].normal.style.AnchorTop);
+        Assert.AreEqual(new UIFixedLength(0.2f, UIFixedUnit.Percent), styleGroup[0].groups[0].normal.style.AnchorRight);
+        Assert.AreEqual(new UIFixedLength(400), styleGroup[0].groups[0].normal.style.AnchorBottom);
+        Assert.AreEqual(new UIFixedLength(90, UIFixedUnit.ViewportHeight), styleGroup[0].groups[0].normal.style.AnchorLeft);
+        Assert.AreEqual(3, styleGroup[0].groups[0].normal.style.ZIndex);
+        Assert.AreEqual(RenderLayer.Screen, styleGroup[0].groups[0].normal.style.RenderLayer);
+        Assert.AreEqual(22, styleGroup[0].groups[0].normal.style.RenderLayerOffset);
     }
 
     [Test]
@@ -876,8 +876,8 @@ style teXt {
 
         StyleSheet styleSheet = NewStyleSheetCompiler().Compile("test", nodes);
         var styleGroup = styleSheet.styleGroupContainers;
-        Assert.AreEqual(Color.red, styleGroup[0].groups[0].normal.TextColor);
-        Assert.AreEqual("Gotham-Medium SDF", styleGroup[0].groups[0].normal.TextFontAsset.name);
+        Assert.AreEqual(Color.red, styleGroup[0].groups[0].normal.style.TextColor);
+        Assert.AreEqual("Gotham-Medium SDF", styleGroup[0].groups[0].normal.style.TextFontAsset.name);
         Assert.AreEqual(FontStyle.Normal
                         | FontStyle.Bold
                         | FontStyle.Italic
@@ -885,9 +885,9 @@ style teXt {
                         | FontStyle.Superscript
                         | FontStyle.Underline
                         | FontStyle.Highlight
-                        | FontStyle.SmallCaps, styleGroup[0].groups[0].normal.TextFontStyle);
-        Assert.AreEqual(TextAlignment.Center, styleGroup[0].groups[0].normal.TextAlignment);
-        Assert.AreEqual(new UIFixedLength(14), styleGroup[0].groups[0].normal.TextFontSize);
+                        | FontStyle.SmallCaps, styleGroup[0].groups[0].normal.style.TextFontStyle);
+        Assert.AreEqual(TextAlignment.Center, styleGroup[0].groups[0].normal.style.TextAlignment);
+        Assert.AreEqual(new UIFixedLength(14), styleGroup[0].groups[0].normal.style.TextFontSize);
     }
 
     [Test]
@@ -903,7 +903,7 @@ style xyz {
 
         StyleSheet styleSheet = NewStyleSheetCompiler().Compile("test", nodes);
         var styleGroup = styleSheet.styleGroupContainers;
-        Assert.AreEqual(Color.red, styleGroup[0].groups[0].normal.BackgroundColor);
+        Assert.AreEqual(Color.red, styleGroup[0].groups[0].normal.style.BackgroundColor);
     }
 
     [Test]
@@ -1022,6 +1022,39 @@ style xyz {
         Assert.AreEqual(3000, animationData.options.duration);
         Assert.AreEqual(EasingFunction.SineEaseOut, animationData.options.timingFunction);
     }
+    
+    [Test]
+    public void ReferenceAnimationInStyle() {
+        var nodes = StyleParser.Parse(@"
+            animation anim1 {
+                [options] {
+                    duration = 500;
+                }
+
+                [keyframes] {
+                    0% { BackgroundColor = @regularColor; }
+                    20% { BackgroundColor = yellow; }
+                    80% { BackgroundColor = yellow; }
+                    100% { BackgroundColor = @regularColor;}
+                }
+            }
+
+            style someStyle {
+                run animation(anim1);
+                [hover] {
+                    run animation(anim1);
+                }
+            }
+
+            const regularColor = red;
+        ".Trim());
+        StyleSheet styleSheet = NewStyleSheetCompiler().Compile("test", nodes);
+        Assert.AreEqual(1, styleSheet.styleGroupContainers.Length);
+        UIStyleGroupContainer container = styleSheet.styleGroupContainers[0];
+        Assert.AreEqual("someStyle", container.name);
+        Assert.AreEqual(1, container.groups[0].normal.runCommands.Count);
+        Assert.AreEqual(1, container.groups[0].hover.runCommands.Count);
+    }
 
     [Test]
     public void CompileBackgroundImageFromSpriteAtlas() {
@@ -1035,6 +1068,6 @@ style xyz {
         StyleSheet styleSheet = NewStyleSheetCompiler().Compile("test", nodes);
         
         var styleContainer = styleSheet.styleGroupContainers;
-        Assert.IsInstanceOf<Sprite>(styleContainer[0].groups[0].normal.BackgroundImage);
+        Assert.IsInstanceOf<Sprite>(styleContainer[0].groups[0].normal.style.BackgroundImage);
     }
 }

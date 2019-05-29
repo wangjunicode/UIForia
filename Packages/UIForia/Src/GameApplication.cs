@@ -19,11 +19,8 @@ namespace UIForia {
             GameApplication retn = new GameApplication(applicationId, templateRootPath);
             onBootstrap?.Invoke(retn);
             retn.SetCamera(camera);
-            UIView view = retn.CreateView("Default View", new Rect(0, 0, Screen.width, Screen.height), type);
-            retn.onUpdate += () => {
-                // todo if view was destroyed return or remove auto-update handler
-                view.SetSize(Screen.width, Screen.height);
-            };
+            retn.CreateView("Default View", new Rect(0, 0, Screen.width, Screen.height), type);
+          
             return retn;
         }
 

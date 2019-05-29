@@ -64,22 +64,6 @@ namespace UIForia.Compilers.Style {
             throw new ParseException($"Cannot find style file {fileName}");
         }
 
-        public UIStyleGroupContainer GetStyleGroupsByTagName(string idOrPath, string literalTemplate, string tagName) {
-            if (literalTemplate != null) {
-                return ImportStyleSheetFromString(idOrPath, literalTemplate).GetStyleGroupsByTagName(tagName);
-            }
-
-            return ImportStyleSheetFromFile(idOrPath).GetStyleGroupsByTagName(tagName);
-        }
-
-        public UIStyleGroupContainer GetStyleGroupByStyleName(string idOrPath, string literalTemplate, string styleName) {
-            if (literalTemplate != null) {
-                return ImportStyleSheetFromString(idOrPath, literalTemplate).GetStyleGroupByStyleName(styleName);
-            }
-
-            return ImportStyleSheetFromFile(idOrPath).GetStyleGroupByStyleName(styleName);
-        }
-
         public void Reset() {
             m_CachedStyleSheets.Clear();
             m_CurrentlyImportingStylesheets.Clear();

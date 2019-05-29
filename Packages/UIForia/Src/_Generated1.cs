@@ -628,6 +628,13 @@ namespace UIForia.Rendering {
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.TextTransform, (int)value), state); }
         }
         
+        public UIForia.Text.WhitespaceMode TextWhitespaceMode {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.TextWhitespaceMode, state).AsWhitespaceMode; }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.TextWhitespaceMode, (int)value), state); }
+        }
+        
         public UIForia.UIFixedLength AnchorTop {
             [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.AnchorTop, state).AsUIFixedLength; }
@@ -927,6 +934,7 @@ namespace UIForia.Rendering {
                     case StylePropertyId.TextShadowSoftness: return !FloatUtil.IsDefined(floatValue);
                     case StylePropertyId.TextShadowType: return valuePart0 == 0 || IntUtil.UnsetValue == valuePart0;
                     case StylePropertyId.TextTransform: return valuePart0 == 0 || IntUtil.UnsetValue == valuePart0;
+                    case StylePropertyId.TextWhitespaceMode: return valuePart0 == 0 || IntUtil.UnsetValue == valuePart0;
                     case StylePropertyId.AnchorTop: return !FloatUtil.IsDefined(floatValue) || valuePart1 == 0;
                     case StylePropertyId.AnchorRight: return !FloatUtil.IsDefined(floatValue) || valuePart1 == 0;
                     case StylePropertyId.AnchorBottom: return !FloatUtil.IsDefined(floatValue) || valuePart1 == 0;
@@ -1588,6 +1596,13 @@ namespace UIForia.Rendering {
             get { return (UIForia.Text.TextTransform)FindEnumProperty(StylePropertyId.TextTransform); }
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.TextTransform, (int)value)); }
+        }
+            
+        public UIForia.Text.WhitespaceMode TextWhitespaceMode {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return (UIForia.Text.WhitespaceMode)FindEnumProperty(StylePropertyId.TextWhitespaceMode); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.TextWhitespaceMode, (int)value)); }
         }
             
         public UIForia.UIFixedLength AnchorTop {
@@ -2621,6 +2636,16 @@ namespace UIForia.Rendering {
                 }
             }
 
+            public UIForia.Text.WhitespaceMode TextWhitespaceMode { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.TextWhitespaceMode, out property)) return property.AsWhitespaceMode;
+                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.TextWhitespaceMode), out property)) return property.AsWhitespaceMode;
+                    return DefaultStyleValues_Generated.TextWhitespaceMode;
+                }
+            }
+
             public UIForia.UIFixedLength AnchorTop { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
@@ -3597,6 +3622,14 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.TextTransform, state).AsTextTransform;
         }
         
+        public void SetTextWhitespaceMode(UIForia.Text.WhitespaceMode value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.TextWhitespaceMode, (int)value), state);
+        }
+
+        public UIForia.Text.WhitespaceMode GetTextWhitespaceMode(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.TextWhitespaceMode, state).AsWhitespaceMode;
+        }
+        
         public void SetAnchorTop(UIForia.UIFixedLength value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.AnchorTop, value), state);
         }
@@ -4010,6 +4043,8 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.TextShadowType, (int)TextShadowType);
 				case StylePropertyId.TextTransform:
 					 return new StyleProperty(StylePropertyId.TextTransform, (int)TextTransform);
+				case StylePropertyId.TextWhitespaceMode:
+					 return new StyleProperty(StylePropertyId.TextWhitespaceMode, (int)TextWhitespaceMode);
 				case StylePropertyId.AnchorTop:
 					 return new StyleProperty(StylePropertyId.AnchorTop, AnchorTop);
 				case StylePropertyId.AnchorRight:
@@ -4188,6 +4223,7 @@ namespace UIForia.Rendering {
                     case StylePropertyId.TextShadowSoftness: return true;
                     case StylePropertyId.TextShadowType: return true;
                     case StylePropertyId.TextTransform: return true;
+                    case StylePropertyId.TextWhitespaceMode: return true;
                     case StylePropertyId.ZIndex: return true;
                     case StylePropertyId.Layer: return true;
 

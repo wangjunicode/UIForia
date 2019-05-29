@@ -22,160 +22,158 @@ namespace UIForia.Editor {
     public static class CodeGen {
 
         internal static readonly PropertyGenerator[] properties = {
-            // Overflow
-            new PropertyGenerator<Overflow>(StylePropertyId.OverflowX, Overflow.Visible),
-            new PropertyGenerator<Overflow>(StylePropertyId.OverflowY, Overflow.Visible),
+                // Overflow
+                new PropertyGenerator<Overflow>(StylePropertyId.OverflowX, Overflow.Visible),
+                new PropertyGenerator<Overflow>(StylePropertyId.OverflowY, Overflow.Visible),
 
-            // Background
-            new AnimatedPropertyGenerator<Color>(StylePropertyId.BackgroundColor, ColorUtil.UnsetValue),
-            new AnimatedPropertyGenerator<Color>(StylePropertyId.BackgroundTint, ColorUtil.UnsetValue),
-            new AnimatedPropertyGenerator<Color>(StylePropertyId.BorderColorTop, ColorUtil.UnsetValue),
-            new AnimatedPropertyGenerator<Color>(StylePropertyId.BorderColorRight, ColorUtil.UnsetValue),
-            new AnimatedPropertyGenerator<Color>(StylePropertyId.BorderColorBottom, ColorUtil.UnsetValue),
-            new AnimatedPropertyGenerator<Color>(StylePropertyId.BorderColorLeft, ColorUtil.UnsetValue),
-            new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.BackgroundImageOffsetX, new UIFixedLength(0)),
-            new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.BackgroundImageOffsetY, new UIFixedLength(0)),
-            new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.BackgroundImageScaleX, new UIFixedLength(0)),
-            new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.BackgroundImageScaleY, new UIFixedLength(0)),
-            new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.BackgroundImageTileX, new UIFixedLength(0)),
-            new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.BackgroundImageTileY, new UIFixedLength(0)),
-            new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.BackgroundImageRotation, new UIFixedLength(0)),
-            new PropertyGenerator<Texture2D>(StylePropertyId.BackgroundImage, null),
-            new PropertyGenerator<string>(StylePropertyId.Painter, string.Empty),
+                // Background
+                new AnimatedPropertyGenerator<Color>(StylePropertyId.BackgroundColor, ColorUtil.UnsetValue),
+                new AnimatedPropertyGenerator<Color>(StylePropertyId.BackgroundTint, ColorUtil.UnsetValue),
+                new AnimatedPropertyGenerator<Color>(StylePropertyId.BorderColorTop, ColorUtil.UnsetValue),
+                new AnimatedPropertyGenerator<Color>(StylePropertyId.BorderColorRight, ColorUtil.UnsetValue),
+                new AnimatedPropertyGenerator<Color>(StylePropertyId.BorderColorBottom, ColorUtil.UnsetValue),
+                new AnimatedPropertyGenerator<Color>(StylePropertyId.BorderColorLeft, ColorUtil.UnsetValue),
+                new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.BackgroundImageOffsetX, new UIFixedLength(0)),
+                new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.BackgroundImageOffsetY, new UIFixedLength(0)),
+                new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.BackgroundImageScaleX, new UIFixedLength(0)),
+                new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.BackgroundImageScaleY, new UIFixedLength(0)),
+                new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.BackgroundImageTileX, new UIFixedLength(0)),
+                new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.BackgroundImageTileY, new UIFixedLength(0)),
+                new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.BackgroundImageRotation, new UIFixedLength(0)),
+                new PropertyGenerator<Texture2D>(StylePropertyId.BackgroundImage, null),
+                new PropertyGenerator<string>(StylePropertyId.Painter, string.Empty),
+                new AnimatedPropertyGenerator<float>(StylePropertyId.Opacity, 1, InheritanceType.Inherited),
+                new PropertyGenerator<CursorStyle>(StylePropertyId.Cursor, null),
+                new PropertyGenerator<Visibility>(StylePropertyId.Visibility, Visibility.Visible),
 
-            new AnimatedPropertyGenerator<float>(StylePropertyId.Opacity, 1, InheritanceType.Inherited),
-            new PropertyGenerator<CursorStyle>(StylePropertyId.Cursor, null),
-            new PropertyGenerator<Visibility>(StylePropertyId.Visibility, Visibility.Visible),
+                // Flex Item
+                new AnimatedPropertyGenerator<int>(StylePropertyId.FlexItemOrder, 0),
+                new AnimatedPropertyGenerator<int>(StylePropertyId.FlexItemGrow, 0),
+                new AnimatedPropertyGenerator<int>(StylePropertyId.FlexItemShrink, 0),
+                new PropertyGenerator<CrossAxisAlignment>(StylePropertyId.FlexItemSelfAlignment, CrossAxisAlignment.Unset),
 
-            // Flex Item
-            new AnimatedPropertyGenerator<int>(StylePropertyId.FlexItemOrder, 0),
-            new AnimatedPropertyGenerator<int>(StylePropertyId.FlexItemGrow, 0),
-            new AnimatedPropertyGenerator<int>(StylePropertyId.FlexItemShrink, 0),
-            new PropertyGenerator<CrossAxisAlignment>(StylePropertyId.FlexItemSelfAlignment, CrossAxisAlignment.Unset),
+                // Flex Layout
+                new PropertyGenerator<LayoutDirection>(StylePropertyId.FlexLayoutDirection, LayoutDirection.Row),
+                new PropertyGenerator<LayoutWrap>(StylePropertyId.FlexLayoutWrap, LayoutWrap.None),
+                new PropertyGenerator<MainAxisAlignment>(StylePropertyId.FlexLayoutMainAxisAlignment, MainAxisAlignment.Start),
+                new PropertyGenerator<CrossAxisAlignment>(StylePropertyId.FlexLayoutCrossAxisAlignment, CrossAxisAlignment.Start),
 
-            // Flex Layout
-            new PropertyGenerator<LayoutDirection>(StylePropertyId.FlexLayoutDirection, LayoutDirection.Row),
-            new PropertyGenerator<LayoutWrap>(StylePropertyId.FlexLayoutWrap, LayoutWrap.None),
-            new PropertyGenerator<MainAxisAlignment>(StylePropertyId.FlexLayoutMainAxisAlignment, MainAxisAlignment.Start),
-            new PropertyGenerator<CrossAxisAlignment>(StylePropertyId.FlexLayoutCrossAxisAlignment, CrossAxisAlignment.Start),
+                // Grid Item
+                new PropertyGenerator<int>(StylePropertyId.GridItemColStart, IntUtil.UnsetValue),
+                new PropertyGenerator<int>(StylePropertyId.GridItemColSpan, 1),
+                new PropertyGenerator<int>(StylePropertyId.GridItemRowStart, IntUtil.UnsetValue),
+                new PropertyGenerator<int>(StylePropertyId.GridItemRowSpan, 1),
+                new PropertyGenerator<GridAxisAlignment>(StylePropertyId.GridItemColSelfAlignment, GridAxisAlignment.Unset),
+                new PropertyGenerator<GridAxisAlignment>(StylePropertyId.GridItemRowSelfAlignment, GridAxisAlignment.Unset),
 
-            // Grid Item
-            new PropertyGenerator<int>(StylePropertyId.GridItemColStart, IntUtil.UnsetValue),
-            new PropertyGenerator<int>(StylePropertyId.GridItemColSpan, 1),
-            new PropertyGenerator<int>(StylePropertyId.GridItemRowStart, IntUtil.UnsetValue),
-            new PropertyGenerator<int>(StylePropertyId.GridItemRowSpan, 1),
-            new PropertyGenerator<GridAxisAlignment>(StylePropertyId.GridItemColSelfAlignment, GridAxisAlignment.Unset),
-            new PropertyGenerator<GridAxisAlignment>(StylePropertyId.GridItemRowSelfAlignment, GridAxisAlignment.Unset),
+                // Grid Layout
+                new PropertyGenerator<LayoutDirection>(StylePropertyId.GridLayoutDirection, LayoutDirection.Row),
+                new PropertyGenerator<GridLayoutDensity>(StylePropertyId.GridLayoutDensity, GridLayoutDensity.Sparse),
+                new PropertyGenerator<IReadOnlyList<GridTrackSize>>(StylePropertyId.GridLayoutColTemplate, ListPool<GridTrackSize>.Empty, InheritanceType.NotInherited, "ListPool<GridTrackSize>.Empty"),
+                new PropertyGenerator<IReadOnlyList<GridTrackSize>>(StylePropertyId.GridLayoutRowTemplate, ListPool<GridTrackSize>.Empty, InheritanceType.NotInherited, "ListPool<GridTrackSize>.Empty"),
+                new PropertyGenerator<GridTrackSize>(StylePropertyId.GridLayoutMainAxisAutoSize, GridTrackSize.MaxContent),
+                new PropertyGenerator<GridTrackSize>(StylePropertyId.GridLayoutCrossAxisAutoSize, GridTrackSize.FractionalRemaining),
+                new AnimatedPropertyGenerator<float>(StylePropertyId.GridLayoutColGap, 0),
+                new AnimatedPropertyGenerator<float>(StylePropertyId.GridLayoutRowGap, 0),
+                new PropertyGenerator<GridAxisAlignment>(StylePropertyId.GridLayoutColAlignment, GridAxisAlignment.Grow),
+                new PropertyGenerator<GridAxisAlignment>(StylePropertyId.GridLayoutRowAlignment, GridAxisAlignment.Grow),
 
-            // Grid Layout
-            new PropertyGenerator<LayoutDirection>(StylePropertyId.GridLayoutDirection, LayoutDirection.Row),
-            new PropertyGenerator<GridLayoutDensity>(StylePropertyId.GridLayoutDensity, GridLayoutDensity.Sparse),
-            new PropertyGenerator<IReadOnlyList<GridTrackSize>>(StylePropertyId.GridLayoutColTemplate, ListPool<GridTrackSize>.Empty, InheritanceType.NotInherited, "ListPool<GridTrackSize>.Empty"),
-            new PropertyGenerator<IReadOnlyList<GridTrackSize>>(StylePropertyId.GridLayoutRowTemplate, ListPool<GridTrackSize>.Empty, InheritanceType.NotInherited, "ListPool<GridTrackSize>.Empty"),
-            new PropertyGenerator<GridTrackSize>(StylePropertyId.GridLayoutMainAxisAutoSize, GridTrackSize.MaxContent),
-            new PropertyGenerator<GridTrackSize>(StylePropertyId.GridLayoutCrossAxisAutoSize, GridTrackSize.FractionalRemaining),
-            new AnimatedPropertyGenerator<float>(StylePropertyId.GridLayoutColGap, 0),
-            new AnimatedPropertyGenerator<float>(StylePropertyId.GridLayoutRowGap, 0),
-            new PropertyGenerator<GridAxisAlignment>(StylePropertyId.GridLayoutColAlignment, GridAxisAlignment.Grow),
-            new PropertyGenerator<GridAxisAlignment>(StylePropertyId.GridLayoutRowAlignment, GridAxisAlignment.Grow),
+                // Radial Layout
+                new AnimatedPropertyGenerator<float>(StylePropertyId.RadialLayoutStartAngle, 0f),
+                new AnimatedPropertyGenerator<float>(StylePropertyId.RadialLayoutEndAngle, 360f),
+                new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.RadialLayoutRadius, new UIFixedLength(0.5f, UIFixedUnit.Percent)),
 
-            // Radial Layout
-            new AnimatedPropertyGenerator<float>(StylePropertyId.RadialLayoutStartAngle, 0f),
-            new AnimatedPropertyGenerator<float>(StylePropertyId.RadialLayoutEndAngle, 360f),
-            new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.RadialLayoutRadius, new UIFixedLength(0.5f, UIFixedUnit.Percent)),
+                // Size
+                new AnimatedPropertyGenerator<UIMeasurement>(StylePropertyId.MinWidth, new UIMeasurement(0)),
+                new AnimatedPropertyGenerator<UIMeasurement>(StylePropertyId.MaxWidth, new UIMeasurement(float.MaxValue)),
+                new AnimatedPropertyGenerator<UIMeasurement>(StylePropertyId.PreferredWidth, UIMeasurement.Content100),
+                new AnimatedPropertyGenerator<UIMeasurement>(StylePropertyId.MinHeight, new UIMeasurement(0)),
+                new AnimatedPropertyGenerator<UIMeasurement>(StylePropertyId.MaxHeight, new UIMeasurement(float.MaxValue)),
+                new AnimatedPropertyGenerator<UIMeasurement>(StylePropertyId.PreferredHeight, UIMeasurement.Content100),
 
-            // Size
-            new AnimatedPropertyGenerator<UIMeasurement>(StylePropertyId.MinWidth, new UIMeasurement(0)),
-            new AnimatedPropertyGenerator<UIMeasurement>(StylePropertyId.MaxWidth, new UIMeasurement(float.MaxValue)),
-            new AnimatedPropertyGenerator<UIMeasurement>(StylePropertyId.PreferredWidth, UIMeasurement.Content100),
-            new AnimatedPropertyGenerator<UIMeasurement>(StylePropertyId.MinHeight, new UIMeasurement(0)),
-            new AnimatedPropertyGenerator<UIMeasurement>(StylePropertyId.MaxHeight, new UIMeasurement(float.MaxValue)),
-            new AnimatedPropertyGenerator<UIMeasurement>(StylePropertyId.PreferredHeight, UIMeasurement.Content100),
+                // Margin
+                new AnimatedPropertyGenerator<UIMeasurement>(StylePropertyId.MarginTop, new UIMeasurement(0)),
+                new AnimatedPropertyGenerator<UIMeasurement>(StylePropertyId.MarginRight, new UIMeasurement(0)),
+                new AnimatedPropertyGenerator<UIMeasurement>(StylePropertyId.MarginBottom, new UIMeasurement(0)),
+                new AnimatedPropertyGenerator<UIMeasurement>(StylePropertyId.MarginLeft, new UIMeasurement(0)),
 
-            // Margin
-            new AnimatedPropertyGenerator<UIMeasurement>(StylePropertyId.MarginTop, new UIMeasurement(0)),
-            new AnimatedPropertyGenerator<UIMeasurement>(StylePropertyId.MarginRight, new UIMeasurement(0)),
-            new AnimatedPropertyGenerator<UIMeasurement>(StylePropertyId.MarginBottom, new UIMeasurement(0)),
-            new AnimatedPropertyGenerator<UIMeasurement>(StylePropertyId.MarginLeft, new UIMeasurement(0)),
+                // Border
+                new AnimatedPropertyGenerator<Color>(StylePropertyId.BorderColor, ColorUtil.UnsetValue),
+                new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.BorderTop, new UIFixedLength(0)),
+                new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.BorderRight, new UIFixedLength(0)),
+                new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.BorderBottom, new UIFixedLength(0)),
+                new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.BorderLeft, new UIFixedLength(0)),
+                new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.BorderRadiusTopLeft, new UIFixedLength(0)),
+                new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.BorderRadiusTopRight, new UIFixedLength(0)),
+                new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.BorderRadiusBottomRight, new UIFixedLength(0)),
+                new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.BorderRadiusBottomLeft, new UIFixedLength(0)),
 
-            // Border
-            new AnimatedPropertyGenerator<Color>(StylePropertyId.BorderColor, ColorUtil.UnsetValue),
+                // Padding
+                new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.PaddingTop, new UIFixedLength(0)),
+                new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.PaddingRight, new UIFixedLength(0)),
+                new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.PaddingBottom, new UIFixedLength(0)),
+                new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.PaddingLeft, new UIFixedLength(0)),
 
-            new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.BorderTop, new UIFixedLength(0)),
-            new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.BorderRight, new UIFixedLength(0)),
-            new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.BorderBottom, new UIFixedLength(0)),
-            new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.BorderLeft, new UIFixedLength(0)),
+                // Text
+                new AnimatedPropertyGenerator<Color>(StylePropertyId.TextColor, Color.black, InheritanceType.Inherited),
+                new PropertyGenerator<TMP_FontAsset>(StylePropertyId.TextFontAsset, null, InheritanceType.Inherited, "TMP_FontAsset.defaultFontAsset"),
+                new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.TextFontSize, 18, InheritanceType.Inherited),
+                new PropertyGenerator<Text.FontStyle>(StylePropertyId.TextFontStyle, Text.FontStyle.Normal, InheritanceType.Inherited),
+                new PropertyGenerator<Text.TextAlignment>(StylePropertyId.TextAlignment, Text.TextAlignment.Left, InheritanceType.Inherited),
+                new AnimatedPropertyGenerator<float>(StylePropertyId.TextOutlineWidth, 0, InheritanceType.Inherited),
+                new AnimatedPropertyGenerator<Color>(StylePropertyId.TextOutlineColor, Color.black, InheritanceType.Inherited),
+                new AnimatedPropertyGenerator<Color>(StylePropertyId.TextGlowColor, ColorUtil.UnsetValue, InheritanceType.Inherited),
+                new AnimatedPropertyGenerator<float>(StylePropertyId.TextGlowOffset, 0, InheritanceType.Inherited),
+                new AnimatedPropertyGenerator<float>(StylePropertyId.TextGlowInner, 0, InheritanceType.Inherited),
+                new AnimatedPropertyGenerator<float>(StylePropertyId.TextGlowOuter, 0, InheritanceType.Inherited),
+                new AnimatedPropertyGenerator<float>(StylePropertyId.TextGlowPower, 0, InheritanceType.Inherited),
+                new AnimatedPropertyGenerator<Color>(StylePropertyId.TextShadowColor, ColorUtil.UnsetValue, InheritanceType.Inherited),
+                new AnimatedPropertyGenerator<float>(StylePropertyId.TextShadowOffsetX, 0, InheritanceType.Inherited),
+                new AnimatedPropertyGenerator<float>(StylePropertyId.TextShadowOffsetY, 0, InheritanceType.Inherited),
+                new AnimatedPropertyGenerator<float>(StylePropertyId.TextShadowIntensity, 0.5f, InheritanceType.Inherited),
+                new AnimatedPropertyGenerator<float>(StylePropertyId.TextShadowSoftness, 0.5f, InheritanceType.Inherited),
+                new PropertyGenerator<ShadowType>(StylePropertyId.TextShadowType, ShadowType.Unset, InheritanceType.Inherited),
+                new PropertyGenerator<TextTransform>(StylePropertyId.TextTransform, TextTransform.None, InheritanceType.Inherited),
+                new PropertyGenerator<UIForia.Text.WhitespaceMode>(StylePropertyId.TextWhitespaceMode, WhitespaceMode.CollapseWhitespace, InheritanceType.Inherited),
+                
+                // Anchors
+                new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.AnchorTop, new UIFixedLength(0f)),
+                new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.AnchorRight, new UIFixedLength(0f)),
+                new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.AnchorBottom, new UIFixedLength(0f)),
+                new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.AnchorLeft, new UIFixedLength(0f)),
+                new PropertyGenerator<AnchorTarget>(StylePropertyId.AnchorTarget, AnchorTarget.Parent),
 
-            new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.BorderRadiusTopLeft, new UIFixedLength(0)),
-            new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.BorderRadiusTopRight, new UIFixedLength(0)),
-            new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.BorderRadiusBottomRight, new UIFixedLength(0)),
-            new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.BorderRadiusBottomLeft, new UIFixedLength(0)),
+                // Transform
+                new AnimatedPropertyGenerator<TransformOffset>(StylePropertyId.TransformPositionX, new TransformOffset(0)),
+                new AnimatedPropertyGenerator<TransformOffset>(StylePropertyId.TransformPositionY, new TransformOffset(0)),
+                new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.TransformPivotX, new UIFixedLength(0)),
+                new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.TransformPivotY, new UIFixedLength(0)),
+                new AnimatedPropertyGenerator<float>(StylePropertyId.TransformScaleX, 1),
+                new AnimatedPropertyGenerator<float>(StylePropertyId.TransformScaleY, 1),
+                new AnimatedPropertyGenerator<float>(StylePropertyId.TransformRotation, 0),
+                new PropertyGenerator<TransformBehavior>(StylePropertyId.TransformBehaviorX, TransformBehavior.LayoutOffset),
+                new PropertyGenerator<TransformBehavior>(StylePropertyId.TransformBehaviorY, TransformBehavior.LayoutOffset),
 
-            // Padding
-            new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.PaddingTop, new UIFixedLength(0)),
-            new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.PaddingRight, new UIFixedLength(0)),
-            new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.PaddingBottom, new UIFixedLength(0)),
-            new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.PaddingLeft, new UIFixedLength(0)),
+                // Layout
+                new PropertyGenerator<LayoutType>(StylePropertyId.LayoutType, LayoutType.Flex),
+                new PropertyGenerator<LayoutBehavior>(StylePropertyId.LayoutBehavior, LayoutBehavior.Normal),
+                new AnimatedPropertyGenerator<int>(StylePropertyId.ZIndex, 0, InheritanceType.Inherited),
+                new AnimatedPropertyGenerator<int>(StylePropertyId.RenderLayerOffset, 0),
+                new AnimatedPropertyGenerator<RenderLayer>(StylePropertyId.RenderLayer, RenderLayer.Default),
+                new AnimatedPropertyGenerator<int>(StylePropertyId.Layer, 0, InheritanceType.Inherited),
 
-            // Text
-            new AnimatedPropertyGenerator<Color>(StylePropertyId.TextColor, Color.black, InheritanceType.Inherited),
-            new PropertyGenerator<TMP_FontAsset>(StylePropertyId.TextFontAsset, null, InheritanceType.Inherited, "TMP_FontAsset.defaultFontAsset"),
-            new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.TextFontSize, 18, InheritanceType.Inherited),
-            new PropertyGenerator<Text.FontStyle>(StylePropertyId.TextFontStyle, Text.FontStyle.Normal, InheritanceType.Inherited),
-            new PropertyGenerator<Text.TextAlignment>(StylePropertyId.TextAlignment, Text.TextAlignment.Left, InheritanceType.Inherited),
-            new AnimatedPropertyGenerator<float>(StylePropertyId.TextOutlineWidth, 0, InheritanceType.Inherited),
-            new AnimatedPropertyGenerator<Color>(StylePropertyId.TextOutlineColor, Color.black, InheritanceType.Inherited),
-            new AnimatedPropertyGenerator<Color>(StylePropertyId.TextGlowColor, ColorUtil.UnsetValue, InheritanceType.Inherited),
-            new AnimatedPropertyGenerator<float>(StylePropertyId.TextGlowOffset, 0, InheritanceType.Inherited),
-            new AnimatedPropertyGenerator<float>(StylePropertyId.TextGlowInner, 0, InheritanceType.Inherited),
-            new AnimatedPropertyGenerator<float>(StylePropertyId.TextGlowOuter, 0, InheritanceType.Inherited),
-            new AnimatedPropertyGenerator<float>(StylePropertyId.TextGlowPower, 0, InheritanceType.Inherited),
-            new AnimatedPropertyGenerator<Color>(StylePropertyId.TextShadowColor, ColorUtil.UnsetValue, InheritanceType.Inherited),
-            new AnimatedPropertyGenerator<float>(StylePropertyId.TextShadowOffsetX, 0, InheritanceType.Inherited),
-            new AnimatedPropertyGenerator<float>(StylePropertyId.TextShadowOffsetY, 0, InheritanceType.Inherited),
-            new AnimatedPropertyGenerator<float>(StylePropertyId.TextShadowIntensity, 0.5f, InheritanceType.Inherited),
-            new AnimatedPropertyGenerator<float>(StylePropertyId.TextShadowSoftness, 0.5f, InheritanceType.Inherited),
-            new PropertyGenerator<ShadowType>(StylePropertyId.TextShadowType, ShadowType.Unset, InheritanceType.Inherited),
-            new PropertyGenerator<TextTransform>(StylePropertyId.TextTransform, TextTransform.None, InheritanceType.Inherited),
+                // Scrollbar
+                new PropertyGenerator<string>(StylePropertyId.Scrollbar, string.Empty),
+                new PropertyGenerator<UIMeasurement>(StylePropertyId.ScrollbarSize, new UIMeasurement(15f)),
+                new AnimatedPropertyGenerator<Color>(StylePropertyId.ScrollbarColor, Color.black),
 
-            // Anchors
-            new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.AnchorTop, new UIFixedLength(0f)),
-            new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.AnchorRight, new UIFixedLength(0f)),
-            new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.AnchorBottom, new UIFixedLength(0f)),
-            new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.AnchorLeft, new UIFixedLength(0f)),
-            new PropertyGenerator<AnchorTarget>(StylePropertyId.AnchorTarget, AnchorTarget.Parent),
-
-            // Transform
-            new AnimatedPropertyGenerator<TransformOffset>(StylePropertyId.TransformPositionX, new TransformOffset(0)),
-            new AnimatedPropertyGenerator<TransformOffset>(StylePropertyId.TransformPositionY, new TransformOffset(0)),
-            new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.TransformPivotX, new UIFixedLength(0)),
-            new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.TransformPivotY, new UIFixedLength(0)),
-            new AnimatedPropertyGenerator<float>(StylePropertyId.TransformScaleX, 1),
-            new AnimatedPropertyGenerator<float>(StylePropertyId.TransformScaleY, 1),
-            new AnimatedPropertyGenerator<float>(StylePropertyId.TransformRotation, 0),
-            new PropertyGenerator<TransformBehavior>(StylePropertyId.TransformBehaviorX, TransformBehavior.LayoutOffset),
-            new PropertyGenerator<TransformBehavior>(StylePropertyId.TransformBehaviorY, TransformBehavior.LayoutOffset),
-
-            // Layout
-            new PropertyGenerator<LayoutType>(StylePropertyId.LayoutType, LayoutType.Flex),
-            new PropertyGenerator<LayoutBehavior>(StylePropertyId.LayoutBehavior, LayoutBehavior.Normal),
-            new AnimatedPropertyGenerator<int>(StylePropertyId.ZIndex, 0, InheritanceType.Inherited),
-            new AnimatedPropertyGenerator<int>(StylePropertyId.RenderLayerOffset, 0),
-            new AnimatedPropertyGenerator<RenderLayer>(StylePropertyId.RenderLayer, RenderLayer.Default),
-            new AnimatedPropertyGenerator<int>(StylePropertyId.Layer, 0, InheritanceType.Inherited),
-
-            // Scrollbar
-            new PropertyGenerator<string>(StylePropertyId.Scrollbar, string.Empty),
-            new PropertyGenerator<UIMeasurement>(StylePropertyId.ScrollbarSize, new UIMeasurement(15f)),
-            new AnimatedPropertyGenerator<Color>(StylePropertyId.ScrollbarColor, Color.black),
-
-            // Shadow
-            new PropertyGenerator<ShadowType>(StylePropertyId.ShadowType, ShadowType.Unset),
-            new AnimatedPropertyGenerator<float>(StylePropertyId.ShadowOffsetX, 0),
-            new AnimatedPropertyGenerator<float>(StylePropertyId.ShadowOffsetY, 0),
-            new AnimatedPropertyGenerator<float>(StylePropertyId.ShadowSoftnessX, 0.1f),
-            new AnimatedPropertyGenerator<float>(StylePropertyId.ShadowSoftnessY, 0.1f),
-            new AnimatedPropertyGenerator<float>(StylePropertyId.ShadowIntensity, 0.7f),
+                // Shadow
+                new PropertyGenerator<ShadowType>(StylePropertyId.ShadowType, ShadowType.Unset),
+                new AnimatedPropertyGenerator<float>(StylePropertyId.ShadowOffsetX, 0),
+                new AnimatedPropertyGenerator<float>(StylePropertyId.ShadowOffsetY, 0),
+                new AnimatedPropertyGenerator<float>(StylePropertyId.ShadowSoftnessX, 0.1f),
+                new AnimatedPropertyGenerator<float>(StylePropertyId.ShadowSoftnessY, 0.1f),
+                new AnimatedPropertyGenerator<float>(StylePropertyId.ShadowIntensity, 0.7f),
         };
 
         [MenuItem("UIForia/Regenerate Style Stuff")]
@@ -421,13 +419,8 @@ namespace UIForia.Rendering {
                 PropertyGenerator generator = properties[i];
                 string key = generator.GetFullTypeName();
 
-
                 if (!templates.Contains(key)) {
-                    retn += BaseStyleBindingTemplate
-                        .Replace("__NAME__", generator.GetPrintableTypeName())
-                        .Replace("__TYPE__", generator.GetFullTypeName())
-                        .Replace("__CAST_TYPE__", generator.GetCastAccessor())
-                        .Replace("__STYLE_PROPERTY_CONSTRUCTOR__", generator.StylePropertyConstructorParameterized("propertyId"));
+                    retn += BaseStyleBindingTemplate.Replace("__NAME__", generator.GetPrintableTypeName()).Replace("__TYPE__", generator.GetFullTypeName()).Replace("__CAST_TYPE__", generator.GetCastAccessor()).Replace("__STYLE_PROPERTY_CONSTRUCTOR__", generator.StylePropertyConstructorParameterized("propertyId"));
                 }
 
                 templates.Add(key);
@@ -507,11 +500,7 @@ namespace UIForia.Rendering {
         }
         ";
 
-            return propertyTemplate
-                .Replace("__TYPE__", propertyGenerator.GetFullTypeName())
-                .Replace("__NAME__", propertyGenerator.propertyIdName)
-                .Replace("__CAST_TYPE__", propertyGenerator.GetCastAccessor())
-                .Replace("__CONSTRUCTOR__", propertyGenerator.StylePropertyConstructor);
+            return propertyTemplate.Replace("__TYPE__", propertyGenerator.GetFullTypeName()).Replace("__NAME__", propertyGenerator.propertyIdName).Replace("__CAST_TYPE__", propertyGenerator.GetCastAccessor()).Replace("__CONSTRUCTOR__", propertyGenerator.StylePropertyConstructor);
         }
 
         private static string InflateUIStyleSetProperties(PropertyGenerator propertyGenerator) {
@@ -529,8 +518,7 @@ namespace UIForia.Rendering {
                     return DefaultStyleValues_Generated.__NAME__;
                 }
             }";
-            }
-            else {
+            } else {
                 propertyTemplate = @"
 
             public __TYPE__ __NAME__ { 
@@ -543,11 +531,7 @@ namespace UIForia.Rendering {
             }";
             }
 
-            return propertyTemplate
-                .Replace("__TYPE__", propertyGenerator.GetFullTypeName())
-                .Replace("__NAME__", propertyGenerator.propertyIdName)
-                .Replace("__CAST_TYPE__", propertyGenerator.GetCastAccessor())
-                .Replace("__CONSTRUCTOR__", propertyGenerator.StylePropertyConstructor);
+            return propertyTemplate.Replace("__TYPE__", propertyGenerator.GetFullTypeName()).Replace("__NAME__", propertyGenerator.propertyIdName).Replace("__CAST_TYPE__", propertyGenerator.GetCastAccessor()).Replace("__CONSTRUCTOR__", propertyGenerator.StylePropertyConstructor);
         }
 
         private static string DefaultGetValue() {
@@ -574,16 +558,13 @@ namespace UIForia.Rendering {
             set {{ SetProperty({propertyGenerator.StylePropertyConstructor}); }}
         }}
             ";
-            return template
-                .Replace("__TYPE__", propertyGenerator.GetFullTypeName())
-                .Replace("__NAME__", propertyGenerator.propertyIdName);
+            return template.Replace("__TYPE__", propertyGenerator.GetFullTypeName()).Replace("__NAME__", propertyGenerator.propertyIdName);
         }
 
         private static string DefaultValue(PropertyGenerator propertyGenerator) {
             if (propertyGenerator.type.IsEnum || typeof(int) == propertyGenerator.type || typeof(float) == propertyGenerator.type) {
                 return $"public const {propertyGenerator.GetTypeName()} {propertyGenerator.propertyIdName} = {propertyGenerator.GetDefaultValue()};\n";
-            }
-            else {
+            } else {
                 return $"public static readonly {propertyGenerator.GetTypeName()} {propertyGenerator.propertyIdName} = {propertyGenerator.GetDefaultValue()};\n";
             }
         }
@@ -591,44 +572,31 @@ namespace UIForia.Rendering {
         public static string UIStyle_GetReaderType(PropertyGenerator propertyGenerator) {
             if (propertyGenerator.type.IsEnum) {
                 return $"({propertyGenerator.GetFullTypeName()})FindEnumProperty(StylePropertyId.{propertyGenerator.propertyIdName});";
-            }
-            else if (typeof(int) == propertyGenerator.type) {
+            } else if (typeof(int) == propertyGenerator.type) {
                 return $"FindIntProperty(StylePropertyId.{propertyGenerator.propertyIdName});";
-            }
-            else if (typeof(float) == propertyGenerator.type) {
+            } else if (typeof(float) == propertyGenerator.type) {
                 return $"FindFloatProperty(StylePropertyId.{propertyGenerator.propertyIdName});";
-            }
-            else if (typeof(Color) == propertyGenerator.type) {
+            } else if (typeof(Color) == propertyGenerator.type) {
                 return $"FindColorProperty(StylePropertyId.{propertyGenerator.propertyIdName});";
-            }
-            else if (typeof(UIFixedLength) == propertyGenerator.type) {
+            } else if (typeof(UIFixedLength) == propertyGenerator.type) {
                 return $"FindUIFixedLengthProperty(StylePropertyId.{propertyGenerator.propertyIdName});";
-            }
-            else if (typeof(UIMeasurement) == propertyGenerator.type) {
+            } else if (typeof(UIMeasurement) == propertyGenerator.type) {
                 return $"FindUIMeasurementProperty(StylePropertyId.{propertyGenerator.propertyIdName});";
-            }
-            else if (typeof(TransformOffset) == propertyGenerator.type) {
+            } else if (typeof(TransformOffset) == propertyGenerator.type) {
                 return $"Find{nameof(TransformOffset)}Property(StylePropertyId.{propertyGenerator.propertyIdName});";
-            }
-            else if (typeof(GridTrackSize) == propertyGenerator.type) {
+            } else if (typeof(GridTrackSize) == propertyGenerator.type) {
                 return $"FindGridTrackSizeProperty(StylePropertyId.{propertyGenerator.propertyIdName});";
-            }
-            else if (typeof(TMP_FontAsset) == propertyGenerator.type) {
+            } else if (typeof(TMP_FontAsset) == propertyGenerator.type) {
                 return $"GetProperty(StylePropertyId.{propertyGenerator.propertyIdName}).AsFont;";
-            }
-            else if (typeof(Texture2D) == propertyGenerator.type) {
+            } else if (typeof(Texture2D) == propertyGenerator.type) {
                 return $"GetProperty(StylePropertyId.{propertyGenerator.propertyIdName}).AsTexture2D;";
-            }
-            else if (typeof(IReadOnlyList<GridTrackSize>) == propertyGenerator.type) {
+            } else if (typeof(IReadOnlyList<GridTrackSize>) == propertyGenerator.type) {
                 return $"GetProperty(StylePropertyId.{propertyGenerator.propertyIdName}).AsGridTemplate;";
-            }
-            else if (typeof(CursorStyle) == propertyGenerator.type) {
+            } else if (typeof(CursorStyle) == propertyGenerator.type) {
                 return $"GetProperty(StylePropertyId.{propertyGenerator.propertyIdName}).AsCursorStyle;";
-            }
-            else if (typeof(string) == propertyGenerator.type) {
+            } else if (typeof(string) == propertyGenerator.type) {
                 return $"GetProperty(StylePropertyId.{propertyGenerator.propertyIdName}).AsString;";
             }
-
 
             throw new ArgumentOutOfRangeException();
         }

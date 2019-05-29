@@ -1,5 +1,5 @@
 style container {
-    PreferredSize = 100vw 100vh;
+    PreferredSize = 1pca;
     BackgroundColor = black;
     Padding = 50px;
     FlexLayoutDirection = Column;

@@ -114,6 +114,8 @@ namespace UIForia.Rendering {
             [DebuggerStepThrough] get { return !IsUnset; }
         }
 
+        public WhitespaceMode AsWhitespaceMode => (WhitespaceMode)valuePart0;
+        
         public int AsInt => valuePart0;
         public float AsFloat => floatValue;
         public GridAxisAlignment AsGridAxisAlignment => (GridAxisAlignment) valuePart0;

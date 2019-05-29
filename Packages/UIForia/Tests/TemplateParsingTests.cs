@@ -2,6 +2,7 @@
  using Tests.Mocks;
  using UIForia.Attributes;
  using UIForia.Elements;
+ using UIForia.Exceptions;
  using UIForia.Parsing.Expression;
  using UIForia.Templates;
  using UnityEngine;
@@ -59,7 +60,7 @@ public class TemplateParsingTests {
 
     [Test]
     public void Children_CannotAppearInsideRepeat() {
-        var x = Assert.Throws<InvalidTemplateException>(() => {
+        var x = Assert.Throws<TemplateParseException>(() => {
             new TemplateParser(null).ParseTemplateFromString<Test1>(@"
                 <UITemplate>
                     <Contents>
@@ -70,7 +71,7 @@ public class TemplateParsingTests {
                 </UITemplate>
             ");
         });
-        Assert.AreEqual("<Children> cannot be inside <Repeat>", x.Message);
+        Assert.IsTrue(x.Message.Contains("<Children> cannot be inside <Repeat>"), "Expected a different error message :(");
     }
 
    

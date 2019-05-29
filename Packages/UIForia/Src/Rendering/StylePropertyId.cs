@@ -107,6 +107,7 @@ namespace UIForia.Rendering {
         TextShadowSoftness = 1017,
         TextShadowType = 1018,
         TextTransform = 1019,
+        TextWhitespaceMode = 1020,
         __TextPropertyEnd__ = 1099,
 
         MinWidth = 1100,
@@ -139,8 +140,7 @@ namespace UIForia.Rendering {
         ShadowOffsetY = 1703,
         ShadowSoftnessX = 1704,
         ShadowSoftnessY = 1705,
-        ShadowIntensity = 1706
- 
+        ShadowIntensity = 1706,
     }
 
 }

@@ -5,11 +5,52 @@
     <Style src="Documentation/Features/InputEventsDemo.style" />
 
     <Contents>
-        <Group x-id="startZone" style="start-zone" onDragDrop="DropDrag($event, $element)">
-            <Div if="IsInStartZone" style="dragme" onDragCreate="StartDrag($element)">Dragme</Div>
+        <Heading1>Drag and Drop</Heading1>
+        <Group style="section">
+            <Div style="show">
+                <Group x-id="startZone" style="start-zone" onDragDrop="DropDrag($event, $element)">
+                    <Div if="IsInStartZone" style="dragme" onDragCreate="StartDrag($element)">Dragme</Div>
+                </Group>
+                <Group style="regular-zone" onDragEnter="OnDragEnter($event)" onDragExit="OnDragExit($event)">
+                    Listens to 
+                    <Text>DragEnter</Text>
+                    DragExit 
+                </Group>
+                <Group x-id="dropZone" style="drop-zone" onDragDrop="DropDrag($event, $element)" onDragHover="OnDragHover($event)">
+                    <Div if="IsInDropZone" style="dragme" onDragCreate="StartDrag($element)">Dragme</Div>
+                </Group>
+            </Div>
+            <Div style="tell">
+                
+                <Heading1>See which event is currently handled</Heading1>
+                
+                <Div style="['code', ActiveEvent('onDragCreate')]">onDragCreate</Div> used to handle the initial drag event. Return a custom DragEvent instance
+                that updates custom state every frame based on the mouse position.
+                
+                <Div style="['code', ActiveEvent('onDragDrop')]">onDragDrop</Div> will register where you released the mouse button making it easy to drop
+                whatever data you have stored in your DragEvent.
+
+                <Div style="['code', ActiveEvent('onDragMove')]">onDragMove</Div> has been registered in the class and not on a specific element so it 
+                will fire when dragging anywhere within the demo screen.
+
+                <Div style="['code', ActiveEvent('onDragHover')]">onDragHover</Div> will shoot if you drag the box over the lower drop area.
+
+                <Div style="['code']">onDragEnter</Div> enter the middle area while dragging to trigger.
+
+                <Div style="['code']">onDragExit</Div> exit the middle area while dragging to trigger.
+
+
+            </Div>
         </Group>
-        <Group x-id="dropZone" style="drop-zone" onDragDrop="DropDrag($event, $element)">
-            <Div if="IsInDropZone" style="dragme" onDragCreate="StartDrag($element)">Dragme</Div>
+        <Heading1>Mouse Events</Heading1>
+        <Group style="section">
+            <Div style="show">
+                <Group style="demo-box" onMouseHover="Hover($event)">Hover Me! Hover Position x: {LastHoverX} y: {LastHoverY}</Group>
+
+            </Div>
+            <Div style="tell">
+                Do what the buttons say!
+            </Div>
         </Group>
     </Contents>
 </UITemplate>

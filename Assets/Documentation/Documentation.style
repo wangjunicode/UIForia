@@ -1,10 +1,14 @@
+style root-container {
+    PreferredSize = 1vw 1vh;
+}
+
 style main-container {
     LayoutType = Grid;
     PreferredSize = 1vw 1vh;
     GridLayoutColTemplate = 300px 1fr;
     GridLayoutRowTemplate = 1fr;
-    GridLayoutRowAlignment = Grow;    
-    GridLayoutColAlignment = Grow;    
+    GridLayoutRowAlignment = Fit;    
+    GridLayoutColAlignment = Fit;    
     TextFontAsset = url("GothamNarrow-Medium SDF");
 }
 
@@ -43,8 +47,9 @@ style demo-panel {
     BorderLeft = 2px;
     BorderColor = #2c2e53;
     BackgroundColor = rgb(240, 230, 240);
-    PreferredSize = 1pca;
+    PreferredSize = 0;
 }
+
 
 style mb20 {
     MarginBottom = 20px;

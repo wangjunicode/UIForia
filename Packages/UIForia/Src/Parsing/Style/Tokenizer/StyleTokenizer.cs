@@ -154,6 +154,7 @@ namespace UIForia.Parsing.Style.Tokenizer {
                 case "rgba": return new StyleToken(StyleTokenType.Rgba, identifierLowerCase, context.line, context.column);
                 case "rgb": return new StyleToken(StyleTokenType.Rgb, identifierLowerCase, context.line, context.column);
                 case "url": return new StyleToken(StyleTokenType.Url, identifierLowerCase, context.line, context.column);
+                case "run": return new StyleToken(StyleTokenType.Run, identifierLowerCase, context.line, context.column);
                 default: {
                     return new StyleToken(StyleTokenType.Identifier, identifier, context.line, context.column);
                 }

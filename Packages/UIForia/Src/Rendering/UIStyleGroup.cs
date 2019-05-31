@@ -1,7 +1,5 @@
-using Packages.UIForia.Src.Rendering;
-
 namespace UIForia.Rendering {
-    
+
     public class UIStyleGroup {
 
         public string name { get; internal set; }
@@ -13,7 +11,7 @@ namespace UIForia.Rendering {
         public UIStyleRule rule { get; internal set; }
 
         public bool isExported { get; internal set; }
-        
+
         public bool HasAttributeRule => rule?.attributeName != null;
 
         public int CountRules() {
@@ -27,5 +25,7 @@ namespace UIForia.Rendering {
 
             return count;
         }
+
     }
+
 }

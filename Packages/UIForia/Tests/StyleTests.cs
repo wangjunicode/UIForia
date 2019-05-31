@@ -1,8 +1,6 @@
 using System;
 using System.Reflection;
-using NUnit.Framework;
-using Packages.UIForia.Src.Rendering;
-using Tests.Mocks;
+using NUnit.Framework;using Tests.Mocks;
 using TMPro;
 using UIForia;
 using UIForia.Attributes;
@@ -10,7 +8,6 @@ using UIForia.Compilers.Style;
 using UIForia.Elements;
 using UIForia.Rendering;
 using UIForia.Util;
-using UnityEditor.VersionControl;
 using UnityEngine;
 
 [TestFixture]

@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using Packages.UIForia.Src.Rendering;
 using TMPro;
 using UIForia.Exceptions;
 using UIForia.Layout;

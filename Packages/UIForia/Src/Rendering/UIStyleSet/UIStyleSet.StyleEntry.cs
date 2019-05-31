@@ -1,4 +1,3 @@
-using Packages.UIForia.Src.Rendering;
 using UIForia.Util;
 
 namespace UIForia.Rendering {

@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using Packages.UIForia.Src.Rendering;
 using SVGX;
 using UIForia.Compilers.Style;
 using UIForia.Elements;

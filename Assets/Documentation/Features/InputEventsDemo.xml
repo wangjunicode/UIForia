@@ -13,8 +13,9 @@
                 </Group>
                 <Group style="regular-zone" onDragEnter="OnDragEnter($event)" onDragExit="OnDragExit($event)">
                     Listens to 
-                    <Text>DragEnter</Text>
-                    DragExit 
+                    <Div style="[ReturnActiveEvent('onDragEnter', 0.5f)]">DragEnter</Div>
+                    and
+                    <Div style="[ReturnActiveEvent('onDragExit', 0.5f)]">DragExit</Div>
                 </Group>
                 <Group x-id="dropZone" style="drop-zone" onDragDrop="DropDrag($event, $element)" onDragHover="OnDragHover($event)">
                     <Div if="IsInDropZone" style="dragme" onDragCreate="StartDrag($element)">Dragme</Div>
@@ -34,7 +35,7 @@
                 will fire when dragging anywhere within the demo screen.
 
                 <Div style="['code', ActiveEvent('onDragHover')]">onDragHover</Div> will shoot if you drag the box over the lower drop area.
-
+                
                 <Div style="['code']">onDragEnter</Div> enter the middle area while dragging to trigger.
 
                 <Div style="['code']">onDragExit</Div> exit the middle area while dragging to trigger.

@@ -1,4 +1,5 @@
 const regularColor = rgb(120, 140, 190);
+const codeColor = rgba(20, 20, 20, 40);
 
 animation flash {
     [options] {
@@ -6,10 +7,10 @@ animation flash {
     }
 
     [keyframes] {
-        0% { BackgroundColor = @regularColor; }
+        0% { BackgroundColor = @codeColor; }
         20% { BackgroundColor = yellow; }
         80% { BackgroundColor = yellow; }
-        100% { BackgroundColor = @regularColor;}
+        100% { BackgroundColor = @codeColor;}
     }
 }
 
@@ -50,15 +51,24 @@ style section {
 }
 
 style code {
-    BackgroundColor = rgba(20, 20, 20, 40);
+    BackgroundColor = @codeColor;
     TextColor = rgb(30, 30, 30);
     Border = 1px;
     BorderColor = rgb(30, 30, 30);
     Padding = 6px;
+    MarginTop = 20px;
 }
 
 style active-event {
     BackgroundColor = rgba(20, 220, 20, 40);
+}
+
+style onDragEnter {
+    run animation(flash);
+}
+
+style onDragExit {
+    run animation(flash);
 }
 
 style regular-zone {

@@ -27,7 +27,7 @@
 
             </Div>
 
-            <ScrollView style="demo-panel" x-router="demo" x-defaultRoute="/RenderSystemShowcase">
+            <ScrollView style="demo-panel" x-router="demo" x-defaultRoute="/inputEvents">
                 
                 <Group x-route="/index">
                     <Heading1>UIForia Documentation</Heading1>

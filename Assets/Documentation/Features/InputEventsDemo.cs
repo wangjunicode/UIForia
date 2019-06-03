@@ -17,6 +17,8 @@ namespace Documentation.Features {
 
         public float LastHoverX;
         public float LastHoverY;
+        public float LastDragEnter;
+        public float LastDragExit;
         public Vector2 LastMove;
         public Vector2 LastEnter;
         public Vector2 LastExit;
@@ -50,11 +52,11 @@ namespace Documentation.Features {
         }
         
         public void OnDragEnter(DragEvent evt) {
-            activeEvent = "onDragEnter";
+            LastDragEnter = Time.realtimeSinceStartup;
         }
 
         public void OnDragExit(DragEvent evt) {
-            activeEvent = "onDragExit";
+            LastDragExit = Time.realtimeSinceStartup;
         }
 
         public void OnDragHover(DragEvent evt) {
@@ -68,6 +70,14 @@ namespace Documentation.Features {
 
         public string ActiveEvent(string evt) {
             return activeEvent == evt ? "active-event" : string.Empty;
+        }
+        
+        public string ReturnActiveEvent(string evt, float threshold) {
+            switch (evt) {
+                case "onDragEnter": return Time.realtimeSinceStartup - LastDragEnter < threshold ? "onDragEnter" : string.Empty;  
+                case "onDragExit": return Time.realtimeSinceStartup - LastDragExit < threshold ? "onDragExit" : string.Empty;  
+            }
+            return string.Empty;
         }
         
         public void Hover(MouseInputEvent evt) {

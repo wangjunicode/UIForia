@@ -1,7 +1,6 @@
 using UIForia.Attributes;
 using UIForia.Elements;
 using UIForia.Rendering;
-using UnityEditor;
 using UnityEngine;
 
 namespace Documentation.DocumentationElements {
@@ -21,7 +20,6 @@ namespace Documentation.DocumentationElements {
             else {
                 style.SetBackgroundColor(Color.clear, StyleState.Normal);
                 style.SetTextColor(Color.black, StyleState.Normal);
-                
             }
         }
 

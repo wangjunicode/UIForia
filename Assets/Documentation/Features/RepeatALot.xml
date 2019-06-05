@@ -3,7 +3,7 @@
     <Style path="Documentation/Features/RepeatALot.style" />
     <Contents style="container">
         <Repeat list="players">
-            <Div>{$item.id} -> {$item.name}</Div>
+            <PlayerDetail player="$item" />
         </Repeat>
     </Contents>
 </UITemplate>

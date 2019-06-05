@@ -135,7 +135,18 @@ namespace UIForia.Compilers {
             ASTNode astRoot = null;
             try {
                 astRoot = ExpressionParser.Parse(input);
-                return (Expression<T>)Visit(astRoot);
+                Expression expression = Visit(astRoot);
+                
+                if (targetType != null && !targetType.IsAssignableFrom(expression.YieldedType)) {
+                    Expression cast = GetImplicitCast(expression, targetType);
+                    if (cast != null) {
+                        return (Expression<T>) cast;
+                    }
+
+                    throw new ParseException($"Type {rootType}.{expression.YieldedType} is not assignable to {targetType} and no implicit conversion exists");
+                }
+
+                return (Expression<T>)expression;
             } catch (ParseException e) {
                 e.SetFileName(this.rootType.FullName);
                 throw;
@@ -635,9 +646,9 @@ namespace UIForia.Compilers {
 
             AccessExpressionPart retn = MakeAccessPartFromInfo(accessInfos, 0, false);
             return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
-                typeof(AccessExpression<,>),
-                new GenericArguments(retn.YieldedType, rootType),
-                new ConstructorArguments(retn)
+                    typeof(AccessExpression<,>),
+                    new GenericArguments(retn.YieldedType, rootType),
+                    new ConstructorArguments(retn)
             );
         }
 

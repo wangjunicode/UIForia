@@ -1,3 +1,4 @@
+using Documentation.DocumentationElements;
 using UIForia.Attributes;
 using UIForia.Elements;
 using UIForia.Util;
@@ -11,22 +12,40 @@ namespace UnityEngine {
 
         public override void OnCreate() {
             players = new RepeatableList<PlayerData>();
-        }
-
-        public override void OnUpdate() {
-            players.Clear();
-            for (int i = 0; i < Random.Range(3, 8); i++) {
+            
+            for (int i = 0; i < 10; i++) {
                 
                 players.Add(new PlayerData() {
-                    id = i,
-                    name = "Player " + i
+                        id = i,
+                        name = "Player " + i,
+                        friends = MakeFriends(4, i),
+                        Active = false,
+                        Visible = true
                 });
             }
         }
-    }
 
-    public class PlayerData {
-        public int id;
-        public string name;
+        private RepeatableList<PlayerData> MakeFriends(int friendCount, int parentId) {
+
+            var friends = new RepeatableList<PlayerData>();
+
+            for (int i = 0; i < friendCount; i++) {
+                int id = 1000 * (parentId + 1) + i;
+
+                friends.Add(new PlayerData() {
+                        id = id,
+                        name = "Player " + i,
+                        friends = MakeFriends(friendCount - 1, id),
+                        Active = false,
+                        Visible = false
+                });
+            }
+
+            return friends;
+        }
+
+        public override void OnUpdate() {
+
+        }
     }
 }

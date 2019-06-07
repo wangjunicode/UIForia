@@ -34,10 +34,10 @@ namespace UI {
             sidebar = FindById("side-bar");
             currentSidebarItem = sidebar?.GetChild(1);
             if (currentSidebarItem != null) {
-                runner.style.SetTransformPositionY(currentSidebarItem.layoutResult.localPosition.y, StyleState.Normal);
+                runner?.style.SetTransformPositionY(currentSidebarItem.layoutResult.localPosition.y, StyleState.Normal);
             }
             else {
-                runner.SetEnabled(false);
+                runner?.SetEnabled(false);
             }
         }
 
@@ -90,7 +90,7 @@ namespace UI {
 
             if (currentSidebarItem == null) {
                 currentSidebarItem = element;
-                runner.style.SetTransformPositionY(element.layoutResult.localPosition.y, StyleState.Normal);
+                runner?.style.SetTransformPositionY(element.layoutResult.localPosition.y, StyleState.Normal);
             }
 
             if (currentSidebarItem == element) {

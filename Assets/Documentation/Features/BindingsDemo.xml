@@ -15,7 +15,7 @@
         
         <Group>
             <Heading1>Click the green thing to update the value</Heading1>
-            <CustomInputElement customOnNumChange="CustomOnNumChange" style="custom-input-box" Value.read.write="MyVal" num.read.write="num" onMouseClick="OnGreenClick($event)" />
+            <CustomInputElement onNumChanged="CustomOnNumChange" style="custom-input-box" Value.read.write="MyVal" num.read.write="num" onMouseClick="OnGreenClick($event)" />
         </Group>
 
         <Heading1>Explanation:</Heading1>

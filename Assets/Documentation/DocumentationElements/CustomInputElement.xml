@@ -10,7 +10,7 @@
         
     </Style>
     <Contents>
-        <Text>MyVal: {GetMyVal()}</Text>
+        <Text>MyVal: {Value.MyVal}</Text>
         <Text>num: {num}</Text>
         <Heading1>Drag the yellow box to get another value</Heading1>
         <Div style="custom-event-box" onDragCreate="onDragCreate($event)" onDragMove="OnDragMove($event)" />

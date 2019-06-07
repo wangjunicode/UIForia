@@ -957,6 +957,10 @@ namespace UIForia.Systems {
                         ReleaseFocus((IFocusable)m_FocusedElement);
                     }
                 }
+
+                if (m_ElementsThisFrame.Count > 0 && m_ElementsThisFrame[0].View.RequestFocus()) {
+                    // todo let's see if we have to process the mouse event again
+                }
                 RunMouseEvents(m_ElementsThisFrame, InputEventType.MouseDown);
             }
             else if (m_MouseState.isLeftMouseUpThisFrame || m_MouseState.isRightMouseUpThisFrame || m_MouseState.isMiddleMouseUpThisFrame) {

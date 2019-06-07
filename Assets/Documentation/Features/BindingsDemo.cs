@@ -25,7 +25,20 @@ namespace Documentation.Features {
 
         public Action<float> CustomOnNumChange = n =>
                         Debug.Log($"{n} is the new value, custom action got called!!");
-
+       
+        [OnPropertyChanged(nameof(MyVal))]
+        public void OnMyValChanged(string propertyName) {
+            Debug.Log($"BindingsDemo: {propertyName} changed");
+            //onValueChanged?.Invoke(Value);
+        }
+        
+        [OnPropertyChanged(nameof(num))]
+        public void OnNumValueChanged(string propertyName) {
+            Debug.Log($"BindingsDemo: {propertyName} changed");
+            // invoking the custom event handler trigger code in BindingsDemo.cs
+            //onNumChanged?.Invoke(num);
+            // Doesn't do anything obvious. Should be related to two-way-binding. todo: figure that out
+        }
         public override void OnCreate() {
             num = 1f;
             MyVal = new CustomInputData();

@@ -101,7 +101,7 @@ namespace UIForia.Systems {
             toLayout.EnsureCapacity(elementCount);
             LayoutBox[] toLayoutArray = toLayout.Array;
 
-            int viewDepth = view.depth;
+            int viewDepth = view.Depth;
 
             while (stack.Count > 0) {
                 UIElement currentElement = stack.PopUnchecked();
@@ -844,7 +844,6 @@ namespace UIForia.Systems {
             int elementCount = view.visibleElements.Count;
             for (int i = 0; i < elementCount; i++) {
                 UIElement element = elements[i];
-                LayoutResult layoutResult = element.layoutResult;
 
                 // todo make this better
                 if (element.isDisabled) {
@@ -855,25 +854,12 @@ namespace UIForia.Systems {
                     if (!handler.ContainsPoint(point)) {
                         continue;
                     }
-                } else if (!layoutResult.ScreenRect.ContainOrOverlap(point)) {
+                } else if (PointInClippedArea(point, element) || !element.layoutResult.ScreenRect.ContainOrOverlap(point)) {
                     continue;
                 }
 
                 UIElement ptr = element.parent;
-                while (ptr != null) {
-                    Vector2 screenPosition = ptr.layoutResult.screenPosition;
-                    if (ptr.style.OverflowX != Overflow.Visible) {
-                        if (point.x < screenPosition.x || point.x > screenPosition.x + ptr.layoutResult.actualSize.width) {
-                            break;
-                        }
-                    }
-
-                    if (ptr.style.OverflowY != Overflow.Visible) {
-                        if (point.y < screenPosition.y || point.y > screenPosition.y + ptr.layoutResult.actualSize.height) {
-                            break;
-                        }
-                    }
-
+                while (ptr != null && !PointInClippedArea(point, ptr)) {
                     ptr = ptr.parent;
                 }
 
@@ -881,6 +867,23 @@ namespace UIForia.Systems {
                     retn.Add(element);
                 }
             }
+        }
+
+        private static bool PointInClippedArea(Vector2 point, UIElement element) {
+            Vector2 screenPosition = element.layoutResult.screenPosition;
+            if (element.style.OverflowX != Overflow.Visible) {
+                if (point.x < screenPosition.x || point.x > screenPosition.x + element.layoutResult.allocatedSize.width) {
+                    return true;
+                }
+            }
+
+            if (element.style.OverflowY != Overflow.Visible) {
+                if (point.y < screenPosition.y || point.y > screenPosition.y + element.layoutResult.allocatedSize.height) {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         public OffsetRect GetPaddingRect(UIElement element) {

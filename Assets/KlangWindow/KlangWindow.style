@@ -62,6 +62,8 @@ style close-button {
 }
 
 style body {
+    Padding = 20px;
+    Margin = 10px;
     GridItemColStart = 1;
     GridItemRowStart = 1;
     BackgroundColor = White;

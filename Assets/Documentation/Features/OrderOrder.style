@@ -23,6 +23,18 @@ style c12 {
 }
 style c13 {
     BackgroundColor = rgba(100, 243, 0, 255);
+    [hover] {
+        BackgroundColor = rgba(100, 243, 0, 235);
+    }
+}
+style c131 {
+    BackgroundColor = rgba(140, 223, 55, 255);
+    TransformPositionX = 150px;
+    TransformPositionY = 50px;
+    PreferredSize = 400px;
+    [hover] {
+        BackgroundColor = rgba(100, 243, 0, 255);
+    }
 }
 style c2 {
     BackgroundColor = rgba(100, 0, 231, 255);

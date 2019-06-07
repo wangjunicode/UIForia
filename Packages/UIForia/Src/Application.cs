@@ -71,6 +71,7 @@ namespace UIForia {
         public event Action onDestroy;
         public event Action onNextRefresh;
         public event Action<UIView> onViewAdded;
+        public event Action<UIView[]> onViewsSorted;
         public event Action<UIView> onViewRemoved;
 
         public static event Action<Application> onApplicationCreated;
@@ -120,7 +121,7 @@ namespace UIForia {
             m_LayoutSystem = new LayoutSystem(this, m_StyleSystem);
             m_InputSystem = new GameInputSystem(m_LayoutSystem);
 //            m_RenderSystem = new VertigoRenderSystem(Camera.current, m_LayoutSystem, m_StyleSystem); 
-            m_RenderSystem = new SVGXRenderSystem(null, m_LayoutSystem);
+            m_RenderSystem = new SVGXRenderSystem(this, null, m_LayoutSystem);
             m_RoutingSystem = new RoutingSystem();
             m_AnimationSystem = new AnimationSystem();
 
@@ -862,6 +863,20 @@ namespace UIForia {
             }
         }
 
+        public void SortViews() {
+            // let's bubble sort the views since only once view is out of place
+            for (int i = (m_Views.Count - 1); i > 0; i--) {
+                for (int j = 1; j <= i; j++) {
+                    if (m_Views[j - 1].Depth > m_Views[j].Depth) {
+                        UIView tempView = m_Views[j - 1];
+                        m_Views[j - 1] = m_Views[j];
+                        m_Views[j] = tempView;
+                    }
+                }
+            }
+
+            onViewsSorted?.Invoke(m_Views.ToArray());
+        }
     }
 
 }

@@ -56,6 +56,11 @@ public class UIView {
     internal LightList<UIElement> visibleElements;
     internal UIViewRootElement rootElement;
     private int elementCount;
+    
+    public bool clipOverflow;
+
+    public bool focusOnMouseDown;
+    public bool sizeChanged;
 
     internal UIView(int id, string name, Application app, Rect rect, int depth, Type elementType, string template = null) {
         this.id = id;
@@ -129,12 +134,6 @@ public class UIView {
         return elementCount;
     }
 
-    public bool clipOverflow;
-
-    public bool focusOnMouseDown;
-    public bool sizeChanged;
-    public int depth;
-
     public void SetZIndex() { }
 
     public void SetCamera(Camera camera, CameraEvent renderHook) { }
@@ -203,4 +202,24 @@ public class UIView {
         }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <returns>true in case the depth has been changed in order to get focus</returns>
+    public bool RequestFocus() {
+        var views = Application.GetViews();
+        if (focusOnMouseDown && Depth < views.Length - 1) {
+            for (var index = 0; index < views.Length; index++) {
+                UIView view = views[index];
+                if (view.Depth > Depth) {
+                    view.Depth--;
+                }
+            }
+            Depth = views.Length - 1;
+            Application.SortViews();
+            return true;
+        }
+
+        return false;
+    }
 }

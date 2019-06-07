@@ -8,11 +8,7 @@
         <Div style="create-button-row">
             <Group onMouseClick="OnButtonClick()" style="button">Create Window</Group>
         </Div>
-
-        <!--        <KlangWindow/>-->
         
-        <!--        <KlangWindow/>-->
-
     </Contents>
 
 </UITemplate>

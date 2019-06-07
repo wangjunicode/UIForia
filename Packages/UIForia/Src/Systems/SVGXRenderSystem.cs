@@ -27,7 +27,11 @@ namespace UIForia.Systems {
         private LightList<UIView> views;
         private ILayoutSystem layoutSystem;
 
-        public SVGXRenderSystem(Camera camera, ILayoutSystem layoutSystem) {
+        public SVGXRenderSystem(Application application, Camera camera, ILayoutSystem layoutSystem) {
+            application.onViewsSorted += uiViews => {
+                views.Clear();
+                views.AddRange(uiViews);
+            };
             this.m_Camera = camera;
             gfx = new GFX(camera);
             ctx = new ImmediateRenderContext();
@@ -251,6 +255,7 @@ namespace UIForia.Systems {
 
         public void OnViewAdded(UIView view) {
             views.Add(view);
+            views.Sort((a, b) => a.Depth < b.Depth ? -1 : 1);
         }
 
         public void OnViewRemoved(UIView view) {

@@ -71,34 +71,25 @@ namespace Documentation.DocumentationElements {
 
         public float num;
 
-        public event Action<float> customOnNumChange;
-        
-        /*
-         * todo: <Text>MyVal: {Value.MyVal}</Text> results in InvalidCastException: Specified cast is not valid. 
-         */
-        public string GetMyVal() {
-            return Value.MyVal.ToString();
-        }
-
         [WriteBinding(nameof(Value))]
         public event Action<CustomInputData> onValueChanged;
         
         [WriteBinding(nameof(num))]
+        // (value) => parent.num = this.num;
         public event Action<float> onNumChanged;
 
         [OnPropertyChanged(nameof(Value))]
         public void OnMyValChanged(string propertyName) {
             Debug.Log($"CustomInputElement: {propertyName} changed");
-            onValueChanged?.Invoke(Value);
+            //onValueChanged?.Invoke(Value);
         }
         
         [OnPropertyChanged(nameof(num))]
         public void OnNumValueChanged(string propertyName) {
             Debug.Log($"CustomInputElement: {propertyName} changed");
             // invoking the custom event handler trigger code in BindingsDemo.cs
-            onNumChanged?.Invoke(num);
+            //onNumChanged?.Invoke(num);
             // Doesn't do anything obvious. Should be related to two-way-binding. todo: figure that out
-            customOnNumChange?.Invoke(num);
         }
 
         public DragEvent onDragCreate(MouseInputEvent evt) {
@@ -121,7 +112,6 @@ namespace Documentation.DocumentationElements {
             
             onValueChanged?.Invoke(Value);
             onNumChanged?.Invoke(num);
-            customOnNumChange?.Invoke(num);
         }
  
     }

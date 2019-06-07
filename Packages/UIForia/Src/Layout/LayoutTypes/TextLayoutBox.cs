@@ -22,14 +22,14 @@ namespace UIForia.Layout.LayoutTypes {
 
         public override void RunLayout() {
             TextInfo textInfo = ((UITextElement) element).TextInfo;
-            float topOffset = PaddingTop + BorderTop;
-            float leftOffset = PaddingLeft + BorderLeft;
+            float topOffset = resolvedPaddingTop + resolvedBorderTop;
+            float leftOffset = resolvedPaddingLeft + resolvedBorderLeft;
 
             Size size = textInfo.Layout(new Vector2(leftOffset, topOffset), allocatedWidth - PaddingHorizontal - BorderHorizontal);
 
             actualWidth = size.width + PaddingHorizontal + BorderHorizontal;
 
-            actualHeight = size.height + PaddingBottom + BorderBottom;
+            actualHeight = size.height + resolvedPaddingBottom + resolvedBorderBottom;
         }
 
         public override void OnStylePropertyChanged(StructList<StyleProperty> property) {

@@ -27,6 +27,7 @@ namespace UIForia.Systems {
         private readonly Dictionary<int, LayoutBoxPool> layoutBoxPoolMap;
         private readonly LightList<LayoutBox> toLayout = new LightList<LayoutBox>(128);
         private readonly Application application;
+        private readonly LightList<LayoutBox> leaves;
 
         public LayoutSystem(Application application, IStyleSystem styleSystem) {
             this.application = application;
@@ -36,7 +37,8 @@ namespace UIForia.Systems {
             this.m_TextLayoutBoxes = new LightList<TextLayoutBox>(64);
             this.m_StyleSystem.onStylePropertyChanged += HandleStylePropertyChanged;
             this.layoutBoxPoolMap = new Dictionary<int, LayoutBoxPool>();
-
+            this.leaves = new LightList<LayoutBox>(64);
+            
             this.layoutBoxPoolMap[(int) LayoutType.Flex] = new LayoutBoxPool<FlexLayoutBox>();
             this.layoutBoxPoolMap[(int) LayoutType.Grid] = new LayoutBoxPool<GridLayoutBox>();
             this.layoutBoxPoolMap[(int) LayoutType.Radial] = new LayoutBoxPool<RadialLayoutBox>();
@@ -138,6 +140,7 @@ namespace UIForia.Systems {
 
         }
 
+
         public void RunLayout(UIView view) {
             m_VisibleBoxList.QuickClear();
             view.visibleElements.QuickClear();
@@ -156,18 +159,24 @@ namespace UIForia.Systems {
             rootBox.actualWidth = rootBox.allocatedWidth;
             rootBox.actualHeight = rootBox.allocatedHeight;
 
+            CollectLayoutBoxes(view);
+
+            leaves.QuickClear();
+
+            LayoutBox[] toLayoutArray = toLayout.Array;
+            int toLayoutCount = toLayout.Count;
+
             // todo -- only if changed
             if (view.sizeChanged) {
+                
+                for (int i = 0; i < toLayoutCount; i++) {
+                    toLayoutArray[i].UpdateViewSizeProperties();
+                }
+                
                 rootBox.RunLayout();
                 view.sizeChanged = false; // todo - dont do this here
             }
 
-            CollectLayoutBoxes(view);
-
-            LightList<LayoutBox> leaves = new LightList<LayoutBox>();
-
-            LayoutBox[] toLayoutArray = toLayout.Array;
-            int toLayoutCount = toLayout.Count;
 
             for (int i = 0; i < toLayoutCount; i++) {
                 LayoutBox box = toLayoutArray[i];
@@ -406,33 +415,9 @@ namespace UIForia.Systems {
                 return;
             }
 
-            bool notifyParent = box.parent != null && !box.IsIgnored && box.element.isEnabled;
-            bool invalidatePreferredSizeCache = false;
-            bool layoutTypeChanged = false;
-
             if (box.HandleStylePropertiesChanged(properties)) {
-                box.parent?.OnChildStylePropertyChanged(box, properties);
-            }
-            
-
-            if (layoutTypeChanged) {
                 HandleLayoutChanged(element);
-                box.parent?.OnChildStylePropertyChanged(box, properties);
-            }
-            else {
-                if (invalidatePreferredSizeCache) {
-                    if (notifyParent) {
-                        box.RequestContentSizeChangeLayout();
-                    }
-
-                    box.InvalidatePreferredSizeCache();
-                }
-
-                box.OnStylePropertyChanged(properties);
-
-                if (notifyParent) {
-                    box.parent.OnChildStylePropertyChanged(box, properties);
-                }
+//                box.parent?.OnChildStylePropertyChanged(box, properties);
             }
         }
 
@@ -452,6 +437,7 @@ namespace UIForia.Systems {
             replace.parent = parent;
             UpdateChildren(replace);
             UpdateChildren(parent);
+            replace.CopyValues(box);
             box.Release();
         }
 
@@ -489,6 +475,7 @@ namespace UIForia.Systems {
 
                 LayoutBox box = CreateLayoutBox(current.element);
                 box.parent = current.parentBox;
+                box.UpdateViewSizeProperties();
                 toUpdateList.Add(box);
 
                 int childCount = current.element.children.Count;
@@ -730,7 +717,7 @@ namespace UIForia.Systems {
             LayoutBox box = m_LayoutBoxMap.GetOrDefault(element.id);
             if (box == null)
                 return new OffsetRect();
-            return new OffsetRect(box.PaddingTop, box.PaddingRight, box.PaddingBottom, box.PaddingLeft);
+            return new OffsetRect(box.resolvedPaddingTop, box.resolvedPaddingRight, box.resolvedPaddingBottom, box.resolvedPaddingLeft);
         }
 
         // todo -- remove this, only used for inspector
@@ -746,7 +733,7 @@ namespace UIForia.Systems {
             LayoutBox box = m_LayoutBoxMap.GetOrDefault(element.id);
             if (box == null)
                 return new OffsetRect();
-            return new OffsetRect(box.BorderTop, box.BorderRight, box.BorderBottom, box.BorderLeft);
+            return new OffsetRect(box.resolvedBorderTop, box.resolvedBorderRight, box.resolvedBorderBottom, box.resolvedBorderLeft);
         }
 
         public LayoutBox GetBoxForElement(UIElement itemElement) {
@@ -770,7 +757,7 @@ namespace UIForia.Systems {
             retn.Count = m_VisibleBoxList.Count;
             return retn;
         }
-        
+
     }
 
 }

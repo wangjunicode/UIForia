@@ -124,8 +124,8 @@ namespace UIForia.Layout.LayoutTypes {
         }
 
         public override void RunLayout() {
-            padding = new OffsetRect(PaddingTop, PaddingRight, PaddingBottom, PaddingLeft);
-            border = new OffsetRect(BorderTop, BorderRight, BorderBottom, BorderLeft);
+            padding = new OffsetRect(resolvedPaddingTop, resolvedPaddingRight, resolvedPaddingBottom, resolvedPaddingLeft);
+            border = new OffsetRect(resolvedBorderBottom, resolvedBorderRight, resolvedBorderBottom, resolvedBorderLeft);
 
             if (children.Count == 0) {
                 actualWidth = allocatedWidth;

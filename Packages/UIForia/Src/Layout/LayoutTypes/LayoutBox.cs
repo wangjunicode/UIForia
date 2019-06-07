@@ -30,6 +30,26 @@ namespace UIForia.Layout.LayoutTypes {
 
         protected internal UIView view;
 
+        // view changed
+        // allocated size changed
+        // text size changed
+        // property changed
+
+        public float resolvedPaddingTop;
+        public float resolvedPaddingRight;
+        public float resolvedPaddingBottom;
+        public float resolvedPaddingLeft;
+
+        public float resolvedBorderTop;
+        public float resolvedBorderRight;
+        public float resolvedBorderBottom;
+        public float resolvedBorderLeft;
+
+        public float resolvedBorderRadiusTopLeft;
+        public float resolvedBorderRadiusTopRight;
+        public float resolvedBorderRadiusBottomRight;
+        public float resolvedBorderRadiusBottomLeft;
+
         internal UIFixedLength paddingTop;
         internal UIFixedLength paddingRight;
         internal UIFixedLength paddingBottom;
@@ -250,6 +270,17 @@ namespace UIForia.Layout.LayoutTypes {
             if ((int) allocatedWidth != (int) width) {
                 allocatedWidth = width;
                 markedForLayout = true; // todo might not need it, delegate to virtual fn 
+
+                resolvedBorderLeft = ResolveFixedWidth(borderLeft);
+                resolvedBorderRight = ResolveFixedWidth(borderRight);
+
+                resolvedPaddingLeft = ResolveFixedWidth(paddingLeft);
+                resolvedPaddingRight = ResolveFixedWidth(paddingRight);
+
+                resolvedBorderRadiusTopLeft = ResolveFixedWidth(borderRadiusTopLeft);
+                resolvedBorderRadiusTopRight = ResolveFixedWidth(borderRadiusTopRight);
+                resolvedBorderRadiusBottomRight = ResolveFixedWidth(borderRadiusBottomRight);
+                resolvedBorderRadiusBottomLeft = ResolveFixedWidth(borderRadiusBottomLeft);
             }
         }
 
@@ -262,7 +293,7 @@ namespace UIForia.Layout.LayoutTypes {
         }
 
         [DebuggerStepThrough]
-        protected float ResolveFixedWidth(UIFixedLength width) {
+        protected internal float ResolveFixedWidth(UIFixedLength width) {
             switch (width.unit) {
                 case UIFixedUnit.Pixel:
                     return width.value * view.ScaleFactor;
@@ -1058,6 +1089,222 @@ namespace UIForia.Layout.LayoutTypes {
             float max = ResolveMinOrMaxWidth(maxWidth);
 
             return new LayoutBoxSize(min, max, prf);
+        }
+
+        internal bool HandleStylePropertiesChanged(StructList<StyleProperty> properties) {
+            // todo early-out if we haven't had a layout pass for the element yet
+
+            bool notifyParent = parent != null && !IsIgnored && element.isEnabled;
+            bool invalidatePreferredSizeCache = false;
+            bool layoutTypeChanged = false;
+
+            for (int i = 0; i < properties.Count; i++) {
+                StyleProperty property = properties[i];
+
+                switch (property.propertyId) {
+                    case StylePropertyId.PaddingLeft:
+                        paddingLeft = property.AsUIFixedLength;
+                        resolvedPaddingLeft = ResolveFixedWidth(property.AsUIFixedLength);
+                        break;
+
+                    case StylePropertyId.PaddingRight:
+                        paddingRight = property.AsUIFixedLength;
+                        resolvedPaddingRight = ResolveFixedWidth(property.AsUIFixedLength);
+                        break;
+
+                    case StylePropertyId.PaddingTop:
+                        paddingTop = property.AsUIFixedLength;
+                        resolvedPaddingTop = ResolveFixedHeight(property.AsUIFixedLength);
+                        break;
+
+                    case StylePropertyId.PaddingBottom:
+                        paddingBottom = property.AsUIFixedLength;
+                        resolvedPaddingBottom = ResolveFixedHeight(property.AsUIFixedLength);
+                        break;
+
+                    case StylePropertyId.BorderLeft:
+                        borderLeft = property.AsUIFixedLength;
+                        resolvedBorderLeft = ResolveFixedWidth(property.AsUIFixedLength);
+                        break;
+
+                    case StylePropertyId.BorderRight:
+                        borderRight = property.AsUIFixedLength;
+                        resolvedBorderRight = ResolveFixedWidth(property.AsUIFixedLength);
+                        break;
+
+                    case StylePropertyId.BorderTop:
+                        borderTop = property.AsUIFixedLength;
+                        resolvedBorderTop = ResolveFixedHeight(property.AsUIFixedLength);
+                        break;
+
+                    case StylePropertyId.BorderBottom:
+                        borderBottom = property.AsUIFixedLength;
+                        resolvedBorderBottom = ResolveFixedHeight(property.AsUIFixedLength);
+                        break;
+
+                    case StylePropertyId.BorderRadiusTopLeft:
+                        borderRadiusTopLeft = property.AsUIFixedLength;
+                        resolvedBorderRadiusTopLeft = ResolveFixedWidth(property.AsUIFixedLength);
+                        break;
+
+                    case StylePropertyId.BorderRadiusTopRight:
+                        borderRadiusTopRight = property.AsUIFixedLength;
+                        resolvedBorderRadiusTopRight = ResolveFixedWidth(property.AsUIFixedLength);
+                        break;
+
+                    case StylePropertyId.BorderRadiusBottomLeft:
+                        borderRadiusBottomLeft = property.AsUIFixedLength;
+                        resolvedBorderRadiusBottomLeft = ResolveFixedWidth(property.AsUIFixedLength);
+                        break;
+
+                    case StylePropertyId.BorderRadiusBottomRight:
+                        borderRadiusBottomRight = property.AsUIFixedLength;
+                        resolvedBorderRadiusBottomRight = ResolveFixedWidth(property.AsUIFixedLength);
+                        break;
+
+                    // todo -- margin should be a fixed measurement probably
+                    case StylePropertyId.MarginLeft:
+                        marginLeft = property.AsUIMeasurement;
+                        break;
+
+                    case StylePropertyId.MarginRight:
+                        marginRight = property.AsUIMeasurement;
+                        break;
+
+                    case StylePropertyId.MarginTop:
+                        marginTop = property.AsUIMeasurement;
+                        break;
+
+                    case StylePropertyId.MarginBottom:
+                        marginBottom = property.AsUIMeasurement;
+                        break;
+
+                    case StylePropertyId.TransformPivotX:
+                        transformPivotX = property.AsUIFixedLength;
+                        break;
+
+                    case StylePropertyId.TransformPivotY:
+                        transformPivotY = property.AsUIFixedLength;
+                        break;
+
+                    case StylePropertyId.TransformPositionX:
+                        transformPositionX = property.AsTransformOffset;
+                        break;
+
+                    case StylePropertyId.TransformPositionY:
+                        transformPositionY = property.AsTransformOffset;
+                        break;
+
+                    case StylePropertyId.TransformBehaviorX:
+                        transformBehaviorX = property.AsTransformBehavior;
+                        break;
+
+                    case StylePropertyId.TransformBehaviorY:
+                        transformBehaviorY = property.AsTransformBehavior;
+                        break;
+
+                    case StylePropertyId.TransformRotation:
+                        transformRotation = property.AsFloat;
+                        break;
+
+                    case StylePropertyId.TransformScaleX:
+                        transformScaleX = property.AsFloat;
+                        break;
+
+                    case StylePropertyId.TransformScaleY:
+                        transformScaleY = property.AsFloat;
+                        break;
+
+                    case StylePropertyId.PreferredWidth:
+                        prefWidth = property.AsUIMeasurement;
+                        break;
+
+                    case StylePropertyId.PreferredHeight:
+                        prefHeight = property.AsUIMeasurement;
+                        break;
+
+                    case StylePropertyId.MinWidth:
+                        minWidth = property.AsUIMeasurement;
+                        break;
+
+                    case StylePropertyId.MinHeight:
+                        minHeight = property.AsUIMeasurement;
+                        break;
+
+                    case StylePropertyId.MaxWidth:
+                        maxWidth = property.AsUIMeasurement;
+                        break;
+
+                    case StylePropertyId.MaxHeight:
+                        maxHeight = property.AsUIMeasurement;
+                        break;
+
+                    case StylePropertyId.ZIndex:
+                        zIndex = property.AsInt;
+                        break;
+
+                    case StylePropertyId.Layer:
+                        layer = property.AsInt;
+                        break;
+
+                    case StylePropertyId.LayoutBehavior:
+                        layoutBehavior = property.AsLayoutBehavior;
+                        UpdateChildren();
+                        break;
+
+                    case StylePropertyId.LayoutType:
+                        layoutTypeChanged = true;
+                        break;
+
+                    case StylePropertyId.OverflowX:
+                        overflowX = property.AsOverflow;
+                        break;
+
+                    case StylePropertyId.OverflowY:
+                        overflowY = property.AsOverflow;
+                        break;
+                }
+
+                if (!invalidatePreferredSizeCache) {
+                    switch (property.propertyId) {
+                        case StylePropertyId.MinWidth:
+                        case StylePropertyId.MaxWidth:
+                        case StylePropertyId.PreferredWidth:
+                            invalidatePreferredSizeCache = true;
+                            break;
+                        case StylePropertyId.MinHeight:
+                        case StylePropertyId.MaxHeight:
+                        case StylePropertyId.PreferredHeight:
+                            invalidatePreferredSizeCache = true;
+                            break;
+                        case StylePropertyId.AnchorTop:
+                        case StylePropertyId.AnchorRight:
+                        case StylePropertyId.AnchorBottom:
+                        case StylePropertyId.AnchorLeft:
+                        case StylePropertyId.AnchorTarget:
+                            invalidatePreferredSizeCache = true;
+                            break;
+                    }
+                }
+            }
+
+
+            if (invalidatePreferredSizeCache) {
+                if (notifyParent) {
+                    RequestContentSizeChangeLayout();
+                }
+
+                InvalidatePreferredSizeCache();
+            }
+
+            OnStylePropertyChanged(properties);
+
+            if (notifyParent) {
+                parent.OnChildStylePropertyChanged(this, properties);
+            }
+
+
+            return layoutTypeChanged;
         }
 
         public struct LayoutBoxSize {

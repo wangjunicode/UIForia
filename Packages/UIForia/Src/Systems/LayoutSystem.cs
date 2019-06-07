@@ -7,7 +7,6 @@ using UIForia.Layout;
 using UIForia.Layout.LayoutTypes;
 using UIForia.Rendering;
 using UIForia.Util;
-using Unity.Mathematics;
 using UnityEngine;
 
 namespace UIForia.Systems {
@@ -38,11 +37,11 @@ namespace UIForia.Systems {
             this.m_StyleSystem.onStylePropertyChanged += HandleStylePropertyChanged;
             this.layoutBoxPoolMap = new Dictionary<int, LayoutBoxPool>();
 
-            this.layoutBoxPoolMap[(int)LayoutType.Flex] = new LayoutBoxPool<FlexLayoutBox>();
-            this.layoutBoxPoolMap[(int)LayoutType.Grid] = new LayoutBoxPool<GridLayoutBox>();
-            this.layoutBoxPoolMap[(int)LayoutType.Radial] = new LayoutBoxPool<RadialLayoutBox>();
-            this.layoutBoxPoolMap[(int)LayoutType.Fixed] = new LayoutBoxPool<FixedLayoutBox>();
-            this.layoutBoxPoolMap[(int)LayoutType.Flow] = new LayoutBoxPool<FlowLayoutBox>();
+            this.layoutBoxPoolMap[(int) LayoutType.Flex] = new LayoutBoxPool<FlexLayoutBox>();
+            this.layoutBoxPoolMap[(int) LayoutType.Grid] = new LayoutBoxPool<GridLayoutBox>();
+            this.layoutBoxPoolMap[(int) LayoutType.Radial] = new LayoutBoxPool<RadialLayoutBox>();
+            this.layoutBoxPoolMap[(int) LayoutType.Fixed] = new LayoutBoxPool<FixedLayoutBox>();
+            this.layoutBoxPoolMap[(int) LayoutType.Flow] = new LayoutBoxPool<FlowLayoutBox>();
             this.layoutBoxPoolMap[TextLayoutPoolKey] = new LayoutBoxPool<TextLayoutBox>();
             this.layoutBoxPoolMap[ImageLayoutPoolKey] = new LayoutBoxPool<ImageLayoutBox>();
         }
@@ -173,7 +172,7 @@ namespace UIForia.Systems {
             for (int i = 0; i < toLayoutCount; i++) {
                 LayoutBox box = toLayoutArray[i];
 
-      
+
                 if (box.IsIgnored) {
                     float currentWidth = box.allocatedWidth;
                     float currentHeight = box.allocatedHeight;
@@ -194,10 +193,9 @@ namespace UIForia.Systems {
                 if (box.children.Count == 0) {
                     leaves.Add(box);
                 }
-                
+
                 box.xMax = box.actualWidth;
                 box.yMax = box.actualHeight;
-
             }
 
             int leafCount = leaves.Count;
@@ -215,22 +213,24 @@ namespace UIForia.Systems {
 
                 while (ptr != null) {
                     // todo -- dont look up overflow values, cache them
-                    if (current.style.OverflowX != Overflow.Visible) {
-                        ptr.xMax = math.max(ptr.xMax, current.actualWidth);
+                    if (current.overflowX != Overflow.Visible) {
+                        ptr.xMax = ptr.xMax > current.actualWidth ? ptr.xMax : current.actualWidth;
                     }
-                    else if (ptr.style.OverflowX != Overflow.Visible) {
-                        ptr.xMax = math.max(ptr.xMax, current.xMax);
-                    } 
+                    else if (ptr.overflowX != Overflow.Visible) {
+                        ptr.xMax = ptr.xMax > current.xMax ? ptr.xMax : current.xMax;
+                    }
                     else {
-                        ptr.xMax = math.max(ptr.xMax, ptr.localX + current.xMax);
+                        ptr.xMax = ptr.xMax > ptr.localX + current.xMax ? ptr.xMax : ptr.localX + current.xMax;
                     }
 
-                    if (current.style.OverflowY != Overflow.Visible) {
-                        ptr.yMax = math.max(ptr.yMax, current.actualHeight);
-                    } else if (ptr.style.OverflowY != Overflow.Visible) {
-                        ptr.yMax = math.max(ptr.yMax, current.yMax);
-                    } else {
-                        ptr.yMax = math.max(ptr.yMax, ptr.localY + current.yMax);
+                    if (current.overflowY != Overflow.Visible) {
+                        ptr.yMax = ptr.yMax > current.actualHeight ? ptr.yMax : current.actualHeight;
+                    }
+                    else if (ptr.overflowY != Overflow.Visible) {
+                        ptr.yMax = ptr.yMax > current.yMax ? ptr.yMax : current.yMax;
+                    }
+                    else {
+                        ptr.yMax = ptr.yMax > ptr.localY + current.yMax ? ptr.yMax : ptr.localY + current.yMax;
                     }
 
                     current = ptr;
@@ -265,7 +265,8 @@ namespace UIForia.Systems {
 
                 if (box.transformRotation != 0) {
                     m = SVGXMatrix.TRS(localPosition, layoutResult.rotation, layoutResult.scale);
-                } else {
+                }
+                else {
                     m = SVGXMatrix.TranslateScale(localPosition.x, localPosition.y, localScale.x, localScale.y);
                 }
 
@@ -276,15 +277,15 @@ namespace UIForia.Systems {
                     m = pivotMat * m * pivotMat.Inverse();
                 }
 
-                float paddingLeft = box.PaddingLeft;
-                float paddingRight = box.PaddingRight;
-                float paddingBottom = box.PaddingBottom;
-                float paddingTop = box.PaddingTop;
+                float paddingLeft = box.resolvedPaddingLeft;
+                float paddingRight = box.resolvedPaddingRight;
+                float paddingBottom = box.resolvedPaddingBottom;
+                float paddingTop = box.resolvedPaddingTop;
 
-                float borderLeft = box.BorderLeft;
-                float borderRight = box.BorderRight;
-                float borderBottom = box.BorderBottom;
-                float borderTop = box.BorderTop;
+                float borderLeft = box.resolvedBorderLeft;
+                float borderRight = box.resolvedBorderRight;
+                float borderBottom = box.resolvedBorderBottom;
+                float borderTop = box.resolvedBorderTop;
 
                 m = parentMatrix * m;
                 layoutResult.matrix = m;
@@ -292,7 +293,6 @@ namespace UIForia.Systems {
                 layoutResult.overflowSize = new Size(box.xMax, box.yMax);
                 layoutResult.localPosition = localPosition;
 
-                layoutResult.ContentRect = new Rect(paddingLeft + borderLeft, paddingTop + borderTop, box.allocatedWidth - paddingLeft - borderLeft - paddingRight - borderRight, box.allocatedHeight - paddingTop - borderTop - paddingBottom - borderBottom);
 
                 layoutResult.actualSize = new Size(box.actualWidth, box.actualHeight);
                 layoutResult.allocatedSize = new Size(box.allocatedWidth, box.allocatedHeight);
@@ -308,13 +308,13 @@ namespace UIForia.Systems {
                 layoutResult.border = new OffsetRect(borderTop, borderRight, borderBottom, borderLeft);
                 layoutResult.padding = new OffsetRect(paddingTop, paddingRight, paddingBottom, paddingLeft);
 
-                if (box.style.OverflowX != Overflow.Visible) {
+                if (box.overflowX != Overflow.Visible) {
                     // use own value for children
                     box.clipRect.x = m.position.x;
                     box.clipRect.width = box.allocatedWidth;
                 }
 
-                if (box.style.OverflowY != Overflow.Visible) {
+                if (box.overflowY != Overflow.Visible) {
                     box.clipRect.y = m.position.y;
                     box.clipRect.height = box.allocatedHeight;
                 }
@@ -389,8 +389,7 @@ namespace UIForia.Systems {
             return localPosition;
         }
 
-        public void OnDestroy() {
-        }
+        public void OnDestroy() { }
 
         public void OnViewAdded(UIView view) {
             CreateLayoutBox(view.rootElement);
@@ -411,180 +410,16 @@ namespace UIForia.Systems {
             bool invalidatePreferredSizeCache = false;
             bool layoutTypeChanged = false;
 
-            for (int i = 0; i < properties.Count; i++) {
-                StyleProperty property = properties[i];
-
-                switch (property.propertyId) {
-                    case StylePropertyId.PaddingLeft:
-                        box.paddingLeft = property.AsUIFixedLength;
-                        break;
-
-                    case StylePropertyId.PaddingRight:
-                        box.paddingRight = property.AsUIFixedLength;
-                        break;
-
-                    case StylePropertyId.PaddingTop:
-                        box.paddingTop = property.AsUIFixedLength;
-                        break;
-
-                    case StylePropertyId.PaddingBottom:
-                        box.paddingBottom = property.AsUIFixedLength;
-                        break;
-
-                    case StylePropertyId.BorderLeft:
-                        box.borderLeft = property.AsUIFixedLength;
-                        break;
-
-                    case StylePropertyId.BorderRight:
-                        box.borderRight = property.AsUIFixedLength;
-                        break;
-
-                    case StylePropertyId.BorderTop:
-                        box.borderTop = property.AsUIFixedLength;
-                        break;
-
-                    case StylePropertyId.BorderBottom:
-                        box.borderBottom = property.AsUIFixedLength;
-                        break;
-
-                    case StylePropertyId.BorderRadiusTopLeft:
-                        box.borderRadiusTopLeft = property.AsUIFixedLength;
-                        break;
-
-                    case StylePropertyId.BorderRadiusTopRight:
-                        box.borderRadiusTopRight = property.AsUIFixedLength;
-                        break;
-
-                    case StylePropertyId.BorderRadiusBottomLeft:
-                        box.borderRadiusBottomLeft = property.AsUIFixedLength;
-                        break;
-
-                    case StylePropertyId.BorderRadiusBottomRight:
-                        box.borderRadiusBottomRight = property.AsUIFixedLength;
-                        break;
-
-                    // todo -- margin should be a fixed measurement probably
-                    case StylePropertyId.MarginLeft:
-                        box.marginLeft = property.AsUIMeasurement;
-                        break;
-
-                    case StylePropertyId.MarginRight:
-                        box.marginRight = property.AsUIMeasurement;
-                        break;
-
-                    case StylePropertyId.MarginTop:
-                        box.marginTop = property.AsUIMeasurement;
-                        break;
-
-                    case StylePropertyId.MarginBottom:
-                        box.marginBottom = property.AsUIMeasurement;
-                        break;
-
-                    case StylePropertyId.TransformPivotX:
-                        box.transformPivotX = property.AsUIFixedLength;
-                        break;
-
-                    case StylePropertyId.TransformPivotY:
-                        box.transformPivotY = property.AsUIFixedLength;
-                        break;
-
-                    case StylePropertyId.TransformPositionX:
-                        box.transformPositionX = property.AsTransformOffset;
-                        break;
-
-                    case StylePropertyId.TransformPositionY:
-                        box.transformPositionY = property.AsTransformOffset;
-                        break;
-
-                    case StylePropertyId.TransformBehaviorX:
-                        box.transformBehaviorX = property.AsTransformBehavior;
-                        break;
-
-                    case StylePropertyId.TransformBehaviorY:
-                        box.transformBehaviorY = property.AsTransformBehavior;
-                        break;
-
-                    case StylePropertyId.TransformRotation:
-                        box.transformRotation = property.AsFloat;
-                        break;
-
-                    case StylePropertyId.TransformScaleX:
-                        box.transformScaleX = property.AsFloat;
-                        break;
-
-                    case StylePropertyId.TransformScaleY:
-                        box.transformScaleY = property.AsFloat;
-                        break;
-
-                    case StylePropertyId.PreferredWidth:
-                        box.prefWidth = property.AsUIMeasurement;
-                        break;
-
-                    case StylePropertyId.PreferredHeight:
-                        box.prefHeight = property.AsUIMeasurement;
-                        break;
-
-                    case StylePropertyId.MinWidth:
-                        box.minWidth = property.AsUIMeasurement;
-                        break;
-
-                    case StylePropertyId.MinHeight:
-                        box.minHeight = property.AsUIMeasurement;
-                        break;
-
-                    case StylePropertyId.MaxWidth:
-                        box.maxWidth = property.AsUIMeasurement;
-                        break;
-
-                    case StylePropertyId.MaxHeight:
-                        box.maxHeight = property.AsUIMeasurement;
-                        break;
-
-                    case StylePropertyId.ZIndex:
-                        box.zIndex = property.AsInt;
-                        break;
-
-                    case StylePropertyId.Layer:
-                        box.layer = property.AsInt;
-                        break;
-
-                    case StylePropertyId.LayoutBehavior:
-                        box.layoutBehavior = property.AsLayoutBehavior;
-                        box.UpdateChildren();
-
-                        break;
-                    case StylePropertyId.LayoutType:
-                        layoutTypeChanged = true;
-                        break;
-                }
-
-                if (!invalidatePreferredSizeCache) {
-                    switch (property.propertyId) {
-                        case StylePropertyId.MinWidth:
-                        case StylePropertyId.MaxWidth:
-                        case StylePropertyId.PreferredWidth:
-                            invalidatePreferredSizeCache = true;
-                            break;
-                        case StylePropertyId.MinHeight:
-                        case StylePropertyId.MaxHeight:
-                        case StylePropertyId.PreferredHeight:
-                            invalidatePreferredSizeCache = true;
-                            break;
-                        case StylePropertyId.AnchorTop:
-                        case StylePropertyId.AnchorRight:
-                        case StylePropertyId.AnchorBottom:
-                        case StylePropertyId.AnchorLeft:
-                        case StylePropertyId.AnchorTarget:
-                            invalidatePreferredSizeCache = true;
-                            break;
-                    }
-                }
+            if (box.HandleStylePropertiesChanged(properties)) {
+                box.parent?.OnChildStylePropertyChanged(box, properties);
             }
+            
 
             if (layoutTypeChanged) {
                 HandleLayoutChanged(element);
                 box.parent?.OnChildStylePropertyChanged(box, properties);
-            } else {
+            }
+            else {
                 if (invalidatePreferredSizeCache) {
                     if (notifyParent) {
                         box.RequestContentSizeChangeLayout();
@@ -640,7 +475,8 @@ namespace UIForia.Systems {
 
             if (element.parent != null) {
                 stack.Push(new LayoutBoxPair(element, m_LayoutBoxMap.GetOrDefault(element.parent.id)));
-            } else {
+            }
+            else {
                 stack.Push(new LayoutBoxPair(element, null));
             }
 
@@ -673,7 +509,7 @@ namespace UIForia.Systems {
             if (element.parent != null) {
                 LayoutBox ptr = toUpdate[0].parent;
                 while (ptr != null) {
-                    if (ptr.style.LayoutBehavior != LayoutBehavior.TranscludeChildren) {
+                    if (ptr.layoutBehavior != LayoutBehavior.TranscludeChildren) {
                         UpdateChildren(ptr);
                         break;
                     }
@@ -727,37 +563,38 @@ namespace UIForia.Systems {
             }
         }
 
-        public void OnAttributeSet(UIElement element, string attributeName, string currentValue, string previousValue) {
-        }
+        public void OnAttributeSet(UIElement element, string attributeName, string currentValue, string previousValue) { }
 
         private LayoutBox CreateLayoutBox(UIElement element) {
             LayoutBox retn = null;
             if ((element is UITextElement)) {
-                TextLayoutBox textLayout = (TextLayoutBox)layoutBoxPoolMap[TextLayoutPoolKey].Get(element);
+                TextLayoutBox textLayout = (TextLayoutBox) layoutBoxPoolMap[TextLayoutPoolKey].Get(element);
                 m_TextLayoutBoxes.Add(textLayout);
                 retn = textLayout;
-            } else if ((element is UIImageElement)) {
+            }
+            else if ((element is UIImageElement)) {
                 retn = layoutBoxPoolMap[ImageLayoutPoolKey].Get(element);
-            } else {
+            }
+            else {
                 switch (element.style.LayoutType) {
                     case LayoutType.Flex:
-                        retn = layoutBoxPoolMap[(int)LayoutType.Flex].Get(element);
+                        retn = layoutBoxPoolMap[(int) LayoutType.Flex].Get(element);
                         break;
 
                     case LayoutType.Flow:
-                        retn = layoutBoxPoolMap[(int)LayoutType.Flow].Get(element);
+                        retn = layoutBoxPoolMap[(int) LayoutType.Flow].Get(element);
                         break;
 
                     case LayoutType.Fixed:
-                        retn = layoutBoxPoolMap[(int)LayoutType.Fixed].Get(element);
+                        retn = layoutBoxPoolMap[(int) LayoutType.Fixed].Get(element);
                         break;
 
                     case LayoutType.Grid:
-                        retn = layoutBoxPoolMap[(int)LayoutType.Grid].Get(element);
+                        retn = layoutBoxPoolMap[(int) LayoutType.Grid].Get(element);
                         break;
 
                     case LayoutType.Radial:
-                        retn = layoutBoxPoolMap[(int)LayoutType.Radial].Get(element);
+                        retn = layoutBoxPoolMap[(int) LayoutType.Radial].Get(element);
                         break;
 
                     default:
@@ -770,8 +607,7 @@ namespace UIForia.Systems {
             return retn;
         }
 
-        public void OnElementCreated(UIElement element) {
-        }
+        public void OnElementCreated(UIElement element) { }
 
         private void GetChildBoxes(LayoutBox box, LightList<LayoutBox> list) {
             UIElement element = box.element;
@@ -784,7 +620,7 @@ namespace UIForia.Systems {
                     continue;
                 }
 
-                LayoutBehavior behavior = childBox.style.LayoutBehavior;
+                LayoutBehavior behavior = childBox.layoutBehavior;
                 switch (behavior) {
                     case LayoutBehavior.Unset:
                     case LayoutBehavior.Normal:
@@ -804,7 +640,7 @@ namespace UIForia.Systems {
         private void UpdateChildren(LayoutBox box) {
             UIElement element = box.element;
 
-            if (box.style.LayoutBehavior == LayoutBehavior.TranscludeChildren) {
+            if (box.layoutBehavior == LayoutBehavior.TranscludeChildren) {
                 return;
             }
 
@@ -839,6 +675,7 @@ namespace UIForia.Systems {
             return retn;
         }
 
+        // todo -- remodel this to use a quad tree or at least screen buckets
         private static void QueryPointInView(Vector2 point, UIView view, List<UIElement> retn) {
             UIElement[] elements = view.visibleElements.Array;
             int elementCount = view.visibleElements.Count;
@@ -854,7 +691,8 @@ namespace UIForia.Systems {
                     if (!handler.ContainsPoint(point)) {
                         continue;
                     }
-                } else if (PointInClippedArea(point, element) || !element.layoutResult.ScreenRect.ContainOrOverlap(point)) {
+                }
+                else if (!element.layoutResult.ScreenRect.ContainOrOverlap(point) || PointInClippedArea(point, element)) {
                     continue;
                 }
 
@@ -869,6 +707,7 @@ namespace UIForia.Systems {
             }
         }
 
+        // todo -- use layout box to access cached values instead of style look up
         private static bool PointInClippedArea(Vector2 point, UIElement element) {
             Vector2 screenPosition = element.layoutResult.screenPosition;
             if (element.style.OverflowX != Overflow.Visible) {
@@ -886,6 +725,7 @@ namespace UIForia.Systems {
             return false;
         }
 
+        // todo -- remove this, only used for inspector
         public OffsetRect GetPaddingRect(UIElement element) {
             LayoutBox box = m_LayoutBoxMap.GetOrDefault(element.id);
             if (box == null)
@@ -893,6 +733,7 @@ namespace UIForia.Systems {
             return new OffsetRect(box.PaddingTop, box.PaddingRight, box.PaddingBottom, box.PaddingLeft);
         }
 
+        // todo -- remove this, only used for inspector
         public OffsetRect GetMarginRect(UIElement element) {
             LayoutBox box = m_LayoutBoxMap.GetOrDefault(element.id);
             if (box == null)
@@ -900,6 +741,7 @@ namespace UIForia.Systems {
             return new OffsetRect(box.GetMarginTop(box.actualWidth), box.GetMarginRight(), box.GetMarginBottom(box.actualWidth), box.GetMarginLeft());
         }
 
+        // todo -- remove this, only used for inspector
         public OffsetRect GetBorderRect(UIElement element) {
             LayoutBox box = m_LayoutBoxMap.GetOrDefault(element.id);
             if (box == null)
@@ -914,7 +756,8 @@ namespace UIForia.Systems {
         public LightList<UIElement> GetVisibleElements(LightList<UIElement> retn = null) {
             if (retn == null) {
                 retn = new LightList<UIElement>(m_VisibleBoxList.Count);
-            } else {
+            }
+            else {
                 retn.EnsureCapacity(m_VisibleBoxList.Count);
             }
 
@@ -927,40 +770,7 @@ namespace UIForia.Systems {
             retn.Count = m_VisibleBoxList.Count;
             return retn;
         }
-
-        private static Extents GetLocalExtents(List<LayoutBox> children) {
-            Vector2 min = new Vector2(float.MaxValue, float.MaxValue);
-            Vector2 max = new Vector2(float.MinValue, float.MinValue);
-
-            for (int i = 0; i < children.Count; i++) {
-                LayoutBox child = children[i];
-
-                if (child.element.isDisabled)
-                    continue;
-
-                Rect rect = child.element.layoutResult.LocalRect;
-                Vector2 localPosition = new Vector2(rect.x, rect.y);
-
-                if (localPosition.x < min.x) {
-                    min.x = localPosition.x;
-                }
-
-                if (localPosition.y < min.y) {
-                    min.y = localPosition.y;
-                }
-
-                if (localPosition.x + rect.width > max.x) {
-                    max.x = localPosition.x + rect.width;
-                }
-
-                if (localPosition.y + rect.height > max.y) {
-                    max.y = localPosition.y + rect.height;
-                }
-            }
-
-            return new Extents(min, max);
-        }
-
+        
     }
 
 }

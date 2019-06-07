@@ -21,6 +21,7 @@
                 <Anchor href="'/ScrollDemo'">Scrolling</Anchor>
                 <Anchor href="'/TransclusionDemo'">Transclusion</Anchor>
                 <Anchor href="'/TransformPlayground'">Transform Playground</Anchor>
+                <Anchor href="'/SelectDemo'">Select / DropDown</Anchor>
                 <Anchor href="'/RepeatExample'">Repeat Example</Anchor>
                 <Anchor href="'/RenderSystemShowcase'">Render System</Anchor>
                 <Anchor href="'/Window'">Window System</Anchor>
@@ -38,6 +39,7 @@
                 <AnimationDemo x-route="/AnimationDemo"/>
                 <InputDemo x-route="/input"/>
                 <InputEventsDemo x-route="/inputEvents"/>
+                <SelectDemo x-route="/SelectDemo"/>
                 <BindingsDemo x-route="/BindingsDemo" />
                 <Cursors x-route="/cursors"/>
                 <DynamicDemo x-route="/DynamicDemo"/>

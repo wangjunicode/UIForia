@@ -123,7 +123,7 @@ namespace UIForia {
             m_RenderSystem = new SVGXRenderSystem(null, m_LayoutSystem);
             m_RoutingSystem = new RoutingSystem();
             m_AnimationSystem = new AnimationSystem();
-            
+
             styleImporter = new StyleSheetImporter(this);
             templateParser = new TemplateParser(this);
 
@@ -206,9 +206,9 @@ namespace UIForia {
             for (int i = 0; i < m_Systems.Count; i++) {
                 m_Systems[i].OnViewAdded(view);
             }
-            
+
             view.Initialize();
-            
+
             onViewAdded?.Invoke(view);
             return view;
         }
@@ -221,9 +221,9 @@ namespace UIForia {
             for (int i = 0; i < m_Systems.Count; i++) {
                 m_Systems[i].OnViewAdded(view);
             }
-            
+
             view.Initialize();
-            
+
             onViewAdded?.Invoke(view);
             return view;
         }
@@ -247,7 +247,7 @@ namespace UIForia {
 
             return templateParser.GetParsedTemplate(type)?.Create();
         }
-        
+
         public T CreateElement<T>() where T : UIElement {
             return templateParser.GetParsedTemplate(typeof(T))?.Create() as T;
         }
@@ -265,20 +265,19 @@ namespace UIForia {
             elementMap.Clear();
             templateParser.Reset();
             styleImporter.Reset();
-            ResourceManager.Reset(); 
+            ResourceManager.Reset();
 
             m_AfterUpdateTaskSystem.OnReset();
             m_BeforeUpdateTaskSystem.OnReset();
 
             // todo -- store root view, rehydrate. kill the rest
             for (int i = 0; i < m_Views.Count; i++) {
-               
                 // RegisterElement(m_Views[i].RootElement);
 
                 for (int j = 0; j < m_Systems.Count; j++) {
                     m_Systems[j].OnViewAdded(m_Views[i]);
                 }
-                
+
                 m_Views[i].Initialize();
             }
 
@@ -448,7 +447,6 @@ namespace UIForia {
         }
 
         public void Update() {
-            
             // todo -- if parent changed we don't want to double update, best to iterate to array & diff a frame id
             updateTree.ConditionalTraversePreOrder(Time.frameCount, (element, frameId) => {
                 if (element == null) return true; // when would element be null? root?
@@ -469,7 +467,7 @@ namespace UIForia {
             m_InputSystem.OnUpdate();
 
             m_BeforeUpdateTaskSystem.OnUpdate();
-            
+
             m_InputSystem.OnLateUpdate();
 
             m_RoutingSystem.OnUpdate();
@@ -477,11 +475,10 @@ namespace UIForia {
             m_RenderSystem.OnUpdate();
 
             m_AfterUpdateTaskSystem.OnUpdate();
-            
+
             onUpdate?.Invoke();
 
             m_Views[0].SetSize(Screen.width, Screen.height);
-            
         }
 
         /// <summary>
@@ -586,10 +583,16 @@ namespace UIForia {
             stack.Push(element);
             element.enablePhase = 2;
 
-            if (targetPhase != -1 && targetPhase <= 2) {
+            if (!element.isEnabled || (targetPhase != -1 && targetPhase <= 2)) {
                 element.enablePhase = 0;
                 LightStack<UIElement>.Release(ref stack);
                 return;
+            }
+            
+            element.flags |= UIElementFlags.AncestorEnabled;
+
+            foreach (ISystem system in m_Systems) {
+                system.OnElementEnabled(element);
             }
 
             while (stack.Count > 0) {
@@ -601,11 +604,7 @@ namespace UIForia {
                 }
 
                 child.flags |= UIElementFlags.HasBeenEnabled;
-                
-                foreach (ISystem system in m_Systems) {
-                    system.OnElementEnabled(element);
-                }
-                
+
                 child.OnEnable();
 
                 if (child.isEnabled) {
@@ -632,8 +631,6 @@ namespace UIForia {
             }
 
             if (element.isEnabled) {
-              
-
                 element.View.ElementHierarchyEnabled(element);
                 onElementEnabled?.Invoke(element);
 
@@ -780,7 +777,7 @@ namespace UIForia {
         public UIView[] GetViews() {
             return m_Views.ToArray();
         }
-        
+
         internal void InsertChild(UIElement parent, UIElement child, uint index) {
             if (child.parent != null) {
                 throw new NotImplementedException("Reparenting is not supported");

@@ -125,8 +125,8 @@ namespace Documentation.Features {
             origin.style.SetAnchorLeft(new UIFixedLength(0), StyleState.Normal);
             origin.style.SetAnchorTop(new UIFixedLength(0), StyleState.Normal);
             origin.style.SetTransformBehavior(TransformBehavior.AnchorMinOffset, StyleState.Normal);
-            origin.style.SetTransformPositionX(new TransformOffset(MousePosition.x -  origin.layoutResult.ActualWidth / 2), StyleState.Normal);
-            origin.style.SetTransformPositionY(new TransformOffset(MousePosition.y - origin.layoutResult.ActualHeight / 2), StyleState.Normal);
+            origin.style.SetTransformPositionX(new TransformOffset(Input.mousePosition.x -  origin.layoutResult.ActualWidth / 2), StyleState.Normal);
+            origin.style.SetTransformPositionY(new TransformOffset((Screen.height - Input.mousePosition.y) - origin.layoutResult.ActualHeight / 2), StyleState.Normal);
         }
 
         public override void Drop(bool success) {

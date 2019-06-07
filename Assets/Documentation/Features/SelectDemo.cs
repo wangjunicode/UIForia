@@ -1,5 +1,6 @@
 using UIForia.Attributes;
 using UIForia.Elements;
+using UIForia.UIInput;
 using UIForia.Util;
 using UnityEngine;
 
@@ -46,7 +47,10 @@ namespace Documentation.Features {
             selectedStringIndex = Random.Range(0, stringList.Count - 1);
         }
 
-        private void SetEmpty() {
+        private void SetEmpty(MouseInputEvent evt) {
+            if (evt.IsConsumed) {
+                return;
+            }
             selectedStringIndex = -1;
         }
     }

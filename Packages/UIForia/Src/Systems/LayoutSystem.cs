@@ -826,20 +826,20 @@ namespace UIForia.Systems {
             box.UpdateChildren();
         }
 
-        public List<UIElement> QueryPoint(Vector2 point, List<UIElement> retn) {
+        public IList<UIElement> QueryPoint(Vector2 point, IList<UIElement> retn) {
             // todo convert to quad tree
             if (retn == null) {
                 retn = ListPool<UIElement>.Get();
             }
 
-            for (int i = 0; i < application.m_Views.Count; i++) {
+            for (int i = application.m_Views.Count - 1; -1 < i; i--) {
                 QueryPointInView(point, application.m_Views[i], retn);
             }
 
             return retn;
         }
 
-        private static void QueryPointInView(Vector2 point, UIView view, List<UIElement> retn) {
+        private static void QueryPointInView(Vector2 point, UIView view, IList<UIElement> retn) {
             UIElement[] elements = view.visibleElements.Array;
             int elementCount = view.visibleElements.Count;
             for (int i = 0; i < elementCount; i++) {
@@ -863,9 +863,12 @@ namespace UIForia.Systems {
                     ptr = ptr.parent;
                 }
 
-                if (ptr == null) {
-                    retn.Add(element);
+                // i.e. clipped by parent
+                if (ptr != null) {
+                    continue;
                 }
+
+                retn.Add(element);
             }
         }
 

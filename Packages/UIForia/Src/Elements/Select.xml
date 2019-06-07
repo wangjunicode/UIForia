@@ -76,7 +76,7 @@
             <Image style="chevron" src="'arrow_right'"/>
         </Group>
 
-        <Children onMouseDown="SelectElement($event)" if="selecting" style="option-list" x-type="template">
+        <Children onMouseClick="SelectElement($event)" if="selecting" style="option-list" x-type="template">
 
             <Group style="select-option">{$option__internal.Label}</Group>
 

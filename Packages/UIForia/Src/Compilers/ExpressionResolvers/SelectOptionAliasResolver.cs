@@ -6,8 +6,10 @@ namespace UIForia.Compilers.ExpressionResolvers {
     public class SelectOptionAliasResolver<T> : ExpressionAliasResolver {
 
         private bool isInternal;
-        
-        public SelectOptionAliasResolver(string itemAlias, bool isInternal) : base(itemAlias) { }
+
+        public SelectOptionAliasResolver(string itemAlias, bool isInternal) : base(itemAlias) {
+            this.isInternal = isInternal;
+        }
 
         public override Expression CompileAsValueExpression(CompilerContext context) {
             ReflectionUtil.ObjectArray2[0] = aliasName;

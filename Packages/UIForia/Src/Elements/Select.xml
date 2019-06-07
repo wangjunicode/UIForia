@@ -78,7 +78,7 @@
 
         <Children onMouseDown="SelectElement($event)" if="selecting" style="option-list" x-type="template">
 
-            <Group style="select-option">Option from select.xml {$option.Label}</Group>
+            <Group style="select-option">{$option__internal.Label}</Group>
 
         </Children>
 

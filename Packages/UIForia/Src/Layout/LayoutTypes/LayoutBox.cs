@@ -28,9 +28,6 @@ namespace UIForia.Layout.LayoutTypes {
         public LayoutBox parent;
         public List<LayoutBox> children;
 
-        public Scrollbar horizontalScrollbar;
-        public Scrollbar verticalScrollbar;
-
         protected internal UIView view;
 
         internal UIFixedLength paddingTop;
@@ -74,6 +71,9 @@ namespace UIForia.Layout.LayoutTypes {
         internal TransformOffset transformPositionY;
         internal TransformBehavior transformBehaviorX;
         internal TransformBehavior transformBehaviorY;
+
+        internal Overflow overflowX;
+        internal Overflow overflowY;
 
         internal LayoutBehavior layoutBehavior;
         internal bool isInPool;
@@ -214,6 +214,8 @@ namespace UIForia.Layout.LayoutTypes {
             zIndex = style.ZIndex;
             layer = style.Layer;
             layoutBehavior = style.LayoutBehavior;
+            overflowX = style.OverflowX;
+            overflowY = style.OverflowY;
         }
 
         public void UpdateChildren() {

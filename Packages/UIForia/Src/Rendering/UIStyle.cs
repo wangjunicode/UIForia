@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using UIForia.Layout;
@@ -14,14 +15,23 @@ namespace UIForia.Rendering {
         private static int NextStyleId;
 
         internal readonly LightList<StyleProperty> m_StyleProperties;
-
+        
+        private int size;
+        private StyleProperty[] array;
+        
         public int Id { get; set; } = NextStyleId++;
 
         public UIStyle(int capacity = 8) {
+            if (capacity <= 0) capacity = 8;
             m_StyleProperties = new LightList<StyleProperty>(capacity);
+            this.array = new StyleProperty[capacity];
+            this.size = 0;
         }
 
         public UIStyle(UIStyle toCopy) : this() {
+            this.size = toCopy.size;
+            this.array = new StyleProperty[toCopy.size];
+            Array.Copy(toCopy.array, 0, array, 0, toCopy.size);
             m_StyleProperties.AddRange(toCopy.m_StyleProperties);
         }
 

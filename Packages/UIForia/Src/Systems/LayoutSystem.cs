@@ -341,7 +341,7 @@ namespace UIForia.Systems {
         private static Vector2 ResolveLocalPosition(LayoutBox box) {
             Vector2 localPosition = Vector2.zero;
 
-            LayoutBehavior layoutBehavior = box.style.LayoutBehavior;
+            LayoutBehavior layoutBehavior = box.layoutBehavior;
             TransformBehavior transformBehaviorX = box.transformBehaviorX;
             TransformBehavior transformBehaviorY = box.transformBehaviorY;
 
@@ -407,7 +407,7 @@ namespace UIForia.Systems {
                 return;
             }
 
-            bool notifyParent = box.parent != null && (box.style.LayoutBehavior & LayoutBehavior.Ignored) == 0 && box.element.isEnabled;
+            bool notifyParent = box.parent != null && !box.IsIgnored && box.element.isEnabled;
             bool invalidatePreferredSizeCache = false;
             bool layoutTypeChanged = false;
 

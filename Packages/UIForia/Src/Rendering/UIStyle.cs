@@ -1,42 +1,35 @@
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using UIForia.Layout;
 using UIForia.Layout.LayoutTypes;
 using UIForia.Util;
 using UnityEngine;
 
 namespace UIForia.Rendering {
 
-    // can this be a struct?
-    [DebuggerDisplay("{nameof(Id)}")]
     public partial class UIStyle {
 
-        private static int NextStyleId;
-
-        internal readonly LightList<StyleProperty> m_StyleProperties;
+        internal StyleProperty[] array;
         
-        private int size;
-        private StyleProperty[] array;
-        
-        public int Id { get; set; } = NextStyleId++;
-
         public UIStyle(int capacity = 8) {
             if (capacity <= 0) capacity = 8;
-            m_StyleProperties = new LightList<StyleProperty>(capacity);
             this.array = new StyleProperty[capacity];
-            this.size = 0;
+            this.PropertyCount = 0;
         }
 
         public UIStyle(UIStyle toCopy) : this() {
-            this.size = toCopy.size;
-            this.array = new StyleProperty[toCopy.size];
-            Array.Copy(toCopy.array, 0, array, 0, toCopy.size);
-            m_StyleProperties.AddRange(toCopy.m_StyleProperties);
+            this.PropertyCount = toCopy.PropertyCount;
+            this.array = new StyleProperty[toCopy.PropertyCount];
+            Array.Copy(toCopy.array, 0, array, 0, toCopy.PropertyCount);
         }
 
-        public IReadOnlyList<StyleProperty> Properties => m_StyleProperties;
+        public int PropertyCount { get; internal set; }
 
+        public StyleProperty this[int index] {
+            get {
+                if (index < 0 || index >= PropertyCount) return default;
+                return array[index];
+            }
+        }
+        
         public BorderRadius BorderRadius {
             set {
                 SetProperty(new StyleProperty(StylePropertyId.BorderRadiusTopLeft, value.topLeft));
@@ -57,19 +50,19 @@ namespace UIForia.Rendering {
         }
 
         public bool DefinesProperty(StylePropertyId propertyId) {
-            for (int i = 0; i < m_StyleProperties.Count; i++) {
-                if (m_StyleProperties[i].propertyId == propertyId) return true;
+            for (int i = 0; i < PropertyCount; i++) {
+                if (array[i].propertyId == propertyId) return true;
             }
 
             return false;
         }
 
         private GridTrackSize FindGridTrackSizeProperty(StylePropertyId propertyId) {
-            for (int i = 0; i < m_StyleProperties.Count; i++) {
-                if (m_StyleProperties[i].propertyId == propertyId) {
+            for (int i = 0; i < PropertyCount; i++) {
+                if (array[i].propertyId == propertyId) {
                     return new GridTrackSize(
-                        m_StyleProperties[i].floatValue,
-                        (GridTemplateUnit) m_StyleProperties[i].valuePart1
+                        array[i].floatValue,
+                        (GridTemplateUnit) array[i].valuePart1
                     );
                 }
             }
@@ -78,12 +71,9 @@ namespace UIForia.Rendering {
         }
 
         private UIMeasurement FindUIMeasurementProperty(StylePropertyId propertyId) {
-            for (int i = 0; i < m_StyleProperties.Count; i++) {
-                if (m_StyleProperties[i].propertyId == propertyId) {
-                    return new UIMeasurement(
-                        m_StyleProperties[i].floatValue,
-                        (UIMeasurementUnit) m_StyleProperties[i].valuePart1
-                    );
+            for (int i = 0; i < PropertyCount; i++) {
+                if (array[i].propertyId == propertyId) {
+                    return array[i].AsUIMeasurement;
                 }
             }
 
@@ -91,11 +81,11 @@ namespace UIForia.Rendering {
         }
         
         private TransformOffset FindTransformOffsetProperty(StylePropertyId propertyId) {
-            for (int i = 0; i < m_StyleProperties.Count; i++) {
-                if (m_StyleProperties[i].propertyId == propertyId) {
+            for (int i = 0; i < PropertyCount; i++) {
+                if (array[i].propertyId == propertyId) {
                     return new TransformOffset(
-                        m_StyleProperties[i].floatValue,
-                        (TransformUnit) m_StyleProperties[i].valuePart1
+                        array[i].floatValue,
+                        (TransformUnit) array[i].valuePart1
                     );
                 }
             }
@@ -104,11 +94,11 @@ namespace UIForia.Rendering {
         }
 
         private UIFixedLength FindUIFixedLengthProperty(StylePropertyId propertyId) {
-            for (int i = 0; i < m_StyleProperties.Count; i++) {
-                if (m_StyleProperties[i].propertyId == propertyId) {
+            for (int i = 0; i < PropertyCount; i++) {
+                if (array[i].propertyId == propertyId) {
                     return new UIFixedLength(
-                        m_StyleProperties[i].floatValue,
-                        (UIFixedUnit) m_StyleProperties[i].valuePart1
+                        array[i].floatValue,
+                        (UIFixedUnit) array[i].valuePart1
                     );
                 }
             }
@@ -139,9 +129,9 @@ namespace UIForia.Rendering {
         internal void SetProperty(in StyleProperty property) {
             StylePropertyId propertyId = property.propertyId;
             if (property.IsUnset) {
-                for (int i = 0; i < m_StyleProperties.Count; i++) {
-                    if (m_StyleProperties[i].propertyId == propertyId) {
-                        m_StyleProperties.RemoveAt(i);
+                for (int i = 0; i < PropertyCount; i++) {
+                    if (array[i].propertyId == propertyId) {
+                        RemoveAt(i);
                         return;
                     }
                 }
@@ -149,20 +139,38 @@ namespace UIForia.Rendering {
             }
 
             // todo -- binary search or int map
-            for (int i = 0; i < m_StyleProperties.Count; i++) {
-                if (m_StyleProperties[i].propertyId == propertyId) {
-                    m_StyleProperties[i] = property;
+            for (int i = 0; i < PropertyCount; i++) {
+                if (array[i].propertyId == propertyId) {
+                    array[i] = property;
                     return;
                 }
             }
 
-            m_StyleProperties.Add(property);
+            if (PropertyCount + 1 >= array.Length) {
+                Array.Resize(ref array, array.Length + 8);
+            }
+
+            array[PropertyCount++] = property;
+        }
+        
+        private  void RemoveAt(int index) {
+            if ((uint) index >= (uint) PropertyCount) return;
+            if (index == PropertyCount - 1) {
+                array[--PropertyCount] = default;
+            }
+            else {
+                for (int j = index; j < PropertyCount - 1; j++) {
+                    array[j] = array[j + 1];
+                }
+
+                array[--PropertyCount] = default;
+            }
         }
         
         public StyleProperty GetProperty(StylePropertyId propertyId) {
-            for (int i = 0; i < m_StyleProperties.Count; i++) {
-                if (m_StyleProperties[i].propertyId == propertyId) {
-                    return m_StyleProperties[i];
+            for (int i = 0; i < PropertyCount; i++) {
+                if (array[i].propertyId == propertyId) {
+                    return array[i];
                 }
             }
 
@@ -170,9 +178,9 @@ namespace UIForia.Rendering {
         }
        
         public bool TryGetProperty(StylePropertyId propertyId, out StyleProperty property) {
-            for (int i = 0; i < m_StyleProperties.Count; i++) {
-                if (m_StyleProperties[i].propertyId == propertyId) {
-                    property = m_StyleProperties[i];
+            for (int i = 0; i < PropertyCount; i++) {
+                if (array[i].propertyId == propertyId) {
+                    property = array[i];
                     return true;
                 }
             }
@@ -182,7 +190,7 @@ namespace UIForia.Rendering {
         }
 
         public static UIStyle Merge(UIStyle destination, UIStyle source) {
-            if (source == null || source.m_StyleProperties.Count == 0) {
+            if (source == null || source.PropertyCount == 0) {
                 return destination;
             }
 
@@ -190,8 +198,8 @@ namespace UIForia.Rendering {
                 return new UIStyle(source);
             }
 
-            for (int pIndex = 0; pIndex < source.m_StyleProperties.Count; pIndex++) {
-                StyleProperty prop = source.m_StyleProperties[pIndex];
+            for (int pIndex = 0; pIndex < source.PropertyCount; pIndex++) {
+                StyleProperty prop = source.array[pIndex];
                 destination.SetProperty(prop);
             }
 

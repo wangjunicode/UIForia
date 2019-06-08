@@ -259,7 +259,9 @@ namespace UIForia.Systems {
             for (int i = 0; i < m_ElementsLastFrame.Count; i++) {
                 if (!m_ElementsThisFrame.Contains(m_ElementsLastFrame[i])) {
                     m_ExitedElements.Add(m_ElementsLastFrame[i]);
-                    m_ElementsLastFrame[i].style?.ExitState(StyleState.Hover);
+                    if (!IsDragging) {
+                        m_ElementsLastFrame[i].style?.ExitState(StyleState.Hover);
+                    }
                 }
             }
 

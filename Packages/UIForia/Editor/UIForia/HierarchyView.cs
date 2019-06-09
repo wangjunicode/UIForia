@@ -58,6 +58,7 @@ public class HierarchyView : TreeView {
 
         foreach (UIView uiView in views) {
             if (uiView.RootElement == null) continue;
+            if (uiView.RootElement.isDisabled && !showDisabled) continue;
 
             ElementTreeItem firstChild = new ElementTreeItem(uiView.RootElement);
             firstChild.displayName = uiView.RootElement.ToString();

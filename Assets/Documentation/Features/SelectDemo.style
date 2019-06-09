@@ -5,7 +5,7 @@ style select-demo-root {
 
 style button-group {
     FlexLayoutDirection = Column;
-    MarginTop = 12;
+    MarginTop = 12px;
 }
 
 style button {

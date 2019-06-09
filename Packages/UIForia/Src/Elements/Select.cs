@@ -118,7 +118,7 @@ namespace UIForia.Elements {
             evt.Consume();
         }
 
-        private void SelectElement(MouseInputEvent evt) {
+        public void SelectElement(MouseInputEvent evt) {
             UIElement[] childrenArray = childrenElement.children.Array;
             int count = childrenElement.children.Count;
             for (int i = 0; i < count; i++) {

@@ -1335,7 +1335,9 @@ namespace UIForia.Compilers {
                     );
                 }
                 else if (ReflectionUtil.IsMethod(rootType, fieldName, out MethodInfo methodInfo)) {
-                    Debug.Log("method " + fieldName);
+                    if (ReflectionUtil.IsAction(targetType)) {
+                        
+                    }
                 }
             }
 

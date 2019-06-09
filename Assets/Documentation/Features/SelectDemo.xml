@@ -32,7 +32,7 @@
                 Set a random selected index
             </Group>
 
-            <Group style="button" onMouseClick="SetEmpty()">
+            <Group style="button" onMouseClick="SetEmpty($event)">
                 Set to empty
             </Group>
         </Group>

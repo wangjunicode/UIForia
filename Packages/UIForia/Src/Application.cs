@@ -200,7 +200,8 @@ namespace UIForia {
         private int nextViewId = 0;
 
         public UIView CreateView(string name, Rect rect, Type type, string template = null) {
-            UIView view = new UIView(nextViewId++, name, this, rect, m_Views.Count, type, template);
+
+            UIView view = GetView(name) ?? new UIView(nextViewId++, name, this, rect, m_Views.Count, type, template);
 
             m_Views.Add(view);
 
@@ -749,6 +750,17 @@ namespace UIForia {
         public UIView GetView(int i) {
             if (i < 0 || i >= m_Views.Count) return null;
             return m_Views[i];
+        }
+
+        public UIView GetView(string name) {
+            for (int i = 0; i < m_Views.Count; i++) {
+                UIView v = m_Views[i];
+                if (v.name == name) {
+                    return v;
+                }
+            }
+
+            return null;
         }
 
         public static Application Find(string appId) {

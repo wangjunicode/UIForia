@@ -93,8 +93,13 @@ namespace UIForia.Util {
         public T this[int index] {
             get => backingStore[index];
             set => backingStore[index] = value;
-        }      
+        }
 
+        public void RemoveRange(int index, int count) {
+            for (int i = index; i < index + count; i++) {
+                backingStore.RemoveAt(i);
+            }
+        }
     }
 
 }

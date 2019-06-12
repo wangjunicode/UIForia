@@ -51,10 +51,10 @@ namespace UIForia.Compilers.Style {
                 {"paddingleft", (targetStyle, property, context) => targetStyle.PaddingLeft = MapFixedLength(property.children[0], context)},
 
                 {"bordercolor", (targetStyle, property, context) => MapBorderColors(targetStyle, property, context)},
-                {"bordercolortop", (targetStyle, property, context) => targetStyle.BorderColor = MapColor(property, context)},
-                {"bordercolorright", (targetStyle, property, context) => targetStyle.BorderColor = MapColor(property, context)},
-                {"bordercolorbottom", (targetStyle, property, context) => targetStyle.BorderColor = MapColor(property, context)},
-                {"bordercolorleft", (targetStyle, property, context) => targetStyle.BorderColor = MapColor(property, context)},
+                {"bordercolortop", (targetStyle, property, context) => targetStyle.BorderColorTop = MapColor(property, context)},
+                {"bordercolorright", (targetStyle, property, context) => targetStyle.BorderColorRight = MapColor(property, context)},
+                {"bordercolorbottom", (targetStyle, property, context) => targetStyle.BorderColorBottom = MapColor(property, context)},
+                {"bordercolorleft", (targetStyle, property, context) => targetStyle.BorderColorLeft = MapColor(property, context)},
 
                 {"border", (targetStyle, property, context) => MapBorders(targetStyle, property, context)},
                 {"bordertop", (targetStyle, property, context) => targetStyle.BorderTop = MapFixedLength(property.children[0], context)},

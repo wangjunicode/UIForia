@@ -43,7 +43,7 @@ namespace UIForia.Compilers.ExpressionResolvers {
                 while (selectPtr != null) {
                     selectPtr = selectPtr.parent;
                     if ((selectPtr is Select<T> select)) {
-                        if (select.selectedIndex < 0) {
+                        if (select.selectedIndex < 0 || select.options == null || select.options.Count - 1 < select.selectedIndex) {
                             return null;
                         }
 

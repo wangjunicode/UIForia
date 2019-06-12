@@ -5,54 +5,54 @@
 
         style select {
 
-        BackgroundColor = white;
-        BorderRadius = 4px;
-        BorderColor = black;
-        Border = 2px;
-        Padding = 0.25em 0.5em;
-        PreferredWidth = 1pca;
-
-        [hover] {
-        BorderColor = rgba(38, 128, 255, 255);
-        }
+            BackgroundColor = white;
+            BorderRadius = 4px;
+            BorderColor = black;
+            Border = 2px;
+            Padding = 0.25em 0.5em;
+            PreferredWidth = 1cnt;
+    
+            [hover] {
+                BorderColor = rgba(38, 128, 255, 255);
+            }
 
         }
 
         style select-option {
-        PreferredWidth = 1pca;
-        TextColor = black;
-
-        [hover] {
-        TextColor = white;
-        BackgroundColor = rgba(38, 128, 255, 255);
-        }
+            PreferredWidth = 1pca;
+            TextColor = black;
+    
+            [hover] {
+                TextColor = white;
+                BackgroundColor = rgba(38, 128, 255, 255);
+            }
         }
 
         style option-list {
-        AnchorTarget = Parent;
-        LayoutBehavior = ignored;
-        TransformBehaviorY = AnchorMaxOffset;
-        TransformPositionY = -1h;
-        BackgroundColor = white;
-        PreferredWidth = 1psz;
-        BorderRadius = 4px;
-        Padding = 0.25em, 0.5em;
-        BorderColor = black;
-        Border = 2px;
-        ZIndex = 30;
+            AnchorTarget = Parent;
+            LayoutBehavior = ignored;
+            TransformBehaviorY = AnchorMaxOffset;
+            TransformPositionY = -1h;
+            BackgroundColor = white;
+            PreferredWidth = 1psz;
+            BorderRadius = 4px;
+            Padding = 0.25em, 0.5em;
+            BorderColor = black;
+            Border = 2px;
+            ZIndex = 30;
         }
 
         style chevron {
-        PreferredSize = 24px;
-        TransformPivot = 0.5;
-        TransformRotation = -90;
+            PreferredSize = 24px;
+            TransformPivot = 0.5;
+            TransformRotation = -90;
         }
 
         style content-area {
-        PreferredWidth = 1pca;
-        FlexLayoutDirection = Column;
-        FlexLayoutMainAxisAlignment = SpaceBetween;
-        FlexLayoutCrossAxisAlignment = Center;
+            PreferredWidth = 1cnt;
+            FlexLayoutDirection = Column;
+            FlexLayoutMainAxisAlignment = SpaceBetween;
+            FlexLayoutCrossAxisAlignment = Center;
         }
 
     </Style>
@@ -63,7 +63,7 @@
 
             <Group if="selectedIndex >= 0">
                 <Slot name="select-display">
-                    Selected: {options[selectedIndex].Label}
+                    {options[selectedIndex].Label}
                 </Slot>
             </Group>
 

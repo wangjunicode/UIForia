@@ -149,6 +149,9 @@ namespace UIForia.Elements {
             selecting = false;
         }
 
+        public override void OnDestroy() {
+            options.onItemInserted -= onInsert;
+        }
     }
 
 }

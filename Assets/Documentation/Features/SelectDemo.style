@@ -5,7 +5,7 @@ style select-demo-root {
 
 style button-group {
     FlexLayoutDirection = Column;
-    MarginTop = 12px;
+    //MarginTop = 12px;
 }
 
 style button {
@@ -13,4 +13,8 @@ style button {
     BorderRadius = 8px;
     Padding = 0.5em, 1em;
     MarginRight = 1em;
+}
+
+style repeat {
+    PreferredSize = 1pca;
 }

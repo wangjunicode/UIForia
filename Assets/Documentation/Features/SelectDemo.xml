@@ -8,33 +8,37 @@
         Selected string = {selectedString}
         Selected index = {selectedStringIndex}
 
-        <Select--string selectedIndex.read.write="selectedStringIndex" selectedValue.read.write="selectedString" options="stringList">
-
-            <SlotContent name="select-placeholder">
-                Placeholder 2
-            </SlotContent>
-
-            <SlotContent name="select-display">
-                Selected override: {$option.Label}
-            </SlotContent>
+        <Repeat list="words" style="repeat">
             
-            <Group>this is a template {$option.Label}</Group>
-
-        </Select--string>
-
+            <Text>Select your favourite translation for the word: {$item}</Text>
+            <Select--int selectedIndex.read.write="selectedLanguage[$index]" selectedValue.read.write="selectedLanguage[$index]" options="translations[$index]">
+    
+                <SlotContent name="select-placeholder">
+                    Placeholder 2
+                </SlotContent>
+    
+                <SlotContent name="select-display">
+                    Selected override: {$option.Label} language is {languages[selectedLanguage[$index]].Label}
+                </SlotContent>
+                
+                <Group>this is a template {$option.Label}</Group>
+    
+            </Select--int>
+        </Repeat>
+    
         <Group style="button-group">
 
-            <Group style="button" onMouseClick="SetRandomString()">
-                Set a random selected string
+            <Group style="button" onMouseClick="ClearWords()">
+                Clear
             </Group>
 
-            <Group style="button" onMouseClick="SetRandomIndex()">
-                Set a random selected index
+            <Group style="button" onMouseClick="AddWords()">
+                Add words
             </Group>
 
-            <Group style="button" onMouseClick="SetEmpty($event)">
-                Set to empty
-            </Group>
+<!--            <Group style="button" onMouseClick="SetEmpty($event)">-->
+<!--                Set to empty-->
+<!--            </Group>-->
         </Group>
 
     </Contents>

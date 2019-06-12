@@ -306,8 +306,8 @@ namespace UIForia.Parsing.Expression {
 
         private UITemplate ParseSlotContentElement(XElement element) {
             EnsureAttribute(element, "name");
-            EnsureNotInsideTagName(element, "Repeat");
-            EnsureNotInsideTagName(element, "Slot");
+            EnsureNotDirectChildOf(element, "Repeat");
+            EnsureNotDirectChildOf(element, "Slot");
 
             return new UISlotContentTemplate(
                 app,
@@ -552,6 +552,16 @@ namespace UIForia.Parsing.Expression {
                 }
 
                 ptr = ptr.Parent;
+            }
+        }
+        
+        private void EnsureNotDirectChildOf(XElement element, string tagName) {
+
+            if (element.Parent != null) {
+                if (element.Parent.Name.LocalName == tagName) {
+                    throw new TemplateParseException(element,
+                        $"<{element.Name.LocalName}> cannot be inside <{tagName}>");
+                }
             }
         }
 

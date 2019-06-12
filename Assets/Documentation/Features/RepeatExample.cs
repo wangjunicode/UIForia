@@ -14,6 +14,11 @@ namespace Documentation.Features {
             return "a";
         }
 
+        [OnMouseClick()]
+        public void RemoveAll() {
+            dictionary.Clear();
+        }
+
         public override void OnCreate() {
             dictionary = new RepeatableList<(string, string)>() {
                 ValueTuple.Create("Mein lieber Herr Gesangsverein!", "My dear mister singing club!")

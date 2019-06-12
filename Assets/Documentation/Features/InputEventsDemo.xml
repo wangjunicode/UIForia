@@ -55,8 +55,10 @@
         <Heading1>Mouse Events in styles</Heading1>
         <Group style="section">
             <Div style="show">
-                <Group style="demo-box changes-on-hover">This will change it`s color on hover</Group>
-                <Group style="demo-box changes-on-active">This will change its appearance on active. Hold the left mouse button down on this.</Group>
+                <Group style="demo-box changes-on-hover-and-active">
+                    <Text>This will change it`s color to yellow on hover</Text>
+                    <Text>and to red on active. Hold the left mouse button down for active state.</Text>
+                </Group>
             </Div>
         </Group>
     </Contents>

@@ -95,14 +95,14 @@ style tell {
     TextWhitespaceMode = CollapseWhitespace PreserveNewLines;
 }
 
-style changes-on-hover {
+style changes-on-hover-and-active {
+    PreferredHeight = 1cnt;
+
     [hover] {
         BackgroundColor = yellow;
     }
-}
-
-style changes-on-active {
+    
     [active] {
-        BackgroundColor = yellow;
+        BackgroundColor = red;
     }
 }

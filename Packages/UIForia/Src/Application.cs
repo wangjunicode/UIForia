@@ -201,17 +201,27 @@ namespace UIForia {
 
         public UIView CreateView(string name, Rect rect, Type type, string template = null) {
 
-            UIView view = GetView(name) ?? new UIView(nextViewId++, name, this, rect, m_Views.Count, type, template);
+            UIView view = GetView(name);
 
-            m_Views.Add(view);
+            if (view == null) {
+                view = new UIView(nextViewId++, name, this, rect, m_Views.Count, type, template);
+                m_Views.Add(view);
 
-            for (int i = 0; i < m_Systems.Count; i++) {
-                m_Systems[i].OnViewAdded(view);
+                for (int i = 0; i < m_Systems.Count; i++) {
+                    m_Systems[i].OnViewAdded(view);
+                }
+
+                view.Initialize();
+
+                onViewAdded?.Invoke(view);
+            }
+            else {
+                if (view.RootElement.GetType() != type) {
+                    throw new Exception($"A view named {name} with another root type ({view.RootElement.GetType()}) already exists.");
+                }
+                view.Viewport = rect;
             }
 
-            view.Initialize();
-
-            onViewAdded?.Invoke(view);
             return view;
         }
 

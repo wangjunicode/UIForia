@@ -15,3 +15,10 @@ style entry {
     GridLayoutColTemplate = 600px 600px;
     GridLayoutColGap = 50;
 }
+
+style next-section {
+    MarginTop = 20px;
+    PaddingTop = 20px;
+    BorderTop = 1px;
+    BorderColorTop = black;
+}

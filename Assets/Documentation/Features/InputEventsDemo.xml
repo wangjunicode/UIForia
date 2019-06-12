@@ -47,10 +47,16 @@
         <Group style="section">
             <Div style="show">
                 <Group style="demo-box" onMouseHover="Hover($event)">Hover Me! Hover Position x: {LastHoverX} y: {LastHoverY}</Group>
-
             </Div>
             <Div style="tell">
                 Do what the buttons say!
+            </Div>
+        </Group>
+        <Heading1>Mouse Events in styles</Heading1>
+        <Group style="section">
+            <Div style="show">
+                <Group style="demo-box changes-on-hover">This will change it`s color on hover</Group>
+                <Group style="demo-box changes-on-active">This will change its appearance on active. Hold the left mouse button down on this.</Group>
             </Div>
         </Group>
     </Contents>

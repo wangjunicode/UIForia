@@ -48,6 +48,7 @@ namespace UIForia.Systems {
         protected MouseState m_MouseState;
 
         private readonly List<UIElement> m_ExitedElements;
+        private readonly List<UIElement> m_ActiveElements;
         private readonly List<UIElement> m_EnteredElements;
         private readonly List<UIElement> m_MouseDownElements;
 
@@ -80,6 +81,7 @@ namespace UIForia.Systems {
             this.m_ElementsLastFrame = new List<UIElement>();
             this.m_EnteredElements = new List<UIElement>();
             this.m_ExitedElements = new List<UIElement>();
+            this.m_ActiveElements = new List<UIElement>();
             this.m_AllElementsThisFrame = new List<UIElement>();
             this.m_AllElementsLastFrame = new List<UIElement>();
 
@@ -249,20 +251,28 @@ namespace UIForia.Systems {
                 m_ElementsThisFrame.Add(element);
 
                 if (!m_ElementsLastFrame.Contains(element)) {
-                    m_EnteredElements.Add(element);
-                    if (!IsDragging) {
-                        element.style?.EnterState(StyleState.Hover);
-                    }
+                    m_EnteredElements.Add(element); 
+                    element.style?.EnterState(StyleState.Hover);
+                }
+
+                if (IsMouseLeftDownThisFrame) {
+                    element.style?.EnterState(StyleState.Active);
+                    m_ActiveElements.Add(element);
                 }
             }
 
             for (int i = 0; i < m_ElementsLastFrame.Count; i++) {
                 if (!m_ElementsThisFrame.Contains(m_ElementsLastFrame[i])) {
                     m_ExitedElements.Add(m_ElementsLastFrame[i]);
-                    if (!IsDragging) {
-                        m_ElementsLastFrame[i].style?.ExitState(StyleState.Hover);
-                    }
+                    m_ElementsLastFrame[i].style?.ExitState(StyleState.Hover);
                 }
+            }
+            
+            if (IsMouseLeftUpThisFrame) {
+                for (int i = 0; i < m_ActiveElements.Count; i++) {
+                    m_ActiveElements[i].style?.ExitState(StyleState.Active);
+                }
+                m_ActiveElements.Clear();
             }
 
             m_EnteredElements.Sort(s_DepthComparer);

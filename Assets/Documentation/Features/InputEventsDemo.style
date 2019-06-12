@@ -94,3 +94,15 @@ style tell {
     MaxWidth = 400px;
     TextWhitespaceMode = CollapseWhitespace PreserveNewLines;
 }
+
+style changes-on-hover {
+    [hover] {
+        BackgroundColor = yellow;
+    }
+}
+
+style changes-on-active {
+    [active] {
+        BackgroundColor = yellow;
+    }
+}

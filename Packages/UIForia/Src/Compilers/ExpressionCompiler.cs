@@ -539,6 +539,9 @@ namespace UIForia.Compilers {
                 new GenericArguments(retn.YieldedType, rootType),
                 new ConstructorArguments(bridge)
             );
+            if (targetType == null) {
+                return expr;
+            }
             return GetImplicitCast(expr, targetType);
         }
 

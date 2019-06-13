@@ -73,7 +73,7 @@ namespace UIForia.Editor {
                 return;
             }
 
-            if (treeView.selectMode && s_SelectedApplication?.InputSystem.DebugElementsThisFrame.Count > 0) {
+            if (treeView != null && treeView.selectMode && s_SelectedApplication?.InputSystem.DebugElementsThisFrame.Count > 0) {
                 if (s_SelectedApplication.InputSystem.DebugMouseUpThisFrame) {
                     treeView.selectMode = false;
                 }

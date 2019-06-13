@@ -29,6 +29,7 @@ public class HierarchyView : TreeView {
 
     public bool showChildrenAndId = false;
     public bool showDisabled = false;
+    public bool selectMode = false;
 
     static HierarchyView() {
         s_ElementNameStyle = new GUIStyle();

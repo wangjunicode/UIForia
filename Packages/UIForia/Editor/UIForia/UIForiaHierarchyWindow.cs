@@ -12,6 +12,7 @@ namespace UIForia.Editor {
 
     public class UIForiaHierarchyWindow : EditorWindow {
 
+        public static readonly List<int> EmptyList = new List<int>();
         public const string k_InspectedAppKey = "UIForia.Inspector.ApplicationName";
 
         public TreeViewState state;
@@ -70,6 +71,21 @@ namespace UIForia.Editor {
         private void Update() {
             if (!EditorApplication.isPlaying) {
                 return;
+            }
+
+            if (treeView.selectMode && s_SelectedApplication?.InputSystem.DebugElementsThisFrame.Count > 0) {
+                if (s_SelectedApplication.InputSystem.DebugMouseUpThisFrame) {
+                    treeView.selectMode = false;
+                }
+                else {
+                    s_SelectedElementId = s_SelectedApplication.InputSystem.DebugElementsThisFrame[0].id;
+                    IList<int> selectedIds = new List<int>(s_SelectedApplication.InputSystem.DebugElementsThisFrame.Count);
+                    
+                    for (int i = 0; i < s_SelectedApplication.InputSystem.DebugElementsThisFrame.Count; i++) {
+                        selectedIds.Add(s_SelectedApplication.InputSystem.DebugElementsThisFrame[i].id);
+                    }
+                    treeView.SetSelection(selectedIds);
+                }
             }
 
             Repaint();
@@ -153,6 +169,7 @@ namespace UIForia.Editor {
             }
 
             treeView.showChildrenAndId = EditorGUILayout.Toggle("Show Meta Data", treeView.showChildrenAndId);
+            treeView.selectMode = EditorGUILayout.Toggle("Activate Select Mode", treeView.selectMode);
             bool wasShowingDisabled = treeView.showDisabled;
             treeView.showDisabled = EditorGUILayout.Toggle("Show Disabled", treeView.showDisabled);
             if (treeView.showDisabled != wasShowingDisabled) {

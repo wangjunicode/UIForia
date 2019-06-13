@@ -32,6 +32,12 @@ namespace UIForia.Systems {
         private readonly ILayoutSystem m_LayoutSystem;
 
         private List<UIElement> m_ElementsThisFrame;
+        
+#if UNITY_EDITOR
+        public List<UIElement> DebugElementsThisFrame => m_ElementsLastFrame;
+        public bool DebugMouseUpThisFrame => m_MouseState.isLeftMouseUpThisFrame;
+#endif
+
         private List<UIElement> m_AllElementsThisFrame;
         private List<UIElement> m_ElementsLastFrame;
         private List<UIElement> m_AllElementsLastFrame;

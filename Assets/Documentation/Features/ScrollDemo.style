@@ -1,11 +1,68 @@
-style container {
+style big-child {
+    PreferredSize = 300px;
+    BackgroundColor = rgba(240, 240, 10, 255);
+}
+
+style level-0 {
+    PreferredSize = 400px;
+    BackgroundColor = red;
     FlexLayoutDirection = Column;
 }
 
-style scroll-container {
-    PreferredSize = 200px;
+style level-1 {
+    PreferredSize = 350px;
+    BackgroundColor = green;
+    FlexLayoutDirection = Column;
+    TextFontSize = 1.4em;
+}
+
+style level-2-a {
+    PreferredSize = 100px;
     BackgroundColor = yellow;
-    OverflowY = Scroll;
-    TextFontSize = 15;
-    TextOutlineWidth = 0.3;
+    FlexLayoutDirection = Column;
+}
+
+style level-2-b {
+    PreferredSize = 100px;
+    BackgroundColor = white;
+    FlexLayoutDirection = Column;
+}
+
+style level-2-c {
+    PreferredSize = 600px;
+    BackgroundColor = black;
+    FlexLayoutDirection = Column;
+}
+style level-2-ignored {
+    BackgroundImage = url("image");
+    PreferredSize = 140px;
+    LayoutBehavior = Ignored;
+    AnchorTop = 100px;
+    TransformBehaviorY = AnchorMinOffset;
+    TransformPositionY = 30px;
+}
+
+style big {
+    PreferredSize = 1vw 1vh;
+    BackgroundImage = url("image");
+    Margin = 50px;
+}
+
+style button {
+    BorderRadius = 6px;
+    Border = 2px;
+    BorderColor = black;
+    TextColor = white;
+    PreferredSize = 200px 60px;
+    Padding = 10px 40px;
+    Margin = 10px;
+    BackgroundColor = rgba(190, 80, 80, 240);
+    [hover] {
+        BackgroundColor = rgba(190, 100, 100, 230);
+    }
+    [active] {
+        MarginTop = 12px;
+        PreferredSize = 200px 58px;
+        BackgroundColor = rgba(170, 120, 120, 250);
+    }
 }

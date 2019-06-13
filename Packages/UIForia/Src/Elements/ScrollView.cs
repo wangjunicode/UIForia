@@ -99,6 +99,12 @@ namespace UIForia.Elements {
         }
 
         public void OnClickVertical(MouseInputEvent evt) {
+            ScrollToPointY(evt.MousePosition.y);
+            evt.StopPropagation();
+        }
+
+        private void ScrollToPointY(float y) {
+            
             if (!verticalTrack.isEnabled) return;
             lastScrollVerticalTimestamp = Time.realtimeSinceStartup;
             float trackRectHeight = verticalTrack.layoutResult.allocatedSize.height;
@@ -107,10 +113,10 @@ namespace UIForia.Elements {
             float handleBottom = handleTop + verticalHandle.layoutResult.allocatedSize.height;
             float pageSize = trackRectHeight;
             float direction = 0;
-            if (evt.MousePosition.y < handleTop) {
+            if (y < handleTop) {
                 direction = -1;
             }
-            else if (evt.MousePosition.y > handleBottom) {
+            else if (y > handleBottom) {
                 direction = 1;
             }
 
@@ -119,10 +125,14 @@ namespace UIForia.Elements {
             float offset = Mathf.Clamp(targetElement.scrollOffset.y + (direction * (pageSize / targetHeight)), 0, 1);
             targetElement.scrollOffset = new Vector2(targetElement.scrollOffset.x, offset);
             verticalHandle.style.SetTransformPositionY(offset * (max), StyleState.Normal);
-            evt.StopPropagation();
         }
 
         public void OnClickHorizontal(MouseInputEvent evt) {
+            ScrollToPointX(evt.MousePosition.x);
+            evt.StopPropagation();
+        }
+
+        private void ScrollToPointX(float x) {
             if (!horizontalTrack.isEnabled) return;
             lastScrollVerticalTimestamp = Time.realtimeSinceStartup;
             float trackRectWidth = horizontalTrack.layoutResult.allocatedSize.width;
@@ -131,10 +141,10 @@ namespace UIForia.Elements {
             float handleRight = handleLeft + horizontalHandle.layoutResult.allocatedSize.width;
             float pageSize = trackRectWidth;
             float direction = 0;
-            if (evt.MousePosition.x < handleLeft) {
+            if (x < handleLeft) {
                 direction = -1;
             }
-            else if (evt.MousePosition.x > handleRight) {
+            else if (x > handleRight) {
                 direction = 1;
             }
 
@@ -143,7 +153,6 @@ namespace UIForia.Elements {
             float offset = Mathf.Clamp(targetElement.scrollOffset.x + (direction * (pageSize / targetWidth)), 0, 1);
             targetElement.scrollOffset = new Vector2(offset, targetElement.scrollOffset.y);
             horizontalHandle.style.SetTransformPositionX(offset * (max), StyleState.Normal);
-            evt.StopPropagation();
         }
 
         [OnDragCreate]
@@ -186,6 +195,18 @@ namespace UIForia.Elements {
             float handlePosition = horizontalHandle.layoutResult.screenPosition.x;
             float baseOffset = evt.MousePosition.x - handlePosition;
             return new ScrollbarDragEvent(ScrollbarOrientation.Horizontal, new Vector2(baseOffset, 0), this);
+        }
+
+        public override void HandleUIEvent(UIEvent evt) {
+            if (evt is UIScrollEvent scrollEvent) {
+                if (scrollEvent.ScrollDestinationX > -1) {
+                    ScrollToPointX(scrollEvent.ScrollDestinationX);
+                }
+
+                if (scrollEvent.ScrollDestinationY > -1) {
+                    ScrollToPointY(scrollEvent.ScrollDestinationY);
+                }
+            }
         }
 
         public class ScrollbarDragEvent : DragEvent {

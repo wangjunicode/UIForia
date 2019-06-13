@@ -1,60 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <UITemplate>
 
-    <!--    <Style path="Documentation/Features/ScrollDemo.style"/>-->
-    <Style>
-
-        style big-child {
-        PreferredSize = 100px;
-        BackgroundColor = yellow;
-        }
-
-        style level-0 {
-        PreferredSize = 400px;
-        BackgroundColor = red;
-        FlexLayoutDirection = Column;
-        }
-
-        style level-1 {
-        PreferredSize = 350px;
-        BackgroundColor = green;
-        FlexLayoutDirection = Column;
-        TextFontSize = 1.4em;
-        }
-
-        style level-2-a {
-        PreferredSize = 100px;
-        BackgroundColor = yellow;
-        FlexLayoutDirection = Column;
-        }
-
-        style level-2-b {
-        PreferredSize = 100px;
-        BackgroundColor = white;
-        FlexLayoutDirection = Column;
-        }
-
-        style level-2-c {
-        PreferredSize = 600px;
-        BackgroundColor = black;
-        FlexLayoutDirection = Column;
-        }
-        style level-2-ignored {
-        BackgroundImage = url("image");
-        PreferredSize = 140px;
-        LayoutBehavior = Ignored;
-        AnchorTop = 100px;
-        TransformBehaviorY = AnchorMinOffset;
-        TransformPositionY = 30px;
-        }
-
-        style big {
-        PreferredSize = 1vw 1vh;
-        BackgroundImage = url("image");
-        Margin = 50px;
-        }
-
-    </Style>
+    <Style path="Documentation/Features/ScrollDemo.style"/>
     <Contents style="container">
 
         <ScrollView style="level-0">
@@ -105,7 +52,14 @@
             <Div style="level-2-ignored"/>
         </ScrollView>
         <Group style="big">
-            <Group style="big-child"></Group>
+            <Group style="big-child">
+                
+                <Div style="button" onMouseClick="ScrollUp($event)">Scroll up</Div>
+                <Div style="button" onMouseClick="ScrollRight($event)">Scroll right</Div>
+                <Div style="button" onMouseClick="ScrollDown($event)">Scroll down</Div>
+                <Div style="button" onMouseClick="ScrollLeft($event)">Scroll left</Div>
+                
+            </Group>
         </Group>
 
         <!--        <ScrollView>-->

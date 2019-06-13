@@ -40,6 +40,10 @@ namespace UIForia {
     }
 
     public abstract class Application {
+        
+#if UNITY_EDITOR
+        public static List<Application> Applications = new List<Application>();
+#endif
 
         public readonly string id;
         private static int ElementIdGenerator;
@@ -73,9 +77,6 @@ namespace UIForia {
         public event Action<UIView> onViewAdded;
         public event Action<UIView[]> onViewsSorted;
         public event Action<UIView> onViewRemoved;
-
-        public static event Action<Application> onApplicationCreated;
-        public static event Action<Application> onApplicationDestroyed;
 
         protected internal readonly List<UIView> m_Views;
 
@@ -140,7 +141,10 @@ namespace UIForia {
 
             m_BeforeUpdateTaskSystem = new UITaskSystem();
             m_AfterUpdateTaskSystem = new UITaskSystem();
-            onApplicationCreated?.Invoke(this);
+
+#if UNITY_EDITOR
+            Applications.Add(this);
+#endif
         }
 
         internal static void ProcessClassAttributes(Type type, IEnumerable<Attribute> attrs) {
@@ -300,7 +304,10 @@ namespace UIForia {
         }
 
         public void Destroy() {
-            onApplicationDestroyed?.Invoke(this);
+
+#if UNITY_EDITOR
+            Applications.Remove(this);
+#endif
             onDestroy?.Invoke();
 
             foreach (ISystem system in m_Systems) {

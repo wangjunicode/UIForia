@@ -2,7 +2,7 @@ style dynamic-style-inner {
     BackgroundColor = red;
 }
 style dynamic-style {
-    BackgroundColor = Green;
+    BackgroundColor = green;
     TextColor = yellow;
     Padding = 20px;
     TextFontAsset = url("Fonts/DIGITALDREAMFAT SDF");

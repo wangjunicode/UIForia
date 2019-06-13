@@ -68,6 +68,21 @@ namespace Documentation.Features {
                 
             }
         }
+        
+        private void ClearTranslations(int index) {
+            RepeatableList<ISelectOption<int>> options = translations[index];
+            
+            List<ISelectOption<int>> temp = new List<ISelectOption<int>>();
+            foreach (var option in options) {
+                temp.Add(option);
+            }
+            
+            options.Clear();
+                  
+            foreach (var option in temp) {
+                options.Add(option);
+            }
+        }
 
         private void SetEmpty(MouseInputEvent evt) {
             if (evt.IsConsumed) {

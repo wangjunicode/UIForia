@@ -24,6 +24,12 @@
                 <Group>this is a template {$option.Label}</Group>
     
             </Select--int>
+
+
+            <Group style="button" onMouseClick="ClearTranslations($index)">
+                Clear
+            </Group>
+            
         </Repeat>
     
         <Group style="button-group">

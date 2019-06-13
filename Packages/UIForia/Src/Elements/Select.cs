@@ -27,6 +27,8 @@ namespace UIForia.Elements {
         public RepeatableList<ISelectOption<T>> options;
         private RepeatableList<ISelectOption<T>> previousOptions;
         private Action<ISelectOption<T>, int> onInsert;
+        private Action<ISelectOption<T>, int> onRemove;
+        private Action onClear;
 
         public bool selecting = false;
         internal UIChildrenElement childrenElement;
@@ -42,11 +44,15 @@ namespace UIForia.Elements {
             if (previousOptions != options) {
                 if (previousOptions != null) {
                     previousOptions.onItemInserted -= onInsert;
+                    options.onItemRemoved -= onRemove;
+                    options.onClear -= onClear;
                 }
             }
 
             if (options != null) {
                 options.onItemInserted += onInsert;
+                options.onItemRemoved += onRemove;
+                options.onClear += onClear;
                 for (int i = 0; i < options.Count; i++) {
                     childrenElement.AddChild(childrenElement.InstantiateTemplate());
                 }
@@ -106,6 +112,8 @@ namespace UIForia.Elements {
 
         public override void OnCreate() {
             onInsert = OnInsert;
+            onClear = OnClear;
+            onRemove = OnRemove;
             childrenElement = FindFirstByType<UIChildrenElement>();
         }
 
@@ -151,6 +159,16 @@ namespace UIForia.Elements {
 
         public override void OnDestroy() {
             options.onItemInserted -= onInsert;
+            options.onItemRemoved -= onRemove;
+            options.onClear -= onClear;
+        }
+
+        private void OnClear() {
+            Application.DestroyChildren(childrenElement);
+        }
+
+        private void OnRemove(ISelectOption<T> selectOption, int index) {
+            childrenElement.children[index].Destroy();
         }
     }
 

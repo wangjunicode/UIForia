@@ -24,6 +24,10 @@ namespace UIForia.Compilers.ExpressionResolvers {
 
                 while (ptr != null) {
                     if (ptr is UIChildrenElement) {
+                        if (trail.siblingIndex < 0 || select.options == null || select.options.Count - 1 < trail.siblingIndex) {
+                            return null;
+                        }
+
                         return select.options[trail.siblingIndex];
                     }
 

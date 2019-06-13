@@ -19,7 +19,7 @@ namespace UIForia.Elements {
     [Template(TemplateType.Internal, "Elements/Select.xml")]
     public class Select<T> : UIElement, IFocusable {
 
-        public int selectedIndex;
+        public int selectedIndex = -1;
         public T defaultValue { get; set; }
 
         public T selectedValue;
@@ -158,9 +158,11 @@ namespace UIForia.Elements {
         }
 
         public override void OnDestroy() {
-            options.onItemInserted -= onInsert;
-            options.onItemRemoved -= onRemove;
-            options.onClear -= onClear;
+            if (options != null) {
+                options.onItemInserted -= onInsert;
+                options.onItemRemoved -= onRemove;
+                options.onClear -= onClear;
+            }
         }
 
         private void OnClear() {

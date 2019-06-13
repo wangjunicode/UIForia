@@ -3,9 +3,12 @@ using UIForia.Attributes;
 using UIForia.Elements;
 using UIForia.UIInput;
 using UIForia.Util;
-using UnityEditor.U2D;
 
 namespace Documentation.Features {
+
+    public class Language {
+        public string Name;
+    }
 
     [Template("Documentation/Features/SelectDemo.xml")]
     public class SelectDemo : UIElement {
@@ -27,25 +30,25 @@ namespace Documentation.Features {
         public int selectedStringIndex = 3;
         
         public RepeatableList<ISelectOption<int>> intList;
-        public RepeatableList<ISelectOption<int>>[] translations;
+        public RepeatableList<ISelectOption<string>>[] translations;
         public RepeatableList<ISelectOption<string>> languages;
 
-        public RepeatableList<int> selectedLanguage;
+        public RepeatableList<Language> selectedLanguage;
 
         public RepeatableList<string> words;
         
         public override void OnCreate() {
             intList = new RepeatableList<ISelectOption<int>>();
             
-            translations = new RepeatableList<ISelectOption<int>>[] {
-                    new RepeatableList<ISelectOption<int>>() {
-                            new SelectOption<int>("Hello", 0),
-                            new SelectOption<int>("Hallo", 1)
+            translations = new RepeatableList<ISelectOption<string>>[] {
+                    new RepeatableList<ISelectOption<string>>() {
+                            new SelectOption<string>("Hello", "en"),
+                            new SelectOption<string>("Hallo", "de")
                     },
                     
-                    new RepeatableList<ISelectOption<int>>() {
-                            new SelectOption<int>("World", 0),
-                            new SelectOption<int>("Welt", 1)
+                    new RepeatableList<ISelectOption<string>>() {
+                            new SelectOption<string>("World", "en"),
+                            new SelectOption<string>("Welt", "de")
                     },
             };
             
@@ -59,20 +62,20 @@ namespace Documentation.Features {
                     "world"
             };
             
-            selectedLanguage = new RepeatableList<int>() {
-                    0, 0
+            selectedLanguage = new RepeatableList<Language>() {
+                    new Language() { Name = "de"}, 
+                    new Language() { Name = "de"}
             };
             
             for (int i = 0; i < 10; i++) {
                 intList.Add(new SelectOption<int>(i.ToString(), i));
-                
             }
         }
         
         private void ClearTranslations(int index) {
-            RepeatableList<ISelectOption<int>> options = translations[index];
+            RepeatableList<ISelectOption<string>> options = translations[index];
             
-            List<ISelectOption<int>> temp = new List<ISelectOption<int>>();
+            List<ISelectOption<string>> temp = new List<ISelectOption<string>>();
             foreach (var option in options) {
                 temp.Add(option);
             }

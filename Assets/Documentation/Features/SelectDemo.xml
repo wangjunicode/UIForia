@@ -11,19 +11,11 @@
         <Repeat list="words" style="repeat">
             
             <Text>Select your favourite translation for the word: {$item}</Text>
-            <Select--int selectedIndex.read.write="selectedLanguage[$index]" selectedValue.read.write="selectedLanguage[$index]" options="translations[$index]">
-    
-                <SlotContent name="select-placeholder">
-                    Placeholder 2
-                </SlotContent>
-    
-                <SlotContent name="select-display">
-                    Selected override: {$option.Label} language is {languages[selectedLanguage[$index]].Label}
-                </SlotContent>
+            <Select--string selectedValue.read.write="selectedLanguage[$index].Name" options="translations[$index]">
                 
                 <Group>this is a template {$option.Label}</Group>
     
-            </Select--int>
+            </Select--string>
 
 
             <Group style="button" onMouseClick="ClearTranslations($index)">

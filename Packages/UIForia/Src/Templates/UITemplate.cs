@@ -276,7 +276,8 @@ namespace UIForia.Templates {
                 }
             }
             catch (Exception e) {
-                Debug.Log(e);
+                Debug.LogWarning($"There's a problem with your template {template.rootElementTemplate.RootType}");
+                Debug.LogError(e);
             }
         }
 

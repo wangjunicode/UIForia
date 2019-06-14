@@ -1,0 +1,13 @@
+style container {
+    PreferredSize = 1vw 1vh;
+}
+
+style <Div> {
+    PreferredSize = 200px 40px;
+    Border = 3px;
+    BorderRadius = 10px;
+    BorderColor = black;
+    BackgroundColor = rgb(200, 200, 200);
+    Margin = 10px 30px;
+    Padding = 10px;
+}

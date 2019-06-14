@@ -21,11 +21,6 @@ namespace UIForia.Parsing.Expression {
         public readonly TemplateAttribute templateAttr;
         public readonly Action<IList<ExpressionAliasResolver>, AttributeList> getResolvers;
 
-        internal static readonly string s_InternalStreamingPath = Path.Combine(UnityEngine.Application.dataPath, "StreamingAssets", "UIForiaInternal");
-        internal static readonly string s_InternalNonStreamingPath = Path.Combine(UnityEngine.Application.dataPath, "..", "Packages", "UIForia", "Src");
-        internal static readonly string s_UserNonStreamingPath = UnityEngine.Application.dataPath;
-        internal static readonly string s_UserStreamingPath = Path.Combine(UnityEngine.Application.dataPath, "StreamingAssets", "UIForia");
-
         public ProcessedType(Type rawType) {
             this.rawType = rawType;
             this.templateAttr = rawType.GetCustomAttribute<TemplateAttribute>();
@@ -45,26 +40,12 @@ namespace UIForia.Parsing.Expression {
             }
 
             switch (templateAttr.templateType) {
-                
                 case TemplateType.Internal:
-                    if (Application.ReadTemplatesFromStreamingAssets) {
-                        string path = Path.GetFullPath(Path.Combine(s_InternalStreamingPath, templateAttr.template));
-                        return TryReadFile(path);
-                    }
-                    else {
-                        string path = Path.GetFullPath(Path.Combine(s_InternalNonStreamingPath, templateAttr.template));
-                        return TryReadFile(path);
-                        
-                    }
-                
+                    return TryReadFile(Application.Settings.GetInternalTemplatePath(templateAttr.template));
+
                 case TemplateType.File:
-                    if (Application.ReadTemplatesFromStreamingAssets) {
-                        return TryReadFile(Path.GetFullPath(Path.Combine(s_UserStreamingPath, templateAttr.template)));
-                    }
-                    else {
-                        return TryReadFile(Path.GetFullPath(Path.Combine(s_UserNonStreamingPath, templateAttr.template)));
-                    }
-                
+                    return TryReadFile(Application.Settings.GetTemplatePath(templateAttr.template));
+
                 default:
                     return templateAttr.template;
             }

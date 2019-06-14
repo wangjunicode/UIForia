@@ -1,0 +1,28 @@
+style dynamic-style-inner {
+    BackgroundColor = red;
+}
+style dynamic-style {
+    BackgroundColor = green;
+    TextColor = yellow;
+    Padding = 20px;
+    TextFontAsset = url("Fonts/DIGITALDREAMFAT SDF");
+    TextFontSize = 1.4em;
+}
+style entry {
+    TextColor = black;
+}
+
+style custom-input-box {
+    PreferredSize = 400px 200px;
+    BackgroundColor = green;
+    TextColor = white;
+    BorderColor = white;
+    Border = 6px;
+    BorderRadius = 4px;
+    Padding = 20px;
+}
+
+style <Paragraph> {
+    MaxWidth = 600px;
+    Margin = 10px 0;
+}

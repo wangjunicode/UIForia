@@ -65,23 +65,22 @@ namespace UIForia {
         public readonly TemplateParser templateParser;
 
         private static readonly LightList<Application> s_ApplicationList;
-        private static readonly UIForiaSettings s_Settings;
 
         private readonly UITaskSystem m_BeforeUpdateTaskSystem;
         private readonly UITaskSystem m_AfterUpdateTaskSystem;
 
         protected readonly SkipTree<UIElement> updateTree;
-
+        public static readonly UIForiaSettings Settings;
+        
         static Application() {
             ArrayPool<UIElement>.SetMaxPoolSize(64);
             s_AttributeProcessors = new List<IAttributeProcessor>();
             s_ApplicationList = new LightList<Application>();
             s_CustomPainters = new Dictionary<string, ISVGXElementPainter>();
             s_Scrollbars = new Dictionary<string, Scrollbar>();
-            s_Settings = Resources.Load<UIForiaSettings>("UIForiaSettings");
+            Settings = Resources.Load<UIForiaSettings>("UIForiaSettings");
         }
 
-        
         protected Application(string id, string templateRootPath = null) {
             this.id = id;
             this.templateRootPath = templateRootPath;
@@ -127,8 +126,6 @@ namespace UIForia {
 #endif
         }
         
-        internal static bool ReadTemplatesFromStreamingAssets => s_Settings.loadTemplatesFromStreamingAssets;
-
         internal static void ProcessClassAttributes(Type type, IEnumerable<Attribute> attrs) {
             foreach (Attribute attr in attrs) {
                 if (attr is CustomPainterAttribute paintAttr) {
@@ -888,6 +885,8 @@ namespace UIForia {
 
             onViewsSorted?.Invoke(m_Views.ToArray());
         }
+
+
     }
 
 }

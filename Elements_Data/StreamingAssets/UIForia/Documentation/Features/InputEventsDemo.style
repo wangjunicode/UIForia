@@ -1,0 +1,108 @@
+const regularColor = rgb(120, 140, 190);
+const codeColor = rgba(20, 20, 20, 40);
+
+animation flash {
+    [options] {
+        duration = 500;
+    }
+
+    [keyframes] {
+        0% { BackgroundColor = @codeColor; }
+        20% { BackgroundColor = yellow; }
+        80% { BackgroundColor = yellow; }
+        100% { BackgroundColor = @codeColor;}
+    }
+}
+
+style start-zone {
+    PreferredSize = 200px;
+    BackgroundColor = green;
+    [hover] {
+        BackgroundColor = rgb(20, 200, 20);
+    }
+    Padding = 40px;
+}
+
+style drop-zone {
+    PreferredSize = 200px;
+    BackgroundColor = red;
+    [hover] {
+        BackgroundColor = rgb(200, 20, 20);
+    }
+    Padding = 40px;
+}
+
+style dragme {
+    PreferredSize = 90px 50px;
+    Border = 2px;
+    BorderColor = black;
+    Padding = 10px;
+    BackgroundColor = rgb(200, 120, 120);
+    ZIndex = 10;
+    [hover] {
+        BackgroundColor = rgb(200, 120, 220);
+    }
+}
+
+style section {
+    LayoutType = Flex;
+    FlexLayoutDirection = Column;
+    MarginBottom = 20px;
+}
+
+style code {
+    BackgroundColor = @codeColor;
+    TextColor = rgb(30, 30, 30);
+    Border = 1px;
+    BorderColor = rgb(30, 30, 30);
+    Padding = 6px;
+    MarginTop = 20px;
+}
+
+style active-event {
+    BackgroundColor = rgba(20, 220, 20, 40);
+}
+
+style onDragEnter {
+    run animation(flash);
+}
+
+style onDragExit {
+    run animation(flash);
+}
+
+style regular-zone {
+    BackgroundColor = @regularColor;
+    Padding = 20px;
+    PreferredSize = 200px;
+    run animation(flash);
+    [hover] {
+        run animation(flash);
+    }
+}
+
+style demo-box {
+    Padding = 10px;
+    BackgroundColor = green;
+    PreferredSize = 1cnt 40px;
+    BorderColor = black;
+    Border = 2px;
+}
+
+style tell {
+    Padding = 0 20px;
+    MaxWidth = 400px;
+    TextWhitespaceMode = CollapseWhitespace PreserveNewLines;
+}
+
+style changes-on-hover-and-active {
+    PreferredHeight = 1cnt;
+
+    [hover] {
+        BackgroundColor = yellow;
+    }
+    
+    [active] {
+        BackgroundColor = red;
+    }
+}

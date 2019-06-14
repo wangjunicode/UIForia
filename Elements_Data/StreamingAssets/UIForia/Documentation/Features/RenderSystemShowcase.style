@@ -1,0 +1,72 @@
+
+style container {
+    PreferredSize = 300px 200px;
+    BackgroundColor = yellow;
+    BackgroundTint = rgba(100, 0, 85, 255);
+    BackgroundImage = url("image");
+    BorderRadius = 50%;
+    BorderRadiusTopRight = 25px;
+}
+
+style header {
+    TextColor = White;
+    TextFontSize = 44;
+    FlexLayoutDirection = Column;
+}
+
+style column-navy {
+    BackgroundColor = #0D2C40;
+}
+
+style crossed-lines-header {
+    PreferredSize = 128px;
+    BorderRadius = 50%;
+    BackgroundColor = white;
+}
+
+style crossed-line-0 {
+
+    PreferredSize = 0.5pca, 3px;
+    BackgroundColor = #F15B30;
+    LayoutBehavior = Ignored;
+    AnchorLeft = 50%;
+    AnchorTop = 50%;
+    TransformBehaviorX = AnchorMinOffset;
+    TransformBehaviorY = AnchorMinOffset;
+    TransformPositionX = -0.5w;
+    TransformPositionY = 0;
+    TransformRotation = 45;
+}
+
+style column-orange-hourglass {
+    PreferredSize = 128px;
+    BorderRadius = 50%;
+    BackgroundColor = white;
+}
+
+style box {
+    PreferredSize = 100px;
+}
+
+style uniform-border-no-fill {
+    Border = 10px;
+    BorderColor = Red;
+}
+
+style mixed-border-no-fill {
+    Border = 10px, 15px, 20px, 25px;
+    BorderColor = Red;
+}
+
+style no-border-color-fill {
+    BackgroundColor = blue;
+}
+
+style no-border-texture-fill {
+    BackgroundImage = url("icon_2");
+}
+
+style no-border-texture-tint-fill {
+    BackgroundImage = url("icon_2");
+    BackgroundTint = rgba(255, 0, 0, 0.5);
+}

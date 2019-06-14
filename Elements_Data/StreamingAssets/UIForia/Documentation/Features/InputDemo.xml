@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UITemplate>
+
+    <Style src="Documentation/Documentation.style" alias="theme" />
+    <Style src="Documentation/Features/InputDemo.style" />
+    
+    <Contents style="input-container">
+        
+        <Heading1>Input Demo</Heading1>
+        
+        <Group style="parameter-list">
+            <Group style="caption">&lt;Input&gt;</Group>
+            <Div style="parameter-list-header">Parameter</Div>
+            <Div style="parameter-list-header">Modifier</Div>
+            <Div style="parameter-list-header">Description</Div>
+            
+            <Div>value</Div>
+            <Div>read (default)</Div>
+            <Div>
+                <Text>`read` on its own will not make much sense. The input field</Text>
+                <Text>is going to read the value every frame from the property</Text>
+                <Text>thus overwriting any change immediately with the start value.</Text>
+                <Text>`read` really is only useful for display purposes e.g. if</Text>
+                <Text>you use disabled.</Text>
+            </Div>
+            
+            <Div>value</Div>
+            <Div>read.write</Div>
+            <Div>
+                <Text>`read.write` reads the property and puts its value into the input</Text>
+                <Text>field and will write the value back to the bound property</Text>
+                <Text>on every change. No additional change handler necessary.</Text>
+                <Text>Use this if you have default values or want to change the input`s</Text>
+                <Text>value from outside events.</Text>
+            </Div>
+            
+            <Div>value</Div>
+            <Div>write</Div>
+            <Div>
+                `write` will only write the value back to the bound property.
+            </Div>
+        </Group>
+
+        <Label>Two inputs that copy each other`s values</Label>
+        <Input value.read.write="textValue"/>
+        <Input value.read.write="textValue"/>
+        <Text style="text mb20">{textValue}</Text>
+        
+        <Label forElement="'input1'">Some label</Label>
+        <Input x-id="input1" value.read.write="rwValue" onKeyUp.late="Autocomplete($event)" />
+
+        <Label forElement="'input2'">Another label</Label>
+        <Input x-id="input2" value.write="regularValue" />
+        
+        <Group>
+            <Heading1>Here be the autocomplete result:</Heading1>
+            <Repeat list="autocompleteList">
+                
+                <Div>{$item}</Div>
+                
+            </Repeat>
+        </Group>
+    </Contents>
+
+</UITemplate>

@@ -3,7 +3,7 @@
     <Contents>
 
         Toggle Count = {toggleCount}
-        <Checkbox onValueChanged="OnToggled" isChecked.read.write="value1Checked"/>
+        <Checkbox isChecked.read.write="value1Checked"/>
         Is checked: {value1Checked}
 
     </Contents>

@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Src.Systems;
 using UIForia.Animation;
 using UIForia.AttributeProcessors;
 using UIForia.Bindings;
@@ -16,28 +15,6 @@ using UIForia.Util;
 using UnityEngine;
 
 namespace UIForia {
-
-    [AttributeUsage(AttributeTargets.Class)]
-    public class CustomPainterAttribute : Attribute {
-
-        public readonly string name;
-
-        public CustomPainterAttribute(string name) {
-            this.name = name;
-        }
-
-    }
-
-    [AttributeUsage(AttributeTargets.Class)]
-    public class CustomScrollbarAttribute : Attribute {
-
-        public readonly string name;
-
-        public CustomScrollbarAttribute(string name) {
-            this.name = name;
-        }
-
-    }
 
     public abstract class Application {
         
@@ -88,6 +65,7 @@ namespace UIForia {
         public readonly TemplateParser templateParser;
 
         private static readonly LightList<Application> s_ApplicationList;
+        private static readonly UIForiaSettings s_Settings;
 
         private readonly UITaskSystem m_BeforeUpdateTaskSystem;
         private readonly UITaskSystem m_AfterUpdateTaskSystem;
@@ -100,8 +78,10 @@ namespace UIForia {
             s_ApplicationList = new LightList<Application>();
             s_CustomPainters = new Dictionary<string, ISVGXElementPainter>();
             s_Scrollbars = new Dictionary<string, Scrollbar>();
+            s_Settings = Resources.Load<UIForiaSettings>("UIForiaSettings");
         }
 
+        
         protected Application(string id, string templateRootPath = null) {
             this.id = id;
             this.templateRootPath = templateRootPath;
@@ -146,6 +126,8 @@ namespace UIForia {
             Applications.Add(this);
 #endif
         }
+        
+        internal static bool ReadTemplatesFromStreamingAssets => s_Settings.loadTemplatesFromStreamingAssets;
 
         internal static void ProcessClassAttributes(Type type, IEnumerable<Attribute> attrs) {
             foreach (Attribute attr in attrs) {

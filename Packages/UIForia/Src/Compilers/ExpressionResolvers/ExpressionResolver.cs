@@ -1,9 +1,12 @@
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Reflection;
 using UIForia.Exceptions;
 using UIForia.Expressions;
 using UIForia.Parsing.Expression.AstNodes;
 using UIForia.Util;
+using Debug = UnityEngine.Debug;
 
 namespace UIForia.Compilers.ExpressionResolvers {
 
@@ -26,7 +29,13 @@ namespace UIForia.Compilers.ExpressionResolvers {
         public virtual Expression CompileAsDotExpression(CompilerContext context, string propertyName) {
             Expression expression = CompileAsValueExpression(context);
             if (expression != null) {
-                return context.compiler.CompileRestOfChain(expression, context);
+                try {
+                    return context.compiler.CompileRestOfChain(expression, context);
+                }
+                catch (Exception e) {
+                    Debug.LogError(e);
+                    throw new CompileException($"Cannot resolve property {propertyName} of alias {aliasName}.");
+                }
             }
             throw new CompileException($"Tried to invoke alias {aliasName} as a dot expression, but this is not supported");
         }

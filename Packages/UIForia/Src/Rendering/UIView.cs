@@ -62,19 +62,18 @@ public class UIView {
     public bool focusOnMouseDown;
     public bool sizeChanged;
 
-    internal UIView(int id, string name, Application app, Rect rect, int depth, Type elementType, string template = null) {
+    internal UIView(int id, string name, Application app, Rect viewportRect, int depth, Type elementType, string template = null) {
         this.id = id;
         this.name = name;
         this.Application = app;
-        this.Viewport = rect;
+        this.Viewport = viewportRect;
         this.Depth = depth;
         this.m_Template = template;
         this.m_ElementType = elementType;
         this.rotation = Quaternion.identity;
         this.scale = Vector3.one;
-        this.position = Vector3.zero;
+        this.position = viewportRect.position;
         this.size = new Size(Screen.width, Screen.height);
-        this.Viewport = new Rect(position.x, position.y, size.width, size.height);
         this.elements = new LightList<UIElement>(32);
         this.visibleElements = new LightList<UIElement>(32);
         this.rootElement = new UIViewRootElement();
@@ -84,17 +83,16 @@ public class UIView {
         this.sizeChanged = true;
     }
 
-    internal UIView(int id, string name, Application app, Rect rect, int depth) {
+    internal UIView(int id, string name, Application app, Rect viewportRect, int depth) {
         this.id = id;
         this.name = name;
         this.Application = app;
-        this.Viewport = rect;
+        this.Viewport = viewportRect;
         this.Depth = depth;
         this.rotation = Quaternion.identity;
         this.scale = Vector3.one;
-        this.position = Vector3.zero;
+        this.position = viewportRect.position;
         this.size = new Size(Screen.width, Screen.height);
-        this.Viewport = new Rect(position.x, position.y, size.width, size.height);
         this.elements = new LightList<UIElement>(32);
         this.visibleElements = new LightList<UIElement>(32);
         this.rootElement = new UIViewRootElement();

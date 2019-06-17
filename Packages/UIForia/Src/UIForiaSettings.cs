@@ -29,21 +29,21 @@ namespace UIForia {
             }
         }
         
-        public string GetTemplatePath(string fileName) {
+        public string GetTemplatePath(string appRoot, string fileName) {
             if (loadTemplatesFromStreamingAssets) {
-                return Path.GetFullPath(Path.Combine(s_UserStreamingPath, fileName));
+                return Path.GetFullPath(Path.Combine(s_UserStreamingPath, appRoot, fileName));
             }
             else {
-                return Path.GetFullPath(Path.Combine(s_UserNonStreamingPath, fileName));
+                return Path.GetFullPath(Path.Combine(s_UserNonStreamingPath, appRoot, fileName));
             }
         }
 
-        public string GetStylePath(string fileName) {
+        public string GetStylePath(string appRoot, string fileName) {
             if (loadTemplatesFromStreamingAssets) {
-                return Path.GetFullPath(Path.Combine(s_UserStreamingPath, fileName));
+                return Path.GetFullPath(Path.Combine(s_UserStreamingPath, appRoot, fileName));
             }
             else {
-                return Path.GetFullPath(Path.Combine(s_UserNonStreamingPath, fileName));
+                return Path.GetFullPath(Path.Combine(s_UserNonStreamingPath, appRoot, fileName));
             }
         }
     }

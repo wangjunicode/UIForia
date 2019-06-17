@@ -79,6 +79,9 @@ namespace UIForia {
             s_CustomPainters = new Dictionary<string, ISVGXElementPainter>();
             s_Scrollbars = new Dictionary<string, Scrollbar>();
             Settings = Resources.Load<UIForiaSettings>("UIForiaSettings");
+            if (Settings == null) {
+                throw new Exception("UIForiaSettings are missing. Use the UIForia/Create UIForia Settings to create it");
+            }
         }
 
         protected Application(string id, string templateRootPath = null) {
@@ -158,7 +161,7 @@ namespace UIForia {
         public string TemplateRootPath {
             get {
                 if (templateRootPath == null) {
-                    return UnityEngine.Application.dataPath;
+                    return string.Empty;// UnityEngine.Application.dataPath;
                 }
 
                 return templateRootPath;

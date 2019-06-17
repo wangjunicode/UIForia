@@ -44,7 +44,7 @@ namespace UIForia.Parsing.Expression {
                     return TryReadFile(Application.Settings.GetInternalTemplatePath(templateAttr.template));
 
                 case TemplateType.File:
-                    return TryReadFile(Application.Settings.GetTemplatePath(templateAttr.template));
+                    return TryReadFile(Application.Settings.GetTemplatePath(templateRoot, templateAttr.template));
 
                 default:
                     return templateAttr.template;

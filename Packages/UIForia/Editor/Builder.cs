@@ -6,7 +6,7 @@ namespace UIForia {
 
     public static class Builder {
 
-        [MenuItem("UIForia/Create Options Object")]
+        [MenuItem("UIForia/Create UIForia Settings")]
         public static void CreateOptionsObject() {
          
             UIForiaSettings asset = ScriptableObject.CreateInstance<UIForiaSettings>();

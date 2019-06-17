@@ -60,7 +60,7 @@ namespace UIForia.Compilers.Style {
 //                path = app == null ? UnityEngine.Application.dataPath + "/" + fileName : app.TemplateRootPath + "/" + fileName;
 //            }
 
-            path = app == null ? UnityEngine.Application.dataPath + "/" + fileName : Application.Settings.GetStylePath(fileName);
+            path = app == null ? UnityEngine.Application.dataPath + "/" + fileName : Application.Settings.GetStylePath(app.TemplateRootPath, fileName);
             
             if (File.Exists(path)) {
                 string contents = File.ReadAllText(path);

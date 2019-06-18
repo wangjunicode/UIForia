@@ -92,66 +92,82 @@ namespace UIForia.Parsing.Expression {
             switch (tokenStream.Previous.expressionTokenType) {
                 case ExpressionTokenType.Plus:
                     operatorNode = ASTNode.OperatorNode(OperatorType.Plus);
+                    operatorNode.WithLocation(tokenStream.Previous);
                     return true;
 
                 case ExpressionTokenType.Minus:
                     operatorNode = ASTNode.OperatorNode(OperatorType.Minus);
+                    operatorNode.WithLocation(tokenStream.Previous);
                     return true;
 
                 case ExpressionTokenType.Times:
                     operatorNode = ASTNode.OperatorNode(OperatorType.Times);
+                    operatorNode.WithLocation(tokenStream.Previous);
                     return true;
 
                 case ExpressionTokenType.Divide:
                     operatorNode = ASTNode.OperatorNode(OperatorType.Divide);
+                    operatorNode.WithLocation(tokenStream.Previous);
                     return true;
 
                 case ExpressionTokenType.Mod:
                     operatorNode = ASTNode.OperatorNode(OperatorType.Mod);
+                    operatorNode.WithLocation(tokenStream.Previous);
                     return true;
 
                 case ExpressionTokenType.And:
                     operatorNode = ASTNode.OperatorNode(OperatorType.And);
+                    operatorNode.WithLocation(tokenStream.Previous);
                     return true;
 
                 case ExpressionTokenType.Or:
                     operatorNode = ASTNode.OperatorNode(OperatorType.Or);
+                    operatorNode.WithLocation(tokenStream.Previous);
                     return true;
 
                 case ExpressionTokenType.Equals:
                     operatorNode = ASTNode.OperatorNode(OperatorType.Equals);
+                    operatorNode.WithLocation(tokenStream.Previous);
                     return true;
 
                 case ExpressionTokenType.NotEquals:
                     operatorNode = ASTNode.OperatorNode(OperatorType.NotEquals);
+                    operatorNode.WithLocation(tokenStream.Previous);
                     return true;
 
                 case ExpressionTokenType.GreaterThan:
                     operatorNode = ASTNode.OperatorNode(OperatorType.GreaterThan);
+                    operatorNode.WithLocation(tokenStream.Previous);
                     return true;
 
                 case ExpressionTokenType.GreaterThanEqualTo:
                     operatorNode = ASTNode.OperatorNode(OperatorType.GreaterThanEqualTo);
+                    operatorNode.WithLocation(tokenStream.Previous);
                     return true;
 
                 case ExpressionTokenType.LessThan:
                     operatorNode = ASTNode.OperatorNode(OperatorType.LessThan);
+                    operatorNode.WithLocation(tokenStream.Previous);
                     return true;
 
                 case ExpressionTokenType.LessThanEqualTo:
                     operatorNode = ASTNode.OperatorNode(OperatorType.LessThanEqualTo);
+                    operatorNode.WithLocation(tokenStream.Previous);
                     return true;
 
                 case ExpressionTokenType.QuestionMark:
                     operatorNode = ASTNode.OperatorNode(OperatorType.TernaryCondition);
+                    operatorNode.WithLocation(tokenStream.Previous);
                     return true;
 
                 case ExpressionTokenType.Colon:
                     operatorNode = ASTNode.OperatorNode(OperatorType.TernarySelection);
+                    operatorNode.WithLocation(tokenStream.Previous);
                     return true;
 
                 case ExpressionTokenType.As: {
                     operatorNode = ASTNode.OperatorNode(OperatorType.As);
+                    operatorNode.WithLocation(tokenStream.Previous);
                     TypePath typePath = default;
                     if (!ParseTypePath(ref typePath)) {
                         Abort();
@@ -164,6 +180,7 @@ namespace UIForia.Parsing.Expression {
 
                 case ExpressionTokenType.Is: {
                     operatorNode = ASTNode.OperatorNode(OperatorType.Is);
+                    operatorNode.WithLocation(tokenStream.Previous);
                     TypePath typePath = default;
                     if (!ParseTypePath(ref typePath)) {
                         Abort();

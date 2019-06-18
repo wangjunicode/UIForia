@@ -73,6 +73,7 @@ namespace UIForia.Compilers.Style {
                     // we sorted the root nodes so all animations run first
                     case AnimationRootNode animNode:
                         styleSheet.animations[animationIndex] = CompileAnimation(animNode);
+                        animationIndex++;
                         break;
                     case StyleRootNode styleRoot:
                         styleSheet.styleGroupContainers[containerIndex] = CompileStyleGroup(styleRoot, styleSheet.animations);

@@ -6,6 +6,7 @@ using System.Reflection;
 using UIForia.Attributes;
 using UIForia.Compilers.ExpressionResolvers;
 using UIForia.Templates;
+using Debug = UnityEngine.Debug;
 
 namespace UIForia.Parsing.Expression {
 
@@ -61,7 +62,8 @@ namespace UIForia.Parsing.Expression {
             try {
                 return File.ReadAllText(path);
             }
-            catch (FileNotFoundException) {
+            catch (FileNotFoundException e) {
+                Debug.LogWarning(e.Message);
                 throw;
             }
             catch (Exception) {

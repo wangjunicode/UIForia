@@ -51,8 +51,17 @@ namespace UIForia.Compilers.Style {
 
             
             // null check is for test cases without an app so that the importer can be used stand-alone
-            string path = app == null ? UnityEngine.Application.dataPath + "/" + fileName : app.TemplateRootPath + "/" + fileName;
 
+            string path = null;
+//            if (Application.Settings.loadTemplatesFromStreamingAssets) {
+//                path = Path.Combine(Application.Settings.StreamingAssetPath, fileName);
+//            }
+//            else {
+//                path = app == null ? UnityEngine.Application.dataPath + "/" + fileName : app.TemplateRootPath + "/" + fileName;
+//            }
+
+            path = app == null ? UnityEngine.Application.dataPath + "/" + fileName : Application.Settings.GetStylePath(app.TemplateRootPath, fileName);
+            
             if (File.Exists(path)) {
                 string contents = File.ReadAllText(path);
                 m_CurrentlyImportingStylesheets.Add(fileName);

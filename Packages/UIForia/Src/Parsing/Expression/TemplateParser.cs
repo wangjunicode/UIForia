@@ -34,9 +34,10 @@ namespace UIForia.Parsing.Expression {
                 parsedTemplates[elementType] = parsedTemplate;
                 return parsedTemplate;
             }
-            catch (Exception) {
+            catch (Exception e) {
                 // todo -- make this a better error message
-                Debug.Log($"Cannot parse file {elementType}, you might be missing a template attribute");
+                Debug.LogWarning(e.Message);
+                Debug.Log($"Cannot parse file {elementType}, you might be missing a template attribute. App root path {app.TemplateRootPath}");
                 throw;
             }
         }
@@ -306,8 +307,8 @@ namespace UIForia.Parsing.Expression {
 
         private UITemplate ParseSlotContentElement(XElement element) {
             EnsureAttribute(element, "name");
-            EnsureNotInsideTagName(element, "Repeat");
-            EnsureNotInsideTagName(element, "Slot");
+            EnsureNotDirectChildOf(element, "Repeat");
+            EnsureNotDirectChildOf(element, "Slot");
 
             return new UISlotContentTemplate(
                 app,
@@ -552,6 +553,16 @@ namespace UIForia.Parsing.Expression {
                 }
 
                 ptr = ptr.Parent;
+            }
+        }
+        
+        private void EnsureNotDirectChildOf(XElement element, string tagName) {
+
+            if (element.Parent != null) {
+                if (element.Parent.Name.LocalName == tagName) {
+                    throw new TemplateParseException(element,
+                        $"<{element.Name.LocalName}> cannot be inside <{tagName}>");
+                }
             }
         }
 

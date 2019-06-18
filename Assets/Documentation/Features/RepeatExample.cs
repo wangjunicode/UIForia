@@ -16,7 +16,8 @@ namespace Documentation.Features {
 
         public override void OnCreate() {
             dictionary = new RepeatableList<(string, string)>() {
-                ValueTuple.Create("Mein lieber Herr Gesangsverein!", "My dear mister singing club!")
+                ValueTuple.Create("Mein lieber Herr Gesangsverein!", "My dear mister singing club!"),
+                ValueTuple.Create("Ich habe Kohldampf!", "I'm having cabbage steam!")
             };
         }
         

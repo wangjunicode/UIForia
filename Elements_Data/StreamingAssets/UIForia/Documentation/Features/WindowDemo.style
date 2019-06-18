@@ -1,0 +1,16 @@
+
+style window-demo-container {
+    
+}
+
+style create-button-row {
+    FlexLayoutDirection = Column;
+}
+
+style button {
+
+    BorderRadius = 50%;
+    Padding = 1em;
+    BackgroundColor = #AAAAAA;
+
+}

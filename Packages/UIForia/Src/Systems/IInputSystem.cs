@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using UIForia.Elements;
 using UIForia.UIInput;
 
 namespace UIForia.Systems {
@@ -10,6 +12,11 @@ namespace UIForia.Systems {
         DragEvent CurrentDragEvent { get; }
         KeyboardInputEvent CurrentKeyboardEvent { get; }
         void OnLateUpdate();
+        
+#if UNITY_EDITOR
+        List<UIElement> DebugElementsThisFrame { get; }
+        bool DebugMouseUpThisFrame { get; }
+#endif
     }
 
 }

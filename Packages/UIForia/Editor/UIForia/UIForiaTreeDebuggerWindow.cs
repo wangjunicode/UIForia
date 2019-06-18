@@ -97,7 +97,6 @@ namespace UIForia.Editor {
         }
 
         private static MethodInfo s_GameWindowSizeMethod;
-        private List<Application> applications;
 
         public static int s_SelectedElementId;
         public static Application s_SelectedApplication;
@@ -108,22 +107,6 @@ namespace UIForia.Editor {
             autoRepaintOnSceneChange = true;
             wantsMouseMove = true;
             wantsMouseEnterLeaveWindow = true;
-            applications = new List<Application>();
-            Application.onApplicationCreated += OnApplicationCreated;
-            Application.onApplicationDestroyed += OnApplicationDestroyed;
-        }
-
-        private void OnDisable() {
-            Application.onApplicationCreated -= OnApplicationCreated;
-            Application.onApplicationDestroyed -= OnApplicationDestroyed;
-        }
-
-        private void OnApplicationCreated(Application app) {
-            applications.Add(app);
-        }
-
-        private void OnApplicationDestroyed(Application app) {
-            applications.Remove(app);
         }
 
         private void OnElementCreatedOrDestroyed(UIElement element) {
@@ -192,13 +175,13 @@ namespace UIForia.Editor {
             }
 
             EditorGUILayout.BeginVertical();
-            string[] names = new string[applications.Count + 1];
+            string[] names = new string[Application.Applications.Count + 1];
             names[0] = "None";
 
             int oldIdx = 0;
 
             for (int i = 1; i < names.Length; i++) {
-                names[i] = applications[i - 1].id;
+                names[i] = Application.Applications[i - 1].id;
                 if (names[i] == inspectedAppId) {
                     oldIdx = i;
                 }

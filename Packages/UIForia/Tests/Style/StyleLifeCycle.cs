@@ -23,7 +23,7 @@ namespace Style {
         public void DoNotPublishChangesIfElementIsNotEnabled() {
             string template = @"
             <UITemplate>
-                <Style path='\\Templates\\FlexLayoutColTests\\FlexLayoutColTests.style'/>
+                <Style path='Templates/FlexLayoutColTests/FlexLayoutColTests.style'/>
                 <Contents style.layoutType='LayoutType.Flex' style.flexLayoutDirection='LayoutDirection.Column' style.preferredWidth='500f' style.preferredHeight='500f'>
                     <Group x-id='child0' style='w100h100'/>
                 </Contents>

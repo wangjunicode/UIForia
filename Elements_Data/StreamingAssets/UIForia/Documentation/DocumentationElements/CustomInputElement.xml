@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UITemplate>
+
+    <Style>
+        
+        style custom-event-box {
+            PreferredSize = 100px;
+            BackgroundColor = yellow;
+        }
+        
+    </Style>
+    <Contents>
+        <Text>MyVal: {Value.MyVal}</Text>
+        <Text>num: {num}</Text>
+        <Heading1>Drag the yellow box to get another value</Heading1>
+        <Div style="custom-event-box" onDragCreate="onDragCreate($event)" onDragMove="OnDragMove($event)" />
+    </Contents>
+</UITemplate>

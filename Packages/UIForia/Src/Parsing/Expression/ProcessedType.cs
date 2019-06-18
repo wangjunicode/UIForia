@@ -6,6 +6,7 @@ using System.Reflection;
 using UIForia.Attributes;
 using UIForia.Compilers.ExpressionResolvers;
 using UIForia.Templates;
+using Debug = UnityEngine.Debug;
 
 namespace UIForia.Parsing.Expression {
 
@@ -41,10 +42,11 @@ namespace UIForia.Parsing.Expression {
 
             switch (templateAttr.templateType) {
                 case TemplateType.Internal:
-                    string path = Path.GetFullPath(Path.Combine(UnityEngine.Application.dataPath, "..", "Packages", "UIForia", "Src", templateAttr.template));
-                    return TryReadFile(path);
+                    return TryReadFile(Application.Settings.GetInternalTemplatePath(templateAttr.template));
+
                 case TemplateType.File:
-                    return TryReadFile(Path.GetFullPath(Path.Combine(templateRoot, templateAttr.template)));
+                    return TryReadFile(Application.Settings.GetTemplatePath(templateRoot, templateAttr.template));
+
                 default:
                     return templateAttr.template;
             }
@@ -60,7 +62,8 @@ namespace UIForia.Parsing.Expression {
             try {
                 return File.ReadAllText(path);
             }
-            catch (FileNotFoundException) {
+            catch (FileNotFoundException e) {
+                Debug.LogWarning(e.Message);
                 throw;
             }
             catch (Exception) {

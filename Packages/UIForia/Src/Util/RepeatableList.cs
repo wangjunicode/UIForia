@@ -87,14 +87,24 @@ namespace UIForia.Util {
         }
 
         public T Find(Predicate<T> fn) {
-            return ((List<T>) backingStore).Find(fn);
+            for (int i = 0; i < backingStore.Count; i++) {
+                if (fn.Invoke(backingStore[i])) {
+                    return backingStore[i];
+                }
+            }
+            return default;
         }
 
         public T this[int index] {
             get => backingStore[index];
             set => backingStore[index] = value;
-        }      
+        }
 
+        public void RemoveRange(int index, int count) {
+            for (int i = index; i < index + count; i++) {
+                backingStore.RemoveAt(i);
+            }
+        }
     }
 
 }

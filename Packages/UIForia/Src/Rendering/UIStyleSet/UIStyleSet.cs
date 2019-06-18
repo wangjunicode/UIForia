@@ -338,6 +338,10 @@ namespace UIForia.Rendering {
             for (int i = 0; i < availableStyles.Count; i++) {
                 StyleEntry entry = styleEntries[i];
 
+                if (entry.state == StyleState.Normal) {
+                    RunCommands(entry.styleRunCommand.runCommands);
+                }
+
                 // if this a state we were in that is now invalid, mark it's properties for update
                 if ((entry.state & oldState) != 0 && (entry.state & state) != 0) {
                     AddMissingProperties(toUpdate, entry.styleRunCommand.style);

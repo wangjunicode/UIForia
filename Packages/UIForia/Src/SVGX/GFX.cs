@@ -8,6 +8,7 @@ using UIForia.Text;
 using UIForia.Util;
 using UnityEngine;
 using UnityEngine.Rendering;
+using Application = UIForia.Application;
 
 namespace SVGX {
 
@@ -36,12 +37,6 @@ namespace SVGX {
         private readonly LightList<TexturedShapeGroup> texturedShapeGroups;
         private readonly IntMap<Texture2D> textureMap;
 
-        private readonly LightList<StrokeVertexData> strokesToRelease = new LightList<StrokeVertexData>();
-        private readonly LightList<FillVertexData> fillsToRelease = new LightList<FillVertexData>();
-
-        private readonly MaterialPool stencilClipSetPool;
-        private readonly MaterialPool stencilClipClearPool;
-        private readonly MaterialPool simpleStrokePool;
         private readonly MaterialPool batchedTransparentPool;
         private readonly DeferredReleasePool<BatchedVertexData> vertexDataPool;
 
@@ -59,7 +54,6 @@ namespace SVGX {
             s_WavePool = new ObjectPool<SVGXDrawWave>(null, (wave) => wave.Clear());
             s_FillVertexDataPool = new ObjectPool<FillVertexData>((a) => a.Clear());
             s_StrokeVertexDataPool = new ObjectPool<StrokeVertexData>((a) => a.Clear());
-            s_SimpleFillPool = new MaterialPool(new Material(Shader.Find("UIForia/SimpleFillOpaque")));
         }
 
         public GFX(Camera camera) {
@@ -67,17 +61,9 @@ namespace SVGX {
 
             scratchPointList = new LightList<Vector2>(64);
             vertexDataPool = new DeferredReleasePool<BatchedVertexData>();
-
-            stencilClipSetPool = new MaterialPool(Shader.Find("UIForia/StencilClipSet"));
-            stencilClipClearPool = new MaterialPool(Shader.Find("UIForia/StencilClipClear"));
-            simpleStrokePool = new MaterialPool(Shader.Find("UIForia/JoinedPolyline"));
-
-            batchedTransparentPool = new MaterialPool(Shader.Find("UIForia/BatchedTransparent"));
-
-            Material simpleFill = new Material(Shader.Find("UIForia/SimpleFillOpaque"));
-
-            simpleFill.SetFloat(s_StencilRefKey, 0);
-
+            
+            batchedTransparentPool = new MaterialPool(Application.Settings.svgxMaterial);
+            
             gradientAtlas = new Texture2D(GradientPrecision, 32);
             gradientAtlas.wrapMode = TextureWrapMode.Clamp;
             gradientAtlasContents = new Color32[GradientPrecision * gradientAtlas.height];
@@ -278,28 +264,12 @@ namespace SVGX {
             this.ctx = ctx;
             drawCallCnt = 0;
 
-            stencilClipSetPool.FlushReleaseQueue();
-            stencilClipClearPool.FlushReleaseQueue();
-            simpleStrokePool.FlushReleaseQueue();
             vertexDataPool.FlushReleaseQueue();
             batchedTransparentPool.FlushReleaseQueue();
 
             textureMap.Clear();
             s_GradientMap.Clear();
             s_GradientRowMap.Clear();
-
-            for (int i = 0; i < strokesToRelease.Count; i++) {
-                s_StrokeVertexDataPool.Release(strokesToRelease[i]);
-            }
-
-            for (int i = 0; i < fillsToRelease.Count; i++) {
-                s_FillVertexDataPool.Release(fillsToRelease[i]);
-            }
-
-            strokesToRelease.Clear();
-            fillsToRelease.Clear();
-
-            s_SimpleFillPool.FlushReleaseQueue();
 
             // for now assume all uses of a gradient get their own entry in gradient map
             // this means we are ok with duplicated values for now. 
@@ -629,7 +599,7 @@ namespace SVGX {
             }
 
             CreateClipFillVertices(wave, ctx.points.Array);
-            DrawMesh(wave.clipMesh, OriginMatrix, stencilClipSetPool.GetAndQueueForRelease());
+            //DrawMesh(wave.clipMesh, OriginMatrix, stencilClipSetPool.GetAndQueueForRelease());
         }
 
         private void ClearClip(SVGXDrawWave wave) {
@@ -637,7 +607,7 @@ namespace SVGX {
                 return;
             }
 
-            DrawMesh(wave.clipMesh, OriginMatrix, stencilClipClearPool.GetAndQueueForRelease());
+            //DrawMesh(wave.clipMesh, OriginMatrix, stencilClipClearPool.GetAndQueueForRelease());
         }
 
         public struct GradientData {

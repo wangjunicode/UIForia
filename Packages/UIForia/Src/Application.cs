@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Src.Systems;
 using UIForia.Animation;
 using UIForia.AttributeProcessors;
 using UIForia.Bindings;
@@ -17,29 +16,11 @@ using UnityEngine;
 
 namespace UIForia {
 
-    [AttributeUsage(AttributeTargets.Class)]
-    public class CustomPainterAttribute : Attribute {
-
-        public readonly string name;
-
-        public CustomPainterAttribute(string name) {
-            this.name = name;
-        }
-
-    }
-
-    [AttributeUsage(AttributeTargets.Class)]
-    public class CustomScrollbarAttribute : Attribute {
-
-        public readonly string name;
-
-        public CustomScrollbarAttribute(string name) {
-            this.name = name;
-        }
-
-    }
-
     public abstract class Application {
+        
+#if UNITY_EDITOR
+        public static List<Application> Applications = new List<Application>();
+#endif
 
         public readonly string id;
         private static int ElementIdGenerator;
@@ -74,9 +55,6 @@ namespace UIForia {
         public event Action<UIView[]> onViewsSorted;
         public event Action<UIView> onViewRemoved;
 
-        public static event Action<Application> onApplicationCreated;
-        public static event Action<Application> onApplicationDestroyed;
-
         protected internal readonly List<UIView> m_Views;
 
         public static readonly List<IAttributeProcessor> s_AttributeProcessors;
@@ -92,13 +70,18 @@ namespace UIForia {
         private readonly UITaskSystem m_AfterUpdateTaskSystem;
 
         protected readonly SkipTree<UIElement> updateTree;
-
+        public static readonly UIForiaSettings Settings;
+        
         static Application() {
             ArrayPool<UIElement>.SetMaxPoolSize(64);
             s_AttributeProcessors = new List<IAttributeProcessor>();
             s_ApplicationList = new LightList<Application>();
             s_CustomPainters = new Dictionary<string, ISVGXElementPainter>();
             s_Scrollbars = new Dictionary<string, Scrollbar>();
+            Settings = Resources.Load<UIForiaSettings>("UIForiaSettings");
+            if (Settings == null) {
+                throw new Exception("UIForiaSettings are missing. Use the UIForia/Create UIForia Settings to create it");
+            }
         }
 
         protected Application(string id, string templateRootPath = null) {
@@ -140,9 +123,12 @@ namespace UIForia {
 
             m_BeforeUpdateTaskSystem = new UITaskSystem();
             m_AfterUpdateTaskSystem = new UITaskSystem();
-            onApplicationCreated?.Invoke(this);
-        }
 
+#if UNITY_EDITOR
+            Applications.Add(this);
+#endif
+        }
+        
         internal static void ProcessClassAttributes(Type type, IEnumerable<Attribute> attrs) {
             foreach (Attribute attr in attrs) {
                 if (attr is CustomPainterAttribute paintAttr) {
@@ -175,7 +161,7 @@ namespace UIForia {
         public string TemplateRootPath {
             get {
                 if (templateRootPath == null) {
-                    return UnityEngine.Application.dataPath;
+                    return string.Empty;// UnityEngine.Application.dataPath;
                 }
 
                 return templateRootPath;
@@ -200,17 +186,28 @@ namespace UIForia {
         private int nextViewId = 0;
 
         public UIView CreateView(string name, Rect rect, Type type, string template = null) {
-            UIView view = new UIView(nextViewId++, name, this, rect, m_Views.Count, type, template);
 
-            m_Views.Add(view);
+            UIView view = GetView(name);
 
-            for (int i = 0; i < m_Systems.Count; i++) {
-                m_Systems[i].OnViewAdded(view);
+            if (view == null) {
+                view = new UIView(nextViewId++, name, this, rect, m_Views.Count, type, template);
+                m_Views.Add(view);
+
+                for (int i = 0; i < m_Systems.Count; i++) {
+                    m_Systems[i].OnViewAdded(view);
+                }
+
+                view.Initialize();
+
+                onViewAdded?.Invoke(view);
+            }
+            else {
+                if (view.RootElement.GetType() != type) {
+                    throw new Exception($"A view named {name} with another root type ({view.RootElement.GetType()}) already exists.");
+                }
+                view.Viewport = rect;
             }
 
-            view.Initialize();
-
-            onViewAdded?.Invoke(view);
             return view;
         }
 
@@ -289,7 +286,10 @@ namespace UIForia {
         }
 
         public void Destroy() {
-            onApplicationDestroyed?.Invoke(this);
+
+#if UNITY_EDITOR
+            Applications.Remove(this);
+#endif
             onDestroy?.Invoke();
 
             foreach (ISystem system in m_Systems) {
@@ -751,6 +751,17 @@ namespace UIForia {
             return m_Views[i];
         }
 
+        public UIView GetView(string name) {
+            for (int i = 0; i < m_Views.Count; i++) {
+                UIView v = m_Views[i];
+                if (v.name == name) {
+                    return v;
+                }
+            }
+
+            return null;
+        }
+
         public static Application Find(string appId) {
             return s_ApplicationList.Find(appId, (app, _id) => app.id == _id);
         }
@@ -877,6 +888,8 @@ namespace UIForia {
 
             onViewsSorted?.Invoke(m_Views.ToArray());
         }
+
+
     }
 
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Reflection;
 using UIForia.Attributes;
 using UIForia.Bindings;
@@ -12,6 +13,7 @@ using UIForia.Util;
 using UnityEngine;
 using Debug = System.Diagnostics.Debug;
 using ElementCallback = System.Action<UIForia.Elements.UIElement, string>;
+using Expression = UIForia.Expressions.Expression;
 
 namespace UIForia.Compilers {
 
@@ -192,7 +194,7 @@ namespace UIForia.Compilers {
             }
 
             if (attrKey == "if") {
-                Expression<bool> ifExpression = compiler.Compile<bool>(rootType, elementType, attrValue);
+                Expressions.Expression<bool> ifExpression = compiler.Compile<bool>(rootType, elementType, attrValue);
                 return new EnabledBinding(ifExpression);
             }
 

@@ -1,0 +1,168 @@
+style parent {
+    PreferredSize = 300px;
+    BackgroundColor = red;
+    FlexLayoutDirection = Vertical; 
+}
+
+style child0 {
+    PreferredSize = 1aw, 100px;
+    BackgroundColor = blue;
+    TransformBehaviorX = AnchorMaxOffset;
+    TransformBehaviorY = AnchorMaxOffset;
+    AnchorRight = 0px;
+    AnchorLeft = 0px;
+    AnchorBottom = -100px;
+    TransformPositionX = 0px;
+}
+
+style child1 {
+    PreferredSize = 100px;
+    BackgroundColor = blue;
+    AnchorRight = 200px;
+}
+
+style wrapper {
+    PreferredSize = 300px;
+    BackgroundColor = yellow;
+    MarginLeft = 200px;
+    MarginTop = 200px;
+    FlexLayoutDirection = Column;
+    BorderColor = red;
+    Border = 30px;
+}
+
+style tooltip {
+    AnchorTarget = ParentContentArea;
+    TransformBehaviorX = AnchorMaxOffset;
+    TransformBehaviorY = AnchorMaxOffset;
+    TransformPositionX = 0cw;
+    TransformPositionY = 0ch;
+}
+
+style anchor-demo-root {
+    LayoutType = Grid;
+    Padding = 30px;
+    FlexItemGrow = 1;
+    GridLayoutColTemplate = 300px 300px 300px;
+    GridLayoutRowTemplate = 300px 300px 300px;
+    GridLayoutColGap = 20;
+    GridLayoutRowGap = 20;
+}
+
+style grid-cell {
+    BackgroundColor = rgb(49, 120, 230);
+    BorderColor = black;
+    Border = 20px;
+} 
+
+style anchor-left-top {
+    AnchorTarget = Parent;
+    AnchorLeft = 20px;
+    AnchorTop = 20px;
+    LayoutBehavior = Ignored;
+    TransformBehaviorY = AnchorMinOffset;
+    TransformPositionY = 0;
+    TransformBehaviorX = AnchorMinOffset;
+}
+
+style anchor-left-center {
+    AnchorTarget = Parent;
+    AnchorLeft = 20px;
+    AnchorTop = 50%;
+    LayoutBehavior = Ignored;
+    TransformBehaviorY = AnchorMinOffset;
+    TransformPositionY = -0.5ch;
+    TransformBehaviorX = AnchorMinOffset;
+}
+
+style anchor-top-center {
+    AnchorTarget = Parent;
+    AnchorLeft = 50%;
+    AnchorTop = 25%;
+    LayoutBehavior = Ignored;
+    TransformBehaviorY = AnchorMinOffset;
+    TransformPositionY = -0.5ch;
+    TransformBehaviorX = AnchorMinOffset;
+    TransformPositionX = -0.5cw;
+}
+
+style anchor-center-center {
+    AnchorTarget = Parent;
+    AnchorLeft = 50%;
+    AnchorTop = 50%;
+    LayoutBehavior = Ignored;
+    TransformBehaviorY = AnchorMinOffset;
+    TransformPositionY = -0.5ch;
+    TransformBehaviorX = AnchorMinOffset;
+    TransformPositionX = -0.5cw;
+}
+
+style anchor-right-center {
+    AnchorTarget = Parent;
+    AnchorRight = 20px;
+    AnchorTop = 50%;
+    LayoutBehavior = Ignored;
+    TransformBehaviorY = AnchorMinOffset;
+    TransformPositionY = -0.5ch;
+    TransformBehaviorX = AnchorMaxOffset;
+}
+
+style anchor-top-right {
+    AnchorTarget = Parent;
+    AnchorRight = 15%;
+    AnchorTop = 20px;
+    LayoutBehavior = Ignored;
+    TransformBehaviorY = AnchorMinOffset;
+    TransformBehaviorX = AnchorMaxOffset;
+    TransformPositionX = -0.5cw;
+}
+
+style anchor-left-bottom {
+    AnchorTarget = Parent;
+    AnchorLeft = 20px;
+    AnchorBottom = 20px;
+    LayoutBehavior = Ignored;
+    TransformBehaviorY = AnchorMaxOffset;
+    TransformBehaviorX = AnchorMinOffset;
+}
+
+style anchor-center-bottom {
+    AnchorTarget = Parent;
+    AnchorRight = 50%;
+    AnchorBottom = 20px;
+    LayoutBehavior = Ignored;
+    TransformBehaviorY = AnchorMaxOffset;
+    TransformBehaviorX = AnchorMaxOffset;
+    TransformPositionX = -0.5cw;
+}
+
+style anchor-right-bottom {
+    AnchorTarget = Parent;
+    AnchorRight = 20px;
+    AnchorBottom = 20px;
+    LayoutBehavior = Ignored;
+    TransformBehaviorY = AnchorMaxOffset;
+    TransformBehaviorX = AnchorMaxOffset;
+}
+
+style center-this {    
+    FlexLayoutDirection = Column;
+}
+
+style button {
+    PreferredSize = 1cnt 40px;
+    Padding = 10px;
+    Border = 1px;
+    BorderColor = black;
+    Margin = 3px 5px 20px;
+    [hover] {
+        
+        Cursor = url("Cursors/hand");
+        BackgroundColor = rgba(200, 220, 220, 200);
+    }
+}
+
+style icon {
+    Margin = 4px;
+    PreferredSize = 40px;
+}

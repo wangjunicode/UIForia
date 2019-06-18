@@ -31,6 +31,10 @@ namespace UIForia.Compilers {
                 return default;
             }
 
+            if (previous == null) {
+                return default;
+            }
+
             return terminalGetter(previous);
         }
 

@@ -1,4 +1,4 @@
-using System;
+using UIForia.Exceptions;
 
 namespace UIForia.Parsing.Expression.AstNodes {
 
@@ -50,8 +50,14 @@ namespace UIForia.Parsing.Expression.AstNodes {
                     case OperatorType.LessThanEqualTo:
                         return -1;
                     
+                    // todo add support for these as soon as we build our own template parser
+                    case OperatorType.Or:
+                        throw new TemplateParseException($"'Or' Operator || could not be parsed because it is not supported right now.", left);
+                    case OperatorType.And:
+                        throw new TemplateParseException($"'And' Operator && could not be parsed because it is not supported right now.", left);
+                    
                     default:
-                        throw new ArgumentOutOfRangeException();
+                        throw new TemplateParseException($"Operator {operatorType} could not be parsed because it is not supported right now.", left);
                 }
             }
         }

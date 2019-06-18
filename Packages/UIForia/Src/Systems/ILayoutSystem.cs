@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UIForia.Elements;
 using UIForia.Layout.LayoutTypes;
 using UIForia.Util;
@@ -9,7 +8,7 @@ namespace UIForia.Systems {
 
     public interface ILayoutSystem : ISystem {
 
-        List<UIElement> QueryPoint(Vector2 point, List<UIElement> retn);
+        IList<UIElement> QueryPoint(Vector2 point, IList<UIElement> retn);
 
         OffsetRect GetPaddingRect(UIElement element);
         OffsetRect GetMarginRect(UIElement element);

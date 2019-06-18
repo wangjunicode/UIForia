@@ -32,7 +32,15 @@ namespace UIForia.Systems {
         private readonly ILayoutSystem m_LayoutSystem;
 
         private List<UIElement> m_ElementsThisFrame;
+        
+#if UNITY_EDITOR
+        public List<UIElement> DebugElementsThisFrame => m_ElementsLastFrame;
+        public bool DebugMouseUpThisFrame => m_MouseState.isLeftMouseUpThisFrame;
+#endif
+
+        private List<UIElement> m_AllElementsThisFrame;
         private List<UIElement> m_ElementsLastFrame;
+        private List<UIElement> m_AllElementsLastFrame;
 
         private CursorStyle currentCursor;
 
@@ -46,6 +54,7 @@ namespace UIForia.Systems {
         protected MouseState m_MouseState;
 
         private readonly List<UIElement> m_ExitedElements;
+        private readonly List<UIElement> m_ActiveElements;
         private readonly List<UIElement> m_EnteredElements;
         private readonly List<UIElement> m_MouseDownElements;
 
@@ -78,6 +87,9 @@ namespace UIForia.Systems {
             this.m_ElementsLastFrame = new List<UIElement>();
             this.m_EnteredElements = new List<UIElement>();
             this.m_ExitedElements = new List<UIElement>();
+            this.m_ActiveElements = new List<UIElement>();
+            this.m_AllElementsThisFrame = new List<UIElement>();
+            this.m_AllElementsLastFrame = new List<UIElement>();
 
             this.m_MouseHandlerMap = new Dictionary<int, MouseHandlerGroup>();
             this.m_DragCreatorMap = new Dictionary<int, DragCreatorGroup>();
@@ -214,8 +226,30 @@ namespace UIForia.Systems {
         }
 
         private void ProcessMouseInput() {
-            List<UIElement> queryResults = m_LayoutSystem.QueryPoint(m_MouseState.mousePosition, ListPool<UIElement>.Get());
+            LightList<UIElement> queryResults = (LightList<UIElement>) m_LayoutSystem.QueryPoint(m_MouseState.mousePosition, LightListPool<UIElement>.Get());
 
+            if (!IsDragging) {
+                LightList<UIElement> ancestorElements = LightListPool<UIElement>.Get();
+
+                // the first element is always correct
+                if (queryResults.Count > 0) {
+                    ancestorElements.Add(queryResults[0]);
+                }
+                /*
+                 * Every following element must be a parent of the first.
+                 * This makes no sense for drag events but a lot for every other.
+                 */
+                for (int index = 1; index < queryResults.Count; index++) {
+                    UIElement element = queryResults[index];
+                    if (IsParentOf(element, queryResults[0])) {
+                        ancestorElements.Add(element);
+                    }
+                }
+
+                LightListPool<UIElement>.Release(ref queryResults);
+                queryResults = ancestorElements;
+            }
+            
             for (int i = 0; i < queryResults.Count; i++) {
                 UIElement element = queryResults[i];
 
@@ -223,10 +257,13 @@ namespace UIForia.Systems {
                 m_ElementsThisFrame.Add(element);
 
                 if (!m_ElementsLastFrame.Contains(element)) {
-                    m_EnteredElements.Add(element);
-                    if (!IsDragging) {
-                        element.style?.EnterState(StyleState.Hover);
-                    }
+                    m_EnteredElements.Add(element); 
+                    element.style?.EnterState(StyleState.Hover);
+                }
+
+                if (IsMouseLeftDownThisFrame) {
+                    element.style?.EnterState(StyleState.Active);
+                    m_ActiveElements.Add(element);
                 }
             }
 
@@ -235,6 +272,13 @@ namespace UIForia.Systems {
                     m_ExitedElements.Add(m_ElementsLastFrame[i]);
                     m_ElementsLastFrame[i].style?.ExitState(StyleState.Hover);
                 }
+            }
+            
+            if (IsMouseLeftUpThisFrame) {
+                for (int i = 0; i < m_ActiveElements.Count; i++) {
+                    m_ActiveElements[i].style?.ExitState(StyleState.Active);
+                }
+                m_ActiveElements.Clear();
             }
 
             m_EnteredElements.Sort(s_DepthComparer);
@@ -268,9 +312,21 @@ namespace UIForia.Systems {
                 }
             }
 
-            ListPool<UIElement>.Release(ref queryResults);
+            LightListPool<UIElement>.Release(ref queryResults);
         }
+        
+        private static bool IsParentOf(UIElement element, UIElement child) {
+            UIElement ptr = child.parent;
+            while (ptr != null) {
+                if (ptr == element) {
+                    return true;
+                }
+                ptr = ptr.parent;
+            }
 
+            return false;
+        }
+        
         private void ProcessDragEvents() {
             if (IsDragging) {
                 if (m_MouseState.ReleasedDrag) {
@@ -617,6 +673,10 @@ namespace UIForia.Systems {
             }
             else {
                 KeyboardEventTreeNode focusedNode = m_KeyboardEventTree.GetItem(m_FocusedElement);
+                if (focusedNode == null) {
+                    Debug.Log($"Should not happen, investigate why focused element '{m_FocusedElement}' is not in m_KeyboardEventTree!");
+                    // todo this happened once, couldn't reproduce. if you can you have to fix it :p
+                } 
                 IReadOnlyList<KeyboardEventHandler> handlers = focusedNode.handlers;
                 ExpressionContext context = ((UIElement) focusedNode.Element).templateContext;
                 for (int i = 0; i < handlers.Count; i++) {
@@ -952,11 +1012,7 @@ namespace UIForia.Systems {
 
             if (m_MouseState.isLeftMouseDownThisFrame || m_MouseState.isRightMouseDownThisFrame || m_MouseState.isMiddleMouseDownThisFrame) {
                 
-                if (m_FocusedElement != null) {
-                    if (!m_FocusedElement.layoutResult.ScreenRect.Contains(m_MouseState.MouseDownPosition)) {
-                        ReleaseFocus((IFocusable)m_FocusedElement);
-                    }
-                }
+                HandleBlur();
 
                 if (m_ElementsThisFrame.Count > 0 && m_ElementsThisFrame[0].View.RequestFocus()) {
                     // todo let's see if we have to process the mouse event again
@@ -971,6 +1027,27 @@ namespace UIForia.Systems {
             }
 
             RunMouseEvents(m_ElementsThisFrame, m_MouseState.DidMove ? InputEventType.MouseMove : InputEventType.MouseHover);
+        }
+
+        private void HandleBlur() {
+            if (m_FocusedElement == null) {
+                return;
+            }
+
+            if (m_ElementsThisFrame.Count == 0) {
+                ReleaseFocus((IFocusable)m_FocusedElement);
+                return;
+            }
+
+            UIElement ptr = m_ElementsThisFrame[0];
+            while (ptr != null) {
+                if (ptr == m_FocusedElement) {
+                    return;
+                }
+                ptr = ptr.parent;
+            }
+            
+            ReleaseFocus((IFocusable)m_FocusedElement);
         }
 
     }

@@ -29,6 +29,7 @@ public class HierarchyView : TreeView {
 
     public bool showChildrenAndId = false;
     public bool showDisabled = false;
+    public bool selectMode = false;
 
     static HierarchyView() {
         s_ElementNameStyle = new GUIStyle();
@@ -58,6 +59,7 @@ public class HierarchyView : TreeView {
 
         foreach (UIView uiView in views) {
             if (uiView.RootElement == null) continue;
+            if (uiView.RootElement.isDisabled && !showDisabled) continue;
 
             ElementTreeItem firstChild = new ElementTreeItem(uiView.RootElement);
             firstChild.displayName = uiView.RootElement.ToString();

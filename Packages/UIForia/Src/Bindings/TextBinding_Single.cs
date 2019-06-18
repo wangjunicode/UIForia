@@ -1,5 +1,7 @@
+using System;
 using UIForia.Elements;
 using UIForia.Expressions;
+using UnityEngine;
 
 namespace UIForia.Bindings {
 
@@ -13,7 +15,17 @@ namespace UIForia.Bindings {
 
         public override void Execute(UIElement element, ExpressionContext context) {
             UITextElement textElement = (UITextElement) element;
-            textElement.SetText(expression.Evaluate(context));
+            
+            try { 
+                
+                textElement.SetText(expression.Evaluate(context));
+
+            } catch (Exception e) {
+                
+                Debug.Log($"Had a problem evaluating text node. Context: current object is '{context.currentObject}' aux is '{context.aux}' and root object is '{context.rootObject}'");
+                
+                throw;
+            }
         }
 
         public override bool IsConstant() {

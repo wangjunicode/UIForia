@@ -12,6 +12,7 @@ namespace UIForia.Editor {
 
     public class UIForiaHierarchyWindow : EditorWindow {
 
+        public static readonly List<int> EmptyList = new List<int>();
         public const string k_InspectedAppKey = "UIForia.Inspector.ApplicationName";
 
         public TreeViewState state;
@@ -25,7 +26,6 @@ namespace UIForia.Editor {
         }
 
         private static MethodInfo s_GameWindowSizeMethod;
-        private List<Application> applications;
 
         public static int s_SelectedElementId;
         public static Application s_SelectedApplication;
@@ -36,9 +36,6 @@ namespace UIForia.Editor {
             autoRepaintOnSceneChange = true;
             wantsMouseMove = true;
             wantsMouseEnterLeaveWindow = true;
-            applications = new List<Application>();
-            Application.onApplicationCreated += OnApplicationCreated;
-            Application.onApplicationDestroyed += OnApplicationDestroyed;
         }
 
         private void OnElementSelectionChanged(UIElement element) {
@@ -48,19 +45,6 @@ namespace UIForia.Editor {
             else {
                 s_SelectedElementId = -1;
             }
-        }
-
-        private void OnDisable() {
-            Application.onApplicationCreated -= OnApplicationCreated;
-            Application.onApplicationDestroyed -= OnApplicationDestroyed;
-        }
-
-        private void OnApplicationCreated(Application app) {
-            applications.Add(app);
-        }
-
-        private void OnApplicationDestroyed(Application app) {
-            applications.Remove(app);
         }
 
         private void Refresh(UIElement element) {
@@ -87,6 +71,21 @@ namespace UIForia.Editor {
         private void Update() {
             if (!EditorApplication.isPlaying) {
                 return;
+            }
+
+            if (treeView != null && treeView.selectMode && s_SelectedApplication?.InputSystem.DebugElementsThisFrame.Count > 0) {
+                if (s_SelectedApplication.InputSystem.DebugMouseUpThisFrame) {
+                    treeView.selectMode = false;
+                }
+                else {
+                    s_SelectedElementId = s_SelectedApplication.InputSystem.DebugElementsThisFrame[0].id;
+                    IList<int> selectedIds = new List<int>(s_SelectedApplication.InputSystem.DebugElementsThisFrame.Count);
+                    
+                    for (int i = 0; i < s_SelectedApplication.InputSystem.DebugElementsThisFrame.Count; i++) {
+                        selectedIds.Add(s_SelectedApplication.InputSystem.DebugElementsThisFrame[i].id);
+                    }
+                    treeView.SetSelection(selectedIds);
+                }
             }
 
             Repaint();
@@ -137,13 +136,13 @@ namespace UIForia.Editor {
             }
 
             EditorGUILayout.BeginVertical();
-            string[] names = new string[applications.Count + 1];
+            string[] names = new string[Application.Applications.Count + 1];
             names[0] = "None";
 
             int oldIdx = 0;
 
             for (int i = 1; i < names.Length; i++) {
-                names[i] = applications[i - 1].id;
+                names[i] = Application.Applications[i - 1].id;
                 if (names[i] == inspectedAppId) {
                     oldIdx = i;
                 }
@@ -170,6 +169,7 @@ namespace UIForia.Editor {
             }
 
             treeView.showChildrenAndId = EditorGUILayout.Toggle("Show Meta Data", treeView.showChildrenAndId);
+            treeView.selectMode = EditorGUILayout.Toggle("Activate Select Mode", treeView.selectMode);
             bool wasShowingDisabled = treeView.showDisabled;
             treeView.showDisabled = EditorGUILayout.Toggle("Show Disabled", treeView.showDisabled);
             if (treeView.showDisabled != wasShowingDisabled) {

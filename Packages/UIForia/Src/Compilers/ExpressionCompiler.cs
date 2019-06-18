@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using UIForia.Compilers.CastHandlers;
 using UIForia.Compilers.ExpressionResolvers;
 using UIForia.Exceptions;
@@ -12,6 +11,7 @@ using UIForia.Extensions;
 using UIForia.Parsing.Expression;
 using UIForia.Parsing.Expression.AstNodes;
 using UIForia.Util;
+using UnityEngine;
 
 namespace UIForia.Compilers {
 
@@ -290,7 +290,7 @@ namespace UIForia.Compilers {
                         );
                     }
                     else if (ReflectionUtil.IsMethod(rootType, fieldName, out MethodInfo info)) {
-                        
+                      
                     }
 
                     throw new CompileException("Invalid write target expression");
@@ -539,6 +539,9 @@ namespace UIForia.Compilers {
                 new GenericArguments(retn.YieldedType, rootType),
                 new ConstructorArguments(bridge)
             );
+            if (targetType == null) {
+                return expr;
+            }
             return GetImplicitCast(expr, targetType);
         }
 
@@ -1305,6 +1308,7 @@ namespace UIForia.Compilers {
                             new ConstructorArguments(rootType, fieldName)
                         );
                     }
+                    
                 }
 
                 if (ReflectionUtil.IsProperty(rootType, fieldName)) {
@@ -1332,6 +1336,11 @@ namespace UIForia.Compilers {
                         new GenericArguments(constantField.FieldType),
                         new ConstructorArguments(constantField.GetValue(null))
                     );
+                }
+                else if (ReflectionUtil.IsMethod(rootType, fieldName, out MethodInfo methodInfo)) {
+                    if (ReflectionUtil.IsAction(targetType)) {
+                        
+                    }
                 }
             }
 

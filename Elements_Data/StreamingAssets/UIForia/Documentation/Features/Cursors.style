@@ -1,0 +1,21 @@
+style red {
+    BackgroundColor = red;
+}
+
+style container {
+    LayoutType = Flex;
+    FlexLayoutDirection = Column;
+    PreferredSize = 300px;
+}
+
+style <Group> {
+    PreferredSize = 150px;
+}
+
+style blue {    
+    BackgroundColor = blue;
+    [hover] {
+        BackgroundColor = yellow;
+        Cursor = url("testimg/Cursor1") 15;
+    }
+}

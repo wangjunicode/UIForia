@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UITemplate>
+
+    <Style src="Documentation/Features/TransformPlayground.style"/>
+    <Using namespace="UIForia.Rendering" />
+    
+    <Contents>
+
+<!--        <Group style="wrapper">-->
+<!--            <Group style="tooltip">-->
+<!--                I am a tooltip an long-->
+<!--            </Group>-->
+<!--        </Group>-->
+        
+        <Group style="center-this">
+            <Div style="button" onMouseClick="ChangeAnchorTo(AnchorTarget.Screen)">Anchor Screen</Div>
+            <Div style="button" onMouseClick="ChangeAnchorTo(AnchorTarget.Parent)">Anchor Parent</Div>
+            <Div style="button" onMouseClick="ChangeAnchorTo(AnchorTarget.ParentContentArea)">Anchor Parent Content Area</Div>
+        </Group>
+        
+        <Text>Current Anchor Target is {AnchorTarget}</Text>
+        
+        <Group style="anchor-demo-root">
+
+            <Group style="grid-cell">
+                <Group style="anchor-left-top" style.anchorTarget="AnchorTarget">
+                    <Image style="icon" src="'icon_1'" />
+                    <Image style="icon" src="'icon_2'" />
+                    <Image style="icon" src="'icon_3'" />
+                    <Image style="icon" src="'icon_4'" />
+                </Group>
+            </Group>
+            
+            <Group style="grid-cell">
+                <Group style="anchor-top-center" style.anchorTarget="AnchorTarget">
+                    <Div style="center-this">
+                        <Image style="icon" src="'icon_2'" />
+                        <Image style="icon" src="'icon_6'" />
+                        <Image style="icon" src="'icon_3'" />
+                        <Image style="icon" src="'icon_8'" />
+                    </Div>
+                </Group>
+            </Group>
+            <Group style="grid-cell">
+                <Group style="anchor-top-right" style.anchorTarget="AnchorTarget">
+                    <Image style="icon" src="'icon_3'" />
+                    <Image style="icon" src="'icon_1'" />
+                    <Image style="icon" src="'icon_2'" />
+                    <Image style="icon" src="'icon_9'" />
+                </Group>
+            </Group>
+            
+            <Group style="grid-cell">
+                <Group style="anchor-left-center" style.anchorTarget="AnchorTarget">
+                    <Image style="icon" src="'icon_2'" />
+                    <Image style="icon" src="'icon_5'" />
+                    <Image style="icon" src="'icon_8'" />
+                    <Image style="icon" src="'icon_1'" />
+                </Group>
+            </Group>
+            <Group style="grid-cell">
+                <Group style="anchor-center-center" style.anchorTarget="AnchorTarget">
+                    <Image style="icon" src="'icon_3'" />
+                    <Image style="icon" src="'icon_4'" />
+                    <Image style="icon" src="'icon_9'" />
+                    <Image style="icon" src="'icon_5'" />
+                </Group>
+            </Group>
+            <Group style="grid-cell">
+                <Group style="anchor-right-center" style.anchorTarget="AnchorTarget">
+                    <Image style="icon" src="'icon_5'" />
+                    <Image style="icon" src="'icon_6'" />
+                    <Image style="icon" src="'icon_7'" />
+                    <Image style="icon" src="'icon_8'" />
+                </Group>
+            </Group>
+            
+            <Group style="grid-cell">
+                <Group style="anchor-left-bottom" style.anchorTarget="AnchorTarget">
+                    <Image style="icon" src="'icon_5'" />
+                    <Image style="icon" src="'icon_6'" />
+                    <Image style="icon" src="'icon_7'" />
+                    <Image style="icon" src="'icon_8'" />
+                </Group>
+            </Group>
+            <Group style="grid-cell">
+                <Group style="anchor-center-bottom" style.anchorTarget="AnchorTarget">
+                    <Image style="icon" src="'icon_5'" />
+                    <Image style="icon" src="'icon_6'" />
+                    <Image style="icon" src="'icon_7'" />
+                    <Image style="icon" src="'icon_8'" />
+                </Group>
+            </Group>
+            <Group style="grid-cell">
+                <Group style="anchor-right-bottom" style.anchorTarget="AnchorTarget">
+                    <Image style="icon" src="'icon_5'" />
+                    <Image style="icon" src="'icon_6'" />
+                    <Image style="icon" src="'icon_7'" />
+                    <Image style="icon" src="'icon_8'" />
+                </Group>
+            </Group>
+            
+        </Group>
+        
+        
+
+    </Contents>
+</UITemplate>

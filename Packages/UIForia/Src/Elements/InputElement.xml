@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<UITempalate>
+<UITemplate>
 
     <Style>
 
         style &lt;this&gt; {
-            TextFontSize = 48px;
-            PreferredSize = 300px, 1cnt;
-            Padding = 0em;
-            Border = 15px;
-            BorderColor = blue;
-            overflow = hidden;
+            Border = 2px;
+            BorderColor = black;
+            BackgroundColor = white;
+            Padding = 8px 8px 1px;
+            PreferredWidth = 500px;
+            TextFontSize = 1.2em;
+            MarginBottom = 20px;
         }
 
         style input-element-text {
@@ -29,5 +30,5 @@
 
     </Contents>
 
-</UITempalate>
+</UITemplate>
 

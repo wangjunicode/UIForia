@@ -8,7 +8,7 @@ namespace Documentation {
     [Template("Documentation/Features/InputDemo")]
     public class InputDemo : UIElement {
         
-        public string textValue = "my string to read";
+        public string tv = "my string to read";
 
         public static readonly string[] VALUES = {
             "anchor",
@@ -26,6 +26,7 @@ namespace Documentation {
             "input",
         };
 
+        public float floatValue;
         public string rwValue;
 
         public string regularValue;

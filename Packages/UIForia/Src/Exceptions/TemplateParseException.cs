@@ -1,6 +1,5 @@
 using System;
 using System.Xml;
-using System.Xml.Linq;
 using UIForia.Parsing.Expression.AstNodes;
 using UIForia.Parsing.Expression.Tokenizer;
 
@@ -21,6 +20,11 @@ namespace UIForia.Exceptions {
         private ExpressionToken token;
 
         private ASTNode node;
+
+        public TemplateParseException(string message, ASTNode node) : base(message) {
+            this.message = message;
+            this.node = node;
+        }
 
         public TemplateParseException(string fileName, string message, Exception rootCause) : base(message, rootCause) {
             this.message = message;
@@ -56,7 +60,7 @@ namespace UIForia.Exceptions {
             this.fileName = $"Error in file {name}: ";
         }
         
-        public override string Message => fileName + $"Your template contains an error in line {line} column {column}." 
+        public override string Message => fileName + $"\nYour template contains an error in line {line} column {column}." 
                                                    + $"\n\tMessage:\n\t\t{message}" 
                                                    + $"\n\tToken:\n\t\t{token.value}" 
                                                    + (node != default ? $"\n\tNode:\n\t\t{node}" : string.Empty);

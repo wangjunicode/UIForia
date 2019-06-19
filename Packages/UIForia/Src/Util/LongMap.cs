@@ -180,7 +180,7 @@ namespace UIForia.Util {
             for (int i = buckets[targetBucket]; i >= 0; i = entries[i].next) {
                 if (entries[i].hashCode == hashCode && entries[i].key == key) {
                     if (add) {
-                        throw new Exception("Duplicate key in IntMap: " + key);
+                        throw new Exception("Duplicate key in LongMap: " + key);
                     }
                     entries[i].value = value;
                     return;

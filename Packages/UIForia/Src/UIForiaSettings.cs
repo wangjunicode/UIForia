@@ -14,6 +14,7 @@ namespace UIForia {
         internal static string s_UserStreamingPath;
 
         public void OnEnable() {
+            loadTemplatesFromStreamingAssets = loadTemplatesFromStreamingAssets || !UnityEngine.Application.isEditor;
             s_InternalStreamingPath = Path.Combine(UnityEngine.Application.dataPath, "StreamingAssets", "UIForiaInternal");
             s_InternalNonStreamingPath = Path.Combine(UnityEngine.Application.dataPath, "..", "Packages", "UIForia", "Src");
             s_UserNonStreamingPath = UnityEngine.Application.dataPath;

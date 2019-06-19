@@ -165,4 +165,5 @@ style button {
 style icon {
     Margin = 4px;
     PreferredSize = 40px;
+    ZIndex = 1;
 }

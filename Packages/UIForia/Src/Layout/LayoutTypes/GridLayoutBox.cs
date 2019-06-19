@@ -402,7 +402,7 @@ namespace UIForia.Layout.LayoutTypes {
             ListPool<ValueTuple<int, GridTrack>>.Release(ref intrinsics);
             ListPool<ValueTuple<int, GridTrack>>.Release(ref flexes);
         }
-
+        
         private void StretchWidthsIfNeeded() {
             float colGap = style.GridLayoutColGap;
             GridAxisAlignment colAlignment = style.GridLayoutColAlignment;
@@ -437,7 +437,7 @@ namespace UIForia.Layout.LayoutTypes {
 
         private float ApplyColumnCrossAxisAlignment(bool applySize) {
             GridAxisAlignment colAlignment = style.GridLayoutColAlignment;
-            float paddingBorderLeft = PaddingLeft + BorderLeft;
+            float paddingBorderLeft = resolvedPaddingLeft + resolvedBorderLeft;
 
             float maxXPlusWidth = 0;
 
@@ -572,7 +572,7 @@ namespace UIForia.Layout.LayoutTypes {
                         break;
                 }
 
-                float paddingBorderTop = PaddingTop + BorderTop;
+                float paddingBorderTop = resolvedPaddingTop + resolvedBorderTop;
 
                 if (applySizes) {
                     child.SetAllocatedYAndHeight(finalY + paddingBorderTop, finalHeight);

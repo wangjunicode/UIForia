@@ -696,10 +696,9 @@ namespace UIForia.Editor {
 
             if (expanded) {
                 EditorGUI.indentLevel++;
-                IReadOnlyList<StyleProperty> properties = style.m_StyleProperties;
                 // todo -- sort? 
-                for (int i = 0; i < properties.Count; i++) {
-                    DrawStyleProperty(properties[i], false);
+                for (int i = 0; i < style.PropertyCount; i++) {
+                    DrawStyleProperty(style[i], false);
                 }
 
                 EditorGUI.indentLevel--;

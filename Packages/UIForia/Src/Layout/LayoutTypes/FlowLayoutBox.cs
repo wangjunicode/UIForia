@@ -91,11 +91,11 @@ namespace UIForia.Layout.LayoutTypes {
         }
 
         protected Size RunColumnLayout() {
-            float paddingBorderTop = PaddingTop + BorderTop;
-            float paddingBorderBottom = PaddingBottom + BorderBottom;
+            float paddingBorderTop = resolvedPaddingTop + resolvedBorderTop;
+            float paddingBorderBottom = resolvedPaddingBottom + resolvedBorderBottom;
 
-            float paddingBorderLeft = PaddingLeft + BorderLeft;
-            float adjustedWidth = allocatedWidth - paddingBorderLeft - PaddingRight - BorderRight;
+            float paddingBorderLeft = resolvedPaddingLeft + resolvedBorderLeft;
+            float adjustedWidth = allocatedWidth - paddingBorderLeft - resolvedPaddingRight - resolvedBorderRight;
 
             CrossAxisAlignment crossAxisAlignment = style.FlexLayoutCrossAxisAlignment;
 
@@ -131,11 +131,11 @@ namespace UIForia.Layout.LayoutTypes {
         }
 
         protected Size RunRowLayout() {
-            float paddingBorderTop = PaddingTop + BorderTop;
-            float paddingBorderBottom = PaddingBottom + BorderBottom;
+            float paddingBorderTop = resolvedPaddingTop + resolvedBorderTop;
+            float paddingBorderBottom = resolvedPaddingBottom + resolvedBorderBottom;
 
-            float paddingBorderLeft = PaddingLeft + BorderLeft;
-            float adjustedWidth = allocatedWidth - paddingBorderLeft - PaddingRight - BorderRight;
+            float paddingBorderLeft = resolvedPaddingLeft + resolvedBorderLeft;
+            float adjustedWidth = allocatedWidth - paddingBorderLeft - resolvedPaddingRight - resolvedBorderRight;
 
             CrossAxisAlignment crossAxisAlignment = style.FlexLayoutCrossAxisAlignment;
             items.Clear();

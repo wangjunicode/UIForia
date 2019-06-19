@@ -60,7 +60,7 @@ namespace UIForia.Exceptions {
             this.fileName = $"Error in file {name}: ";
         }
         
-        public override string Message => fileName + $"Your template contains an error in line {line} column {column}." 
+        public override string Message => fileName + $"\nYour template contains an error in line {line} column {column}." 
                                                    + $"\n\tMessage:\n\t\t{message}" 
                                                    + $"\n\tToken:\n\t\t{token.value}" 
                                                    + (node != default ? $"\n\tNode:\n\t\t{node}" : string.Empty);

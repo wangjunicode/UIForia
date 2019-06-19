@@ -36,7 +36,7 @@ namespace UIForia.Parsing.Expression {
             }
             catch (Exception e) {
                 // todo -- make this a better error message
-                Debug.LogWarning(e.Message);
+                Debug.LogError(e);
                 Debug.Log($"Cannot parse file {elementType}, you might be missing a template attribute. App root path {app.TemplateRootPath}");
                 throw;
             }

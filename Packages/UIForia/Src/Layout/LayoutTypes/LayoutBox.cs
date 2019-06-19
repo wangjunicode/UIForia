@@ -30,6 +30,21 @@ namespace UIForia.Layout.LayoutTypes {
 
         protected internal UIView view;
 
+        public float resolvedPaddingTop;
+        public float resolvedPaddingRight;
+        public float resolvedPaddingBottom;
+        public float resolvedPaddingLeft;
+
+        public float resolvedBorderTop;
+        public float resolvedBorderRight;
+        public float resolvedBorderBottom;
+        public float resolvedBorderLeft;
+
+        public float resolvedBorderRadiusTopLeft;
+        public float resolvedBorderRadiusTopRight;
+        public float resolvedBorderRadiusBottomRight;
+        public float resolvedBorderRadiusBottomLeft;
+
         internal UIFixedLength paddingTop;
         internal UIFixedLength paddingRight;
         internal UIFixedLength paddingBottom;
@@ -94,23 +109,11 @@ namespace UIForia.Layout.LayoutTypes {
         public float TransformX => ResolveTransform(transformPositionX);
         public float TransformY => ResolveTransform(transformPositionY);
 
-        public float PaddingHorizontal => ResolveFixedWidth(paddingLeft) + ResolveFixedWidth(paddingRight);
-        public float BorderHorizontal => ResolveFixedWidth(borderLeft) + ResolveFixedWidth(borderRight);
+        public float PaddingHorizontal => resolvedPaddingRight + resolvedPaddingLeft;
+        public float BorderHorizontal => resolvedBorderLeft + resolvedBorderRight;
 
-        public float PaddingVertical => ResolveFixedHeight(paddingTop) + ResolveFixedHeight(paddingBottom);
-        public float BorderVertical => ResolveFixedHeight(borderTop) + ResolveFixedHeight(borderBottom);
-
-        public float PaddingLeft => ResolveFixedWidth(paddingLeft);
-        public float BorderLeft => ResolveFixedWidth(borderLeft);
-
-        public float PaddingTop => ResolveFixedHeight(paddingTop);
-        public float BorderTop => ResolveFixedHeight(borderTop);
-
-        public float PaddingBottom => ResolveFixedHeight(paddingBottom);
-        public float PaddingRight => ResolveFixedWidth(paddingRight);
-
-        public float BorderBottom => ResolveFixedHeight(borderBottom);
-        public float BorderRight => ResolveFixedWidth(borderRight);
+        public float PaddingVertical => resolvedPaddingTop + resolvedPaddingBottom;
+        public float BorderVertical => resolvedBorderTop + resolvedBorderBottom;
 
         public float BorderRadiusTopRight => ResolveFixedWidth(borderRadiusTopRight);
         public float BorderRadiusTopLeft => ResolveFixedWidth(borderRadiusTopLeft);
@@ -125,21 +128,21 @@ namespace UIForia.Layout.LayoutTypes {
         public float AnchorBottom => ResolveAnchorBottom();
 
         public float PaddingBorderHorizontal =>
-            ResolveFixedWidth(paddingLeft) +
-            ResolveFixedWidth(paddingRight) +
-            ResolveFixedWidth(borderRight) +
-            ResolveFixedWidth(borderLeft);
+            resolvedPaddingLeft +
+            resolvedPaddingRight +
+            resolvedBorderRight +
+            resolvedBorderLeft;
 
         public float PaddingBorderVertical =>
-            ResolveFixedHeight(paddingTop) +
-            ResolveFixedHeight(paddingBottom) +
-            ResolveFixedHeight(borderBottom) +
-            ResolveFixedHeight(borderTop);
+            resolvedPaddingTop +
+            resolvedPaddingBottom +
+            resolvedBorderBottom +
+            resolvedBorderTop;
 
         public Rect ContentRect {
             get {
-                float x = PaddingLeft + BorderLeft;
-                float y = PaddingTop + BorderTop;
+                float x = resolvedPaddingLeft + resolvedBorderLeft;
+                float y = resolvedPaddingTop + resolvedBorderTop;
                 float width = allocatedWidth - PaddingBorderHorizontal;
                 float height = allocatedHeight - PaddingBorderVertical;
                 return new Rect(x, y, Mathf.Max(0, width), Mathf.Max(0, height));
@@ -178,6 +181,23 @@ namespace UIForia.Layout.LayoutTypes {
          * - Child constraint changes && affects output size or position
          * - Layout property changes
          */
+
+        internal void UpdateViewSizeProperties() {
+            resolvedPaddingTop = ResolveFixedHeight(paddingTop);
+            resolvedPaddingRight = ResolveFixedWidth(paddingRight);
+            resolvedPaddingBottom = ResolveFixedHeight(paddingBottom);
+            resolvedPaddingLeft = ResolveFixedWidth(paddingLeft);
+
+            resolvedBorderTop =  ResolveFixedHeight(borderTop);
+            resolvedBorderRight = ResolveFixedWidth(borderRight);
+            resolvedBorderBottom = ResolveFixedHeight(borderBottom);
+            resolvedBorderLeft = ResolveFixedWidth(borderLeft);
+
+            resolvedBorderRadiusTopLeft = ResolveFixedWidth(borderRadiusTopLeft);
+            resolvedBorderRadiusTopRight =  ResolveFixedWidth(borderRadiusTopRight);
+            resolvedBorderRadiusBottomRight = ResolveFixedWidth(borderRadiusBottomRight);
+            resolvedBorderRadiusBottomLeft = ResolveFixedWidth(borderRadiusBottomLeft);
+        }
 
         public void UpdateFromStyle() {
             paddingLeft = style.PaddingLeft;
@@ -218,6 +238,61 @@ namespace UIForia.Layout.LayoutTypes {
             overflowY = style.OverflowY;
         }
 
+
+        internal void CopyValues(LayoutBox other) {
+            paddingLeft = other.paddingLeft;
+            paddingTop = other.paddingTop;
+            paddingBottom = other.paddingBottom;
+            paddingRight = other.paddingRight;
+            borderLeft = other.borderLeft;
+            borderTop = other.borderTop;
+            borderBottom = other.borderBottom;
+            borderRight = other.borderRight;
+            marginLeft = other.marginLeft;
+            marginTop = other.marginTop;
+            marginBottom = other.marginBottom;
+            marginRight = other.marginRight;
+            borderRadiusTopLeft = other.borderRadiusTopLeft;
+            borderRadiusTopRight = other.borderRadiusTopRight;
+            borderRadiusBottomLeft = other.borderRadiusBottomLeft;
+            borderRadiusBottomRight = other.borderRadiusBottomRight;
+            transformPositionX = other.transformPositionX;
+            transformPositionY = other.transformPositionY;
+            transformBehaviorX = other.transformBehaviorX;
+            transformBehaviorY = other.transformBehaviorY;
+            transformPivotX = other.transformPivotX;
+            transformPivotY = other.transformPivotY;
+            transformScaleX = other.transformScaleX;
+            transformScaleY = other.transformScaleY;
+            transformRotation = other.transformRotation;
+            prefWidth = other.prefWidth;
+            minWidth = other.minWidth;
+            maxWidth = other.maxWidth;
+            prefHeight = other.prefHeight;
+            minHeight = other.minHeight;
+            maxHeight = other.maxHeight;
+            zIndex = other.zIndex;
+            layer = other.layer;
+            layoutBehavior = other.layoutBehavior;
+            overflowX = other.overflowX;
+            overflowY = other.overflowY;
+
+            resolvedPaddingTop = other.resolvedPaddingTop;
+            resolvedPaddingRight = other.resolvedPaddingRight;
+            resolvedPaddingBottom = other.resolvedPaddingBottom;
+            resolvedPaddingLeft = other.resolvedPaddingLeft;
+
+            resolvedBorderTop = other.resolvedBorderTop;
+            resolvedBorderRight = other.resolvedBorderRight;
+            resolvedBorderBottom = other.resolvedBorderBottom;
+            resolvedBorderLeft = other.resolvedBorderLeft;
+
+            resolvedBorderRadiusTopLeft = other.resolvedBorderRadiusTopLeft;
+            resolvedBorderRadiusTopRight = other.resolvedBorderRadiusTopRight;
+            resolvedBorderRadiusBottomRight = other.resolvedBorderRadiusBottomRight;
+            resolvedBorderRadiusBottomLeft = other.resolvedBorderRadiusBottomLeft;
+        }
+
         public void UpdateChildren() {
             InvalidatePreferredSizeCache();
             RequestContentSizeChangeLayout();
@@ -250,6 +325,17 @@ namespace UIForia.Layout.LayoutTypes {
             if ((int) allocatedWidth != (int) width) {
                 allocatedWidth = width;
                 markedForLayout = true; // todo might not need it, delegate to virtual fn 
+
+                resolvedBorderLeft = ResolveFixedWidth(borderLeft);
+                resolvedBorderRight = ResolveFixedWidth(borderRight);
+
+                resolvedPaddingLeft = ResolveFixedWidth(paddingLeft);
+                resolvedPaddingRight = ResolveFixedWidth(paddingRight);
+
+                resolvedBorderRadiusTopLeft = ResolveFixedWidth(borderRadiusTopLeft);
+                resolvedBorderRadiusTopRight = ResolveFixedWidth(borderRadiusTopRight);
+                resolvedBorderRadiusBottomRight = ResolveFixedWidth(borderRadiusBottomRight);
+                resolvedBorderRadiusBottomLeft = ResolveFixedWidth(borderRadiusBottomLeft);
             }
         }
 
@@ -258,6 +344,12 @@ namespace UIForia.Layout.LayoutTypes {
             if ((int) allocatedHeight != (int) height) {
                 allocatedHeight = height;
                 markedForLayout = true; // todo might not need it, delegate to virtual fn 
+                
+                resolvedBorderTop = ResolveFixedHeight(borderTop);
+                resolvedBorderBottom = ResolveFixedHeight(borderBottom);
+
+                resolvedPaddingTop = ResolveFixedHeight(paddingTop);
+                resolvedPaddingBottom = ResolveFixedHeight(paddingBottom);
             }
         }
 
@@ -868,11 +960,11 @@ namespace UIForia.Layout.LayoutTypes {
                     return GetContentHeight(actualWidth) * transformOffset.value;
 
                 case TransformUnit.ContentAreaWidth:
-                    float width = allocatedWidth - PaddingLeft + BorderLeft - PaddingRight - BorderRight;
+                    float width = allocatedWidth - resolvedPaddingLeft - resolvedBorderLeft - resolvedPaddingRight - resolvedBorderRight;
                     return Mathf.Max(0, width) * transformOffset.value;
 
                 case TransformUnit.ContentAreaHeight:
-                    float height = allocatedHeight - PaddingTop + PaddingBottom - PaddingBottom - BorderBottom;
+                    float height = allocatedHeight - resolvedPaddingTop - resolvedBorderTop - resolvedPaddingBottom - resolvedBorderBottom;
                     return Mathf.Max(0, height) * transformOffset.value;
 
                 case TransformUnit.ViewportWidth:
@@ -959,7 +1051,9 @@ namespace UIForia.Layout.LayoutTypes {
                     return Mathf.Max(0,
                         parent.allocatedWidth * widthMeasurement.value - (parent.style == null
                             ? 0
-                            : parent.PaddingHorizontal - parent.BorderHorizontal));
+                            : (parent.resolvedPaddingLeft + parent.resolvedPaddingRight) - (parent.resolvedBorderLeft - parent.resolvedBorderRight)
+                        )
+                    );
 
                 case UIMeasurementUnit.Em:
                     return Math.Max(0, style.GetResolvedFontSize() * widthMeasurement.value);
@@ -1018,7 +1112,9 @@ namespace UIForia.Layout.LayoutTypes {
                     return Mathf.Max(0,
                         parent.allocatedHeight * heightMeasurement.value - (parent.style == null
                             ? 0
-                            : parent.PaddingVertical - parent.BorderVertical));
+                            : (parent.resolvedPaddingTop + parent.resolvedPaddingBottom) - (parent.resolvedBorderTop + parent.resolvedBorderBottom)
+                        )
+                    );
 
                 case UIMeasurementUnit.Em:
                     return Mathf.Max(0, style.GetResolvedFontSize() * heightMeasurement.value);
@@ -1058,6 +1154,230 @@ namespace UIForia.Layout.LayoutTypes {
             float max = ResolveMinOrMaxWidth(maxWidth);
 
             return new LayoutBoxSize(min, max, prf);
+        }
+
+        internal bool HandleStylePropertiesChanged(StructList<StyleProperty> properties) {
+            // todo early-out if we haven't had a layout pass for the element yet
+
+            bool notifyParent = parent != null && !IsIgnored && element.isEnabled;
+            bool invalidatePreferredSizeCache = false;
+            bool layoutTypeChanged = false;
+
+            for (int i = 0; i < properties.Count; i++) {
+                StyleProperty property = properties[i];
+
+                switch (property.propertyId) {
+                    case StylePropertyId.PaddingLeft:
+                        paddingLeft = property.AsUIFixedLength;
+                        resolvedPaddingLeft = ResolveFixedWidth(property.AsUIFixedLength);
+                        break;
+
+                    case StylePropertyId.PaddingRight:
+                        paddingRight = property.AsUIFixedLength;
+                        resolvedPaddingRight = ResolveFixedWidth(property.AsUIFixedLength);
+                        break;
+
+                    case StylePropertyId.PaddingTop:
+                        paddingTop = property.AsUIFixedLength;
+                        resolvedPaddingTop = ResolveFixedHeight(property.AsUIFixedLength);
+                        break;
+
+                    case StylePropertyId.PaddingBottom:
+                        paddingBottom = property.AsUIFixedLength;
+                        resolvedPaddingBottom = ResolveFixedHeight(property.AsUIFixedLength);
+                        break;
+
+                    case StylePropertyId.BorderLeft:
+                        borderLeft = property.AsUIFixedLength;
+                        resolvedBorderLeft = ResolveFixedWidth(property.AsUIFixedLength);
+                        break;
+
+                    case StylePropertyId.BorderRight:
+                        borderRight = property.AsUIFixedLength;
+                        resolvedBorderRight = ResolveFixedWidth(property.AsUIFixedLength);
+                        break;
+
+                    case StylePropertyId.BorderTop:
+                        borderTop = property.AsUIFixedLength;
+                        resolvedBorderTop = ResolveFixedHeight(property.AsUIFixedLength);
+                        break;
+
+                    case StylePropertyId.BorderBottom:
+                        borderBottom = property.AsUIFixedLength;
+                        resolvedBorderBottom = ResolveFixedHeight(property.AsUIFixedLength);
+                        break;
+
+                    case StylePropertyId.BorderRadiusTopLeft:
+                        borderRadiusTopLeft = property.AsUIFixedLength;
+                        resolvedBorderRadiusTopLeft = ResolveFixedWidth(property.AsUIFixedLength);
+                        break;
+
+                    case StylePropertyId.BorderRadiusTopRight:
+                        borderRadiusTopRight = property.AsUIFixedLength;
+                        resolvedBorderRadiusTopRight = ResolveFixedWidth(property.AsUIFixedLength);
+                        break;
+
+                    case StylePropertyId.BorderRadiusBottomLeft:
+                        borderRadiusBottomLeft = property.AsUIFixedLength;
+                        resolvedBorderRadiusBottomLeft = ResolveFixedWidth(property.AsUIFixedLength);
+                        break;
+
+                    case StylePropertyId.BorderRadiusBottomRight:
+                        borderRadiusBottomRight = property.AsUIFixedLength;
+                        resolvedBorderRadiusBottomRight = ResolveFixedWidth(property.AsUIFixedLength);
+                        break;
+
+                    case StylePropertyId.TextFontSize:
+                        resolvedPaddingLeft = ResolveFixedWidth(property.AsUIFixedLength);
+                        resolvedPaddingRight = ResolveFixedWidth(property.AsUIFixedLength);
+                        resolvedPaddingTop = ResolveFixedHeight(property.AsUIFixedLength);
+                        resolvedPaddingBottom = ResolveFixedHeight(property.AsUIFixedLength);
+                        resolvedBorderLeft = ResolveFixedWidth(property.AsUIFixedLength);
+                        resolvedBorderRight = ResolveFixedWidth(property.AsUIFixedLength);
+                        resolvedBorderTop = ResolveFixedHeight(property.AsUIFixedLength);
+                        resolvedBorderBottom = ResolveFixedHeight(property.AsUIFixedLength);
+                        resolvedBorderRadiusTopLeft = ResolveFixedWidth(property.AsUIFixedLength);
+                        resolvedBorderRadiusTopRight = ResolveFixedWidth(property.AsUIFixedLength);
+                        resolvedBorderRadiusBottomLeft = ResolveFixedWidth(property.AsUIFixedLength);
+                        resolvedBorderRadiusBottomRight = ResolveFixedWidth(property.AsUIFixedLength);
+                        break;
+
+                    // todo -- margin should be a fixed measurement probably
+                    case StylePropertyId.MarginLeft:
+                        marginLeft = property.AsUIMeasurement;
+                        break;
+
+                    case StylePropertyId.MarginRight:
+                        marginRight = property.AsUIMeasurement;
+                        break;
+
+                    case StylePropertyId.MarginTop:
+                        marginTop = property.AsUIMeasurement;
+                        break;
+
+                    case StylePropertyId.MarginBottom:
+                        marginBottom = property.AsUIMeasurement;
+                        break;
+
+                    case StylePropertyId.TransformPivotX:
+                        transformPivotX = property.AsUIFixedLength;
+                        break;
+
+                    case StylePropertyId.TransformPivotY:
+                        transformPivotY = property.AsUIFixedLength;
+                        break;
+
+                    case StylePropertyId.TransformPositionX:
+                        transformPositionX = property.AsTransformOffset;
+                        break;
+
+                    case StylePropertyId.TransformPositionY:
+                        transformPositionY = property.AsTransformOffset;
+                        break;
+
+                    case StylePropertyId.TransformBehaviorX:
+                        transformBehaviorX = property.AsTransformBehavior;
+                        break;
+
+                    case StylePropertyId.TransformBehaviorY:
+                        transformBehaviorY = property.AsTransformBehavior;
+                        break;
+
+                    case StylePropertyId.TransformRotation:
+                        transformRotation = property.AsFloat;
+                        break;
+
+                    case StylePropertyId.TransformScaleX:
+                        transformScaleX = property.AsFloat;
+                        break;
+
+                    case StylePropertyId.TransformScaleY:
+                        transformScaleY = property.AsFloat;
+                        break;
+
+                    case StylePropertyId.PreferredWidth:
+                        prefWidth = property.AsUIMeasurement;
+                        break;
+
+                    case StylePropertyId.PreferredHeight:
+                        prefHeight = property.AsUIMeasurement;
+                        break;
+
+                    case StylePropertyId.MinWidth:
+                        minWidth = property.AsUIMeasurement;
+                        break;
+
+                    case StylePropertyId.MinHeight:
+                        minHeight = property.AsUIMeasurement;
+                        break;
+
+                    case StylePropertyId.MaxWidth:
+                        maxWidth = property.AsUIMeasurement;
+                        break;
+
+                    case StylePropertyId.MaxHeight:
+                        maxHeight = property.AsUIMeasurement;
+                        break;
+
+                    case StylePropertyId.ZIndex:
+                        zIndex = property.AsInt;
+                        break;
+
+                    case StylePropertyId.Layer:
+                        layer = property.AsInt;
+                        break;
+
+                    case StylePropertyId.LayoutBehavior:
+                        layoutBehavior = property.AsLayoutBehavior;
+                        UpdateChildren();
+                        break;
+
+                    case StylePropertyId.LayoutType:
+                        layoutTypeChanged = true;
+                        break;
+
+                    case StylePropertyId.OverflowX:
+                        overflowX = property.AsOverflow;
+                        break;
+
+                    case StylePropertyId.OverflowY:
+                        overflowY = property.AsOverflow;
+                        break;
+                }
+
+                switch (property.propertyId) {
+                    case StylePropertyId.MinWidth:
+                    case StylePropertyId.MaxWidth:
+                    case StylePropertyId.PreferredWidth:
+                    case StylePropertyId.MinHeight:
+                    case StylePropertyId.MaxHeight:
+                    case StylePropertyId.PreferredHeight:
+                    case StylePropertyId.AnchorTop:
+                    case StylePropertyId.AnchorRight:
+                    case StylePropertyId.AnchorBottom:
+                    case StylePropertyId.AnchorLeft:
+                    case StylePropertyId.AnchorTarget:
+                        invalidatePreferredSizeCache = true;
+                        break;
+                }
+            }
+
+            if (invalidatePreferredSizeCache) {
+                if (notifyParent) {
+                    RequestContentSizeChangeLayout();
+                }
+
+                InvalidatePreferredSizeCache();
+            }
+
+            OnStylePropertyChanged(properties);
+
+            if (notifyParent) {
+                parent.OnChildStylePropertyChanged(this, properties);
+            }
+
+
+            return layoutTypeChanged;
         }
 
         public struct LayoutBoxSize {

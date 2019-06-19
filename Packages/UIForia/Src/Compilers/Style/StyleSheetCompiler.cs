@@ -111,18 +111,17 @@ namespace UIForia.Compilers.Style {
                     StylePropertyMappers.MapProperty(s_ScratchStyle, propertyNode, context);
                 }
 
-                int count = s_ScratchStyle.m_StyleProperties.Count;
-                StyleProperty[] properties = s_ScratchStyle.m_StyleProperties.Array;
+                int count = s_ScratchStyle.PropertyCount;
                 StructList<StyleKeyFrameValue> keyValues = new StructList<StyleKeyFrameValue>(count);
 
                 for (int j = 0; j < count; j++) {
-                    keyValues[j] = new StyleKeyFrameValue(properties[j]);
+                    keyValues[j] = new StyleKeyFrameValue(s_ScratchStyle[j]);
                 }
 
                 keyValues.size = count;
                 frames[i] = new AnimationKeyFrame(time);
                 frames[i].properties = keyValues;
-                s_ScratchStyle.m_StyleProperties.Count = 0;
+                s_ScratchStyle.PropertyCount = 0;
             }
 
             return frames;

@@ -74,7 +74,7 @@ namespace UIForia.Rendering {
             containedStates |= styleState;
 
             if ((currentState & styleState) != 0) {
-                AddMissingProperties(toUpdate, styleRunCommand.style.m_StyleProperties);
+                AddMissingProperties(toUpdate, styleRunCommand.style);
                 RunCommands(styleRunCommand.runCommands);
             }
 
@@ -266,9 +266,10 @@ namespace UIForia.Rendering {
             }
         }
 
-        private static void AddMissingProperties(LightList<StylePropertyId> toUpdate, LightList<StyleProperty> source) {
-            int count = source.Count;
-            StyleProperty[] properties = source.Array;
+        private static void AddMissingProperties(LightList<StylePropertyId> toUpdate, UIStyle style) {
+            int count = style.PropertyCount;
+            StyleProperty[] properties = style.array;
+            
             for (int i = 0; i < count; i++) {
                 StylePropertyId propertyId = properties[i].propertyId;
                 if (!ListContainsStyleProperty(toUpdate, propertyId)) {
@@ -298,7 +299,7 @@ namespace UIForia.Rendering {
 
                 // if this is a state we had not been in before, mark it's properties for update
                 if ((entry.state & oldState) == 0 && (entry.state & state) != 0) {
-                    AddMissingProperties(toUpdate, entry.styleRunCommand.style.m_StyleProperties);
+                    AddMissingProperties(toUpdate, entry.styleRunCommand.style);
                     RunCommands(entry.styleRunCommand.runCommands);
                 }
             }
@@ -343,7 +344,7 @@ namespace UIForia.Rendering {
 
                 // if this a state we were in that is now invalid, mark it's properties for update
                 if ((entry.state & oldState) != 0 && (entry.state & state) != 0) {
-                    AddMissingProperties(toUpdate, entry.styleRunCommand.style.m_StyleProperties);
+                    AddMissingProperties(toUpdate, entry.styleRunCommand.style);
                 }
             }
 
@@ -417,7 +418,7 @@ namespace UIForia.Rendering {
                 for (int j = 0; j < availableStyles.Count; j++) {
                     if (availableStyles[j].sourceGroup == group) {
                         if ((availableStyles[j].state & currentState) != 0) {
-                            AddMissingProperties(toUpdate, availableStyles[j].styleRunCommand.style.m_StyleProperties);
+                            AddMissingProperties(toUpdate, availableStyles[j].styleRunCommand.style);
                             RunCommands(availableStyles[j].styleRunCommand.runCommands);
                         }
 
@@ -682,7 +683,7 @@ namespace UIForia.Rendering {
                                 bool isActive = (availableStyles[nextIdx].state & currentState) != 0;
 
                                 if (isActive) {
-                                    AddMissingProperties(toUpdate, availableStyles[nextIdx].styleRunCommand.style.m_StyleProperties);
+                                    AddMissingProperties(toUpdate, availableStyles[nextIdx].styleRunCommand.style);
                                     RunCommands(availableStyles[nextIdx].styleRunCommand.runCommands);
                                 }
 

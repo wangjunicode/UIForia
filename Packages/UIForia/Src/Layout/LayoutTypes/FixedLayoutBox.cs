@@ -66,8 +66,8 @@ namespace UIForia.Layout.LayoutTypes {
                 maxY = Mathf.Max(maxY, y + heights.clampedSize);
             }
 
-            padding = new OffsetRect(PaddingTop, PaddingRight, PaddingBottom, PaddingLeft);
-            border = new OffsetRect(BorderTop, BorderRight, BorderBottom, BorderLeft);
+            padding = new OffsetRect(resolvedPaddingTop, resolvedPaddingRight, resolvedPaddingBottom, resolvedPaddingLeft);
+            border = new OffsetRect(resolvedBorderBottom, resolvedBorderRight, resolvedBorderBottom, resolvedBorderLeft);
 
             Size size = default;
          

@@ -194,16 +194,23 @@ namespace UIForia.Systems {
                     }
                 }
 
+#if DEBUG && UNITY_EDITOR
                 bool debug = (box.element.flags & UIElementFlags.DebugLayout) != 0;
-                
                 if (debug || box.markedForLayout) {
                     if (debug) {
-                        Debugger.Break(); 
+                        Debugger.Break();
                     }
+
                     box.RunLayout();
                     box.markedForLayout = false;
                 }
-
+#else
+                if (box.markedForLayout) {
+                   box.RunLayout();
+                   box.markedForLayout = false;
+                }
+#endif
+                
                 if (box.children.Count == 0) {
                     leaves.Add(box);
                 }

@@ -1,4 +1,6 @@
 using System;
+using System.Globalization;
+using System.Text;
 using System.Text.RegularExpressions;
 using JetBrains.Annotations;
 using SVGX;
@@ -9,6 +11,7 @@ using UIForia.Text;
 using UIForia.UIInput;
 using UnityEngine;
 using Vertigo;
+using TextInfo = UIForia.Text.TextInfo;
 
 #pragma warning disable 0649
 namespace UIForia.Elements {
@@ -41,10 +44,16 @@ namespace UIForia.Elements {
 
     }
 
+    public static class FormatStrings {
+
+        public const string DoubleFixedPoint = "0.###################################################################################################################################################################################################################################################################################################################################################";
+
+    }
+
     public static class InputSerializers {
 
         public static IInputSerializer<int> IntSerializer = new CallbackSerializer<int>((int input) => input.ToString());
-        public static IInputSerializer<float> FloatSerializer = new CallbackSerializer<float>((float input) => input.ToString());
+        public static IInputSerializer<float> FloatSerializer = new CallbackSerializer<float>((float input) => input.ToString(FormatStrings.DoubleFixedPoint));
         public static IInputSerializer<string> StringSerializer = new CallbackSerializer<string>((string input) => input);
 
     }
@@ -54,6 +63,38 @@ namespace UIForia.Elements {
         public static IInputDeserializer<int> IntDeserializer = new CallbackDeserializer<int>((string input) => int.Parse(input));
         public static IInputDeserializer<float> FloatDeserializer = new CallbackDeserializer<float>((string input) => float.Parse(input));
         public static IInputDeserializer<string> StringDeserializer = new CallbackDeserializer<string>((string input) => input);
+
+    }
+
+    public static class InputFormatters {
+
+        public static IInputFormatter FloatFormatter = new FloatFormatter();
+
+    }
+
+    public class FloatFormatter : IInputFormatter {
+
+        private static StringBuilder builder = new StringBuilder(32);
+
+        private static char k_Decimal = Convert.ToChar(CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator);
+
+        public string Format(string input) {
+            builder.Clear();
+            bool foundDecimal = false;
+
+            for (int i = 0; i < input.Length; i++) {
+                char c = input[i];
+                if (char.IsDigit(c)) {
+                    builder.Append(c);
+                }
+                else if (c == k_Decimal && !foundDecimal) {
+                    builder.Append(k_Decimal);
+                    foundDecimal = true;
+                }
+            }
+
+            return builder.ToString();
+        }
 
     }
 
@@ -89,7 +130,7 @@ namespace UIForia.Elements {
 
     // todo use StructList<char> instead of string to alloc less
     [Template(TemplateType.Internal, "Elements/InputElement.xml")]
-    public class InputElement<T> : UIInputElement {
+    public class InputElement<T> : UIInputElement where T : IEquatable<T> {
 
         public T value;
 
@@ -106,7 +147,7 @@ namespace UIForia.Elements {
         public override void OnCreate() {
             deserializer = deserializer ?? (IInputDeserializer<T>) GetDeserializer();
             serializer = serializer ?? (IInputSerializer<T>) GetSerializer();
-//            formatter = formatValueAsString = formatValueAsString ?? (Func<string, string>) GetFormatValueAsStringFn();
+            formatter = formatter ?? GetFormatter();
 
             text = text ?? string.Empty;
             style.SetPainter("self", StyleState.Normal);
@@ -115,69 +156,66 @@ namespace UIForia.Elements {
             textInfo.Layout();
         }
 
-
         [OnPropertyChanged(nameof(value))]
         protected void OnInputValueChanged(string name) {
-//            text = formatValue(value) ?? string.Empty;
-//            textInfo.UpdateSpan(0, text);
-//            textInfo.Layout();
-//            selectionRange = textInfo.MoveToEndOfText();
-////            onTextValueChanged?.Invoke(textInfo.GetAllText());
-//            T v = parseValue(textInfo.GetAllText());
-//            onValueChanged?.Invoke(v);
-        }
+            string oldText = text;
+            text = serializer.Serialize(value) ?? string.Empty;
 
-        protected static string InsertText(string source, int index, string characters) {
-            if (index <= 0) {
-                return characters + source;
-            }
-            else if (index >= source.Length) {
-                return source + characters;
-            }
-            else {
-                string start = source.Substring(0, index);
-                string end = source.Substring(index);
-                return start + characters + end;
+            textInfo.UpdateSpan(0, text);
+            textInfo.Layout();
+
+            selectionRange = textInfo.MoveToEndOfText();
+            T v = deserializer.Deserialize(text);
+
+            onValueChanged?.Invoke(v);
+
+            if (oldText != text) {
+                EmitTextChanged();
             }
         }
 
         protected override void HandleCharactersEntered(string characters) {
-            if (selectionRange.HasSelection) {
-                selectionRange = textInfo.DeleteTextForwards(selectionRange);
-            }
-
-            string before = text;
-
-            string after = InsertText(text, selectionRange.cursorIndex, characters);
-
-            int preFormatLength = after.Length;
-
-            if (formatter != null) {
-                after = formatter.Format(after);
-            }
-
-            T newValue = deserializer.Deserialize(after);
-
-            if (!Equals(value, newValue)) {
-                onValueChanged?.Invoke(value);
-            }
-
-            //if (before.Length != after.Length) {
-            int index = Mathf.Clamp(selectionRange.cursorIndex + (after.Length - before.Length), 0, after.Length - 1);
-            selectionRange = new SelectionRange(index, TextEdge.Left);
-            //}
-            Debug.Log(selectionRange.cursorIndex);
-            text = after;
-            textInfo.UpdateSpan(0, text);
-            textInfo.Layout();
+            string previous = text;
+           // text = SelectionRangeUtil.InsertText(text, ref selectionRange, characters);
+            HandleTextChanged(previous);
         }
 
         protected override void HandleCharactersDeletedForwards() {
-            throw new NotImplementedException();
+            string previous = text;
+          //  text = SelectionRangeUtil.DeleteTextForwards(text, ref selectionRange);
+            HandleTextChanged(previous);
         }
 
         protected override void HandleCharactersDeletedBackwards() {
-            throw new NotImplementedException();
+            string previous = text;
+            //text = SelectionRangeUtil.DeleteTextBackwards(text, ref selectionRange);
+            HandleTextChanged(previous);
+        }
+
+        private void HandleTextChanged(string previous) {
+            string preFormat = text;
+            
+            if (formatter != null) { // todo -- handle when to format
+                text = formatter.Format(text);
+            }
+
+            if (text != preFormat) {
+                int diff = text.Length - preFormat.Length;
+                selectionRange = new SelectionRange(selectionRange.cursorIndex - diff, TextEdge.Left);
+            }
+
+            textInfo.UpdateSpan(0, text);
+            textInfo.Layout();
+
+            T newValue = deserializer.Deserialize(text);
+            if (!value.Equals(newValue)) {
+                value = newValue;
+                onValueChanged?.Invoke(value);
+            }
+
+            if (text != previous) {
+                EmitTextChanged();
+            }
         }
 
         public override string GetDisplayName() {
@@ -216,30 +254,16 @@ namespace UIForia.Elements {
             throw new Exception($"InputElement with generic type {typeof(T)} requires a custom serializer and deserializer in order to function because {typeof(T)} is not a float, int, or string");
         }
 
-        protected object GetFormatValueAsStringFn() {
-            if (typeof(T) == typeof(int)) {
-                return (Func<string, string>) ((string input) => { return input; });
-            }
-
+        protected IInputFormatter GetFormatter() {
             if (typeof(T) == typeof(float)) {
-                return (Func<string, string>) ((string input) => {
-                    Match match = Regex.Match(input, @"[-+]?[0-9]*\.?[0-9]*");
-                    string result = "";
-                    if (match.Success)
-                        result = match.Value;
-                    return result;
-                });
+                return InputFormatters.FloatFormatter;
             }
 
-            if (typeof(T) == typeof(string)) {
-                return (Func<string, string>) ((string strValue) => strValue);
-            }
-
-            throw new Exception("Bad type");
+            return null;
         }
 
     }
-
+    
 
     public abstract class UIInputElement : UIElement, IFocusable, ISVGXPaintable, IStylePropertiesDidChangeHandler {
 
@@ -285,6 +309,10 @@ namespace UIForia.Elements {
             textInfo.Layout();
         }
 
+        protected void EmitTextChanged() {
+            onTextChanged?.Invoke(text);
+        }
+
         protected abstract void HandleCharactersEntered(string characters);
 
         protected abstract void HandleCharactersDeletedForwards();
@@ -300,22 +328,6 @@ namespace UIForia.Elements {
 
         public override string GetDisplayName() {
             return "InputElement";
-        }
-
-//        protected virtual void HandleCharacterEntered(char c) {
-//            selectionRange = textInfo.InsertText(selectionRange, c);
-//            textValue = textInfo.GetAllText();
-//            textInfo.Layout();
-//            onTextValueChanged?.Invoke(textValue);
-//        }
-
-        [OnPropertyChanged(nameof(text))]
-        protected void OnInputValueChanged(string name) {
-//            text = text ?? string.Empty;
-//            textInfo.UpdateSpan(0, text);
-//            textInfo.Layout();
-//            selectionRange = textInfo.MoveToEndOfText();
-//            onTextChanged?.Invoke(textInfo.GetAllText());
         }
 
         [UsedImplicitly]

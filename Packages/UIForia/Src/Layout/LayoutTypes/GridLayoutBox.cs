@@ -23,23 +23,23 @@ namespace UIForia.Layout.LayoutTypes {
 
         private readonly StructList<GridTrack> m_RowTracks;
         private readonly StructList<GridTrack> m_ColTracks;
-        private readonly List<GridPlacement> m_Placements;
+        private readonly StructList<GridPlacement> m_Placements;
 
         private readonly HashSet<int> m_Occupied;
 
-        private readonly LightList<GridItemSizes> m_Widths;
-        private readonly LightList<GridItemSizes> m_Heights;
+        private readonly StructList<GridItemSizes> m_Widths;
+        private readonly StructList<GridItemSizes> m_Heights;
 
         private bool m_IsPlacementDirty;
 
         public GridLayoutBox() {
             this.m_IsPlacementDirty = true;
-            this.m_Widths = new LightList<GridItemSizes>(4);
-            this.m_Heights = new LightList<GridItemSizes>(4);
+            this.m_Widths = new StructList<GridItemSizes>(4);
+            this.m_Heights = new StructList<GridItemSizes>(4);
             this.m_RowTracks = new StructList<GridTrack>();
             this.m_ColTracks = new StructList<GridTrack>();
             this.m_Occupied = new HashSet<int>();
-            this.m_Placements = new List<GridPlacement>();
+            this.m_Placements = new StructList<GridPlacement>();
             this.m_IsPlacementDirty = true;
         }
 
@@ -55,7 +55,7 @@ namespace UIForia.Layout.LayoutTypes {
             m_RowTracks.QuickClear();
             m_ColTracks.QuickClear();
             m_Occupied.Clear();
-            m_Placements.Clear();
+            m_Placements.QuickClear();
             m_IsPlacementDirty = true;
         }
 
@@ -73,7 +73,6 @@ namespace UIForia.Layout.LayoutTypes {
             }
 
             Place();
-
 
             for (int i = 0; i < children.Count; i++) {
                 LayoutBox layoutBox = children[i];
@@ -303,6 +302,7 @@ namespace UIForia.Layout.LayoutTypes {
 
             List<ValueTuple<int, GridTrack>> intrinsics = ListPool<ValueTuple<int, GridTrack>>.Get();
             List<ValueTuple<int, GridTrack>> flexes = ListPool<ValueTuple<int, GridTrack>>.Get();
+
             for (int i = 0; i < m_ColTracks.Count; i++) {
                 GridTrack track = m_ColTracks[i];
 
@@ -391,10 +391,9 @@ namespace UIForia.Layout.LayoutTypes {
 
             if ((int) remaining > 0 && flexes.Count > 0) {
                 float pieceSize = remaining / flexPieces;
-                bool isContentBased = style.PreferredHeight.IsContentBased;
                 for (int i = 0; i < flexes.Count; i++) {
                     GridTrack track = flexes[i].Item2;
-                    track.outputSize = isContentBased ? 0 : track.size.minValue * pieceSize;
+                    track.outputSize = track.size.minValue * pieceSize;
                     m_RowTracks[flexes[i].Item1] = track;
                 }
             }
@@ -402,7 +401,7 @@ namespace UIForia.Layout.LayoutTypes {
             ListPool<ValueTuple<int, GridTrack>>.Release(ref intrinsics);
             ListPool<ValueTuple<int, GridTrack>>.Release(ref flexes);
         }
-        
+
         private void StretchWidthsIfNeeded() {
             float colGap = style.GridLayoutColGap;
             GridAxisAlignment colAlignment = style.GridLayoutColAlignment;
@@ -776,8 +775,73 @@ namespace UIForia.Layout.LayoutTypes {
             IReadOnlyList<GridTrackSize> colTemplate = style.GridLayoutColTemplate;
             IReadOnlyList<GridTrackSize> rowTemplate = style.GridLayoutRowTemplate;
 
+            // fit -- try to fit the existing content into the existing cells, repeat pattern when overflowing & have more space
+            // fill -- add columns until pattern doesn't fit in the viewport
+
+            // fill
+
+            // for each cell def in template
+            // if repeat
+            // create cells
+            // if value
+            // create cell
+            // if fit
+            // create cell marker
+            // if fill   
+            // create cell marker
+
+
+            // for each cell in def
+            // find sizes + resolve cells needs to happen at the same time I think when repeating to fill
+            // only allow 1 fit/fill
+
+            // fill / fit are not at all compatible with fr, totally exclusive of each other. same story for min-content, max-content, auto and fit-content
+
+            // minmax -> flex size not valid as minimum
+
+            // LayoutType = Grid;
+
+            // 1fr repeat(fill, 1mx) 2fr
+
+            // fill(100px)
+            // fit(300px);
+
+            // if fill
+            // if we have a definite size (or max size) on that axis
+            // repetitions = max(1, repetition count not causing overflow)
+            // intrinsic sizes not allowed
+            // minmax allowed, if(definite max size, use that, otherwise use min)
+            // account for gap
+            // else if we have a definite min size
+            // the number of repetitions is the smallest possible positive integer that fulfills that minimum requirement
+            // else 
+            // repeititions = 1
+
             for (int i = 0; i < colTemplate.Count; i++) {
-                m_ColTracks.Add(new GridTrack(colTemplate[i]));
+                if (colTemplate[i].type == GridTrackSizeType.Repeat) {
+                    int count = (int) colTemplate[i].value;
+
+                    for (int j = 0; j < count; j++) {
+                        for (int k = 0; k < colTemplate[i].pattern.Length; k++) {
+                            m_ColTracks.Add(new GridTrack(colTemplate[i].pattern[k]));
+                        }
+                    }
+                }
+                else if (colTemplate[i].type == GridTrackSizeType.RepeatFit) {
+                    
+                }
+                else if (colTemplate[i].type == GridTrackSizeType.RepeatFill) {
+                    
+                }
+                else if (colTemplate[i].type == GridTrackSizeType.Value) {
+                    m_ColTracks.Add(new GridTrack(colTemplate[i]));
+                }
+                else if (colTemplate[i].type == GridTrackSizeType.Grow) {
+                    m_ColTracks.Add(new GridTrack(colTemplate[i]));
+                }
+                else if (colTemplate[i].type == GridTrackSizeType.Shrink) {
+                    m_ColTracks.Add(new GridTrack(colTemplate[i]));
+                }
             }
 
             for (int i = 0; i < rowTemplate.Count; i++) {

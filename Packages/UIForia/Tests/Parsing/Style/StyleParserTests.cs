@@ -1,8 +1,11 @@
+using System;
+using System.Reflection;
 using NUnit.Framework;
 using UIForia;
 using UIForia.Exceptions;
 using UIForia.Parsing.Style;
 using UIForia.Parsing.Style.AstNodes;
+using UIForia.Parsing.Style.Tokenizer;
 using UIForia.Rendering;
 using UIForia.Util;
 using UnityEngine;
@@ -367,9 +370,8 @@ style s { BrokenUrl = url() }
         Assert.AreEqual("val", varNode.name);
         Assert.AreEqual(typeof(float), varNode.variableType);
         Assert.AreEqual(StyleASTNodeType.NumericLiteral, varNode.value.type);
-
     }
-    
+
     [Test]
     public void ParseAnimationVariableHeaderMultipleValues() {
         LightList<StyleASTNode> nodes = StyleParser.Parse(@"
@@ -398,47 +400,47 @@ style s { BrokenUrl = url() }
         Assert.AreEqual("val", varNode0.name);
         Assert.AreEqual(typeof(float), varNode0.variableType);
         Assert.AreEqual(StyleASTNodeType.NumericLiteral, varNode0.value.type);
-        
+
         VariableDefinitionNode varNode1 = rootNode.variableNodes[1];
         Assert.AreEqual("measure", varNode1.name);
         Assert.AreEqual(typeof(UIMeasurement), varNode1.variableType);
         Assert.AreEqual(StyleASTNodeType.Measurement, varNode1.value.type);
-        
+
         VariableDefinitionNode varNode2 = rootNode.variableNodes[2];
         Assert.AreEqual("measure2", varNode2.name);
         Assert.AreEqual(typeof(UIMeasurement), varNode2.variableType);
         Assert.AreEqual(StyleASTNodeType.Measurement, varNode2.value.type);
-        
+
         VariableDefinitionNode varNode3 = rootNode.variableNodes[3];
         Assert.AreEqual("fm1", varNode3.name);
         Assert.AreEqual(typeof(UIFixedLength), varNode3.variableType);
         Assert.AreEqual(StyleASTNodeType.Measurement, varNode3.value.type);
-        
+
         VariableDefinitionNode varNode4 = rootNode.variableNodes[4];
         Assert.AreEqual("fm2", varNode4.name);
         Assert.AreEqual(typeof(UIFixedLength), varNode4.variableType);
         Assert.AreEqual(StyleASTNodeType.Measurement, varNode4.value.type);
-        
+
         VariableDefinitionNode varNode5 = rootNode.variableNodes[5];
         Assert.AreEqual("t1", varNode5.name);
         Assert.AreEqual(typeof(TransformOffset), varNode5.variableType);
         Assert.AreEqual(StyleASTNodeType.Measurement, varNode5.value.type);
-        
+
         VariableDefinitionNode varNode6 = rootNode.variableNodes[6];
         Assert.AreEqual("t2", varNode6.name);
         Assert.AreEqual(typeof(TransformOffset), varNode6.variableType);
         Assert.AreEqual(StyleASTNodeType.Measurement, varNode6.value.type);
-        
+
         VariableDefinitionNode varNode7 = rootNode.variableNodes[7];
         Assert.AreEqual("i", varNode7.name);
         Assert.AreEqual(typeof(int), varNode7.variableType);
         Assert.AreEqual(StyleASTNodeType.NumericLiteral, varNode7.value.type);
-        
+
         VariableDefinitionNode varNode8 = rootNode.variableNodes[8];
         Assert.AreEqual("c", varNode8.name);
         Assert.AreEqual(typeof(Color), varNode8.variableType);
         Assert.AreEqual(StyleASTNodeType.Color, varNode8.value.type);
-        
+
         VariableDefinitionNode varNode9 = rootNode.variableNodes[9];
         Assert.AreEqual("ref", varNode9.name);
         Assert.AreEqual(typeof(int), varNode9.variableType);
@@ -455,7 +457,7 @@ style s { BrokenUrl = url() }
         Assert.AreEqual(1, nodes.Count);
         Assert.IsInstanceOf<AnimationRootNode>(nodes[0]);
     }
-    
+
     [Test]
     public void ParseAnimationOptionsHeader() {
         LightList<StyleASTNode> nodes = StyleParser.Parse(@"
@@ -480,43 +482,42 @@ style s { BrokenUrl = url() }
         AnimationOptionNode opt0 = rootNode.optionNodes[0];
         Assert.AreEqual("delay", opt0.optionName);
         Assert.AreEqual(StyleASTNodeType.NumericLiteral, opt0.value.type);
-        
+
         AnimationOptionNode opt1 = rootNode.optionNodes[1];
         Assert.AreEqual("loopType", opt1.optionName);
         Assert.AreEqual(StyleASTNodeType.Identifier, opt1.value.type);
-        
+
         AnimationOptionNode opt2 = rootNode.optionNodes[2];
         Assert.AreEqual("loopTime", opt2.optionName);
         Assert.AreEqual(StyleASTNodeType.NumericLiteral, opt2.value.type);
-        
+
         AnimationOptionNode opt3 = rootNode.optionNodes[3];
         Assert.AreEqual("iterations", opt3.optionName);
         Assert.AreEqual(StyleASTNodeType.NumericLiteral, opt3.value.type);
-        
+
         AnimationOptionNode opt4 = rootNode.optionNodes[4];
         Assert.AreEqual("duration", opt4.optionName);
         Assert.AreEqual(StyleASTNodeType.NumericLiteral, opt4.value.type);
-        
+
         AnimationOptionNode opt5 = rootNode.optionNodes[5];
         Assert.AreEqual("forwardStartDelay", opt5.optionName);
         Assert.AreEqual(StyleASTNodeType.NumericLiteral, opt5.value.type);
-        
+
         AnimationOptionNode opt6 = rootNode.optionNodes[6];
         Assert.AreEqual("reverseStartDelay", opt6.optionName);
         Assert.AreEqual(StyleASTNodeType.NumericLiteral, opt6.value.type);
-        
+
         AnimationOptionNode opt7 = rootNode.optionNodes[7];
         Assert.AreEqual("direction", opt7.optionName);
         Assert.AreEqual(StyleASTNodeType.Identifier, opt7.value.type);
-        
+
         AnimationOptionNode opt8 = rootNode.optionNodes[8];
         Assert.AreEqual("timingFunction", opt8.optionName);
         Assert.AreEqual(StyleASTNodeType.Identifier, opt8.value.type);
-        
+
         AnimationOptionNode opt9 = rootNode.optionNodes[9];
         Assert.AreEqual("playbackType", opt9.optionName);
         Assert.AreEqual(StyleASTNodeType.Identifier, opt9.value.type);
-        
     }
 
     [Test]
@@ -531,19 +532,18 @@ style s { BrokenUrl = url() }
         ");
         Assert.AreEqual(1, nodes.Count);
         AnimationRootNode rootNode = nodes[0] as AnimationRootNode;
-        
+
         KeyFrameNode keyFrameNode0 = rootNode.keyFrameNodes[0];
         Assert.AreEqual("0", keyFrameNode0.identifier);
         Assert.AreEqual(1, keyFrameNode0.children.Count);
         Assert.AreEqual(StyleASTNodeType.Property, keyFrameNode0.children[0].type);
-        
+
         KeyFrameNode keyFrameNode1 = rootNode.keyFrameNodes[1];
         Assert.AreEqual("100", keyFrameNode1.identifier);
         Assert.AreEqual(1, keyFrameNode1.children.Count);
         Assert.AreEqual(StyleASTNodeType.Property, keyFrameNode1.children[0].type);
-
     }
-    
+
     [Test]
     public void ParseKeyFramesMultipleProperties() {
         LightList<StyleASTNode> nodes = StyleParser.Parse(@"
@@ -565,24 +565,179 @@ style s { BrokenUrl = url() }
         ");
         Assert.AreEqual(1, nodes.Count);
         AnimationRootNode rootNode = nodes[0] as AnimationRootNode;
-        
+
         KeyFrameNode keyFrameNode0 = rootNode.keyFrameNodes[0];
         Assert.AreEqual("0", keyFrameNode0.identifier);
         Assert.AreEqual(2, keyFrameNode0.children.Count);
         Assert.AreEqual(StyleASTNodeType.Property, keyFrameNode0.children[0].type);
         Assert.AreEqual(StyleASTNodeType.Property, keyFrameNode0.children[1].type);
-        
+
         KeyFrameNode keyFrameNode1 = rootNode.keyFrameNodes[1];
         Assert.AreEqual("50", keyFrameNode1.identifier);
         Assert.AreEqual(1, keyFrameNode1.children.Count);
         Assert.AreEqual(StyleASTNodeType.Property, keyFrameNode1.children[0].type);
-        
+
         KeyFrameNode keyFrameNode2 = rootNode.keyFrameNodes[2];
         Assert.AreEqual("100", keyFrameNode2.identifier);
         Assert.AreEqual(2, keyFrameNode2.children.Count);
         Assert.AreEqual(StyleASTNodeType.Property, keyFrameNode2.children[0].type);
         Assert.AreEqual(StyleASTNodeType.Property, keyFrameNode2.children[1].type);
+    }
 
+    private class StyleNodeTestDef {
+
+        public Type type;
+        public string identifier;
+        public StyleNodeTestDef[] children;
+        public StyleASTNodeType nodeType;
+        public string rawValue;
+        public StyleNodeTestDef value;
+        public StyleNodeTestDef unit;
+
+        public static StyleNodeTestDef CreateMeasurementNode(string value, string unit) {
+            return new StyleNodeTestDef() {
+                type = typeof(MeasurementNode),
+                value = new StyleNodeTestDef() {
+                    type = typeof(StyleLiteralNode),
+                    nodeType = StyleASTNodeType.NumericLiteral,
+                    rawValue = value
+                },
+                unit = new StyleNodeTestDef() {
+                    type = typeof(UnitNode),
+                    nodeType = StyleASTNodeType.Unit,
+                    rawValue = unit
+                }
+            };
+        }
+
+    }
+
+    private static void AssertStyleNodesEqual(StyleNodeTestDef expected, StyleASTNode actual) {
+        Assert.AreEqual(expected.type, actual.GetType());
+        if (expected.identifier != null) {
+            if (actual is StyleNodeContainer n) {
+                Assert.AreEqual(expected.identifier, n.identifier);
+            }
+            else if (actual is StyleIdentifierNode id) {
+                Assert.AreEqual(expected.identifier, id.name);
+            }
+            else {
+                Assert.IsTrue(false, $"Expected node to have an identifier {expected.identifier} but {actual} did not");
+            }
+        }
+
+        if (expected.nodeType != 0) {
+            Assert.AreEqual(expected.nodeType, actual.type);
+        }
+
+        if (expected.type == typeof(MeasurementNode)) {
+            AssertMeasurementNode(expected, actual as MeasurementNode);
+        }
+
+
+        if (expected.rawValue != null) {
+            FieldInfo fieldInfo = null;
+            if (ReflectionUtil.IsField(actual.GetType(), "rawValue", out fieldInfo) || ReflectionUtil.IsField(actual.GetType(), "value", out fieldInfo)) {
+                Assert.AreEqual(expected.rawValue, fieldInfo.GetValue(actual));
+            }
+            else {
+                Assert.IsTrue(false, $"Expected {actual} to have a value or rawValue field, it did not");
+            }
+        }
+
+        if (expected.children != null) {
+            if (actual is StyleNodeContainer c) {
+                Assert.AreEqual(expected.children.Length, c.children.Count);
+
+                for (int i = 0; i < expected.children.Length; i++) {
+                    AssertStyleNodesEqual(expected.children[i], c.children[i]);
+                }
+            }
+            else {
+                Assert.IsTrue(false, $"Expected node to have children but {actual} is not a StyleContainer");
+            }
+        }
+    }
+
+    private static void AssertMeasurementNode(StyleNodeTestDef expected, MeasurementNode actual) {
+        AssertStyleNodesEqual(expected.value, actual.value);
+        AssertStyleNodesEqual(expected.unit, actual.unit);
+    }
+
+    [Test]
+    public void ParseGridTemplateComplex() {
+        LightList<StyleASTNode> nodes = StyleParser.Parse(@"
+            style grid-thing {
+                GridLayoutRowTemplate = repeat(4, 1mx) repeat(auto-fill, grow(1cnt, 300px) 300px) repeat(2, shrink(200px, 1fr));
+            }
+        ");
+
+        Assert.AreEqual(1, nodes.Count);
+        StyleRootNode rootNode = nodes[0] as StyleRootNode;
+        Assert.AreEqual(2, rootNode.children.Count);
+        PropertyNode propertyNode0 = (PropertyNode) rootNode.children[0];
+
+        Assert.AreEqual(3, propertyNode0.children.Count);
+
+        Assert.IsInstanceOf<StyleFunctionNode>(propertyNode0.children[0]);
+        StyleFunctionNode repeat0 = propertyNode0.children[0] as StyleFunctionNode;
+        StyleFunctionNode repeat1 = propertyNode0.children[1] as StyleFunctionNode;
+        StyleFunctionNode repeat2 = propertyNode0.children[2] as StyleFunctionNode;
+
+        AssertStyleNodesEqual(new StyleNodeTestDef() {
+            type = typeof(StyleFunctionNode),
+            identifier = "repeat",
+            children = new[] {
+                new StyleNodeTestDef() {
+                    type = typeof(StyleLiteralNode),
+                    nodeType = StyleASTNodeType.NumericLiteral,
+                    rawValue = "4"
+                },
+                StyleNodeTestDef.CreateMeasurementNode("1", "mx")
+            }
+        }, repeat0);
+
+        AssertStyleNodesEqual(new StyleNodeTestDef() {
+            type = typeof(StyleFunctionNode),
+            identifier = "repeat",
+            children = new[] {
+                new StyleNodeTestDef() {
+                    type = typeof(StyleIdentifierNode),
+                    nodeType = StyleASTNodeType.Identifier,
+                    identifier = "auto-fill"
+                },
+                new StyleNodeTestDef() {
+                    type = typeof(StyleFunctionNode),
+                    identifier = "grow",
+                    children = new[] {
+                        StyleNodeTestDef.CreateMeasurementNode("1", "cnt"),
+                        StyleNodeTestDef.CreateMeasurementNode("300", "px")
+                    }
+                },
+                StyleNodeTestDef.CreateMeasurementNode("300", "px")
+            }
+        }, repeat1);
+
+        AssertStyleNodesEqual(new StyleNodeTestDef() {
+            type = typeof(StyleFunctionNode),
+            identifier = "repeat",
+            children = new[] {
+                new StyleNodeTestDef() {
+                    type = typeof(StyleLiteralNode),
+                    nodeType = StyleASTNodeType.NumericLiteral,
+                    rawValue = "2"
+                },
+                new StyleNodeTestDef() {
+                    type = typeof(StyleFunctionNode),
+                    identifier = "shrink",
+                    children = new[] {
+                        StyleNodeTestDef.CreateMeasurementNode("200", "px"),
+                        StyleNodeTestDef.CreateMeasurementNode("1", "fr")
+                    }
+                }
+            }
+        }, repeat2);
+        
     }
 
 }

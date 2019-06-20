@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using SVGX;
 using UIForia.Elements;
 using UIForia.Extensions;
@@ -38,7 +39,7 @@ namespace UIForia.Systems {
             this.m_StyleSystem.onStylePropertyChanged += HandleStylePropertyChanged;
             this.layoutBoxPoolMap = new Dictionary<int, LayoutBoxPool>();
             this.leaves = new LightList<LayoutBox>(64);
-            
+
             this.layoutBoxPoolMap[(int) LayoutType.Flex] = new LayoutBoxPool<FlexLayoutBox>();
             this.layoutBoxPoolMap[(int) LayoutType.Grid] = new LayoutBoxPool<GridLayoutBox>();
             this.layoutBoxPoolMap[(int) LayoutType.Radial] = new LayoutBoxPool<RadialLayoutBox>();
@@ -168,11 +169,10 @@ namespace UIForia.Systems {
 
             // todo -- only if changed
             if (view.sizeChanged) {
-                
                 for (int i = 0; i < toLayoutCount; i++) {
                     toLayoutArray[i].UpdateViewSizeProperties();
                 }
-                
+
                 rootBox.RunLayout();
                 view.sizeChanged = false; // todo - dont do this here
             }
@@ -194,7 +194,12 @@ namespace UIForia.Systems {
                     }
                 }
 
-                if (box.markedForLayout) {
+                bool debug = (box.element.flags & UIElementFlags.DebugLayout) != 0;
+                
+                if (debug || box.markedForLayout) {
+                    if (debug) {
+                        Debugger.Break(); 
+                    }
                     box.RunLayout();
                     box.markedForLayout = false;
                 }

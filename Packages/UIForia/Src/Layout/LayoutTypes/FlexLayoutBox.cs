@@ -337,6 +337,7 @@ namespace UIForia.Layout.LayoutTypes {
             }
 
             float maxHeight = 0f;
+            
             for (int i = 0; i < children.Count; i++) {
                 float width = itemList[i].mainSize - itemList[i].margin.Horizontal;
                 OffsetRect margin = itemList[i].margin;

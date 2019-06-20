@@ -507,8 +507,7 @@ namespace UIForia.Parsing.Style {
                 case StyleTokenType.Number:
                     StyleLiteralNode value = StyleASTNodeFactory.NumericLiteralNode(tokenStream.Current.value).WithLocation(propertyToken) as StyleLiteralNode;
                     tokenStream.Advance();
-                    if (tokenStream.Current.styleTokenType != StyleTokenType.EndStatement
-                        && tokenStream.Current.styleTokenType != StyleTokenType.Number) {
+                    if (!IsAnyTokenType(StyleTokenType.EndStatement, StyleTokenType.Number, StyleTokenType.Comma, StyleTokenType.ParenClose)) {
                         UnitNode unit = ParseUnit().WithLocation(tokenStream.Previous) as UnitNode;
                         propertyValue = StyleASTNodeFactory.MeasurementNode(value, unit);
                     }
@@ -522,8 +521,16 @@ namespace UIForia.Parsing.Style {
                     tokenStream.Advance();
                     break;
                 case StyleTokenType.Identifier:
-                    propertyValue = StyleASTNodeFactory.IdentifierNode(tokenStream.Current.value);
+                    string identifier = tokenStream.Current.value;
                     tokenStream.Advance();
+                    if (tokenStream.Current.styleTokenType == StyleTokenType.ParenOpen) {
+                        tokenStream.Advance();
+                        propertyValue = ParsePropertyFunction(identifier);
+                    }
+                    else {
+                        propertyValue = StyleASTNodeFactory.IdentifierNode(identifier);
+                    }
+
                     break;
                 case StyleTokenType.Rgba:
                     propertyValue = ParseRgba();
@@ -577,6 +584,18 @@ namespace UIForia.Parsing.Style {
             }
 
             return propertyValue.WithLocation(propertyToken);
+        }
+
+        private StyleFunctionNode ParsePropertyFunction(string identifier) {
+            StyleFunctionNode functionNode = StyleASTNodeFactory.StyleFunctionNode(identifier);
+            
+            while (tokenStream.HasMoreTokens && !AdvanceIfTokenType(StyleTokenType.ParenClose)) {
+                functionNode.AddChildNode(ParsePropertyValue());
+                // we just ignore the comma for now
+                AdvanceIfTokenType(StyleTokenType.Comma);
+            }
+
+            return functionNode;
         }
 
         private StyleASTNode ParseSpriteName() {
@@ -837,6 +856,11 @@ namespace UIForia.Parsing.Style {
                 default:
                     throw new Exception("Unknown op type");
             }
+        }
+
+        private bool IsAnyTokenType(StyleTokenType type0, StyleTokenType type1, StyleTokenType type2 = 0, StyleTokenType type3 = 0, StyleTokenType type4 = 0, StyleTokenType type5 = 0) {
+            StyleTokenType tokenType = tokenStream.Current.styleTokenType;
+            return tokenType == type0 || tokenType == type1 || tokenType == type2 || tokenType == type3 || tokenType == type4 || tokenType == type5;
         }
 
     }

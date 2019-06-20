@@ -151,6 +151,11 @@ public class HierarchyView : TreeView {
         args.rowRect.x += indent;
         args.rowRect.width -= indent;
         s_Content.text = item.element.GetDisplayName();
+        
+        if((item.element.flags & UIElementFlags.DebugLayout) != 0) {
+            s_Content.text = "{Debug Layout} " + s_Content.text;
+        }
+        
         Vector2 v = s_ElementNameStyle.CalcSize(s_Content);
         Rect r = new Rect(args.rowRect);
         GUI.Label(args.rowRect, s_Content, s_ElementNameStyle);

@@ -20,6 +20,8 @@ internal enum UIElementFlags {
 
     Ready = 1 << 13,
     
-    Registered = 1 << 14
+    Registered = 1 << 14,
+
+    DebugLayout = 1 << 15
 
 }

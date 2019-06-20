@@ -4,6 +4,7 @@
     <Using namespace="UnityEngine"/>
 
     <Contents>
+
         <!-- Creates a grid with a fixed amount of columns. More columns will align horizontally and break vertically -->
         <Group style="grid0 grid-horizontal col3layout">
             <Div style="cell cell-end m10 size100">Col 1</Div>
@@ -42,7 +43,7 @@
                 <Text>My preferredWidth is {$parent.style.PreferredWidth.value}</Text>
                 <Text>My actual width is {$parent.layoutResult.actualSize.width}</Text>
             </Div>
-            
+
             <Div style="cell cell-end">
                 I align at the end
             </Div>
@@ -54,53 +55,74 @@
             </Div>
         </Group>
 
-        <!--&lt;!&ndash; Creates a grid with a fixed amount of columns. More columns will align horizontally and break vertically &ndash;&gt;-->
-        <!--<Group style="grid-horizontal col3layout mb50 oddPadding cell-center">-->
-        <!--<Div style="cell m10">Col1</Div>-->
-        <!--<Div style="cell m10">Col2</Div>-->
-        <!--<Div style="cell m10">Col3</Div>-->
+        <!-- Creates a grid with a fixed amount of columns. More columns will align horizontally and break vertically -->
+        <Group style="grid-horizontal col3layout mb50 oddPadding cell-center">
+            <Div style="cell m10">Col1</Div>
+            <Div style="cell m10">Col2</Div>
+            <Div style="cell m10">Col3</Div>
 
-        <!--<Div style="cell m10">Col4 Row 2</Div>-->
-        <!--<Div style="cell m10">Col5 Row 2</Div>-->
-        <!--</Group>-->
+            <Div style="cell m10">Col4 Row 2</Div>
+            <Div style="cell m10">Col5 Row 2</Div>
+        </Group>
 
-        <!--<Group style="grid-horizontal col3layout mb50 oddPadding ">-->
-        <!--<Div style="cell m10">Col1</Div>-->
-        <!--<Div style="cell m10">Col2</Div>-->
-        <!--<Div style="cell m10">Col3</Div>-->
+        <Group style="grid-horizontal col3layout mb50 oddPadding ">
+            <Div style="cell m10">Col1</Div>
+            <Div style="cell m10">Col2</Div>
+            <Div style="cell m10">Col3</Div>
 
-        <!--<Div style="cell m10">Col4 Row 2</Div>-->
-        <!--<Div style="cell m10">Col5 Row 2</Div>-->
-        <!--</Group>-->
-        <!---->
-        <!--<Group style="grid-vertical row3layout mb50 oddPadding">-->
-        <!--<Div style="cell m10">Col1</Div>-->
-        <!--<Div style="cell m10">Col2</Div>-->
-        <!--<Div style="cell m10">Col3</Div>-->
+            <Div style="cell m10">Col4 Row 2</Div>
+            <Div style="cell m10">Col5 Row 2</Div>
+        </Group>
 
-        <!--<Div style="cell m10">Col4 Row 2</Div>-->
-        <!--<Div style="cell m10">Col5 Row 2</Div>-->
-        <!--</Group>-->
+        <Group style="grid-vertical row3layout mb50 oddPadding">
+            <Div style="cell m10">Col1</Div>
+            <Div style="cell m10">Col2</Div>
+            <Div style="cell m10">Col3</Div>
 
-        <!--<Div style="grid-container">-->
+            <Div style="cell m10">Col4 Row 2</Div>
+            <Div style="cell m10">Col5 Row 2</Div>
+        </Group>
 
-        <!--<Group style="grid-cell logo" />-->
-        <!--<Group style="grid-cell thead">Home</Group>-->
-        <!--<Group style="grid-cell thead" onMouseEnter="OnHover()" >-->
-        <!--Concept-->
-        <!--<Group x-id="concept-menu" if="hover" style="concept-hover" onMouseEnter="OnHover()" >-->
-        <!--<Group>Features</Group>-->
-        <!--<Group>Theory</Group>-->
-        <!--<Group>Context</Group>-->
-        <!--</Group>-->
-        <!--</Group>-->
-        <!--<Group style="grid-cell thead seedlogo" onMouseEnter="OnHoverEnd()" />-->
-        <!--<Group style="grid-cell thead">Dev Blog</Group>-->
-        <!--<Group style="grid-cell thead">Community</Group>-->
+        <Div style="grid-container">
 
-        <!--&lt;!&ndash; the red background should not be visible, instead the grid's background should! &ndash;&gt;-->
-        <!--<Group style="[backgroundStyleName, 'borderRadiusTest']"/>-->
-        <!--</Div>-->
+            <Group style="grid-cell logo"/>
+            <Group style="grid-cell thead">Home</Group>
+            <Group style="grid-cell thead" onMouseEnter="OnHover()">
+                Concept
+                <Group x-id="concept-menu" if="hover" style="concept-hover" onMouseEnter="OnHover()">
+                    <Group>Features</Group>
+                    <Group>Theory</Group>
+                    <Group>Context</Group>
+                </Group>
+            </Group>
+            <Group style="grid-cell thead seedlogo" onMouseEnter="OnHoverEnd()"/>
+            <Group style="grid-cell thead">Dev Blog</Group>
+            <Group style="grid-cell thead">Community</Group>
+
+            <!-- the red background should not be visible, instead the grid's background should! -->
+            <Group style="[backgroundStyleName, 'borderRadiusTest']"/>
+        </Div>
+
+        <!-- Resolve grid paradox (temp) -->
+        <Div style="grid-window-thing">
+            <Div>row1</Div>
+            <Group style="grid-maybe-bug">
+                <Div style.preferredHeight="0">
+                    <Div style="nested-bug-child">
+                        <Div style="nested-bug-child">
+                            <Div style="grid-maybe-bug-cell">
+                                <Div style="nested-bug-child">
+                                    <Div style="nested-bug-child">
+                                        Bugz?
+                                    </Div>
+                                </Div>
+                            </Div>
+                        </Div>
+                    </Div>
+                </Div>
+            </Group>
+            <Div>row3</Div>
+        </Div>
 
     </Contents>
 </UITemplate>

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using Shapes2D;
 using TMPro;
 using UIForia.Layout;
@@ -12,13 +13,22 @@ using TextAlignment = UIForia.Text.TextAlignment;
 
 namespace UIForia.Rendering {
 
+//    [StructLayout(LayoutKind.Explicit)]
     public partial struct StyleProperty {
 
-        public readonly object objectField;
+        // element.style.SetGridRowTemplate(new GridRowTemplate(new [] {new Repeat(count/auto-fill/auto-fit, gridTemplate[])});
+        // element.style.GridRowTemplate[0].size = xx;
+        // GridRowStatic[elementId] => return struct
+//        [FieldOffset(0)]
         public readonly StylePropertyId propertyId;
+//        [FieldOffset(4)]
         public readonly int valuePart0;
+//        [FieldOffset(8)]
         public readonly int valuePart1;
+//        [FieldOffset(8)]
         public readonly float floatValue;
+//        [FieldOffset(8)]
+        public readonly object objectField;
 
         [DebuggerStepThrough]
         public StyleProperty(StylePropertyId propertyId, int value0, int value1, float floatValue, object objectField) {

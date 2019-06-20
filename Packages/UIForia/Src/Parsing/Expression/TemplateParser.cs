@@ -417,7 +417,7 @@ namespace UIForia.Parsing.Expression {
         private UITemplate ParseInputElement(XElement element) {
             return new UIElementTemplate(
                 app,
-                typeof(InputElement<string>),
+                typeof(UIInputElement),
                 ParseNodes(element.Nodes()),
                 ParseAttributes(element)
             );

@@ -774,49 +774,7 @@ namespace UIForia.Layout.LayoutTypes {
 
             IReadOnlyList<GridTrackSize> colTemplate = style.GridLayoutColTemplate;
             IReadOnlyList<GridTrackSize> rowTemplate = style.GridLayoutRowTemplate;
-
-            // fit -- try to fit the existing content into the existing cells, repeat pattern when overflowing & have more space
-            // fill -- add columns until pattern doesn't fit in the viewport
-
-            // fill
-
-            // for each cell def in template
-            // if repeat
-            // create cells
-            // if value
-            // create cell
-            // if fit
-            // create cell marker
-            // if fill   
-            // create cell marker
-
-
-            // for each cell in def
-            // find sizes + resolve cells needs to happen at the same time I think when repeating to fill
-            // only allow 1 fit/fill
-
-            // fill / fit are not at all compatible with fr, totally exclusive of each other. same story for min-content, max-content, auto and fit-content
-
-            // minmax -> flex size not valid as minimum
-
-            // LayoutType = Grid;
-
-            // 1fr repeat(fill, 1mx) 2fr
-
-            // fill(100px)
-            // fit(300px);
-
-            // if fill
-            // if we have a definite size (or max size) on that axis
-            // repetitions = max(1, repetition count not causing overflow)
-            // intrinsic sizes not allowed
-            // minmax allowed, if(definite max size, use that, otherwise use min)
-            // account for gap
-            // else if we have a definite min size
-            // the number of repetitions is the smallest possible positive integer that fulfills that minimum requirement
-            // else 
-            // repeititions = 1
-
+            
             for (int i = 0; i < colTemplate.Count; i++) {
                 if (colTemplate[i].type == GridTrackSizeType.Repeat) {
                     int count = (int) colTemplate[i].value;

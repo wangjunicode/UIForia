@@ -209,7 +209,7 @@ namespace UIForia.Elements {
             textInfo.Layout();
 
             T newValue = deserializer.Deserialize(text);
-            if (!value.Equals(newValue)) {
+            if ((value == null && newValue != null) || !value.Equals(newValue)) {
                 value = newValue;
                 onValueChanged?.Invoke(value);
             }

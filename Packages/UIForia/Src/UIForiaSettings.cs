@@ -15,10 +15,10 @@ namespace UIForia {
 
         public void OnEnable() {
             loadTemplatesFromStreamingAssets = loadTemplatesFromStreamingAssets || !UnityEngine.Application.isEditor;
-            s_InternalStreamingPath = Path.Combine(UnityEngine.Application.dataPath, "StreamingAssets", "UIForiaInternal");
+            s_InternalStreamingPath = Path.Combine(UnityEngine.Application.streamingAssetsPath, "UIForiaInternal");
             s_InternalNonStreamingPath = Path.Combine(UnityEngine.Application.dataPath, "..", "Packages", "UIForia", "Src");
             s_UserNonStreamingPath = UnityEngine.Application.dataPath;
-            s_UserStreamingPath = Path.Combine(UnityEngine.Application.dataPath, "StreamingAssets", "UIForia");
+            s_UserStreamingPath = Path.Combine(UnityEngine.Application.streamingAssetsPath, "UIForia");
         }
 
         public string GetInternalTemplatePath(string fileName) {

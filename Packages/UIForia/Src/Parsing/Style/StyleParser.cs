@@ -119,6 +119,14 @@ namespace UIForia.Parsing.Style {
                     AssertTokenType(StyleTokenType.Identifier);
                     tagName = tokenStream.Current.value;
                     tokenStream.Advance();
+                    if (tokenStream.Current.styleTokenType == StyleTokenType.LessThan) {
+                        tagName += tokenStream.Current.value;
+                        tokenStream.Advance();
+                        tagName += tokenStream.Current.value;
+                        AssertTokenTypeAndAdvance(StyleTokenType.Identifier);
+                        tagName += tokenStream.Current.value;
+                        AssertTokenTypeAndAdvance(StyleTokenType.GreaterThan);
+                    }
                     AssertTokenTypeAndAdvance(StyleTokenType.GreaterThan);
                     break;
                 // styleId { ... }

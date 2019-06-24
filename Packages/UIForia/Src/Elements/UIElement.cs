@@ -17,8 +17,8 @@ namespace UIForia.Elements {
     [DebuggerDisplay("{" + nameof(ToString) + "()}")]
     public class UIElement : IHierarchical {
 
-        public readonly int id;
-        public readonly UIStyleSet style;
+        public int id;
+        public UIStyleSet style;
 
         internal LightList<UIElement> children;
 
@@ -29,7 +29,7 @@ namespace UIForia.Elements {
         internal UIElementFlags flags;
         public UIElement parent;
   
-        public readonly LayoutResult layoutResult;
+        public LayoutResult layoutResult;
 
         internal static IntMap<ElementColdData> s_ColdDataMap = new IntMap<ElementColdData>();
 

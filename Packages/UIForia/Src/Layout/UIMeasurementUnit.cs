@@ -16,7 +16,7 @@ namespace UIForia.Layout {
         AnchorWidth = UnitConstants.AnchorWidth,
         AnchorHeight = UnitConstants.AnchorHeight,
         LineHeight = UnitConstants.LineHeight,
-//        FractionalRemaining = UnitConstants.FractionalRemaining,
+        Percentage = UnitConstants.Percent
 
     }
 

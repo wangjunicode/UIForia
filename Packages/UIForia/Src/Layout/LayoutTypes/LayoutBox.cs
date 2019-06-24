@@ -578,6 +578,9 @@ namespace UIForia.Layout.LayoutTypes {
                 case UIMeasurementUnit.Pixel:
                     return view.ScaleFactor * Mathf.Max(0, widthMeasurement.value);
 
+                case UIMeasurementUnit.Percentage:
+                    return 0;
+                
                 case UIMeasurementUnit.Content:
                     return Mathf.Max(0, PaddingBorderHorizontal + (GetContentWidth() * widthMeasurement.value));
 

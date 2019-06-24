@@ -20,6 +20,28 @@ style grid2 {
      GridLayoutRowTemplate = 300px 220px;
 }
 
+style grid-window-thing {
+    LayoutType = Grid;
+    GridLayoutColTemplate = 1fr;
+    GridLayoutRowTemplate = 100px 1fr 100px;
+    PreferredSize = 800px 500px;
+}
+
+style grid-maybe-bug {
+    LayoutType = Grid;
+    GridLayoutColTemplate = 1fr;
+    GridLayoutRowTemplate = 1fr;
+}
+
+style grid-maybe-bug-cell {
+    BackgroundColor = Yellow;
+    PreferredHeight = 1pca;
+}
+
+style nested-bug-child {
+    PreferredHeight = 1pca;
+}
+
 style mb50 {
     MarginBottom = 50px;
 }

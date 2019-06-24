@@ -11,9 +11,14 @@ using UIForia.Text;
 using UIForia.Util;
 using UnityEngine;
 using FontStyle = UIForia.Text.FontStyle;
+using TextAlignment = UIForia.Text.TextAlignment;
 
 namespace UIForia.Compilers.Style {
-    public struct StylePropertyMappers {
+    
+    public static class StylePropertyMappers {
+
+        public const string k_RepeatFit = "fit";
+        public const string k_RepeatFill = "fill";
 
         private static readonly Dictionary<string, Action<UIStyle, PropertyNode, StyleCompileContext>> mappers
             = new Dictionary<string, Action<UIStyle, PropertyNode, StyleCompileContext>> {
@@ -139,7 +144,7 @@ namespace UIForia.Compilers.Style {
                 {"textfontasset", (targetStyle, property, context) => targetStyle.TextFontAsset = MapFont(property.children[0], context)},
                 {"textfontstyle", (targetStyle, property, context) => targetStyle.TextFontStyle = MapTextFontStyle(property, context)},
                 {"textfontsize", (targetStyle, property, context) => targetStyle.TextFontSize = MapFixedLength(property.children[0], context)},
-                {"textalignment", (targetStyle, property, context) => targetStyle.TextAlignment = MapEnum<UIForia.Text.TextAlignment>(property.children[0], context)},
+                {"textalignment", (targetStyle, property, context) => targetStyle.TextAlignment = MapEnum<TextAlignment>(property.children[0], context)},
                 {"textoutlinewidth", (targetStyle, property, context) => targetStyle.TextOutlineWidth = MapNumber(property.children[0], context)},
                 {"textoutlinecolor", (targetStyle, property, context) => targetStyle.TextOutlineColor = MapColor(property, context)},
                 {"textglowcolor", (targetStyle, property, context) => targetStyle.TextGlowColor = MapColor(property, context)},
@@ -195,7 +200,7 @@ namespace UIForia.Compilers.Style {
         }
 
         private static FontStyle MapTextFontStyle(PropertyNode property, StyleCompileContext context) {
-            Text.FontStyle style = Text.FontStyle.Normal;
+            FontStyle style = FontStyle.Normal;
 
             foreach (StyleASTNode value in property.children) {
                 StyleASTNode resolvedValue = context.GetValueForReference(value);
@@ -205,35 +210,35 @@ namespace UIForia.Compilers.Style {
                         string propertyValue = identifierNode.name.ToLower();
 
                         if (propertyValue.Contains("bold")) {
-                            style |= Text.FontStyle.Bold;
+                            style |= FontStyle.Bold;
                         }
 
                         if (propertyValue.Contains("italic")) {
-                            style |= Text.FontStyle.Italic;
+                            style |= FontStyle.Italic;
                         }
 
                         if (propertyValue.Contains("highlight")) {
-                            style |= Text.FontStyle.Highlight;
+                            style |= FontStyle.Highlight;
                         }
 
                         if (propertyValue.Contains("smallcaps")) {
-                            style |= Text.FontStyle.SmallCaps;
+                            style |= FontStyle.SmallCaps;
                         }
 
                         if (propertyValue.Contains("superscript")) {
-                            style |= Text.FontStyle.Superscript;
+                            style |= FontStyle.Superscript;
                         }
 
                         if (propertyValue.Contains("subscript")) {
-                            style |= Text.FontStyle.Subscript;
+                            style |= FontStyle.Subscript;
                         }
 
                         if (propertyValue.Contains("underline")) {
-                            style |= Text.FontStyle.Underline;
+                            style |= FontStyle.Underline;
                         }
 
                         if (propertyValue.Contains("strikethrough")) {
-                            style |= Text.FontStyle.StrikeThrough;
+                            style |= FontStyle.StrikeThrough;
                         }
 
                         break;
@@ -242,7 +247,7 @@ namespace UIForia.Compilers.Style {
                 }
             }
 
-            if ((style & Text.FontStyle.Superscript) != 0 && (style & Text.FontStyle.Subscript) != 0) {
+            if ((style & FontStyle.Superscript) != 0 && (style & FontStyle.Subscript) != 0) {
                 throw new CompileException(context.fileName, property, "Font style cannot be both superscript and subscript");
             }
 
@@ -344,12 +349,14 @@ namespace UIForia.Compilers.Style {
 
         private static IReadOnlyList<GridTrackSize> MapGridLayoutTemplate(PropertyNode propertyNode, StyleCompileContext context) {
             LightList<GridTrackSize> gridTrackSizes = LightListPool<GridTrackSize>.Get();
-            foreach (StyleASTNode trackSize in propertyNode.children) {
+            for (int index = 0; index < propertyNode.children.Count; index++) {
+                StyleASTNode trackSize = propertyNode.children[index];
                 gridTrackSizes.Add(MapGridTrackSize(trackSize, context));
             }
 
             return gridTrackSizes;
         }
+
 
         private static GridTrackSize MapGridTrackSize(StyleASTNode trackSize, StyleCompileContext context) {
             StyleASTNode dereferencedValue = context.GetValueForReference(trackSize);
@@ -370,9 +377,100 @@ namespace UIForia.Compilers.Style {
                     float value = MapNumber(measurementNode.value, context);
                     return new GridTrackSize(value, unit);
 
+                case StyleFunctionNode functionNode:
+
+                    GridTrackSizeType trackSizeType;
+                    GridTrackSize size = default;
+                    
+                    switch (functionNode.identifier.ToLower()) {
+                        case "repeat":
+                            trackSizeType = GridTrackSizeType.Repeat;
+                            if (functionNode.children.Count < 2) {
+                                throw new CompileException(context.fileName, trackSize, $"Had a hard time parsing that track size: {trackSize}. Repeat must have at least two arguments.");
+                            }
+
+                            StyleASTNode firstChild = context.GetValueForReference(functionNode.children[0]);
+                            if (firstChild is StyleLiteralNode literalNode) {
+                                if (literalNode.type != StyleASTNodeType.NumericLiteral) {
+                                    throw new CompileException(context.fileName, trackSize, $"Had a hard time parsing that track size: {trackSize}. The first argument of repeat() must be a positive integer > 0 or one of the keywords {k_RepeatFill} or {k_RepeatFit}.");
+                                }
+
+                                float v = MapNumber(literalNode, context);
+                                if (Mathf.Floor(v) != v || v < 1) {
+                                    throw new CompileException(context.fileName, trackSize, $"Had a hard time parsing that track size: {trackSize}. The first argument of repeat() must be a positive integer > 0 or one of the keywords {k_RepeatFill} or {k_RepeatFit}.");
+                                }
+
+                                size.value = v;
+                                size.type = GridTrackSizeType.Repeat;
+                            }
+                            else if (firstChild is StyleIdentifierNode identifierNode) {
+                                if (identifierNode.name == k_RepeatFill) {
+                                    size.type = GridTrackSizeType.RepeatFill;
+                                }
+                                else if (identifierNode.name == k_RepeatFit) {
+                                    size.type = GridTrackSizeType.RepeatFit;
+                                }
+                                else {
+                                    throw new CompileException(context.fileName, trackSize, $"Had a hard time parsing that track size: {trackSize}. The first argument of repeat() must be a positive integer > 0 or one of the keywords {k_RepeatFill} or {k_RepeatFit}.");
+                                }
+                            }
+                            else {
+                                throw new CompileException(context.fileName, trackSize, $"Had a hard time parsing that track size: {trackSize}. The first argument of repeat() must be a positive integer > 0 or one of the keywords {k_RepeatFill} or {k_RepeatFit}.");
+                            }
+                         
+                            size.pattern = MapGridTrackSizePattern(1, functionNode.children, context, true);
+
+                            break;
+                        case "grow": 
+                            trackSizeType = GridTrackSizeType.Grow;
+                            if (functionNode.children.Count != 2) {
+                                throw new CompileException(context.fileName, trackSize, $"Had a hard time parsing that track size: {trackSize}. Grow must have two arguments.");
+                            }
+
+                            size.type = GridTrackSizeType.Grow;
+                            size.pattern = MapGridTrackSizePattern(0, functionNode.children, context, false);
+
+                            break;
+                        case "shrink": 
+                            trackSizeType = GridTrackSizeType.Shrink;
+                            if (functionNode.children.Count != 2) {
+                                throw new CompileException(context.fileName, trackSize, $"Had a hard time parsing that track size: {trackSize}. Shrink must have two arguments.");
+                            }
+                            size.type = GridTrackSizeType.Shrink;
+                            size.pattern = MapGridTrackSizePattern(0, functionNode.children, context, false);
+                            break;
+                        default:
+                            throw new CompileException(context.fileName, trackSize, $"Had a hard time parsing that track size: {trackSize}. Expected a known track size function (repeat, grow, shrink) but all I got was {functionNode.identifier}");
+                    }
+                    
+                    GridTrackSize[] pattern = new GridTrackSize[functionNode.children.Count];
+
+                    return size;
+                
                 default:
                     throw new CompileException(context.fileName, trackSize, $"Had a hard time parsing that track size: {trackSize}.");
             }
+        }
+
+        private static GridTrackSize[] MapGridTrackSizePattern(int startIndex, LightList<StyleASTNode> nodes, StyleCompileContext context, bool allowGrowOrShrink) {
+            GridTrackSize[] retn = new GridTrackSize[nodes.Count - startIndex];
+
+            for (int index = startIndex; index < nodes.Count; index++) {
+                StyleASTNode argument = context.GetValueForReference(nodes[index]);
+                GridTrackSize trackSize = MapGridTrackSize(argument, context);
+                if (trackSize.type == GridTrackSizeType.Repeat) {
+                    throw new CompileException(argument, "You cannot nest repeats.");
+                }
+
+                if (!allowGrowOrShrink && (trackSize.type == GridTrackSizeType.Grow || trackSize.type == GridTrackSizeType.Shrink)) {
+                    throw new CompileException(argument, "You cannot nest grow and shrink into each other.");
+                }
+
+                // mind blown
+                retn[index - startIndex] = trackSize;
+            }
+
+            return retn;
         }
 
         private static void MapBorders(UIStyle targetStyle, PropertyNode property, StyleCompileContext context) {

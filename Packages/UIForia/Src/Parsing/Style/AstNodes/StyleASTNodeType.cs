@@ -21,6 +21,7 @@ namespace UIForia.Parsing.Style.AstNodes {
         Unit,
         Rgba,
         Rgb,
+        Function,
         Url,
         Property,
         AttributeGroup,

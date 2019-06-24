@@ -26,7 +26,7 @@ namespace Documentation {
             "input",
         };
 
-        public float floatValue;
+        public float floatValue = 1115.52f;
         public string rwValue;
 
         public string regularValue;

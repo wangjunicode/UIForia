@@ -133,6 +133,14 @@ namespace UIForia.Editor {
 
             UIStyleSet style = selectedElement.style;
 
+            bool isSet = (selectedElement.flags & UIElementFlags.DebugLayout) != 0;
+            if (GUILayout.Toggle(isSet, "Debug Layout")) {
+                selectedElement.flags |= UIElementFlags.DebugLayout;
+            }
+            else {
+                selectedElement.flags &= ~UIElementFlags.DebugLayout;
+            }
+            
             GUILayout.BeginHorizontal();
             DrawStyleStateButton("Hover", StyleState.Hover);
             DrawStyleStateButton("Focus", StyleState.Focused);
@@ -752,7 +760,7 @@ namespace UIForia.Editor {
 
                 case StylePropertyId.GridItemColSelfAlignment:
                 case StylePropertyId.GridItemRowSelfAlignment:
-                    return DrawEnumWithValue<CrossAxisAlignment>(property, isEditable);
+                    return DrawEnumWithValue<GridAxisAlignment>(property, isEditable);
 
                 case StylePropertyId.GridLayoutDirection:
                     return DrawEnumWithValue<LayoutDirection>(property, isEditable);
@@ -774,7 +782,7 @@ namespace UIForia.Editor {
 
                 case StylePropertyId.GridLayoutColAlignment:
                 case StylePropertyId.GridLayoutRowAlignment:
-                    return DrawEnumWithValue<CrossAxisAlignment>(property, isEditable);
+                    return DrawEnumWithValue<GridAxisAlignment>(property, isEditable);
 
                 case StylePropertyId.FlexLayoutWrap:
                     return DrawEnumWithValue<WrapMode>(property, isEditable);

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Runtime.Serialization;
 using UIForia.Elements;
 using UIForia.Util;
 using UnityEngine;
@@ -23,7 +24,6 @@ namespace UIForia.LinqExpressions {
         private Dictionary<Type, Action<object>> resetFunctions;
 
         public T Get<T>() where T : UIElement {
-            
 //            pools.TryGetValue(typeof(T), out Type type);
             return null;
         }
@@ -42,6 +42,34 @@ namespace UIForia.LinqExpressions {
     public static class LinqExpressions {
 
         private static readonly List<Expression> s_ExpressionList = new List<Expression>(24);
+
+        private static object[] empty = { };
+
+        public static object ResetInstance(object instance, ConstructorInfo constructorInfo, Action<object> clear) {
+            clear(instance);
+            return constructorInfo.Invoke(instance, empty);
+        }
+
+        public static object CreateInstance(object instance, Type type, Action<object> clear) {
+            var constructor = type.GetConstructor(new Type[0]);
+            if (constructor == null && !type.IsValueType) {
+                throw new NotSupportedException($"Type '{type.FullName}' doesn't have a parameterless constructor");
+            }
+
+            if (instance != null) {
+                clear(instance);
+            }
+
+            var emptyInstance = instance ?? FormatterServices.GetUninitializedObject(type);
+
+            return constructor?.Invoke(emptyInstance, new object[0]) ?? emptyInstance;
+        }
+        
+        public static object CreateInstance(Type type, ConstructorInfo constructor, object[] args) {
+//            var emptyInstance = FormatterServices.GetUninitializedObject(type);
+
+            return constructor.Invoke(args);
+        }
 
         public static bool IsAutoProperty(PropertyInfo prop, FieldInfo[] fieldInfos) {
             if (!prop.CanWrite || !prop.CanRead) {
@@ -95,17 +123,29 @@ namespace UIForia.LinqExpressions {
 
             FieldInfo[] fields = type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
 
+            Assembly assembly = typeof(Expression).Assembly;
+            Type cheating = assembly.GetType("System.Linq.Expressions.AssignBinaryExpression");
+            // this is bypassing the IsInitOnly check done internally by Expression.Assign
+            var ctor = cheating.GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.CreateInstance)[0];
+//            ctor.GetMethodBody().LocalVariables[0
             for (int i = 0; i < fields.Length; i++) {
                 Type fieldType = fields[i].FieldType;
                 if (fields[i].IsInitOnly) {
-                    object defaultValue = fieldType.IsValueType ? Activator.CreateInstance(fieldType) : null;
-                    // use reflection to set the value since the compiler will complain about setting a read only field
-                    s_ExpressionList.Add(Expression.Call(
-                        Expression.Constant(fields[i]),
-                        s_FieldSetValue,
-                        parameterExpression,
-                        Expression.Convert(Expression.Constant(defaultValue), typeof(object)))
-                    );
+//                    object defaultValue = fieldType.IsValueType ? Activator.CreateInstance(fieldType) : null;
+//                    // use reflection to set the value since the compiler will complain about setting a read only field
+//                    s_ExpressionList.Add(Expression.Call(
+//                        Expression.Constant(fields[i]),
+//                        s_FieldSetValue,
+//                        parameterExpression,
+//                        Expression.Convert(Expression.Constant(defaultValue), typeof(object)))
+//                    );
+                    // compiler will bitch about this if we actually generate code that tries to assign to read only fields....
+                    // for dev and non AOT platforms this is perfectly fine to do.
+                    var ohSoBad = CreateInstance(cheating, ctor, new object[] {
+                        Expression.Field(converted, fields[i]),
+                        Expression.Default(fieldType)
+                    });
+                    s_ExpressionList.Add((BinaryExpression)ohSoBad);
                 }
                 else {
                     s_ExpressionList.Add(Expression.Assign(Expression.Field(converted, fields[i]), Expression.Default(fieldType)));

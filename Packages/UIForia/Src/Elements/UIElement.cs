@@ -17,19 +17,19 @@ namespace UIForia.Elements {
     [DebuggerDisplay("{" + nameof(ToString) + "()}")]
     public class UIElement : IHierarchical {
 
-        public int id;
-        public UIStyleSet style;
+        public readonly int id;
+        public readonly UIStyleSet style;
 
-        internal LightList<UIElement> children;
+        internal LightList<UIElement> children; // todo -- replace w/ linked list & child count
 
-        public ExpressionContext templateContext;
+        public ExpressionContext templateContext; // todo -- can probably be moved to binding system
 
-        public int enablePhase;
-        
+        public int enablePhase; // todo -- can probably be removed
+
         internal UIElementFlags flags;
         public UIElement parent;
-  
-        public LayoutResult layoutResult;
+
+        public readonly LayoutResult layoutResult;
 
         internal static IntMap<ElementColdData> s_ColdDataMap = new IntMap<ElementColdData>();
 
@@ -88,11 +88,11 @@ namespace UIForia.Elements {
         public bool isBuiltIn => (flags & UIElementFlags.BuiltIn) != 0;
 
         internal bool isPrimitive => (flags & UIElementFlags.Primitive) != 0;
-                
+
         public bool isCreated => (flags & UIElementFlags.Created) != 0;
 
         public bool isReady => (flags & UIElementFlags.Ready) != 0;
-        
+
         public bool isRegistered => (flags & UIElementFlags.Registered) != 0;
 
         public virtual void OnCreate() { }
@@ -117,12 +117,13 @@ namespace UIForia.Elements {
             if (element == null || element == this || element.isDestroyed) {
                 return null;
             }
+
             if (View == null) {
                 element.parent = this;
                 element.View = null;
                 element.siblingIndex = children.Count;
                 element.depth = depth + 1;
-                children.Insert((int)idx, element);
+                children.Insert((int) idx, element);
             }
             else {
                 Application.InsertChild(this, element, (uint) children.Count);
@@ -130,12 +131,13 @@ namespace UIForia.Elements {
 
             return element;
         }
-        
+
         public UIElement AddChild(UIElement element) {
             // todo -- if <Children/> is defined in the template, attach child to that element instead
             if (element == null || element == this || element.isDestroyed) {
                 return null;
             }
+
             if (View == null) {
                 element.parent = this;
                 element.View = null;
@@ -158,13 +160,13 @@ namespace UIForia.Elements {
                 ptr = ptr.parent;
             }
         }
-        
+
         public void SetEnabled(bool active) {
             if (View == null) {
                 flags &= ~UIElementFlags.Enabled;
                 return;
             }
-            
+
             if (active && isSelfDisabled) {
                 View.Application.DoEnableElement(this);
             }
@@ -410,13 +412,13 @@ namespace UIForia.Elements {
 
         internal UIElementTypeData GetTypeData() {
             UIElementTypeData typeData = default;
-            Type elementType = GetType(); 
+            Type elementType = GetType();
             if (s_TypeDataMap.TryGetValue(elementType, out typeData)) {
                 return typeData;
             }
             else {
                 typeData.requiresUpdate = ReflectionUtil.IsOverride(elementType.GetMethod(nameof(OnUpdate)));
-               //typeData.attributes = elementType.GetCustomAttributes();
+                //typeData.attributes = elementType.GetCustomAttributes();
                 s_TypeDataMap[elementType] = typeData;
                 return typeData;
             }
@@ -427,10 +429,11 @@ namespace UIForia.Elements {
         internal struct UIElementTypeData {
 
             public bool requiresUpdate;
-           // public Attribute[] attributes;
+            // public Attribute[] attributes;
 
         }
 
     }
 
 }
+

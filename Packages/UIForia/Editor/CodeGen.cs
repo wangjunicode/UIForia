@@ -44,7 +44,7 @@ namespace UIForia.Editor {
                 new PropertyGenerator<string>(StylePropertyId.Painter, string.Empty),
                 new AnimatedPropertyGenerator<float>(StylePropertyId.Opacity, 1, InheritanceType.Inherited),
                 new PropertyGenerator<CursorStyle>(StylePropertyId.Cursor, null),
-                new PropertyGenerator<Visibility>(StylePropertyId.Visibility, Visibility.Visible),
+                new PropertyGenerator<Visibility>(StylePropertyId.Visibility, Visibility.Visible, InheritanceType.Inherited),
 
                 // Flex Item
                 new AnimatedPropertyGenerator<int>(StylePropertyId.FlexItemOrder, 0),

@@ -5,8 +5,8 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Reflection.Emit;
+using Boo.Lang;
 using UIForia.Elements;
-using UIForia.Parsing.Expression;
 using UnityEngine;
 
 namespace UIForia.Util {
@@ -45,11 +45,11 @@ namespace UIForia.Util {
         public const BindingFlags InstanceBindFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
         public const BindingFlags InterfaceBindFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.Static;
 
-        private static readonly List<GenericTypeEntry> generics = new List<GenericTypeEntry>();
-        private static readonly List<DelegateEntry> staticDelegates = new List<DelegateEntry>();
-        private static readonly List<DelegateEntry> openDelegates = new List<DelegateEntry>();
+        private static readonly System.Collections.Generic.List<GenericTypeEntry> generics = new System.Collections.Generic.List<GenericTypeEntry>();
+        private static readonly System.Collections.Generic.List<DelegateEntry> staticDelegates = new System.Collections.Generic.List<DelegateEntry>();
+        private static readonly System.Collections.Generic.List<DelegateEntry> openDelegates = new System.Collections.Generic.List<DelegateEntry>();
 
-        private static readonly Dictionary<Type, List<LinqAccessor>> linqDelegates = new Dictionary<Type, List<LinqAccessor>>();
+        private static readonly Dictionary<Type, System.Collections.Generic.List<LinqAccessor>> linqDelegates = new Dictionary<Type, System.Collections.Generic.List<LinqAccessor>>();
 
         public static readonly object[] ObjectArray0 = new object[0];
         public static readonly object[] ObjectArray1 = new object[1];
@@ -717,7 +717,7 @@ namespace UIForia.Util {
         }
 
         public static LinqAccessor GetLinqPropertyAccessors(Type baseType, Type propertyType, string propertyName) {
-            List<LinqAccessor> linqList;
+            System.Collections.Generic.List<LinqAccessor> linqList;
 
             if (linqDelegates.TryGetValue(baseType, out linqList)) {
                 for (int i = 0; i < linqList.Count; i++) {
@@ -727,7 +727,7 @@ namespace UIForia.Util {
                 }
             }
             else {
-                linqList = new List<LinqAccessor>();
+                linqList = new System.Collections.Generic.List<LinqAccessor>();
                 linqDelegates[baseType] = linqList;
             }
 
@@ -744,7 +744,7 @@ namespace UIForia.Util {
         }
 
         public static LinqAccessor GetLinqFieldAccessors(Type baseType, Type fieldType, string fieldName) {
-            List<LinqAccessor> linqList;
+            System.Collections.Generic.List<LinqAccessor> linqList;
 
             if (linqDelegates.TryGetValue(baseType, out linqList)) {
                 for (int i = 0; i < linqList.Count; i++) {
@@ -754,7 +754,7 @@ namespace UIForia.Util {
                 }
             }
             else {
-                linqList = new List<LinqAccessor>();
+                linqList = new System.Collections.Generic.List<LinqAccessor>();
                 linqDelegates[baseType] = linqList;
             }
 
@@ -1001,9 +1001,9 @@ namespace UIForia.Util {
             return null;
         }
 
-        public static List<MethodInfo> GetMethodsWithName(Type type, string targetName) {
+        public static System.Collections.Generic.List<MethodInfo> GetMethodsWithName(Type type, string targetName) {
             MethodInfo[] infos = type.GetMethods(InstanceBindFlags | StaticFlags);
-            List<MethodInfo> retn = new List<MethodInfo>();
+            System.Collections.Generic.List<MethodInfo> retn = new System.Collections.Generic.List<MethodInfo>();
             for (int i = 0; i < infos.Length; i++) {
                 if (infos[i].Name == targetName) {
                     retn.Add(infos[i]);
@@ -1119,8 +1119,77 @@ namespace UIForia.Util {
         }
 
         private static int typeIdGenerator = 0;
+
         public static string GetGeneratedTypeName(string name) {
             return name + typeIdGenerator;
+        }
+
+        public static MemberInfo GetFieldOrProperty(Type type, string memberName) {
+            if (IsField(type, memberName, out FieldInfo fieldInfo)) {
+                return fieldInfo;
+            }
+
+            if (IsProperty(type, memberName, out PropertyInfo propertyInfo)) {
+                return propertyInfo;
+            }
+
+            return null;
+        }
+
+        public static PropertyInfo GetIndexedPropertyWithSignature(Type lastValueType, Type indexType) {
+            TypeArray1[0] = indexType;
+            return GetIndexedPropertyWithSignature(lastValueType, TypeArray1);
+        }
+
+        public static PropertyInfo GetIndexedPropertyWithSignature(Type targetType, Type[] indexTypes) {
+            PropertyInfo[] properties = targetType.GetProperties(InstanceBindFlags);
+
+            for (int i = 0; i < properties.Length; i++) {
+                PropertyInfo p = properties[i];
+                ParameterInfo[] indexParameters = p.GetIndexParameters();
+                if (indexParameters.Length != indexTypes.Length) {
+                    continue;
+                }
+
+                bool matches = true;
+
+                for (int j = 0; j < indexParameters.Length; j++) {
+                    if (indexParameters[j].ParameterType != indexTypes[j]) {
+                        matches = false;
+                        break;
+                    }
+                }
+
+                if (matches) {
+                    return properties[i];
+                }
+            }
+
+            return null;
+        }
+
+        public struct IndexerInfo {
+
+            public PropertyInfo propertyInfo;
+            public ParameterInfo[] parameterInfos;
+
+        }
+        public static IList<IndexerInfo> GetIndexedProperties(Type targetType, IList<IndexerInfo> retn = null) {
+            if (retn == null) retn = new System.Collections.Generic.List<IndexerInfo>();
+            PropertyInfo[] properties = targetType.GetProperties(InstanceBindFlags);
+
+            for (int i = 0; i < properties.Length; i++) {
+                PropertyInfo p = properties[i];
+                ParameterInfo[] indexParameters = p.GetIndexParameters();
+                if (indexParameters.Length > 0) {
+                    retn.Add(new IndexerInfo() {
+                        propertyInfo = p,
+                        parameterInfos = indexParameters
+                    });
+                }
+            }
+
+            return retn;
         }
 
     }

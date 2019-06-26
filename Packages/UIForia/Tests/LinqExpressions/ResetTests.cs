@@ -39,12 +39,12 @@ public class ResetTests {
         ResetThing element = new ResetThing();
         element.flags |= UIElementFlags.TextElement;
 
-        element.layoutResult = new LayoutResult();
         element.autoInt = 1414;
         element.SetCallback(() => { });
         element.evt += () => { };
 
         Assert.NotNull(element.GetCallback());
+        Assert.NotNull(element.layoutResult);
         Action<object> clear = UIForia.LinqExpressions.LinqExpressions.CompileClear(typeof(ResetThing));
         clear(element);
         Assert.AreEqual(default(int), element.autoInt);

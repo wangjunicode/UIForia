@@ -35,6 +35,7 @@ public class ExpressionCompilerTests {
     public class Indexable {
 
         public string[] val;
+
         public string this[int i] {
             get => val[i];
             set => val[i] = value;
@@ -55,18 +56,16 @@ public class ExpressionCompilerTests {
         public float[] floats;
         public Indexable indexable;
         public Thing thing;
-        
+
         public Thing thingProp { get; set; }
-        
+
         public Vector3 structThing;
         public readonly float notWritable;
 
         public float nonWritableProper {
-            set {
-                
-            }
+            set { }
         }
-        
+
         public string StringValueProp => value;
 
         public string GetValue() {
@@ -1133,13 +1132,13 @@ public class ExpressionCompilerTests {
         expression.Assign(ctx, 3f);
         Assert.AreEqual(target.floats[1], 3f);
     }
-    
+
     [Test]
     public void CompileWriteTarget_IndexedField() {
         TestType0 target = new TestType0();
         target.indexable = new Indexable();
         target.indexable.val = new string[] {"hi", "there", "guten tag"};
-        
+
         ExpressionContext ctx = new ExpressionContext(target);
         ExpressionCompiler compiler = new ExpressionCompiler();
         WriteTargetExpression<string> expression = compiler.CompileWriteTarget<string>(typeof(TestType0), "indexable[1]");
@@ -1147,7 +1146,7 @@ public class ExpressionCompilerTests {
         expression.Assign(ctx, "here");
         Assert.AreEqual("here", target.indexable[1]);
     }
-    
+
     [Test]
     public void CompileWriteTarget_DotFieldAccess() {
         TestType0 target = new TestType0();
@@ -1159,7 +1158,7 @@ public class ExpressionCompilerTests {
         expression.Assign(ctx, 12f);
         Assert.AreEqual(12f, target.thing.value);
     }
-    
+
     [Test]
     public void CompileWriteTarget_DotPropertyAccess() {
         TestType0 target = new TestType0();
@@ -1171,7 +1170,7 @@ public class ExpressionCompilerTests {
         expression.Assign(ctx, 12f);
         Assert.AreEqual(12f, target.thingProp.value);
     }
-    
+
     [Test]
     public void CompileWriteTarget_ThrowsForStructTargets() {
         CompileException ex = Assert.Throws<CompileException>(() => {
@@ -1180,7 +1179,7 @@ public class ExpressionCompilerTests {
         });
         Assert.AreEqual("structThing.x", ex.expression);
     }
-    
+
     [Test]
     public void CompileWriteTarget_ErrorOnNonWritable() {
         CompileException ex0 = Assert.Throws<CompileException>(() => {
@@ -1188,12 +1187,14 @@ public class ExpressionCompilerTests {
             compiler.CompileWriteTarget<float>(typeof(TestType0), "notWritable");
         });
         Assert.AreEqual("notWritable", ex0.expression);
-        
+
         CompileException ex1 = Assert.Throws<CompileException>(() => {
             ExpressionCompiler compiler = new ExpressionCompiler();
             compiler.CompileWriteTarget<float>(typeof(TestType0), "notWritableProp");
         });
         Assert.AreEqual("notWritableProp", ex1.expression);
     }
+
+   
 
 }

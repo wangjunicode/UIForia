@@ -12,6 +12,7 @@ using UIForia.Parsing.Expression;
 using UIForia.Parsing.Expression.AstNodes;
 using UIForia.Util;
 using UnityEngine;
+using Linq = System.Linq.Expressions;
 
 namespace UIForia.Compilers {
 
@@ -118,7 +119,7 @@ namespace UIForia.Compilers {
         public void RemoveAliasResolver(ExpressionAliasResolver resolver) {
             aliasResolvers.Remove(resolver);
         }
-        
+
         public void RemoveAliasResolver(string resolverName) {
             for (int i = 0; i < aliasResolvers.Count; i++) {
                 if (aliasResolvers[i].aliasName == resolverName) {
@@ -136,7 +137,7 @@ namespace UIForia.Compilers {
             try {
                 astRoot = ExpressionParser.Parse(input);
                 Expression expression = Visit(astRoot);
-                
+
                 if (targetType != null && !targetType.IsAssignableFrom(expression.YieldedType)) {
                     Expression cast = GetImplicitCast(expression, targetType);
                     if (cast != null) {
@@ -146,16 +147,19 @@ namespace UIForia.Compilers {
                     throw new ParseException($"Type {rootType}.{expression.YieldedType} is not assignable to {targetType} and no implicit conversion exists");
                 }
 
-                return (Expression<T>)expression;
-            } catch (ParseException e) {
+                return (Expression<T>) expression;
+            }
+            catch (ParseException e) {
                 e.SetFileName(this.rootType.FullName);
                 throw;
-            } catch (CompileException e) {
+            }
+            catch (CompileException e) {
                 e.SetFileName(rootType.FullName);
                 e.SetExpression(input);
                 throw;
-            } catch (Exception e) {
-                throw new TemplateParseException(rootType.AssemblyQualifiedName, e.Message, e, astRoot);                
+            }
+            catch (Exception e) {
+                throw new TemplateParseException(rootType.AssemblyQualifiedName, e.Message, e, astRoot);
             }
         }
 
@@ -179,6 +183,8 @@ namespace UIForia.Compilers {
                 throw;
             }
         }
+
+        
 
         public Expression Compile(Type rootType, string input, Type targetType) {
             this.targetType = targetType;
@@ -205,6 +211,7 @@ namespace UIForia.Compilers {
         }
 
         private Expression Visit(ASTNode node) {
+
             switch (node.type) {
                 case ASTNodeType.NullLiteral:
                     return VisitNull((LiteralNode) node);
@@ -289,9 +296,7 @@ namespace UIForia.Compilers {
                             new ConstructorArguments(null, propertyInfo)
                         );
                     }
-                    else if (ReflectionUtil.IsMethod(rootType, fieldName, out MethodInfo info)) {
-                      
-                    }
+                    else if (ReflectionUtil.IsMethod(rootType, fieldName, out MethodInfo info)) { }
 
                     throw new CompileException("Invalid write target expression");
                 }
@@ -542,6 +547,7 @@ namespace UIForia.Compilers {
             if (targetType == null) {
                 return expr;
             }
+
             return GetImplicitCast(expr, targetType);
         }
 
@@ -649,9 +655,9 @@ namespace UIForia.Compilers {
 
             AccessExpressionPart retn = MakeAccessPartFromInfo(accessInfos, 0, false);
             return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
-                    typeof(AccessExpression<,>),
-                    new GenericArguments(retn.YieldedType, rootType),
-                    new ConstructorArguments(retn)
+                typeof(AccessExpression<,>),
+                new GenericArguments(retn.YieldedType, rootType),
+                new ConstructorArguments(retn)
             );
         }
 
@@ -1308,7 +1314,6 @@ namespace UIForia.Compilers {
                             new ConstructorArguments(rootType, fieldName)
                         );
                     }
-                    
                 }
 
                 if (ReflectionUtil.IsProperty(rootType, fieldName)) {
@@ -1338,9 +1343,7 @@ namespace UIForia.Compilers {
                     );
                 }
                 else if (ReflectionUtil.IsMethod(rootType, fieldName, out MethodInfo methodInfo)) {
-                    if (ReflectionUtil.IsAction(targetType)) {
-                        
-                    }
+                    if (ReflectionUtil.IsAction(targetType)) { }
                 }
             }
 

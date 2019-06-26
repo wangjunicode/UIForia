@@ -4,6 +4,14 @@ namespace UIForia.Extensions {
 
     public static class TypeExtensions {
 
+        public static bool Implements(this Type type, Type interfaceType) {
+            if (!interfaceType.IsInterface) {
+                return false;
+            }
+
+            return interfaceType.IsAssignableFrom(type);
+        }
+        
         public static Type GetTypeFromSimpleName(string typeName) {
             if (typeName == null) {
                 throw new ArgumentNullException(nameof(typeName));

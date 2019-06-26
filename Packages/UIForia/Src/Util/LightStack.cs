@@ -10,7 +10,8 @@ namespace UIForia.Util {
         private bool isPooled;
 
         public int Count => size;
-
+        public T[] Stack => array;
+        
         public LightStack(int capacity = 8) {
             capacity = Mathf.Max(1, capacity);
             this.array = new T[capacity];
@@ -38,6 +39,10 @@ namespace UIForia.Util {
             array[size++] = item;
         }
 
+        public T PeekAtUnchecked(int idx) {
+            return array[idx];
+        }
+        
         public T Pop() {
             if (size == 0) return default;
             T obj = array[--size];

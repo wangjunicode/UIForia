@@ -28,10 +28,6 @@ namespace UIForia.Parsing.Expression.AstNodes {
         BinaryAnd = 1 << 21,
         ShiftLeft = 1 << 22,
         ShiftRight = 1 << 23,
-        
-        Boolean = And | Or | Not,
-        Arithmetic = Plus | Minus | Times | Divide | Mod | ShiftLeft | ShiftRight | BinaryAnd | BinaryOr | BinaryXor,
-        Comparator = Equals | NotEquals | GreaterThan | GreaterThanEqualTo | LessThan | LessThanEqualTo,
 
     }
 }

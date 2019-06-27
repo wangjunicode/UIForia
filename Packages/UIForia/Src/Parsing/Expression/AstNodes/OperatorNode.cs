@@ -18,7 +18,7 @@ namespace UIForia.Parsing.Expression.AstNodes {
                         return 1;
                     
                     case OperatorType.Mod:
-                        return 1;
+                        return 2;
                     
                     case OperatorType.Times:
                         return 2;
@@ -49,6 +49,21 @@ namespace UIForia.Parsing.Expression.AstNodes {
                     
                     case OperatorType.LessThanEqualTo:
                         return -1;
+                    
+                    case OperatorType.ShiftLeft:
+                        return 1;
+                    
+                    case OperatorType.ShiftRight:
+                        return 1;
+                    
+                    case OperatorType.BinaryOr:
+                        return 1;
+                    
+                    case OperatorType.BinaryAnd:
+                        return 1;
+                    
+                    case OperatorType.BinaryXor:
+                        return 1;
                     
                     // todo add support for these as soon as we build our own template parser
                     case OperatorType.Or:

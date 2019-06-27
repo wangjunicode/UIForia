@@ -114,27 +114,17 @@ namespace UIForia.Parsing.Expression {
                     operatorNode = ASTNode.OperatorNode(OperatorType.Mod);
                     operatorNode.WithLocation(tokenStream.Previous);
                     return true;
-                
-                case ExpressionTokenType.ShiftLeft:
-                    operatorNode = ASTNode.OperatorNode(OperatorType.ShiftLeft);
-                    operatorNode.WithLocation(tokenStream.Previous);
-                    return true;
 
-                case ExpressionTokenType.ShiftRight:
-                    operatorNode = ASTNode.OperatorNode(OperatorType.ShiftRight);
-                    operatorNode.WithLocation(tokenStream.Previous);
-                    return true;
-                
                 case ExpressionTokenType.BinaryAnd:
                     operatorNode = ASTNode.OperatorNode(OperatorType.BinaryAnd);
                     operatorNode.WithLocation(tokenStream.Previous);
                     return true;
-                
+
                 case ExpressionTokenType.BinaryOr:
                     operatorNode = ASTNode.OperatorNode(OperatorType.BinaryOr);
                     operatorNode.WithLocation(tokenStream.Previous);
                     return true;
-                
+
                 case ExpressionTokenType.BinaryXor:
                     operatorNode = ASTNode.OperatorNode(OperatorType.BinaryXor);
                     operatorNode.WithLocation(tokenStream.Previous);
@@ -161,6 +151,14 @@ namespace UIForia.Parsing.Expression {
                     return true;
 
                 case ExpressionTokenType.GreaterThan:
+                    // two greater thans next to each other are the same as a shift right. this since whitespace is ignored this means > > is actually a shift operator
+                    if (tokenStream.Current.expressionTokenType == ExpressionTokenType.GreaterThan) {
+                        tokenStream.Advance(); // step over the 2nd one
+                        operatorNode = ASTNode.OperatorNode(OperatorType.ShiftRight);
+                        operatorNode.WithLocation(tokenStream.Previous);
+                        return true;
+                    }
+
                     operatorNode = ASTNode.OperatorNode(OperatorType.GreaterThan);
                     operatorNode.WithLocation(tokenStream.Previous);
                     return true;
@@ -171,6 +169,14 @@ namespace UIForia.Parsing.Expression {
                     return true;
 
                 case ExpressionTokenType.LessThan:
+                    // two less thans next to each other are the same as a shift left. this since whitespace is ignored this means < < is actually a shift operator
+                    if (tokenStream.Current.expressionTokenType == ExpressionTokenType.LessThan) {
+                        tokenStream.Advance(); // step over the 2nd one
+                        operatorNode = ASTNode.OperatorNode(OperatorType.ShiftLeft);
+                        operatorNode.WithLocation(tokenStream.Previous);
+                        return true;
+                    }
+
                     operatorNode = ASTNode.OperatorNode(OperatorType.LessThan);
                     operatorNode.WithLocation(tokenStream.Previous);
                     return true;
@@ -232,7 +238,7 @@ namespace UIForia.Parsing.Expression {
                 if (expressionStack.Count == 0) {
                     Abort();
                 }
-                
+
                 OperatorNode op;
                 if (!ParseOperatorExpression(out op)) {
                     Abort();
@@ -279,7 +285,6 @@ namespace UIForia.Parsing.Expression {
 
         // todo string concat expression "string {nested expression}"
         private bool ParseExpression(ref ASTNode retn) {
-            
             if (ParseDirectCastExpression(ref retn)) return true;
             if (ParseTypeOfExpression(ref retn)) return true;
             if (ParseArrayLiteralExpression(ref retn)) return true;
@@ -291,7 +296,7 @@ namespace UIForia.Parsing.Expression {
 
             return false;
         }
-        
+
         private bool ParseArrayLiteralExpression(ref ASTNode retn) {
             if (tokenStream.Current != ExpressionTokenType.ArrayAccessOpen) {
                 return false;
@@ -339,7 +344,7 @@ namespace UIForia.Parsing.Expression {
                 retn = ASTNode.UnaryExpressionNode(ASTNodeType.UnaryMinus, expr);
                 return true;
             }
-            
+
             if (tokenStream.Current == ExpressionTokenType.BinaryNot) {
                 tokenStream.Advance();
                 ASTNode expr = null;
@@ -348,7 +353,7 @@ namespace UIForia.Parsing.Expression {
                     return false;
                 }
 
-                retn = ASTNode.UnaryExpressionNode(ASTNodeType.BinaryNot, expr);
+                retn = ASTNode.UnaryExpressionNode(ASTNodeType.UnaryBitwiseNot, expr);
                 return true;
             }
 
@@ -547,6 +552,7 @@ namespace UIForia.Parsing.Expression {
                     if (!ParseListExpression(ref parameters, ExpressionTokenType.ParenOpen, ExpressionTokenType.ParenClose)) {
                         Abort();
                     }
+
                     parts.Add(ASTNode.InvokeNode(parameters));
                     if (tokenStream.HasMoreTokens) {
                         continue;
@@ -610,7 +616,7 @@ namespace UIForia.Parsing.Expression {
             tokenStream.Save();
 
             ExpressionParser subParser = CreateSubParser(advance);
-            TypePath typePath = new TypePath();
+            TypePath typePath = new TypePath(); // todo -- allocates a list :(
             bool valid = subParser.ParseTypePath(ref typePath);
             subParser.Release();
 
@@ -642,7 +648,6 @@ namespace UIForia.Parsing.Expression {
                         ReleaseList(retn);
                         return false;
                     }
-                    
                 }
                 else {
                     ASTNode node = ParseLoop();
@@ -654,7 +659,6 @@ namespace UIForia.Parsing.Expression {
                     return true;
                 }
             }
-
         }
 
         private bool ParseListExpression(ref List<ASTNode> retn, ExpressionTokenType openExpressionToken, ExpressionTokenType closeExpressionToken) {
@@ -736,7 +740,7 @@ namespace UIForia.Parsing.Expression {
 
             tokenStream.Advance();
             return true;
-        }  
+        }
 
         private void Abort() {
 //            string additionalInfo = isLiteralExpression

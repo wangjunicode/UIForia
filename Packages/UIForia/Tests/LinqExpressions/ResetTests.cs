@@ -58,36 +58,36 @@ public class ResetTests {
 //        Assert.AreEqual(thing2, thing3);
 //        Assert.AreEqual(thing2.someOtherValue, 12);
 
-        int count = 1000000;
-        var ctro = typeof(ResetThing).GetConstructor(Type.EmptyTypes);
-        var stopwatch = new Stopwatch();
-        Action<object> clear = LinqExpressions.CompileClear(typeof(ResetThing));
-
-        stopwatch.Start();
-        for (int i = 0; i < count; i++) {
-            thing = new ResetThing();
-//            LinqExpressions.ResetInstance(thing, constructor, typeof(ResetThing), clear);
-        }
-
-        stopwatch.Stop();
-        UnityEngine.Debug.Log("New");
-        UnityEngine.Debug.Log(stopwatch.ElapsedTicks);
-        UnityEngine.Debug.Log(stopwatch.ElapsedMilliseconds);
-        stopwatch.Reset();
-        stopwatch.Start();
-
-        // in development after creating a type for the first time, ensure that it is empty. if not the user added some field initializers that should not be there
-        // in the far future maybe we can make a util using rosyln to remap field initializers into a create function.
-        for (int i = 0; i < count; i++) {
-            thing = (ResetThing) FormatterServices.GetUninitializedObject(typeof(ResetThing));
-//          LinqExpressions.ResetInstance(thing, ctro, clear);
-        }
-
-        stopwatch.Stop();
-        UnityEngine.Debug.Log("Clear");
-
-        UnityEngine.Debug.Log(stopwatch.ElapsedTicks);
-        UnityEngine.Debug.Log(stopwatch.ElapsedMilliseconds);
+//        int count = 1000000;
+//        var ctro = typeof(ResetThing).GetConstructor(Type.EmptyTypes);
+//        var stopwatch = new Stopwatch();
+//        Action<object> clear = LinqExpressions.CompileClear(typeof(ResetThing));
+//
+//        stopwatch.Start();
+//        for (int i = 0; i < count; i++) {
+//            thing = new ResetThing();
+////            LinqExpressions.ResetInstance(thing, constructor, typeof(ResetThing), clear);
+//        }
+//
+//        stopwatch.Stop();
+//        UnityEngine.Debug.Log("New");
+//        UnityEngine.Debug.Log(stopwatch.ElapsedTicks);
+//        UnityEngine.Debug.Log(stopwatch.ElapsedMilliseconds);
+//        stopwatch.Reset();
+//        stopwatch.Start();
+//
+//        // in development after creating a type for the first time, ensure that it is empty. if not the user added some field initializers that should not be there
+//        // in the far future maybe we can make a util using rosyln to remap field initializers into a create function.
+//        for (int i = 0; i < count; i++) {
+//            //thing = (ResetThing) FormatterServices.GetUninitializedObject(typeof(ResetThing));
+//            LinqExpressions.ResetInstance(thing, ctro, clear);
+//        }
+//
+//        stopwatch.Stop();
+//        UnityEngine.Debug.Log("Clear");
+//
+//        UnityEngine.Debug.Log(stopwatch.ElapsedTicks);
+//        UnityEngine.Debug.Log(stopwatch.ElapsedMilliseconds);
     }
 
     [Test]

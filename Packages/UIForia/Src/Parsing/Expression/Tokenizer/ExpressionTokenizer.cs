@@ -6,7 +6,7 @@ using UnityEngine;
 namespace UIForia.Parsing.Expression.Tokenizer {
 
     public static class ExpressionTokenizer {
-        
+
         private static readonly char stringCharacter = '\'';
 
         private static void TryReadCharacters(TokenizerContext context, string match, ExpressionTokenType expressionTokenType, List<ExpressionToken> output) {
@@ -20,7 +20,7 @@ namespace UIForia.Parsing.Expression.Tokenizer {
             output.Add(new ExpressionToken(expressionTokenType, match, context.line, context.column));
             TryConsumeWhiteSpace(context.Advance(match.Length));
         }
-        
+
         private static void TryConsumeWhiteSpace(TokenizerContext context) {
             if (context.IsConsumed()) {
                 return;
@@ -37,7 +37,6 @@ namespace UIForia.Parsing.Expression.Tokenizer {
             }
 
             if (context.input[context.ptr] == '/' && context.input[context.ptr + 1] == '/') {
-
                 while (context.HasMore()) {
                     char current = context.input[context.ptr];
                     if (current == '\n') {
@@ -48,7 +47,7 @@ namespace UIForia.Parsing.Expression.Tokenizer {
 
                     context.Advance();
                 }
-                
+
                 return;
             }
 
@@ -58,16 +57,14 @@ namespace UIForia.Parsing.Expression.Tokenizer {
 
             context.Advance(2);
             while (context.HasMore()) {
-
                 if (context.input[context.ptr] == '*' && context.input[context.ptr + 1] == '/') {
                     context.Advance(2);
                     TryConsumeWhiteSpace(context);
                     TryConsumeComment(context);
                     return;
                 }
-                
+
                 context.Advance();
-                
             }
         }
 
@@ -93,10 +90,45 @@ namespace UIForia.Parsing.Expression.Tokenizer {
 
                 context.Advance();
             }
-            
-            if (context.HasMore() && context.input[context.ptr] == 'f' && context.input[context.ptr - 1] != '.') {
-                context.Advance();
+
+
+            if (context.HasMore()) {
+                char next = context.input[context.ptr];
+                // todo -- enable the below to making parsing numerics better in the compiler (since we already know what type to try to parse it as)
+                //ExpressionTokenType type = ExpressionTokenType.Number;
+//                if (next == 'f') {
+//                    type = ExpressionTokenType.Number_Float;
+//                }
+//
+//                if (next == 'd') {
+//                    type = ExpressionTokenType.Number_Double;
+//                }
+//
+//                if (next == 'l') {
+//                    type = ExpressionTokenType.Number_Long;
+//                }
+//
+//                if (next == 'u') {
+//                    // todo -- check for ul here
+//                    type = ExpressionTokenType.Number_UInt;
+//                }
+//
+//                if (next == 'm') {
+//                    type = ExpressionTokenType.Number_Decimal;
+//                }
+
+                if (next == 'f' || next == 'd' || next == 'l' || next == 'u' || next == 'm') {
+                    if (next != '.') {
+                        context.Advance();
+                    }
+                }
             }
+
+//            if (context.HasMore() 
+//                && context.input[context.ptr] == 'f'
+//                && context.input[context.ptr - 1] != '.') {
+//                context.Advance();
+//            }
 
             int length = context.ptr - startIndex;
             string digit = context.input.Substring(startIndex, length);
@@ -130,7 +162,7 @@ namespace UIForia.Parsing.Expression.Tokenizer {
             context.Advance(length);
             TryConsumeWhiteSpace(context);
         }
-        
+
         private static ExpressionToken TransformIdentifierToTokenType(TokenizerContext context, string identifier) {
             string identifierLowerCase = identifier.ToLower();
             switch (identifierLowerCase) {
@@ -197,7 +229,7 @@ namespace UIForia.Parsing.Expression.Tokenizer {
             List<ExpressionToken> output = retn ?? new List<ExpressionToken>();
             TokenizerContext context = new TokenizerContext(input);
             TryConsumeWhiteSpace(context);
-            
+
             TryConsumeWhiteSpace(context);
             while (context.ptr < input.Length) {
                 int start = context.ptr;
@@ -208,8 +240,6 @@ namespace UIForia.Parsing.Expression.Tokenizer {
                 TryReadCharacters(context, "&&", ExpressionTokenType.AndAlso, output);
                 TryReadCharacters(context, "||", ExpressionTokenType.OrElse, output);
                 TryReadCharacters(context, "==", ExpressionTokenType.Equals, output);
-                TryReadCharacters(context, "<<", ExpressionTokenType.ShiftLeft, output);
-                TryReadCharacters(context, ">>", ExpressionTokenType.ShiftRight, output);
                 TryReadCharacters(context, "!=", ExpressionTokenType.NotEquals, output);
                 TryReadCharacters(context, ">=", ExpressionTokenType.GreaterThanEqualTo, output);
                 TryReadCharacters(context, "<=", ExpressionTokenType.LessThanEqualTo, output);

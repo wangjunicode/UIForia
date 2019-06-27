@@ -15,7 +15,7 @@ namespace UIForia.Parsing.Expression {
         IndexExpression,
         UnaryNot,
         UnaryMinus,
-        BinaryNot,
+        UnaryBitwiseNot,
         DirectCast,
         ListInitializer,
         New,

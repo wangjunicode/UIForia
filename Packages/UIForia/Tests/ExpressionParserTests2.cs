@@ -1,3 +1,4 @@
+using System;
 using NUnit.Framework;
 using UIForia.Parsing.Expression;
 using UIForia.Parsing.Expression.AstNodes;
@@ -462,6 +463,22 @@ public class ExpressionParserTests2 {
         Assert.AreEqual(ASTNodeType.UnaryNot, node.type);
         Assert.IsInstanceOf<ParenNode>(node.expression);
     }
+    
+    [Test]
+    public void Parse_UnaryExpression_BitwiseNot() {
+        ASTNode root = ExpressionParser.Parse("~someValue");
+        UnaryExpressionNode node = AssertInstanceOfAndReturn<UnaryExpressionNode>(root);
+        Assert.AreEqual(ASTNodeType.UnaryBitwiseNot, node.type);
+        Assert.IsInstanceOf<IdentifierNode>(node.expression);
+    }
+    
+    [Test]
+    public void Parse_UnaryExpression_BitwiseNot_Complex() {
+        ASTNode root = ExpressionParser.Parse("~(someValue > 4)");
+        UnaryExpressionNode node = AssertInstanceOfAndReturn<UnaryExpressionNode>(root);
+        Assert.AreEqual(ASTNodeType.UnaryBitwiseNot, node.type);
+        Assert.IsInstanceOf<ParenNode>(node.expression);
+    }
 
     [Test]
     public void Parse_UnaryExpression_Minus() {
@@ -524,6 +541,23 @@ public class ExpressionParserTests2 {
         TypeNode node = AssertInstanceOfAndReturn<TypeNode>(root);
         Assert.AreEqual("UnityEngine", node.typePath.path[0]);
         Assert.AreEqual("Vector3", node.typePath.path[1]);
+    }
+    
+    [Test]
+    public void Parse_TypeOfExpressionWithGeneric() {
+        Type expected = typeof(System.Collections.Generic.List<System.Collections.Generic.Dictionary<UnityEngine.Color, float>>);
+        ASTNode root = ExpressionParser.Parse("typeof(System.Collections.Generic.List<System.Collections.Generic.Dictionary<UnityEngine.Color, System.Single>>)");
+        TypeNode node = AssertInstanceOfAndReturn<TypeNode>(root);
+        //Type result = TypeProcessor.ResolveType(node.typePath.ConstructPath2());
+//        Assert.AreEqual(expected, result);
+//        Assert.AreEqual("System", node.typePath.path[0]);
+//        Assert.AreEqual("Collections", node.typePath.path[1]);
+//        Assert.AreEqual("Generic", node.typePath.path[2]);
+//        Assert.AreEqual("List", node.typePath.path[3]);
+        
+        // if namespace exists, break it off to resolve base type?
+        
+        
     }
 
     [Test]

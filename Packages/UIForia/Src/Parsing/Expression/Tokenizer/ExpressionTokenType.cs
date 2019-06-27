@@ -13,8 +13,6 @@ namespace UIForia.Parsing.Expression.Tokenizer {
         BinaryOr,
         BinaryAnd,
         BinaryXor,
-        ShiftLeft, 
-        ShiftRight,
         BinaryNot,
         
         Is,
@@ -59,19 +57,15 @@ namespace UIForia.Parsing.Expression.Tokenizer {
         LessThanEqualTo,
         QuestionMark,
         Colon, 
-    
-//        ArithmeticOperator = Plus | Minus | Times | Divide | Mod,
-//        Literal = String | Number | Boolean,
-//        Comparator = Equals | NotEquals | GreaterThan | GreaterThanEqualTo | LessThan | LessThanEqualTo,
-//        BooleanTest = Not | Or | And,
-//        AnyIdentifier = Identifier | Alias,
-//        UnaryOperator = Plus | Minus | Not,
-
-//        Operator = ArithmeticOperator | QuestionMark | Colon | Comparator | BooleanTest,
-
-//        UnaryRequiresCheck = Comma | Colon | QuestionMark | BooleanTest | ArithmeticOperator | Comparator | ParenOpen | ArrayAccessOpen
-
-
+        
+        // todo -- use these to make numeric parsing better
+        Number_Float,
+        Number_Long,
+        Number_ULong,
+        Number_Decimal,
+        Number_Double,
+        Number_Byte,
+        Number_UInt,
 
     }
 

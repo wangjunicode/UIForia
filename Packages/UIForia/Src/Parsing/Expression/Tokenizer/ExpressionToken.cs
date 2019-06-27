@@ -3,7 +3,7 @@ using System.Diagnostics;
 namespace UIForia.Parsing.Expression.Tokenizer {
 
     [DebuggerDisplay("{value} -> {expressionTokenType}")]
-    public struct ExpressionToken {
+    public readonly struct ExpressionToken {
 
         public readonly ExpressionTokenType expressionTokenType;
         public readonly string value;
@@ -12,8 +12,7 @@ namespace UIForia.Parsing.Expression.Tokenizer {
 
 
         public ExpressionToken(ExpressionTokenType expressionTokenType, int line, int column) :
-            this(expressionTokenType, string.Empty, line, column) {
-        }
+            this(expressionTokenType, string.Empty, line, column) { }
 
         public ExpressionToken(ExpressionTokenType expressionTokenType, string value, int line, int column) {
             this.expressionTokenType = expressionTokenType;
@@ -26,7 +25,7 @@ namespace UIForia.Parsing.Expression.Tokenizer {
         public static implicit operator ExpressionTokenType(ExpressionToken token) {
             return token.expressionTokenType;
         }
-        
+
         [DebuggerStepThrough]
         public static implicit operator string(ExpressionToken token) {
             return token.value;
@@ -37,25 +36,28 @@ namespace UIForia.Parsing.Expression.Tokenizer {
             expressionTokenType == ExpressionTokenType.Minus ||
             expressionTokenType == ExpressionTokenType.Times ||
             expressionTokenType == ExpressionTokenType.Divide ||
-            expressionTokenType == ExpressionTokenType.Mod;
-        
-        public bool IsComparator => 
+            expressionTokenType == ExpressionTokenType.Mod ||
+            expressionTokenType == ExpressionTokenType.BinaryAnd ||
+            expressionTokenType == ExpressionTokenType.BinaryOr ||
+            expressionTokenType == ExpressionTokenType.BinaryXor;
+
+        public bool IsComparator =>
             expressionTokenType == ExpressionTokenType.Equals ||
             expressionTokenType == ExpressionTokenType.NotEquals ||
-            expressionTokenType == ExpressionTokenType.GreaterThan || 
-            expressionTokenType == ExpressionTokenType.GreaterThanEqualTo || 
-            expressionTokenType == ExpressionTokenType.LessThan || 
+            expressionTokenType == ExpressionTokenType.GreaterThan ||
+            expressionTokenType == ExpressionTokenType.GreaterThanEqualTo ||
+            expressionTokenType == ExpressionTokenType.LessThan ||
             expressionTokenType == ExpressionTokenType.LessThanEqualTo;
 
         public bool IsBooleanTest =>
             expressionTokenType == ExpressionTokenType.AndAlso ||
             expressionTokenType == ExpressionTokenType.OrElse ||
             expressionTokenType == ExpressionTokenType.Not;
-        
+
         public bool IsOperator =>
             IsArithmeticOperator ||
             IsComparator ||
-            IsBooleanTest || 
+            IsBooleanTest ||
             expressionTokenType == ExpressionTokenType.As ||
             expressionTokenType == ExpressionTokenType.Is ||
             expressionTokenType == ExpressionTokenType.QuestionMark ||
@@ -64,6 +66,7 @@ namespace UIForia.Parsing.Expression.Tokenizer {
         public bool IsUnaryOperator =>
             expressionTokenType == ExpressionTokenType.Plus ||
             expressionTokenType == ExpressionTokenType.Minus ||
+            expressionTokenType == ExpressionTokenType.BinaryNot ||
             expressionTokenType == ExpressionTokenType.Not;
 
         public bool UnaryRequiresCheck =>

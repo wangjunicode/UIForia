@@ -1,13 +1,16 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
 using NUnit.Framework;
 using UIForia.Bindings;
 using UIForia.Compilers;
+using UIForia.Exceptions;
 using UIForia.Expressions;
 using UIForia.Extensions;
 using UIForia.Parsing.Expression;
+using UIForia.Parsing.Expression.AstNodes;
 using UnityEngine;
 using Expression = System.Linq.Expressions.Expression;
 
@@ -23,6 +26,7 @@ public class TestLinqCompiler {
         public StructValueHolder<Vector3> svHolderVec3;
         public Vector3[] vec3Array;
         public List<Vector3> vec3List;
+        public int intVal;
         public Dictionary<string, Vector3> vec3Dic;
 
     }
@@ -91,8 +95,6 @@ public class TestLinqCompiler {
                 }
             });
 
-            //Debug.Log(PrintCode(compiler.BuildLambda()));
-
             return compiler.BuildLambda();
         }
 
@@ -136,15 +138,15 @@ public class TestLinqCompiler {
 
         AssertStringsEqual(@"
             (LinqThing root, LinqThing element) =>
-            {
-                float rhsOutput;
+             {
                 ValueHolder<float> part;
                 float part0;
+                float rhsOutput;
 
+                rhsOutput = default(float);
                 part = root.valueHolderFloat;
                 if (part == null)
                 {
-                    rhsOutput = default(float);
                     goto retn;
                 }
                 part0 = part.value;
@@ -175,11 +177,12 @@ public class TestLinqCompiler {
         AssertStringsEqual(@"
                (LinqThing root, LinqThing element) =>
         {
-            float rhsOutput;
             StructValueHolder<Vector3> part;
             Vector3 part0;
             float part1;
+            float rhsOutput;
 
+            rhsOutput = default(float);
             part = root.svHolderVec3;
             part0 = part.value;
             part1 = part0.z;
@@ -208,26 +211,26 @@ public class TestLinqCompiler {
         Assert.AreEqual(42, element.floatValue);
         AssertStringsEqual(@"
         (LinqThing root, LinqThing element) =>
-        {
-                float rhsOutput;
-                ValueHolder<Vector3> part;
-                Vector3 part0;
-                float part1;
+                {
+            ValueHolder<Vector3> part;
+            Vector3 part0;
+            float part1;
+            float rhsOutput;
 
-                part = root.refValueHolderVec3;
-                if (part == null)
-                {
-                    rhsOutput = default(float);
-                    goto retn;
-                }
-                part0 = part.value;
-                part1 = part0.z;
-                rhsOutput = part1;
-            retn:
-                if (element.floatValue != rhsOutput)
-                {
-                    element.floatValue = rhsOutput;
-                }
+            rhsOutput = default(float);
+            part = root.refValueHolderVec3;
+            if (part == null)
+            {
+                goto retn;
+            }
+            part0 = part.value;
+            part1 = part0.z;
+            rhsOutput = part1;
+        retn:
+            if (element.floatValue != rhsOutput)
+            {
+                element.floatValue = rhsOutput;
+            }
         }
         ", PrintCode(expr));
     }
@@ -256,17 +259,17 @@ public class TestLinqCompiler {
         AssertStringsEqual(@"
         (LinqThing root, LinqThing element) =>
         {
-            float rhsOutput;
             Vector3[] part;
             int indexer;
             Vector3 arrayVal;
             float part1;
-
+            float rhsOutput;
+            
+            rhsOutput = default(float);    
             part = root.vec3Array;
             indexer = 3;
             if ((part == null) || ((indexer < 0) || (indexer >= part.Length)))
             {
-                rhsOutput = default(float);
                 goto retn;
             }
             arrayVal = part[indexer];
@@ -305,17 +308,17 @@ public class TestLinqCompiler {
         AssertStringsEqual(@"
         (LinqThing root, LinqThing element) =>
         {
-            float rhsOutput;
             List<Vector3> part;
             int indexer;
             Vector3 indexVal;
             float part1;
+            float rhsOutput;
 
+            rhsOutput = default(float);
             part = root.vec3List;
             indexer = 3;
             if ((part == null) || ((indexer < 0) || (indexer >= part.Count)))
             {
-                rhsOutput = default(float);
                 goto retn;
             }
             indexVal = part[indexer];
@@ -351,29 +354,29 @@ public class TestLinqCompiler {
         Assert.AreEqual(2, element.floatValue);
         AssertStringsEqual(@"
           (LinqThing root, LinqThing element) =>
-          {
-            float rhsOutput;
-            Dictionary<string, Vector3> part;
-            string indexer;
-            Vector3 indexVal;
-            float part1;
+         {
+    Dictionary<string, Vector3> part;
+    string indexer;
+    Vector3 indexVal;
+    float part1;
+    float rhsOutput;
 
-            part = root.vec3Dic;
-            indexer = ""two"";
-                if (part == null)
-                {
-                    rhsOutput = default(float);
-                    goto retn;
-                }
-                indexVal = part[indexer];
-                part1 = indexVal.z;
-                rhsOutput = part1;
-                retn:
-                if (element.floatValue != rhsOutput)
-                {
-                    element.floatValue = rhsOutput;
-                }
-            }
+    rhsOutput = default(float);
+    part = root.vec3Dic;
+    indexer = ""two"";
+        if (part == null)
+        {
+            goto retn;
+        }
+        indexVal = part[indexer];
+        part1 = indexVal.z;
+        rhsOutput = part1;
+        retn:
+        if (element.floatValue != rhsOutput)
+        {
+            element.floatValue = rhsOutput;
+        }
+    }
         ", PrintCode(expr));
     }
 
@@ -401,18 +404,18 @@ public class TestLinqCompiler {
         Assert.AreEqual(42, element.floatValue);
         AssertStringsEqual(@"
         (LinqThing root, LinqThing element) =>
-        {
-            float rhsOutput;
+               {
             List<Vector3> part;
             int indexer;
             Vector3 indexVal;
             float part1;
+            float rhsOutput;
 
+            rhsOutput = default(float);
             part = root.vec3List;
             indexer = 3;
             if ((part == null) || ((indexer < 0) || (indexer >= part.Count)))
             {
-                rhsOutput = default(float);
                 goto retn;
             }
             indexVal = part[indexer];
@@ -528,12 +531,13 @@ public class TestLinqCompiler {
             StructValueHolder<Vector3> svHolderVec3;
             Vector3 value;
             float x;
-            float rhsOutput;
             List<Vector3> part;
             int indexer;
             Vector3 indexVal;
             float part1;
+            float rhsOutput;
 
+            rhsOutput = default(float);
             svHolderVec3 = element.svHolderVec3;
             value = svHolderVec3.value;
             x = value.x;
@@ -541,7 +545,6 @@ public class TestLinqCompiler {
             indexer = 3;
             if ((part == null) || ((indexer < 0) || (indexer >= part.Count)))
             {
-                rhsOutput = default(float);
                 goto retn;
             }
             indexVal = part[indexer];
@@ -564,23 +567,339 @@ public class TestLinqCompiler {
 
         object CompileAndReset<T>(string input) where T : Delegate {
             compiler.ReturnStatement(compiler.CreateRHSStatementChain(input));
+            AssertStringsEqual(@"() => 
+            {
+                return {input};
+            }".Replace("{input}", input.Replace("f", "")), PrintCode(compiler.BuildLambda<T>()));
             T retn = compiler.Compile<T>();
             compiler.Reset();
             return retn.DynamicInvoke();
         }
-        
+
         Assert.AreEqual(5 + 4, CompileAndReset<Func<int>>("5 + 4"));
         Assert.AreEqual(5 - 4, CompileAndReset<Func<int>>("5 - 4"));
         Assert.AreEqual(5 * 4, CompileAndReset<Func<int>>("5 * 4"));
         Assert.AreEqual(5 % 4, CompileAndReset<Func<int>>("5 % 4"));
         Assert.AreEqual(5 / 4, CompileAndReset<Func<int>>("5 / 4"));
-        
+        Assert.AreEqual(5 >> 4, CompileAndReset<Func<int>>("5 >> 4"));
+        Assert.AreEqual(5 << 4, CompileAndReset<Func<int>>("5 << 4"));
+        Assert.AreEqual(5 | 4, CompileAndReset<Func<int>>("5 | 4"));
+        Assert.AreEqual(5 & 4, CompileAndReset<Func<int>>("5 & 4"));
+
         Assert.AreEqual(5f + 4f, CompileAndReset<Func<float>>("5f + 4f"));
         Assert.AreEqual(5f - 4f, CompileAndReset<Func<float>>("5f - 4f"));
         Assert.AreEqual(5f * 4f, CompileAndReset<Func<float>>("5f * 4f"));
         Assert.AreEqual(5f % 4f, CompileAndReset<Func<float>>("5f % 4f"));
         Assert.AreEqual(5f / 4f, CompileAndReset<Func<float>>("5f / 4f"));
-        
+    }
+
+    [Test]
+    public void CompileNumericOperators_MultipleOperators() {
+        LinqCompiler compiler = new LinqCompiler();
+
+        object CompileAndReset<T>(string input) where T : Delegate {
+            compiler.ReturnStatement(compiler.CreateRHSStatementChain(input));
+            T retn = compiler.Compile<T>();
+            compiler.Reset();
+            return retn.DynamicInvoke();
+        }
+
+        Assert.AreEqual(5 + 4 * 7, CompileAndReset<Func<int>>("5 + 4 * 7"));
+        Assert.AreEqual(5 - 4 * 7, CompileAndReset<Func<int>>("5 - 4 * 7"));
+        Assert.AreEqual(5 * 4 * 7, CompileAndReset<Func<int>>("5 * 4 * 7"));
+        Assert.AreEqual(5 % 4 * 7, CompileAndReset<Func<int>>("5 % 4 * 7"));
+        Assert.AreEqual(5 / 4 * 7, CompileAndReset<Func<int>>("5 / 4 * 7"));
+        Assert.AreEqual(5 >> 4 * 7, CompileAndReset<Func<int>>("5 >> 4 * 7"));
+        Assert.AreEqual(5 << 4 * 7, CompileAndReset<Func<int>>("5 << 4 * 7"));
+        Assert.AreEqual(5 | 4 * 7, CompileAndReset<Func<int>>("5 | 4 * 7"));
+        Assert.AreEqual(5 & 4 * 7, CompileAndReset<Func<int>>("5 & 4 * 7"));
+    }
+
+    [Test]
+    public void CompileNumericOperators_MultipleOperators_Parens() {
+        LinqCompiler compiler = new LinqCompiler();
+
+        object CompileAndReset<T>(string input) where T : Delegate {
+            compiler.ReturnStatement(compiler.CreateRHSStatementChain(input));
+            T retn = compiler.Compile<T>();
+            compiler.Reset();
+            return retn.DynamicInvoke();
+        }
+
+        Assert.AreEqual((124 + 4) * 7, CompileAndReset<Func<int>>("(124 + 4) * 7"));
+        Assert.AreEqual((124 - 4) * 7, CompileAndReset<Func<int>>("(124 - 4) * 7"));
+        Assert.AreEqual((124 * 4) * 7, CompileAndReset<Func<int>>("(124 * 4) * 7"));
+        Assert.AreEqual((124 % 4) * 7, CompileAndReset<Func<int>>("(124 % 4) * 7"));
+        Assert.AreEqual((124 / 4) * 7, CompileAndReset<Func<int>>("(124 / 4) * 7"));
+        Assert.AreEqual((124 >> 4) * 7, CompileAndReset<Func<int>>("(124 >> 4) * 7"));
+        Assert.AreEqual((124 << 4) * 7, CompileAndReset<Func<int>>("(124 << 4) * 7"));
+        Assert.AreEqual((124 | 4) * 7, CompileAndReset<Func<int>>("(124 | 4) * 7"));
+        Assert.AreEqual((124 & 4) * 7, CompileAndReset<Func<int>>("(124 & 4) * 7"));
+
+        Assert.AreEqual(124 + (4 * 7), CompileAndReset<Func<int>>("124 + (4 * 7)"));
+        Assert.AreEqual(124 - (4 * 7), CompileAndReset<Func<int>>("124 - (4 * 7)"));
+        Assert.AreEqual(124 * (4 * 7), CompileAndReset<Func<int>>("124 * (4 * 7)"));
+        Assert.AreEqual(124 % (4 * 7), CompileAndReset<Func<int>>("124 % (4 * 7)"));
+        Assert.AreEqual(124 / (4 * 7), CompileAndReset<Func<int>>("124 / (4 * 7)"));
+        Assert.AreEqual(124 >> (4 * 7), CompileAndReset<Func<int>>("124 >> (4 * 7)"));
+        Assert.AreEqual(124 << (4 * 7), CompileAndReset<Func<int>>("124 << (4 * 7)"));
+        Assert.AreEqual(124 | (4 * 7), CompileAndReset<Func<int>>("124 | (4 * 7)"));
+        Assert.AreEqual(124 & (4 * 7), CompileAndReset<Func<int>>("124 & (4 * 7)"));
+    }
+
+    private class OperatorOverloadTest {
+
+        public Vector3 v0;
+        public Vector3 v1;
+
+    }
+
+    [Test]
+    public void CompileOperatorOverloads() {
+        LinqCompiler compiler = new LinqCompiler();
+
+        T CompileAndReset<T>(string input) where T : Delegate {
+            compiler.AddParameter(typeof(OperatorOverloadTest), "opOverload");
+            compiler.SetDefaultIdentifier("opOverload");
+            compiler.ReturnStatement(compiler.CreateRHSStatementChain("opOverload", typeof(Vector3), input));
+            T retn = compiler.Compile<T>();
+            Debug.Log(PrintCode(compiler.BuildLambda<T>()));
+
+            compiler.Reset();
+            return retn;
+        }
+
+        OperatorOverloadTest overloadTest = new OperatorOverloadTest();
+
+        overloadTest.v0 = new Vector3(1124, 522, 241);
+        overloadTest.v1 = new Vector3(1124, 522, 241);
+
+        Assert.AreEqual(overloadTest.v0 + overloadTest.v1, CompileAndReset<Func<OperatorOverloadTest, Vector3>>("v0 + v1")(overloadTest));
+        Assert.AreEqual(overloadTest.v0 - overloadTest.v1, CompileAndReset<Func<OperatorOverloadTest, Vector3>>("v0 - v1")(overloadTest));
+        CompileException exception = Assert.Throws<CompileException>(() => { CompileAndReset<Func<OperatorOverloadTest, Vector3>>("v0 / v1")(overloadTest); });
+        Assert.AreEqual(exception.Message, CompileException.MissingBinaryOperator(OperatorType.Divide, typeof(Vector3), typeof(Vector3)).Message);
+    }
+
+    [Test]
+    public void CompileTypeOfConstant() {
+        LinqCompiler compiler = new LinqCompiler();
+
+        compiler.ReturnStatement(compiler.CreateRHSStatementChain("typeof(int)"));
+        Assert.AreEqual(typeof(int), compiler.Compile<Func<Type>>()());
+
+        compiler.AddParameter(typeof(List<Vector3>), "root");
+        compiler.SetDefaultIdentifier("root");
+        compiler.ReturnStatement(compiler.CreateRHSStatementChain("typeof(T)"));
+        Assert.AreEqual(typeof(Vector3), compiler.Compile<Func<List<Vector3>, Type>>()(new List<Vector3>()));
+    }
+
+    [Test]
+    public void CompileUnaryNot() {
+        LinqCompiler compiler = new LinqCompiler();
+
+        compiler.ReturnStatement(compiler.CreateRHSStatementChain("!true"));
+        Assert.AreEqual(false, compiler.Compile<Func<bool>>()());
+        compiler.Reset();
+
+        compiler.ReturnStatement(compiler.CreateRHSStatementChain("!true && false"));
+        Assert.AreEqual(!true && false, compiler.Compile<Func<bool>>()());
+        compiler.Reset();
+
+        compiler.ReturnStatement(compiler.CreateRHSStatementChain("!false"));
+        Assert.AreEqual(!false, compiler.Compile<Func<bool>>()());
+        compiler.Reset();
+
+        compiler.ReturnStatement(compiler.CreateRHSStatementChain("false && !true"));
+        Assert.AreEqual(false && !true, compiler.Compile<Func<bool>>()());
+        compiler.Reset();
+    }
+
+    [Test]
+    public void CompileUnaryMinus() {
+        LinqCompiler compiler = new LinqCompiler();
+
+        compiler.ReturnStatement(compiler.CreateRHSStatementChain("-10"));
+        Assert.AreEqual(-10, compiler.Compile<Func<int>>()());
+        compiler.Reset();
+
+        compiler.ReturnStatement(compiler.CreateRHSStatementChain("-1425.24f"));
+        Assert.AreEqual(-1425.24f, compiler.Compile<Func<float>>()());
+        compiler.Reset();
+
+        compiler.ReturnStatement(compiler.CreateRHSStatementChain("-1425.24d"));
+        Assert.AreEqual(-1425.24d, compiler.Compile<Func<double>>()());
+        compiler.Reset();
+    }
+
+    [Test]
+    public void CompileUnaryBitwiseNot() {
+        LinqCompiler compiler = new LinqCompiler();
+
+        compiler.ReturnStatement(compiler.CreateRHSStatementChain("~10"));
+        Assert.AreEqual(~10, compiler.Compile<Func<int>>()());
+        compiler.Reset();
+
+        compiler.ReturnStatement(compiler.CreateRHSStatementChain("~(1425 & 4)"));
+        Assert.AreEqual(~(1425 & 4), compiler.Compile<Func<int>>()());
+        compiler.Reset();
+    }
+
+    [Test]
+    public void CompileArrayIndex_Constant() {
+        LinqCompiler compiler = new LinqCompiler();
+
+        LinqThing thing = new LinqThing();
+
+        thing.vec3Array = new[] {
+            new Vector3(1, 2, 3),
+            new Vector3(4, 5, 6),
+            new Vector3(7, 8, 9)
+        };
+
+        compiler.SetReturnType(typeof(Vector3));
+        compiler.AddParameter(typeof(LinqThing), "thing");
+        compiler.SetDefaultIdentifier("thing");
+        compiler.ReturnStatement(compiler.CreateRHSStatementChain("vec3Array[1]"));
+        Assert.AreEqual(thing.vec3Array[1], compiler.Compile<Func<LinqThing, Vector3>>()(thing));
+
+        AssertStringsEqual(@"
+        (LinqThing thing) =>
+        {
+            Vector3[] part;
+            int indexer;
+            Vector3 arrayVal;
+            Vector3 rhsOutput;
+
+            rhsOutput = default(Vector3);
+            part = thing.vec3Array;
+            indexer = 1;
+            if ((part == null) || ((indexer < 0) || (indexer >= part.Length)))
+            {
+                goto retn;
+            }
+            arrayVal = part[indexer];
+            rhsOutput = arrayVal;
+        retn:
+            return rhsOutput;
+        }
+        ", PrintCode(compiler.BuildLambda()));
+        compiler.Reset();
+
+        compiler.AddParameter(typeof(LinqThing), "thing");
+        compiler.SetReturnType(typeof(Vector3));
+        compiler.SetDefaultIdentifier("thing");
+        compiler.ReturnStatement(compiler.CreateRHSStatementChain("vec3Array[1 + 1]"));
+        Assert.AreEqual(thing.vec3Array[2], compiler.Compile<Func<LinqThing, Vector3>>()(thing));
+        compiler.Reset();
+
+        compiler.AddParameter(typeof(LinqThing), "thing");
+        compiler.SetReturnType(typeof(Vector3));
+        compiler.SetDefaultIdentifier("thing");
+        compiler.ReturnStatement(compiler.CreateRHSStatementChain("vec3Array[99999]"));
+        Assert.AreEqual(default(Vector3), compiler.Compile<Func<LinqThing, Vector3>>()(thing));
+        compiler.Reset();
+
+        compiler.AddParameter(typeof(LinqThing), "thing");
+        compiler.SetReturnType(typeof(Vector3));
+        compiler.SetDefaultIdentifier("thing");
+        compiler.ReturnStatement(compiler.CreateRHSStatementChain("vec3Array[-14]"));
+        Assert.AreEqual(default(Vector3), compiler.Compile<Func<LinqThing, Vector3>>()(thing));
+
+        compiler.Reset();
+    }
+
+    [Test]
+    public void CompileArrayIndex_Expression() {
+        LinqCompiler compiler = new LinqCompiler();
+
+        LinqThing thing = new LinqThing();
+
+        thing.intVal = 3;
+        thing.vec3Array = new[] {
+            new Vector3(1, 2, 3),
+            new Vector3(4, 5, 6),
+            new Vector3(7, 8, 9)
+        };
+
+        compiler.SetReturnType(typeof(Vector3));
+        compiler.AddParameter(typeof(LinqThing), "thing");
+        compiler.AddParameter(typeof(int), "arg0");
+        compiler.AddParameter(typeof(int), "arg1");
+        compiler.SetDefaultIdentifier("thing");
+        compiler.ReturnStatement(compiler.CreateRHSStatementChain("vec3Array[arg0 + intVal - arg1]"));
+        Assert.AreEqual(thing.vec3Array[2], compiler.Compile<Func<LinqThing, int, int, Vector3>>()(thing, 1, 2));
+    }
+
+    [Test]
+    public void CompileArrayIndex_InvalidExpression() {
+        LinqCompiler compiler = new LinqCompiler();
+
+        LinqThing thing = new LinqThing();
+
+        thing.intVal = 3;
+        thing.vec3Array = new[] {
+            new Vector3(1, 2, 3),
+            new Vector3(4, 5, 6),
+            new Vector3(7, 8, 9)
+        };
+
+        compiler.SetReturnType(typeof(Vector3));
+        compiler.AddParameter(typeof(LinqThing), "thing");
+        compiler.SetDefaultIdentifier("thing");
+        CompileException exception = Assert.Throws<CompileException>(() => { compiler.ReturnStatement(compiler.CreateRHSStatementChain("vec3Array[vec3Dic]")); });
+        Assert.AreEqual(CompileException.InvalidTargetType(typeof(int), typeof(Dictionary<string, Vector3>)).Message, exception.Message);
+    }
+
+    [Test]
+    public void CompileIs() {
+        LinqCompiler compiler = new LinqCompiler();
+
+        LinqThing thing = new LinqThing();
+
+        thing.intVal = 3;
+        thing.vec3Array = new[] {
+            new Vector3(1, 2, 3),
+            new Vector3(4, 5, 6),
+            new Vector3(7, 8, 9)
+        };
+
+        compiler.SetReturnType(typeof(bool));
+        compiler.AddParameter(typeof(LinqThing), "thing");
+        compiler.AddNamespace("System.Collections.Generic");
+        compiler.SetDefaultIdentifier("thing");
+        compiler.ReturnStatement(compiler.CreateRHSStatementChain("vec3Array[0].x is System.Collections.Generic.List<float>"));
+        Debug.Log(PrintCode(compiler.BuildLambda<Func<LinqThing, bool>>()));
+        Assert.AreEqual(false, compiler.Compile<Func<LinqThing, bool>>()(thing));
+
+    }
+    
+    [Test]
+    public void CompileAs() {
+        LinqCompiler compiler = new LinqCompiler();
+
+        LinqThing thing = new LinqThing();
+
+        thing.intVal = 3;
+        thing.vec3Array = new[] {
+            new Vector3(1, 2, 3),
+            new Vector3(4, 5, 6),
+            new Vector3(7, 8, 9)
+        };
+
+        compiler.SetReturnType(typeof(bool));
+        compiler.AddNamespace("System.Collections");
+        compiler.AddParameter(typeof(LinqThing), "thing");
+        compiler.SetDefaultIdentifier("thing");
+        compiler.ReturnStatement(compiler.CreateRHSStatementChain("vec3Array as IList"));
+        Debug.Log(PrintCode(compiler.BuildLambda<Func<LinqThing, IList>>()));
+        Assert.AreEqual(thing.vec3Array, compiler.Compile<Func<LinqThing, IList>>()(thing));
+
+    }
+
+    [Test]
+    public void CompileFalsyBoolean() {
+        Assert.IsFalse(true);
+        // if(someValue) when some value is a ref type or a numeric (or char) with default value, then the condition should be false    
     }
 
     public void AssertStringsEqual(string a, string b) {

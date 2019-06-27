@@ -1185,7 +1185,7 @@ namespace UIForia.Compilers {
                     return new ConstantExpression<Type>(generics[i]);
                 }
             }
-
+//
             Type t = TypeExtensions.GetTypeFromSimpleName(constructedTypePath);
             if (t != null) {
                 return new ConstantExpression<Type>(t);

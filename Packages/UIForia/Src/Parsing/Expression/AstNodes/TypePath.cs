@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Text;
 using UIForia.Util;
 
-namespace UIForia.Parsing.Style.AstNodes {
+namespace UIForia.Parsing.Expression.AstNodes {
 
     public struct TypePath {
 
@@ -32,7 +32,7 @@ namespace UIForia.Parsing.Style.AstNodes {
                 s_Builder.Append(path[i]);
                 s_Builder.Append('.');
             }
-            
+
             s_Builder.Append(path[path.Count - 1]);
             if (genericArguments != null && genericArguments.Count > 0) {
                 s_Builder.Append('`');
@@ -47,6 +47,34 @@ namespace UIForia.Parsing.Style.AstNodes {
 
                 s_Builder.Append(']');
             }
+        }
+
+        public TypeLookup ConstructTypeLookupTree() {
+            if (path == null) {
+                return default;
+            }
+
+            TypeLookup t = new TypeLookup();
+            s_Builder.Clear();
+            for (int i = 0; i < path.Count - 1; i++) {
+                s_Builder.Append(path[i]);
+                if (i != path.Count - 2) {
+                    s_Builder.Append('.');
+                }
+            }
+
+            t.namespaceName = s_Builder.ToString();
+            t.typeName = path[path.Count - 1];
+
+            if (genericArguments != null && genericArguments.Count > 0) {
+                t.typeName += "`" + genericArguments.Count;
+                t.generics = new TypeLookup[genericArguments.Count];
+                for (int i = 0; i < genericArguments.Count; i++) {
+                    t.generics[i] = genericArguments[i].ConstructTypeLookupTree();
+                }
+            }
+
+            return t;
         }
 
         public string GetConstructedPath() {

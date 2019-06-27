@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Text;
 using UIForia.Parsing.Expression.Tokenizer;
 using UIForia.Util;
 
@@ -31,7 +30,7 @@ namespace UIForia.Parsing.Expression.AstNodes {
                 return false;
             }
         }
-        
+
         public int line;
         public int column;
 
@@ -99,7 +98,7 @@ namespace UIForia.Parsing.Expression.AstNodes {
             typeOfNode.type = ASTNodeType.TypeOf;
             return typeOfNode;
         }
-        
+
         public static TypeNode NewExpressionNode(TypePath typePath) {
             TypeNode typeOfNode = s_TypeNodePool.Get();
             typeOfNode.typePath = typePath;
@@ -131,7 +130,7 @@ namespace UIForia.Parsing.Expression.AstNodes {
             accessExpressionNode.parts = parts;
             return accessExpressionNode;
         }
-      
+
         public static ListInitializerNode ListInitializerNode(List<ASTNode> list) {
             ListInitializerNode listInitializerNode = s_ListInitializerPool.Get();
             listInitializerNode.list = list;
@@ -161,67 +160,11 @@ namespace UIForia.Parsing.Expression.AstNodes {
 
     }
 
-    public struct TypePath {
-
-        public List<string> path;
-        public List<TypePath> genericArguments;
-
-        public void Release() {
-            ListPool<string>.Release(ref path);
-            ReleaseGenerics();
-        }
-
-        public void ReleaseGenerics() {
-            if (genericArguments != null && genericArguments.Count > 0) {
-                for (int i = 0; i < genericArguments.Count; i++) {
-                    genericArguments[i].Release();
-                }
-                ListPool<TypePath>.Release(ref genericArguments);
-                genericArguments = null;
-            }
-        }
-
-        private static readonly StringBuilder s_Builder = new StringBuilder(128);
-
-        private void GetConstructedPathStep() {
-            for (int i = 0; i < path.Count - 1; i++) {
-                s_Builder.Append(path[i]);
-                s_Builder.Append('.');
-            }
-
-            s_Builder.Append(path[path.Count - 1]);
-            if (genericArguments != null && genericArguments.Count > 0) {
-                s_Builder.Append('`');
-                s_Builder.Append(genericArguments.Count);
-                s_Builder.Append('[');
-                for (int i = 0; i < genericArguments.Count; i++) {
-                    genericArguments[i].GetConstructedPathStep();
-                    if(i != genericArguments.Count - 1) {
-                        s_Builder.Append(',');
-                    }
-                }
-
-                s_Builder.Append(']');
-            }
-        }
-        
-        public string GetConstructedPath() {
-            if (path == null) {
-                return string.Empty;
-            }
-            GetConstructedPathStep();
-            string retn = s_Builder.ToString();
-            s_Builder.Clear();
-            return retn;
-        }
-
-    }
-    
     public class UnaryExpressionNode : ASTNode {
 
         public ASTNode expression;
         public TypePath typePath;
-        
+
         public override void Release() {
             typePath.Release();
             expression?.Release();
@@ -238,15 +181,16 @@ namespace UIForia.Parsing.Expression.AstNodes {
         public MemberAccessExpressionNode() {
             type = ASTNodeType.AccessExpression;
         }
-        
+
         public override void Release() {
             s_MemberAccessExpressionPool.Release(this);
             for (int i = 0; i < parts.Count; i++) {
                 parts[i].Release();
             }
+
             ListPool<ASTNode>.Release(ref parts);
         }
-        
+
         public override string ToString() {
             return $"{identifier} with parts: {string.Join(".", parts)}";
         }
@@ -260,7 +204,7 @@ namespace UIForia.Parsing.Expression.AstNodes {
         public ParenNode() {
             type = ASTNodeType.Paren;
         }
-        
+
         public override void Release() {
             expression?.Release();
             s_ParenPool.Release(this);
@@ -274,7 +218,7 @@ namespace UIForia.Parsing.Expression.AstNodes {
 
         public override void Release() {
             s_TypeNodePool.Release(this);
-            typePath.Release();            
+            typePath.Release();
         }
 
     }
@@ -282,11 +226,12 @@ namespace UIForia.Parsing.Expression.AstNodes {
     public class InvokeNode : ASTNode {
 
         public List<ASTNode> parameters;
-        
+
         public override void Release() {
             for (int i = 0; i < parameters.Count; i++) {
                 parameters[i].Release();
             }
+
             ListPool<ASTNode>.Release(ref parameters);
             s_InvokeNodePool.Release(this);
         }
@@ -296,11 +241,11 @@ namespace UIForia.Parsing.Expression.AstNodes {
     public class NewExpressionNode : ASTNode {
 
         public TypePath typePath;
-        
+
         public NewExpressionNode() {
             type = ASTNodeType.New;
         }
-        
+
         public override void Release() {
             throw new NotImplementedException();
         }
@@ -314,17 +259,18 @@ namespace UIForia.Parsing.Expression.AstNodes {
         public ListInitializerNode() {
             type = ASTNodeType.ListInitializer;
         }
-        
+
         public override void Release() {
             for (int i = 0; i < list.Count; i++) {
                 list[i].Release();
             }
+
             ListPool<ASTNode>.Release(ref list);
             s_ListInitializerPool.Release(this);
         }
 
     }
-    
+
     public class IndexNode : ASTNode {
 
         public ASTNode expression;
@@ -332,7 +278,7 @@ namespace UIForia.Parsing.Expression.AstNodes {
         public IndexNode() {
             type = ASTNodeType.IndexExpression;
         }
-        
+
         public override void Release() {
             expression?.Release();
             s_IndexExpressionPool.Release(this);
@@ -341,16 +287,17 @@ namespace UIForia.Parsing.Expression.AstNodes {
         public override string ToString() {
             return expression.ToString();
         }
+
     }
 
     public class DotAccessNode : ASTNode {
 
         public string propertyName;
-        
+
         public DotAccessNode() {
             type = ASTNodeType.DotAccess;
         }
-        
+
         public override void Release() {
             s_DotAccessPool.Release(this);
         }
@@ -358,8 +305,7 @@ namespace UIForia.Parsing.Expression.AstNodes {
         public override string ToString() {
             return propertyName;
         }
+
     }
-    
-    
 
 }

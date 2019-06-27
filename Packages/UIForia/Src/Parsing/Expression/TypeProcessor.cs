@@ -7,9 +7,8 @@ using UIForia.Attributes;
 using UIForia.Elements;
 using UIForia.Exceptions;
 using UIForia.Extensions;
-using UIForia.Rendering;
+using UIForia.Parsing.Expression.AstNodes;
 using UIForia.Util;
-using UnityEngine;
 using UnityEngine.Assertions;
 using Debug = UnityEngine.Debug;
 
@@ -35,12 +34,16 @@ namespace UIForia.Parsing.Expression {
 
         }
 
-        private static readonly Dictionary<string, ProcessedType> typeMap = new Dictionary<string, ProcessedType>();
-        private static LightList<Assembly> filteredAssemblies;
-        private static LightList<Type> loadedTypes;
-        private static TypeData[] templateTypes;
-        private static readonly Dictionary<string, ProcessedType> templateTypeMap = new Dictionary<string, ProcessedType>();
-        private static readonly Dictionary<string, LightList<Assembly>> s_NamespaceMap = new Dictionary<string, LightList<Assembly>>();
+        public static readonly Dictionary<string, ProcessedType> typeMap = new Dictionary<string, ProcessedType>();
+        public static LightList<Assembly> filteredAssemblies;
+        public static LightList<Type> loadedTypes;
+        public static TypeData[] templateTypes;
+        public static readonly Dictionary<string, ProcessedType> templateTypeMap = new Dictionary<string, ProcessedType>();
+        public static readonly Dictionary<string, LightList<Assembly>> s_NamespaceMap = new Dictionary<string, LightList<Assembly>>();
+
+        public static void Bootstrap() {
+            FilterAssemblies();
+        }
 
         private static void FilterAssemblies() {
             if (filteredAssemblies != null) return;
@@ -49,25 +52,30 @@ namespace UIForia.Parsing.Expression {
 
             Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
             filteredAssemblies = new LightList<Assembly>();
-            loadedTypes = new LightList<Type>();
-
-            
+            //loadedTypes = new LightList<Type>();
+            int count = 0;
             for (int i = 0; i < assemblies.Length; i++) {
                 Assembly assembly = assemblies[i];
 
-                if (assembly == null) {
+                if (assembly == null || assembly.IsDynamic) {
                     continue;
                 }
 
-                if (!FilterAssembly(assembly)) continue;
+                bool filteredOut = !FilterAssembly(assembly);
+                bool shouldProcessTypes = ShouldProcessTypes(assembly, filteredOut);
 
+                if (!shouldProcessTypes) {
+                    continue;
+                }
+
+                count++;
                 filteredAssemblies.Add(assembly);
-                try {
 
+                // Debug.Log($"{filteredOut} {assembly}");
+                try {
                     Type[] types = assembly.GetTypes();
 
                     for (int j = 0; j < types.Length; j++) {
-
                         Type currentType = types[j];
                         // can be null if assembly referenced is unavailable
                         // ReSharper disable once ConditionIsAlwaysTrueOrFalse
@@ -75,21 +83,24 @@ namespace UIForia.Parsing.Expression {
                             continue;
                         }
 
-                        loadedTypes.Add(currentType);
+                        if (!filteredOut && currentType.IsClass) {
+                            IEnumerable<Attribute> attrs = currentType.GetCustomAttributes();
+                            Application.ProcessClassAttributes(currentType, attrs);
+                            // loadedTypes.Add(currentType);
+                        }
 
-                        IEnumerable<Attribute> attrs = currentType.GetCustomAttributes();
-
-                        Application.ProcessClassAttributes(currentType, attrs);
+                        if (filteredOut && !currentType.IsPublic) {
+                            continue;
+                        }
 
                         if (!s_NamespaceMap.TryGetValue(currentType.Namespace ?? "null", out LightList<Assembly> list)) {
-                            list = new LightList<Assembly>();
+                            list = new LightList<Assembly>(2);
                             s_NamespaceMap.Add(currentType.Namespace ?? "null", list);
                         }
 
                         if (!list.Contains(assembly)) {
                             list.Add(assembly);
                         }
-
                     }
                 }
                 catch (ReflectionTypeLoadException) {
@@ -98,9 +109,9 @@ namespace UIForia.Parsing.Expression {
                 }
             }
 
-            loadedTypes.Add(typeof(Color));
             watch.Stop();
-            Debug.Log("Types loaded in: " + watch.ElapsedMilliseconds + "ms");
+            Debug.Log($"Loaded types in: {watch.ElapsedMilliseconds} ms from {count} assemblies");
+            Debug.Log(s_NamespaceMap.Count);
             GC.Collect();
         }
 
@@ -128,6 +139,107 @@ namespace UIForia.Parsing.Expression {
             return t != null;
         }
 
+        private static Type ResolveSimpleType(string typeName) {
+            switch (typeName) {
+                case "bool": return typeof(bool);
+                case "byte": return typeof(byte);
+                case "sbyte": return typeof(sbyte);
+                case "char": return typeof(char);
+                case "decimal": return typeof(decimal);
+                case "double": return typeof(double);
+                case "float": return typeof(float);
+                case "int": return typeof(int);
+                case "uint": return typeof(uint);
+                case "long": return typeof(long);
+                case "ulong": return typeof(ulong);
+                case "object": return typeof(object);
+                case "short": return typeof(short);
+                case "ushort": return typeof(ushort);
+                case "string": return typeof(string);
+            }
+
+            return null;
+        }
+
+
+        private static Type[] ResolveGenericTypes(TypeLookup typeLookup, IList<string> namespaces) {
+            Type[] results = new Type[typeLookup.generics.Length];
+
+            for (int i = 0; i < typeLookup.generics.Length; i++) {
+                results[i] = ResolveType(typeLookup.generics[i], namespaces);
+
+                if (results[i] == null) {
+                    throw new TypeResolutionException($"Failed to find a type from string {typeLookup.generics[i]}");
+                }
+            }
+
+            return results;
+        }
+
+        private static Type ResolveBaseTypePath(TypeLookup typeLookup, IList<string> namespaces) {
+            Type retn = ResolveSimpleType(typeLookup.typeName);
+
+            if (retn != null) {
+                return retn;
+            }
+
+            string baseTypeName = "." + typeLookup.typeName; // save some string concat
+            if (!string.IsNullOrEmpty(typeLookup.namespaceName)) {
+                LightList<Assembly> assemblies = s_NamespaceMap.GetOrDefault(typeLookup.namespaceName);
+
+                if (assemblies == null) {
+                    throw new TypeResolutionException($"No loaded assemblies found for namespace {typeLookup.namespaceName}");
+                }
+
+                string typename = typeLookup.namespaceName + baseTypeName;
+
+                for (int a = 0; a < assemblies.Count; a++) {
+                    retn = assemblies[a].GetType(typename);
+                    if (retn != null) {
+                        return retn;
+                    }
+                }
+
+                throw new TypeResolutionException($"Unable to resolve type {typeLookup}");
+            }
+            else {
+                for (int i = 0; i < namespaces.Count; i++) {
+                    LightList<Assembly> assemblies = s_NamespaceMap.GetOrDefault(namespaces[i]);
+                    if (assemblies == null) {
+                        continue;
+                    }
+
+                    string typename = namespaces[i] + baseTypeName;
+                    for (int a = 0; a < assemblies.Count; a++) {
+                        retn = assemblies[a].GetType(typename);
+                        if (retn != null) {
+                            return retn;
+                        }
+                    }
+                }
+
+                throw new TypeResolutionException($"Unable to resolve type {typeLookup}");
+            }
+        }
+
+        public static Type ResolveType(TypeLookup typeLookup, IList<string> namespaces) {
+            FilterAssemblies();
+
+            // base type will valid or an exception will be thrown
+            Type baseType = ResolveBaseTypePath(typeLookup, namespaces);
+
+            if (typeLookup.generics != null && typeLookup.generics.Length != 0) {
+                if (!baseType.IsGenericTypeDefinition) {
+                    throw new TypeResolutionException($"{baseType} is not a generic type definition but we are trying to resolve a generic type with it because generic arguments were provided");
+                }
+                
+                Type[] generics = ResolveGenericTypes(typeLookup, namespaces);
+                return ReflectionUtil.CreateGenericType(baseType, generics);
+            }
+
+            return baseType;
+        }
+
         public static Type ResolveType(Type originType, string name, IList<string> namespaces) {
             string subtypeName = originType.FullName + "+" + name;
             subtypeName = subtypeName + ", " + originType.Assembly.FullName;
@@ -141,9 +253,9 @@ namespace UIForia.Parsing.Expression {
 
             LightList<Assembly> assemblies = s_NamespaceMap.GetOrDefault(originType.Namespace ?? "null");
             if (assemblies != null) {
-
                 string typeName = originType.Namespace ?? "null" + "." + name + ", ";
-                foreach (Assembly assembly in assemblies) {
+                for (int i = 0; i < assemblies.Count; i++) {
+                    Assembly assembly = assemblies[i];
                     string fullTypeName = typeName + assembly.FullName;
 
                     retn = Type.GetType(fullTypeName);
@@ -152,7 +264,6 @@ namespace UIForia.Parsing.Expression {
                         return retn;
                     }
                 }
-
             }
 
             if (originType.FullName.Contains("+")) {
@@ -168,7 +279,6 @@ namespace UIForia.Parsing.Expression {
                         return retn;
                     }
                 }
-
             }
 
             return ResolveType(name, namespaces);
@@ -236,13 +346,14 @@ namespace UIForia.Parsing.Expression {
             if (templateTypeMap.TryGetValue(tagName, out processedType)) {
                 return processedType;
             }
-            
+
 //            if (templateTypeMap.TryGetValue(typeof(UIGroupElement).Name, out processedType)){
 //                return processedType;
 //            }
 
             throw new ParseException("Unable to find type for tag name: " + tagName);
         }
+
 
         public static Type ResolveTypeName(string typeName) {
             switch (typeName) {
@@ -306,6 +417,11 @@ namespace UIForia.Parsing.Expression {
             return processedType;
         }
 
+        private static bool ShouldProcessTypes(Assembly assembly, bool wasFilteredOut) {
+            string name = assembly.FullName;
+            return !wasFilteredOut || (name.StartsWith("System") || name.StartsWith("Unity") || name.Contains("mscorlib"));
+        }
+
         private static bool FilterAssembly(Assembly assembly) {
             string name = assembly.FullName;
 
@@ -323,7 +439,7 @@ namespace UIForia.Parsing.Expression {
                 name.StartsWith("ExCSS.") ||
                 name.Contains("mscorlib") ||
                 name.Contains("JetBrains") ||
-                name.Contains("UnityEngine.") ||
+                name.Contains("UnityEngine") ||
                 name.Contains("UnityEditor") ||
                 name.Contains("Jetbrains")) {
                 return false;
@@ -351,7 +467,12 @@ namespace UIForia.Parsing.Expression {
 
             return templateTypes;
         }
-        
+
+    }
+
+    public class TypeResolutionException : Exception {
+
+        public TypeResolutionException(string message) : base(message) { }
 
     }
 

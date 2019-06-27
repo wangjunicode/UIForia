@@ -16,10 +16,13 @@ namespace UIForia.Compilers {
         }
 
         public void AddStatement(Expression statement) {
-            statements = statements ?? new LightList<Expression>();
             statements.Add(statement);
         }
 
+        public void PrependStatement(Expression statement) {
+            statements.Insert(0, statement);
+        }
+        
         public ParameterExpression AddVariable(Type type, string name = null) {
             if (string.IsNullOrEmpty(name) || string.IsNullOrWhiteSpace(name)) {
                 name = "_var$";

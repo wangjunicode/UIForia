@@ -115,12 +115,12 @@
             string input = "&&";
             List<ExpressionToken> tokens = ExpressionTokenizer.Tokenize(input);
             Assert.AreEqual(1, tokens.Count);
-            Assert.AreEqual(ExpressionTokenType.And, tokens[0].expressionTokenType);
+            Assert.AreEqual(ExpressionTokenType.AndAlso, tokens[0].expressionTokenType);
             
             input = "||";
             tokens = ExpressionTokenizer.Tokenize(input);
             Assert.AreEqual(1, tokens.Count);
-            Assert.AreEqual(ExpressionTokenType.Or, tokens[0].expressionTokenType);
+            Assert.AreEqual(ExpressionTokenType.OrElse, tokens[0].expressionTokenType);
             
             input = "==";
             tokens = ExpressionTokenizer.Tokenize(input);
@@ -246,10 +246,10 @@
             types.Add(ExpressionTokenType.Identifier);
             types.Add(ExpressionTokenType.NotEquals);
             types.Add(ExpressionTokenType.Number);
-            types.Add(ExpressionTokenType.And);
+            types.Add(ExpressionTokenType.AndAlso);
             types.Add(ExpressionTokenType.Not);
             types.Add(ExpressionTokenType.Identifier);
-            types.Add(ExpressionTokenType.Or);
+            types.Add(ExpressionTokenType.OrElse);
             types.Add(ExpressionTokenType.Minus);
             types.Add(ExpressionTokenType.ParenOpen);
             types.Add(ExpressionTokenType.Number);

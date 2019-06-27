@@ -12,6 +12,14 @@ namespace UIForia.Exceptions {
         public CompileException(string message = null) : base(message) {
         }
 
+        public static CompileException RHSRootIdentifierMissing(string identifierName) {
+            return new CompileException($"Unable to compile right hand side expression beginning with {identifierName} because there was no root variable.");
+        } 
+        
+        public static CompileException NoStatementsRootBlock() {
+            return new CompileException($"Cannot compile the lambda because there are not statements emitted in the main block of the function");
+        }
+        
         public CompileException(StyleASTNode node, string message = null) :
             base($"Compile error for style token at line {node.line}, column {node.column}, node type '{node.type}'\n{message}") {
         }
@@ -40,6 +48,8 @@ namespace UIForia.Exceptions {
         public void SetExpression(string input) {
             expression = input;
         }
+
+       
 
     }
 

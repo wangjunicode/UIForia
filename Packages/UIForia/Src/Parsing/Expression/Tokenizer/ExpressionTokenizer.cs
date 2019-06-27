@@ -7,7 +7,7 @@ namespace UIForia.Parsing.Expression.Tokenizer {
 
     public static class ExpressionTokenizer {
         
-        private readonly static char stringCharacter = '\'';
+        private static readonly char stringCharacter = '\'';
 
         private static void TryReadCharacters(TokenizerContext context, string match, ExpressionTokenType expressionTokenType, List<ExpressionToken> output) {
             if (context.ptr + match.Length > context.input.Length) return;
@@ -205,13 +205,16 @@ namespace UIForia.Parsing.Expression.Tokenizer {
                 TryConsumeComment(context);
 
                 TryReadCharacters(context, "@", ExpressionTokenType.At, output);
-                TryReadCharacters(context, "&&", ExpressionTokenType.And, output);
-                TryReadCharacters(context, "||", ExpressionTokenType.Or, output);
+                TryReadCharacters(context, "&&", ExpressionTokenType.AndAlso, output);
+                TryReadCharacters(context, "||", ExpressionTokenType.OrElse, output);
                 TryReadCharacters(context, "==", ExpressionTokenType.Equals, output);
+                TryReadCharacters(context, "<<", ExpressionTokenType.ShiftLeft, output);
+                TryReadCharacters(context, ">>", ExpressionTokenType.ShiftRight, output);
                 TryReadCharacters(context, "!=", ExpressionTokenType.NotEquals, output);
                 TryReadCharacters(context, ">=", ExpressionTokenType.GreaterThanEqualTo, output);
                 TryReadCharacters(context, "<=", ExpressionTokenType.LessThanEqualTo, output);
                 TryReadCharacters(context, ">", ExpressionTokenType.GreaterThan, output);
+                TryReadCharacters(context, "<", ExpressionTokenType.LessThan, output);
                 TryReadCharacters(context, "<", ExpressionTokenType.LessThan, output);
 
                 TryReadCharacters(context, "!", ExpressionTokenType.Not, output);
@@ -220,6 +223,10 @@ namespace UIForia.Parsing.Expression.Tokenizer {
                 TryReadCharacters(context, "/", ExpressionTokenType.Divide, output);
                 TryReadCharacters(context, "*", ExpressionTokenType.Times, output);
                 TryReadCharacters(context, "%", ExpressionTokenType.Mod, output);
+                TryReadCharacters(context, "~", ExpressionTokenType.BinaryNot, output);
+                TryReadCharacters(context, "|", ExpressionTokenType.BinaryOr, output);
+                TryReadCharacters(context, "&", ExpressionTokenType.BinaryAnd, output);
+                TryReadCharacters(context, "^", ExpressionTokenType.BinaryXor, output);
                 TryReadCharacters(context, "?", ExpressionTokenType.QuestionMark, output);
                 TryReadCharacters(context, ":", ExpressionTokenType.Colon, output);
 

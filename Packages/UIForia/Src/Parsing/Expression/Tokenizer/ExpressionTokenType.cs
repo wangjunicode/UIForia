@@ -10,6 +10,12 @@ namespace UIForia.Parsing.Expression.Tokenizer {
         Times,
         Divide,
         Mod,
+        BinaryOr,
+        BinaryAnd,
+        BinaryXor,
+        ShiftLeft, 
+        ShiftRight,
+        BinaryNot,
         
         Is,
         As,
@@ -40,8 +46,8 @@ namespace UIForia.Parsing.Expression.Tokenizer {
         Number,
 
         // booleans
-        And,
-        Or,
+        AndAlso,
+        OrElse,
         Not,
 
         // Comparators

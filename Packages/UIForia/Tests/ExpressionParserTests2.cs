@@ -189,6 +189,11 @@ public class ExpressionParserTests2 {
         ASTNode v2 = ExpressionParser.Parse("{someIdentifier * someIdentifier2}");
         ASTNode v3 = ExpressionParser.Parse("{someIdentifier / someIdentifier2}");
         ASTNode v4 = ExpressionParser.Parse("{someIdentifier % someIdentifier2}");
+        ASTNode v5 = ExpressionParser.Parse("{someIdentifier >> someIdentifier2}");
+        ASTNode v6 = ExpressionParser.Parse("{someIdentifier << someIdentifier2}");
+        ASTNode v7 = ExpressionParser.Parse("{someIdentifier & someIdentifier2}");
+        ASTNode v8 = ExpressionParser.Parse("{someIdentifier | someIdentifier2}");
+        ASTNode v9 = ExpressionParser.Parse("{someIdentifier ^ someIdentifier2}");
 
         void Verify(ASTNode node, OperatorType opType) {
             OperatorNode opEx = (OperatorNode) node;
@@ -202,6 +207,11 @@ public class ExpressionParserTests2 {
         Verify(v2, OperatorType.Times);
         Verify(v3, OperatorType.Divide);
         Verify(v4, OperatorType.Mod);
+        Verify(v5, OperatorType.ShiftRight);
+        Verify(v6, OperatorType.ShiftLeft);
+        Verify(v7, OperatorType.BinaryAnd);
+        Verify(v8, OperatorType.BinaryOr);
+        Verify(v9, OperatorType.BinaryXor);
     }
 
     [Test]

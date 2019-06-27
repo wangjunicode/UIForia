@@ -22,9 +22,15 @@ namespace UIForia.Parsing.Expression.AstNodes {
         Not = 1 << 15,
         As = 1 << 16,
         Is = 1 << 17,
+        BinaryNot = 1 << 18,
+        BinaryOr = 1 << 19,
+        BinaryXor = 1 << 20,
+        BinaryAnd = 1 << 21,
+        ShiftLeft = 1 << 22,
+        ShiftRight = 1 << 23,
         
         Boolean = And | Or | Not,
-        Arithmetic = Plus | Minus | Times | Divide | Mod,
+        Arithmetic = Plus | Minus | Times | Divide | Mod | ShiftLeft | ShiftRight | BinaryAnd | BinaryOr | BinaryXor,
         Comparator = Equals | NotEquals | GreaterThan | GreaterThanEqualTo | LessThan | LessThanEqualTo,
 
     }

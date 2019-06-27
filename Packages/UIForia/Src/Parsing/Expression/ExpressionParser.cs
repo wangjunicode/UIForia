@@ -114,13 +114,38 @@ namespace UIForia.Parsing.Expression {
                     operatorNode = ASTNode.OperatorNode(OperatorType.Mod);
                     operatorNode.WithLocation(tokenStream.Previous);
                     return true;
+                
+                case ExpressionTokenType.ShiftLeft:
+                    operatorNode = ASTNode.OperatorNode(OperatorType.ShiftLeft);
+                    operatorNode.WithLocation(tokenStream.Previous);
+                    return true;
 
-                case ExpressionTokenType.And:
+                case ExpressionTokenType.ShiftRight:
+                    operatorNode = ASTNode.OperatorNode(OperatorType.ShiftRight);
+                    operatorNode.WithLocation(tokenStream.Previous);
+                    return true;
+                
+                case ExpressionTokenType.BinaryAnd:
+                    operatorNode = ASTNode.OperatorNode(OperatorType.BinaryAnd);
+                    operatorNode.WithLocation(tokenStream.Previous);
+                    return true;
+                
+                case ExpressionTokenType.BinaryOr:
+                    operatorNode = ASTNode.OperatorNode(OperatorType.BinaryOr);
+                    operatorNode.WithLocation(tokenStream.Previous);
+                    return true;
+                
+                case ExpressionTokenType.BinaryXor:
+                    operatorNode = ASTNode.OperatorNode(OperatorType.BinaryXor);
+                    operatorNode.WithLocation(tokenStream.Previous);
+                    return true;
+
+                case ExpressionTokenType.AndAlso:
                     operatorNode = ASTNode.OperatorNode(OperatorType.And);
                     operatorNode.WithLocation(tokenStream.Previous);
                     return true;
 
-                case ExpressionTokenType.Or:
+                case ExpressionTokenType.OrElse:
                     operatorNode = ASTNode.OperatorNode(OperatorType.Or);
                     operatorNode.WithLocation(tokenStream.Previous);
                     return true;
@@ -285,7 +310,7 @@ namespace UIForia.Parsing.Expression {
         }
 
         private bool ParseUnaryExpression(ref ASTNode retn) {
-            if (tokenStream.Current != ExpressionTokenType.Not && tokenStream.HasPrevious && !tokenStream.Previous.UnaryRequiresCheck) {
+            if (tokenStream.Current != ExpressionTokenType.Not && tokenStream.Current != ExpressionTokenType.BinaryNot && tokenStream.HasPrevious && !tokenStream.Previous.UnaryRequiresCheck) {
                 return false;
             }
 
@@ -312,6 +337,18 @@ namespace UIForia.Parsing.Expression {
                 }
 
                 retn = ASTNode.UnaryExpressionNode(ASTNodeType.UnaryMinus, expr);
+                return true;
+            }
+            
+            if (tokenStream.Current == ExpressionTokenType.BinaryNot) {
+                tokenStream.Advance();
+                ASTNode expr = null;
+                if (!ParseExpression(ref expr)) {
+                    tokenStream.Restore();
+                    return false;
+                }
+
+                retn = ASTNode.UnaryExpressionNode(ASTNodeType.BinaryNot, expr);
                 return true;
             }
 
@@ -716,30 +753,6 @@ namespace UIForia.Parsing.Expression {
 
             ListPool<ASTNode>.Release(ref list);
         }
-
-    }
-
-    public enum ASTNodeType {
-
-        None,
-        NullLiteral,
-        BooleanLiteral,
-        NumericLiteral,
-        DefaultLiteral,
-        StringLiteral,
-        Operator,
-        TypeOf,
-        Identifier,
-        Invalid,
-        DotAccess,
-        AccessExpression,
-        IndexExpression,
-        UnaryNot,
-        UnaryMinus,
-        DirectCast,
-        ListInitializer,
-        New,
-        Paren
 
     }
 

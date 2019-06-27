@@ -14,69 +14,6 @@ using Expression = System.Linq.Expressions.Expression;
 
 namespace UIForia.Compilers {
 
-    public class BlockDefinition {
-
-        public LightList<ParameterExpression> variables;
-        public LightList<Expression> statements;
-
-        public BlockDefinition() {
-            this.variables = new LightList<ParameterExpression>();
-            this.statements = new LightList<Expression>();
-        }
-
-        public void AddStatement(Expression statement) {
-            statements = statements ?? new LightList<Expression>();
-            statements.Add(statement);
-        }
-
-        public ParameterExpression AddVariable(Type type, string name = null) {
-            if (string.IsNullOrEmpty(name) || string.IsNullOrWhiteSpace(name)) {
-                name = "_var$";
-            }
-
-            variables = variables ?? new LightList<ParameterExpression>();
-
-            for (int i = 0; i < variables.Count; i++) {
-                if (variables[i].Name == name) {
-                    name += i;
-                    break;
-                }
-            }
-
-            ParameterExpression retn = Expression.Parameter(type, name);
-            variables.Add(retn);
-            return retn;
-        }
-
-        public ParameterExpression ResolveVariable(string variableName) {
-            if (variables == null) return null;
-            for (int i = 0; i < variables.Count; i++) {
-                if (variables[i].Name == variableName) {
-                    return variables[i];
-                }
-            }
-
-            return null;
-        }
-
-        public Expression ToExpressionBlock(Type retnType) {
-            if (statements == null || statements.Count == 0) {
-                if (variables != null && variables.Count > 0) {
-                    return Expression.Block(retnType, variables, Expression.Empty());
-                }
-
-                return Expression.Block(retnType, Expression.Empty());
-            }
-
-            if (variables != null && variables.Count > 0) {
-                return Expression.Block(retnType, variables, statements);
-            }
-
-            return Expression.Block(retnType, statements);
-        }
-
-    }
-
     public class LinqCompiler {
 
         // todo -- pool blocks 
@@ -144,8 +81,10 @@ namespace UIForia.Compilers {
             currentBlock.AddStatement(Expression.Assign(left, right));
         }
 
-        public void GetVariable(string variableName) { }
-
+        public void ReturnStatement(Expression expression) {
+            currentBlock.AddStatement(expression);    
+        }
+        
         public void Invoke(Expression target, MethodInfo methodInfo, params Expression[] args) { }
 
         // todo -- support strings and or expressions or constants
@@ -171,7 +110,7 @@ namespace UIForia.Compilers {
 
         public void IfNotEqual(LHSStatementChain left, RHSStatementChain right, Action body) {
             Debug.Assert(left != null);
-            Debug.Assert(right != null);
+            Debug.Assert(right.OutputExpression != null);
             Debug.Assert(body != null);
 
             Expression condition = Expression.NotEqual(left.targetExpression, right.OutputExpression);
@@ -190,7 +129,21 @@ namespace UIForia.Compilers {
         public LambdaExpression BuildLambda() {
             Debug.Assert(blockStack.Count == 1);
             // todo -- return type is wrong probably
-            return Expression.Lambda(currentBlock.ToExpressionBlock(typeof(void)).Reduce(), parameters.ToArray());
+            return Expression.Lambda(currentBlock.ToExpressionBlock(typeof(void)), parameters.ToArray());
+        }
+
+        public T Compile<T>() where T : Delegate {
+            Debug.Assert(blockStack.Count == 1);
+            Expression<T> expr;
+            Type genericTypeDef = typeof(T).GetGenericTypeDefinition();
+            if (genericTypeDef == typeof(Func<>)) {
+                Type[] genericArguments = typeof(T).GetGenericArguments();
+                expr = Expression.Lambda<T>(currentBlock.ToExpressionBlock(genericArguments[genericArguments.Length - 1]), parameters.ToArray());
+            }
+            else {
+                expr = Expression.Lambda<T>(currentBlock.ToExpressionBlock(typeof(void)), parameters.ToArray());
+            }
+            return expr.Compile();
         }
 
         public ParameterExpression AddParameter(Type type, string name) {
@@ -217,41 +170,6 @@ namespace UIForia.Compilers {
             return null;
         }
 
-        public struct LHSAssignment {
-
-            public Expression left;
-            public Expression right;
-            public Expression index;
-
-        }
-
-        // statement chain should make its output value accessible and know how to unroll back to struct / indexer types
-        public class LHSStatementChain {
-
-            public string outputVarName;
-            public bool isSimpleAssignment;
-            public Expression targetExpression;
-            public StructList<LHSAssignment> assignments;
-            public Expression OutputExpression => null;
-
-            public void AddAssignment(Expression left, Expression right) {
-                assignments = assignments ?? new StructList<LHSAssignment>();
-                assignments.Add(new LHSAssignment() {
-                    left = left,
-                    right = right
-                });
-            }
-
-            public void AddIndexAssignment(Expression left, Expression right, IndexExpression index) { }
-
-        }
-
-        public class RHSStatementChain {
-
-            public string outputVarName;
-            public Expression OutputExpression;
-
-        }
 
         private ParameterExpression ResolveVariableName(string variableName) {
             for (int i = blockStack.Count - 1; i >= 0; i--) {
@@ -414,6 +332,7 @@ namespace UIForia.Compilers {
                             needsNullChecking = true;
                             currentBlock.AddStatement(NullCheck(lastValue, outputVariable, returnTarget));
                         }
+
                         last = Expression.MakeIndex(lastValue, indexProperty, new[] {indexer});
                         lastValue = currentBlock.AddVariable(indexProperty.PropertyType, "indexVal");
                         currentBlock.AddStatement(Expression.Assign(lastValue, last));
@@ -505,6 +424,10 @@ namespace UIForia.Compilers {
             throw new CompileException($"Can't find indexed property that accepts an indexer of type {indexExpression.Type}");
         }
 
+        private Expression Visit(ASTNode node) {
+            return Visit(null, node);
+        }
+
         private Expression Visit(Type targetType, ASTNode node) {
             switch (node.type) {
                 case ASTNodeType.NullLiteral:
@@ -528,8 +451,6 @@ namespace UIForia.Compilers {
                 case ASTNodeType.TypeOf:
                     break;
                 case ASTNodeType.Identifier:
-                    break;
-                case ASTNodeType.Invalid:
                     break;
                 case ASTNodeType.DotAccess:
                     break;
@@ -564,6 +485,81 @@ namespace UIForia.Compilers {
             return null;
         }
 
+        private Expression VisitOperator(OperatorNode operatorNode) {
+            Expression left;
+            Expression right;
+
+            if (operatorNode.operatorType == OperatorType.TernaryCondition) {
+                OperatorNode select = (OperatorNode) operatorNode.right;
+
+                if (select.operatorType != OperatorType.TernarySelection) {
+                    throw new CompileException("Bad ternary, expected the right hand side to be a TernarySelection but it was {select.operatorType}");
+                }
+
+                left = Visit(select.left);
+                right = Visit(select.right);
+
+                Expression ternaryCondition = Visit(operatorNode.left);
+                Expression conditionVariable = currentBlock.AddVariable(typeof(bool), "ternary");
+
+                currentBlock.AddAssignment(conditionVariable, ternaryCondition);
+
+                // Expression ternaryBody = Expression.IfThenElse(conditionVariable
+                throw new NotImplementedException();
+            }
+
+            left = Visit(operatorNode.left);
+            right = Visit(operatorNode.right);
+
+            switch (operatorNode.operatorType) {
+                case OperatorType.Plus:
+                    return Expression.Add(left, right);
+
+                case OperatorType.Minus:
+                    return Expression.Subtract(left, right);
+
+                case OperatorType.Mod:
+                    return Expression.Modulo(left, right);
+
+                case OperatorType.Times:
+                    return Expression.Multiply(left, right);
+
+                case OperatorType.Divide:
+                    return Expression.Divide(left, right);
+
+                case OperatorType.Equals:
+                    return Expression.Equal(left, right);
+
+                case OperatorType.NotEquals:
+                    return Expression.NotEqual(left, right);
+
+                case OperatorType.GreaterThan:
+                    return Expression.GreaterThan(left, right);
+
+                case OperatorType.GreaterThanEqualTo:
+                    return Expression.GreaterThanOrEqual(left, right);
+
+                case OperatorType.LessThan:
+                    return Expression.LessThan(left, right);
+
+                case OperatorType.LessThanEqualTo:
+                    return Expression.LessThanOrEqual(left, right);
+
+                case OperatorType.And:
+                    return Expression.AndAlso(left, right);
+
+                case OperatorType.Or:
+                    return Expression.OrElse(left, right);
+
+                default:
+                    throw new CompileException($"Tried to visit the operator node {operatorNode.operatorType} but it wasn't handled by LinqCompiler.VisitOperator");
+            }
+        }
+
+        public RHSStatementChain CreateRHSStatementChain(string input) {
+            return CreateRHSStatementChain(null, null, input);
+        }
+
         public RHSStatementChain CreateRHSStatementChain(string rootVariableName, Type targetType, string input) {
             ASTNode astRoot = ExpressionParser.Parse(input);
 
@@ -593,12 +589,17 @@ namespace UIForia.Compilers {
                     break;
 
                 case ASTNodeType.Operator:
+                    retn.OutputExpression = VisitOperator((OperatorNode) astRoot);
                     break;
 
                 case ASTNodeType.TypeOf:
                     break;
 
                 case ASTNodeType.Identifier: {
+                    if (string.IsNullOrEmpty(rootVariableName) || string.IsNullOrWhiteSpace(rootVariableName)) {
+                        throw CompileException.RHSRootIdentifierMissing(((IdentifierNode) astRoot).name);
+                    }
+
                     retn.OutputExpression = VisitIdentifierNode(rootVariableName, (IdentifierNode) astRoot);
                     break;
                 }
@@ -848,12 +849,6 @@ namespace UIForia.Compilers {
 
             throw new CompileException($"Unable to parse numeric value from {literalNode.rawValue} target type was {targetType}");
         }
-
-    }
-
-    public class InvalidLeftHandStatementException : Exception {
-
-        public InvalidLeftHandStatementException(string message, string input) : base($" {message} is an invalid LHS expression statement, parsed from {input}") { }
 
     }
 

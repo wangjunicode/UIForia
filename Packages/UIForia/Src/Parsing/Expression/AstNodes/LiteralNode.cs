@@ -6,7 +6,7 @@ namespace UIForia.Parsing.Expression.AstNodes {
 
         public override void Release() {
             rawValue = null;
-            type = ASTNodeType.Invalid;
+            type = 0;
             s_LiteralPool.Release(this);
         }
     }

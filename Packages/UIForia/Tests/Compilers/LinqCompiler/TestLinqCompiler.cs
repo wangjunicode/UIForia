@@ -75,8 +75,8 @@ public class TestLinqCompiler {
             RHSStatementChain right = compiler.CreateRHSStatementChain("root", left.targetExpression.Type, attributeDefinition.value);
 
             // if no listeners and field or auto prop then just assign, no need to check
-                //compiler.Assign(left, Expression.Constant(34f));
-            
+            //compiler.Assign(left, Expression.Constant(34f));
+
             compiler.IfNotEqual(left, right, () => {
                 compiler.Assign(left, right);
 //
@@ -376,7 +376,7 @@ public class TestLinqCompiler {
             }
         ", PrintCode(expr));
     }
-    
+
     [Test]
     public void CompileIndexAccess_AttemptTypeCast() {
         BindingCompiler bindingCompiler = new BindingCompiler();
@@ -395,7 +395,7 @@ public class TestLinqCompiler {
         Assert.AreEqual(0, element.floatValue);
         Assert.AreEqual(42, root.vec3List[3].z);
         Debug.Log(PrintCode(expr));
-            
+
         fn.Invoke(root, element);
 
         Assert.AreEqual(42, element.floatValue);
@@ -426,7 +426,7 @@ public class TestLinqCompiler {
         }
         ", PrintCode(expr));
     }
-    
+
     [Test]
     public void CompileStructFieldAssignment_Constant() {
         BindingCompiler bindingCompiler = new BindingCompiler();
@@ -435,14 +435,14 @@ public class TestLinqCompiler {
         Action<LinqThing, LinqThing> fn = (Action<LinqThing, LinqThing>) expr.Compile();
         LinqThing root = new LinqThing();
         LinqThing element = new LinqThing();
-       
+
         Assert.AreEqual(0, element.svHolderVec3.value.x);
         Debug.Log(PrintCode(expr));
-            
+
         fn.Invoke(root, element);
 
         Assert.AreEqual(34, element.svHolderVec3.value.x);
-        
+
         AssertStringsEqual(@"
        (LinqThing root, LinqThing element) =>
         {
@@ -462,7 +462,7 @@ public class TestLinqCompiler {
         }
         ", PrintCode(expr));
     }
-    
+
     [Test]
     public void CompileStructFieldAssignment_Variable() {
         BindingCompiler bindingCompiler = new BindingCompiler();
@@ -473,11 +473,11 @@ public class TestLinqCompiler {
         LinqThing element = new LinqThing();
         root.floatValue = 35;
         Assert.AreEqual(0, element.svHolderVec3.value.x);
-            
+
         fn.Invoke(root, element);
 
         Assert.AreEqual(35, element.svHolderVec3.value.x);
-        
+
         AssertStringsEqual(@"
                (LinqThing root, LinqThing element) =>
         {
@@ -499,7 +499,7 @@ public class TestLinqCompiler {
         }
         ", PrintCode(expr));
     }
-    
+
     [Test]
     public void CompileStructFieldAssignment_Accessor() {
         BindingCompiler bindingCompiler = new BindingCompiler();
@@ -521,7 +521,7 @@ public class TestLinqCompiler {
         fn.Invoke(root, element);
 
         Assert.AreEqual(42, element.svHolderVec3.value.x);
-        
+
         AssertStringsEqual(@"
         (LinqThing root, LinqThing element) =>
         {
@@ -556,6 +556,31 @@ public class TestLinqCompiler {
             }
         }
         ", PrintCode(expr));
+    }
+
+    [Test]
+    public void CompileNumericOperators() {
+        LinqCompiler compiler = new LinqCompiler();
+
+        object CompileAndReset<T>(string input) where T : Delegate {
+            compiler.ReturnStatement(compiler.CreateRHSStatementChain(input));
+            T retn = compiler.Compile<T>();
+            compiler.Reset();
+            return retn.DynamicInvoke();
+        }
+        
+        Assert.AreEqual(5 + 4, CompileAndReset<Func<int>>("5 + 4"));
+        Assert.AreEqual(5 - 4, CompileAndReset<Func<int>>("5 - 4"));
+        Assert.AreEqual(5 * 4, CompileAndReset<Func<int>>("5 * 4"));
+        Assert.AreEqual(5 % 4, CompileAndReset<Func<int>>("5 % 4"));
+        Assert.AreEqual(5 / 4, CompileAndReset<Func<int>>("5 / 4"));
+        
+        Assert.AreEqual(5f + 4f, CompileAndReset<Func<float>>("5f + 4f"));
+        Assert.AreEqual(5f - 4f, CompileAndReset<Func<float>>("5f - 4f"));
+        Assert.AreEqual(5f * 4f, CompileAndReset<Func<float>>("5f * 4f"));
+        Assert.AreEqual(5f % 4f, CompileAndReset<Func<float>>("5f % 4f"));
+        Assert.AreEqual(5f / 4f, CompileAndReset<Func<float>>("5f / 4f"));
+        
     }
 
     public void AssertStringsEqual(string a, string b) {

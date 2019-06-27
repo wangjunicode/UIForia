@@ -48,8 +48,8 @@ namespace UIForia.Parsing.Expression.Tokenizer {
             expressionTokenType == ExpressionTokenType.LessThanEqualTo;
 
         public bool IsBooleanTest =>
-            expressionTokenType == ExpressionTokenType.And ||
-            expressionTokenType == ExpressionTokenType.Or ||
+            expressionTokenType == ExpressionTokenType.AndAlso ||
+            expressionTokenType == ExpressionTokenType.OrElse ||
             expressionTokenType == ExpressionTokenType.Not;
         
         public bool IsOperator =>

@@ -6,6 +6,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Reflection.Emit;
 using Boo.Lang;
+using UIForia.Bindings;
 using UIForia.Elements;
 using UnityEngine;
 
@@ -1174,6 +1175,7 @@ namespace UIForia.Util {
             public ParameterInfo[] parameterInfos;
 
         }
+
         public static IList<IndexerInfo> GetIndexedProperties(Type targetType, IList<IndexerInfo> retn = null) {
             if (retn == null) retn = new System.Collections.Generic.List<IndexerInfo>();
             PropertyInfo[] properties = targetType.GetProperties(InstanceBindFlags);
@@ -1190,6 +1192,56 @@ namespace UIForia.Util {
             }
 
             return retn;
+        }
+
+        public static ConstructorInfo GetConstructor(Type type, IReadOnlyList<Type> argTypes) {
+            ConstructorInfo[] constructors = type.GetConstructors(BindingFlags.Instance | BindingFlags.Public);
+
+            for (int i = 0; i < constructors.Length; i++) {
+                ParameterInfo[] parameters = constructors[i].GetParameters();
+
+                if (parameters.Length > argTypes.Count) {
+                    int start = argTypes.Count;
+                }
+                else if (argTypes.Count == parameters.Length) {
+                    if (MatchesSignature(argTypes, parameters)) {
+                        return constructors[i];
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        private static bool MatchesSignature(IReadOnlyList<Type> argTypes, ParameterInfo[] parameters) {
+            for (int j = 0; j < parameters.Length; j++) {
+                Type argType = argTypes[j];
+                Type paramType = parameters[j].ParameterType;
+
+                if (paramType != argType) {
+                    if (!TypeUtil.HasIdentityPrimitiveOrNullableConversion(argType, paramType) && !TypeUtil.HasReferenceConversion(argType, paramType)) {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        public static MemberInfo GetStaticOrConstMemberInfo(Type type, string fieldOrPropertyName) {
+            
+            FieldInfo fieldInfo = type.GetField(fieldOrPropertyName, StaticFlags | BindingFlags.FlattenHierarchy);
+            
+            if (fieldInfo != null) {
+                return fieldInfo;
+            }
+
+            PropertyInfo propertyInfo = type.GetProperty(fieldOrPropertyName, StaticFlags | BindingFlags.FlattenHierarchy);
+            if (propertyInfo != null) {
+                return propertyInfo;
+            }
+
+            return null;
         }
 
     }

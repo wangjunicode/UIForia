@@ -24,7 +24,7 @@ namespace UIForia.Templates {
         internal Dictionary<string, UIStyleGroupContainer> implicitStyleMap;
         private UIStyleGroupContainer implicitRootStyle;
 
-        private readonly List<string> usings;
+        public readonly List<string> usings;
         private readonly List<UISlotContentTemplate> inheritedContent;
         private readonly List<StyleDefinition> styleDefinitions;
         public readonly UIElementTemplate rootElementTemplate;

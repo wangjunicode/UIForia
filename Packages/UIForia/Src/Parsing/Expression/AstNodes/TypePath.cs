@@ -4,6 +4,7 @@ using UIForia.Util;
 
 namespace UIForia.Parsing.Expression.AstNodes {
 
+    // todo -- remove type path and replace with TypeLookup
     public struct TypePath {
 
         public List<string> path;

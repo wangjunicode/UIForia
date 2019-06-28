@@ -1,4 +1,4 @@
-namespace UIForia.Parsing.Expression.AstNodes {
+namespace UIForia {
 
     public struct TypeLookup {
 
@@ -6,6 +6,12 @@ namespace UIForia.Parsing.Expression.AstNodes {
         public string namespaceName;
         public TypeLookup[] generics;
 
+        public TypeLookup(string typeName) {
+            this.typeName = typeName;
+            this.namespaceName = null;
+            this.generics = null;
+        }
+        
         public override string ToString() {
             string retn = "";
             if (!string.IsNullOrEmpty(namespaceName) && !string.IsNullOrWhiteSpace(namespaceName)) {

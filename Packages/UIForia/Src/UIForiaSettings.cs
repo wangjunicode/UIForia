@@ -7,6 +7,7 @@ namespace UIForia {
 
         public bool loadTemplatesFromStreamingAssets = false;
         public Material svgxMaterial;
+        public string[] defaultNamespaces;
         
         internal static string s_InternalStreamingPath;
         internal static string s_InternalNonStreamingPath;

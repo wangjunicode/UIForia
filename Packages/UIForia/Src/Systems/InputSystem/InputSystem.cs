@@ -825,6 +825,7 @@ namespace UIForia.Systems {
             else if (UnityEngine.Input.GetKeyDown(code)) {
                 m_KeyStates[code] = KeyState.DownThisFrame;
                 m_DownThisFrame.Add(code);
+                ProcessKeyboardEvent(code, InputEventType.KeyDown, '\0', modifiersThisFrame);
             }
             else if (isDown) {
                 m_KeyStates[code] = KeyState.Down;

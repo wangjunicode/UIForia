@@ -22,7 +22,7 @@ namespace UIForia.Compilers {
         public void PrependStatement(Expression statement) {
             statements.Insert(0, statement);
         }
-        
+
         public ParameterExpression AddVariable(Type type, string name = null) {
             if (string.IsNullOrEmpty(name) || string.IsNullOrWhiteSpace(name)) {
                 name = "_var$";
@@ -45,7 +45,7 @@ namespace UIForia.Compilers {
         public void AddAssignment(Expression target, Expression value) {
             statements.Add(Expression.Assign(target, value));
         }
-        
+
         public ParameterExpression ResolveVariable(string variableName) {
             if (variables == null) return null;
             for (int i = 0; i < variables.Count; i++) {
@@ -57,7 +57,8 @@ namespace UIForia.Compilers {
             return null;
         }
 
-        public Expression ToExpressionBlock(Type retnType) {
+        public Expression ToExpressionBlock(Type retnType = null) {
+            retnType = retnType ?? typeof(void);
             if (statements == null || statements.Count == 0) {
                 throw CompileException.NoStatementsRootBlock();
             }
@@ -67,6 +68,10 @@ namespace UIForia.Compilers {
             }
 
             return Expression.Block(retnType, statements);
+        }
+
+        public static implicit operator Expression(BlockDefinition block) {
+            return block.ToExpressionBlock();
         }
 
     }

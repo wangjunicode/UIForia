@@ -129,8 +129,9 @@ namespace UIForia {
 #endif
         }
         
-        internal static void ProcessClassAttributes(Type type, IEnumerable<Attribute> attrs) {
-            foreach (Attribute attr in attrs) {
+        internal static void ProcessClassAttributes(Type type, Attribute[] attrs) {
+            for (var i = 0; i < attrs.Length; i++) {
+                Attribute attr = attrs[i];
                 if (attr is CustomPainterAttribute paintAttr) {
                     if (type.GetConstructor(Type.EmptyTypes) == null || type.GetInterface(nameof(ISVGXElementPainter)) == null) {
                         throw new Exception($"Classes marked with [{nameof(CustomPainterAttribute)}] must provide a parameterless constructor" +
@@ -531,11 +532,12 @@ namespace UIForia {
             // if element is not enabled (ie has a disabled ancestor), no-op 
             if (!element.isEnabled) return;
 
-            int targetPhase = -1;
+            int targetPhase = -1; 
+            
             UIElement ptr = element.parent;
             if (!ptr.isReady) {
                 while (ptr != null) {
-                    if (ptr.enablePhase != 0) {
+                    if (ptr.enablePhase != 0) { // todo -- remove this element field and make it an element flag
                         targetPhase = ptr.enablePhase;
                         break;
                     }

@@ -285,6 +285,7 @@ namespace UIForia.Parsing.Expression {
 
         // todo string concat expression "string {nested expression}"
         private bool ParseExpression(ref ASTNode retn) {
+            if (ParseNewExpression(ref retn)) return true;
             if (ParseDirectCastExpression(ref retn)) return true;
             if (ParseTypeOfExpression(ref retn)) return true;
             if (ParseArrayLiteralExpression(ref retn)) return true;
@@ -589,14 +590,30 @@ namespace UIForia.Parsing.Expression {
             return true;
         }
 
-        // new Vector3(1, 2, 3)
-        // new UnityEngine.Vector3(1, 2, 3)
         private bool ParseNewExpression(ref ASTNode retn) {
             if (tokenStream.Current != ExpressionTokenType.New) {
                 return false;
             }
+            tokenStream.Save();
+            tokenStream.Advance();
+            TypePath typePath = new TypePath(); // todo -- allocates a list :(
+            bool valid = ParseTypePath(ref typePath);
+            
+            if (!valid || tokenStream.Current != ExpressionTokenType.ParenOpen) {
+                typePath.Release();
+                tokenStream.Restore();
+                return false;
+            }
 
-            throw new NotImplementedException();
+            List<ASTNode> parameters = null;
+            
+            if (!ParseListExpression(ref parameters, ExpressionTokenType.ParenOpen, ExpressionTokenType.ParenClose)) {
+                Abort();
+            }
+            
+            retn = ASTNode.NewExpressionNode(typePath, parameters);
+            
+            return true;
         }
 
         // (int)something

@@ -2,6 +2,7 @@ using System;
 using NUnit.Framework;
 using UIForia.Parsing.Expression;
 using UIForia.Parsing.Expression.AstNodes;
+using UnityEngine;
 using static Tests.TestUtils;
 
 [TestFixture]
@@ -542,22 +543,78 @@ public class ExpressionParserTests2 {
         Assert.AreEqual("UnityEngine", node.typePath.path[0]);
         Assert.AreEqual("Vector3", node.typePath.path[1]);
     }
+
+    [Test]
+    public void Parse_NewExpression() {
+        ASTNode root = ExpressionParser.Parse("new Vector3(1, 2, 3)");
+        NewExpressionNode expressionNode = AssertInstanceOfAndReturn<NewExpressionNode>(root);
+        Assert.AreEqual(typeof(Vector3), TypeProcessor.ResolveType(expressionNode.typePath.GetConstructedPath(), new string[] { "UnityEngine"}));
+        Assert.AreEqual(3, expressionNode.parameters.Count);
+        LiteralNode param0 = AssertInstanceOfAndReturn<LiteralNode>(expressionNode.parameters[0]);
+        LiteralNode param1 = AssertInstanceOfAndReturn<LiteralNode>(expressionNode.parameters[1]);
+        LiteralNode param2 = AssertInstanceOfAndReturn<LiteralNode>(expressionNode.parameters[2]);
+        Assert.AreEqual("1", param0.rawValue);
+        Assert.AreEqual("2", param1.rawValue);
+        Assert.AreEqual("3", param2.rawValue);
+    }
+ 
+    [Test]
+    public void Parse_NewExpression_Generic() {
+        ASTNode root = ExpressionParser.Parse("new Tuple<float, float, float>(1, 2, 3)");
+        NewExpressionNode expressionNode = AssertInstanceOfAndReturn<NewExpressionNode>(root);
+        Assert.AreEqual(typeof(Tuple<float, float, float>), TypeProcessor.ResolveType(expressionNode.typePath.ConstructTypeLookupTree(), new string[] { "System"}));
+        Assert.AreEqual(3, expressionNode.parameters.Count);
+        LiteralNode param0 = AssertInstanceOfAndReturn<LiteralNode>(expressionNode.parameters[0]);
+        LiteralNode param1 = AssertInstanceOfAndReturn<LiteralNode>(expressionNode.parameters[1]);
+        LiteralNode param2 = AssertInstanceOfAndReturn<LiteralNode>(expressionNode.parameters[2]);
+        Assert.AreEqual("1", param0.rawValue);
+        Assert.AreEqual("2", param1.rawValue);
+        Assert.AreEqual("3", param2.rawValue);
+    } 
     
     [Test]
-    public void Parse_TypeOfExpressionWithGeneric() {
-        Type expected = typeof(System.Collections.Generic.List<System.Collections.Generic.Dictionary<UnityEngine.Color, float>>);
-        ASTNode root = ExpressionParser.Parse("typeof(System.Collections.Generic.List<System.Collections.Generic.Dictionary<UnityEngine.Color, System.Single>>)");
-        TypeNode node = AssertInstanceOfAndReturn<TypeNode>(root);
-        //Type result = TypeProcessor.ResolveType(node.typePath.ConstructPath2());
-//        Assert.AreEqual(expected, result);
-//        Assert.AreEqual("System", node.typePath.path[0]);
-//        Assert.AreEqual("Collections", node.typePath.path[1]);
-//        Assert.AreEqual("Generic", node.typePath.path[2]);
-//        Assert.AreEqual("List", node.typePath.path[3]);
+    public void Parse_NewExpression_NamespaceWithGeneric() {
+        ASTNode root = ExpressionParser.Parse("new System.Tuple<float, float, float>(1, 2, 3)");
+        NewExpressionNode expressionNode = AssertInstanceOfAndReturn<NewExpressionNode>(root);
+        Assert.AreEqual(typeof(Tuple<float, float, float>), TypeProcessor.ResolveType(expressionNode.typePath.ConstructTypeLookupTree()));
+        Assert.AreEqual(3, expressionNode.parameters.Count);
+        LiteralNode param0 = AssertInstanceOfAndReturn<LiteralNode>(expressionNode.parameters[0]);
+        LiteralNode param1 = AssertInstanceOfAndReturn<LiteralNode>(expressionNode.parameters[1]);
+        LiteralNode param2 = AssertInstanceOfAndReturn<LiteralNode>(expressionNode.parameters[2]);
+        Assert.AreEqual("1", param0.rawValue);
+        Assert.AreEqual("2", param1.rawValue);
+        Assert.AreEqual("3", param2.rawValue);
+    } 
+    
+    [Test]
+    public void Parse_NewExpressionNoArguments() {
+        ASTNode root = ExpressionParser.Parse("new Vector3()");
+        NewExpressionNode expressionNode = AssertInstanceOfAndReturn<NewExpressionNode>(root);
+        Assert.AreEqual(typeof(Vector3), TypeProcessor.ResolveType(expressionNode.typePath.ConstructTypeLookupTree(), new string[] { "UnityEngine"}));
+        Assert.AreEqual(0, expressionNode.parameters.Count);
+    }
+    
+    [Test]
+    public void Parse_NewExpression_Nested() {
+        ASTNode root = ExpressionParser.Parse("new Vector3(5, new Vector3(1, 2, 3), 2)");
+        NewExpressionNode expressionNode = AssertInstanceOfAndReturn<NewExpressionNode>(root);
+        Assert.AreEqual(typeof(Vector3), TypeProcessor.ResolveType(expressionNode.typePath.ConstructTypeLookupTree(), new string[] { "UnityEngine"}));
+        Assert.AreEqual(3, expressionNode.parameters.Count);
         
-        // if namespace exists, break it off to resolve base type?
+        LiteralNode p0 = AssertInstanceOfAndReturn<LiteralNode>(expressionNode.parameters[0]);
+        LiteralNode p1 = AssertInstanceOfAndReturn<LiteralNode>(expressionNode.parameters[2]);
         
+        NewExpressionNode nestedNew = AssertInstanceOfAndReturn<NewExpressionNode>(expressionNode.parameters[1]);
         
+        Assert.AreEqual(3, nestedNew.parameters.Count);
+        LiteralNode param0 = AssertInstanceOfAndReturn<LiteralNode>(nestedNew.parameters[0]);
+        LiteralNode param1 = AssertInstanceOfAndReturn<LiteralNode>(nestedNew.parameters[1]);
+        LiteralNode param2 = AssertInstanceOfAndReturn<LiteralNode>(nestedNew.parameters[2]);
+        Assert.AreEqual("5", p0.rawValue);
+        Assert.AreEqual("2", p1.rawValue);
+        Assert.AreEqual("1", param0.rawValue);
+        Assert.AreEqual("2", param1.rawValue);
+        Assert.AreEqual("3", param2.rawValue);
     }
 
     [Test]

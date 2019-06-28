@@ -16,6 +16,7 @@ namespace UIForia.Parsing.Expression.AstNodes {
         protected static readonly ObjectPool<MemberAccessExpressionNode> s_MemberAccessExpressionPool = new ObjectPool<MemberAccessExpressionNode>();
         protected static readonly ObjectPool<IndexNode> s_IndexExpressionPool = new ObjectPool<IndexNode>();
         protected static readonly ObjectPool<InvokeNode> s_InvokeNodePool = new ObjectPool<InvokeNode>();
+        protected static readonly ObjectPool<NewExpressionNode> s_NewExpressionNodePool = new ObjectPool<NewExpressionNode>();
         protected static readonly ObjectPool<UnaryExpressionNode> s_UnaryNodePool = new ObjectPool<UnaryExpressionNode>();
         protected static readonly ObjectPool<ListInitializerNode> s_ListInitializerPool = new ObjectPool<ListInitializerNode>();
 
@@ -99,11 +100,12 @@ namespace UIForia.Parsing.Expression.AstNodes {
             return typeOfNode;
         }
 
-        public static TypeNode NewExpressionNode(TypePath typePath) {
-            TypeNode typeOfNode = s_TypeNodePool.Get();
-            typeOfNode.typePath = typePath;
-            typeOfNode.type = ASTNodeType.New;
-            return typeOfNode;
+        public static NewExpressionNode NewExpressionNode(TypePath typePath, List<ASTNode> parameters) {
+            NewExpressionNode retn = s_NewExpressionNodePool.Get();
+            retn.typePath = typePath;
+            retn.parameters = parameters;
+            retn.type = ASTNodeType.New;
+            return retn;
         }
 
         public static ParenNode ParenNode(ASTNode expression) {
@@ -241,13 +243,21 @@ namespace UIForia.Parsing.Expression.AstNodes {
     public class NewExpressionNode : ASTNode {
 
         public TypePath typePath;
-
+        public List<ASTNode> parameters;
+        
         public NewExpressionNode() {
             type = ASTNodeType.New;
         }
 
         public override void Release() {
-            throw new NotImplementedException();
+            if (parameters != null) {
+                for (int i = 0; i < parameters.Count; i++) {
+                    parameters[i].Release();
+                }
+            }
+            typePath.Release();
+            ListPool<ASTNode>.Release(ref parameters);
+            s_NewExpressionNodePool.Release(this);
         }
 
     }

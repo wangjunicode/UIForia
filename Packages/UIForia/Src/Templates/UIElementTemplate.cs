@@ -4,8 +4,10 @@ using UIForia.Attributes;
 using UIForia.Bindings;
 using UIForia.Compilers.ExpressionResolvers;
 using UIForia.Elements;
+using UIForia.Exceptions;
 using UIForia.Expressions;
 using UIForia.Parsing.Expression;
+using UIForia.Parsing.Expression.AstNodes;
 using UIForia.Util;
 using UnityEngine;
 
@@ -36,14 +38,14 @@ namespace UIForia.Templates {
     public class UIElementTemplate : UITemplate {
 
         private Type rootType;
-        private readonly string typeName;
+        private readonly string tagName;
         private ParsedTemplate templateToExpand;
         private TemplateType templateType;
         private List<UISlotContentTemplate> slotContentTemplates;
 
-        public UIElementTemplate(Application app, string typeName, List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null)
+        public UIElementTemplate(Application app, string tagName, List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null)
             : base(app, childTemplates, attributes) {
-            this.typeName = typeName;
+            this.tagName = tagName;
         }
 
         public UIElementTemplate(Application app, Type rootType, List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null)
@@ -59,8 +61,15 @@ namespace UIForia.Templates {
             if (isCompiled) return;
             isCompiled = true;
 
+            // todo -- add namespaces from initiating assembly
             if (rootType == null) {
-                rootType = TypeProcessor.GetType(typeName, template.Imports).rawType;
+                ProcessedType processedType = TypeProcessor.ResolveTagName(tagName, template.usings);
+                if (processedType.rawType != null) {
+                    rootType = processedType.rawType;
+                }
+                else {
+                    throw new Exception($"Unable to resolve tag name {tagName}. If this element lives in a non default namespace, try adding a <Using> directive to the template");
+                }
             }
 
             if (!(typeof(UIElement).IsAssignableFrom(elementType))) {
@@ -70,7 +79,7 @@ namespace UIForia.Templates {
 
             templateToExpand = app.templateParser.GetParsedTemplate(rootType);
 
-            Action<IList<ExpressionAliasResolver>, AttributeList> getResolvers = TypeProcessor.GetType(elementType).getResolvers;
+            Action<IList<ExpressionAliasResolver>, AttributeList> getResolvers = TypeProcessor.GetProcessedType(elementType).getResolvers;
 
             if (getResolvers != null) {
                 resolvers = ListPool<ExpressionAliasResolver>.Get();

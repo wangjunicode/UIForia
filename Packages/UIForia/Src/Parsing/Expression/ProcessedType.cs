@@ -23,10 +23,11 @@ namespace UIForia.Parsing.Expression {
         public readonly TemplateAttribute templateAttr;
         public readonly Action<IList<ExpressionAliasResolver>, AttributeList> getResolvers;
 
-        public ProcessedType(Type rawType) {
+        public ProcessedType(Type rawType, TemplateAttribute templateAttr) {
             this.rawType = rawType;
-            this.templateAttr = rawType.GetCustomAttribute<TemplateAttribute>();
+            this.templateAttr = templateAttr;
             this.getResolvers = null;
+            // todo -- remove this and replace with a better way to introduce context
             MethodInfo info = rawType.GetMethod("GetAliasResolvers", BindingFlags.Static | BindingFlags.NonPublic, null, s_Signature, null);
 
             if (info != null) {

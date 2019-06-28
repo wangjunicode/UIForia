@@ -165,7 +165,7 @@ namespace UIForia.Templates {
                 return;
             }
 
-            Action<IList<ExpressionAliasResolver>, AttributeList> getResolvers = TypeProcessor.GetType(elementType).getResolvers;
+            Action<IList<ExpressionAliasResolver>, AttributeList> getResolvers = TypeProcessor.GetProcessedType(elementType).getResolvers;
 
             if (getResolvers != null) {
                 resolvers = ListPool<ExpressionAliasResolver>.Get();

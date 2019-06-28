@@ -2,8 +2,11 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Text;
+using UIForia.Compilers.Style;
 using UIForia.Exceptions;
 using UIForia.Extensions;
 using UIForia.Parsing.Expression;
@@ -16,6 +19,7 @@ namespace UIForia.Compilers {
 
     public class LinqCompiler {
 
+        // todo -- when printing expressions, we probably want to print the entire type namespace so we can compile it actual c#
         // todo -- pool blocks 
 
         private readonly List<ParameterExpression> parameters;
@@ -114,20 +118,47 @@ namespace UIForia.Compilers {
 
         public void ForEach(IEnumerable list, Action<ParameterExpression> block) { }
 
-        public void IfEqual(LHSStatementChain left, RHSStatementChain right, Action body) { }
+        public Expression Constant(object value) {
+            return Expression.Constant(value);
+        }
 
-        public void IfEqual(Expression left, Expression right, Action body) {
+        public void IfEqual(string variableName, object value, Action bodyTrue, Action bodyFalse = null) {
+            Expression variable = ResolveVariableName(variableName);
+            Expression right = null;
+            if (value is Expression valueExpression) {
+                right = valueExpression;
+            }
+            else {
+                right = Expression.Constant(value);
+            }
+
+            IfEqual(variable, right, bodyTrue, bodyFalse);
+        }
+
+        public void IfEqual(Expression left, Expression right, Action bodyTrue, Action bodyFalse = null) {
             Expression condition = Expression.Equal(left, right);
 
             BlockDefinition bodyBlock = new BlockDefinition();
-
             blockStack.Push(bodyBlock);
 
-            body();
+            bodyTrue();
 
             blockStack.PopUnchecked();
 
-            currentBlock.AddStatement(Expression.IfThen(condition, bodyBlock.ToExpressionBlock(typeof(void))));
+            if (bodyFalse == null) {
+                currentBlock.AddStatement(Expression.IfThen(condition, bodyBlock));
+            }
+            else {
+                BlockDefinition falseBodyBlock = new BlockDefinition();
+
+                blockStack.Push(falseBodyBlock);
+
+                bodyFalse();
+
+                blockStack.Pop();
+
+                currentBlock.AddStatement(Expression.IfThenElse(condition, bodyBlock, falseBodyBlock));
+            }
         }
 
         public void IfNotEqual(LHSStatementChain left, RHSStatementChain right, Action body) {
@@ -257,31 +288,195 @@ namespace UIForia.Compilers {
             return retn;
         }
 
+        private Expression StaticOrConstMemberAccess(Type type, string fieldOrPropertyName) {
+            MemberInfo memberInfo = ReflectionUtil.GetStaticOrConstMemberInfo(type, fieldOrPropertyName);
+            if (memberInfo == null) {
+                throw new CompileException($"Type {type} does not declare an accessible static field or property with the name {fieldOrPropertyName}");
+            }
+
+            return Expression.MakeMemberAccess(null, memberInfo);
+        }
+
         private Expression MemberAccess(Expression head, string fieldOrPropertyName) {
             MemberInfo memberInfo = ReflectionUtil.GetFieldOrProperty(head.Type, fieldOrPropertyName);
             if (memberInfo == null) {
-                throw new CompileException($"Type {head.Type} does not declare an accessible field or property with the name {fieldOrPropertyName}");
+                throw new CompileException($"Type {head.Type} does not declare an accessible instance field or property with the name {fieldOrPropertyName}");
             }
 
             return Expression.MakeMemberAccess(head, memberInfo);
         }
 
+        private static Expression ParseEnum(Type type, string value) {
+            try {
+                return Expression.Constant(Enum.Parse(type, value));
+            }
+            catch (Exception) {
+                throw CompileException.UnknownEnumValue(type, value);
+            }
+        }
 
+        private static bool ResolveNamespaceChain(MemberAccessExpressionNode node, out int start, out string resolvedNamespace) {
+            // since we don't know where the namespace stops and the type begins, when we cannot immediately resolve a variable or type from a member access,
+            // we need to walk the chain and resolve as we go.
+
+            // UnityEngine.Color.Red.r => [(UnityEngine, Color), (UnityEngine.Color, Red), (UnityEngine.Color.Red, r)]
+
+            LightList<string> names = LightListPool<string>.Get();
+
+            names.Add(node.identifier);
+
+            for (int i = 0; i < node.parts.Count; i++) {
+                if ((node.parts[i] is DotAccessNode dotAccessNode)) {
+                    names.Add(dotAccessNode.propertyName);
+                }
+                else {
+                    break;
+                }
+            }
+
+            string BuildString(int count) {
+                string retn = "";
+
+                for (int i = 0; i < count; i++) {
+                    retn += names[i] + ".";
+                }
+
+                retn += names[count];
+
+                return retn;
+            }
+
+            for (int i = names.Count - 1; i > 1; i--) {
+                string check = BuildString(i - 1);
+                if (TypeProcessor.IsNamespace(check)) {
+                    LightListPool<string>.Release(ref names);
+                    resolvedNamespace = check;
+                    start = i - 1;
+                    return true;
+                }
+            }
+
+            LightListPool<string>.Release(ref names);
+            start = 0;
+            resolvedNamespace = string.Empty;
+            return false;
+        }
+
+        private bool ResolveTypeChain(MemberAccessExpressionNode node, out int start, out Type tailType) {
+            LightList<string> names = LightListPool<string>.Get();
+
+            names.Add(node.identifier);
+
+            Type headType = TypeProcessor.ResolveType(node.identifier, namespaces);
+            if (headType == null) {
+                start = 0;
+                tailType = null;
+                return false;
+            }
+
+            Type[] subTypes = headType.GetNestedTypes();
+            if (subTypes.Length == 0) {
+                start = 0;
+                tailType = headType;
+                return true;
+            }
+
+
+            throw new ImFeelingLazyException();
+            for (int i = 0; i < node.parts.Count; i++) {
+                if (node.parts[i] is DotAccessNode dotAccessNode) {
+                    for (int j = 0; j < subTypes.Length; j++) {
+                        // todo finish this, return the tail type
+                        if (subTypes[j].Name == dotAccessNode.propertyName) {
+                            start = i;
+                            tailType = subTypes[j];
+                        }
+                    }
+                }
+                else {
+                    start = 0;
+                    tailType = headType;
+                    return true;
+                }
+            }
+
+            tailType = headType;
+            start = 0;
+            return true;
+        }
+
+        // todo -- get rid of defaultIdentifier and replace with a user-specified visit callback that can inject it on member access calls
+
+        // compiler.onVisit((ASTNodeType nodeType, ASTNode node) => {  });
+        // identifier.something
+        // identifier() 
+        // identifier[] 
         private Expression VisitAccessExpression(MemberAccessExpressionNode accessNode) {
             List<ASTNode> parts = accessNode.parts;
 
-            // assume not an alias for now
-            ParameterExpression head = null;
+            // assume not an alias for now, aliases will be resolved by user visit code
+
+            Expression head = null;
             Expression last = null;
 
-            if (defaultIdentifier != null) {
-                head = ResolveVariableName(defaultIdentifier);
-                last = MemberAccess(head, accessNode.identifier);
+            int start = 0;
+            string accessRootName = accessNode.identifier;
+            string resolvedNamespace;
+
+            if (ResolveNamespaceChain(accessNode, out start, out resolvedNamespace)) {
+                // if a namespace chain was resolved then we have to resolve a type next which means an enum, static, or const value
+                if ((!(accessNode.parts[start] is DotAccessNode dotAccessNode))) {
+                    // namespace[index] and namespace() are both invalid. If we hit that its a hard error
+                    throw CompileException.InvalidNamespaceOperation(resolvedNamespace, accessNode.parts[start].GetType());
+                }
+
+                accessRootName = dotAccessNode.propertyName;
+                start++;
+
+                if (start >= accessNode.parts.Count) {
+                    throw CompileException.InvalidAccessExpression();
+                }
+
+                Type type = TypeProcessor.ResolveType(accessRootName, resolvedNamespace);
+
+                if (type == null) {
+                    throw CompileException.UnresolvedType(new TypeLookup(accessRootName), namespaces);
+                }
+
+                if (!(accessNode.parts[start] is DotAccessNode dot)) {
+                    // type[index] and type() are both invalid. If we hit that its a hard error
+                    throw CompileException.InvalidIndexOrInvokeOperator(); //resolvedNamespace, accessNode.parts[start].GetType());
+                }
+
+                if (type.IsEnum) {
+                    last = head = ParseEnum(type, dot.propertyName);
+                }
+                else {
+                    last = head = StaticOrConstMemberAccess(type, dot.propertyName);
+                }
+
+                start++;
+
+                if (start == parts.Count) {
+                    return last;
+                }
             }
             else {
-                head = ResolveVariableName(accessNode.identifier);
-                // todo this needs work, need to start parts access at 1 probably and visit the first immediately or 'last' will be null. maybe we can just set last = head?
-                throw new NotImplementedException("Haven't implemented non implicit access expressions yet");
+                if (defaultIdentifier != null) {
+                    // todo -- first need to resolve this as a type or other argument. last resort is to check default identifier because its unclear
+                    // if someone is referencing a field or a namespace with the same name. maybe introduce a namespace operator like :: to help make this clear
+                    head = ResolveVariableName(defaultIdentifier);
+                    last = MemberAccess(head, accessNode.identifier);
+                }
+                else {
+                    // todo -- parser needs to handle generic type node like MyType<T>.StaticProperty, should be a GenericTypePath node instead of just a DotAccessNode
+
+                    // probably need to resolve a type chain if head isn't a resolved field or property
+                    // Type.SubType.Something.Field
+                    // scoot forward through the member access until we find a non type node
+
+                    if (ResolveTypeChain(accessNode, out start, out Type tailType)) { }
+                }
             }
 
             bool needsNullChecking = false;
@@ -295,8 +490,7 @@ namespace UIForia.Compilers {
             // structs do not need intermediate variables, in fact due to the copy cost its best not to have them for structs at all
             // properties are always read into fields, we assume they are more expensive and worth local caching even when structs
             // need to read from local variable if last thing we hit was
-
-            for (int i = 0; i < parts.Count; i++) {
+            for (int i = start; i < parts.Count; i++) {
                 if (parts[i] is DotAccessNode dotAccessNode) {
                     // if the last thing checked was a class, we need a null check
                     if (last.Type.IsClass) {
@@ -365,8 +559,8 @@ namespace UIForia.Compilers {
             ParameterExpression output = currentBlock.AddVariable(lastValue.Type, "rhsOutput");
             currentBlock.PrependStatement(Expression.Assign(output, Expression.Default(output.Type)));
 
+            // todo -- optimize this to remove redundant variable for output
             currentBlock.AddStatement(Expression.Assign(output, lastValue));
-
             if (needsNullChecking) {
                 currentBlock.AddStatement(Expression.Label(returnTarget));
             }
@@ -386,6 +580,7 @@ namespace UIForia.Compilers {
                     Expression.Goto(returnTarget)
                 );
             }
+
             else {
                 return Expression.IfThen(
                     Expression.OrElse(
@@ -406,8 +601,9 @@ namespace UIForia.Compilers {
             List<ReflectionUtil.IndexerInfo> l = (List<ReflectionUtil.IndexerInfo>) indexedProperties;
 
             Type targetType = indexExpression.Type;
-
-            for (int i = 0; i < indexedProperties.Count; i++) {
+            for (int i = 0;
+                i < indexedProperties.Count;
+                i++) {
                 if (indexedProperties[i].parameterInfos.Length == 1) {
                     if (indexedProperties[i].parameterInfos[0].ParameterType == targetType) {
                         indexProperty = indexedProperties[i].propertyInfo;
@@ -417,7 +613,9 @@ namespace UIForia.Compilers {
                 }
             }
 
-            for (int i = 0; i < indexedProperties.Count; i++) {
+            for (int i = 0;
+                i < indexedProperties.Count;
+                i++) {
                 // if any conversions exist this will work, if not we hit an exception
                 try {
                     indexExpression = Expression.Convert(indexExpression, indexedProperties[i].parameterInfos[0].ParameterType);
@@ -432,7 +630,6 @@ namespace UIForia.Compilers {
             }
 
             ListPool<ReflectionUtil.IndexerInfo>.Release(ref l);
-
             throw new CompileException($"Can't find indexed property that accepts an indexer of type {indexExpression.Type}");
         }
 
@@ -452,8 +649,12 @@ namespace UIForia.Compilers {
                     return VisitNumericLiteral(targetType, (LiteralNode) node);
 
                 case ASTNodeType.DefaultLiteral:
-                    // todo -- when target type is unknown
-                    return null; // Expression.Default(targetType);
+                    if (targetType != null) {
+                        return Expression.Default(targetType);
+                    }
+
+                    // todo -- when target type is unknown we require the default(T) syntax. Change the parser to check for a type node optionally after default tokens, maybe use ASTNodeType.DefaultExpression
+                    return null;
 
                 case ASTNodeType.StringLiteral:
                     return Expression.Constant(((LiteralNode) node).rawValue);
@@ -480,7 +681,7 @@ namespace UIForia.Compilers {
                     return VisitBitwiseNot((UnaryExpressionNode) node);
 
                 case ASTNodeType.DirectCast:
-                    break;
+                    return VisitDirectCast((UnaryExpressionNode) node);
 
                 case ASTNodeType.ListInitializer:
                     // [] if not used as a return value then use pooling for the array 
@@ -491,7 +692,7 @@ namespace UIForia.Compilers {
                     break;
 
                 case ASTNodeType.New:
-                    break;
+                    return VisitNew((NewExpressionNode) node);
 
                 case ASTNodeType.Paren:
                     ParenNode parenNode = (ParenNode) node;
@@ -528,8 +729,8 @@ namespace UIForia.Compilers {
 
         private Expression VisitOperator(OperatorNode operatorNode) {
             Expression left;
-            Expression right;
 
+            Expression right;
             if (operatorNode.operatorType == OperatorType.TernaryCondition) {
                 OperatorNode select = (OperatorNode) operatorNode.right;
 
@@ -631,6 +832,7 @@ namespace UIForia.Compilers {
             }
         }
 
+
         public RHSStatementChain CreateRHSStatementChain(string input) {
             return CreateRHSStatementChain(null, null, input);
         }
@@ -639,7 +841,6 @@ namespace UIForia.Compilers {
             ASTNode astRoot = ExpressionParser.Parse(input);
 
             RHSStatementChain retn = new RHSStatementChain();
-
             if (defaultIdentifier != null) {
                 SetDefaultIdentifier(defaultIdentifier);
             }
@@ -676,6 +877,7 @@ namespace UIForia.Compilers {
                     break;
 
                 case ASTNodeType.Identifier: {
+                    // todo -- get rid of this and make default identifier a user-specified visitor modifier
                     if (string.IsNullOrEmpty(defaultIdentifier) || string.IsNullOrWhiteSpace(defaultIdentifier)) {
                         throw CompileException.RHSRootIdentifierMissing(((IdentifierNode) astRoot).name);
                     }
@@ -705,12 +907,14 @@ namespace UIForia.Compilers {
                     break;
 
                 case ASTNodeType.DirectCast:
+                    retn.OutputExpression = VisitDirectCast((UnaryExpressionNode) astRoot);
                     break;
 
                 case ASTNodeType.ListInitializer:
                     break;
 
                 case ASTNodeType.New:
+                    retn.OutputExpression = VisitNew((NewExpressionNode) astRoot);
                     break;
 
                 case ASTNodeType.Paren:
@@ -723,6 +927,54 @@ namespace UIForia.Compilers {
             }
 
             return retn;
+        }
+
+        private Expression VisitNew(NewExpressionNode newNode) {
+            TypeLookup typeLookup = newNode.typePath.ConstructTypeLookupTree();
+
+            Type type = TypeProcessor.ResolveType(typeLookup, namespaces);
+            if (type == null) {
+                throw CompileException.UnresolvedType(typeLookup);
+            }
+
+            if (newNode.parameters == null || newNode.parameters.Count == 0) {
+                return Expression.New(type);
+            }
+
+            Expression[] arguments = new Expression[newNode.parameters.Count];
+            for (int i = 0;
+                i < newNode.parameters.Count;
+                i++) {
+                Expression argument = Visit(newNode.parameters[i]);
+                arguments[i] = argument;
+            }
+
+            StructList<ExpressionUtil.ParameterConversion> conversions;
+
+            ConstructorInfo constructor = ExpressionUtil.SelectEligibleConstructor(type, arguments, out conversions);
+            if (constructor == null) {
+                throw CompileException.UnresolvedConstructor(type, arguments.Select((e) => e.Type).ToArray());
+            }
+
+            if (conversions.size > arguments.Length) {
+                Array.Resize(ref arguments, conversions.size);
+            }
+
+            for (int i = 0;
+                i < conversions.size;
+                i++) {
+                arguments[i] = conversions[i].Convert();
+            }
+
+            StructList<ExpressionUtil.ParameterConversion>.Release(ref conversions);
+            return Expression.New(constructor, arguments);
+        }
+
+        private Expression VisitDirectCast(UnaryExpressionNode node) {
+            Type t = TypeProcessor.ResolveType(node.typePath.ConstructTypeLookupTree(), namespaces);
+
+            Expression toConvert = Visit(node.expression);
+            return Expression.Convert(toConvert, t);
         }
 
         private Expression VisitUnaryNot(UnaryExpressionNode node) {
@@ -742,7 +994,6 @@ namespace UIForia.Compilers {
 
         private Expression VisitTypeNode(TypeNode typeNode) {
             TypePath typePath = typeNode.typePath;
-
             try {
                 TypeLookup typeLookup = typePath.ConstructTypeLookupTree();
                 Type t = TypeProcessor.ResolveType(typeLookup, namespaces);
@@ -771,7 +1022,6 @@ namespace UIForia.Compilers {
             }
 
             throw CompileException.UnresolvedType(typePath.ConstructTypeLookupTree());
-            
         }
 
         private Expression VisitIdentifierNode(IdentifierNode identifierNode) {
@@ -785,6 +1035,7 @@ namespace UIForia.Compilers {
                 currentBlock.AddStatement(Expression.Assign(variable, parameterExpression));
                 return variable;
             }
+
             else if (defaultIdentifier != null) {
                 Expression expr = MemberAccess(ResolveVariableName(defaultIdentifier), identifierNode.name);
                 Expression variable = currentBlock.AddVariable(expr.Type, identifierNode.name);

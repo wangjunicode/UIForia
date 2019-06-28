@@ -43,6 +43,8 @@ namespace UIForia.Exceptions {
             expression = input;
         }
 
+        // todo -- add more debug info to these and make them actually useful. These are basically placeholder but need help to be really useful to people
+        
         public static CompileException RHSRootIdentifierMissing(string identifierName) {
             return new CompileException($"Unable to compile right hand side expression beginning with {identifierName} because there was no root variable.");
         }
@@ -66,11 +68,58 @@ namespace UIForia.Exceptions {
         public static CompileException InvalidTargetType(Type expected, Type actual) {
             return new CompileException($"Expected expression to be compatible with type {expected} but got {actual} which was not convertable");
         }
-
-        public static CompileException UnresolvedType(TypeLookup typeLookup) {
-            return new CompileException($"Unable to resolve type {typeLookup}, are you missing a namespace?");
+        
+        public static CompileException InvalidAccessExpression() {
+            return new CompileException("Expected access expression to have more symbols, the last expression is not a valid terminal");
+        }
+        
+        public static CompileException InvalidIndexOrInvokeOperator() {
+            return new CompileException("Index or Invoke operations are not valid on static types or namespaces");
         }
 
+        public static CompileException UnresolvedType(TypeLookup typeLookup, IReadOnlyList<string> searchedNamespaces = null) {
+            string retn = string.Empty;
+            if (searchedNamespaces != null) {
+                retn += " searched in the following namespaces: ";
+                for (int i = 0; i < searchedNamespaces.Count - 1; i++) {
+                    retn += searchedNamespaces[i] + ",";
+                }
+
+                retn += searchedNamespaces[searchedNamespaces.Count - 1];
+            }
+            
+            return new CompileException($"Unable to resolve type {typeLookup}, are you missing a namespace?{retn}");
+        }
+        
+        public static CompileException InvalidNamespaceOperation(string namespaceName, Type type) {
+            return new CompileException($"Resolved namespace {namespaceName} but {type} is not a valid next token");
+        }
+        
+        public static CompileException UnknownEnumValue(Type type, string value) {
+            return new CompileException($"Unable to enum value {value} on type {type}");
+        }
+
+        public static CompileException UnresolvedConstructor(Type type, Type[] arguments) {
+            string BuildArgumentList() {
+                if (arguments == null || arguments.Length == 0) {
+                    return "no arguments";
+                }
+
+                string retn = "arguments (";
+                for (int i = 0; i < arguments.Length; i++) {
+                    retn += arguments[i];
+                    if (i != arguments.Length - 1) {
+                        retn += ", ";
+                    }
+                }
+
+                retn += ")";
+                return retn;
+            }
+            
+            return new CompileException($"Unable to find a suitable constructor on type {type} that accepts {BuildArgumentList()}");
+        }
+        
     }
 
     public static class CompileExceptions {

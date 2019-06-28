@@ -1,7 +1,9 @@
 using System;
+using UIForia.Attributes;
 
 namespace UIForia.Elements.Routing {
 
+    [TemplateTagName("GuardedRoute")]
     public class GuardedRoute : RouteElement {
 
         public Func<bool> guardFn;

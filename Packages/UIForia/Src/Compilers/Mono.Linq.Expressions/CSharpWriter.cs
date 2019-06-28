@@ -175,7 +175,7 @@ namespace Mono.Linq.Expressions {
             }
 
             if (type.IsGenericParameter) {
-                WriteReference(type.Name, type);
+                WriteReference(type.FullName, type);
                 return;
             }
 
@@ -220,7 +220,7 @@ namespace Mono.Linq.Expressions {
         }
 
         static string CleanGenericName(Type type) {
-            var name = type.Name;
+            var name = type.FullName;
             var position = name.LastIndexOf("`");
             if (position == -1)
                 return name;
@@ -238,6 +238,10 @@ namespace Mono.Linq.Expressions {
             if (type == typeof(object))
                 return "object";
 
+            if (type.IsEnum) {
+                return type.FullName;
+            }
+            
             switch (Type.GetTypeCode(type)) {
                 case TypeCode.Boolean:
                     return "bool";
@@ -268,7 +272,7 @@ namespace Mono.Linq.Expressions {
                 case TypeCode.UInt64:
                     return "ulong";
                 default:
-                    return type.Name;
+                    return type.FullName;
             }
         }
 
@@ -805,7 +809,7 @@ namespace Mono.Linq.Expressions {
         static string GetEnumLiteral(object value) {
             var type = value.GetType();
             if (Enum.IsDefined(type, value))
-                return type.Name + "." + Enum.GetName(type, value);
+                return type.FullName + "." + Enum.GetName(type, value);
 
             throw new NotSupportedException();
         }

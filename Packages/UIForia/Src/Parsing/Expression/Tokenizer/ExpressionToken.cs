@@ -2,7 +2,7 @@ using System.Diagnostics;
 
 namespace UIForia.Parsing.Expression.Tokenizer {
 
-    [DebuggerDisplay("{value} -> {expressionTokenType}")]
+    [DebuggerDisplay("{value} --- {expressionTokenType}")]
     public readonly struct ExpressionToken {
 
         public readonly ExpressionTokenType expressionTokenType;

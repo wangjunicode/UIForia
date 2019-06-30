@@ -9,29 +9,30 @@ namespace UIForia.Parsing.Expression.Tokenizer {
     public struct TokenStream {
 
         private int ptr;
-
+        private int lastTokenIndex;
         private Stack<int> stack;
-        private List<ExpressionToken> tokens;
+        private StructList<ExpressionToken> tokens;
 
-        public TokenStream(List<ExpressionToken> tokens) {
-            ptr = 0;
+        public TokenStream(StructList<ExpressionToken> tokens) {
+            this.ptr = 0;
             this.tokens = tokens;
-            stack = StackPool<int>.Get();
+            this.lastTokenIndex = tokens.Count;
+            this.stack = StackPool<int>.Get();
         }
 
         public int CurrentIndex => ptr;
 
         public ExpressionToken Current {
-            [DebuggerStepThrough] get { return (ptr >= tokens.Count || tokens.Count == 0) ? ExpressionToken.Invalid : tokens[ptr]; }
+            [DebuggerStepThrough] get { return (ptr >= lastTokenIndex || lastTokenIndex == 0) ? ExpressionToken.Invalid : tokens[ptr]; }
         }
 
         public ExpressionToken Next {
-            [DebuggerStepThrough] get { return (ptr + 1 >= tokens.Count) ? ExpressionToken.Invalid : tokens[ptr + 1]; }
+            [DebuggerStepThrough] get { return (ptr + 1 >= lastTokenIndex) ? ExpressionToken.Invalid : tokens[ptr + 1]; }
         }
 
         public ExpressionToken Previous {
-//            [DebuggerStepThrough]
-            get { return (ptr - 1 < 0 || tokens.Count == 0) ? ExpressionToken.Invalid : tokens[ptr - 1]; }
+            [DebuggerStepThrough]
+            get { return (ptr - 1 < 0 || lastTokenIndex == 0) ? ExpressionToken.Invalid : tokens[ptr - 1]; }
         }
 
         public ExpressionToken Last {
@@ -39,7 +40,7 @@ namespace UIForia.Parsing.Expression.Tokenizer {
         }
 
         public bool HasMoreTokens {
-            [DebuggerStepThrough] get { return ptr < tokens.Count; }
+            [DebuggerStepThrough] get { return ptr < lastTokenIndex; }
         }
 
         public bool HasPrevious {
@@ -67,12 +68,12 @@ namespace UIForia.Parsing.Expression.Tokenizer {
 
         [DebuggerStepThrough]
         public void Chop() {
-            tokens.RemoveAt(tokens.Count - 1);
+            lastTokenIndex--;
         }
 
         public override string ToString() {
             string retn = string.Empty;
-            for (int i = 0; i < tokens.Count; i++) {
+            for (int i = 0; i < lastTokenIndex; i++) {
                 retn += tokens[i].value;
             }
 
@@ -133,7 +134,7 @@ namespace UIForia.Parsing.Expression.Tokenizer {
 
             int i = -1;
             int counter = 0;
-            while (ptr != tokens.Count) {
+            while (ptr != lastTokenIndex) {
                 i++;
 
                 if (Current == braceOpen) {
@@ -157,7 +158,7 @@ namespace UIForia.Parsing.Expression.Tokenizer {
 
         [DebuggerStepThrough]
         public TokenStream AdvanceAndReturnSubStream(int advance) {
-            List<ExpressionToken> subStreamTokens = tokens.GetRange(ptr, advance);
+            StructList<ExpressionToken> subStreamTokens = tokens.GetRange(ptr, advance);
             Advance(advance);
             return new TokenStream(subStreamTokens);
         }
@@ -169,18 +170,26 @@ namespace UIForia.Parsing.Expression.Tokenizer {
 
         [DebuggerStepThrough]
         public bool HasTokenAt(int p0) {
-            return ptr + p0 < tokens.Count;
+            return ptr + p0 < lastTokenIndex;
         }
 
         public void Release() {
             StackPool<int>.Release(stack);
-            ListPool<ExpressionToken>.Release(ref tokens);
+            StructList<ExpressionToken>.Release(ref tokens);
             stack = null;
-            tokens = null;
         }
 
         public void Rewind(int count = 1) {
             ptr -= count;
+        }
+
+        public string PrintTokens() {
+            string retn = string.Empty;
+            for (int i = 0; i < tokens.Count; i++) {
+                retn += tokens[i].value;
+            }
+
+            return retn;
         }
 
     }

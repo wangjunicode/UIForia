@@ -16,7 +16,7 @@ namespace UIForia.Util {
         public static void SetMaxPoolSize(int poolSize) {
             MaxPoolSize = poolSize;
         }
-        
+
         public static T[] GetMinSize(int minSize) {
             minSize = Mathf.Max(0, minSize);
             for (int i = 0; i < s_ArrayPool.Count; i++) {
@@ -45,17 +45,43 @@ namespace UIForia.Util {
 
         public static void Resize(ref T[] array, int minSize) {
             minSize = Mathf.Max(0, minSize);
+            T[] retn = null;
+            
             for (int i = 0; i < s_ArrayPool.Count; i++) {
                 if (s_ArrayPool[i].Length >= minSize) {
-                    T[] retn = s_ArrayPool[i];
+                    retn = s_ArrayPool[i];
                     s_ArrayPool[i] = array;
+                    Array.Copy(array, 0, retn, 0, array.Length);
                     Array.Clear(array, 0, array.Length);
                     array = retn;
                     return;
                 }
             }
-            // add to pool & return new one?
-            Array.Resize(ref array, minSize);
+
+            retn = new T[minSize];
+            
+            Array.Copy(array, 0, retn, 0, array.Length);
+
+            if (s_ArrayPool.Count < 8) {
+                Array.Clear(array, 0, array.Length);
+                s_ArrayPool.Add(array);
+            }
+            else {
+                int minLengthIndex = 0;
+                int minLength = 0;
+                
+                for (int i = 0; i < s_ArrayPool.Count; i++) {
+                    if (s_ArrayPool[i].Length < minLength) {
+                        minLength = s_ArrayPool[i].Length;
+                        minLength = i;
+                    }
+                }
+
+                s_ArrayPool[minLengthIndex] = array;
+
+            }
+
+            array = retn;
         }
 
         public static void Release(ref T[] array) {
@@ -79,6 +105,7 @@ namespace UIForia.Util {
                 if (s_ArrayPool.Contains(array)) {
                     return;
                 }
+
                 s_ArrayPool.Add(array);
             }
 
@@ -90,6 +117,7 @@ namespace UIForia.Util {
             for (int i = 0; i < source.Count; i++) {
                 retn[i] = source[i];
             }
+
             return retn;
         }
 

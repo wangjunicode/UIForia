@@ -20,7 +20,7 @@ namespace UIForia.Elements {
 
         public void InitializeAttributes() {
             if (attributes == null && templateRef?.templateAttributes != null) {
-                attributes = LightListPool<ElementAttribute>.Get();
+                attributes = LightList<ElementAttribute>.Get();
                 for (int i = 0; i < templateRef.templateAttributes.Count; i++) {
                     attributes.AddUnchecked(templateRef.templateAttributes[i]);
                 }
@@ -29,7 +29,7 @@ namespace UIForia.Elements {
 
         public void SetAttribute(string name, string value) {
             ElementAttribute attribute = new ElementAttribute(name, value);
-            attributes = attributes ?? LightListPool<ElementAttribute>.Get();
+            attributes = attributes ?? LightList<ElementAttribute>.Get();
             for (int i = 0; i < attributes.Count; i++) {
                 if (attributes[i].name == name) {
                     if (string.IsNullOrEmpty(value)) {
@@ -107,7 +107,7 @@ namespace UIForia.Elements {
         }
 
         public void Destroy() {
-            LightListPool<ElementAttribute>.Release(ref attributes);
+            LightList<ElementAttribute>.Release(ref attributes);
             onAttributeAdded = null;
             onAttributeRemoved = null;
             onAttributeChanged = null;

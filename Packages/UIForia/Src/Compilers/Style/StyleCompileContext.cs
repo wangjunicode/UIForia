@@ -15,12 +15,12 @@ namespace UIForia.Compilers.Style {
         public Dictionary<string, LightList<StyleConstant>> importedStyleConstants = new Dictionary<string, LightList<StyleConstant>>();
 
         public Dictionary<string, StyleConstant> constantsWithReferences = new Dictionary<string, StyleConstant>();
-        public LightList<StyleConstant> constants = LightListPool<StyleConstant>.Get();
-        public LightList<UIStyleGroup> importedGroups = LightListPool<UIStyleGroup>.Get();
+        public LightList<StyleConstant> constants = LightList<StyleConstant>.Get();
+        public LightList<UIStyleGroup> importedGroups = LightList<UIStyleGroup>.Get();
 
         public void Release() {
-            LightListPool<StyleConstant>.Release(ref constants);
-            LightListPool<UIStyleGroup>.Release(ref importedGroups);
+            LightList<StyleConstant>.Release(ref constants);
+            LightList<UIStyleGroup>.Release(ref importedGroups);
             constNodes.Clear();
             constantsWithReferences.Clear();
         }

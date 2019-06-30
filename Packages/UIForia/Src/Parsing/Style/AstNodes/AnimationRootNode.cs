@@ -36,7 +36,7 @@ namespace UIForia.Parsing.Style.AstNodes {
                     variableNodes[i].Release();
                 }
                 variableNodes.Clear();
-                LightListPool<VariableDefinitionNode>.Release(ref variableNodes);
+                LightList<VariableDefinitionNode>.Release(ref variableNodes);
             }
             
             if (optionNodes != null) {
@@ -44,7 +44,7 @@ namespace UIForia.Parsing.Style.AstNodes {
                     optionNodes[i].Release();
                 }
                 optionNodes.Clear();
-                LightListPool<AnimationOptionNode>.Release(ref optionNodes);
+                LightList<AnimationOptionNode>.Release(ref optionNodes);
             }
             
             if (keyFrameNodes != null) {
@@ -52,7 +52,7 @@ namespace UIForia.Parsing.Style.AstNodes {
                     keyFrameNodes[i].Release();
                 }
                 keyFrameNodes.Clear();
-                LightListPool<KeyFrameNode>.Release(ref keyFrameNodes);
+                LightList<KeyFrameNode>.Release(ref keyFrameNodes);
             }
         }
 

@@ -1,8 +1,8 @@
 ﻿﻿using System.Collections.Generic;
  using NUnit.Framework;
- using UIForia;
  using UIForia.Exceptions;
  using UIForia.Parsing.Expression.Tokenizer;
+ using UIForia.Util;
 
  [TestFixture]
     public class TokenizingTests {
@@ -10,7 +10,7 @@
         [Test]
         public void TokenizeBasicString() {
             string input = "item.thing";
-            List<ExpressionToken> tokens = ExpressionTokenizer.Tokenize(input);
+            StructList<ExpressionToken> tokens = ExpressionTokenizer.Tokenize(input);
             Assert.AreEqual(3, tokens.Count);
             Assert.AreEqual("item", tokens[0].value);
             Assert.AreEqual(".", tokens[1].value);
@@ -20,7 +20,7 @@
         [Test]
         public void Tokenize_Boolean() {
             string input = "true";
-            List<ExpressionToken> tokens = ExpressionTokenizer.Tokenize(input);
+            StructList<ExpressionToken> tokens = ExpressionTokenizer.Tokenize(input);
             Assert.AreEqual(1, tokens.Count);
             Assert.AreEqual("true", tokens[0].value);
 
@@ -33,7 +33,7 @@
         [Test]
         public void Tokenize_Number() {
             string input = "6264.1";
-            List<ExpressionToken> tokens = ExpressionTokenizer.Tokenize(input);
+            StructList<ExpressionToken> tokens = ExpressionTokenizer.Tokenize(input);
             Assert.AreEqual(1, tokens.Count);
             Assert.AreEqual("6264.1", tokens[0].value);
             Assert.AreEqual(ExpressionTokenType.Number, tokens[0].expressionTokenType);
@@ -77,7 +77,7 @@
         [Test]
         public void Tokenize_String() {
             string input = "'some string'";
-            List<ExpressionToken> tokens = ExpressionTokenizer.Tokenize(input);
+            StructList<ExpressionToken> tokens = ExpressionTokenizer.Tokenize(input);
             Assert.AreEqual(1, tokens.Count);
             Assert.AreEqual("some string", tokens[0].value);
         }
@@ -85,7 +85,7 @@
         [Test]
         public void Tokenize_Operators() {
             string input = "+";
-            List<ExpressionToken> tokens = ExpressionTokenizer.Tokenize(input);
+            StructList<ExpressionToken> tokens = ExpressionTokenizer.Tokenize(input);
             Assert.AreEqual(1, tokens.Count);
             Assert.AreEqual(ExpressionTokenType.Plus, tokens[0].expressionTokenType);
             
@@ -113,7 +113,7 @@
         [Test]
         public void Tokenize_Conditionals() {
             string input = "&&";
-            List<ExpressionToken> tokens = ExpressionTokenizer.Tokenize(input);
+            StructList<ExpressionToken> tokens = ExpressionTokenizer.Tokenize(input);
             Assert.AreEqual(1, tokens.Count);
             Assert.AreEqual(ExpressionTokenType.AndAlso, tokens[0].expressionTokenType);
             
@@ -161,7 +161,7 @@
         [Test]
         public void Tokenize_ArrayAccess() {
             string input = "[";
-            List<ExpressionToken> tokens = ExpressionTokenizer.Tokenize(input);
+            StructList<ExpressionToken> tokens = ExpressionTokenizer.Tokenize(input);
             Assert.AreEqual(1, tokens.Count);
             Assert.AreEqual(ExpressionTokenType.ArrayAccessOpen, tokens[0].expressionTokenType);
             
@@ -174,7 +174,7 @@
         [Test]
         public void Tokenize_ExpressionStatement() {
             string input = "{";
-            List<ExpressionToken> tokens = ExpressionTokenizer.Tokenize(input);
+            StructList<ExpressionToken> tokens = ExpressionTokenizer.Tokenize(input);
             Assert.AreEqual(1, tokens.Count);
             Assert.AreEqual(ExpressionTokenType.ExpressionOpen, tokens[0].expressionTokenType);
             
@@ -188,7 +188,7 @@
         [Test]
         public void Tokenize_CompoundOperatorExpression() {
             string input = "52 + 2.4";
-            List<ExpressionToken> tokens = ExpressionTokenizer.Tokenize(input);
+            StructList<ExpressionToken> tokens = ExpressionTokenizer.Tokenize(input);
             Assert.AreEqual(3, tokens.Count);
             Assert.AreEqual(ExpressionTokenType.Number, tokens[0].expressionTokenType);
             Assert.AreEqual(ExpressionTokenType.Plus, tokens[1].expressionTokenType);
@@ -206,7 +206,7 @@
         [Test]
         public void Tokenize_CompoundPropertyAccess() {
             string input = "366 + something.first.second.third";
-            List<ExpressionToken> tokens = ExpressionTokenizer.Tokenize(input);
+            StructList<ExpressionToken> tokens = ExpressionTokenizer.Tokenize(input);
             Assert.AreEqual(9, tokens.Count);
             Assert.AreEqual(ExpressionTokenType.Number, tokens[0].expressionTokenType);
             Assert.AreEqual(ExpressionTokenType.Plus, tokens[1].expressionTokenType);
@@ -222,7 +222,7 @@
         [Test]
         public void Tokenize_CompoundArrayAccess() {
             string input = "366 + something[first]second.third";
-            List<ExpressionToken> tokens = ExpressionTokenizer.Tokenize(input);
+            StructList<ExpressionToken> tokens = ExpressionTokenizer.Tokenize(input);
             Assert.AreEqual(9, tokens.Count);
             Assert.AreEqual(ExpressionTokenType.Number, tokens[0].expressionTokenType);
             Assert.AreEqual(ExpressionTokenType.Plus, tokens[1].expressionTokenType);
@@ -240,7 +240,7 @@
         [Test]
         public void Tokenize_ComplexUnary() {
             string input = "item != 55 && !someCondition || -(11 * 4)";
-            List<ExpressionToken> tokens = ExpressionTokenizer.Tokenize(input);
+            StructList<ExpressionToken> tokens = ExpressionTokenizer.Tokenize(input);
             List<ExpressionTokenType> types = new List<ExpressionTokenType>();
             
             types.Add(ExpressionTokenType.Identifier);
@@ -264,7 +264,7 @@
         [Test]
         public void Tokenize_SpecialIdentifier() {
             string input = "1 + $ident";
-            List<ExpressionToken> tokens = ExpressionTokenizer.Tokenize(input);
+            StructList<ExpressionToken> tokens = ExpressionTokenizer.Tokenize(input);
             List<ExpressionTokenType> types = new List<ExpressionTokenType>();
             types.Add(ExpressionTokenType.Number);
             types.Add(ExpressionTokenType.Plus);
@@ -276,7 +276,7 @@
         [Test]
         public void Tokenize_Comma() {
             string input = "method(1, 2, 3)";
-            List<ExpressionToken> tokens = ExpressionTokenizer.Tokenize(input);
+            StructList<ExpressionToken> tokens = ExpressionTokenizer.Tokenize(input);
             List<ExpressionTokenType> types = new List<ExpressionTokenType>();
             types.Add(ExpressionTokenType.Identifier);
             types.Add(ExpressionTokenType.ParenOpen);
@@ -293,7 +293,7 @@
         [Test]
         public void Tokenize_Ternary() {
             string input = "value ? 1 : 2";
-            List<ExpressionToken> tokens = ExpressionTokenizer.Tokenize(input);
+            StructList<ExpressionToken> tokens = ExpressionTokenizer.Tokenize(input);
             List<ExpressionTokenType> types = new List<ExpressionTokenType>();
             types.Add(ExpressionTokenType.Identifier);
             types.Add(ExpressionTokenType.QuestionMark);
@@ -314,7 +314,7 @@
         [Test]
         public void AllowKeyWordAsIdentifierPartInExpression() {
             string input = "isThing ? 1 : 2";
-            List<ExpressionToken> tokens = ExpressionTokenizer.Tokenize(input);
+            StructList<ExpressionToken> tokens = ExpressionTokenizer.Tokenize(input);
             List<ExpressionTokenType> types = new List<ExpressionTokenType>();
             types.Add(ExpressionTokenType.Identifier);
             types.Add(ExpressionTokenType.QuestionMark);
@@ -327,13 +327,13 @@
         [Test]
         public void AllowKeyWordAsIdentifierPart() {
             string input = "isThing";
-            List<ExpressionToken> tokens = ExpressionTokenizer.Tokenize(input);
+            StructList<ExpressionToken> tokens = ExpressionTokenizer.Tokenize(input);
             List<ExpressionTokenType> types = new List<ExpressionTokenType>();
             types.Add(ExpressionTokenType.Identifier);
             AssertTokenTypes(types, tokens);
         }
         
-        private static void AssertTypesAndValues(List<ExpressionToken> expectedTokens, List<ExpressionToken> actualTokens) {
+        private static void AssertTypesAndValues(StructList<ExpressionToken> expectedTokens, StructList<ExpressionToken> actualTokens) {
             Assert.AreEqual(expectedTokens.Count, actualTokens.Count);
             for (int i = 0; i < actualTokens.Count; i++) {
                 Assert.AreEqual(expectedTokens[i].expressionTokenType, actualTokens[i].expressionTokenType);
@@ -341,7 +341,7 @@
             } 
         }
         
-        private static void AssertTokenTypes(List<ExpressionTokenType> types, List<ExpressionToken> tokens) {
+        private static void AssertTokenTypes(List<ExpressionTokenType> types, StructList<ExpressionToken> tokens) {
             Assert.AreEqual(types.Count, tokens.Count);
             for (int i = 0; i < types.Count; i++) {
                 Assert.AreEqual(tokens[i].expressionTokenType, types[i]);

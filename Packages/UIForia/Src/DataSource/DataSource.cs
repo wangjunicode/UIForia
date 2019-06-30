@@ -235,7 +235,7 @@ namespace UIForia.DataSource {
                 return;
             }
             
-            LightList<T> records = LightListPool<T>.Get();
+            LightList<T> records = LightList<T>.Get();
             records.EnsureCapacity(recordStore.Count);
             recordStore.GetAllRecords(records);
             T[] recordsArray = records.Array;
@@ -244,7 +244,7 @@ namespace UIForia.DataSource {
                 onRecordRemoved.Invoke(recordsArray[i]);
             }
 
-            LightListPool<T>.Release(ref records);
+            LightList<T>.Release(ref records);
         }
     }
 

@@ -1,9 +1,25 @@
 using System;
 using System.Collections.Generic;
-using Vertigo;
+using System.Diagnostics;
+using UIForia.Parsing.Expression.Tokenizer;
 
 namespace UIForia.Util {
 
+    [DebuggerTypeProxy(typeof(StructList<>))]
+    internal class StructListDebugView<T> where T : struct {
+
+        private readonly StructList<T> structList;
+        public T[] array;
+
+        public StructListDebugView(StructList<T> structList) {
+            this.structList = structList;
+            array = structList.ToArray();
+        }
+
+    }
+
+    [DebuggerDisplay("StructList Count = {" + nameof(size) + "} | capacity = {array.Length}")]
+    [DebuggerTypeProxy(typeof(StructListDebugView<>))]
     public class StructList<T> where T : struct {
 
         public T[] array;
@@ -15,6 +31,11 @@ namespace UIForia.Util {
         public StructList(int capacity = 8) {
             this.size = 0;
             this.array = new T[capacity];
+        }
+
+        public StructList(T[] array) {
+            this.array = array;
+            this.size = array.Length;
         }
 
         public int Count {
@@ -260,7 +281,24 @@ namespace UIForia.Util {
             QuickSort(comparison, 0, size - 1);
         }
 
+        public StructList<T> GetRange(int index, int count, StructList<T> retn = null) {
+            if (retn == null) {
+                retn = Get(count);
+            }
+            else {
+                retn.EnsureCapacity(count);
+            }
+
+            System.Array.Copy(array, index, retn.array, 0, count);
+            retn.size = count;
+            return retn;
+        }
+
         private static readonly LightList<StructList<T>> s_Pool = new LightList<StructList<T>>();
+
+        public static implicit operator StructList<T>(T[] array) {
+            return new StructList<T>(array);
+        }
 
         public static StructList<T> Get() {
             StructList<T> retn = s_Pool.Count > 0 ? s_Pool.RemoveLast() : new StructList<T>();
@@ -268,6 +306,19 @@ namespace UIForia.Util {
             return retn;
         }
 
+        public static StructList<T> Get(int minCapacity) {
+            if (minCapacity < 1) minCapacity = 4;
+            StructList<T> retn = s_Pool.Count > 0 ? s_Pool.RemoveLast() : new StructList<T>(minCapacity);
+            retn.isInPool = false;
+
+            if (retn.array.Length < minCapacity) {
+                T[] array = retn.array;
+                System.Array.Resize(ref array, minCapacity);
+                retn.array = array;
+            }
+
+            return retn;
+        }
 
         public static void Release(ref StructList<T> toPool) {
             toPool.Clear();
@@ -288,6 +339,12 @@ namespace UIForia.Util {
 
             System.Array.Copy(array, index, array, index + 1, size - index);
             array[index] = item;
+        }
+
+        public T[] ToArray() {
+            T[] retn = new T[size];
+            System.Array.Copy(array, 0, retn, 0, size);
+            return retn;
         }
 
     }

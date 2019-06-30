@@ -3,49 +3,10 @@ using System.Collections.Generic;
 using NUnit.Framework;
 using UIForia;
 using UIForia.Parsing.Expression;
-using UIForia.Parsing.Expression.AstNodes;
 using UnityEngine;
 
 [TestFixture]
 public class TypeProcessorTests {
-
-//    [Test]
-//    public void ResolveATypeWithNamespace() {
-//        
-////        Type type = TypeProcessor.ResolveType("UnityEngine.Vector3", new List<string>());
-////        Assert.AreEqual(typeof(UnityEngine.Vector3), type);
-////        
-////        type = TypeProcessor.ResolveType("UnityEngine.MeshTopology.Lines", new List<string>());
-////        Assert.AreEqual(typeof(UnityEngine.MeshTopology), type);
-//        Type type;
-//        
-//        TypePath typePath = new TypePath();
-//        
-//        // main problem: where to draw the line w/ whats a namespace and whats a type
-//        
-//        typePath.path = new List<string>(){"System", "Collections", "Generic", "Dictionary"};
-//        typePath.genericArguments = new List<TypePath>() {
-//            new TypePath() {
-//                path = new List<string>() {
-//                    "System", "Single"
-//                }
-//            },
-//            new TypePath() {
-//                path = new List<string>() {
-//                    "System", "Single"
-//                }
-//            }
-//        };
-//        
-//        // Thing<float>.OtherThing<string>.Value
-//        
-//        Debug.Log("path: " + typePath.GetConstructedPath());
-//        Type t = Type.GetType(typePath.GetConstructedPath());
-//        Debug.Log(typeof(Dictionary<float, float>) == t);
-//        type = TypeProcessor.ResolveType("System.Collections.Generic.List`1[System.Single]", new List<string>());
-//        Assert.AreEqual(typeof(List<float>), type);
-//        
-//    }
 
     private class Thing {
 
@@ -60,6 +21,16 @@ public class TypeProcessorTests {
         Type t = TypeProcessor.ResolveType(typeof(Thing), "Vector3", new List<string>() {"UnityEngine"});
         Assert.AreEqual(typeof(Vector3), t);
     }
+    
+    [Test]
+    public void ResolveArrayType() {
+        TypeLookup lookup = new TypeLookup();
+        lookup.typeName = "String";
+        lookup.namespaceName = "System";
+        lookup.isArray = true;
+        Type t = TypeProcessor.ResolveType(lookup);
+        Assert.AreEqual(typeof(string[]), t);
+    }
 
     [Test]
     public void ResolveWithNamespaceNoOrigin() {
@@ -72,29 +43,15 @@ public class TypeProcessorTests {
     }
 
     [Test]
-    public void ResolveSubType() {
-        Type t = TypeProcessor.ResolveType(typeof(Thing), "SubThing", new List<string>());
-        Assert.AreEqual(typeof(Thing.SubThing), t);
-    }
-
-    [Test]
     public void ResolveTypeFromTypeLookup() {
         TypeLookup lookup = new TypeLookup();
-//        lookup.typeName = "AnimationCurve";
-//        Type t = TypeProcessor.ResolveType(lookup, new List<string>() { "UnityEngine"});
-//        Assert.AreEqual(typeof(AnimationCurve), t);
-//        lookup.typeName = "AnimationCurve";
-//        lookup.namespaceName = "UnityEngine";
-//        Type t2 = TypeProcessor.ResolveType(lookup, new List<string>());
-//        Assert.AreEqual(typeof(AnimationCurve), t2);
-//        
         lookup.typeName = "String";
         lookup.namespaceName = "System";
         lookup.generics = null;
         Type t0 = TypeProcessor.ResolveType(lookup, new List<string>());
         Assert.AreEqual(typeof(string), t0);
 
-        lookup.typeName = "List`1";
+        lookup.typeName = "List";
         lookup.namespaceName = "System.Collections.Generic";
         lookup.generics = new[] {
             new TypeLookup() {
@@ -104,7 +61,7 @@ public class TypeProcessorTests {
         Type t3 = TypeProcessor.ResolveType(lookup, new List<string>());
         Assert.AreEqual(typeof(List<string>), t3);
 
-        lookup.typeName = "List`1";
+        lookup.typeName = "List";
         lookup.namespaceName = "System.Collections.Generic";
         lookup.generics = new[] {
             new TypeLookup() {
@@ -115,11 +72,11 @@ public class TypeProcessorTests {
         Type t4 = TypeProcessor.ResolveType(lookup, new List<string>());
         Assert.AreEqual(typeof(List<string>), t4);
 
-        lookup.typeName = "List`1";
+        lookup.typeName = "List";
         lookup.namespaceName = "System.Collections.Generic";
         lookup.generics = new[] {
             new TypeLookup() {
-                typeName = "Dictionary`2",
+                typeName = "Dictionary",
                 namespaceName = "System.Collections.Generic",
                 generics = new[] {
                     new TypeLookup() {
@@ -127,7 +84,7 @@ public class TypeProcessorTests {
                         namespaceName = "UnityEngine"
                     },
                     new TypeLookup() {
-                        typeName = "KeyValuePair`2",
+                        typeName = "KeyValuePair",
                         namespaceName = "System.Collections.Generic",
                         generics = new[] {
                             new TypeLookup() {
@@ -144,16 +101,16 @@ public class TypeProcessorTests {
         Type t5 = TypeProcessor.ResolveType(lookup, new List<string>());
         Assert.AreEqual(typeof(List<Dictionary<Color, KeyValuePair<float, int>>>), t5);
 
-        lookup.typeName = "List`1";
+        lookup.typeName = "List";
         lookup.generics = new[] {
             new TypeLookup() {
-                typeName = "Dictionary`2",
+                typeName = "Dictionary",
                 generics = new[] {
                     new TypeLookup() {
                         typeName = "Color",
                     },
                     new TypeLookup() {
-                        typeName = "KeyValuePair`2",
+                        typeName = "KeyValuePair",
                         generics = new[] {
                             new TypeLookup() {
                                 typeName = "float"

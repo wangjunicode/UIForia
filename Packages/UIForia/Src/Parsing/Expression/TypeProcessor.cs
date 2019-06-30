@@ -5,28 +5,13 @@ using System.Linq;
 using System.Reflection;
 using UIForia.Attributes;
 using UIForia.Elements;
-using UIForia.Exceptions;
 using UIForia.Extensions;
-using UIForia.Parsing.Expression.AstNodes;
 using UIForia.Util;
-using UnityEngine.Assertions;
 using Debug = UnityEngine.Debug;
 
 namespace UIForia.Parsing.Expression {
 
     public static class TypeProcessor {
-
-        public struct TypeData {
-
-            public readonly Type type;
-            public readonly string tagName;
-
-            public TypeData(Type type, string tagName) {
-                this.type = type;
-                this.tagName = tagName;
-            }
-
-        }
 
         public static bool processedTypes;
         private static readonly StructList<ProcessedType> templateTypes = new StructList<ProcessedType>(64);
@@ -154,17 +139,23 @@ namespace UIForia.Parsing.Expression {
             return null;
         }
 
-        private static Type[] ResolveGenericTypes(TypeLookup typeLookup, IReadOnlyList<string> namespaces = null) {
-            Type[] results = new Type[typeLookup.generics.Length];
+        private static LightList<Type> ResolveGenericTypes(TypeLookup typeLookup, IReadOnlyList<string> namespaces = null) {
+            int count = typeLookup.generics.size;
 
-            for (int i = 0; i < typeLookup.generics.Length; i++) {
-                results[i] = ResolveType(typeLookup.generics[i], namespaces);
+            LightList<Type> results = LightList<Type>.Get();
+            results.EnsureCapacity(count);
 
-                if (results[i] == null) {
+            Type[] array = results.Array;
+
+            for (int i = 0; i < count; i++) {
+                array[i] = ResolveType(typeLookup.generics[i], namespaces);
+
+                if (array[i] == null) {
                     throw new TypeResolutionException($"Failed to find a type from string {typeLookup.generics[i]}");
                 }
             }
 
+            results.Count = typeLookup.generics.size;
             return results;
         }
 
@@ -175,7 +166,7 @@ namespace UIForia.Parsing.Expression {
                 return retn;
             }
 
-            string baseTypeName = "." + typeLookup.typeName; // save some string concat
+            string baseTypeName = "." + typeLookup.GetBaseTypeName(); // save some string concat
             if (!string.IsNullOrEmpty(typeLookup.namespaceName)) {
                 LightList<Assembly> assemblies = s_NamespaceMap.GetOrDefault(typeLookup.namespaceName);
 
@@ -191,8 +182,16 @@ namespace UIForia.Parsing.Expression {
                         return retn;
                     }
                 }
-
-                throw new TypeResolutionException($"Unable to resolve type {typeLookup}");
+                LightList<Assembly> lastDitchAssemblies = s_NamespaceMap.GetOrDefault("null");
+                if (lastDitchAssemblies != null) {
+                    typename = typeLookup.typeName;
+                    for (int a = 0; a < lastDitchAssemblies.Count; a++) {
+                        retn = lastDitchAssemblies[a].GetType(typename);
+                        if (retn != null) {
+                            return retn;
+                        }
+                    }
+                }
             }
             else {
                 if (namespaces != null) {
@@ -222,8 +221,14 @@ namespace UIForia.Parsing.Expression {
                         }
                     }
                 }
+            }
 
-                throw new TypeResolutionException($"Unable to resolve type {typeLookup}");
+            if (namespaces != null && namespaces.Count > 0 && namespaces[0] != string.Empty) {
+                string checkedNamespaces = string.Join(",", namespaces.ToArray());
+                throw new TypeResolutionException($"Unable to resolve type {typeLookup}. Looked in namespaces: {checkedNamespaces}");
+            }
+            else {
+                throw new TypeResolutionException($"Unable to resolve type {typeLookup}.");
             }
         }
 
@@ -243,66 +248,40 @@ namespace UIForia.Parsing.Expression {
             // base type will valid or an exception will be thrown
             Type baseType = ResolveBaseTypePath(typeLookup, namespaces);
 
-            if (typeLookup.generics != null && typeLookup.generics.Length != 0) {
+            if (typeLookup.generics != null && typeLookup.generics.Count != 0) {
                 if (!baseType.IsGenericTypeDefinition) {
                     throw new TypeResolutionException($"{baseType} is not a generic type definition but we are trying to resolve a generic type with it because generic arguments were provided");
                 }
 
-                Type[] generics = ResolveGenericTypes(typeLookup, namespaces);
-                return ReflectionUtil.CreateGenericType(baseType, generics);
+                baseType = ReflectionUtil.CreateGenericType(baseType, ResolveGenericTypes(typeLookup, namespaces));
             }
 
+            if (typeLookup.isArray) {
+                baseType = baseType.MakeArrayType();
+            }
+            
             return baseType;
         }
 
-        // todo -- remove this when old expression compiler is no longer used
-        public static Type ResolveType(Type originType, string name, IReadOnlyList<string> namespaces) {
-            string subtypeName = originType.FullName + "+" + name;
-            subtypeName = subtypeName + ", " + originType.Assembly.FullName;
-            Type retn = Type.GetType(subtypeName);
-
-            if (retn != null) {
-                return retn;
-            }
-
+        public static Type ResolveNestedGenericType(Type containingType, Type baseType, TypeLookup typeLookup, LightList<string> namespaces) {
             FilterAssemblies();
 
-            LightList<Assembly> assemblies = s_NamespaceMap.GetOrDefault(originType.Namespace ?? "null");
-            if (assemblies != null) {
-                string typeName = originType.Namespace ?? "null" + "." + name + ", ";
-                for (int i = 0; i < assemblies.Count; i++) {
-                    Assembly assembly = assemblies[i];
-                    string fullTypeName = typeName + assembly.FullName;
-
-                    retn = Type.GetType(fullTypeName);
-
-                    if (retn != null) {
-                        return retn;
-                    }
-                }
+            if (!baseType.IsGenericTypeDefinition) {
+                throw new TypeResolutionException($"{baseType} is not a generic type definition but we are trying to resolve a generic type with it because generic arguments were provided");
             }
 
-            if (originType.FullName.Contains("+")) {
-                Assembly assembly = originType.Assembly;
-                string[] parentTypePath = originType.FullName.Split('+');
-                string typeName = string.Empty;
-                string assemblyName = ", " + assembly.FullName;
-                for (int i = 0; i < parentTypePath.Length - 1; i++) {
-                    typeName += parentTypePath[i] + "+";
-                    string fullTypeName = typeName + name + assemblyName;
-                    retn = Type.GetType(fullTypeName);
-                    if (retn != null) {
-                        return retn;
-                    }
-                }
+            if (!baseType.IsGenericTypeDefinition) {
+                throw new TypeResolutionException($"{baseType} is not a generic type definition but we are trying to resolve a generic type with it because generic arguments were provided");
             }
 
-            return ResolveType(name, namespaces);
+            if (typeLookup.generics == null || typeLookup.generics.Count == 0) {
+                throw new TypeResolutionException($"Tried to resolve generic types from {baseType} but no generic types were given in the {nameof(typeLookup)} argument");
+            }
+
+            return ReflectionUtil.CreateNestedGenericType(containingType, baseType, ResolveGenericTypes(typeLookup, namespaces));
         }
 
-        // todo -- handle generics too 
-        // todo -- handle nested types
-        public static Type ResolveType(string name, IReadOnlyList<string> namespaces) {
+        public static Type ResolveType(string typeName, IReadOnlyList<string> namespaces) {
             FilterAssemblies();
 
             for (int i = 0; i < namespaces.Count; i++) {
@@ -311,9 +290,9 @@ namespace UIForia.Parsing.Expression {
                     continue;
                 }
 
-                string typeName = namespaces[i] + "." + name + ", ";
+                string prefixedTypeName = namespaces[i] + "." + typeName + ", ";
                 foreach (Assembly assembly in assemblies) {
-                    string fullTypeName = typeName + assembly.FullName;
+                    string fullTypeName = prefixedTypeName + assembly.FullName;
 
                     Type retn = Type.GetType(fullTypeName);
 
@@ -323,48 +302,19 @@ namespace UIForia.Parsing.Expression {
                 }
             }
 
+            LightList<Assembly> lastDitchAssemblies = s_NamespaceMap.GetOrDefault("null");
+            if (lastDitchAssemblies != null) {
+                string typename = typeName;
+                for (int a = 0; a < lastDitchAssemblies.Count; a++) {
+                    Type retn = lastDitchAssemblies[a].GetType(typename);
+                    if (retn != null) {
+                        return retn;
+                    }
+                }
+            }
+
             return null;
         }
-
-//        public static ProcessedType GetProcessedType(string typeName, List<ImportDeclaration> importPaths = null) {
-//            FilterAssemblies();
-//            
-//            if (typeMap.TryGetValue(typeName, out ProcessedType processedType)) {
-//                return processedType;
-//            }
-//
-////            for (int i = 0; i < TemplateParser.IntrinsicElementTypes.Length; i++) {
-////                if (typeName == TemplateParser.IntrinsicElementTypes[i].name) {
-////                    return new ProcessedType(TemplateParser.IntrinsicElementTypes[i].type);
-////                }
-////            }
-//
-//            Type type = Type.GetType(typeName);
-//
-////            if (type == null) {
-//////                for (int i = 0; i < loadedTypes.Count; i++) {
-//////                    if (loadedTypes[i].Name == typeName) {
-//////                        type = loadedTypes[i];
-//////                        break;
-//////                    }
-//////                }
-////            }
-//
-//            Assert.IsNotNull(type, $"type != null, unable to find type {typeName}");
-//            typeMap.TryGetValue(type.Name, out ProcessedType retn);
-//            return retn;
-//        }
-
-//        // todo -- handle imports
-//        public static ProcessedType GetTemplateType(string tagName) {
-//
-//            ProcessedType processedType;
-//            if (templateTypeMap.TryGetValue(tagName, out processedType)) {
-//                return processedType;
-//            }
-//
-//            throw new ParseException("Unable to find type for tag name: " + tagName);
-//        }
 
         public static ProcessedType GetProcessedType(Type type) {
             FilterAssemblies();
@@ -456,6 +406,52 @@ namespace UIForia.Parsing.Expression {
         public static bool IsNamespace(string toCheck) {
             FilterAssemblies();
             return s_NamespaceMap.ContainsKey(toCheck);
+        }
+
+
+        // todo -- remove this when old expression compiler is no longer used
+        public static Type ResolveType(Type originType, string name, IReadOnlyList<string> namespaces) {
+            string subtypeName = originType.FullName + "+" + name;
+            subtypeName = subtypeName + ", " + originType.Assembly.FullName;
+            Type retn = Type.GetType(subtypeName);
+
+            if (retn != null) {
+                return retn;
+            }
+
+            FilterAssemblies();
+
+            LightList<Assembly> assemblies = s_NamespaceMap.GetOrDefault(originType.Namespace ?? "null");
+            if (assemblies != null) {
+                string typeName = originType.Namespace ?? "null" + "." + name + ", ";
+                for (int i = 0; i < assemblies.Count; i++) {
+                    Assembly assembly = assemblies[i];
+                    string fullTypeName = typeName + assembly.FullName;
+
+                    retn = Type.GetType(fullTypeName);
+
+                    if (retn != null) {
+                        return retn;
+                    }
+                }
+            }
+
+            if (originType.FullName.Contains("+")) {
+                Assembly assembly = originType.Assembly;
+                string[] parentTypePath = originType.FullName.Split('+');
+                string typeName = string.Empty;
+                string assemblyName = ", " + assembly.FullName;
+                for (int i = 0; i < parentTypePath.Length - 1; i++) {
+                    typeName += parentTypePath[i] + "+";
+                    string fullTypeName = typeName + name + assemblyName;
+                    retn = Type.GetType(fullTypeName);
+                    if (retn != null) {
+                        return retn;
+                    }
+                }
+            }
+
+            return ResolveType(name, namespaces);
         }
 
     }

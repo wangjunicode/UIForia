@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
+using System.Reflection;
 using UIForia.Parsing.Expression.AstNodes;
 using UIForia.Parsing.Style.AstNodes;
 using Expression = UIForia.Expressions.Expression;
@@ -44,7 +45,7 @@ namespace UIForia.Exceptions {
         }
 
         // todo -- add more debug info to these and make them actually useful. These are basically placeholder but need help to be really useful to people
-        
+
         public static CompileException RHSRootIdentifierMissing(string identifierName) {
             return new CompileException($"Unable to compile right hand side expression beginning with {identifierName} because there was no root variable.");
         }
@@ -53,7 +54,7 @@ namespace UIForia.Exceptions {
             return new CompileException($"Cannot compile the lambda because there are not statements emitted in the main block of the function");
         }
 
-        public static CompileException InvalidActionArgumentCount(List<ParameterExpression> parameters, Type[] genericArguments) {
+        public static CompileException InvalidActionArgumentCount(IList<ParameterExpression> parameters, Type[] genericArguments) {
             return new CompileException($"Cannot compile the action because the declared parameter count {parameters.Count} is not the same as the required signatures parameter count {genericArguments.Length}");
         }
 
@@ -68,13 +69,50 @@ namespace UIForia.Exceptions {
         public static CompileException InvalidTargetType(Type expected, Type actual) {
             return new CompileException($"Expected expression to be compatible with type {expected} but got {actual} which was not convertable");
         }
-        
+
         public static CompileException InvalidAccessExpression() {
             return new CompileException("Expected access expression to have more symbols, the last expression is not a valid terminal");
         }
-        
+
         public static CompileException InvalidIndexOrInvokeOperator() {
             return new CompileException("Index or Invoke operations are not valid on static types or namespaces");
+        }
+
+        public static CompileException UnknownStaticOrConstMember(Type type, string memberName) {
+            return new CompileException($"Unable to find a field or property with the name {memberName} on type {type}");
+        }
+
+        public static CompileException AccessNonReadableStaticOrConstField(Type type, string memberName) {
+            return new CompileException($"Unable to read static or const field {memberName} on type {type} because it is not marked as public");
+        }
+
+        public static CompileException AccessNonReadableStaticProperty(Type type, string memberName) {
+            return new CompileException($"Unable to read static property {memberName} on type {type} because has no read accessor");
+        }
+
+        public static CompileException AccessNonReadableProperty(Type type, PropertyInfo propertyInfo) {
+            return new CompileException($"Unable to read {(propertyInfo.GetMethod.IsStatic ? "static" : "instance")} property {propertyInfo.Name} on type {type} because has no public read accessor");
+        }
+
+        public static CompileException AccessNonPublicStaticProperty(Type type, string memberName) {
+            return new CompileException($"Unable to read static property {memberName} on type {type} because it's read accessor is not public");
+        }
+
+        public static CompileException AccessNonReadableField(Type type, FieldInfo fieldInfo) {
+            if (fieldInfo.IsStatic) {
+                return new CompileException($"Unable to read static field {fieldInfo.Name} on type {type} because it is not marked as public");
+            }
+            else {
+                return new CompileException($"Unable to read instance field {fieldInfo.Name} on type {type} because it is not marked as public");
+            }
+        }
+
+        public static CompileException AccessNonReadableInstanceProperty(Type type, string memberName) {
+            return new CompileException($"Unable to read property {memberName} on type {type} because has no read accessor");
+        }
+
+        public static CompileException AccessNonPublicInstanceProperty(Type type, string memberName) {
+            return new CompileException($"Unable to read static property {memberName} on type {type} because it's read accessor is not public");
         }
 
         public static CompileException UnresolvedType(TypeLookup typeLookup, IReadOnlyList<string> searchedNamespaces = null) {
@@ -87,14 +125,14 @@ namespace UIForia.Exceptions {
 
                 retn += searchedNamespaces[searchedNamespaces.Count - 1];
             }
-            
+
             return new CompileException($"Unable to resolve type {typeLookup}, are you missing a namespace?{retn}");
         }
-        
+
         public static CompileException InvalidNamespaceOperation(string namespaceName, Type type) {
             return new CompileException($"Resolved namespace {namespaceName} but {type} is not a valid next token");
         }
-        
+
         public static CompileException UnknownEnumValue(Type type, string value) {
             return new CompileException($"Unable to enum value {value} on type {type}");
         }
@@ -116,10 +154,10 @@ namespace UIForia.Exceptions {
                 retn += ")";
                 return retn;
             }
-            
+
             return new CompileException($"Unable to find a suitable constructor on type {type} that accepts {BuildArgumentList()}");
         }
-        
+
     }
 
     public static class CompileExceptions {

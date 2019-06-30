@@ -44,7 +44,7 @@ namespace UIForia.Elements {
 
             this.siblingIndex = int.MaxValue - (orientation == ScrollbarOrientation.Horizontal ? 1 : 0);
 
-            this.children = LightListPool<UIElement>.Get();
+            this.children = LightList<UIElement>.Get();
             this.orientation = orientation;
 
             if (target.isEnabled) {

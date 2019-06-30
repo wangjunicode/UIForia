@@ -44,7 +44,7 @@ namespace UIForia.Routing {
 
         public void Release() {
             if (routeParameters != null) {
-                LightListPool<RouteParameter>.Release(ref routeParameters);
+                LightList<RouteParameter>.Release(ref routeParameters);
             }
         }
     }
@@ -86,7 +86,7 @@ namespace UIForia.Routing {
                 return new RouteMatch(matchPath, false, parentMatch, null);
             }
             
-            LightList<RouteParameter> routeParameters = LightListPool<RouteParameter>.Get();
+            LightList<RouteParameter> routeParameters = LightList<RouteParameter>.Get();
 
             // note: /test/url does not match /test/url/
             

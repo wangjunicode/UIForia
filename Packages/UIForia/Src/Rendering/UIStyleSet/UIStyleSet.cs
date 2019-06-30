@@ -84,7 +84,7 @@ namespace UIForia.Rendering {
         internal void ClearPropertyMap() {
             // when clearing the property map we want to retain the styles that we have inherited from elsewhere
             // to do this, we need to read in the inherited values, store them, clear the map, then write the values back
-            LightList<StyleProperty> inherited = LightListPool<StyleProperty>.Get();
+            LightList<StyleProperty> inherited = LightList<StyleProperty>.Get();
             inherited.EnsureCapacity(StyleUtil.InheritedProperties.Count);
             StyleProperty[] inheritedArray = inherited.Array;
             for (int i = 0; i < StyleUtil.InheritedProperties.Count; i++) {
@@ -101,7 +101,7 @@ namespace UIForia.Rendering {
                 propertyMap.Add(key, inheritedArray[i]);
             }
 
-            LightListPool<StyleProperty>.Release(ref inherited);
+            LightList<StyleProperty>.Release(ref inherited);
         }
 
         internal void Initialize() {
@@ -119,7 +119,7 @@ namespace UIForia.Rendering {
 
             ParsedTemplate template = originTemplate.SourceTemplate;
 
-            LightList<StylePropertyId> toUpdate = LightListPool<StylePropertyId>.Get();
+            LightList<StylePropertyId> toUpdate = LightList<StylePropertyId>.Get();
             styleGroupContainers.EnsureCapacity(baseStyles.Length);
 
             for (int i = 0; i < baseStyles.Length; i++) {
@@ -136,14 +136,14 @@ namespace UIForia.Rendering {
 
             UpdatePropertyMap(toUpdate);
 
-            LightListPool<StylePropertyId>.Release(ref toUpdate);
+            LightList<StylePropertyId>.Release(ref toUpdate);
         }
 
         private void AppendSharedStyles(LightList<UIStyleGroupContainer> updatedStyles, int index) {
             int count = updatedStyles.Count;
             UIStyleGroupContainer[] updatedStyleArray = updatedStyles.Array;
 
-            LightList<StylePropertyId> toUpdate = LightListPool<StylePropertyId>.Get();
+            LightList<StylePropertyId> toUpdate = LightList<StylePropertyId>.Get();
             styleGroupContainers.EnsureAdditionalCapacity(updatedStyles.Count - index);
 
             for (int i = index; i < count; i++) {
@@ -155,7 +155,7 @@ namespace UIForia.Rendering {
 
             UpdatePropertyMap(toUpdate);
 
-            LightListPool<StylePropertyId>.Release(ref toUpdate);
+            LightList<StylePropertyId>.Release(ref toUpdate);
         }
 
         private void ResetSharedStyles(LightList<UIStyleGroupContainer> updatedStyles) {
@@ -171,7 +171,7 @@ namespace UIForia.Rendering {
             containedStates = 0;
             hasAttributeStyles = false;
 
-            LightList<StylePropertyId> toUpdate = LightListPool<StylePropertyId>.Get();
+            LightList<StylePropertyId> toUpdate = LightList<StylePropertyId>.Get();
 
             if (instanceStyle != null) {
                 CreateStyleEntry(toUpdate, instanceStyle, instanceStyle.normal, StyleType.Instance, StyleState.Normal, 0);
@@ -192,7 +192,7 @@ namespace UIForia.Rendering {
 
             UpdatePropertyMap(toUpdate);
 
-            LightListPool<StylePropertyId>.Release(ref toUpdate);
+            LightList<StylePropertyId>.Release(ref toUpdate);
         }
 
         internal void UpdateSharedStyles(LightList<UIStyleGroupContainer> updatedStyles) {
@@ -290,8 +290,8 @@ namespace UIForia.Rendering {
                 return;
             }
 
-            LightList<StylePropertyId> toUpdate = LightListPool<StylePropertyId>.Get();
-            LightList<IRunCommand> toRun = LightListPool<IRunCommand>.Get();
+            LightList<StylePropertyId> toUpdate = LightList<StylePropertyId>.Get();
+            LightList<IRunCommand> toRun = LightList<IRunCommand>.Get();
 
             StyleEntry[] styleEntries = availableStyles.Array;
             for (int i = 0; i < availableStyles.Count; i++) {
@@ -306,8 +306,8 @@ namespace UIForia.Rendering {
 
             UpdatePropertyMap(toUpdate);
 
-            LightListPool<StylePropertyId>.Release(ref toUpdate);
-            LightListPool<IRunCommand>.Release(ref toRun);
+            LightList<StylePropertyId>.Release(ref toUpdate);
+            LightList<IRunCommand>.Release(ref toRun);
         }
 
         private void RunCommands(LightList<IRunCommand> runCommands) {
@@ -332,7 +332,7 @@ namespace UIForia.Rendering {
                 return;
             }
 
-            LightList<StylePropertyId> toUpdate = LightListPool<StylePropertyId>.Get();
+            LightList<StylePropertyId> toUpdate = LightList<StylePropertyId>.Get();
 
             StyleEntry[] styleEntries = availableStyles.Array;
             for (int i = 0; i < availableStyles.Count; i++) {
@@ -350,7 +350,7 @@ namespace UIForia.Rendering {
 
             UpdatePropertyMap(toUpdate);
 
-            LightListPool<StylePropertyId>.Release(ref toUpdate);
+            LightList<StylePropertyId>.Release(ref toUpdate);
         }
 
         internal bool SetInheritedStyle(StyleProperty property) {
@@ -392,7 +392,7 @@ namespace UIForia.Rendering {
                 return;
             }
 
-            LightList<StylePropertyId> toUpdate = LightListPool<StylePropertyId>.Get();
+            LightList<StylePropertyId> toUpdate = LightList<StylePropertyId>.Get();
 
             AddStyleGroups(toUpdate, container);
 
@@ -400,7 +400,7 @@ namespace UIForia.Rendering {
 
             UpdatePropertyMap(toUpdate);
 
-            LightListPool<StylePropertyId>.Release(ref toUpdate);
+            LightList<StylePropertyId>.Release(ref toUpdate);
         }
 
         public void RemoveStyleGroupContainer(UIStyleGroupContainer container) {
@@ -410,7 +410,7 @@ namespace UIForia.Rendering {
 
             styleGroupContainers.Remove(container);
 
-            LightList<StylePropertyId> toUpdate = LightListPool<StylePropertyId>.Get();
+            LightList<StylePropertyId> toUpdate = LightList<StylePropertyId>.Get();
 
             for (int i = 0; i < container.groups.Count; i++) {
                 UIStyleGroup group = container.groups[i];
@@ -439,7 +439,7 @@ namespace UIForia.Rendering {
 
             // todo -- handle inheritance, probably done in the style system and not here
 
-            LightListPool<StylePropertyId>.Release(ref toUpdate);
+            LightList<StylePropertyId>.Release(ref toUpdate);
         }
 
         private void SortStyles() {
@@ -659,7 +659,7 @@ namespace UIForia.Rendering {
             int containerCount = styleGroupContainers.Count;
             UIStyleGroupContainer[] containers = styleGroupContainers.Array;
 
-            LightList<StylePropertyId> toUpdate = LightListPool<StylePropertyId>.Get();
+            LightList<StylePropertyId> toUpdate = LightList<StylePropertyId>.Get();
 
             for (int i = 0; i < containerCount; i++) {
                 IReadOnlyList<UIStyleGroup> groups = containers[i].groups;
@@ -714,7 +714,7 @@ namespace UIForia.Rendering {
 
             UpdatePropertyMap(toUpdate);
 
-            LightListPool<StylePropertyId>.Release(ref toUpdate);
+            LightList<StylePropertyId>.Release(ref toUpdate);
         }
 
         private void UpdatePropertyMap(LightList<StylePropertyId> toUpdate) {

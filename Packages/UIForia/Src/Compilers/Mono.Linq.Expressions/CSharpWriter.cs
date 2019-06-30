@@ -28,7 +28,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq.Expressions;
+using System.Text;
 
 namespace Mono.Linq.Expressions {
 
@@ -175,7 +177,7 @@ namespace Mono.Linq.Expressions {
             }
 
             if (type.IsGenericParameter) {
-                WriteReference(type.FullName, type);
+                WriteReference(GetPrintableTypeName(type), type);
                 return;
             }
 
@@ -209,10 +211,50 @@ namespace Mono.Linq.Expressions {
             WriteToken(">");
         }
 
-        void VisitGenericTypeInstance(Type type) {
-            WriteReference(CleanGenericName(type), type);
+        void OutputGeneric(Type type) {
+            Type[] genericArguments = type.GetGenericArguments();
+            int argIndx = 0;
 
-            VisitGenericArguments(type.GetGenericArguments());
+            // namespace.basetype
+            // for each type in chain that has generic arguments
+            // replace `{arg count} with < ,? > until no more args
+            // UIForia.Test.NamespaceTest.SomeNamespace.NamespaceTestClass+SubType1`1+NestedSubType1`1[System.Int32,System.Int32]
+
+            string typeName = type.ToString();
+            for (int i = 0; i < typeName.Length; i++) {
+                if (typeName[i] == '`') {
+                    i++;
+                    int count = int.Parse(typeName[i].ToString());
+                    WriteToken("<");
+                    for (int c = 0; c < count; c++) {
+                        VisitType(genericArguments[argIndx++]);
+
+                        if (c != count - 1) {
+                            WriteToken(", ");
+                        }
+                    }
+
+                    WriteToken(">");
+                }
+                else {
+                    if (typeName[i] == '[') {
+                        return;
+                    }
+
+                    if (typeName[i] == '+') {
+                        WriteToken(".");
+                    }
+                    else {
+                        WriteToken(typeName[i].ToString());
+                    }
+                }
+            }
+        }
+
+        void VisitGenericTypeInstance(Type type) {
+//            WriteReference(CleanGenericName(type), type);
+            OutputGeneric(type);
+//            VisitGenericArguments(type.GetGenericArguments());
         }
 
         void VisitGenericArguments(Type[] generic_arguments) {
@@ -220,7 +262,7 @@ namespace Mono.Linq.Expressions {
         }
 
         static string CleanGenericName(Type type) {
-            var name = type.FullName;
+            var name = GetPrintableTypeName(type);
             var position = name.LastIndexOf("`");
             if (position == -1)
                 return name;
@@ -239,9 +281,9 @@ namespace Mono.Linq.Expressions {
                 return "object";
 
             if (type.IsEnum) {
-                return type.FullName;
+                return GetPrintableTypeName(type);
             }
-            
+
             switch (Type.GetTypeCode(type)) {
                 case TypeCode.Boolean:
                     return "bool";
@@ -272,8 +314,17 @@ namespace Mono.Linq.Expressions {
                 case TypeCode.UInt64:
                     return "ulong";
                 default:
-                    return type.FullName;
+                    return GetPrintableTypeName(type);
             }
+        }
+
+        private static string GetPrintableTypeName(Type type) {
+            string typeName = type.FullName;
+            if (typeName.Contains("+")) {
+                return typeName.Replace("+", ".");
+            }
+
+            return typeName;
         }
 
         protected override Expression VisitBlock(BlockExpression node) {
@@ -809,7 +860,7 @@ namespace Mono.Linq.Expressions {
         static string GetEnumLiteral(object value) {
             var type = value.GetType();
             if (Enum.IsDefined(type, value))
-                return type.FullName + "." + Enum.GetName(type, value);
+                return GetPrintableTypeName(type) + "." + Enum.GetName(type, value);
 
             throw new NotSupportedException();
         }
@@ -820,7 +871,7 @@ namespace Mono.Linq.Expressions {
             WriteToken(":");
             WriteLine();
             Indent();
-            
+
 //            WriteToken(node.Target.Name + ":");
 //            WriteLine();
             return node;

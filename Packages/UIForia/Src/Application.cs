@@ -340,7 +340,7 @@ namespace UIForia {
             }
 
             LightStack<UIElement> stack = new LightStack<UIElement>();
-            LightList<UIElement> toInternalDestroy = LightListPool<UIElement>.Get();
+            LightList<UIElement> toInternalDestroy = LightList<UIElement>.Get();
 
             stack.Push(element);
 
@@ -383,7 +383,7 @@ namespace UIForia {
                 }
             }
 
-            LightListPool<UIElement>.Release(ref toInternalDestroy);
+            LightList<UIElement>.Release(ref toInternalDestroy);
 
             onElementDestroyed?.Invoke(element);
 
@@ -401,7 +401,7 @@ namespace UIForia {
             }
 
             LightStack<UIElement> stack = LightStack<UIElement>.Get();
-            LightList<UIElement> toInternalDestroy = LightListPool<UIElement>.Get();
+            LightList<UIElement> toInternalDestroy = LightList<UIElement>.Get();
 
             int childCount = element.children.Count;
             UIElement[] children = element.children.Array;
@@ -444,7 +444,7 @@ namespace UIForia {
                 }
             }
 
-            LightListPool<UIElement>.Release(ref toInternalDestroy);
+            LightList<UIElement>.Release(ref toInternalDestroy);
             element.children.Clear();
         }
 

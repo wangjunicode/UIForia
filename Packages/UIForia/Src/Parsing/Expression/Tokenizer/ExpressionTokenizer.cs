@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UIForia.Exceptions;
+using UIForia.Util;
 using UnityEngine;
 
 namespace UIForia.Parsing.Expression.Tokenizer {
@@ -9,7 +10,7 @@ namespace UIForia.Parsing.Expression.Tokenizer {
 
         private static readonly char stringCharacter = '\'';
 
-        private static void TryReadCharacters(TokenizerContext context, string match, ExpressionTokenType expressionTokenType, List<ExpressionToken> output) {
+        private static void TryReadCharacters(TokenizerContext context, string match, ExpressionTokenType expressionTokenType, StructList<ExpressionToken> output) {
             if (context.ptr + match.Length > context.input.Length) return;
             for (int i = 0; i < match.Length; i++) {
                 if (context.input[context.ptr + i] != match[i]) {
@@ -68,7 +69,7 @@ namespace UIForia.Parsing.Expression.Tokenizer {
             }
         }
 
-        private static void TryReadDigit(TokenizerContext context, List<ExpressionToken> output) {
+        private static void TryReadDigit(TokenizerContext context, StructList<ExpressionToken> output) {
             if (context.IsConsumed()) return;
             bool foundDot = false;
             int startIndex = context.ptr;
@@ -140,7 +141,7 @@ namespace UIForia.Parsing.Expression.Tokenizer {
             TryConsumeWhiteSpace(context);
         }
 
-        private static void TryReadIdentifier(TokenizerContext context, List<ExpressionToken> output) {
+        private static void TryReadIdentifier(TokenizerContext context, StructList<ExpressionToken> output) {
             if (context.IsConsumed()) return;
             int start = context.ptr;
             char first = context.input[context.ptr];
@@ -188,7 +189,7 @@ namespace UIForia.Parsing.Expression.Tokenizer {
         // add + token
         // run parse loop on contents of {}
 
-        private static void TryReadString(TokenizerContext context, List<ExpressionToken> output) {
+        private static void TryReadString(TokenizerContext context, StructList<ExpressionToken> output) {
             if (context.IsConsumed()) return;
             if (context.input[context.ptr] != stringCharacter) return;
             int start = context.ptr;
@@ -225,8 +226,8 @@ namespace UIForia.Parsing.Expression.Tokenizer {
         }
 
         // todo take optional file / line number for error message
-        public static List<ExpressionToken> Tokenize(string input, List<ExpressionToken> retn = null) {
-            List<ExpressionToken> output = retn ?? new List<ExpressionToken>();
+        public static StructList<ExpressionToken> Tokenize(string input, StructList<ExpressionToken> retn = null) {
+            StructList<ExpressionToken> output = retn ?? new StructList<ExpressionToken>();
             TokenizerContext context = new TokenizerContext(input);
             TryConsumeWhiteSpace(context);
 

@@ -19,6 +19,7 @@ namespace UIForia.Parsing.Expression.AstNodes {
         protected static readonly ObjectPool<NewExpressionNode> s_NewExpressionNodePool = new ObjectPool<NewExpressionNode>();
         protected static readonly ObjectPool<UnaryExpressionNode> s_UnaryNodePool = new ObjectPool<UnaryExpressionNode>();
         protected static readonly ObjectPool<ListInitializerNode> s_ListInitializerPool = new ObjectPool<ListInitializerNode>();
+        protected static readonly ObjectPool<GenericTypePathNode> s_GenericTypePathNode = new ObjectPool<GenericTypePathNode>();
 
         public ASTNodeType type;
 
@@ -93,16 +94,16 @@ namespace UIForia.Parsing.Expression.AstNodes {
             return idNode;
         }
 
-        public static TypeNode TypeOfNode(TypePath typePath) {
+        public static TypeNode TypeOfNode(TypeLookup typeLookup) {
             TypeNode typeOfNode = s_TypeNodePool.Get();
-            typeOfNode.typePath = typePath;
+            typeOfNode.typeLookup = typeLookup;
             typeOfNode.type = ASTNodeType.TypeOf;
             return typeOfNode;
         }
 
-        public static NewExpressionNode NewExpressionNode(TypePath typePath, List<ASTNode> parameters) {
+        public static NewExpressionNode NewExpressionNode(TypeLookup typeLookup, List<ASTNode> parameters) {
             NewExpressionNode retn = s_NewExpressionNodePool.Get();
-            retn.typePath = typePath;
+            retn.typeLookup = typeLookup;
             retn.parameters = parameters;
             retn.type = ASTNodeType.New;
             return retn;
@@ -152,12 +153,33 @@ namespace UIForia.Parsing.Expression.AstNodes {
             return unaryNode;
         }
 
-        public static UnaryExpressionNode DirectCastNode(TypePath typePath, ASTNode expression) {
+        public static UnaryExpressionNode DirectCastNode(TypeLookup typeLookup, ASTNode expression) {
             UnaryExpressionNode unaryNode = s_UnaryNodePool.Get();
             unaryNode.type = ASTNodeType.DirectCast;
-            unaryNode.typePath = typePath;
+            unaryNode.typeLookup = typeLookup;
             unaryNode.expression = expression;
             return unaryNode;
+        }
+
+        public static ASTNode GenericTypePath(TypeLookup genericPath) {
+            GenericTypePathNode node = s_GenericTypePathNode.Get();
+            node.genericPath = genericPath;
+            return node;
+        }
+
+    }
+
+    public class GenericTypePathNode : ASTNode {
+
+        public TypeLookup genericPath;
+
+        public GenericTypePathNode() {
+            this.type = ASTNodeType.GenericTypePath;
+        }
+
+        public override void Release() {
+            genericPath.Release();
+            s_GenericTypePathNode.Release(this);
         }
 
     }
@@ -165,10 +187,10 @@ namespace UIForia.Parsing.Expression.AstNodes {
     public class UnaryExpressionNode : ASTNode {
 
         public ASTNode expression;
-        public TypePath typePath;
+        public TypeLookup typeLookup;
 
         public override void Release() {
-            typePath.Release();
+            typeLookup.Release();
             expression?.Release();
             s_UnaryNodePool.Release(this);
         }
@@ -216,11 +238,11 @@ namespace UIForia.Parsing.Expression.AstNodes {
 
     public class TypeNode : ASTNode {
 
-        public TypePath typePath;
+        public TypeLookup typeLookup;
 
         public override void Release() {
             s_TypeNodePool.Release(this);
-            typePath.Release();
+            typeLookup.Release();
         }
 
     }
@@ -242,9 +264,9 @@ namespace UIForia.Parsing.Expression.AstNodes {
 
     public class NewExpressionNode : ASTNode {
 
-        public TypePath typePath;
+        public TypeLookup typeLookup;
         public List<ASTNode> parameters;
-        
+
         public NewExpressionNode() {
             type = ASTNodeType.New;
         }
@@ -255,7 +277,8 @@ namespace UIForia.Parsing.Expression.AstNodes {
                     parameters[i].Release();
                 }
             }
-            typePath.Release();
+
+            typeLookup.Release();
             ListPool<ASTNode>.Release(ref parameters);
             s_NewExpressionNodePool.Release(this);
         }

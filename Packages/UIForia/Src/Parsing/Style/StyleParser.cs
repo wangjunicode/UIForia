@@ -26,7 +26,7 @@ namespace UIForia.Parsing.Style {
 
         private StyleParser(StyleTokenStream stream) {
             tokenStream = stream;
-            nodes = LightListPool<StyleASTNode>.Get();
+            nodes = LightList<StyleASTNode>.Get();
             operatorStack = StackPool<StyleOperatorNode>.Get();
             expressionStack = StackPool<StyleASTNode>.Get();
             groupExpressionStack = StackPool<AttributeNodeContainer>.Get();

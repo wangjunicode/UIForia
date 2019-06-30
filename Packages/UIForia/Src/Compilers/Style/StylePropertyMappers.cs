@@ -348,7 +348,7 @@ namespace UIForia.Compilers.Style {
         }
 
         private static IReadOnlyList<GridTrackSize> MapGridLayoutTemplate(PropertyNode propertyNode, StyleCompileContext context) {
-            LightList<GridTrackSize> gridTrackSizes = LightListPool<GridTrackSize>.Get();
+            LightList<GridTrackSize> gridTrackSizes = LightList<GridTrackSize>.Get();
             for (int index = 0; index < propertyNode.children.Count; index++) {
                 StyleASTNode trackSize = propertyNode.children[index];
                 gridTrackSizes.Add(MapGridTrackSize(trackSize, context));

@@ -182,7 +182,7 @@ namespace UIForia.Templates {
                 scope.slotContents = inputSlotContent;
             }
 
-            element.children = LightListPool<UIElement>.Get();
+            element.children = LightList<UIElement>.Get();
 
             element.templateContext = new ExpressionContext(element, element);
 
@@ -193,7 +193,7 @@ namespace UIForia.Templates {
 
             UIChildrenElement childrenElement = element.TranscludedChildren;
             if (childrenElement != null) {
-                childrenElement.children = LightListPool<UIElement>.Get();
+                childrenElement.children = LightList<UIElement>.Get();
             }
 
             return element;
@@ -212,7 +212,7 @@ namespace UIForia.Templates {
 
             //int childCount = templateToExpand.childTemplates.Count;
 
-            element.children = LightListPool<UIElement>.Get();
+            element.children = LightList<UIElement>.Get();
             element.templateContext = new ExpressionContext(inputScope.rootElement, element);
             scope.slotContents = slotContentTemplates;
 

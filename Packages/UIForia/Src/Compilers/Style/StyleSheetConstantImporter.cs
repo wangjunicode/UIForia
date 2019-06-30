@@ -30,7 +30,7 @@ namespace UIForia.Compilers.Style {
                     case ImportNode importNode:
                         StyleSheet importedStyle = styleSheetImporter.ImportStyleSheetFromFile(importNode.source);
 
-                        LightList<StyleConstant> importedStyleConstants = LightListPool<StyleConstant>.Get();
+                        LightList<StyleConstant> importedStyleConstants = LightList<StyleConstant>.Get();
                         context.importedStyleConstants.Add(importNode.alias, importedStyleConstants);
 
                         for (int constantIndex = 0; constantIndex < importedStyle.constants.Length; constantIndex++) {

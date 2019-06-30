@@ -226,10 +226,10 @@ namespace UIForia.Systems {
         }
 
         private void ProcessMouseInput() {
-            LightList<UIElement> queryResults = (LightList<UIElement>) m_LayoutSystem.QueryPoint(m_MouseState.mousePosition, LightListPool<UIElement>.Get());
+            LightList<UIElement> queryResults = (LightList<UIElement>) m_LayoutSystem.QueryPoint(m_MouseState.mousePosition, LightList<UIElement>.Get());
 
             if (!IsDragging) {
-                LightList<UIElement> ancestorElements = LightListPool<UIElement>.Get();
+                LightList<UIElement> ancestorElements = LightList<UIElement>.Get();
 
                 // the first element is always correct
                 if (queryResults.Count > 0) {
@@ -246,7 +246,7 @@ namespace UIForia.Systems {
                     }
                 }
 
-                LightListPool<UIElement>.Release(ref queryResults);
+                LightList<UIElement>.Release(ref queryResults);
                 queryResults = ancestorElements;
             }
             
@@ -312,7 +312,7 @@ namespace UIForia.Systems {
                 }
             }
 
-            LightListPool<UIElement>.Release(ref queryResults);
+            LightList<UIElement>.Release(ref queryResults);
         }
         
         private static bool IsParentOf(UIElement element, UIElement child) {

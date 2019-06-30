@@ -395,9 +395,9 @@ namespace UIForia.Compilers {
                 }
             }
 
-            LightList<Expression> exprList = LightListPool<Expression>.Get();
+            LightList<Expression> exprList = LightList<Expression>.Get();
 
-            LightList<Type> typeList = LightListPool<Type>.Get();
+            LightList<Type> typeList = LightList<Type>.Get();
             for (int i = 0;
                 i < node.list.Count;
                 i++) {
@@ -427,13 +427,13 @@ namespace UIForia.Compilers {
                 );
             }
 
-            LightListPool<Expression>.Release(ref exprList);
-            LightListPool<Type>.Release(ref typeList);
+            LightList<Expression>.Release(ref exprList);
+            LightList<Type>.Release(ref typeList);
             return retnExpr;
         }
 
         private LightList<AccessInfo> GetAccessInfoList(Type rootType, MemberAccessExpressionNode node, bool injectHead = true) {
-            LightList<AccessInfo> accessInfoList = LightListPool<AccessInfo>.Get();
+            LightList<AccessInfo> accessInfoList = LightList<AccessInfo>.Get();
 
             Type lastType = rootType;
             if (injectHead) {
@@ -520,7 +520,7 @@ namespace UIForia.Compilers {
         private Expression VisitStaticAccessExpression(Type headType, MemberAccessExpressionNode node) {
             LightList<AccessInfo> accessInfos = GetAccessInfoList(headType, node, false);
             AccessExpressionPart retn = MakeAccessPartFromInfo(accessInfos, 0, false);
-            LightListPool<AccessInfo>.Release(ref accessInfos);
+            LightList<AccessInfo>.Release(ref accessInfos);
             return (Expression) ReflectionUtil.CreateGenericInstanceFromOpenType(
                 typeof(AccessExpression_Static<,>),
                 new GenericArguments(retn.YieldedType, headType),
@@ -1175,24 +1175,6 @@ namespace UIForia.Compilers {
         }
 
         private Expression VisitTypeOf(TypeNode typeNode) {
-            TypePath typePath = typeNode.typePath;
-
-// todo this method isn't fully working
-            string constructedTypePath = typePath.GetConstructedPath();
-            Type[] generics = rootType.GetGenericArguments();
-            for (int i = 0; i < generics.Length; i++) {
-                if (generics[i].Name == constructedTypePath) {
-                    return new ConstantExpression<Type>(generics[i]);
-                }
-            }
-//
-            Type t = TypeExtensions.GetTypeFromSimpleName(constructedTypePath);
-            if (t != null) {
-                return new ConstantExpression<Type>(t);
-            }
-
-// todo -- need to load ups from using path
-// todo -- support generics 
             throw new NotImplementedException();
         }
 

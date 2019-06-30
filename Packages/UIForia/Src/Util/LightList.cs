@@ -2,20 +2,36 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using UIForia.Layout;
-using UnityEngine;
 
 namespace UIForia.Util {
 
-    [DebuggerDisplay("Count = {" + nameof(size) + "}")]
+    [DebuggerTypeProxy(typeof(LightList<>))]
+    internal class LightListDebugView<T> where T : struct {
+
+        private readonly StructList<T> lightList;
+        public T[] array;
+        
+        public LightListDebugView(StructList<T> lightList) {
+            this.lightList = lightList;
+            array = lightList.ToArray();
+        }        
+
+    }
+    
+    [DebuggerDisplay("LightList Count = {" + nameof(size) + "} | capacity = {array.Length}")]
+    [DebuggerTypeProxy(typeof(LightListDebugView<>))]
     public class LightList<T> : IReadOnlyList<T>, IList<T> {
 
         private int size;
         private T[] array;
+        private bool isPooled;
+        
+        private static readonly List<LightList<T>> s_LightListPool = new List<LightList<T>>();
 
         [DebuggerStepThrough]
-        public LightList(int size = 8) {
-            this.array = ArrayPool<T>.GetMinSize(size);
+        public LightList(int minCapacity = 8) {
+            if (minCapacity < 1) minCapacity = 8;
+            this.array = new T[minCapacity];
             this.size = 0;
         }
 
@@ -55,7 +71,6 @@ namespace UIForia.Util {
             [DebuggerStepThrough] set { array[size - 1] = value; }
         }
 
-        [DebuggerStepThrough]
         public void Add(T item) {
             if (size + 1 > array.Length) {
                 ArrayPool<T>.Resize(ref array, (size + 1) * 2);
@@ -498,6 +513,44 @@ namespace UIForia.Util {
         IEnumerator IEnumerable.GetEnumerator() {
             return new Enumerator(this);
         }
+
+        public static LightList<T> Get() {
+            if (s_LightListPool.Count > 0) {
+                LightList<T> retn = s_LightListPool[s_LightListPool.Count - 1];
+                retn.isPooled = false;
+                s_LightListPool.RemoveAt(s_LightListPool.Count - 1);
+                return retn;
+            }
+
+            return new LightList<T>();
+        }
+        
+        public static LightList<T> Get(int minSize) {
+            for (int i = 0; i < s_LightListPool.Count; i++) {
+                if (s_LightListPool[i].Capacity >= minSize) {
+                    LightList<T> retn = s_LightListPool[i];
+                    s_LightListPool.RemoveAt(i);
+                    retn.isPooled = false;
+                    return retn;
+                }
+            }
+
+            return new LightList<T>(minSize);
+        }
+
+        public static void Release(ref LightList<T> toRelease) {
+            if (toRelease == null || toRelease.isPooled) {
+                toRelease = null;
+                return;
+            }
+
+            toRelease.isPooled = true;
+            toRelease.Clear();
+            s_LightListPool.Add(toRelease);
+            toRelease = null;
+        }
+        
+        
 
         public class Enumerator : IEnumerator<T> {
 

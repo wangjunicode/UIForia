@@ -330,7 +330,21 @@ namespace UIForia.Util {
             return Activator.CreateInstance(genericType, args);
         }
 
+        public static Type CreateGenericType(Type baseType, IReadOnlyList<Type> genericArguments) {
+            Type[] genericArray = GetTempTypeArray(genericArguments.Count);
+
+
+            for (int i = 0; i < genericArray.Length; i++) {
+                genericArray[i] = genericArguments[i];
+            }
+
+            Type outputType = baseType.MakeGenericType(genericArray);
+            ReleaseTempTypeArray(ref genericArray);
+            return outputType;    
+        }
+        
         public static Type CreateGenericType(Type baseType, params Type[] genericArguments) {
+            // todo -- not sure we need this layer of caching anymore once Expression Compiler is replaced
             for (int i = 0; i < generics.Count; i++) {
                 GenericTypeEntry entry = generics[i];
                 if (entry.baseType != baseType || genericArguments.Length != entry.paramTypes.Length) {
@@ -354,9 +368,49 @@ namespace UIForia.Util {
             return outputType;
         }
 
-        private static bool TypeParamsMatch(Type[] params0, Type[] params1) {
-            if (params0.Length != params1.Length) return false;
-            for (int i = 0; i < params0.Length; i++) {
+        private static Type[] GetTempTypeArray(int count) {
+            switch (count) {
+                case 0: return Type.EmptyTypes;
+                case 1: return TypeArray1;
+                case 2: return TypeArray2;
+                case 3: return TypeArray3;
+                case 4: return TypeArray4;
+                default: return ArrayPool<Type>.GetExactSize(count);
+            }
+        }
+
+        private static void ReleaseTempTypeArray(ref Type[] array) {
+            if (array.Length == 0) return;
+            if (array == TypeArray1) return;
+            if (array == TypeArray2) return;
+            if (array == TypeArray3) return;
+            if (array == TypeArray4) return;
+            ArrayPool<Type>.Release(ref array);
+        }
+
+        public static Type CreateNestedGenericType(Type containingType, Type nestedType, IList<Type> genericArguments) {
+            // if the base type is nested the generic arguments will be projected onto it, be sure to use them
+            Type[] projected = containingType.GetGenericArguments();
+            Type[] genericArray = GetTempTypeArray(genericArguments.Count + projected.Length);
+
+            int idx = 0;
+
+            for (int i = 0; i < projected.Length; i++) {
+                genericArray[idx++] = projected[i];
+            }
+
+            for (int i = 0; i < genericArguments.Count; i++) {
+                genericArray[idx++] = genericArguments[i];
+            }
+
+            Type outputType = nestedType.MakeGenericType(genericArray);
+            ReleaseTempTypeArray(ref genericArray);
+            return outputType;
+        }
+
+        private static bool TypeParamsMatch(IList<Type> params0, IList<Type> params1) {
+            if (params0.Count != params1.Count) return false;
+            for (int i = 0; i < params0.Count; i++) {
                 if (params0[i] != params1[i]) {
                     return false;
                 }
@@ -1229,19 +1283,36 @@ namespace UIForia.Util {
         }
 
         public static MemberInfo GetStaticOrConstMemberInfo(Type type, string fieldOrPropertyName) {
-            
-            FieldInfo fieldInfo = type.GetField(fieldOrPropertyName, StaticFlags | BindingFlags.FlattenHierarchy);
-            
+            FieldInfo fieldInfo = type.GetField(fieldOrPropertyName, PublicStatic | BindingFlags.FlattenHierarchy);
+
             if (fieldInfo != null) {
                 return fieldInfo;
             }
 
-            PropertyInfo propertyInfo = type.GetProperty(fieldOrPropertyName, StaticFlags | BindingFlags.FlattenHierarchy);
+            PropertyInfo propertyInfo = type.GetProperty(fieldOrPropertyName, PublicStatic | BindingFlags.FlattenHierarchy);
             if (propertyInfo != null) {
                 return propertyInfo;
             }
 
             return null;
+        }
+
+        public static bool HasConstOrStaticMember(Type type, string fieldOrPropertyName, out MemberInfo memberInfo) {
+            FieldInfo fieldInfo = type.GetField(fieldOrPropertyName, PublicStatic | BindingFlags.FlattenHierarchy);
+
+            if (fieldInfo != null) {
+                memberInfo = fieldInfo;
+                return true;
+            }
+
+            PropertyInfo propertyInfo = type.GetProperty(fieldOrPropertyName, PublicStatic | BindingFlags.FlattenHierarchy);
+            if (propertyInfo != null) {
+                memberInfo = propertyInfo;
+                return true;
+            }
+
+            memberInfo = null;
+            return false;
         }
 
     }

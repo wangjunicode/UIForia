@@ -141,7 +141,7 @@ namespace UIForia.Animation {
                 }
             }
 
-            LightList<ProcessedKeyFrame> list = LightListPool<ProcessedKeyFrame>.Get();
+            LightList<ProcessedKeyFrame> list = LightList<ProcessedKeyFrame>.Get();
             list.Add(new ProcessedKeyFrame(time, property));
             processedFrameGroups.Add(new ProcessedKeyFrameGroup(property.propertyId, list));
         }

@@ -468,7 +468,7 @@ namespace UIForia.Systems {
         public void OnElementEnabled(UIElement element) {
             // none of these boxes should exist for the whole hierarchy, create them
 
-            LightList<LayoutBox> toUpdateList = LightListPool<LayoutBox>.Get();
+            LightList<LayoutBox> toUpdateList = LightList<LayoutBox>.Get();
             LightStack<LayoutBoxPair> stack = LightStack<LayoutBoxPair>.Get();
 
             if (element.parent != null) {
@@ -517,7 +517,7 @@ namespace UIForia.Systems {
                 }
             }
 
-            LightListPool<LayoutBox>.Release(ref toUpdateList);
+            LightList<LayoutBox>.Release(ref toUpdateList);
             LightStack<LayoutBoxPair>.Release(ref stack);
         }
 
@@ -647,7 +647,7 @@ namespace UIForia.Systems {
                 return;
             }
 
-            LightList<LayoutBox> boxes = LightListPool<LayoutBox>.Get();
+            LightList<LayoutBox> boxes = LightList<LayoutBox>.Get();
             boxes.EnsureCapacity(element.children.Count);
 
             box.children.Clear();
@@ -657,7 +657,7 @@ namespace UIForia.Systems {
                 boxes[i].parent = box;
             }
 
-            LightListPool<LayoutBox>.Release(ref boxes);
+            LightList<LayoutBox>.Release(ref boxes);
             box.UpdateChildren();
         }
 

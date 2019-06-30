@@ -102,7 +102,7 @@ namespace SVGX {
             if (ctx.drawCalls.Count == 0) return null;
 
             int lastClipId = ctx.drawCalls[0].clipGroupId;
-            LightList<SVGXDrawWave> waves = LightListPool<SVGXDrawWave>.Get();
+            LightList<SVGXDrawWave> waves = LightList<SVGXDrawWave>.Get();
 
             SVGXDrawWave wave = s_WavePool.Get();
 
@@ -302,9 +302,9 @@ namespace SVGX {
 
             if (waves == null) return;
 
-            LightList<SVGXStyle> styles = LightListPool<SVGXStyle>.Get();
-            LightList<SVGXMatrix> matrices = LightListPool<SVGXMatrix>.Get();
-            LightList<Rect> scissors = LightListPool<Rect>.Get();
+            LightList<SVGXStyle> styles = LightList<SVGXStyle>.Get();
+            LightList<SVGXMatrix> matrices = LightList<SVGXMatrix>.Get();
+            LightList<Rect> scissors = LightList<Rect>.Get();
 
             SVGXDrawWave[] waveArray = waves.Array;
             for (int i = 0; i < waves.Count; i++) {
@@ -312,7 +312,7 @@ namespace SVGX {
 
                 DrawClip(wave);
 
-                LightList<SVGXRenderShape> transparents = LightListPool<SVGXRenderShape>.Get();
+                LightList<SVGXRenderShape> transparents = LightList<SVGXRenderShape>.Get();
 
                 // j is the wave's draw call need the over all offset as well
                 for (int j = 0; j < wave.drawCalls.Count; j++) {
@@ -371,17 +371,17 @@ namespace SVGX {
 
                 DrawBatchedTransparents(ctx.points.Array, transparents, scissors, styles, matrices);
 
-                LightListPool<SVGXRenderShape>.Release(ref transparents);
+                LightList<SVGXRenderShape>.Release(ref transparents);
 
                 ClearClip(wave);
 
                 s_WavePool.Release(wave);
             }
 
-            LightListPool<SVGXDrawWave>.Release(ref waves);
-            LightListPool<SVGXStyle>.Release(ref styles);
-            LightListPool<SVGXMatrix>.Release(ref matrices);
-            LightListPool<Rect>.Release(ref scissors);
+            LightList<SVGXDrawWave>.Release(ref waves);
+            LightList<SVGXStyle>.Release(ref styles);
+            LightList<SVGXMatrix>.Release(ref matrices);
+            LightList<Rect>.Release(ref scissors);
         }
 
         private static void GroupByTexture(LightList<SVGXStyle> styles, LightList<SVGXRenderShape> shapes, LightList<TexturedShapeGroup> retn) {
@@ -393,7 +393,7 @@ namespace SVGX {
                     if (idx == -1) {
                         TexturedShapeGroup group = new TexturedShapeGroup() {
                             textureId = textureId,
-                            shapes = LightListPool<SVGXRenderShape>.Get()
+                            shapes = LightList<SVGXRenderShape>.Get()
                         };
                         group.shapes.Add(shapes[i]);
                         retn.Add(group);
@@ -407,7 +407,7 @@ namespace SVGX {
                     if (idx == -1) {
                         TexturedShapeGroup group = new TexturedShapeGroup() {
                             textureId = -1,
-                            shapes = LightListPool<SVGXRenderShape>.Get()
+                            shapes = LightList<SVGXRenderShape>.Get()
                         };
                         group.shapes.Add(shapes[i]);
                         retn.Add(group);
@@ -479,7 +479,7 @@ namespace SVGX {
 //                material.SetTexture(s_MainTexKey, textureMap.GetOrDefault(array[i].textureId));
 //                DrawMesh(batchedVertexData.FillMesh(), originMatrix, material);
 //
-//                LightListPool<SVGXRenderShape>.Release(ref array[i].shapes);
+//                LightList<SVGXRenderShape>.Release(ref array[i].shapes);
 //            }
 //
 //            texturedShapeGroups.Clear();

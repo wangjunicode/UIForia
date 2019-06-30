@@ -19,7 +19,8 @@ namespace UIForia.Parsing.Expression {
         DirectCast,
         ListInitializer,
         New,
-        Paren
+        Paren,
+        GenericTypePath
 
     }
 

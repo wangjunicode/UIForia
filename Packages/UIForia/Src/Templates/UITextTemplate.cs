@@ -107,7 +107,7 @@ namespace UIForia.Templates {
             Debug.Assert(element != null, nameof(element) + " != null");
             
             element.templateContext = new ExpressionContext(inputScope.rootElement, element);
-            element.children = LightListPool<UIElement>.Get();
+            element.children = LightList<UIElement>.Get();
             element.OriginTemplate = this;
 
             return element;

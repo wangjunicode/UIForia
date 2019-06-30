@@ -40,7 +40,7 @@ namespace UIForia.Elements {
             this.style = new UIStyleSet(this);
             this.layoutResult = new LayoutResult();
             this.flags = UIElementFlags.Enabled;
-            this.children = LightListPool<UIElement>.Get();
+            this.children = LightList<UIElement>.Get();
         }
 
         public Application Application => View.Application;
@@ -389,7 +389,7 @@ namespace UIForia.Elements {
             ElementColdData coldData = s_ColdDataMap.GetOrDefault(id);
             coldData.Destroy();
             s_ColdDataMap.Remove(id);
-            LightListPool<UIElement>.Release(ref children);
+            LightList<UIElement>.Release(ref children);
             parent = null;
         }
 

@@ -427,7 +427,7 @@ namespace SVGX {
                     throw new ArgumentOutOfRangeException();
             }
 
-            LightList<Vector2> pointCache = LightListPool<Vector2>.Get();
+            LightList<Vector2> pointCache = LightList<Vector2>.Get();
             SVGXGeometryUtil.GenerateStrokeGeometry(pointCache, style.strokePlacement, style.strokeWidth, renderShape.shape.type, matrix, points, renderShape.shape.pointRange, renderShape.shape.isClosed);
 
             bool isClosed = renderShape.shape.isClosed;
@@ -453,7 +453,7 @@ namespace SVGX {
                 uv3List[uv3List.Count - 1] = new Vector4(uv3List[uv3List.Count - 1].x, uv3List[uv3List.Count - 1].y, cap, 0);
             }
 
-            LightListPool<Vector2>.Release(ref pointCache);
+            LightList<Vector2>.Release(ref pointCache);
         }
 
         internal void CreateFillVertices(Vector2[] points, SVGXRenderShape renderShape, Rect scissorRect, GFX.GradientData gradientData, SVGXStyle style, SVGXMatrix matrix) {

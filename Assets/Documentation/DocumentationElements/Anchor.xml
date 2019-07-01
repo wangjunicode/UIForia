@@ -1,12 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <UITemplate>
     <Contents>
-        <Children attr="(v) => $element.doStuff(v)
-            {
-                value: ...splitData.x,
-                other: y,
-                ...data
-            }
-"/>
+        <Children />
     </Contents>
 </UITemplate>

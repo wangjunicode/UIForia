@@ -46,10 +46,6 @@ namespace UIForia.Exceptions {
 
         // todo -- add more debug info to these and make them actually useful. These are basically placeholder but need help to be really useful to people
 
-        public static CompileException RHSRootIdentifierMissing(string identifierName) {
-            return new CompileException($"Unable to compile right hand side expression beginning with {identifierName} because there was no root variable.");
-        }
-
         public static CompileException NoStatementsRootBlock() {
             return new CompileException($"Cannot compile the lambda because there are not statements emitted in the main block of the function");
         }
@@ -105,14 +101,6 @@ namespace UIForia.Exceptions {
             else {
                 return new CompileException($"Unable to read instance field {fieldInfo.Name} on type {type} because it is not marked as public");
             }
-        }
-
-        public static CompileException AccessNonReadableInstanceProperty(Type type, string memberName) {
-            return new CompileException($"Unable to read property {memberName} on type {type} because has no read accessor");
-        }
-
-        public static CompileException AccessNonPublicInstanceProperty(Type type, string memberName) {
-            return new CompileException($"Unable to read static property {memberName} on type {type} because it's read accessor is not public");
         }
 
         public static CompileException UnresolvedType(TypeLookup typeLookup, IReadOnlyList<string> searchedNamespaces = null) {

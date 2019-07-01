@@ -19,7 +19,7 @@ namespace UIForia.Parsing.Expression {
         public static ASTNode Parse(string input) {
             return new ExpressionParser().ParseInternal(input);
         }
-        
+
         private ExpressionParser(TokenStream stream) {
             tokenStream = stream;
             operatorStack = StackPool<OperatorNode>.Get();
@@ -193,13 +193,14 @@ namespace UIForia.Parsing.Expression {
                     if (!ParseTypePath(ref typeLookup)) {
                         Abort();
                     }
-                    
+
                     // todo -- figure out why we are directly pushing this into the stack
                     expressionStack.Push(ASTNode.TypeOfNode(typeLookup));
                     return true;
                 }
 
                 case ExpressionTokenType.Is: {
+                    // todo -- support variable name syntax ie val is float f
                     operatorNode = ASTNode.OperatorNode(OperatorType.Is);
                     operatorNode.WithLocation(tokenStream.Previous);
                     TypeLookup typeLookup = default;
@@ -263,6 +264,7 @@ namespace UIForia.Parsing.Expression {
             return new ExpressionParser(tokenStream.AdvanceAndReturnSubStream(advance));
         }
 
+        // todo -- in theory we don't need a full substream, just need constrain the indices for the ptr
         private ExpressionParser CreateSubParser(int advance) {
             tokenStream.Advance(); // step over the open brace
             // -1 to drop the closing paren token from sub stream
@@ -276,6 +278,7 @@ namespace UIForia.Parsing.Expression {
         // todo string concat expression "string {nested expression}"
         private bool ParseExpression(ref ASTNode retn) {
             if (ParseNewExpression(ref retn)) return true;
+            if (ParseLambdaExpression(ref retn)) return true;
             if (ParseDirectCastExpression(ref retn)) return true;
             if (ParseTypeOfExpression(ref retn)) return true;
             if (ParseArrayLiteralExpression(ref retn)) return true;
@@ -286,6 +289,104 @@ namespace UIForia.Parsing.Expression {
             if (ParseUnaryExpression(ref retn)) return true;
 
             return false;
+        }
+
+        private bool ParseLambdaExpression(ref ASTNode node) {
+            if (tokenStream.Current != ExpressionTokenType.ParenOpen) {
+                return false;
+            }
+
+            int advance = tokenStream.FindMatchingIndex(ExpressionTokenType.ParenOpen, ExpressionTokenType.ParenClose);
+
+            if (advance < 0) {
+                return false;
+            }
+
+            if (!tokenStream.HasTokenAt(advance + 1)) {
+                return false;
+            }
+
+            if (tokenStream.Peek(advance + 1) != ExpressionTokenType.LambdaArrow) {
+                return false;
+            }
+
+            StructList<LambdaArgument> signatureList = StructList<LambdaArgument>.Get(4);
+
+            if (advance != 1) {
+                ExpressionParser subParser = CreateSubParser(advance);
+
+                if (!subParser.ParseLambdaSignature(ref signatureList)) {
+                    return false;
+                }
+
+                tokenStream.Advance(); // step over => 
+            }
+            else {
+                tokenStream.Advance(3); // 1 = ( 2 = ) 3 = => 
+            }
+
+            ASTNode body = null;
+            if (!ParseExpression(ref body)) {
+                tokenStream.Restore();
+                StructList<LambdaArgument>.Release(ref signatureList);
+                return false;
+            }
+
+            node = ASTNode.LambdaExpressionNode(signatureList, body);
+
+            return true;
+        }
+
+        private bool ParseLambdaSignature(ref StructList<LambdaArgument> signature) {
+            tokenStream.Save();
+
+            while (tokenStream.HasMoreTokens) {
+                // can be either just names or type specifier and then names. can probably also be aliases
+                TypeLookup typeLookup = default;
+                LambdaArgument argument = default;
+
+                // should parse a path even if only an identifier is present
+                if (ParseTypePath(ref typeLookup)) {
+                    argument.type = typeLookup;
+                }
+                else {
+                    tokenStream.Restore();
+                    return false;
+                }
+
+                if (!tokenStream.HasMoreTokens) {
+                    if (typeLookup.generics != null || !string.IsNullOrEmpty(typeLookup.namespaceName)) {
+                        tokenStream.Restore();
+                        return false;
+                    }
+
+                    argument.identifier = typeLookup.typeName;
+                    argument.type = null;
+                    signature.Add(argument);
+                    return true;
+                }
+
+                if (tokenStream.Current == ExpressionTokenType.Identifier) {
+                    argument.identifier = tokenStream.Current;
+                    tokenStream.Advance();
+                    signature.Add(argument);
+                }
+
+                if (!tokenStream.HasMoreTokens) {
+                    return true;
+                }
+
+                // better be a comma or end if have more tokens
+                if (tokenStream.Current != ExpressionTokenType.Comma) {
+                    Abort($"Failed parse LambdaExpression signature because we expected a comma and we hit {tokenStream.Current} instead.");
+                    signature.Clear();
+                    return false;
+                }
+
+                tokenStream.Advance();
+            }
+
+            return true;
         }
 
         private bool ParseArrayLiteralExpression(ref ASTNode retn) {
@@ -409,7 +510,7 @@ namespace UIForia.Parsing.Expression {
                 retn.Release();
                 return false;
             }
-            
+
             retn.generics = retn.generics ?? StructList<TypeLookup>.Get(4);
             retn.generics.Add(arg);
 
@@ -557,7 +658,7 @@ namespace UIForia.Parsing.Expression {
                 }
                 else if (tokenStream.Current == ExpressionTokenType.ParenOpen) {
                     List<ASTNode> parameters = null;
-                    
+
                     if (!ParseListExpression(ref parameters, ExpressionTokenType.ParenOpen, ExpressionTokenType.ParenClose)) {
                         Abort();
                     }
@@ -666,7 +767,7 @@ namespace UIForia.Parsing.Expression {
             tokenStream.Save();
 
             ExpressionParser subParser = CreateSubParser(advance);
-            TypeLookup typeLookup = new TypeLookup(); 
+            TypeLookup typeLookup = new TypeLookup();
             bool valid = subParser.ParseTypePath(ref typeLookup);
             subParser.Release();
 
@@ -782,6 +883,7 @@ namespace UIForia.Parsing.Expression {
                     retn = ASTNode.NumericLiteralNode(tokenStream.Current.value).WithLocation(tokenStream.Current);
                     break;
                 case ExpressionTokenType.Default:
+                    // todo -- allow a type expression a-la default(List<float>);
                     retn = ASTNode.DefaultLiteralNode(tokenStream.Current.value).WithLocation(tokenStream.Current);
                     break;
                 default:

@@ -20,6 +20,7 @@ namespace UIForia.Parsing.Expression.AstNodes {
         protected static readonly ObjectPool<UnaryExpressionNode> s_UnaryNodePool = new ObjectPool<UnaryExpressionNode>();
         protected static readonly ObjectPool<ListInitializerNode> s_ListInitializerPool = new ObjectPool<ListInitializerNode>();
         protected static readonly ObjectPool<GenericTypePathNode> s_GenericTypePathNode = new ObjectPool<GenericTypePathNode>();
+        protected static readonly ObjectPool<LambdaExpressionNode> s_LambdaExpressionPool = new ObjectPool<LambdaExpressionNode>();
 
         public ASTNodeType type;
 
@@ -167,6 +168,13 @@ namespace UIForia.Parsing.Expression.AstNodes {
             return node;
         }
 
+        public static LambdaExpressionNode LambdaExpressionNode(StructList<LambdaArgument> arguments, ASTNode body) {
+            LambdaExpressionNode node = s_LambdaExpressionPool.Get();
+            node.signature = arguments;
+            node.body = body;
+            return node;
+        }
+        
     }
 
     public class GenericTypePathNode : ASTNode {
@@ -338,6 +346,32 @@ namespace UIForia.Parsing.Expression.AstNodes {
         public override string ToString() {
             return propertyName;
         }
+
+    }
+
+    public struct LambdaArgument {
+
+        public TypeLookup? type;
+        public string identifier;
+
+    }
+    
+    public class LambdaExpressionNode : ASTNode {
+
+        public StructList<LambdaArgument> signature;
+        public ASTNode body;
+
+        public LambdaExpressionNode() {
+            type = ASTNodeType.LambdaExpression;
+        }
+
+        public override void Release() {
+            body.Release();
+            StructList<LambdaArgument>.Release(ref signature);
+            body = null;
+            s_LambdaExpressionPool.Release(this);
+        }
+
 
     }
 

@@ -9,6 +9,7 @@ namespace UIForia.Util {
     internal class StructListDebugView<T> where T : struct {
 
         private readonly StructList<T> structList;
+        [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
         public T[] array;
 
         public StructListDebugView(StructList<T> structList) {
@@ -18,8 +19,9 @@ namespace UIForia.Util {
 
     }
 
-    [DebuggerDisplay("StructList Count = {" + nameof(size) + "} | capacity = {array.Length}")]
+    [DebuggerDisplay("StructList Count = {" + nameof(size) + "} | Capacity = {array.Length}")]
     [DebuggerTypeProxy(typeof(StructListDebugView<>))]
+
     public class StructList<T> where T : struct {
 
         public T[] array;

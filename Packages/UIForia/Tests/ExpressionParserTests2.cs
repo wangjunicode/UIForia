@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using NUnit.Framework;
 using UIForia;
+using UIForia.Exceptions;
 using UIForia.Parsing.Expression;
 using UIForia.Parsing.Expression.AstNodes;
 using UnityEngine;
@@ -683,4 +685,45 @@ public class ExpressionParserTests2 {
         Assert.AreEqual("$item", node.name);
     }
     
+    [Test]
+    public void Parse_LambdaNoParameters() {
+        ASTNode root = ExpressionParser.Parse("() => value");
+        LambdaExpressionNode node = AssertInstanceOfAndReturn<LambdaExpressionNode>(root);
+        Assert.AreEqual(0, node.signature.Count);
+    }
+    
+    [Test]
+    public void Parse_LambdaNoParameters_NoBody() {
+        Assert.Throws<ParseException>(() => { ExpressionParser.Parse("() => "); });
+    }
+
+    [Test]
+    public void Parse_LambdaTypedParameter_1() {
+        ASTNode root = ExpressionParser.Parse("(string value) => value");
+        LambdaExpressionNode node = AssertInstanceOfAndReturn<LambdaExpressionNode>(root);
+        Assert.AreEqual(1, node.signature.Count);
+        Assert.AreEqual("string", node.signature[0].type.Value.typeName);
+        Assert.AreEqual("value", node.signature[0].identifier);
+    }
+    
+    [Test]
+    public void Parse_LambdaTypedParameter_2() {
+        ASTNode root = ExpressionParser.Parse("(string value, System.Collections.Generic.List<int> listValue) => value");
+        LambdaExpressionNode node = AssertInstanceOfAndReturn<LambdaExpressionNode>(root);
+        Assert.AreEqual(2, node.signature.Count);
+        Assert.AreEqual("string", node.signature[0].type.Value.typeName);
+        Assert.AreEqual("value", node.signature[0].identifier);
+        Assert.AreEqual(typeof(List<int>), TypeProcessor.ResolveType(node.signature[1].type.Value));
+        Assert.AreEqual("listValue", node.signature[1].identifier);
+    }
+    
+    [Test]
+    public void Parse_LambdaUnTypedParameters_1() {
+        ASTNode root = ExpressionParser.Parse("(value) => value");
+        LambdaExpressionNode node = AssertInstanceOfAndReturn<LambdaExpressionNode>(root);
+        Assert.AreEqual(1, node.signature.Count);
+        Assert.AreEqual(null, node.signature[0].type);
+        Assert.AreEqual("value", node.signature[0].identifier);
+    }
+
 }

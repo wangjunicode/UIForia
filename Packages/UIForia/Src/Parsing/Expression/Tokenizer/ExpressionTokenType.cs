@@ -67,6 +67,8 @@ namespace UIForia.Parsing.Expression.Tokenizer {
         Number_Byte,
         Number_UInt,
 
+        LambdaArrow
+
     }
 
 }

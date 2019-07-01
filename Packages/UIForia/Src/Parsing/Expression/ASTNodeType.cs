@@ -20,7 +20,9 @@ namespace UIForia.Parsing.Expression {
         ListInitializer,
         New,
         Paren,
-        GenericTypePath
+        GenericTypePath,
+
+        LambdaExpression
 
     }
 

@@ -2,23 +2,24 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 
 namespace UIForia.Util {
 
     [DebuggerTypeProxy(typeof(LightList<>))]
     internal class LightListDebugView<T> where T : struct {
 
-        private readonly StructList<T> lightList;
+        private readonly LightList<T> lightList;
         public T[] array;
         
-        public LightListDebugView(StructList<T> lightList) {
+        public LightListDebugView(LightList<T> lightList) {
             this.lightList = lightList;
             array = lightList.ToArray();
         }        
 
     }
     
-    [DebuggerDisplay("LightList Count = {" + nameof(size) + "} | capacity = {array.Length}")]
+    [DebuggerDisplay("LightList Count = {" + nameof(size) + "} | Capacity = {array.Length}")]
     [DebuggerTypeProxy(typeof(LightListDebugView<>))]
     public class LightList<T> : IReadOnlyList<T>, IList<T> {
 

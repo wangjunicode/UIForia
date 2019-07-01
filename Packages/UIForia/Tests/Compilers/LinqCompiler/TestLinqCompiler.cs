@@ -6,11 +6,13 @@ using System.Reflection;
 using NUnit.Framework;
 using UIForia.Bindings;
 using UIForia.Compilers;
+using UIForia.Elements;
 using UIForia.Exceptions;
 using UIForia.Expressions;
 using UIForia.Extensions;
 using UIForia.Parsing.Expression;
 using UIForia.Parsing.Expression.AstNodes;
+using UIForia.UIInput;
 using UnityEngine;
 using Expression = System.Linq.Expressions.Expression;
 
@@ -81,7 +83,7 @@ public class TestLinqCompiler {
 
             // if no listeners and field or auto prop then just assign, no need to check
             //compiler.Assign(left, Expression.Constant(34f));
-            
+
             compiler.IfNotEqual(left, right, () => {
                 compiler.Assign(left, right);
 //
@@ -128,7 +130,122 @@ public class TestLinqCompiler {
     // todo -- test alias list initializer
     // todo -- test initializer syntax { x: 4 }
     // todo -- test falsy bool handling
+
+
+    private class TestElement : UIElement {
+
+        public void HandleValueChanged(string value, int idx) { }
+
+    }
+
+    // bindings need to come from some factory so they can be either shared not not. 
     
+    // some bindings will want context such as repeats
+    
+    // some bindings will want their own instances so they can store contextual data
+    
+    // interface for bindings
+
+    // bindings can be aggressively pooled
+    // bindings can invoke their functions with whatever parameters they like
+    
+    // context
+    // closures 
+    // events
+    // callbacks
+    // enable / disable
+    // run enable when element disabled
+    
+    public class Binding {
+
+        public string id;
+        public Binding parent;
+        public Binding nextSibling;
+        public Binding firstChild;
+
+        private Action<UIElement, UIElement> fn;
+        
+        public virtual void OnEnable() { }
+
+        public virtual void OnDisable() { }
+
+        public virtual void OnElementChanged() { }
+        
+        public virtual void OnElementDestroyed() { }
+
+        public virtual void Execute(UIElement root, UIElement current) {
+            fn(root, current);
+        }
+
+    }
+    
+    //for non const actions probably can't share this binding since we need to know the last action and compare it with the new one
+
+    // need a factory that generates a closure over my arguments
+    // need a special instance of binding node or another closure to invoke that factory
+
+    private class CallbackBinding : Binding {
+
+        
+        private Action<string, int> previous;
+        private Action<string> previousOuter;
+
+        private Func<UIElement, Action<string>> factory => (UIElement el) => { return (string value) => { ((TestElement) el).HandleValueChanged(value, 0); }; };
+
+        private Action<Select<string>, TestElement> binding;
+
+        private void SetBinding() {
+            binding = (Select<string> selectElement, TestElement root) => {
+                Action<string, int> a = root.HandleValueChanged;
+                // do work and check if not constant
+
+                // ... run expression body here
+
+                if (a != previous) {
+                    selectElement.onValueChanged -= previousOuter;
+                    previousOuter = factory(root);
+                    selectElement.onValueChanged += previousOuter;
+                }
+            };
+        }
+        
+
+    }
+
+    [Test]
+    public void CompileClosure() {
+        LinqCompiler compiler = new LinqCompiler();
+//        compiler.AddParameter(typeof(LinqThing), "root");
+//        // <Element onValueChanged="(evt) => HandleValueChanged($evt.arg0, 4f)"/>
+//        compiler.ReturnStatement(compiler.CreateRHSStatementChain("(evt, value) => root.svHolderVec3.value.z"));
+//        Action<UIElement, UIElement> action = compiler.Compile<Action<UIElement, UIElement>>();
+
+        void Compile<T, U>() {
+            var ps = Expression.Parameter(typeof(Select<T>), "s");
+            var pt = Expression.Parameter(typeof(int), "t");
+
+            var ex2 = Expression.Lambda(
+                Expression.Quote(
+                    Expression.Lambda(
+                        Expression.Block(
+                            typeof(void),
+                            Expression.Add(ps, pt), pt)
+                    )
+                ),
+                ps);
+            Debug.Log(PrintCode(ex2));
+        }
+
+
+        Select<string> selectElementString = new Select<string>();
+        TestElement testElement = new TestElement();
+
+        selectElementString.onValueChanged += (s) => testElement.HandleValueChanged(s, 0);
+
+//        var f2a = (Func<int, Expression<Func<int, int>>>)ex2.Compile();
+//        var f2b = f2a(200).Compile();
+    }
+
     [Test]
     public void CompileReadFromValueChain() {
         LinqCompiler compiler = new LinqCompiler();
@@ -824,7 +941,7 @@ public class TestLinqCompiler {
         compiler.ReturnStatement(compiler.CreateRHSStatementChain("thing.vec3Array[1]"));
         Assert.AreEqual(thing.vec3Array[1], compiler.Compile<Func<LinqThing, Vector3>>()(thing));
 
-        UnityEngine.Debug.Log( PrintCode(compiler.BuildLambda()));
+        UnityEngine.Debug.Log(PrintCode(compiler.BuildLambda()));
         AssertStringsEqual(@"
        (TestLinqCompiler.LinqThing thing) =>
        {

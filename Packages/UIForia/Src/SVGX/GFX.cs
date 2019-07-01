@@ -85,7 +85,7 @@ namespace SVGX {
 
         public void DrawMesh(Mesh mesh, Matrix4x4 transform, Material material) {
             material.renderQueue = drawCallCnt++;
-            Graphics.DrawMesh(mesh, transform, material, 0, camera, 0, null, ShadowCastingMode.Off, false, null, LightProbeUsage.Off);
+            Graphics.DrawMesh(mesh, transform, material, LayerMask.NameToLayer("UI"), camera, 0, null, ShadowCastingMode.Off, false, null, LightProbeUsage.Off);
         }
 
         internal static LightList<SVGXDrawWave> CreateWaves(ImmediateRenderContext ctx) {

@@ -2,12 +2,11 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 
 namespace UIForia.Util {
 
     [DebuggerTypeProxy(typeof(LightList<>))]
-    internal class LightListDebugView<T> where T : struct {
+    internal class LightListDebugView<T> {
 
         private readonly LightList<T> lightList;
         public T[] array;
@@ -26,6 +25,12 @@ namespace UIForia.Util {
         private int size;
         private T[] array;
         private bool isPooled;
+
+        public T[] ToArray() {
+            T[] retn = new T[size];
+            System.Array.Copy(array, 0, retn, 0, size);
+            return retn;
+        }
         
         private static readonly List<LightList<T>> s_LightListPool = new List<LightList<T>>();
 

@@ -102,6 +102,14 @@ namespace UIForia.Exceptions {
                 return new CompileException($"Unable to read instance field {fieldInfo.Name} on type {type} because it is not marked as public");
             }
         }
+        
+        public static CompileException InvalidLambdaArgument() {
+            return new CompileException($"Type mismatch with Lambda Argument");
+        }
+        
+        public static CompileException NoSuchProperty(Type type, string fieldOrPropertyName) {
+            return new CompileException($"Type {type} has no field or property {fieldOrPropertyName}");
+        }
 
         public static CompileException UnresolvedType(TypeLookup typeLookup, IReadOnlyList<string> searchedNamespaces = null) {
             string retn = string.Empty;
@@ -145,6 +153,9 @@ namespace UIForia.Exceptions {
 
             return new CompileException($"Unable to find a suitable constructor on type {type} that accepts {BuildArgumentList()}");
         }
+
+
+       
 
     }
 

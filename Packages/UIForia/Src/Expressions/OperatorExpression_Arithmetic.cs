@@ -37,8 +37,7 @@ namespace UIForia.Expressions {
                     }
 
                 case TypeCode.Single:
-                    Expression<float> leftFloat = (Expression<float>) left
-                        ;
+                    Expression<float> leftFloat = (Expression<float>) left;
                     switch (rightCode) {
                         case TypeCode.Int32:
                             return new OperatorExpression_Arithmetic_FloatInt(operatorType, leftFloat, (Expression<int>) right);

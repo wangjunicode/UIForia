@@ -326,11 +326,8 @@ namespace UIForia.Parsing.Expression {
             }
 
             ASTNode body = null;
-            if (!ParseExpression(ref body)) {
-                tokenStream.Restore();
-                StructList<LambdaArgument>.Release(ref signatureList);
-                return false;
-            }
+
+            body = ParseLoop(); // todo -- not sure how dangerous this might be
 
             node = ASTNode.LambdaExpressionNode(signatureList, body);
 
@@ -369,6 +366,11 @@ namespace UIForia.Parsing.Expression {
                 if (tokenStream.Current == ExpressionTokenType.Identifier) {
                     argument.identifier = tokenStream.Current;
                     tokenStream.Advance();
+                    signature.Add(argument);
+                }
+                else if (tokenStream.Current == ExpressionTokenType.Comma) {
+                    argument.identifier = typeLookup.typeName;
+                    argument.type = null;
                     signature.Add(argument);
                 }
 

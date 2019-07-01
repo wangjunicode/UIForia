@@ -726,4 +726,28 @@ public class ExpressionParserTests2 {
         Assert.AreEqual("value", node.signature[0].identifier);
     }
 
+    [Test]
+    public void Parse_LambdaUnTypedParameters_2() {
+        ASTNode root = ExpressionParser.Parse("(v0, v1) => value");
+        LambdaExpressionNode node = AssertInstanceOfAndReturn<LambdaExpressionNode>(root);
+        Assert.AreEqual(2, node.signature.Count);
+        Assert.AreEqual(null, node.signature[0].type);
+        Assert.AreEqual("v0", node.signature[0].identifier);
+        Assert.AreEqual(null, node.signature[1].type);
+        Assert.AreEqual("v1", node.signature[1].identifier);
+    }
+    
+    [Test]
+    public void Parse_LambdaWithBody() {
+        ASTNode root = ExpressionParser.Parse("(value) => 1 + 1");
+        LambdaExpressionNode node = AssertInstanceOfAndReturn<LambdaExpressionNode>(root);
+        Assert.AreEqual(1, node.signature.Count);
+        Assert.AreEqual(null, node.signature[0].type);
+        Assert.AreEqual("value", node.signature[0].identifier);
+        OperatorNode operatorNode = AssertInstanceOfAndReturn<OperatorNode>(node.body);
+        Assert.AreEqual(OperatorType.Plus, operatorNode.operatorType);
+        Assert.IsInstanceOf<LiteralNode>(operatorNode.left);
+        Assert.IsInstanceOf<LiteralNode>(operatorNode.right);
+    }
+    
 }

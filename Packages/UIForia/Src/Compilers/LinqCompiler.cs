@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
@@ -10,39 +11,13 @@ using UIForia.Extensions;
 using UIForia.Parsing.Expression;
 using UIForia.Parsing.Expression.AstNodes;
 using UIForia.Util;
-using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 namespace UIForia.Compilers {
 
     public class LinqCompiler {
 
-        [Flags]
-        public enum ParameterFlags {
-
-            Implicit = 1 << 0,
-            NeverNull = 1 << 1
-
-        }
-
-        public struct Parameter {
-
-            public ParameterFlags flags;
-            public ParameterExpression expression;
-            public string name;
-            public Type type;
-
-            public Parameter(Type type, string name, ParameterFlags flags) {
-                this.type = type;
-                this.name = name;
-                this.flags = flags;
-                this.expression = Expression.Parameter(type, name);
-            }
-
-            public static implicit operator ParameterExpression(Parameter parameter) {
-                return parameter.expression;
-            }
-
-        }
+        private static readonly ObjectPool<LinqCompiler> s_CompilerPool = new ObjectPool<LinqCompiler>(null, (c) => c.Reset());
 
         // todo -- pool blocks 
 
@@ -50,6 +25,7 @@ namespace UIForia.Compilers {
         private readonly LightStack<BlockDefinition> blockStack;
         private readonly LightList<string> namespaces;
         private Parameter? implicitContext;
+        private LinqCompiler parent;
 
         private Type returnType;
 
@@ -60,15 +36,127 @@ namespace UIForia.Compilers {
             blockStack.Push(new BlockDefinition());
         }
 
-        private BlockDefinition currentBlock => blockStack.Peek();
+        private BlockDefinition currentBlock {
+            [DebuggerStepThrough] get { return blockStack.Peek(); }
+        }
+
 
         public void Reset() {
+            parent = null;
+            returnType = null;
             implicitContext = null;
             parameters.Clear();
             blockStack.Clear();
             namespaces.Clear();
             blockStack.Push(new BlockDefinition());
-            returnType = null;
+        }
+
+        public void SetSignature<T>() {
+            parameters.Clear();
+            returnType = typeof(T);
+        }
+
+        public void SetSignature(Type retnType = null) {
+            parameters.Clear();
+            returnType = retnType ?? typeof(void);
+        }
+
+        public void SetSignature<T>(in Parameter p0) {
+            parameters.Clear();
+            AddParameter(p0);
+            returnType = typeof(T);
+        }
+
+        public void SetSignature(in Parameter p0, Type retnType = null) {
+            parameters.Clear();
+            AddParameter(p0);
+            returnType = retnType ?? typeof(void);
+        }
+
+        public void SetSignature<T>(in Parameter p0, in Parameter p1) {
+            parameters.Clear();
+            AddParameter(p0);
+            AddParameter(p1);
+            returnType = typeof(T);
+        }
+
+        public void SetSignature(in Parameter p0, in Parameter p1, Type retnType = null) {
+            parameters.Clear();
+            AddParameter(p0);
+            AddParameter(p1);
+            returnType = retnType ?? typeof(void);
+        }
+
+        public void SetSignature<T>(in Parameter p0, in Parameter p1, in Parameter p2) {
+            parameters.Clear();
+            AddParameter(p0);
+            AddParameter(p1);
+            AddParameter(p2);
+            returnType = typeof(T);
+        }
+
+        public void SetSignature(in Parameter p0, in Parameter p1, in Parameter p2, Type retnType = null) {
+            parameters.Clear();
+            AddParameter(p0);
+            AddParameter(p1);
+            AddParameter(p2);
+            returnType = retnType ?? typeof(void);
+        }
+
+        public void SetSignature<T>(in Parameter p0, in Parameter p1, in Parameter p2, in Parameter p3) {
+            parameters.Clear();
+            AddParameter(p0);
+            AddParameter(p1);
+            AddParameter(p2);
+            AddParameter(p3);
+            returnType = typeof(T);
+        }
+
+        public void SetSignature(in Parameter p0, in Parameter p1, in Parameter p2, in Parameter p3, Type retnType = null) {
+            parameters.Clear();
+            AddParameter(p0);
+            AddParameter(p1);
+            AddParameter(p2);
+            AddParameter(p3);
+            returnType = retnType ?? typeof(void);
+        }
+
+        public void SetSignature<T>(in Parameter p0, in Parameter p1, in Parameter p2, in Parameter p3, in Parameter p4) {
+            parameters.Clear();
+            AddParameter(p0);
+            AddParameter(p1);
+            AddParameter(p2);
+            AddParameter(p3);
+            AddParameter(p4);
+            returnType = typeof(T);
+        }
+
+        public void SetSignature(in Parameter p0, in Parameter p1, in Parameter p2, in Parameter p3, in Parameter p4, Type retnType = null) {
+            parameters.Clear();
+            AddParameter(p0);
+            AddParameter(p1);
+            AddParameter(p2);
+            AddParameter(p3);
+            AddParameter(p4);
+            returnType = retnType ?? typeof(void);
+        }
+
+        public void SetSignature<T>(IReadOnlyList<Parameter> parameters) {
+            this.parameters.Clear();
+            for (int i = 0; i < parameters.Count; i++) {
+                AddParameter(parameters[i]);
+            }
+
+            returnType = typeof(T);
+        }
+
+        public void SetSignature(IReadOnlyList<Parameter> parameters, Type retnType = null) {
+            this.parameters.Clear();
+            for (int i = 0; i < parameters.Count; i++) {
+                AddParameter(parameters[i]);
+            }
+
+            returnType = retnType ?? typeof(void);
         }
 
         public void Assign(LHSStatementChain left, RHSStatementChain right) {
@@ -119,12 +207,16 @@ namespace UIForia.Compilers {
             namespaces.Add(namespaceName);
         }
 
-        public void SetReturnType(Type returnType) {
-            this.returnType = returnType;
-        }
-
         public void Assign(Expression left, Expression right) {
             currentBlock.AddStatement(Expression.Assign(left, right));
+        }
+
+        public void ReturnStatement(string input) {
+            if (returnType == null) {
+                throw new CompileException("Return Type not set");
+            }
+
+            currentBlock.AddStatement(Visit(returnType, ExpressionParser.Parse(input)));
         }
 
         public void ReturnStatement(Expression expression) {
@@ -206,7 +298,6 @@ namespace UIForia.Compilers {
 
         public LambdaExpression BuildLambda() {
             Debug.Assert(blockStack.Count == 1);
-            // todo -- return type is wrong probably
             return Expression.Lambda(currentBlock.ToExpressionBlock(returnType ?? typeof(void)), MakeParameterArray(parameters));
         }
 
@@ -243,12 +334,26 @@ namespace UIForia.Compilers {
             return BuildLambda<T>().Compile();
         }
 
-        public ParameterExpression AddParameter(Type type, string name, ParameterFlags flags = 0) {
+        private ParameterExpression AddParameter(Type type, string name, ParameterFlags flags = 0) {
             // todo validate no name conflicts && no keyword names
             Parameter parameter = new Parameter(type, name, flags);
             if ((flags & ParameterFlags.Implicit) != 0) {
                 if (implicitContext != null) {
                     throw new CompileException($"Trying to set parameter {name} as the implicit context but {implicitContext.Value.name} was already set. There can only be one implicit context parameter");
+                }
+
+                implicitContext = parameter;
+            }
+
+            parameters.Add(parameter);
+            return parameter;
+        }
+
+        private ParameterExpression AddParameter(Parameter parameter) {
+            // todo validate no name conflicts && no keyword names
+            if ((parameter.flags & ParameterFlags.Implicit) != 0) {
+                if (implicitContext != null) {
+                    throw new CompileException($"Trying to set parameter {parameter.name} as the implicit context but {implicitContext.Value.name} was already set. There can only be one implicit context parameter");
                 }
 
                 implicitContext = parameter;
@@ -272,7 +377,7 @@ namespace UIForia.Compilers {
                 }
             }
 
-            return null;
+            return parent?.ResolveVariableName(variableName);
         }
 
         private bool TryResolveVariableName(string variableName, out ParameterExpression expression) {
@@ -289,6 +394,10 @@ namespace UIForia.Compilers {
                     expression = parameters[i];
                     return true;
                 }
+            }
+
+            if (parent != null) {
+                return parent.TryResolveVariableName(variableName, out expression);
             }
 
             expression = null;
@@ -604,7 +713,7 @@ namespace UIForia.Compilers {
                     head = MakePropertyAccess(variable, propertyInfo);
                 }
                 else {
-                    throw new NotImplementedException();
+                    throw CompileException.NoSuchProperty(variable.Type, dotAccessNode.propertyName);
                 }
 
                 return VisitAccessExpressionParts(head, parts, 1);
@@ -926,6 +1035,9 @@ namespace UIForia.Compilers {
                     ParenNode parenNode = (ParenNode) node;
                     return Visit(parenNode.expression);
 
+                case ASTNodeType.LambdaExpression:
+                    return VisitLambda(targetType, (LambdaExpressionNode) node);
+
                 default:
                     throw new ArgumentOutOfRangeException();
             }
@@ -943,6 +1055,95 @@ namespace UIForia.Compilers {
             }
 
             return retn;
+        }
+
+        private Expression VisitOperatorStep(OperatorType operatorType, Expression left, Expression right) {
+            if (TypeUtil.IsArithmetic(left.Type) && TypeUtil.IsArithmetic(right.Type)) {
+                if (left.Type != right.Type) {
+                    if (ReflectionUtil.AreNumericTypesCompatible(left.Type, right.Type)) {
+                        // todo -- conversions between integrals and floating points
+
+                        bool isLeftIntegral = ReflectionUtil.IsIntegralType(left.Type);
+                        bool isRightIntegral = ReflectionUtil.IsIntegralType(right.Type);
+                        bool isLeftFloatingPoint = !isLeftIntegral;
+                        bool isRightFloatingPoint = !isRightIntegral;
+
+                        if (isLeftIntegral && isRightFloatingPoint) {
+                            left = Expression.Convert(left, right.Type);
+                        }
+                        else if (isLeftFloatingPoint && isRightIntegral) {
+                            right = Expression.Convert(right, left.Type);
+                        }
+                        else if (isLeftIntegral) {
+                            throw new NotImplementedException("Implicit conversion between integral types is not yet supported");
+                        }
+                        else {
+                            throw new NotImplementedException("Implicit conversion between floating point types is not yet supported");
+                        }
+                    }
+                }
+            }
+
+            switch (operatorType) {
+                case OperatorType.Plus:
+                    // todo -- if one of the types is a string, call string.Concat() with one side's .ToString() result
+                    return Expression.Add(left, right);
+
+                case OperatorType.Minus:
+                    return Expression.Subtract(left, right);
+
+                case OperatorType.Mod:
+                    return Expression.Modulo(left, right);
+
+                case OperatorType.Times:
+                    return Expression.Multiply(left, right);
+
+                case OperatorType.Divide:
+                    return Expression.Divide(left, right);
+
+                case OperatorType.Equals:
+                    return Expression.Equal(left, right);
+
+                case OperatorType.NotEquals:
+                    return Expression.NotEqual(left, right);
+
+                case OperatorType.GreaterThan:
+                    return Expression.GreaterThan(left, right);
+
+                case OperatorType.GreaterThanEqualTo:
+                    return Expression.GreaterThanOrEqual(left, right);
+
+                case OperatorType.LessThan:
+                    return Expression.LessThan(left, right);
+
+                case OperatorType.LessThanEqualTo:
+                    return Expression.LessThanOrEqual(left, right);
+
+                case OperatorType.And:
+                    return Expression.AndAlso(left, right);
+
+                case OperatorType.Or:
+                    return Expression.OrElse(left, right);
+
+                case OperatorType.ShiftRight:
+                    return Expression.RightShift(left, right);
+
+                case OperatorType.ShiftLeft:
+                    return Expression.LeftShift(left, right);
+
+                case OperatorType.BinaryAnd:
+                    return Expression.And(left, right);
+
+                case OperatorType.BinaryOr:
+                    return Expression.Or(left, right);
+
+                case OperatorType.BinaryXor:
+                    return Expression.ExclusiveOr(left, right);
+
+
+                default:
+                    throw new CompileException($"Tried to visit the operator node {operatorType} but it wasn't handled by LinqCompiler.VisitOperator");
+            }
         }
 
         private Expression VisitOperator(OperatorNode operatorNode) {
@@ -969,80 +1170,24 @@ namespace UIForia.Compilers {
             }
 
             left = Visit(operatorNode.left);
+            if (operatorNode.operatorType == OperatorType.Is) {
+                TypeNode typeNode = (TypeNode) operatorNode.right;
+                Type t = TypeProcessor.ResolveType(typeNode.typeLookup, namespaces);
+                return Expression.TypeIs(left, t);
+            }
+            else if (operatorNode.operatorType == OperatorType.As) {
+                TypeNode typeNode = (TypeNode) operatorNode.right;
+                Type t = TypeProcessor.ResolveType(typeNode.typeLookup, namespaces);
+                return Expression.TypeAs(left, t);
+            }
+
             right = Visit(operatorNode.right);
+
             try {
-                switch (operatorNode.operatorType) {
-                    case OperatorType.Plus:
-                        return Expression.Add(left, right);
-
-                    case OperatorType.Minus:
-                        return Expression.Subtract(left, right);
-
-                    case OperatorType.Mod:
-                        return Expression.Modulo(left, right);
-
-                    case OperatorType.Times:
-                        return Expression.Multiply(left, right);
-
-                    case OperatorType.Divide:
-                        return Expression.Divide(left, right);
-
-                    case OperatorType.Equals:
-                        return Expression.Equal(left, right);
-
-                    case OperatorType.NotEquals:
-                        return Expression.NotEqual(left, right);
-
-                    case OperatorType.GreaterThan:
-                        return Expression.GreaterThan(left, right);
-
-                    case OperatorType.GreaterThanEqualTo:
-                        return Expression.GreaterThanOrEqual(left, right);
-
-                    case OperatorType.LessThan:
-                        return Expression.LessThan(left, right);
-
-                    case OperatorType.LessThanEqualTo:
-                        return Expression.LessThanOrEqual(left, right);
-
-                    case OperatorType.And:
-                        return Expression.AndAlso(left, right);
-
-                    case OperatorType.Or:
-                        return Expression.OrElse(left, right);
-
-                    case OperatorType.ShiftRight:
-                        return Expression.RightShift(left, right);
-
-                    case OperatorType.ShiftLeft:
-                        return Expression.LeftShift(left, right);
-
-                    case OperatorType.BinaryAnd:
-                        return Expression.And(left, right);
-
-                    case OperatorType.BinaryOr:
-                        return Expression.Or(left, right);
-
-                    case OperatorType.BinaryXor:
-                        return Expression.ExclusiveOr(left, right);
-
-                    case OperatorType.Is: {
-                        TypeNode typeNode = (TypeNode) operatorNode.right;
-                        Type t = TypeProcessor.ResolveType(typeNode.typeLookup, namespaces);
-                        return Expression.TypeIs(left, t);
-                    }
-
-                    case OperatorType.As: {
-                        TypeNode typeNode = (TypeNode) operatorNode.right;
-                        Type t = TypeProcessor.ResolveType(typeNode.typeLookup, namespaces);
-                        return Expression.TypeAs(left, t);
-                    }
-
-                    default:
-                        throw new CompileException($"Tried to visit the operator node {operatorNode.operatorType} but it wasn't handled by LinqCompiler.VisitOperator");
-                }
+                return VisitOperatorStep(operatorNode.operatorType, left, right);
             }
             catch (InvalidOperationException invalidOp) {
+                // todo -- need to do my own casting for math types and string concats
                 if (invalidOp.Message.Contains("is not defined for the types")) {
                     throw CompileException.MissingBinaryOperator(operatorNode.operatorType, left.Type, right.Type);
                 }
@@ -1129,10 +1274,62 @@ namespace UIForia.Compilers {
                     retn.OutputExpression = Visit(parenNode.expression);
                     break;
 
+                case ASTNodeType.LambdaExpression:
+                    retn.OutputExpression = VisitLambda(targetType, (LambdaExpressionNode) astRoot);
+                    break;
+
                 default:
                     throw new ArgumentOutOfRangeException();
             }
 
+            return retn;
+        }
+
+
+        private Expression VisitLambda(Type targetType, LambdaExpressionNode lambda) {
+            // assume a target type for now, I think its an error not to have one anyway
+
+            LinqCompiler nested = s_CompilerPool.Get();
+
+            nested.parent = this;
+
+            if (targetType == null) {
+                throw new NotImplementedException("LambdaExpressions are only valid when they have a target type set.");
+            }
+
+            Type[] arguments = targetType.GetGenericArguments();
+
+            if (ReflectionUtil.IsAction(targetType)) {
+                if (lambda.signature.size != arguments.Length) { }
+
+                nested.returnType = typeof(void);
+            }
+            else {
+                nested.returnType = arguments[arguments.Length - 1];
+                if (lambda.signature.size != arguments.Length - 1) { }
+            }
+
+            if (lambda.signature.size > 0) {
+                for (int i = 0; i < lambda.signature.size; i++) {
+                    if (lambda.signature[i].type != null) {
+                        Type argType = TypeProcessor.ResolveType(lambda.signature[i].type.Value, namespaces);
+                        if (argType != arguments[i]) {
+                            throw CompileException.InvalidLambdaArgument();
+                        }
+
+                        nested.AddParameter(argType, lambda.signature[i].identifier);
+                    }
+                    else {
+                        nested.AddParameter(arguments[i], lambda.signature[i].identifier);
+                    }
+                }
+            }
+
+
+            nested.ReturnStatement(nested.Visit(arguments[arguments.Length - 1], lambda.body));
+
+            LambdaExpression retn = nested.BuildLambda(); //Expression.Quote(nested.BuildLambda());
+            s_CompilerPool.Release(nested);
             return retn;
         }
 
@@ -1232,7 +1429,6 @@ namespace UIForia.Compilers {
         }
 
         private Expression VisitIdentifierNode(IdentifierNode identifierNode) {
-  
             if (identifierNode.IsAlias) {
                 throw new NotImplementedException("Aliases aren't support yet");
             }
@@ -1243,12 +1439,14 @@ namespace UIForia.Compilers {
                 }
             }
 
+            // temp
+
             Expression parameterExpression = ResolveVariableName(identifierNode.name);
 
             if (parameterExpression != null) {
-                Expression variable = currentBlock.AddVariable(parameterExpression.Type, identifierNode.name);
-                currentBlock.AddStatement(Expression.Assign(variable, parameterExpression));
-                return variable;
+                //  Expression variable = currentBlock.AddVariable(parameterExpression.Type, identifierNode.name);
+                //  currentBlock.AddStatement(Expression.Assign(variable, parameterExpression));
+                return parameterExpression; //variable;
             }
 //
 //            else if (defaultIdentifier != null) {
@@ -1462,6 +1660,51 @@ namespace UIForia.Compilers {
 
             throw new CompileException($"Unable to parse numeric value from {literalNode.rawValue} target type was {targetType}");
         }
+
+    }
+
+    public struct Parameter<T> {
+
+        public readonly string name;
+        public readonly ParameterFlags flags;
+
+        public Parameter(string name, ParameterFlags flags = 0) {
+            this.name = name;
+            this.flags = flags;
+        }
+
+        public static implicit operator Parameter(Parameter<T> parameter) {
+            return new Parameter(typeof(T), parameter.name, parameter.flags);
+        }
+
+    }
+
+    public struct Parameter {
+
+        public ParameterFlags flags;
+        public ParameterExpression expression;
+        public string name;
+        public Type type;
+
+        public Parameter(Type type, string name, ParameterFlags flags = 0) {
+            this.type = type;
+            this.name = name;
+            this.flags = flags;
+            this.expression = Expression.Parameter(type, name);
+        }
+
+        public static implicit operator ParameterExpression(Parameter parameter) {
+            return parameter.expression;
+        }
+
+    }
+
+    [Flags]
+    public enum ParameterFlags {
+
+        Implicit = 1 << 0,
+        NeverNull = 1 << 1,
+        NeverOutOfBounds = 1 << 2
 
     }
 

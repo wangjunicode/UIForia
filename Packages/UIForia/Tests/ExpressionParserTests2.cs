@@ -390,8 +390,8 @@ public class ExpressionParserTests2 {
         Assert.AreEqual("rootContext", node.identifier);
         Assert.AreEqual(1, node.parts.Count);
         Assert.IsInstanceOf<IndexNode>(node.parts[0]);
-        Assert.IsInstanceOf<OperatorNode>(((IndexNode) node.parts[0]).expression);
-        OperatorNode opNode = (OperatorNode) ((IndexNode) node.parts[0]).expression;
+        Assert.IsInstanceOf<OperatorNode>(((IndexNode) node.parts[0]).arguments[0]);
+        OperatorNode opNode = (OperatorNode) ((IndexNode) node.parts[0]).arguments[0];
         Assert.AreEqual(OperatorType.Plus, opNode.operatorType);
         Assert.IsInstanceOf<LiteralNode>(opNode.left);
         Assert.IsInstanceOf<LiteralNode>(opNode.right);
@@ -405,10 +405,10 @@ public class ExpressionParserTests2 {
         Assert.AreEqual("rootContext", node.identifier);
         Assert.AreEqual(1, node.parts.Count);
         Assert.IsInstanceOf<IndexNode>(node.parts[0]);
-        Assert.IsInstanceOf<ParenNode>(((IndexNode) node.parts[0]).expression);
+        Assert.IsInstanceOf<ParenNode>(((IndexNode) node.parts[0]).arguments[0]);
 
-        Assert.IsInstanceOf<ParenNode>(((IndexNode) node.parts[0]).expression);
-        ParenNode parenNodeOld = (ParenNode) ((IndexNode) node.parts[0]).expression;
+        Assert.IsInstanceOf<ParenNode>(((IndexNode) node.parts[0]).arguments[0]);
+        ParenNode parenNodeOld = (ParenNode) ((IndexNode) node.parts[0]).arguments[0];
         OperatorNode opNode = (OperatorNode) parenNodeOld.expression;
         Assert.AreEqual(OperatorType.Plus, opNode.operatorType);
         Assert.IsInstanceOf<LiteralNode>(opNode.left);
@@ -423,7 +423,7 @@ public class ExpressionParserTests2 {
         Assert.AreEqual("rootContext", node.identifier);
         Assert.AreEqual(1, node.parts.Count);
         Assert.IsInstanceOf<IndexNode>(node.parts[0]);
-        Assert.IsInstanceOf<MemberAccessExpressionNode>(((IndexNode) node.parts[0]).expression);
+        Assert.IsInstanceOf<MemberAccessExpressionNode>(((IndexNode) node.parts[0]).arguments[0]);
     }
 
     [Test]

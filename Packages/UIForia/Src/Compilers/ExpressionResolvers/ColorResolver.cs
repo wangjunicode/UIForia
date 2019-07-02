@@ -19,7 +19,7 @@ namespace UIForia.Compilers.ExpressionResolvers {
         
         public ColorResolver(string aliasName) : base(aliasName) { }
 
-        public override Expression CompileAsMethodExpression(CompilerContext context, List<ASTNode> parameters) {
+        public override Expression CompileAsMethodExpression(CompilerContext context, LightList<ASTNode> parameters) {
             if (context.targetType == typeof(Color)) {
                 if (parameters.Count == 3) {
                     Expression exprRed = context.Visit(typeof(int), parameters[0]);

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
 using UIForia.Extensions;
@@ -38,6 +39,79 @@ namespace UIForia.Compilers {
 
         }
 
+        internal static MethodInfo SelectEligibleMethod(IList<MethodInfo> methodInfos, Expression[] arguments, out StructList<ParameterConversion> winningConversions) {
+            if (methodInfos.Count == 0) {
+                winningConversions = null;
+                return null;
+            }
+            
+            if (methodInfos.Count == 1) {
+                winningConversions = null;
+                if (CheckCandidate(new Candidate(methodInfos[0].GetParametersCached()), arguments, out int unused, out winningConversions)) {
+                    return methodInfos[0];
+                }
+
+                return null;
+            }
+
+            StructList<Candidate> candidates = StructList<Candidate>.Get(methodInfos.Count);
+
+            int argCount = arguments.Length;
+
+            for (int i = 0; i < methodInfos.Count; i++) {
+                MethodInfo methodInfo = methodInfos[i];
+                ParameterInfo[] parameterInfos = methodInfo.GetParametersCached();
+
+                if (parameterInfos.Length == argCount) {
+                    candidates.Add(new Candidate(methodInfo, parameterInfos));
+                }
+                else if (parameterInfos.Length > argCount) {
+                    bool valid = true;
+                    for (int j = 0; j < parameterInfos.Length; j++) {
+                        if (!parameterInfos[j].HasDefaultValue) {
+                            valid = false;
+                            break;
+                        }
+                    }
+
+                    if (valid) {
+                        candidates.Add(new Candidate(methodInfo, parameterInfos));
+                    }
+                }
+            }
+
+            winningConversions = null;
+            
+            int winner = -1;
+            int winnerPoints = 0;
+            for (int i = 0; i < candidates.Count; i++) {
+                int candidatePoints;
+                StructList<ParameterConversion> conversions;
+                if (!CheckCandidate(candidates[i], arguments, out candidatePoints, out conversions)) {
+                    continue;
+                }
+
+                // todo -- handle the ambiguous case
+                if (BestScoreSoFar(candidatePoints, winnerPoints)) {
+                    winner = i;
+                    winnerPoints = candidatePoints;
+                    if (winningConversions != null) {
+                        StructList<ParameterConversion>.Release(ref winningConversions);
+                    }
+
+                    winningConversions = conversions;
+                }
+            }
+
+            if (winner != -1) {
+                MethodInfo retn = candidates[winner].methodInfo;
+                StructList<Candidate>.Release(ref candidates);
+                return retn;
+            }
+            StructList<Candidate>.Release(ref candidates);
+            return null;
+        }
+
         internal static ConstructorInfo SelectEligibleConstructor(Type type, Expression[] arguments, out StructList<ParameterConversion> winningConversions) {
             ConstructorInfo[] constructors = type.GetConstructors(BindingFlags.Instance | BindingFlags.Public);
 
@@ -48,18 +122,18 @@ namespace UIForia.Compilers {
 
             if (constructors.Length == 1) {
                 winningConversions = null;
-                if (CheckCtorCandidate(new ConstructorCandidate(constructors[0]), arguments, out int unused, out winningConversions)) {
+                if (CheckCandidate(new Candidate(constructors[0].GetParametersCached()), arguments, out int unused, out winningConversions)) {
                     return constructors[0];
                 }
 
                 return null;
             }
 
-            ConstructorCandidate[] candidates = new ConstructorCandidate[constructors.Length];
+            Candidate[] candidates = new Candidate[constructors.Length];
             winningConversions = null;
 
             for (int i = 0; i < candidates.Length; i++) {
-                candidates[i] = new ConstructorCandidate(constructors[i]);
+                candidates[i] = new Candidate(constructors[i].GetParametersCached());
             }
 
             int winner = -1;
@@ -67,7 +141,7 @@ namespace UIForia.Compilers {
             for (int i = 0; i < constructors.Length; i++) {
                 int candidatePoints;
                 StructList<ParameterConversion> conversions;
-                if (!CheckCtorCandidate(candidates[i], arguments, out candidatePoints, out conversions)) {
+                if (!CheckCandidate(candidates[i], arguments, out candidatePoints, out conversions)) {
                     continue;
                 }
 
@@ -90,14 +164,19 @@ namespace UIForia.Compilers {
             return null;
         }
 
-        public struct ConstructorCandidate {
+        public struct Candidate {
 
-            public ConstructorInfo constructorInfo;
+            public MethodInfo methodInfo;
             public ParameterInfo[] dependencies;
 
-            public ConstructorCandidate(ConstructorInfo info) {
-                this.constructorInfo = info;
-                this.dependencies = info.GetParametersCached();
+            public Candidate(ParameterInfo[] dependencies) {
+                this.methodInfo = null;
+                this.dependencies = dependencies;
+            }
+
+            public Candidate(MethodInfo methodInfo, ParameterInfo[] dependencies) {
+                this.methodInfo = methodInfo;
+                this.dependencies = dependencies;
             }
 
         }
@@ -106,7 +185,7 @@ namespace UIForia.Compilers {
             return winnerPoints < candidatePoints;
         }
 
-        private static bool CheckCtorCandidate(ConstructorCandidate candidate, Expression[] context, out int candidatePoints, out StructList<ParameterConversion> conversions) {
+        private static bool CheckCandidate(Candidate candidate, Expression[] context, out int candidatePoints, out StructList<ParameterConversion> conversions) {
             candidatePoints = 0;
 
 

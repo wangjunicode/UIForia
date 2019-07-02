@@ -19,6 +19,11 @@ namespace UIForia.Compilers {
 
         private static readonly ObjectPool<LinqCompiler> s_CompilerPool = new ObjectPool<LinqCompiler>(null, (c) => c.Reset());
 
+        private static readonly MethodInfo StringConcat2 = typeof(string).GetMethod(
+            "Concat",
+            ReflectionUtil.SetTempTypeArray(typeof(string), typeof(string))
+        );
+
         // todo -- pool blocks 
 
         private readonly StructList<Parameter> parameters;
@@ -219,10 +224,6 @@ namespace UIForia.Compilers {
             currentBlock.AddStatement(Visit(returnType, ExpressionParser.Parse(input)));
         }
 
-        public void ReturnStatement(Expression expression) {
-            currentBlock.AddStatement(expression);
-        }
-
         public void Invoke(Expression target, MethodInfo methodInfo, params Expression[] args) { }
 
         // todo -- support strings and or expressions or constants
@@ -278,12 +279,12 @@ namespace UIForia.Compilers {
             currentBlock.AddStatement(Expression.IfThen(condition, trueExpr));
         }
 
-        public void IfNotEqual(LHSStatementChain left, RHSStatementChain right, Action body) {
+        public void IfNotEqual(LHSStatementChain left, Expression right, Action body) {
             Debug.Assert(left != null);
-            Debug.Assert(right.OutputExpression != null);
+            Debug.Assert(right != null);
             Debug.Assert(body != null);
 
-            Expression condition = Expression.NotEqual(left.targetExpression, right.OutputExpression);
+            Expression condition = Expression.NotEqual(left.targetExpression, right);
 
             BlockDefinition bodyBlock = new BlockDefinition();
 
@@ -521,11 +522,65 @@ namespace UIForia.Compilers {
             return Expression.MakeMemberAccess(head, propertyInfo);
         }
 
-        private Expression MemberAccess(Expression head, string fieldOrPropertyName) {
+        private Expression MakeMethodCall(Expression head, LightList<MethodInfo> methodInfos, InvokeNode arguments) {
+            Expression[] args = new Expression[arguments.parameters.Count];
+
+            for (int i = 0; i < arguments.parameters.Count; i++) {
+                args[i] = Visit(arguments.parameters[i]);
+            }
+
+            MethodInfo info = ExpressionUtil.SelectEligibleMethod(methodInfos, args, out StructList<ExpressionUtil.ParameterConversion> conversions);
+
+            if (conversions.size > args.Length) {
+                Array.Resize(ref args, conversions.size);
+            }
+
+            for (int i = 0; i < conversions.size; i++) {
+                args[i] = conversions[i].Convert();
+            }
+
+            return Expression.Call(head, info, args);
+        }
+
+        public bool shouldNullCheck = true;
+
+        public Expression IndexArray(Expression head, Expression indexExpression) {
+            
+            currentBlock.requireNullCheck = true;
+            Expression toBeIndexed = currentBlock.AddVariable(head.Type, "toBeIndexed");
+            currentBlock.AddAssignment(toBeIndexed, head);
+            head = toBeIndexed;
+            Expression indexer = currentBlock.AddVariable(indexExpression.Type, "indexer");
+            currentBlock.AddStatement(Expression.Assign(indexer, indexExpression));
+            currentBlock.AddStatement(NullAndBoundsCheck(indexer, head, "Length", currentBlock.ReturnTarget));
+            IndexExpression access = Expression.ArrayAccess(head, indexer);
+            ParameterExpression variable = currentBlock.AddVariable(access.Type, "arrayVal");
+            currentBlock.AddAssignment(variable, access);
+            return variable;
+
+        }
+
+        private Expression MemberAccessUnchecked(Expression head, string fieldOrPropertyName) {
+            return MemberAccess(head, fieldOrPropertyName, false);
+        }
+
+        private Expression MemberAccess(Expression head, string fieldOrPropertyName, bool check = true) {
             MemberInfo memberInfo = ReflectionUtil.GetFieldOrProperty(head.Type, fieldOrPropertyName);
+
+            // todo check for public and readable
 
             if (memberInfo == null) {
                 throw new CompileException($"Type {head.Type} does not declare an accessible instance field or property with the name {fieldOrPropertyName}");
+            }
+
+            // cascade a null check, if we are looking up a value and trying to read from something that is null,
+            // then we jump to the end of value chain and use default(inputType) as a final value
+            if (check && shouldNullCheck && head.Type.IsClass && (!ResolveParameter(head, out Parameter parameter) || (parameter.flags & ParameterFlags.NeverNull) == 0)) {
+                currentBlock.requireNullCheck = true;
+                Expression nullCheck = currentBlock.AddVariable(head.Type, "nullCheck");
+                currentBlock.AddAssignment(nullCheck, head);
+                currentBlock.AddStatement(NullCheck(nullCheck, currentBlock.ReturnTarget));
+                head = nullCheck;
             }
 
             if (memberInfo is FieldInfo fieldInfo) {
@@ -578,12 +633,12 @@ namespace UIForia.Compilers {
                 return retn;
             }
 
-            for (int i = names.Count - 1; i > 1; i--) {
-                string check = BuildString(i - 1);
+            for (int i = names.Count - 2; i >= 0; i--) {
+                string check = BuildString(i);
                 if (TypeProcessor.IsNamespace(check)) {
                     LightList<string>.Release(ref names);
                     resolvedNamespace = check;
-                    start = i - 1;
+                    start = i;
                     return true;
                 }
             }
@@ -594,28 +649,28 @@ namespace UIForia.Compilers {
             return false;
         }
 
-        private bool ResolveTypeChain(Type startType, List<ASTNode> parts, ref int start, out Type tailType) {
+        private bool ResolveTypeChain(Type startType, LightList<ProcessedPart> parts, ref int start, out Type tailType) {
             if (start >= parts.Count || startType.IsEnum) {
                 tailType = null;
                 return false;
             }
 
-            if (!(parts[start] is DotAccessNode startNode)) {
+            if (parts[start].type != PartType.DotAccess) {
                 tailType = null;
                 return false;
             }
 
             Type[] nestedTypes = startType.GetNestedTypes(BindingFlags.Public);
 
-            string targetName = startNode.propertyName;
+            string targetName = parts[start].name;
 
             GenericTypePathNode genericNode = null;
             // if we are looking for a generic type we need to be sure not to pick up a non generic with the same name
             // we also need to be sure the generic argument count is equal
-            if (start + 1 < parts.Count - 1 && parts[start + 1] is GenericTypePathNode genericTypePathNode) {
-                targetName += "`" + genericTypePathNode.genericPath.generics.Count;
+            if (start + 1 < parts.Count - 1 && parts[start + 1].type == PartType.Generic) {
+                targetName += "`" + parts[start + 1].generic.genericPath.generics.Count;
                 start++;
-                genericNode = genericTypePathNode;
+                genericNode = parts[start + 1].generic;
             }
 
             for (int i = 0; i < nestedTypes.Length; i++) {
@@ -639,6 +694,36 @@ namespace UIForia.Compilers {
 
             tailType = null;
             return false;
+        }
+
+        private Expression MakeStaticMethodCall(Type type, string propertyName, InvokeNode invokeNode) {
+            Expression[] args = new Expression[invokeNode.parameters.Count];
+
+            for (int i = 0; i < invokeNode.parameters.Count; i++) {
+                args[i] = Visit(invokeNode.parameters[i]);
+            }
+
+            if (!ReflectionUtil.HasStaticMethod(type, propertyName, out LightList<MethodInfo> methodInfos)) {
+                throw new NotImplementedException();
+            }
+
+            MethodInfo info = ExpressionUtil.SelectEligibleMethod(methodInfos, args, out StructList<ExpressionUtil.ParameterConversion> conversions);
+
+            if (info == null) {
+                throw new NotImplementedException();
+            }
+
+            if (conversions.size > args.Length) {
+                Array.Resize(ref args, conversions.size);
+            }
+
+            for (int i = 0; i < conversions.size; i++) {
+                args[i] = conversions[i].Convert();
+            }
+
+            LightList<MethodInfo>.Release(ref methodInfos);
+
+            return Expression.Call(null, info, args);
         }
 
         private static Expression MakeStaticConstOrEnumMemberAccess(Type type, string propertyName) {
@@ -666,12 +751,167 @@ namespace UIForia.Compilers {
             throw CompileException.UnknownStaticOrConstMember(type, propertyName);
         }
 
-        // compiler.onVisit((ASTNodeType nodeType, ASTNode node) => {  });
-        // identifier.something
-        // identifier() 
-        // identifier[] 
+
+        private Expression VisitStaticAccessExpression(Type type, LightList<ProcessedPart> parts, int start) {
+            Expression head = null;
+
+            if (ResolveTypeChain(type, parts, ref start, out Type subType)) {
+                type = subType;
+            }
+
+            if (parts[start].type == PartType.DotAccess) {
+//                if (start + 1 < parts.Count && parts[start + 1] is InvokeNode staticInvoke) {
+//                    head = MakeStaticMethodCall(type, d.propertyName, staticInvoke);
+//                    start += 2;
+//                }
+//                else {
+//                    head = MakeStaticConstOrEnumMemberAccess(type, d.propertyName);
+//                }
+            }
+            else {
+                // fail hard
+                throw new NotImplementedException();
+            }
+
+            start++;
+
+            if (start == parts.Count) {
+                return head;
+            }
+
+            return VisitAccessExpressionParts(head, parts, start);
+        }
+
+
+        private bool TryCreateVariableExpression(Expression expressionHead, string propertyRead, out Expression expression) {
+            Type exprType = expressionHead.Type;
+            if (ReflectionUtil.IsField(exprType, propertyRead)) {
+                expression = MemberAccess(expressionHead, propertyRead);
+                return true;
+            }
+            else if (ReflectionUtil.IsProperty(exprType, propertyRead)) {
+                expression = MemberAccess(expressionHead, propertyRead);
+                return true;
+            }
+            else if (ReflectionUtil.HasInstanceMethod(exprType, propertyRead, out LightList<MethodInfo> methodInfos)) {
+//                if (parts.Count > 1 && parts[1] is InvokeNode invokeNode) {
+//                    head = MakeMethodCall(implicitContext.Value.expression, methodInfos, invokeNode);
+//                    start = 2;
+//                }
+//                else {
+//                    // might be trying access method a delegate
+//                    throw new NotImplementedException();
+//                }
+            }
+
+            expression = null;
+            return false;
+        }
+
+//        if (ReflectionUtil.IsField(implicitContext.Value.type, accessNode.identifier)) {
+//            head = MemberAccess(implicitContext.Value.expression, accessNode.identifier);
+//        }
+//        else if (ReflectionUtil.IsProperty(implicitContext.Value.type, accessNode.identifier)) {
+//            head = MemberAccess(implicitContext.Value.expression, accessNode.identifier);
+//        }
+//        else if (ReflectionUtil.HasInstanceMethod(implicitContext.Value.type, accessNode.identifier, out LightList<MethodInfo> methodInfos)) {
+//            if (parts.Count > 1 && parts[1] is InvokeNode invokeNode) {
+//                head = MakeMethodCall(implicitContext.Value.expression, methodInfos, invokeNode);
+//                start = 2;
+//            }
+//            else {
+//                // might be trying access method a delegate
+//                throw new NotImplementedException();
+//            }
+//        }
+//        // todo -- this is wrong
+//        return VisitAccessExpressionParts(head, parts, 0);
+
+        private struct ProcessedPart {
+
+            public string name;
+            public PartType type;
+            public LightList<ASTNode> arguments;
+            public GenericTypePathNode generic;
+
+        }
+
+        private enum PartType {
+
+            DotAccess,
+            DotInvoke,
+            DotIndex,
+            Invoke,
+            Index,
+            Generic
+
+        }
+
+        private static LightList<ProcessedPart> ProcessASTParts(LightList<ASTNode> parts) {
+            LightList<ProcessedPart> retn = LightList<ProcessedPart>.Get();
+
+            for (int i = 0; i < parts.Count; i++) {
+                if (parts[i] is DotAccessNode dotAccessNode) {
+                    if (i + 1 < parts.Count) {
+                        if (parts[i + 1] is InvokeNode invokeNode) {
+                            retn.Add(new ProcessedPart() {
+                                type = PartType.DotInvoke,
+                                name = dotAccessNode.propertyName,
+                                arguments = invokeNode.parameters
+                            });
+                            i++;
+                            continue;
+                        }
+                        else if (parts[i + 1] is IndexNode indexNode) {
+                            retn.Add(new ProcessedPart() {
+                                type = PartType.DotIndex,
+                                name = dotAccessNode.propertyName,
+                                arguments = indexNode.arguments
+                            });
+                            i++;
+                            continue;
+                        }
+                    }
+
+                    retn.Add(new ProcessedPart() {
+                        type = PartType.DotAccess,
+                        name = dotAccessNode.propertyName,
+                        arguments = null
+                    });
+
+                    continue;
+                }
+                else if (parts[i] is IndexNode idx) {
+                    retn.Add(new ProcessedPart() {
+                        type = PartType.Index,
+                        name = null,
+                        arguments = idx.arguments
+                    });
+                }
+                else if (parts[i] is InvokeNode invoke) {
+                    retn.Add(new ProcessedPart() {
+                        type = PartType.Index,
+                        name = null,
+                        arguments = invoke.parameters
+                    });
+                }
+                else if (parts[i] is GenericTypePathNode genericTypePathNode) {
+                    retn.Add(new ProcessedPart() {
+                        type = PartType.Generic,
+                        name = null,
+                        arguments = null,
+                        generic = genericTypePathNode
+                    });
+                }
+
+                throw new InvalidArgumentException();
+            }
+
+            return retn;
+        }
+
         private Expression VisitAccessExpression(MemberAccessExpressionNode accessNode) {
-            List<ASTNode> parts = accessNode.parts;
+            LightList<ProcessedPart> parts = ProcessASTParts(accessNode.parts);
 
             // assume not an alias for now, aliases will be resolved by user visit code
 
@@ -684,41 +924,54 @@ namespace UIForia.Compilers {
             // if implicit is defined give it priority
             // then check variables
             // then check types
-
-            if (implicitContext != null) {
-                if (ReflectionUtil.IsField(implicitContext.Value.type, accessNode.identifier)) {
-                    head = MemberAccess(implicitContext.Value.expression, accessNode.identifier);
+            if (implicitContext.HasValue) {
+                if (TryCreateVariableExpression(implicitContext.Value.expression, accessNode.identifier, out head)) {
+                    return VisitAccessExpressionParts(head, parts, 0);
                 }
-                else if (ReflectionUtil.IsProperty(implicitContext.Value.type, accessNode.identifier)) {
-                    head = MemberAccess(implicitContext.Value.expression, accessNode.identifier);
-                }
-                else {
-                    throw new NotImplementedException();
-                }
-
-                return VisitAccessExpressionParts(head, parts, 0);
             }
 
             if (TryResolveVariableName(accessNode.identifier, out ParameterExpression variable)) {
-                if (!(parts[0] is DotAccessNode)) {
-                    throw CompileException.InvalidAccessExpression();
-                }
-
-                DotAccessNode dotAccessNode = (DotAccessNode) parts[0];
-
-                if (ReflectionUtil.IsField(variable.Type, dotAccessNode.propertyName, out FieldInfo fieldInfo)) {
-                    head = MakeFieldAccess(variable, fieldInfo);
-                }
-                else if (ReflectionUtil.IsProperty(variable.Type, dotAccessNode.propertyName, out PropertyInfo propertyInfo)) {
-                    head = MakePropertyAccess(variable, propertyInfo);
-                }
-                else {
-                    throw CompileException.NoSuchProperty(variable.Type, dotAccessNode.propertyName);
-                }
-
-                return VisitAccessExpressionParts(head, parts, 1);
+                // thing.function() -> head -> invoke node
+                // thing.function().function()[i]()
+                // dot access type -> invoke, index, fieldproperty
+                return VisitAccessExpressionParts(variable, parts, 0);
+//
+//                
+//                if (!(parts[0] is DotAccessNode)) {
+//                    throw CompileException.InvalidAccessExpression();
+//                }
+//
+//                start = 1;
+//
+//                DotAccessNode dotAccessNode = (DotAccessNode) parts[0];
+//
+//                if (TryCreateVariableExpression(variable, dotAccessNode.propertyName, out head)) {
+//                    return VisitAccessExpressionParts(head, parts, 0);
+//                }
+//                
+//                if (ReflectionUtil.IsField(variable.Type, dotAccessNode.propertyName, out FieldInfo fieldInfo)) {
+//                    head = MakeFieldAccess(variable, fieldInfo);
+//                }
+//                else if (ReflectionUtil.IsProperty(variable.Type, dotAccessNode.propertyName, out PropertyInfo propertyInfo)) {
+//                    head = MakePropertyAccess(variable, propertyInfo);
+//                }
+//                else if (ReflectionUtil.HasInstanceMethod(variable.Type, dotAccessNode.propertyName, out LightList<MethodInfo> methodInfos)) {
+//                    if (parts.Count > 1 && parts[1] is InvokeNode invokeNode) {
+//                        head = MakeMethodCall(variable, methodInfos, invokeNode);
+//                        start = 2;       
+//                    }
+//                    else {
+//                        // might be trying access method a delegate
+//                        throw new NotImplementedException();
+//                    }
+//                }
+//
+//                if (start >= parts.Count) {
+//                    return head;
+//                }
+//
+//                return VisitAccessExpressionParts(head, parts, start);
             }
-
 
             if (ResolveNamespaceChain(accessNode, out start, out resolvedNamespace)) {
                 // if a namespace chain was resolved then we have to resolve a type next which means an enum, static, or const value
@@ -745,25 +998,7 @@ namespace UIForia.Compilers {
                     throw CompileException.InvalidIndexOrInvokeOperator(); //resolvedNamespace, accessNode.parts[start].GetType());
                 }
 
-                if (ResolveTypeChain(type, parts, ref start, out Type subType)) {
-                    type = subType;
-                }
-
-                if (parts[start] is DotAccessNode d) {
-                    head = MakeStaticConstOrEnumMemberAccess(type, d.propertyName);
-                }
-                else {
-                    // fail hard
-                    throw new NotImplementedException();
-                }
-
-                start++;
-
-                if (start == parts.Count) {
-                    return head;
-                }
-
-                return VisitAccessExpressionParts(head, parts, start);
+                return VisitStaticAccessExpression(type, parts, start);
             }
             else {
                 // check for generic access too
@@ -773,27 +1008,7 @@ namespace UIForia.Compilers {
                     throw CompileException.UnresolvedIdentifier(accessRootName);
                 }
 
-                if (ResolveTypeChain(type, parts, ref start, out Type tailType)) {
-                    type = tailType;
-                }
-
-                // anything from here on will be static, expect a dot node or fail.
-
-                if (parts[start] is DotAccessNode d) {
-                    head = MakeStaticConstOrEnumMemberAccess(type, d.propertyName);
-                }
-                else {
-                    // fail hard
-                    throw new NotImplementedException();
-                }
-
-                start++;
-
-                if (start == parts.Count) {
-                    return head;
-                }
-
-                return VisitAccessExpressionParts(head, parts, start);
+                return VisitStaticAccessExpression(type, parts, start);
             }
         }
 
@@ -804,105 +1019,113 @@ namespace UIForia.Compilers {
         // todo -- don't re-access properties
         // todo -- nested visits should have their own return labels and maybe we bail out of the root if any nested visit bails
 
-        private Expression VisitAccessExpressionParts(Expression head, List<ASTNode> parts, int start) {
+        private bool ResolveParameter(Expression parameterExpression, out Parameter parameter) {
+            if (!(parameterExpression is ParameterExpression)) {
+                parameter = default;
+                return false;
+            }
+
+            for (int i = 0; i < parameters.size; i++) {
+                if (parameters[i].expression == parameterExpression) {
+                    parameter = parameters[i];
+                    return true;
+                }
+            }
+
+            if (parent != null) {
+                return parent.ResolveParameter(parameterExpression, out parameter);
+            }
+
+            parameter = default;
+            return false;
+        }
+
+        private Expression VisitAccessExpressionParts(Expression head, LightList<ProcessedPart> parts, int start) {
             bool needsNullChecking = false;
 
-            LabelTarget returnTarget = Expression.Label("retn");
             Expression lastExpression = head;
             // need a variable when we hit a reference type
             // structs do not need intermediate variables, in fact due to the copy cost its best not to have them for structs at all
             // todo -- properties should always be read into fields, we assume they are more expensive and worth local caching even when structs
 
             for (int i = start; i < parts.Count; i++) {
-                if (parts[i] is DotAccessNode dotAccessNode) {
-                    // if the last thing checked was a class, we need a null check
-                    if (lastExpression.Type.IsClass) {
-                        needsNullChecking = true;
+                ref ProcessedPart part = ref parts.Array[i];
+                switch (part.type) {
+                    case PartType.DotAccess: {
+                        if (lastExpression.Type.IsClass) {
+                            if (lastExpression is ParameterExpression parameterExpression && ResolveParameter(parameterExpression, out Parameter parameter)) {
+                                if ((parameter.flags & ParameterFlags.NeverNull) != 0) {
+                                    lastExpression = MemberAccess(lastExpression, part.name);
+                                    continue;
+                                }
+                            }
 
-                        // cascade a null check, if we are looking up a value and trying to read from something that is null,
-                        // then we jump to the end of value chain and use default(inputType) as a final value
-                        Expression nullCheck = currentBlock.AddVariable(lastExpression.Type, "nullCheck");
-                        currentBlock.AddAssignment(nullCheck, lastExpression);
-                        currentBlock.AddStatement(NullCheck(nullCheck, returnTarget));
-                        lastExpression = nullCheck;
+                            needsNullChecking = true;
+                        }
+
+                        lastExpression = MemberAccess(lastExpression, part.name);
+                        break;
                     }
 
-                    lastExpression = MemberAccess(lastExpression, dotAccessNode.propertyName);
-                }
-                else if (parts[i] is IndexNode indexNode) {
-                    Type lastValueType = lastExpression.Type;
-                    // todo -- also no support for multiple index properties right now, parser needs to accept a comma list for that to work
+                    case PartType.DotInvoke:
+                        break;
 
-                    Expression indexed = currentBlock.AddVariable(lastValueType, "toBeIndexed");
-                    currentBlock.AddAssignment(indexed, lastExpression);
-                    lastExpression = indexed;
+                    case PartType.Invoke:
+                        break;
 
-                    if (lastValueType.IsArray) {
-                        needsNullChecking = true;
+                    case PartType.Index:
+                        break;
 
-                        if (lastValueType.GetArrayRank() != 1) {
-                            throw new NotSupportedException("Expressions do not support multidimensional arrays yet");
+                    case PartType.DotIndex: {
+                        // todo -- also no support for multiple index properties right now, parser needs to accept a comma list for that to work
+
+                        lastExpression = MemberAccess(lastExpression, part.name);
+                        Type lastValueType = lastExpression.Type;
+
+                        if (lastValueType.IsArray) {
+                            
+                            if (lastValueType.GetArrayRank() != 1) {
+                                throw new NotSupportedException("Expressions do not support multidimensional arrays yet");
+                            }
+                            
+                            lastExpression = IndexArray(lastExpression,  Visit(typeof(int), part.arguments[0]));
+
+                        }
+                        else {
+                            bool isList = lastValueType.Implements(typeof(IList));
+                            bool isDictionary = lastValueType.GetGenericTypeDefinition() == typeof(Dictionary<,>);
+
+                            Expression indexExpression = Visit(isList ? typeof(int) : null, part.arguments[0]);
+                            indexExpression = FindIndexExpression(lastValueType, indexExpression, out PropertyInfo indexProperty);
+                            Expression indexer = currentBlock.AddVariable(indexExpression.Type, "indexer");
+                            currentBlock.AddStatement(Expression.Assign(indexer, indexExpression));
+
+                            if (isList) {
+                                needsNullChecking = true;
+                                currentBlock.AddStatement(NullAndBoundsCheck(indexer, lastExpression, "Count", currentBlock.ReturnTarget));
+                            }
+                            else if (isDictionary) {
+                                // todo -- use TryGetValue instead of indexer?
+                                needsNullChecking = true;
+                                currentBlock.AddStatement(NullCheck(lastExpression, currentBlock.ReturnTarget));
+                            }
+                            else if (lastValueType.IsClass) {
+                                needsNullChecking = true;
+                                currentBlock.AddStatement(NullCheck(lastExpression, currentBlock.ReturnTarget));
+                            }
+
+                            lastExpression = Expression.MakeIndex(lastExpression, indexProperty, new[] {indexer});
                         }
 
-                        Expression indexExpression = Visit(typeof(int), indexNode.expression);
-                        if (indexExpression.Type != typeof(int)) {
-                            indexExpression = Expression.Convert(indexExpression, typeof(int));
-                        }
-
-                        Expression indexer = currentBlock.AddVariable(indexExpression.Type, "indexer");
-                        currentBlock.AddStatement(Expression.Assign(indexer, indexExpression));
-                        currentBlock.AddStatement(NullAndBoundsCheck(indexer, lastExpression, "Length", returnTarget));
-
-                        lastExpression = Expression.ArrayAccess(lastExpression, indexer);
+                        break;
                     }
-                    else {
-                        bool isList = lastValueType.Implements(typeof(IList));
-                        bool isDictionary = lastValueType.GetGenericTypeDefinition() == typeof(Dictionary<,>);
 
-                        Expression indexExpression = Visit(isList ? typeof(int) : null, indexNode.expression);
-                        indexExpression = FindIndexExpression(lastValueType, indexExpression, out PropertyInfo indexProperty);
-                        Expression indexer = currentBlock.AddVariable(indexExpression.Type, "indexer");
-                        currentBlock.AddStatement(Expression.Assign(indexer, indexExpression));
-
-                        if (isList) {
-                            needsNullChecking = true;
-                            currentBlock.AddStatement(NullAndBoundsCheck(indexer, lastExpression, "Count", returnTarget));
-                        }
-                        else if (isDictionary) {
-                            // todo -- use TryGetValue instead of indexer?
-                            needsNullChecking = true;
-                            currentBlock.AddStatement(NullCheck(lastExpression, returnTarget));
-                        }
-                        else if (lastValueType.IsClass) {
-                            needsNullChecking = true;
-                            currentBlock.AddStatement(NullCheck(lastExpression, returnTarget));
-                        }
-
-                        lastExpression = Expression.MakeIndex(lastExpression, indexProperty, new[] {indexer});
-                    }
-                }
-                else {
-                    throw new NotImplementedException();
+                    default:
+                        throw new ArgumentOutOfRangeException();
                 }
             }
-
-            Expression output = lastExpression;
-
-            if (needsNullChecking) {
-                output = currentBlock.AddVariable(lastExpression.Type, "rhsOutput");
-
-                if (currentBlock.LastStatementWasAssignment && currentBlock.GetLastAssignmentType() == lastExpression.Type) {
-                    currentBlock.ReplaceLastAssignment(output);
-                }
-                else {
-                    currentBlock.AddAssignment(output, lastExpression);
-                }
-
-                currentBlock.PrependStatement(Expression.Assign(output, Expression.Default(output.Type)));
-                currentBlock.AddStatement(Expression.Label(returnTarget));
-            }
-
-            return output;
+            
+            return lastExpression;
         }
 
         private Expression NullAndBoundsCheck(Expression indexExpression, Expression variable, string field, LabelTarget returnTarget) {
@@ -912,7 +1135,7 @@ namespace UIForia.Compilers {
                         Expression.Equal(variable, Expression.Constant(null)),
                         Expression.OrElse(
                             Expression.LessThan(indexExpression, Expression.Constant(0)),
-                            Expression.GreaterThanOrEqual(indexExpression, MemberAccess(variable, field))
+                            Expression.GreaterThanOrEqual(indexExpression, MemberAccessUnchecked(variable, field))
                         )),
                     Expression.Goto(returnTarget)
                 );
@@ -1075,19 +1298,93 @@ namespace UIForia.Compilers {
                             right = Expression.Convert(right, left.Type);
                         }
                         else if (isLeftIntegral) {
-                            throw new NotImplementedException("Implicit conversion between integral types is not yet supported");
+                            if (right.Type == typeof(int) && right.NodeType == ExpressionType.Constant) {
+                                ConstantExpression constantExpression = (ConstantExpression) right;
+                                int constValue = (int) constantExpression.Value;
+
+                                if (left.Type == typeof(byte) && constValue <= byte.MaxValue && constValue >= byte.MaxValue) {
+                                    right = ExpressionFactory.Convert(right, typeof(byte), null);
+                                }
+
+                                if (left.Type == typeof(sbyte) && constValue <= sbyte.MaxValue && constValue >= sbyte.MaxValue) {
+                                    right = ExpressionFactory.Convert(right, typeof(sbyte), null);
+                                }
+
+                                if (left.Type == typeof(short) && constValue <= short.MaxValue && constValue >= short.MaxValue) {
+                                    right = ExpressionFactory.Convert(right, typeof(short), null);
+                                }
+
+                                if (left.Type == typeof(ushort) && constValue <= ushort.MaxValue && constValue >= ushort.MaxValue) {
+                                    right = ExpressionFactory.Convert(right, typeof(ushort), null);
+                                }
+
+                                if (left.Type == typeof(uint)) {
+                                    right = ExpressionFactory.Convert(right, typeof(uint), null);
+                                }
+
+                                if (left.Type == typeof(ulong)) {
+                                    right = ExpressionFactory.Convert(right, typeof(ulong), null);
+                                }
+                            }
+
+                            else {
+                                throw new NotImplementedException("Implicit conversion between integral types is not yet supported. Please use casting to fix this");
+                            }
                         }
                         else {
-                            throw new NotImplementedException("Implicit conversion between floating point types is not yet supported");
+                            // there are no implicit conversions between floating point types.
+                            throw CompileException.NoImplicitConversion(left.Type, right.Type);
                         }
                     }
                 }
             }
 
+            // todo -- more constant folding
             switch (operatorType) {
                 case OperatorType.Plus:
-                    // todo -- if one of the types is a string, call string.Concat() with one side's .ToString() result
-                    return Expression.Add(left, right);
+                    bool leftIsString = left.Type == typeof(string);
+                    bool rightIsString = right.Type == typeof(string);
+
+                    if (leftIsString && rightIsString) {
+                        if (left is ConstantExpression leftConst && right is ConstantExpression rightConst) {
+                            string leftStr = (string) leftConst.Value;
+                            string rightStr = (string) rightConst.Value;
+                            return Expression.Constant(leftStr + rightStr);
+                        }
+
+                        return Expression.Call(StringConcat2, left, right);
+                    }
+                    else if (leftIsString) {
+                        if (left is ConstantExpression leftConst) {
+                            if (right is ConstantExpression rightConst) {
+                                return Expression.Constant((string) leftConst.Value + rightConst.Value);
+                            }
+                        }
+
+                        if (right is ConstantExpression constRight) {
+                            return Expression.Call(StringConcat2, left, Expression.Constant(constRight.Value.ToString()));
+                        }
+
+                        Expression x = Expression.Call(right, right.Type.GetMethod("ToString", Type.EmptyTypes));
+                        return Expression.Call(null, StringConcat2, left, x);
+                    }
+                    else if (rightIsString) {
+                        if (right is ConstantExpression rightConst) {
+                            if (left is ConstantExpression leftConst) {
+                                return Expression.Constant(leftConst.Value + (string) rightConst.Value);
+                            }
+                        }
+
+                        if (left is ConstantExpression leftConst2) {
+                            return Expression.Call(StringConcat2, Expression.Constant(leftConst2.Value.ToString()), right);
+                        }
+
+                        Expression x = Expression.Call(left, left.Type.GetMethod("ToString", Type.EmptyTypes));
+                        return Expression.Call(null, StringConcat2, x, right);
+                    }
+                    else {
+                        return Expression.Add(left, right);
+                    }
 
                 case OperatorType.Minus:
                     return Expression.Subtract(left, right);
@@ -1140,7 +1437,6 @@ namespace UIForia.Compilers {
                 case OperatorType.BinaryXor:
                     return Expression.ExclusiveOr(left, right);
 
-
                 default:
                     throw new CompileException($"Tried to visit the operator node {operatorType} but it wasn't handled by LinqCompiler.VisitOperator");
             }
@@ -1166,7 +1462,7 @@ namespace UIForia.Compilers {
                 currentBlock.AddAssignment(conditionVariable, ternaryCondition);
 
                 // Expression ternaryBody = Expression.IfThenElse(conditionVariable
-                throw new NotImplementedException();
+                throw new NotImplementedException("Ternary is not yet implemented");
             }
 
             left = Visit(operatorNode.left);
@@ -1196,93 +1492,96 @@ namespace UIForia.Compilers {
         }
 
 
-        public RHSStatementChain CreateRHSStatementChain(string input) {
-            return CreateRHSStatementChain(null, input);
+        public Expression CreateRHSStatementChain(string input) {
+            Expression statementChain = CreateRHSStatementChain(null, input);
+            currentBlock.AddStatement(statementChain);
+            return statementChain;
         }
 
-        public RHSStatementChain CreateRHSStatementChain(Type targetType, string input) {
-            ASTNode astRoot = ExpressionParser.Parse(input);
-
-            RHSStatementChain retn = new RHSStatementChain();
-
-            // todo -- not setting default identifier should try to resolve first node by parameter name
-            switch (astRoot.type) {
-                case ASTNodeType.NullLiteral:
-                    retn.OutputExpression = Expression.Constant(null);
-                    break;
-
-                case ASTNodeType.BooleanLiteral:
-                    retn.OutputExpression = VisitBoolLiteral((LiteralNode) astRoot);
-                    break;
-
-                case ASTNodeType.NumericLiteral:
-                    retn.OutputExpression = VisitNumericLiteral(targetType, (LiteralNode) astRoot);
-                    break;
-
-                case ASTNodeType.DefaultLiteral:
-                    retn.OutputExpression = Expression.Default(targetType);
-                    break;
-
-                case ASTNodeType.StringLiteral:
-                    // todo -- apply escaping here?
-                    retn.OutputExpression = Expression.Constant(((LiteralNode) astRoot).rawValue);
-                    break;
-
-                case ASTNodeType.Operator:
-                    retn.OutputExpression = VisitOperator((OperatorNode) astRoot);
-                    break;
-
-                case ASTNodeType.TypeOf:
-                    retn.OutputExpression = VisitTypeNode((TypeNode) astRoot);
-                    break;
-
-                case ASTNodeType.Identifier: {
-                    retn.OutputExpression = VisitIdentifierNode((IdentifierNode) astRoot);
-                    break;
-                }
-
-                case ASTNodeType.AccessExpression: {
-                    retn.OutputExpression = VisitAccessExpression((MemberAccessExpressionNode) astRoot);
-                    break;
-                }
-
-                case ASTNodeType.UnaryNot:
-                    retn.OutputExpression = VisitUnaryNot((UnaryExpressionNode) astRoot);
-                    break;
-
-                case ASTNodeType.UnaryMinus:
-                    retn.OutputExpression = VisitUnaryMinus((UnaryExpressionNode) astRoot);
-                    break;
-
-                case ASTNodeType.UnaryBitwiseNot:
-                    retn.OutputExpression = VisitBitwiseNot((UnaryExpressionNode) astRoot);
-                    break;
-
-                case ASTNodeType.DirectCast:
-                    retn.OutputExpression = VisitDirectCast((UnaryExpressionNode) astRoot);
-                    break;
-
-                case ASTNodeType.ListInitializer:
-                    throw new NotImplementedException();
-
-                case ASTNodeType.New:
-                    retn.OutputExpression = VisitNew((NewExpressionNode) astRoot);
-                    break;
-
-                case ASTNodeType.Paren:
-                    ParenNode parenNode = (ParenNode) astRoot;
-                    retn.OutputExpression = Visit(parenNode.expression);
-                    break;
-
-                case ASTNodeType.LambdaExpression:
-                    retn.OutputExpression = VisitLambda(targetType, (LambdaExpressionNode) astRoot);
-                    break;
-
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-
-            return retn;
+        public Expression CreateRHSStatementChain(Type targetType, string input) {
+            return Visit(targetType, ExpressionParser.Parse(input));
+//            ASTNode astRoot = ExpressionParser.Parse(input);
+//
+//            RHSStatementChain retn = new RHSStatementChain();
+//
+//            // todo -- not setting default identifier should try to resolve first node by parameter name
+//            switch (astRoot.type) {
+//                case ASTNodeType.NullLiteral:
+//                    retn.OutputExpression = Expression.Constant(null);
+//                    break;
+//
+//                case ASTNodeType.BooleanLiteral:
+//                    retn.OutputExpression = VisitBoolLiteral((LiteralNode) astRoot);
+//                    break;
+//
+//                case ASTNodeType.NumericLiteral:
+//                    retn.OutputExpression = VisitNumericLiteral(targetType, (LiteralNode) astRoot);
+//                    break;
+//
+//                case ASTNodeType.DefaultLiteral:
+//                    retn.OutputExpression = Expression.Default(targetType);
+//                    break;
+//
+//                case ASTNodeType.StringLiteral:
+//                    // todo -- apply escaping here?
+//                    retn.OutputExpression = Expression.Constant(((LiteralNode) astRoot).rawValue);
+//                    break;
+//
+//                case ASTNodeType.Operator:
+//                    retn.OutputExpression = VisitOperator((OperatorNode) astRoot);
+//                    break;
+//
+//                case ASTNodeType.TypeOf:
+//                    retn.OutputExpression = VisitTypeNode((TypeNode) astRoot);
+//                    break;
+//
+//                case ASTNodeType.Identifier: {
+//                    retn.OutputExpression = VisitIdentifierNode((IdentifierNode) astRoot);
+//                    break;
+//                }
+//
+//                case ASTNodeType.AccessExpression: {
+//                    retn.OutputExpression = VisitAccessExpression((MemberAccessExpressionNode) astRoot);
+//                    break;
+//                }
+//
+//                case ASTNodeType.UnaryNot:
+//                    retn.OutputExpression = VisitUnaryNot((UnaryExpressionNode) astRoot);
+//                    break;
+//
+//                case ASTNodeType.UnaryMinus:
+//                    retn.OutputExpression = VisitUnaryMinus((UnaryExpressionNode) astRoot);
+//                    break;
+//
+//                case ASTNodeType.UnaryBitwiseNot:
+//                    retn.OutputExpression = VisitBitwiseNot((UnaryExpressionNode) astRoot);
+//                    break;
+//
+//                case ASTNodeType.DirectCast:
+//                    retn.OutputExpression = VisitDirectCast((UnaryExpressionNode) astRoot);
+//                    break;
+//
+//                case ASTNodeType.ListInitializer:
+//                    throw new NotImplementedException();
+//
+//                case ASTNodeType.New:
+//                    retn.OutputExpression = VisitNew((NewExpressionNode) astRoot);
+//                    break;
+//
+//                case ASTNodeType.Paren:
+//                    ParenNode parenNode = (ParenNode) astRoot;
+//                    retn.OutputExpression = Visit(parenNode.expression);
+//                    break;
+//
+//                case ASTNodeType.LambdaExpression:
+//                    retn.OutputExpression = VisitLambda(targetType, (LambdaExpressionNode) astRoot);
+//                    break;
+//
+//                default:
+//                    throw new ArgumentOutOfRangeException();
+//            }
+//
+//            return retn;
         }
 
 
@@ -1326,9 +1625,9 @@ namespace UIForia.Compilers {
             }
 
 
-            nested.ReturnStatement(nested.Visit(arguments[arguments.Length - 1], lambda.body));
+            nested.Visit(arguments[arguments.Length - 1], lambda.body);
 
-            LambdaExpression retn = nested.BuildLambda(); //Expression.Quote(nested.BuildLambda());
+            LambdaExpression retn = nested.BuildLambda();
             s_CompilerPool.Release(nested);
             return retn;
         }
@@ -1704,7 +2003,8 @@ namespace UIForia.Compilers {
 
         Implicit = 1 << 0,
         NeverNull = 1 << 1,
-        NeverOutOfBounds = 1 << 2
+        NeverOutOfBounds = 1 << 2,
+        TreatAsConstant = 1 << 3
 
     }
 

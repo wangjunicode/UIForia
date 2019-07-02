@@ -12,7 +12,7 @@ namespace UIForia.Compilers.ExpressionResolvers {
 
         public ContentSizeResolver() : base("$content") { }
 
-        public override Expression CompileAsMethodExpression(CompilerContext context, List<ASTNode> parameters) {
+        public override Expression CompileAsMethodExpression(CompilerContext context, LightList<ASTNode> parameters) {
             if (parameters.Count == 1) {
                 if (context.targetType == typeof(UIMeasurement)) {
                     Expression arg = context.Visit(typeof(float), parameters[0]);

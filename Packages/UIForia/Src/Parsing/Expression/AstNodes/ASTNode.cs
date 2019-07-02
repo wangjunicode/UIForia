@@ -102,7 +102,7 @@ namespace UIForia.Parsing.Expression.AstNodes {
             return typeOfNode;
         }
 
-        public static NewExpressionNode NewExpressionNode(TypeLookup typeLookup, List<ASTNode> parameters) {
+        public static NewExpressionNode NewExpressionNode(TypeLookup typeLookup, LightList<ASTNode> parameters) {
             NewExpressionNode retn = s_NewExpressionNodePool.Get();
             retn.typeLookup = typeLookup;
             retn.parameters = parameters;
@@ -122,28 +122,31 @@ namespace UIForia.Parsing.Expression.AstNodes {
             return dotAccessNode;
         }
 
-        public static InvokeNode InvokeNode(List<ASTNode> parameters) {
+        public static InvokeNode InvokeNode(LightList<ASTNode> parameters) {
             InvokeNode invokeNode = s_InvokeNodePool.Get();
             invokeNode.parameters = parameters;
             return invokeNode;
         }
 
-        public static MemberAccessExpressionNode MemberAccessExpressionNode(string identifier, List<ASTNode> parts) {
+        public static MemberAccessExpressionNode MemberAccessExpressionNode(string identifier, LightList<ASTNode> parts) {
             MemberAccessExpressionNode accessExpressionNode = s_MemberAccessExpressionPool.Get();
             accessExpressionNode.identifier = identifier;
             accessExpressionNode.parts = parts;
             return accessExpressionNode;
         }
 
-        public static ListInitializerNode ListInitializerNode(List<ASTNode> list) {
+        public static ListInitializerNode ListInitializerNode(LightList<ASTNode> list) {
             ListInitializerNode listInitializerNode = s_ListInitializerPool.Get();
             listInitializerNode.list = list;
             return listInitializerNode;
         }
 
+        // todo -- support multiple indexer arguments
         public static IndexNode IndexExpressionNode(ASTNode expression) {
             IndexNode indexNode = s_IndexExpressionPool.Get();
-            indexNode.expression = expression;
+            LightList<ASTNode> list = LightList<ASTNode>.Get(4);
+            list.Add(expression);
+            indexNode.arguments = list;
             return indexNode;
         }
 
@@ -208,7 +211,7 @@ namespace UIForia.Parsing.Expression.AstNodes {
     public class MemberAccessExpressionNode : ASTNode {
 
         public string identifier;
-        public List<ASTNode> parts;
+        public LightList<ASTNode> parts;
 
         public MemberAccessExpressionNode() {
             type = ASTNodeType.AccessExpression;
@@ -220,7 +223,7 @@ namespace UIForia.Parsing.Expression.AstNodes {
                 parts[i].Release();
             }
 
-            ListPool<ASTNode>.Release(ref parts);
+            LightList<ASTNode>.Release(ref parts);
         }
 
         public override string ToString() {
@@ -257,14 +260,14 @@ namespace UIForia.Parsing.Expression.AstNodes {
 
     public class InvokeNode : ASTNode {
 
-        public List<ASTNode> parameters;
+        public LightList<ASTNode> parameters;
 
         public override void Release() {
             for (int i = 0; i < parameters.Count; i++) {
                 parameters[i].Release();
             }
 
-            ListPool<ASTNode>.Release(ref parameters);
+            LightList<ASTNode>.Release(ref parameters);
             s_InvokeNodePool.Release(this);
         }
 
@@ -273,7 +276,7 @@ namespace UIForia.Parsing.Expression.AstNodes {
     public class NewExpressionNode : ASTNode {
 
         public TypeLookup typeLookup;
-        public List<ASTNode> parameters;
+        public LightList<ASTNode> parameters;
 
         public NewExpressionNode() {
             type = ASTNodeType.New;
@@ -287,7 +290,7 @@ namespace UIForia.Parsing.Expression.AstNodes {
             }
 
             typeLookup.Release();
-            ListPool<ASTNode>.Release(ref parameters);
+            LightList<ASTNode>.Release(ref parameters);
             s_NewExpressionNodePool.Release(this);
         }
 
@@ -295,7 +298,7 @@ namespace UIForia.Parsing.Expression.AstNodes {
 
     public class ListInitializerNode : ASTNode {
 
-        public List<ASTNode> list;
+        public LightList<ASTNode> list;
 
         public ListInitializerNode() {
             type = ASTNodeType.ListInitializer;
@@ -306,7 +309,7 @@ namespace UIForia.Parsing.Expression.AstNodes {
                 list[i].Release();
             }
 
-            ListPool<ASTNode>.Release(ref list);
+            LightList<ASTNode>.Release(ref list);
             s_ListInitializerPool.Release(this);
         }
 
@@ -314,19 +317,22 @@ namespace UIForia.Parsing.Expression.AstNodes {
 
     public class IndexNode : ASTNode {
 
-        public ASTNode expression;
+        public LightList<ASTNode> arguments;
 
         public IndexNode() {
             type = ASTNodeType.IndexExpression;
         }
 
         public override void Release() {
-            expression?.Release();
+            for (int i = 0; i < arguments.Count; i++) {
+                arguments[i].Release();
+            }
+            LightList<ASTNode>.Release(ref arguments);
             s_IndexExpressionPool.Release(this);
         }
 
         public override string ToString() {
-            return expression.ToString();
+            return arguments.ToString();
         }
 
     }

@@ -502,7 +502,7 @@ namespace UIForia.Compilers {
 
                     case IndexNode indexNode: {
                         // todo allow index operator overloads here
-                        Expression indexExpression = Visit(typeof(int), indexNode.expression);
+                        Expression indexExpression = Visit(typeof(int), indexNode.arguments[0]);
                         if (AccessInfo.CreateIndexer(ref accessInfo, lastType, indexExpression)) {
                             lastType = accessInfo.outputType;
                             accessInfoList.Add(accessInfo);
@@ -569,7 +569,7 @@ namespace UIForia.Compilers {
             }
 
             if (node.parts[0] is IndexNode indexNode) {
-                return resolver.CompileAsIndexExpression(context, indexNode.expression);
+                return resolver.CompileAsIndexExpression(context, indexNode.arguments[0]);
             }
 
             return null;
@@ -585,7 +585,7 @@ namespace UIForia.Compilers {
             return null;
         }
 
-        private List<Expression> VisitFuncArguments(Type funcType, List<ASTNode> arguments, out Type outputType) {
+        private List<Expression> VisitFuncArguments(Type funcType, LightList<ASTNode> arguments, out Type outputType) {
             Type[] funcParameterTypes = funcType.GetGenericArguments();
             if (arguments.Count + 1 != funcParameterTypes.Length) {
                 throw new CompileException($"parameter count mismatch when compiling func invocation {funcType}");
@@ -606,7 +606,7 @@ namespace UIForia.Compilers {
             return expressionArguments;
         }
 
-        private List<Expression> VisitMethodArguments(Type originType, string methodName, List<ASTNode> arguments, out MethodInfo methodInfo) {
+        private List<Expression> VisitMethodArguments(Type originType, string methodName, LightList<ASTNode> arguments, out MethodInfo methodInfo) {
             List<MethodInfo> infos = ReflectionUtil.GetMethodsWithName(originType, methodName);
             List<Expression> expressionArguments = new List<Expression>();
             for (int i = 0; i < infos.Count; i++) {
@@ -758,7 +758,7 @@ namespace UIForia.Compilers {
             AccessExpressionPart next = MakeAccessPart(u + 1, parts, outputType, inputTypes);
 // todo -- this should handle dictionary indexing as well, pick up target type 
             IndexNode indexNode = (IndexNode) parts[u];
-            Expression indexExpr = Visit(typeof(int), indexNode.expression);
+            Expression indexExpr = Visit(typeof(int), indexNode.arguments[0]);
             return (AccessExpressionPart) ReflectionUtil.CreateGenericInstanceFromOpenType(
                 typeof(AccessExpressionPart_Index<,,>),
                 new GenericArguments(outputType, inputTypes[u], inputTypes[u + 1]),

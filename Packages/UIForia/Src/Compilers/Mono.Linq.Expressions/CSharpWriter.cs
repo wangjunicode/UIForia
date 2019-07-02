@@ -844,14 +844,36 @@ namespace Mono.Linq.Expressions {
                 return GetEnumLiteral(value);
 
             switch (Type.GetTypeCode(value.GetType())) {
+                case TypeCode.Single:
+                    return ((IFormattable) value).ToString(null, System.Globalization.CultureInfo.InvariantCulture) + "f";
+
+                case TypeCode.Decimal:
+                    return ((IFormattable) value).ToString(null, System.Globalization.CultureInfo.InvariantCulture) + "m";
+
+                case TypeCode.UInt32:
+                    return value + "u";
+                
+                case TypeCode.Int64:
+                    return value + "l";
+
+                case TypeCode.UInt64:
+                    return value + "ul";
+
+                case TypeCode.Double:
+                    return value + "d";
+                
                 case TypeCode.Boolean:
                     return ((bool) value) ? "true" : "false";
+                
                 case TypeCode.Char:
                     return "'" + ((char) value) + "'";
+                
                 case TypeCode.String:
                     return "\"" + ((string) value) + "\"";
+                
                 case TypeCode.Int32:
                     return ((IFormattable) value).ToString(null, System.Globalization.CultureInfo.InvariantCulture);
+                
                 default:
                     return value.ToString();
             }

@@ -5,8 +5,6 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Reflection.Emit;
-using Boo.Lang;
-using UIForia.Bindings;
 using UIForia.Elements;
 using UnityEngine;
 
@@ -154,6 +152,48 @@ namespace UIForia.Util {
             return methodInfo != null;
         }
 
+        public static bool HasInstanceMethod(Type type, string methodName, out LightList<MethodInfo> methodInfos) {
+            MethodInfo[] publicMethods = type.GetMethods(PublicInstance);
+            
+            LightList<MethodInfo> retn = LightList<MethodInfo>.Get();
+
+            for (int i = 0; i < publicMethods.Length; i++) {
+                if (publicMethods[i].Name == methodName) {
+                    retn.Add(publicMethods[i]);
+                }
+            }
+
+            if (retn.Count == 0) {
+                LightList<MethodInfo>.Release(ref retn);
+                methodInfos = null;
+                return false;
+            }
+
+            methodInfos = retn;
+            return true;
+        }
+        
+        public static bool HasStaticMethod(Type type, string methodName, out LightList<MethodInfo> methodInfos) {
+            MethodInfo[] publicMethods = type.GetMethods(StaticFlags | BindingFlags.Public);
+            
+            LightList<MethodInfo> retn = LightList<MethodInfo>.Get();
+
+            for (int i = 0; i < publicMethods.Length; i++) {
+                if (publicMethods[i].Name == methodName) {
+                    retn.Add(publicMethods[i]);
+                }
+            }
+
+            if (retn.Count == 0) {
+                LightList<MethodInfo>.Release(ref retn);
+                methodInfos = null;
+                return false;
+            }
+
+            methodInfos = retn;
+            return true;
+        }
+
         public static Type GetFieldType(Type type, string fieldName) {
             return GetFieldInfoOrThrow(type, fieldName).FieldType;
         }
@@ -212,7 +252,7 @@ namespace UIForia.Util {
                     return false;
             }
         }
-        
+
         public static bool IsFloatingPointType(Type o) {
             switch (Type.GetTypeCode(o)) {
                 case TypeCode.Decimal:
@@ -223,7 +263,7 @@ namespace UIForia.Util {
                     return false;
             }
         }
-        
+
         public static bool IsNumericType(Type o) {
             switch (Type.GetTypeCode(o)) {
                 case TypeCode.Byte:
@@ -367,9 +407,9 @@ namespace UIForia.Util {
 
             Type outputType = baseType.MakeGenericType(genericArray);
             ReleaseTempTypeArray(ref genericArray);
-            return outputType;    
+            return outputType;
         }
-        
+
         public static Type CreateGenericType(Type baseType, params Type[] genericArguments) {
             // todo -- not sure we need this layer of caching anymore once Expression Compiler is replaced
             for (int i = 0; i < generics.Count; i++) {
@@ -395,7 +435,13 @@ namespace UIForia.Util {
             return outputType;
         }
 
-        private static Type[] GetTempTypeArray(int count) {
+        public static Type[] SetTempTypeArray(Type type, Type type1) {
+            TypeArray2[0] = type;
+            TypeArray2[1] = type1;
+            return TypeArray2;
+        }
+
+        public static Type[] GetTempTypeArray(int count) {
             switch (count) {
                 case 0: return Type.EmptyTypes;
                 case 1: return TypeArray1;
@@ -406,7 +452,7 @@ namespace UIForia.Util {
             }
         }
 
-        private static void ReleaseTempTypeArray(ref Type[] array) {
+        public static void ReleaseTempTypeArray(ref Type[] array) {
             if (array.Length == 0) return;
             if (array == TypeArray1) return;
             if (array == TypeArray2) return;
@@ -1085,7 +1131,7 @@ namespace UIForia.Util {
 
         public static System.Collections.Generic.List<MethodInfo> GetMethodsWithName(Type type, string targetName) {
             MethodInfo[] infos = type.GetMethods(InstanceBindFlags | StaticFlags);
-            System.Collections.Generic.List<MethodInfo> retn = new System.Collections.Generic.List<MethodInfo>();
+            List<MethodInfo> retn = new List<MethodInfo>();
             for (int i = 0; i < infos.Length; i++) {
                 if (infos[i].Name == targetName) {
                     retn.Add(infos[i]);
@@ -1342,7 +1388,12 @@ namespace UIForia.Util {
             return false;
         }
 
-       
+    }
+
+    public struct MethodDescriptor {
+
+        public MethodInfo methodInfo;
+        public ParameterInfo[] parameterInfos;
 
     }
 

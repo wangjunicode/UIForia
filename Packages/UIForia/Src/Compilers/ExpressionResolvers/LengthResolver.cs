@@ -20,7 +20,7 @@ namespace UIForia.Compilers.ExpressionResolvers {
 
         public LengthResolver(string aliasName) : base(aliasName) { }
 
-        public override Expression CompileAsMethodExpression(CompilerContext context, List<ASTNode> parameters) {
+        public override Expression CompileAsMethodExpression(CompilerContext context, LightList<ASTNode> parameters) {
             if (context.targetType == typeof(FixedLengthVector)) {
                 if (parameters.Count == 1) {
                     Expression expr = context.Visit(typeof(UIFixedLength), parameters[0]);

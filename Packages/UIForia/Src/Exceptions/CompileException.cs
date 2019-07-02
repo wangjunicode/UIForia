@@ -107,6 +107,10 @@ namespace UIForia.Exceptions {
             return new CompileException($"Type mismatch with Lambda Argument");
         }
         
+        public static CompileException NoImplicitConversion(Type a, Type b) {
+            return new CompileException($"Implicit conversion exists between types {a} and {b}. Please use casing to fix this");
+        }
+        
         public static CompileException NoSuchProperty(Type type, string fieldOrPropertyName) {
             return new CompileException($"Type {type} has no field or property {fieldOrPropertyName}");
         }

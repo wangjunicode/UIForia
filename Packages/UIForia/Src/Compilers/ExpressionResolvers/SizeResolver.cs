@@ -21,7 +21,7 @@ namespace UIForia.Compilers.ExpressionResolvers {
 
         public SizeResolver(string aliasName) : base(aliasName) { }
 
-        public override Expression CompileAsMethodExpression(CompilerContext context, List<ASTNode> parameters) {
+        public override Expression CompileAsMethodExpression(CompilerContext context, LightList<ASTNode> parameters) {
             if (context.targetType != typeof(MeasurementPair)) {
                 return null;
             }

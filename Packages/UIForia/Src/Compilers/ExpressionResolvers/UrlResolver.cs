@@ -26,7 +26,7 @@ namespace UIForia.Compilers.ExpressionResolvers {
 
         public UrlResolver(string aliasName) : base(aliasName) { }
 
-        public override Expression CompileAsMethodExpression(CompilerContext context, List<ASTNode> parameters) {
+        public override Expression CompileAsMethodExpression(CompilerContext context, LightList<ASTNode> parameters) {
             if (parameters.Count == 1) {
                 Expression expression = context.Visit(typeof(string), parameters[0]);
                 s_Expressions[0] = expression;

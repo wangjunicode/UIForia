@@ -95,7 +95,7 @@ namespace UIForia.Parsing.Expression.Tokenizer {
 
             if (context.HasMore()) {
                 char next = context.input[context.ptr];
-                // todo -- enable the below to making parsing numerics better in the compiler (since we already know what type to try to parse it as)
+                // todo -- enable the below to making parsing numbers better in the compiler (since we already know what type to try to parse it as)
                 //ExpressionTokenType type = ExpressionTokenType.Number;
 //                if (next == 'f') {
 //                    type = ExpressionTokenType.Number_Float;

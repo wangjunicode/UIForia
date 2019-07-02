@@ -48,7 +48,7 @@ namespace UIForia.Compilers.ExpressionResolvers {
             throw new CompileException($"Tried to invoke alias {aliasName} as an index expression, but this is not supported");
         }
 
-        public virtual Expression CompileAsMethodExpression(CompilerContext context, List<ASTNode> parameters) {
+        public virtual Expression CompileAsMethodExpression(CompilerContext context, LightList<ASTNode> parameters) {
             Expression expression = CompileAsValueExpression(context);
             if (expression != null) {
                 return context.compiler.CompileRestOfChain(expression, context);

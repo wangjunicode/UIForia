@@ -396,7 +396,7 @@ namespace UIForia.Parsing.Expression {
                 return false;
             }
 
-            List<ASTNode> list = null;
+            LightList<ASTNode> list = null;
             bool valid = ParseListExpression(ref list, ExpressionTokenType.ArrayAccessOpen, ExpressionTokenType.ArrayAccessClose);
 
             if (!valid) {
@@ -630,7 +630,7 @@ namespace UIForia.Parsing.Expression {
 
             string identifier = tokenStream.Current.value;
             tokenStream.Save();
-            List<ASTNode> parts = ListPool<ASTNode>.Get();
+            LightList<ASTNode> parts = LightList<ASTNode>.Get();
             tokenStream.Advance();
             while (tokenStream.HasMoreTokens) {
                 if (tokenStream.Current == ExpressionTokenType.Dot) {
@@ -659,7 +659,7 @@ namespace UIForia.Parsing.Expression {
                     }
                 }
                 else if (tokenStream.Current == ExpressionTokenType.ParenOpen) {
-                    List<ASTNode> parameters = null;
+                    LightList<ASTNode> parameters = null;
 
                     if (!ParseListExpression(ref parameters, ExpressionTokenType.ParenOpen, ExpressionTokenType.ParenClose)) {
                         Abort();
@@ -675,7 +675,7 @@ namespace UIForia.Parsing.Expression {
                     // shortcut the << operator since we can't have a << in a generic type node. List<<string>> is invalid for example
                     if (tokenStream.HasMoreTokens && tokenStream.Next == ExpressionTokenType.LessThan) {
                         tokenStream.Restore();
-                        ListPool<ASTNode>.Release(ref parts);
+                        LightList<ASTNode>.Release(ref parts);
                         return false;
                     }
 
@@ -683,7 +683,7 @@ namespace UIForia.Parsing.Expression {
 
                     if (!(ParseTypePathGenerics(ref typePath))) {
                         tokenStream.Restore();
-                        ListPool<ASTNode>.Release(ref parts);
+                        LightList<ASTNode>.Release(ref parts);
                         return false;
                     }
 
@@ -695,7 +695,7 @@ namespace UIForia.Parsing.Expression {
 
                 if (parts.Count == 0) {
                     tokenStream.Restore();
-                    ListPool<ASTNode>.Release(ref parts);
+                    LightList<ASTNode>.Release(ref parts);
                     return false;
                 }
 
@@ -741,7 +741,7 @@ namespace UIForia.Parsing.Expression {
                 return false;
             }
 
-            List<ASTNode> parameters = null;
+            LightList<ASTNode> parameters = null;
 
             if (!ParseListExpression(ref parameters, ExpressionTokenType.ParenOpen, ExpressionTokenType.ParenClose)) {
                 Abort();
@@ -789,7 +789,7 @@ namespace UIForia.Parsing.Expression {
             return true;
         }
 
-        private bool ParseListExpressionStep(ref List<ASTNode> retn) {
+        private bool ParseListExpressionStep(ref LightList<ASTNode> retn) {
             while (true) {
                 int commaIndex = tokenStream.FindNextIndexAtSameLevel(ExpressionTokenType.Comma);
                 if (commaIndex != -1) {
@@ -814,7 +814,7 @@ namespace UIForia.Parsing.Expression {
             }
         }
 
-        private bool ParseListExpression(ref List<ASTNode> retn, ExpressionTokenType openExpressionToken, ExpressionTokenType closeExpressionToken) {
+        private bool ParseListExpression(ref LightList<ASTNode> retn, ExpressionTokenType openExpressionToken, ExpressionTokenType closeExpressionToken) {
             if (tokenStream.Current != openExpressionToken) {
                 return false;
             }
@@ -824,15 +824,15 @@ namespace UIForia.Parsing.Expression {
 
             if (range == 1) {
                 tokenStream.Advance(2);
-                retn = ListPool<ASTNode>.Get();
+                retn = LightList<ASTNode>.Get();
                 return true;
             }
 
             if (retn != null) {
-                ListPool<ASTNode>.Release(ref retn);
+                LightList<ASTNode>.Release(ref retn);
             }
 
-            retn = ListPool<ASTNode>.Get();
+            retn = LightList<ASTNode>.Get();
             //todo find next comma at same level (meaning not inside [ or ( or <
 
             ExpressionParser parser = CreateSubParser(range);
@@ -905,13 +905,13 @@ namespace UIForia.Parsing.Expression {
             }
         }
 
-        private static void ReleaseList(List<ASTNode> list) {
+        private static void ReleaseList(LightList<ASTNode> list) {
             if (list == null) return;
             for (int i = 0; i < list.Count; i++) {
                 list[i].Release();
             }
 
-            ListPool<ASTNode>.Release(ref list);
+            LightList<ASTNode>.Release(ref list);
         }
 
     }

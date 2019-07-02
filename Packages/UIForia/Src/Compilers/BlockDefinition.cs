@@ -7,8 +7,14 @@ namespace UIForia.Compilers {
 
     public class BlockDefinition {
 
-        public LightList<ParameterExpression> variables;
-        public LightList<Expression> statements;
+        private LightList<ParameterExpression> variables;
+        private LightList<Expression> statements;
+        public bool requireNullCheck;
+        public LabelTarget returnTarget;
+
+        private BlockExpression blockExpression;
+
+        public BlockDefinition parent;
 
         public BlockDefinition() {
             this.variables = new LightList<ParameterExpression>();
@@ -17,6 +23,17 @@ namespace UIForia.Compilers {
 
         public bool LastStatementWasAssignment {
             get { return statements.Count > 0 && statements[statements.Count - 1].NodeType == ExpressionType.Assign; }
+        }
+
+        public LabelTarget ReturnTarget {
+            get {
+                if (returnTarget == null) {
+                    // todo -- handle multiple of these
+                    returnTarget = Expression.Label("retn");
+                }
+
+                return returnTarget;
+            }
         }
 
         public void AddStatement(Expression statement) {
@@ -64,22 +81,40 @@ namespace UIForia.Compilers {
         }
 
         public Expression ToExpressionBlock(Type retnType = null) {
+            if (blockExpression != null) {
+                return blockExpression;
+            }
+
             retnType = retnType ?? typeof(void);
+
             if (statements == null || statements.Count == 0) {
                 throw CompileException.NoStatementsRootBlock();
             }
 
-            if (variables != null && variables.Count > 0) {
-                return Expression.Block(retnType, variables, statements);
+            if (requireNullCheck) {
+                Expression lastExpression = GetLastAssignment();
+                Expression output = AddVariable(lastExpression.Type, "rhsOutput");
+                PrependStatement(Expression.Assign(output, Expression.Default(output.Type)));
+
+                statements.Add(Expression.Label(returnTarget));
+                statements.Add(output); 
+                ReplaceLastAssignment(output);
             }
 
-            return Expression.Block(retnType, statements);
+            if (variables != null && variables.Count > 0) {
+                blockExpression = Expression.Block(retnType, variables, statements);
+            }
+            else {
+                blockExpression = Expression.Block(retnType, statements);
+            }
+
+            return blockExpression;
         }
 
         public static implicit operator Expression(BlockDefinition block) {
             return block.ToExpressionBlock();
         }
-        
+
         public void ReplaceLastAssignment(Expression output) {
             for (int i = statements.Count - 1; i >= 0; i--) {
                 if (statements[i].NodeType == ExpressionType.Assign) {
@@ -96,6 +131,17 @@ namespace UIForia.Compilers {
                 if (statements[i].NodeType == ExpressionType.Assign) {
                     BinaryExpression assignment = (BinaryExpression) statements[i];
                     return assignment.Left.Type;
+                }
+            }
+
+            return null;
+        }
+
+        public Expression GetLastAssignment() {
+            for (int i = statements.Count - 1; i >= 0; i--) {
+                if (statements[i].NodeType == ExpressionType.Assign) {
+                    BinaryExpression assignment = (BinaryExpression) statements[i];
+                    return assignment.Left;
                 }
             }
 

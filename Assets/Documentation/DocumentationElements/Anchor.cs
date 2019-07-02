@@ -16,6 +16,7 @@ namespace Documentation.DocumentationElements {
             if (Application.RoutingSystem.FindRouter("demo").CurrentUrl == href) {
                 style.SetBackgroundColor(highlight, StyleState.Normal);
                 style.SetTextColor(Color.white, StyleState.Normal);
+                style.SetTextColor(Color.black, StyleState.Hover);
             }
             else {
                 style.SetBackgroundColor(Color.clear, StyleState.Normal);

@@ -18,15 +18,25 @@
             PreferredSize = 1pca, 1.15em;
         }
 
+        style placeholder {
+        }
+        
+        style placeholder-slot {
+            LayoutBehavior = Ignored;
+            AnchorTarget = ParentContentArea;
+            TransformBehavior = AnchorMinOffset;
+            TextColor = rgb(150, 150, 150);
+        }
+
     </Style>
 
     <Contents style="input-element">
 
         <Group style="input-element-text"/>
         
-        <!--<Slot placeholder-visible="true" placeholder="">-->
-        <!--<Text>default placeholder</Text>-->
-        <!--</Slot>-->
+        <Slot name="placeholder" style="placeholder-slot" if="ShowPlaceholder">
+            <Text style="placeholder">{placeholder}</Text>
+        </Slot>
 
     </Contents>
 

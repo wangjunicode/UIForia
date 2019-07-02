@@ -7,12 +7,12 @@ style <Label> {
     }
 }
 
-style <InputElement> {
+style <InputElement<String>> {
     Border = 2px;
     BorderColor = black;
     BackgroundColor = white;
     Padding = 8px 8px 1px;
     PreferredWidth = 500px;
-    TextFontSize = 1.2em;
+    TextFontSize = 1em;
     MarginBottom = 20px;
 }

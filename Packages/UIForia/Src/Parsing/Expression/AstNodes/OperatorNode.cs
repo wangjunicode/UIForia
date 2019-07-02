@@ -65,11 +65,14 @@ namespace UIForia.Parsing.Expression.AstNodes {
                     case OperatorType.BinaryXor:
                         return 1;
                     
-                    // todo add support for these as soon as we build our own template parser
+                    case OperatorType.Coalesce:
+                        return 1; // todo -- not sure about this
+                    
                     case OperatorType.Or:
-                        throw new TemplateParseException($"'Or' Operator || could not be parsed because it is not supported right now.", left);
+                        return 2; // todo -- not sure about this
+                    
                     case OperatorType.And:
-                        throw new TemplateParseException($"'And' Operator && could not be parsed because it is not supported right now.", left);
+                        return 2; // todo -- not sure about this 
                     
                     default:
                         throw new TemplateParseException($"Operator {operatorType} could not be parsed because it is not supported right now.", left);

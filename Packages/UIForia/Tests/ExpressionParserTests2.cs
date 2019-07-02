@@ -166,7 +166,7 @@ public class ExpressionParserTests2 {
 
     [Test]
     public void Parse_OperatorExpression_Or() {
-        ASTNode root = ExpressionParser.Parse("true || false");
+        ASTNode root = ExpressionParser.Parse("true || false || true");
         Assert.IsInstanceOf<OperatorNode>(root);
         Assert.AreEqual(OperatorType.Or, ((OperatorNode) root).operatorType);
     }
@@ -750,4 +750,49 @@ public class ExpressionParserTests2 {
         Assert.IsInstanceOf<LiteralNode>(operatorNode.right);
     }
     
+    [Test]
+    public void Parse_CoalesceOperator() {
+        ASTNode root = ExpressionParser.Parse("value ?? otherValue");
+        OperatorNode node = AssertInstanceOfAndReturn<OperatorNode>(root);
+        Assert.AreEqual(OperatorType.Coalesce, node.operatorType);
+        Assert.IsInstanceOf<IdentifierNode>(node.left);
+        Assert.IsInstanceOf<IdentifierNode>(node.right);
+    }
+    
+    [Test]
+    public void Parse_ElvisAccessor_Dot() {
+        ASTNode root = ExpressionParser.Parse("instance?.property");
+        MemberAccessExpressionNode node = AssertInstanceOfAndReturn<MemberAccessExpressionNode>(root);
+        Assert.AreEqual(1, node.parts.Count);
+        Assert.AreEqual("instance", node.identifier);
+        Assert.IsInstanceOf<DotAccessNode>(node.parts[0]);
+        Assert.IsTrue(((DotAccessNode)node.parts[0]).isElvisAccess);
+        Assert.AreEqual("property", ((DotAccessNode)node.parts[0]).propertyName);
+    }
+    
+    [Test]
+    public void Parse_ElvisAccessor_Invoke() {
+        ASTNode root = ExpressionParser.Parse("instance?.ToString()");
+        MemberAccessExpressionNode node = AssertInstanceOfAndReturn<MemberAccessExpressionNode>(root);
+        Assert.AreEqual(2, node.parts.Count);
+        Assert.AreEqual("instance", node.identifier);
+        Assert.IsInstanceOf<DotAccessNode>(node.parts[0]);
+        Assert.IsTrue(((DotAccessNode)node.parts[0]).isElvisAccess);
+        Assert.AreEqual("ToString", ((DotAccessNode)node.parts[0]).propertyName);
+        Assert.IsInstanceOf<InvokeNode>(node.parts[1]);
+    }
+    
+    [Test]
+    public void Parse_ElvisAccessor_Index() {
+        ASTNode root = ExpressionParser.Parse("instance?[1]");
+        MemberAccessExpressionNode node = AssertInstanceOfAndReturn<MemberAccessExpressionNode>(root);
+        Assert.AreEqual(1, node.parts.Count);
+        Assert.AreEqual("instance", node.identifier);
+        Assert.IsInstanceOf<IndexNode>(node.parts[0]);
+        IndexNode indexNode = (IndexNode) node.parts[0];
+        Assert.IsTrue(indexNode.isElvisAccess);
+        Assert.AreEqual(1, indexNode.arguments.Count);
+        Assert.IsInstanceOf<LiteralNode>(indexNode.arguments[0]);
+    }
+
 }

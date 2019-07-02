@@ -239,6 +239,8 @@ namespace UIForia.Parsing.Expression.Tokenizer {
 
                 TryReadCharacters(context, "@", ExpressionTokenType.At, output);
                 TryReadCharacters(context, "&&", ExpressionTokenType.AndAlso, output);
+                TryReadCharacters(context, "??", ExpressionTokenType.Coalesce, output);
+                TryReadCharacters(context, "?.", ExpressionTokenType.Elvis, output);
                 TryReadCharacters(context, "||", ExpressionTokenType.OrElse, output);
                 TryReadCharacters(context, "=>", ExpressionTokenType.LambdaArrow, output);
                 TryReadCharacters(context, "==", ExpressionTokenType.Equals, output);

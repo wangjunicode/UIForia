@@ -98,17 +98,34 @@ public class TestLinqCompiler {
                 new Parameter(root, "root", ParameterFlags.Implicit | ParameterFlags.NeverNull),
                 new Parameter(elementType, "element")
             );
-            
+
             LHSStatementChain left = compiler.CreateLHSStatementChain("element", attributeDefinition.key);
             Expression right = compiler.CreateRHSStatementChain(left.targetExpression.Type, attributeDefinition.value);
+
+           // if no listeners and field or auto prop then just assign, no need to check
+           
+           // compiler.Assign(left, Expression.Constant(34f));
+           // compiler.EnableNullChecking(null);
+           // compiler.SetOutOfBoundsHandler(HandlerSettings);
+           // compiler.TryCatch(() => {}, () => {})
+//            compiler.Variable("left", attributeDefinition.key, () => compiler.Call(typeof(LinqCompiler).GetMethod("DebugLog"), root, fieldName, astNode));
+//            compiler.Variable("right", attributeDefinition.value, "errorHandler", NotNullChecked | NeverOutOfBounds);
+//            compiler.IfEqual("left", "right", (c) => {
+//                compiler.Assign("left", "right + 1");
+//                compiler.Invoke("root.ChangeHandler()");
+//                compiler.Invoke("root.ChangeHandler()");
+//                compiler.Invoke("root.ChangeHandler()");
+//                compiler.Invoke("root.ChangeHandler(oldValue, newValue)");
+//                compiler.Invoke("root", changeHandler, "newValue, "oldValue", "1f", compiler.Constant(new Vector3(14, 24, 21));
+//            });
+//          compiler.Return("() => value");
+            // return = assign to output variable; goto return;
             
-            // if no listeners and field or auto prop then just assign, no need to check
-            //compiler.Assign(left, Expression.Constant(34f));
-            
-            compiler.Compile<Action<UIElement, UIElement>>();
-            compiler.Compile<Func<UIElement, UIElement>>();
-                
-            compiler.IfNotEqual(left, right, () => {
+            // collapse stage 'optimizes' by folding constants, removing variable writes for return statements where not needed, don't generate return label when not needed.
+            // there is no 'current block' the compiler has context and thats it.
+            // signature must be set before calling other methods. no error will thrown but it is incorrect.
+
+        compiler.IfNotEqual(left, right, () => {
                 compiler.Assign(left, right);
                 if (changedHandlers != null) {
                     for (int i = 0; i < changedHandlers.Length; i++) {
@@ -222,8 +239,19 @@ public class TestLinqCompiler {
 
         compiler.SetSignature<Func<int>>(new Parameter<UIElement>("root"));
 
-        compiler.CreateRHSStatementChain("() => root.id");
+        compiler.CreateRHSStatementChain(typeof(Func<int>), "() => root.id");
 
+        // always write assignments
+        // always write conditionals
+        // only write access chain when we actually have to
+        // if current chain.lastStatement != currentStatement, write it
+        // chain always ends with its last expression being an assignment to its output var
+        // the last chain has this assignment repalced with an assignment to body return value
+        // if current chain is null or bounds checked, 
+            // assign to chain output var
+            // main-retn-label:
+            // return 
+        
         Func<UIElement, Func<int>> fn = compiler.Compile<Func<UIElement, Func<int>>>();
         TestElement element = new TestElement();
         TestElement element1 = new TestElement();
@@ -232,12 +260,12 @@ public class TestLinqCompiler {
         Assert.AreEqual(id, fn(element)());
 
         compiler.Reset();
-        compiler.SetSignature<Func<UIElement, int>>(new Parameter<UIElement>("root"));
-
-        compiler.CreateRHSStatementChain("(el) => root.id + el.id");
-
-        Func<UIElement, Func<UIElement, int>> fn2 = compiler.Compile<Func<UIElement, Func<UIElement, int>>>();
-        Assert.AreEqual(element.id + element1.id, fn2(element)(element1));
+//        compiler.SetSignature<Func<UIElement, int>>(new Parameter<UIElement>("root"));
+//
+//        compiler.CreateRHSStatementChain("(el) => root.id + el.id");
+//
+//        Func<UIElement, Func<UIElement, int>> fn2 = compiler.Compile<Func<UIElement, Func<UIElement, int>>>();
+//        Assert.AreEqual(element.id + element1.id, fn2(element)(element1));
     }
 
     [Test]

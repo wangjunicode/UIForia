@@ -31,8 +31,7 @@ namespace UIForia.Parsing.Expression.Tokenizer {
         }
 
         public ExpressionToken Previous {
-            [DebuggerStepThrough]
-            get { return (ptr - 1 < 0 || lastTokenIndex == 0) ? ExpressionToken.Invalid : tokens[ptr - 1]; }
+            [DebuggerStepThrough] get { return (ptr - 1 < 0 || lastTokenIndex == 0) ? ExpressionToken.Invalid : tokens[ptr - 1]; }
         }
 
         public ExpressionToken Last {
@@ -101,7 +100,7 @@ namespace UIForia.Parsing.Expression.Tokenizer {
 
             return -1;
         }
-        
+
         [DebuggerStepThrough]
         public int FindNextIndexAtSameLevel(ExpressionTokenType targetExpressionTokenType) {
             int i = 0;
@@ -190,6 +189,11 @@ namespace UIForia.Parsing.Expression.Tokenizer {
             }
 
             return retn;
+        }
+
+        public bool NextTokenIs(ExpressionTokenType tokenType) {
+            if (ptr + 1 >= lastTokenIndex) return false;
+            return Next == tokenType;
         }
 
     }

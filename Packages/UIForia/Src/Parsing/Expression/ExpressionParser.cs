@@ -141,6 +141,7 @@ namespace UIForia.Parsing.Expression {
                     return true;
 
                 case ExpressionTokenType.GreaterThan:
+                    // don't make this a token type since generic paths use the << in their syntax
                     // two greater thans next to each other are the same as a shift right. this since whitespace is ignored this means > > is actually a shift operator
                     if (tokenStream.Current.expressionTokenType == ExpressionTokenType.GreaterThan) {
                         tokenStream.Advance(); // step over the 2nd one
@@ -183,6 +184,16 @@ namespace UIForia.Parsing.Expression {
 
                 case ExpressionTokenType.Colon:
                     operatorNode = ASTNode.OperatorNode(OperatorType.TernarySelection);
+                    operatorNode.WithLocation(tokenStream.Previous);
+                    return true;
+                
+                case ExpressionTokenType.Coalesce:
+                    operatorNode = ASTNode.OperatorNode(OperatorType.Coalesce);
+                    operatorNode.WithLocation(tokenStream.Previous);
+                    return true;
+                
+                case ExpressionTokenType.Elvis:
+                    operatorNode = ASTNode.OperatorNode(OperatorType.Elvis);
                     operatorNode.WithLocation(tokenStream.Previous);
                     return true;
 
@@ -633,26 +644,32 @@ namespace UIForia.Parsing.Expression {
             LightList<ASTNode> parts = LightList<ASTNode>.Get();
             tokenStream.Advance();
             while (tokenStream.HasMoreTokens) {
-                if (tokenStream.Current == ExpressionTokenType.Dot) {
+                if (tokenStream.Current == ExpressionTokenType.Dot || tokenStream.Current == ExpressionTokenType.Elvis) {
                     if (tokenStream.Next != ExpressionTokenType.Identifier) {
                         break;
                     }
 
                     tokenStream.Advance();
-                    parts.Add(ASTNode.DotAccessNode(tokenStream.Current.value));
+                    parts.Add(ASTNode.DotAccessNode(tokenStream.Current.value, tokenStream.Previous == ExpressionTokenType.Elvis));
                     tokenStream.Advance();
                     if (tokenStream.HasMoreTokens) {
                         continue;
                     }
                 }
-                else if (tokenStream.Current == ExpressionTokenType.ArrayAccessOpen) {
+                else if (tokenStream.Current == ExpressionTokenType.ArrayAccessOpen || tokenStream.Current == ExpressionTokenType.QuestionMark && tokenStream.NextTokenIs(ExpressionTokenType.ArrayAccessOpen) ) {
+                    bool isElvis = false;
+                    if (tokenStream.Current == ExpressionTokenType.QuestionMark) {
+                        isElvis = true;
+                        tokenStream.Advance();
+                    }
+                    
                     int advance = tokenStream.FindMatchingIndex(ExpressionTokenType.ArrayAccessOpen, ExpressionTokenType.ArrayAccessClose);
                     if (advance == -1) {
                         Abort("Unmatched array bracket");
                     }
 
                     ExpressionParser subParser = CreateSubParser(advance);
-                    parts.Add(ASTNode.IndexExpressionNode(subParser.ParseLoop()));
+                    parts.Add(ASTNode.IndexExpressionNode(subParser.ParseLoop(), isElvis));
                     subParser.Release();
                     if (tokenStream.HasMoreTokens) {
                         continue;

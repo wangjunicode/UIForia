@@ -5,6 +5,13 @@ using UIForia.Util;
 
 namespace UIForia.Compilers {
 
+    public class Statement {
+
+        public bool isWritten;
+        public Expression head;
+
+    }
+    
     public class BlockDefinition {
 
         private LightList<ParameterExpression> variables;
@@ -80,6 +87,14 @@ namespace UIForia.Compilers {
             return null;
         }
 
+        // compiler.Variable("root", type);
+        // compiler.Variable("root", "expression");
+        // compiler.Assign("root.value.x", "value");
+        // compiler.Variable("x", "''");
+        // compiler.Return("(val, val2) => val1);
+        // compiler.IfThen("expression", () => { compiler.Assign("x", "y") })
+        // compiler.Call();
+        
         public Expression ToExpressionBlock(Type retnType = null) {
             if (blockExpression != null) {
                 return blockExpression;
@@ -91,14 +106,29 @@ namespace UIForia.Compilers {
                 throw CompileException.NoStatementsRootBlock();
             }
 
+            // write last expression
+            // if has null check 
+            // lastexpression = variable
+            // variable
+            // last expression = assign(var, lastExpression); 
+            
+            // if null check is required, last expression needs to be the return value
+            // if not last expression needs to be typed parameter value (ie a variable)
+            // this can be 'inlined' by replacing the assignment with just the lefthand expression
+            
+            // lastExpression = statement;
             if (requireNullCheck) {
-                Expression lastExpression = GetLastAssignment();
+
+                statements.RemoveLast();
+                
+                Expression lastExpression = statements[statements.Count - 1];
                 Expression output = AddVariable(lastExpression.Type, "rhsOutput");
                 PrependStatement(Expression.Assign(output, Expression.Default(output.Type)));
 
-                statements.Add(Expression.Label(returnTarget));
-                statements.Add(output); 
                 ReplaceLastAssignment(output);
+                statements.Add(Expression.Label(returnTarget));
+                statements.Add(output);
+                statements[statements.Count - 1] = output;
             }
 
             if (variables != null && variables.Count > 0) {

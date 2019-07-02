@@ -58,6 +58,8 @@ namespace UIForia.Parsing.Expression.Tokenizer {
             IsArithmeticOperator ||
             IsComparator ||
             IsBooleanTest ||
+            expressionTokenType == ExpressionTokenType.Coalesce ||
+            expressionTokenType == ExpressionTokenType.Elvis ||
             expressionTokenType == ExpressionTokenType.As ||
             expressionTokenType == ExpressionTokenType.Is ||
             expressionTokenType == ExpressionTokenType.QuestionMark ||

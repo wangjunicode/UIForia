@@ -116,9 +116,10 @@ namespace UIForia.Parsing.Expression.AstNodes {
             return parenNode;
         }
 
-        public static DotAccessNode DotAccessNode(string propertyName) {
+        public static DotAccessNode DotAccessNode(string propertyName, bool isElvisAccess = false) {
             DotAccessNode dotAccessNode = s_DotAccessPool.Get();
             dotAccessNode.propertyName = propertyName;
+            dotAccessNode.isElvisAccess = isElvisAccess;
             return dotAccessNode;
         }
 
@@ -142,11 +143,12 @@ namespace UIForia.Parsing.Expression.AstNodes {
         }
 
         // todo -- support multiple indexer arguments
-        public static IndexNode IndexExpressionNode(ASTNode expression) {
+        public static IndexNode IndexExpressionNode(ASTNode expression, bool isElvisAccess) {
             IndexNode indexNode = s_IndexExpressionPool.Get();
             LightList<ASTNode> list = LightList<ASTNode>.Get(4);
             list.Add(expression);
             indexNode.arguments = list;
+            indexNode.isElvisAccess = isElvisAccess;
             return indexNode;
         }
 
@@ -318,6 +320,7 @@ namespace UIForia.Parsing.Expression.AstNodes {
     public class IndexNode : ASTNode {
 
         public LightList<ASTNode> arguments;
+        public bool isElvisAccess;
 
         public IndexNode() {
             type = ASTNodeType.IndexExpression;
@@ -340,6 +343,7 @@ namespace UIForia.Parsing.Expression.AstNodes {
     public class DotAccessNode : ASTNode {
 
         public string propertyName;
+        public bool isElvisAccess;
 
         public DotAccessNode() {
             type = ASTNodeType.DotAccess;

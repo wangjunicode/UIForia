@@ -31,20 +31,23 @@ namespace UIForia.Compilers {
         private readonly LightList<string> namespaces;
         private Parameter? implicitContext;
         private LinqCompiler parent;
+        private LightList<Expression> statements;
 
         private Type returnType;
+        private LabelTarget returnLabel;
+        private ParameterExpression returnVar;
 
         public LinqCompiler() {
             this.parameters = new StructList<Parameter>();
             this.blockStack = new LightStack<BlockDefinition>();
             this.namespaces = new LightList<string>();
+            this.statements = new LightList<Expression>();
             blockStack.Push(new BlockDefinition());
         }
 
         private BlockDefinition currentBlock {
             [DebuggerStepThrough] get { return blockStack.Peek(); }
         }
-
 
         public void Reset() {
             parent = null;
@@ -53,6 +56,9 @@ namespace UIForia.Compilers {
             parameters.Clear();
             blockStack.Clear();
             namespaces.Clear();
+            statements.Clear();
+            returnVar = null;
+            returnLabel = null;
             blockStack.Push(new BlockDefinition());
         }
 
@@ -146,6 +152,7 @@ namespace UIForia.Compilers {
             returnType = retnType ?? typeof(void);
         }
 
+
         public void SetSignature<T>(IReadOnlyList<Parameter> parameters) {
             this.parameters.Clear();
             for (int i = 0; i < parameters.Count; i++) {
@@ -162,6 +169,34 @@ namespace UIForia.Compilers {
             }
 
             returnType = retnType ?? typeof(void);
+        }
+
+        // helpful for debugging to see exactly where a statement was added from
+        private void AddStatement(Expression expression) {
+            statements.Add(expression);
+        }
+
+        public void Return(string input = null) {
+            if (returnType == typeof(void) && !string.IsNullOrEmpty(input)) {
+                throw new InvalidArgumentException("Return expects a null value because the signature of the currently compiled function expects a void return value");
+            }
+
+            if (returnType == typeof(void)) {
+                // ensure we have a return label
+                // emit a goto for the label
+                if (returnLabel == null) {
+                    returnLabel = Expression.Label("retn");
+                }
+
+                AddStatement(Expression.Return(returnLabel));
+                return;
+            }
+
+            if (returnVar == null) {
+                returnVar = Expression.Variable(returnType, "__retnVal__");
+            }
+
+            AddStatement(Expression.Assign(returnVar, Visit(returnType, ExpressionParser.Parse(input))));
         }
 
         public void Assign(LHSStatementChain left, RHSStatementChain right) {
@@ -507,6 +542,8 @@ namespace UIForia.Compilers {
                 throw CompileException.AccessNonReadableField(head.Type, fieldInfo);
             }
 
+            // current expression = member access
+            // current expression.isWritten = false;
             return Expression.MakeMemberAccess(head, fieldInfo);
         }
 
@@ -543,12 +580,17 @@ namespace UIForia.Compilers {
         }
 
         public bool shouldNullCheck = true;
+        public Expression currentStatement;
+
+        public void WriteCurrentStatement() { }
 
         public Expression IndexArray(Expression head, Expression indexExpression) {
-            
             currentBlock.requireNullCheck = true;
             Expression toBeIndexed = currentBlock.AddVariable(head.Type, "toBeIndexed");
             currentBlock.AddAssignment(toBeIndexed, head);
+
+//            AssignVariable("toBeIndexed", head);
+
             head = toBeIndexed;
             Expression indexer = currentBlock.AddVariable(indexExpression.Type, "indexer");
             currentBlock.AddStatement(Expression.Assign(indexer, indexExpression));
@@ -557,7 +599,6 @@ namespace UIForia.Compilers {
             ParameterExpression variable = currentBlock.AddVariable(access.Type, "arrayVal");
             currentBlock.AddAssignment(variable, access);
             return variable;
-
         }
 
         private Expression MemberAccessUnchecked(Expression head, string fieldOrPropertyName) {
@@ -579,6 +620,9 @@ namespace UIForia.Compilers {
                 currentBlock.requireNullCheck = true;
                 Expression nullCheck = currentBlock.AddVariable(head.Type, "nullCheck");
                 currentBlock.AddAssignment(nullCheck, head);
+                // currentExpression = variable;
+                // currentExpression.isWritten = true;
+
                 currentBlock.AddStatement(NullCheck(nullCheck, currentBlock.ReturnTarget));
                 head = nullCheck;
             }
@@ -1083,13 +1127,11 @@ namespace UIForia.Compilers {
                         Type lastValueType = lastExpression.Type;
 
                         if (lastValueType.IsArray) {
-                            
                             if (lastValueType.GetArrayRank() != 1) {
                                 throw new NotSupportedException("Expressions do not support multidimensional arrays yet");
                             }
-                            
-                            lastExpression = IndexArray(lastExpression,  Visit(typeof(int), part.arguments[0]));
 
+                            lastExpression = IndexArray(lastExpression, Visit(typeof(int), part.arguments[0]));
                         }
                         else {
                             bool isList = lastValueType.Implements(typeof(IList));
@@ -1124,7 +1166,7 @@ namespace UIForia.Compilers {
                         throw new ArgumentOutOfRangeException();
                 }
             }
-            
+
             return lastExpression;
         }
 
@@ -1491,11 +1533,11 @@ namespace UIForia.Compilers {
             }
         }
 
-
         public Expression CreateRHSStatementChain(string input) {
             Expression statementChain = CreateRHSStatementChain(null, input);
-            currentBlock.AddStatement(statementChain);
-            return statementChain;
+            ParameterExpression variable = currentBlock.AddVariable(statementChain.Type, "rhsChainOutput");
+            currentBlock.AddAssignment(variable, statementChain);
+            return variable;
         }
 
         public Expression CreateRHSStatementChain(Type targetType, string input) {
@@ -1625,7 +1667,7 @@ namespace UIForia.Compilers {
             }
 
 
-            nested.Visit(arguments[arguments.Length - 1], lambda.body);
+            nested.currentBlock.AddStatement(nested.Visit(arguments[arguments.Length - 1], lambda.body));
 
             LambdaExpression retn = nested.BuildLambda();
             s_CompilerPool.Release(nested);

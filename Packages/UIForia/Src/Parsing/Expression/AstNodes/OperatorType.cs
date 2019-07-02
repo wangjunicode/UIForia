@@ -28,6 +28,8 @@ namespace UIForia.Parsing.Expression.AstNodes {
         BinaryAnd = 1 << 21,
         ShiftLeft = 1 << 22,
         ShiftRight = 1 << 23,
+        Coalesce = 1 << 24,
+        Elvis = 1 << 25,
 
     }
 }

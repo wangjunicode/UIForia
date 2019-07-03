@@ -136,6 +136,10 @@ namespace UIForia.Exceptions {
         public static CompileException UnknownEnumValue(Type type, string value) {
             return new CompileException($"Unable to enum value {value} on type {type}");
         }
+        
+        public static CompileException NonPublicType(Type type) {
+            return new CompileException($"The type {type} is not public and cannot be used in expressions.");
+        }
 
         public static CompileException UnresolvedConstructor(Type type, Type[] arguments) {
             string BuildArgumentList() {
@@ -159,7 +163,7 @@ namespace UIForia.Exceptions {
         }
 
 
-       
+  
 
     }
 

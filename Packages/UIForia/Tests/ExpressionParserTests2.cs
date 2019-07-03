@@ -766,7 +766,7 @@ public class ExpressionParserTests2 {
         Assert.AreEqual(1, node.parts.Count);
         Assert.AreEqual("instance", node.identifier);
         Assert.IsInstanceOf<DotAccessNode>(node.parts[0]);
-        Assert.IsTrue(((DotAccessNode)node.parts[0]).isElvisAccess);
+        Assert.IsTrue(((DotAccessNode)node.parts[0]).isNullableAccess);
         Assert.AreEqual("property", ((DotAccessNode)node.parts[0]).propertyName);
     }
     
@@ -777,7 +777,7 @@ public class ExpressionParserTests2 {
         Assert.AreEqual(2, node.parts.Count);
         Assert.AreEqual("instance", node.identifier);
         Assert.IsInstanceOf<DotAccessNode>(node.parts[0]);
-        Assert.IsTrue(((DotAccessNode)node.parts[0]).isElvisAccess);
+        Assert.IsTrue(((DotAccessNode)node.parts[0]).isNullableAccess);
         Assert.AreEqual("ToString", ((DotAccessNode)node.parts[0]).propertyName);
         Assert.IsInstanceOf<InvokeNode>(node.parts[1]);
     }
@@ -790,7 +790,7 @@ public class ExpressionParserTests2 {
         Assert.AreEqual("instance", node.identifier);
         Assert.IsInstanceOf<IndexNode>(node.parts[0]);
         IndexNode indexNode = (IndexNode) node.parts[0];
-        Assert.IsTrue(indexNode.isElvisAccess);
+        Assert.IsTrue(indexNode.isNullableAccess);
         Assert.AreEqual(1, indexNode.arguments.Count);
         Assert.IsInstanceOf<LiteralNode>(indexNode.arguments[0]);
     }

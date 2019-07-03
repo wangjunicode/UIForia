@@ -12,11 +12,23 @@ using UIForia.Expressions;
 using UIForia.Extensions;
 using UIForia.Parsing.Expression;
 using UIForia.Parsing.Expression.AstNodes;
+using UIForia.Test.NamespaceTest.SomeNamespace;
+using UIForia.Util;
 using UnityEngine;
 using Expression = System.Linq.Expressions.Expression;
 
 [TestFixture]
 public class TestLinqCompiler {
+
+    private class ExpressionErrorLogger {
+
+        public string error;
+
+        public void OnError(string error) {
+            this.error = error;
+        }
+
+    }
 
     private class LinqThing {
 
@@ -31,11 +43,12 @@ public class TestLinqCompiler {
         public int intVal;
         public Dictionary<string, Vector3> vec3Dic;
         public string stringField;
-        
+        public const float ConstFloatValue = 14242;
+
         public Vector3 GetVectorValue() {
             return svHolderVec3.value;
         }
-        
+
         public Vector3 GetVectorValueWith1Arg(int arg) {
             return svHolderVec3.value;
         }
@@ -44,13 +57,12 @@ public class TestLinqCompiler {
             stringField = nameof(OverloadWithValue) + "_int";
             return value;
         }
-        
+
         public float OverloadWithValue(float value = 10.02424f) {
             stringField = nameof(OverloadWithValue) + "_float";
             return value;
         }
-        
-        
+
     }
 
     public struct StructValueHolder<T> {
@@ -95,19 +107,21 @@ public class TestLinqCompiler {
             MethodInfo[] changedHandlers = GetPropertyChangedHandlers(elementType, "fieldName");
 
             compiler.SetSignature(
-                new Parameter(root, "root", ParameterFlags.Implicit | ParameterFlags.NeverNull),
-                new Parameter(elementType, "element")
+                new Parameter(root, "root", ParameterFlags.NeverNull),
+                new Parameter(elementType, "element", ParameterFlags.NeverNull)
             );
 
-            LHSStatementChain left = compiler.CreateLHSStatementChain("element", attributeDefinition.key);
-            Expression right = compiler.CreateRHSStatementChain(left.targetExpression.Type, attributeDefinition.value);
+            // <Ele floatValue="expression"/>
+            LHSStatementChain left = compiler.AssignableStatement(attributeDefinition.key);
 
-           // if no listeners and field or auto prop then just assign, no need to check
-           
-           // compiler.Assign(left, Expression.Constant(34f));
-           // compiler.EnableNullChecking(null);
-           // compiler.SetOutOfBoundsHandler(HandlerSettings);
-           // compiler.TryCatch(() => {}, () => {})
+            ParameterExpression right = compiler.AddVariable(left.targetExpression.Type, "right");
+            compiler.Assign(right, compiler.AccessorStatement(left.targetExpression.Type, attributeDefinition.value));
+            // if no listeners and field or auto prop then just assign, no need to check
+
+            // compiler.Assign(left, Expression.Constant(34f));
+            // compiler.EnableNullChecking(null);
+            // compiler.SetOutOfBoundsHandler(HandlerSettings);
+            // compiler.TryCatch(() => {}, () => {})
 //            compiler.Variable("left", attributeDefinition.key, () => compiler.Call(typeof(LinqCompiler).GetMethod("DebugLog"), root, fieldName, astNode));
 //            compiler.Variable("right", attributeDefinition.value, "errorHandler", NotNullChecked | NeverOutOfBounds);
 //            compiler.IfEqual("left", "right", (c) => {
@@ -120,12 +134,12 @@ public class TestLinqCompiler {
 //            });
 //          compiler.Return("() => value");
             // return = assign to output variable; goto return;
-            
+
             // collapse stage 'optimizes' by folding constants, removing variable writes for return statements where not needed, don't generate return label when not needed.
             // there is no 'current block' the compiler has context and thats it.
             // signature must be set before calling other methods. no error will thrown but it is incorrect.
 
-        compiler.IfNotEqual(left, right, () => {
+            compiler.IfNotEqual(left, right, () => {
                 compiler.Assign(left, right);
                 if (changedHandlers != null) {
                     for (int i = 0; i < changedHandlers.Length; i++) {
@@ -138,8 +152,8 @@ public class TestLinqCompiler {
                 }
             });
 
-            Debug.Log(PrintCode(compiler.BuildLambda()));
-            return compiler.BuildLambda();
+            compiler.Log();
+            return compiler.BuildLambda2();
         }
 
         public LinqBinding CompileMemberReadBinding(Type root, Type elementType, AttributeDefinition attributeDefinition) {
@@ -151,6 +165,9 @@ public class TestLinqCompiler {
         }
 
     }
+
+
+    private class TestElement : UIElement { }
 
     // todo -- test bad enum values
     // todo -- test bad constant values
@@ -171,101 +188,575 @@ public class TestLinqCompiler {
     // todo -- test initializer syntax { x: 4 }
     // todo -- test falsy bool handling
     // todo -- test ternary
+    // todo -- test coalesce
+    // todo -- test elvis
+    // todo -- test partial ternary (ternary default)
+    // todo -- expressions should not be null checked again unless assigned to after last null check
 
-
-    private class TestElement : UIElement {
-
-        public void HandleValueChanged(string value, int idx) { }
-
-    }
-
-    public class Binding {
-
-        public string id;
-        public Binding parent;
-        public Binding nextSibling;
-        public Binding firstChild;
-
-        private Action<UIElement, UIElement> fn;
-
-        public virtual void OnEnable() { }
-
-        public virtual void OnDisable() { }
-
-        public virtual void OnElementChanged() { }
-
-        public virtual void OnElementDestroyed() { }
-
-        public virtual void Execute(UIElement root, UIElement current) {
-            fn(root, current);
+    [Test]
+    public void CompileConstant() {
+        LinqCompiler compiler = new LinqCompiler();
+        compiler.SetSignature<float>();
+        compiler.Return("5f");
+        compiler.Log();
+        AssertStringsEqual(@"
+        () => 
+        {
+            return 5f;
         }
-
+        ", compiler.Print());
     }
 
-    //for non const actions probably can't share this binding since we need to know the last action and compare it with the new one
+    [Test]
+    public void CompileFieldAccess_NullChecked() {
+        LinqCompiler compiler = new LinqCompiler();
+        compiler.SetSignature<float>(
+            new Parameter<LinqThing>("thing")
+        );
+        compiler.Return("thing.floatValue");
+        compiler.Log();
+        AssertStringsEqual(@"
+       (TestLinqCompiler.LinqThing thing) =>
+        {
+            float retn_val;
 
-    // need a factory that generates a closure over my arguments
-    // need a special instance of binding node or another closure to invoke that factory
+            retn_val = default(float);
+            if (thing == null)
+            {
+                goto retn;
+            }
+            retn_val = thing.floatValue;
+        retn:
+            return retn_val;
+        }
+        ", compiler.Print());
+        Func<LinqThing, float> fn = compiler.Compile<Func<LinqThing, float>>();
+        LinqThing thing = new LinqThing();
+        thing.floatValue = 24;
+        Assert.AreEqual(24, fn(thing));
+        Assert.AreEqual(0, fn(null));
+    }
 
-    private class CallbackBinding : Binding {
+    [Test]
+    public void CompileFieldAccess_NoNullCheck() {
+        LinqCompiler compiler = new LinqCompiler();
+        compiler.SetSignature<float>(
+            new Parameter<LinqThing>("thing", ParameterFlags.NeverNull)
+        );
+        compiler.Return("thing.floatValue");
+        compiler.Log();
+        AssertStringsEqual(@"
+        (TestLinqCompiler.LinqThing thing) =>
+        {
+            return thing.floatValue;
+        }
+        ", compiler.Print());
+        Func<LinqThing, float> fn = compiler.Compile<Func<LinqThing, float>>();
+        LinqThing thing = new LinqThing();
+        thing.floatValue = 24;
+        Assert.AreEqual(24, fn(thing));
+        Assert.Throws<NullReferenceException>(() => { fn(null); });
+    }
 
-        private Action<string, int> previous;
-        private Action<string> previousOuter;
+    [Test]
+    public void CompileArrayIndex_NoNullCheck() {
+        LinqCompiler compiler = new LinqCompiler();
+        compiler.SetNullCheckingEnabled(false);
+        compiler.SetOutOfBoundsCheckingEnabled(false);
+        compiler.SetSignature<float>(
+            new Parameter<LinqThing>("thing")
+        );
+        compiler.Return("thing.vec3Array[0].x");
+        compiler.Log();
+        AssertStringsEqual(@"
+        (TestLinqCompiler.LinqThing thing) =>
+        {
+            return thing.vec3Array[0].x;
+        }
+        ", compiler.Print());
+        Func<LinqThing, float> fn = compiler.Compile<Func<LinqThing, float>>();
+        LinqThing thing = new LinqThing();
+        thing.vec3Array = new[] {new Vector3(1, 2, 3)};
+        Assert.AreEqual(1, fn(thing));
+        Assert.Throws<NullReferenceException>(() => { fn(null); });
+    }
 
-        private Func<UIElement, Action<string>> factory => (UIElement el) => { return (string value) => { ((TestElement) el).HandleValueChanged(value, 0); }; };
+    [Test]
+    public void CompileArrayIndex_NullCheck_BoundsCheck() {
+        LinqCompiler compiler = new LinqCompiler();
+        compiler.SetNullCheckingEnabled(true);
+        compiler.SetOutOfBoundsCheckingEnabled(true);
+        compiler.SetSignature<float>(
+            new Parameter<LinqThing>("thing")
+        );
+        compiler.Return("thing.vec3Array[0].x");
+        compiler.Log();
+        AssertStringsEqual(@"
+        (TestLinqCompiler.LinqThing thing) =>
+        {
+            float retn_val;
+            UnityEngine.Vector3[] toBoundsCheck;
 
-        private Action<Select<string>, TestElement> binding;
+            retn_val = default(float);
+            if (thing == null)
+            {
+                goto retn;
+            }
+            toBoundsCheck = thing.vec3Array;
+            if (toBoundsCheck == null)
+            {
+                goto retn;
+            }
+            if (0 >= toBoundsCheck.Length)
+            {
+                goto retn;
+            }
+            retn_val = toBoundsCheck[0].x;
+        retn:
+            return retn_val;
+        }
+        ", compiler.Print());
+        Func<LinqThing, float> fn = compiler.Compile<Func<LinqThing, float>>();
+        LinqThing thing = new LinqThing();
+        thing.vec3Array = new[] {new Vector3(1, 2, 3)};
+        Assert.AreEqual(1, fn(thing));
+    }
 
-        private void SetBinding() {
-            binding = (Select<string> selectElement, TestElement root) => {
-                Action<string, int> a = root.HandleValueChanged;
-                // do work and check if not constant
+    [Test]
+    public void CompileArrayIndex_BoundsCheck() {
+        LinqCompiler compiler = new LinqCompiler();
+        compiler.SetNullCheckingEnabled(false);
+        compiler.SetOutOfBoundsCheckingEnabled(true);
+        compiler.SetSignature<float>(
+            new Parameter<LinqThing>("thing")
+        );
+        compiler.Return("thing.vec3Array[0].x");
+        compiler.Log();
+        AssertStringsEqual(@"
+        (TestLinqCompiler.LinqThing thing) =>
+        {
+            float retn_val;
+            UnityEngine.Vector3[] toBoundsCheck;
 
-                // ... run expression body here
+            retn_val = default(float);
+            toBoundsCheck = thing.vec3Array;
+            if (0 >= toBoundsCheck.Length)
+            {
+                goto retn;
+            }
+            retn_val = toBoundsCheck[0].x;
+        retn:
+            return retn_val;
+        }
+        ", compiler.Print());
+        Func<LinqThing, float> fn = compiler.Compile<Func<LinqThing, float>>();
+        LinqThing thing = new LinqThing();
+        thing.vec3Array = new[] {new Vector3(1, 2, 3)};
+        Assert.AreEqual(1, fn(thing));
+    }
 
-                if (a != previous) {
-                    selectElement.onValueChanged -= previousOuter;
-                    previousOuter = factory(root);
-                    selectElement.onValueChanged += previousOuter;
+
+    [Test]
+    public void CompileArrayIndex_Constant() {
+        LinqCompiler compiler = new LinqCompiler();
+
+        LinqThing thing = new LinqThing();
+
+        thing.vec3Array = new[] {
+            new Vector3(1, 2, 3),
+            new Vector3(4, 5, 6),
+            new Vector3(7, 8, 9)
+        };
+
+        compiler.SetSignature<Vector3>(new Parameter<LinqThing>("thing", ParameterFlags.NeverNull));
+        compiler.Return("thing.vec3Array[1]");
+        Assert.AreEqual(thing.vec3Array[1], compiler.Compile<Func<LinqThing, Vector3>>()(thing));
+        compiler.Log();
+        AssertStringsEqual(@"
+        (TestLinqCompiler.LinqThing thing) =>
+        {
+            UnityEngine.Vector3 retn_val;
+            UnityEngine.Vector3[] toBoundsCheck;
+
+            retn_val = default(UnityEngine.Vector3);
+            toBoundsCheck = thing.vec3Array;
+            if (toBoundsCheck == null)
+            {
+                goto retn;
+            }
+            if (1 >= toBoundsCheck.Length)
+            {
+                goto retn;
+            }
+            retn_val = toBoundsCheck[1];
+        retn:
+            return retn_val;
+        }
+        ", compiler.Print());
+        compiler.Reset();
+
+        compiler.SetSignature<Vector3>(new Parameter<LinqThing>("thing"));
+        compiler.Return("thing.vec3Array[1 + 1]");
+        compiler.Log();
+        Assert.AreEqual(thing.vec3Array[2], compiler.Compile<Func<LinqThing, Vector3>>()(thing));
+        compiler.Reset();
+
+        compiler.SetSignature<Vector3>(new Parameter<LinqThing>("thing"));
+        compiler.Return("thing.vec3Array[99999]");
+        Assert.AreEqual(default(Vector3), compiler.Compile<Func<LinqThing, Vector3>>()(thing));
+        compiler.Reset();
+
+        compiler.SetSignature<Vector3>(new Parameter<LinqThing>("thing"));
+        compiler.Return("thing.vec3Array[-14]");
+        Assert.AreEqual(default(Vector3), compiler.Compile<Func<LinqThing, Vector3>>()(thing));
+    }
+
+    [Test]
+    public void CompileArrayIndex_Expression_NullAndBoundsChecked() {
+        LinqCompiler compiler = new LinqCompiler();
+
+        LinqThing thing = new LinqThing();
+
+        thing.intVal = 3;
+        thing.vec3Array = new[] {
+            new Vector3(1, 2, 3),
+            new Vector3(4, 5, 6),
+            new Vector3(7, 8, 9)
+        };
+
+        compiler.SetSignature<Vector3>(
+            new Parameter<LinqThing>("thing"),
+            new Parameter<int>("arg0"),
+            new Parameter<int>("arg1")
+        );
+
+        compiler.Return("thing.vec3Array[arg0 + thing.intVal - arg1]");
+        compiler.Log();
+        AssertStringsEqual(@"
+        (TestLinqCompiler.LinqThing thing, int arg0, int arg1) =>
+        {
+            UnityEngine.Vector3 retn_val;
+            UnityEngine.Vector3[] toBoundsCheck;
+            int indexer;
+
+            retn_val = default(UnityEngine.Vector3);
+            if (thing == null)
+            {
+                goto retn;
+            }
+            toBoundsCheck = thing.vec3Array;
+            if (toBoundsCheck == null)
+            {
+                goto retn;
+            }
+            indexer = (arg0 + thing.intVal) - arg1;
+            if ((indexer < 0) || (indexer >= toBoundsCheck.Length))
+            {
+                goto retn;
+            }
+            retn_val = toBoundsCheck[indexer];
+        retn:
+            return retn_val;
+        }", compiler.Print());
+        Assert.AreEqual(thing.vec3Array[2], compiler.Compile<Func<LinqThing, int, int, Vector3>>()(thing, 1, 2));
+    }
+
+    [Test]
+    public void CompileArrayIndex_Expression_NullChecked() {
+        LinqCompiler compiler = new LinqCompiler();
+
+        LinqThing thing = new LinqThing();
+
+        thing.intVal = 3;
+        thing.vec3Array = new[] {
+            new Vector3(1, 2, 3),
+            new Vector3(4, 5, 6),
+            new Vector3(7, 8, 9)
+        };
+
+        compiler.SetSignature<Vector3>(
+            new Parameter<LinqThing>("thing"),
+            new Parameter<int>("arg0"),
+            new Parameter<int>("arg1")
+        );
+
+        compiler.SetOutOfBoundsCheckingEnabled(false);
+        compiler.Return("thing.vec3Array[arg0 + thing.intVal - arg1]");
+        compiler.Log();
+        AssertStringsEqual(@"
+        (TestLinqCompiler.LinqThing thing, int arg0, int arg1) =>
+        {
+            UnityEngine.Vector3 retn_val;
+            UnityEngine.Vector3[] toBoundsCheck;
+
+            retn_val = default(UnityEngine.Vector3);
+            if (thing == null)
+            {
+                goto retn;
+            }
+            toBoundsCheck = thing.vec3Array;
+            if (toBoundsCheck == null)
+            {
+                goto retn;
+            }
+            retn_val = toBoundsCheck[(arg0 + thing.intVal) - arg1];
+        retn:
+            return retn_val;
+        }", compiler.Print());
+        Assert.AreEqual(thing.vec3Array[2], compiler.Compile<Func<LinqThing, int, int, Vector3>>()(thing, 1, 2));
+    }
+
+    [Test]
+    public void CompileArrayIndex_Expression_NoChecks() {
+        LinqCompiler compiler = new LinqCompiler();
+
+        LinqThing thing = new LinqThing();
+
+        thing.intVal = 3;
+        thing.vec3Array = new[] {
+            new Vector3(1, 2, 3),
+            new Vector3(4, 5, 6),
+            new Vector3(7, 8, 9)
+        };
+
+        compiler.SetSignature<Vector3>(
+            new Parameter<LinqThing>("thing"),
+            new Parameter<int>("arg0"),
+            new Parameter<int>("arg1")
+        );
+
+        compiler.SetOutOfBoundsCheckingEnabled(false);
+        compiler.SetNullCheckingEnabled(false);
+        compiler.Return("thing.vec3Array[arg0 + thing.intVal - arg1]");
+        compiler.Log();
+        AssertStringsEqual(@"
+        (TestLinqCompiler.LinqThing thing, int arg0, int arg1) =>
+        {
+            return thing.vec3Array[(arg0 + thing.intVal) - arg1];
+        }",
+            compiler.Print());
+        Assert.AreEqual(thing.vec3Array[2], compiler.Compile<Func<LinqThing, int, int, Vector3>>()(thing, 1, 2));
+    }
+
+    [Test]
+    public void CompileArrayIndex_ElvisAccess() {
+        LinqCompiler compiler = new LinqCompiler();
+
+        LinqThing thing = new LinqThing();
+
+        thing.intVal = 3;
+        thing.vec3Array = new[] {
+            new Vector3(2, 2, 2),
+            new Vector3(4, 5, 6),
+            new Vector3(7, 8, 9)
+        };
+
+        compiler.SetSignature<Vector3>(
+            new Parameter<LinqThing>("thing"),
+            new Parameter<int>("arg0"),
+            new Parameter<int>("arg1")
+        );
+
+        compiler.AddNamespace("UnityEngine");
+        compiler.SetNullCheckingEnabled(false);
+
+        compiler.Return("thing.vec3Array?[arg0 + thing.intVal - arg1] ?? Vector3.one");
+        compiler.Log();
+
+        AssertStringsEqual(@"
+        (TestLinqCompiler.LinqThing thing, int arg0, int arg1) =>
+        {
+            UnityEngine.Vector3 retn_val;
+            UnityEngine.Vector3? nullableAccess;
+            int indexer;
+        
+            retn_val = default(UnityEngine.Vector3);
+            nullableAccess = default(UnityEngine.Vector3?);
+            indexer = (arg0 + thing.intVal) - arg1;
+            if (thing.vec3Array != null)
+            {
+                if ((indexer < 0) || (indexer >= thing.vec3Array.Length))
+                {
+                    goto retn;
                 }
-            };
-        }
+                nullableAccess = (UnityEngine.Vector3?)thing.vec3Array[indexer];
+            }
+            retn_val = nullableAccess ?? UnityEngine.Vector3.one;
+        retn:
+            return retn_val;
+        }       
+        ",
+            compiler.Print());
+        Assert.AreEqual(thing.vec3Array[2], compiler.Compile<Func<LinqThing, int, int, Vector3>>()(thing, 1, 2));
+        thing.vec3Array = null;
+        Assert.AreEqual(Vector3.one, compiler.Compile<Func<LinqThing, int, int, Vector3>>()(thing, 1, 2));
+    }
 
+    [Test]
+    public void CompileArrayIndex_InvalidExpression() {
+        LinqCompiler compiler = new LinqCompiler();
+
+        LinqThing thing = new LinqThing();
+
+        thing.intVal = 3;
+        thing.vec3Array = new[] {
+            new Vector3(1, 2, 3),
+            new Vector3(4, 5, 6),
+            new Vector3(7, 8, 9)
+        };
+
+        compiler.SetSignature<Vector3>(new Parameter<LinqThing>("thing"));
+        CompileException exception = Assert.Throws<CompileException>(() => { compiler.Return("thing.vec3Array[thing.vec3Dic]"); });
+        Assert.AreEqual(CompileException.InvalidTargetType(typeof(int), typeof(Dictionary<string, Vector3>)).Message, exception.Message);
+    }
+
+    [Test]
+    public void CompileFieldAccess_Static() {
+        LinqCompiler compiler = new LinqCompiler();
+        compiler.SetSignature<Color>();
+        compiler.Return("UnityEngine.Color.red");
+        AssertStringsEqual(@"
+        () => 
+        {
+            return UnityEngine.Color.red;
+        }    
+        ", compiler.Print());
+        Assert.AreEqual(Color.red, compiler.Compile<Func<Color>>()());
+    }
+
+    [Test]
+    public void CompileFieldAccess_Const() {
+        LinqCompiler compiler = new LinqCompiler();
+        compiler.SetSignature<float>();
+        compiler.AddNamespace("UIForia.Test.NamespaceTest.SomeNamespace");
+        compiler.Return("NamespaceTestClass.FloatValueConst");
+        AssertStringsEqual(@"
+        () => 
+        {
+            return UIForia.Test.NamespaceTest.SomeNamespace.NamespaceTestClass.FloatValueConst;
+        }    
+        ", compiler.Print());
+        Assert.AreEqual(NamespaceTestClass.FloatValueConst, compiler.Compile<Func<float>>()());
+    }
+
+    [Test]
+    public void CompileFieldAccess_Const_NonPublicType() {
+        LinqCompiler compiler = new LinqCompiler();
+        compiler.SetSignature<float>();
+
+        CompileException exception = Assert.Throws<CompileException>(() => { compiler.Return("TestLinqCompiler.LinqThing.ConstFloatValue"); });
+        Assert.AreEqual(CompileException.NonPublicType(typeof(LinqThing)).Message, exception.Message);
+    }
+
+    [Test]
+    public void CompileFieldAccess_NullChecked_CustomError() {
+        LinqCompiler compiler = new LinqCompiler();
+        compiler.SetSignature<float>(
+            new Parameter<LinqThing>("thing"),
+            new Parameter<LinqThing>("thing2"),
+            new Parameter<ExpressionErrorLogger>("logger")
+        );
+
+        compiler.SetNullCheckHandler((c, expression) => {
+            ParameterExpression parameterExpression = expression as ParameterExpression;
+            c.Assign("logger.error", $"'{parameterExpression.Name} was null'");
+        });
+
+        compiler.Return("thing.floatValue + thing2.floatValue");
+        compiler.Log();
+        AssertStringsEqual(@"
+        (TestLinqCompiler.LinqThing thing, TestLinqCompiler.LinqThing thing2, TestLinqCompiler.ExpressionErrorLogger logger) =>
+        {
+        float retn_val;
+
+        retn_val = default(float);
+        if (thing == null)
+        {
+            logger.error = ""thing was null"";
+            goto retn;
+        }
+        if (thing2 == null)
+        {
+            logger.error = ""thing2 was null"";
+            goto retn;
+        }
+        retn_val = thing.floatValue + thing2.floatValue;
+        retn:
+            return retn_val;
+        }
+        ", compiler.Print());
+        Func<LinqThing, LinqThing, ExpressionErrorLogger, float> fn = compiler.Compile<Func<LinqThing, LinqThing, ExpressionErrorLogger, float>>();
+        LinqThing thing = new LinqThing();
+        LinqThing thing2 = new LinqThing();
+        thing.floatValue = 24;
+        thing2.floatValue = 284;
+        ExpressionErrorLogger logger = new ExpressionErrorLogger();
+
+        Assert.AreEqual(thing.floatValue + thing2.floatValue, fn(thing, thing2, logger));
+        Assert.AreEqual(null, logger.error);
+
+        Assert.AreEqual(0, fn(null, thing2, logger));
+        Assert.AreEqual("thing was null", logger.error);
+
+        Assert.AreEqual(0, fn(thing, null, logger));
+        Assert.AreEqual("thing2 was null", logger.error);
     }
 
     [Test]
     public void CompileClosure() {
         LinqCompiler compiler = new LinqCompiler();
 
-        compiler.SetSignature<Func<int>>(new Parameter<UIElement>("root"));
+        compiler.SetSignature<Func<int>>(new Parameter<LinqThing>("root"));
 
-        compiler.CreateRHSStatementChain(typeof(Func<int>), "() => root.id");
+        compiler.AddVariable(typeof(Vector3[]), "vectors");
+        compiler.Assign("vectors", "root.vec3Array");
+        compiler.Return("() => root.intVal");
 
-        // always write assignments
-        // always write conditionals
-        // only write access chain when we actually have to
-        // if current chain.lastStatement != currentStatement, write it
-        // chain always ends with its last expression being an assignment to its output var
-        // the last chain has this assignment repalced with an assignment to body return value
-        // if current chain is null or bounds checked, 
-            // assign to chain output var
-            // main-retn-label:
-            // return 
-        
-        Func<UIElement, Func<int>> fn = compiler.Compile<Func<UIElement, Func<int>>>();
-        TestElement element = new TestElement();
-        TestElement element1 = new TestElement();
+        Func<LinqThing, Func<int>> fn = compiler.Compile<Func<LinqThing, Func<int>>>();
+        LinqThing element = new LinqThing();
+        LinqThing element1 = new LinqThing();
 
-        int id = element.id;
-        Assert.AreEqual(id, fn(element)());
+        element.intVal = 12042;
+        element1.intVal = 12044;
 
+        Assert.AreEqual(element.intVal, fn(element)());
+        compiler.Log();
+        AssertStringsEqual(@"
+        (TestLinqCompiler.LinqThing root) =>
+        {
+            UnityEngine.Vector3[] vectors;
+            System.Func<int> retn_val;
+
+            retn_val = default(System.Func<int>);
+            if (root == null)
+            {
+                goto retn;
+            }
+            vectors = root.vec3Array;
+            retn_val = () =>
+            {
+                int retn_val_1;
+
+                retn_val_1 = default(int);
+                if (root == null)
+                {
+                    goto retn_1;
+                }
+                retn_val_1 = root.intVal;
+            retn_1:
+                return retn_val_1;
+            };
+        retn:
+            return retn_val;
+        }
+        ", compiler.Print());
         compiler.Reset();
-//        compiler.SetSignature<Func<UIElement, int>>(new Parameter<UIElement>("root"));
-//
-//        compiler.CreateRHSStatementChain("(el) => root.id + el.id");
-//
-//        Func<UIElement, Func<UIElement, int>> fn2 = compiler.Compile<Func<UIElement, Func<UIElement, int>>>();
-//        Assert.AreEqual(element.id + element1.id, fn2(element)(element1));
+
+        compiler.SetSignature<Func<LinqThing, int>>(new Parameter<LinqThing>("root"));
+        compiler.Return("(el) => root.intVal + el.intVal");
+        compiler.Log();
+        Func<LinqThing, Func<LinqThing, int>> fn2 = compiler.Compile<Func<LinqThing, Func<LinqThing, int>>>();
+        Assert.AreEqual(element.intVal + element1.intVal, fn2(element)(element1));
     }
 
     [Test]
@@ -274,7 +765,7 @@ public class TestLinqCompiler {
 
         compiler.SetSignature<Func<float, int, int>>(new Parameter<UIElement>("root"));
 
-        compiler.CreateRHSStatementChain("(intVal, intVal2) => (intVal + root.id) + intVal2");
+        compiler.Return("(intVal, intVal2) => (intVal + root.id) + intVal2");
 
         Func<UIElement, Func<float, int, int>> fn = compiler.Compile<Func<UIElement, Func<float, int, int>>>();
 
@@ -328,7 +819,7 @@ public class TestLinqCompiler {
         Tuple<string> s = new Tuple<string>("hello");
         Assert.AreEqual("hello1", compiler.Compile<Func<Tuple<string>, string>>()(s));
     }
-    
+
     [Test]
     public void CompileStringConcat_RightNonConstWithNumeric() {
         LinqCompiler compiler = new LinqCompiler();
@@ -506,7 +997,7 @@ public class TestLinqCompiler {
     [Test]
     public void CompileDotAccessMixedStructRefMemberRead() {
         BindingCompiler bindingCompiler = new BindingCompiler();
-        LambdaExpression expr = bindingCompiler.BuildMemberReadBinding(LinqType, LinqType, new AttributeDefinition("floatValue", "refValueHolderVec3.value.z"));
+        LambdaExpression expr = bindingCompiler.BuildMemberReadBinding(LinqType, LinqType, new AttributeDefinition("element.floatValue", "root.refValueHolderVec3.value.z"));
         Action<LinqThing, LinqThing> fn = (Action<LinqThing, LinqThing>) expr.Compile();
         LinqThing root = new LinqThing();
         LinqThing element = new LinqThing();
@@ -520,21 +1011,21 @@ public class TestLinqCompiler {
         AssertStringsEqual(@"
         (TestLinqCompiler.LinqThing root, TestLinqCompiler.LinqThing element) =>
         {
+            float right;
             TestLinqCompiler.ValueHolder<UnityEngine.Vector3> nullCheck;
-            float rhsOutput;
 
-            rhsOutput = default(float);
             nullCheck = root.refValueHolderVec3;
             if (nullCheck == null)
             {
                 goto retn;
             }
-            rhsOutput = nullCheck.value.z;
-        retn:
-            if (element.floatValue != rhsOutput)
+            right = nullCheck.value.z;
+            if (element.floatValue != right)
             {
-                element.floatValue = rhsOutput;
+                element.floatValue = right;
             }
+        retn:
+            default(void);
         }
         ", PrintCode(expr));
     }
@@ -973,19 +1464,19 @@ public class TestLinqCompiler {
     public void CompileUnaryNot() {
         LinqCompiler compiler = new LinqCompiler();
 
-        compiler.CreateRHSStatementChain("!true");
+        compiler.Return("!true");
         Assert.AreEqual(false, compiler.Compile<Func<bool>>()());
         compiler.Reset();
 
-        compiler.CreateRHSStatementChain("!true && false");
+        compiler.Return("!true && false");
         Assert.AreEqual(!true && false, compiler.Compile<Func<bool>>()());
         compiler.Reset();
 
-        compiler.CreateRHSStatementChain("!false");
+        compiler.Return("!false");
         Assert.AreEqual(!false, compiler.Compile<Func<bool>>()());
         compiler.Reset();
 
-        compiler.CreateRHSStatementChain("false && !true");
+        compiler.Return("false && !true");
         Assert.AreEqual(false && !true, compiler.Compile<Func<bool>>()());
         compiler.Reset();
     }
@@ -1018,103 +1509,6 @@ public class TestLinqCompiler {
         compiler.CreateRHSStatementChain("~(1425 & 4)");
         Assert.AreEqual(~(1425 & 4), compiler.Compile<Func<int>>()());
         compiler.Reset();
-    }
-
-    [Test]
-    public void CompileArrayIndex_Constant() {
-        LinqCompiler compiler = new LinqCompiler();
-
-        LinqThing thing = new LinqThing();
-
-        thing.vec3Array = new[] {
-            new Vector3(1, 2, 3),
-            new Vector3(4, 5, 6),
-            new Vector3(7, 8, 9)
-        };
-
-        compiler.SetSignature<Vector3>(new Parameter<LinqThing>("thing", ParameterFlags.NeverNull));
-        // compiler.Assign(compiler.AssignLHSStatementChain(), compiler.CreateRHSStatementChain());
-        compiler.CreateRHSStatementChain("thing.vec3Array[1]");
-
-        Debug.Log(PrintCode(compiler.BuildLambda()));
-        Assert.AreEqual(thing.vec3Array[1], compiler.Compile<Func<LinqThing, Vector3>>()(thing));
-        AssertStringsEqual(@"
-       (TestLinqCompiler.LinqThing thing) =>
-       {
-            UnityEngine.Vector3[] toBeIndexed;
-            int indexer;
-            UnityEngine.Vector3 rhsOutput;
-
-            rhsOutput = default(UnityEngine.Vector3);
-            toBeIndexed = thing.vec3Array;
-            indexer = 1;
-            if ((toBeIndexed == null) || ((indexer < 0) || (indexer >= toBeIndexed.Length)))
-            {
-                goto retn;
-            }
-            rhsOutput = toBeIndexed[indexer];
-        retn:
-            return rhsOutput;
-        }
-        ", PrintCode(compiler.BuildLambda()));
-        compiler.Reset();
-
-        compiler.SetSignature<Vector3>(new Parameter<LinqThing>("thing"));
-        compiler.CreateRHSStatementChain("thing.vec3Array[1 + 1]");
-        Assert.AreEqual(thing.vec3Array[2], compiler.Compile<Func<LinqThing, Vector3>>()(thing));
-        compiler.Reset();
-
-        compiler.SetSignature<Vector3>(new Parameter<LinqThing>("thing"));
-        compiler.CreateRHSStatementChain("thing.vec3Array[99999]");
-        Assert.AreEqual(default(Vector3), compiler.Compile<Func<LinqThing, Vector3>>()(thing));
-        compiler.Reset();
-
-        compiler.SetSignature<Vector3>(new Parameter<LinqThing>("thing"));
-        compiler.CreateRHSStatementChain("thing.vec3Array[-14]");
-        Assert.AreEqual(default(Vector3), compiler.Compile<Func<LinqThing, Vector3>>()(thing));
-
-        compiler.Reset();
-    }
-
-    [Test]
-    public void CompileArrayIndex_Expression() {
-        LinqCompiler compiler = new LinqCompiler();
-
-        LinqThing thing = new LinqThing();
-
-        thing.intVal = 3;
-        thing.vec3Array = new[] {
-            new Vector3(1, 2, 3),
-            new Vector3(4, 5, 6),
-            new Vector3(7, 8, 9)
-        };
-
-        compiler.SetSignature<Vector3>(
-            new Parameter<LinqThing>("thing"),
-            new Parameter<int>("arg0"),
-            new Parameter<int>("arg1")
-        );
-
-        compiler.CreateRHSStatementChain("thing.vec3Array[arg0 + thing.intVal - arg1]");
-        Assert.AreEqual(thing.vec3Array[2], compiler.Compile<Func<LinqThing, int, int, Vector3>>()(thing, 1, 2));
-    }
-
-    [Test]
-    public void CompileArrayIndex_InvalidExpression() {
-        LinqCompiler compiler = new LinqCompiler();
-
-        LinqThing thing = new LinqThing();
-
-        thing.intVal = 3;
-        thing.vec3Array = new[] {
-            new Vector3(1, 2, 3),
-            new Vector3(4, 5, 6),
-            new Vector3(7, 8, 9)
-        };
-
-        compiler.SetSignature<Vector3>(new Parameter<LinqThing>("thing"));
-        CompileException exception = Assert.Throws<CompileException>(() => { compiler.CreateRHSStatementChain("thing.vec3Array[thing.vec3Dic]"); });
-        Assert.AreEqual(CompileException.InvalidTargetType(typeof(int), typeof(Dictionary<string, Vector3>)).Message, exception.Message);
     }
 
     [Test]
@@ -1151,16 +1545,16 @@ public class TestLinqCompiler {
         };
 
         compiler.AddNamespace("System.Collections");
-        compiler.SetSignature<bool>(new Parameter<LinqThing>("thing", ParameterFlags.NeverNull));
-        compiler.CreateRHSStatementChain("thing.vec3Array as IList");
-        Debug.Log(PrintCode(compiler.BuildLambda<Func<LinqThing, IList>>()));
+        compiler.SetSignature<IList>(new Parameter<LinqThing>("thing", ParameterFlags.NeverNull));
+        compiler.Return("thing.vec3Array as IList");
+        compiler.Log();
         Assert.AreEqual(thing.vec3Array, compiler.Compile<Func<LinqThing, IList>>()(thing));
         AssertStringsEqual(@"
         (TestLinqCompiler.LinqThing thing) =>
         {
             return thing.vec3Array as System.Collections.IList;
         }
-        ", PrintCode(compiler.BuildLambda()));
+        ", compiler.Print());
     }
 
     [Test]
@@ -1181,15 +1575,15 @@ public class TestLinqCompiler {
         );
         compiler.AddNamespace("System.Collections.Generic");
         compiler.AddNamespace("UnityEngine");
-        compiler.CreateRHSStatementChain("(IReadOnlyList<Vector3>)thing.vec3Array");
-        Debug.Log(PrintCode(compiler.BuildLambda<Func<LinqThing, IReadOnlyList<Vector3>>>()));
+        compiler.Return("(IReadOnlyList<Vector3>)thing.vec3Array");
+        compiler.Log();
         Assert.AreEqual(thing.vec3Array, compiler.Compile<Func<LinqThing, IReadOnlyList<Vector3>>>()(thing));
         AssertStringsEqual(@"
         (TestLinqCompiler.LinqThing thing) =>
         {
             return (System.Collections.Generic.IReadOnlyList<UnityEngine.Vector3>)thing.vec3Array;
         }
-        ", PrintCode(compiler.BuildLambda()));
+        ", compiler.Print());
     }
 
     [Test]
@@ -1287,55 +1681,54 @@ public class TestLinqCompiler {
     public void CompileEnumAccess() {
         LinqCompiler compiler = new LinqCompiler();
         compiler.SetSignature<TestEnum>();
-        compiler.CreateRHSStatementChain("TestEnum.One");
-        Debug.Log(PrintCode(compiler.BuildLambda()));
+        compiler.Return("TestEnum.One");
         Assert.AreEqual(TestEnum.One, compiler.Compile<Func<TestEnum>>()());
         AssertStringsEqual(@"
-           () =>
-            {
-                return TestEnum.One;
-            }
-        ", PrintCode(compiler.BuildLambda()));
+        () =>
+        {
+            return TestEnum.One;
+        }
+        ", compiler.Print());
     }
 
     [Test]
     public void CompileNamespacePath() {
         LinqCompiler compiler = new LinqCompiler();
         compiler.SetSignature<float>();
-        compiler.CreateRHSStatementChain("UIForia.Test.NamespaceTest.SomeNamespace.NamespaceTestClass.FloatValue");
-        Debug.Log(PrintCode(compiler.BuildLambda()));
+        compiler.Return("UIForia.Test.NamespaceTest.SomeNamespace.NamespaceTestClass.FloatValue");
+        compiler.Log();
         Assert.AreEqual(UIForia.Test.NamespaceTest.SomeNamespace.NamespaceTestClass.FloatValue, compiler.Compile<Func<float>>()());
         AssertStringsEqual(@"
         () =>
         {
             return UIForia.Test.NamespaceTest.SomeNamespace.NamespaceTestClass.FloatValue;
         }
-        ", PrintCode(compiler.BuildLambda()));
+        ", compiler.Print());
 
-        compiler.Reset();
-        compiler.SetSignature<float>();
-        compiler.CreateRHSStatementChain("UIForia.Test.NamespaceTest.SomeNamespace.NamespaceTestClass.FloatArray[0]");
-        Debug.Log(PrintCode(compiler.BuildLambda()));
-        Assert.AreEqual(UIForia.Test.NamespaceTest.SomeNamespace.NamespaceTestClass.FloatArray[0], compiler.Compile<Func<float>>()());
-        AssertStringsEqual(@"
-       () =>
-       {
-            float[] toBeIndexed;
-            int indexer;
-            float rhsOutput;
-
-            rhsOutput = default(float);
-            toBeIndexed = UIForia.Test.NamespaceTest.SomeNamespace.NamespaceTestClass.FloatArray;
-            indexer = 0;
-            if ((toBeIndexed == null) || ((indexer < 0) || (indexer >= toBeIndexed.Length)))
-            {
-                goto retn;
-            }
-            rhsOutput = toBeIndexed[indexer];
-        retn:
-            return rhsOutput;
-       }
-       ", PrintCode(compiler.BuildLambda()));
+//        compiler.Reset();
+//        compiler.SetSignature<float>();
+//        compiler.CreateRHSStatementChain("UIForia.Test.NamespaceTest.SomeNamespace.NamespaceTestClass.FloatArray[0]");
+//        Debug.Log(PrintCode(compiler.BuildLambda()));
+//        Assert.AreEqual(UIForia.Test.NamespaceTest.SomeNamespace.NamespaceTestClass.FloatArray[0], compiler.Compile<Func<float>>()());
+//        AssertStringsEqual(@"
+//       () =>
+//       {
+//            float[] toBeIndexed;
+//            int indexer;
+//            float rhsOutput;
+//
+//            rhsOutput = default(float);
+//            toBeIndexed = UIForia.Test.NamespaceTest.SomeNamespace.NamespaceTestClass.FloatArray;
+//            indexer = 0;
+//            if ((toBeIndexed == null) || ((indexer < 0) || (indexer >= toBeIndexed.Length)))
+//            {
+//                goto retn;
+//            }
+//            rhsOutput = toBeIndexed[indexer];
+//        retn:
+//            return rhsOutput;
+//       }
+//       ", PrintCode(compiler.BuildLambda()));
     }
 
     [Test]
@@ -1423,7 +1816,7 @@ public class TestLinqCompiler {
     [Test]
     public void CompileInstanceMethod_NoArgs() {
         LinqCompiler compiler = new LinqCompiler();
-        
+
         compiler.SetSignature<Vector3>(new Parameter<LinqThing>("root"));
         compiler.ReturnStatement("root.GetVectorValue()");
         Debug.Log(PrintCode(compiler.BuildLambda()));
@@ -1431,11 +1824,11 @@ public class TestLinqCompiler {
         thing.svHolderVec3 = new StructValueHolder<Vector3>(new Vector3(10, 11, 12));
         Assert.AreEqual(thing.GetVectorValue(), compiler.Compile<Func<LinqThing, Vector3>>()(thing));
     }
-    
+
     [Test]
     public void CompileInstanceMethod_1Arg() {
         LinqCompiler compiler = new LinqCompiler();
-        
+
         compiler.SetSignature<Vector3>(new Parameter<LinqThing>("root"));
         compiler.ReturnStatement("root.GetVectorValueWith1Arg(1)");
         Debug.Log(PrintCode(compiler.BuildLambda()));
@@ -1443,11 +1836,11 @@ public class TestLinqCompiler {
         thing.svHolderVec3 = new StructValueHolder<Vector3>(new Vector3(10, 11, 12));
         Assert.AreEqual(thing.GetVectorValueWith1Arg(1), compiler.Compile<Func<LinqThing, Vector3>>()(thing));
     }
-    
+
     [Test]
     public void CompileInstanceMethod_1Arg_ImplicitConversion() {
         LinqCompiler compiler = new LinqCompiler();
-        
+
         compiler.SetSignature<Vector3>(new Parameter<LinqThing>("root"));
         compiler.ReturnStatement("root.GetVectorValueWith1Arg(1f)");
         Debug.Log(PrintCode(compiler.BuildLambda()));
@@ -1455,70 +1848,69 @@ public class TestLinqCompiler {
         thing.svHolderVec3 = new StructValueHolder<Vector3>(new Vector3(10, 11, 12));
         Assert.AreEqual(thing.GetVectorValueWith1Arg(1), compiler.Compile<Func<LinqThing, Vector3>>()(thing));
     }
-    
+
     [Test]
     public void CompileInstanceMethod_1Arg_Overload() {
-        
         LinqThing thing = new LinqThing();
         thing.floatValue = 100;
         thing.intVal = 200;
         thing.stringField = null;
-        
+
         LinqCompiler compiler = new LinqCompiler();
-        
+
         compiler.SetSignature<float>(new Parameter<LinqThing>("root"));
         compiler.ReturnStatement("root.OverloadWithValue(root.floatValue)");
         Func<LinqThing, float> fn = compiler.Compile<Func<LinqThing, float>>();
         Debug.Log(PrintCode(compiler.BuildLambda()));
-        
+
         Assert.AreEqual(thing.floatValue, fn(thing));
         Assert.AreEqual(thing.stringField, "OverloadWithValue_float");
-        
+
         compiler.Reset();
         compiler.SetSignature<float>(new Parameter<LinqThing>("root"));
         compiler.ReturnStatement("root.OverloadWithValue(root.intVal)");
         fn = compiler.Compile<Func<LinqThing, float>>();
         Debug.Log(PrintCode(compiler.BuildLambda()));
-        
+
         Assert.AreEqual(thing.intVal, fn(thing));
         Assert.AreEqual(thing.stringField, "OverloadWithValue_int");
-        
+
         compiler.Reset();
         compiler.SetSignature<float>(new Parameter<LinqThing>("root"));
         compiler.ReturnStatement("root.OverloadWithValue()");
         fn = compiler.Compile<Func<LinqThing, float>>();
         Debug.Log(PrintCode(compiler.BuildLambda()));
-        
+
 
         Assert.AreEqual(10.02424f, fn(thing));
         Assert.AreEqual(thing.stringField, "OverloadWithValue_float");
     }
-    
+
     [Test]
     public void CompileStaticMethodNoNamespace() {
         LinqCompiler compiler = new LinqCompiler();
-        
+
         Color expected = Color.HSVToRGB(0.5f, 0.5f, 0.5f);
         compiler.SetSignature<Color>();
         compiler.AddNamespace("UnityEngine");
         compiler.ReturnStatement("Color.HSVToRGB(0.5f, 0.5f, 0.5f)");
-        
+
         Debug.Log(PrintCode(compiler.BuildLambda()));
         Assert.AreEqual(expected, compiler.Compile<Func<Color>>()());
     }
-    
+
     [Test]
     public void CompileStaticMethodWithNamespace() {
         LinqCompiler compiler = new LinqCompiler();
-        
+
         Color expected = Color.HSVToRGB(0.5f, 0.5f, 0.5f);
         compiler.SetSignature<Color>();
         compiler.ReturnStatement("UnityEngine.Color.HSVToRGB(0.5f, 0.5f, 0.5f)");
-        
+
         Debug.Log(PrintCode(compiler.BuildLambda()));
         Assert.AreEqual(expected, compiler.Compile<Func<Color>>()());
     }
-    
+
     [Test]
     public void CompileFalsyBoolean() {
         LinqCompiler compiler = new LinqCompiler();
@@ -1595,6 +1987,7 @@ namespace UIForia.Test.NamespaceTest.SomeNamespace {
     public class NamespaceTestClass {
 
         public static float FloatValue = 1;
+        public const float FloatValueConst = 142;
         public static float[] FloatArray = {1};
 
         public class SubType1 {

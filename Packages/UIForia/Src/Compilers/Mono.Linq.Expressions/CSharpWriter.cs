@@ -28,9 +28,9 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.Globalization;
 using System.Linq.Expressions;
-using System.Text;
+using UIForia.Util;
 
 namespace Mono.Linq.Expressions {
 
@@ -220,6 +220,12 @@ namespace Mono.Linq.Expressions {
             // replace `{arg count} with < ,? > until no more args
             // UIForia.Test.NamespaceTest.SomeNamespace.NamespaceTestClass+SubType1`1+NestedSubType1`1[System.Int32,System.Int32]
 
+            if (type.IsNullableType()) {
+                VisitType(type.GetGenericArguments()[0]);
+                WriteToken("?");
+                return;
+            }
+            
             string typeName = type.ToString();
             for (int i = 0; i < typeName.Length; i++) {
                 if (typeName[i] == '`') {
@@ -429,7 +435,7 @@ namespace Mono.Linq.Expressions {
         }
 
         void VisitPower(BinaryExpression node) {
-            var pow = Expression.Call(typeof(System.Math).GetMethod("Pow"), node.Left, node.Right);
+            var pow = Expression.Call(typeof(Math).GetMethod("Pow"), node.Left, node.Right);
 
             if (node.Is(ExpressionType.Power))
                 Visit(pow);
@@ -845,10 +851,10 @@ namespace Mono.Linq.Expressions {
 
             switch (Type.GetTypeCode(value.GetType())) {
                 case TypeCode.Single:
-                    return ((IFormattable) value).ToString(null, System.Globalization.CultureInfo.InvariantCulture) + "f";
+                    return ((IFormattable) value).ToString(null, CultureInfo.InvariantCulture) + "f";
 
                 case TypeCode.Decimal:
-                    return ((IFormattable) value).ToString(null, System.Globalization.CultureInfo.InvariantCulture) + "m";
+                    return ((IFormattable) value).ToString(null, CultureInfo.InvariantCulture) + "m";
 
                 case TypeCode.UInt32:
                     return value + "u";
@@ -872,7 +878,7 @@ namespace Mono.Linq.Expressions {
                     return "\"" + ((string) value) + "\"";
                 
                 case TypeCode.Int32:
-                    return ((IFormattable) value).ToString(null, System.Globalization.CultureInfo.InvariantCulture);
+                    return ((IFormattable) value).ToString(null, CultureInfo.InvariantCulture);
                 
                 default:
                     return value.ToString();

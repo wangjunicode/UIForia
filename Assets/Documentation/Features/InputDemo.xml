@@ -52,9 +52,9 @@
         <Label forElement="'input2'">Another label</Label>
         <Input x-id="input2" value.write="regularValue" />
 
-        <Label>Float value Input, value is {floatValue}</Label>
+        <Label>Float value Input, value is {floatValue}. Also demonstrates the MaxLength property.</Label>
         
-        <InputElement--float value.read.write="floatValue"/>
+        <InputElement--float value.read.write="floatValue" MaxLength="8"/>
         
         <Group>
             <Heading1>Here be the autocomplete result:</Heading1>

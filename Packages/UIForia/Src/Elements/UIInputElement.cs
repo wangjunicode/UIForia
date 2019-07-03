@@ -60,8 +60,20 @@ namespace UIForia.Elements {
 
     public static class InputDeserializers {
 
-        public static IInputDeserializer<int> IntDeserializer = new CallbackDeserializer<int>((string input) => int.Parse(input));
-        public static IInputDeserializer<float> FloatDeserializer = new CallbackDeserializer<float>((string input) => float.Parse(input));
+        public static IInputDeserializer<int> IntDeserializer = new CallbackDeserializer<int>((string input) => {
+            try {
+                return int.Parse(input);
+            } catch (Exception) {
+                return 0;
+            }
+        });
+        public static IInputDeserializer<float> FloatDeserializer = new CallbackDeserializer<float>((string input) => {
+            try {
+                return float.Parse(input);
+            } catch (Exception) {
+                return 0f;
+            }
+        });
         public static IInputDeserializer<string> StringDeserializer = new CallbackDeserializer<string>((string input) => input);
 
     }
@@ -140,6 +152,8 @@ namespace UIForia.Elements {
         public IInputFormatter formatter;
         public IInputSerializer<T> serializer;
         public IInputDeserializer<T> deserializer;
+        
+        public int MaxLength = Int32.MaxValue;
 
         [WriteBinding(nameof(value))]
         public event Action<T> onValueChanged;
@@ -200,9 +214,13 @@ namespace UIForia.Elements {
                 text = formatter.Format(text);
             }
 
+            if (text.Length > MaxLength) {
+                text = text.Substring(0, MaxLength);
+            }
+
             if (text != preFormat) {
                 int diff = text.Length - preFormat.Length;
-                selectionRange = new SelectionRange(selectionRange.cursorIndex - diff, TextEdge.Left);
+                selectionRange = new SelectionRange(selectionRange.cursorIndex + diff, TextEdge.Left);
             }
 
             textInfo.UpdateSpan(0, text);
@@ -367,6 +385,10 @@ namespace UIForia.Elements {
         [UsedImplicitly]
         [OnKeyDownWithFocus]
         protected void EnterText(KeyboardInputEvent evt) {
+            if (evt.ctrl) {
+                return;
+            }
+
             evt.StopPropagation();
             if (HasDisabledAttr()) return;
 
@@ -411,7 +433,7 @@ namespace UIForia.Elements {
         protected void HandleHome(KeyboardInputEvent evt) {
             evt.StopPropagation();
             if (HasDisabledAttr()) return;
-            selectionRange = textInfo.MoveToStartOfLine(selectionRange);
+            selectionRange = textInfo.MoveToStartOfLine(selectionRange, evt.shift);
             blinkStartTime = Time.unscaledTime;
             ScrollToCursor();
         }
@@ -421,7 +443,7 @@ namespace UIForia.Elements {
         protected void HandleEnd(KeyboardInputEvent evt) {
             evt.StopPropagation();
             if (HasDisabledAttr()) return;
-            selectionRange = textInfo.MoveToEndOfLine(selectionRange);
+            selectionRange = textInfo.MoveToEndOfLine(selectionRange, evt.shift);
             ScrollToCursor();
             blinkStartTime = Time.unscaledTime;
         }
@@ -606,12 +628,12 @@ namespace UIForia.Elements {
 
             Rect contentRect = layoutResult.ContentRect;
 
-//            ctx.EnableScissorRect(new Rect(contentRect) {
-//                x = contentRect.x + layoutResult.screenPosition.x,
-//                y = contentRect.y + layoutResult.screenPosition.y
-//            });
+            ctx.EnableScissorRect(new Rect(contentRect) {
+                x = contentRect.x + layoutResult.screenPosition.x,
+                y = contentRect.y + layoutResult.screenPosition.y
+            });
 
-            ctx.DisableScissorRect();
+            // ctx.DisableScissorRect();
             if (isSelecting) {
                 ctx.BeginPath();
                 ctx.SetStroke(caretColor);

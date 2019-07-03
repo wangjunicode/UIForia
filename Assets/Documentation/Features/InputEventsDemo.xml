@@ -61,5 +61,20 @@
                 </Group>
             </Div>
         </Group>
+        
+        <Group style="section">
+            <Div style="show">
+                <Group style="demo-box show-context-menu" onMouseContext="ShowContextMenu($event)">
+                    <Text>Right-Click this box to show a context menu</Text>
+                </Group>
+                <Div if="IsContextMenuVisible" style="context-menu" style.AnchorTop="LastContext.y" style.AnchorLeft="LastContext.x">
+                    <Div style="context-menu-item">Open</Div>
+                    <Div style="context-menu-item">Send to</Div>
+                    <Div style="context-menu-item">View</Div>
+                    <Div style="context-menu-item">Refresh</Div>
+                    <Div style="context-menu-item">Properties</Div>
+                </Div>
+            </Div>
+        </Group>
     </Contents>
 </UITemplate>

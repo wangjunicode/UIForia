@@ -52,7 +52,7 @@ namespace UI {
         }
 
         [OnDragCreate]
-        private DragEvent ResizeWindow(MouseInputEvent evt) {
+        public DragEvent ResizeWindow(MouseInputEvent evt) {
             const float growFactor = 3f;
 
             Rect screenRect = layoutResult.ScreenRect.Grow(growFactor);
@@ -115,7 +115,7 @@ namespace UI {
             return layoutResult.ScreenRect.Grow(3).ContainOrOverlap(point);
         }
 
-        private DragEvent CreateDrag_TitleBar(MouseInputEvent evt) {
+        public DragEvent CreateDrag_TitleBar(MouseInputEvent evt) {
             titlebarButtons = titlebarButtons ?? FindById("title-button-group");
             if (evt.Origin.IsAncestorOf(titlebarButtons)) {
                 return null;

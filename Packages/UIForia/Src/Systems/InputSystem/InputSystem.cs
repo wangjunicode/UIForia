@@ -1024,6 +1024,8 @@ namespace UIForia.Systems {
                 RunMouseEvents(m_ElementsThisFrame, InputEventType.MouseUp);
                 if (m_MouseState.clickCount > 0) {
                     RunMouseEvents(m_ElementsThisFrame, InputEventType.MouseClick);
+                } else if (!m_MouseState.isLeftMouseDown && !m_MouseState.isMiddleMouseDown) {
+                    RunMouseEvents(m_ElementsThisFrame, InputEventType.MouseContext);
                 }
             }
 

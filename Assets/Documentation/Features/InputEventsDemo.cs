@@ -27,6 +27,8 @@ namespace Documentation.Features {
         public Vector2 LastDown;
         public Vector2 LastContext;
 
+        public bool IsContextMenuVisible = false;
+
         private string activeEvent;
 
         public override void OnEnable() {
@@ -84,6 +86,18 @@ namespace Documentation.Features {
             LastHoverX = evt.MousePosition.x;
             LastHoverY = evt.MousePosition.y;
         }
+        
+        public void ShowContextMenu(MouseInputEvent evt) {
+            LastContext = evt.MousePosition;
+            IsContextMenuVisible = true;
+        }
+        
+        [OnMouseContext]
+        public void ToggleContextMenuFromAnyWhere(MouseInputEvent evt) {
+            LastContext = evt.MousePosition;
+            IsContextMenuVisible = true;
+        }
+
         //
         // public void Move(MouseInputEvent evt) {
         //     LastMove = evt;

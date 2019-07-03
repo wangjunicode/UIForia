@@ -1264,7 +1264,21 @@ namespace UIForia.Text {
             return new SelectionRange(0, TextEdge.Left, CharCount - 1, TextEdge.Right);
         }
 
-        public SelectionRange MoveToStartOfLine(SelectionRange selectionRange) {
+        public SelectionRange MoveToStartOfLine(SelectionRange selectionRange, bool maintainSelection) {
+            int selectionIndex = selectionRange.selectIndex;
+            TextEdge selectionEdge = selectionRange.selectEdge;
+
+            if (!maintainSelection && selectionRange.HasSelection) {
+                return new SelectionRange(selectionRange.cursorIndex, selectionRange.cursorEdge).NormalizeLeft();
+            }
+            else if (!maintainSelection) {
+                selectionIndex = -1;
+            }
+            else if (!selectionRange.HasSelection) {
+                selectionIndex = selectionRange.cursorIndex;
+                selectionEdge = selectionRange.cursorEdge;
+            }
+            
             CharInfo charInfo = charInfoList.Array[selectionRange.cursorIndex];
             int lineIdx = charInfo.lineIndex;
             int i = selectionRange.cursorIndex;
@@ -1276,14 +1290,27 @@ namespace UIForia.Text {
                 i--;
             }
 
-            return new SelectionRange(i, TextEdge.Left);
+            return new SelectionRange(i, TextEdge.Left, selectionIndex, selectionEdge);
         }
 
         public SelectionRange MoveToEndOfText() {
             return new SelectionRange(CharCount - 1, TextEdge.Right);
         }
 
-        public SelectionRange MoveToEndOfLine(SelectionRange selectionRange) {
+        public SelectionRange MoveToEndOfLine(SelectionRange selectionRange, bool maintainSelection) {
+            int selectionIndex;
+            TextEdge selectionEdge = TextEdge.Right;
+            
+            if (!maintainSelection) {
+                selectionIndex = -1;
+                selectionEdge = TextEdge.Left;
+            }
+            else if (!selectionRange.HasSelection) {
+                selectionIndex = selectionRange.cursorIndex;
+            } else {
+                selectionIndex = selectionRange.selectIndex;
+            }      
+            
             CharInfo charInfo = charInfoList.Array[selectionRange.cursorIndex];
             int lineIdx = charInfo.lineIndex;
             int i = selectionRange.cursorIndex;
@@ -1294,8 +1321,8 @@ namespace UIForia.Text {
 
                 i++;
             }
-
-            return new SelectionRange(i, TextEdge.Right);
+            
+            return new SelectionRange(i, TextEdge.Right, selectionIndex, selectionEdge);
         }
 
         private static readonly StringBuilder s_Builder = new StringBuilder(128);

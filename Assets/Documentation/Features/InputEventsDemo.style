@@ -106,3 +106,23 @@ style changes-on-hover-and-active {
         BackgroundColor = red;
     }
 }
+
+style context-menu {
+    LayoutBehavior = Ignored;
+    AnchorTarget = Screen;
+    TransformBehavior = AnchorMinOffset;
+    BorderColor = rgb(50, 50, 50);
+    BackgroundColor = grey;
+    Border = 1px;
+    PreferredSize = 150px 1cnt;
+}
+
+style context-menu-item {
+    Padding = 20px;
+    TextFontSize = 0.9em;
+    BackgroundColor = rgb(90, 90, 90);
+    PreferredSize = 1pca 1cnt;
+    [hover] {
+        BackgroundColor = rgb(150, 150, 150);
+    }
+}

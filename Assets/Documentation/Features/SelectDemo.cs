@@ -72,7 +72,7 @@ namespace Documentation.Features {
             }
         }
         
-        private void ClearTranslations(int index) {
+        public void ClearTranslations(int index) {
             RepeatableList<ISelectOption<string>> options = translations[index];
             
             List<ISelectOption<string>> temp = new List<ISelectOption<string>>();
@@ -87,18 +87,18 @@ namespace Documentation.Features {
             }
         }
 
-        private void SetEmpty(MouseInputEvent evt) {
+        public void SetEmpty(MouseInputEvent evt) {
             if (evt.IsConsumed) {
                 return;
             }
             selectedStringIndex = -1;
         }
 
-        private void ClearWords() {
+        public void ClearWords() {
             words.Clear();
         }
 
-        private void AddWords() {
+        public void AddWords() {
             words.Add("hello");
             words.Add("world");
         }

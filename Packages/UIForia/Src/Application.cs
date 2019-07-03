@@ -269,16 +269,20 @@ namespace UIForia {
             m_AfterUpdateTaskSystem.OnReset();
             m_BeforeUpdateTaskSystem.OnReset();
 
+            // copy the list here because there might be view-sorting going on during view.initialize() 
+            LightList<UIView> views = LightList<UIView>.Get();
+            views.AddRange(m_Views);
+            
             // todo -- store root view, rehydrate. kill the rest
-            for (int i = 0; i < m_Views.Count; i++) {
-                // RegisterElement(m_Views[i].RootElement);
-
+            for (int i = 0; i < views.Count; i++) {
                 for (int j = 0; j < m_Systems.Count; j++) {
-                    m_Systems[j].OnViewAdded(m_Views[i]);
+                    m_Systems[j].OnViewAdded(views[i]);
                 }
 
-                m_Views[i].Initialize();
+                views[i].Initialize();
             }
+            
+            LightList<UIView>.Release(ref views);
 
             onRefresh?.Invoke();
             onNextRefresh?.Invoke();

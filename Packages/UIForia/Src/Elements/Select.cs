@@ -117,7 +117,7 @@ namespace UIForia.Elements {
             childrenElement = FindFirstByType<UIChildrenElement>();
         }
 
-        private void BeginSelecting(MouseInputEvent evt) {
+        public void BeginSelecting(MouseInputEvent evt) {
             if (Application.InputSystem.RequestFocus(this)) {
                 selecting = true;
             }

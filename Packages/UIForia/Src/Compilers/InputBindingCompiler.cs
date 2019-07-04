@@ -630,6 +630,7 @@ namespace UIForia.Compilers {
 
         private static readonly InputAttributeTuple[] s_KeyboardAttributeDefs = {
             new InputAttributeTuple("onKeyDown", InputEventType.KeyDown, s_KeyboardEventAlias),
+            new InputAttributeTuple("onKeyHeldDown", InputEventType.KeyHeldDown, s_KeyboardEventAlias),
             new InputAttributeTuple("onKeyUp", InputEventType.KeyUp, s_KeyboardEventAlias),
         };
 

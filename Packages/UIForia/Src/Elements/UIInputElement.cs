@@ -470,7 +470,7 @@ namespace UIForia.Elements {
         }
 
         [UsedImplicitly]
-        [OnKeyHeldWithFocus(KeyCode.Backspace)]
+        [OnKeyHeldDownWithFocus(KeyCode.Backspace)]
         protected void HandleBackspaceHeld(KeyboardInputEvent evt) {
             evt.StopPropagation();
             if (!CanTriggerHeldKey()) return;
@@ -482,7 +482,7 @@ namespace UIForia.Elements {
         }
 
         [UsedImplicitly]
-        [OnKeyHeldWithFocus(KeyCode.Delete)]
+        [OnKeyHeldDownWithFocus(KeyCode.Delete)]
         protected void HandleDeleteHeld(KeyboardInputEvent evt) {
             evt.StopPropagation();
             if (!CanTriggerHeldKey()) return;
@@ -507,7 +507,7 @@ namespace UIForia.Elements {
         }
 
         [UsedImplicitly]
-        [OnKeyHeldWithFocus(KeyCode.LeftArrow)]
+        [OnKeyHeldDownWithFocus(KeyCode.LeftArrow)]
         protected void HandleLeftArrowHeld(KeyboardInputEvent evt) {
             evt.StopPropagation();
             if (!CanTriggerHeldKey()) return;
@@ -532,7 +532,7 @@ namespace UIForia.Elements {
         }
 
         [UsedImplicitly]
-        [OnKeyHeldWithFocus(KeyCode.RightArrow)]
+        [OnKeyHeldDownWithFocus(KeyCode.RightArrow)]
         protected void HandleRightArrowHeld(KeyboardInputEvent evt) {
             evt.StopPropagation();
 

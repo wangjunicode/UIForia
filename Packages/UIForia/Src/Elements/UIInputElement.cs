@@ -290,7 +290,10 @@ namespace UIForia.Elements {
 
         internal TextInfo textInfo;
         internal string text;
-        internal string placeholder;
+        
+        public string placeholder;
+
+        public bool autofocus;
 
         protected float holdDebounce = 0.05f;
         protected float timestamp;
@@ -328,6 +331,12 @@ namespace UIForia.Elements {
             textInfo = new TextInfo(new TextSpan(text, style.GetTextStyle()));
             textInfo.UpdateSpan(0, text);
             textInfo.Layout();
+        }
+
+        public override void OnEnable() {
+            if (autofocus) {
+                Application.InputSystem.RequestFocus(this);
+            }
         }
 
         protected void EmitTextChanged() {

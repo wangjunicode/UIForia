@@ -41,8 +41,8 @@
             </Div>
         </Group>
 
-        <Label>Two inputs that copy each other`s values</Label>
-        <Input value.read.write="tv"/>
+        <Label>Two inputs that copy each other`s values. The first input has autofocus enabled. It will gain focus every time it is enabled.</Label>
+        <Input value.read.write="tv" autofocus="true"/>
         <Input value.read.write="tv"/>
         <Text style="text mb20">{tv}</Text>
         

@@ -290,7 +290,10 @@ namespace UIForia.Elements {
 
         internal TextInfo textInfo;
         internal string text;
-        internal string placeholder;
+        
+        public string placeholder;
+
+        public bool autofocus;
 
         protected float holdDebounce = 0.05f;
         protected float timestamp;
@@ -328,6 +331,12 @@ namespace UIForia.Elements {
             textInfo = new TextInfo(new TextSpan(text, style.GetTextStyle()));
             textInfo.UpdateSpan(0, text);
             textInfo.Layout();
+        }
+
+        public override void OnEnable() {
+            if (autofocus) {
+                Application.InputSystem.RequestFocus(this);
+            }
         }
 
         protected void EmitTextChanged() {
@@ -461,7 +470,7 @@ namespace UIForia.Elements {
         }
 
         [UsedImplicitly]
-        [OnKeyHeldWithFocus(KeyCode.Backspace)]
+        [OnKeyHeldDownWithFocus(KeyCode.Backspace)]
         protected void HandleBackspaceHeld(KeyboardInputEvent evt) {
             evt.StopPropagation();
             if (!CanTriggerHeldKey()) return;
@@ -473,7 +482,7 @@ namespace UIForia.Elements {
         }
 
         [UsedImplicitly]
-        [OnKeyHeldWithFocus(KeyCode.Delete)]
+        [OnKeyHeldDownWithFocus(KeyCode.Delete)]
         protected void HandleDeleteHeld(KeyboardInputEvent evt) {
             evt.StopPropagation();
             if (!CanTriggerHeldKey()) return;
@@ -498,7 +507,7 @@ namespace UIForia.Elements {
         }
 
         [UsedImplicitly]
-        [OnKeyHeldWithFocus(KeyCode.LeftArrow)]
+        [OnKeyHeldDownWithFocus(KeyCode.LeftArrow)]
         protected void HandleLeftArrowHeld(KeyboardInputEvent evt) {
             evt.StopPropagation();
             if (!CanTriggerHeldKey()) return;
@@ -523,7 +532,7 @@ namespace UIForia.Elements {
         }
 
         [UsedImplicitly]
-        [OnKeyHeldWithFocus(KeyCode.RightArrow)]
+        [OnKeyHeldDownWithFocus(KeyCode.RightArrow)]
         protected void HandleRightArrowHeld(KeyboardInputEvent evt) {
             evt.StopPropagation();
 

@@ -198,14 +198,6 @@ namespace UIForia.Elements {
                     return children[i] as T;
                 }
 
-                if (children[i] is UIChildrenElement) {
-                    continue;
-                }
-
-                if (children[i]?.OriginTemplate is UIElementTemplate) {
-                    continue;
-                }
-
                 UIElement childResult = children[i].FindById(id);
 
                 if (childResult != null) {

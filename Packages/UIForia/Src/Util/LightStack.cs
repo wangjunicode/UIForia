@@ -13,6 +13,8 @@ namespace UIForia.Util {
         public int Count => size;
         public T[] Stack => array;
 
+        public T Previous => PeekAtUnchecked(size - 1);
+
         [DebuggerStepThrough]
         public LightStack(int capacity = 8) {
             capacity = Mathf.Max(1, capacity);

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
+using UIForia.Compilers;
 using UIForia.Parsing.Expression.AstNodes;
 using UIForia.Parsing.Style.AstNodes;
 using Expression = UIForia.Expressions.Expression;
@@ -141,6 +142,10 @@ namespace UIForia.Exceptions {
             return new CompileException($"The type {type} is not public and cannot be used in expressions.");
         }
 
+        public static CompileException SignatureNotDefined() {
+            return new CompileException($"The signature must be set before calling builder methods on {nameof(LinqCompiler)}");
+        }
+        
         public static CompileException UnresolvedConstructor(Type type, Type[] arguments) {
             string BuildArgumentList() {
                 if (arguments == null || arguments.Length == 0) {
@@ -163,7 +168,6 @@ namespace UIForia.Exceptions {
         }
 
 
-  
 
     }
 

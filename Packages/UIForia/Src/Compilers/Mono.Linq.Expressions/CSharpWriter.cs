@@ -30,7 +30,10 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq.Expressions;
+using System.Reflection;
+using UIForia.Extensions;
 using UIForia.Util;
+using UnityEngine;
 
 namespace Mono.Linq.Expressions {
 
@@ -366,6 +369,16 @@ namespace Mono.Linq.Expressions {
                     WriteSpace();
                 }
 
+                if (i == node.Expressions.Count - 1 && expression.NodeType == ExpressionType.Default) {
+                    DefaultExpression defaultExpression = (DefaultExpression) expression;
+                    if (defaultExpression.Type == typeof(void)) {
+                        WriteKeyword("return");
+                        WriteToken(";");
+                        WriteLine();
+                        continue;
+                    }
+                }
+                
                 Write(expression);
 
                 if (!IsActualStatement(expression))
@@ -922,6 +935,14 @@ namespace Mono.Linq.Expressions {
             return node;
         }
 
+        private struct MethodArgModifier {
+
+            public Expression expression;
+            public bool isOut;
+            public bool isRef;
+
+        }
+        
         protected override Expression VisitMethodCall(MethodCallExpression node) {
             var method = node.Method;
 
@@ -934,10 +955,40 @@ namespace Mono.Linq.Expressions {
 
             WriteReference(method.Name, method);
 
-            if (method.IsGenericMethod && !method.IsGenericMethodDefinition)
+            if (method.IsGenericMethod && !method.IsGenericMethodDefinition) {
                 VisitGenericArguments(method.GetGenericArguments());
+            }
 
-            VisitArguments(node.Arguments);
+
+            if (node.Arguments.Count == 0) {
+                WriteToken("()");
+                return node;
+            }
+            
+            ParameterInfo[] parameterInfos = method.GetParametersCached();
+
+            WriteToken("(");
+
+            for (int i = 0; i < node.Arguments.Count; i++) {
+                
+                if (i > 0) {
+                    WriteToken(",");
+                    WriteSpace();
+                }
+
+                if (parameterInfos[i].IsOut) {
+                    WriteToken("out ");
+                    Visit(node.Arguments[i]);
+                }
+                else {
+                    Visit(node.Arguments[i]);
+                }
+                
+            }
+
+            WriteToken(")");
+
+//            VisitArguments(node.Arguments);
 
             return node;
         }

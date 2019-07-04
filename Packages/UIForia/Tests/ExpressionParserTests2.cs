@@ -794,5 +794,13 @@ public class ExpressionParserTests2 {
         Assert.AreEqual(1, indexNode.arguments.Count);
         Assert.IsInstanceOf<LiteralNode>(indexNode.arguments[0]);
     }
+    
+    [Test]
+    public void Parse_PartialNestedTernary() {
+        ASTNode root = ExpressionParser.Parse("thing ? thing.floatValue > 5 ? 1");
+        OperatorNode node = AssertInstanceOfAndReturn<OperatorNode>(root);
+        Assert.IsTrue(false);
+        // todo this isn't parsing correctly, might need to use a look-ahead to find next ? or : (be sure to keep braces matched) 
+    }
 
 }

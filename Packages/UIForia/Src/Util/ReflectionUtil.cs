@@ -44,11 +44,11 @@ namespace UIForia.Util {
         public const BindingFlags InstanceBindFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
         public const BindingFlags InterfaceBindFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.Static;
 
-        private static readonly System.Collections.Generic.List<GenericTypeEntry> generics = new System.Collections.Generic.List<GenericTypeEntry>();
-        private static readonly System.Collections.Generic.List<DelegateEntry> staticDelegates = new System.Collections.Generic.List<DelegateEntry>();
-        private static readonly System.Collections.Generic.List<DelegateEntry> openDelegates = new System.Collections.Generic.List<DelegateEntry>();
+        private static readonly List<GenericTypeEntry> generics = new List<GenericTypeEntry>();
+        private static readonly List<DelegateEntry> staticDelegates = new List<DelegateEntry>();
+        private static readonly List<DelegateEntry> openDelegates = new List<DelegateEntry>();
 
-        private static readonly Dictionary<Type, System.Collections.Generic.List<LinqAccessor>> linqDelegates = new Dictionary<Type, System.Collections.Generic.List<LinqAccessor>>();
+        private static readonly Dictionary<Type, List<LinqAccessor>> linqDelegates = new Dictionary<Type, List<LinqAccessor>>();
 
         public static readonly object[] ObjectArray0 = new object[0];
         public static readonly object[] ObjectArray1 = new object[1];
@@ -62,26 +62,29 @@ namespace UIForia.Util {
         public static readonly Type[] TypeArray3 = new Type[3];
         public static readonly Type[] TypeArray4 = new Type[4];
 
-//    private static Dictionary<Type, object[]> methodAttributeCache;
-
         public static Type GetArrayElementTypeOrThrow(Type targetType) {
-            bool isListType = typeof(IList).IsAssignableFrom(targetType);
 
-            if (targetType == typeof(IList)) {
-                return typeof(object);
-            }
-
-            if (!isListType) {
-                throw new Exception($"Trying to read the element type of {targetType.Name} but it is not a list type");
-            }
+            targetType = Nullable.GetUnderlyingType(targetType) ?? targetType;
 
             if (targetType.IsArray) {
                 return targetType.GetElementType();
             }
 
-            Type[] genericTypes = targetType.GetGenericArguments();
-            if (genericTypes.Length == 1) {
-                return genericTypes[0];
+            Type[] interfaces = targetType.GetInterfaces();
+
+            for (int i = 0; i < interfaces.Length; i++) {
+                if (interfaces[i].IsGenericType) {
+                    Type definition = interfaces[i].GetGenericTypeDefinition();
+                    if (definition == typeof(IList<>)) {
+                        return interfaces[i].GetGenericArguments()[0];
+                    }
+                }
+            }
+
+            for (int i = 0; i < interfaces.Length; i++) {
+                if (interfaces[i] == typeof(IList)) {
+                    return typeof(object);
+                }
             }
 
             throw new Exception($"Trying to read the element type of {targetType.Name} but it is not a list type");
@@ -154,7 +157,7 @@ namespace UIForia.Util {
 
         public static bool HasInstanceMethod(Type type, string methodName, out LightList<MethodInfo> methodInfos) {
             MethodInfo[] publicMethods = type.GetMethods(PublicInstance);
-            
+
             LightList<MethodInfo> retn = LightList<MethodInfo>.Get();
 
             for (int i = 0; i < publicMethods.Length; i++) {
@@ -172,10 +175,10 @@ namespace UIForia.Util {
             methodInfos = retn;
             return true;
         }
-        
+
         public static bool HasStaticMethod(Type type, string methodName, out LightList<MethodInfo> methodInfos) {
             MethodInfo[] publicMethods = type.GetMethods(StaticFlags | BindingFlags.Public);
-            
+
             LightList<MethodInfo> retn = LightList<MethodInfo>.Get();
 
             for (int i = 0; i < publicMethods.Length; i++) {
@@ -845,7 +848,7 @@ namespace UIForia.Util {
         }
 
         public static LinqAccessor GetLinqPropertyAccessors(Type baseType, Type propertyType, string propertyName) {
-            System.Collections.Generic.List<LinqAccessor> linqList;
+            List<LinqAccessor> linqList;
 
             if (linqDelegates.TryGetValue(baseType, out linqList)) {
                 for (int i = 0; i < linqList.Count; i++) {
@@ -855,7 +858,7 @@ namespace UIForia.Util {
                 }
             }
             else {
-                linqList = new System.Collections.Generic.List<LinqAccessor>();
+                linqList = new List<LinqAccessor>();
                 linqDelegates[baseType] = linqList;
             }
 
@@ -872,7 +875,7 @@ namespace UIForia.Util {
         }
 
         public static LinqAccessor GetLinqFieldAccessors(Type baseType, Type fieldType, string fieldName) {
-            System.Collections.Generic.List<LinqAccessor> linqList;
+            List<LinqAccessor> linqList;
 
             if (linqDelegates.TryGetValue(baseType, out linqList)) {
                 for (int i = 0; i < linqList.Count; i++) {
@@ -882,7 +885,7 @@ namespace UIForia.Util {
                 }
             }
             else {
-                linqList = new System.Collections.Generic.List<LinqAccessor>();
+                linqList = new List<LinqAccessor>();
                 linqDelegates[baseType] = linqList;
             }
 
@@ -1129,9 +1132,21 @@ namespace UIForia.Util {
             return null;
         }
 
-        public static System.Collections.Generic.List<MethodInfo> GetMethodsWithName(Type type, string targetName) {
+        public static List<MethodInfo> GetMethodsWithName(Type type, string targetName) {
             MethodInfo[] infos = type.GetMethods(InstanceBindFlags | StaticFlags);
             List<MethodInfo> retn = new List<MethodInfo>();
+            for (int i = 0; i < infos.Length; i++) {
+                if (infos[i].Name == targetName) {
+                    retn.Add(infos[i]);
+                }
+            }
+
+            return retn;
+        }
+
+        public static LightList<MethodInfo> GetInstanceMethodsWithName(Type type, string targetName) {
+            MethodInfo[] infos = type.GetMethods(InstanceBindFlags);
+            LightList<MethodInfo> retn = LightList<MethodInfo>.Get();
             for (int i = 0; i < infos.Length; i++) {
                 if (infos[i].Name == targetName) {
                     retn.Add(infos[i]);
@@ -1152,7 +1167,7 @@ namespace UIForia.Util {
 
         private static ClassBuilder classBuilder;
 
-        public static Type CreateType(string id, Type baseType, IList<ReflectionUtil.FieldDefinition> fields) {
+        public static Type CreateType(string id, Type baseType, IList<FieldDefinition> fields) {
             if (classBuilder == null) classBuilder = new ClassBuilder();
             return classBuilder.CreateRuntimeType(id, baseType, fields);
         }
@@ -1295,7 +1310,7 @@ namespace UIForia.Util {
 
             return null;
         }
-        
+
         public static Type GetNullableType(Type type) {
             // Use Nullable.GetUnderlyingType() to remove the Nullable<T> wrapper if type is already nullable.
             type = Nullable.GetUnderlyingType(type) ?? type; // avoid type becoming null
@@ -1315,7 +1330,7 @@ namespace UIForia.Util {
         }
 
         public static IList<IndexerInfo> GetIndexedProperties(Type targetType, IList<IndexerInfo> retn = null) {
-            if (retn == null) retn = new System.Collections.Generic.List<IndexerInfo>();
+            if (retn == null) retn = new List<IndexerInfo>();
             PropertyInfo[] properties = targetType.GetProperties(InstanceBindFlags);
 
             for (int i = 0; i < properties.Length; i++) {

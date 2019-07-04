@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using NUnit.Framework;
@@ -170,5 +171,156 @@ public class ReflectionUtilTests {
         Assert.AreEqual(list[0], "hallochen");
         Assert.AreEqual(z.Invoke(list, 0), "hallochen");
     }
+
+    private class Ref1 : IList<float>, IList {
+
+        public IEnumerator<float> GetEnumerator() {
+            throw new NotImplementedException();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator() {
+            return GetEnumerator();
+        }
+
+        public void Add(float item) {
+            throw new NotImplementedException();
+        }
+
+        public int Add(object value) {
+            throw new NotImplementedException();
+        }
+
+        public void Clear() {
+            throw new NotImplementedException();
+        }
+
+        public bool Contains(object value) {
+            throw new NotImplementedException();
+        }
+
+        public int IndexOf(object value) {
+            throw new NotImplementedException();
+        }
+
+        public void Insert(int index, object value) {
+            throw new NotImplementedException();
+        }
+
+        public void Remove(object value) {
+            throw new NotImplementedException();
+        }
+
+        public bool Contains(float item) {
+            throw new NotImplementedException();
+        }
+
+        public void CopyTo(float[] array, int arrayIndex) {
+            throw new NotImplementedException();
+        }
+
+        public bool Remove(float item) {
+            throw new NotImplementedException();
+        }
+
+        public void CopyTo(Array array, int index) {
+            throw new NotImplementedException();
+        }
+
+        public int Count { get; }
+        public bool IsSynchronized { get; }
+        public object SyncRoot { get; }
+        public bool IsReadOnly { get; }
+        
+        object IList.this[int index] {
+            get => null;
+            set { }
+        }
+
+        public int IndexOf(float item) {
+            throw new NotImplementedException();
+        }
+
+        public void Insert(int index, float item) {
+            throw new NotImplementedException();
+        }
+
+        public void RemoveAt(int index) {
+            throw new NotImplementedException();
+        }
+
+        public bool IsFixedSize { get; }
+
+        public float this[int index] {
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
+        }
+
+    }
+
+    private class Ref2 : IList {
+
+        public IEnumerator GetEnumerator() {
+            throw new NotImplementedException();
+        }
+
+        public void CopyTo(Array array, int index) {
+            throw new NotImplementedException();
+        }
+
+        public int Count { get; }
+        public bool IsSynchronized { get; }
+        public object SyncRoot { get; }
+
+        public int Add(object value) {
+            throw new NotImplementedException();
+        }
+
+        public void Clear() {
+            throw new NotImplementedException();
+        }
+
+        public bool Contains(object value) {
+            throw new NotImplementedException();
+        }
+
+        public int IndexOf(object value) {
+            throw new NotImplementedException();
+        }
+
+        public void Insert(int index, object value) {
+            throw new NotImplementedException();
+        }
+
+        public void Remove(object value) {
+            throw new NotImplementedException();
+        }
+
+        public void RemoveAt(int index) {
+            throw new NotImplementedException();
+        }
+
+        public bool IsFixedSize { get; }
+        public bool IsReadOnly { get; }
+
+        public object this[int index] {
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
+        }
+
+    }
+
+    [Test]
+    public void GetListElementType() {
+        Assert.AreEqual(typeof(float), ReflectionUtil.GetArrayElementTypeOrThrow(typeof(Ref1)));
+    }
     
+    [Test]
+    public void GetListElementTypeIList() {
+        Assert.AreEqual(typeof(object), ReflectionUtil.GetArrayElementTypeOrThrow(typeof(Ref2)));
+    }
+    
+    [Test]
+    public void GetListElementTypeArray() {
+        Assert.AreEqual(typeof(string), ReflectionUtil.GetArrayElementTypeOrThrow(typeof(string[])));
+    }
 }

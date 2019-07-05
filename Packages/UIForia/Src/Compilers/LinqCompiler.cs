@@ -1177,7 +1177,6 @@ namespace UIForia.Compilers {
                 case PartType.DotIndex:
 //                    head = MakeStaticIndex(type, parts[start].name, parts[start].arguments);
                     throw new NotImplementedException();
-                    break;
                 default:
                     throw new NotImplementedException();
             }
@@ -1411,11 +1410,9 @@ namespace UIForia.Compilers {
 
                     case PartType.Invoke:
                         throw new NotImplementedException();
-                        break;
 
                     case PartType.Index:
                         throw new NotImplementedException();
-                        break;
 
                     case PartType.DotIndex: {
                         // todo -- also no support for multiple index properties right now, parser needs to accept a comma list for that to work

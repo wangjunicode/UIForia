@@ -674,8 +674,8 @@ namespace UIForia.Systems {
             else {
                 KeyboardEventTreeNode focusedNode = m_KeyboardEventTree.GetItem(m_FocusedElement);
                 if (focusedNode == null) {
-                    Debug.Log($"Should not happen, investigate why focused element '{m_FocusedElement}' is not in m_KeyboardEventTree!");
-                    // todo this happened once, couldn't reproduce. if you can you have to fix it :p
+                    // actually this is totally fine since any element can implement IFocusable without accepting keyboard input
+                    return;
                 } 
                 IReadOnlyList<KeyboardEventHandler> handlers = focusedNode.handlers;
                 ExpressionContext context = ((UIElement) focusedNode.Element).templateContext;

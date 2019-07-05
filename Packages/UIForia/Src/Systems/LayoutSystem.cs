@@ -21,7 +21,6 @@ namespace UIForia.Systems {
         protected readonly IntMap<LayoutBox> m_LayoutBoxMap;
         protected readonly LightList<TextLayoutBox> m_TextLayoutBoxes;
 
-        private Size m_ScreenSize;
         private readonly LightList<LayoutBox> m_VisibleBoxList;
 
         private static readonly IComparer<LayoutBox> comparer = new DepthComparer();
@@ -149,7 +148,8 @@ namespace UIForia.Systems {
             UIElement rootElement = view.rootElement;
 
             LayoutBox rootBox = m_LayoutBoxMap.GetOrDefault(rootElement.id);
-            rootBox.element.layoutResult.matrix = SVGXMatrix.identity;
+            rootBox.element.layoutResult.matrix = new SVGXMatrix(1, 0, 0, 1, view.position.x, view.position.y);
+            
             rootBox.prefWidth = new UIMeasurement(1, UIMeasurementUnit.ViewportWidth);
             rootBox.prefHeight = new UIMeasurement(1, UIMeasurementUnit.ViewportHeight);
 
@@ -177,10 +177,8 @@ namespace UIForia.Systems {
                 view.sizeChanged = false; // todo - dont do this here
             }
 
-
             for (int i = 0; i < toLayoutCount; i++) {
                 LayoutBox box = toLayoutArray[i];
-
 
                 if (box.IsIgnored) {
                     float currentWidth = box.allocatedWidth;

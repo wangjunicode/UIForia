@@ -121,7 +121,7 @@ namespace UI {
                 return null;
             }
 
-            return new WindowDragEvent(this, evt.MouseDownPosition - layoutResult.screenPosition);
+            return new WindowDragEvent(this, evt.MouseDownPosition - layoutResult.screenPosition + View.Viewport.position);
         }
 
 

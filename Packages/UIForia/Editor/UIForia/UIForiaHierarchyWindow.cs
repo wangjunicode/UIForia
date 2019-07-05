@@ -2,8 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using UIForia.Elements;
-using UIForia.Rendering;
-using UIForia.Util;
 using UnityEditor;
 using UnityEditor.IMGUI.Controls;
 using UnityEngine;

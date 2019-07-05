@@ -674,7 +674,7 @@ style s { BrokenUrl = url() }
 
         Assert.AreEqual(1, nodes.Count);
         StyleRootNode rootNode = nodes[0] as StyleRootNode;
-        Assert.AreEqual(2, rootNode.children.Count);
+        Assert.AreEqual(1, rootNode.children.Count);
         PropertyNode propertyNode0 = (PropertyNode) rootNode.children[0];
 
         Assert.AreEqual(3, propertyNode0.children.Count);

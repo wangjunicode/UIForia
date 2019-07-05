@@ -172,7 +172,10 @@ public class UIView {
         onElementHierarchyDisabled?.Invoke(element);
     }
 
-    public void SetPosition(Vector3 position) {
+    public void SetPosition(Vector2 position) {
+        if (position != Viewport.position) {
+            sizeChanged = true;
+        }
         Viewport = new Rect(position.x, position.y, Viewport.width, Viewport.height);
     }
 

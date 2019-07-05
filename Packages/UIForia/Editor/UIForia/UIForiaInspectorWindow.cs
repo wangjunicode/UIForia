@@ -536,6 +536,8 @@ namespace UIForia.Editor {
             Rect clipRect = layoutResult.clipRect;
             Rect contentRect = layoutResult.ContentRect;
 
+            DrawLabel("View", selectedElement.View.name);
+            DrawLabel("Viewport", $"X: {selectedElement.View.Viewport.x}, Y: {selectedElement.View.Viewport.y}, W: {selectedElement.View.Viewport.width}, H: {selectedElement.View.Viewport.height}");
             DrawVector2Value("Local Position", layoutResult.localPosition);
             DrawVector2Value("Screen Position", layoutResult.screenPosition);
             DrawVector2Value("Scale", layoutResult.scale);

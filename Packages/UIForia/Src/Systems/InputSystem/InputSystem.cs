@@ -429,6 +429,18 @@ namespace UIForia.Systems {
             m_CurrentDragEvent.MousePosition = MousePosition;
             m_CurrentDragEvent.Modifiers = modifiersThisFrame;
 
+            bool isOriginElementThisFrame = false;
+            for (int i = 0; i < m_ElementsThisFrame.Count; i++) {
+                if (m_ElementsThisFrame[i].id == m_CurrentDragEvent.origin.id) {
+                    isOriginElementThisFrame = true;
+                    break;
+                }
+            }
+
+            if (!isOriginElementThisFrame) {
+                m_ElementsThisFrame.Add(m_CurrentDragEvent.origin);
+            }
+
             if (evtType == InputEventType.DragCancel) {
                 RunDragEvent(m_ElementsThisFrame, InputEventType.DragCancel);
             }

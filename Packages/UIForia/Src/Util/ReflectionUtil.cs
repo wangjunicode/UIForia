@@ -1062,6 +1062,28 @@ namespace UIForia.Util {
             if (generic == typeof(Action<,,,,,,>)) return true;
             return false;
         }
+        
+        public static bool IsFunc(Type type) {
+
+            if (!type.IsGenericType) return false;
+            
+            Type generic = null;
+            if (type.IsGenericTypeDefinition) {
+                generic = type;
+            }
+            else if (type.IsGenericType) {
+                generic = type.GetGenericTypeDefinition();
+            }
+
+            if (generic == typeof(Func<>)) return true;
+            if (generic == typeof(Func<,>)) return true;
+            if (generic == typeof(Func<,,>)) return true;
+            if (generic == typeof(Func<,,,>)) return true;
+            if (generic == typeof(Func<,,,,>)) return true;
+            if (generic == typeof(Func<,,,,,>)) return true;
+            if (generic == typeof(Func<,,,,,,>)) return true;
+            return false;
+        }
 
         public static MethodInfo GetImplicitConversion(Type targetType, Type inputType) {
             MethodInfo[] infos = targetType.GetMethods(BindingFlags.Public | BindingFlags.Static);

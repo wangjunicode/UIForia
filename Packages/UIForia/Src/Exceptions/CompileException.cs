@@ -138,6 +138,10 @@ namespace UIForia.Exceptions {
             return new CompileException($"Unable to enum value {value} on type {type}");
         }
         
+        public static CompileException UnresolvedStaticMethod(Type type, string value) {
+            return new CompileException($"Unable to find a public method on {type} with the name {value}");
+        }
+        
         public static CompileException NonPublicType(Type type) {
             return new CompileException($"The type {type} is not public and cannot be used in expressions.");
         }
@@ -145,6 +149,18 @@ namespace UIForia.Exceptions {
         public static CompileException SignatureNotDefined() {
             return new CompileException($"The signature must be set before calling builder methods on {nameof(LinqCompiler)}");
         }
+        public static CompileException UnresolvedMethodOverload(Type type, string methodName, Type[] inputTypeArguments) {
+            string argumentTypeString = "";
+            for (int i = 0; i < inputTypeArguments.Length; i++) {
+                argumentTypeString += inputTypeArguments[i].FullName;
+                if (i != inputTypeArguments.Length - 1) {
+                    argumentTypeString += ", ";
+                }
+            }
+            return new CompileException($"Unable to find a public method '{methodName}' on type {type} with a signature matching ({argumentTypeString})");
+        }
+
+        
         
         public static CompileException UnresolvedConstructor(Type type, Type[] arguments) {
             string BuildArgumentList() {

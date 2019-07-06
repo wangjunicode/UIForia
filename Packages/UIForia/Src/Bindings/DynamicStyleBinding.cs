@@ -11,7 +11,6 @@ namespace UIForia.Bindings {
         private readonly ParsedTemplate template;
         public readonly ArrayLiteralExpression<string> bindingList;
 
-        //when bindings support multi-threading: add [ThreadStatic] 
         private static readonly LightList<string> boundStyles;
         private static readonly LightList<UIStyleGroupContainer> containers;
 
@@ -25,6 +24,12 @@ namespace UIForia.Bindings {
             boundStyles = new LightList<string>(12);
         }
 
+        // <Element style="[]"/> parser should figure out which ones are constant, don't diff those
+        // map to style object instead of a string
+        // if input value doesn't change, don't do a lookup for the style object
+        // order matters, mixing dynamic and non dynamic needs to respect their ordering
+        // probably want an array per binding to hold 'last' values since diffing is expensive
+        
         public override void Execute(UIElement element, ExpressionContext context) {
             string[] bindingStyles = bindingList.Evaluate(context);
             

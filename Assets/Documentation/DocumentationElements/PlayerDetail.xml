@@ -2,11 +2,11 @@
 <UITemplate>
 
     <Style>
-        
+        "
         style friend-container {
             MarginLeft = 20px;
         }
-        
+        "
     </Style>
     
     <Contents>

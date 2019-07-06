@@ -50,6 +50,11 @@ namespace UIForia.Parsing.Expression.Tokenizer {
         public void Advance(int count = 1) {
             ptr = Mathf.Min(ptr + count, tokens.Count);
         }
+        
+        [DebuggerStepThrough]
+        public void Set(int idx) {
+            ptr = Mathf.Min(idx, tokens.Count);
+        }
 
         [DebuggerStepThrough]
         public void Save() {
@@ -114,6 +119,37 @@ namespace UIForia.Parsing.Expression.Tokenizer {
                     level--;
                 }
                 else if (expressionToken == targetExpressionTokenType && level == 0) {
+                    return i;
+                }
+
+                i++;
+            }
+
+            return -1;
+        }
+        
+        public int FindMatchingTernaryColon() {
+            int i = 0;
+            int level = 0;
+            while (HasTokenAt(i)) {
+                ExpressionTokenType expressionToken = Peek(i);
+                // find paren open, recurse
+                
+                if (expressionToken == ExpressionTokenType.ParenOpen) {
+                    i = FindMatchingIndex(ExpressionTokenType.ParenOpen, ExpressionTokenType.ParenClose);
+//                    level++;
+                }
+                else if (expressionToken == ExpressionTokenType.ParenClose) {
+//                    level--;
+                }
+                // avoid false positives from ?. and ?[
+                else if (expressionToken == ExpressionTokenType.QuestionMark && HasTokenAt(i + 1) && Peek(i + 1) != ExpressionTokenType.QuestionMark && Peek(i + 1) != ExpressionTokenType.Dot && Peek(i + 1) != ExpressionTokenType.ArrayAccessOpen) {
+                    level++;
+                }
+                else if (expressionToken == ExpressionTokenType.Colon && level != 0) {
+                    level--;
+                }
+                else if (expressionToken == ExpressionTokenType.Colon && level == 0) {
                     return i;
                 }
 

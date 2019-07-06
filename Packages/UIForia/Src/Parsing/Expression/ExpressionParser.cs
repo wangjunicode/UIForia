@@ -26,8 +26,11 @@ namespace UIForia.Parsing.Expression {
             expressionStack = StackPool<ASTNode>.Get();
         }
 
-        private void Release() {
-            tokenStream.Release();
+        private void Release(bool releaseTokenStream = true) {
+            if (releaseTokenStream) {
+                tokenStream.Release();
+            }
+
             StackPool<OperatorNode>.Release(operatorStack);
             StackPool<ASTNode>.Release(expressionStack);
         }
@@ -177,10 +180,9 @@ namespace UIForia.Parsing.Expression {
                     operatorNode.WithLocation(tokenStream.Previous);
                     return true;
 
-                case ExpressionTokenType.QuestionMark:
-                    operatorNode = ASTNode.OperatorNode(OperatorType.TernaryCondition);
-                    operatorNode.WithLocation(tokenStream.Previous);
-                    return true;
+                case ExpressionTokenType.QuestionMark: {
+                    throw new Exception("Should not hit this");
+                }
 
                 case ExpressionTokenType.Colon:
                     operatorNode = ASTNode.OperatorNode(OperatorType.TernarySelection);
@@ -239,6 +241,67 @@ namespace UIForia.Parsing.Expression {
 
                 if (expressionStack.Count == 0) {
                     Abort();
+                }
+
+                if (tokenStream.Current == ExpressionTokenType.QuestionMark && !tokenStream.NextTokenIs(ExpressionTokenType.QuestionMark)) {
+                    
+                    while (operatorStack.Count != 0) {
+                        OperatorNode opNode = operatorStack.Pop();
+                        opNode.right = expressionStack.Pop();
+                        opNode.left = expressionStack.Pop();
+                        expressionStack.Push(opNode);
+                    }
+                    
+                    OperatorNode condition = ASTNode.OperatorNode(OperatorType.TernaryCondition);
+                    OperatorNode selection = ASTNode.OperatorNode(OperatorType.TernarySelection);
+                    
+                    condition.WithLocation(tokenStream.Previous);
+                    tokenStream.Advance();
+                    int idx = tokenStream.FindMatchingTernaryColon();
+
+                    if (idx != -1) {
+                        
+                        TokenStream stream = tokenStream.AdvanceAndReturnSubStream(idx);
+                        
+                        // parse the left side of the : operator
+                        ExpressionParser parser = new ExpressionParser(stream);
+                        ASTNode leftNode = parser.ParseLoop();
+                        parser.Release();
+
+                        tokenStream.Advance(); // step over colon
+                        
+                        ExpressionParser parserRight = new ExpressionParser(tokenStream);
+                        ASTNode rightNode = parserRight.ParseLoop();
+                        tokenStream.Set(parserRight.tokenStream.CurrentIndex);
+                        parserRight.Release(false);
+
+                        selection.left = leftNode;
+                        selection.right = rightNode;
+                        
+                        condition.left =  expressionStack.Pop();
+                        condition.right = selection;
+                    
+                        expressionStack.Push(condition);
+                    }
+                    else {
+                        
+                        // read to end use implicit default value for left hand side
+                        
+                        ExpressionParser parserLeft = new ExpressionParser(tokenStream);
+                        ASTNode leftNode = parserLeft.ParseLoop();
+                        tokenStream.Set(parserLeft.tokenStream.CurrentIndex);
+                        parserLeft.Release(false);
+                        
+                        selection.left = leftNode;
+                        selection.right = ASTNode.DefaultLiteralNode("default");
+                        
+                        condition.left =  expressionStack.Pop();
+                        condition.right = selection;
+                    
+                        expressionStack.Push(condition);
+                    }
+                    
+                    continue;
                 }
 
                 OperatorNode op;

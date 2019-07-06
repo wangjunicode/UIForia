@@ -50,6 +50,11 @@ namespace UIForia.Util {
         public T PeekAtUnchecked(int idx) {
             return array[idx];
         }
+        
+        [DebuggerStepThrough]
+        public T PeekRelativeUnchecked(int cnt) {
+            return array[size - cnt];
+        }
 
         [DebuggerStepThrough]
         public T Pop() {

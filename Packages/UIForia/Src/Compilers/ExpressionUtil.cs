@@ -83,7 +83,7 @@ namespace UIForia.Compilers {
             winningConversions = null;
             
             int winner = -1;
-            int winnerPoints = 0;
+            int winnerPoints = -1;
             for (int i = 0; i < candidates.Count; i++) {
                 int candidatePoints;
                 StructList<ParameterConversion> conversions;

@@ -6,6 +6,7 @@ using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using UIForia.Compilers.ExpressionResolvers;
 using UIForia.Exceptions;
 using UIForia.Parsing.Expression;
 using UIForia.Parsing.Expression.AstNodes;
@@ -18,8 +19,8 @@ namespace UIForia.Compilers {
 
         // todo -- event / delegate subscription
         // todo -- delegate invocation
-        // todo -- complex indexers
-        // todo -- don't re-access properties
+        // todo -- don't re-access properties that are not auto fields, might be expensive
+        // todo    null checking needs to be scope aware, not global since multiple code paths can be checked. also need positive & negative ie != null && == null
 
         private static readonly ObjectPool<LinqCompiler> s_CompilerPool = new ObjectPool<LinqCompiler>(null, (c) => c.Reset());
         private static readonly ObjectPool<BlockDefinition2> s_BlockPool = new ObjectPool<BlockDefinition2>((b) => b.Spawn(), (b) => b.Release());
@@ -49,6 +50,7 @@ namespace UIForia.Compilers {
         private int id;
 
         private Action<LinqCompiler, Expression> nullCheckHandler;
+        private LightList<ExpressionAliasResolver> aliasResolvers;
 
         public LinqCompiler() {
             this.parameters = new StructList<Parameter>();
@@ -58,6 +60,8 @@ namespace UIForia.Compilers {
             this.wasNullChecked = new HashSet<Expression>();
             PushBlock();
         }
+
+        public void AddAliasResolver(string aliasName, Func<ASTNode> resolver) { }
 
         private BlockDefinition2 currentBlock {
             [DebuggerStepThrough] get { return blockStack.PeekUnchecked(); }
@@ -69,9 +73,9 @@ namespace UIForia.Compilers {
             }
 
             if (variableNames.TryGetValue(name, out int val)) {
-                name += "_" + val;
-                variableNames[name] = val++;
-                return name;
+                string retn = name + "_" + val;
+                variableNames[name] = ++val;
+                return retn;
             }
             else {
                 variableNames[name] = 0;
@@ -356,6 +360,7 @@ namespace UIForia.Compilers {
                 return;
             }
 
+
             if (returnVar == null) {
                 if (id == 0) {
                     returnVar = blockStack.Stack[0].AddInternalVariable(returnType, "retn_val");
@@ -429,10 +434,6 @@ namespace UIForia.Compilers {
             currentBlock.AddStatement(Expression.Assign(left, right));
         }
 
-        public void Invoke(Expression target, MethodInfo methodInfo, params Expression[] args) { }
-
-        // todo -- support strings and or expressions or constants
-        public void Invoke(string targetVariableName, string methodName, params Expression[] args) { }
 
         public void ForEach(IEnumerable list, Action<ParameterExpression> block) { }
 
@@ -516,9 +517,11 @@ namespace UIForia.Compilers {
             this.nullCheckHandler = nullCHeckHandler;
         }
 
-        public void SetOutOfBoundsCheckHandler() { }
+        public void SetOutOfBoundsCheckHandler() {
+            throw new NotImplementedException();
+        }
 
-        private ParameterExpression AddParameter(Type type, string name, ParameterFlags flags = 0) {
+        private void AddParameter(Type type, string name, ParameterFlags flags = 0) {
             // todo validate no name conflicts && no keyword names
             Parameter parameter = new Parameter(type, name, flags);
             if ((flags & ParameterFlags.Implicit) != 0) {
@@ -530,10 +533,9 @@ namespace UIForia.Compilers {
             }
 
             parameters.Add(parameter);
-            return parameter;
         }
 
-        private ParameterExpression AddParameter(Parameter parameter) {
+        private void AddParameter(Parameter parameter) {
             // todo validate no name conflicts && no keyword names
             if ((parameter.flags & ParameterFlags.Implicit) != 0) {
                 if (implicitContext != null) {
@@ -544,7 +546,6 @@ namespace UIForia.Compilers {
             }
 
             parameters.Add(parameter);
-            return parameter;
         }
 
         private ParameterExpression ResolveVariableName(string variableName) {
@@ -634,33 +635,6 @@ namespace UIForia.Compilers {
                     throw new InvalidLeftHandStatementException(astRoot.type.ToString(), input);
                 }
 
-//                Expression last = MemberAccess(head, memberNode.identifier);
-//
-//                Expression variable = currentBlock.AddVariable(last.Type, memberNode.identifier);
-//                currentBlock.AddStatement(Expression.Assign(variable, last));
-//
-//                retn.AddAssignment(variable, last);
-//
-//                for (int i = 0; i < memberNode.parts.Count; i++) {
-//                    // if any part is a method, fail
-//                    // if any part is read only fail
-//                    // if any part is a struct need to write back
-//                    ASTNode part = memberNode.parts[i];
-//
-//                    if (part is DotAccessNode dotAccessNode) {
-//                        last = MemberAccess(variable, dotAccessNode.propertyName);
-//                        variable = currentBlock.AddVariable(last.Type, dotAccessNode.propertyName);
-//                        currentBlock.AddStatement(Expression.Assign(variable, last));
-//                        retn.AddAssignment(variable, last);
-//                    }
-//                    else if (part is IndexNode indexNode) {
-//                        // recurse to get index
-//                    }
-//                    else if (part is InvokeNode invokeNode) {
-//                        throw new InvalidLeftHandStatementException(part.type.ToString(), "Cannot use invoke operator () in the lhs");
-//                    }
-//                }
-
                 retn.targetExpression = retn.assignments[retn.assignments.size - 1].left;
             }
             else {
@@ -668,15 +642,6 @@ namespace UIForia.Compilers {
             }
 
             return retn;
-        }
-
-        private Expression StaticOrConstMemberAccess(Type type, string fieldOrPropertyName) {
-            MemberInfo memberInfo = ReflectionUtil.GetStaticOrConstMemberInfo(type, fieldOrPropertyName);
-            if (memberInfo == null) {
-                throw new CompileException($"Type {type} does not declare an accessible static field or property with the name {fieldOrPropertyName}");
-            }
-
-            return Expression.MakeMemberAccess(null, memberInfo);
         }
 
         private bool TryResolveInstanceOrStaticMemberAccess(Expression head, string fieldOrPropertyName, out Expression accessExpression) {
@@ -733,6 +698,7 @@ namespace UIForia.Compilers {
             return Expression.MakeMemberAccess(head, propertyInfo);
         }
 
+
         private Expression MakeMethodCall(Expression head, LightList<MethodInfo> methodInfos, LightList<ASTNode> arguments) {
             Expression[] args = new Expression[arguments.Count];
 
@@ -740,7 +706,13 @@ namespace UIForia.Compilers {
                 args[i] = Visit(arguments[i]);
             }
 
+            head = NullCheck(head);
+
             MethodInfo info = ExpressionUtil.SelectEligibleMethod(methodInfos, args, out StructList<ExpressionUtil.ParameterConversion> conversions);
+
+            if (info == null || !info.IsPublic) {
+                throw CompileException.UnresolvedMethodOverload(head.Type, methodInfos[0].Name, args.Select(a => a.Type).ToArray());
+            }
 
             if (conversions.size > args.Length) {
                 Array.Resize(ref args, conversions.size);
@@ -856,7 +828,7 @@ namespace UIForia.Compilers {
                     if (shouldBoundsCheck && (!ResolveParameter(head, out Parameter p) || (p.flags & ParameterFlags.NeverOutOfBounds) == 0)) {
                         PushBlock();
 
-                        BoundsCheck(head, indexer);
+                        head = BoundsCheck(head, ref indexer);
 
                         AddStatement(assign);
 
@@ -871,6 +843,8 @@ namespace UIForia.Compilers {
                     return nullableAccessVar;
                 }
 
+                head = NullCheck(head);
+
                 indexExpression = FindIndexExpression(head.Type, indexExpression, out PropertyInfo indexProperty);
                 return Expression.MakeIndex(head, indexProperty, new[] {indexer});
             }
@@ -884,7 +858,6 @@ namespace UIForia.Compilers {
 
             Type headType = head.Type;
 
-
             if (isNullableAccess) {
                 // Nullable<T> result = default(T?);
                 // if head != null
@@ -892,42 +865,45 @@ namespace UIForia.Compilers {
                 // return result
 
 
-                if (!(indexExpression is ParameterExpression) && !(indexExpression is ConstantExpression)) {
-                    indexer = AddVariable(indexExpression.Type, "indexer");
-                    AddStatement(Expression.Assign(indexer, indexExpression));
-                }
-                else {
-                    indexer = indexExpression;
-                }
-
                 start++;
 
                 Expression nullableAccessVar = null;
 
+                if (!wasNullChecked.Contains(head)) {
+                    wasNullChecked.Add(head);
+                }
+
                 BinaryExpression condition = Expression.NotEqual(head, Expression.Constant(null));
                 Expression block = null;
 
-                Expression idx = PerformIndex(head, indexer, headType);
-
                 // if more parts, continue visiting here since we need to final type to create our nullable variable
-                Expression continuation = VisitAccessExpressionParts(idx, parts, ref start);
-                nullableAccessVar = AddVariable(ReflectionUtil.GetNullableType(continuation.Type), "nullableAccess");
 
-                AddStatement(Expression.Assign(nullableAccessVar, Expression.Default(nullableAccessVar.Type)));
-
-                BinaryExpression assign = Expression.Assign(nullableAccessVar, Expression.Convert(continuation, nullableAccessVar.Type));
-
-                if (shouldBoundsCheck && (!ResolveParameter(head, out Parameter p) || (p.flags & ParameterFlags.NeverOutOfBounds) == 0)) {
+                if (RequiresBoundsCheck(head)) {
                     PushBlock();
 
-                    BoundsCheck(head, indexer);
+                    head = BoundsCheck(head, ref indexer);
+
+                    Expression idx = PerformIndex(head, indexer, headType);
+
+                    Expression continuation = VisitAccessExpressionParts(idx, parts, ref start);
+
+                    nullableAccessVar = blockStack.PeekRelativeUnchecked(2).AddInternalVariable(ReflectionUtil.GetNullableType(continuation.Type), "nullableAccess");
+
+                    blockStack.PeekRelativeUnchecked(2).AddStatement(Expression.Assign(nullableAccessVar, Expression.Default(nullableAccessVar.Type)));
+
+                    BinaryExpression assign = Expression.Assign(nullableAccessVar, Expression.Convert(continuation, nullableAccessVar.Type));
 
                     AddStatement(assign);
 
                     block = PopBlock();
                 }
                 else {
-                    block = Expression.Block(typeof(void), assign);
+                    Expression idx = PerformIndex(head, indexer, headType);
+                    Expression continuation = VisitAccessExpressionParts(idx, parts, ref start);
+
+                    nullableAccessVar = AddVariable(ReflectionUtil.GetNullableType(continuation.Type), "nullableAccess");
+                    AddStatement(Expression.Assign(nullableAccessVar, Expression.Default(nullableAccessVar.Type)));
+                    block = Expression.Block(typeof(void), Expression.Assign(nullableAccessVar, Expression.Convert(continuation, nullableAccessVar.Type)));
                 }
 
                 AddStatement(Expression.IfThen(condition, block));
@@ -935,38 +911,30 @@ namespace UIForia.Compilers {
                 return nullableAccessVar;
             }
 
-            if (shouldNullCheck && !wasNullChecked.Contains(head) && (!ResolveParameter(head, out Parameter parameter) || (parameter.flags & ParameterFlags.NeverOutOfBounds) == 0)) {
-                if (!(head is ParameterExpression) && !(head is ConstantExpression)) {
-                    ParameterExpression newHead = AddVariable(head.Type, "toBoundsCheck");
-                    AddStatement(Expression.Assign(newHead, head));
-                    head = newHead;
-                }
+            head = NullCheck(head);
 
-                NullCheck(head);
-            }
-
-            if (shouldBoundsCheck && !(indexExpression is ParameterExpression) && !(indexExpression is ConstantExpression)) {
-                indexer = AddVariable(indexExpression.Type, "indexer");
-                AddStatement(Expression.Assign(indexer, indexExpression));
-            }
-            else {
-                indexer = indexExpression;
-            }
-
-            if (shouldBoundsCheck && (!ResolveParameter(head, out parameter) || (parameter.flags & ParameterFlags.NeverOutOfBounds) == 0)) {
-                if (!(head is ParameterExpression) && !(head is ConstantExpression)) {
-                    ParameterExpression newHead = AddVariable(head.Type, "toBoundsCheck");
-                    AddStatement(Expression.Assign(newHead, head));
-                    head = newHead;
-                }
-
-                BoundsCheck(head, indexer);
-            }
+            head = BoundsCheck(head, ref indexer);
 
             return PerformIndex(head, indexer, headType);
         }
 
-        private Expression MemberAccess(Expression head, string fieldOrPropertyName, bool check = true) {
+        private Expression Invoke(Expression head, LightList<ASTNode> arguments) {
+            head = NullCheck(head);
+
+            Expression[] args = new Expression[arguments.Count];
+
+            Type delegateType = head.Type;
+
+            ParameterInfo[] parameterInfos = delegateType.GetMethod("Invoke").GetParameters();
+            
+            for (int i = 0; i < arguments.Count; i++) {
+                args[i] = Visit(parameterInfos[i].ParameterType, arguments[i]);
+            }
+
+            return Expression.Invoke(head, args);
+        }
+
+        private Expression MemberAccess(Expression head, string fieldOrPropertyName) {
             MemberInfo memberInfo = ReflectionUtil.GetFieldOrProperty(head.Type, fieldOrPropertyName);
 
             if (memberInfo == null) {
@@ -975,17 +943,7 @@ namespace UIForia.Compilers {
 
             // cascade a null check, if we are looking up a value and trying to read from something that is null,
             // then we jump to the end of value chain and use default(inputType) as a final value
-            if (check && shouldNullCheck && head.Type.IsClass && (!ResolveParameter(head, out Parameter parameter) || (parameter.flags & ParameterFlags.NeverNull) == 0)) {
-                if (!(head is ParameterExpression)) {
-                    Expression nullCheck = AddVariable(head.Type, "nullCheck");
-                    Assign(nullCheck, head);
-                    NullCheck(nullCheck);
-                    head = nullCheck;
-                }
-                else {
-                    NullCheck(head);
-                }
-            }
+            head = NullCheck(head);
 
             if (memberInfo is FieldInfo fieldInfo) {
                 return MakeFieldAccess(head, fieldInfo);
@@ -1108,13 +1066,13 @@ namespace UIForia.Compilers {
             }
 
             if (!ReflectionUtil.HasStaticMethod(type, propertyName, out LightList<MethodInfo> methodInfos)) {
-                throw new NotImplementedException();
+                throw CompileException.UnresolvedStaticMethod(type, propertyName);
             }
 
             MethodInfo info = ExpressionUtil.SelectEligibleMethod(methodInfos, args, out StructList<ExpressionUtil.ParameterConversion> conversions);
 
             if (info == null) {
-                throw new NotImplementedException();
+                throw CompileException.UnresolvedMethodOverload(type, propertyName, args.Select(a => a.Type).ToArray());
             }
 
             if (conversions.size > args.Length) {
@@ -1167,16 +1125,38 @@ namespace UIForia.Compilers {
                 throw CompileException.NonPublicType(type);
             }
 
-            switch (parts[start].type) {
+            ref ProcessedPart part = ref parts.Array[start];
+
+            switch (part.type) {
                 case PartType.DotAccess:
-                    head = MakeStaticConstOrEnumMemberAccess(type, parts[start].name);
+                    head = MakeStaticConstOrEnumMemberAccess(type, part.name);
                     break;
+
                 case PartType.DotInvoke:
-                    head = MakeStaticMethodCall(type, parts[start].name, parts[start].arguments);
+                    head = MakeStaticMethodCall(type, part.name, part.arguments);
                     break;
+
                 case PartType.DotIndex:
-//                    head = MakeStaticIndex(type, parts[start].name, parts[start].arguments);
-                    throw new NotImplementedException();
+
+                    head = MakeStaticConstOrEnumMemberAccess(type, part.name);
+
+                    Type lastValueType = head.Type;
+
+                    if (typeof(IList).IsAssignableFrom(lastValueType)) {
+                        if (lastValueType.IsArray && lastValueType.GetArrayRank() != 1) {
+                            throw new NotSupportedException("Expressions do not support multidimensional arrays yet");
+                        }
+
+                        head = IndexIList(head, Visit(typeof(int), part.arguments[0]), part.isNullableAccess, parts, ref start);
+                    }
+                    else if (lastValueType.IsGenericType && lastValueType.GetGenericTypeDefinition() == typeof(Dictionary<,>)) {
+                        head = IndexDictionary(head, part.arguments[0], part.isNullableAccess, parts, ref start);
+                    }
+                    else {
+                        head = IndexNonList(head, part.arguments, part.isNullableAccess, parts, ref start);
+                    }
+
+                    break;
                 default:
                     throw new NotImplementedException();
             }
@@ -1409,10 +1389,28 @@ namespace UIForia.Compilers {
                         break;
 
                     case PartType.Invoke:
-                        throw new NotImplementedException();
+                        lastExpression = Invoke(lastExpression, part.arguments);
+                        break;
 
-                    case PartType.Index:
-                        throw new NotImplementedException();
+                    case PartType.Index: {
+                        Type lastValueType = lastExpression.Type;
+
+                        if (typeof(IList).IsAssignableFrom(lastValueType)) {
+                            if (lastValueType.IsArray && lastValueType.GetArrayRank() != 1) {
+                                throw new NotSupportedException("Expressions do not support multidimensional arrays yet");
+                            }
+
+                            lastExpression = IndexIList(lastExpression, Visit(typeof(int), part.arguments[0]), part.isNullableAccess, parts, ref i);
+                        }
+                        else if (lastValueType.IsGenericType && lastValueType.GetGenericTypeDefinition() == typeof(Dictionary<,>)) {
+                            lastExpression = IndexDictionary(lastExpression, part.arguments[0], part.isNullableAccess, parts, ref i);
+                        }
+                        else {
+                            lastExpression = IndexNonList(lastExpression, part.arguments, part.isNullableAccess, parts, ref i);
+                        }
+
+                        break;
+                    }
 
                     case PartType.DotIndex: {
                         // todo -- also no support for multiple index properties right now, parser needs to accept a comma list for that to work
@@ -1445,28 +1443,55 @@ namespace UIForia.Compilers {
             return lastExpression;
         }
 
-        private void BoundsCheck(Expression variable, Expression indexer) {
+        private bool RequiresBoundsCheck(Expression head) {
+            return shouldBoundsCheck && (!ResolveParameter(head, out Parameter parameter) || (parameter.flags & ParameterFlags.NeverOutOfBounds) == 0);
+        }
+
+        private Expression BoundsCheck(Expression head, ref Expression indexExpression) {
+            if (!RequiresBoundsCheck(head)) {
+                return head;
+            }
+
+            Expression indexer = indexExpression;
+
+            if (!(indexExpression is ParameterExpression) && !(indexExpression is ConstantExpression)) {
+                indexer = AddVariable(indexExpression.Type, "indexer");
+                AddStatement(Expression.Assign(indexer, indexExpression));
+                indexExpression = indexer;
+            }
+
+            if (!(head is ParameterExpression) && !(head is ConstantExpression)) {
+                ParameterExpression newHead = AddVariable(head.Type, "toBoundsCheck");
+                AddStatement(Expression.Assign(newHead, head));
+                if (wasNullChecked.Contains(head)) {
+                    wasNullChecked.Add(newHead);
+                }
+
+                head = newHead;
+            }
+
             EnsureReturnLabel();
+
             Expression lengthExpr = null;
 
-            if (variable.Type.IsArray) {
-                lengthExpr = Expression.ArrayLength(variable);
+            if (head.Type.IsArray) {
+                lengthExpr = Expression.ArrayLength(head);
             }
             else {
-                lengthExpr = MemberAccess(variable, "Count", false);
+                lengthExpr = MemberAccess(head, "Count");
             }
 
             if (indexer is ConstantExpression constantExpression && constantExpression.Value is int intVal) {
                 if (intVal < 0) {
                     currentBlock.AddStatement(Expression.Goto(returnLabel));
-                    return;
+                    return head;
                 }
 
                 AddStatement(Expression.IfThen(
                     Expression.GreaterThanOrEqual(indexer, lengthExpr),
                     Expression.Goto(returnLabel)
                 ));
-                return;
+                return head;
             }
 
             ConditionalExpression expr = Expression.IfThen(
@@ -1477,16 +1502,31 @@ namespace UIForia.Compilers {
                 Expression.Goto(returnLabel)
             );
             currentBlock.AddStatement(expr);
+            return head;
         }
 
-        private void NullCheck(Expression variable) {
-            EnsureReturnLabel();
+        private bool RequiresNullCheck(Expression head) {
+            return shouldNullCheck && head.Type.IsClass && !wasNullChecked.Contains(head) && (!ResolveParameter(head, out Parameter parameter) || (parameter.flags & ParameterFlags.NeverNull) == 0);
+        }
 
-            if (wasNullChecked.Contains(variable)) {
-                return;
+        private Expression NullCheck(Expression variable) {
+            if (!RequiresNullCheck(variable)) {
+                return variable;
             }
 
-            wasNullChecked.Add(variable);
+            EnsureReturnLabel();
+
+            Expression nullCheck = variable;
+
+            if (!(variable is ConstantExpression) && !(variable is ParameterExpression)) {
+                nullCheck = AddVariable(variable.Type, "nullCheck");
+                Assign(nullCheck, variable);
+                wasNullChecked.Add(nullCheck);
+            }
+
+            if (!wasNullChecked.Contains(variable)) {
+                wasNullChecked.Add(variable);
+            }
 
             if (nullCheckHandler != null) {
                 shouldNullCheck = false;
@@ -1494,14 +1534,14 @@ namespace UIForia.Compilers {
                 nullCheckHandler.Invoke(this, variable);
                 AddStatement(Expression.Goto(returnLabel));
                 BlockExpression blockExpression = PopBlock();
-                AddStatement(Expression.IfThen(Expression.Equal(variable, Expression.Constant(null)), blockExpression));
+                AddStatement(Expression.IfThen(Expression.Equal(nullCheck, Expression.Constant(null)), blockExpression));
                 shouldNullCheck = true;
             }
             else {
-                AddStatement(Expression.IfThen(Expression.Equal(variable, Expression.Constant(null)), Expression.Goto(returnLabel)));
+                AddStatement(Expression.IfThen(Expression.Equal(nullCheck, Expression.Constant(null)), Expression.Goto(returnLabel)));
             }
 
-            // todo -- if user handles null check, invoke callback here
+            return nullCheck;
         }
 
         private static Expression FindIndexExpression(Type type, Expression indexExpression, out PropertyInfo indexProperty) {
@@ -1568,7 +1608,7 @@ namespace UIForia.Compilers {
                     return Expression.Constant(((LiteralNode) node).rawValue);
 
                 case ASTNodeType.Operator:
-                    return VisitOperator((OperatorNode) node);
+                    return VisitOperator(targetType, (OperatorNode) node);
 
                 case ASTNodeType.TypeOf:
                     return VisitTypeNode((TypeNode) node);
@@ -1620,7 +1660,7 @@ namespace UIForia.Compilers {
                 try {
                     retn = Expression.Convert(retn, targetType);
                 }
-                catch (InvalidOperationException ex) {
+                catch (InvalidOperationException) {
                     throw CompileException.InvalidTargetType(targetType, retn.Type);
                 }
             }
@@ -1632,8 +1672,6 @@ namespace UIForia.Compilers {
             if (TypeUtil.IsArithmetic(left.Type) && TypeUtil.IsArithmetic(right.Type)) {
                 if (left.Type != right.Type) {
                     if (ReflectionUtil.AreNumericTypesCompatible(left.Type, right.Type)) {
-                        // todo -- conversions between integrals and floating points
-
                         bool isLeftIntegral = ReflectionUtil.IsIntegralType(left.Type);
                         bool isRightIntegral = ReflectionUtil.IsIntegralType(right.Type);
                         bool isLeftFloatingPoint = !isLeftIntegral;
@@ -1749,11 +1787,27 @@ namespace UIForia.Compilers {
                 case OperatorType.Divide:
                     return Expression.Divide(left, right);
 
-                case OperatorType.Equals:
-                    return Expression.Equal(left, right);
+                case OperatorType.Equals: {
+                    if (left.Type.IsClass && (right is ConstantExpression nullNode) && nullNode.Value == null) {
+                        wasNullChecked.Add(left);
+                    }
+                    else if (right.Type.IsClass && (left is ConstantExpression nullNode2) && nullNode2.Value == null) {
+                        wasNullChecked.Add(right);
+                    }
 
-                case OperatorType.NotEquals:
+                    return Expression.Equal(left, right);
+                }
+
+                case OperatorType.NotEquals: {
+                    if (left.Type.IsClass && (right is ConstantExpression nullNode) && nullNode.Value == null) {
+                        wasNullChecked.Add(left);
+                    }
+                    else if (right.Type.IsClass && (left is ConstantExpression nullNode2) && nullNode2.Value == null) {
+                        wasNullChecked.Add(right);
+                    }
+
                     return Expression.NotEqual(left, right);
+                }
 
                 case OperatorType.GreaterThan:
                     return Expression.GreaterThan(left, right);
@@ -1793,69 +1847,70 @@ namespace UIForia.Compilers {
             }
         }
 
-        private Expression VisitPartialTernary(OperatorNode operatorNode) {
-            Expression ternaryCondition = Visit(operatorNode.left);
+        private Expression ForceBooleanCast(Expression expression) {
+            Type expressionType = expression.Type;
 
-            if (ternaryCondition.Type != typeof(bool)) {
-                if (ternaryCondition.Type.IsClass) {
-                    
-                    ParameterExpression variable = AddVariable(typeof(bool), "ternary");
-                    
-                    AddStatement(Expression.Assign(variable, Expression.Constant(true)));
-                    
-                    AddStatement(Expression.IfThen(Expression.Equal(ternaryCondition, Expression.Constant(null)),
-                            Expression.Block(typeof(void),
-                                Expression.Assign(variable, Expression.Constant(false))
-                            )
-                        )
-                    );
+            if (expressionType == typeof(bool)) {
+                return expression;
+            }
 
-                    ternaryCondition = variable;
-                }
-                else {
-                    // if numeric check 0?
-                    throw new NotImplementedException();
+            try {
+                expression = Expression.Convert(expression, typeof(bool));
+            }
+            catch (InvalidOperationException ex) {
+                if (ex.Message.Contains("No coercion operator is defined between types")) {
+                    if (expressionType.IsClass || expressionType.IsNullableType()) {
+                        wasNullChecked.Add(expression);
+                        expression = Expression.NotEqual(expression, Expression.Constant(null));
+                    }
+                    else if (TypeUtil.IsArithmetic(expressionType)) {
+                        expression = Expression.NotEqual(expression, Expression.Constant(0));
+                    }
                 }
             }
 
-            Expression expr = Visit(operatorNode.right);
-
-            Expression ternaryVariable = currentBlock.AddInternalVariable(expr.Type, "ternaryOutput");
-            AddStatement(Expression.Assign(ternaryVariable, Expression.Default(ternaryVariable.Type)));
-
-            BlockExpression pass = Expression.Block(typeof(void), Expression.Assign(ternaryVariable, Visit(operatorNode.right)));
-
-
-            AddStatement(Expression.IfThen(ternaryCondition, pass));
-
-            return ternaryVariable;
+            return expression;
         }
 
-        private Expression VisitOperator(OperatorNode operatorNode) {
+        private Expression VisitOperator(Type targetType, OperatorNode operatorNode) {
             Expression left;
             Expression right;
 
             if (operatorNode.operatorType == OperatorType.TernaryCondition) {
-                
                 if (!(operatorNode.right is OperatorNode select)) {
-                    return VisitPartialTernary(operatorNode);
+                    throw new CompileException("Bad ternary, expected the right hand side to be a TernarySelection but it was {select}");
                 }
 
                 if (select.operatorType != OperatorType.TernarySelection) {
-                    throw new CompileException("Bad ternary, expected the right hand side to be a TernarySelection but it was {select.operatorType}");
+                    throw new CompileException($"Bad ternary, expected the right hand side to be a TernarySelection but it was {select.operatorType}");
                 }
 
-                left = Visit(select.left);
-                right = Visit(select.right);
+                Debug.Assert(targetType != null);
 
-                Expression ternaryVariable = currentBlock.AddInternalVariable(left.Type, "ternaryOutput");
+                // if target type is null & left type & right type are not compatible, error
 
-                Expression ternaryCondition = Visit(operatorNode.left);
+                // todo -- support null target type & try to find matching type between left and right.
+                // todo    probably involves re-visiting with sub-compilers since we don't want to emit the output, just find types
+                Expression ternaryCondition = ForceBooleanCast(VisitUnchecked(typeof(bool), operatorNode.left));
 
-                BlockExpression pass = Expression.Block(typeof(void), Expression.Assign(ternaryVariable, left));
-                BlockExpression fail = Expression.Block(typeof(void), Expression.Assign(ternaryVariable, right));
+                Expression ternaryVariable = currentBlock.AddInternalVariable(targetType, "ternaryOutput");
 
-                AddStatement(Expression.IfThenElse(ternaryCondition, pass, fail));
+                PushBlock();
+
+                left = Visit(targetType, select.left);
+                AddStatement(Expression.Assign(ternaryVariable, left));
+
+                BlockExpression passBlock = PopBlock();
+
+                PushBlock();
+
+                right = Visit(targetType, select.right);
+                AddStatement(Expression.Assign(ternaryVariable, right));
+
+                BlockExpression failBlock = PopBlock();
+
+
+                AddStatement(Expression.IfThenElse(ternaryCondition, passBlock, failBlock));
 
                 return ternaryVariable;
             }
@@ -2007,31 +2062,6 @@ namespace UIForia.Compilers {
                 return Expression.Constant(t);
             }
             catch (TypeResolutionException) { }
-
-            // need to figure out how to get <T> generic types
-            // class SpecialElement<T> : UIElement
-            // (UIElement root, SpecialElement<T> current) =>
-            //     T t = typeof(T);
-            //     x = default(T);
-
-//            if (defaultIdentifier != null) {
-//                Expression root = ResolveVariableName(defaultIdentifier);
-//
-//                if (!root.Type.IsGenericType) {
-//                    throw new NotImplementedException($"Searching for type {typePath} but unable to find it from type {root.Type}. typeof() can currently only resolve generics if {nameof(SetDefaultIdentifier)} has been called");
-//                }
-//
-//                Type[] generics = root.Type.GetGenericArguments();
-//                Type[] baseGenericArguments = root.Type.GetGenericTypeDefinition().GetGenericArguments();
-//
-//                Debug.Assert(generics.Length == baseGenericArguments.Length);
-//
-//                for (int i = 0; i < generics.Length; i++) {
-//                    if (baseGenericArguments[i].Name == typePath.typeName) {
-//                        return Expression.Constant(generics[i]);
-//                    }
-//                }
-//            }
 
             throw CompileException.UnresolvedType(typePath);
         }

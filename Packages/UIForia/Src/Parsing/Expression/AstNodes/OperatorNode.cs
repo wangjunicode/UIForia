@@ -1,7 +1,23 @@
+using System.Diagnostics;
 using UIForia.Exceptions;
 
 namespace UIForia.Parsing.Expression.AstNodes {
 
+    public class OperatorNodeDebugView {
+
+        public OperatorType operatorType;
+        public ASTNode left;
+        public ASTNode right;
+        
+        public OperatorNodeDebugView(OperatorNode node) {
+            operatorType = node.operatorType;
+            left = node.left;
+            right = node.right;
+        }
+
+    }
+    
+    [DebuggerTypeProxy(typeof(OperatorNodeDebugView))]
     public class OperatorNode : ASTNode {
 
         public ASTNode left;

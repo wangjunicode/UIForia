@@ -156,8 +156,8 @@ namespace UIForia.Util {
         }
 
         public T this[int idx] {
-            get => array[idx];
-            set => array[idx] = value;
+           [DebuggerStepThrough] get => array[idx];
+           [DebuggerStepThrough] set => array[idx] = value;
         }
 
         public void SetFromRange(T[] source, int start, int count) {

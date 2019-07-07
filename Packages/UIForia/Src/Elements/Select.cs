@@ -145,8 +145,6 @@ namespace UIForia.Elements {
         }
 
         private static void GetAliasResolvers(IList<ExpressionAliasResolver> resolvers, AttributeList attributes) {
-            AttributeDefinition aliasAttr = attributes.GetAttribute("optionAlias");
-            string optionName = aliasAttr?.value ?? "$option";
             resolvers.Add(new SelectOptionAliasResolver<T>("$option", false));
             resolvers.Add(new SelectOptionAliasResolver<T>("$option__internal", true));
         }

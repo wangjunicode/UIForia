@@ -136,7 +136,7 @@ namespace UIForia.Compilers {
             List<KeyboardEventHandler> retn = null;
 
             for (int i = 0; i < attributeDefinitions.Count; i++) {
-                if (attributeDefinitions[i].isCompiled || attributeDefinitions[i].isRealAttribute) {
+                if (attributeDefinitions[i].isCompiled || attributeDefinitions[i].key.StartsWith("x-")) {
                     continue;
                 }
 
@@ -184,7 +184,7 @@ namespace UIForia.Compilers {
             List<MouseEventHandler> retn = null;
 
             for (int i = 0; i < attributeDefinitions.Count; i++) {
-                if (attributeDefinitions[i].isCompiled || attributeDefinitions[i].isRealAttribute) {
+                if (attributeDefinitions[i].isCompiled || attributeDefinitions[i].key.StartsWith("x-")) {
                     continue;
                 }
 
@@ -387,7 +387,7 @@ namespace UIForia.Compilers {
             List<DragEventHandler> retn = null;
 
             for (int i = 0; i < attributeDefinitions.Count; i++) {
-                if (attributeDefinitions[i].isCompiled || attributeDefinitions[i].isRealAttribute) {
+                if (attributeDefinitions[i].isCompiled || attributeDefinitions[i].key.StartsWith("x-")) {
                     continue;
                 }
 
@@ -476,7 +476,7 @@ namespace UIForia.Compilers {
             List<DragEventCreator> retn = null;
 
             for (int i = 0; i < attributeDefinitions.Count; i++) {
-                if (attributeDefinitions[i].isCompiled || attributeDefinitions[i].isRealAttribute) {
+                if (attributeDefinitions[i].isCompiled || attributeDefinitions[i].key.StartsWith("x-")) {
                     continue;
                 }
 

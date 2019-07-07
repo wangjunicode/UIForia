@@ -145,7 +145,7 @@ namespace UIForia.Parsing.Expression.AstNodes {
         // todo -- support multiple indexer arguments
         public static IndexNode IndexExpressionNode(ASTNode expression, bool isElvisAccess) {
             IndexNode indexNode = s_IndexExpressionPool.Get();
-            LightList<ASTNode> list = LightList<ASTNode>.Get(4);
+            LightList<ASTNode> list = LightList<ASTNode>.GetMinSize(4);
             list.Add(expression);
             indexNode.arguments = list;
             indexNode.isNullableAccess = isElvisAccess;

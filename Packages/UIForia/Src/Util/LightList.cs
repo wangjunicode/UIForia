@@ -9,6 +9,7 @@ namespace UIForia.Util {
     internal class LightListDebugView<T> {
 
         private readonly LightList<T> lightList;
+        [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
         public T[] array;
         
         public LightListDebugView(LightList<T> lightList) {
@@ -22,6 +23,14 @@ namespace UIForia.Util {
     [DebuggerTypeProxy(typeof(LightListDebugView<>))]
     public class LightList<T> : IReadOnlyList<T>, IList<T> {
 
+        public struct ListSpan {
+
+            public LightList<T> list;
+            public int start;
+            public int end;
+
+        }
+        
         private int size;
         private T[] array;
         private bool isPooled;
@@ -531,7 +540,7 @@ namespace UIForia.Util {
             return new LightList<T>();
         }
         
-        public static LightList<T> Get(int minSize) {
+        public static LightList<T> GetMinSize(int minSize) {
             for (int i = 0; i < s_LightListPool.Count; i++) {
                 if (s_LightListPool[i].Capacity >= minSize) {
                     LightList<T> retn = s_LightListPool[i];
@@ -556,7 +565,9 @@ namespace UIForia.Util {
             toRelease = null;
         }
         
-        
+        public static implicit operator LightList<T>(T[] array) {
+            return new LightList<T>(array);
+        }
 
         public class Enumerator : IEnumerator<T> {
 

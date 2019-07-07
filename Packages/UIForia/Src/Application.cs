@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UIForia.Animation;
 using UIForia.AttributeProcessors;
 using UIForia.Bindings;
+using UIForia.Compilers;
 using UIForia.Compilers.Style;
 using UIForia.Elements;
 using UIForia.Extensions;
@@ -71,6 +72,7 @@ namespace UIForia {
 
         protected readonly SkipTree<UIElement> updateTree;
         public static readonly UIForiaSettings Settings;
+        private ElementPool elementPool;
         
         static Application() {
             ArrayPool<UIElement>.SetMaxPoolSize(64);
@@ -84,6 +86,13 @@ namespace UIForia {
             }
         }
 
+        // todo -- replace the static version with this one
+        public UIForiaSettings settings => Settings;
+
+        public UIElement CreateElementFromPool(Type type) {
+            return elementPool.Get(type);
+        }
+        
         protected Application(string id, string templateRootPath = null) {
             this.id = id;
             this.templateRootPath = templateRootPath;
@@ -95,6 +104,7 @@ namespace UIForia {
 
             s_ApplicationList.Add(this);
 
+            this.elementPool = new ElementPool();
             this.m_Systems = new List<ISystem>();
             this.m_Views = new List<UIView>();
             this.updateTree = new SkipTree<UIElement>();

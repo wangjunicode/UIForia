@@ -228,7 +228,7 @@ namespace Mono.Linq.Expressions {
                 WriteToken("?");
                 return;
             }
-            
+
             string typeName = type.ToString();
             for (int i = 0; i < typeName.Length; i++) {
                 if (typeName[i] == '`') {
@@ -378,7 +378,7 @@ namespace Mono.Linq.Expressions {
                         continue;
                     }
                 }
-                
+
                 Write(expression);
 
                 if (!IsActualStatement(expression))
@@ -850,7 +850,14 @@ namespace Mono.Linq.Expressions {
         }
 
         protected override Expression VisitConstant(ConstantExpression node) {
-            WriteLiteral(GetLiteral(node.Value));
+            if (node.Value is Type type) {
+                WriteToken("typeof(");
+                VisitType(type);
+                WriteToken(")");
+            }
+            else {
+                WriteLiteral(GetLiteral(node.Value));
+            }
 
             return node;
         }
@@ -862,6 +869,8 @@ namespace Mono.Linq.Expressions {
             if (value.GetType().IsEnum)
                 return GetEnumLiteral(value);
 
+            if (value is Type) { }
+
             switch (Type.GetTypeCode(value.GetType())) {
                 case TypeCode.Single:
                     return ((IFormattable) value).ToString(null, CultureInfo.InvariantCulture) + "f";
@@ -871,7 +880,7 @@ namespace Mono.Linq.Expressions {
 
                 case TypeCode.UInt32:
                     return value + "u";
-                
+
                 case TypeCode.Int64:
                     return value + "l";
 
@@ -880,19 +889,19 @@ namespace Mono.Linq.Expressions {
 
                 case TypeCode.Double:
                     return value + "d";
-                
+
                 case TypeCode.Boolean:
                     return ((bool) value) ? "true" : "false";
-                
+
                 case TypeCode.Char:
                     return "'" + ((char) value) + "'";
-                
+
                 case TypeCode.String:
                     return "\"" + ((string) value) + "\"";
-                
+
                 case TypeCode.Int32:
                     return ((IFormattable) value).ToString(null, CultureInfo.InvariantCulture);
-                
+
                 default:
                     return value.ToString();
             }
@@ -942,7 +951,7 @@ namespace Mono.Linq.Expressions {
             public bool isRef;
 
         }
-        
+
         protected override Expression VisitMethodCall(MethodCallExpression node) {
             var method = node.Method;
 
@@ -964,13 +973,12 @@ namespace Mono.Linq.Expressions {
                 WriteToken("()");
                 return node;
             }
-            
+
             ParameterInfo[] parameterInfos = method.GetParametersCached();
 
             WriteToken("(");
 
             for (int i = 0; i < node.Arguments.Count; i++) {
-                
                 if (i > 0) {
                     WriteToken(",");
                     WriteSpace();
@@ -983,7 +991,6 @@ namespace Mono.Linq.Expressions {
                 else {
                     Visit(node.Arguments[i]);
                 }
-                
             }
 
             WriteToken(")");

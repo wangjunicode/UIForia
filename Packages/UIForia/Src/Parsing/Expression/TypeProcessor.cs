@@ -374,6 +374,8 @@ namespace UIForia.Parsing.Expression {
         private static readonly char[] s_GenericSplitter = {'-', '-'};
 
         public static ProcessedType ResolveTagName(string tagName, IReadOnlyList<string> namespaces) {
+            FilterAssemblies();
+            
             if (templateTypeMap.TryGetValue(tagName, out ProcessedType retnType)) {
                 return retnType;
             }

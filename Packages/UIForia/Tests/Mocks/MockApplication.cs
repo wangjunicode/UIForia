@@ -11,7 +11,7 @@ namespace Tests.Mocks {
 
     public class MockApplication : Application {
 
-        public MockApplication(Type elementType, string template = null) : base(GUID.Generate().ToString()) {
+        public MockApplication(Type elementType, string template = null, bool createView = true) : base(GUID.Generate().ToString()) {
             
             TemplateRootPath = Path.GetFullPath(Path.Combine(UnityEngine.Application.dataPath, "../Packages/UIForia/Tests"));
             MockLayoutSystem layoutSystem = new MockLayoutSystem(this, m_StyleSystem);
@@ -24,7 +24,9 @@ namespace Tests.Mocks {
             m_RenderSystem = renderSystem;
             m_LayoutSystem = layoutSystem;
 
-            CreateView("Test View", new Rect(), elementType, template);
+            if (createView) {
+                CreateView("Test View", new Rect(), elementType, template);
+            }
         }
 
         public new MockInputSystem InputSystem => (MockInputSystem) m_InputSystem;
@@ -34,6 +36,9 @@ namespace Tests.Mocks {
             m_Views[0].Viewport = rect;
         }
 
+        public static MockApplication CreateWithoutView() {
+            return new MockApplication(null, null, false);
+        }
     }
 
     public class MockRenderSystem : IRenderSystem {

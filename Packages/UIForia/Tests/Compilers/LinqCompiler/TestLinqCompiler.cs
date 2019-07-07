@@ -207,7 +207,7 @@ public class TestLinqCompiler {
             });
 
             compiler.Log();
-            return compiler.BuildLambda2();
+            return compiler.BuildLambda();
         }
 
         public LinqBinding CompileMemberReadBinding(Type root, Type elementType, AttributeDefinition attributeDefinition) {

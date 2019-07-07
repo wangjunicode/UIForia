@@ -265,10 +265,10 @@ namespace UIForia.Compilers {
         }
 
         public string Print() {
-            return Mono.Linq.Expressions.CSharp.ToCSharpCode((Expression) BuildLambda2());
+            return Mono.Linq.Expressions.CSharp.ToCSharpCode((Expression) BuildLambda());
         }
 
-        public LambdaExpression BuildLambda2() {
+        public LambdaExpression BuildLambda() {
             if (lambdaExpression != null) {
                 return lambdaExpression;
             }
@@ -498,6 +498,22 @@ namespace UIForia.Compilers {
 
             currentBlock.AddStatement(Expression.IfThen(condition, bodyBlock));
         }
+        
+        public void IfNotEqual<T>(LHSStatementChain left, Expression right, Action<T> body, T ctx) {
+            Debug.Assert(left != null);
+            Debug.Assert(right != null);
+            Debug.Assert(body != null);
+
+            Expression condition = Expression.NotEqual(left.targetExpression, right);
+
+            PushBlock();
+
+            body(ctx);
+
+            BlockExpression bodyBlock = PopBlock();
+
+            currentBlock.AddStatement(Expression.IfThen(condition, bodyBlock));
+        }
 
         // todo -- see if this works w/ pooling
         private static ParameterExpression[] MakeParameterArray(StructList<Parameter> parameters) {
@@ -510,7 +526,7 @@ namespace UIForia.Compilers {
         }
 
         public T Compile<T>() where T : Delegate {
-            return (T) BuildLambda2().Compile();
+            return (T) BuildLambda().Compile();
         }
 
         public void SetNullCheckHandler(Action<LinqCompiler, Expression> nullCHeckHandler) {
@@ -1991,7 +2007,7 @@ namespace UIForia.Compilers {
 
             nested.Return(lambda.body);
 
-            LambdaExpression retn = nested.BuildLambda2();
+            LambdaExpression retn = nested.BuildLambda();
             s_CompilerPool.Release(nested);
             return retn;
         }

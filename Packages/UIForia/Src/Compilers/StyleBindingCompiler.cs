@@ -35,8 +35,7 @@ namespace UIForia.Compilers {
         internal static readonly IAliasSource[] fixedSources;
         internal static readonly IAliasSource[] measurementSources;
         internal static readonly IAliasSource[] colorSources;
-
-
+        
         // todo implement these globally in bindings
         private static readonly string[] k_ElementProperties = {
             "$childIndex",
@@ -65,10 +64,6 @@ namespace UIForia.Compilers {
         }
 
         public StyleBinding Compile(Type rootType, Type elementType, string key, string value) {
-            
-            if (key == "style") {
-                    
-            }
             
             if (!key.StartsWith("style.")) return null;
             this.rootType = rootType;

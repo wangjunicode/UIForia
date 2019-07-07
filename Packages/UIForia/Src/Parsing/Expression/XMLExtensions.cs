@@ -56,7 +56,6 @@ namespace UIForia.Parsing.Expression {
             
             element.ReplaceNodes(output);
 
-            
         }
 
     }

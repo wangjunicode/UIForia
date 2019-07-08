@@ -9,16 +9,17 @@ namespace UIForia.Util {
     internal class LightListDebugView<T> {
 
         private readonly LightList<T> lightList;
+
         [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
         public T[] array;
-        
+
         public LightListDebugView(LightList<T> lightList) {
             this.lightList = lightList;
             array = lightList.ToArray();
-        }        
+        }
 
     }
-    
+
     [DebuggerDisplay("LightList Count = {" + nameof(size) + "} | Capacity = {array.Length}")]
     [DebuggerTypeProxy(typeof(LightListDebugView<>))]
     public class LightList<T> : IReadOnlyList<T>, IList<T> {
@@ -29,10 +30,16 @@ namespace UIForia.Util {
             public int start;
             public int end;
 
+            public ListSpan(LightList<T> list, int start, int end) {
+                this.list = list;
+                this.start = start;
+                this.end = end;
+            }
+
         }
-        
-        private int size;
-        private T[] array;
+
+        public int size;
+        public T[] array;
         private bool isPooled;
 
         public T[] ToArray() {
@@ -40,7 +47,7 @@ namespace UIForia.Util {
             System.Array.Copy(array, 0, retn, 0, size);
             return retn;
         }
-        
+
         private static readonly List<LightList<T>> s_LightListPool = new List<LightList<T>>();
 
         [DebuggerStepThrough]
@@ -399,7 +406,7 @@ namespace UIForia.Util {
                 break;
             }
         }
-        
+
         private int Partition(Comparison<T> comparison, int low, int high) {
             T temp;
             T pivot = array[high];
@@ -414,13 +421,14 @@ namespace UIForia.Util {
                     array[j] = temp;
                 }
             }
+
             temp = array[i + 1];
             array[i + 1] = array[high];
             array[high] = temp;
 
             return i + 1;
         }
-        
+
         private int Partition(IComparer<T> comparison, int low, int high) {
             T temp;
             T pivot = array[high];
@@ -435,6 +443,7 @@ namespace UIForia.Util {
                     array[j] = temp;
                 }
             }
+
             temp = array[i + 1];
             array[i + 1] = array[high];
             array[high] = temp;
@@ -445,15 +454,15 @@ namespace UIForia.Util {
         private class Cmp : IComparer<T> {
 
             public Comparison<T> cmp;
-            
+
             public int Compare(T x, T y) {
                 return cmp.Invoke(x, y);
             }
-            
+
         }
 
         private static Cmp s_Comparer = new Cmp();
-        
+
         // NOT FUCKING THREAD SAFE
         public void Sort(Comparison<T> comparison) {
             if (size < 2) return;
@@ -495,6 +504,10 @@ namespace UIForia.Util {
             return InternalBinarySearch(array, 0, size, value, Comparer<T>.Default);
         }
 
+        public ListSpan CreateSpan(int start, int end) {
+            return new ListSpan(this, start, end);
+        }
+
         private static int InternalBinarySearch(T[] array, int index, int length, T value, IComparer<T> comparer) {
             int num1 = index;
             int num2 = index + length - 1;
@@ -516,7 +529,7 @@ namespace UIForia.Util {
 
             return ~num1;
         }
-        
+
         public Enumerator GetEnumerator() {
             return new Enumerator(this);
         }
@@ -539,7 +552,7 @@ namespace UIForia.Util {
 
             return new LightList<T>();
         }
-        
+
         public static LightList<T> GetMinSize(int minSize) {
             for (int i = 0; i < s_LightListPool.Count; i++) {
                 if (s_LightListPool[i].Capacity >= minSize) {
@@ -564,7 +577,7 @@ namespace UIForia.Util {
             s_LightListPool.Add(toRelease);
             toRelease = null;
         }
-        
+
         public static implicit operator LightList<T>(T[] array) {
             return new LightList<T>(array);
         }

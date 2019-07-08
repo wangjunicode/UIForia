@@ -7,6 +7,7 @@ using UIForia.Expressions;
 using UIForia.Layout;
 using UIForia.Rendering;
 using UIForia.Routing;
+using UIForia.Systems;
 using UIForia.Templates;
 using UIForia.UIInput;
 using UIForia.Util;
@@ -33,6 +34,10 @@ namespace UIForia.Elements {
 
         internal static IntMap<ElementColdData> s_ColdDataMap = new IntMap<ElementColdData>();
 
+        internal LinqBindingNode bindingNode;
+
+        internal StructList<ElementAttribute> attributes;
+        
         public UIView View { get; internal set; }
         
         protected internal UIElement() {

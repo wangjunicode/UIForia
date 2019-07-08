@@ -1,8 +1,9 @@
 using System;
 using System.Linq.Expressions;
+using UIForia.Compilers;
 using UIForia.Elements;
 
-namespace UIForia.Compilers {
+namespace UIForia.Systems {
 
     public class LinqPropertyBinding : LinqBinding {
 
@@ -16,6 +17,8 @@ namespace UIForia.Compilers {
         public override void Execute(UIElement templateRoot, UIElement current, TemplateContext context) {
             fn(templateRoot, current, context);
         }
+
+        public override bool CanBeShared => true;
 
     }
 

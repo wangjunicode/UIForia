@@ -4,9 +4,11 @@ using System.Linq.Expressions;
 using System.Reflection;
 using UIForia.Attributes;
 using UIForia.Bindings;
+using UIForia.Elements;
 using UIForia.Exceptions;
 using UIForia.Extensions;
 using UIForia.Parsing.Expression;
+using UIForia.Systems;
 using UIForia.Util;
 
 namespace UIForia.Compilers {
@@ -37,23 +39,33 @@ namespace UIForia.Compilers {
 
         }
 
-        public LinqBinding Compile(Type rootType, Type elementType, TemplateContextTreeDefinition ctx, in AttributeDefinition2 attributeDefinition) {
+        public LambdaExpression BuildLambda(Type rootType, Type elementType, TemplateContextTreeDefinition ctx, in AttributeDefinition2 attributeDefinition) {
             LightList<MethodInfo> changedHandlers = GetPropertyChangedHandlers(elementType, attributeDefinition.key);
 
             compiler.SetSignature(
                 // todo -- supported dotted or indexed access to properties, need to play with the implicit flag, set to element for left, root for right
-                new Parameter(rootType, "root", ParameterFlags.NeverNull | ParameterFlags.Implicit),
-                new Parameter(elementType, "element", ParameterFlags.NeverNull),
+                new Parameter(typeof(UIElement), "root", ParameterFlags.NeverNull),
+                new Parameter(typeof(UIElement), "element", ParameterFlags.NeverNull),
                 new Parameter(typeof(TemplateContext), "templateContext", ParameterFlags.NeverNull)
             );
+
+            // todo -- never null check _root or _element
+            ParameterExpression rootExpr = compiler.AddVariable(rootType, "_root", Expression.Convert(compiler.GetParameter("root"), rootType));
+            ParameterExpression elementExpr = compiler.AddVariable(elementType, "_element", Expression.Convert(compiler.GetParameter("element"), elementType));
+            
+            // if is content binding
+                // assign root = element
+            
             
             compiler.SetNullCheckHandler((c, expr) => {
                 // todo -- log out errors to uiforia console,
                 // if element handles binding failure, invoke that handler. maybe log out the whole binding & file path & type of the null thing (var name is probably useless)
             });
 
+            compiler.SetImplicitContext(elementExpr);
             LHSStatementChain left = compiler.AssignableStatement(attributeDefinition.key);
-
+            
+            compiler.SetImplicitContext(rootExpr);
             Expression accessor = compiler.AccessorStatement(left.targetExpression.Type, attributeDefinition.value);
             Expression right = null;
 
@@ -91,17 +103,14 @@ namespace UIForia.Compilers {
 
             LightList<MethodInfo>.Release(ref changedHandlers);
             
-            // todo -- add parameters for context tree
-            
-            LinqPropertyBinding binding = new LinqPropertyBinding();
-            binding.lambdaExpression = compiler.BuildLambda();
+            LambdaExpression retn = compiler.BuildLambda();
             // todo -- set other data?
             // todo -- scan for 'const-ness'
             // todo -- optimize generated code (constant folding, etc)
 
             compiler.Reset();
             
-            return binding;
+            return retn;
         }
 
         private struct PropertyChangeHandlerMethod {

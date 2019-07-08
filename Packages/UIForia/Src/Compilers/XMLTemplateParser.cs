@@ -200,7 +200,8 @@ namespace UIForia.Compilers {
                                 }
                             }
 
-                            templateNode.attributes.Add(new AttributeDefinition2(attributeType, name, attr.Value.Trim(), line, column));
+                            // todo -- set flag properly
+                            templateNode.attributes.Add(new AttributeDefinition2(attributeType, 0, name, attr.Value.Trim(), line, column));
                         }
                         
                         templateNode.parent = parent;

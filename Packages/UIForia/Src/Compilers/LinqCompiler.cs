@@ -220,6 +220,15 @@ namespace UIForia.Compilers {
             returnType = retnType ?? typeof(void);
         }
 
+        public ParameterExpression GetParameter(string name) {
+            for (int i = 0; i < parameters.Count; i++) {
+                if (parameters[i].name == name) {
+                    return parameters[i].expression;
+                }
+            }
+
+            return parent?.GetParameter(name);
+        }
 
         public void SetSignature<T>(IReadOnlyList<Parameter> parameters) {
             this.parameters.Clear();
@@ -254,6 +263,16 @@ namespace UIForia.Compilers {
 
         public Expression AccessorStatement(Type targetType, string input) {
             return Visit(targetType, ExpressionParser.Parse(input));
+        }
+
+        public ParameterExpression AddVariable(Type type, string name, Expression value) {
+            ParameterExpression variable = currentBlock.AddInternalVariable(type, name);
+            AddStatement(Expression.Assign(variable, value));
+            return variable;
+        }
+
+        public void SetImplicitContext(ParameterExpression parameterExpression) {
+            implicitContext = new Parameter(parameterExpression.Type, parameterExpression.Name);
         }
 
         public ParameterExpression AddVariable(Type type, string name) {
@@ -498,7 +517,7 @@ namespace UIForia.Compilers {
 
             currentBlock.AddStatement(Expression.IfThen(condition, bodyBlock));
         }
-        
+
         public void IfNotEqual<T>(LHSStatementChain left, Expression right, Action<T> body, T ctx) {
             Debug.Assert(left != null);
             Debug.Assert(right != null);
@@ -540,26 +559,26 @@ namespace UIForia.Compilers {
         private void AddParameter(Type type, string name, ParameterFlags flags = 0) {
             // todo validate no name conflicts && no keyword names
             Parameter parameter = new Parameter(type, name, flags);
-            if ((flags & ParameterFlags.Implicit) != 0) {
-                if (implicitContext != null) {
-                    throw new CompileException($"Trying to set parameter {name} as the implicit context but {implicitContext.Value.name} was already set. There can only be one implicit context parameter");
-                }
-
-                implicitContext = parameter;
-            }
+//            if ((flags & ParameterFlags.Implicit) != 0) {
+//                if (implicitContext != null) {
+//                    throw new CompileException($"Trying to set parameter {name} as the implicit context but {implicitContext.Value.name} was already set. There can only be one implicit context parameter");
+//                }
+//
+//                implicitContext = parameter;
+//            }
 
             parameters.Add(parameter);
         }
 
         private void AddParameter(Parameter parameter) {
             // todo validate no name conflicts && no keyword names
-            if ((parameter.flags & ParameterFlags.Implicit) != 0) {
-                if (implicitContext != null) {
-                    throw new CompileException($"Trying to set parameter {parameter.name} as the implicit context but {implicitContext.Value.name} was already set. There can only be one implicit context parameter");
-                }
-
-                implicitContext = parameter;
-            }
+//            if ((parameter.flags & ParameterFlags.Implicit) != 0) {
+//                if (implicitContext != null) {
+//                    throw new CompileException($"Trying to set parameter {parameter.name} as the implicit context but {implicitContext.Value.name} was already set. There can only be one implicit context parameter");
+//                }
+//
+//                implicitContext = parameter;
+//            }
 
             parameters.Add(parameter);
         }
@@ -942,7 +961,7 @@ namespace UIForia.Compilers {
             Type delegateType = head.Type;
 
             ParameterInfo[] parameterInfos = delegateType.GetMethod("Invoke").GetParameters();
-            
+
             for (int i = 0; i < arguments.Count; i++) {
                 args[i] = Visit(parameterInfos[i].ParameterType, arguments[i]);
             }
@@ -2356,10 +2375,8 @@ namespace UIForia.Compilers {
     [Flags]
     public enum ParameterFlags {
 
-        Implicit = 1 << 0,
         NeverNull = 1 << 1,
-        NeverOutOfBounds = 1 << 2,
-        TreatAsConstant = 1 << 3
+        NeverOutOfBounds = 1 << 2
 
     }
 

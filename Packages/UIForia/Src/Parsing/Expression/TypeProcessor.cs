@@ -243,6 +243,11 @@ namespace UIForia.Parsing.Expression {
         }
 
         public static Type ResolveType(TypeLookup typeLookup, IReadOnlyList<string> namespaces = null) {
+            
+            if (typeLookup.resolvedType != null) {
+                return typeLookup.resolvedType;
+            }
+            
             FilterAssemblies();
 
             // base type will valid or an exception will be thrown

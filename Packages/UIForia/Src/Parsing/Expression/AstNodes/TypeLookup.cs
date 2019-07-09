@@ -1,3 +1,4 @@
+using System;
 using UIForia.Util;
 
 namespace UIForia {
@@ -8,12 +9,24 @@ namespace UIForia {
         public string namespaceName;
         public StructList<TypeLookup> generics;
         public bool isArray;
+        public Type resolvedType;
 
         public TypeLookup(string typeName) {
             this.typeName = typeName;
             this.namespaceName = null;
             this.generics = null;
             this.isArray = false;
+            this.resolvedType = null;
+        }
+        
+        
+        public TypeLookup(Type type) {
+            this.resolvedType = type;
+            this.typeName = null;
+            this.namespaceName = null;
+            this.generics = null;
+            this.isArray = false;
+            this.resolvedType = null;
         }
 
         public void Release() {

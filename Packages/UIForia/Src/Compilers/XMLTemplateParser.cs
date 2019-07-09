@@ -97,7 +97,7 @@ namespace UIForia.Compilers {
             retn.root = rootNode;
             retn.usings = usings;
             retn.styles = styles;
-            retn.extends = contentElement.GetAttribute("x-inherited") != null || contentElement.GetAttribute("attr:inherited") != null;
+            //retn.extends = contentElement.GetAttribute("x-inherited") != null || contentElement.GetAttribute("attr:inherited") != null;
             return retn;
         }
 
@@ -105,7 +105,9 @@ namespace UIForia.Compilers {
             ProcessedType processedType = TypeProcessor.GetProcessedType(type);
 
             string template = processedType.GetTemplate(application.TemplateRootPath);
-            return Parse(template);
+            TemplateAST retn = Parse(template);
+            retn.root.typeLookup = new TypeLookup(type);
+            return retn;
         }
 
         private static readonly TypeLookup s_TextTypeLookup = new TypeLookup() {
@@ -133,7 +135,7 @@ namespace UIForia.Compilers {
 
             int lastIdx = tagName.LastIndexOf('.');
 
-            if (lastIdx < 0) {
+            if (lastIdx > 0) {
                 typeLookup.namespaceName = tagName.Substring(0, lastIdx);
                 typeLookup.typeName = tagName.Substring(lastIdx);
             }
@@ -147,6 +149,9 @@ namespace UIForia.Compilers {
                 switch (node.NodeType) {
                     case XmlNodeType.Text: {
                         XText textNode = (XText) node;
+                        if (string.IsNullOrWhiteSpace(textNode.Value)) {
+                            continue;
+                        }
                         TemplateNode templateNode = TemplateNode.Get();
                         templateNode.parent = parent;
                         templateNode.typeLookup = s_TextTypeLookup;

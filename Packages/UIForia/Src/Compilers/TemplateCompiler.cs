@@ -197,10 +197,11 @@ namespace UIForia.Compilers {
                     )
                 )
             );
+
             // var childArray = targetElement.children.array;
-            ctx.statements.Add(
-                Expression.Assign(childArray, Expression.Field(Expression.Field(ctx.GetParentTargetElementVariable(), s_Element_ChildrenList), s_LightList_Element_Array))
-            );
+            BinaryExpression assignChildArray = Expression.Assign(childArray, Expression.Field(Expression.Field(ctx.GetParentTargetElementVariable(), s_Element_ChildrenList), s_LightList_Element_Array));
+            CSharpWriter.IndentExpressions.Add(assignChildArray);
+            ctx.statements.Add(assignChildArray);
 
             // childList[idx] = Visit()
             for (int i = 0; i < node.children.Count; i++) {
@@ -218,9 +219,9 @@ namespace UIForia.Compilers {
             );
 
             // targetElement.children.size = 2;
-            ctx.statements.Add(
-                Expression.Assign(Expression.Field(Expression.Field(ctx.GetTargetElementVariable(), s_Element_ChildrenList), s_LightList_Element_Size), Expression.Constant(node.children.Count))
-            );
+            var assignChildArraySize = Expression.Assign(Expression.Field(Expression.Field(ctx.GetTargetElementVariable(), s_Element_ChildrenList), s_LightList_Element_Size), Expression.Constant(node.children.Count));
+            CSharpWriter.OutdentExpressions.Add(assignChildArraySize);
+            ctx.statements.Add(assignChildArraySize);
         }
 
         public CompiledTemplate Compile(TemplateAST ast) {
@@ -235,7 +236,9 @@ namespace UIForia.Compilers {
                 }
             }
 
-            ProcessedType processedType = TypeProcessor.ResolveTagName(root.typeLookup.typeName, namespaces);
+            ProcessedType processedType = root.typeLookup.resolvedType != null
+                ? TypeProcessor.GetProcessedType(root.typeLookup.resolvedType)
+                : TypeProcessor.ResolveTagName(root.typeLookup.typeName, namespaces);
 
             CompilationContext ctx = new CompilationContext();
 

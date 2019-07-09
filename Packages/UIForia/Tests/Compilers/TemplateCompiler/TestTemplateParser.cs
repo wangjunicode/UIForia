@@ -8,6 +8,7 @@ using NUnit.Framework;
 using Tests;
 using Tests.Mocks;
 using UIForia;
+using UIForia.Attributes;
 using UIForia.Compilers;
 using UIForia.Elements;
 using UIForia.Parsing.Expression;
@@ -50,6 +51,17 @@ public class TestTemplateParser {
         TemplateCompiler compiler = new TemplateCompiler();
     }
 
+    [Template(TemplateType.String, @"
+    <UITemplate>
+        <Content>
+
+            <Div attr:id='hello0'/>
+            <Div attr:id='hello1'/>
+            <Div attr:id='hello2'/>
+
+        </Content>
+    </UITemplate>
+    ")]
     private class CompileTestElement : UIElement { }
 
     private class CompileTestChildElement : UIElement {
@@ -58,6 +70,18 @@ public class TestTemplateParser {
 
     }
 
+    [Test]
+    public void ParseTemplate2() {
+        
+        TemplateCompiler compiler = new TemplateCompiler();
+        XMLTemplateParser parser = new XMLTemplateParser(MockApplication.CreateWithoutView());
+
+        TemplateAST ast = parser.Parse(typeof(CompileTestElement));
+
+        CompiledTemplate template = compiler.Compile(ast);
+
+    }
+    
     [Test]
     public void CompileTemplate_GenerateAttributes() {
         TemplateCompiler compiler = new TemplateCompiler();

@@ -29,6 +29,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using UIForia.Extensions;
@@ -440,11 +441,19 @@ namespace Mono.Linq.Expressions {
         }
 
         void VisitAssign(BinaryExpression node) {
+            if (IndentExpressions.Contains(node)) {
+                WriteLine();
+                Indent();
+            }
             Visit(node.Left);
             WriteSpace();
             WriteToken(GetBinaryOperator(node.NodeType));
             WriteSpace();
             Visit(node.Right);
+            if (OutdentExpressions.Contains(node)) {
+                Dedent();
+                WriteLine();
+            }
         }
 
         void VisitPower(BinaryExpression node) {
@@ -459,6 +468,9 @@ namespace Mono.Linq.Expressions {
         static bool IsPower(ExpressionType type) {
             return type == ExpressionType.Power || type == ExpressionType.PowerAssign;
         }
+        
+        public static HashSet<BinaryExpression> IndentExpressions = new HashSet<BinaryExpression>();
+        public static HashSet<BinaryExpression> OutdentExpressions = new HashSet<BinaryExpression>();
 
         void VisitSimpleBinary(BinaryExpression node) {
             VisitParenthesizedExpression(node.Left);

@@ -1,129 +1,113 @@
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
-using System.Xml;
-using System.Xml.Linq;
 using Mono.Linq.Expressions;
 using NUnit.Framework;
-using Tests;
 using Tests.Mocks;
-using UIForia;
 using UIForia.Attributes;
 using UIForia.Compilers;
 using UIForia.Elements;
-using UIForia.Parsing.Expression;
+using UIForia.Systems;
+using UIForia.Util;
 using UnityEngine;
-using Application = UIForia.Application;
 
 [TestFixture]
 public class TestTemplateParser {
 
-    [Test]
-    public void ParseTemplate() {
-        NameTable nameTable = new NameTable();
-
-        XmlNamespaceManager nameSpaceManager = new XmlNamespaceManager(nameTable);
-
-        nameSpaceManager.AddNamespace("attr", "attr");
-        nameSpaceManager.AddNamespace("evt", "evt");
-
-        XmlParserContext parserContext = new XmlParserContext(null, nameSpaceManager, null, XmlSpace.None);
-
-        XmlTextReader txtReader = new XmlTextReader(@"<Contents><X/><Thing attr:thing=""someattr""/></Contents>", XmlNodeType.Element, parserContext);
-
-        XElement elem = XElement.Load(txtReader);
-
-        Assert.AreEqual("thing", (elem.FirstNode as XElement).FirstAttribute.Name.LocalName);
-        Assert.AreEqual("attr", (elem.FirstNode as XElement).FirstAttribute.Name.NamespaceName);
-    }
-
-    [Test]
-    public void CompileTemplate() {
-        XMLTemplateParser parser = new XMLTemplateParser(new MockApplication(typeof(InputSystem_DragTests.DragTestThing)));
-        parser.Parse(@"
-            <UITemplate>
-                <Content>
-                    <Thing thing=""someattr""/>
-                </Content>
-            </UITemplate>
-        ");
-
-        TemplateCompiler compiler = new TemplateCompiler();
-    }
-
     [Template(TemplateType.String, @"
     <UITemplate>
-        <Content>
+        <Content attr:stuff='yep'>
 
             <Div attr:id='hello0'/>
-            <Div attr:id='hello1'/>
-            <Div attr:id='hello2'/>
+
+            <CompileTestChildElement attr:id='hello1' floatValue='4f'>
+
+                <Div> some content </Div>
+
+            </CompileTestChildElement>
+
+            <CompileTestChildElement attr:id='hello2' floatValue='14f'/>
 
         </Content>
     </UITemplate>
     ")]
-    private class CompileTestElement : UIElement { }
+    public class CompileTestElement : UIElement { }
 
-    private class CompileTestChildElement : UIElement {
+    [Template(TemplateType.String, @"
+        <UITemplate>
+        <Content attr:isChild='yep'>
 
-        public float floatProperty;
+           <Text>{floatValue}</Text>
+
+        </Content>
+        </UITemplate>
+    ")]
+    
+    public class CompileTestChildElement : UIElement {
+
+        public float floatValue;
 
     }
 
     [Test]
     public void ParseTemplate2() {
         
-        TemplateCompiler compiler = new TemplateCompiler();
-        XMLTemplateParser parser = new XMLTemplateParser(MockApplication.CreateWithoutView());
+        MockApplication application = MockApplication.CreateWithoutView();
+        
+        TemplateCompiler compiler = new TemplateCompiler(application);
+        
+        CompiledTemplate compiledTemplate = compiler.GetCompiledTemplate(typeof(CompileTestElement));
 
-        TemplateAST ast = parser.Parse(typeof(CompileTestElement));
+        Func<UIElement, TemplateScope2, CompiledTemplate, UIElement> create = compiledTemplate.Compile();
 
-        CompiledTemplate template = compiler.Compile(ast);
+        Debug.Log(PrintCode(compiledTemplate.buildExpression, false));
 
+        UIElement r = create(null, new TemplateScope2() {
+            application = application,
+            bindingNode = new LinqBindingNode()
+        }, compiledTemplate);
+
+        Assert.IsInstanceOf<CompileTestElement>(r);
+        Assert.AreEqual(3, r.children.size);
+        Assert.IsInstanceOf<UIDivElement>(r.children[0]);
+        Assert.IsInstanceOf<CompileTestChildElement>(r.children[1]);
+        Assert.IsInstanceOf<CompileTestChildElement>(r.children[2]);
+        Assert.AreEqual(1, r.attributes.size);
+        Assert.AreEqual("stuff", r.attributes[0].name);
+        Assert.AreEqual("yep", r.attributes[0].value);
+        Assert.AreEqual(1, r.children[0].attributes.size);
+        Assert.AreEqual(2, r.children[1].attributes.size);
+        Assert.AreEqual(2, r.children[2].attributes.size);
+        
+        Assert.AreEqual("id", r.children[0].attributes[0].name);
+        Assert.AreEqual("hello0", r.children[0].attributes[0].value);
+        
+        Assert.AreEqual("id", r.children[1].attributes[0].name);
+        Assert.AreEqual("hello1", r.children[1].attributes[0].value);
+        Assert.AreEqual("isChild", r.children[1].attributes[1].name);
+        Assert.AreEqual("yep", r.children[1].attributes[1].value);
+        
+        Assert.AreEqual("id", r.children[2].attributes[0].name);
+        Assert.AreEqual("hello2", r.children[2].attributes[0].value);
+        Assert.AreEqual("isChild", r.children[2].attributes[1].name);
+        Assert.AreEqual("yep", r.children[2].attributes[1].value);
+
+        UIElement element = application.CreateElementFromPool(typeof(CompileTestElement));
+        create(element, new TemplateScope2() {
+            application = application,
+            bindingNode = new LinqBindingNode(),
+        }, compiledTemplate);
+
+        // application.CreateTemplate(templateId, element, bindingNode);
+        // 
+        
     }
     
-    [Test]
-    public void CompileTemplate_GenerateAttributes() {
-        TemplateCompiler compiler = new TemplateCompiler();
 
-        compiler.application = MockApplication.CreateWithoutView();
-
-        CompiledTemplate result = compiler.Compile(new TemplateAST() {
-            root = new TemplateNode() {
-                typeLookup = new TypeLookup("CompileTestChildElement"),
-                attributes = new[] {
-                    new AttributeDefinition2(AttributeType.Attribute, 0, "someAttr", "someAttrValue"),
-                    new AttributeDefinition2(AttributeType.Property, 0, "floatProperty", "5 * 12"),
-                },
-                children = new[] {
-                    new TemplateNode() {
-                        typeLookup = new TypeLookup("CompileTestChildElement"),
-                    },
-                    new TemplateNode() {
-                        typeLookup = new TypeLookup("CompileTestChildElement"),
-                        attributes = new[] {
-                            new AttributeDefinition2(AttributeType.Attribute, 0, "someAttr", "someAttrValue"),
-                            new AttributeDefinition2(AttributeType.Attribute, 0, "someAttr1", "someAttrValue1"),
-                            new AttributeDefinition2(AttributeType.Attribute, 0, "someAttr2", "someAttrValue2"),
-                        },
-                        children = new[] {
-                            new TemplateNode() {
-                                typeLookup = new TypeLookup("CompileTestChildElement"),
-                                attributes = new[] {
-                                    new AttributeDefinition2(AttributeType.Property, 0, "floatProperty", "5 * 12"),
-                                },
-                            }
-                        }
-                    }
-                }
-            }
-        });
-
-        LogCode(result.buildExpression);
-    }
-
-    private static string PrintCode(IList<Expression> expressions) {
+    private static string PrintCode(IList<Expression> expressions, bool printNamespaces = true) {
         string retn = "";
+        bool old = CSharpWriter.printNamespaces;
+        CSharpWriter.printNamespaces = printNamespaces;
         for (int i = 0; i < expressions.Count; i++) {
             retn += expressions[i].ToCSharpCode();
             if (i != expressions.Count - 1) {
@@ -131,15 +115,24 @@ public class TestTemplateParser {
             }
         }
 
+        CSharpWriter.printNamespaces = old;
         return retn;
     }
 
-    private static string PrintCode(Expression expression) {
-        return expression.ToCSharpCode();
+    private static string PrintCode(Expression expression, bool printNamespaces = true) {
+        bool old = CSharpWriter.printNamespaces;
+        CSharpWriter.printNamespaces = printNamespaces;
+        string retn =expression.ToCSharpCode();
+        CSharpWriter.printNamespaces = old;
+        return retn;
     }
 
-    private static void LogCode(Expression expression) {
-        Debug.Log(expression.ToCSharpCode());
+    private static void LogCode(Expression expression, bool printNamespaces = true) {
+        bool old = CSharpWriter.printNamespaces;
+        CSharpWriter.printNamespaces = printNamespaces;
+        string retn = expression.ToCSharpCode();
+        CSharpWriter.printNamespaces = old;
+        Debug.Log(retn);
     }
 
 }

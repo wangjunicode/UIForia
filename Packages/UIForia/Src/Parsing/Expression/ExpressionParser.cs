@@ -384,7 +384,7 @@ namespace UIForia.Parsing.Expression {
                 return false;
             }
 
-            StructList<LambdaArgument> signatureList = StructList<LambdaArgument>.Get(4);
+            StructList<LambdaArgument> signatureList = StructList<LambdaArgument>.GetMinSize(4);
 
             if (advance != 1) {
                 ExpressionParser subParser = CreateSubParser(advance);
@@ -570,7 +570,7 @@ namespace UIForia.Parsing.Expression {
                 }
 
                 if (tokenStream.Current == ExpressionTokenType.Comma) {
-                    retn.generics = retn.generics ?? StructList<TypeLookup>.Get(4);
+                    retn.generics = retn.generics ?? StructList<TypeLookup>.GetMinSize(4);
                     retn.generics.Add(arg);
                     tokenStream.Advance();
                     continue;
@@ -587,7 +587,7 @@ namespace UIForia.Parsing.Expression {
                 return false;
             }
 
-            retn.generics = retn.generics ?? StructList<TypeLookup>.Get(4);
+            retn.generics = retn.generics ?? StructList<TypeLookup>.GetMinSize(4);
             retn.generics.Add(arg);
 
             return true;

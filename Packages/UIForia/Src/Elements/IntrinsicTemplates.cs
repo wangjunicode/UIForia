@@ -3,6 +3,7 @@ using UIForia.UIInput;
 
 namespace UIForia.Elements {
 
+    [TemplateTagName("Group")]
     public class UIGroupElement : UIContainerElement {
 
         public UIGroupElement() {
@@ -15,6 +16,7 @@ namespace UIForia.Elements {
 
     }
 
+    [TemplateTagName("Panel")]
     public class UIPanelElement : UIContainerElement {
 
         public UIPanelElement() {
@@ -27,6 +29,7 @@ namespace UIForia.Elements {
 
     }
 
+    [TemplateTagName("Section")]
     public class UISectionElement : UIContainerElement {
         
         public UISectionElement() {
@@ -39,6 +42,7 @@ namespace UIForia.Elements {
 
     }
 
+    [TemplateTagName("Div")]
     public class UIDivElement : UIContainerElement {
 
         public UIDivElement() {
@@ -51,6 +55,7 @@ namespace UIForia.Elements {
 
     }
 
+    [TemplateTagName("Header")]
     public class UIHeaderElement : UIContainerElement {
 
         public UIHeaderElement() {
@@ -63,6 +68,7 @@ namespace UIForia.Elements {
 
     }
 
+    [TemplateTagName("Footer")]
     public class UIFooterElement : UIContainerElement {
         
         public UIFooterElement() {
@@ -75,6 +81,7 @@ namespace UIForia.Elements {
 
     }
 
+    [TemplateTagName("Label")]
     public class UILabelElement : UITextElement {
 
         public string forElement;
@@ -97,6 +104,7 @@ namespace UIForia.Elements {
 
     }
 
+    [TemplateTagName("Paragraph")]
     public class UIParagraphElement : UITextElement {
 
         public UIParagraphElement(string text = "") : base(text) {
@@ -109,6 +117,7 @@ namespace UIForia.Elements {
 
     }
 
+    [TemplateTagName("Heading1")]
     public class UIHeading1Element : UITextElement {
 
         public UIHeading1Element(string text = "") : base(text) {
@@ -121,6 +130,7 @@ namespace UIForia.Elements {
 
     }
 
+    [TemplateTagName("Heading2")]
     public class UIHeading2Element : UITextElement {
 
         public UIHeading2Element(string text = "") : base(text) {
@@ -133,6 +143,7 @@ namespace UIForia.Elements {
 
     }
 
+    [TemplateTagName("Heading3")]
     public class UIHeading3Element : UITextElement {
 
         public UIHeading3Element(string text = "") : base(text) {
@@ -149,6 +160,7 @@ namespace UIForia.Elements {
 
     }
 
+    [TemplateTagName("Heading4")]
     public class UIHeading4Element : UITextElement {
 
         public UIHeading4Element(string text = "") : base(text) {
@@ -161,6 +173,7 @@ namespace UIForia.Elements {
 
     }
 
+    [TemplateTagName("Heading5")]
     public class UIHeading5Element : UITextElement {
 
         public UIHeading5Element(string text = "") : base(text) {
@@ -173,6 +186,7 @@ namespace UIForia.Elements {
 
     }
 
+    [TemplateTagName("Heading6")]
     public class UIHeading6Element : UITextElement {
 
         public UIHeading6Element(string text = "") : base(text) {

@@ -40,7 +40,7 @@ namespace UIForia.Parsing.Expression {
                 );
             }
 
-            this.requiresTemplateExpansion = false;//(!typeof(UIContainerElement).IsAssignableFrom(rawType) && !typeof(UITextElement).IsAssignableFrom(rawType));
+            this.requiresTemplateExpansion = (!typeof(UIContainerElement).IsAssignableFrom(rawType) && !typeof(UITextElement).IsAssignableFrom(rawType));
         }
 
         public string GetTemplate(string templateRoot) {

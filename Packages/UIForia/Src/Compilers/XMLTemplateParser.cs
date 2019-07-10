@@ -37,6 +37,8 @@ namespace UIForia.Compilers {
         public Application application;
 
         private readonly XmlParserContext parserContext;
+        
+        [ThreadStatic] private static string[] s_NamespaceLookup;
 
         private readonly string[] s_Directives = {
             "Slot",
@@ -63,11 +65,12 @@ namespace UIForia.Compilers {
             this.parserContext = new XmlParserContext(null, nameSpaceManager, null, XmlSpace.None);
         }
 
-        internal TemplateAST Parse(string template, string fileName = null) {
+        internal TemplateAST Parse(ProcessedType processedType) {
+            string template = processedType.GetTemplateFromApplication(application);
             XElement root = XElement.Load(new XmlTextReader(template, XmlNodeType.Element, parserContext));
 
             root.MergeTextNodes();
-            
+
             IEnumerable<XElement> styleElements = root.GetChildren("Style");
             IEnumerable<XElement> usingElements = root.GetChildren("Using");
             IEnumerable<XElement> contentElements = root.GetChildren("Content");
@@ -75,8 +78,14 @@ namespace UIForia.Compilers {
             StructList<UsingDeclaration> usings = StructList<UsingDeclaration>.Get();
             StructList<StyleDefinition> styles = StructList<StyleDefinition>.Get();
 
+            LightList<string> namespaces = LightList<string>.Get();
+
             foreach (XElement usingElement in usingElements) {
                 usings.Add(ParseUsing(usingElement));
+            }
+
+            for (int i = 0; i < usings.Count; i++) {
+                namespaces.Add(usings[i].namespaceName);
             }
 
             foreach (XElement styleElement in styleElements) {
@@ -86,65 +95,108 @@ namespace UIForia.Compilers {
             if (contentElements.Count() != 1) { }
 
             XElement contentElement = contentElements.First();
-            
-            TemplateNode rootNode = TemplateNode.Get();
 
-            ParseChildren(rootNode, contentElement.Nodes());
+            TemplateNode rootNode = TemplateNode.Get();
+            rootNode.processedType = processedType;
+
+            ParseAttributes(rootNode, contentElement);
+            ParseChildren(rootNode, contentElement.Nodes(), namespaces);
+
 
             TemplateAST retn = new TemplateAST();
 
-            retn.fileName = fileName;
+            retn.fileName = processedType.GetTemplatePath();
             retn.root = rootNode;
             retn.usings = usings;
             retn.styles = styles;
+            LightList<string>.Release(ref namespaces);
             //retn.extends = contentElement.GetAttribute("x-inherited") != null || contentElement.GetAttribute("attr:inherited") != null;
             return retn;
         }
 
-        internal TemplateAST Parse(Type type) {
-            ProcessedType processedType = TypeProcessor.GetProcessedType(type);
-
-            string template = processedType.GetTemplate(application.TemplateRootPath);
-            TemplateAST retn = Parse(template);
-            retn.root.typeLookup = new TypeLookup(type);
-            return retn;
-        }
-
-        private static readonly TypeLookup s_TextTypeLookup = new TypeLookup() {
-            typeName = typeof(UITextElement).Name,
-            namespaceName = typeof(UITextElement).Namespace
-        };
-
         private static readonly char[] s_DotArray = {'.'};
 
-        private static void ParseElementTag(TemplateNode templateNode, XElement element) {
+        private static void ParseElementTag(TemplateNode templateNode, XElement element, LightList<string> namespaces) {
             string directives = element.Name.Namespace.NamespaceName;
             string tagName = element.Name.LocalName;
 
             if (directives.Contains('.')) {
+                
                 string[] directiveList = directives.Split(s_DotArray, StringSplitOptions.RemoveEmptyEntries);
+                
                 for (int i = 0; i < directiveList.Length; i++) {
                     templateNode.directives.Add(new DirectiveDefinition(directiveList[i]));
                 }
+                
             }
             else if (!string.IsNullOrWhiteSpace(directives) && !string.IsNullOrEmpty(directives)) {
                 templateNode.directives.Add(new DirectiveDefinition(directives));
             }
 
-            ref TypeLookup typeLookup = ref templateNode.typeLookup;
-
             int lastIdx = tagName.LastIndexOf('.');
 
+            if (tagName == "Children") {
+                // ast.slots.Add(new SlotDefinition("Children");
+            }
+            
             if (lastIdx > 0) {
-                typeLookup.namespaceName = tagName.Substring(0, lastIdx);
-                typeLookup.typeName = tagName.Substring(lastIdx);
+                s_NamespaceLookup = s_NamespaceLookup ?? new string[1];
+                s_NamespaceLookup[0] = tagName.Substring(0, lastIdx);
+                templateNode.processedType = TypeProcessor.ResolveTagName(tagName.Substring(lastIdx), s_NamespaceLookup);
             }
             else {
-                typeLookup.typeName = tagName;
+                templateNode.processedType = TypeProcessor.ResolveTagName(tagName, namespaces);
+            }
+
+            if (templateNode.processedType.rawType == null) {
+                throw new Exception("Unresolved tag name: " + element.Name.LocalName);
+            }
+            
+        }
+
+        private static void ParseAttributes(TemplateNode templateNode, XElement node) {
+            foreach (XAttribute attr in node.Attributes()) {
+                string prefix = attr.Name.NamespaceName;
+                string name = attr.Name.LocalName.Trim();
+
+                int line = ((IXmlLineInfo) attr).LineNumber;
+                int column = ((IXmlLineInfo) attr).LinePosition;
+
+                AttributeType attributeType = AttributeType.Property;
+
+                if (prefix == string.Empty) {
+                    if (attr.Name.LocalName.StartsWith("style.")) {
+                        attributeType = AttributeType.Style;
+                        name = attr.Name.LocalName.Substring("style.".Length);
+                    }
+
+                    if (attr.Name.LocalName.StartsWith("x-")) {
+                        attributeType = AttributeType.Attribute;
+                        name = attr.Name.LocalName.Substring("x-.".Length);
+                    }
+                }
+                else {
+                    switch (prefix) {
+                        case "attr":
+                            attributeType = AttributeType.Attribute;
+                            break;
+                        case "style":
+                            attributeType = AttributeType.Style;
+                            break;
+                        case "evt":
+                            attributeType = AttributeType.Event;
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException("Unknown attribute prefix: " + prefix);
+                    }
+                }
+
+                // todo -- set flag properly
+                templateNode.attributes.Add(new AttributeDefinition2(attributeType, 0, name, attr.Value.Trim(), line, column));
             }
         }
 
-        private static void ParseChildren(TemplateNode parent, IEnumerable<XNode> nodes) {
+        private static void ParseChildren(TemplateNode parent, IEnumerable<XNode> nodes, LightList<string> namespaces) {
             foreach (XNode node in nodes) {
                 switch (node.NodeType) {
                     case XmlNodeType.Text: {
@@ -152,10 +204,16 @@ namespace UIForia.Compilers {
                         if (string.IsNullOrWhiteSpace(textNode.Value)) {
                             continue;
                         }
+
+                        if (typeof(UITextElement).IsAssignableFrom(parent.processedType.rawType)) {
+                            parent.textContent += textNode.Value;
+                            continue;
+                        }
+                        
                         TemplateNode templateNode = TemplateNode.Get();
                         templateNode.parent = parent;
-                        templateNode.typeLookup = s_TextTypeLookup;
-                        templateNode.textContent = "'" + textNode.Value.Trim() + "'";
+                        templateNode.processedType = TypeProcessor.GetProcessedType(typeof(UITextElement));
+                        templateNode.textContent = textNode.Value;
                         parent.children.Add(templateNode);
                         templateNode = TemplateNode.Get();
                         continue;
@@ -165,54 +223,14 @@ namespace UIForia.Compilers {
                         XElement element = (XElement) node;
                         TemplateNode templateNode = TemplateNode.Get();
 
-                        ParseElementTag(templateNode, element);
+                        ParseElementTag(templateNode, element, namespaces);
 
-                        foreach (XAttribute attr in element.Attributes()) {
-                            string prefix = attr.Name.NamespaceName;
-                            string name = attr.Name.LocalName.Trim();
+                        ParseAttributes(templateNode, element);
 
-                            int line = ((IXmlLineInfo) attr).LineNumber;
-                            int column = ((IXmlLineInfo) attr).LinePosition;
-                            
-                            AttributeType attributeType = AttributeType.Property;
-                            
-                            if (prefix == string.Empty) {
-                             
-                                if (attr.Name.LocalName.StartsWith("style.")) {
-                                    attributeType = AttributeType.Style;
-                                    name = attr.Name.LocalName.Substring("style.".Length);
-                                }
-
-                                if (attr.Name.LocalName.StartsWith("x-")) {
-                                    attributeType = AttributeType.Attribute;
-                                    name = attr.Name.LocalName.Substring("x-.".Length);
-                                }
-                                
-                            }
-                            else {
-                                switch (prefix) {
-                                    case "attr":
-                                        attributeType = AttributeType.Attribute;
-                                        break;
-                                    case "style":
-                                        attributeType = AttributeType.Style;
-                                        break;
-                                    case "evt":
-                                        attributeType = AttributeType.Event;
-                                        break;
-                                    default:
-                                        throw new ArgumentOutOfRangeException("Unknown attribute prefix: " + prefix);
-                                }
-                            }
-
-                            // todo -- set flag properly
-                            templateNode.attributes.Add(new AttributeDefinition2(attributeType, 0, name, attr.Value.Trim(), line, column));
-                        }
-                        
                         templateNode.parent = parent;
                         parent.children.Add(templateNode);
 
-                        ParseChildren(templateNode, element.Nodes());
+                        ParseChildren(templateNode, element.Nodes(), namespaces);
 
                         templateNode = TemplateNode.Get();
                         continue;
@@ -286,7 +304,6 @@ namespace UIForia.Compilers {
 
             return new StyleDefinition(alias, importPathAttr.Value.Trim());
         }
-        
 
     }
 

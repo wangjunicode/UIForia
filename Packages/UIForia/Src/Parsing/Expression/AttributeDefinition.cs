@@ -18,7 +18,8 @@ namespace UIForia.Parsing.Expression {
 
         Binding = 1 << 0,
         Const = 1 << 1,
-        EnableOnly = 1 << 2
+        EnableOnly = 1 << 2,
+        RootContext = 1 << 3
 
     }
     

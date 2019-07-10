@@ -285,7 +285,7 @@ namespace UIForia.Util {
 
         public StructList<T> GetRange(int index, int count, StructList<T> retn = null) {
             if (retn == null) {
-                retn = Get(count);
+                retn = GetMinSize(count);
             }
             else {
                 retn.EnsureCapacity(count);
@@ -308,9 +308,9 @@ namespace UIForia.Util {
             return retn;
         }
 
-        public static StructList<T> Get(int minCapacity) {
+        public static StructList<T> GetMinSize(int minCapacity) {
             if (minCapacity < 1) minCapacity = 4;
-            StructList<T> retn = s_Pool.Count > 0 ? s_Pool.RemoveLast() : new StructList<T>(minCapacity);
+            StructList<T> retn = s_Pool.Count > 0 ? s_Pool.RemoveLast() : new StructList<T>(minCapacity * 2);
             retn.isInPool = false;
 
             if (retn.array.Length < minCapacity) {

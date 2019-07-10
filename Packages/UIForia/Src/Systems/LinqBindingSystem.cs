@@ -4,9 +4,9 @@ namespace UIForia.Systems {
 
     public class LinqBindingSystem : ISystem {
 
-        public int currentPhase;
-        public int previousPhase;
-        public LinqBindingNode currentlyActive;
+        internal int currentPhase;
+        internal int previousPhase;
+        internal LinqBindingNode currentlyActive;
 
         private readonly LinqBindingNode rootNode = new LinqBindingNode();
 

@@ -50,7 +50,7 @@ namespace UIForia.Util {
         public T PeekAtUnchecked(int idx) {
             return array[idx];
         }
-        
+
         [DebuggerStepThrough]
         public T PeekRelativeUnchecked(int cnt) {
             return array[size - cnt];
@@ -112,6 +112,16 @@ namespace UIForia.Util {
         [DebuggerStepThrough]
         public T PeekUnchecked() {
             return array[size - 1];
+        }
+
+        public bool Contains(T item) {
+            for (int i = 0; i < size; i++) {
+                if (ReferenceEquals(array[i], item)) {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
     }

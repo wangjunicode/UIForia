@@ -35,6 +35,7 @@ namespace UIForia {
         protected IInputSystem m_InputSystem;
         protected RoutingSystem m_RoutingSystem;
         protected AnimationSystem m_AnimationSystem;
+        protected LinqBindingSystem linqBindingSystem;
 
         public readonly StyleSheetImporter styleImporter;
         private readonly IntMap<UIElement> elementMap;
@@ -117,6 +118,7 @@ namespace UIForia {
             m_RenderSystem = new SVGXRenderSystem(this, null, m_LayoutSystem);
             m_RoutingSystem = new RoutingSystem();
             m_AnimationSystem = new AnimationSystem();
+            linqBindingSystem = new LinqBindingSystem();
 
             styleImporter = new StyleSheetImporter(this);
             templateParser = new TemplateParser(this);
@@ -188,7 +190,25 @@ namespace UIForia {
         public RoutingSystem RoutingSystem => m_RoutingSystem;
 
         public Camera Camera { get; private set; }
+        public LinqBindingSystem LinqBindingSystem => linqBindingSystem;
 
+        internal void HydrateTemplate(int templateId, UIElement parent, TemplateScope2 scope) {
+            templateCache.compiledTemplates[templateId].Create(parent, scope);
+        }
+        
+        internal TemplateCache templateCache = new TemplateCache();
+        
+        internal class TemplateCache {
+
+            internal LightList<CompiledTemplate> compiledTemplates = new LightList<CompiledTemplate>();
+            
+            public void Add(CompiledTemplate retn) {
+                retn.templateId = compiledTemplates.Count;
+                compiledTemplates.Add(retn);
+            }
+
+        }
+        
         public void SetCamera(Camera camera) {
             Camera = camera;
             RenderSystem.SetCamera(camera);

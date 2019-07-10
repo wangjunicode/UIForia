@@ -1,4 +1,5 @@
 using SVGX;
+using UIForia.Attributes;
 using UIForia.Rendering;
 using UIForia.Systems;
 using UIForia.Text;
@@ -6,6 +7,7 @@ using UnityEngine;
 
 namespace UIForia.Elements {
 
+    [TemplateTagName("Text")]
     public class UITextElement : UIElement, IStyleChangeHandler, IStylePropertiesWillChangeHandler, IStylePropertiesDidChangeHandler {
 
         internal string text;

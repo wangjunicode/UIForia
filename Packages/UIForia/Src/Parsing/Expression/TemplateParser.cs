@@ -496,6 +496,7 @@ namespace UIForia.Parsing.Expression {
 
                     case XmlNodeType.Comment:
                         continue;
+                    
                 }
 
                 throw new TemplateParseException(node, $"Unable to handle node type: {node.NodeType}");

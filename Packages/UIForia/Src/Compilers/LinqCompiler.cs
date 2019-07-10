@@ -616,11 +616,20 @@ namespace UIForia.Compilers {
                 }
 
                 if (implicitContext != null) {
-                    if (TryResolveInstanceOrStaticMemberAccess(implicitContext.Value.expression, idNode.name, out Expression expression)) {
-                        retn.isSimpleAssignment = true;
-                        retn.targetExpression = expression;
-                        return retn;
-                    }
+                    // todo -- still wrong
+//                    Expression last = MemberAccess(implicitContext.Value.expression, idNode.name);
+//                    Expression variable = currentBlock.AddInternalVariable(last.Type, idNode.name + "_assign");
+//                    currentBlock.AddStatement(Expression.Assign(variable, last));
+//                    retn.AddAssignment(variable, last);
+                    retn.isSimpleAssignment = true;
+                    retn.targetExpression = MemberAccess(implicitContext.Value.expression, idNode.name);
+                    return retn;
+                    
+//                    if (TryResolveInstanceOrStaticMemberAccess(implicitContext.Value.expression, idNode.name, out Expression expression)) {
+//                        retn.isSimpleAssignment = true;
+//                        retn.targetExpression = expression;
+//                        return retn;
+//                    }
                 }
 
                 ParameterExpression head = ResolveVariableName(idNode.name);

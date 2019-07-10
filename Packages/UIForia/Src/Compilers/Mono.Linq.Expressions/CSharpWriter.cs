@@ -231,6 +231,11 @@ namespace Mono.Linq.Expressions {
             }
 
             string typeName = type.ToString();
+            
+            if (!printNamespaces && type.Namespace != null) {
+                typeName = typeName.Substring(type.Namespace.Length + 1);
+            }
+            
             for (int i = 0; i < typeName.Length; i++) {
                 if (typeName[i] == '`') {
                     i++;
@@ -328,8 +333,10 @@ namespace Mono.Linq.Expressions {
             }
         }
 
+        public static bool printNamespaces = true;
+        
         private static string GetPrintableTypeName(Type type) {
-            string typeName = type.FullName;
+            string typeName = printNamespaces ? type.FullName : type.Name;
             if (typeName.Contains("+")) {
                 return typeName.Replace("+", ".");
             }

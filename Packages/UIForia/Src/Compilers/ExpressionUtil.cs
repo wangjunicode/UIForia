@@ -54,7 +54,7 @@ namespace UIForia.Compilers {
                 return null;
             }
 
-            StructList<Candidate> candidates = StructList<Candidate>.Get(methodInfos.Count);
+            StructList<Candidate> candidates = StructList<Candidate>.GetMinSize(methodInfos.Count);
 
             int argCount = arguments.Length;
 

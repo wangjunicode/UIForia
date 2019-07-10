@@ -6,12 +6,12 @@ namespace UIForia.Compilers {
 
     public class TemplateNode {
 
-        public TypeLookup typeLookup;
         public LightList<DirectiveDefinition> directives;
         public StructList<AttributeDefinition2> attributes;
         public LightList<TemplateNode> children;
         public TemplateNode parent;
         public string textContent;
+        public ProcessedType processedType;
 
         [ThreadStatic] private static LightList<TemplateNode> s_Pool;
 
@@ -39,7 +39,7 @@ namespace UIForia.Compilers {
                 s_Pool = new LightList<TemplateNode>(32);
             }
 
-            node.typeLookup = default;
+            node.processedType = default;
             node.directives.Clear();
             node.attributes.Clear();
             node.children.Clear();

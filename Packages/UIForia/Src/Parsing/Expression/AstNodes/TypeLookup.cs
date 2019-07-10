@@ -26,7 +26,6 @@ namespace UIForia {
             this.namespaceName = null;
             this.generics = null;
             this.isArray = false;
-            this.resolvedType = null;
         }
 
         public void Release() {

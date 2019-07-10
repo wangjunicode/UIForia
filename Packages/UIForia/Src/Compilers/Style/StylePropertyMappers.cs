@@ -1061,7 +1061,5 @@ namespace UIForia.Compilers.Style {
             public string SpriteName;
         }
     }
-
-    internal class ImFeelingLazyException : Exception { }
-
+    
 }

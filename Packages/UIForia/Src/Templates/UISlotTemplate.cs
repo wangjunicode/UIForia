@@ -13,7 +13,7 @@ namespace UIForia.Templates {
         public UISlotTemplate(Application app, List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null)
             : base(app, childTemplates, attributes) { }
 
-        protected override Type elementType => typeof(UISlotElement);
+        protected override Type elementType => typeof(UISlotDefinition);
         public string SlotName => slotNameAttr.value;
 
         public override void Compile(ParsedTemplate template) {
@@ -27,30 +27,30 @@ namespace UIForia.Templates {
         }
 
         public UIElement CreateWithDefault(TemplateScope inputScope) {
-            UISlotElement element = new UISlotElement(slotNameAttr.value);
-            element.templateContext = new ExpressionContext(inputScope.rootElement, element);
+            UISlotDefinition definition = new UISlotDefinition(slotNameAttr.value);
+            definition.templateContext = new ExpressionContext(inputScope.rootElement, definition);
             for (int i = 0; i < childTemplates.Count; i++) {
-                element.children.Add(childTemplates[i].CreateScoped(inputScope));
-                element.children[i].parent = element;
+                definition.children.Add(childTemplates[i].CreateScoped(inputScope));
+                definition.children[i].parent = definition;
             }
 
-            element.OriginTemplate = this;
-            return element;
+            definition.OriginTemplate = this;
+            return definition;
         }
 
         public UIElement CreateWithContent(TemplateScope inputScope, List<UITemplate> content) {
-            UISlotElement element = new UISlotElement(slotNameAttr.value);
+            UISlotDefinition definition = new UISlotDefinition(slotNameAttr.value);
 
             TemplateScope s = new TemplateScope(inputScope.rootElement.templateContext.rootObject as UIElement);
-            element.templateContext = new ExpressionContext(s.rootElement, element);
+            definition.templateContext = new ExpressionContext(s.rootElement, definition);
 
             for (int i = 0; i < content.Count; i++) {
-                element.children.Add(content[i].CreateScoped(s));
-                element.children[i].parent = element;
+                definition.children.Add(content[i].CreateScoped(s));
+                definition.children[i].parent = definition;
             }
 
-            element.OriginTemplate = this;
-            return element;
+            definition.OriginTemplate = this;
+            return definition;
         }
 
     }

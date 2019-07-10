@@ -9,9 +9,11 @@ namespace UIForia.Compilers {
         public LightList<DirectiveDefinition> directives;
         public StructList<AttributeDefinition2> attributes;
         public LightList<TemplateNode> children;
+        public TemplateAST astRoot;
         public TemplateNode parent;
         public string textContent;
         public ProcessedType processedType;
+        public string slotName;
 
         [ThreadStatic] private static LightList<TemplateNode> s_Pool;
 

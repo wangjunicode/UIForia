@@ -192,9 +192,16 @@ namespace UIForia {
         public Camera Camera { get; private set; }
         public LinqBindingSystem LinqBindingSystem => linqBindingSystem;
 
+        // Doesn't expect to create the root
         internal void HydrateTemplate(int templateId, UIElement parent, TemplateScope2 scope) {
             templateCache.compiledTemplates[templateId].Create(parent, scope);
         }
+        
+        // always creates the root
+        internal UIElement CreateSubTemplate(int templateId, UIElement parent, TemplateScope2 scope) {
+            return templateCache.compiledTemplates[templateId].Create(parent, scope);
+        }
+        
         
         internal TemplateCache templateCache = new TemplateCache();
         

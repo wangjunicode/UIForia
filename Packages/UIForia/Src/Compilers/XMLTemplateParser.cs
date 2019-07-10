@@ -41,8 +41,8 @@ namespace UIForia.Compilers {
         [ThreadStatic] private static string[] s_NamespaceLookup;
 
         private readonly string[] s_Directives = {
+            "DefineSlot",
             "Slot",
-            "SlotContent",
             "LazyLoad",
             "Dynamic",
             "Virtual",
@@ -75,6 +75,8 @@ namespace UIForia.Compilers {
             IEnumerable<XElement> usingElements = root.GetChildren("Using");
             IEnumerable<XElement> contentElements = root.GetChildren("Content");
 
+            TemplateAST retn = new TemplateAST();
+
             StructList<UsingDeclaration> usings = StructList<UsingDeclaration>.Get();
             StructList<StyleDefinition> styles = StructList<StyleDefinition>.Get();
 
@@ -97,13 +99,12 @@ namespace UIForia.Compilers {
             XElement contentElement = contentElements.First();
 
             TemplateNode rootNode = TemplateNode.Get();
+            rootNode.astRoot = retn;
+            
             rootNode.processedType = processedType;
 
             ParseAttributes(rootNode, contentElement);
             ParseChildren(rootNode, contentElement.Nodes(), namespaces);
-
-
-            TemplateAST retn = new TemplateAST();
 
             retn.fileName = processedType.GetTemplatePath();
             retn.root = rootNode;
@@ -133,11 +134,19 @@ namespace UIForia.Compilers {
                 templateNode.directives.Add(new DirectiveDefinition(directives));
             }
 
-            int lastIdx = tagName.LastIndexOf('.');
-
-            if (tagName == "Children") {
-                // ast.slots.Add(new SlotDefinition("Children");
+            if (directives.Contains("DefineSlot")) {
+                templateNode.slotName = element.Name.LocalName;
+                templateNode.processedType = TypeProcessor.GetProcessedType(typeof(UISlotDefinition));
+                return;
             }
+
+            if (directives.Contains("Slot")) {
+                templateNode.slotName = element.Name.LocalName;
+                templateNode.processedType = TypeProcessor.GetProcessedType(typeof(UISlotContent));
+                return;
+            }
+            
+            int lastIdx = tagName.LastIndexOf('.');
             
             if (lastIdx > 0) {
                 s_NamespaceLookup = s_NamespaceLookup ?? new string[1];
@@ -212,6 +221,7 @@ namespace UIForia.Compilers {
                         
                         TemplateNode templateNode = TemplateNode.Get();
                         templateNode.parent = parent;
+                        templateNode.astRoot = parent.astRoot;
                         templateNode.processedType = TypeProcessor.GetProcessedType(typeof(UITextElement));
                         templateNode.textContent = textNode.Value;
                         parent.children.Add(templateNode);
@@ -222,12 +232,13 @@ namespace UIForia.Compilers {
                     case XmlNodeType.Element: {
                         XElement element = (XElement) node;
                         TemplateNode templateNode = TemplateNode.Get();
-
+                        templateNode.parent = parent;
+                        templateNode.astRoot = parent.astRoot;
+                        
                         ParseElementTag(templateNode, element, namespaces);
 
                         ParseAttributes(templateNode, element);
 
-                        templateNode.parent = parent;
                         parent.children.Add(templateNode);
 
                         ParseChildren(templateNode, element.Nodes(), namespaces);

@@ -22,7 +22,7 @@ public class TestTemplateParser {
 
             <CompileTestChildElement attr:id='hello1' floatValue='4f'>
 
-                <Div> some content </Div>
+           
 
             </CompileTestChildElement>
 
@@ -42,7 +42,6 @@ public class TestTemplateParser {
         </Content>
         </UITemplate>
     ")]
-    
     public class CompileTestChildElement : UIElement {
 
         public float floatValue;
@@ -51,11 +50,10 @@ public class TestTemplateParser {
 
     [Test]
     public void ParseTemplate2() {
-        
         MockApplication application = MockApplication.CreateWithoutView();
-        
+
         TemplateCompiler compiler = new TemplateCompiler(application);
-        
+
         CompiledTemplate compiledTemplate = compiler.GetCompiledTemplate(typeof(CompileTestElement));
 
         Func<UIElement, TemplateScope2, CompiledTemplate, UIElement> create = compiledTemplate.Compile();
@@ -78,15 +76,15 @@ public class TestTemplateParser {
         Assert.AreEqual(1, r.children[0].attributes.size);
         Assert.AreEqual(2, r.children[1].attributes.size);
         Assert.AreEqual(2, r.children[2].attributes.size);
-        
+
         Assert.AreEqual("id", r.children[0].attributes[0].name);
         Assert.AreEqual("hello0", r.children[0].attributes[0].value);
-        
+
         Assert.AreEqual("id", r.children[1].attributes[0].name);
         Assert.AreEqual("hello1", r.children[1].attributes[0].value);
         Assert.AreEqual("isChild", r.children[1].attributes[1].name);
         Assert.AreEqual("yep", r.children[1].attributes[1].value);
-        
+
         Assert.AreEqual("id", r.children[2].attributes[0].name);
         Assert.AreEqual("hello2", r.children[2].attributes[0].value);
         Assert.AreEqual("isChild", r.children[2].attributes[1].name);
@@ -100,9 +98,47 @@ public class TestTemplateParser {
 
         // application.CreateTemplate(templateId, element, bindingNode);
         // 
-        
     }
-    
+
+    [Template(TemplateType.String, @"
+    <UITemplate>    
+        <Content>
+            <Div>
+                <Text>Outer Content</Text>
+                <DefineSlot:Slot0>
+                    <Text>Default Slot0 Content</Text>
+                    <DefineSlot:Slot1>
+                        <Text>Default Slot1 Content</Text>
+                    </DefineSlot:Slot1>
+                </DefineSlot:Slot0>
+            </Div>
+        </Content>
+    </UITemplate>
+    ")]
+    public class TemplateWithSlots : UIElement { }
+
+    [Template(TemplateType.String, @"
+    <UITemplate>    
+        <Content>
+            <TemplateWithSlots>
+                <Slot:Slot0>
+                    <Text>Replaced Slot0 Content</Text>
+                </Slot:Slot0>
+            </TemplateWithSlots>
+        </Content>
+    </UITemplate>
+    ")]
+    public class TemplateUsingSlots : UIElement { }
+
+    [Test]
+    public void TestSlotTemplate() {
+        MockApplication application = MockApplication.CreateWithoutView();
+
+        TemplateCompiler compiler = new TemplateCompiler(application);
+
+        CompiledTemplate compiledTemplate = compiler.GetCompiledTemplate(typeof(TemplateUsingSlots));
+        LogCode(compiledTemplate.buildExpression);
+    }
 
     private static string PrintCode(IList<Expression> expressions, bool printNamespaces = true) {
         string retn = "";
@@ -122,7 +158,7 @@ public class TestTemplateParser {
     private static string PrintCode(Expression expression, bool printNamespaces = true) {
         bool old = CSharpWriter.printNamespaces;
         CSharpWriter.printNamespaces = printNamespaces;
-        string retn =expression.ToCSharpCode();
+        string retn = expression.ToCSharpCode();
         CSharpWriter.printNamespaces = old;
         return retn;
     }

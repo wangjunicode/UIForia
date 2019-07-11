@@ -1,20 +1,17 @@
 using System;
-using System.Collections.Generic;
 using System.Linq.Expressions;
-using UIForia.Compilers.Style;
 using UIForia.Elements;
 using UIForia.Systems;
-using UIForia.Templates;
 using UIForia.Util;
 
 namespace UIForia.Compilers {
 
     public class CompilationContext {
 
-        public IReadOnlyList<string> namespaces;
-        public Dictionary<string, ParsedTemplate.AliasedUIStyleGroupContainer> sharedStyleMap;
-        public Dictionary<string, UIStyleGroupContainer> implicitStyleMap;
-        public UIStyleGroupContainer implicitRootStyle;
+//        public IReadOnlyList<string> namespaces;
+//        public Dictionary<string, ParsedTemplate.AliasedUIStyleGroupContainer> sharedStyleMap;
+//        public Dictionary<string, UIStyleGroupContainer> implicitStyleMap;
+//        public UIStyleGroupContainer implicitRootStyle;
         public LightList<ParameterExpression> variables;
         public Expression applicationExpr;
         public Type rootType;
@@ -23,20 +20,18 @@ namespace UIForia.Compilers {
         public ParameterExpression rootParam;
         public ParameterExpression templateParam;
         public ParameterExpression scopeParam;
-        public Expression sharedBindingsExpr;
+        public Expression sharedBindingsExpr; // probably lives on the template itself since CompilationContext goes away
         public LightStack<Expression> bindingNodeStack;
         public LightStack<CompiledTemplate> expansionStack;
+        public LightStack<LightList<Expression>> statementStacks;
 
-        public StructList<VariableGroup> variableGroups = new StructList<VariableGroup>();
+        public StructList<VariableGroup> variableGroups;
 
         private int currentDepth;
         private int maxDepth;
 
-        public LightStack<LightList<Expression>> statementStacks;
-        
         public CompilationContext() {
             
-       //     this.statements = LightList<Expression>.Get();
             this.variables = LightList<ParameterExpression>.Get();
             this.rootParam = Expression.Parameter(typeof(UIElement), "root");
             this.scopeParam = Expression.Parameter(typeof(TemplateScope2), "scope");
@@ -45,36 +40,42 @@ namespace UIForia.Compilers {
             this.expansionStack = new LightStack<CompiledTemplate>();
             this.statementStacks = new LightStack<LightList<Expression>>();
             this.statementStacks.Push(new LightList<Expression>());
+            this.variableGroups = StructList<VariableGroup>.Get();
             
             AddVariableGroup();
         }
 
+        public CompilationContext Clone() {
+            CompilationContext retn = new CompilationContext();
+            retn.sharedBindingsExpr = sharedBindingsExpr;
+            retn.rootType = rootType;
+            return retn;
+        }
+
         private void AddVariableGroup() {
             ParameterExpression targetElement;
-            ParameterExpression childArray;
 
             if (currentDepth != 0) {
                 targetElement = Expression.Parameter(typeof(UIElement), "targetElement_" + currentDepth);
-                childArray = Expression.Parameter(typeof(UIElement[]), "childArray_" + currentDepth);
             }
             else {
                 targetElement = rootParam;
-                childArray = null;
             }
 
             ParameterExpression bindingNode = Expression.Parameter(typeof(LinqBindingNode), "bindingNode_" + currentDepth);
+            ParameterExpression slotUsage = Expression.Parameter(typeof(LightList<UIElement>), "slotInput" + currentDepth);
 
             if (currentDepth != 0) {
                 variables.Add(targetElement);
-                variables.Add(childArray);
             }
 
             variables.Add(bindingNode);
+            variables.Add(slotUsage);
 
             variableGroups.Add(new VariableGroup() {
                 targetElement = targetElement,
-                childArray = childArray,
                 bindingNode = bindingNode,
+                slotUsage = slotUsage
             });
         }
 
@@ -99,8 +100,12 @@ namespace UIForia.Compilers {
             return variableGroups[currentDepth].bindingNode;
         }
 
-        public ParameterExpression GetChildArrayVariable() {
-            return variableGroups[currentDepth].childArray;
+        public ParameterExpression GetSlotUsageVariable() {
+            return variableGroups[currentDepth].slotUsage;
+        }
+        
+        public ParameterExpression GetParentSlotUsageVariable() {
+            return variableGroups[currentDepth - 1].slotUsage;
         }
 
         public void PopScope() {
@@ -134,6 +139,8 @@ namespace UIForia.Compilers {
         public void AddStatement(Expression expression) {
             this.statementStacks.PeekUnchecked().Add(expression);
         }
+
+       
 
     }
 

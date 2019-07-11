@@ -88,10 +88,10 @@ namespace UIForia.Elements {
 
         public ExpressionContext templateContext; // todo -- can probably be moved to binding system
 
-        public int enablePhase; // todo -- can probably be removed
+        internal int enablePhase; // todo -- can probably be removed
 
         internal UIElementFlags flags;
-        public UIElement parent;
+        internal UIElement parent;
 
         public readonly LayoutResult layoutResult;
 

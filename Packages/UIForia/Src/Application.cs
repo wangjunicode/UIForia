@@ -90,8 +90,19 @@ namespace UIForia {
         // todo -- replace the static version with this one
         public UIForiaSettings settings => Settings;
 
-        public UIElement CreateElementFromPool(Type type) {
-            return elementPool.Get(type);
+        public UIElement CreateElementFromPool(Type type, UIElement parent, int childCount) {
+            UIElement retn = elementPool.Get(type);
+            retn.children = LightList<UIElement>.GetMinSize(childCount);
+            retn.children.size = childCount;
+            if (parent != null) {
+                // don't know sibling index here unless it is passed in to us
+                retn.parent = parent;
+                if (parent.isEnabled) {
+                    retn.flags |= UIElementFlags.Enabled;
+                }
+                retn.depth = parent.depth + 1;
+            }
+            return retn;
         }
         
         protected Application(string id, string templateRootPath = null) {

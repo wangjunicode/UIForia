@@ -8,7 +8,6 @@ using UIForia.Compilers.ExpressionResolvers;
 using UIForia.Elements;
 using UIForia.Exceptions;
 using UIForia.Templates;
-using UIForia.Util;
 using Debug = UnityEngine.Debug;
 
 namespace UIForia.Parsing.Expression {
@@ -40,7 +39,12 @@ namespace UIForia.Parsing.Expression {
                 );
             }
 
-            this.requiresTemplateExpansion = (!typeof(UIContainerElement).IsAssignableFrom(rawType) && !typeof(UITextElement).IsAssignableFrom(rawType));
+            this.requiresTemplateExpansion = (
+                !typeof(UIContainerElement).IsAssignableFrom(rawType) &&
+                !typeof(UITextElement).IsAssignableFrom(rawType) &&
+                !typeof(UISlotDefinition).IsAssignableFrom(rawType) &&
+                !typeof(UISlotContent).IsAssignableFrom(rawType)
+            );
         }
 
         public string GetTemplate(string templateRoot) {
@@ -131,6 +135,14 @@ namespace UIForia.Parsing.Expression {
         // path from Assets directory
         public string GetTemplatePath() {
             return !HasTemplatePath() ? rawType.AssemblyQualifiedName : templateAttr.template;
+        }
+
+        public static bool operator ==(ProcessedType processedType, Type type) {
+            return processedType.rawType == type;
+        }
+
+        public static bool operator !=(ProcessedType processedType, Type type) {
+            return processedType.rawType != type;
         }
 
     }

@@ -1,6 +1,6 @@
 namespace UIForia.Elements {
 
-    public class UISlotDefinition : UIElement {
+    public class UISlotDefinition : UIContainerElement {
 
         public readonly string slotId;
 

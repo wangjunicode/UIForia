@@ -51,6 +51,17 @@ namespace UIForia.Compilers {
             node = null;
         }
 
+        public bool HasAttribute(string attrName) {
+            if (attributes == null) return false;
+            for (int i = 0; i < attributes.Count; i++) {
+                if (attributes[i].key == attrName) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
     }
 
 }

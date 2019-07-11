@@ -37,7 +37,7 @@ namespace UIForia.Compilers {
         public Application application;
 
         private readonly XmlParserContext parserContext;
-        
+
         [ThreadStatic] private static string[] s_NamespaceLookup;
 
         private readonly string[] s_Directives = {
@@ -66,7 +66,9 @@ namespace UIForia.Compilers {
         }
 
         internal TemplateAST Parse(ProcessedType processedType) {
+            
             string template = processedType.GetTemplateFromApplication(application);
+            
             XElement root = XElement.Load(new XmlTextReader(template, XmlNodeType.Element, parserContext));
 
             root.MergeTextNodes();
@@ -100,7 +102,7 @@ namespace UIForia.Compilers {
 
             TemplateNode rootNode = TemplateNode.Get();
             rootNode.astRoot = retn;
-            
+
             rootNode.processedType = processedType;
 
             ParseAttributes(rootNode, contentElement);
@@ -122,13 +124,11 @@ namespace UIForia.Compilers {
             string tagName = element.Name.LocalName;
 
             if (directives.Contains('.')) {
-                
                 string[] directiveList = directives.Split(s_DotArray, StringSplitOptions.RemoveEmptyEntries);
-                
+
                 for (int i = 0; i < directiveList.Length; i++) {
                     templateNode.directives.Add(new DirectiveDefinition(directiveList[i]));
                 }
-                
             }
             else if (!string.IsNullOrWhiteSpace(directives) && !string.IsNullOrEmpty(directives)) {
                 templateNode.directives.Add(new DirectiveDefinition(directives));
@@ -145,9 +145,9 @@ namespace UIForia.Compilers {
                 templateNode.processedType = TypeProcessor.GetProcessedType(typeof(UISlotContent));
                 return;
             }
-            
+
             int lastIdx = tagName.LastIndexOf('.');
-            
+
             if (lastIdx > 0) {
                 s_NamespaceLookup = s_NamespaceLookup ?? new string[1];
                 s_NamespaceLookup[0] = tagName.Substring(0, lastIdx);
@@ -160,7 +160,6 @@ namespace UIForia.Compilers {
             if (templateNode.processedType.rawType == null) {
                 throw new Exception("Unresolved tag name: " + element.Name.LocalName);
             }
-            
         }
 
         private static void ParseAttributes(TemplateNode templateNode, XElement node) {
@@ -218,7 +217,7 @@ namespace UIForia.Compilers {
                             parent.textContent += textNode.Value;
                             continue;
                         }
-                        
+
                         TemplateNode templateNode = TemplateNode.Get();
                         templateNode.parent = parent;
                         templateNode.astRoot = parent.astRoot;
@@ -234,10 +233,14 @@ namespace UIForia.Compilers {
                         TemplateNode templateNode = TemplateNode.Get();
                         templateNode.parent = parent;
                         templateNode.astRoot = parent.astRoot;
-                        
+
                         ParseElementTag(templateNode, element, namespaces);
 
                         ParseAttributes(templateNode, element);
+
+                        if (!parent.processedType.requiresTemplateExpansion && templateNode.processedType == typeof(UISlotContent)) {
+                            throw new TemplateParseException(node, $"Slot cannot be added for type {parent.processedType.rawType} because it is a text or container type and does not accept slots.");
+                        }
 
                         parent.children.Add(templateNode);
 
@@ -252,6 +255,30 @@ namespace UIForia.Compilers {
                 }
 
                 throw new TemplateParseException(node, $"Unable to handle node type: {node.NodeType}");
+            }
+
+            if (parent.parent != null && parent.processedType.requiresTemplateExpansion && parent.children.Count > 0) {
+                TemplateNode childrenSlotNode = TemplateNode.Get();
+                for (int i = 0; i < parent.children.size; i++) {
+                    Type type = parent.children[i].processedType.rawType;
+
+                    if (type != typeof(UISlotContent)) {
+                        childrenSlotNode.children.Add(parent.children[i]);
+                        parent.children.RemoveAt(i--);
+                    }
+                }
+
+                if (childrenSlotNode.children.Count > 0) {
+                    childrenSlotNode.astRoot = parent.astRoot;
+                    childrenSlotNode.parent = parent;
+                    childrenSlotNode.processedType = TypeProcessor.GetProcessedType(typeof(UIChildrenElement));
+                    childrenSlotNode.slotName = "Children";
+                    childrenSlotNode.directives.Add(new DirectiveDefinition("Slot"));
+                    parent.children.Add(childrenSlotNode);
+                }
+                else {
+                    TemplateNode.Release(ref childrenSlotNode);
+                }
             }
         }
 

@@ -1,10 +1,12 @@
+using UIForia.Attributes;
 using UIForia.Layout;
 using UIForia.Rendering;
 using UIForia.Templates;
 
 namespace UIForia.Elements {
 
-    public class UIChildrenElement : UIElement {
+    [TemplateTagName("Children")]
+    public class UIChildrenElement : UISlotContent {
 
         internal UITemplate template;
         internal TemplateScope templateScope;

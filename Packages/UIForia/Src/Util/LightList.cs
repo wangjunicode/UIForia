@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using UnityEngine;
 
 namespace UIForia.Util {
 
@@ -563,7 +564,7 @@ namespace UIForia.Util {
                 }
             }
 
-            return new LightList<T>(minSize);
+            return new LightList<T>(Mathf.Min(8, minSize));
         }
 
         public static void Release(ref LightList<T> toRelease) {

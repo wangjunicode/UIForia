@@ -322,6 +322,13 @@ namespace UIForia.Util {
             return retn;
         }
 
+        public void Release() {
+            Clear();
+            if (isInPool) return;
+            isInPool = true;
+            s_Pool.Add(this);
+        }
+        
         public static void Release(ref StructList<T> toPool) {
             toPool.Clear();
             if (toPool.isInPool) return;

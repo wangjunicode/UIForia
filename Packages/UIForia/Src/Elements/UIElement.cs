@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using JetBrains.Annotations;
+using UIForia.Compilers;
 using UIForia.Elements.Routing;
 using UIForia.Expressions;
 using UIForia.Layout;
@@ -78,6 +79,19 @@ namespace UIForia.Elements {
 
     }
 
+    public struct ArrayContainer<T> {
+
+        public T[] array;
+        public int size;
+        
+        public ArrayContainer(T[] array, int size = 0) {
+            this.array = array;
+            this.size = size;
+        }
+        
+    }
+
+    
     [DebuggerDisplay("{" + nameof(ToString) + "()}")]
     public class UIElement : IHierarchical {
 
@@ -102,6 +116,9 @@ namespace UIForia.Elements {
         internal StructList<ElementAttribute> attributes;
         
         public UIView View { get; internal set; }
+        
+        // todo -- move this
+        public ArrayContainer<StoredTemplate> storedTemplates;
         
         protected internal UIElement() {
             this.id = Application.NextElementId;
@@ -218,6 +235,10 @@ namespace UIForia.Elements {
             }
 
             return element;
+        }
+
+        public UIElement AddChild(in StoredTemplate storedTemplate) {
+            return Application.InsertChildFromTemplate(this, storedTemplate, (uint)children.Count);
         }
 
         public void TriggerEvent(UIEvent evt) {
@@ -426,6 +447,14 @@ namespace UIForia.Elements {
             return default;
         }
 
+        internal void StoreTemplate(StoredTemplate storedTemplate) {
+            
+        }
+
+        public StoredTemplate GetStoredTemplate(string templateName) {
+            return default;
+        }
+        
         public int UniqueId => id;
         public IHierarchical Element => this;
         public IHierarchical Parent => parent;

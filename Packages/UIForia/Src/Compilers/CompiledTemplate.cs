@@ -8,6 +8,34 @@ using UIForia.Util;
 
 namespace UIForia.Compilers {
 
+    public readonly struct LexicalScope {
+
+        public readonly UIElement root;
+        public readonly CompiledTemplate data;
+
+        public LexicalScope(UIElement root, CompiledTemplate data) {
+            this.root = root;
+            this.data = data;
+        }
+
+    }
+
+    public readonly struct SlotUsage {
+
+        public readonly string slotName;
+        public readonly int templateId;
+        public readonly LexicalScope lexicalScope;
+
+        public SlotUsage(string slotName, int templateId, LexicalScope lexicalScope) {
+            this.slotName = slotName;
+            this.templateId = templateId;
+            this.lexicalScope = lexicalScope;
+        }
+
+    }
+
+    internal delegate UIElement SlotUsageTemplate(Application application, LinqBindingNode bindingNode, UIElement parent, LexicalScope lexicalScope);
+
     public class CompiledTemplate {
 
         internal Expression<Func<UIElement, TemplateScope2, CompiledTemplate, UIElement>> buildExpression;
@@ -29,23 +57,25 @@ namespace UIForia.Compilers {
                 slotDefinition = default;
                 return false;
             }
+
             for (int i = 0; i < slotDefinitions.Count; i++) {
                 if (slotDefinitions[i].tagName == slotName) {
                     slotDefinition = slotDefinitions[i];
                     return true;
                 }
-            }    
+            }
+
             slotDefinition = default;
             return false;
         }
 
         public int AddSlotData(SlotDefinition slotDefinition) {
             slotDefinitions = slotDefinitions ?? StructList<SlotDefinition>.Get();
-            slotDefinition.slotId = (short)slotDefinitions.Count;
+            slotDefinition.slotId = (short) slotDefinitions.Count;
             slotDefinitions.Add(slotDefinition);
             return slotDefinition.slotId;
         }
-        
+
         internal UIElement Create(UIElement root, TemplateScope2 scope) {
             if (createFn == null) {
                 createFn = buildExpression.Compile();
@@ -57,11 +87,10 @@ namespace UIForia.Compilers {
         }
 
         public int GetSlotId(string slotName) {
-            
             if (slotDefinitions == null) {
                 throw new ArgumentOutOfRangeException(slotName, $"Slot name {slotName} was not registered");
             }
-            
+
             for (int i = 0; i < slotDefinitions.Count; i++) {
                 if (slotDefinitions.array[i].tagName == slotName) {
                     return slotDefinitions[i].slotId;
@@ -80,9 +109,9 @@ namespace UIForia.Compilers {
                     if (slotList[j] == target) {
                         throw new TemplateParseException(fileName, $"Invalid slot input, you provided the slot name {target} multiple times");
                     }
-                }    
+                }
             }
-            
+
             for (int i = 0; i < slotList.size; i++) {
                 TryGetSlotData(slotList[i], out SlotDefinition slotDefinition);
 
@@ -98,9 +127,7 @@ namespace UIForia.Compilers {
                         break;
                     }
                 }
-                        
             }
-
         }
 
         public string GetValidSlotNameMessage() {
@@ -117,6 +144,7 @@ namespace UIForia.Compilers {
                     retn += ", ";
                 }
             }
+
             return retn;
         }
 

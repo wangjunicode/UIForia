@@ -60,10 +60,7 @@ public class TestTemplateParser {
 
         Debug.Log(PrintCode(compiledTemplate.buildExpression, false));
 
-        UIElement r = create(null, new TemplateScope2() {
-            application = application,
-            bindingNode = new LinqBindingNode()
-        }, compiledTemplate);
+        UIElement r = create(null, new TemplateScope2(application, new LinqBindingNode(), null), compiledTemplate);
 
         Assert.IsInstanceOf<CompileTestElement>(r);
         Assert.AreEqual(3, r.children.size);
@@ -91,10 +88,7 @@ public class TestTemplateParser {
         Assert.AreEqual("yep", r.children[2].attributes[1].value);
 
         UIElement element = application.CreateElementFromPool(typeof(CompileTestElement), null, compiledTemplate.childCount);
-        create(element, new TemplateScope2() {
-            application = application,
-            bindingNode = new LinqBindingNode(),
-        }, compiledTemplate);
+        create(element, new TemplateScope2(application, new LinqBindingNode(), null), compiledTemplate);
     }
 
     [Template(TemplateType.String, @"
@@ -231,10 +225,20 @@ public class TestTemplateParser {
 
             </DefineSlot:TemplateSlot>
 
+            <Div attr:id='attach-point'/>
+
+            <Children/>
+
         </Content>
     </UITemplate>
     ")]
-    public class CompileAsTemplateFn : UIElement { }
+    public class CompileAsTemplateFn : UIElement {
+        
+        public override void OnCreate() {
+            FindById("attach-point").AddChild(GetStoredTemplate("TemplateSlot"));
+        }
+
+    }
     
     [Test]
     public void TestSlotTemplate() {
@@ -247,9 +251,7 @@ public class TestTemplateParser {
 
         UIElement element = new TemplateWithSlotsSimple();
 
-        compiledTemplate.Create(element, new TemplateScope2() {
-            application = application
-        });
+        compiledTemplate.Create(element, new TemplateScope2(application, null, null));
 
         AssertElementHierarchy(new ElementAssertion(typeof(TemplateWithSlotsSimple)) {
             children = new[] {
@@ -295,9 +297,7 @@ public class TestTemplateParser {
 
         UIElement element = new TestSimpleSlotReplace();
 
-        compiledTemplate.Create(element, new TemplateScope2() {
-            application = application
-        });
+        compiledTemplate.Create(element, new TemplateScope2(application, null, null));
 
         AssertElementHierarchy(new ElementAssertion(typeof(TestSimpleSlotReplace)) {
             children = new[] {
@@ -330,9 +330,7 @@ public class TestTemplateParser {
 
         UIElement element = new TemplateReplaceInnerSlot();
 
-        compiledTemplate.Create(element, new TemplateScope2() {
-            application = application
-        });
+        compiledTemplate.Create(element, new TemplateScope2(application, null, null));
 
         AssertElementHierarchy(new ElementAssertion(typeof(TemplateReplaceInnerSlot)) {
             children = new[] {
@@ -376,9 +374,7 @@ public class TestTemplateParser {
 
         UIElement element = new TemplateReplaceOuterSlot();
 
-        compiledTemplate.Create(element, new TemplateScope2() {
-            application = application
-        });
+        compiledTemplate.Create(element, new TemplateScope2(application, null, null));
 
         AssertElementHierarchy(new ElementAssertion(typeof(TemplateReplaceOuterSlot)) {
             children = new[] {
@@ -451,10 +447,10 @@ public class TestTemplateParser {
 
         UIElement element = new CompileAsTemplateFn();
 
-        compiledTemplate.Create(element, new TemplateScope2() {
-            application = application
-        });
+        compiledTemplate.Create(element, new TemplateScope2(application, null, null));
 
+        Assert.IsNotNull(element.storedTemplates);
+        
     }
 
     public void AssertElementHierarchy(ElementAssertion assertion, UIElement element, UIElement parent = null) {

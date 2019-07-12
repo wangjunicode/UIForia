@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using UIForia.Animation;
 using UIForia.AttributeProcessors;
 using UIForia.Bindings;
@@ -90,6 +91,8 @@ namespace UIForia {
         // todo -- replace the static version with this one
         public UIForiaSettings settings => Settings;
 
+        // todo -- override that accepts an index into an array instead of a type, to save a dictionary lookup
+        // todo -- don't create a list for every type, maybe a single pool list w/ sorting & a jump search or similar
         public UIElement CreateElementFromPool(Type type, UIElement parent, int childCount) {
             UIElement retn = elementPool.Get(type);
             retn.children = LightList<UIElement>.GetMinSize(childCount);
@@ -101,6 +104,7 @@ namespace UIForia {
                     retn.flags |= UIElementFlags.Enabled;
                 }
                 retn.depth = parent.depth + 1;
+                retn.View = parent.View;
             }
             return retn;
         }
@@ -943,6 +947,63 @@ namespace UIForia {
             onViewsSorted?.Invoke(m_Views.ToArray());
         }
 
+
+        internal UIElement InsertChildFromTemplate(UIElement parent, in StoredTemplate storedTemplate, uint index) {
+            CompiledTemplate template = templateCache.compiledTemplates[storedTemplate.templateId];
+            // template.CreateStored(parent, storedTemplate.closureRoot, slots?, context? bindingNode?)
+            UIElement child = template.Create(parent, new TemplateScope2(this, null, StructList<SlotUsage>.Get()));
+            return child;
+        }
+
+        internal LightList<SlotUsageTemplate> slotUsageTemplates = new LightList<SlotUsageTemplate>(128);
+        
+        // todo we will want to not compile this here, explore jitting this
+        internal int AddSlotUsageTemplate(Expression<SlotUsageTemplate> lambda) {
+            slotUsageTemplates.Add(lambda.Compile());
+            return slotUsageTemplates.Count - 1;
+        }
+
+        internal bool TryCreateSlot(StructList<SlotUsage> slots, string targetSlot, LinqBindingNode bindingNode, UIElement parent, out UIElement element) {
+            SlotUsage[] array = slots.array;
+            for (int i = 0; i < slots.size; i++) {
+                if (array[i].slotName == targetSlot) {
+                    element = slotUsageTemplates[array[i].templateId].Invoke(this, bindingNode, parent, array[i].lexicalScope);
+                    element.View = parent.View;
+                    return true;
+                }
+            }
+
+            element = null;
+            return false;
+        }
+        
+        internal UIElement CreateSlot(StructList<SlotUsage> slots, string targetSlot, LinqBindingNode bindingNode, UIElement parent, UIElement root, CompiledTemplate defaultTemplateData, int defaultTemplateId) {
+            UIElement element;
+            
+           if (slots == null) {
+               element = slotUsageTemplates[defaultTemplateId].Invoke(this, bindingNode, parent, new LexicalScope(root, defaultTemplateData));
+               element.View = parent.View;
+               element.parent = parent;
+               return element;
+           }
+            
+           SlotUsage[] array = slots.array;
+           for (int i = 0; i < slots.size; i++) {
+               if (array[i].slotName == targetSlot) {
+                   element = slotUsageTemplates[array[i].templateId].Invoke(this, bindingNode, parent, array[i].lexicalScope);
+                   element.parent = parent;
+                   element.View = parent.View;
+                   return element;
+               }
+           }
+           
+           element = slotUsageTemplates[defaultTemplateId].Invoke(this, bindingNode, parent, new LexicalScope(root, defaultTemplateData));
+           element.View = parent.View;
+           element.parent = parent;
+           return element;
+           
+        }
+        
 
     }
 

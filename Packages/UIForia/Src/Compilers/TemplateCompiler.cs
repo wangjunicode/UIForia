@@ -15,55 +15,11 @@ namespace UIForia.Compilers {
 
     public class TemplateContextTreeDefinition { }
 
-    internal struct TemplateScope2 {
-
-        public Application application;
-        public UIView view;
-        public StructList<SlotUsage> slotInputs;
-        public LinqBindingNode bindingNode;
-
-        public TemplateScope2(Application application, LinqBindingNode bindingNode, StructList<SlotUsage> slotInputs) {
-            this.application = application;
-            this.view = null;
-            this.slotInputs = slotInputs;
-            this.bindingNode = bindingNode;
-        }
-
-        public SlotUsage FindMatchingSlot(string slotName) {
-            for (int i = 0; i < slotInputs.size; i++) {
-                if (slotInputs[i].slotName == slotName) {
-                    return slotInputs[i];
-                }
-            }
-
-            return default; // should never reach this
-        }
-        
-        public bool HasMatchingSlot(string slotName) {
-            for (int i = 0; i < slotInputs.size; i++) {
-                if (slotInputs[i].slotName == slotName) {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-    }
-
     public class LinqStyleCompiler {
 
         public LinqBinding Compile(Type rootType, Type elementType, TemplateContextTreeDefinition ctx, in AttributeDefinition2 attributeDefinition) {
             return null;
         }
-
-    }
-
-    public struct VariableGroup {
-
-        public ParameterExpression targetElement;
-        public ParameterExpression bindingNode;
-        public ParameterExpression slotUsage;
 
     }
 
@@ -85,37 +41,28 @@ namespace UIForia.Compilers {
         private static readonly FieldInfo s_StructList_ElementAttr_Array = typeof(StructList<ElementAttribute>).GetField("array");
         private static readonly FieldInfo s_Scope_ApplicationField = typeof(TemplateScope2).GetField("application");
         private static readonly FieldInfo s_ScopeBindingNodeField = typeof(TemplateScope2).GetField(nameof(TemplateScope2.bindingNode));
-        private static readonly FieldInfo s_ScopeInputSlotField = typeof(TemplateScope2).GetField(nameof(TemplateScope2.slotInputs));
+        private static readonly FieldInfo s_Scope_CompiledTemplate = typeof(TemplateScope2).GetField(nameof(TemplateScope2.compiledTemplate));
         private static readonly FieldInfo s_Element_Parent = typeof(UIElement).GetField(nameof(UIElement.parent), BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+        private static readonly PropertyInfo s_Element_Application = typeof(UIElement).GetProperty(nameof(UIElement.Application), BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
 
         private static readonly ConstructorInfo s_ElementAttributeCtor = typeof(ElementAttribute).GetConstructor(new[] {typeof(string), typeof(string)});
-        private static readonly ConstructorInfo s_TemplateScope_Ctor = typeof(TemplateScope2).GetConstructor(new[] {typeof(Application), typeof(LinqBindingNode), typeof(LightList<UIElement>)});
+        private static readonly ConstructorInfo s_TemplateScope_Ctor = typeof(TemplateScope2).GetConstructor(new[] {typeof(Application), typeof(LinqBindingNode), typeof(StructList<SlotUsage>)});
+        private static readonly FieldInfo s_TemplateScope_SlotInputList = typeof(TemplateScope2).GetField(nameof(TemplateScope2.slotInputs));
+        private static readonly ConstructorInfo s_LexicalScope_Ctor = typeof(LexicalScope).GetConstructor(new[] {typeof(UIElement), typeof(CompiledTemplate)});
 
-        private static readonly MethodInfo s_ArrayPool_Int_GetMinSize = typeof(ArrayPool<int>).GetMethod(nameof(ArrayPool<int>.GetMinSize));
-
-        private static readonly MethodInfo s_LinqBindingList_CreateListSpan = typeof(LightList<LinqBinding>).GetMethod("CreateSpan");
         private static readonly FieldInfo s_ElementAttributeList = typeof(UIElement).GetField("attributes", BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance);
-        private static readonly FieldInfo s_ElementBindingNode = typeof(UIElement).GetField("bindingNode", BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance);
-        private static readonly FieldInfo s_BindingNode_Bindings = typeof(LinqBindingNode).GetField(nameof(LinqBindingNode.bindings), BindingFlags.NonPublic | BindingFlags.Instance);
         private static readonly MethodInfo s_BindingNode_AddChild = typeof(LinqBindingNode).GetMethod(nameof(LinqBindingNode.AddChild), BindingFlags.Public | BindingFlags.Instance);
-        private static readonly FieldInfo s_Template_SharedBindings = typeof(CompiledTemplate).GetField(nameof(CompiledTemplate.sharedBindings), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
         private static readonly FieldInfo s_Element_ChildrenList = typeof(UIElement).GetField(nameof(UIElement.children), BindingFlags.NonPublic | BindingFlags.Instance);
         private static readonly FieldInfo s_LightList_Element_Array = typeof(LightList<UIElement>).GetField(nameof(LightList<UIElement>.array), BindingFlags.Public | BindingFlags.Instance);
-        private static readonly FieldInfo s_LightList_Element_Size = typeof(LightList<UIElement>).GetField(nameof(LightList<UIElement>.size), BindingFlags.Public | BindingFlags.Instance);
-        private static readonly MethodInfo s_LightList_Element_GetMinSize = typeof(LightList<UIElement>).GetMethod(nameof(LightList<UIElement>.GetMinSize), BindingFlags.Public | BindingFlags.Static);
-        private static readonly MethodInfo s_LightList_Element_Release = typeof(LightList<UIElement>).GetMethod(nameof(LightList<UIElement>.Release), BindingFlags.Public | BindingFlags.Static);
         private static readonly MethodInfo s_Application_HydrateTemplate = typeof(Application).GetMethod(nameof(Application.HydrateTemplate), BindingFlags.NonPublic | BindingFlags.Instance);
-        private static readonly MethodInfo s_Application_CreateSubTemplate = typeof(Application).GetMethod(nameof(Application.CreateSubTemplate), BindingFlags.NonPublic | BindingFlags.Instance);
         private static readonly FieldInfo s_TextElement_Text = typeof(UITextElement).GetField(nameof(UITextElement.text), BindingFlags.Instance | BindingFlags.NonPublic);
 
-        private static readonly MethodInfo s_Scope_FindMatchingSlot = typeof(TemplateScope2).GetMethod(nameof(TemplateScope2.FindMatchingSlot), BindingFlags.Public | BindingFlags.Instance);
-        private static readonly MethodInfo s_Scope_HasMatchingSlot = typeof(TemplateScope2).GetMethod(nameof(TemplateScope2.HasMatchingSlot), BindingFlags.Public | BindingFlags.Instance);
+        private static readonly MethodInfo s_Application_CreateSlot = typeof(Application).GetMethod(nameof(Application.CreateSlot), BindingFlags.NonPublic | BindingFlags.Instance);
 
-        private static readonly ConstructorInfo s_SlotUsage_Ctor = typeof(SlotUsage).GetConstructor(new Type[] {typeof(string), typeof(UIElement), typeof(CompiledTemplate)});
-        private static readonly MethodInfo s_StructList_SlotUsage_Get = typeof(StructList<SlotUsage>).GetMethod(nameof(StructList<SlotUsage>.GetMinSize), new[] {typeof(int)});
-        private static readonly FieldInfo s_StructList_SlotUsage_Size = typeof(StructList<SlotUsage>).GetField("size");
-        private static readonly FieldInfo s_StructList_SlotUsage_Array = typeof(StructList<SlotUsage>).GetField("array");
-        private static readonly MethodInfo s_StructList_SlotUsage_AddUnchecked = typeof(StructList<SlotUsage>).GetMethod(nameof(StructList<SlotUsage>.AddUnsafe));
+        private static readonly ConstructorInfo s_SlotUsage_Ctor = typeof(SlotUsage).GetConstructor(new[] {typeof(string), typeof(int), typeof(LexicalScope)});
+
+        private static readonly FieldInfo s_LexicalScope_root = typeof(LexicalScope).GetField(nameof(LexicalScope.root), BindingFlags.Instance | BindingFlags.Public);
+        private static readonly FieldInfo s_LexicalScope_data = typeof(LexicalScope).GetField(nameof(LexicalScope.data), BindingFlags.Instance | BindingFlags.Public);
 
         public TemplateCompiler(Application application) {
             this.application = application;
@@ -125,24 +72,30 @@ namespace UIForia.Compilers {
             this.xmlTemplateParser = new XMLTemplateParser(application);
         }
 
-        private void VisitChildren(CompiledTemplate retn, TemplateNode node, CompilationContext ctx) {
+        private void VisitChildren(TemplateNode node, CompilationContext ctx, CompiledTemplate retn) {
             if (node.children == null || node.children.Count <= 0) {
                 return;
             }
 
-            Expression parentChildList = Expression.Field(ctx.GetParentTargetElementVariable(), s_Element_ChildrenList);
+            ctx.PushScope();
+            Expression parentChildList = Expression.Field(ctx.ParentExpr, s_Element_ChildrenList);
             Expression parentChildListArray = Expression.Field(parentChildList, s_LightList_Element_Array);
 
             // childList[idx] = Visit()
             for (int i = 0; i < node.children.Count; i++) {
                 Expression visit = Visit(node.children[i], ctx, retn);
-                ctx.AddStatement(
-                    Expression.Assign(
-                        Expression.ArrayAccess(parentChildListArray, Expression.Constant(i)),
-                        visit
-                    )
-                );
+                // will be null for templates
+                if (visit != null) {
+                    ctx.AddStatement(
+                        Expression.Assign(
+                            Expression.ArrayAccess(parentChildListArray, Expression.Constant(i)),
+                            visit
+                        )
+                    );
+                }
             }
+
+            ctx.PopScope();
         }
 
         public CompiledTemplate GetCompiledTemplate(Type type) {
@@ -197,6 +150,15 @@ namespace UIForia.Compilers {
             Debug.Log(retn);
         }
 
+        private static void LogCode(string comment, Expression expression, bool printNamespaces = false) {
+            bool old = CSharpWriter.printNamespaces;
+            CSharpWriter.printNamespaces = printNamespaces;
+            string retn = expression.ToCSharpCode();
+            CSharpWriter.printNamespaces = old;
+            Debug.Log(comment);
+            Debug.Log(retn + "\n");
+        }
+
         private CompiledTemplate Compile(TemplateAST ast) {
             CompiledTemplate retn = new CompiledTemplate();
             retn.childCount = ast.root.children.size;
@@ -212,39 +174,46 @@ namespace UIForia.Compilers {
 
             ProcessedType processedType = ast.root.processedType;
 
+            ParameterExpression rootParam = Expression.Parameter(typeof(UIElement), "root");
+            ParameterExpression scopeParam = Expression.Parameter(typeof(TemplateScope2), "scope");
+            ParameterExpression templateParam = Expression.Parameter(typeof(CompiledTemplate), "templateData");
+
             CompilationContext ctx = new CompilationContext();
-
             ctx.rootType = processedType.rawType;
+            ctx.rootParam = rootParam;
+            ctx.templateScope = scopeParam;
             ctx.elementType = processedType.rawType;
-            ctx.contextTree = null;
+            ctx.applicationExpr = Expression.Field(scopeParam, s_Scope_ApplicationField);
+            ctx.templateData = Expression.Field(scopeParam, s_Scope_CompiledTemplate);
 
-            Expression scopeBindingNode = Expression.Field(ctx.scopeParam, s_ScopeBindingNodeField);
-            ctx.applicationExpr = Expression.Field(ctx.scopeParam, s_Scope_ApplicationField);
-            ctx.sharedBindingsExpr = Expression.Field(ctx.templateParam, s_Template_SharedBindings);
+            Expression scopeBindingNode = Expression.Field(scopeParam, s_ScopeBindingNodeField);
 
-            ctx.PushBindingNode(scopeBindingNode);
+            ctx.Initialize(rootParam, scopeBindingNode);
 
-            ctx.PushBlock();
-            // create the root element bindings from <Content> tag
-            // todo -- if we have a parent, use it instead of default(UIElement)
-            Expression createRootExpression = Expression.Call(ctx.applicationExpr, s_CreateFromPool, Expression.Constant(processedType.rawType), Expression.Default(typeof(UIElement)), Expression.Constant(ast.root.children.size));
-            ctx.AddStatement(Expression.Assign(ctx.rootParam, createRootExpression));
-            ProcessAttributes(retn, null, ast.root.attributes, ctx, out bool hasBindings);
-            // application.OnElementRegistered(root);
-            // root.OnInitialize(); if needed
-            BlockExpression createUnscopedBlock = ctx.PopBlock();
+            {
+                ctx.PushBlock();
 
-            ctx.AddStatement(Expression.IfThen(Expression.Equal(ctx.rootParam, Expression.Constant(null)), createUnscopedBlock));
+                Expression createRootExpression = Expression.Call(ctx.applicationExpr, s_CreateFromPool,
+                    Expression.Constant(processedType.rawType),
+                    Expression.Default(typeof(UIElement)),
+                    Expression.Constant(ast.root.children.size)
+                );
 
-            ctx.PushScope();
-            VisitChildren(retn, root, ctx);
-            ctx.PopScope();
+                ctx.AddStatement(Expression.Assign(ctx.rootParam, createRootExpression));
+
+                ProcessAttributes(retn, null, ast.root.attributes, ctx, out bool hasBindings);
+
+                BlockExpression createUnscopedBlock = ctx.PopBlock();
+
+                ctx.AddStatement(Expression.IfThen(Expression.Equal(ctx.rootParam, Expression.Constant(null)), createUnscopedBlock));
+            }
+
+
+            VisitChildren(root, ctx, retn);
 
             ctx.AddStatement(ctx.rootParam); // this is the return value
 
-            BlockExpression block = Expression.Block(typeof(UIElement), ctx.variables, ctx.statementStacks.PeekAtUnchecked(0));
-
-            retn.buildExpression = Expression.Lambda<Func<UIElement, TemplateScope2, CompiledTemplate, UIElement>>(block, ctx.rootParam, ctx.scopeParam, ctx.templateParam);
+            retn.buildExpression = Expression.Lambda<Func<UIElement, TemplateScope2, CompiledTemplate, UIElement>>(ctx.Finalize(typeof(UIElement)), rootParam, scopeParam, templateParam);
             retn.elementType = ast.root.processedType;
             retn.attributes = ast.root.attributes.ToArray();
 
@@ -259,49 +228,84 @@ namespace UIForia.Compilers {
             return retn;
         }
 
-        private ParameterExpression CompileToReusableTemplate(TemplateNode templateNode, CompilationContext ctx, CompiledTemplate template) {
-            ctx = ctx.Clone();
+        private int CompileSlot(TemplateNode templateNode, CompilationContext parentCtx, CompiledTemplate template) {
+            // want a fresh set of variables but keep the style / file / binding data / etc contexts
+            CompilationContext ctx = new CompilationContext();
 
-            // needs to clone template scope
-            // inputs from scope need to be converted into functions so they can be re-used?
-            // 
+            ParameterExpression bindingNodeParam = Expression.Parameter(typeof(LinqBindingNode), "bindingNode");
+            ParameterExpression parentParam = Expression.Parameter(typeof(UIElement), "parent");
+            ParameterExpression appParam = Expression.Parameter(typeof(Application), "application");
+            ParameterExpression lexicalScopeParam = Expression.Parameter(typeof(LexicalScope), "lexicalScope");
+            ParameterExpression retnVal = Expression.Parameter(typeof(UIElement), "retn");
 
-            // keep 1 array of slot inputs and compute offsets
-            CompiledTemplate retn = new CompiledTemplate();
+            ctx.applicationExpr = appParam;
 
-            retn.fileName = template.fileName;
-            retn.childCount = templateNode.children.size;
-            retn.elementType = templateNode.processedType;
+            ctx.templateData = Expression.Field(lexicalScopeParam, s_LexicalScope_data);
+            ctx.rootParam = Expression.Parameter(typeof(UIElement), "root");
 
-            ProcessedType processedType = templateNode.processedType;
+            ctx.variables.Add((ParameterExpression) ctx.rootParam);
+            ctx.variables.Add(retnVal);
 
-            ctx.rootType = processedType.rawType;
-            ctx.elementType = processedType.rawType;
-            ctx.contextTree = null;
+            ctx.Initialize(retnVal, bindingNodeParam);
 
-            ctx.applicationExpr = Expression.Field(ctx.scopeParam, s_Scope_ApplicationField);
-            ctx.sharedBindingsExpr = Expression.Field(ctx.templateParam, s_Template_SharedBindings);
+            ctx.AddStatement(Expression.Assign(ctx.rootParam, Expression.Field(lexicalScopeParam, s_LexicalScope_root)));
 
-            ctx.PushScope();
-            VisitChildren(retn, templateNode, ctx);
-            ctx.PopScope();
+            Expression createRootExpression = Expression.Call(ctx.applicationExpr, s_CreateFromPool,
+                Expression.Constant(templateNode.processedType.rawType == typeof(UIChildrenElement)
+                    ? typeof(UIChildrenElement)
+                    : typeof(UISlotContent)),
+                parentParam,
+                Expression.Constant(templateNode.children.size)
+            );
 
-            ctx.AddStatement(ctx.rootParam); // this is the return value
+            ctx.AddStatement(Expression.Assign(retnVal, createRootExpression));
 
-            Debug.Assert(ctx.statementStacks.Count == 1);
-            BlockExpression block = Expression.Block(typeof(UIElement), ctx.variables, ctx.statementStacks.Pop());
+            VisitChildren(templateNode, ctx, template);
 
-            retn.buildExpression = Expression.Lambda<Func<UIElement, TemplateScope2, CompiledTemplate, UIElement>>(block, ctx.rootParam, ctx.scopeParam, ctx.templateParam);
+            ctx.AddStatement(retnVal);
 
-            //todo  release context
+            Expression<SlotUsageTemplate> lambda = Expression.Lambda<SlotUsageTemplate>(
+                ctx.Finalize(typeof(UIElement)),
+                appParam,
+                bindingNodeParam,
+                parentParam,
+                lexicalScopeParam
+            );
 
-            application.templateCache.Add(retn);
-
-            LogCode(retn.buildExpression);
-            // return <Element templateFn="new TemplateFn(scope.root, templateFn, contextTree?)"/>
-            return null;
+            LogCode("SlotUsage: " + templateNode.slotName, lambda);
+            return application.AddSlotUsageTemplate(lambda);
         }
 
+        // todo -- process attributes! need to save them on SlotUsage?
+        private Expression CompileSlotUsage(TemplateNode templateNode, CompilationContext parentCtx, CompiledTemplate template) {
+            int slotTemplateId = CompileSlot(templateNode, parentCtx, template);
+
+            return Expression.New(s_SlotUsage_Ctor,
+                Expression.Constant(templateNode.slotName),
+                Expression.Constant(slotTemplateId),
+                Expression.New(s_LexicalScope_Ctor,
+                    parentCtx.rootParam,
+                    Expression.Default(typeof(CompiledTemplate)) // todo -- need to reference the compiled template to get data for styles & bindings
+                )
+            );
+        }
+
+        private void CompileToStoredSlot(TemplateNode templateNode, CompilationContext parentCtx, CompiledTemplate template) {
+            // traverse to find slot definitions
+            // if has slot definitions, emit StoreTemplate(new string[] { slotIds }, slotName, templateId, root, template);
+            // todo -- attributes? probably part of the template itself, just need to store context
+            // element.StoreTemplate(templateNode.slotName, templateId, new LexicalScope(root, template));
+            // templates can only exist at the root level (or better maybe outside in a <Templates> tag
+            // need to store incoming template scope, or at minimum the slotInputs on it if there are any
+            // best to gather a list of templates to store and do them all at once, emit a single call to element.StoreTemplates(slotInputs, root (which is always == this), compiledTemplate (which should maybe be made available on element) new [] { templatesToStore })
+            
+            // element.StoreTemplates(compiledTemplate, scope.inputSlots.ToArray(), new int[] { new StoredTemplate("TemplateName1", templateFnId1), new StoredTemplate("TemplateName2", templateFnId2) });
+            
+            // this method should return which input slots it requires so they can be saved.
+            // do a gather phase, then output data as code.
+            
+        }
+        
         private ParameterExpression VisitSlotDefinition(TemplateNode templateNode, CompilationContext ctx, CompiledTemplate template) {
             ProcessedType processedType = templateNode.processedType;
             Type type = processedType.rawType;
@@ -331,100 +335,39 @@ namespace UIForia.Compilers {
                 ptr = ptr.parent;
             }
 
-            ParameterExpression nodeExpr = ctx.GetTargetElementVariable();
-            bool hasBindings;
-
             if (slotData.slotType == SlotType.Template) {
-                return CompileToReusableTemplate(templateNode, ctx, template);
+                CompileToStoredSlot(templateNode, ctx, template);
+                return null;
             }
+            
+            ParameterExpression nodeExpr = ctx.ElementExpr;
 
-            Expression slotUsage = Expression.Field(ctx.scopeParam, s_ScopeInputSlotField);
-            Expression slotOverrides = Expression.Field(slotUsage, s_LightList_Element_Array);
+            bool hasBindings = false;
 
-            int slotId = template.AddSlotData(slotData);
+            // todo process attributes etc
 
-            Expression slotsNotNull = Expression.NotEqual(slotUsage, Expression.Constant(null));
+            template.AddSlotData(slotData);
 
-            Expression hasSlot = Expression.NotEqual(
-                Expression.ArrayAccess(slotOverrides, Expression.Constant(slotId)), Expression.Constant(null)
+            int slotTemplateId = CompileSlot(templateNode, ctx, template);
+
+            ctx.AddStatement(
+                Expression.Assign(
+                    ctx.ElementExpr,
+                    Expression.Call(ctx.applicationExpr, s_Application_CreateSlot,
+                        Expression.Field(ctx.templateScope, s_TemplateScope_SlotInputList),
+                        Expression.Constant(templateNode.slotName),
+                        Expression.Default(typeof(LinqBindingNode)), // todo -- linq node!
+                        ctx.ParentExpr,
+                        ctx.rootParam,
+                        ctx.templateData,
+                        Expression.Constant(slotTemplateId)
+                    )
+                )
             );
-
-            Expression condition = Expression.Call(ctx.scopeParam, s_Scope_HasMatchingSlot, Expression.Constant(templateNode.slotName));
-
-            // use default template block
-            ctx.PushBlock();
-            {
-                ctx.AddStatement(
-                    Expression.Assign(nodeExpr, Expression.Call(ctx.applicationExpr, s_CreateFromPool, Expression.Constant(typeof(UISlotContent)), ctx.GetParentTargetElementVariable(), Expression.Constant(templateNode.children.size)))
-                );
-
-                ProcessAttributes(template, null, templateNode.attributes, ctx, out hasBindings);
-
-                if (templateNode.children != null && templateNode.children.Count > 0) {
-                    ctx.PushScope();
-                    VisitChildren(template, templateNode, ctx);
-                    ctx.PopScope();
-                }
-            }
-
-            // use input template block
-            ctx.PushBlock();
-            {
-                // todo -- hook up binding node 
-                ctx.AddStatement(Expression.Assign(nodeExpr, Expression.Call(ctx.scopeParam, s_Scope_FindMatchingSlot, Expression.Constant(slotData.tagName))));
-                ctx.AddStatement(Expression.Assign(nodeExpr, Expression.ArrayAccess(slotOverrides, Expression.Constant(slotId))));
-                ctx.AddStatement(Expression.Assign(Expression.Field(nodeExpr, s_Element_Parent), ctx.GetParentTargetElementVariable()));
-            }
-
-            ctx.AddStatement(Expression.IfThenElse(condition, ctx.PopBlock(), ctx.PopBlock()));
 
             if (hasBindings) {
                 ctx.bindingNodeStack.Pop();
             }
-
-            return nodeExpr;
-        }
-
-        private ParameterExpression VisitSlotContent(TemplateNode templateNode, in CompilationContext ctx, CompiledTemplate template) {
-            // replace default w/ content 
-            // push into scope.inputSlot list at id where id == matching target template slot id
-            ParameterExpression nodeExpr = ctx.GetTargetElementVariable();
-
-            if (ctx.expansionStack.Count == 0) {
-                throw new TemplateParseException(templateNode.astRoot.fileName, "<Slot> elements can only be used as children of elements defining a matching <DefineSlot> element. Did you mean to use <DefineSlot> instead?");
-            }
-
-            CompiledTemplate target = ctx.expansionStack.PeekUnchecked();
-
-            if (!target.TryGetSlotData(templateNode.slotName, out SlotDefinition slotDefinition)) {
-                throw new TemplateParseException(templateNode.astRoot.fileName, $"Slot with the name {templateNode.slotName} was not defined on template for type {target.elementType.rawType}. {target.GetValidSlotNameMessage()}");
-            }
-
-            if (slotDefinition.slotType == SlotType.Template) {
-                CompileToReusableTemplate(templateNode, ctx, template);
-                // slotUsageList.Add("slotId", ctx.rootParam, templateId)
-            }
-
-            ctx.AddStatement(
-                Expression.Assign(nodeExpr, Expression.Call(ctx.applicationExpr, s_CreateFromPool, Expression.Constant(typeof(UISlotContent)), ctx.GetParentTargetElementVariable(), Expression.Constant(templateNode.children.size)))
-            );
-
-            if (templateNode.children != null && templateNode.children.Count > 0) {
-                ctx.PushScope();
-                VisitChildren(template, templateNode, ctx);
-                ctx.PopScope();
-            }
-
-            Expression slotUsage = ctx.GetParentSlotUsageVariable();
-//            Expression slotInputArray = Expression.Field(slotUsage, s_LightList_Element_Array);
-
-            Expression newSlotUsage = Expression.New(s_SlotUsage_Ctor, Expression.Constant(templateNode.slotName), nodeExpr, Expression.Default(typeof(CompiledTemplate)));
-            ctx.AddStatement(Expression.Call(slotUsage, s_StructList_SlotUsage_AddUnchecked, newSlotUsage));
-//            ctx.AddStatement(Expression.Assign(
-//                    Expression.ArrayAccess(slotInputArray, Expression.Constant(ctx.expansionStack.Peek().GetSlotId(templateNode.slotName))),
-//                    nodeExpr
-//                )
-//            );
 
             return nodeExpr;
         }
@@ -436,17 +379,15 @@ namespace UIForia.Compilers {
                 return VisitSlotDefinition(templateNode, ctx, template);
             }
 
-            if (processedType.rawType == typeof(UISlotContent)) {
-                return VisitSlotContent(templateNode, ctx, template);
-            }
-
             Type type = processedType.rawType;
             ctx.elementType = type;
 
-            ParameterExpression nodeExpr = ctx.GetTargetElementVariable();
+            ParameterExpression nodeExpr = ctx.ElementExpr;
+
             bool hasBindings;
+
             ctx.AddStatement(
-                Expression.Assign(nodeExpr, Expression.Call(ctx.applicationExpr, s_CreateFromPool, Expression.Constant(type), ctx.GetParentTargetElementVariable(), Expression.Constant(templateNode.children.size)))
+                Expression.Assign(nodeExpr, Expression.Call(ctx.applicationExpr, s_CreateFromPool, Expression.Constant(type), ctx.ParentExpr, Expression.Constant(templateNode.children.size)))
             );
 
             if (typeof(UITextElement).IsAssignableFrom(type)) {
@@ -464,13 +405,10 @@ namespace UIForia.Compilers {
             }
 
             if (processedType.requiresTemplateExpansion) {
-                // create all bindings
-
                 CompiledTemplate compiled = GetCompiledTemplate(processedType);
 
-                ctx.expansionStack.Push(compiled);
-
-                Expression bindingNode = ctx.bindingNodeStack.PeekUnchecked();
+                // todo -- binding
+                Expression bindingNode = Expression.Default(typeof(LinqBindingNode));
 
                 // merge bindings, outer ones win, take the base bindings and replace duplicates with outer ones
                 StructList<AttributeDefinition2> attributes = MergeAttributes(compiled.attributes, templateNode.attributes);
@@ -478,17 +416,23 @@ namespace UIForia.Compilers {
                 ProcessAttributes(template, compiled, attributes, ctx, out hasBindings);
 
                 Expression templateScopeCtor;
-                if (templateNode.children != null && templateNode.children.Count > 0) {
-                    ParameterExpression slotUsage = ctx.GetSlotUsageVariable();
 
-                    ctx.AddStatement(Expression.Assign(slotUsage, Expression.Call(null, s_LightList_Element_GetMinSize, Expression.Constant(compiled.slotDefinitions.Count))));
+                // All children are slots, children added to the element that are not <Slot> elements themselves are wrapped in a <Slot:Children> implicitly.
+
+                if (templateNode.children != null && templateNode.children.Count > 0) {
+                    Expression slotUsage = ctx.GetSlotUsageArray(templateNode.children.size);
 
                     ctx.PushScope();
 
                     LightList<string> slotList = LightList<string>.GetMinSize(templateNode.children.size);
 
                     for (int i = 0; i < templateNode.children.size; i++) {
-                        VisitSlotContent(templateNode.children[i], ctx, template);
+                        ctx.AddStatement(
+                            Expression.Assign(
+                                Expression.ArrayAccess(Expression.Field(slotUsage, s_StructList_SlotUsage_Array), Expression.Constant(i)),
+                                // slot usage[i] = new SlotUsage("slotName, templateId, new LexicalScope(root, template));
+                                CompileSlotUsage(templateNode.children[i], ctx, template))
+                        );
                         slotList.Add(templateNode.children[i].slotName);
                     }
 
@@ -498,27 +442,24 @@ namespace UIForia.Compilers {
 
                     ctx.PopScope();
 
+                    // templateScope = new TemplateScope2(application, bindingNode, slotInput);
                     templateScopeCtor = Expression.New(s_TemplateScope_Ctor, ctx.applicationExpr, bindingNode, slotUsage);
+                    // scope.application.HydrateTemplate(templateId, targetElement, templateScope)
                     ctx.AddStatement(Expression.Call(ctx.applicationExpr, s_Application_HydrateTemplate, Expression.Constant(compiled.templateId), nodeExpr, templateScopeCtor));
-                    ctx.AddStatement(Expression.Call(null, s_LightList_Element_Release, slotUsage));
+
+                    ctx.ReleaseSlotUsage();
                 }
                 else {
-                    templateScopeCtor = Expression.New(s_TemplateScope_Ctor, ctx.applicationExpr, bindingNode, Expression.Default(typeof(LightList<UIElement>)));
+                    // templateScope = new TemplateScope2(application, bindingNode, null);
+                    templateScopeCtor = Expression.New(s_TemplateScope_Ctor, ctx.applicationExpr, bindingNode, Expression.Default(typeof(StructList<SlotUsage>)));
+                    // scope.application.HydrateTemplate(templateId, targetElement, templateScope)
                     ctx.AddStatement(Expression.Call(ctx.applicationExpr, s_Application_HydrateTemplate, Expression.Constant(compiled.templateId), nodeExpr, templateScopeCtor));
                 }
-
-                ctx.expansionStack.Pop();
             }
             else {
                 ProcessAttributes(template, null, templateNode.attributes, ctx, out hasBindings);
-
-                if (templateNode.children != null && templateNode.children.Count > 0) {
-                    ctx.PushScope();
-                    VisitChildren(template, templateNode, ctx);
-                    ctx.PopScope();
-                }
+                VisitChildren(templateNode, ctx, template);
             }
-
 
             if (hasBindings) {
                 ctx.bindingNodeStack.Pop();
@@ -527,6 +468,7 @@ namespace UIForia.Compilers {
             return nodeExpr;
         }
 
+        private static readonly FieldInfo s_StructList_SlotUsage_Array = typeof(StructList<SlotUsage>).GetField(nameof(StructList<SlotUsage>.array));
 
         private void ProcessAttributes(CompiledTemplate outerTemplate, CompiledTemplate innerTemplate, StructList<AttributeDefinition2> attributes, in CompilationContext ctx, out bool hasBindings) {
             int attrCount = attributes.size;
@@ -584,7 +526,7 @@ namespace UIForia.Compilers {
                 ref AttributeDefinition2 attr = ref attributeDefinitions[i];
 
                 // assume not const & shared for now
-                LambdaExpression bindingExpression = propertyCompiler.BuildLambda(ctx.rootType, ctx.elementType, ctx.contextTree, attr);
+                // LambdaExpression bindingExpression = propertyCompiler.BuildLambda(ctx.rootType, ctx.elementType, ctx.contextTree, attr);
 
                 LinqBinding binding = new LinqPropertyBinding();
 
@@ -613,14 +555,14 @@ namespace UIForia.Compilers {
             hasBindings = true;
 
             if (!hasNonSharedBindings) {
-                ParameterExpression bindingNode = ctx.GetBindingNodeVariable();
+                ParameterExpression bindingNode = ctx.ElementExpr;
 
                 // bindingNode = new LinqBindingNode(root, element, ctx.contextStack.Peek());
                 ctx.AddStatement(Expression.Assign(bindingNode,
                     Expression.Call(null, s_BindingNodePool_Get,
-                        ctx.scopeParam,
+                        ctx.templateScope,
                         ctx.rootParam,
-                        ctx.GetTargetElementVariable(),
+                        ctx.ElementExpr,
                         Expression.Default(typeof(TemplateContext)),
                         Expression.Default(typeof(LinqBinding)),
                         Expression.Default(typeof(LightList<LinqBinding>.ListSpan)
@@ -628,14 +570,14 @@ namespace UIForia.Compilers {
                     )
                 ));
                 // bindingNode.bindings = sharedBindings.CreateSpan(bindingStart, sharedBindings.Count);
-                ctx.AddStatement(Expression.Assign(
-                    Expression.Field(bindingNode, s_BindingNode_Bindings),
-                    Expression.Call(ctx.sharedBindingsExpr, s_LinqBindingList_CreateListSpan, Expression.Constant(startBindingIndex), Expression.Constant(endBindingIndex))
-                ));
-
-                ctx.AddStatement(Expression.Assign(
-                    Expression.Field(ctx.GetTargetElementVariable(), s_ElementBindingNode), bindingNode)
-                );
+//                ctx.AddStatement(Expression.Assign(
+//                    Expression.Field(bindingNode, s_BindingNode_Bindings),
+//                    Expression.Call(ctx.sharedBindingsExpr, s_LinqBindingList_CreateListSpan, Expression.Constant(startBindingIndex), Expression.Constant(endBindingIndex))
+//                ));
+//
+//                ctx.AddStatement(Expression.Assign(
+//                    Expression.Field(ctx.GetTargetElementVariable(), s_ElementBindingNode), bindingNode)
+//                );
 
                 Expression lastBindingParent = ctx.bindingNodeStack.Peek();
 
@@ -666,7 +608,7 @@ namespace UIForia.Compilers {
                     cnt++;
                 }
                 else {
-                    LinqBinding binding = styleCompiler.Compile(ctx.rootType, ctx.elementType, ctx.contextTree, attr);
+                    // LinqBinding binding = styleCompiler.Compile(ctx.rootType, ctx.elementType, ctx.contextTree, attr);
 
 
                     // to support root level bindings we need 2 binding nodes or a switch
@@ -725,7 +667,7 @@ namespace UIForia.Compilers {
 
             ctx.AddStatement(
                 Expression.Assign(
-                    Expression.Field(ctx.GetTargetElementVariable(), s_ElementAttributeList),
+                    Expression.Field(ctx.ElementExpr, s_ElementAttributeList),
                     attributeList
                 )
             );

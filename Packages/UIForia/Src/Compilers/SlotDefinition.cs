@@ -10,19 +10,6 @@ namespace UIForia.Compilers {
 
     }
 
-    public struct SlotUsage {
-
-        public string slotName;
-        public UIElement element;
-        public CompiledTemplate template;
-
-        public SlotUsage(string slotName, UIElement element, CompiledTemplate template) {
-            this.slotName = slotName;
-            this.element = element;
-            this.template = template;
-        }
-
-    }
     
     public struct SlotDefinition {
 

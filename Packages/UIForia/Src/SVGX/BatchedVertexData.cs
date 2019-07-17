@@ -672,10 +672,10 @@ namespace SVGX {
                     uv2List.Add(new Vector4(0, 0, 0, 0));
                     uv2List.Add(new Vector4(0, 0, 0, 0));
 
-                    uv3List.Add(new Vector4());
-                    uv3List.Add(new Vector4());
-                    uv3List.Add(new Vector4());
-                    uv3List.Add(new Vector4());
+                    uv3List.Add(new Vector4(opacity, 0, 0, 0));
+                    uv3List.Add(new Vector4(opacity, 0, 0, 0));
+                    uv3List.Add(new Vector4(opacity, 0, 0, 0));
+                    uv3List.Add(new Vector4(opacity, 0, 0, 0));
 
                     uv4List.Add(scissorVector);
                     uv4List.Add(scissorVector);
@@ -737,10 +737,10 @@ namespace SVGX {
                     uv2List.Add(new Vector4(borderRadiusXY.x, borderRadiusXY.y, borderRadiusZW.x, borderRadiusZW.y));
                     uv2List.Add(new Vector4(borderRadiusXY.x, borderRadiusXY.y, borderRadiusZW.x, borderRadiusZW.y));
 
-                    uv3List.Add(new Vector4());
-                    uv3List.Add(new Vector4());
-                    uv3List.Add(new Vector4());
-                    uv3List.Add(new Vector4());
+                    uv3List.Add(new Vector4(opacity, 0, 0, 0));
+                    uv3List.Add(new Vector4(opacity, 0, 0, 0));
+                    uv3List.Add(new Vector4(opacity, 0, 0, 0));
+                    uv3List.Add(new Vector4(opacity, 0, 0, 0));
 
                     uv4List.Add(scissorVector);
                     uv4List.Add(scissorVector);

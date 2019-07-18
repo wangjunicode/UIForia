@@ -320,7 +320,7 @@ namespace UIForia.Systems {
                     m = pivotMat * m * pivotMat.Inverse();
                 }
 
-                // m = parentMatrix * m;
+                // m = parentMatrix * m; might be backwards :/
                 m = new SVGXMatrix(
                     m.m0 * parentMatrix.m0 + m.m2 * parentMatrix.m1,
                     m.m1 * parentMatrix.m0 + m.m3 * parentMatrix.m1,

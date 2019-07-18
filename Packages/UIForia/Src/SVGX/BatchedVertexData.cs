@@ -444,10 +444,6 @@ namespace SVGX {
             int renderData = BitUtil.SetHighLowBits((int) renderShape.shape.type, RenderTypeText);
 
             TextInfo textInfo = renderShape.textInfo;
-//   UIForia doesn't want this to do layout but raw system probably does
-//                    if (textInfo.layoutBeforeRender && textInfo.LayoutDirty) {
-//                        textInfo.Layout(Vector2.zero);
-//                    }
 
             CharInfo[] charInfos = textInfo.charInfoList.Array;
             int charCount = textInfo.CharCount;
@@ -483,7 +479,6 @@ namespace SVGX {
             Vector4[] uv0 = uv0List.array;
             Vector4[] uv1 = uv1List.array;
             Vector4[] uv2 = uv2List.array;
-            Vector4[] uv3 = uv3List.array;
             Vector4[] uv4 = uv4List.array;
             Color[] colors = colorList.array;
             int[] triangles = trianglesList.array;
@@ -498,15 +493,6 @@ namespace SVGX {
 
                 Vector2 topLeft = charInfo.layoutTopLeft;
                 Vector2 bottomRight = charInfo.layoutBottomRight;
-//                        topLeft.x = topLeft.x - 2.5f;
-//                        bottomRight.x = bottomRight.x + 2.5f;
-//                        topLeft.y = topLeft.y - 2.5f;
-//                        bottomRight.y = bottomRight.y + 2.5f;
-
-//                        positionList.Add(new Vector3(p0.x + topLeft.x, -p0.y + -bottomRight.y, z)); // Bottom Left
-//                        positionList.Add(new Vector3(p0.x + topLeft.x, -p0.y + -topLeft.y, z)); // Top Left
-//                        positionList.Add(new Vector3(p0.x + bottomRight.x, -p0.y + -topLeft.y, z)); // Top Right
-//                        positionList.Add(new Vector3(p0.x + bottomRight.x, -p0.y + -bottomRight.y, z)); // Bottom Right
 
                 ref Vector3 position = ref positions[vertIdx + 0];
                 position.x = p0.x + topLeft.x;
@@ -528,10 +514,10 @@ namespace SVGX {
                 position.y = -p0.y + -bottomRight.y;
                 position.z = z;
 
-                float x = charInfo.uv0.x; // - (5 / 1024f);
-                float y = charInfo.uv0.y; // - (5 / 1024f);
-                float x1 = charInfo.uv1.x; // + (5 / 1024f);
-                float y1 = charInfo.uv1.y; // + (5 / 1024f);
+                float x = charInfo.uv0.x; 
+                float y = charInfo.uv0.y;
+                float x1 = charInfo.uv1.x;
+                float y1 = charInfo.uv1.y;
 
                 ref Vector4 uvVec = ref uv0[vertIdx + 0];
                 uvVec.x = x;
@@ -576,26 +562,13 @@ namespace SVGX {
                 colors[vertIdx + 1] = textColor;
                 colors[vertIdx + 2] = textColor;
                 colors[vertIdx + 3] = textColor;
-//
-//                        triangles[tidx + 0] = vertIdx + 0;
-//                        triangles[tidx + 1] = vertIdx + 1;
-//                        triangles[tidx + 2] = vertIdx + 2;
-//                        triangles[tidx + 3] = vertIdx + 2;
-//                        triangles[tidx + 4] = vertIdx + 3;
-//                        triangles[tidx + 5] = vertIdx + 0;
-//                        
+
                 triangles[tidx + 0] = vertIdx + 0;
                 triangles[tidx + 1] = vertIdx + 1;
                 triangles[tidx + 2] = vertIdx + 2;
                 triangles[tidx + 3] = vertIdx + 2;
                 triangles[tidx + 4] = vertIdx + 3;
                 triangles[tidx + 5] = vertIdx + 0;
-//                        trianglesList.AddUnsafe(vertIdx + 0);
-//                        trianglesList.AddUnsafe(vertIdx + 1);
-//                        trianglesList.AddUnsafe(vertIdx + 2);
-//                        trianglesList.AddUnsafe(vertIdx + 2);
-//                        trianglesList.AddUnsafe(vertIdx + 3);
-//                        trianglesList.AddUnsafe(vertIdx + 0);
 
                 vertIdx += 4;
                 tidx += 6;

@@ -378,7 +378,7 @@ namespace UIForia.Util {
 
         public void EnsureAdditionalCapacity(int capacity) {
             if (array.Length < size + capacity) {
-                System.Array.Resize(ref array, capacity);
+                System.Array.Resize(ref array, size + capacity);
             }
         }
 

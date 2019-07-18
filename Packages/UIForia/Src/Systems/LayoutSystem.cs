@@ -416,6 +416,11 @@ namespace UIForia.Systems {
 
         public void OnViewRemoved(UIView view) {
             m_LayoutBoxMap.GetOrDefault(view.rootElement.id)?.Release();
+            for (int i = 0; i < m_TextLayoutBoxes.size; i++) {
+                if (m_TextLayoutBoxes[i].element.View == view) {
+                    m_TextLayoutBoxes.RemoveAt(i--);
+                }
+            }
         }
 
         private void HandleStylePropertyChanged(UIElement element, StructList<StyleProperty> properties) {
@@ -532,6 +537,9 @@ namespace UIForia.Systems {
                 UIElement current = stack.PopUnchecked();
 
                 if (m_LayoutBoxMap.Remove(current.id, out LayoutBox box)) {
+                    if (box is TextLayoutBox textLayoutBox) {
+                        m_TextLayoutBoxes.Remove(textLayoutBox);
+                    }
                     box.Release();
                 }
 

@@ -96,7 +96,7 @@ namespace UIForia.Util {
 
         public void Add(T item) {
             if (size + 1 > array.Length) {
-                System.Array.Resize(ref array, (int)(size * 1.4f));
+                System.Array.Resize(ref array, (size + 1) * 2);
             }
 
             array[size] = item;
@@ -214,7 +214,7 @@ namespace UIForia.Util {
 
         public void Insert(int index, T item) {
             if (size + 1 >= array.Length) {
-                System.Array.Resize(ref array, (int)(size * 1.4f));
+                System.Array.Resize(ref array, (size + 1) * 2);
             }
 
             size++;
@@ -372,13 +372,13 @@ namespace UIForia.Util {
 
         public void EnsureCapacity(int capacity) {
             if (array.Length < capacity) {
-                System.Array.Resize(ref array, (int)(size * 1.4f));
+                System.Array.Resize(ref array, capacity);
             }
         }
 
         public void EnsureAdditionalCapacity(int capacity) {
             if (array.Length < size + capacity) {
-                System.Array.Resize(ref array, (int)(size * 1.4f));
+                System.Array.Resize(ref array, capacity);
             }
         }
 

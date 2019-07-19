@@ -519,7 +519,7 @@ namespace UIForia.Layout.LayoutTypes {
                 LayoutBox child = children[i];
                 GridItem rowItem = placement.rowItem;
 
-                GridAxisAlignment alignment = default; //child.style.GridItemRowSelfAlignment;
+                GridAxisAlignment alignment = child.style.GridItemRowSelfAlignment;
                 if (alignment == GridAxisAlignment.Unset) {
                     alignment = rowAlignment;
                 }

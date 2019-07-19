@@ -389,6 +389,8 @@ namespace UIForia.Layout.LayoutTypes {
                 m_RowTracks[intrinsics[i].Item1] = track;
             }
 
+            remaining -= style.GridLayoutRowGap * (m_RowTracks.Count - 1);
+            
             if ((int) remaining > 0 && flexes.Count > 0) {
                 float pieceSize = remaining / flexPieces;
                 for (int i = 0; i < flexes.Count; i++) {

@@ -464,7 +464,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            return new StyleProperty(propertyId, IntUtil.UnsetValue, IntUtil.UnsetValue, FloatUtil.UnsetValue, null);
+            return DefaultStyleValues_Generated.GetPropertyValue(propertyId);
+//            return new StyleProperty(propertyId, IntUtil.UnsetValue, IntUtil.UnsetValue, FloatUtil.UnsetValue, null);
         }
 
         // I think this won't return normal or inherited styles right now, should it?

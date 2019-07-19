@@ -440,7 +440,9 @@ namespace SVGX {
         }
 
         internal void CreateTextFillVertices(Vector2[] points, int start, in SVGXRenderShape renderShape, in SVGXStyle style, in Vector4 scissorVector, in SVGXMatrix matrix) {
+            
             Vector2 p0 = matrix.Transform(points[start]);
+            
             int renderData = BitUtil.SetHighLowBits((int) renderShape.shape.type, RenderTypeText);
 
             TextInfo textInfo = renderShape.textInfo;
@@ -491,6 +493,7 @@ namespace SVGX {
                 ref CharInfo charInfo = ref charInfos[i];
                 if (charInfo.character == ' ') continue;
 
+                // todo -- text is not currently respecting transform scale, wait for vertigo to implement this for perf reasons
                 Vector2 topLeft = charInfo.layoutTopLeft;
                 Vector2 bottomRight = charInfo.layoutBottomRight;
 
@@ -498,7 +501,7 @@ namespace SVGX {
                 position.x = p0.x + topLeft.x;
                 position.y = -p0.y + -bottomRight.y;
                 position.z = z;
-
+            
                 position = ref positions[vertIdx + 1];
                 position.x = p0.x + topLeft.x;
                 position.y = -p0.y + -topLeft.y;

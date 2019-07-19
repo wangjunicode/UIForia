@@ -303,8 +303,13 @@ namespace UIForia.Systems {
                 localScale.x = box.transformScaleX;
                 localScale.y = box.transformScaleY;
 
-                Vector2 pivot = box.pivot;
+                Vector2 pivot = default;
                 SVGXMatrix m;
+                
+                if (box.transformPivotX != 0 && box.transformPivotY != 0) {
+                    pivot.x = box.ResolveFixedWidth(box.transformPivotX);
+                    pivot.y = box.ResolveFixedHeight(box.transformPivotY);
+                }
 
                 if (box.transformRotation != 0) {
                     m = SVGXMatrix.TRS(localPosition, layoutResult.rotation, layoutResult.scale);
@@ -320,16 +325,15 @@ namespace UIForia.Systems {
                     m = pivotMat * m * pivotMat.Inverse();
                 }
 
-                // m = parentMatrix * m; might be backwards :/
                 m = new SVGXMatrix(
-                    m.m0 * parentMatrix.m0 + m.m2 * parentMatrix.m1,
-                    m.m1 * parentMatrix.m0 + m.m3 * parentMatrix.m1,
-                    m.m0 * parentMatrix.m2 + m.m2 * parentMatrix.m3,
-                    m.m1 * parentMatrix.m2 + m.m3 * parentMatrix.m3,
-                    m.m0 * parentMatrix.m4 + m.m2 * parentMatrix.m5 + m.m4,
-                    m.m1 * parentMatrix.m4 + m.m3 * parentMatrix.m5 + m.m5
+                    parentMatrix.m0 * m.m0 + parentMatrix.m2 * m.m1,
+                    parentMatrix.m1 * m.m0 + parentMatrix.m3 * m.m1,
+                    parentMatrix.m0 * m.m2 + parentMatrix.m2 * m.m3,
+                    parentMatrix.m1 * m.m2 + parentMatrix.m3 * m.m3,
+                    parentMatrix.m0 * m.m4 + parentMatrix.m2 * m.m5 + parentMatrix.m4,
+                    parentMatrix.m1 * m.m4 + parentMatrix.m3 * m.m5 + parentMatrix.m5
                 );
-                
+
                 layoutResult.matrix = m;
 
                 layoutResult.overflowSize.width = box.xMax;
@@ -350,15 +354,15 @@ namespace UIForia.Systems {
                 layoutResult.rotation = box.transformRotation;
                 layoutResult.pivot = pivot;
 
-                layoutResult.borderRadius.topLeft = box.resolvedBorderRadiusTopLeft; 
-                layoutResult.borderRadius.topRight = box.resolvedBorderRadiusTopRight; 
-                layoutResult.borderRadius.bottomRight = box.resolvedBorderRadiusBottomRight; 
+                layoutResult.borderRadius.topLeft = box.resolvedBorderRadiusTopLeft;
+                layoutResult.borderRadius.topRight = box.resolvedBorderRadiusTopRight;
+                layoutResult.borderRadius.bottomRight = box.resolvedBorderRadiusBottomRight;
                 layoutResult.borderRadius.bottomLeft = box.resolvedBorderRadiusBottomLeft;
-                
+
                 layoutResult.border.top = box.resolvedBorderTop;
                 layoutResult.border.right = box.resolvedBorderRight;
                 layoutResult.border.bottom = box.resolvedBorderBottom;
-                layoutResult.border.left =  box.resolvedBorderLeft;
+                layoutResult.border.left = box.resolvedBorderLeft;
 
                 layoutResult.padding.top = box.resolvedPaddingTop;
                 layoutResult.padding.right = box.resolvedPaddingRight;

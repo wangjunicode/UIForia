@@ -346,7 +346,7 @@ namespace UIForia.Layout.LayoutTypes {
         }
 
         [DebuggerStepThrough]
-        protected float ResolveFixedWidth(UIFixedLength width) {
+        public float ResolveFixedWidth(UIFixedLength width) {
             switch (width.unit) {
                 case UIFixedUnit.Pixel:
                     return width.value * view.ScaleFactor;
@@ -372,7 +372,7 @@ namespace UIForia.Layout.LayoutTypes {
         }
 
         [DebuggerStepThrough]
-        protected float ResolveFixedHeight(UIFixedLength height) {
+        public float ResolveFixedHeight(UIFixedLength height) {
             switch (height.unit) {
                 case UIFixedUnit.Pixel:
                     return height.value * view.ScaleFactor;

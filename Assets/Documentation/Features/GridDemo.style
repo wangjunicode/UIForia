@@ -52,7 +52,16 @@ style cell-start {
 
 style cell-end {
      GridItemColSelfAlignment = End;
-     GridItemRowSelfAlignment = End;
+     GridItemRowSelfAlignment = Center;
+     [hover] {
+        TransformScale = 1.2;
+        TransformPivot = 0.5;
+     }
+}
+
+style color-me {
+    PreferredSize = 40px;
+    BackgroundColor = white;
 }
 
 style cell-center {

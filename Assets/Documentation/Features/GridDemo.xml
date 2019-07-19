@@ -46,6 +46,7 @@
 
             <Div style="cell cell-end">
                 I align at the end
+                <Group style="color-me"/>
             </Div>
 
             <Div style="cell m10 size100 cell-center">I am centered</Div>

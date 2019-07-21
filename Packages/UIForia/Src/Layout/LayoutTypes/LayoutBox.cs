@@ -592,6 +592,7 @@ namespace UIForia.Layout.LayoutTypes {
 
                 case UIMeasurementUnit.ParentContentArea:
                     if (parent == null) return view.Viewport.width;
+                    
                     if (!IsIgnored && parent.prefWidth.IsContentBased) {
                         // todo there are cases where this is not true
                         // if we hit the paradox -> size = own content size

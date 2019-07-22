@@ -1,5 +1,7 @@
 namespace UIForia.Layout {
-    public class UnitConstants {
+
+    public sealed class UnitConstants {
+
         public const int Unset = 0;
         public const int ActualWidth = 1 << 0;
         public const int ActualHeight = 1 << 1;
@@ -31,5 +33,8 @@ namespace UIForia.Layout {
         public const int ScreenHeight = 1 << 27;
         public const int ViewportWidth = 1 << 28;
         public const int ViewportHeight = 1 << 29;
+        public const int FitContent = 1 << 30;
+
     }
+
 }

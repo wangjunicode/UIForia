@@ -514,6 +514,7 @@ namespace UIForia.Elements {
         }
 
         private static readonly Dictionary<Type, UIElementTypeData> s_TypeDataMap = new Dictionary<Type, UIElementTypeData>();
+        public FastLayoutBox layoutBox;
 
         internal struct UIElementTypeData {
 

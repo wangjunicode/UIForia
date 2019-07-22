@@ -138,10 +138,6 @@ namespace UIForia.Layout.LayoutTypes {
             }
         }
 
-//        public Vector2 Pivot => new Vector2(
-//            ResolveFixedWidth(transformPivotX),
-//            ResolveFixedHeight(transformPivotY)
-//        );
 
         public float GetMarginTop(float width) {
             return ResolveMarginVertical(width, marginTop);
@@ -226,7 +222,6 @@ namespace UIForia.Layout.LayoutTypes {
             overflowX = style.OverflowX;
             overflowY = style.OverflowY;
         }
-
 
         internal void CopyValues(LayoutBox other) {
             paddingLeft = other.paddingLeft;
@@ -604,8 +599,7 @@ namespace UIForia.Layout.LayoutTypes {
 
                 case UIMeasurementUnit.Em:
                     return Math.Max(0, style.GetResolvedFontSize() * widthMeasurement.value);
-
-
+                
                 case UIMeasurementUnit.AnchorWidth:
                     anchorTarget = style.AnchorTarget;
                     if (parent == null) return view.Viewport.width;

@@ -70,24 +70,6 @@ namespace UIForia.Systems {
             }
         }
 
-        /*
-         * for each view
-         *     gather list of elements to consider for layout
-         *     
-         *     if element children exceed width bounds
-         *     if overflow y is scroll & scroll layout is push content
-         *     run scrollbar vertical layout
-         *     run layout again w/ width - scroll bar width
-         *     set clip rect x - width to 0 -> scroll bar x (or invert if scroll position inverted)
-         *
-         *     traverse to find things to layout
-         *     run those layouts
-         *     compute matrices
-         *     compute clip rects
-         *     update query grid
-         *     copy properites to layout result
-         */
-
         private void CollectLayoutBoxes(UIView view) {
             LightStack<UIElement> stack = LightStack<UIElement>.Get();
             UIElement rootElement = view.rootElement;
@@ -140,7 +122,6 @@ namespace UIForia.Systems {
             public int height;
 
         }
-
 
         public void RunLayout(UIView view) {
             m_VisibleBoxList.QuickClear();

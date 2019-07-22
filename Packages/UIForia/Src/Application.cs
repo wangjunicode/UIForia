@@ -520,6 +520,8 @@ namespace UIForia {
 
             m_StyleSystem.OnUpdate();
 
+            SetTraversalIndex();
+            
             m_LayoutSystem.OnUpdate();
 
             m_InputSystem.OnUpdate();
@@ -537,6 +539,42 @@ namespace UIForia {
             onUpdate?.Invoke();
 
             m_Views[0].SetSize(Screen.width, Screen.height);
+        }
+        
+        // todo -- optimize this and 
+        private void SetTraversalIndex() {
+            
+            LightStack<UIElement> stack = LightStack<UIElement>.Get();
+
+            for (int i = 0; i < m_Views.Count; i++) {
+                stack.Push(m_Views[i].rootElement);
+            }
+
+            int idx = 0;
+
+            while (stack.size > 0) {
+                UIElement currentElement = stack.array[--stack.size];
+
+                currentElement.traversalIndex = idx++;
+
+                UIElement[] childArray = currentElement.children.array;
+                int childCount = currentElement.children.size;
+
+                stack.EnsureAdditionalCapacity(childCount);
+                
+                for (int i = childCount - 1; i >= 0; i--) {
+                    
+                    // todo -- direct flag check
+                    if (childArray[i].isDisabled) {
+                        continue;
+                    }
+
+                    stack.array[stack.size++] = childArray[i];
+                    
+                }
+            }
+
+            LightStack<UIElement>.Release(ref stack);
         }
 
         /// <summary>

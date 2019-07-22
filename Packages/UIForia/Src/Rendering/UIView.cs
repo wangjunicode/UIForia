@@ -37,7 +37,7 @@ public class UIView {
     public Rect Viewport { get; set; }
     // this might want to be changed but so many test expect this that I dont' want to right now
 
-    public UIElement RootElement => rootElement.GetChild(0);
+    public UIElement RootElement => rootElement;
     public float ScaleFactor { get; set; } = 1f;
 
     internal Matrix4x4 matrix;

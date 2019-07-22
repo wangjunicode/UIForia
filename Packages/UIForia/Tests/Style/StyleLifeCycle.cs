@@ -29,11 +29,11 @@ namespace Style {
                 </Contents>
             </UITemplate>
             ";
-            MockApplication app = new MockApplication(typeof(FlexLayoutColTests.FlexColLayoutThing), template);
+            MockApplication app = new MockApplication(typeof(FlexLayoutRowTests.FlexRowLayoutThing), template);
             int callCount = 0;
             app.StyleSystem.onStylePropertyChanged += (element, list) => { callCount++; }; 
             app.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
-            FlexLayoutColTests.FlexColLayoutThing root = (FlexLayoutColTests.FlexColLayoutThing) app.RootElement;
+            FlexLayoutRowTests.FlexRowLayoutThing root = (FlexLayoutRowTests.FlexRowLayoutThing) app.RootElement;
             app.Update();
             Assert.AreEqual(0, callCount);
             Assert.AreEqual(100f, app.RootElement.FindById("child0").style.PreferredWidth.value);

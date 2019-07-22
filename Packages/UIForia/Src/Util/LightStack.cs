@@ -6,8 +6,8 @@ namespace UIForia.Util {
 
     public class LightStack<T> {
 
-        private T[] array;
-        private int size;
+        public T[] array;
+        public int size;
         private bool isPooled;
 
         public int Count => size;
@@ -91,6 +91,14 @@ namespace UIForia.Util {
             return retn;
         }
 
+        public void Release() {
+            Array.Clear(array, 0, size);
+            size = 0;
+            if (isPooled) return;
+            isPooled = true;
+            s_Pool.Add(this);
+        }
+        
         [DebuggerStepThrough]
         public static void Release(ref LightStack<T> toPool) {
             Array.Clear(toPool.array, 0, toPool.size);

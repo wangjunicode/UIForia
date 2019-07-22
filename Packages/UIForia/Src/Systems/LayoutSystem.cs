@@ -9,7 +9,6 @@ using UIForia.Layout.LayoutTypes;
 using UIForia.Rendering;
 using UIForia.Util;
 using UnityEngine;
-using RectExtensions = Vertigo.RectExtensions;
 
 namespace UIForia.Systems {
 
@@ -698,6 +697,7 @@ namespace UIForia.Systems {
             box.children.Clear();
             GetChildBoxes(box, boxes);
             box.children.AddRange(boxes);
+            
             for (int i = 0; i < boxes.Count; i++) {
                 boxes[i].parent = box;
             }

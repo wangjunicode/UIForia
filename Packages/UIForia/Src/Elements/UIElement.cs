@@ -515,6 +515,7 @@ namespace UIForia.Elements {
 
         private static readonly Dictionary<Type, UIElementTypeData> s_TypeDataMap = new Dictionary<Type, UIElementTypeData>();
         public FastLayoutBox layoutBox;
+        public int traversalIndex;
 
         internal struct UIElementTypeData {
 
@@ -523,6 +524,7 @@ namespace UIForia.Elements {
 
         }
 
+       
     }
 
 }

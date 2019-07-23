@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using SVGX;
 using UIForia.Elements;
 using UIForia.Layout;
 using UIForia.Rendering;
@@ -69,6 +70,8 @@ namespace UIForia.Systems {
         public Alignment targetAlignmentVertical;
 
         public UIElement element;
+        public FastLayoutSystem.LayoutOwner owner;
+        public SVGXMatrix localMatrix;
 
         protected FastLayoutBox(UIElement element) {
             this.element = element;
@@ -143,8 +146,47 @@ namespace UIForia.Systems {
             return 0;
         }
 
-        private Vector2 ApplyAlignment() {
-            Vector2 retn = default;
+        public Vector2 ApplyAlignment() {
+            Vector2 retn = allocatedPosition;
+
+            float horizontalBasis = 0;
+            
+            switch (targetAlignmentHorizontal.target) {
+                
+                case AlignmentTarget.ActualBox:
+                    
+                    break;
+                
+                case AlignmentTarget.AllocatedBox:
+                    horizontalBasis = allocatedSize.width;
+                    break;
+                
+                case AlignmentTarget.Parent:
+                    horizontalBasis = parent.size.width;
+                    break;
+                
+                case AlignmentTarget.ParentContentArea:
+                    horizontalBasis = parent.size.width;
+
+                    break;
+                
+                case AlignmentTarget.View:
+                    break;
+                
+                case AlignmentTarget.Application:
+                    break;
+                
+                case AlignmentTarget.Screen:
+                    break;
+                
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+
+            float pivotHorizontal = size.width * targetAlignmentHorizontal.pivot;
+
+            retn.x = allocatedPosition.x + (pivotHorizontal + horizontalBasis);
+            
             return retn;
         }
 
@@ -381,6 +423,13 @@ namespace UIForia.Systems {
 
         }
 
+        public struct ClipGroup {
+
+            public FastLayoutBox root;
+            public LightList<FastLayoutBox> members;
+
+        }
+        
         public void GetWidth(float lastResolvedWidth, ref SizeConstraints output) {
             output.minWidth = ResolveWidth(lastResolvedWidth, widthMeasurement.minValue, widthMeasurement.minUnit);
 
@@ -403,30 +452,41 @@ namespace UIForia.Systems {
             if (output.prefHeight > output.maxHeight) output.prefHeight = output.maxHeight;
         }
 
-        public bool IsLayoutBoundary() {
-            
-            if ((flags & LayoutRenderFlag.Ignored) != 0) {
-                return true;
-            }
-
-            if (parent == null) {
-                return true;
-            }
-            
-            
-            // if parent doesn't use my size
-            
-            return false;
-        }
-
         public void Layout() {
             
             if ((flags & LayoutRenderFlag.NeedsLayout) == 0) {
                 return;
             }
+
+            SVGXMatrix m = localMatrix;
+            
+            float pivotX = ResolveFixedWidth(element.style.TransformPivotX);
+            float pivotY = ResolveFixedWidth(element.style.TransformPivotY);
+            float scaleX = element.style.TransformScaleX;
+            float scaleY = element.style.TransformScaleY;
+            float rotation = element.style.TransformRotation;
+            
+            // todo -- need to apply alignment here
+            // todo -- ResolveTransformOffset();
+            Vector2 localPosition = allocatedPosition;
+            
+            m = SVGXMatrix.TRS(localPosition, rotation, new Vector2(scaleX, scaleY));
+            SVGXMatrix pivotMat = new SVGXMatrix(1, 0, 0, 1, size.width * pivotX, size.height * pivotY);
+            localMatrix = pivotMat * m * new SVGXMatrix(1, 0, 0, 1, -size.width * pivotX, -size.height * pivotY);
+
+            owner.localMatrixList.array[traversalIndex] = localMatrix;
             
             PerformLayout();
             
+            flags &= ~LayoutRenderFlag.NeedsLayout;
+
+            FastLayoutBox child = firstChild;
+            while (child != null) {
+                child.Layout();
+                child = child.nextSibling;
+            }
+            // todo -- compute content size & local overflow? might need to happen elsewhere
+
         }
         
 //        public void Layout(ContainingBlock containingBlock, bool parentUsesSize = false) {

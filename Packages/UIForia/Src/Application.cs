@@ -133,7 +133,6 @@ namespace UIForia {
             m_RenderSystem = new SVGXRenderSystem(this, null, m_LayoutSystem);
             m_RoutingSystem = new RoutingSystem();
             m_AnimationSystem = new AnimationSystem();
-            linqBindingSystem = new LinqBindingSystem();
 
             styleImporter = new StyleSheetImporter(this);
             templateParser = new TemplateParser(this);
@@ -205,7 +204,6 @@ namespace UIForia {
         public RoutingSystem RoutingSystem => m_RoutingSystem;
 
         public Camera Camera { get; private set; }
-        public LinqBindingSystem LinqBindingSystem => linqBindingSystem;
 
         // Doesn't expect to create the root
         internal void HydrateTemplate(int templateId, UIElement parent, TemplateScope2 scope) {

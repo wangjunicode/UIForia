@@ -3,10 +3,10 @@ using UnityEngine;
 
 namespace UIForia.Util {
 
-    public class StructStack<T> {
+    public class StructStack<T> where T: struct {
 
-        private T[] array;
-        private int size;
+        public T[] array;
+        public int size;
         private bool isPooled;
 
         public int Count => size;

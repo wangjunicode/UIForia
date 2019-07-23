@@ -2,37 +2,22 @@ using System;
 using System.Diagnostics;
 using UIForia.Elements;
 using UIForia.Layout;
+using UIForia.Rendering;
 using UIForia.Util;
 using UnityEngine;
 
 namespace UIForia.Systems {
 
-    public enum AxisEdge {
+    public struct SizeConstraints {
 
-        Min,
-        Max
-
-    }
-
-    public struct Alignment {
-
-        public float value;
-        public bool isIn;
-        public AxisEdge edge;
-        public TransformUnit unit;
+        public float minWidth;
+        public float maxWidth;
+        public float prefWidth;
+        public float minHeight;
+        public float maxHeight;
+        public float prefHeight;
 
     }
-
-    public enum Fit {
-
-        Unset,
-        None,
-        Grow,
-        Shrink,
-        Fit
-
-    }
-    
 
     public abstract class FastLayoutBox {
 
@@ -42,28 +27,37 @@ namespace UIForia.Systems {
         public FastLayoutBox parent;
         public FastLayoutBox firstChild;
         public FastLayoutBox nextSibling;
-        public FastLayoutBox prevSibling;
+        public FastLayoutBox prevSibling; // maybe drop since we use index traversal anyway when adding / removing
 
         // optimized to use bits for units & holds resolved value 
-        public OffsetBox paddingBox;
-        public OffsetBox borderBox;
-        public OffsetBox marginBox;
+        public OffsetRect paddingBox;
+        public OffsetRect borderBox;
 
+        public UIMeasurement marginTop;
+        public UIMeasurement marginRight;
+        public UIMeasurement marginBottom;
+        public UIMeasurement marginLeft;
+        
         // holds units in bit field
         public MeasurementSet widthMeasurement;
         public MeasurementSet heightMeasurement;
 
-        public LayoutBehavior layoutBehavior;
-        public ContainingBlock constraints;
         public FastLayoutSystem layoutSystem;
 
         public int traversalIndex;
-
         public bool sizedByParent;
 
-        internal bool isInPool;
+        public Size lastResolvedBlockSize;
+        public Size allocatedSize;
+        public Size contentSize;
+        public Size size;
+        public Vector2 allocatedPosition;
 
         public int depth;
+
+        public Size containingBox;
+
+        public int enabledFrame;
 
         public Fit selfFitHorizontal;
         public Fit selfFitVertical;
@@ -71,12 +65,15 @@ namespace UIForia.Systems {
         public Alignment selfAlignmentHorizontal;
         public Alignment selfAlignmentVertical;
 
+        public Alignment targetAlignmentHorizontal;
+        public Alignment targetAlignmentVertical;
+
         public UIElement element;
 
         protected FastLayoutBox(UIElement element) {
             this.element = element;
         }
-        
+
         public virtual void AddChild(FastLayoutBox child) {
             if (firstChild == null) {
                 firstChild = child;
@@ -146,122 +143,20 @@ namespace UIForia.Systems {
             return 0;
         }
 
-        public Rect containingBox;
-        public Rect localRect;
-
-        public Size size;
-        public Vector2 position;
-        public int enabledFrame;
-
-        public void ApplyLayout(in Size boxSize, in Rect rect, in Alignment horizontal, in Alignment vertical, Fit horizontalFit, Fit verticalFit) {
-            // if our layout doesn't care about what size our parent asked us to be, don't layout
-
-            if (containingBox != rect) {
-                containingBox = rect;
-
-                size = ApplyFitToSize(size, rect, horizontalFit, verticalFit);
-
-                position = ApplyAlignment(rect, horizontal, vertical);
-
-                // actual size comes from running layout
-                // if we grow / shrink or fit after getting our allocation, we probably need to re-layout
-
-                // layout needs to figure out our actual size, then apply aspect ratio, fit, then align, then do matrix math?
-            }
-        }
-
-        private Vector2 ApplyAlignment(in Rect rect, Alignment horizontal, Alignment vertical) {
+        private Vector2 ApplyAlignment() {
             Vector2 retn = default;
-
-            switch (horizontal.unit) {
-                case TransformUnit.Pixel:
-                    if (horizontal.edge == AxisEdge.Min) {
-                        retn.x = rect.x + horizontal.value;
-                    }
-                    else {
-                        retn.x = rect.x + rect.width + horizontal.value;
-                    }
-
-                    break;
-
-                case TransformUnit.ContentWidth:
-                    break;
-
-                case TransformUnit.ContentHeight:
-                    break;
-            }
-
             return retn;
         }
 
-        private Size ApplyFitToSize(in Size size1, in Rect rect, Fit horizontalFit, Fit verticalFit) {
-            horizontalFit = selfFitHorizontal == Fit.Unset ? horizontalFit : selfFitHorizontal;
-            verticalFit = selfFitVertical == Fit.Unset ? verticalFit : selfFitVertical;
-
-            switch (horizontalFit) {
-                case Fit.Unset:
-                case Fit.None:
-                    break;
-
-                case Fit.Grow:
-                    if (size.width < rect.width) {
-                        size.width = rect.width;
-                    }
-
-                    break;
-
-                case Fit.Shrink:
-                    if (size.width > rect.width) {
-                        size.width = rect.width;
-                    }
-
-                    break;
-
-                case Fit.Fit:
-                    size.width = rect.width;
-                    break;
-
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(horizontalFit), horizontalFit, null);
-            }
-
-            switch (verticalFit) {
-                case Fit.Unset:
-                case Fit.None:
-                    break;
-
-                case Fit.Grow:
-                    if (size.height < rect.height) {
-                        size.height = rect.height;
-                    }
-
-                    break;
-
-                case Fit.Shrink:
-                    if (size.height > rect.height) {
-                        size.height = rect.height;
-                    }
-
-                    break;
-
-                case Fit.Fit:
-                    size.height = rect.height;
-                    break;
-
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(verticalFit), verticalFit, null);
-            }
-
-
-            return size;
-        }
-
-        public float ResolveWidth(in ContainingBlock containingBlock, float value, UIMeasurementUnit unit) {
+        public float ResolveWidth(float resolvedBlockSize, float value, UIMeasurementUnit unit) {
             switch (unit) {
                 case UIMeasurementUnit.Content:
+                    return ComputeContentWidth(resolvedBlockSize);
+
+                case UIMeasurementUnit.FitContent:
                     float minWidth = GetIntrinsicMinWidth();
                     float pref = GetIntrinsicMaxWidth();
-                    return Mathf.Max(minWidth, Mathf.Min(containingBlock.width, pref));
+                    return Mathf.Max(minWidth, Mathf.Min(resolvedBlockSize, pref));
 
                 case UIMeasurementUnit.Pixel:
                     return value;
@@ -271,7 +166,7 @@ namespace UIForia.Systems {
 
                 case UIMeasurementUnit.Percentage:
                     // percentage of last resolved size (ie containing block)
-                    return containingBlock.width * value;
+                    return resolvedBlockSize * value;
 
                 case UIMeasurementUnit.ViewportWidth:
                     return element.View.Viewport.width * value;
@@ -289,12 +184,15 @@ namespace UIForia.Systems {
             return 0;
         }
 
-        public float ResolveHeight(in ContainingBlock containingBlock, float value, UIMeasurementUnit unit) {
+        public float ResolveHeight(float width, float resolvedBlockSize, float value, UIMeasurementUnit unit) {
             switch (unit) {
                 case UIMeasurementUnit.Content:
+                    return ComputeContentHeight(width, resolvedBlockSize);
+
+                case UIMeasurementUnit.FitContent:
                     float minHeight = GetIntrinsicMinHeight();
                     float pref = GetIntrinsicMaxHeight();
-                    return Mathf.Max(minHeight, Mathf.Min(containingBlock.height, pref));
+                    return Mathf.Max(minHeight, Mathf.Min(resolvedBlockSize, pref));
 
                 case UIMeasurementUnit.Pixel:
                     return value;
@@ -304,7 +202,7 @@ namespace UIForia.Systems {
 
                 case UIMeasurementUnit.Percentage:
                     // percentage of last resolved size (ie containing block)
-                    return containingBlock.height * value;
+                    return resolvedBlockSize * value;
 
                 case UIMeasurementUnit.ViewportWidth:
                     return element.View.Viewport.width * value;
@@ -322,52 +220,262 @@ namespace UIForia.Systems {
             return 0;
         }
 
-        public Size GetSize(in ContainingBlock containingBlock) {
-            float minWidth = ResolveWidth(containingBlock, widthMeasurement.minValue, widthMeasurement.minUnit);
 
-            float maxWidth = ResolveWidth(containingBlock, widthMeasurement.maxValue, widthMeasurement.maxUnit);
-
-            float prefWidth = ResolveWidth(containingBlock, widthMeasurement.prefValue, widthMeasurement.prefUnit);
-
-            float minHeight = ResolveHeight(containingBlock, heightMeasurement.minValue, heightMeasurement.minUnit);
-
-            float maxHeight = ResolveHeight(containingBlock, heightMeasurement.maxValue, heightMeasurement.maxUnit);
-
-            float prefHeight = ResolveHeight(containingBlock, heightMeasurement.prefValue, heightMeasurement.prefUnit);
-
-            // return preferred & clamp again later?
-
-            return new Size();
+        public virtual float ComputeContentWidth(float blockWidth) {
+            return 0;
         }
 
-        public void Layout(ContainingBlock containingBlock, bool parentUsesSize = false) {
-            FastLayoutBox relayoutBoundary;
+        public virtual float ComputeContentHeight(float width, float blockHeight) {
+            return 0;
+        }
 
-            // also account for fixed size on both dimensions
-            if (!parentUsesSize || sizedByParent) {
-                relayoutBoundary = this;
+        [DebuggerStepThrough]
+        public float ResolveFixedWidth(UIFixedLength width) {
+            switch (width.unit) {
+                case UIFixedUnit.Pixel:
+                    return width.value;
+
+                case UIFixedUnit.Percent:
+                    return size.width * width.value;
+
+                case UIFixedUnit.ViewportHeight:
+                    return element.View.Viewport.height * width.value;
+
+                case UIFixedUnit.ViewportWidth:
+                    return element.View.Viewport.width * width.value;
+
+                case UIFixedUnit.Em:
+                    return element.style.GetResolvedFontSize() * width.value;
+
+                case UIFixedUnit.LineHeight:
+                    return element.style.LineHeightSize * width.value;
+
+                default:
+                    return 0;
             }
-            else {
-                relayoutBoundary = parent.relayoutBoundary;
+        }
+
+        [DebuggerStepThrough]
+        public float ResolveFixedHeight(UIFixedLength height) {
+            
+            switch (height.unit) {
+                
+                case UIFixedUnit.Pixel:
+                    return height.value;
+
+                case UIFixedUnit.Percent:
+                    return size.height * height.value;
+
+                case UIFixedUnit.ViewportHeight:
+                    return element.View.Viewport.height * height.value;
+
+                case UIFixedUnit.ViewportWidth:
+                    return element.View.Viewport.width * height.value;
+
+                case UIFixedUnit.Em:
+                    return element.style.GetResolvedFontSize() * height.value;
+
+                case UIFixedUnit.LineHeight:
+                    return element.style.LineHeightSize * height.value;
+
+                default:
+                    return 0;
+            }
+            
+        }
+
+        public void ApplyHorizontalLayout(float localX, float containingWidth, float allocatedWidth, float preferredWidth, in Alignment alignment, Fit fit) {
+            // need to know the actual size of what im laying out in order to grow...oder?
+
+            allocatedPosition.x = localX;
+
+            if (selfFitHorizontal != Fit.Unset) {
+                fit = selfFitHorizontal;
+            }
+            
+            Size oldSize = size;
+
+            paddingBox.left = ResolveFixedWidth(element.style.PaddingLeft);
+            paddingBox.right = ResolveFixedWidth(element.style.PaddingRight);
+            borderBox.left = ResolveFixedWidth(element.style.BorderLeft);
+            borderBox.right = ResolveFixedWidth(element.style.BorderRight);
+
+            switch (fit) {
+                case Fit.Unset:
+                case Fit.None:
+                    size.width = preferredWidth;
+                    break;
+
+                case Fit.Grow:
+                    if (allocatedWidth > preferredWidth) {
+                        size.width = allocatedWidth;
+                    }
+
+                    break;
+
+                case Fit.Shrink:
+                    if (allocatedWidth < preferredWidth) {
+                        size.width = allocatedWidth;
+                    }
+
+                    break;
+
+                case Fit.Fit:
+                    size.width = allocatedWidth;
+                    break;
             }
 
-            if ((flags & LayoutRenderFlag.NeedsLayout) != 0 && this.constraints.Equals(containingBlock) && this.relayoutBoundary == relayoutBoundary) {
+            allocatedSize.width = allocatedWidth;
+            containingBox.width = containingWidth;
+            
+            // if content size changed we need to layout todo account for padding
+            if ((int)oldSize.width != (int)size.width) {
+                flags |= LayoutRenderFlag.NeedsLayout;
+            }
+
+            // size = how big am I actually
+            // allocated size = size my parent told me to be
+            // content size = extents of my content
+        }
+
+        public void ApplyLayoutVertical(float localY, float containingHeight, float allocatedHeight, float preferredHeight, in Alignment alignment, Fit fit) {
+            allocatedPosition.y = localY;
+
+            if (selfFitHorizontal != Fit.Unset) {
+                fit = selfFitHorizontal;
+            }
+
+            Size oldSize = size;
+            
+            switch (fit) {
+                case Fit.Unset:
+                case Fit.None:
+                    size.height = preferredHeight;
+                    break;
+
+                case Fit.Grow:
+                    if (allocatedHeight > preferredHeight) {
+                        size.height = allocatedHeight;
+                    }
+
+                    break;
+
+                case Fit.Shrink:
+                    if (allocatedHeight < preferredHeight) {
+                        size.height = allocatedHeight;
+                    }
+
+                    break;
+
+                case Fit.Fit:
+                    size.height = allocatedHeight;
+                    break;
+            }
+
+            allocatedSize.height = allocatedHeight;
+            containingBox.height = containingHeight;
+
+            if ((int)oldSize.height != (int)size.height) {
+                flags |= LayoutRenderFlag.NeedsLayout;
+            }
+
+        }
+
+        public void GetWidth(float lastResolvedWidth, ref SizeConstraints output) {
+            output.minWidth = ResolveWidth(lastResolvedWidth, widthMeasurement.minValue, widthMeasurement.minUnit);
+
+            output.maxWidth = ResolveWidth(lastResolvedWidth, widthMeasurement.maxValue, widthMeasurement.maxUnit);
+
+            output.prefWidth = ResolveWidth(lastResolvedWidth, widthMeasurement.prefValue, widthMeasurement.prefUnit);
+
+            if (output.prefWidth < output.minWidth) output.prefWidth = output.minWidth;
+            if (output.prefWidth > output.maxWidth) output.prefWidth = output.maxWidth;
+        }
+
+        public void GetHeight(float width, float lastResolvedHeight, ref SizeConstraints output) {
+            output.minHeight = ResolveHeight(width, lastResolvedHeight, heightMeasurement.minValue, heightMeasurement.minUnit);
+
+            output.maxHeight = ResolveHeight(width, lastResolvedHeight, heightMeasurement.maxValue, heightMeasurement.maxUnit);
+
+            output.prefHeight = ResolveHeight(width, lastResolvedHeight, heightMeasurement.prefValue, heightMeasurement.prefUnit);
+
+            if (output.prefHeight < output.minHeight) output.prefHeight = output.minHeight;
+            if (output.prefHeight > output.maxHeight) output.prefHeight = output.maxHeight;
+        }
+
+        public bool IsLayoutBoundary() {
+            
+            if ((flags & LayoutRenderFlag.Ignored) != 0) {
+                return true;
+            }
+
+            if (parent == null) {
+                return true;
+            }
+            
+            
+            // if parent doesn't use my size
+            
+            return false;
+        }
+
+        public void Layout() {
+            
+            if ((flags & LayoutRenderFlag.NeedsLayout) == 0) {
                 return;
             }
-
-            this.constraints = containingBlock;
-            this.relayoutBoundary = relayoutBoundary;
-
-            if (sizedByParent) {
-                PerformResize();
-            }
-
+            
             PerformLayout();
-
-            flags &= ~(LayoutRenderFlag.NeedsLayout);
-
-            MarkNeedsPaint();
+            
         }
+        
+//        public void Layout(ContainingBlock containingBlock, bool parentUsesSize = false) {
+//            FastLayoutBox relayoutBoundary;
+//
+//            // when would parent not use size?
+//            // fr grid cell
+//            // table cell?
+//            // ignored
+//
+//            // also account for fixed size on both dimensions
+//
+//            bool tightWidth = (widthMeasurement.prefUnit == UIMeasurementUnit.Pixel ||
+//                               widthMeasurement.prefUnit == UIMeasurementUnit.Em ||
+//                               widthMeasurement.prefUnit == UIMeasurementUnit.ViewportWidth ||
+//                               widthMeasurement.prefUnit == UIMeasurementUnit.ViewportHeight);
+//
+//            bool tight = tightWidth && (heightMeasurement.prefUnit == UIMeasurementUnit.Pixel ||
+//                                        heightMeasurement.prefUnit == UIMeasurementUnit.Em ||
+//                                        heightMeasurement.prefUnit == UIMeasurementUnit.ViewportWidth ||
+//                                        heightMeasurement.prefUnit == UIMeasurementUnit.ViewportHeight);
+//
+//            if (element.style.LayoutBehavior == LayoutBehavior.Ignored || !parentUsesSize || sizedByParent || tight || parent == null) {
+//                relayoutBoundary = this;
+//            }
+//            else {
+//                relayoutBoundary = parent.relayoutBoundary;
+//            }
+//
+//            // if sized based on containing block & containing block size didn't change, don't layout.
+//            // can be per axis probably and mixed w/ tight width or height
+//
+//            if ((flags & LayoutRenderFlag.NeedsLayout) != 0 && this.blockSize.Equals(containingBlock) && this.relayoutBoundary == relayoutBoundary) {
+//                return;
+//            }
+//
+//            this.blockSize = containingBlock;
+//            this.relayoutBoundary = relayoutBoundary;
+//
+//            if (sizedByParent) {
+//                PerformResize();
+//            }
+//
+//            PerformLayout();
+//
+//            flags &= ~(LayoutRenderFlag.NeedsLayout);
+//
+//            MarkNeedsPaint();
+//        }
 
         public void PerformResize() { }
 
@@ -380,17 +488,173 @@ namespace UIForia.Systems {
                 return;
             }
 
+            // go upwards until we find a relayout boundary
             if (relayoutBoundary != this) {
                 parent.MarkNeedsLayout();
             }
             else {
                 flags |= LayoutRenderFlag.NeedsLayout;
                 layoutSystem.nodesNeedingLayout.Add(this); // add to root list of nodes needing layout
-                // renderSystem.RequireRender();
             }
         }
 
-        public virtual void OnStyleChanged() { }
+        public virtual void OnStyleChanged(StructList<StyleProperty> changeList) {
+            bool marked = false;
+
+            int count = changeList.size;
+            StyleProperty[] properties = changeList.array;
+
+            for (int i = 0; i < count; i++) {
+                ref StyleProperty property = ref properties[i];
+
+                switch (property.propertyId) {
+                    case StylePropertyId.PaddingLeft:
+                        paddingBox.left = ResolveFixedWidth(property.AsUIFixedLength);
+                        marked = true;
+                        break;
+
+                    case StylePropertyId.PaddingRight:
+                        paddingBox.right = ResolveFixedWidth(property.AsUIFixedLength);
+                        marked = true;
+                        break;
+
+                    case StylePropertyId.PaddingTop:
+                        paddingBox.top = ResolveFixedHeight(property.AsUIFixedLength);
+                        marked = true;
+                        break;
+
+                    case StylePropertyId.PaddingBottom:
+                        paddingBox.bottom = ResolveFixedHeight(property.AsUIFixedLength);
+                        marked = true;
+                        break;
+
+                    case StylePropertyId.BorderLeft:
+                        borderBox.left = ResolveFixedWidth(property.AsUIFixedLength);
+                        marked = true;
+                        break;
+
+                    case StylePropertyId.BorderRight:
+                        borderBox.right = ResolveFixedWidth(property.AsUIFixedLength);
+                        marked = true;
+                        break;
+
+                    case StylePropertyId.BorderTop:
+                        borderBox.top = ResolveFixedHeight(property.AsUIFixedLength);
+                        marked = true;
+                        break;
+
+                    case StylePropertyId.BorderBottom:
+                        borderBox.bottom = ResolveFixedHeight(property.AsUIFixedLength);
+                        marked = true;
+                        break;
+
+                    case StylePropertyId.TextFontSize:
+                        
+                        paddingBox.left = ResolveFixedWidth(element.style.PaddingLeft);
+                        paddingBox.right = ResolveFixedWidth(element.style.PaddingRight);
+                        paddingBox.top = ResolveFixedHeight(element.style.PaddingTop);
+                        paddingBox.bottom = ResolveFixedHeight(element.style.PaddingBottom);
+                        
+                        borderBox.left = ResolveFixedWidth(element.style.BorderLeft);
+                        borderBox.right = ResolveFixedWidth(element.style.BorderRight);
+                        borderBox.top = ResolveFixedHeight(element.style.BorderTop);
+                        borderBox.bottom = ResolveFixedHeight(element.style.BorderBottom);
+                        
+                        // anything else em sized should be updated here too
+                        
+                        break;
+
+                    // todo -- margin should be a fixed measurement probably
+                    case StylePropertyId.MarginLeft:
+                        marginLeft = property.AsUIMeasurement;
+                        break;
+
+                    case StylePropertyId.MarginRight:
+                        marginRight = property.AsUIMeasurement;
+                        break;
+
+                    case StylePropertyId.MarginTop:
+                        marginTop = property.AsUIMeasurement;
+                        break;
+
+                    case StylePropertyId.MarginBottom:
+                        marginBottom = property.AsUIMeasurement;
+                        break;
+
+                    case StylePropertyId.PreferredWidth:
+                        UIMeasurement prefWidth = property.AsUIMeasurement;
+                        widthMeasurement.prefValue = prefWidth.value;
+                        widthMeasurement.prefUnit = prefWidth.unit;
+                        marked = true;
+                        break;
+
+                    case StylePropertyId.PreferredHeight:
+                        UIMeasurement prefHeight = property.AsUIMeasurement;
+                        heightMeasurement.prefValue = prefHeight.value;
+                        heightMeasurement.prefUnit = prefHeight.unit;
+                        marked = true;
+                        break;
+
+                    case StylePropertyId.MinWidth:
+                        UIMeasurement minWidth = property.AsUIMeasurement;
+                        widthMeasurement.minValue = minWidth.value;
+                        widthMeasurement.minUnit = minWidth.unit;
+                        marked = true;
+                        break;
+
+                    case StylePropertyId.MinHeight:
+                        UIMeasurement minHeight = property.AsUIMeasurement;
+                        heightMeasurement.minValue = minHeight.value;
+                        heightMeasurement.minUnit = minHeight.unit;
+                        marked = true;
+                        break;
+
+                    case StylePropertyId.MaxWidth:
+                        UIMeasurement maxWidth = property.AsUIMeasurement;
+                        widthMeasurement.maxValue = maxWidth.value;
+                        widthMeasurement.maxUnit = maxWidth.unit;
+                        marked = true;
+                        break;
+
+                    case StylePropertyId.MaxHeight:
+                        UIMeasurement maxHeight = property.AsUIMeasurement;
+                        heightMeasurement.maxValue = maxHeight.value;
+                        heightMeasurement.maxUnit = maxHeight.unit;
+                        marked = true;
+                        break;
+
+                    case StylePropertyId.ZIndex:
+                        // zIndex = property.AsInt;
+                        break;
+
+                    case StylePropertyId.Layer:
+                        // layer = property.AsInt;
+                        break;
+
+                    case StylePropertyId.LayoutBehavior:
+                        // layoutBehavior = property.AsLayoutBehavior;
+                        // UpdateChildren();
+                        break;
+
+                    case StylePropertyId.LayoutType:
+                        //layoutTypeChanged = true;
+                        break;
+
+                    case StylePropertyId.OverflowX:
+                        // overflowX = property.AsOverflow;
+                        break;
+
+                    case StylePropertyId.OverflowY:
+                        // overflowY = property.AsOverflow;
+                        break;
+                }
+            }
+
+            if (marked) {
+                MarkNeedsLayout();
+            }
+            
+        }
 
         public virtual void SetChildren(LightList<FastLayoutBox> container) {
             if (container.size == 0) {
@@ -399,7 +663,9 @@ namespace UIForia.Systems {
             }
 
             firstChild = container[0];
-            for (int i = 0; i < container.size; i++) {
+            for (int i = 0;
+                i < container.size;
+                i++) {
                 FastLayoutBox ptr = container[i];
                 ptr.parent = this;
                 if (i != 0) {
@@ -425,6 +691,9 @@ namespace UIForia.Systems {
                 return boxList.ToArray();
             }
         }
+
+        public void GetMarginHorizontal(ref float containingBlockWidth) { }
+
     }
 
 }

@@ -368,6 +368,7 @@ namespace UIForia.Layout.LayoutTypes {
 
         [DebuggerStepThrough]
         public float ResolveFixedHeight(UIFixedLength height) {
+            
             switch (height.unit) {
                 case UIFixedUnit.Pixel:
                     return height.value * view.ScaleFactor;

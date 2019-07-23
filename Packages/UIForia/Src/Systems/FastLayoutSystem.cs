@@ -1,99 +1,33 @@
 using System;
 using System.Collections.Generic;
+using SVGX;
 using UIForia.Elements;
 using UIForia.Layout;
 using UIForia.Layout.LayoutTypes;
+using UIForia.Rendering;
 using UIForia.Util;
 using UnityEngine;
 using Debug = System.Diagnostics.Debug;
 
 namespace UIForia.Systems {
 
-    public class FastFlexLayoutBox : FastLayoutBox {
-
-        private StructList<Item> itemList;
-
-        public FastFlexLayoutBox(UIElement element) : base(element) {
-            this.itemList = new StructList<Item>();
-        }
-
-
-        public override void PerformLayout() {
-            Item[] items = itemList.array;
-            FastLayoutBox child = firstChild;
-            for (int i = 0; i < itemList.size; i++) {
-                ref Item item = ref items[i];
-
-                if (item.needsUpdate) { }
-
-//                items[i].baseSize = child.GetSize(new BoxConstraint() {
-//                    minWidth = 0,
-//                    maxWidth = float.PositiveInfinity,
-//                    minHeight = 0,
-//                    maxHeight = float.PositiveInfinity
-//                });
-
-                child = child.nextSibling;
-            }
-        }
-
-        public struct Item {
-
-            public bool needsUpdate;
-            public float mainAxisStart;
-            public float crossAxisStart;
-            public float mainSize;
-            public float crossSize;
-            public float minSize;
-            public float maxSize;
-            public int growFactor;
-            public int shrinkFactor;
-            public OffsetRect margin;
-            public CrossAxisAlignment crossAxisAlignment;
-
-        }
-
-    }
-
-    public class TranscludeLayoutBox : FastLayoutBox {
-
-        public TranscludeLayoutBox(UIElement element) : base(element) { }
-
-        public override void PerformLayout() {
-            throw new NotImplementedException("Should never call layout on a transcluded layout box");
-        }
-
-    }
-
     [Flags]
     public enum LayoutRenderFlag {
 
-        NeedsLayout = 1 << 0
+        NeedsLayout = 1 << 0,
+        Ignored = 1 << 1,
+        Transcluded = 1 << 2
 
     }
 
-    public struct OffsetBox { }
+    public enum ClipBehavior {
 
-    public struct MeasurementSet {
-
-        public float minValue;
-        public float maxValue;
-        public float prefValue;
-
-        public UIMeasurementUnit minUnit;
-        public UIMeasurementUnit maxUnit;
-        public UIMeasurementUnit prefUnit;
+        Never,
+        Normal,
+        View
 
     }
-
-    public struct ContainingBlock {
-
-        public float width;
-        public float height;
-
-    }
-
-
+    
     public class FastLayoutSystem : ILayoutSystem {
 
         public readonly LightList<FastLayoutBox> nodesNeedingLayout;
@@ -105,6 +39,8 @@ namespace UIForia.Systems {
         public readonly IStyleSystem styleSystem;
 
         private readonly LightList<UIElement> enabledElements;
+        private readonly LightList<FastLayoutBox> toAlign;
+        private readonly LightList<FastLayoutBox> toMultiply;
 
         public FastLayoutSystem(Application application, IStyleSystem styleSystem) {
             this.application = application;
@@ -129,7 +65,15 @@ namespace UIForia.Systems {
             nodesNeedingLayout.Sort((a, b) => a.depth - b.depth);
 
             FastLayoutBox[] toLayout = nodesNeedingLayout.array;
-            
+
+            // layout only nodes needing update. can be threaded in the future as long as no two threads work on the same hierarchy
+
+            // when marked or size changed need to layout
+            // when marked, mark parent until parent doesn't care what size you are
+            // parent won't need to layout a child whos width changed if they only care about height
+            // parent won't need to layout a child whos padding or border changes
+            // if content changes and parent is content sized mark for layout
+
             for (int i = 0; i < nodesNeedingLayout.size; i++) {
                 if ((toLayout[i].flags & LayoutRenderFlag.NeedsLayout) != 0) {
                     toLayout[i].PerformLayout();
@@ -138,7 +82,135 @@ namespace UIForia.Systems {
             }
 
             nodesNeedingLayout.QuickClear();
+
+            LightStack<FastLayoutBox> stack = LightStack<FastLayoutBox>.Get();
+
+            for (int i = 0; i < application.m_Views.Count; i++) {
+                stack.Push(application.m_Views[i].rootElement.layoutBox);
+            }
+
+            while (stack.size > 0) {
+                
+                FastLayoutBox box = stack.array[--stack.size];
+
+                box.ApplyAlignment();
+                
+                LayoutResult layoutResult = box.element.layoutResult;
+
+                layoutResult.border = box.borderBox;
+                layoutResult.padding = box.paddingBox;
+
+                SVGXMatrix parentMatrix = box.parent.element.layoutResult.matrix;
+
+                Vector2 pivot = default;
+                SVGXMatrix m;
+
+                if (box.transformRotation != 0) {
+                    m = SVGXMatrix.TRS(localPosition, layoutResult.rotation, layoutResult.scale);
+                }
+                else {
+                    m = SVGXMatrix.TranslateScale(localPosition.x, localPosition.y, localScale.x, localScale.y);
+                }
+
+                if (pivot.x != 0 || pivot.y != 0) {
+                    SVGXMatrix pivotMat = SVGXMatrix.Translation(new Vector2(box.size.width * pivot.x, box.size.height * pivot.y));
+                    m = pivotMat * m * pivotMat.Inverse();
+                }
+
+                m = new SVGXMatrix(
+                    parentMatrix.m0 * m.m0 + parentMatrix.m2 * m.m1,
+                    parentMatrix.m1 * m.m0 + parentMatrix.m3 * m.m1,
+                    parentMatrix.m0 * m.m2 + parentMatrix.m2 * m.m3,
+                    parentMatrix.m1 * m.m2 + parentMatrix.m3 * m.m3,
+                    parentMatrix.m0 * m.m4 + parentMatrix.m2 * m.m5 + parentMatrix.m4,
+                    parentMatrix.m1 * m.m4 + parentMatrix.m3 * m.m5 + parentMatrix.m5
+                );
+
+                if (box.element.style.ClipBehavior == ClipBehavior.Never) {
+                    clipTree.overlay.Add(box.element);
+                }
+                else {
+                    clipTree.Add(new RenderBox() {
+                        element = box.element,
+                        layoutBox = box,
+                        matrix = m
+                    });
+                }
+
+                bool pushClip = box.element.style.OverflowX != Overflow.Visible || box.element.style.OverflowY != Overflow.Visible;
+
+                if (pushClip) {
+                    // push a clip shape (can be non rect, is transformed by transform matrix into screen space)
+                    clipTree.Push();
+                }
+
+                // do children
+
+                FastLayoutBox child = box.firstChild;
+
+                if (clipTree.Peek().Contains(child, matrix)) {
+                    clipTree.Add
+                }
+                
+                // need real recursion or some way to signify we are done with the children and should pop our stack
+                while (child != null) {
+                    stack.Push(child);   
+                    child = child.nextSibling;
+                }
+
+                // clip tree needs to be hierarchical tree of clip groups
+                // clip groups are render boundaries implicitly
+                if (pushClip) {
+                    clipList.Add(clipTree.Pop());
+                }
+                
+            }
+            
+            LightStack<FastLayoutBox>.Release(ref stack);
+            // for now just loop, later split into change sets and only process changes per frame.
+
+            // the following phases can be split into threaded jobs w/o contention. run for all elements
+
+            // transform changed
+
+            // local position changed
+
+            // alignment changed
+
+            // layout changed
+
+            // scroll behavior / scroll offset changed
+
+            // for each item check change flags
+
+            ApplyAlignment();
+
+            ApplyScrollBehavior();
+
+            MultiplyMatrices();
+
+            // culling can be threaded but must wait for rejoin here I think since it has to happen after matrix pass
+
+            BroadPhaseCull();
         }
+
+        private void ApplyAlignment() {
+            for (int i = 0; i < toAlign.size; i++) {
+//                toAlign[i].ApplyAlignment();
+            }
+        }
+
+        // apply scroll offsets & sticky / fixed
+        private void ApplyScrollBehavior() { }
+
+        private void MultiplyMatrices() {
+            // build local matrix
+            // localPosition + alignedLocalPosition
+            // pivot
+            // parent screen matrix
+        }
+
+        private void BroadPhaseCull() { }
 
         public void OnDestroy() { }
 
@@ -157,13 +229,11 @@ namespace UIForia.Systems {
 
             // need to figure out if the loop processed this element via traversing children already 
             for (int i = 0; i < enabledElements.size; i++) {
-                
                 UIElement element = enabledElements[i];
 
                 if (element.layoutBox == null || element.layoutBox.enabledFrame != thisFrame) {
                     UpdateLayoutBoxes(element, thisFrame);
                 }
-                
             }
 
             enabledElements.QuickClear();
@@ -177,14 +247,13 @@ namespace UIForia.Systems {
             LightList<FastLayoutBox> container = LightList<FastLayoutBox>.Get();
 
             CreateOrUpdateLayoutBox(element, frame);
-            
+
             while (stack.size > 0) {
                 UIElement current = stack.array[--stack.size];
 
                 for (int i = 0; i < current.children.size; i++) {
-                    
                     UIElement child = current.children.array[i];
-                    
+
                     if (!child.isEnabled) {
                         continue;
                     }

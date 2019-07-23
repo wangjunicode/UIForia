@@ -182,6 +182,10 @@ namespace UIForia.Systems {
 
                     box.RunLayout();
                     box.markedForLayout = false;
+                    
+                    // if box.hasOverflowX
+                    // clips.Push(box)
+                    
                 }
 #else
                 if (box.markedForLayout) {

@@ -4,15 +4,15 @@ style w100h100 {
 }
 
 style w90h90m10 {
-    MarginLeft = 5f;
-    MarginRight = 5f;
+    MarginTop = 5f;
+    MarginBottom = 5f;
     PreferredWidth = 90f;    
     PreferredHeight = 90f;
 }
 
 style w90h90mc10 {
-    MarginTop = 5f;
-    MarginBottom = 5f;
+    MarginRight = 5f;
+    MarginLeft = 5f;
     PreferredWidth = 90f;
     PreferredHeight = 90f;
 }

@@ -1,13 +1,11 @@
 using System;
 using UIForia.Elements;
 
-namespace UIForia.Systems {
+namespace UIForia.Layout {
 
     public class TranscludeLayoutBox : FastLayoutBox {
-
-        public TranscludeLayoutBox(UIElement element) : base(element) { }
-
-        public override void PerformLayout() {
+        
+        protected override void PerformLayout() {
             throw new NotImplementedException("Should never call layout on a transcluded layout box");
         }
 

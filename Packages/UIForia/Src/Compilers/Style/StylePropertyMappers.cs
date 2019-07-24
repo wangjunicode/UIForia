@@ -14,7 +14,7 @@ using FontStyle = UIForia.Text.FontStyle;
 using TextAlignment = UIForia.Text.TextAlignment;
 
 namespace UIForia.Compilers.Style {
-    
+
     public static class StylePropertyMappers {
 
         public const string k_RepeatFit = "fit";
@@ -27,6 +27,16 @@ namespace UIForia.Compilers.Style {
                 {"overflowx", (targetStyle, property, context) => targetStyle.OverflowX = MapEnum<Overflow>(property.children[0], context)},
                 {"overflowy", (targetStyle, property, context) => targetStyle.OverflowY = MapEnum<Overflow>(property.children[0], context)},
 
+                // Alignment
+                {"alignmentbehaviorx", (targetStyle, property, context) => targetStyle.AlignmentBehaviorX = MapEnum<AlignmentBehavior>(property.children[0], context)},
+                {"alignmentbehaviory", (targetStyle, property, context) => targetStyle.AlignmentBehaviorY = MapEnum<AlignmentBehavior>(property.children[0], context)},
+                {"alignmenttargetx", (targetStyle, property, context) => targetStyle.AlignmentTargetX = MapEnum<AlignmentTarget>(property.children[0], context)},
+                {"alignmenttargety", (targetStyle, property, context) => targetStyle.AlignmentTargetY = MapEnum<AlignmentTarget>(property.children[0], context)},
+                {"alignmentpivotx", (targetStyle, property, context) => targetStyle.AlignmentPivotX = MapNumber(property.children[0], context)},
+                {"alignmentpivoty", (targetStyle, property, context) => targetStyle.AlignmentPivotY = MapNumber(property.children[0], context)},
+                {"alignmentoffsetx", (targetStyle, property, context) => targetStyle.AlignmentOffsetX = MapNumber(property.children[0], context)},
+                {"alignmentoffsety", (targetStyle, property, context) => targetStyle.AlignmentOffsetY = MapNumber(property.children[0], context)},
+                
                 // Background
                 {"backgroundcolor", (targetStyle, property, context) => targetStyle.BackgroundColor = MapColor(property, context)},
                 {"backgroundtint", (targetStyle, property, context) => targetStyle.BackgroundTint = MapColor(property, context)},
@@ -38,7 +48,7 @@ namespace UIForia.Compilers.Style {
                 {"backgroundimagetiley", (targetStyle, property, context) => targetStyle.BackgroundImageTileY = MapFixedLength(property.children[0], context)},
                 {"backgroundimagerotation", (targetStyle, property, context) => targetStyle.BackgroundImageRotation = MapFixedLength(property.children[0], context)},
                 {"backgroundimage", (targetStyle, property, context) => targetStyle.BackgroundImage = MapTexture(property.children[0], context)},
-                
+
                 {"visibility", (targetStyle, property, context) => targetStyle.Visibility = MapEnum<Visibility>(property.children[0], context)},
                 {"opacity", (targetStyle, property, context) => targetStyle.Opacity = MapNumber(property.children[0], context)},
                 {"cursor", (targetStyle, property, context) => targetStyle.Cursor = MapCursor(property, context)},
@@ -102,7 +112,7 @@ namespace UIForia.Compilers.Style {
                 {"radiallayoutstartangle", (targetStyle, property, context) => targetStyle.RadialLayoutStartAngle = MapNumber(property.children[0], context)},
                 {"radiallayoutendangle", (targetStyle, property, context) => targetStyle.RadialLayoutEndAngle = MapNumber(property.children[0], context)},
                 {"radiallayoutradius", (targetStyle, property, context) => targetStyle.RadialLayoutRadius = MapFixedLength(property.children[0], context)},
-                
+
                 {"transformposition", (targetStyle, property, context) => MapTransformPosition(targetStyle, property, context)},
                 {"transformpositionx", (targetStyle, property, context) => targetStyle.TransformPositionX = MapTransformOffset(property.children[0], context)},
                 {"transformpositiony", (targetStyle, property, context) => targetStyle.TransformPositionY = MapTransformOffset(property.children[0], context)},
@@ -158,17 +168,19 @@ namespace UIForia.Compilers.Style {
                 {"textshadowintensity", (targetStyle, property, context) => targetStyle.TextShadowIntensity = MapNumber(property.children[0], context)},
                 {"textshadowsoftness", (targetStyle, property, context) => targetStyle.TextShadowSoftness = MapNumber(property.children[0], context)},
                 {"textshadowtype", (targetStyle, property, context) => targetStyle.TextShadowType = MapEnum<ShadowType>(property.children[0], context)},
-                {"texttransform", (targetStyle, property, context) => targetStyle.TextTransform = MapEnum<TextTransform>(property.children[0], context)},
-                {"textwhitespacemode", (targetStyle, property, context) => {
-                    // couldn't find a generic version for merging a list of enum flags... just one that involves boxing: https://stackoverflow.com/questions/987607/c-flags-enum-generic-function-to-look-for-a-flag
-                    WhitespaceMode result = MapEnum<WhitespaceMode>(property.children[0], context);
-                    if (property.children.Count > 1) {
-                        for (int index = 1; index < property.children.Count; index++) {
-                            result |= MapEnum<WhitespaceMode>(property.children[index], context);
+                {"texttransform", (targetStyle, property, context) => targetStyle.TextTransform = MapEnum<TextTransform>(property.children[0], context)}, {
+                    "textwhitespacemode", (targetStyle, property, context) => {
+                        // couldn't find a generic version for merging a list of enum flags... just one that involves boxing: https://stackoverflow.com/questions/987607/c-flags-enum-generic-function-to-look-for-a-flag
+                        WhitespaceMode result = MapEnum<WhitespaceMode>(property.children[0], context);
+                        if (property.children.Count > 1) {
+                            for (int index = 1; index < property.children.Count; index++) {
+                                result |= MapEnum<WhitespaceMode>(property.children[index], context);
+                            }
                         }
+
+                        targetStyle.TextWhitespaceMode = result;
                     }
-                    targetStyle.TextWhitespaceMode = result;
-                }},
+                },
 
                 {"painter", (targetStyle, property, context) => targetStyle.Painter = MapPainter(property, context)},
 
@@ -176,7 +188,7 @@ namespace UIForia.Compilers.Style {
                 {"scrollbar", (targetStyle, property, context) => targetStyle.Scrollbar = MapString(property.children[0], context)},
                 {"scrollbarsize", (targetStyle, property, context) => targetStyle.ScrollbarSize = MapMeasurement(property.children[0], context)},
                 {"scrollbarcolor", (targetStyle, property, context) => targetStyle.ScrollbarColor = MapColor(property, context)},
-                
+
                 // shadows for things
                 {"shadowtype", (targetStyle, property, context) => targetStyle.ShadowType = MapEnum<ShadowType>(property.children[0], context)},
                 {"shadowoffsetx", (targetStyle, property, context) => targetStyle.ShadowOffsetX = MapNumber(property.children[0], context)},
@@ -188,14 +200,15 @@ namespace UIForia.Compilers.Style {
 
         private static string MapPainter(PropertyNode property, StyleCompileContext context) {
             string customPainter = MapString(property.children[0], context);
-            
+
             if (customPainter == "self" || customPainter == "none") {
                 return customPainter;
             }
-            
+
             if (string.IsNullOrEmpty(customPainter) || !Application.HasCustomPainter(customPainter)) {
                 Debug.Log($"Could not find your custom painter {customPainter} in file {context.fileName}.");
             }
+
             return customPainter;
         }
 
@@ -242,8 +255,9 @@ namespace UIForia.Compilers.Style {
                         }
 
                         break;
-                    default: throw new CompileException(context.fileName, value, $"Invalid TextFontStyle {value}. " +
-                           "Make sure you use one of those: bold, italic, highlight, smallcaps, superscript, subscript, underline or strikethrough.");
+                    default:
+                        throw new CompileException(context.fileName, value, $"Invalid TextFontStyle {value}. " +
+                                                                            "Make sure you use one of those: bold, italic, highlight, smallcaps, superscript, subscript, underline or strikethrough.");
                 }
             }
 
@@ -381,7 +395,7 @@ namespace UIForia.Compilers.Style {
 
                     GridTrackSizeType trackSizeType;
                     GridTrackSize size = default;
-                    
+
                     switch (functionNode.identifier.ToLower()) {
                         case "repeat":
                             trackSizeType = GridTrackSizeType.Repeat;
@@ -417,11 +431,11 @@ namespace UIForia.Compilers.Style {
                             else {
                                 throw new CompileException(context.fileName, trackSize, $"Had a hard time parsing that track size: {trackSize}. The first argument of repeat() must be a positive integer > 0 or one of the keywords {k_RepeatFill} or {k_RepeatFit}.");
                             }
-                         
+
                             size.pattern = MapGridTrackSizePattern(1, functionNode.children, context, true);
 
                             break;
-                        case "grow": 
+                        case "grow":
                             trackSizeType = GridTrackSizeType.Grow;
                             if (functionNode.children.Count != 2) {
                                 throw new CompileException(context.fileName, trackSize, $"Had a hard time parsing that track size: {trackSize}. Grow must have two arguments.");
@@ -431,22 +445,23 @@ namespace UIForia.Compilers.Style {
                             size.pattern = MapGridTrackSizePattern(0, functionNode.children, context, false);
 
                             break;
-                        case "shrink": 
+                        case "shrink":
                             trackSizeType = GridTrackSizeType.Shrink;
                             if (functionNode.children.Count != 2) {
                                 throw new CompileException(context.fileName, trackSize, $"Had a hard time parsing that track size: {trackSize}. Shrink must have two arguments.");
                             }
+
                             size.type = GridTrackSizeType.Shrink;
                             size.pattern = MapGridTrackSizePattern(0, functionNode.children, context, false);
                             break;
                         default:
                             throw new CompileException(context.fileName, trackSize, $"Had a hard time parsing that track size: {trackSize}. Expected a known track size function (repeat, grow, shrink) but all I got was {functionNode.identifier}");
                     }
-                    
+
                     GridTrackSize[] pattern = new GridTrackSize[functionNode.children.Count];
 
                     return size;
-                
+
                 default:
                     throw new CompileException(context.fileName, trackSize, $"Had a hard time parsing that track size: {trackSize}.");
             }
@@ -689,6 +704,7 @@ namespace UIForia.Compilers.Style {
                         if (unit == UIFixedUnit.Percent) {
                             measurementValue *= 0.01f;
                         }
+
                         return new UIFixedLength(measurementValue, unit);
                     }
 
@@ -888,6 +904,7 @@ namespace UIForia.Compilers.Style {
                     if (assetInfo.SpriteName != null) {
                         throw new CompileException(urlNode, "SpriteAtlas access is coming soon!");
                     }
+
                     return ResourceManager.GetTexture(assetInfo.Path);
                 case StyleLiteralNode literalNode:
                     string value = literalNode.rawValue;
@@ -909,8 +926,9 @@ namespace UIForia.Compilers.Style {
                     if (assetInfo.SpriteName != null) {
                         throw new CompileException(urlNode, "SpriteAtlas access is coming soon!");
                     }
+
                     return Resources.Load<TMP_FontAsset>(assetInfo.Path);
-                    // return ResourceManager.GetFont(TransformUrlNode(urlNode, context));
+                // return ResourceManager.GetFont(TransformUrlNode(urlNode, context));
                 case StyleLiteralNode literalNode:
                     string value = literalNode.rawValue;
                     if (value == "unset" || value == "default" || value == "null") {
@@ -948,7 +966,7 @@ namespace UIForia.Compilers.Style {
             throw new CompileException(url, "Invalid url value.");
         }
 
-        
+
         private static Color MapColor(PropertyNode property, StyleCompileContext context) {
             AssertSingleValue(property.children, context);
             return MapColor(property.children[0], context);
@@ -1000,7 +1018,7 @@ namespace UIForia.Compilers.Style {
                 }
             }
 
-            throw new CompileException(context.fileName,node, $"Expected a numeric value but all I got was this lousy {node}");
+            throw new CompileException(context.fileName, node, $"Expected a numeric value but all I got was this lousy {node}");
         }
 
         private static string MapString(StyleASTNode node, StyleCompileContext context) {
@@ -1014,7 +1032,7 @@ namespace UIForia.Compilers.Style {
                 return literalNode.rawValue;
             }
 
-            throw new CompileException(context.fileName,node, $"Expected a string value but all I got was this lousy {node}");
+            throw new CompileException(context.fileName, node, $"Expected a string value but all I got was this lousy {node}");
         }
 
         public static void MapProperty(UIStyle targetStyle, PropertyNode node, StyleCompileContext context) {
@@ -1042,12 +1060,12 @@ namespace UIForia.Compilers.Style {
             }
 
             throw new CompileException(context.fileName, node, $"Expected a proper {typeof(T).Name} value, which must be one of " +
-                                             $"{EnumValues(typeof(T))} and your " +
-                                             $"value {node} does not match any of them.");
+                                                               $"{EnumValues(typeof(T))} and your " +
+                                                               $"value {node} does not match any of them.");
         }
 
         private static bool TryParseFloat(string input, out float result) {
-           return float.TryParse(input, NumberStyles.Float, CultureInfo.InvariantCulture, out result);
+            return float.TryParse(input, NumberStyles.Float, CultureInfo.InvariantCulture, out result);
         }
 
         private static void AssertSingleValue(LightList<StyleASTNode> propertyValues, StyleCompileContext context) {
@@ -1057,9 +1075,12 @@ namespace UIForia.Compilers.Style {
         }
 
         public struct AssetInfo {
+
             public string Path;
             public string SpriteName;
+
         }
+
     }
-    
+
 }

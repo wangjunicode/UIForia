@@ -1,13 +1,12 @@
-using System;
 using System.Diagnostics;
 using SVGX;
 using UIForia.Elements;
-using UIForia.Layout;
 using UIForia.Rendering;
+using UIForia.Systems;
 using UIForia.Util;
 using UnityEngine;
 
-namespace UIForia.Systems {
+namespace UIForia.Layout {
 
     public struct SizeConstraints {
 
@@ -28,7 +27,6 @@ namespace UIForia.Systems {
         public FastLayoutBox parent;
         public FastLayoutBox firstChild;
         public FastLayoutBox nextSibling;
-        public FastLayoutBox prevSibling; // maybe drop since we use index traversal anyway when adding / removing
 
         // optimized to use bits for units & holds resolved value 
         public OffsetRect paddingBox;
@@ -38,33 +36,26 @@ namespace UIForia.Systems {
         public UIMeasurement marginRight;
         public UIMeasurement marginBottom;
         public UIMeasurement marginLeft;
-        
-        // holds units in bit field
-        public MeasurementSet widthMeasurement;
-        public MeasurementSet heightMeasurement;
 
-        public FastLayoutSystem layoutSystem;
+        public UIMeasurement minWidth;
+        public UIMeasurement maxWidth;
+        public UIMeasurement prefWidth;
+        public UIMeasurement minHeight;
+        public UIMeasurement maxHeight;
+        public UIMeasurement prefHeight;
 
         public int traversalIndex;
-        public bool sizedByParent;
 
-        public Size lastResolvedBlockSize;
         public Size allocatedSize;
         public Size contentSize;
         public Size size;
         public Vector2 allocatedPosition;
-
-        public int depth;
+        public Vector2 alignedPosition;
 
         public Size containingBox;
 
-        public int enabledFrame;
-
         public Fit selfFitHorizontal;
         public Fit selfFitVertical;
-
-        public Alignment selfAlignmentHorizontal;
-        public Alignment selfAlignmentVertical;
 
         public Alignment targetAlignmentHorizontal;
         public Alignment targetAlignmentVertical;
@@ -73,11 +64,8 @@ namespace UIForia.Systems {
         public FastLayoutSystem.LayoutOwner owner;
         public SVGXMatrix localMatrix;
 
-        protected FastLayoutBox(UIElement element) {
-            this.element = element;
-        }
-
         public virtual void AddChild(FastLayoutBox child) {
+            child.parent = this;
             if (firstChild == null) {
                 firstChild = child;
                 return;
@@ -95,12 +83,10 @@ namespace UIForia.Systems {
 
             if (trail == null) {
                 child.nextSibling = firstChild;
-                firstChild.prevSibling = child;
                 firstChild = child;
                 OnChildAdded(child, idx);
             }
             else {
-                child.prevSibling = ptr;
                 child.nextSibling = ptr.nextSibling;
                 ptr.nextSibling = child;
                 OnChildAdded(child, idx);
@@ -118,23 +104,50 @@ namespace UIForia.Systems {
             OnChildRemoved(child, idx);
         }
 
-        public virtual void OnChildAdded(FastLayoutBox child, int index) { }
+        public virtual void UpdateStyleData() {
+            // update style properties
+            minWidth = element.style.MinWidth;
+            maxWidth = element.style.MaxWidth;
+            prefWidth = element.style.PreferredWidth;
 
-        public virtual void OnChildRemoved(FastLayoutBox child, int index) { }
+            minHeight = element.style.MinHeight;
+            maxHeight = element.style.MaxHeight;
+            prefHeight = element.style.PreferredHeight;
+
+            marginTop = element.style.MarginTop;
+            marginRight = element.style.MarginRight;
+            marginBottom = element.style.MarginBottom;
+            marginLeft = element.style.MarginLeft;
+//            var localPositionX = element.style.TransformPositionX;
+//            var localPositionY = element.style.TransformPositionY;
+//            var rotation = element.style.TransformRotation;
+//            var scaleX = element.style.TransformScaleX;
+//            var scaleY = element.style.TransformScaleY;
+
+            MarkNeedsLayout();
+        }
+
+        public virtual void ComputeContentSize(Size blockSize) {
+            // optimize for when we need to compute width & height together so we avoid a width pass and do both at once
+        }
+
+        protected virtual void OnChildAdded(FastLayoutBox child, int index) { }
+
+        protected virtual void OnChildRemoved(FastLayoutBox child, int index) { }
 
         public virtual float GetIntrinsicMinWidth() {
             return 0;
         }
 
-        public virtual float GetIntrinsicMinHeight() {
+        protected virtual float GetIntrinsicMinHeight() {
             return 0;
         }
 
-        public virtual float GetIntrinsicMaxWidth() {
+        protected virtual float GetIntrinsicMaxWidth() {
             return float.MaxValue;
         }
 
-        public virtual float GetIntrinsicMaxHeight() {
+        protected virtual float GetIntrinsicMaxHeight() {
             return float.MaxValue;
         }
 
@@ -146,59 +159,28 @@ namespace UIForia.Systems {
             return 0;
         }
 
-        public Vector2 ApplyAlignment() {
-            Vector2 retn = allocatedPosition;
+        public float ResolveWidth(float resolvedBlockSize, UIMeasurement measurement) {
+            float value = measurement.value;
 
-            float horizontalBasis = 0;
-            
-            switch (targetAlignmentHorizontal.target) {
-                
-                case AlignmentTarget.ActualBox:
-                    
-                    break;
-                
-                case AlignmentTarget.AllocatedBox:
-                    horizontalBasis = allocatedSize.width;
-                    break;
-                
-                case AlignmentTarget.Parent:
-                    horizontalBasis = parent.size.width;
-                    break;
-                
-                case AlignmentTarget.ParentContentArea:
-                    horizontalBasis = parent.size.width;
-
-                    break;
-                
-                case AlignmentTarget.View:
-                    break;
-                
-                case AlignmentTarget.Application:
-                    break;
-                
-                case AlignmentTarget.Screen:
-                    break;
-                
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-
-            float pivotHorizontal = size.width * targetAlignmentHorizontal.pivot;
-
-            retn.x = allocatedPosition.x + (pivotHorizontal + horizontalBasis);
-            
-            return retn;
-        }
-
-        public float ResolveWidth(float resolvedBlockSize, float value, UIMeasurementUnit unit) {
-            switch (unit) {
-                case UIMeasurementUnit.Content:
-                    return ComputeContentWidth(resolvedBlockSize);
+            switch (measurement.unit) {
+                case UIMeasurementUnit.Content: {
+                    float width = ComputeContentWidth(resolvedBlockSize);
+                    float old = size.width;
+                    size.width = width;
+                    // todo -- try not to fuck with style here
+                    width += ResolveFixedWidth(element.style.PaddingLeft);
+                    width += ResolveFixedWidth(element.style.PaddingRight);
+                    width += ResolveFixedWidth(element.style.BorderRight);
+                    width += ResolveFixedWidth(element.style.BorderLeft);
+                    size.width = old;
+                    if (width < 0) width = 0;
+                    return width;
+                }
 
                 case UIMeasurementUnit.FitContent:
-                    float minWidth = GetIntrinsicMinWidth();
+                    float min = GetIntrinsicMinWidth();
                     float pref = GetIntrinsicMaxWidth();
-                    return Mathf.Max(minWidth, Mathf.Min(resolvedBlockSize, pref));
+                    return Mathf.Max(min, Mathf.Min(resolvedBlockSize, pref));
 
                 case UIMeasurementUnit.Pixel:
                     return value;
@@ -221,20 +203,35 @@ namespace UIForia.Systems {
 
                 case UIMeasurementUnit.MaxContent:
                     return GetIntrinsicMaxWidth();
+                
+                case UIMeasurementUnit.ParentSize:
+                case UIMeasurementUnit.ParentContentArea:
+                    return resolvedBlockSize * measurement.value;
             }
 
             return 0;
         }
 
-        public float ResolveHeight(float width, float resolvedBlockSize, float value, UIMeasurementUnit unit) {
-            switch (unit) {
+        public float ResolveHeight(float width, float blockWidth, float blockHeight, UIMeasurement measurement) {
+            float value = measurement.value;
+
+            switch (measurement.unit) {
                 case UIMeasurementUnit.Content:
-                    return ComputeContentHeight(width, resolvedBlockSize);
+                    float height = ComputeContentHeight(width, blockWidth, blockHeight);
+                    float old = size.height;
+                    size.height = height;
+                    height += ResolveFixedHeight(element.style.PaddingTop);
+                    height += ResolveFixedHeight(element.style.PaddingBottom);
+                    height += ResolveFixedHeight(element.style.BorderBottom);
+                    height += ResolveFixedHeight(element.style.BorderTop);
+                    size.height = old;
+                    if (height < 0) height = 0;
+                    return height;
 
                 case UIMeasurementUnit.FitContent:
-                    float minHeight = GetIntrinsicMinHeight();
+                    float min = GetIntrinsicMinHeight();
                     float pref = GetIntrinsicMaxHeight();
-                    return Mathf.Max(minHeight, Mathf.Min(resolvedBlockSize, pref));
+                    return Mathf.Max(min, Mathf.Min(blockHeight, pref));
 
                 case UIMeasurementUnit.Pixel:
                     return value;
@@ -244,7 +241,7 @@ namespace UIForia.Systems {
 
                 case UIMeasurementUnit.Percentage:
                     // percentage of last resolved size (ie containing block)
-                    return resolvedBlockSize * value;
+                    return blockHeight * value;
 
                 case UIMeasurementUnit.ViewportWidth:
                     return element.View.Viewport.width * value;
@@ -257,17 +254,21 @@ namespace UIForia.Systems {
 
                 case UIMeasurementUnit.MaxContent:
                     return GetIntrinsicMaxHeight();
+                
+                case UIMeasurementUnit.ParentSize:
+                case UIMeasurementUnit.ParentContentArea:
+                    return blockHeight * measurement.value;
             }
 
             return 0;
         }
 
 
-        public virtual float ComputeContentWidth(float blockWidth) {
+        protected virtual float ComputeContentWidth(float blockWidth) {
             return 0;
         }
 
-        public virtual float ComputeContentHeight(float width, float blockHeight) {
+        protected virtual float ComputeContentHeight(float width, float blockWidth, float blockHeight) {
             return 0;
         }
 
@@ -299,9 +300,7 @@ namespace UIForia.Systems {
 
         [DebuggerStepThrough]
         public float ResolveFixedHeight(UIFixedLength height) {
-            
             switch (height.unit) {
-                
                 case UIFixedUnit.Pixel:
                     return height.value;
 
@@ -323,7 +322,6 @@ namespace UIForia.Systems {
                 default:
                     return 0;
             }
-            
         }
 
         public void ApplyHorizontalLayout(float localX, float containingWidth, float allocatedWidth, float preferredWidth, in Alignment alignment, Fit fit) {
@@ -334,7 +332,7 @@ namespace UIForia.Systems {
             if (selfFitHorizontal != Fit.Unset) {
                 fit = selfFitHorizontal;
             }
-            
+
             Size oldSize = size;
 
             paddingBox.left = ResolveFixedWidth(element.style.PaddingLeft);
@@ -369,9 +367,51 @@ namespace UIForia.Systems {
 
             allocatedSize.width = allocatedWidth;
             containingBox.width = containingWidth;
-            
+
+            ref SizeSet sizeSet = ref owner.sizeSetList.array[traversalIndex];
+            sizeSet.size = size;
+            sizeSet.allocatedSize = allocatedSize;
+
+            AlignmentBehavior alignmentBehavior = element.style.AlignmentBehaviorX;
+            if (alignmentBehavior == AlignmentBehavior.Self) {
+                targetAlignmentHorizontal.value = element.style.AlignmentOffsetX;
+                targetAlignmentHorizontal.pivot = element.style.AlignmentPivotX;
+                targetAlignmentHorizontal.target = element.style.AlignmentTargetX;
+            }
+            else {
+                targetAlignmentHorizontal = alignment;
+            }
+
+            switch (targetAlignmentHorizontal.target) {
+                case AlignmentTarget.AllocatedBox:
+                    alignedPosition.x = (allocatedWidth * targetAlignmentHorizontal.value) - (size.width * targetAlignmentHorizontal.pivot);
+                    break;
+
+                case AlignmentTarget.Parent:
+                    alignedPosition.x = (parent.size.width * targetAlignmentHorizontal.value) - (size.width * targetAlignmentHorizontal.pivot);
+                    break;
+
+                case AlignmentTarget.ParentContentArea:
+                    alignedPosition.x = ((parent.size.width - parent.paddingBox.top - parent.paddingBox.bottom) * targetAlignmentHorizontal.value) - (size.width * targetAlignmentHorizontal.pivot);
+                    break;
+
+                case AlignmentTarget.View:
+                    alignedPosition.x = ((element.View.Viewport.width - parent.paddingBox.top - parent.paddingBox.bottom) * targetAlignmentHorizontal.value) - (size.width * targetAlignmentHorizontal.pivot);
+                    break;
+
+                case AlignmentTarget.Screen:
+                    alignedPosition.x = ((Screen.width - parent.paddingBox.top - parent.paddingBox.bottom) * targetAlignmentHorizontal.value) - (size.width * targetAlignmentHorizontal.pivot);
+                    break;
+            }
+
+            alignedPosition.x += localX;
+
+            ref PositionSet positionSet = ref owner.positionSetList.array[traversalIndex];
+            positionSet.allocatedPosition = allocatedPosition;
+            positionSet.alignedPosition = alignedPosition;
+
             // if content size changed we need to layout todo account for padding
-            if ((int)oldSize.width != (int)size.width) {
+            if ((int) oldSize.width != (int) size.width) {
                 flags |= LayoutRenderFlag.NeedsLayout;
             }
 
@@ -380,15 +420,20 @@ namespace UIForia.Systems {
             // content size = extents of my content
         }
 
-        public void ApplyLayoutVertical(float localY, float containingHeight, float allocatedHeight, float preferredHeight, in Alignment alignment, Fit fit) {
+        public void ApplyVerticalLayout(float localY, float containingHeight, float allocatedHeight, float preferredHeight, in Alignment alignment, Fit fit) {
             allocatedPosition.y = localY;
 
-            if (selfFitHorizontal != Fit.Unset) {
-                fit = selfFitHorizontal;
+            if (selfFitVertical != Fit.Unset) {
+                fit = selfFitVertical;
             }
 
             Size oldSize = size;
-            
+
+            paddingBox.top = ResolveFixedHeight(element.style.PaddingTop);
+            paddingBox.bottom = ResolveFixedHeight(element.style.PaddingBottom);
+            borderBox.top = ResolveFixedHeight(element.style.BorderTop);
+            borderBox.bottom = ResolveFixedHeight(element.style.BorderBottom);
+
             switch (fit) {
                 case Fit.Unset:
                 case Fit.None:
@@ -417,67 +462,99 @@ namespace UIForia.Systems {
             allocatedSize.height = allocatedHeight;
             containingBox.height = containingHeight;
 
-            if ((int)oldSize.height != (int)size.height) {
-                flags |= LayoutRenderFlag.NeedsLayout;
+            AlignmentBehavior alignmentBehavior = element.style.AlignmentBehaviorY;
+            if (alignmentBehavior == AlignmentBehavior.Self) {
+                targetAlignmentVertical.value = element.style.AlignmentOffsetY;
+                targetAlignmentVertical.pivot = element.style.AlignmentPivotY;
+                targetAlignmentVertical.target = element.style.AlignmentTargetY;
+            }
+            else {
+                targetAlignmentVertical = alignment;
+            }
+            
+            switch (targetAlignmentVertical.target) {
+                case AlignmentTarget.AllocatedBox:
+                    alignedPosition.y = (allocatedHeight * targetAlignmentVertical.value) - (size.height * targetAlignmentVertical.pivot);
+                    break;
+
+                // todo -- do the following cases need to be offset again by margin size?
+                case AlignmentTarget.Parent:
+                    alignedPosition.y = (parent.size.height * targetAlignmentVertical.value) - (size.height * targetAlignmentVertical.pivot);
+                    break;
+
+                case AlignmentTarget.ParentContentArea:
+                    alignedPosition.y = ((parent.size.height - parent.paddingBox.top - parent.paddingBox.bottom) * targetAlignmentVertical.value) - (size.height * targetAlignmentVertical.pivot);
+                    break;
+
+                case AlignmentTarget.View:
+                    alignedPosition.y = ((element.View.Viewport.height - parent.paddingBox.top - parent.paddingBox.bottom) * targetAlignmentVertical.value) - (size.height * targetAlignmentVertical.pivot);
+                    break;
+
+                case AlignmentTarget.Screen:
+                    alignedPosition.y = ((Screen.height - parent.paddingBox.top - parent.paddingBox.bottom) * targetAlignmentVertical.value) - (size.height * targetAlignmentVertical.pivot);
+                    break;
             }
 
+            alignedPosition.y += localY;
+
+            ref SizeSet sizeSet = ref owner.sizeSetList.array[traversalIndex];
+            sizeSet.size = size;
+            sizeSet.allocatedSize = allocatedSize;
+
+            ref PositionSet positionSet = ref owner.positionSetList.array[traversalIndex];
+            positionSet.allocatedPosition = allocatedPosition;
+            positionSet.alignedPosition = alignedPosition;
+
+            if ((int) oldSize.height != (int) size.height) {
+                flags |= LayoutRenderFlag.NeedsLayout;
+            }
         }
 
-        public struct ClipGroup {
-
-            public FastLayoutBox root;
-            public LightList<FastLayoutBox> members;
-
-        }
-        
         public void GetWidth(float lastResolvedWidth, ref SizeConstraints output) {
-            output.minWidth = ResolveWidth(lastResolvedWidth, widthMeasurement.minValue, widthMeasurement.minUnit);
-
-            output.maxWidth = ResolveWidth(lastResolvedWidth, widthMeasurement.maxValue, widthMeasurement.maxUnit);
-
-            output.prefWidth = ResolveWidth(lastResolvedWidth, widthMeasurement.prefValue, widthMeasurement.prefUnit);
+            output.minWidth = ResolveWidth(lastResolvedWidth, minWidth);
+            output.maxWidth = ResolveWidth(lastResolvedWidth, maxWidth);
+            output.prefWidth = ResolveWidth(lastResolvedWidth, prefWidth);
 
             if (output.prefWidth < output.minWidth) output.prefWidth = output.minWidth;
             if (output.prefWidth > output.maxWidth) output.prefWidth = output.maxWidth;
         }
 
-        public void GetHeight(float width, float lastResolvedHeight, ref SizeConstraints output) {
-            output.minHeight = ResolveHeight(width, lastResolvedHeight, heightMeasurement.minValue, heightMeasurement.minUnit);
-
-            output.maxHeight = ResolveHeight(width, lastResolvedHeight, heightMeasurement.maxValue, heightMeasurement.maxUnit);
-
-            output.prefHeight = ResolveHeight(width, lastResolvedHeight, heightMeasurement.prefValue, heightMeasurement.prefUnit);
+        public void GetHeight(float width, float blockWidth, float blockHeight, ref SizeConstraints output) {
+            output.minHeight = ResolveHeight(width, blockWidth, blockHeight, minHeight);
+            output.maxHeight = ResolveHeight(width, blockWidth, blockHeight, maxHeight);
+            output.prefHeight = ResolveHeight(width, blockWidth, blockHeight, prefHeight);
 
             if (output.prefHeight < output.minHeight) output.prefHeight = output.minHeight;
             if (output.prefHeight > output.maxHeight) output.prefHeight = output.maxHeight;
         }
 
         public void Layout() {
-            
-            if ((flags & LayoutRenderFlag.NeedsLayout) == 0) {
-                return;
-            }
+            // todo -- size check
 
             SVGXMatrix m = localMatrix;
-            
+
             float pivotX = ResolveFixedWidth(element.style.TransformPivotX);
             float pivotY = ResolveFixedWidth(element.style.TransformPivotY);
             float scaleX = element.style.TransformScaleX;
             float scaleY = element.style.TransformScaleY;
             float rotation = element.style.TransformRotation;
-            
+
             // todo -- need to apply alignment here
             // todo -- ResolveTransformOffset();
-            Vector2 localPosition = allocatedPosition;
-            
+            Vector2 localPosition = alignedPosition;
+
             m = SVGXMatrix.TRS(localPosition, rotation, new Vector2(scaleX, scaleY));
             SVGXMatrix pivotMat = new SVGXMatrix(1, 0, 0, 1, size.width * pivotX, size.height * pivotY);
             localMatrix = pivotMat * m * new SVGXMatrix(1, 0, 0, 1, -size.width * pivotX, -size.height * pivotY);
 
             owner.localMatrixList.array[traversalIndex] = localMatrix;
-            
+
+            if ((flags & LayoutRenderFlag.NeedsLayout) == 0) {
+                return;
+            }
+
             PerformLayout();
-            
+
             flags &= ~LayoutRenderFlag.NeedsLayout;
 
             FastLayoutBox child = firstChild;
@@ -485,63 +562,31 @@ namespace UIForia.Systems {
                 child.Layout();
                 child = child.nextSibling;
             }
+
             // todo -- compute content size & local overflow? might need to happen elsewhere
-
         }
-        
-//        public void Layout(ContainingBlock containingBlock, bool parentUsesSize = false) {
-//            FastLayoutBox relayoutBoundary;
-//
-//            // when would parent not use size?
-//            // fr grid cell
-//            // table cell?
-//            // ignored
-//
-//            // also account for fixed size on both dimensions
-//
-//            bool tightWidth = (widthMeasurement.prefUnit == UIMeasurementUnit.Pixel ||
-//                               widthMeasurement.prefUnit == UIMeasurementUnit.Em ||
-//                               widthMeasurement.prefUnit == UIMeasurementUnit.ViewportWidth ||
-//                               widthMeasurement.prefUnit == UIMeasurementUnit.ViewportHeight);
-//
-//            bool tight = tightWidth && (heightMeasurement.prefUnit == UIMeasurementUnit.Pixel ||
-//                                        heightMeasurement.prefUnit == UIMeasurementUnit.Em ||
-//                                        heightMeasurement.prefUnit == UIMeasurementUnit.ViewportWidth ||
-//                                        heightMeasurement.prefUnit == UIMeasurementUnit.ViewportHeight);
-//
-//            if (element.style.LayoutBehavior == LayoutBehavior.Ignored || !parentUsesSize || sizedByParent || tight || parent == null) {
-//                relayoutBoundary = this;
-//            }
-//            else {
-//                relayoutBoundary = parent.relayoutBoundary;
-//            }
-//
-//            // if sized based on containing block & containing block size didn't change, don't layout.
-//            // can be per axis probably and mixed w/ tight width or height
-//
-//            if ((flags & LayoutRenderFlag.NeedsLayout) != 0 && this.blockSize.Equals(containingBlock) && this.relayoutBoundary == relayoutBoundary) {
-//                return;
-//            }
-//
-//            this.blockSize = containingBlock;
-//            this.relayoutBoundary = relayoutBoundary;
-//
-//            if (sizedByParent) {
-//                PerformResize();
-//            }
-//
-//            PerformLayout();
-//
-//            flags &= ~(LayoutRenderFlag.NeedsLayout);
-//
-//            MarkNeedsPaint();
-//        }
 
-        public void PerformResize() { }
+        protected abstract void PerformLayout();
 
-        public abstract void PerformLayout();
+        protected virtual void OnChildSizeChanged(FastLayoutBox child) {
+            if ((flags & LayoutRenderFlag.NeedsLayout) != 0) {
+                return;
+            }
 
-        public void MarkNeedsPaint() { }
+            if ((child.flags & LayoutRenderFlag.Ignored) != 0) {
+                return;
+            }
+
+            if (prefWidth.unit == UIMeasurementUnit.Content || prefHeight.unit == UIMeasurementUnit.Content) {
+                MarkNeedsLayout();
+            }
+        }
+
+        public void MarkNeedsContentSizeLayout(FastLayoutBox child) {
+            if ((flags & LayoutRenderFlag.NeedsLayout) != 0) {
+                return;
+            }
+        }
 
         public void MarkNeedsLayout() {
             if ((flags & LayoutRenderFlag.NeedsLayout) != 0) {
@@ -549,12 +594,13 @@ namespace UIForia.Systems {
             }
 
             // go upwards until we find a relayout boundary
-            if (relayoutBoundary != this) {
+            if (relayoutBoundary != this && parent != null) {
                 parent.MarkNeedsLayout();
             }
             else {
+                // add to root list of nodes needing layout
                 flags |= LayoutRenderFlag.NeedsLayout;
-                layoutSystem.nodesNeedingLayout.Add(this); // add to root list of nodes needing layout
+                owner.toLayout.Add(this);
             }
         }
 
@@ -609,19 +655,19 @@ namespace UIForia.Systems {
                         break;
 
                     case StylePropertyId.TextFontSize:
-                        
+
                         paddingBox.left = ResolveFixedWidth(element.style.PaddingLeft);
                         paddingBox.right = ResolveFixedWidth(element.style.PaddingRight);
                         paddingBox.top = ResolveFixedHeight(element.style.PaddingTop);
                         paddingBox.bottom = ResolveFixedHeight(element.style.PaddingBottom);
-                        
+
                         borderBox.left = ResolveFixedWidth(element.style.BorderLeft);
                         borderBox.right = ResolveFixedWidth(element.style.BorderRight);
                         borderBox.top = ResolveFixedHeight(element.style.BorderTop);
                         borderBox.bottom = ResolveFixedHeight(element.style.BorderBottom);
-                        
+
                         // anything else em sized should be updated here too
-                        
+
                         break;
 
                     // todo -- margin should be a fixed measurement probably
@@ -642,44 +688,32 @@ namespace UIForia.Systems {
                         break;
 
                     case StylePropertyId.PreferredWidth:
-                        UIMeasurement prefWidth = property.AsUIMeasurement;
-                        widthMeasurement.prefValue = prefWidth.value;
-                        widthMeasurement.prefUnit = prefWidth.unit;
+                        prefWidth = property.AsUIMeasurement;
                         marked = true;
                         break;
 
                     case StylePropertyId.PreferredHeight:
-                        UIMeasurement prefHeight = property.AsUIMeasurement;
-                        heightMeasurement.prefValue = prefHeight.value;
-                        heightMeasurement.prefUnit = prefHeight.unit;
+                        prefHeight = property.AsUIMeasurement;
                         marked = true;
                         break;
 
                     case StylePropertyId.MinWidth:
-                        UIMeasurement minWidth = property.AsUIMeasurement;
-                        widthMeasurement.minValue = minWidth.value;
-                        widthMeasurement.minUnit = minWidth.unit;
+                        minWidth = property.AsUIMeasurement;
                         marked = true;
                         break;
 
                     case StylePropertyId.MinHeight:
-                        UIMeasurement minHeight = property.AsUIMeasurement;
-                        heightMeasurement.minValue = minHeight.value;
-                        heightMeasurement.minUnit = minHeight.unit;
+                        minHeight = property.AsUIMeasurement;
                         marked = true;
                         break;
 
                     case StylePropertyId.MaxWidth:
-                        UIMeasurement maxWidth = property.AsUIMeasurement;
-                        widthMeasurement.maxValue = maxWidth.value;
-                        widthMeasurement.maxUnit = maxWidth.unit;
+                        maxWidth = property.AsUIMeasurement;
                         marked = true;
                         break;
 
                     case StylePropertyId.MaxHeight:
-                        UIMeasurement maxHeight = property.AsUIMeasurement;
-                        heightMeasurement.maxValue = maxHeight.value;
-                        heightMeasurement.maxUnit = maxHeight.unit;
+                        maxHeight = property.AsUIMeasurement;
                         marked = true;
                         break;
 
@@ -711,9 +745,8 @@ namespace UIForia.Systems {
             }
 
             if (marked) {
-                MarkNeedsLayout();
+                parent?.OnChildSizeChanged(this);
             }
-            
         }
 
         public virtual void SetChildren(LightList<FastLayoutBox> container) {
@@ -723,15 +756,10 @@ namespace UIForia.Systems {
             }
 
             firstChild = container[0];
-            for (int i = 0;
-                i < container.size;
-                i++) {
+            for (int i = 0;i < container.size;i++) {
                 FastLayoutBox ptr = container[i];
                 ptr.parent = this;
-                if (i != 0) {
-                    ptr.prevSibling = container[i - 1];
-                }
-
+                
                 if (i != container.size - 1) {
                     ptr.nextSibling = container[i + 1];
                 }
@@ -752,7 +780,77 @@ namespace UIForia.Systems {
             }
         }
 
-        public void GetMarginHorizontal(ref float containingBlockWidth) { }
+        public void GetMarginHorizontal(float blockWidth, ref OffsetRect margin) {
+            switch (marginLeft.unit) {
+                case UIMeasurementUnit.Pixel:
+                    margin.left = marginLeft.value;
+                    break;
+
+                case UIMeasurementUnit.Em:
+                    margin.left = element.style.GetResolvedFontSize() * marginLeft.value;
+                    break;
+
+                case UIMeasurementUnit.Percentage:
+                    margin.left = blockWidth * marginLeft.value;
+                    break;
+            }
+
+            switch (marginRight.unit) {
+                case UIMeasurementUnit.Pixel:
+                    margin.right = marginRight.value;
+                    break;
+
+                case UIMeasurementUnit.Em:
+                    margin.right = element.style.GetResolvedFontSize() * marginRight.value;
+                    break;
+
+                case UIMeasurementUnit.Percentage:
+                    margin.right = blockWidth * marginRight.value;
+                    break;
+            }
+        }
+
+        public void GetMarginVertical(float blockHeight, ref OffsetRect margin) {
+            switch (marginTop.unit) {
+                case UIMeasurementUnit.Pixel:
+                    margin.top = marginTop.value;
+                    break;
+
+                case UIMeasurementUnit.Em:
+                    margin.top = element.style.GetResolvedFontSize() * marginTop.value;
+                    break;
+
+                case UIMeasurementUnit.Percentage:
+                    margin.top = blockHeight * marginTop.value;
+                    break;
+            }
+
+            switch (marginBottom.unit) {
+                case UIMeasurementUnit.Pixel:
+                    margin.bottom = marginBottom.value;
+                    break;
+
+                case UIMeasurementUnit.Em:
+                    margin.bottom = element.style.GetResolvedFontSize() * marginBottom.value;
+                    break;
+
+                case UIMeasurementUnit.Percentage:
+                    margin.bottom = blockHeight * marginBottom.value;
+                    break;
+            }
+        }
+
+        public void Replace(FastLayoutBox box) {
+            firstChild = box.firstChild;
+            parent = box.parent;
+            FastLayoutBox ptr = firstChild;
+            while (ptr != null) {
+                ptr.parent = this;
+                ptr = ptr.nextSibling;
+            }
+        }
+
+        protected virtual void OnChildStyleChanged(FastLayoutBox child, StructList<StyleProperty> changeList) { }
 
     }
 

@@ -108,7 +108,7 @@ namespace UIForia.Systems {
             node.enabledBinding = enabledBinding;
             node.root = rootElement;
             node.element = element;
-            node.system = scope.application.LinqBindingSystem;
+          //  node.system = scope.application.LinqBindingSystem;
             node.phase = node.system.previousPhase;
             node.iteratorIndex = -1;
             node.bindings = default;

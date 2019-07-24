@@ -6,6 +6,7 @@ using TMPro;
 using UIForia.Layout;
 using UIForia.Layout.LayoutTypes;
 using UIForia.Rendering;
+using UIForia.Systems;
 using UnityEngine;
 
 namespace UIForia.Editor {
@@ -53,7 +54,7 @@ namespace UIForia.Editor {
                     return preamble + $"(int){GetDefaultValue()})";
                 }
 
-                return preamble + $"0, 0, {GetDefaultValue()})";
+                return preamble + $"{GetDefaultValue()})";
             }
         }
 
@@ -80,7 +81,7 @@ namespace UIForia.Editor {
                     return $"new StyleProperty(StylePropertyId.{propertyIdName}, {propertyIdName})";
                 }
 
-                return $"new StyleProperty(StylePropertyId.{propertyIdName}, 0, 0, {propertyIdName})";
+                return $"new StyleProperty(StylePropertyId.{propertyIdName}, {propertyIdName})";
             }
         }
         
@@ -98,6 +99,10 @@ namespace UIForia.Editor {
                     return $"new StyleProperty(StylePropertyId.{propertyIdName}, value)";
                 }
 
+                if (type == typeof(Alignment)) {
+                    return $"new StyleProperty(StylePropertyId.{propertyIdName}, value)";
+                }
+                
                 if (typeof(UIMeasurement) == type
                     || typeof(UIFixedLength) == type
                     || typeof(GridTrackSize) == type
@@ -107,7 +112,7 @@ namespace UIForia.Editor {
                     return $"new StyleProperty(StylePropertyId.{propertyIdName}, value)";
                 }
 
-                return $"new StyleProperty(StylePropertyId.{propertyIdName}, 0, 0, value)";
+                return $"new StyleProperty(StylePropertyId.{propertyIdName}, value)";
             }
         }
 
@@ -115,35 +120,35 @@ namespace UIForia.Editor {
 
         public string GetIsUnset() {
             if (type.IsEnum) {
-                return $"{nameof(StyleProperty.valuePart0)} == 0 || IntUtil.UnsetValue == {nameof(StyleProperty.valuePart0)}";
+                return $"{nameof(StyleProperty.int0)} == 0 || IntUtil.UnsetValue == {nameof(StyleProperty.int0)}";
             }
 
             if (type == typeof(float)) {
-                return $"!FloatUtil.IsDefined({nameof(StyleProperty.floatValue)})";
+                return $"!FloatUtil.IsDefined({nameof(StyleProperty.float1)})";
             }
 
             if (type == typeof(int)) {
-                return $"!IntUtil.IsDefined({nameof(StyleProperty.valuePart0)})";
+                return $"!IntUtil.IsDefined({nameof(StyleProperty.int0)})";
             }
 
             if (type == typeof(UIMeasurement)) {
-                return $"!FloatUtil.IsDefined({nameof(StyleProperty.floatValue)}) || {nameof(StyleProperty.valuePart1)} == 0";
+                return $"!FloatUtil.IsDefined({nameof(StyleProperty.float1)}) || {nameof(StyleProperty.int1)} == 0";
             }
 
             if (type == typeof(TransformOffset)) {
-                return $"!FloatUtil.IsDefined({nameof(StyleProperty.floatValue)}) || {nameof(StyleProperty.valuePart1)} == 0";
+                return $"!FloatUtil.IsDefined({nameof(StyleProperty.float1)}) || {nameof(StyleProperty.int1)} == 0";
             }
             
             if (type == typeof(UIFixedLength)) {
-                return $"!FloatUtil.IsDefined({nameof(StyleProperty.floatValue)}) || {nameof(StyleProperty.valuePart1)} == 0";
+                return $"!FloatUtil.IsDefined({nameof(StyleProperty.float1)}) || {nameof(StyleProperty.int1)} == 0";
             }
 
             if (type == typeof(GridTrackSize)) {
-                return $"!FloatUtil.IsDefined({nameof(StyleProperty.floatValue)}) || {nameof(StyleProperty.valuePart1)} == 0";
+                return $"!FloatUtil.IsDefined({nameof(StyleProperty.float1)}) || {nameof(StyleProperty.int1)} == 0";
             }
 
             if (type == typeof(Color)) {
-                return $"{nameof(StyleProperty.valuePart1)} == 0";
+                return $"{nameof(StyleProperty.int1)} == 0";
             }
 
             return $"{nameof(StyleProperty.objectField)} == null";
@@ -206,6 +211,10 @@ namespace UIForia.Editor {
             if (defaultValue is Color) {
                 Color c = (Color) defaultValue;
                 return $"new Color({c.r.ToString(CultureInfo.InvariantCulture)}f, {c.g.ToString(CultureInfo.InvariantCulture)}f, {c.b.ToString(CultureInfo.InvariantCulture)}f, {c.a.ToString(CultureInfo.InvariantCulture)}f)";
+            }
+
+            if (defaultValue is Alignment alignment) {
+                return $"new Alignment({alignment.value.ToString(CultureInfo.InvariantCulture)}f, {alignment.pivot.ToString(CultureInfo.InvariantCulture)}f, {Enum.GetName(typeof(UIMeasurementUnit), alignment.target)})";
             }
 
             if (defaultValue is float) {
@@ -315,7 +324,7 @@ namespace UIForia.Editor {
                 return $"new StyleProperty({paramName}, {valueName})";
             }
 
-            return $"new StyleProperty({paramName}, 0, 0, {valueName})";
+            return $"new StyleProperty({paramName}, {valueName})";
         }
 
     }

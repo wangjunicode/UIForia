@@ -63,6 +63,16 @@ namespace UIForia.Rendering {
 		public const float RadialLayoutStartAngle = 0f;
 		public const float RadialLayoutEndAngle = 360f;
 		public static readonly UIFixedLength RadialLayoutRadius = new UIFixedLength(0.5f, UIFixedUnit.Percent);
+		public const AlignmentTarget AlignmentTargetX = UIForia.Layout.AlignmentTarget.Unset;
+		public const AlignmentTarget AlignmentTargetY = UIForia.Layout.AlignmentTarget.Unset;
+		public const AlignmentBehavior AlignmentBehaviorX = UIForia.Layout.AlignmentBehavior.Default;
+		public const AlignmentBehavior AlignmentBehaviorY = UIForia.Layout.AlignmentBehavior.Default;
+		public const float AlignmentPivotX = 0f;
+		public const float AlignmentPivotY = 0f;
+		public const float AlignmentOffsetX = 0f;
+		public const float AlignmentOffsetY = 0f;
+		public const Fit FitX = UIForia.Layout.Fit.Unset;
+		public const Fit FitY = UIForia.Layout.Fit.Unset;
 		public static readonly UIMeasurement MinWidth = new UIMeasurement(0f, UIMeasurementUnit.Pixel);
 		public static readonly UIMeasurement MaxWidth = new UIMeasurement(3.402823E+38f, UIMeasurementUnit.Pixel);
 		public static readonly UIMeasurement PreferredWidth = new UIMeasurement(1f, UIMeasurementUnit.Content);
@@ -169,13 +179,13 @@ namespace UIForia.Rendering {
 				case StylePropertyId.BackgroundImageRotation:
 					 return new StyleProperty(StylePropertyId.BackgroundImageRotation, new UIFixedLength(0f, UIFixedUnit.Pixel));
 				case StylePropertyId.BackgroundImage:
-					 return new StyleProperty(StylePropertyId.BackgroundImage, 0, 0, null);
+					 return new StyleProperty(StylePropertyId.BackgroundImage, null);
 				case StylePropertyId.Painter:
-					 return new StyleProperty(StylePropertyId.Painter, 0, 0, "");
+					 return new StyleProperty(StylePropertyId.Painter, "");
 				case StylePropertyId.Opacity:
 					 return new StyleProperty(StylePropertyId.Opacity, 1f);
 				case StylePropertyId.Cursor:
-					 return new StyleProperty(StylePropertyId.Cursor, 0, 0, null);
+					 return new StyleProperty(StylePropertyId.Cursor, null);
 				case StylePropertyId.Visibility:
 					 return new StyleProperty(StylePropertyId.Visibility, (int)UIForia.Rendering.Visibility.Visible);
 				case StylePropertyId.FlexItemOrder:
@@ -211,9 +221,9 @@ namespace UIForia.Rendering {
 				case StylePropertyId.GridLayoutDensity:
 					 return new StyleProperty(StylePropertyId.GridLayoutDensity, (int)UIForia.Layout.GridLayoutDensity.Sparse);
 				case StylePropertyId.GridLayoutColTemplate:
-					 return new StyleProperty(StylePropertyId.GridLayoutColTemplate, 0, 0, ListPool<GridTrackSize>.Empty);
+					 return new StyleProperty(StylePropertyId.GridLayoutColTemplate, ListPool<GridTrackSize>.Empty);
 				case StylePropertyId.GridLayoutRowTemplate:
-					 return new StyleProperty(StylePropertyId.GridLayoutRowTemplate, 0, 0, ListPool<GridTrackSize>.Empty);
+					 return new StyleProperty(StylePropertyId.GridLayoutRowTemplate, ListPool<GridTrackSize>.Empty);
 				case StylePropertyId.GridLayoutMainAxisAutoSize:
 					 return new StyleProperty(StylePropertyId.GridLayoutMainAxisAutoSize, new GridTrackSize(1f, GridTemplateUnit.MaxContent));
 				case StylePropertyId.GridLayoutCrossAxisAutoSize:
@@ -232,6 +242,26 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.RadialLayoutEndAngle, 360f);
 				case StylePropertyId.RadialLayoutRadius:
 					 return new StyleProperty(StylePropertyId.RadialLayoutRadius, new UIFixedLength(0.5f, UIFixedUnit.Percent));
+				case StylePropertyId.AlignmentTargetX:
+					 return new StyleProperty(StylePropertyId.AlignmentTargetX, (int)UIForia.Layout.AlignmentTarget.Unset);
+				case StylePropertyId.AlignmentTargetY:
+					 return new StyleProperty(StylePropertyId.AlignmentTargetY, (int)UIForia.Layout.AlignmentTarget.Unset);
+				case StylePropertyId.AlignmentBehaviorX:
+					 return new StyleProperty(StylePropertyId.AlignmentBehaviorX, (int)UIForia.Layout.AlignmentBehavior.Default);
+				case StylePropertyId.AlignmentBehaviorY:
+					 return new StyleProperty(StylePropertyId.AlignmentBehaviorY, (int)UIForia.Layout.AlignmentBehavior.Default);
+				case StylePropertyId.AlignmentPivotX:
+					 return new StyleProperty(StylePropertyId.AlignmentPivotX, 0f);
+				case StylePropertyId.AlignmentPivotY:
+					 return new StyleProperty(StylePropertyId.AlignmentPivotY, 0f);
+				case StylePropertyId.AlignmentOffsetX:
+					 return new StyleProperty(StylePropertyId.AlignmentOffsetX, 0f);
+				case StylePropertyId.AlignmentOffsetY:
+					 return new StyleProperty(StylePropertyId.AlignmentOffsetY, 0f);
+				case StylePropertyId.FitX:
+					 return new StyleProperty(StylePropertyId.FitX, (int)UIForia.Layout.Fit.Unset);
+				case StylePropertyId.FitY:
+					 return new StyleProperty(StylePropertyId.FitY, (int)UIForia.Layout.Fit.Unset);
 				case StylePropertyId.MinWidth:
 					 return new StyleProperty(StylePropertyId.MinWidth, new UIMeasurement(0f, UIMeasurementUnit.Pixel));
 				case StylePropertyId.MaxWidth:
@@ -281,7 +311,7 @@ namespace UIForia.Rendering {
 				case StylePropertyId.TextColor:
 					 return new StyleProperty(StylePropertyId.TextColor, new Color(0f, 0f, 0f, 1f));
 				case StylePropertyId.TextFontAsset:
-					 return new StyleProperty(StylePropertyId.TextFontAsset, 0, 0, TMP_FontAsset.defaultFontAsset);
+					 return new StyleProperty(StylePropertyId.TextFontAsset, TMP_FontAsset.defaultFontAsset);
 				case StylePropertyId.TextFontSize:
 					 return new StyleProperty(StylePropertyId.TextFontSize, new UIFixedLength(18f, UIFixedUnit.Pixel));
 				case StylePropertyId.TextFontStyle:
@@ -359,7 +389,7 @@ namespace UIForia.Rendering {
 				case StylePropertyId.Layer:
 					 return new StyleProperty(StylePropertyId.Layer, 0);
 				case StylePropertyId.Scrollbar:
-					 return new StyleProperty(StylePropertyId.Scrollbar, 0, 0, "");
+					 return new StyleProperty(StylePropertyId.Scrollbar, "");
 				case StylePropertyId.ScrollbarSize:
 					 return new StyleProperty(StylePropertyId.ScrollbarSize, new UIMeasurement(15f, UIMeasurementUnit.Pixel));
 				case StylePropertyId.ScrollbarColor:

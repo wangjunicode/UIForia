@@ -22,6 +22,8 @@ internal enum UIElementFlags {
     
     Registered = 1 << 14,
 
-    DebugLayout = 1 << 15
+    DebugLayout = 1 << 15,
+
+    EnabledThisFrame = 1 << 16
 
 }

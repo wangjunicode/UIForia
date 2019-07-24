@@ -1,8 +1,10 @@
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using TMPro;
 using UIForia.Layout;
 using UIForia.Layout.LayoutTypes;
+using UIForia.Systems;
 using UIForia.Text;
 using UIForia.Util;
 using UnityEngine;
@@ -11,205 +13,238 @@ using TextAlignment = UIForia.Text.TextAlignment;
 
 namespace UIForia.Rendering {
 
-    //[StructLayout(LayoutKind.Explicit)]
+    [StructLayout(LayoutKind.Explicit)]
     public partial struct StyleProperty {
 
-        // todo -- use offsets but can't use use valuePart1, floatValue, and object together
-        //  [FieldOffset(0)]
-        public readonly StylePropertyId propertyId;
+        [FieldOffset(0)] public readonly StylePropertyId propertyId;
 
-        // [FieldOffset(4)]
-        public readonly int valuePart0;
+        [FieldOffset(4)] public readonly int int0;
 
-        //  [FieldOffset(8)]
-        public readonly int valuePart1;
+        [FieldOffset(4)] public readonly float float0;
 
-        //  [FieldOffset(8)]
-        public readonly float floatValue;
+        [FieldOffset(8)] public readonly int int1;
 
-        //  [FieldOffset(8)]
-        public readonly object objectField;
+        [FieldOffset(8)] public readonly float float1;
+
+        [FieldOffset(12)] public readonly int int2;
+
+        [FieldOffset(16)] public readonly object objectField;
 
         [DebuggerStepThrough]
-        public StyleProperty(StylePropertyId propertyId, int value0, int value1, float floatValue, object objectField) {
+        public StyleProperty(StylePropertyId propertyId) {
             this.propertyId = propertyId;
-            this.floatValue = floatValue;
-            this.valuePart0 = value0;
-            this.valuePart1 = value1;
-            this.objectField = objectField;
+            this.int0 = 0;
+            this.int1 = 0;
+            this.float0 = 0;
+            this.float1 = 0;
+            this.int2 = 0;
+            this.objectField = null;
         }
 
         [DebuggerStepThrough]
-        public StyleProperty(StylePropertyId propertyId, int value0, int value1 = 0, object objectField = null) {
-            this.propertyId = propertyId;
-            this.floatValue = 0;
-            this.valuePart0 = value0;
-            this.valuePart1 = value1;
-            this.objectField = objectField;
-        }
-
-        [DebuggerStepThrough]
-        public StyleProperty(StylePropertyId propertyId, float value0, int value1 = 0) {
+        public StyleProperty(StylePropertyId propertyId, int value0, int value1) {
             this.propertyId = propertyId;
             this.objectField = null;
-            this.valuePart0 = 0;
-            this.floatValue = value0;
-            this.valuePart1 = value1;
+            this.float0 = 0;
+            this.float1 = 0;
+            this.int0 = value0;
+            this.int1 = value1;
+            this.int2 = 0;
+        }
+
+        [DebuggerStepThrough]
+        public StyleProperty(StylePropertyId propertyId, float float0, int value1) {
+            this.propertyId = propertyId;
+            this.objectField = null;
+            this.int0 = 0;
+            this.float1 = 0;
+            this.float0 = float0;
+            this.int1 = value1;
+            this.int2 = 0;
         }
 
         [DebuggerStepThrough]
         public StyleProperty(StylePropertyId propertyId, Color color) {
             this.propertyId = propertyId;
             this.objectField = null;
-            this.floatValue = 0;
-            this.valuePart0 = new StyleColor(color).rgba;
-            this.valuePart1 = ColorUtil.IsDefined(color) ? 1 : 0;
+            this.float0 = 0;
+            this.float1 = 0;
+            this.int0 = new StyleColor(color).rgba;
+            this.int1 = ColorUtil.IsDefined(color) ? 1 : 0;
+            this.int2 = 0;
         }
 
         [DebuggerStepThrough]
         public StyleProperty(StylePropertyId propertyId, UIFixedLength length) {
-            this.valuePart0 = 0;
-            this.objectField = null;
             this.propertyId = propertyId;
-            this.floatValue = length.value;
-            this.valuePart1 = (int) length.unit;
+            this.int0 = 0;
+            this.int2 = 0;
+            this.float1 = 0;
+            this.objectField = null;
+            this.float0 = length.value;
+            this.int1 = (int) length.unit;
         }
 
         [DebuggerStepThrough]
         public StyleProperty(StylePropertyId propertyId, UIMeasurement measurement) {
-            this.valuePart0 = 0;
-            this.objectField = null;
             this.propertyId = propertyId;
-            this.floatValue = measurement.value;
-            this.valuePart1 = (int) measurement.unit;
+            this.int0 = 0;
+            this.float1 = 0;
+            this.int2 = 0;
+            this.objectField = null;
+            this.float0 = measurement.value;
+            this.int1 = (int) measurement.unit;
+        }
+
+        [DebuggerStepThrough]
+        public StyleProperty(StylePropertyId propertyId, Alignment alignment) {
+            this.propertyId = propertyId;
+            this.int0 = 0;
+            this.int1 = 0;
+            this.int2 = (int) alignment.target;
+            this.float0 = alignment.value;
+            this.float1 = alignment.pivot;
+            this.objectField = null;
         }
 
         [DebuggerStepThrough]
         public StyleProperty(StylePropertyId propertyId, TransformOffset offset) {
             this.propertyId = propertyId;
             this.objectField = null;
-            this.valuePart0 = 0;
-            this.floatValue = offset.value;
-            this.valuePart1 = (int) offset.unit;
+            this.int0 = 0;
+            this.int2 = 0;
+            this.float1 = 0;
+            this.float0 = offset.value;
+            this.int1 = (int) offset.unit;
         }
 
         [DebuggerStepThrough]
         public StyleProperty(StylePropertyId propertyId, GridTrackSize trackSize) {
-            this.valuePart0 = 0;
             this.propertyId = propertyId;
-            this.floatValue = trackSize.minValue;
-            this.valuePart1 = (int) trackSize.minUnit;
+            this.int0 = 0;
+            this.int2 = 0;
+            this.float1 = 0;
             this.objectField = null;
+            this.float0 = trackSize.minValue;
+            this.int1 = (int) trackSize.minUnit;
         }
 
         [DebuggerStepThrough]
-        public StyleProperty(StylePropertyId propertyId, float floatValue) {
+        public StyleProperty(StylePropertyId propertyId, float float0) {
             this.propertyId = propertyId;
-            this.valuePart0 = 0;
-            this.floatValue = floatValue;
-            this.valuePart1 = 0;
+            this.int0 = 0;
+            this.int1 = 0;
+            this.int2 = 0;
+            this.float1 = 0;
             this.objectField = null;
+            this.float0 = float0;
         }
 
         [DebuggerStepThrough]
         public StyleProperty(StylePropertyId propertyId, int intValue) {
-            this.floatValue = 0;
             this.propertyId = propertyId;
-            this.valuePart0 = intValue;
-            this.valuePart1 = 0;
+            this.float0 = 0;
+            this.float1 = 0;
+            this.int1 = 0;
+            this.int2 = 0;
             this.objectField = null;
+            this.int0 = intValue;
+        }
+
+        [DebuggerStepThrough]
+        public StyleProperty(StylePropertyId propertyId, object objectField) {
+            this.propertyId = propertyId;
+            this.float0 = 0;
+            this.float1 = 0;
+            this.int1 = 0;
+            this.int0 = 0;
+            this.int2 = 0;
+            this.objectField = objectField;
         }
 
         public bool IsDefined {
             [DebuggerStepThrough] get { return !IsUnset; }
         }
 
-        public WhitespaceMode AsWhitespaceMode => (WhitespaceMode) valuePart0;
+        public WhitespaceMode AsWhitespaceMode => (WhitespaceMode) int0;
 
-        public int AsInt => valuePart0;
-        public float AsFloat => floatValue;
-        public GridAxisAlignment AsGridAxisAlignment => (GridAxisAlignment) valuePart0;
-        public CrossAxisAlignment AsCrossAxisAlignment => (CrossAxisAlignment) valuePart0;
-        public MainAxisAlignment AsMainAxisAlignment => (MainAxisAlignment) valuePart0;
-        public Overflow AsOverflow => (Overflow) valuePart0;
-        public Color AsColor => valuePart1 == 0 ? ColorUtil.UnsetValue : (Color) new StyleColor(valuePart0);
+        public int AsInt => int0;
+        public float AsFloat => float0;
+        public GridAxisAlignment AsGridAxisAlignment => (GridAxisAlignment) int0;
+        public CrossAxisAlignment AsCrossAxisAlignment => (CrossAxisAlignment) int0;
+        public MainAxisAlignment AsMainAxisAlignment => (MainAxisAlignment) int0;
+        public Overflow AsOverflow => (Overflow) int0;
+        public Color AsColor => int1 == 0 ? ColorUtil.UnsetValue : (Color) new StyleColor(int0);
 
         public TMP_FontAsset AsFont => (TMP_FontAsset) objectField;
         public Texture2D AsTexture => (Texture2D) objectField;
 
-        public FontStyle AsFontStyle => (FontStyle) valuePart0;
-        public TextAlignment AsTextAlignment => (TextAlignment) valuePart0;
-        public LayoutDirection AsLayoutDirection => (LayoutDirection) valuePart0;
-        public LayoutWrap AsLayoutWrap => (LayoutWrap) valuePart0;
+        public FontStyle AsFontStyle => (FontStyle) int0;
+        public TextAlignment AsTextAlignment => (TextAlignment) int0;
+        public LayoutDirection AsLayoutDirection => (LayoutDirection) int0;
+        public LayoutWrap AsLayoutWrap => (LayoutWrap) int0;
 
-        public GridTrackSize AsGridTrackSize => new GridTrackSize(floatValue, (GridTemplateUnit) valuePart1);
-        public UIMeasurement AsUIMeasurement => new UIMeasurement(floatValue, (UIMeasurementUnit) valuePart1);
-        public UIFixedLength AsUIFixedLength => new UIFixedLength(floatValue, (UIFixedUnit) valuePart1);
-        public TransformOffset AsTransformOffset => new TransformOffset(floatValue, (TransformUnit) valuePart1);
-
+        public GridTrackSize AsGridTrackSize => new GridTrackSize(float0, (GridTemplateUnit) int1);
+        public UIMeasurement AsUIMeasurement => new UIMeasurement(float0, (UIMeasurementUnit) int1);
+        public UIFixedLength AsUIFixedLength => new UIFixedLength(float0, (UIFixedUnit) int1);
+        public TransformOffset AsTransformOffset => new TransformOffset(float0, (TransformUnit) int1);
+        
         public IReadOnlyList<GridTrackSize> AsGridTrackTemplate => (IReadOnlyList<GridTrackSize>) objectField;
 
-        public AnchorTarget AsAnchorTarget => (AnchorTarget) valuePart0;
-        public RenderLayer AsRenderLayer => (RenderLayer) valuePart0;
+        public AnchorTarget AsAnchorTarget => (AnchorTarget) int0;
+        public RenderLayer AsRenderLayer => (RenderLayer) int0;
         public Texture2D AsTexture2D => (Texture2D) objectField;
-        public BackgroundFillType AsBackgroundFillType => (BackgroundFillType) valuePart0;
-        public BackgroundShapeType AsBackgroundShapeType => (BackgroundShapeType) valuePart0;
-        public GridLayoutDensity AsGridLayoutDensity => (GridLayoutDensity) valuePart0;
-        public TransformBehavior AsTransformBehavior => (TransformBehavior) valuePart0;
-        public LayoutType AsLayoutType => (LayoutType) valuePart0;
-        public TextTransform AsTextTransform => (TextTransform) valuePart0;
-        public LayoutBehavior AsLayoutBehavior => (LayoutBehavior) valuePart0;
+        public GridLayoutDensity AsGridLayoutDensity => (GridLayoutDensity) int0;
+        public TransformBehavior AsTransformBehavior => (TransformBehavior) int0;
+        public LayoutType AsLayoutType => (LayoutType) int0;
+        public TextTransform AsTextTransform => (TextTransform) int0;
+        public LayoutBehavior AsLayoutBehavior => (LayoutBehavior) int0;
 
         public IReadOnlyList<GridTrackSize> AsGridTemplate => (IReadOnlyList<GridTrackSize>) objectField;
-        public VerticalScrollbarAttachment AsVerticalScrollbarAttachment => (VerticalScrollbarAttachment) valuePart0;
-        public HorizontalScrollbarAttachment AsHorizontalScrollbarAttachment => (HorizontalScrollbarAttachment) valuePart0;
-        public ScrollbarButtonPlacement AsScrollbarButtonPlacement => (ScrollbarButtonPlacement) valuePart0;
-        public Visibility AsVisibility => (Visibility) valuePart0;
+        public Visibility AsVisibility => (Visibility) int0;
         public CursorStyle AsCursorStyle => (CursorStyle) objectField;
         public string AsString => (string) objectField;
-        public ShadowType AsShadowType => (ShadowType) valuePart0;
+        public ShadowType AsShadowType => (ShadowType) int0;
+        public Fit AsFit => (Fit) int0;
+        
+        public AlignmentTarget AsAlignmentTarget => (AlignmentTarget) int0;
+        public AlignmentBehavior AsAlignmentBehavior => (AlignmentBehavior) int0;
 
-        public static bool operator ==(StyleProperty a, StyleProperty b) {
-            bool baseCase =
-                a.propertyId == b.propertyId &&
-                a.valuePart0 == b.valuePart0 &&
-                a.valuePart1 == b.valuePart1 &&
-                a.objectField == b.objectField;
-
-            if (baseCase) return true;
-            bool aIsNan = float.IsNaN(a.floatValue);
-            bool bIsNan = float.IsNaN(b.floatValue);
-            return aIsNan == bIsNan && Mathf.Approximately(a.floatValue, b.floatValue);
+        public static bool operator ==(in StyleProperty a, in StyleProperty b) {
+            return a.propertyId == b.propertyId &&
+                   a.int0 == b.int0 &&
+                   a.int1 == b.int1 &&
+                   a.int2 == b.int2 &&
+                   a.objectField == b.objectField;
         }
 
-        public static bool operator !=(StyleProperty a, StyleProperty b) {
-            bool baseCase =
-                a.propertyId != b.propertyId ||
-                a.valuePart0 != b.valuePart0 ||
-                a.valuePart1 != b.valuePart1 ||
-                a.objectField != b.objectField;
-
-            if (baseCase) return true;
-            bool aIsNan = float.IsNaN(a.floatValue);
-            bool bIsNan = float.IsNaN(b.floatValue);
-            return aIsNan != bIsNan || !Mathf.Approximately(a.floatValue, b.floatValue);
+        public static bool operator !=(in StyleProperty a, in StyleProperty b) {
+            return a.propertyId != b.propertyId ||
+                   a.int0 != b.int0 ||
+                   a.int1 != b.int1 ||
+                   a.int2 != b.int2 ||
+                   a.objectField != b.objectField;
         }
 
-
-        public bool Equals(StyleProperty other) {
-            return propertyId == other.propertyId && valuePart0 == other.valuePart0 && valuePart1 == other.valuePart1 && Equals(objectField, other.objectField);
+        public bool Equals(in StyleProperty other) {
+            return propertyId == other.propertyId &&
+                   int0 == other.int0 &&
+                   int1 == other.int1 && 
+                   int2 == other.int2 && 
+                   objectField == other.objectField;
         }
 
         public override bool Equals(object obj) {
             if (ReferenceEquals(null, obj)) return false;
-            return obj is StyleProperty && Equals((StyleProperty) obj);
+            return obj is StyleProperty property && Equals(property);
         }
 
         public override int GetHashCode() {
             unchecked {
                 var hashCode = (int) propertyId;
-                hashCode = (hashCode * 397) ^ valuePart0;
-                hashCode = (hashCode * 397) ^ valuePart1;
+                hashCode = (hashCode * 397) ^ int0;
+                hashCode = (hashCode * 397) ^ int1;
+                hashCode = (hashCode * 397) ^ int2;
                 hashCode = (hashCode * 397) ^ (objectField != null ? objectField.GetHashCode() : 0);
                 return hashCode;
             }
@@ -217,7 +252,8 @@ namespace UIForia.Rendering {
 
         [DebuggerStepThrough]
         public static StyleProperty Unset(StylePropertyId propertyId) {
-            return new StyleProperty(propertyId, IntUtil.UnsetValue, IntUtil.UnsetValue, FloatUtil.UnsetValue, null);
+            StyleProperty retn = new StyleProperty(propertyId);
+            return retn;
         }
 
         public static StyleProperty TransformPositionX(TransformOffset length) {
@@ -253,7 +289,7 @@ namespace UIForia.Rendering {
         }
 
         public static StyleProperty BackgroundImage(Texture2D texture) {
-            return new StyleProperty(StylePropertyId.BackgroundImage, 0, 0, texture);
+            return new StyleProperty(StylePropertyId.BackgroundImage, texture);
         }
 
         public static StyleProperty BorderColor(Color color) {
@@ -265,7 +301,7 @@ namespace UIForia.Rendering {
         }
 
         public static StyleProperty Cursor(Texture2D texture) {
-            return new StyleProperty(StylePropertyId.Cursor, 0, 0, texture);
+            return new StyleProperty(StylePropertyId.Cursor, texture);
         }
 
         public static StyleProperty GridItemColStart(int colStart) {
@@ -297,11 +333,11 @@ namespace UIForia.Rendering {
         }
 
         public static StyleProperty GridLayoutColTemplate(IList<GridTrackSize> colTemplate) {
-            return new StyleProperty(StylePropertyId.GridLayoutColTemplate, 0, 0, colTemplate);
+            return new StyleProperty(StylePropertyId.GridLayoutColTemplate, colTemplate);
         }
 
         public static StyleProperty GridLayoutRowTemplate(IList<GridTrackSize> rowTemplate) {
-            return new StyleProperty(StylePropertyId.GridLayoutRowTemplate, 0, 0, rowTemplate);
+            return new StyleProperty(StylePropertyId.GridLayoutRowTemplate, rowTemplate);
         }
 
         public static StyleProperty GridLayoutDirection(LayoutDirection direction) {
@@ -453,7 +489,7 @@ namespace UIForia.Rendering {
         }
 
         public static StyleProperty Font(TMP_FontAsset fontAsset) {
-            return new StyleProperty(StylePropertyId.TextFontAsset, 0, 0, fontAsset);
+            return new StyleProperty(StylePropertyId.TextFontAsset, fontAsset);
         }
 
     }

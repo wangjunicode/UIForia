@@ -141,6 +141,22 @@ namespace UIForia.Rendering {
         ShadowSoftnessX = 1704,
         ShadowSoftnessY = 1705,
         ShadowIntensity = 1706,
+        
+        AlignmentTargetX = 2001,
+        AlignmentTargetY = 2002,
+        
+        AlignmentPivotX = 2003,
+        AlignmentPivotY = 2004,
+        
+        AlignmentOffsetX = 2005,
+        AlignmentOffsetY = 2006,
+        
+        AlignmentBehaviorX = 2007,
+        AlignmentBehaviorY = 2008,
+        
+        FitX = 2009,
+        FitY = 2010,
+
     }
 
 }

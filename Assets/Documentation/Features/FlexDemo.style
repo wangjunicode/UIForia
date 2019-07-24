@@ -7,6 +7,7 @@ style flex-demo {
     PreferredSize = 1pca, 1cnt;
     Padding = 1em;
     FlexLayoutMainAxisAlignment = Center;
+    FlexLayoutDirection = Horizontal;
     Border = 2px;
     BorderColor = black;
     BorderRadius = 20px;
@@ -18,10 +19,11 @@ style flex-demo-content {
     PreferredSize = 1.5cnt, 1cnt;
     TextColor = White;
     BackgroundColor = blue;
+    FlexLayoutDirection = Horizontal;
 }
 
-style col {
-    FlexLayoutDirection = Column;
+style horizontal {
+    FlexLayoutDirection = Horizontal;
 }
 
 style flex-start {

@@ -133,7 +133,7 @@ namespace UIForia.Bindings.StyleBindings {
             var oldValue = element.style.propertyMap[(int)propertyId].AsTexture2D;
             var value = expression.Evaluate(context);
             if (value != oldValue) {
-                element.style.SetProperty(new StyleProperty(propertyId, 0, 0, value), state);
+                element.style.SetProperty(new StyleProperty(propertyId, value), state);
             }
         }
 
@@ -143,12 +143,12 @@ namespace UIForia.Bindings.StyleBindings {
 
         public override void Apply(UIStyle style, ExpressionContext context) {
             var value = expression.Evaluate(context);
-            style.SetProperty(new StyleProperty(propertyId, 0, 0, value));
+            style.SetProperty(new StyleProperty(propertyId, value));
         }
 
         public override void Apply(UIStyleSet styleSet, ExpressionContext context) {
             var value = expression.Evaluate(context);
-            styleSet.SetProperty(new StyleProperty(propertyId, 0, 0, value), state);
+            styleSet.SetProperty(new StyleProperty(propertyId, value), state);
         }
 
     }
@@ -170,7 +170,7 @@ namespace UIForia.Bindings.StyleBindings {
             var oldValue = element.style.propertyMap[(int)propertyId].AsString;
             var value = expression.Evaluate(context);
             if (value != oldValue) {
-                element.style.SetProperty(new StyleProperty(propertyId, 0, 0, value), state);
+                element.style.SetProperty(new StyleProperty(propertyId, value), state);
             }
         }
 
@@ -180,12 +180,12 @@ namespace UIForia.Bindings.StyleBindings {
 
         public override void Apply(UIStyle style, ExpressionContext context) {
             var value = expression.Evaluate(context);
-            style.SetProperty(new StyleProperty(propertyId, 0, 0, value));
+            style.SetProperty(new StyleProperty(propertyId, value));
         }
 
         public override void Apply(UIStyleSet styleSet, ExpressionContext context) {
             var value = expression.Evaluate(context);
-            styleSet.SetProperty(new StyleProperty(propertyId, 0, 0, value), state);
+            styleSet.SetProperty(new StyleProperty(propertyId, value), state);
         }
 
     }
@@ -244,7 +244,7 @@ namespace UIForia.Bindings.StyleBindings {
             var oldValue = element.style.propertyMap[(int)propertyId].AsCursorStyle;
             var value = expression.Evaluate(context);
             if (value != oldValue) {
-                element.style.SetProperty(new StyleProperty(propertyId, 0, 0, value), state);
+                element.style.SetProperty(new StyleProperty(propertyId, value), state);
             }
         }
 
@@ -254,12 +254,12 @@ namespace UIForia.Bindings.StyleBindings {
 
         public override void Apply(UIStyle style, ExpressionContext context) {
             var value = expression.Evaluate(context);
-            style.SetProperty(new StyleProperty(propertyId, 0, 0, value));
+            style.SetProperty(new StyleProperty(propertyId, value));
         }
 
         public override void Apply(UIStyleSet styleSet, ExpressionContext context) {
             var value = expression.Evaluate(context);
-            styleSet.SetProperty(new StyleProperty(propertyId, 0, 0, value), state);
+            styleSet.SetProperty(new StyleProperty(propertyId, value), state);
         }
 
     }
@@ -577,7 +577,7 @@ namespace UIForia.Bindings.StyleBindings {
             var oldValue = element.style.propertyMap[(int)propertyId].AsGridTemplate;
             var value = expression.Evaluate(context);
             if (value != oldValue) {
-                element.style.SetProperty(new StyleProperty(propertyId, 0, 0, value), state);
+                element.style.SetProperty(new StyleProperty(propertyId, value), state);
             }
         }
 
@@ -587,12 +587,12 @@ namespace UIForia.Bindings.StyleBindings {
 
         public override void Apply(UIStyle style, ExpressionContext context) {
             var value = expression.Evaluate(context);
-            style.SetProperty(new StyleProperty(propertyId, 0, 0, value));
+            style.SetProperty(new StyleProperty(propertyId, value));
         }
 
         public override void Apply(UIStyleSet styleSet, ExpressionContext context) {
             var value = expression.Evaluate(context);
-            styleSet.SetProperty(new StyleProperty(propertyId, 0, 0, value), state);
+            styleSet.SetProperty(new StyleProperty(propertyId, value), state);
         }
 
     }
@@ -630,6 +630,117 @@ namespace UIForia.Bindings.StyleBindings {
         public override void Apply(UIStyleSet styleSet, ExpressionContext context) {
             var value = expression.Evaluate(context);
             styleSet.SetProperty(new StyleProperty(propertyId, value), state);
+        }
+
+    }
+        
+    public class StyleBinding_AlignmentTarget : StyleBinding {
+
+        public readonly Expression<UIForia.Layout.AlignmentTarget> expression;
+        public readonly StylePropertyId propertyId;
+        
+        public StyleBinding_AlignmentTarget(string propertyName, StylePropertyId propertyId, StyleState state, Expression<UIForia.Layout.AlignmentTarget> expression)
+            : base(propertyName, state) {
+            this.propertyId = propertyId;
+            this.expression = expression;
+        }
+
+        public override void Execute(UIElement element, ExpressionContext context) {
+            if (!element.style.IsInState(state)) return;
+
+            var oldValue = element.style.propertyMap[(int)propertyId].AsAlignmentTarget;
+            var value = expression.Evaluate(context);
+            if (value != oldValue) {
+                element.style.SetProperty(new StyleProperty(propertyId, (int)value), state);
+            }
+        }
+
+        public override bool IsConstant() {
+            return expression.IsConstant();
+        }
+
+        public override void Apply(UIStyle style, ExpressionContext context) {
+            var value = expression.Evaluate(context);
+            style.SetProperty(new StyleProperty(propertyId, (int)value));
+        }
+
+        public override void Apply(UIStyleSet styleSet, ExpressionContext context) {
+            var value = expression.Evaluate(context);
+            styleSet.SetProperty(new StyleProperty(propertyId, (int)value), state);
+        }
+
+    }
+        
+    public class StyleBinding_AlignmentBehavior : StyleBinding {
+
+        public readonly Expression<UIForia.Layout.AlignmentBehavior> expression;
+        public readonly StylePropertyId propertyId;
+        
+        public StyleBinding_AlignmentBehavior(string propertyName, StylePropertyId propertyId, StyleState state, Expression<UIForia.Layout.AlignmentBehavior> expression)
+            : base(propertyName, state) {
+            this.propertyId = propertyId;
+            this.expression = expression;
+        }
+
+        public override void Execute(UIElement element, ExpressionContext context) {
+            if (!element.style.IsInState(state)) return;
+
+            var oldValue = element.style.propertyMap[(int)propertyId].AsAlignmentBehavior;
+            var value = expression.Evaluate(context);
+            if (value != oldValue) {
+                element.style.SetProperty(new StyleProperty(propertyId, (int)value), state);
+            }
+        }
+
+        public override bool IsConstant() {
+            return expression.IsConstant();
+        }
+
+        public override void Apply(UIStyle style, ExpressionContext context) {
+            var value = expression.Evaluate(context);
+            style.SetProperty(new StyleProperty(propertyId, (int)value));
+        }
+
+        public override void Apply(UIStyleSet styleSet, ExpressionContext context) {
+            var value = expression.Evaluate(context);
+            styleSet.SetProperty(new StyleProperty(propertyId, (int)value), state);
+        }
+
+    }
+        
+    public class StyleBinding_Fit : StyleBinding {
+
+        public readonly Expression<UIForia.Layout.Fit> expression;
+        public readonly StylePropertyId propertyId;
+        
+        public StyleBinding_Fit(string propertyName, StylePropertyId propertyId, StyleState state, Expression<UIForia.Layout.Fit> expression)
+            : base(propertyName, state) {
+            this.propertyId = propertyId;
+            this.expression = expression;
+        }
+
+        public override void Execute(UIElement element, ExpressionContext context) {
+            if (!element.style.IsInState(state)) return;
+
+            var oldValue = element.style.propertyMap[(int)propertyId].AsFit;
+            var value = expression.Evaluate(context);
+            if (value != oldValue) {
+                element.style.SetProperty(new StyleProperty(propertyId, (int)value), state);
+            }
+        }
+
+        public override bool IsConstant() {
+            return expression.IsConstant();
+        }
+
+        public override void Apply(UIStyle style, ExpressionContext context) {
+            var value = expression.Evaluate(context);
+            style.SetProperty(new StyleProperty(propertyId, (int)value));
+        }
+
+        public override void Apply(UIStyleSet styleSet, ExpressionContext context) {
+            var value = expression.Evaluate(context);
+            styleSet.SetProperty(new StyleProperty(propertyId, (int)value), state);
         }
 
     }
@@ -688,7 +799,7 @@ namespace UIForia.Bindings.StyleBindings {
             var oldValue = element.style.propertyMap[(int)propertyId].AsFont;
             var value = expression.Evaluate(context);
             if (value != oldValue) {
-                element.style.SetProperty(new StyleProperty(propertyId, 0, 0, value), state);
+                element.style.SetProperty(new StyleProperty(propertyId, value), state);
             }
         }
 
@@ -698,12 +809,12 @@ namespace UIForia.Bindings.StyleBindings {
 
         public override void Apply(UIStyle style, ExpressionContext context) {
             var value = expression.Evaluate(context);
-            style.SetProperty(new StyleProperty(propertyId, 0, 0, value));
+            style.SetProperty(new StyleProperty(propertyId, value));
         }
 
         public override void Apply(UIStyleSet styleSet, ExpressionContext context) {
             var value = expression.Evaluate(context);
-            styleSet.SetProperty(new StyleProperty(propertyId, 0, 0, value), state);
+            styleSet.SetProperty(new StyleProperty(propertyId, value), state);
         }
 
     }
@@ -1129,6 +1240,9 @@ namespace UIForia.Compilers {
         private static readonly EnumAliasSource<UIForia.Layout.MainAxisAlignment> s_EnumSource_MainAxisAlignment = new EnumAliasSource<UIForia.Layout.MainAxisAlignment>();
         private static readonly EnumAliasSource<UIForia.Layout.GridAxisAlignment> s_EnumSource_GridAxisAlignment = new EnumAliasSource<UIForia.Layout.GridAxisAlignment>();
         private static readonly EnumAliasSource<UIForia.Layout.GridLayoutDensity> s_EnumSource_GridLayoutDensity = new EnumAliasSource<UIForia.Layout.GridLayoutDensity>();
+        private static readonly EnumAliasSource<UIForia.Layout.AlignmentTarget> s_EnumSource_AlignmentTarget = new EnumAliasSource<UIForia.Layout.AlignmentTarget>();
+        private static readonly EnumAliasSource<UIForia.Layout.AlignmentBehavior> s_EnumSource_AlignmentBehavior = new EnumAliasSource<UIForia.Layout.AlignmentBehavior>();
+        private static readonly EnumAliasSource<UIForia.Layout.Fit> s_EnumSource_Fit = new EnumAliasSource<UIForia.Layout.Fit>();
         private static readonly EnumAliasSource<UIForia.Text.FontStyle> s_EnumSource_FontStyle = new EnumAliasSource<UIForia.Text.FontStyle>();
         private static readonly EnumAliasSource<UIForia.Text.TextAlignment> s_EnumSource_TextAlignment = new EnumAliasSource<UIForia.Text.TextAlignment>();
         private static readonly EnumAliasSource<UIForia.Rendering.ShadowType> s_EnumSource_ShadowType = new EnumAliasSource<UIForia.Rendering.ShadowType>();
@@ -1238,6 +1352,26 @@ case "overflowx":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_float("RadialLayoutEndAngle", UIForia.Rendering.StylePropertyId.RadialLayoutEndAngle, targetState.state, Compile<float>(value, null));                
                 case "radiallayoutradius":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_UIFixedLength("RadialLayoutRadius", UIForia.Rendering.StylePropertyId.RadialLayoutRadius, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
+                case "alignmenttargetx":
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_AlignmentTarget("AlignmentTargetX", UIForia.Rendering.StylePropertyId.AlignmentTargetX, targetState.state, Compile<UIForia.Layout.AlignmentTarget>(value, s_EnumSource_AlignmentTarget));                
+                case "alignmenttargety":
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_AlignmentTarget("AlignmentTargetY", UIForia.Rendering.StylePropertyId.AlignmentTargetY, targetState.state, Compile<UIForia.Layout.AlignmentTarget>(value, s_EnumSource_AlignmentTarget));                
+                case "alignmentbehaviorx":
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_AlignmentBehavior("AlignmentBehaviorX", UIForia.Rendering.StylePropertyId.AlignmentBehaviorX, targetState.state, Compile<UIForia.Layout.AlignmentBehavior>(value, s_EnumSource_AlignmentBehavior));                
+                case "alignmentbehaviory":
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_AlignmentBehavior("AlignmentBehaviorY", UIForia.Rendering.StylePropertyId.AlignmentBehaviorY, targetState.state, Compile<UIForia.Layout.AlignmentBehavior>(value, s_EnumSource_AlignmentBehavior));                
+                case "alignmentpivotx":
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_float("AlignmentPivotX", UIForia.Rendering.StylePropertyId.AlignmentPivotX, targetState.state, Compile<float>(value, null));                
+                case "alignmentpivoty":
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_float("AlignmentPivotY", UIForia.Rendering.StylePropertyId.AlignmentPivotY, targetState.state, Compile<float>(value, null));                
+                case "alignmentoffsetx":
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_float("AlignmentOffsetX", UIForia.Rendering.StylePropertyId.AlignmentOffsetX, targetState.state, Compile<float>(value, null));                
+                case "alignmentoffsety":
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_float("AlignmentOffsetY", UIForia.Rendering.StylePropertyId.AlignmentOffsetY, targetState.state, Compile<float>(value, null));                
+                case "fitx":
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_Fit("FitX", UIForia.Rendering.StylePropertyId.FitX, targetState.state, Compile<UIForia.Layout.Fit>(value, s_EnumSource_Fit));                
+                case "fity":
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_Fit("FitY", UIForia.Rendering.StylePropertyId.FitY, targetState.state, Compile<UIForia.Layout.Fit>(value, s_EnumSource_Fit));                
                 case "minwidth":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_UIMeasurement("MinWidth", UIForia.Rendering.StylePropertyId.MinWidth, targetState.state, Compile<UIForia.Rendering.UIMeasurement>(value, measurementSources));                
                 case "maxwidth":

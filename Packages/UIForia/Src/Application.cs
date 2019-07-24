@@ -127,7 +127,7 @@ namespace UIForia {
 
             m_StyleSystem = new StyleSystem();
             m_BindingSystem = new BindingSystem();
-            m_LayoutSystem = new LayoutSystem(this, m_StyleSystem);
+            m_LayoutSystem = new FastLayoutSystem(this, m_StyleSystem);
             m_InputSystem = new GameInputSystem(m_LayoutSystem);
 //            m_RenderSystem = new VertigoRenderSystem(Camera.current, m_LayoutSystem, m_StyleSystem); 
             m_RenderSystem = new SVGXRenderSystem(this, null, m_LayoutSystem);
@@ -709,6 +709,8 @@ namespace UIForia {
                         continue;
                     }
 
+                    child.flags |= UIElementFlags.EnabledThisFrame;
+                    
                     children = child.children.Array;
                     childCount = child.children.Count;
                     for (int i = childCount - 1; i >= 0; i--) {

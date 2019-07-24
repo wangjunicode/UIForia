@@ -43,7 +43,7 @@ public class FlexLayoutRowTests {
         string template = @"
         <UITemplate>
             <Style path='Templates/FlexLayoutRowTests/FlexLayoutRowTests.style'/>
-            <Contents style.layoutType='LayoutType.Flex' style.flexLayoutDirection='LayoutDirection.Row' style.preferredWidth='500f'>
+            <Contents style.layoutType='LayoutType.Flex' style.flexLayoutDirection='LayoutDirection.Horizontal' style.preferredWidth='500f'>
                 <Group x-id='child0' style='w100h100'/>
                 <Group x-id='child1' style='w100h100'/>
                 <Group x-id='child2' style='w100h100'/>
@@ -53,7 +53,7 @@ public class FlexLayoutRowTests {
         
         MockApplication app = new MockApplication(typeof(FlexRowLayoutThing), template);
         app.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
-        FlexRowLayoutThing root = (FlexRowLayoutThing) app.RootElement;
+        FlexRowLayoutThing root = (FlexRowLayoutThing) app.RootElement.GetChild(0);
         root.style.SetFlexLayoutCrossAxisAlignment(CrossAxisAlignment.Start, StyleState.Normal);
         app.Update();
 
@@ -67,7 +67,7 @@ public class FlexLayoutRowTests {
         string template = @"
         <UITemplate>
             <Style path='Templates/FlexLayoutRowTests/FlexLayoutRowTests.style'/>
-            <Contents style.layoutType='LayoutType.Flex' style.flexLayoutDirection='LayoutDirection.Row' style.preferredHeight='500f'>
+            <Contents style.layoutType='LayoutType.Flex' style.flexLayoutDirection='LayoutDirection.Horizontal' style.preferredHeight='500f'>
                 <Group x-id='child0' style='w100h100'/>
                 <Group x-id='child1' style='w100h100'/>
                 <Group x-id='child2' style='w100h100'/>
@@ -76,7 +76,7 @@ public class FlexLayoutRowTests {
         ";
         MockApplication app = new MockApplication(typeof(FlexRowLayoutThing), template);
         app.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
-        FlexRowLayoutThing root = (FlexRowLayoutThing) app.RootElement;
+        FlexRowLayoutThing root = (FlexRowLayoutThing) app.RootElement.GetChild(0);
         root.style.SetFlexLayoutCrossAxisAlignment(CrossAxisAlignment.End, StyleState.Normal);
         app.Update();
 
@@ -99,7 +99,7 @@ public class FlexLayoutRowTests {
         ";
         MockApplication app = new MockApplication(typeof(FlexRowLayoutThing), template);
         app.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
-        FlexRowLayoutThing root = (FlexRowLayoutThing) app.RootElement;
+        FlexRowLayoutThing root = (FlexRowLayoutThing) app.RootElement.GetChild(0);
         root.style.SetFlexLayoutCrossAxisAlignment(CrossAxisAlignment.Center, StyleState.Normal);
         app.Update();
 
@@ -122,7 +122,7 @@ public class FlexLayoutRowTests {
         ";
         MockApplication app = new MockApplication(typeof(FlexRowLayoutThing), template);
         app.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
-        FlexRowLayoutThing root = (FlexRowLayoutThing) app.RootElement;
+        FlexRowLayoutThing root = (FlexRowLayoutThing) app.RootElement.GetChild(0);
         root.style.SetFlexLayoutCrossAxisAlignment(CrossAxisAlignment.Stretch, StyleState.Normal);
         app.Update();
 
@@ -145,7 +145,7 @@ public class FlexLayoutRowTests {
         ";
         MockApplication app = new MockApplication(typeof(FlexRowLayoutThing), template);
         app.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
-        FlexRowLayoutThing root = (FlexRowLayoutThing) app.RootElement;
+        FlexRowLayoutThing root = (FlexRowLayoutThing) app.RootElement.GetChild(0);
         root.style.SetFlexLayoutMainAxisAlignment(MainAxisAlignment.End, StyleState.Normal);
         app.Update();
 
@@ -191,7 +191,7 @@ public class FlexLayoutRowTests {
         ";
         MockApplication app = new MockApplication(typeof(FlexRowLayoutThing), template);
         app.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
-        FlexRowLayoutThing root = (FlexRowLayoutThing) app.RootElement;
+        FlexRowLayoutThing root = (FlexRowLayoutThing) app.RootElement.GetChild(0);
         root.style.SetFlexLayoutMainAxisAlignment(MainAxisAlignment.SpaceBetween, StyleState.Normal);
         app.Update();
 
@@ -214,7 +214,7 @@ public class FlexLayoutRowTests {
         ";
         MockApplication app = new MockApplication(typeof(FlexRowLayoutThing), template);
         app.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
-        FlexRowLayoutThing root = (FlexRowLayoutThing) app.RootElement;
+        FlexRowLayoutThing root = (FlexRowLayoutThing) app.RootElement.GetChild(0);
         root.style.SetFlexLayoutMainAxisAlignment(MainAxisAlignment.SpaceAround, StyleState.Normal);
         app.Update();
 
@@ -263,7 +263,7 @@ public class FlexLayoutRowTests {
         ";
         MockApplication mockView = new MockApplication(typeof(FlexRowLayoutThing), template);
         mockView.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
-        FlexRowLayoutThing root = (FlexRowLayoutThing) mockView.RootElement;
+        FlexRowLayoutThing root = (FlexRowLayoutThing) mockView.RootElement.GetChild(0);
         mockView.Update();
         Assert.AreEqual(new Rect(0, 0, 300, 500), root.layoutResult.ScreenRect);
         Assert.AreEqual(new Rect(5, 0, 90, 90), root.child0.layoutResult.ScreenRect);
@@ -288,7 +288,7 @@ public class FlexLayoutRowTests {
         ";
         MockApplication mockView = new MockApplication(typeof(FlexRowLayoutThing), template);
         mockView.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
-        FlexRowLayoutThing root = (FlexRowLayoutThing) mockView.RootElement;
+        FlexRowLayoutThing root = (FlexRowLayoutThing) mockView.RootElement.GetChild(0);
         mockView.Update();
         Assert.AreEqual(new Rect(0, 0, 270, 500), root.layoutResult.ScreenRect);
         Assert.AreEqual(new Rect(0, 5, 90, 90), root.child0.layoutResult.ScreenRect);
@@ -313,7 +313,7 @@ public class FlexLayoutRowTests {
         ";
         MockApplication mockView = new MockApplication(typeof(FlexRowLayoutThing), template);
         mockView.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
-        FlexRowLayoutThing root = (FlexRowLayoutThing) mockView.RootElement;
+        FlexRowLayoutThing root = (FlexRowLayoutThing) mockView.RootElement.GetChild(0);
         root.style.SetFlexLayoutCrossAxisAlignment(CrossAxisAlignment.Center, StyleState.Normal);
         mockView.Update();
         Assert.AreEqual(new Rect(0, 0, 270f, 600f), root.layoutResult.ScreenRect);
@@ -339,7 +339,7 @@ public class FlexLayoutRowTests {
         ";
         MockApplication mockView = new MockApplication(typeof(FlexRowLayoutThing), template);
         mockView.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
-        FlexRowLayoutThing root = (FlexRowLayoutThing) mockView.RootElement;
+        FlexRowLayoutThing root = (FlexRowLayoutThing) mockView.RootElement.GetChild(0);
         root.style.SetFlexLayoutCrossAxisAlignment(CrossAxisAlignment.End, StyleState.Normal);
         mockView.Update();
         Assert.AreEqual(new Rect(0, 0, 270f, 600f), root.layoutResult.ScreenRect);
@@ -365,7 +365,7 @@ public class FlexLayoutRowTests {
         ";
         MockApplication mockView = new MockApplication(typeof(FlexRowLayoutThing), template);
         mockView.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
-        FlexRowLayoutThing root = (FlexRowLayoutThing) mockView.RootElement;
+        FlexRowLayoutThing root = (FlexRowLayoutThing) mockView.RootElement.GetChild(0);
         root.style.SetFlexLayoutCrossAxisAlignment(CrossAxisAlignment.Stretch, StyleState.Normal);
         mockView.Update();
         Assert.AreEqual(new Rect(0, 0, 270, 600), root.layoutResult.ScreenRect);
@@ -388,9 +388,16 @@ public class FlexLayoutRowTests {
         ";
         MockApplication app = new MockApplication(typeof(FlexRowLayoutThing), template);
         app.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
-        FlexRowLayoutThing root = (FlexRowLayoutThing) app.RootElement;
+        FlexRowLayoutThing root = (FlexRowLayoutThing) app.RootElement.GetChild(0);
+        
         root.style.SetFlexLayoutCrossAxisAlignment(CrossAxisAlignment.Center, StyleState.Normal);
-        root.child1.style.SetFlexItemSelfAlignment(CrossAxisAlignment.Start, StyleState.Normal);
+        
+        root.GetChild(1).style.SetAlignmentBehaviorY(AlignmentBehavior.Self, StyleState.Normal);
+        root.GetChild(1).style.SetAlignmentPivotY(-0.5f, StyleState.Normal);
+        root.GetChild(1).style.SetAlignmentOffsetY(-0.5f, StyleState.Normal);
+        
+        //root.child1.style.SetFlexItemSelfAlignment(CrossAxisAlignment.Start, StyleState.Normal);
+
         app.Update();
 
         Assert.AreEqual(new Rect(0, 200, 100, 100), root.child0.layoutResult.ScreenRect);
@@ -412,7 +419,7 @@ public class FlexLayoutRowTests {
         ";
         MockApplication app = new MockApplication(typeof(FlexRowLayoutThing), template);
         app.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
-        FlexRowLayoutThing root = (FlexRowLayoutThing) app.RootElement;
+        FlexRowLayoutThing root = (FlexRowLayoutThing) app.RootElement.GetChild(0);
         app.Update();
 
         Assert.AreEqual(new Rect(0, 0, 100, 100), root.child0.layoutResult.ScreenRect);
@@ -434,7 +441,7 @@ public class FlexLayoutRowTests {
         ";
         MockApplication app = new MockApplication(typeof(FlexRowLayoutThing), template);
         app.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
-        FlexRowLayoutThing root = (FlexRowLayoutThing) app.RootElement;
+        FlexRowLayoutThing root = (FlexRowLayoutThing) app.RootElement.GetChild(0);
         app.Update();
 
         Assert.AreEqual(new Rect(0, 0, 100, 100), root.child0.layoutResult.ScreenRect);
@@ -566,7 +573,7 @@ public class FlexLayoutRowTests {
         ";
         MockApplication app = new MockApplication(typeof(FlexRowLayoutThing), template);
         app.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
-        FlexRowLayoutThing root = (FlexRowLayoutThing) app.RootElement;
+        FlexRowLayoutThing root = (FlexRowLayoutThing) app.RootElement.GetChild(0);
         app.Update();
         Assert.AreEqual(new Rect(0, 0, 310, 500), root.layoutResult.ScreenRect);
         Assert.AreEqual(new Rect(5, 0, 100, 100), root.child0.layoutResult.ScreenRect);
@@ -588,7 +595,7 @@ public class FlexLayoutRowTests {
         ";
         MockApplication app = new MockApplication(typeof(FlexRowLayoutThing), template);
         app.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
-        FlexRowLayoutThing root = (FlexRowLayoutThing) app.RootElement;
+        FlexRowLayoutThing root = (FlexRowLayoutThing) app.RootElement.GetChild(0);
         app.Update();
         Assert.AreEqual(new Rect(0, 0, 300, 500), root.layoutResult.ScreenRect);
         Assert.AreEqual(new Rect(0, 0, 100, 100), root.child0.layoutResult.ScreenRect);
@@ -610,50 +617,50 @@ public class FlexLayoutRowTests {
         ";
         MockApplication app = new MockApplication(typeof(FlexRowLayoutThing), template);
         app.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
-        FlexRowLayoutThing root = (FlexRowLayoutThing) app.RootElement;
+        FlexRowLayoutThing root = (FlexRowLayoutThing) app.RootElement.GetChild(0);
         app.Update();
         Assert.AreEqual(300, root.layoutResult.ActualWidth);
         Assert.AreEqual(100, root.layoutResult.ActualHeight);
     }
 
 
-    [Test]
-    public void CentersButtonEvenIfStyleIsDynamic() {
-        string template = @"
-        <UITemplate>
-            <Style path='Templates/FlexLayoutRowTests/FlexLayoutRowTests.style'/>
-            <Contents>
-                <Div if='isDivEnabled'>
-                    <Group style='[GetButtonStyle()]'>
-                        <Text style='button-text'>button text</Text>
-                    </Group>
-                </Div>
-                <Group style='button' x-id='button' onMouseDown='Activate()' />
-            </Contents>
-        </UITemplate>
-        ";
-        MockApplication app = new MockApplication(typeof(FlexRowLayoutThing), template);
-        app.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
-        FlexRowLayoutThing root = (FlexRowLayoutThing) app.RootElement;
-        app.Update();
-
-        UIElement group = root.FindFirstByType<UIGroupElement>();
-        UIElement div = root.FindFirstByType<UIDivElement>();
-        app.Update();
-        // disabled
-        Assert.AreEqual(0, group.layoutResult.ActualWidth);
-
-        app.InputSystem.MouseDown(new Vector2(15, 15));
-        app.Update();
-        app.InputSystem.MouseUp();
-
-        app.Update();
-
-        // enabled
-        Assert.AreEqual(MainAxisAlignment.Center, group.style.FlexLayoutMainAxisAlignment);
-        Assert.AreEqual(CrossAxisAlignment.Center, group.style.FlexLayoutCrossAxisAlignment);
-        Assert.AreEqual(true, div.isEnabled);
-       
-    }
+//    [Test]
+//    public void CentersButtonEvenIfStyleIsDynamic() {
+//        string template = @"
+//        <UITemplate>
+//            <Style path='Templates/FlexLayoutRowTests/FlexLayoutRowTests.style'/>
+//            <Contents>
+//                <Div if='isDivEnabled'>
+//                    <Group style='[GetButtonStyle()]'>
+//                        <Text style='button-text'>button text</Text>
+//                    </Group>
+//                </Div>
+//                <Group style='button' x-id='button' onMouseDown='Activate()' />
+//            </Contents>
+//        </UITemplate>
+//        ";
+//        MockApplication app = new MockApplication(typeof(FlexRowLayoutThing), template);
+//        app.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
+//        FlexRowLayoutThing root = (FlexRowLayoutThing) app.RootElement.GetChild(0);
+//        app.Update();
+//
+//        UIElement group = root.FindFirstByType<UIGroupElement>();
+//        UIElement div = root.FindFirstByType<UIDivElement>();
+//        app.Update();
+//        // disabled
+//        Assert.AreEqual(0, group.layoutResult.ActualWidth);
+//
+//        app.InputSystem.MouseDown(new Vector2(15, 15));
+//        app.Update();
+//        app.InputSystem.MouseUp();
+//
+//        app.Update();
+//
+//        // enabled
+//        Assert.AreEqual(MainAxisAlignment.Center, group.style.FlexLayoutMainAxisAlignment);
+//        Assert.AreEqual(CrossAxisAlignment.Center, group.style.FlexLayoutCrossAxisAlignment);
+//        Assert.AreEqual(true, div.isEnabled);
+//       
+//    }
 
 }

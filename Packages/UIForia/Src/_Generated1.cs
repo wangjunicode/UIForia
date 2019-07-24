@@ -114,14 +114,14 @@ namespace UIForia.Rendering {
             [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.BackgroundImage, state).AsTexture2D; }
             [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.BackgroundImage, 0, 0, value), state); }
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.BackgroundImage, value), state); }
         }
         
         public string Painter {
             [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.Painter, state).AsString; }
             [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.Painter, 0, 0, value), state); }
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.Painter, value), state); }
         }
         
         public float Opacity {
@@ -135,7 +135,7 @@ namespace UIForia.Rendering {
             [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.Cursor, state).AsCursorStyle; }
             [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.Cursor, 0, 0, value), state); }
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.Cursor, value), state); }
         }
         
         public UIForia.Rendering.Visibility Visibility {
@@ -261,14 +261,14 @@ namespace UIForia.Rendering {
             [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.GridLayoutColTemplate, state).AsGridTemplate; }
             [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.GridLayoutColTemplate, 0, 0, value), state); }
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.GridLayoutColTemplate, value), state); }
         }
         
         public System.Collections.Generic.IReadOnlyList<UIForia.Layout.LayoutTypes.GridTrackSize> GridLayoutRowTemplate {
             [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.GridLayoutRowTemplate, state).AsGridTemplate; }
             [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.GridLayoutRowTemplate, 0, 0, value), state); }
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.GridLayoutRowTemplate, value), state); }
         }
         
         public UIForia.Layout.LayoutTypes.GridTrackSize GridLayoutMainAxisAutoSize {
@@ -332,6 +332,76 @@ namespace UIForia.Rendering {
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.RadialLayoutRadius, state).AsUIFixedLength; }
             [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.RadialLayoutRadius, value), state); }
+        }
+        
+        public UIForia.Layout.AlignmentTarget AlignmentTargetX {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.AlignmentTargetX, state).AsAlignmentTarget; }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.AlignmentTargetX, (int)value), state); }
+        }
+        
+        public UIForia.Layout.AlignmentTarget AlignmentTargetY {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.AlignmentTargetY, state).AsAlignmentTarget; }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.AlignmentTargetY, (int)value), state); }
+        }
+        
+        public UIForia.Layout.AlignmentBehavior AlignmentBehaviorX {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.AlignmentBehaviorX, state).AsAlignmentBehavior; }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.AlignmentBehaviorX, (int)value), state); }
+        }
+        
+        public UIForia.Layout.AlignmentBehavior AlignmentBehaviorY {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.AlignmentBehaviorY, state).AsAlignmentBehavior; }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.AlignmentBehaviorY, (int)value), state); }
+        }
+        
+        public float AlignmentPivotX {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.AlignmentPivotX, state).AsFloat; }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.AlignmentPivotX, value), state); }
+        }
+        
+        public float AlignmentPivotY {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.AlignmentPivotY, state).AsFloat; }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.AlignmentPivotY, value), state); }
+        }
+        
+        public float AlignmentOffsetX {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.AlignmentOffsetX, state).AsFloat; }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.AlignmentOffsetX, value), state); }
+        }
+        
+        public float AlignmentOffsetY {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.AlignmentOffsetY, state).AsFloat; }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.AlignmentOffsetY, value), state); }
+        }
+        
+        public UIForia.Layout.Fit FitX {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.FitX, state).AsFit; }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.FitX, (int)value), state); }
+        }
+        
+        public UIForia.Layout.Fit FitY {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.FitY, state).AsFit; }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.FitY, (int)value), state); }
         }
         
         public UIForia.Rendering.UIMeasurement MinWidth {
@@ -506,7 +576,7 @@ namespace UIForia.Rendering {
             [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.TextFontAsset, state).AsFont; }
             [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.TextFontAsset, 0, 0, value), state); }
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.TextFontAsset, value), state); }
         }
         
         public UIForia.UIFixedLength TextFontSize {
@@ -779,7 +849,7 @@ namespace UIForia.Rendering {
             [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.Scrollbar, state).AsString; }
             [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.Scrollbar, 0, 0, value), state); }
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.Scrollbar, value), state); }
         }
         
         public UIForia.Rendering.UIMeasurement ScrollbarSize {
@@ -845,125 +915,135 @@ namespace UIForia.Rendering {
         public bool IsUnset {
             get { 
                 switch(propertyId) {
-                                        case StylePropertyId.OverflowX: return valuePart0 == 0 || IntUtil.UnsetValue == valuePart0;
-                    case StylePropertyId.OverflowY: return valuePart0 == 0 || IntUtil.UnsetValue == valuePart0;
-                    case StylePropertyId.BackgroundColor: return valuePart1 == 0;
-                    case StylePropertyId.BackgroundTint: return valuePart1 == 0;
-                    case StylePropertyId.BorderColorTop: return valuePart1 == 0;
-                    case StylePropertyId.BorderColorRight: return valuePart1 == 0;
-                    case StylePropertyId.BorderColorBottom: return valuePart1 == 0;
-                    case StylePropertyId.BorderColorLeft: return valuePart1 == 0;
-                    case StylePropertyId.BackgroundImageOffsetX: return !FloatUtil.IsDefined(floatValue) || valuePart1 == 0;
-                    case StylePropertyId.BackgroundImageOffsetY: return !FloatUtil.IsDefined(floatValue) || valuePart1 == 0;
-                    case StylePropertyId.BackgroundImageScaleX: return !FloatUtil.IsDefined(floatValue) || valuePart1 == 0;
-                    case StylePropertyId.BackgroundImageScaleY: return !FloatUtil.IsDefined(floatValue) || valuePart1 == 0;
-                    case StylePropertyId.BackgroundImageTileX: return !FloatUtil.IsDefined(floatValue) || valuePart1 == 0;
-                    case StylePropertyId.BackgroundImageTileY: return !FloatUtil.IsDefined(floatValue) || valuePart1 == 0;
-                    case StylePropertyId.BackgroundImageRotation: return !FloatUtil.IsDefined(floatValue) || valuePart1 == 0;
+                                        case StylePropertyId.OverflowX: return int0 == 0 || IntUtil.UnsetValue == int0;
+                    case StylePropertyId.OverflowY: return int0 == 0 || IntUtil.UnsetValue == int0;
+                    case StylePropertyId.BackgroundColor: return int1 == 0;
+                    case StylePropertyId.BackgroundTint: return int1 == 0;
+                    case StylePropertyId.BorderColorTop: return int1 == 0;
+                    case StylePropertyId.BorderColorRight: return int1 == 0;
+                    case StylePropertyId.BorderColorBottom: return int1 == 0;
+                    case StylePropertyId.BorderColorLeft: return int1 == 0;
+                    case StylePropertyId.BackgroundImageOffsetX: return !FloatUtil.IsDefined(float1) || int1 == 0;
+                    case StylePropertyId.BackgroundImageOffsetY: return !FloatUtil.IsDefined(float1) || int1 == 0;
+                    case StylePropertyId.BackgroundImageScaleX: return !FloatUtil.IsDefined(float1) || int1 == 0;
+                    case StylePropertyId.BackgroundImageScaleY: return !FloatUtil.IsDefined(float1) || int1 == 0;
+                    case StylePropertyId.BackgroundImageTileX: return !FloatUtil.IsDefined(float1) || int1 == 0;
+                    case StylePropertyId.BackgroundImageTileY: return !FloatUtil.IsDefined(float1) || int1 == 0;
+                    case StylePropertyId.BackgroundImageRotation: return !FloatUtil.IsDefined(float1) || int1 == 0;
                     case StylePropertyId.BackgroundImage: return objectField == null;
                     case StylePropertyId.Painter: return objectField == null;
-                    case StylePropertyId.Opacity: return !FloatUtil.IsDefined(floatValue);
+                    case StylePropertyId.Opacity: return !FloatUtil.IsDefined(float1);
                     case StylePropertyId.Cursor: return objectField == null;
-                    case StylePropertyId.Visibility: return valuePart0 == 0 || IntUtil.UnsetValue == valuePart0;
-                    case StylePropertyId.FlexItemOrder: return !IntUtil.IsDefined(valuePart0);
-                    case StylePropertyId.FlexItemGrow: return !IntUtil.IsDefined(valuePart0);
-                    case StylePropertyId.FlexItemShrink: return !IntUtil.IsDefined(valuePart0);
-                    case StylePropertyId.FlexItemSelfAlignment: return valuePart0 == 0 || IntUtil.UnsetValue == valuePart0;
-                    case StylePropertyId.FlexLayoutDirection: return valuePart0 == 0 || IntUtil.UnsetValue == valuePart0;
-                    case StylePropertyId.FlexLayoutWrap: return valuePart0 == 0 || IntUtil.UnsetValue == valuePart0;
-                    case StylePropertyId.FlexLayoutMainAxisAlignment: return valuePart0 == 0 || IntUtil.UnsetValue == valuePart0;
-                    case StylePropertyId.FlexLayoutCrossAxisAlignment: return valuePart0 == 0 || IntUtil.UnsetValue == valuePart0;
-                    case StylePropertyId.GridItemColStart: return !IntUtil.IsDefined(valuePart0);
-                    case StylePropertyId.GridItemColSpan: return !IntUtil.IsDefined(valuePart0);
-                    case StylePropertyId.GridItemRowStart: return !IntUtil.IsDefined(valuePart0);
-                    case StylePropertyId.GridItemRowSpan: return !IntUtil.IsDefined(valuePart0);
-                    case StylePropertyId.GridItemColSelfAlignment: return valuePart0 == 0 || IntUtil.UnsetValue == valuePart0;
-                    case StylePropertyId.GridItemRowSelfAlignment: return valuePart0 == 0 || IntUtil.UnsetValue == valuePart0;
-                    case StylePropertyId.GridLayoutDirection: return valuePart0 == 0 || IntUtil.UnsetValue == valuePart0;
-                    case StylePropertyId.GridLayoutDensity: return valuePart0 == 0 || IntUtil.UnsetValue == valuePart0;
+                    case StylePropertyId.Visibility: return int0 == 0 || IntUtil.UnsetValue == int0;
+                    case StylePropertyId.FlexItemOrder: return !IntUtil.IsDefined(int0);
+                    case StylePropertyId.FlexItemGrow: return !IntUtil.IsDefined(int0);
+                    case StylePropertyId.FlexItemShrink: return !IntUtil.IsDefined(int0);
+                    case StylePropertyId.FlexItemSelfAlignment: return int0 == 0 || IntUtil.UnsetValue == int0;
+                    case StylePropertyId.FlexLayoutDirection: return int0 == 0 || IntUtil.UnsetValue == int0;
+                    case StylePropertyId.FlexLayoutWrap: return int0 == 0 || IntUtil.UnsetValue == int0;
+                    case StylePropertyId.FlexLayoutMainAxisAlignment: return int0 == 0 || IntUtil.UnsetValue == int0;
+                    case StylePropertyId.FlexLayoutCrossAxisAlignment: return int0 == 0 || IntUtil.UnsetValue == int0;
+                    case StylePropertyId.GridItemColStart: return !IntUtil.IsDefined(int0);
+                    case StylePropertyId.GridItemColSpan: return !IntUtil.IsDefined(int0);
+                    case StylePropertyId.GridItemRowStart: return !IntUtil.IsDefined(int0);
+                    case StylePropertyId.GridItemRowSpan: return !IntUtil.IsDefined(int0);
+                    case StylePropertyId.GridItemColSelfAlignment: return int0 == 0 || IntUtil.UnsetValue == int0;
+                    case StylePropertyId.GridItemRowSelfAlignment: return int0 == 0 || IntUtil.UnsetValue == int0;
+                    case StylePropertyId.GridLayoutDirection: return int0 == 0 || IntUtil.UnsetValue == int0;
+                    case StylePropertyId.GridLayoutDensity: return int0 == 0 || IntUtil.UnsetValue == int0;
                     case StylePropertyId.GridLayoutColTemplate: return objectField == null;
                     case StylePropertyId.GridLayoutRowTemplate: return objectField == null;
-                    case StylePropertyId.GridLayoutMainAxisAutoSize: return !FloatUtil.IsDefined(floatValue) || valuePart1 == 0;
-                    case StylePropertyId.GridLayoutCrossAxisAutoSize: return !FloatUtil.IsDefined(floatValue) || valuePart1 == 0;
-                    case StylePropertyId.GridLayoutColGap: return !FloatUtil.IsDefined(floatValue);
-                    case StylePropertyId.GridLayoutRowGap: return !FloatUtil.IsDefined(floatValue);
-                    case StylePropertyId.GridLayoutColAlignment: return valuePart0 == 0 || IntUtil.UnsetValue == valuePart0;
-                    case StylePropertyId.GridLayoutRowAlignment: return valuePart0 == 0 || IntUtil.UnsetValue == valuePart0;
-                    case StylePropertyId.RadialLayoutStartAngle: return !FloatUtil.IsDefined(floatValue);
-                    case StylePropertyId.RadialLayoutEndAngle: return !FloatUtil.IsDefined(floatValue);
-                    case StylePropertyId.RadialLayoutRadius: return !FloatUtil.IsDefined(floatValue) || valuePart1 == 0;
-                    case StylePropertyId.MinWidth: return !FloatUtil.IsDefined(floatValue) || valuePart1 == 0;
-                    case StylePropertyId.MaxWidth: return !FloatUtil.IsDefined(floatValue) || valuePart1 == 0;
-                    case StylePropertyId.PreferredWidth: return !FloatUtil.IsDefined(floatValue) || valuePart1 == 0;
-                    case StylePropertyId.MinHeight: return !FloatUtil.IsDefined(floatValue) || valuePart1 == 0;
-                    case StylePropertyId.MaxHeight: return !FloatUtil.IsDefined(floatValue) || valuePart1 == 0;
-                    case StylePropertyId.PreferredHeight: return !FloatUtil.IsDefined(floatValue) || valuePart1 == 0;
-                    case StylePropertyId.MarginTop: return !FloatUtil.IsDefined(floatValue) || valuePart1 == 0;
-                    case StylePropertyId.MarginRight: return !FloatUtil.IsDefined(floatValue) || valuePart1 == 0;
-                    case StylePropertyId.MarginBottom: return !FloatUtil.IsDefined(floatValue) || valuePart1 == 0;
-                    case StylePropertyId.MarginLeft: return !FloatUtil.IsDefined(floatValue) || valuePart1 == 0;
-                    case StylePropertyId.BorderColor: return valuePart1 == 0;
-                    case StylePropertyId.BorderTop: return !FloatUtil.IsDefined(floatValue) || valuePart1 == 0;
-                    case StylePropertyId.BorderRight: return !FloatUtil.IsDefined(floatValue) || valuePart1 == 0;
-                    case StylePropertyId.BorderBottom: return !FloatUtil.IsDefined(floatValue) || valuePart1 == 0;
-                    case StylePropertyId.BorderLeft: return !FloatUtil.IsDefined(floatValue) || valuePart1 == 0;
-                    case StylePropertyId.BorderRadiusTopLeft: return !FloatUtil.IsDefined(floatValue) || valuePart1 == 0;
-                    case StylePropertyId.BorderRadiusTopRight: return !FloatUtil.IsDefined(floatValue) || valuePart1 == 0;
-                    case StylePropertyId.BorderRadiusBottomRight: return !FloatUtil.IsDefined(floatValue) || valuePart1 == 0;
-                    case StylePropertyId.BorderRadiusBottomLeft: return !FloatUtil.IsDefined(floatValue) || valuePart1 == 0;
-                    case StylePropertyId.PaddingTop: return !FloatUtil.IsDefined(floatValue) || valuePart1 == 0;
-                    case StylePropertyId.PaddingRight: return !FloatUtil.IsDefined(floatValue) || valuePart1 == 0;
-                    case StylePropertyId.PaddingBottom: return !FloatUtil.IsDefined(floatValue) || valuePart1 == 0;
-                    case StylePropertyId.PaddingLeft: return !FloatUtil.IsDefined(floatValue) || valuePart1 == 0;
-                    case StylePropertyId.TextColor: return valuePart1 == 0;
+                    case StylePropertyId.GridLayoutMainAxisAutoSize: return !FloatUtil.IsDefined(float1) || int1 == 0;
+                    case StylePropertyId.GridLayoutCrossAxisAutoSize: return !FloatUtil.IsDefined(float1) || int1 == 0;
+                    case StylePropertyId.GridLayoutColGap: return !FloatUtil.IsDefined(float1);
+                    case StylePropertyId.GridLayoutRowGap: return !FloatUtil.IsDefined(float1);
+                    case StylePropertyId.GridLayoutColAlignment: return int0 == 0 || IntUtil.UnsetValue == int0;
+                    case StylePropertyId.GridLayoutRowAlignment: return int0 == 0 || IntUtil.UnsetValue == int0;
+                    case StylePropertyId.RadialLayoutStartAngle: return !FloatUtil.IsDefined(float1);
+                    case StylePropertyId.RadialLayoutEndAngle: return !FloatUtil.IsDefined(float1);
+                    case StylePropertyId.RadialLayoutRadius: return !FloatUtil.IsDefined(float1) || int1 == 0;
+                    case StylePropertyId.AlignmentTargetX: return int0 == 0 || IntUtil.UnsetValue == int0;
+                    case StylePropertyId.AlignmentTargetY: return int0 == 0 || IntUtil.UnsetValue == int0;
+                    case StylePropertyId.AlignmentBehaviorX: return int0 == 0 || IntUtil.UnsetValue == int0;
+                    case StylePropertyId.AlignmentBehaviorY: return int0 == 0 || IntUtil.UnsetValue == int0;
+                    case StylePropertyId.AlignmentPivotX: return !FloatUtil.IsDefined(float1);
+                    case StylePropertyId.AlignmentPivotY: return !FloatUtil.IsDefined(float1);
+                    case StylePropertyId.AlignmentOffsetX: return !FloatUtil.IsDefined(float1);
+                    case StylePropertyId.AlignmentOffsetY: return !FloatUtil.IsDefined(float1);
+                    case StylePropertyId.FitX: return int0 == 0 || IntUtil.UnsetValue == int0;
+                    case StylePropertyId.FitY: return int0 == 0 || IntUtil.UnsetValue == int0;
+                    case StylePropertyId.MinWidth: return !FloatUtil.IsDefined(float1) || int1 == 0;
+                    case StylePropertyId.MaxWidth: return !FloatUtil.IsDefined(float1) || int1 == 0;
+                    case StylePropertyId.PreferredWidth: return !FloatUtil.IsDefined(float1) || int1 == 0;
+                    case StylePropertyId.MinHeight: return !FloatUtil.IsDefined(float1) || int1 == 0;
+                    case StylePropertyId.MaxHeight: return !FloatUtil.IsDefined(float1) || int1 == 0;
+                    case StylePropertyId.PreferredHeight: return !FloatUtil.IsDefined(float1) || int1 == 0;
+                    case StylePropertyId.MarginTop: return !FloatUtil.IsDefined(float1) || int1 == 0;
+                    case StylePropertyId.MarginRight: return !FloatUtil.IsDefined(float1) || int1 == 0;
+                    case StylePropertyId.MarginBottom: return !FloatUtil.IsDefined(float1) || int1 == 0;
+                    case StylePropertyId.MarginLeft: return !FloatUtil.IsDefined(float1) || int1 == 0;
+                    case StylePropertyId.BorderColor: return int1 == 0;
+                    case StylePropertyId.BorderTop: return !FloatUtil.IsDefined(float1) || int1 == 0;
+                    case StylePropertyId.BorderRight: return !FloatUtil.IsDefined(float1) || int1 == 0;
+                    case StylePropertyId.BorderBottom: return !FloatUtil.IsDefined(float1) || int1 == 0;
+                    case StylePropertyId.BorderLeft: return !FloatUtil.IsDefined(float1) || int1 == 0;
+                    case StylePropertyId.BorderRadiusTopLeft: return !FloatUtil.IsDefined(float1) || int1 == 0;
+                    case StylePropertyId.BorderRadiusTopRight: return !FloatUtil.IsDefined(float1) || int1 == 0;
+                    case StylePropertyId.BorderRadiusBottomRight: return !FloatUtil.IsDefined(float1) || int1 == 0;
+                    case StylePropertyId.BorderRadiusBottomLeft: return !FloatUtil.IsDefined(float1) || int1 == 0;
+                    case StylePropertyId.PaddingTop: return !FloatUtil.IsDefined(float1) || int1 == 0;
+                    case StylePropertyId.PaddingRight: return !FloatUtil.IsDefined(float1) || int1 == 0;
+                    case StylePropertyId.PaddingBottom: return !FloatUtil.IsDefined(float1) || int1 == 0;
+                    case StylePropertyId.PaddingLeft: return !FloatUtil.IsDefined(float1) || int1 == 0;
+                    case StylePropertyId.TextColor: return int1 == 0;
                     case StylePropertyId.TextFontAsset: return objectField == null;
-                    case StylePropertyId.TextFontSize: return !FloatUtil.IsDefined(floatValue) || valuePart1 == 0;
-                    case StylePropertyId.TextFontStyle: return valuePart0 == 0 || IntUtil.UnsetValue == valuePart0;
-                    case StylePropertyId.TextAlignment: return valuePart0 == 0 || IntUtil.UnsetValue == valuePart0;
-                    case StylePropertyId.TextOutlineWidth: return !FloatUtil.IsDefined(floatValue);
-                    case StylePropertyId.TextOutlineColor: return valuePart1 == 0;
-                    case StylePropertyId.TextGlowColor: return valuePart1 == 0;
-                    case StylePropertyId.TextGlowOffset: return !FloatUtil.IsDefined(floatValue);
-                    case StylePropertyId.TextGlowInner: return !FloatUtil.IsDefined(floatValue);
-                    case StylePropertyId.TextGlowOuter: return !FloatUtil.IsDefined(floatValue);
-                    case StylePropertyId.TextGlowPower: return !FloatUtil.IsDefined(floatValue);
-                    case StylePropertyId.TextShadowColor: return valuePart1 == 0;
-                    case StylePropertyId.TextShadowOffsetX: return !FloatUtil.IsDefined(floatValue);
-                    case StylePropertyId.TextShadowOffsetY: return !FloatUtil.IsDefined(floatValue);
-                    case StylePropertyId.TextShadowIntensity: return !FloatUtil.IsDefined(floatValue);
-                    case StylePropertyId.TextShadowSoftness: return !FloatUtil.IsDefined(floatValue);
-                    case StylePropertyId.TextShadowType: return valuePart0 == 0 || IntUtil.UnsetValue == valuePart0;
-                    case StylePropertyId.TextTransform: return valuePart0 == 0 || IntUtil.UnsetValue == valuePart0;
-                    case StylePropertyId.TextWhitespaceMode: return valuePart0 == 0 || IntUtil.UnsetValue == valuePart0;
-                    case StylePropertyId.AnchorTop: return !FloatUtil.IsDefined(floatValue) || valuePart1 == 0;
-                    case StylePropertyId.AnchorRight: return !FloatUtil.IsDefined(floatValue) || valuePart1 == 0;
-                    case StylePropertyId.AnchorBottom: return !FloatUtil.IsDefined(floatValue) || valuePart1 == 0;
-                    case StylePropertyId.AnchorLeft: return !FloatUtil.IsDefined(floatValue) || valuePart1 == 0;
-                    case StylePropertyId.AnchorTarget: return valuePart0 == 0 || IntUtil.UnsetValue == valuePart0;
-                    case StylePropertyId.TransformPositionX: return !FloatUtil.IsDefined(floatValue) || valuePart1 == 0;
-                    case StylePropertyId.TransformPositionY: return !FloatUtil.IsDefined(floatValue) || valuePart1 == 0;
-                    case StylePropertyId.TransformPivotX: return !FloatUtil.IsDefined(floatValue) || valuePart1 == 0;
-                    case StylePropertyId.TransformPivotY: return !FloatUtil.IsDefined(floatValue) || valuePart1 == 0;
-                    case StylePropertyId.TransformScaleX: return !FloatUtil.IsDefined(floatValue);
-                    case StylePropertyId.TransformScaleY: return !FloatUtil.IsDefined(floatValue);
-                    case StylePropertyId.TransformRotation: return !FloatUtil.IsDefined(floatValue);
-                    case StylePropertyId.TransformBehaviorX: return valuePart0 == 0 || IntUtil.UnsetValue == valuePart0;
-                    case StylePropertyId.TransformBehaviorY: return valuePart0 == 0 || IntUtil.UnsetValue == valuePart0;
-                    case StylePropertyId.LayoutType: return valuePart0 == 0 || IntUtil.UnsetValue == valuePart0;
-                    case StylePropertyId.LayoutBehavior: return valuePart0 == 0 || IntUtil.UnsetValue == valuePart0;
-                    case StylePropertyId.ZIndex: return !IntUtil.IsDefined(valuePart0);
-                    case StylePropertyId.RenderLayerOffset: return !IntUtil.IsDefined(valuePart0);
-                    case StylePropertyId.RenderLayer: return valuePart0 == 0 || IntUtil.UnsetValue == valuePart0;
-                    case StylePropertyId.Layer: return !IntUtil.IsDefined(valuePart0);
+                    case StylePropertyId.TextFontSize: return !FloatUtil.IsDefined(float1) || int1 == 0;
+                    case StylePropertyId.TextFontStyle: return int0 == 0 || IntUtil.UnsetValue == int0;
+                    case StylePropertyId.TextAlignment: return int0 == 0 || IntUtil.UnsetValue == int0;
+                    case StylePropertyId.TextOutlineWidth: return !FloatUtil.IsDefined(float1);
+                    case StylePropertyId.TextOutlineColor: return int1 == 0;
+                    case StylePropertyId.TextGlowColor: return int1 == 0;
+                    case StylePropertyId.TextGlowOffset: return !FloatUtil.IsDefined(float1);
+                    case StylePropertyId.TextGlowInner: return !FloatUtil.IsDefined(float1);
+                    case StylePropertyId.TextGlowOuter: return !FloatUtil.IsDefined(float1);
+                    case StylePropertyId.TextGlowPower: return !FloatUtil.IsDefined(float1);
+                    case StylePropertyId.TextShadowColor: return int1 == 0;
+                    case StylePropertyId.TextShadowOffsetX: return !FloatUtil.IsDefined(float1);
+                    case StylePropertyId.TextShadowOffsetY: return !FloatUtil.IsDefined(float1);
+                    case StylePropertyId.TextShadowIntensity: return !FloatUtil.IsDefined(float1);
+                    case StylePropertyId.TextShadowSoftness: return !FloatUtil.IsDefined(float1);
+                    case StylePropertyId.TextShadowType: return int0 == 0 || IntUtil.UnsetValue == int0;
+                    case StylePropertyId.TextTransform: return int0 == 0 || IntUtil.UnsetValue == int0;
+                    case StylePropertyId.TextWhitespaceMode: return int0 == 0 || IntUtil.UnsetValue == int0;
+                    case StylePropertyId.AnchorTop: return !FloatUtil.IsDefined(float1) || int1 == 0;
+                    case StylePropertyId.AnchorRight: return !FloatUtil.IsDefined(float1) || int1 == 0;
+                    case StylePropertyId.AnchorBottom: return !FloatUtil.IsDefined(float1) || int1 == 0;
+                    case StylePropertyId.AnchorLeft: return !FloatUtil.IsDefined(float1) || int1 == 0;
+                    case StylePropertyId.AnchorTarget: return int0 == 0 || IntUtil.UnsetValue == int0;
+                    case StylePropertyId.TransformPositionX: return !FloatUtil.IsDefined(float1) || int1 == 0;
+                    case StylePropertyId.TransformPositionY: return !FloatUtil.IsDefined(float1) || int1 == 0;
+                    case StylePropertyId.TransformPivotX: return !FloatUtil.IsDefined(float1) || int1 == 0;
+                    case StylePropertyId.TransformPivotY: return !FloatUtil.IsDefined(float1) || int1 == 0;
+                    case StylePropertyId.TransformScaleX: return !FloatUtil.IsDefined(float1);
+                    case StylePropertyId.TransformScaleY: return !FloatUtil.IsDefined(float1);
+                    case StylePropertyId.TransformRotation: return !FloatUtil.IsDefined(float1);
+                    case StylePropertyId.TransformBehaviorX: return int0 == 0 || IntUtil.UnsetValue == int0;
+                    case StylePropertyId.TransformBehaviorY: return int0 == 0 || IntUtil.UnsetValue == int0;
+                    case StylePropertyId.LayoutType: return int0 == 0 || IntUtil.UnsetValue == int0;
+                    case StylePropertyId.LayoutBehavior: return int0 == 0 || IntUtil.UnsetValue == int0;
+                    case StylePropertyId.ZIndex: return !IntUtil.IsDefined(int0);
+                    case StylePropertyId.RenderLayerOffset: return !IntUtil.IsDefined(int0);
+                    case StylePropertyId.RenderLayer: return int0 == 0 || IntUtil.UnsetValue == int0;
+                    case StylePropertyId.Layer: return !IntUtil.IsDefined(int0);
                     case StylePropertyId.Scrollbar: return objectField == null;
-                    case StylePropertyId.ScrollbarSize: return !FloatUtil.IsDefined(floatValue) || valuePart1 == 0;
-                    case StylePropertyId.ScrollbarColor: return valuePart1 == 0;
-                    case StylePropertyId.ShadowType: return valuePart0 == 0 || IntUtil.UnsetValue == valuePart0;
-                    case StylePropertyId.ShadowOffsetX: return !FloatUtil.IsDefined(floatValue);
-                    case StylePropertyId.ShadowOffsetY: return !FloatUtil.IsDefined(floatValue);
-                    case StylePropertyId.ShadowSoftnessX: return !FloatUtil.IsDefined(floatValue);
-                    case StylePropertyId.ShadowSoftnessY: return !FloatUtil.IsDefined(floatValue);
-                    case StylePropertyId.ShadowIntensity: return !FloatUtil.IsDefined(floatValue);
+                    case StylePropertyId.ScrollbarSize: return !FloatUtil.IsDefined(float1) || int1 == 0;
+                    case StylePropertyId.ScrollbarColor: return int1 == 0;
+                    case StylePropertyId.ShadowType: return int0 == 0 || IntUtil.UnsetValue == int0;
+                    case StylePropertyId.ShadowOffsetX: return !FloatUtil.IsDefined(float1);
+                    case StylePropertyId.ShadowOffsetY: return !FloatUtil.IsDefined(float1);
+                    case StylePropertyId.ShadowSoftnessX: return !FloatUtil.IsDefined(float1);
+                    case StylePropertyId.ShadowSoftnessY: return !FloatUtil.IsDefined(float1);
+                    case StylePropertyId.ShadowIntensity: return !FloatUtil.IsDefined(float1);
 
                 }
                 return true;
@@ -1084,14 +1164,14 @@ namespace UIForia.Rendering {
             [System.Diagnostics.DebuggerStepThrough]
             get { return GetProperty(StylePropertyId.BackgroundImage).AsTexture2D; }
             [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.BackgroundImage, 0, 0, value)); }
+            set { SetProperty(new StyleProperty(StylePropertyId.BackgroundImage, value)); }
         }
             
         public string Painter {
             [System.Diagnostics.DebuggerStepThrough]
             get { return GetProperty(StylePropertyId.Painter).AsString; }
             [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.Painter, 0, 0, value)); }
+            set { SetProperty(new StyleProperty(StylePropertyId.Painter, value)); }
         }
             
         public float Opacity {
@@ -1105,7 +1185,7 @@ namespace UIForia.Rendering {
             [System.Diagnostics.DebuggerStepThrough]
             get { return GetProperty(StylePropertyId.Cursor).AsCursorStyle; }
             [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.Cursor, 0, 0, value)); }
+            set { SetProperty(new StyleProperty(StylePropertyId.Cursor, value)); }
         }
             
         public UIForia.Rendering.Visibility Visibility {
@@ -1231,14 +1311,14 @@ namespace UIForia.Rendering {
             [System.Diagnostics.DebuggerStepThrough]
             get { return GetProperty(StylePropertyId.GridLayoutColTemplate).AsGridTemplate; }
             [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.GridLayoutColTemplate, 0, 0, value)); }
+            set { SetProperty(new StyleProperty(StylePropertyId.GridLayoutColTemplate, value)); }
         }
             
         public System.Collections.Generic.IReadOnlyList<UIForia.Layout.LayoutTypes.GridTrackSize> GridLayoutRowTemplate {
             [System.Diagnostics.DebuggerStepThrough]
             get { return GetProperty(StylePropertyId.GridLayoutRowTemplate).AsGridTemplate; }
             [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.GridLayoutRowTemplate, 0, 0, value)); }
+            set { SetProperty(new StyleProperty(StylePropertyId.GridLayoutRowTemplate, value)); }
         }
             
         public UIForia.Layout.LayoutTypes.GridTrackSize GridLayoutMainAxisAutoSize {
@@ -1302,6 +1382,76 @@ namespace UIForia.Rendering {
             get { return FindUIFixedLengthProperty(StylePropertyId.RadialLayoutRadius); }
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.RadialLayoutRadius, value)); }
+        }
+            
+        public UIForia.Layout.AlignmentTarget AlignmentTargetX {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return (UIForia.Layout.AlignmentTarget)FindEnumProperty(StylePropertyId.AlignmentTargetX); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.AlignmentTargetX, (int)value)); }
+        }
+            
+        public UIForia.Layout.AlignmentTarget AlignmentTargetY {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return (UIForia.Layout.AlignmentTarget)FindEnumProperty(StylePropertyId.AlignmentTargetY); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.AlignmentTargetY, (int)value)); }
+        }
+            
+        public UIForia.Layout.AlignmentBehavior AlignmentBehaviorX {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return (UIForia.Layout.AlignmentBehavior)FindEnumProperty(StylePropertyId.AlignmentBehaviorX); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.AlignmentBehaviorX, (int)value)); }
+        }
+            
+        public UIForia.Layout.AlignmentBehavior AlignmentBehaviorY {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return (UIForia.Layout.AlignmentBehavior)FindEnumProperty(StylePropertyId.AlignmentBehaviorY); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.AlignmentBehaviorY, (int)value)); }
+        }
+            
+        public float AlignmentPivotX {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return FindFloatProperty(StylePropertyId.AlignmentPivotX); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.AlignmentPivotX, value)); }
+        }
+            
+        public float AlignmentPivotY {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return FindFloatProperty(StylePropertyId.AlignmentPivotY); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.AlignmentPivotY, value)); }
+        }
+            
+        public float AlignmentOffsetX {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return FindFloatProperty(StylePropertyId.AlignmentOffsetX); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.AlignmentOffsetX, value)); }
+        }
+            
+        public float AlignmentOffsetY {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return FindFloatProperty(StylePropertyId.AlignmentOffsetY); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.AlignmentOffsetY, value)); }
+        }
+            
+        public UIForia.Layout.Fit FitX {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return (UIForia.Layout.Fit)FindEnumProperty(StylePropertyId.FitX); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.FitX, (int)value)); }
+        }
+            
+        public UIForia.Layout.Fit FitY {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return (UIForia.Layout.Fit)FindEnumProperty(StylePropertyId.FitY); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.FitY, (int)value)); }
         }
             
         public UIForia.Rendering.UIMeasurement MinWidth {
@@ -1476,7 +1626,7 @@ namespace UIForia.Rendering {
             [System.Diagnostics.DebuggerStepThrough]
             get { return GetProperty(StylePropertyId.TextFontAsset).AsFont; }
             [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.TextFontAsset, 0, 0, value)); }
+            set { SetProperty(new StyleProperty(StylePropertyId.TextFontAsset, value)); }
         }
             
         public UIForia.UIFixedLength TextFontSize {
@@ -1749,7 +1899,7 @@ namespace UIForia.Rendering {
             [System.Diagnostics.DebuggerStepThrough]
             get { return GetProperty(StylePropertyId.Scrollbar).AsString; }
             [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.Scrollbar, 0, 0, value)); }
+            set { SetProperty(new StyleProperty(StylePropertyId.Scrollbar, value)); }
         }
             
         public UIForia.Rendering.UIMeasurement ScrollbarSize {
@@ -1992,6 +2142,7 @@ namespace UIForia.Rendering {
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.Visibility, out property)) return property.AsVisibility;
+                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.Visibility), out property)) return property.AsVisibility;
                     return DefaultStyleValues_Generated.Visibility;
                 }
             }
@@ -2236,6 +2387,96 @@ namespace UIForia.Rendering {
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.RadialLayoutRadius, out property)) return property.AsUIFixedLength;
                     return DefaultStyleValues_Generated.RadialLayoutRadius;
+                }
+            }
+
+            public UIForia.Layout.AlignmentTarget AlignmentTargetX { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.AlignmentTargetX, out property)) return property.AsAlignmentTarget;
+                    return DefaultStyleValues_Generated.AlignmentTargetX;
+                }
+            }
+
+            public UIForia.Layout.AlignmentTarget AlignmentTargetY { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.AlignmentTargetY, out property)) return property.AsAlignmentTarget;
+                    return DefaultStyleValues_Generated.AlignmentTargetY;
+                }
+            }
+
+            public UIForia.Layout.AlignmentBehavior AlignmentBehaviorX { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.AlignmentBehaviorX, out property)) return property.AsAlignmentBehavior;
+                    return DefaultStyleValues_Generated.AlignmentBehaviorX;
+                }
+            }
+
+            public UIForia.Layout.AlignmentBehavior AlignmentBehaviorY { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.AlignmentBehaviorY, out property)) return property.AsAlignmentBehavior;
+                    return DefaultStyleValues_Generated.AlignmentBehaviorY;
+                }
+            }
+
+            public float AlignmentPivotX { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.AlignmentPivotX, out property)) return property.AsFloat;
+                    return DefaultStyleValues_Generated.AlignmentPivotX;
+                }
+            }
+
+            public float AlignmentPivotY { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.AlignmentPivotY, out property)) return property.AsFloat;
+                    return DefaultStyleValues_Generated.AlignmentPivotY;
+                }
+            }
+
+            public float AlignmentOffsetX { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.AlignmentOffsetX, out property)) return property.AsFloat;
+                    return DefaultStyleValues_Generated.AlignmentOffsetX;
+                }
+            }
+
+            public float AlignmentOffsetY { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.AlignmentOffsetY, out property)) return property.AsFloat;
+                    return DefaultStyleValues_Generated.AlignmentOffsetY;
+                }
+            }
+
+            public UIForia.Layout.Fit FitX { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.FitX, out property)) return property.AsFit;
+                    return DefaultStyleValues_Generated.FitX;
+                }
+            }
+
+            public UIForia.Layout.Fit FitY { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.FitY, out property)) return property.AsFit;
+                    return DefaultStyleValues_Generated.FitY;
                 }
             }
 
@@ -3031,7 +3272,7 @@ namespace UIForia.Rendering {
         }
         
         public void SetBackgroundImage(UnityEngine.Texture2D value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.BackgroundImage, 0, 0, value), state);
+            SetProperty(new StyleProperty(StylePropertyId.BackgroundImage, value), state);
         }
 
         public UnityEngine.Texture2D GetBackgroundImage(StyleState state) {
@@ -3039,7 +3280,7 @@ namespace UIForia.Rendering {
         }
         
         public void SetPainter(string value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.Painter, 0, 0, value), state);
+            SetProperty(new StyleProperty(StylePropertyId.Painter, value), state);
         }
 
         public string GetPainter(StyleState state) {
@@ -3055,7 +3296,7 @@ namespace UIForia.Rendering {
         }
         
         public void SetCursor(UIForia.Rendering.CursorStyle value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.Cursor, 0, 0, value), state);
+            SetProperty(new StyleProperty(StylePropertyId.Cursor, value), state);
         }
 
         public UIForia.Rendering.CursorStyle GetCursor(StyleState state) {
@@ -3199,7 +3440,7 @@ namespace UIForia.Rendering {
         }
         
         public void SetGridLayoutColTemplate(System.Collections.Generic.IReadOnlyList<UIForia.Layout.LayoutTypes.GridTrackSize> value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.GridLayoutColTemplate, 0, 0, value), state);
+            SetProperty(new StyleProperty(StylePropertyId.GridLayoutColTemplate, value), state);
         }
 
         public System.Collections.Generic.IReadOnlyList<UIForia.Layout.LayoutTypes.GridTrackSize> GetGridLayoutColTemplate(StyleState state) {
@@ -3207,7 +3448,7 @@ namespace UIForia.Rendering {
         }
         
         public void SetGridLayoutRowTemplate(System.Collections.Generic.IReadOnlyList<UIForia.Layout.LayoutTypes.GridTrackSize> value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.GridLayoutRowTemplate, 0, 0, value), state);
+            SetProperty(new StyleProperty(StylePropertyId.GridLayoutRowTemplate, value), state);
         }
 
         public System.Collections.Generic.IReadOnlyList<UIForia.Layout.LayoutTypes.GridTrackSize> GetGridLayoutRowTemplate(StyleState state) {
@@ -3284,6 +3525,86 @@ namespace UIForia.Rendering {
 
         public UIForia.UIFixedLength GetRadialLayoutRadius(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.RadialLayoutRadius, state).AsUIFixedLength;
+        }
+        
+        public void SetAlignmentTargetX(UIForia.Layout.AlignmentTarget value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.AlignmentTargetX, (int)value), state);
+        }
+
+        public UIForia.Layout.AlignmentTarget GetAlignmentTargetX(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.AlignmentTargetX, state).AsAlignmentTarget;
+        }
+        
+        public void SetAlignmentTargetY(UIForia.Layout.AlignmentTarget value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.AlignmentTargetY, (int)value), state);
+        }
+
+        public UIForia.Layout.AlignmentTarget GetAlignmentTargetY(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.AlignmentTargetY, state).AsAlignmentTarget;
+        }
+        
+        public void SetAlignmentBehaviorX(UIForia.Layout.AlignmentBehavior value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.AlignmentBehaviorX, (int)value), state);
+        }
+
+        public UIForia.Layout.AlignmentBehavior GetAlignmentBehaviorX(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.AlignmentBehaviorX, state).AsAlignmentBehavior;
+        }
+        
+        public void SetAlignmentBehaviorY(UIForia.Layout.AlignmentBehavior value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.AlignmentBehaviorY, (int)value), state);
+        }
+
+        public UIForia.Layout.AlignmentBehavior GetAlignmentBehaviorY(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.AlignmentBehaviorY, state).AsAlignmentBehavior;
+        }
+        
+        public void SetAlignmentPivotX(float value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.AlignmentPivotX, value), state);
+        }
+
+        public float GetAlignmentPivotX(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.AlignmentPivotX, state).AsFloat;
+        }
+        
+        public void SetAlignmentPivotY(float value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.AlignmentPivotY, value), state);
+        }
+
+        public float GetAlignmentPivotY(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.AlignmentPivotY, state).AsFloat;
+        }
+        
+        public void SetAlignmentOffsetX(float value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.AlignmentOffsetX, value), state);
+        }
+
+        public float GetAlignmentOffsetX(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.AlignmentOffsetX, state).AsFloat;
+        }
+        
+        public void SetAlignmentOffsetY(float value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.AlignmentOffsetY, value), state);
+        }
+
+        public float GetAlignmentOffsetY(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.AlignmentOffsetY, state).AsFloat;
+        }
+        
+        public void SetFitX(UIForia.Layout.Fit value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.FitX, (int)value), state);
+        }
+
+        public UIForia.Layout.Fit GetFitX(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.FitX, state).AsFit;
+        }
+        
+        public void SetFitY(UIForia.Layout.Fit value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.FitY, (int)value), state);
+        }
+
+        public UIForia.Layout.Fit GetFitY(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.FitY, state).AsFit;
         }
         
         public void SetMinWidth(UIForia.Rendering.UIMeasurement value, StyleState state) {
@@ -3479,7 +3800,7 @@ namespace UIForia.Rendering {
         }
         
         public void SetTextFontAsset(TMPro.TMP_FontAsset value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.TextFontAsset, 0, 0, value), state);
+            SetProperty(new StyleProperty(StylePropertyId.TextFontAsset, value), state);
         }
 
         public TMPro.TMP_FontAsset GetTextFontAsset(StyleState state) {
@@ -3791,7 +4112,7 @@ namespace UIForia.Rendering {
         }
         
         public void SetScrollbar(string value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.Scrollbar, 0, 0, value), state);
+            SetProperty(new StyleProperty(StylePropertyId.Scrollbar, value), state);
         }
 
         public string GetScrollbar(StyleState state) {
@@ -3896,13 +4217,13 @@ namespace UIForia.Rendering {
 				case StylePropertyId.BackgroundImageRotation:
 					 return new StyleProperty(StylePropertyId.BackgroundImageRotation, BackgroundImageRotation);
 				case StylePropertyId.BackgroundImage:
-					 return new StyleProperty(StylePropertyId.BackgroundImage, 0, 0, BackgroundImage);
+					 return new StyleProperty(StylePropertyId.BackgroundImage, BackgroundImage);
 				case StylePropertyId.Painter:
-					 return new StyleProperty(StylePropertyId.Painter, 0, 0, Painter);
+					 return new StyleProperty(StylePropertyId.Painter, Painter);
 				case StylePropertyId.Opacity:
 					 return new StyleProperty(StylePropertyId.Opacity, Opacity);
 				case StylePropertyId.Cursor:
-					 return new StyleProperty(StylePropertyId.Cursor, 0, 0, Cursor);
+					 return new StyleProperty(StylePropertyId.Cursor, Cursor);
 				case StylePropertyId.Visibility:
 					 return new StyleProperty(StylePropertyId.Visibility, (int)Visibility);
 				case StylePropertyId.FlexItemOrder:
@@ -3938,9 +4259,9 @@ namespace UIForia.Rendering {
 				case StylePropertyId.GridLayoutDensity:
 					 return new StyleProperty(StylePropertyId.GridLayoutDensity, (int)GridLayoutDensity);
 				case StylePropertyId.GridLayoutColTemplate:
-					 return new StyleProperty(StylePropertyId.GridLayoutColTemplate, 0, 0, GridLayoutColTemplate);
+					 return new StyleProperty(StylePropertyId.GridLayoutColTemplate, GridLayoutColTemplate);
 				case StylePropertyId.GridLayoutRowTemplate:
-					 return new StyleProperty(StylePropertyId.GridLayoutRowTemplate, 0, 0, GridLayoutRowTemplate);
+					 return new StyleProperty(StylePropertyId.GridLayoutRowTemplate, GridLayoutRowTemplate);
 				case StylePropertyId.GridLayoutMainAxisAutoSize:
 					 return new StyleProperty(StylePropertyId.GridLayoutMainAxisAutoSize, GridLayoutMainAxisAutoSize);
 				case StylePropertyId.GridLayoutCrossAxisAutoSize:
@@ -3959,6 +4280,26 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.RadialLayoutEndAngle, RadialLayoutEndAngle);
 				case StylePropertyId.RadialLayoutRadius:
 					 return new StyleProperty(StylePropertyId.RadialLayoutRadius, RadialLayoutRadius);
+				case StylePropertyId.AlignmentTargetX:
+					 return new StyleProperty(StylePropertyId.AlignmentTargetX, (int)AlignmentTargetX);
+				case StylePropertyId.AlignmentTargetY:
+					 return new StyleProperty(StylePropertyId.AlignmentTargetY, (int)AlignmentTargetY);
+				case StylePropertyId.AlignmentBehaviorX:
+					 return new StyleProperty(StylePropertyId.AlignmentBehaviorX, (int)AlignmentBehaviorX);
+				case StylePropertyId.AlignmentBehaviorY:
+					 return new StyleProperty(StylePropertyId.AlignmentBehaviorY, (int)AlignmentBehaviorY);
+				case StylePropertyId.AlignmentPivotX:
+					 return new StyleProperty(StylePropertyId.AlignmentPivotX, AlignmentPivotX);
+				case StylePropertyId.AlignmentPivotY:
+					 return new StyleProperty(StylePropertyId.AlignmentPivotY, AlignmentPivotY);
+				case StylePropertyId.AlignmentOffsetX:
+					 return new StyleProperty(StylePropertyId.AlignmentOffsetX, AlignmentOffsetX);
+				case StylePropertyId.AlignmentOffsetY:
+					 return new StyleProperty(StylePropertyId.AlignmentOffsetY, AlignmentOffsetY);
+				case StylePropertyId.FitX:
+					 return new StyleProperty(StylePropertyId.FitX, (int)FitX);
+				case StylePropertyId.FitY:
+					 return new StyleProperty(StylePropertyId.FitY, (int)FitY);
 				case StylePropertyId.MinWidth:
 					 return new StyleProperty(StylePropertyId.MinWidth, MinWidth);
 				case StylePropertyId.MaxWidth:
@@ -4008,7 +4349,7 @@ namespace UIForia.Rendering {
 				case StylePropertyId.TextColor:
 					 return new StyleProperty(StylePropertyId.TextColor, TextColor);
 				case StylePropertyId.TextFontAsset:
-					 return new StyleProperty(StylePropertyId.TextFontAsset, 0, 0, TextFontAsset);
+					 return new StyleProperty(StylePropertyId.TextFontAsset, TextFontAsset);
 				case StylePropertyId.TextFontSize:
 					 return new StyleProperty(StylePropertyId.TextFontSize, TextFontSize);
 				case StylePropertyId.TextFontStyle:
@@ -4086,7 +4427,7 @@ namespace UIForia.Rendering {
 				case StylePropertyId.Layer:
 					 return new StyleProperty(StylePropertyId.Layer, Layer);
 				case StylePropertyId.Scrollbar:
-					 return new StyleProperty(StylePropertyId.Scrollbar, 0, 0, Scrollbar);
+					 return new StyleProperty(StylePropertyId.Scrollbar, Scrollbar);
 				case StylePropertyId.ScrollbarSize:
 					 return new StyleProperty(StylePropertyId.ScrollbarSize, ScrollbarSize);
 				case StylePropertyId.ScrollbarColor:
@@ -4136,6 +4477,10 @@ namespace UIForia.Rendering {
                     case StylePropertyId.RadialLayoutStartAngle: return true;
                     case StylePropertyId.RadialLayoutEndAngle: return true;
                     case StylePropertyId.RadialLayoutRadius: return true;
+                    case StylePropertyId.AlignmentPivotX: return true;
+                    case StylePropertyId.AlignmentPivotY: return true;
+                    case StylePropertyId.AlignmentOffsetX: return true;
+                    case StylePropertyId.AlignmentOffsetY: return true;
                     case StylePropertyId.MinWidth: return true;
                     case StylePropertyId.MaxWidth: return true;
                     case StylePropertyId.PreferredWidth: return true;
@@ -4204,6 +4549,7 @@ namespace UIForia.Rendering {
             switch (propertyId) {
 
                     case StylePropertyId.Opacity: return true;
+                    case StylePropertyId.Visibility: return true;
                     case StylePropertyId.TextColor: return true;
                     case StylePropertyId.TextFontAsset: return true;
                     case StylePropertyId.TextFontSize: return true;

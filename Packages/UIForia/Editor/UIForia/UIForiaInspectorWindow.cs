@@ -287,7 +287,7 @@ namespace UIForia.Editor {
                 mesh = MeshUtil.ResizeStandardUIMesh(mesh, renderSize);
 
                 material.SetVector(s_MarginRectKey, new Vector4(
-                    0, 0, width + margin.right + margin.left, height + margin.top + margin.bottom
+                     width + margin.right + margin.left, height + margin.top + margin.bottom
                 ));
 
                 material.SetVector(s_BorderRectKey, new Vector4(
@@ -569,7 +569,7 @@ namespace UIForia.Editor {
 
             GUILayout.Space(16);
 
-            OffsetRect border = app.LayoutSystem.GetBorderRect(selectedElement);
+            OffsetRect border = selectedElement.layoutResult.border;
 
             DrawLabel("Border Top", border.top.ToString());
             DrawLabel("Border Right", border.right.ToString());
@@ -578,7 +578,7 @@ namespace UIForia.Editor {
 
             GUILayout.Space(16);
 
-            OffsetRect padding = app.LayoutSystem.GetPaddingRect(selectedElement);
+            OffsetRect padding = selectedElement.layoutResult.padding;
             DrawLabel("Padding Top", padding.top.ToString());
             DrawLabel("Padding Right", padding.right.ToString());
             DrawLabel("Padding Bottom", padding.bottom.ToString());
@@ -950,7 +950,7 @@ namespace UIForia.Editor {
 
             int[] values = tuple.Item1;
             GUIContent[] displayOptions = tuple.Item2;
-            int index = Array.IndexOf(values, property.valuePart0);
+            int index = Array.IndexOf(values, property.int0);
             int output = EditorGUILayout.Popup(s_Content, index, displayOptions);
             // unclear if output is a value or an index, I suspect index
             GUI.enabled = true;
@@ -978,7 +978,7 @@ namespace UIForia.Editor {
             GUI.enabled = isEditable;
             string value = EditorGUILayout.TextField(s_Content, property.AsString);
             GUI.enabled = true;
-            return isEditable ? new StyleProperty(property.propertyId, 0, 0, value) : property;
+            return isEditable ? new StyleProperty(property.propertyId,  value) : property;
         }
 
         private static StyleProperty DrawFloat(StyleProperty property, bool isEditable) {
@@ -1045,7 +1045,7 @@ namespace UIForia.Editor {
 
             GUI.enabled = true;
             GUILayout.EndHorizontal();
-            return isEditable ? new StyleProperty(property.propertyId, 0, 0, newTexture) : property;
+            return isEditable ? new StyleProperty(property.propertyId,  newTexture) : property;
         }
 
         private static StyleProperty DrawFontAsset(StyleProperty property, bool isEditable) {
@@ -1058,7 +1058,7 @@ namespace UIForia.Editor {
 
             GUI.enabled = true;
             GUILayout.EndHorizontal();
-            return isEditable ? new StyleProperty(property.propertyId, 0, 0, newFont) : property;
+            return isEditable ? new StyleProperty(property.propertyId,  newFont) : property;
         }
 
         private static StyleProperty DrawGridTemplate(StyleProperty property, bool isEditable) {
@@ -1079,7 +1079,7 @@ namespace UIForia.Editor {
 
             EditorGUILayout.EndHorizontal();
             GUI.enabled = true;
-            return isEditable ? new StyleProperty(property.propertyId, 0, 0, null) : property;
+            return isEditable ? new StyleProperty(property.propertyId,  null) : property;
         }
 
     }

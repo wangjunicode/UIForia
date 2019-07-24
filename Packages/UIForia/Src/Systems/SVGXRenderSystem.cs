@@ -77,10 +77,9 @@ namespace UIForia.Systems {
             m_Camera.orthographicSize = Screen.height * 0.5f;
             
             LightList<UIElement> visibleElements = view.visibleElements;
-            visibleElements.Reverse();
 
             UIElement[] elementArray = visibleElements.Array;
-            for (int i = 0; i < visibleElements.Count; i++) {
+            for (int i = visibleElements.size - 1; i >= 0; i--) {
                 UIElement current = elementArray[i];
 
                 if (current.style.Visibility == Visibility.Hidden) {
@@ -171,8 +170,8 @@ namespace UIForia.Systems {
 
             Vector4 border = layoutResult.border;
             Vector4 resolveBorderRadius = layoutResult.borderRadius;
-            float width = layoutResult.allocatedSize.width;
-            float height = layoutResult.allocatedSize.height;
+            float width = layoutResult.actualSize.width;
+            float height = layoutResult.actualSize.height;
             bool hasUniformBorder = border.x == border.y && border.z == border.x && border.w == border.x;
             bool hasBorder = border.x > 0 || border.y > 0 || border.z > 0 || border.w > 0;
 
@@ -181,7 +180,7 @@ namespace UIForia.Systems {
             ctx.SetFillOpacity(current.style.Opacity);
             ctx.SetStrokeOpacity(current.style.Opacity);
             if (resolveBorderRadius == Vector4.zero) {
-                ctx.Rect(borderRect.left, borderRect.top, layoutResult.allocatedSize.width - borderRect.Horizontal, layoutResult.allocatedSize.height - borderRect.Vertical);
+                ctx.Rect(borderRect.left, borderRect.top, width - borderRect.Horizontal, height - borderRect.Vertical);
 
                 if (!hasBorder) {
                     DrawNormalFill(ctx, current);

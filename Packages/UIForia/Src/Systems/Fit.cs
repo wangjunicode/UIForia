@@ -1,4 +1,4 @@
-namespace UIForia.Systems {
+namespace UIForia.Layout {
 
     public enum Fit {
 

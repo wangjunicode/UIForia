@@ -61,8 +61,8 @@ namespace UIForia.Rendering {
             for (int i = 0; i < PropertyCount; i++) {
                 if (array[i].propertyId == propertyId) {
                     return new GridTrackSize(
-                        array[i].floatValue,
-                        (GridTemplateUnit) array[i].valuePart1
+                        array[i].float1,
+                        (GridTemplateUnit) array[i].int1
                     );
                 }
             }
@@ -84,8 +84,8 @@ namespace UIForia.Rendering {
             for (int i = 0; i < PropertyCount; i++) {
                 if (array[i].propertyId == propertyId) {
                     return new TransformOffset(
-                        array[i].floatValue,
-                        (TransformUnit) array[i].valuePart1
+                        array[i].float1,
+                        (TransformUnit) array[i].int1
                     );
                 }
             }
@@ -97,8 +97,8 @@ namespace UIForia.Rendering {
             for (int i = 0; i < PropertyCount; i++) {
                 if (array[i].propertyId == propertyId) {
                     return new UIFixedLength(
-                        array[i].floatValue,
-                        (UIFixedUnit) array[i].valuePart1
+                        array[i].float1,
+                        (UIFixedUnit) array[i].int1
                     );
                 }
             }
@@ -113,17 +113,17 @@ namespace UIForia.Rendering {
 
         private int FindIntProperty(StylePropertyId propertyId) {
             StyleProperty property = GetProperty(propertyId);
-            return property.IsUnset ? IntUtil.UnsetValue : property.valuePart0;
+            return property.IsUnset ? IntUtil.UnsetValue : property.int0;
         }
 
         private int FindEnumProperty(StylePropertyId propertyId) {
             StyleProperty property = GetProperty(propertyId);
-            return property.IsUnset ? 0 : property.valuePart0;
+            return property.IsUnset ? 0 : property.int0;
         }
 
         private Color FindColorProperty(StylePropertyId propertyId) {
             StyleProperty property = GetProperty(propertyId);
-            return property.IsUnset ?  ColorUtil.UnsetValue :(Color) new StyleColor(property.valuePart0);
+            return property.IsUnset ?  ColorUtil.UnsetValue :(Color) new StyleColor(property.int0);
         }
         
         internal void SetProperty(in StyleProperty property) {

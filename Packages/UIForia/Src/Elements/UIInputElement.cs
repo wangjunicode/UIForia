@@ -237,7 +237,7 @@ namespace UIForia.Elements {
             }
         }
 
-        public bool ShowPlaceholder => placeholder != null && text.Length == 0;
+        public bool ShowPlaceholder => placeholder != null && string.IsNullOrEmpty(text);
 
         public override string GetDisplayName() {
             return $"InputElement<{typeof(T).Name}>";

@@ -103,6 +103,7 @@ namespace UIForia.Util {
         public void RemoveRange(int index, int count) {
             for (int i = index; i < index + count; i++) {
                 backingStore.RemoveAt(i);
+                onItemRemoved?.Invoke(backingStore[i], i);
             }
         }
     }

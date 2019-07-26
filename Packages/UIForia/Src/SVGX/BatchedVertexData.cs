@@ -447,24 +447,24 @@ namespace SVGX {
 
             TextInfo textInfo = renderShape.textInfo;
 
-            CharInfo[] charInfos = textInfo.charInfoList.Array;
-            int charCount = textInfo.CharCount;
+            CharInfo2[] charInfos = textInfo.rootSpan.charInfoList.Array;
+            int charCount = textInfo.rootSpan.charInfoList.size;
 
             SVGXTextStyle textStyle = textInfo.spanList[0].textStyle;
 
-            float outlineWidth = Mathf.Clamp01(textStyle.outlineWidth);
-            float outlineSoftness = textStyle.outlineSoftness;
+            float outlineWidth = 0; //Mathf.Clamp01(textStyle.outlineWidth);
+            float outlineSoftness = 0; //textStyle.outlineSoftness;
 
             Color32 glowColor = Color.green;
-            float glowOuter = textStyle.glowOuter;
-            float glowOffset = textStyle.glowOffset;
+            float glowOuter = 0; //textStyle.glowOuter;
+            float glowOffset = 0; //textStyle.glowOffset;
             float z = renderShape.zIndex;
             
             Vector4 glowAndRenderData = new Vector4(renderData, new StyleColor(glowColor).rgba, glowOuter, glowOffset);
 
             int isStroke = 0;
 
-            Vector4 outline = new Vector4(outlineWidth, outlineSoftness, VertigoUtil.ColorToFloat(textStyle.outlineColor), 0);
+            Vector4 outline = new Vector4(outlineWidth, outlineSoftness, VertigoUtil.ColorToFloat(textStyle.outlineColor ?? Color.black), 0);
 
             Color textColor = style.fillColor;
 
@@ -490,90 +490,90 @@ namespace SVGX {
 
             // todo -- clip smarter using layout lines
             for (int i = 0; i < charCount; i++) {
-                ref CharInfo charInfo = ref charInfos[i];
-                if (charInfo.character == ' ') continue;
-
-                // todo -- text is not currently respecting transform scale, wait for vertigo to implement this for perf reasons
-                Vector2 topLeft = charInfo.layoutTopLeft;
-                Vector2 bottomRight = charInfo.layoutBottomRight;
-
-                ref Vector3 position = ref positions[vertIdx + 0];
-                position.x = p0.x + topLeft.x;
-                position.y = -p0.y + -bottomRight.y;
-                position.z = z;
-            
-                position = ref positions[vertIdx + 1];
-                position.x = p0.x + topLeft.x;
-                position.y = -p0.y + -topLeft.y;
-                position.z = z;
-
-                position = ref positions[vertIdx + 2];
-                position.x = p0.x + bottomRight.x;
-                position.y = -p0.y + -topLeft.y;
-                position.z = z;
-
-                position = ref positions[vertIdx + 3];
-                position.x = p0.x + bottomRight.x;
-                position.y = -p0.y + -bottomRight.y;
-                position.z = z;
-
-                float x = charInfo.uv0.x; 
-                float y = charInfo.uv0.y;
-                float x1 = charInfo.uv1.x;
-                float y1 = charInfo.uv1.y;
-
-                ref Vector4 uvVec = ref uv0[vertIdx + 0];
-                uvVec.x = x;
-                uvVec.y = y;
-                uvVec.z = charInfo.uv2.x;
-                uvVec.w = isStroke;
-
-                uvVec = ref uv0[vertIdx + 1];
-                uvVec.x = x;
-                uvVec.y = y1;
-                uvVec.z = charInfo.uv2.x;
-                uvVec.w = isStroke;
-
-                uvVec = ref uv0[vertIdx + 2];
-                uvVec.x = x1;
-                uvVec.y = y1;
-                uvVec.z = charInfo.uv2.x;
-                uvVec.w = isStroke;
-
-                uvVec = ref uv0[vertIdx + 3];
-                uvVec.x = x1;
-                uvVec.y = y;
-                uvVec.z = charInfo.uv2.x;
-                uvVec.w = isStroke;
-
-                uv1[vertIdx + 0] = glowAndRenderData;
-                uv1[vertIdx + 1] = glowAndRenderData;
-                uv1[vertIdx + 2] = glowAndRenderData;
-                uv1[vertIdx + 3] = glowAndRenderData;
-
-                uv2[vertIdx + 0] = outline;
-                uv2[vertIdx + 1] = outline;
-                uv2[vertIdx + 2] = outline;
-                uv2[vertIdx + 3] = outline;
-
-                uv4[vertIdx + 0] = scissorVector;
-                uv4[vertIdx + 1] = scissorVector;
-                uv4[vertIdx + 2] = scissorVector;
-                uv4[vertIdx + 3] = scissorVector;
-
-                colors[vertIdx + 0] = textColor;
-                colors[vertIdx + 1] = textColor;
-                colors[vertIdx + 2] = textColor;
-                colors[vertIdx + 3] = textColor;
-
-                triangles[tidx + 0] = vertIdx + 0;
-                triangles[tidx + 1] = vertIdx + 1;
-                triangles[tidx + 2] = vertIdx + 2;
-                triangles[tidx + 3] = vertIdx + 2;
-                triangles[tidx + 4] = vertIdx + 3;
-                triangles[tidx + 5] = vertIdx + 0;
-
-                vertIdx += 4;
+//                ref CharInfo2 charInfo = ref charInfos[i];
+//                if (charInfo.character == ' ') continue;
+//
+//                // todo -- text is not currently respecting transform scale, wait for vertigo to implement this for perf reasons
+//                Vector2 topLeft = charInfo.layoutTopLeft;
+//                Vector2 bottomRight = charInfo.layoutBottomRight;
+//
+//                ref Vector3 position = ref positions[vertIdx + 0];
+//                position.x = p0.x + topLeft.x;
+//                position.y = -p0.y + -bottomRight.y;
+//                position.z = z;
+//            
+//                position = ref positions[vertIdx + 1];
+//                position.x = p0.x + topLeft.x;
+//                position.y = -p0.y + -topLeft.y;
+//                position.z = z;
+//
+//                position = ref positions[vertIdx + 2];
+//                position.x = p0.x + bottomRight.x;
+//                position.y = -p0.y + -topLeft.y;
+//                position.z = z;
+//
+//                position = ref positions[vertIdx + 3];
+//                position.x = p0.x + bottomRight.x;
+//                position.y = -p0.y + -bottomRight.y;
+//                position.z = z;
+//
+//                float x = charInfo.uv0.x; 
+//                float y = charInfo.uv0.y;
+//                float x1 = charInfo.uv1.x;
+//                float y1 = charInfo.uv1.y;
+//
+//                ref Vector4 uvVec = ref uv0[vertIdx + 0];
+//                uvVec.x = x;
+//                uvVec.y = y;
+//                uvVec.z = charInfo.uv2.x;
+//                uvVec.w = isStroke;
+//
+//                uvVec = ref uv0[vertIdx + 1];
+//                uvVec.x = x;
+//                uvVec.y = y1;
+//                uvVec.z = charInfo.uv2.x;
+//                uvVec.w = isStroke;
+//
+//                uvVec = ref uv0[vertIdx + 2];
+//                uvVec.x = x1;
+//                uvVec.y = y1;
+//                uvVec.z = charInfo.uv2.x;
+//                uvVec.w = isStroke;
+//
+//                uvVec = ref uv0[vertIdx + 3];
+//                uvVec.x = x1;
+//                uvVec.y = y;
+//                uvVec.z = charInfo.uv2.x;
+//                uvVec.w = isStroke;
+//
+//                uv1[vertIdx + 0] = glowAndRenderData;
+//                uv1[vertIdx + 1] = glowAndRenderData;
+//                uv1[vertIdx + 2] = glowAndRenderData;
+//                uv1[vertIdx + 3] = glowAndRenderData;
+//
+//                uv2[vertIdx + 0] = outline;
+//                uv2[vertIdx + 1] = outline;
+//                uv2[vertIdx + 2] = outline;
+//                uv2[vertIdx + 3] = outline;
+//
+//                uv4[vertIdx + 0] = scissorVector;
+//                uv4[vertIdx + 1] = scissorVector;
+//                uv4[vertIdx + 2] = scissorVector;
+//                uv4[vertIdx + 3] = scissorVector;
+//
+//                colors[vertIdx + 0] = textColor;
+//                colors[vertIdx + 1] = textColor;
+//                colors[vertIdx + 2] = textColor;
+//                colors[vertIdx + 3] = textColor;
+//
+//                triangles[tidx + 0] = vertIdx + 0;
+//                triangles[tidx + 1] = vertIdx + 1;
+//                triangles[tidx + 2] = vertIdx + 2;
+//                triangles[tidx + 3] = vertIdx + 2;
+//                triangles[tidx + 4] = vertIdx + 3;
+//                triangles[tidx + 5] = vertIdx + 0;
+//
+//                vertIdx += 4;
                 tidx += 6;
                 triangleIndex += 4;
             }

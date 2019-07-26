@@ -11,18 +11,23 @@ namespace UIForia.Compilers.Style {
         private static readonly Func<StyleConstant, string, bool> s_FindStyleConstant = (element, name) => element.name == name;
 
         public string fileName;
-        public Dictionary<string, ConstNode> constNodes = new Dictionary<string, ConstNode>();
-        public Dictionary<string, LightList<StyleConstant>> importedStyleConstants = new Dictionary<string, LightList<StyleConstant>>();
 
-        public Dictionary<string, StyleConstant> constantsWithReferences = new Dictionary<string, StyleConstant>();
-        public LightList<StyleConstant> constants = LightList<StyleConstant>.Get();
-        public LightList<UIStyleGroup> importedGroups = LightList<UIStyleGroup>.Get();
+        public Dictionary<string, LightList<StyleConstant>> importedStyleConstants;
+        public Dictionary<string, StyleConstant> constantsWithReferences;
+        public LightList<StyleConstant> constants;
+        public Application application;
 
+        public StyleCompileContext(Application application) {
+            this.application = application;
+            this.importedStyleConstants = new Dictionary<string, LightList<StyleConstant>>();
+            this.constantsWithReferences = new Dictionary<string, StyleConstant>();
+            this.constants = new LightList<StyleConstant>();
+        }
+        
         public void Release() {
-            LightList<StyleConstant>.Release(ref constants);
-            LightList<UIStyleGroup>.Release(ref importedGroups);
-            constNodes.Clear();
+            importedStyleConstants.Clear();
             constantsWithReferences.Clear();
+            constants.Clear();
         }
 
         /// <summary>

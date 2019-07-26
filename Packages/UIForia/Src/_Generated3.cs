@@ -1,7 +1,6 @@
 using Shapes2D;
 using UIForia.Layout;
 using UIForia.Layout.LayoutTypes;
-using TMPro;
 using UIForia.Bindings.StyleBindings;
 using System.Collections.Generic;
 using UnityEngine;
@@ -97,7 +96,7 @@ namespace UIForia.Rendering {
 		public static readonly UIFixedLength PaddingBottom = new UIFixedLength(0f, UIFixedUnit.Pixel);
 		public static readonly UIFixedLength PaddingLeft = new UIFixedLength(0f, UIFixedUnit.Pixel);
 		public static readonly Color TextColor = new Color(0f, 0f, 0f, 1f);
-		public static readonly TMP_FontAsset TextFontAsset = TMP_FontAsset.defaultFontAsset;
+		public static readonly FontAsset TextFontAsset = FontAsset.defaultFontAsset;
 		public static readonly UIFixedLength TextFontSize = new UIFixedLength(18f, UIFixedUnit.Pixel);
 		public const FontStyle TextFontStyle = UIForia.Text.FontStyle.Normal;
 		public const TextAlignment TextAlignment = UIForia.Text.TextAlignment.Left;
@@ -108,12 +107,12 @@ namespace UIForia.Rendering {
 		public const float TextGlowInner = 0f;
 		public const float TextGlowOuter = 0f;
 		public const float TextGlowPower = 0f;
-		public static readonly Color TextShadowColor = new Color(-1f, -1f, -1f, -1f);
-		public const float TextShadowOffsetX = 0f;
-		public const float TextShadowOffsetY = 0f;
-		public const float TextShadowIntensity = 0.5f;
-		public const float TextShadowSoftness = 0.5f;
-		public const ShadowType TextShadowType = UIForia.Rendering.ShadowType.Unset;
+		public static readonly Color TextUnderlayColor = new Color(-1f, -1f, -1f, -1f);
+		public const float TextUnderlayX = 0f;
+		public const float TextUnderlayY = 0f;
+		public const float TextUnderlayDilate = 0.5f;
+		public const float TextUnderlaySoftness = 0.5f;
+		public const UnderlayType TextUnderlayType = UIForia.Rendering.UnderlayType.Unset;
 		public const TextTransform TextTransform = UIForia.Text.TextTransform.None;
 		public const WhitespaceMode TextWhitespaceMode = UIForia.Text.WhitespaceMode.CollapseWhitespace;
 		public static readonly UIFixedLength AnchorTop = new UIFixedLength(0f, UIFixedUnit.Pixel);
@@ -139,7 +138,7 @@ namespace UIForia.Rendering {
 		public static readonly string Scrollbar = "";
 		public static readonly UIMeasurement ScrollbarSize = new UIMeasurement(15f, UIMeasurementUnit.Pixel);
 		public static readonly Color ScrollbarColor = new Color(0f, 0f, 0f, 1f);
-		public const ShadowType ShadowType = UIForia.Rendering.ShadowType.Unset;
+		public const UnderlayType ShadowType = UIForia.Rendering.UnderlayType.Unset;
 		public const float ShadowOffsetX = 0f;
 		public const float ShadowOffsetY = 0f;
 		public const float ShadowSoftnessX = 0.1f;
@@ -311,7 +310,7 @@ namespace UIForia.Rendering {
 				case StylePropertyId.TextColor:
 					 return new StyleProperty(StylePropertyId.TextColor, new Color(0f, 0f, 0f, 1f));
 				case StylePropertyId.TextFontAsset:
-					 return new StyleProperty(StylePropertyId.TextFontAsset, TMP_FontAsset.defaultFontAsset);
+					 return new StyleProperty(StylePropertyId.TextFontAsset, FontAsset.defaultFontAsset);
 				case StylePropertyId.TextFontSize:
 					 return new StyleProperty(StylePropertyId.TextFontSize, new UIFixedLength(18f, UIFixedUnit.Pixel));
 				case StylePropertyId.TextFontStyle:
@@ -332,18 +331,18 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.TextGlowOuter, 0f);
 				case StylePropertyId.TextGlowPower:
 					 return new StyleProperty(StylePropertyId.TextGlowPower, 0f);
-				case StylePropertyId.TextShadowColor:
-					 return new StyleProperty(StylePropertyId.TextShadowColor, new Color(-1f, -1f, -1f, -1f));
-				case StylePropertyId.TextShadowOffsetX:
-					 return new StyleProperty(StylePropertyId.TextShadowOffsetX, 0f);
-				case StylePropertyId.TextShadowOffsetY:
-					 return new StyleProperty(StylePropertyId.TextShadowOffsetY, 0f);
-				case StylePropertyId.TextShadowIntensity:
-					 return new StyleProperty(StylePropertyId.TextShadowIntensity, 0.5f);
-				case StylePropertyId.TextShadowSoftness:
-					 return new StyleProperty(StylePropertyId.TextShadowSoftness, 0.5f);
-				case StylePropertyId.TextShadowType:
-					 return new StyleProperty(StylePropertyId.TextShadowType, (int)UIForia.Rendering.ShadowType.Unset);
+				case StylePropertyId.TextUnderlayColor:
+					 return new StyleProperty(StylePropertyId.TextUnderlayColor, new Color(-1f, -1f, -1f, -1f));
+				case StylePropertyId.TextUnderlayX:
+					 return new StyleProperty(StylePropertyId.TextUnderlayX, 0f);
+				case StylePropertyId.TextUnderlayY:
+					 return new StyleProperty(StylePropertyId.TextUnderlayY, 0f);
+				case StylePropertyId.TextUnderlayDilate:
+					 return new StyleProperty(StylePropertyId.TextUnderlayDilate, 0.5f);
+				case StylePropertyId.TextUnderlaySoftness:
+					 return new StyleProperty(StylePropertyId.TextUnderlaySoftness, 0.5f);
+				case StylePropertyId.TextUnderlayType:
+					 return new StyleProperty(StylePropertyId.TextUnderlayType, (int)UIForia.Rendering.UnderlayType.Unset);
 				case StylePropertyId.TextTransform:
 					 return new StyleProperty(StylePropertyId.TextTransform, (int)UIForia.Text.TextTransform.None);
 				case StylePropertyId.TextWhitespaceMode:
@@ -395,7 +394,7 @@ namespace UIForia.Rendering {
 				case StylePropertyId.ScrollbarColor:
 					 return new StyleProperty(StylePropertyId.ScrollbarColor, new Color(0f, 0f, 0f, 1f));
 				case StylePropertyId.ShadowType:
-					 return new StyleProperty(StylePropertyId.ShadowType, (int)UIForia.Rendering.ShadowType.Unset);
+					 return new StyleProperty(StylePropertyId.ShadowType, (int)UIForia.Rendering.UnderlayType.Unset);
 				case StylePropertyId.ShadowOffsetX:
 					 return new StyleProperty(StylePropertyId.ShadowOffsetX, 0f);
 				case StylePropertyId.ShadowOffsetY:

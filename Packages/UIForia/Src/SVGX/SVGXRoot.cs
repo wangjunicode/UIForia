@@ -70,7 +70,7 @@ namespace SVGX {
         public void Start() {
             ctx = new ImmediateRenderContext();
             gfx = new GFX(camera);
-            textInfo = new TextInfo(new TextSpan("Hello World"));
+            textInfo = new TextInfo("Hello World");
         }
 
         public Vector4 radii = new Vector4(100, 100, 100, 100);

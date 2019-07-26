@@ -131,7 +131,7 @@ namespace UIForia.Editor {
 
             // Text
             new AnimatedPropertyGenerator<Color>(StylePropertyId.TextColor, Color.black, InheritanceType.Inherited),
-            new PropertyGenerator<TMP_FontAsset>(StylePropertyId.TextFontAsset, null, InheritanceType.Inherited, "TMP_FontAsset.defaultFontAsset"),
+            new PropertyGenerator<FontAsset>(StylePropertyId.TextFontAsset, FontAsset.defaultFontAsset, InheritanceType.Inherited, "FontAsset.defaultFontAsset"),
             new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.TextFontSize, 18, InheritanceType.Inherited),
             new PropertyGenerator<Text.FontStyle>(StylePropertyId.TextFontStyle, Text.FontStyle.Normal, InheritanceType.Inherited),
             new PropertyGenerator<Text.TextAlignment>(StylePropertyId.TextAlignment, Text.TextAlignment.Left, InheritanceType.Inherited),
@@ -142,12 +142,12 @@ namespace UIForia.Editor {
             new AnimatedPropertyGenerator<float>(StylePropertyId.TextGlowInner, 0, InheritanceType.Inherited),
             new AnimatedPropertyGenerator<float>(StylePropertyId.TextGlowOuter, 0, InheritanceType.Inherited),
             new AnimatedPropertyGenerator<float>(StylePropertyId.TextGlowPower, 0, InheritanceType.Inherited),
-            new AnimatedPropertyGenerator<Color>(StylePropertyId.TextShadowColor, ColorUtil.UnsetValue, InheritanceType.Inherited),
-            new AnimatedPropertyGenerator<float>(StylePropertyId.TextShadowOffsetX, 0, InheritanceType.Inherited),
-            new AnimatedPropertyGenerator<float>(StylePropertyId.TextShadowOffsetY, 0, InheritanceType.Inherited),
-            new AnimatedPropertyGenerator<float>(StylePropertyId.TextShadowIntensity, 0.5f, InheritanceType.Inherited),
-            new AnimatedPropertyGenerator<float>(StylePropertyId.TextShadowSoftness, 0.5f, InheritanceType.Inherited),
-            new PropertyGenerator<ShadowType>(StylePropertyId.TextShadowType, ShadowType.Unset, InheritanceType.Inherited),
+            new AnimatedPropertyGenerator<Color>(StylePropertyId.TextUnderlayColor, ColorUtil.UnsetValue, InheritanceType.Inherited),
+            new AnimatedPropertyGenerator<float>(StylePropertyId.TextUnderlayX, 0, InheritanceType.Inherited),
+            new AnimatedPropertyGenerator<float>(StylePropertyId.TextUnderlayY, 0, InheritanceType.Inherited),
+            new AnimatedPropertyGenerator<float>(StylePropertyId.TextUnderlayDilate, 0.5f, InheritanceType.Inherited),
+            new AnimatedPropertyGenerator<float>(StylePropertyId.TextUnderlaySoftness, 0.5f, InheritanceType.Inherited),
+            new PropertyGenerator<UnderlayType>(StylePropertyId.TextUnderlayType, UnderlayType.Unset, InheritanceType.Inherited),
             new PropertyGenerator<TextTransform>(StylePropertyId.TextTransform, TextTransform.None, InheritanceType.Inherited),
             new PropertyGenerator<UIForia.Text.WhitespaceMode>(StylePropertyId.TextWhitespaceMode, WhitespaceMode.CollapseWhitespace, InheritanceType.Inherited),
 
@@ -183,7 +183,7 @@ namespace UIForia.Editor {
             new AnimatedPropertyGenerator<Color>(StylePropertyId.ScrollbarColor, Color.black),
 
             // Shadow
-            new PropertyGenerator<ShadowType>(StylePropertyId.ShadowType, ShadowType.Unset),
+            new PropertyGenerator<UnderlayType>(StylePropertyId.ShadowType, UnderlayType.Unset),
             new AnimatedPropertyGenerator<float>(StylePropertyId.ShadowOffsetX, 0),
             new AnimatedPropertyGenerator<float>(StylePropertyId.ShadowOffsetY, 0),
             new AnimatedPropertyGenerator<float>(StylePropertyId.ShadowSoftnessX, 0.1f),
@@ -360,7 +360,6 @@ __REPLACE_StyleBindingCompiler_DoCompile
             string code = @"using Shapes2D;
 using UIForia.Layout;
 using UIForia.Layout.LayoutTypes;
-using TMPro;
 using UIForia.Bindings.StyleBindings;
 using System.Collections.Generic;
 using UnityEngine;
@@ -611,7 +610,7 @@ namespace UIForia.Rendering {
             else if (typeof(GridTrackSize) == propertyGenerator.type) {
                 return $"FindGridTrackSizeProperty(StylePropertyId.{propertyGenerator.propertyIdName});";
             }
-            else if (typeof(TMP_FontAsset) == propertyGenerator.type) {
+            else if (typeof(FontAsset) == propertyGenerator.type) {
                 return $"GetProperty(StylePropertyId.{propertyGenerator.propertyIdName}).AsFont;";
             }
             else if (typeof(Texture2D) == propertyGenerator.type) {

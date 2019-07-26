@@ -1051,10 +1051,10 @@ namespace UIForia.Editor {
         private static StyleProperty DrawFontAsset(StyleProperty property, bool isEditable) {
             GUI.enabled = isEditable;
             GUILayout.BeginHorizontal();
-            TMP_FontAsset fontAsset = property.AsFont;
+            FontAsset fontAsset = property.AsFont;
 
             TMP_FontAsset newFont = (TMP_FontAsset) EditorGUILayout.ObjectField(StyleUtil.GetPropertyName(property),
-                fontAsset, typeof(TMP_FontAsset), false);
+                fontAsset.textMeshProFont, typeof(TMP_FontAsset), false);
 
             GUI.enabled = true;
             GUILayout.EndHorizontal();

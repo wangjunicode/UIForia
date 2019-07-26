@@ -14,6 +14,9 @@ namespace UIForia.Util {
         public T[] Stack => array;
 
         public T Previous => PeekAtUnchecked(size - 1);
+        
+        [ThreadStatic]
+        private static LightList<LightStack<T>> s_Pool;
 
         [DebuggerStepThrough]
         public LightStack(int capacity = 8) {
@@ -82,10 +85,10 @@ namespace UIForia.Util {
             size = 0;
         }
 
-        private static readonly LightList<LightStack<T>> s_Pool = new LightList<LightStack<T>>();
 
         [DebuggerStepThrough]
         public static LightStack<T> Get() {
+            s_Pool = s_Pool ?? new LightList<LightStack<T>>(4);
             LightStack<T> retn = s_Pool.Count > 0 ? s_Pool.RemoveLast() : new LightStack<T>();
             retn.isPooled = false;
             return retn;
@@ -96,6 +99,7 @@ namespace UIForia.Util {
             size = 0;
             if (isPooled) return;
             isPooled = true;
+            s_Pool = s_Pool ?? new LightList<LightStack<T>>(4);
             s_Pool.Add(this);
         }
         
@@ -105,6 +109,7 @@ namespace UIForia.Util {
             toPool.size = 0;
             if (toPool.isPooled) return;
             toPool.isPooled = true;
+            s_Pool = s_Pool ?? new LightList<LightStack<T>>(4);
             s_Pool.Add(toPool);
         }
 

@@ -11,11 +11,11 @@ namespace UIForia.Layout.LayoutTypes {
         public TextInfo TextInfo => ((UITextElement) element).textInfo;
 
         protected override float ComputeContentWidth() {
-            return ((UITextElement) element).TextInfo.ComputeWidth();
+            return 0; //((UITextElement) element).TextInfo.ComputeWidth();
         }
 
         protected override float ComputeContentHeight(float width) {
-            return ((UITextElement) element).TextInfo.ComputeHeight(width - PaddingHorizontal - BorderHorizontal);
+            return 0; // ((UITextElement) element).TextInfo.ComputeHeight(width - PaddingHorizontal - BorderHorizontal);
         }
 
         protected override void OnChildrenChanged() { }

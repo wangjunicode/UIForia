@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using NUnit.Framework;
+using Tests.Mocks;
 using UIForia;
 using UIForia.Animation;
 using UIForia.Compilers.Style;
@@ -17,7 +18,7 @@ using TextAlignment = UIForia.Text.TextAlignment;
 public class StyleSheetCompilerTests {
 
     public static StyleSheetCompiler NewStyleSheetCompiler() {
-        return new StyleSheetCompiler(new StyleSheetImporter(null));
+        return new StyleSheetCompiler(new StyleSheetImporter(new MockApplication(typeof(ViewTestThing))));
     }
 
     [Test]
@@ -1022,11 +1023,7 @@ style teXt {
         Assert.AreEqual(FontStyle.Normal
                         | FontStyle.Bold
                         | FontStyle.Italic
-                        | FontStyle.Highlight
-                        | FontStyle.Superscript
-                        | FontStyle.Underline
-                        | FontStyle.Highlight
-                        | FontStyle.SmallCaps, styleGroup[0].groups[0].normal.style.TextFontStyle);
+                        | FontStyle.Underline, styleGroup[0].groups[0].normal.style.TextFontStyle);
         Assert.AreEqual(TextAlignment.Center, styleGroup[0].groups[0].normal.style.TextAlignment);
         Assert.AreEqual(new UIFixedLength(14), styleGroup[0].groups[0].normal.style.TextFontSize);
     }
@@ -1035,7 +1032,7 @@ style teXt {
     public void CompileImport() {
         // note: because of possible spaces in paths we have to support string values for urls
         var nodes = StyleParser.Parse(@"
-import ""Tests/Styles/ImportFromMe.style"" as importedThings;
+import ""Data/Styles/ImportFromMe.style"" as importedThings;
 
 style xyz {
     BackgroundColor = @importedThings.colorRed;

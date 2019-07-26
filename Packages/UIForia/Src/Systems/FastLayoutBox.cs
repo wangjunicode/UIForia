@@ -61,7 +61,7 @@ namespace UIForia.Layout {
         public Alignment targetAlignmentVertical;
 
         public UIElement element;
-        public FastLayoutSystem.LayoutOwner owner;
+        public LayoutOwner owner;
         public SVGXMatrix localMatrix;
 
         public virtual void AddChild(FastLayoutBox child) {

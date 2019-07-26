@@ -78,6 +78,8 @@ namespace UIForia.Systems {
             
             LightList<UIElement> visibleElements = view.visibleElements;
 
+            return;
+            
             UIElement[] elementArray = visibleElements.Array;
             for (int i = visibleElements.size - 1; i >= 0; i--) {
                 UIElement current = elementArray[i];

@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using TMPro;
 using UIForia.Util;
 using UnityEngine;
@@ -5,7 +7,7 @@ using UnityEngine.U2D;
 
 namespace UIForia {
 
-    public static class ResourceManager {
+    public class ResourceManager {
 
         private struct AssetEntry<T> where T : UnityEngine.Object {
 
@@ -16,98 +18,95 @@ namespace UIForia {
         }
 
         // todo -- add cursors / animations / maybe style sheets
-        private static readonly IntMap<AssetEntry<Texture2D>> s_TextureMap;
-        private static readonly IntMap<AssetEntry<SpriteAtlas>> s_SpriteAtlasMap;
-        private static readonly IntMap<AssetEntry<TMP_FontAsset>> s_FontMap;
-        private static readonly IntMap<AssetEntry<AudioClip>> s_AudioMap;
+        private readonly IntMap<AssetEntry<Texture2D>> s_TextureMap;
+        private readonly IntMap<AssetEntry<SpriteAtlas>> s_SpriteAtlasMap;
+        private readonly Dictionary<string, FontAsset> s_FontMap;
+        private readonly IntMap<AssetEntry<AudioClip>> s_AudioMap;
 
-        static ResourceManager() {
+        public ResourceManager() {
             s_TextureMap = new IntMap<AssetEntry<Texture2D>>();
             s_SpriteAtlasMap = new IntMap<AssetEntry<SpriteAtlas>>();
-            s_FontMap = new IntMap<AssetEntry<TMP_FontAsset>>();
+            s_FontMap = new Dictionary<string, FontAsset>();
             s_AudioMap = new IntMap<AssetEntry<AudioClip>>();
         }
 
-        public static void Reset() {
+        public void Reset() {
             s_TextureMap.Clear();
             s_SpriteAtlasMap.Clear();
             s_FontMap.Clear();
             s_AudioMap.Clear();
         }
-        
-        public static Texture2D AddTexture(string path, Texture2D texture) {
+
+        public Texture2D AddTexture(string path, Texture2D texture) {
             return AddResource(path, texture, s_TextureMap);
         }
-        
-        public static Texture2D AddTexture(Texture2D texture) {
+
+        public Texture2D AddTexture(Texture2D texture) {
             return AddResource(texture, s_TextureMap);
         }
 
-        public static TMP_FontAsset AddFont(TMP_FontAsset font) {
-            return AddResource(font, s_FontMap);
-        }
-        
-        public static TMP_FontAsset AddFont(string path, TMP_FontAsset font) {
-            return AddResource(path, font, s_FontMap);
+//        public FontAsset AddFont(TMP_FontAsset font) {
+//            return AddResource(font, s_FontMap);
+//        }
+
+        public FontAsset AddFont(string path, TMP_FontAsset font) {
+            return null;
+            // return AddResource(path, font, s_FontMap);
         }
 
-        public static AudioClip AddAudioClip(AudioClip clip) {
+        public AudioClip AddAudioClip(AudioClip clip) {
             return AddResource(clip, s_AudioMap);
         }
 
-        public static Texture2D GetTexture(string path) {
+        public Texture2D GetTexture(string path) {
             return GetResource(path, s_TextureMap);
         }
 
-        public static TMP_FontAsset GetFont(string path) {
-            return GetResource(path, s_FontMap);
+
+        public FontAsset GetFont(string path, bool tryReloading = false) {
+            // will be present & null if loaded but not resolved
+            if (s_FontMap.TryGetValue(path, out FontAsset fontAsset)) {
+                if (fontAsset != null) {
+                    return fontAsset;
+                }
+
+                if (!tryReloading) {
+                    return null;
+                }
+            }
+
+            TMP_FontAsset tmpFontAsset = Resources.Load<TMP_FontAsset>(path);
+
+            if (tmpFontAsset == null) {
+                s_FontMap.Add(path, null);
+                return null;
+            }
+
+            if (tmpFontAsset.fontAssetType != TMP_FontAsset.FontAssetTypes.SDF) {
+                throw new Exception($"UIForia currently supports only SDF Fonts. {path} is not an SDF font, please reference another");
+            }
+
+            FontAsset retn = new FontAsset(tmpFontAsset);
+            s_FontMap.Add(path, retn);
+
+            return retn;
         }
 
-        public static AudioClip GetAudioClip(string path) {
+        public AudioClip GetAudioClip(string path) {
             return GetResource(path, s_AudioMap);
         }
-        
-        public static void RemoveTexture(string path) {
-            RemoveResource(path, s_TextureMap);
-        }
 
-        public static void RemoveTexture(Texture2D texture) {
-            s_TextureMap.Remove(texture.GetHashCode());
-        }
-
-        public static void RemoveFont(string path) {
-            RemoveResource(path, s_FontMap);
-        }
-
-        public static void RemoveFont(TMP_FontAsset font) {
-            RemoveResource(font, s_FontMap);
-        }
-
-        public static void RemoveAudioClip(AudioClip audioClip) {
-            RemoveResource(audioClip, s_AudioMap);
-        }
-
-        public static void RemoveAudioClip(string path) {
-            RemoveResource(path, s_AudioMap);
-        }
-  
-        //todo
-//        public static Texture2D GetEditorTexture() {
-//            // load using EditorGUIUtility.Load()
-//            // hook into AssetModificationProcessor to watch for changes
-//        }
-
-        private static T AddResource<T>(string path, T resource, IntMap<AssetEntry<T>> map) where T : UnityEngine.Object {
+        private T AddResource<T>(string path, T resource, IntMap<AssetEntry<T>> map) where T : UnityEngine.Object {
             if (resource == null || path == null) {
                 return null;
             }
 
             int pathId = path.GetHashCode();
             int id = resource.GetHashCode();
-            
+
             AssetEntry<T> pathEntry;
             AssetEntry<T> idEntry;
-            
+
             if (map.TryGetValue(pathId, out pathEntry)) {
                 return resource;
             }
@@ -122,8 +121,8 @@ namespace UIForia {
             map.Add(id, idEntry);
             return resource;
         }
-        
-        private static T AddResource<T>(T resource, IntMap<AssetEntry<T>> map) where T : UnityEngine.Object {
+
+        private T AddResource<T>(T resource, IntMap<AssetEntry<T>> map) where T : UnityEngine.Object {
             int id = resource.GetHashCode();
             AssetEntry<T> entry;
             if (map.TryGetValue(id, out entry)) {
@@ -137,17 +136,18 @@ namespace UIForia {
             return resource;
         }
 
-        private static T GetResource<T>(int id, IntMap<AssetEntry<T>> map) where T : UnityEngine.Object {
+        private T GetResource<T>(int id, IntMap<AssetEntry<T>> map) where T : UnityEngine.Object {
             AssetEntry<T> entry;
             map.TryGetValue(id, out entry);
             return entry.asset;
         }
 
-        private static T GetResource<T>(string path, IntMap<AssetEntry<T>> map) where T : UnityEngine.Object {
+        private T GetResource<T>(string path, IntMap<AssetEntry<T>> map) where T : UnityEngine.Object {
             T resource;
             if (path == null) {
                 return null;
             }
+
             AssetEntry<T> pathEntry;
             int pathId = path.GetHashCode();
             if (map.TryGetValue(pathId, out pathEntry)) {
@@ -178,7 +178,7 @@ namespace UIForia {
             return resource;
         }
 
-        private static void RemoveResource<T>(T resource, IntMap<AssetEntry<T>> map) where T : UnityEngine.Object {
+        private void RemoveResource<T>(T resource, IntMap<AssetEntry<T>> map) where T : UnityEngine.Object {
             if (resource == null) return;
             int id = resource.GetHashCode();
             AssetEntry<T> entry;
@@ -188,7 +188,7 @@ namespace UIForia {
             }
         }
 
-        private static void RemoveResource<T>(string path, IntMap<AssetEntry<T>> map) where T : UnityEngine.Object {
+        private void RemoveResource<T>(string path, IntMap<AssetEntry<T>> map) where T : UnityEngine.Object {
             if (string.IsNullOrEmpty(path)) {
                 return;
             }

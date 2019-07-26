@@ -35,9 +35,9 @@ public class VertigoBehaviorRoot : MonoBehaviour {
 
         ctx.SetFillMaterial(ctx.materialPool.GetShared("Materials/VertigoDefault"));
         ctx.SetStrokeMaterial(ctx.materialPool.GetShared("Materials/VertigoDefault"));
-        textInfo = new TextInfo(new TextSpan("H", new SVGXTextStyle() {
+        textInfo = new TextInfo("H", new SVGXTextStyle() {
             fontSize = 36
-        }));
+        });
 
         textInfo.Layout();
 

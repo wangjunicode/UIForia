@@ -335,7 +335,7 @@ namespace SVGX {
             }
 
             if (styles.Count > 0) {
-                currentStyle = styles.RemoveLast();
+                currentStyle = styles.RemoveLast(); 
             }
         }
 

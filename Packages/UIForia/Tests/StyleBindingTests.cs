@@ -23,10 +23,6 @@ public class StyleBindingTests {
 
     }
 
-    [SetUp]
-    public void Setup() {
-        ResourceManager.Reset();
-    }
     
     [Test]
     public void SetBackgroundImageConstant() {
@@ -38,8 +34,9 @@ public class StyleBindingTests {
         </UITemplate>
         ";
         Texture2D tex1 = new Texture2D(1, 1);
-        ResourceManager.AddTexture("path/to/tex1", tex1);
-        MockApplication view = new MockApplication(typeof(StyleTestThing), template);
+        ResourceManager resourceManager = new ResourceManager();
+        resourceManager.AddTexture("path/to/tex1", tex1);
+        MockApplication view = new MockApplication(typeof(StyleTestThing), template, resourceManager);
         StyleTestThing root = (StyleTestThing) view.RootElement;
         view.Update();
         UIElement panel = root.FindFirstByType<UIElement>();
@@ -56,8 +53,9 @@ public class StyleBindingTests {
         </UITemplate>
         ";
         Texture2D tex1 = new Texture2D(1, 1);
-        ResourceManager.AddTexture("path/to/tex1", tex1);
-        MockApplication view = new MockApplication(typeof(StyleTestThing), template);
+        ResourceManager resourceManager = new ResourceManager();
+        resourceManager.AddTexture("path/to/tex1", tex1);
+        MockApplication view = new MockApplication(typeof(StyleTestThing), template, resourceManager);
         StyleTestThing root = (StyleTestThing) view.RootElement;
         root.textureName = "tex1";
         view.Update();
@@ -83,13 +81,13 @@ public class StyleBindingTests {
         ";
         TMP_FontAsset font1 = ScriptableObject.CreateInstance<TMP_FontAsset>();
         font1.name = "new font";
-        ResourceManager.AddFont("path/to/font1", font1);
-        MockApplication view = new MockApplication(typeof(StyleTestThing), template);
+        ResourceManager resourceManager = new ResourceManager();
+        resourceManager.AddFont("path/to/font1", font1);
+        MockApplication view = new MockApplication(typeof(StyleTestThing), template, resourceManager);
         StyleTestThing root = (StyleTestThing) view.RootElement;
         UIElement panel = root.FindFirstByType<UIElement>();
         view.Update();
         Assert.AreEqual(font1, panel.style.TextFontAsset);
-        ResourceManager.RemoveFont(font1);
         view.Update(); // should keep font after removing
         Assert.AreEqual(font1, panel.style.TextFontAsset);
         Object.DestroyImmediate(font1);
@@ -105,8 +103,10 @@ public class StyleBindingTests {
         </UITemplate>
         ";
         TMP_FontAsset font1 = ScriptableObject.CreateInstance<TMP_FontAsset>();
-        ResourceManager.AddFont("path/to/font1", font1);
-        MockApplication view = new MockApplication(typeof(StyleTestThing), template);
+        font1.name = "new font";
+        ResourceManager resourceManager = new ResourceManager();
+        resourceManager.AddFont("path/to/font1", font1);
+        MockApplication view = new MockApplication(typeof(StyleTestThing), template, resourceManager);
         StyleTestThing root = (StyleTestThing) view.RootElement;
         root.fontName = "font1";
         view.Update();

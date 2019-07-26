@@ -25,6 +25,12 @@ namespace UIForia.Util {
             freeList = -1;
         }
 
+        public IntMap(IDictionary<int, T> collection) : this(7) {
+            foreach (KeyValuePair<int,T> pair in collection) {
+                Insert(pair.Key, pair.Value, true);
+            }
+        }
+
         public int Count => count - freeCount;
 
         [DebuggerStepThrough]

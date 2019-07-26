@@ -9,7 +9,7 @@ namespace UIForia.Layout {
         public TextInfo TextInfo => ((UITextElement) element).textInfo;
 
         protected override float ComputeContentWidth(float blockWidth) {
-            return ((UITextElement) element).TextInfo.ComputeWidth();
+            return 0; //((UITextElement) element).TextInfo.ComputeWidth();
         }
 
         protected override void PerformLayout() {
@@ -24,7 +24,8 @@ namespace UIForia.Layout {
         }
 
         protected override float ComputeContentHeight(float width, float blockWidth, float blockHeight) {
-            return ((UITextElement) element).TextInfo.ComputeHeight(width - paddingBox.left - paddingBox.right - borderBox.left - borderBox.right);
+            return 0;
+            //return ((UITextElement) element).TextInfo.ComputeHeight(width - paddingBox.left - paddingBox.right - borderBox.left - borderBox.right);
         }
 
 //        public override void OnStylePropertyChanged(StructList<StyleProperty> property) {

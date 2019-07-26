@@ -111,16 +111,16 @@ namespace UIForia.Systems {
         }
 
         // todo -- build quad tree for queries
-        private unsafe struct QuadTreeNode {
-
-            public fixed int ids[12]; // index into visibility list
-            public fixed int children[4];
-            public int x;
-            public int y;
-            public int width;
-            public int height;
-
-        }
+//        private unsafe struct QuadTreeNode {
+//
+//            public fixed int ids[12]; // index into visibility list
+//            public fixed int children[4];
+//            public int x;
+//            public int y;
+//            public int width;
+//            public int height;
+//
+//        }
 
         public void RunLayout(UIView view) {
             m_VisibleBoxList.QuickClear();

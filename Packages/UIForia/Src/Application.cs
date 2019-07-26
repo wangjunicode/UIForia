@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
+using Src.Systems;
 using UIForia.Animation;
 using UIForia.AttributeProcessors;
 using UIForia.Bindings;
@@ -19,7 +20,7 @@ using UnityEngine;
 namespace UIForia {
 
     public abstract class Application {
-        
+
 #if UNITY_EDITOR
         public static List<Application> Applications = new List<Application>();
 #endif
@@ -37,6 +38,8 @@ namespace UIForia {
         protected RoutingSystem m_RoutingSystem;
         protected AnimationSystem m_AnimationSystem;
         protected LinqBindingSystem linqBindingSystem;
+
+        protected ResourceManager resourceManager;
 
         public readonly StyleSheetImporter styleImporter;
         private readonly IntMap<UIElement> elementMap;
@@ -62,7 +65,7 @@ namespace UIForia {
 
         public static readonly List<IAttributeProcessor> s_AttributeProcessors;
 
-        internal static readonly Dictionary<string, ISVGXElementPainter> s_CustomPainters;
+        internal static readonly Dictionary<string, Type> s_CustomPainters;
         internal static readonly Dictionary<string, Scrollbar> s_Scrollbars;
 
         public readonly TemplateParser templateParser;
@@ -75,12 +78,12 @@ namespace UIForia {
         protected readonly SkipTree<UIElement> updateTree;
         public static readonly UIForiaSettings Settings;
         private ElementPool elementPool;
-        
+
         static Application() {
             ArrayPool<UIElement>.SetMaxPoolSize(64);
             s_AttributeProcessors = new List<IAttributeProcessor>();
             s_ApplicationList = new LightList<Application>();
-            s_CustomPainters = new Dictionary<string, ISVGXElementPainter>();
+            s_CustomPainters = new Dictionary<string, Type>();
             s_Scrollbars = new Dictionary<string, Scrollbar>();
             Settings = Resources.Load<UIForiaSettings>("UIForiaSettings");
             if (Settings == null) {
@@ -103,13 +106,15 @@ namespace UIForia {
                 if (parent.isEnabled) {
                     retn.flags |= UIElementFlags.Enabled;
                 }
+
                 retn.depth = parent.depth + 1;
                 retn.View = parent.View;
             }
+
             return retn;
         }
-        
-        protected Application(string id, string templateRootPath = null) {
+
+        protected Application(string id, string templateRootPath = null, ResourceManager resourceManager = null) {
             this.id = id;
             this.templateRootPath = templateRootPath;
 
@@ -121,6 +126,9 @@ namespace UIForia {
             s_ApplicationList.Add(this);
 
             this.elementPool = new ElementPool();
+
+            this.resourceManager = resourceManager ?? new ResourceManager();
+
             this.m_Systems = new List<ISystem>();
             this.m_Views = new List<UIView>();
             this.updateTree = new SkipTree<UIElement>();
@@ -129,8 +137,8 @@ namespace UIForia {
             m_BindingSystem = new BindingSystem();
             m_LayoutSystem = new FastLayoutSystem(this, m_StyleSystem);
             m_InputSystem = new GameInputSystem(m_LayoutSystem);
-//            m_RenderSystem = new VertigoRenderSystem(Camera.current, m_LayoutSystem, m_StyleSystem); 
-            m_RenderSystem = new SVGXRenderSystem(this, null, m_LayoutSystem);
+            m_RenderSystem = new VertigoRenderSystem(Camera.current, this); 
+     //       m_RenderSystem = new SVGXRenderSystem(this, null, m_LayoutSystem);
             m_RoutingSystem = new RoutingSystem();
             m_AnimationSystem = new AnimationSystem();
 
@@ -154,7 +162,7 @@ namespace UIForia {
             Applications.Add(this);
 #endif
         }
-        
+
         internal static void ProcessClassAttributes(Type type, Attribute[] attrs) {
             for (var i = 0; i < attrs.Length; i++) {
                 Attribute attr = attrs[i];
@@ -168,7 +176,7 @@ namespace UIForia {
                         throw new Exception($"Failed to register a custom painter with the name {paintAttr.name} from type {type.FullName} because it was already registered.");
                     }
 
-                    s_CustomPainters.Add(paintAttr.name, (ISVGXElementPainter) Activator.CreateInstance(type));
+                    s_CustomPainters.Add(paintAttr.name, type);
                 }
                 else if (attr is CustomScrollbarAttribute scrollbarAttr) {
                     if (type.GetConstructor(Type.EmptyTypes) == null || !(typeof(Scrollbar)).IsAssignableFrom(type)) {
@@ -188,7 +196,7 @@ namespace UIForia {
         public string TemplateRootPath {
             get {
                 if (templateRootPath == null) {
-                    return string.Empty;// UnityEngine.Application.dataPath;
+                    return string.Empty; // UnityEngine.Application.dataPath;
                 }
 
                 return templateRootPath;
@@ -205,30 +213,32 @@ namespace UIForia {
 
         public Camera Camera { get; private set; }
 
+        public ResourceManager ResourceManager => resourceManager;
+
         // Doesn't expect to create the root
         internal void HydrateTemplate(int templateId, UIElement parent, TemplateScope2 scope) {
             templateCache.compiledTemplates[templateId].Create(parent, scope);
         }
-        
+
         // always creates the root
         internal UIElement CreateSubTemplate(int templateId, UIElement parent, TemplateScope2 scope) {
             return templateCache.compiledTemplates[templateId].Create(parent, scope);
         }
-        
-        
+
+
         internal TemplateCache templateCache = new TemplateCache();
-        
+
         internal class TemplateCache {
 
             internal LightList<CompiledTemplate> compiledTemplates = new LightList<CompiledTemplate>();
-            
+
             public void Add(CompiledTemplate retn) {
                 retn.templateId = compiledTemplates.Count;
                 compiledTemplates.Add(retn);
             }
 
         }
-        
+
         public void SetCamera(Camera camera) {
             Camera = camera;
             RenderSystem.SetCamera(camera);
@@ -237,7 +247,6 @@ namespace UIForia {
         private int nextViewId = 0;
 
         public UIView CreateView(string name, Rect rect, Type type, string template = null) {
-
             UIView view = GetView(name);
 
             if (view == null) {
@@ -256,6 +265,7 @@ namespace UIForia {
                 if (view.RootElement.GetType() != type) {
                     throw new Exception($"A view named {name} with another root type ({view.RootElement.GetType()}) already exists.");
                 }
+
                 view.Viewport = rect;
             }
 
@@ -314,7 +324,7 @@ namespace UIForia {
             elementMap.Clear();
             templateParser.Reset();
             styleImporter.Reset();
-            ResourceManager.Reset();
+            resourceManager.Reset();
 
             m_AfterUpdateTaskSystem.OnReset();
             m_BeforeUpdateTaskSystem.OnReset();
@@ -322,7 +332,7 @@ namespace UIForia {
             // copy the list here because there might be view-sorting going on during view.initialize() 
             LightList<UIView> views = LightList<UIView>.Get();
             views.AddRange(m_Views);
-            
+
             // todo -- store root view, rehydrate. kill the rest
             for (int i = 0; i < views.Count; i++) {
                 for (int j = 0; j < m_Systems.Count; j++) {
@@ -331,7 +341,7 @@ namespace UIForia {
 
                 views[i].Initialize();
             }
-            
+
             LightList<UIView>.Release(ref views);
 
             onRefresh?.Invoke();
@@ -341,7 +351,6 @@ namespace UIForia {
         }
 
         public void Destroy() {
-
 #if UNITY_EDITOR
             Applications.Remove(this);
 #endif
@@ -519,7 +528,7 @@ namespace UIForia {
             m_StyleSystem.OnUpdate();
 
             SetTraversalIndex();
-            
+
             m_LayoutSystem.OnUpdate();
 
             m_InputSystem.OnUpdate();
@@ -530,6 +539,8 @@ namespace UIForia {
 
             m_RoutingSystem.OnUpdate();
 
+            // todo -- run phase 1 of rendering in parallel to layout, do the gather phase at least
+            
             m_RenderSystem.OnUpdate();
 
             m_AfterUpdateTaskSystem.OnUpdate();
@@ -537,11 +548,39 @@ namespace UIForia {
             onUpdate?.Invoke();
 
             m_Views[0].SetSize(Screen.width, Screen.height);
-        }
-        
-        // todo -- optimize this and 
-        private void SetTraversalIndex() {
             
+            UnsetEnabledThisFrame();
+            
+        }
+
+        // todo -- get rid of this
+        private void UnsetEnabledThisFrame() {
+            LightStack<UIElement> stack = LightStack<UIElement>.Get();
+
+            for (int i = 0; i < m_Views.Count; i++) {
+                stack.Push(m_Views[i].rootElement);
+            }
+
+            while (stack.size > 0) {
+                UIElement currentElement = stack.array[--stack.size];
+
+                currentElement.flags &= ~(UIElementFlags.EnabledThisFrame);
+                
+                UIElement[] childArray = currentElement.children.array;
+
+                int childCount = currentElement.children.size;
+
+                stack.EnsureAdditionalCapacity(childCount);
+
+                for (int i = 0; i < childCount; i++) {
+                    stack.array[stack.size++] = childArray[i];
+                }
+            }
+
+            LightStack<UIElement>.Release(ref stack);
+        }
+
+        private void SetTraversalIndex() {
             LightStack<UIElement> stack = LightStack<UIElement>.Get();
 
             for (int i = 0; i < m_Views.Count; i++) {
@@ -559,16 +598,14 @@ namespace UIForia {
                 int childCount = currentElement.children.size;
 
                 stack.EnsureAdditionalCapacity(childCount);
-                
+
                 for (int i = childCount - 1; i >= 0; i--) {
-                    
                     // todo -- direct flag check
                     if (childArray[i].isDisabled) {
                         continue;
                     }
 
                     stack.array[stack.size++] = childArray[i];
-                    
                 }
             }
 
@@ -624,8 +661,8 @@ namespace UIForia {
             // if element is not enabled (ie has a disabled ancestor), no-op 
             if (!element.isEnabled) return;
 
-            int targetPhase = -1; 
-            
+            int targetPhase = -1;
+
             UIElement ptr = element.parent;
             if (!ptr.isReady) {
                 while (ptr != null) {
@@ -683,7 +720,7 @@ namespace UIForia {
                 LightStack<UIElement>.Release(ref stack);
                 return;
             }
-            
+
             element.flags |= UIElementFlags.AncestorEnabled;
 
             foreach (ISystem system in m_Systems) {
@@ -710,7 +747,7 @@ namespace UIForia {
                     }
 
                     child.flags |= UIElementFlags.EnabledThisFrame;
-                    
+
                     children = child.children.Array;
                     childCount = child.children.Count;
                     for (int i = childCount - 1; i >= 0; i--) {
@@ -867,7 +904,7 @@ namespace UIForia {
         }
 
         public static ISVGXElementPainter GetCustomPainter(string name) {
-            return s_CustomPainters.GetOrDefault(name);
+            return null; //s_CustomPainters.GetOrDefault(name);
         }
 
         public static Scrollbar GetCustomScrollbar(string name) {
@@ -994,7 +1031,7 @@ namespace UIForia {
         }
 
         internal LightList<SlotUsageTemplate> slotUsageTemplates = new LightList<SlotUsageTemplate>(128);
-        
+
         // todo we will want to not compile this here, explore jitting this
         internal int AddSlotUsageTemplate(Expression<SlotUsageTemplate> lambda) {
             slotUsageTemplates.Add(lambda.Compile());
@@ -1014,34 +1051,32 @@ namespace UIForia {
             element = null;
             return false;
         }
-        
+
         internal UIElement CreateSlot(StructList<SlotUsage> slots, string targetSlot, LinqBindingNode bindingNode, UIElement parent, UIElement root, CompiledTemplate defaultTemplateData, int defaultTemplateId) {
             UIElement element;
-            
-           if (slots == null) {
-               element = slotUsageTemplates[defaultTemplateId].Invoke(this, bindingNode, parent, new LexicalScope(root, defaultTemplateData));
-               element.View = parent.View;
-               element.parent = parent;
-               return element;
-           }
-            
-           SlotUsage[] array = slots.array;
-           for (int i = 0; i < slots.size; i++) {
-               if (array[i].slotName == targetSlot) {
-                   element = slotUsageTemplates[array[i].templateId].Invoke(this, bindingNode, parent, array[i].lexicalScope);
-                   element.parent = parent;
-                   element.View = parent.View;
-                   return element;
-               }
-           }
-           
-           element = slotUsageTemplates[defaultTemplateId].Invoke(this, bindingNode, parent, new LexicalScope(root, defaultTemplateData));
-           element.View = parent.View;
-           element.parent = parent;
-           return element;
-           
+
+            if (slots == null) {
+                element = slotUsageTemplates[defaultTemplateId].Invoke(this, bindingNode, parent, new LexicalScope(root, defaultTemplateData));
+                element.View = parent.View;
+                element.parent = parent;
+                return element;
+            }
+
+            SlotUsage[] array = slots.array;
+            for (int i = 0; i < slots.size; i++) {
+                if (array[i].slotName == targetSlot) {
+                    element = slotUsageTemplates[array[i].templateId].Invoke(this, bindingNode, parent, array[i].lexicalScope);
+                    element.parent = parent;
+                    element.View = parent.View;
+                    return element;
+                }
+            }
+
+            element = slotUsageTemplates[defaultTemplateId].Invoke(this, bindingNode, parent, new LexicalScope(root, defaultTemplateData));
+            element.View = parent.View;
+            element.parent = parent;
+            return element;
         }
-        
 
     }
 

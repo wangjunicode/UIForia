@@ -1,5 +1,6 @@
 using UIForia.Attributes;
 using UIForia.Rendering;
+using UIForia.Util;
 using UnityEngine;
 
 namespace UIForia.Elements {
@@ -21,7 +22,7 @@ namespace UIForia.Elements {
         [OnPropertyChanged(nameof(texture))]
         public void OnSrcChanged(string name) {
             if (src != null) {
-                texture = ResourceManager.GetTexture(src);
+                texture = Application.ResourceManager.GetTexture(src);
             }
             style.SetBackgroundImage(texture, StyleState.Normal);
             if (Width > 0) {

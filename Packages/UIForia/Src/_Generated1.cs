@@ -572,7 +572,7 @@ namespace UIForia.Rendering {
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.TextColor, value), state); }
         }
         
-        public TMPro.TMP_FontAsset TextFontAsset {
+        public UIForia.FontAsset TextFontAsset {
             [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.TextFontAsset, state).AsFont; }
             [System.Diagnostics.DebuggerStepThrough]
@@ -649,46 +649,46 @@ namespace UIForia.Rendering {
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.TextGlowPower, value), state); }
         }
         
-        public UnityEngine.Color TextShadowColor {
+        public UnityEngine.Color TextUnderlayColor {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.TextShadowColor, state).AsColor; }
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.TextUnderlayColor, state).AsColor; }
             [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.TextShadowColor, value), state); }
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.TextUnderlayColor, value), state); }
         }
         
-        public float TextShadowOffsetX {
+        public float TextUnderlayX {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.TextShadowOffsetX, state).AsFloat; }
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.TextUnderlayX, state).AsFloat; }
             [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.TextShadowOffsetX, value), state); }
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.TextUnderlayX, value), state); }
         }
         
-        public float TextShadowOffsetY {
+        public float TextUnderlayY {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.TextShadowOffsetY, state).AsFloat; }
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.TextUnderlayY, state).AsFloat; }
             [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.TextShadowOffsetY, value), state); }
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.TextUnderlayY, value), state); }
         }
         
-        public float TextShadowIntensity {
+        public float TextUnderlayDilate {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.TextShadowIntensity, state).AsFloat; }
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.TextUnderlayDilate, state).AsFloat; }
             [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.TextShadowIntensity, value), state); }
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.TextUnderlayDilate, value), state); }
         }
         
-        public float TextShadowSoftness {
+        public float TextUnderlaySoftness {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.TextShadowSoftness, state).AsFloat; }
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.TextUnderlaySoftness, state).AsFloat; }
             [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.TextShadowSoftness, value), state); }
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.TextUnderlaySoftness, value), state); }
         }
         
-        public UIForia.Rendering.ShadowType TextShadowType {
+        public UIForia.Rendering.UnderlayType TextUnderlayType {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.TextShadowType, state).AsShadowType; }
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.TextUnderlayType, state).AsUnderlayType; }
             [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.TextShadowType, (int)value), state); }
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.TextUnderlayType, (int)value), state); }
         }
         
         public UIForia.Text.TextTransform TextTransform {
@@ -866,9 +866,9 @@ namespace UIForia.Rendering {
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ScrollbarColor, value), state); }
         }
         
-        public UIForia.Rendering.ShadowType ShadowType {
+        public UIForia.Rendering.UnderlayType ShadowType {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ShadowType, state).AsShadowType; }
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ShadowType, state).AsUnderlayType; }
             [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ShadowType, (int)value), state); }
         }
@@ -1007,12 +1007,12 @@ namespace UIForia.Rendering {
                     case StylePropertyId.TextGlowInner: return !FloatUtil.IsDefined(float1);
                     case StylePropertyId.TextGlowOuter: return !FloatUtil.IsDefined(float1);
                     case StylePropertyId.TextGlowPower: return !FloatUtil.IsDefined(float1);
-                    case StylePropertyId.TextShadowColor: return int1 == 0;
-                    case StylePropertyId.TextShadowOffsetX: return !FloatUtil.IsDefined(float1);
-                    case StylePropertyId.TextShadowOffsetY: return !FloatUtil.IsDefined(float1);
-                    case StylePropertyId.TextShadowIntensity: return !FloatUtil.IsDefined(float1);
-                    case StylePropertyId.TextShadowSoftness: return !FloatUtil.IsDefined(float1);
-                    case StylePropertyId.TextShadowType: return int0 == 0 || IntUtil.UnsetValue == int0;
+                    case StylePropertyId.TextUnderlayColor: return int1 == 0;
+                    case StylePropertyId.TextUnderlayX: return !FloatUtil.IsDefined(float1);
+                    case StylePropertyId.TextUnderlayY: return !FloatUtil.IsDefined(float1);
+                    case StylePropertyId.TextUnderlayDilate: return !FloatUtil.IsDefined(float1);
+                    case StylePropertyId.TextUnderlaySoftness: return !FloatUtil.IsDefined(float1);
+                    case StylePropertyId.TextUnderlayType: return int0 == 0 || IntUtil.UnsetValue == int0;
                     case StylePropertyId.TextTransform: return int0 == 0 || IntUtil.UnsetValue == int0;
                     case StylePropertyId.TextWhitespaceMode: return int0 == 0 || IntUtil.UnsetValue == int0;
                     case StylePropertyId.AnchorTop: return !FloatUtil.IsDefined(float1) || int1 == 0;
@@ -1622,7 +1622,7 @@ namespace UIForia.Rendering {
             set { SetProperty(new StyleProperty(StylePropertyId.TextColor, value)); }
         }
             
-        public TMPro.TMP_FontAsset TextFontAsset {
+        public UIForia.FontAsset TextFontAsset {
             [System.Diagnostics.DebuggerStepThrough]
             get { return GetProperty(StylePropertyId.TextFontAsset).AsFont; }
             [System.Diagnostics.DebuggerStepThrough]
@@ -1699,46 +1699,46 @@ namespace UIForia.Rendering {
             set { SetProperty(new StyleProperty(StylePropertyId.TextGlowPower, value)); }
         }
             
-        public UnityEngine.Color TextShadowColor {
+        public UnityEngine.Color TextUnderlayColor {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return FindColorProperty(StylePropertyId.TextShadowColor); }
+            get { return FindColorProperty(StylePropertyId.TextUnderlayColor); }
             [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.TextShadowColor, value)); }
+            set { SetProperty(new StyleProperty(StylePropertyId.TextUnderlayColor, value)); }
         }
             
-        public float TextShadowOffsetX {
+        public float TextUnderlayX {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return FindFloatProperty(StylePropertyId.TextShadowOffsetX); }
+            get { return FindFloatProperty(StylePropertyId.TextUnderlayX); }
             [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.TextShadowOffsetX, value)); }
+            set { SetProperty(new StyleProperty(StylePropertyId.TextUnderlayX, value)); }
         }
             
-        public float TextShadowOffsetY {
+        public float TextUnderlayY {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return FindFloatProperty(StylePropertyId.TextShadowOffsetY); }
+            get { return FindFloatProperty(StylePropertyId.TextUnderlayY); }
             [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.TextShadowOffsetY, value)); }
+            set { SetProperty(new StyleProperty(StylePropertyId.TextUnderlayY, value)); }
         }
             
-        public float TextShadowIntensity {
+        public float TextUnderlayDilate {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return FindFloatProperty(StylePropertyId.TextShadowIntensity); }
+            get { return FindFloatProperty(StylePropertyId.TextUnderlayDilate); }
             [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.TextShadowIntensity, value)); }
+            set { SetProperty(new StyleProperty(StylePropertyId.TextUnderlayDilate, value)); }
         }
             
-        public float TextShadowSoftness {
+        public float TextUnderlaySoftness {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return FindFloatProperty(StylePropertyId.TextShadowSoftness); }
+            get { return FindFloatProperty(StylePropertyId.TextUnderlaySoftness); }
             [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.TextShadowSoftness, value)); }
+            set { SetProperty(new StyleProperty(StylePropertyId.TextUnderlaySoftness, value)); }
         }
             
-        public UIForia.Rendering.ShadowType TextShadowType {
+        public UIForia.Rendering.UnderlayType TextUnderlayType {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return (UIForia.Rendering.ShadowType)FindEnumProperty(StylePropertyId.TextShadowType); }
+            get { return (UIForia.Rendering.UnderlayType)FindEnumProperty(StylePropertyId.TextUnderlayType); }
             [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.TextShadowType, (int)value)); }
+            set { SetProperty(new StyleProperty(StylePropertyId.TextUnderlayType, (int)value)); }
         }
             
         public UIForia.Text.TextTransform TextTransform {
@@ -1916,9 +1916,9 @@ namespace UIForia.Rendering {
             set { SetProperty(new StyleProperty(StylePropertyId.ScrollbarColor, value)); }
         }
             
-        public UIForia.Rendering.ShadowType ShadowType {
+        public UIForia.Rendering.UnderlayType ShadowType {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return (UIForia.Rendering.ShadowType)FindEnumProperty(StylePropertyId.ShadowType); }
+            get { return (UIForia.Rendering.UnderlayType)FindEnumProperty(StylePropertyId.ShadowType); }
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.ShadowType, (int)value)); }
         }
@@ -2697,7 +2697,7 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public TMPro.TMP_FontAsset TextFontAsset { 
+            public UIForia.FontAsset TextFontAsset { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
@@ -2807,63 +2807,63 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UnityEngine.Color TextShadowColor { 
+            public UnityEngine.Color TextUnderlayColor { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.TextShadowColor, out property)) return property.AsColor;
-                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.TextShadowColor), out property)) return property.AsColor;
-                    return DefaultStyleValues_Generated.TextShadowColor;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.TextUnderlayColor, out property)) return property.AsColor;
+                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.TextUnderlayColor), out property)) return property.AsColor;
+                    return DefaultStyleValues_Generated.TextUnderlayColor;
                 }
             }
 
-            public float TextShadowOffsetX { 
+            public float TextUnderlayX { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.TextShadowOffsetX, out property)) return property.AsFloat;
-                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.TextShadowOffsetX), out property)) return property.AsFloat;
-                    return DefaultStyleValues_Generated.TextShadowOffsetX;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.TextUnderlayX, out property)) return property.AsFloat;
+                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.TextUnderlayX), out property)) return property.AsFloat;
+                    return DefaultStyleValues_Generated.TextUnderlayX;
                 }
             }
 
-            public float TextShadowOffsetY { 
+            public float TextUnderlayY { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.TextShadowOffsetY, out property)) return property.AsFloat;
-                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.TextShadowOffsetY), out property)) return property.AsFloat;
-                    return DefaultStyleValues_Generated.TextShadowOffsetY;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.TextUnderlayY, out property)) return property.AsFloat;
+                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.TextUnderlayY), out property)) return property.AsFloat;
+                    return DefaultStyleValues_Generated.TextUnderlayY;
                 }
             }
 
-            public float TextShadowIntensity { 
+            public float TextUnderlayDilate { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.TextShadowIntensity, out property)) return property.AsFloat;
-                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.TextShadowIntensity), out property)) return property.AsFloat;
-                    return DefaultStyleValues_Generated.TextShadowIntensity;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.TextUnderlayDilate, out property)) return property.AsFloat;
+                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.TextUnderlayDilate), out property)) return property.AsFloat;
+                    return DefaultStyleValues_Generated.TextUnderlayDilate;
                 }
             }
 
-            public float TextShadowSoftness { 
+            public float TextUnderlaySoftness { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.TextShadowSoftness, out property)) return property.AsFloat;
-                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.TextShadowSoftness), out property)) return property.AsFloat;
-                    return DefaultStyleValues_Generated.TextShadowSoftness;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.TextUnderlaySoftness, out property)) return property.AsFloat;
+                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.TextUnderlaySoftness), out property)) return property.AsFloat;
+                    return DefaultStyleValues_Generated.TextUnderlaySoftness;
                 }
             }
 
-            public UIForia.Rendering.ShadowType TextShadowType { 
+            public UIForia.Rendering.UnderlayType TextUnderlayType { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.TextShadowType, out property)) return property.AsShadowType;
-                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.TextShadowType), out property)) return property.AsShadowType;
-                    return DefaultStyleValues_Generated.TextShadowType;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.TextUnderlayType, out property)) return property.AsUnderlayType;
+                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.TextUnderlayType), out property)) return property.AsUnderlayType;
+                    return DefaultStyleValues_Generated.TextUnderlayType;
                 }
             }
 
@@ -3096,11 +3096,11 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UIForia.Rendering.ShadowType ShadowType { 
+            public UIForia.Rendering.UnderlayType ShadowType { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.ShadowType, out property)) return property.AsShadowType;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.ShadowType, out property)) return property.AsUnderlayType;
                     return DefaultStyleValues_Generated.ShadowType;
                 }
             }
@@ -3799,11 +3799,11 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.TextColor, state).AsColor;
         }
         
-        public void SetTextFontAsset(TMPro.TMP_FontAsset value, StyleState state) {
+        public void SetTextFontAsset(UIForia.FontAsset value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.TextFontAsset, value), state);
         }
 
-        public TMPro.TMP_FontAsset GetTextFontAsset(StyleState state) {
+        public UIForia.FontAsset GetTextFontAsset(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.TextFontAsset, state).AsFont;
         }
         
@@ -3887,52 +3887,52 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.TextGlowPower, state).AsFloat;
         }
         
-        public void SetTextShadowColor(UnityEngine.Color value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.TextShadowColor, value), state);
+        public void SetTextUnderlayColor(UnityEngine.Color value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.TextUnderlayColor, value), state);
         }
 
-        public UnityEngine.Color GetTextShadowColor(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.TextShadowColor, state).AsColor;
+        public UnityEngine.Color GetTextUnderlayColor(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.TextUnderlayColor, state).AsColor;
         }
         
-        public void SetTextShadowOffsetX(float value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.TextShadowOffsetX, value), state);
+        public void SetTextUnderlayX(float value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.TextUnderlayX, value), state);
         }
 
-        public float GetTextShadowOffsetX(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.TextShadowOffsetX, state).AsFloat;
+        public float GetTextUnderlayX(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.TextUnderlayX, state).AsFloat;
         }
         
-        public void SetTextShadowOffsetY(float value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.TextShadowOffsetY, value), state);
+        public void SetTextUnderlayY(float value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.TextUnderlayY, value), state);
         }
 
-        public float GetTextShadowOffsetY(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.TextShadowOffsetY, state).AsFloat;
+        public float GetTextUnderlayY(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.TextUnderlayY, state).AsFloat;
         }
         
-        public void SetTextShadowIntensity(float value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.TextShadowIntensity, value), state);
+        public void SetTextUnderlayDilate(float value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.TextUnderlayDilate, value), state);
         }
 
-        public float GetTextShadowIntensity(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.TextShadowIntensity, state).AsFloat;
+        public float GetTextUnderlayDilate(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.TextUnderlayDilate, state).AsFloat;
         }
         
-        public void SetTextShadowSoftness(float value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.TextShadowSoftness, value), state);
+        public void SetTextUnderlaySoftness(float value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.TextUnderlaySoftness, value), state);
         }
 
-        public float GetTextShadowSoftness(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.TextShadowSoftness, state).AsFloat;
+        public float GetTextUnderlaySoftness(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.TextUnderlaySoftness, state).AsFloat;
         }
         
-        public void SetTextShadowType(UIForia.Rendering.ShadowType value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.TextShadowType, (int)value), state);
+        public void SetTextUnderlayType(UIForia.Rendering.UnderlayType value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.TextUnderlayType, (int)value), state);
         }
 
-        public UIForia.Rendering.ShadowType GetTextShadowType(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.TextShadowType, state).AsShadowType;
+        public UIForia.Rendering.UnderlayType GetTextUnderlayType(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.TextUnderlayType, state).AsUnderlayType;
         }
         
         public void SetTextTransform(UIForia.Text.TextTransform value, StyleState state) {
@@ -4135,12 +4135,12 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.ScrollbarColor, state).AsColor;
         }
         
-        public void SetShadowType(UIForia.Rendering.ShadowType value, StyleState state) {
+        public void SetShadowType(UIForia.Rendering.UnderlayType value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.ShadowType, (int)value), state);
         }
 
-        public UIForia.Rendering.ShadowType GetShadowType(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.ShadowType, state).AsShadowType;
+        public UIForia.Rendering.UnderlayType GetShadowType(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.ShadowType, state).AsUnderlayType;
         }
         
         public void SetShadowOffsetX(float value, StyleState state) {
@@ -4370,18 +4370,18 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.TextGlowOuter, TextGlowOuter);
 				case StylePropertyId.TextGlowPower:
 					 return new StyleProperty(StylePropertyId.TextGlowPower, TextGlowPower);
-				case StylePropertyId.TextShadowColor:
-					 return new StyleProperty(StylePropertyId.TextShadowColor, TextShadowColor);
-				case StylePropertyId.TextShadowOffsetX:
-					 return new StyleProperty(StylePropertyId.TextShadowOffsetX, TextShadowOffsetX);
-				case StylePropertyId.TextShadowOffsetY:
-					 return new StyleProperty(StylePropertyId.TextShadowOffsetY, TextShadowOffsetY);
-				case StylePropertyId.TextShadowIntensity:
-					 return new StyleProperty(StylePropertyId.TextShadowIntensity, TextShadowIntensity);
-				case StylePropertyId.TextShadowSoftness:
-					 return new StyleProperty(StylePropertyId.TextShadowSoftness, TextShadowSoftness);
-				case StylePropertyId.TextShadowType:
-					 return new StyleProperty(StylePropertyId.TextShadowType, (int)TextShadowType);
+				case StylePropertyId.TextUnderlayColor:
+					 return new StyleProperty(StylePropertyId.TextUnderlayColor, TextUnderlayColor);
+				case StylePropertyId.TextUnderlayX:
+					 return new StyleProperty(StylePropertyId.TextUnderlayX, TextUnderlayX);
+				case StylePropertyId.TextUnderlayY:
+					 return new StyleProperty(StylePropertyId.TextUnderlayY, TextUnderlayY);
+				case StylePropertyId.TextUnderlayDilate:
+					 return new StyleProperty(StylePropertyId.TextUnderlayDilate, TextUnderlayDilate);
+				case StylePropertyId.TextUnderlaySoftness:
+					 return new StyleProperty(StylePropertyId.TextUnderlaySoftness, TextUnderlaySoftness);
+				case StylePropertyId.TextUnderlayType:
+					 return new StyleProperty(StylePropertyId.TextUnderlayType, (int)TextUnderlayType);
 				case StylePropertyId.TextTransform:
 					 return new StyleProperty(StylePropertyId.TextTransform, (int)TextTransform);
 				case StylePropertyId.TextWhitespaceMode:
@@ -4513,11 +4513,11 @@ namespace UIForia.Rendering {
                     case StylePropertyId.TextGlowInner: return true;
                     case StylePropertyId.TextGlowOuter: return true;
                     case StylePropertyId.TextGlowPower: return true;
-                    case StylePropertyId.TextShadowColor: return true;
-                    case StylePropertyId.TextShadowOffsetX: return true;
-                    case StylePropertyId.TextShadowOffsetY: return true;
-                    case StylePropertyId.TextShadowIntensity: return true;
-                    case StylePropertyId.TextShadowSoftness: return true;
+                    case StylePropertyId.TextUnderlayColor: return true;
+                    case StylePropertyId.TextUnderlayX: return true;
+                    case StylePropertyId.TextUnderlayY: return true;
+                    case StylePropertyId.TextUnderlayDilate: return true;
+                    case StylePropertyId.TextUnderlaySoftness: return true;
                     case StylePropertyId.AnchorTop: return true;
                     case StylePropertyId.AnchorRight: return true;
                     case StylePropertyId.AnchorBottom: return true;
@@ -4562,12 +4562,12 @@ namespace UIForia.Rendering {
                     case StylePropertyId.TextGlowInner: return true;
                     case StylePropertyId.TextGlowOuter: return true;
                     case StylePropertyId.TextGlowPower: return true;
-                    case StylePropertyId.TextShadowColor: return true;
-                    case StylePropertyId.TextShadowOffsetX: return true;
-                    case StylePropertyId.TextShadowOffsetY: return true;
-                    case StylePropertyId.TextShadowIntensity: return true;
-                    case StylePropertyId.TextShadowSoftness: return true;
-                    case StylePropertyId.TextShadowType: return true;
+                    case StylePropertyId.TextUnderlayColor: return true;
+                    case StylePropertyId.TextUnderlayX: return true;
+                    case StylePropertyId.TextUnderlayY: return true;
+                    case StylePropertyId.TextUnderlayDilate: return true;
+                    case StylePropertyId.TextUnderlaySoftness: return true;
+                    case StylePropertyId.TextUnderlayType: return true;
                     case StylePropertyId.TextTransform: return true;
                     case StylePropertyId.TextWhitespaceMode: return true;
                     case StylePropertyId.ZIndex: return true;

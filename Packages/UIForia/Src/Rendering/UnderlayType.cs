@@ -1,6 +1,6 @@
 namespace UIForia.Rendering {
 
-    public enum ShadowType {
+    public enum UnderlayType {
 
         Unset = 0,
         None = 1 << 0,

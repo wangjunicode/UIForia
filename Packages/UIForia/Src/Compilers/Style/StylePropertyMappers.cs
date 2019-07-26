@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using TMPro;
 using UIForia.Exceptions;
 using UIForia.Layout;
 using UIForia.Layout.LayoutTypes;
@@ -12,6 +11,8 @@ using UIForia.Util;
 using UnityEngine;
 using FontStyle = UIForia.Text.FontStyle;
 using TextAlignment = UIForia.Text.TextAlignment;
+
+// ReSharper disable StringLiteralTypo
 
 namespace UIForia.Compilers.Style {
 
@@ -36,7 +37,7 @@ namespace UIForia.Compilers.Style {
                 {"alignmentpivoty", (targetStyle, property, context) => targetStyle.AlignmentPivotY = MapNumber(property.children[0], context)},
                 {"alignmentoffsetx", (targetStyle, property, context) => targetStyle.AlignmentOffsetX = MapNumber(property.children[0], context)},
                 {"alignmentoffsety", (targetStyle, property, context) => targetStyle.AlignmentOffsetY = MapNumber(property.children[0], context)},
-                
+
                 // Background
                 {"backgroundcolor", (targetStyle, property, context) => targetStyle.BackgroundColor = MapColor(property, context)},
                 {"backgroundtint", (targetStyle, property, context) => targetStyle.BackgroundTint = MapColor(property, context)},
@@ -162,12 +163,12 @@ namespace UIForia.Compilers.Style {
                 {"textglowinner", (targetStyle, property, context) => targetStyle.TextGlowInner = MapNumber(property.children[0], context)},
                 {"textglowouter", (targetStyle, property, context) => targetStyle.TextGlowOuter = MapNumber(property.children[0], context)},
                 {"textglowpower", (targetStyle, property, context) => targetStyle.TextGlowPower = MapNumber(property.children[0], context)},
-                {"textshadowcolor", (targetStyle, property, context) => targetStyle.TextShadowColor = MapColor(property, context)},
-                {"textshadowoffsetx", (targetStyle, property, context) => targetStyle.TextShadowOffsetX = MapNumber(property.children[0], context)},
-                {"textshadowoffsety", (targetStyle, property, context) => targetStyle.TextShadowOffsetY = MapNumber(property.children[0], context)},
-                {"textshadowintensity", (targetStyle, property, context) => targetStyle.TextShadowIntensity = MapNumber(property.children[0], context)},
-                {"textshadowsoftness", (targetStyle, property, context) => targetStyle.TextShadowSoftness = MapNumber(property.children[0], context)},
-                {"textshadowtype", (targetStyle, property, context) => targetStyle.TextShadowType = MapEnum<ShadowType>(property.children[0], context)},
+                {"textunderlaycolor", (targetStyle, property, context) => targetStyle.TextUnderlayColor = MapColor(property, context)},
+                {"textunderlayoffsetx", (targetStyle, property, context) => targetStyle.TextUnderlayX = MapNumber(property.children[0], context)},
+                {"textunderlayoffsety", (targetStyle, property, context) => targetStyle.TextUnderlayY = MapNumber(property.children[0], context)},
+                {"textunderlayintensity", (targetStyle, property, context) => targetStyle.TextUnderlayDilate = MapNumber(property.children[0], context)},
+                {"textunderlaysoftness", (targetStyle, property, context) => targetStyle.TextUnderlaySoftness = MapNumber(property.children[0], context)},
+                {"textunderlaytype", (targetStyle, property, context) => targetStyle.TextUnderlayType = MapEnum<UnderlayType>(property.children[0], context)},
                 {"texttransform", (targetStyle, property, context) => targetStyle.TextTransform = MapEnum<TextTransform>(property.children[0], context)}, {
                     "textwhitespacemode", (targetStyle, property, context) => {
                         // couldn't find a generic version for merging a list of enum flags... just one that involves boxing: https://stackoverflow.com/questions/987607/c-flags-enum-generic-function-to-look-for-a-flag
@@ -190,7 +191,7 @@ namespace UIForia.Compilers.Style {
                 {"scrollbarcolor", (targetStyle, property, context) => targetStyle.ScrollbarColor = MapColor(property, context)},
 
                 // shadows for things
-                {"shadowtype", (targetStyle, property, context) => targetStyle.ShadowType = MapEnum<ShadowType>(property.children[0], context)},
+//                {"shadowtype", (targetStyle, property, context) => targetStyle.UnderlayType = MapEnum<UnderlayType>(property.children[0], context)},
                 {"shadowoffsetx", (targetStyle, property, context) => targetStyle.ShadowOffsetX = MapNumber(property.children[0], context)},
                 {"shadowoffsety", (targetStyle, property, context) => targetStyle.ShadowOffsetY = MapNumber(property.children[0], context)},
                 {"shadowsoftnessx", (targetStyle, property, context) => targetStyle.ShadowSoftnessX = MapNumber(property.children[0], context)},
@@ -223,50 +224,31 @@ namespace UIForia.Compilers.Style {
                         string propertyValue = identifierNode.name.ToLower();
 
                         if (propertyValue.Contains("bold")) {
-                            style |= FontStyle.Bold;
+                            style |= Text.FontStyle.Bold;
                         }
 
                         if (propertyValue.Contains("italic")) {
-                            style |= FontStyle.Italic;
-                        }
-
-                        if (propertyValue.Contains("highlight")) {
-                            style |= FontStyle.Highlight;
-                        }
-
-                        if (propertyValue.Contains("smallcaps")) {
-                            style |= FontStyle.SmallCaps;
-                        }
-
-                        if (propertyValue.Contains("superscript")) {
-                            style |= FontStyle.Superscript;
-                        }
-
-                        if (propertyValue.Contains("subscript")) {
-                            style |= FontStyle.Subscript;
+                            style |= Text.FontStyle.Italic;
                         }
 
                         if (propertyValue.Contains("underline")) {
-                            style |= FontStyle.Underline;
+                            style |= Text.FontStyle.Underline;
                         }
 
                         if (propertyValue.Contains("strikethrough")) {
-                            style |= FontStyle.StrikeThrough;
+                            style |= Text.FontStyle.StrikeThrough;
                         }
 
                         break;
                     default:
                         throw new CompileException(context.fileName, value, $"Invalid TextFontStyle {value}. " +
-                                                                            "Make sure you use one of those: bold, italic, highlight, smallcaps, superscript, subscript, underline or strikethrough.");
+                                                                            "Make sure you use one of those: bold, italic, underline or strikethrough.");
                 }
-            }
-
-            if ((style & FontStyle.Superscript) != 0 && (style & FontStyle.Subscript) != 0) {
-                throw new CompileException(context.fileName, property, "Font style cannot be both superscript and subscript");
             }
 
             return style;
         }
+
 
         private static void MapMaxSize(UIStyle targetStyle, PropertyNode property, StyleCompileContext context) {
             UIMeasurement x = MapMeasurement(property.children[0], context);
@@ -905,7 +887,7 @@ namespace UIForia.Compilers.Style {
                         throw new CompileException(urlNode, "SpriteAtlas access is coming soon!");
                     }
 
-                    return ResourceManager.GetTexture(assetInfo.Path);
+                    return context.application.ResourceManager.GetTexture(assetInfo.Path);
                 case StyleLiteralNode literalNode:
                     string value = literalNode.rawValue;
                     if (value == "unset" || value == "default" || value == "null") {
@@ -918,7 +900,7 @@ namespace UIForia.Compilers.Style {
             throw new CompileException(context.fileName, node, $"Expected url(path/to/texture) but found {node}.");
         }
 
-        private static TMP_FontAsset MapFont(StyleASTNode node, StyleCompileContext context) {
+        private static FontAsset MapFont(StyleASTNode node, StyleCompileContext context) {
             node = context.GetValueForReference(node);
             switch (node) {
                 case UrlNode urlNode:
@@ -927,7 +909,7 @@ namespace UIForia.Compilers.Style {
                         throw new CompileException(urlNode, "SpriteAtlas access is coming soon!");
                     }
 
-                    return Resources.Load<TMP_FontAsset>(assetInfo.Path);
+                    return context.application.ResourceManager.GetFont(assetInfo.Path);
                 // return ResourceManager.GetFont(TransformUrlNode(urlNode, context));
                 case StyleLiteralNode literalNode:
                     string value = literalNode.rawValue;

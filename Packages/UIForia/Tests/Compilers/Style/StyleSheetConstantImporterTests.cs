@@ -57,9 +57,9 @@ public class StyleSheetConstantImporterTests {
     [Test]
     public void ImportAndUseConsts() {
         LightList<StyleASTNode> nodes = new LightList<StyleASTNode>();
-        nodes.Add(StyleASTNodeFactory.ImportNode("importedThing", "Tests/Styles/ImportFromMe.style"));
+        nodes.Add(StyleASTNodeFactory.ImportNode("importedThing", "Data/Styles/ImportFromMe.style"));
 
-        var context = new StyleSheetConstantImporter(new StyleSheetImporter(null)).CreateContext(nodes);
+        var context = new StyleSheetConstantImporter(new StyleSheetImporter(new MockApplication(typeof(ViewTestThing)))).CreateContext(nodes);
         Assert.AreEqual(1, context.importedStyleConstants.Count);
         Assert.AreEqual(1, context.importedStyleConstants["importedThing"].Count);
         Assert.AreEqual("colorRed", context.importedStyleConstants["importedThing"][0].name);

@@ -55,7 +55,7 @@ style flex-grow-2 {
 }
 
 style flex-item {
-    PreferredSize = 50px 1cnt;
+    PreferredSize = 50px 30px;//1cnt;
     MinWidth = 1cnt;
     Padding = 0.5em;
     BackgroundColor = red;

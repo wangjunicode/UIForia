@@ -1,10 +1,8 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-using TMPro;
 using UIForia.Layout;
 using UIForia.Layout.LayoutTypes;
-using UIForia.Systems;
 using UIForia.Text;
 using UIForia.Util;
 using UnityEngine;
@@ -176,7 +174,7 @@ namespace UIForia.Rendering {
         public Overflow AsOverflow => (Overflow) int0;
         public Color AsColor => int1 == 0 ? ColorUtil.UnsetValue : (Color) new StyleColor(int0);
 
-        public TMP_FontAsset AsFont => (TMP_FontAsset) objectField;
+        public FontAsset AsFont => (FontAsset) objectField;
         public Texture2D AsTexture => (Texture2D) objectField;
 
         public FontStyle AsFontStyle => (FontStyle) int0;
@@ -204,7 +202,7 @@ namespace UIForia.Rendering {
         public Visibility AsVisibility => (Visibility) int0;
         public CursorStyle AsCursorStyle => (CursorStyle) objectField;
         public string AsString => (string) objectField;
-        public ShadowType AsShadowType => (ShadowType) int0;
+        public UnderlayType AsUnderlayType => (UnderlayType) int0;
         public Fit AsFit => (Fit) int0;
         
         public AlignmentTarget AsAlignmentTarget => (AlignmentTarget) int0;
@@ -488,7 +486,7 @@ namespace UIForia.Rendering {
             return new StyleProperty(StylePropertyId.RenderLayer, (int) renderLayer);
         }
 
-        public static StyleProperty Font(TMP_FontAsset fontAsset) {
+        public static StyleProperty Font(FontAsset fontAsset) {
             return new StyleProperty(StylePropertyId.TextFontAsset, fontAsset);
         }
 

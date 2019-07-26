@@ -112,6 +112,10 @@ namespace UIForia.Elements {
         internal static IntMap<ElementColdData> s_ColdDataMap = new IntMap<ElementColdData>();
 
         internal LinqBindingNode bindingNode;
+        internal FastLayoutBox layoutBox;
+        internal RenderBox renderBox;
+        
+        public int traversalIndex;
 
         internal StructList<ElementAttribute> attributes;
         
@@ -514,8 +518,7 @@ namespace UIForia.Elements {
         }
 
         private static readonly Dictionary<Type, UIElementTypeData> s_TypeDataMap = new Dictionary<Type, UIElementTypeData>();
-        public FastLayoutBox layoutBox;
-        public int traversalIndex;
+
 
         internal struct UIElementTypeData {
 

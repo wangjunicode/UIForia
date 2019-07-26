@@ -19,7 +19,7 @@ namespace UIForia.Elements {
         internal void Initialize(TextInfo textInfo) {
             this.textInfo = textInfo;
             spanIndex = textInfo.spanList.Count;
-            textInfo.AppendSpan(new TextSpan(text));
+           // textInfo.AppendSpan(text);
             if (children != null) {
                 for (int i = 0; i < children.Count; i++) {
                     TextSpanElement childSpan = (TextSpanElement) children[i];
@@ -29,7 +29,7 @@ namespace UIForia.Elements {
         }
 
         public void SetText(string text) {
-            textInfo.UpdateSpan(spanIndex, new TextSpan(text));
+           // textInfo.UpdateSpan(spanIndex, new TextSpan(text));
         }
         
         public override string GetDisplayName() {
@@ -38,12 +38,12 @@ namespace UIForia.Elements {
         
         // maybe just mark for update, or have an option to disable a span 
         public override void OnEnable() {
-            textInfo.UpdateSpan(spanIndex, new TextSpan(text));
+           // textInfo.UpdateSpan(spanIndex, new TextSpan(text));
         }
         
         // maybe just mark for update, or have an option to disable a span 
         public override void OnDisable() {
-            textInfo.UpdateSpan(spanIndex, new TextSpan(string.Empty));
+            //textInfo.UpdateSpan(spanIndex, new TextSpan(string.Empty));
         }
         
     }

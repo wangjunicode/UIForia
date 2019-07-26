@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using TMPro;
 using UIForia.Layout;
 using UIForia.Layout.LayoutTypes;
 using UIForia.Rendering;
@@ -235,7 +234,7 @@ namespace UIForia.Editor {
                 return "GridTemplate";
             }
 
-            if (typeof(TMP_FontAsset) == type) {
+            if (typeof(FontAsset) == type) {
                 return "Font";
             }
 
@@ -275,7 +274,7 @@ namespace UIForia.Editor {
                 return "null";
             }
 
-            if (type == typeof(TMP_FontAsset)) {
+            if (type == typeof(FontAsset)) {
                 return "fontUrlSource";
             }
 

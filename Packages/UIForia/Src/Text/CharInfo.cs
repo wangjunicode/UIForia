@@ -3,9 +3,9 @@ using UnityEngine;
 namespace UIForia.Text {
 
     public struct CharInfo {
-        
+
         // todo -- crunch this down or at least be sure not to incur silly copy costs
-        
+
         public char character;
         public Vector2 topLeft;
         public Vector2 bottomRight;

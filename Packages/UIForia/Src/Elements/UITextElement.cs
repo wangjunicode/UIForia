@@ -8,15 +8,18 @@ using UnityEngine;
 namespace UIForia.Elements {
 
     [TemplateTagName("Text")]
-    public class UITextElement : UIElement, IStyleChangeHandler, IStylePropertiesWillChangeHandler, IStylePropertiesDidChangeHandler {
+    public class UITextElement : UIElement, IStyleChangeHandler {
 
         internal string text;
         internal TextInfo textInfo;
+        internal TextSpan textSpan;
+
         private bool shouldUpdateSpanStyle;
         private SVGXTextStyle spanStyle;
+
         public UITextElement(string text = "") {
             this.text = text ?? string.Empty;
-            this.textInfo = new TextInfo(new TextSpan(string.Empty));
+            this.textInfo = new TextInfo(string.Empty);
             this.flags = flags | UIElementFlags.TextElement
                                | UIElementFlags.BuiltIn
                                | UIElementFlags.Primitive;
@@ -31,12 +34,11 @@ namespace UIForia.Elements {
                     childSpan.Initialize(textInfo);
                 }
             }
-
-            textInfo.UpdateSpan(0, new TextSpan(text, style.GetTextStyle()));
         }
 
         public override void OnEnable() {
-            textInfo.UpdateSpan(0, new TextSpan(text, style.GetTextStyle())); 
+            textSpan.SetStyle(style.GetTextStyle());
+            textSpan.SetText(text);
         }
 
         public string GetText() {
@@ -44,15 +46,24 @@ namespace UIForia.Elements {
         }
 
         public void SetText(string newText) {
+            if (textSpan == null) {
+                if (parent is UITextElement textParent) {
+                    textSpan = new TextSpan(text, style.GetTextStyle());
+                    textInfo = textParent.textInfo;
+                    textParent.textSpan.InsertChild(textSpan, (uint) siblingIndex);
+                }
+                else {
+                    textInfo = new TextInfo(newText, style.GetTextStyle());
+                    textSpan = textInfo.rootSpan;
+                }
+            }
+
             if (this.text == newText) {
                 return;
             }
-            this.text = newText;
-            textInfo.UpdateSpan(0, text, style.GetTextStyle());
-        }
 
-        public void SetText(int spanIndex, string text) {
-            textInfo.UpdateSpan(spanIndex, text);
+            this.text = newText;
+            textSpan.SetText(text);
         }
 
         public override string GetDisplayName() {
@@ -76,42 +87,75 @@ namespace UIForia.Elements {
             return new string(chars);
         }
 
-        // size, font, style, whitespace, transform, alignment
         public void OnStylePropertyChanged(in StyleProperty property) {
             switch (property.propertyId) {
+                
                 case StylePropertyId.TextFontSize:
-                    shouldUpdateSpanStyle = true;
-                    spanStyle.fontSize = property.AsInt;
+                    textSpan.SetFontSize(property.AsInt);
                     break;
+
                 case StylePropertyId.TextFontStyle:
-                    shouldUpdateSpanStyle = true;
-                    spanStyle.fontStyle = property.AsFontStyle;
+                    textSpan.SetFontStyle(property.AsFontStyle);
                     break;
+
                 case StylePropertyId.TextAlignment:
-                    shouldUpdateSpanStyle = true;
-                    spanStyle.alignment = property.AsTextAlignment;
+                    textSpan.SetTextAlignment(property.AsTextAlignment);
                     break;
+
                 case StylePropertyId.TextFontAsset:
-                    shouldUpdateSpanStyle = true;
-                    spanStyle.fontAsset = property.AsFont;
+                    textSpan.SetFont(property.AsFont);
                     break;
+
                 case StylePropertyId.TextTransform:
-                    shouldUpdateSpanStyle = true;
-                    spanStyle.textTransform = property.AsTextTransform;
+                    textSpan.SetTextTransform(property.AsTextTransform);
                     break;
-                // todo -- support this
-                // case StylePropertyId.WhiteSpaceMode:
-            }
-        }
 
-        public void OnStylePropertiesWillChange() {
-            shouldUpdateSpanStyle = false;
-        }
+                case StylePropertyId.TextWhitespaceMode:
+                    textSpan.SetWhitespaceMode(property.AsWhitespaceMode);
+                    break;
 
-        public void OnStylePropertiesDidChange() {
-            if (shouldUpdateSpanStyle) {
-                textInfo.UpdateSpanStyle(0, style.GetTextStyle());
-                shouldUpdateSpanStyle = false;
+                case StylePropertyId.TextColor:
+                    textSpan.SetTextColor(property.AsColor);
+                    break;
+
+                case StylePropertyId.TextGlowColor:
+                    textSpan.SetGlowColor(property.AsColor);
+                    break;
+
+                case StylePropertyId.TextGlowOffset:
+                    textSpan.SetGlowOffset(property.AsFloat);
+                    break;
+
+                case StylePropertyId.TextGlowOuter:
+                    textSpan.SetGlowOuter(property.AsFloat);
+                    break;
+
+                case StylePropertyId.TextUnderlayX:
+                    textSpan.SetUnderlayX(property.AsFloat);
+                    break;
+
+                case StylePropertyId.TextUnderlayY:
+                    break;
+
+                case StylePropertyId.TextUnderlayDilate:
+                    textSpan.SetUnderlayDilate(property.AsFloat);
+                    break;
+
+                case StylePropertyId.TextUnderlayColor:
+                    textSpan.SetUnderlayColor(property.AsColor);
+                    break;
+
+                case StylePropertyId.TextUnderlaySoftness:
+                    textSpan.SetUnderlaySoftness(property.AsFloat);
+                    break;
+
+                case StylePropertyId.TextFaceDilate:
+                    textSpan.SetFaceDilate(property.AsFloat);
+                    break;
+
+                case StylePropertyId.TextGlowPower:
+                case StylePropertyId.TextUnderlayType:
+                    break;
             }
         }
 

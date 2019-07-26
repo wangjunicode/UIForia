@@ -782,12 +782,12 @@ namespace UIForia.Bindings.StyleBindings {
 
     }
         
-    public class StyleBinding_TMP_FontAsset : StyleBinding {
+    public class StyleBinding_FontAsset : StyleBinding {
 
-        public readonly Expression<TMPro.TMP_FontAsset> expression;
+        public readonly Expression<UIForia.FontAsset> expression;
         public readonly StylePropertyId propertyId;
         
-        public StyleBinding_TMP_FontAsset(string propertyName, StylePropertyId propertyId, StyleState state, Expression<TMPro.TMP_FontAsset> expression)
+        public StyleBinding_FontAsset(string propertyName, StylePropertyId propertyId, StyleState state, Expression<UIForia.FontAsset> expression)
             : base(propertyName, state) {
             this.propertyId = propertyId;
             this.expression = expression;
@@ -893,12 +893,12 @@ namespace UIForia.Bindings.StyleBindings {
 
     }
         
-    public class StyleBinding_ShadowType : StyleBinding {
+    public class StyleBinding_UnderlayType : StyleBinding {
 
-        public readonly Expression<UIForia.Rendering.ShadowType> expression;
+        public readonly Expression<UIForia.Rendering.UnderlayType> expression;
         public readonly StylePropertyId propertyId;
         
-        public StyleBinding_ShadowType(string propertyName, StylePropertyId propertyId, StyleState state, Expression<UIForia.Rendering.ShadowType> expression)
+        public StyleBinding_UnderlayType(string propertyName, StylePropertyId propertyId, StyleState state, Expression<UIForia.Rendering.UnderlayType> expression)
             : base(propertyName, state) {
             this.propertyId = propertyId;
             this.expression = expression;
@@ -907,7 +907,7 @@ namespace UIForia.Bindings.StyleBindings {
         public override void Execute(UIElement element, ExpressionContext context) {
             if (!element.style.IsInState(state)) return;
 
-            var oldValue = element.style.propertyMap[(int)propertyId].AsShadowType;
+            var oldValue = element.style.propertyMap[(int)propertyId].AsUnderlayType;
             var value = expression.Evaluate(context);
             if (value != oldValue) {
                 element.style.SetProperty(new StyleProperty(propertyId, (int)value), state);
@@ -1245,7 +1245,7 @@ namespace UIForia.Compilers {
         private static readonly EnumAliasSource<UIForia.Layout.Fit> s_EnumSource_Fit = new EnumAliasSource<UIForia.Layout.Fit>();
         private static readonly EnumAliasSource<UIForia.Text.FontStyle> s_EnumSource_FontStyle = new EnumAliasSource<UIForia.Text.FontStyle>();
         private static readonly EnumAliasSource<UIForia.Text.TextAlignment> s_EnumSource_TextAlignment = new EnumAliasSource<UIForia.Text.TextAlignment>();
-        private static readonly EnumAliasSource<UIForia.Rendering.ShadowType> s_EnumSource_ShadowType = new EnumAliasSource<UIForia.Rendering.ShadowType>();
+        private static readonly EnumAliasSource<UIForia.Rendering.UnderlayType> s_EnumSource_UnderlayType = new EnumAliasSource<UIForia.Rendering.UnderlayType>();
         private static readonly EnumAliasSource<UIForia.Text.TextTransform> s_EnumSource_TextTransform = new EnumAliasSource<UIForia.Text.TextTransform>();
         private static readonly EnumAliasSource<UIForia.Text.WhitespaceMode> s_EnumSource_WhitespaceMode = new EnumAliasSource<UIForia.Text.WhitespaceMode>();
         private static readonly EnumAliasSource<UIForia.Rendering.AnchorTarget> s_EnumSource_AnchorTarget = new EnumAliasSource<UIForia.Rendering.AnchorTarget>();
@@ -1421,7 +1421,7 @@ case "overflowx":
                 case "textcolor":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_Color("TextColor", UIForia.Rendering.StylePropertyId.TextColor, targetState.state, Compile<UnityEngine.Color>(value, colorSources));                
                 case "textfontasset":
-                    return new UIForia.Bindings.StyleBindings.StyleBinding_TMP_FontAsset("TextFontAsset", UIForia.Rendering.StylePropertyId.TextFontAsset, targetState.state, Compile<TMPro.TMP_FontAsset>(value, fontUrlSource));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_FontAsset("TextFontAsset", UIForia.Rendering.StylePropertyId.TextFontAsset, targetState.state, Compile<UIForia.FontAsset>(value, fontUrlSource));                
                 case "textfontsize":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_UIFixedLength("TextFontSize", UIForia.Rendering.StylePropertyId.TextFontSize, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
                 case "textfontstyle":
@@ -1442,18 +1442,18 @@ case "overflowx":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_float("TextGlowOuter", UIForia.Rendering.StylePropertyId.TextGlowOuter, targetState.state, Compile<float>(value, null));                
                 case "textglowpower":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_float("TextGlowPower", UIForia.Rendering.StylePropertyId.TextGlowPower, targetState.state, Compile<float>(value, null));                
-                case "textshadowcolor":
-                    return new UIForia.Bindings.StyleBindings.StyleBinding_Color("TextShadowColor", UIForia.Rendering.StylePropertyId.TextShadowColor, targetState.state, Compile<UnityEngine.Color>(value, colorSources));                
-                case "textshadowoffsetx":
-                    return new UIForia.Bindings.StyleBindings.StyleBinding_float("TextShadowOffsetX", UIForia.Rendering.StylePropertyId.TextShadowOffsetX, targetState.state, Compile<float>(value, null));                
-                case "textshadowoffsety":
-                    return new UIForia.Bindings.StyleBindings.StyleBinding_float("TextShadowOffsetY", UIForia.Rendering.StylePropertyId.TextShadowOffsetY, targetState.state, Compile<float>(value, null));                
-                case "textshadowintensity":
-                    return new UIForia.Bindings.StyleBindings.StyleBinding_float("TextShadowIntensity", UIForia.Rendering.StylePropertyId.TextShadowIntensity, targetState.state, Compile<float>(value, null));                
-                case "textshadowsoftness":
-                    return new UIForia.Bindings.StyleBindings.StyleBinding_float("TextShadowSoftness", UIForia.Rendering.StylePropertyId.TextShadowSoftness, targetState.state, Compile<float>(value, null));                
-                case "textshadowtype":
-                    return new UIForia.Bindings.StyleBindings.StyleBinding_ShadowType("TextShadowType", UIForia.Rendering.StylePropertyId.TextShadowType, targetState.state, Compile<UIForia.Rendering.ShadowType>(value, s_EnumSource_ShadowType));                
+                case "textunderlaycolor":
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_Color("TextUnderlayColor", UIForia.Rendering.StylePropertyId.TextUnderlayColor, targetState.state, Compile<UnityEngine.Color>(value, colorSources));                
+                case "textunderlayx":
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_float("TextUnderlayX", UIForia.Rendering.StylePropertyId.TextUnderlayX, targetState.state, Compile<float>(value, null));                
+                case "textunderlayy":
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_float("TextUnderlayY", UIForia.Rendering.StylePropertyId.TextUnderlayY, targetState.state, Compile<float>(value, null));                
+                case "textunderlaydilate":
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_float("TextUnderlayDilate", UIForia.Rendering.StylePropertyId.TextUnderlayDilate, targetState.state, Compile<float>(value, null));                
+                case "textunderlaysoftness":
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_float("TextUnderlaySoftness", UIForia.Rendering.StylePropertyId.TextUnderlaySoftness, targetState.state, Compile<float>(value, null));                
+                case "textunderlaytype":
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_UnderlayType("TextUnderlayType", UIForia.Rendering.StylePropertyId.TextUnderlayType, targetState.state, Compile<UIForia.Rendering.UnderlayType>(value, s_EnumSource_UnderlayType));                
                 case "texttransform":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_TextTransform("TextTransform", UIForia.Rendering.StylePropertyId.TextTransform, targetState.state, Compile<UIForia.Text.TextTransform>(value, s_EnumSource_TextTransform));                
                 case "textwhitespacemode":
@@ -1505,7 +1505,7 @@ case "overflowx":
                 case "scrollbarcolor":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_Color("ScrollbarColor", UIForia.Rendering.StylePropertyId.ScrollbarColor, targetState.state, Compile<UnityEngine.Color>(value, colorSources));                
                 case "shadowtype":
-                    return new UIForia.Bindings.StyleBindings.StyleBinding_ShadowType("ShadowType", UIForia.Rendering.StylePropertyId.ShadowType, targetState.state, Compile<UIForia.Rendering.ShadowType>(value, s_EnumSource_ShadowType));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_UnderlayType("ShadowType", UIForia.Rendering.StylePropertyId.ShadowType, targetState.state, Compile<UIForia.Rendering.UnderlayType>(value, s_EnumSource_UnderlayType));                
                 case "shadowoffsetx":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_float("ShadowOffsetX", UIForia.Rendering.StylePropertyId.ShadowOffsetX, targetState.state, Compile<float>(value, null));                
                 case "shadowoffsety":

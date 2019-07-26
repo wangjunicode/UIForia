@@ -20,7 +20,9 @@ namespace UIForia {
             application = GameApplication.Create(applicationId, type, camera);
         }
 
+
         private void Update() {
+
             if (type == null) return;
             if (application == null) {
 

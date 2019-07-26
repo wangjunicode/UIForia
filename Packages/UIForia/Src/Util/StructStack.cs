@@ -74,6 +74,10 @@ namespace UIForia.Util {
             s_Pool.Add(toPool);
         }
 
+        public T PeekUnchecked() {
+            return array[size - 1];
+        }
+
     }
 
 }

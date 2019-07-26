@@ -8,11 +8,11 @@
         <Div style="flex-demo">
             <Heading3>Flex-Start</Heading3>
             <Group style="flex-demo-content flex-start horizontal">
-                <Div style="flex-item">Item 1</Div>
-                <Div style="flex-item">Item 2</Div>
-                <Div style="flex-item">Item 3</Div>
-                <Div style="flex-item">Item 4</Div>
-                <Div style="flex-item">Item 5</Div>
+                <Div style="flex-item"></Div>
+                <Div style="flex-item"></Div>
+                <Div style="flex-item"></Div>
+                <Div style="flex-item"></Div>
+                <Div style="flex-item"></Div>
             </Group>
         </Div>
 

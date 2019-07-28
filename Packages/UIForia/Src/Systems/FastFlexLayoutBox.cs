@@ -664,7 +664,8 @@ namespace UIForia.Systems {
 
         public override void SetChildren(LightList<FastLayoutBox> children) {
             base.SetChildren(children);
-            
+
+
             if (itemList == null) {
                 itemList = new StructList<Item>(children.size);
             }
@@ -674,6 +675,10 @@ namespace UIForia.Systems {
 
             itemList.size = children.size;
             Item[] items = itemList.array;
+
+            if (children.size == 0) {
+                return;
+            }
 
             firstChild = children[0];
 
@@ -694,7 +699,7 @@ namespace UIForia.Systems {
                 return;
             }
 
-            itemList = itemList ?? new StructList<Item>(8);
+            itemList = itemList ?? new StructList<Item>();
 
             itemList.Insert(index, new Item() {
                 layoutBox = child,

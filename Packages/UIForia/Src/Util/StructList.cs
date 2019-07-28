@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using UIForia.Parsing.Expression.Tokenizer;
+using UnityEngine;
 
 namespace UIForia.Util {
 
@@ -360,6 +361,10 @@ namespace UIForia.Util {
             T[] retn = new T[size];
             System.Array.Copy(array, 0, retn, 0, size);
             return retn;
+        }
+
+        public void CopyToArrayUnchecked(T[] target) {
+            System.Array.Copy(array, 0, target, 0, size);
         }
 
     }

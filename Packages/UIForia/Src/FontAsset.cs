@@ -45,6 +45,8 @@ namespace UIForia {
             this.normalStyle = tmpFontAsset.normalStyle;
             this.normalSpacingOffset = tmpFontAsset.normalSpacingOffset;
             this.italicStyle = tmpFontAsset.italicStyle;
+            this.weightNormal = tmpFontAsset.normalStyle;
+            this.weightBold = tmpFontAsset.boldStyle;
         }
 
         private static IntMap<TextKerningPair> ConvertKerning(Dictionary<int, KerningPair> tmpKerning) {

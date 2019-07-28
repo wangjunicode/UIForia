@@ -150,7 +150,8 @@ float3x3 TRS2D(float2 position, float2 scale, float rotation) {
 #define ShapeType_Rhombus (1 << 4)
 #define ShapeType_Triangle (1 << 5)
 #define ShapeType_RegularPolygon (1 << 6)
-#define ShapeType_Text (1 << 7)
+#define ShapeType_Text 1
+//(1 << 7)
 
 #define ShapeType_RectLike (ShapeType_Rect | ShapeType_RoundedRect | ShapeType_Circle)
 

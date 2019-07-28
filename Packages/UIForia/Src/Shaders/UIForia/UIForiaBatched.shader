@@ -13,9 +13,10 @@ Shader "UIForia/Standard"
          "Queue" = "Transparent"
         }
         LOD 100
-        Cull Off
+        Cull Back
         Blend One OneMinusSrcAlpha
-         
+         ZTest Off
+         ZClip Off
         // this stencil setting solves self-blending
         // does mean we have to issue the draw call twice probably
         // if we want to reset the stencil
@@ -39,42 +40,41 @@ Shader "UIForia/Standard"
             
             sampler2D _MainTex;
             sampler2D _MaskTexture;
+            sampler2D _FontTexture;
+            
             float4 _MainTex_ST;
             float4 _Color;
             float _Radius;
             float _MaskSoftness;
             float _InvertMask;
              
-            // todo -- set as vector4s instead of floats
-            sampler2D _FontTexture;
             float _FontScaleX;
             float _FontScaleY;
-        
-            float4 _FontScales[BATCH_SIZE];
-            float4 _FontWeightsAndSizes[BATCH_SIZE];
-            float4 _FontTextData[BATCH_SIZE];
+            float4 _FontScales;
+            float4 _FontTextureSize;
+            
             float4 _ColorData[BATCH_SIZE];
             float4 _ObjectData[BATCH_SIZE];
-            float4 _TransformData[BATCH_SIZE];
+            float4x4 _TransformData[BATCH_SIZE];
                                                           
             #define Vert_BorderSize 0
-            //v.texCoord1.x
+            
             #define Vert_BorderRadii objectInfo.y
             #define Vert_BorderSizeColor v.texCoord1
                        
-            #define _FontGradientScale fontScales.x
-            #define _FontScaleRatioA fontScales.y
-            #define _FontScaleRatioB fontScales.z
-            #define _FontScaleRatioC fontScales.w
-            #define _FontWeightNormal fontWeightsAndSizes.x
-            #define _FontWeightBold fontWeightsAndSizes.y
-            #define _FontTextureWidth fontWeightsAndSizes.z
-            #define _FontTextureHeight fontWeightsAndSizes.w
+            #define _FontGradientScale _FontScales.x
+            #define _FontScaleRatioA _FontScales.y
+            #define _FontScaleRatioB _FontScales.z
+            #define _FontScaleRatioC _FontScales.w
             
-            // todo -- move to texCoord2
-            #define _CharacterScale fontTextData.x
-            #define _CharacterPackedOutline fontTextData.z
-            #define _CharacterPackedUnderlay fontTextData.w
+            #define _FontTextureWidth _FontTextureSize.x
+            #define _FontTextureHeight _FontTextureSize.y
+            
+            #define Vert_CharacterScale v.texCoord1.x
+            #define Vert_ShapeType objectInfo.x
+            #define Vert_CharacterPackedOutline objectInfo.y
+            #define Vert_CharacterPackedUnderlay objectInfo.z
+            #define Vert_CharacterWeight objectInfo.w
                     
             #define PaintMode_Color 1 << 0
             #define PaintMode_Texture 1 << 1
@@ -86,51 +86,28 @@ Shader "UIForia/Standard"
             
             #define Frag_ShapeType i.texCoord2.x
                     
-            inline float4 UnpackUnderlay(float scale, float weight, float4 fontScales, float4 fontTextData, float4 fontWeightsAndSizes) {
-                fixed4 unpackedUnderlay = UnpackColor(asuint(_CharacterPackedUnderlay));
-             
-                fixed underlayX = (unpackedUnderlay.x * 2) - 1;
-                fixed underlayY = (unpackedUnderlay.y * 2) - 1;
-                fixed underlayDilate = (unpackedUnderlay.z * 2) - 1;
-                fixed underlaySoftness = unpackedUnderlay.w;
-             
-                float underlayScale = scale;
-                underlayScale /= 1 + ((underlaySoftness * _FontScaleRatioC) * underlayScale);
-                float underlayBias = (0.5 - weight) * underlayScale - 0.5 - ((underlayDilate * _FontScaleRatioC) * 0.5 * underlayScale);
-            
-                float2 underlayOffset = float2(
-                    -(underlayX * _FontScaleRatioC) * _FontGradientScale / _FontTextureWidth,
-                    -(underlayY * _FontScaleRatioC) * _FontGradientScale / _FontTextureHeight
-                );
-                
-                return float4(underlayOffset, underlayScale, underlayBias);
-            }
-            
             v2f vert (appdata v) {
                 v2f o;
                                 
-                int transformIndex = (int)v.texCoord0.z;
-                int objectIndex = (int)v.texCoord0.w;
+                int objectIndex = (int)v.texCoord1.w; // can be a byte, consider packing this if needed
 
                 float4 objectInfo = _ObjectData[objectIndex];
-                float4 transform = _TransformData[transformIndex];
+                float4x4 transform = _TransformData[objectIndex];
                 o.color = _ColorData[objectIndex];
                 
                 int shapeType = objectInfo.x;
                 
-                half2 size = transform.zw;// UnpackToHalf2(objectInfo.z);
-                half2 pos = transform.xy;
+                half2 size = half2(0, 0); // todo transform.zw;// UnpackToHalf2(objectInfo.z);
+                half2 pos = half2(0, 0);// transform.xy;
                 half2 scale =  float2(1, 1); 
-                //transform.zw;
-                float rotation = objectInfo.w;
-                
-                float3x3 m = mul(TRS2D(0, scale, rotation), TRS2D(-0.5 * size, scale, 0));
-                float3 outputVertXY = mul((m), float3(v.vertex.xy, 1));
-                
+
+                v.vertex = mul(transform, float4(v.vertex.xyz, 1));
+
                 // o.vertex = UnityObjectToClipPos(float3(outputVertXY.xy, v.vertex.z));
+                
                 o.vertex = UnityObjectToClipPos(v.vertex); //float3(outputVertXY.xy, v.vertex.z));
                 
-                if(shapeType != ShapeType_Text) {
+                if(shapeType != 1) {
                     //o.vertex = SDFPixelSnap(o.vertex); // pixel snap is bad for text rendering
                     o.texCoord0 = float4(v.texCoord0.xy, 0, 0);
                     o.texCoord1 = float4(size, Vert_BorderRadii, Vert_BorderSize);
@@ -138,39 +115,54 @@ Shader "UIForia/Standard"
                     o.texCoord3 = Vert_BorderSizeColor;
                 }
                 else {             
-                    int spanIndex = (int)v.texCoord1.z;
-                    float4 fontScales = _FontScales[spanIndex];    
-                    float4 fontWeightsAndSizes = _FontWeightsAndSizes[spanIndex];
-                    float4 fontTextData = _FontTextData[spanIndex];
-                               
                     _FontScaleX = 1;
                     _FontScaleY = 1;
                     
-                    fixed4 unpackedOutline = UnpackColor(asuint(_CharacterPackedOutline));
+                    float weight = Vert_CharacterWeight; 
+
+                    fixed4 unpackedOutline = UnpackColor(asuint(Vert_CharacterPackedOutline));
                     float outlineWidth = unpackedOutline.x;
                     float outlineSoftness = unpackedOutline.y;
                     
                     // todo -- glow
                     
-                    // scale stuff can be moved to cpu
-                    float2 pixelSize = o.vertex.w;
-                    
-                    pixelSize /= float2(_FontScaleX, _FontScaleY) * abs(mul((float2x2)UNITY_MATRIX_P, _ScreenParams.xy));
-                    float scale = rsqrt(dot(pixelSize, pixelSize));
-                    scale *= abs(_CharacterScale) * _FontGradientScale * 1.5;
-                    
-                    float weight = _FontWeightNormal; 
-                    float bias = (0.5 - weight) + (0.5 / scale);
-                    float alphaClip = (1.0 - outlineWidth * _FontScaleRatioA - outlineSoftness * _FontScaleRatioA);
+                     fixed4 unpackedUnderlay = UnpackColor(asuint(Vert_CharacterPackedUnderlay));
                      
-                    alphaClip = alphaClip / 2.0 - ( 0.5 / scale) - weight;
+                     fixed underlayX = 1; //(unpackedUnderlay.x * 2) - 1;
+                     fixed underlayY = 1; //(unpackedUnderlay.y * 2) - 1;
+                     fixed underlayDilate = 0; //(unpackedUnderlay.z * 2) - 1;
+                     fixed underlaySoftness = 0;//unpackedUnderlay.w;
+                     
+                     float underlayScale = scale;
+                     underlayScale /= 1 + ((underlaySoftness * _FontScaleRatioC) * underlayScale);
+                     float underlayBias = (0.5 - weight) * underlayScale - 0.5 - ((underlayDilate * _FontScaleRatioC) * 0.5 * underlayScale);
                     
-                    o.texCoord0 = float4(v.texCoord0.xy, 0, 0);
-                    o.texCoord1 = float4(alphaClip, scale, bias, weight);
-                    o.texCoord2 = float4(shapeType, outlineWidth, outlineSoftness, _FontScaleRatioA);
-                    o.texCoord3 = UnpackUnderlay(scale, weight, fontScales, fontTextData, fontWeightsAndSizes);
+                     float2 underlayOffset = float2(
+                         -(underlayX * _FontScaleRatioC) * _FontGradientScale / _FontTextureWidth,
+                         -(underlayY * _FontScaleRatioC) * _FontGradientScale / _FontTextureHeight
+                     );
+                
+                     // scale stuff can be moved to cpu, alpha clip & bias too
+                     float2 pixelSize = o.vertex.w;
                     
+                     pixelSize /= float2(_FontScaleX, _FontScaleY) * abs(mul((float2x2)UNITY_MATRIX_P, _ScreenParams.xy));
+                     float scale = rsqrt(dot(pixelSize, pixelSize));
+                     scale *= abs(Vert_CharacterScale) * _FontGradientScale * 1.5;
+                    
+                     float bias = (0.5 - weight) + (0.5 / scale);
+                     float alphaClip = (1.0 - outlineWidth * _FontScaleRatioA - outlineSoftness * _FontScaleRatioA);
+                     
+                     alphaClip = alphaClip / 2.0 - ( 0.5 / scale) - weight;
+                    
+                     o.texCoord0 = v.texCoord0;
+                     o.texCoord1 = float4(alphaClip, scale, bias, weight);
+                     o.texCoord2 = float4(ShapeType_Text, outlineWidth, outlineSoftness, 0);
+                     o.texCoord3 = float4(underlayOffset, underlayScale, underlayBias);
+
                 }
+                
+                // todo -- more unpacking can be done in the vertex shader
+                
                 return o;
             }            
             
@@ -216,6 +208,11 @@ Shader "UIForia/Standard"
  
             fixed4 frag (v2f i) : SV_Target {            
                 
+                // todo -- i.color needs to be unpacked for text
+                // todo -- use color mode effectively
+                
+                fixed4 mainColor = ComputeColor(i.color, i.texCoord0.xy);
+
                 if(Frag_ShapeType != ShapeType_Text) {
                 
                     SDFData sdfData;
@@ -234,18 +231,17 @@ Shader "UIForia/Standard"
                         alpha.rgb *= alpha.a;
                     }
 
-                    fixed4 mainColor = ComputeColor(i.color, i.texCoord0.xy);
-                   // mainColor.a = alpha.a;
-                    //mainColor.rgb *=  mainColor.a;
+                    // mainColor.a = alpha.a;
+                    // mainColor.rgb *=  mainColor.a;
                     return mainColor;
                 }
                 
                 float outlineWidth = i.texCoord2.y;
                 float outlineSoftness = i.texCoord2.z;
-                float c = tex2D(_FontTexture, i.texCoord0.xy).a;
+                float c = tex2D(_FontTexture, i.texCoord0.zw).a;
 
-               // clip(c - i.texCoord1.x);
-                float scaleRatio = i.texCoord2.w;
+//                clip(c - i.texCoord1.x);
+                float scaleRatio = _FontScaleRatioA;
                 
                 float scale	= i.texCoord1.y;
 			    float bias = i.texCoord1.z;
@@ -254,15 +250,15 @@ Shader "UIForia/Standard"
 			    
                 float outline = (outlineWidth * scaleRatio) * scale;
 			    float softness = (outlineSoftness * scaleRatio) * scale;
-                
+
                 fixed4 faceColor = UnpackColor(asuint(i.color.r));
 			    fixed4 outlineColor = UnpackColor(asuint(i.color.g));
                 fixed4 underlayColor = UnpackColor(asuint(i.color.b));
                 fixed4 glowColor = UnpackColor(asuint(i.color.a));
                 
                 underlayColor.rgb *= underlayColor.a;
-                outlineColor.rgb *= outlineColor.a;
                 faceColor.rgb *= faceColor.a;
+                outlineColor.rgb *= outlineColor.a;
                 glowColor.rgb *= glowColor.a;
                 
                 faceColor = GetTextColor(sd, faceColor, outlineColor, outline, softness);

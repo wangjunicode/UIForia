@@ -21,7 +21,6 @@ namespace UIForia.Systems {
             
             // todo figure out how a view can take the size of it's contents
          
-            firstChild.Layout();
             
         }
 

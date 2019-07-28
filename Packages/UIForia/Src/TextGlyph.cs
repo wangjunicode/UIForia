@@ -1,6 +1,7 @@
 namespace UIForia {
 
-    public struct TextGlyph {
+    // class because there are lots of these, I think it saves a lot of memory not having this be a struct
+    public class TextGlyph {
 
         public int id;
         public float x;

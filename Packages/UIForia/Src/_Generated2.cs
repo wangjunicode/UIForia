@@ -1432,6 +1432,8 @@ case "overflowx":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_float("TextOutlineWidth", UIForia.Rendering.StylePropertyId.TextOutlineWidth, targetState.state, Compile<float>(value, null));                
                 case "textoutlinecolor":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_Color("TextOutlineColor", UIForia.Rendering.StylePropertyId.TextOutlineColor, targetState.state, Compile<UnityEngine.Color>(value, colorSources));                
+                case "textoutlinesoftness":
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_float("TextOutlineSoftness", UIForia.Rendering.StylePropertyId.TextOutlineSoftness, targetState.state, Compile<float>(value, null));                
                 case "textglowcolor":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_Color("TextGlowColor", UIForia.Rendering.StylePropertyId.TextGlowColor, targetState.state, Compile<UnityEngine.Color>(value, colorSources));                
                 case "textglowoffset":
@@ -1452,6 +1454,8 @@ case "overflowx":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_float("TextUnderlayDilate", UIForia.Rendering.StylePropertyId.TextUnderlayDilate, targetState.state, Compile<float>(value, null));                
                 case "textunderlaysoftness":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_float("TextUnderlaySoftness", UIForia.Rendering.StylePropertyId.TextUnderlaySoftness, targetState.state, Compile<float>(value, null));                
+                case "textfacedilate":
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_float("TextFaceDilate", UIForia.Rendering.StylePropertyId.TextFaceDilate, targetState.state, Compile<float>(value, null));                
                 case "textunderlaytype":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_UnderlayType("TextUnderlayType", UIForia.Rendering.StylePropertyId.TextUnderlayType, targetState.state, Compile<UIForia.Rendering.UnderlayType>(value, s_EnumSource_UnderlayType));                
                 case "texttransform":

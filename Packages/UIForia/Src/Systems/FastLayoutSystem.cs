@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UIForia.Elements;
 using UIForia.Layout;
 using UIForia.Layout.LayoutTypes;
+using UIForia.Rendering;
 using UIForia.Util;
 using UnityEngine;
 
@@ -18,6 +19,11 @@ namespace UIForia.Systems {
             this.application = application;
             this.styleSystem = styleSystem;
             this.layoutOwners = new LightList<LayoutOwner>();
+            this.styleSystem.onStylePropertyChanged += HandleStylePropertyChanged;
+        }
+
+        private void HandleStylePropertyChanged(UIElement element, StructList<StyleProperty> changeList) {
+            element.layoutBox?.OnStyleChanged(changeList);
         }
 
         public void OnReset() {

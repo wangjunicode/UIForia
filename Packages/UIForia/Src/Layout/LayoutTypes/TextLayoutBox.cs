@@ -11,7 +11,7 @@ namespace UIForia.Layout.LayoutTypes {
         public TextInfo TextInfo => ((UITextElement) element).textInfo;
 
         protected override float ComputeContentWidth() {
-            return 0; //((UITextElement) element).TextInfo.ComputeWidth();
+            return TextInfo.GetIntrinsicWidth();
         }
 
         protected override float ComputeContentHeight(float width) {

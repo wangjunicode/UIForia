@@ -1,3 +1,4 @@
+using System;
 using UIForia.Util;
 using UnityEngine;
 
@@ -5,11 +6,13 @@ namespace UIForia.Rendering {
 
     public class UIForiaGeometry {
 
+        public Color packedColors;
+        public Vector4 objectData;
         public StructList<Vector3> positionList;
         public StructList<Vector4> texCoordList0;
         public StructList<Vector4> texCoordList1;
         public StructList<int> triangleList;
-        public Color packedColors;
+
 
         public UIForiaGeometry() {
             this.positionList = new StructList<Vector3>();
@@ -99,6 +102,20 @@ namespace UIForia.Rendering {
             triangles[startTriangle + 5] = startVert + 0;
 
             UpdateSizes(4, 6);
+        }
+
+        public void EnsureCapacity(int vertexCount, int triangleCount) {
+            
+            if (positionList.array.Length < vertexCount) {
+                Array.Resize(ref positionList.array, vertexCount);
+                Array.Resize(ref texCoordList0.array, vertexCount);
+                Array.Resize(ref texCoordList1.array, vertexCount);
+            }
+
+            if (triangleList.array.Length < triangleCount) {
+                Array.Resize(ref triangleList.array, triangleCount);
+            }
+            
         }
 
     }

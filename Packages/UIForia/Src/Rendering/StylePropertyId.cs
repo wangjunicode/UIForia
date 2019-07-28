@@ -109,6 +109,7 @@ namespace UIForia.Rendering {
         TextTransform = 1019,
         TextWhitespaceMode = 1020,
         TextFaceDilate = 1021,
+        TextOutlineSoftness = 1022,
         __TextPropertyEnd__ = 1099,
 
         MinWidth = 1100,

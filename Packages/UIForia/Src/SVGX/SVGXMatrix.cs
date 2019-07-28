@@ -199,16 +199,20 @@ namespace SVGX {
         }
 
         public Matrix4x4 ToMatrix4x4() {
-            Matrix4x4 matrix = Matrix4x4.identity;
 
-            matrix[0, 0] = m0;
-            matrix[0, 1] = m1;
-            matrix[1, 0] = m2;
-            matrix[1, 1] = m3;
-            matrix[2, 0] = m4;
-            matrix[2, 1] = m5;
+            Matrix4x4 matrix = default;
 
+            matrix.m00 = m0;
+            matrix.m01 = m1;
+            matrix.m10 = m2;
+            matrix.m11 = m3;
+            matrix.m03 = m4;
+            matrix.m13 = m5;
+            matrix.m22 = 1;
+            matrix.m33 = 1;
+            
             return matrix;
+            
         }
 
         public override string ToString() {

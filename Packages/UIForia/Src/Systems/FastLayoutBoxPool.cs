@@ -13,6 +13,7 @@ namespace UIForia.Layout {
             box.firstChild = null;
             box.nextSibling = null;
             box.parent = null;
+            box.OnDestroy();
             box.element = null;
             box.relayoutBoundary = null;
             box.flags = 0;
@@ -34,6 +35,7 @@ namespace UIForia.Layout {
 
             retn.owner = owner;
             retn.element = element;
+            retn.OnInitialize();
             retn.UpdateStyleData();
             return retn;
         }

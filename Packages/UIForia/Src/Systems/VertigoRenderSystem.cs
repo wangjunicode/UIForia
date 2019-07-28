@@ -1,94 +1,23 @@
 using System;
 using SVGX;
 using UIForia.Elements;
-using UIForia.Extensions;
 using UIForia.Rendering;
-using UIForia.Systems;
 using UIForia.Util;
 using UnityEngine;
 using UnityEngine.Rendering;
-using Vertigo;
-using Random = System.Random;
+using Application = UIForia.Application;
 
 namespace Src.Systems {
 
-    [Flags]
-    public enum RenderMethod {
-
-        None = 0,
-        Text = 1 << 0,
-        Painter = 1 << 1,
-        SelfPainter = 1 << 2,
-
-        Border = 1 << 3,
-        BorderRadius = 1 << 4,
-        Fill = 1 << 5,
-        UniformBorder = 1 << 6,
-        UniformBorderRadius = 1 << 7,
-        Color = 1 << 8,
-        Texture = 1 << 9,
-        UniformBorderFill = Border | UniformBorder | Fill,
-        UniformBorderNoFill = Border | UniformBorder,
-        UniformBorderRadiusUniformBorderFill = Border | UniformBorder | BorderRadius | UniformBorderRadius | Fill,
-        UniformBorderRadiusUniformBorderNoFill,
-        MixedBorderFill,
-        NoBorderTextureFill = Fill | Texture,
-        NoBorderTextureColorFill = Fill | Texture | Color,
-        NoBorderColorFill = Color | Fill,
-        MixedBorderNoFill = Border,
-        NoBorderFilled
-
-    }
-
-    public struct RenderInfo {
-
-        public int elementId;
-        public Color32 backgroundColor;
-        public Color32 backgroundTint;
-        public Color32 textColor;
-        public Color32 borderColorTop;
-        public Color32 borderColorRight;
-        public Color32 borderColorBottom;
-        public Color32 borderColorLeft;
-        public float opacity;
-
-        // todo -- some / all of these can be packed 
-
-        public Rect uvRect;
-        public Vector2 uvTiling;
-        public Vector2 uvOffset;
-        public Vector2 backgroundScale;
-        public float backgroundRotation;
-        public ResolvedBorderRadius borderRadius;
-        public OffsetRect borderSize;
-
-        // todo -- border style
-
-        public Color32 textOutlineColor;
-        public Color32 textGlowColor;
-        public Vector4 clipRect;
-        public Visibility visibility;
-        public ISVGXPaintable painter;
-        public ISVGXElementPainter selfPainter;
-        public RenderMethod renderMethod;
-        public Texture backgroundImage;
-        public VertigoMaterial material;
-        public bool isText;
-
-    }
-    
-
     public class RenderBoxPool {
-        
+
         // todo -- this doesn't actually pool right now
         public RenderBox GetCustomPainter(string painterId) {
-            
-            if (UIForia.Application.s_CustomPainters.TryGetValue(painterId, out Type boxType)) {
+            if (Application.s_CustomPainters.TryGetValue(painterId, out Type boxType)) {
                 return (RenderBox) Activator.CreateInstance(boxType);
             }
 
             return null;
-            
         }
 
     }
@@ -100,12 +29,17 @@ namespace Src.Systems {
         private RenderContext renderContext;
         private LightList<RenderOwner> renderOwners;
 
-        public VertigoRenderSystem(Camera camera, UIForia.Application application) {
+        public VertigoRenderSystem(Camera camera, Application application) {
             this.camera = camera;
             this.commandBuffer = new CommandBuffer(); // todo -- per view
+            this.commandBuffer.name = "UIForia Main Command Buffer";
             this.renderContext = new RenderContext(application.settings.batchedMaterial);
             this.renderOwners = new LightList<RenderOwner>();
-            this.camera?.AddCommandBuffer(CameraEvent.AfterEverything, commandBuffer);
+
+            if (this.camera != null) {
+                this.camera.AddCommandBuffer(CameraEvent.AfterEverything, commandBuffer);
+            }
+
             application.StyleSystem.onStylePropertyChanged += HandleStylePropertyChanged;
         }
 
@@ -131,12 +65,14 @@ namespace Src.Systems {
 
         public event Action<ImmediateRenderContext> DrawDebugOverlay;
 
-        public void OnReset() { }
+        public void OnReset() {
+            commandBuffer.Clear();
+            renderOwners.QuickClear();
+        }
 
         public void OnUpdate() {
-
             renderContext.Clear();
-            
+
             // todo
             // views can have their own cameras.
             // if they do they are not batchable with other views. 
@@ -149,11 +85,10 @@ namespace Src.Systems {
                 renderOwners.array[i].BuildClipGroups();
                 renderOwners.array[i].Render(renderContext);
             }
-            
+
             renderContext.Render(camera, commandBuffer);
-            
         }
-        
+
         public void OnDestroy() { }
 
         public void OnViewAdded(UIView view) {
@@ -169,13 +104,9 @@ namespace Src.Systems {
             }
         }
 
-        public void OnElementEnabled(UIElement element) {
+        public void OnElementEnabled(UIElement element) { }
 
-        }
-
-        public void OnElementDisabled(UIElement element) {
-            
-        }
+        public void OnElementDisabled(UIElement element) { }
 
         public void OnElementDestroyed(UIElement element) {
             // re-pool the render boxes for the hierarchy
@@ -193,9 +124,15 @@ namespace Src.Systems {
         public void OnElementCreated(UIElement element) { }
 
         public void SetCamera(Camera camera) {
-            this.camera?.RemoveCommandBuffer(CameraEvent.AfterEverything, commandBuffer);
+            if (this.camera != null) {
+                this.camera.RemoveCommandBuffer(CameraEvent.AfterEverything, commandBuffer);
+            }
+
             this.camera = camera; // todo -- should be handled by the view
-            this.camera?.AddCommandBuffer(CameraEvent.AfterEverything, commandBuffer);
+            
+            if (this.camera != null) {
+                this.camera.AddCommandBuffer(CameraEvent.AfterEverything, commandBuffer);
+            }
         }
 
     }

@@ -26,6 +26,9 @@ namespace UIForia.Text {
         private Size metrics;
         internal bool requiresSpanListRebuild;
 
+        private IntrinsicSizes intrinsics;
+
+
         public TextInfo(string content, in SVGXTextStyle style = default, bool inheritStyleProperties = false) {
             this.rootSpan = new TextSpan();
             this.rootSpan.textInfo = this;
@@ -58,15 +61,16 @@ namespace UIForia.Text {
             rootSpan.textStyle = style;
             rootSpan.SetText(content);
         }
-        
+
         public bool LayoutDirty => requiresLayout;
-        
+
         internal void SpanRequiresLayout(TextSpan span) {
             requiresLayout = true;
         }
 
         private void RebuildSpanList() {
             if (!requiresSpanListRebuild) return;
+            
             requiresSpanListRebuild = false;
             spanList.QuickClear();
 
@@ -80,18 +84,20 @@ namespace UIForia.Text {
                 span.Rebuild();
 
                 TextSpan ptr = span.firstChild;
-                
+
                 // todo -- might be backwards
                 while (ptr != null) {
                     stack.Push(ptr);
                     ptr = ptr.nextSibling;
                 }
-                
             }
 
+            UpdateIntrinsics();
+            
             LightStack<TextSpan>.Release(ref stack);
         }
 
+        // todo -- optimize for change types where possible and do partial layout for affect spans only
         public Size Layout(Vector2 offset = default, float width = float.MaxValue) {
             lineInfoList.size = 0;
             RebuildSpanList();
@@ -122,17 +128,8 @@ namespace UIForia.Text {
 
             // todo -- right / left / center align lines
 
-            int spanCount = spanList.Count;
             TextSpan[] spans = spanList.Array;
-
-            // todo -- if linestart != 0 this is wrong!
-            for (int i = lines[lineStart].spanStart; i < spanCount; i++) {
-                if (spans[i].geometryList == null) {
-                    spans[i].geometryList = new StructList<TextGeometry>(0);
-                }
-                spans[i].geometryList.size = 0;
-            }
-
+            
             float lineOffsetY = 0;
 
             for (int lineIndex = lineStart; lineIndex < lineCount; lineIndex++) {
@@ -141,83 +138,49 @@ namespace UIForia.Text {
 
                 float lineOffsetX = 0; // alignment
                 float wordOffsetX = lineOffsetX;
-                
+
                 for (int s = spanStart; s < spanEnd; s++) {
                     TextSpan span = spans[s];
+                    
+                    span.geometryVersion++;
+                    
                     WordInfo2[] words = span.wordInfoList.array;
                     CharInfo2[] chars = span.charInfoList.array;
-
-                    if (span.geometryList == null) {
-                        span.geometryList = new StructList<TextGeometry>(0);
-                    }
                     
-                    int idx = span.geometryList.size;
-
                     int wordStart = s == spanStart ? lines[lineIndex].wordStart : 0;
                     int wordEnd = s == spanEnd - 1 ? lines[lineIndex].wordEnd : span.wordInfoList.size;
-                    int geometrySize = 0;
-
+                    
                     for (int w = wordStart; w < wordEnd; w++) {
-                        if (words[w].type == WordType.Normal) {
-                            geometrySize += words[w].charEnd - words[w].charStart;
-                        }
-                    }
-
-                    span.geometryList.EnsureAdditionalCapacity(geometrySize);
-                    TextGeometry[] geometry = span.geometryList.array;
-
-                    for (int w = wordStart; w < wordEnd; w++) {
-                        if (words[w].type == WordType.Normal) {
-                            int charStart = words[w].charStart;
-                            int charEnd = words[w].charEnd;
+                        ref WordInfo2 wordInfo = ref words[w];
+                        
+                        if (wordInfo.type == WordType.Normal) {
+                            int charStart = wordInfo.charStart;
+                            int charEnd = wordInfo.charEnd;
 
                             for (int c = charStart; c < charEnd; c++) {
-                                ref Vector2 topLeft = ref chars[c].topLeft;
-                                ref Vector2 bottomRight = ref chars[c].bottomRight;
                                 ref CharInfo2 charInfo = ref chars[c];
-                                ref TextGeometry textGeometry = ref geometry[idx++];
-                                textGeometry.topShear = charInfo.topShear;
-                                textGeometry.bottomShear = charInfo.bottomShear;
-                                textGeometry.topLeft.x = wordOffsetX + topLeft.x;
-                                textGeometry.topLeft.y = lineOffsetY + topLeft.y;
-                                textGeometry.bottomRight.x = wordOffsetX + bottomRight.x;
-                                textGeometry.bottomRight.y = lineOffsetY + bottomRight.y;
-                                textGeometry.topLeftTexCoord = chars[c].topLeftUV;
-                                textGeometry.bottomRightTexCoord = chars[c].bottomRightUV;
-                                textGeometry.scale = chars[c].scale;
+                                charInfo.layoutX = wordOffsetX;
+                                charInfo.layoutY = lineOffsetY;
+                                charInfo.lineIndex = lineIndex;
+                                charInfo.visible = true;
                             }
                         }
 
-                        wordOffsetX += words[w].width;
+                        wordOffsetX += wordInfo.width;
                     }
 
-                    span.geometryList.size = idx;
                 }
 
                 lineOffsetY += lines[lineIndex].height;
             }
         }
 
-        public float GetIntrinsicMinWidth() {
-            float maxWord = 0;
-            for (int i = 0; i < spanList.size; i++) {
-                
-                if (spanList.array[i].isEnabled) {
-
-                    if (maxWord < spanList.array[i].longestWordSize) {
-                        maxWord = spanList.array[i].longestWordSize;
-                    }
-
-                }
-                
-            }
-
-            return maxWord;
+        private void RunSizingHeightLayout(float width) {
+           throw new NotImplementedException();
         }
-        
-        private StructList<LineInfo2> RunLayout(StructList<LineInfo2> lines, float width) {
-            if (!requiresLayout) return lines;
 
+        // todo -- introduce faster version that just outputs size and not a filled line info list
+        private StructList<LineInfo2> RunLayout(StructList<LineInfo2> lines, float width) {
             lines.size = 0;
 
             LineInfo2 currentLine = new LineInfo2();
@@ -235,13 +198,14 @@ namespace UIForia.Text {
                 TextSpan span = spans[spanIndex];
                 WordInfo2[] wordInfos = span.wordInfoList.array;
 
-
                 // todo -- if text set to nowrap or pre-wrap need different layout algorithm
                 // todo -- use different algorithm for text with blocking spans in it
 
+                float baseLineHeight = span.textStyle.fontAsset.faceInfo.LineHeight;
+
                 int end = span.wordInfoList.size;
                 for (int w = 0; w < end; w++) {
-                    WordInfo2 wordInfo = wordInfos[w];
+                    ref WordInfo2 wordInfo = ref wordInfos[w];
 
                     switch (wordInfo.type) {
                         case WordType.Whitespace:
@@ -284,7 +248,8 @@ namespace UIForia.Text {
                                 currentLine.wordCount = 1;
                                 currentLine.spanEnd = spanIndex;
                                 currentLine.wordEnd = w + 1;
-                                currentLine.height = wordInfo.height;
+                                if (wordInfo.height > currentLine.height) currentLine.height = wordInfo.height;
+
                                 lines.Add(currentLine);
 
                                 currentLine = new LineInfo2(spanIndex, w + 1);
@@ -296,7 +261,7 @@ namespace UIForia.Text {
                                 lines.Add(currentLine);
                                 currentLine = new LineInfo2(spanIndex, w, wordInfo.width);
                                 currentLine.wordCount = 1;
-                                currentLine.height = wordInfo.height;
+                                if (wordInfo.height > currentLine.height) currentLine.height = wordInfo.height;
                             }
                             else {
                                 currentLine.width += wordInfo.width;
@@ -332,7 +297,7 @@ namespace UIForia.Text {
         public void SetStyle(in SVGXTextStyle style) {
             rootSpan.SetStyle(style);
         }
-        
+
         public void SetOutlineWidth(float? outlineWidth) {
             rootSpan.SetOutlineWidth(outlineWidth);
         }
@@ -340,7 +305,7 @@ namespace UIForia.Text {
         public void SetOutlineSoftness(float? outlineSoftness) {
             rootSpan.SetOutlineSoftness(outlineSoftness);
         }
-        
+
         public void SetFontSize(float? fontSize) {
             rootSpan.SetFontSize(fontSize);
         }
@@ -376,7 +341,7 @@ namespace UIForia.Text {
         public void SetUnderlayDilate(float? dilate) {
             rootSpan.SetUnderlayDilate(dilate);
         }
-        
+
         public void SetUnderlaySoftness(float? softness) {
             rootSpan.SetUnderlaySoftness(softness);
         }
@@ -396,13 +361,154 @@ namespace UIForia.Text {
         public void SetTextTransform(TextTransform? transform) {
             rootSpan.SetTextTransform(transform);
         }
-        
+
         public void SetWhitespaceMode(WhitespaceMode? whitespaceMode) {
             rootSpan.SetWhitespaceMode(whitespaceMode);
         }
 
         public TextSpan InsertSpan(string text, SVGXTextStyle getTextStyle) {
             throw new NotImplementedException();
+        }
+
+        private float ComputeIntrinsicMinWidth() {
+            int spanCount = spanList.Count;
+            TextSpan[] spans = spanList.Array;
+
+            float maxWidth = 0;
+
+            for (int spanIndex = 0; spanIndex < spanCount; spanIndex++) {
+                TextSpan span = spans[spanIndex];
+                WordInfo2[] wordInfos = span.wordInfoList.array;
+
+                int end = span.wordInfoList.size;
+
+                for (int w = 0; w < end; w++) {
+                    ref WordInfo2 wordInfo = ref wordInfos[w];
+
+                    switch (wordInfo.type) {
+                        case WordType.Whitespace:
+                        case WordType.NewLine:
+                            break;
+
+                        case WordType.SoftHyphen:
+                        case WordType.Normal:
+                            if (wordInfo.width > maxWidth) {
+                                maxWidth = wordInfo.width;
+                            }
+
+                            break;
+
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
+                }
+            }
+
+            return maxWidth;
+        }
+
+        private void UpdateIntrinsics() {
+            intrinsics.minWidth = ComputeIntrinsicMinWidth();
+            StructList<LineInfo2> lines = StructList<LineInfo2>.Get();
+            RunLayout(lines, intrinsics.minWidth);
+            intrinsics.minHeight = lines[lines.size - 1].y + lines[lines.size - 1].height;
+            lines.size = 0;
+            RunLayout(lines, float.MaxValue);
+
+            float maxWidth = 0;
+            for (int i = 0; i < lines.size; i++) {
+                if (maxWidth < lines.array[i].width) {
+                    maxWidth = lines.array[i].width;
+                }
+            }
+
+            intrinsics.prefWidth = maxWidth;
+            intrinsics.prefHeight = lines[lines.size - 1].y + lines[lines.size - 1].height;
+
+            StructList<LineInfo2>.Release(ref lines);
+        }
+
+        public float ComputeIntrinsicMaxHeight() {
+            if (requiresSpanListRebuild) {
+                RebuildSpanList();
+            }
+
+            return intrinsics.prefHeight;
+        }
+
+        public float GetIntrinsicWidth() {
+            if (requiresSpanListRebuild) {
+                RebuildSpanList();
+            }
+
+            return intrinsics.prefWidth;
+        }
+
+        public float GetIntrinsicHeight() {
+            if (requiresSpanListRebuild) {
+                RebuildSpanList();
+            }
+
+            return intrinsics.prefHeight;
+        }
+
+        public float GetIntrinsicMinWidth() {
+            if (requiresSpanListRebuild) {
+                RebuildSpanList();
+            }
+
+            return intrinsics.minWidth;
+        }
+
+        public float GetIntrinsicMinHeight() {
+            if (requiresSpanListRebuild) {
+                RebuildSpanList();
+            }
+
+            return intrinsics.minHeight;
+        }
+
+        public float ComputeHeightForWidth(float width, float blockWidth, float blockHeight) {
+            // todo -- if has span content that is not text we need to use block width & height to resolve their sizes
+
+            // can't use intrinsics here if we have content that is not text
+
+            if (requiresSpanListRebuild) {
+                RebuildSpanList();
+            }
+
+            if (Mathf.Approximately(width, intrinsics.minWidth)) {
+                return intrinsics.minHeight;
+            }
+
+            if (Mathf.Approximately(width, intrinsics.prefWidth)) {
+                return intrinsics.prefHeight;
+            }
+
+            StructList<LineInfo2> lines = StructList<LineInfo2>.Get();
+
+            RunLayout(lines, float.MaxValue);
+
+            float retn = lines[lines.size - 1].y + lines[lines.size - 1].height;
+
+            lines.Release();
+
+            return retn;
+        }
+
+        // todo -- if any span has content need to use block width to resolve it since it will be a layout box most likely
+        public float ComputeContentWidth(float blockWidth) {
+            return GetIntrinsicWidth();
+        }
+
+
+        public struct IntrinsicSizes {
+
+            public float minWidth;
+            public float prefWidth;
+            public float minHeight;
+            public float prefHeight;
+
         }
 
     }

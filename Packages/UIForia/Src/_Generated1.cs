@@ -614,6 +614,13 @@ namespace UIForia.Rendering {
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.TextOutlineColor, value), state); }
         }
         
+        public float TextOutlineSoftness {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.TextOutlineSoftness, state).AsFloat; }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.TextOutlineSoftness, value), state); }
+        }
+        
         public UnityEngine.Color TextGlowColor {
             [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.TextGlowColor, state).AsColor; }
@@ -682,6 +689,13 @@ namespace UIForia.Rendering {
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.TextUnderlaySoftness, state).AsFloat; }
             [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.TextUnderlaySoftness, value), state); }
+        }
+        
+        public float TextFaceDilate {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.TextFaceDilate, state).AsFloat; }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.TextFaceDilate, value), state); }
         }
         
         public UIForia.Rendering.UnderlayType TextUnderlayType {
@@ -1002,6 +1016,7 @@ namespace UIForia.Rendering {
                     case StylePropertyId.TextAlignment: return int0 == 0 || IntUtil.UnsetValue == int0;
                     case StylePropertyId.TextOutlineWidth: return !FloatUtil.IsDefined(float1);
                     case StylePropertyId.TextOutlineColor: return int1 == 0;
+                    case StylePropertyId.TextOutlineSoftness: return !FloatUtil.IsDefined(float1);
                     case StylePropertyId.TextGlowColor: return int1 == 0;
                     case StylePropertyId.TextGlowOffset: return !FloatUtil.IsDefined(float1);
                     case StylePropertyId.TextGlowInner: return !FloatUtil.IsDefined(float1);
@@ -1012,6 +1027,7 @@ namespace UIForia.Rendering {
                     case StylePropertyId.TextUnderlayY: return !FloatUtil.IsDefined(float1);
                     case StylePropertyId.TextUnderlayDilate: return !FloatUtil.IsDefined(float1);
                     case StylePropertyId.TextUnderlaySoftness: return !FloatUtil.IsDefined(float1);
+                    case StylePropertyId.TextFaceDilate: return !FloatUtil.IsDefined(float1);
                     case StylePropertyId.TextUnderlayType: return int0 == 0 || IntUtil.UnsetValue == int0;
                     case StylePropertyId.TextTransform: return int0 == 0 || IntUtil.UnsetValue == int0;
                     case StylePropertyId.TextWhitespaceMode: return int0 == 0 || IntUtil.UnsetValue == int0;
@@ -1664,6 +1680,13 @@ namespace UIForia.Rendering {
             set { SetProperty(new StyleProperty(StylePropertyId.TextOutlineColor, value)); }
         }
             
+        public float TextOutlineSoftness {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return FindFloatProperty(StylePropertyId.TextOutlineSoftness); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.TextOutlineSoftness, value)); }
+        }
+            
         public UnityEngine.Color TextGlowColor {
             [System.Diagnostics.DebuggerStepThrough]
             get { return FindColorProperty(StylePropertyId.TextGlowColor); }
@@ -1732,6 +1755,13 @@ namespace UIForia.Rendering {
             get { return FindFloatProperty(StylePropertyId.TextUnderlaySoftness); }
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.TextUnderlaySoftness, value)); }
+        }
+            
+        public float TextFaceDilate {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return FindFloatProperty(StylePropertyId.TextFaceDilate); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.TextFaceDilate, value)); }
         }
             
         public UIForia.Rendering.UnderlayType TextUnderlayType {
@@ -2757,6 +2787,16 @@ namespace UIForia.Rendering {
                 }
             }
 
+            public float TextOutlineSoftness { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.TextOutlineSoftness, out property)) return property.AsFloat;
+                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.TextOutlineSoftness), out property)) return property.AsFloat;
+                    return DefaultStyleValues_Generated.TextOutlineSoftness;
+                }
+            }
+
             public UnityEngine.Color TextGlowColor { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
@@ -2854,6 +2894,16 @@ namespace UIForia.Rendering {
                     if (propertyMap.TryGetValue((int) StylePropertyId.TextUnderlaySoftness, out property)) return property.AsFloat;
                     if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.TextUnderlaySoftness), out property)) return property.AsFloat;
                     return DefaultStyleValues_Generated.TextUnderlaySoftness;
+                }
+            }
+
+            public float TextFaceDilate { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.TextFaceDilate, out property)) return property.AsFloat;
+                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.TextFaceDilate), out property)) return property.AsFloat;
+                    return DefaultStyleValues_Generated.TextFaceDilate;
                 }
             }
 
@@ -3847,6 +3897,14 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.TextOutlineColor, state).AsColor;
         }
         
+        public void SetTextOutlineSoftness(float value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.TextOutlineSoftness, value), state);
+        }
+
+        public float GetTextOutlineSoftness(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.TextOutlineSoftness, state).AsFloat;
+        }
+        
         public void SetTextGlowColor(UnityEngine.Color value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.TextGlowColor, value), state);
         }
@@ -3925,6 +3983,14 @@ namespace UIForia.Rendering {
 
         public float GetTextUnderlaySoftness(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.TextUnderlaySoftness, state).AsFloat;
+        }
+        
+        public void SetTextFaceDilate(float value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.TextFaceDilate, value), state);
+        }
+
+        public float GetTextFaceDilate(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.TextFaceDilate, state).AsFloat;
         }
         
         public void SetTextUnderlayType(UIForia.Rendering.UnderlayType value, StyleState state) {
@@ -4360,6 +4426,8 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.TextOutlineWidth, TextOutlineWidth);
 				case StylePropertyId.TextOutlineColor:
 					 return new StyleProperty(StylePropertyId.TextOutlineColor, TextOutlineColor);
+				case StylePropertyId.TextOutlineSoftness:
+					 return new StyleProperty(StylePropertyId.TextOutlineSoftness, TextOutlineSoftness);
 				case StylePropertyId.TextGlowColor:
 					 return new StyleProperty(StylePropertyId.TextGlowColor, TextGlowColor);
 				case StylePropertyId.TextGlowOffset:
@@ -4380,6 +4448,8 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.TextUnderlayDilate, TextUnderlayDilate);
 				case StylePropertyId.TextUnderlaySoftness:
 					 return new StyleProperty(StylePropertyId.TextUnderlaySoftness, TextUnderlaySoftness);
+				case StylePropertyId.TextFaceDilate:
+					 return new StyleProperty(StylePropertyId.TextFaceDilate, TextFaceDilate);
 				case StylePropertyId.TextUnderlayType:
 					 return new StyleProperty(StylePropertyId.TextUnderlayType, (int)TextUnderlayType);
 				case StylePropertyId.TextTransform:
@@ -4508,6 +4578,7 @@ namespace UIForia.Rendering {
                     case StylePropertyId.TextFontSize: return true;
                     case StylePropertyId.TextOutlineWidth: return true;
                     case StylePropertyId.TextOutlineColor: return true;
+                    case StylePropertyId.TextOutlineSoftness: return true;
                     case StylePropertyId.TextGlowColor: return true;
                     case StylePropertyId.TextGlowOffset: return true;
                     case StylePropertyId.TextGlowInner: return true;
@@ -4518,6 +4589,7 @@ namespace UIForia.Rendering {
                     case StylePropertyId.TextUnderlayY: return true;
                     case StylePropertyId.TextUnderlayDilate: return true;
                     case StylePropertyId.TextUnderlaySoftness: return true;
+                    case StylePropertyId.TextFaceDilate: return true;
                     case StylePropertyId.AnchorTop: return true;
                     case StylePropertyId.AnchorRight: return true;
                     case StylePropertyId.AnchorBottom: return true;
@@ -4557,6 +4629,7 @@ namespace UIForia.Rendering {
                     case StylePropertyId.TextAlignment: return true;
                     case StylePropertyId.TextOutlineWidth: return true;
                     case StylePropertyId.TextOutlineColor: return true;
+                    case StylePropertyId.TextOutlineSoftness: return true;
                     case StylePropertyId.TextGlowColor: return true;
                     case StylePropertyId.TextGlowOffset: return true;
                     case StylePropertyId.TextGlowInner: return true;
@@ -4567,6 +4640,7 @@ namespace UIForia.Rendering {
                     case StylePropertyId.TextUnderlayY: return true;
                     case StylePropertyId.TextUnderlayDilate: return true;
                     case StylePropertyId.TextUnderlaySoftness: return true;
+                    case StylePropertyId.TextFaceDilate: return true;
                     case StylePropertyId.TextUnderlayType: return true;
                     case StylePropertyId.TextTransform: return true;
                     case StylePropertyId.TextWhitespaceMode: return true;

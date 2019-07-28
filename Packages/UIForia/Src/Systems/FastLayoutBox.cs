@@ -5,6 +5,7 @@ using UIForia.Rendering;
 using UIForia.Systems;
 using UIForia.Util;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 namespace UIForia.Layout {
 
@@ -174,7 +175,8 @@ namespace UIForia.Layout {
                     width += ResolveFixedWidth(element.style.BorderLeft);
                     size.width = old;
                     if (width < 0) width = 0;
-                    return width;
+                    float retn = measurement.value * width;
+                    return retn > 0 ? retn : 0;
                 }
 
                 case UIMeasurementUnit.FitContent:
@@ -203,7 +205,7 @@ namespace UIForia.Layout {
 
                 case UIMeasurementUnit.MaxContent:
                     return GetIntrinsicMaxWidth();
-                
+
                 case UIMeasurementUnit.ParentSize:
                 case UIMeasurementUnit.ParentContentArea:
                     return resolvedBlockSize * measurement.value;
@@ -254,7 +256,7 @@ namespace UIForia.Layout {
 
                 case UIMeasurementUnit.MaxContent:
                     return GetIntrinsicMaxHeight();
-                
+
                 case UIMeasurementUnit.ParentSize:
                 case UIMeasurementUnit.ParentContentArea:
                     return blockHeight * measurement.value;
@@ -471,7 +473,7 @@ namespace UIForia.Layout {
             else {
                 targetAlignmentVertical = alignment;
             }
-            
+
             switch (targetAlignmentVertical.target) {
                 case AlignmentTarget.AllocatedBox:
                     alignedPosition.y = (allocatedHeight * targetAlignmentVertical.value) - (size.height * targetAlignmentVertical.pivot);
@@ -560,6 +562,9 @@ namespace UIForia.Layout {
             FastLayoutBox child = firstChild;
             while (child != null) {
                 child.Layout();
+                if (child == child.nextSibling) {
+                    break;
+                }
                 child = child.nextSibling;
             }
 
@@ -756,10 +761,10 @@ namespace UIForia.Layout {
             }
 
             firstChild = container[0];
-            for (int i = 0;i < container.size;i++) {
+            for (int i = 0; i < container.size; i++) {
                 FastLayoutBox ptr = container[i];
                 ptr.parent = this;
-                
+
                 if (i != container.size - 1) {
                     ptr.nextSibling = container[i + 1];
                 }
@@ -851,6 +856,9 @@ namespace UIForia.Layout {
         }
 
         protected virtual void OnChildStyleChanged(FastLayoutBox child, StructList<StyleProperty> changeList) { }
+
+        public virtual void OnInitialize() { }
+        public virtual void OnDestroy() { }
 
     }
 

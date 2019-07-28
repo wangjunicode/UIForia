@@ -32,6 +32,7 @@ namespace UIForia.Text {
         internal RebuildFlag rebuildFlags;
         public bool isEnabled;
         public float longestWordSize;
+        public bool isInline;
 
         [Flags]
         internal enum RebuildFlag {
@@ -427,7 +428,7 @@ namespace UIForia.Text {
         private void ComputeWordAndCharacterSizes(StructList<CharInfo2> characterList, StructList<WordInfo2> wordInfoList) {
             TextDisplayData textDisplayData = GetTextDisplayData();
 
-            float smallCapsMultiplier = (textTransform == TextTransform.SmallCaps) ? 1.0f : 0.8f;
+            float smallCapsMultiplier = (textTransform == TextTransform.SmallCaps) ? 0.8f : 1f;
             float fontScale = fontSize * smallCapsMultiplier / fontAsset.faceInfo.PointSize * fontAsset.faceInfo.Scale;
 
             Vector3 ratios = TextUtil.ComputeRatios(textDisplayData);
@@ -473,6 +474,10 @@ namespace UIForia.Text {
 
             fontBaseLineOffset = 0; //+= currentFontAsset.faceInfo.SuperscriptOffset * fontScale * fontScaleMultiplier;
 
+            // I am not sure if using a standard line height for words is correct. TMP does not use the font info, it uses max char ascender & descender for a line
+            // seems to me that this would produce weird results with multiline text
+            float lineHeight = (fontAsset.faceInfo.Ascender - fontAsset.faceInfo.Descender) * fontScale;
+            
             CharInfo2[] characters = characterList.array;
             WordInfo2[] words = wordInfoList.array;
             int wordCount = wordInfoList.size;
@@ -482,7 +487,7 @@ namespace UIForia.Text {
                 int start = group.charStart;
                 int end = group.charEnd;
                 float xAdvance = 0;
-                float height = 0;
+                
                 for (int c = start; c < end; c++) {
                     Vector2 topLeft;
                     Vector2 bottomRight;
@@ -491,6 +496,7 @@ namespace UIForia.Text {
 
                     ref CharInfo2 charInfo = ref characters[c];
 
+                    // todo -- pull glyph & adjustments into their own struct array
                     TextGlyph glyph = charInfo.glyph;
                     GlyphValueRecord glyphAdjustments = charInfo.glyphAdjustment;
 
@@ -524,13 +530,10 @@ namespace UIForia.Text {
                                  + currentFontAsset.normalSpacingOffset
                                  + glyphAdjustments.xAdvance) * currentElementScale;
 
-                    if (bottomRight.y - topLeft.y > height) {
-                        height = bottomRight.y - topLeft.y;
-                    }
                 }
 
                 words[w].width = xAdvance;
-                words[w].height = height;
+                words[w].height = lineHeight;
             }
         }
 
@@ -575,6 +578,7 @@ namespace UIForia.Text {
         
         private static void FindGlyphs(FontAsset fontAsset, CharInfo2[] charInfos, int count) {
             IntMap<TextGlyph> fontAssetCharacterDictionary = fontAsset.characterDictionary;
+            // todo make a better struct based dictionary or make text glyph a class
             for (int i = 0; i < count; i++) {
                 charInfos[i].glyph = fontAssetCharacterDictionary.GetOrDefault(charInfos[i].character);
             }
@@ -1228,8 +1232,12 @@ namespace UIForia.Text {
                 textInfo.SpanRequiresLayout(this);
             }
 
+            geometryVersion++;
+            
             rebuildFlags = 0;
         }
+
+        public int geometryVersion;
 
     }
 

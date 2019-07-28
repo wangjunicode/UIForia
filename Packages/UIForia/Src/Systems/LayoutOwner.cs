@@ -5,70 +5,7 @@ using UIForia.Elements;
 using UIForia.Systems;
 using UIForia.Util;
 using UnityEngine;
-using Vertigo;
-using PooledMesh = UIForia.Rendering.Vertigo.PooledMesh;
 
-namespace UIForia.Rendering {
-
-    using UIForia.Util;
-using UnityEngine;
-
-namespace Vertigo {}
-
-internal struct RenderCall {
-
-        public RenderTexture renderTexture;
-        public int drawMeshCallStart;
-        public int drawMeshCallEnd;
-
-    }
-
-//    internal struct DrawCall {
-//
-//        public PooledMesh mesh;
-//        public PooledMaterial material;
-//        public RangeInt propertyRange;
-//        public RangeInt transformRange;
-//
-//    }
-
-    public enum BatchType {
-
-        Unset,
-        UIForia,
-        Path,
-        Custom
-
-    }
-
-    public class UIForiaData {
-
-        public List<Vector4> colors = new List<Vector4>();
-        public List<Vector4> objectData0 = new List<Vector4>();
-        public List<Vector4> objectData1 = new List<Vector4>();
-        public List<Vector4> transformData = new List<Vector4>();
-
-    }
-    
-    internal struct Batch {
-
-        public BatchType batchType;
-        public PooledMesh pooledMesh;
-        public Material material;
-        public UIForiaData uiforiaData;
-        public int drawCallSize;
-
-    }
-
-    public interface IRenderBox {
-
-         void PaintBackground(RenderContext ctx);
-
-         void PaintForeground(RenderContext ctx);
-
-    }
-
-}
 
 namespace UIForia.Layout {
 

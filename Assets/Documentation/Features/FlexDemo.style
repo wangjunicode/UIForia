@@ -1,18 +1,26 @@
 style container {
     PreferredSize = 1pca;
-    Padding = 1em;
+   // Padding = 1em;
+   BackgroundColor = white;
 }
 
 style flex-demo {
-    PreferredSize = 1pca, 1cnt;
-    Padding = 1em;
-    FlexLayoutMainAxisAlignment = Center;
+//    PreferredSize = 1.5cnt, 1cnt;
+    //Padding = 1em;
+    FlexLayoutMainAxisAlignment = Start;
     FlexLayoutDirection = Horizontal;
-    Border = 2px;
-    BorderColor = black;
-    BorderRadius = 20px;
-    BackgroundColor = yellow;
-    Margin = 0.5em 0;
+  //  Border = 2px;
+   // BorderColor = black;
+  //  BorderRadius = 20px;
+  TextFontSize = 64;
+  TextColor = black;
+  TextUnderlayX = 1;
+  TextUnderlayY = 1;
+  TextUnderlayIntensity = 1;
+  TextUnderlayColor = red;
+  TextUnderlaySoftness = 1;
+    BackgroundColor = white;
+//    Margin = 0.5em 0;
 }
 
 style flex-demo-content {
@@ -57,8 +65,8 @@ style flex-grow-2 {
 style flex-item {
     PreferredSize = 50px 30px;//1cnt;
     MinWidth = 1cnt;
-    Padding = 0.5em;
+    //Padding = 0.5em;
     BackgroundColor = red;
-    Margin = 0.25em;
+    //Margin = 0.25em;
     TextAlignment = Center;
 }

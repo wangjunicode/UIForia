@@ -7,70 +7,70 @@
 
         <Div style="flex-demo">
             <Heading3>Flex-Start</Heading3>
-            <Group style="flex-demo-content flex-start horizontal">
-                <Div style="flex-item"></Div>
-                <Div style="flex-item"></Div>
-                <Div style="flex-item"></Div>
-                <Div style="flex-item"></Div>
-                <Div style="flex-item"></Div>
-            </Group>
+<!--            <Group style="flex-demo-content flex-space-around horizontal">-->
+<!--                <Div style="flex-item"></Div>-->
+<!--                <Div style="flex-item"></Div>-->
+<!--                <Div style="flex-item"></Div>-->
+<!--                <Div style="flex-item"></Div>-->
+<!--                <Div style="flex-item"></Div>-->
+<!--            </Group>-->
         </Div>
 
-<!--        <Div style="flex-demo">-->
-<!--            <Heading3>Flex-End</Heading3>-->
-<!--            <Div style="flex-demo-content flex-end horizontal">-->
-<!--                <Div style="flex-item">Item 1</Div>-->
-<!--                <Div style="flex-item">Item 2</Div>-->
-<!--                <Div style="flex-item">Item 3</Div>-->
-<!--                <Div style="flex-item">Item 4</Div>-->
-<!--                <Div style="flex-item">Item 5</Div>-->
-<!--            </Div>-->
-<!--        </Div>-->
+        <!--        <Div style="flex-demo">-->
+        <!--            <Heading3>Flex-End</Heading3>-->
+        <!--            <Div style="flex-demo-content flex-end horizontal">-->
+        <!--                <Div style="flex-item">Item 1</Div>-->
+        <!--                <Div style="flex-item">Item 2</Div>-->
+        <!--                <Div style="flex-item">Item 3</Div>-->
+        <!--                <Div style="flex-item">Item 4</Div>-->
+        <!--                <Div style="flex-item">Item 5</Div>-->
+        <!--            </Div>-->
+        <!--        </Div>-->
 
-<!--        <Div style="flex-demo">-->
-<!--            <Heading3>Flex-Center</Heading3>-->
-<!--            <Div style="flex-demo-content flex-center horizontal">-->
-<!--                <Div style="flex-item">Item 1</Div>-->
-<!--                <Div style="flex-item">Item 2</Div>-->
-<!--                <Div style="flex-item">Item 3</Div>-->
-<!--                <Div style="flex-item">Item 4</Div>-->
-<!--                <Div style="flex-item">Item 5</Div>-->
-<!--            </Div>-->
-<!--        </Div>-->
+        <!--        <Div style="flex-demo">-->
+        <!--            <Heading3>Flex-Center</Heading3>-->
+        <!--            <Div style="flex-demo-content flex-center horizontal">-->
+        <!--                <Div style="flex-item">Item 1</Div>-->
+        <!--                <Div style="flex-item">Item 2</Div>-->
+        <!--                <Div style="flex-item">Item 3</Div>-->
+        <!--                <Div style="flex-item">Item 4</Div>-->
+        <!--                <Div style="flex-item">Item 5</Div>-->
+        <!--            </Div>-->
+        <!--        </Div>-->
 
-<!--        <Div style="flex-demo">-->
-<!--            <Heading3>Flex-Space-Between</Heading3>-->
-<!--            <Div style="flex-demo-content flex-space-between horizontal">-->
-<!--                <Div style="flex-item">Item 1</Div>-->
-<!--                <Div style="flex-item">Item 2</Div>-->
-<!--                <Div style="flex-item">Item 3</Div>-->
-<!--                <Div style="flex-item">Item 4</Div>-->
-<!--                <Div style="flex-item">Item 5</Div>-->
-<!--            </Div>-->
-<!--        </Div>-->
+        <!--        <Div style="flex-demo">-->
+        <!--            <Heading3>Flex-Space-Between</Heading3>-->
+        <!--            <Div style="flex-demo-content flex-space-between horizontal">-->
+        <!--                <Div style="flex-item">Item 1</Div>-->
+        <!--                <Div style="flex-item">Item 2</Div>-->
+        <!--                <Div style="flex-item">Item 3</Div>-->
+        <!--                <Div style="flex-item">Item 4</Div>-->
+        <!--                <Div style="flex-item">Item 5</Div>-->
+        <!--            </Div>-->
+        <!--        </Div>-->
 
-<!--        <Div style="flex-demo">-->
-<!--            <Heading3>Flex-Space-Around</Heading3>-->
-<!--            <Div style="flex-demo-content flex-space-around horizontal">-->
-<!--                <Div style="flex-item">Item 1</Div>-->
-<!--                <Div style="flex-item">Item 2</Div>-->
-<!--                <Div style="flex-item">Item 3</Div>-->
-<!--                <Div style="flex-item">Item 4</Div>-->
-<!--                <Div style="flex-item">Item 5</Div>-->
-<!--            </Div>-->
-<!--        </Div>-->
+        <!--        <Div style="flex-demo">-->
+        <!--            <Heading3>Flex-Space-Around</Heading3>-->
+        <!--            <Div style="flex-demo-content flex-space-around horizontal">-->
+        <!--                <Div style="flex-item">Item 1</Div>-->
+        <!--                <Div style="flex-item">Item 2</Div>-->
+        <!--                <Div style="flex-item">Item 3</Div>-->
+        <!--                <Div style="flex-item">Item 4</Div>-->
+        <!--                <Div style="flex-item">Item 5</Div>-->
+        <!--            </Div>-->
+        <!--        </Div>-->
 
-<!--        <Div style="flex-demo">-->
-<!--            <Heading3>Flex-Grow</Heading3>-->
-<!--            <Div style="flex-demo-content flex-stretch horizontal">-->
-<!--                <Div style="flex-item">Grow 0</Div>-->
-<!--                <Div style="flex-item flex-grow-1">Grow 1</Div>-->
-<!--                <Div style="flex-item flex-grow-2">Grow 2</Div>-->
-<!--                <Div style="flex-item flex-grow-1">Grow 1</Div>-->
-<!--                <Div style="flex-item">Grow 0</Div>-->
-<!--            </Div>-->
-<!--        </Div>-->
-<!--        -->
+        <!--        <Div style="flex-demo">-->
+        <!--            <Heading3>Flex-Grow</Heading3>-->
+        <!--            <Div style="flex-demo-content flex-stretch horizontal">-->
+        <!--                <Div style="flex-item">Grow 0</Div>-->
+        <!--                <Div style="flex-item flex-grow-1">Grow 1</Div>-->
+        <!--                <Div style="flex-item flex-grow-2">Grow 2</Div>-->
+        <!--                <Div style="flex-item flex-grow-1">Grow 1</Div>-->
+        <!--                <Div style="flex-item">Grow 0</Div>-->
+        <!--            </Div>-->
+        <!--        </Div>-->
+        <!--        -->
 
         <!--        <Div style="flex-demo">-->
         <!--            <Heading3>Flex-End</Heading3>-->

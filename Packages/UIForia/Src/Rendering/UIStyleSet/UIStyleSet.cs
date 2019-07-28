@@ -882,13 +882,19 @@ namespace UIForia.Rendering {
                 fontStyle = TextFontStyle,
                 glowOffset = TextGlowOffset,
                 glowOuter = TextGlowOuter,
+                glowColor = TextGlowColor,
                 outlineColor = TextOutlineColor,
-                outlineSoftness = 0, // todo 
+                outlineSoftness = TextOutlineSoftness,
                 outlineWidth = TextOutlineWidth,
                 textTransform = TextTransform,
-                whitespaceMode = TextWhitespaceMode
-                
-                // style.whitespace = Preserve Collapse
+                whitespaceMode = TextWhitespaceMode,
+                textColor = TextColor,
+                faceDilate = TextFaceDilate,
+                underlayColor = TextUnderlayColor,
+                underlaySoftness = TextUnderlaySoftness,
+                underlayX = TextUnderlayX,
+                underlayY = TextUnderlayY,
+                underlayDilate = TextUnderlayDilate,
             };
         }
 

@@ -10,8 +10,7 @@ namespace Src.Systems {
 
     public class RootRenderBox : RenderBox {
 
-        // 0 , 0?
-        public override Rect RenderBounds => element.View.Viewport;
+        public override Rect RenderBounds => new Rect(0, 0, element.View.Viewport.width, element.View.Viewport.height);
 
         public override void PaintBackground(RenderContext ctx) { }
 
@@ -38,9 +37,9 @@ namespace Src.Systems {
         }
 
         public void Render(RenderContext renderContext) {
-           // var geometry = new UIForiaGeometry();
-          //  geometry.FillRectUniformBorder_Miter(-100, -100);
-         //      renderContext.DrawBatchedGeometry(geometry);
+            // var geometry = new UIForiaGeometry();
+            //  geometry.FillRectUniformBorder_Miter(-100, -100);
+            //      renderContext.DrawBatchedGeometry(geometry);
             view.rootElement.renderBox.Render(renderContext);
         }
 

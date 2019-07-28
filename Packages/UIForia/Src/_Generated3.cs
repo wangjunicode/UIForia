@@ -102,6 +102,7 @@ namespace UIForia.Rendering {
 		public const TextAlignment TextAlignment = UIForia.Text.TextAlignment.Left;
 		public const float TextOutlineWidth = 0f;
 		public static readonly Color TextOutlineColor = new Color(0f, 0f, 0f, 1f);
+		public const float TextOutlineSoftness = 0f;
 		public static readonly Color TextGlowColor = new Color(-1f, -1f, -1f, -1f);
 		public const float TextGlowOffset = 0f;
 		public const float TextGlowInner = 0f;
@@ -112,6 +113,7 @@ namespace UIForia.Rendering {
 		public const float TextUnderlayY = 0f;
 		public const float TextUnderlayDilate = 0.5f;
 		public const float TextUnderlaySoftness = 0.5f;
+		public const float TextFaceDilate = 0f;
 		public const UnderlayType TextUnderlayType = UIForia.Rendering.UnderlayType.Unset;
 		public const TextTransform TextTransform = UIForia.Text.TextTransform.None;
 		public const WhitespaceMode TextWhitespaceMode = UIForia.Text.WhitespaceMode.CollapseWhitespace;
@@ -321,6 +323,8 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.TextOutlineWidth, 0f);
 				case StylePropertyId.TextOutlineColor:
 					 return new StyleProperty(StylePropertyId.TextOutlineColor, new Color(0f, 0f, 0f, 1f));
+				case StylePropertyId.TextOutlineSoftness:
+					 return new StyleProperty(StylePropertyId.TextOutlineSoftness, 0f);
 				case StylePropertyId.TextGlowColor:
 					 return new StyleProperty(StylePropertyId.TextGlowColor, new Color(-1f, -1f, -1f, -1f));
 				case StylePropertyId.TextGlowOffset:
@@ -341,6 +345,8 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.TextUnderlayDilate, 0.5f);
 				case StylePropertyId.TextUnderlaySoftness:
 					 return new StyleProperty(StylePropertyId.TextUnderlaySoftness, 0.5f);
+				case StylePropertyId.TextFaceDilate:
+					 return new StyleProperty(StylePropertyId.TextFaceDilate, 0f);
 				case StylePropertyId.TextUnderlayType:
 					 return new StyleProperty(StylePropertyId.TextUnderlayType, (int)UIForia.Rendering.UnderlayType.Unset);
 				case StylePropertyId.TextTransform:

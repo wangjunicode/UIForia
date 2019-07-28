@@ -1,3 +1,4 @@
+using SVGX;
 using UIForia.Layout;
 using UIForia.Util;
 using UnityEngine;
@@ -15,7 +16,7 @@ namespace UIForia.Rendering {
         private float borderBottom;
         private float borderLeft;
         private Size lastSize;
-
+        private GeometryRange range;
         private UIForiaGeometry geometry;
 
         public StandardRenderBox() {
@@ -67,7 +68,8 @@ namespace UIForia.Rendering {
             Color c;
             geometry.Clear();
             geometry.FillRectUniformBorder_Miter(size.width, size.height);
-
+            range = new GeometryRange(0, geometry.positionList.size, 0, geometry.triangleList.size);
+            
             // corner join: Bevel | Miter | Round
             // border only
             // border uniform
@@ -90,6 +92,7 @@ namespace UIForia.Rendering {
             Color32 backgroundTint = element.style.BackgroundTint;
             Texture backgroundImage = element.style.BackgroundImage;
 
+           // Debug.Log("paint: " + element.GetAttribute("id"));
             if (backgroundColor.a <= 0) {
                 return;
             }
@@ -112,9 +115,10 @@ namespace UIForia.Rendering {
 
             // todo -- put this back to packed! shader too
             geometry.packedColors = backgroundColor;//new Color(packedBackgroundColor, packedBackgroundTint, (int) colorMode, 0);
+            // y and rotation are inverted!
+            // element.layoutResult.matrix = SVGXMatrix.TRS(new Vector2(100, -100), -45, Vector2.one);
+            ctx.DrawBatchedGeometry(geometry, range, element.layoutResult.matrix.ToMatrix4x4());
             
-            // geometry.matrix = element.layoutResult.matrix;
-            ctx.DrawBatchedGeometry(geometry);
         }
 
     }

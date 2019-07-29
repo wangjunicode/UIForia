@@ -1,0 +1,57 @@
+style container {
+    LayoutType = Flex;
+    FlexLayoutDirection = Row;
+    FlexLayoutMainAxisAlignment = Center;
+    FlexLayoutCrossAxisAlignment = Center;
+    PreferredSize = 1pca;
+    Padding = 1em;
+}
+
+style top {
+   BackgroundColor = #FCC000;
+    Border = 4px;
+    BorderColor = white;
+    BorderBottom = 0px;
+    PreferredSize = 115px;
+    FlexLayoutMainAxisAlignment = Center;
+    FlexLayoutCrossAxisAlignment = Center;
+}
+
+style box-border {
+    BackgroundColor = #FFC100;
+    Border = 4px;
+    BorderColor = white;
+    PreferredSize = 95px;
+}
+
+style bottom  {
+    BackgroundColor = #FFC100;
+    Border = 4px;
+    BorderColor = white;
+    PreferredHeight= 75px;
+    PreferredWidth = 600px;
+    Padding = 1em;
+    TextColor = White;
+    TextAlignment = Center;
+}
+
+style text {
+    BackgroundColor = black;
+    Border = 4px;
+    BorderTop = 0px;
+    BorderColor = white;
+    PreferredHeight= 200px;
+    PreferredWidth = 600px;
+    Padding = 1em;
+    Opacity = 0.70;
+    TextAlignment = Center;
+    TextColor = White;
+    MarginBottom = 200px;
+
+    
+}
+
+style button {
+    PreferredSize = 100px;
+    BackgroundColor = blue;
+}

@@ -1,78 +1,187 @@
 style container {
-    LayoutType = Flex;
-    FlexLayoutDirection = Column;
-    PreferredSize = 300px, 100px;
-}
-
-style <Group> {
-    Border = 5px;
-    BorderColor = black;
-    PreferredSize = 100px;
-    Margin = 20px;
-    TextColor = white;
-} 
-
-style c1 {
-    BackgroundColor = rgba(100, 0, 0, 255);
-}
-style c11 {
-    BackgroundColor = rgba(200, 0, 0, 255);
-}
-style c12 {
-    BackgroundColor = rgba(140, 0, 0, 255);
-}
-style c13 {
-    BackgroundColor = rgba(100, 243, 0, 255);
-    [hover] {
-        BackgroundColor = rgba(100, 243, 0, 235);
-    }
-}
-style c131 {
-    BackgroundColor = rgba(140, 223, 55, 255);
-    TransformPositionX = 150px;
-    TransformPositionY = 50px;
-    PreferredSize = 400px;
-    [hover] {
-        BackgroundColor = rgba(100, 243, 0, 255);
-    }
-}
-style c2 {
-    BackgroundColor = rgba(100, 0, 231, 255);
-}
-style c21 {
-    BackgroundColor = rgba(123, 123, 0, 255);
-}
-style c22 {
-    BackgroundColor = rgba(54, 0, 45, 255);
-}
-style c23 {
-    PreferredSize = 200px;
-    BackgroundColor = rgba(100, 34, 3, 255);
-    ZIndex = 20;
-    [hover] {
-        BackgroundColor = yellow;
-        Cursor = url("testimg/Cursor15") 15;
-    }
-}
-
-
-style c3 {
-    PreferredSize = 200px;
-    BackgroundColor = rgba(24, 0, 66, 255);
-    zIndex = 10;
-}
-style c31 {
-    BackgroundColor = rgba(9, 123, 45, 255);
-}
-style c32 {
-    BackgroundColor = rgba(211, 0, 0, 255);
-    TransformPositionX = -100px;
+    LayoutType = Grid;
+    GridLayoutColTemplate = 0.50pca 0.50pca;
+    GridLayoutRowTemplate = 0.25pca 0.25pca 0.25pca;
+    GridLayoutColGap = 8;
+    GridLayoutRowGap = 8;
+    MarginTop = 100;
+    MarginBottom = 100;
    
 }
-style c33 {
-    BackgroundColor = rgba(211, 56, 54, 255);
+
+ 
+
+style menu_grid_one {
+    BackgroundImage = url("Images/1");
+    Border = 0.25px;
+    BorderRadius = 5px;
+    BorderColor = black;
+    TransformPivotX = 1,1;
+    TransformPivotX = 1,1;
+    Opacity = 0.5;
+   
+    [hover] {
+            BorderColor=yellow;
+            TransformScale = 1.02;
+            }
+
 }
-style c331 {
-    PreferredSize = 200px;
-    BackgroundColor = rgba(86, 0, 0, 255);
+
+
+
+style menu_grid_two {
+    BackgroundImage = url("Images/2");
+    Border = 0.25px;
+    BorderRadius = 5px;
+    BorderColor = black;
+    GridItemRowStart = 1;
+    TransformPivotX = 0,0;
+  
+   
+    [hover] {
+            BorderColor=rgb(20,14,104);
+            TransformScale = 1.02;
+            }
 }
+
+style menu_grid_three {
+ 
+    LayoutType = Grid;
+    GridLayoutDirection = Vertical;
+    GridLayoutColTemplate = 1fr 1fr;
+    GridLayoutRowTemplate = 1fr 1fr 1fr 1fr 1fr 1fr;
+    GridLayoutColGap = 5;
+    GridLayoutRowGap = 5;
+    GridItemRowSpan = 2;
+   
+   
+}
+
+style menu_grid_four {
+    LayoutType = Grid;
+    GridLayoutDirection = Horizontal;
+  
+    GridLayoutRowTemplate = 1fr;
+    GridItemColSpan = 2;
+    TextColor = white;
+    
+    GridItemColSelfAlignment = Center;
+    
+    [hover] {
+        TextGlowColor = black;
+    }
+    
+    
+    
+}
+
+style buttons {
+    GridItemColSelfAlignment = End;
+    GridItemRowSelfAlignment = Start;
+    PreferredSize = 32;
+  
+}
+
+
+style grow {
+    FlexItemGrow = 1;
+}
+
+style cell1 {
+    griditemcolspan = 2;
+    griditemrowspan = 2;
+    BackgroundImage = url("Images/2");
+    
+    [hover] {
+                BorderColor=rgb(20,14,104);
+                TransformScale = 1.02;
+                }
+}
+
+style cell2 {
+    GridItemColSpan = 1;
+    GridItemRowSpan = 2;
+    BackgroundColor = white;
+    BackgroundImage = url("Images/2");
+    Border = 0.25px;
+    BorderRadius = 5px;
+    BorderColor = black;
+    
+    [hover] {
+                BorderColor=rgb(20,14,104);
+                TransformScale = 1.02;
+                }
+}
+
+style cell3 {
+    GridItemColSpan = 1;
+    GridItemRowSpan = 1;
+    BackgroundColor = blue;
+    Border = 0.25px;
+    BorderRadius = 5px;
+    BorderColor = black;
+  
+    [hover] {
+                BorderColor=rgb(20,14,104);
+                TransformScale = 1.02;
+                }
+}
+
+style top {
+     BackgroundImage = url("Images/");
+     Border = 0.25px;
+     BorderRadius = 5px;
+     BorderColor = black;
+}
+
+style bottom {
+    BackgroundImage = url("Images/setting");
+    Border = 0.25px;
+    BorderRadius = 5px;
+    BorderColor = black;
+  
+}
+
+
+
+
+style menu-item {
+    PaddingTop = 5px;
+    PaddingLeft = 5px;
+    TextColor = White;
+    TextFontSize = 24px;
+    
+   
+    [hover] {
+        BorderColor=rgb(20,14,104);
+    }
+}
+
+style subchild {
+    BackgroundColor = black;
+    GridLayoutRowAlignment = Grow;    
+    GridLayoutColAlignment = Grow;
+    PaddingLeft = 3px;
+    PreferredHeight = 1cnt;
+    TextColor = White;
+   
+   
+   
+ 
+    Opacity = 0.5;
+  }
+
+style col {
+    FlexLayoutDirection = Column;  
+}
+
+
+
+
+
+
+
+
+
+
+

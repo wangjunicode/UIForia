@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UITemplate>
+    <Style path="Documentation/Features/Test.style"/>
+    <Contents style="container">
+
+        <Group style="top">
+            <Div style="box-border"></Div>
+        </Group>
+        <Div style="bottom">Dust of Realms</Div>
+        <Div style="text">This item is dankkk</Div>
+
+        <Div style="button">
+            <Group onMouseClick="OnButtonClick()" style="button">Blue</Group>
+        </Div>
+        <Div style="item-blue">Blue</Div>
+        <Div style="item-purple">Purple</Div>
+
+    </Contents>
+</UITemplate>

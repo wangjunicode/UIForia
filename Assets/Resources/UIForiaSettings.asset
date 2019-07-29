@@ -14,3 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   loadTemplatesFromStreamingAssets: 0
   svgxMaterial: {fileID: 2100000, guid: 82a43e99b87829b4390236a419a3dc16, type: 2}
+  defaultNamespaces: []

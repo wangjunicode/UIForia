@@ -105,7 +105,8 @@ style grid-vertical {
 }
 
 style oddPadding {
-    Padding = 12px 29px 18px 21px;
+    Padding = 120px 290px 18px 21px;
+
 }
 
 style col3layout {
@@ -137,7 +138,7 @@ style borderRadiusTest {
 
 style grid-cell {
     PreferredSize = 100px;
-    BorderColor = black;
+    BorderColor = yellow;
     FlexLayoutCrossAxisAlignment = Center;
     FlexLayoutMainAxisAlignment = Center;
     //GridItemColSelfAlignment = Center;

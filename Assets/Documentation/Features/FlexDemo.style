@@ -1,7 +1,8 @@
 style container {
-    PreferredSize = 1pca;
+    PreferredSize = 1cnt, 300px;
    // Padding = 1em;
-   BackgroundColor = white;
+   BackgroundColor = green;
+   BackgroundImage = url(image);
 }
 
 style flex-demo {
@@ -20,6 +21,7 @@ style flex-demo {
   TextUnderlayColor = red;
   TextUnderlaySoftness = 1;
     BackgroundColor = white;
+    Painter = "Dissolve";
 //    Margin = 0.5em 0;
 }
 

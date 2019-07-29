@@ -7,13 +7,13 @@
 
         <Div style="flex-demo">
             <Heading3>Flex-Start</Heading3>
-<!--            <Group style="flex-demo-content flex-space-around horizontal">-->
+            <Group style="flex-demo-content flex-space-around horizontal">
+                <Div style="flex-item"></Div>
+                <Div style="flex-item"></Div>
 <!--                <Div style="flex-item"></Div>-->
 <!--                <Div style="flex-item"></Div>-->
 <!--                <Div style="flex-item"></Div>-->
-<!--                <Div style="flex-item"></Div>-->
-<!--                <Div style="flex-item"></Div>-->
-<!--            </Group>-->
+            </Group>
         </Div>
 
         <!--        <Div style="flex-demo">-->

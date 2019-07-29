@@ -37,10 +37,11 @@ namespace Src.Systems {
             this.renderOwners = new LightList<RenderOwner>();
 
             if (this.camera != null) {
-                this.camera.AddCommandBuffer(CameraEvent.AfterEverything, commandBuffer);
+                this.camera.AddCommandBuffer(CameraEvent.BeforeForwardOpaque, commandBuffer);
             }
 
             application.StyleSystem.onStylePropertyChanged += HandleStylePropertyChanged;
+            
         }
 
         private void HandleStylePropertyChanged(UIElement element, StructList<StyleProperty> propertyList) {
@@ -125,13 +126,13 @@ namespace Src.Systems {
 
         public void SetCamera(Camera camera) {
             if (this.camera != null) {
-                this.camera.RemoveCommandBuffer(CameraEvent.AfterEverything, commandBuffer);
+                this.camera.RemoveCommandBuffer(CameraEvent.BeforeForwardOpaque, commandBuffer);
             }
 
             this.camera = camera; // todo -- should be handled by the view
             
             if (this.camera != null) {
-                this.camera.AddCommandBuffer(CameraEvent.AfterEverything, commandBuffer);
+                this.camera.AddCommandBuffer(CameraEvent.BeforeForwardOpaque, commandBuffer);
             }
         }
 

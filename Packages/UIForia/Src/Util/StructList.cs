@@ -367,6 +367,25 @@ namespace UIForia.Util {
             System.Array.Copy(array, 0, target, 0, size);
         }
 
+        public void RemoveAt(int index) {
+            System.Array.Copy(array, index + 1, array, index, size - index);
+            array[size--] = default;
+        }
+
+        public void SwapRemoveAt(int index) {
+            array[index] = array[size - 1];
+            array[size - 1] = default;
+            size--;
+        }
+        
+        public T SwapRemoveAtWithValue(int index) {
+            T tmp = array[index];
+            array[index] = array[size - 1];
+            array[size - 1] = default;
+            size--;
+            return tmp;
+        }
+
     }
 
 }

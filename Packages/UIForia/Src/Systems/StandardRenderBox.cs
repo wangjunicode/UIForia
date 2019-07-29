@@ -8,16 +8,16 @@ namespace UIForia.Rendering {
 
     public class StandardRenderBox : RenderBox {
 
-        private bool geometryNeedsUpdate;
-        private bool dataNeedsUpdate;
+        protected bool geometryNeedsUpdate;
+        protected bool dataNeedsUpdate;
 
-        private float borderTop;
-        private float borderRight;
-        private float borderBottom;
-        private float borderLeft;
-        private Size lastSize;
-        private GeometryRange range;
-        private UIForiaGeometry geometry;
+        protected float borderTop;
+        protected float borderRight;
+        protected float borderBottom;
+        protected float borderLeft;
+        protected Size lastSize;
+        protected GeometryRange range;
+        protected UIForiaGeometry geometry;
 
         public StandardRenderBox() {
             this.uniqueId = "UIForia::StandardRenderBox";
@@ -115,9 +115,11 @@ namespace UIForia.Rendering {
 
             // todo -- put this back to packed! shader too
             geometry.packedColors = backgroundColor;//new Color(packedBackgroundColor, packedBackgroundTint, (int) colorMode, 0);
+            geometry.mainTexture = backgroundImage;
             // y and rotation are inverted!
             // element.layoutResult.matrix = SVGXMatrix.TRS(new Vector2(100, -100), -45, Vector2.one);
             ctx.DrawBatchedGeometry(geometry, range, element.layoutResult.matrix.ToMatrix4x4());
+            
             
         }
 

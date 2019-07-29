@@ -243,6 +243,7 @@ namespace UIForia.Rendering {
                 float glowColor = VertigoUtil.ColorToFloat(textSpan.glowColor);
 
                 float weight = 0;
+                
                 if ((textSpan.fontStyle & Text.FontStyle.Bold) != 0) {
                     weight = fontData.fontAsset.weightBold;
                 }

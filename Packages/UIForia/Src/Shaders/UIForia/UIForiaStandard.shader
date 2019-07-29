@@ -1,11 +1,11 @@
 Shader "UIForia/Standard"
 {
     Properties {
-        _MainTex ("Texture", 2D) = "white" {}
-        _MaskTexture ("Mask", 2D) = "white" {}
-        _MaskSoftness ("Mask",  Range (0.001, 1)) = 0
-        _Radius ("Radius",  Range (1, 200)) = 0
-        [Toggle] _InvertMask ("Invert Mask",  Int) = 0
+      //  _MainTex ("Texture", 2D) = "white" {}
+       // _MaskTexture ("Mask", 2D) = "white" {}
+       //// _MaskSoftness ("Mask",  Range (0.001, 1)) = 0
+       // _Radius ("Radius",  Range (1, 200)) = 0
+       // [Toggle] _InvertMask ("Invert Mask",  Int) = 0
     }
     SubShader {
         Tags {
@@ -39,8 +39,10 @@ Shader "UIForia/Standard"
             #include "./UIForiaSDFUtil.cginc"
             
             sampler2D _MainTex;
+            sampler2D _MainTexture;
             sampler2D _MaskTexture;
             sampler2D _FontTexture;
+            sampler2D _Texture;
             
             float4 _MainTex_ST;
             float4 _Color;
@@ -177,7 +179,7 @@ Shader "UIForia/Standard"
                 
                 fixed4 bgColor = UnpackColor(asuint(packedColor.r));
                 fixed4 tintColor = UnpackColor(asuint(packedColor.g));
-                fixed4 textureColor = tex2D(_MainTex, texCoord);
+                fixed4 textureColor = tex2D(_MainTexture, texCoord);
 
                 bgColor.rgb *= bgColor.a;
                 tintColor.rgb *= tintColor.a;
@@ -210,7 +212,7 @@ Shader "UIForia/Standard"
                 
                 // todo -- i.color needs to be unpacked for text
                 // todo -- use color mode effectively
-                
+
                 fixed4 mainColor = ComputeColor(i.color, i.texCoord0.xy);
 
                 if(Frag_ShapeType != ShapeType_Text) {
@@ -267,8 +269,9 @@ Shader "UIForia/Standard"
                 #define underlayScale i.texCoord3.z
                 #define underlayBias i.texCoord3.w
 						    
-                float d = tex2D(_FontTexture, i.texCoord0.xy + underlayOffset).a * underlayScale;
-                faceColor += underlayColor * saturate(d - underlayBias) * (1 - faceColor.a);
+						    // todo -- pull underlay into a seperate shader
+              //  float d = tex2D(_FontTexture, i.texCoord0.xy + underlayOffset).a * underlayScale;
+              //  faceColor += underlayColor * saturate(d - underlayBias) * (1 - faceColor.a);
                 
                 return faceColor;// * i.color.a; 
                 

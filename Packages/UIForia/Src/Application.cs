@@ -167,9 +167,9 @@ namespace UIForia {
             for (var i = 0; i < attrs.Length; i++) {
                 Attribute attr = attrs[i];
                 if (attr is CustomPainterAttribute paintAttr) {
-                    if (type.GetConstructor(Type.EmptyTypes) == null || type.GetInterface(nameof(ISVGXElementPainter)) == null) {
+                    if (type.GetConstructor(Type.EmptyTypes) == null || !typeof(RenderBox).IsAssignableFrom(type)) {
                         throw new Exception($"Classes marked with [{nameof(CustomPainterAttribute)}] must provide a parameterless constructor" +
-                                            $" and the class must implement {nameof(ISVGXElementPainter)}. Ensure that {type.FullName} conforms to these rules");
+                                            $" and the class must extend {nameof(RenderBox)}. Ensure that {type.FullName} conforms to these rules");
                     }
 
                     if (s_CustomPainters.ContainsKey(paintAttr.name)) {

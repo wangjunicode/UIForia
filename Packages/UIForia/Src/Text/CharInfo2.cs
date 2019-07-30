@@ -1,8 +1,10 @@
+using System.Diagnostics;
 using TMPro;
 using UnityEngine;
 
 namespace UIForia.Text {
 
+    [DebuggerDisplay("Char = {(char)character}")]
     public struct CharInfo2 {
 
         public Vector2 topLeft;

@@ -25,13 +25,20 @@ style flex-demo {
 style flex-demo-content {
     FlexItemGrow = 1;
     FlexItemShrink = 1;
-    TextColor = White;
-    TextFontSize = 12;
+    TextColor = white;
+    TextFaceDilate = 0.4;
+    TextFontStyle = Italic;
+    TextFontSize = 14;
     BackgroundColor = blue;
     FlexLayoutDirection = Horizontal;
     FlexLayoutCrossAxisAlignment = Center;
     Margin = 0 1em;
     Padding = 10px;
+}
+
+style special-text {
+    TextFontSize = 1.5em;
+    TextColor = yellow;
 }
 
 style heading {
@@ -74,9 +81,10 @@ style flex-item {
     PreferredSize = 1cnt;
     MaxWidth = 2cnt;
     FlexItemGrow = 1;
-    Padding = 0.25em;
+    Padding = 1em 0.25em;
     BackgroundColor = red;
    // Margin = 0 10px;
-    TextAlignment = Right;
-    TextWhitespaceMode = PreserveNewLines;
+    TextAlignment = Center;
+    FlexLayoutMainAxisAlignment = Center;
+    TextWhitespaceMode = PreserveNewLines TrimLineStart;
 }

@@ -472,7 +472,7 @@ namespace UIForia.Text {
 
             float fontBaseLineOffset = currentFontAsset.faceInfo.Baseline * fontScale * fontScaleMultiplier * currentFontAsset.faceInfo.Scale;
 
-            fontBaseLineOffset = 0; //+= currentFontAsset.faceInfo.SuperscriptOffset * fontScale * fontScaleMultiplier;
+           // fontBaseLineOffset = 0; //+= currentFontAsset.faceInfo.SuperscriptOffset * fontScale * fontScaleMultiplier;
 
             // I am not sure if using a standard line height for words is correct. TMP does not use the font info, it uses max char ascender & descender for a line
             // seems to me that this would produce weird results with multiline text

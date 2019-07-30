@@ -12,6 +12,7 @@ namespace UIForia.Text {
         public int charEnd;
         public float width;
         public float height;
+        public float yOffset;
 
     }
 

@@ -19,7 +19,6 @@ namespace UIForia.Elements {
 
         public UITextElement(string text = "") {
             this.text = text ?? string.Empty;
-            this.textInfo = new TextInfo(string.Empty);
             this.flags = flags | UIElementFlags.TextElement
                                | UIElementFlags.BuiltIn
                                | UIElementFlags.Primitive;
@@ -27,18 +26,13 @@ namespace UIForia.Elements {
 
         internal TextInfo TextInfo => textInfo;
 
-        public override void OnCreate() {
-            if (children != null) {
-                for (int i = 0; i < children.Count; i++) {
-                    TextSpanElement childSpan = (TextSpanElement) children[i];
-                    childSpan.Initialize(textInfo);
-                }
-            }
-        }
-
         public override void OnEnable() {
             textSpan.SetStyle(style.GetTextStyle());
             textSpan.SetText(text);
+        }
+
+        public override void OnDisable() {
+            textSpan?.parent?.RemoveChild(textSpan);
         }
 
         public string GetText() {
@@ -68,23 +62,6 @@ namespace UIForia.Elements {
 
         public override string GetDisplayName() {
             return "Text";
-        }
-
-        public string GetSubstring(SelectionRange selectionRange) {
-            if (!selectionRange.HasSelection) {
-                return string.Empty;
-            }
-
-            int start = Mathf.Min(selectionRange.cursorIndex, selectionRange.selectIndex);
-            int end = Mathf.Max(selectionRange.cursorIndex, selectionRange.selectIndex);
-
-            char[] chars = new char[end - start];
-//            int idx = 0;
-//            for (int i = start; i < end; i++) {
-//                chars[idx++] = textInfo.charInfos[i].character;
-//            }
-
-            return new string(chars);
         }
 
         public void OnStylePropertyChanged(in StyleProperty property) {

@@ -100,10 +100,10 @@ namespace UIForia.Rendering {
             this.pendingBatches = new StructList<Batch>();
             this.uiforiaMeshPool = new MeshPool();
             this.uiforiaMaterialPool = new UIForiaMaterialPool(batchedMaterial);
-            this.positionList = new StructList<Vector3>(128);
-            this.texCoordList0 = new StructList<Vector4>(128);
-            this.texCoordList1 = new StructList<Vector4>(128);
-            this.triangleList = new StructList<int>(128 * 3);
+            this.positionList = new StructList<Vector3>(8);
+            this.texCoordList0 = new StructList<Vector4>(8);
+            this.texCoordList1 = new StructList<Vector4>(8);
+            this.triangleList = new StructList<int>(8 * 3);
             this.clipStack = new StructStack<Rect>();
             this.renderCommandList = new StructList<RenderOperation>();
             this.scratchTextures = new StructList<ScratchRenderTexture>();
@@ -214,28 +214,30 @@ namespace UIForia.Rendering {
 
         private void UpdateUIForiaGeometry(UIForiaGeometry geometry, in GeometryRange range) {
             int start = positionList.size;
+            int vertexCount = range.vertexEnd - range.vertexStart;
+            int triangleCount = range.triangleEnd - range.triangleStart;
+            
+            positionList.AddRange(geometry.positionList, range.vertexStart, vertexCount);
+            texCoordList0.AddRange(geometry.texCoordList0, range.vertexStart, vertexCount);
+            texCoordList1.AddRange(geometry.texCoordList1, range.vertexStart, vertexCount);
 
-            positionList.AddRange(geometry.positionList, range.vertexStart, range.vertexEnd);
-            texCoordList0.AddRange(geometry.texCoordList0, range.vertexStart, range.vertexEnd);
-            texCoordList1.AddRange(geometry.texCoordList1, range.vertexStart, range.vertexEnd);
-
-            for (int i = range.vertexStart; i < range.vertexEnd; i++) {
-                texCoordList1.array[start + i].w = currentBatch.drawCallSize;
+            for (int i = start; i < start + vertexCount; i++) {
+                texCoordList1.array[i].w = currentBatch.drawCallSize;
             }
 
             currentBatch.drawCallSize++;
 
-            triangleList.EnsureAdditionalCapacity(range.triangleEnd - range.triangleStart);
+            triangleList.EnsureAdditionalCapacity(triangleCount);
 
             int offset = triangleList.size;
             int[] triangles = triangleList.array;
             int[] geometryTriangles = geometry.triangleList.array;
 
-            for (int i = range.triangleStart; i < range.triangleEnd; i++) {
-                triangles[offset + i] = start + geometryTriangles[i];
+            for (int i = 0; i < triangleCount; i++) {
+                triangles[offset + i] = start + (geometryTriangles[range.triangleStart + i] - range.vertexStart);
             }
 
-            triangleList.size += (range.triangleEnd - range.triangleStart);
+            triangleList.size += triangleCount;
         }
 
         private void FinalizeCurrentBatch(bool cloneMaterial = true) {

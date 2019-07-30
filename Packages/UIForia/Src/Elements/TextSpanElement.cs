@@ -1,51 +1,16 @@
-using UIForia.Text;
+using UIForia.Attributes;
 
 namespace UIForia.Elements {
 
-    public class TextSpanElement : UIElement {
+    [TemplateTagName("TextSpan")]
+    public class TextSpanElement : UITextElement {
 
-        private string text;
-        private int spanIndex;
-        private TextInfo textInfo;
-        
-        public TextSpanElement(string text = "") {
-            this.text = text ?? string.Empty;
-            this.spanIndex = -1;
-            flags = flags | UIElementFlags.TextElement
-                          | UIElementFlags.BuiltIn
-                          | UIElementFlags.Primitive;
-        }
+        public TextSpanElement(string rawText) : base(rawText) { }
 
-        internal void Initialize(TextInfo textInfo) {
-            this.textInfo = textInfo;
-            spanIndex = textInfo.spanList.Count;
-           // textInfo.AppendSpan(text);
-            if (children != null) {
-                for (int i = 0; i < children.Count; i++) {
-                    TextSpanElement childSpan = (TextSpanElement) children[i];
-                    childSpan.Initialize(textInfo);
-                }
-            }
-        }
-
-        public void SetText(string text) {
-           // textInfo.UpdateSpan(spanIndex, new TextSpan(text));
-        }
-        
         public override string GetDisplayName() {
             return "TextSpan";
         }
-        
-        // maybe just mark for update, or have an option to disable a span 
-        public override void OnEnable() {
-           // textInfo.UpdateSpan(spanIndex, new TextSpan(text));
-        }
-        
-        // maybe just mark for update, or have an option to disable a span 
-        public override void OnDisable() {
-            //textInfo.UpdateSpan(spanIndex, new TextSpan(string.Empty));
-        }
-        
+
     }
 
 }

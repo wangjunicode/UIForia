@@ -409,7 +409,32 @@ namespace UIForia.Parsing.Expression {
             );
         }
 
+        private UITemplate ParseTextSpan(XElement element, in TemplateData templateData) {
+            string rawText = string.Empty;
+            foreach (XNode node in element.Nodes()) {
+                switch (node.NodeType) {
+                    case XmlNodeType.Text:
+                        rawText += "'" + ((XText) node).Value.Trim() + "'";
+                        continue;
+
+                    case XmlNodeType.Element:
+                        throw new TemplateParseException(node, "<TextSpan> can only have text children, no elements");
+
+                    case XmlNodeType.Comment:
+                        continue;
+                }
+
+                throw new TemplateParseException(node, "Unable to handle node type: " + node.NodeType);
+            }
+
+            return new UITextSpanTemplate(app, rawText, ParseNodes(element.Nodes(), templateData), ParseAttributes(element));
+        }
+        
         private UITemplate ParseElement(XElement element, in TemplateData templateData) {
+            if (element.Name == "TextSpan") {
+                return ParseTextSpan(element, templateData);
+            }
+            
             if (element.Name == "Children") {
                 return ParseChildrenElement(element, templateData);
             }

@@ -142,6 +142,9 @@ namespace UIForia.Text {
                     case TextAlignment.Right:
                         lineOffsetX = totalWidth - lines[lineIndex].width;
                         break;
+                    case TextAlignment.Center:
+                        lineOffsetX = (totalWidth - lines[lineIndex].width) * 0.5f;
+                        break;
                 }
                 
                 float wordOffsetX = lineOffsetX;
@@ -167,7 +170,7 @@ namespace UIForia.Text {
                             for (int c = charStart; c < charEnd; c++) {
                                 ref CharInfo2 charInfo = ref chars[c];
                                 charInfo.layoutX = wordOffsetX;
-                                charInfo.layoutY = lineOffsetY;
+                                charInfo.layoutY = wordInfo.yOffset + lineOffsetY;
                                 charInfo.lineIndex = lineIndex;
                                 charInfo.visible = true;
                             }
@@ -209,7 +212,7 @@ namespace UIForia.Text {
                 // todo -- use different algorithm for text with blocking spans in it
 
                 float baseLineHeight = span.textStyle.fontAsset.faceInfo.LineHeight;
-
+                float lineOffset = 0;
                 int end = span.wordInfoList.size;
                 for (int w = 0; w < end; w++) {
                     ref WordInfo2 wordInfo = ref wordInfos[w];
@@ -220,7 +223,9 @@ namespace UIForia.Text {
                                 currentLine.spanEnd = spanIndex;
                                 currentLine.wordEnd = w;
                                 lines.Add(currentLine);
+                                lineOffset += currentLine.height;
                                 currentLine = new LineInfo2(spanIndex, w + 1);
+                                currentLine.y = lineOffset;
                             }
                             else {
                                 if (currentLine.wordCount != 0) {
@@ -238,8 +243,10 @@ namespace UIForia.Text {
                             currentLine.wordEnd = w;
                             currentLine.spanEnd = spanIndex;
                             lines.Add(currentLine);
+                            lineOffset += currentLine.height;
                             currentLine = new LineInfo2(spanIndex, w + 1);
                             currentLine.height = wordInfo.height; // or LineHeight?
+                            currentLine.y = lineOffset;
                             break;
 
                         case WordType.Normal:
@@ -248,25 +255,32 @@ namespace UIForia.Text {
                                 if (currentLine.wordCount > 0) {
                                     currentLine.spanEnd = spanIndex;
                                     currentLine.wordEnd = w;
+                                    lineOffset += currentLine.height;
                                     lines.Add(currentLine);
                                 }
 
                                 currentLine = new LineInfo2(spanIndex, w, wordInfo.width);
+                                currentLine.y = lineOffset;
                                 currentLine.wordCount = 1;
                                 currentLine.spanEnd = spanIndex;
                                 currentLine.wordEnd = w + 1;
                                 if (wordInfo.height > currentLine.height) currentLine.height = wordInfo.height;
 
-                                lines.Add(currentLine);
+                                lineOffset += currentLine.height;
 
+                                lines.Add(currentLine);
                                 currentLine = new LineInfo2(spanIndex, w + 1);
+                                currentLine.y = lineOffset;
+                                
                             }
                             // if word is too long for the current line, break to next line
                             else if (wordInfo.width + currentLine.width > width + 0.5) {
                                 currentLine.spanEnd = spanIndex;
                                 currentLine.wordEnd = w;
                                 lines.Add(currentLine);
+                                lineOffset += currentLine.height;
                                 currentLine = new LineInfo2(spanIndex, w, wordInfo.width);
+                                currentLine.y = lineOffset;
                                 currentLine.wordCount = 1;
                                 if (wordInfo.height > currentLine.height) currentLine.height = wordInfo.height;
                             }
@@ -293,9 +307,36 @@ namespace UIForia.Text {
                 lines.Add(currentLine);
             }
 
+            // todo -- something is weird with too many lines here check it out
+            
             LineInfo2[] lineArray = lines.array;
             for (int i = 0; i < lines.size; i++) {
-                lineArray[i].spanEnd++;
+                ref LineInfo2 lineInfo = ref lineArray[i];
+                lineInfo.spanEnd++;
+                // align via baseline
+                if (lineInfo.spanStart != lineInfo.spanEnd) {
+                    // add difference between word baseline & line baseline (which will always be >=) to the y positions of wordInfos
+                    for (int j = lineInfo.spanStart; j < lineInfo.spanEnd; j++) {
+                        TextSpan span = spans[j];
+
+                        int wordStart = 0;
+                        int wordEnd = span.wordInfoList.size;
+                        
+                        if (j == lineInfo.spanStart) {
+                            wordStart = lineInfo.wordStart;
+                        }
+                        if (j == lineInfo.spanEnd - 1) {
+                            wordEnd = lineInfo.wordEnd;
+                        }
+
+                        for (int w = wordStart; w < wordEnd; w++) {
+                            // todo -- not working properly
+                            // todo -- really want this in a different place, maybe only when creating geometry
+                            span.wordInfoList.array[w].yOffset += (lineInfo.height - span.wordInfoList[w].height);
+                        }
+                    }
+                }
+                
             }
 
             return lines;

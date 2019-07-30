@@ -51,9 +51,7 @@ namespace UIForia.Rendering {
             int triIndex = 0;
 
             int currentLineIndex = -1;
-
-            // todo -- dont use array of geometries, just use offsets
-
+            
             GeometryRange range = new GeometryRange();
 
             int renderedCharCount = 0;
@@ -77,6 +75,11 @@ namespace UIForia.Rendering {
 
             geometry.EnsureCapacity(renderedCharCount * 4, renderedCharCount * 6);
 
+            Vector3[] positions = geometry.positionList.array;
+            Vector4[] texCoord0 = geometry.texCoordList0.array;
+            Vector4[] texCoord1 = geometry.texCoordList1.array;
+            int[] triangles = geometry.triangleList.array;
+            
             Vector2 faceTextureUVTopLeft = new Vector2(0, 1);
             Vector2 faceTextureUVBottomRight = new Vector2(1, 0);
 
@@ -94,11 +97,6 @@ namespace UIForia.Rendering {
                     range.triangleStart = triIndex;
                     currentLineIndex = geo.lineIndex;
                 }
-
-                Vector3[] positions = geometry.positionList.array;
-                Vector4[] texCoord0 = geometry.texCoordList0.array;
-                Vector4[] texCoord1 = geometry.texCoordList1.array;
-                int[] triangles = geometry.triangleList.array;
 
                 ref Vector3 p0 = ref positions[vertIdx + 0];
                 ref Vector3 p1 = ref positions[vertIdx + 1];
@@ -268,7 +266,6 @@ namespace UIForia.Rendering {
             // ctx.DrawBatchedGeometry(geometry, ranges.array[0], element.layoutResult.matrix.ToMatrix4x4());
             if (ranges.size == 1) {
                 ctx.DrawBatchedText(geometry, ranges.array[0], matrix, fontData);
-//                ctx.DrawBatchedGeometry(geometry, ranges.array[0], matrix);
             }
             else {
                 for (int i = 0; i < ranges.size; i++) {

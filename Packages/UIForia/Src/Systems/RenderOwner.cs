@@ -37,9 +37,6 @@ namespace Src.Systems {
         }
 
         public void Render(RenderContext renderContext) {
-            // var geometry = new UIForiaGeometry();
-            //  geometry.FillRectUniformBorder_Miter(-100, -100);
-            //      renderContext.DrawBatchedGeometry(geometry);
             view.rootElement.renderBox.Render(renderContext);
         }
 
@@ -99,7 +96,7 @@ namespace Src.Systems {
 
                 if (children.size == 0) {
                     parent.firstChild = null;
-                    return;
+                    continue;
                 }
 
                 RenderBox lastChild = null;
@@ -138,11 +135,7 @@ namespace Src.Systems {
                 }
             }
         }
-
-
-        // really do want a flat list
-        // if a child fails the broadphase cull check, do not add it but do add its children
-
+        
         // todo -- jobify this
         public void BuildClipGroups() {
             clipStack.Push(new Rect(0, 0, Screen.width, Screen.height));
@@ -163,6 +156,7 @@ namespace Src.Systems {
             }
 
             RenderBox ptr = parent.firstChild;
+            
             while (ptr != null) {
                 if (ptr.clipBehavior != ClipBehavior.Never) {
                     ptr.clipped = false; // clipStack.PeekUnchecked().Overlaps(ptr.RenderBounds); //  || clipStack.PeekUnchecked().Contains(ptr.RenderBounds);
@@ -173,7 +167,7 @@ namespace Src.Systems {
 
                 ptr.clipRect = clipRect;
                 BuildClipGroups(ptr);
-                ptr = parent.nextSibling;
+                ptr = ptr.nextSibling;
             }
 
             if (parent.overflowX != Overflow.Visible || parent.overflowY != Overflow.Visible) {

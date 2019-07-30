@@ -3,6 +3,23 @@ using UnityEngine;
 
 namespace UIForia.Layout {
 
+    public struct SizeInt {
+
+        public int width;
+        public int height;
+
+        public SizeInt(int width, int height) {
+            this.width = width;
+            this.height = height;
+        }
+        
+        public SizeInt(float width, float height) {
+            this.width = (int)width;
+            this.height = (int)height;
+        }
+
+    }
+    
     public struct Size {
 
         public float width;

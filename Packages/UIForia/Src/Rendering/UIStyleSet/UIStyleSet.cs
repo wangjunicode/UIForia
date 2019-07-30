@@ -859,10 +859,7 @@ namespace UIForia.Rendering {
                         return element.parent.style.GetResolvedFontSize() * fontSize.value;
                     }
                     return DefaultStyleValues_Generated.TextFontSize.value * fontSize.value;
-                
-                case UIFixedUnit.LineHeight:
-                    throw new NotImplementedException();
-                
+
                 case UIFixedUnit.ViewportWidth:
                     return element.View.Viewport.width * fontSize.value;
                 

@@ -35,8 +35,8 @@ namespace UIForia.Compilers.Style {
                 {"alignmenttargety", (targetStyle, property, context) => targetStyle.AlignmentTargetY = MapEnum<AlignmentTarget>(property.children[0], context)},
                 {"alignmentpivotx", (targetStyle, property, context) => targetStyle.AlignmentPivotX = MapNumber(property.children[0], context)},
                 {"alignmentpivoty", (targetStyle, property, context) => targetStyle.AlignmentPivotY = MapNumber(property.children[0], context)},
-                {"alignmentoffsetx", (targetStyle, property, context) => targetStyle.AlignmentOffsetX = MapNumber(property.children[0], context)},
-                {"alignmentoffsety", (targetStyle, property, context) => targetStyle.AlignmentOffsetY = MapNumber(property.children[0], context)},
+                {"alignmentoffsetx", (targetStyle, property, context) => targetStyle.AlignmentOffsetX = MapFixedLength(property.children[0], context)},
+                {"alignmentoffsety", (targetStyle, property, context) => targetStyle.AlignmentOffsetY = MapFixedLength(property.children[0], context)},
 
                 // Background
                 {"backgroundcolor", (targetStyle, property, context) => targetStyle.BackgroundColor = MapColor(property, context)},
@@ -660,11 +660,16 @@ namespace UIForia.Compilers.Style {
             value = context.GetValueForReference(value);
             switch (value) {
                 case MeasurementNode measurementNode:
+                    UIMeasurementUnit unit = MapUnit(measurementNode.unit, context);
                     if (TryParseFloat(measurementNode.value.rawValue, out float measurementValue)) {
-                        return new UIMeasurement(measurementValue, MapUnit(measurementNode.unit, context));
+                        if (unit == UIMeasurementUnit.Percentage) {
+                            measurementValue *= 0.01f;
+                        }
+                        return new UIMeasurement(measurementValue, unit);
                     }
-
-                    break;
+                    else {
+                        return new UIMeasurement(1f, unit);
+                    }
 
                 case StyleLiteralNode literalNode:
                     if (TryParseFloat(literalNode.rawValue, out float literalValue)) {
@@ -676,7 +681,7 @@ namespace UIForia.Compilers.Style {
 
             throw new CompileException(context.fileName, value, $"Cannot parse value, expected a numeric literal or measurement {value}.");
         }
-
+        
         private static UIFixedLength MapFixedLength(StyleASTNode value, StyleCompileContext context) {
             value = context.GetValueForReference(value);
             switch (value) {
@@ -709,26 +714,38 @@ namespace UIForia.Compilers.Style {
             switch (unitNode.value) {
                 case "px":
                     return UIMeasurementUnit.Pixel;
+                
                 case "pca":
                     return UIMeasurementUnit.ParentContentArea;
+                
                 case "psz":
                     return UIMeasurementUnit.ParentSize;
+                
                 case "em":
                     return UIMeasurementUnit.Em;
+                
                 case "cnt":
+                case "content":
                     return UIMeasurementUnit.Content;
-                case "lh":
-                    return UIMeasurementUnit.LineHeight;
-                case "aw":
-                    return UIMeasurementUnit.AnchorWidth;
-                case "ah":
-                    return UIMeasurementUnit.AnchorHeight;
+                
                 case "vw":
                     return UIMeasurementUnit.ViewportWidth;
+                
                 case "vh":
                     return UIMeasurementUnit.ViewportHeight;
+                
                 case "%":
                     return UIMeasurementUnit.Percentage;
+                
+                case "intrinsic":
+                    return UIMeasurementUnit.IntrinsicPreferred;
+                
+                case "intrinsic-min":
+                    return UIMeasurementUnit.IntrinsicMinimum;
+                
+                case "fit-content":
+                    return UIMeasurementUnit.FitContent;
+                
             }
 
             Debug.LogWarning($"You used a {unitNode.value} in line {unitNode.line} column {unitNode.column} in file {context.fileName} but this unit isn't supported. " +
@@ -737,6 +754,29 @@ namespace UIForia.Compilers.Style {
             return UIMeasurementUnit.Pixel;
         }
 
+        private static UIFixedUnit MapAlignmentUnit(UnitNode unitNode, StyleCompileContext context) {
+            if (unitNode == null) return UIFixedUnit.Pixel;
+
+            switch (unitNode.value) {
+                case "px":
+                    return UIFixedUnit.Pixel;
+                case "%":
+                    return UIFixedUnit.Percent;
+                case "vh":
+                    return UIFixedUnit.ViewportHeight;
+                case "vw":
+                    return UIFixedUnit.ViewportWidth;
+                case "em":
+                    return UIFixedUnit.Em;
+
+            }
+
+            Debug.LogWarning($"You used a {unitNode.value} in line {unitNode.line} column {unitNode.column} in file {context.fileName} but this unit isn't supported. " +
+                             "Try px, %, em, vw, vh or lh instead (see UIFixedUnit). Will fall back to px.");
+
+            return UIFixedUnit.Pixel;
+        }
+        
         private static UIFixedUnit MapFixedUnit(UnitNode unitNode, StyleCompileContext context) {
             if (unitNode == null) return UIFixedUnit.Pixel;
 
@@ -751,8 +791,6 @@ namespace UIForia.Compilers.Style {
                     return UIFixedUnit.ViewportWidth;
                 case "em":
                     return UIFixedUnit.Em;
-                case "lh":
-                    return UIFixedUnit.LineHeight;
             }
 
             Debug.LogWarning($"You used a {unitNode.value} in line {unitNode.line} column {unitNode.column} in file {context.fileName} but this unit isn't supported. " +

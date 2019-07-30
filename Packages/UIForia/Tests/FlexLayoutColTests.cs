@@ -1,5 +1,6 @@
 using NUnit.Framework;
 using Tests.Mocks;
+using UIForia;
 using UIForia.Attributes;
 using UIForia.Elements;
 using UIForia.Layout;
@@ -263,7 +264,7 @@ public class FlexLayoutColTests {
         root.style.SetFlexLayoutCrossAxisAlignment(CrossAxisAlignment.Center, StyleState.Normal);
         root.child1.style.SetAlignmentBehaviorX(AlignmentBehavior.Self, StyleState.Normal);
         root.child1.style.SetAlignmentPivotX(0, StyleState.Normal);
-        root.child1.style.SetAlignmentOffsetX(0, StyleState.Normal);
+        root.child1.style.SetAlignmentOffsetX(new UIFixedLength(0), StyleState.Normal);
         
         mockView.Update();
         

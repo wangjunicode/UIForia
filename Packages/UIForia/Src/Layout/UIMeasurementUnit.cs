@@ -13,12 +13,9 @@ namespace UIForia.Layout {
         ViewportHeight = UnitConstants.ViewportHeight,
         ParentContentArea = UnitConstants.ParentContentArea,
         Em = UnitConstants.Em,
-        AnchorWidth = UnitConstants.AnchorWidth,
-        AnchorHeight = UnitConstants.AnchorHeight,
-        LineHeight = UnitConstants.LineHeight,
         Percentage = UnitConstants.Percent,
-        MinContent = UnitConstants.MinContent,
-        MaxContent = UnitConstants.MaxContent,
+        IntrinsicMinimum = UnitConstants.MinContent,
+        IntrinsicPreferred = UnitConstants.MaxContent,
         FitContent = UnitConstants.FitContent
 
     }

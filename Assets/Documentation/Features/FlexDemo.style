@@ -1,35 +1,41 @@
 style container {
-    PreferredSize = 1cnt, 300px;
-   // Padding = 1em;
-   BackgroundColor = green;
+   PreferredSize = 800px;
+}
+
+style constrain {
+   PreferredSize = 1cnt, 1cnt;
+   Padding = 10px;
+   BackgroundColor = yellow;
    BackgroundImage = url(image);
+   FlexLayoutDirection = Vertical;
 }
 
 style flex-demo {
-//    PreferredSize = 1.5cnt, 1cnt;
-    //Padding = 1em;
+    PreferredSize = 1pca, 1cnt;
     FlexLayoutMainAxisAlignment = Start;
+    FlexLayoutCrossAxisAlignment = Center;
     FlexLayoutDirection = Horizontal;
-  //  Border = 2px;
-   // BorderColor = black;
-  //  BorderRadius = 20px;
-  TextFontSize = 64;
-  TextColor = black;
-  TextUnderlayX = 1;
-  TextUnderlayY = 1;
-  TextUnderlayIntensity = 1;
-  TextUnderlayColor = red;
-  TextUnderlaySoftness = 1;
+    TextFontSize = 32;
+    TextColor = black;
     BackgroundColor = white;
-    Painter = "Dissolve";
-//    Margin = 0.5em 0;
+    Padding = 10px;
+    //MarginBottom = 1em;
 }
 
 style flex-demo-content {
-    PreferredSize = 1.5cnt, 1cnt;
+    FlexItemGrow = 1;
+    FlexItemShrink = 1;
     TextColor = White;
+    TextFontSize = 12;
     BackgroundColor = blue;
     FlexLayoutDirection = Horizontal;
+    FlexLayoutCrossAxisAlignment = Center;
+    Margin = 0 1em;
+    Padding = 10px;
+}
+
+style heading {
+    FlexItemGrow = 1;
 }
 
 style horizontal {
@@ -65,10 +71,12 @@ style flex-grow-2 {
 }
 
 style flex-item {
-    PreferredSize = 50px 30px;//1cnt;
-    MinWidth = 1cnt;
-    //Padding = 0.5em;
+    PreferredSize = 1cnt;
+    MaxWidth = 2cnt;
+    FlexItemGrow = 1;
+    Padding = 0.25em;
     BackgroundColor = red;
-    //Margin = 0.25em;
-    TextAlignment = Center;
+   // Margin = 0 10px;
+    TextAlignment = Right;
+    TextWhitespaceMode = PreserveNewLines;
 }

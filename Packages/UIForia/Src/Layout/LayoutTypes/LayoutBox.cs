@@ -357,10 +357,7 @@ namespace UIForia.Layout.LayoutTypes {
 
                 case UIFixedUnit.Em:
                     return style.GetResolvedFontSize() * width.value;
-
-                case UIFixedUnit.LineHeight:
-                    return style.LineHeightSize * width.value;
-
+                
                 default:
                     return 0;
             }
@@ -384,9 +381,6 @@ namespace UIForia.Layout.LayoutTypes {
 
                 case UIFixedUnit.Em:
                     return style.GetResolvedFontSize() * height.value;
-
-                case UIFixedUnit.LineHeight:
-                    return style.LineHeightSize * height.value;
 
                 default:
                     return 0;
@@ -425,24 +419,6 @@ namespace UIForia.Layout.LayoutTypes {
 
                 case UIMeasurementUnit.Em:
                     return style.GetResolvedFontSize() * margin.value;
-
-                case UIMeasurementUnit.AnchorWidth:
-                    anchorTarget = style.AnchorTarget;
-                    if (parent.prefHeight.IsContentBased && anchorTarget == AnchorTarget.Parent ||
-                        anchorTarget == AnchorTarget.ParentContentArea) {
-                        return 0f;
-                    }
-
-                    return ResolveAnchorWidth(margin.value);
-
-                case UIMeasurementUnit.AnchorHeight:
-                    anchorTarget = style.AnchorTarget;
-                    if (parent.prefHeight.IsContentBased && anchorTarget == AnchorTarget.Parent ||
-                        anchorTarget == AnchorTarget.ParentContentArea) {
-                        return 0f;
-                    }
-
-                    return ResolveAnchorHeight(margin.value);
 
                 case UIMeasurementUnit.Unset:
                 default:
@@ -601,26 +577,6 @@ namespace UIForia.Layout.LayoutTypes {
                 case UIMeasurementUnit.Em:
                     return Math.Max(0, style.GetResolvedFontSize() * widthMeasurement.value);
                 
-                case UIMeasurementUnit.AnchorWidth:
-                    anchorTarget = style.AnchorTarget;
-                    if (parent == null) return view.Viewport.width;
-                    if (parent.prefWidth.IsContentBased && anchorTarget == AnchorTarget.Parent ||
-                        anchorTarget == AnchorTarget.ParentContentArea) {
-                        return 0f;
-                    }
-
-                    return ResolveAnchorWidth(widthMeasurement.value);
-
-                case UIMeasurementUnit.AnchorHeight:
-                    anchorTarget = style.AnchorTarget;
-                    if (parent == null) return view.Viewport.height;
-                    if (parent.prefWidth.IsContentBased && anchorTarget == AnchorTarget.Parent ||
-                        anchorTarget == AnchorTarget.ParentContentArea) {
-                        return 0f;
-                    }
-
-                    return ResolveAnchorHeight(widthMeasurement.value);
-
                 default:
                     throw new ArgumentOutOfRangeException();
             }
@@ -647,10 +603,7 @@ namespace UIForia.Layout.LayoutTypes {
 
                 case UIFixedUnit.Em:
                     return style.GetResolvedFontSize() * anchor.value;
-
-                case UIFixedUnit.LineHeight:
-                    return 0;
-
+                
                 case UIFixedUnit.ViewportWidth:
                     return view.Viewport.width * anchor.value;
 
@@ -836,25 +789,7 @@ namespace UIForia.Layout.LayoutTypes {
                 case UIMeasurementUnit.Em:
                     return Mathf.Max(0, style.GetResolvedFontSize() * height.value);
 
-                case UIMeasurementUnit.AnchorWidth:
-                    anchorTarget = style.AnchorTarget;
-                    if (parent == null) return view.Viewport.width;
-                    if (parent.prefHeight.IsContentBased && anchorTarget == AnchorTarget.Parent ||
-                        anchorTarget == AnchorTarget.ParentContentArea) {
-                        return 0f;
-                    }
-
-                    return ResolveAnchorWidth(height.value);
-
-                case UIMeasurementUnit.AnchorHeight:
-                    anchorTarget = style.AnchorTarget;
-                    if (parent == null) return view.Viewport.height;
-                    if (parent.prefHeight.IsContentBased && anchorTarget == AnchorTarget.Parent ||
-                        anchorTarget == AnchorTarget.ParentContentArea) {
-                        return 0f;
-                    }
-
-                    return ResolveAnchorHeight(height.value);
+                
                 default:
                     throw new ArgumentOutOfRangeException();
             }
@@ -895,24 +830,7 @@ namespace UIForia.Layout.LayoutTypes {
                            (parent.style == null ? 0 : parent.PaddingBorderHorizontal);
 
 
-                case UIMeasurementUnit.AnchorWidth:
-                    anchorTarget = style.AnchorTarget;
-                    if (parent.prefWidth.IsContentBased && anchorTarget == AnchorTarget.Parent ||
-                        anchorTarget == AnchorTarget.ParentContentArea) {
-                        return 0f;
-                    }
-
-                    return ResolveAnchorWidth(margin.value);
-
-                case UIMeasurementUnit.AnchorHeight:
-                    anchorTarget = style.AnchorTarget;
-                    if (parent.prefWidth.IsContentBased && anchorTarget == AnchorTarget.Parent ||
-                        anchorTarget == AnchorTarget.ParentContentArea) {
-                        return 0f;
-                    }
-
-                    return ResolveAnchorHeight(margin.value);
-
+              
                 case UIMeasurementUnit.Unset:
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -1049,24 +967,7 @@ namespace UIForia.Layout.LayoutTypes {
                 case UIMeasurementUnit.Em:
                     return Math.Max(0, style.GetResolvedFontSize() * widthMeasurement.value);
 
-                case UIMeasurementUnit.AnchorWidth:
-                    anchorTarget = style.AnchorTarget;
-                    if (parent.prefWidth.IsContentBased && anchorTarget == AnchorTarget.Parent ||
-                        anchorTarget == AnchorTarget.ParentContentArea) {
-                        return 0f;
-                    }
-
-                    return ResolveAnchorWidth(widthMeasurement.value);
-
-                case UIMeasurementUnit.AnchorHeight:
-                    anchorTarget = style.AnchorTarget;
-                    if (parent.prefWidth.IsContentBased && anchorTarget == AnchorTarget.Parent ||
-                        anchorTarget == AnchorTarget.ParentContentArea) {
-                        return 0f;
-                    }
-
-                    return ResolveAnchorHeight(widthMeasurement.value);
-
+               
                 default:
                     throw new ArgumentOutOfRangeException();
             }
@@ -1110,23 +1011,6 @@ namespace UIForia.Layout.LayoutTypes {
                 case UIMeasurementUnit.Em:
                     return Mathf.Max(0, style.GetResolvedFontSize() * heightMeasurement.value);
 
-                case UIMeasurementUnit.AnchorWidth:
-                    anchorTarget = style.AnchorTarget;
-                    if (parent.prefHeight.IsContentBased && anchorTarget == AnchorTarget.Parent ||
-                        anchorTarget == AnchorTarget.ParentContentArea) {
-                        return 0f;
-                    }
-
-                    return ResolveAnchorWidth(heightMeasurement.value);
-
-                case UIMeasurementUnit.AnchorHeight:
-                    anchorTarget = style.AnchorTarget;
-                    if (parent.prefHeight.IsContentBased && anchorTarget == AnchorTarget.Parent ||
-                        anchorTarget == AnchorTarget.ParentContentArea) {
-                        return 0f;
-                    }
-
-                    return ResolveAnchorHeight(heightMeasurement.value);
                 default:
                     throw new ArgumentOutOfRangeException();
             }

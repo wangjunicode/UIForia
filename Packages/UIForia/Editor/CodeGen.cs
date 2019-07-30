@@ -85,14 +85,14 @@ namespace UIForia.Editor {
             new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.RadialLayoutRadius, new UIFixedLength(0.5f, UIFixedUnit.Percent)),
 
             // Alignment
-            new PropertyGenerator<AlignmentTarget>(StylePropertyId.AlignmentTargetX, AlignmentTarget.Unset),
-            new PropertyGenerator<AlignmentTarget>(StylePropertyId.AlignmentTargetY, AlignmentTarget.Unset),
+            new PropertyGenerator<AlignmentTarget>(StylePropertyId.AlignmentTargetX, AlignmentTarget.AllocatedBox),
+            new PropertyGenerator<AlignmentTarget>(StylePropertyId.AlignmentTargetY, AlignmentTarget.AllocatedBox),
             new PropertyGenerator<AlignmentBehavior>(StylePropertyId.AlignmentBehaviorX, AlignmentBehavior.Default),
             new PropertyGenerator<AlignmentBehavior>(StylePropertyId.AlignmentBehaviorY, AlignmentBehavior.Default),
             new AnimatedPropertyGenerator<float>(StylePropertyId.AlignmentPivotX, 0),
             new AnimatedPropertyGenerator<float>(StylePropertyId.AlignmentPivotY, 0),
-            new AnimatedPropertyGenerator<float>(StylePropertyId.AlignmentOffsetX, 0),
-            new AnimatedPropertyGenerator<float>(StylePropertyId.AlignmentOffsetY, 0),
+            new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.AlignmentOffsetX, new UIFixedLength(0)),
+            new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.AlignmentOffsetY, new UIFixedLength(0)),
 
             // Fit
             new PropertyGenerator<Fit>(StylePropertyId.FitX, Fit.Unset),
@@ -626,9 +626,6 @@ namespace UIForia.Rendering {
             }
             else if (typeof(string) == propertyGenerator.type) {
                 return $"GetProperty(StylePropertyId.{propertyGenerator.propertyIdName}).AsString;";
-            }
-            else if (typeof(Alignment) == propertyGenerator.type) {
-                return $"GetProperty(StylePropertyId.{propertyGenerator.propertyIdName}).AsAlignment;";
             }
 
             throw new ArgumentOutOfRangeException();

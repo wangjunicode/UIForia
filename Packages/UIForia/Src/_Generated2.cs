@@ -1365,9 +1365,9 @@ case "overflowx":
                 case "alignmentpivoty":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_float("AlignmentPivotY", UIForia.Rendering.StylePropertyId.AlignmentPivotY, targetState.state, Compile<float>(value, null));                
                 case "alignmentoffsetx":
-                    return new UIForia.Bindings.StyleBindings.StyleBinding_float("AlignmentOffsetX", UIForia.Rendering.StylePropertyId.AlignmentOffsetX, targetState.state, Compile<float>(value, null));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_UIFixedLength("AlignmentOffsetX", UIForia.Rendering.StylePropertyId.AlignmentOffsetX, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
                 case "alignmentoffsety":
-                    return new UIForia.Bindings.StyleBindings.StyleBinding_float("AlignmentOffsetY", UIForia.Rendering.StylePropertyId.AlignmentOffsetY, targetState.state, Compile<float>(value, null));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_UIFixedLength("AlignmentOffsetY", UIForia.Rendering.StylePropertyId.AlignmentOffsetY, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
                 case "fitx":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_Fit("FitX", UIForia.Rendering.StylePropertyId.FitX, targetState.state, Compile<UIForia.Layout.Fit>(value, s_EnumSource_Fit));                
                 case "fity":

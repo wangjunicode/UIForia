@@ -1,6 +1,4 @@
-﻿using System;
-using SVGX;
-using TMPro;
+﻿using SVGX;
 using UIForia.Text;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -39,7 +37,7 @@ public class VertigoBehaviorRoot : MonoBehaviour {
             fontSize = 36
         });
 
-        textInfo.Layout();
+        //textInfo.Layout();
 
         commandBuffer = new CommandBuffer();
         camera.AddCommandBuffer(CameraEvent.AfterEverything, commandBuffer);

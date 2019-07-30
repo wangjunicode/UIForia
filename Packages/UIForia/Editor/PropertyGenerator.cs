@@ -212,10 +212,6 @@ namespace UIForia.Editor {
                 return $"new Color({c.r.ToString(CultureInfo.InvariantCulture)}f, {c.g.ToString(CultureInfo.InvariantCulture)}f, {c.b.ToString(CultureInfo.InvariantCulture)}f, {c.a.ToString(CultureInfo.InvariantCulture)}f)";
             }
 
-            if (defaultValue is Alignment alignment) {
-                return $"new Alignment({alignment.value.ToString(CultureInfo.InvariantCulture)}f, {alignment.pivot.ToString(CultureInfo.InvariantCulture)}f, {Enum.GetName(typeof(UIMeasurementUnit), alignment.target)})";
-            }
-
             if (defaultValue is float) {
                 return defaultValue.ToString() + "f";
             }

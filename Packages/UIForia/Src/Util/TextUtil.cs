@@ -253,15 +253,18 @@ namespace UIForia.Text {
             padding.z = faceDilate + dilate + softness + offsetX;
             padding.w = faceDilate + dilate + softness + offsetY;
 
-            padding.x = math.max(padding.x, uniformPadding);
-            padding.y = math.max(padding.y, uniformPadding);
-            padding.z = math.max(padding.z, uniformPadding);
-            padding.w = math.max(padding.w, uniformPadding);
+            padding = math.max(padding, uniformPadding);
+//            padding.x = math.max(padding.x, uniformPadding);
+//            padding.y = math.max(padding.y, uniformPadding);
+//            padding.z = math.max(padding.z, uniformPadding);
+//            padding.w = math.max(padding.w, uniformPadding);
 
-            padding.x = math.min(padding.x, 1);
-            padding.y = math.min(padding.y, 1);
-            padding.z = math.min(padding.z, 1);
-            padding.w = math.min(padding.w, 1);
+            padding = math.min(padding, 1);
+            
+//            padding.x = math.min(padding.x, 1);
+//            padding.y = math.min(padding.y, 1);
+//            padding.z = math.min(padding.z, 1);
+//            padding.w = math.min(padding.w, 1);
             
             padding *= textStyle.fontAsset.gradientScale;
 

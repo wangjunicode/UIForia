@@ -14,27 +14,27 @@ namespace UIForia.Layout {
             textInfo = ((UITextElement) element).textInfo;
         }
 
-        protected override float ComputeContentWidth(float blockWidth) {
-            return textInfo.ComputeContentWidth(blockWidth);
+        public override float ComputeContentWidth(BlockSize blockWidth) {
+            return textInfo.ComputeContentWidth(blockWidth.contentAreaSize);
         }
-        
-        protected override float ComputeContentHeight(float width, float blockWidth, float blockHeight) {
+
+        public override float ComputeContentHeight(float width, BlockSize blockWidth, BlockSize blockHeight) {
             return textInfo.ComputeHeightForWidth(width, blockWidth, blockHeight);
         }
 
         public override float GetIntrinsicMinWidth() {
             return textInfo.GetIntrinsicMinWidth();
         }
-        
-        protected override float GetIntrinsicMinHeight() {
+
+        public override float GetIntrinsicMinHeight() {
             return textInfo.GetIntrinsicMinHeight();
         }
 
-        protected override float GetIntrinsicMaxWidth() {
+        public override float GetIntrinsicPreferredWidth() {
             return textInfo.GetIntrinsicWidth();
         }
-        
-        protected override float GetIntrinsicMaxHeight() {
+
+        public override float GetIntrinsicPreferredHeight() {
             return textInfo.GetIntrinsicHeight();
         }
 
@@ -48,6 +48,8 @@ namespace UIForia.Layout {
             float topOffset = paddingBox.top - borderBox.top;
             float leftOffset = paddingBox.left + borderBox.left;
 
+            // need a greedy size or some way to know
+            // if text were multiple lines it would probably work
             contentSize = textInfo.Layout(new Vector2(leftOffset, topOffset), size.width - paddingBox.left - paddingBox.right - borderBox.right - borderBox.left);
 
 //            actualWidth = size.width + PaddingHorizontal + BorderHorizontal;

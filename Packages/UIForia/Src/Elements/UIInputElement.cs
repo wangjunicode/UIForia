@@ -723,7 +723,7 @@ namespace UIForia.Elements {
 
         public void OnStylePropertiesDidChange() {
            // textInfo.SetSpanStyle(0, style.GetTextStyle());
-            textInfo.Layout();
+           // textInfo.Layout();
         }
 
         protected class TextSelectDragEvent : DragEvent {

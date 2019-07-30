@@ -93,17 +93,7 @@ namespace UIForia.Rendering {
             this.float0 = measurement.value;
             this.int1 = (int) measurement.unit;
         }
-
-        [DebuggerStepThrough]
-        public StyleProperty(StylePropertyId propertyId, Alignment alignment) {
-            this.propertyId = propertyId;
-            this.int0 = 0;
-            this.int1 = 0;
-            this.int2 = (int) alignment.target;
-            this.float0 = alignment.value;
-            this.float1 = alignment.pivot;
-            this.objectField = null;
-        }
+        
 
         [DebuggerStepThrough]
         public StyleProperty(StylePropertyId propertyId, TransformOffset offset) {

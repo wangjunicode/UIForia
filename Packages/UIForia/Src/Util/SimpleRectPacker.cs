@@ -2,7 +2,7 @@ using System;
 
 namespace UIForia.Util {
 
-    internal class SimpleRectPacker {
+    public class SimpleRectPacker {
 
         private int totalWidth;
         private int totalHeight;
@@ -118,8 +118,8 @@ namespace UIForia.Util {
                 }
             }
         }
-        
-        internal struct PackedRect {
+
+        public struct PackedRect {
 
             public int id;
             public int xMin;

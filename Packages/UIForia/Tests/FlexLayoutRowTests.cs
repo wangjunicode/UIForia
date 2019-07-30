@@ -1,5 +1,6 @@
 using NUnit.Framework;
 using Tests.Mocks;
+using UIForia;
 using UIForia.Attributes;
 using UIForia.Elements;
 using UIForia.Layout;
@@ -394,7 +395,7 @@ public class FlexLayoutRowTests {
         
         root.GetChild(1).style.SetAlignmentBehaviorY(AlignmentBehavior.Self, StyleState.Normal);
         root.GetChild(1).style.SetAlignmentPivotY(-0.5f, StyleState.Normal);
-        root.GetChild(1).style.SetAlignmentOffsetY(-0.5f, StyleState.Normal);
+        root.GetChild(1).style.SetAlignmentOffsetY(new UIFixedLength(-0.5f, UIFixedUnit.Percent), StyleState.Normal);
         
         //root.child1.style.SetFlexItemSelfAlignment(CrossAxisAlignment.Start, StyleState.Normal);
 

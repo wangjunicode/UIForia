@@ -176,6 +176,10 @@ namespace UIForia.Rendering {
             range.vertexEnd = vertIdx;
             range.triangleEnd = triIndex;
             ranges.Add(range);
+            geometry.positionList.size = vertIdx;
+            geometry.texCoordList0.size = vertIdx;
+            geometry.texCoordList1.size = vertIdx;
+            geometry.triangleList.size = triIndex;
         }
 
 
@@ -243,7 +247,7 @@ namespace UIForia.Rendering {
                 float glowColor = VertigoUtil.ColorToFloat(textSpan.glowColor);
 
                 float weight = 0;
-                
+
                 if ((textSpan.fontStyle & Text.FontStyle.Bold) != 0) {
                     weight = fontData.fontAsset.weightBold;
                 }
@@ -259,15 +263,16 @@ namespace UIForia.Rendering {
                 geometry.packedColors = new Vector4(mainColor, outlineColor, underlayColor, glowColor);
             }
 
-            ctx.DrawBatchedText(geometry, ranges.array[0], element.layoutResult.matrix.ToMatrix4x4(), fontData);
 
+            Matrix4x4 matrix = element.layoutResult.matrix.ToMatrix4x4();
             // ctx.DrawBatchedGeometry(geometry, ranges.array[0], element.layoutResult.matrix.ToMatrix4x4());
             if (ranges.size == 1) {
-//                ctx.DrawBatchedGeometry(geometry, ranges.array[0], element.layoutResult.matrix.ToMatrix4x4());
+                ctx.DrawBatchedText(geometry, ranges.array[0], matrix, fontData);
+//                ctx.DrawBatchedGeometry(geometry, ranges.array[0], matrix);
             }
             else {
                 for (int i = 0; i < ranges.size; i++) {
-                    // do cull check
+                    ctx.DrawBatchedText(geometry, ranges.array[i], matrix, fontData);
                 }
 
                 // if all passed cull check, submit as one range

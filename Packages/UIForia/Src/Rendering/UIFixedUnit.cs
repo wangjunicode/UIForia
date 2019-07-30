@@ -8,7 +8,6 @@ namespace UIForia {
         Pixel = UnitConstants.Pixel,
         Percent = UnitConstants.Percent,
         Em = UnitConstants.Em,
-        LineHeight = UnitConstants.LineHeight,
         ViewportWidth = UnitConstants.ViewportWidth,
         ViewportHeight = UnitConstants.ViewportHeight,
 

@@ -98,7 +98,7 @@ namespace UIForia.Text {
         }
 
         // todo -- optimize for change types where possible and do partial layout for affect spans only
-        public Size Layout(Vector2 offset = default, float width = float.MaxValue) {
+        public Size Layout(Vector2 offset, float width) {
             lineInfoList.size = 0;
             RebuildSpanList();
             RunLayout(lineInfoList, width);
@@ -114,20 +114,18 @@ namespace UIForia.Text {
 
             float height = lastLine.y + lastLine.height;
             // todo -- handle alignment across multiple spans
-            // ApplyTextAlignment(maxWidth, style.TextAlignment);
-            ApplyLineAndWordOffsets();
+//            ApplyTextAlignment(maxWidth, rootSpan.alignment);
+            ApplyLineAndWordOffsets(width, rootSpan.alignment);
             metrics = new Size(maxWidth, height);
             return metrics;
         }
 
-        private void ApplyLineAndWordOffsets(int lineStart = 0) {
+        private void ApplyLineAndWordOffsets(float totalWidth, TextAlignment alignment, int lineStart = 0) {
             // todo -- this can be done partially in the case where we append or insert text 
 
             LineInfo2[] lines = lineInfoList.array;
             int lineCount = lineInfoList.size;
-
-            // todo -- right / left / center align lines
-
+            
             TextSpan[] spans = spanList.Array;
             
             float lineOffsetY = 0;
@@ -136,7 +134,16 @@ namespace UIForia.Text {
                 int spanStart = lines[lineIndex].spanStart;
                 int spanEnd = lines[lineIndex].spanEnd;
 
-                float lineOffsetX = 0; // alignment
+                float lineOffsetX = 0;
+                switch (alignment) {
+                    case TextAlignment.Unset:     
+                    case TextAlignment.Left:
+                        break;
+                    case TextAlignment.Right:
+                        lineOffsetX = totalWidth - lines[lineIndex].width;
+                        break;
+                }
+                
                 float wordOffsetX = lineOffsetX;
 
                 for (int s = spanStart; s < spanEnd; s++) {
@@ -428,14 +435,7 @@ namespace UIForia.Text {
             StructList<LineInfo2>.Release(ref lines);
         }
 
-        public float ComputeIntrinsicMaxHeight() {
-            if (requiresSpanListRebuild) {
-                RebuildSpanList();
-            }
-
-            return intrinsics.prefHeight;
-        }
-
+       
         public float GetIntrinsicWidth() {
             if (requiresSpanListRebuild) {
                 RebuildSpanList();
@@ -468,7 +468,7 @@ namespace UIForia.Text {
             return intrinsics.minHeight;
         }
 
-        public float ComputeHeightForWidth(float width, float blockWidth, float blockHeight) {
+        public float ComputeHeightForWidth(float width, BlockSize blockWidth, BlockSize blockHeight) {
             // todo -- if has span content that is not text we need to use block width & height to resolve their sizes
 
             // can't use intrinsics here if we have content that is not text

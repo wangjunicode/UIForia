@@ -376,16 +376,16 @@ namespace UIForia.Rendering {
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.AlignmentPivotY, value), state); }
         }
         
-        public float AlignmentOffsetX {
+        public UIForia.UIFixedLength AlignmentOffsetX {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.AlignmentOffsetX, state).AsFloat; }
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.AlignmentOffsetX, state).AsUIFixedLength; }
             [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.AlignmentOffsetX, value), state); }
         }
         
-        public float AlignmentOffsetY {
+        public UIForia.UIFixedLength AlignmentOffsetY {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.AlignmentOffsetY, state).AsFloat; }
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.AlignmentOffsetY, state).AsUIFixedLength; }
             [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.AlignmentOffsetY, value), state); }
         }
@@ -982,8 +982,8 @@ namespace UIForia.Rendering {
                     case StylePropertyId.AlignmentBehaviorY: return int0 == 0 || IntUtil.UnsetValue == int0;
                     case StylePropertyId.AlignmentPivotX: return !FloatUtil.IsDefined(float1);
                     case StylePropertyId.AlignmentPivotY: return !FloatUtil.IsDefined(float1);
-                    case StylePropertyId.AlignmentOffsetX: return !FloatUtil.IsDefined(float1);
-                    case StylePropertyId.AlignmentOffsetY: return !FloatUtil.IsDefined(float1);
+                    case StylePropertyId.AlignmentOffsetX: return !FloatUtil.IsDefined(float1) || int1 == 0;
+                    case StylePropertyId.AlignmentOffsetY: return !FloatUtil.IsDefined(float1) || int1 == 0;
                     case StylePropertyId.FitX: return int0 == 0 || IntUtil.UnsetValue == int0;
                     case StylePropertyId.FitY: return int0 == 0 || IntUtil.UnsetValue == int0;
                     case StylePropertyId.MinWidth: return !FloatUtil.IsDefined(float1) || int1 == 0;
@@ -1442,16 +1442,16 @@ namespace UIForia.Rendering {
             set { SetProperty(new StyleProperty(StylePropertyId.AlignmentPivotY, value)); }
         }
             
-        public float AlignmentOffsetX {
+        public UIForia.UIFixedLength AlignmentOffsetX {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return FindFloatProperty(StylePropertyId.AlignmentOffsetX); }
+            get { return FindUIFixedLengthProperty(StylePropertyId.AlignmentOffsetX); }
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.AlignmentOffsetX, value)); }
         }
             
-        public float AlignmentOffsetY {
+        public UIForia.UIFixedLength AlignmentOffsetY {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return FindFloatProperty(StylePropertyId.AlignmentOffsetY); }
+            get { return FindUIFixedLengthProperty(StylePropertyId.AlignmentOffsetY); }
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.AlignmentOffsetY, value)); }
         }
@@ -2474,20 +2474,20 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public float AlignmentOffsetX { 
+            public UIForia.UIFixedLength AlignmentOffsetX { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.AlignmentOffsetX, out property)) return property.AsFloat;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.AlignmentOffsetX, out property)) return property.AsUIFixedLength;
                     return DefaultStyleValues_Generated.AlignmentOffsetX;
                 }
             }
 
-            public float AlignmentOffsetY { 
+            public UIForia.UIFixedLength AlignmentOffsetY { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.AlignmentOffsetY, out property)) return property.AsFloat;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.AlignmentOffsetY, out property)) return property.AsUIFixedLength;
                     return DefaultStyleValues_Generated.AlignmentOffsetY;
                 }
             }
@@ -3625,20 +3625,20 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.AlignmentPivotY, state).AsFloat;
         }
         
-        public void SetAlignmentOffsetX(float value, StyleState state) {
+        public void SetAlignmentOffsetX(UIForia.UIFixedLength value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.AlignmentOffsetX, value), state);
         }
 
-        public float GetAlignmentOffsetX(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.AlignmentOffsetX, state).AsFloat;
+        public UIForia.UIFixedLength GetAlignmentOffsetX(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.AlignmentOffsetX, state).AsUIFixedLength;
         }
         
-        public void SetAlignmentOffsetY(float value, StyleState state) {
+        public void SetAlignmentOffsetY(UIForia.UIFixedLength value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.AlignmentOffsetY, value), state);
         }
 
-        public float GetAlignmentOffsetY(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.AlignmentOffsetY, state).AsFloat;
+        public UIForia.UIFixedLength GetAlignmentOffsetY(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.AlignmentOffsetY, state).AsUIFixedLength;
         }
         
         public void SetFitX(UIForia.Layout.Fit value, StyleState state) {

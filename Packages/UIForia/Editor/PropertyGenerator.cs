@@ -63,23 +63,6 @@ namespace UIForia.Editor {
                     return $"new StyleProperty(StylePropertyId.{propertyIdName}, (int){propertyIdName})";
                 }
 
-                if (type == typeof(int)) {
-                    return $"new StyleProperty(StylePropertyId.{propertyIdName}, {propertyIdName})";
-                }
-
-                if (type == typeof(float)) {
-                    return $"new StyleProperty(StylePropertyId.{propertyIdName}, {propertyIdName})";
-                }
-
-                if (typeof(UIMeasurement) == type
-                    || typeof(UIFixedLength) == type
-                    || typeof(TransformOffset) == type
-                    || typeof(GridTrackSize) == type
-                    || typeof(Color) == type
-                ) {
-                    return $"new StyleProperty(StylePropertyId.{propertyIdName}, {propertyIdName})";
-                }
-
                 return $"new StyleProperty(StylePropertyId.{propertyIdName}, {propertyIdName})";
             }
         }
@@ -89,28 +72,7 @@ namespace UIForia.Editor {
                 if (type.IsEnum) {
                     return $"new StyleProperty(StylePropertyId.{propertyIdName}, (int)value)";
                 }
-
-                if (type == typeof(int)) {
-                    return $"new StyleProperty(StylePropertyId.{propertyIdName}, value)";
-                }
-
-                if (type == typeof(float)) {
-                    return $"new StyleProperty(StylePropertyId.{propertyIdName}, value)";
-                }
-
-                if (type == typeof(Alignment)) {
-                    return $"new StyleProperty(StylePropertyId.{propertyIdName}, value)";
-                }
-                
-                if (typeof(UIMeasurement) == type
-                    || typeof(UIFixedLength) == type
-                    || typeof(GridTrackSize) == type
-                    || typeof(TransformOffset) == type
-                    || typeof(Color) == type
-                ) {
-                    return $"new StyleProperty(StylePropertyId.{propertyIdName}, value)";
-                }
-
+               
                 return $"new StyleProperty(StylePropertyId.{propertyIdName}, value)";
             }
         }
@@ -146,6 +108,10 @@ namespace UIForia.Editor {
                 return $"!FloatUtil.IsDefined({nameof(StyleProperty.float1)}) || {nameof(StyleProperty.int1)} == 0";
             }
 
+            if (type == typeof(GridItemPlacement)) {
+                return $"!IntUtil.IsDefined({nameof(StyleProperty.int0)}) &&  {nameof(StyleProperty.objectField)} == null";
+            }
+            
             if (type == typeof(Color)) {
                 return $"{nameof(StyleProperty.int1)} == 0";
             }
@@ -212,6 +178,10 @@ namespace UIForia.Editor {
                 return $"new Color({c.r.ToString(CultureInfo.InvariantCulture)}f, {c.g.ToString(CultureInfo.InvariantCulture)}f, {c.b.ToString(CultureInfo.InvariantCulture)}f, {c.a.ToString(CultureInfo.InvariantCulture)}f)";
             }
 
+            if (defaultValue is GridItemPlacement placement) {
+                return $"new GridItemPlacement({placement.index})";
+            }
+            
             if (defaultValue is float) {
                 return defaultValue.ToString() + "f";
             }
@@ -300,23 +270,6 @@ namespace UIForia.Editor {
         public string StylePropertyConstructorParameterized(string paramName, string valueName = "value") {
             if (type.IsEnum) {
                 return $"new StyleProperty({paramName}, (int){valueName})";
-            }
-
-            if (type == typeof(int)) {
-                return $"new StyleProperty({paramName}, {valueName})";
-            }
-
-            if (type == typeof(float)) {
-                return $"new StyleProperty({paramName}, {valueName})";
-            }
-
-            if (typeof(UIMeasurement) == type
-                || typeof(UIFixedLength) == type
-                || typeof(GridTrackSize) == type
-                || typeof(TransformOffset) == type
-                || typeof(Color) == type
-            ) {
-                return $"new StyleProperty({paramName}, {valueName})";
             }
 
             return $"new StyleProperty({paramName}, {valueName})";

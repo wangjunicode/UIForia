@@ -113,8 +113,6 @@ namespace UIForia.Text {
             }
 
             float height = lastLine.y + lastLine.height;
-            // todo -- handle alignment across multiple spans
-//            ApplyTextAlignment(maxWidth, rootSpan.alignment);
             ApplyLineAndWordOffsets(width, rootSpan.alignment);
             metrics = new Size(maxWidth, height);
             return metrics;

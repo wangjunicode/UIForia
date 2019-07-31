@@ -413,7 +413,7 @@ namespace UIForia.Layout.LayoutTypes {
                 LayoutBox child = children[i];
                 GridItem colItem = placement.colItem;
 
-                GridAxisAlignment alignment = child.style.GridItemColSelfAlignment;
+                GridAxisAlignment alignment = default;
                 if (alignment == GridAxisAlignment.Unset) {
                     alignment = colAlignment;
                 }
@@ -448,7 +448,7 @@ namespace UIForia.Layout.LayoutTypes {
                 LayoutBox child = children[idx];
                 GridItem colItem = placement.colItem;
 
-                GridAxisAlignment alignment = child.style.GridItemColSelfAlignment;
+                GridAxisAlignment alignment = default; //child.style.GridItemColSelfAlignment;
                 if (alignment == GridAxisAlignment.Unset) {
                     alignment = colAlignment;
                 }
@@ -498,8 +498,7 @@ namespace UIForia.Layout.LayoutTypes {
                         finalX = x;
                         break;
                 }
-
-
+                
                 if (applySize) {
                     child.SetAllocatedXAndWidth(finalX + paddingBorderLeft, finalWidth);
                 }
@@ -521,7 +520,7 @@ namespace UIForia.Layout.LayoutTypes {
                 LayoutBox child = children[i];
                 GridItem rowItem = placement.rowItem;
 
-                GridAxisAlignment alignment = child.style.GridItemRowSelfAlignment;
+                GridAxisAlignment alignment = default;//child.style.GridItemRowSelfAlignment;
                 if (alignment == GridAxisAlignment.Unset) {
                     alignment = rowAlignment;
                 }
@@ -739,7 +738,7 @@ namespace UIForia.Layout.LayoutTypes {
         private static void ClearGridTracks(StructList<GridTrack> tracks) {
             GridTrack[] array = tracks.Array;
             for (int i = 0; i < tracks.Count; i++) {
-                ListPool<int>.Release(ref array[i].spanningItems);
+                // ListPool<int>.Release(ref array[i].spanningItems);
             }
 
             tracks.Clear();
@@ -796,12 +795,10 @@ namespace UIForia.Layout.LayoutTypes {
                 else if (colTemplate[i].type == GridTrackSizeType.Value) {
                     m_ColTracks.Add(new GridTrack(colTemplate[i]));
                 }
-                else if (colTemplate[i].type == GridTrackSizeType.Grow) {
+                else if (colTemplate[i].type == GridTrackSizeType.MinMax) {
                     m_ColTracks.Add(new GridTrack(colTemplate[i]));
                 }
-                else if (colTemplate[i].type == GridTrackSizeType.Shrink) {
-                    m_ColTracks.Add(new GridTrack(colTemplate[i]));
-                }
+          
             }
 
             for (int i = 0; i < rowTemplate.Count; i++) {
@@ -1049,10 +1046,10 @@ namespace UIForia.Layout.LayoutTypes {
             m_Heights.Clear();
             for (int i = 0; i < children.Count; i++) {
                 LayoutBox child = children[i];
-                int colStart = child.style.GridItemColStart;
-                int colSpan = child.style.GridItemColSpan;
-                int rowStart = child.style.GridItemRowStart;
-                int rowSpan = child.style.GridItemRowSpan;
+                int colStart = 0; //child.style.GridItemColStart;
+                int colSpan = 0; //child.style.GridItemColSpan;
+                int rowStart = 0; //child.style.GridItemRowStart;
+                int rowSpan = 0; //child.style.GridItemRowSpan;
                 m_Widths.Add(new GridItemSizes());
                 m_Heights.Add(new GridItemSizes());
                 m_Placements.Add(new GridPlacement(
@@ -1091,10 +1088,10 @@ namespace UIForia.Layout.LayoutTypes {
             m_Placements.Clear();
             for (int i = 0; i < children.Count; i++) {
                 LayoutBox child = children[i];
-                int colStart = child.style.GridItemColStart;
-                int colSpan = child.style.GridItemColSpan;
-                int rowStart = child.style.GridItemRowStart;
-                int rowSpan = child.style.GridItemRowSpan;
+                int colStart = 0; //child.style.GridItemColStart;
+                int colSpan = 0; //child.style.GridItemColSpan;
+                int rowStart = 0; //child.style.GridItemRowStart;
+                int rowSpan = 0; //child.style.GridItemRowSpan;
                 m_Placements.Add(new GridPlacement(child.element.id, i, new GridItem(colStart, colSpan), new GridItem(rowStart, rowSpan)));
             }
         }

@@ -51,7 +51,6 @@ namespace UIForia.Editor {
             new AnimatedPropertyGenerator<int>(StylePropertyId.FlexItemOrder, 0),
             new AnimatedPropertyGenerator<int>(StylePropertyId.FlexItemGrow, 0),
             new AnimatedPropertyGenerator<int>(StylePropertyId.FlexItemShrink, 0),
-            new PropertyGenerator<CrossAxisAlignment>(StylePropertyId.FlexItemSelfAlignment, CrossAxisAlignment.Unset),
 
             // Flex Layout
             new PropertyGenerator<LayoutDirection>(StylePropertyId.FlexLayoutDirection, LayoutDirection.Row),
@@ -60,12 +59,10 @@ namespace UIForia.Editor {
             new PropertyGenerator<CrossAxisAlignment>(StylePropertyId.FlexLayoutCrossAxisAlignment, CrossAxisAlignment.Start),
 
             // Grid Item
-            new PropertyGenerator<int>(StylePropertyId.GridItemColStart, IntUtil.UnsetValue),
-            new PropertyGenerator<int>(StylePropertyId.GridItemColSpan, 1),
-            new PropertyGenerator<int>(StylePropertyId.GridItemRowStart, IntUtil.UnsetValue),
-            new PropertyGenerator<int>(StylePropertyId.GridItemRowSpan, 1),
-            new PropertyGenerator<GridAxisAlignment>(StylePropertyId.GridItemColSelfAlignment, GridAxisAlignment.Unset),
-            new PropertyGenerator<GridAxisAlignment>(StylePropertyId.GridItemRowSelfAlignment, GridAxisAlignment.Unset),
+            new PropertyGenerator<GridItemPlacement>(StylePropertyId.GridItemColStart, new GridItemPlacement(-1)),
+            new PropertyGenerator<GridItemPlacement>(StylePropertyId.GridItemColSpan, new GridItemPlacement(1)),
+            new PropertyGenerator<GridItemPlacement>(StylePropertyId.GridItemRowStart, new GridItemPlacement(-1)),
+            new PropertyGenerator<GridItemPlacement>(StylePropertyId.GridItemRowSpan, new GridItemPlacement(1)),
 
             // Grid Layout
             new PropertyGenerator<LayoutDirection>(StylePropertyId.GridLayoutDirection, LayoutDirection.Row),
@@ -76,6 +73,7 @@ namespace UIForia.Editor {
             new PropertyGenerator<GridTrackSize>(StylePropertyId.GridLayoutCrossAxisAutoSize, GridTrackSize.FractionalRemaining),
             new AnimatedPropertyGenerator<float>(StylePropertyId.GridLayoutColGap, 0),
             new AnimatedPropertyGenerator<float>(StylePropertyId.GridLayoutRowGap, 0),
+            // tod -- remove
             new PropertyGenerator<GridAxisAlignment>(StylePropertyId.GridLayoutColAlignment, GridAxisAlignment.Grow),
             new PropertyGenerator<GridAxisAlignment>(StylePropertyId.GridLayoutRowAlignment, GridAxisAlignment.Grow),
 
@@ -603,6 +601,7 @@ namespace UIForia.Rendering {
             else if (typeof(UIFixedLength) == propertyGenerator.type) {
                 return $"FindUIFixedLengthProperty(StylePropertyId.{propertyGenerator.propertyIdName});";
             }
+    
             else if (typeof(UIMeasurement) == propertyGenerator.type) {
                 return $"FindUIMeasurementProperty(StylePropertyId.{propertyGenerator.propertyIdName});";
             }
@@ -626,6 +625,9 @@ namespace UIForia.Rendering {
             }
             else if (typeof(string) == propertyGenerator.type) {
                 return $"GetProperty(StylePropertyId.{propertyGenerator.propertyIdName}).AsString;";
+            }
+            else if (typeof(GridItemPlacement) == propertyGenerator.type) {
+                return $"GetProperty(StylePropertyId.{propertyGenerator.propertyIdName}).AsGridItemPlacement;";
             }
 
             throw new ArgumentOutOfRangeException();

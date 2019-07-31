@@ -631,7 +631,7 @@ public class GridLayoutTests {
         root.GetChild(0).style.SetMarginLeft(30, StyleState.Normal);
         root.GetChild(1).style.SetMarginTop(30, StyleState.Normal);
         root.GetChild(2).style.SetMarginBottom(30, StyleState.Normal);
-        root.GetChild(3).style.SetGridItemColSelfAlignment(GridAxisAlignment.Grow, StyleState.Normal);
+        //root.GetChild(3).style.SetGridItemColSelfAlignment(GridAxisAlignment.Grow, StyleState.Normal);
 
         mockView.Update();
 
@@ -661,8 +661,8 @@ public class GridLayoutTests {
 
         foreach (var child in root.GetChildren()) {
             child.style.SetPreferredWidth(100f, StyleState.Normal);
-            child.style.SetGridItemColSelfAlignment(GridAxisAlignment.Center, StyleState.Normal);
-            child.style.SetGridItemRowSelfAlignment(GridAxisAlignment.Grow, StyleState.Normal);
+            //child.style.SetGridItemColSelfAlignment(GridAxisAlignment.Center, StyleState.Normal);
+         //   child.style.SetGridItemRowSelfAlignment(GridAxisAlignment.Grow, StyleState.Normal);
         }
 
         // Left and right margin is ignored when the element is centered
@@ -789,6 +789,11 @@ public class GridLayoutTests {
         Assert.AreEqual(new Rect(100, 0, 200, 100), root.GetChildAt(3).layoutResult.LocalRect);
         Assert.AreEqual(new Rect(100, 100, 100, 100), root.GetChildAt(4).layoutResult.LocalRect);
         Assert.AreEqual(new Rect(100, 200, 100, 100), root.GetChildAt(5).layoutResult.LocalRect);
+        
+    }
+
+    [Test]
+    public void RepeatFill_RepeatProperly() {
         
     }
 

@@ -61,7 +61,7 @@ namespace UIForia.Layout.LayoutTypes {
             Item[] itemList = items.Array;
             for (int i = 0; i < children.Count; i++) {
                 LayoutBox child = children[i];
-                CrossAxisAlignment childCrossAlignment = children[i].style.FlexItemSelfAlignment;
+                CrossAxisAlignment childCrossAlignment = default; //children[i].style.FlexItemSelfAlignment;
                 if (childCrossAlignment == CrossAxisAlignment.Unset) {
                     childCrossAlignment = crossAxisAlignment;
                 }
@@ -83,7 +83,7 @@ namespace UIForia.Layout.LayoutTypes {
                         mainAxisAlignment = style.FlexLayoutMainAxisAlignment;
                         Item[] itemList = items.Array;
                         for (int i = 0; i < children.Count; i++) {
-                            CrossAxisAlignment childCrossAlignment = children[i].style.FlexItemSelfAlignment;
+                            CrossAxisAlignment childCrossAlignment = default; //children[i].style.FlexItemSelfAlignment;
                             if (childCrossAlignment == CrossAxisAlignment.Unset) {
                                 childCrossAlignment = crossAxisAlignment;
                             }
@@ -107,7 +107,7 @@ namespace UIForia.Layout.LayoutTypes {
                         Item[] itemList = items.Array;
                         for (int i = 0; i < children.Count; i++) {
                             if (children[i] == child) {
-                                CrossAxisAlignment childCrossAlignment = child.style.FlexItemSelfAlignment;
+                                CrossAxisAlignment childCrossAlignment = default; //child.style.FlexItemSelfAlignment;
                                 if (childCrossAlignment == CrossAxisAlignment.Unset) {
                                     childCrossAlignment = crossAxisAlignment;
                                 }

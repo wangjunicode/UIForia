@@ -38,17 +38,14 @@ namespace UIForia.Rendering {
 		public const int FlexItemOrder = 0;
 		public const int FlexItemGrow = 0;
 		public const int FlexItemShrink = 0;
-		public const CrossAxisAlignment FlexItemSelfAlignment = UIForia.Layout.CrossAxisAlignment.Unset;
 		public const LayoutDirection FlexLayoutDirection = UIForia.Layout.LayoutDirection.Horizontal;
 		public const LayoutWrap FlexLayoutWrap = UIForia.Layout.LayoutWrap.None;
 		public const MainAxisAlignment FlexLayoutMainAxisAlignment = UIForia.Layout.MainAxisAlignment.Start;
 		public const CrossAxisAlignment FlexLayoutCrossAxisAlignment = UIForia.Layout.CrossAxisAlignment.Start;
-		public const int GridItemColStart = 2147483647;
-		public const int GridItemColSpan = 1;
-		public const int GridItemRowStart = 2147483647;
-		public const int GridItemRowSpan = 1;
-		public const GridAxisAlignment GridItemColSelfAlignment = UIForia.Layout.GridAxisAlignment.Unset;
-		public const GridAxisAlignment GridItemRowSelfAlignment = UIForia.Layout.GridAxisAlignment.Unset;
+		public static readonly GridItemPlacement GridItemColStart = new GridItemPlacement(-1);
+		public static readonly GridItemPlacement GridItemColSpan = new GridItemPlacement(1);
+		public static readonly GridItemPlacement GridItemRowStart = new GridItemPlacement(-1);
+		public static readonly GridItemPlacement GridItemRowSpan = new GridItemPlacement(1);
 		public const LayoutDirection GridLayoutDirection = UIForia.Layout.LayoutDirection.Horizontal;
 		public const GridLayoutDensity GridLayoutDensity = UIForia.Layout.GridLayoutDensity.Sparse;
 		public static readonly IReadOnlyList<UIForia.Layout.LayoutTypes.GridTrackSize> GridLayoutColTemplate = ListPool<GridTrackSize>.Empty;
@@ -195,8 +192,6 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.FlexItemGrow, 0);
 				case StylePropertyId.FlexItemShrink:
 					 return new StyleProperty(StylePropertyId.FlexItemShrink, 0);
-				case StylePropertyId.FlexItemSelfAlignment:
-					 return new StyleProperty(StylePropertyId.FlexItemSelfAlignment, (int)UIForia.Layout.CrossAxisAlignment.Unset);
 				case StylePropertyId.FlexLayoutDirection:
 					 return new StyleProperty(StylePropertyId.FlexLayoutDirection, (int)UIForia.Layout.LayoutDirection.Horizontal);
 				case StylePropertyId.FlexLayoutWrap:
@@ -206,17 +201,13 @@ namespace UIForia.Rendering {
 				case StylePropertyId.FlexLayoutCrossAxisAlignment:
 					 return new StyleProperty(StylePropertyId.FlexLayoutCrossAxisAlignment, (int)UIForia.Layout.CrossAxisAlignment.Start);
 				case StylePropertyId.GridItemColStart:
-					 return new StyleProperty(StylePropertyId.GridItemColStart, 2147483647);
+					 return new StyleProperty(StylePropertyId.GridItemColStart, new GridItemPlacement(-1));
 				case StylePropertyId.GridItemColSpan:
-					 return new StyleProperty(StylePropertyId.GridItemColSpan, 1);
+					 return new StyleProperty(StylePropertyId.GridItemColSpan, new GridItemPlacement(1));
 				case StylePropertyId.GridItemRowStart:
-					 return new StyleProperty(StylePropertyId.GridItemRowStart, 2147483647);
+					 return new StyleProperty(StylePropertyId.GridItemRowStart, new GridItemPlacement(-1));
 				case StylePropertyId.GridItemRowSpan:
-					 return new StyleProperty(StylePropertyId.GridItemRowSpan, 1);
-				case StylePropertyId.GridItemColSelfAlignment:
-					 return new StyleProperty(StylePropertyId.GridItemColSelfAlignment, (int)UIForia.Layout.GridAxisAlignment.Unset);
-				case StylePropertyId.GridItemRowSelfAlignment:
-					 return new StyleProperty(StylePropertyId.GridItemRowSelfAlignment, (int)UIForia.Layout.GridAxisAlignment.Unset);
+					 return new StyleProperty(StylePropertyId.GridItemRowSpan, new GridItemPlacement(1));
 				case StylePropertyId.GridLayoutDirection:
 					 return new StyleProperty(StylePropertyId.GridLayoutDirection, (int)UIForia.Layout.LayoutDirection.Horizontal);
 				case StylePropertyId.GridLayoutDensity:

@@ -166,13 +166,6 @@ namespace UIForia.Rendering {
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.FlexItemShrink, value), state); }
         }
         
-        public UIForia.Layout.CrossAxisAlignment FlexItemSelfAlignment {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.FlexItemSelfAlignment, state).AsCrossAxisAlignment; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.FlexItemSelfAlignment, (int)value), state); }
-        }
-        
         public UIForia.Layout.LayoutDirection FlexLayoutDirection {
             [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.FlexLayoutDirection, state).AsLayoutDirection; }
@@ -201,46 +194,32 @@ namespace UIForia.Rendering {
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.FlexLayoutCrossAxisAlignment, (int)value), state); }
         }
         
-        public int GridItemColStart {
+        public UIForia.Layout.LayoutTypes.GridItemPlacement GridItemColStart {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.GridItemColStart, state).AsInt; }
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.GridItemColStart, state).AsGridItemPlacement; }
             [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.GridItemColStart, value), state); }
         }
         
-        public int GridItemColSpan {
+        public UIForia.Layout.LayoutTypes.GridItemPlacement GridItemColSpan {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.GridItemColSpan, state).AsInt; }
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.GridItemColSpan, state).AsGridItemPlacement; }
             [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.GridItemColSpan, value), state); }
         }
         
-        public int GridItemRowStart {
+        public UIForia.Layout.LayoutTypes.GridItemPlacement GridItemRowStart {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.GridItemRowStart, state).AsInt; }
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.GridItemRowStart, state).AsGridItemPlacement; }
             [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.GridItemRowStart, value), state); }
         }
         
-        public int GridItemRowSpan {
+        public UIForia.Layout.LayoutTypes.GridItemPlacement GridItemRowSpan {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.GridItemRowSpan, state).AsInt; }
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.GridItemRowSpan, state).AsGridItemPlacement; }
             [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.GridItemRowSpan, value), state); }
-        }
-        
-        public UIForia.Layout.GridAxisAlignment GridItemColSelfAlignment {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.GridItemColSelfAlignment, state).AsGridAxisAlignment; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.GridItemColSelfAlignment, (int)value), state); }
-        }
-        
-        public UIForia.Layout.GridAxisAlignment GridItemRowSelfAlignment {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.GridItemRowSelfAlignment, state).AsGridAxisAlignment; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.GridItemRowSelfAlignment, (int)value), state); }
         }
         
         public UIForia.Layout.LayoutDirection GridLayoutDirection {
@@ -952,17 +931,14 @@ namespace UIForia.Rendering {
                     case StylePropertyId.FlexItemOrder: return !IntUtil.IsDefined(int0);
                     case StylePropertyId.FlexItemGrow: return !IntUtil.IsDefined(int0);
                     case StylePropertyId.FlexItemShrink: return !IntUtil.IsDefined(int0);
-                    case StylePropertyId.FlexItemSelfAlignment: return int0 == 0 || IntUtil.UnsetValue == int0;
                     case StylePropertyId.FlexLayoutDirection: return int0 == 0 || IntUtil.UnsetValue == int0;
                     case StylePropertyId.FlexLayoutWrap: return int0 == 0 || IntUtil.UnsetValue == int0;
                     case StylePropertyId.FlexLayoutMainAxisAlignment: return int0 == 0 || IntUtil.UnsetValue == int0;
                     case StylePropertyId.FlexLayoutCrossAxisAlignment: return int0 == 0 || IntUtil.UnsetValue == int0;
-                    case StylePropertyId.GridItemColStart: return !IntUtil.IsDefined(int0);
-                    case StylePropertyId.GridItemColSpan: return !IntUtil.IsDefined(int0);
-                    case StylePropertyId.GridItemRowStart: return !IntUtil.IsDefined(int0);
-                    case StylePropertyId.GridItemRowSpan: return !IntUtil.IsDefined(int0);
-                    case StylePropertyId.GridItemColSelfAlignment: return int0 == 0 || IntUtil.UnsetValue == int0;
-                    case StylePropertyId.GridItemRowSelfAlignment: return int0 == 0 || IntUtil.UnsetValue == int0;
+                    case StylePropertyId.GridItemColStart: return !IntUtil.IsDefined(int0) &&  objectField == null;
+                    case StylePropertyId.GridItemColSpan: return !IntUtil.IsDefined(int0) &&  objectField == null;
+                    case StylePropertyId.GridItemRowStart: return !IntUtil.IsDefined(int0) &&  objectField == null;
+                    case StylePropertyId.GridItemRowSpan: return !IntUtil.IsDefined(int0) &&  objectField == null;
                     case StylePropertyId.GridLayoutDirection: return int0 == 0 || IntUtil.UnsetValue == int0;
                     case StylePropertyId.GridLayoutDensity: return int0 == 0 || IntUtil.UnsetValue == int0;
                     case StylePropertyId.GridLayoutColTemplate: return objectField == null;
@@ -1232,13 +1208,6 @@ namespace UIForia.Rendering {
             set { SetProperty(new StyleProperty(StylePropertyId.FlexItemShrink, value)); }
         }
             
-        public UIForia.Layout.CrossAxisAlignment FlexItemSelfAlignment {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return (UIForia.Layout.CrossAxisAlignment)FindEnumProperty(StylePropertyId.FlexItemSelfAlignment); }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.FlexItemSelfAlignment, (int)value)); }
-        }
-            
         public UIForia.Layout.LayoutDirection FlexLayoutDirection {
             [System.Diagnostics.DebuggerStepThrough]
             get { return (UIForia.Layout.LayoutDirection)FindEnumProperty(StylePropertyId.FlexLayoutDirection); }
@@ -1267,46 +1236,32 @@ namespace UIForia.Rendering {
             set { SetProperty(new StyleProperty(StylePropertyId.FlexLayoutCrossAxisAlignment, (int)value)); }
         }
             
-        public int GridItemColStart {
+        public UIForia.Layout.LayoutTypes.GridItemPlacement GridItemColStart {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return FindIntProperty(StylePropertyId.GridItemColStart); }
+            get { return GetProperty(StylePropertyId.GridItemColStart).AsGridItemPlacement; }
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.GridItemColStart, value)); }
         }
             
-        public int GridItemColSpan {
+        public UIForia.Layout.LayoutTypes.GridItemPlacement GridItemColSpan {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return FindIntProperty(StylePropertyId.GridItemColSpan); }
+            get { return GetProperty(StylePropertyId.GridItemColSpan).AsGridItemPlacement; }
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.GridItemColSpan, value)); }
         }
             
-        public int GridItemRowStart {
+        public UIForia.Layout.LayoutTypes.GridItemPlacement GridItemRowStart {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return FindIntProperty(StylePropertyId.GridItemRowStart); }
+            get { return GetProperty(StylePropertyId.GridItemRowStart).AsGridItemPlacement; }
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.GridItemRowStart, value)); }
         }
             
-        public int GridItemRowSpan {
+        public UIForia.Layout.LayoutTypes.GridItemPlacement GridItemRowSpan {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return FindIntProperty(StylePropertyId.GridItemRowSpan); }
+            get { return GetProperty(StylePropertyId.GridItemRowSpan).AsGridItemPlacement; }
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.GridItemRowSpan, value)); }
-        }
-            
-        public UIForia.Layout.GridAxisAlignment GridItemColSelfAlignment {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return (UIForia.Layout.GridAxisAlignment)FindEnumProperty(StylePropertyId.GridItemColSelfAlignment); }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.GridItemColSelfAlignment, (int)value)); }
-        }
-            
-        public UIForia.Layout.GridAxisAlignment GridItemRowSelfAlignment {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return (UIForia.Layout.GridAxisAlignment)FindEnumProperty(StylePropertyId.GridItemRowSelfAlignment); }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.GridItemRowSelfAlignment, (int)value)); }
         }
             
         public UIForia.Layout.LayoutDirection GridLayoutDirection {
@@ -2204,15 +2159,6 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UIForia.Layout.CrossAxisAlignment FlexItemSelfAlignment { 
-                [System.Diagnostics.DebuggerStepThrough]
-                get { 
-                    StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.FlexItemSelfAlignment, out property)) return property.AsCrossAxisAlignment;
-                    return DefaultStyleValues_Generated.FlexItemSelfAlignment;
-                }
-            }
-
             public UIForia.Layout.LayoutDirection FlexLayoutDirection { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
@@ -2249,57 +2195,39 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public int GridItemColStart { 
+            public UIForia.Layout.LayoutTypes.GridItemPlacement GridItemColStart { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.GridItemColStart, out property)) return property.AsInt;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.GridItemColStart, out property)) return property.AsGridItemPlacement;
                     return DefaultStyleValues_Generated.GridItemColStart;
                 }
             }
 
-            public int GridItemColSpan { 
+            public UIForia.Layout.LayoutTypes.GridItemPlacement GridItemColSpan { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.GridItemColSpan, out property)) return property.AsInt;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.GridItemColSpan, out property)) return property.AsGridItemPlacement;
                     return DefaultStyleValues_Generated.GridItemColSpan;
                 }
             }
 
-            public int GridItemRowStart { 
+            public UIForia.Layout.LayoutTypes.GridItemPlacement GridItemRowStart { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.GridItemRowStart, out property)) return property.AsInt;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.GridItemRowStart, out property)) return property.AsGridItemPlacement;
                     return DefaultStyleValues_Generated.GridItemRowStart;
                 }
             }
 
-            public int GridItemRowSpan { 
+            public UIForia.Layout.LayoutTypes.GridItemPlacement GridItemRowSpan { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.GridItemRowSpan, out property)) return property.AsInt;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.GridItemRowSpan, out property)) return property.AsGridItemPlacement;
                     return DefaultStyleValues_Generated.GridItemRowSpan;
-                }
-            }
-
-            public UIForia.Layout.GridAxisAlignment GridItemColSelfAlignment { 
-                [System.Diagnostics.DebuggerStepThrough]
-                get { 
-                    StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.GridItemColSelfAlignment, out property)) return property.AsGridAxisAlignment;
-                    return DefaultStyleValues_Generated.GridItemColSelfAlignment;
-                }
-            }
-
-            public UIForia.Layout.GridAxisAlignment GridItemRowSelfAlignment { 
-                [System.Diagnostics.DebuggerStepThrough]
-                get { 
-                    StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.GridItemRowSelfAlignment, out property)) return property.AsGridAxisAlignment;
-                    return DefaultStyleValues_Generated.GridItemRowSelfAlignment;
                 }
             }
 
@@ -3385,14 +3313,6 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.FlexItemShrink, state).AsInt;
         }
         
-        public void SetFlexItemSelfAlignment(UIForia.Layout.CrossAxisAlignment value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.FlexItemSelfAlignment, (int)value), state);
-        }
-
-        public UIForia.Layout.CrossAxisAlignment GetFlexItemSelfAlignment(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.FlexItemSelfAlignment, state).AsCrossAxisAlignment;
-        }
-        
         public void SetFlexLayoutDirection(UIForia.Layout.LayoutDirection value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.FlexLayoutDirection, (int)value), state);
         }
@@ -3425,52 +3345,36 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.FlexLayoutCrossAxisAlignment, state).AsCrossAxisAlignment;
         }
         
-        public void SetGridItemColStart(int value, StyleState state) {
+        public void SetGridItemColStart(UIForia.Layout.LayoutTypes.GridItemPlacement value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.GridItemColStart, value), state);
         }
 
-        public int GetGridItemColStart(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.GridItemColStart, state).AsInt;
+        public UIForia.Layout.LayoutTypes.GridItemPlacement GetGridItemColStart(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.GridItemColStart, state).AsGridItemPlacement;
         }
         
-        public void SetGridItemColSpan(int value, StyleState state) {
+        public void SetGridItemColSpan(UIForia.Layout.LayoutTypes.GridItemPlacement value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.GridItemColSpan, value), state);
         }
 
-        public int GetGridItemColSpan(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.GridItemColSpan, state).AsInt;
+        public UIForia.Layout.LayoutTypes.GridItemPlacement GetGridItemColSpan(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.GridItemColSpan, state).AsGridItemPlacement;
         }
         
-        public void SetGridItemRowStart(int value, StyleState state) {
+        public void SetGridItemRowStart(UIForia.Layout.LayoutTypes.GridItemPlacement value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.GridItemRowStart, value), state);
         }
 
-        public int GetGridItemRowStart(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.GridItemRowStart, state).AsInt;
+        public UIForia.Layout.LayoutTypes.GridItemPlacement GetGridItemRowStart(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.GridItemRowStart, state).AsGridItemPlacement;
         }
         
-        public void SetGridItemRowSpan(int value, StyleState state) {
+        public void SetGridItemRowSpan(UIForia.Layout.LayoutTypes.GridItemPlacement value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.GridItemRowSpan, value), state);
         }
 
-        public int GetGridItemRowSpan(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.GridItemRowSpan, state).AsInt;
-        }
-        
-        public void SetGridItemColSelfAlignment(UIForia.Layout.GridAxisAlignment value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.GridItemColSelfAlignment, (int)value), state);
-        }
-
-        public UIForia.Layout.GridAxisAlignment GetGridItemColSelfAlignment(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.GridItemColSelfAlignment, state).AsGridAxisAlignment;
-        }
-        
-        public void SetGridItemRowSelfAlignment(UIForia.Layout.GridAxisAlignment value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.GridItemRowSelfAlignment, (int)value), state);
-        }
-
-        public UIForia.Layout.GridAxisAlignment GetGridItemRowSelfAlignment(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.GridItemRowSelfAlignment, state).AsGridAxisAlignment;
+        public UIForia.Layout.LayoutTypes.GridItemPlacement GetGridItemRowSpan(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.GridItemRowSpan, state).AsGridItemPlacement;
         }
         
         public void SetGridLayoutDirection(UIForia.Layout.LayoutDirection value, StyleState state) {
@@ -4298,8 +4202,6 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.FlexItemGrow, FlexItemGrow);
 				case StylePropertyId.FlexItemShrink:
 					 return new StyleProperty(StylePropertyId.FlexItemShrink, FlexItemShrink);
-				case StylePropertyId.FlexItemSelfAlignment:
-					 return new StyleProperty(StylePropertyId.FlexItemSelfAlignment, (int)FlexItemSelfAlignment);
 				case StylePropertyId.FlexLayoutDirection:
 					 return new StyleProperty(StylePropertyId.FlexLayoutDirection, (int)FlexLayoutDirection);
 				case StylePropertyId.FlexLayoutWrap:
@@ -4316,10 +4218,6 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.GridItemRowStart, GridItemRowStart);
 				case StylePropertyId.GridItemRowSpan:
 					 return new StyleProperty(StylePropertyId.GridItemRowSpan, GridItemRowSpan);
-				case StylePropertyId.GridItemColSelfAlignment:
-					 return new StyleProperty(StylePropertyId.GridItemColSelfAlignment, (int)GridItemColSelfAlignment);
-				case StylePropertyId.GridItemRowSelfAlignment:
-					 return new StyleProperty(StylePropertyId.GridItemRowSelfAlignment, (int)GridItemRowSelfAlignment);
 				case StylePropertyId.GridLayoutDirection:
 					 return new StyleProperty(StylePropertyId.GridLayoutDirection, (int)GridLayoutDirection);
 				case StylePropertyId.GridLayoutDensity:

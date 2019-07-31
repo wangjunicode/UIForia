@@ -15,115 +15,115 @@
             <Div style="cell m10">Col 5 Row 2</Div>
         </Group>
 
-        <!-- Creates a grid with a fixed number of columns. One item does not have margin -->
-        <Group style="grid1 grid-horizontal col3layout">
-            <Div style="cell">Col 1</Div>
-            <Div style="cell m10 cell-start">Col 2</Div>
-            <Div style="cell m10 cell-end">Col 3</Div>
+<!--        &lt;!&ndash; Creates a grid with a fixed number of columns. One item does not have margin &ndash;&gt;-->
+<!--        <Group style="grid1 grid-horizontal col3layout">-->
+<!--            <Div style="cell">Col 1</Div>-->
+<!--            <Div style="cell m10 cell-start">Col 2</Div>-->
+<!--            <Div style="cell m10 cell-end">Col 3</Div>-->
 
-            <Div style="cell m10 size100 cell-center">Col 4 Row 2</Div>
-            <Div style="cell m10">Col 5 Row 2</Div>
-        </Group>
+<!--            <Div style="cell m10 size100 cell-center">Col 4 Row 2</Div>-->
+<!--            <Div style="cell m10">Col 5 Row 2</Div>-->
+<!--        </Group>-->
 
-        <!-- Create a grid where some items must shrink to fit -->
-        <Group style="grid2 grid-horizontal">
+<!--        &lt;!&ndash; Create a grid where some items must shrink to fit &ndash;&gt;-->
+<!--        <Group style="grid2 grid-horizontal">-->
 
-            <Div style="cell cell-shrink" style.preferredWidth="500f" style.backgroundColor="Color.yellow">
-                <Text>I Shrink to fit.</Text>
-                <Text>
-                    My preferredWidth is {$parent.style.PreferredWidth.value}
-                </Text>
-                <Text>
-                    My actual width is {$parent.layoutResult.actualSize.width}
-                </Text>
-            </Div>
+<!--            <Div style="cell cell-shrink" style.preferredWidth="500f" style.backgroundColor="Color.yellow">-->
+<!--                <Text>I Shrink to fit.</Text>-->
+<!--                <Text>-->
+<!--                    My preferredWidth is {$parent.style.PreferredWidth.value}-->
+<!--                </Text>-->
+<!--                <Text>-->
+<!--                    My actual width is {$parent.layoutResult.actualSize.width}-->
+<!--                </Text>-->
+<!--            </Div>-->
 
-            <Div style="cell cell-grow size100">
-                <Text>I grow to fit.</Text>
-                <Text>My preferredWidth is {$parent.style.PreferredWidth.value}</Text>
-                <Text>My actual width is {$parent.layoutResult.actualSize.width}</Text>
-            </Div>
+<!--            <Div style="cell cell-grow size100">-->
+<!--                <Text>I grow to fit.</Text>-->
+<!--                <Text>My preferredWidth is {$parent.style.PreferredWidth.value}</Text>-->
+<!--                <Text>My actual width is {$parent.layoutResult.actualSize.width}</Text>-->
+<!--            </Div>-->
 
-            <Div style="cell cell-end">
-                I align at the end
-                <Group style="color-me"/>
-            </Div>
+<!--            <Div style="cell cell-end">-->
+<!--                I align at the end-->
+<!--                <Group style="color-me"/>-->
+<!--            </Div>-->
 
-            <Div style="cell m10 size100 cell-center">I am centered</Div>
-            <Div style="cell m10 cell-fit">I will grow or shrink to fit</Div>
-            <Div style="cell  cell-start">
-                I align at the start
-            </Div>
-        </Group>
+<!--            <Div style="cell m10 size100 cell-center">I am centered</Div>-->
+<!--            <Div style="cell m10 cell-fit">I will grow or shrink to fit</Div>-->
+<!--            <Div style="cell  cell-start">-->
+<!--                I align at the start-->
+<!--            </Div>-->
+<!--        </Group>-->
 
-        <!-- Creates a grid with a fixed amount of columns. More columns will align horizontally and break vertically -->
-        <Group style="grid-horizontal col3layout mb50 oddPadding cell-center">
-            <Div style="cell m10">Col1</Div>
-            <Div style="cell m10">Col2</Div>
-            <Div style="cell m10">Col3</Div>
+<!--        &lt;!&ndash; Creates a grid with a fixed amount of columns. More columns will align horizontally and break vertically &ndash;&gt;-->
+<!--        <Group style="grid-horizontal col3layout mb50 oddPadding cell-center">-->
+<!--            <Div style="cell m10">Col1</Div>-->
+<!--            <Div style="cell m10">Col2</Div>-->
+<!--            <Div style="cell m10">Col3</Div>-->
 
-            <Div style="cell m10">Col4 Row 2</Div>
-            <Div style="cell m10">Col5 Row 2</Div>
-        </Group>
+<!--            <Div style="cell m10">Col4 Row 2</Div>-->
+<!--            <Div style="cell m10">Col5 Row 2</Div>-->
+<!--        </Group>-->
 
-        <Group style="grid-horizontal col3layout mb50 oddPadding ">
-            <Div style="cell m10">Col1</Div>
-            <Div style="cell m10">Col2</Div>
-            <Div style="cell m10">Col3</Div>
+<!--        <Group style="grid-horizontal col3layout mb50 oddPadding ">-->
+<!--            <Div style="cell m10">Col1</Div>-->
+<!--            <Div style="cell m10">Col2</Div>-->
+<!--            <Div style="cell m10">Col3</Div>-->
 
-            <Div style="cell m10">Col4 Row 2</Div>
-            <Div style="cell m10">Col5 Row 2</Div>
-        </Group>
+<!--            <Div style="cell m10">Col4 Row 2</Div>-->
+<!--            <Div style="cell m10">Col5 Row 2</Div>-->
+<!--        </Group>-->
 
-        <Group style="grid-vertical row3layout mb50 oddPadding">
-            <Div style="cell m10">Col1</Div>
-            <Div style="cell m10">Col2</Div>
-            <Div style="cell m10">Col3</Div>
+<!--        <Group style="grid-vertical row3layout mb50 oddPadding">-->
+<!--            <Div style="cell m10">Col1</Div>-->
+<!--            <Div style="cell m10">Col2</Div>-->
+<!--            <Div style="cell m10">Col3</Div>-->
 
-            <Div style="cell m10">Col4 Row 2</Div>
-            <Div style="cell m10">Col5 Row 2</Div>
-        </Group>
+<!--            <Div style="cell m10">Col4 Row 2</Div>-->
+<!--            <Div style="cell m10">Col5 Row 2</Div>-->
+<!--        </Group>-->
 
-        <Div style="grid-container">
+<!--        <Div style="grid-container">-->
 
-            <Group style="grid-cell logo"/>
-            <Group style="grid-cell thead">Home</Group>
-            <Group style="grid-cell thead" onMouseEnter="OnHover()">
-                Concept
-                <Group x-id="concept-menu" if="hover" style="concept-hover" onMouseEnter="OnHover()">
-                    <Group>Features</Group>
-                    <Group>Theory</Group>
-                    <Group>Context</Group>
-                </Group>
-            </Group>
-            <Group style="grid-cell thead seedlogo" onMouseEnter="OnHoverEnd()"/>
-            <Group style="grid-cell thead">Dev Blog</Group>
-            <Group style="grid-cell thead">Community</Group>
+<!--            <Group style="grid-cell logo"/>-->
+<!--            <Group style="grid-cell thead">Home</Group>-->
+<!--            <Group style="grid-cell thead" onMouseEnter="OnHover()">-->
+<!--                Concept-->
+<!--                <Group x-id="concept-menu" if="hover" style="concept-hover" onMouseEnter="OnHover()">-->
+<!--                    <Group>Features</Group>-->
+<!--                    <Group>Theory</Group>-->
+<!--                    <Group>Context</Group>-->
+<!--                </Group>-->
+<!--            </Group>-->
+<!--            <Group style="grid-cell thead seedlogo" onMouseEnter="OnHoverEnd()"/>-->
+<!--            <Group style="grid-cell thead">Dev Blog</Group>-->
+<!--            <Group style="grid-cell thead">Community</Group>-->
 
-            <!-- the red background should not be visible, instead the grid's background should! -->
-            <Group style="[backgroundStyleName, 'borderRadiusTest']"/>
-        </Div>
+<!--            &lt;!&ndash; the red background should not be visible, instead the grid's background should! &ndash;&gt;-->
+<!--            <Group style="[backgroundStyleName, 'borderRadiusTest']"/>-->
+<!--        </Div>-->
 
-        <!-- Resolve grid paradox (temp) -->
-        <Div style="grid-window-thing">
-            <Div>row1</Div>
-            <Group style="grid-maybe-bug">
-                <Div style.preferredHeight="0">
-                    <Div style="nested-bug-child">
-                        <Div style="nested-bug-child">
-                            <Div style="grid-maybe-bug-cell">
-                                <Div style="nested-bug-child">
-                                    <Div style="nested-bug-child">
-                                        Bugz?
-                                    </Div>
-                                </Div>
-                            </Div>
-                        </Div>
-                    </Div>
-                </Div>
-            </Group>
-            <Div>row3</Div>
-        </Div>
+<!--        &lt;!&ndash; Resolve grid paradox (temp) &ndash;&gt;-->
+<!--        <Div style="grid-window-thing">-->
+<!--            <Div>row1</Div>-->
+<!--            <Group style="grid-maybe-bug">-->
+<!--                <Div style.preferredHeight="0">-->
+<!--                    <Div style="nested-bug-child">-->
+<!--                        <Div style="nested-bug-child">-->
+<!--                            <Div style="grid-maybe-bug-cell">-->
+<!--                                <Div style="nested-bug-child">-->
+<!--                                    <Div style="nested-bug-child">-->
+<!--                                        Bugz?-->
+<!--                                    </Div>-->
+<!--                                </Div>-->
+<!--                            </Div>-->
+<!--                        </Div>-->
+<!--                    </Div>-->
+<!--                </Div>-->
+<!--            </Group>-->
+<!--            <Div>row3</Div>-->
+<!--        </Div>-->
 
     </Contents>
 </UITemplate>

@@ -4,6 +4,7 @@ using System.Diagnostics;
 using SVGX;
 using UIForia.Compilers.Style;
 using UIForia.Elements;
+using UIForia.Layout.LayoutTypes;
 using UIForia.Systems;
 using UIForia.Templates;
 using UIForia.Util;
@@ -741,10 +742,10 @@ namespace UIForia.Rendering {
         }
 
         public void SetGridItemPlacement(int colStart, int colSpan, int rowStart, int rowSpan, StyleState state) {
-            SetGridItemColStart(colStart, state);
-            SetGridItemColSpan(colSpan, state);
-            SetGridItemRowStart(rowStart, state);
-            SetGridItemRowSpan(rowSpan, state);
+            SetGridItemColStart(new GridItemPlacement(colStart), state);
+            SetGridItemColSpan(new GridItemPlacement(colSpan), state);
+            SetGridItemRowStart(new GridItemPlacement(rowStart), state);
+            SetGridItemRowSpan(new GridItemPlacement(rowSpan), state);
         }
 
         public BorderRadius GetBorderRadius(StyleState state) {

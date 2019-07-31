@@ -84,12 +84,10 @@ namespace UIForia.Compilers.Style {
                 {"borderradiusbottomright", (targetStyle, property, context) => targetStyle.BorderRadiusBottomRight = MapFixedLength(property.children[0], context)},
                 {"borderradiusbottomleft", (targetStyle, property, context) => targetStyle.BorderRadiusBottomLeft = MapFixedLength(property.children[0], context)},
 
-                {"griditemcolstart", (targetStyle, property, context) => targetStyle.GridItemColStart = (int) MapNumber(property.children[0], context)},
-                {"griditemcolspan", (targetStyle, property, context) => targetStyle.GridItemColSpan = (int) MapNumber(property.children[0], context)},
-                {"griditemrowstart", (targetStyle, property, context) => targetStyle.GridItemRowStart = (int) MapNumber(property.children[0], context)},
-                {"griditemrowspan", (targetStyle, property, context) => targetStyle.GridItemRowSpan = (int) MapNumber(property.children[0], context)},
-                {"griditemcolselfalignment", (targetStyle, property, context) => targetStyle.GridItemColSelfAlignment = MapEnum<GridAxisAlignment>(property.children[0], context)},
-                {"griditemrowselfalignment", (targetStyle, property, context) => targetStyle.GridItemRowSelfAlignment = MapEnum<GridAxisAlignment>(property.children[0], context)},
+                {"griditemcolstart", (targetStyle, property, context) => targetStyle.GridItemColStart = MapGridItemPlacement(property, context)},
+                {"griditemcolspan", (targetStyle, property, context) => targetStyle.GridItemColSpan = MapGridItemPlacement(property, context)},
+                {"griditemrowstart", (targetStyle, property, context) => targetStyle.GridItemRowStart = MapGridItemPlacement(property, context)},
+                {"griditemrowspan", (targetStyle, property, context) => targetStyle.GridItemRowSpan = MapGridItemPlacement(property, context)},
                 {"gridlayoutcolalignment", (targetStyle, property, context) => targetStyle.GridLayoutColAlignment = MapEnum<GridAxisAlignment>(property.children[0], context)},
                 {"gridlayoutrowalignment", (targetStyle, property, context) => targetStyle.GridLayoutRowAlignment = MapEnum<GridAxisAlignment>(property.children[0], context)},
                 {"gridlayoutdensity", (targetStyle, property, context) => targetStyle.GridLayoutDensity = MapEnum<GridLayoutDensity>(property.children[0], context)},
@@ -101,7 +99,6 @@ namespace UIForia.Compilers.Style {
                 {"gridlayoutcolgap", (targetStyle, property, context) => targetStyle.GridLayoutColGap = MapNumber(property.children[0], context)},
                 {"gridlayoutrowgap", (targetStyle, property, context) => targetStyle.GridLayoutRowGap = MapNumber(property.children[0], context)},
 
-                {"flexitemselfalignment", (targetStyle, property, context) => targetStyle.FlexItemSelfAlignment = MapEnum<CrossAxisAlignment>(property.children[0], context)},
                 {"flexitemorder", (targetStyle, property, context) => targetStyle.FlexItemOrder = (int) MapNumber(property.children[0], context)},
                 {"flexitemgrow", (targetStyle, property, context) => targetStyle.FlexItemGrow = (int) MapNumber(property.children[0], context)},
                 {"flexitemshrink", (targetStyle, property, context) => targetStyle.FlexItemShrink = (int) MapNumber(property.children[0], context)},
@@ -300,6 +297,30 @@ namespace UIForia.Compilers.Style {
             return new CursorStyle(null, MapTexture(property.children[0], context), new Vector2(hotSpotX, hotSpotY));
         }
 
+        private static GridItemPlacement MapGridItemPlacement(PropertyNode property, StyleCompileContext context) {
+            StyleASTNode dereferencedValue = context.GetValueForReference(property);
+            
+            switch (dereferencedValue.type) {
+                case StyleASTNodeType.NumericLiteral:
+                    int number = (int) MapNumber(dereferencedValue, context);
+                    if (number < 0) {
+                        return new GridItemPlacement(IntUtil.UnsetValue);
+                    }
+
+                    return new GridItemPlacement(number);
+
+                case StyleASTNodeType.StringLiteral:
+                    string placementName = MapString(property.children[0], context);
+                    if (string.IsNullOrEmpty(placementName) || string.IsNullOrWhiteSpace(placementName) || placementName == ".") {
+                        return new GridItemPlacement(IntUtil.UnsetValue);
+                    }
+                    else {
+                        return new GridItemPlacement(placementName);
+                    }
+            }
+            throw new CompileException(context.fileName, property, $"Had a hard time parsing that grid item placement: {property}.");
+        }
+
         private static void MapTransformBehavior(UIStyle targetStyle, PropertyNode property, StyleCompileContext context) {
             TransformBehavior x = MapEnum<TransformBehavior>(property.children[0], context);
             TransformBehavior y = x;
@@ -418,24 +439,15 @@ namespace UIForia.Compilers.Style {
                             size.pattern = MapGridTrackSizePattern(1, functionNode.children, context, true);
 
                             break;
-                        case "grow":
-                            trackSizeType = GridTrackSizeType.Grow;
+                        case "minmax":
+                            trackSizeType = GridTrackSizeType.MinMax;
                             if (functionNode.children.Count != 2) {
-                                throw new CompileException(context.fileName, trackSize, $"Had a hard time parsing that track size: {trackSize}. Grow must have two arguments.");
+                                throw new CompileException(context.fileName, trackSize, $"Had a hard time parsing that track size: {trackSize}. minmax() must have two arguments.");
                             }
 
-                            size.type = GridTrackSizeType.Grow;
+                            size.type = GridTrackSizeType.MinMax;
                             size.pattern = MapGridTrackSizePattern(0, functionNode.children, context, false);
-
-                            break;
-                        case "shrink":
-                            trackSizeType = GridTrackSizeType.Shrink;
-                            if (functionNode.children.Count != 2) {
-                                throw new CompileException(context.fileName, trackSize, $"Had a hard time parsing that track size: {trackSize}. Shrink must have two arguments.");
-                            }
-
-                            size.type = GridTrackSizeType.Shrink;
-                            size.pattern = MapGridTrackSizePattern(0, functionNode.children, context, false);
+                            
                             break;
                         default:
                             throw new CompileException(context.fileName, trackSize, $"Had a hard time parsing that track size: {trackSize}. Expected a known track size function (repeat, grow, shrink) but all I got was {functionNode.identifier}");
@@ -460,11 +472,10 @@ namespace UIForia.Compilers.Style {
                     throw new CompileException(argument, "You cannot nest repeats.");
                 }
 
-                if (!allowGrowOrShrink && (trackSize.type == GridTrackSizeType.Grow || trackSize.type == GridTrackSizeType.Shrink)) {
-                    throw new CompileException(argument, "You cannot nest grow and shrink into each other.");
+                if (!allowGrowOrShrink && (trackSize.type == GridTrackSizeType.MinMax)) {
+                    throw new CompileException(argument, "You cannot nest MinMaxes into each other.");
                 }
 
-                // mind blown
                 retn[index - startIndex] = trackSize;
             }
 
@@ -666,6 +677,7 @@ namespace UIForia.Compilers.Style {
                         if (unit == UIMeasurementUnit.Percentage) {
                             measurementValue *= 0.01f;
                         }
+
                         return new UIMeasurement(measurementValue, unit);
                     }
                     else {
@@ -682,7 +694,7 @@ namespace UIForia.Compilers.Style {
 
             throw new CompileException(context.fileName, value, $"Cannot parse value, expected a numeric literal or measurement {value}.");
         }
-        
+
         private static UIFixedLength MapFixedLength(StyleASTNode value, StyleCompileContext context) {
             value = context.GetValueForReference(value);
             switch (value) {
@@ -715,38 +727,37 @@ namespace UIForia.Compilers.Style {
             switch (unitNode.value) {
                 case "px":
                     return UIMeasurementUnit.Pixel;
-                
+
                 case "pca":
                     return UIMeasurementUnit.ParentContentArea;
-                
+
                 case "psz":
                     return UIMeasurementUnit.ParentSize;
-                
+
                 case "em":
                     return UIMeasurementUnit.Em;
-                
+
                 case "cnt":
                 case "content":
                     return UIMeasurementUnit.Content;
-                
+
                 case "vw":
                     return UIMeasurementUnit.ViewportWidth;
-                
+
                 case "vh":
                     return UIMeasurementUnit.ViewportHeight;
-                
+
                 case "%":
                     return UIMeasurementUnit.Percentage;
-                
+
                 case "intrinsic":
                     return UIMeasurementUnit.IntrinsicPreferred;
-                
+
                 case "intrinsic-min":
                     return UIMeasurementUnit.IntrinsicMinimum;
-                
+
                 case "fit-content":
                     return UIMeasurementUnit.FitContent;
-                
             }
 
             Debug.LogWarning($"You used a {unitNode.value} in line {unitNode.line} column {unitNode.column} in file {context.fileName} but this unit isn't supported. " +
@@ -769,7 +780,6 @@ namespace UIForia.Compilers.Style {
                     return UIFixedUnit.ViewportWidth;
                 case "em":
                     return UIFixedUnit.Em;
-
             }
 
             Debug.LogWarning($"You used a {unitNode.value} in line {unitNode.line} column {unitNode.column} in file {context.fileName} but this unit isn't supported. " +
@@ -777,7 +787,7 @@ namespace UIForia.Compilers.Style {
 
             return UIFixedUnit.Pixel;
         }
-        
+
         private static UIFixedUnit MapFixedUnit(UnitNode unitNode, StyleCompileContext context) {
             if (unitNode == null) return UIFixedUnit.Pixel;
 

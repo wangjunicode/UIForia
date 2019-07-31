@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using SVGX;
 using UIForia.Elements;
+using UIForia.Layout.LayoutTypes;
 using UIForia.Systems;
 using UIForia.Util;
 using UnityEngine;
@@ -52,6 +53,7 @@ namespace UIForia.Layout {
             
             this.layoutBoxPoolMap = new Dictionary<int, FastLayoutBoxPool>();
             this.layoutBoxPoolMap[(int) LayoutType.Flex] = new FastLayoutBoxPool<FastFlexLayoutBox>();
+            this.layoutBoxPoolMap[(int) LayoutType.Grid] = new FastLayoutBoxPool<FastGridLayoutBox>();
             this.layoutBoxPoolMap[TextLayoutPoolKey] = new FastLayoutBoxPool<FastTextLayoutBox>();
 
             toLayout.Add(root);
@@ -426,7 +428,7 @@ namespace UIForia.Layout {
                         break;
 
                     case LayoutType.Grid:
-                        //retn = layoutBoxPoolMap[(int) LayoutType.Grid].Get(element);
+                        return layoutBoxPoolMap[(int) LayoutType.Grid].Get(this, element);
                         break;
 
                     case LayoutType.Radial:

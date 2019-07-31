@@ -93,7 +93,7 @@ namespace UIForia.Rendering {
             this.float0 = measurement.value;
             this.int1 = (int) measurement.unit;
         }
-        
+
 
         [DebuggerStepThrough]
         public StyleProperty(StylePropertyId propertyId, TransformOffset offset) {
@@ -149,6 +149,17 @@ namespace UIForia.Rendering {
             this.int2 = 0;
             this.objectField = objectField;
         }
+        [DebuggerStepThrough]
+        public StyleProperty(StylePropertyId propertyId, GridItemPlacement placement) {
+            this.propertyId = propertyId;
+            this.float0 = 0;
+            this.float1 = 0;
+            this.int0 = placement.index;
+            this.int1 = 0;
+            this.int2 = 0;
+            this.objectField = placement.name;
+        }
+        
 
         public bool IsDefined {
             [DebuggerStepThrough] get { return !IsUnset; }
@@ -176,7 +187,17 @@ namespace UIForia.Rendering {
         public UIMeasurement AsUIMeasurement => new UIMeasurement(float0, (UIMeasurementUnit) int1);
         public UIFixedLength AsUIFixedLength => new UIFixedLength(float0, (UIFixedUnit) int1);
         public TransformOffset AsTransformOffset => new TransformOffset(float0, (TransformUnit) int1);
-        
+
+        public GridItemPlacement AsGridItemPlacement {
+            get {
+                if (objectField is string name) {
+                    return new GridItemPlacement(name);
+                }
+
+                return new GridItemPlacement(int0);
+            }
+        }
+
         public IReadOnlyList<GridTrackSize> AsGridTrackTemplate => (IReadOnlyList<GridTrackSize>) objectField;
 
         public AnchorTarget AsAnchorTarget => (AnchorTarget) int0;
@@ -194,7 +215,7 @@ namespace UIForia.Rendering {
         public string AsString => (string) objectField;
         public UnderlayType AsUnderlayType => (UnderlayType) int0;
         public Fit AsFit => (Fit) int0;
-        
+
         public AlignmentTarget AsAlignmentTarget => (AlignmentTarget) int0;
         public AlignmentBehavior AsAlignmentBehavior => (AlignmentBehavior) int0;
 
@@ -217,8 +238,8 @@ namespace UIForia.Rendering {
         public bool Equals(in StyleProperty other) {
             return propertyId == other.propertyId &&
                    int0 == other.int0 &&
-                   int1 == other.int1 && 
-                   int2 == other.int2 && 
+                   int1 == other.int1 &&
+                   int2 == other.int2 &&
                    objectField == other.objectField;
         }
 

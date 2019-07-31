@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 
 namespace UIForia.Layout.LayoutTypes {
 
@@ -24,10 +25,58 @@ namespace UIForia.Layout.LayoutTypes {
 
         Value,
         Repeat,
-        Grow,
-        Shrink,
+        MinMax,
         RepeatFit,
         RepeatFill
+
+    }
+
+    public struct GridItemPlacement {
+        
+        public readonly int index;
+        public readonly string name;
+
+        public GridItemPlacement(string name) {
+            if (name != null) {
+                this.index = 0;
+                this.name = name;
+            }
+            else {
+                this.name = null;
+                this.index = 0;
+            }
+        }
+
+        public GridItemPlacement(int index) {
+            this.name = null;
+            this.index = index;
+        }
+
+        public static implicit operator GridItemPlacement(int value) {
+            return new GridItemPlacement(value);
+        }
+        
+        public static bool operator ==(in GridItemPlacement a, in GridItemPlacement b) {
+            return a.index == b.index && a.name == b.name;
+        }
+
+        public static bool operator !=(GridItemPlacement a, GridItemPlacement b) {
+            return a.index != b.index || a.name != b.name;
+        }
+        
+        public bool Equals(in GridItemPlacement other) {
+            return index == other.index && string.Equals(name, other.name);
+        }
+
+        public override bool Equals(object obj) {
+            return obj is GridItemPlacement other && Equals(other);
+        }
+
+        public override int GetHashCode() {
+            unchecked {
+                return (index * 397) ^ (name != null ? name.GetHashCode() : 0);
+            }
+        }
 
     }
 
@@ -41,7 +90,7 @@ namespace UIForia.Layout.LayoutTypes {
         public GridTemplateUnit unit;
         public GridTrackSizeType type;
         public GridTrackSize[] pattern;
-        
+
         public readonly GridTemplateUnit minUnit;
         public readonly GridTemplateUnit maxUnit;
 

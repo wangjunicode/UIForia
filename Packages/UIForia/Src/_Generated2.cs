@@ -338,43 +338,6 @@ namespace UIForia.Bindings.StyleBindings {
 
     }
         
-    public class StyleBinding_CrossAxisAlignment : StyleBinding {
-
-        public readonly Expression<UIForia.Layout.CrossAxisAlignment> expression;
-        public readonly StylePropertyId propertyId;
-        
-        public StyleBinding_CrossAxisAlignment(string propertyName, StylePropertyId propertyId, StyleState state, Expression<UIForia.Layout.CrossAxisAlignment> expression)
-            : base(propertyName, state) {
-            this.propertyId = propertyId;
-            this.expression = expression;
-        }
-
-        public override void Execute(UIElement element, ExpressionContext context) {
-            if (!element.style.IsInState(state)) return;
-
-            var oldValue = element.style.propertyMap[(int)propertyId].AsCrossAxisAlignment;
-            var value = expression.Evaluate(context);
-            if (value != oldValue) {
-                element.style.SetProperty(new StyleProperty(propertyId, (int)value), state);
-            }
-        }
-
-        public override bool IsConstant() {
-            return expression.IsConstant();
-        }
-
-        public override void Apply(UIStyle style, ExpressionContext context) {
-            var value = expression.Evaluate(context);
-            style.SetProperty(new StyleProperty(propertyId, (int)value));
-        }
-
-        public override void Apply(UIStyleSet styleSet, ExpressionContext context) {
-            var value = expression.Evaluate(context);
-            styleSet.SetProperty(new StyleProperty(propertyId, (int)value), state);
-        }
-
-    }
-        
     public class StyleBinding_LayoutDirection : StyleBinding {
 
         public readonly Expression<UIForia.Layout.LayoutDirection> expression;
@@ -486,12 +449,12 @@ namespace UIForia.Bindings.StyleBindings {
 
     }
         
-    public class StyleBinding_GridAxisAlignment : StyleBinding {
+    public class StyleBinding_CrossAxisAlignment : StyleBinding {
 
-        public readonly Expression<UIForia.Layout.GridAxisAlignment> expression;
+        public readonly Expression<UIForia.Layout.CrossAxisAlignment> expression;
         public readonly StylePropertyId propertyId;
         
-        public StyleBinding_GridAxisAlignment(string propertyName, StylePropertyId propertyId, StyleState state, Expression<UIForia.Layout.GridAxisAlignment> expression)
+        public StyleBinding_CrossAxisAlignment(string propertyName, StylePropertyId propertyId, StyleState state, Expression<UIForia.Layout.CrossAxisAlignment> expression)
             : base(propertyName, state) {
             this.propertyId = propertyId;
             this.expression = expression;
@@ -500,7 +463,7 @@ namespace UIForia.Bindings.StyleBindings {
         public override void Execute(UIElement element, ExpressionContext context) {
             if (!element.style.IsInState(state)) return;
 
-            var oldValue = element.style.propertyMap[(int)propertyId].AsGridAxisAlignment;
+            var oldValue = element.style.propertyMap[(int)propertyId].AsCrossAxisAlignment;
             var value = expression.Evaluate(context);
             if (value != oldValue) {
                 element.style.SetProperty(new StyleProperty(propertyId, (int)value), state);
@@ -519,6 +482,43 @@ namespace UIForia.Bindings.StyleBindings {
         public override void Apply(UIStyleSet styleSet, ExpressionContext context) {
             var value = expression.Evaluate(context);
             styleSet.SetProperty(new StyleProperty(propertyId, (int)value), state);
+        }
+
+    }
+        
+    public class StyleBinding_GridItemPlacement : StyleBinding {
+
+        public readonly Expression<UIForia.Layout.LayoutTypes.GridItemPlacement> expression;
+        public readonly StylePropertyId propertyId;
+        
+        public StyleBinding_GridItemPlacement(string propertyName, StylePropertyId propertyId, StyleState state, Expression<UIForia.Layout.LayoutTypes.GridItemPlacement> expression)
+            : base(propertyName, state) {
+            this.propertyId = propertyId;
+            this.expression = expression;
+        }
+
+        public override void Execute(UIElement element, ExpressionContext context) {
+            if (!element.style.IsInState(state)) return;
+
+            var oldValue = element.style.propertyMap[(int)propertyId].AsGridItemPlacement;
+            var value = expression.Evaluate(context);
+            if (value != oldValue) {
+                element.style.SetProperty(new StyleProperty(propertyId, value), state);
+            }
+        }
+
+        public override bool IsConstant() {
+            return expression.IsConstant();
+        }
+
+        public override void Apply(UIStyle style, ExpressionContext context) {
+            var value = expression.Evaluate(context);
+            style.SetProperty(new StyleProperty(propertyId, value));
+        }
+
+        public override void Apply(UIStyleSet styleSet, ExpressionContext context) {
+            var value = expression.Evaluate(context);
+            styleSet.SetProperty(new StyleProperty(propertyId, value), state);
         }
 
     }
@@ -630,6 +630,43 @@ namespace UIForia.Bindings.StyleBindings {
         public override void Apply(UIStyleSet styleSet, ExpressionContext context) {
             var value = expression.Evaluate(context);
             styleSet.SetProperty(new StyleProperty(propertyId, value), state);
+        }
+
+    }
+        
+    public class StyleBinding_GridAxisAlignment : StyleBinding {
+
+        public readonly Expression<UIForia.Layout.GridAxisAlignment> expression;
+        public readonly StylePropertyId propertyId;
+        
+        public StyleBinding_GridAxisAlignment(string propertyName, StylePropertyId propertyId, StyleState state, Expression<UIForia.Layout.GridAxisAlignment> expression)
+            : base(propertyName, state) {
+            this.propertyId = propertyId;
+            this.expression = expression;
+        }
+
+        public override void Execute(UIElement element, ExpressionContext context) {
+            if (!element.style.IsInState(state)) return;
+
+            var oldValue = element.style.propertyMap[(int)propertyId].AsGridAxisAlignment;
+            var value = expression.Evaluate(context);
+            if (value != oldValue) {
+                element.style.SetProperty(new StyleProperty(propertyId, (int)value), state);
+            }
+        }
+
+        public override bool IsConstant() {
+            return expression.IsConstant();
+        }
+
+        public override void Apply(UIStyle style, ExpressionContext context) {
+            var value = expression.Evaluate(context);
+            style.SetProperty(new StyleProperty(propertyId, (int)value));
+        }
+
+        public override void Apply(UIStyleSet styleSet, ExpressionContext context) {
+            var value = expression.Evaluate(context);
+            styleSet.SetProperty(new StyleProperty(propertyId, (int)value), state);
         }
 
     }
@@ -1234,12 +1271,12 @@ namespace UIForia.Compilers {
 
         private static readonly EnumAliasSource<UIForia.Rendering.Overflow> s_EnumSource_Overflow = new EnumAliasSource<UIForia.Rendering.Overflow>();
         private static readonly EnumAliasSource<UIForia.Rendering.Visibility> s_EnumSource_Visibility = new EnumAliasSource<UIForia.Rendering.Visibility>();
-        private static readonly EnumAliasSource<UIForia.Layout.CrossAxisAlignment> s_EnumSource_CrossAxisAlignment = new EnumAliasSource<UIForia.Layout.CrossAxisAlignment>();
         private static readonly EnumAliasSource<UIForia.Layout.LayoutDirection> s_EnumSource_LayoutDirection = new EnumAliasSource<UIForia.Layout.LayoutDirection>();
         private static readonly EnumAliasSource<UIForia.Layout.LayoutWrap> s_EnumSource_LayoutWrap = new EnumAliasSource<UIForia.Layout.LayoutWrap>();
         private static readonly EnumAliasSource<UIForia.Layout.MainAxisAlignment> s_EnumSource_MainAxisAlignment = new EnumAliasSource<UIForia.Layout.MainAxisAlignment>();
-        private static readonly EnumAliasSource<UIForia.Layout.GridAxisAlignment> s_EnumSource_GridAxisAlignment = new EnumAliasSource<UIForia.Layout.GridAxisAlignment>();
+        private static readonly EnumAliasSource<UIForia.Layout.CrossAxisAlignment> s_EnumSource_CrossAxisAlignment = new EnumAliasSource<UIForia.Layout.CrossAxisAlignment>();
         private static readonly EnumAliasSource<UIForia.Layout.GridLayoutDensity> s_EnumSource_GridLayoutDensity = new EnumAliasSource<UIForia.Layout.GridLayoutDensity>();
+        private static readonly EnumAliasSource<UIForia.Layout.GridAxisAlignment> s_EnumSource_GridAxisAlignment = new EnumAliasSource<UIForia.Layout.GridAxisAlignment>();
         private static readonly EnumAliasSource<UIForia.Layout.AlignmentTarget> s_EnumSource_AlignmentTarget = new EnumAliasSource<UIForia.Layout.AlignmentTarget>();
         private static readonly EnumAliasSource<UIForia.Layout.AlignmentBehavior> s_EnumSource_AlignmentBehavior = new EnumAliasSource<UIForia.Layout.AlignmentBehavior>();
         private static readonly EnumAliasSource<UIForia.Layout.Fit> s_EnumSource_Fit = new EnumAliasSource<UIForia.Layout.Fit>();
@@ -1304,8 +1341,6 @@ case "overflowx":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_int("FlexItemGrow", UIForia.Rendering.StylePropertyId.FlexItemGrow, targetState.state, Compile<int>(value, null));                
                 case "flexitemshrink":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_int("FlexItemShrink", UIForia.Rendering.StylePropertyId.FlexItemShrink, targetState.state, Compile<int>(value, null));                
-                case "flexitemselfalignment":
-                    return new UIForia.Bindings.StyleBindings.StyleBinding_CrossAxisAlignment("FlexItemSelfAlignment", UIForia.Rendering.StylePropertyId.FlexItemSelfAlignment, targetState.state, Compile<UIForia.Layout.CrossAxisAlignment>(value, s_EnumSource_CrossAxisAlignment));                
                 case "flexlayoutdirection":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_LayoutDirection("FlexLayoutDirection", UIForia.Rendering.StylePropertyId.FlexLayoutDirection, targetState.state, Compile<UIForia.Layout.LayoutDirection>(value, s_EnumSource_LayoutDirection));                
                 case "flexlayoutwrap":
@@ -1315,17 +1350,13 @@ case "overflowx":
                 case "flexlayoutcrossaxisalignment":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_CrossAxisAlignment("FlexLayoutCrossAxisAlignment", UIForia.Rendering.StylePropertyId.FlexLayoutCrossAxisAlignment, targetState.state, Compile<UIForia.Layout.CrossAxisAlignment>(value, s_EnumSource_CrossAxisAlignment));                
                 case "griditemcolstart":
-                    return new UIForia.Bindings.StyleBindings.StyleBinding_int("GridItemColStart", UIForia.Rendering.StylePropertyId.GridItemColStart, targetState.state, Compile<int>(value, null));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_GridItemPlacement("GridItemColStart", UIForia.Rendering.StylePropertyId.GridItemColStart, targetState.state, Compile<UIForia.Layout.LayoutTypes.GridItemPlacement>(value, null));                
                 case "griditemcolspan":
-                    return new UIForia.Bindings.StyleBindings.StyleBinding_int("GridItemColSpan", UIForia.Rendering.StylePropertyId.GridItemColSpan, targetState.state, Compile<int>(value, null));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_GridItemPlacement("GridItemColSpan", UIForia.Rendering.StylePropertyId.GridItemColSpan, targetState.state, Compile<UIForia.Layout.LayoutTypes.GridItemPlacement>(value, null));                
                 case "griditemrowstart":
-                    return new UIForia.Bindings.StyleBindings.StyleBinding_int("GridItemRowStart", UIForia.Rendering.StylePropertyId.GridItemRowStart, targetState.state, Compile<int>(value, null));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_GridItemPlacement("GridItemRowStart", UIForia.Rendering.StylePropertyId.GridItemRowStart, targetState.state, Compile<UIForia.Layout.LayoutTypes.GridItemPlacement>(value, null));                
                 case "griditemrowspan":
-                    return new UIForia.Bindings.StyleBindings.StyleBinding_int("GridItemRowSpan", UIForia.Rendering.StylePropertyId.GridItemRowSpan, targetState.state, Compile<int>(value, null));                
-                case "griditemcolselfalignment":
-                    return new UIForia.Bindings.StyleBindings.StyleBinding_GridAxisAlignment("GridItemColSelfAlignment", UIForia.Rendering.StylePropertyId.GridItemColSelfAlignment, targetState.state, Compile<UIForia.Layout.GridAxisAlignment>(value, s_EnumSource_GridAxisAlignment));                
-                case "griditemrowselfalignment":
-                    return new UIForia.Bindings.StyleBindings.StyleBinding_GridAxisAlignment("GridItemRowSelfAlignment", UIForia.Rendering.StylePropertyId.GridItemRowSelfAlignment, targetState.state, Compile<UIForia.Layout.GridAxisAlignment>(value, s_EnumSource_GridAxisAlignment));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_GridItemPlacement("GridItemRowSpan", UIForia.Rendering.StylePropertyId.GridItemRowSpan, targetState.state, Compile<UIForia.Layout.LayoutTypes.GridItemPlacement>(value, null));                
                 case "gridlayoutdirection":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_LayoutDirection("GridLayoutDirection", UIForia.Rendering.StylePropertyId.GridLayoutDirection, targetState.state, Compile<UIForia.Layout.LayoutDirection>(value, s_EnumSource_LayoutDirection));                
                 case "gridlayoutdensity":

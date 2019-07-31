@@ -354,8 +354,6 @@ style myStyle {
 const colSelfAlignment = Center;
 
 style myStyle {
-    GridItemColSelfAlignment = @colSelfAlignment;
-    GridItemRowSelfAlignment = End;
     GridLayoutColAlignment = Shrink;
     GridLayoutRowAlignment = fit;
 }
@@ -367,8 +365,6 @@ style myStyle {
         var containers = styleSheet.styleGroupContainers;
         Assert.AreEqual(1, containers.Length);
 
-        Assert.AreEqual(GridAxisAlignment.Center, containers[0].groups[0].normal.style.GridItemColSelfAlignment);
-        Assert.AreEqual(GridAxisAlignment.End, containers[0].groups[0].normal.style.GridItemRowSelfAlignment);
         Assert.AreEqual(GridAxisAlignment.Shrink, containers[0].groups[0].normal.style.GridLayoutColAlignment);
         Assert.AreEqual(GridAxisAlignment.Fit, containers[0].groups[0].normal.style.GridLayoutRowAlignment);
     }
@@ -606,8 +602,8 @@ style myStyle {
         style myStyle {
             GridLayoutRowTemplate = 
                 repeat(fit, @aSize) 
-                repeat(5, 10px 10px grow(1mx, 10px)) 
-                shrink(1mx, @aSize) 
+                repeat(5, 10px 10px minmax(1mx, 10px)) 
+                minmax(1mx, @aSize) 
                 1mx;
         }
 
@@ -641,7 +637,7 @@ style myStyle {
         Assert.AreEqual(10f, actual2.pattern[1].value);
         Assert.AreEqual(GridTemplateUnit.Pixel, actual2.pattern[1].unit);
         // arg 3
-        Assert.AreEqual(GridTrackSizeType.Grow, actual2.pattern[2].type);
+        Assert.AreEqual(GridTrackSizeType.MinMax, actual2.pattern[2].type);
         Assert.AreEqual(2, actual2.pattern[2].pattern.Length);
         Assert.AreEqual(1, actual2.pattern[2].pattern[0].value);
         Assert.AreEqual(GridTemplateUnit.MaxContent, actual2.pattern[2].pattern[0].unit);
@@ -650,7 +646,7 @@ style myStyle {
         
         GridTrackSize actual3 = styleGroup[0].groups[0].normal.style.GridLayoutRowTemplate[2];
 
-        Assert.AreEqual(GridTrackSizeType.Shrink, actual3.type);
+        Assert.AreEqual(GridTrackSizeType.MinMax, actual3.type);
         Assert.AreEqual(2, actual3.pattern.Length);
         Assert.AreEqual(GridTrackSizeType.Value, actual3.pattern[0].type);
         Assert.AreEqual(1, actual3.pattern[0].value);
@@ -667,7 +663,6 @@ style myStyle {
 const axis = Stretch;
 
 style myStyle {
-    FlexItemSelfAlignment = Center;
     FlexLayoutCrossAxisAlignment = @axis;
     FlexLayoutMainAxisAlignment = SpaceAround;
 }
@@ -678,7 +673,6 @@ style myStyle {
         var styleGroup = styleSheet.styleGroupContainers;
         Assert.AreEqual(1, styleGroup.Length);
 
-        Assert.AreEqual(CrossAxisAlignment.Center, styleGroup[0].groups[0].normal.style.FlexItemSelfAlignment);
         Assert.AreEqual(CrossAxisAlignment.Stretch, styleGroup[0].groups[0].normal.style.FlexLayoutCrossAxisAlignment);
         Assert.AreEqual(MainAxisAlignment.SpaceAround, styleGroup[0].groups[0].normal.style.FlexLayoutMainAxisAlignment);
     }

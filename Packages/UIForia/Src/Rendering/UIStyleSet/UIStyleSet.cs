@@ -741,11 +741,18 @@ namespace UIForia.Rendering {
             //styleSystem.SetStyleProperties(element, toUpdate);
         }
 
-        public void SetGridItemPlacement(int colStart, int colSpan, int rowStart, int rowSpan, StyleState state) {
-            SetGridItemColStart(new GridItemPlacement(colStart), state);
-            SetGridItemColSpan(new GridItemPlacement(colSpan), state);
-            SetGridItemRowStart(new GridItemPlacement(rowStart), state);
-            SetGridItemRowSpan(new GridItemPlacement(rowSpan), state);
+        public void SetGridItemPlacement(int x, int y, int width, int height, StyleState state) {
+            SetGridItemX(new GridItemPlacement(x), state);
+            SetGridItemY(new GridItemPlacement(y), state);
+            SetGridItemWidth(new GridItemPlacement(width < 1 ? 1 : width), state);
+            SetGridItemHeight(new GridItemPlacement(height < 1 ? 1 : height), state);
+        }
+        
+        public void SetGridItemPlacement(int x, int y, StyleState state) {
+            SetGridItemX(new GridItemPlacement(x), state);
+            SetGridItemY(new GridItemPlacement(y), state);
+            SetGridItemWidth(new GridItemPlacement(1), state);
+            SetGridItemHeight(new GridItemPlacement(1), state);
         }
 
         public BorderRadius GetBorderRadius(StyleState state) {

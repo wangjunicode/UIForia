@@ -314,19 +314,19 @@ namespace UIForia.Rendering {
         }
 
         public static StyleProperty GridItemColStart(int colStart) {
-            return new StyleProperty(StylePropertyId.GridItemColStart, colStart);
+            return new StyleProperty(StylePropertyId.GridItemY, colStart);
         }
 
         public static StyleProperty GridItemColSpan(int colSpan) {
-            return new StyleProperty(StylePropertyId.GridItemColSpan, colSpan);
+            return new StyleProperty(StylePropertyId.GridItemHeight, colSpan);
         }
 
         public static StyleProperty GridItemRowStart(int rowStart) {
-            return new StyleProperty(StylePropertyId.GridItemRowStart, rowStart);
+            return new StyleProperty(StylePropertyId.GridItemX, rowStart);
         }
 
         public static StyleProperty GridItemRowSpan(int rowSpan) {
-            return new StyleProperty(StylePropertyId.GridItemRowSpan, rowSpan);
+            return new StyleProperty(StylePropertyId.GridItemWidth, rowSpan);
         }
 
         public static StyleProperty GridItemColSelfAlignment(CrossAxisAlignment alignment) {
@@ -354,11 +354,11 @@ namespace UIForia.Rendering {
         }
 
         public static StyleProperty GridLayoutColAutoSize(GridTrackSize autoColSize) {
-            return new StyleProperty(StylePropertyId.GridLayoutMainAxisAutoSize, autoColSize.minValue, (int) autoColSize.minUnit);
+            return new StyleProperty(StylePropertyId.GridLayoutColAutoSize, autoColSize.minValue, (int) autoColSize.minUnit);
         }
 
         public static StyleProperty GridLayoutRowAutoSize(GridTrackSize autoRowSize) {
-            return new StyleProperty(StylePropertyId.GridLayoutCrossAxisAutoSize, autoRowSize.minValue, (int) autoRowSize.minUnit);
+            return new StyleProperty(StylePropertyId.GridLayoutRowAutoSize, autoRowSize.minValue, (int) autoRowSize.minUnit);
         }
 
         public static StyleProperty GridLayoutColGap(float colGap) {

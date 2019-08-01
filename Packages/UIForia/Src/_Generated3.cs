@@ -42,10 +42,10 @@ namespace UIForia.Rendering {
 		public const LayoutWrap FlexLayoutWrap = UIForia.Layout.LayoutWrap.None;
 		public const MainAxisAlignment FlexLayoutMainAxisAlignment = UIForia.Layout.MainAxisAlignment.Start;
 		public const CrossAxisAlignment FlexLayoutCrossAxisAlignment = UIForia.Layout.CrossAxisAlignment.Start;
-		public static readonly GridItemPlacement GridItemColStart = new GridItemPlacement(-1);
-		public static readonly GridItemPlacement GridItemColSpan = new GridItemPlacement(1);
-		public static readonly GridItemPlacement GridItemRowStart = new GridItemPlacement(-1);
-		public static readonly GridItemPlacement GridItemRowSpan = new GridItemPlacement(1);
+		public static readonly GridItemPlacement GridItemX = new GridItemPlacement(-1);
+		public static readonly GridItemPlacement GridItemY = new GridItemPlacement(-1);
+		public static readonly GridItemPlacement GridItemWidth = new GridItemPlacement(1);
+		public static readonly GridItemPlacement GridItemHeight = new GridItemPlacement(1);
 		public const LayoutDirection GridLayoutDirection = UIForia.Layout.LayoutDirection.Horizontal;
 		public const GridLayoutDensity GridLayoutDensity = UIForia.Layout.GridLayoutDensity.Sparse;
 		public static readonly IReadOnlyList<UIForia.Layout.LayoutTypes.GridTrackSize> GridLayoutColTemplate = ListPool<GridTrackSize>.Empty;
@@ -200,14 +200,14 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.FlexLayoutMainAxisAlignment, (int)UIForia.Layout.MainAxisAlignment.Start);
 				case StylePropertyId.FlexLayoutCrossAxisAlignment:
 					 return new StyleProperty(StylePropertyId.FlexLayoutCrossAxisAlignment, (int)UIForia.Layout.CrossAxisAlignment.Start);
-				case StylePropertyId.GridItemColStart:
-					 return new StyleProperty(StylePropertyId.GridItemColStart, new GridItemPlacement(-1));
-				case StylePropertyId.GridItemColSpan:
-					 return new StyleProperty(StylePropertyId.GridItemColSpan, new GridItemPlacement(1));
-				case StylePropertyId.GridItemRowStart:
-					 return new StyleProperty(StylePropertyId.GridItemRowStart, new GridItemPlacement(-1));
-				case StylePropertyId.GridItemRowSpan:
-					 return new StyleProperty(StylePropertyId.GridItemRowSpan, new GridItemPlacement(1));
+				case StylePropertyId.GridItemX:
+					 return new StyleProperty(StylePropertyId.GridItemX, new GridItemPlacement(-1));
+				case StylePropertyId.GridItemY:
+					 return new StyleProperty(StylePropertyId.GridItemY, new GridItemPlacement(-1));
+				case StylePropertyId.GridItemWidth:
+					 return new StyleProperty(StylePropertyId.GridItemWidth, new GridItemPlacement(1));
+				case StylePropertyId.GridItemHeight:
+					 return new StyleProperty(StylePropertyId.GridItemHeight, new GridItemPlacement(1));
 				case StylePropertyId.GridLayoutDirection:
 					 return new StyleProperty(StylePropertyId.GridLayoutDirection, (int)UIForia.Layout.LayoutDirection.Horizontal);
 				case StylePropertyId.GridLayoutDensity:
@@ -216,10 +216,10 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.GridLayoutColTemplate, ListPool<GridTrackSize>.Empty);
 				case StylePropertyId.GridLayoutRowTemplate:
 					 return new StyleProperty(StylePropertyId.GridLayoutRowTemplate, ListPool<GridTrackSize>.Empty);
-				case StylePropertyId.GridLayoutMainAxisAutoSize:
-					 return new StyleProperty(StylePropertyId.GridLayoutMainAxisAutoSize, new GridTrackSize(1f, GridTemplateUnit.MaxContent));
-				case StylePropertyId.GridLayoutCrossAxisAutoSize:
-					 return new StyleProperty(StylePropertyId.GridLayoutCrossAxisAutoSize, new GridTrackSize(1f, GridTemplateUnit.FractionalRemaining));
+				case StylePropertyId.GridLayoutColAutoSize:
+					 return new StyleProperty(StylePropertyId.GridLayoutColAutoSize, new GridTrackSize(1f, GridTemplateUnit.MaxContent));
+				case StylePropertyId.GridLayoutRowAutoSize:
+					 return new StyleProperty(StylePropertyId.GridLayoutRowAutoSize, new GridTrackSize(1f, GridTemplateUnit.FractionalRemaining));
 				case StylePropertyId.GridLayoutColGap:
 					 return new StyleProperty(StylePropertyId.GridLayoutColGap, 0f);
 				case StylePropertyId.GridLayoutRowGap:

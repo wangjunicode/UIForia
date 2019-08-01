@@ -74,10 +74,10 @@ namespace UIForia.Util {
                 for (int i = 0; i < rectCount; i++) {
                     ref PackedRect check = ref packedRects[i];
 
-                    bool intersects = retn.yMin >= check.yMax ||
+                    bool intersects = !(retn.yMin >= check.yMax ||
                                       retn.yMax <= check.yMin ||
                                       retn.xMax <= check.xMin ||
-                                      retn.xMin >= check.xMax;
+                                      retn.xMin >= check.xMax);
 
                     if (intersects) {
                         intersectCount++;

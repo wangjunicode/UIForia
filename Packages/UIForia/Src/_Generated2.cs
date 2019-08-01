@@ -1349,14 +1349,14 @@ case "overflowx":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_MainAxisAlignment("FlexLayoutMainAxisAlignment", UIForia.Rendering.StylePropertyId.FlexLayoutMainAxisAlignment, targetState.state, Compile<UIForia.Layout.MainAxisAlignment>(value, s_EnumSource_MainAxisAlignment));                
                 case "flexlayoutcrossaxisalignment":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_CrossAxisAlignment("FlexLayoutCrossAxisAlignment", UIForia.Rendering.StylePropertyId.FlexLayoutCrossAxisAlignment, targetState.state, Compile<UIForia.Layout.CrossAxisAlignment>(value, s_EnumSource_CrossAxisAlignment));                
-                case "griditemcolstart":
-                    return new UIForia.Bindings.StyleBindings.StyleBinding_GridItemPlacement("GridItemColStart", UIForia.Rendering.StylePropertyId.GridItemColStart, targetState.state, Compile<UIForia.Layout.LayoutTypes.GridItemPlacement>(value, null));                
-                case "griditemcolspan":
-                    return new UIForia.Bindings.StyleBindings.StyleBinding_GridItemPlacement("GridItemColSpan", UIForia.Rendering.StylePropertyId.GridItemColSpan, targetState.state, Compile<UIForia.Layout.LayoutTypes.GridItemPlacement>(value, null));                
-                case "griditemrowstart":
-                    return new UIForia.Bindings.StyleBindings.StyleBinding_GridItemPlacement("GridItemRowStart", UIForia.Rendering.StylePropertyId.GridItemRowStart, targetState.state, Compile<UIForia.Layout.LayoutTypes.GridItemPlacement>(value, null));                
-                case "griditemrowspan":
-                    return new UIForia.Bindings.StyleBindings.StyleBinding_GridItemPlacement("GridItemRowSpan", UIForia.Rendering.StylePropertyId.GridItemRowSpan, targetState.state, Compile<UIForia.Layout.LayoutTypes.GridItemPlacement>(value, null));                
+                case "griditemx":
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_GridItemPlacement("GridItemX", UIForia.Rendering.StylePropertyId.GridItemX, targetState.state, Compile<UIForia.Layout.LayoutTypes.GridItemPlacement>(value, null));                
+                case "griditemy":
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_GridItemPlacement("GridItemY", UIForia.Rendering.StylePropertyId.GridItemY, targetState.state, Compile<UIForia.Layout.LayoutTypes.GridItemPlacement>(value, null));                
+                case "griditemwidth":
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_GridItemPlacement("GridItemWidth", UIForia.Rendering.StylePropertyId.GridItemWidth, targetState.state, Compile<UIForia.Layout.LayoutTypes.GridItemPlacement>(value, null));                
+                case "griditemheight":
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_GridItemPlacement("GridItemHeight", UIForia.Rendering.StylePropertyId.GridItemHeight, targetState.state, Compile<UIForia.Layout.LayoutTypes.GridItemPlacement>(value, null));                
                 case "gridlayoutdirection":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_LayoutDirection("GridLayoutDirection", UIForia.Rendering.StylePropertyId.GridLayoutDirection, targetState.state, Compile<UIForia.Layout.LayoutDirection>(value, s_EnumSource_LayoutDirection));                
                 case "gridlayoutdensity":
@@ -1366,9 +1366,9 @@ case "overflowx":
                 case "gridlayoutrowtemplate":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_GridTrackTemplate("GridLayoutRowTemplate", UIForia.Rendering.StylePropertyId.GridLayoutRowTemplate, targetState.state, Compile<System.Collections.Generic.IReadOnlyList<UIForia.Layout.LayoutTypes.GridTrackSize>>(value, null));                
                 case "gridlayoutmainaxisautosize":
-                    return new UIForia.Bindings.StyleBindings.StyleBinding_GridTrackSize("GridLayoutMainAxisAutoSize", UIForia.Rendering.StylePropertyId.GridLayoutMainAxisAutoSize, targetState.state, Compile<UIForia.Layout.LayoutTypes.GridTrackSize>(value, null));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_GridTrackSize("GridLayoutMainAxisAutoSize", UIForia.Rendering.StylePropertyId.GridLayoutColAutoSize, targetState.state, Compile<UIForia.Layout.LayoutTypes.GridTrackSize>(value, null));                
                 case "gridlayoutcrossaxisautosize":
-                    return new UIForia.Bindings.StyleBindings.StyleBinding_GridTrackSize("GridLayoutCrossAxisAutoSize", UIForia.Rendering.StylePropertyId.GridLayoutCrossAxisAutoSize, targetState.state, Compile<UIForia.Layout.LayoutTypes.GridTrackSize>(value, null));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_GridTrackSize("GridLayoutCrossAxisAutoSize", UIForia.Rendering.StylePropertyId.GridLayoutRowAutoSize, targetState.state, Compile<UIForia.Layout.LayoutTypes.GridTrackSize>(value, null));                
                 case "gridlayoutcolgap":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_float("GridLayoutColGap", UIForia.Rendering.StylePropertyId.GridLayoutColGap, targetState.state, Compile<float>(value, null));                
                 case "gridlayoutrowgap":

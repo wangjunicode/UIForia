@@ -4,11 +4,11 @@ namespace UIForia.Util {
 
     public static class IntUtil {
 
-        public const int UnsetValue = int.MaxValue;
+        public const int UnsetValue = int.MinValue;
         
         [DebuggerStepThrough]
         public static bool IsDefined(int value) {
-            return value < int.MaxValue;
+            return value != int.MinValue;
         }
 
     }

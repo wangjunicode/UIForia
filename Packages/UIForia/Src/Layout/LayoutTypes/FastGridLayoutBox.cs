@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using UIForia.Rendering;
 using UIForia.Util;
 using UnityEngine;
 
@@ -9,18 +10,22 @@ namespace UIForia.Layout.LayoutTypes {
 
         private bool placementDirty;
 
-        private readonly StructList<GridTrack> rowTrackList;
         private readonly StructList<GridTrack> colTrackList;
+        private readonly StructList<GridTrack> rowTrackList;
         private readonly StructList<GridPlacement> placementList;
 
         private static readonly StructList<GridRegion> s_OccupiedAreas = new StructList<GridRegion>(32);
 
         public FastGridLayoutBox() {
             this.placementDirty = true;
-            this.rowTrackList = new StructList<GridTrack>();
             this.colTrackList = new StructList<GridTrack>();
+            this.rowTrackList = new StructList<GridTrack>();
             this.placementList = new StructList<GridPlacement>();
         }
+
+        internal int RowCount => rowTrackList.size;
+
+        internal int ColCount => colTrackList.size;
 
         public override float GetIntrinsicMinWidth() {
             return 0;
@@ -65,143 +70,327 @@ namespace UIForia.Layout.LayoutTypes {
                 placement.layoutBox.GetMarginHorizontal(widthBlock, ref placement.margin);
                 placement.outputWidth = placement.size.prefWidth + placement.margin.left + placement.margin.right;
             }
-            
-            ResolveColumnTrackWidths(size.width - paddingBox.left - paddingBox.right - borderBox.left - borderBox.right);
-            
 
+            ResolveHorizontalTrackWidths(widthBlock, size.width - paddingBox.left - paddingBox.right - borderBox.left - borderBox.right);
+
+            PositionTracks(colTrackList, element.style.GridLayoutColGap);
+
+            ApplyHorizontalSizes();
+
+            for (int i = 0; i < placementCount; i++) {
+                ref GridPlacement placement = ref placements[i];
+                placement.layoutBox.GetHeight(placement.layoutBox.size.width, widthBlock, heightBlock, ref placement.size);
+                placement.layoutBox.GetMarginVertical(heightBlock, ref placement.margin);
+                placement.outputHeight = placement.size.prefHeight + placement.margin.top + placement.margin.bottom;
+            }
+
+            ResolveVerticalTrackHeights(heightBlock, size.height - paddingBox.top - paddingBox.bottom - borderBox.top - borderBox.bottom);
+
+            PositionTracks(rowTrackList, element.style.GridLayoutRowGap);
+
+            ApplyVerticalSizes();
         }
 
-        private void ResolveColumnTrackWidths(in BlockSize blockWidth, float remaining) {
+        private void ApplyHorizontalSizes() {
+            GridAxisAlignment colAlignment = element.style.GridLayoutColAlignment;
+
+            float paddingBorderLeft = paddingBox.left + borderBox.left;
+
+            GridPlacement[] placements = placementList.array;
+            int placementCount = placementList.size;
+            GridTrack[] tracks = colTrackList.array;
+
+            for (int i = 0; i < placementCount; i++) {
+                ref GridPlacement placement = ref placements[i];
+                ref GridTrack spanEnd = ref tracks[placement.x + placement.width - 1];
+
+                FastLayoutBox child = placement.layoutBox;
+
+                float x = tracks[placement.x].position;
+                float spannedTracksWidth = (spanEnd.position + spanEnd.size) - x;
+
+                float finalX = x + placement.margin.left;
+                float finalWidth = spannedTracksWidth;
+
+                Fit fit = default;
+                Alignment alignment = new Alignment(new UIFixedLength(0, UIFixedUnit.Percent), 0, AlignmentTarget.AllocatedBox);
+
+                BlockSize blockSize = new BlockSize();
+                blockSize.size = finalWidth;
+                blockSize.contentAreaSize = finalWidth;
+
+                switch (colAlignment) {
+                    case GridAxisAlignment.Center:
+                        alignment = new Alignment(new UIFixedLength(0.5f, UIFixedUnit.Percent), 0.5f, AlignmentTarget.AllocatedBox);
+                        break;
+
+                    case GridAxisAlignment.End:
+                        alignment = new Alignment(new UIFixedLength(1, UIFixedUnit.Percent), 1, AlignmentTarget.AllocatedBox);
+                        break;
+
+                    case GridAxisAlignment.Start:
+                        break;
+
+                    case GridAxisAlignment.Grow:
+                        fit = Fit.Grow;
+                        break;
+                    case GridAxisAlignment.Shrink:
+                        fit = Fit.Shrink;
+                        break;
+                    case GridAxisAlignment.Fit:
+                        fit = Fit.Fit;
+                        break;
+                }
+
+                child.ApplyHorizontalLayout(finalX + paddingBorderLeft, blockSize, blockSize.contentAreaSize, placement.size.prefWidth, alignment, fit);
+            }
+        }
+
+        private void ApplyVerticalSizes() {
+            GridAxisAlignment colAlignment = element.style.GridLayoutColAlignment;
+
+            float paddingBorderTop = paddingBox.top + borderBox.top;
+
+            GridPlacement[] placements = placementList.array;
+            int placementCount = placementList.size;
+            GridTrack[] tracks = rowTrackList.array;
+
+            for (int i = 0; i < placementCount; i++) {
+                ref GridPlacement placement = ref placements[i];
+                ref GridTrack spanEnd = ref tracks[placement.y + placement.height - 1];
+
+                FastLayoutBox child = placement.layoutBox;
+
+                float y = tracks[placement.y].position;
+                float spannedTrackHeights = (spanEnd.position + spanEnd.size) - y;
+
+                float finalY = y + placement.margin.top;
+                float finalHeight = spannedTrackHeights;
+
+                Fit fit = default;
+                Alignment alignment = new Alignment(new UIFixedLength(0, UIFixedUnit.Percent), 0, AlignmentTarget.AllocatedBox);
+
+                BlockSize blockSize = new BlockSize();
+                blockSize.size = finalHeight;
+                blockSize.contentAreaSize = finalHeight;
+
+                switch (colAlignment) {
+                    case GridAxisAlignment.Center:
+                        alignment = new Alignment(new UIFixedLength(0.5f, UIFixedUnit.Percent), 0.5f, AlignmentTarget.AllocatedBox);
+                        break;
+
+                    case GridAxisAlignment.End:
+                        alignment = new Alignment(new UIFixedLength(1, UIFixedUnit.Percent), 1, AlignmentTarget.AllocatedBox);
+                        break;
+
+                    case GridAxisAlignment.Start:
+                        break;
+
+                    case GridAxisAlignment.Grow:
+                        fit = Fit.Grow;
+                        break;
+                    case GridAxisAlignment.Shrink:
+                        fit = Fit.Shrink;
+                        break;
+                    case GridAxisAlignment.Fit:
+                        fit = Fit.Fit;
+                        break;
+                }
+
+                child.ApplyVerticalLayout(finalY + paddingBorderTop, blockSize, blockSize.contentAreaSize, placement.size.prefHeight, alignment, fit);
+            }
+        }
+
+        private void ResolveHorizontalTrackWidths(in BlockSize blockWidth, float remaining) {
             int flexPieces = 0;
 
-            List<ValueTuple<int, GridTrack>> intrinsics = ListPool<ValueTuple<int, GridTrack>>.Get();
-            List<ValueTuple<int, GridTrack>> flexes = ListPool<ValueTuple<int, GridTrack>>.Get();
+            StructList<int> intrinsics = StructList<int>.Get();
+            StructList<int> flexes = StructList<int>.Get();
 
             GridTrack[] colTracks = colTrackList.array;
             int colTrackCount = colTrackList.size;
-            
+
             for (int i = 0; i < colTrackCount; i++) {
-                ref GridTrack track = ref  colTracks[i];
+                ref GridTrack track = ref colTracks[i];
 
                 if ((track.minUnit & GridTemplateUnit.Fixed) != 0) {
-                    track.outputSize = ResolveFixedWidthMeasurement(blockWidth, track.size, SizeType.Min);
-                    remaining -= track.outputSize;
+                    track.size = ResolveFixedGridMeasurement(blockWidth, track.minValue, track.minUnit);
+                    remaining -= track.size;
                 }
                 else if (track.minUnit == GridTemplateUnit.FractionalRemaining) {
-                    flexes.Add(ValueTuple.Create(i, track));
+                    flexes.Add(i);
                     flexPieces += (int) track.minValue; // move flex to max only?
                 }
                 else {
-                    intrinsics.Add(ValueTuple.Create(i, track));
+                    intrinsics.Add(i);
+                }
+            }
+//
+//            for (int i = 0; i < intrinsics.Count; i++) {
+//                
+//                ref GridTrack track = ref colTracks[i];
+//
+//                if (track.minUnit == GridTemplateUnit.MinContent) {
+//                    track.size = ResolveContentMinWidth(track, SizeType.Min);
+//                }
+//                else if (track.minUnit == GridTemplateUnit.MaxContent) {
+//                    track.size = ResolveContentMaxWidth(track, SizeType.Min);
+//                }
+//
+//                remaining -= track.size;
+//                
+//            }
+
+            // now grow the track using maxes of min-max
+
+            float colGap = element.style.GridLayoutColGap;
+            remaining -= colGap * (colTrackCount - 1);
+
+//            if ((int) remaining > 0 && flexes.Count > 0) {
+//                float pieceSize = remaining / flexPieces;
+//                for (int i = 0; i < flexes.Count; i++) {
+//                    GridTrack track = flexes[i].Item2;
+//                    track.outputSize = track.size.minValue * pieceSize;
+//                    m_ColTracks[flexes[i].Item1] = track;
+//                }
+//            }
+
+
+            intrinsics.Release();
+            flexes.Release();
+        }
+
+        private void ResolveVerticalTrackHeights(in BlockSize blockHeight, float remaining) {
+            int flexPieces = 0;
+
+            StructList<int> intrinsics = StructList<int>.Get();
+            StructList<int> flexes = StructList<int>.Get();
+
+            GridTrack[] rowTracks = rowTrackList.array;
+            int rowTrackCount = rowTrackList.size;
+
+            for (int i = 0; i < rowTrackCount; i++) {
+                ref GridTrack track = ref rowTracks[i];
+
+                if ((track.minUnit & GridTemplateUnit.Fixed) != 0) {
+                    track.size = ResolveFixedGridMeasurement(blockHeight, track.minValue, track.minUnit);
+                    remaining -= track.size;
+                }
+                else if (track.minUnit == GridTemplateUnit.FractionalRemaining) {
+                    flexes.Add(i);
+                    flexPieces += (int) track.minValue; // move flex to max only?
+                }
+                else {
+                    intrinsics.Add(i);
                 }
             }
 
             for (int i = 0; i < intrinsics.Count; i++) {
-                GridTrack track = intrinsics[i].Item2;
+                
+                ref GridTrack track = ref colTrackList.array[intrinsics.array[i]];
 
-                if (track.size.minUnit == GridTemplateUnit.MinContent) {
-                    track.outputSize = ResolveContentMinWidth(track, SizeType.Min);
+                if (track.minUnit == GridTemplateUnit.MinContent) {
+                    track.size = ResolveContentMinHeight(blockHeight, track, intrinsics.array[i]);
                 }
-                else if (track.size.minUnit == GridTemplateUnit.MaxContent) {
-                    track.outputSize = ResolveContentMaxWidth(track, SizeType.Min);
+                else if (track.minUnit == GridTemplateUnit.MaxContent) {
+                    // track.size = ResolveContentMaxWidth(track, SizeType.Min);
                 }
 
-                remaining -= track.outputSize;
-                m_ColTracks[intrinsics[i].Item1] = track;
+                remaining -= track.size;
+                
             }
 
-            float colGap = style.GridLayoutColGap;
-            remaining -= colGap * (m_ColTracks.Count - 1);
+            // now grow the track using maxes of min-max
 
-            if ((int) remaining > 0 && flexes.Count > 0) {
-                float pieceSize = remaining / flexPieces;
-                for (int i = 0; i < flexes.Count; i++) {
-                    GridTrack track = flexes[i].Item2;
-                    track.outputSize = track.size.minValue * pieceSize;
-                    m_ColTracks[flexes[i].Item1] = track;
-                }
+            float rowGap = element.style.GridLayoutRowGap;
+            remaining -= rowGap * (rowTrackCount - 1);
+
+//            if ((int) remaining > 0 && flexes.Count > 0) {
+//                float pieceSize = remaining / flexPieces;
+//                for (int i = 0; i < flexes.Count; i++) {
+//                    GridTrack track = flexes[i].Item2;
+//                    track.outputSize = track.size.minValue * pieceSize;
+//                    m_ColTracks[flexes[i].Item1] = track;
+//                }
+//            }
+
+
+            intrinsics.Release();
+            flexes.Release();
+        }
+
+        private static void PositionTracks(StructList<GridTrack> trackList, float gap) {
+            for (int i = 1; i < trackList.size; i++) {
+                ref GridTrack track = ref trackList.array[i];
+                ref GridTrack previous = ref trackList.array[i - 1];
+                track.position = gap + previous.position + previous.size;
             }
-
-            PositionColumnTracks();
-            ListPool<ValueTuple<int, GridTrack>>.Release(ref intrinsics);
-            ListPool<ValueTuple<int, GridTrack>>.Release(ref flexes);
         }
-        
-        private enum SizeType {
 
-            Min,
-            Max
 
-        }
-        
-        private float ResolveContentMinWidth(GridTrack track, SizeType sizeType) {
+        private float ResolveContentMinHeight(in BlockSize blockSize, in GridTrack track, int index) {
             float minSize = 0;
 
-            GridTemplateUnit unit = track.size.minUnit;
-            float value = track.size.minValue;
+            GridPlacement[] placements = placementList.array;
+            int placementCount = placementList.size;
+            
+            // only need to check 1 dimension
+            for (int i = 0; i < placementCount; i++) {
+                
+                ref GridPlacement placement = ref placements[i];
 
-            if (sizeType == SizeType.Max) {
-                value = track.size.maxValue;
-            }
+                int yMax = placement.y + placement.height;
 
-            for (int i = 0; i < track.spanningItems.Count; i++) {
-                int childIndex = track.spanningItems[i];
-                GridItem colItem = m_Placements[childIndex].colItem;
+                // if not spanning this cell, continue
+                if (!(placement.y >= index || yMax < index)) {
+                    continue;
+                }
+
                 int pieces = 0; // never 0 because we only call this function for intrinsic sized tracks
-                GridItemSizes gridItemSizes = m_Widths[childIndex];
-                float baseWidth = gridItemSizes.outputSize;
+                float baseHeight = placement.outputHeight;
 
-                for (int j = colItem.trackStart; j < colItem.trackStart + colItem.trackSpan; j++) {
-                    GridTrack spanned = m_ColTracks[j];
-                    if ((unit & GridTemplateUnit.Fixed) != 0) {
-                        baseWidth -= spanned.outputSize;
-                        if (baseWidth <= 0) {
+                for (int j = placement.y; j < yMax; j++) {
+                    GridTrack spanned = colTrackList.array[j];
+                    if ((track.minUnit & GridTemplateUnit.Fixed) != 0) {
+                        baseHeight -= spanned.size;
+                        if (baseHeight <= 0) {
                             break;
                         }
                     }
-                    else if (unit != GridTemplateUnit.FractionalRemaining) {
+                    else if (track.minUnit != GridTemplateUnit.FractionalRemaining) {
                         pieces++;
                     }
                 }
 
                 if (minSize == 0) {
-                    minSize = baseWidth;
+                    minSize = baseHeight;
                 }
 
-                if (baseWidth > 0) {
-                    minSize = Mathf.Min(minSize, value * (baseWidth / pieces));
+                if (baseHeight > 0) {
+                    minSize = Mathf.Min(minSize, track.minValue * (baseHeight / pieces));
                 }
             }
 
             return minSize;
         }
-        
-        private float ResolveFixedWidthMeasurement(in BlockSize blockWidth, GridTrackSize size, SizeType sizeType) {
-            GridTemplateUnit unit = size.maxUnit;
-            float value = size.maxValue;
 
-            if (sizeType == SizeType.Min) {
-                unit = size.minUnit;
-                value = size.minValue;
-            }
-
+        private float ResolveFixedGridMeasurement(in BlockSize blockWidth, float value, GridTemplateUnit unit) {
             switch (unit) {
-                
                 case GridTemplateUnit.Pixel:
                     return value;
-                
+
                 case GridTemplateUnit.Em:
                     return value * element.style.GetResolvedFontSize() * value;
-                
+
                 case GridTemplateUnit.ViewportWidth:
                     return value * element.View.Viewport.width;
-                
+
                 case GridTemplateUnit.ViewportHeight:
                     return value * element.View.Viewport.height;
-                
+
                 case GridTemplateUnit.ParentSize:
                     return blockWidth.size * value;
-                
+
                 case GridTemplateUnit.ParentContentArea:
                     return blockWidth.contentAreaSize * value;
 
@@ -214,104 +403,55 @@ namespace UIForia.Layout.LayoutTypes {
                     return 0f;
             }
         }
-        
+
         private void CreateNamedGridAreas() {
             // retokenize & parse if needed
         }
 
-        private int ResolveColumnStart(string name) {
+        private int ResolveHorizontalStart(string name) {
             return -1;
         }
 
-        private int ResolveColumnSpan(int resolvedColStart, string name) {
+        private int ResolveHorizontalWidth(int resolvedColStart, string name) {
             return 1;
         }
 
-        private int ResolveRowStart(string name) {
+        private int ResolveVerticalStart(string name) {
             return -1;
         }
 
-        private int ResolveRowSpan(int resolvedRowStart, string name) {
+        private int ResolveVerticalHeight(int resolvedRowStart, string name) {
             return 1;
         }
 
         private void CreateOrUpdatePlacement(FastLayoutBox child) {
             GridPlacement[] placements = placementList.array;
 
-            GridItemPlacement colStart = child.element.style.GridItemColStart;
-            GridItemPlacement colSpan = child.element.style.GridItemColSpan;
-            GridItemPlacement rowStart = child.element.style.GridItemRowStart;
-            GridItemPlacement rowSpan = child.element.style.GridItemRowSpan;
+            GridItemPlacement x = child.element.style.GridItemX;
+            GridItemPlacement y = child.element.style.GridItemY;
+            GridItemPlacement width = child.element.style.GridItemWidth;
+            GridItemPlacement height = child.element.style.GridItemHeight;
 
             GridPlacement placement = default;
 
             placement.layoutBox = child;
-            placement.colStart = colStart.name != null ? ResolveColumnStart(colStart.name) : colStart.index;
-            placement.colSpan = colSpan.name != null ? ResolveColumnSpan(placement.colStart, colSpan.name) : colSpan.index;
-            placement.rowStart = rowStart.name != null ? ResolveRowStart(rowStart.name) : rowStart.index;
-            placement.rowSpan = rowSpan.name != null ? ResolveRowSpan(placement.rowStart, rowSpan.name) : rowSpan.index;
+            placement.x = x.name != null ? ResolveHorizontalStart(x.name) : x.index;
+            placement.y = y.name != null ? ResolveVerticalStart(y.name) : y.index;
+            placement.width = width.name != null ? ResolveHorizontalWidth(placement.x, width.name) : width.index;
+            placement.height = height.name != null ? ResolveVerticalHeight(placement.y, height.name) : height.index;
 
             for (int i = 0; i < placementList.size; i++) {
                 if (placements[i].layoutBox == child) {
                     placements[i] = placement;
-                    break;
+                    return;
                 }
             }
 
             placementList.Add(placement);
         }
 
-        private bool ValidateTrackSizes() {
-            IReadOnlyList<GridTrackSize> rowTemplate = element.style.GridLayoutRowTemplate;
-            bool usingFitOrFill = false;
-            bool hasIntrinsics = false;
-
-            for (int i = 0; i < rowTemplate.Count; i++) {
-                GridTrackSize template = rowTemplate[i];
-
-                switch (template.type) {
-                    case GridTrackSizeType.Value:
-                        break;
-                    case GridTrackSizeType.Repeat:
-                        break;
-                    case GridTrackSizeType.MinMax:
-                        break;
-                    case GridTrackSizeType.RepeatFill:
-                    case GridTrackSizeType.RepeatFit:
-                        usingFitOrFill = true;
-                        for (int j = 0; j < template.pattern.Length; j++) {
-                            GridTrackSize innerTemplate = template.pattern[j];
-
-                            switch (innerTemplate.type) {
-                                case GridTrackSizeType.Value:
-                                    break;
-                                case GridTrackSizeType.MinMax:
-                                    break;
-                                case GridTrackSizeType.Repeat:
-                                case GridTrackSizeType.RepeatFit:
-                                case GridTrackSizeType.RepeatFill:
-                                    break;
-                                default:
-                                    throw new ArgumentOutOfRangeException();
-                            }
-                        }
-
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-            }
-
-            return true;
-            // minmax(400, 500);
-            // grow(start, max);
-            // shrink(start, min);
-            // clamp(fixed, min, max);
-        }
-
         private float ResolveMin(in BlockSize blockSize, float value, GridTemplateUnit unit) {
             switch (unit) {
-                
                 case GridTemplateUnit.Unset:
                 case GridTemplateUnit.Pixel:
                     return value;
@@ -336,214 +476,248 @@ namespace UIForia.Layout.LayoutTypes {
             }
         }
 
-        private void GenerateExplicitTracks(BlockSize widthSize, BlockSize height) {
+        private void GenerateExplicitTracksForAxis(IReadOnlyList<GridTrackSize> templateList, in BlockSize blockSize, float contentSize, StructList<GridTrack> trackList, float gutter) {
+            int fillRepeatIndex = -1;
+            int idx = 0;
 
-            rowTrackList.size = 0;
+            GridTrackSize repeatFill = default;
+
+            for (int i = 0; i < templateList.Count; i++) {
+                GridTrackSize template = templateList[i];
+
+                switch (template.type) {
+                    case GridTrackSizeType.MinMax:
+                    case GridTrackSizeType.Value:
+                        trackList.array[idx++] = new GridTrack(template);
+                        break;
+
+                    case GridTrackSizeType.Repeat:
+
+                        trackList.EnsureAdditionalCapacity(template.pattern.Length);
+
+                        for (int j = 0; j < template.pattern.Length; j++) {
+                            trackList.array[idx] = new GridTrack(template.pattern[j]);
+                        }
+
+                        break;
+
+                    case GridTrackSizeType.RepeatFit:
+                    case GridTrackSizeType.RepeatFill:
+                        fillRepeatIndex = idx;
+                        repeatFill = template;
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
+
+            trackList.size = idx;
+
+            if (fillRepeatIndex != -1) {
+                float totalMin = 0;
+
+                for (int i = 0; i < trackList.size; i++) {
+                    totalMin += ResolveMin(blockSize, trackList.array[i].minValue, trackList.array[i].minUnit);
+                    totalMin += gutter;
+                }
+
+                float remaining = contentSize - totalMin;
+
+                StructList<GridTrack> repeats = StructList<GridTrack>.Get();
+
+                do {
+                    repeats.EnsureAdditionalCapacity(repeatFill.pattern.Length);
+                    for (int i = 0; i < repeatFill.pattern.Length; i++) {
+                        repeats.array[idx] = new GridTrack(repeatFill.pattern[i]);
+                        float val = ResolveMin(blockSize, trackList.array[i].minValue, trackList.array[i].minUnit);
+                        if (val <= 0) val = 1;
+                        remaining -= val; // this is a pretty crap way to handle this
+                        remaining -= gutter;
+                    }
+                } while (remaining > 0);
+
+                trackList.InsertRange(fillRepeatIndex, repeats);
+
+                repeats.Release();
+            }
+        }
+
+        private void GenerateExplicitTracks(BlockSize widthSize, BlockSize heightSize) {
             colTrackList.size = 0;
+            rowTrackList.size = 0;
 
             IReadOnlyList<GridTrackSize> rowTemplate = element.style.GridLayoutRowTemplate;
             IReadOnlyList<GridTrackSize> colTemplate = element.style.GridLayoutColTemplate;
 
-            int idx = 0;
-
-            rowTrackList.EnsureCapacity(rowTemplate.Count);
-            colTrackList.EnsureCapacity(colTemplate.Count);
-
-            float totalMin = 0;
-
-            // find auto fill repeats
-            // add fixed sizes
-
-            // do one iteration
-
-            for (int i = 0; i < rowTemplate.Count; i++) {
-                GridTrackSize template = rowTemplate[i];
-                switch (template.type) {
-                    
-                    case GridTrackSizeType.MinMax:
-                    case GridTrackSizeType.Value:
-                        totalMin += ResolveMin(widthSize, template.minValue, template.minUnit);
-                        break;
-                    
-                    case GridTrackSizeType.Repeat:
-                    
-                        for (int j = 0; j < template.pattern.Length; j++) {
-                            totalMin += ResolveMin(widthSize, template.pattern[j].minValue, template.pattern[j].minUnit);
-                        }
-                        
-                        break;
-                    
-                    case GridTrackSizeType.RepeatFit:
-                    case GridTrackSizeType.RepeatFill:
-                        throw new NotImplementedException();
-                    
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-            }
-
-            for (int i = 0; i < rowTemplate.Count; i++) {
-                GridTrackSize template = rowTemplate[i];
-
-                switch (template.type) {
-                    case GridTrackSizeType.MinMax:
-                    case GridTrackSizeType.Value: {
-                        GridTrack track = default;
-                        track.minValue = template.minValue;
-                        track.minUnit = template.minUnit;
-                        track.maxValue = template.maxValue;
-                        track.maxUnit = template.maxUnit;
-                        rowTrackList.array[idx++] = track;
-                        break;
-                    }
-
-                    case GridTrackSizeType.Repeat: {
-                        rowTrackList.EnsureAdditionalCapacity(template.pattern.Length);
-
-                        for (int j = 0; j < template.pattern.Length; j++) {
-                            GridTrack track = default;
-                            track.minValue = template.pattern[j].minValue;
-                            track.minUnit = template.pattern[j].minUnit;
-                            track.maxValue = template.pattern[j].maxValue;
-                            track.maxUnit = template.pattern[j].maxUnit;
-                            rowTrackList.array[idx++] = track;
-                        }
-
-                        break;
-                    }
-
-                    case GridTrackSizeType.RepeatFill:
-                    case GridTrackSizeType.RepeatFit:
-                        throw new NotImplementedException();
-                    
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-            }
-
-            rowTrackList.size = idx;
-            
-        }
-
-        private void Place() {
-            if (!placementDirty) {
+            if (rowTemplate.Count == 0 && colTemplate.Count == 0) {
                 return;
             }
 
-            CreateNamedGridAreas();
+            float contentAreaWidth = size.width - paddingBox.left - paddingBox.right - borderBox.left - borderBox.right;
+            float contentAreaHeight = size.height - paddingBox.top - paddingBox.bottom - borderBox.top - borderBox.bottom;
 
-            GenerateExplicitTracks(default, default);
+            float horizontalGutter = element.style.GridLayoutColGap;
+            float verticalGutter = element.style.GridLayoutRowGap;
 
-            StructList<GridPlacement> remainingItems = StructList<GridPlacement>.GetMinSize(placementList.size);
+            GenerateExplicitTracksForAxis(colTemplate, widthSize, contentAreaWidth, colTrackList, horizontalGutter);
+            GenerateExplicitTracksForAxis(rowTemplate, heightSize, contentAreaHeight, rowTrackList, verticalGutter);
+        }
 
-            FastLayoutBox child = firstChild;
+        private void Place() {
+//            if (!placementDirty) {
+//                return;
+//            }
+
 
             // todo -- move out of here
+            FastLayoutBox child = firstChild;
             while (child != null) {
                 CreateOrUpdatePlacement(child);
                 child = child.nextSibling;
             }
 
+            rowTrackList.Clear();
+            colTrackList.Clear();
+            
+            CreateNamedGridAreas();
+
+            GenerateExplicitTracks(default, default);
+
             s_OccupiedAreas.size = 0;
+            
+            GridTrackSize[] autoColSizePattern = new[] {element.style.GridLayoutRowAutoSize};
+            GridTrackSize[] autoRowSizePattern = new[] {element.style.GridLayoutColAutoSize};
+            
+            int rowSizeAutoPtr = 0;
+            int colSizeAutoPtr = 0;
 
-            int colTrackCount = 0;
-            int rowTrackCount = 0;
+            PlaceBothAxisLocked(ref colSizeAutoPtr, autoColSizePattern, ref rowSizeAutoPtr, autoRowSizePattern);
+            PlaceSingleAxisLocked(ref colSizeAutoPtr, autoColSizePattern, ref rowSizeAutoPtr, autoRowSizePattern);
+            PlaceRemainingItems(ref colSizeAutoPtr, autoColSizePattern, ref rowSizeAutoPtr, autoRowSizePattern);
+            placementDirty = false;
+        }
 
-            int idx = 0;
+        private void PlaceBothAxisLocked(ref int colSizeAutoPtr, GridTrackSize[] autoColSizePattern, ref int rowSizeAutoPtr, GridTrackSize[] autoRowSizePattern) {
+            int horizontalTrackCount = colTrackList.size;
+            int verticalTrackCount = rowTrackList.size;
 
             for (int i = 0; i < placementList.Count; i++) {
                 ref GridPlacement placement = ref placementList.array[i];
 
-                if (placement.colStart >= 0 && placement.rowStart >= 0) {
+                if (placement.y >= 0 && placement.x >= 0) {
                     GridRegion region = new GridRegion();
-                    region.xMin = placement.rowStart;
-                    region.yMin = placement.colStart;
-                    region.xMax = placement.rowStart + placement.rowSpan;
-                    region.yMax = placement.colStart + placement.colSpan;
+                    region.xMin = placement.x;
+                    region.yMin = placement.y;
+                    region.xMax = placement.x + placement.width;
+                    region.yMax = placement.y + placement.height;
                     s_OccupiedAreas.Add(region);
-                }
-                else {
-                    remainingItems[idx++] = placement;
+
+                    if (region.xMax > horizontalTrackCount) {
+                        horizontalTrackCount = region.xMax;
+                        EnsureImplicitTrackCapacity(colTrackList, horizontalTrackCount, ref colSizeAutoPtr, autoColSizePattern);
+                    }
+
+                    if (region.yMax > verticalTrackCount) {
+                        verticalTrackCount = region.yMax;
+                        EnsureImplicitTrackCapacity(rowTrackList, verticalTrackCount, ref rowSizeAutoPtr, autoRowSizePattern);
+                    }
                 }
             }
-
-            remainingItems.size = idx;
-
-            PlaceRemainingItems(remainingItems);
-            placementDirty = false;
-
-            StructList<GridPlacement>.Release(ref remainingItems);
         }
 
-        private void PlaceRemainingItems(StructList<GridPlacement> placementList) {
-            bool flowHorizontal = element.style.GridLayoutDirection == LayoutDirection.Horizontal;
+        private void PlaceSingleAxisLocked(ref int colSizeAutoPtr, GridTrackSize[] autoColSizePattern, ref int rowSizeAutoPtr, GridTrackSize[] autoRowSizePattern) {
             bool dense = element.style.GridLayoutDensity == GridLayoutDensity.Dense;
-
-            LayoutDirection direction = element.style.GridLayoutDirection;
-
-            GridTrackSize[] autoColSizePattern;
-            GridTrackSize[] autoRowSizePattern;
-
-            // todo -- change auto size to accept a list
-            if (direction == LayoutDirection.Horizontal) {
-                autoColSizePattern = new[] {element.style.GridLayoutMainAxisAutoSize};
-                autoRowSizePattern = new[] {element.style.GridLayoutCrossAxisAutoSize};
-            }
-            else {
-                autoColSizePattern = new[] {element.style.GridLayoutCrossAxisAutoSize};
-                autoRowSizePattern = new[] {element.style.GridLayoutMainAxisAutoSize};
-            }
-
-            int sparseStartX = 0;
-            int sparseStartY = 0;
-
-            int rowSizeAutoPtr = 0;
-            int colSizeAutoPtr = 0;
-
-            GridTrack[] rowTracks = rowTrackList.array;
-            GridTrack[] colTracks = colTrackList.array;
 
             for (int i = 0; i < placementList.size; i++) {
                 ref GridPlacement placement = ref placementList.array[i];
 
-                int rowStart = placement.rowStart;
-                int rowSpan = placement.rowSpan;
-                int colStart = placement.colStart;
-                int colSpan = placement.colSpan;
+                int x = placement.x;
+                int y = placement.y;
+                int width = placement.width;
+                int height = placement.height;
 
-                int colCount = colTrackList.Count;
-                int rowCount = rowTrackList.Count;
+                // x axis is in a fixed position, we need to find a valid Y
+                if (y < 0 && x >= 0) {
+                    int cursorY = dense ? 0 : rowTrackList.array[x].autoPlacementCursor;
+
+                    while (!IsGridAreaAvailable(x, cursorY, width, height)) {
+                        cursorY++;
+                    }
+
+                    EnsureImplicitTrackCapacity(rowTrackList, cursorY + height, ref rowSizeAutoPtr, autoRowSizePattern);
+                    EnsureImplicitTrackCapacity(colTrackList, x + width, ref rowSizeAutoPtr, autoRowSizePattern);
+
+                    colTrackList.array[x].autoPlacementCursor = cursorY;
+
+                    placement.y = cursorY;
+                    
+                    s_OccupiedAreas.Add(new GridRegion() {
+                        xMin = placement.x,
+                        yMin = placement.y,
+                        xMax = placement.x + placement.width,
+                        yMax = placement.y + placement.height
+                    });
+                }
+
+                // if row was fixed we definitely created it in an earlier step
+                else if (x < 0 && y >= 0) {
+                    int cursorX = dense ? 0 : rowTrackList[y].autoPlacementCursor;
+
+                    while (!IsGridAreaAvailable(cursorX, y, width, height)) {
+                        cursorX++;
+                    }
+
+                    
+                    EnsureImplicitTrackCapacity(colTrackList, cursorX + width, ref colSizeAutoPtr, autoColSizePattern);
+                    EnsureImplicitTrackCapacity(rowTrackList, y + height, ref rowSizeAutoPtr, autoRowSizePattern);
+
+                    rowTrackList.array[y].autoPlacementCursor = cursorX;
+
+                    placement.x = cursorX;
+                    
+                    s_OccupiedAreas.Add(new GridRegion() {
+                        xMin = placement.x,
+                        yMin = placement.y,
+                        xMax = placement.x + placement.width,
+                        yMax = placement.y + placement.height
+                    });
+                }
+            }
+        }
+
+        private void PlaceRemainingItems(ref int colSizeAutoPtr, GridTrackSize[] autoColSizePattern, ref int rowSizeAutoPtr, GridTrackSize[] autoRowSizePattern) {
+            if (placementList.size == 0) {
+                return;
+            }
+
+            bool flowHorizontal = element.style.GridLayoutDirection == LayoutDirection.Horizontal;
+            bool dense = element.style.GridLayoutDensity == GridLayoutDensity.Dense;
+
+            int sparseStartX = 0;
+            int sparseStartY = 0;
+
+            if (colTrackList.Count == 0) {
+                EnsureImplicitTrackCapacity(colTrackList, 1, ref rowSizeAutoPtr, autoRowSizePattern);
+            }
+
+            if (rowTrackList.Count == 0) {
+                EnsureImplicitTrackCapacity(rowTrackList, 1, ref colSizeAutoPtr, autoColSizePattern);
+            }
+
+            for (int i = 0; i < placementList.size; i++) {
+                ref GridPlacement placement = ref placementList.array[i];
+
+                int width = placement.width;
+                int height = placement.height;
 
                 int cursorX = 0;
                 int cursorY = 0;
 
-                // if row was fixed we definitely created it in an earlier step
-                if (rowStart >= 0) {
-                    cursorX = dense ? 0 : rowTrackList[rowStart].autoPlacementCursor;
-
-                    while (!IsGridAreaAvailable(cursorX, colSpan, rowStart, rowSpan)) {
-                        cursorX++;
-                    }
-
-                    CreateTracks(colTrackList, cursorX + colSpan, ref colSizeAutoPtr, autoColSizePattern);
-
-                    rowTracks[rowStart].autoPlacementCursor = cursorX;
-                    placement.colStart = cursorX;
+                if (placement.x >= 0 || placement.y >= 0) {
+                    continue;
                 }
-                else if (colStart >= 0) {
-                    cursorY = dense ? 0 : colTracks[colStart].autoPlacementCursor;
 
-                    while (!IsGridAreaAvailable(colStart, colSpan, cursorY, rowSpan)) {
-                        cursorY++;
-                    }
-
-                    CreateTracks(rowTrackList, cursorY + rowSpan, ref rowSizeAutoPtr, autoRowSizePattern);
-
-                    colTracks[colStart].autoPlacementCursor = cursorY;
-
-                    placement.rowStart = cursorY;
-                }
-                else if (flowHorizontal) {
+                if (flowHorizontal) {
                     if (dense) {
                         cursorX = 0;
                         cursorY = 0;
@@ -554,27 +728,28 @@ namespace UIForia.Layout.LayoutTypes {
                     }
 
                     while (true) {
-                        if (cursorX + colSpan > colCount) {
+                        if (cursorX + width > colTrackList.size) {
                             cursorY++;
-                            CreateTracks(rowTrackList, cursorY + rowSpan, ref rowSizeAutoPtr, autoRowSizePattern);
-                            cursorX = !dense ? rowTracks[cursorY].autoPlacementCursor : 0;
+                            // make sure enough rows exist to contain the entire vertical span
+                            EnsureImplicitTrackCapacity(rowTrackList, cursorY + height, ref rowSizeAutoPtr, autoRowSizePattern);
+                            cursorX = !dense ? rowTrackList.array[cursorY].autoPlacementCursor : 0;
                             continue;
                         }
 
-                        if (IsGridAreaAvailable(cursorX, colSpan, cursorY, rowSpan)) {
+                        if (IsGridAreaAvailable(cursorX, cursorY, height, width)) {
                             break;
                         }
 
                         cursorX++;
                     }
 
-                    sparseStartX = cursorX + colSpan;
+                    sparseStartX = cursorX + width;
                     sparseStartY = cursorY;
-                    placement.colStart = cursorX;
-                    placement.rowStart = cursorY;
-                    CreateTracks(colTrackList, cursorX + colSpan, ref colSizeAutoPtr, autoColSizePattern);
-                    colTracks[cursorX].autoPlacementCursor = cursorY;
-                    rowTracks[cursorY].autoPlacementCursor = cursorX;
+                    placement.x = cursorX;
+                    placement.y = cursorY;
+                    EnsureImplicitTrackCapacity(colTrackList, cursorX + width, ref colSizeAutoPtr, autoColSizePattern);
+                    rowTrackList.array[cursorX].autoPlacementCursor = cursorY;
+                    colTrackList.array[cursorY].autoPlacementCursor = cursorX;
                 }
                 else {
                     if (dense) {
@@ -587,14 +762,14 @@ namespace UIForia.Layout.LayoutTypes {
                     }
 
                     while (true) {
-                        if (cursorY + rowSpan > rowCount) {
+                        if (cursorY + height > rowTrackList.size) {
                             cursorX++;
-                            CreateTracks(colTrackList, cursorX + colSpan, ref colSizeAutoPtr, autoColSizePattern);
-                            cursorY = !dense ? colTracks[cursorX].autoPlacementCursor : 0;
+                            EnsureImplicitTrackCapacity(colTrackList, cursorX + width, ref colSizeAutoPtr, autoColSizePattern);
+                            cursorY = !dense ? rowTrackList.array[cursorX].autoPlacementCursor : 0;
                             continue;
                         }
 
-                        if (IsGridAreaAvailable(cursorX, colSpan, cursorY, rowSpan)) {
+                        if (IsGridAreaAvailable(cursorX, cursorY, height, width)) {
                             break;
                         }
 
@@ -602,34 +777,34 @@ namespace UIForia.Layout.LayoutTypes {
                     }
 
                     sparseStartX = cursorX;
-                    sparseStartY = cursorY + rowSpan;
-                    placement.colStart = cursorX;
-                    placement.rowStart = cursorY;
-                    colTracks[cursorX].autoPlacementCursor = cursorY;
-                    rowTracks[cursorY].autoPlacementCursor = cursorX;
-                    CreateTracks(colTrackList, cursorX + colSpan, ref colSizeAutoPtr, autoColSizePattern);
-                    CreateTracks(rowTrackList, cursorY + rowSpan, ref rowSizeAutoPtr, autoRowSizePattern);
+                    sparseStartY = cursorY + height;
+                    placement.x = cursorX;
+                    placement.y = cursorY;
+                    colTrackList.array[cursorX].autoPlacementCursor = cursorY;
+                    rowTrackList.array[cursorY].autoPlacementCursor = cursorX;
+                    EnsureImplicitTrackCapacity(colTrackList, cursorX + width, ref colSizeAutoPtr, autoColSizePattern);
+                    EnsureImplicitTrackCapacity(rowTrackList, cursorY + height, ref rowSizeAutoPtr, autoRowSizePattern);
                 }
 
                 s_OccupiedAreas.Add(new GridRegion() {
-                    xMin = placement.rowStart,
-                    yMin = placement.colStart,
-                    xMax = placement.rowStart + placement.rowSpan,
-                    yMax = placement.colStart + placement.colSpan
+                    xMin = placement.x,
+                    yMin = placement.y,
+                    xMax = placement.x + placement.width,
+                    yMax = placement.y + placement.height
                 });
             }
         }
 
-        private static bool IsGridAreaAvailable(int colStart, int colSpan, int rowStart, int rowSpan) {
-            int xMax = rowStart + rowSpan;
-            int yMax = colStart + colSpan;
+        private static bool IsGridAreaAvailable(int x, int y, int width, int height) {
+            int xMax = x + width;
+            int yMax = y + height;
 
             GridRegion[] array = s_OccupiedAreas.array;
             int count = s_OccupiedAreas.size;
 
             for (int i = 0; i < count; i++) {
                 ref GridRegion check = ref array[i];
-                if (colStart >= check.yMax || yMax <= check.yMin || xMax <= check.xMin || rowStart >= check.xMax) {
+                if (!(y >= check.yMax || yMax <= check.yMin || xMax <= check.xMin || x >= check.xMax)) {
                     return false;
                 }
             }
@@ -637,27 +812,56 @@ namespace UIForia.Layout.LayoutTypes {
             return true;
         }
 
-        private static int CreateTracks(StructList<GridTrack> tracksList, int count, ref int autoSize, GridTrackSize[] autoSizes) {
-            int total = count - tracksList.size;
-            if (total > 0) {
-                tracksList.EnsureAdditionalCapacity(total);
+        private static void EnsureImplicitTrackCapacity(StructList<GridTrack> tracksList, int count, ref int autoSize, GridTrackSize[] autoSizes) {
+            if (count >= tracksList.size) {
+                tracksList.EnsureCapacity(count);
+
+                int idx = tracksList.size;
+                int toCreate = count - tracksList.size;
+
+                for (int i = 0; i < toCreate; i++) {
+                    ref GridTrack track = ref tracksList.array[idx++];
+                    ref GridTrackSize size = ref autoSizes[autoSize];
+                    track.minValue = size.minValue;
+                    track.minUnit = size.maxUnit;
+                    track.maxValue = size.maxValue;
+                    track.maxUnit = size.maxUnit;
+                    track.autoPlacementCursor = 0;
+                    track.size = 0;
+                    track.position = 0;
+                    autoSize = (autoSize + 1) % autoSizes.Length;
+                }
+
+                tracksList.size = idx;
             }
-
-            int idx = tracksList.size;
-
-            for (int i = 0; i < total; i++) {
-                ref GridTrack track = ref tracksList.array[idx++];
-                track.minValue = autoSizes[autoSize].minValue;
-                track.minUnit = autoSizes[autoSize].maxUnit;
-                track.maxValue = autoSizes[autoSize].maxValue;
-                track.maxUnit = autoSizes[autoSize].maxUnit;
-                autoSize = (autoSize + 1) % autoSizes.Length;
-            }
-
-            return total;
         }
 
-        public struct GridRegion {
+        protected override void OnChildStyleChanged(FastLayoutBox child, StructList<StyleProperty> properties) {
+            // int idx = GetPlacementIndexForId(child.element.id); // what was this intended for?
+            bool markedForLayout = false;
+            for (int i = 0; i < properties.Count; i++) {
+                StyleProperty property = properties[i];
+                switch (property.propertyId) {
+                    case StylePropertyId.LayoutBehavior:
+                        // markedForLayout = true; already set by the layout system but could be set here explicitly again for clarity maybe?
+                        placementDirty = true;
+                        break;
+                    case StylePropertyId.GridItemHeight:
+                    case StylePropertyId.GridItemWidth:
+                    case StylePropertyId.GridItemY:
+                    case StylePropertyId.GridItemX:
+                        placementDirty = true;
+                        markedForLayout = true;
+                        break;
+                }
+            }
+
+            if (markedForLayout) {
+                MarkNeedsLayout();
+            }
+        }
+
+        internal struct GridRegion {
 
             public int xMin;
             public int yMin;
@@ -666,12 +870,12 @@ namespace UIForia.Layout.LayoutTypes {
 
         }
 
-        public struct GridPlacement {
+        internal struct GridPlacement {
 
-            public int colStart;
-            public int colSpan;
-            public int rowStart;
-            public int rowSpan;
+            public int x;
+            public int y;
+            public int width;
+            public int height;
             public FastLayoutBox layoutBox;
             public OffsetRect margin;
             public SizeConstraints size;
@@ -680,15 +884,25 @@ namespace UIForia.Layout.LayoutTypes {
 
         }
 
-        public struct GridTrack {
+        internal struct GridTrack {
 
             public float position;
-            public float outputSize;
+            public float size;
             public int autoPlacementCursor;
             public float minValue;
             public float maxValue;
             public GridTemplateUnit minUnit;
             public GridTemplateUnit maxUnit;
+
+            public GridTrack(in GridTrackSize template) {
+                this.minValue = template.minValue;
+                this.minUnit = template.minUnit;
+                this.maxValue = template.maxValue;
+                this.maxUnit = template.maxUnit;
+                this.position = 0;
+                this.size = 0;
+                this.autoPlacementCursor = 0;
+            }
 
         }
 

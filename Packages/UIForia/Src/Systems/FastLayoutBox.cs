@@ -546,9 +546,10 @@ namespace UIForia.Layout {
 
             owner.localMatrixList.array[traversalIndex] = localMatrix;
 
-            if ((flags & LayoutRenderFlag.NeedsLayout) == 0) {
-                return;
-            }
+            // todo -- need to use this 
+//            if ((flags & LayoutRenderFlag.NeedsLayout) == 0) {
+//                return;
+//            }
 
             PerformLayout();
 
@@ -751,6 +752,8 @@ namespace UIForia.Layout {
             if (marked) {
                 parent?.OnChildSizeChanged(this);
             }
+            
+            parent?.OnChildStyleChanged(this, changeList);
         }
 
         public virtual void SetChildren(LightList<FastLayoutBox> container) {

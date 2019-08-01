@@ -328,10 +328,10 @@ style myStyle {
 const rowStart = 2;
 
 style myStyle {
-    GridItemColStart = 0;
-    GridItemColSpan = 4;
-    GridItemRowStart = @rowStart;
-    GridItemRowSpan = 5;
+    GridItemX = 0;
+    GridItemWidth = 4;
+    GridItemY = @rowStart;
+    GridItemHeight = 5;
 }
 
         ".Trim());
@@ -341,10 +341,10 @@ style myStyle {
         var containers = styleSheet.styleGroupContainers;
         Assert.AreEqual(1, containers.Length);
 
-        Assert.AreEqual(0, containers[0].groups[0].normal.style.GridItemColStart);
-        Assert.AreEqual(4, containers[0].groups[0].normal.style.GridItemColSpan);
-        Assert.AreEqual(2, containers[0].groups[0].normal.style.GridItemRowStart);
-        Assert.AreEqual(5, containers[0].groups[0].normal.style.GridItemRowSpan);
+        Assert.AreEqual(0, containers[0].groups[0].normal.style.GridItemX);
+        Assert.AreEqual(4, containers[0].groups[0].normal.style.GridItemWidth);
+        Assert.AreEqual(2, containers[0].groups[0].normal.style.GridItemY);
+        Assert.AreEqual(5, containers[0].groups[0].normal.style.GridItemHeight);
     }
 
     [Test]

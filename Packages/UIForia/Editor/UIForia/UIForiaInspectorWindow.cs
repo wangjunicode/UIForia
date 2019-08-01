@@ -754,10 +754,10 @@ namespace UIForia.Editor {
                 case StylePropertyId.Opacity:
                     return DrawFloat(property, isEditable);
 
-                case StylePropertyId.GridItemColStart:
-                case StylePropertyId.GridItemColSpan:
-                case StylePropertyId.GridItemRowStart:
-                case StylePropertyId.GridItemRowSpan:
+                case StylePropertyId.GridItemY:
+                case StylePropertyId.GridItemHeight:
+                case StylePropertyId.GridItemX:
+                case StylePropertyId.GridItemWidth:
                     return DrawInt(property, isEditable);
 
                 case StylePropertyId.GridItemColSelfAlignment:
@@ -774,8 +774,8 @@ namespace UIForia.Editor {
                 case StylePropertyId.GridLayoutRowTemplate:
                     return DrawGridTemplate(property, isEditable);
 
-                case StylePropertyId.GridLayoutMainAxisAutoSize:
-                case StylePropertyId.GridLayoutCrossAxisAutoSize:
+                case StylePropertyId.GridLayoutColAutoSize:
+                case StylePropertyId.GridLayoutRowAutoSize:
                     return DrawGridTrackSize(property, isEditable);
 
                 case StylePropertyId.GridLayoutColGap:

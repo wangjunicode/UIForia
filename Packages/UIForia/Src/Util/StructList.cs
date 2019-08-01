@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using UIForia.Layout.LayoutTypes;
 using UIForia.Parsing.Expression.Tokenizer;
 using UnityEngine;
 
@@ -10,6 +11,7 @@ namespace UIForia.Util {
     internal class StructListDebugView<T> where T : struct {
 
         private readonly StructList<T> structList;
+
         [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
         public T[] array;
 
@@ -22,7 +24,6 @@ namespace UIForia.Util {
 
     [DebuggerDisplay("StructList Count = {" + nameof(size) + "} | Capacity = {array.Length}")]
     [DebuggerTypeProxy(typeof(StructListDebugView<>))]
-
     public class StructList<T> where T : struct {
 
         public T[] array;
@@ -163,8 +164,8 @@ namespace UIForia.Util {
         }
 
         public T this[int idx] {
-           [DebuggerStepThrough] get => array[idx];
-           [DebuggerStepThrough] set => array[idx] = value;
+            [DebuggerStepThrough] get => array[idx];
+            [DebuggerStepThrough] set => array[idx] = value;
         }
 
         public void SetFromRange(T[] source, int start, int count) {
@@ -335,7 +336,7 @@ namespace UIForia.Util {
             isInPool = true;
             s_Pool.Add(this);
         }
-        
+
         public static void Release(ref StructList<T> toPool) {
             toPool.Clear();
             if (toPool.isInPool) return;
@@ -377,13 +378,29 @@ namespace UIForia.Util {
             array[size - 1] = default;
             size--;
         }
-        
+
         public T SwapRemoveAtWithValue(int index) {
             T tmp = array[index];
             array[index] = array[size - 1];
             array[size - 1] = default;
             size--;
             return tmp;
+        }
+
+        public void InsertRange(int index, StructList<T> items) {
+            EnsureAdditionalCapacity(items.size);
+            
+            if (index < size) {
+                System.Array.Copy(array, index, array, index + items.size, size - index);
+            }
+
+            if (this == items) {
+                System.Array.Copy(array, 0, array, index, index);
+                System.Array.Copy(array, index + items.size, array, index * 2, size - index);
+            }
+            else {
+                System.Array.Copy(items.array, 0, array, size, items.size);
+            }
         }
 
     }

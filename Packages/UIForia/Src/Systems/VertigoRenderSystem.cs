@@ -45,6 +45,8 @@ namespace Src.Systems {
         }
 
         private void HandleStylePropertyChanged(UIElement element, StructList<StyleProperty> propertyList) {
+            if (element.renderBox == null) return;
+            
             int count = propertyList.size;
             StyleProperty[] properties = propertyList.array;
 

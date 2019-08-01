@@ -117,12 +117,16 @@ namespace UIForia.Layout {
                 SizeSet sizeSet = sizeSets[idx];
                 PositionSet positionSet = positionSets[idx];
 
+                
                 layoutResult.padding = element.layoutBox.paddingBox;
                 layoutResult.border = element.layoutBox.borderBox;
-                layoutResult.matrix = worldMatrices[idx];
                 layoutResult.actualSize = sizeSet.size;
                 layoutResult.allocatedSize = sizeSet.allocatedSize;
-                layoutResult.screenPosition = layoutResult.matrix.position;
+                layoutResult.matrix = worldMatrices[idx];
+                Vector2 position = layoutResult.matrix.position;
+                position.y = -position.y;
+                layoutResult.screenPosition = position;
+                layoutResult.localPosition = element.layoutBox.alignedPosition;
                 layoutResult.clipRect = new Rect(0, 0, Screen.width, Screen.height); // todo -- temp
             }
         }

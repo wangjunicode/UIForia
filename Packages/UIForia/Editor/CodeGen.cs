@@ -59,21 +59,24 @@ namespace UIForia.Editor {
             new PropertyGenerator<CrossAxisAlignment>(StylePropertyId.FlexLayoutCrossAxisAlignment, CrossAxisAlignment.Start),
 
             // Grid Item
-            new PropertyGenerator<GridItemPlacement>(StylePropertyId.GridItemColStart, new GridItemPlacement(-1)),
-            new PropertyGenerator<GridItemPlacement>(StylePropertyId.GridItemColSpan, new GridItemPlacement(1)),
-            new PropertyGenerator<GridItemPlacement>(StylePropertyId.GridItemRowStart, new GridItemPlacement(-1)),
-            new PropertyGenerator<GridItemPlacement>(StylePropertyId.GridItemRowSpan, new GridItemPlacement(1)),
+            new PropertyGenerator<GridItemPlacement>(StylePropertyId.GridItemX, new GridItemPlacement(-1)),
+            new PropertyGenerator<GridItemPlacement>(StylePropertyId.GridItemY, new GridItemPlacement(-1)),
+            new PropertyGenerator<GridItemPlacement>(StylePropertyId.GridItemWidth, new GridItemPlacement(1)),
+            new PropertyGenerator<GridItemPlacement>(StylePropertyId.GridItemHeight, new GridItemPlacement(1)),
 
             // Grid Layout
             new PropertyGenerator<LayoutDirection>(StylePropertyId.GridLayoutDirection, LayoutDirection.Row),
             new PropertyGenerator<GridLayoutDensity>(StylePropertyId.GridLayoutDensity, GridLayoutDensity.Sparse),
+            
             new PropertyGenerator<IReadOnlyList<GridTrackSize>>(StylePropertyId.GridLayoutColTemplate, ListPool<GridTrackSize>.Empty, InheritanceType.NotInherited, "ListPool<GridTrackSize>.Empty"),
             new PropertyGenerator<IReadOnlyList<GridTrackSize>>(StylePropertyId.GridLayoutRowTemplate, ListPool<GridTrackSize>.Empty, InheritanceType.NotInherited, "ListPool<GridTrackSize>.Empty"),
-            new PropertyGenerator<GridTrackSize>(StylePropertyId.GridLayoutMainAxisAutoSize, GridTrackSize.MaxContent),
-            new PropertyGenerator<GridTrackSize>(StylePropertyId.GridLayoutCrossAxisAutoSize, GridTrackSize.FractionalRemaining),
+            
+            new PropertyGenerator<GridTrackSize>(StylePropertyId.GridLayoutColAutoSize, GridTrackSize.MaxContent),
+            new PropertyGenerator<GridTrackSize>(StylePropertyId.GridLayoutRowAutoSize, GridTrackSize.FractionalRemaining),
+            
             new AnimatedPropertyGenerator<float>(StylePropertyId.GridLayoutColGap, 0),
             new AnimatedPropertyGenerator<float>(StylePropertyId.GridLayoutRowGap, 0),
-            // tod -- remove
+
             new PropertyGenerator<GridAxisAlignment>(StylePropertyId.GridLayoutColAlignment, GridAxisAlignment.Grow),
             new PropertyGenerator<GridAxisAlignment>(StylePropertyId.GridLayoutRowAlignment, GridAxisAlignment.Grow),
 

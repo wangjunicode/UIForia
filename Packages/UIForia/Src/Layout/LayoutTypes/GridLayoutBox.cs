@@ -754,12 +754,12 @@ namespace UIForia.Layout.LayoutTypes {
             GridTrackSize autoRowSize;
 
             if (direction == LayoutDirection.Horizontal) {
-                autoColSize = style.GridLayoutMainAxisAutoSize;
-                autoRowSize = style.GridLayoutCrossAxisAutoSize;
+                autoColSize = style.GridLayoutColAutoSize;
+                autoRowSize = style.GridLayoutRowAutoSize;
             }
             else {
-                autoColSize = style.GridLayoutCrossAxisAutoSize;
-                autoRowSize = style.GridLayoutMainAxisAutoSize;
+                autoColSize = style.GridLayoutRowAutoSize;
+                autoRowSize = style.GridLayoutColAutoSize;
             }
 
             List<GridPlacement> bothAxesLocked = ListPool<GridPlacement>.Get();
@@ -860,12 +860,12 @@ namespace UIForia.Layout.LayoutTypes {
             GridTrackSize autoRowSize;
 
             if (direction == LayoutDirection.Horizontal) {
-                autoColSize = style.GridLayoutMainAxisAutoSize;
-                autoRowSize = style.GridLayoutCrossAxisAutoSize;
+                autoColSize = style.GridLayoutColAutoSize;
+                autoRowSize = style.GridLayoutRowAutoSize;
             }
             else {
-                autoColSize = style.GridLayoutCrossAxisAutoSize;
-                autoRowSize = style.GridLayoutMainAxisAutoSize;
+                autoColSize = style.GridLayoutRowAutoSize;
+                autoRowSize = style.GridLayoutColAutoSize;
             }
 
             for (int i = 0; i < placements.Count; i++) {
@@ -903,12 +903,12 @@ namespace UIForia.Layout.LayoutTypes {
             GridTrackSize autoRowSize;
 
             if (direction == LayoutDirection.Horizontal) {
-                autoColSize = style.GridLayoutMainAxisAutoSize;
-                autoRowSize = style.GridLayoutCrossAxisAutoSize;
+                autoColSize = style.GridLayoutColAutoSize;
+                autoRowSize = style.GridLayoutRowAutoSize;
             }
             else {
-                autoColSize = style.GridLayoutCrossAxisAutoSize;
-                autoRowSize = style.GridLayoutMainAxisAutoSize;
+                autoColSize = style.GridLayoutRowAutoSize;
+                autoRowSize = style.GridLayoutColAutoSize;
             }
 
             int sparseStartX = 0;
@@ -1076,8 +1076,8 @@ namespace UIForia.Layout.LayoutTypes {
                         break;
                     case StylePropertyId.GridLayoutRowGap:
                     case StylePropertyId.GridLayoutColGap:
-                    case StylePropertyId.GridLayoutMainAxisAutoSize:
-                    case StylePropertyId.GridLayoutCrossAxisAutoSize:
+                    case StylePropertyId.GridLayoutColAutoSize:
+                    case StylePropertyId.GridLayoutRowAutoSize:
                         markedForLayout = true;
                         break;
                 }
@@ -1105,10 +1105,10 @@ namespace UIForia.Layout.LayoutTypes {
                         // markedForLayout = true; already set by the layout system but could be set here explicitly again for clarity maybe?
                         m_IsPlacementDirty = true;
                         break;
-                    case StylePropertyId.GridItemColSpan:
-                    case StylePropertyId.GridItemRowSpan:
-                    case StylePropertyId.GridItemColStart:
-                    case StylePropertyId.GridItemRowStart:
+                    case StylePropertyId.GridItemHeight:
+                    case StylePropertyId.GridItemWidth:
+                    case StylePropertyId.GridItemY:
+                    case StylePropertyId.GridItemX:
                         m_IsPlacementDirty = true;
                         markedForLayout = true;
                         break;

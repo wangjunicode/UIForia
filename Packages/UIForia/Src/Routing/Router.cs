@@ -138,6 +138,7 @@ namespace UIForia.Routing {
         private int historyIndex;
 
         private readonly LightList<Route> m_HistoryStack;
+        private readonly LightList<Route> m_ForwardHistoryStack;
         private readonly LightList<Route> m_RouteHandlers;
         private readonly LightList<RouteTransition> m_Transitions;
         private readonly LightList<RouteTransition> m_ActiveTransitions;
@@ -158,6 +159,7 @@ namespace UIForia.Routing {
             this.defaultRoute = defaultRoute;
 
             m_HistoryStack = new LightList<Route>();
+            m_ForwardHistoryStack = new LightList<Route>();
             m_RouteHandlers = new LightList<Route>();
             m_Transitions = new LightList<RouteTransition>();
             m_ActiveTransitions = new LightList<RouteTransition>();
@@ -169,17 +171,29 @@ namespace UIForia.Routing {
             targetRoute = null;
         }
 
-        public bool CanGoForwards => m_HistoryStack.Count > 1 && historyIndex != m_HistoryStack.Count - 1;
+        public bool CanGoForwards => m_ForwardHistoryStack.Count > 1;
+
+        public bool CanGoBackwards => m_HistoryStack.Count > 1 && historyIndex != 0;
 
         public void GoBack() {
             if (historyIndex == 0) {
                 return;
             }
 
-            m_HistoryStack.RemoveLast();
+            Route lastRoute = m_HistoryStack.RemoveLast();
+            m_ForwardHistoryStack.Add(lastRoute);
+
             Route route = m_HistoryStack.RemoveLast();
             historyIndex = historyIndex - 2;
-            GoTo(route.path);
+            GoTo(route.path, true);
+        }
+
+        public void GoForwards() {
+            if (!CanGoForwards) {
+                return;
+            }
+
+            GoTo(m_ForwardHistoryStack.RemoveLast().path, true);
         }
 
         public Route ActiveRoute => activeRoute;
@@ -247,7 +261,7 @@ namespace UIForia.Routing {
         }
 
         // todo if goto is called during an active transition the old route will not be disabled leaving two routes active at the same time
-        public void GoTo(string path) {
+        public void GoTo(string path, bool preserveForwardHistory = false) {
             targetUrl = path;
             for (int i = 0; i < m_RouteHandlers.Count; i++) {
                 RouteMatch match = Route.Match(m_RouteHandlers[i], path);
@@ -268,6 +282,9 @@ namespace UIForia.Routing {
 
                     if (m_ActiveTransitions.Count == 0) {
                         EnterRoute(match);
+                        if (!preserveForwardHistory) {
+                            m_ForwardHistoryStack.Clear();
+                        }
                     }
 
                     return;

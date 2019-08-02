@@ -30,12 +30,11 @@ namespace UIForia.Rendering {
 		public static readonly UIFixedLength BackgroundImageTileX = new UIFixedLength(0f, UIFixedUnit.Pixel);
 		public static readonly UIFixedLength BackgroundImageTileY = new UIFixedLength(0f, UIFixedUnit.Pixel);
 		public static readonly UIFixedLength BackgroundImageRotation = new UIFixedLength(0f, UIFixedUnit.Pixel);
-		public static readonly Texture2D BackgroundImage = null;
+		public static readonly Texture2D BackgroundImage = default(Texture2D);
 		public static readonly string Painter = "";
 		public const float Opacity = 1f;
-		public static readonly CursorStyle Cursor = null;
+		public static readonly CursorStyle Cursor = default(CursorStyle);
 		public const Visibility Visibility = UIForia.Rendering.Visibility.Visible;
-		public const int FlexItemOrder = 0;
 		public const int FlexItemGrow = 0;
 		public const int FlexItemShrink = 0;
 		public const LayoutDirection FlexLayoutDirection = UIForia.Layout.LayoutDirection.Horizontal;
@@ -67,8 +66,8 @@ namespace UIForia.Rendering {
 		public const float AlignmentPivotY = 0f;
 		public static readonly UIFixedLength AlignmentOffsetX = new UIFixedLength(0f, UIFixedUnit.Pixel);
 		public static readonly UIFixedLength AlignmentOffsetY = new UIFixedLength(0f, UIFixedUnit.Pixel);
-		public const Fit FitX = UIForia.Layout.Fit.Unset;
-		public const Fit FitY = UIForia.Layout.Fit.Unset;
+		public const Fit FitHorizontal = UIForia.Layout.Fit.Unset;
+		public const Fit FitVertical = UIForia.Layout.Fit.Unset;
 		public static readonly UIMeasurement MinWidth = new UIMeasurement(0f, UIMeasurementUnit.Pixel);
 		public static readonly UIMeasurement MaxWidth = new UIMeasurement(3.402823E+38f, UIMeasurementUnit.Pixel);
 		public static readonly UIMeasurement PreferredWidth = new UIMeasurement(1f, UIMeasurementUnit.Content);
@@ -177,17 +176,15 @@ namespace UIForia.Rendering {
 				case StylePropertyId.BackgroundImageRotation:
 					 return new StyleProperty(StylePropertyId.BackgroundImageRotation, new UIFixedLength(0f, UIFixedUnit.Pixel));
 				case StylePropertyId.BackgroundImage:
-					 return new StyleProperty(StylePropertyId.BackgroundImage, (Texture)null);
+					 return new StyleProperty(StylePropertyId.BackgroundImage, default(Texture2D));
 				case StylePropertyId.Painter:
 					 return new StyleProperty(StylePropertyId.Painter, "");
 				case StylePropertyId.Opacity:
 					 return new StyleProperty(StylePropertyId.Opacity, 1f);
 				case StylePropertyId.Cursor:
-					 return new StyleProperty(StylePropertyId.Cursor, (CursorStyle)null);
+					 return new StyleProperty(StylePropertyId.Cursor, default(CursorStyle));
 				case StylePropertyId.Visibility:
 					 return new StyleProperty(StylePropertyId.Visibility, (int)UIForia.Rendering.Visibility.Visible);
-				case StylePropertyId.FlexItemOrder:
-					 return new StyleProperty(StylePropertyId.FlexItemOrder, 0);
 				case StylePropertyId.FlexItemGrow:
 					 return new StyleProperty(StylePropertyId.FlexItemGrow, 0);
 				case StylePropertyId.FlexItemShrink:
@@ -250,10 +247,10 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.AlignmentOffsetX, new UIFixedLength(0f, UIFixedUnit.Pixel));
 				case StylePropertyId.AlignmentOffsetY:
 					 return new StyleProperty(StylePropertyId.AlignmentOffsetY, new UIFixedLength(0f, UIFixedUnit.Pixel));
-				case StylePropertyId.FitX:
-					 return new StyleProperty(StylePropertyId.FitX, (int)UIForia.Layout.Fit.Unset);
-				case StylePropertyId.FitY:
-					 return new StyleProperty(StylePropertyId.FitY, (int)UIForia.Layout.Fit.Unset);
+				case StylePropertyId.FitHorizontal:
+					 return new StyleProperty(StylePropertyId.FitHorizontal, (int)UIForia.Layout.Fit.Unset);
+				case StylePropertyId.FitVertical:
+					 return new StyleProperty(StylePropertyId.FitVertical, (int)UIForia.Layout.Fit.Unset);
 				case StylePropertyId.MinWidth:
 					 return new StyleProperty(StylePropertyId.MinWidth, new UIMeasurement(0f, UIMeasurementUnit.Pixel));
 				case StylePropertyId.MaxWidth:

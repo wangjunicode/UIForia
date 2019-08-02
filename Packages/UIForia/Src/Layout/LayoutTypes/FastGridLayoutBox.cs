@@ -995,7 +995,7 @@ namespace UIForia.Layout.LayoutTypes {
                     }
 
                     sparseStartX = cursorX;
-                    sparseStartY = cursorY; // + height;
+                    sparseStartY = cursorY; 
                     placement.x = cursorX;
                     placement.y = cursorY;
                     colTrackList.array[cursorX].autoPlacementCursor = cursorY;
@@ -1055,15 +1055,11 @@ namespace UIForia.Layout.LayoutTypes {
         }
 
         protected override void OnChildStyleChanged(FastLayoutBox child, StructList<StyleProperty> properties) {
-            // int idx = GetPlacementIndexForId(child.element.id); // what was this intended for?
             bool markedForLayout = false;
             for (int i = 0; i < properties.Count; i++) {
                 StyleProperty property = properties[i];
                 switch (property.propertyId) {
                     case StylePropertyId.LayoutBehavior:
-                        // markedForLayout = true; already set by the layout system but could be set here explicitly again for clarity maybe?
-                        placementDirty = true;
-                        break;
                     case StylePropertyId.GridItemHeight:
                     case StylePropertyId.GridItemWidth:
                     case StylePropertyId.GridItemY:

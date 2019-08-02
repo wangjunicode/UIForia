@@ -145,13 +145,6 @@ namespace UIForia.Rendering {
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.Visibility, (int)value), state); }
         }
         
-        public int FlexItemOrder {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.FlexItemOrder, state).AsInt; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.FlexItemOrder, value), state); }
-        }
-        
         public int FlexItemGrow {
             [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.FlexItemGrow, state).AsInt; }
@@ -369,18 +362,18 @@ namespace UIForia.Rendering {
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.AlignmentOffsetY, value), state); }
         }
         
-        public UIForia.Layout.Fit FitX {
+        public UIForia.Layout.Fit FitHorizontal {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.FitX, state).AsFit; }
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.FitHorizontal, state).AsFit; }
             [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.FitX, (int)value), state); }
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.FitHorizontal, (int)value), state); }
         }
         
-        public UIForia.Layout.Fit FitY {
+        public UIForia.Layout.Fit FitVertical {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.FitY, state).AsFit; }
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.FitVertical, state).AsFit; }
             [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.FitY, (int)value), state); }
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.FitVertical, (int)value), state); }
         }
         
         public UIForia.Rendering.UIMeasurement MinWidth {
@@ -545,9 +538,9 @@ namespace UIForia.Rendering {
         }
         
         public UnityEngine.Color TextColor {
-//            [System.Diagnostics.DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.TextColor, state).AsColor; }
-//            [System.Diagnostics.DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.TextColor, value), state); }
         }
         
@@ -1046,13 +1039,6 @@ namespace UIForia.Rendering {
             set { SetProperty(new StyleProperty(StylePropertyId.Visibility, (int)value)); }
         }
             
-        public int FlexItemOrder {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return FindIntProperty(StylePropertyId.FlexItemOrder); }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.FlexItemOrder, value)); }
-        }
-            
         public int FlexItemGrow {
             [System.Diagnostics.DebuggerStepThrough]
             get { return FindIntProperty(StylePropertyId.FlexItemGrow); }
@@ -1270,18 +1256,18 @@ namespace UIForia.Rendering {
             set { SetProperty(new StyleProperty(StylePropertyId.AlignmentOffsetY, value)); }
         }
             
-        public UIForia.Layout.Fit FitX {
+        public UIForia.Layout.Fit FitHorizontal {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return (UIForia.Layout.Fit)FindEnumProperty(StylePropertyId.FitX); }
+            get { return (UIForia.Layout.Fit)FindEnumProperty(StylePropertyId.FitHorizontal); }
             [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.FitX, (int)value)); }
+            set { SetProperty(new StyleProperty(StylePropertyId.FitHorizontal, (int)value)); }
         }
             
-        public UIForia.Layout.Fit FitY {
+        public UIForia.Layout.Fit FitVertical {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return (UIForia.Layout.Fit)FindEnumProperty(StylePropertyId.FitY); }
+            get { return (UIForia.Layout.Fit)FindEnumProperty(StylePropertyId.FitVertical); }
             [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.FitY, (int)value)); }
+            set { SetProperty(new StyleProperty(StylePropertyId.FitVertical, (int)value)); }
         }
             
         public UIForia.Rendering.UIMeasurement MinWidth {
@@ -1991,15 +1977,6 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public int FlexItemOrder { 
-                [System.Diagnostics.DebuggerStepThrough]
-                get { 
-                    StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.FlexItemOrder, out property)) return property.AsInt;
-                    return DefaultStyleValues_Generated.FlexItemOrder;
-                }
-            }
-
             public int FlexItemGrow { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
@@ -2279,21 +2256,21 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UIForia.Layout.Fit FitX { 
+            public UIForia.Layout.Fit FitHorizontal { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.FitX, out property)) return property.AsFit;
-                    return DefaultStyleValues_Generated.FitX;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.FitHorizontal, out property)) return property.AsFit;
+                    return DefaultStyleValues_Generated.FitHorizontal;
                 }
             }
 
-            public UIForia.Layout.Fit FitY { 
+            public UIForia.Layout.Fit FitVertical { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.FitY, out property)) return property.AsFit;
-                    return DefaultStyleValues_Generated.FitY;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.FitVertical, out property)) return property.AsFit;
+                    return DefaultStyleValues_Generated.FitVertical;
                 }
             }
 
@@ -2505,7 +2482,7 @@ namespace UIForia.Rendering {
             }
 
             public UnityEngine.Color TextColor { 
-//                [System.Diagnostics.DebuggerStepThrough]
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.TextColor, out property)) return property.AsColor;
@@ -3148,14 +3125,6 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.Visibility, state).AsVisibility;
         }
         
-        public void SetFlexItemOrder(in int? value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.FlexItemOrder, value), state);
-        }
-
-        public int GetFlexItemOrder(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.FlexItemOrder, state).AsInt;
-        }
-        
         public void SetFlexItemGrow(in int? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.FlexItemGrow, value), state);
         }
@@ -3404,20 +3373,20 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.AlignmentOffsetY, state).AsUIFixedLength;
         }
         
-        public void SetFitX(in UIForia.Layout.Fit? value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.FitX, (int)value), state);
+        public void SetFitHorizontal(in UIForia.Layout.Fit? value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.FitHorizontal, (int)value), state);
         }
 
-        public UIForia.Layout.Fit GetFitX(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.FitX, state).AsFit;
+        public UIForia.Layout.Fit GetFitHorizontal(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.FitHorizontal, state).AsFit;
         }
         
-        public void SetFitY(in UIForia.Layout.Fit? value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.FitY, (int)value), state);
+        public void SetFitVertical(in UIForia.Layout.Fit? value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.FitVertical, (int)value), state);
         }
 
-        public UIForia.Layout.Fit GetFitY(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.FitY, state).AsFit;
+        public UIForia.Layout.Fit GetFitVertical(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.FitVertical, state).AsFit;
         }
         
         public void SetMinWidth(in UIForia.Rendering.UIMeasurement? value, StyleState state) {
@@ -4055,8 +4024,6 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.Cursor, Cursor);
 				case StylePropertyId.Visibility:
 					 return new StyleProperty(StylePropertyId.Visibility, (int)Visibility);
-				case StylePropertyId.FlexItemOrder:
-					 return new StyleProperty(StylePropertyId.FlexItemOrder, FlexItemOrder);
 				case StylePropertyId.FlexItemGrow:
 					 return new StyleProperty(StylePropertyId.FlexItemGrow, FlexItemGrow);
 				case StylePropertyId.FlexItemShrink:
@@ -4119,10 +4086,10 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.AlignmentOffsetX, AlignmentOffsetX);
 				case StylePropertyId.AlignmentOffsetY:
 					 return new StyleProperty(StylePropertyId.AlignmentOffsetY, AlignmentOffsetY);
-				case StylePropertyId.FitX:
-					 return new StyleProperty(StylePropertyId.FitX, (int)FitX);
-				case StylePropertyId.FitY:
-					 return new StyleProperty(StylePropertyId.FitY, (int)FitY);
+				case StylePropertyId.FitHorizontal:
+					 return new StyleProperty(StylePropertyId.FitHorizontal, (int)FitHorizontal);
+				case StylePropertyId.FitVertical:
+					 return new StyleProperty(StylePropertyId.FitVertical, (int)FitVertical);
 				case StylePropertyId.MinWidth:
 					 return new StyleProperty(StylePropertyId.MinWidth, MinWidth);
 				case StylePropertyId.MaxWidth:
@@ -4296,7 +4263,6 @@ namespace UIForia.Rendering {
                     case StylePropertyId.BackgroundImageTileY: return true;
                     case StylePropertyId.BackgroundImageRotation: return true;
                     case StylePropertyId.Opacity: return true;
-                    case StylePropertyId.FlexItemOrder: return true;
                     case StylePropertyId.FlexItemGrow: return true;
                     case StylePropertyId.FlexItemShrink: return true;
                     case StylePropertyId.GridLayoutColGap: return true;

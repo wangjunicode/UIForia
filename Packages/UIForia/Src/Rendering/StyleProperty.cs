@@ -174,7 +174,7 @@ namespace UIForia.Rendering {
                 GridTrackSize val = trackSize.Value;
                 this.float0 = val.minValue;
                 this.int1 = (int) val.minUnit;
-                this.hasValue = false;
+                this.hasValue = true;
             }
         }
 
@@ -475,15 +475,7 @@ namespace UIForia.Rendering {
         public static StyleProperty GridItemRowSpan(int rowSpan) {
             return new StyleProperty(StylePropertyId.GridItemWidth, rowSpan);
         }
-
-        public static StyleProperty GridItemColSelfAlignment(CrossAxisAlignment alignment) {
-            return new StyleProperty(StylePropertyId.GridItemColSelfAlignment, (int) alignment);
-        }
-
-        public static StyleProperty GridItemRowSelfAlignment(CrossAxisAlignment alignment) {
-            return new StyleProperty(StylePropertyId.GridItemRowSelfAlignment, (int) alignment);
-        }
-
+        
         public static StyleProperty GridLayoutDensity(GridLayoutDensity density) {
             return new StyleProperty(StylePropertyId.GridLayoutDensity, (int) density);
         }

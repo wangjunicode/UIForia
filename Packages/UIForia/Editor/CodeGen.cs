@@ -48,7 +48,6 @@ namespace UIForia.Editor {
             new PropertyGenerator<Visibility>(StylePropertyId.Visibility, Visibility.Visible, InheritanceType.Inherited),
 
             // Flex Item
-            new AnimatedPropertyGenerator<int>(StylePropertyId.FlexItemOrder, 0),
             new AnimatedPropertyGenerator<int>(StylePropertyId.FlexItemGrow, 0),
             new AnimatedPropertyGenerator<int>(StylePropertyId.FlexItemShrink, 0),
 
@@ -96,8 +95,8 @@ namespace UIForia.Editor {
             new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.AlignmentOffsetY, new UIFixedLength(0)),
 
             // Fit
-            new PropertyGenerator<Fit>(StylePropertyId.FitX, Fit.Unset),
-            new PropertyGenerator<Fit>(StylePropertyId.FitY, Fit.Unset),
+            new PropertyGenerator<Fit>(StylePropertyId.FitHorizontal, Fit.Unset),
+            new PropertyGenerator<Fit>(StylePropertyId.FitVertical, Fit.Unset),
 
             // Size
             new AnimatedPropertyGenerator<UIMeasurement>(StylePropertyId.MinWidth, new UIMeasurement(0)),
@@ -286,15 +285,7 @@ __REPLACE_StyleBindingCompiler_DoCompile
 
             template = template.Replace("__REPLACE__UIStyleSetStateProxy__", retn);
             retn = "";
-
-            for (int i = 0; i < properties.Length; i++) {
-                string statement = $"                    case StylePropertyId.{properties[i].propertyIdName}: return ";
-                retn += statement + InflateStylePropertyUnset(properties[i]) + ";\n";
-            }
-
-            template = template.Replace("__REPLACE_StyleProperty__IsUnset", retn);
-            retn = "";
-
+            
             for (int i = 0; i < properties.Length; i++) {
                 retn += InflateUIStyleSetProperties(properties[i]);
             }
@@ -500,10 +491,6 @@ namespace UIForia.Rendering {
             return {propertyGenerator.GetStyleSetGetter()};
         }}
         ";
-        }
-
-        private static string InflateStylePropertyUnset(PropertyGenerator propertyGenerator) {
-            return propertyGenerator.GetIsUnset();
         }
 
         private static string InflatePropertyTemplate(PropertyGenerator propertyGenerator) {

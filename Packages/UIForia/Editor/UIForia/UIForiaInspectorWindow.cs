@@ -760,10 +760,6 @@ namespace UIForia.Editor {
                 case StylePropertyId.GridItemWidth:
                     return DrawInt(property, isEditable);
 
-                case StylePropertyId.GridItemColSelfAlignment:
-                case StylePropertyId.GridItemRowSelfAlignment:
-                    return DrawEnumWithValue<GridAxisAlignment>(property, isEditable);
-
                 case StylePropertyId.GridLayoutDirection:
                     return DrawEnumWithValue<LayoutDirection>(property, isEditable);
 
@@ -796,10 +792,8 @@ namespace UIForia.Editor {
                     return DrawEnumWithValue<MainAxisAlignment>(property, isEditable);
 
                 case StylePropertyId.FlexLayoutCrossAxisAlignment:
-                case StylePropertyId.FlexItemSelfAlignment:
                     return DrawEnumWithValue<CrossAxisAlignment>(property, isEditable);
 
-                case StylePropertyId.FlexItemOrder:
                 case StylePropertyId.FlexItemGrow:
                 case StylePropertyId.FlexItemShrink:
                     return DrawInt(property, isEditable);

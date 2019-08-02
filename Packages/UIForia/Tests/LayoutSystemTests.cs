@@ -45,41 +45,42 @@ public class LayoutSystemTests {
         app.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
         LayoutTestThing root = (LayoutTestThing) app.RootElement.GetChild(0);
         app.Update();
-        Assert.AreEqual(Vector2.zero, root.child0.layoutResult.localPosition);
+        Assert.AreEqual(300, root.child0.layoutResult.actualSize.width);
+        Assert.AreEqual(100, root.child0.layoutResult.actualSize.height);
         Assert.AreEqual(new Vector2(0, 100), root.child1.layoutResult.localPosition);
-        Assert.AreEqual(100, root.child1.layoutResult.AllocatedWidth);
-        Assert.AreEqual(100, root.child1.layoutResult.AllocatedHeight);
+        Assert.AreEqual(100, root.child1.layoutResult.actualSize.width);
+        Assert.AreEqual(100, root.child1.layoutResult.actualSize.height);
 
         Assert.AreEqual(new Vector2(0, 200), root.child2.layoutResult.localPosition);
-        Assert.AreEqual(100, root.child2.layoutResult.AllocatedWidth);
-        Assert.AreEqual(100, root.child2.layoutResult.AllocatedHeight);
+        Assert.AreEqual(100, root.child2.layoutResult.actualSize.width);
+        Assert.AreEqual(100, root.child2.layoutResult.actualSize.height);
     }
 
     [Test]
     public void Updates() {
         MockApplication app = new MockApplication(typeof(LayoutTestThing));
         app.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
-        LayoutTestThing root = (LayoutTestThing) app.RootElement;
+        LayoutTestThing root = (LayoutTestThing) app.RootElement.GetChild(0);
         app.Update();
         Assert.AreEqual(Vector2.zero, root.child0.layoutResult.localPosition);
         Assert.AreEqual(new Vector2(0, 100), root.child1.layoutResult.localPosition);
-        Assert.AreEqual(100, root.child1.layoutResult.AllocatedWidth);
-        Assert.AreEqual(100, root.child1.layoutResult.AllocatedHeight);
+        Assert.AreEqual(100, root.child1.layoutResult.actualSize.width);
+        Assert.AreEqual(100, root.child1.layoutResult.actualSize.height);
 
         Assert.AreEqual(new Vector2(0, 200), root.child2.layoutResult.localPosition);
-        Assert.AreEqual(100, root.child2.layoutResult.AllocatedWidth);
-        Assert.AreEqual(100, root.child2.layoutResult.AllocatedHeight);
+        Assert.AreEqual(100, root.child2.layoutResult.actualSize.width);
+        Assert.AreEqual(100, root.child2.layoutResult.actualSize.height);
 
         root.child2.style.SetPreferredWidth(200, StyleState.Normal);
         app.Update();
         Assert.AreEqual(Vector2.zero, root.child0.layoutResult.localPosition);
         Assert.AreEqual(new Vector2(0, 100), root.child1.layoutResult.localPosition);
-        Assert.AreEqual(100, root.child1.layoutResult.AllocatedWidth);
-        Assert.AreEqual(100, root.child1.layoutResult.AllocatedHeight);
+        Assert.AreEqual(100, root.child1.layoutResult.actualSize.width);
+        Assert.AreEqual(100, root.child1.layoutResult.actualSize.height);
 
         Assert.AreEqual(new Vector2(0, 200), root.child2.layoutResult.localPosition);
-        Assert.AreEqual(200, root.child2.layoutResult.AllocatedWidth);
-        Assert.AreEqual(100, root.child2.layoutResult.AllocatedHeight);
+        Assert.AreEqual(200, root.child2.layoutResult.actualSize.width);
+        Assert.AreEqual(100, root.child2.layoutResult.actualSize.height);
     }
 
     [Test]
@@ -101,7 +102,7 @@ public class LayoutSystemTests {
         </UITemplate>
         ";
         MockApplication app = new MockApplication(typeof(LayoutTestThing), template);
-        LayoutTestThing root = (LayoutTestThing) app.RootElement;
+        LayoutTestThing root = (LayoutTestThing) app.RootElement.GetChild(0);
         app.Update();
         Assert.AreEqual(new Rect(0, 100, 300, 50), root.child1.layoutResult.AllocatedRect);
     }
@@ -125,7 +126,7 @@ public class LayoutSystemTests {
         </UITemplate>
         ";
         MockApplication app = new MockApplication(typeof(LayoutTestThing), template);
-        LayoutTestThing root = (LayoutTestThing) app.RootElement;
+        LayoutTestThing root = (LayoutTestThing) app.RootElement.GetChild(0);
         app.Update();
         Assert.AreEqual(new Rect(0, 100, 300, 50), root.child1.layoutResult.AllocatedRect);
         root.child1.style.SetMaxWidth(150f, StyleState.Normal);
@@ -152,7 +153,7 @@ public class LayoutSystemTests {
         </UITemplate>
         ";
         MockApplication app = new MockApplication(typeof(LayoutTestThing), template);
-        LayoutTestThing root = (LayoutTestThing) app.RootElement;
+        LayoutTestThing root = (LayoutTestThing) app.RootElement.GetChild(0);
         app.Update();
         Assert.AreEqual(new Rect(0, 100, 400, 50), root.child1.layoutResult.AllocatedRect);
         root.child1.style.SetMaxWidth(UIMeasurement.Content100, StyleState.Normal);
@@ -182,7 +183,7 @@ public class LayoutSystemTests {
         </UITemplate>
         ";
         MockApplication app = new MockApplication(typeof(LayoutTestThing), template);
-        LayoutTestThing root = (LayoutTestThing) app.RootElement;
+        LayoutTestThing root = (LayoutTestThing) app.RootElement.GetChild(0);
 
         app.Update();
         Assert.AreEqual(new Rect(0, 100, 400, 300), root.child1.layoutResult.AllocatedRect);
@@ -212,7 +213,7 @@ public class LayoutSystemTests {
         </UITemplate>
         ";
         MockApplication app = new MockApplication(typeof(LayoutTestThing), template);
-        LayoutTestThing root = (LayoutTestThing) app.RootElement;
+        LayoutTestThing root = (LayoutTestThing) app.RootElement.GetChild(0);
 
         app.Update();
         Assert.AreEqual(new Rect(0, 100, 400, 300), root.child1.layoutResult.AllocatedRect);
@@ -232,7 +233,7 @@ public class LayoutSystemTests {
                     MinWidth = 300px;
                 }
             </Style>
-            <Contents style.layoutType='LayoutType.Flex'>
+            <Contents style.layoutType='LayoutType.Flex' style.flexLayoutDirection='LayoutDirection.Vertical'>
                 <Group x-id='child0' style.preferredWidth='100f' style.preferredHeight='100f'/>
                 <Group x-id='child1' style.preferredWidth='$content(100)' style.preferredHeight='$content(100)'>
                     <Group if='false' x-id='nested-child-1' style.preferredWidth='300f' style.preferredHeight='50f'/>
@@ -244,7 +245,7 @@ public class LayoutSystemTests {
         ";
         MockApplication app = new MockApplication(typeof(LayoutTestThing), template);
         app.Update();
-        LayoutTestThing root = (LayoutTestThing) app.RootElement;
+        LayoutTestThing root = (LayoutTestThing) app.RootElement.GetChild(0);
         Assert.IsFalse(root.child1.FindById("nested-child-1").isEnabled);
         Assert.AreEqual(new Rect(0, 100, 200, 50), root.child1.layoutResult.AllocatedRect);
         root.child1.FindById("nested-child-1").SetEnabled(true);
@@ -275,7 +276,7 @@ public class LayoutSystemTests {
         ";
         MockApplication app = new MockApplication(typeof(LayoutTestThing), template);
         app.Update();
-        LayoutTestThing root = (LayoutTestThing) app.RootElement;
+        LayoutTestThing root = (LayoutTestThing) app.RootElement.GetChild(0);
 
         Assert.IsTrue(root.child1.FindById("nested-child-1").isEnabled);
         Assert.AreEqual(new Rect(0, 100, 300, 100), root.child1.layoutResult.AllocatedRect);
@@ -308,7 +309,7 @@ public class LayoutSystemTests {
         ";
         MockApplication app = new MockApplication(typeof(LayoutTestThing), template);
 
-        LayoutTestThing root = (LayoutTestThing) app.RootElement;
+        LayoutTestThing root = (LayoutTestThing) app.RootElement.GetChild(0);
         UIElement nestedChild1 = root.child1.FindById("nested-child-1");
         UIElement nestedChild2 = root.child1.FindById("nested-child-2");
         app.Update();

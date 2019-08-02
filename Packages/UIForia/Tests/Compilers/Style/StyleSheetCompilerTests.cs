@@ -341,10 +341,10 @@ style myStyle {
         var containers = styleSheet.styleGroupContainers;
         Assert.AreEqual(1, containers.Length);
 
-        Assert.AreEqual(0, containers[0].groups[0].normal.style.GridItemX);
-        Assert.AreEqual(4, containers[0].groups[0].normal.style.GridItemWidth);
-        Assert.AreEqual(2, containers[0].groups[0].normal.style.GridItemY);
-        Assert.AreEqual(5, containers[0].groups[0].normal.style.GridItemHeight);
+        Assert.AreEqual(new GridItemPlacement(0), containers[0].groups[0].normal.style.GridItemX);
+        Assert.AreEqual(new GridItemPlacement(4), containers[0].groups[0].normal.style.GridItemWidth);
+        Assert.AreEqual(new GridItemPlacement(2), containers[0].groups[0].normal.style.GridItemY);
+        Assert.AreEqual(new GridItemPlacement(5), containers[0].groups[0].normal.style.GridItemHeight);
     }
 
     [Test]
@@ -483,8 +483,8 @@ style myStyle {
 const main = 1fr;
 
 style myStyle {
-    GridLayoutMainAxisAutoSize = @main;
-    GridLayoutCrossAxisAutoSize = 42px;
+    GridLayoutColAutoSize = @main;
+    GridLayoutRowAutoSize = 42px;
 }
         ".Trim());
 
@@ -684,7 +684,6 @@ export const wrap = WrapReverse;
 export const grow = 1;
 
 style myStyle {
-    FlexItemOrder = 2;
     FlexItemGrow = @grow;
     FlexItemShrink = 0;
     FlexLayoutWrap = @wrap;
@@ -696,7 +695,6 @@ style myStyle {
         var styleGroup = styleSheet.styleGroupContainers;
         Assert.AreEqual(1, styleGroup.Length);
 
-        Assert.AreEqual(2, styleGroup[0].groups[0].normal.style.FlexItemOrder);
         Assert.AreEqual(1, styleGroup[0].groups[0].normal.style.FlexItemGrow);
         Assert.AreEqual(0, styleGroup[0].groups[0].normal.style.FlexItemShrink);
         Assert.AreEqual(LayoutWrap.WrapReverse, styleGroup[0].groups[0].normal.style.FlexLayoutWrap);
@@ -891,9 +889,9 @@ style transBeh4 { TransformBehaviorY = AnchorMaxOffset; }
         Assert.AreEqual(2, styleGroup[0].groups[0].normal.style.TransformScaleY);
 
         Assert.AreEqual(3, styleGroup[1].groups[0].normal.style.TransformScaleX);
-        Assert.AreEqual(0, styleGroup[1].groups[0].normal.style.TransformScaleY);
+        Assert.AreEqual(float.NaN, styleGroup[1].groups[0].normal.style.TransformScaleY);
 
-        Assert.AreEqual(0, styleGroup[2].groups[0].normal.style.TransformScaleX);
+        Assert.AreEqual(float.NaN, styleGroup[2].groups[0].normal.style.TransformScaleX);
         Assert.AreEqual(4, styleGroup[2].groups[0].normal.style.TransformScaleY);
 
         Assert.AreEqual(new UIFixedLength(0.1f, UIFixedUnit.Percent), styleGroup[3].groups[0].normal.style.TransformPivotX);

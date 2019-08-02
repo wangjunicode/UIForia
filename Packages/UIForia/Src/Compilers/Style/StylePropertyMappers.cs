@@ -38,6 +38,9 @@ namespace UIForia.Compilers.Style {
                 {"alignmentoffsetx", (targetStyle, property, context) => targetStyle.AlignmentOffsetX = MapFixedLength(property.children[0], context)},
                 {"alignmentoffsety", (targetStyle, property, context) => targetStyle.AlignmentOffsetY = MapFixedLength(property.children[0], context)},
 
+                {"fithorizontal", (targetStyle, property, context) => targetStyle.FitHorizontal = MapEnum<Fit>(property.children[0], context)},
+                {"fitvertical", (targetStyle, property, context) => targetStyle.FitVertical = MapEnum<Fit>(property.children[0], context)},
+                
                 // Background
                 {"backgroundcolor", (targetStyle, property, context) => targetStyle.BackgroundColor = MapColor(property, context)},
                 {"backgroundtint", (targetStyle, property, context) => targetStyle.BackgroundTint = MapColor(property, context)},
@@ -99,7 +102,6 @@ namespace UIForia.Compilers.Style {
                 {"gridlayoutcolgap", (targetStyle, property, context) => targetStyle.GridLayoutColGap = MapNumber(property.children[0], context)},
                 {"gridlayoutrowgap", (targetStyle, property, context) => targetStyle.GridLayoutRowGap = MapNumber(property.children[0], context)},
 
-                {"flexitemorder", (targetStyle, property, context) => targetStyle.FlexItemOrder = (int) MapNumber(property.children[0], context)},
                 {"flexitemgrow", (targetStyle, property, context) => targetStyle.FlexItemGrow = (int) MapNumber(property.children[0], context)},
                 {"flexitemshrink", (targetStyle, property, context) => targetStyle.FlexItemShrink = (int) MapNumber(property.children[0], context)},
                 {"flexlayoutwrap", (targetStyle, property, context) => targetStyle.FlexLayoutWrap = MapEnum<LayoutWrap>(property.children[0], context)},
@@ -156,6 +158,7 @@ namespace UIForia.Compilers.Style {
                 {"textalignment", (targetStyle, property, context) => targetStyle.TextAlignment = MapEnum<TextAlignment>(property.children[0], context)},
                 {"textoutlinewidth", (targetStyle, property, context) => targetStyle.TextOutlineWidth = MapNumber(property.children[0], context)},
                 {"textoutlinecolor", (targetStyle, property, context) => targetStyle.TextOutlineColor = MapColor(property, context)},
+                {"textoutlinesoftness", (targetStyle, property, context) => targetStyle.TextOutlineSoftness = MapNumber(property.children[0], context)},
                 {"textglowcolor", (targetStyle, property, context) => targetStyle.TextGlowColor = MapColor(property, context)},
                 {"textglowoffset", (targetStyle, property, context) => targetStyle.TextGlowOffset = MapNumber(property.children[0], context)},
                 {"textglowinner", (targetStyle, property, context) => targetStyle.TextGlowInner = MapNumber(property.children[0], context)},
@@ -164,7 +167,7 @@ namespace UIForia.Compilers.Style {
                 {"textunderlaycolor", (targetStyle, property, context) => targetStyle.TextUnderlayColor = MapColor(property, context)},
                 {"textunderlayx", (targetStyle, property, context) => targetStyle.TextUnderlayX = MapNumber(property.children[0], context)},
                 {"textunderlayy", (targetStyle, property, context) => targetStyle.TextUnderlayY = MapNumber(property.children[0], context)},
-                {"textunderlayintensity", (targetStyle, property, context) => targetStyle.TextUnderlayDilate = MapNumber(property.children[0], context)},
+                {"textunderlaydilate", (targetStyle, property, context) => targetStyle.TextUnderlayDilate = MapNumber(property.children[0], context)},
                 {"textunderlaysoftness", (targetStyle, property, context) => targetStyle.TextUnderlaySoftness = MapNumber(property.children[0], context)},
                 {"textunderlaytype", (targetStyle, property, context) => targetStyle.TextUnderlayType = MapEnum<UnderlayType>(property.children[0], context)},
                 {"texttransform", (targetStyle, property, context) => targetStyle.TextTransform = MapEnum<TextTransform>(property.children[0], context)}, {
@@ -189,7 +192,7 @@ namespace UIForia.Compilers.Style {
                 {"scrollbarcolor", (targetStyle, property, context) => targetStyle.ScrollbarColor = MapColor(property, context)},
 
                 // shadows for things
-//                {"shadowtype", (targetStyle, property, context) => targetStyle.UnderlayType = MapEnum<UnderlayType>(property.children[0], context)},
+                {"shadowtype", (targetStyle, property, context) => targetStyle.ShadowType = MapEnum<UnderlayType>(property.children[0], context)},
                 {"shadowoffsetx", (targetStyle, property, context) => targetStyle.ShadowOffsetX = MapNumber(property.children[0], context)},
                 {"shadowoffsety", (targetStyle, property, context) => targetStyle.ShadowOffsetY = MapNumber(property.children[0], context)},
                 {"shadowsoftnessx", (targetStyle, property, context) => targetStyle.ShadowSoftnessX = MapNumber(property.children[0], context)},

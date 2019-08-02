@@ -102,7 +102,6 @@ namespace UIForia.Layout.LayoutTypes {
                 switch (property.propertyId) {
                     case StylePropertyId.FlexItemGrow:
                     case StylePropertyId.FlexItemShrink:
-                    case StylePropertyId.FlexItemSelfAlignment:
 
                         Item[] itemList = items.Array;
                         for (int i = 0; i < children.Count; i++) {

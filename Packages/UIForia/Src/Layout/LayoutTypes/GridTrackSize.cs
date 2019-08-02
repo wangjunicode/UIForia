@@ -80,7 +80,7 @@ namespace UIForia.Layout.LayoutTypes {
 
     }
 
-    [DebuggerDisplay("(minValue = {nameof(minValue)}, minUnit = {nameof(minUnit)}, maxValue = {nameof(maxValue)}, maxUnit = {nameof(maxUnit)})")]
+    [DebuggerDisplay("(minValue = {minValue}, minUnit = {(minUnit)}, maxValue = {(maxValue)}, maxUnit = {(maxUnit)})")]
     public struct GridTrackSize {
 
         public readonly float minValue;

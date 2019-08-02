@@ -1335,8 +1335,6 @@ case "overflowx":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_CursorStyle("Cursor", UIForia.Rendering.StylePropertyId.Cursor, targetState.state, Compile<UIForia.Rendering.CursorStyle>(value, null));                
                 case "visibility":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_Visibility("Visibility", UIForia.Rendering.StylePropertyId.Visibility, targetState.state, Compile<UIForia.Rendering.Visibility>(value, s_EnumSource_Visibility));                
-                case "flexitemorder":
-                    return new UIForia.Bindings.StyleBindings.StyleBinding_int("FlexItemOrder", UIForia.Rendering.StylePropertyId.FlexItemOrder, targetState.state, Compile<int>(value, null));                
                 case "flexitemgrow":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_int("FlexItemGrow", UIForia.Rendering.StylePropertyId.FlexItemGrow, targetState.state, Compile<int>(value, null));                
                 case "flexitemshrink":
@@ -1399,10 +1397,10 @@ case "overflowx":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_UIFixedLength("AlignmentOffsetX", UIForia.Rendering.StylePropertyId.AlignmentOffsetX, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
                 case "alignmentoffsety":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_UIFixedLength("AlignmentOffsetY", UIForia.Rendering.StylePropertyId.AlignmentOffsetY, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
-                case "fitx":
-                    return new UIForia.Bindings.StyleBindings.StyleBinding_Fit("FitX", UIForia.Rendering.StylePropertyId.FitX, targetState.state, Compile<UIForia.Layout.Fit>(value, s_EnumSource_Fit));                
-                case "fity":
-                    return new UIForia.Bindings.StyleBindings.StyleBinding_Fit("FitY", UIForia.Rendering.StylePropertyId.FitY, targetState.state, Compile<UIForia.Layout.Fit>(value, s_EnumSource_Fit));                
+                case "fithorizontal":
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_Fit("FitHorizontal", UIForia.Rendering.StylePropertyId.FitHorizontal, targetState.state, Compile<UIForia.Layout.Fit>(value, s_EnumSource_Fit));                
+                case "fitvertical":
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_Fit("FitVertical", UIForia.Rendering.StylePropertyId.FitVertical, targetState.state, Compile<UIForia.Layout.Fit>(value, s_EnumSource_Fit));                
                 case "minwidth":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_UIMeasurement("MinWidth", UIForia.Rendering.StylePropertyId.MinWidth, targetState.state, Compile<UIForia.Rendering.UIMeasurement>(value, measurementSources));                
                 case "maxwidth":

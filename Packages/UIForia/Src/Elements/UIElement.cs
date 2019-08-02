@@ -111,18 +111,10 @@ namespace UIForia.Elements {
 
         internal static IntMap<ElementColdData> s_ColdDataMap = new IntMap<ElementColdData>();
 
-        internal LinqBindingNode bindingNode;
         internal FastLayoutBox layoutBox;
         internal RenderBox renderBox;
         
-        public int traversalIndex;
-
-        internal StructList<ElementAttribute> attributes;
-        
         public UIView View { get; internal set; }
-        
-        // todo -- move this
-        public ArrayContainer<StoredTemplate> storedTemplates;
         
         protected internal UIElement() {
             this.id = Application.NextElementId;
@@ -241,9 +233,6 @@ namespace UIForia.Elements {
             return element;
         }
 
-        public UIElement AddChild(in StoredTemplate storedTemplate) {
-            return Application.InsertChildFromTemplate(this, storedTemplate, (uint)children.Count);
-        }
 
         public void TriggerEvent(UIEvent evt) {
             evt.origin = this;
@@ -448,14 +437,6 @@ namespace UIForia.Elements {
                 ptr = ptr.parent;
             }
 
-            return default;
-        }
-
-        internal void StoreTemplate(StoredTemplate storedTemplate) {
-            
-        }
-
-        public StoredTemplate GetStoredTemplate(string templateName) {
             return default;
         }
         

@@ -1112,10 +1112,6 @@ namespace UIForia.Layout.LayoutTypes {
                         m_IsPlacementDirty = true;
                         markedForLayout = true;
                         break;
-                    case StylePropertyId.GridItemColSelfAlignment:
-                    case StylePropertyId.GridItemRowSelfAlignment:
-                        markedForLayout = true;
-                        break;
                 }
             }
         }

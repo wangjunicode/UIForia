@@ -37,7 +37,6 @@ namespace UIForia {
         protected IInputSystem m_InputSystem;
         protected RoutingSystem m_RoutingSystem;
         protected AnimationSystem m_AnimationSystem;
-        protected LinqBindingSystem linqBindingSystem;
 
         protected ResourceManager resourceManager;
 
@@ -216,29 +215,7 @@ namespace UIForia {
         public ResourceManager ResourceManager => resourceManager;
 
         // Doesn't expect to create the root
-        internal void HydrateTemplate(int templateId, UIElement parent, TemplateScope2 scope) {
-            templateCache.compiledTemplates[templateId].Create(parent, scope);
-        }
-
-        // always creates the root
-        internal UIElement CreateSubTemplate(int templateId, UIElement parent, TemplateScope2 scope) {
-            return templateCache.compiledTemplates[templateId].Create(parent, scope);
-        }
-
-
-        internal TemplateCache templateCache = new TemplateCache();
-
-        internal class TemplateCache {
-
-            internal LightList<CompiledTemplate> compiledTemplates = new LightList<CompiledTemplate>();
-
-            public void Add(CompiledTemplate retn) {
-                retn.templateId = compiledTemplates.Count;
-                compiledTemplates.Add(retn);
-            }
-
-        }
-
+       
         public void SetCamera(Camera camera) {
             Camera = camera;
             RenderSystem.SetCamera(camera);
@@ -527,7 +504,7 @@ namespace UIForia {
 
             m_StyleSystem.OnUpdate();
 
-            SetTraversalIndex();
+            // SetTraversalIndex();
 
             m_LayoutSystem.OnUpdate();
 
@@ -580,37 +557,37 @@ namespace UIForia {
             LightStack<UIElement>.Release(ref stack);
         }
 
-        private void SetTraversalIndex() {
-            LightStack<UIElement> stack = LightStack<UIElement>.Get();
-
-            for (int i = 0; i < m_Views.Count; i++) {
-                stack.Push(m_Views[i].rootElement);
-            }
-
-            int idx = 0;
-
-            while (stack.size > 0) {
-                UIElement currentElement = stack.array[--stack.size];
-
-                currentElement.traversalIndex = idx++;
-
-                UIElement[] childArray = currentElement.children.array;
-                int childCount = currentElement.children.size;
-
-                stack.EnsureAdditionalCapacity(childCount);
-
-                for (int i = childCount - 1; i >= 0; i--) {
-                    // todo -- direct flag check
-                    if (childArray[i].isDisabled) {
-                        continue;
-                    }
-
-                    stack.array[stack.size++] = childArray[i];
-                }
-            }
-
-            LightStack<UIElement>.Release(ref stack);
-        }
+//        private void SetTraversalIndex() {
+//            LightStack<UIElement> stack = LightStack<UIElement>.Get();
+//
+//            for (int i = 0; i < m_Views.Count; i++) {
+//                stack.Push(m_Views[i].rootElement);
+//            }
+//
+//            int idx = 0;
+//
+//            while (stack.size > 0) {
+//                UIElement currentElement = stack.array[--stack.size];
+//
+//                currentElement.traversalIndex = idx++;
+//
+//                UIElement[] childArray = currentElement.children.array;
+//                int childCount = currentElement.children.size;
+//
+//                stack.EnsureAdditionalCapacity(childCount);
+//
+//                for (int i = childCount - 1; i >= 0; i--) {
+//                    // todo -- direct flag check
+//                    if (childArray[i].isDisabled) {
+//                        continue;
+//                    }
+//
+//                    stack.array[stack.size++] = childArray[i];
+//                }
+//            }
+//
+//            LightStack<UIElement>.Release(ref stack);
+//        }
 
         /// <summary>
         /// Note: you don't need to remove tasks from the system. Any canceled or otherwise completed task gets removed
@@ -1022,62 +999,7 @@ namespace UIForia {
 
             onViewsSorted?.Invoke(m_Views.ToArray());
         }
-
-
-        internal UIElement InsertChildFromTemplate(UIElement parent, in StoredTemplate storedTemplate, uint index) {
-            CompiledTemplate template = templateCache.compiledTemplates[storedTemplate.templateId];
-            // template.CreateStored(parent, storedTemplate.closureRoot, slots?, context? bindingNode?)
-            UIElement child = template.Create(parent, new TemplateScope2(this, null, StructList<SlotUsage>.Get()));
-            return child;
-        }
-
-        internal LightList<SlotUsageTemplate> slotUsageTemplates = new LightList<SlotUsageTemplate>(128);
-
-        // todo we will want to not compile this here, explore jitting this
-        internal int AddSlotUsageTemplate(Expression<SlotUsageTemplate> lambda) {
-            slotUsageTemplates.Add(lambda.Compile());
-            return slotUsageTemplates.Count - 1;
-        }
-
-        internal bool TryCreateSlot(StructList<SlotUsage> slots, string targetSlot, LinqBindingNode bindingNode, UIElement parent, out UIElement element) {
-            SlotUsage[] array = slots.array;
-            for (int i = 0; i < slots.size; i++) {
-                if (array[i].slotName == targetSlot) {
-                    element = slotUsageTemplates[array[i].templateId].Invoke(this, bindingNode, parent, array[i].lexicalScope);
-                    element.View = parent.View;
-                    return true;
-                }
-            }
-
-            element = null;
-            return false;
-        }
-
-        internal UIElement CreateSlot(StructList<SlotUsage> slots, string targetSlot, LinqBindingNode bindingNode, UIElement parent, UIElement root, CompiledTemplate defaultTemplateData, int defaultTemplateId) {
-            UIElement element;
-
-            if (slots == null) {
-                element = slotUsageTemplates[defaultTemplateId].Invoke(this, bindingNode, parent, new LexicalScope(root, defaultTemplateData));
-                element.View = parent.View;
-                element.parent = parent;
-                return element;
-            }
-
-            SlotUsage[] array = slots.array;
-            for (int i = 0; i < slots.size; i++) {
-                if (array[i].slotName == targetSlot) {
-                    element = slotUsageTemplates[array[i].templateId].Invoke(this, bindingNode, parent, array[i].lexicalScope);
-                    element.parent = parent;
-                    element.View = parent.View;
-                    return element;
-                }
-            }
-
-            element = slotUsageTemplates[defaultTemplateId].Invoke(this, bindingNode, parent, new LexicalScope(root, defaultTemplateData));
-            element.View = parent.View;
-            element.parent = parent;
-            return element;
-        }
+        
 
     }
 

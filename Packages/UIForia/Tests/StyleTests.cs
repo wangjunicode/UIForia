@@ -61,18 +61,7 @@ public class StyleTests {
             nameof(UIStyleSet.FlexItemShrink),
             nameof(DefaultStyleValues_Generated.FlexItemShrink)
         );
-
-        TestBody(
-            nameof(UIStyleSet.SetFlexItemOrder),
-            nameof(UIStyleSet.FlexItemOrder),
-            nameof(DefaultStyleValues_Generated.FlexItemOrder)
-        );
-
-        TestBody(
-            nameof(UIStyleSet.SetFlexItemOrder),
-            nameof(UIStyleSet.FlexItemOrder),
-            nameof(DefaultStyleValues_Generated.FlexItemOrder)
-        );
+        
     }
 
     private void RunSizeTests(Action<string, string, string> TestBody) {

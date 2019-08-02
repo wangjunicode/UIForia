@@ -79,46 +79,6 @@ namespace UIForia.Editor {
 
         public bool IsInherited => inheritanceType == InheritanceType.Inherited;
 
-        public string GetIsUnset() {
-            if (type.IsEnum) {
-                return $"{nameof(StyleProperty.int0)} == 0 || IntUtil.UnsetValue == {nameof(StyleProperty.int0)}";
-            }
-
-            if (type == typeof(float)) {
-                return $"!float.IsNaN({nameof(StyleProperty.float1)})";
-            }
-
-            if (type == typeof(int)) {
-                return $"{nameof(StyleProperty.int0)} == IntUtil.UnsetValue";
-            }
-
-            if (type == typeof(UIMeasurement)) {
-                return $"!FloatUtil.IsDefined({nameof(StyleProperty.float1)}) || {nameof(StyleProperty.int1)} == 0";
-            }
-
-            if (type == typeof(TransformOffset)) {
-                return $"!FloatUtil.IsDefined({nameof(StyleProperty.float1)}) || {nameof(StyleProperty.int1)} == 0";
-            }
-            
-            if (type == typeof(UIFixedLength)) {
-                return $"!FloatUtil.IsDefined({nameof(StyleProperty.float1)}) || {nameof(StyleProperty.int1)} == 0";
-            }
-
-            if (type == typeof(GridTrackSize)) {
-                return $"!FloatUtil.IsDefined({nameof(StyleProperty.float1)}) || {nameof(StyleProperty.int1)} == 0";
-            }
-
-            if (type == typeof(GridItemPlacement)) {
-                return $"!IntUtil.IsDefined({nameof(StyleProperty.int0)}) &&  {nameof(StyleProperty.objectField)} == null";
-            }
-            
-            if (type == typeof(Color)) {
-                return $"{nameof(StyleProperty.int1)} == 0";
-            }
-
-            return $"{nameof(StyleProperty.objectField)} == null";
-        }
-
         public string GetTypeName() {
             if (type == typeof(IReadOnlyList<GridTrackSize>)) {
                 return "IReadOnlyList<UIForia.Layout.LayoutTypes.GridTrackSize>";
@@ -190,7 +150,7 @@ namespace UIForia.Editor {
                 return '"' + defaultValue.ToString() + '"';
             }
             
-            if (defaultValue == null) return "null";
+            if (defaultValue == null) return $"default({GetTypeName()})";
 
             return defaultValue.ToString();
         }

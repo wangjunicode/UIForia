@@ -29,8 +29,6 @@ namespace UIForia.Rendering {
         GridItemHeight = 201,
         GridItemX = 202,
         GridItemWidth = 203,
-        GridItemColSelfAlignment = 204,
-        GridItemRowSelfAlignment = 205,
 
         GridLayoutDirection = 2204,
         GridLayoutDensity = 2205,
@@ -48,8 +46,6 @@ namespace UIForia.Rendering {
         FlexLayoutMainAxisAlignment = 302,
         FlexLayoutCrossAxisAlignment = 303,
 
-        FlexItemSelfAlignment = 400,
-        FlexItemOrder = 401,
         FlexItemGrow = 402,
         FlexItemShrink = 403,
 
@@ -156,8 +152,8 @@ namespace UIForia.Rendering {
         AlignmentBehaviorX = 2007,
         AlignmentBehaviorY = 2008,
         
-        FitX = 2009,
-        FitY = 2010,
+        FitHorizontal = 2009,
+        FitVertical = 2010,
 
     }
 

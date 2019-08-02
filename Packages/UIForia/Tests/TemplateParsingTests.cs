@@ -151,7 +151,7 @@ public class TemplateParsingTests {
     public void SlotContent_UsesAssignedSlotContentOnMatch() {
         MockApplication app = new MockApplication(typeof(TestThing2));
         app.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
-        ThingWithSlot slotThing = app.RootElement.FindFirstByType<ThingWithSlot>();
+        ThingWithSlot slotThing = app.RootElement.GetChild(0).FindFirstByType<ThingWithSlot>();
         UITextElement textElement = slotThing.FindFirstByType<UITextElement>();
         Assert.IsNotNull(textElement);
         Assert.AreEqual("should be slot child", textElement.text);
@@ -161,7 +161,7 @@ public class TemplateParsingTests {
     public void SlotContent_UsesDefaultSlotContentOnNoMatch() {
         MockApplication app = new MockApplication(typeof(TestThing3));
         app.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
-        ThingWithSlot slotThing = app.RootElement.FindFirstByType<ThingWithSlot>();
+        ThingWithSlot slotThing = app.RootElement.GetChild(0).FindFirstByType<ThingWithSlot>();
         UITextElement textElement = slotThing.FindFirstByType<UITextElement>();
         Assert.IsNotNull(textElement);
         Assert.AreEqual("default content", textElement.text);

@@ -85,11 +85,11 @@ namespace UIForia.Editor {
             }
 
             if (type == typeof(float)) {
-                return $"!FloatUtil.IsDefined({nameof(StyleProperty.float1)})";
+                return $"!float.IsNaN({nameof(StyleProperty.float1)})";
             }
 
             if (type == typeof(int)) {
-                return $"!IntUtil.IsDefined({nameof(StyleProperty.int0)})";
+                return $"{nameof(StyleProperty.int0)} == IntUtil.UnsetValue";
             }
 
             if (type == typeof(UIMeasurement)) {

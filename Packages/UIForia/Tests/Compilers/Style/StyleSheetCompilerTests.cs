@@ -493,8 +493,8 @@ style myStyle {
         var styleGroup = styleSheet.styleGroupContainers;
         Assert.AreEqual(1, styleGroup.Length);
 
-        Assert.AreEqual(new GridTrackSize(1, GridTemplateUnit.FractionalRemaining), styleGroup[0].groups[0].normal.style.GridLayoutMainAxisAutoSize);
-        Assert.AreEqual(new GridTrackSize(42, GridTemplateUnit.Pixel), styleGroup[0].groups[0].normal.style.GridLayoutCrossAxisAutoSize);
+        Assert.AreEqual(new GridTrackSize(1, GridTemplateUnit.FractionalRemaining), styleGroup[0].groups[0].normal.style.GridLayoutColAutoSize);
+        Assert.AreEqual(new GridTrackSize(42, GridTemplateUnit.Pixel), styleGroup[0].groups[0].normal.style.GridLayoutRowAutoSize);
     }
 
     [Test]

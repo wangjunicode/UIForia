@@ -142,7 +142,7 @@ namespace UIForia.Layout.LayoutTypes {
                         break;
                 }
 
-                child.ApplyHorizontalLayout(finalX + paddingBorderLeft, blockSize, blockSize.contentAreaSize, placement.size.prefWidth, alignment, fit);
+                child.ApplyHorizontalLayout(finalX + paddingBorderLeft, blockSize, blockSize.contentAreaSize - placement.margin.left - placement.margin.right, placement.size.prefWidth, alignment, fit);
             }
         }
 
@@ -171,8 +171,8 @@ namespace UIForia.Layout.LayoutTypes {
                 Alignment alignment = new Alignment(new UIFixedLength(0, UIFixedUnit.Percent), 0, AlignmentTarget.AllocatedBox);
 
                 BlockSize blockSize = new BlockSize();
-                blockSize.size = finalHeight;
-                blockSize.contentAreaSize = finalHeight;
+                blockSize.size = finalHeight - placement.margin.top - placement.margin.bottom;
+                blockSize.contentAreaSize = finalHeight - placement.margin.top - placement.margin.bottom;
 
                 switch (colAlignment) {
                     case GridAxisAlignment.Center:
@@ -197,7 +197,7 @@ namespace UIForia.Layout.LayoutTypes {
                         break;
                 }
 
-                child.ApplyVerticalLayout(finalY + paddingBorderTop, blockSize, blockSize.contentAreaSize, placement.size.prefHeight, alignment, fit);
+                child.ApplyVerticalLayout(finalY + paddingBorderTop, blockSize , blockSize.contentAreaSize , placement.size.prefHeight, alignment, fit);
             }
         }
 
@@ -225,35 +225,32 @@ namespace UIForia.Layout.LayoutTypes {
                     intrinsics.Add(i);
                 }
             }
-//
-//            for (int i = 0; i < intrinsics.Count; i++) {
-//                
-//                ref GridTrack track = ref colTracks[i];
-//
-//                if (track.minUnit == GridTemplateUnit.MinContent) {
-//                    track.size = ResolveContentMinWidth(track, SizeType.Min);
-//                }
-//                else if (track.minUnit == GridTemplateUnit.MaxContent) {
-//                    track.size = ResolveContentMaxWidth(track, SizeType.Min);
-//                }
-//
-//                remaining -= track.size;
-//                
-//            }
+
+            for (int i = 0; i < intrinsics.size; i++) {
+                ref GridTrack track = ref colTracks[intrinsics.array[i]];
+
+                if (track.minUnit == GridTemplateUnit.MinContent) {
+                    track.size = ResolveContentMinWidth(track, intrinsics.array[i]);
+                }
+                else if (track.minUnit == GridTemplateUnit.MaxContent) {
+                    track.size = ResolveContentMaxWidth(track, intrinsics.array[i]);
+                }
+
+                remaining -= track.size;
+            }
 
             // now grow the track using maxes of min-max
 
             float colGap = element.style.GridLayoutColGap;
             remaining -= colGap * (colTrackCount - 1);
 
-//            if ((int) remaining > 0 && flexes.Count > 0) {
-//                float pieceSize = remaining / flexPieces;
-//                for (int i = 0; i < flexes.Count; i++) {
-//                    GridTrack track = flexes[i].Item2;
-//                    track.outputSize = track.size.minValue * pieceSize;
-//                    m_ColTracks[flexes[i].Item1] = track;
-//                }
-//            }
+            if ((int) remaining > 0 && flexes.size > 0) {
+                float pieceSize = remaining / flexPieces;
+                for (int i = 0; i < flexes.size; i++) {
+                    ref GridTrack track = ref colTracks[flexes.array[i]];
+                    track.size = (int) track.minValue * pieceSize;
+                }
+            }
 
 
             intrinsics.Release();
@@ -268,6 +265,10 @@ namespace UIForia.Layout.LayoutTypes {
 
             GridTrack[] rowTracks = rowTrackList.array;
             int rowTrackCount = rowTrackList.size;
+
+            // min values are never fr
+            // we alias 1fr to minmax(0, 1fr)
+            // clamp(base, min, max)
 
             for (int i = 0; i < rowTrackCount; i++) {
                 ref GridTrack track = ref rowTracks[i];
@@ -286,37 +287,109 @@ namespace UIForia.Layout.LayoutTypes {
             }
 
             for (int i = 0; i < intrinsics.Count; i++) {
-                
-                ref GridTrack track = ref colTrackList.array[intrinsics.array[i]];
+                ref GridTrack track = ref rowTrackList.array[intrinsics.array[i]];
 
                 if (track.minUnit == GridTemplateUnit.MinContent) {
-                    track.size = ResolveContentMinHeight(blockHeight, track, intrinsics.array[i]);
+                    track.size = ResolveContentMinHeight(track, intrinsics.array[i]);
                 }
                 else if (track.minUnit == GridTemplateUnit.MaxContent) {
-                    // track.size = ResolveContentMaxWidth(track, SizeType.Min);
+                    track.size = ResolveContentMaxHeight(track, intrinsics.array[i]);
                 }
 
                 remaining -= track.size;
-                
             }
+
+            // everything has a base value now
+
+            // find non flexed maxes
+
+            // grow all non flexed things to their max treat as flexbox with grow factor 1
+
+            // find maxed sizes of non flexed things
+
+            // remove minmax flex when min > flex would have been
+
+            // distribute fr as in flexbox
 
             // now grow the track using maxes of min-max
 
             float rowGap = element.style.GridLayoutRowGap;
             remaining -= rowGap * (rowTrackCount - 1);
 
-//            if ((int) remaining > 0 && flexes.Count > 0) {
-//                float pieceSize = remaining / flexPieces;
-//                for (int i = 0; i < flexes.Count; i++) {
-//                    GridTrack track = flexes[i].Item2;
-//                    track.outputSize = track.size.minValue * pieceSize;
-//                    m_ColTracks[flexes[i].Item1] = track;
+            if ((int) remaining > 0 && flexes.size > 0) {
+                float pieceSize = remaining / flexPieces;
+                for (int i = 0; i < flexes.size; i++) {
+                    ref GridTrack track = ref rowTracks[flexes.array[i]];
+                    track.size = (int) track.minValue * pieceSize;
+                }
+            }
+
+            // for each track
+            // if max size not reached & space remaining
+            // treat everything as though it had grow factor = 1
+            // grow until max size reached
+            // fr has no max size but has more grow factor
+            // maybe grow everything except frs first
+
+//            if (remaining > 0) {
+//                for (int i = 0; i < rowTrackCount; i++) {
+//                    ref GridTrack track = ref rowTracks[i];
+//
+//                    if ((track.minUnit & GridTemplateUnit.Fixed) != 0) {
+//                        track.maxSize = ResolveFixedGridMeasurement(blockHeight, track.maxValue, track.maxUnit);
+//                    }
+//                    else if (track.minUnit == GridTemplateUnit.FractionalRemaining) {
+//                        flexes.Add(i);
+//                        flexPieces += (int) track.maxValue; // move flex to max only?
+//                    }
+//                    else {
+//                        intrinsics.Add(i);
+//                    }
+//                }
+//
+//                for (int i = 0; i < rowTrackCount; i++) {
+//                    ref GridTrack track = ref rowTracks[i];
 //                }
 //            }
 
-
             intrinsics.Release();
             flexes.Release();
+        }
+
+        private float GrowHeight(int pieces, float remainingSpace) {
+            bool allocate = pieces > 0;
+
+            GridTrack[] rowTracks = rowTrackList.array;
+            int trackCount = rowTrackList.size;
+
+            while (allocate && (int) remainingSpace > 0 && pieces > 0) {
+                allocate = false;
+
+                float pieceSize = remainingSpace / pieces;
+
+                for (int i = 0; i < trackCount; i++) {
+                    ref GridTrack track = ref rowTracks[i];
+                    float max = track.maxSize;
+                    float output = track.size;
+                    int growthFactor = 1; //track.growFactor;
+
+                    if (growthFactor == 0 || (int) output == (int) max) {
+                        continue;
+                    }
+
+                    allocate = true;
+                    float start = output;
+                    float growSize = growthFactor * pieceSize;
+                    float totalGrowth = start + growSize;
+                    output = totalGrowth > max ? max : totalGrowth;
+
+                    remainingSpace -= output - start;
+
+                    track.size = output;
+                }
+            }
+
+            return remainingSpace;
         }
 
         private static void PositionTracks(StructList<GridTrack> trackList, float gap) {
@@ -327,22 +400,110 @@ namespace UIForia.Layout.LayoutTypes {
             }
         }
 
-
-        private float ResolveContentMinHeight(in BlockSize blockSize, in GridTrack track, int index) {
+        private float ResolveContentMinWidth(in GridTrack track, int index) {
             float minSize = 0;
 
             GridPlacement[] placements = placementList.array;
             int placementCount = placementList.size;
-            
+
             // only need to check 1 dimension
             for (int i = 0; i < placementCount; i++) {
-                
+                ref GridPlacement placement = ref placements[i];
+
+                int xMax = placement.x + placement.width;
+
+                // if not spanning this cell, continue
+                if (!(placement.x <= index && xMax > index)) {
+                    continue;
+                }
+
+                int pieces = 0; // never 0 because we only call this function for intrinsic sized tracks
+                float baseWidth = placement.outputWidth;
+
+                for (int j = placement.x; j < xMax; j++) {
+                    GridTrack spanned = colTrackList.array[j];
+                    if ((track.minUnit & GridTemplateUnit.Fixed) != 0) {
+                        baseWidth -= spanned.size;
+                        if (baseWidth <= 0) {
+                            break;
+                        }
+                    }
+                    else if (track.minUnit != GridTemplateUnit.FractionalRemaining) {
+                        pieces++;
+                    }
+                }
+
+                if (minSize == 0) {
+                    minSize = baseWidth;
+                }
+
+                if (baseWidth > 0) {
+                    minSize = Mathf.Min(minSize, track.minValue * (baseWidth / pieces));
+                }
+            }
+
+            return minSize;
+        }
+
+        private float ResolveContentMaxWidth(in GridTrack track, int index) {
+            float maxSize = 0;
+
+            GridPlacement[] placements = placementList.array;
+            int placementCount = placementList.size;
+
+            // only need to check 1 dimension
+            for (int i = 0; i < placementCount; i++) {
+                ref GridPlacement placement = ref placements[i];
+
+                int xMax = placement.x + placement.width;
+
+                // if not spanning this cell, continue
+                if (!(placement.x <= index && xMax > index)) {
+                    continue;
+                }
+
+                int pieces = 0; // never 0 because we only call this function for intrinsic sized tracks
+                float baseWidth = placement.outputWidth;
+
+                for (int j = placement.x; j < xMax; j++) {
+                    GridTrack spanned = colTrackList.array[j];
+                    if ((track.minUnit & GridTemplateUnit.Fixed) != 0) {
+                        baseWidth -= spanned.size;
+                        if (baseWidth <= 0) {
+                            break;
+                        }
+                    }
+                    else if (track.minUnit != GridTemplateUnit.FractionalRemaining) {
+                        pieces++;
+                    }
+                }
+
+                if (maxSize == 0) {
+                    maxSize = baseWidth;
+                }
+
+                if (baseWidth > 0) {
+                    maxSize = Mathf.Max(maxSize, track.minValue * (baseWidth / pieces));
+                }
+            }
+
+            return maxSize;
+        }
+
+        private float ResolveContentMinHeight(in GridTrack track, int index) {
+            float minSize = 0;
+
+            GridPlacement[] placements = placementList.array;
+            int placementCount = placementList.size;
+
+            // only need to check 1 dimension
+            for (int i = 0; i < placementCount; i++) {
                 ref GridPlacement placement = ref placements[i];
 
                 int yMax = placement.y + placement.height;
 
                 // if not spanning this cell, continue
-                if (!(placement.y >= index || yMax < index)) {
+                if (!(placement.y <= index && yMax > index)) {
                     continue;
                 }
 
@@ -350,7 +511,7 @@ namespace UIForia.Layout.LayoutTypes {
                 float baseHeight = placement.outputHeight;
 
                 for (int j = placement.y; j < yMax; j++) {
-                    GridTrack spanned = colTrackList.array[j];
+                    GridTrack spanned = rowTrackList.array[j];
                     if ((track.minUnit & GridTemplateUnit.Fixed) != 0) {
                         baseHeight -= spanned.size;
                         if (baseHeight <= 0) {
@@ -372,6 +533,51 @@ namespace UIForia.Layout.LayoutTypes {
             }
 
             return minSize;
+        }
+
+        private float ResolveContentMaxHeight(in GridTrack track, int index) {
+            float maxSize = 0;
+
+            GridPlacement[] placements = placementList.array;
+            int placementCount = placementList.size;
+
+            // only need to check 1 dimension
+            for (int i = 0; i < placementCount; i++) {
+                ref GridPlacement placement = ref placements[i];
+
+                int yMax = placement.y + placement.height;
+
+                // if not spanning this cell, continue
+                if (!(placement.y <= index && yMax > index)) {
+                    continue;
+                }
+
+                int pieces = 0; // never 0 because we only call this function for intrinsic sized tracks
+                float baseHeight = placement.outputHeight;
+
+                for (int j = placement.y; j < yMax; j++) {
+                    GridTrack spanned = rowTrackList.array[j];
+                    if ((track.minUnit & GridTemplateUnit.Fixed) != 0) {
+                        baseHeight -= spanned.size;
+                        if (baseHeight <= 0) {
+                            break;
+                        }
+                    }
+                    else if (track.minUnit != GridTemplateUnit.FractionalRemaining) {
+                        pieces++;
+                    }
+                }
+
+                if (maxSize == 0) {
+                    maxSize = baseHeight;
+                }
+
+                if (baseHeight > 0) {
+                    maxSize = Mathf.Max(maxSize, track.minValue * (baseHeight / pieces));
+                }
+            }
+
+            return maxSize;
         }
 
         private float ResolveFixedGridMeasurement(in BlockSize blockWidth, float value, GridTemplateUnit unit) {
@@ -578,28 +784,27 @@ namespace UIForia.Layout.LayoutTypes {
 
             rowTrackList.Clear();
             colTrackList.Clear();
-            
+
             CreateNamedGridAreas();
 
             GenerateExplicitTracks(default, default);
 
             s_OccupiedAreas.size = 0;
-            
-            GridTrackSize[] autoColSizePattern = new[] {element.style.GridLayoutRowAutoSize};
-            GridTrackSize[] autoRowSizePattern = new[] {element.style.GridLayoutColAutoSize};
-            
+
+            GridTrackSize[] autoColSizePattern = new[] {element.style.GridLayoutColAutoSize};
+            GridTrackSize[] autoRowSizePattern = new[] {element.style.GridLayoutRowAutoSize};
+
             int rowSizeAutoPtr = 0;
             int colSizeAutoPtr = 0;
 
-            PlaceBothAxisLocked(ref colSizeAutoPtr, autoColSizePattern, ref rowSizeAutoPtr, autoRowSizePattern);
+            PreAllocateRowAndColumns(ref colSizeAutoPtr, ref rowSizeAutoPtr, autoColSizePattern, autoRowSizePattern);
+            PlaceBothAxisLocked();
             PlaceSingleAxisLocked(ref colSizeAutoPtr, autoColSizePattern, ref rowSizeAutoPtr, autoRowSizePattern);
             PlaceRemainingItems(ref colSizeAutoPtr, autoColSizePattern, ref rowSizeAutoPtr, autoRowSizePattern);
             placementDirty = false;
         }
 
-        private void PlaceBothAxisLocked(ref int colSizeAutoPtr, GridTrackSize[] autoColSizePattern, ref int rowSizeAutoPtr, GridTrackSize[] autoRowSizePattern) {
-            int horizontalTrackCount = colTrackList.size;
-            int verticalTrackCount = rowTrackList.size;
+        private void PlaceBothAxisLocked() {
 
             for (int i = 0; i < placementList.Count; i++) {
                 ref GridPlacement placement = ref placementList.array[i];
@@ -612,15 +817,6 @@ namespace UIForia.Layout.LayoutTypes {
                     region.yMax = placement.y + placement.height;
                     s_OccupiedAreas.Add(region);
 
-                    if (region.xMax > horizontalTrackCount) {
-                        horizontalTrackCount = region.xMax;
-                        EnsureImplicitTrackCapacity(colTrackList, horizontalTrackCount, ref colSizeAutoPtr, autoColSizePattern);
-                    }
-
-                    if (region.yMax > verticalTrackCount) {
-                        verticalTrackCount = region.yMax;
-                        EnsureImplicitTrackCapacity(rowTrackList, verticalTrackCount, ref rowSizeAutoPtr, autoRowSizePattern);
-                    }
                 }
             }
         }
@@ -638,7 +834,7 @@ namespace UIForia.Layout.LayoutTypes {
 
                 // x axis is in a fixed position, we need to find a valid Y
                 if (y < 0 && x >= 0) {
-                    int cursorY = dense ? 0 : rowTrackList.array[x].autoPlacementCursor;
+                    int cursorY = dense ? 0 : colTrackList.array[x].autoPlacementCursor;
 
                     while (!IsGridAreaAvailable(x, cursorY, width, height)) {
                         cursorY++;
@@ -650,7 +846,7 @@ namespace UIForia.Layout.LayoutTypes {
                     colTrackList.array[x].autoPlacementCursor = cursorY;
 
                     placement.y = cursorY;
-                    
+
                     s_OccupiedAreas.Add(new GridRegion() {
                         xMin = placement.x,
                         yMin = placement.y,
@@ -667,14 +863,13 @@ namespace UIForia.Layout.LayoutTypes {
                         cursorX++;
                     }
 
-                    
                     EnsureImplicitTrackCapacity(colTrackList, cursorX + width, ref colSizeAutoPtr, autoColSizePattern);
                     EnsureImplicitTrackCapacity(rowTrackList, y + height, ref rowSizeAutoPtr, autoRowSizePattern);
 
                     rowTrackList.array[y].autoPlacementCursor = cursorX;
 
                     placement.x = cursorX;
-                    
+
                     s_OccupiedAreas.Add(new GridRegion() {
                         xMin = placement.x,
                         yMin = placement.y,
@@ -683,6 +878,36 @@ namespace UIForia.Layout.LayoutTypes {
                     });
                 }
             }
+        }
+
+        private void PreAllocateRowAndColumns(ref int colPtr, ref int rowPtr, GridTrackSize[] colPattern, GridTrackSize[] rowPattern) {
+            int maxColStartAndSpan = 0;
+            int maxRowStartAndSpan = 0;
+
+            GridPlacement[] placements = placementList.array;
+
+            for (int i = 0; i < placementList.size; i++) {
+                ref GridPlacement placement = ref placements[i];
+                int colStart = placement.x;
+                int rowStart = placement.y;
+                int colSpan = placement.width;
+                int rowSpan = placement.height;
+
+
+                if (colStart < 1) {
+                    colStart = 0;
+                }
+
+                if (rowStart < 1) {
+                    rowStart = 0;
+                }
+
+                maxColStartAndSpan = maxColStartAndSpan > colStart + colSpan ? maxColStartAndSpan : colStart + colSpan;
+                maxRowStartAndSpan = maxRowStartAndSpan > rowStart + rowSpan ? maxRowStartAndSpan : rowStart + rowSpan;
+            }
+
+            EnsureImplicitTrackCapacity(colTrackList, maxColStartAndSpan, ref colPtr, colPattern);
+            EnsureImplicitTrackCapacity(rowTrackList, maxRowStartAndSpan, ref rowPtr, rowPattern);
         }
 
         private void PlaceRemainingItems(ref int colSizeAutoPtr, GridTrackSize[] autoColSizePattern, ref int rowSizeAutoPtr, GridTrackSize[] autoRowSizePattern) {
@@ -695,14 +920,6 @@ namespace UIForia.Layout.LayoutTypes {
 
             int sparseStartX = 0;
             int sparseStartY = 0;
-
-            if (colTrackList.Count == 0) {
-                EnsureImplicitTrackCapacity(colTrackList, 1, ref rowSizeAutoPtr, autoRowSizePattern);
-            }
-
-            if (rowTrackList.Count == 0) {
-                EnsureImplicitTrackCapacity(rowTrackList, 1, ref colSizeAutoPtr, autoColSizePattern);
-            }
 
             for (int i = 0; i < placementList.size; i++) {
                 ref GridPlacement placement = ref placementList.array[i];
@@ -736,7 +953,7 @@ namespace UIForia.Layout.LayoutTypes {
                             continue;
                         }
 
-                        if (IsGridAreaAvailable(cursorX, cursorY, height, width)) {
+                        if (IsGridAreaAvailable(cursorX, cursorY, width, height)) {
                             break;
                         }
 
@@ -748,8 +965,9 @@ namespace UIForia.Layout.LayoutTypes {
                     placement.x = cursorX;
                     placement.y = cursorY;
                     EnsureImplicitTrackCapacity(colTrackList, cursorX + width, ref colSizeAutoPtr, autoColSizePattern);
-                    rowTrackList.array[cursorX].autoPlacementCursor = cursorY;
-                    colTrackList.array[cursorY].autoPlacementCursor = cursorX;
+                    EnsureImplicitTrackCapacity(rowTrackList, cursorY + height, ref rowSizeAutoPtr, autoRowSizePattern);
+                    rowTrackList.array[cursorY].autoPlacementCursor = cursorX + width;
+                    colTrackList.array[cursorX].autoPlacementCursor = cursorY;
                 }
                 else {
                     if (dense) {
@@ -765,11 +983,11 @@ namespace UIForia.Layout.LayoutTypes {
                         if (cursorY + height > rowTrackList.size) {
                             cursorX++;
                             EnsureImplicitTrackCapacity(colTrackList, cursorX + width, ref colSizeAutoPtr, autoColSizePattern);
-                            cursorY = !dense ? rowTrackList.array[cursorX].autoPlacementCursor : 0;
+                            cursorY = !dense ? colTrackList.array[cursorX].autoPlacementCursor : 0;
                             continue;
                         }
 
-                        if (IsGridAreaAvailable(cursorX, cursorY, height, width)) {
+                        if (IsGridAreaAvailable(cursorX, cursorY, width, height)) {
                             break;
                         }
 
@@ -777,7 +995,7 @@ namespace UIForia.Layout.LayoutTypes {
                     }
 
                     sparseStartX = cursorX;
-                    sparseStartY = cursorY + height;
+                    sparseStartY = cursorY; // + height;
                     placement.x = cursorX;
                     placement.y = cursorY;
                     colTrackList.array[cursorX].autoPlacementCursor = cursorY;
@@ -893,6 +1111,7 @@ namespace UIForia.Layout.LayoutTypes {
             public float maxValue;
             public GridTemplateUnit minUnit;
             public GridTemplateUnit maxUnit;
+            public float maxSize;
 
             public GridTrack(in GridTrackSize template) {
                 this.minValue = template.minValue;
@@ -902,6 +1121,7 @@ namespace UIForia.Layout.LayoutTypes {
                 this.position = 0;
                 this.size = 0;
                 this.autoPlacementCursor = 0;
+                this.maxSize = 0;
             }
 
         }

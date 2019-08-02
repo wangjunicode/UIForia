@@ -394,11 +394,9 @@ public class FlexLayoutRowTests {
         root.style.SetFlexLayoutCrossAxisAlignment(CrossAxisAlignment.Center, StyleState.Normal);
         
         root.GetChild(1).style.SetAlignmentBehaviorY(AlignmentBehavior.Self, StyleState.Normal);
-        root.GetChild(1).style.SetAlignmentPivotY(-0.5f, StyleState.Normal);
-        root.GetChild(1).style.SetAlignmentOffsetY(new UIFixedLength(-0.5f, UIFixedUnit.Percent), StyleState.Normal);
+        root.GetChild(1).style.SetAlignmentPivotY(0f, StyleState.Normal);
+        root.GetChild(1).style.SetAlignmentOffsetY(new UIFixedLength(0f, UIFixedUnit.Percent), StyleState.Normal);
         
-        //root.child1.style.SetFlexItemSelfAlignment(CrossAxisAlignment.Start, StyleState.Normal);
-
         app.Update();
 
         Assert.AreEqual(new Rect(0, 200, 100, 100), root.child0.layoutResult.ScreenRect);

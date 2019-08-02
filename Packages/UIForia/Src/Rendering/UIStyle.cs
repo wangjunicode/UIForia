@@ -128,7 +128,7 @@ namespace UIForia.Rendering {
         
         internal void SetProperty(in StyleProperty property) {
             StylePropertyId propertyId = property.propertyId;
-            if (property.IsUnset) {
+            if (property.IsUnset2) {
                 for (int i = 0; i < PropertyCount; i++) {
                     if (array[i].propertyId == propertyId) {
                         RemoveAt(i);

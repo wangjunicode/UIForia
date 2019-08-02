@@ -27,8 +27,7 @@ namespace UIForia.Elements {
         internal TextInfo TextInfo => textInfo;
 
         public override void OnEnable() {
-            textSpan.SetStyle(style.GetTextStyle());
-            textSpan.SetText(text);
+            SetText(text);
         }
 
         public override void OnDisable() {

@@ -83,7 +83,7 @@ public class TemplateTests {
     [Test]
     public void RepeatElementCanHaveMultipleChildren() {
         MockApplication app = new MockApplication(typeof(MultipleRepeatThing));
-        MultipleRepeatThing target = app.GetView(0).RootElement as MultipleRepeatThing;
+        MultipleRepeatThing target = app.GetView(0).RootElement.GetChild(0) as MultipleRepeatThing;
 
         target.values = new RepeatableList<int>(new[] {
             1, 2, 3

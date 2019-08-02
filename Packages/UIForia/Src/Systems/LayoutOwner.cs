@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using SVGX;
 using UIForia.Elements;
+using UIForia.Extensions;
 using UIForia.Layout.LayoutTypes;
+using UIForia.Rendering;
 using UIForia.Systems;
 using UIForia.Util;
 using UnityEngine;
@@ -504,6 +506,60 @@ namespace UIForia.Layout {
                 return a.traversalIndex - b.traversalIndex;
             }
 
+        }
+
+
+        private static bool PointInClippedArea(Vector2 point, UIElement element) {
+            Vector2 screenPosition = element.layoutResult.screenPosition;
+            
+            if (element.style.OverflowX != Overflow.Visible) {
+                if (point.x < screenPosition.x || point.x > screenPosition.x + element.layoutResult.allocatedSize.width) {
+                    return true;
+                }
+            }
+
+            if (element.style.OverflowY != Overflow.Visible) {
+                if (point.y < screenPosition.y || point.y > screenPosition.y + element.layoutResult.allocatedSize.height) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+        
+        public void GetElementsAtPoint(Vector2 point, IList<UIElement> retn) {
+            LayoutData[] layoutDatas = enabledBoxList.array;
+            
+            for (int i = 0; i < enabledBoxList.size; i++) {
+                UIElement element = layoutDatas[i].element;
+
+                if (element is IPointerQueryHandler handler) {
+                    if (!handler.ContainsPoint(point)) {
+                        continue;
+                    }
+                }
+
+                if (!element.layoutResult.ScreenRect.ContainOrOverlap(point)) {
+                    continue;
+                }
+
+                else if (!element.layoutResult.ScreenRect.ContainOrOverlap(point) || PointInClippedArea(point, element)) {
+                    continue;
+                }
+
+                UIElement ptr = element.parent;
+                while (ptr != null && !PointInClippedArea(point, ptr)) {
+                    ptr = ptr.parent;
+                }
+
+                // i.e. clipped by parent
+                if (ptr != null) {
+                    continue;
+                }
+
+                retn.Add(element);
+            }
+            
         }
 
     }

@@ -89,7 +89,7 @@ public class StyleTests {
     public void IntProperties_UpdateComputedStyleWithValue() {
         Action<string, string, string> TestBody = (setFnName, computedPropertyName, defaultName) => {
             MockApplication view = new MockApplication(typeof(StyleSetTestThing));
-            StyleSetTestThing root = (StyleSetTestThing) view.RootElement;
+            StyleSetTestThing root = (StyleSetTestThing) view.RootElement.GetChild(0);
 
             Assert.AreEqual(DefaultValue<int>(defaultName), ComputedValue<int>(root, computedPropertyName));
 
@@ -105,7 +105,7 @@ public class StyleTests {
     public void IntProperties_UpdateComputedStyleWithUnsetValue() {
         Action<string, string, string> TestBody = (setFnName, computedPropertyName, defaultName) => {
             MockApplication view = new MockApplication(typeof(StyleSetTestThing));
-            StyleSetTestThing root = (StyleSetTestThing) view.RootElement;
+            StyleSetTestThing root = (StyleSetTestThing) view.RootElement.GetChild(0);
 
             Assert.AreEqual(DefaultValue<int>(defaultName), ComputedValue<int>(root, computedPropertyName));
 
@@ -122,7 +122,7 @@ public class StyleTests {
     public void IntProperties_EnterState() {
         Action<string, string, string> TestBody = (setFnName, propName, defaultName) => {
             MockApplication view = new MockApplication(typeof(StyleSetTestThing));
-            StyleSetTestThing root = (StyleSetTestThing) view.RootElement;
+            StyleSetTestThing root = (StyleSetTestThing) view.RootElement.GetChild(0);
 
             CallMethod(root.style, setFnName, DefaultValue<int>(defaultName) + 1, StyleState.Hover);
 
@@ -140,7 +140,7 @@ public class StyleTests {
     public void IntProperties_EnterSecondState() {
         Action<string, string, string> TestBody = (setFnName, propName, defaultName) => {
             MockApplication view = new MockApplication(typeof(StyleSetTestThing));
-            StyleSetTestThing root = (StyleSetTestThing) view.RootElement;
+            StyleSetTestThing root = (StyleSetTestThing) view.RootElement.GetChild(0);
 
             CallMethod(root.style, setFnName, DefaultValue<int>(defaultName) + 1, StyleState.Hover);
             CallMethod(root.style, setFnName, DefaultValue<int>(defaultName) + 5, StyleState.Focused);
@@ -164,7 +164,7 @@ public class StyleTests {
     public void IntProperties_ExitState() {
         Action<string, string, string> TestBody = (setFnName, propName, defaultName) => {
             MockApplication view = new MockApplication(typeof(StyleSetTestThing));
-            StyleSetTestThing root = (StyleSetTestThing) view.RootElement;
+            StyleSetTestThing root = (StyleSetTestThing) view.RootElement.GetChild(0);
 
             CallMethod(root.style, setFnName, DefaultValue<int>(defaultName) + 1, StyleState.Normal);
             CallMethod(root.style, setFnName, DefaultValue<int>(defaultName) + 2, StyleState.Hover);
@@ -186,7 +186,7 @@ public class StyleTests {
     public void IntProperties_FromBaseStyle() {
         Action<string, string, string> TestBody = (setFnName, propName, defaultName) => {
             MockApplication view = new MockApplication(typeof(StyleSetTestThing));
-            StyleSetTestThing root = (StyleSetTestThing) view.RootElement;
+            StyleSetTestThing root = (StyleSetTestThing) view.RootElement.GetChild(0);
 
             UIStyle baseStyle = new UIStyle();
             SetStyleValue(baseStyle, propName, 5);
@@ -214,7 +214,7 @@ public class StyleTests {
     public void IntProperties_OverrideBaseStyle() {
         Action<string, string, string> TestBody = (setFnName, propName, defaultName) => {
             MockApplication view = new MockApplication(typeof(StyleSetTestThing));
-            StyleSetTestThing root = (StyleSetTestThing) view.RootElement;
+            StyleSetTestThing root = (StyleSetTestThing) view.RootElement.GetChild(0);
 
             UIStyle baseStyle = new UIStyle();
             SetStyleValue(baseStyle, propName, 5);
@@ -244,7 +244,7 @@ public class StyleTests {
     public void IntProperties_OverrideBaseStyleInState() {
         Action<string, string, string> TestBody = (setFnName, propName, defaultName) => {
             MockApplication view = new MockApplication(typeof(StyleSetTestThing));
-            StyleSetTestThing root = (StyleSetTestThing) view.RootElement;
+            StyleSetTestThing root = (StyleSetTestThing) view.RootElement.GetChild(0);
 
             UIStyle baseStyle = new UIStyle();
             SetStyleValue(baseStyle, propName, 5);
@@ -271,7 +271,7 @@ public class StyleTests {
     public void SizeProperties_UpdateComputedValue() {
         Action<string, string, string> TestBody = (setFnName, computedPropertyName, defaultName) => {
             MockApplication view = new MockApplication(typeof(StyleSetTestThing));
-            StyleSetTestThing root = (StyleSetTestThing) view.RootElement;
+            StyleSetTestThing root = (StyleSetTestThing) view.RootElement.GetChild(0);
 
             Assert.AreEqual(DefaultValue<UIMeasurement>(defaultName), ComputedValue<UIMeasurement>(root, computedPropertyName));
 
@@ -287,12 +287,12 @@ public class StyleTests {
     public void SizeProperties_UpdateComputedStyleWithUnsetValue() {
         Action<string, string, string> TestBody = (setFnName, computedPropertyName, defaultName) => {
             MockApplication view = new MockApplication(typeof(StyleSetTestThing));
-            StyleSetTestThing root = (StyleSetTestThing) view.RootElement;
+            StyleSetTestThing root = (StyleSetTestThing) view.RootElement.GetChild(0);
 
             Assert.AreEqual(DefaultValue<UIMeasurement>(defaultName), ComputedValue<UIMeasurement>(root, computedPropertyName));
 
             CallMethod(root.style, setFnName, new UIMeasurement(99999), StyleState.Normal);
-            CallMethod(root.style, setFnName, UIMeasurement.Unset, StyleState.Normal);
+            CallMethod(root.style, setFnName, null, StyleState.Normal);
 
             Assert.AreEqual(DefaultValue<UIMeasurement>(defaultName), ComputedValue<UIMeasurement>(root, computedPropertyName));
         };
@@ -304,7 +304,7 @@ public class StyleTests {
     public void SizeProperties_EnterState() {
         Action<string, string, string> TestBody = (setFnName, propName, defaultName) => {
             MockApplication view = new MockApplication(typeof(StyleSetTestThing));
-            StyleSetTestThing root = (StyleSetTestThing) view.RootElement;
+            StyleSetTestThing root = (StyleSetTestThing) view.RootElement.GetChild(0);
 
             CallMethod(root.style, setFnName, new UIMeasurement(99999), StyleState.Hover);
 
@@ -322,7 +322,7 @@ public class StyleTests {
     public void SizeProperties_EnterSecondState() {
         Action<string, string, string> TestBody = (setFnName, propName, defaultName) => {
             MockApplication view = new MockApplication(typeof(StyleSetTestThing));
-            StyleSetTestThing root = (StyleSetTestThing) view.RootElement;
+            StyleSetTestThing root = (StyleSetTestThing) view.RootElement.GetChild(0);
 
             CallMethod(root.style, setFnName, new UIMeasurement(1000), StyleState.Hover);
             CallMethod(root.style, setFnName, new UIMeasurement(5000), StyleState.Focused);
@@ -346,7 +346,7 @@ public class StyleTests {
     public void SizeProperties_ExitState() {
         Action<string, string, string> TestBody = (setFnName, propName, defaultName) => {
             MockApplication view = new MockApplication(typeof(StyleSetTestThing));
-            StyleSetTestThing root = (StyleSetTestThing) view.RootElement;
+            StyleSetTestThing root = (StyleSetTestThing) view.RootElement.GetChild(0);
 
             CallMethod(root.style, setFnName, new UIMeasurement(1000), StyleState.Normal);
             CallMethod(root.style, setFnName, new UIMeasurement(2000), StyleState.Hover);
@@ -368,7 +368,7 @@ public class StyleTests {
     public void SizeProperties_FromBaseStyle() {
         Action<string, string, string> TestBody = (setFnName, propName, defaultName) => {
             MockApplication view = new MockApplication(typeof(StyleSetTestThing));
-            StyleSetTestThing root = (StyleSetTestThing) view.RootElement;
+            StyleSetTestThing root = (StyleSetTestThing) view.RootElement.GetChild(0);
 
             UIStyle baseStyle = new UIStyle();
             SetStyleValue(baseStyle, propName, new UIMeasurement(5000));
@@ -395,7 +395,7 @@ public class StyleTests {
     public void SizeProperties_OverrideBaseStyle() {
         Action<string, string, string> TestBody = (setFnName, propName, defaultName) => {
             MockApplication view = new MockApplication(typeof(StyleSetTestThing));
-            StyleSetTestThing root = (StyleSetTestThing) view.RootElement;
+            StyleSetTestThing root = (StyleSetTestThing) view.RootElement.GetChild(0);
 
             UIStyle baseStyle = new UIStyle();
             SetStyleValue(baseStyle, propName, new UIMeasurement(5000));
@@ -422,7 +422,7 @@ public class StyleTests {
     public void SizeProperties_OverrideBaseStyleInState() {
         Action<string, string, string> TestBody = (setFnName, propName, defaultName) => {
             MockApplication view = new MockApplication(typeof(StyleSetTestThing));
-            StyleSetTestThing root = (StyleSetTestThing) view.RootElement;
+            StyleSetTestThing root = (StyleSetTestThing) view.RootElement.GetChild(0);
 
             UIStyle baseStyle = new UIStyle();
             SetStyleValue(baseStyle, propName, new UIMeasurement(500));
@@ -454,7 +454,7 @@ public class StyleTests {
     [Test]
     public void Inherit_FontSize() {
         MockApplication app = new MockApplication(typeof(StyleSetTestThing));
-        StyleSetTestThing root = (StyleSetTestThing) app.RootElement;
+        StyleSetTestThing root = (StyleSetTestThing) app.RootElement.GetChild(0);
         UIStyleSetStateProxy normal = root.style.Normal;
         normal.TextFontSize = 8;
         app.Update();
@@ -464,7 +464,7 @@ public class StyleTests {
         app.Update();
         Assert.AreEqual(new UIFixedLength(12), root.FindById("group1").style.TextFontSize);
         Assert.AreEqual(new UIFixedLength(12), root.FindById("group2").style.TextFontSize);
-        root.FindById("group1").style.SetTextFontSize(new UIFixedLength(FloatUtil.UnsetValue), StyleState.Normal);
+        root.FindById("group1").style.SetTextFontSize(null, StyleState.Normal);
         app.Update();
         Assert.AreEqual(new UIFixedLength(8), root.FindById("group1").style.TextFontSize);
         Assert.AreEqual(new UIFixedLength(8), root.FindById("group2").style.TextFontSize);
@@ -473,7 +473,7 @@ public class StyleTests {
     [Test]
     public void Inherit_TextColor() {
         MockApplication app = new MockApplication(typeof(StyleSetTestThing));
-        StyleSetTestThing root = (StyleSetTestThing) app.RootElement;
+        StyleSetTestThing root = (StyleSetTestThing) app.RootElement.GetChild(0);
         UIStyleSetStateProxy normal = root.style.Normal;
         normal.TextColor = Color.red;
         app.Update();
@@ -492,10 +492,10 @@ public class StyleTests {
     [Test]
     public void Inherit_FontAsset() {
         MockApplication app = new MockApplication(typeof(StyleSetTestThing));
-        StyleSetTestThing root = (StyleSetTestThing) app.RootElement;
+        StyleSetTestThing root = (StyleSetTestThing) app.RootElement.GetChild(0);
         UIStyleSetStateProxy normal = root.style.Normal;
-        var font0 = new FontAsset(ScriptableObject.CreateInstance<TMP_FontAsset>());
-        var font1 = new FontAsset(ScriptableObject.CreateInstance<TMP_FontAsset>());
+        var font0 = new FontAsset(TMP_FontAsset.defaultFontAsset);
+        var font1 = new FontAsset(TMP_FontAsset.defaultFontAsset);
         normal.TextFontAsset = font0;
         app.Update();
         Assert.AreEqual(font0, root.FindById("group1").style.TextFontAsset);
@@ -513,7 +513,7 @@ public class StyleTests {
     [Test]
     public void ApplyDynamicStyleBinding() {
         MockApplication app = new MockApplication(typeof(StyleSetTestThing));
-        StyleSetTestThing root = (StyleSetTestThing) app.RootElement;
+        StyleSetTestThing root = (StyleSetTestThing) app.RootElement.GetChild(0);
         app.Update();
         Assert.AreEqual(100, root.FindById("dynamic").style.MarginTop.value);
     }
@@ -532,7 +532,7 @@ public class StyleTests {
     [Test]
     public void ApplyHeadingStyles() {
         MockApplication app = new MockApplication(typeof(HeadingStyleElement));
-        HeadingStyleElement root = (HeadingStyleElement) app.RootElement;
+        HeadingStyleElement root = (HeadingStyleElement) app.RootElement.GetChild(0);
         app.Update();
         Assert.AreEqual(new UIFixedLength(100), root.FindById("myHeading").style.TextFontSize);
     }
@@ -560,7 +560,7 @@ public class StyleTests {
     [Test]
     public void StylesAreInheritedForDynamicallyCreatedElements() {
         MockApplication app = new MockApplication(typeof(InheritStyleElement));
-        InheritStyleElement target = app.GetView(0).RootElement as InheritStyleElement;
+        InheritStyleElement target = app.GetView(0).RootElement.GetChild(0) as InheritStyleElement;
         target.list = new RepeatableList<string>(new [] {
             "one", "two", "three"
         });
@@ -572,7 +572,7 @@ public class StyleTests {
     [Test]
     public void StylesAreInheritedWhenEnabled() {
         MockApplication app = new MockApplication(typeof(InheritStyleElement));
-        InheritStyleElement target = app.GetView(0).RootElement as InheritStyleElement;
+        InheritStyleElement target = app.GetView(0).RootElement.GetChild(0) as InheritStyleElement;
         target.list = new RepeatableList<string>(new [] {
             "one", "two", "three"
         });

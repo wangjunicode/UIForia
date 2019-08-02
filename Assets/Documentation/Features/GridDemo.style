@@ -1,5 +1,42 @@
 const cellMargin = 20px;
 
+style fill-cell {
+    
+}
+
+style child {
+    MarginLeft = 10px;
+    PreferredSize = 1pca;
+    BackgroundColor = green;
+}
+
+style grid-vertical-1x4 {
+    GridLayoutRowTemplate = 100px 100px 100px 100px;
+    GridLayoutRowAutoSize = 100px;
+    GridLayoutColAutoSize = 100px;
+    LayoutType = Grid;
+    GridLayoutDirection = Horizontal;
+    GridLayoutRowGap = 10;
+    GridLayoutColGap = 10;
+}
+
+style grid-horizontal-4x1 {
+    GridLayoutColTemplate = 100px 100px 100px 100px;
+    GridLayoutRowAutoSize = 100px;
+    LayoutType = Grid;
+    Margin = 10px;
+}
+
+style span-height-2 {
+    GridItemHeight = 2;
+    BackgroundColor = white;
+}
+
+style span-width-2 {
+    GridItemWidth = 3;
+    GridItemX = 2;
+    BackgroundColor = white;
+}
 
 style varStyle0 {
     PreferredSize = 300px, 300px;
@@ -90,6 +127,7 @@ style m10 {
 
 style cell {
     BackgroundColor = rgba(200, 100, 160, 200);
+    PreferredSize = 100px;
 }
 
 style grid-horizontal {

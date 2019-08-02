@@ -11,6 +11,7 @@ using TextAlignment = UIForia.Text.TextAlignment;
 
 namespace UIForia.Rendering {
 
+    // todo if object is at 0 we can do better with packing & get rid of int 2, nobody uses it yet anyway
     [StructLayout(LayoutKind.Explicit)]
     public partial struct StyleProperty {
 
@@ -83,6 +84,30 @@ namespace UIForia.Rendering {
             this.int1 = (int) length.unit;
         }
 
+        [DebuggerStepThrough]
+        public StyleProperty(StylePropertyId propertyId, UIFixedLength? length) {
+            this.propertyId = propertyId;
+            if (length == null) {
+                this.int0 = 0;
+                this.int1 = 0;
+                this.int2 = 0;
+                this.float0 = 0;
+                this.float1 = 0;
+                this.objectField = null;
+            }
+            else {
+                UIFixedLength v = length.Value;
+                this.propertyId = propertyId;
+                this.int0 = 0;
+                this.int2 = 0;
+                this.float1 = 0;
+                this.objectField = null;
+                this.float0 = v.value;
+                this.int1 = (int) v.unit;
+            }
+            
+        }
+        
         [DebuggerStepThrough]
         public StyleProperty(StylePropertyId propertyId, UIMeasurement measurement) {
             this.propertyId = propertyId;
@@ -160,10 +185,7 @@ namespace UIForia.Rendering {
             this.objectField = placement.name;
         }
         
-
-        public bool IsDefined {
-            [DebuggerStepThrough] get { return !IsUnset; }
-        }
+        public bool IsUnset2 => int0 == int.MinValue && int1 == int.MinValue && int2 == int.MinValue && objectField == null;
 
         public WhitespaceMode AsWhitespaceMode => (WhitespaceMode) int0;
 

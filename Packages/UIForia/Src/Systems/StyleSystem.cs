@@ -190,14 +190,14 @@ namespace UIForia.Systems {
 
                 while (ptr != null) {
                     parentProperty = ptr.style.GetPropertyValue(property.propertyId);
-                    if (parentProperty.IsDefined) {
+                    if (!parentProperty.IsUnset2) {
                         break;
                     }
 
                     ptr = ptr.parent;
                 }
 
-                if (!parentProperty.IsDefined) {
+                if (parentProperty.IsUnset2) {
                     parentProperty = DefaultStyleValues_Generated.GetPropertyValue(property.propertyId);
                 }
 

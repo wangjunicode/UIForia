@@ -108,6 +108,9 @@ namespace UIForia.Systems {
 
 
         public IList<UIElement> QueryPoint(Vector2 point, IList<UIElement> retn) {
+            for (int i = 0; i < layoutOwners.size; i++) {
+                layoutOwners.array[i].GetElementsAtPoint(point, retn);
+            }
             return retn;
         }
 

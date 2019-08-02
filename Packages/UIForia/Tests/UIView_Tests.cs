@@ -146,7 +146,7 @@ public class UIView_Tests {
     public void InitializesHierarchyInTreeOrder() {
         MockApplication app = new MockApplication(typeof(ViewTestThing));
 
-        UIElement element = app.RootElement;
+        UIElement element = app.RootElement.GetChild(0);
 
         Assert.IsInstanceOf<ViewTestThing>(element);
 
@@ -167,7 +167,7 @@ public class UIView_Tests {
     public void SetsFlagsForHierarchyChildren() {
         MockApplication application = new MockApplication(typeof(ViewTestThing));
 
-        UIElement element = application.RootElement;
+        UIElement element = application.RootElement.GetChild(0);
         element.children[0].children[0].flags &= ~(UIElementFlags.Enabled);
 
         Assert.IsInstanceOf<TranscludedThing>(element.children[0].children[0]);
@@ -191,7 +191,7 @@ public class UIView_Tests {
     [Test]
     public void DisableElement() {
         MockApplication testView = new MockApplication(typeof(ViewTestThing));
-        UIElement element = testView.RootElement;
+        UIElement element = testView.RootElement.GetChild(0);
         TranscludedThing thing = As<TranscludedThing>(element.children[0].children[0]);
 
         Application.DisableElement(thing);
@@ -210,7 +210,7 @@ public class UIView_Tests {
 
         MockApplication testView2 = new MockApplication(typeof(ViewTestThing));
 
-        element = testView2.RootElement;
+        element = testView2.RootElement.GetChild(0);
 
         UITextElement text0 = As<UITextElement>(element.children[0].children[0].children[0]);
         UIChildrenElement children = As<UIChildrenElement>(element.children[0].children[0].children[1]);
@@ -263,7 +263,7 @@ public class UIView_Tests {
     [Test]
     public void Callback_OnDisable() {
         MockApplication application = new MockApplication(typeof(ViewTestThing));
-        UIElement element = application.RootElement;
+        UIElement element = application.RootElement.GetChild(0);
         TranscludedThing thing = As<TranscludedThing>(element.children[0].children[0]);
 
         int callCount = 0;
@@ -273,7 +273,7 @@ public class UIView_Tests {
         Assert.AreEqual(1, callCount);
 
         MockApplication testView2 = new MockApplication(typeof(ViewTestThing));
-        element = testView2.RootElement;
+        element = testView2.RootElement.GetChild(0);
         thing = As<TranscludedThing>(element.children[0].children[0]);
         thing.onDisableCallback = () => { callCount++; };
         Application.DisableElement(element.children[0]);
@@ -286,7 +286,7 @@ public class UIView_Tests {
     [Test]
     public void EnableElement() {
         MockApplication testView = new MockApplication(typeof(ViewTestThing));
-        UIElement element = testView.RootElement;
+        UIElement element = testView.RootElement.GetChild(0);
         TranscludedThing thing = As<TranscludedThing>(element.children[0].children[0]);
 
         Application.DisableElement(thing);
@@ -359,7 +359,7 @@ public class UIView_Tests {
     [Test]
     public void Callback_OnEnable() {
         MockApplication testView = new MockApplication(typeof(ViewTestThing));
-        UIElement element = testView.RootElement;
+        UIElement element = testView.RootElement.GetChild(0);
         TranscludedThing thing = As<TranscludedThing>(element.children[0].children[0]);
         UIGroupElement group = As<UIGroupElement>(element.children[0]);
         int callCount = 0;
@@ -379,14 +379,14 @@ public class UIView_Tests {
     [Test]
     public void LifeCycle_OnCreate() {
         MockApplication testView = new MockApplication(typeof(ViewTestThing));
-        ViewTestThing thing = (ViewTestThing) testView.RootElement;
+        ViewTestThing thing = (ViewTestThing) testView.RootElement.GetChild(0);
         Assert.IsTrue(thing.didCreate);
     }
 
     [Test]
     public void LifeCycle_OnUpdate() {
         MockApplication testView = new MockApplication(typeof(ViewTestThing));
-        ViewTestThing thing = (ViewTestThing) testView.RootElement;
+        ViewTestThing thing = (ViewTestThing) testView.RootElement.GetChild(0);
         Assert.AreEqual(0, thing.updateCount);
         testView.Update();
         Assert.AreEqual(1, thing.updateCount);
@@ -396,7 +396,7 @@ public class UIView_Tests {
     public void RemoveFromChildrenOnDestroy() {
         MockApplication testView = new MockApplication(typeof(ViewTestThing), template);
         
-        ViewTestThing root = (ViewTestThing) testView.RootElement;
+        ViewTestThing root = (ViewTestThing) testView.RootElement.GetChild(0);
         UIElement parent = root.FindById("L1-3").parent;
         int childCount = parent.children.Count;
         Application.DestroyElement(root.FindById("L1-3"));

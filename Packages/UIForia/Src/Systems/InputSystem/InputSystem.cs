@@ -231,27 +231,28 @@ namespace UIForia.Systems {
         private void ProcessMouseInput() {
             LightList<UIElement> queryResults = (LightList<UIElement>) m_LayoutSystem.QueryPoint(m_MouseState.mousePosition, LightList<UIElement>.Get());
 
-            if (!IsDragging) {
-                LightList<UIElement> ancestorElements = LightList<UIElement>.Get();
-
-                // the first element is always correct
-                if (queryResults.Count > 0) {
-                    ancestorElements.Add(queryResults[0]);
-                }
-                /*
-                 * Every following element must be a parent of the first.
-                 * This makes no sense for drag events but a lot for every other.
-                 */
-                for (int index = 1; index < queryResults.Count; index++) {
-                    UIElement element = queryResults[index];
-                    if (IsParentOf(element, queryResults[0])) {
-                        ancestorElements.Add(element);
-                    }
-                }
-
-                LightList<UIElement>.Release(ref queryResults);
-                queryResults = ancestorElements;
-            }
+            // todo -- this breaks all the input tests!
+//            if (!IsDragging) {
+//                LightList<UIElement> ancestorElements = LightList<UIElement>.Get();
+//
+//                // the first element is always correct
+//                if (queryResults.Count > 0) {
+//                    ancestorElements.Add(queryResults[0]);
+//                }
+//                /*
+//                 * Every following element must be a parent of the first.
+//                 * This makes no sense for drag events but a lot for every other.
+//                 */
+//                for (int index = 1; index < queryResults.Count; index++) {
+//                    UIElement element = queryResults[index];
+//                    if (IsParentOf(element, queryResults[0])) {
+//                        ancestorElements.Add(element);
+//                    }
+//                }
+//
+//                LightList<UIElement>.Release(ref queryResults);
+//                queryResults = ancestorElements;
+//            }
             
             for (int i = 0; i < queryResults.Count; i++) {
                 UIElement element = queryResults[i];

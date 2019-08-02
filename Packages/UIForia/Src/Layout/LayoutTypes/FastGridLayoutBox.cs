@@ -197,7 +197,7 @@ namespace UIForia.Layout.LayoutTypes {
                         break;
                 }
 
-                child.ApplyVerticalLayout(finalY + paddingBorderTop, blockSize , blockSize.contentAreaSize , placement.size.prefHeight, alignment, fit);
+                child.ApplyVerticalLayout(finalY + paddingBorderTop, blockSize, blockSize.contentAreaSize, placement.size.prefHeight, alignment, fit);
             }
         }
 
@@ -774,25 +774,39 @@ namespace UIForia.Layout.LayoutTypes {
 //                return;
 //            }
 
+            CreateNamedGridAreas();
 
-            // todo -- move out of here
+            placementList.size = 0;
             FastLayoutBox child = firstChild;
+            
             while (child != null) {
-                CreateOrUpdatePlacement(child);
+                GridItemPlacement x = child.element.style.GridItemX;
+                GridItemPlacement y = child.element.style.GridItemY;
+                GridItemPlacement width = child.element.style.GridItemWidth;
+                GridItemPlacement height = child.element.style.GridItemHeight;
+
+                GridPlacement placement = default;
+
+                placement.layoutBox = child;
+                placement.x = x.name != null ? ResolveHorizontalStart(x.name) : x.index;
+                placement.y = y.name != null ? ResolveVerticalStart(y.name) : y.index;
+                placement.width = width.name != null ? ResolveHorizontalWidth(placement.x, width.name) : width.index;
+                placement.height = height.name != null ? ResolveVerticalHeight(placement.y, height.name) : height.index;
+                
+                placementList.Add(placement);
+
                 child = child.nextSibling;
             }
-
+            
             rowTrackList.Clear();
             colTrackList.Clear();
-
-            CreateNamedGridAreas();
 
             GenerateExplicitTracks(default, default);
 
             s_OccupiedAreas.size = 0;
 
-            GridTrackSize[] autoColSizePattern = new[] {element.style.GridLayoutColAutoSize};
-            GridTrackSize[] autoRowSizePattern = new[] {element.style.GridLayoutRowAutoSize};
+            IReadOnlyList<GridTrackSize> autoColSizePattern = element.style.GridLayoutColAutoSize;
+            IReadOnlyList<GridTrackSize> autoRowSizePattern = element.style.GridLayoutRowAutoSize;
 
             int rowSizeAutoPtr = 0;
             int colSizeAutoPtr = 0;
@@ -805,7 +819,6 @@ namespace UIForia.Layout.LayoutTypes {
         }
 
         private void PlaceBothAxisLocked() {
-
             for (int i = 0; i < placementList.Count; i++) {
                 ref GridPlacement placement = ref placementList.array[i];
 
@@ -816,12 +829,11 @@ namespace UIForia.Layout.LayoutTypes {
                     region.xMax = placement.x + placement.width;
                     region.yMax = placement.y + placement.height;
                     s_OccupiedAreas.Add(region);
-
                 }
             }
         }
 
-        private void PlaceSingleAxisLocked(ref int colSizeAutoPtr, GridTrackSize[] autoColSizePattern, ref int rowSizeAutoPtr, GridTrackSize[] autoRowSizePattern) {
+        private void PlaceSingleAxisLocked(ref int colSizeAutoPtr, IReadOnlyList<GridTrackSize> autoColSizePattern, ref int rowSizeAutoPtr, IReadOnlyList<GridTrackSize> autoRowSizePattern) {
             bool dense = element.style.GridLayoutDensity == GridLayoutDensity.Dense;
 
             for (int i = 0; i < placementList.size; i++) {
@@ -880,7 +892,7 @@ namespace UIForia.Layout.LayoutTypes {
             }
         }
 
-        private void PreAllocateRowAndColumns(ref int colPtr, ref int rowPtr, GridTrackSize[] colPattern, GridTrackSize[] rowPattern) {
+        private void PreAllocateRowAndColumns(ref int colPtr, ref int rowPtr, IReadOnlyList<GridTrackSize> colPattern, IReadOnlyList<GridTrackSize> rowPattern) {
             int maxColStartAndSpan = 0;
             int maxRowStartAndSpan = 0;
 
@@ -910,7 +922,7 @@ namespace UIForia.Layout.LayoutTypes {
             EnsureImplicitTrackCapacity(rowTrackList, maxRowStartAndSpan, ref rowPtr, rowPattern);
         }
 
-        private void PlaceRemainingItems(ref int colSizeAutoPtr, GridTrackSize[] autoColSizePattern, ref int rowSizeAutoPtr, GridTrackSize[] autoRowSizePattern) {
+        private void PlaceRemainingItems(ref int colSizeAutoPtr, IReadOnlyList<GridTrackSize> autoColSizePattern, ref int rowSizeAutoPtr, IReadOnlyList<GridTrackSize> autoRowSizePattern) {
             if (placementList.size == 0) {
                 return;
             }
@@ -995,7 +1007,7 @@ namespace UIForia.Layout.LayoutTypes {
                     }
 
                     sparseStartX = cursorX;
-                    sparseStartY = cursorY; 
+                    sparseStartY = cursorY;
                     placement.x = cursorX;
                     placement.y = cursorY;
                     colTrackList.array[cursorX].autoPlacementCursor = cursorY;
@@ -1030,7 +1042,7 @@ namespace UIForia.Layout.LayoutTypes {
             return true;
         }
 
-        private static void EnsureImplicitTrackCapacity(StructList<GridTrack> tracksList, int count, ref int autoSize, GridTrackSize[] autoSizes) {
+        private static void EnsureImplicitTrackCapacity(StructList<GridTrack> tracksList, int count, ref int autoSize, IReadOnlyList<GridTrackSize> autoSizes) {
             if (count >= tracksList.size) {
                 tracksList.EnsureCapacity(count);
 
@@ -1039,7 +1051,7 @@ namespace UIForia.Layout.LayoutTypes {
 
                 for (int i = 0; i < toCreate; i++) {
                     ref GridTrack track = ref tracksList.array[idx++];
-                    ref GridTrackSize size = ref autoSizes[autoSize];
+                    GridTrackSize size = autoSizes[autoSize];
                     track.minValue = size.minValue;
                     track.minUnit = size.maxUnit;
                     track.maxValue = size.maxValue;
@@ -1047,10 +1059,25 @@ namespace UIForia.Layout.LayoutTypes {
                     track.autoPlacementCursor = 0;
                     track.size = 0;
                     track.position = 0;
-                    autoSize = (autoSize + 1) % autoSizes.Length;
+                    autoSize = (autoSize + 1) % autoSizes.Count;
                 }
 
                 tracksList.size = idx;
+            }
+        }
+
+        public override void AddChild(FastLayoutBox child) {
+            base.AddChild(child);
+            placementDirty = true;
+            CreateOrUpdatePlacement(child);
+        }
+
+        public override void RemoveChild(FastLayoutBox child) {
+            for (int i = 0; i < placementList.size; i++) {
+                if (placementList.array[i].layoutBox == child) {
+                    placementList.RemoveAt(i);
+                    return;
+                }
             }
         }
 
@@ -1066,6 +1093,7 @@ namespace UIForia.Layout.LayoutTypes {
                     case StylePropertyId.GridItemX:
                         placementDirty = true;
                         markedForLayout = true;
+                        CreateOrUpdatePlacement(child);
                         break;
                 }
             }

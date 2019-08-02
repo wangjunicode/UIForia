@@ -750,17 +750,17 @@ namespace UIForia.Layout.LayoutTypes {
             }
 
             LayoutDirection direction = style.GridLayoutDirection;
-            GridTrackSize autoColSize;
-            GridTrackSize autoRowSize;
+          //  GridTrackSize autoColSize = null;
+          //  GridTrackSize autoRowSize = null;
 
-            if (direction == LayoutDirection.Horizontal) {
-                autoColSize = style.GridLayoutColAutoSize;
-                autoRowSize = style.GridLayoutRowAutoSize;
-            }
-            else {
-                autoColSize = style.GridLayoutRowAutoSize;
-                autoRowSize = style.GridLayoutColAutoSize;
-            }
+//            if (direction == LayoutDirection.Horizontal) {
+//                autoColSize = style.GridLayoutColAutoSize;
+//                autoRowSize = style.GridLayoutRowAutoSize;
+//            }
+//            else {
+//                autoColSize = style.GridLayoutRowAutoSize;
+//                autoRowSize = style.GridLayoutColAutoSize;
+//            }
 
             List<GridPlacement> bothAxesLocked = ListPool<GridPlacement>.Get();
             List<GridPlacement> singleAxisLockedRow = ListPool<GridPlacement>.Get();
@@ -814,7 +814,7 @@ namespace UIForia.Layout.LayoutTypes {
                     int colEnd = colItem.trackStart + colItem.trackSpan;
 
                     if (m_ColTracks.Count < colEnd) {
-                        CreateTracks(m_ColTracks, colEnd, autoColSize);
+                    //    CreateTracks(m_ColTracks, colEnd, autoColSize);
                     }
                 }
 
@@ -822,7 +822,7 @@ namespace UIForia.Layout.LayoutTypes {
                     int rowEnd = rowItem.trackStart + rowItem.trackSpan;
 
                     if (m_RowTracks.Count < rowEnd) {
-                        CreateTracks(m_RowTracks, rowEnd, autoRowSize);
+                    //    CreateTracks(m_RowTracks, rowEnd, autoRowSize);
                     }
                 }
 
@@ -856,17 +856,17 @@ namespace UIForia.Layout.LayoutTypes {
             int maxRowStartAndSpan = 0;
 
             LayoutDirection direction = style.GridLayoutDirection;
-            GridTrackSize autoColSize;
-            GridTrackSize autoRowSize;
+            GridTrackSize autoColSize = default;
+            GridTrackSize autoRowSize = default;
 
-            if (direction == LayoutDirection.Horizontal) {
-                autoColSize = style.GridLayoutColAutoSize;
-                autoRowSize = style.GridLayoutRowAutoSize;
-            }
-            else {
-                autoColSize = style.GridLayoutRowAutoSize;
-                autoRowSize = style.GridLayoutColAutoSize;
-            }
+//            if (direction == LayoutDirection.Horizontal) {
+//                autoColSize = style.GridLayoutColAutoSize;
+//                autoRowSize = style.GridLayoutRowAutoSize;
+//            }
+//            else {
+//                autoColSize = style.GridLayoutRowAutoSize;
+//                autoRowSize = style.GridLayoutColAutoSize;
+//            }
 
             for (int i = 0; i < placements.Count; i++) {
                 GridPlacement placement = placements[i];
@@ -903,12 +903,12 @@ namespace UIForia.Layout.LayoutTypes {
             GridTrackSize autoRowSize;
 
             if (direction == LayoutDirection.Horizontal) {
-                autoColSize = style.GridLayoutColAutoSize;
-                autoRowSize = style.GridLayoutRowAutoSize;
+               // autoColSize = style.GridLayoutColAutoSize;
+               // autoRowSize = style.GridLayoutRowAutoSize;
             }
             else {
-                autoColSize = style.GridLayoutRowAutoSize;
-                autoRowSize = style.GridLayoutColAutoSize;
+               // autoColSize = style.GridLayoutRowAutoSize;
+              //  autoRowSize = style.GridLayoutColAutoSize;
             }
 
             int sparseStartX = 0;
@@ -939,7 +939,7 @@ namespace UIForia.Layout.LayoutTypes {
                         cursorX++;
                     }
 
-                    CreateTracks(m_ColTracks, cursorX + colSpan, autoColSize);
+                    //CreateTracks(m_ColTracks, cursorX + colSpan, autoColSize);
 
                     m_RowTracks.Array[rowStart].autoPlacementCursor = cursorX;
 
@@ -952,7 +952,7 @@ namespace UIForia.Layout.LayoutTypes {
                         cursorY++;
                     }
 
-                    CreateTracks(m_RowTracks, cursorY + rowSpan, autoRowSize);
+                   // CreateTracks(m_RowTracks, cursorY + rowSpan, autoRowSize);
 
                     m_ColTracks.Array[colStart].autoPlacementCursor = cursorY;
 
@@ -971,7 +971,7 @@ namespace UIForia.Layout.LayoutTypes {
                     while (true) {
                         if (cursorX + colSpan > colCount) {
                             cursorY++;
-                            CreateTracks(m_RowTracks, cursorY + rowSpan, autoRowSize);
+                          //  CreateTracks(m_RowTracks, cursorY + rowSpan, autoRowSize);
                             cursorX = !dense ? m_RowTracks[cursorY].autoPlacementCursor : 0;
                             continue;
                         }
@@ -987,7 +987,7 @@ namespace UIForia.Layout.LayoutTypes {
                     sparseStartY = cursorY;
                     colItem.trackStart = cursorX;
                     rowItem.trackStart = cursorY;
-                    CreateTracks(m_ColTracks, cursorX + colSpan, autoColSize);
+                   // CreateTracks(m_ColTracks, cursorX + colSpan, autoColSize);
                     m_ColTracks.Array[cursorX].autoPlacementCursor = cursorY;
                     m_RowTracks.Array[cursorY].autoPlacementCursor = cursorX;
                 }
@@ -1004,7 +1004,7 @@ namespace UIForia.Layout.LayoutTypes {
                     while (true) {
                         if (cursorY + rowSpan > rowCount) {
                             cursorX++;
-                            CreateTracks(m_ColTracks, cursorX + colSpan, autoColSize);
+                         //   CreateTracks(m_ColTracks, cursorX + colSpan, autoColSize);
                             cursorY = !dense ? m_ColTracks[cursorX].autoPlacementCursor : 0;
                             continue;
                         }
@@ -1022,8 +1022,8 @@ namespace UIForia.Layout.LayoutTypes {
                     rowItem.trackStart = cursorY;
                     m_ColTracks.Array[cursorX].autoPlacementCursor = cursorY;
                     m_RowTracks.Array[cursorY].autoPlacementCursor = cursorX;
-                    CreateTracks(m_ColTracks, cursorX + colSpan, autoColSize);
-                    CreateTracks(m_RowTracks, cursorY + rowSpan, autoRowSize);
+               //     CreateTracks(m_ColTracks, cursorX + colSpan, autoColSize);
+               //     CreateTracks(m_RowTracks, cursorY + rowSpan, autoRowSize);
                 }
 
                 m_Placements[placement.index] = new GridPlacement(placement.id, placement.index, colItem, rowItem);

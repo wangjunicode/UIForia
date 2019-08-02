@@ -66,16 +66,12 @@ namespace UIForia.Editor {
             // Grid Layout
             new PropertyGenerator<LayoutDirection>(StylePropertyId.GridLayoutDirection, LayoutDirection.Row),
             new PropertyGenerator<GridLayoutDensity>(StylePropertyId.GridLayoutDensity, GridLayoutDensity.Sparse),
-            
             new PropertyGenerator<IReadOnlyList<GridTrackSize>>(StylePropertyId.GridLayoutColTemplate, ListPool<GridTrackSize>.Empty, InheritanceType.NotInherited, "ListPool<GridTrackSize>.Empty"),
             new PropertyGenerator<IReadOnlyList<GridTrackSize>>(StylePropertyId.GridLayoutRowTemplate, ListPool<GridTrackSize>.Empty, InheritanceType.NotInherited, "ListPool<GridTrackSize>.Empty"),
-            
-            new PropertyGenerator<GridTrackSize>(StylePropertyId.GridLayoutColAutoSize, GridTrackSize.MaxContent),
-            new PropertyGenerator<GridTrackSize>(StylePropertyId.GridLayoutRowAutoSize, GridTrackSize.FractionalRemaining),
-            
+            new PropertyGenerator<IReadOnlyList<GridTrackSize>>(StylePropertyId.GridLayoutColAutoSize, ListPool<GridTrackSize>.Empty, InheritanceType.NotInherited, "new List<GridTrackSize>() {GridTrackSize.MaxContent}"),
+            new PropertyGenerator<IReadOnlyList<GridTrackSize>>(StylePropertyId.GridLayoutRowAutoSize, ListPool<GridTrackSize>.Empty, InheritanceType.NotInherited, "new List<GridTrackSize>() {GridTrackSize.FractionalRemaining}"),
             new AnimatedPropertyGenerator<float>(StylePropertyId.GridLayoutColGap, 0),
             new AnimatedPropertyGenerator<float>(StylePropertyId.GridLayoutRowGap, 0),
-
             new PropertyGenerator<GridAxisAlignment>(StylePropertyId.GridLayoutColAlignment, GridAxisAlignment.Grow),
             new PropertyGenerator<GridAxisAlignment>(StylePropertyId.GridLayoutRowAlignment, GridAxisAlignment.Grow),
 
@@ -285,7 +281,7 @@ __REPLACE_StyleBindingCompiler_DoCompile
 
             template = template.Replace("__REPLACE__UIStyleSetStateProxy__", retn);
             retn = "";
-            
+
             for (int i = 0; i < properties.Length; i++) {
                 retn += InflateUIStyleSetProperties(properties[i]);
             }
@@ -482,6 +478,7 @@ namespace UIForia.Rendering {
         }}
         ";
             }
+
             return $@"
         public void Set{propertyGenerator.propertyIdName}({propertyGenerator.GetFullTypeName()} value, {nameof(StyleState)} state) {{
             {propertyGenerator.GetStyleSetSetter()};
@@ -590,7 +587,7 @@ namespace UIForia.Rendering {
             else if (typeof(UIFixedLength) == propertyGenerator.type) {
                 return $"FindUIFixedLengthProperty(StylePropertyId.{propertyGenerator.propertyIdName});";
             }
-    
+
             else if (typeof(UIMeasurement) == propertyGenerator.type) {
                 return $"FindUIMeasurementProperty(StylePropertyId.{propertyGenerator.propertyIdName});";
             }

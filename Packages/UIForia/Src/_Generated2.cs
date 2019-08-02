@@ -597,43 +597,6 @@ namespace UIForia.Bindings.StyleBindings {
 
     }
         
-    public class StyleBinding_GridTrackSize : StyleBinding {
-
-        public readonly Expression<UIForia.Layout.LayoutTypes.GridTrackSize> expression;
-        public readonly StylePropertyId propertyId;
-        
-        public StyleBinding_GridTrackSize(string propertyName, StylePropertyId propertyId, StyleState state, Expression<UIForia.Layout.LayoutTypes.GridTrackSize> expression)
-            : base(propertyName, state) {
-            this.propertyId = propertyId;
-            this.expression = expression;
-        }
-
-        public override void Execute(UIElement element, ExpressionContext context) {
-            if (!element.style.IsInState(state)) return;
-
-            var oldValue = element.style.propertyMap[(int)propertyId].AsGridTrackSize;
-            var value = expression.Evaluate(context);
-            if (value != oldValue) {
-                element.style.SetProperty(new StyleProperty(propertyId, value), state);
-            }
-        }
-
-        public override bool IsConstant() {
-            return expression.IsConstant();
-        }
-
-        public override void Apply(UIStyle style, ExpressionContext context) {
-            var value = expression.Evaluate(context);
-            style.SetProperty(new StyleProperty(propertyId, value));
-        }
-
-        public override void Apply(UIStyleSet styleSet, ExpressionContext context) {
-            var value = expression.Evaluate(context);
-            styleSet.SetProperty(new StyleProperty(propertyId, value), state);
-        }
-
-    }
-        
     public class StyleBinding_GridAxisAlignment : StyleBinding {
 
         public readonly Expression<UIForia.Layout.GridAxisAlignment> expression;
@@ -1364,9 +1327,9 @@ case "overflowx":
                 case "gridlayoutrowtemplate":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_GridTrackTemplate("GridLayoutRowTemplate", UIForia.Rendering.StylePropertyId.GridLayoutRowTemplate, targetState.state, Compile<System.Collections.Generic.IReadOnlyList<UIForia.Layout.LayoutTypes.GridTrackSize>>(value, null));                
                 case "gridlayoutcolautosize":
-                    return new UIForia.Bindings.StyleBindings.StyleBinding_GridTrackSize("GridLayoutColAutoSize", UIForia.Rendering.StylePropertyId.GridLayoutColAutoSize, targetState.state, Compile<UIForia.Layout.LayoutTypes.GridTrackSize>(value, null));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_GridTrackTemplate("GridLayoutColAutoSize", UIForia.Rendering.StylePropertyId.GridLayoutColAutoSize, targetState.state, Compile<System.Collections.Generic.IReadOnlyList<UIForia.Layout.LayoutTypes.GridTrackSize>>(value, null));                
                 case "gridlayoutrowautosize":
-                    return new UIForia.Bindings.StyleBindings.StyleBinding_GridTrackSize("GridLayoutRowAutoSize", UIForia.Rendering.StylePropertyId.GridLayoutRowAutoSize, targetState.state, Compile<UIForia.Layout.LayoutTypes.GridTrackSize>(value, null));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_GridTrackTemplate("GridLayoutRowAutoSize", UIForia.Rendering.StylePropertyId.GridLayoutRowAutoSize, targetState.state, Compile<System.Collections.Generic.IReadOnlyList<UIForia.Layout.LayoutTypes.GridTrackSize>>(value, null));                
                 case "gridlayoutcolgap":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_float("GridLayoutColGap", UIForia.Rendering.StylePropertyId.GridLayoutColGap, targetState.state, Compile<float>(value, null));                
                 case "gridlayoutrowgap":

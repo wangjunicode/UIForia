@@ -97,8 +97,8 @@ namespace UIForia.Compilers.Style {
                 {"gridlayoutcoltemplate", (targetStyle, property, context) => targetStyle.GridLayoutColTemplate = MapGridLayoutTemplate(property, context)},
                 {"gridlayoutrowtemplate", (targetStyle, property, context) => targetStyle.GridLayoutRowTemplate = MapGridLayoutTemplate(property, context)},
                 {"gridlayoutdirection", (targetStyle, property, context) => targetStyle.GridLayoutDirection = MapEnum<LayoutDirection>(property.children[0], context)},
-                {"gridlayoutcolautosize", (targetStyle, property, context) => targetStyle.GridLayoutColAutoSize = MapGridTrackSize(property.children[0], context)},
-                {"gridlayoutrowautosize", (targetStyle, property, context) => targetStyle.GridLayoutRowAutoSize = MapGridTrackSize(property.children[0], context)},
+                {"gridlayoutcolautosize", (targetStyle, property, context) => targetStyle.GridLayoutColAutoSize = MapGridLayoutTemplate(property, context)},
+                {"gridlayoutrowautosize", (targetStyle, property, context) => targetStyle.GridLayoutRowAutoSize = MapGridLayoutTemplate(property, context)},
                 {"gridlayoutcolgap", (targetStyle, property, context) => targetStyle.GridLayoutColGap = MapNumber(property.children[0], context)},
                 {"gridlayoutrowgap", (targetStyle, property, context) => targetStyle.GridLayoutRowGap = MapNumber(property.children[0], context)},
 

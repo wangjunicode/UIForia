@@ -19,7 +19,9 @@ namespace UIForia.Rendering {
 
         private StyleState currentState;
         private UIStyleGroup instanceStyle;
+
         private StyleState containedStates;
+
         //private UIStyleGroupContainer implicitStyleContainer;
         private readonly LightList<StyleEntry> availableStyles;
         private readonly LightList<UIStyleGroupContainer> styleGroupContainers; // probably only need to store the names
@@ -106,13 +108,12 @@ namespace UIForia.Rendering {
         }
 
         internal void Initialize() {
-
             UITemplate originTemplate = element.OriginTemplate;
-            
+
             if (originTemplate == null) {
                 return;
             }
-            
+
             UIStyleGroupContainer[] baseStyles = originTemplate.baseStyles;
 
             containedStates = 0;
@@ -200,7 +201,7 @@ namespace UIForia.Rendering {
             int count = styleGroupContainers.Count;
             UIStyleGroupContainer[] currentContainers = styleGroupContainers.Array;
             UIStyleGroupContainer[] updatedContainers = updatedStyles.Array;
-            
+
             if (updatedStyles.Count > styleGroupContainers.Count) {
                 // if we have more styles in the incoming list
                 // check that all existing styles match
@@ -270,7 +271,7 @@ namespace UIForia.Rendering {
         private static void AddMissingProperties(LightList<StylePropertyId> toUpdate, UIStyle style) {
             int count = style.PropertyCount;
             StyleProperty[] properties = style.array;
-            
+
             for (int i = 0; i < count; i++) {
                 StylePropertyId propertyId = properties[i].propertyId;
                 if (!ListContainsStyleProperty(toUpdate, propertyId)) {
@@ -315,6 +316,7 @@ namespace UIForia.Rendering {
             if (runCommands == null) {
                 return;
             }
+
             for (int index = 0; index < runCommands.Count; index++) {
                 runCommands[index].Run(element);
             }
@@ -378,9 +380,9 @@ namespace UIForia.Rendering {
         public bool IsInState(StyleState state) {
             return (currentState & state) != 0;
         }
-       
+
         public bool HasBaseStyles => styleGroupContainers.Count > 0;
-        
+
         public float LineHeightSize => 16f; // todo -- wrong
 
         // todo -- handle inherited?
@@ -741,13 +743,21 @@ namespace UIForia.Rendering {
             //styleSystem.SetStyleProperties(element, toUpdate);
         }
 
+        public void SetGridLayoutColAutoSize(in GridTrackSize trackSize, StyleState state) {
+            SetGridLayoutColAutoSize(new[] {trackSize}, state);
+        }
+
+        public void SetGridLayoutRowAutoSize(in GridTrackSize trackSize, StyleState state) {
+            SetGridLayoutRowAutoSize(new[] {trackSize}, state);
+        }
+
         public void SetGridItemPlacement(int x, int y, int width, int height, StyleState state) {
             SetGridItemX(new GridItemPlacement(x), state);
             SetGridItemY(new GridItemPlacement(y), state);
             SetGridItemWidth(new GridItemPlacement(width < 1 ? 1 : width), state);
             SetGridItemHeight(new GridItemPlacement(height < 1 ? 1 : height), state);
         }
-        
+
         public void SetGridItemPlacement(int x, int y, StyleState state) {
             SetGridItemX(new GridItemPlacement(x), state);
             SetGridItemY(new GridItemPlacement(y), state);
@@ -854,26 +864,26 @@ namespace UIForia.Rendering {
         public float GetResolvedFontSize() {
             UIFixedLength fontSize = TextFontSize;
             switch (fontSize.unit) {
-                
                 case UIFixedUnit.Unset:
                     return 0;
-                
+
                 case UIFixedUnit.Pixel:
                     return fontSize.value;
-                
+
                 case UIFixedUnit.Em:
                 case UIFixedUnit.Percent:
                     if (element.parent != null) {
                         return element.parent.style.GetResolvedFontSize() * fontSize.value;
                     }
+
                     return DefaultStyleValues_Generated.TextFontSize.value * fontSize.value;
 
                 case UIFixedUnit.ViewportWidth:
                     return element.View.Viewport.width * fontSize.value;
-                
+
                 case UIFixedUnit.ViewportHeight:
                     return element.View.Viewport.height * fontSize.value;
-                
+
                 default:
                     throw new ArgumentOutOfRangeException();
             }
@@ -881,7 +891,7 @@ namespace UIForia.Rendering {
 
         public SVGXTextStyle GetTextStyle() {
             return new SVGXTextStyle() {
-                fontSize =  GetResolvedFontSize(),
+                fontSize = GetResolvedFontSize(),
                 alignment = TextAlignment,
                 fontAsset = TextFontAsset,
                 fontStyle = TextFontStyle,

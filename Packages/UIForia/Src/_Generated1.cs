@@ -243,16 +243,16 @@ namespace UIForia.Rendering {
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.GridLayoutRowTemplate, value), state); }
         }
         
-        public UIForia.Layout.LayoutTypes.GridTrackSize GridLayoutColAutoSize {
+        public System.Collections.Generic.IReadOnlyList<UIForia.Layout.LayoutTypes.GridTrackSize> GridLayoutColAutoSize {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.GridLayoutColAutoSize, state).AsGridTrackSize; }
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.GridLayoutColAutoSize, state).AsGridTemplate; }
             [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.GridLayoutColAutoSize, value), state); }
         }
         
-        public UIForia.Layout.LayoutTypes.GridTrackSize GridLayoutRowAutoSize {
+        public System.Collections.Generic.IReadOnlyList<UIForia.Layout.LayoutTypes.GridTrackSize> GridLayoutRowAutoSize {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.GridLayoutRowAutoSize, state).AsGridTrackSize; }
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.GridLayoutRowAutoSize, state).AsGridTemplate; }
             [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.GridLayoutRowAutoSize, value), state); }
         }
@@ -1137,16 +1137,16 @@ namespace UIForia.Rendering {
             set { SetProperty(new StyleProperty(StylePropertyId.GridLayoutRowTemplate, value)); }
         }
             
-        public UIForia.Layout.LayoutTypes.GridTrackSize GridLayoutColAutoSize {
+        public System.Collections.Generic.IReadOnlyList<UIForia.Layout.LayoutTypes.GridTrackSize> GridLayoutColAutoSize {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return FindGridTrackSizeProperty(StylePropertyId.GridLayoutColAutoSize); }
+            get { return GetProperty(StylePropertyId.GridLayoutColAutoSize).AsGridTemplate; }
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.GridLayoutColAutoSize, value)); }
         }
             
-        public UIForia.Layout.LayoutTypes.GridTrackSize GridLayoutRowAutoSize {
+        public System.Collections.Generic.IReadOnlyList<UIForia.Layout.LayoutTypes.GridTrackSize> GridLayoutRowAutoSize {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return FindGridTrackSizeProperty(StylePropertyId.GridLayoutRowAutoSize); }
+            get { return GetProperty(StylePropertyId.GridLayoutRowAutoSize).AsGridTemplate; }
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.GridLayoutRowAutoSize, value)); }
         }
@@ -2103,20 +2103,20 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UIForia.Layout.LayoutTypes.GridTrackSize GridLayoutColAutoSize { 
+            public System.Collections.Generic.IReadOnlyList<UIForia.Layout.LayoutTypes.GridTrackSize> GridLayoutColAutoSize { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.GridLayoutColAutoSize, out property)) return property.AsGridTrackSize;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.GridLayoutColAutoSize, out property)) return property.AsGridTemplate;
                     return DefaultStyleValues_Generated.GridLayoutColAutoSize;
                 }
             }
 
-            public UIForia.Layout.LayoutTypes.GridTrackSize GridLayoutRowAutoSize { 
+            public System.Collections.Generic.IReadOnlyList<UIForia.Layout.LayoutTypes.GridTrackSize> GridLayoutRowAutoSize { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.GridLayoutRowAutoSize, out property)) return property.AsGridTrackSize;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.GridLayoutRowAutoSize, out property)) return property.AsGridTemplate;
                     return DefaultStyleValues_Generated.GridLayoutRowAutoSize;
                 }
             }
@@ -3237,20 +3237,20 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.GridLayoutRowTemplate, state).AsGridTemplate;
         }
         
-        public void SetGridLayoutColAutoSize(in UIForia.Layout.LayoutTypes.GridTrackSize? value, StyleState state) {
+        public void SetGridLayoutColAutoSize(System.Collections.Generic.IReadOnlyList<UIForia.Layout.LayoutTypes.GridTrackSize> value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.GridLayoutColAutoSize, value), state);
         }
 
-        public UIForia.Layout.LayoutTypes.GridTrackSize GetGridLayoutColAutoSize(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.GridLayoutColAutoSize, state).AsGridTrackSize;
+        public System.Collections.Generic.IReadOnlyList<UIForia.Layout.LayoutTypes.GridTrackSize> GetGridLayoutColAutoSize(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.GridLayoutColAutoSize, state).AsGridTemplate;
         }
         
-        public void SetGridLayoutRowAutoSize(in UIForia.Layout.LayoutTypes.GridTrackSize? value, StyleState state) {
+        public void SetGridLayoutRowAutoSize(System.Collections.Generic.IReadOnlyList<UIForia.Layout.LayoutTypes.GridTrackSize> value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.GridLayoutRowAutoSize, value), state);
         }
 
-        public UIForia.Layout.LayoutTypes.GridTrackSize GetGridLayoutRowAutoSize(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.GridLayoutRowAutoSize, state).AsGridTrackSize;
+        public System.Collections.Generic.IReadOnlyList<UIForia.Layout.LayoutTypes.GridTrackSize> GetGridLayoutRowAutoSize(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.GridLayoutRowAutoSize, state).AsGridTemplate;
         }
         
         public void SetGridLayoutColGap(in float? value, StyleState state) {

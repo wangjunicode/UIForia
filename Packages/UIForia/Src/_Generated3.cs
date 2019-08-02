@@ -49,8 +49,8 @@ namespace UIForia.Rendering {
 		public const GridLayoutDensity GridLayoutDensity = UIForia.Layout.GridLayoutDensity.Sparse;
 		public static readonly IReadOnlyList<UIForia.Layout.LayoutTypes.GridTrackSize> GridLayoutColTemplate = ListPool<GridTrackSize>.Empty;
 		public static readonly IReadOnlyList<UIForia.Layout.LayoutTypes.GridTrackSize> GridLayoutRowTemplate = ListPool<GridTrackSize>.Empty;
-		public static readonly GridTrackSize GridLayoutColAutoSize = new GridTrackSize(1f, GridTemplateUnit.MaxContent);
-		public static readonly GridTrackSize GridLayoutRowAutoSize = new GridTrackSize(1f, GridTemplateUnit.FractionalRemaining);
+		public static readonly IReadOnlyList<UIForia.Layout.LayoutTypes.GridTrackSize> GridLayoutColAutoSize = new List<GridTrackSize>() {GridTrackSize.MaxContent};
+		public static readonly IReadOnlyList<UIForia.Layout.LayoutTypes.GridTrackSize> GridLayoutRowAutoSize = new List<GridTrackSize>() {GridTrackSize.FractionalRemaining};
 		public const float GridLayoutColGap = 0f;
 		public const float GridLayoutRowGap = 0f;
 		public const GridAxisAlignment GridLayoutColAlignment = UIForia.Layout.GridAxisAlignment.Grow;
@@ -214,9 +214,9 @@ namespace UIForia.Rendering {
 				case StylePropertyId.GridLayoutRowTemplate:
 					 return new StyleProperty(StylePropertyId.GridLayoutRowTemplate, ListPool<GridTrackSize>.Empty);
 				case StylePropertyId.GridLayoutColAutoSize:
-					 return new StyleProperty(StylePropertyId.GridLayoutColAutoSize, new GridTrackSize(1f, GridTemplateUnit.MaxContent));
+					 return new StyleProperty(StylePropertyId.GridLayoutColAutoSize, new List<GridTrackSize>() {GridTrackSize.MaxContent});
 				case StylePropertyId.GridLayoutRowAutoSize:
-					 return new StyleProperty(StylePropertyId.GridLayoutRowAutoSize, new GridTrackSize(1f, GridTemplateUnit.FractionalRemaining));
+					 return new StyleProperty(StylePropertyId.GridLayoutRowAutoSize, new List<GridTrackSize>() {GridTrackSize.FractionalRemaining});
 				case StylePropertyId.GridLayoutColGap:
 					 return new StyleProperty(StylePropertyId.GridLayoutColGap, 0f);
 				case StylePropertyId.GridLayoutRowGap:

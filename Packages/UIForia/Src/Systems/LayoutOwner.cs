@@ -119,7 +119,6 @@ namespace UIForia.Layout {
                 SizeSet sizeSet = sizeSets[idx];
                 PositionSet positionSet = positionSets[idx];
 
-                
                 layoutResult.padding = element.layoutBox.paddingBox;
                 layoutResult.border = element.layoutBox.borderBox;
                 layoutResult.actualSize = sizeSet.size;
@@ -132,8 +131,7 @@ namespace UIForia.Layout {
                 layoutResult.clipRect = new Rect(0, 0, Screen.width, Screen.height); // todo -- temp
             }
         }
-
-
+        
         private void GatherBoxData() {
             LayoutData[] enabledBoxes = enabledBoxList.array;
             SVGXMatrix[] localMatrices = localMatrixList.array;
@@ -175,7 +173,7 @@ namespace UIForia.Layout {
 
                     FastLayoutBox childBox = childElement.layoutBox;
 
-                    if ((childElement.flags & UIElementFlags.EnabledThisFrame) != 0) {
+                    if (childBox == null || (childElement.flags & UIElementFlags.EnabledThisFrame) != 0) {
                         // apply up-chain selectors
                         // update style data
                         // create layout box

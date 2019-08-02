@@ -12,7 +12,7 @@ namespace UIForia.Animation {
 
         public StyleKeyFrameValue(StylePropertyId propertyId, string rawExpression) {
             this.rawExpression = rawExpression;
-            this.styleProperty = new StyleProperty(propertyId, 0, 0);
+            this.styleProperty = new StyleProperty(propertyId);
             this.expr = null;
         }
 

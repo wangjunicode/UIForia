@@ -25,7 +25,7 @@ namespace UIForia.Compilers.ExpressionResolvers {
                     return new TextureResolver(stringExpression);
                 }
 
-                if (typeof(TMP_FontAsset) == context.targetType) {
+                if (typeof(FontAsset) == context.targetType) {
                     return new FontResolver(stringExpression);
                 }
 

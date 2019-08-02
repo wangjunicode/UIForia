@@ -17,7 +17,7 @@ public class LayoutSystemTests {
                     MinWidth = 300px;
                 }
             </Style>
-            <Contents style.layoutType='LayoutType.Flex'>
+            <Contents style.layoutType='LayoutType.Flex' style.flexLayoutDirection='LayoutDirection.Vertical'>
                 <Group x-id='child0' style='child1' style.preferredWidth='100f' style.preferredHeight='100f'/>
                 <Group x-id='child1' style.preferredWidth='100f' style.preferredHeight='100f'/>
                 <Group x-id='child2' style.preferredWidth='100f' style.preferredHeight='100f'/>
@@ -43,7 +43,7 @@ public class LayoutSystemTests {
     public void Works() {
         MockApplication app = new MockApplication(typeof(LayoutTestThing));
         app.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
-        LayoutTestThing root = (LayoutTestThing) app.RootElement;
+        LayoutTestThing root = (LayoutTestThing) app.RootElement.GetChild(0);
         app.Update();
         Assert.AreEqual(Vector2.zero, root.child0.layoutResult.localPosition);
         Assert.AreEqual(new Vector2(0, 100), root.child1.layoutResult.localPosition);

@@ -1002,6 +1002,7 @@ namespace UIForia {
             LightStack<UIElement>.Release(ref stack);
 
             if (parentEnabled && child.isEnabled) {
+                child.flags |= UIElementFlags.EnabledThisFrame;
                 child.flags &= ~UIElementFlags.Enabled;
                 DoEnableElement(child);
             }

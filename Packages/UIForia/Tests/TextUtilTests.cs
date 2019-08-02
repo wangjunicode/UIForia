@@ -198,7 +198,7 @@ public class TextUtilTests {
         char[] buffer = null;
         string input = "  \tspaces   \nshould change\n";
         string expected = "spaces should change";
-        int outputSize = TextUtil.ProcessWhitespace(WhitespaceMode.CollapseWhitespace, ref buffer, input.ToCharArray());
+        int outputSize = TextUtil.ProcessWhitespace(WhitespaceMode.TrimStart | WhitespaceMode.CollapseWhitespace, ref buffer, input.ToCharArray());
         Assert.AreEqual(expected.Length, outputSize);
         for (int i = 0; i < expected.Length; i++) {
             Assert.AreEqual(expected[i], buffer[i]);

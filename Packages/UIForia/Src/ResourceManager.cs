@@ -50,8 +50,13 @@ namespace UIForia {
 //        }
 
         public FontAsset AddFont(string path, TMP_FontAsset font) {
-            return null;
-            // return AddResource(path, font, s_FontMap);
+            if (font == null || path == null) {
+                return null;
+            }
+
+            FontAsset asset = new FontAsset(font);
+            s_FontMap.Add(path, asset);
+            return asset;
         }
 
         public AudioClip AddAudioClip(AudioClip clip) {

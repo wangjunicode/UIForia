@@ -209,19 +209,6 @@ namespace UIForia.Rendering {
         __REPLACE__UIStyleSetStateProxy__
     }
 
-    public partial struct StyleProperty {
-
-        public bool IsUnset {
-            get { 
-                switch(propertyId) {
-                    __REPLACE_StyleProperty__IsUnset
-                }
-                return true;
-            }
-        }
-
-    }
-
     public partial class UIStyle {
     
         __REPLACE__UIStyle
@@ -492,6 +479,18 @@ namespace UIForia.Rendering {
         }
 
         private static string InflateStyleSetMethods(PropertyGenerator propertyGenerator) {
+            bool isStruct = propertyGenerator.type.IsValueType;
+            if (isStruct) {
+                return $@"
+        public void Set{propertyGenerator.propertyIdName}(in {propertyGenerator.GetFullTypeName()}? value, {nameof(StyleState)} state) {{
+            {propertyGenerator.GetStyleSetSetter()};
+        }}
+
+        public {propertyGenerator.GetFullTypeName()} Get{propertyGenerator.propertyIdName}({nameof(StyleState)} state) {{
+            return {propertyGenerator.GetStyleSetGetter()};
+        }}
+        ";
+            }
             return $@"
         public void Set{propertyGenerator.propertyIdName}({propertyGenerator.GetFullTypeName()} value, {nameof(StyleState)} state) {{
             {propertyGenerator.GetStyleSetSetter()};

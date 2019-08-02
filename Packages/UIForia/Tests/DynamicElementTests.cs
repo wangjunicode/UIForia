@@ -64,7 +64,7 @@ public class DynamicElementTests {
     [Test]
     public void SetsData() {
         MockApplication app = new MockApplication(typeof(DynamicThing));
-        DynamicThing thing = app.RootElement as DynamicThing;
+        DynamicThing thing = app.RootElement.GetChild(0) as DynamicThing;
         app.Update();
         UIDynamicElement dynamicElement = thing.FindFirstByType<UIDynamicElement>();
         Assert.AreEqual(0, dynamicElement.ChildCount);
@@ -81,7 +81,7 @@ public class DynamicElementTests {
     [Test]
     public void RemovesChildWhenDataIsNull() {
         MockApplication app = new MockApplication(typeof(DynamicThing));
-        DynamicThing thing = app.RootElement as DynamicThing;
+        DynamicThing thing = app.RootElement.GetChild(0) as DynamicThing;
         app.Update();
         UIDynamicElement dynamicElement = thing.FindFirstByType<UIDynamicElement>();
         thing.dynamicData = new DynamicDataTest<DynamicTestType1>();
@@ -95,7 +95,7 @@ public class DynamicElementTests {
     [Test]
     public void DoesNotCreateNewWhenTypeDoesNotChange() {
         MockApplication app = new MockApplication(typeof(DynamicThing));
-        DynamicThing thing = app.RootElement as DynamicThing;
+        DynamicThing thing = app.RootElement.GetChild(0) as DynamicThing;
         app.Update();
         UIDynamicElement dynamicElement = thing.FindFirstByType<UIDynamicElement>();
         

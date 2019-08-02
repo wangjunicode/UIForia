@@ -92,7 +92,7 @@ public class PropertyWriterTests {
     [Test]
     public void CompilesWriterAttrModifier_Field() {
         MockApplication app = new MockApplication(typeof(ThingWrittenTo));
-        ThingWrittenTo root = (ThingWrittenTo) app.RootElement;
+        ThingWrittenTo root = (ThingWrittenTo) app.RootElement.GetChild(0);
         ThingThatWrites writer = root.FindFirstByType<ThingThatWrites>();
         writer.SetValue("this is a value");
 
@@ -105,7 +105,7 @@ public class PropertyWriterTests {
     [Test]
     public void CompilesWriterAttrModifierNested_Field() {
         MockApplication app = new MockApplication(typeof(ThingWrittenToNested));
-        ThingWrittenToNested root = (ThingWrittenToNested) app.RootElement;
+        ThingWrittenToNested root = (ThingWrittenToNested) app.RootElement.GetChild(0);
         ThingThatWrites writer = root.FindFirstByType<ThingThatWrites>();
         
         writer.SetValue("this is a value");
@@ -118,7 +118,7 @@ public class PropertyWriterTests {
     [Test]
     public void CompilesWriterAttrModifier_Property() {
         MockApplication app = new MockApplication(typeof(ThingWrittenTo_Property));
-        ThingWrittenTo_Property root = (ThingWrittenTo_Property) app.RootElement;
+        ThingWrittenTo_Property root = (ThingWrittenTo_Property) app.RootElement.GetChild(0);
         ThingThatWrites writer = root.FindFirstByType<ThingThatWrites>();
         writer.SetValue("this is a value");
 
@@ -131,7 +131,7 @@ public class PropertyWriterTests {
     [Test]
     public void CompilesWriterAttrModifierNested_Property() {
         MockApplication app = new MockApplication(typeof(ThingWrittenTo_NestedProperty));
-        ThingWrittenTo_NestedProperty root = (ThingWrittenTo_NestedProperty) app.RootElement;
+        ThingWrittenTo_NestedProperty root = (ThingWrittenTo_NestedProperty) app.RootElement.GetChild(0);
         ThingThatWrites writer = root.FindFirstByType<ThingThatWrites>();
         writer.SetValue("this is a value");
 

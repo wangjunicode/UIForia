@@ -26,8 +26,8 @@ public class RouterTests {
         MockApplication app = new MockApplication(typeof(ParsersRouterNestedThing));
         app.Update();
         
-        var uiElement1 = app.RootElement.GetChild(0);
-        var uiElement2 = app.RootElement.GetChild(1);
+        var uiElement1 = app.RootElement.GetChild(0).GetChild(0);
+        var uiElement2 = app.RootElement.GetChild(0).GetChild(1);
         
         Assert.IsInstanceOf<UIGroupElement>(uiElement1);
         Assert.IsInstanceOf<UIGroupElement>(uiElement2);
@@ -60,8 +60,8 @@ public class RouterTests {
         MockApplication app = new MockApplication(typeof(DeeplyNestedRouters));
         app.Update();
         
-        var uiElement1 = app.RootElement.GetChild(0);
-        var uiElement2 = app.RootElement.GetChild(1);
+        var uiElement1 = app.RootElement.GetChild(0).GetChild(0);
+        var uiElement2 = app.RootElement.GetChild(0).GetChild(1);
         
         Assert.IsInstanceOf<UIGroupElement>(uiElement1);
         Assert.IsInstanceOf<UIGroupElement>(uiElement2);
@@ -80,7 +80,7 @@ public class RouterTests {
         MockApplication app = new MockApplication(typeof(ParsersRouterNestedThing));
         app.Update();
         
-        var uiElement1 = app.RootElement.GetChild(0);
+        var uiElement1 = app.RootElement.GetChild(0).GetChild(0);
         Router router = app.RootElement.Application.RoutingSystem.FindRouter("game");
         router.GoTo("/user/2/something/23");
         

@@ -1,1955 +1,1804 @@
 
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using UIForia.Layout;
-using UIForia.Layout.LayoutTypes;
-using UIForia.Text;
 using UIForia.Util;
-using UnityEngine;
-using FontStyle = UIForia.Text.FontStyle;
-using TextAlignment = UIForia.Text.TextAlignment;
 
 namespace UIForia.Rendering {
     
     public partial struct UIStyleSetStateProxy {
         
-        public Overflow OverflowX {
-            [DebuggerStepThrough]
+        public UIForia.Rendering.Overflow OverflowX {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.OverflowX, state).AsOverflow; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.OverflowX, (int)value), state); }
         }
         
-        public Overflow OverflowY {
-            [DebuggerStepThrough]
+        public UIForia.Rendering.Overflow OverflowY {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.OverflowY, state).AsOverflow; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.OverflowY, (int)value), state); }
         }
         
-        public Color BackgroundColor {
-            [DebuggerStepThrough]
+        public UnityEngine.Color BackgroundColor {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.BackgroundColor, state).AsColor; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.BackgroundColor, value), state); }
         }
         
-        public Color BackgroundTint {
-            [DebuggerStepThrough]
+        public UnityEngine.Color BackgroundTint {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.BackgroundTint, state).AsColor; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.BackgroundTint, value), state); }
         }
         
-        public Color BorderColorTop {
-            [DebuggerStepThrough]
+        public UnityEngine.Color BorderColorTop {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.BorderColorTop, state).AsColor; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.BorderColorTop, value), state); }
         }
         
-        public Color BorderColorRight {
-            [DebuggerStepThrough]
+        public UnityEngine.Color BorderColorRight {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.BorderColorRight, state).AsColor; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.BorderColorRight, value), state); }
         }
         
-        public Color BorderColorBottom {
-            [DebuggerStepThrough]
+        public UnityEngine.Color BorderColorBottom {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.BorderColorBottom, state).AsColor; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.BorderColorBottom, value), state); }
         }
         
-        public Color BorderColorLeft {
-            [DebuggerStepThrough]
+        public UnityEngine.Color BorderColorLeft {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.BorderColorLeft, state).AsColor; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.BorderColorLeft, value), state); }
         }
         
-        public UIFixedLength BackgroundImageOffsetX {
-            [DebuggerStepThrough]
+        public UIForia.UIFixedLength BackgroundImageOffsetX {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.BackgroundImageOffsetX, state).AsUIFixedLength; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.BackgroundImageOffsetX, value), state); }
         }
         
-        public UIFixedLength BackgroundImageOffsetY {
-            [DebuggerStepThrough]
+        public UIForia.UIFixedLength BackgroundImageOffsetY {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.BackgroundImageOffsetY, state).AsUIFixedLength; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.BackgroundImageOffsetY, value), state); }
         }
         
-        public UIFixedLength BackgroundImageScaleX {
-            [DebuggerStepThrough]
+        public UIForia.UIFixedLength BackgroundImageScaleX {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.BackgroundImageScaleX, state).AsUIFixedLength; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.BackgroundImageScaleX, value), state); }
         }
         
-        public UIFixedLength BackgroundImageScaleY {
-            [DebuggerStepThrough]
+        public UIForia.UIFixedLength BackgroundImageScaleY {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.BackgroundImageScaleY, state).AsUIFixedLength; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.BackgroundImageScaleY, value), state); }
         }
         
-        public UIFixedLength BackgroundImageTileX {
-            [DebuggerStepThrough]
+        public UIForia.UIFixedLength BackgroundImageTileX {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.BackgroundImageTileX, state).AsUIFixedLength; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.BackgroundImageTileX, value), state); }
         }
         
-        public UIFixedLength BackgroundImageTileY {
-            [DebuggerStepThrough]
+        public UIForia.UIFixedLength BackgroundImageTileY {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.BackgroundImageTileY, state).AsUIFixedLength; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.BackgroundImageTileY, value), state); }
         }
         
-        public UIFixedLength BackgroundImageRotation {
-            [DebuggerStepThrough]
+        public UIForia.UIFixedLength BackgroundImageRotation {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.BackgroundImageRotation, state).AsUIFixedLength; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.BackgroundImageRotation, value), state); }
         }
         
-        public Texture2D BackgroundImage {
-            [DebuggerStepThrough]
+        public UnityEngine.Texture2D BackgroundImage {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.BackgroundImage, state).AsTexture2D; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.BackgroundImage, value), state); }
         }
         
         public string Painter {
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.Painter, state).AsString; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.Painter, value), state); }
         }
         
         public float Opacity {
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.Opacity, state).AsFloat; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.Opacity, value), state); }
         }
         
-        public CursorStyle Cursor {
-            [DebuggerStepThrough]
+        public UIForia.Rendering.CursorStyle Cursor {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.Cursor, state).AsCursorStyle; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.Cursor, value), state); }
         }
         
-        public Visibility Visibility {
-            [DebuggerStepThrough]
+        public UIForia.Rendering.Visibility Visibility {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.Visibility, state).AsVisibility; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.Visibility, (int)value), state); }
         }
         
         public int FlexItemOrder {
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.FlexItemOrder, state).AsInt; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.FlexItemOrder, value), state); }
         }
         
         public int FlexItemGrow {
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.FlexItemGrow, state).AsInt; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.FlexItemGrow, value), state); }
         }
         
         public int FlexItemShrink {
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.FlexItemShrink, state).AsInt; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.FlexItemShrink, value), state); }
         }
         
-        public LayoutDirection FlexLayoutDirection {
-            [DebuggerStepThrough]
+        public UIForia.Layout.LayoutDirection FlexLayoutDirection {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.FlexLayoutDirection, state).AsLayoutDirection; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.FlexLayoutDirection, (int)value), state); }
         }
         
-        public LayoutWrap FlexLayoutWrap {
-            [DebuggerStepThrough]
+        public UIForia.Layout.LayoutWrap FlexLayoutWrap {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.FlexLayoutWrap, state).AsLayoutWrap; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.FlexLayoutWrap, (int)value), state); }
         }
         
-        public MainAxisAlignment FlexLayoutMainAxisAlignment {
-            [DebuggerStepThrough]
+        public UIForia.Layout.MainAxisAlignment FlexLayoutMainAxisAlignment {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.FlexLayoutMainAxisAlignment, state).AsMainAxisAlignment; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.FlexLayoutMainAxisAlignment, (int)value), state); }
         }
         
-        public CrossAxisAlignment FlexLayoutCrossAxisAlignment {
-            [DebuggerStepThrough]
+        public UIForia.Layout.CrossAxisAlignment FlexLayoutCrossAxisAlignment {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.FlexLayoutCrossAxisAlignment, state).AsCrossAxisAlignment; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.FlexLayoutCrossAxisAlignment, (int)value), state); }
         }
         
-        public GridItemPlacement GridItemX {
-            [DebuggerStepThrough]
+        public UIForia.Layout.LayoutTypes.GridItemPlacement GridItemX {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.GridItemX, state).AsGridItemPlacement; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.GridItemX, value), state); }
         }
         
-        public GridItemPlacement GridItemY {
-            [DebuggerStepThrough]
+        public UIForia.Layout.LayoutTypes.GridItemPlacement GridItemY {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.GridItemY, state).AsGridItemPlacement; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.GridItemY, value), state); }
         }
         
-        public GridItemPlacement GridItemWidth {
-            [DebuggerStepThrough]
+        public UIForia.Layout.LayoutTypes.GridItemPlacement GridItemWidth {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.GridItemWidth, state).AsGridItemPlacement; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.GridItemWidth, value), state); }
         }
         
-        public GridItemPlacement GridItemHeight {
-            [DebuggerStepThrough]
+        public UIForia.Layout.LayoutTypes.GridItemPlacement GridItemHeight {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.GridItemHeight, state).AsGridItemPlacement; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.GridItemHeight, value), state); }
         }
         
-        public LayoutDirection GridLayoutDirection {
-            [DebuggerStepThrough]
+        public UIForia.Layout.LayoutDirection GridLayoutDirection {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.GridLayoutDirection, state).AsLayoutDirection; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.GridLayoutDirection, (int)value), state); }
         }
         
-        public GridLayoutDensity GridLayoutDensity {
-            [DebuggerStepThrough]
+        public UIForia.Layout.GridLayoutDensity GridLayoutDensity {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.GridLayoutDensity, state).AsGridLayoutDensity; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.GridLayoutDensity, (int)value), state); }
         }
         
-        public IReadOnlyList<GridTrackSize> GridLayoutColTemplate {
-            [DebuggerStepThrough]
+        public System.Collections.Generic.IReadOnlyList<UIForia.Layout.LayoutTypes.GridTrackSize> GridLayoutColTemplate {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.GridLayoutColTemplate, state).AsGridTemplate; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.GridLayoutColTemplate, value), state); }
         }
         
-        public IReadOnlyList<GridTrackSize> GridLayoutRowTemplate {
-            [DebuggerStepThrough]
+        public System.Collections.Generic.IReadOnlyList<UIForia.Layout.LayoutTypes.GridTrackSize> GridLayoutRowTemplate {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.GridLayoutRowTemplate, state).AsGridTemplate; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.GridLayoutRowTemplate, value), state); }
         }
         
-        public GridTrackSize GridLayoutMainAxisAutoSize {
-            [DebuggerStepThrough]
+        public UIForia.Layout.LayoutTypes.GridTrackSize GridLayoutColAutoSize {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.GridLayoutColAutoSize, state).AsGridTrackSize; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.GridLayoutColAutoSize, value), state); }
         }
         
-        public GridTrackSize GridLayoutCrossAxisAutoSize {
-            [DebuggerStepThrough]
+        public UIForia.Layout.LayoutTypes.GridTrackSize GridLayoutRowAutoSize {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.GridLayoutRowAutoSize, state).AsGridTrackSize; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.GridLayoutRowAutoSize, value), state); }
         }
         
         public float GridLayoutColGap {
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.GridLayoutColGap, state).AsFloat; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.GridLayoutColGap, value), state); }
         }
         
         public float GridLayoutRowGap {
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.GridLayoutRowGap, state).AsFloat; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.GridLayoutRowGap, value), state); }
         }
         
-        public GridAxisAlignment GridLayoutColAlignment {
-            [DebuggerStepThrough]
+        public UIForia.Layout.GridAxisAlignment GridLayoutColAlignment {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.GridLayoutColAlignment, state).AsGridAxisAlignment; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.GridLayoutColAlignment, (int)value), state); }
         }
         
-        public GridAxisAlignment GridLayoutRowAlignment {
-            [DebuggerStepThrough]
+        public UIForia.Layout.GridAxisAlignment GridLayoutRowAlignment {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.GridLayoutRowAlignment, state).AsGridAxisAlignment; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.GridLayoutRowAlignment, (int)value), state); }
         }
         
         public float RadialLayoutStartAngle {
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.RadialLayoutStartAngle, state).AsFloat; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.RadialLayoutStartAngle, value), state); }
         }
         
         public float RadialLayoutEndAngle {
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.RadialLayoutEndAngle, state).AsFloat; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.RadialLayoutEndAngle, value), state); }
         }
         
-        public UIFixedLength RadialLayoutRadius {
-            [DebuggerStepThrough]
+        public UIForia.UIFixedLength RadialLayoutRadius {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.RadialLayoutRadius, state).AsUIFixedLength; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.RadialLayoutRadius, value), state); }
         }
         
-        public AlignmentTarget AlignmentTargetX {
-            [DebuggerStepThrough]
+        public UIForia.Layout.AlignmentTarget AlignmentTargetX {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.AlignmentTargetX, state).AsAlignmentTarget; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.AlignmentTargetX, (int)value), state); }
         }
         
-        public AlignmentTarget AlignmentTargetY {
-            [DebuggerStepThrough]
+        public UIForia.Layout.AlignmentTarget AlignmentTargetY {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.AlignmentTargetY, state).AsAlignmentTarget; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.AlignmentTargetY, (int)value), state); }
         }
         
-        public AlignmentBehavior AlignmentBehaviorX {
-            [DebuggerStepThrough]
+        public UIForia.Layout.AlignmentBehavior AlignmentBehaviorX {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.AlignmentBehaviorX, state).AsAlignmentBehavior; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.AlignmentBehaviorX, (int)value), state); }
         }
         
-        public AlignmentBehavior AlignmentBehaviorY {
-            [DebuggerStepThrough]
+        public UIForia.Layout.AlignmentBehavior AlignmentBehaviorY {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.AlignmentBehaviorY, state).AsAlignmentBehavior; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.AlignmentBehaviorY, (int)value), state); }
         }
         
         public float AlignmentPivotX {
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.AlignmentPivotX, state).AsFloat; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.AlignmentPivotX, value), state); }
         }
         
         public float AlignmentPivotY {
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.AlignmentPivotY, state).AsFloat; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.AlignmentPivotY, value), state); }
         }
         
-        public UIFixedLength AlignmentOffsetX {
-            [DebuggerStepThrough]
+        public UIForia.UIFixedLength AlignmentOffsetX {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.AlignmentOffsetX, state).AsUIFixedLength; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.AlignmentOffsetX, value), state); }
         }
         
-        public UIFixedLength AlignmentOffsetY {
-            [DebuggerStepThrough]
+        public UIForia.UIFixedLength AlignmentOffsetY {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.AlignmentOffsetY, state).AsUIFixedLength; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.AlignmentOffsetY, value), state); }
         }
         
-        public Fit FitX {
-            [DebuggerStepThrough]
+        public UIForia.Layout.Fit FitX {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.FitX, state).AsFit; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.FitX, (int)value), state); }
         }
         
-        public Fit FitY {
-            [DebuggerStepThrough]
+        public UIForia.Layout.Fit FitY {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.FitY, state).AsFit; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.FitY, (int)value), state); }
         }
         
-        public UIMeasurement MinWidth {
-            [DebuggerStepThrough]
+        public UIForia.Rendering.UIMeasurement MinWidth {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.MinWidth, state).AsUIMeasurement; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.MinWidth, value), state); }
         }
         
-        public UIMeasurement MaxWidth {
-            [DebuggerStepThrough]
+        public UIForia.Rendering.UIMeasurement MaxWidth {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.MaxWidth, state).AsUIMeasurement; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.MaxWidth, value), state); }
         }
         
-        public UIMeasurement PreferredWidth {
-            [DebuggerStepThrough]
+        public UIForia.Rendering.UIMeasurement PreferredWidth {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.PreferredWidth, state).AsUIMeasurement; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.PreferredWidth, value), state); }
         }
         
-        public UIMeasurement MinHeight {
-            [DebuggerStepThrough]
+        public UIForia.Rendering.UIMeasurement MinHeight {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.MinHeight, state).AsUIMeasurement; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.MinHeight, value), state); }
         }
         
-        public UIMeasurement MaxHeight {
-            [DebuggerStepThrough]
+        public UIForia.Rendering.UIMeasurement MaxHeight {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.MaxHeight, state).AsUIMeasurement; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.MaxHeight, value), state); }
         }
         
-        public UIMeasurement PreferredHeight {
-            [DebuggerStepThrough]
+        public UIForia.Rendering.UIMeasurement PreferredHeight {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.PreferredHeight, state).AsUIMeasurement; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.PreferredHeight, value), state); }
         }
         
-        public UIMeasurement MarginTop {
-            [DebuggerStepThrough]
+        public UIForia.Rendering.UIMeasurement MarginTop {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.MarginTop, state).AsUIMeasurement; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.MarginTop, value), state); }
         }
         
-        public UIMeasurement MarginRight {
-            [DebuggerStepThrough]
+        public UIForia.Rendering.UIMeasurement MarginRight {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.MarginRight, state).AsUIMeasurement; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.MarginRight, value), state); }
         }
         
-        public UIMeasurement MarginBottom {
-            [DebuggerStepThrough]
+        public UIForia.Rendering.UIMeasurement MarginBottom {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.MarginBottom, state).AsUIMeasurement; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.MarginBottom, value), state); }
         }
         
-        public UIMeasurement MarginLeft {
-            [DebuggerStepThrough]
+        public UIForia.Rendering.UIMeasurement MarginLeft {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.MarginLeft, state).AsUIMeasurement; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.MarginLeft, value), state); }
         }
         
-        public Color BorderColor {
-            [DebuggerStepThrough]
+        public UnityEngine.Color BorderColor {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.BorderColor, state).AsColor; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.BorderColor, value), state); }
         }
         
-        public UIFixedLength BorderTop {
-            [DebuggerStepThrough]
+        public UIForia.UIFixedLength BorderTop {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.BorderTop, state).AsUIFixedLength; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.BorderTop, value), state); }
         }
         
-        public UIFixedLength BorderRight {
-            [DebuggerStepThrough]
+        public UIForia.UIFixedLength BorderRight {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.BorderRight, state).AsUIFixedLength; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.BorderRight, value), state); }
         }
         
-        public UIFixedLength BorderBottom {
-            [DebuggerStepThrough]
+        public UIForia.UIFixedLength BorderBottom {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.BorderBottom, state).AsUIFixedLength; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.BorderBottom, value), state); }
         }
         
-        public UIFixedLength BorderLeft {
-            [DebuggerStepThrough]
+        public UIForia.UIFixedLength BorderLeft {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.BorderLeft, state).AsUIFixedLength; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.BorderLeft, value), state); }
         }
         
-        public UIFixedLength BorderRadiusTopLeft {
-            [DebuggerStepThrough]
+        public UIForia.UIFixedLength BorderRadiusTopLeft {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.BorderRadiusTopLeft, state).AsUIFixedLength; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.BorderRadiusTopLeft, value), state); }
         }
         
-        public UIFixedLength BorderRadiusTopRight {
-            [DebuggerStepThrough]
+        public UIForia.UIFixedLength BorderRadiusTopRight {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.BorderRadiusTopRight, state).AsUIFixedLength; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.BorderRadiusTopRight, value), state); }
         }
         
-        public UIFixedLength BorderRadiusBottomRight {
-            [DebuggerStepThrough]
+        public UIForia.UIFixedLength BorderRadiusBottomRight {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.BorderRadiusBottomRight, state).AsUIFixedLength; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.BorderRadiusBottomRight, value), state); }
         }
         
-        public UIFixedLength BorderRadiusBottomLeft {
-            [DebuggerStepThrough]
+        public UIForia.UIFixedLength BorderRadiusBottomLeft {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.BorderRadiusBottomLeft, state).AsUIFixedLength; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.BorderRadiusBottomLeft, value), state); }
         }
         
-        public UIFixedLength PaddingTop {
-            [DebuggerStepThrough]
+        public UIForia.UIFixedLength PaddingTop {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.PaddingTop, state).AsUIFixedLength; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.PaddingTop, value), state); }
         }
         
-        public UIFixedLength PaddingRight {
-            [DebuggerStepThrough]
+        public UIForia.UIFixedLength PaddingRight {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.PaddingRight, state).AsUIFixedLength; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.PaddingRight, value), state); }
         }
         
-        public UIFixedLength PaddingBottom {
-            [DebuggerStepThrough]
+        public UIForia.UIFixedLength PaddingBottom {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.PaddingBottom, state).AsUIFixedLength; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.PaddingBottom, value), state); }
         }
         
-        public UIFixedLength PaddingLeft {
-            [DebuggerStepThrough]
+        public UIForia.UIFixedLength PaddingLeft {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.PaddingLeft, state).AsUIFixedLength; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.PaddingLeft, value), state); }
         }
         
-        public Color TextColor {
-            [DebuggerStepThrough]
+        public UnityEngine.Color TextColor {
+//            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.TextColor, state).AsColor; }
-            [DebuggerStepThrough]
+//            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.TextColor, value), state); }
         }
         
-        public FontAsset TextFontAsset {
-            [DebuggerStepThrough]
+        public UIForia.FontAsset TextFontAsset {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.TextFontAsset, state).AsFont; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.TextFontAsset, value), state); }
         }
         
-        public UIFixedLength TextFontSize {
-            [DebuggerStepThrough]
+        public UIForia.UIFixedLength TextFontSize {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.TextFontSize, state).AsUIFixedLength; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.TextFontSize, value), state); }
         }
         
-        public FontStyle TextFontStyle {
-            [DebuggerStepThrough]
+        public UIForia.Text.FontStyle TextFontStyle {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.TextFontStyle, state).AsFontStyle; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.TextFontStyle, (int)value), state); }
         }
         
-        public TextAlignment TextAlignment {
-            [DebuggerStepThrough]
+        public UIForia.Text.TextAlignment TextAlignment {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.TextAlignment, state).AsTextAlignment; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.TextAlignment, (int)value), state); }
         }
         
         public float TextOutlineWidth {
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.TextOutlineWidth, state).AsFloat; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.TextOutlineWidth, value), state); }
         }
         
-        public Color TextOutlineColor {
-            [DebuggerStepThrough]
+        public UnityEngine.Color TextOutlineColor {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.TextOutlineColor, state).AsColor; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.TextOutlineColor, value), state); }
         }
         
         public float TextOutlineSoftness {
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.TextOutlineSoftness, state).AsFloat; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.TextOutlineSoftness, value), state); }
         }
         
-        public Color TextGlowColor {
-            [DebuggerStepThrough]
+        public UnityEngine.Color TextGlowColor {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.TextGlowColor, state).AsColor; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.TextGlowColor, value), state); }
         }
         
         public float TextGlowOffset {
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.TextGlowOffset, state).AsFloat; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.TextGlowOffset, value), state); }
         }
         
         public float TextGlowInner {
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.TextGlowInner, state).AsFloat; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.TextGlowInner, value), state); }
         }
         
         public float TextGlowOuter {
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.TextGlowOuter, state).AsFloat; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.TextGlowOuter, value), state); }
         }
         
         public float TextGlowPower {
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.TextGlowPower, state).AsFloat; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.TextGlowPower, value), state); }
         }
         
-        public Color TextUnderlayColor {
-            [DebuggerStepThrough]
+        public UnityEngine.Color TextUnderlayColor {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.TextUnderlayColor, state).AsColor; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.TextUnderlayColor, value), state); }
         }
         
         public float TextUnderlayX {
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.TextUnderlayX, state).AsFloat; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.TextUnderlayX, value), state); }
         }
         
         public float TextUnderlayY {
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.TextUnderlayY, state).AsFloat; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.TextUnderlayY, value), state); }
         }
         
         public float TextUnderlayDilate {
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.TextUnderlayDilate, state).AsFloat; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.TextUnderlayDilate, value), state); }
         }
         
         public float TextUnderlaySoftness {
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.TextUnderlaySoftness, state).AsFloat; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.TextUnderlaySoftness, value), state); }
         }
         
         public float TextFaceDilate {
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.TextFaceDilate, state).AsFloat; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.TextFaceDilate, value), state); }
         }
         
-        public UnderlayType TextUnderlayType {
-            [DebuggerStepThrough]
+        public UIForia.Rendering.UnderlayType TextUnderlayType {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.TextUnderlayType, state).AsUnderlayType; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.TextUnderlayType, (int)value), state); }
         }
         
-        public TextTransform TextTransform {
-            [DebuggerStepThrough]
+        public UIForia.Text.TextTransform TextTransform {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.TextTransform, state).AsTextTransform; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.TextTransform, (int)value), state); }
         }
         
-        public WhitespaceMode TextWhitespaceMode {
-            [DebuggerStepThrough]
+        public UIForia.Text.WhitespaceMode TextWhitespaceMode {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.TextWhitespaceMode, state).AsWhitespaceMode; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.TextWhitespaceMode, (int)value), state); }
         }
         
-        public UIFixedLength AnchorTop {
-            [DebuggerStepThrough]
+        public UIForia.UIFixedLength AnchorTop {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.AnchorTop, state).AsUIFixedLength; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.AnchorTop, value), state); }
         }
         
-        public UIFixedLength AnchorRight {
-            [DebuggerStepThrough]
+        public UIForia.UIFixedLength AnchorRight {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.AnchorRight, state).AsUIFixedLength; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.AnchorRight, value), state); }
         }
         
-        public UIFixedLength AnchorBottom {
-            [DebuggerStepThrough]
+        public UIForia.UIFixedLength AnchorBottom {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.AnchorBottom, state).AsUIFixedLength; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.AnchorBottom, value), state); }
         }
         
-        public UIFixedLength AnchorLeft {
-            [DebuggerStepThrough]
+        public UIForia.UIFixedLength AnchorLeft {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.AnchorLeft, state).AsUIFixedLength; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.AnchorLeft, value), state); }
         }
         
-        public AnchorTarget AnchorTarget {
-            [DebuggerStepThrough]
+        public UIForia.Rendering.AnchorTarget AnchorTarget {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.AnchorTarget, state).AsAnchorTarget; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.AnchorTarget, (int)value), state); }
         }
         
-        public TransformOffset TransformPositionX {
-            [DebuggerStepThrough]
+        public UIForia.TransformOffset TransformPositionX {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.TransformPositionX, state).AsTransformOffset; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.TransformPositionX, value), state); }
         }
         
-        public TransformOffset TransformPositionY {
-            [DebuggerStepThrough]
+        public UIForia.TransformOffset TransformPositionY {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.TransformPositionY, state).AsTransformOffset; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.TransformPositionY, value), state); }
         }
         
-        public UIFixedLength TransformPivotX {
-            [DebuggerStepThrough]
+        public UIForia.UIFixedLength TransformPivotX {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.TransformPivotX, state).AsUIFixedLength; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.TransformPivotX, value), state); }
         }
         
-        public UIFixedLength TransformPivotY {
-            [DebuggerStepThrough]
+        public UIForia.UIFixedLength TransformPivotY {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.TransformPivotY, state).AsUIFixedLength; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.TransformPivotY, value), state); }
         }
         
         public float TransformScaleX {
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.TransformScaleX, state).AsFloat; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.TransformScaleX, value), state); }
         }
         
         public float TransformScaleY {
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.TransformScaleY, state).AsFloat; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.TransformScaleY, value), state); }
         }
         
         public float TransformRotation {
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.TransformRotation, state).AsFloat; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.TransformRotation, value), state); }
         }
         
-        public TransformBehavior TransformBehaviorX {
-            [DebuggerStepThrough]
+        public UIForia.Rendering.TransformBehavior TransformBehaviorX {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.TransformBehaviorX, state).AsTransformBehavior; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.TransformBehaviorX, (int)value), state); }
         }
         
-        public TransformBehavior TransformBehaviorY {
-            [DebuggerStepThrough]
+        public UIForia.Rendering.TransformBehavior TransformBehaviorY {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.TransformBehaviorY, state).AsTransformBehavior; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.TransformBehaviorY, (int)value), state); }
         }
         
-        public LayoutType LayoutType {
-            [DebuggerStepThrough]
+        public UIForia.Layout.LayoutType LayoutType {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.LayoutType, state).AsLayoutType; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.LayoutType, (int)value), state); }
         }
         
-        public LayoutBehavior LayoutBehavior {
-            [DebuggerStepThrough]
+        public UIForia.Layout.LayoutBehavior LayoutBehavior {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.LayoutBehavior, state).AsLayoutBehavior; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.LayoutBehavior, (int)value), state); }
         }
         
         public int ZIndex {
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ZIndex, state).AsInt; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ZIndex, value), state); }
         }
         
         public int RenderLayerOffset {
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.RenderLayerOffset, state).AsInt; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.RenderLayerOffset, value), state); }
         }
         
-        public RenderLayer RenderLayer {
-            [DebuggerStepThrough]
+        public UIForia.Rendering.RenderLayer RenderLayer {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.RenderLayer, state).AsRenderLayer; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.RenderLayer, (int)value), state); }
         }
         
         public int Layer {
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.Layer, state).AsInt; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.Layer, value), state); }
         }
         
         public string Scrollbar {
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.Scrollbar, state).AsString; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.Scrollbar, value), state); }
         }
         
-        public UIMeasurement ScrollbarSize {
-            [DebuggerStepThrough]
+        public UIForia.Rendering.UIMeasurement ScrollbarSize {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ScrollbarSize, state).AsUIMeasurement; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ScrollbarSize, value), state); }
         }
         
-        public Color ScrollbarColor {
-            [DebuggerStepThrough]
+        public UnityEngine.Color ScrollbarColor {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ScrollbarColor, state).AsColor; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ScrollbarColor, value), state); }
         }
         
-        public UnderlayType ShadowType {
-            [DebuggerStepThrough]
+        public UIForia.Rendering.UnderlayType ShadowType {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ShadowType, state).AsUnderlayType; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ShadowType, (int)value), state); }
         }
         
         public float ShadowOffsetX {
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ShadowOffsetX, state).AsFloat; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ShadowOffsetX, value), state); }
         }
         
         public float ShadowOffsetY {
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ShadowOffsetY, state).AsFloat; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ShadowOffsetY, value), state); }
         }
         
         public float ShadowSoftnessX {
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ShadowSoftnessX, state).AsFloat; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ShadowSoftnessX, value), state); }
         }
         
         public float ShadowSoftnessY {
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ShadowSoftnessY, state).AsFloat; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ShadowSoftnessY, value), state); }
         }
         
         public float ShadowIntensity {
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ShadowIntensity, state).AsFloat; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ShadowIntensity, value), state); }
         }
         
     }
 
-    public partial struct StyleProperty {
-
-        
-        public bool IsUnset {
-            get { 
-                switch(propertyId) {
-                                        case StylePropertyId.OverflowX: return int0 == 0 || IntUtil.UnsetValue == int0;
-                    case StylePropertyId.OverflowY: return int0 == 0 || IntUtil.UnsetValue == int0;
-                    case StylePropertyId.BackgroundColor: return int1 == 0;
-                    case StylePropertyId.BackgroundTint: return int1 == 0;
-                    case StylePropertyId.BorderColorTop: return int1 == 0;
-                    case StylePropertyId.BorderColorRight: return int1 == 0;
-                    case StylePropertyId.BorderColorBottom: return int1 == 0;
-                    case StylePropertyId.BorderColorLeft: return int1 == 0;
-                    case StylePropertyId.BackgroundImageOffsetX: return !FloatUtil.IsDefined(float1) || int1 == 0;
-                    case StylePropertyId.BackgroundImageOffsetY: return !FloatUtil.IsDefined(float1) || int1 == 0;
-                    case StylePropertyId.BackgroundImageScaleX: return !FloatUtil.IsDefined(float1) || int1 == 0;
-                    case StylePropertyId.BackgroundImageScaleY: return !FloatUtil.IsDefined(float1) || int1 == 0;
-                    case StylePropertyId.BackgroundImageTileX: return !FloatUtil.IsDefined(float1) || int1 == 0;
-                    case StylePropertyId.BackgroundImageTileY: return !FloatUtil.IsDefined(float1) || int1 == 0;
-                    case StylePropertyId.BackgroundImageRotation: return !FloatUtil.IsDefined(float1) || int1 == 0;
-                    case StylePropertyId.BackgroundImage: return objectField == null;
-                    case StylePropertyId.Painter: return objectField == null;
-                    case StylePropertyId.Opacity: return !FloatUtil.IsDefined(float1);
-                    case StylePropertyId.Cursor: return objectField == null;
-                    case StylePropertyId.Visibility: return int0 == 0 || IntUtil.UnsetValue == int0;
-                    case StylePropertyId.FlexItemOrder: return !IntUtil.IsDefined(int0);
-                    case StylePropertyId.FlexItemGrow: return !IntUtil.IsDefined(int0);
-                    case StylePropertyId.FlexItemShrink: return !IntUtil.IsDefined(int0);
-                    case StylePropertyId.FlexLayoutDirection: return int0 == 0 || IntUtil.UnsetValue == int0;
-                    case StylePropertyId.FlexLayoutWrap: return int0 == 0 || IntUtil.UnsetValue == int0;
-                    case StylePropertyId.FlexLayoutMainAxisAlignment: return int0 == 0 || IntUtil.UnsetValue == int0;
-                    case StylePropertyId.FlexLayoutCrossAxisAlignment: return int0 == 0 || IntUtil.UnsetValue == int0;
-                    case StylePropertyId.GridItemX: return !IntUtil.IsDefined(int0) &&  objectField == null;
-                    case StylePropertyId.GridItemY: return !IntUtil.IsDefined(int0) &&  objectField == null;
-                    case StylePropertyId.GridItemWidth: return !IntUtil.IsDefined(int0) &&  objectField == null;
-                    case StylePropertyId.GridItemHeight: return !IntUtil.IsDefined(int0) &&  objectField == null;
-                    case StylePropertyId.GridLayoutDirection: return int0 == 0 || IntUtil.UnsetValue == int0;
-                    case StylePropertyId.GridLayoutDensity: return int0 == 0 || IntUtil.UnsetValue == int0;
-                    case StylePropertyId.GridLayoutColTemplate: return objectField == null;
-                    case StylePropertyId.GridLayoutRowTemplate: return objectField == null;
-                    case StylePropertyId.GridLayoutColAutoSize: return !FloatUtil.IsDefined(float1) || int1 == 0;
-                    case StylePropertyId.GridLayoutRowAutoSize: return !FloatUtil.IsDefined(float1) || int1 == 0;
-                    case StylePropertyId.GridLayoutColGap: return !FloatUtil.IsDefined(float1);
-                    case StylePropertyId.GridLayoutRowGap: return !FloatUtil.IsDefined(float1);
-                    case StylePropertyId.GridLayoutColAlignment: return int0 == 0 || IntUtil.UnsetValue == int0;
-                    case StylePropertyId.GridLayoutRowAlignment: return int0 == 0 || IntUtil.UnsetValue == int0;
-                    case StylePropertyId.RadialLayoutStartAngle: return !FloatUtil.IsDefined(float1);
-                    case StylePropertyId.RadialLayoutEndAngle: return !FloatUtil.IsDefined(float1);
-                    case StylePropertyId.RadialLayoutRadius: return !FloatUtil.IsDefined(float1) || int1 == 0;
-                    case StylePropertyId.AlignmentTargetX: return int0 == 0 || IntUtil.UnsetValue == int0;
-                    case StylePropertyId.AlignmentTargetY: return int0 == 0 || IntUtil.UnsetValue == int0;
-                    case StylePropertyId.AlignmentBehaviorX: return int0 == 0 || IntUtil.UnsetValue == int0;
-                    case StylePropertyId.AlignmentBehaviorY: return int0 == 0 || IntUtil.UnsetValue == int0;
-                    case StylePropertyId.AlignmentPivotX: return !FloatUtil.IsDefined(float1);
-                    case StylePropertyId.AlignmentPivotY: return !FloatUtil.IsDefined(float1);
-                    case StylePropertyId.AlignmentOffsetX: return !FloatUtil.IsDefined(float1) || int1 == 0;
-                    case StylePropertyId.AlignmentOffsetY: return !FloatUtil.IsDefined(float1) || int1 == 0;
-                    case StylePropertyId.FitX: return int0 == 0 || IntUtil.UnsetValue == int0;
-                    case StylePropertyId.FitY: return int0 == 0 || IntUtil.UnsetValue == int0;
-                    case StylePropertyId.MinWidth: return !FloatUtil.IsDefined(float1) || int1 == 0;
-                    case StylePropertyId.MaxWidth: return !FloatUtil.IsDefined(float1) || int1 == 0;
-                    case StylePropertyId.PreferredWidth: return !FloatUtil.IsDefined(float1) || int1 == 0;
-                    case StylePropertyId.MinHeight: return !FloatUtil.IsDefined(float1) || int1 == 0;
-                    case StylePropertyId.MaxHeight: return !FloatUtil.IsDefined(float1) || int1 == 0;
-                    case StylePropertyId.PreferredHeight: return !FloatUtil.IsDefined(float1) || int1 == 0;
-                    case StylePropertyId.MarginTop: return !FloatUtil.IsDefined(float1) || int1 == 0;
-                    case StylePropertyId.MarginRight: return !FloatUtil.IsDefined(float1) || int1 == 0;
-                    case StylePropertyId.MarginBottom: return !FloatUtil.IsDefined(float1) || int1 == 0;
-                    case StylePropertyId.MarginLeft: return !FloatUtil.IsDefined(float1) || int1 == 0;
-                    case StylePropertyId.BorderColor: return int1 == 0;
-                    case StylePropertyId.BorderTop: return !FloatUtil.IsDefined(float1) || int1 == 0;
-                    case StylePropertyId.BorderRight: return !FloatUtil.IsDefined(float1) || int1 == 0;
-                    case StylePropertyId.BorderBottom: return !FloatUtil.IsDefined(float1) || int1 == 0;
-                    case StylePropertyId.BorderLeft: return !FloatUtil.IsDefined(float1) || int1 == 0;
-                    case StylePropertyId.BorderRadiusTopLeft: return !FloatUtil.IsDefined(float1) || int1 == 0;
-                    case StylePropertyId.BorderRadiusTopRight: return !FloatUtil.IsDefined(float1) || int1 == 0;
-                    case StylePropertyId.BorderRadiusBottomRight: return !FloatUtil.IsDefined(float1) || int1 == 0;
-                    case StylePropertyId.BorderRadiusBottomLeft: return !FloatUtil.IsDefined(float1) || int1 == 0;
-                    case StylePropertyId.PaddingTop: return !FloatUtil.IsDefined(float1) || int1 == 0;
-                    case StylePropertyId.PaddingRight: return !FloatUtil.IsDefined(float1) || int1 == 0;
-                    case StylePropertyId.PaddingBottom: return !FloatUtil.IsDefined(float1) || int1 == 0;
-                    case StylePropertyId.PaddingLeft: return !FloatUtil.IsDefined(float1) || int1 == 0;
-                    case StylePropertyId.TextColor: return int1 == 0;
-                    case StylePropertyId.TextFontAsset: return objectField == null;
-                    case StylePropertyId.TextFontSize: return !FloatUtil.IsDefined(float1) || int1 == 0;
-                    case StylePropertyId.TextFontStyle: return int0 == 0 || IntUtil.UnsetValue == int0;
-                    case StylePropertyId.TextAlignment: return int0 == 0 || IntUtil.UnsetValue == int0;
-                    case StylePropertyId.TextOutlineWidth: return !FloatUtil.IsDefined(float1);
-                    case StylePropertyId.TextOutlineColor: return int1 == 0;
-                    case StylePropertyId.TextOutlineSoftness: return !FloatUtil.IsDefined(float1);
-                    case StylePropertyId.TextGlowColor: return int1 == 0;
-                    case StylePropertyId.TextGlowOffset: return !FloatUtil.IsDefined(float1);
-                    case StylePropertyId.TextGlowInner: return !FloatUtil.IsDefined(float1);
-                    case StylePropertyId.TextGlowOuter: return !FloatUtil.IsDefined(float1);
-                    case StylePropertyId.TextGlowPower: return !FloatUtil.IsDefined(float1);
-                    case StylePropertyId.TextUnderlayColor: return int1 == 0;
-                    case StylePropertyId.TextUnderlayX: return !FloatUtil.IsDefined(float1);
-                    case StylePropertyId.TextUnderlayY: return !FloatUtil.IsDefined(float1);
-                    case StylePropertyId.TextUnderlayDilate: return !FloatUtil.IsDefined(float1);
-                    case StylePropertyId.TextUnderlaySoftness: return !FloatUtil.IsDefined(float1);
-                    case StylePropertyId.TextFaceDilate: return !FloatUtil.IsDefined(float1);
-                    case StylePropertyId.TextUnderlayType: return int0 == 0 || IntUtil.UnsetValue == int0;
-                    case StylePropertyId.TextTransform: return int0 == 0 || IntUtil.UnsetValue == int0;
-                    case StylePropertyId.TextWhitespaceMode: return int0 == 0 || IntUtil.UnsetValue == int0;
-                    case StylePropertyId.AnchorTop: return !FloatUtil.IsDefined(float1) || int1 == 0;
-                    case StylePropertyId.AnchorRight: return !FloatUtil.IsDefined(float1) || int1 == 0;
-                    case StylePropertyId.AnchorBottom: return !FloatUtil.IsDefined(float1) || int1 == 0;
-                    case StylePropertyId.AnchorLeft: return !FloatUtil.IsDefined(float1) || int1 == 0;
-                    case StylePropertyId.AnchorTarget: return int0 == 0 || IntUtil.UnsetValue == int0;
-                    case StylePropertyId.TransformPositionX: return !FloatUtil.IsDefined(float1) || int1 == 0;
-                    case StylePropertyId.TransformPositionY: return !FloatUtil.IsDefined(float1) || int1 == 0;
-                    case StylePropertyId.TransformPivotX: return !FloatUtil.IsDefined(float1) || int1 == 0;
-                    case StylePropertyId.TransformPivotY: return !FloatUtil.IsDefined(float1) || int1 == 0;
-                    case StylePropertyId.TransformScaleX: return !FloatUtil.IsDefined(float1);
-                    case StylePropertyId.TransformScaleY: return !FloatUtil.IsDefined(float1);
-                    case StylePropertyId.TransformRotation: return !FloatUtil.IsDefined(float1);
-                    case StylePropertyId.TransformBehaviorX: return int0 == 0 || IntUtil.UnsetValue == int0;
-                    case StylePropertyId.TransformBehaviorY: return int0 == 0 || IntUtil.UnsetValue == int0;
-                    case StylePropertyId.LayoutType: return int0 == 0 || IntUtil.UnsetValue == int0;
-                    case StylePropertyId.LayoutBehavior: return int0 == 0 || IntUtil.UnsetValue == int0;
-                    case StylePropertyId.ZIndex: return !IntUtil.IsDefined(int0);
-                    case StylePropertyId.RenderLayerOffset: return !IntUtil.IsDefined(int0);
-                    case StylePropertyId.RenderLayer: return int0 == 0 || IntUtil.UnsetValue == int0;
-                    case StylePropertyId.Layer: return !IntUtil.IsDefined(int0);
-                    case StylePropertyId.Scrollbar: return objectField == null;
-                    case StylePropertyId.ScrollbarSize: return !FloatUtil.IsDefined(float1) || int1 == 0;
-                    case StylePropertyId.ScrollbarColor: return int1 == 0;
-                    case StylePropertyId.ShadowType: return int0 == 0 || IntUtil.UnsetValue == int0;
-                    case StylePropertyId.ShadowOffsetX: return !FloatUtil.IsDefined(float1);
-                    case StylePropertyId.ShadowOffsetY: return !FloatUtil.IsDefined(float1);
-                    case StylePropertyId.ShadowSoftnessX: return !FloatUtil.IsDefined(float1);
-                    case StylePropertyId.ShadowSoftnessY: return !FloatUtil.IsDefined(float1);
-                    case StylePropertyId.ShadowIntensity: return !FloatUtil.IsDefined(float1);
-
-                }
-                return true;
-            }
-        }
-
-    }
-
     public partial class UIStyle {
     
         
-        public Overflow OverflowX {
-            [DebuggerStepThrough]
-            get { return (Overflow)FindEnumProperty(StylePropertyId.OverflowX); }
-            [DebuggerStepThrough]
+        public UIForia.Rendering.Overflow OverflowX {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return (UIForia.Rendering.Overflow)FindEnumProperty(StylePropertyId.OverflowX); }
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.OverflowX, (int)value)); }
         }
             
-        public Overflow OverflowY {
-            [DebuggerStepThrough]
-            get { return (Overflow)FindEnumProperty(StylePropertyId.OverflowY); }
-            [DebuggerStepThrough]
+        public UIForia.Rendering.Overflow OverflowY {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return (UIForia.Rendering.Overflow)FindEnumProperty(StylePropertyId.OverflowY); }
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.OverflowY, (int)value)); }
         }
             
-        public Color BackgroundColor {
-            [DebuggerStepThrough]
+        public UnityEngine.Color BackgroundColor {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindColorProperty(StylePropertyId.BackgroundColor); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.BackgroundColor, value)); }
         }
             
-        public Color BackgroundTint {
-            [DebuggerStepThrough]
+        public UnityEngine.Color BackgroundTint {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindColorProperty(StylePropertyId.BackgroundTint); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.BackgroundTint, value)); }
         }
             
-        public Color BorderColorTop {
-            [DebuggerStepThrough]
+        public UnityEngine.Color BorderColorTop {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindColorProperty(StylePropertyId.BorderColorTop); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.BorderColorTop, value)); }
         }
             
-        public Color BorderColorRight {
-            [DebuggerStepThrough]
+        public UnityEngine.Color BorderColorRight {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindColorProperty(StylePropertyId.BorderColorRight); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.BorderColorRight, value)); }
         }
             
-        public Color BorderColorBottom {
-            [DebuggerStepThrough]
+        public UnityEngine.Color BorderColorBottom {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindColorProperty(StylePropertyId.BorderColorBottom); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.BorderColorBottom, value)); }
         }
             
-        public Color BorderColorLeft {
-            [DebuggerStepThrough]
+        public UnityEngine.Color BorderColorLeft {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindColorProperty(StylePropertyId.BorderColorLeft); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.BorderColorLeft, value)); }
         }
             
-        public UIFixedLength BackgroundImageOffsetX {
-            [DebuggerStepThrough]
+        public UIForia.UIFixedLength BackgroundImageOffsetX {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindUIFixedLengthProperty(StylePropertyId.BackgroundImageOffsetX); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.BackgroundImageOffsetX, value)); }
         }
             
-        public UIFixedLength BackgroundImageOffsetY {
-            [DebuggerStepThrough]
+        public UIForia.UIFixedLength BackgroundImageOffsetY {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindUIFixedLengthProperty(StylePropertyId.BackgroundImageOffsetY); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.BackgroundImageOffsetY, value)); }
         }
             
-        public UIFixedLength BackgroundImageScaleX {
-            [DebuggerStepThrough]
+        public UIForia.UIFixedLength BackgroundImageScaleX {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindUIFixedLengthProperty(StylePropertyId.BackgroundImageScaleX); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.BackgroundImageScaleX, value)); }
         }
             
-        public UIFixedLength BackgroundImageScaleY {
-            [DebuggerStepThrough]
+        public UIForia.UIFixedLength BackgroundImageScaleY {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindUIFixedLengthProperty(StylePropertyId.BackgroundImageScaleY); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.BackgroundImageScaleY, value)); }
         }
             
-        public UIFixedLength BackgroundImageTileX {
-            [DebuggerStepThrough]
+        public UIForia.UIFixedLength BackgroundImageTileX {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindUIFixedLengthProperty(StylePropertyId.BackgroundImageTileX); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.BackgroundImageTileX, value)); }
         }
             
-        public UIFixedLength BackgroundImageTileY {
-            [DebuggerStepThrough]
+        public UIForia.UIFixedLength BackgroundImageTileY {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindUIFixedLengthProperty(StylePropertyId.BackgroundImageTileY); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.BackgroundImageTileY, value)); }
         }
             
-        public UIFixedLength BackgroundImageRotation {
-            [DebuggerStepThrough]
+        public UIForia.UIFixedLength BackgroundImageRotation {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindUIFixedLengthProperty(StylePropertyId.BackgroundImageRotation); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.BackgroundImageRotation, value)); }
         }
             
-        public Texture2D BackgroundImage {
-            [DebuggerStepThrough]
+        public UnityEngine.Texture2D BackgroundImage {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return GetProperty(StylePropertyId.BackgroundImage).AsTexture2D; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.BackgroundImage, value)); }
         }
             
         public string Painter {
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             get { return GetProperty(StylePropertyId.Painter).AsString; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.Painter, value)); }
         }
             
         public float Opacity {
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindFloatProperty(StylePropertyId.Opacity); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.Opacity, value)); }
         }
             
-        public CursorStyle Cursor {
-            [DebuggerStepThrough]
+        public UIForia.Rendering.CursorStyle Cursor {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return GetProperty(StylePropertyId.Cursor).AsCursorStyle; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.Cursor, value)); }
         }
             
-        public Visibility Visibility {
-            [DebuggerStepThrough]
-            get { return (Visibility)FindEnumProperty(StylePropertyId.Visibility); }
-            [DebuggerStepThrough]
+        public UIForia.Rendering.Visibility Visibility {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return (UIForia.Rendering.Visibility)FindEnumProperty(StylePropertyId.Visibility); }
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.Visibility, (int)value)); }
         }
             
         public int FlexItemOrder {
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindIntProperty(StylePropertyId.FlexItemOrder); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.FlexItemOrder, value)); }
         }
             
         public int FlexItemGrow {
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindIntProperty(StylePropertyId.FlexItemGrow); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.FlexItemGrow, value)); }
         }
             
         public int FlexItemShrink {
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindIntProperty(StylePropertyId.FlexItemShrink); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.FlexItemShrink, value)); }
         }
             
-        public LayoutDirection FlexLayoutDirection {
-            [DebuggerStepThrough]
-            get { return (LayoutDirection)FindEnumProperty(StylePropertyId.FlexLayoutDirection); }
-            [DebuggerStepThrough]
+        public UIForia.Layout.LayoutDirection FlexLayoutDirection {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return (UIForia.Layout.LayoutDirection)FindEnumProperty(StylePropertyId.FlexLayoutDirection); }
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.FlexLayoutDirection, (int)value)); }
         }
             
-        public LayoutWrap FlexLayoutWrap {
-            [DebuggerStepThrough]
-            get { return (LayoutWrap)FindEnumProperty(StylePropertyId.FlexLayoutWrap); }
-            [DebuggerStepThrough]
+        public UIForia.Layout.LayoutWrap FlexLayoutWrap {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return (UIForia.Layout.LayoutWrap)FindEnumProperty(StylePropertyId.FlexLayoutWrap); }
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.FlexLayoutWrap, (int)value)); }
         }
             
-        public MainAxisAlignment FlexLayoutMainAxisAlignment {
-            [DebuggerStepThrough]
-            get { return (MainAxisAlignment)FindEnumProperty(StylePropertyId.FlexLayoutMainAxisAlignment); }
-            [DebuggerStepThrough]
+        public UIForia.Layout.MainAxisAlignment FlexLayoutMainAxisAlignment {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return (UIForia.Layout.MainAxisAlignment)FindEnumProperty(StylePropertyId.FlexLayoutMainAxisAlignment); }
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.FlexLayoutMainAxisAlignment, (int)value)); }
         }
             
-        public CrossAxisAlignment FlexLayoutCrossAxisAlignment {
-            [DebuggerStepThrough]
-            get { return (CrossAxisAlignment)FindEnumProperty(StylePropertyId.FlexLayoutCrossAxisAlignment); }
-            [DebuggerStepThrough]
+        public UIForia.Layout.CrossAxisAlignment FlexLayoutCrossAxisAlignment {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return (UIForia.Layout.CrossAxisAlignment)FindEnumProperty(StylePropertyId.FlexLayoutCrossAxisAlignment); }
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.FlexLayoutCrossAxisAlignment, (int)value)); }
         }
             
-        public GridItemPlacement GridItemX {
-            [DebuggerStepThrough]
+        public UIForia.Layout.LayoutTypes.GridItemPlacement GridItemX {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return GetProperty(StylePropertyId.GridItemX).AsGridItemPlacement; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.GridItemX, value)); }
         }
             
-        public GridItemPlacement GridItemY {
-            [DebuggerStepThrough]
+        public UIForia.Layout.LayoutTypes.GridItemPlacement GridItemY {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return GetProperty(StylePropertyId.GridItemY).AsGridItemPlacement; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.GridItemY, value)); }
         }
             
-        public GridItemPlacement GridItemWidth {
-            [DebuggerStepThrough]
+        public UIForia.Layout.LayoutTypes.GridItemPlacement GridItemWidth {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return GetProperty(StylePropertyId.GridItemWidth).AsGridItemPlacement; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.GridItemWidth, value)); }
         }
             
-        public GridItemPlacement GridItemHeight {
-            [DebuggerStepThrough]
+        public UIForia.Layout.LayoutTypes.GridItemPlacement GridItemHeight {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return GetProperty(StylePropertyId.GridItemHeight).AsGridItemPlacement; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.GridItemHeight, value)); }
         }
             
-        public LayoutDirection GridLayoutDirection {
-            [DebuggerStepThrough]
-            get { return (LayoutDirection)FindEnumProperty(StylePropertyId.GridLayoutDirection); }
-            [DebuggerStepThrough]
+        public UIForia.Layout.LayoutDirection GridLayoutDirection {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return (UIForia.Layout.LayoutDirection)FindEnumProperty(StylePropertyId.GridLayoutDirection); }
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.GridLayoutDirection, (int)value)); }
         }
             
-        public GridLayoutDensity GridLayoutDensity {
-            [DebuggerStepThrough]
-            get { return (GridLayoutDensity)FindEnumProperty(StylePropertyId.GridLayoutDensity); }
-            [DebuggerStepThrough]
+        public UIForia.Layout.GridLayoutDensity GridLayoutDensity {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return (UIForia.Layout.GridLayoutDensity)FindEnumProperty(StylePropertyId.GridLayoutDensity); }
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.GridLayoutDensity, (int)value)); }
         }
             
-        public IReadOnlyList<GridTrackSize> GridLayoutColTemplate {
-            [DebuggerStepThrough]
+        public System.Collections.Generic.IReadOnlyList<UIForia.Layout.LayoutTypes.GridTrackSize> GridLayoutColTemplate {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return GetProperty(StylePropertyId.GridLayoutColTemplate).AsGridTemplate; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.GridLayoutColTemplate, value)); }
         }
             
-        public IReadOnlyList<GridTrackSize> GridLayoutRowTemplate {
-            [DebuggerStepThrough]
+        public System.Collections.Generic.IReadOnlyList<UIForia.Layout.LayoutTypes.GridTrackSize> GridLayoutRowTemplate {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return GetProperty(StylePropertyId.GridLayoutRowTemplate).AsGridTemplate; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.GridLayoutRowTemplate, value)); }
         }
             
-        public GridTrackSize GridLayoutColAutoSize {
-            [DebuggerStepThrough]
+        public UIForia.Layout.LayoutTypes.GridTrackSize GridLayoutColAutoSize {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindGridTrackSizeProperty(StylePropertyId.GridLayoutColAutoSize); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.GridLayoutColAutoSize, value)); }
         }
             
-        public GridTrackSize GridLayoutRowAutoSize {
-            [DebuggerStepThrough]
+        public UIForia.Layout.LayoutTypes.GridTrackSize GridLayoutRowAutoSize {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindGridTrackSizeProperty(StylePropertyId.GridLayoutRowAutoSize); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.GridLayoutRowAutoSize, value)); }
         }
             
         public float GridLayoutColGap {
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindFloatProperty(StylePropertyId.GridLayoutColGap); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.GridLayoutColGap, value)); }
         }
             
         public float GridLayoutRowGap {
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindFloatProperty(StylePropertyId.GridLayoutRowGap); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.GridLayoutRowGap, value)); }
         }
             
-        public GridAxisAlignment GridLayoutColAlignment {
-            [DebuggerStepThrough]
-            get { return (GridAxisAlignment)FindEnumProperty(StylePropertyId.GridLayoutColAlignment); }
-            [DebuggerStepThrough]
+        public UIForia.Layout.GridAxisAlignment GridLayoutColAlignment {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return (UIForia.Layout.GridAxisAlignment)FindEnumProperty(StylePropertyId.GridLayoutColAlignment); }
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.GridLayoutColAlignment, (int)value)); }
         }
             
-        public GridAxisAlignment GridLayoutRowAlignment {
-            [DebuggerStepThrough]
-            get { return (GridAxisAlignment)FindEnumProperty(StylePropertyId.GridLayoutRowAlignment); }
-            [DebuggerStepThrough]
+        public UIForia.Layout.GridAxisAlignment GridLayoutRowAlignment {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return (UIForia.Layout.GridAxisAlignment)FindEnumProperty(StylePropertyId.GridLayoutRowAlignment); }
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.GridLayoutRowAlignment, (int)value)); }
         }
             
         public float RadialLayoutStartAngle {
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindFloatProperty(StylePropertyId.RadialLayoutStartAngle); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.RadialLayoutStartAngle, value)); }
         }
             
         public float RadialLayoutEndAngle {
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindFloatProperty(StylePropertyId.RadialLayoutEndAngle); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.RadialLayoutEndAngle, value)); }
         }
             
-        public UIFixedLength RadialLayoutRadius {
-            [DebuggerStepThrough]
+        public UIForia.UIFixedLength RadialLayoutRadius {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindUIFixedLengthProperty(StylePropertyId.RadialLayoutRadius); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.RadialLayoutRadius, value)); }
         }
             
-        public AlignmentTarget AlignmentTargetX {
-            [DebuggerStepThrough]
-            get { return (AlignmentTarget)FindEnumProperty(StylePropertyId.AlignmentTargetX); }
-            [DebuggerStepThrough]
+        public UIForia.Layout.AlignmentTarget AlignmentTargetX {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return (UIForia.Layout.AlignmentTarget)FindEnumProperty(StylePropertyId.AlignmentTargetX); }
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.AlignmentTargetX, (int)value)); }
         }
             
-        public AlignmentTarget AlignmentTargetY {
-            [DebuggerStepThrough]
-            get { return (AlignmentTarget)FindEnumProperty(StylePropertyId.AlignmentTargetY); }
-            [DebuggerStepThrough]
+        public UIForia.Layout.AlignmentTarget AlignmentTargetY {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return (UIForia.Layout.AlignmentTarget)FindEnumProperty(StylePropertyId.AlignmentTargetY); }
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.AlignmentTargetY, (int)value)); }
         }
             
-        public AlignmentBehavior AlignmentBehaviorX {
-            [DebuggerStepThrough]
-            get { return (AlignmentBehavior)FindEnumProperty(StylePropertyId.AlignmentBehaviorX); }
-            [DebuggerStepThrough]
+        public UIForia.Layout.AlignmentBehavior AlignmentBehaviorX {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return (UIForia.Layout.AlignmentBehavior)FindEnumProperty(StylePropertyId.AlignmentBehaviorX); }
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.AlignmentBehaviorX, (int)value)); }
         }
             
-        public AlignmentBehavior AlignmentBehaviorY {
-            [DebuggerStepThrough]
-            get { return (AlignmentBehavior)FindEnumProperty(StylePropertyId.AlignmentBehaviorY); }
-            [DebuggerStepThrough]
+        public UIForia.Layout.AlignmentBehavior AlignmentBehaviorY {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return (UIForia.Layout.AlignmentBehavior)FindEnumProperty(StylePropertyId.AlignmentBehaviorY); }
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.AlignmentBehaviorY, (int)value)); }
         }
             
         public float AlignmentPivotX {
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindFloatProperty(StylePropertyId.AlignmentPivotX); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.AlignmentPivotX, value)); }
         }
             
         public float AlignmentPivotY {
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindFloatProperty(StylePropertyId.AlignmentPivotY); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.AlignmentPivotY, value)); }
         }
             
-        public UIFixedLength AlignmentOffsetX {
-            [DebuggerStepThrough]
+        public UIForia.UIFixedLength AlignmentOffsetX {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindUIFixedLengthProperty(StylePropertyId.AlignmentOffsetX); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.AlignmentOffsetX, value)); }
         }
             
-        public UIFixedLength AlignmentOffsetY {
-            [DebuggerStepThrough]
+        public UIForia.UIFixedLength AlignmentOffsetY {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindUIFixedLengthProperty(StylePropertyId.AlignmentOffsetY); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.AlignmentOffsetY, value)); }
         }
             
-        public Fit FitX {
-            [DebuggerStepThrough]
-            get { return (Fit)FindEnumProperty(StylePropertyId.FitX); }
-            [DebuggerStepThrough]
+        public UIForia.Layout.Fit FitX {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return (UIForia.Layout.Fit)FindEnumProperty(StylePropertyId.FitX); }
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.FitX, (int)value)); }
         }
             
-        public Fit FitY {
-            [DebuggerStepThrough]
-            get { return (Fit)FindEnumProperty(StylePropertyId.FitY); }
-            [DebuggerStepThrough]
+        public UIForia.Layout.Fit FitY {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return (UIForia.Layout.Fit)FindEnumProperty(StylePropertyId.FitY); }
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.FitY, (int)value)); }
         }
             
-        public UIMeasurement MinWidth {
-            [DebuggerStepThrough]
+        public UIForia.Rendering.UIMeasurement MinWidth {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindUIMeasurementProperty(StylePropertyId.MinWidth); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.MinWidth, value)); }
         }
             
-        public UIMeasurement MaxWidth {
-            [DebuggerStepThrough]
+        public UIForia.Rendering.UIMeasurement MaxWidth {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindUIMeasurementProperty(StylePropertyId.MaxWidth); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.MaxWidth, value)); }
         }
             
-        public UIMeasurement PreferredWidth {
-            [DebuggerStepThrough]
+        public UIForia.Rendering.UIMeasurement PreferredWidth {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindUIMeasurementProperty(StylePropertyId.PreferredWidth); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.PreferredWidth, value)); }
         }
             
-        public UIMeasurement MinHeight {
-            [DebuggerStepThrough]
+        public UIForia.Rendering.UIMeasurement MinHeight {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindUIMeasurementProperty(StylePropertyId.MinHeight); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.MinHeight, value)); }
         }
             
-        public UIMeasurement MaxHeight {
-            [DebuggerStepThrough]
+        public UIForia.Rendering.UIMeasurement MaxHeight {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindUIMeasurementProperty(StylePropertyId.MaxHeight); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.MaxHeight, value)); }
         }
             
-        public UIMeasurement PreferredHeight {
-            [DebuggerStepThrough]
+        public UIForia.Rendering.UIMeasurement PreferredHeight {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindUIMeasurementProperty(StylePropertyId.PreferredHeight); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.PreferredHeight, value)); }
         }
             
-        public UIMeasurement MarginTop {
-            [DebuggerStepThrough]
+        public UIForia.Rendering.UIMeasurement MarginTop {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindUIMeasurementProperty(StylePropertyId.MarginTop); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.MarginTop, value)); }
         }
             
-        public UIMeasurement MarginRight {
-            [DebuggerStepThrough]
+        public UIForia.Rendering.UIMeasurement MarginRight {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindUIMeasurementProperty(StylePropertyId.MarginRight); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.MarginRight, value)); }
         }
             
-        public UIMeasurement MarginBottom {
-            [DebuggerStepThrough]
+        public UIForia.Rendering.UIMeasurement MarginBottom {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindUIMeasurementProperty(StylePropertyId.MarginBottom); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.MarginBottom, value)); }
         }
             
-        public UIMeasurement MarginLeft {
-            [DebuggerStepThrough]
+        public UIForia.Rendering.UIMeasurement MarginLeft {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindUIMeasurementProperty(StylePropertyId.MarginLeft); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.MarginLeft, value)); }
         }
             
-        public Color BorderColor {
-            [DebuggerStepThrough]
+        public UnityEngine.Color BorderColor {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindColorProperty(StylePropertyId.BorderColor); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.BorderColor, value)); }
         }
             
-        public UIFixedLength BorderTop {
-            [DebuggerStepThrough]
+        public UIForia.UIFixedLength BorderTop {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindUIFixedLengthProperty(StylePropertyId.BorderTop); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.BorderTop, value)); }
         }
             
-        public UIFixedLength BorderRight {
-            [DebuggerStepThrough]
+        public UIForia.UIFixedLength BorderRight {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindUIFixedLengthProperty(StylePropertyId.BorderRight); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.BorderRight, value)); }
         }
             
-        public UIFixedLength BorderBottom {
-            [DebuggerStepThrough]
+        public UIForia.UIFixedLength BorderBottom {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindUIFixedLengthProperty(StylePropertyId.BorderBottom); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.BorderBottom, value)); }
         }
             
-        public UIFixedLength BorderLeft {
-            [DebuggerStepThrough]
+        public UIForia.UIFixedLength BorderLeft {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindUIFixedLengthProperty(StylePropertyId.BorderLeft); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.BorderLeft, value)); }
         }
             
-        public UIFixedLength BorderRadiusTopLeft {
-            [DebuggerStepThrough]
+        public UIForia.UIFixedLength BorderRadiusTopLeft {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindUIFixedLengthProperty(StylePropertyId.BorderRadiusTopLeft); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.BorderRadiusTopLeft, value)); }
         }
             
-        public UIFixedLength BorderRadiusTopRight {
-            [DebuggerStepThrough]
+        public UIForia.UIFixedLength BorderRadiusTopRight {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindUIFixedLengthProperty(StylePropertyId.BorderRadiusTopRight); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.BorderRadiusTopRight, value)); }
         }
             
-        public UIFixedLength BorderRadiusBottomRight {
-            [DebuggerStepThrough]
+        public UIForia.UIFixedLength BorderRadiusBottomRight {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindUIFixedLengthProperty(StylePropertyId.BorderRadiusBottomRight); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.BorderRadiusBottomRight, value)); }
         }
             
-        public UIFixedLength BorderRadiusBottomLeft {
-            [DebuggerStepThrough]
+        public UIForia.UIFixedLength BorderRadiusBottomLeft {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindUIFixedLengthProperty(StylePropertyId.BorderRadiusBottomLeft); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.BorderRadiusBottomLeft, value)); }
         }
             
-        public UIFixedLength PaddingTop {
-            [DebuggerStepThrough]
+        public UIForia.UIFixedLength PaddingTop {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindUIFixedLengthProperty(StylePropertyId.PaddingTop); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.PaddingTop, value)); }
         }
             
-        public UIFixedLength PaddingRight {
-            [DebuggerStepThrough]
+        public UIForia.UIFixedLength PaddingRight {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindUIFixedLengthProperty(StylePropertyId.PaddingRight); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.PaddingRight, value)); }
         }
             
-        public UIFixedLength PaddingBottom {
-            [DebuggerStepThrough]
+        public UIForia.UIFixedLength PaddingBottom {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindUIFixedLengthProperty(StylePropertyId.PaddingBottom); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.PaddingBottom, value)); }
         }
             
-        public UIFixedLength PaddingLeft {
-            [DebuggerStepThrough]
+        public UIForia.UIFixedLength PaddingLeft {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindUIFixedLengthProperty(StylePropertyId.PaddingLeft); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.PaddingLeft, value)); }
         }
             
-        public Color TextColor {
-            [DebuggerStepThrough]
+        public UnityEngine.Color TextColor {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindColorProperty(StylePropertyId.TextColor); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.TextColor, value)); }
         }
             
-        public FontAsset TextFontAsset {
-            [DebuggerStepThrough]
+        public UIForia.FontAsset TextFontAsset {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return GetProperty(StylePropertyId.TextFontAsset).AsFont; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.TextFontAsset, value)); }
         }
             
-        public UIFixedLength TextFontSize {
-            [DebuggerStepThrough]
+        public UIForia.UIFixedLength TextFontSize {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindUIFixedLengthProperty(StylePropertyId.TextFontSize); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.TextFontSize, value)); }
         }
             
-        public FontStyle TextFontStyle {
-            [DebuggerStepThrough]
-            get { return (FontStyle)FindEnumProperty(StylePropertyId.TextFontStyle); }
-            [DebuggerStepThrough]
+        public UIForia.Text.FontStyle TextFontStyle {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return (UIForia.Text.FontStyle)FindEnumProperty(StylePropertyId.TextFontStyle); }
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.TextFontStyle, (int)value)); }
         }
             
-        public TextAlignment TextAlignment {
-            [DebuggerStepThrough]
-            get { return (TextAlignment)FindEnumProperty(StylePropertyId.TextAlignment); }
-            [DebuggerStepThrough]
+        public UIForia.Text.TextAlignment TextAlignment {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return (UIForia.Text.TextAlignment)FindEnumProperty(StylePropertyId.TextAlignment); }
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.TextAlignment, (int)value)); }
         }
             
         public float TextOutlineWidth {
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindFloatProperty(StylePropertyId.TextOutlineWidth); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.TextOutlineWidth, value)); }
         }
             
-        public Color TextOutlineColor {
-            [DebuggerStepThrough]
+        public UnityEngine.Color TextOutlineColor {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindColorProperty(StylePropertyId.TextOutlineColor); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.TextOutlineColor, value)); }
         }
             
         public float TextOutlineSoftness {
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindFloatProperty(StylePropertyId.TextOutlineSoftness); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.TextOutlineSoftness, value)); }
         }
             
-        public Color TextGlowColor {
-            [DebuggerStepThrough]
+        public UnityEngine.Color TextGlowColor {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindColorProperty(StylePropertyId.TextGlowColor); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.TextGlowColor, value)); }
         }
             
         public float TextGlowOffset {
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindFloatProperty(StylePropertyId.TextGlowOffset); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.TextGlowOffset, value)); }
         }
             
         public float TextGlowInner {
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindFloatProperty(StylePropertyId.TextGlowInner); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.TextGlowInner, value)); }
         }
             
         public float TextGlowOuter {
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindFloatProperty(StylePropertyId.TextGlowOuter); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.TextGlowOuter, value)); }
         }
             
         public float TextGlowPower {
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindFloatProperty(StylePropertyId.TextGlowPower); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.TextGlowPower, value)); }
         }
             
-        public Color TextUnderlayColor {
-            [DebuggerStepThrough]
+        public UnityEngine.Color TextUnderlayColor {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindColorProperty(StylePropertyId.TextUnderlayColor); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.TextUnderlayColor, value)); }
         }
             
         public float TextUnderlayX {
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindFloatProperty(StylePropertyId.TextUnderlayX); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.TextUnderlayX, value)); }
         }
             
         public float TextUnderlayY {
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindFloatProperty(StylePropertyId.TextUnderlayY); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.TextUnderlayY, value)); }
         }
             
         public float TextUnderlayDilate {
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindFloatProperty(StylePropertyId.TextUnderlayDilate); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.TextUnderlayDilate, value)); }
         }
             
         public float TextUnderlaySoftness {
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindFloatProperty(StylePropertyId.TextUnderlaySoftness); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.TextUnderlaySoftness, value)); }
         }
             
         public float TextFaceDilate {
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindFloatProperty(StylePropertyId.TextFaceDilate); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.TextFaceDilate, value)); }
         }
             
-        public UnderlayType TextUnderlayType {
-            [DebuggerStepThrough]
-            get { return (UnderlayType)FindEnumProperty(StylePropertyId.TextUnderlayType); }
-            [DebuggerStepThrough]
+        public UIForia.Rendering.UnderlayType TextUnderlayType {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return (UIForia.Rendering.UnderlayType)FindEnumProperty(StylePropertyId.TextUnderlayType); }
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.TextUnderlayType, (int)value)); }
         }
             
-        public TextTransform TextTransform {
-            [DebuggerStepThrough]
-            get { return (TextTransform)FindEnumProperty(StylePropertyId.TextTransform); }
-            [DebuggerStepThrough]
+        public UIForia.Text.TextTransform TextTransform {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return (UIForia.Text.TextTransform)FindEnumProperty(StylePropertyId.TextTransform); }
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.TextTransform, (int)value)); }
         }
             
-        public WhitespaceMode TextWhitespaceMode {
-            [DebuggerStepThrough]
-            get { return (WhitespaceMode)FindEnumProperty(StylePropertyId.TextWhitespaceMode); }
-            [DebuggerStepThrough]
+        public UIForia.Text.WhitespaceMode TextWhitespaceMode {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return (UIForia.Text.WhitespaceMode)FindEnumProperty(StylePropertyId.TextWhitespaceMode); }
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.TextWhitespaceMode, (int)value)); }
         }
             
-        public UIFixedLength AnchorTop {
-            [DebuggerStepThrough]
+        public UIForia.UIFixedLength AnchorTop {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindUIFixedLengthProperty(StylePropertyId.AnchorTop); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.AnchorTop, value)); }
         }
             
-        public UIFixedLength AnchorRight {
-            [DebuggerStepThrough]
+        public UIForia.UIFixedLength AnchorRight {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindUIFixedLengthProperty(StylePropertyId.AnchorRight); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.AnchorRight, value)); }
         }
             
-        public UIFixedLength AnchorBottom {
-            [DebuggerStepThrough]
+        public UIForia.UIFixedLength AnchorBottom {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindUIFixedLengthProperty(StylePropertyId.AnchorBottom); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.AnchorBottom, value)); }
         }
             
-        public UIFixedLength AnchorLeft {
-            [DebuggerStepThrough]
+        public UIForia.UIFixedLength AnchorLeft {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindUIFixedLengthProperty(StylePropertyId.AnchorLeft); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.AnchorLeft, value)); }
         }
             
-        public AnchorTarget AnchorTarget {
-            [DebuggerStepThrough]
-            get { return (AnchorTarget)FindEnumProperty(StylePropertyId.AnchorTarget); }
-            [DebuggerStepThrough]
+        public UIForia.Rendering.AnchorTarget AnchorTarget {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return (UIForia.Rendering.AnchorTarget)FindEnumProperty(StylePropertyId.AnchorTarget); }
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.AnchorTarget, (int)value)); }
         }
             
-        public TransformOffset TransformPositionX {
-            [DebuggerStepThrough]
+        public UIForia.TransformOffset TransformPositionX {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindTransformOffsetProperty(StylePropertyId.TransformPositionX); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.TransformPositionX, value)); }
         }
             
-        public TransformOffset TransformPositionY {
-            [DebuggerStepThrough]
+        public UIForia.TransformOffset TransformPositionY {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindTransformOffsetProperty(StylePropertyId.TransformPositionY); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.TransformPositionY, value)); }
         }
             
-        public UIFixedLength TransformPivotX {
-            [DebuggerStepThrough]
+        public UIForia.UIFixedLength TransformPivotX {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindUIFixedLengthProperty(StylePropertyId.TransformPivotX); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.TransformPivotX, value)); }
         }
             
-        public UIFixedLength TransformPivotY {
-            [DebuggerStepThrough]
+        public UIForia.UIFixedLength TransformPivotY {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindUIFixedLengthProperty(StylePropertyId.TransformPivotY); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.TransformPivotY, value)); }
         }
             
         public float TransformScaleX {
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindFloatProperty(StylePropertyId.TransformScaleX); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.TransformScaleX, value)); }
         }
             
         public float TransformScaleY {
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindFloatProperty(StylePropertyId.TransformScaleY); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.TransformScaleY, value)); }
         }
             
         public float TransformRotation {
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindFloatProperty(StylePropertyId.TransformRotation); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.TransformRotation, value)); }
         }
             
-        public TransformBehavior TransformBehaviorX {
-            [DebuggerStepThrough]
-            get { return (TransformBehavior)FindEnumProperty(StylePropertyId.TransformBehaviorX); }
-            [DebuggerStepThrough]
+        public UIForia.Rendering.TransformBehavior TransformBehaviorX {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return (UIForia.Rendering.TransformBehavior)FindEnumProperty(StylePropertyId.TransformBehaviorX); }
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.TransformBehaviorX, (int)value)); }
         }
             
-        public TransformBehavior TransformBehaviorY {
-            [DebuggerStepThrough]
-            get { return (TransformBehavior)FindEnumProperty(StylePropertyId.TransformBehaviorY); }
-            [DebuggerStepThrough]
+        public UIForia.Rendering.TransformBehavior TransformBehaviorY {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return (UIForia.Rendering.TransformBehavior)FindEnumProperty(StylePropertyId.TransformBehaviorY); }
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.TransformBehaviorY, (int)value)); }
         }
             
-        public LayoutType LayoutType {
-            [DebuggerStepThrough]
-            get { return (LayoutType)FindEnumProperty(StylePropertyId.LayoutType); }
-            [DebuggerStepThrough]
+        public UIForia.Layout.LayoutType LayoutType {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return (UIForia.Layout.LayoutType)FindEnumProperty(StylePropertyId.LayoutType); }
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.LayoutType, (int)value)); }
         }
             
-        public LayoutBehavior LayoutBehavior {
-            [DebuggerStepThrough]
-            get { return (LayoutBehavior)FindEnumProperty(StylePropertyId.LayoutBehavior); }
-            [DebuggerStepThrough]
+        public UIForia.Layout.LayoutBehavior LayoutBehavior {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return (UIForia.Layout.LayoutBehavior)FindEnumProperty(StylePropertyId.LayoutBehavior); }
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.LayoutBehavior, (int)value)); }
         }
             
         public int ZIndex {
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindIntProperty(StylePropertyId.ZIndex); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.ZIndex, value)); }
         }
             
         public int RenderLayerOffset {
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindIntProperty(StylePropertyId.RenderLayerOffset); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.RenderLayerOffset, value)); }
         }
             
-        public RenderLayer RenderLayer {
-            [DebuggerStepThrough]
-            get { return (RenderLayer)FindEnumProperty(StylePropertyId.RenderLayer); }
-            [DebuggerStepThrough]
+        public UIForia.Rendering.RenderLayer RenderLayer {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return (UIForia.Rendering.RenderLayer)FindEnumProperty(StylePropertyId.RenderLayer); }
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.RenderLayer, (int)value)); }
         }
             
         public int Layer {
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindIntProperty(StylePropertyId.Layer); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.Layer, value)); }
         }
             
         public string Scrollbar {
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             get { return GetProperty(StylePropertyId.Scrollbar).AsString; }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.Scrollbar, value)); }
         }
             
-        public UIMeasurement ScrollbarSize {
-            [DebuggerStepThrough]
+        public UIForia.Rendering.UIMeasurement ScrollbarSize {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindUIMeasurementProperty(StylePropertyId.ScrollbarSize); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.ScrollbarSize, value)); }
         }
             
-        public Color ScrollbarColor {
-            [DebuggerStepThrough]
+        public UnityEngine.Color ScrollbarColor {
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindColorProperty(StylePropertyId.ScrollbarColor); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.ScrollbarColor, value)); }
         }
             
-        public UnderlayType ShadowType {
-            [DebuggerStepThrough]
-            get { return (UnderlayType)FindEnumProperty(StylePropertyId.ShadowType); }
-            [DebuggerStepThrough]
+        public UIForia.Rendering.UnderlayType ShadowType {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return (UIForia.Rendering.UnderlayType)FindEnumProperty(StylePropertyId.ShadowType); }
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.ShadowType, (int)value)); }
         }
             
         public float ShadowOffsetX {
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindFloatProperty(StylePropertyId.ShadowOffsetX); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.ShadowOffsetX, value)); }
         }
             
         public float ShadowOffsetY {
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindFloatProperty(StylePropertyId.ShadowOffsetY); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.ShadowOffsetY, value)); }
         }
             
         public float ShadowSoftnessX {
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindFloatProperty(StylePropertyId.ShadowSoftnessX); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.ShadowSoftnessX, value)); }
         }
             
         public float ShadowSoftnessY {
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindFloatProperty(StylePropertyId.ShadowSoftnessY); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.ShadowSoftnessY, value)); }
         }
             
         public float ShadowIntensity {
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             get { return FindFloatProperty(StylePropertyId.ShadowIntensity); }
-            [DebuggerStepThrough]
+            [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.ShadowIntensity, value)); }
         }
             
@@ -1960,8 +1809,8 @@ namespace UIForia.Rendering {
     
         
 
-            public Overflow OverflowX { 
-                [DebuggerStepThrough]
+            public UIForia.Rendering.Overflow OverflowX { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.OverflowX, out property)) return property.AsOverflow;
@@ -1969,8 +1818,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public Overflow OverflowY { 
-                [DebuggerStepThrough]
+            public UIForia.Rendering.Overflow OverflowY { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.OverflowY, out property)) return property.AsOverflow;
@@ -1978,8 +1827,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public Color BackgroundColor { 
-                [DebuggerStepThrough]
+            public UnityEngine.Color BackgroundColor { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.BackgroundColor, out property)) return property.AsColor;
@@ -1987,8 +1836,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public Color BackgroundTint { 
-                [DebuggerStepThrough]
+            public UnityEngine.Color BackgroundTint { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.BackgroundTint, out property)) return property.AsColor;
@@ -1996,8 +1845,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public Color BorderColorTop { 
-                [DebuggerStepThrough]
+            public UnityEngine.Color BorderColorTop { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.BorderColorTop, out property)) return property.AsColor;
@@ -2005,8 +1854,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public Color BorderColorRight { 
-                [DebuggerStepThrough]
+            public UnityEngine.Color BorderColorRight { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.BorderColorRight, out property)) return property.AsColor;
@@ -2014,8 +1863,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public Color BorderColorBottom { 
-                [DebuggerStepThrough]
+            public UnityEngine.Color BorderColorBottom { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.BorderColorBottom, out property)) return property.AsColor;
@@ -2023,8 +1872,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public Color BorderColorLeft { 
-                [DebuggerStepThrough]
+            public UnityEngine.Color BorderColorLeft { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.BorderColorLeft, out property)) return property.AsColor;
@@ -2032,8 +1881,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UIFixedLength BackgroundImageOffsetX { 
-                [DebuggerStepThrough]
+            public UIForia.UIFixedLength BackgroundImageOffsetX { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.BackgroundImageOffsetX, out property)) return property.AsUIFixedLength;
@@ -2041,8 +1890,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UIFixedLength BackgroundImageOffsetY { 
-                [DebuggerStepThrough]
+            public UIForia.UIFixedLength BackgroundImageOffsetY { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.BackgroundImageOffsetY, out property)) return property.AsUIFixedLength;
@@ -2050,8 +1899,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UIFixedLength BackgroundImageScaleX { 
-                [DebuggerStepThrough]
+            public UIForia.UIFixedLength BackgroundImageScaleX { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.BackgroundImageScaleX, out property)) return property.AsUIFixedLength;
@@ -2059,8 +1908,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UIFixedLength BackgroundImageScaleY { 
-                [DebuggerStepThrough]
+            public UIForia.UIFixedLength BackgroundImageScaleY { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.BackgroundImageScaleY, out property)) return property.AsUIFixedLength;
@@ -2068,8 +1917,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UIFixedLength BackgroundImageTileX { 
-                [DebuggerStepThrough]
+            public UIForia.UIFixedLength BackgroundImageTileX { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.BackgroundImageTileX, out property)) return property.AsUIFixedLength;
@@ -2077,8 +1926,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UIFixedLength BackgroundImageTileY { 
-                [DebuggerStepThrough]
+            public UIForia.UIFixedLength BackgroundImageTileY { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.BackgroundImageTileY, out property)) return property.AsUIFixedLength;
@@ -2086,8 +1935,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UIFixedLength BackgroundImageRotation { 
-                [DebuggerStepThrough]
+            public UIForia.UIFixedLength BackgroundImageRotation { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.BackgroundImageRotation, out property)) return property.AsUIFixedLength;
@@ -2095,8 +1944,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public Texture2D BackgroundImage { 
-                [DebuggerStepThrough]
+            public UnityEngine.Texture2D BackgroundImage { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.BackgroundImage, out property)) return property.AsTexture2D;
@@ -2105,7 +1954,7 @@ namespace UIForia.Rendering {
             }
 
             public string Painter { 
-                [DebuggerStepThrough]
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.Painter, out property)) return property.AsString;
@@ -2114,7 +1963,7 @@ namespace UIForia.Rendering {
             }
 
             public float Opacity { 
-                [DebuggerStepThrough]
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.Opacity, out property)) return property.AsFloat;
@@ -2123,8 +1972,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public CursorStyle Cursor { 
-                [DebuggerStepThrough]
+            public UIForia.Rendering.CursorStyle Cursor { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.Cursor, out property)) return property.AsCursorStyle;
@@ -2132,8 +1981,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public Visibility Visibility { 
-                [DebuggerStepThrough]
+            public UIForia.Rendering.Visibility Visibility { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.Visibility, out property)) return property.AsVisibility;
@@ -2143,7 +1992,7 @@ namespace UIForia.Rendering {
             }
 
             public int FlexItemOrder { 
-                [DebuggerStepThrough]
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.FlexItemOrder, out property)) return property.AsInt;
@@ -2152,7 +2001,7 @@ namespace UIForia.Rendering {
             }
 
             public int FlexItemGrow { 
-                [DebuggerStepThrough]
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.FlexItemGrow, out property)) return property.AsInt;
@@ -2161,7 +2010,7 @@ namespace UIForia.Rendering {
             }
 
             public int FlexItemShrink { 
-                [DebuggerStepThrough]
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.FlexItemShrink, out property)) return property.AsInt;
@@ -2169,8 +2018,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public LayoutDirection FlexLayoutDirection { 
-                [DebuggerStepThrough]
+            public UIForia.Layout.LayoutDirection FlexLayoutDirection { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.FlexLayoutDirection, out property)) return property.AsLayoutDirection;
@@ -2178,8 +2027,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public LayoutWrap FlexLayoutWrap { 
-                [DebuggerStepThrough]
+            public UIForia.Layout.LayoutWrap FlexLayoutWrap { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.FlexLayoutWrap, out property)) return property.AsLayoutWrap;
@@ -2187,8 +2036,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public MainAxisAlignment FlexLayoutMainAxisAlignment { 
-                [DebuggerStepThrough]
+            public UIForia.Layout.MainAxisAlignment FlexLayoutMainAxisAlignment { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.FlexLayoutMainAxisAlignment, out property)) return property.AsMainAxisAlignment;
@@ -2196,8 +2045,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public CrossAxisAlignment FlexLayoutCrossAxisAlignment { 
-                [DebuggerStepThrough]
+            public UIForia.Layout.CrossAxisAlignment FlexLayoutCrossAxisAlignment { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.FlexLayoutCrossAxisAlignment, out property)) return property.AsCrossAxisAlignment;
@@ -2205,8 +2054,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public GridItemPlacement GridItemX { 
-                [DebuggerStepThrough]
+            public UIForia.Layout.LayoutTypes.GridItemPlacement GridItemX { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.GridItemX, out property)) return property.AsGridItemPlacement;
@@ -2214,8 +2063,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public GridItemPlacement GridItemY { 
-                [DebuggerStepThrough]
+            public UIForia.Layout.LayoutTypes.GridItemPlacement GridItemY { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.GridItemY, out property)) return property.AsGridItemPlacement;
@@ -2223,8 +2072,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public GridItemPlacement GridItemWidth { 
-                [DebuggerStepThrough]
+            public UIForia.Layout.LayoutTypes.GridItemPlacement GridItemWidth { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.GridItemWidth, out property)) return property.AsGridItemPlacement;
@@ -2232,8 +2081,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public GridItemPlacement GridItemHeight { 
-                [DebuggerStepThrough]
+            public UIForia.Layout.LayoutTypes.GridItemPlacement GridItemHeight { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.GridItemHeight, out property)) return property.AsGridItemPlacement;
@@ -2241,8 +2090,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public LayoutDirection GridLayoutDirection { 
-                [DebuggerStepThrough]
+            public UIForia.Layout.LayoutDirection GridLayoutDirection { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.GridLayoutDirection, out property)) return property.AsLayoutDirection;
@@ -2250,8 +2099,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public GridLayoutDensity GridLayoutDensity { 
-                [DebuggerStepThrough]
+            public UIForia.Layout.GridLayoutDensity GridLayoutDensity { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.GridLayoutDensity, out property)) return property.AsGridLayoutDensity;
@@ -2259,8 +2108,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public IReadOnlyList<GridTrackSize> GridLayoutColTemplate { 
-                [DebuggerStepThrough]
+            public System.Collections.Generic.IReadOnlyList<UIForia.Layout.LayoutTypes.GridTrackSize> GridLayoutColTemplate { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.GridLayoutColTemplate, out property)) return property.AsGridTemplate;
@@ -2268,8 +2117,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public IReadOnlyList<GridTrackSize> GridLayoutRowTemplate { 
-                [DebuggerStepThrough]
+            public System.Collections.Generic.IReadOnlyList<UIForia.Layout.LayoutTypes.GridTrackSize> GridLayoutRowTemplate { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.GridLayoutRowTemplate, out property)) return property.AsGridTemplate;
@@ -2277,26 +2126,26 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public GridTrackSize GridLayoutColAutoSize { 
-                [DebuggerStepThrough]
+            public UIForia.Layout.LayoutTypes.GridTrackSize GridLayoutColAutoSize { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.GridLayoutColAutoSize, out property)) return property.AsGridTrackSize;
-                    return DefaultStyleValues_Generated.GridLayoutMainAxisAutoSize;
+                    return DefaultStyleValues_Generated.GridLayoutColAutoSize;
                 }
             }
 
-            public GridTrackSize GridLayoutRowAutoSize { 
-                [DebuggerStepThrough]
+            public UIForia.Layout.LayoutTypes.GridTrackSize GridLayoutRowAutoSize { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.GridLayoutRowAutoSize, out property)) return property.AsGridTrackSize;
-                    return DefaultStyleValues_Generated.GridLayoutCrossAxisAutoSize;
+                    return DefaultStyleValues_Generated.GridLayoutRowAutoSize;
                 }
             }
 
             public float GridLayoutColGap { 
-                [DebuggerStepThrough]
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.GridLayoutColGap, out property)) return property.AsFloat;
@@ -2305,7 +2154,7 @@ namespace UIForia.Rendering {
             }
 
             public float GridLayoutRowGap { 
-                [DebuggerStepThrough]
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.GridLayoutRowGap, out property)) return property.AsFloat;
@@ -2313,8 +2162,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public GridAxisAlignment GridLayoutColAlignment { 
-                [DebuggerStepThrough]
+            public UIForia.Layout.GridAxisAlignment GridLayoutColAlignment { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.GridLayoutColAlignment, out property)) return property.AsGridAxisAlignment;
@@ -2322,8 +2171,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public GridAxisAlignment GridLayoutRowAlignment { 
-                [DebuggerStepThrough]
+            public UIForia.Layout.GridAxisAlignment GridLayoutRowAlignment { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.GridLayoutRowAlignment, out property)) return property.AsGridAxisAlignment;
@@ -2332,7 +2181,7 @@ namespace UIForia.Rendering {
             }
 
             public float RadialLayoutStartAngle { 
-                [DebuggerStepThrough]
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.RadialLayoutStartAngle, out property)) return property.AsFloat;
@@ -2341,7 +2190,7 @@ namespace UIForia.Rendering {
             }
 
             public float RadialLayoutEndAngle { 
-                [DebuggerStepThrough]
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.RadialLayoutEndAngle, out property)) return property.AsFloat;
@@ -2349,8 +2198,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UIFixedLength RadialLayoutRadius { 
-                [DebuggerStepThrough]
+            public UIForia.UIFixedLength RadialLayoutRadius { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.RadialLayoutRadius, out property)) return property.AsUIFixedLength;
@@ -2358,8 +2207,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public AlignmentTarget AlignmentTargetX { 
-                [DebuggerStepThrough]
+            public UIForia.Layout.AlignmentTarget AlignmentTargetX { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.AlignmentTargetX, out property)) return property.AsAlignmentTarget;
@@ -2367,8 +2216,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public AlignmentTarget AlignmentTargetY { 
-                [DebuggerStepThrough]
+            public UIForia.Layout.AlignmentTarget AlignmentTargetY { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.AlignmentTargetY, out property)) return property.AsAlignmentTarget;
@@ -2376,8 +2225,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public AlignmentBehavior AlignmentBehaviorX { 
-                [DebuggerStepThrough]
+            public UIForia.Layout.AlignmentBehavior AlignmentBehaviorX { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.AlignmentBehaviorX, out property)) return property.AsAlignmentBehavior;
@@ -2385,8 +2234,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public AlignmentBehavior AlignmentBehaviorY { 
-                [DebuggerStepThrough]
+            public UIForia.Layout.AlignmentBehavior AlignmentBehaviorY { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.AlignmentBehaviorY, out property)) return property.AsAlignmentBehavior;
@@ -2395,7 +2244,7 @@ namespace UIForia.Rendering {
             }
 
             public float AlignmentPivotX { 
-                [DebuggerStepThrough]
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.AlignmentPivotX, out property)) return property.AsFloat;
@@ -2404,7 +2253,7 @@ namespace UIForia.Rendering {
             }
 
             public float AlignmentPivotY { 
-                [DebuggerStepThrough]
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.AlignmentPivotY, out property)) return property.AsFloat;
@@ -2412,8 +2261,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UIFixedLength AlignmentOffsetX { 
-                [DebuggerStepThrough]
+            public UIForia.UIFixedLength AlignmentOffsetX { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.AlignmentOffsetX, out property)) return property.AsUIFixedLength;
@@ -2421,8 +2270,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UIFixedLength AlignmentOffsetY { 
-                [DebuggerStepThrough]
+            public UIForia.UIFixedLength AlignmentOffsetY { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.AlignmentOffsetY, out property)) return property.AsUIFixedLength;
@@ -2430,8 +2279,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public Fit FitX { 
-                [DebuggerStepThrough]
+            public UIForia.Layout.Fit FitX { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.FitX, out property)) return property.AsFit;
@@ -2439,8 +2288,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public Fit FitY { 
-                [DebuggerStepThrough]
+            public UIForia.Layout.Fit FitY { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.FitY, out property)) return property.AsFit;
@@ -2448,8 +2297,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UIMeasurement MinWidth { 
-                [DebuggerStepThrough]
+            public UIForia.Rendering.UIMeasurement MinWidth { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.MinWidth, out property)) return property.AsUIMeasurement;
@@ -2457,8 +2306,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UIMeasurement MaxWidth { 
-                [DebuggerStepThrough]
+            public UIForia.Rendering.UIMeasurement MaxWidth { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.MaxWidth, out property)) return property.AsUIMeasurement;
@@ -2466,8 +2315,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UIMeasurement PreferredWidth { 
-                [DebuggerStepThrough]
+            public UIForia.Rendering.UIMeasurement PreferredWidth { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.PreferredWidth, out property)) return property.AsUIMeasurement;
@@ -2475,8 +2324,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UIMeasurement MinHeight { 
-                [DebuggerStepThrough]
+            public UIForia.Rendering.UIMeasurement MinHeight { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.MinHeight, out property)) return property.AsUIMeasurement;
@@ -2484,8 +2333,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UIMeasurement MaxHeight { 
-                [DebuggerStepThrough]
+            public UIForia.Rendering.UIMeasurement MaxHeight { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.MaxHeight, out property)) return property.AsUIMeasurement;
@@ -2493,8 +2342,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UIMeasurement PreferredHeight { 
-                [DebuggerStepThrough]
+            public UIForia.Rendering.UIMeasurement PreferredHeight { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.PreferredHeight, out property)) return property.AsUIMeasurement;
@@ -2502,8 +2351,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UIMeasurement MarginTop { 
-                [DebuggerStepThrough]
+            public UIForia.Rendering.UIMeasurement MarginTop { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.MarginTop, out property)) return property.AsUIMeasurement;
@@ -2511,8 +2360,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UIMeasurement MarginRight { 
-                [DebuggerStepThrough]
+            public UIForia.Rendering.UIMeasurement MarginRight { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.MarginRight, out property)) return property.AsUIMeasurement;
@@ -2520,8 +2369,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UIMeasurement MarginBottom { 
-                [DebuggerStepThrough]
+            public UIForia.Rendering.UIMeasurement MarginBottom { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.MarginBottom, out property)) return property.AsUIMeasurement;
@@ -2529,8 +2378,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UIMeasurement MarginLeft { 
-                [DebuggerStepThrough]
+            public UIForia.Rendering.UIMeasurement MarginLeft { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.MarginLeft, out property)) return property.AsUIMeasurement;
@@ -2538,8 +2387,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public Color BorderColor { 
-                [DebuggerStepThrough]
+            public UnityEngine.Color BorderColor { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.BorderColor, out property)) return property.AsColor;
@@ -2547,8 +2396,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UIFixedLength BorderTop { 
-                [DebuggerStepThrough]
+            public UIForia.UIFixedLength BorderTop { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.BorderTop, out property)) return property.AsUIFixedLength;
@@ -2556,8 +2405,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UIFixedLength BorderRight { 
-                [DebuggerStepThrough]
+            public UIForia.UIFixedLength BorderRight { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.BorderRight, out property)) return property.AsUIFixedLength;
@@ -2565,8 +2414,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UIFixedLength BorderBottom { 
-                [DebuggerStepThrough]
+            public UIForia.UIFixedLength BorderBottom { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.BorderBottom, out property)) return property.AsUIFixedLength;
@@ -2574,8 +2423,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UIFixedLength BorderLeft { 
-                [DebuggerStepThrough]
+            public UIForia.UIFixedLength BorderLeft { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.BorderLeft, out property)) return property.AsUIFixedLength;
@@ -2583,8 +2432,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UIFixedLength BorderRadiusTopLeft { 
-                [DebuggerStepThrough]
+            public UIForia.UIFixedLength BorderRadiusTopLeft { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.BorderRadiusTopLeft, out property)) return property.AsUIFixedLength;
@@ -2592,8 +2441,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UIFixedLength BorderRadiusTopRight { 
-                [DebuggerStepThrough]
+            public UIForia.UIFixedLength BorderRadiusTopRight { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.BorderRadiusTopRight, out property)) return property.AsUIFixedLength;
@@ -2601,8 +2450,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UIFixedLength BorderRadiusBottomRight { 
-                [DebuggerStepThrough]
+            public UIForia.UIFixedLength BorderRadiusBottomRight { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.BorderRadiusBottomRight, out property)) return property.AsUIFixedLength;
@@ -2610,8 +2459,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UIFixedLength BorderRadiusBottomLeft { 
-                [DebuggerStepThrough]
+            public UIForia.UIFixedLength BorderRadiusBottomLeft { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.BorderRadiusBottomLeft, out property)) return property.AsUIFixedLength;
@@ -2619,8 +2468,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UIFixedLength PaddingTop { 
-                [DebuggerStepThrough]
+            public UIForia.UIFixedLength PaddingTop { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.PaddingTop, out property)) return property.AsUIFixedLength;
@@ -2628,8 +2477,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UIFixedLength PaddingRight { 
-                [DebuggerStepThrough]
+            public UIForia.UIFixedLength PaddingRight { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.PaddingRight, out property)) return property.AsUIFixedLength;
@@ -2637,8 +2486,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UIFixedLength PaddingBottom { 
-                [DebuggerStepThrough]
+            public UIForia.UIFixedLength PaddingBottom { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.PaddingBottom, out property)) return property.AsUIFixedLength;
@@ -2646,8 +2495,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UIFixedLength PaddingLeft { 
-                [DebuggerStepThrough]
+            public UIForia.UIFixedLength PaddingLeft { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.PaddingLeft, out property)) return property.AsUIFixedLength;
@@ -2655,8 +2504,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public Color TextColor { 
-                [DebuggerStepThrough]
+            public UnityEngine.Color TextColor { 
+//                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.TextColor, out property)) return property.AsColor;
@@ -2665,8 +2514,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public FontAsset TextFontAsset { 
-                [DebuggerStepThrough]
+            public UIForia.FontAsset TextFontAsset { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.TextFontAsset, out property)) return property.AsFont;
@@ -2675,8 +2524,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UIFixedLength TextFontSize { 
-                [DebuggerStepThrough]
+            public UIForia.UIFixedLength TextFontSize { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.TextFontSize, out property)) return property.AsUIFixedLength;
@@ -2685,8 +2534,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public FontStyle TextFontStyle { 
-                [DebuggerStepThrough]
+            public UIForia.Text.FontStyle TextFontStyle { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.TextFontStyle, out property)) return property.AsFontStyle;
@@ -2695,8 +2544,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public TextAlignment TextAlignment { 
-                [DebuggerStepThrough]
+            public UIForia.Text.TextAlignment TextAlignment { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.TextAlignment, out property)) return property.AsTextAlignment;
@@ -2706,7 +2555,7 @@ namespace UIForia.Rendering {
             }
 
             public float TextOutlineWidth { 
-                [DebuggerStepThrough]
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.TextOutlineWidth, out property)) return property.AsFloat;
@@ -2715,8 +2564,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public Color TextOutlineColor { 
-                [DebuggerStepThrough]
+            public UnityEngine.Color TextOutlineColor { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.TextOutlineColor, out property)) return property.AsColor;
@@ -2726,7 +2575,7 @@ namespace UIForia.Rendering {
             }
 
             public float TextOutlineSoftness { 
-                [DebuggerStepThrough]
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.TextOutlineSoftness, out property)) return property.AsFloat;
@@ -2735,8 +2584,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public Color TextGlowColor { 
-                [DebuggerStepThrough]
+            public UnityEngine.Color TextGlowColor { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.TextGlowColor, out property)) return property.AsColor;
@@ -2746,7 +2595,7 @@ namespace UIForia.Rendering {
             }
 
             public float TextGlowOffset { 
-                [DebuggerStepThrough]
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.TextGlowOffset, out property)) return property.AsFloat;
@@ -2756,7 +2605,7 @@ namespace UIForia.Rendering {
             }
 
             public float TextGlowInner { 
-                [DebuggerStepThrough]
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.TextGlowInner, out property)) return property.AsFloat;
@@ -2766,7 +2615,7 @@ namespace UIForia.Rendering {
             }
 
             public float TextGlowOuter { 
-                [DebuggerStepThrough]
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.TextGlowOuter, out property)) return property.AsFloat;
@@ -2776,7 +2625,7 @@ namespace UIForia.Rendering {
             }
 
             public float TextGlowPower { 
-                [DebuggerStepThrough]
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.TextGlowPower, out property)) return property.AsFloat;
@@ -2785,8 +2634,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public Color TextUnderlayColor { 
-                [DebuggerStepThrough]
+            public UnityEngine.Color TextUnderlayColor { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.TextUnderlayColor, out property)) return property.AsColor;
@@ -2796,7 +2645,7 @@ namespace UIForia.Rendering {
             }
 
             public float TextUnderlayX { 
-                [DebuggerStepThrough]
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.TextUnderlayX, out property)) return property.AsFloat;
@@ -2806,7 +2655,7 @@ namespace UIForia.Rendering {
             }
 
             public float TextUnderlayY { 
-                [DebuggerStepThrough]
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.TextUnderlayY, out property)) return property.AsFloat;
@@ -2816,7 +2665,7 @@ namespace UIForia.Rendering {
             }
 
             public float TextUnderlayDilate { 
-                [DebuggerStepThrough]
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.TextUnderlayDilate, out property)) return property.AsFloat;
@@ -2826,7 +2675,7 @@ namespace UIForia.Rendering {
             }
 
             public float TextUnderlaySoftness { 
-                [DebuggerStepThrough]
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.TextUnderlaySoftness, out property)) return property.AsFloat;
@@ -2836,7 +2685,7 @@ namespace UIForia.Rendering {
             }
 
             public float TextFaceDilate { 
-                [DebuggerStepThrough]
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.TextFaceDilate, out property)) return property.AsFloat;
@@ -2845,8 +2694,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UnderlayType TextUnderlayType { 
-                [DebuggerStepThrough]
+            public UIForia.Rendering.UnderlayType TextUnderlayType { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.TextUnderlayType, out property)) return property.AsUnderlayType;
@@ -2855,8 +2704,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public TextTransform TextTransform { 
-                [DebuggerStepThrough]
+            public UIForia.Text.TextTransform TextTransform { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.TextTransform, out property)) return property.AsTextTransform;
@@ -2865,8 +2714,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public WhitespaceMode TextWhitespaceMode { 
-                [DebuggerStepThrough]
+            public UIForia.Text.WhitespaceMode TextWhitespaceMode { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.TextWhitespaceMode, out property)) return property.AsWhitespaceMode;
@@ -2875,8 +2724,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UIFixedLength AnchorTop { 
-                [DebuggerStepThrough]
+            public UIForia.UIFixedLength AnchorTop { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.AnchorTop, out property)) return property.AsUIFixedLength;
@@ -2884,8 +2733,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UIFixedLength AnchorRight { 
-                [DebuggerStepThrough]
+            public UIForia.UIFixedLength AnchorRight { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.AnchorRight, out property)) return property.AsUIFixedLength;
@@ -2893,8 +2742,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UIFixedLength AnchorBottom { 
-                [DebuggerStepThrough]
+            public UIForia.UIFixedLength AnchorBottom { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.AnchorBottom, out property)) return property.AsUIFixedLength;
@@ -2902,8 +2751,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UIFixedLength AnchorLeft { 
-                [DebuggerStepThrough]
+            public UIForia.UIFixedLength AnchorLeft { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.AnchorLeft, out property)) return property.AsUIFixedLength;
@@ -2911,8 +2760,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public AnchorTarget AnchorTarget { 
-                [DebuggerStepThrough]
+            public UIForia.Rendering.AnchorTarget AnchorTarget { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.AnchorTarget, out property)) return property.AsAnchorTarget;
@@ -2920,8 +2769,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public TransformOffset TransformPositionX { 
-                [DebuggerStepThrough]
+            public UIForia.TransformOffset TransformPositionX { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.TransformPositionX, out property)) return property.AsTransformOffset;
@@ -2929,8 +2778,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public TransformOffset TransformPositionY { 
-                [DebuggerStepThrough]
+            public UIForia.TransformOffset TransformPositionY { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.TransformPositionY, out property)) return property.AsTransformOffset;
@@ -2938,8 +2787,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UIFixedLength TransformPivotX { 
-                [DebuggerStepThrough]
+            public UIForia.UIFixedLength TransformPivotX { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.TransformPivotX, out property)) return property.AsUIFixedLength;
@@ -2947,8 +2796,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UIFixedLength TransformPivotY { 
-                [DebuggerStepThrough]
+            public UIForia.UIFixedLength TransformPivotY { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.TransformPivotY, out property)) return property.AsUIFixedLength;
@@ -2957,7 +2806,7 @@ namespace UIForia.Rendering {
             }
 
             public float TransformScaleX { 
-                [DebuggerStepThrough]
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.TransformScaleX, out property)) return property.AsFloat;
@@ -2966,7 +2815,7 @@ namespace UIForia.Rendering {
             }
 
             public float TransformScaleY { 
-                [DebuggerStepThrough]
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.TransformScaleY, out property)) return property.AsFloat;
@@ -2975,7 +2824,7 @@ namespace UIForia.Rendering {
             }
 
             public float TransformRotation { 
-                [DebuggerStepThrough]
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.TransformRotation, out property)) return property.AsFloat;
@@ -2983,8 +2832,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public TransformBehavior TransformBehaviorX { 
-                [DebuggerStepThrough]
+            public UIForia.Rendering.TransformBehavior TransformBehaviorX { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.TransformBehaviorX, out property)) return property.AsTransformBehavior;
@@ -2992,8 +2841,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public TransformBehavior TransformBehaviorY { 
-                [DebuggerStepThrough]
+            public UIForia.Rendering.TransformBehavior TransformBehaviorY { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.TransformBehaviorY, out property)) return property.AsTransformBehavior;
@@ -3001,8 +2850,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public LayoutType LayoutType { 
-                [DebuggerStepThrough]
+            public UIForia.Layout.LayoutType LayoutType { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.LayoutType, out property)) return property.AsLayoutType;
@@ -3010,8 +2859,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public LayoutBehavior LayoutBehavior { 
-                [DebuggerStepThrough]
+            public UIForia.Layout.LayoutBehavior LayoutBehavior { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.LayoutBehavior, out property)) return property.AsLayoutBehavior;
@@ -3020,7 +2869,7 @@ namespace UIForia.Rendering {
             }
 
             public int ZIndex { 
-                [DebuggerStepThrough]
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.ZIndex, out property)) return property.AsInt;
@@ -3030,7 +2879,7 @@ namespace UIForia.Rendering {
             }
 
             public int RenderLayerOffset { 
-                [DebuggerStepThrough]
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.RenderLayerOffset, out property)) return property.AsInt;
@@ -3038,8 +2887,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public RenderLayer RenderLayer { 
-                [DebuggerStepThrough]
+            public UIForia.Rendering.RenderLayer RenderLayer { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.RenderLayer, out property)) return property.AsRenderLayer;
@@ -3048,7 +2897,7 @@ namespace UIForia.Rendering {
             }
 
             public int Layer { 
-                [DebuggerStepThrough]
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.Layer, out property)) return property.AsInt;
@@ -3058,7 +2907,7 @@ namespace UIForia.Rendering {
             }
 
             public string Scrollbar { 
-                [DebuggerStepThrough]
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.Scrollbar, out property)) return property.AsString;
@@ -3066,8 +2915,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UIMeasurement ScrollbarSize { 
-                [DebuggerStepThrough]
+            public UIForia.Rendering.UIMeasurement ScrollbarSize { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarSize, out property)) return property.AsUIMeasurement;
@@ -3075,8 +2924,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public Color ScrollbarColor { 
-                [DebuggerStepThrough]
+            public UnityEngine.Color ScrollbarColor { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarColor, out property)) return property.AsColor;
@@ -3084,8 +2933,8 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UnderlayType ShadowType { 
-                [DebuggerStepThrough]
+            public UIForia.Rendering.UnderlayType ShadowType { 
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.ShadowType, out property)) return property.AsUnderlayType;
@@ -3094,7 +2943,7 @@ namespace UIForia.Rendering {
             }
 
             public float ShadowOffsetX { 
-                [DebuggerStepThrough]
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.ShadowOffsetX, out property)) return property.AsFloat;
@@ -3103,7 +2952,7 @@ namespace UIForia.Rendering {
             }
 
             public float ShadowOffsetY { 
-                [DebuggerStepThrough]
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.ShadowOffsetY, out property)) return property.AsFloat;
@@ -3112,7 +2961,7 @@ namespace UIForia.Rendering {
             }
 
             public float ShadowSoftnessX { 
-                [DebuggerStepThrough]
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.ShadowSoftnessX, out property)) return property.AsFloat;
@@ -3121,7 +2970,7 @@ namespace UIForia.Rendering {
             }
 
             public float ShadowSoftnessY { 
-                [DebuggerStepThrough]
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.ShadowSoftnessY, out property)) return property.AsFloat;
@@ -3130,7 +2979,7 @@ namespace UIForia.Rendering {
             }
 
             public float ShadowIntensity { 
-                [DebuggerStepThrough]
+                [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.ShadowIntensity, out property)) return property.AsFloat;
@@ -3139,131 +2988,131 @@ namespace UIForia.Rendering {
             }
 
         
-        public void SetOverflowX(Overflow value, StyleState state) {
+        public void SetOverflowX(in UIForia.Rendering.Overflow? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.OverflowX, (int)value), state);
         }
 
-        public Overflow GetOverflowX(StyleState state) {
+        public UIForia.Rendering.Overflow GetOverflowX(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.OverflowX, state).AsOverflow;
         }
         
-        public void SetOverflowY(Overflow value, StyleState state) {
+        public void SetOverflowY(in UIForia.Rendering.Overflow? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.OverflowY, (int)value), state);
         }
 
-        public Overflow GetOverflowY(StyleState state) {
+        public UIForia.Rendering.Overflow GetOverflowY(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.OverflowY, state).AsOverflow;
         }
         
-        public void SetBackgroundColor(Color value, StyleState state) {
+        public void SetBackgroundColor(in UnityEngine.Color? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.BackgroundColor, value), state);
         }
 
-        public Color GetBackgroundColor(StyleState state) {
+        public UnityEngine.Color GetBackgroundColor(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.BackgroundColor, state).AsColor;
         }
         
-        public void SetBackgroundTint(Color value, StyleState state) {
+        public void SetBackgroundTint(in UnityEngine.Color? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.BackgroundTint, value), state);
         }
 
-        public Color GetBackgroundTint(StyleState state) {
+        public UnityEngine.Color GetBackgroundTint(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.BackgroundTint, state).AsColor;
         }
         
-        public void SetBorderColorTop(Color value, StyleState state) {
+        public void SetBorderColorTop(in UnityEngine.Color? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.BorderColorTop, value), state);
         }
 
-        public Color GetBorderColorTop(StyleState state) {
+        public UnityEngine.Color GetBorderColorTop(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.BorderColorTop, state).AsColor;
         }
         
-        public void SetBorderColorRight(Color value, StyleState state) {
+        public void SetBorderColorRight(in UnityEngine.Color? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.BorderColorRight, value), state);
         }
 
-        public Color GetBorderColorRight(StyleState state) {
+        public UnityEngine.Color GetBorderColorRight(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.BorderColorRight, state).AsColor;
         }
         
-        public void SetBorderColorBottom(Color value, StyleState state) {
+        public void SetBorderColorBottom(in UnityEngine.Color? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.BorderColorBottom, value), state);
         }
 
-        public Color GetBorderColorBottom(StyleState state) {
+        public UnityEngine.Color GetBorderColorBottom(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.BorderColorBottom, state).AsColor;
         }
         
-        public void SetBorderColorLeft(Color value, StyleState state) {
+        public void SetBorderColorLeft(in UnityEngine.Color? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.BorderColorLeft, value), state);
         }
 
-        public Color GetBorderColorLeft(StyleState state) {
+        public UnityEngine.Color GetBorderColorLeft(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.BorderColorLeft, state).AsColor;
         }
         
-        public void SetBackgroundImageOffsetX(UIFixedLength value, StyleState state) {
+        public void SetBackgroundImageOffsetX(in UIForia.UIFixedLength? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.BackgroundImageOffsetX, value), state);
         }
 
-        public UIFixedLength GetBackgroundImageOffsetX(StyleState state) {
+        public UIForia.UIFixedLength GetBackgroundImageOffsetX(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.BackgroundImageOffsetX, state).AsUIFixedLength;
         }
         
-        public void SetBackgroundImageOffsetY(UIFixedLength value, StyleState state) {
+        public void SetBackgroundImageOffsetY(in UIForia.UIFixedLength? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.BackgroundImageOffsetY, value), state);
         }
 
-        public UIFixedLength GetBackgroundImageOffsetY(StyleState state) {
+        public UIForia.UIFixedLength GetBackgroundImageOffsetY(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.BackgroundImageOffsetY, state).AsUIFixedLength;
         }
         
-        public void SetBackgroundImageScaleX(UIFixedLength value, StyleState state) {
+        public void SetBackgroundImageScaleX(in UIForia.UIFixedLength? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.BackgroundImageScaleX, value), state);
         }
 
-        public UIFixedLength GetBackgroundImageScaleX(StyleState state) {
+        public UIForia.UIFixedLength GetBackgroundImageScaleX(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.BackgroundImageScaleX, state).AsUIFixedLength;
         }
         
-        public void SetBackgroundImageScaleY(UIFixedLength value, StyleState state) {
+        public void SetBackgroundImageScaleY(in UIForia.UIFixedLength? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.BackgroundImageScaleY, value), state);
         }
 
-        public UIFixedLength GetBackgroundImageScaleY(StyleState state) {
+        public UIForia.UIFixedLength GetBackgroundImageScaleY(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.BackgroundImageScaleY, state).AsUIFixedLength;
         }
         
-        public void SetBackgroundImageTileX(UIFixedLength value, StyleState state) {
+        public void SetBackgroundImageTileX(in UIForia.UIFixedLength? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.BackgroundImageTileX, value), state);
         }
 
-        public UIFixedLength GetBackgroundImageTileX(StyleState state) {
+        public UIForia.UIFixedLength GetBackgroundImageTileX(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.BackgroundImageTileX, state).AsUIFixedLength;
         }
         
-        public void SetBackgroundImageTileY(UIFixedLength value, StyleState state) {
+        public void SetBackgroundImageTileY(in UIForia.UIFixedLength? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.BackgroundImageTileY, value), state);
         }
 
-        public UIFixedLength GetBackgroundImageTileY(StyleState state) {
+        public UIForia.UIFixedLength GetBackgroundImageTileY(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.BackgroundImageTileY, state).AsUIFixedLength;
         }
         
-        public void SetBackgroundImageRotation(UIFixedLength value, StyleState state) {
+        public void SetBackgroundImageRotation(in UIForia.UIFixedLength? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.BackgroundImageRotation, value), state);
         }
 
-        public UIFixedLength GetBackgroundImageRotation(StyleState state) {
+        public UIForia.UIFixedLength GetBackgroundImageRotation(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.BackgroundImageRotation, state).AsUIFixedLength;
         }
         
-        public void SetBackgroundImage(Texture2D value, StyleState state) {
+        public void SetBackgroundImage(UnityEngine.Texture2D value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.BackgroundImage, value), state);
         }
 
-        public Texture2D GetBackgroundImage(StyleState state) {
+        public UnityEngine.Texture2D GetBackgroundImage(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.BackgroundImage, state).AsTexture2D;
         }
         
@@ -3275,7 +3124,7 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.Painter, state).AsString;
         }
         
-        public void SetOpacity(float value, StyleState state) {
+        public void SetOpacity(in float? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.Opacity, value), state);
         }
 
@@ -3283,23 +3132,23 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.Opacity, state).AsFloat;
         }
         
-        public void SetCursor(CursorStyle value, StyleState state) {
+        public void SetCursor(UIForia.Rendering.CursorStyle value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.Cursor, value), state);
         }
 
-        public CursorStyle GetCursor(StyleState state) {
+        public UIForia.Rendering.CursorStyle GetCursor(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.Cursor, state).AsCursorStyle;
         }
         
-        public void SetVisibility(Visibility value, StyleState state) {
+        public void SetVisibility(in UIForia.Rendering.Visibility? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.Visibility, (int)value), state);
         }
 
-        public Visibility GetVisibility(StyleState state) {
+        public UIForia.Rendering.Visibility GetVisibility(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.Visibility, state).AsVisibility;
         }
         
-        public void SetFlexItemOrder(int value, StyleState state) {
+        public void SetFlexItemOrder(in int? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.FlexItemOrder, value), state);
         }
 
@@ -3307,7 +3156,7 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.FlexItemOrder, state).AsInt;
         }
         
-        public void SetFlexItemGrow(int value, StyleState state) {
+        public void SetFlexItemGrow(in int? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.FlexItemGrow, value), state);
         }
 
@@ -3315,7 +3164,7 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.FlexItemGrow, state).AsInt;
         }
         
-        public void SetFlexItemShrink(int value, StyleState state) {
+        public void SetFlexItemShrink(in int? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.FlexItemShrink, value), state);
         }
 
@@ -3323,119 +3172,119 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.FlexItemShrink, state).AsInt;
         }
         
-        public void SetFlexLayoutDirection(LayoutDirection value, StyleState state) {
+        public void SetFlexLayoutDirection(in UIForia.Layout.LayoutDirection? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.FlexLayoutDirection, (int)value), state);
         }
 
-        public LayoutDirection GetFlexLayoutDirection(StyleState state) {
+        public UIForia.Layout.LayoutDirection GetFlexLayoutDirection(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.FlexLayoutDirection, state).AsLayoutDirection;
         }
         
-        public void SetFlexLayoutWrap(LayoutWrap value, StyleState state) {
+        public void SetFlexLayoutWrap(in UIForia.Layout.LayoutWrap? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.FlexLayoutWrap, (int)value), state);
         }
 
-        public LayoutWrap GetFlexLayoutWrap(StyleState state) {
+        public UIForia.Layout.LayoutWrap GetFlexLayoutWrap(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.FlexLayoutWrap, state).AsLayoutWrap;
         }
         
-        public void SetFlexLayoutMainAxisAlignment(MainAxisAlignment value, StyleState state) {
+        public void SetFlexLayoutMainAxisAlignment(in UIForia.Layout.MainAxisAlignment? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.FlexLayoutMainAxisAlignment, (int)value), state);
         }
 
-        public MainAxisAlignment GetFlexLayoutMainAxisAlignment(StyleState state) {
+        public UIForia.Layout.MainAxisAlignment GetFlexLayoutMainAxisAlignment(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.FlexLayoutMainAxisAlignment, state).AsMainAxisAlignment;
         }
         
-        public void SetFlexLayoutCrossAxisAlignment(CrossAxisAlignment value, StyleState state) {
+        public void SetFlexLayoutCrossAxisAlignment(in UIForia.Layout.CrossAxisAlignment? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.FlexLayoutCrossAxisAlignment, (int)value), state);
         }
 
-        public CrossAxisAlignment GetFlexLayoutCrossAxisAlignment(StyleState state) {
+        public UIForia.Layout.CrossAxisAlignment GetFlexLayoutCrossAxisAlignment(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.FlexLayoutCrossAxisAlignment, state).AsCrossAxisAlignment;
         }
         
-        public void SetGridItemX(GridItemPlacement value, StyleState state) {
+        public void SetGridItemX(in UIForia.Layout.LayoutTypes.GridItemPlacement? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.GridItemX, value), state);
         }
 
-        public GridItemPlacement GetGridItemX(StyleState state) {
+        public UIForia.Layout.LayoutTypes.GridItemPlacement GetGridItemX(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.GridItemX, state).AsGridItemPlacement;
         }
         
-        public void SetGridItemY(GridItemPlacement value, StyleState state) {
+        public void SetGridItemY(in UIForia.Layout.LayoutTypes.GridItemPlacement? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.GridItemY, value), state);
         }
 
-        public GridItemPlacement GetGridItemY(StyleState state) {
+        public UIForia.Layout.LayoutTypes.GridItemPlacement GetGridItemY(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.GridItemY, state).AsGridItemPlacement;
         }
         
-        public void SetGridItemWidth(GridItemPlacement value, StyleState state) {
+        public void SetGridItemWidth(in UIForia.Layout.LayoutTypes.GridItemPlacement? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.GridItemWidth, value), state);
         }
 
-        public GridItemPlacement GetGridItemWidth(StyleState state) {
+        public UIForia.Layout.LayoutTypes.GridItemPlacement GetGridItemWidth(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.GridItemWidth, state).AsGridItemPlacement;
         }
         
-        public void SetGridItemHeight(GridItemPlacement value, StyleState state) {
+        public void SetGridItemHeight(in UIForia.Layout.LayoutTypes.GridItemPlacement? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.GridItemHeight, value), state);
         }
 
-        public GridItemPlacement GetGridItemHeight(StyleState state) {
+        public UIForia.Layout.LayoutTypes.GridItemPlacement GetGridItemHeight(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.GridItemHeight, state).AsGridItemPlacement;
         }
         
-        public void SetGridLayoutDirection(LayoutDirection value, StyleState state) {
+        public void SetGridLayoutDirection(in UIForia.Layout.LayoutDirection? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.GridLayoutDirection, (int)value), state);
         }
 
-        public LayoutDirection GetGridLayoutDirection(StyleState state) {
+        public UIForia.Layout.LayoutDirection GetGridLayoutDirection(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.GridLayoutDirection, state).AsLayoutDirection;
         }
         
-        public void SetGridLayoutDensity(GridLayoutDensity value, StyleState state) {
+        public void SetGridLayoutDensity(in UIForia.Layout.GridLayoutDensity? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.GridLayoutDensity, (int)value), state);
         }
 
-        public GridLayoutDensity GetGridLayoutDensity(StyleState state) {
+        public UIForia.Layout.GridLayoutDensity GetGridLayoutDensity(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.GridLayoutDensity, state).AsGridLayoutDensity;
         }
         
-        public void SetGridLayoutColTemplate(IReadOnlyList<GridTrackSize> value, StyleState state) {
+        public void SetGridLayoutColTemplate(System.Collections.Generic.IReadOnlyList<UIForia.Layout.LayoutTypes.GridTrackSize> value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.GridLayoutColTemplate, value), state);
         }
 
-        public IReadOnlyList<GridTrackSize> GetGridLayoutColTemplate(StyleState state) {
+        public System.Collections.Generic.IReadOnlyList<UIForia.Layout.LayoutTypes.GridTrackSize> GetGridLayoutColTemplate(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.GridLayoutColTemplate, state).AsGridTemplate;
         }
         
-        public void SetGridLayoutRowTemplate(IReadOnlyList<GridTrackSize> value, StyleState state) {
+        public void SetGridLayoutRowTemplate(System.Collections.Generic.IReadOnlyList<UIForia.Layout.LayoutTypes.GridTrackSize> value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.GridLayoutRowTemplate, value), state);
         }
 
-        public IReadOnlyList<GridTrackSize> GetGridLayoutRowTemplate(StyleState state) {
+        public System.Collections.Generic.IReadOnlyList<UIForia.Layout.LayoutTypes.GridTrackSize> GetGridLayoutRowTemplate(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.GridLayoutRowTemplate, state).AsGridTemplate;
         }
         
-        public void SetGridLayoutColAutoSize(GridTrackSize value, StyleState state) {
+        public void SetGridLayoutColAutoSize(in UIForia.Layout.LayoutTypes.GridTrackSize? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.GridLayoutColAutoSize, value), state);
         }
 
-        public GridTrackSize GetGridLayoutMainAxisAutoSize(StyleState state) {
+        public UIForia.Layout.LayoutTypes.GridTrackSize GetGridLayoutColAutoSize(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.GridLayoutColAutoSize, state).AsGridTrackSize;
         }
         
-        public void SetGridLayoutRowAutoSize(GridTrackSize value, StyleState state) {
+        public void SetGridLayoutRowAutoSize(in UIForia.Layout.LayoutTypes.GridTrackSize? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.GridLayoutRowAutoSize, value), state);
         }
 
-        public GridTrackSize GetGridLayoutCrossAxisAutoSize(StyleState state) {
+        public UIForia.Layout.LayoutTypes.GridTrackSize GetGridLayoutRowAutoSize(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.GridLayoutRowAutoSize, state).AsGridTrackSize;
         }
         
-        public void SetGridLayoutColGap(float value, StyleState state) {
+        public void SetGridLayoutColGap(in float? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.GridLayoutColGap, value), state);
         }
 
@@ -3443,7 +3292,7 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.GridLayoutColGap, state).AsFloat;
         }
         
-        public void SetGridLayoutRowGap(float value, StyleState state) {
+        public void SetGridLayoutRowGap(in float? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.GridLayoutRowGap, value), state);
         }
 
@@ -3451,23 +3300,23 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.GridLayoutRowGap, state).AsFloat;
         }
         
-        public void SetGridLayoutColAlignment(GridAxisAlignment value, StyleState state) {
+        public void SetGridLayoutColAlignment(in UIForia.Layout.GridAxisAlignment? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.GridLayoutColAlignment, (int)value), state);
         }
 
-        public GridAxisAlignment GetGridLayoutColAlignment(StyleState state) {
+        public UIForia.Layout.GridAxisAlignment GetGridLayoutColAlignment(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.GridLayoutColAlignment, state).AsGridAxisAlignment;
         }
         
-        public void SetGridLayoutRowAlignment(GridAxisAlignment value, StyleState state) {
+        public void SetGridLayoutRowAlignment(in UIForia.Layout.GridAxisAlignment? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.GridLayoutRowAlignment, (int)value), state);
         }
 
-        public GridAxisAlignment GetGridLayoutRowAlignment(StyleState state) {
+        public UIForia.Layout.GridAxisAlignment GetGridLayoutRowAlignment(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.GridLayoutRowAlignment, state).AsGridAxisAlignment;
         }
         
-        public void SetRadialLayoutStartAngle(float value, StyleState state) {
+        public void SetRadialLayoutStartAngle(in float? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.RadialLayoutStartAngle, value), state);
         }
 
@@ -3475,7 +3324,7 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.RadialLayoutStartAngle, state).AsFloat;
         }
         
-        public void SetRadialLayoutEndAngle(float value, StyleState state) {
+        public void SetRadialLayoutEndAngle(in float? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.RadialLayoutEndAngle, value), state);
         }
 
@@ -3483,47 +3332,47 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.RadialLayoutEndAngle, state).AsFloat;
         }
         
-        public void SetRadialLayoutRadius(UIFixedLength value, StyleState state) {
+        public void SetRadialLayoutRadius(in UIForia.UIFixedLength? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.RadialLayoutRadius, value), state);
         }
 
-        public UIFixedLength GetRadialLayoutRadius(StyleState state) {
+        public UIForia.UIFixedLength GetRadialLayoutRadius(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.RadialLayoutRadius, state).AsUIFixedLength;
         }
         
-        public void SetAlignmentTargetX(AlignmentTarget value, StyleState state) {
+        public void SetAlignmentTargetX(in UIForia.Layout.AlignmentTarget? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.AlignmentTargetX, (int)value), state);
         }
 
-        public AlignmentTarget GetAlignmentTargetX(StyleState state) {
+        public UIForia.Layout.AlignmentTarget GetAlignmentTargetX(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.AlignmentTargetX, state).AsAlignmentTarget;
         }
         
-        public void SetAlignmentTargetY(AlignmentTarget value, StyleState state) {
+        public void SetAlignmentTargetY(in UIForia.Layout.AlignmentTarget? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.AlignmentTargetY, (int)value), state);
         }
 
-        public AlignmentTarget GetAlignmentTargetY(StyleState state) {
+        public UIForia.Layout.AlignmentTarget GetAlignmentTargetY(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.AlignmentTargetY, state).AsAlignmentTarget;
         }
         
-        public void SetAlignmentBehaviorX(AlignmentBehavior value, StyleState state) {
+        public void SetAlignmentBehaviorX(in UIForia.Layout.AlignmentBehavior? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.AlignmentBehaviorX, (int)value), state);
         }
 
-        public AlignmentBehavior GetAlignmentBehaviorX(StyleState state) {
+        public UIForia.Layout.AlignmentBehavior GetAlignmentBehaviorX(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.AlignmentBehaviorX, state).AsAlignmentBehavior;
         }
         
-        public void SetAlignmentBehaviorY(AlignmentBehavior value, StyleState state) {
+        public void SetAlignmentBehaviorY(in UIForia.Layout.AlignmentBehavior? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.AlignmentBehaviorY, (int)value), state);
         }
 
-        public AlignmentBehavior GetAlignmentBehaviorY(StyleState state) {
+        public UIForia.Layout.AlignmentBehavior GetAlignmentBehaviorY(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.AlignmentBehaviorY, state).AsAlignmentBehavior;
         }
         
-        public void SetAlignmentPivotX(float value, StyleState state) {
+        public void SetAlignmentPivotX(in float? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.AlignmentPivotX, value), state);
         }
 
@@ -3531,7 +3380,7 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.AlignmentPivotX, state).AsFloat;
         }
         
-        public void SetAlignmentPivotY(float value, StyleState state) {
+        public void SetAlignmentPivotY(in float? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.AlignmentPivotY, value), state);
         }
 
@@ -3539,263 +3388,263 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.AlignmentPivotY, state).AsFloat;
         }
         
-        public void SetAlignmentOffsetX(UIFixedLength value, StyleState state) {
+        public void SetAlignmentOffsetX(in UIForia.UIFixedLength? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.AlignmentOffsetX, value), state);
         }
 
-        public UIFixedLength GetAlignmentOffsetX(StyleState state) {
+        public UIForia.UIFixedLength GetAlignmentOffsetX(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.AlignmentOffsetX, state).AsUIFixedLength;
         }
         
-        public void SetAlignmentOffsetY(UIFixedLength value, StyleState state) {
+        public void SetAlignmentOffsetY(in UIForia.UIFixedLength? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.AlignmentOffsetY, value), state);
         }
 
-        public UIFixedLength GetAlignmentOffsetY(StyleState state) {
+        public UIForia.UIFixedLength GetAlignmentOffsetY(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.AlignmentOffsetY, state).AsUIFixedLength;
         }
         
-        public void SetFitX(Fit value, StyleState state) {
+        public void SetFitX(in UIForia.Layout.Fit? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.FitX, (int)value), state);
         }
 
-        public Fit GetFitX(StyleState state) {
+        public UIForia.Layout.Fit GetFitX(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.FitX, state).AsFit;
         }
         
-        public void SetFitY(Fit value, StyleState state) {
+        public void SetFitY(in UIForia.Layout.Fit? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.FitY, (int)value), state);
         }
 
-        public Fit GetFitY(StyleState state) {
+        public UIForia.Layout.Fit GetFitY(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.FitY, state).AsFit;
         }
         
-        public void SetMinWidth(UIMeasurement value, StyleState state) {
+        public void SetMinWidth(in UIForia.Rendering.UIMeasurement? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.MinWidth, value), state);
         }
 
-        public UIMeasurement GetMinWidth(StyleState state) {
+        public UIForia.Rendering.UIMeasurement GetMinWidth(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.MinWidth, state).AsUIMeasurement;
         }
         
-        public void SetMaxWidth(UIMeasurement value, StyleState state) {
+        public void SetMaxWidth(in UIForia.Rendering.UIMeasurement? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.MaxWidth, value), state);
         }
 
-        public UIMeasurement GetMaxWidth(StyleState state) {
+        public UIForia.Rendering.UIMeasurement GetMaxWidth(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.MaxWidth, state).AsUIMeasurement;
         }
         
-        public void SetPreferredWidth(UIMeasurement value, StyleState state) {
+        public void SetPreferredWidth(in UIForia.Rendering.UIMeasurement? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.PreferredWidth, value), state);
         }
 
-        public UIMeasurement GetPreferredWidth(StyleState state) {
+        public UIForia.Rendering.UIMeasurement GetPreferredWidth(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.PreferredWidth, state).AsUIMeasurement;
         }
         
-        public void SetMinHeight(UIMeasurement value, StyleState state) {
+        public void SetMinHeight(in UIForia.Rendering.UIMeasurement? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.MinHeight, value), state);
         }
 
-        public UIMeasurement GetMinHeight(StyleState state) {
+        public UIForia.Rendering.UIMeasurement GetMinHeight(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.MinHeight, state).AsUIMeasurement;
         }
         
-        public void SetMaxHeight(UIMeasurement value, StyleState state) {
+        public void SetMaxHeight(in UIForia.Rendering.UIMeasurement? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.MaxHeight, value), state);
         }
 
-        public UIMeasurement GetMaxHeight(StyleState state) {
+        public UIForia.Rendering.UIMeasurement GetMaxHeight(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.MaxHeight, state).AsUIMeasurement;
         }
         
-        public void SetPreferredHeight(UIMeasurement value, StyleState state) {
+        public void SetPreferredHeight(in UIForia.Rendering.UIMeasurement? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.PreferredHeight, value), state);
         }
 
-        public UIMeasurement GetPreferredHeight(StyleState state) {
+        public UIForia.Rendering.UIMeasurement GetPreferredHeight(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.PreferredHeight, state).AsUIMeasurement;
         }
         
-        public void SetMarginTop(UIMeasurement value, StyleState state) {
+        public void SetMarginTop(in UIForia.Rendering.UIMeasurement? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.MarginTop, value), state);
         }
 
-        public UIMeasurement GetMarginTop(StyleState state) {
+        public UIForia.Rendering.UIMeasurement GetMarginTop(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.MarginTop, state).AsUIMeasurement;
         }
         
-        public void SetMarginRight(UIMeasurement value, StyleState state) {
+        public void SetMarginRight(in UIForia.Rendering.UIMeasurement? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.MarginRight, value), state);
         }
 
-        public UIMeasurement GetMarginRight(StyleState state) {
+        public UIForia.Rendering.UIMeasurement GetMarginRight(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.MarginRight, state).AsUIMeasurement;
         }
         
-        public void SetMarginBottom(UIMeasurement value, StyleState state) {
+        public void SetMarginBottom(in UIForia.Rendering.UIMeasurement? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.MarginBottom, value), state);
         }
 
-        public UIMeasurement GetMarginBottom(StyleState state) {
+        public UIForia.Rendering.UIMeasurement GetMarginBottom(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.MarginBottom, state).AsUIMeasurement;
         }
         
-        public void SetMarginLeft(UIMeasurement value, StyleState state) {
+        public void SetMarginLeft(in UIForia.Rendering.UIMeasurement? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.MarginLeft, value), state);
         }
 
-        public UIMeasurement GetMarginLeft(StyleState state) {
+        public UIForia.Rendering.UIMeasurement GetMarginLeft(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.MarginLeft, state).AsUIMeasurement;
         }
         
-        public void SetBorderColor(Color value, StyleState state) {
+        public void SetBorderColor(in UnityEngine.Color? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.BorderColor, value), state);
         }
 
-        public Color GetBorderColor(StyleState state) {
+        public UnityEngine.Color GetBorderColor(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.BorderColor, state).AsColor;
         }
         
-        public void SetBorderTop(UIFixedLength value, StyleState state) {
+        public void SetBorderTop(in UIForia.UIFixedLength? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.BorderTop, value), state);
         }
 
-        public UIFixedLength GetBorderTop(StyleState state) {
+        public UIForia.UIFixedLength GetBorderTop(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.BorderTop, state).AsUIFixedLength;
         }
         
-        public void SetBorderRight(UIFixedLength value, StyleState state) {
+        public void SetBorderRight(in UIForia.UIFixedLength? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.BorderRight, value), state);
         }
 
-        public UIFixedLength GetBorderRight(StyleState state) {
+        public UIForia.UIFixedLength GetBorderRight(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.BorderRight, state).AsUIFixedLength;
         }
         
-        public void SetBorderBottom(UIFixedLength value, StyleState state) {
+        public void SetBorderBottom(in UIForia.UIFixedLength? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.BorderBottom, value), state);
         }
 
-        public UIFixedLength GetBorderBottom(StyleState state) {
+        public UIForia.UIFixedLength GetBorderBottom(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.BorderBottom, state).AsUIFixedLength;
         }
         
-        public void SetBorderLeft(UIFixedLength value, StyleState state) {
+        public void SetBorderLeft(in UIForia.UIFixedLength? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.BorderLeft, value), state);
         }
 
-        public UIFixedLength GetBorderLeft(StyleState state) {
+        public UIForia.UIFixedLength GetBorderLeft(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.BorderLeft, state).AsUIFixedLength;
         }
         
-        public void SetBorderRadiusTopLeft(UIFixedLength value, StyleState state) {
+        public void SetBorderRadiusTopLeft(in UIForia.UIFixedLength? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.BorderRadiusTopLeft, value), state);
         }
 
-        public UIFixedLength GetBorderRadiusTopLeft(StyleState state) {
+        public UIForia.UIFixedLength GetBorderRadiusTopLeft(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.BorderRadiusTopLeft, state).AsUIFixedLength;
         }
         
-        public void SetBorderRadiusTopRight(UIFixedLength value, StyleState state) {
+        public void SetBorderRadiusTopRight(in UIForia.UIFixedLength? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.BorderRadiusTopRight, value), state);
         }
 
-        public UIFixedLength GetBorderRadiusTopRight(StyleState state) {
+        public UIForia.UIFixedLength GetBorderRadiusTopRight(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.BorderRadiusTopRight, state).AsUIFixedLength;
         }
         
-        public void SetBorderRadiusBottomRight(UIFixedLength value, StyleState state) {
+        public void SetBorderRadiusBottomRight(in UIForia.UIFixedLength? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.BorderRadiusBottomRight, value), state);
         }
 
-        public UIFixedLength GetBorderRadiusBottomRight(StyleState state) {
+        public UIForia.UIFixedLength GetBorderRadiusBottomRight(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.BorderRadiusBottomRight, state).AsUIFixedLength;
         }
         
-        public void SetBorderRadiusBottomLeft(UIFixedLength value, StyleState state) {
+        public void SetBorderRadiusBottomLeft(in UIForia.UIFixedLength? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.BorderRadiusBottomLeft, value), state);
         }
 
-        public UIFixedLength GetBorderRadiusBottomLeft(StyleState state) {
+        public UIForia.UIFixedLength GetBorderRadiusBottomLeft(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.BorderRadiusBottomLeft, state).AsUIFixedLength;
         }
         
-        public void SetPaddingTop(UIFixedLength value, StyleState state) {
+        public void SetPaddingTop(in UIForia.UIFixedLength? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.PaddingTop, value), state);
         }
 
-        public UIFixedLength GetPaddingTop(StyleState state) {
+        public UIForia.UIFixedLength GetPaddingTop(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.PaddingTop, state).AsUIFixedLength;
         }
         
-        public void SetPaddingRight(UIFixedLength value, StyleState state) {
+        public void SetPaddingRight(in UIForia.UIFixedLength? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.PaddingRight, value), state);
         }
 
-        public UIFixedLength GetPaddingRight(StyleState state) {
+        public UIForia.UIFixedLength GetPaddingRight(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.PaddingRight, state).AsUIFixedLength;
         }
         
-        public void SetPaddingBottom(UIFixedLength value, StyleState state) {
+        public void SetPaddingBottom(in UIForia.UIFixedLength? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.PaddingBottom, value), state);
         }
 
-        public UIFixedLength GetPaddingBottom(StyleState state) {
+        public UIForia.UIFixedLength GetPaddingBottom(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.PaddingBottom, state).AsUIFixedLength;
         }
         
-        public void SetPaddingLeft(UIFixedLength value, StyleState state) {
+        public void SetPaddingLeft(in UIForia.UIFixedLength? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.PaddingLeft, value), state);
         }
 
-        public UIFixedLength GetPaddingLeft(StyleState state) {
+        public UIForia.UIFixedLength GetPaddingLeft(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.PaddingLeft, state).AsUIFixedLength;
         }
         
-        public void SetTextColor(in Color value, StyleState state) {
+        public void SetTextColor(in UnityEngine.Color? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.TextColor, value), state);
         }
 
-        public Color GetTextColor(StyleState state) {
+        public UnityEngine.Color GetTextColor(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.TextColor, state).AsColor;
         }
         
-        public void SetTextFontAsset(FontAsset value, StyleState state) {
+        public void SetTextFontAsset(UIForia.FontAsset value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.TextFontAsset, value), state);
         }
 
-        public FontAsset GetTextFontAsset(StyleState state) {
+        public UIForia.FontAsset GetTextFontAsset(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.TextFontAsset, state).AsFont;
         }
         
-        public void SetTextFontSize(in UIFixedLength? value, StyleState state) {
+        public void SetTextFontSize(in UIForia.UIFixedLength? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.TextFontSize, value), state);
         }
 
-        public UIFixedLength GetTextFontSize(StyleState state) {
+        public UIForia.UIFixedLength GetTextFontSize(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.TextFontSize, state).AsUIFixedLength;
         }
         
-        public void SetTextFontStyle(FontStyle value, StyleState state) {
+        public void SetTextFontStyle(in UIForia.Text.FontStyle? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.TextFontStyle, (int)value), state);
         }
 
-        public FontStyle GetTextFontStyle(StyleState state) {
+        public UIForia.Text.FontStyle GetTextFontStyle(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.TextFontStyle, state).AsFontStyle;
         }
         
-        public void SetTextAlignment(TextAlignment value, StyleState state) {
+        public void SetTextAlignment(in UIForia.Text.TextAlignment? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.TextAlignment, (int)value), state);
         }
 
-        public TextAlignment GetTextAlignment(StyleState state) {
+        public UIForia.Text.TextAlignment GetTextAlignment(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.TextAlignment, state).AsTextAlignment;
         }
         
-        public void SetTextOutlineWidth(float value, StyleState state) {
+        public void SetTextOutlineWidth(in float? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.TextOutlineWidth, value), state);
         }
 
@@ -3803,15 +3652,15 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.TextOutlineWidth, state).AsFloat;
         }
         
-        public void SetTextOutlineColor(Color value, StyleState state) {
+        public void SetTextOutlineColor(in UnityEngine.Color? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.TextOutlineColor, value), state);
         }
 
-        public Color GetTextOutlineColor(StyleState state) {
+        public UnityEngine.Color GetTextOutlineColor(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.TextOutlineColor, state).AsColor;
         }
         
-        public void SetTextOutlineSoftness(float value, StyleState state) {
+        public void SetTextOutlineSoftness(in float? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.TextOutlineSoftness, value), state);
         }
 
@@ -3819,15 +3668,15 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.TextOutlineSoftness, state).AsFloat;
         }
         
-        public void SetTextGlowColor(Color value, StyleState state) {
+        public void SetTextGlowColor(in UnityEngine.Color? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.TextGlowColor, value), state);
         }
 
-        public Color GetTextGlowColor(StyleState state) {
+        public UnityEngine.Color GetTextGlowColor(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.TextGlowColor, state).AsColor;
         }
         
-        public void SetTextGlowOffset(float value, StyleState state) {
+        public void SetTextGlowOffset(in float? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.TextGlowOffset, value), state);
         }
 
@@ -3835,7 +3684,7 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.TextGlowOffset, state).AsFloat;
         }
         
-        public void SetTextGlowInner(float value, StyleState state) {
+        public void SetTextGlowInner(in float? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.TextGlowInner, value), state);
         }
 
@@ -3843,7 +3692,7 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.TextGlowInner, state).AsFloat;
         }
         
-        public void SetTextGlowOuter(float value, StyleState state) {
+        public void SetTextGlowOuter(in float? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.TextGlowOuter, value), state);
         }
 
@@ -3851,7 +3700,7 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.TextGlowOuter, state).AsFloat;
         }
         
-        public void SetTextGlowPower(float value, StyleState state) {
+        public void SetTextGlowPower(in float? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.TextGlowPower, value), state);
         }
 
@@ -3859,15 +3708,15 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.TextGlowPower, state).AsFloat;
         }
         
-        public void SetTextUnderlayColor(Color value, StyleState state) {
+        public void SetTextUnderlayColor(in UnityEngine.Color? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.TextUnderlayColor, value), state);
         }
 
-        public Color GetTextUnderlayColor(StyleState state) {
+        public UnityEngine.Color GetTextUnderlayColor(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.TextUnderlayColor, state).AsColor;
         }
         
-        public void SetTextUnderlayX(float value, StyleState state) {
+        public void SetTextUnderlayX(in float? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.TextUnderlayX, value), state);
         }
 
@@ -3875,7 +3724,7 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.TextUnderlayX, state).AsFloat;
         }
         
-        public void SetTextUnderlayY(float value, StyleState state) {
+        public void SetTextUnderlayY(in float? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.TextUnderlayY, value), state);
         }
 
@@ -3883,7 +3732,7 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.TextUnderlayY, state).AsFloat;
         }
         
-        public void SetTextUnderlayDilate(float value, StyleState state) {
+        public void SetTextUnderlayDilate(in float? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.TextUnderlayDilate, value), state);
         }
 
@@ -3891,7 +3740,7 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.TextUnderlayDilate, state).AsFloat;
         }
         
-        public void SetTextUnderlaySoftness(float value, StyleState state) {
+        public void SetTextUnderlaySoftness(in float? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.TextUnderlaySoftness, value), state);
         }
 
@@ -3899,7 +3748,7 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.TextUnderlaySoftness, state).AsFloat;
         }
         
-        public void SetTextFaceDilate(float value, StyleState state) {
+        public void SetTextFaceDilate(in float? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.TextFaceDilate, value), state);
         }
 
@@ -3907,103 +3756,103 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.TextFaceDilate, state).AsFloat;
         }
         
-        public void SetTextUnderlayType(UnderlayType value, StyleState state) {
+        public void SetTextUnderlayType(in UIForia.Rendering.UnderlayType? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.TextUnderlayType, (int)value), state);
         }
 
-        public UnderlayType GetTextUnderlayType(StyleState state) {
+        public UIForia.Rendering.UnderlayType GetTextUnderlayType(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.TextUnderlayType, state).AsUnderlayType;
         }
         
-        public void SetTextTransform(TextTransform value, StyleState state) {
+        public void SetTextTransform(in UIForia.Text.TextTransform? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.TextTransform, (int)value), state);
         }
 
-        public TextTransform GetTextTransform(StyleState state) {
+        public UIForia.Text.TextTransform GetTextTransform(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.TextTransform, state).AsTextTransform;
         }
         
-        public void SetTextWhitespaceMode(WhitespaceMode value, StyleState state) {
+        public void SetTextWhitespaceMode(in UIForia.Text.WhitespaceMode? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.TextWhitespaceMode, (int)value), state);
         }
 
-        public WhitespaceMode GetTextWhitespaceMode(StyleState state) {
+        public UIForia.Text.WhitespaceMode GetTextWhitespaceMode(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.TextWhitespaceMode, state).AsWhitespaceMode;
         }
         
-        public void SetAnchorTop(UIFixedLength value, StyleState state) {
+        public void SetAnchorTop(in UIForia.UIFixedLength? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.AnchorTop, value), state);
         }
 
-        public UIFixedLength GetAnchorTop(StyleState state) {
+        public UIForia.UIFixedLength GetAnchorTop(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.AnchorTop, state).AsUIFixedLength;
         }
         
-        public void SetAnchorRight(UIFixedLength value, StyleState state) {
+        public void SetAnchorRight(in UIForia.UIFixedLength? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.AnchorRight, value), state);
         }
 
-        public UIFixedLength GetAnchorRight(StyleState state) {
+        public UIForia.UIFixedLength GetAnchorRight(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.AnchorRight, state).AsUIFixedLength;
         }
         
-        public void SetAnchorBottom(UIFixedLength value, StyleState state) {
+        public void SetAnchorBottom(in UIForia.UIFixedLength? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.AnchorBottom, value), state);
         }
 
-        public UIFixedLength GetAnchorBottom(StyleState state) {
+        public UIForia.UIFixedLength GetAnchorBottom(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.AnchorBottom, state).AsUIFixedLength;
         }
         
-        public void SetAnchorLeft(UIFixedLength value, StyleState state) {
+        public void SetAnchorLeft(in UIForia.UIFixedLength? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.AnchorLeft, value), state);
         }
 
-        public UIFixedLength GetAnchorLeft(StyleState state) {
+        public UIForia.UIFixedLength GetAnchorLeft(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.AnchorLeft, state).AsUIFixedLength;
         }
         
-        public void SetAnchorTarget(AnchorTarget value, StyleState state) {
+        public void SetAnchorTarget(in UIForia.Rendering.AnchorTarget? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.AnchorTarget, (int)value), state);
         }
 
-        public AnchorTarget GetAnchorTarget(StyleState state) {
+        public UIForia.Rendering.AnchorTarget GetAnchorTarget(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.AnchorTarget, state).AsAnchorTarget;
         }
         
-        public void SetTransformPositionX(TransformOffset value, StyleState state) {
+        public void SetTransformPositionX(in UIForia.TransformOffset? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.TransformPositionX, value), state);
         }
 
-        public TransformOffset GetTransformPositionX(StyleState state) {
+        public UIForia.TransformOffset GetTransformPositionX(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.TransformPositionX, state).AsTransformOffset;
         }
         
-        public void SetTransformPositionY(TransformOffset value, StyleState state) {
+        public void SetTransformPositionY(in UIForia.TransformOffset? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.TransformPositionY, value), state);
         }
 
-        public TransformOffset GetTransformPositionY(StyleState state) {
+        public UIForia.TransformOffset GetTransformPositionY(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.TransformPositionY, state).AsTransformOffset;
         }
         
-        public void SetTransformPivotX(UIFixedLength value, StyleState state) {
+        public void SetTransformPivotX(in UIForia.UIFixedLength? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.TransformPivotX, value), state);
         }
 
-        public UIFixedLength GetTransformPivotX(StyleState state) {
+        public UIForia.UIFixedLength GetTransformPivotX(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.TransformPivotX, state).AsUIFixedLength;
         }
         
-        public void SetTransformPivotY(UIFixedLength value, StyleState state) {
+        public void SetTransformPivotY(in UIForia.UIFixedLength? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.TransformPivotY, value), state);
         }
 
-        public UIFixedLength GetTransformPivotY(StyleState state) {
+        public UIForia.UIFixedLength GetTransformPivotY(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.TransformPivotY, state).AsUIFixedLength;
         }
         
-        public void SetTransformScaleX(float value, StyleState state) {
+        public void SetTransformScaleX(in float? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.TransformScaleX, value), state);
         }
 
@@ -4011,7 +3860,7 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.TransformScaleX, state).AsFloat;
         }
         
-        public void SetTransformScaleY(float value, StyleState state) {
+        public void SetTransformScaleY(in float? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.TransformScaleY, value), state);
         }
 
@@ -4019,7 +3868,7 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.TransformScaleY, state).AsFloat;
         }
         
-        public void SetTransformRotation(float value, StyleState state) {
+        public void SetTransformRotation(in float? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.TransformRotation, value), state);
         }
 
@@ -4027,39 +3876,39 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.TransformRotation, state).AsFloat;
         }
         
-        public void SetTransformBehaviorX(TransformBehavior value, StyleState state) {
+        public void SetTransformBehaviorX(in UIForia.Rendering.TransformBehavior? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.TransformBehaviorX, (int)value), state);
         }
 
-        public TransformBehavior GetTransformBehaviorX(StyleState state) {
+        public UIForia.Rendering.TransformBehavior GetTransformBehaviorX(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.TransformBehaviorX, state).AsTransformBehavior;
         }
         
-        public void SetTransformBehaviorY(TransformBehavior value, StyleState state) {
+        public void SetTransformBehaviorY(in UIForia.Rendering.TransformBehavior? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.TransformBehaviorY, (int)value), state);
         }
 
-        public TransformBehavior GetTransformBehaviorY(StyleState state) {
+        public UIForia.Rendering.TransformBehavior GetTransformBehaviorY(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.TransformBehaviorY, state).AsTransformBehavior;
         }
         
-        public void SetLayoutType(LayoutType value, StyleState state) {
+        public void SetLayoutType(in UIForia.Layout.LayoutType? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.LayoutType, (int)value), state);
         }
 
-        public LayoutType GetLayoutType(StyleState state) {
+        public UIForia.Layout.LayoutType GetLayoutType(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.LayoutType, state).AsLayoutType;
         }
         
-        public void SetLayoutBehavior(LayoutBehavior value, StyleState state) {
+        public void SetLayoutBehavior(in UIForia.Layout.LayoutBehavior? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.LayoutBehavior, (int)value), state);
         }
 
-        public LayoutBehavior GetLayoutBehavior(StyleState state) {
+        public UIForia.Layout.LayoutBehavior GetLayoutBehavior(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.LayoutBehavior, state).AsLayoutBehavior;
         }
         
-        public void SetZIndex(int value, StyleState state) {
+        public void SetZIndex(in int? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.ZIndex, value), state);
         }
 
@@ -4067,7 +3916,7 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.ZIndex, state).AsInt;
         }
         
-        public void SetRenderLayerOffset(int value, StyleState state) {
+        public void SetRenderLayerOffset(in int? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.RenderLayerOffset, value), state);
         }
 
@@ -4075,15 +3924,15 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.RenderLayerOffset, state).AsInt;
         }
         
-        public void SetRenderLayer(RenderLayer value, StyleState state) {
+        public void SetRenderLayer(in UIForia.Rendering.RenderLayer? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.RenderLayer, (int)value), state);
         }
 
-        public RenderLayer GetRenderLayer(StyleState state) {
+        public UIForia.Rendering.RenderLayer GetRenderLayer(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.RenderLayer, state).AsRenderLayer;
         }
         
-        public void SetLayer(int value, StyleState state) {
+        public void SetLayer(in int? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.Layer, value), state);
         }
 
@@ -4099,31 +3948,31 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.Scrollbar, state).AsString;
         }
         
-        public void SetScrollbarSize(UIMeasurement value, StyleState state) {
+        public void SetScrollbarSize(in UIForia.Rendering.UIMeasurement? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.ScrollbarSize, value), state);
         }
 
-        public UIMeasurement GetScrollbarSize(StyleState state) {
+        public UIForia.Rendering.UIMeasurement GetScrollbarSize(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.ScrollbarSize, state).AsUIMeasurement;
         }
         
-        public void SetScrollbarColor(Color value, StyleState state) {
+        public void SetScrollbarColor(in UnityEngine.Color? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.ScrollbarColor, value), state);
         }
 
-        public Color GetScrollbarColor(StyleState state) {
+        public UnityEngine.Color GetScrollbarColor(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.ScrollbarColor, state).AsColor;
         }
         
-        public void SetShadowType(UnderlayType value, StyleState state) {
+        public void SetShadowType(in UIForia.Rendering.UnderlayType? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.ShadowType, (int)value), state);
         }
 
-        public UnderlayType GetShadowType(StyleState state) {
+        public UIForia.Rendering.UnderlayType GetShadowType(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.ShadowType, state).AsUnderlayType;
         }
         
-        public void SetShadowOffsetX(float value, StyleState state) {
+        public void SetShadowOffsetX(in float? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.ShadowOffsetX, value), state);
         }
 
@@ -4131,7 +3980,7 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.ShadowOffsetX, state).AsFloat;
         }
         
-        public void SetShadowOffsetY(float value, StyleState state) {
+        public void SetShadowOffsetY(in float? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.ShadowOffsetY, value), state);
         }
 
@@ -4139,7 +3988,7 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.ShadowOffsetY, state).AsFloat;
         }
         
-        public void SetShadowSoftnessX(float value, StyleState state) {
+        public void SetShadowSoftnessX(in float? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.ShadowSoftnessX, value), state);
         }
 
@@ -4147,7 +3996,7 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.ShadowSoftnessX, state).AsFloat;
         }
         
-        public void SetShadowSoftnessY(float value, StyleState state) {
+        public void SetShadowSoftnessY(in float? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.ShadowSoftnessY, value), state);
         }
 
@@ -4155,7 +4004,7 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.ShadowSoftnessY, state).AsFloat;
         }
         
-        public void SetShadowIntensity(float value, StyleState state) {
+        public void SetShadowIntensity(in float? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.ShadowIntensity, value), state);
         }
 
@@ -4422,7 +4271,7 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.ShadowSoftnessY, ShadowSoftnessY);
 				case StylePropertyId.ShadowIntensity:
 					 return new StyleProperty(StylePropertyId.ShadowIntensity, ShadowIntensity);
-				default: throw new ArgumentOutOfRangeException(nameof(propertyId), propertyId, null);
+				default: throw new System.ArgumentOutOfRangeException(nameof(propertyId), propertyId, null);
 				}  
         }
 

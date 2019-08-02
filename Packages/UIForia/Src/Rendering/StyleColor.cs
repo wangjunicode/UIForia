@@ -12,7 +12,7 @@ namespace UIForia.Rendering {
         [FieldOffset(2)] public byte b;
         [FieldOffset(3)] public byte a;
 
-        public StyleColor(Color color) {
+        public StyleColor(in Color color) {
             this.rgba = 0;
             this.r = (byte) (Mathf.Clamp01(color.r) * byte.MaxValue);
             this.g = (byte) (Mathf.Clamp01(color.g) * byte.MaxValue);
@@ -20,7 +20,7 @@ namespace UIForia.Rendering {
             this.a = (byte) (Mathf.Clamp01(color.a) * byte.MaxValue);
         }
         
-        public StyleColor(Color32 color) {
+        public StyleColor(in Color32 color) {
             this.rgba = 0;
             this.r = color.r;
             this.g = color.g;

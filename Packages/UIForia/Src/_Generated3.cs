@@ -50,8 +50,8 @@ namespace UIForia.Rendering {
 		public const GridLayoutDensity GridLayoutDensity = UIForia.Layout.GridLayoutDensity.Sparse;
 		public static readonly IReadOnlyList<UIForia.Layout.LayoutTypes.GridTrackSize> GridLayoutColTemplate = ListPool<GridTrackSize>.Empty;
 		public static readonly IReadOnlyList<UIForia.Layout.LayoutTypes.GridTrackSize> GridLayoutRowTemplate = ListPool<GridTrackSize>.Empty;
-		public static readonly GridTrackSize GridLayoutMainAxisAutoSize = new GridTrackSize(1f, GridTemplateUnit.MaxContent);
-		public static readonly GridTrackSize GridLayoutCrossAxisAutoSize = new GridTrackSize(1f, GridTemplateUnit.FractionalRemaining);
+		public static readonly GridTrackSize GridLayoutColAutoSize = new GridTrackSize(1f, GridTemplateUnit.MaxContent);
+		public static readonly GridTrackSize GridLayoutRowAutoSize = new GridTrackSize(1f, GridTemplateUnit.FractionalRemaining);
 		public const float GridLayoutColGap = 0f;
 		public const float GridLayoutRowGap = 0f;
 		public const GridAxisAlignment GridLayoutColAlignment = UIForia.Layout.GridAxisAlignment.Grow;
@@ -177,13 +177,13 @@ namespace UIForia.Rendering {
 				case StylePropertyId.BackgroundImageRotation:
 					 return new StyleProperty(StylePropertyId.BackgroundImageRotation, new UIFixedLength(0f, UIFixedUnit.Pixel));
 				case StylePropertyId.BackgroundImage:
-					 return new StyleProperty(StylePropertyId.BackgroundImage, null);
+					 return new StyleProperty(StylePropertyId.BackgroundImage, (Texture)null);
 				case StylePropertyId.Painter:
 					 return new StyleProperty(StylePropertyId.Painter, "");
 				case StylePropertyId.Opacity:
 					 return new StyleProperty(StylePropertyId.Opacity, 1f);
 				case StylePropertyId.Cursor:
-					 return new StyleProperty(StylePropertyId.Cursor, null);
+					 return new StyleProperty(StylePropertyId.Cursor, (CursorStyle)null);
 				case StylePropertyId.Visibility:
 					 return new StyleProperty(StylePropertyId.Visibility, (int)UIForia.Rendering.Visibility.Visible);
 				case StylePropertyId.FlexItemOrder:

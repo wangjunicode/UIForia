@@ -184,20 +184,20 @@ namespace UIForia.Systems {
                 return;
             }
 
-            if (property.IsUnset) {
+            if (!property.hasValue) {
                 UIElement ptr = element.parent;
                 StyleProperty parentProperty = StyleProperty.Unset(property.propertyId);
 
                 while (ptr != null) {
                     parentProperty = ptr.style.GetPropertyValue(property.propertyId);
-                    if (!parentProperty.IsUnset2) {
+                    if (parentProperty.hasValue) {
                         break;
                     }
 
                     ptr = ptr.parent;
                 }
 
-                if (parentProperty.IsUnset2) {
+                if (!parentProperty.hasValue) {
                     parentProperty = DefaultStyleValues_Generated.GetPropertyValue(property.propertyId);
                 }
 

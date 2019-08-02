@@ -191,8 +191,8 @@ style myStyle {
         Assert.AreEqual(1, containers.Length);
         Assert.AreEqual(2, containers[0].groups.Count);
 
-        Assert.AreEqual(10, containers[0].groups[0].normal.style.MarginTop.value);
-        Assert.AreEqual(UIMeasurementUnit.Pixel, containers[0].groups[0].normal.style.MarginTop.unit);
+        Assert.IsTrue(Mathf.Approximately(0.1f, containers[0].groups[0].normal.style.MarginTop.value));
+        Assert.AreEqual(UIMeasurementUnit.Percentage, containers[0].groups[0].normal.style.MarginTop.unit);
         Assert.AreEqual(20, containers[0].groups[0].hover.style.MarginLeft.value);
         Assert.AreEqual(20, containers[0].groups[1].normal.style.MarginTop.value);
     }

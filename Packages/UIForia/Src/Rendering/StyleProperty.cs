@@ -4,16 +4,15 @@ using System.Runtime.InteropServices;
 using UIForia.Layout;
 using UIForia.Layout.LayoutTypes;
 using UIForia.Text;
-using UIForia.Util;
 using UnityEngine;
 using FontStyle = UIForia.Text.FontStyle;
 using TextAlignment = UIForia.Text.TextAlignment;
 
 namespace UIForia.Rendering {
 
-    // todo if object is at 0 we can do better with packing & get rid of int 2, nobody uses it yet anyway
     [StructLayout(LayoutKind.Explicit)]
-    public partial struct StyleProperty {
+    [DebuggerDisplay("type = {propertyId.ToString()}")]
+    public readonly partial struct StyleProperty {
 
         [FieldOffset(0)] public readonly StylePropertyId propertyId;
 
@@ -25,7 +24,7 @@ namespace UIForia.Rendering {
 
         [FieldOffset(8)] public readonly float float1;
 
-        [FieldOffset(12)] public readonly int int2;
+        [FieldOffset(12)] public readonly bool hasValue; // todo -- more bytes available here, maybe move object to 0 since its likely exclusive
 
         [FieldOffset(16)] public readonly object objectField;
 
@@ -36,48 +35,42 @@ namespace UIForia.Rendering {
             this.int1 = 0;
             this.float0 = 0;
             this.float1 = 0;
-            this.int2 = 0;
+            this.hasValue = false;
             this.objectField = null;
         }
 
         [DebuggerStepThrough]
-        public StyleProperty(StylePropertyId propertyId, int value0, int value1) {
-            this.propertyId = propertyId;
-            this.objectField = null;
-            this.float0 = 0;
-            this.float1 = 0;
-            this.int0 = value0;
-            this.int1 = value1;
-            this.int2 = 0;
-        }
-
-        [DebuggerStepThrough]
-        public StyleProperty(StylePropertyId propertyId, float float0, int value1) {
-            this.propertyId = propertyId;
-            this.objectField = null;
-            this.int0 = 0;
-            this.float1 = 0;
-            this.float0 = float0;
-            this.int1 = value1;
-            this.int2 = 0;
-        }
-
-        [DebuggerStepThrough]
-        public StyleProperty(StylePropertyId propertyId, Color color) {
+        public StyleProperty(StylePropertyId propertyId, in Color color) {
             this.propertyId = propertyId;
             this.objectField = null;
             this.float0 = 0;
             this.float1 = 0;
             this.int0 = new StyleColor(color).rgba;
-            this.int1 = ColorUtil.IsDefined(color) ? 1 : 0;
-            this.int2 = 0;
+            this.int1 = 1;
+            this.hasValue = true;
         }
 
         [DebuggerStepThrough]
-        public StyleProperty(StylePropertyId propertyId, UIFixedLength length) {
+        public StyleProperty(StylePropertyId propertyId, in Color? color) {
+            this.propertyId = propertyId;
+            this.objectField = null;
+            this.float0 = 0;
+            this.float1 = 0;
+            this.int0 = 0;
+            this.int1 = 0;
+            this.hasValue = false;
+            if (color.HasValue) {
+                this.int0 = new StyleColor(color.Value).rgba;
+                this.int1 = 1;
+                this.hasValue = true;
+            }
+        }
+
+        [DebuggerStepThrough]
+        public StyleProperty(StylePropertyId propertyId, in UIFixedLength length) {
             this.propertyId = propertyId;
             this.int0 = 0;
-            this.int2 = 0;
+            this.hasValue = true;
             this.float1 = 0;
             this.objectField = null;
             this.float0 = length.value;
@@ -85,57 +78,83 @@ namespace UIForia.Rendering {
         }
 
         [DebuggerStepThrough]
-        public StyleProperty(StylePropertyId propertyId, UIFixedLength? length) {
+        public StyleProperty(StylePropertyId propertyId, in UIFixedLength? length) {
             this.propertyId = propertyId;
-            if (length == null) {
-                this.int0 = 0;
-                this.int1 = 0;
-                this.int2 = 0;
-                this.float0 = 0;
-                this.float1 = 0;
-                this.objectField = null;
-            }
-            else {
+            this.int0 = 0;
+            this.int1 = 0;
+            this.hasValue = false;
+            this.float0 = 0;
+            this.float1 = 0;
+            this.objectField = null;
+            if (length.HasValue) {
                 UIFixedLength v = length.Value;
-                this.propertyId = propertyId;
-                this.int0 = 0;
-                this.int2 = 0;
-                this.float1 = 0;
-                this.objectField = null;
                 this.float0 = v.value;
                 this.int1 = (int) v.unit;
+                this.hasValue = true;
             }
-            
         }
-        
+
         [DebuggerStepThrough]
-        public StyleProperty(StylePropertyId propertyId, UIMeasurement measurement) {
+        public StyleProperty(StylePropertyId propertyId, in UIMeasurement measurement) {
             this.propertyId = propertyId;
             this.int0 = 0;
             this.float1 = 0;
-            this.int2 = 0;
+            this.hasValue = true;
             this.objectField = null;
             this.float0 = measurement.value;
             this.int1 = (int) measurement.unit;
         }
 
+        [DebuggerStepThrough]
+        public StyleProperty(StylePropertyId propertyId, in UIMeasurement? measurement) {
+            this.propertyId = propertyId;
+            this.int0 = 0;
+            this.int1 = 0;
+            this.hasValue = false;
+            this.float0 = 0;
+            this.float1 = 0;
+            this.objectField = null;
+            if (measurement.HasValue) {
+                UIMeasurement val = measurement.Value;
+                this.float0 = val.value;
+                this.int1 = (int) val.unit;
+                this.hasValue = true;
+            }
+        }
 
         [DebuggerStepThrough]
-        public StyleProperty(StylePropertyId propertyId, TransformOffset offset) {
+        public StyleProperty(StylePropertyId propertyId, in TransformOffset offset) {
             this.propertyId = propertyId;
             this.objectField = null;
             this.int0 = 0;
-            this.int2 = 0;
+            this.hasValue = true;
             this.float1 = 0;
             this.float0 = offset.value;
             this.int1 = (int) offset.unit;
         }
 
         [DebuggerStepThrough]
-        public StyleProperty(StylePropertyId propertyId, GridTrackSize trackSize) {
+        public StyleProperty(StylePropertyId propertyId, in TransformOffset? offset) {
+            this.propertyId = propertyId;
+            this.objectField = null;
+            this.int0 = 0;
+            this.int1 = 0;
+            this.hasValue = false;
+            this.float0 = 0;
+            this.float1 = 0;
+            if (offset.HasValue) {
+                TransformOffset val = offset.Value;
+                this.float0 = val.value;
+                this.int1 = (int) val.unit;
+                this.hasValue = true;
+            }
+        }
+
+        [DebuggerStepThrough]
+        public StyleProperty(StylePropertyId propertyId, in GridTrackSize trackSize) {
             this.propertyId = propertyId;
             this.int0 = 0;
-            this.int2 = 0;
+            this.hasValue = true;
             this.float1 = 0;
             this.objectField = null;
             this.float0 = trackSize.minValue;
@@ -143,14 +162,46 @@ namespace UIForia.Rendering {
         }
 
         [DebuggerStepThrough]
+        public StyleProperty(StylePropertyId propertyId, in GridTrackSize? trackSize) {
+            this.propertyId = propertyId;
+            this.int0 = 0;
+            this.int1 = 0;
+            this.hasValue = false;
+            this.float0 = 0;
+            this.float1 = 0;
+            this.objectField = null;
+            if (trackSize.HasValue) {
+                GridTrackSize val = trackSize.Value;
+                this.float0 = val.minValue;
+                this.int1 = (int) val.minUnit;
+                this.hasValue = false;
+            }
+        }
+
+        [DebuggerStepThrough]
         public StyleProperty(StylePropertyId propertyId, float float0) {
             this.propertyId = propertyId;
             this.int0 = 0;
             this.int1 = 0;
-            this.int2 = 0;
+            this.hasValue = true;
             this.float1 = 0;
             this.objectField = null;
             this.float0 = float0;
+        }
+
+        [DebuggerStepThrough]
+        public StyleProperty(StylePropertyId propertyId, in float? floatValue) {
+            this.propertyId = propertyId;
+            this.int0 = 0;
+            this.int1 = 0;
+            this.hasValue = false;
+            this.float0 = 0;
+            this.float1 = 0;
+            this.objectField = null;
+            if (floatValue.HasValue) {
+                this.float0 = floatValue.Value;
+                this.hasValue = true;
+            }
         }
 
         [DebuggerStepThrough]
@@ -159,33 +210,108 @@ namespace UIForia.Rendering {
             this.float0 = 0;
             this.float1 = 0;
             this.int1 = 0;
-            this.int2 = 0;
+            this.hasValue = true;
             this.objectField = null;
             this.int0 = intValue;
         }
 
         [DebuggerStepThrough]
-        public StyleProperty(StylePropertyId propertyId, object objectField) {
+        public StyleProperty(StylePropertyId propertyId, int? intValue) {
             this.propertyId = propertyId;
             this.float0 = 0;
             this.float1 = 0;
-            this.int1 = 0;
             this.int0 = 0;
-            this.int2 = 0;
-            this.objectField = objectField;
+            this.int1 = 0;
+            this.hasValue = false;
+            this.objectField = null;
+            if (intValue.HasValue) {
+                this.int0 = intValue.Value;
+                this.hasValue = true;
+            }
         }
+
         [DebuggerStepThrough]
-        public StyleProperty(StylePropertyId propertyId, GridItemPlacement placement) {
+        public StyleProperty(StylePropertyId propertyId, in GridItemPlacement placement) {
             this.propertyId = propertyId;
             this.float0 = 0;
             this.float1 = 0;
             this.int0 = placement.index;
             this.int1 = 0;
-            this.int2 = 0;
+            this.hasValue = true;
             this.objectField = placement.name;
         }
-        
-        public bool IsUnset2 => int0 == int.MinValue && int1 == int.MinValue && int2 == int.MinValue && objectField == null;
+
+        [DebuggerStepThrough]
+        public StyleProperty(StylePropertyId propertyId, GridItemPlacement? placement) {
+            this.propertyId = propertyId;
+            this.float0 = 0;
+            this.float1 = 0;
+            this.int0 = 0;
+            this.int1 = 0;
+            this.hasValue = false;
+            this.objectField = null;
+            if (placement.HasValue) {
+                GridItemPlacement val = placement.Value;
+                this.objectField = val.name;
+                this.int0 = val.index;
+                this.hasValue = true;
+            }
+        }
+
+        [DebuggerStepThrough]
+        public StyleProperty(StylePropertyId propertyId, string objectField) {
+            this.propertyId = propertyId;
+            this.float0 = 0;
+            this.float1 = 0;
+            this.int1 = 0;
+            this.int0 = 0;
+            this.hasValue = objectField != null;
+            this.objectField = objectField;
+        }
+
+        [DebuggerStepThrough]
+        public StyleProperty(StylePropertyId propertyId, Texture objectField) {
+            this.propertyId = propertyId;
+            this.float0 = 0;
+            this.float1 = 0;
+            this.int1 = 0;
+            this.int0 = 0;
+            this.hasValue = objectField != null;
+            this.objectField = objectField;
+        }
+
+        [DebuggerStepThrough]
+        public StyleProperty(StylePropertyId propertyId, CursorStyle objectField) {
+            this.propertyId = propertyId;
+            this.float0 = 0;
+            this.float1 = 0;
+            this.int1 = 0;
+            this.int0 = 0;
+            this.hasValue = objectField != null;
+            this.objectField = objectField;
+        }
+
+        [DebuggerStepThrough]
+        public StyleProperty(StylePropertyId propertyId, IReadOnlyList<GridTrackSize> objectField) {
+            this.propertyId = propertyId;
+            this.float0 = 0;
+            this.float1 = 0;
+            this.int1 = 0;
+            this.int0 = 0;
+            this.hasValue = objectField != null;
+            this.objectField = objectField;
+        }
+
+        [DebuggerStepThrough]
+        public StyleProperty(StylePropertyId propertyId, FontAsset objectField) {
+            this.propertyId = propertyId;
+            this.float0 = 0;
+            this.float1 = 0;
+            this.int1 = 0;
+            this.int0 = 0;
+            this.hasValue = objectField != null;
+            this.objectField = objectField;
+        }
 
         public WhitespaceMode AsWhitespaceMode => (WhitespaceMode) int0;
 
@@ -195,7 +321,7 @@ namespace UIForia.Rendering {
         public CrossAxisAlignment AsCrossAxisAlignment => (CrossAxisAlignment) int0;
         public MainAxisAlignment AsMainAxisAlignment => (MainAxisAlignment) int0;
         public Overflow AsOverflow => (Overflow) int0;
-        public Color AsColor => int1 == 0 ? ColorUtil.UnsetValue : (Color) new StyleColor(int0);
+        public Color AsColor => new StyleColor(int0);
 
         public FontAsset AsFont => (FontAsset) objectField;
         public Texture2D AsTexture => (Texture2D) objectField;
@@ -245,7 +371,7 @@ namespace UIForia.Rendering {
             return a.propertyId == b.propertyId &&
                    a.int0 == b.int0 &&
                    a.int1 == b.int1 &&
-                   a.int2 == b.int2 &&
+                   a.hasValue == b.hasValue &&
                    a.objectField == b.objectField;
         }
 
@@ -253,7 +379,7 @@ namespace UIForia.Rendering {
             return a.propertyId != b.propertyId ||
                    a.int0 != b.int0 ||
                    a.int1 != b.int1 ||
-                   a.int2 != b.int2 ||
+                   a.hasValue != b.hasValue ||
                    a.objectField != b.objectField;
         }
 
@@ -261,7 +387,7 @@ namespace UIForia.Rendering {
             return propertyId == other.propertyId &&
                    int0 == other.int0 &&
                    int1 == other.int1 &&
-                   int2 == other.int2 &&
+                   hasValue == other.hasValue &&
                    objectField == other.objectField;
         }
 
@@ -275,7 +401,6 @@ namespace UIForia.Rendering {
                 var hashCode = (int) propertyId;
                 hashCode = (hashCode * 397) ^ int0;
                 hashCode = (hashCode * 397) ^ int1;
-                hashCode = (hashCode * 397) ^ int2;
                 hashCode = (hashCode * 397) ^ (objectField != null ? objectField.GetHashCode() : 0);
                 return hashCode;
             }
@@ -363,11 +488,11 @@ namespace UIForia.Rendering {
             return new StyleProperty(StylePropertyId.GridLayoutDensity, (int) density);
         }
 
-        public static StyleProperty GridLayoutColTemplate(IList<GridTrackSize> colTemplate) {
+        public static StyleProperty GridLayoutColTemplate(IReadOnlyList<GridTrackSize> colTemplate) {
             return new StyleProperty(StylePropertyId.GridLayoutColTemplate, colTemplate);
         }
 
-        public static StyleProperty GridLayoutRowTemplate(IList<GridTrackSize> rowTemplate) {
+        public static StyleProperty GridLayoutRowTemplate(IReadOnlyList<GridTrackSize> rowTemplate) {
             return new StyleProperty(StylePropertyId.GridLayoutRowTemplate, rowTemplate);
         }
 
@@ -376,11 +501,11 @@ namespace UIForia.Rendering {
         }
 
         public static StyleProperty GridLayoutColAutoSize(GridTrackSize autoColSize) {
-            return new StyleProperty(StylePropertyId.GridLayoutColAutoSize, autoColSize.minValue, (int) autoColSize.minUnit);
+            return new StyleProperty(StylePropertyId.GridLayoutColAutoSize, autoColSize);
         }
 
         public static StyleProperty GridLayoutRowAutoSize(GridTrackSize autoRowSize) {
-            return new StyleProperty(StylePropertyId.GridLayoutRowAutoSize, autoRowSize.minValue, (int) autoRowSize.minUnit);
+            return new StyleProperty(StylePropertyId.GridLayoutRowAutoSize, autoRowSize);
         }
 
         public static StyleProperty GridLayoutColGap(float colGap) {
@@ -488,19 +613,19 @@ namespace UIForia.Rendering {
         }
 
         public static StyleProperty AnchorTop(UIFixedLength anchor) {
-            return new StyleProperty(StylePropertyId.AnchorTop, anchor.value, (int) anchor.unit);
+            return new StyleProperty(StylePropertyId.AnchorTop, anchor);
         }
 
         public static StyleProperty AnchorRight(UIFixedLength anchor) {
-            return new StyleProperty(StylePropertyId.AnchorRight, anchor.value, (int) anchor.unit);
+            return new StyleProperty(StylePropertyId.AnchorRight, anchor);
         }
 
         public static StyleProperty AnchorBottom(UIFixedLength anchor) {
-            return new StyleProperty(StylePropertyId.AnchorBottom, anchor.value, (int) anchor.unit);
+            return new StyleProperty(StylePropertyId.AnchorBottom, anchor);
         }
 
         public static StyleProperty AnchorLeft(UIFixedLength anchor) {
-            return new StyleProperty(StylePropertyId.AnchorLeft, anchor.value, (int) anchor.unit);
+            return new StyleProperty(StylePropertyId.AnchorLeft, anchor);
         }
 
         public static StyleProperty AnchorTarget(AnchorTarget anchorTarget) {

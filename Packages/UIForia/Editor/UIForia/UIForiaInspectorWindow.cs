@@ -175,7 +175,7 @@ namespace UIForia.Editor {
 
                     string source = selectedElement.style.GetPropertySource(propertyId);
                     StyleProperty property = selectedElement.style.GetComputedStyleProperty(propertyId);
-                    if (property.IsUnset) {
+                    if (property.hasValue) {
                         property = DefaultStyleValues_Generated.GetPropertyValue(propertyId);
                     }
 
@@ -1058,7 +1058,7 @@ namespace UIForia.Editor {
 
             GUI.enabled = true;
             GUILayout.EndHorizontal();
-            return isEditable ? new StyleProperty(property.propertyId,  newFont) : property;
+            return isEditable ? new StyleProperty(property.propertyId,  default(FontAsset)) : property;
         }
 
         private static StyleProperty DrawGridTemplate(StyleProperty property, bool isEditable) {
@@ -1079,7 +1079,7 @@ namespace UIForia.Editor {
 
             EditorGUILayout.EndHorizontal();
             GUI.enabled = true;
-            return isEditable ? new StyleProperty(property.propertyId,  null) : property;
+            return isEditable ? new StyleProperty(property.propertyId,  default(IReadOnlyList<GridTrackSize>)) : property;
         }
 
     }

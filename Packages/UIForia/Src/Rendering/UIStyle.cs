@@ -60,10 +60,7 @@ namespace UIForia.Rendering {
         private GridTrackSize FindGridTrackSizeProperty(StylePropertyId propertyId) {
             for (int i = 0; i < PropertyCount; i++) {
                 if (array[i].propertyId == propertyId) {
-                    return new GridTrackSize(
-                        array[i].float1,
-                        (GridTemplateUnit) array[i].int1
-                    );
+                    return array[i].AsGridTrackSize;
                 }
             }
 
@@ -83,10 +80,7 @@ namespace UIForia.Rendering {
         private TransformOffset FindTransformOffsetProperty(StylePropertyId propertyId) {
             for (int i = 0; i < PropertyCount; i++) {
                 if (array[i].propertyId == propertyId) {
-                    return new TransformOffset(
-                        array[i].float1,
-                        (TransformUnit) array[i].int1
-                    );
+                    return array[i].AsTransformOffset;
                 }
             }
 
@@ -96,10 +90,7 @@ namespace UIForia.Rendering {
         private UIFixedLength FindUIFixedLengthProperty(StylePropertyId propertyId) {
             for (int i = 0; i < PropertyCount; i++) {
                 if (array[i].propertyId == propertyId) {
-                    return new UIFixedLength(
-                        array[i].float1,
-                        (UIFixedUnit) array[i].int1
-                    );
+                    return array[i].AsUIFixedLength;
                 }
             }
 
@@ -108,27 +99,27 @@ namespace UIForia.Rendering {
 
         private float FindFloatProperty(StylePropertyId propertyId) {
             StyleProperty property = GetProperty(propertyId);
-            return property.IsUnset ? FloatUtil.UnsetValue : property.AsFloat;
+            return !property.hasValue ? FloatUtil.UnsetValue : property.AsFloat;
         }
 
         private int FindIntProperty(StylePropertyId propertyId) {
             StyleProperty property = GetProperty(propertyId);
-            return property.IsUnset ? IntUtil.UnsetValue : property.int0;
+            return !property.hasValue ? IntUtil.UnsetValue : property.int0;
         }
 
         private int FindEnumProperty(StylePropertyId propertyId) {
             StyleProperty property = GetProperty(propertyId);
-            return property.IsUnset ? 0 : property.int0;
+            return !property.hasValue ? 0 : property.int0;
         }
 
         private Color FindColorProperty(StylePropertyId propertyId) {
             StyleProperty property = GetProperty(propertyId);
-            return property.IsUnset ?  ColorUtil.UnsetValue :(Color) new StyleColor(property.int0);
+            return !property.hasValue ?  ColorUtil.UnsetValue :(Color) new StyleColor(property.int0);
         }
         
         internal void SetProperty(in StyleProperty property) {
             StylePropertyId propertyId = property.propertyId;
-            if (property.IsUnset2) {
+            if (!property.hasValue) {
                 for (int i = 0; i < PropertyCount; i++) {
                     if (array[i].propertyId == propertyId) {
                         RemoveAt(i);
@@ -174,7 +165,7 @@ namespace UIForia.Rendering {
                 }
             }
 
-            return new StyleProperty(propertyId, int.MaxValue, int.MaxValue);
+            return new StyleProperty(propertyId);
         }
        
         public bool TryGetProperty(StylePropertyId propertyId, out StyleProperty property) {

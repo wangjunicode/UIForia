@@ -110,7 +110,7 @@ public class StyleTests {
             Assert.AreEqual(DefaultValue<int>(defaultName), ComputedValue<int>(root, computedPropertyName));
 
             CallMethod(root.style, setFnName, DefaultValue<int>(defaultName) + 1, StyleState.Normal);
-            CallMethod(root.style, setFnName, IntUtil.UnsetValue, StyleState.Normal);
+            CallMethod(root.style, setFnName, null, StyleState.Normal);
 
             Assert.AreEqual(DefaultValue<int>(defaultName), ComputedValue<int>(root, computedPropertyName));
         };
@@ -483,7 +483,7 @@ public class StyleTests {
         app.Update();
         Assert.AreEqual(Color.blue, root.FindById("group1").style.TextColor);
         Assert.AreEqual(Color.blue, root.FindById("group2").style.TextColor);
-        root.FindById("group1").style.SetTextColor(ColorUtil.UnsetValue, StyleState.Normal);
+        root.FindById("group1").style.SetTextColor(null, StyleState.Normal);
         app.Update();
         Assert.AreEqual(Color.red, root.FindById("group1").style.TextColor);
         Assert.AreEqual(Color.red, root.FindById("group2").style.TextColor);

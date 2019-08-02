@@ -93,7 +93,7 @@ public class BindingTests {
     public void CreateAndDeleteRepeatableListItems() {
         MockApplication app = new MockApplication(typeof(RepeatBindingChecker));
 
-        for (int i = 0; i < 1000; i++) {
+        for (int i = 0; i < 10; i++) {
             app.InputSystem.MouseUp();
             app.Update();
             app.InputSystem.MouseUp();
@@ -103,7 +103,7 @@ public class BindingTests {
     [Test]
     public void RunAnActiveBinding() {
         MockApplication app = new MockApplication(typeof(BindingTestThing));
-        BindingTestThing root = (BindingTestThing) app.RootElement;
+        BindingTestThing root = (BindingTestThing) app.RootElement.GetChild(0);
         BindingTestThingChild child = (BindingTestThingChild) root.FindById("child");
         root.intProperty = 11;
         app.Update();
@@ -120,7 +120,7 @@ public class BindingTests {
         </UITemplate>
         ";
         MockApplication app = new MockApplication(typeof(BindingTestThing), template);
-        BindingTestThing root = (BindingTestThing) app.RootElement;
+        BindingTestThing root = (BindingTestThing) app.RootElement.GetChild(0);
         BindingTestThingChild child = (BindingTestThingChild) root.FindById("child");
         root.intProperty = 2;
         app.Update();
@@ -144,7 +144,7 @@ public class BindingTests {
         </UITemplate>
         ";
         MockApplication app = new MockApplication(typeof(BindingTestThing), template);
-        BindingTestThing root = (BindingTestThing) app.RootElement;
+        BindingTestThing root = (BindingTestThing) app.RootElement.GetChild(0);
         root.list = new RepeatableList<int>();
         root.list.Add(1);
         root.list.Add(2);
@@ -175,7 +175,7 @@ public class BindingTests {
         </UITemplate>
         ";
         MockApplication app = new MockApplication(typeof(BindingTestThing), template);
-        BindingTestThing root = (BindingTestThing) app.RootElement;
+        BindingTestThing root = (BindingTestThing) app.RootElement.GetChild(0);
         root.list = new RepeatableList<int>();
         root.list.Add(1);
         root.list.Add(2);
@@ -204,7 +204,7 @@ public class BindingTests {
         </UITemplate>
         ";
         MockApplication app = new MockApplication(typeof(BindingTestThing), template);
-        BindingTestThing root = (BindingTestThing) app.RootElement;
+        BindingTestThing root = (BindingTestThing) app.RootElement.GetChild(0);
         root.list = new RepeatableList<int>();
         root.list.Add(1);
         root.list.Add(2);
@@ -230,7 +230,7 @@ public class BindingTests {
         </UITemplate>
         ";
         MockApplication app = new MockApplication(typeof(BindingTestThing), template);
-        BindingTestThing root = (BindingTestThing) app.RootElement;
+        BindingTestThing root = (BindingTestThing) app.RootElement.GetChild(0);
         root.list = new RepeatableList<int>();
         root.list.Add(1);
         root.list.Add(2);
@@ -256,7 +256,7 @@ public class BindingTests {
         </UITemplate>
         ";
         MockApplication app = new MockApplication(typeof(BindingTestThing), template);
-        BindingTestThing root = (BindingTestThing) app.RootElement;
+        BindingTestThing root = (BindingTestThing) app.RootElement.GetChild(0);
         root.list = new RepeatableList<int>();
         root.list.Add(1);
         root.list.Add(2);
@@ -281,7 +281,7 @@ public class BindingTests {
         </UITemplate>
         ";
         MockApplication app = new MockApplication(typeof(BindingTestThing), template);
-        BindingTestThing root = (BindingTestThing) app.RootElement;
+        BindingTestThing root = (BindingTestThing) app.RootElement.GetChild(0);
         root.list = new RepeatableList<int>();
         root.list.Add(1);
         root.list.Add(2);
@@ -307,7 +307,7 @@ public class BindingTests {
         </UITemplate>
         ";
         MockApplication app = new MockApplication(typeof(BindingTestThing), template);
-        BindingTestThing root = (BindingTestThing) app.RootElement;
+        BindingTestThing root = (BindingTestThing) app.RootElement.GetChild(0);
         root.list = new RepeatableList<int>();
         root.list2 = new RepeatableList<int>();
         root.list.Add(1);

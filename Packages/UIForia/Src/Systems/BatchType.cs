@@ -5,7 +5,9 @@ namespace UIForia.Rendering {
         Unset,
         UIForia,
         Path,
-        Custom
+        Custom,
+
+        Mesh
 
     }
 

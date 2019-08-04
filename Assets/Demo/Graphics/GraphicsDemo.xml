@@ -1,0 +1,45 @@
+<UITemplate>
+    
+    <Style>
+        
+        style container {
+            PreferredSize = 800px 600px;
+        }
+        
+        style particles {
+            Painter = DemoParticles;
+        }
+        
+        style img {
+            PreferredSize = 200px 200px;
+            BackgroundImageOffsetX = 30;
+            BackgroundImageOffsetY = 250;
+            BackgroundImageScaleX = 1;
+            BackgroundImageScaleY = 1;
+            BackgroundImageRotation = 0;
+            BackgroundImage = url(image);
+            BackgroundColor = Red;
+            Margin = 10px;
+            Border = 1px;
+            BorderRadiusTopLeft = 150px;
+        }
+        
+        style scroll {
+            PreferredSize = 200px;
+        }
+        
+    </Style>
+    
+    <Contents style="container">
+        
+<!--        <ScrollView style="scroll">-->
+            
+        <Group style="img"/>
+        <Group style="img"/>
+<!--            <Image style="img" src="'image'"/>-->
+            
+<!--        </ScrollView>-->
+
+    </Contents>
+    
+</UITemplate>

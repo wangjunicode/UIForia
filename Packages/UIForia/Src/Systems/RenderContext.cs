@@ -126,6 +126,14 @@ namespace UIForia.Rendering {
 
         public void DrawMesh(Mesh mesh, Material material, in Matrix4x4 transform) {
             FinalizeCurrentBatch(false);
+            currentBatch = new Batch();
+            currentBatch.material = material;
+            currentBatch.batchType = BatchType.Mesh;
+            currentBatch.unpooledMesh = mesh;
+            currentBatch.drawCallSize++;
+            currentBatch.uiforiaData = new UIForiaData();
+            currentBatch.uiforiaData.transformData.Add(transform); // todo -- remove from uiforia data
+            FinalizeCurrentBatch(false);
         }
 
         public void DrawGeometry(UIForiaGeometry geometry, Material material) {
@@ -243,11 +251,12 @@ namespace UIForia.Rendering {
         private void FinalizeCurrentBatch(bool cloneMaterial = true) {
             // if have pending things to draw, create batch from them
 
-            if (positionList.size == 0) {
-                return;
-            }
+          
 
             if (currentBatch.batchType == BatchType.UIForia) {
+                if (positionList.size == 0) {
+                    return;
+                }
                 // select material based on batch size
                 PooledMesh mesh = uiforiaMeshPool.Get(); // todo -- maybe worth trying to find a large mesh
                 UIForiaPropertyBlock propertyBlock = uiforiaMaterialPool.GetPropertyBlock(currentBatch.drawCallSize);
@@ -273,7 +282,15 @@ namespace UIForia.Rendering {
             }
             else if (currentBatch.batchType == BatchType.Path) { }
 
+            else if (currentBatch.batchType == BatchType.Mesh) {
+                pendingBatches.Add(currentBatch);
+                renderCommandList.Add(new RenderOperation(pendingBatches.size - 1));
+                currentBatch = new Batch();
+            }
             else {
+                if (positionList.size == 0) {
+                    return;
+                }
                 PooledMesh mesh = uiforiaMeshPool.Get(); // todo -- maybe worth trying to find a large mesh
                 int vertexCount = positionList.size;
                 int triangleCount = triangleList.size;
@@ -364,7 +381,7 @@ namespace UIForia.Rendering {
             currentBatch = new Batch();
 
             for (int i = 0; i < pendingBatches.size; i++) {
-                pendingBatches[i].pooledMesh.Release();
+                pendingBatches[i].pooledMesh?.Release();
                 // pendingBatches[i].uiforiaData?.Release();
             }
 
@@ -508,8 +525,8 @@ namespace UIForia.Rendering {
             // assert camera & has texture
 
             Vector3 cameraOrigin = camera.transform.position;
-            cameraOrigin.x -= 0.5f * Screen.width;
-            cameraOrigin.y += (0.5f * Screen.height);
+          // cameraOrigin.x -= 0.5f * Screen.width;
+         //  cameraOrigin.y += (0.5f * Screen.height);
             cameraOrigin.z += 2;
 
             Matrix4x4 origin = Matrix4x4.TRS(cameraOrigin, Quaternion.identity, Vector3.one);
@@ -531,8 +548,8 @@ namespace UIForia.Rendering {
 
                             commandBuffer.DrawMesh(batch.pooledMesh.mesh, origin, uiForiaPropertyBlock.material, 0, 0, uiForiaPropertyBlock.matBlock);
                         }
-                        else if (batch.batchType == BatchType.Custom) {
-                            commandBuffer.DrawMesh(batch.pooledMesh.mesh, origin, batch.material, 0, 0, null);
+                        else if (batch.batchType == BatchType.Mesh) {
+                            commandBuffer.DrawMesh(batch.unpooledMesh, batch.uiforiaData.transformData[0], batch.material, 0, batch.material.passCount - 1, null);
                         }
 
                         break;

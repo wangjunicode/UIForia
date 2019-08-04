@@ -54,7 +54,8 @@ namespace Vertigo {
         None = 0,
         Color = 1 << 0,
         Texture = 1 << 1,
-        TextureTint = 1 << 2
+        TextureTint = 1 << 2,
+        LetterBoxTexture = 1 << 3
                       
     }
 

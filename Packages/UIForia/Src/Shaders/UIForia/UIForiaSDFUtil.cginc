@@ -15,7 +15,7 @@ inline float4 SDFPixelSnap (float4 pos) {
      return pos;
  }
 
-float RectSDF(float2 p, float2 size, float r) {
+inline float RectSDF(float2 p, float2 size, float r) {
    float2 d = abs(p) - size + float2(r, r);
    return min(max(d.x, d.y), 0.0) + length(max(d, 0.0)) - r;   
 }
@@ -188,7 +188,7 @@ fixed4 GetBorderColor(float2 coords, fixed4 contentColor, float4 packedBorderDat
     return fixed4(1, 1, 1, 1);    
 }
 
-fixed GetBorderRadius(float2 coords, float packedRadii) {
+inline fixed GetBorderRadius(float2 coords, float packedRadii) {
     float left = step(coords.x, 0.5); // 1 if left
     float bottom = step(coords.y, 0.5); // 1 if bottom
     #define top (1 - bottom)
@@ -240,26 +240,17 @@ fixed4 SDFColor(SDFData sdfData, fixed4 borderColor, fixed4 contentColor) {
     fixed4 fromColor = borderColor;
     
     // todo -- inset so we can have AA edges with rotation
-    
-#if CUTOUT_STROKE 
-    // gives weird border radius size but keep for reference
-    float2 halfShapeSize = size * 0.5;
-    float shape1 = RectSDF(center, halfShapeSize, radius);
-    float2 sizeForStroke = halfShapeSize - (2 * halfStrokeWidth);
-    minSize = min(sizeForStroke.x, sizeForStroke.y) * 2;
-    radius = clamp(minSize * sdfData.radius, 0, minSize);
-    float shape2 = RectSDF(center, sizeForStroke, radius);
-    float retn = lerp(shape1, max(shape1, -shape2), halfStrokeWidth > 0);
-#else
+
     float shape1 = RectSDF(center, (size * 0.5) - halfStrokeWidth, radius - halfStrokeWidth);
-    float retn = halfStrokeWidth > 0 ? abs(shape1) - halfStrokeWidth : shape1;
-#endif
+    float retn = abs(shape1) - halfStrokeWidth;
         
     if(shape1 >= 0) {
        toColor = fixed4(fromColor.rgb, 0);
     }
     
-    fBlendAmount = smoothstep(-1, 1, retn);
+    // with a border -1, 1 looks better
+    // without 0 to 1 is better
+    fBlendAmount = smoothstep(0, 1, retn);
     
     return lerp(toColor, fromColor, 1 - fBlendAmount); // do not pre-multiply alpha here!
 

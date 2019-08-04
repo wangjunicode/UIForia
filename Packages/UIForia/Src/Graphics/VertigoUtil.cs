@@ -154,7 +154,7 @@ public static class VertigoUtil {
         return GetSpriteData(sprite).uvBounds;
     }
 
-    public static float Vector2ToFloat(Vector4 vec) {
+    public static float Vector2ToFloat(Vector2 vec) {
         float x = vec.x;
         float y = vec.y;
         x = x < 0 ? 0 : 1 < x ? 1 : x;

@@ -57,6 +57,7 @@ namespace UIForia.Layout {
             this.layoutBoxPoolMap[(int) LayoutType.Flex] = new FastLayoutBoxPool<FastFlexLayoutBox>();
             this.layoutBoxPoolMap[(int) LayoutType.Grid] = new FastLayoutBoxPool<FastGridLayoutBox>();
             this.layoutBoxPoolMap[TextLayoutPoolKey] = new FastLayoutBoxPool<FastTextLayoutBox>();
+            this.layoutBoxPoolMap[ImageLayoutPoolKey] = new FastLayoutBoxPool<FastImageLayoutBox>();
 
             toLayout.Add(root);
         }
@@ -416,7 +417,7 @@ namespace UIForia.Layout {
                 return (FastTextLayoutBox) layoutBoxPoolMap[TextLayoutPoolKey].Get(this, element);
             }
             else if ((element is UIImageElement)) {
-                //retn = layoutBoxPoolMap[ImageLayoutPoolKey].Get(element);
+                return layoutBoxPoolMap[ImageLayoutPoolKey].Get(this, element);
             }
             else {
                 switch (element.style.LayoutType) {
@@ -450,7 +451,7 @@ namespace UIForia.Layout {
         private FastLayoutBox CreateOrUpdateLayoutBox(UIElement element) {
             FastLayoutBox box = element.layoutBox;
 
-            if (box == null) {
+            if (box == null || element is UIImageElement || element is UITextElement) {
                 return CreateLayoutBox(element);
             }
 

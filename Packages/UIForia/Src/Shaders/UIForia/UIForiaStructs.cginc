@@ -19,7 +19,7 @@ struct v2f {
     float4 texCoord0 : TEXCOORD0;    
     nointerpolation float4 texCoord1 : TEXCOORD1;
     nointerpolation float4 texCoord2 : TEXCOORD2;
-    float4 texCoord3 : TEXCOORD3;
+    nointerpolation float4 texCoord3 : TEXCOORD3;
     nointerpolation float4 color : COLOR0;
     
 };

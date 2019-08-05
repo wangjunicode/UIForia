@@ -228,7 +228,7 @@ fixed4 SDFRectColor(SDFData sdfData, fixed4 color) {
             
 #define CUTOUT_STROKE 0
             
-fixed4 SDFColor(SDFData sdfData, fixed4 borderColor, fixed4 contentColor) {
+fixed4 SDFColor(SDFData sdfData, fixed4 borderColor, fixed4 contentColor, float distFromCenter) {
     float halfStrokeWidth = sdfData.strokeWidth * 0.5;
     float2 size = sdfData.size;
     float minSize = min(size.x, size.y);
@@ -248,9 +248,27 @@ fixed4 SDFColor(SDFData sdfData, fixed4 borderColor, fixed4 contentColor) {
        toColor = fixed4(fromColor.rgb, 0);
     }
     
-    // with a border -1, 1 looks better
-    // without 0 to 1 is better
+    float borderSize = (1 / minSize) *  1.4;
+                     
     fBlendAmount = smoothstep(0, 1, retn);
+    if(sdfData.radius < 0.1) {
+        return toColor;
+    }
+    
+    if(distFromCenter <= borderSize) {
+        //toColor = Green;
+        //sdfData.radius *= 0.75;
+      
+        
+        if((sdfData.uv.x > sdfData.radius && sdfData.uv.x < 1 - sdfData.radius)) {
+            return Green;
+        }
+   
+          
+        if((sdfData.uv.y > sdfData.radius && sdfData.uv.y < 1 - sdfData.radius)) {
+            return toColor;
+        }
+    }
     
     return lerp(toColor, fromColor, 1 - fBlendAmount); // do not pre-multiply alpha here!
 

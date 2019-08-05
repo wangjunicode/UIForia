@@ -363,6 +363,7 @@ namespace UIForia.Rendering {
         public string AsString => (string) objectField;
         public UnderlayType AsUnderlayType => (UnderlayType) int0;
         public Fit AsFit => (Fit) int0;
+        public BackgroundFit AsBackgroundFit => (BackgroundFit) int0;
 
         public AlignmentTarget AsAlignmentTarget => (AlignmentTarget) int0;
         public AlignmentBehavior AsAlignmentBehavior => (AlignmentBehavior) int0;

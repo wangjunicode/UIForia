@@ -133,6 +133,7 @@ namespace UIForia.Rendering {
             EnsureAdditionalCapacity(9, 24);
             Vector3[] positions = positionList.array;
             Vector4[] texCoord0 = texCoordList0.array;
+            Vector4[] texCoord1 = texCoordList1.array;
             int[] triangles = triangleList.array;
 
             int startVert = positionList.size;
@@ -189,6 +190,20 @@ namespace UIForia.Rendering {
                 texCoord0[startVert + i] = new Vector4(x, y, x, y);
             }
             
+            
+            for (int i = 0; i < 8; i++) {
+                texCoord1[startVert + i].z = 0;// = new Vector4(x, y, width, height);
+            }
+
+//            texCoord1[startVert + 0].y = 1;
+//            texCoord1[startVert + 1].y = 1;
+            texCoord1[startVert + 6].y = 1;
+            texCoord1[startVert + 7].y = 1;
+            
+            texCoord1[startVert + 8].z = 1;// = new Vector4(x, y, width, height);
+            texCoord1[startVert + 8].y = 1;// = new Vector4(x, y, width, height);
+
+            
             triangleList.size += 24;
             positionList.size += 9;
             texCoordList0.size += 9;
@@ -199,6 +214,7 @@ namespace UIForia.Rendering {
             EnsureAdditionalCapacity(9, 24);
             Vector3[] positions = positionList.array;
             Vector4[] texCoord0 = texCoordList0.array;
+            Vector4[] texCoord1 = texCoordList1.array;
             int[] triangles = triangleList.array;
 
             int startVert = positionList.size;
@@ -254,6 +270,7 @@ namespace UIForia.Rendering {
                 float y = positions[startVert + i].y / height;
                 texCoord0[startVert + i] = new Vector4(x, y, width, height);
             }
+
             
             triangleList.size += 24;
             positionList.size += 9;

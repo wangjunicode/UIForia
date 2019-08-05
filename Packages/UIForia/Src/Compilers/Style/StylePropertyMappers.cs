@@ -52,6 +52,7 @@ namespace UIForia.Compilers.Style {
                 {"backgroundimagetiley", (targetStyle, property, context) => targetStyle.BackgroundImageTileY = MapFixedLength(property.children[0], context)},
                 {"backgroundimagerotation", (targetStyle, property, context) => targetStyle.BackgroundImageRotation = MapFixedLength(property.children[0], context)},
                 {"backgroundimage", (targetStyle, property, context) => targetStyle.BackgroundImage = MapTexture(property.children[0], context)},
+                {"backgroundfit", (targetStyle, property, context) => targetStyle.BackgroundFit = MapEnum<BackgroundFit>(property.children[0], context)},
 
                 {"visibility", (targetStyle, property, context) => targetStyle.Visibility = MapEnum<Visibility>(property.children[0], context)},
                 {"opacity", (targetStyle, property, context) => targetStyle.Opacity = MapNumber(property.children[0], context)},
@@ -86,6 +87,11 @@ namespace UIForia.Compilers.Style {
                 {"borderradiustopright", (targetStyle, property, context) => targetStyle.BorderRadiusTopRight = MapFixedLength(property.children[0], context)},
                 {"borderradiusbottomright", (targetStyle, property, context) => targetStyle.BorderRadiusBottomRight = MapFixedLength(property.children[0], context)},
                 {"borderradiusbottomleft", (targetStyle, property, context) => targetStyle.BorderRadiusBottomLeft = MapFixedLength(property.children[0], context)},
+                
+                {"cornerbeveltopleft", (targetStyle, property, context) => targetStyle.CornerBevelTopLeft = MapFixedLength(property.children[0], context)},
+                {"cornerbeveltopright", (targetStyle, property, context) => targetStyle.CornerBevelTopRight = MapFixedLength(property.children[0], context)},
+                {"cornerbevelbottomright", (targetStyle, property, context) => targetStyle.CornerBevelBottomRight = MapFixedLength(property.children[0], context)},
+                {"cornerbevelbottomleft", (targetStyle, property, context) => targetStyle.CornerBevelBottomLeft = MapFixedLength(property.children[0], context)},
 
                 {"griditemx", (targetStyle, property, context) => targetStyle.GridItemX = MapGridItemPlacement(property, context)},
                 {"griditemy", (targetStyle, property, context) => targetStyle.GridItemY = MapGridItemPlacement(property, context)},

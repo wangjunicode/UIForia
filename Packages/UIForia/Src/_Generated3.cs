@@ -15,14 +15,14 @@ namespace UIForia.Rendering {
 
     public static class DefaultStyleValues_Generated {
 
+		public const Visibility Visibility = UIForia.Rendering.Visibility.Visible;
+		public const float Opacity = 1f;
+		public static readonly CursorStyle Cursor = default(CursorStyle);
+		public static readonly string Painter = "";
 		public const Overflow OverflowX = UIForia.Rendering.Overflow.Visible;
 		public const Overflow OverflowY = UIForia.Rendering.Overflow.Visible;
 		public static readonly Color BackgroundColor = new Color(-1f, -1f, -1f, -1f);
 		public static readonly Color BackgroundTint = new Color(-1f, -1f, -1f, -1f);
-		public static readonly Color BorderColorTop = new Color(-1f, -1f, -1f, -1f);
-		public static readonly Color BorderColorRight = new Color(-1f, -1f, -1f, -1f);
-		public static readonly Color BorderColorBottom = new Color(-1f, -1f, -1f, -1f);
-		public static readonly Color BorderColorLeft = new Color(-1f, -1f, -1f, -1f);
 		public static readonly UIFixedLength BackgroundImageOffsetX = new UIFixedLength(0f, UIFixedUnit.Pixel);
 		public static readonly UIFixedLength BackgroundImageOffsetY = new UIFixedLength(0f, UIFixedUnit.Pixel);
 		public static readonly UIFixedLength BackgroundImageScaleX = new UIFixedLength(0f, UIFixedUnit.Pixel);
@@ -31,10 +31,15 @@ namespace UIForia.Rendering {
 		public static readonly UIFixedLength BackgroundImageTileY = new UIFixedLength(0f, UIFixedUnit.Pixel);
 		public static readonly UIFixedLength BackgroundImageRotation = new UIFixedLength(0f, UIFixedUnit.Pixel);
 		public static readonly Texture2D BackgroundImage = default(Texture2D);
-		public static readonly string Painter = "";
-		public const float Opacity = 1f;
-		public static readonly CursorStyle Cursor = default(CursorStyle);
-		public const Visibility Visibility = UIForia.Rendering.Visibility.Visible;
+		public const BackgroundFit BackgroundFit = UIForia.Rendering.BackgroundFit.Fill;
+		public static readonly Color BorderColorTop = new Color(-1f, -1f, -1f, -1f);
+		public static readonly Color BorderColorRight = new Color(-1f, -1f, -1f, -1f);
+		public static readonly Color BorderColorBottom = new Color(-1f, -1f, -1f, -1f);
+		public static readonly Color BorderColorLeft = new Color(-1f, -1f, -1f, -1f);
+		public static readonly UIFixedLength CornerBevelTopLeft = new UIFixedLength(0f, UIFixedUnit.Pixel);
+		public static readonly UIFixedLength CornerBevelTopRight = new UIFixedLength(0f, UIFixedUnit.Pixel);
+		public static readonly UIFixedLength CornerBevelBottomRight = new UIFixedLength(0f, UIFixedUnit.Pixel);
+		public static readonly UIFixedLength CornerBevelBottomLeft = new UIFixedLength(0f, UIFixedUnit.Pixel);
 		public const int FlexItemGrow = 0;
 		public const int FlexItemShrink = 0;
 		public const LayoutDirection FlexLayoutDirection = UIForia.Layout.LayoutDirection.Horizontal;
@@ -145,6 +150,14 @@ namespace UIForia.Rendering {
 		public static StyleProperty GetPropertyValue(StylePropertyId propertyId) {
 
 			switch(propertyId) {
+				case StylePropertyId.Visibility:
+					 return new StyleProperty(StylePropertyId.Visibility, (int)UIForia.Rendering.Visibility.Visible);
+				case StylePropertyId.Opacity:
+					 return new StyleProperty(StylePropertyId.Opacity, 1f);
+				case StylePropertyId.Cursor:
+					 return new StyleProperty(StylePropertyId.Cursor, default(CursorStyle));
+				case StylePropertyId.Painter:
+					 return new StyleProperty(StylePropertyId.Painter, "");
 				case StylePropertyId.OverflowX:
 					 return new StyleProperty(StylePropertyId.OverflowX, (int)UIForia.Rendering.Overflow.Visible);
 				case StylePropertyId.OverflowY:
@@ -153,14 +166,6 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.BackgroundColor, new Color(-1f, -1f, -1f, -1f));
 				case StylePropertyId.BackgroundTint:
 					 return new StyleProperty(StylePropertyId.BackgroundTint, new Color(-1f, -1f, -1f, -1f));
-				case StylePropertyId.BorderColorTop:
-					 return new StyleProperty(StylePropertyId.BorderColorTop, new Color(-1f, -1f, -1f, -1f));
-				case StylePropertyId.BorderColorRight:
-					 return new StyleProperty(StylePropertyId.BorderColorRight, new Color(-1f, -1f, -1f, -1f));
-				case StylePropertyId.BorderColorBottom:
-					 return new StyleProperty(StylePropertyId.BorderColorBottom, new Color(-1f, -1f, -1f, -1f));
-				case StylePropertyId.BorderColorLeft:
-					 return new StyleProperty(StylePropertyId.BorderColorLeft, new Color(-1f, -1f, -1f, -1f));
 				case StylePropertyId.BackgroundImageOffsetX:
 					 return new StyleProperty(StylePropertyId.BackgroundImageOffsetX, new UIFixedLength(0f, UIFixedUnit.Pixel));
 				case StylePropertyId.BackgroundImageOffsetY:
@@ -177,14 +182,24 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.BackgroundImageRotation, new UIFixedLength(0f, UIFixedUnit.Pixel));
 				case StylePropertyId.BackgroundImage:
 					 return new StyleProperty(StylePropertyId.BackgroundImage, default(Texture2D));
-				case StylePropertyId.Painter:
-					 return new StyleProperty(StylePropertyId.Painter, "");
-				case StylePropertyId.Opacity:
-					 return new StyleProperty(StylePropertyId.Opacity, 1f);
-				case StylePropertyId.Cursor:
-					 return new StyleProperty(StylePropertyId.Cursor, default(CursorStyle));
-				case StylePropertyId.Visibility:
-					 return new StyleProperty(StylePropertyId.Visibility, (int)UIForia.Rendering.Visibility.Visible);
+				case StylePropertyId.BackgroundFit:
+					 return new StyleProperty(StylePropertyId.BackgroundFit, (int)UIForia.Rendering.BackgroundFit.Fill);
+				case StylePropertyId.BorderColorTop:
+					 return new StyleProperty(StylePropertyId.BorderColorTop, new Color(-1f, -1f, -1f, -1f));
+				case StylePropertyId.BorderColorRight:
+					 return new StyleProperty(StylePropertyId.BorderColorRight, new Color(-1f, -1f, -1f, -1f));
+				case StylePropertyId.BorderColorBottom:
+					 return new StyleProperty(StylePropertyId.BorderColorBottom, new Color(-1f, -1f, -1f, -1f));
+				case StylePropertyId.BorderColorLeft:
+					 return new StyleProperty(StylePropertyId.BorderColorLeft, new Color(-1f, -1f, -1f, -1f));
+				case StylePropertyId.CornerBevelTopLeft:
+					 return new StyleProperty(StylePropertyId.CornerBevelTopLeft, new UIFixedLength(0f, UIFixedUnit.Pixel));
+				case StylePropertyId.CornerBevelTopRight:
+					 return new StyleProperty(StylePropertyId.CornerBevelTopRight, new UIFixedLength(0f, UIFixedUnit.Pixel));
+				case StylePropertyId.CornerBevelBottomRight:
+					 return new StyleProperty(StylePropertyId.CornerBevelBottomRight, new UIFixedLength(0f, UIFixedUnit.Pixel));
+				case StylePropertyId.CornerBevelBottomLeft:
+					 return new StyleProperty(StylePropertyId.CornerBevelBottomLeft, new UIFixedLength(0f, UIFixedUnit.Pixel));
 				case StylePropertyId.FlexItemGrow:
 					 return new StyleProperty(StylePropertyId.FlexItemGrow, 0);
 				case StylePropertyId.FlexItemShrink:

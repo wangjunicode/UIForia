@@ -5,6 +5,34 @@ namespace UIForia.Rendering {
     
     public partial struct UIStyleSetStateProxy {
         
+        public UIForia.Rendering.Visibility Visibility {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.Visibility, state).AsVisibility; }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.Visibility, (int)value), state); }
+        }
+        
+        public float Opacity {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.Opacity, state).AsFloat; }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.Opacity, value), state); }
+        }
+        
+        public UIForia.Rendering.CursorStyle Cursor {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.Cursor, state).AsCursorStyle; }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.Cursor, value), state); }
+        }
+        
+        public string Painter {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.Painter, state).AsString; }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.Painter, value), state); }
+        }
+        
         public UIForia.Rendering.Overflow OverflowX {
             [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.OverflowX, state).AsOverflow; }
@@ -31,34 +59,6 @@ namespace UIForia.Rendering {
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.BackgroundTint, state).AsColor; }
             [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.BackgroundTint, value), state); }
-        }
-        
-        public UnityEngine.Color BorderColorTop {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.BorderColorTop, state).AsColor; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.BorderColorTop, value), state); }
-        }
-        
-        public UnityEngine.Color BorderColorRight {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.BorderColorRight, state).AsColor; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.BorderColorRight, value), state); }
-        }
-        
-        public UnityEngine.Color BorderColorBottom {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.BorderColorBottom, state).AsColor; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.BorderColorBottom, value), state); }
-        }
-        
-        public UnityEngine.Color BorderColorLeft {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.BorderColorLeft, state).AsColor; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.BorderColorLeft, value), state); }
         }
         
         public UIForia.UIFixedLength BackgroundImageOffsetX {
@@ -117,32 +117,67 @@ namespace UIForia.Rendering {
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.BackgroundImage, value), state); }
         }
         
-        public string Painter {
+        public UIForia.Rendering.BackgroundFit BackgroundFit {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.Painter, state).AsString; }
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.BackgroundFit, state).AsBackgroundFit; }
             [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.Painter, value), state); }
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.BackgroundFit, (int)value), state); }
         }
         
-        public float Opacity {
+        public UnityEngine.Color BorderColorTop {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.Opacity, state).AsFloat; }
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.BorderColorTop, state).AsColor; }
             [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.Opacity, value), state); }
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.BorderColorTop, value), state); }
         }
         
-        public UIForia.Rendering.CursorStyle Cursor {
+        public UnityEngine.Color BorderColorRight {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.Cursor, state).AsCursorStyle; }
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.BorderColorRight, state).AsColor; }
             [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.Cursor, value), state); }
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.BorderColorRight, value), state); }
         }
         
-        public UIForia.Rendering.Visibility Visibility {
+        public UnityEngine.Color BorderColorBottom {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.Visibility, state).AsVisibility; }
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.BorderColorBottom, state).AsColor; }
             [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.Visibility, (int)value), state); }
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.BorderColorBottom, value), state); }
+        }
+        
+        public UnityEngine.Color BorderColorLeft {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.BorderColorLeft, state).AsColor; }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.BorderColorLeft, value), state); }
+        }
+        
+        public UIForia.UIFixedLength CornerBevelTopLeft {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.CornerBevelTopLeft, state).AsUIFixedLength; }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.CornerBevelTopLeft, value), state); }
+        }
+        
+        public UIForia.UIFixedLength CornerBevelTopRight {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.CornerBevelTopRight, state).AsUIFixedLength; }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.CornerBevelTopRight, value), state); }
+        }
+        
+        public UIForia.UIFixedLength CornerBevelBottomRight {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.CornerBevelBottomRight, state).AsUIFixedLength; }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.CornerBevelBottomRight, value), state); }
+        }
+        
+        public UIForia.UIFixedLength CornerBevelBottomLeft {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.CornerBevelBottomLeft, state).AsUIFixedLength; }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.CornerBevelBottomLeft, value), state); }
         }
         
         public int FlexItemGrow {
@@ -899,6 +934,34 @@ namespace UIForia.Rendering {
     public partial class UIStyle {
     
         
+        public UIForia.Rendering.Visibility Visibility {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return (UIForia.Rendering.Visibility)FindEnumProperty(StylePropertyId.Visibility); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.Visibility, (int)value)); }
+        }
+            
+        public float Opacity {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return FindFloatProperty(StylePropertyId.Opacity); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.Opacity, value)); }
+        }
+            
+        public UIForia.Rendering.CursorStyle Cursor {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return GetProperty(StylePropertyId.Cursor).AsCursorStyle; }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.Cursor, value)); }
+        }
+            
+        public string Painter {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return GetProperty(StylePropertyId.Painter).AsString; }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.Painter, value)); }
+        }
+            
         public UIForia.Rendering.Overflow OverflowX {
             [System.Diagnostics.DebuggerStepThrough]
             get { return (UIForia.Rendering.Overflow)FindEnumProperty(StylePropertyId.OverflowX); }
@@ -925,34 +988,6 @@ namespace UIForia.Rendering {
             get { return FindColorProperty(StylePropertyId.BackgroundTint); }
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.BackgroundTint, value)); }
-        }
-            
-        public UnityEngine.Color BorderColorTop {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return FindColorProperty(StylePropertyId.BorderColorTop); }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.BorderColorTop, value)); }
-        }
-            
-        public UnityEngine.Color BorderColorRight {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return FindColorProperty(StylePropertyId.BorderColorRight); }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.BorderColorRight, value)); }
-        }
-            
-        public UnityEngine.Color BorderColorBottom {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return FindColorProperty(StylePropertyId.BorderColorBottom); }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.BorderColorBottom, value)); }
-        }
-            
-        public UnityEngine.Color BorderColorLeft {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return FindColorProperty(StylePropertyId.BorderColorLeft); }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.BorderColorLeft, value)); }
         }
             
         public UIForia.UIFixedLength BackgroundImageOffsetX {
@@ -1011,32 +1046,67 @@ namespace UIForia.Rendering {
             set { SetProperty(new StyleProperty(StylePropertyId.BackgroundImage, value)); }
         }
             
-        public string Painter {
+        public UIForia.Rendering.BackgroundFit BackgroundFit {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return GetProperty(StylePropertyId.Painter).AsString; }
+            get { return (UIForia.Rendering.BackgroundFit)FindEnumProperty(StylePropertyId.BackgroundFit); }
             [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.Painter, value)); }
+            set { SetProperty(new StyleProperty(StylePropertyId.BackgroundFit, (int)value)); }
         }
             
-        public float Opacity {
+        public UnityEngine.Color BorderColorTop {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return FindFloatProperty(StylePropertyId.Opacity); }
+            get { return FindColorProperty(StylePropertyId.BorderColorTop); }
             [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.Opacity, value)); }
+            set { SetProperty(new StyleProperty(StylePropertyId.BorderColorTop, value)); }
         }
             
-        public UIForia.Rendering.CursorStyle Cursor {
+        public UnityEngine.Color BorderColorRight {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return GetProperty(StylePropertyId.Cursor).AsCursorStyle; }
+            get { return FindColorProperty(StylePropertyId.BorderColorRight); }
             [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.Cursor, value)); }
+            set { SetProperty(new StyleProperty(StylePropertyId.BorderColorRight, value)); }
         }
             
-        public UIForia.Rendering.Visibility Visibility {
+        public UnityEngine.Color BorderColorBottom {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return (UIForia.Rendering.Visibility)FindEnumProperty(StylePropertyId.Visibility); }
+            get { return FindColorProperty(StylePropertyId.BorderColorBottom); }
             [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.Visibility, (int)value)); }
+            set { SetProperty(new StyleProperty(StylePropertyId.BorderColorBottom, value)); }
+        }
+            
+        public UnityEngine.Color BorderColorLeft {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return FindColorProperty(StylePropertyId.BorderColorLeft); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.BorderColorLeft, value)); }
+        }
+            
+        public UIForia.UIFixedLength CornerBevelTopLeft {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return FindUIFixedLengthProperty(StylePropertyId.CornerBevelTopLeft); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.CornerBevelTopLeft, value)); }
+        }
+            
+        public UIForia.UIFixedLength CornerBevelTopRight {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return FindUIFixedLengthProperty(StylePropertyId.CornerBevelTopRight); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.CornerBevelTopRight, value)); }
+        }
+            
+        public UIForia.UIFixedLength CornerBevelBottomRight {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return FindUIFixedLengthProperty(StylePropertyId.CornerBevelBottomRight); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.CornerBevelBottomRight, value)); }
+        }
+            
+        public UIForia.UIFixedLength CornerBevelBottomLeft {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return FindUIFixedLengthProperty(StylePropertyId.CornerBevelBottomLeft); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.CornerBevelBottomLeft, value)); }
         }
             
         public int FlexItemGrow {
@@ -1795,6 +1865,44 @@ namespace UIForia.Rendering {
     
         
 
+            public UIForia.Rendering.Visibility Visibility { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.Visibility, out property)) return property.AsVisibility;
+                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.Visibility), out property)) return property.AsVisibility;
+                    return DefaultStyleValues_Generated.Visibility;
+                }
+            }
+
+            public float Opacity { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.Opacity, out property)) return property.AsFloat;
+                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.Opacity), out property)) return property.AsFloat;
+                    return DefaultStyleValues_Generated.Opacity;
+                }
+            }
+
+            public UIForia.Rendering.CursorStyle Cursor { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.Cursor, out property)) return property.AsCursorStyle;
+                    return DefaultStyleValues_Generated.Cursor;
+                }
+            }
+
+            public string Painter { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.Painter, out property)) return property.AsString;
+                    return DefaultStyleValues_Generated.Painter;
+                }
+            }
+
             public UIForia.Rendering.Overflow OverflowX { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
@@ -1828,42 +1936,6 @@ namespace UIForia.Rendering {
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.BackgroundTint, out property)) return property.AsColor;
                     return DefaultStyleValues_Generated.BackgroundTint;
-                }
-            }
-
-            public UnityEngine.Color BorderColorTop { 
-                [System.Diagnostics.DebuggerStepThrough]
-                get { 
-                    StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.BorderColorTop, out property)) return property.AsColor;
-                    return DefaultStyleValues_Generated.BorderColorTop;
-                }
-            }
-
-            public UnityEngine.Color BorderColorRight { 
-                [System.Diagnostics.DebuggerStepThrough]
-                get { 
-                    StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.BorderColorRight, out property)) return property.AsColor;
-                    return DefaultStyleValues_Generated.BorderColorRight;
-                }
-            }
-
-            public UnityEngine.Color BorderColorBottom { 
-                [System.Diagnostics.DebuggerStepThrough]
-                get { 
-                    StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.BorderColorBottom, out property)) return property.AsColor;
-                    return DefaultStyleValues_Generated.BorderColorBottom;
-                }
-            }
-
-            public UnityEngine.Color BorderColorLeft { 
-                [System.Diagnostics.DebuggerStepThrough]
-                get { 
-                    StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.BorderColorLeft, out property)) return property.AsColor;
-                    return DefaultStyleValues_Generated.BorderColorLeft;
                 }
             }
 
@@ -1939,41 +2011,84 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public string Painter { 
+            public UIForia.Rendering.BackgroundFit BackgroundFit { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.Painter, out property)) return property.AsString;
-                    return DefaultStyleValues_Generated.Painter;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.BackgroundFit, out property)) return property.AsBackgroundFit;
+                    return DefaultStyleValues_Generated.BackgroundFit;
                 }
             }
 
-            public float Opacity { 
+            public UnityEngine.Color BorderColorTop { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.Opacity, out property)) return property.AsFloat;
-                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.Opacity), out property)) return property.AsFloat;
-                    return DefaultStyleValues_Generated.Opacity;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.BorderColorTop, out property)) return property.AsColor;
+                    return DefaultStyleValues_Generated.BorderColorTop;
                 }
             }
 
-            public UIForia.Rendering.CursorStyle Cursor { 
+            public UnityEngine.Color BorderColorRight { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.Cursor, out property)) return property.AsCursorStyle;
-                    return DefaultStyleValues_Generated.Cursor;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.BorderColorRight, out property)) return property.AsColor;
+                    return DefaultStyleValues_Generated.BorderColorRight;
                 }
             }
 
-            public UIForia.Rendering.Visibility Visibility { 
+            public UnityEngine.Color BorderColorBottom { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.Visibility, out property)) return property.AsVisibility;
-                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.Visibility), out property)) return property.AsVisibility;
-                    return DefaultStyleValues_Generated.Visibility;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.BorderColorBottom, out property)) return property.AsColor;
+                    return DefaultStyleValues_Generated.BorderColorBottom;
+                }
+            }
+
+            public UnityEngine.Color BorderColorLeft { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.BorderColorLeft, out property)) return property.AsColor;
+                    return DefaultStyleValues_Generated.BorderColorLeft;
+                }
+            }
+
+            public UIForia.UIFixedLength CornerBevelTopLeft { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.CornerBevelTopLeft, out property)) return property.AsUIFixedLength;
+                    return DefaultStyleValues_Generated.CornerBevelTopLeft;
+                }
+            }
+
+            public UIForia.UIFixedLength CornerBevelTopRight { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.CornerBevelTopRight, out property)) return property.AsUIFixedLength;
+                    return DefaultStyleValues_Generated.CornerBevelTopRight;
+                }
+            }
+
+            public UIForia.UIFixedLength CornerBevelBottomRight { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.CornerBevelBottomRight, out property)) return property.AsUIFixedLength;
+                    return DefaultStyleValues_Generated.CornerBevelBottomRight;
+                }
+            }
+
+            public UIForia.UIFixedLength CornerBevelBottomLeft { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.CornerBevelBottomLeft, out property)) return property.AsUIFixedLength;
+                    return DefaultStyleValues_Generated.CornerBevelBottomLeft;
                 }
             }
 
@@ -2965,6 +3080,38 @@ namespace UIForia.Rendering {
             }
 
         
+        public void SetVisibility(in UIForia.Rendering.Visibility? value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.Visibility, (int)value), state);
+        }
+
+        public UIForia.Rendering.Visibility GetVisibility(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.Visibility, state).AsVisibility;
+        }
+        
+        public void SetOpacity(in float? value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.Opacity, value), state);
+        }
+
+        public float GetOpacity(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.Opacity, state).AsFloat;
+        }
+        
+        public void SetCursor(UIForia.Rendering.CursorStyle value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.Cursor, value), state);
+        }
+
+        public UIForia.Rendering.CursorStyle GetCursor(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.Cursor, state).AsCursorStyle;
+        }
+        
+        public void SetPainter(string value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.Painter, value), state);
+        }
+
+        public string GetPainter(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.Painter, state).AsString;
+        }
+        
         public void SetOverflowX(in UIForia.Rendering.Overflow? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.OverflowX, (int)value), state);
         }
@@ -2995,38 +3142,6 @@ namespace UIForia.Rendering {
 
         public UnityEngine.Color GetBackgroundTint(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.BackgroundTint, state).AsColor;
-        }
-        
-        public void SetBorderColorTop(in UnityEngine.Color? value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.BorderColorTop, value), state);
-        }
-
-        public UnityEngine.Color GetBorderColorTop(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.BorderColorTop, state).AsColor;
-        }
-        
-        public void SetBorderColorRight(in UnityEngine.Color? value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.BorderColorRight, value), state);
-        }
-
-        public UnityEngine.Color GetBorderColorRight(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.BorderColorRight, state).AsColor;
-        }
-        
-        public void SetBorderColorBottom(in UnityEngine.Color? value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.BorderColorBottom, value), state);
-        }
-
-        public UnityEngine.Color GetBorderColorBottom(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.BorderColorBottom, state).AsColor;
-        }
-        
-        public void SetBorderColorLeft(in UnityEngine.Color? value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.BorderColorLeft, value), state);
-        }
-
-        public UnityEngine.Color GetBorderColorLeft(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.BorderColorLeft, state).AsColor;
         }
         
         public void SetBackgroundImageOffsetX(in UIForia.UIFixedLength? value, StyleState state) {
@@ -3093,36 +3208,76 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.BackgroundImage, state).AsTexture2D;
         }
         
-        public void SetPainter(string value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.Painter, value), state);
+        public void SetBackgroundFit(in UIForia.Rendering.BackgroundFit? value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.BackgroundFit, (int)value), state);
         }
 
-        public string GetPainter(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.Painter, state).AsString;
+        public UIForia.Rendering.BackgroundFit GetBackgroundFit(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.BackgroundFit, state).AsBackgroundFit;
         }
         
-        public void SetOpacity(in float? value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.Opacity, value), state);
+        public void SetBorderColorTop(in UnityEngine.Color? value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.BorderColorTop, value), state);
         }
 
-        public float GetOpacity(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.Opacity, state).AsFloat;
+        public UnityEngine.Color GetBorderColorTop(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.BorderColorTop, state).AsColor;
         }
         
-        public void SetCursor(UIForia.Rendering.CursorStyle value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.Cursor, value), state);
+        public void SetBorderColorRight(in UnityEngine.Color? value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.BorderColorRight, value), state);
         }
 
-        public UIForia.Rendering.CursorStyle GetCursor(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.Cursor, state).AsCursorStyle;
+        public UnityEngine.Color GetBorderColorRight(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.BorderColorRight, state).AsColor;
         }
         
-        public void SetVisibility(in UIForia.Rendering.Visibility? value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.Visibility, (int)value), state);
+        public void SetBorderColorBottom(in UnityEngine.Color? value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.BorderColorBottom, value), state);
         }
 
-        public UIForia.Rendering.Visibility GetVisibility(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.Visibility, state).AsVisibility;
+        public UnityEngine.Color GetBorderColorBottom(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.BorderColorBottom, state).AsColor;
+        }
+        
+        public void SetBorderColorLeft(in UnityEngine.Color? value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.BorderColorLeft, value), state);
+        }
+
+        public UnityEngine.Color GetBorderColorLeft(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.BorderColorLeft, state).AsColor;
+        }
+        
+        public void SetCornerBevelTopLeft(in UIForia.UIFixedLength? value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.CornerBevelTopLeft, value), state);
+        }
+
+        public UIForia.UIFixedLength GetCornerBevelTopLeft(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.CornerBevelTopLeft, state).AsUIFixedLength;
+        }
+        
+        public void SetCornerBevelTopRight(in UIForia.UIFixedLength? value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.CornerBevelTopRight, value), state);
+        }
+
+        public UIForia.UIFixedLength GetCornerBevelTopRight(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.CornerBevelTopRight, state).AsUIFixedLength;
+        }
+        
+        public void SetCornerBevelBottomRight(in UIForia.UIFixedLength? value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.CornerBevelBottomRight, value), state);
+        }
+
+        public UIForia.UIFixedLength GetCornerBevelBottomRight(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.CornerBevelBottomRight, state).AsUIFixedLength;
+        }
+        
+        public void SetCornerBevelBottomLeft(in UIForia.UIFixedLength? value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.CornerBevelBottomLeft, value), state);
+        }
+
+        public UIForia.UIFixedLength GetCornerBevelBottomLeft(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.CornerBevelBottomLeft, state).AsUIFixedLength;
         }
         
         public void SetFlexItemGrow(in int? value, StyleState state) {
@@ -3984,6 +4139,14 @@ namespace UIForia.Rendering {
 
         public StyleProperty GetComputedStyleProperty(StylePropertyId propertyId) {
         			switch(propertyId) {
+				case StylePropertyId.Visibility:
+					 return new StyleProperty(StylePropertyId.Visibility, (int)Visibility);
+				case StylePropertyId.Opacity:
+					 return new StyleProperty(StylePropertyId.Opacity, Opacity);
+				case StylePropertyId.Cursor:
+					 return new StyleProperty(StylePropertyId.Cursor, Cursor);
+				case StylePropertyId.Painter:
+					 return new StyleProperty(StylePropertyId.Painter, Painter);
 				case StylePropertyId.OverflowX:
 					 return new StyleProperty(StylePropertyId.OverflowX, (int)OverflowX);
 				case StylePropertyId.OverflowY:
@@ -3992,14 +4155,6 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.BackgroundColor, BackgroundColor);
 				case StylePropertyId.BackgroundTint:
 					 return new StyleProperty(StylePropertyId.BackgroundTint, BackgroundTint);
-				case StylePropertyId.BorderColorTop:
-					 return new StyleProperty(StylePropertyId.BorderColorTop, BorderColorTop);
-				case StylePropertyId.BorderColorRight:
-					 return new StyleProperty(StylePropertyId.BorderColorRight, BorderColorRight);
-				case StylePropertyId.BorderColorBottom:
-					 return new StyleProperty(StylePropertyId.BorderColorBottom, BorderColorBottom);
-				case StylePropertyId.BorderColorLeft:
-					 return new StyleProperty(StylePropertyId.BorderColorLeft, BorderColorLeft);
 				case StylePropertyId.BackgroundImageOffsetX:
 					 return new StyleProperty(StylePropertyId.BackgroundImageOffsetX, BackgroundImageOffsetX);
 				case StylePropertyId.BackgroundImageOffsetY:
@@ -4016,14 +4171,24 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.BackgroundImageRotation, BackgroundImageRotation);
 				case StylePropertyId.BackgroundImage:
 					 return new StyleProperty(StylePropertyId.BackgroundImage, BackgroundImage);
-				case StylePropertyId.Painter:
-					 return new StyleProperty(StylePropertyId.Painter, Painter);
-				case StylePropertyId.Opacity:
-					 return new StyleProperty(StylePropertyId.Opacity, Opacity);
-				case StylePropertyId.Cursor:
-					 return new StyleProperty(StylePropertyId.Cursor, Cursor);
-				case StylePropertyId.Visibility:
-					 return new StyleProperty(StylePropertyId.Visibility, (int)Visibility);
+				case StylePropertyId.BackgroundFit:
+					 return new StyleProperty(StylePropertyId.BackgroundFit, (int)BackgroundFit);
+				case StylePropertyId.BorderColorTop:
+					 return new StyleProperty(StylePropertyId.BorderColorTop, BorderColorTop);
+				case StylePropertyId.BorderColorRight:
+					 return new StyleProperty(StylePropertyId.BorderColorRight, BorderColorRight);
+				case StylePropertyId.BorderColorBottom:
+					 return new StyleProperty(StylePropertyId.BorderColorBottom, BorderColorBottom);
+				case StylePropertyId.BorderColorLeft:
+					 return new StyleProperty(StylePropertyId.BorderColorLeft, BorderColorLeft);
+				case StylePropertyId.CornerBevelTopLeft:
+					 return new StyleProperty(StylePropertyId.CornerBevelTopLeft, CornerBevelTopLeft);
+				case StylePropertyId.CornerBevelTopRight:
+					 return new StyleProperty(StylePropertyId.CornerBevelTopRight, CornerBevelTopRight);
+				case StylePropertyId.CornerBevelBottomRight:
+					 return new StyleProperty(StylePropertyId.CornerBevelBottomRight, CornerBevelBottomRight);
+				case StylePropertyId.CornerBevelBottomLeft:
+					 return new StyleProperty(StylePropertyId.CornerBevelBottomLeft, CornerBevelBottomLeft);
 				case StylePropertyId.FlexItemGrow:
 					 return new StyleProperty(StylePropertyId.FlexItemGrow, FlexItemGrow);
 				case StylePropertyId.FlexItemShrink:
@@ -4249,12 +4414,9 @@ namespace UIForia.Rendering {
       public static bool CanAnimate(StylePropertyId propertyId) {
                 switch (propertyId) {
     
+                    case StylePropertyId.Opacity: return true;
                     case StylePropertyId.BackgroundColor: return true;
                     case StylePropertyId.BackgroundTint: return true;
-                    case StylePropertyId.BorderColorTop: return true;
-                    case StylePropertyId.BorderColorRight: return true;
-                    case StylePropertyId.BorderColorBottom: return true;
-                    case StylePropertyId.BorderColorLeft: return true;
                     case StylePropertyId.BackgroundImageOffsetX: return true;
                     case StylePropertyId.BackgroundImageOffsetY: return true;
                     case StylePropertyId.BackgroundImageScaleX: return true;
@@ -4262,7 +4424,14 @@ namespace UIForia.Rendering {
                     case StylePropertyId.BackgroundImageTileX: return true;
                     case StylePropertyId.BackgroundImageTileY: return true;
                     case StylePropertyId.BackgroundImageRotation: return true;
-                    case StylePropertyId.Opacity: return true;
+                    case StylePropertyId.BorderColorTop: return true;
+                    case StylePropertyId.BorderColorRight: return true;
+                    case StylePropertyId.BorderColorBottom: return true;
+                    case StylePropertyId.BorderColorLeft: return true;
+                    case StylePropertyId.CornerBevelTopLeft: return true;
+                    case StylePropertyId.CornerBevelTopRight: return true;
+                    case StylePropertyId.CornerBevelBottomRight: return true;
+                    case StylePropertyId.CornerBevelBottomLeft: return true;
                     case StylePropertyId.FlexItemGrow: return true;
                     case StylePropertyId.FlexItemShrink: return true;
                     case StylePropertyId.GridLayoutColGap: return true;
@@ -4343,8 +4512,8 @@ namespace UIForia.Rendering {
         public static bool IsInherited(StylePropertyId propertyId) {
             switch (propertyId) {
 
-                    case StylePropertyId.Opacity: return true;
                     case StylePropertyId.Visibility: return true;
+                    case StylePropertyId.Opacity: return true;
                     case StylePropertyId.TextColor: return true;
                     case StylePropertyId.TextFontAsset: return true;
                     case StylePropertyId.TextFontSize: return true;

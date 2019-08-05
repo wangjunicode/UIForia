@@ -1,3 +1,4 @@
+using System;
 using SVGX;
 using UIForia.Elements;
 using UIForia.Extensions;
@@ -6,10 +7,20 @@ using UIForia.Util;
 using Unity.Mathematics;
 using UnityEngine;
 using Vertigo;
-using Earcut = Vertigo.Earcut;
 
 namespace UIForia.Rendering {
+    
+    public enum BackgroundFit {
 
+        Unset = 0,
+        ScaleDown = 1 << 0,
+        Cover = 1 << 1,
+        Contain = 1 << 2,
+        Fill = 1 << 3,
+        None = 1 << 4
+
+    }
+    
     public class ImageRenderBox : StandardRenderBox {
 
         public override Rect RenderBounds { get; }
@@ -83,28 +94,65 @@ namespace UIForia.Rendering {
             }
         }
 
+        private float ResolveFixedSize(float baseSize, UIFixedLength length) {
+            switch (length.unit) {
+                case UIFixedUnit.Unset:
+                case UIFixedUnit.Pixel:
+                    return length.value;
+                case UIFixedUnit.Percent:
+                    return baseSize * length.value;
+                case UIFixedUnit.Em:
+                    return element.style.GetResolvedFontSize() * length.value;
+                case UIFixedUnit.ViewportWidth:
+                    return element.View.Viewport.width * length.value;
+                case UIFixedUnit.ViewportHeight:
+                    return element.View.Viewport.height * length.value;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
         private void UpdateGeometry(in Size size) {
             geometryNeedsUpdate = false;
-
-            bool hasBorder = element.layoutResult.border.IsZero;
-
+            
             Color c;
             geometry.Clear();
-            // geometry.FillRectUniformBorder_Miter(size.width, size.height);
 
             float width = size.width;
             float height = size.height;
+            float min = Mathf.Min(width, height);
 
-            geometry.ClipCornerRect(new Size(width, height), new UIForiaGeometry.CornerDef() {
-                topLeftX = (25 * 0.5f),
-                topLeftY = (25 * 0.5f),
-                topRightX = (25 * 0.5f),
-                topRightY = (25 * 0.5f),
-                bottomRightX = (25 * 0.5f),
-                bottomRightY = (25 * 0.5f),
-                bottomLeftX = (25 * 0.5f),
-                bottomLeftY = (25 * 0.5f),
-            });
+            float bevelTopLeft = 0; //ResolveFixedSize(min, element.style.CornerBevelTopLeft);
+            float bevelTopRight = 10; //ResolveFixedSize(min, element.style.CornerBevelTopRight);
+            float bevelBottomRight = 10; ResolveFixedSize(min, element.style.CornerBevelBottomRight);
+            float bevelBottomLeft = 10; ResolveFixedSize(min, element.style.CornerBevelBottomLeft);
+            float radiusTopLeft = ResolveFixedSize(min, element.style.BorderRadiusTopLeft);
+            float radiusTopRight = ResolveFixedSize(min, element.style.BorderRadiusTopRight);
+            float radiusBottomRight = ResolveFixedSize(min, element.style.BorderRadiusBottomRight);
+            float radiusBottomLeft = ResolveFixedSize(min, element.style.BorderRadiusBottomLeft);
+
+            if (radiusBottomLeft > 0 ||
+                radiusBottomRight > 0 ||
+                radiusTopLeft > 0 ||
+                radiusTopRight > 0 ||
+                bevelTopRight > 0 ||
+                bevelTopLeft > 0 ||
+                bevelBottomLeft > 0 ||
+                bevelBottomRight > 0) {
+                geometry.ClipCornerRect(new Size(width, height), new UIForiaGeometry.CornerDef() {
+                    topLeftX = bevelTopLeft,
+                    topLeftY = bevelTopLeft,
+                    topRightX = bevelTopRight,
+                    topRightY = bevelTopRight,
+                    bottomRightX = bevelBottomRight,
+                    bottomRightY = bevelBottomRight,
+                    bottomLeftX = bevelBottomLeft,
+                    bottomLeftY = bevelBottomLeft,
+                });
+            }
+            else {
+                geometry.FillRectUniformBorder_Miter(width, size.height);//size.width, size.height);
+            }
 
             if (element.style.BackgroundImage != null) {
                 Vector3[] positions = geometry.positionList.array;
@@ -135,24 +183,48 @@ namespace UIForia.Rendering {
                 int newHeight = (int) (originalHeight * ratio);
                 int newWidth = (int) (originalWidth * ratio);
 
-                // Now calculate the X,Y position of the upper-left corner 
-                // (one of these will always be zero)
+                // Now calculate the X,Y position of the upper-left corner (one of these will always be zero)
                 int posX = (int) ((width - (originalWidth * ratio)) / 2);
                 int posY = (int) ((height - (originalHeight * ratio)) / 2);
 
-                // graphic.Clear(Color.White); // white padding
-                // graphic.DrawImage(image, posX, posY, newWidth, newHeight);
-
-                for (int i = 0; i < geometry.texCoordList0.size; i++) {
-                    float x = (posX + positions[i].x) / (bgScaleX * newWidth);
-                    float y = ((posY + positions[i].y) / (bgScaleY * -newHeight));
-                    float newX = (cosX * x) - (sinX * y);
-                    float newY = (sinX * x) + (cosX * y);
-                    texCoord0[i].x = x;
-                    texCoord0[i].y = 1 - y;
-                    texCoord1[i].y = 1;
-                    // texCoord1[i] = new Vector4(x, 1 - y, width, height);
+                switch (element.style.BackgroundFit) {
+                    
+                    case BackgroundFit.Fill:
+                        for (int i = 0; i < geometry.texCoordList0.size; i++) {
+                            float x = (bgPositionX + positions[i].x) / (bgScaleX * width);
+                            float y = (bgPositionY + positions[i].y) / (bgScaleY * -height);
+                            float newX = (cosX * x) - (sinX * y);
+                            float newY = (sinX * x) + (cosX * y);
+                            texCoord0[i].x = newX;
+                            texCoord0[i].y = 1 - newY;
+                        }
+                        break;
+                    
+                    case BackgroundFit.ScaleDown:
+                        break;
+                    
+                    case BackgroundFit.Cover:
+                        break;
+                    
+                    case BackgroundFit.Contain:
+                        for (int i = 0; i < geometry.texCoordList0.size; i++) {
+                            float x = (posX + bgPositionX + positions[i].x) / (bgScaleX * newWidth);
+                            float y = (posY + bgPositionY + positions[i].y) / (bgScaleY * -newHeight);
+                            float newX = (cosX * x) - (sinX * y);
+                            float newY = (sinX * x) + (cosX * y);
+                            texCoord0[i].x = newX;
+                            texCoord0[i].y = 1 - newY;
+                        }
+                        break;
+                    
+                    case BackgroundFit.None:
+                       
+                        break;
+                    
                 }
+//                
+//                
+                
             }
 
             range = new GeometryRange(0, geometry.positionList.size, 0, geometry.triangleList.size);
@@ -167,6 +239,8 @@ namespace UIForia.Rendering {
             // uv transform
         }
 
+  
+        
         public override void PaintBackground(RenderContext ctx) {
             Size newSize = element.layoutResult.actualSize;
 
@@ -187,7 +261,7 @@ namespace UIForia.Rendering {
             if (!element.style.BackgroundColor.IsDefined()) {
                 packedBackgroundColor = VertigoUtil.ColorToFloat(new Color32(0, 0, 0, 0));
             }
-            
+
             float packedBackgroundTint = VertigoUtil.ColorToFloat(element.style.BackgroundTint);
             PaintMode colorMode = PaintMode.None;
 
@@ -205,32 +279,32 @@ namespace UIForia.Rendering {
 
             // if keeping aspect ratio
             colorMode |= PaintMode.LetterBoxTexture;
-            
+
             // could include a letterbox color in packed colors
-            
+
             float borderRadiusTopLeft = element.style.BorderRadiusTopLeft.value;
             float borderRadiusTopRight = element.style.BorderRadiusTopRight.value;
             float borderRadiusBottomLeft = element.style.BorderRadiusBottomLeft.value;
             float borderRadiusBottomRight = element.style.BorderRadiusBottomRight.value;
-            
+
             float min = math.min(element.layoutResult.actualSize.width, element.layoutResult.actualSize.height);
-            
+
             if (min <= 0) min = 0.0001f;
-            
+
             float halfMin = min * 0.5f;
 
             borderRadiusTopLeft = math.clamp(borderRadiusTopLeft, 0, halfMin) / min;
             borderRadiusTopRight = math.clamp(borderRadiusTopRight, 0, halfMin) / min;
             borderRadiusBottomLeft = math.clamp(borderRadiusBottomLeft, 0, halfMin) / min;
             borderRadiusBottomRight = math.clamp(borderRadiusBottomRight, 0, halfMin) / min;
-            
+
             byte b0 = (byte) (((borderRadiusTopLeft * 1000)) * 0.5f);
             byte b1 = (byte) (((borderRadiusTopRight * 1000)) * 0.5f);
             byte b2 = (byte) (((borderRadiusBottomLeft * 1000)) * 0.5f);
             byte b3 = (byte) (((borderRadiusBottomRight * 1000)) * 0.5f);
-            
+
             float packedBorderRadii = VertigoUtil.BytesToFloat(b0, b1, b2, b3);
-            
+
             geometry.packedColors = new Color(packedBackgroundColor, packedBackgroundTint, (int) colorMode, 0);
             geometry.objectData = new Vector4((int) ShapeType.RoundedRect, VertigoUtil.PackSizeVector(element.layoutResult.actualSize), packedBorderRadii, 0);
             geometry.mainTexture = backgroundImage;

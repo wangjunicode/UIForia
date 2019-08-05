@@ -80,6 +80,7 @@ Shader "UIForia/Standard"
             #define Vert_CharacterPackedOutline objectInfo.y
             #define Vert_CharacterPackedUnderlay objectInfo.z
             #define Vert_CharacterWeight objectInfo.w
+            #define Vert_Bevel v.texCoord1.y
                     
             #define PaintMode_Color 1 << 0
             #define PaintMode_Texture 1 << 1
@@ -111,18 +112,20 @@ Shader "UIForia/Standard"
                 int shapeType = objectInfo.x;
                 
                 half2 size = UnpackSize(Vert_PackedSize);
-
                 v.vertex = mul(transform, float4(v.vertex.xyz, 1));
                 
                 o.vertex = UnityObjectToClipPos(v.vertex);
                 o.texCoord0 = v.texCoord0;
                 o.color = _ColorData[objectIndex];
-
+                float2 pixelSize2 = o.vertex.w;
+                pixelSize2 /= abs(mul((float2x2)UNITY_MATRIX_P, _ScreenParams.xy * size));
+                o.texCoord4 = float4(v.texCoord1.z, 0, 0, Vert_Bevel);
                 if(shapeType != 1) {
-                    o.vertex = SDFPixelSnap(o.vertex); // pixel snap is bad for text rendering
+                    //o.vertex = SDFPixelSnap(o.vertex); // pixel snap is bad for text rendering
                     o.texCoord1 = float4(size.x, size.y, Vert_BorderRadii, Vert_BorderSize);
-                    o.texCoord2 = float4(shapeType, 0, 0, 0);
+                    o.texCoord2 = float4(shapeType, pixelSize2, Vert_Bevel);
                     o.texCoord3 = Vert_BorderSizeColor;
+
                 }
                 else {             
                     _FontScaleX = 1;
@@ -194,7 +197,7 @@ Shader "UIForia/Standard"
                 
                 textureColor = lerp(textureColor, textureColor + tintColor, tintTexture);
                 
-                if (useTexture && letterBoxTexture && texCoord.y < 0 || texCoord.y > 1) {
+                if (useTexture && letterBoxTexture && (texCoord.x < 0 || texCoord.x > 1)) {
                     return bgColor; // could return a letterbox color instead
                 }
                 
@@ -218,14 +221,30 @@ Shader "UIForia/Standard"
             
                 return faceColor;
             }
- 
-            fixed4 frag (v2f i) : SV_Target {            
-                
+            
+            float sdRoundBox( float2 p, float2 b, in float r ) 
+            {
+                float2 q = abs(p) - b + float2(r, r);
+                return min(max(q.x,q.y),0.0) + length(max(q,0.0)) - r;
+            }
+
+            float map(float s, float a1, float a2, float b1, float b2) {
+                return b1 + (s-a1)*(b2-b1)/(a2-a1);
+            }
+            
+            float sdRoundBox2( in float2 p, float2 b, float r ) {
+                float2 q = abs(p)-b;
+                float d = (min(q.x, q.y) > 0.) ? length(q) : max( q.x, q.y );   
+                return d - r;
+            }
+
+            fixed4 frag (v2f i) : SV_Target {           
+             //                
                 // todo -- use color mode effectively
                 
                 fixed4 mainColor = ComputeColor(i.color, i.texCoord0.xy);
                 mainColor.rgb *= mainColor.a;
-                                
+                              
                 if(Frag_ShapeType != ShapeType_Text) {
 
                     SDFData sdfData;
@@ -233,15 +252,26 @@ Shader "UIForia/Standard"
                     sdfData.uv = Frag_SDFCoords;
                     sdfData.size = Frag_SDFSize;
                     sdfData.radius = GetBorderRadius(Frag_SDFCoords, Frag_SDFBorderRadii);
-                    sdfData.strokeWidth = Frag_SDFStrokeWidth;
+                    sdfData.strokeWidth = 0; //Frag_SDFStrokeWidth;
                     
                     fixed4 contentColor = mainColor;
                     fixed4 borderColor = fixed4(mainColor.rgb, 0);//GetBorderColor(Frag_SDFCoords, contentColor, Frag_BorderColors);
 
                     // we get bad blending at the edges of our SDF, this ensure rects are not smooth stepped                                       
-//                     mainColor = lerp(mainColor, SDFColor(sdfData, borderColor, contentColor), 1);//sdfData.radius != 0);
-                     mainColor = SDFColor(sdfData, borderColor, contentColor);
+                    // mainColor = lerp(mainColor, SDFColor(sdfData, borderColor, contentColor, i.texCoord4.x), sdfData.radius != 0);
+                     mainColor = SDFColor(sdfData, borderColor, contentColor, i.texCoord4.x);
                      mainColor.rgb *=  mainColor.a;
+                     
+                     float borderSize = 1 / (min(Frag_SDFSize.x, Frag_SDFSize.y)) * 2;
+                     
+                     if(mainColor.a > 0 && i.texCoord4.x < borderSize && i.texCoord4.w == 1) {
+                        fixed4 aefaf = fixed4(mainColor.rgb, 0);
+                        fixed4 cx = mainColor;
+                        aefaf = lerp(aefaf, cx, i.texCoord4.x / borderSize);
+                        aefaf.rgb *= i.texCoord4.x / (borderSize);
+                        return aefaf;
+                     }
+                     
                      return mainColor;
                 }
                 

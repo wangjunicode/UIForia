@@ -23,6 +23,13 @@ namespace UIForia.Editor {
     public static class CodeGen {
 
         internal static readonly PropertyGenerator[] properties = {
+            
+            // Misc
+            new PropertyGenerator<Visibility>(StylePropertyId.Visibility, Visibility.Visible, InheritanceType.Inherited),
+            new AnimatedPropertyGenerator<float>(StylePropertyId.Opacity, 1, InheritanceType.Inherited),
+            new PropertyGenerator<CursorStyle>(StylePropertyId.Cursor, null),
+            new PropertyGenerator<string>(StylePropertyId.Painter, string.Empty),
+            
             // Overflow
             new PropertyGenerator<Overflow>(StylePropertyId.OverflowX, Overflow.Visible),
             new PropertyGenerator<Overflow>(StylePropertyId.OverflowY, Overflow.Visible),
@@ -30,10 +37,6 @@ namespace UIForia.Editor {
             // Background
             new AnimatedPropertyGenerator<Color>(StylePropertyId.BackgroundColor, ColorUtil.UnsetValue),
             new AnimatedPropertyGenerator<Color>(StylePropertyId.BackgroundTint, ColorUtil.UnsetValue),
-            new AnimatedPropertyGenerator<Color>(StylePropertyId.BorderColorTop, ColorUtil.UnsetValue),
-            new AnimatedPropertyGenerator<Color>(StylePropertyId.BorderColorRight, ColorUtil.UnsetValue),
-            new AnimatedPropertyGenerator<Color>(StylePropertyId.BorderColorBottom, ColorUtil.UnsetValue),
-            new AnimatedPropertyGenerator<Color>(StylePropertyId.BorderColorLeft, ColorUtil.UnsetValue),
             new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.BackgroundImageOffsetX, new UIFixedLength(0)),
             new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.BackgroundImageOffsetY, new UIFixedLength(0)),
             new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.BackgroundImageScaleX, new UIFixedLength(0)),
@@ -42,11 +45,20 @@ namespace UIForia.Editor {
             new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.BackgroundImageTileY, new UIFixedLength(0)),
             new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.BackgroundImageRotation, new UIFixedLength(0)),
             new PropertyGenerator<Texture2D>(StylePropertyId.BackgroundImage, null),
-            new PropertyGenerator<string>(StylePropertyId.Painter, string.Empty),
-            new AnimatedPropertyGenerator<float>(StylePropertyId.Opacity, 1, InheritanceType.Inherited),
-            new PropertyGenerator<CursorStyle>(StylePropertyId.Cursor, null),
-            new PropertyGenerator<Visibility>(StylePropertyId.Visibility, Visibility.Visible, InheritanceType.Inherited),
+            new PropertyGenerator<BackgroundFit>(StylePropertyId.BackgroundFit, BackgroundFit.Fill),
 
+            // Border
+            new AnimatedPropertyGenerator<Color>(StylePropertyId.BorderColorTop, ColorUtil.UnsetValue),
+            new AnimatedPropertyGenerator<Color>(StylePropertyId.BorderColorRight, ColorUtil.UnsetValue),
+            new AnimatedPropertyGenerator<Color>(StylePropertyId.BorderColorBottom, ColorUtil.UnsetValue),
+            new AnimatedPropertyGenerator<Color>(StylePropertyId.BorderColorLeft, ColorUtil.UnsetValue),
+            
+            // Corner
+            new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.CornerBevelTopLeft, new UIFixedLength(0)),
+            new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.CornerBevelTopRight, new UIFixedLength(0)),
+            new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.CornerBevelBottomRight, new UIFixedLength(0)),
+            new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.CornerBevelBottomLeft, new UIFixedLength(0)),
+            
             // Flex Item
             new AnimatedPropertyGenerator<int>(StylePropertyId.FlexItemGrow, 0),
             new AnimatedPropertyGenerator<int>(StylePropertyId.FlexItemShrink, 0),

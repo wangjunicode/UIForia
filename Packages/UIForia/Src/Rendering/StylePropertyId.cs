@@ -24,6 +24,7 @@ namespace UIForia.Rendering {
         BorderColorBottom = 127,
         BorderColorLeft = 128,
         BackgroundTint = 129, 
+        BackgroundFit = 130,
         
         GridItemY = 200,
         GridItemHeight = 201,
@@ -154,6 +155,11 @@ namespace UIForia.Rendering {
         
         FitHorizontal = 2009,
         FitVertical = 2010,
+
+        CornerBevelTopLeft = 3001,
+        CornerBevelTopRight = 3002,
+        CornerBevelBottomLeft = 3003,
+        CornerBevelBottomRight = 3004,
 
     }
 

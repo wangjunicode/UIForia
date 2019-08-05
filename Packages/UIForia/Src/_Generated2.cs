@@ -5,6 +5,154 @@ using UIForia.Rendering;
 
 namespace UIForia.Bindings.StyleBindings {
             
+    public class StyleBinding_Visibility : StyleBinding {
+
+        public readonly Expression<UIForia.Rendering.Visibility> expression;
+        public readonly StylePropertyId propertyId;
+        
+        public StyleBinding_Visibility(string propertyName, StylePropertyId propertyId, StyleState state, Expression<UIForia.Rendering.Visibility> expression)
+            : base(propertyName, state) {
+            this.propertyId = propertyId;
+            this.expression = expression;
+        }
+
+        public override void Execute(UIElement element, ExpressionContext context) {
+            if (!element.style.IsInState(state)) return;
+
+            var oldValue = element.style.propertyMap[(int)propertyId].AsVisibility;
+            var value = expression.Evaluate(context);
+            if (value != oldValue) {
+                element.style.SetProperty(new StyleProperty(propertyId, (int)value), state);
+            }
+        }
+
+        public override bool IsConstant() {
+            return expression.IsConstant();
+        }
+
+        public override void Apply(UIStyle style, ExpressionContext context) {
+            var value = expression.Evaluate(context);
+            style.SetProperty(new StyleProperty(propertyId, (int)value));
+        }
+
+        public override void Apply(UIStyleSet styleSet, ExpressionContext context) {
+            var value = expression.Evaluate(context);
+            styleSet.SetProperty(new StyleProperty(propertyId, (int)value), state);
+        }
+
+    }
+        
+    public class StyleBinding_float : StyleBinding {
+
+        public readonly Expression<float> expression;
+        public readonly StylePropertyId propertyId;
+        
+        public StyleBinding_float(string propertyName, StylePropertyId propertyId, StyleState state, Expression<float> expression)
+            : base(propertyName, state) {
+            this.propertyId = propertyId;
+            this.expression = expression;
+        }
+
+        public override void Execute(UIElement element, ExpressionContext context) {
+            if (!element.style.IsInState(state)) return;
+
+            var oldValue = element.style.propertyMap[(int)propertyId].AsFloat;
+            var value = expression.Evaluate(context);
+            if (value != oldValue) {
+                element.style.SetProperty(new StyleProperty(propertyId, value), state);
+            }
+        }
+
+        public override bool IsConstant() {
+            return expression.IsConstant();
+        }
+
+        public override void Apply(UIStyle style, ExpressionContext context) {
+            var value = expression.Evaluate(context);
+            style.SetProperty(new StyleProperty(propertyId, value));
+        }
+
+        public override void Apply(UIStyleSet styleSet, ExpressionContext context) {
+            var value = expression.Evaluate(context);
+            styleSet.SetProperty(new StyleProperty(propertyId, value), state);
+        }
+
+    }
+        
+    public class StyleBinding_CursorStyle : StyleBinding {
+
+        public readonly Expression<UIForia.Rendering.CursorStyle> expression;
+        public readonly StylePropertyId propertyId;
+        
+        public StyleBinding_CursorStyle(string propertyName, StylePropertyId propertyId, StyleState state, Expression<UIForia.Rendering.CursorStyle> expression)
+            : base(propertyName, state) {
+            this.propertyId = propertyId;
+            this.expression = expression;
+        }
+
+        public override void Execute(UIElement element, ExpressionContext context) {
+            if (!element.style.IsInState(state)) return;
+
+            var oldValue = element.style.propertyMap[(int)propertyId].AsCursorStyle;
+            var value = expression.Evaluate(context);
+            if (value != oldValue) {
+                element.style.SetProperty(new StyleProperty(propertyId, value), state);
+            }
+        }
+
+        public override bool IsConstant() {
+            return expression.IsConstant();
+        }
+
+        public override void Apply(UIStyle style, ExpressionContext context) {
+            var value = expression.Evaluate(context);
+            style.SetProperty(new StyleProperty(propertyId, value));
+        }
+
+        public override void Apply(UIStyleSet styleSet, ExpressionContext context) {
+            var value = expression.Evaluate(context);
+            styleSet.SetProperty(new StyleProperty(propertyId, value), state);
+        }
+
+    }
+        
+    public class StyleBinding_string : StyleBinding {
+
+        public readonly Expression<string> expression;
+        public readonly StylePropertyId propertyId;
+        
+        public StyleBinding_string(string propertyName, StylePropertyId propertyId, StyleState state, Expression<string> expression)
+            : base(propertyName, state) {
+            this.propertyId = propertyId;
+            this.expression = expression;
+        }
+
+        public override void Execute(UIElement element, ExpressionContext context) {
+            if (!element.style.IsInState(state)) return;
+
+            var oldValue = element.style.propertyMap[(int)propertyId].AsString;
+            var value = expression.Evaluate(context);
+            if (value != oldValue) {
+                element.style.SetProperty(new StyleProperty(propertyId, value), state);
+            }
+        }
+
+        public override bool IsConstant() {
+            return expression.IsConstant();
+        }
+
+        public override void Apply(UIStyle style, ExpressionContext context) {
+            var value = expression.Evaluate(context);
+            style.SetProperty(new StyleProperty(propertyId, value));
+        }
+
+        public override void Apply(UIStyleSet styleSet, ExpressionContext context) {
+            var value = expression.Evaluate(context);
+            styleSet.SetProperty(new StyleProperty(propertyId, value), state);
+        }
+
+    }
+        
     public class StyleBinding_Overflow : StyleBinding {
 
         public readonly Expression<UIForia.Rendering.Overflow> expression;
@@ -153,12 +301,12 @@ namespace UIForia.Bindings.StyleBindings {
 
     }
         
-    public class StyleBinding_string : StyleBinding {
+    public class StyleBinding_BackgroundFit : StyleBinding {
 
-        public readonly Expression<string> expression;
+        public readonly Expression<UIForia.Rendering.BackgroundFit> expression;
         public readonly StylePropertyId propertyId;
         
-        public StyleBinding_string(string propertyName, StylePropertyId propertyId, StyleState state, Expression<string> expression)
+        public StyleBinding_BackgroundFit(string propertyName, StylePropertyId propertyId, StyleState state, Expression<UIForia.Rendering.BackgroundFit> expression)
             : base(propertyName, state) {
             this.propertyId = propertyId;
             this.expression = expression;
@@ -167,118 +315,7 @@ namespace UIForia.Bindings.StyleBindings {
         public override void Execute(UIElement element, ExpressionContext context) {
             if (!element.style.IsInState(state)) return;
 
-            var oldValue = element.style.propertyMap[(int)propertyId].AsString;
-            var value = expression.Evaluate(context);
-            if (value != oldValue) {
-                element.style.SetProperty(new StyleProperty(propertyId, value), state);
-            }
-        }
-
-        public override bool IsConstant() {
-            return expression.IsConstant();
-        }
-
-        public override void Apply(UIStyle style, ExpressionContext context) {
-            var value = expression.Evaluate(context);
-            style.SetProperty(new StyleProperty(propertyId, value));
-        }
-
-        public override void Apply(UIStyleSet styleSet, ExpressionContext context) {
-            var value = expression.Evaluate(context);
-            styleSet.SetProperty(new StyleProperty(propertyId, value), state);
-        }
-
-    }
-        
-    public class StyleBinding_float : StyleBinding {
-
-        public readonly Expression<float> expression;
-        public readonly StylePropertyId propertyId;
-        
-        public StyleBinding_float(string propertyName, StylePropertyId propertyId, StyleState state, Expression<float> expression)
-            : base(propertyName, state) {
-            this.propertyId = propertyId;
-            this.expression = expression;
-        }
-
-        public override void Execute(UIElement element, ExpressionContext context) {
-            if (!element.style.IsInState(state)) return;
-
-            var oldValue = element.style.propertyMap[(int)propertyId].AsFloat;
-            var value = expression.Evaluate(context);
-            if (value != oldValue) {
-                element.style.SetProperty(new StyleProperty(propertyId, value), state);
-            }
-        }
-
-        public override bool IsConstant() {
-            return expression.IsConstant();
-        }
-
-        public override void Apply(UIStyle style, ExpressionContext context) {
-            var value = expression.Evaluate(context);
-            style.SetProperty(new StyleProperty(propertyId, value));
-        }
-
-        public override void Apply(UIStyleSet styleSet, ExpressionContext context) {
-            var value = expression.Evaluate(context);
-            styleSet.SetProperty(new StyleProperty(propertyId, value), state);
-        }
-
-    }
-        
-    public class StyleBinding_CursorStyle : StyleBinding {
-
-        public readonly Expression<UIForia.Rendering.CursorStyle> expression;
-        public readonly StylePropertyId propertyId;
-        
-        public StyleBinding_CursorStyle(string propertyName, StylePropertyId propertyId, StyleState state, Expression<UIForia.Rendering.CursorStyle> expression)
-            : base(propertyName, state) {
-            this.propertyId = propertyId;
-            this.expression = expression;
-        }
-
-        public override void Execute(UIElement element, ExpressionContext context) {
-            if (!element.style.IsInState(state)) return;
-
-            var oldValue = element.style.propertyMap[(int)propertyId].AsCursorStyle;
-            var value = expression.Evaluate(context);
-            if (value != oldValue) {
-                element.style.SetProperty(new StyleProperty(propertyId, value), state);
-            }
-        }
-
-        public override bool IsConstant() {
-            return expression.IsConstant();
-        }
-
-        public override void Apply(UIStyle style, ExpressionContext context) {
-            var value = expression.Evaluate(context);
-            style.SetProperty(new StyleProperty(propertyId, value));
-        }
-
-        public override void Apply(UIStyleSet styleSet, ExpressionContext context) {
-            var value = expression.Evaluate(context);
-            styleSet.SetProperty(new StyleProperty(propertyId, value), state);
-        }
-
-    }
-        
-    public class StyleBinding_Visibility : StyleBinding {
-
-        public readonly Expression<UIForia.Rendering.Visibility> expression;
-        public readonly StylePropertyId propertyId;
-        
-        public StyleBinding_Visibility(string propertyName, StylePropertyId propertyId, StyleState state, Expression<UIForia.Rendering.Visibility> expression)
-            : base(propertyName, state) {
-            this.propertyId = propertyId;
-            this.expression = expression;
-        }
-
-        public override void Execute(UIElement element, ExpressionContext context) {
-            if (!element.style.IsInState(state)) return;
-
-            var oldValue = element.style.propertyMap[(int)propertyId].AsVisibility;
+            var oldValue = element.style.propertyMap[(int)propertyId].AsBackgroundFit;
             var value = expression.Evaluate(context);
             if (value != oldValue) {
                 element.style.SetProperty(new StyleProperty(propertyId, (int)value), state);
@@ -1232,8 +1269,9 @@ namespace UIForia.Compilers {
 
     public partial class StyleBindingCompiler {
 
-        private static readonly EnumAliasSource<UIForia.Rendering.Overflow> s_EnumSource_Overflow = new EnumAliasSource<UIForia.Rendering.Overflow>();
         private static readonly EnumAliasSource<UIForia.Rendering.Visibility> s_EnumSource_Visibility = new EnumAliasSource<UIForia.Rendering.Visibility>();
+        private static readonly EnumAliasSource<UIForia.Rendering.Overflow> s_EnumSource_Overflow = new EnumAliasSource<UIForia.Rendering.Overflow>();
+        private static readonly EnumAliasSource<UIForia.Rendering.BackgroundFit> s_EnumSource_BackgroundFit = new EnumAliasSource<UIForia.Rendering.BackgroundFit>();
         private static readonly EnumAliasSource<UIForia.Layout.LayoutDirection> s_EnumSource_LayoutDirection = new EnumAliasSource<UIForia.Layout.LayoutDirection>();
         private static readonly EnumAliasSource<UIForia.Layout.LayoutWrap> s_EnumSource_LayoutWrap = new EnumAliasSource<UIForia.Layout.LayoutWrap>();
         private static readonly EnumAliasSource<UIForia.Layout.MainAxisAlignment> s_EnumSource_MainAxisAlignment = new EnumAliasSource<UIForia.Layout.MainAxisAlignment>();
@@ -1258,7 +1296,15 @@ namespace UIForia.Compilers {
         private UIForia.Bindings.StyleBindings.StyleBinding DoCompile(string key, string value, Target targetState) {
             switch(targetState.property.ToLower()) {
 
-case "overflowx":
+case "visibility":
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_Visibility("Visibility", UIForia.Rendering.StylePropertyId.Visibility, targetState.state, Compile<UIForia.Rendering.Visibility>(value, s_EnumSource_Visibility));                
+                case "opacity":
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_float("Opacity", UIForia.Rendering.StylePropertyId.Opacity, targetState.state, Compile<float>(value, null));                
+                case "cursor":
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_CursorStyle("Cursor", UIForia.Rendering.StylePropertyId.Cursor, targetState.state, Compile<UIForia.Rendering.CursorStyle>(value, null));                
+                case "painter":
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_string("Painter", UIForia.Rendering.StylePropertyId.Painter, targetState.state, Compile<string>(value, null));                
+                case "overflowx":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_Overflow("OverflowX", UIForia.Rendering.StylePropertyId.OverflowX, targetState.state, Compile<UIForia.Rendering.Overflow>(value, s_EnumSource_Overflow));                
                 case "overflowy":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_Overflow("OverflowY", UIForia.Rendering.StylePropertyId.OverflowY, targetState.state, Compile<UIForia.Rendering.Overflow>(value, s_EnumSource_Overflow));                
@@ -1266,14 +1312,6 @@ case "overflowx":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_Color("BackgroundColor", UIForia.Rendering.StylePropertyId.BackgroundColor, targetState.state, Compile<UnityEngine.Color>(value, colorSources));                
                 case "backgroundtint":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_Color("BackgroundTint", UIForia.Rendering.StylePropertyId.BackgroundTint, targetState.state, Compile<UnityEngine.Color>(value, colorSources));                
-                case "bordercolortop":
-                    return new UIForia.Bindings.StyleBindings.StyleBinding_Color("BorderColorTop", UIForia.Rendering.StylePropertyId.BorderColorTop, targetState.state, Compile<UnityEngine.Color>(value, colorSources));                
-                case "bordercolorright":
-                    return new UIForia.Bindings.StyleBindings.StyleBinding_Color("BorderColorRight", UIForia.Rendering.StylePropertyId.BorderColorRight, targetState.state, Compile<UnityEngine.Color>(value, colorSources));                
-                case "bordercolorbottom":
-                    return new UIForia.Bindings.StyleBindings.StyleBinding_Color("BorderColorBottom", UIForia.Rendering.StylePropertyId.BorderColorBottom, targetState.state, Compile<UnityEngine.Color>(value, colorSources));                
-                case "bordercolorleft":
-                    return new UIForia.Bindings.StyleBindings.StyleBinding_Color("BorderColorLeft", UIForia.Rendering.StylePropertyId.BorderColorLeft, targetState.state, Compile<UnityEngine.Color>(value, colorSources));                
                 case "backgroundimageoffsetx":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_UIFixedLength("BackgroundImageOffsetX", UIForia.Rendering.StylePropertyId.BackgroundImageOffsetX, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
                 case "backgroundimageoffsety":
@@ -1290,14 +1328,24 @@ case "overflowx":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_UIFixedLength("BackgroundImageRotation", UIForia.Rendering.StylePropertyId.BackgroundImageRotation, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
                 case "backgroundimage":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_Texture2D("BackgroundImage", UIForia.Rendering.StylePropertyId.BackgroundImage, targetState.state, Compile<UnityEngine.Texture2D>(value, textureUrlSource));                
-                case "painter":
-                    return new UIForia.Bindings.StyleBindings.StyleBinding_string("Painter", UIForia.Rendering.StylePropertyId.Painter, targetState.state, Compile<string>(value, null));                
-                case "opacity":
-                    return new UIForia.Bindings.StyleBindings.StyleBinding_float("Opacity", UIForia.Rendering.StylePropertyId.Opacity, targetState.state, Compile<float>(value, null));                
-                case "cursor":
-                    return new UIForia.Bindings.StyleBindings.StyleBinding_CursorStyle("Cursor", UIForia.Rendering.StylePropertyId.Cursor, targetState.state, Compile<UIForia.Rendering.CursorStyle>(value, null));                
-                case "visibility":
-                    return new UIForia.Bindings.StyleBindings.StyleBinding_Visibility("Visibility", UIForia.Rendering.StylePropertyId.Visibility, targetState.state, Compile<UIForia.Rendering.Visibility>(value, s_EnumSource_Visibility));                
+                case "backgroundfit":
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_BackgroundFit("BackgroundFit", UIForia.Rendering.StylePropertyId.BackgroundFit, targetState.state, Compile<UIForia.Rendering.BackgroundFit>(value, s_EnumSource_BackgroundFit));                
+                case "bordercolortop":
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_Color("BorderColorTop", UIForia.Rendering.StylePropertyId.BorderColorTop, targetState.state, Compile<UnityEngine.Color>(value, colorSources));                
+                case "bordercolorright":
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_Color("BorderColorRight", UIForia.Rendering.StylePropertyId.BorderColorRight, targetState.state, Compile<UnityEngine.Color>(value, colorSources));                
+                case "bordercolorbottom":
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_Color("BorderColorBottom", UIForia.Rendering.StylePropertyId.BorderColorBottom, targetState.state, Compile<UnityEngine.Color>(value, colorSources));                
+                case "bordercolorleft":
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_Color("BorderColorLeft", UIForia.Rendering.StylePropertyId.BorderColorLeft, targetState.state, Compile<UnityEngine.Color>(value, colorSources));                
+                case "cornerbeveltopleft":
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_UIFixedLength("CornerBevelTopLeft", UIForia.Rendering.StylePropertyId.CornerBevelTopLeft, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
+                case "cornerbeveltopright":
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_UIFixedLength("CornerBevelTopRight", UIForia.Rendering.StylePropertyId.CornerBevelTopRight, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
+                case "cornerbevelbottomright":
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_UIFixedLength("CornerBevelBottomRight", UIForia.Rendering.StylePropertyId.CornerBevelBottomRight, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
+                case "cornerbevelbottomleft":
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_UIFixedLength("CornerBevelBottomLeft", UIForia.Rendering.StylePropertyId.CornerBevelBottomLeft, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
                 case "flexitemgrow":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_int("FlexItemGrow", UIForia.Rendering.StylePropertyId.FlexItemGrow, targetState.state, Compile<int>(value, null));                
                 case "flexitemshrink":

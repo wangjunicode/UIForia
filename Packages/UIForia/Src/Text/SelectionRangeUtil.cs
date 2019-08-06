@@ -21,13 +21,19 @@ namespace UIForia.Text {
                 source = DeleteTextForwards(source, ref selectionRange);
             }
 
-            int cursorIndex = Mathf.Clamp(selectionRange.cursorIndex, 0, source.Length - 1);
+            if (string.IsNullOrEmpty(source)) {
+                selectionRange = new SelectionRange(characters.Length - 1, TextEdge.Right);
+                return characters;
+            }
+
+            int cursorIndex = source.Length > 0 ? Mathf.Clamp(selectionRange.cursorIndex, 0, source.Length - 1) : 0;
             TextEdge edge = selectionRange.cursorEdge;
             if (selectionRange.cursorIndex == source.Length - 1) {
                 if (selectionRange.cursorEdge == TextEdge.Left) {
                     string text = source.Substring(0, cursorIndex);
                     string endText = source.Substring(cursorIndex);
                     retn = text + characters + endText;
+                    cursorIndex += characters.Length;
                 }
                 else {
                     retn = source + characters;
@@ -80,9 +86,14 @@ namespace UIForia.Text {
                     max++;
                 }
 
-                string part0 = source.Substring(0, min);
-                string part1 = source.Substring(max);
-                retn = part0 + part1;
+                if (cursorIndex == source.Length - 1 && selectionRange.cursorEdge == TextEdge.Right) {
+                    retn = source.Substring(0, min);
+                }
+                else {
+                    string part0 = source.Substring(0, min);
+                    string part1 = source.Substring(max);
+                    retn = part0 + part1;
+                }
 
                 if (selectionRange.selectEdge == TextEdge.Right) {
                     if (min - 1 < 0) {
@@ -91,6 +102,10 @@ namespace UIForia.Text {
                     else {
                         selectionRange = new SelectionRange(min - 1, TextEdge.Right);
                     }
+                }
+                else if (min == retn.Length) {
+                    selectionRange = new SelectionRange(min - 1, TextEdge.Right);
+                    return retn;
                 }
                 else {
                     selectionRange = new SelectionRange(min, TextEdge.Left);

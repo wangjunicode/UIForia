@@ -92,6 +92,22 @@ public class TextSelectionTests {
     }
 
     [Test]
+    public void InsertWhitespaceToNonEmptyString() {
+        string text = "Randomword|";
+
+        SelectionRange range = GetCursorFromCharacter(ref text);
+
+        string toAdd = " ";
+
+        string expected = "Randomword another";
+        string result = SelectionRangeUtil.InsertText(text, ref range, toAdd);
+        result = SelectionRangeUtil.InsertText(result, ref range, "another");
+
+        Assert.AreEqual(expected, result);
+        AssertSelection(result, range, "Randomword another|");
+    }
+
+    [Test]
     public void DeleteTextRangeForwardFromStart() {
         string text = "|Delete|Keep";
 
@@ -115,6 +131,12 @@ public class TextSelectionTests {
 
         Assert.AreEqual(expected, result);
         AssertSelection(result, range, "Keep|");
+        
+        string toAdd = " ";
+        result = SelectionRangeUtil.InsertText(result, ref range, toAdd);
+
+        Assert.AreEqual("Keep ", result);
+        AssertSelection(result, range, "Keep |");
     }
     
     [Test]

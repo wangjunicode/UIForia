@@ -38,17 +38,12 @@ Shader "UIForia/Standard"
             #include "UnityCG.cginc"
             #include "./UIForiaSDFUtil.cginc"
             
-            sampler2D _MainTex;
             sampler2D _MainTexture;
             sampler2D _MaskTexture;
             sampler2D _FontTexture;
             sampler2D _Texture;
             
-            float4 _MainTex_ST;
             float4 _Color;
-            float _Radius;
-            float _MaskSoftness;
-            float _InvertMask;
              
             float _FontScaleX;
             float _FontScaleY;
@@ -59,10 +54,7 @@ Shader "UIForia/Standard"
             float4 _ObjectData[BATCH_SIZE];
             float4x4 _TransformData[BATCH_SIZE];
                                                           
-            #define Vert_BorderSize 0
-            
-
-                       
+                                   
             #define _FontGradientScale _FontScales.x
             #define _FontScaleRatioA _FontScales.y
             #define _FontScaleRatioB _FontScales.z
@@ -71,36 +63,25 @@ Shader "UIForia/Standard"
             #define _FontTextureWidth _FontTextureSize.x
             #define _FontTextureHeight _FontTextureSize.y
             
+            #define Vert_BorderSize 0
             #define Vert_BorderRadii objectInfo.z
-            #define Vert_BorderSizeColor v.texCoord1
             #define Vert_PackedSize objectInfo.y
+            #define Vert_BorderColors v.texCoord1.xy
             
             #define Vert_CharacterScale v.texCoord1.x
             #define Vert_ShapeType objectInfo.x
             #define Vert_CharacterPackedOutline objectInfo.y
             #define Vert_CharacterPackedUnderlay objectInfo.z
             #define Vert_CharacterWeight objectInfo.w
-            #define Vert_Bevel v.texCoord1.y
-                    
-            #define PaintMode_Color 1 << 0
-            #define PaintMode_Texture 1 << 1
-            #define PaintMode_TextureTint 1 << 2
-            #define PaintMode_LetterBoxTexture 1 << 3
-            
+  
             #define Frag_SDFSize i.texCoord1.xy
             #define Frag_SDFBorderRadii i.texCoord1.z
             #define Frag_SDFStrokeWidth i.texCoord1.w
             #define Frag_SDFCoords i.texCoord0.zw
             #define Frag_ShapeType i.texCoord2.x
-            #define Frag_BorderColors i.texCoord3
+            #define Frag_BorderColors i.texCoord3.xy
+            #define Frag_SDFBorderSize 10
                     
-            float2 UnpackSize(float packedSize) {
-                uint input = asuint(packedSize);
-                uint high = (input >> 16) & (1 << 16) - 1;
-                uint low =  input & 0xffff;
-                return float2(high / 10, low / 10);
-            }
-            
             v2f vert (appdata v) {
                 v2f o;
                                 
@@ -117,14 +98,15 @@ Shader "UIForia/Standard"
                 o.vertex = UnityObjectToClipPos(v.vertex);
                 o.texCoord0 = v.texCoord0;
                 o.color = _ColorData[objectIndex];
-                float2 pixelSize2 = o.vertex.w;
-                pixelSize2 /= abs(mul((float2x2)UNITY_MATRIX_P, _ScreenParams.xy * size));
-                o.texCoord4 = float4(v.texCoord1.z, 0, 0, Vert_Bevel);
+                
+                // this only works for 'flower' configuration meshes, not for quads. use a flag for the quad
+                o.texCoord4 = float4(lerp(0, 1, v.texCoord0.x == 0.5 && v.texCoord0.y == 0.5), 0, 0, 0);
+                
                 if(shapeType != 1) {
-                    //o.vertex = SDFPixelSnap(o.vertex); // pixel snap is bad for text rendering
-                    o.texCoord1 = float4(size.x, size.y, Vert_BorderRadii, Vert_BorderSize);
-                    o.texCoord2 = float4(shapeType, pixelSize2, Vert_Bevel);
-                    o.texCoord3 = Vert_BorderSizeColor;
+                    // o.vertex = SDFPixelSnap(o.vertex); // pixel snap is bad for text rendering
+                    o.texCoord1 = float4(size.x, size.y, Vert_BorderRadii, 0);
+                    o.texCoord2 = float4(shapeType, 0, 0, 0);
+                    o.texCoord3 = float4(Vert_BorderColors, 0, 0);
 
                 }
                 else {             
@@ -134,8 +116,8 @@ Shader "UIForia/Standard"
                     float weight = Vert_CharacterWeight; 
 
                     fixed4 unpackedOutline = UnpackColor(asuint(Vert_CharacterPackedOutline));
-                    float outlineWidth = unpackedOutline.x;
-                    float outlineSoftness = unpackedOutline.y;
+                    float outlineWidth = 0; unpackedOutline.x;
+                    float outlineSoftness = 0; // unpackedOutline.y;
                     
                     // todo -- glow
                     
@@ -148,10 +130,10 @@ Shader "UIForia/Standard"
                     
                      // scale stuff can be moved to cpu, alpha clip & bias too
                      float2 pixelSize = o.vertex.w;
-                    
-                     pixelSize /= float2(_FontScaleX, _FontScaleY) * abs(mul((float2x2)UNITY_MATRIX_P, _ScreenParams.xy));
+                     pixelSize /= float2(1, 1) * abs(mul((float2x2)UNITY_MATRIX_P, _ScreenParams.xy));
+                     
                      float scale = rsqrt(dot(pixelSize, pixelSize));
-                     scale *= abs(Vert_CharacterScale) * _FontGradientScale * 1.5;
+                     scale *= abs(0.2) * _FontGradientScale * 1.5;
 
                      float underlayScale = scale;
                      underlayScale /= 1 + ((underlaySoftness * _FontScaleRatioC) * underlayScale);
@@ -178,73 +160,10 @@ Shader "UIForia/Standard"
                 return o;
             }            
             
-            inline fixed4 ComputeColor(float4 packedColor, float2 texCoord) {
-            
-                uint colorMode = packedColor.b;
-                
-                int useColor = (colorMode & PaintMode_Color) != 0;
-                int useTexture = (colorMode & PaintMode_Texture) != 0;
-                int tintTexture = (colorMode & PaintMode_TextureTint) != 0;
-                int letterBoxTexture = (colorMode & PaintMode_LetterBoxTexture) != 0;
-                
-                fixed4 bgColor = UnpackColor(asuint(packedColor.r));
-                fixed4 tintColor = UnpackColor(asuint(packedColor.g));
-                fixed4 textureColor = tex2D(_MainTexture, texCoord);
-
-                bgColor.rgb *= bgColor.a;
-                tintColor.rgb *= tintColor.a;
-                textureColor.rgb *= textureColor.a;
-                
-                textureColor = lerp(textureColor, textureColor + tintColor, tintTexture);
-                
-                if (useTexture && letterBoxTexture && (texCoord.x < 0 || texCoord.x > 1)) {
-                    return bgColor; // could return a letterbox color instead
-                }
-                
-                if(useTexture && useColor) {
-                    return lerp(textureColor, bgColor, 1 - textureColor.a);
-                }
-                                
-                return lerp(bgColor, textureColor, useTexture);
-            }
-            
-            inline fixed4 GetTextColor(half d, fixed4 faceColor, fixed4 outlineColor, half outline, half softness) {
-                half faceAlpha = 1 - saturate((d - outline * 0.5 + softness * 0.5) / (1.0 + softness));
-                half outlineAlpha = saturate((d + outline * 0.5)) * sqrt(min(1.0, outline));
-            
-                faceColor.rgb *= faceColor.a;
-                outlineColor.rgb *= outlineColor.a;
-            
-                faceColor = lerp(faceColor, outlineColor, outlineAlpha);
-            
-                faceColor *= faceAlpha;
-            
-                return faceColor;
-            }
-            
-            float sdRoundBox( float2 p, float2 b, in float r ) 
-            {
-                float2 q = abs(p) - b + float2(r, r);
-                return min(max(q.x,q.y),0.0) + length(max(q,0.0)) - r;
-            }
-
-            float map(float s, float a1, float a2, float b1, float b2) {
-                return b1 + (s-a1)*(b2-b1)/(a2-a1);
-            }
-            
-            float sdRoundBox2( in float2 p, float2 b, float r ) {
-                float2 q = abs(p)-b;
-                float d = (min(q.x, q.y) > 0.) ? length(q) : max( q.x, q.y );   
-                return d - r;
-            }
-
             fixed4 frag (v2f i) : SV_Target {           
-             //                
-                // todo -- use color mode effectively
+            
+                fixed4 mainColor = ComputeColor(i.color, i.texCoord0.xy, _MainTexture);
                 
-                fixed4 mainColor = ComputeColor(i.color, i.texCoord0.xy);
-                mainColor.rgb *= mainColor.a;
-                              
                 if(Frag_ShapeType != ShapeType_Text) {
 
                     SDFData sdfData;
@@ -252,31 +171,19 @@ Shader "UIForia/Standard"
                     sdfData.uv = Frag_SDFCoords;
                     sdfData.size = Frag_SDFSize;
                     sdfData.radius = GetBorderRadius(Frag_SDFCoords, Frag_SDFBorderRadii);
-                    sdfData.strokeWidth = 0; //Frag_SDFStrokeWidth;
+                    sdfData.strokeWidth = 10;//GetBorderSize(Frag_SDFCoords, float4(0, 0, 0, 0));
                     
-                    fixed4 contentColor = mainColor;
-                    fixed4 borderColor = fixed4(mainColor.rgb, 0);//GetBorderColor(Frag_SDFCoords, contentColor, Frag_BorderColors);
-
-                    // we get bad blending at the edges of our SDF, this ensure rects are not smooth stepped                                       
-                    // mainColor = lerp(mainColor, SDFColor(sdfData, borderColor, contentColor, i.texCoord4.x), sdfData.radius != 0);
-                     mainColor = SDFColor(sdfData, borderColor, contentColor, i.texCoord4.x);
+                    fixed4 borderColor = GetBorderColor(Frag_SDFCoords, Frag_SDFSize, mainColor, Frag_BorderColors);
+                    
+                     mainColor = SDFColor(sdfData, borderColor, mainColor, i.texCoord4.x);
+                     // mainColor = MeshBorderAA(mainColor, Frag_SDFSize, i.texCoord4.x);
                      mainColor.rgb *=  mainColor.a;
-                     
-                     float borderSize = 1 / (min(Frag_SDFSize.x, Frag_SDFSize.y)) * 2;
-                     
-                     if(mainColor.a > 0 && i.texCoord4.x < borderSize && i.texCoord4.w == 1) {
-                        fixed4 aefaf = fixed4(mainColor.rgb, 0);
-                        fixed4 cx = mainColor;
-                        aefaf = lerp(aefaf, cx, i.texCoord4.x / borderSize);
-                        aefaf.rgb *= i.texCoord4.x / (borderSize);
-                        return aefaf;
-                     }
                      
                      return mainColor;
                 }
-                
-                float outlineWidth = i.texCoord2.y;
-                float outlineSoftness = i.texCoord2.z;
+
+                float outlineWidth = 0; //i.texCoord2.y;
+                float outlineSoftness = 0; //i.texCoord2.z;
                 float c = tex2D(_FontTexture, i.texCoord0.zw).a;
 
 //                clip(c - i.texCoord1.x);
@@ -286,19 +193,19 @@ Shader "UIForia/Standard"
 			    float bias = i.texCoord1.z;
 			    float weight = i.texCoord1.w;
 			    float sd = (bias - c) * scale;
-			    
-                float outline = (outlineWidth * scaleRatio) * scale;
-			    float softness = (outlineSoftness * scaleRatio) * scale;
 
-                fixed4 faceColor = UnpackColor(asuint(i.color.r));
-			    fixed4 outlineColor = UnpackColor(asuint(i.color.g));
-                fixed4 underlayColor = UnpackColor(asuint(i.color.b));
-                fixed4 glowColor = UnpackColor(asuint(i.color.a));
+                float outline = 0; // (outlineWidth * scaleRatio) * scale;
+			    float softness = 0; //(outlineSoftness * scaleRatio) * scale;
+
+                fixed4 faceColor = Red;//UnpackColor(asuint(i.color.r));
+			    fixed4 outlineColor = Red;//UnpackColor(asuint(i.color.g));
+                //fixed4 underlayColor = UnpackColor(asuint(i.color.b));
+                //fixed4 glowColor = UnpackColor(asuint(i.color.a));
                 
-                underlayColor.rgb *= underlayColor.a;
+               // underlayColor.rgb *= underlayColor.a;
                 faceColor.rgb *= faceColor.a;
-                outlineColor.rgb *= outlineColor.a;
-                glowColor.rgb *= glowColor.a;
+               // outlineColor.rgb *= outlineColor.a;
+               // glowColor.rgb *= glowColor.a;
                 
                 faceColor = GetTextColor(sd, faceColor, outlineColor, outline, softness);
               
@@ -310,7 +217,7 @@ Shader "UIForia/Standard"
               //  float d = tex2D(_FontTexture, i.texCoord0.xy + underlayOffset).a * underlayScale;
               //  faceColor += underlayColor * saturate(d - underlayBias) * (1 - faceColor.a);
                 
-                return faceColor;// * i.color.a; 
+                return faceColor;
                 
              
                 

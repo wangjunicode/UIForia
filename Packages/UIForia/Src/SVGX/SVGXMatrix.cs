@@ -203,8 +203,8 @@ namespace SVGX {
             Matrix4x4 matrix = default;
 
             matrix.m00 = m0;
-            matrix.m01 = m1;
-            matrix.m10 = m2;
+            matrix.m01 = m2;
+            matrix.m10 = m1;
             matrix.m11 = m3;
             matrix.m03 = m4;
             matrix.m13 = m5;

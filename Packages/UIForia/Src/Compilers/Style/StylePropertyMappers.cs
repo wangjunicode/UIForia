@@ -40,7 +40,7 @@ namespace UIForia.Compilers.Style {
 
                 {"fithorizontal", (targetStyle, property, context) => targetStyle.FitHorizontal = MapEnum<Fit>(property.children[0], context)},
                 {"fitvertical", (targetStyle, property, context) => targetStyle.FitVertical = MapEnum<Fit>(property.children[0], context)},
-                
+
                 // Background
                 {"backgroundcolor", (targetStyle, property, context) => targetStyle.BackgroundColor = MapColor(property, context)},
                 {"backgroundtint", (targetStyle, property, context) => targetStyle.BackgroundTint = MapColor(property, context)},
@@ -87,7 +87,7 @@ namespace UIForia.Compilers.Style {
                 {"borderradiustopright", (targetStyle, property, context) => targetStyle.BorderRadiusTopRight = MapFixedLength(property.children[0], context)},
                 {"borderradiusbottomright", (targetStyle, property, context) => targetStyle.BorderRadiusBottomRight = MapFixedLength(property.children[0], context)},
                 {"borderradiusbottomleft", (targetStyle, property, context) => targetStyle.BorderRadiusBottomLeft = MapFixedLength(property.children[0], context)},
-                
+
                 {"cornerbeveltopleft", (targetStyle, property, context) => targetStyle.CornerBevelTopLeft = MapFixedLength(property.children[0], context)},
                 {"cornerbeveltopright", (targetStyle, property, context) => targetStyle.CornerBevelTopRight = MapFixedLength(property.children[0], context)},
                 {"cornerbevelbottomright", (targetStyle, property, context) => targetStyle.CornerBevelBottomRight = MapFixedLength(property.children[0], context)},
@@ -308,7 +308,7 @@ namespace UIForia.Compilers.Style {
 
         private static GridItemPlacement MapGridItemPlacement(PropertyNode property, StyleCompileContext context) {
             StyleASTNode dereferencedValue = context.GetValueForReference(property.children[0]);
-            
+
             switch (dereferencedValue.type) {
                 case StyleASTNodeType.NumericLiteral:
                     int number = (int) MapNumber(dereferencedValue, context);
@@ -327,6 +327,7 @@ namespace UIForia.Compilers.Style {
                         return new GridItemPlacement(placementName);
                     }
             }
+
             throw new CompileException(context.fileName, property, $"Had a hard time parsing that grid item placement: {property}.");
         }
 
@@ -456,7 +457,7 @@ namespace UIForia.Compilers.Style {
 
                             size.type = GridTrackSizeType.MinMax;
                             size.pattern = MapGridTrackSizePattern(0, functionNode.children, context, false);
-                            
+
                             break;
                         default:
                             throw new CompileException(context.fileName, trackSize, $"Had a hard time parsing that track size: {trackSize}. Expected a known track size function (repeat, grow, shrink) but all I got was {functionNode.identifier}");
@@ -1016,15 +1017,171 @@ namespace UIForia.Compilers.Style {
             var styleAstNode = context.GetValueForReference(colorStyleAstNode);
             switch (styleAstNode) {
                 case StyleIdentifierNode identifierNode:
-                    Color color;
-                    ColorUtility.TryParseHtmlString(identifierNode.name, out color);
-                    return color;
+                    return ParseColor(identifierNode, context);
+                
                 case ColorNode colorNode: return colorNode.color;
                 case RgbaNode rgbaNode: return MapRbgaNodeToColor(rgbaNode, context);
                 case RgbNode rgbNode: return MapRgbNodeToColor(rgbNode, context);
                 default:
                     throw new CompileException(context.fileName, styleAstNode, "Unsupported color value.");
             }
+        }
+
+        private static Color32 ParseColor(StyleIdentifierNode node, StyleCompileContext context) {
+            switch (node.name.ToLower()) {
+                case "clear": return new Color32(0, 0, 0, 0);
+                case "transparent": return new Color32(0, 0, 0, 0);
+                case "black": return new Color32(0, 0, 0, 255);
+                case "indianred": return new Color32(205, 92, 92, 255);
+                case "lightcoral": return new Color32(240, 128, 128, 255);
+                case "salmon": return new Color32(250, 128, 114, 255);
+                case "darksalmon": return new Color32(233, 150, 122, 255);
+                case "lightsalmon": return new Color32(255, 160, 122, 255);
+                case "crimson": return new Color32(220, 20, 60, 255);
+                case "red": return new Color32(255, 0, 0, 255);
+                case "firebrick": return new Color32(178, 34, 34, 255);
+                case "darkred": return new Color32(139, 0, 0, 255);
+                case "pink": return new Color32(255, 192, 203, 255);
+                case "lightpink": return new Color32(255, 182, 193, 255);
+                case "hotpink": return new Color32(255, 105, 180, 255);
+                case "deeppink": return new Color32(255, 20, 147, 255);
+                case "mediumvioletred": return new Color32(199, 21, 133, 255);
+                case "palevioletred": return new Color32(219, 112, 147, 255);
+                case "coral": return new Color32(255, 127, 80, 255);
+                case "tomato": return new Color32(255, 99, 71, 255);
+                case "orangered": return new Color32(255, 69, 0, 255);
+                case "darkorange": return new Color32(255, 140, 0, 255);
+                case "orange": return new Color32(255, 165, 0, 255);
+                case "gold": return new Color32(255, 215, 0, 255);
+                case "yellow": return new Color32(255, 255, 0, 255);
+                case "lightyellow": return new Color32(255, 255, 224, 255);
+                case "lemonchiffon": return new Color32(255, 250, 205, 255);
+                case "lightgoldenrodyellow": return new Color32(250, 250, 210, 255);
+                case "papayawhip": return new Color32(255, 239, 213, 255);
+                case "moccasin": return new Color32(255, 228, 181, 255);
+                case "peachpuff": return new Color32(255, 218, 185, 255);
+                case "palegoldenrod": return new Color32(238, 232, 170, 255);
+                case "khaki": return new Color32(240, 230, 140, 255);
+                case "darkkhaki": return new Color32(189, 183, 107, 255);
+                case "lavender": return new Color32(230, 230, 250, 255);
+                case "thistle": return new Color32(216, 191, 216, 255);
+                case "plum": return new Color32(221, 160, 221, 255);
+                case "violet": return new Color32(238, 130, 238, 255);
+                case "orchid": return new Color32(218, 112, 214, 255);
+                case "fuchsia": return new Color32(255, 0, 255, 255);
+                case "magenta": return new Color32(255, 0, 255, 255);
+                case "mediumorchid": return new Color32(186, 85, 211, 255);
+                case "mediumpurple": return new Color32(147, 112, 219, 255);
+                case "blueviolet": return new Color32(138, 43, 226, 255);
+                case "darkviolet": return new Color32(148, 0, 211, 255);
+                case "darkorchid": return new Color32(153, 50, 204, 255);
+                case "darkmagenta": return new Color32(139, 0, 139, 255);
+                case "purple": return new Color32(128, 0, 128, 255);
+                case "rebeccapurple": return new Color32(102, 51, 153, 255);
+                case "indigo": return new Color32(75, 0, 130, 255);
+                case "mediumslateblue": return new Color32(123, 104, 238, 255);
+                case "slateblue": return new Color32(106, 90, 205, 255);
+                case "darkslateblue": return new Color32(72, 61, 139, 255);
+                case "greenyellow": return new Color32(173, 255, 47, 255);
+                case "chartreuse": return new Color32(127, 255, 0, 255);
+                case "lawngreen": return new Color32(124, 252, 0, 255);
+                case "lime": return new Color32(0, 255, 0, 255);
+                case "limegreen": return new Color32(50, 205, 50, 255);
+                case "palegreen": return new Color32(152, 251, 152, 255);
+                case "lightgreen": return new Color32(144, 238, 144, 255);
+                case "mediumspringgreen": return new Color32(0, 250, 154, 255);
+                case "springgreen": return new Color32(0, 255, 127, 255);
+                case "mediumseagreen": return new Color32(60, 179, 113, 255);
+                case "seagreen": return new Color32(46, 139, 87, 255);
+                case "forestgreen": return new Color32(34, 139, 34, 255);
+                case "green": return new Color32(0, 128, 0, 255);
+                case "darkgreen": return new Color32(0, 100, 0, 255);
+                case "yellowgreen": return new Color32(154, 205, 50, 255);
+                case "olivedrab": return new Color32(107, 142, 35, 255);
+                case "olive": return new Color32(128, 128, 0, 255);
+                case "darkolivegreen": return new Color32(85, 107, 47, 255);
+                case "mediumaquamarine": return new Color32(102, 205, 170, 255);
+                case "darkseagreen": return new Color32(143, 188, 143, 255);
+                case "lightseagreen": return new Color32(32, 178, 170, 255);
+                case "darkcyan": return new Color32(0, 139, 139, 255);
+                case "teal": return new Color32(0, 128, 128, 255);
+                case "aqua": return new Color32(0, 255, 255, 255);
+                case "cyan": return new Color32(0, 255, 255, 255);
+                case "lightcyan": return new Color32(224, 255, 255, 255);
+                case "paleturquoise": return new Color32(175, 238, 238, 255);
+                case "aquamarine": return new Color32(127, 255, 212, 255);
+                case "turquoise": return new Color32(64, 224, 208, 255);
+                case "mediumturquoise": return new Color32(72, 209, 204, 255);
+                case "darkturquoise": return new Color32(0, 206, 209, 255);
+                case "cadetblue": return new Color32(95, 158, 160, 255);
+                case "steelblue": return new Color32(70, 130, 180, 255);
+                case "lightsteelblue": return new Color32(176, 196, 222, 255);
+                case "powderblue": return new Color32(176, 224, 230, 255);
+                case "lightblue": return new Color32(173, 216, 230, 255);
+                case "skyblue": return new Color32(135, 206, 235, 255);
+                case "lightskyblue": return new Color32(135, 206, 250, 255);
+                case "deepskyblue": return new Color32(0, 191, 255, 255);
+                case "dodgerblue": return new Color32(30, 144, 255, 255);
+                case "cornflowerblue": return new Color32(100, 149, 237, 255);
+                case "royalblue": return new Color32(65, 105, 225, 255);
+                case "blue": return new Color32(0, 0, 255, 255);
+                case "mediumblue": return new Color32(0, 0, 205, 255);
+                case "darkblue": return new Color32(0, 0, 139, 255);
+                case "navy": return new Color32(0, 0, 128, 255);
+                case "midnightblue": return new Color32(25, 25, 112, 255);
+                case "cornsilk": return new Color32(255, 248, 220, 255);
+                case "blanchedalmond": return new Color32(255, 235, 205, 255);
+                case "bisque": return new Color32(255, 228, 196, 255);
+                case "navajowhite": return new Color32(255, 222, 173, 255);
+                case "wheat": return new Color32(245, 222, 179, 255);
+                case "burlywood": return new Color32(222, 184, 135, 255);
+                case "tan": return new Color32(210, 180, 140, 255);
+                case "rosybrown": return new Color32(188, 143, 143, 255);
+                case "sandybrown": return new Color32(244, 164, 96, 255);
+                case "goldenrod": return new Color32(218, 165, 32, 255);
+                case "darkgoldenrod": return new Color32(184, 134, 11, 255);
+                case "peru": return new Color32(205, 133, 63, 255);
+                case "chocolate": return new Color32(210, 105, 30, 255);
+                case "saddlebrown": return new Color32(139, 69, 19, 255);
+                case "sienna": return new Color32(160, 82, 45, 255);
+                case "brown": return new Color32(165, 42, 42, 255);
+                case "maroon": return new Color32(128, 0, 0, 255);
+                case "white": return new Color32(255, 255, 255, 255);
+                case "snow": return new Color32(255, 250, 250, 255);
+                case "honeydew": return new Color32(240, 255, 240, 255);
+                case "mintcream": return new Color32(245, 255, 250, 255);
+                case "azure": return new Color32(240, 255, 255, 255);
+                case "aliceblue": return new Color32(240, 248, 255, 255);
+                case "ghostwhite": return new Color32(248, 248, 255, 255);
+                case "whitesmoke": return new Color32(245, 245, 245, 255);
+                case "seashell": return new Color32(255, 245, 238, 255);
+                case "beige": return new Color32(245, 245, 220, 255);
+                case "oldlace": return new Color32(253, 245, 230, 255);
+                case "floralwhite": return new Color32(255, 250, 240, 255);
+                case "ivory": return new Color32(255, 255, 240, 255);
+                case "antiquewhite": return new Color32(250, 235, 215, 255);
+                case "linen": return new Color32(250, 240, 230, 255);
+                case "lavenderblush": return new Color32(255, 240, 245, 255);
+                case "mistyrose": return new Color32(255, 228, 225, 255);
+                case "gainsboro": return new Color32(220, 220, 220, 255);
+                case "lightgray": return new Color32(211, 211, 211, 255);
+                case "lightgrey": return new Color32(211, 211, 211, 255);
+                case "silver": return new Color32(192, 192, 192, 255);
+                case "darkgray": return new Color32(169, 169, 169, 255);
+                case "darkgrey": return new Color32(169, 169, 169, 255);
+                case "gray": return new Color32(128, 128, 128, 255);
+                case "grey": return new Color32(128, 128, 128, 255);
+                case "dimgray": return new Color32(105, 105, 105, 255);
+                case "dimgrey": return new Color32(105, 105, 105, 255);
+                case "lightslategray": return new Color32(119, 136, 153, 255);
+                case "lightslategrey": return new Color32(119, 136, 153, 255);
+                case "slategray": return new Color32(112, 128, 144, 255);
+                case "slategrey": return new Color32(112, 128, 144, 255);
+                case "darkslategray": return new Color32(47, 79, 79, 255);
+                case "darkslategrey": return new Color32(47, 79, 79, 255);
+            }
+
+            throw new CompileException(context.fileName, node, $"Unable to map color name: {node.name} to a color");
         }
 
         private static Color MapRbgaNodeToColor(RgbaNode rgbaNode, StyleCompileContext context) {

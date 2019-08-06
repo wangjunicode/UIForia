@@ -24,7 +24,21 @@ public static class VertigoUtil {
     }
 
     public static float ColorToFloat(Color c) {
-        int color = (int) (c.r * 255) | (int) (c.g * 255) << 8 | (int) (c.b * 255) << 16 | (int) (c.a * 255) << 24;
+        float r = c.r;
+        float g = c.g;
+        float b = c.b;
+        float a = c.a;
+        
+        if (r < 0) r = 0;
+        if (r > 1) r = 1;
+        if (g < 0) g = 0;
+        if (g > 1) g = 1;
+        if (b < 0) b = 0;
+        if (b > 1) b = 1;
+        if (a < 0) a = 0;
+        if (a > 1) a = 1;
+        
+        int color = (int) (r * 255) | (int) (g * 255) << 8 | (int) (b * 255) << 16 | (int) (a * 255) << 24;
 
         Union color2Float;
         color2Float.asFloat = 0;
@@ -167,6 +181,13 @@ public static class VertigoUtil {
         Union color2Float;
         color2Float.asFloat = 0;
         color2Float.asInt = ((int) (size.x * 10) << 16) | ((int)(size.y * 10) & 0xffff);
+        return color2Float.asFloat;
+    }
+    
+    public static float PackSizeVector(float x, float y) {
+        Union color2Float;
+        color2Float.asFloat = 0;
+        color2Float.asInt = ((int) (x * 10) << 16) | ((int)(y * 10) & 0xffff);
         return color2Float.asFloat;
     }
 

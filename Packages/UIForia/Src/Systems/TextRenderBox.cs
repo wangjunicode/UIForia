@@ -135,18 +135,18 @@ namespace UIForia.Rendering {
                 uv0.z = geo.topLeftUV.x;
                 uv0.w = geo.bottomRightUV.y;
 
-                uv0.x = faceTextureUVBottomRight.x;
-                uv0.y = faceTextureUVBottomRight.y;
+                uv1.x = faceTextureUVBottomRight.x;
+                uv1.y = faceTextureUVBottomRight.y;
                 uv1.z = geo.bottomRightUV.x;
                 uv1.w = geo.bottomRightUV.y;
 
-                uv0.x = faceTextureUVBottomRight.x;
-                uv0.y = faceTextureUVTopLeft.y;
+                uv2.x = faceTextureUVBottomRight.x;
+                uv2.y = faceTextureUVTopLeft.y;
                 uv2.z = geo.bottomRightUV.x;
                 uv2.w = geo.topLeftUV.y;
 
-                uv0.x = faceTextureUVTopLeft.x;
-                uv0.y = faceTextureUVTopLeft.y;
+                uv2.x = faceTextureUVTopLeft.x;
+                uv2.y = faceTextureUVTopLeft.y;
                 uv3.z = geo.topLeftUV.x;
                 uv3.w = geo.topLeftUV.y;
 

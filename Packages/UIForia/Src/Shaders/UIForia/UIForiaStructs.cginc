@@ -17,10 +17,10 @@ struct v2f {
     
     float4 vertex : SV_POSITION;
     float4 texCoord0 : TEXCOORD0;    
+    float4 texCoord4 : TEXCOORD4;
     nointerpolation float4 texCoord1 : TEXCOORD1;
     nointerpolation float4 texCoord2 : TEXCOORD2;
     nointerpolation float4 texCoord3 : TEXCOORD3;
-    centroid float4 texCoord4 : TEXCOORD4;
     nointerpolation float4 color : COLOR0;
     
 };

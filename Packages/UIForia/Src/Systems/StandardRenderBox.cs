@@ -9,7 +9,7 @@ using UnityEngine;
 using Vertigo;
 
 namespace UIForia.Rendering {
-    
+
     public enum BackgroundFit {
 
         Unset = 0,
@@ -20,7 +20,7 @@ namespace UIForia.Rendering {
         None = 1 << 4
 
     }
-    
+
     public class ImageRenderBox : StandardRenderBox {
 
         public override Rect RenderBounds { get; }
@@ -114,7 +114,7 @@ namespace UIForia.Rendering {
 
         private void UpdateGeometry(in Size size) {
             geometryNeedsUpdate = false;
-            
+
             Color c;
             geometry.Clear();
 
@@ -122,15 +122,27 @@ namespace UIForia.Rendering {
             float height = size.height;
             float min = Mathf.Min(width, height);
 
-            float bevelTopLeft = 0; //ResolveFixedSize(min, element.style.CornerBevelTopLeft);
-            float bevelTopRight = 10; //ResolveFixedSize(min, element.style.CornerBevelTopRight);
-            float bevelBottomRight = 10; ResolveFixedSize(min, element.style.CornerBevelBottomRight);
-            float bevelBottomLeft = 10; ResolveFixedSize(min, element.style.CornerBevelBottomLeft);
+            float bevelTopLeft = ResolveFixedSize(min, element.style.CornerBevelTopLeft);
+            float bevelTopRight = ResolveFixedSize(min, element.style.CornerBevelTopRight);
+            float bevelBottomRight = ResolveFixedSize(min, element.style.CornerBevelBottomRight);
+            float bevelBottomLeft =ResolveFixedSize(min, element.style.CornerBevelBottomLeft);
+            
             float radiusTopLeft = ResolveFixedSize(min, element.style.BorderRadiusTopLeft);
             float radiusTopRight = ResolveFixedSize(min, element.style.BorderRadiusTopRight);
             float radiusBottomRight = ResolveFixedSize(min, element.style.BorderRadiusBottomRight);
             float radiusBottomLeft = ResolveFixedSize(min, element.style.BorderRadiusBottomLeft);
 
+            float packedBorderColorTop = VertigoUtil.ColorToFloat(element.style.BorderColorTop);
+            float packedBorderColorRight = VertigoUtil.ColorToFloat(element.style.BorderColorRight);
+            float packedBorderColorBottom = VertigoUtil.ColorToFloat(element.style.BorderColorBottom);
+            float packedBorderColorLeft = VertigoUtil.ColorToFloat(element.style.BorderColorLeft);
+            
+            const float EdgeDistance0 = 0;
+            const float EdgeDistance1 = 1;
+            const float ReserveForObjectIndex = 0;
+            
+            int startVert = geometry.positionList.size;
+            
             if (radiusBottomLeft > 0 ||
                 radiusBottomRight > 0 ||
                 radiusTopLeft > 0 ||
@@ -139,6 +151,8 @@ namespace UIForia.Rendering {
                 bevelTopLeft > 0 ||
                 bevelBottomLeft > 0 ||
                 bevelBottomRight > 0) {
+                
+
                 geometry.ClipCornerRect(new Size(width, height), new UIForiaGeometry.CornerDef() {
                     topLeftX = bevelTopLeft,
                     topLeftY = bevelTopLeft,
@@ -149,9 +163,30 @@ namespace UIForia.Rendering {
                     bottomLeftX = bevelBottomLeft,
                     bottomLeftY = bevelBottomLeft,
                 });
+                
+                Vector4[] texCoord1 = geometry.texCoordList1.array;
+                OffsetRect border = element.layoutResult.border;
+                float borderLeftAndTop = VertigoUtil.PackSizeVector(border.left, border.top);
+                float borderLeftAndBottom = VertigoUtil.PackSizeVector(border.left, border.bottom);
+                float borderRightAndTop = VertigoUtil.PackSizeVector(border.right, border.top);
+                float borderRightAndBottom = VertigoUtil.PackSizeVector(border.right, border.bottom);
+                texCoord1[startVert + 0] = new Vector4(packedBorderColorTop, packedBorderColorLeft, borderLeftAndTop, ReserveForObjectIndex);
+                texCoord1[startVert + 1] = new Vector4(packedBorderColorTop, packedBorderColorLeft, borderLeftAndTop, ReserveForObjectIndex);
+                texCoord1[startVert + 2] = new Vector4(packedBorderColorTop, packedBorderColorRight, borderRightAndTop, ReserveForObjectIndex);
+                texCoord1[startVert + 3] = new Vector4(packedBorderColorTop, packedBorderColorRight, borderRightAndTop, ReserveForObjectIndex);
+                texCoord1[startVert + 4] = new Vector4(packedBorderColorBottom, packedBorderColorRight, borderRightAndBottom, ReserveForObjectIndex);
+                texCoord1[startVert + 5] = new Vector4(packedBorderColorBottom, packedBorderColorRight, borderRightAndBottom, ReserveForObjectIndex);
+                texCoord1[startVert + 6] = new Vector4(packedBorderColorBottom, packedBorderColorLeft, borderLeftAndBottom, ReserveForObjectIndex);
+                texCoord1[startVert + 7] = new Vector4(packedBorderColorBottom, packedBorderColorLeft, borderLeftAndBottom, ReserveForObjectIndex);
+                texCoord1[startVert + 8] = new Vector4(0, 0, EdgeDistance1, ReserveForObjectIndex);
             }
             else {
-                geometry.FillRectUniformBorder_Miter(width, size.height);//size.width, size.height);
+                Vector4[] texCoord1 = geometry.texCoordList1.array;
+                geometry.FillRectUniformBorder_Miter(width, size.height);
+                texCoord1[startVert + 0] = new Vector4(packedBorderColorTop, packedBorderColorLeft, EdgeDistance0, ReserveForObjectIndex);
+                texCoord1[startVert + 1] = new Vector4(packedBorderColorTop, packedBorderColorRight, EdgeDistance0, ReserveForObjectIndex);
+                texCoord1[startVert + 2] = new Vector4(packedBorderColorBottom, packedBorderColorRight, EdgeDistance0, ReserveForObjectIndex);
+                texCoord1[startVert + 3] = new Vector4(packedBorderColorBottom, packedBorderColorRight, EdgeDistance0, ReserveForObjectIndex);
             }
 
             if (element.style.BackgroundImage != null) {
@@ -188,7 +223,6 @@ namespace UIForia.Rendering {
                 int posY = (int) ((height - (originalHeight * ratio)) / 2);
 
                 switch (element.style.BackgroundFit) {
-                    
                     case BackgroundFit.Fill:
                         for (int i = 0; i < geometry.texCoordList0.size; i++) {
                             float x = (bgPositionX + positions[i].x) / (bgScaleX * width);
@@ -198,14 +232,15 @@ namespace UIForia.Rendering {
                             texCoord0[i].x = newX;
                             texCoord0[i].y = 1 - newY;
                         }
+
                         break;
-                    
+
                     case BackgroundFit.ScaleDown:
                         break;
-                    
+
                     case BackgroundFit.Cover:
                         break;
-                    
+
                     case BackgroundFit.Contain:
                         for (int i = 0; i < geometry.texCoordList0.size; i++) {
                             float x = (posX + bgPositionX + positions[i].x) / (bgScaleX * newWidth);
@@ -215,16 +250,16 @@ namespace UIForia.Rendering {
                             texCoord0[i].x = newX;
                             texCoord0[i].y = 1 - newY;
                         }
+
                         break;
-                    
+
                     case BackgroundFit.None:
-                       
+
                         break;
-                    
                 }
+
 //                
 //                
-                
             }
 
             range = new GeometryRange(0, geometry.positionList.size, 0, geometry.triangleList.size);
@@ -239,8 +274,7 @@ namespace UIForia.Rendering {
             // uv transform
         }
 
-  
-        
+
         public override void PaintBackground(RenderContext ctx) {
             Size newSize = element.layoutResult.actualSize;
 
@@ -249,20 +283,17 @@ namespace UIForia.Rendering {
                 lastSize = newSize;
             }
 
-            Color32 backgroundColor = element.style.BackgroundColor;
-            Color32 backgroundTint = element.style.BackgroundTint;
+            Color backgroundColor = element.style.BackgroundColor;
+            Color backgroundTint = element.style.BackgroundTint;
             Texture backgroundImage = element.style.BackgroundImage;
 
             if (backgroundColor.a <= 0 && backgroundImage == null) {
                 return;
             }
 
-            float packedBackgroundColor = VertigoUtil.ColorToFloat(element.style.BackgroundColor);
-            if (!element.style.BackgroundColor.IsDefined()) {
-                packedBackgroundColor = VertigoUtil.ColorToFloat(new Color32(0, 0, 0, 0));
-            }
+            float packedBackgroundColor = VertigoUtil.ColorToFloat(backgroundColor);
+            float packedBackgroundTint = VertigoUtil.ColorToFloat(backgroundTint);
 
-            float packedBackgroundTint = VertigoUtil.ColorToFloat(element.style.BackgroundTint);
             PaintMode colorMode = PaintMode.None;
 
             if (backgroundImage != null) {
@@ -282,10 +313,8 @@ namespace UIForia.Rendering {
 
             // could include a letterbox color in packed colors
 
-            float borderRadiusTopLeft = element.style.BorderRadiusTopLeft.value;
-            float borderRadiusTopRight = element.style.BorderRadiusTopRight.value;
-            float borderRadiusBottomLeft = element.style.BorderRadiusBottomLeft.value;
-            float borderRadiusBottomRight = element.style.BorderRadiusBottomRight.value;
+            // todo resolve as size
+           
 
             float min = math.min(element.layoutResult.actualSize.width, element.layoutResult.actualSize.height);
 
@@ -293,6 +322,11 @@ namespace UIForia.Rendering {
 
             float halfMin = min * 0.5f;
 
+            float borderRadiusTopLeft = ResolveFixedSize(min, element.style.BorderRadiusTopLeft);
+            float borderRadiusTopRight = ResolveFixedSize(min, element.style.BorderRadiusTopRight);
+            float borderRadiusBottomLeft = ResolveFixedSize(min, element.style.BorderRadiusBottomLeft);
+            float borderRadiusBottomRight = ResolveFixedSize(min, element.style.BorderRadiusBottomRight);
+            
             borderRadiusTopLeft = math.clamp(borderRadiusTopLeft, 0, halfMin) / min;
             borderRadiusTopRight = math.clamp(borderRadiusTopRight, 0, halfMin) / min;
             borderRadiusBottomLeft = math.clamp(borderRadiusBottomLeft, 0, halfMin) / min;

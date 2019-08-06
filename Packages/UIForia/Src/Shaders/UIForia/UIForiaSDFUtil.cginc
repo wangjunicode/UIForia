@@ -4,8 +4,17 @@
 #include "./UIForiaStructs.cginc"
 
 const float SQRT_2 = 1.4142135623730951;
+            
+                           
+#define PaintMode_Color 1 << 0
+#define PaintMode_Texture 1 << 1
+#define PaintMode_TextureTint 1 << 2
+#define PaintMode_LetterBoxTexture 1 << 3
 
-           
+// remap input from one range to an other            
+float Map(float s, float a1, float a2, float b1, float b2) {
+    return b1 + (s-a1) * (b2-b1) / (a2-a1);
+}           
            
 // same as UnityPixelSnap except taht we add 0.5 to pixelPos after rounding
 inline float4 SDFPixelSnap (float4 pos) {
@@ -120,6 +129,13 @@ inline float4 UnpackSDFRadii(float packed) {
     );
 }
 
+inline float2 UnpackSize(float packedSize) {
+    uint input = asuint(packedSize);
+    uint high = (input >> 16) & (1 << 16) - 1;
+    uint low =  input & 0xffff;
+    return float2(high / 10, low / 10);
+}
+
 float3x3 TRS2D(float2 position, float2 scale, float rotation) {
     const float a = 1;
     const float b = 0;
@@ -150,42 +166,44 @@ float3x3 TRS2D(float2 position, float2 scale, float rotation) {
 #define ShapeType_Rhombus (1 << 4)
 #define ShapeType_Triangle (1 << 5)
 #define ShapeType_RegularPolygon (1 << 6)
-#define ShapeType_Text 1
-//(1 << 7)
+#define ShapeType_Text (1 << 7)
 
 #define ShapeType_RectLike (ShapeType_Rect | ShapeType_RoundedRect | ShapeType_Circle)
 
-fixed4 GetBorderColor(float2 coords, fixed4 contentColor, float4 packedBorderData) {
+fixed4 GetBorderColor(float2 coords, float2 size, fixed4 contentColor, float2 packedBorderData) {
     float left = step(coords.x, 0.5); // 1 if left
     float bottom = step(coords.y, 0.5); // 1 if bottom
     
     #define top (1 - bottom)
     #define right (1 - left)  
     
-    if(packedBorderData.x == 0) return contentColor;
-    
-    fixed4 borderColorTop = UnpackColor(asuint(packedBorderData.x));
-    fixed4 borderColorRight = UnpackColor(asuint(packedBorderData.y));
-    fixed4 borderColorBottom = UnpackColor(asuint(packedBorderData.z));
-    fixed4 borderColorLeft = UnpackColor(asuint(packedBorderData.w));
+
+    fixed4 borderColorHorizontal = UnpackColor(asuint(packedBorderData.y));
+    fixed4 borderColorVertical = UnpackColor(asuint(packedBorderData.x));
     
     if((top * left) != 0) {
-        return (1 - coords.x >= coords.y) ? borderColorLeft : borderColorTop;
+        float x = coords.x * size.x;
+        float y = (1 - coords.y) * size.y;
+        return lerp(borderColorHorizontal, borderColorVertical, smoothstep(-0.01, 0.01, x - y));  
     }
     
     if((top * right) != 0) {
-        return (coords.x >= coords.y) ? borderColorRight : borderColorTop;
+        float x = (1 - coords.x) * size.x;
+        float y = (1 - coords.y) * size.y;
+        return lerp(borderColorHorizontal, borderColorVertical, smoothstep(-0.01, 0.01, x - y));  
     }
     
     if((bottom * left) != 0) {
-        return (1 - coords.x > 1 - coords.y) ? borderColorLeft : borderColorBottom;
+        float x = (coords.x) * size.x;
+        float y = (coords.y) * size.y;
+        return lerp(borderColorHorizontal, borderColorVertical, smoothstep(-0.01, 0.01, x - y));  
     }
     
-    if((bottom * right) != 0) {
-        return (coords.x > 1 - coords.y) ? borderColorRight : borderColorBottom;
-    }
-    // should never hit
-    return fixed4(1, 1, 1, 1);    
+    // bottom right case
+    float x = (1 - coords.x) * size.x;
+    float y = (coords.y) * size.y;
+    return lerp(borderColorHorizontal, borderColorVertical, smoothstep(-0.01, 0.01, x - y));
+      
 }
 
 inline fixed GetBorderRadius(float2 coords, float packedRadii) {
@@ -210,7 +228,24 @@ inline fixed GetBorderRadius(float2 coords, float packedRadii) {
     r += (bottom * right) * radii.w;
     return (r * 2) / 1000;
 }
-          
+
+// this will give great AA on rotated edges but for cases where the sides are vertical or horizontal 
+// it will cause a ~1 pixel blend that looks terrible when placed side by side with another object
+// size is size of the quad, distFromCenter is 0 - 1 where 0 is an edge          
+inline fixed4 MeshBorderAA(fixed4 mainColor, float2 size, float distFromCenter) {
+     // this tries to find a 1 or 2 pixel border from edges
+     float borderSize = 1 / (min(size.x, size.y)) * 2;// could also be 1.41 as sqrt2 for pixel size
+     
+     if(mainColor.a > 0 && distFromCenter < borderSize && distFromCenter == 1) {
+        fixed4 retn = fixed4(mainColor.rgb, 0);
+        retn = lerp(retn, mainColor, distFromCenter / borderSize);
+        retn.rgb *= distFromCenter / (borderSize);
+        return retn;
+     }
+     
+     return mainColor;
+}
+
 fixed4 SDFRectColor(SDFData sdfData, fixed4 color) {
     float halfStrokeWidth = sdfData.strokeWidth * 0.5;
     float minSize = min(sdfData.size.x, sdfData.size.y);
@@ -226,8 +261,55 @@ fixed4 SDFRectColor(SDFData sdfData, fixed4 color) {
     return lerp(color, fixed4(color.rgb, 0), fBlendAmount);
 }
             
-#define CUTOUT_STROKE 0
             
+inline fixed4 ComputeColor(float4 packedColor, float2 texCoord, sampler2D _MainTexture) {
+
+    uint colorMode = packedColor.b;
+    
+    int useColor = (colorMode & PaintMode_Color) != 0;
+    int useTexture = (colorMode & PaintMode_Texture) != 0;
+    int tintTexture = (colorMode & PaintMode_TextureTint) != 0;
+    int letterBoxTexture = (colorMode & PaintMode_LetterBoxTexture) != 0;
+    
+    fixed4 bgColor = UnpackColor(asuint(packedColor.r));
+    fixed4 tintColor = UnpackColor(asuint(packedColor.g));
+    fixed4 textureColor = tex2D(_MainTexture, texCoord);
+
+    bgColor.rgb *= bgColor.a;
+    tintColor.rgb *= tintColor.a;
+    textureColor.rgb *= textureColor.a;
+    
+    textureColor = lerp(textureColor, textureColor + tintColor, tintTexture);
+    
+    if (useTexture && letterBoxTexture && (texCoord.x < 0 || texCoord.x > 1) || (texCoord.y < 0 || texCoord.y > 1)) {
+        return bgColor; // could return a letterbox color instead
+    }
+    
+    if(useTexture && useColor) {
+        return lerp(textureColor, bgColor, 1 - textureColor.a);
+    }
+                    
+    return lerp(bgColor, textureColor, useTexture);
+}
+
+inline fixed4 GetTextColor(half d, fixed4 faceColor, fixed4 outlineColor, half outline, half softness) {
+    half faceAlpha = 1 - saturate((d - outline * 0.5 + softness * 0.5) / (1.0 + softness));
+    half outlineAlpha = saturate((d + outline * 0.5)) * sqrt(min(1.0, outline));
+
+    faceColor.rgb *= faceColor.a;
+    outlineColor.rgb *= outlineColor.a;
+
+    faceColor = lerp(faceColor, outlineColor, outlineAlpha);
+
+    faceColor.rgb *= faceAlpha;
+
+    return faceColor;
+}
+
+inline float GetBorderSize(float2 texCoords, float4 borderSize) {
+    return borderSize.x;
+}
+
 fixed4 SDFColor(SDFData sdfData, fixed4 borderColor, fixed4 contentColor, float distFromCenter) {
     float halfStrokeWidth = sdfData.strokeWidth * 0.5;
     float2 size = sdfData.size;
@@ -236,80 +318,44 @@ fixed4 SDFColor(SDFData sdfData, fixed4 borderColor, fixed4 contentColor, float 
   
     float2 center = ((sdfData.uv.xy - 0.5) * size); 
     float fBlendAmount = 0;
-    fixed4 toColor = contentColor;
-    fixed4 fromColor = borderColor;
     
-    // todo -- inset so we can have AA edges with rotation
-
     float shape1 = RectSDF(center, (size * 0.5) - halfStrokeWidth, radius - halfStrokeWidth);
     float retn = abs(shape1) - halfStrokeWidth;
-        
+    
+    borderColor = lerp(contentColor, borderColor, halfStrokeWidth != 0);
+    
     if(shape1 >= 0) {
-       toColor = fixed4(fromColor.rgb, 0);
+       contentColor = lerp(fixed4(contentColor.rgb, 0), fixed4(borderColor.rgb, 0), halfStrokeWidth > 0);
     }
     
     float borderSize = (1 / minSize) *  1.4;
-                     
-    fBlendAmount = smoothstep(0, 1, retn);
-    if(sdfData.radius < 0.1) {
-        return toColor;
-    }
-    
-    if(distFromCenter <= borderSize) {
-        //toColor = Green;
-        //sdfData.radius *= 0.75;
-      
-        
-        if((sdfData.uv.x > sdfData.radius && sdfData.uv.x < 1 - sdfData.radius)) {
-            return Green;
-        }
-   
-          
-        if((sdfData.uv.y > sdfData.radius && sdfData.uv.y < 1 - sdfData.radius)) {
-            return toColor;
-        }
-    }
-    
-    return lerp(toColor, fromColor, 1 - fBlendAmount); // do not pre-multiply alpha here!
 
+    // with a border -1, 1 looks the best, without use 0, 1
+    fBlendAmount = smoothstep(lerp(-1, 0, halfStrokeWidth == 0), 1, retn);
+       
+    if(distFromCenter <= halfStrokeWidth * 2 * borderSize) {  
+    
+        // this is for the clipped corner case
+        if(sdfData.radius == 0) {
+            return borderColor;
+        }
         
-    //}
-    /*
-    if(sdfData.shapeType == ShapeType_Ellipse) {
-        fDist = EllipseSDF(center - float2(0, 0.5), halfShapeSize);
-        fBlendAmount = smoothstep(-1, 1, fDist);
+        if(distFromCenter < borderSize) {
+        
+            if((sdfData.uv.x > sdfData.radius * sdfData.uv.x < 1 - sdfData.radius)) {
+                return lerp(contentColor, borderColor, halfStrokeWidth != 0);
+            }
+              
+            if((sdfData.uv.y > sdfData.radius * sdfData.uv.y < 1 - sdfData.radius)) {
+                return lerp(contentColor, borderColor, halfStrokeWidth != 0);
+            }
+        }
+      
     }
+      
+    return lerp(contentColor, borderColor, 1 - fBlendAmount); // do not pre-multiply alpha here!
     
-    if(sdfData.shapeType == ShapeType_Triangle) {
-        fDist = abs(TriangleSDF(sdfData.uv * size, float2(0, 0) * size, float2(0.6, 1) * size, float2(1, 0.8) * size)) - 1;
-    }
-    
-    if(sdfData.shapeType == ShapeType_Rhombus) {
-        fDist = RhombusSDF(center, halfShapeSize - halfStrokeWidth);
-        // for stroke try this:
-        //float distanceChange = fwidth(fDist);
-        //fBlendAmount = smoothstep(-distanceChange, distanceChange, fDist);
-        fBlendAmount = smoothstep(-1, 1, fDist);
-    }
-    */
-   /* halfStrokeWidth = 10;
-    fDist = RhombusSDF(center * (size + halfStrokeWidth * 0.5), halfShapeSize - halfStrokeWidth);
-    float innerDist = abs(RhombusSDF(center * (size + halfStrokeWidth * 0.5), halfShapeSize - halfStrokeWidth)) - halfStrokeWidth;
-    
-    halfStrokeWidth = 0;
-    float shape1 = RhombusSDF(center * (size + halfStrokeWidth * 0.5), halfShapeSize - halfStrokeWidth);;
-    halfStrokeWidth = 0;
-    
-    float shape2 = RhombusSDF(center * (size + halfStrokeWidth * 0.5), halfShapeSize - halfStrokeWidth);;
-    float retn = max(shape1, -shape2); // gives a hard outline
-    */
-    //float distanceChange = fwidth(fDist);
-    //float fBlendAmount = smoothstep(distanceChange, -distanceChange, fDist);
-    
-    
-    //float fBlendAmount = smoothstep(-1, 1, 1 - retn);
-    
-    //using -1 to 1 gives slightly better aa but all edges have alpha which is bad when two shapes share an edge
+    // using -1 to 1 gives slightly better aa but all edges have alpha which is bad when two shapes share an edge
     // use larger negative to get nice blur effect
     // smoothstep(-1, 0, fDist) gives the best aa but there is a gap between shapes that should touch
     // smoothstep(0, 1, fDist) fixes the gap perfectly but causes rounded shapes to be slightly cut off at the bottom and right edges

@@ -106,16 +106,6 @@ namespace UIForia.Rendering {
             UpdateSizes(4, 6);
         }
 
-        [Flags]
-        public enum Corner {
-
-            TopLeft = 1 << 0,
-            TopRight = 1 << 1,
-            BottomRight = 1 << 2,
-            BottomLeft = 1 << 3
-
-        }
-
         public struct CornerDef {
 
             public float topLeftX;
@@ -190,19 +180,14 @@ namespace UIForia.Rendering {
                 texCoord0[startVert + i] = new Vector4(x, y, x, y);
             }
             
-            
+            // x = border color 0
+            // y = border color 1
+            // z = distance to edge (0 in all but center)
+            // w = object index
+           
             for (int i = 0; i < 8; i++) {
                 texCoord1[startVert + i].z = 0;// = new Vector4(x, y, width, height);
             }
-
-//            texCoord1[startVert + 0].y = 1;
-//            texCoord1[startVert + 1].y = 1;
-            texCoord1[startVert + 6].y = 1;
-            texCoord1[startVert + 7].y = 1;
-            
-            texCoord1[startVert + 8].z = 1;// = new Vector4(x, y, width, height);
-            texCoord1[startVert + 8].y = 1;// = new Vector4(x, y, width, height);
-
             
             triangleList.size += 24;
             positionList.size += 9;
@@ -270,7 +255,6 @@ namespace UIForia.Rendering {
                 float y = positions[startVert + i].y / height;
                 texCoord0[startVert + i] = new Vector4(x, y, width, height);
             }
-
             
             triangleList.size += 24;
             positionList.size += 9;

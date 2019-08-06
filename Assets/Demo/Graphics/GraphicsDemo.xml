@@ -23,6 +23,7 @@
             PreferredSize = 800px 600px;
             FlexLayoutDirection = Row;
             //run animation(rot);
+            TransformRotation = 0;
         }
         
         style particles {
@@ -30,7 +31,7 @@
         }
         
         style img {
-            PreferredSize = 200px 200px;
+            PreferredSize = 300px 300px;
             BackgroundImageOffsetX = 0;
             BackgroundImageOffsetY = 0;
             BackgroundImageScaleX = 1;
@@ -38,13 +39,22 @@
             BackgroundImageRotation = 0;
             BackgroundImage = url(image);
             BackgroundColor = Red;
-            Border = 0px;
-            BorderRadiusTopLeft = 150px;
+            BackgroundTint = rgba(255, 0, 0, 5);
+            Border = 10px;
+            //BorderRadiusTopLeft = 150px;
             BorderRadiusBottomLeft = 150px;
-            BackgroundFit = Fill;
+            BackgroundFit = Contain;
+            BackgroundColor = aqua;
+            BorderColorTop = blueviolet;
+            BorderColorRight = Red;
+            BorderColorLeft = lawngreen;
+            BorderColorBottom = rosybrown;
+            CornerBevelTopLeft = 30px;
+            CornerBevelBottomRight = 50px;
         }
 
         style img2 {
+            MarginLeft = 10px;
             PreferredSize = 300px 200px;
             BackgroundImageOffsetX = 0;
             BackgroundImageOffsetY = 0;
@@ -56,6 +66,10 @@
             Border = 0px;
             BackgroundFit = Fill;
             BorderRadiusBottomRight = 150px;
+            BorderColorTop = Yellow;
+            BorderColorRight = Green;
+            BorderColorLeft = Blue;
+            BorderColorBottom = White;
         }
 
         style scroll {
@@ -65,6 +79,8 @@
         style square {
             PreferredSize = 300px;
             BackgroundColor = rgb(100, 40, 80);
+            CornerBevelTopLeft = 30px;
+            CornerBevelBottomRight = 50px;
         }
         
     </Style>
@@ -72,8 +88,8 @@
     <Contents style="container">
         
 <!--        <ScrollView style="scroll">-->
-            
-<!--        <Group style="particles"/>-->
+        <Text>So Crisp</Text>
+        <Group style="particles"/>
         <Group style="img"/>
         <Group style="img2"/>
         <Group style="square"/>

@@ -279,14 +279,15 @@ namespace UIForia.Layout {
 
                 for (int j = start; j < end; j++) {
                     SVGXMatrix m = localMatrices[j];
-                    worldMatrices[j] = new SVGXMatrix(
-                        parentMatrix.m0 * m.m0 + parentMatrix.m2 * m.m1,
-                        parentMatrix.m1 * m.m0 + parentMatrix.m3 * m.m1,
-                        parentMatrix.m0 * m.m2 + parentMatrix.m2 * m.m3,
-                        parentMatrix.m1 * m.m2 + parentMatrix.m3 * m.m3,
-                        parentMatrix.m0 * m.m4 + parentMatrix.m2 * m.m5 + parentMatrix.m4,
-                        parentMatrix.m1 * m.m4 + parentMatrix.m3 * m.m5 + parentMatrix.m5
-                    );
+//                    worldMatrices[j] = new SVGXMatrix(
+//                        parentMatrix.m0 * m.m0 + parentMatrix.m2 * m.m1,
+//                        parentMatrix.m1 * m.m0 + parentMatrix.m3 * m.m1,
+//                        parentMatrix.m0 * m.m2 + parentMatrix.m2 * m.m3,
+//                        parentMatrix.m1 * m.m2 + parentMatrix.m3 * m.m3,
+//                        parentMatrix.m0 * m.m4 + parentMatrix.m2 * m.m5 + parentMatrix.m4,
+//                        parentMatrix.m1 * m.m4 + parentMatrix.m3 * m.m5 + parentMatrix.m5
+//                    );
+                    worldMatrices[j] = parentMatrix* m;
                 }
             }
         }

@@ -539,9 +539,9 @@ namespace UIForia.Layout {
             Vector2 localPosition = alignedPosition;
 
             localPosition.y = -localPosition.y;
-            m = SVGXMatrix.TRS(localPosition, rotation, new Vector2(scaleX, scaleY));
+            m = SVGXMatrix.TRS(localPosition, -rotation, new Vector2(scaleX, scaleY));
             SVGXMatrix pivotMat = new SVGXMatrix(1, 0, 0, 1, size.width * pivotX, size.height * pivotY);
-            localMatrix = pivotMat * m * new SVGXMatrix(1, 0, 0, 1, -size.width * pivotX, -size.height * pivotY);
+            localMatrix = m; //pivotMat * m * new SVGXMatrix(1, 0, 0, 1, -size.width * pivotX, -size.height * pivotY);
 
             owner.localMatrixList.array[traversalIndex] = localMatrix;
 

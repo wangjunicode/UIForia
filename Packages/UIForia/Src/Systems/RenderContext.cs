@@ -20,7 +20,6 @@ namespace UIForia.Rendering {
 
     }
 
-
     internal enum RenderOperationType {
 
         DrawBatch,
@@ -190,6 +189,7 @@ namespace UIForia.Rendering {
 
             currentBatch.uiforiaData.transformData.Add(transform);
             currentBatch.uiforiaData.objectData0.Add(geometry.objectData);
+            currentBatch.uiforiaData.objectData1.Add(geometry.miscData);
             currentBatch.uiforiaData.colors.Add(geometry.packedColors);
             currentBatch.uiforiaData.fontData = fontData;
 
@@ -215,6 +215,7 @@ namespace UIForia.Rendering {
             currentBatch.uiforiaData.mainTexture = geometry.mainTexture != null ? geometry.mainTexture : currentBatch.uiforiaData.mainTexture;
             currentBatch.uiforiaData.colors.Add(geometry.packedColors);
             currentBatch.uiforiaData.objectData0.Add(geometry.objectData);
+            currentBatch.uiforiaData.objectData1.Add(geometry.miscData);
             currentBatch.uiforiaData.transformData.Add(transform);
 
             UpdateUIForiaGeometry(geometry, range);
@@ -428,7 +429,6 @@ namespace UIForia.Rendering {
                     renderTexture = renderTexture
                 });
             }
-
 
             renderCommandList.Add(new RenderOperation() {
                 operationType = RenderOperationType.PushRenderTexture,

@@ -115,7 +115,6 @@ namespace UIForia.Rendering {
         private void UpdateGeometry(in Size size) {
             geometryNeedsUpdate = false;
 
-            Color c;
             geometry.Clear();
 
             float width = size.width;
@@ -132,16 +131,6 @@ namespace UIForia.Rendering {
             float radiusBottomRight = ResolveFixedSize(min, element.style.BorderRadiusBottomRight);
             float radiusBottomLeft = ResolveFixedSize(min, element.style.BorderRadiusBottomLeft);
 
-            float packedBorderColorTop = VertigoUtil.ColorToFloat(element.style.BorderColorTop);
-            float packedBorderColorRight = VertigoUtil.ColorToFloat(element.style.BorderColorRight);
-            float packedBorderColorBottom = VertigoUtil.ColorToFloat(element.style.BorderColorBottom);
-            float packedBorderColorLeft = VertigoUtil.ColorToFloat(element.style.BorderColorLeft);
-            
-            const float EdgeDistance0 = 0;
-            const float EdgeDistance1 = 1;
-            const float ReserveForObjectIndex = 0;
-            
-            int startVert = geometry.positionList.size;
             
             if (radiusBottomLeft > 0 ||
                 radiusBottomRight > 0 ||
@@ -151,7 +140,6 @@ namespace UIForia.Rendering {
                 bevelTopLeft > 0 ||
                 bevelBottomLeft > 0 ||
                 bevelBottomRight > 0) {
-                
 
                 geometry.ClipCornerRect(new Size(width, height), new UIForiaGeometry.CornerDef() {
                     topLeftX = bevelTopLeft,
@@ -164,35 +152,14 @@ namespace UIForia.Rendering {
                     bottomLeftY = bevelBottomLeft,
                 });
                 
-                Vector4[] texCoord1 = geometry.texCoordList1.array;
-                OffsetRect border = element.layoutResult.border;
-                float borderLeftAndTop = VertigoUtil.PackSizeVector(border.left, border.top);
-                float borderLeftAndBottom = VertigoUtil.PackSizeVector(border.left, border.bottom);
-                float borderRightAndTop = VertigoUtil.PackSizeVector(border.right, border.top);
-                float borderRightAndBottom = VertigoUtil.PackSizeVector(border.right, border.bottom);
-                texCoord1[startVert + 0] = new Vector4(packedBorderColorTop, packedBorderColorLeft, borderLeftAndTop, ReserveForObjectIndex);
-                texCoord1[startVert + 1] = new Vector4(packedBorderColorTop, packedBorderColorLeft, borderLeftAndTop, ReserveForObjectIndex);
-                texCoord1[startVert + 2] = new Vector4(packedBorderColorTop, packedBorderColorRight, borderRightAndTop, ReserveForObjectIndex);
-                texCoord1[startVert + 3] = new Vector4(packedBorderColorTop, packedBorderColorRight, borderRightAndTop, ReserveForObjectIndex);
-                texCoord1[startVert + 4] = new Vector4(packedBorderColorBottom, packedBorderColorRight, borderRightAndBottom, ReserveForObjectIndex);
-                texCoord1[startVert + 5] = new Vector4(packedBorderColorBottom, packedBorderColorRight, borderRightAndBottom, ReserveForObjectIndex);
-                texCoord1[startVert + 6] = new Vector4(packedBorderColorBottom, packedBorderColorLeft, borderLeftAndBottom, ReserveForObjectIndex);
-                texCoord1[startVert + 7] = new Vector4(packedBorderColorBottom, packedBorderColorLeft, borderLeftAndBottom, ReserveForObjectIndex);
-                texCoord1[startVert + 8] = new Vector4(0, 0, EdgeDistance1, ReserveForObjectIndex);
             }
             else {
-                Vector4[] texCoord1 = geometry.texCoordList1.array;
                 geometry.FillRectUniformBorder_Miter(width, size.height);
-                texCoord1[startVert + 0] = new Vector4(packedBorderColorTop, packedBorderColorLeft, EdgeDistance0, ReserveForObjectIndex);
-                texCoord1[startVert + 1] = new Vector4(packedBorderColorTop, packedBorderColorRight, EdgeDistance0, ReserveForObjectIndex);
-                texCoord1[startVert + 2] = new Vector4(packedBorderColorBottom, packedBorderColorRight, EdgeDistance0, ReserveForObjectIndex);
-                texCoord1[startVert + 3] = new Vector4(packedBorderColorBottom, packedBorderColorRight, EdgeDistance0, ReserveForObjectIndex);
             }
-
+            
             if (element.style.BackgroundImage != null) {
                 Vector3[] positions = geometry.positionList.array;
                 Vector4[] texCoord0 = geometry.texCoordList0.array;
-                Vector4[] texCoord1 = geometry.texCoordList1.array;
 
                 float bgPositionX = element.style.BackgroundImageOffsetX.value;
                 float bgPositionY = element.style.BackgroundImageOffsetY.value;
@@ -257,23 +224,12 @@ namespace UIForia.Rendering {
 
                         break;
                 }
-
-//                
-//                
+              
             }
 
             range = new GeometryRange(0, geometry.positionList.size, 0, geometry.triangleList.size);
 
-            // corner join: Bevel | Miter | Round
-            // border only
-            // border uniform
-            // border rounded
-            // border fill only
-            // background cover
-            // background box (border, padding, content)
-            // uv transform
         }
-
 
         public override void PaintBackground(RenderContext ctx) {
             Size newSize = element.layoutResult.actualSize;
@@ -287,8 +243,9 @@ namespace UIForia.Rendering {
             Color backgroundTint = element.style.BackgroundTint;
             Texture backgroundImage = element.style.BackgroundImage;
 
+            // todo -- border also 0
             if (backgroundColor.a <= 0 && backgroundImage == null) {
-                return;
+              //  return;
             }
 
             float packedBackgroundColor = VertigoUtil.ColorToFloat(backgroundColor);
@@ -309,12 +266,8 @@ namespace UIForia.Rendering {
             }
 
             // if keeping aspect ratio
-            colorMode |= PaintMode.LetterBoxTexture;
-
             // could include a letterbox color in packed colors
-
-            // todo resolve as size
-           
+            colorMode |= PaintMode.LetterBoxTexture;
 
             float min = math.min(element.layoutResult.actualSize.width, element.layoutResult.actualSize.height);
 
@@ -339,8 +292,19 @@ namespace UIForia.Rendering {
 
             float packedBorderRadii = VertigoUtil.BytesToFloat(b0, b1, b2, b3);
 
-            geometry.packedColors = new Color(packedBackgroundColor, packedBackgroundTint, (int) colorMode, 0);
-            geometry.objectData = new Vector4((int) ShapeType.RoundedRect, VertigoUtil.PackSizeVector(element.layoutResult.actualSize), packedBorderRadii, 0);
+            float packedBorderColorTop = VertigoUtil.ColorToFloat(element.style.BorderColorTop);
+            float packedBorderColorRight = VertigoUtil.ColorToFloat(element.style.BorderColorRight);
+            float packedBorderColorBottom = VertigoUtil.ColorToFloat(element.style.BorderColorBottom);
+            float packedBorderColorLeft = VertigoUtil.ColorToFloat(element.style.BorderColorLeft);
+            
+            geometry.miscData = new Vector4(packedBorderColorTop, packedBorderColorRight, packedBorderColorBottom, packedBorderColorLeft);
+            OffsetRect border = element.layoutResult.border;
+            
+            float borderLeftAndTop = VertigoUtil.PackSizeVector(border.left, border.top);
+            float borderRightAndBottom = VertigoUtil.PackSizeVector(border.right, border.bottom);
+            
+            geometry.packedColors = new Color(packedBackgroundColor, packedBackgroundTint, borderLeftAndTop, borderRightAndBottom);
+            geometry.objectData = new Vector4((int) ShapeType.RoundedRect, VertigoUtil.PackSizeVector(element.layoutResult.actualSize), packedBorderRadii, (int)colorMode);
             geometry.mainTexture = backgroundImage;
             ctx.DrawBatchedGeometry(geometry, range, element.layoutResult.matrix.ToMatrix4x4());
         }

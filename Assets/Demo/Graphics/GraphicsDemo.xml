@@ -24,6 +24,7 @@
             FlexLayoutDirection = Row;
             //run animation(rot);
             TransformRotation = 0;
+            TextFontSize = 136;
         }
         
         style particles {
@@ -31,7 +32,7 @@
         }
         
         style img {
-            PreferredSize = 300px 300px;
+            PreferredSize = 300px 200px;
             BackgroundImageOffsetX = 0;
             BackgroundImageOffsetY = 0;
             BackgroundImageScaleX = 1;
@@ -40,17 +41,19 @@
             BackgroundImage = url(image);
             BackgroundColor = Red;
             BackgroundTint = rgba(255, 0, 0, 5);
-            Border = 10px;
-            //BorderRadiusTopLeft = 150px;
-            BorderRadiusBottomLeft = 150px;
+            BorderTop = 20px;
+            BorderBottom = 10px;
+            BorderRight = 20px;
+            BorderLeft = 5px;
+           // BorderRadiusTopLeft = 150px;
+           // BorderRadiusBottomLeft = 150px;
+           // BorderRadiusBottomRight = 150px;
+           // BorderRadiusTopRight = 150px;
             BackgroundFit = Contain;
-            BackgroundColor = aqua;
-            BorderColorTop = blueviolet;
-            BorderColorRight = Red;
-            BorderColorLeft = lawngreen;
-            BorderColorBottom = rosybrown;
-            CornerBevelTopLeft = 30px;
-            CornerBevelBottomRight = 50px;
+            BackgroundColor = white;
+         
+            //CornerBevelTopLeft = 30px;
+            //CornerBevelBottomRight = 50px;
         }
 
         style img2 {
@@ -89,7 +92,7 @@
         
 <!--        <ScrollView style="scroll">-->
         <Text>So Crisp</Text>
-        <Group style="particles"/>
+<!--        <Group style="particles"/>-->
         <Group style="img"/>
         <Group style="img2"/>
         <Group style="square"/>

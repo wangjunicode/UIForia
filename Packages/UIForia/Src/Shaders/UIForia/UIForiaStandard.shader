@@ -51,6 +51,7 @@ Shader "UIForia/Standard"
             float4 _FontTextureSize;
             
             float4 _ColorData[BATCH_SIZE];
+            float4 _MiscData[BATCH_SIZE];
             float4 _ObjectData[BATCH_SIZE];
             float4x4 _TransformData[BATCH_SIZE];
                                                           
@@ -79,8 +80,9 @@ Shader "UIForia/Standard"
             #define Frag_SDFStrokeWidth i.texCoord1.w
             #define Frag_SDFCoords i.texCoord0.zw
             #define Frag_ShapeType i.texCoord2.x
-            #define Frag_BorderColors i.texCoord3.xy
-            #define Frag_SDFBorderSize 10
+            #define Frag_BorderColors i.texCoord3
+            #define Frag_BorderSize i.color.zw
+            #define Frag_ColorMode i.texCoord2.y
                     
             v2f vert (appdata v) {
                 v2f o;
@@ -90,24 +92,25 @@ Shader "UIForia/Standard"
                 float4 objectInfo = _ObjectData[objectIndex];
                 float4x4 transform = _TransformData[objectIndex];
                 
-                int shapeType = objectInfo.x;
+                uint shapeType = objectInfo.x;
+                uint colorMode = objectInfo.w;
+                fixed4 colors = _ColorData[objectIndex];
                 
                 half2 size = UnpackSize(Vert_PackedSize);
                 v.vertex = mul(transform, float4(v.vertex.xyz, 1));
                 
                 o.vertex = UnityObjectToClipPos(v.vertex);
                 o.texCoord0 = v.texCoord0;
-                o.color = _ColorData[objectIndex];
+                o.color = colors;
                 
                 // this only works for 'flower' configuration meshes, not for quads. use a flag for the quad
                 o.texCoord4 = float4(lerp(0, 1, v.texCoord0.x == 0.5 && v.texCoord0.y == 0.5), 0, 0, 0);
                 
-                if(shapeType != 1) {
+                if(shapeType != ShapeType_Text) {
                     // o.vertex = SDFPixelSnap(o.vertex); // pixel snap is bad for text rendering
                     o.texCoord1 = float4(size.x, size.y, Vert_BorderRadii, 0);
-                    o.texCoord2 = float4(shapeType, 0, 0, 0);
-                    o.texCoord3 = float4(Vert_BorderColors, 0, 0);
-
+                    o.texCoord2 = float4(shapeType, colorMode, 0, 0);
+                    o.texCoord3 = _MiscData[objectIndex];
                 }
                 else {             
                     _FontScaleX = 1;
@@ -133,7 +136,7 @@ Shader "UIForia/Standard"
                      pixelSize /= float2(1, 1) * abs(mul((float2x2)UNITY_MATRIX_P, _ScreenParams.xy));
                      
                      float scale = rsqrt(dot(pixelSize, pixelSize));
-                     scale *= abs(0.2) * _FontGradientScale * 1.5;
+                     scale *= abs(Vert_CharacterScale) * _FontGradientScale * 1.5;
 
                      float underlayScale = scale;
                      underlayScale /= 1 + ((underlaySoftness * _FontScaleRatioC) * underlayScale);
@@ -162,20 +165,20 @@ Shader "UIForia/Standard"
             
             fixed4 frag (v2f i) : SV_Target {           
             
-                fixed4 mainColor = ComputeColor(i.color, i.texCoord0.xy, _MainTexture);
+                fixed4 mainColor = ComputeColor(i.color.r, i.color.g, Frag_ColorMode, i.texCoord0.xy, _MainTexture);
+                
                 
                 if(Frag_ShapeType != ShapeType_Text) {
-
-                    SDFData sdfData;
+                
+                    BorderData borderData = GetBorderData(Frag_SDFCoords, Frag_SDFSize, Frag_BorderColors, Frag_BorderSize, Frag_SDFBorderRadii);
                     
+                    SDFData sdfData;
                     sdfData.uv = Frag_SDFCoords;
                     sdfData.size = Frag_SDFSize;
-                    sdfData.radius = GetBorderRadius(Frag_SDFCoords, Frag_SDFBorderRadii);
-                    sdfData.strokeWidth = 10;//GetBorderSize(Frag_SDFCoords, float4(0, 0, 0, 0));
+                    sdfData.strokeWidth = borderData.size;
+                    sdfData.radius = borderData.radius;
                     
-                    fixed4 borderColor = GetBorderColor(Frag_SDFCoords, Frag_SDFSize, mainColor, Frag_BorderColors);
-                    
-                     mainColor = SDFColor(sdfData, borderColor, mainColor, i.texCoord4.x);
+                     mainColor = SDFColor(sdfData, borderData.color, mainColor, i.texCoord4.x);
                      // mainColor = MeshBorderAA(mainColor, Frag_SDFSize, i.texCoord4.x);
                      mainColor.rgb *=  mainColor.a;
                      
@@ -185,7 +188,6 @@ Shader "UIForia/Standard"
                 float outlineWidth = 0; //i.texCoord2.y;
                 float outlineSoftness = 0; //i.texCoord2.z;
                 float c = tex2D(_FontTexture, i.texCoord0.zw).a;
-
 //                clip(c - i.texCoord1.x);
                 float scaleRatio = _FontScaleRatioA;
                 
@@ -198,7 +200,7 @@ Shader "UIForia/Standard"
 			    float softness = 0; //(outlineSoftness * scaleRatio) * scale;
 
                 fixed4 faceColor = Red;//UnpackColor(asuint(i.color.r));
-			    fixed4 outlineColor = Red;//UnpackColor(asuint(i.color.g));
+			    fixed4 outlineColor = Green;//UnpackColor(asuint(i.color.g));
                 //fixed4 underlayColor = UnpackColor(asuint(i.color.b));
                 //fixed4 glowColor = UnpackColor(asuint(i.color.a));
                 

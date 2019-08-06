@@ -30,7 +30,6 @@ struct SDFData {
     float2 size;
     float radius;
     float strokeWidth;
-    int shapeType;
 };
 
 

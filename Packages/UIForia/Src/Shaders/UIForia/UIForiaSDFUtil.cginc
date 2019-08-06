@@ -170,48 +170,26 @@ float3x3 TRS2D(float2 position, float2 scale, float rotation) {
 
 #define ShapeType_RectLike (ShapeType_Rect | ShapeType_RoundedRect | ShapeType_Circle)
 
-fixed4 GetBorderColor(float2 coords, float2 size, fixed4 contentColor, float2 packedBorderData) {
+struct BorderData {
+    fixed4 color;
+    float size;
+    float radius;
+};
+
+BorderData GetBorderData(float2 coords, float2 size, float4 packedBorderColors, float2 packedBorderSizes, float packedRadii) {
     float left = step(coords.x, 0.5); // 1 if left
     float bottom = step(coords.y, 0.5); // 1 if bottom
     
     #define top (1 - bottom)
     #define right (1 - left)  
     
+    fixed4 borderColorTop = UnpackColor(asuint(packedBorderColors.x));
+    fixed4 borderColorRight = UnpackColor(asuint(packedBorderColors.y));
+    fixed4 borderColorBottom = UnpackColor(asuint(packedBorderColors.w));
+    fixed4 borderColorLeft = UnpackColor(asuint(packedBorderColors.z));
 
-    fixed4 borderColorHorizontal = UnpackColor(asuint(packedBorderData.y));
-    fixed4 borderColorVertical = UnpackColor(asuint(packedBorderData.x));
-    
-    if((top * left) != 0) {
-        float x = coords.x * size.x;
-        float y = (1 - coords.y) * size.y;
-        return lerp(borderColorHorizontal, borderColorVertical, smoothstep(-0.01, 0.01, x - y));  
-    }
-    
-    if((top * right) != 0) {
-        float x = (1 - coords.x) * size.x;
-        float y = (1 - coords.y) * size.y;
-        return lerp(borderColorHorizontal, borderColorVertical, smoothstep(-0.01, 0.01, x - y));  
-    }
-    
-    if((bottom * left) != 0) {
-        float x = (coords.x) * size.x;
-        float y = (coords.y) * size.y;
-        return lerp(borderColorHorizontal, borderColorVertical, smoothstep(-0.01, 0.01, x - y));  
-    }
-    
-    // bottom right case
-    float x = (1 - coords.x) * size.x;
-    float y = (coords.y) * size.y;
-    return lerp(borderColorHorizontal, borderColorVertical, smoothstep(-0.01, 0.01, x - y));
-      
-}
+    BorderData retn;
 
-inline fixed GetBorderRadius(float2 coords, float packedRadii) {
-    float left = step(coords.x, 0.5); // 1 if left
-    float bottom = step(coords.y, 0.5); // 1 if bottom
-    #define top (1 - bottom)
-    #define right (1 - left)
-    
     uint packedRadiiUInt = asuint(packedRadii);
     
     float4 radii = float4(
@@ -226,7 +204,48 @@ inline fixed GetBorderRadius(float2 coords, float packedRadii) {
     r += (top * right) * radii.y;
     r += (bottom * left) * radii.z;
     r += (bottom * right) * radii.w;
-    return (r * 2) / 1000;
+    retn.radius = (r * 2) / 1000;
+    
+    half2 topLeftBorderSize = UnpackSize(packedBorderSizes.x);
+    half2 bottomRightBorderSize = UnpackSize(packedBorderSizes.y);
+    
+    #define borderTop topLeftBorderSize.y
+    #define borderLeft topLeftBorderSize.x
+    #define borderBottom bottomRightBorderSize.y
+    #define borderRight bottomRightBorderSize.x
+    
+    // todo -- border size when only on 1 edge eg top but not left. don't do the triangle cut out for that case
+    
+    if((top * left) != 0) {
+        float x = coords.x * size.x;
+        float y = (1 - coords.y) * size.y;
+        retn.color = lerp(borderColorLeft, borderColorTop, smoothstep(-0.01, 0.01, x - y));
+        retn.size = lerp(borderTop, borderLeft, x < y);
+        return retn;  
+    }
+    
+    if((top * right) != 0) {
+        float x = (1 - coords.x) * size.x;
+        float y = (1 - coords.y) * size.y;
+        retn.color = lerp(borderColorRight, borderColorTop, smoothstep(-0.01, 0.01, x - y));
+        retn.size = lerp(borderTop, borderRight, x < y);
+        return retn;  
+    }
+    
+    if((bottom * left) != 0) {
+        float x = (coords.x) * size.x;
+        float y = (coords.y) * size.y;
+        retn.color = lerp(borderColorLeft, borderColorBottom, smoothstep(-0.01, 0.01, x - y));
+        retn.size = lerp(borderBottom, borderLeft, x < y);
+        return retn;  
+    }
+    
+    // bottom right case
+    float x = (1 - coords.x) * size.x;
+    float y = (coords.y) * size.y;
+    retn.color = lerp(borderColorRight, borderColorBottom, smoothstep(-0.01, 0.01, x - y));
+    retn.size = lerp(borderBottom, borderRight, x < y);
+    return retn;      
 }
 
 // this will give great AA on rotated edges but for cases where the sides are vertical or horizontal 
@@ -245,34 +264,17 @@ inline fixed4 MeshBorderAA(fixed4 mainColor, float2 size, float distFromCenter) 
      
      return mainColor;
 }
-
-fixed4 SDFRectColor(SDFData sdfData, fixed4 color) {
-    float halfStrokeWidth = sdfData.strokeWidth * 0.5;
-    float minSize = min(sdfData.size.x, sdfData.size.y);
-    float2 halfShapeSize = (sdfData.size * 0.5) - halfStrokeWidth;
-    float radius = clamp(sdfData.size * sdfData.radius, 0, minSize);
-    float2 center = (sdfData.uv.xy - 0.5) * sdfData.size;   
-   
-    float fDist = RectSDF(center, halfShapeSize, radius - halfStrokeWidth);
-    float s = lerp(0, -1, radius / minSize);
-    float e = lerp(1, 0, radius / minSize);
-    float fBlendAmount = smoothstep(s, e, fDist);
-    
-    return lerp(color, fixed4(color.rgb, 0), fBlendAmount);
-}
+       
             
-            
-inline fixed4 ComputeColor(float4 packedColor, float2 texCoord, sampler2D _MainTexture) {
+inline fixed4 ComputeColor(float packedBg, float packedTint, int colorMode, float2 texCoord, sampler2D _MainTexture) {
 
-    uint colorMode = packedColor.b;
-    
     int useColor = (colorMode & PaintMode_Color) != 0;
     int useTexture = (colorMode & PaintMode_Texture) != 0;
     int tintTexture = (colorMode & PaintMode_TextureTint) != 0;
     int letterBoxTexture = (colorMode & PaintMode_LetterBoxTexture) != 0;
     
-    fixed4 bgColor = UnpackColor(asuint(packedColor.r));
-    fixed4 tintColor = UnpackColor(asuint(packedColor.g));
+    fixed4 bgColor = UnpackColor(asuint(packedBg));
+    fixed4 tintColor = UnpackColor(asuint(packedTint));
     fixed4 textureColor = tex2D(_MainTexture, texCoord);
 
     bgColor.rgb *= bgColor.a;
@@ -301,14 +303,11 @@ inline fixed4 GetTextColor(half d, fixed4 faceColor, fixed4 outlineColor, half o
 
     faceColor = lerp(faceColor, outlineColor, outlineAlpha);
 
-    faceColor.rgb *= faceAlpha;
+    faceColor *= faceAlpha;
 
     return faceColor;
 }
 
-inline float GetBorderSize(float2 texCoords, float4 borderSize) {
-    return borderSize.x;
-}
 
 fixed4 SDFColor(SDFData sdfData, fixed4 borderColor, fixed4 contentColor, float distFromCenter) {
     float halfStrokeWidth = sdfData.strokeWidth * 0.5;
@@ -324,6 +323,10 @@ fixed4 SDFColor(SDFData sdfData, fixed4 borderColor, fixed4 contentColor, float 
     
     borderColor = lerp(contentColor, borderColor, halfStrokeWidth != 0);
     
+    if(contentColor.a == 0) {
+        contentColor = fixed4(borderColor.rgb, 0);
+    }
+    
     if(shape1 >= 0) {
        contentColor = lerp(fixed4(contentColor.rgb, 0), fixed4(borderColor.rgb, 0), halfStrokeWidth > 0);
     }
@@ -333,26 +336,7 @@ fixed4 SDFColor(SDFData sdfData, fixed4 borderColor, fixed4 contentColor, float 
     // with a border -1, 1 looks the best, without use 0, 1
     fBlendAmount = smoothstep(lerp(-1, 0, halfStrokeWidth == 0), 1, retn);
        
-    if(distFromCenter <= halfStrokeWidth * 2 * borderSize) {  
-    
-        // this is for the clipped corner case
-        if(sdfData.radius == 0) {
-            return borderColor;
-        }
-        
-        if(distFromCenter < borderSize) {
-        
-            if((sdfData.uv.x > sdfData.radius * sdfData.uv.x < 1 - sdfData.radius)) {
-                return lerp(contentColor, borderColor, halfStrokeWidth != 0);
-            }
-              
-            if((sdfData.uv.y > sdfData.radius * sdfData.uv.y < 1 - sdfData.radius)) {
-                return lerp(contentColor, borderColor, halfStrokeWidth != 0);
-            }
-        }
-      
-    }
-      
+   
     return lerp(contentColor, borderColor, 1 - fBlendAmount); // do not pre-multiply alpha here!
     
     // using -1 to 1 gives slightly better aa but all edges have alpha which is bad when two shapes share an edge

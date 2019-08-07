@@ -48,6 +48,7 @@
         
         <Label forElement="'input1'">Some label</Label>
         <Input x-id="input1" value.read.write="rwValue" onKeyUp.late="Autocomplete($event)" placeholder="'Some value please'" />
+        <Input x-disabled="disabled" placeholder="'cannot focus the disabled one'" />
 
         <Label forElement="'input2'">Another label</Label>
         <Input x-id="input2" value.write="regularValue" />

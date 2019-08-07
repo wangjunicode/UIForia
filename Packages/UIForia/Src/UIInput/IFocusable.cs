@@ -16,7 +16,7 @@ namespace UIForia.UIInput {
 
     public interface IFocusable {
       
-        void Focus();
+        bool Focus();
         void Blur();
 
     }

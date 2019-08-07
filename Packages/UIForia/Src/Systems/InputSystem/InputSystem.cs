@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
-using UIForia.Rendering;
 using UIForia.Elements;
 using UIForia.Expressions;
+using UIForia.Rendering;
 using UIForia.Systems.Input;
 using UIForia.Templates;
 using UIForia.UIInput;
@@ -82,6 +82,10 @@ namespace UIForia.Systems {
         private LightList<KeyboardEventHandlerInvocation> lateHandlers = new LightList<KeyboardEventHandlerInvocation>();
         private LightList<UIEvent> lateTriggers = new LightList<UIEvent>();
 
+        private List<IFocusable> focusables;
+
+        private int focusableIndex;
+
         protected InputSystem(ILayoutSystem layoutSystem) {
             this.m_LayoutSystem = layoutSystem;
 
@@ -108,6 +112,7 @@ namespace UIForia.Systems {
             this.m_MouseEventCaptureList = new List<ValueTuple<MouseEventHandler, UIElement, ExpressionContext>>();
             this.m_DragEventCaptureList = new List<ValueTuple<DragEventHandler, UIElement, ExpressionContext>>();
             this.m_FocusedElement = null;
+            this.focusables = new List<IFocusable>();
         }
 
         public DragEvent CurrentDragEvent => m_CurrentDragEvent;
@@ -139,8 +144,35 @@ namespace UIForia.Systems {
             return (IFocusable) m_FocusedElement;
         }
 
+        public void RegisterFocusable(IFocusable focusable) {
+            focusables.Add(focusable);
+        }
+
+        public void UnRegisterFocusable(IFocusable focusable) {
+            focusables.Remove(focusable);
+        }
+
+        public void FocusNext() {
+            int initialIndex = focusableIndex;
+            do {
+                focusableIndex = focusableIndex + 1 == focusables.Count ? 0 : focusableIndex + 1;
+            } while (!(RequestFocus(focusables[focusableIndex]) || focusableIndex == initialIndex));
+        }
+
+        public void FocusPrevious() {
+            int initialIndex = focusableIndex;
+            do {
+                focusableIndex = focusableIndex == 0 ? focusables.Count - 1 : focusableIndex - 1;
+            } while (!(RequestFocus(focusables[focusableIndex]) || focusableIndex == initialIndex));
+        }
+
         public bool RequestFocus(IFocusable target) {
-            if (!(target is UIElement)) {
+            if (!(target is UIElement element && !element.isDisabled)) {
+                return false;
+            }
+
+            // try focus the element early to see if they accept being focused.
+            if (!target.Focus()) {
                 return false;
             }
 
@@ -157,9 +189,15 @@ namespace UIForia.Systems {
             }
 
             m_FocusedElement = (UIElement) target;
-            target.Focus();
             m_FocusedElement.style.EnterState(StyleState.Focused);
             onFocusChanged?.Invoke(target);
+            focusableIndex = -1;
+            for (int i = 0; i < focusables.Count; i++) {
+                if (focusables[i] == target) {
+                    focusableIndex = i;
+                    return true;
+                }
+            }
             return true;
         }
 
@@ -170,6 +208,7 @@ namespace UIForia.Systems {
                 focusable.Blur();
                 // todo -- if focus handlers added via template invoke them
                 m_FocusedElement = null;
+                focusableIndex = -1;
                 onFocusChanged?.Invoke(target);
             }
         }
@@ -223,6 +262,14 @@ namespace UIForia.Systems {
             for (int index = 0; index < lateTriggers.Count; index++) {
                 UIEvent uiEvent = lateTriggers[index];
                 uiEvent.origin.TriggerEvent(uiEvent);
+                if (uiEvent is TabNavigationEvent && uiEvent.IsPropagating()) {
+                    // If the TabNavigationEvent isn't handled we assume it's ok to tab to the next input element.
+                    if (uiEvent.keyboardInputEvent.shift) {
+                        FocusPrevious();
+                    } else {
+                        FocusNext();
+                    }
+                }
             }
 
             lateTriggers.Clear();

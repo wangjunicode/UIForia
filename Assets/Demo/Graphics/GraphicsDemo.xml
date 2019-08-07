@@ -42,22 +42,22 @@
             BackgroundColor = Red;
             BackgroundTint = rgba(255, 0, 0, 5);
             BorderTop = 20px;
-            BorderBottom = 10px;
+            BorderBottom = 0px;
             BorderRight = 20px;
             BorderLeft = 5px;
-           // BorderRadiusTopLeft = 150px;
-           // BorderRadiusBottomLeft = 150px;
-           // BorderRadiusBottomRight = 150px;
-           // BorderRadiusTopRight = 150px;
-            BackgroundFit = Contain;
+            MarginTop = 0.5px;
+            BorderRadiusTopLeft = 150px;
+            //BorderRadiusBottomLeft = 150px;
+            BorderRadiusBottomRight = 150px;
+            BorderRadiusTopRight = 150px;
+            // BackgroundFit = Contain;
             BackgroundColor = white;
-         
+            BorderColor = Blue;
             //CornerBevelTopLeft = 30px;
             //CornerBevelBottomRight = 50px;
         }
 
         style img2 {
-            MarginLeft = 10px;
             PreferredSize = 300px 200px;
             BackgroundImageOffsetX = 0;
             BackgroundImageOffsetY = 0;
@@ -91,7 +91,6 @@
     <Contents style="container">
         
 <!--        <ScrollView style="scroll">-->
-        <Text>So Crisp</Text>
 <!--        <Group style="particles"/>-->
         <Group style="img"/>
         <Group style="img2"/>

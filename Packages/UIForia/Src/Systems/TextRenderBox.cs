@@ -261,7 +261,7 @@ namespace UIForia.Rendering {
                 geometry.packedColors = new Vector4(mainColor, outlineColor, underlayColor, glowColor);
             }
 
-
+            
             Matrix4x4 matrix = element.layoutResult.matrix.ToMatrix4x4();
             // ctx.DrawBatchedGeometry(geometry, ranges.array[0], element.layoutResult.matrix.ToMatrix4x4());
             if (ranges.size == 1) {

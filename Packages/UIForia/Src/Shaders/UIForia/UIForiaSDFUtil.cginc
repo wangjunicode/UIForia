@@ -175,8 +175,8 @@ struct BorderData {
     float size;
     float radius;
 };
-
-BorderData GetBorderData(float2 coords, float2 size, float4 packedBorderColors, float2 packedBorderSizes, float packedRadii) {
+/*
+BorderData GetBorderDataOld(float2 coords, float2 size, float4 packedBorderColors, float2 packedBorderSizes, float packedRadii) {
     float left = step(coords.x, 0.5); // 1 if left
     float bottom = step(coords.y, 0.5); // 1 if bottom
     
@@ -209,12 +209,10 @@ BorderData GetBorderData(float2 coords, float2 size, float4 packedBorderColors, 
     half2 topLeftBorderSize = UnpackSize(packedBorderSizes.x);
     half2 bottomRightBorderSize = UnpackSize(packedBorderSizes.y);
     
-    #define borderTop topLeftBorderSize.y
-    #define borderLeft topLeftBorderSize.x
-    #define borderBottom bottomRightBorderSize.y
-    #define borderRight bottomRightBorderSize.x
-    
-    // todo -- border size when only on 1 edge eg top but not left. don't do the triangle cut out for that case
+//    #define borderTop topLeftBorderSize.y
+//    #define borderLeft topLeftBorderSize.x
+//    #define borderBottom bottomRightBorderSize.y
+//    #define borderRight bottomRightBorderSize.x
     
     if((top * left) != 0) {
         float x = coords.x * size.x;
@@ -227,6 +225,16 @@ BorderData GetBorderData(float2 coords, float2 size, float4 packedBorderColors, 
     if((top * right) != 0) {
         float x = (1 - coords.x) * size.x;
         float y = (1 - coords.y) * size.y;
+        
+        if(borderTop == 0) {
+            
+        }
+        else if(borderRight == 0) {
+            retn.color = lerp(borderColorRight, borderColorTop, smoothstep(-0.01, 0.01, x - y));
+            retn.size = lerp(borderTop, borderRight, x < y);
+            return retn;  
+        }
+        
         retn.color = lerp(borderColorRight, borderColorTop, smoothstep(-0.01, 0.01, x - y));
         retn.size = lerp(borderTop, borderRight, x < y);
         return retn;  
@@ -246,6 +254,127 @@ BorderData GetBorderData(float2 coords, float2 size, float4 packedBorderColors, 
     retn.color = lerp(borderColorRight, borderColorBottom, smoothstep(-0.01, 0.01, x - y));
     retn.size = lerp(borderBottom, borderRight, x < y);
     return retn;      
+}*/
+
+// This code works sort of for mixed border sizes, sucks for rounded corners and the blend line is bad but it does work
+ 
+float DistToLine(float2 pt1, float2 pt2, float2 testPt) {
+  float2 lineDir = pt2 - pt1;
+  float2 perpDir = float2(lineDir.y, -lineDir.x);
+  float2 dirToPt1 = pt1 - testPt;
+  return abs(dot(normalize(perpDir), dirToPt1));
+}
+
+BorderData GetBorderData(float2 coords, float2 size, float4 packedBorderColors, float2 packedBorderSizes, float packedRadii, fixed4 contentColor) {
+    float left = step(coords.x, 0.5); // 1 if left
+    float bottom = step(coords.y, 0.5); // 1 if bottom
+    
+    #define top (1 - bottom)
+    #define right (1 - left)  
+    
+    fixed4 borderColorTop = UnpackColor(asuint(packedBorderColors.x));
+    fixed4 borderColorRight = UnpackColor(asuint(packedBorderColors.y));
+    fixed4 borderColorBottom = UnpackColor(asuint(packedBorderColors.w));
+    fixed4 borderColorLeft = UnpackColor(asuint(packedBorderColors.z));
+
+    BorderData retn;
+
+    uint packedRadiiUInt = asuint(packedRadii);
+    
+    float4 radii = float4(
+        uint((packedRadiiUInt >>  0) & 0xff),
+        uint((packedRadiiUInt >>  8) & 0xff),
+        uint((packedRadiiUInt >> 16) & 0xff),
+        uint((packedRadiiUInt >> 24) & 0xff)
+    );
+        
+    float r = 0;
+    r += (top * left) * radii.x;
+    r += (top * right) * radii.y;
+    r += (bottom * left) * radii.z;
+    r += (bottom * right) * radii.w;
+    retn.radius = (r * 2) / 1000;
+    
+    half2 topLeftBorderSize = UnpackSize(packedBorderSizes.x);
+    half2 bottomRightBorderSize = UnpackSize(packedBorderSizes.y);
+    float dir = 1;
+    
+    // #define borderTop topLeftBorderSize.y
+    // #define borderLeft topLeftBorderSize.x
+    // #define borderBottom bottomRightBorderSize.y
+    // #define borderRight bottomRightBorderSize.x
+    
+    // todo -- border size when only on 1 edge eg top but not left. don't do the triangle cut out for that case
+    float borderTop = 20;
+    float borderRight = 10;
+    float borderBottom = 0;
+    float borderLeft = 10;
+    
+    float x = coords.x * size.x;
+    float y = (1 - coords.y) * size.y;
+    float2 p = float2(x, y);
+    float2 corner = float2(lerp(0, size.x, right), lerp(0, size.y, bottom));
+    
+    float2 inset = float2(lerp(borderLeft, size.x - borderRight, right), lerp(borderTop, size.y - borderBottom, bottom));
+    
+    if(left != 0) {
+        dir = -1;
+    }
+    
+    // equasion of a line, take the sign to determine if a point is above or below the line
+    float v = (inset.x - corner.x) * (y - corner.y) - (inset.y - corner.y) * (x - corner.x);
+    float d  = DistToLine(corner, inset, p);
+    
+    fixed sideOfLine = dir * sign(v);
+    
+    float verticalSize = lerp(borderTop, borderBottom, bottom);
+    float horizontalSize = lerp(borderRight, borderLeft, left);;
+    
+    float sizeAbove = borderTop;
+    float sizeBelow = horizontalSize; 
+    
+    fixed4 horizontal = lerp(borderColorRight, borderColorLeft, left);
+    fixed4 vertical = lerp(borderColorTop, borderColorBottom, bottom);
+    
+    fixed4 colorAbove = borderColorTop;
+    fixed4 colorBelow = horizontal;
+      
+    if(bottom) {
+        sizeAbove = sizeBelow;
+        sizeBelow = borderBottom;
+        colorAbove = colorBelow;
+        colorBelow = borderColorBottom;
+    }
+      
+    if(sideOfLine == 1) {
+        retn.color = colorAbove; 
+        retn.size = sizeAbove;
+    }
+    else {
+        retn.color = colorBelow;
+        retn.size = sizeBelow;
+        if(d < 1) {
+            retn.color = lerp(colorAbove, colorBelow, d);
+        }
+        
+    }
+       
+    float2 s = step(float2(borderLeft, size.y - borderBottom), p) - step(float2(size.x - borderRight, borderTop), p);
+    
+    float radialX = lerp(coords.x * size.x, (1 - coords.x) * size.x, right);
+    float radialY = lerp(coords.y * size.y, (1 - coords.y) * size.y, top);
+    
+    if(retn.radius > 0) {
+        retn.color = lerp(horizontal, vertical, smoothstep(-0.01, 0.01, radialX - radialY));;
+        retn.size = lerp(verticalSize, horizontalSize, radialX < radialY);
+    }
+    else if(s.x * s.y) {
+        retn.size = 0;
+    }
+    
+    retn.color.rgb *= retn.color.a;
+
+    return retn;     
 }
 
 // this will give great AA on rotated edges but for cases where the sides are vertical or horizontal 
@@ -335,8 +464,27 @@ fixed4 SDFColor(SDFData sdfData, fixed4 borderColor, fixed4 contentColor, float 
 
     // with a border -1, 1 looks the best, without use 0, 1
     fBlendAmount = smoothstep(lerp(-1, 0, halfStrokeWidth == 0), 1, retn);
-       
-   
+          
+    if(distFromCenter <= halfStrokeWidth * 2 * borderSize) {  
+    
+        // this is for the clipped corner case, not currently in use 
+        if(sdfData.radius == 0) {
+             return borderColor;
+        }
+        
+        if(radius > 0 && distFromCenter < borderSize) {
+        
+            if((sdfData.uv.x > sdfData.radius * sdfData.uv.x < 1 - sdfData.radius)) {
+                return lerp(contentColor, borderColor, halfStrokeWidth != 0);
+            }
+              
+            if((sdfData.uv.y > sdfData.radius * sdfData.uv.y < 1 - sdfData.radius)) {
+                return lerp(contentColor, borderColor, halfStrokeWidth != 0);
+            }
+        }
+      
+    }
+    
     return lerp(contentColor, borderColor, 1 - fBlendAmount); // do not pre-multiply alpha here!
     
     // using -1 to 1 gives slightly better aa but all edges have alpha which is bad when two shapes share an edge

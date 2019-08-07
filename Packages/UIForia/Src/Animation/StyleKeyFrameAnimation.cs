@@ -287,6 +287,10 @@ namespace UIForia.Animation {
                     }
 
                     case StylePropertyId.BorderColor:
+                    case StylePropertyId.BorderColorTop:
+                    case StylePropertyId.BorderColorRight:
+                    case StylePropertyId.BorderColorBottom:
+                    case StylePropertyId.BorderColorLeft:
                     case StylePropertyId.BackgroundColor:
                     case StylePropertyId.TextColor: {
 

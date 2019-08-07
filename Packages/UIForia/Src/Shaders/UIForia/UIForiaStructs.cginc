@@ -12,6 +12,7 @@ struct appdata {
 #define Blue fixed4(0, 0, 1, 1)
 #define White fixed4(1, 1, 1, 1)
 #define Black fixed4(0, 0, 0, 1)
+#define Yellow fixed4(1, 1, 0, 1)
 
 struct v2f {
     

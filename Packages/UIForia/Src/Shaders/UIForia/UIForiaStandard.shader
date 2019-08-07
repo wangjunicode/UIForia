@@ -170,9 +170,9 @@ Shader "UIForia/Standard"
                 
                 if(Frag_ShapeType != ShapeType_Text) {
                 
-                    BorderData borderData = GetBorderData(Frag_SDFCoords, Frag_SDFSize, Frag_BorderColors, Frag_BorderSize, Frag_SDFBorderRadii);
-                    
+                    BorderData borderData = GetBorderData(Frag_SDFCoords, Frag_SDFSize, Frag_BorderColors, Frag_BorderSize, Frag_SDFBorderRadii, mainColor);
                     SDFData sdfData;
+                    
                     sdfData.uv = Frag_SDFCoords;
                     sdfData.size = Frag_SDFSize;
                     sdfData.strokeWidth = borderData.size;

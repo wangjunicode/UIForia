@@ -245,7 +245,7 @@ namespace UIForia.Rendering {
 
             // todo -- border also 0
             if (backgroundColor.a <= 0 && backgroundImage == null) {
-              //  return;
+                return;
             }
 
             float packedBackgroundColor = VertigoUtil.ColorToFloat(backgroundColor);

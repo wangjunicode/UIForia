@@ -159,17 +159,11 @@ namespace UIForia.Elements {
         public event Action<T> onValueChanged;
 
         public override void OnCreate() {
+            base.OnCreate();
             deserializer = deserializer ?? (IInputDeserializer<T>) GetDeserializer();
             serializer = serializer ?? (IInputSerializer<T>) GetSerializer();
             formatter = formatter ?? GetFormatter();
-
-            text = text ?? string.Empty;
-            style.SetPainter("self", StyleState.Normal);
-            textInfo = new TextInfo(new TextSpan(text, style.GetTextStyle()));
-            textInfo.UpdateSpan(0, text);
-            textInfo.Layout();
         }
-
 
         [OnPropertyChanged(nameof(value))]
         protected void OnInputValueChanged(string name) {
@@ -237,7 +231,7 @@ namespace UIForia.Elements {
             }
         }
 
-        public bool ShowPlaceholder => placeholder != null && text.Length == 0;
+        public bool ShowPlaceholder => placeholder != null && string.IsNullOrEmpty(text);
 
         public override string GetDisplayName() {
             return $"InputElement<{typeof(T).Name}>";
@@ -331,6 +325,7 @@ namespace UIForia.Elements {
             textInfo = new TextInfo(new TextSpan(text, style.GetTextStyle()));
             textInfo.UpdateSpan(0, text);
             textInfo.Layout();
+            Application.InputSystem.RegisterFocusable(this);
         }
 
         public override void OnEnable() {
@@ -350,6 +345,7 @@ namespace UIForia.Elements {
 
         public override void OnDestroy() {
             Blur();
+            Application.InputSystem.UnRegisterFocusable(this);
         }
 
         public override void OnDisable() {
@@ -710,12 +706,13 @@ namespace UIForia.Elements {
             get { return layoutResult.ContentRect; }
         }
 
-        public void Focus() {
+        public bool Focus() {
             if (GetAttribute("disabled") != null) {
-                return;
+                return false;
             }
 
             hasFocus = true;
+            return true;
         }
 
         public void Blur() {

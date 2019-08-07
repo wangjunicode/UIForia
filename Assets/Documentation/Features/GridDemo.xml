@@ -4,6 +4,7 @@
     <Using namespace="UnityEngine"/>
 
     <Contents>
+        
 
         <!-- Creates a grid with a fixed amount of columns. More columns will align horizontally and break vertically -->
         <Group style="grid0 grid-horizontal col3layout">
@@ -42,7 +43,7 @@
                 <Text>I grow to fit.</Text>
                 <Text>My preferredWidth is {$parent.style.PreferredWidth.value}</Text>
                 <Text>My actual width is {$parent.layoutResult.actualSize.width}</Text>
-            </Div>
+            </Div> 
 
             <Div style="cell cell-end">
                 I align at the end
@@ -52,7 +53,7 @@
             <Div style="cell m10 size100 cell-center">I am centered</Div>
             <Div style="cell m10 cell-fit">I will grow or shrink to fit</Div>
             <Div style="cell  cell-start">
-                I align at the start
+                I align at the startttt
             </Div>
         </Group>
 
@@ -66,13 +67,13 @@
             <Div style="cell m10">Col5 Row 2</Div>
         </Group>
 
-        <Group style="grid-horizontal col3layout mb50 oddPadding ">
+        <Group style="grid-horizontal col3layout mb50 oddPadding">
             <Div style="cell m10">Col1</Div>
             <Div style="cell m10">Col2</Div>
             <Div style="cell m10">Col3</Div>
 
             <Div style="cell m10">Col4 Row 2</Div>
-            <Div style="cell m10">Col5 Row 2</Div>
+            <Div style="cell m10">Col5 Row 222222</Div>
         </Group>
 
         <Group style="grid-vertical row3layout mb50 oddPadding">

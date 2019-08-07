@@ -26,10 +26,11 @@
                 <Anchor href="'/RenderSystemShowcase'">Render System</Anchor>
                 <Anchor href="'/Window'">Window System</Anchor>
                 <Anchor href="'/Checkbox'">Checkbox</Anchor>
+                <Anchor href="'/Test'">Test</Anchor>
 
             </Div>
 
-            <ScrollView style="demo-panel" x-router="demo" x-defaultRoute="/index">
+            <ScrollView style="demo-panel" x-router="demo" x-defaultRoute="/Test">
 
                 <Group x-route="/index">
                     <Heading1>UIForia Documentation</Heading1>
@@ -55,7 +56,9 @@
                 <RenderSystemShowcase x-route="/RenderSystemShowcase"/>
                 <WindowDemo x-route="/Window"/>
                 <CheckboxDemo x-route="/Checkbox"/>
-                
+                <Test x-route="/Test"/>
+
+
             </ScrollView>
 
         </Group>

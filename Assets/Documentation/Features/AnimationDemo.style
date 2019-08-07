@@ -6,7 +6,7 @@ style container {
 }
 
 style one-container {
-    TransformPivot = 0.5 0.5;
+   TransformPivot = 0.5 0.5;
 }
 
 style circle {

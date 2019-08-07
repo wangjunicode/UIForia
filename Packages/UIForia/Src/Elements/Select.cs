@@ -149,7 +149,9 @@ namespace UIForia.Elements {
             resolvers.Add(new SelectOptionAliasResolver<T>("$option__internal", true));
         }
 
-        public void Focus() { }
+        public bool Focus() {
+            return GetAttribute("disabled") == null;
+        }
 
         public void Blur() {
             selecting = false;

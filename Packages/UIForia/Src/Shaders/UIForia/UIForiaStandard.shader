@@ -107,7 +107,7 @@ Shader "UIForia/Standard"
                 o.texCoord4 = float4(lerp(0, 1, v.texCoord0.x == 0.5 && v.texCoord0.y == 0.5), 0, 0, 0);
                 
                 if(shapeType != ShapeType_Text) {
-                    // o.vertex = SDFPixelSnap(o.vertex); // pixel snap is bad for text rendering
+                     //o.vertex = SDFPixelSnap(o.vertex); // pixel snap is bad for text rendering
                     o.texCoord1 = float4(size.x, size.y, Vert_BorderRadii, 0);
                     o.texCoord2 = float4(shapeType, colorMode, 0, 0);
                     o.texCoord3 = _MiscData[objectIndex];
@@ -167,7 +167,6 @@ Shader "UIForia/Standard"
             
                 fixed4 mainColor = ComputeColor(i.color.r, i.color.g, Frag_ColorMode, i.texCoord0.xy, _MainTexture);
                 
-                
                 if(Frag_ShapeType != ShapeType_Text) {
                 
                     BorderData borderData = GetBorderData(Frag_SDFCoords, Frag_SDFSize, Frag_BorderColors, Frag_BorderSize, Frag_SDFBorderRadii, mainColor);
@@ -179,7 +178,7 @@ Shader "UIForia/Standard"
                     sdfData.radius = borderData.radius;
                     
                      mainColor = SDFColor(sdfData, borderData.color, mainColor, i.texCoord4.x);
-                     // mainColor = MeshBorderAA(mainColor, Frag_SDFSize, i.texCoord4.x);
+                     //mainColor = MeshBorderAA(mainColor, Frag_SDFSize, i.texCoord4.x);
                      mainColor.rgb *=  mainColor.a;
                      
                      return mainColor;

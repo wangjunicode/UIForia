@@ -258,10 +258,10 @@ BorderData GetBorderDataOld(float2 coords, float2 size, float4 packedBorderColor
 
 // This code works sort of for mixed border sizes, sucks for rounded corners and the blend line is bad but it does work
  
-float DistToLine(float2 pt1, float2 pt2, float2 testPt) {
-  float2 lineDir = pt2 - pt1;
-  float2 perpDir = float2(lineDir.y, -lineDir.x);
-  float2 dirToPt1 = pt1 - testPt;
+inline half DistToLine(half2 pt1, half2 pt2, half2 testPt) {
+  half2 lineDir = pt2 - pt1;
+  half2 perpDir = half2(lineDir.y, -lineDir.x);
+  half2 dirToPt1 = pt1 - testPt;
   return abs(dot(normalize(perpDir), dirToPt1));
 }
 
@@ -274,64 +274,59 @@ BorderData GetBorderData(float2 coords, float2 size, float4 packedBorderColors, 
     
     fixed4 borderColorTop = UnpackColor(asuint(packedBorderColors.x));
     fixed4 borderColorRight = UnpackColor(asuint(packedBorderColors.y));
-    fixed4 borderColorBottom = UnpackColor(asuint(packedBorderColors.w));
-    fixed4 borderColorLeft = UnpackColor(asuint(packedBorderColors.z));
+    fixed4 borderColorBottom = UnpackColor(asuint(packedBorderColors.z));
+    fixed4 borderColorLeft = UnpackColor(asuint(packedBorderColors.w));
 
     BorderData retn;
 
     uint packedRadiiUInt = asuint(packedRadii);
     
-    float4 radii = float4(
+    fixed4 radii = fixed4(
         uint((packedRadiiUInt >>  0) & 0xff),
         uint((packedRadiiUInt >>  8) & 0xff),
         uint((packedRadiiUInt >> 16) & 0xff),
         uint((packedRadiiUInt >> 24) & 0xff)
     );
         
-    float r = 0;
+    fixed r = 0;
     r += (top * left) * radii.x;
     r += (top * right) * radii.y;
     r += (bottom * left) * radii.z;
     r += (bottom * right) * radii.w;
-    retn.radius = (r * 2) / 1000;
+    retn.radius = (r * 2) / 1000; // radius comes in as a byte representing 0 to 50 of our width, remap 0 - 250 to 0 - 0.5
     
     half2 topLeftBorderSize = UnpackSize(packedBorderSizes.x);
     half2 bottomRightBorderSize = UnpackSize(packedBorderSizes.y);
-    float dir = 1;
     
-    // #define borderTop topLeftBorderSize.y
-    // #define borderLeft topLeftBorderSize.x
-    // #define borderBottom bottomRightBorderSize.y
-    // #define borderRight bottomRightBorderSize.x
+    #define borderTop topLeftBorderSize.y
+    #define borderLeft topLeftBorderSize.x
+    #define borderBottom bottomRightBorderSize.y
+    #define borderRight bottomRightBorderSize.x
     
-    // todo -- border size when only on 1 edge eg top but not left. don't do the triangle cut out for that case
-    float borderTop = 20;
-    float borderRight = 10;
-    float borderBottom = 0;
-    float borderLeft = 10;
+    half x = coords.x * size.x;
+    half y = (1 - coords.y) * size.y;
+    half2 p = half2(x, y);
     
-    float x = coords.x * size.x;
-    float y = (1 - coords.y) * size.y;
-    float2 p = float2(x, y);
-    float2 corner = float2(lerp(0, size.x, right), lerp(0, size.y, bottom));
-    
-    float2 inset = float2(lerp(borderLeft, size.x - borderRight, right), lerp(borderTop, size.y - borderBottom, bottom));
-    
+    // find the corner nearest this pixel and compute an inset point from that corner 
+    half2 corner = half2(lerp(0, size.x, right), lerp(0, size.y, bottom));
+    half2 inset = half2(lerp(borderLeft, size.x - borderRight, right), lerp(borderTop, size.y - borderBottom, bottom));
+    half dir = 1;
+
     if(left != 0) {
         dir = -1;
     }
     
     // equasion of a line, take the sign to determine if a point is above or below the line
-    float v = (inset.x - corner.x) * (y - corner.y) - (inset.y - corner.y) * (x - corner.x);
-    float d  = DistToLine(corner, inset, p);
+    half v = (inset.x - corner.x) * (y - corner.y) - (inset.y - corner.y) * (x - corner.x);
+    half d  = DistToLine(corner, inset, p);
     
     fixed sideOfLine = dir * sign(v);
     
-    float verticalSize = lerp(borderTop, borderBottom, bottom);
-    float horizontalSize = lerp(borderRight, borderLeft, left);;
+    half verticalSize = lerp(borderTop, borderBottom, bottom);
+    half horizontalSize = lerp(borderRight, borderLeft, left);;
     
-    float sizeAbove = borderTop;
-    float sizeBelow = horizontalSize; 
+    half sizeAbove = borderTop;
+    half sizeBelow = horizontalSize; 
     
     fixed4 horizontal = lerp(borderColorRight, borderColorLeft, left);
     fixed4 vertical = lerp(borderColorTop, borderColorBottom, bottom);
@@ -353,10 +348,9 @@ BorderData GetBorderData(float2 coords, float2 size, float4 packedBorderColors, 
     else {
         retn.color = colorBelow;
         retn.size = sizeBelow;
-        if(d < 1) {
+        if(d < 1 && !(corner.x - inset.x == 0 || corner.y - inset.y == 0)) {
             retn.color = lerp(colorAbove, colorBelow, d);
         }
-        
     }
        
     float2 s = step(float2(borderLeft, size.y - borderBottom), p) - step(float2(size.x - borderRight, borderTop), p);
@@ -365,15 +359,13 @@ BorderData GetBorderData(float2 coords, float2 size, float4 packedBorderColors, 
     float radialY = lerp(coords.y * size.y, (1 - coords.y) * size.y, top);
     
     if(retn.radius > 0) {
-        retn.color = lerp(horizontal, vertical, smoothstep(-0.01, 0.01, radialX - radialY));;
-        retn.size = lerp(verticalSize, horizontalSize, radialX < radialY);
+        retn.color = lerp(horizontal, vertical, smoothstep(-0.01, 0.01, radialX - radialY));
+        retn.size = lerp(verticalSize, horizontalSize, radialX < radialY); // - 0.5;
     }
     else if(s.x * s.y) {
         retn.size = 0;
     }
-    
-    retn.color.rgb *= retn.color.a;
-
+    retn.color.rgb * retn.color.a;
     return retn;     
 }
 
@@ -411,7 +403,6 @@ inline fixed4 ComputeColor(float packedBg, float packedTint, int colorMode, floa
     textureColor.rgb *= textureColor.a;
     
     textureColor = lerp(textureColor, textureColor + tintColor, tintTexture);
-    
     if (useTexture && letterBoxTexture && (texCoord.x < 0 || texCoord.x > 1) || (texCoord.y < 0 || texCoord.y > 1)) {
         return bgColor; // could return a letterbox color instead
     }
@@ -442,10 +433,11 @@ fixed4 SDFColor(SDFData sdfData, fixed4 borderColor, fixed4 contentColor, float 
     float halfStrokeWidth = sdfData.strokeWidth * 0.5;
     float2 size = sdfData.size;
     float minSize = min(size.x, size.y);
+   
     float radius = clamp(minSize * sdfData.radius, 0, minSize);
-  
-    float2 center = ((sdfData.uv.xy - 0.5) * size); 
-    float fBlendAmount = 0;
+    // upscale size by that factor, the size passed in is the layout box size, not the geometry size which is why this works
+    float2 center = ((sdfData.uv.xy - 0.5) * (size ));
+    // need to give padding to these sdf things or they may get cut off in an ugly way
     
     float shape1 = RectSDF(center, (size * 0.5) - halfStrokeWidth, radius - halfStrokeWidth);
     float retn = abs(shape1) - halfStrokeWidth;
@@ -456,35 +448,33 @@ fixed4 SDFColor(SDFData sdfData, fixed4 borderColor, fixed4 contentColor, float 
         contentColor = fixed4(borderColor.rgb, 0);
     }
     
-    if(shape1 >= 0) {
+    if(shape1 > 0) {
        contentColor = lerp(fixed4(contentColor.rgb, 0), fixed4(borderColor.rgb, 0), halfStrokeWidth > 0);
     }
     
-    float borderSize = (1 / minSize) *  1.4;
+    // this is 1 pixel of border size
+    //float borderSize = (1 / minSize) * 1.4;
 
     // with a border -1, 1 looks the best, without use 0, 1
-    fBlendAmount = smoothstep(lerp(-1, 0, halfStrokeWidth == 0), 1, retn);
           
-    if(distFromCenter <= halfStrokeWidth * 2 * borderSize) {  
+    // below seems no longer needed but keeping just in case          
+   // if(distFromCenter < halfStrokeWidth * 2 * borderSize) {  
     
         // this is for the clipped corner case, not currently in use 
-        if(sdfData.radius == 0) {
-             return borderColor;
-        }
+      //  if(sdfData.radius == 0) {
+      //      return borderColor;
+      //  }
         
-        if(radius > 0 && distFromCenter < borderSize) {
-        
-            if((sdfData.uv.x > sdfData.radius * sdfData.uv.x < 1 - sdfData.radius)) {
-                return lerp(contentColor, borderColor, halfStrokeWidth != 0);
-            }
-              
-            if((sdfData.uv.y > sdfData.radius * sdfData.uv.y < 1 - sdfData.radius)) {
-                return lerp(contentColor, borderColor, halfStrokeWidth != 0);
-            }
-        }
+        //if(sdfData.radius > 0 && distFromCenter < borderSize) {
+            // todo -- ask micha how to optimize this
+          //  if((sdfData.uv.x > sdfData.radius * sdfData.uv.x < 1 - sdfData.radius) || (sdfData.uv.y > sdfData.radius * sdfData.uv.y < 1 - sdfData.radius)) {
+                // return lerp(contentColor, borderColor, halfStrokeWidth != 0);
+           // }
+      //  }
       
-    }
+  //  }
     
+    float fBlendAmount = smoothstep(lerp(-1, 0, halfStrokeWidth == 0), 1, retn);
     return lerp(contentColor, borderColor, 1 - fBlendAmount); // do not pre-multiply alpha here!
     
     // using -1 to 1 gives slightly better aa but all edges have alpha which is bad when two shapes share an edge

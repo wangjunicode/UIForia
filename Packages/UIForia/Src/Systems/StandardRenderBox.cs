@@ -151,7 +151,9 @@ namespace UIForia.Rendering {
                     bottomLeftX = bevelBottomLeft,
                     bottomLeftY = bevelBottomLeft,
                 });
-                
+                for (int i = 0; i < geometry.positionList.size; i++) {
+                    geometry.positionList.array[i].y -= 1f;
+                }
             }
             else {
                 geometry.FillRectUniformBorder_Miter(width, size.height);
@@ -167,7 +169,6 @@ namespace UIForia.Rendering {
                 float bgScaleX = element.style.BackgroundImageScaleX.value;
                 float bgScaleY = element.style.BackgroundImageScaleY.value;
                 float bgRotation = element.style.BackgroundImageRotation.value;
-
 
                 float sinX = Mathf.Sin(bgRotation * Mathf.Deg2Rad);
                 float cosX = Mathf.Cos(bgRotation * Mathf.Deg2Rad);

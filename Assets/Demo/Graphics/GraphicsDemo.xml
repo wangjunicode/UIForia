@@ -21,7 +21,7 @@
         
         style container {
             PreferredSize = 800px 600px;
-            FlexLayoutDirection = Row;
+            FlexLayoutDirection = Column;
             //run animation(rot);
             TransformRotation = 0;
             TextFontSize = 136;
@@ -32,29 +32,25 @@
         }
         
         style img {
-            PreferredSize = 300px 200px;
+            PreferredSize = 100px 100px;
             BackgroundImageOffsetX = 0;
             BackgroundImageOffsetY = 0;
             BackgroundImageScaleX = 1;
             BackgroundImageScaleY = 1;
             BackgroundImageRotation = 0;
             BackgroundImage = url(image);
-            BackgroundColor = Red;
-            BackgroundTint = rgba(255, 0, 0, 5);
-            BorderTop = 20px;
-            BorderBottom = 0px;
-            BorderRight = 20px;
-            BorderLeft = 5px;
-            MarginTop = 0.5px;
-            BorderRadiusTopLeft = 150px;
-            //BorderRadiusBottomLeft = 150px;
-            BorderRadiusBottomRight = 150px;
-            BorderRadiusTopRight = 150px;
-            // BackgroundFit = Contain;
-            BackgroundColor = white;
-            BorderColor = Blue;
-            //CornerBevelTopLeft = 30px;
-            //CornerBevelBottomRight = 50px;
+         //   BackgroundTint = rgba(255, 0, 0, 15);
+     
+            BorderRadiusTopLeft = 50%;
+            BorderRadiusBottomLeft =  50%;
+            BorderRadiusBottomRight =  50%;
+            BorderRadiusTopRight =  50%;
+            BackgroundColor = Black;
+            BorderColorTop = rgba(255, 255, 255, 128);
+            BorderColorRight = Red;
+            BorderColorLeft = Blue;
+            BorderColorBottom = Green;  
+     
         }
 
         style img2 {
@@ -66,13 +62,13 @@
             BackgroundImageRotation = 0;
             BackgroundImage = url(image);
             BackgroundColor = Red;
-            Border = 0px;
+            Border = 20px;
             BackgroundFit = Fill;
             BorderRadiusBottomRight = 150px;
             BorderColorTop = Yellow;
             BorderColorRight = Green;
             BorderColorLeft = Blue;
-            BorderColorBottom = White;
+            BorderColorBottom = Red;
         }
 
         style scroll {
@@ -83,7 +79,8 @@
             PreferredSize = 300px;
             BackgroundColor = rgb(100, 40, 80);
             CornerBevelTopLeft = 30px;
-            CornerBevelBottomRight = 50px;
+            //CornerBevelBottomRight = 50px;
+            //MarginLeft = 9.5px;
         }
         
     </Style>
@@ -92,6 +89,7 @@
         
 <!--        <ScrollView style="scroll">-->
 <!--        <Group style="particles"/>-->
+        <Group style="img"/>
         <Group style="img"/>
         <Group style="img2"/>
         <Group style="square"/>

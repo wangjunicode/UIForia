@@ -335,8 +335,13 @@ namespace UIForia.Compilers {
             Expression expression = compiler.Compile(rootType, attrValue, eventInfo.EventHandlerType);
             
             // todo -- this only works for the root type, if we have $item.xxx it will not work yet
-            
-            ReflectionUtil.LinqAccessor accessor = ReflectionUtil.GetLinqFieldAccessors(elementType, eventInfo.EventHandlerType, attrKey);
+            ReflectionUtil.LinqAccessor accessor;
+            try {
+                accessor = ReflectionUtil.GetLinqFieldAccessors(elementType, eventInfo.EventHandlerType, attrKey);
+            }
+            catch {
+                accessor = ReflectionUtil.GetLinqPropertyAccessors(elementType, eventInfo.EventHandlerType, attrKey);
+            }
 
             ReflectionUtil.ObjectArray3[0] = eventInfo;
             ReflectionUtil.ObjectArray3[1] = expression;

@@ -169,6 +169,7 @@ namespace UIForia.Rendering {
         public Visibility AsVisibility => (Visibility) valuePart0;
         public CursorStyle AsCursorStyle => (CursorStyle) objectField;
         public string AsString => (string) objectField;
+
         public ShadowType AsShadowType => (ShadowType) valuePart0;
         
         public static bool operator ==(StyleProperty a, StyleProperty b) {

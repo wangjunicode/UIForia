@@ -280,13 +280,14 @@ namespace UIForia.Elements {
     }
 
 
-    public abstract class UIInputElement : UIElement, IFocusable, ISVGXPaintable, IStylePropertiesDidChangeHandler {
+    public abstract class UIInputElement : UIElement, IFocusableEvented, ISVGXPaintable, IStylePropertiesDidChangeHandler {
 
         internal TextInfo textInfo;
         internal string text;
         
         public string placeholder;
-
+        public event Action<FocusEvent> onFocus;
+        public event Action<BlurEvent> onBlur;
         public bool autofocus;
 
         protected float holdDebounce = 0.05f;
@@ -712,11 +713,13 @@ namespace UIForia.Elements {
             }
 
             hasFocus = true;
+            onFocus?.Invoke(new FocusEvent());
             return true;
         }
 
         public void Blur() {
             hasFocus = false;
+            onBlur?.Invoke(new BlurEvent());
         }
 
         public void OnStylePropertiesDidChange() {
@@ -749,6 +752,8 @@ namespace UIForia.Elements {
         public void Paint(VertigoContext ctx, in Matrix4x4 matrix) {
             throw new NotImplementedException();
         }
+
+
 
     }
 

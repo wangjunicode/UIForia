@@ -4,7 +4,7 @@
     <Contents style="root-container">
         <Group style="main-container">
 
-            <Div style="navigation">
+            <ScrollView style="navigation">
 
                 <Heading1>Choose a feature</Heading1>
                 <Anchor href="'/index'">Home</Anchor>
@@ -22,15 +22,16 @@
                 <Anchor href="'/TransclusionDemo'">Transclusion</Anchor>
                 <Anchor href="'/TransformPlayground'">Transform Playground</Anchor>
                 <Anchor href="'/SelectDemo'">Select / DropDown</Anchor>
+                <Anchor href="'/StylePropertiesDemo'">Style Properties</Anchor>
                 <Anchor href="'/RepeatExample'">Repeat Example</Anchor>
                 <Anchor href="'/RenderSystemShowcase'">Render System</Anchor>
                 <Anchor href="'/Window'">Window System</Anchor>
                 <Anchor href="'/Checkbox'">Checkbox</Anchor>
                 <Anchor href="'/Test'">Test</Anchor>
 
-            </Div>
+            </ScrollView>
 
-            <ScrollView style="demo-panel" x-router="demo" x-defaultRoute="/Test">
+            <ScrollView style="demo-panel" x-router="demo" x-defaultRoute="/index">
 
                 <Group x-route="/index">
                     <Heading1>UIForia Documentation</Heading1>
@@ -54,11 +55,11 @@
                 <TransformPlayground x-route="/TransformPlayground"/>
                 <RepeatExample x-route="/RepeatExample"/>
                 <RenderSystemShowcase x-route="/RenderSystemShowcase"/>
+                <StylePropertiesDemo x-route="/StylePropertiesDemo"/>
                 <WindowDemo x-route="/Window"/>
                 <CheckboxDemo x-route="/Checkbox"/>
                 <Test x-route="/Test"/>
-
-
+                
             </ScrollView>
 
         </Group>

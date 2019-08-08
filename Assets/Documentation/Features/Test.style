@@ -5,6 +5,7 @@ style container {
     FlexLayoutCrossAxisAlignment = Center;
     PreferredSize = 1pca;
     Padding = 1em;
+    BackgroundImage = url("images/bg");
 }
 
 style top {

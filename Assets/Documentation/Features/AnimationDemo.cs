@@ -4,7 +4,7 @@ using UIForia.Elements;
 using UIForia.Rendering;
 using UnityEngine;
 
-namespace Demo {
+namespace Documentation.Features {
 
     [Template("Documentation/Features/AnimationDemo.xml")]
     public class AnimationDemo : UIElement {

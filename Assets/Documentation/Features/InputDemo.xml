@@ -51,7 +51,7 @@
         <Input x-disabled="disabled" placeholder="'cannot focus the disabled one'" />
 
         <Label forElement="'input2'">Another label</Label>
-        <Input x-id="input2" onFocus="FocusedMe" value.write="regularValue" />
+        <Input x-id="input2" value.write="regularValue" />
 
         <Label>Float value Input, value is {floatValue}. Also demonstrates the MaxLength property.</Label>
         

@@ -1992,6 +1992,7 @@ namespace UIForia.Rendering {
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.Visibility, out property)) return property.AsVisibility;
+                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.Visibility), out property)) return property.AsVisibility;
                     return DefaultStyleValues_Generated.Visibility;
                 }
             }
@@ -4204,6 +4205,7 @@ namespace UIForia.Rendering {
             switch (propertyId) {
 
                     case StylePropertyId.Opacity: return true;
+                    case StylePropertyId.Visibility: return true;
                     case StylePropertyId.TextColor: return true;
                     case StylePropertyId.TextFontAsset: return true;
                     case StylePropertyId.TextFontSize: return true;

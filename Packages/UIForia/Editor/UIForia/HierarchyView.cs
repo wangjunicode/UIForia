@@ -165,7 +165,7 @@ public class HierarchyView : TreeView {
 
         List<string> names = ListPool<string>.Get();
 
-        item.element.style.GetStyleNames(names);
+        item.element.style.GetStyleNameList(names);
         string styleName = string.Empty;
 
         for (int i = 0; i < names.Count; i++) {

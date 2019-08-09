@@ -15,7 +15,8 @@ namespace Documentation.Features {
 
     [Template("Documentation/Features/BindingsDemo.xml")]
     public class BindingsDemo : UIElement {
-        public static string simpleBinding;
+        
+        public string simpleBinding;
         
         public RepeatableList<int> numbers = new RepeatableList<int>() {1, 2, 3, 4, 5, 6, 7};
 

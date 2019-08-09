@@ -79,10 +79,10 @@ namespace UIForia.Text {
 
                 ptr.nextSibling = child;
             }
+
             child.textInfo = textInfo;
             child.parent = this;
-            textInfo.requiresSpanListRebuild = true;
-            textInfo.SpanRequiresLayout(this);
+            textInfo.RebuildSpans();
             if (inheritStyleProperties) {
                 child.inheritedStyle = Merge(inheritedStyle);
             }
@@ -93,12 +93,11 @@ namespace UIForia.Text {
             if (child.parent == this) return;
 
             if (child.textInfo != null) return;
-            
+
             if (firstChild == null) {
                 firstChild = child;
             }
             else {
-
                 if (index == 0) {
                     child.nextSibling = firstChild;
                     firstChild = child;
@@ -106,7 +105,7 @@ namespace UIForia.Text {
                 else {
                     TextSpan ptr = firstChild;
                     TextSpan trail = null;
-                    
+
                     for (int i = 0; i < index; i++) {
                         trail = ptr;
                         ptr = ptr.nextSibling;
@@ -116,18 +115,15 @@ namespace UIForia.Text {
                         }
                     }
                 }
-             
             }
 
             child.textInfo = textInfo;
             child.parent = this;
-            textInfo.requiresSpanListRebuild = true;
-            textInfo.SpanRequiresLayout(this);
-            
+            textInfo.RebuildSpans();
+
             if (inheritStyleProperties) {
                 child.inheritedStyle = Merge(inheritedStyle);
             }
-
         }
 
         public void RemoveChild(TextSpan child) {
@@ -151,17 +147,14 @@ namespace UIForia.Text {
                     trail.nextSibling = child.nextSibling;
                     child.nextSibling = null;
                 }
-                
             }
-            
+
             child.textInfo = null;
             child.parent = null;
-            textInfo.SpanRequiresLayout(this);
-            textInfo.requiresSpanListRebuild = true;
-            
+            textInfo.RebuildSpans();
         }
 
-        
+
         // todo -- handle this later
 //            for (int i = 0; i < characters.Length; i++) {
 //                if (characters[i] == '&') {
@@ -178,17 +171,17 @@ namespace UIForia.Text {
 
         // todo -- support this, need an Append buffer method, need to merge old words, can save on layout, etch
         public void AppendText(string text) { }
-        
+
         // todo -- support this, need an Append buffer method, need to merge old words, can save on layout, etch
         public void AppendText(char[] text) { }
 
         public void SetText(IList<string> content) {
             int size = 0;
-            
+
             for (int i = 0; i < content.Count; i++) {
                 size += content[i].Length;
             }
-            
+
             if (rawContent == null) {
                 rawContent = new char[size];
             }
@@ -205,18 +198,17 @@ namespace UIForia.Text {
             }
 
             rawContentSize = size;
-            
+
             UpdateBuffers();
-            
         }
 
         public void SetText(IList<char[]> content) {
             int size = 0;
-            
+
             for (int i = 0; i < content.Count; i++) {
                 size += content[i].Length;
             }
-            
+
             if (rawContent == null) {
                 rawContent = new char[size];
             }
@@ -233,11 +225,16 @@ namespace UIForia.Text {
             }
 
             rawContentSize = size;
-            
+
             UpdateBuffers();
         }
 
         public void SetText(string text) {
+            
+            if (text == null) {
+                text = string.Empty;
+            }
+            
             if (rawContent == null) {
                 rawContent = new char[text.Length];
             }
@@ -246,10 +243,10 @@ namespace UIForia.Text {
             }
 
             SetRawContentFromString(text);
-            
+
             UpdateBuffers();
         }
-                
+
         public void SetText(char[] characters) {
             if (rawContent == null) {
                 rawContent = new char[characters.Length];
@@ -264,7 +261,7 @@ namespace UIForia.Text {
 
             UpdateBuffers();
         }
-        
+
         private void UpdateBuffers() {
             int bufferSize = TextUtil.ProcessWhitespace(whitespaceMode, ref processedContent, rawContent, rawContentSize);
 
@@ -283,6 +280,7 @@ namespace UIForia.Text {
             charInfoList.size = bufferSize;
 
             for (int i = 0; i < bufferSize; i++) {
+                charInfos[i].visible = false;// technically safer to set to default but this faster
                 charInfos[i].character = processedContent[i];
             }
 
@@ -293,13 +291,14 @@ namespace UIForia.Text {
             FindKerningInfo(fontAsset, charInfos, bufferSize); // affected by text transform, content, font
 
             ComputeWordAndCharacterSizes(charInfoList, wordInfoList); // affected by font size, font
-        }
 
+            textInfo.RebuildSpans();
+        }
 
         public void SetStyle(in SVGXTextStyle textStyle) {
             this.textStyle = textStyle;
-            textInfo.requiresSpanListRebuild = true;
             rebuildFlags = RebuildFlag.All;
+            textInfo.RebuildSpans();
             // todo -- inherit!
         }
 
@@ -472,12 +471,12 @@ namespace UIForia.Text {
 
             float fontBaseLineOffset = currentFontAsset.faceInfo.Baseline * fontScale * fontScaleMultiplier * currentFontAsset.faceInfo.Scale;
 
-           // fontBaseLineOffset = 0; //+= currentFontAsset.faceInfo.SuperscriptOffset * fontScale * fontScaleMultiplier;
+            // fontBaseLineOffset = 0; //+= currentFontAsset.faceInfo.SuperscriptOffset * fontScale * fontScaleMultiplier;
 
             // I am not sure if using a standard line height for words is correct. TMP does not use the font info, it uses max char ascender & descender for a line
             // seems to me that this would produce weird results with multiline text
             float lineHeight = (fontAsset.faceInfo.Ascender - fontAsset.faceInfo.Descender) * fontScale;
-            
+
             CharInfo2[] characters = characterList.array;
             WordInfo2[] words = wordInfoList.array;
             int wordCount = wordInfoList.size;
@@ -487,7 +486,7 @@ namespace UIForia.Text {
                 int start = group.charStart;
                 int end = group.charEnd;
                 float xAdvance = 0;
-                
+
                 for (int c = start; c < end; c++) {
                     Vector2 topLeft;
                     Vector2 bottomRight;
@@ -523,13 +522,12 @@ namespace UIForia.Text {
                     charInfo.topLeftUV = topLeftUV;
                     charInfo.bottomRightUV = bottomRightUV;
                     charInfo.scale = currentElementScale;
-
+                
                     // maybe just store x advance per character since we need a word pass on xadvance any
                     xAdvance += (glyph.xAdvance
                                  * boldAdvanceMultiplier
                                  + currentFontAsset.normalSpacingOffset
                                  + glyphAdjustments.xAdvance) * currentElementScale;
-
                 }
 
                 words[w].width = xAdvance;
@@ -554,7 +552,7 @@ namespace UIForia.Text {
                 ptr = ptr.nextSibling;
             }
         }
-        
+
         private void SetChildInheritedColor(TextStyleProperty property, Color32 value) {
             if (!inheritStyleProperties) return;
             TextSpan ptr = firstChild;
@@ -571,11 +569,11 @@ namespace UIForia.Text {
                 if (!textStyle.fontSize.HasValue) {
                     SetChildInheritedFont(value);
                     rebuildFlags |= RebuildFlag.All;
-                    textInfo.requiresSpanListRebuild = true;
+                    textInfo.RebuildSpans();
                 }
             }
         }
-        
+
         private static void FindGlyphs(FontAsset fontAsset, CharInfo2[] charInfos, int count) {
             IntMap<TextGlyph> fontAssetCharacterDictionary = fontAsset.characterDictionary;
             // todo make a better struct based dictionary or make text glyph a class
@@ -657,7 +655,7 @@ namespace UIForia.Text {
             retn.alignment = alignment;
         }
 
-   
+
         private static bool Color32Equal(Color32 a, Color32 b) {
             return a.r == b.r && a.g == b.g && a.b == b.b && a.a == b.a;
         }
@@ -942,20 +940,21 @@ namespace UIForia.Text {
         }
 
         private void SetRebuildFlags(TextStyleProperty property) {
+            bool shouldRebuild = false;
             switch (property) {
                 case TextStyleProperty.FontAsset:
                     rebuildFlags |= RebuildFlag.Glyphs | RebuildFlag.Positions | RebuildFlag.UVCoords;
-                    textInfo.requiresSpanListRebuild = true;
+                    shouldRebuild = true;
                     break;
 
                 case TextStyleProperty.FontSize:
                     rebuildFlags |= RebuildFlag.Positions;
-                    textInfo.requiresSpanListRebuild = true;
+                    shouldRebuild = true;
                     break;
 
                 case TextStyleProperty.TextTransform:
                     rebuildFlags |= RebuildFlag.Casing;
-                    textInfo.requiresSpanListRebuild = true;
+                    shouldRebuild = true;
                     break;
 
                 case TextStyleProperty.TextColor:
@@ -974,26 +973,30 @@ namespace UIForia.Text {
                 case TextStyleProperty.OutlineWidth:
                 case TextStyleProperty.OutlineSoftness:
                     rebuildFlags |= RebuildFlag.Positions;
-                    textInfo.requiresSpanListRebuild = true;
+                    shouldRebuild = true;
                     break;
 
                 case TextStyleProperty.WhitespaceMode:
                     rebuildFlags |= RebuildFlag.Whitespace;
-                    textInfo.requiresSpanListRebuild = true;
+                    shouldRebuild = true;
                     break;
 
                 case TextStyleProperty.Alignment:
                     rebuildFlags |= RebuildFlag.Positions;
-                    textInfo.requiresSpanListRebuild = true;
+                    shouldRebuild = true;
                     break;
 
                 case TextStyleProperty.FontStyle:
                     rebuildFlags |= RebuildFlag.Positions | RebuildFlag.UVCoords;
-                    textInfo.requiresSpanListRebuild = true;
+                    shouldRebuild = true;
                     break;
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(property), property, null);
+            }
+
+            if (shouldRebuild) {
+                textInfo.RebuildSpans();
             }
         }
 
@@ -1229,11 +1232,11 @@ namespace UIForia.Text {
 
             if ((rebuildFlags & RebuildFlag.Positions) != 0) {
                 ComputeWordAndCharacterSizes(charInfoList, wordInfoList); // affected by font size, font
-                textInfo.SpanRequiresLayout(this);
+                textInfo.RebuildSpans();
             }
 
             geometryVersion++;
-            
+
             rebuildFlags = 0;
         }
 

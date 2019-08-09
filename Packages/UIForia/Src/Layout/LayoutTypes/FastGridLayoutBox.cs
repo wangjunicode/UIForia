@@ -1099,7 +1099,7 @@ namespace UIForia.Layout.LayoutTypes {
             }
 
             if (markedForLayout) {
-                MarkNeedsLayout();
+                MarkForLayout();
             }
         }
 

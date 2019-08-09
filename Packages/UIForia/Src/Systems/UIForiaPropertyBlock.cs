@@ -12,6 +12,7 @@ namespace UIForia.Rendering {
         public readonly Vector4[] colorData;
         public readonly Vector4[] objectData;
         public readonly Vector4[] miscData;
+        public readonly Vector4[] clipUVs;
 
         public static readonly int s_TransformDataKey = Shader.PropertyToID("_TransformData");
         public static readonly int s_ColorDataKey = Shader.PropertyToID("_ColorData");
@@ -21,6 +22,8 @@ namespace UIForia.Rendering {
         public static readonly int s_FontTextureSize = Shader.PropertyToID("_FontTextureSize");
         public static readonly int s_FontTexture = Shader.PropertyToID("_FontTexture");
         public static readonly int s_MainTextureKey = Shader.PropertyToID("_MainTexture");
+        public static readonly int s_ClipTextureKey = Shader.PropertyToID("_MaskTexture");
+        public static readonly int s_ClipUVKey = Shader.PropertyToID("_ClipUVs");
 
         public UIForiaPropertyBlock(Material material, int size) {
             this.size = size;
@@ -30,6 +33,7 @@ namespace UIForia.Rendering {
             this.colorData = new Vector4[size];
             this.objectData = new Vector4[size];
             this.miscData = new Vector4[size];
+            this.clipUVs = new Vector4[size];
         }
 
         public void SetData(UIForiaData data) {
@@ -37,16 +41,22 @@ namespace UIForia.Rendering {
             Array.Copy(data.colors.array, 0, colorData, 0, data.colors.size);
             Array.Copy(data.objectData0.array, 0, objectData, 0, data.objectData0.size);
             Array.Copy(data.objectData1.array, 0, miscData, 0, data.objectData1.size);
+            Array.Copy(data.clipUVs.array, 0, clipUVs, 0, data.clipUVs.size);
 
             matBlock.SetMatrixArray(s_TransformDataKey, transformData);
             matBlock.SetVectorArray(s_ColorDataKey, colorData);
             matBlock.SetVectorArray(s_ObjectDataKey, objectData);
             matBlock.SetVectorArray(s_MiscDataKey, miscData);
+            matBlock.SetVectorArray(s_ClipUVKey, clipUVs);
 
             if (data.mainTexture != null) {
                 material.SetTexture(s_MainTextureKey, data.mainTexture);
             }
 
+            if (data.clipTexture != null) {
+                material.SetTexture(s_ClipTextureKey, data.clipTexture);
+            }
+            
             if (data.fontData.fontAsset != null) {
                 FontData fontData = data.fontData;
                 matBlock.SetVector(s_FontDataScales, new Vector4(fontData.gradientScale, fontData.scaleRatioA, fontData.scaleRatioB, fontData.scaleRatioC));

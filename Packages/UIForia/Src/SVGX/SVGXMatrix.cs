@@ -5,12 +5,12 @@ namespace SVGX {
 
     public struct SVGXMatrix {
 
-        public readonly float m0;
-        public readonly float m1;
-        public readonly float m2;
-        public readonly float m3;
-        public readonly float m4;
-        public readonly float m5;
+        public float m0;
+        public float m1;
+        public float m2;
+        public float m3;
+        public float m4;
+        public float m5;
 
         public SVGXMatrix(float m0, float m1, float m2, float m3, float m4, float m5) {
             this.m0 = m0;
@@ -161,45 +161,30 @@ namespace SVGX {
         }
 
         public static SVGXMatrix TRS(float positionX, float positionY, float rotation, float scaleX, float scaleY) {
-            const float a = 1;
-            const float b = 0;
-            const float c = 0;
-            const float d = 1;
-            const float e = 0;
-            const float f = 0;
             float ca = math.cos(rotation * Mathf.Deg2Rad);
             float sa = math.sin(rotation * Mathf.Deg2Rad);
             return new SVGXMatrix(
-                (a * ca + c * sa) * scaleX,
-                (b * ca + d * sa) * scaleX,
-                (c * ca - a * sa) * scaleY,
-                (d * ca - b * sa) * scaleY,
-                a * positionX + c * positionY + e,
-                b * positionX + d * positionY + f
+                ca * scaleX,
+                sa * scaleX,
+                -sa * scaleY,
+                ca * scaleY,
+                positionX,
+                positionY
             );
         }
 
         public static SVGXMatrix TranslateScale(float positionX, float positionY, float scaleX, float scaleY) {
-            const float a = 1;
-            const float b = 0;
-            const float c = 0;
-            const float d = 1;
-            const float e = 0;
-            const float f = 0;
-            const float ca = 1;
-            const float sa = 0;
             return new SVGXMatrix(
-                (a * ca + c * sa) * scaleX,
-                (b * ca + d * sa) * scaleX,
-                (c * ca - a * sa) * scaleY,
-                (d * ca - b * sa) * scaleY,
-                a * positionX + c * positionY + e,
-                b * positionX + d * positionY + f
+                scaleX,
+                0,
+                0,
+                scaleY,
+                positionX,
+                positionY
             );
         }
 
         public Matrix4x4 ToMatrix4x4() {
-
             Matrix4x4 matrix = default;
 
             matrix.m00 = m0;
@@ -210,9 +195,8 @@ namespace SVGX {
             matrix.m13 = m5;
             matrix.m22 = 1;
             matrix.m33 = 1;
-            
+
             return matrix;
-            
         }
 
         public override string ToString() {

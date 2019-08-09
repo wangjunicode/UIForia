@@ -9,7 +9,7 @@
         <Group style="section">
             <Div style="show">
                 <Group x-id="startZone" style="start-zone" onDragDrop="DropDrag($event, $element)">
-                    <Div if="IsInStartZone" style="dragme" onDragCreate="StartDrag($element)">Dragme</Div>
+                    <Div if="IsInStartZone" style="dragme" onDragCreate="StartDrag($event, $element)">Dragme</Div>
                 </Group>
                 <Group style="regular-zone" onDragEnter="OnDragEnter($event)" onDragExit="OnDragExit($event)">
                     Listens to 
@@ -18,7 +18,7 @@
                     <Div style="[ReturnActiveEvent('onDragExit', 0.5f)]">DragExit</Div>
                 </Group>
                 <Group x-id="dropZone" style="drop-zone" onDragDrop="DropDrag($event, $element)" onDragHover="OnDragHover($event)">
-                    <Div if="IsInDropZone" style="dragme" onDragCreate="StartDrag($element)">Dragme</Div>
+<!--                    <Div if="IsInDropZone" style="dragme" onDragCreate="StartDrag($element)">Dragme</Div>-->
                 </Group>
             </Div>
             <Div style="tell">

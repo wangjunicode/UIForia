@@ -3,7 +3,6 @@ using UIForia.Attributes;
 using UIForia.Rendering;
 using UIForia.Systems;
 using UIForia.Text;
-using UnityEngine;
 
 namespace UIForia.Elements {
 
@@ -57,6 +56,7 @@ namespace UIForia.Elements {
 
             this.text = newText;
             textSpan.SetText(text);
+            layoutBox?.MarkForLayout();
         }
 
         public override string GetDisplayName() {

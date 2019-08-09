@@ -38,7 +38,7 @@ public class TemplateTests {
 
     [Test]
     public void TextElement_CompileMultipartConstantBinding() {
-        UITextTemplate template = new UITextTemplate(null, "'hello {'there'}'");
+        UITextTemplate template = new UITextTemplate(null, "hello {'there'}");
         template.Compile(dummyTemplate);
         UIElement element = template.CreateScoped(new TemplateScope());
         Assert.IsNotEmpty(template.triggeredBindings);
@@ -54,7 +54,7 @@ public class TemplateTests {
         ExpressionContext ctx = new ExpressionContext(target);
 
         target.stringValue = "world";
-        UITextTemplate template = new UITextTemplate(null, "'hello {stringValue}!'");
+        UITextTemplate template = new UITextTemplate(null, "hello {stringValue}!");
         template.Compile(dummyTemplate);
         UIElement element = template.CreateScoped(new TemplateScope());
         Assert.IsNotEmpty(template.perFrameBindings);

@@ -346,7 +346,7 @@ namespace UIForia.Parsing.Expression {
 
         private UITextTemplate ParseTextNode(XText node, in TemplateData templateData) {
             // todo split nodes based on inline {expressions}
-            return new UITextTemplate(null, "'" + node.Value.Trim() + "'");
+            return new UITextTemplate(null, node.Value);
         }
 
         private UITemplate ParseTemplateElement(XElement element, in TemplateData templateData) {
@@ -380,7 +380,7 @@ namespace UIForia.Parsing.Expression {
             foreach (XNode node in element.Nodes()) {
                 switch (node.NodeType) {
                     case XmlNodeType.Text:
-                        rawText += "'" + ((XText) node).Value.Trim() + "'";
+                        rawText += ((XText) node).Value;
                         continue;
 
                     case XmlNodeType.Element:
@@ -414,7 +414,7 @@ namespace UIForia.Parsing.Expression {
             foreach (XNode node in element.Nodes()) {
                 switch (node.NodeType) {
                     case XmlNodeType.Text:
-                        rawText += "'" + ((XText) node).Value.Trim() + "'";
+                        rawText += ((XText) node).Value;
                         continue;
 
                     case XmlNodeType.Element:

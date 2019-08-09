@@ -32,7 +32,7 @@ namespace UIForia.Systems {
         private readonly ILayoutSystem m_LayoutSystem;
 
         private List<UIElement> m_ElementsThisFrame;
-        
+
 #if UNITY_EDITOR
         public List<UIElement> DebugElementsThisFrame => m_ElementsLastFrame;
         public bool DebugMouseUpThisFrame => m_MouseState.isLeftMouseUpThisFrame;
@@ -43,7 +43,7 @@ namespace UIForia.Systems {
         private List<UIElement> m_AllElementsLastFrame;
 
         // temporary hack for the building system, this should be formalized and use ElementRef instead
-        public IReadOnlyList<UIElement> ElementsThisFrame => m_ElementsLastFrame;    
+        public IReadOnlyList<UIElement> ElementsThisFrame => m_ElementsLastFrame;
 
         private CursorStyle currentCursor;
 
@@ -231,29 +231,31 @@ namespace UIForia.Systems {
         private void ProcessMouseInput() {
             LightList<UIElement> queryResults = (LightList<UIElement>) m_LayoutSystem.QueryPoint(m_MouseState.mousePosition, LightList<UIElement>.Get());
 
-            // todo -- this breaks all the input tests!
-//            if (!IsDragging) {
-//                LightList<UIElement> ancestorElements = LightList<UIElement>.Get();
-//
-//                // the first element is always correct
-//                if (queryResults.Count > 0) {
-//                    ancestorElements.Add(queryResults[0]);
-//                }
-//                /*
-//                 * Every following element must be a parent of the first.
-//                 * This makes no sense for drag events but a lot for every other.
-//                 */
-//                for (int index = 1; index < queryResults.Count; index++) {
-//                    UIElement element = queryResults[index];
-//                    if (IsParentOf(element, queryResults[0])) {
-//                        ancestorElements.Add(element);
-//                    }
-//                }
-//
-//                LightList<UIElement>.Release(ref queryResults);
-//                queryResults = ancestorElements;
-//            }
-            
+            if (!IsDragging) {
+                LightList<UIElement> ancestorElements = LightList<UIElement>.Get();
+
+                if (queryResults.Count > 0) {
+
+                    /*
+                     * Every following element must be a parent of the first.
+                     * This makes no sense for drag events but a lot for every other.
+                     */
+                    UIElement last = queryResults[queryResults.size - 1];
+                    
+                    for (int index = 0; index < queryResults.size - 1; index++) {
+                        UIElement element = queryResults[index];
+                        if (IsParentOf(element, last)) {
+                            ancestorElements.Add(element);
+                        }
+                    }
+                    
+                    ancestorElements.Add(last);
+
+                    LightList<UIElement>.Release(ref queryResults);
+                    queryResults = ancestorElements;
+                }
+            }
+
             for (int i = 0; i < queryResults.Count; i++) {
                 UIElement element = queryResults[i];
 
@@ -261,7 +263,7 @@ namespace UIForia.Systems {
                 m_ElementsThisFrame.Add(element);
 
                 if (!m_ElementsLastFrame.Contains(element)) {
-                    m_EnteredElements.Add(element); 
+                    m_EnteredElements.Add(element);
                     element.style?.EnterState(StyleState.Hover);
                 }
 
@@ -277,11 +279,12 @@ namespace UIForia.Systems {
                     m_ElementsLastFrame[i].style?.ExitState(StyleState.Hover);
                 }
             }
-            
+
             if (IsMouseLeftUpThisFrame) {
                 for (int i = 0; i < m_ActiveElements.Count; i++) {
                     m_ActiveElements[i].style?.ExitState(StyleState.Active);
                 }
+
                 m_ActiveElements.Clear();
             }
 
@@ -318,19 +321,20 @@ namespace UIForia.Systems {
 
             LightList<UIElement>.Release(ref queryResults);
         }
-        
+
         private static bool IsParentOf(UIElement element, UIElement child) {
             UIElement ptr = child.parent;
             while (ptr != null) {
                 if (ptr == element) {
                     return true;
                 }
+
                 ptr = ptr.parent;
             }
 
             return false;
         }
-        
+
         private void ProcessDragEvents() {
             if (IsDragging) {
                 if (m_MouseState.ReleasedDrag) {
@@ -614,13 +618,14 @@ namespace UIForia.Systems {
                 m_DragCreatorMap[element.id] = new DragCreatorGroup(element.templateContext, dragEventCreators);
             }
 
-//            if (element.children == null) {
-//                return;
-//            }
+            if (element.children == null) {
+                return;
+            }
 
-//            for (int i = 0; i < element.children.Count; i++) {
-//                OnElementCreated(element.children[i]);
-//            }
+            for (int i = 0; i < element.children.Count; i++) {
+                OnElementCreated(element.children[i]);
+            }
+            
         }
 
         public void OnAttributeSet(UIElement element, string attributeName, string currentValue, string attributeValue) { }
@@ -692,7 +697,8 @@ namespace UIForia.Systems {
                 if (focusedNode == null) {
                     // actually this is totally fine since any element can implement IFocusable without accepting keyboard input
                     return;
-                } 
+                }
+
                 IReadOnlyList<KeyboardEventHandler> handlers = focusedNode.handlers;
                 ExpressionContext context = ((UIElement) focusedNode.Element).templateContext;
                 for (int i = 0; i < handlers.Count; i++) {
@@ -1028,19 +1034,20 @@ namespace UIForia.Systems {
             }
 
             if (m_MouseState.isLeftMouseDownThisFrame || m_MouseState.isRightMouseDownThisFrame || m_MouseState.isMiddleMouseDownThisFrame) {
-                
                 HandleBlur();
 
                 if (m_ElementsThisFrame.Count > 0 && m_ElementsThisFrame[0].View.RequestFocus()) {
                     // todo let's see if we have to process the mouse event again
                 }
+
                 RunMouseEvents(m_ElementsThisFrame, InputEventType.MouseDown);
             }
             else if (m_MouseState.isLeftMouseUpThisFrame || m_MouseState.isRightMouseUpThisFrame || m_MouseState.isMiddleMouseUpThisFrame) {
                 RunMouseEvents(m_ElementsThisFrame, InputEventType.MouseUp);
                 if (m_MouseState.clickCount > 0) {
                     RunMouseEvents(m_ElementsThisFrame, InputEventType.MouseClick);
-                } else if (!m_MouseState.isLeftMouseDown && !m_MouseState.isMiddleMouseDown) {
+                }
+                else if (!m_MouseState.isLeftMouseDown && !m_MouseState.isMiddleMouseDown) {
                     RunMouseEvents(m_ElementsThisFrame, InputEventType.MouseContext);
                 }
             }
@@ -1054,7 +1061,7 @@ namespace UIForia.Systems {
             }
 
             if (m_ElementsThisFrame.Count == 0) {
-                ReleaseFocus((IFocusable)m_FocusedElement);
+                ReleaseFocus((IFocusable) m_FocusedElement);
                 return;
             }
 
@@ -1063,10 +1070,11 @@ namespace UIForia.Systems {
                 if (ptr == m_FocusedElement) {
                     return;
                 }
+
                 ptr = ptr.parent;
             }
-            
-            ReleaseFocus((IFocusable)m_FocusedElement);
+
+            ReleaseFocus((IFocusable) m_FocusedElement);
         }
 
     }

@@ -40,7 +40,7 @@ namespace UIForia.Layout {
 
         public override void OnStyleChanged(StructList<StyleProperty> changeList) {
             base.OnStyleChanged(changeList);
-            MarkNeedsLayout();
+            MarkForLayout();
         }
 
         protected override void PerformLayout() {

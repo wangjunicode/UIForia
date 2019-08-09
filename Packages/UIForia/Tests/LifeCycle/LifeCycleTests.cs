@@ -10,6 +10,8 @@ using Debug = UnityEngine.Debug;
 
 namespace LifeCycle {
 
+    // todo --- these tests don't make sense anymore w/o ready, rewrite them!
+    
     [TestFixture]
     public class LifeCycleTests {
 
@@ -90,11 +92,6 @@ namespace LifeCycle {
                 onCreate?.Invoke(this);
             }
 
-            public override void OnReady() {
-                output.Add(name + ".ready");
-                onReady?.Invoke(this);
-            }
-
             public override void OnEnable() {
                 output.Add(name + ".enable");
                 onEnable?.Invoke(this);
@@ -129,7 +126,6 @@ namespace LifeCycle {
             Assert.AreEqual(new[] {
                 "root.create",
                 "root.enable",
-                "root.ready"
             }, list.ToArray());
         }
 

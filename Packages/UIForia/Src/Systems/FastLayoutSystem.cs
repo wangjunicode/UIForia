@@ -84,7 +84,8 @@ namespace UIForia.Systems {
                 }
             }
 
-            element.layoutBox?.parent.RemoveChild(element.layoutBox);
+            // dont via gather phase
+//            element.layoutBox?.parent?.RemoveChild(element.layoutBox);
 
             // need a placeholder layout box for transclusion
 

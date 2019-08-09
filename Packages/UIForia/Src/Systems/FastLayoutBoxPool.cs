@@ -15,7 +15,6 @@ namespace UIForia.Layout {
             box.parent = null;
             box.OnDestroy();
             box.element = null;
-            box.relayoutBoundary = null;
             box.flags = 0;
             pool.Add(box);
         }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace UIForia.Util {
+    
     public class IntMap<T> {
 
         private int[] buckets;
@@ -17,9 +18,9 @@ namespace UIForia.Util {
         public IntMap(int capacity) {
             int size = HashHelpers.GetPrime(capacity);
             this.capacity = size;
-            buckets = ArrayPool<int>.GetMinSize(size);
-            entries = ArrayPool<Entry>.GetMinSize(size);
-            for (int i = 0; i < capacity; i++) {
+            buckets = new int[size];
+            entries = new Entry[size];
+            for (int i = 0; i < size; i++) {
                 buckets[i] = -1;
             }
             freeList = -1;
@@ -168,12 +169,15 @@ namespace UIForia.Util {
 
         [DebuggerStepThrough]
         private int FindEntry(int key) {
+            if (count == 0) return -1;
+            
             int hashCode = key & 0x7FFFFFFF;
             for (int i = buckets[hashCode % capacity]; i >= 0; i = entries[i].next) {
                 if (entries[i].hashCode == hashCode && entries[i].key == key) {
                     return i;
                 }
             }
+            
             return -1;
         }
 

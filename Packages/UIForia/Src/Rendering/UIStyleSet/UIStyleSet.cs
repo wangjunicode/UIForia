@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Text;
 using SVGX;
 using UIForia.Compilers.Style;
 using UIForia.Elements;
@@ -849,7 +850,7 @@ namespace UIForia.Rendering {
         /// </summary>
         /// <param name="retn"></param>
         /// <returns></returns>
-        public List<string> GetStyleNames(List<string> retn = null) {
+        public IList<string> GetStyleNameList(IList<string> retn = null) {
             retn = retn ?? new List<string>(styleGroupContainers.Count);
             for (int i = 0; i < styleGroupContainers.Count; i++) {
                 if (styleGroupContainers[i].styleType == StyleType.Shared) {
@@ -858,6 +859,20 @@ namespace UIForia.Rendering {
             }
 
             return retn;
+        }
+
+        private static readonly StringBuilder s_Builder = new StringBuilder(128);
+
+        public string GetStyleNames() {
+            s_Builder.Clear();
+            
+            for (int i = 0; i < styleGroupContainers.Count; i++) {
+                if (styleGroupContainers[i].styleType == StyleType.Shared) {
+                    s_Builder.Append(styleGroupContainers[i].name);
+                }
+            }
+
+            return s_Builder.ToString();
         }
 
         // todo -- explore caching this value

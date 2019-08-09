@@ -33,7 +33,7 @@ style drop-zone {
 }
 
 style dragme {
-    PreferredSize = 90px 50px;
+    //PreferredSize = 90px 50px;
     Border = 2px;
     BorderColor = black;
     Padding = 10px;
@@ -46,7 +46,7 @@ style dragme {
 
 style section {
     LayoutType = Flex;
-    FlexLayoutDirection = Column;
+    FlexLayoutDirection = Row;
     MarginBottom = 20px;
 }
 

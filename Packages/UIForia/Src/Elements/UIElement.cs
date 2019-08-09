@@ -36,11 +36,11 @@ namespace UIForia.Elements {
                 return element;
             }
         }
-        
+
         public static implicit operator UIElement(UIElementRef elementRef) {
             return elementRef.Element;
         }
-        
+
     }
 
     public struct UIElementRef<T> where T : UIElement {
@@ -52,7 +52,7 @@ namespace UIForia.Elements {
             this.id = element?.id ?? -1;
             this.element = element;
         }
-        
+
         public T Element {
             get {
                 if (id != element.id) {
@@ -67,15 +67,14 @@ namespace UIForia.Elements {
         public static implicit operator UIElementRef(UIElementRef<T> elementRef) {
             return new UIElementRef(elementRef.Element);
         }
-        
+
         public static implicit operator UIElement(UIElementRef<T> elementRef) {
             return elementRef.Element;
         }
-        
+
         public static implicit operator T(UIElementRef<T> elementRef) {
             return elementRef.Element;
         }
-
 
     }
 
@@ -83,15 +82,15 @@ namespace UIForia.Elements {
 
         public T[] array;
         public int size;
-        
+
         public ArrayContainer(T[] array, int size = 0) {
             this.array = array;
             this.size = size;
         }
-        
+
     }
 
-    
+
     [DebuggerDisplay("{" + nameof(ToString) + "()}")]
     public class UIElement : IHierarchical {
 
@@ -101,9 +100,7 @@ namespace UIForia.Elements {
         internal LightList<UIElement> children; // todo -- replace w/ linked list & child count
 
         public ExpressionContext templateContext; // todo -- can probably be moved to binding system
-
-        internal int enablePhase; // todo -- can probably be removed
-
+        
         internal UIElementFlags flags;
         internal UIElement parent;
 
@@ -113,14 +110,14 @@ namespace UIForia.Elements {
 
         internal FastLayoutBox layoutBox;
         internal RenderBox renderBox;
-        
+
         public UIView View { get; internal set; }
-        
+
         protected internal UIElement() {
             this.id = Application.NextElementId;
             this.style = new UIStyleSet(this);
             this.layoutResult = new LayoutResult();
-            this.flags = UIElementFlags.Enabled;
+            this.flags = UIElementFlags.Enabled | UIElementFlags.Alive;
             this.children = LightList<UIElement>.Get();
         }
 
@@ -164,7 +161,7 @@ namespace UIForia.Elements {
 
         public bool hasDisabledAncestor => (flags & UIElementFlags.AncestorEnabled) == 0;
 
-        public bool isDestroyed => (flags & UIElementFlags.Destroyed) != 0;
+        public bool isDestroyed => (flags & UIElementFlags.Alive) == 0;
 
         public bool isBuiltIn => (flags & UIElementFlags.BuiltIn) != 0;
 
@@ -172,13 +169,9 @@ namespace UIForia.Elements {
 
         public bool isCreated => (flags & UIElementFlags.Created) != 0;
 
-        public bool isReady => (flags & UIElementFlags.Ready) != 0;
-
         public bool isRegistered => (flags & UIElementFlags.Registered) != 0;
 
         public virtual void OnCreate() { }
-
-        public virtual void OnReady() { }
 
         public virtual void OnUpdate() { }
 
@@ -345,12 +338,10 @@ namespace UIForia.Elements {
         }
 
         public override string ToString() {
-            if (HasAttribute("id")) {
-                return "<" + GetDisplayName() + ":" + GetAttribute("id") + " " + id + ">";
-            }
-
-            if (style != null && style.HasBaseStyles) {
-                return "<" + GetDisplayName() + ">"; // + style.BaseStyleNames;
+            if (style != null) {
+                string idText = GetAttribute("id");
+                string styleNames = style.GetStyleNames();
+                return $"<{GetDisplayName()}[{id}]{(idText != null ? ":" + idText : "")}> {styleNames}";
             }
             else {
                 return "<" + GetDisplayName() + " " + id + ">";
@@ -439,7 +430,7 @@ namespace UIForia.Elements {
 
             return default;
         }
-        
+
         public int UniqueId => id;
         public IHierarchical Element => this;
         public IHierarchical Parent => parent;
@@ -508,8 +499,6 @@ namespace UIForia.Elements {
 
         }
 
-       
     }
 
 }
-

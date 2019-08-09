@@ -36,6 +36,13 @@ style flex-demo-content {
     Padding = 10px;
 }
 
+style circle-clip {
+    Overflow = Hidden;
+    BorderRadius = 50%;
+    FlexItemGrow = 0;
+    PreferredSize = 200px 1cnt;
+}
+
 style special-text {
     TextFontSize = 1.5em;
     TextColor = yellow;

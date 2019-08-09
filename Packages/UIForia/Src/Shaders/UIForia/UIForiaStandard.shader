@@ -53,6 +53,7 @@ Shader "UIForia/Standard"
             float4 _ColorData[BATCH_SIZE];
             float4 _MiscData[BATCH_SIZE];
             float4 _ObjectData[BATCH_SIZE];
+            float4 _ClipUVs[BATCH_SIZE];
             float4x4 _TransformData[BATCH_SIZE];
                                                           
                                    
@@ -181,6 +182,8 @@ Shader "UIForia/Standard"
                      //mainColor = MeshBorderAA(mainColor, Frag_SDFSize, i.texCoord4.x);
                      mainColor.rgb *=  mainColor.a;
                      
+                     fixed a = tex2D(_MaskTexture, float2(0, 0)).a;
+                     mainColor.r = a;
                      return mainColor;
                 }
 
@@ -198,7 +201,7 @@ Shader "UIForia/Standard"
                 float outline = 0; // (outlineWidth * scaleRatio) * scale;
 			    float softness = 0; //(outlineSoftness * scaleRatio) * scale;
 
-                fixed4 faceColor = Red;//UnpackColor(asuint(i.color.r));
+                fixed4 faceColor = UnpackColor(asuint(i.color.r));
 			    fixed4 outlineColor = Green;//UnpackColor(asuint(i.color.g));
                 //fixed4 underlayColor = UnpackColor(asuint(i.color.b));
                 //fixed4 glowColor = UnpackColor(asuint(i.color.a));

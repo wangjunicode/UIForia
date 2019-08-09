@@ -1,53 +1,55 @@
-//using System;
-//using System.Collections.Generic;
-//using System.Linq.Expressions;
-//using Mono.Linq.Expressions;
-//using NUnit.Framework;
-//using Tests.Mocks;
-//using UIForia.Attributes;
-//using UIForia.Compilers;
-//using UIForia.Elements;
-//using UIForia.Exceptions;
-//using UIForia.Systems;
-//using UnityEngine;
-//
-//[TestFixture]
-//public class TestTemplateParser {
-//
-//    [Template(TemplateType.String, @"
-//    <UITemplate>
-//        <Content attr:stuff='yep'>
-//
-//            <Div attr:id='hello0'/>
-//
-//            <CompileTestChildElement attr:id='hello1' floatValue='4f'>
-//
-//           
-//
-//            </CompileTestChildElement>
-//
-//            <CompileTestChildElement attr:id='hello2' floatValue='14f'/>
-//
-//        </Content>
-//    </UITemplate>
-//    ")]
-//    public class CompileTestElement : UIElement { }
-//
-//    [Template(TemplateType.String, @"
-//        <UITemplate>
-//        <Content attr:isChild='yep'>
-//
-//           <Text>{floatValue}</Text>
-//
-//        </Content>
-//        </UITemplate>
-//    ")]
-//    public class CompileTestChildElement : UIElement {
-//
-//        public float floatValue;
-//
-//    }
-//
+using System;
+using System.Collections.Generic;
+using System.Linq.Expressions;
+using Mono.Linq.Expressions;
+using NUnit.Framework;
+using Tests.Mocks;
+using UIForia.Attributes;
+using UIForia.Compilers;
+using UIForia.Elements;
+using UIForia.Exceptions;
+using UIForia.Parsing.Expression;
+using UIForia.Systems;
+using UIForia.Util;
+using UnityEngine;
+
+[TestFixture]
+public class TestTemplateParser {
+
+    [Template(TemplateType.String, @"
+    <UITemplate>
+        <Content attr:stuff='yep'>
+
+            <Div attr:id='hello0'/>
+
+            <CompileTestChildElement attr:id='hello1' floatValue='4f'>
+
+           
+
+            </CompileTestChildElement>
+
+            <CompileTestChildElement attr:id='hello2' floatValue='14f'/>
+
+        </Content>
+    </UITemplate>
+    ")]
+    public class CompileTestElement : UIElement { }
+
+    [Template(TemplateType.String, @"
+        <UITemplate>
+        <Content attr:isChild='yep'>
+
+           <Text>{floatValue}</Text>
+
+        </Content>
+        </UITemplate>
+    ")]
+    public class CompileTestChildElement : UIElement {
+
+        public float floatValue;
+
+    }
+
 //    [Test]
 //    public void ParseTemplate2() {
 //        MockApplication application = MockApplication.CreateWithoutView();
@@ -496,50 +498,91 @@
 //            Assert.AreEqual(asserts[i].value, elementAttributes[i].value);
 //        }
 //    }
-//
-//    public class ElementAssertion {
-//
-//        public Type type;
-//        public ElementAttribute[] attributes;
-//        public ElementAssertion[] children;
-//        public string textContent;
-//
-//        public ElementAssertion(Type type) {
-//            this.type = type;
-//        }
-//
-//    }
-//
-//
-//    private static string PrintCode(IList<Expression> expressions, bool printNamespaces = true) {
-//        string retn = "";
-//        bool old = CSharpWriter.printNamespaces;
-//        CSharpWriter.printNamespaces = printNamespaces;
-//        for (int i = 0; i < expressions.Count; i++) {
-//            retn += expressions[i].ToCSharpCode();
-//            if (i != expressions.Count - 1) {
-//                retn += "\n";
-//            }
-//        }
-//
-//        CSharpWriter.printNamespaces = old;
-//        return retn;
-//    }
-//
-//    private static string PrintCode(Expression expression, bool printNamespaces = true) {
-//        bool old = CSharpWriter.printNamespaces;
-//        CSharpWriter.printNamespaces = printNamespaces;
-//        string retn = expression.ToCSharpCode();
-//        CSharpWriter.printNamespaces = old;
-//        return retn;
-//    }
-//
-//    private static void LogCode(Expression expression, bool printNamespaces = true) {
-//        bool old = CSharpWriter.printNamespaces;
-//        CSharpWriter.printNamespaces = printNamespaces;
-//        string retn = expression.ToCSharpCode();
-//        CSharpWriter.printNamespaces = old;
-//        Debug.Log(retn);
-//    }
-//
-//}
+
+    [Test]
+    public void ParseTextExpressions() {
+        string input = "\n this is {expression} text";
+        StructList<TextExpression> output = StructList<TextExpression>.Get();
+        
+        TextTemplateProcessor.ProcessTextExpressions(input, output);
+        
+        Assert.AreEqual(3, output.size);
+        Assert.AreEqual("\n this is ", output[0].text);
+        Assert.AreEqual(false, output[0].isExpression);
+        
+        Assert.AreEqual("expression", output[1].text);
+        Assert.AreEqual(true, output[1].isExpression);
+        
+        Assert.AreEqual(" text", output[2].text);
+        Assert.AreEqual(false, output[2].isExpression);
+        
+        output.Clear();
+        TextTemplateProcessor.ProcessTextExpressions("more {expression {expr} expression }", output);
+        
+        Assert.AreEqual(2, output.size);
+        Assert.AreEqual("more ", output[0].text);
+        Assert.AreEqual(false, output[0].isExpression);
+        
+        Assert.AreEqual("expression {expr} expression ", output[1].text);
+        Assert.AreEqual(true, output[1].isExpression);
+
+        output.Clear();
+        TextTemplateProcessor.ProcessTextExpressions(@"more \{expression {expr} expression \}", output);
+        Assert.AreEqual(3, output.size);
+        Assert.AreEqual("more {expression ", output[0].text);
+        Assert.AreEqual(false, output[0].isExpression);
+        
+        Assert.AreEqual("expr", output[1].text);
+        Assert.AreEqual(true, output[1].isExpression);
+        
+        Assert.AreEqual(" expression }", output[2].text);
+        Assert.AreEqual(false, output[2].isExpression);
+        
+    }
+
+    public class ElementAssertion {
+
+        public Type type;
+        public ElementAttribute[] attributes;
+        public ElementAssertion[] children;
+        public string textContent;
+
+        public ElementAssertion(Type type) {
+            this.type = type;
+        }
+
+    }
+
+
+    private static string PrintCode(IList<Expression> expressions, bool printNamespaces = true) {
+        string retn = "";
+        bool old = CSharpWriter.printNamespaces;
+        CSharpWriter.printNamespaces = printNamespaces;
+        for (int i = 0; i < expressions.Count; i++) {
+            retn += expressions[i].ToCSharpCode();
+            if (i != expressions.Count - 1) {
+                retn += "\n";
+            }
+        }
+
+        CSharpWriter.printNamespaces = old;
+        return retn;
+    }
+
+    private static string PrintCode(Expression expression, bool printNamespaces = true) {
+        bool old = CSharpWriter.printNamespaces;
+        CSharpWriter.printNamespaces = printNamespaces;
+        string retn = expression.ToCSharpCode();
+        CSharpWriter.printNamespaces = old;
+        return retn;
+    }
+
+    private static void LogCode(Expression expression, bool printNamespaces = true) {
+        bool old = CSharpWriter.printNamespaces;
+        CSharpWriter.printNamespaces = printNamespaces;
+        string retn = expression.ToCSharpCode();
+        CSharpWriter.printNamespaces = old;
+        Debug.Log(retn);
+    }
+
+}

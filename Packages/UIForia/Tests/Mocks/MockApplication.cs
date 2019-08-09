@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using Src.Systems;
 using SVGX;
 using UIForia;
 
@@ -17,7 +18,7 @@ namespace Tests.Mocks {
             
             TemplateRootPath = Path.GetFullPath(Path.Combine(UnityEngine.Application.dataPath, "../Packages/UIForia/Tests"));
             MockLayoutSystem layoutSystem = new MockLayoutSystem(this, m_StyleSystem);
-            MockRenderSystem renderSystem = new MockRenderSystem();
+            MockRenderSystem renderSystem = new MockRenderSystem(null, this);
             MockInputSystem inputSystem = new MockInputSystem(layoutSystem);
             m_Systems[m_Systems.IndexOf(m_RenderSystem)] = renderSystem;
             m_Systems[m_Systems.IndexOf(m_InputSystem)] = inputSystem;
@@ -43,33 +44,13 @@ namespace Tests.Mocks {
         }
     }
 
-    public class MockRenderSystem : IRenderSystem {
-
-        public void OnReset() { }
-
-        public void OnUpdate() {
-            DrawDebugOverlay?.Invoke(null);
+    public class MockRenderSystem : VertigoRenderSystem {
+        
+        public override void OnUpdate() {
+            // do nothing
         }
 
-        public void OnDestroy() { }
-
-        public void OnViewAdded(UIView view) { }
-
-        public void OnViewRemoved(UIView view) { }
-
-        public void OnElementEnabled(UIElement element) { }
-
-        public void OnElementDisabled(UIElement element) { }
-
-        public void OnElementDestroyed(UIElement element) { }
-
-        public void OnElementCreated(UIElement element) { }
-
-        public void OnAttributeSet(UIElement element, string attributeName, string currentValue, string attributeValue) {}
-        
-        public event Action<ImmediateRenderContext> DrawDebugOverlay;
-
-        public void SetCamera(Camera camera) { }
+        public MockRenderSystem(Camera camera, Application application) : base(camera, application) { }
 
     }
 

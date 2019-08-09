@@ -167,23 +167,6 @@ public class TemplateParsingTests {
         Assert.AreEqual("default content", textElement.text);
     }
 
-    [Test]
-    public void Text_ParsesExpressionParts() {
-        TextElementParser parser = new TextElementParser();
-        string[] output1 = parser.Parse("'one expression'");
-        Assert.AreEqual(1, output1.Length);
-        Assert.AreEqual("'one expression'", output1[0]);
-
-        string[] output2 = parser.Parse("'two {expressions}'");
-        Assert.AreEqual(2, output2.Length);
-        Assert.AreEqual("'two '", output2[0]);
-        Assert.AreEqual("{expressions}", output2[1]);
-
-        string[] output3 = parser.Parse("'three {expressions} here'");
-        Assert.AreEqual(3, output3.Length);
-        Assert.AreEqual("'three '", output3[0]);
-        Assert.AreEqual("{expressions}", output3[1]);
-        Assert.AreEqual("' here'", output3[2]);
-    }
+   
 
 }

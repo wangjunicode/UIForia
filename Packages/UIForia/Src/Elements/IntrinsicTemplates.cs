@@ -150,10 +150,6 @@ namespace UIForia.Elements {
             flags |= UIElementFlags.BuiltIn;
         }
 
-        public override void OnReady() {
-//            style.AddImplicitStyleGroup(StyleParser.GetImplicitStyleGroup(""));
-        }
-
         public override string GetDisplayName() {
             return "Heading3";
         }

@@ -14,7 +14,6 @@ public class UIViewRootElement : UIElement {
         flags |= UIElementFlags.BuiltIn;
         flags |= UIElementFlags.ImplicitElement;
         flags |= UIElementFlags.Created;
-        flags |= UIElementFlags.Ready;
     }
 
 }

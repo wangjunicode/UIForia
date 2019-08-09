@@ -61,12 +61,22 @@ namespace UIForia.Rendering {
         public override Rect RenderBounds => new Rect(0, 0, element.layoutResult.actualSize.width, element.layoutResult.actualSize.height);
 
         public override void OnInitialize() {
+            base.OnInitialize();
             geometry.Clear();
             lastSize = new Size(-1, -1);
             geometryNeedsUpdate = true;
             dataNeedsUpdate = true;
         }
 
+        public override ClipShape CreateClipShape() {
+            ClipShape shape = new ClipShape();
+            shape.width = (int)element.layoutResult.actualSize.width;
+            shape.height = (int)element.layoutResult.actualSize.height;
+            shape.type = ClipShapeType.SDFFill;
+            shape.geometry = UIForiaGeometry.CreateQuadMesh(shape.width, shape.height);
+            return shape;
+        }
+        
         public override void OnStylePropertyChanged(StructList<StyleProperty> propertyList) {
             StyleProperty[] properties = propertyList.array;
             int count = propertyList.size;
@@ -307,6 +317,12 @@ namespace UIForia.Rendering {
             geometry.packedColors = new Color(packedBackgroundColor, packedBackgroundTint, borderLeftAndTop, borderRightAndBottom);
             geometry.objectData = new Vector4((int) ShapeType.RoundedRect, VertigoUtil.PackSizeVector(element.layoutResult.actualSize), packedBorderRadii, (int)colorMode);
             geometry.mainTexture = backgroundImage;
+            
+            if (clipper != null) {
+                geometry.clipTexture = clipper.clipTexture;
+                geometry.clipUVs = clipper.clipUVs;
+            }
+            
             ctx.DrawBatchedGeometry(geometry, range, element.layoutResult.matrix.ToMatrix4x4());
         }
 

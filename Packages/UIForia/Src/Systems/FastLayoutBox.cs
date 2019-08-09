@@ -24,7 +24,6 @@ namespace UIForia.Layout {
     public abstract class FastLayoutBox {
 
         public LayoutRenderFlag flags;
-        public FastLayoutBox relayoutBoundary;
 
         public FastLayoutBox parent;
         public FastLayoutBox firstChild;
@@ -46,6 +45,9 @@ namespace UIForia.Layout {
         public UIMeasurement maxHeight;
         public UIMeasurement prefHeight;
 
+        public TransformOffset transformPositionX;
+        public TransformOffset transformPositionY;
+        
         public int traversalIndex;
 
         public Size allocatedSize;
@@ -60,55 +62,105 @@ namespace UIForia.Layout {
         public Fit selfFitHorizontal;
         public Fit selfFitVertical;
 
-        public Alignment targetAlignmentHorizontal;
-        public Alignment targetAlignmentVertical;
+        public Alignment parentAlignmentHorizontal;
+        public Alignment parentAlignmentVertical;
+        
+        public Alignment selfAlignmentVertical;
+        public Alignment selfAlignmentHorizontal;
 
         public UIElement element;
         public LayoutOwner owner;
-        public SVGXMatrix localMatrix;
+
+        public float rotation;
+        public float pivotX;
+        public float pivotY;
+        public float scaleX;
+        public float scaleY;
 
         public virtual void AddChild(FastLayoutBox child) {
             child.parent = this;
+            
             if (firstChild == null) {
                 firstChild = child;
+                OnChildAdded(child, 0);
                 return;
             }
 
             FastLayoutBox ptr = firstChild;
             FastLayoutBox trail = null;
             int idx = 0;
-
-            while (ptr.traversalIndex < child.traversalIndex) {
-                ptr = ptr.nextSibling;
-                trail = ptr;
-                idx++;
-            }
-
-            if (trail == null) {
-                child.nextSibling = firstChild;
+            
+            if (ptr == null) {
                 firstChild = child;
-                OnChildAdded(child, idx);
+                child.nextSibling = null;
+                OnChildAdded(child, 0);
+                return;
             }
-            else {
-                child.nextSibling = ptr.nextSibling;
-                ptr.nextSibling = child;
-                OnChildAdded(child, idx);
+            
+            while (ptr != null) {
+                
+                if (ptr.element.parent == child.element.parent) {
+                    if (ptr.element.siblingIndex > child.element.siblingIndex) {
+                        child.nextSibling = ptr.nextSibling;
+                        ptr.nextSibling = child;
+                        OnChildAdded(child, idx);
+                        return;
+                    }
+                }
+                else {
+                    if (ptr.element.parent.depth == child.element.parent.depth) {
+                        // find common parent, compare sibling index
+                        throw new NotImplementedException();
+                    }
+                    else {
+                        if (ptr.element.depth > child.element.depth) {
+                            child.nextSibling = ptr.nextSibling;
+                            ptr.nextSibling = child;
+                            OnChildAdded(child, idx);
+                            return;
+                        }
+                    }
+                }
+                
+                trail = ptr;
+                ptr = ptr.nextSibling;
+                idx++;
+
+                if (idx > 1000) {
+                    throw new Exception("fail layout");
+                }
             }
+            
+            child.nextSibling = null;
+            trail.nextSibling = child;
+            OnChildAdded(child, idx);
+            
+            //todo this always add to end, we actually want an insert 
+           
+            
         }
 
         public virtual void RemoveChild(FastLayoutBox child) {
             int idx = 0;
             FastLayoutBox ptr = firstChild;
-            while (ptr != child) {
+          
+            Debug.Assert(child != null, "child != null");
+            
+            while (ptr != null && ptr != child) {
                 idx++;
                 ptr = ptr.nextSibling;
             }
 
+            if (child == firstChild) {
+                firstChild = firstChild.nextSibling;
+            }
+            
             OnChildRemoved(child, idx);
+            
         }
 
         public virtual void UpdateStyleData() {
-            // update style properties
+            
             minWidth = element.style.MinWidth;
             maxWidth = element.style.MaxWidth;
             prefWidth = element.style.PreferredWidth;
@@ -121,14 +173,18 @@ namespace UIForia.Layout {
             marginRight = element.style.MarginRight;
             marginBottom = element.style.MarginBottom;
             marginLeft = element.style.MarginLeft;
-//            var localPositionX = element.style.TransformPositionX;
-//            var localPositionY = element.style.TransformPositionY;
-//            var rotation = element.style.TransformRotation;
-//            var scaleX = element.style.TransformScaleX;
-//            var scaleY = element.style.TransformScaleY;
 
-            MarkNeedsLayout();
+            transformPositionX = element.style.TransformPositionX;
+            transformPositionY = element.style.TransformPositionY;
+            rotation = element.style.TransformRotation;
+            scaleX = element.style.TransformScaleX;
+            scaleY = element.style.TransformScaleY;
+            
+            MarkForLayout();
+            
         }
+
+        protected abstract void PerformLayout();
 
         protected virtual void OnChildAdded(FastLayoutBox child, int index) { }
 
@@ -324,6 +380,8 @@ namespace UIForia.Layout {
             allocatedPosition.x = localX;
             alignedPosition.x = localX;
 
+            pivotX = ResolveFixedWidth(element.style.TransformPivotX);
+
             if (selfFitHorizontal != Fit.Unset) {
                 fit = selfFitHorizontal;
             }
@@ -370,37 +428,37 @@ namespace UIForia.Layout {
 
             AlignmentBehavior alignmentBehavior = element.style.AlignmentBehaviorX;
             if (alignmentBehavior == AlignmentBehavior.Self) {
-                targetAlignmentHorizontal.value = element.style.AlignmentOffsetX;
-                targetAlignmentHorizontal.pivot = element.style.AlignmentPivotX;
-                targetAlignmentHorizontal.target = element.style.AlignmentTargetX;
+                parentAlignmentHorizontal.value = element.style.AlignmentOffsetX;
+                parentAlignmentHorizontal.pivot = element.style.AlignmentPivotX;
+                parentAlignmentHorizontal.target = element.style.AlignmentTargetX;
             }
             else {
-                targetAlignmentHorizontal = alignment;
+                parentAlignmentHorizontal = alignment;
             }
 
-            switch (targetAlignmentHorizontal.target) {
+            switch (parentAlignmentHorizontal.target) {
                 case AlignmentTarget.AllocatedBox:
-                    alignedPosition.x = localX + ResolveFixedSize(allocatedWidth, targetAlignmentHorizontal.value) - (size.width * targetAlignmentHorizontal.pivot);
+                    alignedPosition.x = localX + ResolveFixedSize(allocatedWidth, parentAlignmentHorizontal.value) - (size.width * parentAlignmentHorizontal.pivot);
                     break;
 
                 case AlignmentTarget.Parent:
-                    alignedPosition.x = localX + ResolveFixedSize(parent.size.width, targetAlignmentHorizontal.value) - (size.width * targetAlignmentHorizontal.pivot);
+                    alignedPosition.x = localX + ResolveFixedSize(parent.size.width, parentAlignmentHorizontal.value) - (size.width * parentAlignmentHorizontal.pivot);
                     break;
 
                 case AlignmentTarget.ParentContentArea:
-                    alignedPosition.x = localX + ResolveFixedSize(parent.size.width - parent.paddingBox.top - parent.paddingBox.bottom, targetAlignmentHorizontal.value) - (size.width * targetAlignmentHorizontal.pivot);
+                    alignedPosition.x = localX + ResolveFixedSize(parent.size.width - parent.paddingBox.top - parent.paddingBox.bottom, parentAlignmentHorizontal.value) - (size.width * parentAlignmentHorizontal.pivot);
                     break;
 
                 case AlignmentTarget.View:
-                    alignedPosition.x = localX + ResolveFixedSize(element.View.Viewport.width - parent.paddingBox.top - parent.paddingBox.bottom, targetAlignmentHorizontal.value) - (size.width * targetAlignmentHorizontal.pivot);
+                    alignedPosition.x = localX + ResolveFixedSize(element.View.Viewport.width - parent.paddingBox.top - parent.paddingBox.bottom, parentAlignmentHorizontal.value) - (size.width * parentAlignmentHorizontal.pivot);
                     break;
 
                 case AlignmentTarget.Screen:
-                    alignedPosition.x = localX + ResolveFixedSize(Screen.width - parent.paddingBox.top - parent.paddingBox.bottom, targetAlignmentHorizontal.value) - (size.width * targetAlignmentHorizontal.pivot);
+                    alignedPosition.x = localX + ResolveFixedSize(Screen.width - parent.paddingBox.top - parent.paddingBox.bottom, parentAlignmentHorizontal.value) - (size.width * parentAlignmentHorizontal.pivot);
                     break;
             }
 
-
+            
             ref PositionSet positionSet = ref owner.positionSetList.array[traversalIndex];
             positionSet.allocatedPosition = allocatedPosition;
             positionSet.alignedPosition = alignedPosition;
@@ -424,6 +482,7 @@ namespace UIForia.Layout {
             }
 
             Size oldSize = size;
+            pivotY = ResolveFixedWidth(element.style.TransformPivotY);
 
             paddingBox.top = ResolveFixedHeight(element.style.PaddingTop);
             paddingBox.bottom = ResolveFixedHeight(element.style.PaddingBottom);
@@ -461,34 +520,34 @@ namespace UIForia.Layout {
 
             AlignmentBehavior alignmentBehavior = element.style.AlignmentBehaviorY;
             if (alignmentBehavior == AlignmentBehavior.Self) {
-                targetAlignmentVertical.value = element.style.AlignmentOffsetY;
-                targetAlignmentVertical.pivot = element.style.AlignmentPivotY;
-                targetAlignmentVertical.target = element.style.AlignmentTargetY;
+                parentAlignmentVertical.value = element.style.AlignmentOffsetY;
+                parentAlignmentVertical.pivot = element.style.AlignmentPivotY;
+                parentAlignmentVertical.target = element.style.AlignmentTargetY;
             }
             else {
-                targetAlignmentVertical = alignment;
+                parentAlignmentVertical = alignment;
             }
 
-            switch (targetAlignmentVertical.target) {
+            switch (parentAlignmentVertical.target) {
                 case AlignmentTarget.AllocatedBox:
-                    alignedPosition.y = localY + ResolveFixedSize(allocatedHeight, targetAlignmentVertical.value) - (size.height * targetAlignmentVertical.pivot);
+                    alignedPosition.y = localY + ResolveFixedSize(allocatedHeight, parentAlignmentVertical.value) - (size.height * parentAlignmentVertical.pivot);
                     break;
 
                 // todo -- do the following cases need to be offset again by margin size?
                 case AlignmentTarget.Parent:
-                    alignedPosition.y = localY + ResolveFixedSize(parent.size.height, targetAlignmentVertical.value) - (size.height * targetAlignmentVertical.pivot);
+                    alignedPosition.y = localY + ResolveFixedSize(parent.size.height, parentAlignmentVertical.value) - (size.height * parentAlignmentVertical.pivot);
                     break;
 
                 case AlignmentTarget.ParentContentArea:
-                    alignedPosition.y = localY + ResolveFixedSize(parent.size.height - parent.paddingBox.top - parent.paddingBox.bottom, targetAlignmentVertical.value) - (size.height * targetAlignmentVertical.pivot);
+                    alignedPosition.y = localY + ResolveFixedSize(parent.size.height - parent.paddingBox.top - parent.paddingBox.bottom, parentAlignmentVertical.value) - (size.height * parentAlignmentVertical.pivot);
                     break;
 
                 case AlignmentTarget.View:
-                    alignedPosition.y = localY + ResolveFixedSize(element.View.Viewport.height - parent.paddingBox.top - parent.paddingBox.bottom, targetAlignmentVertical.value) - (size.height * targetAlignmentVertical.pivot);
+                    alignedPosition.y = localY + ResolveFixedSize(element.View.Viewport.height - parent.paddingBox.top - parent.paddingBox.bottom, parentAlignmentVertical.value) - (size.height * parentAlignmentVertical.pivot);
                     break;
 
                 case AlignmentTarget.Screen:
-                    alignedPosition.y = localY + ResolveFixedSize(Screen.height - parent.paddingBox.top - parent.paddingBox.bottom, targetAlignmentVertical.value) - (size.height * targetAlignmentVertical.pivot);
+                    alignedPosition.y = localY + ResolveFixedSize(Screen.height - parent.paddingBox.top - parent.paddingBox.bottom, parentAlignmentVertical.value) - (size.height * parentAlignmentVertical.pivot);
                     break;
             }
 
@@ -525,30 +584,15 @@ namespace UIForia.Layout {
 
         public void Layout() {
             // todo -- size check
+            
+            pivotY = ResolveFixedWidth(element.style.TransformPivotY);
+            scaleX = element.style.TransformScaleX;
+            scaleY = element.style.TransformScaleY;
+            rotation = element.style.TransformRotation;
 
-            SVGXMatrix m = localMatrix;
-
-            float pivotX = ResolveFixedWidth(element.style.TransformPivotX);
-            float pivotY = ResolveFixedWidth(element.style.TransformPivotY);
-            float scaleX = element.style.TransformScaleX;
-            float scaleY = element.style.TransformScaleY;
-            float rotation = element.style.TransformRotation;
-
-            // todo -- need to apply alignment here
-            // todo -- ResolveTransformOffset();
-            Vector2 localPosition = alignedPosition;
-
-            localPosition.y = -localPosition.y;
-            m = SVGXMatrix.TRS(localPosition, -rotation, new Vector2(scaleX, scaleY));
-            SVGXMatrix pivotMat = new SVGXMatrix(1, 0, 0, 1, size.width * pivotX, size.height * pivotY);
-            localMatrix = m; //pivotMat * m * new SVGXMatrix(1, 0, 0, 1, -size.width * pivotX, -size.height * pivotY);
-
-            owner.localMatrixList.array[traversalIndex] = localMatrix;
-
-            // todo -- need to use this 
-//            if ((flags & LayoutRenderFlag.NeedsLayout) == 0) {
-//                return;
-//            }
+            if ((flags & LayoutRenderFlag.NeedsLayout) == 0) {
+                return;
+            }
 
             PerformLayout();
 
@@ -567,7 +611,6 @@ namespace UIForia.Layout {
             // todo -- compute content size & local overflow? might need to happen elsewhere
         }
 
-        protected abstract void PerformLayout();
 
         protected virtual void OnChildSizeChanged(FastLayoutBox child) {
             if ((flags & LayoutRenderFlag.NeedsLayout) != 0) {
@@ -579,33 +622,38 @@ namespace UIForia.Layout {
             }
 
             if (prefWidth.unit == UIMeasurementUnit.Content || prefHeight.unit == UIMeasurementUnit.Content) {
-                MarkNeedsLayout();
+                MarkForLayout();
             }
         }
 
-        public void MarkNeedsContentSizeLayout(FastLayoutBox child) {
+        protected virtual void ChildMarkedForLayout(FastLayoutBox child) {
+            
             if ((flags & LayoutRenderFlag.NeedsLayout) != 0) {
                 return;
             }
+            
+            flags |= LayoutRenderFlag.NeedsLayout;
+            owner.toLayout.Add(this);
+               
+            // if this element is not sized based on its content we can stop propagating
+            if (prefWidth.unit != UIMeasurementUnit.Content && prefHeight.unit != UIMeasurementUnit.Content) {
+                return;
+            }
+            
+            parent?.ChildMarkedForLayout(this);    
         }
-
-        public void MarkNeedsLayout() {
+        
+        public void MarkForLayout() {
+            
             if ((flags & LayoutRenderFlag.NeedsLayout) != 0) {
                 return;
             }
 
-            // todo -- relayout boundary is never set.
-            // tough because we might be a boundary on one axis but not another
-            // might be better to use MarkNeedsContentSizeLayout and let the layout box itself decide if it needs to layout
-            // go upwards until we find a relayout boundary
-            if (relayoutBoundary != this && parent != null) {
-                parent.MarkNeedsLayout();
-            }
-            else {
-                // add to root list of nodes needing layout
-                flags |= LayoutRenderFlag.NeedsLayout;
-                owner.toLayout.Add(this);
-            }
+            flags |= LayoutRenderFlag.NeedsLayout;
+            owner.toLayout.Add(this);
+            
+            parent?.ChildMarkedForLayout(this);
+            
         }
 
         public virtual void OnStyleChanged(StructList<StyleProperty> changeList) {
@@ -614,10 +662,13 @@ namespace UIForia.Layout {
             int count = changeList.size;
             StyleProperty[] properties = changeList.array;
 
+            bool sizeChanged = false;
+            
             for (int i = 0; i < count; i++) {
                 ref StyleProperty property = ref properties[i];
 
                 switch (property.propertyId) {
+                    
                     case StylePropertyId.PaddingLeft:
                         paddingBox.left = ResolveFixedWidth(property.AsUIFixedLength);
                         marked = true;
@@ -693,16 +744,19 @@ namespace UIForia.Layout {
 
                     case StylePropertyId.PreferredWidth:
                         prefWidth = property.AsUIMeasurement;
+                        sizeChanged = true;
                         marked = true;
                         break;
 
                     case StylePropertyId.PreferredHeight:
                         prefHeight = property.AsUIMeasurement;
+                        sizeChanged = true;
                         marked = true;
                         break;
 
                     case StylePropertyId.MinWidth:
                         minWidth = property.AsUIMeasurement;
+                        sizeChanged = true;
                         marked = true;
                         break;
 
@@ -713,11 +767,13 @@ namespace UIForia.Layout {
 
                     case StylePropertyId.MaxWidth:
                         maxWidth = property.AsUIMeasurement;
+                        sizeChanged = true;
                         marked = true;
                         break;
 
                     case StylePropertyId.MaxHeight:
                         maxHeight = property.AsUIMeasurement;
+                        sizeChanged = true;
                         marked = true;
                         break;
 
@@ -745,10 +801,28 @@ namespace UIForia.Layout {
                     case StylePropertyId.OverflowY:
                         // overflowY = property.AsOverflow;
                         break;
+                    case StylePropertyId.AlignmentOffsetX:
+                        break;
+                    
+                    case StylePropertyId.AlignmentOffsetY:
+                        break;
+                    
+                    case StylePropertyId.TransformPositionX:
+                        transformPositionX = property.AsTransformOffset;
+                        break;
+                    
+                    case StylePropertyId.TransformPositionY:
+                        transformPositionY = property.AsTransformOffset;
+                        break;
+                        
                 }
             }
 
-            if (marked) {
+            if(marked) {
+                MarkForLayout();
+            }
+            
+            if (sizeChanged) {
                 parent?.OnChildSizeChanged(this);
             }
 

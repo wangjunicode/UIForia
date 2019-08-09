@@ -7,6 +7,7 @@ using UIForia.Layout.LayoutTypes;
 using UIForia.Rendering;
 using UIForia.Systems;
 using UIForia.Util;
+using Unity.Mathematics;
 using UnityEngine;
 
 
@@ -52,7 +53,7 @@ namespace UIForia.Layout {
             this.toLayout = new LightList<FastLayoutBox>(16);
             this.tempChildList = new LightList<FastLayoutBox>(16);
             this.clipGroups = new LightList<ClipGroup>();
-            
+
             this.layoutBoxPoolMap = new Dictionary<int, FastLayoutBoxPool>();
             this.layoutBoxPoolMap[(int) LayoutType.Flex] = new FastLayoutBoxPool<FastFlexLayoutBox>();
             this.layoutBoxPoolMap[(int) LayoutType.Grid] = new FastLayoutBoxPool<FastGridLayoutBox>();
@@ -66,10 +67,6 @@ namespace UIForia.Layout {
             // if nothing to layout, just return and be done with it
             // might be able to short cut the traversal gather step if nothing was enabled / disabled this frame
 
-            if (toLayout.size == 0 && enabledThisFrame.size == 0) {
-                return;
-            }
-            
             enabledThisFrame.QuickClear();
 
             // todo -- should really just be number of enabled elements
@@ -80,25 +77,29 @@ namespace UIForia.Layout {
             sizeSetList.EnsureCapacity(elementCount);
             positionSetList.EnsureCapacity(elementCount);
 
+
+            // if (toLayout.size > 0 || enabledThisFrame.size > 0) {
             GatherBoxData();
 
             UpdateLayout();
+            //  }
+
+            UpdateAlignments();
 
             ComputeWorldTransforms();
 
             GatherClipGroups();
 
             SortClipGroups();
-            
+
             OutputLayoutResults();
 
             view.visibleElements.EnsureCapacity(enabledBoxList.size);
             view.visibleElements.size = enabledBoxList.size;
+
             for (int i = 0; i < enabledBoxList.size; i++) {
                 view.visibleElements.array[i] = enabledBoxList.array[i].element;
             }
-            
-            Render();
 
             // can even do in parallel with matrix transforms since the gather phase has no dependencies on it
             // now can cull w/ jobs in parallel! fuck yeah! (might have to join all our threads before dishing out to job system)
@@ -132,7 +133,7 @@ namespace UIForia.Layout {
                 layoutResult.clipRect = new Rect(0, 0, Screen.width, Screen.height); // todo -- temp
             }
         }
-        
+
         private void GatherBoxData() {
             LayoutData[] enabledBoxes = enabledBoxList.array;
             SVGXMatrix[] localMatrices = localMatrixList.array;
@@ -167,13 +168,26 @@ namespace UIForia.Layout {
 
                 bool parentEnabledThisFrame = (data.element.flags & UIElementFlags.EnabledThisFrame) != 0;
 
+                // option 1 -- unset previous traversal indices from all children before processing next batch
+                // option 2 -- sort when children are added, would need callback for index changed
+                // option 3 -- array diff
+                // option 4 -- use element.traversalIndex
+
                 for (int i = 0; i < childCount; i++) {
                     UIElement childElement = childrenElements[i];
 
-                    if (!childElement.isEnabled) continue;
+                    if (!childElement.isEnabled) {
+                        if (childElement.layoutBox?.parent != null) {
+                            data.layoutBox.RemoveChild(childElement.layoutBox);
+                            childElement.layoutBox.parent = null;
+                        }
 
+                        continue;
+                    }
+                    
                     FastLayoutBox childBox = childElement.layoutBox;
 
+                    // todo -- EnabledThisFrame is borked because input runs after layout and we enable on click
                     if (childBox == null || (childElement.flags & UIElementFlags.EnabledThisFrame) != 0) {
                         // apply up-chain selectors
                         // update style data
@@ -181,6 +195,7 @@ namespace UIForia.Layout {
                         // create render box
 
                         childBox = CreateOrUpdateLayoutBox(childElement);
+                        childBox.traversalIndex = idx;
                         childElement.layoutBox = childBox;
 
                         if (parentEnabledThisFrame) {
@@ -202,19 +217,24 @@ namespace UIForia.Layout {
 
                         sizeSets[idx] = sizeSet;
                         positionSets[idx] = positionSet;
-                        localMatrices[idx] = childBox.localMatrix;
+                        childBox.traversalIndex = idx;
+
+                        // localMatrices[idx] = childBox.localMatrix;
                     }
 
                     // overflowX & Y, clip behavior, scroll behavior, other shit from style that doesn't change at this point
 
-                    childBox.traversalIndex = idx;
                     enabledBoxes[idx] = new LayoutData() {
                         idx = idx,
                         parentIndex = data.idx,
                         element = childElement,
                         layoutBox = childBox
                     };
-
+#if DEBUG
+                    if ((childBox.element.flags & UIElementFlags.DebugLayout) != 0) {
+                        System.Diagnostics.Debugger.Break();
+                    }
+#endif
                     queue.Enqueue(idx);
 
                     idx++;
@@ -224,8 +244,6 @@ namespace UIForia.Layout {
 
                 if (parentEnabledThisFrame) {
                     data.layoutBox.SetChildren(tempChildList);
-                    // todo -- this can't be done in a system since it is a shared flag
-                    // data.element.flags &= ~UIElementFlags.EnabledThisFrame;
                     tempChildList.QuickClear();
                 }
             }
@@ -262,7 +280,167 @@ namespace UIForia.Layout {
                 return;
             }
 
+            // maybe add to-layout parent?
             enabledThisFrame.Remove(element);
+        }
+
+        private void UpdateAlignments() {
+            LayoutData[] enabledBoxes = enabledBoxList.array;
+            SVGXMatrix[] localMatrices = localMatrixList.array;
+
+            SVGXMatrix pivot = SVGXMatrix.identity;
+            SVGXMatrix inversePivot = pivot;
+
+            float viewportWidth = view.Viewport.width;
+            float viewportHeight = view.Viewport.height;
+
+            // todo -- this can be done without dereferencing box or parent
+
+            for (int i = 0; i < enabledBoxList.size; i++) {
+                FastLayoutBox box = enabledBoxes[i].layoutBox;
+
+                // also if no changes in here we don't need to rebuild clip groups if we also didn't layout 
+                // same for world matrix computation
+                // todo -- lots of ways to avoid doing this. only need it for self aligning things or things with a transform position not in pixels
+
+                Vector2 alignedPosition = box.alignedPosition;
+                float localX = box.allocatedPosition.x;
+                float localY = box.allocatedPosition.y;
+
+                float horizontalOffset = (box.size.width * box.parentAlignmentVertical.pivot);
+                float verticalOffset = (box.size.height * box.parentAlignmentVertical.pivot);
+
+                float baseSizeX = 0;
+                float baseSizeY = 0;
+
+                switch (box.parentAlignmentHorizontal.target) {
+                    case AlignmentTarget.AllocatedBox:
+                        baseSizeX = box.allocatedSize.width;
+                        break;
+
+                    // todo -- do the following cases need to be offset again by margin size?
+                    case AlignmentTarget.Parent:
+                        baseSizeX = box.parent.allocatedSize.width;
+                        break;
+
+                    case AlignmentTarget.ParentContentArea:
+                        baseSizeX = box.parent.allocatedSize.width - box.parent.paddingBox.left - box.parent.paddingBox.right - box.parent.borderBox.left - box.parent.borderBox.right;
+                        break;
+
+                    case AlignmentTarget.View:
+                        baseSizeX = viewportWidth;
+                        break;
+
+                    case AlignmentTarget.Screen:
+                        baseSizeX = Screen.width;
+                        break;
+                }
+
+                switch (box.parentAlignmentVertical.target) {
+                    case AlignmentTarget.AllocatedBox:
+                        baseSizeY = box.allocatedSize.height;
+                        break;
+
+                    // todo -- do the following cases need to be offset again by margin size?
+                    case AlignmentTarget.Parent:
+                        baseSizeY = box.parent.allocatedSize.height;
+                        break;
+
+                    case AlignmentTarget.ParentContentArea:
+                        baseSizeY = box.parent.allocatedSize.height - box.parent.paddingBox.top - box.parent.paddingBox.bottom - box.parent.borderBox.top - box.parent.borderBox.bottom;
+                        break;
+
+                    case AlignmentTarget.View:
+                        baseSizeY = viewportHeight;
+                        break;
+
+                    case AlignmentTarget.Screen:
+                        baseSizeY = Screen.height;
+                        break;
+                }
+
+                float valueX = box.parentAlignmentHorizontal.value.value;
+                float valueY = box.parentAlignmentVertical.value.value;
+//                switch (box.parentAlignmentHorizontal.value.unit) {
+//                    case UIFixedUnit.Pixel:
+//                        alignedPosition.x = localX + valueX;
+//                        break;
+//
+//                    case UIFixedUnit.Percent:
+//                        alignedPosition.x = localX + baseSizeX * valueX;
+//                        break;
+//
+//                    case UIFixedUnit.ViewportHeight:
+//                        alignedPosition.x = localX + viewportHeight * valueX;
+//                        break;
+//
+//                    case UIFixedUnit.ViewportWidth:
+//                        alignedPosition.x = localX + viewportWidth * valueX;
+//                        break;
+//
+//                    case UIFixedUnit.Em:
+//                        alignedPosition.x = localX + box.element.style.GetResolvedFontSize() * valueX;
+//                        break;
+//                    default:
+//                        alignedPosition.x = localX;
+//                        break;
+//                }
+//
+//                switch (box.parentAlignmentVertical.value.unit) {
+//                    case UIFixedUnit.Pixel:
+//                        alignedPosition.y = localY + valueY;
+//                        break;
+//
+//                    case UIFixedUnit.Percent:
+//                        alignedPosition.y = localY + baseSizeY * valueY;
+//                        break;
+//
+//                    case UIFixedUnit.ViewportHeight:
+//                        alignedPosition.y = localY + viewportHeight * valueY;
+//                        break;
+//
+//                    case UIFixedUnit.ViewportWidth:
+//                        alignedPosition.y = localY + viewportWidth * valueY;
+//                        break;
+//
+//                    case UIFixedUnit.Em:
+//                        alignedPosition.y = localY + box.element.style.GetResolvedFontSize() * valueY;
+//                        break;
+//                    default:
+//                        alignedPosition.y = localY;
+//                        break;
+//                }
+
+
+//                alignedPosition.x += horizontalOffset;
+//                alignedPosition.y += verticalOffset;
+//                alignedPosition.x += box.transformPositionX.value;
+//                alignedPosition.y += box.transformPositionY.value;
+//                alignedPosition.y = -alignedPosition.y;
+
+                SVGXMatrix m;
+
+                if (box.rotation == 0) {
+                    m = new SVGXMatrix(box.scaleX, 0, 0, box.scaleY, alignedPosition.x, -alignedPosition.y);
+                }
+                else {
+                    float ca = math.cos(-box.rotation * Mathf.Deg2Rad);
+                    float sa = math.sin(-box.rotation * Mathf.Deg2Rad);
+                    m = new SVGXMatrix(ca * box.scaleX, sa * box.scaleX, -sa * box.scaleY, ca * box.scaleY, alignedPosition.x, -alignedPosition.y);
+                }
+
+                if (box.pivotX == 0 && box.pivotY == 0) {
+                    localMatrices[i] = m;
+                }
+                else {
+                    pivot.m4 = box.pivotX * box.size.width;
+                    pivot.m5 = box.pivotY * box.size.height;
+                    inversePivot.m4 = -pivot.m4;
+                    inversePivot.m5 = -pivot.m5;
+
+                    localMatrices[i] = pivot * m * inversePivot;
+                }
+            }
         }
 
 
@@ -279,19 +457,17 @@ namespace UIForia.Layout {
 
                 for (int j = start; j < end; j++) {
                     SVGXMatrix m = localMatrices[j];
-//                    worldMatrices[j] = new SVGXMatrix(
-//                        parentMatrix.m0 * m.m0 + parentMatrix.m2 * m.m1,
-//                        parentMatrix.m1 * m.m0 + parentMatrix.m3 * m.m1,
-//                        parentMatrix.m0 * m.m2 + parentMatrix.m2 * m.m3,
-//                        parentMatrix.m1 * m.m2 + parentMatrix.m3 * m.m3,
-//                        parentMatrix.m0 * m.m4 + parentMatrix.m2 * m.m5 + parentMatrix.m4,
-//                        parentMatrix.m1 * m.m4 + parentMatrix.m3 * m.m5 + parentMatrix.m5
-//                    );
-                    worldMatrices[j] = parentMatrix* m;
+                    worldMatrices[j] = new SVGXMatrix(
+                        parentMatrix.m0 * m.m0 + parentMatrix.m2 * m.m1,
+                        parentMatrix.m1 * m.m0 + parentMatrix.m3 * m.m1,
+                        parentMatrix.m0 * m.m2 + parentMatrix.m2 * m.m3,
+                        parentMatrix.m1 * m.m2 + parentMatrix.m3 * m.m3,
+                        parentMatrix.m0 * m.m4 + parentMatrix.m2 * m.m5 + parentMatrix.m4,
+                        parentMatrix.m1 * m.m4 + parentMatrix.m3 * m.m5 + parentMatrix.m5
+                    );
                 }
             }
         }
-
 
 
         // walk through adding clip groups
@@ -302,7 +478,6 @@ namespace UIForia.Layout {
         // clip root defines group, can be compared per frame
 
         private void GatherClipGroups() {
-            
             LayoutData[] enabledBoxes = enabledBoxList.array;
 
             clipGroups[0] = new ClipGroup() {root = enabledBoxes[0].layoutBox, members = new LightList<FastLayoutBox>()};
@@ -343,38 +518,34 @@ namespace UIForia.Layout {
         }
 
         public void SortClipGroups() {
-            
             for (int i = 0; i < clipGroups.size; i++) {
                 clipGroups[i].members.Sort(s_DepthComparer);
             }
 
             clipGroups.Sort((a, b) => a.root.traversalIndex - b.root.traversalIndex);
-            
         }
 
         public void ApplyBroadPhaseCulling() {
-            
             // for each element
-                
-                // if element.clipBehavior == Clip.Never
-                // if element.clipBehavior == Clip.Normal
-                // if element.clipBehavior == Clip.View
-                // if element.clipBehavior == Clip.Screen
-                // if element.visibility == Visibility.None
 
-                
-                
-                // if !element.renderBox.ClipTest(clipShape, view)
-                //    continue;
-                // if !element.isEnabled || failedClipTest
-                //    continue;
-                // clip group.Add(element)
-                //    
-                
+            // if element.clipBehavior == Clip.Never
+            // if element.clipBehavior == Clip.Normal
+            // if element.clipBehavior == Clip.View
+            // if element.clipBehavior == Clip.Screen
+            // if element.visibility == Visibility.None
+
+
+            // if !element.renderBox.ClipTest(clipShape, view)
+            //    continue;
+            // if !element.isEnabled || failedClipTest
+            //    continue;
+            // clip group.Add(element)
+            //    
+
             // standard painter
-                // if size.width || size.height == 0
-                    // return
-                
+            // if size.width || size.height == 0
+            // return
+
             // for each clip group
             // if group is off screen, cull whole group
             // if group is not overlapping its parent group, cull whole group
@@ -382,33 +553,16 @@ namespace UIForia.Layout {
             // if element corners not inside outer clip shape (polygon, circle, ellipse, rect)
             // clip element
             // would be nice to know if any descendent element is aligned or transformed outside its parent bounds (compute at layout time)
-            
+
             // if no elements visible in group, remove em all
             // if element visibility is hidden -> clip children
-            
+
             // within each clip group
             // if a painter sets a clip we need to respect it
-            
-            // view has a content group that is clipped to the view rect and an overlay group that is submitted to the same batch as the view itself with 
-            
-        }
- 
-        public void Render() {
 
-            // do in parallel!
-            // want to flatten each clip group by z-index & respect foreground render if present.
-            // if painter type changed need to re-allocate a render box for the element
-            
-            // visibility affects children regardless of z-index
-            // z-index does not change clip behavior
-            
-            // clipBehavior = Parent | View | Screen | Never
-            
-            for (int i = 0; i < clipGroups.size; i++) {
-                
-            }
-            
+            // view has a content group that is clipped to the view rect and an overlay group that is submitted to the same batch as the view itself with 
         }
+
 
         public void Release() { }
 
@@ -511,7 +665,7 @@ namespace UIForia.Layout {
 
         private static bool PointInClippedArea(Vector2 point, UIElement element) {
             Vector2 screenPosition = element.layoutResult.screenPosition;
-            
+
             if (element.style.OverflowX != Overflow.Visible) {
                 if (point.x < screenPosition.x || point.x > screenPosition.x + element.layoutResult.allocatedSize.width) {
                     return true;
@@ -526,10 +680,10 @@ namespace UIForia.Layout {
 
             return false;
         }
-        
+
         public void GetElementsAtPoint(Vector2 point, IList<UIElement> retn) {
             LayoutData[] layoutDatas = enabledBoxList.array;
-            
+
             for (int i = 0; i < enabledBoxList.size; i++) {
                 UIElement element = layoutDatas[i].element;
 
@@ -559,7 +713,6 @@ namespace UIForia.Layout {
 
                 retn.Add(element);
             }
-            
         }
 
     }

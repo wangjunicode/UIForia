@@ -3,15 +3,14 @@ using System.Collections.Generic;
 using UIForia.Bindings;
 using UIForia.Elements;
 using UIForia.Expressions;
+using UIForia.Extensions;
 using UIForia.Parsing.Expression;
 using UIForia.Util;
 
 namespace UIForia.Templates {
 
     public class UITextSpanTemplate : UITemplate {
-
-        private static readonly TextElementParser textParser = new TextElementParser();
-
+        
         public string RawText { get; }
 
         public UITextSpanTemplate(Application app, string rawText, List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null) : base(app, childTemplates, attributes) {
@@ -29,29 +28,33 @@ namespace UIForia.Templates {
         }
 
         public override void Compile(ParsedTemplate template) {
-            // todo -- if part is constant and value is empty string, remove it
-            string[] expressionParts = textParser.Parse(RawText);
+            StructList<TextExpression> list = StructList<TextExpression>.Get();
+            
+            TextTemplateProcessor.ProcessTextExpressions(RawText, list);
 
-            List<Expression<string>> expressionList = ListPool<Expression<string>>.Get();
-
-            for (int i = 0; i < expressionParts.Length; i++) {
-                if (expressionParts[i] == "''") {
-                    continue;
+            LightList<Expression<string>> expressionList = LightList<Expression<string>>.Get();
+            
+            expressionList.EnsureCapacity(list.size);
+            
+            for (int i = 0; i < list.size; i++) {
+                Expression<string> expression;
+                if (list[i].isExpression) {
+                    expression = template.compiler.Compile<string>(template.RootType, elementType, list[i].text);
+                }
+                else {
+                    expression = new LiteralExpression_String(list[i].text);
                 }
 
-                Expression<string> expression = template.compiler.Compile<string>(template.RootType, elementType, expressionParts[i]);
                 expressionList.Add(expression);
             }
 
-            // todo -- if constant, try to merge bindings. This probably happens in the binding system
-            // todo    because we need to have access to the element and an expression context
-
+            StructList<TextExpression>.Release(ref list);
+            
             if (expressionList.Count == 1) {
                 Binding binding = new TextBinding_Single(expressionList[0]);
                 if (binding.IsConstant()) {
                     binding.bindingType = BindingType.Constant;
                 }
-
                 s_BindingList.Add(binding);
             }
             else if (expressionList.Count > 1) {
@@ -59,11 +62,10 @@ namespace UIForia.Templates {
                 if (binding.IsConstant()) {
                     binding.bindingType = BindingType.Constant;
                 }
-
                 s_BindingList.Add(binding);
             }
 
-            ListPool<Expression<string>>.Release(ref expressionList);
+            LightList<Expression<string>>.Release(ref expressionList);
 
             base.Compile(template);
         }

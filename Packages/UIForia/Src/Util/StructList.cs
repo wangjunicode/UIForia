@@ -194,101 +194,21 @@ namespace UIForia.Util {
             size -= count;
         }
 
-
-        private void QuickSort(Comparison<T> comparison, int low, int high) {
-            while (true) {
-                if (low < high) {
-                    int partition = Partition(comparison, low, high);
-                    QuickSort(comparison, low, partition - 1);
-                    low = partition + 1;
-                    continue;
-                }
-
-                break;
-            }
-        }
-
-        private void QuickSort(IComparer<T> comparison, int low, int high) {
-            while (true) {
-                if (low < high) {
-                    int partition = Partition(comparison, low, high);
-                    QuickSort(comparison, low, partition - 1);
-                    low = partition + 1;
-                    continue;
-                }
-
-                break;
-            }
-        }
-
-        private int Partition(Comparison<T> comparison, int low, int high) {
-            T temp;
-            T pivot = array[high];
-
-            int i = (low - 1);
-            for (int j = low; j <= high - 1; j++) {
-                if (comparison(array[j], pivot) <= 0) {
-                    i++;
-
-                    temp = array[i];
-                    array[i] = array[j];
-                    array[j] = temp;
-                }
-            }
-
-            temp = array[i + 1];
-            array[i + 1] = array[high];
-            array[high] = temp;
-
-            return i + 1;
-        }
-
-        private int Partition(IComparer<T> comparison, int low, int high) {
-            T temp;
-            T pivot = array[high];
-
-            int i = (low - 1);
-            for (int j = low; j <= high - 1; j++) {
-                if (comparison.Compare(array[j], pivot) <= 0) {
-                    i++;
-
-                    temp = array[i];
-                    array[i] = array[j];
-                    array[j] = temp;
-                }
-            }
-
-            temp = array[i + 1];
-            array[i + 1] = array[high];
-            array[high] = temp;
-
-            return i + 1;
-        }
-
-        public void Sort(Comparison<T> comparison) {
-            if (size < 2) return;
-            QuickSort(comparison, 0, size - 1);
-        }
-
-        public void Sort(Comparison<T> comparison, int start, int end) {
-            if (size < 2) return;
-            if (start < 0) start = 0;
-            if (start >= size) start = size - 1;
-            if (end >= size) end = size - 1;
-            QuickSort(comparison, start, end);
-        }
-
-        public void Sort(IComparer<T> comparison, int start, int end) {
-            if (size < 2) return;
-            if (start < 0) start = 0;
-            if (start >= size) start = size - 1;
-            if (end >= size) end = size - 1;
-            QuickSort(comparison, start, end);
-        }
-
         public void Sort(IComparer<T> comparison) {
             if (size < 2) return;
-            QuickSort(comparison, 0, size - 1);
+            IntroSort(array, 0, size - 1, 2 * FloorLog2(size), comparison);
+        }
+
+        public void Sort(int start, int length, IComparer<T> comparison) {
+            if (size < 2) return;
+            IntroSort(array, start, length + start - 1, 2 * FloorLog2(length), comparison);
+        }
+
+        internal static int FloorLog2(int n) {
+            int num = 0;
+            for (; n >= 1; n /= 2)
+                ++num;
+            return num;
         }
 
         public StructList<T> GetRange(int index, int count, StructList<T> retn = null) {
@@ -330,6 +250,119 @@ namespace UIForia.Util {
             return retn;
         }
 
+        private static void SwapIfGreater(T[] keys, IComparer<T> comparer, int a, int b) {
+            if (a == b || comparer.Compare(keys[a], keys[b]) <= 0)
+                return;
+            T key = keys[a];
+            keys[a] = keys[b];
+            keys[b] = key;
+        }
+
+        private static void Swap(T[] a, int i, int j) {
+            if (i == j)
+                return;
+            T obj = a[i];
+            a[i] = a[j];
+            a[j] = obj;
+        }
+
+        private static void IntroSort(T[] keys, int lo, int hi, int depthLimit, IComparer<T> comparer) {
+            int num1;
+            for (; hi > lo; hi = num1 - 1) {
+                int num2 = hi - lo + 1;
+                if (num2 <= 16) {
+                    if (num2 == 1)
+                        break;
+                    if (num2 == 2) {
+                        SwapIfGreater(keys, comparer, lo, hi);
+                        break;
+                    }
+
+                    if (num2 == 3) {
+                        SwapIfGreater(keys, comparer, lo, hi - 1);
+                        SwapIfGreater(keys, comparer, lo, hi);
+                        SwapIfGreater(keys, comparer, hi - 1, hi);
+                        break;
+                    }
+
+                    InsertionSort(keys, lo, hi, comparer);
+                    break;
+                }
+
+                if (depthLimit == 0) {
+                    Heapsort(keys, lo, hi, comparer);
+                    break;
+                }
+
+                --depthLimit;
+                num1 = PickPivotAndPartition(keys, lo, hi, comparer);
+                IntroSort(keys, num1 + 1, hi, depthLimit, comparer);
+            }
+        }
+
+        private static int PickPivotAndPartition(T[] keys, int lo, int hi, IComparer<T> comparer) {
+            int index = lo + (hi - lo) / 2;
+            SwapIfGreater(keys, comparer, lo, index);
+            SwapIfGreater(keys, comparer, lo, hi);
+            SwapIfGreater(keys, comparer, index, hi);
+            T key = keys[index];
+            Swap(keys, index, hi - 1);
+            int i = lo;
+            int j = hi - 1;
+            while (i < j) {
+                do
+                    ;
+                while (comparer.Compare(keys[++i], key) < 0);
+                do
+                    ;
+                while (comparer.Compare(key, keys[--j]) < 0);
+                if (i < j)
+                    Swap(keys, i, j);
+                else
+                    break;
+            }
+
+            Swap(keys, i, hi - 1);
+            return i;
+        }
+
+        private static void Heapsort(T[] keys, int lo, int hi, IComparer<T> comparer) {
+            int n = hi - lo + 1;
+            for (int i = n / 2; i >= 1; --i)
+                DownHeap(keys, i, n, lo, comparer);
+            for (int index = n; index > 1; --index) {
+                Swap(keys, lo, lo + index - 1);
+                DownHeap(keys, 1, index - 1, lo, comparer);
+            }
+        }
+
+        private static void DownHeap(T[] keys, int i, int n, int lo, IComparer<T> comparer) {
+            T key = keys[lo + i - 1];
+            int num;
+            for (; i <= n / 2; i = num) {
+                num = 2 * i;
+                if (num < n && comparer.Compare(keys[lo + num - 1], keys[lo + num]) < 0)
+                    ++num;
+                if (comparer.Compare(key, keys[lo + num - 1]) < 0)
+                    keys[lo + i - 1] = keys[lo + num - 1];
+                else
+                    break;
+            }
+
+            keys[lo + i - 1] = key;
+        }
+
+        private static void InsertionSort(T[] keys, int lo, int hi, IComparer<T> comparer) {
+            for (int index1 = lo; index1 < hi; ++index1) {
+                int index2 = index1;
+                T key;
+                for (key = keys[index1 + 1]; index2 >= lo && comparer.Compare(key, keys[index2]) < 0; --index2)
+                    keys[index2 + 1] = keys[index2];
+                keys[index2 + 1] = key;
+            }
+        }
+
+
         public void Release() {
             Clear();
             if (isInPool) return;
@@ -369,8 +402,9 @@ namespace UIForia.Util {
         }
 
         public void RemoveAt(int index) {
+            --size;
             System.Array.Copy(array, index + 1, array, index, size - index);
-            array[size--] = default;
+            array[size] = default;
         }
 
         public void SwapRemoveAt(int index) {
@@ -389,7 +423,6 @@ namespace UIForia.Util {
 
         public void InsertRange(int index, StructList<T> items) {
             EnsureAdditionalCapacity(items.size);
-            
             if (index < size) {
                 System.Array.Copy(array, index, array, index + items.size, size - index);
             }

@@ -8,7 +8,7 @@ namespace Documentation {
 
         public static string defaultRoute = "/index";
 
-        public override void OnCreate() {
+        public override void OnEnable() {
             Application.RoutingSystem.FindRouter("demo").GoTo(defaultRoute);
         }
     }

@@ -16,6 +16,8 @@ namespace UIForia.Rendering {
         public StructList<int> triangleList;
         public Texture mainTexture;
         public Vector4 miscData;
+        public Vector4 clipUVs;
+        public Texture clipTexture;
 
 
         public UIForiaGeometry() {
@@ -378,16 +380,24 @@ namespace UIForia.Rendering {
 
             uv0.x = 0;
             uv0.y = 1;
+            uv0.z = width;
+            uv0.w = height;
 
             uv1.x = 1;
             uv1.y = 1;
-
+            uv1.z = width;
+            uv1.w = height;
+            
             uv2.x = 1;
             uv2.y = 0;
-
+            uv2.z = width;
+            uv2.w = height;
+            
             uv3.x = 0;
             uv3.y = 0;
-
+            uv3.z = width;
+            uv3.w = height;
+            
             triangles[startTriangle + 0] = startVert + 0;
             triangles[startTriangle + 1] = startVert + 1;
             triangles[startTriangle + 2] = startVert + 2;
@@ -397,6 +407,7 @@ namespace UIForia.Rendering {
 
             Mesh retn = new Mesh();
             retn.vertices = positions;
+            retn.triangles = triangles;
             retn.SetUVs(0, new List<Vector4>(texCoord0));
 
             return retn;

@@ -28,7 +28,9 @@ namespace UIForia.Rendering {
         BlitRenderTexture,
         SetScissorRect,
         SetCameraViewMatrix,
-        SetCameraProjectionMatrix
+        SetCameraProjectionMatrix,
+
+        PopRenderTexture
 
     }
 
@@ -43,7 +45,7 @@ namespace UIForia.Rendering {
         public RenderOperation(int batchIndex) {
             this.batchIndex = batchIndex;
             this.operationType = RenderOperationType.DrawBatch;
-            
+
             this.rect = default;
             this.renderTexture = null;
             this.color = default;
@@ -89,7 +91,7 @@ namespace UIForia.Rendering {
         private readonly StructList<Batch> pendingBatches;
         private RenderTexture pingPongTexture;
         private readonly StructStack<RenderArea> areaStack;
-        
+
         static RenderContext() {
             int maxTextureSize = SystemInfo.maxTextureSize;
             s_MaxTextureSize = Mathf.Min(maxTextureSize, 4096);
@@ -171,6 +173,11 @@ namespace UIForia.Rendering {
         }
 
         public void DrawBatchedText(UIForiaGeometry geometry, in GeometryRange range, in Matrix4x4 transform, in FontData fontData) {
+            
+            if (currentBatch.uiforiaData?.transformData.size + 1 >= k_ObjectCount_Huge) {
+                FinalizeCurrentBatch(false);  
+            }
+            
             if (currentBatch.batchType == BatchType.Custom) {
                 FinalizeCurrentBatch(false);
             }
@@ -197,6 +204,11 @@ namespace UIForia.Rendering {
         }
 
         public void DrawBatchedGeometry(UIForiaGeometry geometry, in GeometryRange range, in Matrix4x4 transform) {
+            
+            if (currentBatch.uiforiaData?.transformData.size + 1 >= k_ObjectCount_Huge) {
+                  FinalizeCurrentBatch(false);  
+            }
+            
             if (currentBatch.batchType == BatchType.Custom) {
                 FinalizeCurrentBatch(false);
             }
@@ -213,9 +225,11 @@ namespace UIForia.Rendering {
             }
 
             currentBatch.uiforiaData.mainTexture = geometry.mainTexture != null ? geometry.mainTexture : currentBatch.uiforiaData.mainTexture;
+            currentBatch.uiforiaData.clipTexture = geometry.clipTexture != null ? geometry.clipTexture : currentBatch.uiforiaData.clipTexture;
             currentBatch.uiforiaData.colors.Add(geometry.packedColors);
             currentBatch.uiforiaData.objectData0.Add(geometry.objectData);
             currentBatch.uiforiaData.objectData1.Add(geometry.miscData);
+            currentBatch.uiforiaData.clipUVs.Add(geometry.clipUVs);
             currentBatch.uiforiaData.transformData.Add(transform);
 
             UpdateUIForiaGeometry(geometry, range);
@@ -225,7 +239,7 @@ namespace UIForia.Rendering {
             int start = positionList.size;
             int vertexCount = range.vertexEnd - range.vertexStart;
             int triangleCount = range.triangleEnd - range.triangleStart;
-            
+
             positionList.AddRange(geometry.positionList, range.vertexStart, vertexCount);
             texCoordList0.AddRange(geometry.texCoordList0, range.vertexStart, vertexCount);
             texCoordList1.AddRange(geometry.texCoordList1, range.vertexStart, vertexCount);
@@ -252,12 +266,12 @@ namespace UIForia.Rendering {
         private void FinalizeCurrentBatch(bool cloneMaterial = true) {
             // if have pending things to draw, create batch from them
 
-          
 
             if (currentBatch.batchType == BatchType.UIForia) {
                 if (positionList.size == 0) {
                     return;
                 }
+
                 // select material based on batch size
                 PooledMesh mesh = uiforiaMeshPool.Get(); // todo -- maybe worth trying to find a large mesh
                 UIForiaPropertyBlock propertyBlock = uiforiaMaterialPool.GetPropertyBlock(currentBatch.drawCallSize);
@@ -292,6 +306,7 @@ namespace UIForia.Rendering {
                 if (positionList.size == 0) {
                     return;
                 }
+
                 PooledMesh mesh = uiforiaMeshPool.Get(); // todo -- maybe worth trying to find a large mesh
                 int vertexCount = positionList.size;
                 int triangleCount = triangleList.size;
@@ -437,13 +452,29 @@ namespace UIForia.Rendering {
             });
         }
 
+        public void SetRenderTexture(RenderTexture texture) {
+            if (texture == null) {
+                renderCommandList.Add(new RenderOperation() {
+                    operationType = RenderOperationType.PopRenderTexture,
+                    renderTexture = texture
+                });
+            }
+            else {
+                renderCommandList.Add(new RenderOperation() {
+                    operationType = RenderOperationType.PushRenderTexture,
+                    renderTexture = texture,
+                    rect = new SimpleRectPacker.PackedRect()
+                });
+            }
+        }
+
         public RenderArea PushRenderArea(SizeInt size, in Color? clearColor = null) {
             SimpleRectPacker packer = null;
             RenderTexture renderTexture = null;
             SimpleRectPacker.PackedRect rect = default;
 
             FinalizeCurrentBatch(false);
-            
+
             for (int i = 0; i < scratchTextures.size; i++) {
                 if (scratchTextures.array[i].packer.TryPackRect(size.width, size.height, out rect)) {
                     packer = scratchTextures.array[i].packer;
@@ -491,8 +522,8 @@ namespace UIForia.Rendering {
 
         public RenderArea PopRenderArea() {
             FinalizeCurrentBatch(false);
-            
-         //   EffectData effectData = effectStack.PopUnchecked();
+
+            //   EffectData effectData = effectStack.PopUnchecked();
 
 //            currentBatch.material = effectData.material;
 //            currentBatch.batchType = BatchType.Custom;
@@ -500,12 +531,12 @@ namespace UIForia.Rendering {
 //            
             renderCommandList.Add(new RenderOperation() {
                 operationType = RenderOperationType.BlitRenderTexture,
-               // batchIndex = pendingBatches.size
+                // batchIndex = pendingBatches.size
             });
 //            
 //            pendingBatches.Add(currentBatch);
 //            currentBatch = new Batch();
-            
+
             RenderArea area = areaStack.Pop();
             // todo -- mark area as free
             return area;
@@ -525,8 +556,8 @@ namespace UIForia.Rendering {
             // assert camera & has texture
 
             Vector3 cameraOrigin = camera.transform.position;
-          // cameraOrigin.x -= 0.5f * Screen.width;
-         //  cameraOrigin.y += (0.5f * Screen.height);
+            cameraOrigin.x -= 0.5f * Screen.width;
+            cameraOrigin.y += (0.5f * Screen.height);
             cameraOrigin.z += 2;
 
             Matrix4x4 origin = Matrix4x4.TRS(cameraOrigin, Quaternion.identity, Vector3.one);
@@ -549,22 +580,22 @@ namespace UIForia.Rendering {
                             commandBuffer.DrawMesh(batch.pooledMesh.mesh, origin, uiForiaPropertyBlock.material, 0, 0, uiForiaPropertyBlock.matBlock);
                         }
                         else if (batch.batchType == BatchType.Mesh) {
-                            commandBuffer.DrawMesh(batch.unpooledMesh, batch.uiforiaData.transformData[0], batch.material, 0, batch.material.passCount - 1, null);
+                            commandBuffer.DrawMesh(batch.unpooledMesh, origin, batch.material, 0, batch.material.passCount - 1, null);
                         }
 
                         break;
 
                     case RenderOperationType.PushRenderTexture:
 
-                        if (rtStack.array[rtStack.size - 1].renderTexture != cmd.renderTexture) {
+  //                      if (rtStack.array[rtStack.size - 1].renderTexture != cmd.renderTexture) {
                             // todo -- figure out the weirdness with perspective or view when texture is larger than camera texture
                             commandBuffer.SetRenderTarget(cmd.renderTexture);
                             int width = cmd.renderTexture.width / 2;
                             int height = cmd.renderTexture.height / 2;
                             Matrix4x4 projection = Matrix4x4.Ortho(-width, width, -height, height, 0.1f, 9999);
                             commandBuffer.SetViewProjectionMatrices(cameraMatrix, projection);
-                            commandBuffer.ClearRenderTarget(true, true, Color.clear);
-                        }
+                            commandBuffer.ClearRenderTarget(true, true, cmd.color);
+//                        }
 
                         // always push so pop will pop the right texture, duplicate refs are ok
                         rtStack.Push(new RenderArea(cmd.renderTexture, cmd.rect));
@@ -611,6 +642,10 @@ namespace UIForia.Rendering {
 
                         break;
 
+                    case RenderOperationType.PopRenderTexture:
+                        commandBuffer.SetRenderTarget(BuiltinRenderTextureType.CameraTarget);
+                        break;
+                    
                     case RenderOperationType.SetScissorRect:
                         break;
 
@@ -653,12 +688,11 @@ namespace UIForia.Rendering {
 //        public RenderTargetIdentifier GetNextRenderTarget() {
 //            return renderTargetStack.Peek();
 //        }
-        
+
         // need to ping pong if target texture is the same one used by the area
         public Texture GetTextureFromArea(RenderArea area, RenderTargetIdentifier? outputTarget = null) {
-            return area.renderTexture;//.Peek();
+            return area.renderTexture; //.Peek();
         }
-        
 
     }
 

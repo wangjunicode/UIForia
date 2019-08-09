@@ -27,7 +27,7 @@ namespace Src.Systems {
         private Camera camera;
         private CommandBuffer commandBuffer;
         private RenderContext renderContext;
-        private LightList<RenderOwner> renderOwners;
+        internal LightList<RenderOwner> renderOwners;
 
         public VertigoRenderSystem(Camera camera, Application application) {
             this.camera = camera;
@@ -73,7 +73,7 @@ namespace Src.Systems {
             renderOwners.QuickClear();
         }
 
-        public void OnUpdate() {
+        public virtual void OnUpdate() {
             renderContext.Clear();
 
             // todo
@@ -84,8 +84,6 @@ namespace Src.Systems {
             camera.orthographicSize = Screen.height * 0.5f;
 
             for (int i = 0; i < renderOwners.size; i++) {
-                renderOwners.array[i].GatherBoxData();
-                renderOwners.array[i].BuildClipGroups();
                 renderOwners.array[i].Render(renderContext);
             }
 
@@ -112,14 +110,7 @@ namespace Src.Systems {
         public void OnElementDisabled(UIElement element) { }
 
         public void OnElementDestroyed(UIElement element) {
-            // re-pool the render boxes for the hierarchy
-            UIView view = element.View;
-            for (int i = 0; i < renderOwners.size; i++) {
-                if (renderOwners.array[i].view == view) {
-                    renderOwners.array[i].OnElementDestroyed(element);
-                    return;
-                }
-            }
+          
         }
 
         public void OnAttributeSet(UIElement element, string attributeName, string currentValue, string previousValue) { }

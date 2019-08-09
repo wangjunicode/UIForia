@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using UIForia.Layout;
 using UIForia.Rendering;
 using UIForia.Util;
@@ -5,6 +6,7 @@ using UnityEngine;
 
 namespace UIForia.Systems {
 
+    [DebuggerDisplay("FlexBox : {element.ToString()}")]
     public class FastFlexLayoutBox : FastLayoutBox {
 
         private StructList<Item> itemList;
@@ -736,25 +738,29 @@ namespace UIForia.Systems {
                 item.shrinkFactor = children[i].element.style.FlexItemShrink;
             }
 
-            MarkNeedsLayout();
+            MarkForLayout();
         }
 
         protected override void OnChildAdded(FastLayoutBox child, int index) {
+            itemList = itemList ?? new StructList<Item>();
+            
             if (firstChild == null) {
                 firstChild = child;
-                MarkNeedsLayout();
+                MarkForLayout();
                 return;
             }
-
-            itemList = itemList ?? new StructList<Item>();
-
+            
             itemList.Insert(index, new Item() {
                 layoutBox = child,
                 growFactor = child.element.style.FlexItemGrow,
                 shrinkFactor = child.element.style.FlexItemShrink,
             });
 
-            MarkNeedsLayout();
+            MarkForLayout();
+        }
+
+        protected override void OnChildRemoved(FastLayoutBox child, int index) {
+            itemList.RemoveAt(index);
         }
 
         public override void OnStyleChanged(StructList<StyleProperty> changeList) {
@@ -785,7 +791,7 @@ namespace UIForia.Systems {
             }
 
             if (changed) {
-                MarkNeedsLayout();
+                MarkForLayout();
             }
         }
 
@@ -823,7 +829,7 @@ namespace UIForia.Systems {
             }
 
             if (changed) {
-                MarkNeedsLayout();
+                MarkForLayout();
             }
         }
 

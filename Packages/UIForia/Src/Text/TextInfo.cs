@@ -22,20 +22,20 @@ namespace UIForia.Text {
         internal LightList<TextSpan> spanList;
         internal TextSpan rootSpan;
 
-        private bool requiresLayout;
         private Size metrics;
-        internal bool requiresSpanListRebuild;
+        private bool requiresSpanListRebuild;
 
         private IntrinsicSizes intrinsics;
-
+        private bool requiresLayout;
 
         public TextInfo(string content, in SVGXTextStyle style = default, bool inheritStyleProperties = false) {
             this.rootSpan = new TextSpan();
             this.rootSpan.textInfo = this;
             this.spanList = new LightList<TextSpan>();
             this.lineInfoList = StructList<LineInfo2>.Get();
-            this.requiresLayout = true;
             this.requiresSpanListRebuild = true;
+            this.requiresLayout = true;
+
             rootSpan.inheritedStyle = new SVGXInheritedTextStyle() {
                 alignment = TextAlignment.Left,
                 textTransform = TextTransform.None,
@@ -62,15 +62,16 @@ namespace UIForia.Text {
             rootSpan.SetText(content);
         }
 
-        public bool LayoutDirty => requiresLayout;
+        public bool LayoutDirty => requiresSpanListRebuild; // todo remove
 
-        internal void SpanRequiresLayout(TextSpan span) {
-            requiresLayout = true;
+        internal void RebuildSpans() {
+            requiresSpanListRebuild = true;
         }
 
         private void RebuildSpanList() {
             if (!requiresSpanListRebuild) return;
-            
+
+            requiresLayout = true;
             requiresSpanListRebuild = false;
             spanList.QuickClear();
 
@@ -93,7 +94,7 @@ namespace UIForia.Text {
             }
 
             UpdateIntrinsics();
-            
+
             LightStack<TextSpan>.Release(ref stack);
         }
 
@@ -101,20 +102,30 @@ namespace UIForia.Text {
         public Size Layout(Vector2 offset, float width) {
             lineInfoList.size = 0;
             RebuildSpanList();
-            RunLayout(lineInfoList, width);
-            LineInfo2 lastLine = lineInfoList[lineInfoList.Count - 1];
-            float maxWidth = 0;
+            if (requiresLayout) {
+                requiresLayout = false;
+                RunLayout(lineInfoList, width);
 
-            LineInfo2[] lineInfos = lineInfoList.Array;
-            for (int i = 0; i < lineInfoList.Count; i++) {
-                lineInfos[i].x += offset.x;
-                lineInfos[i].y += offset.y;
-                maxWidth = Mathf.Max(maxWidth, lineInfos[i].width);
+                if (lineInfoList.size == 0) {
+                    metrics = new Size(0, 0);
+                    return metrics;
+                }
+
+                LineInfo2 lastLine = lineInfoList[lineInfoList.Count - 1];
+                float maxWidth = 0;
+
+                LineInfo2[] lineInfos = lineInfoList.Array;
+                for (int i = 0; i < lineInfoList.Count; i++) {
+                    lineInfos[i].x += offset.x;
+                    lineInfos[i].y += offset.y;
+                    maxWidth = Mathf.Max(maxWidth, lineInfos[i].width);
+                }
+
+                float height = lastLine.y + lastLine.height;
+                ApplyLineAndWordOffsets(width, rootSpan.alignment);
+                metrics = new Size(maxWidth, height);
             }
 
-            float height = lastLine.y + lastLine.height;
-            ApplyLineAndWordOffsets(width, rootSpan.alignment);
-            metrics = new Size(maxWidth, height);
             return metrics;
         }
 
@@ -123,9 +134,9 @@ namespace UIForia.Text {
 
             LineInfo2[] lines = lineInfoList.array;
             int lineCount = lineInfoList.size;
-            
+
             TextSpan[] spans = spanList.Array;
-            
+
             float lineOffsetY = 0;
 
             for (int lineIndex = lineStart; lineIndex < lineCount; lineIndex++) {
@@ -134,7 +145,7 @@ namespace UIForia.Text {
 
                 float lineOffsetX = 0;
                 switch (alignment) {
-                    case TextAlignment.Unset:     
+                    case TextAlignment.Unset:
                     case TextAlignment.Left:
                         break;
                     case TextAlignment.Right:
@@ -144,23 +155,23 @@ namespace UIForia.Text {
                         lineOffsetX = (totalWidth - lines[lineIndex].width) * 0.5f;
                         break;
                 }
-                
+
                 float wordOffsetX = lineOffsetX;
 
                 for (int s = spanStart; s < spanEnd; s++) {
                     TextSpan span = spans[s];
-                    
+
                     span.geometryVersion++;
-                    
+
                     WordInfo2[] words = span.wordInfoList.array;
                     CharInfo2[] chars = span.charInfoList.array;
-                    
+
                     int wordStart = s == spanStart ? lines[lineIndex].wordStart : 0;
                     int wordEnd = s == spanEnd - 1 ? lines[lineIndex].wordEnd : span.wordInfoList.size;
-                    
+
                     for (int w = wordStart; w < wordEnd; w++) {
                         ref WordInfo2 wordInfo = ref words[w];
-                        
+
                         if (wordInfo.type == WordType.Normal) {
                             int charStart = wordInfo.charStart;
                             int charEnd = wordInfo.charEnd;
@@ -176,7 +187,6 @@ namespace UIForia.Text {
 
                         wordOffsetX += wordInfo.width;
                     }
-
                 }
 
                 lineOffsetY += lines[lineIndex].height;
@@ -184,7 +194,7 @@ namespace UIForia.Text {
         }
 
         private void RunSizingHeightLayout(float width) {
-           throw new NotImplementedException();
+            throw new NotImplementedException();
         }
 
         // todo -- introduce faster version that just outputs size and not a filled line info list
@@ -269,7 +279,6 @@ namespace UIForia.Text {
                                 lines.Add(currentLine);
                                 currentLine = new LineInfo2(spanIndex, w + 1);
                                 currentLine.y = lineOffset;
-                                
                             }
                             // if word is too long for the current line, break to next line
                             else if (wordInfo.width + currentLine.width > width + 0.5) {
@@ -306,7 +315,7 @@ namespace UIForia.Text {
             }
 
             // todo -- something is weird with too many lines here check it out
-            
+
             LineInfo2[] lineArray = lines.array;
             for (int i = 0; i < lines.size; i++) {
                 ref LineInfo2 lineInfo = ref lineArray[i];
@@ -319,10 +328,11 @@ namespace UIForia.Text {
 
                         int wordStart = 0;
                         int wordEnd = span.wordInfoList.size;
-                        
+
                         if (j == lineInfo.spanStart) {
                             wordStart = lineInfo.wordStart;
                         }
+
                         if (j == lineInfo.spanEnd - 1) {
                             wordEnd = lineInfo.wordEnd;
                         }
@@ -334,7 +344,6 @@ namespace UIForia.Text {
                         }
                     }
                 }
-                
             }
 
             return lines;
@@ -457,6 +466,16 @@ namespace UIForia.Text {
             intrinsics.minWidth = ComputeIntrinsicMinWidth();
             StructList<LineInfo2> lines = StructList<LineInfo2>.Get();
             RunLayout(lines, intrinsics.minWidth);
+
+            if (lines.size == 0) {
+                intrinsics.minHeight = 0;
+                intrinsics.minWidth = 0;
+                intrinsics.prefHeight = 0;
+                intrinsics.prefWidth = 0;
+                StructList<LineInfo2>.Release(ref lines);
+                return;
+            }
+
             intrinsics.minHeight = lines[lines.size - 1].y + lines[lines.size - 1].height;
             lines.size = 0;
             RunLayout(lines, float.MaxValue);
@@ -474,7 +493,7 @@ namespace UIForia.Text {
             StructList<LineInfo2>.Release(ref lines);
         }
 
-       
+
         public float GetIntrinsicWidth() {
             if (requiresSpanListRebuild) {
                 RebuildSpanList();
@@ -528,9 +547,13 @@ namespace UIForia.Text {
 
             RunLayout(lines, float.MaxValue);
 
+            if (lines.size == 0) {
+                lines.Release();
+                return 0;
+            }
+
             float retn = lines[lines.size - 1].y + lines[lines.size - 1].height;
 
-            lines.Release();
 
             return retn;
         }

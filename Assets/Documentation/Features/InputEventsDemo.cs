@@ -3,6 +3,7 @@ using UIForia;
 using UIForia.Animation;
 using UIForia.Attributes;
 using UIForia.Elements;
+using UIForia.Layout;
 using UIForia.Rendering;
 using UIForia.UIInput;
 using UnityEngine;
@@ -15,8 +16,8 @@ namespace Documentation.Features {
         public bool IsInStartZone;
         public bool IsInDropZone;
 
-        public float LastHoverX;
-        public float LastHoverY;
+        public string LastHoverX;
+        public string LastHoverY;
         public float LastDragEnter;
         public float LastDragExit;
         public Vector2 LastMove;
@@ -36,9 +37,9 @@ namespace Documentation.Features {
             IsInStartZone = true;
         }
 
-        public DragEvent StartDrag(UIElement element) {
+        public DragEvent StartDrag(MouseInputEvent evt, UIElement element) {
             activeEvent = "onDragCreate";
-            return new DemoDragEvent(element);
+            return new DemoDragEvent(evt.MousePosition, element);
         }
 
         public void DropDrag(DragEvent evt, UIElement target) {
@@ -83,8 +84,8 @@ namespace Documentation.Features {
         }
         
         public void Hover(MouseInputEvent evt) {
-            LastHoverX = evt.MousePosition.x;
-            LastHoverY = evt.MousePosition.y;
+            LastHoverX = evt.MousePosition.x.ToString();
+            LastHoverY = evt.MousePosition.y.ToString();
         }
         
         public void ShowContextMenu(MouseInputEvent evt) {
@@ -131,24 +132,31 @@ namespace Documentation.Features {
 
     public class DemoDragEvent : DragEvent {
 
-        public DemoDragEvent(UIElement element) : base(element) {
+        private float baseX;
+        private float baseY;
+        private float offsetX;
+        private float offsetY;
+
+        public DemoDragEvent(Vector2 offset, UIElement element) : base(element) {
+            this.baseX = element.layoutResult.screenPosition.x - offset.x;
+            this.baseY = element.layoutResult.screenPosition.y - offset.y;
         }
 
         public override void Update() {
-            origin.style.SetAnchorTarget(AnchorTarget.Screen, StyleState.Normal);
-            origin.style.SetAnchorLeft(new UIFixedLength(0), StyleState.Normal);
-            origin.style.SetAnchorTop(new UIFixedLength(0), StyleState.Normal);
-            origin.style.SetTransformBehavior(TransformBehavior.AnchorMinOffset, StyleState.Normal);
-            origin.style.SetTransformPositionX(new TransformOffset(Input.mousePosition.x -  origin.layoutResult.ActualWidth / 2), StyleState.Normal);
-            origin.style.SetTransformPositionY(new TransformOffset((Screen.height - Input.mousePosition.y) - origin.layoutResult.ActualHeight / 2), StyleState.Normal);
+            // mouse position - original position - pivot
+            float x = MousePosition.x - baseX;
+            float y = MousePosition.y - baseY;
+            origin.style.SetTransformPositionX(x, StyleState.Normal);
+            origin.style.SetTransformPositionY(y, StyleState.Normal);
         }
 
         public override void Drop(bool success) {
             base.Drop(success);
-            origin.style.SetAnchorTarget(AnchorTarget.Parent, StyleState.Normal);
-            origin.style.SetTransformBehavior(TransformBehavior.LayoutOffset, StyleState.Normal);
-            origin.style.SetTransformPositionX(new TransformOffset(0), StyleState.Normal);
-            origin.style.SetTransformPositionY(new TransformOffset(0), StyleState.Normal);
+//            origin.Application.Animate(origin, new AnimationData() {
+//                frames = new [] {
+//                    new StyleKeyFrameValue(0, StyleProperty.TransformPositionX()), 
+//                }
+//            });
         }
 
     }

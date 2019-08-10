@@ -12,12 +12,66 @@ const float SQRT_2 = 1.4142135623730951;
 #define PaintMode_LetterBoxTexture 1 << 3
 
 // remap input from one range to an other            
-float Map(float s, float a1, float a2, float b1, float b2) {
-    return b1 + (s-a1) * (b2-b1) / (a2-a1);
+inline float Map(float s, float a1, float a2, float b1, float b2) {
+    return b1 + (s - a1) * (b2 - b1) / ( a2 - a1);
 }           
-           
+
+// might divide by 0           
+inline float PercentOfRange(float v, float minVal, float maxVal) {
+    return (v - minVal) / (maxVal - minVal);
+}
+
+fixed4 UIForiaAlphaClip(float inputAlpha, sampler2D clipTexture, float2 screenUV, float4 clipRect, float4 clipUvs) {
+
+    screenUV.y = 1 - screenUV.y;
+    
+    // todo -- if mask render texture is packed with padding we need to account for that padding
+    
+    float2 screenPos = float2(screenUV.x * _ScreenParams.x, screenUV.y * _ScreenParams.y);
+    
+    if(clipRect.z == 0 && clipRect.w == 0) {
+        return inputAlpha;
+    }
+    
+    // point in rect, does not handle rotation, need to be sure box & point are in the same same aligned coordinate space
+    // -1 to fix artifacts
+    float2 s = step(float2(clipRect.x, clipRect.y + clipRect.w - 1), screenPos) - step(float2(clipRect.x + clipRect.z , clipRect.y), screenPos);
+
+    // todo -- handle single axis overflow
+    if (s.x * s.y) {
+            
+        float x = PercentOfRange(screenPos.x, clipRect.x, clipRect.z - clipRect.x);
+        float y = PercentOfRange(screenPos.y, clipRect.y, clipRect.w - clipRect.y);
+        
+        x = Map(x, 0, 1, clipUvs.x, clipUvs.z);
+        y = Map(y, 0, 1, clipUvs.y, clipUvs.w);
+    
+        // clip rect is in integers, this accounts for loss of fraction by subtracting 1 pixel size to x and y
+        // x += (1 / _ScreenParams.x) * 0.5;
+        // y += (1 / _ScreenParams.y) * 0.5;
+        
+        // todo -- different channel use different values
+        // y comes in [0 - 1], need to sample with [1, 0]
+        fixed a = tex2Dlod(clipTexture, float4(x, 1 - y, 0, 0)).a;// * 0.5;
+        
+        // currently making makes at half resolution, multipling alpha by a bit makes up for the lower resolution
+        a = saturate(a * 1.4);
+        
+        // if z and w (width and height max) are 0 we consider the check to be 'rect-only'   
+        if(clipUvs.z == 0 && clipUvs.w == 0) {
+            a = inputAlpha;  
+        }
+        
+        return inputAlpha * a;
+
+    }
+    
+    return 0;
+    
+}
+                                   
 // same as UnityPixelSnap except taht we add 0.5 to pixelPos after rounding
-inline float4 SDFPixelSnap (float4 pos) {
+inline float4 UIForiaPixelSnap (float4 pos) {
      float2 hpc = _ScreenParams.xy * 0.5f;
      float2 pixelPos = round ((pos.xy / pos.w) * hpc) + 0.5;
      pos.xy = pixelPos / hpc * pos.w;
@@ -323,7 +377,7 @@ BorderData GetBorderData(float2 coords, float2 size, float4 packedBorderColors, 
     fixed sideOfLine = dir * sign(v);
     
     half verticalSize = lerp(borderTop, borderBottom, bottom);
-    half horizontalSize = lerp(borderRight, borderLeft, left);;
+    half horizontalSize = lerp(borderRight, borderLeft, left);
     
     half sizeAbove = borderTop;
     half sizeBelow = horizontalSize; 
@@ -352,7 +406,7 @@ BorderData GetBorderData(float2 coords, float2 size, float4 packedBorderColors, 
             retn.color = lerp(colorAbove, colorBelow, d);
         }
     }
-       
+    
     float2 s = step(float2(borderLeft, size.y - borderBottom), p) - step(float2(size.x - borderRight, borderTop), p);
     
     float radialX = lerp(coords.x * size.x, (1 - coords.x) * size.x, right);
@@ -365,6 +419,7 @@ BorderData GetBorderData(float2 coords, float2 size, float4 packedBorderColors, 
     else if(s.x * s.y) {
         retn.size = 0;
     }
+    
     retn.color.rgb * retn.color.a;
     return retn;     
 }
@@ -428,28 +483,27 @@ inline fixed4 GetTextColor(half d, fixed4 faceColor, fixed4 outlineColor, half o
     return faceColor;
 }
 
-
 fixed4 SDFColor(SDFData sdfData, fixed4 borderColor, fixed4 contentColor, float distFromCenter) {
-    float halfStrokeWidth = sdfData.strokeWidth * 0.5;
+    int hasBorder = sdfData.strokeWidth > 0;
     float2 size = sdfData.size;
     float minSize = min(size.x, size.y);
-   
+    // having a border size makes aa waaaay better use a dummy value if user didn't provide one
+    float halfStrokeWidth = lerp(2, sdfData.strokeWidth * 0.5, hasBorder);
     float radius = clamp(minSize * sdfData.radius, 0, minSize);
     // upscale size by that factor, the size passed in is the layout box size, not the geometry size which is why this works
-    float2 center = ((sdfData.uv.xy - 0.5) * (size ));
-    // need to give padding to these sdf things or they may get cut off in an ugly way
+    float2 center = ((sdfData.uv.xy - 0.5) * size);
     
     float shape1 = RectSDF(center, (size * 0.5) - halfStrokeWidth, radius - halfStrokeWidth);
-    float retn = abs(shape1) - halfStrokeWidth;
+    float retn = abs(shape1) - halfStrokeWidth;  
     
-    borderColor = lerp(contentColor, borderColor, halfStrokeWidth != 0);
+    borderColor = lerp(contentColor, borderColor, hasBorder);
     
     if(contentColor.a == 0) {
         contentColor = fixed4(borderColor.rgb, 0);
     }
     
     if(shape1 > 0) {
-       contentColor = lerp(fixed4(contentColor.rgb, 0), fixed4(borderColor.rgb, 0), halfStrokeWidth > 0);
+       contentColor = lerp(fixed4(contentColor.rgb, 0), fixed4(borderColor.rgb, 0), hasBorder);
     }
     
     // this is 1 pixel of border size
@@ -473,9 +527,9 @@ fixed4 SDFColor(SDFData sdfData, fixed4 borderColor, fixed4 contentColor, float 
       //  }
       
   //  }
-    
-    float fBlendAmount = smoothstep(lerp(-1, 0, halfStrokeWidth == 0), 1, retn);
-    return lerp(contentColor, borderColor, 1 - fBlendAmount); // do not pre-multiply alpha here!
+    float distanceChange = fwidth(retn) * 0.5;
+    float aa = smoothstep(distanceChange, -distanceChange, retn);
+    return lerp(contentColor, borderColor, aa); // do not pre-multiply alpha here!
     
     // using -1 to 1 gives slightly better aa but all edges have alpha which is bad when two shapes share an edge
     // use larger negative to get nice blur effect

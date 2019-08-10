@@ -18,6 +18,7 @@ namespace UIForia.Rendering {
         public Vector4 miscData;
         public Vector4 clipUVs;
         public Texture clipTexture;
+        public Vector4 clipRect;
 
 
         public UIForiaGeometry() {
@@ -119,7 +120,7 @@ namespace UIForia.Rendering {
             public float bottomLeftY;
             public float bottomRightX;
             public float bottomRightY;
-            
+
         }
 
         public void ClipCornerRect(Size size, in CornerDef cornerDef) {
@@ -134,7 +135,7 @@ namespace UIForia.Rendering {
 
             float width = size.width;
             float height = size.height;
-            
+
             positions[startVert + 0] = new Vector3(0, -cornerDef.topLeftY, 0);
             positions[startVert + 1] = new Vector3(cornerDef.topLeftX, 0, 0);
             positions[startVert + 2] = new Vector3(width - cornerDef.topRightX, 0, 0);
@@ -148,31 +149,31 @@ namespace UIForia.Rendering {
             triangles[startTriangle + 0] = startVert + 1;
             triangles[startTriangle + 1] = startVert + 8;
             triangles[startTriangle + 2] = startVert + 0;
-            
+
             triangles[startTriangle + 3] = startVert + 2;
             triangles[startTriangle + 4] = startVert + 8;
             triangles[startTriangle + 5] = startVert + 1;
-            
+
             triangles[startTriangle + 6] = startVert + 3;
             triangles[startTriangle + 7] = startVert + 8;
             triangles[startTriangle + 8] = startVert + 2;
-                      
+
             triangles[startTriangle + 9] = startVert + 4;
             triangles[startTriangle + 10] = startVert + 8;
             triangles[startTriangle + 11] = startVert + 3;
-            
+
             triangles[startTriangle + 12] = startVert + 5;
             triangles[startTriangle + 13] = startVert + 8;
             triangles[startTriangle + 14] = startVert + 4;
-            
+
             triangles[startTriangle + 15] = startVert + 6;
             triangles[startTriangle + 16] = startVert + 8;
             triangles[startTriangle + 17] = startVert + 5;
-            
+
             triangles[startTriangle + 18] = startVert + 7;
             triangles[startTriangle + 19] = startVert + 8;
             triangles[startTriangle + 20] = startVert + 6;
-            
+
             triangles[startTriangle + 21] = startVert + 0;
             triangles[startTriangle + 22] = startVert + 8;
             triangles[startTriangle + 23] = startVert + 7;
@@ -182,22 +183,14 @@ namespace UIForia.Rendering {
                 float y = 1 - (positions[startVert + i].y / -height);
                 texCoord0[startVert + i] = new Vector4(x, y, x, y);
             }
-            
-            // x = border color 0
-            // y = border color 1
-            // z = distance to edge (0 in all but center)
-            // w = object index
-           
-            for (int i = 0; i < 8; i++) {
-                texCoord1[startVert + i].z = 0;// = new Vector4(x, y, width, height);
-            }
-            
+     
             triangleList.size += 24;
             positionList.size += 9;
             texCoordList0.size += 9;
             texCoordList1.size += 9;
+            
         }
-        
+
         public void ClipCornerRectWithFill(Vector2 fillOrigin, float angle, Size size, in CornerDef cornerDef) {
             EnsureAdditionalCapacity(9, 24);
             Vector3[] positions = positionList.array;
@@ -210,7 +203,7 @@ namespace UIForia.Rendering {
 
             float width = size.width;
             float height = size.height;
-            
+
             positions[startVert + 0] = new Vector3(0, -cornerDef.topLeftY, 0);
             positions[startVert + 1] = new Vector3(cornerDef.topLeftX, 0, 0);
             positions[startVert + 2] = new Vector3(width - cornerDef.topRightX, 0, 0);
@@ -220,35 +213,35 @@ namespace UIForia.Rendering {
             positions[startVert + 6] = new Vector3(cornerDef.bottomLeftX, -height, 0);
             positions[startVert + 7] = new Vector3(0, -(height - cornerDef.bottomLeftY), 0);
             positions[startVert + 8] = new Vector3(width * 0.5f, -height * 0.5f, 0);
-            
+
             triangles[startTriangle + 0] = startVert + 1;
             triangles[startTriangle + 1] = startVert + 8;
             triangles[startTriangle + 2] = startVert + 0;
-            
+
             triangles[startTriangle + 3] = startVert + 2;
             triangles[startTriangle + 4] = startVert + 8;
             triangles[startTriangle + 5] = startVert + 1;
-            
+
             triangles[startTriangle + 6] = startVert + 3;
             triangles[startTriangle + 7] = startVert + 8;
             triangles[startTriangle + 8] = startVert + 2;
-                      
+
             triangles[startTriangle + 9] = startVert + 4;
             triangles[startTriangle + 10] = startVert + 8;
             triangles[startTriangle + 11] = startVert + 3;
-            
+
             triangles[startTriangle + 12] = startVert + 5;
             triangles[startTriangle + 13] = startVert + 8;
             triangles[startTriangle + 14] = startVert + 4;
-            
+
             triangles[startTriangle + 15] = startVert + 6;
             triangles[startTriangle + 16] = startVert + 8;
             triangles[startTriangle + 17] = startVert + 5;
-            
+
             triangles[startTriangle + 18] = startVert + 7;
             triangles[startTriangle + 19] = startVert + 8;
             triangles[startTriangle + 20] = startVert + 6;
-            
+
             triangles[startTriangle + 21] = startVert + 0;
             triangles[startTriangle + 22] = startVert + 8;
             triangles[startTriangle + 23] = startVert + 7;
@@ -258,13 +251,13 @@ namespace UIForia.Rendering {
                 float y = positions[startVert + i].y / height;
                 texCoord0[startVert + i] = new Vector4(x, y, x, y);
             }
-            
+
             triangleList.size += 24;
             positionList.size += 9;
             texCoordList0.size += 9;
             texCoordList1.size += 9;
         }
-        
+
         public void FillRectUniformBorder_Miter(float width, float height) {
             Vector3[] positions = positionList.array;
             Vector4[] texCoord0 = texCoordList0.array;
@@ -303,7 +296,7 @@ namespace UIForia.Rendering {
             uv0.y = 1;
             uv0.z = 0;
             uv0.w = 1;
-            
+
             uv1.x = 1;
             uv1.y = 1;
             uv1.z = 1;
@@ -387,17 +380,17 @@ namespace UIForia.Rendering {
             uv1.y = 1;
             uv1.z = width;
             uv1.w = height;
-            
+
             uv2.x = 1;
             uv2.y = 0;
             uv2.z = width;
             uv2.w = height;
-            
+
             uv3.x = 0;
             uv3.y = 0;
             uv3.z = width;
             uv3.w = height;
-            
+
             triangles[startTriangle + 0] = startVert + 0;
             triangles[startTriangle + 1] = startVert + 1;
             triangles[startTriangle + 2] = startVert + 2;

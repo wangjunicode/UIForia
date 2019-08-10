@@ -75,37 +75,37 @@ namespace UIForia.Rendering {
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.BackgroundImageOffsetY, value), state); }
         }
         
-        public UIForia.UIFixedLength BackgroundImageScaleX {
+        public float BackgroundImageScaleX {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.BackgroundImageScaleX, state).AsUIFixedLength; }
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.BackgroundImageScaleX, state).AsFloat; }
             [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.BackgroundImageScaleX, value), state); }
         }
         
-        public UIForia.UIFixedLength BackgroundImageScaleY {
+        public float BackgroundImageScaleY {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.BackgroundImageScaleY, state).AsUIFixedLength; }
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.BackgroundImageScaleY, state).AsFloat; }
             [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.BackgroundImageScaleY, value), state); }
         }
         
-        public UIForia.UIFixedLength BackgroundImageTileX {
+        public float BackgroundImageTileX {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.BackgroundImageTileX, state).AsUIFixedLength; }
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.BackgroundImageTileX, state).AsFloat; }
             [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.BackgroundImageTileX, value), state); }
         }
         
-        public UIForia.UIFixedLength BackgroundImageTileY {
+        public float BackgroundImageTileY {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.BackgroundImageTileY, state).AsUIFixedLength; }
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.BackgroundImageTileY, state).AsFloat; }
             [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.BackgroundImageTileY, value), state); }
         }
         
-        public UIForia.UIFixedLength BackgroundImageRotation {
+        public float BackgroundImageRotation {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.BackgroundImageRotation, state).AsUIFixedLength; }
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.BackgroundImageRotation, state).AsFloat; }
             [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.BackgroundImageRotation, value), state); }
         }
@@ -1004,37 +1004,37 @@ namespace UIForia.Rendering {
             set { SetProperty(new StyleProperty(StylePropertyId.BackgroundImageOffsetY, value)); }
         }
             
-        public UIForia.UIFixedLength BackgroundImageScaleX {
+        public float BackgroundImageScaleX {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return FindUIFixedLengthProperty(StylePropertyId.BackgroundImageScaleX); }
+            get { return FindFloatProperty(StylePropertyId.BackgroundImageScaleX); }
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.BackgroundImageScaleX, value)); }
         }
             
-        public UIForia.UIFixedLength BackgroundImageScaleY {
+        public float BackgroundImageScaleY {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return FindUIFixedLengthProperty(StylePropertyId.BackgroundImageScaleY); }
+            get { return FindFloatProperty(StylePropertyId.BackgroundImageScaleY); }
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.BackgroundImageScaleY, value)); }
         }
             
-        public UIForia.UIFixedLength BackgroundImageTileX {
+        public float BackgroundImageTileX {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return FindUIFixedLengthProperty(StylePropertyId.BackgroundImageTileX); }
+            get { return FindFloatProperty(StylePropertyId.BackgroundImageTileX); }
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.BackgroundImageTileX, value)); }
         }
             
-        public UIForia.UIFixedLength BackgroundImageTileY {
+        public float BackgroundImageTileY {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return FindUIFixedLengthProperty(StylePropertyId.BackgroundImageTileY); }
+            get { return FindFloatProperty(StylePropertyId.BackgroundImageTileY); }
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.BackgroundImageTileY, value)); }
         }
             
-        public UIForia.UIFixedLength BackgroundImageRotation {
+        public float BackgroundImageRotation {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return FindUIFixedLengthProperty(StylePropertyId.BackgroundImageRotation); }
+            get { return FindFloatProperty(StylePropertyId.BackgroundImageRotation); }
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.BackgroundImageRotation, value)); }
         }
@@ -1957,47 +1957,47 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UIForia.UIFixedLength BackgroundImageScaleX { 
+            public float BackgroundImageScaleX { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.BackgroundImageScaleX, out property)) return property.AsUIFixedLength;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.BackgroundImageScaleX, out property)) return property.AsFloat;
                     return DefaultStyleValues_Generated.BackgroundImageScaleX;
                 }
             }
 
-            public UIForia.UIFixedLength BackgroundImageScaleY { 
+            public float BackgroundImageScaleY { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.BackgroundImageScaleY, out property)) return property.AsUIFixedLength;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.BackgroundImageScaleY, out property)) return property.AsFloat;
                     return DefaultStyleValues_Generated.BackgroundImageScaleY;
                 }
             }
 
-            public UIForia.UIFixedLength BackgroundImageTileX { 
+            public float BackgroundImageTileX { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.BackgroundImageTileX, out property)) return property.AsUIFixedLength;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.BackgroundImageTileX, out property)) return property.AsFloat;
                     return DefaultStyleValues_Generated.BackgroundImageTileX;
                 }
             }
 
-            public UIForia.UIFixedLength BackgroundImageTileY { 
+            public float BackgroundImageTileY { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.BackgroundImageTileY, out property)) return property.AsUIFixedLength;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.BackgroundImageTileY, out property)) return property.AsFloat;
                     return DefaultStyleValues_Generated.BackgroundImageTileY;
                 }
             }
 
-            public UIForia.UIFixedLength BackgroundImageRotation { 
+            public float BackgroundImageRotation { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.BackgroundImageRotation, out property)) return property.AsUIFixedLength;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.BackgroundImageRotation, out property)) return property.AsFloat;
                     return DefaultStyleValues_Generated.BackgroundImageRotation;
                 }
             }
@@ -3160,44 +3160,44 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.BackgroundImageOffsetY, state).AsUIFixedLength;
         }
         
-        public void SetBackgroundImageScaleX(in UIForia.UIFixedLength? value, StyleState state) {
+        public void SetBackgroundImageScaleX(in float? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.BackgroundImageScaleX, value), state);
         }
 
-        public UIForia.UIFixedLength GetBackgroundImageScaleX(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.BackgroundImageScaleX, state).AsUIFixedLength;
+        public float GetBackgroundImageScaleX(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.BackgroundImageScaleX, state).AsFloat;
         }
         
-        public void SetBackgroundImageScaleY(in UIForia.UIFixedLength? value, StyleState state) {
+        public void SetBackgroundImageScaleY(in float? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.BackgroundImageScaleY, value), state);
         }
 
-        public UIForia.UIFixedLength GetBackgroundImageScaleY(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.BackgroundImageScaleY, state).AsUIFixedLength;
+        public float GetBackgroundImageScaleY(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.BackgroundImageScaleY, state).AsFloat;
         }
         
-        public void SetBackgroundImageTileX(in UIForia.UIFixedLength? value, StyleState state) {
+        public void SetBackgroundImageTileX(in float? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.BackgroundImageTileX, value), state);
         }
 
-        public UIForia.UIFixedLength GetBackgroundImageTileX(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.BackgroundImageTileX, state).AsUIFixedLength;
+        public float GetBackgroundImageTileX(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.BackgroundImageTileX, state).AsFloat;
         }
         
-        public void SetBackgroundImageTileY(in UIForia.UIFixedLength? value, StyleState state) {
+        public void SetBackgroundImageTileY(in float? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.BackgroundImageTileY, value), state);
         }
 
-        public UIForia.UIFixedLength GetBackgroundImageTileY(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.BackgroundImageTileY, state).AsUIFixedLength;
+        public float GetBackgroundImageTileY(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.BackgroundImageTileY, state).AsFloat;
         }
         
-        public void SetBackgroundImageRotation(in UIForia.UIFixedLength? value, StyleState state) {
+        public void SetBackgroundImageRotation(in float? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.BackgroundImageRotation, value), state);
         }
 
-        public UIForia.UIFixedLength GetBackgroundImageRotation(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.BackgroundImageRotation, state).AsUIFixedLength;
+        public float GetBackgroundImageRotation(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.BackgroundImageRotation, state).AsFloat;
         }
         
         public void SetBackgroundImage(UnityEngine.Texture2D value, StyleState state) {

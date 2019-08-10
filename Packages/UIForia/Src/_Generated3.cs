@@ -25,11 +25,11 @@ namespace UIForia.Rendering {
 		public static readonly Color BackgroundTint = new Color(-1f, -1f, -1f, -1f);
 		public static readonly UIFixedLength BackgroundImageOffsetX = new UIFixedLength(0f, UIFixedUnit.Pixel);
 		public static readonly UIFixedLength BackgroundImageOffsetY = new UIFixedLength(0f, UIFixedUnit.Pixel);
-		public static readonly UIFixedLength BackgroundImageScaleX = new UIFixedLength(0f, UIFixedUnit.Pixel);
-		public static readonly UIFixedLength BackgroundImageScaleY = new UIFixedLength(0f, UIFixedUnit.Pixel);
-		public static readonly UIFixedLength BackgroundImageTileX = new UIFixedLength(0f, UIFixedUnit.Pixel);
-		public static readonly UIFixedLength BackgroundImageTileY = new UIFixedLength(0f, UIFixedUnit.Pixel);
-		public static readonly UIFixedLength BackgroundImageRotation = new UIFixedLength(0f, UIFixedUnit.Pixel);
+		public const float BackgroundImageScaleX = 1f;
+		public const float BackgroundImageScaleY = 1f;
+		public const float BackgroundImageTileX = 1f;
+		public const float BackgroundImageTileY = 1f;
+		public const float BackgroundImageRotation = 0f;
 		public static readonly Texture2D BackgroundImage = default(Texture2D);
 		public const BackgroundFit BackgroundFit = UIForia.Rendering.BackgroundFit.Fill;
 		public static readonly Color BorderColorTop = new Color(-1f, -1f, -1f, -1f);
@@ -171,15 +171,15 @@ namespace UIForia.Rendering {
 				case StylePropertyId.BackgroundImageOffsetY:
 					 return new StyleProperty(StylePropertyId.BackgroundImageOffsetY, new UIFixedLength(0f, UIFixedUnit.Pixel));
 				case StylePropertyId.BackgroundImageScaleX:
-					 return new StyleProperty(StylePropertyId.BackgroundImageScaleX, new UIFixedLength(0f, UIFixedUnit.Pixel));
+					 return new StyleProperty(StylePropertyId.BackgroundImageScaleX, 1f);
 				case StylePropertyId.BackgroundImageScaleY:
-					 return new StyleProperty(StylePropertyId.BackgroundImageScaleY, new UIFixedLength(0f, UIFixedUnit.Pixel));
+					 return new StyleProperty(StylePropertyId.BackgroundImageScaleY, 1f);
 				case StylePropertyId.BackgroundImageTileX:
-					 return new StyleProperty(StylePropertyId.BackgroundImageTileX, new UIFixedLength(0f, UIFixedUnit.Pixel));
+					 return new StyleProperty(StylePropertyId.BackgroundImageTileX, 1f);
 				case StylePropertyId.BackgroundImageTileY:
-					 return new StyleProperty(StylePropertyId.BackgroundImageTileY, new UIFixedLength(0f, UIFixedUnit.Pixel));
+					 return new StyleProperty(StylePropertyId.BackgroundImageTileY, 1f);
 				case StylePropertyId.BackgroundImageRotation:
-					 return new StyleProperty(StylePropertyId.BackgroundImageRotation, new UIFixedLength(0f, UIFixedUnit.Pixel));
+					 return new StyleProperty(StylePropertyId.BackgroundImageRotation, 0f);
 				case StylePropertyId.BackgroundImage:
 					 return new StyleProperty(StylePropertyId.BackgroundImage, default(Texture2D));
 				case StylePropertyId.BackgroundFit:

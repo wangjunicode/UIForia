@@ -230,6 +230,7 @@ namespace UIForia.Rendering {
             currentBatch.uiforiaData.objectData0.Add(geometry.objectData);
             currentBatch.uiforiaData.objectData1.Add(geometry.miscData);
             currentBatch.uiforiaData.clipUVs.Add(geometry.clipUVs);
+            currentBatch.uiforiaData.clipRects.Add(geometry.clipRect);
             currentBatch.uiforiaData.transformData.Add(transform);
 
             UpdateUIForiaGeometry(geometry, range);
@@ -580,14 +581,16 @@ namespace UIForia.Rendering {
                             commandBuffer.DrawMesh(batch.pooledMesh.mesh, origin, uiForiaPropertyBlock.material, 0, 0, uiForiaPropertyBlock.matBlock);
                         }
                         else if (batch.batchType == BatchType.Mesh) {
-                            commandBuffer.DrawMesh(batch.unpooledMesh, origin, batch.material, 0, batch.material.passCount - 1, null);
+                            // todo -- origin is wrong
+                            var m = batch.uiforiaData.transformData.array[0] * origin;
+                            commandBuffer.DrawMesh(batch.unpooledMesh,  m, batch.material, 0, batch.material.passCount - 1, null);
                         }
 
                         break;
 
                     case RenderOperationType.PushRenderTexture:
 
-  //                      if (rtStack.array[rtStack.size - 1].renderTexture != cmd.renderTexture) {
+                        if (rtStack.array[rtStack.size - 1].renderTexture != cmd.renderTexture) {
                             // todo -- figure out the weirdness with perspective or view when texture is larger than camera texture
                             commandBuffer.SetRenderTarget(cmd.renderTexture);
                             int width = cmd.renderTexture.width / 2;
@@ -595,7 +598,7 @@ namespace UIForia.Rendering {
                             Matrix4x4 projection = Matrix4x4.Ortho(-width, width, -height, height, 0.1f, 9999);
                             commandBuffer.SetViewProjectionMatrices(cameraMatrix, projection);
                             commandBuffer.ClearRenderTarget(true, true, cmd.color);
-//                        }
+                        }
 
                         // always push so pop will pop the right texture, duplicate refs are ok
                         rtStack.Push(new RenderArea(cmd.renderTexture, cmd.rect));

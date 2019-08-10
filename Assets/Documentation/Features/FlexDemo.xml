@@ -8,15 +8,19 @@
         <Group style="constrain">
 
             <Div style="flex-demo">
+<!--todo find out why including this element breaks clip rect for item -->
+<!--                <Heading3 style="header">Flex-Start</Heading3>-->
 
-                <Heading3 style="header">Flex-Start</Heading3>
+                <Group x-id="demo-content" style="flex-demo-content  horizontal circle-clip">
+                    <Div style="clip-test-more-clip"/>
+                    <Div style="clip-test-more-clip"/>
+                    <Div style="clip-test-more-clip"/>
 
-                <Group x-id="demo-content" style="flex-demo-content flex-space-between horizontal circle-clip">
-                    
-                        <Div style="flex-item">
-                            Item 1
-                            <TextSpan style="special-text">More Items here Mofo</TextSpan>
-                            Even more text here
+                    <Div style="clip-test-more-clip">
+<!--                        <Div style="flex-item">-->
+<!--                            Item 1-->
+<!--                            <TextSpan style="special-text">More Itemms here Mofo</TextSpan>-->
+<!--                            Even more text here-->
                         </Div>
                         
                     <!--                    <Div style="flex-item">Item 2</Div>-->

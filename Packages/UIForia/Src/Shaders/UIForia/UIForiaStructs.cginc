@@ -22,7 +22,8 @@ struct v2f {
     nointerpolation float4 texCoord1 : TEXCOORD1;
     nointerpolation float4 texCoord2 : TEXCOORD2;
     nointerpolation float4 texCoord3 : TEXCOORD3;
-    nointerpolation float4 color : COLOR0;
+    nointerpolation float4 clipRect : TEXCOORD5; // todo -- just lookup in array
+    nointerpolation float4 color : COLOR0;      // could probably also be array look up
     
 };
 

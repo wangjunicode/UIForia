@@ -89,18 +89,20 @@ namespace UIForia.Util {
                 if (intersectCount == 0) {
                     retn.id = ++s_IdGenerator;
                     rectList.Add(retn);
+                    retn.xMin += padding;
+                    retn.yMin += padding;
                     retn.xMax -= padding;
                     retn.yMax -= padding;
                     return true;
                 }
 
-                retn.yMin = yMax;
+                retn.yMin = padding + yMax;
                 retn.yMax = retn.yMin + height;
 
                 if (retn.yMax > totalHeight) {
                     retn.yMin = 0;
                     retn.yMax = height;
-                    retn.xMin += (xMin - retn.xMin);
+                    retn.xMin += padding + (xMin - retn.xMin);
                     retn.xMax = retn.xMin + width;
                     xMin = int.MaxValue;
 

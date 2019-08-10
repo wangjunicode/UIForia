@@ -1317,15 +1317,15 @@ case "visibility":
                 case "backgroundimageoffsety":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_UIFixedLength("BackgroundImageOffsetY", UIForia.Rendering.StylePropertyId.BackgroundImageOffsetY, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
                 case "backgroundimagescalex":
-                    return new UIForia.Bindings.StyleBindings.StyleBinding_UIFixedLength("BackgroundImageScaleX", UIForia.Rendering.StylePropertyId.BackgroundImageScaleX, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_float("BackgroundImageScaleX", UIForia.Rendering.StylePropertyId.BackgroundImageScaleX, targetState.state, Compile<float>(value, null));                
                 case "backgroundimagescaley":
-                    return new UIForia.Bindings.StyleBindings.StyleBinding_UIFixedLength("BackgroundImageScaleY", UIForia.Rendering.StylePropertyId.BackgroundImageScaleY, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_float("BackgroundImageScaleY", UIForia.Rendering.StylePropertyId.BackgroundImageScaleY, targetState.state, Compile<float>(value, null));                
                 case "backgroundimagetilex":
-                    return new UIForia.Bindings.StyleBindings.StyleBinding_UIFixedLength("BackgroundImageTileX", UIForia.Rendering.StylePropertyId.BackgroundImageTileX, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_float("BackgroundImageTileX", UIForia.Rendering.StylePropertyId.BackgroundImageTileX, targetState.state, Compile<float>(value, null));                
                 case "backgroundimagetiley":
-                    return new UIForia.Bindings.StyleBindings.StyleBinding_UIFixedLength("BackgroundImageTileY", UIForia.Rendering.StylePropertyId.BackgroundImageTileY, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_float("BackgroundImageTileY", UIForia.Rendering.StylePropertyId.BackgroundImageTileY, targetState.state, Compile<float>(value, null));                
                 case "backgroundimagerotation":
-                    return new UIForia.Bindings.StyleBindings.StyleBinding_UIFixedLength("BackgroundImageRotation", UIForia.Rendering.StylePropertyId.BackgroundImageRotation, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_float("BackgroundImageRotation", UIForia.Rendering.StylePropertyId.BackgroundImageRotation, targetState.state, Compile<float>(value, null));                
                 case "backgroundimage":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_Texture2D("BackgroundImage", UIForia.Rendering.StylePropertyId.BackgroundImage, targetState.state, Compile<UnityEngine.Texture2D>(value, textureUrlSource));                
                 case "backgroundfit":

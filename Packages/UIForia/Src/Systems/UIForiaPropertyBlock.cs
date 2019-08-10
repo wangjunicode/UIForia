@@ -5,7 +5,6 @@ namespace UIForia.Rendering {
 
     public class UIForiaPropertyBlock {
 
-        public readonly int size;
         public readonly Material material;
         public readonly MaterialPropertyBlock matBlock;
         public readonly Matrix4x4[] transformData;
@@ -13,6 +12,7 @@ namespace UIForia.Rendering {
         public readonly Vector4[] objectData;
         public readonly Vector4[] miscData;
         public readonly Vector4[] clipUVs;
+        public readonly Vector4[] clipRects;
 
         public static readonly int s_TransformDataKey = Shader.PropertyToID("_TransformData");
         public static readonly int s_ColorDataKey = Shader.PropertyToID("_ColorData");
@@ -24,9 +24,9 @@ namespace UIForia.Rendering {
         public static readonly int s_MainTextureKey = Shader.PropertyToID("_MainTexture");
         public static readonly int s_ClipTextureKey = Shader.PropertyToID("_MaskTexture");
         public static readonly int s_ClipUVKey = Shader.PropertyToID("_ClipUVs");
+        public static readonly int s_ClipRectKey = Shader.PropertyToID("_ClipRects");
 
         public UIForiaPropertyBlock(Material material, int size) {
-            this.size = size;
             this.material = material;
             this.matBlock = new MaterialPropertyBlock();
             this.transformData = new Matrix4x4[size];
@@ -34,6 +34,7 @@ namespace UIForia.Rendering {
             this.objectData = new Vector4[size];
             this.miscData = new Vector4[size];
             this.clipUVs = new Vector4[size];
+            this.clipRects = new Vector4[size];
         }
 
         public void SetData(UIForiaData data) {
@@ -42,12 +43,14 @@ namespace UIForia.Rendering {
             Array.Copy(data.objectData0.array, 0, objectData, 0, data.objectData0.size);
             Array.Copy(data.objectData1.array, 0, miscData, 0, data.objectData1.size);
             Array.Copy(data.clipUVs.array, 0, clipUVs, 0, data.clipUVs.size);
+            Array.Copy(data.clipRects.array, 0, clipRects, 0, data.clipRects.size);
 
             matBlock.SetMatrixArray(s_TransformDataKey, transformData);
             matBlock.SetVectorArray(s_ColorDataKey, colorData);
             matBlock.SetVectorArray(s_ObjectDataKey, objectData);
             matBlock.SetVectorArray(s_MiscDataKey, miscData);
             matBlock.SetVectorArray(s_ClipUVKey, clipUVs);
+            matBlock.SetVectorArray(s_ClipRectKey, clipRects);
 
             if (data.mainTexture != null) {
                 material.SetTexture(s_MainTextureKey, data.mainTexture);

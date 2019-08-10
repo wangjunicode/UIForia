@@ -1,10 +1,10 @@
 style container {
    PreferredSize = 800px;
+   FlexLayoutDirection = Row;
 }
 
 style constrain {
    PreferredSize = 1cnt, 1cnt;
-   Padding = 10px;
    BackgroundColor = yellow;
    BackgroundImage = url(image);
    FlexLayoutDirection = Vertical;
@@ -13,12 +13,10 @@ style constrain {
 style flex-demo {
     PreferredSize = 1pca, 1cnt;
     FlexLayoutMainAxisAlignment = Start;
-    FlexLayoutCrossAxisAlignment = Center;
     FlexLayoutDirection = Horizontal;
     TextFontSize = 32;
     TextColor = black;
-    BackgroundColor = white;
-    Padding = 10px;
+    BackgroundColor = Green;
     //MarginBottom = 1em;
 }
 
@@ -29,18 +27,22 @@ style flex-demo-content {
     TextFaceDilate = 0.4;
     TextFontStyle = Italic;
     TextFontSize = 14;
-    BackgroundColor = blue;
+    BackgroundColor = Blue;
     FlexLayoutDirection = Horizontal;
     FlexLayoutCrossAxisAlignment = Center;
-    Margin = 0 1em;
-    Padding = 10px;
+  //  Padding = 10px;
+    PreferredSize = 300px;
 }
 
 style circle-clip {
-    Overflow = Hidden;
     BorderRadius = 50%;
+//    BorderRadiusTopRight = 20%;
+    Overflow = Hidden;
     FlexItemGrow = 0;
-    PreferredSize = 200px 1cnt;
+}
+
+style rot {
+    TransformRotation = 30;
 }
 
 style special-text {
@@ -94,4 +96,20 @@ style flex-item {
     TextAlignment = Center;
     FlexLayoutMainAxisAlignment = Center;
     TextWhitespaceMode = PreserveNewLines TrimLineStart;
+}
+
+style clip-test-item {
+    PreferredSize = 300px;
+    BackgroundColor = Red;
+    MarginLeft = 20px;
+    MarginTop = 20px;
+    //BackgroundImage = url(images/backgroundimg);
+}
+
+style clip-test-more-clip {
+     PreferredSize = 100px;
+     BackgroundColor = Yellow;
+     BorderRadius = 50%;
+     MarginLeft = 30px;   
+     Overflow = Hidden;
 }

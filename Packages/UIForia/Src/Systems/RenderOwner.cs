@@ -6,6 +6,7 @@ using UIForia.Layout.LayoutTypes;
 using UIForia.Rendering;
 using UIForia.Util;
 using UnityEngine;
+using UnityEngine.Assertions;
 using Vertigo;
 using Debug = System.Diagnostics.Debug;
 
@@ -35,7 +36,7 @@ namespace Src.Systems {
         private SimpleRectPacker maskPackerR = new SimpleRectPacker(Screen.width, Screen.height, 4);
         private SimpleRectPacker maskPackerG = new SimpleRectPacker(Screen.width, Screen.height, 4);
         private SimpleRectPacker maskPackerB = new SimpleRectPacker(Screen.width, Screen.height, 4);
-        private SimpleRectPacker maskPackerA = new SimpleRectPacker(Screen.width, Screen.height, 4);
+        private SimpleRectPacker maskPackerA = new SimpleRectPacker(Screen.width, Screen.height, 0);
         private SimpleRectPacker textPacker = new SimpleRectPacker(Screen.width, Screen.height, 4);
         private SimpleRectPacker texturePacker = new SimpleRectPacker(Screen.width, Screen.height, 4);
 
@@ -97,6 +98,7 @@ namespace Src.Systems {
         private void DrawClipShapes(RenderContext ctx) {
             if (clipTexture == null) {
                 clipTexture = RenderTexture.GetTemporary(Screen.width, Screen.height, 0, RenderTextureFormat.ARGB32);
+                clipTexture.filterMode = FilterMode.Trilinear;
             }
 
             maskPackerA.Clear();
@@ -107,16 +109,38 @@ namespace Src.Systems {
 
             for (int i = 0; i < renderedClippers.size; i++) {
                 RenderBox box = renderedClippers.array[i];
-                ClipShape clipShape = box.CreateClipShape();
-                if (clipShape == null) continue;
+
+                ClipShape clipShape = box.CreateClipShape(null);
+
+                if (clipShape == null) {
+                    box.clipRect = new Vector4(0, 0, 0, 0);
+                    box.clipUVs = default;
+                    continue;
+                }
+
+                // may be faster to alternate packers since it is easier to find free space when more free space is available (profile this)
+                // foreach packer -> packer.TryFitRect(i, rect)
                 if (maskPackerA.TryPackRect(clipShape.width, clipShape.height, out SimpleRectPacker.PackedRect r)) {
-                    ctx.DrawMesh(clipShape.geometry, sdfClipMaterial, Matrix4x4.identity);
+                    Matrix4x4 mat = Matrix4x4.Translate(new Vector3(r.xMin, -r.yMin, 0));
+
+                    ctx.DrawMesh(clipShape.mesh, sdfClipMaterial, mat);
                     box.clipTexture = clipTexture;
+
+                    // can compress into 2 floats for xy and width / height. but only have max of 6553.6 when using floats, can be int at 65536 which is fine
+                    // just need to watch out for screen size (ultra high pixel count over 4k probably don't need to worry about yet)
+                    // todo -- this is screen oriented, will need to handle the case when this is transformed
+                    box.clipRect = new Vector4(
+                        box.element.layoutResult.screenPosition.x,
+                        box.element.layoutResult.screenPosition.y,
+                        box.element.layoutResult.actualSize.width,
+                        box.element.layoutResult.actualSize.height
+                    );
+                    // can compress to float (2 bytes each for reasonable precision)
                     box.clipUVs = new Vector4(
                         r.xMin / (float) clipTexture.width,
                         r.yMin / (float) clipTexture.height,
-                        (r.xMax - r.xMin) / (float) clipTexture.width,
-                        (r.yMax - r.yMin) / (float) clipTexture.height
+                        r.xMax / (float) clipTexture.width,
+                        r.yMax / (float) clipTexture.height
                     );
                 }
             }
@@ -343,6 +367,7 @@ namespace Src.Systems {
                                 if (!renderBox.clipped && clipStack.size > 0) {
                                     renderBox.clipper = clipStack.array[clipStack.size - 1];
                                     renderBox.clipper.clippedBoxCount++;
+                                    Assert.IsFalse(renderBox.clipper == renderBox);
                                 }
 
                                 break;

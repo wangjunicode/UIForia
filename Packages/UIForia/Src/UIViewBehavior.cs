@@ -18,6 +18,13 @@ namespace UIForia {
 
         private Path2D path = new Path2D();
 
+        public Vector2 pos = new Vector2(200, 200);
+        public Vector2 size = new Vector2(200, 200);
+        public Vector4 radii = new Vector4(100, 100, 0, 50);
+        public Vector2 shadowSize;
+        public Vector2 shadowOffset;
+        public float shadowIntensity = 10;
+
         public void Start() {
             type = Type.GetType(typeName);
 
@@ -28,12 +35,15 @@ namespace UIForia {
 
         private void DrawOverlay(RenderContext ctx) {
             path.Clear();
-
+            path.SetShadowIntensity(shadowIntensity);
+            path.SetShadowOffset(shadowOffset);
+            path.SetShadowColor(Color.red);
+            //path.RoundedRect(pos.x, pos.y, size.x, size.y, radii.x, radii.y, radii.z, radii.w);
             
-            path.Rect(100, 100, 200, 100);
-            path.SetStrokeWidth(3f);
+            path.SetFill(Color.yellow);
+            path.RoundedRect(pos.x, pos.y, size.x, size.y, radii.x, radii.y, radii.z, radii.w);
             path.Fill();
-            
+
 //            path.Begin("sectionName");
 ////
 ////            path.SetUVTransform();

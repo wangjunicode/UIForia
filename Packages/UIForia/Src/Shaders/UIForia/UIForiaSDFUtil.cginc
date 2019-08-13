@@ -6,10 +6,11 @@
 const float SQRT_2 = 1.4142135623730951;
             
                            
-#define PaintMode_Color 1 << 0
-#define PaintMode_Texture 1 << 1
-#define PaintMode_TextureTint 1 << 2
-#define PaintMode_LetterBoxTexture 1 << 3
+#define PaintMode_Color (1 << 0)
+#define PaintMode_Texture (1 << 1)
+#define PaintMode_TextureTint (1 << 2)
+#define PaintMode_LetterBoxTexture (1 << 3)
+#define PaintMode_Shadow (1 << 4)
 
 // remap input from one range to an other            
 inline float Map(float s, float a1, float a2, float b1, float b2) {

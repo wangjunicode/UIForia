@@ -173,16 +173,6 @@ namespace Vertigo {
 
         public int RoundedRect(float x, float y, float width, float height, float r0, float r1, float r2, float r3) {
             ShapeDef shapeDef = new ShapeDef(ShapeType.RoundedRect);
-            float min = math.min(width, height);
-
-            if (min <= 0) min = 0.0001f;
-
-            float halfMin = min * 0.5f;
-
-            r0 = math.clamp(r0, 0, halfMin) / min;
-            r1 = math.clamp(r1, 0, halfMin) / min;
-            r2 = math.clamp(r2, 0, halfMin) / min;
-            r3 = math.clamp(r3, 0, halfMin) / min;
             shapeDef.pointRange = new RangeInt(pointList.size, 2);
             pointList.Add(new PathPoint(r0, r1));
             pointList.Add(new PathPoint(r2, r3));

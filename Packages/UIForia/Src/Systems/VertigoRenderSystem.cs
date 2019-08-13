@@ -140,6 +140,11 @@ namespace Src.Systems {
         public float opacity;
         public float encodedTint;
         public int gradientId;
+        public Color32 shadowColor;
+        public float shadowIntensity;
+        public float shadowOffsetX;
+        public float shadowOffsetY;
+        public Color32 shadowTint;
 
         public static SVGXFillStyle Default => new SVGXFillStyle() {
             paintMode = PaintMode.Color,

@@ -53,6 +53,7 @@ namespace UIForia.Systems {
 
             gfx.Render(ctx);
         }
+        public event Action<RenderContext> DrawDebugOverlay2;
 
         private static void DrawNormalFill(ImmediateRenderContext ctx, UIElement element) {
             Color bgColor = element.style.BackgroundColor;

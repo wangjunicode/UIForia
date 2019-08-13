@@ -5,6 +5,7 @@ using UIForia.Rendering;
 using UIForia.Util;
 using UnityEngine;
 using UnityEngine.Rendering;
+using Vertigo;
 using Application = UIForia.Application;
 
 namespace Src.Systems {
@@ -41,12 +42,11 @@ namespace Src.Systems {
             }
 
             application.StyleSystem.onStylePropertyChanged += HandleStylePropertyChanged;
-            
         }
 
         private void HandleStylePropertyChanged(UIElement element, StructList<StyleProperty> propertyList) {
             if (element.renderBox == null) return;
-            
+
             int count = propertyList.size;
             StyleProperty[] properties = propertyList.array;
 
@@ -67,6 +67,7 @@ namespace Src.Systems {
         }
 
         public event Action<ImmediateRenderContext> DrawDebugOverlay;
+        public event Action<RenderContext> DrawDebugOverlay2;
 
         public void OnReset() {
             commandBuffer.Clear();
@@ -87,6 +88,7 @@ namespace Src.Systems {
                 renderOwners.array[i].Render(renderContext);
             }
 
+            DrawDebugOverlay2?.Invoke(renderContext);
             renderContext.Render(camera, commandBuffer);
         }
 
@@ -109,9 +111,7 @@ namespace Src.Systems {
 
         public void OnElementDisabled(UIElement element) { }
 
-        public void OnElementDestroyed(UIElement element) {
-          
-        }
+        public void OnElementDestroyed(UIElement element) { }
 
         public void OnAttributeSet(UIElement element, string attributeName, string currentValue, string previousValue) { }
 
@@ -123,11 +123,62 @@ namespace Src.Systems {
             }
 
             this.camera = camera; // todo -- should be handled by the view
-            
+
             if (this.camera != null) {
                 this.camera.AddCommandBuffer(CameraEvent.BeforeForwardOpaque, commandBuffer);
             }
         }
+
+    }
+
+    internal struct SVGXFillStyle {
+
+        public PaintMode paintMode;
+        public float encodedColor;
+        public Texture texture;
+        public SVGXMatrix uvTransform;
+        public float opacity;
+        public float encodedTint;
+        public int gradientId;
+
+        public static SVGXFillStyle Default => new SVGXFillStyle() {
+            paintMode = PaintMode.Color,
+            encodedColor = VertigoUtil.ColorToFloat(Color.black),
+            texture = null,
+            uvTransform = SVGXMatrix.identity,
+            opacity = 1f,
+            encodedTint = VertigoUtil.ColorToFloat(Color.clear),
+            gradientId = -1
+        };
+
+    }
+    
+    internal struct SVGXStrokeStyle {
+
+        public PaintMode paintMode;
+        public float encodedColor;
+        public Texture texture;
+        public SVGXMatrix uvTransform;
+        public float opacity;
+        public float encodedTint;
+        public int gradientId;
+        public float strokeWidth;
+        public Vertigo.LineJoin lineJoin;
+        public Vertigo.LineCap lineCap;
+        public float miterLimit;
+        
+        public static SVGXStrokeStyle Default => new SVGXStrokeStyle() {
+            paintMode = PaintMode.Color,
+            encodedColor = VertigoUtil.ColorToFloat(Color.black),
+            texture = null,
+            uvTransform = SVGXMatrix.identity,
+            opacity = 1f,
+            encodedTint = VertigoUtil.ColorToFloat(Color.clear),
+            gradientId = -1,
+            lineJoin = Vertigo.LineJoin.Miter,
+            lineCap = Vertigo.LineCap.Butt,
+            miterLimit = 10f
+        };
 
     }
 

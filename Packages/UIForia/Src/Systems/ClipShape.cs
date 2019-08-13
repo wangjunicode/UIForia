@@ -28,7 +28,6 @@ namespace UIForia.Rendering {
         }
 
         public ClipShapeType type;
-        public Mesh mesh;
 
         public void SetFromElement(UIElement element) {
 
@@ -74,7 +73,7 @@ namespace UIForia.Rendering {
                 bevelBottomLeft > 0 ||
                 bevelBottomRight > 0) {
 
-                geometry.ClipCornerRect(new Size(width, height), new UIForiaGeometry.CornerDef() {
+                geometry.ClipCornerRect(new Size(width, height), new CornerDefinition() {
                     topLeftX = bevelTopLeft,
                     topLeftY = bevelTopLeft,
                     topRightX = bevelTopRight,
@@ -87,7 +86,7 @@ namespace UIForia.Rendering {
 
             }
             else {
-                geometry.FillRectUniformBorder_Miter(size.width, size.height);
+                geometry.FillRect(size.width, size.height);
             }
             
             PaintMode paintMode = PaintMode.None;

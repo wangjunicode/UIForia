@@ -369,15 +369,15 @@ namespace Vertigo {
             }
         }
 
-        private Vector4[] GetUVChannel(TextureCoordChannel texCoordChannel) {
+        private Vector4[] GetUVChannel(VertexChannel texCoordChannel) {
             switch (texCoordChannel) {
-                case TextureCoordChannel.TextureCoord0:
+                case VertexChannel.TextureCoord0:
                     return texCoordList0.array;
-                case TextureCoordChannel.TextureCoord1:
+                case VertexChannel.TextureCoord1:
                     return texCoordList1.array;
-                case TextureCoordChannel.TextureCoord2:
+                case VertexChannel.TextureCoord2:
                     return texCoordList2.array;
-                case TextureCoordChannel.TextureCoord3:
+                case VertexChannel.TextureCoord3:
                     return texCoordList3.array;
             }
 

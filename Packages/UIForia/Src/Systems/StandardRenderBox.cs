@@ -44,11 +44,6 @@ namespace UIForia.Rendering {
 
         protected bool geometryNeedsUpdate;
         protected bool dataNeedsUpdate;
-
-        protected float borderTop;
-        protected float borderRight;
-        protected float borderBottom;
-        protected float borderLeft;
         protected Size lastSize;
         protected GeometryRange range;
         protected UIForiaGeometry geometry;
@@ -66,16 +61,6 @@ namespace UIForia.Rendering {
             lastSize = new Size(-1, -1);
             geometryNeedsUpdate = true;
             dataNeedsUpdate = true;
-        }
-
-        public override ClipShape CreateClipShape(ClipShape shape) {
-            // making the shape at half resolution to save texture usage
-            shape.width = (int) (element.layoutResult.actualSize.width / 2);
-            shape.height = (int) (element.layoutResult.actualSize.height / 2);
-            shape.type = ClipShapeType.SDFFill;
-            shape.mesh = UIForiaGeometry.CreateQuadMesh(shape.width, shape.height);
-            // new SDFClipShape(SDFType.Rhombus);
-            return shape;
         }
 
         public override void OnStylePropertyChanged(StructList<StyleProperty> propertyList) {
@@ -135,7 +120,7 @@ namespace UIForia.Rendering {
                 bevelTopLeft > 0 ||
                 bevelBottomLeft > 0 ||
                 bevelBottomRight > 0) {
-                geometry.ClipCornerRect(new Size(width, height), new UIForiaGeometry.CornerDef() {
+                geometry.ClipCornerRect(new Size(width, height), new CornerDefinition() {
                     topLeftX = bevelTopLeft,
                     topLeftY = bevelTopLeft,
                     topRightX = bevelTopRight,
@@ -147,7 +132,7 @@ namespace UIForia.Rendering {
                 });
             }
             else {
-                geometry.FillRectUniformBorder_Miter(size.width, size.height);
+                geometry.FillRect(size.width, size.height);
             }
 
             if (element.style.BackgroundImage != null) {

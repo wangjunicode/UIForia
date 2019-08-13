@@ -5,8 +5,8 @@ style container {
 
 style constrain {
    PreferredSize = 1cnt, 1cnt;
-   BackgroundColor = yellow;
-   BackgroundImage = url(image);
+//   BackgroundColor = yellow;
+//   BackgroundImage = url(image);
    FlexLayoutDirection = Vertical;
 }
 
@@ -16,7 +16,7 @@ style flex-demo {
     FlexLayoutDirection = Horizontal;
     TextFontSize = 32;
     TextColor = black;
-    BackgroundColor = Green;
+//    BackgroundColor = Green;
     //MarginBottom = 1em;
 }
 

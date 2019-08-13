@@ -11,8 +11,8 @@ namespace UIForia.Rendering {
 
         SDFFill,
         SDFStroke,
-        SDFComposite,
-        Geometry
+        Path,
+        Texture
 
     }
 
@@ -47,7 +47,9 @@ namespace UIForia.Rendering {
         internal int clippedBoxCount;
         public Texture clipTexture;
         public Vector4 clipUVs;
-
+        
+        protected ClipShape clipShape;
+        
         public abstract Rect RenderBounds { get; }
 
         public virtual void OnInitialize() {
@@ -90,7 +92,10 @@ namespace UIForia.Rendering {
             }
         }
 
-        public virtual ClipShape CreateClipShape(ClipShape clipShape) {
+        public virtual ClipShape GetClipShape() {
+
+            clipShape = clipShape ?? new ClipShape();
+            
             // corner clip
             // radii
             // width
@@ -110,7 +115,7 @@ namespace UIForia.Rendering {
 //            clipShape.SetTexture(texture, channel);
 
             clipShape.SetFromElement(element);
-
+            
             return clipShape;
         }
 

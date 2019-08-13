@@ -179,7 +179,7 @@ namespace SVGX {
 
             for (int i = 0; i < wave.clipShapes.Count; i++) {
                 SVGXShape shape = shapes[i];
-                int start = shape.pointRange.start;
+                int start = shape.dataRange.start;
 
                 switch (shape.type) {
                     case SVGXShapeType.Unset:

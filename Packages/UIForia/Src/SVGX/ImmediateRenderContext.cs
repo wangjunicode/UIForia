@@ -167,7 +167,7 @@ namespace SVGX {
 
             switch (currentShape.type) {
                 case SVGXShapeType.Path:
-                    currentShape.pointRange.length++;
+                    currentShape.dataRange.length++;
                     shapes[shapes.Count - 1] = currentShape;
                     break;
                 case SVGXShapeType.Unset:
@@ -236,7 +236,7 @@ namespace SVGX {
                 return;
             }
 
-            Vector2 startPoint = points[currentShape.pointRange.start];
+            Vector2 startPoint = points[currentShape.dataRange.start];
             LineTo(startPoint.x, startPoint.y);
             currentShape.isClosed = true;
             shapes[shapes.Count - 1] = currentShape;
@@ -289,7 +289,7 @@ namespace SVGX {
             SVGXShape currentShape = shapes[shapes.Count - 1];
             switch (currentShape.type) {
                 case SVGXShapeType.Path:
-                    currentShape.pointRange.length += pointCount;
+                    currentShape.dataRange.length += pointCount;
                     shapes[shapes.Count - 1] = currentShape;
                     break;
                 case SVGXShapeType.Unset:

@@ -17,6 +17,8 @@ namespace Vertigo {
         Sprite = 1 << 10,
 
 
+        Sector
+
     }
 
 }

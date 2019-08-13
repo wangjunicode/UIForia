@@ -96,9 +96,9 @@ namespace Src.Systems {
         private RenderTexture clipTexture;
 
         private void DrawClipShapes(RenderContext ctx) {
+            
             if (clipTexture == null) {
                 clipTexture = RenderTexture.GetTemporary(Screen.width, Screen.height, 0, RenderTextureFormat.ARGB32);
-                clipTexture.filterMode = FilterMode.Trilinear;
             }
 
             maskPackerA.Clear();
@@ -110,7 +110,7 @@ namespace Src.Systems {
             for (int i = 0; i < renderedClippers.size; i++) {
                 RenderBox box = renderedClippers.array[i];
 
-                ClipShape clipShape = box.CreateClipShape(null);
+                ClipShape clipShape = box.GetClipShape();
 
                 if (clipShape == null) {
                     box.clipRect = new Vector4(0, 0, 0, 0);
@@ -121,9 +121,11 @@ namespace Src.Systems {
                 // may be faster to alternate packers since it is easier to find free space when more free space is available (profile this)
                 // foreach packer -> packer.TryFitRect(i, rect)
                 if (maskPackerA.TryPackRect(clipShape.width, clipShape.height, out SimpleRectPacker.PackedRect r)) {
+                    
                     Matrix4x4 mat = Matrix4x4.Translate(new Vector3(r.xMin, -r.yMin, 0));
 
-                    ctx.DrawMesh(clipShape.mesh, sdfClipMaterial, mat);
+                    
+                    ctx.DrawClipShape(clipShape);
                     box.clipTexture = clipTexture;
 
                     // can compress into 2 floats for xy and width / height. but only have max of 6553.6 when using floats, can be int at 65536 which is fine
@@ -329,6 +331,8 @@ namespace Src.Systems {
 
             RenderBoxWrapper[] wrappers = wrapperList.array;
 
+            bool activeClipperIsCulled = false;
+            
             for (int i = 0; i < wrapperList.size; i++) {
                 RenderBoxWrapper wrapper = wrappers[i];
 
@@ -344,24 +348,43 @@ namespace Src.Systems {
 
                         switch (renderBox.clipBehavior) {
                             case ClipBehavior.Never:
-                                renderBox.clipper = null; // need a default rect clipper that is huge
+                                renderBox.clipper = null;
                                 drawList.Add(new DrawCommand(renderBox, DrawCommandType.BackgroundTransparent));
                                 break;
 
                             case ClipBehavior.Screen:
-                                renderBox.clipper = null; // need a default rect clipper that is huge
+                                renderBox.clipper = null;
                                 break;
 
                             case ClipBehavior.Normal:
 
+                                // if current clipper is clipped, mark as clipped
+                                
+                                // otherwise intersect with currently visible polygon
+                                // any rounded shape masking will happen in the shader I think
+                                if (activeClipperIsCulled) {
+                                    renderBox.clipper = clipStack.array[clipStack.size - 1];
+                                    renderBox.clipper.clippedBoxCount++;
+                                    renderBox.clipped = true;
+                                    continue;
+                                }
+                                
                                 for (int j = 0; j < clipStack.size; j++) {
                                     // there is probably a faster way to do this linearly, need bounds in screen space to compare against each other
                                     // if parent is clipped & not overflowing parent  & identity transform -> clipped = true
                                     Rect bounds = renderBox.RenderBounds;
+                                    
+                                    // 2 phases for culling 
+                                    //     1. general rect bounds intersection, always run
+                                    //     2. user defined cull check, run if painter implements ShouldCull
+                                    
+                                    // go through 
+                                    
                                     if (clipStack.array[j].ShouldCull(bounds)) {
                                         renderBox.clipped = true;
                                         break;
                                     }
+                                    
                                 }
 
                                 if (!renderBox.clipped && clipStack.size > 0) {
@@ -376,7 +399,10 @@ namespace Src.Systems {
                                 break;
                         }
 
-                        drawList.Add(new DrawCommand(renderBox, DrawCommandType.BackgroundTransparent));
+                        if (!renderBox.clipped) {
+                            drawList.Add(new DrawCommand(renderBox, DrawCommandType.BackgroundTransparent));
+                        }
+
                         break;
 
                     case RenderOpType.DrawForeground:
@@ -388,7 +414,10 @@ namespace Src.Systems {
                         break;
 
                     case RenderOpType.PushClipShape:
-                        clipStack.Push(wrapper.element.renderBox);
+                        // push no matter what, if this clipper gets clipped by parent clipper we'll figure it out later
+                        // for now assume no rotation or scaling, we can handle transformations later
+                        // wrapper.renderBox.intersectClipRect = RectExtensions.Intersect(wrapper.orientedScreenRect);
+                        clipStack.Push(wrapper.renderBox);
                         break;
 
                     case RenderOpType.PopClipShape:

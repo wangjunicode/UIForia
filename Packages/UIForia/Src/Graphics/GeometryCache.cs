@@ -14,7 +14,7 @@ namespace Vertigo {
     }
 
     [Flags]
-    public enum TextureCoordChannel {
+    public enum VertexChannel {
 
         TextureCoord0 = 1 << 0,
         TextureCoord1 = 1 << 1,
@@ -27,7 +27,7 @@ namespace Vertigo {
 
         public ShapeType shapeType;
         public GeometryType geometryType;
-        public TextureCoordChannel textureCoordChannels;
+        public VertexChannel vertexChannels;
         public Bounds bounds;
         public int vertexStart;
         public int vertexCount;
@@ -41,94 +41,78 @@ namespace Vertigo {
         public StructList<GeometryShape> shapes;
 
         public StructList<Vector3> positions;
-        public StructList<Vector3> normals;
-        public StructList<Color> colors;
         public StructList<Vector4> texCoord0;
         public StructList<Vector4> texCoord1;
-        public StructList<Vector4> texCoord2;
-        public StructList<Vector4> texCoord3;
         public StructList<int> triangles;
 
         public int shapeCount => shapes.size;
-        public int vertexCount => positions.size;
-        public int triangleCount => triangles.size;
+        
+        public int vertexCount;
+        public int triangleCount;
 
         public GeometryCache(int capacity = 8) {
             shapes = new StructList<GeometryShape>();
             positions = new StructList<Vector3>(capacity);
-            normals = new StructList<Vector3>(capacity);
-            colors = new StructList<Color>(capacity);
             texCoord0 = new StructList<Vector4>(capacity);
             texCoord1 = new StructList<Vector4>(capacity);
-            texCoord2 = new StructList<Vector4>(capacity);
-            texCoord3 = new StructList<Vector4>(capacity);
             triangles = new StructList<int>(capacity * 2);
         }
 
-        
         public void EnsureAdditionalCapacity(int vertCount, int triCount) {
             positions.EnsureAdditionalCapacity(vertCount);
-            normals.EnsureAdditionalCapacity(vertCount);
-            colors.EnsureAdditionalCapacity(vertCount);
             texCoord0.EnsureAdditionalCapacity(vertCount);
             texCoord1.EnsureAdditionalCapacity(vertCount);
-            texCoord2.EnsureAdditionalCapacity(vertCount);
-            texCoord3.EnsureAdditionalCapacity(vertCount);
             triangles.EnsureAdditionalCapacity(triCount);
         }
 
-        public bool SetVertexColors(int shapeIdx, Color color) {
-            if (shapeIdx < 0 || shapeIdx > shapes.size) {
-                return false;
-            }
-
-            GeometryShape shape = shapes.array[shapeIdx];
-            //shapes.array[shapeIdx].textureCoordChannels |= TextureCoordChannel.Color;
-            int start = shape.vertexStart;
-            int end = start + shape.vertexCount;
-            Color[] c = this.colors.array;
-            for (int i = start; i < end; i++) {
-                c[i] = color;
-            }
-
-            return true;
-        }
-
-        public bool SetNormals(int shapeIdx, Vector3 normal) {
-            if (shapeIdx < 0 || shapeIdx > shapes.size) {
-                return false;
-            }
-
-            GeometryShape shape = shapes.array[shapeIdx];
-            //shapes.array[shapeIdx].textureCoordChannels |= TextureCoordChannel.Normal;
-            int start = shape.vertexStart;
-            int end = start + shape.vertexCount;
-            Vector3[] c = this.normals.array;
-            for (int i = start; i < end; i++) {
-                c[i] = normal;
-            }
-
-            return true;
-        }
-
-        public bool SetVertexChannels(int shapeIdx, TextureCoordChannel channel) {
-            if (shapeIdx < 0 || shapeIdx > shapes.size) {
-                return false;
-            }
-            shapes.array[shapeIdx].textureCoordChannels = channel;
-            return true;
-        }
+//        public bool SetVertexColors(int shapeIdx, Color color) {
+//            if (shapeIdx < 0 || shapeIdx > shapes.size) {
+//                return false;
+//            }
+//
+//            GeometryShape shape = shapes.array[shapeIdx];
+//            //shapes.array[shapeIdx].textureCoordChannels |= TextureCoordChannel.Color;
+//            int start = shape.vertexStart;
+//            int end = start + shape.vertexCount;
+//            Color[] c = this.colors.array;
+//            for (int i = start; i < end; i++) {
+//                c[i] = color;
+//            }
+//
+//            return true;
+//        }
+//
+//        public bool SetNormals(int shapeIdx, Vector3 normal) {
+//            if (shapeIdx < 0 || shapeIdx > shapes.size) {
+//                return false;
+//            }
+//
+//            GeometryShape shape = shapes.array[shapeIdx];
+//            //shapes.array[shapeIdx].textureCoordChannels |= TextureCoordChannel.Normal;
+//            int start = shape.vertexStart;
+//            int end = start + shape.vertexCount;
+//            Vector3[] c = this.normals.array;
+//            for (int i = start; i < end; i++) {
+//                c[i] = normal;
+//            }
+//
+//            return true;
+//        }
+//
+//        public bool SetVertexChannels(int shapeIdx, VertexChannel channel) {
+//            if (shapeIdx < 0 || shapeIdx > shapes.size) {
+//                return false;
+//            }
+//            shapes.array[shapeIdx].vertexChannels = channel;
+//            return true;
+//        }
 
         public void Clear() {
             shapes.QuickClear();
-            positions.QuickClear();
-            normals.QuickClear();
-            colors.QuickClear();
-            texCoord0.QuickClear();
-            texCoord1.QuickClear();
-            texCoord2.QuickClear();
-            texCoord3.QuickClear();
-            triangles.QuickClear();
+            positions.size = 0;
+            texCoord0.size = 0;
+            texCoord1.size = 0;
+            triangles.size = 0;
         }
 
         public int GetTextureCoord0(int idx, ref Vector4[] retn) {

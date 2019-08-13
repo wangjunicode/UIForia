@@ -177,7 +177,7 @@ namespace SVGX {
         }
 
         internal void CreateStrokeVertices(Vector2[] points, SVGXRenderShape renderShape, GFX.GradientData gradientData, Rect scissor, SVGXStyle style, SVGXMatrix matrix) {
-            int start = renderShape.shape.pointRange.start;
+            int start = renderShape.shape.dataRange.start;
             int triIdx = triangleIndex;
             float strokeWidth = Mathf.Clamp(style.strokeWidth, 1f, style.strokeWidth);
             float z = renderShape.zIndex;
@@ -411,14 +411,14 @@ namespace SVGX {
             }
 
             LightList<Vector2> pointCache = LightList<Vector2>.Get();
-            SVGXGeometryUtil.GenerateStrokeGeometry(pointCache, style.strokePlacement, style.strokeWidth, renderShape.shape.type, matrix, points, renderShape.shape.pointRange, renderShape.shape.isClosed);
+            SVGXGeometryUtil.GenerateStrokeGeometry(pointCache, style.strokePlacement, style.strokeWidth, renderShape.shape.type, matrix, points, renderShape.shape.dataRange, renderShape.shape.isClosed);
 
             bool isClosed = renderShape.shape.isClosed;
             const int cap = 1;
             if (isClosed) {
                 GenerateSegmentBodies(pointCache.Array, scissor, pointCache.Count - 2, color, strokeWidth, renderShape.zIndex);
             }
-            else if (renderShape.shape.pointRange.length == 2) {
+            else if (renderShape.shape.dataRange.length == 2) {
                 int renderData = BitUtil.SetHighLowBits(DrawType_Stroke, RenderTypeStroke);
                 int rangeStart = uv1List.Count;
                 GenerateSegmentBodies(pointCache.Array, scissor, pointCache.Count - 2, color, strokeWidth, renderShape.zIndex);
@@ -589,8 +589,8 @@ namespace SVGX {
         }
 
         internal void CreateFillVertices(Vector2[] points, SVGXRenderShape renderShape, Rect scissorRect, GFX.GradientData gradientData, in SVGXStyle style, in SVGXMatrix matrix) {
-            int start = renderShape.shape.pointRange.start;
-            int end = renderShape.shape.pointRange.end;
+            int start = renderShape.shape.dataRange.start;
+            int end = renderShape.shape.dataRange.end;
 
             int triIdx = triangleIndex;
 
@@ -805,8 +805,8 @@ namespace SVGX {
         }
 
         internal void CreateShadowVertices(Vector2[] points, SVGXRenderShape renderShape, GFX.GradientData gradientData, SVGXStyle style, SVGXMatrix matrix) {
-            int start = renderShape.shape.pointRange.start;
-            int end = renderShape.shape.pointRange.end;
+            int start = renderShape.shape.dataRange.start;
+            int end = renderShape.shape.dataRange.end;
 
             int triIdx = triangleIndex;
             float z = renderShape.zIndex;

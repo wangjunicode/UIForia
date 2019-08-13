@@ -110,24 +110,10 @@ namespace UIForia.Rendering {
             UpdateSizes(4, 6);
         }
 
-        public struct CornerDef {
-
-            public float topLeftX;
-            public float topLeftY;
-            public float topRightX;
-            public float topRightY;
-            public float bottomLeftX;
-            public float bottomLeftY;
-            public float bottomRightX;
-            public float bottomRightY;
-
-        }
-
-        public void ClipCornerRect(Size size, in CornerDef cornerDef) {
+        public void ClipCornerRect(Size size, in CornerDefinition cornerDefinition, in Vector2 position = default) {
             EnsureAdditionalCapacity(9, 24);
             Vector3[] positions = positionList.array;
             Vector4[] texCoord0 = texCoordList0.array;
-            Vector4[] texCoord1 = texCoordList1.array;
             int[] triangles = triangleList.array;
 
             int startVert = positionList.size;
@@ -136,15 +122,15 @@ namespace UIForia.Rendering {
             float width = size.width;
             float height = size.height;
 
-            positions[startVert + 0] = new Vector3(0, -cornerDef.topLeftY, 0);
-            positions[startVert + 1] = new Vector3(cornerDef.topLeftX, 0, 0);
-            positions[startVert + 2] = new Vector3(width - cornerDef.topRightX, 0, 0);
-            positions[startVert + 3] = new Vector3(width, -cornerDef.topRightY, 0);
-            positions[startVert + 4] = new Vector3(width, -(height - cornerDef.bottomRightY), 0);
-            positions[startVert + 5] = new Vector3(width - cornerDef.bottomRightX, -height, 0);
-            positions[startVert + 6] = new Vector3(cornerDef.bottomLeftX, -height, 0);
-            positions[startVert + 7] = new Vector3(0, -(height - cornerDef.bottomLeftY), 0);
-            positions[startVert + 8] = new Vector3(width * 0.5f, -height * 0.5f, 0);
+            positions[startVert + 0] = new Vector3(position.x + 0, -(position.y + cornerDefinition.topLeftY), 0);
+            positions[startVert + 1] = new Vector3(position.x + cornerDefinition.topLeftX, -position.y, 0);
+            positions[startVert + 2] = new Vector3(position.x + width - cornerDefinition.topRightX, -position.y, 0);
+            positions[startVert + 3] = new Vector3(position.x + width, -(position.y + cornerDefinition.topRightY), 0);
+            positions[startVert + 4] = new Vector3(position.x + width, -(position.y + height - cornerDefinition.bottomRightY), 0);
+            positions[startVert + 5] = new Vector3(position.x + width - cornerDefinition.bottomRightX, -(position.y + height), 0);
+            positions[startVert + 6] = new Vector3(position.x + cornerDefinition.bottomLeftX, -(position.y + height), 0);
+            positions[startVert + 7] = new Vector3(position.x + 0, -(position.y + height - cornerDefinition.bottomLeftY), 0);
+            positions[startVert + 8] = new Vector3(position.x + width * 0.5f, -(position.y + (height * 0.5f)), 0);
 
             triangles[startTriangle + 0] = startVert + 1;
             triangles[startTriangle + 1] = startVert + 8;
@@ -179,19 +165,18 @@ namespace UIForia.Rendering {
             triangles[startTriangle + 23] = startVert + 7;
 
             for (int i = 0; i < 9; i++) {
-                float x = positions[startVert + i].x / width;
-                float y = 1 - (positions[startVert + i].y / -height);
+                float x = (positions[startVert + i].x - position.x) / width;
+                float y = 1 - ((positions[startVert + i].y + position.y) / -height);
                 texCoord0[startVert + i] = new Vector4(x, y, x, y);
             }
-     
+
             triangleList.size += 24;
             positionList.size += 9;
             texCoordList0.size += 9;
             texCoordList1.size += 9;
-            
         }
 
-        public void ClipCornerRectWithFill(Vector2 fillOrigin, float angle, Size size, in CornerDef cornerDef) {
+        public void ClipCornerRectWithFill(Vector2 fillOrigin, float angle, Size size, in CornerDefinition cornerDefinition) {
             EnsureAdditionalCapacity(9, 24);
             Vector3[] positions = positionList.array;
             Vector4[] texCoord0 = texCoordList0.array;
@@ -204,14 +189,14 @@ namespace UIForia.Rendering {
             float width = size.width;
             float height = size.height;
 
-            positions[startVert + 0] = new Vector3(0, -cornerDef.topLeftY, 0);
-            positions[startVert + 1] = new Vector3(cornerDef.topLeftX, 0, 0);
-            positions[startVert + 2] = new Vector3(width - cornerDef.topRightX, 0, 0);
-            positions[startVert + 3] = new Vector3(width, -cornerDef.topRightY, 0);
-            positions[startVert + 4] = new Vector3(width, -(height - cornerDef.bottomRightY), 0);
-            positions[startVert + 5] = new Vector3(width - cornerDef.bottomRightX, -height, 0);
-            positions[startVert + 6] = new Vector3(cornerDef.bottomLeftX, -height, 0);
-            positions[startVert + 7] = new Vector3(0, -(height - cornerDef.bottomLeftY), 0);
+            positions[startVert + 0] = new Vector3(0, -cornerDefinition.topLeftY, 0);
+            positions[startVert + 1] = new Vector3(cornerDefinition.topLeftX, 0, 0);
+            positions[startVert + 2] = new Vector3(width - cornerDefinition.topRightX, 0, 0);
+            positions[startVert + 3] = new Vector3(width, -cornerDefinition.topRightY, 0);
+            positions[startVert + 4] = new Vector3(width, -(height - cornerDefinition.bottomRightY), 0);
+            positions[startVert + 5] = new Vector3(width - cornerDefinition.bottomRightX, -height, 0);
+            positions[startVert + 6] = new Vector3(cornerDefinition.bottomLeftX, -height, 0);
+            positions[startVert + 7] = new Vector3(0, -(height - cornerDefinition.bottomLeftY), 0);
             positions[startVert + 8] = new Vector3(width * 0.5f, -height * 0.5f, 0);
 
             triangles[startTriangle + 0] = startVert + 1;
@@ -258,7 +243,7 @@ namespace UIForia.Rendering {
             texCoordList1.size += 9;
         }
 
-        public void FillRectUniformBorder_Miter(float width, float height) {
+        public void FillRect(float width, float height, in Vector2 position = default) {
             Vector3[] positions = positionList.array;
             Vector4[] texCoord0 = texCoordList0.array;
             int[] triangles = triangleList.array;
@@ -276,20 +261,20 @@ namespace UIForia.Rendering {
             ref Vector4 uv2 = ref texCoord0[startVert + 2];
             ref Vector4 uv3 = ref texCoord0[startVert + 3];
 
-            p0.x = 0;
-            p0.y = 0;
+            p0.x = position.x + 0;
+            p0.y = -position.y;
             p0.z = 0;
 
-            p1.x = width;
-            p1.y = 0;
+            p1.x = position.x + width;
+            p1.y = -position.y;
             p1.z = 0;
 
-            p2.x = width;
-            p2.y = -height;
+            p2.x = position.x + width;
+            p2.y = -(position.y + height);
             p2.z = 0;
 
-            p3.x = 0;
-            p3.y = -height;
+            p3.x = position.x;
+            p3.y = -(position.y + height);
             p3.z = 0;
 
             uv0.x = 0;

@@ -125,8 +125,8 @@ namespace UIForia.Util {
             if (collection.size < HandCopyThreshold) {
                 T[] src = collection.array;
                 int idx = size;
-                for (int i = start; i < count; i++) {
-                    array[idx++] = src[i];
+                for (int i = 0; i < count; i++) {
+                    array[idx++] = src[start + i];
                 }
             }
             else {
@@ -362,7 +362,13 @@ namespace UIForia.Util {
             }
         }
 
-
+        public void QuickRelease() {
+            size = 0;
+            if (isInPool) return;
+            isInPool = true;
+            s_Pool.Add(this);
+        }
+        
         public void Release() {
             Clear();
             if (isInPool) return;

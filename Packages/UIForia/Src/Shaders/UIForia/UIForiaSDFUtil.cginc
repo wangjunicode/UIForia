@@ -84,9 +84,9 @@ inline float RectSDF(float2 p, float2 size, float r) {
 }
 
 float EllipseSDF(float2 p, float2 r) {
-    float k0 = length(p/r);
-    float k1 = length(p/(r*r));
-    return k0*(k0-1.0)/k1;
+    float k0 = length(p / r);
+    float k1 = length(p/ (r * r));
+    return k0 * (k0 - 1.0) / k1;
 }
 
 float RhombusSDF(float2 p, float2 size) {
@@ -181,6 +181,28 @@ inline float4 UnpackSDFRadii(float packed) {
         uint((packedRadii >> 16) & 0xff),
         uint((packedRadii >> 24) & 0xff)
     );
+}
+
+inline float UnpackCornerRadius(float packed, float2 texCoord) {
+
+    uint packedRadiiUInt = asuint(packed);
+    float percentRadius = 0;
+    
+    float left = step(texCoord.x, 0.5); // 1 if left
+    float bottom = step(texCoord.y, 0.5); // 1 if bottom
+    
+    #define top (1 - bottom)
+    #define right (1 - left) 
+    
+    percentRadius += (top * left) * uint((packedRadiiUInt >> 0) & 0xff);
+    percentRadius += (top * right) * uint((packedRadiiUInt >> 8) & 0xff);
+    percentRadius += (bottom * left) * uint((packedRadiiUInt >> 16) & 0xff);
+    percentRadius += (bottom * right) * uint((packedRadiiUInt >> 24) & 0xff);
+    // radius comes in as a byte representing 0 to 50 of our width, remap 0 - 250 to 0 - 0.5
+    percentRadius = (percentRadius * 2) / 1000; 
+    return percentRadius;
+    #undef top
+    #undef right
 }
 
 inline float2 UnpackSize(float packedSize) {
@@ -527,7 +549,7 @@ fixed4 SDFColor(SDFData sdfData, fixed4 borderColor, fixed4 contentColor, float 
       //  }
       
   //  }
-    float distanceChange = fwidth(retn) * 0.5;
+    float distanceChange = fwidth(retn);// was * 0.5 but I think without looks better
     float aa = smoothstep(distanceChange, -distanceChange, retn);
     return lerp(contentColor, borderColor, aa); // do not pre-multiply alpha here!
     

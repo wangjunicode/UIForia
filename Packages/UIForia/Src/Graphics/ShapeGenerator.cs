@@ -1,4 +1,6 @@
 using System;
+using System.Runtime.InteropServices;
+using UIForia.Rendering;
 using UIForia.Util;
 using Unity.Mathematics;
 using UnityEngine;
@@ -7,31 +9,32 @@ namespace Vertigo {
 
     public class ShapeGenerator {
 
-        private Vector2 lastPoint;
-        private PathDef currentPath;
+        protected Vector2 lastPoint;
+        protected PathDef currentPath;
 
-        internal StructList<PathPoint> points;
-        internal StructList<PathPoint> holes;
-        internal StructList<ShapeDef> shapes;
+        internal StructList<PathPoint> pointList;
+        internal StructList<PathPoint> holeList;
+        internal StructList<ShapeDef> shapeList;
 
-        private bool buildingPath;
-        private bool inHole;
+        protected bool buildingPath;
+        protected bool inHole;
+        protected RangeInt currentShapeRange;
 
         public ShapeGenerator(int capacity = 8) {
-            this.shapes = new StructList<ShapeDef>(capacity);
-            this.points = new StructList<PathPoint>(capacity * 8);
-            this.holes = new StructList<PathPoint>(capacity * 2);
+            this.shapeList = new StructList<ShapeDef>(capacity);
+            this.pointList = new StructList<PathPoint>(capacity * 8);
+            this.holeList = new StructList<PathPoint>(capacity * 2);
         }
 
         public void LineTo(float x, float y) {
             if (!buildingPath) return;
 
             if (inHole) {
-                holes.Add(new PathPoint(x, y, PointFlag.Corner | PointFlag.Hole));
+                holeList.Add(new PathPoint(x, y, PointFlag.Corner | PointFlag.Hole));
                 currentPath.holeRange.length++;
             }
             else {
-                points.Add(new PathPoint(x, y, PointFlag.Corner));
+                pointList.Add(new PathPoint(x, y, PointFlag.Corner));
                 currentPath.pointRange.length++;
             }
 
@@ -51,11 +54,11 @@ namespace Vertigo {
             Vector2 end = new Vector2(x, y);
             // todo flags
             if (inHole) {
-                pointCount = Bezier.CubicCurve(holes, lastPoint, new Vector2(c0x, c0y), new Vector2(c1x, c1y), end);
+                pointCount = Bezier.CubicCurve(holeList, lastPoint, new Vector2(c0x, c0y), new Vector2(c1x, c1y), end);
                 currentPath.holeRange.length += pointCount;
             }
             else {
-                pointCount = Bezier.CubicCurve(points, lastPoint, new Vector2(c0x, c0y), new Vector2(c1x, c1y), end);
+                pointCount = Bezier.CubicCurve(pointList, lastPoint, new Vector2(c0x, c0y), new Vector2(c1x, c1y), end);
                 currentPath.pointRange.length += pointCount;
             }
 
@@ -74,29 +77,59 @@ namespace Vertigo {
         public void BeginPath(float x, float y) {
             if (buildingPath) {
                 // delete old path if it hasn't ended
-                points.Count = currentPath.pointRange.start;
-                holes.Count = currentPath.holeRange.start;
+                pointList.size = currentPath.pointRange.start;
+                holeList.size = currentPath.holeRange.start;
             }
 
+            currentShapeRange = new RangeInt(shapeList.size, 0);
+
             currentPath = new PathDef();
-            currentPath.pointRange.start = points.Count;
-            currentPath.holeRange.start = holes.Count;
+            currentPath.pointRange.start = pointList.size;
+            currentPath.holeRange.start = holeList.size;
             currentPath.pointRange.length++;
-            points.Add(new PathPoint(x, y, PointFlag.Corner));
+            pointList.Add(new PathPoint(x, y, PointFlag.Corner));
             buildingPath = true;
             inHole = false; // just in case
             lastPoint = new Vector2(x, y);
         }
 
+        public void BeginPath() {
+            if (buildingPath) {
+                // delete old path if it hasn't ended
+                pointList.size = currentPath.pointRange.start;
+                holeList.size = currentPath.holeRange.start;
+            }
+
+            currentShapeRange = new RangeInt(shapeList.size, 0);
+
+            currentPath = new PathDef();
+            currentPath.pointRange.start = pointList.size;
+            currentPath.holeRange.start = holeList.size;
+            currentPath.pointRange.length++;
+            pointList.Add(new PathPoint(lastPoint.x, lastPoint.y, PointFlag.Corner));
+            buildingPath = true;
+            inHole = false; // just in case
+        }
+
+        public void MoveTo(float x, float y) {
+            lastPoint = new Vector2(x, y);
+        }
+
+        public void MoveTo(Vector2 position) {
+            lastPoint = position;
+        }
+
         public void ClosePath() {
             if (!buildingPath) return;
+            currentShapeRange.length++;
             buildingPath = false;
             inHole = false;
             ShapeDef shapeDef = new ShapeDef(ShapeType.ClosedPath);
-            shapeDef.pathDef = currentPath;
+            shapeDef.pointRange = currentPath.pointRange;
+            shapeDef.holeRange = currentPath.holeRange;
             shapeDef.bounds = ComputePathBounds();
-            ClampHoles(shapeDef.pathDef.holeRange, shapeDef.bounds);
-            shapes.Add(shapeDef);
+            ClampHoles(shapeDef.holeRange, shapeDef.bounds);
+            shapeList.Add(shapeDef);
             currentPath = default;
             lastPoint.x = 0;
             lastPoint.y = 0;
@@ -104,13 +137,15 @@ namespace Vertigo {
 
         public void EndPath() {
             if (!buildingPath) return;
+            currentShapeRange.length++;
             buildingPath = false;
             inHole = false;
             ShapeDef shapeDef = new ShapeDef(ShapeType.Path);
-            shapeDef.pathDef = currentPath;
+            shapeDef.pointRange = currentPath.pointRange;
+            shapeDef.holeRange = currentPath.holeRange;
             shapeDef.bounds = ComputePathBounds();
-            ClampHoles(shapeDef.pathDef.holeRange, shapeDef.bounds);
-            shapes.Add(shapeDef);
+            ClampHoles(shapeDef.holeRange, shapeDef.bounds);
+            shapeList.Add(shapeDef);
             currentPath = default;
             lastPoint.x = 0;
             lastPoint.y = 0;
@@ -118,7 +153,7 @@ namespace Vertigo {
 
         public void BeginHole(float x, float y) {
             inHole = true;
-            holes.Add(new PathPoint(x, y, PointFlag.Corner | PointFlag.Hole | PointFlag.HoleStart));
+            holeList.Add(new PathPoint(x, y, PointFlag.Corner | PointFlag.Hole | PointFlag.HoleStart));
             currentPath.holeRange.length++;
             lastPoint.x = x;
             lastPoint.y = y;
@@ -128,73 +163,71 @@ namespace Vertigo {
             inHole = false;
         }
 
-        public void Rect(float x, float y, float width, float height) {
+        public int Rect(float x, float y, float width, float height) {
             ShapeDef shapeDef = new ShapeDef(ShapeType.Rect);
-            shapeDef.p0 = new Vector2(x, y);
-            shapeDef.p1 = new Vector2(width, height);
             shapeDef.bounds = new Rect(x, y, width, height);
-            shapes.Add(shapeDef);
+            shapeList.Add(shapeDef);
+            currentShapeRange.length++;
+            return shapeList.size - 1;
         }
 
         public int RoundedRect(float x, float y, float width, float height, float r0, float r1, float r2, float r3) {
             ShapeDef shapeDef = new ShapeDef(ShapeType.RoundedRect);
-            shapeDef.p0 = new Vector2(x, y);
-            shapeDef.p1 = new Vector2(width, height);
-
             float min = math.min(width, height);
-            
+
             if (min <= 0) min = 0.0001f;
-            
+
             float halfMin = min * 0.5f;
 
             r0 = math.clamp(r0, 0, halfMin) / min;
             r1 = math.clamp(r1, 0, halfMin) / min;
             r2 = math.clamp(r2, 0, halfMin) / min;
             r3 = math.clamp(r3, 0, halfMin) / min;
-            
-            shapeDef.p2 = new Vector2(r0, r1);
-            shapeDef.p3 = new Vector2(r2, r3);
+            shapeDef.pointRange = new RangeInt(pointList.size, 2);
+            pointList.Add(new PathPoint(r0, r1));
+            pointList.Add(new PathPoint(r2, r3));
             shapeDef.bounds = new Rect(x, y, width, height);
-            shapes.Add(shapeDef);
-            return shapes.Count - 1;
+            shapeList.Add(shapeDef);
+            currentShapeRange.length++;
+            return shapeList.Count - 1;
         }
 
-        public int Circle(float x, float y, float r, int segmentCount = 50) {
+        public int Circle(float x, float y, float r) {
+            currentShapeRange.length++;
             float diameter = r * 2;
             ShapeDef shapeDef = new ShapeDef(ShapeType.Circle);
-            shapeDef.p0 = new Vector2(x, y);
-            shapeDef.p1 = new Vector2(diameter, diameter);
-            shapeDef.p2 = new Vector2(segmentCount, 0);
             shapeDef.bounds = new Rect(x, y, diameter, diameter);
-            shapes.Add(shapeDef);
-            return shapes.Count - 1;
+            shapeList.Add(shapeDef);
+            return shapeList.Count - 1;
         }
 
-        public int Ellipse(float x, float y, float rw, float rh, int segmentCount = 50) {
+        public int Ellipse(float x, float y, float rw, float rh) {
+            currentShapeRange.length++;
             ShapeDef shapeDef = new ShapeDef(ShapeType.Ellipse);
-            shapeDef.p0 = new Vector2(x, y);
-            shapeDef.p1 = new Vector2(rw, rh);
-            shapeDef.p2 = new Vector2(segmentCount, 0);
             shapeDef.bounds = new Rect(x, y, rw * 2, rh * 2);
-            shapes.Add(shapeDef);
-            return shapes.Count - 1;
+            shapeList.Add(shapeDef);
+            return shapeList.Count - 1;
         }
 
         public void RegularPolygon(float x, float y, float width, float height, int sides) {
+            currentShapeRange.length++;
             if (sides < 3) sides = 3;
             ShapeDef shapeDef = new ShapeDef(ShapeType.Polygon);
-            shapeDef.p0 = new Vector2(x, y);
-            shapeDef.p1 = new Vector2(width, height);
-            shapeDef.p2 = new Vector2(sides, 0);
+            shapeDef.pointRange.start = pointList.size;
+            shapeDef.pointRange.length = 1;
+            pointList.Add(new PathPoint(sides, 0));
             shapeDef.bounds = new Rect(x, y, width, height);
-            shapes.Add(shapeDef);
+            shapeList.Add(shapeDef);
         }
 
         public void Triangle(float x0, float y0, float x1, float y1, float x2, float y2) {
+            currentShapeRange.length++;
             ShapeDef shapeDef = new ShapeDef(ShapeType.Triangle);
-            shapeDef.p0 = new Vector2(x0, y0);
-            shapeDef.p1 = new Vector2(x1, y1);
-            shapeDef.p2 = new Vector2(x2, y2);
+            shapeDef.pointRange.start = pointList.size;
+            shapeDef.pointRange.length = 3;
+            pointList.Add(new PathPoint(x0, y0));
+            pointList.Add(new PathPoint(x1, y1));
+            pointList.Add(new PathPoint(x2, y2));
             float minX = x0;
             float minY = y0;
             float maxX = x0;
@@ -208,16 +241,15 @@ namespace Vertigo {
             maxY = y1 > maxY ? y1 : maxY;
             maxY = y2 > maxY ? y2 : maxY;
             shapeDef.bounds = new Rect(minX, minY, maxX - minX, maxY - minY);
-            shapes.Add(shapeDef);
+            shapeList.Add(shapeDef);
         }
 
         public int Rhombus(float x, float y, float width, float height) {
+            currentShapeRange.length++;
             ShapeDef shapeDef = new ShapeDef(ShapeType.Rhombus);
-            shapeDef.p0 = new Vector2(x, y);
-            shapeDef.p1 = new Vector2(width, height);
             shapeDef.bounds = new Rect(x, y, width, height);
-            shapes.Add(shapeDef);
-            return shapes.size - 1;
+            shapeList.Add(shapeDef);
+            return shapeList.size - 1;
         }
 
         // equallateral triangle & iso triangle should be simple once triangle is done
@@ -230,7 +262,7 @@ namespace Vertigo {
             float minY = float.MaxValue;
             float maxX = float.MinValue;
             float maxY = float.MinValue;
-            PathPoint[] array = points.array;
+            PathPoint[] array = pointList.array;
             for (int i = start; i < end; i++) {
                 float x = array[i].position.x;
                 float y = array[i].position.y;
@@ -263,7 +295,7 @@ namespace Vertigo {
                 return;
             }
 
-            PathPoint[] array = holes.array;
+            PathPoint[] array = holeList.array;
 
             float minX = rect.xMin;
             float minY = rect.yMin;
@@ -282,16 +314,16 @@ namespace Vertigo {
         }
 
         public void Clear() {
-            shapes.QuickClear();
-            points.QuickClear();
-            holes.QuickClear();
+            shapeList.QuickClear();
+            pointList.size = 0;
+            holeList.size = 0;
             inHole = false;
             buildingPath = false;
             lastPoint = Vector2.zero;
         }
 
         [Flags]
-        internal enum PointFlag {
+        public enum PointFlag {
 
             Hole = 1 << 1,
             Corner = 1 << 2,
@@ -299,7 +331,7 @@ namespace Vertigo {
 
         }
 
-        internal struct PathPoint {
+        public struct PathPoint {
 
             public PointFlag flags;
             public Vector2 position;
@@ -312,34 +344,27 @@ namespace Vertigo {
 
         }
 
-        internal struct PathDef {
+        public struct PathDef {
 
             public RangeInt pointRange;
             public RangeInt holeRange;
 
-            public int TotalVertices => pointRange.length + holeRange.length;
-
         }
 
-        // todo -- crunch this down w/ field offsets, path def can be re-used
         internal struct ShapeDef {
 
-            public Vector2 p0;
-            public Vector2 p1;
-            public Vector2 p2;
-            public Vector2 p3;
             public Rect bounds;
-            public PathDef pathDef;
+            public RangeInt pointRange;
+            public RangeInt holeRange;
             public readonly ShapeType shapeType;
+            public GeometryRange geometryRange;
 
             public ShapeDef(ShapeType shapeType) {
-                this.p0 = default;
-                this.p1 = default;
-                this.p2 = default;
-                this.p3 = default;
-                this.pathDef = default;
-                this.bounds = default;
                 this.shapeType = shapeType;
+                this.pointRange = default;
+                this.holeRange = default;
+                this.bounds = default;
+                this.geometryRange = default;
             }
 
         }

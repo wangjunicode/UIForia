@@ -19,7 +19,7 @@
             #pragma multi_compile __ MASK_SDF MASK_TEXT MASK_TEXTURE MASK_MESH
 
             #include "UnityCG.cginc"
-            #include "./UIForiaSDFUtil.cginc";
+            #include "./UIForiaSDFUtil.cginc"
             #include "./BatchSize.cginc"
 
             float4 objectInfo[BATCH_SIZE];
@@ -50,20 +50,23 @@
                
                 uint packedRadiiUInt = asuint(i.objectInfo.y);
                 float percentRadius = 0;
-
-                fixed4 radii = fixed4(
-                    uint((packedRadiiUInt >>  0) & 0xff),
-                    uint((packedRadiiUInt >>  8) & 0xff),
-                    uint((packedRadiiUInt >> 16) & 0xff),
-                    uint((packedRadiiUInt >> 24) & 0xff)
-                );
-                    
-                percentRadius += (top * left) * radii.x;
-                percentRadius += (top * right) * radii.y;
-                percentRadius += (bottom * left) * radii.z;
-                percentRadius += (bottom * right) * radii.w;
-                percentRadius = (r * 2) / 1000; // radius comes in as a byte representing 0 to 50 of our width, remap 0 - 250 to 0 - 0.5
-    
+                
+                float left = step(i.texCoord0.x, 0.5); // 1 if left
+                float bottom = step(i.texCoord0.y, 0.5); // 1 if bottom
+                
+                #define top (1 - bottom)
+                #define right (1 - left) 
+                
+                percentRadius += (top * left) * uint((packedRadiiUInt >> 0) & 0xff);
+                percentRadius += (top * right) * uint((packedRadiiUInt >> 8) & 0xff);
+                percentRadius += (bottom * left) * uint((packedRadiiUInt >> 16) & 0xff);
+                percentRadius += (bottom * right) * uint((packedRadiiUInt >> 24) & 0xff);
+                // radius comes in as a byte representing 0 to 50 of our width, remap 0 - 250 to 0 - 0.5
+                percentRadius = (percentRadius * 2) / 1000; 
+                
+                #undef top
+                #undef right
+                
                 float2 size = i.texCoord0.zw;
                 float minSize = min(size.x, size.y);
                 float padding = 0;
@@ -80,8 +83,11 @@
                 fixed4 inner = fixed4(1, 1, 1, 1);
                 fixed4 outer = fixed4(0, 0, 0, 0);
                 
+             
+                
                 return lerp(inner, outer, 1 - aa);
 
+              
             }
             
             ENDCG

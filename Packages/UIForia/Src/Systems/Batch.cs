@@ -1,4 +1,5 @@
 using UIForia.Rendering.Vertigo;
+using UIForia.Util;
 using UnityEngine;
 
 namespace UIForia.Rendering {
@@ -11,7 +12,7 @@ namespace UIForia.Rendering {
         public Mesh unpooledMesh;
         public Material material;
         public UIForiaData uiforiaData;
-        public UIForiaPropertyBlock uiforiaPropertyBlock;
+        public StructList<Matrix4x4> transformData;
 
     }
 

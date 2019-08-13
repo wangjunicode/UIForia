@@ -5,32 +5,32 @@
 
     <Contents style="container">
 
-        <Group style="constrain">
+<!--        <Group style="constrain">-->
 
-            <Div style="flex-demo">
-<!--todo find out why including this element breaks clip rect for item -->
-<!--                <Heading3 style="header">Flex-Start</Heading3>-->
+<!--            <Div style="flex-demo">-->
+<!--&lt;!&ndash;todo find out why including this element breaks clip rect for item &ndash;&gt;-->
+<!--&lt;!&ndash;                <Heading3 style="header">Flex-Start</Heading3>&ndash;&gt;-->
 
-                <Group x-id="demo-content" style="flex-demo-content  horizontal circle-clip">
-                    <Div style="clip-test-more-clip"/>
-                    <Div style="clip-test-more-clip"/>
-                    <Div style="clip-test-more-clip"/>
+<!--                <Group x-id="demo-content" style="flex-demo-content  horizontal circle-clip">-->
+<!--                    <Div style="clip-test-more-clip"/>-->
+<!--                    <Div style="clip-test-more-clip"/>-->
+<!--                    <Div style="clip-test-more-clip"/>-->
 
-                    <Div style="clip-test-more-clip">
-<!--                        <Div style="flex-item">-->
-<!--                            Item 1-->
-<!--                            <TextSpan style="special-text">More Itemms here Mofo</TextSpan>-->
-<!--                            Even more text here-->
-                        </Div>
-                        
-                    <!--                    <Div style="flex-item">Item 2</Div>-->
-                    <!--                    <Div style="flex-item">Item 3</Div>-->
-                    <!--                    <Div style="flex-item">Item 4</Div>-->
-                    <!--                    <Div style="flex-item">Item 5</Div>-->
-                </Group>
-            </Div>
+<!--                    <Div style="clip-test-more-clip">-->
+<!--&lt;!&ndash;                        <Div style="flex-item">&ndash;&gt;-->
+<!--&lt;!&ndash;                            Item 1&ndash;&gt;-->
+<!--&lt;!&ndash;                            <TextSpan style="special-text">More Itemms here Mofo</TextSpan>&ndash;&gt;-->
+<!--&lt;!&ndash;                            Even more text here&ndash;&gt;-->
+<!--                        </Div>-->
+<!--                        -->
+<!--                    &lt;!&ndash;                    <Div style="flex-item">Item 2</Div>&ndash;&gt;-->
+<!--                    &lt;!&ndash;                    <Div style="flex-item">Item 3</Div>&ndash;&gt;-->
+<!--                    &lt;!&ndash;                    <Div style="flex-item">Item 4</Div>&ndash;&gt;-->
+<!--                    &lt;!&ndash;                    <Div style="flex-item">Item 5</Div>&ndash;&gt;-->
+<!--                </Group>-->
+<!--            </Div>-->
 
-        </Group>
+<!--        </Group>-->
         <!--        <Div style="flex-demo">-->
         <!--            <Heading3 style="header">Flex-End</Heading3>-->
         <!--&lt;!&ndash;            <Div style="flex-demo-content flex-end horizontal">&ndash;&gt;-->

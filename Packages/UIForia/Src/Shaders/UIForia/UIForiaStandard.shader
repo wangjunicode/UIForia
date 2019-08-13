@@ -42,7 +42,6 @@ Shader "UIForia/Standard"
             sampler2D _MainTexture;
             sampler2D _MaskTexture;
             sampler2D _FontTexture;
-            sampler2D _Texture;
             
             float4 _Color;
             
@@ -66,7 +65,6 @@ Shader "UIForia/Standard"
             #define _FontTextureWidth _FontTextureSize.x
             #define _FontTextureHeight _FontTextureSize.y
             
-            #define Vert_BorderSize 0
             #define Vert_BorderRadii objectInfo.z
             #define Vert_PackedSize objectInfo.y
             #define Vert_BorderColors v.texCoord1.xy

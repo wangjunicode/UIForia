@@ -90,17 +90,17 @@
             
             fixed4 ShadowFragment(float2 pos) {
 
-               float shadowSoftnessX = 0.25;// i.fragData2.x;
-               float shadowSoftnessY = 0.25;//1 - 0.5; //i.fragData2.y;
+               float shadowSoftnessX = 0.75;
+               float shadowSoftnessY = 0.25;
                
-               float shadowAlpha = 1; //i.fragData2.z;
-               fixed4 shadowTint = fixed4(0, 1, 0, 0);//i.fragData3.r, i.fragData3.g, i.fragData3.b, 0);
-               float2 shadowSize = float2(1, 1);//float2(0.8, 0.8);
+               float shadowAlpha = 1; 
+               fixed4 shadowTint = fixed4(0, 1, 0, 0);
+               float2 shadowSize = float2(1, 1);
                float2 shadowPosition =  float2((1 - shadowSize.x) * 0.5, (1 - shadowSize.y) * 0.5);
                
                float shadowRect = shadowAlpha * SmoothRect(pos, shadowPosition, shadowSize, shadowSoftnessX, shadowSoftnessY);
                
-               float a = smoothstep(0.5, 0.8, shadowRect);
+               float a = smoothstep(0.3, 0.9, shadowRect);
                fixed4 shadowColor = fixed4(1, 1,1, 1);
                fixed4 color = lerp(fixed4(shadowTint.rgb, 0), fixed4(shadowColor.rgb, shadowColor.a * a), a);
                color = lerp(fixed4(1, 1, 1, 0), color, a);
@@ -108,58 +108,121 @@
                return color;
                
             }
-          
+            
+            float subtractSDF(float base, float subtraction){
+                return max(base, -subtraction);
+            }
+            
+            float sdTriangle(float2 p, float2 p0, float2 p1, float2 p2 ) {
+                float2 e0 = p1-p0, e1 = p2-p1, e2 = p0-p2;
+                float2 v0 = p -p0, v1 = p -p1, v2 = p -p2;
+                float2 pq0 = v0 - e0*clamp( dot(v0,e0)/dot(e0,e0), 0.0, 1.0 );
+                float2 pq1 = v1 - e1*clamp( dot(v1,e1)/dot(e1,e1), 0.0, 1.0 );
+                float2 pq2 = v2 - e2*clamp( dot(v2,e2)/dot(e2,e2), 0.0, 1.0 );
+                float s = sign( e0.x*e2.y - e0.y*e2.x );
+                float2 d = min(min(float2(dot(pq0,pq0), s*(v0.x*e0.y-v0.y*e0.x)),
+                                 float2(dot(pq1,pq1), s*(v1.x*e1.y-v1.y*e1.x))),
+                                 float2(dot(pq2,pq2), s*(v2.x*e2.y-v2.y*e2.x)));
+                return -sqrt(d.x)*sign(d.y);
+            }
+            
+            float pie(float2 p, float angle) {
+                angle = radians(angle) / 2.0;
+                float2 n = float2(cos(angle), sin(angle));
+                return abs(p).x * n.x + p.y * n.y;
+            }
+            
+            float sector(float2 p, float radius, float angle, float width) {
+                width /= 2.0;
+                radius -= width;
+                return max(-pie(p, angle), abs(length(p) - radius) - width);
+            }
+            
             fixed4 frag (UIForiaPathFragData i) : SV_Target {              
-                _ShadowIntensity = 50;
                 float2 size = i.texCoord2.xy;
                 float minSize = min(size.x, size.y);
             
                 float4 objectInfo = _ObjectData[(int)Frag_ObjectIndex];
                 float4 colorInfo = _ColorData[(int)Frag_ObjectIndex];
                 uint packedFlags = (objectInfo.x);
-                uint paintMode = packedFlags;//(packedFlags & 0xffff);
+                uint paintMode = (packedFlags & 0xffff);
                 
                 fixed4 mainColor = ComputeColor(colorInfo.r, colorInfo.g, colorInfo.a, i.texCoord0.xy, _MainTex);
                 mainColor.a *= colorInfo.b;
                 
-                float halfStrokeWidth = 0;// 0.5 * Frag_StrokeWidth;
+                int isStroke = Frag_StrokeWidth > 0;
+                float halfStrokeWidth = max(Frag_StrokeWidth, 0) * 0.5;
+                if(isStroke < 0) return Green;
+                int isShadow = (paintMode & PaintMode_Shadow) != 0;
+                int shapeType = Frag_ShapeType;
+                float2 center = (i.texCoord0.xy - 0.5) * size;
+
+                float shadowIntensity = colorInfo.a;
                 
-                int isStroke = 0;
-                int isShadow = paintMode == (1 << 4);
-                int shapeType = ShapeType_RectLike;//Frag_ShapeType;
                 fixed4 inner = mainColor;
                 fixed4 outer = fixed4(mainColor.rgb, 0);
-                
-                inner.rgb *= inner.a;
-                outer.rgb *= outer.a;
+
                 float sdf = 0;
+                float percentRadius = UnpackCornerRadius(ObjectInfo_CornerRadii, i.texCoord0.zw);
+                float radius = clamp(minSize * percentRadius, 0, minSize);
+                float cut = radius;
+
                 if(shapeType == ShapeType_Ellipse) {
                     halfStrokeWidth = halfStrokeWidth / max(size.x, size.y);
                     sdf = EllipseSDF(i.texCoord0.xy - 0.5, float2(0.49, 0.49));
                 }
                 else if((shapeType & ShapeType_RectLike) != 0) {      
-                    float percentRadius = UnpackCornerRadius(ObjectInfo_CornerRadii, i.texCoord0.zw);
-                    float radius = clamp(minSize * percentRadius, 0, minSize);
-                    float2 center = (i.texCoord0.xy - 0.5) * size;
                     sdf = RectSDF(center,  (size * 0.5) - halfStrokeWidth, radius - halfStrokeWidth);
                 }
+                else if(shapeType == ShapeType_Sector) {
+                    cut = 0;
+                    float angle = i.texCoord1.x;
+                    float width = i.texCoord1.y;
+                    // if stroking the geometry is twice as large to account for weirdness 
+                    // with stroke length going off the geometry and clipping horribly
+                    float sectorSize = minSize * lerp(0.5, 0.25, isStroke);
+                    sdf = sector(center, sectorSize, angle, width);
+                    if(isStroke) sdf = abs(sdf) - halfStrokeWidth;
+                }        
                 else {
                     return mainColor;
-                }               
+                }
+                     
+                float halfX = size.x * 0.5;
+                float halfY = size.y * 0.5;
+                
+                fixed hDir = lerp(-1, 1, i.texCoord0.x > 0.5);
+                fixed vDir = lerp(-1, 1, i.texCoord0.y > 0.5);
+                
+                float2 p0 = float2(hDir * (halfX - cut), vDir * halfY);
+                float2 p1 = float2(hDir * size.x, vDir * size.y); // big on purpose so we don't get bad bleeding of non clipped edge
+                float2 p2 = float2(hDir * halfX, vDir * (halfY - cut));
+                
+                // could be replaced w/ an equalateral triangle sdf that is rotated, profile this
+                float tri = sdTriangle(center, p0, p1, p2); 
+
+                sdf = lerp(sdf, subtractSDF(sdf, tri), cut != 0);
                 
                 if(isShadow) {
-                    float n = smoothstep(-_ShadowIntensity, 0, sdf);        
-                    fixed4 shadowColor = fixed4(1, 1, 1, 1);  
-                    fixed4 shadowTint = fixed4(0, 1, 0, 0);
+                    // todo -- use alpha blend somehow to mix these colors
+                    float n = smoothstep(-shadowIntensity, 2, sdf);
+                    fixed4 shadowColor = fixed4(UnpackColor(asuint(colorInfo.r)).rgb, 1);
+                    fixed4 shadowTint = fixed4(UnpackColor(asuint(colorInfo.g)).rgb, 1);
             
-                    fixed4 color = lerp(fixed4(shadowColor.rgb, 0), shadowColor, 1 - n);                
-                    color = lerp(fixed4(shadowTint.rgb, 0), fixed4(shadowColor.rgb, shadowColor.a * (1 - n)),  1 - n);
+                    fixed4 color = lerp(fixed4(shadowColor.rgb, 1 - n), shadowColor, (1 - n));                
+                    fixed4 tintedShadowColor = lerp(fixed4(shadowTint.rgb, 1 - n), shadowColor,  (1 - n));
+                    tintedShadowColor = lerp(color, tintedShadowColor, n);
+                    if((paintMode & PaintMode_ShadowTint) != 0) {
+                        color = tintedShadowColor;
+                    }
                     color.rgb *= color.a;
                     return color;       
                 }
       
                 float distanceChange = fwidth(sdf);
                 float aa = smoothstep(distanceChange, -distanceChange, sdf);
+                inner.rgb *= inner.a;
+                outer.rgb *= outer.a;
                 return lerp(inner, outer, 1 - aa);
                 
             }

@@ -144,6 +144,8 @@ namespace Src.Systems {
         public float shadowIntensity;
         public float shadowOffsetX;
         public float shadowOffsetY;
+        public float shadowSizeX;
+        public float shadowSizeY;
         public Color32 shadowTint;
 
         public static SVGXFillStyle Default => new SVGXFillStyle() {

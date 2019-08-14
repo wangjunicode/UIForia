@@ -4,8 +4,8 @@ namespace SVGX {
 
         StandardStroke,
         StandardFill,
-        Shadow,
-
+        ShadowStroke,
+        ShadowFill
 
     }
 

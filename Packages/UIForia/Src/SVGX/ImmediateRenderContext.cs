@@ -476,7 +476,7 @@ namespace SVGX {
 
         public void Shadow() {
             int clipId = clipStack.Count > 0 ? clipStack.Peek() : -1;
-            drawCalls.Add(new SVGXDrawCall(DrawCallType.Shadow, clipId, currentStyle, currentScissorRect, currentMatrix, currentShapeRange));
+            drawCalls.Add(new SVGXDrawCall(DrawCallType.ShadowFill, clipId, currentStyle, currentScissorRect, currentMatrix, currentShapeRange));
         }
 
         public void Stroke() {

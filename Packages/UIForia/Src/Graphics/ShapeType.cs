@@ -1,5 +1,8 @@
+using System;
+
 namespace Vertigo {
 
+    [Flags]
     public enum ShapeType {
 
         Unset = 0,
@@ -11,13 +14,10 @@ namespace Vertigo {
         Triangle = 1 << 5,
         Polygon = 1 << 6,
         Text = 1 << 7,
-        // below are NOT used in SDF shaders
-        Path = 1 << 8,
-        ClosedPath = 1 << 9,
-        Sprite = 1 << 10,
-
-
-        Sector
+        Sector = 1 << 8,
+        Path = 1 << 9,
+        ClosedPath = 1 << 10,
+        Sprite = 1 << 11,
 
     }
 

@@ -351,7 +351,7 @@ namespace SVGX {
 
                             break;
                         }
-                        case DrawCallType.Shadow:
+                        case DrawCallType.ShadowFill:
                             for (int k = call.shapeRange.start; k < call.shapeRange.end; k++) {
                                 int z = ushort.MaxValue - k;
                                 TextInfo textInfo = null;
@@ -360,7 +360,7 @@ namespace SVGX {
                                     textInfo = ctx.textInfos[ctx.shapes[k].textInfoId];
                                 }
 
-                                transparents.Add(new SVGXRenderShape(ctx.shapes[k], z, j, j, DrawCallType.Shadow, textInfo));
+                                transparents.Add(new SVGXRenderShape(ctx.shapes[k], z, j, j, DrawCallType.ShadowFill, textInfo));
                             }
 
                             break;
@@ -561,7 +561,7 @@ namespace SVGX {
                     case DrawCallType.StandardStroke:
                         batchedVertexData.CreateStrokeVertices(points, renderShape, gradientData, scissors[renderShape.styleId], styles[renderShape.styleId], matrices[renderShape.matrixId]);
                         break;
-                    case DrawCallType.Shadow:
+                    case DrawCallType.ShadowFill:
                         batchedVertexData.CreateShadowVertices(points, renderShape, gradientData, styles[renderShape.styleId], matrices[renderShape.matrixId]);
                         break;
                 }

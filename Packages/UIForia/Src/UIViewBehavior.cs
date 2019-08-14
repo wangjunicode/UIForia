@@ -24,7 +24,15 @@ namespace UIForia {
         public Vector2 shadowSize;
         public Vector2 shadowOffset;
         public float shadowIntensity = 10;
-
+        public float shadowIntensity2 = 30;
+        public Color shadowColor = Color.red;
+        public Color shadowTint;
+        public float radius = 45;
+        public float rotation = 0;
+        public float angle = 0;
+        public float width = 20;
+        public Color strokeColor = Color.red;
+        public float strokeWidth = 3f;
         public void Start() {
             type = Type.GetType(typeName);
 
@@ -37,13 +45,26 @@ namespace UIForia {
             path.Clear();
             path.SetShadowIntensity(shadowIntensity);
             path.SetShadowOffset(shadowOffset);
-            path.SetShadowColor(Color.red);
-            //path.RoundedRect(pos.x, pos.y, size.x, size.y, radii.x, radii.y, radii.z, radii.w);
+            path.SetShadowSize(shadowSize);
+            path.SetShadowColor(shadowColor);
+            path.SetShadowTint(shadowTint);
             
             path.SetFill(Color.yellow);
-            path.RoundedRect(pos.x, pos.y, size.x, size.y, radii.x, radii.y, radii.z, radii.w);
-            path.Fill();
+         //   path.RoundedRect(pos.x - 40, pos.y - 40, size.x, size.y, radii.x, radii.y, radii.z, radii.w);
+           // path.Fill(FillMode.Shadow);
+            
+//            path.RoundedRect(pos.x, pos.y, size.x, size.y, radii.x, radii.y, radii.z, radii.w);
 
+          //  path.Sector(300, 300, radius, rotation, angle, width);
+            
+            path.BeginPath();
+//            path.Sector(300, 300, radius, rotation, angle, width);
+            path.Triangle(100, 100, 200, 100, 150, 150);
+            path.Fill();
+            
+//            path.SetStrokeWidth(strokeWidth);
+//            path.SetStroke(strokeColor);
+//            path.Stroke();
 //            path.Begin("sectionName");
 ////
 ////            path.SetUVTransform();

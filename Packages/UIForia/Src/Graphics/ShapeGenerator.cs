@@ -191,6 +191,19 @@ namespace Vertigo {
             return shapeList.Count - 1;
         }
 
+        public int Sector(float x, float y, float radius, float rotation, float angle, float width) {
+            currentShapeRange.length++;
+            float diameter = radius * 2;
+            ShapeDef shapeDef = new ShapeDef(ShapeType.Sector);
+            shapeDef.bounds = new Rect(x, y, diameter, diameter);
+            shapeDef.pointRange.start = pointList.size;
+            shapeDef.pointRange.length = 2;
+            pointList.Add(new PathPoint(angle, width));
+            pointList.Add(new PathPoint(rotation, 0));
+            shapeList.Add(shapeDef);
+            return shapeList.Count - 1;
+        }
+        
         public int Ellipse(float x, float y, float rw, float rh) {
             currentShapeRange.length++;
             ShapeDef shapeDef = new ShapeDef(ShapeType.Ellipse);
@@ -199,7 +212,7 @@ namespace Vertigo {
             return shapeList.Count - 1;
         }
 
-        public void RegularPolygon(float x, float y, float width, float height, int sides) {
+        public int RegularPolygon(float x, float y, float width, float height, int sides) {
             currentShapeRange.length++;
             if (sides < 3) sides = 3;
             ShapeDef shapeDef = new ShapeDef(ShapeType.Polygon);
@@ -208,9 +221,10 @@ namespace Vertigo {
             pointList.Add(new PathPoint(sides, 0));
             shapeDef.bounds = new Rect(x, y, width, height);
             shapeList.Add(shapeDef);
+            return shapeList.size - 1;
         }
 
-        public void Triangle(float x0, float y0, float x1, float y1, float x2, float y2) {
+        public int Triangle(float x0, float y0, float x1, float y1, float x2, float y2) {
             currentShapeRange.length++;
             ShapeDef shapeDef = new ShapeDef(ShapeType.Triangle);
             shapeDef.pointRange.start = pointList.size;
@@ -232,6 +246,7 @@ namespace Vertigo {
             maxY = y2 > maxY ? y2 : maxY;
             shapeDef.bounds = new Rect(minX, minY, maxX - minX, maxY - minY);
             shapeList.Add(shapeDef);
+            return shapeList.size - 1;
         }
 
         public int Rhombus(float x, float y, float width, float height) {
@@ -346,15 +361,13 @@ namespace Vertigo {
             public Rect bounds;
             public RangeInt pointRange;
             public RangeInt holeRange;
-            public readonly ShapeType shapeType;
-            public GeometryRange geometryRange;
+            public ShapeType shapeType;
 
             public ShapeDef(ShapeType shapeType) {
                 this.shapeType = shapeType;
                 this.pointRange = default;
                 this.holeRange = default;
                 this.bounds = default;
-                this.geometryRange = default;
             }
 
         }

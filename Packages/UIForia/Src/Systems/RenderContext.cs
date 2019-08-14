@@ -731,14 +731,16 @@ namespace UIForia.Rendering {
 
                 switch (drawCall.type) {
                     
+                    case DrawCallType.ShadowStroke:
+                        break;
+                    
                     case DrawCallType.StandardStroke:
+                        mainTexture = path.strokeStyles.array[drawCall.styleIdx].texture;
                         break;
 
+                    case DrawCallType.ShadowFill:
                     case DrawCallType.StandardFill:
                         mainTexture = path.fillStyles.array[drawCall.styleIdx].texture;
-                        break;
-
-                    case DrawCallType.Shadow:
                         break;
 
                     default:
@@ -756,16 +758,27 @@ namespace UIForia.Rendering {
                 lastTexture = mainTexture ?? lastTexture;
 
                 currentBatch.uiforiaData.mainTexture = mainTexture != null ? mainTexture : currentBatch.uiforiaData.mainTexture;
-                currentBatch.uiforiaData.clipTexture = null; //geometry.clipTexture != null ? geometry.clipTexture : currentBatch.uiforiaData.clipTexture;
-                // currentBatch.uiforiaData.colors.Add(geometry.packedColors);
-                // currentBatch.uiforiaData.objectData0.Add(geometry.objectData);
-                // currentBatch.uiforiaData.objectData1.Add(geometry.miscData);
-                // currentBatch.uiforiaData.clipUVs.Add(geometry.clipUVs);
-                // currentBatch.uiforiaData.clipRects.Add(geometry.clipRect);
+                currentBatch.uiforiaData.clipTexture = null; //geometry.clipTexture != null ? geometry.clipTexture : currentBatch.uiforiaData.clipTexture;;
                 currentBatch.transformData.Add(path.transforms.array[drawCall.transformIdx].ToMatrix4x4());
 
-                currentBatch.uiforiaData.objectData0.AddRange(path.objectData, drawCall.shapeRange.start, drawCall.shapeRange.length);
-                currentBatch.uiforiaData.colors.AddRange(path.colorData, drawCall.shapeRange.start, drawCall.shapeRange.length);
+                int objectStart = drawCall.objectRange.start;
+                int objectEnd = drawCall.objectRange.end;
+                
+                currentBatch.uiforiaData.objectData0.EnsureAdditionalCapacity(objectEnd - objectStart);
+                currentBatch.uiforiaData.colors.EnsureAdditionalCapacity(objectEnd - objectStart);
+                Vector4[] objectData = currentBatch.uiforiaData.objectData0.array;
+                Vector4[] colorData = currentBatch.uiforiaData.colors.array;
+                int insertIdx = currentBatch.uiforiaData.objectData0.size;
+                
+                for (int j = objectStart; j < objectEnd; j++) {
+                    objectData[insertIdx] = path.objectDataList.array[j].objectData;
+                    colorData[insertIdx] = path.objectDataList.array[j].colorData;
+                    insertIdx++;
+                }
+
+                currentBatch.uiforiaData.objectData0.size = insertIdx;
+                currentBatch.uiforiaData.colors.size = insertIdx;
+                
                 int start = positionList.size;
                 
                 GeometryRange range = drawCall.geometryRange;
@@ -779,8 +792,8 @@ namespace UIForia.Rendering {
                 
                 Vector4[] texCoord1 = texCoordList1.array;
 
-                for (int j = drawCall.shapeRange.start; j < drawCall.shapeRange.end; j++) {
-                    ShapeGenerator.ShapeDef shape = path.shapeList.array[j];
+                for (int j = drawCall.objectRange.start; j < drawCall.objectRange.end; j++) {
+                    Path2D.ObjectData shape = path.objectDataList.array[j];
                     int geometryStart = shape.geometryRange.vertexStart;
                     int geometryEnd = shape.geometryRange.vertexEnd;
                     int objectIndex = currentBatch.drawCallSize++;

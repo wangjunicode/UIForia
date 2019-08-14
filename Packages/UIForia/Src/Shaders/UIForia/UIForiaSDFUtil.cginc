@@ -11,6 +11,7 @@ const float SQRT_2 = 1.4142135623730951;
 #define PaintMode_TextureTint (1 << 2)
 #define PaintMode_LetterBoxTexture (1 << 3)
 #define PaintMode_Shadow (1 << 4)
+#define PaintMode_ShadowTint (1 << 5)
 
 // remap input from one range to an other            
 inline float Map(float s, float a1, float a2, float b1, float b2) {
@@ -244,6 +245,7 @@ float3x3 TRS2D(float2 position, float2 scale, float rotation) {
 #define ShapeType_Triangle (1 << 5)
 #define ShapeType_RegularPolygon (1 << 6)
 #define ShapeType_Text (1 << 7)
+#define ShapeType_Sector (1 << 8)
 
 #define ShapeType_RectLike (ShapeType_Rect | ShapeType_RoundedRect | ShapeType_Circle)
 
@@ -463,7 +465,6 @@ inline fixed4 MeshBorderAA(fixed4 mainColor, float2 size, float distFromCenter) 
      
      return mainColor;
 }
-       
             
 inline fixed4 ComputeColor(float packedBg, float packedTint, int colorMode, float2 texCoord, sampler2D _MainTexture) {
 

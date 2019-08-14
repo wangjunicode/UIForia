@@ -40,6 +40,7 @@ namespace SVGX {
         public readonly DrawCallType type;
         public readonly int transformIdx;
         public readonly RangeInt shapeRange;
+        public RangeInt objectRange;
 
         public SVGXDrawCall2(DrawCallType type, int styleIdx, int transformIdx, in RangeInt shapeRange) {
             this.type = type;
@@ -48,6 +49,7 @@ namespace SVGX {
             this.styleIdx = styleIdx;
             this.material = null;
             this.geometryRange = default;
+            this.objectRange = default;
         }
 
     }

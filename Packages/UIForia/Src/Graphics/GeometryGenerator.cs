@@ -385,7 +385,6 @@ namespace Vertigo {
             texCoord0[startVert + 2] = uv2;
             texCoord0[startVert + 3] = uv3;
 
-
             triangles[startTriangle + 0] = startVert + 0;
             triangles[startTriangle + 1] = startVert + 1;
             triangles[startTriangle + 2] = startVert + 2;

@@ -4,6 +4,15 @@ namespace UIForia.Extensions {
 
     public static class Vector2Extensions {
 
+        public static Vector2 Project(this Vector2 v, Vector2 a, Vector2 b) {
+            Vector2 atob = b - a;
+            Vector2 atop = v - a;
+            float len = atob.x * atob.x + atob.y * atob.y;
+            float dot = atop.x * atob.x + atop.y * atob.y;
+            float t = Mathf.Clamp01(dot / len);
+            return new Vector2(a.x + atob.x * t, a.y + atob.y * t);
+        }
+
         public static Vector2 Rotate(this Vector2 v, Vector2 pivot, float degrees) {
             float sin = Mathf.Sin(degrees * Mathf.Deg2Rad);
             float cos = Mathf.Cos(degrees * Mathf.Deg2Rad);

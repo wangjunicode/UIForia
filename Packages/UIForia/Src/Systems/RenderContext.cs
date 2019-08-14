@@ -6,7 +6,6 @@ using UIForia.Rendering.Vertigo;
 using UIForia.Util;
 using UnityEngine;
 using UnityEngine.Rendering;
-using Vertigo;
 using PooledMesh = UIForia.Rendering.Vertigo.PooledMesh;
 
 namespace UIForia.Rendering {
@@ -73,7 +72,6 @@ namespace UIForia.Rendering {
         public StructList<Vector4> texCoordList3;
         public StructList<int> triangleList;
 
-        private ObjectPool<UIForiaData> uiforiaDataPool;
         private Batch currentBatch;
         private Material activeMaterial;
 
@@ -100,7 +98,6 @@ namespace UIForia.Rendering {
         }
 
         internal RenderContext(Material batchedMaterial) {
-            this.uiforiaDataPool = new ObjectPool<UIForiaData>(null, (d) => d.Clear());
             this.pendingBatches = new StructList<Batch>();
             this.uiforiaMeshPool = new MeshPool();
             this.uiforiaMaterialPool = new UIForiaMaterialPool(batchedMaterial);
@@ -115,16 +112,6 @@ namespace UIForia.Rendering {
 
             this.pathMaterial = new Material(Shader.Find("UIForia/UIForiaPathSDF")); // temp
             this.pathMaterialPool = new UIForiaMaterialPool(pathMaterial);
-        }
-
-        public void SetMaterial(Material material) {
-            if (currentBatch.batchType == BatchType.Custom) {
-                if (activeMaterial != material) {
-                    FinalizeCurrentBatch();
-                }
-            }
-
-            activeMaterial = material;
         }
 
         public void DrawMesh(Mesh mesh, Material material, in Matrix4x4 transform) {
@@ -239,13 +226,13 @@ namespace UIForia.Rendering {
 
             if (currentBatch.batchType == BatchType.Unset) {
                 currentBatch.batchType = BatchType.UIForia;
-                currentBatch.uiforiaData = uiforiaDataPool.Get();
+                currentBatch.uiforiaData = UIForiaData.Get();
             }
 
             if (geometry.mainTexture != null && currentBatch.uiforiaData.mainTexture != null && currentBatch.uiforiaData.mainTexture != geometry.mainTexture) {
                 FinalizeCurrentBatch();
                 currentBatch.batchType = BatchType.UIForia;
-                currentBatch.uiforiaData = uiforiaDataPool.Get();
+                currentBatch.uiforiaData = UIForiaData.Get();
             }
 
             currentBatch.uiforiaData.mainTexture = geometry.mainTexture != null ? geometry.mainTexture : currentBatch.uiforiaData.mainTexture;
@@ -387,6 +374,8 @@ namespace UIForia.Rendering {
         }
 
         public void Clear() {
+            currentBatch.transformData?.Release();
+            UIForiaData.Release(ref currentBatch.uiforiaData);
             currentBatch = new Batch();
             currentBatch.transformData = StructList<Matrix4x4>.Get();
 
@@ -395,7 +384,7 @@ namespace UIForia.Rendering {
                 pendingBatches[i].transformData.QuickRelease();
 
                 if (pendingBatches[i].uiforiaData != null) {
-                    uiforiaDataPool.Release(pendingBatches[i].uiforiaData);
+                    UIForiaData.Release(ref pendingBatches.array[i].uiforiaData);
                 }
             }
 
@@ -710,8 +699,10 @@ namespace UIForia.Rendering {
             FinalizeCurrentBatch();
             path.UpdateGeometry();
 
+            if (path.drawCallList.size == 0) return;
+            
             currentBatch.batchType = BatchType.Path;
-            currentBatch.uiforiaData = currentBatch.uiforiaData ?? uiforiaDataPool.Get();
+            currentBatch.uiforiaData = currentBatch.uiforiaData ?? UIForiaData.Get();
 
             // eventually do pre-pass for texture swaps, text, and clipping as normal
             Texture lastTexture = null;
@@ -752,7 +743,7 @@ namespace UIForia.Rendering {
                 if (mainTexture != null && mainTexture != lastTexture && lastTexture != null) {
                     FinalizeCurrentBatch();
                     currentBatch.batchType = BatchType.Path;
-                    currentBatch.uiforiaData = uiforiaDataPool.Get();
+                    currentBatch.uiforiaData = UIForiaData.Get();
                 }
 
                 lastTexture = mainTexture ?? lastTexture;

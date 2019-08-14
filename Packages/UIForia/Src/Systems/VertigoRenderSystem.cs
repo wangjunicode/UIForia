@@ -147,6 +147,7 @@ namespace Src.Systems {
         public float shadowSizeX;
         public float shadowSizeY;
         public Color32 shadowTint;
+        public float shadowOpacity;
 
         public static SVGXFillStyle Default => new SVGXFillStyle() {
             paintMode = PaintMode.Color,

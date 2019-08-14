@@ -472,7 +472,7 @@ inline fixed4 ComputeColor(float packedBg, float packedTint, int colorMode, floa
     int useTexture = (colorMode & PaintMode_Texture) != 0;
     int tintTexture = (colorMode & PaintMode_TextureTint) != 0;
     int letterBoxTexture = (colorMode & PaintMode_LetterBoxTexture) != 0;
-    
+
     fixed4 bgColor = UnpackColor(asuint(packedBg));
     fixed4 tintColor = UnpackColor(asuint(packedTint));
     fixed4 textureColor = tex2D(_MainTexture, texCoord);

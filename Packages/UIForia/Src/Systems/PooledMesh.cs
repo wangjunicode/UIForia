@@ -24,11 +24,7 @@ namespace UIForia.Rendering.Vertigo {
         }
 
         public void Release() {
-            if (isActive) {
-                isActive = false;
-                mesh.Clear(true);
-                origin?.Release(this);
-            }
+            origin?.Release(this);
         }
 
         public void SetVertices(Vector3[] positions, int count) {
@@ -107,6 +103,7 @@ namespace UIForia.Rendering.Vertigo {
 
         public void Release(PooledMesh mesh) {
             if (mesh.isActive) {
+                mesh.mesh.Clear(true);
                 dynamicPool.Add(mesh);
                 mesh.isActive = false;
             }

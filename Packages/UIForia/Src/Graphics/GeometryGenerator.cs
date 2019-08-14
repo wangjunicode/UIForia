@@ -965,7 +965,7 @@ namespace Vertigo {
             }
         }
 
-        private static void GenerateEndCap(GeometryCache retn, ShapeGenerator.PathPoint[] pathPointArray, int endIndex, in RenderState renderState) {
+        private static void GenerateEndCap(GeometryData data, ShapeGenerator.PathPoint[] pathPointArray, int endIndex, in RenderState renderState) {
             float halfStrokeWidth = renderState.strokeWidth * 0.5f;
             Vector2 end = pathPointArray[endIndex - 1].position;
             Vector2 prev = pathPointArray[endIndex - 2].position;
@@ -974,8 +974,8 @@ namespace Vertigo {
 
             Vector2 fromPrev = (prev - end).normalized;
             Vector2 perp = new Vector2(-fromPrev.y, fromPrev.x);
-            int vertexCount = retn.vertexCount;
-
+            int vertexStart = data.positionList.size;
+            int triangleStart = data.triangleList.size;
             if (renderState.lineCap == LineCap.Round) {
 //                 Vector2 center = end;
 //                 int segmentCount = (int) (math.abs(Math.PI * halfStrokeWidth) / 5) + 1;
@@ -1009,49 +1009,76 @@ namespace Vertigo {
 //                 
             }
             else if (renderState.lineCap == LineCap.TriangleOut) {
-                retn.EnsureAdditionalCapacity(3, 3);
+                data.positionList.EnsureAdditionalCapacity(3, 3);
+                data.texCoordList0.EnsureAdditionalCapacity(3, 3);
+                data.texCoordList1.EnsureAdditionalCapacity(3, 3);
+                data.triangleList.EnsureAdditionalCapacity(3, 3);
 
-                retn.positions.AddUnsafe(end - (perp * halfStrokeWidth));
-                retn.positions.AddUnsafe(end + (perp * halfStrokeWidth));
-                retn.positions.AddUnsafe(end - (fromPrev * halfStrokeWidth));
+                data.positionList.array[vertexStart + 0] = end - (perp * halfStrokeWidth);
+                data.positionList.array[vertexStart + 1] = end + (perp * halfStrokeWidth);
+                data.positionList.array[vertexStart + 2] = end - (fromPrev * halfStrokeWidth);
 
-                retn.triangles.AddUnsafe(vertexCount + 0);
-                retn.triangles.AddUnsafe(vertexCount + 1);
-                retn.triangles.AddUnsafe(vertexCount + 2);
+                data.triangleList.array[triangleStart + 0] = vertexStart + 0;
+                data.triangleList.array[triangleStart + 1] = vertexStart + 1;
+                data.triangleList.array[triangleStart + 2] = vertexStart + 2;
+
+                data.positionList.size += 3;
+                data.texCoordList0.size += 3;
+                data.texCoordList1.size += 3;
+                data.triangleList.size += 3;
             }
             else if (renderState.lineCap == LineCap.TriangleIn) {
-                retn.EnsureAdditionalCapacity(6, 6);
+                data.positionList.EnsureAdditionalCapacity(6);
+                data.texCoordList0.EnsureAdditionalCapacity(6);
+                data.texCoordList1.EnsureAdditionalCapacity(6);
+                data.triangleList.EnsureAdditionalCapacity(6);
 
-                retn.positions.AddUnsafe(end);
-                retn.positions.AddUnsafe(end - (fromPrev * halfStrokeWidth) - (perp * halfStrokeWidth));
-                retn.positions.AddUnsafe(end - (perp * halfStrokeWidth));
+                data.positionList.array[vertexStart + 0] = end;
+                data.positionList.array[vertexStart + 1] = end - (fromPrev * halfStrokeWidth) - (perp * halfStrokeWidth);
+                data.positionList.array[vertexStart + 2] = end - (perp * halfStrokeWidth);
 
-                retn.positions.AddUnsafe(end);
-                retn.positions.AddUnsafe(end - (fromPrev * halfStrokeWidth) + (perp * halfStrokeWidth));
-                retn.positions.AddUnsafe(end - (perp * -halfStrokeWidth));
+                data.positionList.array[vertexStart + 3] = end;
+                data.positionList.array[vertexStart + 4] = end - (fromPrev * halfStrokeWidth) + (perp * halfStrokeWidth);
+                data.positionList.array[vertexStart + 5] = end - (perp * -halfStrokeWidth);
 
-                retn.triangles.AddUnsafe(vertexCount + 0);
-                retn.triangles.AddUnsafe(vertexCount + 1);
-                retn.triangles.AddUnsafe(vertexCount + 2);
 
-                retn.triangles.AddUnsafe(vertexCount + 3);
-                retn.triangles.AddUnsafe(vertexCount + 4);
-                retn.triangles.AddUnsafe(vertexCount + 5);
+                data.triangleList.array[triangleStart + 0] = vertexStart + 0;
+                data.triangleList.array[triangleStart + 1] = vertexStart + 1;
+                data.triangleList.array[triangleStart + 2] = vertexStart + 2;
+
+                data.triangleList.array[triangleStart + 3] = vertexStart + 3;
+                data.triangleList.array[triangleStart + 4] = vertexStart + 4;
+                data.triangleList.array[triangleStart + 5] = vertexStart + 5;
+
+                data.positionList.size += 6;
+                data.texCoordList0.size += 6;
+                data.texCoordList1.size += 6;
+                data.triangleList.size += 6;
+              
             }
             else if (renderState.lineCap == LineCap.Square) {
-                retn.EnsureAdditionalCapacity(4, 6);
 
-                retn.positions.AddUnsafe(end - (perp * halfStrokeWidth));
-                retn.positions.AddUnsafe(end + (perp * halfStrokeWidth));
-                retn.positions.AddUnsafe(end - (fromPrev * halfStrokeWidth) - (perp * -halfStrokeWidth));
-                retn.positions.AddUnsafe(end - (fromPrev * halfStrokeWidth) + (perp * -halfStrokeWidth));
+                data.positionList.EnsureAdditionalCapacity(4);
+                data.texCoordList0.EnsureAdditionalCapacity(4);
+                data.texCoordList1.EnsureAdditionalCapacity(4);
+                data.triangleList.EnsureAdditionalCapacity(6);
 
-                retn.triangles.AddUnsafe(vertexCount + 0);
-                retn.triangles.AddUnsafe(vertexCount + 1);
-                retn.triangles.AddUnsafe(vertexCount + 2);
-                retn.triangles.AddUnsafe(vertexCount + 2);
-                retn.triangles.AddUnsafe(vertexCount + 3);
-                retn.triangles.AddUnsafe(vertexCount + 0);
+                data.positionList.array[vertexStart + 0] = end - (perp * halfStrokeWidth);
+                data.positionList.array[vertexStart + 1] = end + (perp * halfStrokeWidth);
+                data.positionList.array[vertexStart + 2] = end - (fromPrev * halfStrokeWidth) - (perp * -halfStrokeWidth);
+                data.positionList.array[vertexStart + 3] = end - (fromPrev * halfStrokeWidth) + (perp * -halfStrokeWidth);
+
+                data.triangleList.array[triangleStart + 0] = vertexStart + 0;
+                data.triangleList.array[triangleStart + 1] = vertexStart + 1;
+                data.triangleList.array[triangleStart + 2] = vertexStart + 2;
+                data.triangleList.array[triangleStart + 3] = vertexStart + 2;
+                data.triangleList.array[triangleStart + 4] = vertexStart + 3;
+                data.triangleList.array[triangleStart + 5] = vertexStart + 0;
+
+                data.positionList.size += 4;
+                data.texCoordList0.size += 4;
+                data.texCoordList1.size += 4;
+                data.triangleList.size += 6;
             }
         }
 
@@ -1082,8 +1109,7 @@ namespace Vertigo {
                 CreateStrokeTriangles(data, midpoints[i - 1], pathPointArray[i].position, midpoints[i], halfStrokeWidth, join, miterLimit);
             }
 
-            throw new NotImplementedException();
-            // GenerateEndCap(data, pathPoints.array, pointRange.end, renderState);
+            GenerateEndCap(data, pathPoints.array, pointRange.end, renderState);
 
             return new GeometryRange() {
                 vertexStart = vertexStart,

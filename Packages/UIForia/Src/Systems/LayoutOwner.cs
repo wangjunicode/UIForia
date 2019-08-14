@@ -478,43 +478,43 @@ namespace UIForia.Layout {
         // clip root defines group, can be compared per frame
 
         private void GatherClipGroups() {
-            LayoutData[] enabledBoxes = enabledBoxList.array;
-
-            clipGroups[0] = new ClipGroup() {root = enabledBoxes[0].layoutBox, members = new LightList<FastLayoutBox>()};
-
-            for (int i = 1; i < enabledBoxList.size; i++) {
-                ref LayoutData current = ref enabledBoxes[i];
-
-                int start = current.childStart;
-                int end = current.childEnd;
-
-                if (end - start == 0) {
-                    continue;
-                }
-
-                int clipIndex;
-
-                if ((current.layoutBox.flags & LayoutRenderFlag.Clip) != 0) {
-                    clipIndex = clipGroups.size;
-
-                    // find last frame clip group if present
-                    // 
-                    clipGroups.Add(new ClipGroup() {
-                        root = current.layoutBox,
-                        members = LightList<FastLayoutBox>.Get(),
-                    });
-                }
-                else {
-                    clipIndex = current.clipGroupIndex;
-                }
-
-                clipGroups[clipIndex].members.EnsureAdditionalCapacity(end - start);
-
-                for (int j = start; j < end; j++) {
-                    clipGroups[clipIndex].members.Add(enabledBoxes[j].layoutBox);
-                    enabledBoxes[j].clipGroupIndex = clipIndex;
-                }
-            }
+//            LayoutData[] enabledBoxes = enabledBoxList.array;
+//
+//            clipGroups[0] = new ClipGroup() {root = enabledBoxes[0].layoutBox, members = new LightList<FastLayoutBox>()};
+//
+//            for (int i = 1; i < enabledBoxList.size; i++) {
+//                ref LayoutData current = ref enabledBoxes[i];
+//
+//                int start = current.childStart;
+//                int end = current.childEnd;
+//
+//                if (end - start == 0) {
+//                    continue;
+//                }
+//
+//                int clipIndex;
+//
+//                if ((current.layoutBox.flags & LayoutRenderFlag.Clip) != 0) {
+//                    clipIndex = clipGroups.size;
+//
+//                    // find last frame clip group if present
+//                    // 
+//                    clipGroups.Add(new ClipGroup() {
+//                        root = current.layoutBox,
+//                        members = LightList<FastLayoutBox>.Get(),
+//                    });
+//                }
+//                else {
+//                    clipIndex = current.clipGroupIndex;
+//                }
+//
+//                clipGroups[clipIndex].members.EnsureAdditionalCapacity(end - start);
+//
+//                for (int j = start; j < end; j++) {
+//                    clipGroups[clipIndex].members.Add(enabledBoxes[j].layoutBox);
+//                    enabledBoxes[j].clipGroupIndex = clipIndex;
+//                }
+//            }
         }
 
         public void SortClipGroups() {

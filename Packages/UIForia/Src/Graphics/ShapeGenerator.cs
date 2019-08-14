@@ -105,18 +105,22 @@ namespace Vertigo {
             currentPath = new PathDef();
             currentPath.pointRange.start = pointList.size;
             currentPath.holeRange.start = holeList.size;
-            currentPath.pointRange.length++;
-            pointList.Add(new PathPoint(lastPoint.x, lastPoint.y, PointFlag.Corner));
-            buildingPath = true;
+           
             inHole = false; // just in case
         }
 
         public void MoveTo(float x, float y) {
             lastPoint = new Vector2(x, y);
+            currentPath.pointRange.length++;
+            pointList.Add(new PathPoint(lastPoint.x, lastPoint.y, PointFlag.Corner));
+            buildingPath = true;
         }
 
         public void MoveTo(Vector2 position) {
             lastPoint = position;
+            currentPath.pointRange.length++;
+            pointList.Add(new PathPoint(lastPoint.x, lastPoint.y, PointFlag.Corner));
+            buildingPath = true;
         }
 
         public void ClosePath() {

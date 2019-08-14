@@ -71,18 +71,44 @@ namespace Src.Systems {
             currentShapeRange = default;
             transforms.Add(currentMatrix);
         }
-
-
-        public void SetTexture(Texture texture) { }
-
+        
         public void SetUVTransform() { }
 
         public void SetStroke(in Color color) {
             currentStrokeStyle.encodedColor = VertigoUtil.ColorToFloat(color);
         }
 
-        public void SetFill(in Color color) {
-            currentFillStyle.encodedColor = VertigoUtil.ColorToFloat(color);
+        public void SetFill(in Color? color) {
+            if (color.HasValue) {
+                currentFillStyle.encodedColor = VertigoUtil.ColorToFloat(color.Value);
+                currentFillStyle.paintMode |= PaintMode.Color;
+            }
+            else {
+                currentFillStyle.encodedColor = 0;
+                currentFillStyle.paintMode &= ~PaintMode.Color;
+            }
+        }
+        
+        public void SetFill(SVGXGradient gradient) {
+            if (gradient != null) {
+                currentFillGradient = gradient;
+                currentFillStyle.paintMode |= PaintMode.Gradient;
+            }
+            else {
+                currentFillGradient = null;
+                currentFillStyle.paintMode &= ~PaintMode.Gradient;
+            }
+        }
+        
+        public void SetFill(Texture texture) {
+            if (texture != null) {
+                currentFillStyle.texture = texture;
+                currentFillStyle.paintMode |= PaintMode.Texture;
+            }
+            else {
+                currentFillStyle.texture = null;
+                currentFillStyle.paintMode &= ~PaintMode.Texture;
+            }
         }
 
         public void SetFillOpacity(float opacity) {
@@ -417,19 +443,18 @@ namespace Src.Systems {
                     Vector2 p0 = pointList.array[shape.pointRange.start + 0].position;
                     Vector2 p1 = pointList.array[shape.pointRange.start + 1].position;
                     Vector2 p2 = pointList.array[shape.pointRange.start + 2].position;
-                    
+                    // remap points into uvs from our bounds
                     float p0X = MathUtil.PercentOfRange(p0.x, position.x, position.x + size.x);
-                    float p0Y = MathUtil.PercentOfRange(p0.y, position.y, position.x + size.y);
+                    float p0Y = 1 - MathUtil.PercentOfRange(p0.y, position.y, position.y + size.y);
                     float p1X = MathUtil.PercentOfRange(p1.x, position.x, position.x + size.x);
-                    float p1Y = MathUtil.PercentOfRange(p1.y, position.y, position.x + size.y);
+                    float p1Y = 1- MathUtil.PercentOfRange(p1.y, position.y, position.y + size.y);
                     float p2X = MathUtil.PercentOfRange(p2.x, position.x, position.x + size.x);
-                    float p2Y = MathUtil.PercentOfRange(p2.y, position.y, position.x + size.y);
-                    
-                    // todo -- use this in the shader
+                    float p2Y = 1 - MathUtil.PercentOfRange(p2.y, position.y, position.y + size.y);
+                    objectData.objectData.y = p2Y;
                     for (int i = objectData.geometryRange.vertexStart; i < objectData.geometryRange.vertexEnd; i++) {
                         geometryData.texCoordList0.array[i].z = p0X;
                         geometryData.texCoordList0.array[i].w = p0Y;
-                        geometryData.texCoordList1.array[i] = new Vector4(p1X, p1Y, p2X, p2Y);
+                        geometryData.texCoordList1.array[i] = new Vector4(p1X, p1Y, p2X, 0); // cant use w since object id goes there
                     }
                     
                     break;
@@ -471,7 +496,7 @@ namespace Src.Systems {
 
         private void GenerateShadowFillGeometry(ref GeometryData geometryData, ref ShapeDef shape, in SVGXFillStyle fillStyle) {
             ObjectData objectData = new ObjectData();
-            objectData.colorData = new Vector4(VertigoUtil.ColorToFloat(fillStyle.shadowColor), VertigoUtil.ColorToFloat(fillStyle.shadowTint), fillStyle.opacity, fillStyle.shadowIntensity);
+            objectData.colorData = new Vector4(VertigoUtil.ColorToFloat(fillStyle.shadowColor), VertigoUtil.ColorToFloat(fillStyle.shadowTint), fillStyle.shadowOpacity, fillStyle.shadowIntensity);
 
             int paintMode = (int) ((fillStyle.shadowTint.a > 0) ? (PaintMode.Shadow | PaintMode.ShadowTint) : PaintMode.Shadow);
             Vector2 position = shape.bounds.position;
@@ -515,7 +540,7 @@ namespace Src.Systems {
                 case ShapeType.Ellipse: {
                     float clip = Mathf.Min(size.x, size.y) * 0.25f;
                     CornerDefinition cornerDefinition = new CornerDefinition(clip);
-                    int flags = BitUtil.SetHighLowBits((int) ShapeType.Ellipse, (int) fillStyle.paintMode);
+                    int flags = BitUtil.SetHighLowBits((int) ShapeType.Ellipse, paintMode);
                     objectData.geometryRange = GeometryGenerator.FillDecoratedRect(geometryData, position, size.x, size.y, cornerDefinition);
                     objectData.objectData = new Vector4(flags, s_CircleRadii, VertigoUtil.PackSizeVector(size), k_StrokeWidthZero);
                     break;
@@ -523,8 +548,30 @@ namespace Src.Systems {
 
                 case ShapeType.Rhombus:
                     break;
-                case ShapeType.Triangle:
+                case ShapeType.Triangle: {
+                    int flags = BitUtil.SetHighLowBits((int) ShapeType.Triangle, paintMode);
+                    objectData.geometryRange = GeometryGenerator.FillRect(geometryData, position.x, position.y, size.x, size.y);
+                    Vector2 originalPosition = shape.bounds.position;
+                    Vector2 originalSize = shape.bounds.size;
+                    objectData.objectData = new Vector4(flags, 0, VertigoUtil.PackSizeVector(originalSize), k_StrokeWidthZero);
+                    Vector2 p0 = pointList.array[shape.pointRange.start + 0].position;
+                    Vector2 p1 = pointList.array[shape.pointRange.start + 1].position;
+                    Vector2 p2 = pointList.array[shape.pointRange.start + 2].position;
+                    // remap points into uvs from our bounds
+                    float p0X = MathUtil.PercentOfRange(p0.x, originalPosition.x, originalPosition.x + originalSize.x);
+                    float p0Y = 1 - MathUtil.PercentOfRange(p0.y, originalPosition.y, originalPosition.y + originalSize.y);
+                    float p1X = MathUtil.PercentOfRange(p1.x, originalPosition.x, originalPosition.x + originalSize.x);
+                    float p1Y = 1 - MathUtil.PercentOfRange(p1.y, originalPosition.y, originalPosition.y + originalSize.y);
+                    float p2X = MathUtil.PercentOfRange(p2.x, originalPosition.x, originalPosition.x + originalSize.x);
+                    float p2Y = 1 - MathUtil.PercentOfRange(p2.y, originalPosition.y, originalPosition.y + originalSize.y);
+                    objectData.objectData.y = p2Y;
+                    for (int i = objectData.geometryRange.vertexStart; i < objectData.geometryRange.vertexEnd; i++) {
+                        geometryData.texCoordList0.array[i].z = p0X;
+                        geometryData.texCoordList0.array[i].w = p0Y;
+                        geometryData.texCoordList1.array[i] = new Vector4(p1X, p1Y, p2X, 0); // cant use w since object id goes there
+                    }
                     break;
+                }
                 case ShapeType.Polygon:
                     break;
                 case ShapeType.Text:
@@ -594,6 +641,10 @@ namespace Src.Systems {
         public void SetShadowIntensity(float shadowIntensity) {
             if (shadowIntensity < 0) shadowIntensity = 0;
             currentFillStyle.shadowIntensity = shadowIntensity;
+        }
+
+        public void SetShadowOpacity(float shadowOpacity) {
+            currentFillStyle.shadowOpacity = shadowOpacity;
         }
 
     }

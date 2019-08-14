@@ -16,5 +16,6 @@ style button {
 }
 
 style repeat {
-    PreferredSize = 1pca;
+    PreferredSize = 200px 1cnt;
+    MarginBottom = 10px;
 }

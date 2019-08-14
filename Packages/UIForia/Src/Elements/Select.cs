@@ -1,15 +1,11 @@
 using System;
 using System.Collections.Generic;
-using SVGX;
 using UIForia.Attributes;
 using UIForia.Compilers.ExpressionResolvers;
 using UIForia.Rendering;
-using UIForia.Systems;
 using UIForia.Templates;
 using UIForia.UIInput;
 using UIForia.Util;
-using UnityEngine;
-using Vertigo;
 
 namespace UIForia.Elements {
 
@@ -135,7 +131,12 @@ namespace UIForia.Elements {
         }
 
         public void BeginSelecting(MouseInputEvent evt) {
-            if (Application.InputSystem.RequestFocus(this)) {
+            if (selecting) {
+                Application.InputSystem.ReleaseFocus(this);
+                selecting = false;
+            }
+            else {
+                Application.InputSystem.RequestFocus(this);
                 selecting = true;
             }
 
@@ -184,6 +185,10 @@ namespace UIForia.Elements {
                 options.onItemRemoved -= onRemove;
                 options.onClear -= onClear;
             }
+        }
+
+        public bool DisplaySelectedIcon(ISelectOption<T> option) {
+            return selectedElementIcon != null && selectedIndex > -1 && (options[selectedIndex].Label == option.Label);
         }
 
         private void OnClear() {

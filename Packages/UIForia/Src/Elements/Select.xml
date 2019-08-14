@@ -4,7 +4,7 @@
     <Style>
 
         style select {
-            PreferredWidth = 1cnt;
+            PreferredWidth = 1pca;
             [attr:disabled] {
                 Opacity = 0.4;
             }
@@ -60,7 +60,7 @@
             AnchorTarget = Parent;
             LayoutBehavior = ignored;
             AnchorLeft = -10px;
-            AnchorBottom = -7px;
+            AnchorBottom = 3px;
             TransformBehaviorX = AnchorMinOffset;
             TransformBehaviorY = AnchorMaxOffset;
             TransformPositionY = -1h;
@@ -71,7 +71,28 @@
             Border = 1px;
             ZIndex = 30;
         }
+
+        style select-chevron {
+            PreferredSize = 2px 1px;
+            BackgroundColor = white;
+        }
         
+        style chevron-container {
+            BackgroundColor = #00b5d0;
+            BorderColor = #006d82;
+            BorderRadius = 0 4px 0 4px;
+            Border = 1px;
+            PreferredSize = 26px 1psz;
+            FlexLayoutMainAxisAlignment = SpaceAround;
+            FlexLayoutCrossAxisAlignment = Center;
+            FlexLayoutDirection = Row;
+    
+            [attr:disabled] {
+                BorderColor = #666;
+                BackgroundColor = #999;
+            }
+        }
+
         style slot {
             LayoutBehavior = TranscludeChildren;
         }
@@ -79,7 +100,7 @@
         style content-area {
             LayoutType = Grid;
     
-            PreferredSize = 1pca;
+            PreferredWidth = 1pca;
             GridLayoutColTemplate = 1fr 1mx;
             GridLayoutRowTemplate = 1mx;
     
@@ -90,6 +111,8 @@
         }
 
     </Style>
+
+    <Using namespace="UIForia.Elements" />
 
     <Contents style="select">
 
@@ -108,14 +131,17 @@
             </Group>
 
             <Slot name="chevron" style="slot">
-                <Image style="chevron" src="'arrow_right'"/>
+                <Div style="chevron-container">
+                    <Arrow Rotation="ArrowRotation.Up" style="select-chevron" />
+                    <Arrow Rotation="ArrowRotation.Down" style="select-chevron" />
+                </Div>
             </Slot>
         </Group>
 
         <Children onMouseClick="SelectElement($event)" if="selecting" style="option-list" x-id="option-list" x-type="template">
 
             <Group style="select-option">
-                <Image src="selectedElementIcon" style="selected-element-icon" if="selectedIndex == -1 ? false : (options[selectedIndex].Label == $option__internal.Label)" />
+                <Image src="selectedElementIcon" style="selected-element-icon" if="DisplaySelectedIcon($option__internal)" />
                 <Div>{$option__internal.Label}</Div>
             </Group>
 

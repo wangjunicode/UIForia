@@ -4,81 +4,120 @@
     <Style>
 
         style select {
-
-            BackgroundColor = white;
-            BorderRadius = 4px;
-            BorderColor = black;
-            Border = 2px;
-            Padding = 0.25em 0.5em;
             PreferredWidth = 1cnt;
-    
-            [hover] {
-                BorderColor = rgba(38, 128, 255, 255);
+            [attr:disabled] {
+                Opacity = 0.4;
             }
-
+        }
+        
+        style select-padding {
+            Border = 1px 0 1px 1px;
+            BorderColor = #b2b2b2;
+            BorderRadius = 4px 0 4px 0;
+            BackgroundColor = white;
+            Padding = 6px 8px;
+            Overflow = Hidden;
+            [hover] {
+                BorderColor = #00b5d9;
+            }
+            [attr:disabled] {
+                [hover] {
+                    BorderColor = #b2b2b2;
+                }
+            }
         }
 
         style select-option {
             PreferredWidth = 1pca;
+            MaxWidth = 1pca;
             TextColor = black;
-    
+            Overflow = Hidden;
+            Padding = 4px 8px 4px 22px;
+            FlexLayoutCrossAxisAlignment = Center;
+            FlexLayoutDirection = Column;
             [hover] {
+                MinWidth = 1cnt;
                 TextColor = white;
-                BackgroundColor = rgba(38, 128, 255, 255);
+                BackgroundColor = #006d82;
+                BorderRadius = 4px;
+            }
+        }
+        
+        style selected-element-icon {
+            PreferredSize = 10px;
+            BackgroundColor = black;
+            LayoutBehavior = Ignored;
+            AnchorTop = -5px;
+            AnchorTarget = Parent;
+            TransformPositionY = 0.5pcah;
+            TransformPositionX = 5px;
+            [hover] {
+                BackgroundColor = white;
             }
         }
 
         style option-list {
             AnchorTarget = Parent;
             LayoutBehavior = ignored;
+            AnchorLeft = -10px;
+            AnchorBottom = -7px;
+            TransformBehaviorX = AnchorMinOffset;
             TransformBehaviorY = AnchorMaxOffset;
             TransformPositionY = -1h;
             BackgroundColor = white;
             PreferredWidth = 1psz;
             BorderRadius = 4px;
-            Padding = 0.25em, 0.5em;
             BorderColor = black;
-            Border = 2px;
+            Border = 1px;
             ZIndex = 30;
         }
-
-        style chevron {
-            PreferredSize = 24px;
-            TransformPivot = 0.5;
-            TransformRotation = -90;
+        
+        style slot {
+            LayoutBehavior = TranscludeChildren;
         }
 
         style content-area {
-            PreferredWidth = 1cnt;
-            FlexLayoutDirection = Column;
-            FlexLayoutMainAxisAlignment = SpaceBetween;
-            FlexLayoutCrossAxisAlignment = Center;
+            LayoutType = Grid;
+    
+            PreferredSize = 1pca;
+            GridLayoutColTemplate = 1fr 1mx;
+            GridLayoutRowTemplate = 1mx;
+    
+            GridLayoutRowAlignment = Fit;
+            GridLayoutColAlignment = Fit;
+    
+            BorderRadius = 4px;
         }
 
     </Style>
 
     <Contents style="select">
 
-        <Group onMouseDown="BeginSelecting($event)" style="content-area">
+        <Group onMouseClick="BeginSelecting($event)" style="content-area">
 
-            <Group if="selectedIndex >= 0">
+            <Group if="selectedIndex >= 0" style="select-padding">
                 <Slot name="select-display">
                     {options[selectedIndex].Label}
                 </Slot>
             </Group>
 
-            <Group if="selectedIndex &lt; 0">
+            <Group if="selectedIndex &lt; 0" style="select-padding">
                 <Slot name="select-placeholder">
                     Placeholder
                 </Slot>
             </Group>
 
-            <Image style="chevron" src="'arrow_right'"/>
+            <Slot name="chevron" style="slot">
+                <Image style="chevron" src="'arrow_right'"/>
+            </Slot>
         </Group>
 
-        <Children onMouseClick="SelectElement($event)" if="selecting" style="option-list" x-type="template">
+        <Children onMouseClick="SelectElement($event)" if="selecting" style="option-list" x-id="option-list" x-type="template">
 
-            <Group style="select-option">{$option__internal.Label}</Group>
+            <Group style="select-option">
+                <Image src="selectedElementIcon" style="selected-element-icon" if="selectedIndex == -1 ? false : (options[selectedIndex].Label == $option__internal.Label)" />
+                <Div>{$option__internal.Label}</Div>
+            </Group>
 
         </Children>
 

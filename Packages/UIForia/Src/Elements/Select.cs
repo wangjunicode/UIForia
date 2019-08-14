@@ -1,11 +1,15 @@
 using System;
 using System.Collections.Generic;
+using SVGX;
 using UIForia.Attributes;
 using UIForia.Compilers.ExpressionResolvers;
-using UIForia.Parsing.Expression;
+using UIForia.Rendering;
+using UIForia.Systems;
 using UIForia.Templates;
 using UIForia.UIInput;
 using UIForia.Util;
+using UnityEngine;
+using Vertigo;
 
 namespace UIForia.Elements {
 
@@ -23,6 +27,8 @@ namespace UIForia.Elements {
         public T defaultValue { get; set; }
 
         public T selectedValue;
+
+        public string selectedElementIcon;
 
         public RepeatableList<ISelectOption<T>> options;
         private RepeatableList<ISelectOption<T>> previousOptions;
@@ -115,6 +121,17 @@ namespace UIForia.Elements {
             onClear = OnClear;
             onRemove = OnRemove;
             childrenElement = FindFirstByType<UIChildrenElement>();
+            if (GetAttribute("disabled") != null) {
+                DisableAllChildren(this);
+            }
+        }
+
+        private void DisableAllChildren(UIElement element) {
+            for (int index = 0; index < element.children.Count; index++) {
+                UIElement child = element.children[index];
+                child.SetAttribute("disabled", "disabled");
+                DisableAllChildren(child);
+            }
         }
 
         public void BeginSelecting(MouseInputEvent evt) {
@@ -129,14 +146,18 @@ namespace UIForia.Elements {
         public void SelectElement(MouseInputEvent evt) {
             UIElement[] childrenArray = childrenElement.children.Array;
             int count = childrenElement.children.Count;
+            float offset = 0;
             for (int i = 0; i < count; i++) {
                 if (childrenArray[i].layoutResult.ScreenRect.Contains(evt.MousePosition)) {
                     selectedIndex = i;
                     selectedValue = options[selectedIndex].Value;
+                    childrenElement.style.SetTransformPositionY(-offset, StyleState.Normal);
+                    childrenElement.style.SetTransformBehaviorY(TransformBehavior.AnchorMinOffset, StyleState.Normal);
                     onValueChanged?.Invoke(selectedValue);
                     onIndexChanged?.Invoke(selectedIndex);
                     break;
                 }
+                offset += childrenArray[i].layoutResult.ActualHeight;
             }
 
             selecting = false;

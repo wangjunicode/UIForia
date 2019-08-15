@@ -28,12 +28,14 @@ namespace Src.Systems {
         private readonly LightList<UIElement> enabledElementList;
         private readonly LightStack<RenderBox> stack;
         private readonly RenderBoxPool painterPool;
-        private LightStack<RenderBox> clipStack;
+        private LightStack<ClipData> clipStack;
         private StructList<RenderBoxWrapper> wrapperList;
         private StructList<DrawCommand> drawList;
         private StructStack<RenderBoxWrapper> wrapperStack;
-        private LightList<RenderBox> renderedClippers;
-
+        internal LightList<ClipData> renderedClippers;
+        private LightList<ClipData> clipDataPool = new LightList<ClipData>();
+        private LightList<ClipData> culledClippers = new LightList<ClipData>();
+        
         private SimpleRectPacker maskPackerR = new SimpleRectPacker(Screen.width, Screen.height, 4);
         private SimpleRectPacker maskPackerG = new SimpleRectPacker(Screen.width, Screen.height, 4);
         private SimpleRectPacker maskPackerB = new SimpleRectPacker(Screen.width, Screen.height, 4);
@@ -41,7 +43,10 @@ namespace Src.Systems {
         private SimpleRectPacker textPacker = new SimpleRectPacker(Screen.width, Screen.height, 4);
         private SimpleRectPacker texturePacker = new SimpleRectPacker(Screen.width, Screen.height, 4);
 
+        private RenderTexture clipTexture;
+        
         private static readonly DepthComparer s_RenderComparer = new DepthComparer();
+        private static readonly StructList<Vector2> s_SubjectRect = new StructList<Vector2>(4);
 
         public RenderOwner(UIView view, Camera camera) {
             this.view = view;
@@ -49,17 +54,16 @@ namespace Src.Systems {
             this.enabledElementList = new LightList<UIElement>();
             this.stack = new LightStack<RenderBox>();
             this.painterPool = new RenderBoxPool();
-            this.clipStack = new LightStack<RenderBox>();
+            this.clipStack = new LightStack<ClipData>();
             this.wrapperList = new StructList<RenderBoxWrapper>(32);
             this.wrapperStack = new StructStack<RenderBoxWrapper>(16);
             this.drawList = new StructList<DrawCommand>(0);
-            this.renderedClippers = new LightList<RenderBox>();
+            this.renderedClippers = new LightList<ClipData>();
             this.view.RootElement.renderBox = new RootRenderBox();
             this.view.RootElement.renderBox.element = view.RootElement;
         }
 
         public void Render(RenderContext renderContext) {
-            
             GatherBoxDataParallel(); // todo -- move and push on thread to do parallel w/ layout
 
             Cull();
@@ -68,10 +72,8 @@ namespace Src.Systems {
 
             Draw(renderContext);
 
-            renderedClippers.QuickClear();
             wrapperList.QuickClear();
             drawList.QuickClear();
-//            view.rootElement.renderBox.Render(renderContext);
         }
 
         public enum DrawCommandType {
@@ -95,7 +97,6 @@ namespace Src.Systems {
 
         }
 
-        private RenderTexture clipTexture;
 
         private void DrawClipShapes(RenderContext ctx) {
             if (clipTexture == null) {
@@ -109,46 +110,46 @@ namespace Src.Systems {
             ctx.SetRenderTexture(clipTexture);
 
             for (int i = 0; i < renderedClippers.size; i++) {
-                RenderBox box = renderedClippers.array[i];
-
-                ClipShape clipShape = box.GetClipShape();
-
-                if (clipShape == null) {
-                    box.clipRect = new Vector4(0, 0, 0, 0);
-                    box.clipUVs = default;
-                    continue;
-                }
-
-                // may be faster to alternate packers since it is easier to find free space when more free space is available (profile this)
-                // foreach packer -> packer.TryFitRect(i, rect)
-                if (maskPackerA.TryPackRect(clipShape.width, clipShape.height, out SimpleRectPacker.PackedRect r)) {
-                    Matrix4x4 mat = Matrix4x4.Translate(new Vector3(r.xMin, -r.yMin, 0));
-
-                    ctx.DrawClipShape(clipShape);
-                    box.clipTexture = clipTexture;
-
-                    // can compress into 2 floats for xy and width / height. but only have max of 6553.6 when using floats, can be int at 65536 which is fine
-                    // just need to watch out for screen size (ultra high pixel count over 4k probably don't need to worry about yet)
-                    // todo -- this is screen oriented, will need to handle the case when this is transformed
-                    box.clipRect = new Vector4(
-                        box.element.layoutResult.screenPosition.x,
-                        box.element.layoutResult.screenPosition.y,
-                        box.element.layoutResult.actualSize.width,
-                        box.element.layoutResult.actualSize.height
-                    );
-                    // can compress to float (2 bytes each for reasonable precision)
-                    box.clipUVs = new Vector4(
-                        r.xMin / (float) clipTexture.width,
-                        r.yMin / (float) clipTexture.height,
-                        r.xMax / (float) clipTexture.width,
-                        r.yMax / (float) clipTexture.height
-                    );
-                }
+//                ClipData box = renderedClippers.array[i];
+//
+//                ClipShape clipShape = box.GetClipShape();
+//
+//                if (clipShape == null) {
+//                    box.clipRect = new Vector4(0, 0, 0, 0);
+//                    box.clipUVs = default;
+//                    continue;
+//                }
+//
+//                // may be faster to alternate packers since it is easier to find free space when more free space is available (profile this)
+//                // foreach packer -> packer.TryFitRect(i, rect)
+//                if (maskPackerA.TryPackRect(clipShape.width, clipShape.height, out SimpleRectPacker.PackedRect r)) {
+//                    Matrix4x4 mat = Matrix4x4.Translate(new Vector3(r.xMin, -r.yMin, 0));
+//
+//                    ctx.DrawClipShape(clipShape);
+//                    box.clipTexture = clipTexture;
+//
+//                    // can compress into 2 floats for xy and width / height. but only have max of 6553.6 when using floats, can be int at 65536 which is fine
+//                    // just need to watch out for screen size (ultra high pixel count over 4k probably don't need to worry about yet)
+//                    // todo -- this is screen oriented, will need to handle the case when this is transformed
+//                    box.clipRect = new Vector4(
+//                        box.element.layoutResult.screenPosition.x,
+//                        box.element.layoutResult.screenPosition.y,
+//                        box.element.layoutResult.actualSize.width,
+//                        box.element.layoutResult.actualSize.height
+//                    );
+//                    // can compress to float (2 bytes each for reasonable precision)
+//                    box.clipUVs = new Vector4(
+//                        r.xMin / (float) clipTexture.width,
+//                        r.yMin / (float) clipTexture.height,
+//                        r.xMax / (float) clipTexture.width,
+//                        r.yMax / (float) clipTexture.height
+//                    );
+//                }
             }
 
             ctx.SetRenderTexture(null);
         }
-        
+
         private void UpdateRenderBox(UIElement element) {
             // get painter
             // see if it the same as current render box
@@ -253,7 +254,7 @@ namespace Src.Systems {
                 if (current.renderOp == RenderOpType.DrawBackground) {
                     current.renderBox = current.element.renderBox;
                     // ReSharper disable once PossibleNullReferenceException
-                    current.renderBox.clipped = false;
+                    current.renderBox.culled = false;
                     current.renderBox.clippedBoxCount = 0;
                     LightList<UIElement> children = current.element.children;
 
@@ -327,11 +328,38 @@ namespace Src.Systems {
             // first do an easy screen cull
             // screen is always aligned
             // if world space rect is not inside the screen, fail immediately
+            renderedClippers.Clear();
 
+            for (int i = 0; i < renderedClippers.size; i++) {
+                renderedClippers.array[i].Clear();
+            }
+
+            for (int i = 0; i < culledClippers.size; i++) {
+                culledClippers.array[i].Clear();
+            }
+            
+            clipDataPool.AddRange(renderedClippers);
+            clipDataPool.AddRange(culledClippers);
+
+            renderedClippers.size = 0;
+            culledClippers.size = 0;
+            
             RenderBoxWrapper[] wrappers = wrapperList.array;
 
-            
-            bool activeClipperIsCulled = false;
+            ClipData screenClip = GetClipData();
+            screenClip.worldBounds.p0 = new Vector2(1, 2);
+            screenClip.worldBounds.p1 = new Vector2(Screen.width, 2);
+            screenClip.worldBounds.p2 = new Vector2(Screen.width, Screen.height);
+            screenClip.worldBounds.p3 = new Vector2(1, Screen.height);
+            screenClip.intersected.array[0] = screenClip.worldBounds.p0;
+            screenClip.intersected.array[1] = screenClip.worldBounds.p1;
+            screenClip.intersected.array[2] = screenClip.worldBounds.p2;
+            screenClip.intersected.array[3] = screenClip.worldBounds.p3;
+            screenClip.intersected.size = 4;
+
+            screenClip.isCulled = false;
+            renderedClippers.Add(screenClip);
+            clipStack.Push(screenClip);
 
             for (int i = 0; i < wrapperList.size; i++) {
                 RenderBoxWrapper wrapper = wrappers[i];
@@ -342,116 +370,128 @@ namespace Src.Systems {
                     case RenderOpType.Unset:
                         break;
 
-                    case RenderOpType.DrawBackground:
-
-                        renderBox.clipped = false;
+                    case RenderOpType.DrawBackground: {
+                        renderBox.culled = false;
 
                         switch (renderBox.clipBehavior) {
+                            
                             case ClipBehavior.Never:
                                 renderBox.clipper = null;
-                                drawList.Add(new DrawCommand(renderBox, DrawCommandType.BackgroundTransparent));
+                                renderBox.culled = false;
                                 break;
 
                             case ClipBehavior.Screen:
-                                renderBox.clipper = null;
-                                break;
-
-                            case ClipBehavior.Normal:
-
-                                // if current clipper is clipped, mark as clipped
-
-                                // otherwise intersect with currently visible polygon
-                                // any rounded shape masking will happen in the shader I think
-                                if (activeClipperIsCulled) {
-                                    renderBox.clipper = clipStack.array[clipStack.size - 1];
-                                    renderBox.clipper.clippedBoxCount++;
-                                    renderBox.clipped = true;
-                                    continue;
-                                }
-
-                                Rect renderBounds = renderBox.RenderBounds;
-                                SVGXMatrix transform = wrapper.element.layoutResult.matrix;
-
-                                Vector2 p0 = transform.Transform(renderBounds.xMin, renderBounds.yMin);
-                                Vector2 p1 = transform.Transform(renderBounds.xMax, renderBounds.yMin);
-                                Vector2 p2 = transform.Transform(renderBounds.xMax, renderBounds.yMax);
-                                Vector2 p3 = transform.Transform(renderBounds.xMin, renderBounds.yMax); 
+                                renderBox.clipper = screenClip;
                                 
-                                // clipShape.ContainsOrOverlaps(worldSpaceBounds);
-
-                                for (int j = 0; j < clipStack.size; j++) {
-                                    // there is probably a faster way to do this linearly, need bounds in screen space to compare against each other
-                                    // if parent is clipped & not overflowing parent  & identity transform -> clipped = true
-                                    Rect bounds = renderBox.RenderBounds;
-
-                                    // 2 phases for culling 
-                                    //     1. general rect bounds intersection, always run
-                                    //     2. user defined cull check, run if painter implements ShouldCull
-
-                                    // go through 
-
-                                    if (clipStack.array[j].ShouldCull(bounds)) {
-                                        renderBox.clipped = true;
-                                        break;
-                                    }
-                                }
-
-                                if (!renderBox.clipped && clipStack.size > 0) {
-                                    renderBox.clipper = clipStack.array[clipStack.size - 1];
-                                    renderBox.clipper.clippedBoxCount++;
-                                    Assert.IsFalse(renderBox.clipper == renderBox);
-                                }
-
                                 break;
 
                             case ClipBehavior.View:
+//                                renderBox.clipper = viewClip;
                                 break;
+                            
+                            case ClipBehavior.Normal:
+
+                                // if current clipper is clipped, mark as clipped
+                                ClipData clipData = clipStack.array[clipStack.size - 1];
+
+                                if (!clipData.isCulled) {
+                                    Rect renderBounds = renderBox.RenderBounds;
+                                    SVGXMatrix transform = wrapper.element.layoutResult.matrix;
+
+                                    Vector2 p0 = transform.Transform(renderBounds.xMin, renderBounds.yMin);
+                                    Vector2 p1 = transform.Transform(renderBounds.xMax, renderBounds.yMin);
+                                    Vector2 p2 = transform.Transform(renderBounds.xMax, renderBounds.yMax);
+                                    Vector2 p3 = transform.Transform(renderBounds.xMin, renderBounds.yMax);
+
+                                    // if contained by resulting screen aligned rect or overlaps it, we will draw 
+
+                                    Rect screenAligned = clipData.screenSpaceBounds;
+                                    if (screenAligned.Contains(p0) || screenAligned.Contains(p1) || screenAligned.Contains(p2) || screenAligned.Contains(p3)) {
+                                        
+                                    }
+                                    else {
+                                        
+                                    }
+
+                                    // todo -- this assumes both rects are in the same space, they are not always! fix this!
+                                    renderBox.culled = !screenAligned.Overlaps(new Rect(p0.x, p0.y, p2.x - p0.x, p2.y - p0.y));
+                                    
+                                    if (!renderBox.culled) {
+                                        renderBox.clipper = clipStack.array[clipStack.size - 1];
+                                        renderBox.clipper.visibleBoxCount++;
+                                    }
+                                }
+                                else {
+                                    renderBox.culled = true;
+                                }
+                                break;
+
                         }
 
-                        if (!renderBox.clipped) {
+                        if (!renderBox.culled) {
                             drawList.Add(new DrawCommand(renderBox, DrawCommandType.BackgroundTransparent));
                         }
 
                         break;
-
+                    }
                     case RenderOpType.DrawForeground:
 
-                        if (!renderBox.clipped) {
+                        if (!renderBox.culled) {
                             drawList.Add(new DrawCommand(renderBox, DrawCommandType.ForeGroundTransparent));
                         }
 
                         break;
 
-                    case RenderOpType.PushClipShape:
+                    case RenderOpType.PushClipShape: {
                         // push no matter what, if this clipper gets clipped by parent clipper we'll figure it out later
                         // for now assume no rotation or scaling, we can handle transformations later
                         // wrapper.renderBox.intersectClipRect = RectExtensions.Intersect(wrapper.orientedScreenRect);
-                        ClipData clipData = new ClipData();
-                        clipData.clipParent = clipStack.PeekUnchecked();
-                        // clipData.clipShape = renderBox.GetClipShape();
+
+                        Rect localBounds = renderBox.RenderBounds;
+
+                        SVGXMatrix transform = wrapper.element.layoutResult.matrix;
+
+                        Vector2 p0 = transform.Transform(localBounds.xMin, localBounds.yMin);
+                        Vector2 p1 = transform.Transform(localBounds.xMax, localBounds.yMin);
+                        Vector2 p2 = transform.Transform(localBounds.xMax, localBounds.yMax);
+                        Vector2 p3 = transform.Transform(localBounds.xMin, localBounds.yMax);
+
+                        ClipData clipData = GetClipData();
+                        clipData.parent = clipStack.PeekUnchecked();
+                        clipData.worldBounds = new PolyRect(p0, p1, p2, p3);
+                        clipData.renderBox = renderBox;
+                        clipData.isCulled = true;
+                        clipData.visibleBoxCount = 0;
+                        clipData.intersected.size = 0;
                         
-                        Polygon clipPolygon = clipData.clipParent
-                        wrapper.renderBox.clipPolygon = clipPolygon.Intersect(wrapper.element.layoutResult.matrix, wrapper.renderBox.RenderBounds);
-                        
-                        if (wrapper.renderBox.clipPolygon == null) {
-                            wrapper.renderBox.clipped = true;
+                        if (!clipData.parent.isCulled) {
+                            s_SubjectRect.array[0] = p0;
+                            s_SubjectRect.array[1] = p1;
+                            s_SubjectRect.array[2] = p2;
+                            s_SubjectRect.array[3] = p3;
+                            s_SubjectRect.size = 4;
+                            SutherlandHodgman.GetIntersectedPolygon(s_SubjectRect, clipData.parent.intersected, ref clipData.intersected);
+                            clipData.isCulled = clipData.intersected.size == 0;
+                            if (!clipData.isCulled) {
+                                clipData.screenSpaceBounds = GetBounds(clipData.intersected);
+                            }
                         }
-                        
-                        clipStack.Push(wrapper.renderBox);
-                        
+
+                        clipStack.Push(clipData);
+
                         break;
-
-                    case RenderOpType.PopClipShape:
-
-                        RenderBox box = clipStack.Pop();
+                    }
+                    case RenderOpType.PopClipShape: {
+                        ClipData clip = clipStack.Pop();
                         // want to remove no-op clip shapes (ie broad phase already culled the whole membership)
-                        renderedClippers.Add(box);
-                        if (box.clippedBoxCount > 0) {
-                            // todo -- always 0
+                        if (clip.isCulled || clip.visibleBoxCount == 0) {
+                            culledClippers.Add(clip);
                         }
-
+                        else {
+                            renderedClippers.Add(clip);
+                        }
                         break;
-
+                    }
                     // might be a pre-pass to find these
                     // then do cull check afterwards
                     case RenderOpType.PushPostEffect:
@@ -471,6 +511,29 @@ namespace Src.Systems {
             }
         }
 
+        
+        private ClipData GetClipData() {
+            if (clipDataPool.size > 0) {
+                return clipDataPool.RemoveLast();
+            }
+            return new ClipData();
+        }
+        
+        private static Rect GetBounds(StructList<Vector2> p) {
+            float minX = float.MaxValue;
+            float minY = float.MaxValue;
+            float maxX = float.MinValue;
+            float maxY = float.MinValue;
+            for (int b = 0; b < p.size; b++) {
+                Vector2 point = p.array[b];
+                if (point.x < minX) minX = point.x;
+                if (point.x > maxX) maxX = point.x;
+                if (point.y < minY) minY = point.y;
+                if (point.y > maxY) maxY = point.y;
+            }
+
+            return new Rect(minX, minY, maxX - minX, maxY - minY);
+        }
 
         private void Draw(RenderContext renderContext) {
             DrawCommand[] commands = drawList.array;

@@ -503,6 +503,13 @@ namespace UIForia.Rendering {
             return area;
         }
 
+        public void ClearRenderTarget(Color color) {
+            renderCommandList.Add(new RenderOperation() {
+                operationType = RenderOperationType.ClearRenderTextureRegion,
+                color = color
+            });
+        }
+        
         public RenderArea PopRenderArea() {
             FinalizeCurrentBatch();
 
@@ -598,6 +605,7 @@ namespace UIForia.Rendering {
                         break;
 
                     case RenderOperationType.ClearRenderTextureRegion:
+                        commandBuffer.ClearRenderTarget(true, true, cmd.color);
                         break;
 
                     case RenderOperationType.BlitRenderTexture:
@@ -800,6 +808,8 @@ namespace UIForia.Rendering {
                 triangleList.size += triangleCount;
             }
         }
+
+ 
 
     }
 

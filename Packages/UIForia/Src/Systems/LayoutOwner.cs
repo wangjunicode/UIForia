@@ -421,12 +421,12 @@ namespace UIForia.Layout {
                 SVGXMatrix m;
 
                 if (box.rotation == 0) {
-                    m = new SVGXMatrix(box.scaleX, 0, 0, box.scaleY, alignedPosition.x, -alignedPosition.y);
+                    m = new SVGXMatrix(box.scaleX, 0, 0, box.scaleY, alignedPosition.x, alignedPosition.y);
                 }
                 else {
                     float ca = math.cos(-box.rotation * Mathf.Deg2Rad);
                     float sa = math.sin(-box.rotation * Mathf.Deg2Rad);
-                    m = new SVGXMatrix(ca * box.scaleX, sa * box.scaleX, -sa * box.scaleY, ca * box.scaleY, alignedPosition.x, -alignedPosition.y);
+                    m = new SVGXMatrix(ca * box.scaleX, sa * box.scaleX, -sa * box.scaleY, ca * box.scaleY, alignedPosition.x, alignedPosition.y);
                 }
 
                 if (box.pivotX == 0 && box.pivotY == 0) {

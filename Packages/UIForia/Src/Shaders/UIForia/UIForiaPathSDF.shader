@@ -3,14 +3,15 @@
     Properties
     {
         _MainTex ("Texture", 2D) = "white" {}       
-        _ShadowIntensity ("_ShadowIntensity", float) = 0
-        
     }
     SubShader
     {
         LOD 100
-        Blend One OneMinusSrcAlpha
+        //Blend One OneMinusSrcAlpha
         Cull Off // lines often come in reversed
+        BlendOp Min
+        Blend One One
+        
         Pass
         {
             CGPROGRAM

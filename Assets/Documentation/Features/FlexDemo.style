@@ -34,6 +34,13 @@ style flex-demo-content {
     PreferredSize = 300px;
 }
 
+style clip-nested {
+    PreferredSize = 100px;
+    MarginTop = 25px;
+    MarginLeft = 25px;
+    BackgroundColor = cyan;
+}
+
 style circle-clip {
     BorderRadius = 50%;
 //    BorderRadiusTopRight = 20%;
@@ -42,7 +49,8 @@ style circle-clip {
 }
 
 style rot {
-    TransformRotation = 30;
+    TransformRotation = 45;
+    TransformPivot = 0.5 0.5;
 }
 
 style special-text {

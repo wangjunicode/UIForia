@@ -7,6 +7,7 @@ using UIForia.Extensions;
 using UIForia.Rendering;
 using UIForia.Util;
 using UnityEngine;
+using Vertigo;
 
 namespace UIForia {
 
@@ -74,12 +75,25 @@ namespace UIForia {
         public Vector2 p1 = new Vector2(200, 200);
         public Vector2 p2 = new Vector2(300, 50);
 
-        public void DrawPolygon(Path2D path, Polygon polygon, Color color) {
+        public void DrawPolygon(StructList<Vector2> pointList, Color color) {
             path.BeginPath();
-            path.MoveTo(polygon.pointList[0]);
-            for (int i = 1; i < polygon.pointList.size; i++) {
-                path.LineTo(polygon.pointList[i]);
+            path.MoveTo(pointList[0]);
+            for (int i = 1; i < pointList.size; i++) {
+                path.LineTo(pointList[i]);
             }
+
+            path.ClosePath();
+            path.SetStroke(color);
+            path.SetStrokeWidth(2f);
+            path.Stroke();
+        }
+
+        public void DrawPolygonRect(PolyRect polyRect, Color color) {
+            path.BeginPath();
+            path.MoveTo(polyRect.p0);
+            path.LineTo(polyRect.p1);
+            path.LineTo(polyRect.p2);
+            path.LineTo(polyRect.p3);
 
             path.ClosePath();
             path.SetStroke(color);
@@ -93,28 +107,61 @@ namespace UIForia {
             if (element.isDisabled) return;
 
             if (element.renderBox != null) {
-                if (!element.renderBox.clipped && element.renderBox.didRender) {
+                if (!element.renderBox.culled && element.renderBox.didRender) {
                     path.BeginPath();
                     path.Rect(element.layoutResult.ScreenRect);
                     path.SetStroke(Color.red);
                     path.Stroke();
                 }
             }
-            
+
             if (element.children == null) return;
 
             for (int i = 0; i < element.children.size; i++) {
-                DrawElement(element.children[i]);    
+                DrawElement(element.children[i]);
             }
-            
         }
+
+        private void DrawClipTree(ClipData clipData) { }
+
         private void DrawOverlay(RenderContext ctx) {
             path.Clear();
-            
-            UIElement rootElement = application.GetView(0).RootElement;
 
-            DrawElement(rootElement);
+            VertigoRenderSystem renderSystem = application.RenderSystem as VertigoRenderSystem;
+            LightList<ClipData> clippers = renderSystem.renderOwners[0].renderedClippers;
+
+//            for (int i = 0; i < clippers.size; i++) {
+//                if (clippers[i].isCulled) {
+//                    DrawPolygonRect(clippers[i].worldBounds, Color.red);
+//                }
+//                else {
+//                    DrawPolygon(clippers[i].intersected, Color.green);
+//                }
+//            }
+
+//            path.Rect(100, 100, 400, 400);
+//            path.SetFill(Color.black);
+//            path.Fill();
+
+//            initial -> clear to black
+//            draw 'this' in white w/ blend off
+//            for each other clip in hierarchy
+//                draw 'that' in white w/ min blend
+        
+            path.BeginPath();
+            path.Rect(200, 200, 200, 200);
+            path.SetFill(Color.black);
+            path.Fill();
             
+            path.BeginPath();
+            path.Rect(150, 150, 200, 200);
+            path.SetFill(Color.white);
+            path.Fill();
+
+   
+
+//            DrawElement(rootElement);
+
 //            Polygon subject = new Polygon();
 //            subject.pointList = new StructList<Vector2>();
 //            subject.pointList.Add(new Vector2(100, 100));

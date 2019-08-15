@@ -151,6 +151,12 @@ public class HierarchyView : TreeView {
         args.rowRect.x += indent;
         args.rowRect.width -= indent;
         s_Content.text = item.element.GetDisplayName();
+
+        if (item.element.isEnabled && item.element.renderBox != null) {
+            if (item.element.renderBox.overflowX != Overflow.Visible || item.element.renderBox.overflowY != Overflow.Visible) {
+                s_Content.text += " [Clipper]";
+            }    
+        }
         
         if((item.element.flags & UIElementFlags.DebugLayout) != 0) {
             s_Content.text = "{Debug Layout} " + s_Content.text;

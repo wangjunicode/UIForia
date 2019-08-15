@@ -1,7 +1,12 @@
-﻿Shader "Unlit/UIForiaSDFMask"
+﻿Shader "UIForia/UIForiaSDFMask"
 {
     Properties
     {
+        [HideInInspector] _SrcBlend ("__src", Float) = 1.0
+        [HideInInspector] _DstBlend ("__dst", Float) = 0.0
+        [HideInInspector] _ZWrite ("__zw", Float) = 1.0
+        [HideInInspector] _ZTest ("__zw", Float) = 1.0
+        [HideInInspector] _BlendOp ("__blndop", Float) = 1.0
     }
     SubShader
     {
@@ -9,8 +14,12 @@
         LOD 100
         Cull Back
         ZTest Off
-        Blend One One
-        BlendOp Min
+        
+        Blend [_SrcBlend] [_DstBlend]
+        ZWrite [_ZWrite]
+        ZTest [_ZTest]
+        BlendOp [_BlendOp]
+        
         Pass
         {
             CGPROGRAM

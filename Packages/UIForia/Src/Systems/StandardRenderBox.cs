@@ -285,9 +285,9 @@ namespace UIForia.Rendering {
             geometry.mainTexture = backgroundImage;
 
             if (clipper != null) {
-                geometry.clipTexture = clipper.clipTexture;
-                geometry.clipUVs = clipper.clipUVs;
-                geometry.clipRect = clipper.clipRect;
+//                geometry.clipTexture = clipper.clipTexture;
+//                geometry.clipUVs = clipper.clipUVs;
+//                geometry.clipRect = clipper.clipRect;
             }
 
             ctx.DrawBatchedGeometry(geometry, range, element.layoutResult.matrix.ToMatrix4x4());

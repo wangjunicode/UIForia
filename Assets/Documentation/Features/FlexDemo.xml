@@ -5,22 +5,22 @@
 
     <Contents style="container">
 
-        <Group style="constrain">
+<!--        <Group style="constrain">-->
 
-            <Div style="flex-demo">
-<!--&lt;!&ndash;&lt;!&ndash;todo find out why including this element breaks clip rect for item &ndash;&gt;&ndash;&gt;-->
-<!--&lt;!&ndash;&lt;!&ndash;                <Heading3 style="header">Flex-Start</Heading3>&ndash;&gt;&ndash;&gt;-->
+<!--            <Div style="flex-demo">-->
 
-                <Group x-id="demo-content" style="flex-demo-content  horizontal circle-clip">
-                    <Div style="clip-test-more-clip"/>
-                    <Div style="clip-test-more-clip"/>
-                    <Div style="clip-test-more-clip"/>
-                    <Div style="clip-test-more-clip"/>
-                    <Div style="clip-test-more-clip"/>
-                    <Div style="clip-test-more-clip"/>
-                </Group>
-            </Div>
-        </Group>
+<!--                <Group x-id="demo-content" style="flex-demo-content  horizontal circle-clip">-->
+<!--                    <Div style="clip-test-more-clip"/>-->
+<!--                    <Div style="clip-test-more-clip">-->
+<!--                        <Group style="clip-nested"/>-->
+<!--                    </Div>-->
+<!--                    <Div style="clip-test-more-clip"/>-->
+<!--                    <Div style="clip-test-more-clip"/>-->
+<!--                    <Div style="clip-test-more-clip"/>-->
+<!--                    <Div style="clip-test-more-clip"/>-->
+<!--                </Group>-->
+<!--            </Div>-->
+<!--        </Group>-->
         
 <!--&lt;!&ndash;                    <Div style="clip-test-more-clip">&ndash;&gt;-->
 <!--&lt;!&ndash;&lt;!&ndash;                        <Div style="flex-item">&ndash;&gt;&ndash;&gt;-->

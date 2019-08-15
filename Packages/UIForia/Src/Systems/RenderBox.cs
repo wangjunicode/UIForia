@@ -27,16 +27,48 @@ namespace UIForia.Rendering {
 
     }
 
-    public struct ClipData {
+    public struct PolyRect {
 
-        public Polygon clipPolygon;
-        public bool isRect;
-        public bool isClipped;
-        public Rect screenSpaceBounds;
-        public RenderBox clipParent;
+        public Vector2 p0;
+        public Vector2 p1;
+        public Vector2 p2;
+        public Vector2 p3;
+
+        public PolyRect(in Vector2 p0, in Vector2 p1, in Vector2 p2, in Vector2 p3) {
+            this.p0 = p0;
+            this.p1 = p1;
+            this.p2 = p2;
+            this.p3 = p3;
+        }
 
     }
-    
+
+    public class ClipData {
+
+        public bool isRect;
+        public bool isCulled;
+        public Rect screenSpaceBounds;
+        public ClipData parent;
+        public int visibleBoxCount;
+        public StructList<Vector2> intersected;
+        public PolyRect worldBounds;
+        public RenderBox renderBox;
+
+        public ClipData() {
+            intersected = new StructList<Vector2>();
+        }
+
+        public void Clear() {
+            parent = null;
+            isCulled = false;
+            visibleBoxCount = 0;
+            isRect = false;
+            renderBox = null;
+            intersected.size = 0;
+            worldBounds = default;
+        }
+    }
+
     public abstract class RenderBox {
 
         internal string uniqueId;
@@ -47,23 +79,28 @@ namespace UIForia.Rendering {
         public Overflow overflowX;
         public Overflow overflowY;
         public ClipBehavior clipBehavior = ClipBehavior.Normal;
-        public bool clipped;
+        public bool culled;
         public Vector4 clipRect;
         public bool hasForeground;
         public int zIndex;
         public int layer;
 
-        internal RenderBox clipper;
+        internal ClipData clipper;
         internal int clippedBoxCount;
         public Texture clipTexture;
         public Vector4 clipUVs;
         public bool didRender;
         protected ClipShape clipShape;
-        
-        public abstract Rect RenderBounds { get; }
-        
+
+        public virtual Rect RenderBounds => new Rect(
+            element.layoutResult.localPosition.x,
+            element.layoutResult.localPosition.y,
+            element.layoutResult.actualSize.width,
+            element.layoutResult.actualSize.height
+        );
+
         public virtual Rect ClipBounds => RenderBounds;
-        
+
         public virtual void OnInitialize() {
             overflowX = element.style.OverflowX;
             overflowY = element.style.OverflowY;
@@ -71,7 +108,19 @@ namespace UIForia.Rendering {
 
         public virtual void OnDestroy() { }
 
-        public virtual void OnStylePropertyChanged(StructList<StyleProperty> propertyList) { }
+        public virtual void OnStylePropertyChanged(StructList<StyleProperty> propertyList) {
+            for (int i = 0; i < propertyList.size; i++) {
+                ref StyleProperty property = ref propertyList.array[i];
+                switch (property.propertyId) {
+                    case StylePropertyId.OverflowX:
+                        overflowX = property.AsOverflow;
+                        break;
+                    case StylePropertyId.OverflowY:
+                        overflowY = property.AsOverflow;
+                        break;
+                }
+            }
+        }
 
         public abstract void PaintBackground(RenderContext ctx);
 
@@ -105,9 +154,8 @@ namespace UIForia.Rendering {
         }
 
         public virtual ClipShape GetClipShape() {
-
             clipShape = clipShape ?? new ClipShape();
-            
+
             // corner clip
             // radii
             // width
@@ -127,7 +175,7 @@ namespace UIForia.Rendering {
 //            clipShape.SetTexture(texture, channel);
 
             clipShape.SetFromElement(element);
-            
+
             return clipShape;
         }
 

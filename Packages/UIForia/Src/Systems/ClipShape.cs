@@ -16,6 +16,10 @@ namespace UIForia.Rendering {
 
         public StructList<Vector2> pointList;
 
+        public Polygon() {
+            this.pointList = new StructList<Vector2>();
+        }
+
         public Polygon Clip(Polygon subject) {
             Polygon retn = new Polygon();
             retn.pointList = new StructList<Vector2>();

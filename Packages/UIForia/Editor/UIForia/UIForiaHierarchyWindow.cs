@@ -185,15 +185,6 @@ namespace UIForia.Editor {
             EditorGUILayout.EndVertical();
         }
 
-        private static Vector2 GetMainGameViewSize() {
-            if (s_GameWindowSizeMethod == null) {
-                Type windowType = Type.GetType("UnityEditor.GameView,UnityEditor");
-                s_GameWindowSizeMethod = windowType.GetMethod("GetSizeOfMainGameView", BindingFlags.NonPublic | BindingFlags.Static);
-            }
-
-            return (Vector2) s_GameWindowSizeMethod.Invoke(null, null);
-        }
-
     }
 
 }

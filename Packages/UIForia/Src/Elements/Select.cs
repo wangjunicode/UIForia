@@ -31,8 +31,6 @@ namespace UIForia.Elements {
 
         public bool disabled;
 
-        private bool needsAdjustment;
-
         public RepeatableList<ISelectOption<T>> options;
         private RepeatableList<ISelectOption<T>> previousOptions;
         private Action<ISelectOption<T>, int> onInsert;
@@ -41,6 +39,7 @@ namespace UIForia.Elements {
 
         public bool selecting = false;
         internal UIChildrenElement childrenElement;
+        internal UIElement optionList;
 
         [WriteBinding(nameof(selectedValue))]
         public event Action<T> onValueChanged;
@@ -123,7 +122,8 @@ namespace UIForia.Elements {
             onInsert = OnInsert;
             onClear = OnClear;
             onRemove = OnRemove;
-            childrenElement = FindFirstByType<ScrollView>().FindFirstByType<UIChildrenElement>().FindFirstByType<UIChildrenElement>();
+            childrenElement = FindById<UIChildrenElement>("option-children");
+            optionList = FindById<ScrollView>("option-list");
             if (disabled) {
                 SetAttribute("disabled", disabledAttributeValue);
                 DisableAllChildren(this);
@@ -187,14 +187,14 @@ namespace UIForia.Elements {
         public void AdjustOptionPosition() {
             float offset = 0;
             float maxOffset = layoutResult.screenPosition.y;
-            float minOffset = childrenElement.layoutResult.screenPosition.y - childrenElement.style.TransformPositionY.value + childrenElement.layoutResult.ActualHeight - Screen.height;
+            float minOffset = optionList.layoutResult.screenPosition.y - optionList.style.TransformPositionY.value + optionList.layoutResult.AllocatedHeight - Screen.height;
             UIElement[] childrenArray = childrenElement.children.Array;
             for (int i = 0; i < selectedIndex; i++) {
                 offset += childrenArray[i].layoutResult.ActualHeight;
             }
 
-            childrenElement.style.SetTransformPositionY(-Math.Min(maxOffset, Math.Max(offset, minOffset)), StyleState.Normal);
-            childrenElement.style.SetTransformBehaviorY(TransformBehavior.AnchorMinOffset, StyleState.Normal);
+            optionList.style.SetTransformPositionY(-Math.Min(maxOffset, Math.Max(offset, minOffset)), StyleState.Normal);
+            optionList.style.SetTransformBehaviorY(TransformBehavior.AnchorMinOffset, StyleState.Normal);
         }
 
         public void SelectElement(MouseInputEvent evt) {

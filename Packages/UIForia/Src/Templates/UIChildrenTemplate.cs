@@ -32,6 +32,7 @@ namespace UIForia.Templates {
             CompileStyleBindings(template);
             ResolveBaseStyles(template);
             CompilePropertyBindings(template);
+            ResolveActualAttributes();
             BuildBindings();
             
             if (typeAttr != null && typeAttr.value == "template") {

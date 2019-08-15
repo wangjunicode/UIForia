@@ -902,7 +902,13 @@ namespace UIForia.Compilers.Style {
         }
 
         private static TMP_FontAsset MapFont(StyleASTNode node, StyleCompileContext context) {
-            node = context.GetValueForReference(node);
+            try {
+                node = context.GetValueForReference(node);
+            }
+            catch (CompileException e) {
+                e.SetFileName(context.fileName);
+                throw;
+            }
             switch (node) {
                 case UrlNode urlNode:
                     AssetInfo assetInfo = TransformUrlNode(urlNode, context);

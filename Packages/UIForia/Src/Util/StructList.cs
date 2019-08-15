@@ -442,6 +442,13 @@ namespace UIForia.Util {
             }
         }
 
+        public StructList<T> Clone() {
+            StructList<T> retn = new StructList<T>(size);
+            System.Array.Copy(array, 0, retn.array, 0, size);
+            retn.size = size;
+            return retn;
+        }
+
     }
 
 }

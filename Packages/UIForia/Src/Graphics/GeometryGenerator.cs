@@ -457,37 +457,37 @@ namespace Vertigo {
             texCoord0[startVert + 6] = new Vector4(1 - PercentOfRange(p2Inset.x, x, xMax), PercentOfRange(p2Inset.y, -y, yMax));
             texCoord0[startVert + 7] = new Vector4(1 - PercentOfRange(p3Inset.x, x, xMax), PercentOfRange(p3Inset.y, -y, yMax));
 
-            triangles[startTriangle + 0] = p0_index;
-            triangles[startTriangle + 1] = p1_index;
-            triangles[startTriangle + 2] = p0_inset_index;
+            triangles[startTriangle + 0] = startVert + p0_index;
+            triangles[startTriangle + 1] = startVert + p1_index;
+            triangles[startTriangle + 2] = startVert + p0_inset_index;
 
-            triangles[startTriangle + 3] = p1_index;
-            triangles[startTriangle + 4] = p1_inset_index;
-            triangles[startTriangle + 5] = p0_inset_index;
+            triangles[startTriangle + 3] = startVert + p1_index;
+            triangles[startTriangle + 4] = startVert + p1_inset_index;
+            triangles[startTriangle + 5] = startVert + p0_inset_index;
 
-            triangles[startTriangle + 6] = p1_index;
-            triangles[startTriangle + 7] = p2_index;
-            triangles[startTriangle + 8] = p2_inset_index;
+            triangles[startTriangle + 6] = startVert + p1_index;
+            triangles[startTriangle + 7] = startVert + p2_index;
+            triangles[startTriangle + 8] = startVert + p2_inset_index;
 
-            triangles[startTriangle + 9] = p2_inset_index;
-            triangles[startTriangle + 10] = p1_inset_index;
-            triangles[startTriangle + 11] = p1_index;
+            triangles[startTriangle + 9] =  startVert + p2_inset_index;
+            triangles[startTriangle + 10] = startVert + p1_inset_index;
+            triangles[startTriangle + 11] = startVert + p1_index;
 
-            triangles[startTriangle + 12] = p2_index;
-            triangles[startTriangle + 13] = p3_index;
-            triangles[startTriangle + 14] = p3_inset_index;
+            triangles[startTriangle + 12] = startVert + p2_index;
+            triangles[startTriangle + 13] = startVert + p3_index;
+            triangles[startTriangle + 14] = startVert + p3_inset_index;
 
-            triangles[startTriangle + 15] = p2_index;
-            triangles[startTriangle + 16] = p3_inset_index;
-            triangles[startTriangle + 17] = p2_inset_index;
+            triangles[startTriangle + 15] = startVert + p2_index;
+            triangles[startTriangle + 16] = startVert + p3_inset_index;
+            triangles[startTriangle + 17] = startVert + p2_inset_index;
 
-            triangles[startTriangle + 18] = p3_index;
-            triangles[startTriangle + 19] = p0_index;
-            triangles[startTriangle + 20] = p0_inset_index;
+            triangles[startTriangle + 18] = startVert + p3_index;
+            triangles[startTriangle + 19] = startVert + p0_index;
+            triangles[startTriangle + 20] = startVert + p0_inset_index;
 
-            triangles[startTriangle + 21] = p0_inset_index;
-            triangles[startTriangle + 22] = p3_inset_index;
-            triangles[startTriangle + 23] = p3_index;
+            triangles[startTriangle + 21] = startVert + p0_inset_index;
+            triangles[startTriangle + 22] = startVert + p3_inset_index;
+            triangles[startTriangle + 23] = startVert + p3_index;
 
             data.positionList.size += 8;
             data.texCoordList0.size += 8;
@@ -1645,9 +1645,8 @@ namespace Vertigo {
                 float c0 = a0 * p0.x + b0 * p0.y;
                 float c1 = a1 * p2.x + b1 * p2.y;
 
-                float x = (b1 * c0 - b0 * c1) / det;
-                float y = (a0 * c1 - a1 * c0) / det;
-                intersection = new Vector2(x, y);
+                intersection.x = (b1 * c0 - b0 * c1) / det;
+                intersection.y = (a0 * c1 - a1 * c0) / det;
                 return true;
             }
         }

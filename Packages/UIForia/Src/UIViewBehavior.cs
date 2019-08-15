@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using Src.Systems;
 using SVGX;
+using UIForia.Elements;
 using UIForia.Extensions;
 using UIForia.Rendering;
+using UIForia.Util;
 using UnityEngine;
 
 namespace UIForia {
@@ -39,6 +41,7 @@ namespace UIForia {
         public Texture2D gradientOutput;
         public Texture2D image;
         public float shadowOpacity = 0.8f;
+
         public void Start() {
             type = Type.GetType(typeName);
 
@@ -57,9 +60,10 @@ namespace UIForia {
                     gradientOutput.SetPixel(x, y, gradient.Evaluate(dist));
                 }
             }
+
             gradientOutput.Apply();
         }
-        
+
         SVGXGradient gradient = new SVGXLinearGradient(GradientDirection.Horizontal, new List<ColorStop>() {
             new ColorStop(0, Color.red),
             new ColorStop(0.5f, Color.white),
@@ -69,38 +73,119 @@ namespace UIForia {
         public Vector2 p0 = new Vector2(100, 100);
         public Vector2 p1 = new Vector2(200, 200);
         public Vector2 p2 = new Vector2(300, 50);
-        
+
+        public void DrawPolygon(Path2D path, Polygon polygon, Color color) {
+            path.BeginPath();
+            path.MoveTo(polygon.pointList[0]);
+            for (int i = 1; i < polygon.pointList.size; i++) {
+                path.LineTo(polygon.pointList[i]);
+            }
+
+            path.ClosePath();
+            path.SetStroke(color);
+            path.SetStrokeWidth(2f);
+            path.Stroke();
+        }
+
+        public Vector2 clipPosition = new Vector2(20, 20);
+
+        private void DrawElement(UIElement element) {
+            if (element.isDisabled) return;
+
+            if (element.renderBox != null) {
+                if (!element.renderBox.clipped && element.renderBox.didRender) {
+                    path.BeginPath();
+                    path.Rect(element.layoutResult.ScreenRect);
+                    path.SetStroke(Color.red);
+                    path.Stroke();
+                }
+            }
+            
+            if (element.children == null) return;
+
+            for (int i = 0; i < element.children.size; i++) {
+                DrawElement(element.children[i]);    
+            }
+            
+        }
         private void DrawOverlay(RenderContext ctx) {
             path.Clear();
-            path.SetShadowIntensity(shadowIntensity);
-            path.SetShadowOffset(shadowOffset);
-            path.SetShadowSize(shadowSize);
-            path.SetShadowColor(shadowColor);
-            path.SetShadowTint(shadowTint);
-            path.SetShadowOpacity(shadowOpacity);
-//            path.Rect(100, 100, 512, 128);
-//            path.SetFill(gradient);
-//            path.Fill();
+            
+            UIElement rootElement = application.GetView(0).RootElement;
+
+            DrawElement(rootElement);
+            
+//            Polygon subject = new Polygon();
+//            subject.pointList = new StructList<Vector2>();
+//            subject.pointList.Add(new Vector2(100, 100));
+//            subject.pointList.Add(new Vector2(200, 100));
+//            subject.pointList.Add(new Vector2(200, 300));
+//            subject.pointList.Add(new Vector2(100, 300));
+//            subject.Rotate(rotation);
+//
+//            Polygon clipPolygon = new Polygon();
+//            clipPolygon.pointList = new StructList<Vector2>();
+//
+//            clipPolygon.pointList.Add(clipPosition + new Vector2(150, 150) * size);
+//            clipPolygon.pointList.Add(clipPosition + new Vector2(250, 150) * size);
+//            clipPolygon.pointList.Add(clipPosition + new Vector2(250, 250) * size);
+//            clipPolygon.pointList.Add(clipPosition + new Vector2(150, 250) * size);
+//
+//            clipPolygon.Rotate(rotation);
+//
+//            Polygon clipMeNested = new Polygon();
+//            clipMeNested.pointList = new StructList<Vector2>();
+//
+//            clipMeNested.pointList.Add(clipPolygon.pointList[0] + new Vector2(15, 15) * size);
+//            clipMeNested.pointList.Add(clipPolygon.pointList[1] + new Vector2(25, 15) * size);
+//            clipMeNested.pointList.Add(clipPolygon.pointList[2] + new Vector2(25, 25) * size);
+//            clipMeNested.pointList.Add(clipPolygon.pointList[3] + new Vector2(15, 25) * size);
+//            
+//            Polygon result = clipPolygon.Clip(subject);
+//            DrawPolygon(path, subject, Color.blue);
+//            DrawPolygon(path, clipPolygon, Color.red);
+//            DrawPolygon(path, clipMeNested, Color.white);
+//            
+//            if (result != null && result.pointList.size > 0) {
+//                result = result.Clip(clipMeNested);
+//                if (result != null && result.pointList.size > 0) {
+//                    DrawPolygon(path, result, Color.green);
+//                    Polygon bounds = result.GetScreenRect();
+//                    DrawPolygon(path, bounds, Color.yellow);
+//                }
+//            }
+
+//            path.SetShadowIntensity(shadowIntensity);
+//            path.SetShadowOffset(shadowOffset);
+//            path.SetShadowSize(shadowSize);
+//            path.SetShadowColor(shadowColor);
+//            path.SetShadowTint(shadowTint);
+//            path.SetShadowOpacity(shadowOpacity);
+////            path.Rect(100, 100, 512, 128);
+////            path.SetFill(gradient);
+////            path.Fill();
 //            path.BeginPath();
 //            path.MoveTo(100, 100);
-//            path.LineTo(612, 228);
+//            path.LineTo(612, 100);
 //            path.EndPath();
 //            path.SetStroke(Color.black);
 //            path.SetStrokeWidth(5f);
 //            path.Stroke();
+
+
 //            path.BeginPath();
-            path.RoundedRect(pos.x - 40, pos.y - 40, size.x, size.y, radii.x, radii.y, radii.z, radii.w);
-            path.Fill(FillMode.Shadow);
+//            path.RoundedRect(pos.x - 40, pos.y - 40, size.x, size.y, radii.x, radii.y, radii.z, radii.w);
+//            path.Fill(FillMode.Shadow);
 //            
 //            path.RoundedRect(pos.x, pos.y, size.x, size.y, radii.x, radii.y, radii.z, radii.w);
 //
 //            path.Sector(300, 300, radius, rotation, angle, width);
-                                         ////            
-                                         ////            path.Sector(300, 300, radius, rotation, angle, width);
-                                         //            path.Triangle(p0.x, p0.y, p1.x, p1.y, p2.x, p2.y);
-                                         //            path.Fill(FillMode.Shadow);
-             path.Fill();
-            
+            ////            
+            ////            path.Sector(300, 300, radius, rotation, angle, width);
+//                                                    path.Triangle(p0.x, p0.y, p1.x, p1.y, p2.x, p2.y);
+            //            path.Fill(FillMode.Shadow);
+//             path.Fill();
+
 //            path.SetStrokeWidth(strokeWidth);
 //            path.SetStroke(strokeColor);
 //            path.Stroke();

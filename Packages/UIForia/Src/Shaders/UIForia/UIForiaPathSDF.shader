@@ -176,6 +176,7 @@
                 float2 p0 = float2(hDir * (halfX - cut), vDir * halfY);
                 float2 p1 = float2(hDir * size.x, vDir * size.y); // big on purpose so we don't get bad bleeding of non clipped edge
                 float2 p2 = float2(hDir * halfX, vDir * (halfY - cut));
+                int mainColorOnly = 0;
                 
                 if(shapeType == ShapeType_Ellipse) {
                     halfStrokeWidth = halfStrokeWidth / max(size.x, size.y);
@@ -204,7 +205,7 @@
                      p2 = float2(i.texCoord1.z, objectInfo.y) * size;
                 }
                 else {
-                    sdf = 1; // return here causes lots of branching
+                    mainColorOnly = 1; // just returning mainColor here causes NINE extra branches. Don't do it!
                 }
                 
                 float tri = sdTriangle(center, p0, p1, p2);
@@ -229,7 +230,8 @@
                 inner.rgb *= inner.a;
                 outer.rgb *= outer.a;
                 fixed4 sdfRetn = lerp(inner, outer, 1 - aa);
-                return lerp(sdfRetn, shadowRetn, isShadow && shadowIntensity > 1);
+                fixed4 retn = lerp(sdfRetn, shadowRetn, isShadow && shadowIntensity > 1);
+                return lerp(retn, mainColor, mainColorOnly);
                 
             }
 

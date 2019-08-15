@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using SVGX;
 using UIForia.Elements;
 using UIForia.Layout;
 using UIForia.Layout.LayoutTypes;
@@ -58,6 +59,7 @@ namespace Src.Systems {
         }
 
         public void Render(RenderContext renderContext) {
+            
             GatherBoxDataParallel(); // todo -- move and push on thread to do parallel w/ layout
 
             Cull();
@@ -96,7 +98,6 @@ namespace Src.Systems {
         private RenderTexture clipTexture;
 
         private void DrawClipShapes(RenderContext ctx) {
-            
             if (clipTexture == null) {
                 clipTexture = RenderTexture.GetTemporary(Screen.width, Screen.height, 0, RenderTextureFormat.ARGB32);
             }
@@ -121,10 +122,8 @@ namespace Src.Systems {
                 // may be faster to alternate packers since it is easier to find free space when more free space is available (profile this)
                 // foreach packer -> packer.TryFitRect(i, rect)
                 if (maskPackerA.TryPackRect(clipShape.width, clipShape.height, out SimpleRectPacker.PackedRect r)) {
-                    
                     Matrix4x4 mat = Matrix4x4.Translate(new Vector3(r.xMin, -r.yMin, 0));
 
-                    
                     ctx.DrawClipShape(clipShape);
                     box.clipTexture = clipTexture;
 
@@ -149,7 +148,7 @@ namespace Src.Systems {
 
             ctx.SetRenderTexture(null);
         }
-
+        
         private void UpdateRenderBox(UIElement element) {
             // get painter
             // see if it the same as current render box
@@ -331,8 +330,9 @@ namespace Src.Systems {
 
             RenderBoxWrapper[] wrappers = wrapperList.array;
 
-            bool activeClipperIsCulled = false;
             
+            bool activeClipperIsCulled = false;
+
             for (int i = 0; i < wrapperList.size; i++) {
                 RenderBoxWrapper wrapper = wrappers[i];
 
@@ -359,7 +359,7 @@ namespace Src.Systems {
                             case ClipBehavior.Normal:
 
                                 // if current clipper is clipped, mark as clipped
-                                
+
                                 // otherwise intersect with currently visible polygon
                                 // any rounded shape masking will happen in the shader I think
                                 if (activeClipperIsCulled) {
@@ -368,23 +368,32 @@ namespace Src.Systems {
                                     renderBox.clipped = true;
                                     continue;
                                 }
+
+                                Rect renderBounds = renderBox.RenderBounds;
+                                SVGXMatrix transform = wrapper.element.layoutResult.matrix;
+
+                                Vector2 p0 = transform.Transform(renderBounds.xMin, renderBounds.yMin);
+                                Vector2 p1 = transform.Transform(renderBounds.xMax, renderBounds.yMin);
+                                Vector2 p2 = transform.Transform(renderBounds.xMax, renderBounds.yMax);
+                                Vector2 p3 = transform.Transform(renderBounds.xMin, renderBounds.yMax); 
                                 
+                                // clipShape.ContainsOrOverlaps(worldSpaceBounds);
+
                                 for (int j = 0; j < clipStack.size; j++) {
                                     // there is probably a faster way to do this linearly, need bounds in screen space to compare against each other
                                     // if parent is clipped & not overflowing parent  & identity transform -> clipped = true
                                     Rect bounds = renderBox.RenderBounds;
-                                    
+
                                     // 2 phases for culling 
                                     //     1. general rect bounds intersection, always run
                                     //     2. user defined cull check, run if painter implements ShouldCull
-                                    
+
                                     // go through 
-                                    
+
                                     if (clipStack.array[j].ShouldCull(bounds)) {
                                         renderBox.clipped = true;
                                         break;
                                     }
-                                    
                                 }
 
                                 if (!renderBox.clipped && clipStack.size > 0) {
@@ -417,7 +426,19 @@ namespace Src.Systems {
                         // push no matter what, if this clipper gets clipped by parent clipper we'll figure it out later
                         // for now assume no rotation or scaling, we can handle transformations later
                         // wrapper.renderBox.intersectClipRect = RectExtensions.Intersect(wrapper.orientedScreenRect);
+                        ClipData clipData = new ClipData();
+                        clipData.clipParent = clipStack.PeekUnchecked();
+                        // clipData.clipShape = renderBox.GetClipShape();
+                        
+                        Polygon clipPolygon = clipData.clipParent
+                        wrapper.renderBox.clipPolygon = clipPolygon.Intersect(wrapper.element.layoutResult.matrix, wrapper.renderBox.RenderBounds);
+                        
+                        if (wrapper.renderBox.clipPolygon == null) {
+                            wrapper.renderBox.clipped = true;
+                        }
+                        
                         clipStack.Push(wrapper.renderBox);
+                        
                         break;
 
                     case RenderOpType.PopClipShape:

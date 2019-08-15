@@ -27,6 +27,16 @@ namespace UIForia.Rendering {
 
     }
 
+    public struct ClipData {
+
+        public Polygon clipPolygon;
+        public bool isRect;
+        public bool isClipped;
+        public Rect screenSpaceBounds;
+        public RenderBox clipParent;
+
+    }
+    
     public abstract class RenderBox {
 
         internal string uniqueId;
@@ -47,11 +57,13 @@ namespace UIForia.Rendering {
         internal int clippedBoxCount;
         public Texture clipTexture;
         public Vector4 clipUVs;
-        
+        public bool didRender;
         protected ClipShape clipShape;
         
         public abstract Rect RenderBounds { get; }
-
+        
+        public virtual Rect ClipBounds => RenderBounds;
+        
         public virtual void OnInitialize() {
             overflowX = element.style.OverflowX;
             overflowY = element.style.OverflowY;

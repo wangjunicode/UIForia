@@ -174,6 +174,14 @@ namespace Vertigo {
             currentShapeRange.length++;
             return shapeList.size - 1;
         }
+        
+        public int Rect(in Rect rect) {
+            ShapeDef shapeDef = new ShapeDef(ShapeType.Rect);
+            shapeDef.bounds = rect;
+            shapeList.Add(shapeDef);
+            currentShapeRange.length++;
+            return shapeList.size - 1;
+        }
 
         public int RoundedRect(float x, float y, float width, float height, float r0, float r1, float r2, float r3) {
             ShapeDef shapeDef = new ShapeDef(ShapeType.RoundedRect);

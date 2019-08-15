@@ -64,12 +64,8 @@ namespace UIForia.Rendering {
         internal const int k_ObjectCount_Massive = 128;
 
         public StructList<Vector3> positionList;
-        public StructList<Vector3> normalList;
-        public StructList<Vector4> colorList;
         public StructList<Vector4> texCoordList0;
         public StructList<Vector4> texCoordList1;
-        public StructList<Vector4> texCoordList2;
-        public StructList<Vector4> texCoordList3;
         public StructList<int> triangleList;
 
         private Batch currentBatch;

@@ -192,7 +192,7 @@ Shader "UIForia/Standard"
                     //mainColor = MeshBorderAA(mainColor, Frag_SDFSize, i.texCoord4.x);
 //                    mainColor.a = UIForiaAlphaClip(mainColor.a, _MaskTexture, screenUV, clipRect, clipUvs);
                     if(clipRect.z > 0) {
-                        mainColor.a = UIForiaAlphaClip(mainColor.a, _MaskTexture, screenUV, clipRect, clipUvs);
+                        // mainColor.a = UIForiaAlphaClip(mainColor.a, _MaskTexture, screenUV, clipRect, clipUvs);
                     }
                     mainColor.rgb *=  mainColor.a;
                     return mainColor;

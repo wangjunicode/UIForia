@@ -135,6 +135,9 @@ namespace SVGX {
         public Vector2 Transform(Vector2 point) {
             return new Vector2(m0 * point.x + m2 * point.y + m4, m1 * point.x + m3 * point.y + m5);
         }
+        public Vector2 Transform(float x, float y) {
+            return new Vector2(m0 * x + m2 * y + m4, m1 * x + m3 * y + m5);
+        }
 
         public Vector3 Transform(Vector3 point) {
             return new Vector3(m0 * point.x + m2 * point.y + m4, m1 * point.x + m3 * point.y + m5, point.z);

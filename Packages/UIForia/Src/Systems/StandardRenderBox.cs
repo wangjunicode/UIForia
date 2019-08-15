@@ -220,9 +220,11 @@ namespace UIForia.Rendering {
 
             // todo -- border also 0
             if (backgroundColor.a <= 0 && backgroundImage == null) {
+                didRender = false;
                 return;
             }
 
+            didRender = true;
             float packedBackgroundColor = VertigoUtil.ColorToFloat(backgroundColor);
             float packedBackgroundTint = VertigoUtil.ColorToFloat(backgroundTint);
 

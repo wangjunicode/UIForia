@@ -71,7 +71,7 @@ namespace Src.Systems {
             currentShapeRange = default;
             transforms.Add(currentMatrix);
         }
-        
+
         public void SetUVTransform() { }
 
         public void SetStroke(in Color color) {
@@ -88,7 +88,7 @@ namespace Src.Systems {
                 currentFillStyle.paintMode &= ~PaintMode.Color;
             }
         }
-        
+
         public void SetFill(SVGXGradient gradient) {
             if (gradient != null) {
                 currentFillGradient = gradient;
@@ -99,7 +99,7 @@ namespace Src.Systems {
                 currentFillStyle.paintMode &= ~PaintMode.Gradient;
             }
         }
-        
+
         public void SetFill(Texture texture) {
             if (texture != null) {
                 currentFillStyle.texture = texture;
@@ -211,6 +211,9 @@ namespace Src.Systems {
                 drawCall.objectRange.start = rangeStart;
                 drawCall.objectRange.length = drawCall.shapeRange.length;
                 rangeStart = drawCall.objectRange.end;
+                if (drawCall.objectRange.start >= objectDataList.size) {
+                    Debug.Log("Bad");
+                }
             }
         }
 
@@ -243,7 +246,11 @@ namespace Src.Systems {
         private void GenerateShadowStrokeGeometry() { }
 
         private void GenerateStrokeGeometry(ref GeometryData geometryData, ref ShapeDef shape, in SVGXStrokeStyle strokeStyle) {
-            if (strokeStyle.strokeWidth <= 0) return;
+            float strokeWidth = strokeStyle.strokeWidth;
+            if (strokeWidth <= 0) {
+                strokeWidth = 1f;
+            }
+            
             Vector4 colorData = new Vector4(strokeStyle.encodedColor, strokeStyle.encodedTint, strokeStyle.opacity, (int) strokeStyle.paintMode);
             ObjectData objectData = new ObjectData();
             objectData.colorData = colorData;
@@ -255,8 +262,8 @@ namespace Src.Systems {
                 case ShapeType.Rect: {
                     Vector2 position = shape.bounds.position;
                     Vector2 size = shape.bounds.size;
-                    objectData.geometryRange = GeometryGenerator.StrokeRect(geometryData, position.x, position.y, size.x, size.y, strokeStyle.strokeWidth);
-                    objectData.objectData = new Vector4((int) ShapeType.Rect, 0, VertigoUtil.PackSizeVector(size), strokeStyle.strokeWidth);
+                    objectData.geometryRange = GeometryGenerator.StrokeRect(geometryData, position.x, position.y, size.x, size.y, strokeWidth);
+                    objectData.objectData = new Vector4((int) ShapeType.Rect, 0, VertigoUtil.PackSizeVector(size), strokeWidth);
                     break;
                 }
 
@@ -268,7 +275,7 @@ namespace Src.Systems {
                     float clip = Mathf.Min(size.x, size.y) * 0.25f;
                     CornerDefinition cornerDefinition = new CornerDefinition(clip);
                     objectData.geometryRange = GeometryGenerator.FillDecoratedRect(geometryData, position, size.x, size.y, cornerDefinition);
-                    objectData.objectData = new Vector4((int) ShapeType.RoundedRect, EncodeCornerRadii(size.x, size.y, radiiTop, radiiBottom), VertigoUtil.PackSizeVector(size), strokeStyle.strokeWidth);
+                    objectData.objectData = new Vector4((int) ShapeType.RoundedRect, EncodeCornerRadii(size.x, size.y, radiiTop, radiiBottom), VertigoUtil.PackSizeVector(size), strokeWidth);
                     break;
                 }
 
@@ -278,7 +285,7 @@ namespace Src.Systems {
                     float clip = Mathf.Min(size.x, size.y) * 0.25f;
                     CornerDefinition cornerDefinition = new CornerDefinition(clip);
                     objectData.geometryRange = GeometryGenerator.FillDecoratedRect(geometryData, position, size.x, size.y, cornerDefinition);
-                    objectData.objectData = new Vector4((int) ShapeType.Circle, s_CircleRadii, VertigoUtil.PackSizeVector(size), strokeStyle.strokeWidth);
+                    objectData.objectData = new Vector4((int) ShapeType.Circle, s_CircleRadii, VertigoUtil.PackSizeVector(size), strokeWidth);
                     break;
                 }
 
@@ -288,7 +295,7 @@ namespace Src.Systems {
                     float clip = Mathf.Min(size.x, size.y) * 0.25f;
                     CornerDefinition cornerDefinition = new CornerDefinition(clip);
                     objectData.geometryRange = GeometryGenerator.FillDecoratedRect(geometryData, position, size.x, size.y, cornerDefinition);
-                    objectData.objectData = new Vector4((int) ShapeType.Ellipse, s_CircleRadii, VertigoUtil.PackSizeVector(size), strokeStyle.strokeWidth);
+                    objectData.objectData = new Vector4((int) ShapeType.Ellipse, s_CircleRadii, VertigoUtil.PackSizeVector(size), strokeWidth);
                     break;
                 }
 
@@ -306,7 +313,7 @@ namespace Src.Systems {
                     renderState.lineCap = strokeStyle.lineCap;
                     renderState.lineJoin = strokeStyle.lineJoin;
                     renderState.miterLimit = (int) strokeStyle.miterLimit;
-                    renderState.strokeWidth = strokeStyle.strokeWidth;
+                    renderState.strokeWidth = strokeWidth;
                     int flags = BitUtil.SetHighLowBits((int) ShapeType.Path, (int) strokeStyle.paintMode);
                     objectData.geometryRange = GeometryGenerator.StrokeOpenPath(geometryData, pointList, shape.pointRange, renderState);
                     objectData.objectData = new Vector4(flags, 0, 0, 0);
@@ -319,7 +326,7 @@ namespace Src.Systems {
                     renderState.lineCap = strokeStyle.lineCap;
                     renderState.lineJoin = strokeStyle.lineJoin;
                     renderState.miterLimit = (int) strokeStyle.miterLimit;
-                    renderState.strokeWidth = strokeStyle.strokeWidth;
+                    renderState.strokeWidth = strokeWidth;
 
                     int flags = BitUtil.SetHighLowBits((int) ShapeType.ClosedPath, (int) strokeStyle.paintMode);
                     objectData.geometryRange = GeometryGenerator.StrokeClosedPath(geometryData, pointList, shape.pointRange, renderState);
@@ -344,7 +351,7 @@ namespace Src.Systems {
                         geometryData.texCoordList1.array[i] = new Vector4(angleAndWidth.x, angleAndWidth.y, 0, 0);
                     }
 
-                    objectData.objectData = new Vector4(flags, VertigoUtil.PackSizeVector(angleAndWidth), VertigoUtil.PackSizeVector(size), strokeStyle.strokeWidth);
+                    objectData.objectData = new Vector4(flags, VertigoUtil.PackSizeVector(angleAndWidth), VertigoUtil.PackSizeVector(size), strokeWidth);
                     break;
                 }
 
@@ -439,7 +446,7 @@ namespace Src.Systems {
                     int flags = BitUtil.SetHighLowBits((int) ShapeType.Triangle, (int) fillStyle.paintMode);
                     objectData.geometryRange = GeometryGenerator.FillRect(geometryData, position.x, position.y, size.x, size.y);
                     objectData.objectData = new Vector4(flags, 0, VertigoUtil.PackSizeVector(size), k_StrokeWidthZero);
-                    
+
                     Vector2 p0 = pointList.array[shape.pointRange.start + 0].position;
                     Vector2 p1 = pointList.array[shape.pointRange.start + 1].position;
                     Vector2 p2 = pointList.array[shape.pointRange.start + 2].position;
@@ -447,7 +454,7 @@ namespace Src.Systems {
                     float p0X = MathUtil.PercentOfRange(p0.x, position.x, position.x + size.x);
                     float p0Y = 1 - MathUtil.PercentOfRange(p0.y, position.y, position.y + size.y);
                     float p1X = MathUtil.PercentOfRange(p1.x, position.x, position.x + size.x);
-                    float p1Y = 1- MathUtil.PercentOfRange(p1.y, position.y, position.y + size.y);
+                    float p1Y = 1 - MathUtil.PercentOfRange(p1.y, position.y, position.y + size.y);
                     float p2X = MathUtil.PercentOfRange(p2.x, position.x, position.x + size.x);
                     float p2Y = 1 - MathUtil.PercentOfRange(p2.y, position.y, position.y + size.y);
                     objectData.objectData.y = p2Y;
@@ -456,7 +463,7 @@ namespace Src.Systems {
                         geometryData.texCoordList0.array[i].w = p0Y;
                         geometryData.texCoordList1.array[i] = new Vector4(p1X, p1Y, p2X, 0); // cant use w since object id goes there
                     }
-                    
+
                     break;
                 }
 
@@ -484,14 +491,6 @@ namespace Src.Systems {
             }
 
             objectDataList.Add(objectData);
-        }
-
-        public struct ObjectData {
-
-            public GeometryRange geometryRange;
-            public Vector4 objectData;
-            public Vector4 colorData;
-
         }
 
         private void GenerateShadowFillGeometry(ref GeometryData geometryData, ref ShapeDef shape, in SVGXFillStyle fillStyle) {
@@ -570,8 +569,10 @@ namespace Src.Systems {
                         geometryData.texCoordList0.array[i].w = p0Y;
                         geometryData.texCoordList1.array[i] = new Vector4(p1X, p1Y, p2X, 0); // cant use w since object id goes there
                     }
+
                     break;
                 }
+
                 case ShapeType.Polygon:
                     break;
                 case ShapeType.Text:
@@ -645,6 +646,14 @@ namespace Src.Systems {
 
         public void SetShadowOpacity(float shadowOpacity) {
             currentFillStyle.shadowOpacity = shadowOpacity;
+        }
+
+        public struct ObjectData {
+
+            public GeometryRange geometryRange;
+            public Vector4 objectData;
+            public Vector4 colorData;
+
         }
 
     }

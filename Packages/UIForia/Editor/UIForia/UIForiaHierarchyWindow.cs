@@ -83,6 +83,9 @@ namespace UIForia.Editor {
                         selectedIds.Add(s_SelectedApplication.InputSystem.DebugElementsThisFrame[i].id);
                     }
                     treeView.SetSelection(selectedIds);
+                    if (selectedIds.Count > 0) {
+                        treeView.FrameItem(selectedIds[0]);
+                    }
                 }
             }
 

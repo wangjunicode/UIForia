@@ -6,6 +6,7 @@ using UIForia.Rendering;
 using UIForia.Templates;
 using UIForia.UIInput;
 using UIForia.Util;
+using UnityEngine;
 
 namespace UIForia.Elements {
 
@@ -19,12 +20,18 @@ namespace UIForia.Elements {
     [Template(TemplateType.Internal, "Elements/Select.xml")]
     public class Select<T> : UIElement, IFocusable {
 
+        private const string disabledAttributeValue = "select-disabled";
+        
         public int selectedIndex = -1;
         public T defaultValue { get; set; }
 
         public T selectedValue;
 
         public string selectedElementIcon;
+
+        public bool disabled;
+
+        private bool needsAdjustment;
 
         public RepeatableList<ISelectOption<T>> options;
         private RepeatableList<ISelectOption<T>> previousOptions;
@@ -116,8 +123,11 @@ namespace UIForia.Elements {
             onInsert = OnInsert;
             onClear = OnClear;
             onRemove = OnRemove;
-            childrenElement = FindFirstByType<UIChildrenElement>();
-            if (GetAttribute("disabled") != null) {
+            childrenElement = FindFirstByType<ScrollView>().FindFirstByType<UIChildrenElement>().FindFirstByType<UIChildrenElement>();
+            if (disabled) {
+                SetAttribute("disabled", disabledAttributeValue);
+                DisableAllChildren(this);
+            } else if (GetAttribute("disabled") != null) {
                 DisableAllChildren(this);
             }
         }
@@ -125,12 +135,42 @@ namespace UIForia.Elements {
         private void DisableAllChildren(UIElement element) {
             for (int index = 0; index < element.children.Count; index++) {
                 UIElement child = element.children[index];
-                child.SetAttribute("disabled", "disabled");
-                DisableAllChildren(child);
+                if (!child.HasAttribute("disabled")) {
+                    child.SetAttribute("disabled", disabledAttributeValue);
+                    DisableAllChildren(child);
+                }
+            }
+        }
+        private void EnableAllChildren(UIElement element) {
+            for (int index = 0; index < element.children.Count; index++) {
+                UIElement child = element.children[index];
+                if (child.GetAttribute("disabled") == disabledAttributeValue) {
+                    child.SetAttribute("disabled", null);
+                    DisableAllChildren(child);
+                }
+            }
+        }
+
+        public override void OnUpdate() {
+            if (!disabled && HasAttribute("disabled")) {
+                SetAttribute("disabled", null);
+                EnableAllChildren(this);
+            } 
+            else if (disabled && !HasAttribute("disabled")) {
+                SetAttribute("disabled", disabledAttributeValue);
+                DisableAllChildren(this);
+            }
+
+            if (selecting) {
+                AdjustOptionPosition();
             }
         }
 
         public void BeginSelecting(MouseInputEvent evt) {
+            if (HasAttribute("disabled")) {
+                return;
+            }
+
             if (selecting) {
                 Application.InputSystem.ReleaseFocus(this);
                 selecting = false;
@@ -144,21 +184,30 @@ namespace UIForia.Elements {
             evt.Consume();
         }
 
+        public void AdjustOptionPosition() {
+            float offset = 0;
+            float maxOffset = layoutResult.screenPosition.y;
+            float minOffset = childrenElement.layoutResult.screenPosition.y - childrenElement.style.TransformPositionY.value + childrenElement.layoutResult.ActualHeight - Screen.height;
+            UIElement[] childrenArray = childrenElement.children.Array;
+            for (int i = 0; i < selectedIndex; i++) {
+                offset += childrenArray[i].layoutResult.ActualHeight;
+            }
+
+            childrenElement.style.SetTransformPositionY(-Math.Min(maxOffset, Math.Max(offset, minOffset)), StyleState.Normal);
+            childrenElement.style.SetTransformBehaviorY(TransformBehavior.AnchorMinOffset, StyleState.Normal);
+        }
+
         public void SelectElement(MouseInputEvent evt) {
             UIElement[] childrenArray = childrenElement.children.Array;
             int count = childrenElement.children.Count;
-            float offset = 0;
             for (int i = 0; i < count; i++) {
                 if (childrenArray[i].layoutResult.ScreenRect.Contains(evt.MousePosition)) {
                     selectedIndex = i;
                     selectedValue = options[selectedIndex].Value;
-                    childrenElement.style.SetTransformPositionY(-offset, StyleState.Normal);
-                    childrenElement.style.SetTransformBehaviorY(TransformBehavior.AnchorMinOffset, StyleState.Normal);
                     onValueChanged?.Invoke(selectedValue);
                     onIndexChanged?.Invoke(selectedIndex);
                     break;
                 }
-                offset += childrenArray[i].layoutResult.ActualHeight;
             }
 
             selecting = false;

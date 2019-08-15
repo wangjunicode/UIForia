@@ -70,6 +70,11 @@
             BorderColor = black;
             Border = 1px;
             ZIndex = 30;
+            MaxHeight = 400px;
+        }
+        
+        style transclude {
+            LayoutBehavior = TranscludeChildren;
         }
 
         style select-chevron {
@@ -87,14 +92,10 @@
             FlexLayoutCrossAxisAlignment = Center;
             FlexLayoutDirection = Row;
     
-            [attr:disabled] {
+            [attr:disabled="select-disabled"] {
                 BorderColor = #666;
                 BackgroundColor = #999;
             }
-        }
-
-        style slot {
-            LayoutBehavior = TranscludeChildren;
         }
 
         style content-area {
@@ -130,7 +131,7 @@
                 </Slot>
             </Group>
 
-            <Slot name="chevron" style="slot">
+            <Slot name="chevron" style="transclude">
                 <Div style="chevron-container">
                     <Arrow Rotation="ArrowRotation.Up" style="select-chevron" />
                     <Arrow Rotation="ArrowRotation.Down" style="select-chevron" />
@@ -138,14 +139,16 @@
             </Slot>
         </Group>
 
-        <Children onMouseClick="SelectElement($event)" if="selecting" style="option-list" x-id="option-list" x-type="template">
+        <ScrollView onMouseClick="SelectElement($event)" if="selecting" style="option-list" >
+            <Children x-id="option-list" style="transclude" x-type="template">
+                
+                <Group style="select-option">
+                    <Image src="selectedElementIcon" style="selected-element-icon" if="DisplaySelectedIcon($option__internal)" />
+                    <Div>{$option__internal.Label}</Div>
+                </Group>
+            </Children>
 
-            <Group style="select-option">
-                <Image src="selectedElementIcon" style="selected-element-icon" if="DisplaySelectedIcon($option__internal)" />
-                <Div>{$option__internal.Label}</Div>
-            </Group>
-
-        </Children>
+        </ScrollView>
 
     </Contents>
 

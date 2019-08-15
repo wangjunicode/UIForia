@@ -158,7 +158,7 @@ public class LayoutSystemTests {
         root.child1.style.SetMaxWidth(UIMeasurement.Content100, StyleState.Normal);
         app.Update();
         Assert.AreEqual(new Rect(0, 100, 300, 50), root.child1.layoutResult.AllocatedRect);
-        root.child1.FindById("nested-child").style.SetPreferredWidth(150f, StyleState.Normal);
+        root.FindById("nested-child").style.SetPreferredWidth(150f, StyleState.Normal);
         app.Update();
         Assert.AreEqual(new Rect(0, 100, 150, 50), root.child1.layoutResult.AllocatedRect);
     }
@@ -245,12 +245,12 @@ public class LayoutSystemTests {
         MockApplication app = new MockApplication(typeof(LayoutTestThing), template);
         app.Update();
         LayoutTestThing root = (LayoutTestThing) app.RootElement;
-        Assert.IsFalse(root.child1.FindById("nested-child-1").isEnabled);
+        Assert.IsFalse(root.FindById("nested-child-1").isEnabled);
         Assert.AreEqual(new Rect(0, 100, 200, 50), root.child1.layoutResult.AllocatedRect);
-        root.child1.FindById("nested-child-1").SetEnabled(true);
-        Assert.IsTrue(root.child1.FindById("nested-child-1").isEnabled);
+        root.FindById("nested-child-1").SetEnabled(true);
+        Assert.IsTrue(root.FindById("nested-child-1").isEnabled);
         app.Update();
-        Assert.IsTrue(root.child1.FindById("nested-child-1").isEnabled);
+        Assert.IsTrue(root.FindById("nested-child-1").isEnabled);
         Assert.AreEqual(new Rect(0, 100, 300, 100), root.child1.layoutResult.AllocatedRect);
     }
 
@@ -277,13 +277,13 @@ public class LayoutSystemTests {
         app.Update();
         LayoutTestThing root = (LayoutTestThing) app.RootElement;
 
-        Assert.IsTrue(root.child1.FindById("nested-child-1").isEnabled);
+        Assert.IsTrue(root.FindById("nested-child-1").isEnabled);
         Assert.AreEqual(new Rect(0, 100, 300, 100), root.child1.layoutResult.AllocatedRect);
 
-        root.child1.FindById("nested-child-1").SetEnabled(false);
+        root.FindById("nested-child-1").SetEnabled(false);
 
         app.Update();
-        Assert.IsFalse(root.child1.FindById("nested-child-1").isEnabled);
+        Assert.IsFalse(root.FindById("nested-child-1").isEnabled);
         Assert.AreEqual(new Rect(0, 100, 200, 50), root.child1.layoutResult.AllocatedRect);
     }
 
@@ -309,8 +309,8 @@ public class LayoutSystemTests {
         MockApplication app = new MockApplication(typeof(LayoutTestThing), template);
 
         LayoutTestThing root = (LayoutTestThing) app.RootElement;
-        UIElement nestedChild1 = root.child1.FindById("nested-child-1");
-        UIElement nestedChild2 = root.child1.FindById("nested-child-2");
+        UIElement nestedChild1 = root.FindById("nested-child-1");
+        UIElement nestedChild2 = root.FindById("nested-child-2");
         app.Update();
 
         Assert.AreEqual(new Rect(0, 100, 300, 100), root.child1.layoutResult.AllocatedRect);

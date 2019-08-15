@@ -37,6 +37,8 @@
     
     <Contents style="scrollview">
 
+        <Children/>
+
         <Group onMouseClick="OnClickVertical($event)" onMouseHover="OnHoverVertical($event)" x-id="scroll-track-vertical" style="scroll-track-vertical">
             <Div onDragCreate="OnCreateVerticalDrag($event)" x-id="scroll-handle-vertical" style="scroll-handle-vertical"/>
         </Group>
@@ -44,8 +46,6 @@
         <Group onMouseClick="OnClickHorizontal($event)" onMouseHover="OnHoverHorizontal($event)" x-id="scroll-track-horizontal" style="scroll-track-horizontal">
             <Div onDragCreate="OnCreateHorizontalDrag($event)" x-id="scroll-handle-horizontal" style="scroll-handle-horizontal"/>
         </Group>
-
-        <Children/>
 
     </Contents>
 </UITemplate>

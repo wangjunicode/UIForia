@@ -16,6 +16,10 @@ style button {
 }
 
 style repeat {
-    PreferredSize = 400px 1cnt;
+    PreferredSize = 100px 1cnt;
     MarginBottom = 10px;
+}
+
+style select {
+    OverflowX = Hidden;
 }

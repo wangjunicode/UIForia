@@ -34,11 +34,19 @@
             Padding = 4px 8px 4px 22px;
             FlexLayoutCrossAxisAlignment = Center;
             FlexLayoutDirection = Column;
+            Overflow = Hidden;
             [hover] {
                 MinWidth = 1cnt;
                 TextColor = white;
                 BackgroundColor = #006d82;
                 BorderRadius = 4px;
+            }
+        }
+        
+        style select-label {
+            PreferredWidth = 1pca;
+            [hover] {
+                MinWidth = 1cnt;
             }
         }
         
@@ -70,6 +78,7 @@
             Border = 1px;
             ZIndex = 30;
             MaxHeight = 400px;
+            OverflowY = Hidden;
         }
         
         style transclude {
@@ -146,12 +155,12 @@
             </Slot>
         </Group>
 
-        <ScrollView onMouseClick="SelectElement($event)" if="selecting" style="option-list" x-id="option-list">
+        <ScrollView onMouseClick="SelectElement($event)" if="selecting" style="option-list" x-id="option-list" disableOverflowX="disableOverflowX" disableOverflowY="disableOverflowY">
             <Children x-id="option-children" style="transclude" x-type="template">
                 
                 <Group style="select-option">
                     <Image src="selectedElementIcon" style="selected-element-icon" if="DisplaySelectedIcon($option__internal)" />
-                    <Div>{$option__internal.Label}</Div>
+                    <Div style="select-label">{$option__internal.Label}</Div>
                 </Group>
             </Children>
 

@@ -44,8 +44,8 @@ namespace Documentation.Features {
                     new RepeatableList<ISelectOption<string>>() {
                             new SelectOption<string>("World", "en"),
                             new SelectOption<string>("Welt", "de"),
-                            new SelectOption<string>("Welt", "de"),
-                            new SelectOption<string>("Welt", "de"),
+                            new SelectOption<string>("supercalifragilisticexpialidocious", "en"),
+                            new SelectOption<string>("Supercalifragilisticexpialigetisch", "de"),
                             new SelectOption<string>("Welt", "de"),
                             new SelectOption<string>("Welt", "de"),
                             new SelectOption<string>("Welt", "de"),

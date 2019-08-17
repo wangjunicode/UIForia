@@ -23,11 +23,11 @@ namespace Demo {
         }
 
         public void ScrollRight(MouseInputEvent evt) {
-            TriggerEvent(new UIScrollEvent(Screen.width, -1));
+            TriggerEvent(new UIScrollEvent(1, -1));
         }
 
         public void ScrollDown(MouseInputEvent evt) {
-            TriggerEvent(new UIScrollEvent(-1, Screen.height));
+            TriggerEvent(new UIScrollEvent(-1, 1));
         }
 
         public void ScrollLeft(MouseInputEvent evt) {

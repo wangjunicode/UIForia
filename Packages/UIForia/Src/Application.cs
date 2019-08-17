@@ -746,6 +746,10 @@ namespace UIForia {
                 return;
             }
 
+            element.style.EnterState(StyleState.Hover);
+            element.style.EnterState(StyleState.Active);
+            element.style.EnterState(StyleState.Focused);
+
             LightStack<UIElement> stack = LightStack<UIElement>.Get();
 
             UIElement[] children = element.children.Array;

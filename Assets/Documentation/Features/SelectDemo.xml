@@ -5,10 +5,13 @@
 
     <Contents style="select-demo-root">
 
+        <Input />
+        
+        
         <Repeat list="words" style="repeat">
             
             <Text>Select your favourite translation for the word: {$item}</Text>
-            <Select--string selectedValue.read.write="selectedLanguage[$index].Name" options="translations[$index]">
+            <Select--string selectedValue.read.write="selectedLanguage[$index].Name" options="translations[$index]" disableOverflowX="true">
                 <SlotContent name="select-placeholder">Select your word</SlotContent>
                 <Group>this is a template {$option.Label}</Group>
     

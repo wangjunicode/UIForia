@@ -1,31 +1,10 @@
 using System;
 using UIForia.Elements;
-using UIForia.Extensions;
 using UIForia.Layout;
 using UIForia.Util;
 using UnityEngine;
 
 namespace UIForia.Rendering {
-
-    public enum ClipShapeType {
-
-        SDFFill,
-        SDFStroke,
-        Path,
-        Texture
-
-    }
-
-    public enum RenderBoxTypeFlag {
-
-        CustomClipper,
-        TextPrePass,
-        TexturePrePass,
-        TextureCachePrePass,
-        Opaque,
-        Transparent
-
-    }
 
     public struct PolyRect {
 
@@ -41,32 +20,6 @@ namespace UIForia.Rendering {
             this.p3 = p3;
         }
 
-    }
-
-    public class ClipData {
-
-        public bool isRect;
-        public bool isCulled;
-        public Rect screenSpaceBounds;
-        public ClipData parent;
-        public int visibleBoxCount;
-        public StructList<Vector2> intersected;
-        public PolyRect worldBounds;
-        public RenderBox renderBox;
-
-        public ClipData() {
-            intersected = new StructList<Vector2>();
-        }
-
-        public void Clear() {
-            parent = null;
-            isCulled = false;
-            visibleBoxCount = 0;
-            isRect = false;
-            renderBox = null;
-            intersected.size = 0;
-            worldBounds = default;
-        }
     }
 
     public abstract class RenderBox {
@@ -86,7 +39,6 @@ namespace UIForia.Rendering {
         public int layer;
 
         internal ClipData clipper;
-        internal int clippedBoxCount;
         public Texture clipTexture;
         public Vector4 clipUVs;
         public bool didRender;
@@ -155,13 +107,6 @@ namespace UIForia.Rendering {
 
         public virtual ClipShape GetClipShape() {
             clipShape = clipShape ?? new ClipShape();
-
-            // corner clip
-            // radii
-            // width
-            // height
-            // texture
-            // type 
 
 //            clipShape.SetCornerClip();
 //            clipShape.SetCornerRadii();

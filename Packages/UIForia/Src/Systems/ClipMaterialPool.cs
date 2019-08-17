@@ -4,7 +4,9 @@ using UnityEngine;
 
 namespace UIForia.Rendering {
 
-    internal class UIForiaMaterialPool {
+   
+    
+    internal class ClipMaterialPool {
 
         public Material small;
         public Material medium;
@@ -13,13 +15,13 @@ namespace UIForia.Rendering {
         public Material massive;
 
         // todo -- get stats on how often each is used 
-        private readonly UIForiaPropertyBlock smallBlock;
-        private readonly UIForiaPropertyBlock mediumBlock;
-        private readonly UIForiaPropertyBlock largeBlock;
-        private readonly UIForiaPropertyBlock hugeBlock;
-        private readonly UIForiaPropertyBlock massiveBlock;
+        private readonly ClipPropertyBlock smallBlock;
+        private readonly ClipPropertyBlock mediumBlock;
+        private readonly ClipPropertyBlock largeBlock;
+        private readonly ClipPropertyBlock hugeBlock;
+        private readonly ClipPropertyBlock massiveBlock;
 
-        public UIForiaMaterialPool(Material material) {
+        public ClipMaterialPool(Material material) {
             this.small = new Material(material);
             this.medium = new Material(material);
             this.large = new Material(material);
@@ -32,22 +34,16 @@ namespace UIForia.Rendering {
             this.huge.EnableKeyword("BATCH_SIZE_HUGE");
             this.massive.EnableKeyword("BATCH_SIZE_MASSIVE");
 
-            this.smallBlock = new UIForiaPropertyBlock(small, RenderContext.k_ObjectCount_Small);
-            this.mediumBlock = new UIForiaPropertyBlock(medium, RenderContext.k_ObjectCount_Medium);
-            this.largeBlock = new UIForiaPropertyBlock(large, RenderContext.k_ObjectCount_Large);
-            this.hugeBlock = new UIForiaPropertyBlock(huge, RenderContext.k_ObjectCount_Huge);
-            this.massiveBlock = new UIForiaPropertyBlock(massive, RenderContext.k_ObjectCount_Massive);
-
-            FixedRenderState state = FixedRenderState.Default;
-
-           MaterialUtil.SetupState(small, state);
-           MaterialUtil.SetupState(medium, state);
-           MaterialUtil.SetupState(large, state);
-           MaterialUtil.SetupState(huge, state);
-           MaterialUtil.SetupState(massive, state);
+            this.smallBlock = new ClipPropertyBlock(small, RenderContext.k_ObjectCount_Small);
+            this.mediumBlock = new ClipPropertyBlock(medium, RenderContext.k_ObjectCount_Medium);
+            this.largeBlock = new ClipPropertyBlock(large, RenderContext.k_ObjectCount_Large);
+            this.hugeBlock = new ClipPropertyBlock(huge, RenderContext.k_ObjectCount_Huge);
+            this.massiveBlock = new ClipPropertyBlock(massive, RenderContext.k_ObjectCount_Massive);
         }
-
-        public UIForiaPropertyBlock GetPropertyBlock(int objectCount) {
+        
+      
+        
+        public ClipPropertyBlock GetPropertyBlock(int objectCount) {
             if (objectCount <= RenderContext.k_ObjectCount_Small) {
                 return smallBlock;
             }

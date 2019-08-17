@@ -111,7 +111,7 @@ Shader "UIForia/Standard"
                 o.clipRect = _ClipUVs[objectIndex];
                 
                 if(shapeType != ShapeType_Text) {
-                    o.vertex = UIForiaPixelSnap(o.vertex); // pixel snap is bad for text rendering
+                    // o.vertex = UIForiaPixelSnap(o.vertex); // pixel snap is bad for text rendering
                     o.texCoord1 = float4(size.x, size.y, Vert_BorderRadii, objectIndex);
                     o.texCoord2 = float4(shapeType, colorMode, 0, 0);
                     o.texCoord3 = _MiscData[objectIndex];
@@ -166,17 +166,15 @@ Shader "UIForia/Standard"
                 
                 return o;
             }            
-            
-
-            
+          
             fixed4 frag (v2f i) : SV_Target {           
                 
                 float2 screenUV = i.texCoord4.yz / i.texCoord4.w;
                 
-                
                 float4 clipRect = _ClipRects[(uint)i.texCoord1.w];
                 float4 clipUvs = _ClipUVs[(uint)i.texCoord1.w];
-                
+                // todo -- returns cause branching here
+                // get rid of text and we can get rid of branching
                 fixed4 mainColor = ComputeColor(i.color.r, i.color.g, Frag_ColorMode, i.texCoord0.xy, _MainTexture);
                 if(Frag_ShapeType != ShapeType_Text) {
                     
@@ -187,14 +185,9 @@ Shader "UIForia/Standard"
                     sdfData.size = Frag_SDFSize;
                     sdfData.strokeWidth = borderData.size;
                     sdfData.radius = borderData.radius;
-
                     mainColor = SDFColor(sdfData, borderData.color, mainColor, i.texCoord4.x);
-                    //mainColor = MeshBorderAA(mainColor, Frag_SDFSize, i.texCoord4.x);
-//                    mainColor.a = UIForiaAlphaClip(mainColor.a, _MaskTexture, screenUV, clipRect, clipUvs);
-                    if(clipRect.z > 0) {
-                        // mainColor.a = UIForiaAlphaClip(mainColor.a, _MaskTexture, screenUV, clipRect, clipUvs);
-                    }
-                    mainColor.rgb *=  mainColor.a;
+                    mainColor = UIForiaAlphaClipColor(mainColor, _MaskTexture, screenUV, clipRect, clipUvs);
+                    mainColor.rgb *= mainColor.a;
                     return mainColor;
                 }
 

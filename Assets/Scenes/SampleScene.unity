@@ -230,7 +230,7 @@ Camera:
     width: 1
     height: 1
   near clip plane: 0.3
-  far clip plane: 100000000
+  far clip plane: 1000
   field of view: 60
   orthographic: 1
   orthographic size: 5
@@ -257,7 +257,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 534669902}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1, z: 3.41}
+  m_LocalPosition: {x: 0, y: 1, z: 1}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -359,10 +359,32 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 35f2b5d632fd4d64b9acedec5215cda2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  typeName: Documentation.DocumentationRoot, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+  typeName: Documentation.Features.FlexDemo, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
     PublicKeyToken=null
   camera: {fileID: 534669904}
   applicationId: Game App
+  pos: {x: 200, y: 200}
+  size: {x: 200, y: 200}
+  radii: {x: 100, y: 100, z: 0, w: 50}
+  shadowSize: {x: 0, y: 0}
+  shadowOffset: {x: 0, y: 0}
+  shadowIntensity: 10
+  shadowIntensity2: 30
+  shadowColor: {r: 1, g: 0, b: 0, a: 1}
+  shadowTint: {r: 0, g: 0, b: 0, a: 0}
+  radius: 45
+  rotation: 0
+  angle: 0
+  width: 20
+  strokeColor: {r: 1, g: 0, b: 0, a: 1}
+  strokeWidth: 3
+  gradientOutput: {fileID: 0}
+  image: {fileID: 0}
+  shadowOpacity: 0.8
+  p0: {x: 100, y: 100}
+  p1: {x: 200, y: 200}
+  p2: {x: 300, y: 50}
+  clipPosition: {x: 20, y: 20}
 --- !u!4 &1506585480
 Transform:
   m_ObjectHideFlags: 0

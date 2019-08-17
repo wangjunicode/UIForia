@@ -3,14 +3,22 @@
     Properties
     {
         _MainTex ("Texture", 2D) = "white" {}       
+        _SrcBlend ("__srcBlend", Float) = 1
+        _DstBlend ("__dstBlend", Float) = 1
+        _ZWrite ("__zWrite", Float) = 1.0
+        _ZTest ("__zTest", Float) = 1.0
+        _BlendOp ("__blndop", Float) = 1.0
     }
     SubShader
     {
         LOD 100
         //Blend One OneMinusSrcAlpha
         Cull Off // lines often come in reversed
-        BlendOp Min
-        Blend One One
+        
+        BlendOp [_BlendOp]
+        Blend [_SrcBlend][_DstBlend]
+        ZWrite [_ZWrite]
+        ZTest [_ZTest]
         
         Pass
         {
@@ -18,15 +26,12 @@
             #pragma vertex vert
             #pragma fragment frag
             
-            #pragma multi_compile __ BATCH_SIZE_SMALL BATCH_SIZE_MEDIUM BATCH_SIZE_LARGE BATCH_SIZE_HUGE BATCH_SIZE_MASSIVE
-
+            #pragma multi_compile __ BATCH_SIZE_SMALL BATCH_SIZE_MEDIUM BATCH_SIZE_LARGE BATCH_SIZE_HUGE BATCH_SIZE_MASSIVE SHADOW PRE_MULTIPLY_ALPHA
             
             #include "./BatchSize.cginc"
             #include "UnityCG.cginc"
             #include "UIForiaSDFUtil.cginc"
             
-            float _ShadowIntensity;
-
             struct PathSDFAppData {
                 float4 vertex : POSITION;
                 float4 texCoord0 : TEXCOORD0;
@@ -55,7 +60,6 @@
             float4x4 _TransformData[BATCH_SIZE];
 
             sampler2D _MainTexture;
-            float4 _MainTex_ST;
 
             UIForiaPathFragData vert (appdata v) {
             
@@ -65,8 +69,10 @@
                 uint packedFlags = objectInfo.x;
                 uint shapeType = (packedFlags >> 16) & (1 << 16) - 1;
                 uint colorMode = packedFlags & 0xffff;
-                
+                float4x4 transform = _TransformData[(int)Vert_ObjectIndex];
+
                 UIForiaPathFragData  o;
+                v.vertex = mul(transform, float4(v.vertex.xyz, 1));
                 o.vertex = UnityObjectToClipPos(v.vertex);
                 // if pixel snapping is on some shapes get cut off. find a way to account for this
                 //  o.vertex = UIForiaPixelSnap(o.vertex);
@@ -76,13 +82,6 @@
                 return o;
             }
             
-            float rectangle(float2 samplePosition, float2 halfSize){
-                float2 componentWiseEdgeDistance = abs(samplePosition) - halfSize;
-                float outsideDistance = length(max(componentWiseEdgeDistance, 0));
-                float insideDistance = min(max(componentWiseEdgeDistance.x, componentWiseEdgeDistance.y), 0);
-                return outsideDistance + insideDistance;
-            }
-
             float SmoothRect(float2 uv, float2 pos, float2 size, float sX, float sY) {
                float2 end = pos + size;
                return smoothstep(pos.x - sX, pos.x + sX, uv.x) 
@@ -129,18 +128,6 @@
                 return -sqrt(d.x)*sign(d.y);
             }
             
-            float pie(float2 p, float angle) {
-                angle = radians(angle) / 2.0;
-                float2 n = float2(cos(angle), sin(angle));
-                return abs(p).x * n.x + p.y * n.y;
-            }
-            
-            float sector(float2 p, float radius, float angle, float width) {
-                width /= 2.0;
-                radius -= width;
-                return max(-pie(p, angle), abs(length(p) - radius) - width);
-            }
-            
             fixed4 frag (UIForiaPathFragData i) : SV_Target {              
                 float2 size = i.texCoord2.xy;
                 float minSize = min(size.x, size.y);
@@ -165,7 +152,7 @@
                 fixed4 outer = fixed4(mainColor.rgb, 0);
 
                 float sdf = 0;
-                float percentRadius = UnpackCornerRadius(ObjectInfo_CornerRadii, i.texCoord0.zw);
+                float percentRadius = 0.5;//UnpackCornerRadius(ObjectInfo_CornerRadii, i.texCoord0.zw);
                 float radius = clamp(minSize * percentRadius, 0, minSize);
                 float cut = radius;
                 float halfX = size.x * 0.5;
@@ -214,26 +201,42 @@
                 sdf = lerp(lerp(sdf, subtractSDF(sdf, tri), cut != 0), tri, shapeType == ShapeType_Triangle);
                 
                 // todo -- use alpha blend somehow to mix these colors
-                float n = smoothstep(-shadowIntensity, 2, sdf);
-                fixed4 shadowColor = fixed4(UnpackColor(asuint(colorInfo.r)).rgb, 1);
-                fixed4 shadowTint = fixed4(UnpackColor(asuint(colorInfo.g)).rgb, 1);
-        
-                fixed4 shadowRetn = lerp(fixed4(shadowColor.rgb, 1 - n), shadowColor, (1 - n));                
-                fixed4 tintedShadowColor = lerp(fixed4(shadowTint.rgb, 1 - n), shadowColor,  (1 - n));
-                tintedShadowColor = lerp(shadowRetn, tintedShadowColor, n);
+                #if SHADOW
+                    float n = smoothstep(-shadowIntensity, 2, sdf);
+                    fixed4 shadowColor = fixed4(UnpackColor(asuint(colorInfo.r)).rgb, 1);
+                    fixed4 shadowTint = fixed4(UnpackColor(asuint(colorInfo.g)).rgb, 1);
+            
+                    fixed4 shadowRetn = lerp(fixed4(shadowColor.rgb, 1 - n), shadowColor, (1 - n));                
+                    fixed4 tintedShadowColor = lerp(fixed4(shadowTint.rgb, 1 - n), shadowColor,  (1 - n));
+                    tintedShadowColor = lerp(shadowRetn, tintedShadowColor, n);
+                    
+                    shadowRetn = lerp(shadowRetn, tintedShadowColor, (paintMode & PaintMode_ShadowTint) != 0);
+                    shadowRetn.a *= colorInfo.b;
+                #else
+                    fixed4 shadowRetn = fixed4(0, 0, 0, 0);
+                #endif
                 
-                shadowRetn = lerp(shadowRetn, tintedShadowColor, (paintMode & PaintMode_ShadowTint) != 0);
-                shadowRetn.a *= colorInfo.b;
-                shadowRetn.rgb *= shadowRetn.a;
-    
-                float distanceChange = fwidth(sdf);
+                float distanceChange = fwidth(sdf) * 0.5;
                 float aa = smoothstep(distanceChange, -distanceChange, sdf);
-                inner.rgb *= inner.a;
-                outer.rgb *= outer.a;
+                
+               // #if PRE_MULTIPLY_ALPHA
+                    inner.rgb *= inner.a;
+                    outer.rgb *= outer.a;
+                    shadowRetn.rgb *= shadowRetn.a;
+               // #endif
+                
                 fixed4 sdfRetn = lerp(inner, outer, 1 - aa);
                 fixed4 retn = lerp(sdfRetn, shadowRetn, isShadow && shadowIntensity > 1);
-                return lerp(retn, mainColor, mainColorOnly);
                 
+                return sdfRetn; // todo - stop cheating
+                
+                #if MASK_OUTPUT
+                    fixed a = lerp(retn.a, mainColor.a, mainColorOnly);
+                    // todo -- mask my target channel
+                    return fixed4(a, a, a, a);
+                #else
+                    return lerp(retn, mainColor, mainColorOnly);
+                #endif
             }
 
             ENDCG

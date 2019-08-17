@@ -14,6 +14,13 @@ namespace UIForia.Rendering {
             this.triangleEnd = triangleEnd;
         }
 
+        public GeometryRange(int vertexCount, int triangleCount) {
+            this.vertexStart = 0;
+            this.vertexEnd = vertexCount;
+            this.triangleStart = 0;
+            this.triangleEnd = triangleCount;
+        }
+
     }
 
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Src.Systems;
 using SVGX;
 using UIForia.Elements;
@@ -7,7 +8,12 @@ using UIForia.Extensions;
 using UIForia.Rendering;
 using UIForia.Util;
 using UnityEngine;
+using UnityEngine.Experimental.Rendering;
+using UnityEngine.Rendering;
 using Vertigo;
+using BlendState = Src.Systems.BlendState;
+using CompareFunction = UnityEngine.Rendering.CompareFunction;
+using DepthState = Src.Systems.DepthState;
 
 namespace UIForia {
 
@@ -122,8 +128,6 @@ namespace UIForia {
             }
         }
 
-        private void DrawClipTree(ClipData clipData) { }
-
         private void DrawOverlay(RenderContext ctx) {
             path.Clear();
 
@@ -147,19 +151,53 @@ namespace UIForia {
 //            draw 'this' in white w/ blend off
 //            for each other clip in hierarchy
 //                draw 'that' in white w/ min blend
-        
-            path.BeginPath();
-            path.Rect(200, 200, 200, 200);
-            path.SetFill(Color.black);
-            path.Fill();
+//
+//            BlendState blendState = BlendState.Default;
+//            DepthState depthState = DepthState.Default;
+//            
+//            path.SetBlendState(blendState);
+//            
+//            path.BeginPath();
+//            path.Rect(0, 0, 400, 400);
+//            path.SetFill(Color.black);
+//            path.Fill(FillMode.Shadow);
+//            
+//            path.SetTransform(Matrix4x4.TRS(new Vector3(0, 0, 0), Quaternion.Euler(0, rotation, 0), Vector3.one));
+//
+//            path.BeginPath();
+//            path.Rect(25, 25, 200, 200);
+//            path.SetFill(Color.white);
+//            path.Fill();
+//
+//            blendState.sourceBlendMode = BlendMode.One; 
+//            blendState.destBlendMode = BlendMode.One;
+//            blendState.blendOp = BlendOp.Min;
+//
+//            path.SetTransform(Matrix4x4.Translate(new Vector3(0, 0, 0)));
+//            
+////            path.SetBlendState(blendState);
+//           // path.SetTransform(Matrix4x4.Translate(new Vector3(0, 0, 13)));
+//            //path.SetDepthState(new DepthState(false, CompareFunction.Equal));
+//
+//            path.BeginPath();
+//            path.Rect(150, 150, 200, 200);
+//            path.SetFill(Color.black);
+//            path.Fill();
+//            
+//            path.BeginPath();
+//            path.Rect(175, 175, 200, 200);
+//            path.SetFill(Color.white);
+//            path.Fill();
+//
+//            path.SetTransform(Matrix4x4.Translate(new Vector3(10, 0, rotation)));
+//            path.SetDepthState(new DepthState(false, CompareFunction.Equal));
+//
+//            path.BeginPath();
+//            path.Rect(175, 175, 200, 200);
+//            path.SetFill(Color.red);
+//            path.Fill();
+
             
-            path.BeginPath();
-            path.Rect(150, 150, 200, 200);
-            path.SetFill(Color.white);
-            path.Fill();
-
-   
-
 //            DrawElement(rootElement);
 
 //            Polygon subject = new Polygon();

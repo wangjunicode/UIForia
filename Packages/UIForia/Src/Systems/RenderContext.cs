@@ -63,10 +63,12 @@ namespace UIForia.Rendering {
         internal const int k_ObjectCount_Huge = 64;
         internal const int k_ObjectCount_Massive = 128;
 
-        public StructList<Vector3> positionList;
-        public StructList<Vector4> texCoordList0;
-        public StructList<Vector4> texCoordList1;
-        public StructList<int> triangleList;
+        internal StructList<Vector3> positionList;
+        internal StructList<Vector4> texCoordList0;
+        internal StructList<Vector4> texCoordList1;
+        internal StructList<int> triangleList;
+
+        internal StructList<FixedRenderState> fixedRenderStateList;
 
         private Batch currentBatch;
         private Material activeMaterial;
@@ -87,6 +89,7 @@ namespace UIForia.Rendering {
         private RenderTexture pingPongTexture;
         private readonly StructStack<RenderArea> areaStack;
         private Material pathMaterial;
+        internal ClipContext clipContext;
 
         static RenderContext() {
             int maxTextureSize = SystemInfo.maxTextureSize;
@@ -105,7 +108,8 @@ namespace UIForia.Rendering {
             this.renderCommandList = new StructList<RenderOperation>();
             this.scratchTextures = new StructList<ScratchRenderTexture>();
             this.areaStack = new StructStack<RenderArea>();
-
+            this.fixedRenderStateList = new StructList<FixedRenderState>();
+            this.clipContext = new ClipContext();
             this.pathMaterial = new Material(Shader.Find("UIForia/UIForiaPathSDF")); // temp
             this.pathMaterialPool = new UIForiaMaterialPool(pathMaterial);
         }
@@ -188,30 +192,13 @@ namespace UIForia.Rendering {
             UpdateUIForiaGeometry(geometry, range);
         }
 
-        internal void DrawClipShape(ClipShape clipShape) {
-            // need a target rect
-            // need a target channel
-
-            switch (clipShape.type) {
-                case ClipShapeType.SDFFill:
-                    // sdfClipPass.Add(clipShape);
-                    break;
-
-                case ClipShapeType.SDFStroke:
-                    break;
-
-                case ClipShapeType.Path:
-                    break;
-
-                case ClipShapeType.Texture:
-                    break;
-
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
+        internal void DrawClipData(ClipData clipData) {
+            clipContext.AddClipper(clipData);
         }
 
-        public void DrawBatchedGeometry(UIForiaGeometry geometry, in GeometryRange range, in Matrix4x4 transform) {
+        // todo -- clean up batching code here, ugly as fuck right now
+        public void DrawBatchedGeometry(UIForiaGeometry geometry, in GeometryRange range, in Matrix4x4 transform, ClipData clipper = null) {
+            
             if (currentBatch.transformData.size + 1 >= k_ObjectCount_Huge) {
                 FinalizeCurrentBatch();
             }
@@ -232,12 +219,21 @@ namespace UIForia.Rendering {
             }
 
             currentBatch.uiforiaData.mainTexture = geometry.mainTexture != null ? geometry.mainTexture : currentBatch.uiforiaData.mainTexture;
-            currentBatch.uiforiaData.clipTexture = geometry.clipTexture != null ? geometry.clipTexture : currentBatch.uiforiaData.clipTexture;
             currentBatch.uiforiaData.colors.Add(geometry.packedColors);
             currentBatch.uiforiaData.objectData0.Add(geometry.objectData);
             currentBatch.uiforiaData.objectData1.Add(geometry.miscData);
-            currentBatch.uiforiaData.clipUVs.Add(geometry.clipUVs);
-            currentBatch.uiforiaData.clipRects.Add(geometry.clipRect);
+            
+            if (clipper != null) {
+                // todo break batch if changed
+                currentBatch.uiforiaData.clipTexture = clipper.clipTexture != null ? clipper.clipTexture : currentBatch.uiforiaData.clipTexture;
+                currentBatch.uiforiaData.clipUVs.Add(clipper.clipUVs);
+                currentBatch.uiforiaData.clipRects.Add(clipper.screenSpaceBounds);
+            }
+            else {
+                currentBatch.uiforiaData.clipUVs.Add(default);
+                currentBatch.uiforiaData.clipRects.Add(default);
+            }
+
             currentBatch.transformData.Add(transform);
 
             UpdateUIForiaGeometry(geometry, range);
@@ -342,18 +338,26 @@ namespace UIForia.Rendering {
             }
 
 #if DEBUG
+            commandBuffer.BeginSample("UIFora Clip Pass");
+#endif
+
+            clipContext.Clip(camera, commandBuffer);
+
+#if DEBUG
+            commandBuffer.EndSample("UIFora Clip Pass");
+#endif
+
+#if DEBUG
             commandBuffer.BeginSample("UIForia Render Main");
 #endif
             FinalizeCurrentBatch();
-
+            
             ProcessDrawCommands(camera, commandBuffer);
 
 #if DEBUG
 
             commandBuffer.EndSample("UIForia Render Main");
 #endif
-
-            // Graphics.ExecuteCommandBuffer(commandBuffer);
         }
 
         public void PushClip(Rect clipRect) {
@@ -371,6 +375,7 @@ namespace UIForia.Rendering {
 
         public void Clear() {
             currentBatch.transformData?.Release();
+            clipContext.Clear();
             UIForiaData.Release(ref currentBatch.uiforiaData);
             currentBatch = new Batch();
             currentBatch.transformData = StructList<Matrix4x4>.Get();
@@ -394,6 +399,7 @@ namespace UIForia.Rendering {
                 pingPongTexture = null;
             }
 
+            fixedRenderStateList.size = 0;
             renderCommandList.QuickClear();
             scratchTextures.QuickClear();
             pendingBatches.Clear();
@@ -509,7 +515,7 @@ namespace UIForia.Rendering {
                 color = color
             });
         }
-        
+
         public RenderArea PopRenderArea() {
             FinalizeCurrentBatch();
 
@@ -545,7 +551,7 @@ namespace UIForia.Rendering {
 
             Vector3 cameraOrigin = camera.transform.position;
             cameraOrigin.x -= 0.5f * Screen.width;
-            cameraOrigin.y += (0.5f * Screen.height);
+            cameraOrigin.y += (0.5f * Screen.height) - 2; // for some reason editor needs this minor adjustment
             cameraOrigin.z += 2;
 
             Matrix4x4 origin = Matrix4x4.TRS(cameraOrigin, Quaternion.identity, Vector3.one);
@@ -574,8 +580,14 @@ namespace UIForia.Rendering {
                                 UIForiaPropertyBlock pathPropertyBlock = pathMaterialPool.GetPropertyBlock(batch.drawCallSize);
 
                                 pathPropertyBlock.SetSDFData(batch.uiforiaData, batch.transformData);
+                                Material material = pathPropertyBlock.material;
+                                if (batch.renderStateId != 0) {
+                                    material = new Material(pathPropertyBlock.material); // todo -- pool this!
+                                    FixedRenderState fixedRenderState = fixedRenderStateList.array[batch.renderStateId - 1];
+                                    MaterialUtil.SetupState(material, fixedRenderState);
+                                }
 
-                                commandBuffer.DrawMesh(batch.pooledMesh.mesh, origin, pathPropertyBlock.material, 0, 0, pathPropertyBlock.matBlock);
+                                commandBuffer.DrawMesh(batch.pooledMesh.mesh, origin, material, 0, 0, pathPropertyBlock.matBlock);
                                 break;
                             }
 
@@ -595,7 +607,7 @@ namespace UIForia.Rendering {
                             commandBuffer.SetRenderTarget(cmd.renderTexture);
                             int width = cmd.renderTexture.width / 2;
                             int height = cmd.renderTexture.height / 2;
-                            Matrix4x4 projection = Matrix4x4.Ortho(-width, width, -height, height, 0.1f, 9999);
+                            Matrix4x4 projection = camera.projectionMatrix; //Matrix4x4.Ortho(-width, width, -height, height, 0.1f, 9999);
                             commandBuffer.SetViewProjectionMatrices(cameraMatrix, projection);
                             commandBuffer.ClearRenderTarget(true, true, cmd.color);
                         }
@@ -704,7 +716,9 @@ namespace UIForia.Rendering {
             path.UpdateGeometry();
 
             if (path.drawCallList.size == 0) return;
-            
+
+            int lastBlendStateId = -1;
+
             currentBatch.batchType = BatchType.Path;
             currentBatch.uiforiaData = currentBatch.uiforiaData ?? UIForiaData.Get();
 
@@ -713,9 +727,10 @@ namespace UIForia.Rendering {
 
             // todo -- implement look-ahead so we can figure out if we break the batch or not
             // multiple 'draw calls' can be done in one operation, single copy instead of n
-            
+
+            int vertexAdjustment = 0;
+
             for (int i = 0; i < path.drawCallList.size; i++) {
-                
                 ref SVGXDrawCall2 drawCall = ref path.drawCallList.array[i];
 
                 if (drawCall.material != null) {
@@ -725,10 +740,9 @@ namespace UIForia.Rendering {
                 Texture mainTexture = null;
 
                 switch (drawCall.type) {
-                    
                     case DrawCallType.ShadowStroke:
                         break;
-                    
+
                     case DrawCallType.StandardStroke:
                         mainTexture = path.strokeStyles.array[drawCall.styleIdx].texture;
                         break;
@@ -745,26 +759,41 @@ namespace UIForia.Rendering {
                 //todo -- if range is larger than Huge batch size, split it
 
                 if (mainTexture != null && mainTexture != lastTexture && lastTexture != null) {
+                    vertexAdjustment += positionList.size;
                     FinalizeCurrentBatch();
                     currentBatch.batchType = BatchType.Path;
                     currentBatch.uiforiaData = UIForiaData.Get();
+                    if (drawCall.renderStateId != lastBlendStateId) {
+                        lastBlendStateId = drawCall.renderStateId;
+                        fixedRenderStateList.Add(path.renderStateList[drawCall.renderStateId]);
+                        currentBatch.renderStateId = fixedRenderStateList.size;
+                    }
+                }
+                else if (drawCall.renderStateId != lastBlendStateId) {
+                    lastBlendStateId = drawCall.renderStateId;
+                    vertexAdjustment += positionList.size;
+                    FinalizeCurrentBatch();
+                    currentBatch.batchType = BatchType.Path;
+                    currentBatch.uiforiaData = UIForiaData.Get();
+                    fixedRenderStateList.Add(path.renderStateList[drawCall.renderStateId]);
+                    currentBatch.renderStateId = fixedRenderStateList.size;
                 }
 
                 lastTexture = mainTexture ?? lastTexture;
 
                 currentBatch.uiforiaData.mainTexture = mainTexture != null ? mainTexture : currentBatch.uiforiaData.mainTexture;
                 currentBatch.uiforiaData.clipTexture = null; //geometry.clipTexture != null ? geometry.clipTexture : currentBatch.uiforiaData.clipTexture;;
-                currentBatch.transformData.Add(path.transforms.array[drawCall.transformIdx].ToMatrix4x4());
+                currentBatch.transformData.Add(path.transforms.array[drawCall.transformIdx]);
 
                 int objectStart = drawCall.objectRange.start;
                 int objectEnd = drawCall.objectRange.end;
-                
+
                 currentBatch.uiforiaData.objectData0.EnsureAdditionalCapacity(objectEnd - objectStart);
                 currentBatch.uiforiaData.colors.EnsureAdditionalCapacity(objectEnd - objectStart);
                 Vector4[] objectData = currentBatch.uiforiaData.objectData0.array;
                 Vector4[] colorData = currentBatch.uiforiaData.colors.array;
                 int insertIdx = currentBatch.uiforiaData.objectData0.size;
-                
+
                 for (int j = objectStart; j < objectEnd; j++) {
                     objectData[insertIdx] = path.objectDataList.array[j].objectData;
                     colorData[insertIdx] = path.objectDataList.array[j].colorData;
@@ -773,9 +802,9 @@ namespace UIForia.Rendering {
 
                 currentBatch.uiforiaData.objectData0.size = insertIdx;
                 currentBatch.uiforiaData.colors.size = insertIdx;
-                
+
                 int start = positionList.size;
-                
+
                 GeometryRange range = drawCall.geometryRange;
                 int vertexCount = range.vertexEnd - range.vertexStart;
                 int triangleCount = range.triangleEnd - range.triangleStart;
@@ -784,7 +813,7 @@ namespace UIForia.Rendering {
                 texCoordList0.AddRange(path.geometry.texCoordList0, range.vertexStart, vertexCount);
                 texCoordList1.AddRange(path.geometry.texCoordList1, range.vertexStart, vertexCount);
                 triangleList.EnsureAdditionalCapacity(triangleCount);
-                
+
                 Vector4[] texCoord1 = texCoordList1.array;
 
                 for (int j = drawCall.objectRange.start; j < drawCall.objectRange.end; j++) {
@@ -793,7 +822,7 @@ namespace UIForia.Rendering {
                     int geometryEnd = shape.geometryRange.vertexEnd;
                     int objectIndex = currentBatch.drawCallSize++;
                     for (int s = geometryStart; s < geometryEnd; s++) {
-                        texCoord1[s].w = objectIndex;
+                        texCoord1[s - vertexAdjustment].w = objectIndex;
                     }
                 }
 
@@ -808,8 +837,6 @@ namespace UIForia.Rendering {
                 triangleList.size += triangleCount;
             }
         }
-
- 
 
     }
 

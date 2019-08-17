@@ -206,6 +206,7 @@ namespace UIForia.Rendering {
             range = new GeometryRange(0, geometry.positionList.size, 0, geometry.triangleList.size);
         }
 
+        // todo move material update out of paint function
         public override void PaintBackground(RenderContext ctx) {
             Size newSize = element.layoutResult.actualSize;
 
@@ -284,13 +285,9 @@ namespace UIForia.Rendering {
             geometry.objectData = new Vector4((int) ShapeType.RoundedRect, VertigoUtil.PackSizeVector(element.layoutResult.actualSize), packedBorderRadii, (int) colorMode);
             geometry.mainTexture = backgroundImage;
 
-            if (clipper != null) {
-//                geometry.clipTexture = clipper.clipTexture;
-//                geometry.clipUVs = clipper.clipUVs;
-//                geometry.clipRect = clipper.clipRect;
-            }
-
-            ctx.DrawBatchedGeometry(geometry, range, element.layoutResult.matrix.ToMatrix4x4());
+            geometry.miscData.x = element.id;
+            ctx.DrawBatchedGeometry(geometry, range, element.layoutResult.matrix.ToMatrix4x4(), clipper);
+            
         }
 
     }

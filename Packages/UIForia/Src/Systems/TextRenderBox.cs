@@ -2,6 +2,7 @@ using UIForia.Elements;
 using UIForia.Text;
 using UIForia.Util;
 using UnityEngine;
+using Vertigo;
 using TextInfo = System.Globalization.TextInfo;
 
 namespace UIForia.Rendering {

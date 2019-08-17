@@ -67,38 +67,27 @@ namespace UIForia.Rendering {
 
     public class ClipShape {
 
-        public int id;
-        public int version;
-        public bool invert;
-
-        public int width;
-        public int height;
-
         public Texture texture;
-
-        public readonly UIForiaGeometry geometry;
+        public Path2D path;
 
         public ClipShape() {
-            geometry = new UIForiaGeometry();
+            this.path = new Path2D();
         }
 
         public virtual bool ShouldCull(in Bounds bounds) {
             return false;
         }
 
-        public ClipShapeType type;
-
         public void SetFromElement(UIElement element) {
+            path.Clear();
+
             Size size = element.layoutResult.actualSize;
 
-            width = (int) size.width;
-            height = (int) size.height;
-            geometry.Clear();
-
+            path.SetFill(Color.white);
+            
             float elementWidth = size.width;
             float elementHeight = size.height;
             float min = Mathf.Min(elementWidth, elementHeight);
-            float halfMin = min * 0.5f;
 
             float bevelTopLeft = RenderBox.ResolveFixedSize(element, min, element.style.CornerBevelTopLeft);
             float bevelTopRight = RenderBox.ResolveFixedSize(element, min, element.style.CornerBevelTopRight);
@@ -110,18 +99,7 @@ namespace UIForia.Rendering {
             float radiusBottomRight = RenderBox.ResolveFixedSize(element, min, element.style.BorderRadiusBottomRight);
             float radiusBottomLeft = RenderBox.ResolveFixedSize(element, min, element.style.BorderRadiusBottomLeft);
 
-            radiusTopLeft = math.clamp(radiusTopLeft, 0, halfMin) / min;
-            radiusTopRight = math.clamp(radiusTopRight, 0, halfMin) / min;
-            radiusBottomRight = math.clamp(radiusBottomRight, 0, halfMin) / min;
-            radiusBottomLeft = math.clamp(radiusBottomLeft, 0, halfMin) / min;
-
-            byte b0 = (byte) (((radiusTopLeft * 1000)) * 0.5f);
-            byte b1 = (byte) (((radiusTopRight * 1000)) * 0.5f);
-            byte b2 = (byte) (((radiusBottomRight * 1000)) * 0.5f);
-            byte b3 = (byte) (((radiusBottomLeft * 1000)) * 0.5f);
-
-            float packedBorderRadii = VertigoUtil.BytesToFloat(b0, b1, b2, b3);
-
+            path.SetTransform(element.layoutResult.matrix.ToMatrix4x4());
             if (radiusBottomLeft > 0 ||
                 radiusBottomRight > 0 ||
                 radiusTopLeft > 0 ||
@@ -130,31 +108,16 @@ namespace UIForia.Rendering {
                 bevelTopLeft > 0 ||
                 bevelBottomLeft > 0 ||
                 bevelBottomRight > 0) {
-                geometry.ClipCornerRect(new Size(width, height), new CornerDefinition() {
-                    topLeftX = bevelTopLeft,
-                    topLeftY = bevelTopLeft,
-                    topRightX = bevelTopRight,
-                    topRightY = bevelTopRight,
-                    bottomRightX = bevelBottomRight,
-                    bottomRightY = bevelBottomRight,
-                    bottomLeftX = bevelBottomLeft,
-                    bottomLeftY = bevelBottomLeft,
-                });
+                // todo -- decorated rect w/ cut
+                path.BeginPath();
+                path.RoundedRect(0, 0, size.width, size.height, radiusTopLeft, radiusTopRight, radiusBottomRight, radiusBottomLeft);
+                path.Fill();
             }
             else {
-                geometry.FillRect(size.width, size.height);
+                path.BeginPath();
+                path.Rect(0, 0, size.width, size.height);
+                path.Fill();
             }
-
-            PaintMode paintMode = PaintMode.None;
-
-            if (texture != null) {
-                paintMode = PaintMode.Texture;
-            }
-            else {
-                paintMode = PaintMode.Color;
-            }
-
-            geometry.objectData = new Vector4((int) ShapeType.RoundedRect, VertigoUtil.PackSizeVector(size), packedBorderRadii, (int) paintMode);
         }
 
     }

@@ -13,6 +13,7 @@ namespace UIForia.Rendering {
         public Material material;
         public UIForiaData uiforiaData;
         public StructList<Matrix4x4> transformData;
+        public int renderStateId;
 
     }
 

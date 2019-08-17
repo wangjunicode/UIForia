@@ -23,6 +23,40 @@ inline float PercentOfRange(float v, float minVal, float maxVal) {
     return (v - minVal) / (maxVal - minVal);
 }
 
+fixed4 UIForiaAlphaClipColor(fixed4 color, sampler2D clipTexture, float2 screenUV, float4 clipRect, float4 clipUvs) {
+    screenUV.y = 1 - screenUV.y;
+    
+    // todo -- if mask render texture is packed with padding we need to account for that padding
+    // todo -- mask by channel
+    // todo -- mask at half resolution
+    // todo -- for clipping we don't want to blend do much, for masking we might
+    
+    float2 screenPos = float2(screenUV.x * _ScreenParams.x, screenUV.y * _ScreenParams.y);
+    
+    // point in rect, does not handle rotation, need to be sure box & point are in the same same aligned coordinate space
+    float2 s = step(float2(clipRect.x, clipRect.w), screenPos) - step(float2(clipRect.z , clipRect.y), screenPos);
+    
+    fixed4 retn = color;
+
+    float x = PercentOfRange(screenPos.x, clipRect.x, clipRect.z);
+    float y = PercentOfRange(screenPos.y, clipRect.y, clipRect.w);
+    
+    x = Map(x, 0, 1, clipUvs.x, clipUvs.z);
+    y = Map(y, 0, 1, clipUvs.y, clipUvs.w);
+
+    // clip rect is in integers, this accounts for loss of fraction by subtracting 1 pixel size to x and y
+    //  x -= (1 / _ScreenParams.x) * 0.5;
+    //  y += (1 / _ScreenParams.y) * 0.5;
+
+    // y comes in [0 - 1], need to sample with [1, 0]
+    fixed a = tex2Dlod(clipTexture, float4(x, 1 - y, 0, 0)).r;
+    retn = lerp(retn, fixed4(retn.rgb, lerp(color.a, a, 1 - a)), a < 1 && color.a > 0);
+    retn = lerp(retn, fixed4(0, 0, 0, 0), (s.x * s.y) == 0); 
+    retn = lerp(retn, color, (clipRect.z + clipRect.w == 0) || (clipUvs.z + clipUvs.w) == 0);
+    //if((clipUvs.w >= 0.14 && clipUvs.w <= 0.2) ) return fixed4(a, a, a, 1);
+    return retn;
+}
+
 fixed4 UIForiaAlphaClip(float inputAlpha, sampler2D clipTexture, float2 screenUV, float4 clipRect, float4 clipUvs) {
 
     screenUV.y = 1 - screenUV.y;
@@ -37,8 +71,7 @@ fixed4 UIForiaAlphaClip(float inputAlpha, sampler2D clipTexture, float2 screenUV
     
     // point in rect, does not handle rotation, need to be sure box & point are in the same same aligned coordinate space
     // -1 to fix artifacts
-    float2 s = step(float2(clipRect.x, clipRect.y + clipRect.w - 1), screenPos) - step(float2(clipRect.x + clipRect.z , clipRect.y), screenPos);
-
+    float2 s = step(float2(clipRect.x, clipRect.y + clipRect.w), screenPos) - step(float2(clipRect.x + clipRect.z , clipRect.y), screenPos);
     // todo -- handle single axis overflow
     if (s.x * s.y) {
             
@@ -57,7 +90,7 @@ fixed4 UIForiaAlphaClip(float inputAlpha, sampler2D clipTexture, float2 screenUV
         fixed a = tex2Dlod(clipTexture, float4(x, 1 - y, 0, 0)).a;// * 0.5;
         
         // currently making makes at half resolution, multipling alpha by a bit makes up for the lower resolution
-        a = saturate(a * 1.4);
+        // a = saturate(a * 1.4);
         
         // if z and w (width and height max) are 0 we consider the check to be 'rect-only'   
         if(clipUvs.z == 0 && clipUvs.w == 0) {
@@ -78,8 +111,20 @@ inline float4 UIForiaPixelSnap (float4 pos) {
      float2 pixelPos = round ((pos.xy / pos.w) * hpc) + 0.5;
      pos.xy = pixelPos / hpc * pos.w;
      return pos;
- }
+}
 
+inline float pie(float2 p, float angle) {
+    angle = radians(angle) * 0.5;
+    float2 n = float2(cos(angle), sin(angle));
+    return abs(p).x * n.x + p.y * n.y;
+}
+            
+inline float sector(float2 p, float radius, float angle, float width) {
+    width *= 0.5;
+    radius -= width;
+    return max(-pie(p, angle), abs(length(p) - radius) - width);
+}
+            
 inline float RectSDF(float2 p, float2 size, float r) {
    float2 d = abs(p) - size + float2(r, r);
    return min(max(d.x, d.y), 0.0) + length(max(d, 0.0)) - r;   
@@ -477,9 +522,9 @@ inline fixed4 ComputeColor(float packedBg, float packedTint, int colorMode, floa
     fixed4 tintColor = UnpackColor(asuint(packedTint));
     fixed4 textureColor = tex2D(_MainTexture, texCoord);
 
-    bgColor.rgb *= bgColor.a;
-    tintColor.rgb *= tintColor.a;
-    textureColor.rgb *= textureColor.a;
+    // bgColor.rgb *= bgColor.a;
+    // tintColor.rgb *= tintColor.a;
+    // textureColor.rgb *= textureColor.a;
     
     textureColor = lerp(textureColor, textureColor + tintColor, tintTexture);
     if (useTexture && letterBoxTexture && (texCoord.x < 0 || texCoord.x > 1) || (texCoord.y < 0 || texCoord.y > 1)) {
@@ -508,29 +553,56 @@ inline fixed4 GetTextColor(half d, fixed4 faceColor, fixed4 outlineColor, half o
 }
 
 fixed4 SDFColor(SDFData sdfData, fixed4 borderColor, fixed4 contentColor, float distFromCenter) {
-    int hasBorder = sdfData.strokeWidth > 0;
+    float halfStrokeWidth = sdfData.strokeWidth * 0.5;
+    
     float2 size = sdfData.size;
+    borderColor = Yellow;
     float minSize = min(size.x, size.y);
-    // having a border size makes aa waaaay better use a dummy value if user didn't provide one
-    float halfStrokeWidth = lerp(2, sdfData.strokeWidth * 0.5, hasBorder);
     float radius = clamp(minSize * sdfData.radius, 0, minSize);
-    // upscale size by that factor, the size passed in is the layout box size, not the geometry size which is why this works
     float2 center = ((sdfData.uv.xy - 0.5) * size);
     
-    float shape1 = RectSDF(center, (size * 0.5) - halfStrokeWidth, radius - halfStrokeWidth);
-    float retn = abs(shape1) - halfStrokeWidth;  
-    
-    borderColor = lerp(contentColor, borderColor, hasBorder);
-    
-    if(contentColor.a == 0) {
-        contentColor = fixed4(borderColor.rgb, 0);
+    if(halfStrokeWidth <= 0) {
+        halfStrokeWidth = 1;
+        borderColor = contentColor;
     }
     
-    if(shape1 > 0) {
-       contentColor = lerp(fixed4(contentColor.rgb, 0), fixed4(borderColor.rgb, 0), hasBorder);
-    }
+    float sdf = RectSDF(center, (size * 0.5) - halfStrokeWidth, radius - halfStrokeWidth);
+    float retn = abs(sdf) - halfStrokeWidth;
+   
+    fixed4 innerColor;
+    fixed4 outerColor;
+   
+   // contentColor = contentColor; //lerp(contentColor, fixed4(borderColor.rgb, 0), contentColor.a == 0);
+   // borderColor = lerp(contentColor, borderColor, hasBorder);
     
-    // this is 1 pixel of border size
+    // border to edge
+    if(sdf > halfStrokeWidth * 0.5) {
+        innerColor = borderColor;
+        outerColor = fixed4(borderColor.rgb, 0);
+    }
+    // content
+    else {
+       innerColor = borderColor;
+       outerColor = contentColor;
+    }
+           
+   
+    
+   // if(sdf > 0) {
+   //    contentColor = lerp(fixed4(contentColor.rgb, 0), fixed4(borderColor.rgb, 0), hasBorder);
+   // }
+    
+    float distanceChange = fwidth(retn) * 0.5;
+    float aa = smoothstep(distanceChange, -distanceChange, retn);
+    return lerp(innerColor, outerColor, 1 - aa); // do not pre-multiply alpha here!
+}
+
+    // using -1 to 1 gives slightly better aa but all edges have alpha which is bad when two shapes share an edge
+    // use larger negative to get nice blur effect
+    // smoothstep(-1, 0, fDist) gives the best aa but there is a gap between shapes that should touch
+    // smoothstep(0, 1, fDist) fixes the gap perfectly but causes rounded shapes to be slightly cut off at the bottom and right edges
+         
+             // this is 1 pixel of border size
     //float borderSize = (1 / minSize) * 1.4;
 
     // with a border -1, 1 looks the best, without use 0, 1
@@ -550,15 +622,4 @@ fixed4 SDFColor(SDFData sdfData, fixed4 borderColor, fixed4 contentColor, float 
            // }
       //  }
       
-  //  }
-    float distanceChange = fwidth(retn);// was * 0.5 but I think without looks better
-    float aa = smoothstep(distanceChange, -distanceChange, retn);
-    return lerp(contentColor, borderColor, aa); // do not pre-multiply alpha here!
-    
-    // using -1 to 1 gives slightly better aa but all edges have alpha which is bad when two shapes share an edge
-    // use larger negative to get nice blur effect
-    // smoothstep(-1, 0, fDist) gives the best aa but there is a gap between shapes that should touch
-    // smoothstep(0, 1, fDist) fixes the gap perfectly but causes rounded shapes to be slightly cut off at the bottom and right edges
-}
-         
 #endif // UIFORIA_SDF_INCLUDE

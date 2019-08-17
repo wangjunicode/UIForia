@@ -1,4 +1,3 @@
-using Shapes2D;
 using UIForia.Layout;
 using UIForia.Layout.LayoutTypes;
 using UIForia.Bindings.StyleBindings;

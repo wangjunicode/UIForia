@@ -27,7 +27,7 @@ style flex-demo-content {
     TextFaceDilate = 0.4;
     TextFontStyle = Italic;
     TextFontSize = 14;
-    BackgroundColor = Blue;
+    BackgroundColor = Green;
     FlexLayoutDirection = Horizontal;
     FlexLayoutCrossAxisAlignment = Center;
   //  Padding = 10px;
@@ -116,7 +116,7 @@ style clip-test-item {
 
 style clip-test-more-clip {
      PreferredSize = 100px;
-     BackgroundColor = Yellow;
+     BackgroundColor = Red;
      BorderRadius = 50%;
      MarginLeft = 30px;   
      Overflow = Hidden;

@@ -41,9 +41,11 @@ namespace SVGX {
         public readonly int transformIdx;
         public readonly RangeInt shapeRange;
         public RangeInt objectRange;
+        public int renderStateId;
 
         public SVGXDrawCall2(DrawCallType type, int styleIdx, int transformIdx, in RangeInt shapeRange) {
             this.type = type;
+            this.renderStateId = -1;
             this.shapeRange = shapeRange;
             this.transformIdx = transformIdx;
             this.styleIdx = styleIdx;

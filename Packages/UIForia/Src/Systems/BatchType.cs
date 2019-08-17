@@ -7,7 +7,9 @@ namespace UIForia.Rendering {
         Path,
         Custom,
 
-        Mesh
+        Mesh,
+
+        Clip
 
     }
 

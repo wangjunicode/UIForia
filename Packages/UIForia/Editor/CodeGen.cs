@@ -346,8 +346,7 @@ __REPLACE_StyleBindingCompiler_DoCompile
 
             File.WriteAllText(generatedPath2, template);
 
-            string code = @"using Shapes2D;
-using UIForia.Layout;
+            string code = @"using UIForia.Layout;
 using UIForia.Layout.LayoutTypes;
 using UIForia.Bindings.StyleBindings;
 using System.Collections.Generic;

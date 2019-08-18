@@ -164,10 +164,7 @@ namespace UIForia.Elements {
         }
 
         public override void OnUpdate() {
-            
-            optionList.style.SetOverflowX(style.OverflowX, StyleState.Normal);
-            optionList.style.SetOverflowY(style.OverflowY, StyleState.Normal);
-            
+
             if (!disabled && HasAttribute("disabled")) {
                 SetAttribute("disabled", null);
                 EnableAllChildren(this);

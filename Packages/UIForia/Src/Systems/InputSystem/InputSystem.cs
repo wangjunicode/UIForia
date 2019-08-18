@@ -580,6 +580,8 @@ namespace UIForia.Systems {
         public void OnReset() {
             // don't clear key states
             m_FocusedElement = null;
+            focusables.Clear();
+            focusableIndex = -1;
             m_ElementsLastFrame.Clear();
             m_ElementsThisFrame.Clear();
             m_MouseDownElements.Clear();

@@ -105,23 +105,65 @@ namespace UIForia.Rendering {
             }
         }
 
-        public virtual ClipShape GetClipShape() {
-            clipShape = clipShape ?? new ClipShape();
+        protected Path2D clipPath;
 
-//            clipShape.SetCornerClip();
-//            clipShape.SetCornerRadii();
-//            clipShape.SetFromMesh(mesh);
-//            clipShape.SetFromElement(element);
-//            clipShape.SetFromEllipse();
-//            clipShape.SetFromRect();
-//            clipShape.SetFromCircle();
-//            clipShape.SetFromDiamond();
-//            clipShape.SetFromTriangle();
-//            clipShape.SetTexture(texture, channel);
+        public Path2D GetClipPathFromElement() {
 
-            clipShape.SetFromElement(element);
+            Size size = element.layoutResult.actualSize;
+            float elementWidth = size.width;
+            float elementHeight = size.height;
+            float min = Mathf.Min(elementWidth, elementHeight);
 
-            return clipShape;
+            if (element is UITextElement) {
+                return null;
+            }
+            
+            
+            float bevelTopLeft = ResolveFixedSize(element, min, element.style.CornerBevelTopLeft);
+            float bevelTopRight = ResolveFixedSize(element, min, element.style.CornerBevelTopRight);
+            float bevelBottomRight = ResolveFixedSize(element, min, element.style.CornerBevelBottomRight);
+            float bevelBottomLeft = ResolveFixedSize(element, min, element.style.CornerBevelBottomLeft);
+
+            float radiusTopLeft = ResolveFixedSize(element, min, element.style.BorderRadiusTopLeft);
+            float radiusTopRight = ResolveFixedSize(element, min, element.style.BorderRadiusTopRight);
+            float radiusBottomRight = ResolveFixedSize(element, min, element.style.BorderRadiusBottomRight);
+            float radiusBottomLeft = ResolveFixedSize(element, min, element.style.BorderRadiusBottomLeft);
+            
+            if (radiusBottomLeft > 0 ||
+                radiusBottomRight > 0 ||
+                radiusTopLeft > 0 ||
+                radiusTopRight > 0 ||
+                bevelTopRight > 0 ||
+                bevelTopLeft > 0 ||
+                bevelBottomLeft > 0 ||
+                bevelBottomRight > 0) {
+                // todo -- decorated rect w/ cut
+                
+                // todo -- if padding or border box would be larger enough to ignore cut / radius we can return null here also
+                if (element.layoutResult.padding.top > 0 &&
+                    element.layoutResult.padding.bottom > 0 && 
+                    element.layoutResult.padding.right > 0 &&
+                    element.layoutResult.padding.left > 0) {
+                    return null;
+                }
+                
+                clipPath = clipPath ?? new Path2D();
+                clipPath.Clear(); // todo -- only clear if changed
+
+                
+                clipPath.BeginPath();
+                clipPath.SetFill(Color.white);
+                clipPath.RoundedRect(0, 0, size.width, size.height, radiusTopLeft, radiusTopRight, radiusBottomRight, radiusBottomLeft);
+                clipPath.Fill();
+                return clipPath;
+            }
+            else {
+                return null;
+            }
+        }
+        
+        public virtual Path2D GetClipShape() {
+            return GetClipPathFromElement();
         }
 
     }

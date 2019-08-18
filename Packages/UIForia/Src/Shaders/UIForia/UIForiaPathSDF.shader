@@ -152,7 +152,7 @@
                 fixed4 outer = fixed4(mainColor.rgb, 0);
 
                 float sdf = 0;
-                float percentRadius = 0.5;//UnpackCornerRadius(ObjectInfo_CornerRadii, i.texCoord0.zw);
+                float percentRadius = UnpackCornerRadius(ObjectInfo_CornerRadii, i.texCoord0.zw);
                 float radius = clamp(minSize * percentRadius, 0, minSize);
                 float cut = radius;
                 float halfX = size.x * 0.5;
@@ -227,8 +227,8 @@
                 
                 fixed4 sdfRetn = lerp(inner, outer, 1 - aa);
                 fixed4 retn = lerp(sdfRetn, shadowRetn, isShadow && shadowIntensity > 1);
-                
-                return sdfRetn; // todo - stop cheating
+              //  return lerp(retn, mainColor, mainColorOnly);
+              //  return sdfRetn; // todo - stop cheating
                 
                 #if MASK_OUTPUT
                     fixed a = lerp(retn.a, mainColor.a, mainColorOnly);

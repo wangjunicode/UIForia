@@ -90,8 +90,6 @@ namespace UIForia.Rendering {
             }
         }
 
-        
-
         private void UpdateGeometry(in Size size) {
             geometryNeedsUpdate = false;
 

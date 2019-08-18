@@ -134,14 +134,15 @@ namespace UIForia {
             VertigoRenderSystem renderSystem = application.RenderSystem as VertigoRenderSystem;
             LightList<ClipData> clippers = renderSystem.renderOwners[0].renderedClippers;
 
-//            for (int i = 0; i < clippers.size; i++) {
-//                if (clippers[i].isCulled) {
-//                    DrawPolygonRect(clippers[i].worldBounds, Color.red);
-//                }
-//                else {
-//                    DrawPolygon(clippers[i].intersected, Color.green);
-//                }
-//            }
+
+            for (int i = 0; i < clippers.size; i++) {
+                if (clippers[i].isCulled) {
+                    //   DrawPolygonRect(clippers[i].worldBounds, Color.red);
+                }
+                else {
+                    //    DrawPolygon(clippers[i].intersected, Color.green);
+                }
+            }
 
 //            path.Rect(100, 100, 400, 400);
 //            path.SetFill(Color.black);
@@ -197,7 +198,7 @@ namespace UIForia {
 //            path.SetFill(Color.red);
 //            path.Fill();
 
-            
+
 //            DrawElement(rootElement);
 
 //            Polygon subject = new Polygon();

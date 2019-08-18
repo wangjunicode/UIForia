@@ -69,7 +69,7 @@ namespace UIForia.Rendering {
 
         public Texture texture;
         public Path2D path;
-
+        
         public ClipShape() {
             this.path = new Path2D();
         }

@@ -72,6 +72,8 @@ namespace Src.Systems {
         public void OnReset() {
             commandBuffer.Clear();
             renderOwners.QuickClear();
+            renderContext.clipContext.Destroy();
+            renderContext.clipContext = new ClipContext();
         }
 
         public virtual void OnUpdate() {
@@ -92,7 +94,9 @@ namespace Src.Systems {
             renderContext.Render(camera, commandBuffer);
         }
 
-        public void OnDestroy() { }
+        public void OnDestroy() {
+            renderContext.clipContext.Destroy();
+        }
 
         public void OnViewAdded(UIView view) {
             renderOwners.Add(new RenderOwner(view, camera));

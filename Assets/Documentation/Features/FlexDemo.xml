@@ -4,23 +4,99 @@
     <Style path="Documentation/Features/FlexDemo.style"/>
 
     <Contents style="container">
+        <Div style="img1"/>
+        <Div style="img2"/>
+        <Div style="img3"/>
+        <Div style="img4"/>
+        <Div style="img5"/>
+        <Div style="img6"/>
+        <Div style="img7"/>
+<!--        <Group style="constrain">-->
 
-        <Group style.marginLeft="50" style.marginTop="50" style="constrain">
+<!--  -->
+<!--            -->
+<!--            <Div style.marginTop="150" style="flex-demo">-->
 
-            <Div style="flex-demo">
+<!--                This is some mother fucking text!-->
+<!--                <Text style="special-text">This is other text with some mother fucking style!</Text>-->
+<!--                <Group x-id="demo-content" style="flex-demo-content  horizontal circle-clip">-->
+<!--&lt;!&ndash;                    <Div style="clip-test-more-clip"/>&ndash;&gt;-->
+<!--                    <Div style.marginLeft="240" style="clip-test-more-clip">-->
+<!--                        <Group style="clip-nested not-clipped"/>-->
+<!--                    </Div>-->
+<!--&lt;!&ndash;                    <Div style="clip-test-more-clip"/>&ndash;&gt;-->
+<!--&lt;!&ndash;                    <Div style="clip-test-more-clip"/>&ndash;&gt;-->
+<!--&lt;!&ndash;                    <Div style="clip-test-more-clip"/>&ndash;&gt;-->
+<!--&lt;!&ndash;                    <Div style="clip-test-more-clip"/>&ndash;&gt;-->
+<!--                </Group>-->
+<!--            </Div>-->
+<!--        </Group>-->
+<!--        <Group style="constrain">-->
 
-                <Group x-id="demo-content" style="flex-demo-content  horizontal circle-clip">
-                    <Div style="clip-test-more-clip"/>
-                    <Div style="clip-test-more-clip">
-                        <Group style="clip-nested"/>
-                    </Div>
-                    <Div style="clip-test-more-clip"/>
-                    <Div style="clip-test-more-clip"/>
-                    <Div style="clip-test-more-clip"/>
-                    <Div style="clip-test-more-clip"/>
-                </Group>
-            </Div>
-        </Group>
+<!--            <Div style="flex-demo">-->
+
+<!--                <Group x-id="demo-content" style="flex-demo-content  horizontal circle-clip">-->
+<!--                    <Div style="clip-test-more-clip"/>-->
+<!--                    <Div style.marginLeft="100" style="clip-test-more-clip">-->
+<!--                        <Group style="clip-nested"/>-->
+<!--                    </Div>-->
+<!--                    <Div style="clip-test-more-clip"/>-->
+<!--                    <Div style="clip-test-more-clip"/>-->
+<!--                    <Div style="clip-test-more-clip"/>-->
+<!--                    <Div style="clip-test-more-clip"/>-->
+<!--                </Group>-->
+<!--            </Div>-->
+<!--        </Group>-->
+<!--        <Group style="constrain">-->
+
+<!--            <Div style="flex-demo">-->
+
+<!--                <Group x-id="demo-content" style="flex-demo-content  horizontal circle-clip">-->
+<!--                    <Div style="clip-test-more-clip"/>-->
+<!--                    <Div style.marginLeft="100" style="clip-test-more-clip">-->
+<!--                        <Group style="clip-nested"/>-->
+<!--                    </Div>-->
+<!--                    <Div style="clip-test-more-clip"/>-->
+<!--                    <Div style="clip-test-more-clip"/>-->
+<!--                    <Div style="clip-test-more-clip"/>-->
+<!--                    <Div style="clip-test-more-clip"/>-->
+<!--                </Group>-->
+<!--            </Div>-->
+<!--        </Group>-->
+<!--        <Group style="constrain">-->
+
+<!--            <Div style="flex-demo">-->
+
+<!--                <Group x-id="demo-content" style="flex-demo-content  horizontal circle-clip">-->
+<!--                    <Div style="clip-test-more-clip"/>-->
+<!--                    <Div style.marginLeft="100" style="clip-test-more-clip">-->
+<!--                        <Group style="clip-nested"/>-->
+<!--                    </Div>-->
+<!--                    <Div style="clip-test-more-clip"/>-->
+<!--                    <Div style="clip-test-more-clip"/>-->
+<!--                    <Div style="clip-test-more-clip"/>-->
+<!--                    <Div style="clip-test-more-clip"/>-->
+<!--                </Group>-->
+<!--            </Div>-->
+<!--        </Group>-->
+<!--        <Group style="constrain">-->
+
+<!--            <Div style="flex-demo">-->
+
+<!--                <Group x-id="demo-content" style="flex-demo-content  horizontal circle-clip">-->
+<!--                    <Div style="clip-test-more-clip"/>-->
+<!--                    <Div style.marginLeft="100" style="clip-test-more-clip">-->
+<!--                        <Group style="clip-nested"/>-->
+<!--                    </Div>-->
+<!--                    <Div style="clip-test-more-clip"/>-->
+<!--                    <Div style="clip-test-more-clip"/>-->
+<!--                    <Div style="clip-test-more-clip"/>-->
+<!--                    <Div style="clip-test-more-clip"/>-->
+<!--                </Group>-->
+<!--            </Div>-->
+<!--        </Group>-->
+        
+        
         
 <!--&lt;!&ndash;                    <Div style="clip-test-more-clip">&ndash;&gt;-->
 <!--&lt;!&ndash;&lt;!&ndash;                        <Div style="flex-item">&ndash;&gt;&ndash;&gt;-->

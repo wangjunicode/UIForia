@@ -564,6 +564,7 @@ namespace UIForia.Parsing.Style {
                     }
 
                     if (url is StyleIdentifierNode urlIdentifier) {
+                        // todo -- this doesn't handle spaces!
                         while (tokenStream.HasMoreTokens && !AdvanceIfTokenType(StyleTokenType.ParenClose)) {
                             // advancing tokens no matter the type. We want to concatenate all identifiers and slashes of a path again.
                             urlIdentifier.name += tokenStream.Current.value;

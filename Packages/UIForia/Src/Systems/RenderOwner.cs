@@ -48,7 +48,7 @@ namespace Src.Systems {
             Cull();
 
             DrawClipShapes(renderContext);
-
+        
             Draw(renderContext);
 
             wrapperList.QuickClear();
@@ -57,10 +57,9 @@ namespace Src.Systems {
 
 
         private void DrawClipShapes(RenderContext ctx) {
-            for (int i = 1; i < renderedClippers.size; i++) {
+            for (int i = 0; i < renderedClippers.size; i++) {
                 ClipData clipData = renderedClippers.array[i];
-                ClipShape clipShape = clipData.renderBox.GetClipShape();
-                clipData.clipShape = clipShape;
+                clipData.clipPath = clipData.renderBox?.GetClipShape();
                 ctx.DrawClipData(clipData);
             }
         }
@@ -142,8 +141,7 @@ namespace Src.Systems {
                     if (current.renderBox.overflowX != Overflow.Visible || current.renderBox.overflowY != Overflow.Visible) {
                         wrapperStack.Push(new RenderBoxWrapper(current, RenderOpType.PopClipShape));
                     }
-
-
+                    
                     // if is post effect
                     // push render target
 
@@ -188,7 +186,7 @@ namespace Src.Systems {
             if (!printed) {
                 printed = true;
                 for (int i = 0; i < wrapperList.size; i++) {
-                    Debug.Log(wrapperList.array[i].element + " -- " + (wrapperList.array[i].renderOp));
+//                    Debug.Log(wrapperList.array[i].element + " -- " + (wrapperList.array[i].renderOp));
                 }
             }
         }
@@ -199,7 +197,6 @@ namespace Src.Systems {
             // first do an easy screen cull
             // screen is always aligned
             // if world space rect is not inside the screen, fail immediately
-            renderedClippers.Clear();
 
             for (int i = 0; i < renderedClippers.size; i++) {
                 renderedClippers.array[i].Clear();
@@ -227,11 +224,12 @@ namespace Src.Systems {
             screenClip.intersected.array[2] = screenClip.worldBounds.p2;
             screenClip.intersected.array[3] = screenClip.worldBounds.p3;
             screenClip.intersected.size = 4;
-
+            screenClip.aabb = new Vector4(screenClip.worldBounds.p0.x, screenClip.worldBounds.p0.y, screenClip.worldBounds.p2.x, screenClip.worldBounds.p2.y);
             screenClip.isCulled = false;
             renderedClippers.Add(screenClip);
-            clipStack.Push(screenClip);
 
+            clipStack.Push(screenClip);
+            
             for (int i = 0; i < wrapperList.size; i++) {
                 RenderBoxWrapper wrapper = wrappers[i];
 
@@ -244,31 +242,30 @@ namespace Src.Systems {
                     case RenderOpType.DrawBackground: {
                         renderBox.culled = false;
 
-                        switch (renderBox.clipBehavior) {
+                        switch (renderBox.element.style.ClipBehavior) {
                             case ClipBehavior.Never:
                                 renderBox.clipper = null;
-                                renderBox.culled = false;
                                 break;
 
                             case ClipBehavior.Screen:
                                 renderBox.clipper = screenClip;
-
                                 break;
 
                             case ClipBehavior.View:
-//                                renderBox.clipper = viewClip;
+                                 renderBox.clipper = renderBox.element.View.rootElement.renderBox.clipper;
+
                                 break;
 
                             case ClipBehavior.Normal:
 
-                                // if current clipper is clipped, mark as clipped
                                 ClipData clipData = clipStack.array[clipStack.size - 1];
 
+                                // if current clipper is culled, mark as culled
                                 if (!clipData.isCulled) {
                                     Rect renderBounds = renderBox.RenderBounds;
 
                                     SVGXMatrix transform = wrapper.element.layoutResult.matrix;
-                                    
+
                                     // todo -- only transform if not identity
 
                                     // todo -- considering inlining Transform
@@ -278,9 +275,16 @@ namespace Src.Systems {
                                     Vector2 p3 = transform.Transform(renderBounds.xMin, renderBounds.yMax);
 
                                     // if contained by resulting screen aligned rect or overlaps it, we will draw 
-                                    Vector4 objectScreenBounds = GetBounds(p0, p1, p2, p3);
+                                    Vector4 objectScreenBounds;
+                                    if (transform.IsTranslationOnly) {
+                                        objectScreenBounds = new Vector4(p0.x, p0.y, p2.x, p2.y);
+                                    }
+                                    else {
+                                        objectScreenBounds = GetBounds(p0, p1, p2, p3);
+                                    }
+
                                     // cheap solution is to compare world space bounds for overlap better would be compare oriented bounds
-                                    renderBox.culled = !clipData.screenSpaceBounds.Overlaps(objectScreenBounds);
+                                    renderBox.culled = !clipData.aabb.OverlapAsRect(objectScreenBounds);
 
                                     if (!renderBox.culled) {
                                         renderBox.clipper = clipStack.array[clipStack.size - 1];
@@ -310,10 +314,6 @@ namespace Src.Systems {
                         break;
 
                     case RenderOpType.PushClipShape: {
-                        // push no matter what, if this clipper gets clipped by parent clipper we'll figure it out later
-                        // for now assume no rotation or scaling, we can handle transformations later
-                        // wrapper.renderBox.intersectClipRect = RectExtensions.Intersect(wrapper.orientedScreenRect);
-
                         Rect localBounds = renderBox.RenderBounds;
 
                         SVGXMatrix transform = wrapper.element.layoutResult.matrix;
@@ -324,26 +324,39 @@ namespace Src.Systems {
                         Vector2 p3 = transform.Transform(localBounds.xMin, localBounds.yMax);
 
                         ClipData clipData = GetClipData();
-                        clipData.parent = clipStack.PeekUnchecked();
+                        clipData.parent = clipStack.array[clipStack.size - 1];
                         clipData.worldBounds = new PolyRect(p0, p1, p2, p3);
                         clipData.renderBox = renderBox;
                         clipData.isCulled = true;
                         clipData.visibleBoxCount = 0;
                         clipData.intersected.size = 0;
+                        clipData.isTransformed = !transform.IsTranslationOnly;
 
                         if (!clipData.parent.isCulled) {
-                            s_SubjectRect.array[0] = p0;
-                            s_SubjectRect.array[1] = p1;
-                            s_SubjectRect.array[2] = p2;
-                            s_SubjectRect.array[3] = p3;
-                            s_SubjectRect.size = 4;
-                            SutherlandHodgman.GetIntersectedPolygon(s_SubjectRect, clipData.parent.intersected, ref clipData.intersected);
-                            clipData.isCulled = clipData.intersected.size == 0;
-                            if (!clipData.isCulled) {
-                                clipData.screenSpaceBounds = GetBounds(clipData.intersected);
+                            if (!clipData.isTransformed && !clipData.parent.isTransformed) {
+                                clipData.aabb = clipData.parent.aabb.IntersectAsRect(new Vector4(p0.x, p0.y, p2.x, p2.y));
+                                clipData.isCulled = clipData.aabb.z == 0 || clipData.aabb.w == 0;
+                                clipData.intersected.array[0] = new Vector2(clipData.aabb.x, clipData.aabb.y);
+                                clipData.intersected.array[1] = new Vector2(clipData.aabb.z, clipData.aabb.y);
+                                clipData.intersected.array[2] = new Vector2(clipData.aabb.z, clipData.aabb.w);
+                                clipData.intersected.array[3] = new Vector2(clipData.aabb.x, clipData.aabb.w);
+                                clipData.intersected.size = 4;
+                            }
+                            else {
+                                s_SubjectRect.array[0] = p0;
+                                s_SubjectRect.array[1] = p1;
+                                s_SubjectRect.array[2] = p2;
+                                s_SubjectRect.array[3] = p3;
+                                s_SubjectRect.size = 4;
+                                SutherlandHodgman.GetIntersectedPolygon(s_SubjectRect, clipData.parent.intersected, ref clipData.intersected);
+                                clipData.isCulled = clipData.intersected.size == 0;
+                                if (!clipData.isCulled) {
+                                    clipData.aabb = GetBounds(clipData.intersected);
+                                }
                             }
                         }
 
+                        // push no matter what, if this clipper gets clipped by parent clipper we'll figure it out later
                         clipStack.Push(clipData);
 
                         break;
@@ -381,6 +394,17 @@ namespace Src.Systems {
             }
         }
 
+        // this returns true if the rect is rotated also! careful!
+        private static bool IsRect(Vector2 p0, Vector2 p1, Vector2 p2, Vector2 p3) {
+            int distP0P1 = (int) (p0 - p1).sqrMagnitude;
+            int distP1P2 = (int) (p1 - p2).sqrMagnitude;
+            int distP2P3 = (int) (p2 - p3).sqrMagnitude;
+            int distP3P0 = (int) (p3 - p0).sqrMagnitude;
+            int distP2P0 = (int) (p2 - p0).sqrMagnitude;
+            int distP1P3 = (int) (p1 - p3).sqrMagnitude;
+
+            return (distP0P1 ^ distP1P2 ^ distP2P3 ^ distP3P0 ^ distP2P0 ^ distP1P3) == 0;
+        }
 
         private ClipData GetClipData() {
             if (clipDataPool.size > 0) {

@@ -1,11 +1,14 @@
 using System;
+using System.Collections.Generic;
 using Src.Systems;
 using SVGX;
 using UIForia.Layout;
 using UIForia.Rendering.Vertigo;
+using UIForia.Text;
 using UIForia.Util;
 using UnityEngine;
 using UnityEngine.Rendering;
+using Object = System.Object;
 using PooledMesh = UIForia.Rendering.Vertigo.PooledMesh;
 
 namespace UIForia.Rendering {
@@ -90,6 +93,11 @@ namespace UIForia.Rendering {
         private readonly StructStack<RenderArea> areaStack;
         private Material pathMaterial;
         internal ClipContext clipContext;
+        private TexturePacker texturePacker;
+        private RenderTexture spriteAtlas;
+        private Material spriteAtlasMaterial;
+        private MaterialPropertyBlock propertyBlock;
+        private readonly LightList<PooledMesh> meshesToRelease;
 
         static RenderContext() {
             int maxTextureSize = SystemInfo.maxTextureSize;
@@ -100,10 +108,10 @@ namespace UIForia.Rendering {
             this.pendingBatches = new StructList<Batch>();
             this.uiforiaMeshPool = new MeshPool();
             this.uiforiaMaterialPool = new UIForiaMaterialPool(batchedMaterial);
-            this.positionList = new StructList<Vector3>(8);
-            this.texCoordList0 = new StructList<Vector4>(8);
-            this.texCoordList1 = new StructList<Vector4>(8);
-            this.triangleList = new StructList<int>(8 * 3);
+            this.positionList = new StructList<Vector3>(128);
+            this.texCoordList0 = new StructList<Vector4>(128);
+            this.texCoordList1 = new StructList<Vector4>(128);
+            this.triangleList = new StructList<int>(128 * 3);
             this.clipStack = new StructStack<Rect>();
             this.renderCommandList = new StructList<RenderOperation>();
             this.scratchTextures = new StructList<ScratchRenderTexture>();
@@ -112,6 +120,12 @@ namespace UIForia.Rendering {
             this.clipContext = new ClipContext();
             this.pathMaterial = new Material(Shader.Find("UIForia/UIForiaPathSDF")); // temp
             this.pathMaterialPool = new UIForiaMaterialPool(pathMaterial);
+            this.spriteAtlas = new RenderTexture(Screen.width, Screen.height, 0, RenderTextureFormat.ARGB32);
+            this.spriteAtlas.name = "UIForia Sprite Atlas";
+            this.spriteAtlasMaterial = new Material(Shader.Find("UIForia/UIForiaSpriteAtlas"));
+            this.texturePacker = new TexturePacker(Screen.width, Screen.height);
+            this.propertyBlock = new MaterialPropertyBlock();
+            this.meshesToRelease = new LightList<PooledMesh>();
         }
 
         public void DrawMesh(Mesh mesh, Material material, in Matrix4x4 transform) {
@@ -162,6 +176,52 @@ namespace UIForia.Rendering {
             FinalizeCurrentBatch();
         }
 
+
+        public void DrawBatchedTextLine(Size size, UIForiaData geometry, GeometryRange range, FontData fontData, in Matrix4x4 matrix, ClipData clipper = null) {
+            // atlas built per frame for now, optimize this later w/ region tracking
+            // need a way to tell original caller about the uvs
+            // probably done internally
+            // need to store batch id
+            // need bounds of line 
+            // need font data
+            // need clipping data? or assume we draw text unclipped?
+
+            // if line can't fit in in atlas we need to insert a draw call and not use atlas
+
+            if (currentBatch.transformData.size + 1 >= k_ObjectCount_Huge) {
+                FinalizeCurrentBatch();
+            }
+
+            if (currentBatch.batchType == BatchType.Custom) {
+                FinalizeCurrentBatch();
+            }
+
+            if (currentBatch.batchType == BatchType.Unset) {
+                currentBatch.batchType = BatchType.UIForia;
+                currentBatch.uiforiaData = new UIForiaData(); // todo -- pool
+            }
+
+            positionList.Add(new Vector3(0, 0, 0));
+            positionList.Add(new Vector3(size.width, 0, 0));
+            positionList.Add(new Vector3(size.width, -size.height, 0));
+            positionList.Add(new Vector3(0, -size.height, 0));
+
+            texCoordList0.Add(new Vector4());
+            texCoordList0.Add(new Vector4());
+            texCoordList0.Add(new Vector4());
+            texCoordList0.Add(new Vector4());
+
+            // is packing better if we know all the text beforehand?, maybe marginally
+            // we can assume MOST text is roughly the same size or grouping of sizes
+            // sort by height, pack width first?
+            // word by word?
+            // with words there are more output quads but less overdraw due to whitespace being skipped
+            // fuck it, quads are cheap and better for texture usage probably, less overdraw
+            // todo -- might need to handle float sizes or at least compensate if accuracy is bad
+            //  if (textPacker.TryPackRect((int) size.width, (int) size.height, out SimpleRectPacker.PackedRect rect)) { }
+        }
+
+
         public void DrawBatchedText(UIForiaGeometry geometry, in GeometryRange range, in Matrix4x4 transform, in FontData fontData) {
             if (currentBatch.transformData.size + 1 >= k_ObjectCount_Huge) {
                 FinalizeCurrentBatch();
@@ -176,7 +236,6 @@ namespace UIForia.Rendering {
                 currentBatch.uiforiaData = new UIForiaData(); // todo -- pool
             }
 
-            // todo -- in the future see if we can use atlased font textures, only need to filter by channel 
             if (currentBatch.uiforiaData.fontData.fontAsset != null && currentBatch.uiforiaData.fontData.fontAsset != fontData.fontAsset) {
                 FinalizeCurrentBatch();
                 currentBatch.batchType = BatchType.UIForia;
@@ -189,6 +248,8 @@ namespace UIForia.Rendering {
             currentBatch.uiforiaData.colors.Add(geometry.packedColors);
             currentBatch.uiforiaData.fontData = fontData;
 
+            // add a quad + matrix w/ default styling
+
             UpdateUIForiaGeometry(geometry, range);
         }
 
@@ -198,7 +259,6 @@ namespace UIForia.Rendering {
 
         // todo -- clean up batching code here, ugly as fuck right now
         public void DrawBatchedGeometry(UIForiaGeometry geometry, in GeometryRange range, in Matrix4x4 transform, ClipData clipper = null) {
-            
             if (currentBatch.transformData.size + 1 >= k_ObjectCount_Huge) {
                 FinalizeCurrentBatch();
             }
@@ -212,31 +272,64 @@ namespace UIForia.Rendering {
                 currentBatch.uiforiaData = UIForiaData.Get();
             }
 
-            if (geometry.mainTexture != null && currentBatch.uiforiaData.mainTexture != null && currentBatch.uiforiaData.mainTexture != geometry.mainTexture) {
+            Texture texture = geometry.mainTexture;
+            bool remapUvs = false;
+            Vector4 uvs = default;
+
+            if (geometry.mainTexture != null) {
+                // todo -- if UVs are transformed don't use sprite atlas
+                if (texturePacker.TryPackTexture(geometry.mainTexture, out uvs)) {
+                    texture = spriteAtlas;
+                    remapUvs = true;
+                }
+            }
+
+            if (texture != null && currentBatch.uiforiaData.mainTexture != null && currentBatch.uiforiaData.mainTexture != texture) {
                 FinalizeCurrentBatch();
                 currentBatch.batchType = BatchType.UIForia;
                 currentBatch.uiforiaData = UIForiaData.Get();
             }
 
-            currentBatch.uiforiaData.mainTexture = geometry.mainTexture != null ? geometry.mainTexture : currentBatch.uiforiaData.mainTexture;
+            currentBatch.uiforiaData.mainTexture = texture != null ? texture : currentBatch.uiforiaData.mainTexture;
             currentBatch.uiforiaData.colors.Add(geometry.packedColors);
             currentBatch.uiforiaData.objectData0.Add(geometry.objectData);
             currentBatch.uiforiaData.objectData1.Add(geometry.miscData);
-            
+
             if (clipper != null) {
                 // todo break batch if changed
                 currentBatch.uiforiaData.clipTexture = clipper.clipTexture != null ? clipper.clipTexture : currentBatch.uiforiaData.clipTexture;
                 currentBatch.uiforiaData.clipUVs.Add(clipper.clipUVs);
-                currentBatch.uiforiaData.clipRects.Add(clipper.screenSpaceBounds);
+                currentBatch.uiforiaData.clipRects.Add(clipper.packedBoundsAndChannel);
             }
             else {
                 currentBatch.uiforiaData.clipUVs.Add(default);
-                currentBatch.uiforiaData.clipRects.Add(default);
+                // in order to always draw the thing we take the max fixed float with 0.1 precision we can fit in 16 bits for clip size
+                // (2 ^ 16) / 10
+                currentBatch.uiforiaData.clipRects.Add(new Vector4(0, VertigoUtil.PackSizeVector(6553f, 6553f)));
             }
 
             currentBatch.transformData.Add(transform);
 
+            int vertexStart = positionList.size;
+
             UpdateUIForiaGeometry(geometry, range);
+
+            float Map(float s, float a1, float a2, float b1, float b2) {
+                return b1 + (s - a1) * (b2 - b1) / (a2 - a1);
+            }
+
+            if (remapUvs) {
+                // remap x & y to sprite sheet uvs
+                int vertexEnd = positionList.size;
+                Vector4[] texCoord0 = texCoordList0.array;
+                for (int i = vertexStart; i < vertexEnd; i++) {
+                    float x = texCoord0[i].x;
+                    float y = texCoord0[i].y;
+                    // for now assume 0 to 1 i guess
+                    texCoord0[i].x = Map(x, 0, 1, uvs.x, uvs.z);
+                    texCoord0[i].y = Map(y, 0, 1, 1 - uvs.w, 1 - uvs.y);
+                }
+            }
         }
 
         private void UpdateUIForiaGeometry(UIForiaGeometry geometry, in GeometryRange range) {
@@ -330,28 +423,81 @@ namespace UIForia.Rendering {
             currentBatch.transformData = StructList<Matrix4x4>.Get();
         }
 
+        private PooledMesh MakeQuadMesh(SimpleRectPacker.PackedRect rect) {
+            PooledMesh mesh = uiforiaMeshPool.Get();
+            positionList.Add(new Vector3(rect.xMin, -rect.yMin));
+            positionList.Add(new Vector3(rect.xMax, -rect.yMin));
+            positionList.Add(new Vector3(rect.xMax, -rect.yMax));
+            positionList.Add(new Vector3(rect.xMin, -rect.yMax));
+            texCoordList0.Add(new Vector4(0, 1, 0, 0));
+            texCoordList0.Add(new Vector4(1, 1, 0, 0));
+            texCoordList0.Add(new Vector4(1, 0, 0, 0));
+            texCoordList0.Add(new Vector4(0, 0, 0, 0));
+            triangleList.Add(0);
+            triangleList.Add(1);
+            triangleList.Add(2);
+            triangleList.Add(2);
+            triangleList.Add(3);
+            triangleList.Add(0);
+            mesh.SetVertices(positionList.array, 4);
+            mesh.SetTextureCoord0(texCoordList0.array, 4);
+            mesh.SetTriangles(triangleList.array, 6);
+            positionList.size = 0;
+            texCoordList0.size = 0;
+            texCoordList1.size = 0;
+            triangleList.size = 0;
+            return mesh;
+        }
+
+        private static readonly int s_MainTex = Shader.PropertyToID("_MainTex");
+
+
         public void Render(Camera camera, CommandBuffer commandBuffer) {
             commandBuffer.Clear();
+            for (int i = 0; i < meshesToRelease.size; i++) {
+                meshesToRelease[i].Release();
+            }
+
             if (camera != null && camera.targetTexture != null) {
                 RenderTexture targetTexture = camera.targetTexture;
                 defaultRTDepth = targetTexture.depth;
             }
 
+            StructList<TexturePacker.TextureData> spriteAtlasUpdates = StructList<TexturePacker.TextureData>.Get();
+            commandBuffer.SetRenderTarget(spriteAtlas);
+            texturePacker.GetTexturesToRender(spriteAtlasUpdates);
+            if (spriteAtlasUpdates.size > 0) {
+                Vector3 cameraOrigin = camera.transform.position;
+                cameraOrigin.x -= 0.5f * Screen.width;
+                cameraOrigin.y += (0.5f * Screen.height); // for some reason editor needs this minor adjustment
+                cameraOrigin.z += 2;
+                Matrix4x4 origin = Matrix4x4.TRS(cameraOrigin, Quaternion.identity, Vector3.one);
 #if DEBUG
-            commandBuffer.BeginSample("UIFora Clip Pass");
+                commandBuffer.BeginSample("UIForia Sprite Atlas Update");
 #endif
+                // could do this in larger batches and have the material sample multiple textures per run
+                // ideally we don't update every frame but Unity seems to have other ideas about that and
+                // clears our sprite texture between frames. Ask about this
+                for (int i = 0; i < spriteAtlasUpdates.size; i++) {
+                    PooledMesh mesh = MakeQuadMesh(spriteAtlasUpdates[i].region);
+                    propertyBlock.SetTexture(s_MainTex, spriteAtlasUpdates[i].texture);
+                    commandBuffer.DrawMesh(mesh.mesh, origin, spriteAtlasMaterial, 0, 0, propertyBlock);
+                    meshesToRelease.Add(mesh);
+                }
+#if DEBUG
+                commandBuffer.EndSample("UIForia Sprite Atlas Update");
+#endif
+            }
+
+            StructList<TexturePacker.TextureData>.Release(ref spriteAtlasUpdates);
 
             clipContext.Clip(camera, commandBuffer);
-
-#if DEBUG
-            commandBuffer.EndSample("UIFora Clip Pass");
-#endif
 
 #if DEBUG
             commandBuffer.BeginSample("UIForia Render Main");
 #endif
             FinalizeCurrentBatch();
-            
+
             ProcessDrawCommands(camera, commandBuffer);
 
 #if DEBUG
@@ -699,6 +845,19 @@ namespace UIForia.Rendering {
                 this.rtId = renderTexture;
             }
 
+        }
+
+        public void Destroy() {
+            clipContext?.Destroy();
+            clipContext = null;
+            UnityEngine.Object.Destroy(spriteAtlas);
+            UnityEngine.Object.Destroy(spriteAtlasMaterial);
+
+            for (int i = 0; i < meshesToRelease.size; i++) {
+                meshesToRelease[i].Release();
+            }
+
+            uiforiaMeshPool.Destroy();
         }
 
 //        public RenderTargetIdentifier GetNextRenderTarget() {

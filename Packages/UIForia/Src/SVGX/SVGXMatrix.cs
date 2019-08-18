@@ -25,7 +25,7 @@ namespace SVGX {
 
         public Vector2 position => new Vector2(m4, m5);
 
-        public Vector2 scale => new Vector2(Mathf.Sqrt(m0 * m0 + m1 * m1), Mathf.Sqrt(m2 * m2 + m3 * m3));
+        public Vector2 scale => IsTranslationOnly ? new Vector2(1, 1) : new Vector2(Mathf.Sqrt(m0 * m0 + m1 * m1), Mathf.Sqrt(m2 * m2 + m3 * m3));
 
         public float skewX {
             get {
@@ -41,7 +41,9 @@ namespace SVGX {
             }
         }
 
-        public float rotation => skewX;
+        public float rotation => IsTranslationOnly ? 0 : skewX;
+
+        public bool IsTranslationOnly => m0 == 1 && m1 == 0 && m2 == 0 && m3 == 1;
 
         private Vector2 DeltaTransformPoint(Vector2 point) {
             return new Vector2(point.x * m0 + point.y * m2, point.x * m1 + point.y * m3);
@@ -135,6 +137,7 @@ namespace SVGX {
         public Vector2 Transform(Vector2 point) {
             return new Vector2(m0 * point.x + m2 * point.y + m4, m1 * point.x + m3 * point.y + m5);
         }
+
         public Vector2 Transform(float x, float y) {
             return new Vector2(m0 * x + m2 * y + m4, m1 * x + m3 * y + m5);
         }

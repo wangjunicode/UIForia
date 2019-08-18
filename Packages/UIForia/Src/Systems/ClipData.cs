@@ -5,34 +5,40 @@ namespace UIForia.Rendering {
 
     public class ClipData {
 
-        public bool isRect;
-        public bool isCulled;
-        public Vector4 screenSpaceBounds;
-        public ClipData parent;
-        public int visibleBoxCount;
-        public StructList<Vector2> intersected;
-        public PolyRect worldBounds;
-        public RenderBox renderBox;
-        public RenderTexture clipTexture;
-        public Vector4 clipUVs;
-        public ClipShape clipShape;
-        public int zIndex;
-        public int lastFrameId; // todo -- if user wants to make a clipper thats fine
-        public int textureChannel;
-        public SimpleRectPacker.PackedRect textureRegion;
-        public LightList<ClipData> dependents;
+        internal bool isTransformed;
+        internal bool isCulled;
+        internal bool isDrawn;
+        
+        internal int zIndex;
+        internal int textureChannel;
+        internal int visibleBoxCount;
+        
+        internal Vector4 aabb;
+        internal ClipData parent;
+        internal StructList<Vector2> intersected;
+        internal PolyRect worldBounds;
+        internal RenderBox renderBox;
+        internal RenderTexture clipTexture;
+        internal Vector4 clipUVs;
+        internal Path2D clipPath;
 
-        public ClipData() {
+        internal SimpleRectPacker.PackedRect textureRegion;
+        internal LightList<ClipData> dependents;
+        internal Vector4 packedBoundsAndChannel;
+        internal int regionDrawCount;
+
+        internal ClipData() {
             intersected = new StructList<Vector2>();
             dependents = new LightList<ClipData>();
         }
 
         public void Clear() {
             parent = null;
-            clipShape = null;
+            isDrawn = false;
+            clipPath = null;
             isCulled = false;
             visibleBoxCount = 0;
-            isRect = false;
+            isTransformed = false;
             renderBox = null;
             intersected.size = 0;
             worldBounds = default;

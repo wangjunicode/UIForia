@@ -237,12 +237,11 @@ namespace UIForia.Rendering {
 
             if (shouldUpdateMaterialProperties) {
                 shouldUpdateMaterialProperties = false;
-         //       Debug.Log("Updated " + element.id);
                 float underlayX = (Mathf.Clamp(textSpan.underlayX, -1, 1) + 1) * 0.5f;
                 float underlayY = (Mathf.Clamp(textSpan.underlayY, -1, 1) + 1) * 0.5f;
                 float underlayDilate = (Mathf.Clamp(textSpan.underlayDilate, -1, 1) + 1) * 0.5f;
                 float underlaySoftness = Mathf.Clamp01(textSpan.underlaySoftness);
-                // todo -- something is odd with packing, getting NaN back but might be expected
+
                 float packedUnderlay = VertigoUtil.ColorToFloat(new Color(underlayX, underlayY, underlayDilate, underlaySoftness));
                 float mainColor = VertigoUtil.ColorToFloat(textSpan.textColor);
                 float outlineColor = VertigoUtil.ColorToFloat(textSpan.outlineColor);
@@ -266,6 +265,8 @@ namespace UIForia.Rendering {
                 geometry.packedColors = new Vector4(mainColor, outlineColor, underlayColor, glowColor);
             }
 
+            // ctx.DrawBatchedTextLine(geometry, ranges, matrix);
+            
             Matrix4x4 matrix = element.layoutResult.matrix.ToMatrix4x4();
             // ctx.DrawBatchedGeometry(geometry, ranges.array[0], element.layoutResult.matrix.ToMatrix4x4());
             if (ranges.size == 1) {

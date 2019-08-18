@@ -190,6 +190,43 @@ namespace UIForia.Bindings.StyleBindings {
 
     }
         
+    public class StyleBinding_ClipBehavior : StyleBinding {
+
+        public readonly Expression<UIForia.Layout.ClipBehavior> expression;
+        public readonly StylePropertyId propertyId;
+        
+        public StyleBinding_ClipBehavior(string propertyName, StylePropertyId propertyId, StyleState state, Expression<UIForia.Layout.ClipBehavior> expression)
+            : base(propertyName, state) {
+            this.propertyId = propertyId;
+            this.expression = expression;
+        }
+
+        public override void Execute(UIElement element, ExpressionContext context) {
+            if (!element.style.IsInState(state)) return;
+
+            var oldValue = element.style.propertyMap[(int)propertyId].AsClipBehavior;
+            var value = expression.Evaluate(context);
+            if (value != oldValue) {
+                element.style.SetProperty(new StyleProperty(propertyId, (int)value), state);
+            }
+        }
+
+        public override bool IsConstant() {
+            return expression.IsConstant();
+        }
+
+        public override void Apply(UIStyle style, ExpressionContext context) {
+            var value = expression.Evaluate(context);
+            style.SetProperty(new StyleProperty(propertyId, (int)value));
+        }
+
+        public override void Apply(UIStyleSet styleSet, ExpressionContext context) {
+            var value = expression.Evaluate(context);
+            styleSet.SetProperty(new StyleProperty(propertyId, (int)value), state);
+        }
+
+    }
+        
     public class StyleBinding_Color : StyleBinding {
 
         public readonly Expression<UnityEngine.Color> expression;
@@ -1271,6 +1308,7 @@ namespace UIForia.Compilers {
 
         private static readonly EnumAliasSource<UIForia.Rendering.Visibility> s_EnumSource_Visibility = new EnumAliasSource<UIForia.Rendering.Visibility>();
         private static readonly EnumAliasSource<UIForia.Rendering.Overflow> s_EnumSource_Overflow = new EnumAliasSource<UIForia.Rendering.Overflow>();
+        private static readonly EnumAliasSource<UIForia.Layout.ClipBehavior> s_EnumSource_ClipBehavior = new EnumAliasSource<UIForia.Layout.ClipBehavior>();
         private static readonly EnumAliasSource<UIForia.Rendering.BackgroundFit> s_EnumSource_BackgroundFit = new EnumAliasSource<UIForia.Rendering.BackgroundFit>();
         private static readonly EnumAliasSource<UIForia.Layout.LayoutDirection> s_EnumSource_LayoutDirection = new EnumAliasSource<UIForia.Layout.LayoutDirection>();
         private static readonly EnumAliasSource<UIForia.Layout.LayoutWrap> s_EnumSource_LayoutWrap = new EnumAliasSource<UIForia.Layout.LayoutWrap>();
@@ -1308,6 +1346,8 @@ case "visibility":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_Overflow("OverflowX", UIForia.Rendering.StylePropertyId.OverflowX, targetState.state, Compile<UIForia.Rendering.Overflow>(value, s_EnumSource_Overflow));                
                 case "overflowy":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_Overflow("OverflowY", UIForia.Rendering.StylePropertyId.OverflowY, targetState.state, Compile<UIForia.Rendering.Overflow>(value, s_EnumSource_Overflow));                
+                case "clipbehavior":
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_ClipBehavior("ClipBehavior", UIForia.Rendering.StylePropertyId.ClipBehavior, targetState.state, Compile<UIForia.Layout.ClipBehavior>(value, s_EnumSource_ClipBehavior));                
                 case "backgroundcolor":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_Color("BackgroundColor", UIForia.Rendering.StylePropertyId.BackgroundColor, targetState.state, Compile<UnityEngine.Color>(value, colorSources));                
                 case "backgroundtint":

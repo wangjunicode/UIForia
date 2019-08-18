@@ -27,6 +27,7 @@ namespace UIForia.Compilers.Style {
                 {"overflow", (targetStyle, property, context) => MapOverflows(targetStyle, property, context)},
                 {"overflowx", (targetStyle, property, context) => targetStyle.OverflowX = MapEnum<Overflow>(property.children[0], context)},
                 {"overflowy", (targetStyle, property, context) => targetStyle.OverflowY = MapEnum<Overflow>(property.children[0], context)},
+                {"clipbehavior", (targetStyle, property, context) => targetStyle.ClipBehavior = MapEnum<ClipBehavior>(property.children[0], context)},
 
                 // Alignment
                 {"alignmentbehaviorx", (targetStyle, property, context) => targetStyle.AlignmentBehaviorX = MapEnum<AlignmentBehavior>(property.children[0], context)},

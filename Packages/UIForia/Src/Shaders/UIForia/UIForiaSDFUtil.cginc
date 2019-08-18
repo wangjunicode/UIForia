@@ -23,86 +23,38 @@ inline float PercentOfRange(float v, float minVal, float maxVal) {
     return (v - minVal) / (maxVal - minVal);
 }
 
-fixed4 UIForiaAlphaClipColor(fixed4 color, sampler2D clipTexture, float2 screenUV, float4 clipRect, float4 clipUvs) {
+float2 UnpackSize(float packedSize);
+
+fixed4 UIForiaAlphaClipColor(fixed4 color, sampler2D clipTexture, float2 screenUV, float4 clipData, float4 clipUvs) {
     screenUV.y = 1 - screenUV.y;
     
     // todo -- if mask render texture is packed with padding we need to account for that padding
-    // todo -- mask by channel
     // todo -- mask at half resolution
     // todo -- for clipping we don't want to blend do much, for masking we might
     
     float2 screenPos = float2(screenUV.x * _ScreenParams.x, screenUV.y * _ScreenParams.y);
+    half2 unpackedSizeXY = UnpackSize(clipData.x);
+    half2 unpackedSizeZW = UnpackSize(clipData.y);
     
     // point in rect, does not handle rotation, need to be sure box & point are in the same same aligned coordinate space
-    float2 s = step(float2(clipRect.x, clipRect.w), screenPos) - step(float2(clipRect.z , clipRect.y), screenPos);
+    float2 s = step(float2(unpackedSizeXY.x, unpackedSizeZW.y), screenPos) - step(float2(unpackedSizeZW.x , unpackedSizeXY.y), screenPos);
     
     fixed4 retn = color;
-
-    float x = PercentOfRange(screenPos.x, clipRect.x, clipRect.z);
-    float y = PercentOfRange(screenPos.y, clipRect.y, clipRect.w);
+    
+    float x = PercentOfRange(screenPos.x, unpackedSizeXY.x, unpackedSizeZW.x);
+    float y = PercentOfRange(screenPos.y, unpackedSizeXY.y, unpackedSizeZW.y);
     
     x = Map(x, 0, 1, clipUvs.x, clipUvs.z);
     y = Map(y, 0, 1, clipUvs.y, clipUvs.w);
 
-    // clip rect is in integers, this accounts for loss of fraction by subtracting 1 pixel size to x and y
-    //  x -= (1 / _ScreenParams.x) * 0.5;
-    //  y += (1 / _ScreenParams.y) * 0.5;
+     // x += (1 / _ScreenParams.x) * 0.5;
+     // y += (1 / _ScreenParams.y) * 0.5;
 
     // y comes in [0 - 1], need to sample with [1, 0]
-    fixed a = tex2Dlod(clipTexture, float4(x, 1 - y, 0, 0)).r;
-    retn = lerp(retn, fixed4(retn.rgb, lerp(color.a, a, 1 - a)), a < 1 && color.a > 0);
+    fixed a = tex2Dlod(clipTexture, float4(x, 1 - y, 0, 0))[(int)clipData.z]; // z is the channel the target mask is on
+    retn = lerp(retn, fixed4(retn.rgb, lerp(color.a, a, 1 - a)), a < 1 && color.a > 0 && (clipUvs.z + clipUvs.w) != 0);
     retn = lerp(retn, fixed4(0, 0, 0, 0), (s.x * s.y) == 0); 
-    retn = lerp(retn, color, (clipRect.z + clipRect.w == 0) || (clipUvs.z + clipUvs.w) == 0);
-    //if((clipUvs.w >= 0.14 && clipUvs.w <= 0.2) ) return fixed4(a, a, a, 1);
     return retn;
-}
-
-fixed4 UIForiaAlphaClip(float inputAlpha, sampler2D clipTexture, float2 screenUV, float4 clipRect, float4 clipUvs) {
-
-    screenUV.y = 1 - screenUV.y;
-    
-    // todo -- if mask render texture is packed with padding we need to account for that padding
-    
-    float2 screenPos = float2(screenUV.x * _ScreenParams.x, screenUV.y * _ScreenParams.y);
-    
-    if(clipRect.z == 0 && clipRect.w == 0) {
-        return inputAlpha;
-    }
-    
-    // point in rect, does not handle rotation, need to be sure box & point are in the same same aligned coordinate space
-    // -1 to fix artifacts
-    float2 s = step(float2(clipRect.x, clipRect.y + clipRect.w), screenPos) - step(float2(clipRect.x + clipRect.z , clipRect.y), screenPos);
-    // todo -- handle single axis overflow
-    if (s.x * s.y) {
-            
-        float x = PercentOfRange(screenPos.x, clipRect.x, clipRect.z - clipRect.x);
-        float y = PercentOfRange(screenPos.y, clipRect.y, clipRect.w - clipRect.y);
-        
-        x = Map(x, 0, 1, clipUvs.x, clipUvs.z);
-        y = Map(y, 0, 1, clipUvs.y, clipUvs.w);
-    
-        // clip rect is in integers, this accounts for loss of fraction by subtracting 1 pixel size to x and y
-        // x += (1 / _ScreenParams.x) * 0.5;
-        // y += (1 / _ScreenParams.y) * 0.5;
-        
-        // todo -- different channel use different values
-        // y comes in [0 - 1], need to sample with [1, 0]
-        fixed a = tex2Dlod(clipTexture, float4(x, 1 - y, 0, 0)).a;// * 0.5;
-        
-        // currently making makes at half resolution, multipling alpha by a bit makes up for the lower resolution
-        // a = saturate(a * 1.4);
-        
-        // if z and w (width and height max) are 0 we consider the check to be 'rect-only'   
-        if(clipUvs.z == 0 && clipUvs.w == 0) {
-            a = inputAlpha;  
-        }
-        
-        return inputAlpha * a;
-
-    }
-    
-    return 0;
-    
 }
                                    
 // same as UnityPixelSnap except taht we add 0.5 to pixelPos after rounding

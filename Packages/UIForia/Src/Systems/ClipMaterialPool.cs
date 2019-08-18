@@ -1,10 +1,8 @@
 using System;
-using Src.Systems;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace UIForia.Rendering {
-
-   
     
     internal class ClipMaterialPool {
 
@@ -41,8 +39,6 @@ namespace UIForia.Rendering {
             this.massiveBlock = new ClipPropertyBlock(massive, RenderContext.k_ObjectCount_Massive);
         }
         
-      
-        
         public ClipPropertyBlock GetPropertyBlock(int objectCount) {
             if (objectCount <= RenderContext.k_ObjectCount_Small) {
                 return smallBlock;
@@ -65,6 +61,14 @@ namespace UIForia.Rendering {
             }
 
             throw new Exception($"Batch size is too big. Tried to draw {objectCount} objects but batching supports at most {RenderContext.k_ObjectCount_Massive}");
+        }
+
+        public void Destroy() {
+            Object.Destroy(small);
+            Object.Destroy(medium);
+            Object.Destroy(large);
+            Object.Destroy(huge);
+            Object.Destroy(massive);
         }
 
     }

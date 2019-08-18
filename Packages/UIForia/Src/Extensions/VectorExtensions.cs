@@ -4,7 +4,15 @@ namespace UIForia.Extensions {
 
     public static class VectorExtensions {
 
-        public static bool Overlaps(this Vector4 self, Vector4 other) {
+        public static Vector4 IntersectAsRect(this Vector4 rect, in Vector4 other) {
+            float xMin = rect.x > other.x ? rect.x : other.x;
+            float xMax = rect.z < other.z ? rect.z : other.z;
+            float yMin = rect.y > other.y ? rect.y : other.y;
+            float yMax = rect.w < other.w ? rect.w : other.w;
+            return new Vector4(xMin, yMin, xMax, yMax);
+        }
+
+        public static bool OverlapAsRect(this Vector4 self, Vector4 other) {
             return other.z > self.x && other.x < self.z && other.w > self.y && other.y < self.w;
         }
 

@@ -108,7 +108,6 @@ Shader "UIForia/Standard"
                 
                 // this only works for 'flower' configuration meshes, not for quads. use a flag for the quad
                 o.texCoord4 = float4(lerp(0, 1, v.texCoord0.x == 0.5 && v.texCoord0.y == 0.5), screenPos.xyw);
-                o.clipRect = _ClipUVs[objectIndex];
                 
                 if(shapeType != ShapeType_Text) {
                     // o.vertex = UIForiaPixelSnap(o.vertex); // pixel snap is bad for text rendering
@@ -168,6 +167,7 @@ Shader "UIForia/Standard"
             }            
           
             fixed4 frag (v2f i) : SV_Target {           
+                // return fixed4(i.texCoord0.z, i.texCoord0.z, i.texCoord0.z, 1);
                 
                 float2 screenUV = i.texCoord4.yz / i.texCoord4.w;
                 
@@ -186,7 +186,7 @@ Shader "UIForia/Standard"
                     sdfData.strokeWidth = borderData.size;
                     sdfData.radius = borderData.radius;
                     mainColor = SDFColor(sdfData, borderData.color, mainColor, i.texCoord4.x);
-                    mainColor = UIForiaAlphaClipColor(mainColor, _MaskTexture, screenUV, clipRect, clipUvs);
+                  //  mainColor = UIForiaAlphaClipColor(mainColor, _MaskTexture, screenUV, clipRect, clipUvs);
                     mainColor.rgb *= mainColor.a;
                     return mainColor;
                 }
@@ -205,7 +205,7 @@ Shader "UIForia/Standard"
                 float softness = 0; //(outlineSoftness * scaleRatio) * scale;
 
                 fixed4 faceColor = UnpackColor(asuint(i.color.r)); // could just be mainColor?
-                faceColor.a *= UIForiaAlphaClip(faceColor.a, _MaskTexture, screenUV, clipRect, clipUvs);
+                // faceColor.a *= UIForiaAlphaClip(faceColor.a, _MaskTexture, screenUV, clipRect, clipUvs);
                 
                 fixed4 outlineColor = Green;//UnpackColor(asuint(i.color.g));
                 //fixed4 underlayColor = UnpackColor(asuint(i.color.b));

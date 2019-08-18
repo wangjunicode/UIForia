@@ -54,11 +54,11 @@ namespace UIForia.Rendering {
             matBlock.SetVectorArray(s_ClipRectKey, clipRects);
 
             if (data.mainTexture != null) {
-                material.SetTexture(s_MainTextureKey, data.mainTexture);
+                matBlock.SetTexture(s_MainTextureKey, data.mainTexture);
             }
 
             if (data.clipTexture != null) {
-                material.SetTexture(s_ClipTextureKey, data.clipTexture);
+                matBlock.SetTexture(s_ClipTextureKey, data.clipTexture);
             }
             
             if (data.fontData.fontAsset != null) {

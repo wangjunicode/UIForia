@@ -47,6 +47,13 @@ namespace UIForia.Rendering {
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.OverflowY, (int)value), state); }
         }
         
+        public UIForia.Layout.ClipBehavior ClipBehavior {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ClipBehavior, state).AsClipBehavior; }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ClipBehavior, (int)value), state); }
+        }
+        
         public UnityEngine.Color BackgroundColor {
             [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.BackgroundColor, state).AsColor; }
@@ -974,6 +981,13 @@ namespace UIForia.Rendering {
             get { return (UIForia.Rendering.Overflow)FindEnumProperty(StylePropertyId.OverflowY); }
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.OverflowY, (int)value)); }
+        }
+            
+        public UIForia.Layout.ClipBehavior ClipBehavior {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return (UIForia.Layout.ClipBehavior)FindEnumProperty(StylePropertyId.ClipBehavior); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.ClipBehavior, (int)value)); }
         }
             
         public UnityEngine.Color BackgroundColor {
@@ -1918,6 +1932,15 @@ namespace UIForia.Rendering {
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.OverflowY, out property)) return property.AsOverflow;
                     return DefaultStyleValues_Generated.OverflowY;
+                }
+            }
+
+            public UIForia.Layout.ClipBehavior ClipBehavior { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.ClipBehavior, out property)) return property.AsClipBehavior;
+                    return DefaultStyleValues_Generated.ClipBehavior;
                 }
             }
 
@@ -3128,6 +3151,14 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.OverflowY, state).AsOverflow;
         }
         
+        public void SetClipBehavior(in UIForia.Layout.ClipBehavior? value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.ClipBehavior, (int)value), state);
+        }
+
+        public UIForia.Layout.ClipBehavior GetClipBehavior(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.ClipBehavior, state).AsClipBehavior;
+        }
+        
         public void SetBackgroundColor(in UnityEngine.Color? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.BackgroundColor, value), state);
         }
@@ -4151,6 +4182,8 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.OverflowX, (int)OverflowX);
 				case StylePropertyId.OverflowY:
 					 return new StyleProperty(StylePropertyId.OverflowY, (int)OverflowY);
+				case StylePropertyId.ClipBehavior:
+					 return new StyleProperty(StylePropertyId.ClipBehavior, (int)ClipBehavior);
 				case StylePropertyId.BackgroundColor:
 					 return new StyleProperty(StylePropertyId.BackgroundColor, BackgroundColor);
 				case StylePropertyId.BackgroundTint:

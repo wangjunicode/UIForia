@@ -321,6 +321,7 @@ namespace UIForia.Rendering {
         public CrossAxisAlignment AsCrossAxisAlignment => (CrossAxisAlignment) int0;
         public MainAxisAlignment AsMainAxisAlignment => (MainAxisAlignment) int0;
         public Overflow AsOverflow => (Overflow) int0;
+        public ClipBehavior AsClipBehavior => (ClipBehavior) int0;
         public Color AsColor => new StyleColor(int0);
 
         public FontAsset AsFont => (FontAsset) objectField;

@@ -49,7 +49,7 @@ namespace UIForia.Rendering {
                 edges.array[idx++] = new Edge(clipPoly[k], clipPoly[k - 1]);
             }
 
-            edges.array[idx] = new Edge(clipPoly[0], clipPoly[clipPoly.size - 1]);
+            edges.array[idx++] = new Edge(clipPoly[0], clipPoly[clipPoly.size - 1]);
             edges.size = idx;
 
             //	Walk around the clip polygon clockwise

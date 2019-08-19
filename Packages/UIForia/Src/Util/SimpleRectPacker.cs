@@ -41,6 +41,8 @@ namespace UIForia.Util {
             }
         }
 
+        public int checks = 0;
+        
         public bool TryPackRect(int width, int height, out PackedRect retn) {
             width += padding;
             height += padding;
@@ -56,23 +58,31 @@ namespace UIForia.Util {
             retn.xMax = width;
             retn.yMax = height;
 
-            possibleCollisionList.EnsureCapacity(rectList.size);
+        //   possibleCollisionList.EnsureCapacity(rectList.size);
 
-            PackedRect[] packedRects = possibleCollisionList.array;
+            PackedRect[] packedRects = rectList.array;
 
-            Array.Copy(rectList.array, 0, packedRects, 0, rectList.size);
-            possibleCollisionList.size = rectList.size;
-
+         //   Array.Copy(rectList.array, 0, packedRects, 0, rectList.size);
+           // possibleCollisionList.size = rectList.size;
+        
+            // can keep sorted list by x coord
+            // can't change regions
+            // basically want to only check things we MIGHT collide with
+            // best packing = move over by min x of collision set
+            
             int xMin = int.MaxValue;
 
             while (true) {
                 int intersectCount = 0;
                 int yMax = int.MinValue;
 
-                int rectCount = possibleCollisionList.size;
+                int rectCount = rectList.size;
 
                 for (int i = 0; i < rectCount; i++) {
                     ref PackedRect check = ref packedRects[i];
+
+                    if(check.xMax <= retn.xMin || check.yMax <= retn.yMin) continue;
+                    checks++;
 
                     bool intersects = !(retn.yMin >= check.yMax ||
                                       retn.yMax <= check.yMin ||
@@ -89,20 +99,16 @@ namespace UIForia.Util {
                 if (intersectCount == 0) {
                     retn.id = ++s_IdGenerator;
                     rectList.Add(retn);
-                    retn.xMin += padding;
-                    retn.yMin += padding;
-                    retn.xMax -= padding;
-                    retn.yMax -= padding;
                     return true;
                 }
 
-                retn.yMin = padding + yMax;
+                retn.yMin = yMax;
                 retn.yMax = retn.yMin + height;
 
                 if (retn.yMax > totalHeight) {
                     retn.yMin = 0;
                     retn.yMax = height;
-                    retn.xMin += padding + (xMin - retn.xMin);
+                    retn.xMin += (xMin - retn.xMin);
                     retn.xMax = retn.xMin + width;
                     xMin = int.MaxValue;
 
@@ -112,11 +118,11 @@ namespace UIForia.Util {
                     }
 
                     // if a rect cannot ever intersect, stop checking this by removing it from the list or mark as do not check
-                    for (int i = 0; i < possibleCollisionList.size; i++) {
-                        if (packedRects[i].xMax < retn.xMin) {
-                            packedRects[i--] = packedRects[--possibleCollisionList.size];
-                        }
-                    }
+//                    for (int i = 0; i < possibleCollisionList.size; i++) {
+//                        if (packedRects[i].xMax < retn.xMin) {
+//                            packedRects[i--] = packedRects[--possibleCollisionList.size];
+//                        }
+//                    }
                 }
             }
         }

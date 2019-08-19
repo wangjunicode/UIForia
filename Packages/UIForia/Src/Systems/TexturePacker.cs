@@ -122,7 +122,10 @@ namespace UIForia.Rendering {
 
         // if we don't draw every frame our RT gets cleared which I don't understand :(
         internal void GetTexturesToRender(StructList<TextureData> textureData) {
-            textureData.AddRange(packedTextureList);
+            // comment this line back in to make drawing work
+//            textureData.AddRange(packedTextureList);
+            textureData.AddRange(toDrawThisFrame);
+            toDrawThisFrame.QuickClear();
         }
 
     }

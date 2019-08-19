@@ -186,7 +186,7 @@ Shader "UIForia/Standard"
                     sdfData.strokeWidth = borderData.size;
                     sdfData.radius = borderData.radius;
                     mainColor = SDFColor(sdfData, borderData.color, mainColor, i.texCoord4.x);
-                  //  mainColor = UIForiaAlphaClipColor(mainColor, _MaskTexture, screenUV, clipRect, clipUvs);
+                    mainColor = UIForiaAlphaClipColor(mainColor, _MaskTexture, screenUV, clipRect, clipUvs);
                     mainColor.rgb *= mainColor.a;
                     return mainColor;
                 }

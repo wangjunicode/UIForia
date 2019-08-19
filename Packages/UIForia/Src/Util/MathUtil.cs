@@ -4,6 +4,10 @@ namespace UIForia.Util {
 
     public static class MathUtil {
 
+        public static float RemapRange(float s, float a1, float a2, float b1, float b2) {
+            return b1 + (s - a1) * (b2 - b1) / (a2 - a1);
+        }
+        
         public static float PercentOfRange(float v, float bottom, float top) {
             float div = top - bottom;
             return div == 0 ? 0 : (v - bottom) / div;

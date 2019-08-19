@@ -84,17 +84,19 @@ namespace UIForia.Rendering {
         private int defaultRTDepth;
 
         private static readonly int s_MaxTextureSize;
+        private static readonly int s_MainTex = Shader.PropertyToID("_MainTex");
 
         private readonly Material effectBlitMaterial;
         private readonly StructList<ScratchRenderTexture> scratchTextures;
         private readonly StructList<RenderOperation> renderCommandList;
         private readonly StructList<Batch> pendingBatches;
-        private RenderTexture pingPongTexture;
         private readonly StructStack<RenderArea> areaStack;
-        private Material pathMaterial;
         internal ClipContext clipContext;
-        private TexturePacker texturePacker;
+        private RenderTexture textAtlas;
         private RenderTexture spriteAtlas;
+        private RenderTexture pingPongTexture;
+        private TexturePacker texturePacker;
+        private SimpleRectPacker textPacker;
         private Material spriteAtlasMaterial;
         private MaterialPropertyBlock propertyBlock;
         private readonly LightList<PooledMesh> meshesToRelease;
@@ -118,10 +120,11 @@ namespace UIForia.Rendering {
             this.areaStack = new StructStack<RenderArea>();
             this.fixedRenderStateList = new StructList<FixedRenderState>();
             this.clipContext = new ClipContext();
-            this.pathMaterial = new Material(Shader.Find("UIForia/UIForiaPathSDF")); // temp
-            this.pathMaterialPool = new UIForiaMaterialPool(pathMaterial);
-            this.spriteAtlas = new RenderTexture(Screen.width, Screen.height, 0, RenderTextureFormat.ARGB32);
+            this.pathMaterialPool = new UIForiaMaterialPool(new Material(Shader.Find("UIForia/UIForiaPathSDF")));
+            this.textAtlas = new RenderTexture(Screen.width, Screen.height, 0, RenderTextureFormat.DefaultHDR);
+            this.spriteAtlas = new RenderTexture(Screen.width, Screen.height, 0, RenderTextureFormat.DefaultHDR);
             this.spriteAtlas.name = "UIForia Sprite Atlas";
+            this.textAtlas.name = "UIForia Text Atlas";
             this.spriteAtlasMaterial = new Material(Shader.Find("UIForia/UIForiaSpriteAtlas"));
             this.texturePacker = new TexturePacker(Screen.width, Screen.height);
             this.propertyBlock = new MaterialPropertyBlock();
@@ -176,6 +179,14 @@ namespace UIForia.Rendering {
             FinalizeCurrentBatch();
         }
 
+        public void DrawText(TextSpan textSpan, in Matrix4x4 transform, ClipData clipper = null) {
+            // if needs update, update geometry
+            // break into lines
+            // for each line pack into text atlas
+            // if line won't fit, break in half up to 3 times
+            // if part of line still won't fit, draw directly & maybe break batch
+            
+        }
 
         public void DrawBatchedTextLine(Size size, UIForiaData geometry, GeometryRange range, FontData fontData, in Matrix4x4 matrix, ClipData clipper = null) {
             // atlas built per frame for now, optimize this later w/ region tracking
@@ -313,11 +324,7 @@ namespace UIForia.Rendering {
             int vertexStart = positionList.size;
 
             UpdateUIForiaGeometry(geometry, range);
-
-            float Map(float s, float a1, float a2, float b1, float b2) {
-                return b1 + (s - a1) * (b2 - b1) / (a2 - a1);
-            }
-
+            
             if (remapUvs) {
                 // remap x & y to sprite sheet uvs
                 int vertexEnd = positionList.size;
@@ -326,8 +333,8 @@ namespace UIForia.Rendering {
                     float x = texCoord0[i].x;
                     float y = texCoord0[i].y;
                     // for now assume 0 to 1 i guess
-                    texCoord0[i].x = Map(x, 0, 1, uvs.x, uvs.z);
-                    texCoord0[i].y = Map(y, 0, 1, 1 - uvs.w, 1 - uvs.y);
+                    texCoord0[i].x = MathUtil.RemapRange(x, 0, 1, uvs.x, uvs.z);
+                    texCoord0[i].y = MathUtil.RemapRange(y, 0, 1, 1 - uvs.w, 1 - uvs.y);
                 }
             }
         }
@@ -446,10 +453,9 @@ namespace UIForia.Rendering {
             texCoordList0.size = 0;
             texCoordList1.size = 0;
             triangleList.size = 0;
+            mesh.mesh.name = "Quad";
             return mesh;
         }
-
-        private static readonly int s_MainTex = Shader.PropertyToID("_MainTex");
 
 
         public void Render(Camera camera, CommandBuffer commandBuffer) {
@@ -464,9 +470,9 @@ namespace UIForia.Rendering {
             }
 
             StructList<TexturePacker.TextureData> spriteAtlasUpdates = StructList<TexturePacker.TextureData>.Get();
-            commandBuffer.SetRenderTarget(spriteAtlas);
             texturePacker.GetTexturesToRender(spriteAtlasUpdates);
             if (spriteAtlasUpdates.size > 0) {
+                commandBuffer.SetRenderTarget(spriteAtlas);
                 Vector3 cameraOrigin = camera.transform.position;
                 cameraOrigin.x -= 0.5f * Screen.width;
                 cameraOrigin.y += (0.5f * Screen.height); // for some reason editor needs this minor adjustment

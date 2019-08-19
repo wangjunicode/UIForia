@@ -7,7 +7,6 @@ using UIForia.Templates;
 using UIForia.UIInput;
 using UIForia.Util;
 using UnityEngine;
-using UnityEngine.EventSystems;
 
 namespace UIForia.Elements {
 
@@ -39,6 +38,8 @@ namespace UIForia.Elements {
 
         public bool disableOverflowX;
         public bool disableOverflowY;
+
+        private UIElement clippingElement;
 
         public RepeatableList<ISelectOption<T>> options;
         private RepeatableList<ISelectOption<T>> previousOptions;
@@ -135,7 +136,16 @@ namespace UIForia.Elements {
             optionList = FindById<ScrollView>("option-list");
 
             Application.InputSystem.RegisterFocusable(this);
-                
+
+            UIElement potentialClippingParent = parent;
+            while (clippingElement == null) {
+                if (potentialClippingParent == View.RootElement || potentialClippingParent.style.OverflowY != Overflow.Visible) {
+                    clippingElement = potentialClippingParent;
+                }
+
+                potentialClippingParent = potentialClippingParent.parent;
+            }
+
             if (disabled) {
                 SetAttribute("disabled", disabledAttributeValue);
                 DisableAllChildren(this);
@@ -198,8 +208,10 @@ namespace UIForia.Elements {
             if (selecting && (evt.keyCode == KeyCode.Return || evt.keyCode == KeyCode.Space)) {
                 
                 // space and return should only choose the currently keyboard-selected item
-                SetSelectedValue(keyboardNavigationIndex);
-                childrenElement.children[selectedIndex].style.ExitState(StyleState.Hover);
+                if (keyboardNavigationIndex > -1) {
+                    SetSelectedValue(keyboardNavigationIndex);
+                    childrenElement.children[selectedIndex].style.ExitState(StyleState.Hover);
+                }
                 return;
             }
             
@@ -338,8 +350,8 @@ namespace UIForia.Elements {
 
         public void AdjustOptionPosition() {
             float offset = 0;
-            float maxOffset = layoutResult.screenPosition.y;
-            float minOffset = optionList.layoutResult.screenPosition.y - optionList.style.TransformPositionY.value + optionList.layoutResult.AllocatedHeight - Screen.height;
+            float maxOffset = layoutResult.screenPosition.y - clippingElement.layoutResult.screenPosition.y;
+            float minOffset = optionList.layoutResult.screenPosition.y - optionList.style.TransformPositionY.value + optionList.layoutResult.AllocatedHeight - (clippingElement.layoutResult.screenPosition.y + clippingElement.layoutResult.AllocatedHeight);
             UIElement[] childrenArray = childrenElement.children.Array;
             for (int i = 0; i < selectedIndex; i++) {
                 offset += childrenArray[i].layoutResult.ActualHeight;

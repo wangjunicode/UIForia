@@ -77,38 +77,38 @@ namespace UIForia {
 //            }
 //
 //            gradientOutput.Apply();
-//            packer = new BetterRectPacker(600, 600);
-//            worse = new SimpleRectPacker(600, 600, 0);
-//            
-//            int count = 0;
-//            Size[] sizes = new Size[50];
-//
-//            for (int i = 0; i < sizes.Length; i++) {
-//                sizes[i] = new Size(Random.Range(60, 80), Random.Range(60, 80));
-//            }
-//
-//            Stopwatch stopwatch = new Stopwatch();
-//            stopwatch.Start();
-//            for (int i = 0; i < sizes.Length; i++) {
-//                if (packer.TryPackRect((int) sizes[i].width, (int) sizes[i].height, out BetterRectPacker.PackedRect rect)) {
-//                    count++;
-//                }
-//            }
-//
-//            stopwatch.Stop();
-//
-//            Debug.Log("New -- Packed: " + count + " in " + stopwatch.ElapsedTicks + " ticks" + " with " + packer.checks + " checks");
-//            stopwatch.Reset();
-//            stopwatch.Start();
-//            count = 0;
-//            for (int i = 0; i < sizes.Length; i++) {
-//                if (worse.TryPackRect((int) sizes[i].width, (int) sizes[i].height, out SimpleRectPacker.PackedRect rect)) {
-//                    count++;
-//                }
-//            }
-//
-//            stopwatch.Stop();
-//            Debug.Log("Old -- Packed: " + count + " in " + stopwatch.ElapsedTicks + " ticks" + " with " + worse.checks + " checks");
+            packer = new BetterRectPacker(600, 600);
+            worse = new SimpleRectPacker(600, 600, 0);
+            
+            int count = 0;
+            Size[] sizes = new Size[50];
+
+            for (int i = 0; i < sizes.Length; i++) {
+                sizes[i] = new Size(Random.Range(60, 80), Random.Range(60, 80));
+            }
+
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+            for (int i = 0; i < sizes.Length; i++) {
+                if (packer.TryPackRect((int) sizes[i].width, (int) sizes[i].height, out BetterRectPacker.PackedRect rect)) {
+                    count++;
+                }
+            }
+
+            stopwatch.Stop();
+
+            Debug.Log("New -- Packed: " + count + " in " + stopwatch.ElapsedTicks + " ticks" + " with " + packer.checks + " checks");
+            stopwatch.Reset();
+            stopwatch.Start();
+            count = 0;
+            for (int i = 0; i < sizes.Length; i++) {
+                if (worse.TryPackRect((int) sizes[i].width, (int) sizes[i].height, out SimpleRectPacker.PackedRect rect)) {
+                    count++;
+                }
+            }
+
+            stopwatch.Stop();
+            Debug.Log("Old -- Packed: " + count + " in " + stopwatch.ElapsedTicks + " ticks" + " with " + worse.checks + " checks");
 
         }
 
@@ -172,30 +172,30 @@ namespace UIForia {
         private void DrawOverlay(RenderContext ctx) {
             path.Clear();
 
-//            VertigoRenderSystem renderSystem = application.RenderSystem as VertigoRenderSystem;
-//            LightList<ClipData> clippers = renderSystem.renderOwners[0].renderedClippers;
-//
-//
-//            for (int i = 0; i < clippers.size; i++) {
-//                if (clippers[i].isCulled) {
-//                    //   DrawPolygonRect(clippers[i].worldBounds, Color.red);
-//                }
-//                else {
-//                    //    DrawPolygon(clippers[i].intersected, Color.green);
-//                }
-//            }
-//
-//            path.SetFill(Color.red);
-//            path.SetStroke(Color.black);
-//            path.BeginPath();
-//            path.SetStrokeWidth(3);
-//
-//            for (int i = 0; i < packer.sortedRectList.size; i++) {
-//                path.BeginPath();
-//                BetterRectPacker.PackedRect rect = packer.sortedRectList[i];
-//                path.Rect(rect.xMin, rect.yMin, rect.xMax - rect.xMin, rect.yMax - rect.yMin);
-//                path.Stroke();
-//            }
+            VertigoRenderSystem renderSystem = application.RenderSystem as VertigoRenderSystem;
+            LightList<ClipData> clippers = renderSystem.renderOwners[0].renderedClippers;
+
+
+            for (int i = 0; i < clippers.size; i++) {
+                if (clippers[i].isCulled) {
+                    //   DrawPolygonRect(clippers[i].worldBounds, Color.red);
+                }
+                else {
+                    //    DrawPolygon(clippers[i].intersected, Color.green);
+                }
+            }
+
+            path.SetFill(Color.red);
+            path.SetStroke(Color.black);
+            path.BeginPath();
+            path.SetStrokeWidth(3);
+
+            for (int i = 0; i < packer.sortedRectList.size; i++) {
+                path.BeginPath();
+                BetterRectPacker.PackedRect rect = packer.sortedRectList[i];
+                path.Rect(rect.xMin, rect.yMin, rect.xMax - rect.xMin, rect.yMax - rect.yMin);
+                path.Stroke();
+            }
 
 //            path.Stroke();
 //            path.Rect(100, 100, 400, 400);

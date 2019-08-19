@@ -243,7 +243,7 @@ namespace UIForia.Elements {
                 // if we are NOT in selection mode using the arrow keys should just cycle through the options and set them immediately
                 if (evt.keyCode == KeyCode.UpArrow) {
                     selectedIndex--;
-                    if (selectedIndex == -1) {
+                    if (selectedIndex < 0) {
                         selectedIndex = options.Count - 1;
                     }
 
@@ -268,7 +268,7 @@ namespace UIForia.Elements {
                         childrenElement.children[keyboardNavigationIndex].style.ExitState(StyleState.Hover);
                     }
                     keyboardNavigationIndex--;
-                    if (keyboardNavigationIndex == -1) {
+                    if (keyboardNavigationIndex < 0) {
                         keyboardNavigationIndex = options.Count - 1;
                     }
                     ScrollElementIntoView();
@@ -308,7 +308,7 @@ namespace UIForia.Elements {
 
             if (localPositionY < 0) {
                 // scrolls up to the upper edge of the element
-                float normalizedScrollY = (localPositionY - minY) / trackHeight;
+                float normalizedScrollY = (localPositionY - minY) / (trackHeight - scrollViewHeight);
                 element.TriggerEvent(new UIScrollEvent(0, normalizedScrollY));
             }
             else {

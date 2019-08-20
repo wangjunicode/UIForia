@@ -11,8 +11,8 @@ namespace UIForia.Elements {
         public Texture2D texture;
         private Mesh mesh;
 
-        public int Width;
-        public int Height;
+        public float Width;
+        public float Height;
         
         public UIImageElement() {
             flags |= UIElementFlags.Primitive;
@@ -26,12 +26,12 @@ namespace UIForia.Elements {
             }
             style.SetBackgroundImage(texture, StyleState.Normal);
             if (Width > 0) {
-                style.SetPreferredHeight(texture.height / texture.width * Width, StyleState.Normal);
+                style.SetPreferredHeight(Width * texture.height / texture.width, StyleState.Normal);
                 style.SetPreferredWidth(Width, StyleState.Normal);
                 
             }
             if (Height > 0) {
-                style.SetPreferredWidth(texture.width / texture.height * Height, StyleState.Normal);
+                style.SetPreferredWidth(Height * texture.width / texture.height, StyleState.Normal);
                 style.SetPreferredHeight(Height, StyleState.Normal);
             }
         }

@@ -1,0 +1,17 @@
+import "Documentation/Documentation.style" as theme;
+
+style container {
+    PreferredSize = 1pca;
+}
+
+style section {
+    MarginBottom = 20px;
+    PaddingBottom = 20px;
+    BorderBottom = 2px;
+    BorderColor = grey;
+    PreferredSize = 1pca 1cnt;
+}
+
+style visibility-test {
+    BackgroundColor = rgb(200, 20, 20);
+}

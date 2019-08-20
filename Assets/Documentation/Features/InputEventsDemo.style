@@ -20,7 +20,7 @@ style start-zone {
     [hover] {
         BackgroundColor = rgb(20, 200, 20);
     }
-    Padding = 40px;
+//    Padding = 40px;
 }
 
 style drop-zone {
@@ -33,7 +33,7 @@ style drop-zone {
 }
 
 style dragme {
-    //PreferredSize = 90px 50px;
+    PreferredSize = 90px 50px;
     Border = 2px;
     BorderColor = black;
     Padding = 10px;

@@ -134,9 +134,10 @@ namespace UI {
             }
 
             public override void Update() {
-                origin.style.SetTransformPosition(MousePosition - offset, StyleState.Normal);
+                if (MousePosition.x > 0 && MousePosition.x < Screen.width && MousePosition.y > 0 && MousePosition.y < Screen.height) {
+                    origin.style.SetTransformPosition(MousePosition - offset, StyleState.Normal);
+                }
             }
-
         }
 
         public class WindowResizeEvent : DragEvent {

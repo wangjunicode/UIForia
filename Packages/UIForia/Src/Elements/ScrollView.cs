@@ -19,6 +19,9 @@ namespace UIForia.Elements {
         public float scrollSpeed = 0.05f;
         public float fadeTime = 2f;
 
+        public bool disableOverflowX;
+        public bool disableOverflowY;
+
         protected float lastScrollVerticalTimestamp;
         protected float lastScrollHorizontalTimestamp;
 
@@ -71,11 +74,19 @@ namespace UIForia.Elements {
             Size overflowSize = targetElement.layoutResult.overflowSize;
             Size allocatedSize = targetElement.layoutResult.allocatedSize;
 
+            if (disableOverflowY) {
+                verticalTrack.SetEnabled(false);
+            }
+
+            if (disableOverflowX) {
+                horizontalTrack.SetEnabled(false);
+            }
+
             if (overflowSize.width <= allocatedSize.width) {
                 horizontalTrack.SetEnabled(false);
                 targetElement.scrollOffset = new Vector2(0, targetElement.scrollOffset.y);
             }
-            else {
+            else if (!disableOverflowX) {
                 horizontalTrack.SetEnabled(true);
                 float width = (allocatedSize.width / overflowSize.width) * allocatedSize.width;
                 float opacity = 1 - Mathf.Clamp01(Easing.Interpolate((Time.realtimeSinceStartup - lastScrollHorizontalTimestamp) / fadeTime, EasingFunction.CubicEaseInOut));
@@ -88,7 +99,7 @@ namespace UIForia.Elements {
                 verticalTrack.SetEnabled(false);
                 targetElement.scrollOffset = new Vector2(targetElement.scrollOffset.x, 0);
             }
-            else {
+            else if (!disableOverflowY) {
                 verticalTrack.SetEnabled(true);
                 float height = (allocatedSize.height / overflowSize.height) * allocatedSize.height;
                 float opacity = 1 - Mathf.Clamp01(Easing.Interpolate((Time.realtimeSinceStartup - lastScrollVerticalTimestamp) / fadeTime, EasingFunction.CubicEaseInOut));
@@ -99,11 +110,11 @@ namespace UIForia.Elements {
         }
 
         public void OnClickVertical(MouseInputEvent evt) {
-            ScrollToPointY(evt.MousePosition.y);
+            ScrollPageTowardsY(evt.MousePosition.y);
             evt.StopPropagation();
         }
 
-        private void ScrollToPointY(float y) {
+        private void ScrollPageTowardsY(float y) {
             
             if (!verticalTrack.isEnabled) return;
             lastScrollVerticalTimestamp = Time.realtimeSinceStartup;
@@ -128,11 +139,11 @@ namespace UIForia.Elements {
         }
 
         public void OnClickHorizontal(MouseInputEvent evt) {
-            ScrollToPointX(evt.MousePosition.x);
+            ScrollPageTowardsX(evt.MousePosition.x);
             evt.StopPropagation();
         }
 
-        private void ScrollToPointX(float x) {
+        private void ScrollPageTowardsX(float x) {
             if (!horizontalTrack.isEnabled) return;
             lastScrollVerticalTimestamp = Time.realtimeSinceStartup;
             float trackRectWidth = horizontalTrack.layoutResult.allocatedSize.width;
@@ -166,13 +177,13 @@ namespace UIForia.Elements {
             Vector2 baseOffset = new Vector2();
             ScrollbarOrientation orientation = 0;
 
-            if (overflowSize.width > allocatedSize.width) {
+            if (!disableOverflowX && overflowSize.width > allocatedSize.width) {
                 lastScrollHorizontalTimestamp = Time.realtimeSinceStartup;
                 baseOffset.x = evt.MousePosition.x - horizontalHandle.layoutResult.screenPosition.x;
                 orientation |= ScrollbarOrientation.Horizontal;
             }
 
-            if (overflowSize.height > allocatedSize.height) {
+            if (!disableOverflowY && overflowSize.height > allocatedSize.height) {
                 lastScrollVerticalTimestamp = Time.realtimeSinceStartup;
                 baseOffset.y = evt.MousePosition.y - verticalHandle.layoutResult.screenPosition.y;
                 orientation |= ScrollbarOrientation.Vertical;
@@ -199,14 +210,42 @@ namespace UIForia.Elements {
 
         public override void HandleUIEvent(UIEvent evt) {
             if (evt is UIScrollEvent scrollEvent) {
-                if (scrollEvent.ScrollDestinationX > -1) {
-                    ScrollToPointX(scrollEvent.ScrollDestinationX);
+                if (scrollEvent.ScrollDestinationX >= 0) {
+                    ScrollToX(scrollEvent.ScrollDestinationX);
                 }
 
-                if (scrollEvent.ScrollDestinationY > -1) {
-                    ScrollToPointY(scrollEvent.ScrollDestinationY);
+                if (scrollEvent.ScrollDestinationY >= 0) {
+                    ScrollToY(scrollEvent.ScrollDestinationY);
                 }
             }
+        }
+
+        private void ScrollToY(float y) {
+            if (!verticalTrack.isEnabled) {
+                return;
+            }
+            
+            lastScrollVerticalTimestamp = Time.realtimeSinceStartup;
+            float trackRectHeight = verticalTrack.layoutResult.allocatedSize.height;
+            float handleHeight = verticalHandle.layoutResult.allocatedSize.height;
+            float max = trackRectHeight - handleHeight;
+            float offset = Mathf.Clamp(y, 0, 1);
+            targetElement.scrollOffset = new Vector2(targetElement.scrollOffset.x, offset);
+            verticalHandle.style.SetTransformPositionY(offset * (max), StyleState.Normal);
+        }
+
+        private void ScrollToX(float x) {
+            if (!horizontalTrack.isEnabled) {
+                return;
+            }
+
+            lastScrollVerticalTimestamp = Time.realtimeSinceStartup;
+            float trackRectWidth = horizontalTrack.layoutResult.allocatedSize.width;
+            float handleWidth = horizontalHandle.layoutResult.allocatedSize.width;
+            float max = trackRectWidth - handleWidth;
+            float offset = Mathf.Clamp(x, 0, 1);
+            targetElement.scrollOffset = new Vector2(offset, targetElement.scrollOffset.y);
+            horizontalHandle.style.SetTransformPositionX(offset * (max), StyleState.Normal);
         }
 
         public class ScrollbarDragEvent : DragEvent {

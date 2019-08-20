@@ -86,13 +86,17 @@ namespace UIForia.Systems {
             }
 
             m_ChangeSets.ForEach(this, (id, changeSet, self) => {
+                if (!changeSet.element.isEnabled) {
+                    StructList<StyleProperty>.Release(ref changeSet.changes);
+                    changeSet.element = null;
+                    return;
+                }
+
                 if (changeSet.element is IStylePropertiesWillChangeHandler willChangeHandler) {
                     willChangeHandler.OnStylePropertiesWillChange();
                 }
 
-                if (changeSet.element.isEnabled) {
-                    self.onStylePropertyChanged.Invoke(changeSet.element, changeSet.changes);
-                }
+                self.onStylePropertyChanged.Invoke(changeSet.element, changeSet.changes);
 
                 if (changeSet.element is IStyleChangeHandler changeHandler) {
                     StyleProperty[] properties = changeSet.changes.Array;

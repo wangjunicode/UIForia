@@ -11,6 +11,7 @@ namespace Documentation {
         public override void OnEnable() {
             Application.RoutingSystem.FindRouter("demo").GoTo(defaultRoute);
         }
+        
     }
 
 }

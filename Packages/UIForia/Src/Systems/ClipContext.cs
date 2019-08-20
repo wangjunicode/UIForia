@@ -91,10 +91,10 @@ namespace UIForia.Rendering {
         public void Destroy() {
             Object.DestroyImmediate(clipTexture);
             Object.DestroyImmediate(countTexture);
-            Object.Destroy(clearMaterial);
-            Object.Destroy(countMaterial);
-            Object.Destroy(clearCountMaterial);
-            Object.Destroy(blitCountMaterial);
+            Object.DestroyImmediate(clearMaterial);
+            Object.DestroyImmediate(countMaterial);
+            Object.DestroyImmediate(clearCountMaterial);
+            Object.DestroyImmediate(blitCountMaterial);
             clipMaterialPool.Destroy();
             meshPool.Destroy();
         }

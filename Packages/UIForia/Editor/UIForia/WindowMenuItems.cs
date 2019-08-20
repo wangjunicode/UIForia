@@ -21,9 +21,10 @@ namespace UIForia.Editor {
         }
 
         [MenuItem("UIForia/Refresh UI Templates %g")]
-        public static void Refresh() {            
-            Application.RefreshAll();
-            
+        public static void Refresh() {
+            if (UnityEngine.Application.isPlaying) {
+                Application.RefreshAll();
+            }
         }
     }
 

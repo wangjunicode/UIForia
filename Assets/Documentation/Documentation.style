@@ -1,3 +1,9 @@
+export const boringBackgroundColor = rgb(240, 230, 240);
+export const buttonBackgroundColor = rgb(200, 190, 80);
+export const buttonBackgroundHoverColor = rgb(220, 195, 90);
+export const buttonBackgroundSelectedColor = rgb(220, 95, 190);
+export const buttonBackgroundSelectedHoverColor = rgb(220, 95, 190);
+
 style root-container {
     PreferredSize = 1vw 1vh;
 }
@@ -37,6 +43,36 @@ style <Anchor> {
     }
 }
 
+style button-group {
+    LayoutType = Flex;
+    FlexLayoutDirection = Column;
+    TextFontSize = 18px;
+}
+
+style button {
+    Padding = 10px;
+    Margin = 10px;
+    FlexLayoutCrossAxisAlignment = Center;
+    FlexLayoutMainAxisAlignment = Center;
+    BorderRadius = 3px;
+    BackgroundColor = @buttonBackgroundColor;
+    TextColor = black;
+    [hover] {
+        BackgroundColor = @buttonBackgroundHoverColor;
+        TextColor = black;
+        Cursor = url("Cursors/hand");
+    }
+}
+
+style button-selected {
+    BackgroundColor = @buttonBackgroundSelectedColor;
+    TextColor = black;
+    [hover] {
+        BackgroundColor = @buttonBackgroundSelectedHoverColor;
+        TextColor = black;
+    }
+}
+
 style navigation {
     Padding = 20px;
     BackgroundColor = white;
@@ -46,7 +82,7 @@ style demo-panel {
     Padding = 20px;
     BorderLeft = 2px;
     BorderColor = #2c2e53;
-    BackgroundColor = rgb(240, 230, 240);
+    BackgroundColor = @boringBackgroundColor;
     PreferredSize = 0;
 }
 

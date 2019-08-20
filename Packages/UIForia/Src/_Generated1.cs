@@ -348,20 +348,6 @@ namespace UIForia.Rendering {
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.RadialLayoutRadius, value), state); }
         }
         
-        public UIForia.Layout.AlignmentTarget AlignmentTargetX {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.AlignmentTargetX, state).AsAlignmentTarget; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.AlignmentTargetX, (int)value), state); }
-        }
-        
-        public UIForia.Layout.AlignmentTarget AlignmentTargetY {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.AlignmentTargetY, state).AsAlignmentTarget; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.AlignmentTargetY, (int)value), state); }
-        }
-        
         public UIForia.Layout.AlignmentBehavior AlignmentBehaviorX {
             [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.AlignmentBehaviorX, state).AsAlignmentBehavior; }
@@ -376,18 +362,18 @@ namespace UIForia.Rendering {
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.AlignmentBehaviorY, (int)value), state); }
         }
         
-        public float AlignmentPivotX {
+        public UIForia.UIFixedLength AlignmentOriginX {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.AlignmentPivotX, state).AsFloat; }
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.AlignmentOriginX, state).AsUIFixedLength; }
             [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.AlignmentPivotX, value), state); }
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.AlignmentOriginX, value), state); }
         }
         
-        public float AlignmentPivotY {
+        public UIForia.UIFixedLength AlignmentOriginY {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.AlignmentPivotY, state).AsFloat; }
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.AlignmentOriginY, state).AsUIFixedLength; }
             [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.AlignmentPivotY, value), state); }
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.AlignmentOriginY, value), state); }
         }
         
         public UIForia.UIFixedLength AlignmentOffsetX {
@@ -1284,20 +1270,6 @@ namespace UIForia.Rendering {
             set { SetProperty(new StyleProperty(StylePropertyId.RadialLayoutRadius, value)); }
         }
             
-        public UIForia.Layout.AlignmentTarget AlignmentTargetX {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return (UIForia.Layout.AlignmentTarget)FindEnumProperty(StylePropertyId.AlignmentTargetX); }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.AlignmentTargetX, (int)value)); }
-        }
-            
-        public UIForia.Layout.AlignmentTarget AlignmentTargetY {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return (UIForia.Layout.AlignmentTarget)FindEnumProperty(StylePropertyId.AlignmentTargetY); }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.AlignmentTargetY, (int)value)); }
-        }
-            
         public UIForia.Layout.AlignmentBehavior AlignmentBehaviorX {
             [System.Diagnostics.DebuggerStepThrough]
             get { return (UIForia.Layout.AlignmentBehavior)FindEnumProperty(StylePropertyId.AlignmentBehaviorX); }
@@ -1312,18 +1284,18 @@ namespace UIForia.Rendering {
             set { SetProperty(new StyleProperty(StylePropertyId.AlignmentBehaviorY, (int)value)); }
         }
             
-        public float AlignmentPivotX {
+        public UIForia.UIFixedLength AlignmentOriginX {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return FindFloatProperty(StylePropertyId.AlignmentPivotX); }
+            get { return FindUIFixedLengthProperty(StylePropertyId.AlignmentOriginX); }
             [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.AlignmentPivotX, value)); }
+            set { SetProperty(new StyleProperty(StylePropertyId.AlignmentOriginX, value)); }
         }
             
-        public float AlignmentPivotY {
+        public UIForia.UIFixedLength AlignmentOriginY {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return FindFloatProperty(StylePropertyId.AlignmentPivotY); }
+            get { return FindUIFixedLengthProperty(StylePropertyId.AlignmentOriginY); }
             [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.AlignmentPivotY, value)); }
+            set { SetProperty(new StyleProperty(StylePropertyId.AlignmentOriginY, value)); }
         }
             
         public UIForia.UIFixedLength AlignmentOffsetX {
@@ -2322,24 +2294,6 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UIForia.Layout.AlignmentTarget AlignmentTargetX { 
-                [System.Diagnostics.DebuggerStepThrough]
-                get { 
-                    StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.AlignmentTargetX, out property)) return property.AsAlignmentTarget;
-                    return DefaultStyleValues_Generated.AlignmentTargetX;
-                }
-            }
-
-            public UIForia.Layout.AlignmentTarget AlignmentTargetY { 
-                [System.Diagnostics.DebuggerStepThrough]
-                get { 
-                    StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.AlignmentTargetY, out property)) return property.AsAlignmentTarget;
-                    return DefaultStyleValues_Generated.AlignmentTargetY;
-                }
-            }
-
             public UIForia.Layout.AlignmentBehavior AlignmentBehaviorX { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
@@ -2358,21 +2312,21 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public float AlignmentPivotX { 
+            public UIForia.UIFixedLength AlignmentOriginX { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.AlignmentPivotX, out property)) return property.AsFloat;
-                    return DefaultStyleValues_Generated.AlignmentPivotX;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.AlignmentOriginX, out property)) return property.AsUIFixedLength;
+                    return DefaultStyleValues_Generated.AlignmentOriginX;
                 }
             }
 
-            public float AlignmentPivotY { 
+            public UIForia.UIFixedLength AlignmentOriginY { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.AlignmentPivotY, out property)) return property.AsFloat;
-                    return DefaultStyleValues_Generated.AlignmentPivotY;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.AlignmentOriginY, out property)) return property.AsUIFixedLength;
+                    return DefaultStyleValues_Generated.AlignmentOriginY;
                 }
             }
 
@@ -3495,22 +3449,6 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.RadialLayoutRadius, state).AsUIFixedLength;
         }
         
-        public void SetAlignmentTargetX(in UIForia.Layout.AlignmentTarget? value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.AlignmentTargetX, (int)value), state);
-        }
-
-        public UIForia.Layout.AlignmentTarget GetAlignmentTargetX(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.AlignmentTargetX, state).AsAlignmentTarget;
-        }
-        
-        public void SetAlignmentTargetY(in UIForia.Layout.AlignmentTarget? value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.AlignmentTargetY, (int)value), state);
-        }
-
-        public UIForia.Layout.AlignmentTarget GetAlignmentTargetY(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.AlignmentTargetY, state).AsAlignmentTarget;
-        }
-        
         public void SetAlignmentBehaviorX(in UIForia.Layout.AlignmentBehavior? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.AlignmentBehaviorX, (int)value), state);
         }
@@ -3527,20 +3465,20 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.AlignmentBehaviorY, state).AsAlignmentBehavior;
         }
         
-        public void SetAlignmentPivotX(in float? value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.AlignmentPivotX, value), state);
+        public void SetAlignmentOriginX(in UIForia.UIFixedLength? value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.AlignmentOriginX, value), state);
         }
 
-        public float GetAlignmentPivotX(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.AlignmentPivotX, state).AsFloat;
+        public UIForia.UIFixedLength GetAlignmentOriginX(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.AlignmentOriginX, state).AsUIFixedLength;
         }
         
-        public void SetAlignmentPivotY(in float? value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.AlignmentPivotY, value), state);
+        public void SetAlignmentOriginY(in UIForia.UIFixedLength? value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.AlignmentOriginY, value), state);
         }
 
-        public float GetAlignmentPivotY(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.AlignmentPivotY, state).AsFloat;
+        public UIForia.UIFixedLength GetAlignmentOriginY(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.AlignmentOriginY, state).AsUIFixedLength;
         }
         
         public void SetAlignmentOffsetX(in UIForia.UIFixedLength? value, StyleState state) {
@@ -4268,18 +4206,14 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.RadialLayoutEndAngle, RadialLayoutEndAngle);
 				case StylePropertyId.RadialLayoutRadius:
 					 return new StyleProperty(StylePropertyId.RadialLayoutRadius, RadialLayoutRadius);
-				case StylePropertyId.AlignmentTargetX:
-					 return new StyleProperty(StylePropertyId.AlignmentTargetX, (int)AlignmentTargetX);
-				case StylePropertyId.AlignmentTargetY:
-					 return new StyleProperty(StylePropertyId.AlignmentTargetY, (int)AlignmentTargetY);
 				case StylePropertyId.AlignmentBehaviorX:
 					 return new StyleProperty(StylePropertyId.AlignmentBehaviorX, (int)AlignmentBehaviorX);
 				case StylePropertyId.AlignmentBehaviorY:
 					 return new StyleProperty(StylePropertyId.AlignmentBehaviorY, (int)AlignmentBehaviorY);
-				case StylePropertyId.AlignmentPivotX:
-					 return new StyleProperty(StylePropertyId.AlignmentPivotX, AlignmentPivotX);
-				case StylePropertyId.AlignmentPivotY:
-					 return new StyleProperty(StylePropertyId.AlignmentPivotY, AlignmentPivotY);
+				case StylePropertyId.AlignmentOriginX:
+					 return new StyleProperty(StylePropertyId.AlignmentOriginX, AlignmentOriginX);
+				case StylePropertyId.AlignmentOriginY:
+					 return new StyleProperty(StylePropertyId.AlignmentOriginY, AlignmentOriginY);
 				case StylePropertyId.AlignmentOffsetX:
 					 return new StyleProperty(StylePropertyId.AlignmentOffsetX, AlignmentOffsetX);
 				case StylePropertyId.AlignmentOffsetY:
@@ -4472,8 +4406,8 @@ namespace UIForia.Rendering {
                     case StylePropertyId.RadialLayoutStartAngle: return true;
                     case StylePropertyId.RadialLayoutEndAngle: return true;
                     case StylePropertyId.RadialLayoutRadius: return true;
-                    case StylePropertyId.AlignmentPivotX: return true;
-                    case StylePropertyId.AlignmentPivotY: return true;
+                    case StylePropertyId.AlignmentOriginX: return true;
+                    case StylePropertyId.AlignmentOriginY: return true;
                     case StylePropertyId.AlignmentOffsetX: return true;
                     case StylePropertyId.AlignmentOffsetY: return true;
                     case StylePropertyId.MinWidth: return true;

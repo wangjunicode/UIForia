@@ -292,7 +292,7 @@ namespace UIForia.Layout {
             float viewportWidth = view.Viewport.width;
             float viewportHeight = view.Viewport.height;
 
-            // todo -- this can be done without dereferencing box or parent
+            // todo -- this can be done without dereferencing box or parent and also in parallel
 
             for (int i = 0; i < enabledBoxList.size; i++) {
                 FastLayoutBox box = enabledBoxes[i].layoutBox;
@@ -305,13 +305,13 @@ namespace UIForia.Layout {
                 float localX = box.allocatedPosition.x;
                 float localY = box.allocatedPosition.y;
 
-                float horizontalOffset = (box.size.width * box.parentAlignmentVertical.pivot);
-                float verticalOffset = (box.size.height * box.parentAlignmentVertical.pivot);
+                float horizontalOffset = (box.size.width * box.parentAlignmentVertical.origin);
+                float verticalOffset = (box.size.height * box.parentAlignmentVertical.origin);
 
                 float baseSizeX = 0;
                 float baseSizeY = 0;
 
-                switch (box.parentAlignmentHorizontal.target) {
+                switch (box.selfAlignmentVertical.target) {
                     case AlignmentTarget.AllocatedBox:
                         baseSizeX = box.allocatedSize.width;
                         break;
@@ -452,7 +452,7 @@ namespace UIForia.Layout {
                 int end = enabledBoxes[i].childEnd;
 
                 SVGXMatrix parentMatrix = worldMatrices[i];
-
+                // todo -- could skip the constructor here and assign directly
                 for (int j = start; j < end; j++) {
                     SVGXMatrix m = localMatrices[j];
                     worldMatrices[j] = new SVGXMatrix(
@@ -466,8 +466,7 @@ namespace UIForia.Layout {
                 }
             }
         }
-
-
+        
         // walk through adding clip groups
         // will diff against last frame clip group w/ same id for rendering
         // will sort within clip group

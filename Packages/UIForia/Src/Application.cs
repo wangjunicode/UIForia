@@ -510,7 +510,7 @@ namespace UIForia {
                 if (currentElement.children == null) {
                     continue;
                 }
-                
+
                 UIElement[] childArray = currentElement.children.array;
 
                 int childCount = currentElement.children.size;
@@ -698,6 +698,13 @@ namespace UIForia {
                 // if (child.flags & UIElementFlags.RequiresEnableCall) {
                 child.OnDisable();
                 // }
+                
+                if (child.style.currentState != StyleState.Normal) {
+                    // todo -- maybe just have a clear states method
+                    child.style.ExitState(StyleState.Hover);
+                    child.style.ExitState(StyleState.Active);
+                    child.style.ExitState(StyleState.Focused);
+                }
 
                 child.flags |= UIElementFlags.DisabledThisFrame;
 

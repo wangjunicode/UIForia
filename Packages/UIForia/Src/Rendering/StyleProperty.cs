@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 using UIForia.Layout;
 using UIForia.Layout.LayoutTypes;
 using UIForia.Text;
+using UIForia.Util;
 using UnityEngine;
 using FontStyle = UIForia.Text.FontStyle;
 using TextAlignment = UIForia.Text.TextAlignment;
@@ -25,7 +26,7 @@ namespace UIForia.Rendering {
         [FieldOffset(8)] public readonly float float1;
 
         [FieldOffset(12)] public readonly bool hasValue; // todo -- more bytes available here, maybe move object to 0 since its likely exclusive
-
+        
         [FieldOffset(16)] public readonly object objectField;
 
         [DebuggerStepThrough]
@@ -90,6 +91,37 @@ namespace UIForia.Rendering {
                 UIFixedLength v = length.Value;
                 this.float0 = v.value;
                 this.int1 = (int) v.unit;
+                this.hasValue = true;
+            }
+        }
+        
+        [DebuggerStepThrough]
+        public StyleProperty(StylePropertyId propertyId, in AlignmentOrigin origin) {
+            this.propertyId = propertyId;
+            this.int0 = 0;
+            this.int1 = 0;
+            this.hasValue = true;
+            this.float0 = 0;
+            this.float1 = 0;
+            this.objectField = null;
+            this.float0 = origin.value.value;
+            this.int1 = BitUtil.SetHighLowBits((int) origin.value.unit, (int)origin.direction);
+            this.hasValue = true;
+        }
+        
+        [DebuggerStepThrough]
+        public StyleProperty(StylePropertyId propertyId, in AlignmentOrigin? origin) {
+            this.propertyId = propertyId;
+            this.int0 = 0;
+            this.int1 = 0;
+            this.hasValue = false;
+            this.float0 = 0;
+            this.float1 = 0;
+            this.objectField = null;
+            if (origin.HasValue) {
+                UIFixedLength v = origin.Value.value;
+                this.float0 = v.value;
+                this.int1 = BitUtil.SetHighLowBits((int) v.unit, (int)origin.Value.direction);
                 this.hasValue = true;
             }
         }
@@ -337,6 +369,13 @@ namespace UIForia.Rendering {
         public UIFixedLength AsUIFixedLength => new UIFixedLength(float0, (UIFixedUnit) int1);
         public TransformOffset AsTransformOffset => new TransformOffset(float0, (TransformUnit) int1);
 
+        public AlignmentOrigin AsAlignmentOrigin {
+            get {
+                int unit = BitUtil.GetHighBits(int1);
+                int direction = BitUtil.GetLowBits(int1);
+                return new AlignmentOrigin(float0, (UIFixedUnit)unit, (AlignmentDirection)direction);
+            }
+        }
         public GridItemPlacement AsGridItemPlacement {
             get {
                 if (objectField is string name) {

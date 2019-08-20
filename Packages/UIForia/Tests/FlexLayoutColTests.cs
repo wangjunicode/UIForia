@@ -262,8 +262,8 @@ public class FlexLayoutColTests {
         FlexColLayoutThing root = (FlexColLayoutThing) mockView.RootElement.GetChild(0);
         
         root.style.SetFlexLayoutCrossAxisAlignment(CrossAxisAlignment.Center, StyleState.Normal);
-        root.child1.style.SetAlignmentBehaviorX(AlignmentBehavior.Self, StyleState.Normal);
-        root.child1.style.SetAlignmentPivotX(0, StyleState.Normal);
+        root.child1.style.SetAlignmentBehaviorX(AlignmentBehavior.Cell, StyleState.Normal);
+        root.child1.style.SetAlignmentOriginX(0, StyleState.Normal);
         root.child1.style.SetAlignmentOffsetX(new UIFixedLength(0), StyleState.Normal);
         
         mockView.Update();

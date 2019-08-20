@@ -233,7 +233,7 @@ namespace UIForia.Rendering {
         }
 
 
-        public void DrawBatchedText(UIForiaGeometry geometry, in GeometryRange range, in Matrix4x4 transform, in FontData fontData) {
+        public void DrawBatchedText(UIForiaGeometry geometry, in GeometryRange range, in Matrix4x4 transform, in FontData fontData, ClipData clipper = null) {
             if (currentBatch.transformData.size + 1 >= k_ObjectCount_Huge) {
                 FinalizeCurrentBatch();
             }
@@ -259,8 +259,19 @@ namespace UIForia.Rendering {
             currentBatch.uiforiaData.colors.Add(geometry.packedColors);
             currentBatch.uiforiaData.fontData = fontData;
 
-            // add a quad + matrix w/ default styling
-
+            if (clipper != null) {
+                // todo break batch if changed
+                currentBatch.uiforiaData.clipTexture = clipper.clipTexture != null ? clipper.clipTexture : currentBatch.uiforiaData.clipTexture;
+                currentBatch.uiforiaData.clipUVs.Add(clipper.clipUVs);
+                currentBatch.uiforiaData.clipRects.Add(clipper.packedBoundsAndChannel);
+            }
+            else {
+                currentBatch.uiforiaData.clipUVs.Add(default);
+                // in order to always draw the thing we take the max fixed float with 0.1 precision we can fit in 16 bits for clip size
+                // (2 ^ 16) / 10
+                currentBatch.uiforiaData.clipRects.Add(new Vector4(0, VertigoUtil.PackSizeVector(6553f, 6553f)));
+            }
+            
             UpdateUIForiaGeometry(geometry, range);
         }
 

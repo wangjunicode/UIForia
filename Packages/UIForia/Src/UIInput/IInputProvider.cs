@@ -37,6 +37,11 @@ namespace UIForia.UIInput {
         bool RequestFocus(IFocusable target);
         void ReleaseFocus(IFocusable target);
 
+        void RegisterFocusable(IFocusable focusable);
+        void UnRegisterFocusable(IFocusable focusable);
+        void FocusNext();
+        void FocusPrevious();
+
         void DelayEvent(UIElement origin, UIEvent evt);
 
     }

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UITemplate>
+    <Style path="Documentation/Features/StylePropertiesDemo.style"/>
+    <Style src="Documentation/Documentation.style" alias="theme"/>
+    <Using namespace="UIForia.Rendering"/>
+
+    <Contents style="container">
+
+        <Heading1 x-id="property-visibility">Visibility</Heading1>
+        <Group style="section">
+            <Paragraph>
+                Visibility = [ Visible | Hidden | Always ]
+            </Paragraph>
+            <Heading2>Change the visibility here to:</Heading2>
+            <Group style="button-group">
+                <Button style="['button', visibility == Visibility.Visible ? 'button-selected' : '']" onMouseClick="OnChangeVisibility(Visibility.Visible)">Visible</Button>
+                <Button style="['button', visibility == Visibility.Hidden ? 'button-selected' : '']" onMouseClick="OnChangeVisibility(Visibility.Hidden)">Hidden</Button>
+                <Button style="['button', visibility == Visibility.Always ? 'button-selected' : '']" onMouseClick="OnChangeVisibility(Visibility.Always)">Always</Button>
+            </Group>
+            <Div style.visibility="visibility" style="visibility-test">
+                I am a demo thing.
+                <Div>
+                    I am a nested demo thing.
+                </Div>
+            </Div>
+        </Group>
+
+    </Contents>
+</UITemplate>

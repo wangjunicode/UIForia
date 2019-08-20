@@ -92,11 +92,19 @@ namespace UIForia.Elements {
         public string Format(string input) {
             builder.Clear();
             bool foundDecimal = false;
+            bool foundDigit = false;
+            bool foundSign = false;
 
             for (int i = 0; i < input.Length; i++) {
                 char c = input[i];
-                if (char.IsDigit(c)) {
+
+                if (!foundDigit && !foundSign && c == '-') {
                     builder.Append(c);
+                    foundSign = true;
+                }
+                else if (char.IsDigit(c)) {
+                    builder.Append(c);
+                    foundDigit = true;
                 }
                 else if (c == k_Decimal && !foundDecimal) {
                     builder.Append(k_Decimal);
@@ -158,6 +166,7 @@ namespace UIForia.Elements {
         public event Action<T> onValueChanged;
 
         public override void OnCreate() {
+            base.OnCreate();
             deserializer = deserializer ?? (IInputDeserializer<T>) GetDeserializer();
             serializer = serializer ?? (IInputSerializer<T>) GetSerializer();
             formatter = formatter ?? GetFormatter();
@@ -168,7 +177,6 @@ namespace UIForia.Elements {
            // textInfo.UpdateSpan(0, text);
            // textInfo.Layout();
         }
-
 
         [OnPropertyChanged(nameof(value))]
         protected void OnInputValueChanged(string name) {
@@ -236,7 +244,7 @@ namespace UIForia.Elements {
             }
         }
 
-        public bool ShowPlaceholder => placeholder != null && text.Length == 0;
+        public bool ShowPlaceholder => placeholder != null && string.IsNullOrEmpty(text);
 
         public override string GetDisplayName() {
             return $"InputElement<{typeof(T).Name}>";
@@ -285,13 +293,14 @@ namespace UIForia.Elements {
     }
 
 
-    public abstract class UIInputElement : UIElement, IFocusable, ISVGXPaintable, IStylePropertiesDidChangeHandler {
+    public abstract class UIInputElement : UIElement, IFocusableEvented, ISVGXPaintable, IStylePropertiesDidChangeHandler {
 
         internal TextInfo textInfo;
         internal string text;
         
         public string placeholder;
-
+        public event Action<FocusEvent> onFocus;
+        public event Action<BlurEvent> onBlur;
         public bool autofocus;
 
         protected float holdDebounce = 0.05f;
@@ -330,6 +339,11 @@ namespace UIForia.Elements {
            // textInfo = new TextInfo2(new TextSpan(text, style.GetTextStyle()));
            // textInfo.UpdateSpan(0, text);
            // textInfo.Layout();
+//            style.SetTextWhitespaceMode(WhitespaceMode.PreserveNewLines, StyleState.Normal);
+//            textInfo = new TextInfo(new TextSpan(text, style.GetTextStyle()));
+//            textInfo.UpdateSpan(0, text);
+//            textInfo.Layout();
+            Application.InputSystem.RegisterFocusable(this);
         }
 
         public override void OnEnable() {
@@ -349,6 +363,7 @@ namespace UIForia.Elements {
 
         public override void OnDestroy() {
             Blur();
+            Application.InputSystem.UnRegisterFocusable(this);
         }
 
         public override void OnDisable() {
@@ -709,16 +724,19 @@ namespace UIForia.Elements {
             get { return layoutResult.ContentRect; }
         }
 
-        public void Focus() {
+        public bool Focus() {
             if (GetAttribute("disabled") != null) {
-                return;
+                return false;
             }
 
             hasFocus = true;
+            onFocus?.Invoke(new FocusEvent());
+            return true;
         }
 
         public void Blur() {
             hasFocus = false;
+            onBlur?.Invoke(new BlurEvent());
         }
 
         public void OnStylePropertiesDidChange() {
@@ -751,6 +769,8 @@ namespace UIForia.Elements {
         public void Paint(VertigoContext ctx, in Matrix4x4 matrix) {
             throw new NotImplementedException();
         }
+
+
 
     }
 

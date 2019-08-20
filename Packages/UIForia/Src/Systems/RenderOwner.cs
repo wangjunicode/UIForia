@@ -186,7 +186,7 @@ namespace Src.Systems {
             if (!printed) {
                 printed = true;
                 for (int i = 0; i < wrapperList.size; i++) {
-//                    Debug.Log(wrapperList.array[i].element + " -- " + (wrapperList.array[i].renderOp));
+                    Debug.Log(wrapperList.array[i].element + " -- " + (wrapperList.array[i].renderOp));
                 }
             }
         }

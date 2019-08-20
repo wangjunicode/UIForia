@@ -32,10 +32,8 @@ namespace UIForia.Compilers.Style {
                 // Alignment
                 {"alignmentbehaviorx", (targetStyle, property, context) => targetStyle.AlignmentBehaviorX = MapEnum<AlignmentBehavior>(property.children[0], context)},
                 {"alignmentbehaviory", (targetStyle, property, context) => targetStyle.AlignmentBehaviorY = MapEnum<AlignmentBehavior>(property.children[0], context)},
-                {"alignmenttargetx", (targetStyle, property, context) => targetStyle.AlignmentTargetX = MapEnum<AlignmentTarget>(property.children[0], context)},
-                {"alignmenttargety", (targetStyle, property, context) => targetStyle.AlignmentTargetY = MapEnum<AlignmentTarget>(property.children[0], context)},
-                {"alignmentpivotx", (targetStyle, property, context) => targetStyle.AlignmentPivotX = MapNumber(property.children[0], context)},
-                {"alignmentpivoty", (targetStyle, property, context) => targetStyle.AlignmentPivotY = MapNumber(property.children[0], context)},
+                {"alignmentpivotx", (targetStyle, property, context) => targetStyle.AlignmentOriginX = MapNumber(property.children[0], context)},
+                {"alignmentpivoty", (targetStyle, property, context) => targetStyle.AlignmentOriginY = MapNumber(property.children[0], context)},
                 {"alignmentoffsetx", (targetStyle, property, context) => targetStyle.AlignmentOffsetX = MapFixedLength(property.children[0], context)},
                 {"alignmentoffsety", (targetStyle, property, context) => targetStyle.AlignmentOffsetY = MapFixedLength(property.children[0], context)},
 

@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using UIForia.Attributes;
 using UIForia.Elements;
-using UIForia.UIInput;
 using UIForia.Util;
 
 namespace Documentation.Features {
@@ -24,10 +23,6 @@ namespace Documentation.Features {
             }
 
         }
-
-        public int selectedInt;
-        public string selectedString = "3";
-        public int selectedStringIndex = 3;
         
         public RepeatableList<ISelectOption<int>> intList;
         public RepeatableList<ISelectOption<string>>[] translations;
@@ -48,6 +43,48 @@ namespace Documentation.Features {
                     
                     new RepeatableList<ISelectOption<string>>() {
                             new SelectOption<string>("World", "en"),
+                            new SelectOption<string>("Welt", "de"),
+                            new SelectOption<string>("supercalifragilisticexpialidocious", "en"),
+                            new SelectOption<string>("Supercalifragilisticexpialigetisch", "de"),
+                            new SelectOption<string>("Welt", "de"),
+                            new SelectOption<string>("Welt", "de"),
+                            new SelectOption<string>("Welt", "de"),
+                            new SelectOption<string>("Welt", "de"),
+                            new SelectOption<string>("Welt", "de"),
+                            new SelectOption<string>("Welt", "de"),
+                            new SelectOption<string>("Welt", "de"),
+                            new SelectOption<string>("Welt", "de"),
+                            new SelectOption<string>("Welt", "de"),
+                            new SelectOption<string>("Welt", "de"),
+                            new SelectOption<string>("Welt", "de"),
+                            new SelectOption<string>("Welt", "de"),
+                            new SelectOption<string>("Welt", "de"),
+                            new SelectOption<string>("Welt", "de"),
+                            new SelectOption<string>("Welt", "de"),
+                            new SelectOption<string>("Welt", "de"),
+                            new SelectOption<string>("Welt", "de"),
+                            new SelectOption<string>("Welt", "de"),
+                            new SelectOption<string>("Welt", "de"),
+                            new SelectOption<string>("Welt", "de"),
+                            new SelectOption<string>("Welt", "de"),
+                            new SelectOption<string>("Welt", "de"),
+                            new SelectOption<string>("Welt", "de"),
+                            new SelectOption<string>("Welt", "de"),
+                            new SelectOption<string>("Welt", "de"),
+                            new SelectOption<string>("Welt", "de"),
+                            new SelectOption<string>("Welt", "de"),
+                            new SelectOption<string>("Welt", "de"),
+                            new SelectOption<string>("Welt", "de"),
+                            new SelectOption<string>("Welt", "de"),
+                            new SelectOption<string>("Welt", "de"),
+                            new SelectOption<string>("Welt", "de"),
+                            new SelectOption<string>("Welt", "de"),
+                            new SelectOption<string>("Welt", "de"),
+                            new SelectOption<string>("Welt", "de"),
+                            new SelectOption<string>("Welt", "de"),
+                            new SelectOption<string>("Welt", "de"),
+                            new SelectOption<string>("Welt", "de"),
+                            new SelectOption<string>("Welt", "de"),
                             new SelectOption<string>("Welt", "de")
                     },
             };
@@ -85,13 +122,8 @@ namespace Documentation.Features {
             foreach (var option in temp) {
                 options.Add(option);
             }
-        }
 
-        public void SetEmpty(MouseInputEvent evt) {
-            if (evt.IsConsumed) {
-                return;
-            }
-            selectedStringIndex = -1;
+            selectedLanguage[index].Name = null;
         }
 
         public void ClearWords() {

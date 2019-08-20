@@ -859,8 +859,8 @@ namespace UIForia.Editor {
                 case StylePropertyId.TextAlignment:
                     return DrawEnumWithValue<Text.TextAlignment>(property, isEditable);
 
-//                case StylePropertyId.TextWhitespaceMode:
-//                    return DrawEnum<WhitespaceMode>(property, isEditable);
+                case StylePropertyId.TextWhitespaceMode:
+                    return DrawEnumWithValue<WhitespaceMode>(property, isEditable);
 //
                 case StylePropertyId.TextTransform:
                     return DrawEnumWithValue<TextTransform>(property, isEditable);

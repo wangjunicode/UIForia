@@ -258,27 +258,30 @@ namespace UIForia.Elements {
             return children[index];
         }
 
-        public UIElement FindById(string id) {
-            return FindById<UIElement>(id);
+        public UIElement FindById(string elementId) {
+            return FindById<UIElement>(elementId);
         }
 
         [PublicAPI]
-        public T FindById<T>(string id) where T : UIElement {
-            if (isPrimitive || children == null) {
-                return null;
-            }
-
-            for (int i = 0; i < children.Count; i++) {
-                if (children[i].GetAttribute("id") == id) {
-                    return children[i] as T;
+        public T FindById<T>(string elementId) where T : UIElement {
+            Stack<UIElement> elementStack = StackPool<UIElement>.Get();
+            elementStack.Push(this);
+            while (elementStack.Count > 0) {
+                var element = elementStack.Pop();
+                if (element.isPrimitive || element.children == null) {
+                    continue;
                 }
 
-                UIElement childResult = children[i].FindById(id);
+                for (int i = 0; i < element.children.Count; i++) {
+                    if (element.children[i].GetAttribute("id") == elementId && element.children[i].templateContext.rootObject == this) {
+                        return element.children[i] as T;
+                    }
 
-                if (childResult != null) {
-                    return childResult as T;
+                    elementStack.Push(element.children[i]);
                 }
             }
+
+            StackPool<UIElement>.Release(elementStack);
 
             return null;
         }

@@ -63,12 +63,10 @@ namespace UIForia.Rendering {
 		public const float RadialLayoutStartAngle = 0f;
 		public const float RadialLayoutEndAngle = 360f;
 		public static readonly UIFixedLength RadialLayoutRadius = new UIFixedLength(0.5f, UIFixedUnit.Percent);
-		public const AlignmentTarget AlignmentTargetX = UIForia.Layout.AlignmentTarget.AllocatedBox;
-		public const AlignmentTarget AlignmentTargetY = UIForia.Layout.AlignmentTarget.AllocatedBox;
-		public const AlignmentBehavior AlignmentBehaviorX = UIForia.Layout.AlignmentBehavior.Default;
-		public const AlignmentBehavior AlignmentBehaviorY = UIForia.Layout.AlignmentBehavior.Default;
-		public const float AlignmentPivotX = 0f;
-		public const float AlignmentPivotY = 0f;
+		public const AlignmentBehavior AlignmentBehaviorX = UIForia.Layout.AlignmentBehavior.Layout;
+		public const AlignmentBehavior AlignmentBehaviorY = UIForia.Layout.AlignmentBehavior.Layout;
+		public static readonly UIFixedLength AlignmentOriginX = new UIFixedLength(0f, UIFixedUnit.Pixel);
+		public static readonly UIFixedLength AlignmentOriginY = new UIFixedLength(0f, UIFixedUnit.Pixel);
 		public static readonly UIFixedLength AlignmentOffsetX = new UIFixedLength(0f, UIFixedUnit.Pixel);
 		public static readonly UIFixedLength AlignmentOffsetY = new UIFixedLength(0f, UIFixedUnit.Pixel);
 		public const Fit FitHorizontal = UIForia.Layout.Fit.Unset;
@@ -248,18 +246,14 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.RadialLayoutEndAngle, 360f);
 				case StylePropertyId.RadialLayoutRadius:
 					 return new StyleProperty(StylePropertyId.RadialLayoutRadius, new UIFixedLength(0.5f, UIFixedUnit.Percent));
-				case StylePropertyId.AlignmentTargetX:
-					 return new StyleProperty(StylePropertyId.AlignmentTargetX, (int)UIForia.Layout.AlignmentTarget.AllocatedBox);
-				case StylePropertyId.AlignmentTargetY:
-					 return new StyleProperty(StylePropertyId.AlignmentTargetY, (int)UIForia.Layout.AlignmentTarget.AllocatedBox);
 				case StylePropertyId.AlignmentBehaviorX:
-					 return new StyleProperty(StylePropertyId.AlignmentBehaviorX, (int)UIForia.Layout.AlignmentBehavior.Default);
+					 return new StyleProperty(StylePropertyId.AlignmentBehaviorX, (int)UIForia.Layout.AlignmentBehavior.Layout);
 				case StylePropertyId.AlignmentBehaviorY:
-					 return new StyleProperty(StylePropertyId.AlignmentBehaviorY, (int)UIForia.Layout.AlignmentBehavior.Default);
-				case StylePropertyId.AlignmentPivotX:
-					 return new StyleProperty(StylePropertyId.AlignmentPivotX, 0f);
-				case StylePropertyId.AlignmentPivotY:
-					 return new StyleProperty(StylePropertyId.AlignmentPivotY, 0f);
+					 return new StyleProperty(StylePropertyId.AlignmentBehaviorY, (int)UIForia.Layout.AlignmentBehavior.Layout);
+				case StylePropertyId.AlignmentOriginX:
+					 return new StyleProperty(StylePropertyId.AlignmentOriginX, new UIFixedLength(0f, UIFixedUnit.Pixel));
+				case StylePropertyId.AlignmentOriginY:
+					 return new StyleProperty(StylePropertyId.AlignmentOriginY, new UIFixedLength(0f, UIFixedUnit.Pixel));
 				case StylePropertyId.AlignmentOffsetX:
 					 return new StyleProperty(StylePropertyId.AlignmentOffsetX, new UIFixedLength(0f, UIFixedUnit.Pixel));
 				case StylePropertyId.AlignmentOffsetY:

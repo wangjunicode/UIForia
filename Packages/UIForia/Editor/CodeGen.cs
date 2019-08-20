@@ -94,12 +94,12 @@ namespace UIForia.Editor {
             new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.RadialLayoutRadius, new UIFixedLength(0.5f, UIFixedUnit.Percent)),
 
             // Alignment
-            new PropertyGenerator<AlignmentTarget>(StylePropertyId.AlignmentTargetX, AlignmentTarget.AllocatedBox),
-            new PropertyGenerator<AlignmentTarget>(StylePropertyId.AlignmentTargetY, AlignmentTarget.AllocatedBox),
-            new PropertyGenerator<AlignmentBehavior>(StylePropertyId.AlignmentBehaviorX, AlignmentBehavior.Default),
-            new PropertyGenerator<AlignmentBehavior>(StylePropertyId.AlignmentBehaviorY, AlignmentBehavior.Default),
-            new AnimatedPropertyGenerator<float>(StylePropertyId.AlignmentPivotX, 0),
-            new AnimatedPropertyGenerator<float>(StylePropertyId.AlignmentPivotY, 0),
+//            new PropertyGenerator<AlignmentDirection>(StylePropertyId.AlignmentTargetX, AlignmentTarget.Start),
+//            new PropertyGenerator<AlignmentDirection>(StylePropertyId.AlignmentTargetY, AlignmentTarget.Start),
+            new PropertyGenerator<AlignmentBehavior>(StylePropertyId.AlignmentBehaviorX, AlignmentBehavior.Layout),
+            new PropertyGenerator<AlignmentBehavior>(StylePropertyId.AlignmentBehaviorY, AlignmentBehavior.Layout),
+            new AnimatedPropertyGenerator<AlignmentOrigin>(StylePropertyId.AlignmentOriginX, 0f),
+            new AnimatedPropertyGenerator<AlignmentOrigin>(StylePropertyId.AlignmentOriginY, 0f),
             new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.AlignmentOffsetX, new UIFixedLength(0)),
             new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.AlignmentOffsetY, new UIFixedLength(0)),
 

@@ -1,0 +1,16 @@
+using UIForia.Attributes;
+using UIForia.Elements;
+using UIForia.Rendering;
+
+namespace Documentation.Features {
+    
+    [Template("Documentation/Features/StylePropertiesDemo.xml")]
+    public class StylePropertiesDemo : UIElement {
+
+        public Visibility visibility;
+
+        public void OnChangeVisibility(Visibility visibility) {
+            this.visibility = visibility;
+        }
+    }
+}

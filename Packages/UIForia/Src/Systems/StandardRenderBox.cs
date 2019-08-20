@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using SVGX;
 using UIForia.Elements;
 using UIForia.Extensions;
@@ -40,6 +41,7 @@ namespace UIForia.Rendering {
 
     }
 
+    [DebuggerDisplay("{element.ToString()}")]
     public class StandardRenderBox : RenderBox {
 
         protected bool geometryNeedsUpdate;

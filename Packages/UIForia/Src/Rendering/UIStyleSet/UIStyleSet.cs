@@ -18,7 +18,7 @@ namespace UIForia.Rendering {
 
         public readonly UIElement element;
 
-        private StyleState currentState;
+        internal StyleState currentState;
         private UIStyleGroup instanceStyle;
 
         private StyleState containedStates;

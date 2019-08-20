@@ -56,6 +56,8 @@ namespace UIForia.Rendering {
         public virtual void OnInitialize() {
             overflowX = element.style.OverflowX;
             overflowY = element.style.OverflowY;
+            zIndex = element.style.ZIndex;
+            layer = element.style.Layer;
         }
 
         public virtual void OnDestroy() { }
@@ -69,6 +71,12 @@ namespace UIForia.Rendering {
                         break;
                     case StylePropertyId.OverflowY:
                         overflowY = property.AsOverflow;
+                        break;
+                    case StylePropertyId.ZIndex:
+                        zIndex = property.AsInt;
+                        break;
+                    case StylePropertyId.Layer:
+                        layer = property.AsInt;
                         break;
                 }
             }

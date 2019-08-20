@@ -4,13 +4,13 @@
     <Style path="Documentation/Features/FlexDemo.style"/>
 
     <Contents style="container">
-<!--        <Div style="img1"/>-->
-<!--        <Div style="img2"/>-->
-<!--        <Div style="img3"/>-->
-<!--        <Div style="img4"/>-->
-<!--        <Div style="img5"/>-->
-<!--        <Div style="img6"/>-->
-<!--        <Div style="img3"/>-->
+        <Div style="img1"/>
+        <Div style="img2"/>
+        <Div style="img3"/>
+        <Div style="img4"/>
+        <Div style="img5"/>
+        <Div style="img6"/>
+        <Div style="img7"/>
 <!--        <Group style="constrain">-->
 
 <!--  -->

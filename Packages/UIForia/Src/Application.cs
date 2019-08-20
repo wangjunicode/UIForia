@@ -386,7 +386,7 @@ namespace UIForia {
             stack.Push(element);
 
             while (stack.Count > 0) {
-                UIElement current = stack.array[stack.size--];
+                UIElement current = stack.array[--stack.size];
 
                 if ((current.flags & UIElementFlags.Alive) == 0) {
                     continue;
@@ -507,6 +507,10 @@ namespace UIForia {
 
                 currentElement.flags &= ~(UIElementFlags.EnabledThisFrame | UIElementFlags.DisabledThisFrame);
 
+                if (currentElement.children == null) {
+                    continue;
+                }
+                
                 UIElement[] childArray = currentElement.children.array;
 
                 int childCount = currentElement.children.size;
@@ -663,7 +667,7 @@ namespace UIForia {
                 return;
             }
 
-            if ((element.flags & UIElementFlags.Enabled | UIElementFlags.AncestorEnabled) == 0) {
+            if (element.isDisabled) {
                 return;
             }
 
@@ -686,7 +690,7 @@ namespace UIForia {
                 // if destroyed the whole subtree is also destroyed, do nothing.
                 // if already disabled the whole subtree is also disabled, do nothing.
 
-                if ((child.flags & UIElementFlags.Alive | UIElementFlags.Enabled) == 0) {
+                if ((child.flags & (UIElementFlags.Alive | UIElementFlags.Enabled)) == 0) {
                     continue;
                 }
 

@@ -532,9 +532,9 @@ namespace Src.Systems {
                 this.element = wrapper.element;
                 this.renderBox = element.renderBox;
                 this.zIndex = wrapper.zIndex;
+                this.layer = wrapper.layer;
                 this.siblingIndex = wrapper.siblingIndex;
                 this.traversalIndex = -1;
-                this.layer = wrapper.zIndex;
             }
 
         }

@@ -37,7 +37,7 @@ public class StyleSheetCompilerTests {
 
 const path = ""testimg/cat"";
 export const img1 = url(@path);
-
+  
 style image1 { BackgroundImage = @img1; }
 style image2 { BackgroundImage = url(@path); }
 style image3 { BackgroundImage = url(testimg/cat); }
@@ -1186,18 +1186,18 @@ style xyz {
         Assert.AreEqual(1, container.groups[0].hover.runCommands.Count);
     }
 
-    [Test]
-    public void CompileBackgroundImageFromSpriteAtlas() {
-        var nodes = StyleParser.Parse(@"
-            style fromatlas {
-                BackgroundImage = url(""/some/image"", ""spriteName1""); 
-            }
-        ".Trim());
-        
-        
-        StyleSheet styleSheet = NewStyleSheetCompiler().Compile("test", nodes);
-        
-        var styleContainer = styleSheet.styleGroupContainers;
-        Assert.IsInstanceOf<Sprite>(styleContainer[0].groups[0].normal.style.BackgroundImage);
-    }
+//    [Test]
+//    public void CompileBackgroundImageFromSpriteAtlas() {
+//        var nodes = StyleParser.Parse(@"
+//            style fromatlas {
+//                BackgroundImage = url(""/some/image"", ""spriteName1""); 
+//            }
+//        ".Trim());
+//        
+//        
+//        StyleSheet styleSheet = NewStyleSheetCompiler().Compile("test", nodes);
+//        
+//        var styleContainer = styleSheet.styleGroupContainers;
+//        Assert.IsInstanceOf<Sprite>(styleContainer[0].groups[0].normal.style.BackgroundImage);
+//    }
 }

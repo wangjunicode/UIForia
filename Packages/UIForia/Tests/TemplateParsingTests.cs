@@ -99,7 +99,7 @@ public class TemplateParsingTests {
             ");
         UITextTemplate template = (UITextTemplate) parsedTemplate.childTemplates[0].childTemplates[0];
         Assert.IsNotNull(template);
-        Assert.AreEqual("'text {value} is here'", template.RawText);
+        Assert.AreEqual("text {value} is here", template.RawText);
     }
 
     [Test]

@@ -282,7 +282,6 @@ public class UIView_Tests {
         Assert.AreEqual(2, callCount);
     }
 
-
     [Test]
     public void EnableElement() {
         MockApplication testView = new MockApplication(typeof(ViewTestThing));

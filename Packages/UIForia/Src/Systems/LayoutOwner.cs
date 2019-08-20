@@ -126,9 +126,7 @@ namespace UIForia.Layout {
                 layoutResult.actualSize = sizeSet.size;
                 layoutResult.allocatedSize = sizeSet.allocatedSize;
                 layoutResult.matrix = worldMatrices[idx];
-                Vector2 position = layoutResult.matrix.position;
-                position.y = -position.y;
-                layoutResult.screenPosition = position;
+                layoutResult.screenPosition = layoutResult.matrix.position;
                 layoutResult.localPosition = element.layoutBox.alignedPosition;
                 layoutResult.clipRect = new Rect(0, 0, Screen.width, Screen.height); // todo -- temp
             }

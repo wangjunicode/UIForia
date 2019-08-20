@@ -57,7 +57,11 @@ public class RenderOwnerTests {
         StructList<RenderOwner.RenderBoxWrapper> elements = ((VertigoRenderSystem) app.RenderSystem).renderOwners[0].WrapperList;
 
         for (int i = 0; i < elements.size; i++) {
-            Debug.Log(elements[i].element);
+            if (elements[i].renderOp != RenderOwner.RenderOpType.DrawBackground) {
+                elements.RemoveAt(i--);
+                continue;
+            }
+            //   Debug.Log(elements[i].element + " " + elements[i].renderOp);
         }
 
         Assert.AreEqual(root.FindById("e21"), elements[25].element);
@@ -151,15 +155,13 @@ public class RenderOwnerTests {
         ((VertigoRenderSystem) app.RenderSystem).renderOwners[0].GatherBoxDataParallel();
         StructList<RenderOwner.RenderBoxWrapper> elements = ((VertigoRenderSystem) app.RenderSystem).renderOwners[0].WrapperList;
 
-//        for (int i = 0; i < elements.size; i++) {
-//            if (!elements[i].isBackground) {
-//                Debug.Log(elements[i].element + " [foreground]");
-//            }
-//            else {
-//                Debug.Log(elements[i].element);
-//            }
-//        }
 
+        for (int i = 0; i < elements.size; i++) {
+            if (elements[i].renderOp != RenderOwner.RenderOpType.DrawBackground && elements[i].renderOp != RenderOwner.RenderOpType.DrawForeground) {
+                elements.RemoveAt(i--);
+            }
+        }
+        
         int idx = elements.size;
         Assert.AreEqual(root.FindById("e21"), elements[--idx].element);
         Assert.AreEqual(root.FindById("e17"), elements[--idx].element);

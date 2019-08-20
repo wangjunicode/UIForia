@@ -34,6 +34,7 @@ namespace Style {
             app.StyleSystem.onStylePropertyChanged += (element, list) => { callCount++; }; 
             app.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
             FlexLayoutRowTests.FlexRowLayoutThing root = (FlexLayoutRowTests.FlexRowLayoutThing) app.RootElement.GetChild(0);
+            root.SetEnabled(false);
             app.Update();
             Assert.AreEqual(0, callCount);
             Assert.AreEqual(100f, app.RootElement.FindById("child0").style.PreferredWidth.value);

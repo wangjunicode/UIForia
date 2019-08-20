@@ -199,6 +199,10 @@ namespace UIForia.Elements {
 
         [OnKeyDownWithFocus()]
         public void OnKeyDownNavigate(KeyboardInputEvent evt) {
+
+            if (disabled) {
+                return;
+            }
             
             if (selecting && evt.keyCode == KeyCode.Escape) {
                 selecting = false;
@@ -244,6 +248,10 @@ namespace UIForia.Elements {
         
         [OnKeyHeldDownWithFocus()]
         public void OnKeyboardNavigate(KeyboardInputEvent evt) {
+
+            if (disabled) {
+                return;
+            }
 
             if (debounce - Time.realtimeSinceStartup > -0.1) {
                 return;
@@ -331,7 +339,7 @@ namespace UIForia.Elements {
         }
 
         public void BeginSelecting(MouseInputEvent evt) {
-            if (HasAttribute("disabled")) {
+            if (disabled) {
                 return;
             }
 

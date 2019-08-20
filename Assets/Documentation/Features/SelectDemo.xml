@@ -22,7 +22,9 @@
             </Group>
             
         </Repeat>
-    
+        
+        <Select--string selectedValue.read.write="selectedLanguage[0].Name" options="translations[0]" disableOverflowX="true" disabled="true" />
+
         <Group style="button-group">
             <Group style="button" onMouseClick="ClearWords()">
                 Clear

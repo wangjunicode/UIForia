@@ -10,14 +10,13 @@ namespace UIForia.Elements {
     }
 
     /// <summary>
-    /// Renders an arrowhead that can be used as an arrow-like border or a chevron if the Horizontal property is set to
-    /// true.
+    /// Renders an arrowhead that can be used as an arrow-like border or a chevron. Uses BackgroundColor as
+    /// arrow color and respects margins.
     /// </summary>
     public class Arrow : UIContainerElement, ISVGXPaintable {
 
         /// <summary>
-        /// If true the arrow will face down.
-        /// Default: false, face to the right.
+        /// Sets the direction in which the arrow points. Defaults to left.
         /// </summary>
         public ArrowRotation Rotation;
 

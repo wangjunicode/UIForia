@@ -296,6 +296,7 @@ namespace UIForia.Elements {
         public event Action<FocusEvent> onFocus;
         public event Action<BlurEvent> onBlur;
         public bool autofocus;
+        public bool disabled;
 
         protected float holdDebounce = 0.05f;
         protected float timestamp;
@@ -335,6 +336,9 @@ namespace UIForia.Elements {
             textInfo.UpdateSpan(0, text);
             textInfo.Layout();
             Application.InputSystem.RegisterFocusable(this);
+            if (disabled) {
+                SetAttribute("disabled", "true");
+            }
         }
 
         public override void OnEnable() {

@@ -612,6 +612,7 @@ namespace UIForia.Compilers {
             new InputAttributeTuple("onMouseExit", InputEventType.MouseExit, s_MouseEventAlias),
             new InputAttributeTuple("onMouseClick", InputEventType.MouseClick, s_MouseEventAlias),
             new InputAttributeTuple("onMouseDown", InputEventType.MouseDown, s_MouseEventAlias),
+            new InputAttributeTuple("onMouseHeldDown", InputEventType.MouseHeldDown, s_MouseEventAlias),
             new InputAttributeTuple("onMouseUp", InputEventType.MouseUp, s_MouseEventAlias),
             new InputAttributeTuple("onMouseMove", InputEventType.MouseMove, s_MouseEventAlias),
             new InputAttributeTuple("onMouseHover", InputEventType.MouseHover, s_MouseEventAlias),

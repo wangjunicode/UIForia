@@ -1,3 +1,5 @@
+using System;
+
 namespace UIForia.Text {
 
     public struct SelectionRange {
@@ -8,7 +10,7 @@ namespace UIForia.Text {
         public readonly TextEdge selectEdge;
 
         public SelectionRange(int cursorIndex, TextEdge cursorEdge, int selectIndex = -1, TextEdge selectEdge = TextEdge.Left) {
-            this.cursorIndex = cursorIndex;
+            this.cursorIndex = Math.Max(0, cursorIndex);
             this.cursorEdge = cursorEdge;
             this.selectIndex = selectIndex;
             this.selectEdge = selectEdge;

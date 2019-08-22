@@ -43,16 +43,11 @@ namespace UIForia.Elements {
 
     }
 
-    public static class FormatStrings {
-
-        public const string DoubleFixedPoint = "0.###################################################################################################################################################################################################################################################################################################################################################";
-
-    }
-
     public static class InputSerializers {
 
-        public static IInputSerializer<int> IntSerializer = new CallbackSerializer<int>((int input) => input.ToString());
-        public static IInputSerializer<float> FloatSerializer = new CallbackSerializer<float>((float input) => input.ToString(FormatStrings.DoubleFixedPoint));
+        public static IInputSerializer<int> IntSerializer = new CallbackSerializer<int>((int input) => input.ToString("D"));
+        public static IInputSerializer<float> FloatSerializer = new CallbackSerializer<float>((float input) => input.ToString("G"));
+        public static IInputSerializer<double> DoubleSerializer = new CallbackSerializer<double>((double input) => input.ToString("G"));
         public static IInputSerializer<string> StringSerializer = new CallbackSerializer<string>((string input) => input);
 
     }
@@ -73,6 +68,13 @@ namespace UIForia.Elements {
                 return 0f;
             }
         });
+        public static IInputDeserializer<double> DoubleDeserializer = new CallbackDeserializer<double>((string input) => {
+            try {
+                return double.Parse(input);
+            } catch (Exception) {
+                return 0f;
+            }
+        });
         public static IInputDeserializer<string> StringDeserializer = new CallbackDeserializer<string>((string input) => input);
 
     }
@@ -80,7 +82,34 @@ namespace UIForia.Elements {
     public static class InputFormatters {
 
         public static IInputFormatter FloatFormatter = new FloatFormatter();
+        public static IInputFormatter IntFormatter = new IntFormatter();
 
+    }
+
+    public class IntFormatter : IInputFormatter {
+
+        private static StringBuilder builder = new StringBuilder(32);
+
+        public string Format(string input) {
+            builder.Clear();
+            bool foundDigit = false;
+            bool foundSign = false;
+
+            for (int i = 0; i < input.Length; i++) {
+                char c = input[i];
+
+                if (!foundDigit && !foundSign && c == '-') {
+                    builder.Append(c);
+                    foundSign = true;
+                }
+                else if (char.IsDigit(c)) {
+                    builder.Append(c);
+                    foundDigit = true;
+                }
+            }
+
+            return builder.ToString();
+        }
     }
 
     public class FloatFormatter : IInputFormatter {
@@ -114,7 +143,6 @@ namespace UIForia.Elements {
 
             return builder.ToString();
         }
-
     }
 
     public interface IInputFormatter {
@@ -210,24 +238,26 @@ namespace UIForia.Elements {
 
         private void HandleTextChanged(string previous) {
             string preFormat = text;
-            
+
             if (formatter != null) { // todo -- handle when to format
                 text = formatter.Format(text);
             }
 
+            T newValue = deserializer.Deserialize(text);
+
             if (text.Length > MaxLength) {
                 text = text.Substring(0, MaxLength);
+                newValue = deserializer.Deserialize(text);
             }
 
             if (text != preFormat) {
                 int diff = text.Length - preFormat.Length;
-                selectionRange = new SelectionRange(selectionRange.cursorIndex + diff, TextEdge.Left);
+                selectionRange = new SelectionRange(selectionRange.cursorIndex + diff, selectionRange.cursorEdge);
             }
 
             textInfo.UpdateSpan(0, text);
             textInfo.Layout();
 
-            T newValue = deserializer.Deserialize(text);
             if ((value == null && newValue != null) || !value.Equals(newValue)) {
                 value = newValue;
                 onValueChanged?.Invoke(value);
@@ -253,6 +283,10 @@ namespace UIForia.Elements {
                 return InputDeserializers.FloatDeserializer;
             }
 
+            if (typeof(T) == typeof(double)) {
+                return InputDeserializers.DoubleDeserializer;
+            }
+
             if (typeof(T) == typeof(string)) {
                 return InputDeserializers.StringDeserializer;
             }
@@ -269,6 +303,10 @@ namespace UIForia.Elements {
                 return InputSerializers.FloatSerializer;
             }
 
+            if (typeof(T) == typeof(double)) {
+                return InputSerializers.DoubleSerializer;
+            }
+
             if (typeof(T) == typeof(string)) {
                 return InputSerializers.StringSerializer;
             }
@@ -279,6 +317,12 @@ namespace UIForia.Elements {
         protected IInputFormatter GetFormatter() {
             if (typeof(T) == typeof(float)) {
                 return InputFormatters.FloatFormatter;
+            }
+            if (typeof(T) == typeof(double)) {
+                return InputFormatters.FloatFormatter;
+            }
+            if (typeof(T) == typeof(int)) {
+                return InputFormatters.IntFormatter;
             }
 
             return null;
@@ -764,9 +808,5 @@ namespace UIForia.Elements {
         public void Paint(VertigoContext ctx, in Matrix4x4 matrix) {
             throw new NotImplementedException();
         }
-
-
-
     }
-
 }

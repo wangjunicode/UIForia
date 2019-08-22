@@ -53,9 +53,11 @@
         <Label forElement="'input2'">Another label</Label>
         <Input x-id="input2" value.write="regularValue" />
 
-        <Label>Float value Input, value is {floatValue}. Also demonstrates the MaxLength property.</Label>
-        
-        <InputElement--float value.read.write="floatValue" MaxLength="8"/>
+        <Label>Float value Input, value is {floatValue}. MaxLength=6.</Label>
+        <InputElement--float value.read.write="floatValue" MaxLength="6"/>
+
+        <Label>Double value Input, value is {doubleValue}. MaxLength=12.</Label>
+        <InputElement--double value.read.write="doubleValue" MaxLength="12"/>
         
         <Group>
             <Heading1>Here be the autocomplete result:</Heading1>

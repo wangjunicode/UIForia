@@ -539,7 +539,8 @@ namespace UIForia.Rendering {
         }
 
         private UIStyleGroupContainer FindContainerForGroup(UIStyleGroup group) {
-            for (int i = 0; i < styleGroupContainers.Count; i++) {
+            var count = styleGroupContainers.Count;
+            for (int i = 0; i < count; i++) {
                 for (int j = 0; j < styleGroupContainers[i].groups.Count; i++) {
                     if (styleGroupContainers[i].groups[j] == group) {
                         return styleGroupContainers[i];
@@ -654,7 +655,7 @@ namespace UIForia.Rendering {
             return -1;
         }
 
-        public void UpdateApplicableAttributeRules(string attributeName, string previousValue) {
+        public void UpdateApplicableAttributeRules() {
             if (!hasAttributeStyles) return;
 
             int containerCount = styleGroupContainers.Count;
@@ -685,7 +686,6 @@ namespace UIForia.Rendering {
 
                                 if (isActive) {
                                     AddMissingProperties(toUpdate, availableStyles[nextIdx].styleRunCommand.style);
-                                    RunCommands(availableStyles[nextIdx].styleRunCommand.runCommands);
                                 }
 
                                 availableStyles.RemoveAt(nextIdx);

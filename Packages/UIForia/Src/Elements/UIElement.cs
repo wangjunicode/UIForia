@@ -287,8 +287,13 @@ namespace UIForia.Elements {
                 }
 
                 for (int i = 0; i < element.children.Count; i++) {
-                    if (element.children[i].GetAttribute("id") == elementId && element.children[i].templateContext.rootObject == this) {
-                        return element.children[i] as T;
+                    if (element.children[i].GetAttribute("id") == elementId) {
+                        bool isSameElement = element.children[i].templateContext.rootObject == this;
+                        // special case for slots: if the child belongs to the parent and is also a slot definition we can assume the slot originated also from this element
+                        bool isSlotDefinitionId = element.children[i].templateContext.currentObject is UISlotDefinition slotDefinition && slotDefinition.templateContext.rootObject == parent;
+                        if (isSlotDefinitionId || isSameElement) {  
+                            return element.children[i] as T;
+                        }
                     }
 
                     elementStack.Push(element.children[i]);

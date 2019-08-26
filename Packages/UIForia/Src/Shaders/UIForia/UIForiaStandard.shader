@@ -129,10 +129,10 @@ Shader "UIForia/Standard"
                     
                     fixed4 unpackedUnderlay = UnpackColor(asuint(Vert_CharacterPackedUnderlay));
                     
-                    fixed underlayX = 1; //(unpackedUnderlay.x * 2) - 1;
-                    fixed underlayY = 1; //(unpackedUnderlay.y * 2) - 1;
-                    fixed underlayDilate = 1; //(unpackedUnderlay.z * 2) - 1;
-                    fixed underlaySoftness = 1;//unpackedUnderlay.w;
+                    fixed underlayX = (unpackedUnderlay.x * 2) - 1;
+                    fixed underlayY = (unpackedUnderlay.y * 2) - 1;
+                    fixed underlayDilate = (unpackedUnderlay.z * 2) - 1;
+                    fixed underlaySoftness = unpackedUnderlay.w;
                     
                     // scale stuff can be moved to cpu, alpha clip & bias too
                     float2 pixelSize = o.vertex.w;

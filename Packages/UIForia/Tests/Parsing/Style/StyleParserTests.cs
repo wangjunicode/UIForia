@@ -423,12 +423,12 @@ style s { BrokenUrl = url() }
 
         VariableDefinitionNode varNode5 = rootNode.variableNodes[5];
         Assert.AreEqual("t1", varNode5.name);
-        Assert.AreEqual(typeof(TransformOffset), varNode5.variableType);
+        Assert.AreEqual(typeof(OffsetMeasurement), varNode5.variableType);
         Assert.AreEqual(StyleASTNodeType.Measurement, varNode5.value.type);
 
         VariableDefinitionNode varNode6 = rootNode.variableNodes[6];
         Assert.AreEqual("t2", varNode6.name);
-        Assert.AreEqual(typeof(TransformOffset), varNode6.variableType);
+        Assert.AreEqual(typeof(OffsetMeasurement), varNode6.variableType);
         Assert.AreEqual(StyleASTNodeType.Measurement, varNode6.value.type);
 
         VariableDefinitionNode varNode7 = rootNode.variableNodes[7];

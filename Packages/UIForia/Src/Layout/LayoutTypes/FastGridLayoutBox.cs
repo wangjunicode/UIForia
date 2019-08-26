@@ -113,19 +113,20 @@ namespace UIForia.Layout.LayoutTypes {
                 float finalWidth = spannedTracksWidth;
 
                 Fit fit = default;
-                Alignment alignment = new Alignment(new UIFixedLength(0, UIFixedUnit.Percent), 0, AlignmentTarget.AllocatedBox);
 
                 BlockSize blockSize = new BlockSize();
                 blockSize.size = finalWidth;
                 blockSize.contentAreaSize = finalWidth;
-
+                float colPosition = 0;
+                
                 switch (colAlignment) {
                     case GridAxisAlignment.Center:
-                        alignment = new Alignment(new UIFixedLength(0.5f, UIFixedUnit.Percent), 0.5f, AlignmentTarget.AllocatedBox);
+                        finalWidth -= placement.margin.left + placement.margin.right;
+                        colPosition =  x + (spannedTracksWidth * 0.5f) - (finalWidth * 0.5f);; 
                         break;
 
                     case GridAxisAlignment.End:
-                        alignment = new Alignment(new UIFixedLength(1, UIFixedUnit.Percent), 1, AlignmentTarget.AllocatedBox);
+                        
                         break;
 
                     case GridAxisAlignment.Start:
@@ -142,7 +143,7 @@ namespace UIForia.Layout.LayoutTypes {
                         break;
                 }
 
-                child.ApplyHorizontalLayout(finalX + paddingBorderLeft, blockSize, blockSize.contentAreaSize - placement.margin.left - placement.margin.right, placement.size.prefWidth, alignment, fit);
+                child.ApplyHorizontalLayout(finalX + paddingBorderLeft, blockSize, blockSize.contentAreaSize - placement.margin.left - placement.margin.right, placement.size.prefWidth, colPosition, fit);
             }
         }
 
@@ -168,7 +169,7 @@ namespace UIForia.Layout.LayoutTypes {
                 float finalHeight = spannedTrackHeights;
 
                 Fit fit = default;
-                Alignment alignment = new Alignment(new UIFixedLength(0, UIFixedUnit.Percent), 0, AlignmentTarget.AllocatedBox);
+                float alignment = 0;
 
                 BlockSize blockSize = new BlockSize();
                 blockSize.size = finalHeight - placement.margin.top - placement.margin.bottom;
@@ -176,11 +177,11 @@ namespace UIForia.Layout.LayoutTypes {
 
                 switch (colAlignment) {
                     case GridAxisAlignment.Center:
-                        alignment = new Alignment(new UIFixedLength(0.5f, UIFixedUnit.Percent), 0.5f, AlignmentTarget.AllocatedBox);
+                        alignment = 0;
                         break;
 
                     case GridAxisAlignment.End:
-                        alignment = new Alignment(new UIFixedLength(1, UIFixedUnit.Percent), 1, AlignmentTarget.AllocatedBox);
+                        alignment = 0;
                         break;
 
                     case GridAxisAlignment.Start:

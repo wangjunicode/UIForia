@@ -3,8 +3,8 @@ using UIForia.Elements;
 
 namespace Documentation.Features {
 
-    [Template("Documentation/Features/FlexDemo.xml")]
-    public class FlexDemo : UIElement {
+    [Template("Documentation/Features/AlignmentDemo.xml")]
+    public class AlignmentDemo : UIElement {
 
         
     }

@@ -2,15 +2,15 @@
 
 namespace UIForia.Util {
 
-    public struct FixedLengthVector {
+    public struct UIFixedLengthPair {
 
-        public bool Equals(FixedLengthVector other) {
+        public bool Equals(UIFixedLengthPair other) {
             return x.Equals(other.x) && y.Equals(other.y);
         }
 
         public override bool Equals(object obj) {
             if (ReferenceEquals(null, obj)) return false;
-            return obj is FixedLengthVector && Equals((FixedLengthVector) obj);
+            return obj is UIFixedLengthPair && Equals((UIFixedLengthPair) obj);
         }
 
         public override int GetHashCode() {
@@ -22,20 +22,20 @@ namespace UIForia.Util {
         public readonly UIFixedLength x;
         public readonly UIFixedLength y;
 
-        public FixedLengthVector(UIFixedLength x, UIFixedLength y) {
+        public UIFixedLengthPair(UIFixedLength x, UIFixedLength y) {
             this.x = x;
             this.y = y;
         }
 
-        public static implicit operator FixedLengthVector(Vector2 vec) {
-            return new FixedLengthVector(vec.x, vec.y);
+        public static implicit operator UIFixedLengthPair(Vector2 vec) {
+            return new UIFixedLengthPair(vec.x, vec.y);
         }
 
-        public static bool operator ==(FixedLengthVector self, FixedLengthVector other) {
+        public static bool operator ==(UIFixedLengthPair self, UIFixedLengthPair other) {
             return self.x == other.x && self.y == other.y;
         }
 
-        public static bool operator !=(FixedLengthVector self, FixedLengthVector other) {
+        public static bool operator !=(UIFixedLengthPair self, UIFixedLengthPair other) {
             return !(self == other);
         }
 

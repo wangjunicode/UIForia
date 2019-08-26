@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UITemplate>
+
+    <Style path="Documentation/Features/AlignmentDemo.style"/>
+
+    <Contents>
+        <Group style="group1">
+            
+        </Group>
+        <Group style="group1 center-align">
+            
+        </Group>
+        <Group style="group1">
+            
+        </Group>
+    </Contents>
+</UITemplate>

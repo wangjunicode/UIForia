@@ -48,16 +48,16 @@ namespace Documentation.DocumentationElements {
             origin.style.SetAnchorLeft(new UIFixedLength(0), StyleState.Normal);
             origin.style.SetAnchorTop(new UIFixedLength(0), StyleState.Normal);
             origin.style.SetTransformBehavior(TransformBehavior.AnchorMinOffset, StyleState.Normal);
-            origin.style.SetTransformPositionX(new TransformOffset(MousePosition.x - offset.x), StyleState.Normal);
-            origin.style.SetTransformPositionY(new TransformOffset(MousePosition.y - offset.y), StyleState.Normal);
+            origin.style.SetTransformPositionX(new UIFixedLength(MousePosition.x - offset.x), StyleState.Normal);
+            origin.style.SetTransformPositionY(new UIFixedLength(MousePosition.y - offset.y), StyleState.Normal);
         }
 
         public override void Drop(bool success) {
             base.Drop(success);
             origin.style.SetAnchorTarget(AnchorTarget.Parent, StyleState.Normal);
             origin.style.SetTransformBehavior(TransformBehavior.LayoutOffset, StyleState.Normal);
-            origin.style.SetTransformPositionX(new TransformOffset(0), StyleState.Normal);
-            origin.style.SetTransformPositionY(new TransformOffset(0), StyleState.Normal);
+            origin.style.SetTransformPositionX(new UIFixedLength(0), StyleState.Normal);
+            origin.style.SetTransformPositionY(new UIFixedLength(0), StyleState.Normal);
         }
 
     }

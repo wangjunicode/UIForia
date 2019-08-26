@@ -82,8 +82,8 @@ namespace UIForia.Layout.LayoutTypes {
 
         internal UIFixedLength transformPivotX;
         internal UIFixedLength transformPivotY;
-        internal TransformOffset transformPositionX;
-        internal TransformOffset transformPositionY;
+        internal UIFixedLength transformPositionX;
+        internal UIFixedLength transformPositionY;
         internal TransformBehavior transformBehaviorX;
         internal TransformBehavior transformBehaviorY;
 
@@ -838,51 +838,51 @@ namespace UIForia.Layout.LayoutTypes {
         }
 
         // Note: Only call this AFTER layout has run
-        public float ResolveTransform(TransformOffset transformOffset) {
+        public float ResolveTransform(OffsetMeasurement transformOffset) {
             switch (transformOffset.unit) {
-                case TransformUnit.Unset:
+                case OffsetMeasurementUnit.Unset:
                     return 0;
 
-                case TransformUnit.Pixel:
+                case OffsetMeasurementUnit.Pixel:
                     return transformOffset.value;
 
-                case TransformUnit.Em:
+                case OffsetMeasurementUnit.Em:
                     return style.GetResolvedFontSize() * transformOffset.value;
 
-                case TransformUnit.ActualWidth:
+                case OffsetMeasurementUnit.ActualWidth:
                     return transformOffset.value * actualWidth;
 
-                case TransformUnit.ActualHeight:
+                case OffsetMeasurementUnit.ActualHeight:
                     return transformOffset.value * actualHeight;
 
-                case TransformUnit.AllocatedWidth:
+                case OffsetMeasurementUnit.AllocatedWidth:
                     return transformOffset.value * allocatedWidth;
 
-                case TransformUnit.AllocatedHeight:
+                case OffsetMeasurementUnit.AllocatedHeight:
                     return transformOffset.value * allocatedHeight;
 
-                case TransformUnit.ContentWidth:
+                case OffsetMeasurementUnit.ContentWidth:
                     return GetContentWidth() * transformOffset.value;
 
-                case TransformUnit.ContentHeight:
+                case OffsetMeasurementUnit.ContentHeight:
                     // should this be allocatedWidth instead?
                     return GetContentHeight(actualWidth) * transformOffset.value;
 
-                case TransformUnit.ContentAreaWidth:
+                case OffsetMeasurementUnit.ContentAreaWidth:
                     float width = allocatedWidth - resolvedPaddingLeft - resolvedBorderLeft - resolvedPaddingRight - resolvedBorderRight;
                     return Mathf.Max(0, width) * transformOffset.value;
 
-                case TransformUnit.ContentAreaHeight:
+                case OffsetMeasurementUnit.ContentAreaHeight:
                     float height = allocatedHeight - resolvedPaddingTop - resolvedBorderTop - resolvedPaddingBottom - resolvedBorderBottom;
                     return Mathf.Max(0, height) * transformOffset.value;
 
-                case TransformUnit.ViewportWidth:
+                case OffsetMeasurementUnit.ViewportWidth:
                     return view.Viewport.width * transformOffset.value;
 
-                case TransformUnit.ViewportHeight:
+                case OffsetMeasurementUnit.ViewportHeight:
                     return view.Viewport.height * transformOffset.value;
 
-                case TransformUnit.AnchorWidth: {
+                case OffsetMeasurementUnit.AnchorWidth: {
                     AnchorTarget anchorTarget = style.AnchorTarget;
                     if (parent.prefWidth.IsContentBased && anchorTarget == AnchorTarget.Parent ||
                         anchorTarget == AnchorTarget.ParentContentArea) {
@@ -892,7 +892,7 @@ namespace UIForia.Layout.LayoutTypes {
                     return ResolveAnchorWidth(transformOffset.value);
                 }
 
-                case TransformUnit.AnchorHeight: {
+                case OffsetMeasurementUnit.AnchorHeight: {
                     AnchorTarget anchorTarget = style.AnchorTarget;
                     if (parent.prefHeight.IsContentBased && anchorTarget == AnchorTarget.Parent ||
                         anchorTarget == AnchorTarget.ParentContentArea) {
@@ -902,26 +902,26 @@ namespace UIForia.Layout.LayoutTypes {
                     return ResolveAnchorHeight(transformOffset.value);
                 }
 
-                case TransformUnit.ParentWidth:
+                case OffsetMeasurementUnit.ParentWidth:
                     if (parent == null) return 0;
                     return parent.actualWidth * transformOffset.value;
 
-                case TransformUnit.ParentHeight:
+                case OffsetMeasurementUnit.ParentHeight:
                     if (parent == null) return 0;
                     return parent.actualHeight * transformOffset.value;
 
-                case TransformUnit.ParentContentAreaWidth:
+                case OffsetMeasurementUnit.ParentContentAreaWidth:
                     if (parent == null) return 0;
                     return parent.ContentRect.width * transformOffset.value;
 
-                case TransformUnit.ParentContentAreaHeight:
+                case OffsetMeasurementUnit.ParentContentAreaHeight:
                     if (parent == null) return 0;
                     return parent.ContentRect.height * transformOffset.value;
 
-                case TransformUnit.ScreenWidth:
+                case OffsetMeasurementUnit.ScreenWidth:
                     return Screen.width * transformOffset.value;
 
-                case TransformUnit.ScreenHeight:
+                case OffsetMeasurementUnit.ScreenHeight:
                     return Screen.height * transformOffset.value;
 
                 default:
@@ -1144,11 +1144,11 @@ namespace UIForia.Layout.LayoutTypes {
                         break;
 
                     case StylePropertyId.TransformPositionX:
-                        transformPositionX = property.AsTransformOffset;
+                        transformPositionX = property.AsUIFixedLength;
                         break;
 
                     case StylePropertyId.TransformPositionY:
-                        transformPositionY = property.AsTransformOffset;
+                        transformPositionY = property.AsUIFixedLength;
                         break;
 
                     case StylePropertyId.TransformBehaviorX:

@@ -395,7 +395,7 @@ public class FlexLayoutRowTests {
         
         root.GetChild(1).style.SetAlignmentBehaviorY(AlignmentBehavior.Cell, StyleState.Normal);
         root.GetChild(1).style.SetAlignmentOriginY(0f, StyleState.Normal);
-        root.GetChild(1).style.SetAlignmentOffsetY(new UIFixedLength(0f, UIFixedUnit.Percent), StyleState.Normal);
+        root.GetChild(1).style.SetAlignmentOffsetY(new OffsetMeasurement(0f, OffsetMeasurementUnit.Percent), StyleState.Normal);
         
         app.Update();
 

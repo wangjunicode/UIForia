@@ -94,37 +94,6 @@ namespace UIForia.Rendering {
                 this.hasValue = true;
             }
         }
-        
-        [DebuggerStepThrough]
-        public StyleProperty(StylePropertyId propertyId, in AlignmentOrigin origin) {
-            this.propertyId = propertyId;
-            this.int0 = 0;
-            this.int1 = 0;
-            this.hasValue = true;
-            this.float0 = 0;
-            this.float1 = 0;
-            this.objectField = null;
-            this.float0 = origin.value.value;
-            this.int1 = BitUtil.SetHighLowBits((int) origin.value.unit, (int)origin.direction);
-            this.hasValue = true;
-        }
-        
-        [DebuggerStepThrough]
-        public StyleProperty(StylePropertyId propertyId, in AlignmentOrigin? origin) {
-            this.propertyId = propertyId;
-            this.int0 = 0;
-            this.int1 = 0;
-            this.hasValue = false;
-            this.float0 = 0;
-            this.float1 = 0;
-            this.objectField = null;
-            if (origin.HasValue) {
-                UIFixedLength v = origin.Value.value;
-                this.float0 = v.value;
-                this.int1 = BitUtil.SetHighLowBits((int) v.unit, (int)origin.Value.direction);
-                this.hasValue = true;
-            }
-        }
 
         [DebuggerStepThrough]
         public StyleProperty(StylePropertyId propertyId, in UIMeasurement measurement) {
@@ -155,7 +124,7 @@ namespace UIForia.Rendering {
         }
 
         [DebuggerStepThrough]
-        public StyleProperty(StylePropertyId propertyId, in TransformOffset offset) {
+        public StyleProperty(StylePropertyId propertyId, in OffsetMeasurement offset) {
             this.propertyId = propertyId;
             this.objectField = null;
             this.int0 = 0;
@@ -166,7 +135,7 @@ namespace UIForia.Rendering {
         }
 
         [DebuggerStepThrough]
-        public StyleProperty(StylePropertyId propertyId, in TransformOffset? offset) {
+        public StyleProperty(StylePropertyId propertyId, in OffsetMeasurement? offset) {
             this.propertyId = propertyId;
             this.objectField = null;
             this.int0 = 0;
@@ -175,7 +144,7 @@ namespace UIForia.Rendering {
             this.float0 = 0;
             this.float1 = 0;
             if (offset.HasValue) {
-                TransformOffset val = offset.Value;
+                OffsetMeasurement val = offset.Value;
                 this.float0 = val.value;
                 this.int1 = (int) val.unit;
                 this.hasValue = true;
@@ -367,15 +336,8 @@ namespace UIForia.Rendering {
         public GridTrackSize AsGridTrackSize => new GridTrackSize(float0, (GridTemplateUnit) int1);
         public UIMeasurement AsUIMeasurement => new UIMeasurement(float0, (UIMeasurementUnit) int1);
         public UIFixedLength AsUIFixedLength => new UIFixedLength(float0, (UIFixedUnit) int1);
-        public TransformOffset AsTransformOffset => new TransformOffset(float0, (TransformUnit) int1);
+        public OffsetMeasurement AsOffsetMeasurement => new OffsetMeasurement(float0, (OffsetMeasurementUnit) int1);
 
-        public AlignmentOrigin AsAlignmentOrigin {
-            get {
-                int unit = BitUtil.GetHighBits(int1);
-                int direction = BitUtil.GetLowBits(int1);
-                return new AlignmentOrigin(float0, (UIFixedUnit)unit, (AlignmentDirection)direction);
-            }
-        }
         public GridItemPlacement AsGridItemPlacement {
             get {
                 if (objectField is string name) {
@@ -407,6 +369,7 @@ namespace UIForia.Rendering {
 
         public AlignmentTarget AsAlignmentTarget => (AlignmentTarget) int0;
         public AlignmentBehavior AsAlignmentBehavior => (AlignmentBehavior) int0;
+        public AlignmentDirection AsAlignmentDirection => (AlignmentDirection)int0;
 
         public static bool operator ==(in StyleProperty a, in StyleProperty b) {
             return a.propertyId == b.propertyId &&
@@ -453,11 +416,11 @@ namespace UIForia.Rendering {
             return retn;
         }
 
-        public static StyleProperty TransformPositionX(TransformOffset length) {
+        public static StyleProperty TransformPositionX(OffsetMeasurement length) {
             return new StyleProperty(StylePropertyId.TransformPositionX, length);
         }
 
-        public static StyleProperty TransformPositionY(TransformOffset length) {
+        public static StyleProperty TransformPositionY(OffsetMeasurement length) {
             return new StyleProperty(StylePropertyId.TransformPositionY, length);
         }
 

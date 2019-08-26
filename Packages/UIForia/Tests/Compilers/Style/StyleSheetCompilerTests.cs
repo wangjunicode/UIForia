@@ -842,17 +842,17 @@ style trans4 { TransformPositionY = 15ah; }
         var styleGroup = styleSheet.styleGroupContainers;
         Assert.AreEqual(4, styleGroup.Length);
 
-        Assert.AreEqual(new TransformOffset(20, TransformUnit.ScreenWidth), styleGroup[0].groups[0].normal.style.TransformPositionX);
-        Assert.AreEqual(new TransformOffset(10, TransformUnit.ContentAreaHeight), styleGroup[0].groups[0].normal.style.TransformPositionY);
+        Assert.AreEqual(new OffsetMeasurement(20, OffsetMeasurementUnit.ScreenWidth), styleGroup[0].groups[0].normal.style.TransformPositionX);
+        Assert.AreEqual(new OffsetMeasurement(10, OffsetMeasurementUnit.ContentAreaHeight), styleGroup[0].groups[0].normal.style.TransformPositionY);
 
-        Assert.AreEqual(new TransformOffset(20, TransformUnit.ScreenWidth), styleGroup[1].groups[0].normal.style.TransformPositionX);
-        Assert.AreEqual(new TransformOffset(20, TransformUnit.ScreenWidth), styleGroup[1].groups[0].normal.style.TransformPositionY);
+        Assert.AreEqual(new OffsetMeasurement(20, OffsetMeasurementUnit.ScreenWidth), styleGroup[1].groups[0].normal.style.TransformPositionX);
+        Assert.AreEqual(new OffsetMeasurement(20, OffsetMeasurementUnit.ScreenWidth), styleGroup[1].groups[0].normal.style.TransformPositionY);
 
-        Assert.AreEqual(new TransformOffset(20, TransformUnit.ScreenWidth), styleGroup[2].groups[0].normal.style.TransformPositionX);
-        Assert.AreEqual(TransformOffset.Unset, styleGroup[2].groups[0].normal.style.TransformPositionY);
+        Assert.AreEqual(new OffsetMeasurement(20, OffsetMeasurementUnit.ScreenWidth), styleGroup[2].groups[0].normal.style.TransformPositionX);
+        Assert.AreEqual(OffsetMeasurement.Unset, styleGroup[2].groups[0].normal.style.TransformPositionY);
 
-        Assert.AreEqual(TransformOffset.Unset, styleGroup[3].groups[0].normal.style.TransformPositionX);
-        Assert.AreEqual(new TransformOffset(15, TransformUnit.AnchorHeight), styleGroup[3].groups[0].normal.style.TransformPositionY);
+        Assert.AreEqual(OffsetMeasurement.Unset, styleGroup[3].groups[0].normal.style.TransformPositionX);
+        Assert.AreEqual(new OffsetMeasurement(15, OffsetMeasurementUnit.AnchorHeight), styleGroup[3].groups[0].normal.style.TransformPositionY);
     }
 
     [Test]

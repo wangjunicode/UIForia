@@ -94,14 +94,14 @@ namespace UIForia.Editor {
             new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.RadialLayoutRadius, new UIFixedLength(0.5f, UIFixedUnit.Percent)),
 
             // Alignment
-//            new PropertyGenerator<AlignmentDirection>(StylePropertyId.AlignmentTargetX, AlignmentTarget.Start),
-//            new PropertyGenerator<AlignmentDirection>(StylePropertyId.AlignmentTargetY, AlignmentTarget.Start),
+            new PropertyGenerator<AlignmentDirection>(StylePropertyId.AlignmentDirectionX, AlignmentDirection.Start),
+            new PropertyGenerator<AlignmentDirection>(StylePropertyId.AlignmentDirectionY, AlignmentDirection.Start),
             new PropertyGenerator<AlignmentBehavior>(StylePropertyId.AlignmentBehaviorX, AlignmentBehavior.Layout),
             new PropertyGenerator<AlignmentBehavior>(StylePropertyId.AlignmentBehaviorY, AlignmentBehavior.Layout),
-            new AnimatedPropertyGenerator<AlignmentOrigin>(StylePropertyId.AlignmentOriginX, 0f),
-            new AnimatedPropertyGenerator<AlignmentOrigin>(StylePropertyId.AlignmentOriginY, 0f),
-            new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.AlignmentOffsetX, new UIFixedLength(0)),
-            new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.AlignmentOffsetY, new UIFixedLength(0)),
+            new AnimatedPropertyGenerator<OffsetMeasurement>(StylePropertyId.AlignmentOriginX, new OffsetMeasurement(0)),
+            new AnimatedPropertyGenerator<OffsetMeasurement>(StylePropertyId.AlignmentOriginY, new OffsetMeasurement(0)),
+            new AnimatedPropertyGenerator<OffsetMeasurement>(StylePropertyId.AlignmentOffsetX, new OffsetMeasurement(0)),
+            new AnimatedPropertyGenerator<OffsetMeasurement>(StylePropertyId.AlignmentOffsetY, new OffsetMeasurement(0)),
 
             // Fit
             new PropertyGenerator<Fit>(StylePropertyId.FitHorizontal, Fit.Unset),
@@ -170,8 +170,8 @@ namespace UIForia.Editor {
             new PropertyGenerator<AnchorTarget>(StylePropertyId.AnchorTarget, AnchorTarget.Parent),
 
             // Transform
-            new AnimatedPropertyGenerator<TransformOffset>(StylePropertyId.TransformPositionX, new TransformOffset(0)),
-            new AnimatedPropertyGenerator<TransformOffset>(StylePropertyId.TransformPositionY, new TransformOffset(0)),
+            new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.TransformPositionX, new UIFixedLength(0)),
+            new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.TransformPositionY, new UIFixedLength(0)),
             new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.TransformPivotX, new UIFixedLength(0)),
             new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.TransformPivotY, new UIFixedLength(0)),
             new AnimatedPropertyGenerator<float>(StylePropertyId.TransformScaleX, 1),
@@ -587,48 +587,60 @@ namespace UIForia.Rendering {
             if (propertyGenerator.type.IsEnum) {
                 return $"({propertyGenerator.GetFullTypeName()})FindEnumProperty(StylePropertyId.{propertyGenerator.propertyIdName});";
             }
-            else if (typeof(int) == propertyGenerator.type) {
+
+            if (typeof(int) == propertyGenerator.type) {
                 return $"FindIntProperty(StylePropertyId.{propertyGenerator.propertyIdName});";
             }
-            else if (typeof(float) == propertyGenerator.type) {
+
+            if (typeof(float) == propertyGenerator.type) {
                 return $"FindFloatProperty(StylePropertyId.{propertyGenerator.propertyIdName});";
             }
-            else if (typeof(Color) == propertyGenerator.type) {
+
+            if (typeof(Color) == propertyGenerator.type) {
                 return $"FindColorProperty(StylePropertyId.{propertyGenerator.propertyIdName});";
             }
-            else if (typeof(UIFixedLength) == propertyGenerator.type) {
+
+            if (typeof(UIFixedLength) == propertyGenerator.type) {
                 return $"FindUIFixedLengthProperty(StylePropertyId.{propertyGenerator.propertyIdName});";
             }
 
-            else if (typeof(UIMeasurement) == propertyGenerator.type) {
+            if (typeof(UIMeasurement) == propertyGenerator.type) {
                 return $"FindUIMeasurementProperty(StylePropertyId.{propertyGenerator.propertyIdName});";
             }
-            else if (typeof(TransformOffset) == propertyGenerator.type) {
-                return $"Find{nameof(TransformOffset)}Property(StylePropertyId.{propertyGenerator.propertyIdName});";
+
+            if (typeof(OffsetMeasurement) == propertyGenerator.type) {
+                return $"Find{nameof(OffsetMeasurement)}Property(StylePropertyId.{propertyGenerator.propertyIdName});";
             }
-            else if (typeof(GridTrackSize) == propertyGenerator.type) {
+
+            if (typeof(GridTrackSize) == propertyGenerator.type) {
                 return $"FindGridTrackSizeProperty(StylePropertyId.{propertyGenerator.propertyIdName});";
             }
-            else if (typeof(FontAsset) == propertyGenerator.type) {
+
+            if (typeof(FontAsset) == propertyGenerator.type) {
                 return $"GetProperty(StylePropertyId.{propertyGenerator.propertyIdName}).AsFont;";
             }
-            else if (typeof(Texture2D) == propertyGenerator.type) {
+
+            if (typeof(Texture2D) == propertyGenerator.type) {
                 return $"GetProperty(StylePropertyId.{propertyGenerator.propertyIdName}).AsTexture2D;";
             }
-            else if (typeof(IReadOnlyList<GridTrackSize>) == propertyGenerator.type) {
+
+            if (typeof(IReadOnlyList<GridTrackSize>) == propertyGenerator.type) {
                 return $"GetProperty(StylePropertyId.{propertyGenerator.propertyIdName}).AsGridTemplate;";
             }
-            else if (typeof(CursorStyle) == propertyGenerator.type) {
+
+            if (typeof(CursorStyle) == propertyGenerator.type) {
                 return $"GetProperty(StylePropertyId.{propertyGenerator.propertyIdName}).AsCursorStyle;";
             }
-            else if (typeof(string) == propertyGenerator.type) {
+
+            if (typeof(string) == propertyGenerator.type) {
                 return $"GetProperty(StylePropertyId.{propertyGenerator.propertyIdName}).AsString;";
             }
-            else if (typeof(GridItemPlacement) == propertyGenerator.type) {
+
+            if (typeof(GridItemPlacement) == propertyGenerator.type) {
                 return $"GetProperty(StylePropertyId.{propertyGenerator.propertyIdName}).AsGridItemPlacement;";
             }
 
-            throw new ArgumentOutOfRangeException();
+            throw new ArgumentOutOfRangeException($"Don't know what to do with {propertyGenerator.type}.");
         }
 
     }

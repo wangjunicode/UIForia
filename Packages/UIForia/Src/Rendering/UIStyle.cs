@@ -77,14 +77,14 @@ namespace UIForia.Rendering {
             return UIMeasurement.Unset;
         }
         
-        private TransformOffset FindTransformOffsetProperty(StylePropertyId propertyId) {
+        private OffsetMeasurement FindOffsetMeasurementProperty(StylePropertyId propertyId) {
             for (int i = 0; i < PropertyCount; i++) {
                 if (array[i].propertyId == propertyId) {
-                    return array[i].AsTransformOffset;
+                    return array[i].AsOffsetMeasurement;
                 }
             }
 
-            return TransformOffset.Unset;
+            return OffsetMeasurement.Unset;
         }
 
         private UIFixedLength FindUIFixedLengthProperty(StylePropertyId propertyId) {

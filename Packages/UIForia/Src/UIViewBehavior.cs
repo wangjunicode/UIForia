@@ -281,12 +281,12 @@ namespace UIForia {
 //                }
 //            }
 
-            path.SetShadowIntensity(shadowIntensity);
-            path.SetShadowOffset(shadowOffset);
-            path.SetShadowSize(shadowSize);
-            path.SetShadowColor(shadowColor);
-            path.SetShadowTint(shadowTint);
-            path.SetShadowOpacity(shadowOpacity);
+            // path.SetShadowIntensity(shadowIntensity);
+            // path.SetShadowOffset(shadowOffset);
+            // path.SetShadowSize(shadowSize);
+            // path.SetShadowColor(shadowColor);
+            // path.SetShadowTint(shadowTint);
+            // path.SetShadowOpacity(shadowOpacity);
 //            path.Rect(100, 100, 512, 128);
 //            path.SetFill(gradient);
 //            path.Fill();
@@ -298,12 +298,12 @@ namespace UIForia {
 //            path.SetStrokeWidth(5f);
 //            path.Stroke();
 
-
-            path.BeginPath();
-            path.SetFill(Color.cyan);
-            path.RoundedRect(pos.x - 40, pos.y - 40, size.x, size.y, radii.x, radii.y, radii.z, radii.w);
-            path.Fill(FillMode.Shadow);
-            path.Fill();
+            //
+            // path.BeginPath();
+            // path.SetFill(Color.cyan);
+            // path.RoundedRect(pos.x - 40, pos.y - 40, size.x, size.y, radii.x, radii.y, radii.z, radii.w);
+            // path.Fill(FillMode.Shadow);
+            // path.Fill();
 //            
 //            path.RoundedRect(pos.x, pos.y, size.x, size.y, radii.x, radii.y, radii.z, radii.w);
 //

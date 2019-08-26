@@ -4,17 +4,17 @@ using UIForia.Util;
 
 namespace UIForia {
 
-    public struct TransformOffset {
+    public struct OffsetMeasurement {
 
         public float value;
-        public TransformUnit unit;
+        public OffsetMeasurementUnit unit;
 
-        public TransformOffset(float value, TransformUnit unit = TransformUnit.Pixel) {
+        public OffsetMeasurement(float value, OffsetMeasurementUnit unit = OffsetMeasurementUnit.Pixel) {
             this.value = value;
             this.unit = unit;
         }
 
-        public static TransformOffset Unset => new TransformOffset(FloatUtil.UnsetValue, 0);
+        public static OffsetMeasurement Unset => new OffsetMeasurement(FloatUtil.UnsetValue, 0);
 
         [Pure]
         [DebuggerStepThrough]
@@ -22,13 +22,13 @@ namespace UIForia {
             return FloatUtil.IsDefined(value);
         }
         
-        public bool Equals(TransformOffset other) {
+        public bool Equals(OffsetMeasurement other) {
             return value.Equals(other.value) && unit == other.unit;
         }
 
         public override bool Equals(object obj) {
             if (ReferenceEquals(null, obj)) return false;
-            return obj is TransformOffset a && Equals(a);
+            return obj is OffsetMeasurement a && Equals(a);
         }
 
         public override int GetHashCode() {
@@ -37,7 +37,7 @@ namespace UIForia {
             }
         }
         
-        public static bool operator ==(TransformOffset self, TransformOffset other) {
+        public static bool operator ==(OffsetMeasurement self, OffsetMeasurement other) {
             if (float.IsNaN(self.value) && float.IsNaN(other.value)) {
                 return self.unit == other.unit;
             }
@@ -45,20 +45,20 @@ namespace UIForia {
             return self.value == other.value && self.unit == other.unit;
         }
 
-        public static bool operator !=(TransformOffset self, TransformOffset other) {
+        public static bool operator !=(OffsetMeasurement self, OffsetMeasurement other) {
             return !(self == other);
         }
 
-        public static implicit operator TransformOffset(int value) {            
-            return new TransformOffset(value, TransformUnit.Pixel);
+        public static implicit operator OffsetMeasurement(int value) {            
+            return new OffsetMeasurement(value, OffsetMeasurementUnit.Pixel);
         }
 
-        public static implicit operator TransformOffset(float value) {
-            return new TransformOffset(value, TransformUnit.Pixel);
+        public static implicit operator OffsetMeasurement(float value) {
+            return new OffsetMeasurement(value, OffsetMeasurementUnit.Pixel);
         }
 
-        public static implicit operator TransformOffset(double value) {
-            return new TransformOffset((float) value, TransformUnit.Pixel);
+        public static implicit operator OffsetMeasurement(double value) {
+            return new OffsetMeasurement((float) value, OffsetMeasurementUnit.Pixel);
         }
 
         public override string ToString() {
@@ -66,12 +66,12 @@ namespace UIForia {
         }
     }
 
-    public struct TransformOffsetPair {
+    public struct OffsetMeasurementPair {
 
-        public TransformOffset x;
-        public TransformOffset y;
+        public OffsetMeasurement x;
+        public OffsetMeasurement y;
 
-        public TransformOffsetPair(TransformOffset x, TransformOffset y) {
+        public OffsetMeasurementPair(OffsetMeasurement x, OffsetMeasurement y) {
             this.x = x;
             this.y = y;
         }
@@ -80,21 +80,21 @@ namespace UIForia {
             return x.IsDefined() && y.IsDefined();
         }
         
-        public static bool operator ==(TransformOffsetPair self, TransformOffsetPair other) {
+        public static bool operator ==(OffsetMeasurementPair self, OffsetMeasurementPair other) {
             return self.x == other.x && self.y == other.y;
         }
 
-        public static bool operator !=(TransformOffsetPair self, TransformOffsetPair other) {
+        public static bool operator !=(OffsetMeasurementPair self, OffsetMeasurementPair other) {
             return !(self == other);
         }
 
-        public bool Equals(TransformOffsetPair other) {
+        public bool Equals(OffsetMeasurementPair other) {
             return x.Equals(other.x) && y.Equals(other.y);
         }
 
         public override bool Equals(object obj) {
             if (ReferenceEquals(null, obj)) return false;
-            return obj is TransformOffsetPair a && Equals(a);
+            return obj is OffsetMeasurementPair a && Equals(a);
         }
 
         public override int GetHashCode() {

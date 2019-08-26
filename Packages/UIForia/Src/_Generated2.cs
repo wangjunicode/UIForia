@@ -708,6 +708,43 @@ namespace UIForia.Bindings.StyleBindings {
 
     }
         
+    public class StyleBinding_AlignmentDirection : StyleBinding {
+
+        public readonly Expression<UIForia.Layout.AlignmentDirection> expression;
+        public readonly StylePropertyId propertyId;
+        
+        public StyleBinding_AlignmentDirection(string propertyName, StylePropertyId propertyId, StyleState state, Expression<UIForia.Layout.AlignmentDirection> expression)
+            : base(propertyName, state) {
+            this.propertyId = propertyId;
+            this.expression = expression;
+        }
+
+        public override void Execute(UIElement element, ExpressionContext context) {
+            if (!element.style.IsInState(state)) return;
+
+            var oldValue = element.style.propertyMap[(int)propertyId].AsAlignmentDirection;
+            var value = expression.Evaluate(context);
+            if (value != oldValue) {
+                element.style.SetProperty(new StyleProperty(propertyId, (int)value), state);
+            }
+        }
+
+        public override bool IsConstant() {
+            return expression.IsConstant();
+        }
+
+        public override void Apply(UIStyle style, ExpressionContext context) {
+            var value = expression.Evaluate(context);
+            style.SetProperty(new StyleProperty(propertyId, (int)value));
+        }
+
+        public override void Apply(UIStyleSet styleSet, ExpressionContext context) {
+            var value = expression.Evaluate(context);
+            styleSet.SetProperty(new StyleProperty(propertyId, (int)value), state);
+        }
+
+    }
+        
     public class StyleBinding_AlignmentBehavior : StyleBinding {
 
         public readonly Expression<UIForia.Layout.AlignmentBehavior> expression;
@@ -741,6 +778,43 @@ namespace UIForia.Bindings.StyleBindings {
         public override void Apply(UIStyleSet styleSet, ExpressionContext context) {
             var value = expression.Evaluate(context);
             styleSet.SetProperty(new StyleProperty(propertyId, (int)value), state);
+        }
+
+    }
+        
+    public class StyleBinding_OffsetMeasurement : StyleBinding {
+
+        public readonly Expression<UIForia.OffsetMeasurement> expression;
+        public readonly StylePropertyId propertyId;
+        
+        public StyleBinding_OffsetMeasurement(string propertyName, StylePropertyId propertyId, StyleState state, Expression<UIForia.OffsetMeasurement> expression)
+            : base(propertyName, state) {
+            this.propertyId = propertyId;
+            this.expression = expression;
+        }
+
+        public override void Execute(UIElement element, ExpressionContext context) {
+            if (!element.style.IsInState(state)) return;
+
+            var oldValue = element.style.propertyMap[(int)propertyId].AsOffsetMeasurement;
+            var value = expression.Evaluate(context);
+            if (value != oldValue) {
+                element.style.SetProperty(new StyleProperty(propertyId, value), state);
+            }
+        }
+
+        public override bool IsConstant() {
+            return expression.IsConstant();
+        }
+
+        public override void Apply(UIStyle style, ExpressionContext context) {
+            var value = expression.Evaluate(context);
+            style.SetProperty(new StyleProperty(propertyId, value));
+        }
+
+        public override void Apply(UIStyleSet styleSet, ExpressionContext context) {
+            var value = expression.Evaluate(context);
+            styleSet.SetProperty(new StyleProperty(propertyId, value), state);
         }
 
     }
@@ -1078,43 +1152,6 @@ namespace UIForia.Bindings.StyleBindings {
 
     }
         
-    public class StyleBinding_TransformOffset : StyleBinding {
-
-        public readonly Expression<UIForia.TransformOffset> expression;
-        public readonly StylePropertyId propertyId;
-        
-        public StyleBinding_TransformOffset(string propertyName, StylePropertyId propertyId, StyleState state, Expression<UIForia.TransformOffset> expression)
-            : base(propertyName, state) {
-            this.propertyId = propertyId;
-            this.expression = expression;
-        }
-
-        public override void Execute(UIElement element, ExpressionContext context) {
-            if (!element.style.IsInState(state)) return;
-
-            var oldValue = element.style.propertyMap[(int)propertyId].AsTransformOffset;
-            var value = expression.Evaluate(context);
-            if (value != oldValue) {
-                element.style.SetProperty(new StyleProperty(propertyId, value), state);
-            }
-        }
-
-        public override bool IsConstant() {
-            return expression.IsConstant();
-        }
-
-        public override void Apply(UIStyle style, ExpressionContext context) {
-            var value = expression.Evaluate(context);
-            style.SetProperty(new StyleProperty(propertyId, value));
-        }
-
-        public override void Apply(UIStyleSet styleSet, ExpressionContext context) {
-            var value = expression.Evaluate(context);
-            styleSet.SetProperty(new StyleProperty(propertyId, value), state);
-        }
-
-    }
-        
     public class StyleBinding_TransformBehavior : StyleBinding {
 
         public readonly Expression<UIForia.Rendering.TransformBehavior> expression;
@@ -1279,6 +1316,7 @@ namespace UIForia.Compilers {
         private static readonly EnumAliasSource<UIForia.Layout.CrossAxisAlignment> s_EnumSource_CrossAxisAlignment = new EnumAliasSource<UIForia.Layout.CrossAxisAlignment>();
         private static readonly EnumAliasSource<UIForia.Layout.GridLayoutDensity> s_EnumSource_GridLayoutDensity = new EnumAliasSource<UIForia.Layout.GridLayoutDensity>();
         private static readonly EnumAliasSource<UIForia.Layout.GridAxisAlignment> s_EnumSource_GridAxisAlignment = new EnumAliasSource<UIForia.Layout.GridAxisAlignment>();
+        private static readonly EnumAliasSource<UIForia.Layout.AlignmentDirection> s_EnumSource_AlignmentDirection = new EnumAliasSource<UIForia.Layout.AlignmentDirection>();
         private static readonly EnumAliasSource<UIForia.Layout.AlignmentBehavior> s_EnumSource_AlignmentBehavior = new EnumAliasSource<UIForia.Layout.AlignmentBehavior>();
         private static readonly EnumAliasSource<UIForia.Layout.Fit> s_EnumSource_Fit = new EnumAliasSource<UIForia.Layout.Fit>();
         private static readonly EnumAliasSource<UIForia.Text.FontStyle> s_EnumSource_FontStyle = new EnumAliasSource<UIForia.Text.FontStyle>();
@@ -1394,18 +1432,22 @@ case "visibility":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_float("RadialLayoutEndAngle", UIForia.Rendering.StylePropertyId.RadialLayoutEndAngle, targetState.state, Compile<float>(value, null));                
                 case "radiallayoutradius":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_UIFixedLength("RadialLayoutRadius", UIForia.Rendering.StylePropertyId.RadialLayoutRadius, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
+                case "alignmentdirectionx":
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_AlignmentDirection("AlignmentDirectionX", UIForia.Rendering.StylePropertyId.AlignmentDirectionX, targetState.state, Compile<UIForia.Layout.AlignmentDirection>(value, s_EnumSource_AlignmentDirection));                
+                case "alignmentdirectiony":
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_AlignmentDirection("AlignmentDirectionY", UIForia.Rendering.StylePropertyId.AlignmentDirectionY, targetState.state, Compile<UIForia.Layout.AlignmentDirection>(value, s_EnumSource_AlignmentDirection));                
                 case "alignmentbehaviorx":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_AlignmentBehavior("AlignmentBehaviorX", UIForia.Rendering.StylePropertyId.AlignmentBehaviorX, targetState.state, Compile<UIForia.Layout.AlignmentBehavior>(value, s_EnumSource_AlignmentBehavior));                
                 case "alignmentbehaviory":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_AlignmentBehavior("AlignmentBehaviorY", UIForia.Rendering.StylePropertyId.AlignmentBehaviorY, targetState.state, Compile<UIForia.Layout.AlignmentBehavior>(value, s_EnumSource_AlignmentBehavior));                
                 case "alignmentoriginx":
-                    return new UIForia.Bindings.StyleBindings.StyleBinding_UIFixedLength("AlignmentOriginX", UIForia.Rendering.StylePropertyId.AlignmentOriginX, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_OffsetMeasurement("AlignmentOriginX", UIForia.Rendering.StylePropertyId.AlignmentOriginX, targetState.state, Compile<UIForia.OffsetMeasurement>(value, null));                
                 case "alignmentoriginy":
-                    return new UIForia.Bindings.StyleBindings.StyleBinding_UIFixedLength("AlignmentOriginY", UIForia.Rendering.StylePropertyId.AlignmentOriginY, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_OffsetMeasurement("AlignmentOriginY", UIForia.Rendering.StylePropertyId.AlignmentOriginY, targetState.state, Compile<UIForia.OffsetMeasurement>(value, null));                
                 case "alignmentoffsetx":
-                    return new UIForia.Bindings.StyleBindings.StyleBinding_UIFixedLength("AlignmentOffsetX", UIForia.Rendering.StylePropertyId.AlignmentOffsetX, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_OffsetMeasurement("AlignmentOffsetX", UIForia.Rendering.StylePropertyId.AlignmentOffsetX, targetState.state, Compile<UIForia.OffsetMeasurement>(value, null));                
                 case "alignmentoffsety":
-                    return new UIForia.Bindings.StyleBindings.StyleBinding_UIFixedLength("AlignmentOffsetY", UIForia.Rendering.StylePropertyId.AlignmentOffsetY, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_OffsetMeasurement("AlignmentOffsetY", UIForia.Rendering.StylePropertyId.AlignmentOffsetY, targetState.state, Compile<UIForia.OffsetMeasurement>(value, null));                
                 case "fithorizontal":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_Fit("FitHorizontal", UIForia.Rendering.StylePropertyId.FitHorizontal, targetState.state, Compile<UIForia.Layout.Fit>(value, s_EnumSource_Fit));                
                 case "fitvertical":
@@ -1511,9 +1553,9 @@ case "visibility":
                 case "anchortarget":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_AnchorTarget("AnchorTarget", UIForia.Rendering.StylePropertyId.AnchorTarget, targetState.state, Compile<UIForia.Rendering.AnchorTarget>(value, s_EnumSource_AnchorTarget));                
                 case "transformpositionx":
-                    return new UIForia.Bindings.StyleBindings.StyleBinding_TransformOffset("TransformPositionX", UIForia.Rendering.StylePropertyId.TransformPositionX, targetState.state, Compile<UIForia.TransformOffset>(value, null));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_UIFixedLength("TransformPositionX", UIForia.Rendering.StylePropertyId.TransformPositionX, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
                 case "transformpositiony":
-                    return new UIForia.Bindings.StyleBindings.StyleBinding_TransformOffset("TransformPositionY", UIForia.Rendering.StylePropertyId.TransformPositionY, targetState.state, Compile<UIForia.TransformOffset>(value, null));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_UIFixedLength("TransformPositionY", UIForia.Rendering.StylePropertyId.TransformPositionY, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
                 case "transformpivotx":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_UIFixedLength("TransformPivotX", UIForia.Rendering.StylePropertyId.TransformPivotX, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
                 case "transformpivoty":

@@ -34,8 +34,8 @@ namespace UIForia.Compilers.Style {
                 {"alignmentbehaviory", (targetStyle, property, context) => targetStyle.AlignmentBehaviorY = MapEnum<AlignmentBehavior>(property.children[0], context)},
                 {"alignmentpivotx", (targetStyle, property, context) => targetStyle.AlignmentOriginX = MapNumber(property.children[0], context)},
                 {"alignmentpivoty", (targetStyle, property, context) => targetStyle.AlignmentOriginY = MapNumber(property.children[0], context)},
-                {"alignmentoffsetx", (targetStyle, property, context) => targetStyle.AlignmentOffsetX = MapFixedLength(property.children[0], context)},
-                {"alignmentoffsety", (targetStyle, property, context) => targetStyle.AlignmentOffsetY = MapFixedLength(property.children[0], context)},
+                {"alignmentoffsetx", (targetStyle, property, context) => targetStyle.AlignmentOffsetX = MapAlignmentOffset(property.children[0], context)},
+                {"alignmentoffsety", (targetStyle, property, context) => targetStyle.AlignmentOffsetY = MapAlignmentOffset(property.children[0], context)},
 
                 {"fithorizontal", (targetStyle, property, context) => targetStyle.FitHorizontal = MapEnum<Fit>(property.children[0], context)},
                 {"fitvertical", (targetStyle, property, context) => targetStyle.FitVertical = MapEnum<Fit>(property.children[0], context)},
@@ -119,8 +119,8 @@ namespace UIForia.Compilers.Style {
                 {"radiallayoutradius", (targetStyle, property, context) => targetStyle.RadialLayoutRadius = MapFixedLength(property.children[0], context)},
 
                 {"transformposition", (targetStyle, property, context) => MapTransformPosition(targetStyle, property, context)},
-                {"transformpositionx", (targetStyle, property, context) => targetStyle.TransformPositionX = MapTransformOffset(property.children[0], context)},
-                {"transformpositiony", (targetStyle, property, context) => targetStyle.TransformPositionY = MapTransformOffset(property.children[0], context)},
+                {"transformpositionx", (targetStyle, property, context) => targetStyle.TransformPositionX = MapFixedLength(property.children[0], context)},
+                {"transformpositiony", (targetStyle, property, context) => targetStyle.TransformPositionY = MapFixedLength(property.children[0], context)},
                 {"transformscale", (targetStyle, property, context) => MapTransformScale(targetStyle, property, context)},
                 {"transformscalex", (targetStyle, property, context) => targetStyle.TransformScaleX = MapNumber(property.children[0], context)},
                 {"transformscaley", (targetStyle, property, context) => targetStyle.TransformScaleY = MapNumber(property.children[0], context)},
@@ -364,10 +364,10 @@ namespace UIForia.Compilers.Style {
         }
 
         private static void MapTransformPosition(UIStyle targetStyle, PropertyNode property, StyleCompileContext context) {
-            TransformOffset x = MapTransformOffset(property.children[0], context);
-            TransformOffset y = x;
+            UIFixedLength x = MapFixedLength(property.children[0], context);
+            UIFixedLength y = x;
             if (property.children.Count > 1) {
-                y = MapTransformOffset(property.children[1], context);
+                y = MapFixedLength(property.children[1], context);
             }
 
             targetStyle.TransformPositionX = x;
@@ -849,19 +849,19 @@ namespace UIForia.Compilers.Style {
             return GridTemplateUnit.Pixel;
         }
 
-        private static TransformOffset MapTransformOffset(StyleASTNode value, StyleCompileContext context) {
+        private static OffsetMeasurement MapAlignmentOffset(StyleASTNode value, StyleCompileContext context) {
             value = context.GetValueForReference(value);
             switch (value) {
                 case MeasurementNode measurementNode:
                     if (TryParseFloat(measurementNode.value.rawValue, out float measurementValue)) {
-                        return new TransformOffset(measurementValue, MapTransformUnit(measurementNode.unit, context));
+                        return new OffsetMeasurement(measurementValue, MapTransformUnit(measurementNode.unit, context));
                     }
 
                     break;
 
                 case StyleLiteralNode literalNode:
                     if (TryParseFloat(literalNode.rawValue, out float literalValue)) {
-                        return new TransformOffset(literalValue);
+                        return new OffsetMeasurement(literalValue);
                     }
 
                     break;
@@ -870,56 +870,56 @@ namespace UIForia.Compilers.Style {
             throw new CompileException(context.fileName, value, $"Cannot parse value, expected a numeric literal or measurement {value}.");
         }
 
-        private static TransformUnit MapTransformUnit(UnitNode unitNode, StyleCompileContext context) {
-            if (unitNode == null) return TransformUnit.Pixel;
+        private static OffsetMeasurementUnit MapTransformUnit(UnitNode unitNode, StyleCompileContext context) {
+            if (unitNode == null) return OffsetMeasurementUnit.Pixel;
 
             switch (unitNode.value) {
                 case "px":
-                    return TransformUnit.Pixel;
+                    return OffsetMeasurementUnit.Pixel;
                 case "w":
-                    return TransformUnit.ActualWidth;
+                    return OffsetMeasurementUnit.ActualWidth;
                 case "h":
-                    return TransformUnit.ActualHeight;
+                    return OffsetMeasurementUnit.ActualHeight;
                 case "alw":
-                    return TransformUnit.AllocatedWidth;
+                    return OffsetMeasurementUnit.AllocatedWidth;
                 case "alh":
-                    return TransformUnit.AllocatedHeight;
+                    return OffsetMeasurementUnit.AllocatedHeight;
                 case "cw":
-                    return TransformUnit.ContentWidth;
+                    return OffsetMeasurementUnit.ContentWidth;
                 case "ch":
-                    return TransformUnit.ContentHeight;
+                    return OffsetMeasurementUnit.ContentHeight;
                 case "em":
-                    return TransformUnit.Em;
+                    return OffsetMeasurementUnit.Em;
                 case "caw":
-                    return TransformUnit.ContentAreaWidth;
+                    return OffsetMeasurementUnit.ContentAreaWidth;
                 case "cah":
-                    return TransformUnit.ContentAreaHeight;
+                    return OffsetMeasurementUnit.ContentAreaHeight;
                 case "aw":
-                    return TransformUnit.AnchorWidth;
+                    return OffsetMeasurementUnit.AnchorWidth;
                 case "ah":
-                    return TransformUnit.AnchorHeight;
+                    return OffsetMeasurementUnit.AnchorHeight;
                 case "vw":
-                    return TransformUnit.ViewportWidth;
+                    return OffsetMeasurementUnit.ViewportWidth;
                 case "vh":
-                    return TransformUnit.ViewportHeight;
+                    return OffsetMeasurementUnit.ViewportHeight;
                 case "pw":
-                    return TransformUnit.ParentWidth;
+                    return OffsetMeasurementUnit.ParentWidth;
                 case "ph":
-                    return TransformUnit.ParentHeight;
+                    return OffsetMeasurementUnit.ParentHeight;
                 case "pcaw":
-                    return TransformUnit.ParentContentAreaWidth;
+                    return OffsetMeasurementUnit.ParentContentAreaWidth;
                 case "pcah":
-                    return TransformUnit.ParentContentAreaHeight;
+                    return OffsetMeasurementUnit.ParentContentAreaHeight;
                 case "sw":
-                    return TransformUnit.ScreenWidth;
+                    return OffsetMeasurementUnit.ScreenWidth;
                 case "sh":
-                    return TransformUnit.ScreenHeight;
+                    return OffsetMeasurementUnit.ScreenHeight;
             }
 
             Debug.LogWarning($"You used a {unitNode.value} in line {unitNode.line} column {unitNode.column} in file {context.fileName} but this unit isn't supported. " +
                              "Try px, w, h, alw, alh, cw, ch, em, caw, cah, aw, ah, vw, vh, pw, ph, pcaw, pcah, sw, or sh instead (see TransformUnit). Will fall back to px.");
 
-            return TransformUnit.Pixel;
+            return OffsetMeasurementUnit.Pixel;
         }
 
         private static void MapOverflows(UIStyle targetStyle, PropertyNode property, StyleCompileContext context) {

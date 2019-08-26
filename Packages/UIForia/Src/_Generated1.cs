@@ -348,6 +348,20 @@ namespace UIForia.Rendering {
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.RadialLayoutRadius, value), state); }
         }
         
+        public UIForia.Layout.AlignmentDirection AlignmentDirectionX {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.AlignmentDirectionX, state).AsAlignmentDirection; }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.AlignmentDirectionX, (int)value), state); }
+        }
+        
+        public UIForia.Layout.AlignmentDirection AlignmentDirectionY {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.AlignmentDirectionY, state).AsAlignmentDirection; }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.AlignmentDirectionY, (int)value), state); }
+        }
+        
         public UIForia.Layout.AlignmentBehavior AlignmentBehaviorX {
             [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.AlignmentBehaviorX, state).AsAlignmentBehavior; }
@@ -362,30 +376,30 @@ namespace UIForia.Rendering {
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.AlignmentBehaviorY, (int)value), state); }
         }
         
-        public UIForia.UIFixedLength AlignmentOriginX {
+        public UIForia.OffsetMeasurement AlignmentOriginX {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.AlignmentOriginX, state).AsUIFixedLength; }
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.AlignmentOriginX, state).AsOffsetMeasurement; }
             [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.AlignmentOriginX, value), state); }
         }
         
-        public UIForia.UIFixedLength AlignmentOriginY {
+        public UIForia.OffsetMeasurement AlignmentOriginY {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.AlignmentOriginY, state).AsUIFixedLength; }
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.AlignmentOriginY, state).AsOffsetMeasurement; }
             [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.AlignmentOriginY, value), state); }
         }
         
-        public UIForia.UIFixedLength AlignmentOffsetX {
+        public UIForia.OffsetMeasurement AlignmentOffsetX {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.AlignmentOffsetX, state).AsUIFixedLength; }
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.AlignmentOffsetX, state).AsOffsetMeasurement; }
             [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.AlignmentOffsetX, value), state); }
         }
         
-        public UIForia.UIFixedLength AlignmentOffsetY {
+        public UIForia.OffsetMeasurement AlignmentOffsetY {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.AlignmentOffsetY, state).AsUIFixedLength; }
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.AlignmentOffsetY, state).AsOffsetMeasurement; }
             [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.AlignmentOffsetY, value), state); }
         }
@@ -754,16 +768,16 @@ namespace UIForia.Rendering {
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.AnchorTarget, (int)value), state); }
         }
         
-        public UIForia.TransformOffset TransformPositionX {
+        public UIForia.UIFixedLength TransformPositionX {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.TransformPositionX, state).AsTransformOffset; }
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.TransformPositionX, state).AsUIFixedLength; }
             [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.TransformPositionX, value), state); }
         }
         
-        public UIForia.TransformOffset TransformPositionY {
+        public UIForia.UIFixedLength TransformPositionY {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.TransformPositionY, state).AsTransformOffset; }
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.TransformPositionY, state).AsUIFixedLength; }
             [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.TransformPositionY, value), state); }
         }
@@ -1270,6 +1284,20 @@ namespace UIForia.Rendering {
             set { SetProperty(new StyleProperty(StylePropertyId.RadialLayoutRadius, value)); }
         }
             
+        public UIForia.Layout.AlignmentDirection AlignmentDirectionX {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return (UIForia.Layout.AlignmentDirection)FindEnumProperty(StylePropertyId.AlignmentDirectionX); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.AlignmentDirectionX, (int)value)); }
+        }
+            
+        public UIForia.Layout.AlignmentDirection AlignmentDirectionY {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return (UIForia.Layout.AlignmentDirection)FindEnumProperty(StylePropertyId.AlignmentDirectionY); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.AlignmentDirectionY, (int)value)); }
+        }
+            
         public UIForia.Layout.AlignmentBehavior AlignmentBehaviorX {
             [System.Diagnostics.DebuggerStepThrough]
             get { return (UIForia.Layout.AlignmentBehavior)FindEnumProperty(StylePropertyId.AlignmentBehaviorX); }
@@ -1284,30 +1312,30 @@ namespace UIForia.Rendering {
             set { SetProperty(new StyleProperty(StylePropertyId.AlignmentBehaviorY, (int)value)); }
         }
             
-        public UIForia.UIFixedLength AlignmentOriginX {
+        public UIForia.OffsetMeasurement AlignmentOriginX {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return FindUIFixedLengthProperty(StylePropertyId.AlignmentOriginX); }
+            get { return FindOffsetMeasurementProperty(StylePropertyId.AlignmentOriginX); }
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.AlignmentOriginX, value)); }
         }
             
-        public UIForia.UIFixedLength AlignmentOriginY {
+        public UIForia.OffsetMeasurement AlignmentOriginY {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return FindUIFixedLengthProperty(StylePropertyId.AlignmentOriginY); }
+            get { return FindOffsetMeasurementProperty(StylePropertyId.AlignmentOriginY); }
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.AlignmentOriginY, value)); }
         }
             
-        public UIForia.UIFixedLength AlignmentOffsetX {
+        public UIForia.OffsetMeasurement AlignmentOffsetX {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return FindUIFixedLengthProperty(StylePropertyId.AlignmentOffsetX); }
+            get { return FindOffsetMeasurementProperty(StylePropertyId.AlignmentOffsetX); }
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.AlignmentOffsetX, value)); }
         }
             
-        public UIForia.UIFixedLength AlignmentOffsetY {
+        public UIForia.OffsetMeasurement AlignmentOffsetY {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return FindUIFixedLengthProperty(StylePropertyId.AlignmentOffsetY); }
+            get { return FindOffsetMeasurementProperty(StylePropertyId.AlignmentOffsetY); }
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.AlignmentOffsetY, value)); }
         }
@@ -1676,16 +1704,16 @@ namespace UIForia.Rendering {
             set { SetProperty(new StyleProperty(StylePropertyId.AnchorTarget, (int)value)); }
         }
             
-        public UIForia.TransformOffset TransformPositionX {
+        public UIForia.UIFixedLength TransformPositionX {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return FindTransformOffsetProperty(StylePropertyId.TransformPositionX); }
+            get { return FindUIFixedLengthProperty(StylePropertyId.TransformPositionX); }
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.TransformPositionX, value)); }
         }
             
-        public UIForia.TransformOffset TransformPositionY {
+        public UIForia.UIFixedLength TransformPositionY {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return FindTransformOffsetProperty(StylePropertyId.TransformPositionY); }
+            get { return FindUIFixedLengthProperty(StylePropertyId.TransformPositionY); }
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.TransformPositionY, value)); }
         }
@@ -2294,6 +2322,24 @@ namespace UIForia.Rendering {
                 }
             }
 
+            public UIForia.Layout.AlignmentDirection AlignmentDirectionX { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.AlignmentDirectionX, out property)) return property.AsAlignmentDirection;
+                    return DefaultStyleValues_Generated.AlignmentDirectionX;
+                }
+            }
+
+            public UIForia.Layout.AlignmentDirection AlignmentDirectionY { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.AlignmentDirectionY, out property)) return property.AsAlignmentDirection;
+                    return DefaultStyleValues_Generated.AlignmentDirectionY;
+                }
+            }
+
             public UIForia.Layout.AlignmentBehavior AlignmentBehaviorX { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
@@ -2312,38 +2358,38 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UIForia.UIFixedLength AlignmentOriginX { 
+            public UIForia.OffsetMeasurement AlignmentOriginX { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.AlignmentOriginX, out property)) return property.AsUIFixedLength;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.AlignmentOriginX, out property)) return property.AsOffsetMeasurement;
                     return DefaultStyleValues_Generated.AlignmentOriginX;
                 }
             }
 
-            public UIForia.UIFixedLength AlignmentOriginY { 
+            public UIForia.OffsetMeasurement AlignmentOriginY { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.AlignmentOriginY, out property)) return property.AsUIFixedLength;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.AlignmentOriginY, out property)) return property.AsOffsetMeasurement;
                     return DefaultStyleValues_Generated.AlignmentOriginY;
                 }
             }
 
-            public UIForia.UIFixedLength AlignmentOffsetX { 
+            public UIForia.OffsetMeasurement AlignmentOffsetX { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.AlignmentOffsetX, out property)) return property.AsUIFixedLength;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.AlignmentOffsetX, out property)) return property.AsOffsetMeasurement;
                     return DefaultStyleValues_Generated.AlignmentOffsetX;
                 }
             }
 
-            public UIForia.UIFixedLength AlignmentOffsetY { 
+            public UIForia.OffsetMeasurement AlignmentOffsetY { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.AlignmentOffsetY, out property)) return property.AsUIFixedLength;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.AlignmentOffsetY, out property)) return property.AsOffsetMeasurement;
                     return DefaultStyleValues_Generated.AlignmentOffsetY;
                 }
             }
@@ -2838,20 +2884,20 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UIForia.TransformOffset TransformPositionX { 
+            public UIForia.UIFixedLength TransformPositionX { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.TransformPositionX, out property)) return property.AsTransformOffset;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.TransformPositionX, out property)) return property.AsUIFixedLength;
                     return DefaultStyleValues_Generated.TransformPositionX;
                 }
             }
 
-            public UIForia.TransformOffset TransformPositionY { 
+            public UIForia.UIFixedLength TransformPositionY { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.TransformPositionY, out property)) return property.AsTransformOffset;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.TransformPositionY, out property)) return property.AsUIFixedLength;
                     return DefaultStyleValues_Generated.TransformPositionY;
                 }
             }
@@ -3449,6 +3495,22 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.RadialLayoutRadius, state).AsUIFixedLength;
         }
         
+        public void SetAlignmentDirectionX(in UIForia.Layout.AlignmentDirection? value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.AlignmentDirectionX, (int)value), state);
+        }
+
+        public UIForia.Layout.AlignmentDirection GetAlignmentDirectionX(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.AlignmentDirectionX, state).AsAlignmentDirection;
+        }
+        
+        public void SetAlignmentDirectionY(in UIForia.Layout.AlignmentDirection? value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.AlignmentDirectionY, (int)value), state);
+        }
+
+        public UIForia.Layout.AlignmentDirection GetAlignmentDirectionY(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.AlignmentDirectionY, state).AsAlignmentDirection;
+        }
+        
         public void SetAlignmentBehaviorX(in UIForia.Layout.AlignmentBehavior? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.AlignmentBehaviorX, (int)value), state);
         }
@@ -3465,36 +3527,36 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.AlignmentBehaviorY, state).AsAlignmentBehavior;
         }
         
-        public void SetAlignmentOriginX(in UIForia.UIFixedLength? value, StyleState state) {
+        public void SetAlignmentOriginX(in UIForia.OffsetMeasurement? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.AlignmentOriginX, value), state);
         }
 
-        public UIForia.UIFixedLength GetAlignmentOriginX(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.AlignmentOriginX, state).AsUIFixedLength;
+        public UIForia.OffsetMeasurement GetAlignmentOriginX(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.AlignmentOriginX, state).AsOffsetMeasurement;
         }
         
-        public void SetAlignmentOriginY(in UIForia.UIFixedLength? value, StyleState state) {
+        public void SetAlignmentOriginY(in UIForia.OffsetMeasurement? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.AlignmentOriginY, value), state);
         }
 
-        public UIForia.UIFixedLength GetAlignmentOriginY(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.AlignmentOriginY, state).AsUIFixedLength;
+        public UIForia.OffsetMeasurement GetAlignmentOriginY(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.AlignmentOriginY, state).AsOffsetMeasurement;
         }
         
-        public void SetAlignmentOffsetX(in UIForia.UIFixedLength? value, StyleState state) {
+        public void SetAlignmentOffsetX(in UIForia.OffsetMeasurement? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.AlignmentOffsetX, value), state);
         }
 
-        public UIForia.UIFixedLength GetAlignmentOffsetX(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.AlignmentOffsetX, state).AsUIFixedLength;
+        public UIForia.OffsetMeasurement GetAlignmentOffsetX(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.AlignmentOffsetX, state).AsOffsetMeasurement;
         }
         
-        public void SetAlignmentOffsetY(in UIForia.UIFixedLength? value, StyleState state) {
+        public void SetAlignmentOffsetY(in UIForia.OffsetMeasurement? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.AlignmentOffsetY, value), state);
         }
 
-        public UIForia.UIFixedLength GetAlignmentOffsetY(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.AlignmentOffsetY, state).AsUIFixedLength;
+        public UIForia.OffsetMeasurement GetAlignmentOffsetY(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.AlignmentOffsetY, state).AsOffsetMeasurement;
         }
         
         public void SetFitHorizontal(in UIForia.Layout.Fit? value, StyleState state) {
@@ -3913,20 +3975,20 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.AnchorTarget, state).AsAnchorTarget;
         }
         
-        public void SetTransformPositionX(in UIForia.TransformOffset? value, StyleState state) {
+        public void SetTransformPositionX(in UIForia.UIFixedLength? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.TransformPositionX, value), state);
         }
 
-        public UIForia.TransformOffset GetTransformPositionX(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.TransformPositionX, state).AsTransformOffset;
+        public UIForia.UIFixedLength GetTransformPositionX(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.TransformPositionX, state).AsUIFixedLength;
         }
         
-        public void SetTransformPositionY(in UIForia.TransformOffset? value, StyleState state) {
+        public void SetTransformPositionY(in UIForia.UIFixedLength? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.TransformPositionY, value), state);
         }
 
-        public UIForia.TransformOffset GetTransformPositionY(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.TransformPositionY, state).AsTransformOffset;
+        public UIForia.UIFixedLength GetTransformPositionY(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.TransformPositionY, state).AsUIFixedLength;
         }
         
         public void SetTransformPivotX(in UIForia.UIFixedLength? value, StyleState state) {
@@ -4206,6 +4268,10 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.RadialLayoutEndAngle, RadialLayoutEndAngle);
 				case StylePropertyId.RadialLayoutRadius:
 					 return new StyleProperty(StylePropertyId.RadialLayoutRadius, RadialLayoutRadius);
+				case StylePropertyId.AlignmentDirectionX:
+					 return new StyleProperty(StylePropertyId.AlignmentDirectionX, (int)AlignmentDirectionX);
+				case StylePropertyId.AlignmentDirectionY:
+					 return new StyleProperty(StylePropertyId.AlignmentDirectionY, (int)AlignmentDirectionY);
 				case StylePropertyId.AlignmentBehaviorX:
 					 return new StyleProperty(StylePropertyId.AlignmentBehaviorX, (int)AlignmentBehaviorX);
 				case StylePropertyId.AlignmentBehaviorY:

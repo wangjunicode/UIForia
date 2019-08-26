@@ -29,7 +29,6 @@ namespace UIForia.Layout {
         internal readonly LightList<UIElement> enabledThisFrame;
         internal readonly LightList<FastLayoutBox> toLayout;
         internal readonly LightList<FastLayoutBox> tempChildList;
-        internal readonly LightList<ClipGroup> clipGroups;
 
         internal readonly Queue<int> queue;
 
@@ -52,7 +51,6 @@ namespace UIForia.Layout {
             this.enabledThisFrame = new LightList<UIElement>();
             this.toLayout = new LightList<FastLayoutBox>(16);
             this.tempChildList = new LightList<FastLayoutBox>(16);
-            this.clipGroups = new LightList<ClipGroup>();
 
             this.layoutBoxPoolMap = new Dictionary<int, FastLayoutBoxPool>();
             this.layoutBoxPoolMap[(int) LayoutType.Flex] = new FastLayoutBoxPool<FastFlexLayoutBox>();
@@ -87,11 +85,7 @@ namespace UIForia.Layout {
             UpdateAlignments();
 
             ComputeWorldTransforms();
-
-            GatherClipGroups();
-
-            SortClipGroups();
-
+            
             OutputLayoutResults();
 
             view.visibleElements.EnsureCapacity(enabledBoxList.size);
@@ -132,6 +126,9 @@ namespace UIForia.Layout {
             }
         }
 
+        /// <summary>
+        /// Figures out what needs to get enables and builds a flat list of LayoutData.
+        /// </summary>
         private void GatherBoxData() {
             LayoutData[] enabledBoxes = enabledBoxList.array;
             SVGXMatrix[] localMatrices = localMatrixList.array;
@@ -204,20 +201,7 @@ namespace UIForia.Layout {
                         }
                     }
                     else {
-                        SizeSet sizeSet = default;
-                        sizeSet.size = childBox.size;
-                        sizeSet.allocatedSize = childBox.allocatedSize;
-                        sizeSet.contentSize = childBox.contentSize;
-
-                        PositionSet positionSet = default;
-                        positionSet.alignedPosition = childBox.alignedPosition;
-                        positionSet.allocatedPosition = childBox.allocatedPosition;
-
-                        sizeSets[idx] = sizeSet;
-                        positionSets[idx] = positionSet;
                         childBox.traversalIndex = idx;
-
-                        // localMatrices[idx] = childBox.localMatrix;
                     }
 
                     // overflowX & Y, clip behavior, scroll behavior, other shit from style that doesn't change at this point
@@ -302,119 +286,6 @@ namespace UIForia.Layout {
                 // todo -- lots of ways to avoid doing this. only need it for self aligning things or things with a transform position not in pixels
 
                 Vector2 alignedPosition = box.alignedPosition;
-                float localX = box.allocatedPosition.x;
-                float localY = box.allocatedPosition.y;
-
-                float horizontalOffset = (box.size.width * box.parentAlignmentVertical.origin);
-                float verticalOffset = (box.size.height * box.parentAlignmentVertical.origin);
-
-                float baseSizeX = 0;
-                float baseSizeY = 0;
-
-                switch (box.selfAlignmentVertical.target) {
-                    case AlignmentTarget.AllocatedBox:
-                        baseSizeX = box.allocatedSize.width;
-                        break;
-
-                    // todo -- do the following cases need to be offset again by margin size?
-                    case AlignmentTarget.Parent:
-                        baseSizeX = box.parent.allocatedSize.width;
-                        break;
-
-                    case AlignmentTarget.ParentContentArea:
-                        baseSizeX = box.parent.allocatedSize.width - box.parent.paddingBox.left - box.parent.paddingBox.right - box.parent.borderBox.left - box.parent.borderBox.right;
-                        break;
-
-                    case AlignmentTarget.View:
-                        baseSizeX = viewportWidth;
-                        break;
-
-                    case AlignmentTarget.Screen:
-                        baseSizeX = Screen.width;
-                        break;
-                }
-
-                switch (box.parentAlignmentVertical.target) {
-                    case AlignmentTarget.AllocatedBox:
-                        baseSizeY = box.allocatedSize.height;
-                        break;
-
-                    // todo -- do the following cases need to be offset again by margin size?
-                    case AlignmentTarget.Parent:
-                        baseSizeY = box.parent.allocatedSize.height;
-                        break;
-
-                    case AlignmentTarget.ParentContentArea:
-                        baseSizeY = box.parent.allocatedSize.height - box.parent.paddingBox.top - box.parent.paddingBox.bottom - box.parent.borderBox.top - box.parent.borderBox.bottom;
-                        break;
-
-                    case AlignmentTarget.View:
-                        baseSizeY = viewportHeight;
-                        break;
-
-                    case AlignmentTarget.Screen:
-                        baseSizeY = Screen.height;
-                        break;
-                }
-
-                float valueX = box.parentAlignmentHorizontal.value.value;
-                float valueY = box.parentAlignmentVertical.value.value;
-//                switch (box.parentAlignmentHorizontal.value.unit) {
-//                    case UIFixedUnit.Pixel:
-//                        alignedPosition.x = localX + valueX;
-//                        break;
-//
-//                    case UIFixedUnit.Percent:
-//                        alignedPosition.x = localX + baseSizeX * valueX;
-//                        break;
-//
-//                    case UIFixedUnit.ViewportHeight:
-//                        alignedPosition.x = localX + viewportHeight * valueX;
-//                        break;
-//
-//                    case UIFixedUnit.ViewportWidth:
-//                        alignedPosition.x = localX + viewportWidth * valueX;
-//                        break;
-//
-//                    case UIFixedUnit.Em:
-//                        alignedPosition.x = localX + box.element.style.GetResolvedFontSize() * valueX;
-//                        break;
-//                    default:
-//                        alignedPosition.x = localX;
-//                        break;
-//                }
-//
-//                switch (box.parentAlignmentVertical.value.unit) {
-//                    case UIFixedUnit.Pixel:
-//                        alignedPosition.y = localY + valueY;
-//                        break;
-//
-//                    case UIFixedUnit.Percent:
-//                        alignedPosition.y = localY + baseSizeY * valueY;
-//                        break;
-//
-//                    case UIFixedUnit.ViewportHeight:
-//                        alignedPosition.y = localY + viewportHeight * valueY;
-//                        break;
-//
-//                    case UIFixedUnit.ViewportWidth:
-//                        alignedPosition.y = localY + viewportWidth * valueY;
-//                        break;
-//
-//                    case UIFixedUnit.Em:
-//                        alignedPosition.y = localY + box.element.style.GetResolvedFontSize() * valueY;
-//                        break;
-//                    default:
-//                        alignedPosition.y = localY;
-//                        break;
-//                }
-
-
-//                alignedPosition.x += horizontalOffset;
-//                alignedPosition.y += verticalOffset;
-//                alignedPosition.x += box.transformPositionX.value;
-//                alignedPosition.y += box.transformPositionY.value;
-//                alignedPosition.y = -alignedPosition.y;
 
                 SVGXMatrix m;
 
@@ -466,100 +337,6 @@ namespace UIForia.Layout {
                 }
             }
         }
-        
-        // walk through adding clip groups
-        // will diff against last frame clip group w/ same id for rendering
-        // will sort within clip group
-
-        // will then sort clip groups
-        // clip root defines group, can be compared per frame
-
-        private void GatherClipGroups() {
-//            LayoutData[] enabledBoxes = enabledBoxList.array;
-//
-//            clipGroups[0] = new ClipGroup() {root = enabledBoxes[0].layoutBox, members = new LightList<FastLayoutBox>()};
-//
-//            for (int i = 1; i < enabledBoxList.size; i++) {
-//                ref LayoutData current = ref enabledBoxes[i];
-//
-//                int start = current.childStart;
-//                int end = current.childEnd;
-//
-//                if (end - start == 0) {
-//                    continue;
-//                }
-//
-//                int clipIndex;
-//
-//                if ((current.layoutBox.flags & LayoutRenderFlag.Clip) != 0) {
-//                    clipIndex = clipGroups.size;
-//
-//                    // find last frame clip group if present
-//                    // 
-//                    clipGroups.Add(new ClipGroup() {
-//                        root = current.layoutBox,
-//                        members = LightList<FastLayoutBox>.Get(),
-//                    });
-//                }
-//                else {
-//                    clipIndex = current.clipGroupIndex;
-//                }
-//
-//                clipGroups[clipIndex].members.EnsureAdditionalCapacity(end - start);
-//
-//                for (int j = start; j < end; j++) {
-//                    clipGroups[clipIndex].members.Add(enabledBoxes[j].layoutBox);
-//                    enabledBoxes[j].clipGroupIndex = clipIndex;
-//                }
-//            }
-        }
-
-        public void SortClipGroups() {
-            for (int i = 0; i < clipGroups.size; i++) {
-                clipGroups[i].members.Sort(s_DepthComparer);
-            }
-
-            clipGroups.Sort((a, b) => a.root.traversalIndex - b.root.traversalIndex);
-        }
-
-        public void ApplyBroadPhaseCulling() {
-            // for each element
-
-            // if element.clipBehavior == Clip.Never
-            // if element.clipBehavior == Clip.Normal
-            // if element.clipBehavior == Clip.View
-            // if element.clipBehavior == Clip.Screen
-            // if element.visibility == Visibility.None
-
-
-            // if !element.renderBox.ClipTest(clipShape, view)
-            //    continue;
-            // if !element.isEnabled || failedClipTest
-            //    continue;
-            // clip group.Add(element)
-            //    
-
-            // standard painter
-            // if size.width || size.height == 0
-            // return
-
-            // for each clip group
-            // if group is off screen, cull whole group
-            // if group is not overlapping its parent group, cull whole group
-            // for each element in clipping group
-            // if element corners not inside outer clip shape (polygon, circle, ellipse, rect)
-            // clip element
-            // would be nice to know if any descendent element is aligned or transformed outside its parent bounds (compute at layout time)
-
-            // if no elements visible in group, remove em all
-            // if element visibility is hidden -> clip children
-
-            // within each clip group
-            // if a painter sets a clip we need to respect it
-
-            // view has a content group that is clipped to the view rect and an overlay group that is submitted to the same batch as the view itself with 
-        }
-
 
         public void Release() { }
 

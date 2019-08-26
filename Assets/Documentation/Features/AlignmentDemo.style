@@ -1,0 +1,18 @@
+style <this> {
+   PreferredSize = 800px;
+}
+
+style group1 {
+    PreferredSize = 300px 100px;
+    BackgroundColor = green;
+    Margin = 10px;
+}
+
+style center-align {
+    AlignmentTargetX = Cell;
+    AlignmentOffset = -50%;
+    AlignmentOrigin = 50%;
+    
+    Align = Start | Center | End; // AlignmentOffset = -50% of the element width and AlignmentOrigin = 50% of the
+    Align = 25%;  
+} 

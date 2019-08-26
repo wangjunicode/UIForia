@@ -21,14 +21,14 @@ namespace UIForia.Compilers.ExpressionResolvers {
         public LengthResolver(string aliasName) : base(aliasName) { }
 
         public override Expression CompileAsMethodExpression(CompilerContext context, LightList<ASTNode> parameters) {
-            if (context.targetType == typeof(FixedLengthVector)) {
+            if (context.targetType == typeof(UIFixedLengthPair)) {
                 if (parameters.Count == 1) {
                     Expression expr = context.Visit(typeof(UIFixedLength), parameters[0]);
                     if (expr == null) {
                         throw new CompileException($"Invalid arguments for {aliasName}");
                     }
 
-                    return new MethodCallExpression_Static<UIFixedLength, FixedLengthVector>(s_LengthVector1, new[] {expr});
+                    return new MethodCallExpression_Static<UIFixedLength, UIFixedLengthPair>(s_LengthVector1, new[] {expr});
                 }
 
                 if (parameters.Count == 2) {
@@ -38,7 +38,7 @@ namespace UIForia.Compilers.ExpressionResolvers {
                         throw new CompileException($"Invalid arguments for {aliasName}");
                     }
 
-                    return new MethodCallExpression_Static<UIFixedLength, UIFixedLength, FixedLengthVector>(s_LengthVector2, new[] {expr0, expr1});
+                    return new MethodCallExpression_Static<UIFixedLength, UIFixedLength, UIFixedLengthPair>(s_LengthVector2, new[] {expr0, expr1});
                 }
             }
 
@@ -48,13 +48,13 @@ namespace UIForia.Compilers.ExpressionResolvers {
         }
 
         [Pure]
-        public static FixedLengthVector FixedVec1(UIFixedLength x) {
-            return new FixedLengthVector(x, x);
+        public static UIFixedLengthPair FixedVec1(UIFixedLength x) {
+            return new UIFixedLengthPair(x, x);
         }
 
         [Pure]
-        public static FixedLengthVector FixedVec2(UIFixedLength x, UIFixedLength y) {
-            return new FixedLengthVector(x, y);
+        public static UIFixedLengthPair FixedVec2(UIFixedLength x, UIFixedLength y) {
+            return new UIFixedLengthPair(x, y);
         }
 
     }

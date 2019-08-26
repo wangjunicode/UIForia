@@ -190,8 +190,8 @@ namespace UIForia.Parsing.Style {
             ValueTuple.Create("Measurement", typeof(UIMeasurement)),
             ValueTuple.Create("UIFixedLength", typeof(UIFixedLength)),
             ValueTuple.Create("FixedLength", typeof(UIFixedLength)),
-            ValueTuple.Create("TransformOffset", typeof(TransformOffset)),
-            ValueTuple.Create("Offset", typeof(TransformOffset)),
+            ValueTuple.Create("TransformOffset", typeof(OffsetMeasurement)),
+            ValueTuple.Create("Offset", typeof(OffsetMeasurement)),
         };
 
         public static readonly ValueTuple<string, string>[] s_AnimationOptionNames = {

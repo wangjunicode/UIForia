@@ -413,14 +413,14 @@ namespace UIForia.Systems {
 
                     switch (transformBehaviorX) {
                         case TransformBehavior.AnchorMinOffset:
-                            localPosition.x = box.ResolveAnchorLeft() + box.ResolveTransform(box.transformPositionX);
+                           // localPosition.x = box.ResolveAnchorLeft() + box.ResolveTransform(box.transformPositionX);
                             break;
                         case TransformBehavior.AnchorMaxOffset:
                             box.ResolveAnchorRight();
-                            localPosition.x = box.ResolveAnchorRight() - box.ResolveTransform(box.transformPositionX) - box.actualWidth;
+                          //  localPosition.x = box.ResolveAnchorRight() - box.ResolveTransform(box.transformPositionX) - box.actualWidth;
                             break;
                         case TransformBehavior.LayoutOffset:
-                            localPosition.x = box.localX + box.ResolveTransform(box.transformPositionX);
+                          //  localPosition.x = box.localX + box.ResolveTransform(box.transformPositionX);
                             break;
                         default:
                             localPosition.x = box.localX;
@@ -429,13 +429,13 @@ namespace UIForia.Systems {
 
                     switch (transformBehaviorY) {
                         case TransformBehavior.AnchorMinOffset:
-                            localPosition.y = box.ResolveAnchorTop() + box.ResolveTransform(box.transformPositionY);
+                          //  localPosition.y = box.ResolveAnchorTop() + box.ResolveTransform(box.transformPositionY);
                             break;
                         case TransformBehavior.AnchorMaxOffset:
-                            localPosition.y = box.ResolveAnchorBottom() - box.ResolveTransform(box.transformPositionY) - box.actualHeight;
+                           // localPosition.y = box.ResolveAnchorBottom() - box.ResolveTransform(box.transformPositionY) - box.actualHeight;
                             break;
                         case TransformBehavior.LayoutOffset:
-                            localPosition.y = box.localY + box.ResolveTransform(box.transformPositionY);
+                           // localPosition.y = box.localY + box.ResolveTransform(box.transformPositionY);
                             break;
                         default:
                             localPosition.y = box.localY;

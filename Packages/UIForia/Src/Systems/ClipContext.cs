@@ -5,8 +5,9 @@ using UIForia.Rendering.Vertigo;
 using UIForia.Util;
 using UnityEngine;
 using UnityEngine.Rendering;
-using Vertigo;
+using BlendState = Src.Systems.BlendState;
 using CompareFunction = UnityEngine.Rendering.CompareFunction;
+using DepthState = Src.Systems.DepthState;
 using Object = UnityEngine.Object;
 using PooledMesh = UIForia.Rendering.Vertigo.PooledMesh;
 

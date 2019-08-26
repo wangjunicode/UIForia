@@ -45,8 +45,8 @@ namespace UIForia.Layout {
         public UIMeasurement maxHeight;
         public UIMeasurement prefHeight;
 
-        public TransformOffset transformPositionX;
-        public TransformOffset transformPositionY;
+        public UIFixedLength transformPositionX;
+        public UIFixedLength transformPositionY;
 
         public int traversalIndex;
 
@@ -62,11 +62,11 @@ namespace UIForia.Layout {
         public Fit selfFitHorizontal;
         public Fit selfFitVertical;
 
-        public Alignment parentAlignmentHorizontal;
-        public Alignment parentAlignmentVertical;
+        public OffsetMeasurement parentAlignmentHorizontal;
+        public OffsetMeasurement parentAlignmentVertical;
 
-        public Alignment selfAlignmentVertical;
-        public Alignment selfAlignmentHorizontal;
+        public OffsetMeasurement selfAlignmentVertical;
+        public OffsetMeasurement selfAlignmentHorizontal;
 
         public UIElement element;
         public LayoutOwner owner;
@@ -368,7 +368,7 @@ namespace UIForia.Layout {
             }
         }
 
-        public void ApplyHorizontalLayout(float localX, in BlockSize containingWidth, float allocatedWidth, float preferredWidth, in Alignment alignment, Fit fit) {
+        public void ApplyHorizontalLayout(float localX, in BlockSize containingWidth, float allocatedWidth, float preferredWidth, in OffsetMeasurement alignment, Fit fit) {
             // need to know the actual size of what im laying out in order to grow...oder?
 
             allocatedPosition.x = localX;
@@ -427,28 +427,28 @@ namespace UIForia.Layout {
 //            else {
 //            }
             parentAlignmentHorizontal = alignment;
-
-            switch (parentAlignmentHorizontal.target) {
-                case AlignmentTarget.AllocatedBox:
-                    alignedPosition.x = localX + ResolveFixedSize(allocatedWidth, parentAlignmentHorizontal.value) - (size.width * parentAlignmentHorizontal.origin);
-                    break;
-
-                case AlignmentTarget.Parent:
-                    alignedPosition.x = localX + ResolveFixedSize(parent.size.width, parentAlignmentHorizontal.value) - (size.width * parentAlignmentHorizontal.origin);
-                    break;
-
-                case AlignmentTarget.ParentContentArea:
-                    alignedPosition.x = localX + ResolveFixedSize(parent.size.width - parent.paddingBox.top - parent.paddingBox.bottom, parentAlignmentHorizontal.value) - (size.width * parentAlignmentHorizontal.origin);
-                    break;
-
-                case AlignmentTarget.View:
-                    alignedPosition.x = localX + ResolveFixedSize(element.View.Viewport.width - parent.paddingBox.top - parent.paddingBox.bottom, parentAlignmentHorizontal.value) - (size.width * parentAlignmentHorizontal.origin);
-                    break;
-
-                case AlignmentTarget.Screen:
-                    alignedPosition.x = localX + ResolveFixedSize(Screen.width - parent.paddingBox.top - parent.paddingBox.bottom, parentAlignmentHorizontal.value) - (size.width * parentAlignmentHorizontal.origin);
-                    break;
-            }
+            //
+            // switch (parentAlignmentHorizontal.target) {
+            //     case AlignmentTarget.AllocatedBox:
+            //         alignedPosition.x = localX + ResolveFixedSize(allocatedWidth, parentAlignmentHorizontal.value) - (size.width * parentAlignmentHorizontal.origin);
+            //         break;
+            //
+            //     case AlignmentTarget.Parent:
+            //         alignedPosition.x = localX + ResolveFixedSize(parent.size.width, parentAlignmentHorizontal.value) - (size.width * parentAlignmentHorizontal.origin);
+            //         break;
+            //
+            //     case AlignmentTarget.ParentContentArea:
+            //         alignedPosition.x = localX + ResolveFixedSize(parent.size.width - parent.paddingBox.top - parent.paddingBox.bottom, parentAlignmentHorizontal.value) - (size.width * parentAlignmentHorizontal.origin);
+            //         break;
+            //
+            //     case AlignmentTarget.View:
+            //         alignedPosition.x = localX + ResolveFixedSize(element.View.Viewport.width - parent.paddingBox.top - parent.paddingBox.bottom, parentAlignmentHorizontal.value) - (size.width * parentAlignmentHorizontal.origin);
+            //         break;
+            //
+            //     case AlignmentTarget.Screen:
+            //         alignedPosition.x = localX + ResolveFixedSize(Screen.width - parent.paddingBox.top - parent.paddingBox.bottom, parentAlignmentHorizontal.value) - (size.width * parentAlignmentHorizontal.origin);
+            //         break;
+            // }
 
             ref PositionSet positionSet = ref owner.positionSetList.array[traversalIndex];
             positionSet.allocatedPosition = allocatedPosition;
@@ -464,7 +464,7 @@ namespace UIForia.Layout {
             // content size = extents of my content
         }
 
-        public void ApplyVerticalLayout(float localY, in BlockSize containingHeight, float allocatedHeight, float preferredHeight, in Alignment alignment, Fit fit) {
+        public void ApplyVerticalLayout(float localY, in BlockSize containingHeight, float allocatedHeight, float preferredHeight, float alignment, Fit fit) {
             allocatedPosition.y = localY;
             alignedPosition.y = localY;
 
@@ -510,29 +510,29 @@ namespace UIForia.Layout {
             containingBoxHeight = containingHeight;
             
             parentAlignmentVertical = alignment;
-
-            switch (parentAlignmentVertical.target) {
-                case AlignmentTarget.AllocatedBox:
-                    alignedPosition.y = localY + ResolveFixedSize(allocatedHeight, parentAlignmentVertical.value) - (size.height * parentAlignmentVertical.origin);
-                    break;
-
-                // todo -- do the following cases need to be offset again by margin size?
-                case AlignmentTarget.Parent:
-                    alignedPosition.y = localY + ResolveFixedSize(parent.size.height, parentAlignmentVertical.value) - (size.height * parentAlignmentVertical.origin);
-                    break;
-
-                case AlignmentTarget.ParentContentArea:
-                    alignedPosition.y = localY + ResolveFixedSize(parent.size.height - parent.paddingBox.top - parent.paddingBox.bottom, parentAlignmentVertical.value) - (size.height * parentAlignmentVertical.origin);
-                    break;
-
-                case AlignmentTarget.View:
-                    alignedPosition.y = localY + ResolveFixedSize(element.View.Viewport.height - parent.paddingBox.top - parent.paddingBox.bottom, parentAlignmentVertical.value) - (size.height * parentAlignmentVertical.origin);
-                    break;
-
-                case AlignmentTarget.Screen:
-                    alignedPosition.y = localY + ResolveFixedSize(Screen.height - parent.paddingBox.top - parent.paddingBox.bottom, parentAlignmentVertical.value) - (size.height * parentAlignmentVertical.origin);
-                    break;
-            }
+            //
+            // switch (parentAlignmentVertical.target) {
+            //     case AlignmentTarget.AllocatedBox:
+            //         alignedPosition.y = localY + ResolveFixedSize(allocatedHeight, parentAlignmentVertical.value) - (size.height * parentAlignmentVertical.origin);
+            //         break;
+            //
+            //     // todo -- do the following cases need to be offset again by margin size?
+            //     case AlignmentTarget.Parent:
+            //         alignedPosition.y = localY + ResolveFixedSize(parent.size.height, parentAlignmentVertical.value) - (size.height * parentAlignmentVertical.origin);
+            //         break;
+            //
+            //     case AlignmentTarget.ParentContentArea:
+            //         alignedPosition.y = localY + ResolveFixedSize(parent.size.height - parent.paddingBox.top - parent.paddingBox.bottom, parentAlignmentVertical.value) - (size.height * parentAlignmentVertical.origin);
+            //         break;
+            //
+            //     case AlignmentTarget.View:
+            //         alignedPosition.y = localY + ResolveFixedSize(element.View.Viewport.height - parent.paddingBox.top - parent.paddingBox.bottom, parentAlignmentVertical.value) - (size.height * parentAlignmentVertical.origin);
+            //         break;
+            //
+            //     case AlignmentTarget.Screen:
+            //         alignedPosition.y = localY + ResolveFixedSize(Screen.height - parent.paddingBox.top - parent.paddingBox.bottom, parentAlignmentVertical.value) - (size.height * parentAlignmentVertical.origin);
+            //         break;
+            // }
 
             ref SizeSet sizeSet = ref owner.sizeSetList.array[traversalIndex];
             sizeSet.size = size;
@@ -568,14 +568,15 @@ namespace UIForia.Layout {
         public void Layout() {
             // todo -- size check
 
-            pivotY = ResolveFixedWidth(element.style.TransformPivotY);
-            scaleX = element.style.TransformScaleX;
-            scaleY = element.style.TransformScaleY;
-            rotation = element.style.TransformRotation;
-
             if ((flags & LayoutRenderFlag.NeedsLayout) == 0) {
                 return;
             }
+
+            // pivotY = ResolveFixedHeight(element.style.TransformPivotY);
+            // pivotX = ResolveFixedWidth(element.style.TransformPivotX);
+            // scaleX = element.style.TransformScaleX;
+            // scaleY = element.style.TransformScaleY;
+            // rotation = element.style.TransformRotation;
 
             PerformLayout();
 
@@ -584,6 +585,7 @@ namespace UIForia.Layout {
             FastLayoutBox child = firstChild;
             while (child != null) {
                 child.Layout();
+                // todo find out who sets nextSibling to child
                 if (child == child.nextSibling) {
                     break;
                 }
@@ -787,11 +789,11 @@ namespace UIForia.Layout {
                         break;
 
                     case StylePropertyId.TransformPositionX:
-                        transformPositionX = property.AsTransformOffset;
+                        transformPositionX = property.AsUIFixedLength;
                         break;
 
                     case StylePropertyId.TransformPositionY:
-                        transformPositionY = property.AsTransformOffset;
+                        transformPositionY = property.AsUIFixedLength;
                         break;
                 }
             }

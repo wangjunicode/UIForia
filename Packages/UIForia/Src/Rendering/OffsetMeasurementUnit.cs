@@ -2,7 +2,7 @@ using UIForia.Layout;
 
 namespace UIForia {
 
-    public enum TransformUnit {
+    public enum OffsetMeasurementUnit {
 
         Unset = UnitConstants.Unset,
         Pixel = UnitConstants.Pixel,
@@ -25,7 +25,7 @@ namespace UIForia {
         ParentContentAreaHeight = UnitConstants.ParentContentAreaHeight,
         ScreenWidth = UnitConstants.ScreenWidth,
         ScreenHeight = UnitConstants.ScreenHeight,
-
+        Percent = UnitConstants.Percent
     }
 
 }

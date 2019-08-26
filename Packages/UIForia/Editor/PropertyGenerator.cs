@@ -42,7 +42,7 @@ namespace UIForia.Editor {
                     || typeof(float) == type
                     || typeof(UIMeasurement) == type
                     || typeof(UIFixedLength) == type
-                    || typeof(TransformOffset) == type
+                    || typeof(OffsetMeasurement) == type
                     || typeof(GridTrackSize) == type
                     || typeof(Color) == type
                 ) {
@@ -117,9 +117,9 @@ namespace UIForia.Editor {
                 return $"new {nameof(UIMeasurement)}({measurement.value.ToString(CultureInfo.InvariantCulture)}f, {nameof(UIMeasurementUnit)}.{Enum.GetName(typeof(UIMeasurementUnit), measurement.unit)})";
             }
             
-            if (defaultValue is TransformOffset) {
-                TransformOffset measurement = (TransformOffset) defaultValue;
-                return $"new {nameof(TransformOffset)}({measurement.value.ToString(CultureInfo.InvariantCulture)}f, {nameof(TransformUnit)}.{Enum.GetName(typeof(TransformUnit), measurement.unit)})";
+            if (defaultValue is OffsetMeasurement) {
+                OffsetMeasurement measurement = (OffsetMeasurement) defaultValue;
+                return $"new {nameof(OffsetMeasurement)}({measurement.value.ToString(CultureInfo.InvariantCulture)}f, {nameof(OffsetMeasurementUnit)}.{Enum.GetName(typeof(OffsetMeasurementUnit), measurement.unit)})";
             }
 
             if (defaultValue is UIFixedLength) {

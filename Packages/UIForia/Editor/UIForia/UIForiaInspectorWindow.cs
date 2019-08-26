@@ -998,11 +998,11 @@ namespace UIForia.Editor {
             s_Content.text = StyleUtil.GetPropertyName(property);
             GUILayout.BeginHorizontal();
             GUI.enabled = isEditable;
-            float value = EditorGUILayout.FloatField(s_Content, property.AsTransformOffset.value);
-            TransformUnit unit = (TransformUnit) EditorGUILayout.EnumPopup(property.AsTransformOffset.unit);
+            float value = EditorGUILayout.FloatField(s_Content, property.AsUIFixedLength.value);
+            OffsetMeasurementUnit unit = (OffsetMeasurementUnit) EditorGUILayout.EnumPopup(property.AsUIFixedLength.unit);
             GUI.enabled = true;
             GUILayout.EndHorizontal();
-            return isEditable ? new StyleProperty(property.propertyId, new TransformOffset(value, unit)) : property;
+            return isEditable ? new StyleProperty(property.propertyId, new OffsetMeasurement(value, unit)) : property;
         }
 
         private static StyleProperty DrawGridTrackSize(StyleProperty property, bool isEditable) {

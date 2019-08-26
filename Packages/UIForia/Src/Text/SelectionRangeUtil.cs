@@ -184,16 +184,16 @@ namespace UIForia.Text {
                     range = new SelectionRange(0, TextEdge.Left);
                     return source.Substring(1);
                 }
-                else if (cursorIndex == source.Length - 1) {
+
+                if (cursorIndex == source.Length - 1) {
                     range = new SelectionRange(range.cursorIndex - 1, TextEdge.Right);
                     return source.Substring(0, source.Length - 1);
                 }
-                else {
-                    string part0 = source.Substring(0, cursorIndex);
-                    string part1 = source.Substring(cursorIndex + 1);
-                    range = new SelectionRange(cursorIndex, TextEdge.Left);
-                    return part0 + part1;
-                }
+
+                string part0 = source.Substring(0, cursorIndex);
+                string part1 = source.Substring(cursorIndex + 1);
+                range = new SelectionRange(cursorIndex, TextEdge.Left);
+                return part0 + part1;
             }
         }
 

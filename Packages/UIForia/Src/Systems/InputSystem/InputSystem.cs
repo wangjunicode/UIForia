@@ -1099,6 +1099,8 @@ namespace UIForia.Systems {
                 else if (!m_MouseState.isLeftMouseDown && !m_MouseState.isMiddleMouseDown) {
                     RunMouseEvents(m_ElementsThisFrame, InputEventType.MouseContext);
                 }
+            } else if (m_MouseState.isLeftMouseDown || m_MouseState.isRightMouseDown || m_MouseState.isMiddleMouseDown) {
+                RunMouseEvents(m_ElementsThisFrame, InputEventType.MouseHeldDown);
             }
 
             RunMouseEvents(m_ElementsThisFrame, m_MouseState.DidMove ? InputEventType.MouseMove : InputEventType.MouseHover);

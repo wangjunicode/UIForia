@@ -165,7 +165,7 @@ namespace UIForia.Systems {
         }
 
         public void OnAttributeSet(UIElement element, string attributeName, string currentValue, string attributeValue) {
-            element.style.UpdateApplicableAttributeRules(attributeName, attributeValue);
+            element.style.UpdateApplicableAttributeRules();
         }
 
         private void AddToChangeSet(UIElement element, StyleProperty property) {

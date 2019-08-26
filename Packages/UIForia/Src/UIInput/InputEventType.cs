@@ -9,6 +9,7 @@ namespace UIForia.UIInput {
         MouseExit = 1 << 1,
         MouseUp = 1 << 2,
         MouseDown = 1 << 3,
+        MouseHeldDown = 1 << 20,
         MouseMove = 1 << 4,
         MouseHover = 1 << 5,
         MouseContext = 1 << 6,

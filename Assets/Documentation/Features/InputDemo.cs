@@ -29,6 +29,7 @@ namespace Documentation {
         };
 
         public float floatValue = 1115.52f;
+        public double doubleValue = 1234567.8901d;
         public string rwValue;
 
         public string regularValue;

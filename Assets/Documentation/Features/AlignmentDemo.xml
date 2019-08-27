@@ -4,14 +4,30 @@
     <Style path="Documentation/Features/AlignmentDemo.style"/>
 
     <Contents>
-        <Group style="group1">
-            
+        <Group style="stack-vertical">
+
+            <Group style="group1">
+
+            </Group>
+            <Group style="group1 x-align">
+
+            </Group>
+            <Group style="group1">
+
+            </Group>
         </Group>
-        <Group style="group1 center-align">
-            
-        </Group>
-        <Group style="group1">
-            
+
+        <Group style="stack-horizontal">
+
+            <Group style="group1">
+
+            </Group>
+            <Group style="group1 y-align">
+
+            </Group>
+            <Group style="group1">
+
+            </Group>
         </Group>
     </Contents>
 </UITemplate>

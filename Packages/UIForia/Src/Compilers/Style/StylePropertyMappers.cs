@@ -32,13 +32,17 @@ namespace UIForia.Compilers.Style {
                 // Alignment
                 {"alignmentbehaviorx", (targetStyle, property, context) => targetStyle.AlignmentBehaviorX = MapEnum<AlignmentBehavior>(property.children[0], context)},
                 {"alignmentbehaviory", (targetStyle, property, context) => targetStyle.AlignmentBehaviorY = MapEnum<AlignmentBehavior>(property.children[0], context)},
-                {"alignmentpivotx", (targetStyle, property, context) => targetStyle.AlignmentOriginX = MapNumber(property.children[0], context)},
-                {"alignmentpivoty", (targetStyle, property, context) => targetStyle.AlignmentOriginY = MapNumber(property.children[0], context)},
-                {"alignmentoffsetx", (targetStyle, property, context) => targetStyle.AlignmentOffsetX = MapAlignmentOffset(property.children[0], context)},
-                {"alignmentoffsety", (targetStyle, property, context) => targetStyle.AlignmentOffsetY = MapAlignmentOffset(property.children[0], context)},
+                {"alignmentoriginx", (targetStyle, property, context) => targetStyle.AlignmentOriginX = MapOffsetMeasurement(property.children[0], context)},
+                {"alignmentoriginy", (targetStyle, property, context) => targetStyle.AlignmentOriginY = MapOffsetMeasurement(property.children[0], context)},
+                {"alignmentoffsetx", (targetStyle, property, context) => targetStyle.AlignmentOffsetX = MapOffsetMeasurement(property.children[0], context)},
+                {"alignmentoffsety", (targetStyle, property, context) => targetStyle.AlignmentOffsetY = MapOffsetMeasurement(property.children[0], context)},
+                {"alignmentdirectionx", (targetStyle, property, context) => targetStyle.AlignmentDirectionX = MapEnum<AlignmentDirection>(property.children[0], context)},
+                {"alignmentdirectiony", (targetStyle, property, context) => targetStyle.AlignmentDirectionY = MapEnum<AlignmentDirection>(property.children[0], context)},
+                {"alignx", (targetStyle, property, context) => MapAlignmentX(targetStyle, property, context)},
+                {"aligny", (targetStyle, property, context) => MapAlignmentY(targetStyle, property, context)},
 
-                {"fithorizontal", (targetStyle, property, context) => targetStyle.FitHorizontal = MapEnum<Fit>(property.children[0], context)},
-                {"fitvertical", (targetStyle, property, context) => targetStyle.FitVertical = MapEnum<Fit>(property.children[0], context)},
+                {"fithorizontal", (targetStyle, property, context) => targetStyle.LayoutFitHorizontal = MapEnum<LayoutFit>(property.children[0], context)},
+                {"fitvertical", (targetStyle, property, context) => targetStyle.LayoutFitVertical = MapEnum<LayoutFit>(property.children[0], context)},
 
                 // Background
                 {"backgroundcolor", (targetStyle, property, context) => targetStyle.BackgroundColor = MapColor(property, context)},
@@ -204,6 +208,90 @@ namespace UIForia.Compilers.Style {
                 {"shadowsoftnessy", (targetStyle, property, context) => targetStyle.ShadowSoftnessY = MapNumber(property.children[0], context)},
                 {"shadowintensity", (targetStyle, property, context) => targetStyle.ShadowIntensity = MapNumber(property.children[0], context)},
             };
+
+        private static void MapAlignmentX(UIStyle targetStyle, PropertyNode property, StyleCompileContext context) {
+            if (property.children.size == 1) {
+                // single value mode
+
+                StyleASTNode value = context.GetValueForReference(property.children[0]);
+                if (value.type == StyleASTNodeType.Identifier) {
+                    StyleIdentifierNode idNode = (StyleIdentifierNode) value;
+                    switch (idNode.name.ToLower()) {
+                        case "start":
+                            targetStyle.AlignmentOriginX = new OffsetMeasurement(0);
+                            targetStyle.AlignmentOffsetX = new OffsetMeasurement(0);
+                            break;
+                        case "center":
+                            targetStyle.AlignmentOriginX = new OffsetMeasurement(0.5f, OffsetMeasurementUnit.Percent);
+                            targetStyle.AlignmentOffsetX = new OffsetMeasurement(-0.5f, OffsetMeasurementUnit.Percent);
+                            break;
+                        case "end":
+                            targetStyle.AlignmentOriginX = new OffsetMeasurement(1f, OffsetMeasurementUnit.Percent);
+                            targetStyle.AlignmentOffsetX = new OffsetMeasurement(-1f, OffsetMeasurementUnit.Percent);
+                            break;
+                        default:
+                            throw new CompileException(context.fileName, value, $"Invalid AlignX {value}. " +
+                                                                                "Make sure you use one of the following keywords: start, center, end or provide an OffsetMeasurement.");
+                    }
+                }
+                else {
+                    OffsetMeasurement measurement = MapOffsetMeasurement(value, context);
+                    targetStyle.AlignmentOriginX = measurement;
+                    targetStyle.AlignmentOffsetX = new OffsetMeasurement(-measurement.value, measurement.unit);
+                }
+            }
+            else if (property.children.size == 2) {
+                targetStyle.AlignmentOriginX = MapOffsetMeasurement(context.GetValueForReference(property.children[0]), context);
+                targetStyle.AlignmentOffsetX = MapOffsetMeasurement(context.GetValueForReference(property.children[1]), context);
+            }
+            else if (property.children.size == 3) {
+                targetStyle.AlignmentOriginX = MapOffsetMeasurement(context.GetValueForReference(property.children[0]), context);
+                targetStyle.AlignmentOffsetX = MapOffsetMeasurement(context.GetValueForReference(property.children[1]), context);
+                targetStyle.AlignmentDirectionX = MapEnum<AlignmentDirection>(context.GetValueForReference(property.children[2]), context);
+            }
+        }
+
+        private static void MapAlignmentY(UIStyle targetStyle, PropertyNode property, StyleCompileContext context) {
+            if (property.children.size == 1) {
+                // single value mode
+                StyleASTNode value = context.GetValueForReference(property.children[0]);
+                if (value.type == StyleASTNodeType.Identifier) {
+                    StyleIdentifierNode idNode = (StyleIdentifierNode) value;
+                    switch (idNode.name.ToLower()) {
+                        case "start":
+                            targetStyle.AlignmentOriginY = new OffsetMeasurement(0);
+                            targetStyle.AlignmentOffsetY = new OffsetMeasurement(0);
+                            break;
+                        case "center":
+                            targetStyle.AlignmentOriginY = new OffsetMeasurement(0.5f, OffsetMeasurementUnit.Percent);
+                            targetStyle.AlignmentOffsetY = new OffsetMeasurement(-0.5f, OffsetMeasurementUnit.Percent);
+                            break;
+                        case "end":
+                            targetStyle.AlignmentOriginY = new OffsetMeasurement(1f, OffsetMeasurementUnit.Percent);
+                            targetStyle.AlignmentOffsetY = new OffsetMeasurement(-1f, OffsetMeasurementUnit.Percent);
+                            break;
+                        default:
+                            throw new CompileException(context.fileName, value, $"Invalid AlignY {value}. " +
+                                                                                "Make sure you use one of the following keywords: start, center, end or provide an OffsetMeasurement.");
+                    }
+                }
+                else {
+                    OffsetMeasurement measurement = MapOffsetMeasurement(value, context);
+                    targetStyle.AlignmentOriginY = measurement;
+                    targetStyle.AlignmentOffsetY = new OffsetMeasurement(-measurement.value, measurement.unit);
+                }
+            }
+            else if (property.children.size == 2) {
+                targetStyle.AlignmentOriginY = MapOffsetMeasurement(context.GetValueForReference(property.children[0]), context);
+                targetStyle.AlignmentOffsetY = MapOffsetMeasurement(context.GetValueForReference(property.children[1]), context);
+            }
+            else if (property.children.size == 3) {
+                targetStyle.AlignmentOriginY = MapOffsetMeasurement(context.GetValueForReference(property.children[0]), context);
+                targetStyle.AlignmentOffsetY = MapOffsetMeasurement(context.GetValueForReference(property.children[1]), context);
+                targetStyle.AlignmentDirectionY = MapEnum<AlignmentDirection>(context.GetValueForReference(property.children[2]), context);
+            }
+        }
+
 
         private static string MapPainter(PropertyNode property, StyleCompileContext context) {
             string customPainter = MapString(property.children[0], context);
@@ -849,12 +937,17 @@ namespace UIForia.Compilers.Style {
             return GridTemplateUnit.Pixel;
         }
 
-        private static OffsetMeasurement MapAlignmentOffset(StyleASTNode value, StyleCompileContext context) {
+        private static OffsetMeasurement MapOffsetMeasurement(StyleASTNode value, StyleCompileContext context) {
             value = context.GetValueForReference(value);
             switch (value) {
                 case MeasurementNode measurementNode:
                     if (TryParseFloat(measurementNode.value.rawValue, out float measurementValue)) {
-                        return new OffsetMeasurement(measurementValue, MapTransformUnit(measurementNode.unit, context));
+                        OffsetMeasurementUnit unit = MapTransformUnit(measurementNode.unit, context);
+                        if (unit == OffsetMeasurementUnit.Percent) {
+                            measurementValue *= 0.01f;
+                        }
+
+                        return new OffsetMeasurement(measurementValue, unit);
                     }
 
                     break;
@@ -894,10 +987,6 @@ namespace UIForia.Compilers.Style {
                     return OffsetMeasurementUnit.ContentAreaWidth;
                 case "cah":
                     return OffsetMeasurementUnit.ContentAreaHeight;
-                case "aw":
-                    return OffsetMeasurementUnit.AnchorWidth;
-                case "ah":
-                    return OffsetMeasurementUnit.AnchorHeight;
                 case "vw":
                     return OffsetMeasurementUnit.ViewportWidth;
                 case "vh":
@@ -914,10 +1003,12 @@ namespace UIForia.Compilers.Style {
                     return OffsetMeasurementUnit.ScreenWidth;
                 case "sh":
                     return OffsetMeasurementUnit.ScreenHeight;
+                case "%":
+                    return OffsetMeasurementUnit.Percent;
             }
 
             Debug.LogWarning($"You used a {unitNode.value} in line {unitNode.line} column {unitNode.column} in file {context.fileName} but this unit isn't supported. " +
-                             "Try px, w, h, alw, alh, cw, ch, em, caw, cah, aw, ah, vw, vh, pw, ph, pcaw, pcah, sw, or sh instead (see TransformUnit). Will fall back to px.");
+                             "Try px, w, h, alw, alh, cw, ch, em, caw, cah, vw, vh, pw, ph, pcaw, pcah, sw, or sh instead (see TransformUnit). Will fall back to px.");
 
             return OffsetMeasurementUnit.Pixel;
         }
@@ -1017,7 +1108,7 @@ namespace UIForia.Compilers.Style {
             switch (styleAstNode) {
                 case StyleIdentifierNode identifierNode:
                     return ParseColor(identifierNode, context);
-                
+
                 case ColorNode colorNode: return colorNode.color;
                 case RgbaNode rgbaNode: return MapRbgaNodeToColor(rgbaNode, context);
                 case RgbNode rgbNode: return MapRgbNodeToColor(rgbNode, context);

@@ -156,33 +156,47 @@ namespace UIForia.Animation {
 
             float duration = options.duration.Value * 0.001f;
             float iterationTime = duration;
+            
             if (options.iterations.Value > 0) {
-                iterationTime = iterationTime / options.iterations.Value;
+                iterationTime /= options.iterations.Value;
             }
 
             float progress = Mathf.Clamp01(status.elapsedIterationTime / duration);
 
             status.iterationProgress = progress;
             status.frameCount++;
+
+            float targetProgress = progress;
+            bool isReversed = options.direction.HasValue && options.direction.Value == AnimationDirection.Reverse;
             
-            ProcessedKeyFrameGroup[] groups = processedFrameGroups.Array;
+            if (isReversed) {
+                targetProgress = 1 - targetProgress;
+            }
+            
+            ProcessedKeyFrameGroup[] groups = processedFrameGroups.array;
             for (int i = 0; i < processedFrameGroups.Count; i++) {
                 StylePropertyId propertyId = groups[i].propertyId;
-                ProcessedKeyFrame[] frames = groups[i].frames.Array;
-                int frameCount = groups[i].frames.Count;
+                ProcessedKeyFrame[] frames = groups[i].frames.array;
+                int frameCount = groups[i].frames.size;
 
                 ProcessedKeyFrame prev = frames[0];
                 ProcessedKeyFrame next = frames[frameCount - 1];
 
                 for (int j = 1; j < frameCount; j++) {
-                    if (frames[j].time > progress) {
+                    if (frames[j].time > targetProgress) {
                         prev = frames[j - 1];
                         next = frames[j];
                         break;
                     }
                 }
 
-                float t = Mathf.Clamp01(Easing.Interpolate(MathUtil.PercentOfRange(progress, prev.time, next.time), options.timingFunction.Value));
+                if (isReversed) {
+                    ProcessedKeyFrame tmp = prev;
+                    prev = next;
+                    next = tmp;
+                }
+                
+                float t = Mathf.Clamp01(Easing.Interpolate(MathUtil.PercentOfRange(targetProgress, prev.time, next.time), options.timingFunction.Value));
 
                 switch (propertyId) {
                     case StylePropertyId.AnchorLeft:
@@ -195,7 +209,6 @@ namespace UIForia.Animation {
                     case StylePropertyId.BorderRight:
                     case StylePropertyId.MarginLeft:
                     case StylePropertyId.MarginRight: {
-
                         float v0 = ResolveFixedWidth(target, viewport, prev.value.IsCalculated
                             ? prev.value.Evaluate<UIFixedLength>(null)
                             : prev.value.styleProperty.AsUIFixedLength
@@ -235,7 +248,6 @@ namespace UIForia.Animation {
                     case StylePropertyId.PreferredWidth:
                     case StylePropertyId.MinWidth:
                     case StylePropertyId.MaxWidth: {
-
                         float v0 = ResolveWidthMeasurement(target, viewport, prev.value.IsCalculated
                             ? prev.value.Evaluate<UIMeasurement>(null)
                             : prev.value.styleProperty.AsUIMeasurement
@@ -273,7 +285,6 @@ namespace UIForia.Animation {
                     case StylePropertyId.TransformRotation:
                     case StylePropertyId.GridLayoutColGap:
                     case StylePropertyId.GridLayoutRowGap: {
-
                         float v0 = prev.value.IsCalculated
                             ? prev.value.Evaluate<float>(null)
                             : prev.value.styleProperty.AsFloat;
@@ -286,6 +297,54 @@ namespace UIForia.Animation {
                         break;
                     }
 
+                    case StylePropertyId.AlignmentOffsetX: {
+                        Rect viewRect = target.View.Viewport;
+                        if (target.layoutBox != null) {
+                            float v0 = MeasurementUtil.ResolveOffsetMeasurement(target.layoutBox, viewRect.width, viewRect.height, prev.value.styleProperty.AsOffsetMeasurement, target.layoutBox.size.width);
+                            float v1 = MeasurementUtil.ResolveOffsetMeasurement(target.layoutBox, viewRect.width, viewRect.height, next.value.styleProperty.AsOffsetMeasurement, target.layoutBox.size.width);
+                            target.style.SetAnimatedProperty(new StyleProperty(StylePropertyId.AlignmentOffsetX, new OffsetMeasurement(Mathf.Lerp(v0, v1, t))));
+                        }
+
+                        break;
+                    }
+
+                    case StylePropertyId.AlignmentOffsetY: {
+                        Rect viewRect = target.View.Viewport;
+                        if (target.layoutBox != null) {
+                            float v0 = MeasurementUtil.ResolveOffsetMeasurement(target.layoutBox, viewRect.width, viewRect.height, prev.value.styleProperty.AsOffsetMeasurement, target.layoutBox.size.height);
+                            float v1 = MeasurementUtil.ResolveOffsetMeasurement(target.layoutBox, viewRect.width, viewRect.height, next.value.styleProperty.AsOffsetMeasurement, target.layoutBox.size.height);
+                            target.style.SetAnimatedProperty(new StyleProperty(StylePropertyId.AlignmentOffsetY, new OffsetMeasurement(Mathf.Lerp(v0, v1, t))));
+                        }
+
+                        break;
+                    }
+
+                    case StylePropertyId.AlignmentOriginX: {
+                        Rect viewRect = target.View.Viewport;
+
+                        if (target.layoutBox != null) {
+                            float originSize = MeasurementUtil.ResolveOffsetOriginSizeX(target.layoutBox, viewRect.width, target.layoutBox.alignmentTargetX);
+                            float v0 = MeasurementUtil.ResolveOffsetMeasurement(target.layoutBox, viewRect.width, viewRect.height, prev.value.styleProperty.AsOffsetMeasurement, originSize);
+                            float v1 = MeasurementUtil.ResolveOffsetMeasurement(target.layoutBox, viewRect.width, viewRect.height, next.value.styleProperty.AsOffsetMeasurement, originSize);
+                            target.style.SetAnimatedProperty(new StyleProperty(StylePropertyId.AlignmentOriginX, new OffsetMeasurement(Mathf.Lerp(v0, v1, t))));
+                        }
+
+                        break;
+                    }
+
+                    case StylePropertyId.AlignmentOriginY: {
+                        Rect viewRect = target.View.Viewport;
+
+                        if (target.layoutBox != null) {
+                            float originSize = MeasurementUtil.ResolveOffsetOriginSizeY(target.layoutBox, viewRect.width, target.layoutBox.alignmentTargetY);
+                            float v0 = MeasurementUtil.ResolveOffsetMeasurement(target.layoutBox, viewRect.width, viewRect.height, prev.value.styleProperty.AsOffsetMeasurement, originSize);
+                            float v1 = MeasurementUtil.ResolveOffsetMeasurement(target.layoutBox, viewRect.width, viewRect.height, next.value.styleProperty.AsOffsetMeasurement, originSize);
+                            target.style.SetAnimatedProperty(new StyleProperty(StylePropertyId.AlignmentOriginY, new OffsetMeasurement(Mathf.Lerp(v0, v1, t))));
+                        }
+
+                        break;
+                    }
+
                     case StylePropertyId.BorderColor:
                     case StylePropertyId.BorderColorTop:
                     case StylePropertyId.BorderColorRight:
@@ -293,7 +352,6 @@ namespace UIForia.Animation {
                     case StylePropertyId.BorderColorLeft:
                     case StylePropertyId.BackgroundColor:
                     case StylePropertyId.TextColor: {
-
 //                        float v0 = ResolveHeightMeasurement(target, viewport, prev.value.IsCalculated
 //                            ? prev.value.Evaluate<UIMeasurement>(null)
 //                            : prev.value.styleProperty.AsUIMeasurement

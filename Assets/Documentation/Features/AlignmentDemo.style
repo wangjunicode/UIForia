@@ -1,18 +1,82 @@
 style <this> {
-   PreferredSize = 800px;
+}
+
+style stack-vertical {
+   FlexLayoutDirection = Vertical;
+   PreferredSize = 1pca, 1cnt;
+   BackgroundColor = White;
+   MarginBottom = 10px;
+   FlexLayoutCrossAxisAlignment = Stretch;
+   Padding = 20px;
+   Border = 10px;
+   BorderColor = Red;
+}
+
+style stack-horizontal {
+   FlexLayoutDirection = Horizontal;
+   PreferredSize = 1pca, 4cnt;
+   BackgroundColor = White;
+   FlexLayoutCrossAxisAlignment = Center;
 }
 
 style group1 {
     PreferredSize = 300px 100px;
     BackgroundColor = green;
-    Margin = 10px;
+    MarginRight = 20px;
+    MarginLeft = 20px;
 }
 
-style center-align {
-    AlignmentTargetX = Cell;
-    AlignmentOffset = -50%;
-    AlignmentOrigin = 50%;
-    
-    Align = Start | Center | End; // AlignmentOffset = -50% of the element width and AlignmentOrigin = 50% of the
-    Align = 25%;  
+style x-align {
+    AlignmentBehaviorX = LayoutBox;
+    AlignX = Center;
+//    run animation(left-to-right);
+//    Align = Start | Center | End; // AlignmentOffset = -50% of the element width and AlignmentOrigin = 50% of the
+//    Align = 25%;  
 } 
+
+style y-align {
+    AlignmentBehaviorY = LayoutBox;
+    AlignmentDirectionY = Start;
+
+    
+//    run animation(top-to-bottom);
+}
+
+animation left-to-right {
+
+    [options] {
+        duration = 2000;
+        timingFunction = SineEaseIn;
+    }
+    
+    [keyframes] {
+        0% { 
+            AlignX = 50%;
+        }
+        50% { 
+            AlignX = 0%;
+        }
+        100% { 
+            AlignX = 100%;
+        }
+    }
+}
+
+animation top-to-bottom {
+
+    [options] {
+        duration = 2000;
+        timingFunction = CubicEaseInOut;
+    }
+    
+    [keyframes] {
+        0% { 
+            AlignmentOriginY = 0;
+            AlignmentOffsetY = 0;
+        }
+        100% { 
+            AlignmentOriginY = 100%;
+            AlignmentOffsetY = -100%;
+        }
+    }
+}

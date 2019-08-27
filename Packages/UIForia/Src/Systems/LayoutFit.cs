@@ -1,12 +1,12 @@
 namespace UIForia.Layout {
 
-    public enum Fit {
+    public enum LayoutFit {
 
         Unset,
         None,
         Grow,
         Shrink,
-        Fit
+        Fill
 
     }
 

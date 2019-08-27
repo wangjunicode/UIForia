@@ -882,26 +882,6 @@ namespace UIForia.Layout.LayoutTypes {
                 case OffsetMeasurementUnit.ViewportHeight:
                     return view.Viewport.height * transformOffset.value;
 
-                case OffsetMeasurementUnit.AnchorWidth: {
-                    AnchorTarget anchorTarget = style.AnchorTarget;
-                    if (parent.prefWidth.IsContentBased && anchorTarget == AnchorTarget.Parent ||
-                        anchorTarget == AnchorTarget.ParentContentArea) {
-                        return 0f;
-                    }
-
-                    return ResolveAnchorWidth(transformOffset.value);
-                }
-
-                case OffsetMeasurementUnit.AnchorHeight: {
-                    AnchorTarget anchorTarget = style.AnchorTarget;
-                    if (parent.prefHeight.IsContentBased && anchorTarget == AnchorTarget.Parent ||
-                        anchorTarget == AnchorTarget.ParentContentArea) {
-                        return 0f;
-                    }
-
-                    return ResolveAnchorHeight(transformOffset.value);
-                }
-
                 case OffsetMeasurementUnit.ParentWidth:
                     if (parent == null) return 0;
                     return parent.actualWidth * transformOffset.value;

@@ -833,7 +833,7 @@ export const y = 10cah;
 style trans1 { TransformPosition = @x @y; }
 style trans2 { TransformPosition = @x; }
 style trans3 { TransformPositionX = @x; }
-style trans4 { TransformPositionY = 15ah; }
+style trans4 { TransformPositionY = 15h; }
 
         ".Trim());
 
@@ -852,7 +852,7 @@ style trans4 { TransformPositionY = 15ah; }
         Assert.AreEqual(OffsetMeasurement.Unset, styleGroup[2].groups[0].normal.style.TransformPositionY);
 
         Assert.AreEqual(OffsetMeasurement.Unset, styleGroup[3].groups[0].normal.style.TransformPositionX);
-        Assert.AreEqual(new OffsetMeasurement(15, OffsetMeasurementUnit.AnchorHeight), styleGroup[3].groups[0].normal.style.TransformPositionY);
+        Assert.AreEqual(new OffsetMeasurement(15, OffsetMeasurementUnit.ActualHeight), styleGroup[3].groups[0].normal.style.TransformPositionY);
     }
 
     [Test]

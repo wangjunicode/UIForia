@@ -17,8 +17,6 @@ namespace UIForia {
         ContentAreaHeight = UnitConstants.ContentAreaHeight,
         ViewportWidth = UnitConstants.ViewportWidth,
         ViewportHeight = UnitConstants.ViewportHeight,
-        AnchorWidth = UnitConstants.AnchorWidth,
-        AnchorHeight = UnitConstants.AnchorHeight,
         ParentWidth = UnitConstants.ParentWidth,
         ParentHeight = UnitConstants.ParentHeight,
         ParentContentAreaWidth = UnitConstants.ParentContentAreaWidth,
@@ -26,6 +24,7 @@ namespace UIForia {
         ScreenWidth = UnitConstants.ScreenWidth,
         ScreenHeight = UnitConstants.ScreenHeight,
         Percent = UnitConstants.Percent
+        
     }
 
 }

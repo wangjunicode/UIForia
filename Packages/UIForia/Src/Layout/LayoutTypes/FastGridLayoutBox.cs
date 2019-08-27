@@ -112,7 +112,7 @@ namespace UIForia.Layout.LayoutTypes {
                 float finalX = x + placement.margin.left;
                 float finalWidth = spannedTracksWidth;
 
-                Fit fit = default;
+                LayoutFit layoutFit = default;
 
                 BlockSize blockSize = new BlockSize();
                 blockSize.size = finalWidth;
@@ -133,17 +133,17 @@ namespace UIForia.Layout.LayoutTypes {
                         break;
 
                     case GridAxisAlignment.Grow:
-                        fit = Fit.Grow;
+                        layoutFit = LayoutFit.Grow;
                         break;
                     case GridAxisAlignment.Shrink:
-                        fit = Fit.Shrink;
+                        layoutFit = LayoutFit.Shrink;
                         break;
                     case GridAxisAlignment.Fit:
-                        fit = Fit.Fit;
+                        layoutFit = LayoutFit.Fill;
                         break;
                 }
 
-                child.ApplyHorizontalLayout(finalX + paddingBorderLeft, blockSize, blockSize.contentAreaSize - placement.margin.left - placement.margin.right, placement.size.prefWidth, colPosition, fit);
+                child.ApplyHorizontalLayout(finalX + paddingBorderLeft, blockSize, blockSize.contentAreaSize - placement.margin.left - placement.margin.right, placement.size.prefWidth, colPosition, layoutFit);
             }
         }
 
@@ -168,7 +168,7 @@ namespace UIForia.Layout.LayoutTypes {
                 float finalY = y + placement.margin.top;
                 float finalHeight = spannedTrackHeights;
 
-                Fit fit = default;
+                LayoutFit layoutFit = default;
                 float alignment = 0;
 
                 BlockSize blockSize = new BlockSize();
@@ -188,17 +188,17 @@ namespace UIForia.Layout.LayoutTypes {
                         break;
 
                     case GridAxisAlignment.Grow:
-                        fit = Fit.Grow;
+                        layoutFit = LayoutFit.Grow;
                         break;
                     case GridAxisAlignment.Shrink:
-                        fit = Fit.Shrink;
+                        layoutFit = LayoutFit.Shrink;
                         break;
                     case GridAxisAlignment.Fit:
-                        fit = Fit.Fit;
+                        layoutFit = LayoutFit.Fill;
                         break;
                 }
 
-                child.ApplyVerticalLayout(finalY + paddingBorderTop, blockSize, blockSize.contentAreaSize, placement.size.prefHeight, alignment, fit);
+                child.ApplyVerticalLayout(finalY + paddingBorderTop, blockSize, blockSize.contentAreaSize, placement.size.prefHeight, alignment, layoutFit);
             }
         }
 

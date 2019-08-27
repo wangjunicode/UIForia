@@ -59,8 +59,8 @@ namespace UIForia.Layout {
         public BlockSize containingBoxWidth;
         public BlockSize containingBoxHeight;
 
-        public Fit selfFitHorizontal;
-        public Fit selfFitVertical;
+        public LayoutFit selfLayoutFitHorizontal;
+        public LayoutFit selfLayoutFitVertical;
 
         public OffsetMeasurement parentAlignmentHorizontal;
         public OffsetMeasurement parentAlignmentVertical;
@@ -76,6 +76,9 @@ namespace UIForia.Layout {
         public float pivotY;
         public float scaleX;
         public float scaleY;
+        
+        public AlignmentBehavior alignmentTargetX;
+        public AlignmentBehavior alignmentTargetY;
 
         public virtual void AddChild(FastLayoutBox child) {
             child.parent = this;
@@ -175,6 +178,9 @@ namespace UIForia.Layout {
             scaleX = element.style.TransformScaleX;
             scaleY = element.style.TransformScaleY;
 
+            alignmentTargetX = element.style.AlignmentBehaviorX;
+            alignmentTargetY = element.style.AlignmentBehaviorY;
+            
             MarkForLayout();
         }
 
@@ -368,16 +374,16 @@ namespace UIForia.Layout {
             }
         }
 
-        public void ApplyHorizontalLayout(float localX, in BlockSize containingWidth, float allocatedWidth, float preferredWidth, in OffsetMeasurement alignment, Fit fit) {
+        public void ApplyHorizontalLayout(float localX, in BlockSize containingWidth, float allocatedWidth, float preferredWidth, float alignment, LayoutFit layoutFit) {
             // need to know the actual size of what im laying out in order to grow...oder?
 
             allocatedPosition.x = localX;
-            alignedPosition.x = localX;
+            alignedPosition.x = alignment;
 
             pivotX = ResolveFixedWidth(element.style.TransformPivotX);
 
-            if (selfFitHorizontal != Fit.Unset) {
-                fit = selfFitHorizontal;
+            if (selfLayoutFitHorizontal != LayoutFit.Unset) {
+                layoutFit = selfLayoutFitHorizontal;
             }
 
             Size oldSize = size;
@@ -389,26 +395,26 @@ namespace UIForia.Layout {
 
             size.width = preferredWidth;
 
-            switch (fit) {
-                case Fit.Unset:
-                case Fit.None:
+            switch (layoutFit) {
+                case LayoutFit.Unset:
+                case LayoutFit.None:
                     break;
 
-                case Fit.Grow:
+                case LayoutFit.Grow:
                     if (allocatedWidth > preferredWidth) {
                         size.width = allocatedWidth;
                     }
 
                     break;
 
-                case Fit.Shrink:
+                case LayoutFit.Shrink:
                     if (allocatedWidth < preferredWidth) {
                         size.width = allocatedWidth;
                     }
 
                     break;
 
-                case Fit.Fit:
+                case LayoutFit.Fill:
                     size.width = allocatedWidth;
                     break;
             }
@@ -464,12 +470,12 @@ namespace UIForia.Layout {
             // content size = extents of my content
         }
 
-        public void ApplyVerticalLayout(float localY, in BlockSize containingHeight, float allocatedHeight, float preferredHeight, float alignment, Fit fit) {
+        public void ApplyVerticalLayout(float localY, in BlockSize containingHeight, float allocatedHeight, float preferredHeight, float alignment, LayoutFit layoutFit) {
             allocatedPosition.y = localY;
-            alignedPosition.y = localY;
+            alignedPosition.y = alignment;
 
-            if (selfFitVertical != Fit.Unset) {
-                fit = selfFitVertical;
+            if (selfLayoutFitVertical != LayoutFit.Unset) {
+                layoutFit = selfLayoutFitVertical;
             }
 
             Size oldSize = size;
@@ -482,26 +488,26 @@ namespace UIForia.Layout {
 
             size.height = preferredHeight;
 
-            switch (fit) {
-                case Fit.Unset:
-                case Fit.None:
+            switch (layoutFit) {
+                case LayoutFit.Unset:
+                case LayoutFit.None:
                     break;
 
-                case Fit.Grow:
+                case LayoutFit.Grow:
                     if (allocatedHeight > preferredHeight) {
                         size.height = allocatedHeight;
                     }
 
                     break;
 
-                case Fit.Shrink:
+                case LayoutFit.Shrink:
                     if (allocatedHeight < preferredHeight) {
                         size.height = allocatedHeight;
                     }
 
                     break;
 
-                case Fit.Fit:
+                case LayoutFit.Fill:
                     size.height = allocatedHeight;
                     break;
             }
@@ -795,6 +801,14 @@ namespace UIForia.Layout {
                     case StylePropertyId.TransformPositionY:
                         transformPositionY = property.AsUIFixedLength;
                         break;
+                    
+                    case StylePropertyId.AlignmentBehaviorX:
+                        alignmentTargetX = property.AsAlignmentBehavior;
+                        break;
+                    
+                    case StylePropertyId.AlignmentBehaviorY:
+                        alignmentTargetY = property.AsAlignmentBehavior;
+                        break;
                 }
             }
 
@@ -839,7 +853,7 @@ namespace UIForia.Layout {
                 return boxList.ToArray();
             }
         }
-
+        
         public void GetMarginHorizontal(BlockSize blockWidth, ref OffsetRect margin) {
             switch (marginLeft.unit) {
                 case UIMeasurementUnit.Pixel:

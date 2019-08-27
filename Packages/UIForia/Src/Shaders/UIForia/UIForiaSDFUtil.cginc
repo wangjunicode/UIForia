@@ -525,7 +525,6 @@ fixed4 SDFColor(SDFData sdfData, fixed4 borderColor, fixed4 contentColor, float 
     float halfStrokeWidth = sdfData.strokeWidth * 0.5;
     
     float2 size = sdfData.size;
-    borderColor = Yellow;
     float minSize = min(size.x, size.y);
     float radius = clamp(minSize * sdfData.radius, 0, minSize);
     float2 center = ((sdfData.uv.xy - 0.5) * size);
@@ -554,9 +553,7 @@ fixed4 SDFColor(SDFData sdfData, fixed4 borderColor, fixed4 contentColor, float 
        innerColor = borderColor;
        outerColor = contentColor;
     }
-           
-   
-    
+               
    // if(sdf > 0) {
    //    contentColor = lerp(fixed4(contentColor.rgb, 0), fixed4(borderColor.rgb, 0), hasBorder);
    // }

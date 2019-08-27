@@ -96,16 +96,16 @@ namespace UIForia.Editor {
             // Alignment
             new PropertyGenerator<AlignmentDirection>(StylePropertyId.AlignmentDirectionX, AlignmentDirection.Start),
             new PropertyGenerator<AlignmentDirection>(StylePropertyId.AlignmentDirectionY, AlignmentDirection.Start),
-            new PropertyGenerator<AlignmentBehavior>(StylePropertyId.AlignmentBehaviorX, AlignmentBehavior.Layout),
-            new PropertyGenerator<AlignmentBehavior>(StylePropertyId.AlignmentBehaviorY, AlignmentBehavior.Layout),
+            new PropertyGenerator<AlignmentBehavior>(StylePropertyId.AlignmentBehaviorX, AlignmentBehavior.Default),
+            new PropertyGenerator<AlignmentBehavior>(StylePropertyId.AlignmentBehaviorY, AlignmentBehavior.Default),
             new AnimatedPropertyGenerator<OffsetMeasurement>(StylePropertyId.AlignmentOriginX, new OffsetMeasurement(0)),
             new AnimatedPropertyGenerator<OffsetMeasurement>(StylePropertyId.AlignmentOriginY, new OffsetMeasurement(0)),
             new AnimatedPropertyGenerator<OffsetMeasurement>(StylePropertyId.AlignmentOffsetX, new OffsetMeasurement(0)),
             new AnimatedPropertyGenerator<OffsetMeasurement>(StylePropertyId.AlignmentOffsetY, new OffsetMeasurement(0)),
 
             // Fit
-            new PropertyGenerator<Fit>(StylePropertyId.FitHorizontal, Fit.Unset),
-            new PropertyGenerator<Fit>(StylePropertyId.FitVertical, Fit.Unset),
+            new PropertyGenerator<LayoutFit>(StylePropertyId.FitHorizontal, LayoutFit.Unset),
+            new PropertyGenerator<LayoutFit>(StylePropertyId.FitVertical, LayoutFit.Unset),
 
             // Size
             new AnimatedPropertyGenerator<UIMeasurement>(StylePropertyId.MinWidth, new UIMeasurement(0)),

@@ -71,8 +71,8 @@ namespace UIForia.Systems {
             firstChild.GetWidth(blockWidth, ref targetSize);
             firstChild.GetHeight(targetSize.prefWidth, blockWidth, blockHeight, ref targetSize);
             
-            firstChild.ApplyHorizontalLayout(0, blockWidth, width, targetSize.prefWidth, default, Fit.Unset);
-            firstChild.ApplyVerticalLayout(0, blockHeight, height, targetSize.prefHeight, default, Fit.Unset);
+            firstChild.ApplyHorizontalLayout(0, blockWidth, width, targetSize.prefWidth, default, LayoutFit.Unset);
+            firstChild.ApplyVerticalLayout(0, blockHeight, height, targetSize.prefHeight, default, LayoutFit.Unset);
             
             // todo figure out how a view can take the size of it's contents
          

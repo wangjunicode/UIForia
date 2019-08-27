@@ -404,16 +404,16 @@ namespace UIForia.Rendering {
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.AlignmentOffsetY, value), state); }
         }
         
-        public UIForia.Layout.Fit FitHorizontal {
+        public UIForia.Layout.LayoutFit LayoutFitHorizontal {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.FitHorizontal, state).AsFit; }
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.FitHorizontal, state).AsLayoutFit; }
             [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.FitHorizontal, (int)value), state); }
         }
         
-        public UIForia.Layout.Fit FitVertical {
+        public UIForia.Layout.LayoutFit LayoutFitVertical {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.FitVertical, state).AsFit; }
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.FitVertical, state).AsLayoutFit; }
             [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.FitVertical, (int)value), state); }
         }
@@ -1340,16 +1340,16 @@ namespace UIForia.Rendering {
             set { SetProperty(new StyleProperty(StylePropertyId.AlignmentOffsetY, value)); }
         }
             
-        public UIForia.Layout.Fit FitHorizontal {
+        public UIForia.Layout.LayoutFit LayoutFitHorizontal {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return (UIForia.Layout.Fit)FindEnumProperty(StylePropertyId.FitHorizontal); }
+            get { return (UIForia.Layout.LayoutFit)FindEnumProperty(StylePropertyId.FitHorizontal); }
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.FitHorizontal, (int)value)); }
         }
             
-        public UIForia.Layout.Fit FitVertical {
+        public UIForia.Layout.LayoutFit LayoutFitVertical {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return (UIForia.Layout.Fit)FindEnumProperty(StylePropertyId.FitVertical); }
+            get { return (UIForia.Layout.LayoutFit)FindEnumProperty(StylePropertyId.FitVertical); }
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.FitVertical, (int)value)); }
         }
@@ -2394,20 +2394,20 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UIForia.Layout.Fit FitHorizontal { 
+            public UIForia.Layout.LayoutFit LayoutFitHorizontal { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.FitHorizontal, out property)) return property.AsFit;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.FitHorizontal, out property)) return property.AsLayoutFit;
                     return DefaultStyleValues_Generated.FitHorizontal;
                 }
             }
 
-            public UIForia.Layout.Fit FitVertical { 
+            public UIForia.Layout.LayoutFit LayoutFitVertical { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.FitVertical, out property)) return property.AsFit;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.FitVertical, out property)) return property.AsLayoutFit;
                     return DefaultStyleValues_Generated.FitVertical;
                 }
             }
@@ -3559,20 +3559,20 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.AlignmentOffsetY, state).AsOffsetMeasurement;
         }
         
-        public void SetFitHorizontal(in UIForia.Layout.Fit? value, StyleState state) {
+        public void SetFitHorizontal(in UIForia.Layout.LayoutFit? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.FitHorizontal, (int)value), state);
         }
 
-        public UIForia.Layout.Fit GetFitHorizontal(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.FitHorizontal, state).AsFit;
+        public UIForia.Layout.LayoutFit GetFitHorizontal(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.FitHorizontal, state).AsLayoutFit;
         }
         
-        public void SetFitVertical(in UIForia.Layout.Fit? value, StyleState state) {
+        public void SetFitVertical(in UIForia.Layout.LayoutFit? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.FitVertical, (int)value), state);
         }
 
-        public UIForia.Layout.Fit GetFitVertical(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.FitVertical, state).AsFit;
+        public UIForia.Layout.LayoutFit GetFitVertical(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.FitVertical, state).AsLayoutFit;
         }
         
         public void SetMinWidth(in UIForia.Rendering.UIMeasurement? value, StyleState state) {
@@ -4285,9 +4285,9 @@ namespace UIForia.Rendering {
 				case StylePropertyId.AlignmentOffsetY:
 					 return new StyleProperty(StylePropertyId.AlignmentOffsetY, AlignmentOffsetY);
 				case StylePropertyId.FitHorizontal:
-					 return new StyleProperty(StylePropertyId.FitHorizontal, (int)FitHorizontal);
+					 return new StyleProperty(StylePropertyId.FitHorizontal, (int)LayoutFitHorizontal);
 				case StylePropertyId.FitVertical:
-					 return new StyleProperty(StylePropertyId.FitVertical, (int)FitVertical);
+					 return new StyleProperty(StylePropertyId.FitVertical, (int)LayoutFitVertical);
 				case StylePropertyId.MinWidth:
 					 return new StyleProperty(StylePropertyId.MinWidth, MinWidth);
 				case StylePropertyId.MaxWidth:

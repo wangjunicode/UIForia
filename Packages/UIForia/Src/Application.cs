@@ -213,6 +213,9 @@ namespace UIForia {
         public Camera Camera { get; private set; }
 
         public ResourceManager ResourceManager => resourceManager;
+        
+        public float Width => Screen.width;
+        public float Height => Screen.height;
 
         // Doesn't expect to create the root
 

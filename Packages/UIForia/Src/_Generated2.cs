@@ -821,10 +821,10 @@ namespace UIForia.Bindings.StyleBindings {
         
     public class StyleBinding_Fit : StyleBinding {
 
-        public readonly Expression<UIForia.Layout.Fit> expression;
+        public readonly Expression<UIForia.Layout.LayoutFit> expression;
         public readonly StylePropertyId propertyId;
         
-        public StyleBinding_Fit(string propertyName, StylePropertyId propertyId, StyleState state, Expression<UIForia.Layout.Fit> expression)
+        public StyleBinding_Fit(string propertyName, StylePropertyId propertyId, StyleState state, Expression<UIForia.Layout.LayoutFit> expression)
             : base(propertyName, state) {
             this.propertyId = propertyId;
             this.expression = expression;
@@ -833,7 +833,7 @@ namespace UIForia.Bindings.StyleBindings {
         public override void Execute(UIElement element, ExpressionContext context) {
             if (!element.style.IsInState(state)) return;
 
-            var oldValue = element.style.propertyMap[(int)propertyId].AsFit;
+            var oldValue = element.style.propertyMap[(int)propertyId].AsLayoutFit;
             var value = expression.Evaluate(context);
             if (value != oldValue) {
                 element.style.SetProperty(new StyleProperty(propertyId, (int)value), state);
@@ -1318,7 +1318,7 @@ namespace UIForia.Compilers {
         private static readonly EnumAliasSource<UIForia.Layout.GridAxisAlignment> s_EnumSource_GridAxisAlignment = new EnumAliasSource<UIForia.Layout.GridAxisAlignment>();
         private static readonly EnumAliasSource<UIForia.Layout.AlignmentDirection> s_EnumSource_AlignmentDirection = new EnumAliasSource<UIForia.Layout.AlignmentDirection>();
         private static readonly EnumAliasSource<UIForia.Layout.AlignmentBehavior> s_EnumSource_AlignmentBehavior = new EnumAliasSource<UIForia.Layout.AlignmentBehavior>();
-        private static readonly EnumAliasSource<UIForia.Layout.Fit> s_EnumSource_Fit = new EnumAliasSource<UIForia.Layout.Fit>();
+        private static readonly EnumAliasSource<UIForia.Layout.LayoutFit> s_EnumSource_Fit = new EnumAliasSource<UIForia.Layout.LayoutFit>();
         private static readonly EnumAliasSource<UIForia.Text.FontStyle> s_EnumSource_FontStyle = new EnumAliasSource<UIForia.Text.FontStyle>();
         private static readonly EnumAliasSource<UIForia.Text.TextAlignment> s_EnumSource_TextAlignment = new EnumAliasSource<UIForia.Text.TextAlignment>();
         private static readonly EnumAliasSource<UIForia.Rendering.UnderlayType> s_EnumSource_UnderlayType = new EnumAliasSource<UIForia.Rendering.UnderlayType>();
@@ -1449,9 +1449,9 @@ case "visibility":
                 case "alignmentoffsety":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_OffsetMeasurement("AlignmentOffsetY", UIForia.Rendering.StylePropertyId.AlignmentOffsetY, targetState.state, Compile<UIForia.OffsetMeasurement>(value, null));                
                 case "fithorizontal":
-                    return new UIForia.Bindings.StyleBindings.StyleBinding_Fit("FitHorizontal", UIForia.Rendering.StylePropertyId.FitHorizontal, targetState.state, Compile<UIForia.Layout.Fit>(value, s_EnumSource_Fit));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_Fit("FitHorizontal", UIForia.Rendering.StylePropertyId.FitHorizontal, targetState.state, Compile<UIForia.Layout.LayoutFit>(value, s_EnumSource_Fit));                
                 case "fitvertical":
-                    return new UIForia.Bindings.StyleBindings.StyleBinding_Fit("FitVertical", UIForia.Rendering.StylePropertyId.FitVertical, targetState.state, Compile<UIForia.Layout.Fit>(value, s_EnumSource_Fit));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_Fit("FitVertical", UIForia.Rendering.StylePropertyId.FitVertical, targetState.state, Compile<UIForia.Layout.LayoutFit>(value, s_EnumSource_Fit));                
                 case "minwidth":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_UIMeasurement("MinWidth", UIForia.Rendering.StylePropertyId.MinWidth, targetState.state, Compile<UIForia.Rendering.UIMeasurement>(value, measurementSources));                
                 case "maxwidth":

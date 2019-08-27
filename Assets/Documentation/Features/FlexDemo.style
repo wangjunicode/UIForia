@@ -1,0 +1,169 @@
+style container {
+   PreferredSize = 800px;
+   FlexLayoutDirection = Column;
+}
+
+style constrain {
+//   BackgroundColor = yellow;
+//   BackgroundImage = url(image);
+    PreferredSize = 600px, 300px;
+    
+   FlexLayoutDirection = Vertical;
+   Overflow = Hidden;
+}
+
+style flex-demo {
+    PreferredSize = 1cnt, 1cnt;
+    FlexLayoutMainAxisAlignment = Start;
+    FlexLayoutDirection = Horizontal;
+    TextFontSize = 32;
+    TextColor = black;
+//    BackgroundColor = Green;
+    //MarginBottom = 1em;
+}
+
+style flex-demo-content {
+    FlexItemGrow = 1;
+    FlexItemShrink = 1;
+    TextColor = white;
+    TextFaceDilate = 0.4;
+    TextFontStyle = Italic;
+    TextFontSize = 14;
+    BackgroundColor = Green;
+    FlexLayoutDirection = Horizontal;
+    FlexLayoutCrossAxisAlignment = Center;
+  //  Padding = 10px;
+    PreferredSize = 300px;
+}
+
+style circle-clip {
+    BorderRadius = 50%;
+//    BorderRadiusTopRight = 20%;
+    Overflow = Hidden;
+    FlexItemGrow = 0;
+}
+
+style rot {
+    TransformRotation = 45;
+    TransformPivot = 0.5 0.5;
+}
+
+style special-text {
+    TextFontSize = 1.5em;
+    TextColor = yellow;
+}
+
+style heading {
+    FlexItemGrow = 1;
+}
+
+style horizontal {
+    FlexLayoutDirection = Horizontal;
+}
+
+style flex-start {
+    FlexLayoutMainAxisAlignment = Start;
+}
+
+style flex-end {
+    FlexLayoutMainAxisAlignment = End;
+}
+
+style flex-center {
+    FlexLayoutMainAxisAlignment = Center;
+}
+
+style flex-space-between {
+    FlexLayoutMainAxisAlignment = SpaceBetween;
+}
+
+style flex-space-around {
+    FlexLayoutMainAxisAlignment = SpaceAround;
+}
+
+style flex-grow-1 {
+    FlexItemGrow = 1;
+}
+
+style flex-grow-2 {
+    FlexItemGrow = 2;
+}
+
+style flex-item {
+    PreferredSize = 1cnt;
+    MaxWidth = 2cnt;
+    FlexItemGrow = 1;
+    Padding = 1em 0.25em;
+    BackgroundColor = red;
+   // Margin = 0 10px;
+    TextAlignment = Center;
+    FlexLayoutMainAxisAlignment = Center;
+    TextWhitespaceMode = PreserveNewLines TrimLineStart;
+}
+
+style clip-test-item {
+    PreferredSize = 300px;
+    BackgroundColor = Red;
+    MarginLeft = 20px;
+    MarginTop = 20px;
+    //BackgroundImage = url(images/backgroundimg);
+}
+
+style not-clipped {
+    ClipBehavior = Never;
+}
+
+style clip-test-more-clip {
+     PreferredSize = 100px;
+     BackgroundColor = Red;
+     BorderRadius = 50%;
+     MarginLeft = 30px;   
+     Overflow = Hidden;
+}
+
+style clip-nested {
+    PreferredSize = 100px;
+    MarginTop = 25px;
+    MarginLeft = 25px;
+    BackgroundColor = cyan;
+}
+
+style special-text {
+    TextColor = White;
+    TextFontAsset = url("Fonts/DIGITALDREAMFAT SDF");
+}
+
+style img1 {
+    PreferredSize = 100px;
+    BackgroundImage = url(icon_1);
+}
+
+style img2 {
+    PreferredSize = 100px;
+    BackgroundImage = url(icon_2);
+}
+
+style img3 {
+    PreferredSize = 100px;
+    BackgroundImage = url(icon_3);
+}
+
+style img4 {
+    PreferredSize = 100px;
+    BackgroundImage = url(icon_4);
+}
+
+style img5 {
+    PreferredSize = 100px;
+    BackgroundImage = url(icon_5);
+}
+
+style img6 {
+    PreferredSize = 100px;
+    BackgroundImage = url(icon_6);
+}
+
+style img7 {
+    PreferredSize = 100px;
+    BackgroundImage = url(icon_7);
+}

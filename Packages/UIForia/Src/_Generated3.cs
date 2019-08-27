@@ -65,14 +65,14 @@ namespace UIForia.Rendering {
 		public static readonly UIFixedLength RadialLayoutRadius = new UIFixedLength(0.5f, UIFixedUnit.Percent);
 		public const AlignmentDirection AlignmentDirectionX = UIForia.Layout.AlignmentDirection.Start;
 		public const AlignmentDirection AlignmentDirectionY = UIForia.Layout.AlignmentDirection.Start;
-		public const AlignmentBehavior AlignmentBehaviorX = UIForia.Layout.AlignmentBehavior.Layout;
-		public const AlignmentBehavior AlignmentBehaviorY = UIForia.Layout.AlignmentBehavior.Layout;
+		public const AlignmentBehavior AlignmentBehaviorX = UIForia.Layout.AlignmentBehavior.Default;
+		public const AlignmentBehavior AlignmentBehaviorY = UIForia.Layout.AlignmentBehavior.Default;
 		public static readonly OffsetMeasurement AlignmentOriginX = new OffsetMeasurement(0f, OffsetMeasurementUnit.Pixel);
 		public static readonly OffsetMeasurement AlignmentOriginY = new OffsetMeasurement(0f, OffsetMeasurementUnit.Pixel);
 		public static readonly OffsetMeasurement AlignmentOffsetX = new OffsetMeasurement(0f, OffsetMeasurementUnit.Pixel);
 		public static readonly OffsetMeasurement AlignmentOffsetY = new OffsetMeasurement(0f, OffsetMeasurementUnit.Pixel);
-		public const Fit FitHorizontal = UIForia.Layout.Fit.Unset;
-		public const Fit FitVertical = UIForia.Layout.Fit.Unset;
+		public const LayoutFit FitHorizontal = UIForia.Layout.LayoutFit.Unset;
+		public const LayoutFit FitVertical = UIForia.Layout.LayoutFit.Unset;
 		public static readonly UIMeasurement MinWidth = new UIMeasurement(0f, UIMeasurementUnit.Pixel);
 		public static readonly UIMeasurement MaxWidth = new UIMeasurement(3.402823E+38f, UIMeasurementUnit.Pixel);
 		public static readonly UIMeasurement PreferredWidth = new UIMeasurement(1f, UIMeasurementUnit.Content);
@@ -253,9 +253,9 @@ namespace UIForia.Rendering {
 				case StylePropertyId.AlignmentDirectionY:
 					 return new StyleProperty(StylePropertyId.AlignmentDirectionY, (int)UIForia.Layout.AlignmentDirection.Start);
 				case StylePropertyId.AlignmentBehaviorX:
-					 return new StyleProperty(StylePropertyId.AlignmentBehaviorX, (int)UIForia.Layout.AlignmentBehavior.Layout);
+					 return new StyleProperty(StylePropertyId.AlignmentBehaviorX, (int)UIForia.Layout.AlignmentBehavior.Default);
 				case StylePropertyId.AlignmentBehaviorY:
-					 return new StyleProperty(StylePropertyId.AlignmentBehaviorY, (int)UIForia.Layout.AlignmentBehavior.Layout);
+					 return new StyleProperty(StylePropertyId.AlignmentBehaviorY, (int)UIForia.Layout.AlignmentBehavior.Default);
 				case StylePropertyId.AlignmentOriginX:
 					 return new StyleProperty(StylePropertyId.AlignmentOriginX, new OffsetMeasurement(0f, OffsetMeasurementUnit.Pixel));
 				case StylePropertyId.AlignmentOriginY:
@@ -265,9 +265,9 @@ namespace UIForia.Rendering {
 				case StylePropertyId.AlignmentOffsetY:
 					 return new StyleProperty(StylePropertyId.AlignmentOffsetY, new OffsetMeasurement(0f, OffsetMeasurementUnit.Pixel));
 				case StylePropertyId.FitHorizontal:
-					 return new StyleProperty(StylePropertyId.FitHorizontal, (int)UIForia.Layout.Fit.Unset);
+					 return new StyleProperty(StylePropertyId.FitHorizontal, (int)UIForia.Layout.LayoutFit.Unset);
 				case StylePropertyId.FitVertical:
-					 return new StyleProperty(StylePropertyId.FitVertical, (int)UIForia.Layout.Fit.Unset);
+					 return new StyleProperty(StylePropertyId.FitVertical, (int)UIForia.Layout.LayoutFit.Unset);
 				case StylePropertyId.MinWidth:
 					 return new StyleProperty(StylePropertyId.MinWidth, new UIMeasurement(0f, UIMeasurementUnit.Pixel));
 				case StylePropertyId.MaxWidth:

@@ -264,10 +264,10 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.AlignmentOffsetX, new OffsetMeasurement(0f, OffsetMeasurementUnit.Pixel));
 				case StylePropertyId.AlignmentOffsetY:
 					 return new StyleProperty(StylePropertyId.AlignmentOffsetY, new OffsetMeasurement(0f, OffsetMeasurementUnit.Pixel));
-				case StylePropertyId.FitHorizontal:
-					 return new StyleProperty(StylePropertyId.FitHorizontal, (int)UIForia.Layout.LayoutFit.Unset);
-				case StylePropertyId.FitVertical:
-					 return new StyleProperty(StylePropertyId.FitVertical, (int)UIForia.Layout.LayoutFit.Unset);
+				case StylePropertyId.LayoutFitHorizontal:
+					 return new StyleProperty(StylePropertyId.LayoutFitHorizontal, (int)UIForia.Layout.LayoutFit.Unset);
+				case StylePropertyId.LayoutFitVertical:
+					 return new StyleProperty(StylePropertyId.LayoutFitVertical, (int)UIForia.Layout.LayoutFit.Unset);
 				case StylePropertyId.MinWidth:
 					 return new StyleProperty(StylePropertyId.MinWidth, new UIMeasurement(0f, UIMeasurementUnit.Pixel));
 				case StylePropertyId.MaxWidth:

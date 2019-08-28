@@ -154,8 +154,8 @@ namespace UIForia.Rendering {
         AlignmentBehaviorX = 2007,
         AlignmentBehaviorY = 2008,
         
-        FitHorizontal = 2009,
-        FitVertical = 2010,
+        LayoutFitHorizontal = 2009,
+        LayoutFitVertical = 2010,
 
         CornerBevelTopLeft = 3001,
         CornerBevelTopRight = 3002,

@@ -104,8 +104,8 @@ namespace UIForia.Editor {
             new AnimatedPropertyGenerator<OffsetMeasurement>(StylePropertyId.AlignmentOffsetY, new OffsetMeasurement(0)),
 
             // Fit
-            new PropertyGenerator<LayoutFit>(StylePropertyId.FitHorizontal, LayoutFit.Unset),
-            new PropertyGenerator<LayoutFit>(StylePropertyId.FitVertical, LayoutFit.Unset),
+            new PropertyGenerator<LayoutFit>(StylePropertyId.LayoutFitHorizontal, LayoutFit.Unset),
+            new PropertyGenerator<LayoutFit>(StylePropertyId.LayoutFitVertical, LayoutFit.Unset),
 
             // Size
             new AnimatedPropertyGenerator<UIMeasurement>(StylePropertyId.MinWidth, new UIMeasurement(0)),

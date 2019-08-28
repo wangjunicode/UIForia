@@ -41,8 +41,8 @@ namespace UIForia.Compilers.Style {
                 {"alignx", (targetStyle, property, context) => MapAlignmentX(targetStyle, property, context)},
                 {"aligny", (targetStyle, property, context) => MapAlignmentY(targetStyle, property, context)},
 
-                {"fithorizontal", (targetStyle, property, context) => targetStyle.LayoutFitHorizontal = MapEnum<LayoutFit>(property.children[0], context)},
-                {"fitvertical", (targetStyle, property, context) => targetStyle.LayoutFitVertical = MapEnum<LayoutFit>(property.children[0], context)},
+                {"layoutfithorizontal", (targetStyle, property, context) => targetStyle.LayoutFitHorizontal = MapEnum<LayoutFit>(property.children[0], context)},
+                {"layoutfitvertical", (targetStyle, property, context) => targetStyle.LayoutFitVertical = MapEnum<LayoutFit>(property.children[0], context)},
 
                 // Background
                 {"backgroundcolor", (targetStyle, property, context) => targetStyle.BackgroundColor = MapColor(property, context)},

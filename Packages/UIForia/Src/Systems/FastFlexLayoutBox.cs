@@ -1,3 +1,4 @@
+using System;
 using System.Diagnostics;
 using UIForia.Layout;
 using UIForia.Rendering;
@@ -331,43 +332,37 @@ namespace UIForia.Systems {
                     layoutFit = LayoutFit.Shrink;
                 }
 
-                child.ApplyHorizontalLayout(item.mainAxisStart, blockWidth, item.outputWidth, item.size.prefWidth, item.mainAxisStart, layoutFit);
-
+                child.ApplyHorizontalLayout(item.mainAxisStart, blockWidth, item.outputWidth, item.size.prefWidth, 0, layoutFit);
                 child.GetHeight(child.size.width, blockWidth, blockHeight, ref item.size);
                 child.GetMarginVertical(blockHeight, ref item.margin);
                 item.outputHeight = item.size.prefHeight;
-                
-                if (item.size.prefHeight > track.crossSize) {
-                    track.crossSize = item.size.prefHeight;
-                }
             }
 
             float axisOffset = paddingBox.top + borderBox.top;
 
-
-            track.crossSize = Mathf.Max(size.height - paddingBox.top - paddingBox.bottom - borderBox.top - borderBox.bottom, track.crossSize);
+            track.crossSize = size.height - paddingBox.top - paddingBox.bottom - borderBox.top - borderBox.bottom;
 
             for (int i = 0; i < itemList.size; i++) {
                 ref Item item = ref items[i];
                 LayoutFit verticalLayoutFit = LayoutFit.None;
-                float verticalPosition = 0;
+                float verticalAlignment = 0;
                 switch (crossAxisAlignment) {
                     case CrossAxisAlignment.Unset:
                     case CrossAxisAlignment.Start:
-                        verticalPosition = item.margin.top;
+                        verticalAlignment = 0;
                         break;
                     case CrossAxisAlignment.Center:
-                        verticalPosition = (track.crossSize * 0.5f) - (item.outputHeight * 0.5f) + item.margin.top;
+                        verticalAlignment = 0.5f;
                         break;
                     case CrossAxisAlignment.End:
-                        verticalPosition = track.crossSize - item.outputHeight + item.margin.top;
+                        verticalAlignment = 1f;
                         break;
                     case CrossAxisAlignment.Stretch:
                         verticalLayoutFit = LayoutFit.Grow;
                         break;
                 }
 
-                item.layoutBox.ApplyVerticalLayout(axisOffset + item.margin.top, blockHeight, track.crossSize - item.margin.top - item.margin.bottom, item.size.prefHeight, axisOffset + verticalPosition, verticalLayoutFit);
+                item.layoutBox.ApplyVerticalLayout(axisOffset + item.margin.top, blockHeight, track.crossSize - item.margin.top - item.margin.bottom, item.size.prefHeight, verticalAlignment, verticalLayoutFit);
                 item.outputHeight = item.layoutBox.size.height;
             }
 
@@ -377,8 +372,7 @@ namespace UIForia.Systems {
 
         private void PerformLayoutVertical() {
             Item[] items = itemList.array;
-
-
+            
             BlockSize blockWidth = containingBoxWidth;
             BlockSize blockHeight = containingBoxHeight;
             AdjustBlockSizes(ref blockWidth, ref blockHeight);
@@ -397,15 +391,11 @@ namespace UIForia.Systems {
                 child.GetWidth(blockWidth, ref item.size);
                 child.GetMarginHorizontal(blockWidth, ref item.margin);
                 item.outputWidth = item.size.prefWidth;
-                float totalWidth = item.margin.left + item.size.prefWidth + item.margin.right;
-                if (track.crossSize < totalWidth) {
-                    track.crossSize = totalWidth;
-                }
             }
 
             track.startItemIndex = 0;
             track.endItemIndex = itemList.size;
-            track.crossSize = Mathf.Max(size.width - paddingBox.left - paddingBox.right - borderBox.left - borderBox.right, track.crossSize);
+            track.crossSize = size.width - paddingBox.left - paddingBox.right - borderBox.left - borderBox.right;
 
             for (int i = 0; i < itemList.size; i++) {
                 ref Item item = ref items[i];
@@ -414,27 +404,26 @@ namespace UIForia.Systems {
                 child.GetMarginVertical(blockHeight, ref item.margin);
                 item.outputHeight = item.size.prefHeight;
                 track.mainSize += item.margin.top + item.size.prefHeight + item.margin.bottom;
-                float horizontalPosition = default;
+                float horizontalAlignment = 0;
                 LayoutFit horizontalLayoutFit = LayoutFit.None;
 
                 switch (crossAxisAlignment) {
                     case CrossAxisAlignment.Unset:
                     case CrossAxisAlignment.Start:
-                        horizontalPosition = item.margin.left;
+                        horizontalAlignment = 0f;
                         break;
                     case CrossAxisAlignment.Center:
-                        horizontalPosition = (track.crossSize * 0.5f) - ((item.outputWidth * 0.5f) + (item.margin.left + item.margin.right));
+                        horizontalAlignment = 0.5f;
                         break;
                     case CrossAxisAlignment.End:
-                        horizontalPosition = track.crossSize - item.outputWidth - item.margin.right;
+                        horizontalAlignment = 1f;
                         break;
                     case CrossAxisAlignment.Stretch:
-                        horizontalPosition = item.margin.left;
                         horizontalLayoutFit = LayoutFit.Fill;
                         break;
                 }
 
-                child.ApplyHorizontalLayout(axisOffset + item.margin.left, blockWidth, track.crossSize - item.margin.left - item.margin.right, item.size.prefWidth, axisOffset + horizontalPosition, horizontalLayoutFit);
+                child.ApplyHorizontalLayout(axisOffset + item.margin.left, blockWidth, track.crossSize - item.margin.left - item.margin.right, item.size.prefWidth, horizontalAlignment, horizontalLayoutFit);
             }
 
             track.remainingSpace = size.height - paddingBox.top - paddingBox.bottom - borderBox.top - borderBox.bottom - track.mainSize;
@@ -459,7 +448,7 @@ namespace UIForia.Systems {
                     layoutFit = LayoutFit.Shrink;
                 }
 
-                item.layoutBox.ApplyVerticalLayout(item.mainAxisStart, blockHeight, item.outputHeight, item.size.prefHeight, default, layoutFit);
+                item.layoutBox.ApplyVerticalLayout(item.mainAxisStart, blockHeight, item.outputHeight, item.size.prefHeight, 0, layoutFit);
             }
 
             contentSize.width = 0;

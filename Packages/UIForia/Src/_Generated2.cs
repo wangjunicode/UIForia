@@ -1449,9 +1449,9 @@ case "visibility":
                 case "alignmentoffsety":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_OffsetMeasurement("AlignmentOffsetY", UIForia.Rendering.StylePropertyId.AlignmentOffsetY, targetState.state, Compile<UIForia.OffsetMeasurement>(value, null));                
                 case "fithorizontal":
-                    return new UIForia.Bindings.StyleBindings.StyleBinding_Fit("FitHorizontal", UIForia.Rendering.StylePropertyId.FitHorizontal, targetState.state, Compile<UIForia.Layout.LayoutFit>(value, s_EnumSource_Fit));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_Fit("FitHorizontal", UIForia.Rendering.StylePropertyId.LayoutFitHorizontal, targetState.state, Compile<UIForia.Layout.LayoutFit>(value, s_EnumSource_Fit));                
                 case "fitvertical":
-                    return new UIForia.Bindings.StyleBindings.StyleBinding_Fit("FitVertical", UIForia.Rendering.StylePropertyId.FitVertical, targetState.state, Compile<UIForia.Layout.LayoutFit>(value, s_EnumSource_Fit));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_Fit("FitVertical", UIForia.Rendering.StylePropertyId.LayoutFitVertical, targetState.state, Compile<UIForia.Layout.LayoutFit>(value, s_EnumSource_Fit));                
                 case "minwidth":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_UIMeasurement("MinWidth", UIForia.Rendering.StylePropertyId.MinWidth, targetState.state, Compile<UIForia.Rendering.UIMeasurement>(value, measurementSources));                
                 case "maxwidth":

@@ -1,35 +1,100 @@
 style <this> {
+   FlexLayoutDirection = Horizontal;
+   BackgroundColor = rgb(20, 0, 20);
+   PreferredSize = 1pca;
 }
 
+style container {
+    Margin = 10px;
+}
+
+style color1 { BackgroundColor = rgb(20, 100, 20); }  
+style color2 { BackgroundColor = rgb(20, 200, 120); }  
+style color3 { BackgroundColor = rgb(190, 200, 20); }  
+style color4 { BackgroundColor = rgb(20, 140, 120); }  
+
 style stack-vertical {
-   FlexLayoutDirection = Vertical;
-   PreferredSize = 1pca, 1cnt;
-   BackgroundColor = White;
-   MarginBottom = 10px;
-   FlexLayoutCrossAxisAlignment = Stretch;
-   Padding = 20px;
-   Border = 10px;
-   BorderColor = Red;
+    FlexLayoutDirection = Vertical;
+    FlexLayoutCrossAxisAlignment = Stretch;
+    BackgroundColor = white;
+    PreferredSize = 150px 500px;
+    Padding = 20px;
+    MarginBottom = 10px;
+//   Border = 0 10px 0 0;
+//   BorderColor = rgb(200, 90, 0);
 }
 
 style stack-horizontal {
-   FlexLayoutDirection = Horizontal;
-   PreferredSize = 1pca, 4cnt;
-   BackgroundColor = White;
-   FlexLayoutCrossAxisAlignment = Center;
+    FlexLayoutDirection = Horizontal;
+    FlexLayoutCrossAxisAlignment = Center;
+    BackgroundColor = white;
+    PreferredSize = 500px 150px;
+}
+
+
+style fit {
+    FlexLayoutDirection = Horizontal;
+    FlexLayoutCrossAxisAlignment = Center;
+    BackgroundColor = white;
+    PreferredSize = 500px;
+}
+
+style fit-vertical {
+    FlexLayoutCrossAxisAlignment = End;
+    BackgroundColor = white;
+    PreferredSize = 500px;
+}
+
+style item-fill {
+    LayoutFitHorizontal = Fill;
+}
+
+style item-shrink {
+    PreferredHeight = 1000px;
+    FlexItemShrink = 1;
+}
+
+style item-grow {
+    PreferredWidth = 100px;
+    LayoutFitHorizontal = Grow;
+}
+
+style item-dont-grow {
+    PreferredWidth = 120px;
+    LayoutFitHorizontal = Grow;
+}
+
+style h-item-fill {
+    LayoutFitVertical = Fill;
+}
+
+style h-item-shrink {
+    PreferredHeight = 100px;
+    LayoutFitVertical = Shrink;
+}
+
+style h-item-grow {
+    PreferredHeight = 100px;
+    LayoutFitVertical = Grow;
+}
+
+style h-item-dont-grow {
+    PreferredHeight = 120px;
+    LayoutFitVertical = Grow;
 }
 
 style group1 {
-    PreferredSize = 300px 100px;
-    BackgroundColor = green;
-    MarginRight = 20px;
-    MarginLeft = 20px;
+    PreferredSize = 100px 100px;
+    BackgroundColor = rgba(0, 120, 0, 200);
+    Margin = 5px 10px 10px 15px;
+//    Border = 5x;
+//    BorderColor = black;
 }
 
 style x-align {
     AlignmentBehaviorX = LayoutBox;
-    AlignX = Center;
-//    run animation(left-to-right);
+//    AlignX = Center;
+    run animation(left-to-right);
 //    Align = Start | Center | End; // AlignmentOffset = -50% of the element width and AlignmentOrigin = 50% of the
 //    Align = 25%;  
 } 
@@ -37,9 +102,7 @@ style x-align {
 style y-align {
     AlignmentBehaviorY = LayoutBox;
     AlignmentDirectionY = Start;
-
-    
-//    run animation(top-to-bottom);
+    run animation(top-to-bottom);
 }
 
 animation left-to-right {
@@ -48,17 +111,11 @@ animation left-to-right {
         duration = 2000;
         timingFunction = SineEaseIn;
     }
-    
+
     [keyframes] {
-        0% { 
-            AlignX = 50%;
-        }
-        50% { 
-            AlignX = 0%;
-        }
-        100% { 
-            AlignX = 100%;
-        }
+        0% { AlignX = 50%; }
+        50% { AlignX = 0%; }
+        100% { AlignX = 100%; }
     }
 }
 
@@ -68,7 +125,7 @@ animation top-to-bottom {
         duration = 2000;
         timingFunction = CubicEaseInOut;
     }
-    
+
     [keyframes] {
         0% { 
             AlignmentOriginY = 0;

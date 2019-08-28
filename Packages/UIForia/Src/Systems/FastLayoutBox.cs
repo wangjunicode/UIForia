@@ -181,6 +181,9 @@ namespace UIForia.Layout {
             alignmentTargetX = element.style.AlignmentBehaviorX;
             alignmentTargetY = element.style.AlignmentBehaviorY;
             
+            selfLayoutFitHorizontal = element.style.LayoutFitHorizontal;
+            selfLayoutFitVertical = element.style.LayoutFitVertical;
+            
             MarkForLayout();
         }
 
@@ -375,10 +378,8 @@ namespace UIForia.Layout {
         }
 
         public void ApplyHorizontalLayout(float localX, in BlockSize containingWidth, float allocatedWidth, float preferredWidth, float alignment, LayoutFit layoutFit) {
-            // need to know the actual size of what im laying out in order to grow...oder?
 
             allocatedPosition.x = localX;
-            alignedPosition.x = alignment;
 
             pivotX = ResolveFixedWidth(element.style.TransformPivotX);
 
@@ -422,39 +423,15 @@ namespace UIForia.Layout {
             allocatedSize.width = allocatedWidth;
             containingBoxWidth = containingWidth;
 
+            float originBase = localX;
+            float originOffset = allocatedWidth * alignment;
+            float offset = size.width * -alignment;
+
+            alignedPosition.x = originBase + originOffset + offset;
+
             ref SizeSet sizeSet = ref owner.sizeSetList.array[traversalIndex];
             sizeSet.size = size;
             sizeSet.allocatedSize = allocatedSize;
-
-//            if (alignmentBehavior == AlignmentBehavior.Cell) {
-//                parentAlignmentHorizontal.value = element.style.AlignmentOffsetX;
-//                parentAlignmentHorizontal.origin = element.style.AlignmentOriginX;
-//            }
-//            else {
-//            }
-            parentAlignmentHorizontal = alignment;
-            //
-            // switch (parentAlignmentHorizontal.target) {
-            //     case AlignmentTarget.AllocatedBox:
-            //         alignedPosition.x = localX + ResolveFixedSize(allocatedWidth, parentAlignmentHorizontal.value) - (size.width * parentAlignmentHorizontal.origin);
-            //         break;
-            //
-            //     case AlignmentTarget.Parent:
-            //         alignedPosition.x = localX + ResolveFixedSize(parent.size.width, parentAlignmentHorizontal.value) - (size.width * parentAlignmentHorizontal.origin);
-            //         break;
-            //
-            //     case AlignmentTarget.ParentContentArea:
-            //         alignedPosition.x = localX + ResolveFixedSize(parent.size.width - parent.paddingBox.top - parent.paddingBox.bottom, parentAlignmentHorizontal.value) - (size.width * parentAlignmentHorizontal.origin);
-            //         break;
-            //
-            //     case AlignmentTarget.View:
-            //         alignedPosition.x = localX + ResolveFixedSize(element.View.Viewport.width - parent.paddingBox.top - parent.paddingBox.bottom, parentAlignmentHorizontal.value) - (size.width * parentAlignmentHorizontal.origin);
-            //         break;
-            //
-            //     case AlignmentTarget.Screen:
-            //         alignedPosition.x = localX + ResolveFixedSize(Screen.width - parent.paddingBox.top - parent.paddingBox.bottom, parentAlignmentHorizontal.value) - (size.width * parentAlignmentHorizontal.origin);
-            //         break;
-            // }
 
             ref PositionSet positionSet = ref owner.positionSetList.array[traversalIndex];
             positionSet.allocatedPosition = allocatedPosition;
@@ -472,7 +449,6 @@ namespace UIForia.Layout {
 
         public void ApplyVerticalLayout(float localY, in BlockSize containingHeight, float allocatedHeight, float preferredHeight, float alignment, LayoutFit layoutFit) {
             allocatedPosition.y = localY;
-            alignedPosition.y = alignment;
 
             if (selfLayoutFitVertical != LayoutFit.Unset) {
                 layoutFit = selfLayoutFitVertical;
@@ -512,33 +488,16 @@ namespace UIForia.Layout {
                     break;
             }
 
+            // alignment code here
+
+            float originBase = localY;
+            float originOffset = allocatedHeight * alignment;
+            float offset = size.height * -alignment;
+            
+            alignedPosition.y = originBase + originOffset + offset;
+
             allocatedSize.height = allocatedHeight;
             containingBoxHeight = containingHeight;
-            
-            parentAlignmentVertical = alignment;
-            //
-            // switch (parentAlignmentVertical.target) {
-            //     case AlignmentTarget.AllocatedBox:
-            //         alignedPosition.y = localY + ResolveFixedSize(allocatedHeight, parentAlignmentVertical.value) - (size.height * parentAlignmentVertical.origin);
-            //         break;
-            //
-            //     // todo -- do the following cases need to be offset again by margin size?
-            //     case AlignmentTarget.Parent:
-            //         alignedPosition.y = localY + ResolveFixedSize(parent.size.height, parentAlignmentVertical.value) - (size.height * parentAlignmentVertical.origin);
-            //         break;
-            //
-            //     case AlignmentTarget.ParentContentArea:
-            //         alignedPosition.y = localY + ResolveFixedSize(parent.size.height - parent.paddingBox.top - parent.paddingBox.bottom, parentAlignmentVertical.value) - (size.height * parentAlignmentVertical.origin);
-            //         break;
-            //
-            //     case AlignmentTarget.View:
-            //         alignedPosition.y = localY + ResolveFixedSize(element.View.Viewport.height - parent.paddingBox.top - parent.paddingBox.bottom, parentAlignmentVertical.value) - (size.height * parentAlignmentVertical.origin);
-            //         break;
-            //
-            //     case AlignmentTarget.Screen:
-            //         alignedPosition.y = localY + ResolveFixedSize(Screen.height - parent.paddingBox.top - parent.paddingBox.bottom, parentAlignmentVertical.value) - (size.height * parentAlignmentVertical.origin);
-            //         break;
-            // }
 
             ref SizeSet sizeSet = ref owner.sizeSetList.array[traversalIndex];
             sizeSet.size = size;
@@ -809,6 +768,12 @@ namespace UIForia.Layout {
                     case StylePropertyId.AlignmentBehaviorY:
                         alignmentTargetY = property.AsAlignmentBehavior;
                         break;
+                    case StylePropertyId.LayoutFitHorizontal:
+                        selfLayoutFitHorizontal = property.AsLayoutFit;
+                        break;
+                    case StylePropertyId.LayoutFitVertical:
+                        selfLayoutFitVertical = property.AsLayoutFit;
+                        break;
                 }
             }
 
@@ -890,6 +855,9 @@ namespace UIForia.Layout {
                     margin.right = blockWidth.size * marginRight.value;
                     break;
             }
+
+            margin.left = Math.Max(margin.left, 0);
+            margin.right = Math.Max(margin.right, 0);
         }
 
         public void GetMarginVertical(BlockSize blockHeight, ref OffsetRect margin) {
@@ -928,6 +896,9 @@ namespace UIForia.Layout {
                     margin.bottom = blockHeight.size * marginBottom.value;
                     break;
             }
+
+            margin.top = Math.Max(margin.top, 0);
+            margin.bottom = Math.Max(margin.bottom, 0);
         }
 
         public void Replace(FastLayoutBox box) {

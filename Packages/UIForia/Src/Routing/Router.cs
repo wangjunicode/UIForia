@@ -257,7 +257,7 @@ namespace UIForia.Routing {
                 EnterRoute(default);
             }
 
-            tickElapsed += Time.deltaTime;
+            tickElapsed += Time.unscaledDeltaTime;
         }
 
         // todo if goto is called during an active transition the old route will not be disabled leaving two routes active at the same time

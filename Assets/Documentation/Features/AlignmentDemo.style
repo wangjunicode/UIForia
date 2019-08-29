@@ -1,11 +1,20 @@
 style <this> {
-   FlexLayoutDirection = Horizontal;
-   BackgroundColor = rgb(20, 0, 20);
-   PreferredSize = 1pca;
+    FlexLayoutDirection = Horizontal;
+    BackgroundColor = rgb(20, 0, 20);
+    PreferredSize = 1pca;
+//    FlexLayoutWrap = Wrap;
 }
 
 style container {
-    Margin = 10px;
+    Margin = 0 10px 0 10px;
+    // LayoutFitVertical = Fill;
+}
+
+style content-size-box {
+    PreferredSize = 800px 1cnt;
+    FlexLayoutDirection = Horizontal;
+    BackgroundColor = grey;
+    FlexLayoutWrap = Wrap;
 }
 
 style color1 { BackgroundColor = rgb(20, 100, 20); }  
@@ -31,6 +40,9 @@ style stack-horizontal {
     PreferredSize = 500px 150px;
 }
 
+style g1 {
+    FlexItemGrow = 1;
+}
 
 style fit {
     FlexLayoutDirection = Horizontal;
@@ -43,6 +55,7 @@ style fit-vertical {
     FlexLayoutCrossAxisAlignment = End;
     BackgroundColor = white;
     PreferredSize = 500px;
+    MarginBottom = 10px;
 }
 
 style item-fill {
@@ -89,6 +102,13 @@ style group1 {
     Margin = 5px 10px 10px 15px;
 //    Border = 5x;
 //    BorderColor = black;
+}
+
+style group2 {
+    PreferredSize = 100px;
+    BackgroundColor = rgb(77, 101, 20);
+    Margin = 5px;
+    
 }
 
 style x-align {

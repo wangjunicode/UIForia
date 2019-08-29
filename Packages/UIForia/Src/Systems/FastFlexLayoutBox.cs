@@ -11,7 +11,6 @@ namespace UIForia.Systems {
     public class FastFlexLayoutBox : FastLayoutBox {
 
         private StructList<Item> itemList;
-        private StructList<Track> trackList;
         private LayoutDirection direction;
         private MainAxisAlignment mainAxisAlignment;
         private CrossAxisAlignment crossAxisAlignment;
@@ -25,16 +24,14 @@ namespace UIForia.Systems {
 
         protected override void PerformLayout() {
             if (firstChild == null) {
-                contentSize.width = 0;
-                contentSize.height = 0;
+                contentSize = default;
                 return;
             }
 
             if (direction == LayoutDirection.Horizontal) {
-                PerformLayoutHorizontal();
-            }
-            else {
-                PerformLayoutVertical();
+                contentSize = PerformLayoutHorizontal(false);
+            } else {
+                PerformLayoutVertical(false);
             }
 
             for (int i = 0; i < itemList.size; i++) {
@@ -47,7 +44,9 @@ namespace UIForia.Systems {
             // just get size for all children,
             // add them up.
             // return it
-            if (firstChild == null) return 0;
+            if (firstChild == null) {
+                return 0;
+            }
 
             if (direction == LayoutDirection.Horizontal) {
                 return ComputeHorizontalContentWidth(blockWidth);
@@ -90,58 +89,14 @@ namespace UIForia.Systems {
             return retn;
         }
 
-        private float ComputeHorizontalContentHeight(float width, BlockSize blockWidth, BlockSize blockHeight) {
-            Item[] items = itemList.array;
-            Track track = default;
-
-            int growPieces = 0;
-            int shrinkPieces = 0;
-
-            width -= paddingBox.left - paddingBox.right - borderBox.right - borderBox.left;
-
-            AdjustBlockSizes(ref blockWidth, ref blockWidth);
-
-            for (int i = 0; i < itemList.size; i++) {
-                ref Item item = ref items[i];
-                FastLayoutBox child = item.layoutBox;
-                child.GetWidth(blockWidth, ref item.size);
-                child.GetMarginHorizontal(blockWidth, ref item.margin);
-                item.outputWidth = item.size.prefWidth;
-                growPieces += item.growFactor;
-                shrinkPieces += item.shrinkFactor;
-                track.mainSize += item.size.prefWidth + item.margin.left + item.margin.right;
-            }
-
-            track.remainingSpace = width - track.mainSize;
-
-            if (growPieces > 0 && track.remainingSpace > 0) {
-                GrowWidth(ref track, growPieces);
-            }
-            else if (shrinkPieces > 0 && track.remainingSpace < 0) {
-                ShrinkWidth(ref track, shrinkPieces);
-            }
-
-            float retn = 0;
-
-            // do i need to account for children growing on width and take their actual sizes? probably :(
-
-            for (int i = 0; i < itemList.size; i++) {
-                ref Item item = ref items[i];
-                FastLayoutBox child = item.layoutBox;
-                child.GetHeight(item.outputWidth, blockWidth, blockHeight, ref item.size);
-                child.GetMarginVertical(blockWidth, ref item.margin);
-                float childHeight = item.size.prefHeight + item.margin.top + item.margin.bottom;
-
-                if (childHeight > retn) {
-                    retn = childHeight;
-                }
-            }
-
-            return retn;
+        private float ComputeHorizontalContentHeight(float contentAreaWidth, BlockSize blockWidth, BlockSize blockHeight) {
+            return PerformLayoutHorizontal(true).height;
         }
 
         public override float ComputeContentHeight(float width, BlockSize blockWidth, BlockSize blockHeight) {
-            if (firstChild == null) return 0;
+            if (firstChild == null) {
+                return 0;
+            }
 
             if (direction == LayoutDirection.Horizontal) {
                 return ComputeHorizontalContentHeight(width, blockWidth, blockHeight);
@@ -167,7 +122,6 @@ namespace UIForia.Systems {
             }
 
             crossSize = Mathf.Max(width - paddingBox.left - paddingBox.right - borderBox.left - borderBox.right, crossSize);
-
 
             float retn = 0;
             for (int i = 0; i < itemList.size; i++) {
@@ -195,18 +149,20 @@ namespace UIForia.Systems {
 
                 return min;
             }
-            else {
-                // intrinsic min for vertical direction is the max child intrinsic width
-                float max = 0;
 
-                while (child != null) {
-                    float childMin = child.GetIntrinsicMinWidth();
-                    if (childMin > max) max = childMin;
-                    child = child.nextSibling;
+            // intrinsic min for vertical direction is the max child intrinsic width
+            float max = 0;
+
+            while (child != null) {
+                float childMin = child.GetIntrinsicMinWidth();
+                if (childMin > max) {
+                    max = childMin;
                 }
 
-                return max;
+                child = child.nextSibling;
             }
+
+            return max;
         }
 
         public override float GetIntrinsicMinHeight() {
@@ -230,18 +186,20 @@ namespace UIForia.Systems {
                 retn += ResolveFixedSize(contentWidth, element.style.PaddingRight);
                 retn += ResolveFixedSize(contentWidth, element.style.BorderLeft);
                 retn += ResolveFixedSize(contentWidth, element.style.BorderRight);
-//                retn += ResolveFixedWidth(contentWidth, element.style.MarginLeft);
-//                retn += ResolveFixedWidth(contentWidth, element.style.MarginRight);
+                //                retn += ResolveFixedWidth(contentWidth, element.style.MarginLeft);
+                //                retn += ResolveFixedWidth(contentWidth, element.style.MarginRight);
 
                 return retn;
-            }
-            else {
+            } else {
                 // intrinsic max for vertical direction is the max child intrinsic width
                 float retn = 0;
 
                 while (child != null) {
                     float childMax = child.GetIntrinsicPreferredWidth(); //(element.View.Viewport.width);
-                    if (childMax > retn) retn = childMax;
+                    if (childMax > retn) {
+                        retn = childMax;
+                    }
+
                     child = child.nextSibling;
                 }
 
@@ -259,31 +217,29 @@ namespace UIForia.Systems {
             throw new System.NotImplementedException();
         }
 
-        private void PerformLayoutHorizontalWrap() {
-            trackList = trackList ?? new StructList<Track>(4); // todo -- see if tracks can be stack alloced or reused instead
-        }
-
         private void AdjustBlockSizes(ref BlockSize blockWidth, ref BlockSize blockHeight) {
             if (prefWidth.unit != UIMeasurementUnit.Content) {
                 blockWidth.size = size.width;
                 blockWidth.contentAreaSize = size.width - paddingBox.left - paddingBox.right - borderBox.left - borderBox.right;
-            }
-            else {
+            } else {
                 blockWidth.contentAreaSize -= (paddingBox.left + paddingBox.right + borderBox.left + borderBox.right);
-                if (blockWidth.contentAreaSize < 0) blockWidth.contentAreaSize = 0;
+                if (blockWidth.contentAreaSize < 0) {
+                    blockWidth.contentAreaSize = 0;
+                }
             }
 
             if (prefHeight.unit != UIMeasurementUnit.Content) {
                 blockHeight.size = size.height;
                 blockHeight.contentAreaSize = size.height - paddingBox.top - paddingBox.bottom - borderBox.top - borderBox.bottom;
-            }
-            else {
+            } else {
                 blockHeight.contentAreaSize -= (paddingBox.top + paddingBox.bottom + borderBox.top + borderBox.bottom);
-                if (blockHeight.contentAreaSize < 0) blockHeight.contentAreaSize = 0;
+                if (blockHeight.contentAreaSize < 0) {
+                    blockHeight.contentAreaSize = 0;
+                }
             }
         }
 
-        private void PerformLayoutHorizontal() {
+        private Size PerformLayoutHorizontal(bool isDryRun) {
             Item[] items = itemList.array;
 
             BlockSize blockWidth = containingBoxWidth;
@@ -294,85 +250,70 @@ namespace UIForia.Systems {
             track.startItemIndex = 0;
             track.endItemIndex = itemList.size;
 
-            int growPieces = 0;
-            int shrinkPieces = 0;
+            float totalContentHeight = 0;
 
+            Size retn = default;
+            
+            bool applyWrapping = element.style.FlexLayoutWrap == LayoutWrap.Wrap;
+            float contentAreaWidth = size.width - paddingBox.left - paddingBox.right - borderBox.left - borderBox.right;
+            float largestTrackWidth = 0;
+            
             for (int i = 0; i < itemList.size; i++) {
                 ref Item item = ref items[i];
                 FastLayoutBox child = item.layoutBox;
                 child.GetWidth(blockWidth, ref item.size);
                 child.GetMarginHorizontal(blockWidth, ref item.margin);
                 item.outputWidth = item.size.prefWidth;
-                growPieces += item.growFactor;
-                shrinkPieces += item.shrinkFactor;
-                track.mainSize += item.size.prefWidth + item.margin.left + item.margin.right;
-            }
-
-            track.remainingSpace = size.width - paddingBox.left - paddingBox.right - borderBox.right - borderBox.left - track.mainSize;
-
-            if (track.remainingSpace > 0) {
-                GrowWidth(ref track, growPieces);
-            }
-            else if (track.remainingSpace < 0) {
-                ShrinkWidth(ref track, shrinkPieces);
-            }
-
-            ApplyMainAxisHorizontalPositioning(track, paddingBox.left + borderBox.left);
-
-            for (int i = 0; i < itemList.size; i++) {
-                ref Item item = ref items[i];
-                FastLayoutBox child = item.layoutBox;
-
-                LayoutFit layoutFit = LayoutFit.Unset;
-
-                if (item.outputWidth > item.size.prefWidth && item.growFactor > 0) {
-                    layoutFit = LayoutFit.Grow;
+                track.growPieces += item.growFactor;
+                track.shrinkPieces += item.shrinkFactor;
+                float totalItemWidth = item.size.prefWidth + item.margin.left + item.margin.right;
+                if (applyWrapping) {
+                    track.endItemIndex = i + 1;
+                    if (totalItemWidth + track.mainSize >= contentAreaWidth) {
+                        // break track case
+                        if (track.startItemIndex == i) {
+                            // single item track
+                            throw new NotImplementedException();
+                        } else {
+                            // multi item track
+                            track.endItemIndex -= 1;
+                            totalContentHeight += LayoutTrackHorizontal(totalContentHeight, blockWidth, blockHeight, track, isDryRun, applyWrapping);
+                            track = default;
+                            track.startItemIndex = i;
+                            track.endItemIndex = i + 1;
+                            track.mainSize += totalItemWidth;
+                            track.remainingSpace = contentAreaWidth - track.mainSize;
+                        }
+                    } else {
+                        track.mainSize += totalItemWidth;
+                        track.maxItemHeight = Mathf.Max(track.maxItemHeight, item.outputHeight);
+                        track.remainingSpace = contentAreaWidth - track.mainSize;
+                    }
+                } else {
+                    track.mainSize += totalItemWidth;
+                    track.remainingSpace = contentAreaWidth - track.mainSize;
                 }
-                else if (item.outputWidth < item.size.prefWidth && item.shrinkFactor > 0) {
-                    layoutFit = LayoutFit.Shrink;
-                }
-
-                child.ApplyHorizontalLayout(item.mainAxisStart, blockWidth, item.outputWidth, item.size.prefWidth, 0, layoutFit);
-                child.GetHeight(child.size.width, blockWidth, blockHeight, ref item.size);
-                child.GetMarginVertical(blockHeight, ref item.margin);
-                item.outputHeight = item.size.prefHeight;
             }
 
-            float axisOffset = paddingBox.top + borderBox.top;
-
-            track.crossSize = size.height - paddingBox.top - paddingBox.bottom - borderBox.top - borderBox.bottom;
-
-            for (int i = 0; i < itemList.size; i++) {
-                ref Item item = ref items[i];
-                LayoutFit verticalLayoutFit = LayoutFit.None;
-                float verticalAlignment = 0;
-                switch (crossAxisAlignment) {
-                    case CrossAxisAlignment.Unset:
-                    case CrossAxisAlignment.Start:
-                        verticalAlignment = 0;
-                        break;
-                    case CrossAxisAlignment.Center:
-                        verticalAlignment = 0.5f;
-                        break;
-                    case CrossAxisAlignment.End:
-                        verticalAlignment = 1f;
-                        break;
-                    case CrossAxisAlignment.Stretch:
-                        verticalLayoutFit = LayoutFit.Grow;
-                        break;
+            if (applyWrapping) {
+                // we are wrapping and have extra space left that needs to be laid out
+                if (track.startItemIndex != track.endItemIndex - 1) {
+                    track.remainingSpace = contentAreaWidth - track.mainSize;
+                    totalContentHeight += LayoutTrackHorizontal(totalContentHeight, blockWidth, blockHeight, track, isDryRun, applyWrapping);
                 }
 
-                item.layoutBox.ApplyVerticalLayout(axisOffset + item.margin.top, blockHeight, track.crossSize - item.margin.top - item.margin.bottom, item.size.prefHeight, verticalAlignment, verticalLayoutFit);
-                item.outputHeight = item.layoutBox.size.height;
+                retn.height = totalContentHeight;
+            } else {
+                retn.height = LayoutTrackHorizontal(0, blockWidth, blockHeight, track, isDryRun, applyWrapping);
             }
 
-            contentSize.width = 0;
-            contentSize.height = 0;
+            retn.width = largestTrackWidth; // todo compute this!
+            return retn;
         }
 
-        private void PerformLayoutVertical() {
+        private void PerformLayoutVertical(bool isDryRun) {
             Item[] items = itemList.array;
-            
+
             BlockSize blockWidth = containingBoxWidth;
             BlockSize blockHeight = containingBoxHeight;
             AdjustBlockSizes(ref blockWidth, ref blockHeight);
@@ -430,8 +371,7 @@ namespace UIForia.Systems {
 
             if (growPieces > 0 && track.remainingSpace > 0) {
                 GrowHeight(ref track, growPieces);
-            }
-            else if (shrinkPieces > 0 && track.remainingSpace < 0) {
+            } else if (shrinkPieces > 0 && track.remainingSpace < 0) {
                 ShrinkHeight(ref track, shrinkPieces);
             }
 
@@ -443,8 +383,7 @@ namespace UIForia.Systems {
 
                 if (item.outputHeight > item.size.prefHeight && item.growFactor > 0) {
                     layoutFit = LayoutFit.Grow;
-                }
-                else if (item.outputHeight < item.size.prefHeight && item.shrinkFactor > 0) {
+                } else if (item.outputHeight < item.size.prefHeight && item.shrinkFactor > 0) {
                     layoutFit = LayoutFit.Shrink;
                 }
 
@@ -453,6 +392,87 @@ namespace UIForia.Systems {
 
             contentSize.width = 0;
             contentSize.height = 0;
+        }
+
+        private float LayoutTrackHorizontal(float yOffset, in BlockSize blockWidth, in BlockSize blockHeight, Track track, bool isDryRun, bool isWrapping = false) {
+            Item[] items = itemList.array;
+
+            if (track.remainingSpace > 0) {
+                GrowWidth(ref track, track.growPieces);
+            } else if (track.remainingSpace < 0) {
+                ShrinkWidth(ref track, track.shrinkPieces);
+            }
+
+            ApplyMainAxisHorizontalPositioning(track, paddingBox.left + borderBox.left);
+
+            if (isDryRun) {
+                for (int i = track.startItemIndex; i < track.endItemIndex; i++) {
+                    ref Item item = ref items[i];
+                    FastLayoutBox child = item.layoutBox;
+                    child.GetHeight(child.size.width, blockWidth, blockHeight, ref item.size);
+                    child.GetMarginVertical(blockHeight, ref item.margin);
+                    item.outputHeight = item.size.prefHeight;
+                    float heightAndMargin = item.outputHeight + item.margin.top + item.margin.bottom;
+                    track.maxItemHeight = track.maxItemHeight > heightAndMargin ? track.maxItemHeight : heightAndMargin;
+                }
+
+                track.crossSize = isWrapping ? track.maxItemHeight : size.height - paddingBox.top - paddingBox.bottom - borderBox.top - borderBox.bottom;
+
+                return track.crossSize;
+            }
+
+            for (int i = track.startItemIndex; i < track.endItemIndex; i++) {
+                ref Item item = ref items[i];
+                FastLayoutBox child = item.layoutBox;
+
+                LayoutFit layoutFit = LayoutFit.Unset;
+
+                if (item.outputWidth > item.size.prefWidth && item.growFactor > 0) {
+                    layoutFit = LayoutFit.Grow;
+                } else if (item.outputWidth < item.size.prefWidth && item.shrinkFactor > 0) {
+                    layoutFit = LayoutFit.Shrink;
+                }
+
+                child.ApplyHorizontalLayout(item.mainAxisStart, blockWidth, item.outputWidth, item.size.prefWidth, 0, layoutFit);
+
+                child.GetHeight(child.size.width, blockWidth, blockHeight, ref item.size);
+                child.GetMarginVertical(blockHeight, ref item.margin);
+                item.outputHeight = item.size.prefHeight;
+                float heightAndMargin = item.outputHeight + item.margin.top + item.margin.bottom;
+                track.maxItemHeight = track.maxItemHeight > heightAndMargin ? track.maxItemHeight : heightAndMargin;
+            }
+
+            // if track is first or last do padding & border
+            float paddingBorderTop = track.startItemIndex == 0 ? paddingBox.top + borderBox.top : 0;
+            // float paddingBorderBottom = track.endItemIndex == itemList.size ? paddingBox.bottom + borderBox.bottom : 0;
+            float axisOffset = yOffset + paddingBorderTop; // paddingBox.top + borderBox.top;
+
+            track.crossSize = isWrapping ? track.maxItemHeight : size.height - paddingBox.top - paddingBox.bottom - borderBox.top - borderBox.bottom;
+
+            for (int i = track.startItemIndex; i < track.endItemIndex; i++) {
+                ref Item item = ref items[i];
+                LayoutFit verticalLayoutFit = LayoutFit.None;
+                float verticalAlignment = 0;
+                switch (crossAxisAlignment) {
+                    case CrossAxisAlignment.Unset:
+                    case CrossAxisAlignment.Start:
+                        verticalAlignment = 0;
+                        break;
+                    case CrossAxisAlignment.Center:
+                        verticalAlignment = 0.5f;
+                        break;
+                    case CrossAxisAlignment.End:
+                        verticalAlignment = 1f;
+                        break;
+                    case CrossAxisAlignment.Stretch:
+                        verticalLayoutFit = LayoutFit.Grow;
+                        break;
+                }
+
+                item.layoutBox.ApplyVerticalLayout(axisOffset + item.margin.top, blockHeight, track.crossSize - item.margin.top - item.margin.bottom, item.size.prefHeight, verticalAlignment, verticalLayoutFit);
+            }
+
+            return track.crossSize;
         }
 
         private void ApplyMainAxisHorizontalPositioning(Track track, float mainAxisOffset) {
@@ -564,18 +584,18 @@ namespace UIForia.Systems {
             float toAllocate = track.remainingSpace;
             float remainingSpace = track.remainingSpace;
 
-            while (allocate && (int) remainingSpace > 0 && pieces > 0) {
+            while (allocate && (int)remainingSpace > 0) {
                 allocate = false;
 
                 float pieceSize = remainingSpace / pieces;
 
-                for (int i = 0; i < itemList.size; i++) {
+                for (int i = track.startItemIndex; i < track.endItemIndex; i++) {
                     ref Item item = ref items[i];
                     float max = item.size.maxWidth;
                     float output = item.outputWidth;
                     int growthFactor = item.growFactor;
 
-                    if (growthFactor == 0 || (int) output == (int) max) {
+                    if (growthFactor == 0 || (int)output == (int)max) {
                         continue;
                     }
 
@@ -602,18 +622,18 @@ namespace UIForia.Systems {
             float toAllocate = track.remainingSpace;
             float remainingSpace = track.remainingSpace;
 
-            while (allocate && (int) remainingSpace > 0 && pieces > 0) {
+            while (allocate && (int)remainingSpace > 0 && pieces > 0) {
                 allocate = false;
 
                 float pieceSize = remainingSpace / pieces;
 
-                for (int i = 0; i < itemList.size; i++) {
+                for (int i = track.startItemIndex; i < track.endItemIndex; i++) {
                     ref Item item = ref items[i];
                     float max = item.size.maxHeight;
                     float output = item.outputHeight;
                     int growthFactor = item.growFactor;
 
-                    if (growthFactor == 0 || (int) output == (int) max) {
+                    if (growthFactor == 0 || (int)output == (int)max) {
                         continue;
                     }
 
@@ -642,7 +662,7 @@ namespace UIForia.Systems {
             float overflow = -track.remainingSpace;
 
             bool allocate = pieces > 0;
-            while (allocate && (int) overflow > 0) {
+            while (allocate && (int)overflow > 0) {
                 allocate = false;
 
                 float pieceSize = overflow / pieces;
@@ -653,7 +673,7 @@ namespace UIForia.Systems {
                     float output = item.size.prefWidth;
                     int shrinkFactor = item.shrinkFactor;
 
-                    if (shrinkFactor == 0 || (int) output == (int) min || (int) output == 0) {
+                    if (shrinkFactor == 0 || (int)output == (int)min || (int)output == 0) {
                         continue;
                     }
 
@@ -680,7 +700,7 @@ namespace UIForia.Systems {
             float overflow = -track.remainingSpace;
 
             bool allocate = pieces > 0;
-            while (allocate && (int) overflow > 0) {
+            while (allocate && (int)overflow > 0) {
                 allocate = false;
 
                 float pieceSize = overflow / pieces;
@@ -691,7 +711,7 @@ namespace UIForia.Systems {
                     float output = item.size.prefHeight;
                     int shrinkFactor = item.shrinkFactor;
 
-                    if (shrinkFactor == 0 || (int) output == (int) min || (int) output == 0) {
+                    if (shrinkFactor == 0 || (int)output == (int)min || (int)output == 0) {
                         continue;
                     }
 
@@ -712,11 +732,9 @@ namespace UIForia.Systems {
         public override void SetChildren(LightList<FastLayoutBox> children) {
             base.SetChildren(children);
 
-
             if (itemList == null) {
                 itemList = new StructList<Item>(children.size);
-            }
-            else {
+            } else {
                 itemList.EnsureCapacity(children.size);
             }
 
@@ -748,11 +766,7 @@ namespace UIForia.Systems {
                 return;
             }
 
-            itemList.Insert(index, new Item() {
-                layoutBox = child,
-                growFactor = child.element.style.FlexItemGrow,
-                shrinkFactor = child.element.style.FlexItemShrink,
-            });
+            itemList.Insert(index, new Item() {layoutBox = child, growFactor = child.element.style.FlexItemGrow, shrinkFactor = child.element.style.FlexItemShrink,});
 
             MarkForLayout();
         }
@@ -838,6 +852,10 @@ namespace UIForia.Systems {
             public float remainingSpace;
             public int startItemIndex;
             public int endItemIndex;
+            public int growPieces;
+            public int shrinkPieces;
+            public float maxItemWidth;
+            public float maxItemHeight;
 
         }
 

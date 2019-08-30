@@ -1,20 +1,55 @@
 style <this> {
-    FlexLayoutDirection = Horizontal;
     BackgroundColor = rgb(20, 0, 20);
     PreferredSize = 1pca;
-//    FlexLayoutWrap = Wrap;
+    TextColor = white;
+    Padding = 20px;
+    FlexLayoutWrap = Wrap;
+}
+
+style demo-container {
+    FlexLayoutDirection = Horizontal;
+    FlexLayoutWrap = Wrap;
+    PreferredSize = 1pca 1cnt;
+}
+
+style <Heading1> {
+    TextColor = white;
+    TextFontSize = 1.6em;
+    Margin = 5px 0 10px;
 }
 
 style container {
     Margin = 0 10px 0 10px;
-    // LayoutFitVertical = Fill;
+    LayoutFitVertical = Fill;
 }
 
-style content-size-box {
+style content-size-box-horizontal-wrap {
     PreferredSize = 800px 1cnt;
     FlexLayoutDirection = Horizontal;
     BackgroundColor = grey;
     FlexLayoutWrap = Wrap;
+}
+
+style content-size-box-vertical-wrap {
+    PreferredSize = 1cnt 800px;
+    BackgroundColor = grey;
+    FlexLayoutWrap = Wrap;
+    Overflow = Hidden;
+}
+
+style group-big {
+    PreferredSize = 791px 100px;
+    Margin = 5px;
+}
+
+style groupA {
+    PreferredSize = 1cnt;
+    Border = 1px;
+    BorderColor = black;
+}
+
+style group3 {
+    PreferredSize = 10%;
 }
 
 style color1 { BackgroundColor = rgb(20, 100, 20); }  
@@ -99,7 +134,7 @@ style h-item-dont-grow {
 style group1 {
     PreferredSize = 100px 100px;
     BackgroundColor = rgba(0, 120, 0, 200);
-    Margin = 5px 10px 10px 15px;
+    Margin = 5px 10px 10px 5px;
 //    Border = 5x;
 //    BorderColor = black;
 }

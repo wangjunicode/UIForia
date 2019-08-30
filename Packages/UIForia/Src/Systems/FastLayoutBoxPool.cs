@@ -35,6 +35,7 @@ namespace UIForia.Layout {
             retn.owner = owner;
             retn.element = element;
             retn.OnInitialize();
+            retn.metrics = default;
             retn.UpdateStyleData();
             return retn;
         }

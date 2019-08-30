@@ -171,8 +171,11 @@ namespace UIForia.Editor {
 
             treeView.showChildrenAndId = EditorGUILayout.Toggle("Show Meta Data", treeView.showChildrenAndId);
             treeView.selectMode = EditorGUILayout.Toggle("Activate Select Mode", treeView.selectMode);
+            
             bool wasShowingDisabled = treeView.showDisabled;
             treeView.showDisabled = EditorGUILayout.Toggle("Show Disabled", treeView.showDisabled);
+            treeView.showLayoutStats = EditorGUILayout.Toggle("Show Layout Stats", treeView.showLayoutStats);
+            
             if (treeView.showDisabled != wasShowingDisabled) {
                 needsReload = true;
             }

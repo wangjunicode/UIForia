@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UIForia.Editor;
 using UIForia.Elements;
+using UIForia.Layout;
 using UIForia.Layout.LayoutTypes;
 using UIForia.Rendering;
 using UIForia.Util;
@@ -30,6 +31,7 @@ public class HierarchyView : TreeView {
     public bool showChildrenAndId = false;
     public bool showDisabled = false;
     public bool selectMode = false;
+    public bool showLayoutStats = false;
 
     static HierarchyView() {
         s_ElementNameStyle = new GUIStyle();
@@ -152,6 +154,25 @@ public class HierarchyView : TreeView {
         args.rowRect.width -= indent;
         s_Content.text = item.element.GetDisplayName();
 
+        if (showLayoutStats) {
+            if (item.element.layoutBox != null) {
+                FastLayoutBox.LayoutBoxMetrics metrics = item.element.layoutBox.metrics;
+                string wMetrics = $"w: {metrics.contentWidthCacheHit}, {metrics.contentWidthCacheMiss}";
+                string hMetrics = $"h: {metrics.contentHeightCacheHit}, {metrics.contentHeightCacheMiss}";
+                string total = $"t: {metrics.totalLayoutCount}";
+                
+                if ((!(item.element is UITextElement) && item.element.layoutBox.firstChild == null) || item.element.layoutBox.prefWidth.unit != UIMeasurementUnit.Content && item.element.layoutBox.minWidth.unit != UIMeasurementUnit.Content && item.element.layoutBox.maxWidth.unit != UIMeasurementUnit.Content) {
+                    wMetrics = "";
+                }
+                
+                if ((!(item.element is UITextElement) && item.element.layoutBox.firstChild == null) || item.element.layoutBox.prefHeight.unit != UIMeasurementUnit.Content && item.element.layoutBox.minHeight.unit != UIMeasurementUnit.Content && item.element.layoutBox.maxHeight.unit != UIMeasurementUnit.Content) {
+                    hMetrics = "";
+                }
+                
+                s_Content.text += $" ({wMetrics} {hMetrics} {total})";
+            }
+        }
+        
         if (item.element.isEnabled && item.element.renderBox != null) {
             if (item.element.renderBox.overflowX != Overflow.Visible || item.element.renderBox.overflowY != Overflow.Visible) {
                 s_Content.text += " [Clipper]";
@@ -225,10 +246,10 @@ public class HierarchyView : TreeView {
         if (element is UITextElement textElement) {
             if (!string.IsNullOrEmpty(textElement.text)) {
                 if (textElement.text.Length <= 20) {
-                    s_Content.text = '"' + textElement.text + '"';
+                    s_Content.text = '"' + textElement.text.Trim() + '"';
                 }
                 else {
-                    s_Content.text = '"' + textElement.text.Substring(0, 20) + "...\"";
+                    s_Content.text = '"' + textElement.text.Substring(0, 20).Trim() + "...\"";
                 }
 
                 s_ElementNameStyle.normal.textColor = AdjustColor(UIForiaEditorTheme.elementNameNormal, element);

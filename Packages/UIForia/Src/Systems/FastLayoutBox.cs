@@ -76,10 +76,22 @@ namespace UIForia.Layout {
         public float pivotY;
         public float scaleX;
         public float scaleY;
-        
+
         public AlignmentBehavior alignmentTargetX;
         public AlignmentBehavior alignmentTargetY;
+        private float cachedPreferredWidth;
+        private WidthCache widthCache;
 
+        public LayoutBoxMetrics metrics;
+
+        public struct LayoutBoxMetrics {
+            public int totalLayoutCount;
+            public int contentHeightCacheHit;
+            public int contentHeightCacheMiss;
+            public int contentWidthCacheHit;
+            public int contentWidthCacheMiss;
+        }
+        
         public virtual void AddChild(FastLayoutBox child) {
             child.parent = this;
 
@@ -108,13 +120,11 @@ namespace UIForia.Layout {
                         OnChildAdded(child, idx);
                         return;
                     }
-                }
-                else {
+                } else {
                     if (ptr.element.parent.depth == child.element.parent.depth) {
                         // find common parent, compare sibling index
                         throw new NotImplementedException();
-                    }
-                    else {
+                    } else {
                         if (ptr.element.depth > child.element.depth) {
                             child.nextSibling = ptr.nextSibling;
                             ptr.nextSibling = child;
@@ -180,18 +190,20 @@ namespace UIForia.Layout {
 
             alignmentTargetX = element.style.AlignmentBehaviorX;
             alignmentTargetY = element.style.AlignmentBehaviorY;
-            
+
             selfLayoutFitHorizontal = element.style.LayoutFitHorizontal;
             selfLayoutFitVertical = element.style.LayoutFitVertical;
-            
+
             MarkForLayout();
         }
 
         protected abstract void PerformLayout();
 
-        protected virtual void OnChildAdded(FastLayoutBox child, int index) { }
+        protected virtual void OnChildAdded(FastLayoutBox child, int index) {
+        }
 
-        protected virtual void OnChildRemoved(FastLayoutBox child, int index) { }
+        protected virtual void OnChildRemoved(FastLayoutBox child, int index) {
+        }
 
         public abstract float GetIntrinsicMinWidth();
 
@@ -207,13 +219,16 @@ namespace UIForia.Layout {
             switch (measurement.unit) {
                 case UIMeasurementUnit.Content: {
                     float width = ComputeContentWidth(resolvedBlockSize);
+                    // todo implement cache for content width
+                    metrics.contentWidthCacheMiss++;
                     float baseVal = width;
                     // todo -- try not to fuck with style here
                     baseVal += ResolveFixedSize(width, element.style.PaddingLeft);
                     baseVal += ResolveFixedSize(width, element.style.PaddingRight);
                     baseVal += ResolveFixedSize(width, element.style.BorderRight);
                     baseVal += ResolveFixedSize(width, element.style.BorderLeft);
-                    if (baseVal < 0) baseVal = 0;
+                    if (baseVal < 0)
+                        baseVal = 0;
                     float retn = measurement.value * baseVal;
                     return retn > 0 ? retn : 0;
                 }
@@ -252,18 +267,36 @@ namespace UIForia.Layout {
             return 0;
         }
 
+        public void InvalidatePreferredSizeCache() {
+            cachedPreferredWidth = -1;
+            widthCache = default;
+        }
+
+        
         public float ResolveHeight(float width, in BlockSize blockWidth, in BlockSize blockHeight, in UIMeasurement measurement) {
             float value = measurement.value;
 
             switch (measurement.unit) {
                 case UIMeasurementUnit.Content:
-                    float height = ComputeContentHeight(width, blockWidth, blockHeight);
-                    float baseVal = height;
 
-                    baseVal += ResolveFixedSize(height, element.style.PaddingTop);
-                    baseVal += ResolveFixedSize(height, element.style.PaddingBottom);
-                    baseVal += ResolveFixedSize(height, element.style.BorderBottom);
-                    baseVal += ResolveFixedSize(height, element.style.BorderTop);
+                        float contentHeight = ComputeContentHeight(width, blockWidth, blockHeight);
+                    // todo -- if block size changes the cached value is possibly wrong!
+                    // float contentHeight = GetCachedHeightForWidth(width);
+                    //
+                    //
+                    // if ((int)contentHeight == -1) {
+                    //     SetCachedHeightForWidth(width, contentHeight);
+                    //     metrics.contentHeightCacheMiss++;
+                    // } else {
+                    //     metrics.contentHeightCacheHit++;
+                    // }
+
+                    float baseVal = contentHeight;
+
+                    baseVal += ResolveFixedSize(contentHeight, element.style.PaddingTop);
+                    baseVal += ResolveFixedSize(contentHeight, element.style.PaddingBottom);
+                    baseVal += ResolveFixedSize(contentHeight, element.style.BorderBottom);
+                    baseVal += ResolveFixedSize(contentHeight, element.style.BorderTop);
 
                     if (baseVal < 0) baseVal = 0;
                     float retn = measurement.value * baseVal;
@@ -279,7 +312,6 @@ namespace UIForia.Layout {
 
                 case UIMeasurementUnit.Em:
                     return 0;
-
 
                 case UIMeasurementUnit.ViewportWidth:
                     return element.View.Viewport.width * value;
@@ -378,7 +410,6 @@ namespace UIForia.Layout {
         }
 
         public void ApplyHorizontalLayout(float localX, in BlockSize containingWidth, float allocatedWidth, float preferredWidth, float alignment, LayoutFit layoutFit) {
-
             allocatedPosition.x = localX;
 
             pivotX = ResolveFixedWidth(element.style.TransformPivotX);
@@ -438,13 +469,49 @@ namespace UIForia.Layout {
             positionSet.alignedPosition = alignedPosition;
 
             // if content size changed we need to layout todo account for padding
-            if ((int) oldSize.width != (int) size.width) {
+            if ((int)oldSize.width != (int)size.width) {
                 flags |= LayoutRenderFlag.NeedsLayout;
             }
 
             // size = how big am I actually
             // allocated size = size my parent told me to be
             // content size = extents of my content
+        }
+        
+
+
+        protected float GetCachedHeightForWidth(float width) {
+            int intWidth = (int)width;
+            if (widthCache.width0 == intWidth) {
+                return widthCache.height0;
+            }
+
+            if (widthCache.width1 == intWidth) {
+                return widthCache.height1;
+            }
+
+            if (widthCache.width2 == intWidth) {
+                return widthCache.height2;
+            }
+
+            return -1;
+        }
+
+        protected void SetCachedHeightForWidth(float width, float height) {
+            int intWidth = (int)width;
+            if (widthCache.next == 0) {
+                widthCache.next = 1;
+                widthCache.width0 = intWidth;
+                widthCache.height0 = height;
+            } else if (widthCache.next == 1) {
+                widthCache.next = 2;
+                widthCache.width1 = intWidth;
+                widthCache.height1 = height;
+            } else {
+                widthCache.next = 0;
+                widthCache.width2 = intWidth;
+                widthCache.height2 = height;
+            }
         }
 
         public void ApplyVerticalLayout(float localY, in BlockSize containingHeight, float allocatedHeight, float preferredHeight, float alignment, LayoutFit layoutFit) {
@@ -493,7 +560,7 @@ namespace UIForia.Layout {
             float originBase = localY;
             float originOffset = allocatedHeight * alignment;
             float offset = size.height * -alignment;
-            
+
             alignedPosition.y = originBase + originOffset + offset;
 
             allocatedSize.height = allocatedHeight;
@@ -507,7 +574,7 @@ namespace UIForia.Layout {
             positionSet.allocatedPosition = allocatedPosition;
             positionSet.alignedPosition = alignedPosition;
 
-            if ((int) oldSize.height != (int) size.height) {
+            if ((int)oldSize.height != (int)size.height) {
                 flags |= LayoutRenderFlag.NeedsLayout;
             }
         }
@@ -516,9 +583,11 @@ namespace UIForia.Layout {
             output.minWidth = ResolveWidth(lastResolvedWidth, minWidth);
             output.maxWidth = ResolveWidth(lastResolvedWidth, maxWidth);
             output.prefWidth = ResolveWidth(lastResolvedWidth, prefWidth);
-
-            if (output.prefWidth < output.minWidth) output.prefWidth = output.minWidth;
-            if (output.prefWidth > output.maxWidth) output.prefWidth = output.maxWidth;
+ 
+            if (output.prefWidth < output.minWidth)
+                output.prefWidth = output.minWidth;
+            if (output.prefWidth > output.maxWidth)
+                output.prefWidth = output.maxWidth;
         }
 
         public void GetHeight(float width, in BlockSize blockWidth, in BlockSize blockHeight, ref SizeConstraints output) {
@@ -526,8 +595,10 @@ namespace UIForia.Layout {
             output.maxHeight = ResolveHeight(width, blockWidth, blockHeight, maxHeight);
             output.prefHeight = ResolveHeight(width, blockWidth, blockHeight, prefHeight);
 
-            if (output.prefHeight < output.minHeight) output.prefHeight = output.minHeight;
-            if (output.prefHeight > output.maxHeight) output.prefHeight = output.maxHeight;
+            if (output.prefHeight < output.minHeight)
+                output.prefHeight = output.minHeight;
+            if (output.prefHeight > output.maxHeight)
+                output.prefHeight = output.maxHeight;
         }
 
         public void Layout() {
@@ -543,6 +614,7 @@ namespace UIForia.Layout {
             // scaleY = element.style.TransformScaleY;
             // rotation = element.style.TransformRotation;
 
+            metrics.totalLayoutCount++;
             PerformLayout();
 
             flags &= ~LayoutRenderFlag.NeedsLayout;
@@ -560,7 +632,6 @@ namespace UIForia.Layout {
 
             // todo -- compute content size & local overflow? might need to happen elsewhere
         }
-
 
         protected virtual void OnChildSizeChanged(FastLayoutBox child) {
             if ((flags & LayoutRenderFlag.NeedsLayout) != 0) {
@@ -760,11 +831,11 @@ namespace UIForia.Layout {
                     case StylePropertyId.TransformPositionY:
                         transformPositionY = property.AsUIFixedLength;
                         break;
-                    
+
                     case StylePropertyId.AlignmentBehaviorX:
                         alignmentTargetX = property.AsAlignmentBehavior;
                         break;
-                    
+
                     case StylePropertyId.AlignmentBehaviorY:
                         alignmentTargetY = property.AsAlignmentBehavior;
                         break;
@@ -818,7 +889,7 @@ namespace UIForia.Layout {
                 return boxList.ToArray();
             }
         }
-        
+
         public void GetMarginHorizontal(BlockSize blockWidth, ref OffsetRect margin) {
             switch (marginLeft.unit) {
                 case UIMeasurementUnit.Pixel:
@@ -911,10 +982,28 @@ namespace UIForia.Layout {
             }
         }
 
-        protected virtual void OnChildStyleChanged(FastLayoutBox child, StructList<StyleProperty> changeList) { }
+        protected virtual void OnChildStyleChanged(FastLayoutBox child, StructList<StyleProperty> changeList) {
+        }
 
-        public virtual void OnInitialize() { }
-        public virtual void OnDestroy() { }
+        public virtual void OnInitialize() {
+        }
+
+        public virtual void OnDestroy() {
+        }
+        
+        private struct WidthCache {
+
+            public int next;
+
+            public int width0;
+            public int width1;
+            public int width2;
+
+            public float height0;
+            public float height1;
+            public float height2;
+
+        }
 
     }
 

@@ -868,6 +868,9 @@ namespace UIForia.Rendering {
             
             for (int i = 0; i < styleGroupContainers.Count; i++) {
                 if (styleGroupContainers[i].styleType == StyleType.Shared) {
+                    if (s_Builder.Length > 0) {
+                        s_Builder.Append(" ");
+                    }
                     s_Builder.Append(styleGroupContainers[i].name);
                 }
             }

@@ -4,65 +4,100 @@
     <Style path="Documentation/Features/AlignmentDemo.style"/>
 
     <Contents>
-<!--        <Group style="container fit-vertical ">-->
-<!--            <Group style="group1 item-shrink color1 x-align" />-->
-<!--            <Group style="group1 item-fill color1" />-->
-<!--            <Group style="group1 item-grow color1" />-->
-<!--            <Group style="group1 item-dont-grow color1" />-->
-<!--        </Group>-->
-
-<!--        <Group style="fit container">-->
-<!--            <Group style="group1 h-item-shrink  color2" />-->
-<!--            <Group style="group1 h-item-fill color2" />-->
-<!--            <Group style="group1 h-item-grow color2"/>-->
-<!--            <Group style="group1 h-item-dont-grow color2" />-->
-<!--        </Group>-->
-
-<!--        <Group style="stack-vertical container g1">-->
-<!--            <Group style="group1 color3" />-->
-<!--            <Group style="group1 color3" />-->
-<!--            <Group style="group1 color3" />-->
-<!--        </Group>-->
-
-<!--        <Group style="stack-horizontal container">-->
-<!--            <Group style="group1  color4" />-->
-<!--            <Group style="group1 y-align  color4" />-->
-<!--            <Group style="group1  color4" />-->
-<!--        </Group>-->
-
-
-<!--        <Group style="fit container">-->
-<!--            <Group style="group1 h-item-shrink  color2" />-->
-<!--            <Group style="group1 h-item-fill color2" />-->
-<!--            <Group style="group1 h-item-grow color2"/>-->
-<!--            <Group style="group1 h-item-dont-grow color2" />-->
-<!--        </Group>-->
-
-<!--        <Group style=" stack-horizontal container">-->
-<!--            <Group style="group1  color4" />-->
-<!--            <Group style="group1 y-align  color4" />-->
-<!--            <Group style="group1  color4" />-->
-<!--        </Group>-->
-<!--        -->
-       <Group style="content-size-box">
-           <Group style="group2 color3" />
-           <Group style="group2 color3" />
-           <Group style="group2 color3" />
-           <Group style="group2 color3" />
-           <Group style="group2 color3" />
-           <Group style="group2 color3" />
-           <Group style="group2 color3" />
-           <Group style="group2 color3" />
-           <Group style="group2 color3" />
-           <Group style="group2 color3" />
-           <Group style="group2 color3" />
-           <Group style="group2 color3" />
-           <Group style="group2 color3" />
-           <Group style="group2 color3" />
-           <Group style="group2 color3" />
-           <Group style="group2 color3" />
-           <Group style="group2 color3" />
-
-       </Group> 
+        
+        <Heading1>The Flexbox Layout Guide</Heading1>
+        <Group style="demo-container">
+            <Group style="container fit-vertical ">
+                <Group style="group1 item-shrink color1 x-align" />
+                <Group style="group1 item-fill color1" />
+                <Group style="group1 item-grow color1" />
+                <Group style="group1 item-dont-grow color1" />
+            </Group>
+    
+            <Group style="fit container">
+                <Group style="group1 h-item-shrink  color2" />
+                <Group style="group1 h-item-fill color2" />
+                <Group style="group1 h-item-grow color2"/>
+                <Group style="group1 h-item-dont-grow color2" />
+            </Group>
+    
+            <Group style="stack-vertical container g1">
+                <Group style="group1 color3" />
+                <Group style="group1 color3" />
+                <Group style="group1 color3" />
+            </Group>
+    
+            <Group style="stack-horizontal container">
+                <Group style="group1  color4" />
+                <Group style="group1 y-align  color4" />
+                <Group style="group1  color4" />
+            </Group>
+    
+    
+            <Group style="fit container">
+                <Group style="group1 h-item-shrink  color2" />
+                <Group style="group1 h-item-fill color2" />
+                <Group style="group1 h-item-grow color2"/>
+                <Group style="group1 h-item-dont-grow color2" />
+            </Group>
+    
+            <Group style=" stack-horizontal container">
+                <Group style="group1  color4" />
+                <Group style="group1 y-align  color4" />
+                <Group style="group1  color4" />
+            </Group>
+            
+           <Group style="content-size-box-horizontal-wrap">
+               <Group style="group-big color3" />
+               <Group style="group2 color3" />
+               <Group style="group2 color3" />
+               <Group style="group2 color3 g1" />
+               <Group style="group2 color3" />
+               <Group style="group-big color3" />
+               <Group style="group2 color3" />
+               <Group style="group2 color3" />
+               <Group style="groupA color3">
+                   <Group style="group3 color1" />
+                   <Group style="group3 color2" />
+                   <Group style="group3 color4" />
+               </Group>
+               <Group style="groupA color3">
+                   <Group style="group3 color1" />
+                   <Group style="group3 color2" />
+                   <Group style="group3 color4" />
+               </Group>
+               <Group style="group2 color3" />
+               <Group style="group2 color3" />
+               <Group style="group2 color3" />
+               <Group style="group2 color3" />
+               <Group style="group2 color3" />
+               <Group style="group2 color3" />
+               <Group style="group2 color3" />
+               <Group style="group2 color3" />
+               <Group style="group2 color3" />
+               <Group style="group2 color3" />
+           </Group>
+    
+            <Group style="content-size-box-vertical-wrap">
+                <Group style="group2 color3" />
+                <Group style="group2 color3" />
+                <Group style="group2 color3" />
+                <Group style="group2 color3" />
+                <Group style="group2 color3" />
+                <Group style="group2 color3" />
+                <Group style="group2 color3" />
+                <Group style="group2 color3" />
+                <Group style="group2 color3" />
+                <Group style="group2 color3" />
+                <Group style="group2 color3" />
+                <Group style="group2 color3" />
+                <Group style="group2 color3" />
+                <Group style="group2 color3" />
+                <Group style="group2 color3" />
+                <Group style="group2 color3" />
+                <Group style="group2 color3" />
+    
+            </Group>
+        </Group>
     </Contents>
 </UITemplate>

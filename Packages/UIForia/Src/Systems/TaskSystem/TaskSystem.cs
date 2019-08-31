@@ -48,7 +48,7 @@ namespace UIForia.Systems {
 
         internal void OnUpdate() {
             UITask[] tasks = thisFrame.Array;
-            float delta = Time.deltaTime;
+            float delta = Time.unscaledDeltaTime;
 
             int count = thisFrame.Count;
             for (int i = 0; i < count; i++) {

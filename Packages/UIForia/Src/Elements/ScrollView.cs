@@ -25,10 +25,12 @@ namespace UIForia.Elements {
         protected float lastScrollVerticalTimestamp;
         protected float lastScrollHorizontalTimestamp;
 
+        protected UIElement childrenElement;
         // todo -- without layout system integration this is an overlay scroll bar only
 
         public override void OnEnable() {
             targetElement = this; //FindFirstByType<UIChildrenElement>().GetChild(0);
+            childrenElement = FindById("scroll-root");
             verticalHandle = FindById("scroll-handle-vertical");
             verticalTrack = FindById("scroll-track-vertical");
             horizontalHandle = FindById("scroll-handle-horizontal");
@@ -44,8 +46,8 @@ namespace UIForia.Elements {
                 float handleHeight = verticalHandle.layoutResult.allocatedSize.height;
                 float max = trackRectHeight - handleHeight;
                 float offset = Mathf.Clamp(targetElement.scrollOffset.y - (scrollSpeed * evt.ScrollDelta.y), 0, 1);
-                targetElement.scrollOffset = new Vector2(targetElement.scrollOffset.x, offset);
-                verticalHandle.style.SetTransformPositionY(offset * (max), StyleState.Normal);
+                // targetElement.scrollOffset = new Vector2(targetElement.scrollOffset.x, offset);
+                // verticalHandle.style.SetTransformPositionY(offset * (max), StyleState.Normal);
                 evt.StopPropagation();
             }
 
@@ -56,8 +58,8 @@ namespace UIForia.Elements {
                 float handleWidth = horizontalHandle.layoutResult.allocatedSize.width;
                 float max = trackRectWidth - handleWidth;
                 float offset = Mathf.Clamp(targetElement.scrollOffset.x - (scrollSpeed * evt.ScrollDelta.x), 0, 1);
-                targetElement.scrollOffset = new Vector2(offset, targetElement.scrollOffset.y);
-                horizontalHandle.style.SetTransformPositionX(offset * (max), StyleState.Normal);
+                // targetElement.scrollOffset = new Vector2(offset, targetElement.scrollOffset.y);
+                // horizontalHandle.style.SetTransformPositionX(offset * (max), StyleState.Normal);
                 evt.StopPropagation();
             }
         }
@@ -70,9 +72,30 @@ namespace UIForia.Elements {
             lastScrollVerticalTimestamp = Time.realtimeSinceStartup;
         }
 
+        private Size overflowSize;
+        
         public override void OnUpdate() {
-            Size overflowSize = targetElement.layoutResult.overflowSize;
             Size allocatedSize = targetElement.layoutResult.allocatedSize;
+            float minX = float.MaxValue;
+            float minY = float.MaxValue;
+            float maxX = float.MinValue;
+            float maxY = float.MinValue;
+            
+            for (int i = 0; i < childrenElement.children.size; i++) {
+                if (childrenElement.children[i].style.ClipBehavior == ClipBehavior.Normal) {
+                    Rect screenRect = childrenElement.children[i].layoutResult.ScreenRect;
+                    if (screenRect.x < minX) minX = screenRect.x;
+                    if (screenRect.y < minY) minY = screenRect.y;
+                    if (screenRect.xMax > maxX) maxX = screenRect.xMax;
+                    if (screenRect.yMax > maxY) maxY = screenRect.yMax;
+                }
+            }
+
+            overflowSize = new Size(maxX - minX, maxY - minY);
+
+            if (((flags & UIElementFlags.EnabledThisFrame) != 0)) {
+              //  return;
+            }
 
             if (disableOverflowY) {
                 verticalTrack.SetEnabled(false);
@@ -90,9 +113,9 @@ namespace UIForia.Elements {
                 horizontalTrack.SetEnabled(true);
                 float width = (allocatedSize.width / overflowSize.width) * allocatedSize.width;
                 float opacity = 1 - Mathf.Clamp01(Easing.Interpolate((Time.realtimeSinceStartup - lastScrollHorizontalTimestamp) / fadeTime, EasingFunction.CubicEaseInOut));
-                horizontalHandle.style.SetPreferredWidth(width, StyleState.Normal);
-                horizontalTrack.style.SetOpacity(opacity, StyleState.Normal);
-                horizontalTrack.style.SetTransformPositionY(layoutResult.allocatedSize.height - horizontalTrack.layoutResult.actualSize.height, StyleState.Normal);
+                // horizontalHandle.style.SetPreferredWidth(width, StyleState.Normal);
+                // horizontalTrack.style.SetOpacity(opacity, StyleState.Normal);
+                // horizontalTrack.style.SetTransformPositionY(layoutResult.allocatedSize.height - horizontalTrack.layoutResult.actualSize.height, StyleState.Normal);
             }
 
             if (overflowSize.height <= allocatedSize.height) {
@@ -102,10 +125,10 @@ namespace UIForia.Elements {
             else if (!disableOverflowY) {
                 verticalTrack.SetEnabled(true);
                 float height = (allocatedSize.height / overflowSize.height) * allocatedSize.height;
-                float opacity = 1 - Mathf.Clamp01(Easing.Interpolate((Time.realtimeSinceStartup - lastScrollVerticalTimestamp) / fadeTime, EasingFunction.CubicEaseInOut));
-                verticalHandle.style.SetPreferredHeight(height, StyleState.Normal);
-                verticalTrack.style.SetOpacity(opacity, StyleState.Normal);
-                verticalTrack.style.SetTransformPositionX(layoutResult.allocatedSize.width - verticalTrack.layoutResult.actualSize.width, StyleState.Normal);
+                float opacity = 1; //1 - Mathf.Clamp01(Easing.Interpolate((Time.realtimeSinceStartup - lastScrollVerticalTimestamp) / fadeTime, EasingFunction.CubicEaseInOut));
+                // verticalHandle.style.SetPreferredHeight(height, StyleState.Normal);
+                // verticalTrack.style.SetOpacity(opacity, StyleState.Normal);
+                // verticalTrack.style.SetTransformPositionX(layoutResult.allocatedSize.width - verticalTrack.layoutResult.actualSize.width, StyleState.Normal);
             }
         }
 
@@ -172,7 +195,6 @@ namespace UIForia.Elements {
                 return null;
             }
 
-            Size overflowSize = targetElement.layoutResult.overflowSize;
             Size allocatedSize = targetElement.layoutResult.allocatedSize;
             Vector2 baseOffset = new Vector2();
             ScrollbarOrientation orientation = 0;
@@ -269,7 +291,8 @@ namespace UIForia.Elements {
                     float max = trackRectHeight - handleHeight;
                     float offset = Mathf.Clamp(MousePosition.y - trackRectY - baseOffset.y, 0, max);
                     scrollbar.targetElement.scrollOffset = new Vector2(scrollbar.targetElement.scrollOffset.x, offset / max);
-                    scrollbar.verticalHandle.style.SetTransformPositionY(offset, StyleState.Normal);
+                    scrollbar.verticalHandle.style.SetAlignmentOffsetY(new OffsetMeasurement(-1f, OffsetMeasurementUnit.Percent), StyleState.Normal);
+                    scrollbar.verticalHandle.style.SetAlignmentOriginY(new OffsetMeasurement(1f, OffsetMeasurementUnit.Percent), StyleState.Normal);
                 }
 
                 if ((orientation & ScrollbarOrientation.Horizontal) != 0) {

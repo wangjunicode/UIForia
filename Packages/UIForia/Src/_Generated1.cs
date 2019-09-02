@@ -1940,6 +1940,7 @@ namespace UIForia.Rendering {
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.ClipBehavior, out property)) return property.AsClipBehavior;
+                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.ClipBehavior), out property)) return property.AsClipBehavior;
                     return DefaultStyleValues_Generated.ClipBehavior;
                 }
             }
@@ -2399,7 +2400,7 @@ namespace UIForia.Rendering {
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.LayoutFitHorizontal, out property)) return property.AsLayoutFit;
-                    return DefaultStyleValues_Generated.FitHorizontal;
+                    return DefaultStyleValues_Generated.LayoutFitHorizontal;
                 }
             }
 
@@ -2408,7 +2409,7 @@ namespace UIForia.Rendering {
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.LayoutFitVertical, out property)) return property.AsLayoutFit;
-                    return DefaultStyleValues_Generated.FitVertical;
+                    return DefaultStyleValues_Generated.LayoutFitVertical;
                 }
             }
 
@@ -3559,19 +3560,19 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.AlignmentOffsetY, state).AsOffsetMeasurement;
         }
         
-        public void SetFitHorizontal(in UIForia.Layout.LayoutFit? value, StyleState state) {
+        public void SetLayoutFitHorizontal(in UIForia.Layout.LayoutFit? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.LayoutFitHorizontal, (int)value), state);
         }
 
-        public UIForia.Layout.LayoutFit GetFitHorizontal(StyleState state) {
+        public UIForia.Layout.LayoutFit GetLayoutFitHorizontal(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.LayoutFitHorizontal, state).AsLayoutFit;
         }
         
-        public void SetFitVertical(in UIForia.Layout.LayoutFit? value, StyleState state) {
+        public void SetLayoutFitVertical(in UIForia.Layout.LayoutFit? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.LayoutFitVertical, (int)value), state);
         }
 
-        public UIForia.Layout.LayoutFit GetFitVertical(StyleState state) {
+        public UIForia.Layout.LayoutFit GetLayoutFitVertical(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.LayoutFitVertical, state).AsLayoutFit;
         }
         
@@ -4547,6 +4548,7 @@ namespace UIForia.Rendering {
 
                     case StylePropertyId.Visibility: return true;
                     case StylePropertyId.Opacity: return true;
+                    case StylePropertyId.ClipBehavior: return true;
                     case StylePropertyId.TextColor: return true;
                     case StylePropertyId.TextFontAsset: return true;
                     case StylePropertyId.TextFontSize: return true;

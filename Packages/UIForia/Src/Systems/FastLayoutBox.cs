@@ -161,6 +161,8 @@ namespace UIForia.Layout {
                 ptr = ptr.nextSibling;
             }
 
+            if (ptr == null) return;
+            
             if (child == firstChild) {
                 firstChild = firstChild.nextSibling;
             }
@@ -194,6 +196,10 @@ namespace UIForia.Layout {
             selfLayoutFitHorizontal = element.style.LayoutFitHorizontal;
             selfLayoutFitVertical = element.style.LayoutFitVertical;
 
+            if (element.style.LayoutBehavior == LayoutBehavior.Ignored) {
+                flags |= LayoutRenderFlag.Ignored;
+            }
+            
             MarkForLayout();
         }
 
@@ -601,18 +607,46 @@ namespace UIForia.Layout {
                 output.prefHeight = output.maxHeight;
         }
 
+        private FastLayoutBox GetParent() {
+            // todo -- convert this to use the flag instead
+            if (parent is TranscludeLayoutBox) {
+                return parent.GetParent();
+            }
+
+            // todo -- this flag is never set 
+            // if ((parent.flags & LayoutRenderFlag.Transclude) == 0) {
+            // }
+                return parent;
+
+            // return parent.GetParent();
+        }
+        
         public void Layout() {
             // todo -- size check
 
+            if ((flags & LayoutRenderFlag.Ignored) != 0) {
+                FastLayoutBox layoutParent = GetParent();
+                SizeConstraints constraints = default;
+                
+                BlockSize widthBlock = default;
+                widthBlock.size = layoutParent.size.width;
+                widthBlock.contentAreaSize = layoutParent.contentSize.width;
+                BlockSize heightBlock = default;
+                heightBlock.size = layoutParent.size.height;
+                heightBlock.contentAreaSize = layoutParent.contentSize.height;
+                
+                GetWidth(widthBlock, ref constraints);
+                float clampedWidth = Mathf.Max(constraints.minWidth, Mathf.Min(constraints.maxWidth, constraints.prefWidth)); 
+                GetHeight(clampedWidth, widthBlock, heightBlock, ref constraints);
+                float clampedHeight = Mathf.Max(constraints.minHeight, Mathf.Min(constraints.maxHeight, constraints.prefHeight));
+                
+                ApplyHorizontalLayout(0, widthBlock, widthBlock.contentAreaSize, constraints.prefWidth, 0, LayoutFit.None);
+                ApplyVerticalLayout(0, heightBlock, heightBlock.contentAreaSize, clampedHeight, 0, LayoutFit.None);
+            }
+            
             if ((flags & LayoutRenderFlag.NeedsLayout) == 0) {
                 return;
             }
-
-            // pivotY = ResolveFixedHeight(element.style.TransformPivotY);
-            // pivotX = ResolveFixedWidth(element.style.TransformPivotX);
-            // scaleX = element.style.TransformScaleX;
-            // scaleY = element.style.TransformScaleY;
-            // rotation = element.style.TransformRotation;
 
             metrics.totalLayoutCount++;
             PerformLayout();
@@ -1005,6 +1039,32 @@ namespace UIForia.Layout {
 
         }
 
+        public void RemoveChildByElement(UIElement element) {
+            int idx = 0;
+            FastLayoutBox ptr = firstChild;
+            FastLayoutBox trail = null;
+            
+            while (ptr != null) {
+                if (ptr.element == element) {
+                    break;
+                }
+                idx++;
+                trail = ptr;
+                ptr = ptr.nextSibling;
+            }
+
+            if (ptr == null) return;
+            
+            if (ptr == firstChild) {
+                firstChild = firstChild.nextSibling;
+            }
+            else {
+                trail.nextSibling = ptr.nextSibling;
+            }
+
+            OnChildRemoved(ptr, idx);
+        }
+        
     }
 
     public struct BlockSize {

@@ -52,16 +52,12 @@ namespace UIForia.Systems {
             int count = parentProperties.Count;
             StyleProperty[] parentPropertiesArray = parentProperties.Array;
 
-            if (element.children == null || element.children.Count == 0) {
-                for (int i = 0; i < count; i++) {
-                    element.style.SetInheritedStyle(parentPropertiesArray[i]);
-                }
-
-                return;
-            }
-
             for (int i = 0; i < count; i++) {
                 element.style.SetInheritedStyle(parentPropertiesArray[i]);
+            }
+
+            if (element.children == null || element.children.Count == 0) {
+                return;
             }
             
             StructList<StyleProperty> inheritedProperties = StructList<StyleProperty>.Get();
@@ -71,6 +67,7 @@ namespace UIForia.Systems {
             for (int i = 0; i < count; i++) {
                 inheritedPropertiesArray[i] = element.style.GetComputedStyleProperty(StyleUtil.InheritedProperties[i]);
             }
+            
             inheritedProperties.Count = count;
 
             for (int i = 0; i < element.children.Count; i++) {
@@ -124,34 +121,34 @@ namespace UIForia.Systems {
         public void OnViewRemoved(UIView view) { }
 
         public void OnElementEnabled(UIElement element) {
-            if (element.parent != null) {
-                int count = StyleUtil.InheritedProperties.Count;
-                UIStyleSet parentStyle = element.parent.style;
-                StructList<StyleProperty> inheritedProperties = StructList<StyleProperty>.Get();
-                inheritedProperties.EnsureCapacity(count);
-                StyleProperty[] inheritedPropertiesArray = inheritedProperties.Array;
-
-                for (int i = 0; i < count; i++) {
-                    inheritedPropertiesArray[i] = parentStyle.GetComputedStyleProperty(StyleUtil.InheritedProperties[i]);
-                }
-
-                inheritedProperties.Count = count;
-                OnElementEnabledStep(element, inheritedProperties);
-                StructList<StyleProperty>.Release(ref inheritedProperties);
-            }
-            else {
-                
-                StructList<StyleProperty> inheritedProperties = StructList<StyleProperty>.Get();
-                inheritedProperties.EnsureCapacity(StyleUtil.InheritedProperties.Count);
-                StyleProperty[] inheritedPropertiesArray = inheritedProperties.Array;
-
-                for (int i = 0; i < inheritedProperties.Count; i++) {
-                    inheritedPropertiesArray[i] = DefaultStyleValues_Generated.GetPropertyValue(StyleUtil.InheritedProperties[i]);
-                }
-
-                OnElementEnabledStep(element, inheritedProperties);
-                StructList<StyleProperty>.Release(ref inheritedProperties);
-            }
+            // if (element.parent != null) {
+            //     int count = StyleUtil.InheritedProperties.Count;
+            //     UIStyleSet parentStyle = element.parent.style;
+            //     StructList<StyleProperty> inheritedProperties = StructList<StyleProperty>.Get();
+            //     inheritedProperties.EnsureCapacity(count);
+            //     StyleProperty[] inheritedPropertiesArray = inheritedProperties.Array;
+            //
+            //     for (int i = 0; i < count; i++) {
+            //         inheritedPropertiesArray[i] = parentStyle.GetComputedStyleProperty(StyleUtil.InheritedProperties[i]);
+            //     }
+            //
+            //     inheritedProperties.Count = count;
+            //     OnElementEnabledStep(element, inheritedProperties);
+            //     StructList<StyleProperty>.Release(ref inheritedProperties);
+            // }
+            // else {
+            //     
+            //     StructList<StyleProperty> inheritedProperties = StructList<StyleProperty>.Get();
+            //     inheritedProperties.EnsureCapacity(StyleUtil.InheritedProperties.Count);
+            //     StyleProperty[] inheritedPropertiesArray = inheritedProperties.Array;
+            //
+            //     for (int i = 0; i < inheritedProperties.Count; i++) {
+            //         inheritedPropertiesArray[i] = DefaultStyleValues_Generated.GetPropertyValue(StyleUtil.InheritedProperties[i]);
+            //     }
+            //
+            //     OnElementEnabledStep(element, inheritedProperties);
+            //     StructList<StyleProperty>.Release(ref inheritedProperties);
+            // }
 
         }
 

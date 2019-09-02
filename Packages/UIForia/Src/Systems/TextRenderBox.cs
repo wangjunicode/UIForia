@@ -235,7 +235,7 @@ namespace UIForia.Rendering {
                 shouldUpdateMaterialProperties = true;
             }
 
-            if (shouldUpdateMaterialProperties) {
+            if ((element.flags & UIElementFlags.EnabledThisFrame) != 0 || shouldUpdateMaterialProperties) {
                 shouldUpdateMaterialProperties = false;
                 float underlayX = (Mathf.Clamp(textSpan.underlayX, -1, 1) + 1) * 0.5f;
                 float underlayY = (Mathf.Clamp(textSpan.underlayY, -1, 1) + 1) * 0.5f;

@@ -71,8 +71,8 @@ namespace UIForia.Rendering {
 		public static readonly OffsetMeasurement AlignmentOriginY = new OffsetMeasurement(0f, OffsetMeasurementUnit.Pixel);
 		public static readonly OffsetMeasurement AlignmentOffsetX = new OffsetMeasurement(0f, OffsetMeasurementUnit.Pixel);
 		public static readonly OffsetMeasurement AlignmentOffsetY = new OffsetMeasurement(0f, OffsetMeasurementUnit.Pixel);
-		public const LayoutFit FitHorizontal = UIForia.Layout.LayoutFit.Unset;
-		public const LayoutFit FitVertical = UIForia.Layout.LayoutFit.Unset;
+		public const LayoutFit LayoutFitHorizontal = UIForia.Layout.LayoutFit.Unset;
+		public const LayoutFit LayoutFitVertical = UIForia.Layout.LayoutFit.Unset;
 		public static readonly UIMeasurement MinWidth = new UIMeasurement(0f, UIMeasurementUnit.Pixel);
 		public static readonly UIMeasurement MaxWidth = new UIMeasurement(3.402823E+38f, UIMeasurementUnit.Pixel);
 		public static readonly UIMeasurement PreferredWidth = new UIMeasurement(1f, UIMeasurementUnit.Content);

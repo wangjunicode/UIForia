@@ -1,5 +1,5 @@
 using System;
-using UIForia.Elements;
+using UIForia.Util;
 
 namespace UIForia.Layout {
 
@@ -30,9 +30,23 @@ namespace UIForia.Layout {
         }
 
         protected override void PerformLayout() {
-            throw new NotImplementedException("Should never call PerformLayout on a transcluded layout box");
+            // this only ever gets called if the element was enabled this frame and not part of the regular update code
         }
 
+        public override void AddChild(FastLayoutBox child) {
+            parent.AddChild(child);
+        }
+
+        public override void SetChildren(LightList<FastLayoutBox> container) {
+            for (int i = 0; i < container.size; i++) {
+                parent.AddChild(container[i]);
+            }
+        }
+
+        public override void RemoveChild(FastLayoutBox child) {
+            parent.RemoveChild(child);
+        }
+        
     }
 
 }

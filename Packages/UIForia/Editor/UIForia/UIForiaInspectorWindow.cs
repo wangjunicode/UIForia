@@ -175,7 +175,7 @@ namespace UIForia.Editor {
 
                     string source = selectedElement.style.GetPropertySource(propertyId);
                     StyleProperty property = selectedElement.style.GetComputedStyleProperty(propertyId);
-                    if (property.hasValue) {
+                    if (!property.hasValue) {
                         property = DefaultStyleValues_Generated.GetPropertyValue(propertyId);
                     }
 
@@ -543,7 +543,6 @@ namespace UIForia.Editor {
             DrawVector2Value("Scale", layoutResult.scale);
             DrawSizeValue("Allocated Size", layoutResult.allocatedSize);
             DrawSizeValue("Actual Size", layoutResult.actualSize);
-            DrawSizeValue("Overflow Size", layoutResult.overflowSize);
 
             DrawLabel("Rotation", layoutResult.rotation.ToString());
             DrawLabel("Clip Rect", $"X: {clipRect.x}, Y: {clipRect.y}, W: {clipRect.width}, H: {clipRect.height}");
@@ -822,7 +821,7 @@ namespace UIForia.Editor {
 
                 case StylePropertyId.TransformPositionX:
                 case StylePropertyId.TransformPositionY:
-                    return DrawTransformOffset(property, isEditable);
+                    return DrawOffsetMeasurement(property, isEditable);
 
                 case StylePropertyId.TransformScaleX:
                 case StylePropertyId.TransformScaleY:
@@ -865,6 +864,22 @@ namespace UIForia.Editor {
                 case StylePropertyId.TextTransform:
                     return DrawEnumWithValue<TextTransform>(property, isEditable);
 
+                case StylePropertyId.AlignmentBehaviorX:
+                case StylePropertyId.AlignmentBehaviorY:
+                    return DrawEnumWithValue<AlignmentBehavior>(property, isEditable);
+                
+                case StylePropertyId.AlignmentDirectionX:
+                case StylePropertyId.AlignmentDirectionY:
+                    return DrawEnumWithValue<AlignmentDirection>(property, isEditable);
+                    
+                
+                
+                case StylePropertyId.AlignmentOffsetX:
+                case StylePropertyId.AlignmentOffsetY:
+                case StylePropertyId.AlignmentOriginX:
+                case StylePropertyId.AlignmentOriginY:
+                    return DrawOffsetMeasurement(property, isEditable);
+                
                 case StylePropertyId.MinWidth:
                 case StylePropertyId.MaxWidth:
                 case StylePropertyId.PreferredWidth:
@@ -994,7 +1009,7 @@ namespace UIForia.Editor {
             return isEditable ? new StyleProperty(property.propertyId, new UIFixedLength(value, unit)) : property;
         }
 
-        private static StyleProperty DrawTransformOffset(StyleProperty property, bool isEditable) {
+        private static StyleProperty DrawOffsetMeasurement(StyleProperty property, bool isEditable) {
             s_Content.text = StyleUtil.GetPropertyName(property);
             GUILayout.BeginHorizontal();
             GUI.enabled = isEditable;

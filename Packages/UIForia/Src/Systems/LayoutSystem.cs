@@ -319,9 +319,6 @@ namespace UIForia.Systems {
 
                 layoutResult.matrix = m;
 
-                layoutResult.overflowSize.width = box.xMax;
-                layoutResult.overflowSize.height = box.yMax;
-
                 layoutResult.localPosition = localPosition;
 
                 layoutResult.actualSize.width = box.actualWidth;

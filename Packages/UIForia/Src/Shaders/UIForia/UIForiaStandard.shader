@@ -110,7 +110,7 @@ Shader "UIForia/Standard"
                 o.texCoord4 = float4(lerp(0, 1, v.texCoord0.x == 0.5 && v.texCoord0.y == 0.5), screenPos.xyw);
                 
                 if(shapeType != ShapeType_Text) {
-                    // o.vertex = UIForiaPixelSnap(o.vertex); // pixel snap is bad for text rendering
+                    o.vertex = UIForiaPixelSnap(o.vertex); // pixel snap is bad for text rendering
                     o.texCoord1 = float4(size.x, size.y, Vert_BorderRadii, objectIndex);
                     o.texCoord2 = float4(shapeType, colorMode, 0, 0);
                     o.texCoord3 = _MiscData[objectIndex];
@@ -180,7 +180,6 @@ Shader "UIForia/Standard"
                     
                     BorderData borderData = GetBorderData(Frag_SDFCoords, Frag_SDFSize, Frag_BorderColors, Frag_BorderSize, Frag_SDFBorderRadii, mainColor);
                     SDFData sdfData;
-                    
                     sdfData.uv = Frag_SDFCoords;
                     sdfData.size = Frag_SDFSize;
                     sdfData.strokeWidth = borderData.size;

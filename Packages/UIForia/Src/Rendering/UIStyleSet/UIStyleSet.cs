@@ -357,6 +357,24 @@ namespace UIForia.Rendering {
             LightList<StylePropertyId>.Release(ref toUpdate);
         }
 
+        internal void UpdateInheritedStyles() {
+
+            if (element.parent == null) {
+                return;
+            }
+
+            int count = StyleUtil.InheritedProperties.Count;
+
+            UIStyleSet parentStyle = element.parent.style;
+            
+            for (int i = 0; i < count; i++) {
+                int propertyId = (int)StyleUtil.InheritedProperties[i];
+                int key = BitUtil.SetHighLowBits(1, propertyId);
+                propertyMap[key] = parentStyle.GetComputedStyleProperty(StyleUtil.InheritedProperties[i]);
+            }
+            
+        }
+        
         internal bool SetInheritedStyle(StyleProperty property) {
             if (propertyMap.ContainsKey((int) property.propertyId)) {
                 return false;

@@ -4,71 +4,43 @@
     <Style>
 
         style container {
-            LayoutType = Grid;
-            PreferredWidth = 300px;
-            PreferredHeight = 300px;
-            GridLayoutMainAxisAutoSize = 100px;
-            GridLayoutCrossAxisAutoSize = 100px;
-            GridLayoutColTemplate = 1mx 1mx 1mx;
-            GridLayoutColAlignment = Center;
-            GridLayoutRowAlignment = Center;
-<!--            GridLayoutRowGap = 12;-->
-<!--            GridLayoutColGap = 12;-->
+         
+            FlexLayoutDirection = Horizontal;
         }
 
         style transcluded {
             LayoutBehavior = TranscludeChildren;
             FlexLayoutDirection = Column;
+            Padding = 50px;
         }
-        
+
         style child {
             BackgroundColor = red;
             PreferredSize = 100px;
         }
         
-        style child1 {
-            PreferredSize = 100px;
-        }
-
-        style child2 {
-        BackgroundColor = white;
-        PreferredSize = 100px;
-        }
-
-        style ignoredchild {
+        style bleu {
             LayoutBehavior = Ignored;
-            BackgroundColor = green;
-            PreferredSize = 100px;
-            TransformPositionX = 300px;
+            BackgroundColor = blue;
         }
 
     </Style>
 
     <Contents style="container">
 
-        <Text>Col 1 is longer</Text>
-        <Text>Col 2</Text>
-        <Text>Col 3 is even longer</Text>
-        
-        <Repeat list="colors" style="transcluded">
-           A
-<!--            <Div style="child1" style.backgroundColor="$item">A</Div>-->
-        </Repeat>
-        
-<!--        <Group x-id="trans" style="transcluded">-->
-<!--            -->
-<!--            <Div style="transcluded">-->
-<!--                <Div style="child2"/>-->
-<!--                <Div style="child2"/>-->
-<!--                <Div style="child2"/>-->
-<!--                <Div style="child2"/>-->
-<!--            </Div>-->
-<!--            -->
-<!--            <Div style="child1"/>-->
-<!--        </Group>-->
+        <Group style="transcluded">
+            <Group style="transcluded">
 
-<!--        <Div style="child"/>-->
-        
+                <Group style="child"/>
+                <Group style="child"/>
+                <Group style="child"/>
+                <Group style="child"/>
+                <Group style="child bleu"/>
+                <Group style="child"/>
+                
+            </Group>
+            
+        </Group>
     </Contents>
 
 </UITemplate>

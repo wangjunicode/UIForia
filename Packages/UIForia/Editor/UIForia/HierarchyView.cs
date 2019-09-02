@@ -135,14 +135,12 @@ public class HierarchyView : TreeView {
         GUIStyleState textStyle = s_ElementNameStyle.normal;
 
         bool isTemplateRoot = (item.element.flags & UIElementFlags.TemplateRoot) != 0;
-
-        bool isChildren = item.element is UIChildrenElement;
-
+        
         Color mainColor = isTemplateRoot
             ? UIForiaEditorTheme.mainColorTemplateRoot 
             : UIForiaEditorTheme.mainColorRegularChild;
 
-        if (isChildren) {
+        if (item.element.style.LayoutBehavior == LayoutBehavior.TranscludeChildren) {
             mainColor = UIForiaEditorTheme.mainColorChildrenElement;
         }
 

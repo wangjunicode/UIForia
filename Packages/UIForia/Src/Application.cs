@@ -629,6 +629,7 @@ namespace UIForia {
 
                 // todo -- profile not calling enable when it's not needed
                 // if (child.flags & UIElementFlags.RequiresEnableCall) {
+                child.style.UpdateInheritedStyles();
                 child.OnEnable();
                 // }
 
@@ -700,6 +701,7 @@ namespace UIForia {
                 // todo -- profile not calling disable when it's not needed
                 // if (child.flags & UIElementFlags.RequiresEnableCall) {
                 child.OnDisable();
+                child.layoutBox = null; // todo -- pool
                 // }
                 
                 if (child.style.currentState != StyleState.Normal) {

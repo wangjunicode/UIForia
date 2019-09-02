@@ -17,6 +17,7 @@ namespace UIForia.Layout {
 
         public const int TextLayoutPoolKey = 100;
         public const int ImageLayoutPoolKey = 200;
+        public const int TranscludedLayoutPoolKey = 300;
 
         public UIView view;
         public FastLayoutBox root;
@@ -57,6 +58,7 @@ namespace UIForia.Layout {
             this.layoutBoxPoolMap[(int) LayoutType.Grid] = new FastLayoutBoxPool<FastGridLayoutBox>();
             this.layoutBoxPoolMap[TextLayoutPoolKey] = new FastLayoutBoxPool<FastTextLayoutBox>();
             this.layoutBoxPoolMap[ImageLayoutPoolKey] = new FastLayoutBoxPool<FastImageLayoutBox>();
+            this.layoutBoxPoolMap[TranscludedLayoutPoolKey] = new FastLayoutBoxPool<TranscludeLayoutBox>();
 
             toLayout.Add(root);
         }
@@ -130,9 +132,9 @@ namespace UIForia.Layout {
         /// Figures out what needs to get enables and builds a flat list of LayoutData.
         /// </summary>
         private void GatherBoxData() {
+            SizeSet[] sizeSets = sizeSetList.array;
             LayoutData[] enabledBoxes = enabledBoxList.array;
             SVGXMatrix[] localMatrices = localMatrixList.array;
-            SizeSet[] sizeSets = sizeSetList.array;
             PositionSet[] positionSets = positionSetList.array;
 
             int idx = 1;
@@ -168,22 +170,24 @@ namespace UIForia.Layout {
                 // option 3 -- array diff
                 // option 4 -- use element.traversalIndex
 
+                // Things to look for
+                    // layout type changed
+                    // behavior changed
+                    // enabled state changed
+                    
                 for (int i = 0; i < childCount; i++) {
                     UIElement childElement = childrenElements[i];
 
-                    if (!childElement.isEnabled) {
-                        if (childElement.layoutBox?.parent != null) {
-                            data.layoutBox.RemoveChild(childElement.layoutBox);
-                            childElement.layoutBox.parent = null;
-                        }
-
+                    // if child is null or child.parent != parent
+                    
+                    if (!childElement.isEnabled ) {
                         continue;
                     }
 
                     FastLayoutBox childBox = childElement.layoutBox;
 
                     // todo -- EnabledThisFrame is borked because input runs after layout and we enable on click
-                    if (childBox == null || (childElement.flags & UIElementFlags.EnabledThisFrame) != 0) {
+                    if (childBox == null) {
                         // apply up-chain selectors
                         // update style data
                         // create layout box
@@ -193,11 +197,22 @@ namespace UIForia.Layout {
                         childBox.traversalIndex = idx;
                         childElement.layoutBox = childBox;
 
-                        if (parentEnabledThisFrame) {
-                            tempChildList.Add(childBox);
-                        }
-                        else {
-                            data.layoutBox.AddChild(childBox);
+                        switch (childBox.element.style.LayoutBehavior) {
+                            case LayoutBehavior.Ignored:
+                            case LayoutBehavior.TranscludeChildren: 
+                                childBox.parent = data.layoutBox;
+                                break;
+                            
+                            default: {
+                                if (parentEnabledThisFrame) {
+                                    tempChildList.Add(childBox);
+                                }
+                                else {
+                                    data.layoutBox.AddChild(childBox);
+                                }
+
+                                break;
+                            }
                         }
                     }
                     else {
@@ -212,13 +227,18 @@ namespace UIForia.Layout {
                         element = childElement,
                         layoutBox = childBox
                     };
+                    
+                    if (data.element.style.LayoutBehavior == LayoutBehavior.Ignored) {
+                        toLayout.Add(childBox);
+                    }
+                    
 #if DEBUG
                     if ((childBox.element.flags & UIElementFlags.DebugLayout) != 0) {
                         System.Diagnostics.Debugger.Break();
                     }
 #endif
                     queue.Enqueue(idx);
-
+                    
                     idx++;
                 }
 
@@ -240,7 +260,11 @@ namespace UIForia.Layout {
 
             // call layout on children recursively, they will naturally not do work if they don't have to. 
             for (int i = 0; i < toLayout.size; i++) {
-                toLayout[i].Layout();
+                
+                if (toLayout[i].element.layoutBox == toLayout[i]) {
+                    toLayout[i].Layout();
+                }
+               
             }
 
             toLayout.QuickClear();
@@ -254,16 +278,16 @@ namespace UIForia.Layout {
                 }
             }
 
-            enabledThisFrame.Add(element);
+            enabledThisFrame.Add(element); // todo -- rethink this, maybe a counter is enough
         }
 
         internal void OnElementDisabled(UIElement element) {
-            if (element.layoutBox == null) {
-                return;
+            if (element.parent.layoutBox != null) {
+                element.parent.layoutBox.RemoveChildByElement(element);
+                element.parent.layoutBox.MarkForLayout();
             }
-
             // maybe add to-layout parent?
-            enabledThisFrame.Remove(element);
+            enabledThisFrame.Remove(element); // todo -- rethink this, maybe a counter is enough
         }
 
         private void UpdateAlignments() {
@@ -380,8 +404,13 @@ namespace UIForia.Layout {
 
 
         private FastLayoutBox CreateLayoutBox(UIElement element) {
+
+            if (element.style.LayoutBehavior == LayoutBehavior.TranscludeChildren) {
+                return layoutBoxPoolMap[TranscludedLayoutPoolKey].Get(this, element);
+            }
+            
             if ((element is UITextElement)) {
-                return (FastTextLayoutBox) layoutBoxPoolMap[TextLayoutPoolKey].Get(this, element);
+                return layoutBoxPoolMap[TextLayoutPoolKey].Get(this, element);
             }
             else if ((element is UIImageElement)) {
                 return layoutBoxPoolMap[ImageLayoutPoolKey].Get(this, element);

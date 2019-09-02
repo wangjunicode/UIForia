@@ -9,15 +9,18 @@
 
         style scroll-track-vertical {
             PreferredSize = 10px, 1psz;
-            BackgroundColor = white;
-            LayoutBehavior = Ignored;
-            TransformBehaviorX = AnchorMinOffset;
+            BackgroundColor = red;
+        //    LayoutBehavior = Ignored;
+            AlignX = 100%;
+            AlignmentBehaviorX = Parent;
+            ZIndex = 1;
         }
 
         style scroll-handle-vertical {
             BorderRadius = 50%;
             BackgroundColor = grey;
-            PreferredWidth = 1pca;
+            PreferredWidth = 10;            
+            AlignmentBehaviorY = Parent;
         }
 
         style scroll-handle-horizontal {
@@ -28,16 +31,17 @@
 
         style scroll-track-horizontal {
             PreferredSize = 1psz, 10px;
-            BackgroundColor = white;
+            BackgroundColor = red;
             LayoutBehavior = Ignored;
-            TransformBehaviorY = AnchorMinOffset;
+            AlignmentBehaviorY = Parent;
+            AlignY = 100%;
         }
 
     </Style>
     
     <Contents style="scrollview">
 
-        <Children/>
+        <Children x-id="scroll-root"/>
 
         <Group onMouseClick="OnClickVertical($event)" onMouseHover="OnHoverVertical($event)" x-id="scroll-track-vertical" style="scroll-track-vertical">
             <Div onDragCreate="OnCreateVerticalDrag($event)" x-id="scroll-handle-vertical" style="scroll-handle-vertical"/>

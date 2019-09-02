@@ -181,9 +181,7 @@ namespace UIForia.Systems {
                 retn += ResolveFixedSize(contentWidth, element.style.PaddingRight);
                 retn += ResolveFixedSize(contentWidth, element.style.BorderLeft);
                 retn += ResolveFixedSize(contentWidth, element.style.BorderRight);
-                //                retn += ResolveFixedWidth(contentWidth, element.style.MarginLeft);
-                //                retn += ResolveFixedWidth(contentWidth, element.style.MarginRight);
-
+                
                 return retn;
             } else {
                 // intrinsic max for vertical direction is the max child intrinsic width
@@ -290,7 +288,7 @@ namespace UIForia.Systems {
             }
            
             retn.height = totalContentHeight;
-            retn.width = largestTrackWidth; // todo compute this!
+            retn.width = contentAreaWidth; // todo compute this!
             return retn;
         }
 
@@ -373,7 +371,7 @@ namespace UIForia.Systems {
                 item.layoutBox.ApplyVerticalLayout(item.mainAxisStart, blockHeight, item.outputHeight, item.size.prefHeight, 0, layoutFit);
             }
 
-            return default;
+            return new Size(track.crossSize, track.mainSize);
          }
 
         private float LayoutTrackHorizontal(float yOffset, in BlockSize blockWidth, in BlockSize blockHeight, Track track, bool isDryRun, bool isWrapping = false) {
@@ -398,6 +396,7 @@ namespace UIForia.Systems {
                     track.maxItemHeight = track.maxItemHeight > heightAndMargin ? track.maxItemHeight : heightAndMargin;
                 }
 
+                // todo -- this doesn't work for min or max height
                 track.crossSize = isWrapping || element.style.PreferredHeight.unit == UIMeasurementUnit.Content ? track.maxItemHeight : size.height - paddingBox.top - paddingBox.bottom - borderBox.top - borderBox.bottom;
 
                 return track.crossSize;
@@ -457,68 +456,6 @@ namespace UIForia.Systems {
             return track.crossSize;
         }
 
-        private float LayoutTrackVertical(float xOffset, in BlockSize blockWidth, in BlockSize blockHeight, Track track, bool isDryRun, bool isWrapping = false) {
-            
-            float horizontalAlignment = 0;
-            LayoutFit horizontalLayoutFit = LayoutFit.None;
-
-            switch (crossAxisAlignment) {
-                case CrossAxisAlignment.Unset:
-                case CrossAxisAlignment.Start:
-                    horizontalAlignment = 0f;
-                    break;
-                case CrossAxisAlignment.Center:
-                    horizontalAlignment = 0.5f;
-                    break;
-                case CrossAxisAlignment.End:
-                    horizontalAlignment = 1f;
-                    break;
-                case CrossAxisAlignment.Stretch:
-                    horizontalLayoutFit = LayoutFit.Fill;
-                    break;
-            }
-
-            Item[] items = itemList.array;
-            float axisOffset = xOffset;
-            
-            if (track.startItemIndex == 0) {
-                axisOffset += paddingBox.left + borderBox.left;
-            }
-            
-            for (int i = track.startItemIndex; i < track.endItemIndex; i++) {
-                ref Item item = ref items[i];
-                FastLayoutBox child = item.layoutBox;
-            
-                child.ApplyHorizontalLayout(axisOffset + item.margin.left, blockWidth, track.crossSize - item.margin.left - item.margin.right, item.size.prefWidth, horizontalAlignment, horizontalLayoutFit);
-            }
-            
-            track.remainingSpace = size.height - paddingBox.top - paddingBox.bottom - borderBox.top - borderBox.bottom - track.mainSize;
-
-            if (track.growPieces > 0 && track.remainingSpace > 0) {
-                GrowHeight(ref track, track.growPieces);
-            } else if (track.shrinkPieces > 0 && track.remainingSpace < 0) {
-                ShrinkHeight(ref track, track.shrinkPieces);
-            }
-
-            ApplyMainAxisVerticalPositioning(track, paddingBox.top + borderBox.top);
-
-            for (int i = 0; i < itemList.size; i++) {
-                ref Item item = ref items[i];
-                LayoutFit layoutFit = LayoutFit.Unset;
-
-                if (item.outputHeight > item.size.prefHeight && item.growFactor > 0) {
-                    layoutFit = LayoutFit.Grow;
-                } else if (item.outputHeight < item.size.prefHeight && item.shrinkFactor > 0) {
-                    layoutFit = LayoutFit.Shrink;
-                }
-
-                item.layoutBox.ApplyVerticalLayout(item.mainAxisStart, blockHeight, item.outputHeight, item.size.prefHeight, 0, layoutFit);
-            }
-
-            
-            return axisOffset;
-        }
-        
         private void ApplyMainAxisHorizontalPositioning(Track track, float mainAxisOffset) {
             Item[] items = itemList.array;
             int itemCount = track.endItemIndex - track.startItemIndex;

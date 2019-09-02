@@ -2,19 +2,32 @@ style <this> {
     BackgroundColor = rgb(20, 0, 20);
     PreferredSize = 1pca;
     TextColor = white;
-    Padding = 20px;
-    FlexLayoutWrap = Wrap;
+    TextFontSize = 1.6em;
+//    Padding = 20px;
+    //FlexLayoutWrap = Wrap;
+}
+
+style vertical-content-sized-container {
+    FlexLayoutDirection = Horizontal;
+    PreferredSize = 1cnt;
+    BackgroundColor = white;
+}
+style group5 {
+    PreferredSize = 1cnt;
+    Margin = 3px;
+}
+
+style no-clip {
+    ClipBehavior = Never;
 }
 
 style demo-container {
     FlexLayoutDirection = Horizontal;
     FlexLayoutWrap = Wrap;
-    PreferredSize = 1pca 1cnt;
+    PreferredSize = 1pca 500px;
 }
 
 style <Heading1> {
-    TextColor = white;
-    TextFontSize = 1.6em;
     Margin = 5px 0 10px;
 }
 
@@ -89,8 +102,8 @@ style fit {
 style fit-vertical {
     FlexLayoutCrossAxisAlignment = End;
     BackgroundColor = white;
-    PreferredSize = 500px;
-    MarginBottom = 10px;
+    PreferredSize = 600px;
+    // MarginBottom = 10px;
 }
 
 style item-fill {

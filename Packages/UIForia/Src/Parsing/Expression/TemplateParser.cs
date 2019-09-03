@@ -367,6 +367,15 @@ namespace UIForia.Parsing.Expression {
                 return ParseTextElement(elementType.rawType, element, templateData);
             }
 
+            if (elementType.rawType != null) {
+                return new UIElementTemplate(
+                    app,
+                    elementType.rawType,
+                    ParseNodes(element.Nodes(), templateData),
+                    ParseAttributes(element)
+                );
+            }
+            
             return new UIElementTemplate(
                 app,
                 element.Name.LocalName,

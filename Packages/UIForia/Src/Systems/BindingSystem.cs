@@ -31,7 +31,6 @@ namespace UIForia.Systems {
             m_ReadBindingTree.ConditionalTraversePreOrder((node) => node.OnUpdate());
         }
 
-
         public void OnDestroy() { }
 
         public void OnViewAdded(UIView view) { }

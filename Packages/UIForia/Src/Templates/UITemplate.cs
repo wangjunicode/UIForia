@@ -46,7 +46,8 @@ namespace UIForia.Templates {
         public readonly Application app;
 
         protected List<ExpressionAliasResolver> resolvers;
-        
+        public bool requiresUpdateCall;
+
         protected UITemplate(Application app, List<UITemplate> childTemplates, List<AttributeDefinition> attributes = null) {
             this.app = app;
             this.childTemplates = childTemplates;
@@ -86,6 +87,10 @@ namespace UIForia.Templates {
                 }
             }
 
+            if (requiresUpdateCall) {
+                perFrameCount++;
+            }
+            
             if (triggeredCount > 0) {
                 triggeredBindings = new Binding[triggeredCount];
             }
@@ -134,6 +139,10 @@ namespace UIForia.Templates {
                 }
             }
 
+            if (requiresUpdateCall) {
+                perFrameBindings[perFrameCount] = new UpdateBinding("Element::Update");
+            }
+            
             s_BindingList.Clear();
         }
 
@@ -160,6 +169,8 @@ namespace UIForia.Templates {
         public virtual void Compile(ParsedTemplate template) {
             if (isCompiled) return;
             isCompiled = true;
+            requiresUpdateCall = ReflectionUtil.IsOverride(elementType.GetMethod("OnUpdate"));
+            
             if (!(typeof(UIElement).IsAssignableFrom(elementType))) {
                 Debug.Log($"{elementType} must be a subclass of {typeof(UIElement)} in order to be used in templates");
                 return;

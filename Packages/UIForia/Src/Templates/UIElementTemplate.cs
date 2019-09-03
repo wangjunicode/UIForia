@@ -58,7 +58,7 @@ namespace UIForia.Templates {
         public override void Compile(ParsedTemplate template) {
             if (isCompiled) return;
             isCompiled = true;
-
+            requiresUpdateCall = elementType != null && ReflectionUtil.IsOverride(elementType.GetMethod("OnUpdate"));
             // todo -- add namespaces from initiating assembly
             if (rootType == null) {
                 ProcessedType processedType = TypeProcessor.ResolveTagName(tagName, template.usings);

@@ -223,7 +223,20 @@ namespace UIForia.Bindings {
         }
 
     }
-    
+
+    public class UpdateBinding : Binding {
+
+        public UpdateBinding(string bindingId) : base(bindingId) { }
+
+        public override void Execute(UIElement element, ExpressionContext context) {
+            element.OnUpdate();
+        }
+
+        public override bool IsConstant() {
+            return false;
+        }
+
+    }
     
     public class CallbackBinding : Binding {
 

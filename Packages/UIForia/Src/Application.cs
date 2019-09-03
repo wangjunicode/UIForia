@@ -74,7 +74,6 @@ namespace UIForia {
         private readonly UITaskSystem m_BeforeUpdateTaskSystem;
         private readonly UITaskSystem m_AfterUpdateTaskSystem;
 
-        protected readonly SkipTree<UIElement> updateTree;
         public static readonly UIForiaSettings Settings;
         private ElementPool elementPool;
 
@@ -130,7 +129,6 @@ namespace UIForia {
 
             this.m_Systems = new List<ISystem>();
             this.m_Views = new List<UIView>();
-            this.updateTree = new SkipTree<UIElement>();
 
             m_StyleSystem = new StyleSystem();
             m_BindingSystem = new BindingSystem();
@@ -418,10 +416,7 @@ namespace UIForia {
                     element.parent.children[i].siblingIndex = i;
                 }
             }
-
-            // todo -- remove with new binding system
-            updateTree.RemoveHierarchy(element);
-
+            
             for (int i = 0; i < m_Systems.Count; i++) {
                 m_Systems[i].OnElementDestroyed(element);
             }
@@ -459,12 +454,12 @@ namespace UIForia {
 
         public void Update() {
             // todo -- if parent changed we don't want to double update, best to iterate to array & diff a frame id
-            updateTree.ConditionalTraversePreOrder(Time.frameCount, (element, frameId) => {
-                if (element == null) return true; // when would element be null? root?
-                if (element.isDisabled) return false;
-                element.OnUpdate();
-                return true;
-            });
+//            updateTree.ConditionalTraversePreOrder(Time.frameCount, (element, frameId) => {
+//                if (element == null) return true; // when would element be null? root?
+//                if (element.isDisabled) return false;
+//                element.OnUpdate();
+//                return true;
+//            });
 
             m_AnimationSystem.OnUpdate();
 
@@ -839,13 +834,6 @@ namespace UIForia {
                 }
                 else {
                     current.flags &= ~UIElementFlags.AncestorEnabled;
-                }
-
-                UIElement.UIElementTypeData typeData = current.GetTypeData();
-
-                // todo -- build tree subsection & add it all at once
-                if (typeData.requiresUpdate) {
-                    updateTree.AddItem(current);
                 }
 
                 elementMap[current.id] = current;

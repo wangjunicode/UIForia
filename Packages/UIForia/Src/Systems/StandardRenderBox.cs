@@ -275,7 +275,7 @@ namespace UIForia.Rendering {
             byte b2 = (byte) (((borderRadiusBottomLeft * 1000)) * 0.5f);
             byte b3 = (byte) (((borderRadiusBottomRight * 1000)) * 0.5f);
 
-            float packedBorderRadii = VertigoUtil.BytesToFloat(b0, b1, b2, b3);
+            float packedBorderRadii = VertigoUtil.BytesToFloat(b0, b1, b3, b2);
 
             float packedBorderColorTop = VertigoUtil.ColorToFloat(borderColorTop);
             float packedBorderColorRight = VertigoUtil.ColorToFloat(borderColorRight);

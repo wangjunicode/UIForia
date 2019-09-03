@@ -528,31 +528,55 @@ fixed4 SDFColor(SDFData sdfData, fixed4 borderColor, fixed4 contentColor, float 
     float radius = clamp(minSize * sdfData.radius, 0, minSize);
     float2 center = ((sdfData.uv.xy - 0.5) * size);
     
-    if(halfStrokeWidth <= 0) {
-        halfStrokeWidth = 1;
+    if(halfStrokeWidth < 1) {
+        halfStrokeWidth = 2;
         borderColor = contentColor;
     }
+    else {
+     
+    }
     
+    halfStrokeWidth = 2;
+    contentColor = fixed4(1, 0, 0, 1);
+    borderColor = fixed4(0, 1, 1, 1);
+    //halfStrokeWidth = 6;
+    //borderColor = contentColor;
+
     float sdf = RectSDF(center, (size * 0.5) - halfStrokeWidth, radius - halfStrokeWidth);
     float retn = abs(sdf) - halfStrokeWidth;
    
-    fixed4 innerColor;
-    fixed4 outerColor;
+    fixed4 innerColor = contentColor;
+    fixed4 outerColor = borderColor;
    
    // contentColor = contentColor; //lerp(contentColor, fixed4(borderColor.rgb, 0), contentColor.a == 0);
    // borderColor = lerp(contentColor, borderColor, hasBorder);
     
     // border to edge
-    if(sdf > halfStrokeWidth * 0.5) {
+   /* if(sdf >= halfStrokeWidth * 0.5) {
         innerColor = borderColor;
         outerColor = fixed4(borderColor.rgb, 0);
+    }
+    else if(sdf >= 0) {
+       outerColor = fixed4(1, 0, 0, 1);
+       innerColor = fixed4(1, 0, 0, 1);
     }
     // content
     else {
        innerColor = borderColor;
        outerColor = contentColor;
     }
-               
+    */
+    
+    if(sdf == 0) {
+      innerColor = outerColor;
+      outerColor = fixed4(outerColor.rgb, 0);
+    }
+    else {
+          //innerColor = outerColor;
+   //   outerColor = fixed4(innerColor.rgb, 0);
+    }
+              
+    
    // if(sdf > 0) {
    //    contentColor = lerp(fixed4(contentColor.rgb, 0), fixed4(borderColor.rgb, 0), hasBorder);
    // }

@@ -1,0 +1,55 @@
+<UITemplate>
+
+    <!--    <Style path="Theme.style" alias="theme"/>-->
+    <!--    <Style path="Util.style" alias="util"/>-->
+    <Style path="Demo/BuildingDesigner/BuildingDesigner.style" alias="designer-theme-root"/>
+    <!--    <Style path="Demo/BuildingDesigner/BuildingDesignerTopBar.style" alias="designer-theme-top"/>-->
+    <!--    <Style path="Demo/BuildingDesigner/BuildingDesignerMain.style" alias="designer-theme-main"/>-->
+    <!--    <Style path="Demo/BuildingDesigner/BuildingDesignerFooter.style" alias="designer-theme-footer"/>-->
+    <!--    <Style path="BasicElements/KlangButton/KlangButton.style" alias="klang-button"/>-->
+
+    <Contents>
+
+        <Group style="building-designer-root">
+
+            <Group style="building-designer-top-bar">
+
+                <Text>CONSTRUCTION MODE</Text>
+
+                
+                <Select--int style="select-height" options="brushTypes" onValueChanged="OnBrushTypeChanged"/>
+
+            </Group>
+
+            <Group></Group>
+            <Group></Group>
+
+        </Group>
+        <!--                <Group style="top-left-area flex-horizontal-centered">-->
+
+        <!--                    <Text>CONSTRUCTION MODE</Text>-->
+
+        <!--&lt;!&ndash;                    <Group style="flex-horizontal-centered ml2">&ndash;&gt;-->
+        <!--&lt;!&ndash;                        <Image src="'new_ui_icons/ui_icon_undo'" style="redo-button-image"/>&ndash;&gt;-->
+        <!--&lt;!&ndash;                        <Div style="top-bar-text inactive">UNDO</Div>&ndash;&gt;-->
+        <!--&lt;!&ndash;                    </Group>&ndash;&gt;-->
+
+        <!--&lt;!&ndash;                    <Group style="flex-horizontal-centered ml1">&ndash;&gt;-->
+        <!--&lt;!&ndash;                        <Image src="'new_ui_icons/ui_icon_redo'" style="redo-button-image"/>&ndash;&gt;-->
+        <!--&lt;!&ndash;                        <Div style="top-bar-text inactive">REDO</Div>&ndash;&gt;-->
+        <!--&lt;!&ndash;                    </Group>&ndash;&gt;-->
+
+        <!--                    <Div style="top-bar-text ml1 mr1">TYPE:</Div>-->
+        <!--                    <Select&#45;&#45;int style="top-bar-text mr1 fixed-width-type" options="BrushTypes" onValueChanged="OnBrushTypeChanged"/>-->
+
+        <!--                    <Div style="flex-horizontal-centered">-->
+        <!--                        <Div style="top-bar-text ml1 mr1">STYLE:</Div>-->
+        <!--&lt;!&ndash;                        <Select&#45;&#45;int disabled="!IsBasicSelected" style="top-bar-text mr1 fixed-width-style" options="BasicStyles" onValueChanged="OnBasicStyleChanged"/>&ndash;&gt;-->
+        <!--                    </Div>-->
+        <!--                    -->
+        <!--                </Group>-->
+        <!--            </Group>-->
+        <!--        </Group>-->
+    </Contents>
+
+</UITemplate>

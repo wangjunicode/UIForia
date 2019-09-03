@@ -1,0 +1,54 @@
+// ------------------ TOP-BAR ------------------ 
+
+import "Theme.style" as theme;
+
+const topBarFramePad = 0.7em;
+const topBarTextSize = 12px;
+const iconSize = 30px;
+
+style building-designer-top-bar {
+    BackgroundColor = rgb(239, 239, 239);
+    
+    TextColor = @theme.darkGrey;
+    TextTransform = UpperCase;
+    TextFontSize = 1.1em;
+    
+    FlexLayoutDirection = Column;
+    FlexLayoutCrossAxisAlignment = Center;
+    FlexLayoutMainAxisAlignment = Start;
+        
+    BorderBottom = 3px;
+    BorderColor = rgb(175, 175, 175);
+    
+    Padding = @topBarFramePad;
+    PaddingLeft = 1.2em;
+    
+    PreferredWidth = 1psz;
+}
+
+style top-bar-text {
+    TextFontSize = @topBarTextSize;
+}
+
+style top-left-area {
+    PreferredWidth = 0.5pca;
+    FlexLayoutMainAxisAlignment = Start;
+}
+style top-right-area {
+    PreferredWidth = 0.5pca;
+    FlexLayoutMainAxisAlignment = End;
+}
+
+style redo-button-image {
+    BackgroundColor = @theme.lightGrey;
+    PreferredSize = @iconSize;
+    MarginLeft = 5px;
+}
+
+style fixed-width-type {
+    PreferredWidth = 160px;
+}
+
+style fixed-width-style {
+    PreferredWidth = 200px;
+}

@@ -1,0 +1,71 @@
+// ------------------ FOOTER ------------------ 
+import "Theme.style" as theme;
+import "BuildingDesigner/BuildingDesigner.style" as designerTheme;
+
+const buttonSize = 60px;
+
+style building-designer-footer {
+    BackgroundColor = black;
+    
+    TextColor = rgb(200, 200, 200);
+    
+    FlexLayoutDirection = Column;
+    FlexLayoutCrossAxisAlignment = Center;
+    FlexLayoutMainAxisAlignment = Start;
+        
+    PreferredWidth = 1psz;
+    PreferredHeight = 1cnt;
+}
+
+style footer-icon {
+    PreferredHeight = 30px;
+    PreferredWidth = 30px;
+    MarginRight = 5px;
+}
+
+style footer-left-area {
+    PreferredWidth = 0.6pca;
+    FlexLayoutMainAxisAlignment = Start;
+}
+
+style footer-right-area {
+    PreferredWidth = 0.4pca;
+    FlexLayoutMainAxisAlignment = End;
+}
+
+style footer-button {
+    MarginLeft = 10px;
+    MarginRight = 10px;
+    PreferredHeight = @buttonSize;
+}
+
+style footer-total-cost {
+    TextFontSize = 14px;
+}
+
+style confirm-button {
+    TextColor = @designerTheme.confirmColor;
+        
+    [hover] {
+        BackgroundColor = @designerTheme.confirmColor;
+        TextColor = white;
+    }
+}
+
+style save-exit-button {
+    TextColor = @designerTheme.saveExitColor;
+    
+    [hover] {
+        BackgroundColor = @designerTheme.saveExitColor;
+        TextColor = white;
+    }
+}
+
+style cancel-button {
+    TextColor = @designerTheme.cancelColor;
+    
+    [hover] {
+        BackgroundColor = @designerTheme.cancelColor;
+        TextColor = white;
+    }
+}

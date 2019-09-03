@@ -123,7 +123,22 @@ namespace UIForia.Layout {
                 } else {
                     if (ptr.element.parent.depth == child.element.parent.depth) {
                         // find common parent, compare sibling index
-                        throw new NotImplementedException();
+                        UIElement left = ptr.element.parent;
+                        UIElement right = child.element.parent;
+                        bool loop = true;
+                        while (loop) {
+                            if (left.parent == right.parent) {
+                                if (left.siblingIndex > right.siblingIndex) {
+                                    child.nextSibling = ptr.nextSibling;
+                                    ptr.nextSibling = child;
+                                    OnChildAdded(child, idx);
+                                }
+                                break;
+                            }
+                            left = left.parent;
+                            right = right.parent;
+                        }
+                        
                     } else {
                         if (ptr.element.depth > child.element.depth) {
                             child.nextSibling = ptr.nextSibling;

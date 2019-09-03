@@ -127,6 +127,8 @@ namespace UIForia.Layout.LayoutTypes {
             BlockSize widthBlock = containingBoxWidth;
             BlockSize heightBlock = containingBoxHeight;
 
+            AdjustBlockSizes(ref widthBlock, ref heightBlock);
+            
             Place();
 
             GridPlacement[] placements = placementList.array;

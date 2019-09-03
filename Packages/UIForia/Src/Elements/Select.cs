@@ -148,9 +148,9 @@ namespace UIForia.Elements {
 
             if (disabled) {
                 SetAttribute("disabled", disabledAttributeValue);
-                DisableAllChildren(this);
+               // DisableAllChildren(this);
             } else if (GetAttribute("disabled") != null) {
-                DisableAllChildren(this);
+              //  DisableAllChildren(this);
             }
         }
 
@@ -177,11 +177,11 @@ namespace UIForia.Elements {
 
             if (!disabled && HasAttribute("disabled")) {
                 SetAttribute("disabled", null);
-                EnableAllChildren(this);
+                //EnableAllChildren(this);
             } 
             else if (disabled && !HasAttribute("disabled")) {
                 SetAttribute("disabled", disabledAttributeValue);
-                DisableAllChildren(this);
+//                DisableAllChildren(this);
             }
 
             if (selecting) {

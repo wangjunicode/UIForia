@@ -1,0 +1,310 @@
+// ------------------ MAIN ------------------ 
+//TODO: tooltips on brush-images (with cost)
+//TODO: grid with buttons doesn't stretch vertically
+
+import "Theme.style" as theme;
+
+const durationBase = 100;
+const durationDialog = 500;
+
+const backgroundColor = rgb(253, 253, 253);
+const brushButtonSize = 190px;
+
+animation button-normal {
+    [options] {
+        duration = @durationBase;
+    }
+
+    [keyframes] {
+        0% {
+            BackgroundColor = #fff;
+            Border = 2px; 
+        }
+        100% {
+            BackgroundColor = #C8C8C8;
+            Border = 0px; 
+        }
+    }
+}
+
+animation button-hover {
+    [options] {
+        duration = @durationBase;
+    }
+    
+    [keyframes] {
+        0% {
+            BackgroundColor = #C8C8C8; 
+            Border = 0px; 
+        }
+        100% {
+            BackgroundColor = #fff;
+            Border = 2px; 
+        }
+    }
+}
+
+animation dialog-button-normal {
+    [options] {
+        duration = @durationBase;
+    }
+        
+    [keyframes] {
+        0% {
+            Border = 5px;
+        }
+        100% {
+            Border = 0px;
+        }
+    }
+}
+
+animation dialog-button-hover {
+    [options] {
+        duration = @durationBase;
+    }
+    
+    [keyframes] {
+        0% {
+            Border = 0px; 
+        }
+        100% {
+            Border = 5px;
+        }
+    }
+}
+
+animation open-dialog {
+    [options] {
+        duration = @durationDialog;
+        timingFunction = CubicEaseInOut;
+    }
+    
+    [keyframes] {
+        0% {
+            TransformPositionY = 500px;
+        }
+        
+        100% {
+            TransformPositionY = 0px;
+        }
+    }
+}
+
+animation close-dialog {
+    [options] {
+        duration = @durationDialog;
+        timingFunction = CubicEaseInOut;
+    }
+    
+    [keyframes] {
+        0% {
+            TransformPositionY = 0px;
+        }
+        
+        100% {
+            TransformPositionY = 500px;
+        }
+    }
+}
+
+style dialog {
+    BackgroundColor = rgba(0, 0, 0, 250);
+    TextColor = white;
+    
+    TextFontStyle = UpperCase;
+    
+    LayoutBehavior = Ignored;
+    
+    PreferredSize = 1pca;
+    
+    TransformBehaviorY = AnchorMinOffset;
+    TransformPositionY = 600px;
+    
+    FlexLayoutDirection = Row;
+    FlexLayoutMainAxisAlignment = Center;
+    FlexLayoutCrossAxisAlignment = Center;
+}
+
+style dialog-title {
+    TextFontSize = 25px;
+}
+
+style dialog-buttons {
+    MarginTop = 10px;
+    MarginBottom = 10px;
+    
+    PreferredSize = 1cnt;
+    
+    FlexLayoutDirection = Column;
+    FlexLayoutMainAxisAlignment = Center;
+}
+
+style dialog-button {
+    TextFontSize = 35px;
+    
+    PreferredSize = 120px;
+    BorderRadius = 60px;
+    
+    Margin = 15px;
+    
+    FlexLayoutMainAxisAlignment = Center;
+    FlexLayoutCrossAxisAlignment = Center;
+    
+    BorderColor = white;
+    
+    run animation(dialog-button-normal);
+    [hover] {
+        run animation(dialog-button-hover);
+    }
+}
+
+style building-designer-main {
+    BackgroundColor = @backgroundColor;
+    FlexLayoutDirection = Column;
+    FlexLayoutCrossAxisAlignment = Stretch;
+}
+
+style tools-area {
+    Padding = 15px;
+}
+
+style previews-area {
+    Padding = 10px;
+    FlexItemGrow = 1;
+    PreferredHeight = 1pca;
+}
+
+style grid-with-buttons {
+    LayoutType = Grid;
+    GridLayoutColTemplate = 64px 64px;
+    GridLayoutCrossAxisAutoSize = 64px;
+    GridLayoutColGap = 10;
+    GridLayoutRowGap = 10;
+    GridLayoutColAlignment = Center;
+    GridLayoutRowAlignment = Center;
+}
+
+style tools-button {
+    PreferredSize = 50px;
+    BackgroundColor = @theme.lightGrey;
+    FlexLayoutCrossAxisAlignment = Center;
+    FlexLayoutMainAxisAlignment = Center;
+    
+    [active] {
+        BackgroundColor = black;
+    }
+}
+
+// Ignore this element and treat it's children as the parent's.
+style transclude-children {
+    LayoutBehavior = TranscludeChildren;
+}
+
+style tools-active-button {
+    BackgroundColor = black;
+}
+
+style color-preview {
+    BorderRadius = 50px;
+    Border = 2px;
+    BorderColor = black;
+}
+
+style color-palette {
+    PreferredSize = 1cnt;
+    
+    BackgroundColor = black;
+    
+    LayoutBehavior = Ignored;
+    
+    TransformBehaviorX = AnchorMaxOffset;
+    TransformPositionX = -1.05w;
+    
+    ZIndex = 4;
+}
+
+style color-selection-container {
+    LayoutType = Grid;
+    GridLayoutColTemplate = 40px 40px 40px 40px 40px 40px 40px 40px;
+    GridLayoutColGap = 2;
+    
+    Border = 2px;
+    BorderColor = black;
+}
+
+style palette-item {
+    PreferredSize = 40px;
+    
+    Border = 0px;
+    BorderColor = black;
+    
+    [hover] {
+        Border = 4px;
+        BorderColor = white;
+    }
+}
+
+style grid-with-brushes {
+    LayoutType = Grid;
+    GridLayoutColTemplate = 1mx 1mx 1mx 1mx;
+    GridLayoutCrossAxisAutoSize = 250px;
+    GridLayoutColGap = 10;
+    GridLayoutRowGap = 10;
+}
+
+style brush-button {
+    TextColor = @theme.lightGrey;
+
+    Padding = 4px;
+
+    BorderRadius = 10px;
+
+    FlexLayoutCrossAxisAlignment = Center;
+    FlexLayoutMainAxisAlignment = Center;
+    BorderColor = black; 
+    
+    MinWidth = @brushButtonSize;
+    
+    run animation(button-normal);
+    [hover] {
+        Border = 2px;
+        run animation(button-hover);
+    }
+}
+
+style image-width {
+    PreferredSize = @brushButtonSize;
+}
+
+style brush-label {
+    //MaxWidth = 180px;
+    MarginBottom = 10px;
+}
+
+style remove-button {
+    LayoutBehavior = Ignored;
+    AnchorRight = 8px;
+    AnchorTop = 8px;
+    TransformBehaviorX = AnchorMaxOffset;
+    TransformBehaviorY = AnchorMinOffset;
+    
+    BorderRadius = 20px;
+    
+    BackgroundColor = @theme.darkGrey;
+    
+    TextColor = white;
+    TextFontSize = 18px;
+
+    [hover] {
+        BackgroundColor = red;
+    }
+    [active] {
+        BackgroundColor = rgb(150, 0, 0);
+    }
+}
+
+style plus-sign {
+    BackgroundColor = rgb(230,230,230);
+    PreferredSize = 80px;
+}

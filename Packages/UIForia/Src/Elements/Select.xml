@@ -4,7 +4,7 @@
     <Style>
 
         style select {
-            PreferredWidth = 1pca;
+            PreferredSize = 1pca 320px;
             MinWidth = 1cnt;
             [attr:disabled] {
                 Opacity = 0.4;
@@ -15,12 +15,12 @@
             MinWidth = 1cnt;
             Border = 1px 0 1px 1px;
             BorderColor = #b2b2b2;
-            BorderRadius = 4px 0 4px 0;
+            BorderRadius = 24px 0 24px 0;
             BackgroundColor = white;
             Padding = 6px 8px;
             Overflow = Hidden;
             [hover] {
-                BorderColor = #00b5d9;
+                //BorderColor = #00b5d9;
             }
             [attr:disabled] {
                 [hover] {
@@ -94,9 +94,9 @@
         style chevron-container {
             BackgroundColor = #00b5d0;
             BorderColor = #006d82;
-            BorderRadius = 0 4px 0 4px;
-            Border = 1px;
-            PreferredSize = 26px 1psz;
+            BorderRadius = 0 24px 0 24px;
+            //Border = 1px;
+            PreferredSize = 26px 100%;
             FlexLayoutMainAxisAlignment = SpaceAround;
             FlexLayoutCrossAxisAlignment = Center;
             FlexLayoutDirection = Row;

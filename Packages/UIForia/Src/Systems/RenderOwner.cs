@@ -183,12 +183,12 @@ namespace Src.Systems {
 
             wrapperList.Sort(s_RenderComparer);
 
-            if (!printed) {
-                printed = true;
-                for (int i = 0; i < wrapperList.size; i++) {
-                    Debug.Log(wrapperList.array[i].element + " -- " + (wrapperList.array[i].renderOp));
-                }
-            }
+//            if (!printed) {
+//                printed = true;
+//                for (int i = 0; i < wrapperList.size; i++) {
+//                    Debug.Log(wrapperList.array[i].element + " -- " + (wrapperList.array[i].renderOp));
+//                }
+//            }
         }
 
         private bool printed = false; // todo remove

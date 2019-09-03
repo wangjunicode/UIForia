@@ -55,7 +55,7 @@ namespace UIForia.Rendering {
 		public static readonly IReadOnlyList<UIForia.Layout.LayoutTypes.GridTrackSize> GridLayoutColTemplate = ListPool<GridTrackSize>.Empty;
 		public static readonly IReadOnlyList<UIForia.Layout.LayoutTypes.GridTrackSize> GridLayoutRowTemplate = ListPool<GridTrackSize>.Empty;
 		public static readonly IReadOnlyList<UIForia.Layout.LayoutTypes.GridTrackSize> GridLayoutColAutoSize = new List<GridTrackSize>() {GridTrackSize.MaxContent};
-		public static readonly IReadOnlyList<UIForia.Layout.LayoutTypes.GridTrackSize> GridLayoutRowAutoSize = new List<GridTrackSize>() {GridTrackSize.FractionalRemaining};
+		public static readonly IReadOnlyList<UIForia.Layout.LayoutTypes.GridTrackSize> GridLayoutRowAutoSize = new List<GridTrackSize>() {GridTrackSize.MaxContent};
 		public const float GridLayoutColGap = 0f;
 		public const float GridLayoutRowGap = 0f;
 		public const GridAxisAlignment GridLayoutColAlignment = UIForia.Layout.GridAxisAlignment.Grow;
@@ -233,7 +233,7 @@ namespace UIForia.Rendering {
 				case StylePropertyId.GridLayoutColAutoSize:
 					 return new StyleProperty(StylePropertyId.GridLayoutColAutoSize, new List<GridTrackSize>() {GridTrackSize.MaxContent});
 				case StylePropertyId.GridLayoutRowAutoSize:
-					 return new StyleProperty(StylePropertyId.GridLayoutRowAutoSize, new List<GridTrackSize>() {GridTrackSize.FractionalRemaining});
+					 return new StyleProperty(StylePropertyId.GridLayoutRowAutoSize, new List<GridTrackSize>() {GridTrackSize.MaxContent});
 				case StylePropertyId.GridLayoutColGap:
 					 return new StyleProperty(StylePropertyId.GridLayoutColGap, 0f);
 				case StylePropertyId.GridLayoutRowGap:

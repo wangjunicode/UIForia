@@ -369,7 +369,6 @@ BorderData GetBorderData(float2 coords, float2 size, float4 packedBorderColors, 
     fixed4 borderColorRight = UnpackColor(asuint(packedBorderColors.y));
     fixed4 borderColorBottom = UnpackColor(asuint(packedBorderColors.z));
     fixed4 borderColorLeft = UnpackColor(asuint(packedBorderColors.w));
-
     BorderData retn;
 
     uint packedRadiiUInt = asuint(packedRadii);

@@ -82,7 +82,7 @@ namespace UIForia.Editor {
             new PropertyGenerator<IReadOnlyList<GridTrackSize>>(StylePropertyId.GridLayoutColTemplate, ListPool<GridTrackSize>.Empty, InheritanceType.NotInherited, "ListPool<GridTrackSize>.Empty"),
             new PropertyGenerator<IReadOnlyList<GridTrackSize>>(StylePropertyId.GridLayoutRowTemplate, ListPool<GridTrackSize>.Empty, InheritanceType.NotInherited, "ListPool<GridTrackSize>.Empty"),
             new PropertyGenerator<IReadOnlyList<GridTrackSize>>(StylePropertyId.GridLayoutColAutoSize, ListPool<GridTrackSize>.Empty, InheritanceType.NotInherited, "new List<GridTrackSize>() {GridTrackSize.MaxContent}"),
-            new PropertyGenerator<IReadOnlyList<GridTrackSize>>(StylePropertyId.GridLayoutRowAutoSize, ListPool<GridTrackSize>.Empty, InheritanceType.NotInherited, "new List<GridTrackSize>() {GridTrackSize.FractionalRemaining}"),
+            new PropertyGenerator<IReadOnlyList<GridTrackSize>>(StylePropertyId.GridLayoutRowAutoSize, ListPool<GridTrackSize>.Empty, InheritanceType.NotInherited, "new List<GridTrackSize>() {GridTrackSize.MaxContent}"),
             new AnimatedPropertyGenerator<float>(StylePropertyId.GridLayoutColGap, 0),
             new AnimatedPropertyGenerator<float>(StylePropertyId.GridLayoutRowGap, 0),
             new PropertyGenerator<GridAxisAlignment>(StylePropertyId.GridLayoutColAlignment, GridAxisAlignment.Grow),

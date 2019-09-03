@@ -305,7 +305,7 @@ namespace UIForia.Layout {
 
                 Vector2 alignedPosition = box.alignedPosition;
 
-                if (box.alignmentTargetX != AlignmentBehavior.Default) {
+                if (box.alignmentTargetY != AlignmentBehavior.Unset && box.alignmentTargetX != AlignmentBehavior.Default) {
                     OffsetMeasurement originX = box.element.style.AlignmentOriginX;
                     OffsetMeasurement offsetX = box.element.style.AlignmentOffsetX;
                     AlignmentDirection direction = box.element.style.AlignmentDirectionX;
@@ -323,7 +323,7 @@ namespace UIForia.Layout {
                     }
                 }
 
-                if (box.alignmentTargetY != AlignmentBehavior.Default) {
+                if (box.alignmentTargetY != AlignmentBehavior.Unset && box.alignmentTargetY != AlignmentBehavior.Default) {
                     OffsetMeasurement originY = box.element.style.AlignmentOriginY;
                     OffsetMeasurement offsetY = box.element.style.AlignmentOffsetY;
                     AlignmentDirection direction = box.element.style.AlignmentDirectionY;

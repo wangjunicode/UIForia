@@ -43,12 +43,80 @@ namespace UIForia.Layout.LayoutTypes {
             return 0;
         }
 
-        public override float ComputeContentWidth(BlockSize blockWidth) {
-            return 0;
+        public override float ComputeContentWidth(BlockSize widthBlock) {
+            if (firstChild == null) {
+                return 0;
+            }
+
+            BlockSize heightBlock = containingBoxHeight;
+
+            AdjustBlockSizes(ref widthBlock, ref heightBlock);
+
+            Place();
+
+            GridPlacement[] placements = placementList.array;
+            int placementCount = placementList.size;
+
+            for (int i = 0; i < placementCount; i++) {
+                ref GridPlacement placement = ref placements[i];
+                placement.layoutBox.GetWidth(widthBlock, ref placement.size);
+                placement.layoutBox.GetMarginHorizontal(widthBlock, ref placement.margin);
+                placement.outputWidth = placement.size.prefWidth + placement.margin.left + placement.margin.right;
+            }
+
+            ResolveHorizontalTrackWidths(widthBlock, size.width - paddingBox.left - paddingBox.right - borderBox.left - borderBox.right);
+
+            PositionTracks(colTrackList, element.style.GridLayoutColGap);
+
+            for (int i = 0; i < placementCount; i++) {
+                ref GridPlacement placement = ref placements[i];
+                placement.layoutBox.GetHeight(placement.layoutBox.size.width, widthBlock, heightBlock, ref placement.size);
+                placement.layoutBox.GetMarginVertical(heightBlock, ref placement.margin);
+                placement.outputHeight = placement.size.prefHeight + placement.margin.top + placement.margin.bottom;
+            }
+
+            ResolveVerticalTrackHeights(heightBlock, size.height - paddingBox.top - paddingBox.bottom - borderBox.top - borderBox.bottom);
+
+            PositionTracks(rowTrackList, element.style.GridLayoutRowGap);
+
+            return colTrackList.array[colTrackList.size - 1].position + colTrackList.array[colTrackList.size - 1].size;
         }
 
-        public override float ComputeContentHeight(float width, BlockSize blockWidth, BlockSize blockHeight) {
-            return 0;
+        public override float ComputeContentHeight(float width, BlockSize widthBlock, BlockSize heightBlock) {
+            if (firstChild == null) {
+                return 0;
+            }
+
+            AdjustBlockSizes(ref widthBlock, ref heightBlock);
+            
+            Place();
+
+            GridPlacement[] placements = placementList.array;
+            int placementCount = placementList.size;
+
+            for (int i = 0; i < placementCount; i++) {
+                ref GridPlacement placement = ref placements[i];
+                placement.layoutBox.GetWidth(widthBlock, ref placement.size);
+                placement.layoutBox.GetMarginHorizontal(widthBlock, ref placement.margin);
+                placement.outputWidth = placement.size.prefWidth + placement.margin.left + placement.margin.right;
+            }
+
+            ResolveHorizontalTrackWidths(widthBlock, size.width - paddingBox.left - paddingBox.right - borderBox.left - borderBox.right);
+
+            PositionTracks(colTrackList, element.style.GridLayoutColGap);
+
+            for (int i = 0; i < placementCount; i++) {
+                ref GridPlacement placement = ref placements[i];
+                placement.layoutBox.GetHeight(placement.layoutBox.size.width, widthBlock, heightBlock, ref placement.size);
+                placement.layoutBox.GetMarginVertical(heightBlock, ref placement.margin);
+                placement.outputHeight = placement.size.prefHeight + placement.margin.top + placement.margin.bottom;
+            }
+
+            ResolveVerticalTrackHeights(heightBlock, size.height - paddingBox.top - paddingBox.bottom - borderBox.top - borderBox.bottom);
+
+            PositionTracks(rowTrackList, element.style.GridLayoutRowGap);
+
+            return rowTrackList.array[rowTrackList.size - 1].position + rowTrackList.array[rowTrackList.size - 1].size;
         }
 
         protected override void PerformLayout() {
@@ -118,15 +186,16 @@ namespace UIForia.Layout.LayoutTypes {
                 blockSize.size = finalWidth;
                 blockSize.contentAreaSize = finalWidth;
                 float colPosition = 0;
-                
+
                 switch (colAlignment) {
                     case GridAxisAlignment.Center:
                         finalWidth -= placement.margin.left + placement.margin.right;
-                        colPosition =  x + (spannedTracksWidth * 0.5f) - (finalWidth * 0.5f);; 
+                        colPosition = x + (spannedTracksWidth * 0.5f) - (finalWidth * 0.5f);
+                        ;
                         break;
 
                     case GridAxisAlignment.End:
-                        
+
                         break;
 
                     case GridAxisAlignment.Start:
@@ -177,11 +246,11 @@ namespace UIForia.Layout.LayoutTypes {
 
                 switch (colAlignment) {
                     case GridAxisAlignment.Center:
-                        alignment = 0;
+                        alignment = 0.5f;
                         break;
 
                     case GridAxisAlignment.End:
-                        alignment = 0;
+                        alignment = 1f;
                         break;
 
                     case GridAxisAlignment.Start:
@@ -325,34 +394,14 @@ namespace UIForia.Layout.LayoutTypes {
                 }
             }
 
+            // for minmax ->
             // for each track
             // if max size not reached & space remaining
             // treat everything as though it had grow factor = 1
             // grow until max size reached
             // fr has no max size but has more grow factor
             // maybe grow everything except frs first
-
-//            if (remaining > 0) {
-//                for (int i = 0; i < rowTrackCount; i++) {
-//                    ref GridTrack track = ref rowTracks[i];
-//
-//                    if ((track.minUnit & GridTemplateUnit.Fixed) != 0) {
-//                        track.maxSize = ResolveFixedGridMeasurement(blockHeight, track.maxValue, track.maxUnit);
-//                    }
-//                    else if (track.minUnit == GridTemplateUnit.FractionalRemaining) {
-//                        flexes.Add(i);
-//                        flexPieces += (int) track.maxValue; // move flex to max only?
-//                    }
-//                    else {
-//                        intrinsics.Add(i);
-//                    }
-//                }
-//
-//                for (int i = 0; i < rowTrackCount; i++) {
-//                    ref GridTrack track = ref rowTracks[i];
-//                }
-//            }
-
+            
             intrinsics.Release();
             flexes.Release();
         }
@@ -771,15 +820,17 @@ namespace UIForia.Layout.LayoutTypes {
         }
 
         private void Place() {
-//            if (!placementDirty) {
-//                return;
-//            }
+            if (!placementDirty) {
+                return;
+            }
+
+            placementDirty = false;
 
             CreateNamedGridAreas();
 
             placementList.size = 0;
             FastLayoutBox child = firstChild;
-            
+
             while (child != null) {
                 GridItemPlacement x = child.element.style.GridItemX;
                 GridItemPlacement y = child.element.style.GridItemY;
@@ -793,12 +844,12 @@ namespace UIForia.Layout.LayoutTypes {
                 placement.y = y.name != null ? ResolveVerticalStart(y.name) : y.index;
                 placement.width = width.name != null ? ResolveHorizontalWidth(placement.x, width.name) : width.index;
                 placement.height = height.name != null ? ResolveVerticalHeight(placement.y, height.name) : height.index;
-                
+
                 placementList.Add(placement);
 
                 child = child.nextSibling;
             }
-            
+
             rowTrackList.Clear();
             colTrackList.Clear();
 

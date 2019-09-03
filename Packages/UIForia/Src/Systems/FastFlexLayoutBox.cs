@@ -209,30 +209,6 @@ namespace UIForia.Systems {
             throw new System.NotImplementedException();
         }
 
-        private void AdjustBlockSizes(ref BlockSize blockWidth, ref BlockSize blockHeight) {
-            if (prefWidth.unit != UIMeasurementUnit.Content) {
-                blockWidth.size = size.width;
-                blockWidth.contentAreaSize = size.width - paddingBox.left - paddingBox.right - borderBox.left - borderBox.right;
-            }
-            else {
-                blockWidth.contentAreaSize -= (paddingBox.left + paddingBox.right + borderBox.left + borderBox.right);
-                if (blockWidth.contentAreaSize < 0) {
-                    blockWidth.contentAreaSize = 0;
-                }
-            }
-
-            if (prefHeight.unit != UIMeasurementUnit.Content) {
-                blockHeight.size = size.height;
-                blockHeight.contentAreaSize = size.height - paddingBox.top - paddingBox.bottom - borderBox.top - borderBox.bottom;
-            }
-            else {
-                blockHeight.contentAreaSize -= (paddingBox.top + paddingBox.bottom + borderBox.top + borderBox.bottom);
-                if (blockHeight.contentAreaSize < 0) {
-                    blockHeight.contentAreaSize = 0;
-                }
-            }
-        }
-
         private Size PerformLayoutHorizontal(BlockSize blockWidth, BlockSize blockHeight, bool isDryRun) {
             Item[] items = itemList.array;
 

@@ -594,10 +594,10 @@ namespace UIForia.Layout {
                 output.prefHeight = output.maxHeight;
         }
 
-        private FastLayoutBox GetParent() {
+        internal FastLayoutBox ResolveLayoutParent() {
             // todo -- convert this to use the flag instead
             if (parent is TranscludeLayoutBox) {
-                return parent.GetParent();
+                return parent.ResolveLayoutParent();
             }
 
             // todo -- this flag is never set 
@@ -612,7 +612,7 @@ namespace UIForia.Layout {
             // todo -- size check
 
             if ((flags & LayoutRenderFlag.Ignored) != 0) {
-                FastLayoutBox layoutParent = GetParent();
+                FastLayoutBox layoutParent = ResolveLayoutParent();
                 SizeConstraints constraints = default;
                 
                 BlockSize widthBlock = default;
@@ -1052,8 +1052,32 @@ namespace UIForia.Layout {
             OnChildRemoved(ptr, idx);
         }
         
+        internal void AdjustBlockSizes(ref BlockSize blockWidth, ref BlockSize blockHeight) {
+            if (prefWidth.unit != UIMeasurementUnit.Content) {
+                blockWidth.size = size.width;
+                blockWidth.contentAreaSize = size.width - paddingBox.left - paddingBox.right - borderBox.left - borderBox.right;
+            }
+            else {
+                blockWidth.contentAreaSize -= (paddingBox.left + paddingBox.right + borderBox.left + borderBox.right);
+                if (blockWidth.contentAreaSize < 0) {
+                    blockWidth.contentAreaSize = 0;
+                }
+            }
+
+            if (prefHeight.unit != UIMeasurementUnit.Content) {
+                blockHeight.size = size.height;
+                blockHeight.contentAreaSize = size.height - paddingBox.top - paddingBox.bottom - borderBox.top - borderBox.bottom;
+            }
+            else {
+                blockHeight.contentAreaSize -= (paddingBox.top + paddingBox.bottom + borderBox.top + borderBox.bottom);
+                if (blockHeight.contentAreaSize < 0) {
+                    blockHeight.contentAreaSize = 0;
+                }
+            }
+        }
     }
 
+    
     public struct BlockSize {
 
         public float size;

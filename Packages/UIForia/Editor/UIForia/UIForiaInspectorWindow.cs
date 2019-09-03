@@ -771,7 +771,7 @@ namespace UIForia.Editor {
 
                 case StylePropertyId.GridLayoutColAutoSize:
                 case StylePropertyId.GridLayoutRowAutoSize:
-                    return DrawGridTrackSize(property, isEditable);
+                    return DrawGridTemplate(property, isEditable);
 
                 case StylePropertyId.GridLayoutColGap:
                 case StylePropertyId.GridLayoutRowGap:

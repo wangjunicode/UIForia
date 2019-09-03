@@ -54,14 +54,15 @@ namespace UIForia.Util {
                     return box.allocatedPosition.x;
 
                 case AlignmentBehavior.Parent:
-                    return box.parent.allocatedPosition.x;
+                    return 0;
 
                 case AlignmentBehavior.ParentContentArea:
+                    FastLayoutBox parentBox = box.ResolveLayoutParent();
                     if (direction == AlignmentDirection.Start) {
-                        return box.parent.allocatedPosition.x + box.parent.paddingBox.left + box.parent.borderBox.left;
+                        return parentBox.paddingBox.left + parentBox.borderBox.left;
                     }
                     else {
-                        return box.parent.allocatedPosition.x + box.parent.paddingBox.right + box.parent.borderBox.right;
+                        return parentBox.paddingBox.right + parentBox.borderBox.right;
                     }
 
                 case AlignmentBehavior.Template:
@@ -91,14 +92,16 @@ namespace UIForia.Util {
                     return box.allocatedPosition.y;
 
                 case AlignmentBehavior.Parent:
-                    return box.parent.allocatedPosition.y;
+                    return 0;
 
                 case AlignmentBehavior.ParentContentArea:
+                    FastLayoutBox parentBox = box.ResolveLayoutParent();
+
                     if (direction == AlignmentDirection.Start) {
-                        return box.parent.allocatedPosition.y + box.parent.paddingBox.top + box.parent.borderBox.top;
+                        return parentBox.paddingBox.top + parentBox.borderBox.top;
                     }
                     else {
-                        return box.parent.allocatedPosition.y + box.parent.paddingBox.bottom + box.parent.borderBox.bottom;
+                        return parentBox.paddingBox.bottom + parentBox.borderBox.bottom;
                     }
 
                 case AlignmentBehavior.Template:
@@ -127,10 +130,10 @@ namespace UIForia.Util {
                     return box.allocatedSize.width;
 
                 case AlignmentBehavior.Parent:
-                    return box.parent.size.width;
+                    return box.ResolveLayoutParent().size.width;
 
                 case AlignmentBehavior.ParentContentArea:
-                    return box.parent.contentSize.width;
+                    return box.ResolveLayoutParent().contentSize.width;
 
                 case AlignmentBehavior.Template:
                     // todo handle transclusion
@@ -159,10 +162,10 @@ namespace UIForia.Util {
                     return box.allocatedSize.height;
 
                 case AlignmentBehavior.Parent:
-                    return box.parent.size.height;
+                    return box.ResolveLayoutParent().size.height;
 
                 case AlignmentBehavior.ParentContentArea:
-                    return box.parent.contentSize.height;
+                    return box.ResolveLayoutParent().contentSize.height;
 
                 case AlignmentBehavior.Template:
                     // todo handle transclusion
@@ -225,20 +228,23 @@ namespace UIForia.Util {
                     return viewportHeight * measurement.value;
 
                 case OffsetMeasurementUnit.ParentWidth:
+                    // if box.parent is null the box is the root, otherwise call ResolveLayoutParent to handle transclusion
                     if (box.parent == null) return 0;
-                    return box.parent.size.width * measurement.value;
+                    return box.ResolveLayoutParent().size.width * measurement.value;
 
                 case OffsetMeasurementUnit.ParentHeight:
+                    // if box.parent is null the box is the root, otherwise call ResolveLayoutParent to handle transclusion
                     if (box.parent == null) return 0;
-                    return box.parent.size.height * measurement.value;
+                    return box.ResolveLayoutParent().size.height * measurement.value;
 
                 case OffsetMeasurementUnit.ParentContentAreaWidth:
+                    // if box.parent is null the box is the root, otherwise call ResolveLayoutParent to handle transclusion
                     if (box.parent == null) return 0;
-                    return box.parent.contentSize.width * measurement.value;
+                    return box.ResolveLayoutParent().contentSize.width * measurement.value;
 
                 case OffsetMeasurementUnit.ParentContentAreaHeight:
                     if (box.parent == null) return 0;
-                    return box.parent.contentSize.height * measurement.value;
+                    return box.ResolveLayoutParent().contentSize.height * measurement.value;
 
                 case OffsetMeasurementUnit.ScreenWidth:
                     return Screen.width * measurement.value;

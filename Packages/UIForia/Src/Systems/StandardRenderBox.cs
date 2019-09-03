@@ -219,10 +219,17 @@ namespace UIForia.Rendering {
             Color backgroundTint = element.style.BackgroundTint;
             Texture backgroundImage = element.style.BackgroundImage;
 
+            Color32 borderColorTop = element.style.BorderColorTop;
+            Color32 borderColorRight = element.style.BorderColorRight;
+            Color32 borderColorBottom = element.style.BorderColorBottom;
+            Color32 borderColorLeft = element.style.BorderColorLeft;
+            
             // todo -- border also 0
             if (backgroundColor.a <= 0 && backgroundImage == null) {
                 didRender = false;
-                return;
+                if (borderColorTop.a <= 0 && borderColorRight.a <= 0 && borderColorLeft.a <= 0 && borderColorBottom.a <= 0) {
+                    return;
+                }
             }
 
             didRender = true;
@@ -270,10 +277,10 @@ namespace UIForia.Rendering {
 
             float packedBorderRadii = VertigoUtil.BytesToFloat(b0, b1, b2, b3);
 
-            float packedBorderColorTop = VertigoUtil.ColorToFloat(element.style.BorderColorTop);
-            float packedBorderColorRight = VertigoUtil.ColorToFloat(element.style.BorderColorRight);
-            float packedBorderColorBottom = VertigoUtil.ColorToFloat(element.style.BorderColorBottom);
-            float packedBorderColorLeft = VertigoUtil.ColorToFloat(element.style.BorderColorLeft);
+            float packedBorderColorTop = VertigoUtil.ColorToFloat(borderColorTop);
+            float packedBorderColorRight = VertigoUtil.ColorToFloat(borderColorRight);
+            float packedBorderColorBottom = VertigoUtil.ColorToFloat(borderColorBottom);
+            float packedBorderColorLeft = VertigoUtil.ColorToFloat(borderColorLeft);
 
             geometry.miscData = new Vector4(packedBorderColorTop, packedBorderColorRight, packedBorderColorBottom, packedBorderColorLeft);
             OffsetRect border = element.layoutResult.border;
@@ -285,7 +292,6 @@ namespace UIForia.Rendering {
             geometry.objectData = new Vector4((int) ShapeType.RoundedRect, VertigoUtil.PackSizeVector(element.layoutResult.actualSize), packedBorderRadii, (int) colorMode);
             geometry.mainTexture = backgroundImage;
 
-            geometry.miscData.x = element.id;
             ctx.DrawBatchedGeometry(geometry, range, element.layoutResult.matrix.ToMatrix4x4(), clipper);
             
         }

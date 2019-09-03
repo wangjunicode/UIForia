@@ -768,16 +768,16 @@ namespace UIForia.Rendering {
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.AnchorTarget, (int)value), state); }
         }
         
-        public UIForia.UIFixedLength TransformPositionX {
+        public UIForia.OffsetMeasurement TransformPositionX {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.TransformPositionX, state).AsUIFixedLength; }
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.TransformPositionX, state).AsOffsetMeasurement; }
             [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.TransformPositionX, value), state); }
         }
         
-        public UIForia.UIFixedLength TransformPositionY {
+        public UIForia.OffsetMeasurement TransformPositionY {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.TransformPositionY, state).AsUIFixedLength; }
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.TransformPositionY, state).AsOffsetMeasurement; }
             [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.TransformPositionY, value), state); }
         }
@@ -1704,16 +1704,16 @@ namespace UIForia.Rendering {
             set { SetProperty(new StyleProperty(StylePropertyId.AnchorTarget, (int)value)); }
         }
             
-        public UIForia.UIFixedLength TransformPositionX {
+        public UIForia.OffsetMeasurement TransformPositionX {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return FindUIFixedLengthProperty(StylePropertyId.TransformPositionX); }
+            get { return FindOffsetMeasurementProperty(StylePropertyId.TransformPositionX); }
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.TransformPositionX, value)); }
         }
             
-        public UIForia.UIFixedLength TransformPositionY {
+        public UIForia.OffsetMeasurement TransformPositionY {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return FindUIFixedLengthProperty(StylePropertyId.TransformPositionY); }
+            get { return FindOffsetMeasurementProperty(StylePropertyId.TransformPositionY); }
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.TransformPositionY, value)); }
         }
@@ -2885,20 +2885,20 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UIForia.UIFixedLength TransformPositionX { 
+            public UIForia.OffsetMeasurement TransformPositionX { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.TransformPositionX, out property)) return property.AsUIFixedLength;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.TransformPositionX, out property)) return property.AsOffsetMeasurement;
                     return DefaultStyleValues_Generated.TransformPositionX;
                 }
             }
 
-            public UIForia.UIFixedLength TransformPositionY { 
+            public UIForia.OffsetMeasurement TransformPositionY { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.TransformPositionY, out property)) return property.AsUIFixedLength;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.TransformPositionY, out property)) return property.AsOffsetMeasurement;
                     return DefaultStyleValues_Generated.TransformPositionY;
                 }
             }
@@ -3976,20 +3976,20 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.AnchorTarget, state).AsAnchorTarget;
         }
         
-        public void SetTransformPositionX(in UIForia.UIFixedLength? value, StyleState state) {
+        public void SetTransformPositionX(in UIForia.OffsetMeasurement? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.TransformPositionX, value), state);
         }
 
-        public UIForia.UIFixedLength GetTransformPositionX(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.TransformPositionX, state).AsUIFixedLength;
+        public UIForia.OffsetMeasurement GetTransformPositionX(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.TransformPositionX, state).AsOffsetMeasurement;
         }
         
-        public void SetTransformPositionY(in UIForia.UIFixedLength? value, StyleState state) {
+        public void SetTransformPositionY(in UIForia.OffsetMeasurement? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.TransformPositionY, value), state);
         }
 
-        public UIForia.UIFixedLength GetTransformPositionY(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.TransformPositionY, state).AsUIFixedLength;
+        public UIForia.OffsetMeasurement GetTransformPositionY(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.TransformPositionY, state).AsOffsetMeasurement;
         }
         
         public void SetTransformPivotX(in UIForia.UIFixedLength? value, StyleState state) {

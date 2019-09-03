@@ -29,13 +29,11 @@ namespace UIForia.Systems {
 
             if (direction == LayoutDirection.Horizontal) {
                 contentSize = PerformLayoutHorizontal(containingBoxWidth, containingBoxHeight, false);
-            } else {
+            }
+            else {
                 contentSize = PerformLayoutVertical();
             }
 
-            for (int i = 0; i < itemList.size; i++) {
-                itemList.array[i].layoutBox.Layout();
-            }
         }
 
         public override float ComputeContentWidth(BlockSize blockWidth) {
@@ -181,9 +179,10 @@ namespace UIForia.Systems {
                 retn += ResolveFixedSize(contentWidth, element.style.PaddingRight);
                 retn += ResolveFixedSize(contentWidth, element.style.BorderLeft);
                 retn += ResolveFixedSize(contentWidth, element.style.BorderRight);
-                
+
                 return retn;
-            } else {
+            }
+            else {
                 // intrinsic max for vertical direction is the max child intrinsic width
                 float retn = 0;
 
@@ -214,7 +213,8 @@ namespace UIForia.Systems {
             if (prefWidth.unit != UIMeasurementUnit.Content) {
                 blockWidth.size = size.width;
                 blockWidth.contentAreaSize = size.width - paddingBox.left - paddingBox.right - borderBox.left - borderBox.right;
-            } else {
+            }
+            else {
                 blockWidth.contentAreaSize -= (paddingBox.left + paddingBox.right + borderBox.left + borderBox.right);
                 if (blockWidth.contentAreaSize < 0) {
                     blockWidth.contentAreaSize = 0;
@@ -224,7 +224,8 @@ namespace UIForia.Systems {
             if (prefHeight.unit != UIMeasurementUnit.Content) {
                 blockHeight.size = size.height;
                 blockHeight.contentAreaSize = size.height - paddingBox.top - paddingBox.bottom - borderBox.top - borderBox.bottom;
-            } else {
+            }
+            else {
                 blockHeight.contentAreaSize -= (paddingBox.top + paddingBox.bottom + borderBox.top + borderBox.bottom);
                 if (blockHeight.contentAreaSize < 0) {
                     blockHeight.contentAreaSize = 0;
@@ -269,7 +270,8 @@ namespace UIForia.Systems {
                             track = default;
                             track.startItemIndex = i;
                             track.endItemIndex = i;
-                        } else {
+                        }
+                        else {
                             // multi item track
                             totalContentHeight += LayoutTrackHorizontal(totalContentHeight, blockWidth, blockHeight, track, isDryRun, applyWrapping);
                             track = default;
@@ -277,7 +279,7 @@ namespace UIForia.Systems {
                             track.endItemIndex = i;
                         }
                     }
-                } 
+                }
 
                 track.mainSize += totalItemWidth;
                 track.remainingSpace = contentAreaWidth - track.mainSize;
@@ -286,13 +288,13 @@ namespace UIForia.Systems {
             if (track.endItemIndex - track.startItemIndex > 0) {
                 totalContentHeight += LayoutTrackHorizontal(totalContentHeight, blockWidth, blockHeight, track, isDryRun, applyWrapping);
             }
-           
+
             retn.height = totalContentHeight;
             retn.width = contentAreaWidth; // todo compute this!
             return retn;
         }
 
-         private Size PerformLayoutVertical() {
+        private Size PerformLayoutVertical() {
             Item[] items = itemList.array;
 
             BlockSize blockWidth = containingBoxWidth;
@@ -352,7 +354,8 @@ namespace UIForia.Systems {
 
             if (growPieces > 0 && track.remainingSpace > 0) {
                 GrowHeight(ref track, growPieces);
-            } else if (shrinkPieces > 0 && track.remainingSpace < 0) {
+            }
+            else if (shrinkPieces > 0 && track.remainingSpace < 0) {
                 ShrinkHeight(ref track, shrinkPieces);
             }
 
@@ -364,7 +367,8 @@ namespace UIForia.Systems {
 
                 if (item.outputHeight > item.size.prefHeight && item.growFactor > 0) {
                     layoutFit = LayoutFit.Grow;
-                } else if (item.outputHeight < item.size.prefHeight && item.shrinkFactor > 0) {
+                }
+                else if (item.outputHeight < item.size.prefHeight && item.shrinkFactor > 0) {
                     layoutFit = LayoutFit.Shrink;
                 }
 
@@ -372,14 +376,15 @@ namespace UIForia.Systems {
             }
 
             return new Size(track.crossSize, track.mainSize);
-         }
+        }
 
         private float LayoutTrackHorizontal(float yOffset, in BlockSize blockWidth, in BlockSize blockHeight, Track track, bool isDryRun, bool isWrapping = false) {
             Item[] items = itemList.array;
 
             if (track.remainingSpace > 0) {
                 GrowWidth(ref track, track.growPieces);
-            } else if (track.remainingSpace < 0) {
+            }
+            else if (track.remainingSpace < 0) {
                 ShrinkWidth(ref track, track.shrinkPieces);
             }
 
@@ -410,7 +415,8 @@ namespace UIForia.Systems {
 
                 if (item.outputWidth > item.size.prefWidth && item.growFactor > 0) {
                     layoutFit = LayoutFit.Grow;
-                } else if (item.outputWidth < item.size.prefWidth && item.shrinkFactor > 0) {
+                }
+                else if (item.outputWidth < item.size.prefWidth && item.shrinkFactor > 0) {
                     layoutFit = LayoutFit.Shrink;
                 }
 
@@ -565,7 +571,7 @@ namespace UIForia.Systems {
             float toAllocate = track.remainingSpace;
             float remainingSpace = track.remainingSpace;
 
-            while (allocate && (int)remainingSpace > 0) {
+            while (allocate && (int) remainingSpace > 0) {
                 allocate = false;
 
                 float pieceSize = remainingSpace / pieces;
@@ -576,7 +582,7 @@ namespace UIForia.Systems {
                     float output = item.outputWidth;
                     int growthFactor = item.growFactor;
 
-                    if (growthFactor == 0 || (int)output == (int)max) {
+                    if (growthFactor == 0 || (int) output == (int) max) {
                         continue;
                     }
 
@@ -603,7 +609,7 @@ namespace UIForia.Systems {
             float toAllocate = track.remainingSpace;
             float remainingSpace = track.remainingSpace;
 
-            while (allocate && (int)remainingSpace > 0 && pieces > 0) {
+            while (allocate && (int) remainingSpace > 0 && pieces > 0) {
                 allocate = false;
 
                 float pieceSize = remainingSpace / pieces;
@@ -614,7 +620,7 @@ namespace UIForia.Systems {
                     float output = item.outputHeight;
                     int growthFactor = item.growFactor;
 
-                    if (growthFactor == 0 || (int)output == (int)max) {
+                    if (growthFactor == 0 || (int) output == (int) max) {
                         continue;
                     }
 
@@ -643,7 +649,7 @@ namespace UIForia.Systems {
             float overflow = -track.remainingSpace;
 
             bool allocate = pieces > 0;
-            while (allocate && (int)overflow > 0) {
+            while (allocate && (int) overflow > 0) {
                 allocate = false;
 
                 float pieceSize = overflow / pieces;
@@ -654,7 +660,7 @@ namespace UIForia.Systems {
                     float output = item.size.prefWidth;
                     int shrinkFactor = item.shrinkFactor;
 
-                    if (shrinkFactor == 0 || (int)output == (int)min || (int)output == 0) {
+                    if (shrinkFactor == 0 || (int) output == (int) min || (int) output == 0) {
                         continue;
                     }
 
@@ -681,7 +687,7 @@ namespace UIForia.Systems {
             float overflow = -track.remainingSpace;
 
             bool allocate = pieces > 0;
-            while (allocate && (int)overflow > 0) {
+            while (allocate && (int) overflow > 0) {
                 allocate = false;
 
                 float pieceSize = overflow / pieces;
@@ -692,7 +698,7 @@ namespace UIForia.Systems {
                     float output = item.size.prefHeight;
                     int shrinkFactor = item.shrinkFactor;
 
-                    if (shrinkFactor == 0 || (int)output == (int)min || (int)output == 0) {
+                    if (shrinkFactor == 0 || (int) output == (int) min || (int) output == 0) {
                         continue;
                     }
 
@@ -715,7 +721,8 @@ namespace UIForia.Systems {
 
             if (itemList == null) {
                 itemList = new StructList<Item>(children.size);
-            } else {
+            }
+            else {
                 itemList.EnsureCapacity(children.size);
             }
 

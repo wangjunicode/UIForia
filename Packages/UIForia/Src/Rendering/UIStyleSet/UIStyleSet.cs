@@ -841,11 +841,6 @@ namespace UIForia.Rendering {
             );
         }
 
-        public void SetTransformPosition(UIFixedLengthPair position, StyleState state) {
-            SetTransformPositionX(position.x, state);
-            SetTransformPositionY(position.y, state);
-        }
-
         public void SetBorderRadius(BorderRadius newBorderRadius, StyleState state) {
             SetBorderRadiusBottomLeft(newBorderRadius.bottomLeft, state);
             SetBorderRadiusBottomRight(newBorderRadius.bottomRight, state);

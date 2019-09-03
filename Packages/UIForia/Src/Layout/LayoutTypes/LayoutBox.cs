@@ -82,8 +82,8 @@ namespace UIForia.Layout.LayoutTypes {
 
         internal UIFixedLength transformPivotX;
         internal UIFixedLength transformPivotY;
-        internal UIFixedLength transformPositionX;
-        internal UIFixedLength transformPositionY;
+        internal OffsetMeasurement transformPositionX;
+        internal OffsetMeasurement transformPositionY;
         internal TransformBehavior transformBehaviorX;
         internal TransformBehavior transformBehaviorY;
 
@@ -1124,11 +1124,11 @@ namespace UIForia.Layout.LayoutTypes {
                         break;
 
                     case StylePropertyId.TransformPositionX:
-                        transformPositionX = property.AsUIFixedLength;
+                        transformPositionX = default;//property.AsUIFixedLength;
                         break;
 
                     case StylePropertyId.TransformPositionY:
-                        transformPositionY = property.AsUIFixedLength;
+                        transformPositionY = default;//property.AsUIFixedLength;
                         break;
 
                     case StylePropertyId.TransformBehaviorX:

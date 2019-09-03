@@ -45,8 +45,8 @@ namespace UIForia.Layout {
         public UIMeasurement maxHeight;
         public UIMeasurement prefHeight;
 
-        public UIFixedLength transformPositionX;
-        public UIFixedLength transformPositionY;
+        public OffsetMeasurement transformPositionX;
+        public OffsetMeasurement transformPositionY;
 
         public int traversalIndex;
 
@@ -418,6 +418,9 @@ namespace UIForia.Layout {
         public void ApplyHorizontalLayout(float localX, in BlockSize containingWidth, float allocatedWidth, float preferredWidth, float alignment, LayoutFit layoutFit) {
             allocatedPosition.x = localX;
 
+            if (element.layoutBox != this) {
+                Debug.Log("Bad");
+            }
             pivotX = ResolveFixedWidth(element.style.TransformPivotX);
 
             if (selfLayoutFitHorizontal != LayoutFit.Unset) {
@@ -465,14 +468,6 @@ namespace UIForia.Layout {
             float offset = size.width * -alignment;
 
             alignedPosition.x = originBase + originOffset + offset;
-
-            ref SizeSet sizeSet = ref owner.sizeSetList.array[traversalIndex];
-            sizeSet.size = size;
-            sizeSet.allocatedSize = allocatedSize;
-
-            ref PositionSet positionSet = ref owner.positionSetList.array[traversalIndex];
-            positionSet.allocatedPosition = allocatedPosition;
-            positionSet.alignedPosition = alignedPosition;
 
             // if content size changed we need to layout todo account for padding
             if ((int)oldSize.width != (int)size.width) {
@@ -572,14 +567,6 @@ namespace UIForia.Layout {
             allocatedSize.height = allocatedHeight;
             containingBoxHeight = containingHeight;
 
-            ref SizeSet sizeSet = ref owner.sizeSetList.array[traversalIndex];
-            sizeSet.size = size;
-            sizeSet.allocatedSize = allocatedSize;
-
-            ref PositionSet positionSet = ref owner.positionSetList.array[traversalIndex];
-            positionSet.allocatedPosition = allocatedPosition;
-            positionSet.alignedPosition = alignedPosition;
-
             if ((int)oldSize.height != (int)size.height) {
                 flags |= LayoutRenderFlag.NeedsLayout;
             }
@@ -656,15 +643,15 @@ namespace UIForia.Layout {
             FastLayoutBox child = firstChild;
             while (child != null) {
                 child.Layout();
+                
                 // todo find out who sets nextSibling to child
                 if (child == child.nextSibling) {
-                    break;
+                    throw new Exception("Endless layout loop");
                 }
 
                 child = child.nextSibling;
             }
 
-            // todo -- compute content size & local overflow? might need to happen elsewhere
         }
 
         protected virtual void OnChildSizeChanged(FastLayoutBox child) {
@@ -859,11 +846,11 @@ namespace UIForia.Layout {
                         break;
 
                     case StylePropertyId.TransformPositionX:
-                        transformPositionX = property.AsUIFixedLength;
+                        transformPositionX = property.AsOffsetMeasurement;
                         break;
 
                     case StylePropertyId.TransformPositionY:
-                        transformPositionY = property.AsUIFixedLength;
+                        transformPositionY = property.AsOffsetMeasurement;
                         break;
 
                     case StylePropertyId.AlignmentBehaviorX:

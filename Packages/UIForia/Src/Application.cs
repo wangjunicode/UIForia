@@ -701,9 +701,9 @@ namespace UIForia {
                 // todo -- profile not calling disable when it's not needed
                 // if (child.flags & UIElementFlags.RequiresEnableCall) {
                 child.OnDisable();
-                child.layoutBox = null; // todo -- pool
                 // }
                 
+                // todo -- maybe do this on enable instead
                 if (child.style.currentState != StyleState.Normal) {
                     // todo -- maybe just have a clear states method
                     child.style.ExitState(StyleState.Hover);

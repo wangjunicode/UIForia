@@ -9,8 +9,7 @@
 
         style scroll-track-vertical {
             PreferredSize = 10px, 1psz;
-            BackgroundColor = red;
-        //    LayoutBehavior = Ignored;
+            LayoutBehavior = Ignored;
             AlignX = 100%;
             AlignmentBehaviorX = Parent;
             ZIndex = 1;
@@ -31,17 +30,20 @@
 
         style scroll-track-horizontal {
             PreferredSize = 1psz, 10px;
-            BackgroundColor = red;
             LayoutBehavior = Ignored;
             AlignmentBehaviorY = Parent;
             AlignY = 100%;
         }
 
+        style scroll-root {
+            
+        }
+        
     </Style>
     
     <Contents style="scrollview">
 
-        <Children x-id="scroll-root"/>
+        <Children x-id="scroll-root" style="scroll-root"/>
 
         <Group onMouseClick="OnClickVertical($event)" onMouseHover="OnHoverVertical($event)" x-id="scroll-track-vertical" style="scroll-track-vertical">
             <Div onDragCreate="OnCreateVerticalDrag($event)" x-id="scroll-handle-vertical" style="scroll-handle-vertical"/>

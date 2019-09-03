@@ -23,6 +23,8 @@ namespace UIForia.Systems {
         }
 
         private void HandleStylePropertyChanged(UIElement element, StructList<StyleProperty> changeList) {
+            // todo -- if layout type changed pool box and set to null
+            // todo -- also make pool shared between layout owners, won't work if parallel
             element.layoutBox?.OnStyleChanged(changeList);
         }
 

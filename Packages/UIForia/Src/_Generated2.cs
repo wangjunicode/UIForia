@@ -1553,9 +1553,9 @@ case "visibility":
                 case "anchortarget":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_AnchorTarget("AnchorTarget", UIForia.Rendering.StylePropertyId.AnchorTarget, targetState.state, Compile<UIForia.Rendering.AnchorTarget>(value, s_EnumSource_AnchorTarget));                
                 case "transformpositionx":
-                    return new UIForia.Bindings.StyleBindings.StyleBinding_UIFixedLength("TransformPositionX", UIForia.Rendering.StylePropertyId.TransformPositionX, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_OffsetMeasurement("TransformPositionX", UIForia.Rendering.StylePropertyId.TransformPositionX, targetState.state, Compile<UIForia.OffsetMeasurement>(value, null));                
                 case "transformpositiony":
-                    return new UIForia.Bindings.StyleBindings.StyleBinding_UIFixedLength("TransformPositionY", UIForia.Rendering.StylePropertyId.TransformPositionY, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_OffsetMeasurement("TransformPositionY", UIForia.Rendering.StylePropertyId.TransformPositionY, targetState.state, Compile<UIForia.OffsetMeasurement>(value, null));                
                 case "transformpivotx":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_UIFixedLength("TransformPivotX", UIForia.Rendering.StylePropertyId.TransformPivotX, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
                 case "transformpivoty":

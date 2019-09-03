@@ -25,11 +25,10 @@ namespace UIForia.Layout {
         internal readonly StructList<LayoutData> enabledBoxList;
         internal readonly StructList<SVGXMatrix> worldMatrixList;
         internal readonly StructList<SVGXMatrix> localMatrixList;
-        internal readonly StructList<SizeSet> sizeSetList;
-        internal readonly StructList<PositionSet> positionSetList;
         internal readonly LightList<UIElement> enabledThisFrame;
         internal readonly LightList<FastLayoutBox> toLayout;
         internal readonly LightList<FastLayoutBox> tempChildList;
+        internal readonly LightList<FastLayoutBox> ignoredLayoutList;
 
         internal readonly Queue<int> queue;
 
@@ -46,12 +45,11 @@ namespace UIForia.Layout {
             this.enabledBoxList = new StructList<LayoutData>(0);
             this.worldMatrixList = new StructList<SVGXMatrix>(0);
             this.localMatrixList = new StructList<SVGXMatrix>(0);
-            this.sizeSetList = new StructList<SizeSet>(0);
-            this.positionSetList = new StructList<PositionSet>(0);
 
             this.enabledThisFrame = new LightList<UIElement>();
             this.toLayout = new LightList<FastLayoutBox>(16);
             this.tempChildList = new LightList<FastLayoutBox>(16);
+            this.ignoredLayoutList = new LightList<FastLayoutBox>(16);
 
             this.layoutBoxPoolMap = new Dictionary<int, FastLayoutBoxPool>();
             this.layoutBoxPoolMap[(int) LayoutType.Flex] = new FastLayoutBoxPool<FastFlexLayoutBox>();
@@ -74,8 +72,6 @@ namespace UIForia.Layout {
             enabledBoxList.EnsureCapacity(elementCount);
             worldMatrixList.EnsureCapacity(elementCount);
             localMatrixList.EnsureCapacity(elementCount);
-            sizeSetList.EnsureCapacity(elementCount);
-            positionSetList.EnsureCapacity(elementCount);
 
 
             // if (toLayout.size > 0 || enabledThisFrame.size > 0) {
@@ -106,23 +102,20 @@ namespace UIForia.Layout {
             int count = enabledBoxList.size;
             LayoutData[] enabledBoxes = enabledBoxList.array;
             SVGXMatrix[] worldMatrices = worldMatrixList.array;
-            SizeSet[] sizeSets = sizeSetList.array;
-            PositionSet[] positionSets = positionSetList.array;
 
             for (int i = 1; i < count; i++) {
                 UIElement element = enabledBoxes[i].element;
                 int idx = enabledBoxes[i].idx;
 
                 LayoutResult layoutResult = element.layoutResult;
-                SizeSet sizeSet = sizeSets[idx];
-                PositionSet positionSet = positionSets[idx];
 
+                // todo -- layout result might work better as a proxy to layoutBox data
                 layoutResult.padding = element.layoutBox.paddingBox;
                 layoutResult.border = element.layoutBox.borderBox;
-                layoutResult.actualSize = sizeSet.size;
-                layoutResult.allocatedSize = sizeSet.allocatedSize;
+                layoutResult.actualSize = element.layoutBox.size;
+                layoutResult.allocatedSize = element.layoutBox.allocatedSize;
                 layoutResult.matrix = worldMatrices[idx];
-                layoutResult.screenPosition = layoutResult.matrix.position;
+                layoutResult.screenPosition = layoutResult.matrix.position; // todo screen position should be aligned rect position pre transform
                 layoutResult.localPosition = element.layoutBox.alignedPosition;
                 layoutResult.clipRect = new Rect(0, 0, Screen.width, Screen.height); // todo -- temp
             }
@@ -132,18 +125,14 @@ namespace UIForia.Layout {
         /// Figures out what needs to get enables and builds a flat list of LayoutData.
         /// </summary>
         private void GatherBoxData() {
-            SizeSet[] sizeSets = sizeSetList.array;
             LayoutData[] enabledBoxes = enabledBoxList.array;
             SVGXMatrix[] localMatrices = localMatrixList.array;
-            PositionSet[] positionSets = positionSetList.array;
 
             int idx = 1;
             queue.Enqueue(0);
 
             worldMatrixList[0] = SVGXMatrix.identity;
             localMatrices[0] = SVGXMatrix.identity;
-            positionSets[0] = default;
-            sizeSets[0] = default;
 
             enabledBoxes[0] = new LayoutData() {
                 parentIndex = -1,
@@ -160,49 +149,52 @@ namespace UIForia.Layout {
 
                 data.childStart = idx;
 
+                FastLayoutBox parentBox = data.layoutBox;
                 int childCount = data.element.children.size;
                 UIElement[] childrenElements = data.element.children.array;
 
                 bool parentEnabledThisFrame = (data.element.flags & UIElementFlags.EnabledThisFrame) != 0;
 
-                // option 1 -- unset previous traversal indices from all children before processing next batch
-                // option 2 -- sort when children are added, would need callback for index changed
-                // option 3 -- array diff
-                // option 4 -- use element.traversalIndex
-
                 // Things to look for
-                    // layout type changed
-                    // behavior changed
-                    // enabled state changed
-                    
+                // layout type changed
+                // behavior changed
+                // enabled state changed
+                bool willLayout = (parentBox.flags & LayoutRenderFlag.NeedsLayout) != 0;
+
                 for (int i = 0; i < childCount; i++) {
                     UIElement childElement = childrenElements[i];
 
-                    // if child is null or child.parent != parent
-                    
-                    if (!childElement.isEnabled ) {
+                    if (!willLayout && (childElement.flags & (UIElementFlags.EnabledThisFrame | UIElementFlags.DisabledThisFrame)) != 0) {
+                        parentBox.MarkForLayout();
+                        willLayout = true;
+                    }
+
+                    if (!childElement.isEnabled) {
                         continue;
                     }
 
                     FastLayoutBox childBox = childElement.layoutBox;
 
+                    if (childBox != null && (childElement.flags & UIElementFlags.EnabledThisFrame) != 0) {
+                        childBox.UpdateStyleData();
+                    }
                     // todo -- EnabledThisFrame is borked because input runs after layout and we enable on click
-                    if (childBox == null) {
-                        // apply up-chain selectors
-                        // update style data
-                        // create layout box
-                        // create render box
+                    else if (childBox == null) {
+                        if (!willLayout) {
+                            parentBox.MarkForLayout();
+                            willLayout = true;
+                        }
 
-                        childBox = CreateOrUpdateLayoutBox(childElement);
-                        childBox.traversalIndex = idx;
+                        childBox = CreateLayoutBox(childElement);
+                        childBox.traversalIndex = idx; // parent adding children depends on this
                         childElement.layoutBox = childBox;
 
                         switch (childBox.element.style.LayoutBehavior) {
                             case LayoutBehavior.Ignored:
-                            case LayoutBehavior.TranscludeChildren: 
+                            case LayoutBehavior.TranscludeChildren:
                                 childBox.parent = data.layoutBox;
                                 break;
-                            
+
                             default: {
                                 if (parentEnabledThisFrame) {
                                     tempChildList.Add(childBox);
@@ -215,9 +207,8 @@ namespace UIForia.Layout {
                             }
                         }
                     }
-                    else {
-                        childBox.traversalIndex = idx;
-                    }
+
+                    childBox.traversalIndex = idx;
 
                     // overflowX & Y, clip behavior, scroll behavior, other shit from style that doesn't change at this point
 
@@ -227,18 +218,19 @@ namespace UIForia.Layout {
                         element = childElement,
                         layoutBox = childBox
                     };
-                    
+
+                    // always layout ignored elements
                     if (data.element.style.LayoutBehavior == LayoutBehavior.Ignored) {
-                        toLayout.Add(childBox);
+                        ignoredLayoutList.Add(data.layoutBox);
                     }
-                    
+
 #if DEBUG
                     if ((childBox.element.flags & UIElementFlags.DebugLayout) != 0) {
                         System.Diagnostics.Debugger.Break();
                     }
 #endif
                     queue.Enqueue(idx);
-                    
+
                     idx++;
                 }
 
@@ -260,14 +252,15 @@ namespace UIForia.Layout {
 
             // call layout on children recursively, they will naturally not do work if they don't have to. 
             for (int i = 0; i < toLayout.size; i++) {
-                
-                if (toLayout[i].element.layoutBox == toLayout[i]) {
-                    toLayout[i].Layout();
-                }
-               
+                toLayout.array[i].Layout();
+            }
+
+            for (int i = 0; i < ignoredLayoutList.size; i++) {
+                ignoredLayoutList.array[i].Layout();
             }
 
             toLayout.QuickClear();
+            ignoredLayoutList.QuickClear();
         }
 
         internal void OnElementEnabled(UIElement element) {
@@ -286,6 +279,7 @@ namespace UIForia.Layout {
                 element.parent.layoutBox.RemoveChildByElement(element);
                 element.parent.layoutBox.MarkForLayout();
             }
+
             // maybe add to-layout parent?
             enabledThisFrame.Remove(element); // todo -- rethink this, maybe a counter is enough
         }
@@ -320,14 +314,13 @@ namespace UIForia.Layout {
                     float originSize = MeasurementUtil.ResolveOffsetOriginSizeX(box, viewportWidth, box.alignmentTargetX);
                     float originOffset = MeasurementUtil.ResolveOffsetMeasurement(box, viewportWidth, viewportHeight, originX, originSize);
                     float offset = MeasurementUtil.ResolveOffsetMeasurement(box, viewportWidth, viewportHeight, offsetX, box.size.width);
-                    
+
                     if (direction == AlignmentDirection.End) {
                         alignedPosition.x = (originBase + originSize) - (originOffset + offset) - box.size.width;
                     }
                     else {
                         alignedPosition.x = originBase + originOffset + offset;
                     }
-
                 }
 
                 if (box.alignmentTargetY != AlignmentBehavior.Default) {
@@ -339,16 +332,20 @@ namespace UIForia.Layout {
                     float originSize = MeasurementUtil.ResolveOffsetOriginSizeY(box, viewportHeight, box.alignmentTargetY);
                     float originOffset = MeasurementUtil.ResolveOffsetMeasurement(box, viewportWidth, viewportHeight, originY, originSize);
                     float offset = MeasurementUtil.ResolveOffsetMeasurement(box, viewportWidth, viewportHeight, offsetY, box.size.height);
-                    
+
                     if (direction == AlignmentDirection.End) {
                         alignedPosition.y = (originBase + originSize) - (originOffset + offset) - box.size.height;
                     }
                     else {
                         alignedPosition.y = originBase + originOffset + offset;
                     }
-
                 }
 
+                // todo -- don't do this for elements that aren't transformed
+                alignedPosition.x += MeasurementUtil.ResolveOffsetMeasurement(box, viewportWidth, viewportHeight, box.transformPositionX, box.size.width);
+                alignedPosition.y += MeasurementUtil.ResolveOffsetMeasurement(box, viewportWidth, viewportHeight, box.transformPositionY, box.size.height);
+                
+                // todo -- when this stops happening for every element every frame we need to store local matrix and assign it properly to the localMatrices array in GatherBoxData()
                 SVGXMatrix m;
 
                 if (box.rotation == 0) {
@@ -373,7 +370,6 @@ namespace UIForia.Layout {
                 }
             }
         }
-
 
         private void ComputeWorldTransforms() {
             LayoutData[] enabledBoxes = enabledBoxList.array;
@@ -404,11 +400,14 @@ namespace UIForia.Layout {
 
 
         private FastLayoutBox CreateLayoutBox(UIElement element) {
+            if (element.layoutBox != null) {
+                ReleaseLayoutBox(element.layoutBox);
+            }
 
             if (element.style.LayoutBehavior == LayoutBehavior.TranscludeChildren) {
                 return layoutBoxPoolMap[TranscludedLayoutPoolKey].Get(this, element);
             }
-            
+
             if ((element is UITextElement)) {
                 return layoutBoxPoolMap[TextLayoutPoolKey].Get(this, element);
             }
@@ -430,7 +429,6 @@ namespace UIForia.Layout {
 
                     case LayoutType.Grid:
                         return layoutBoxPoolMap[(int) LayoutType.Grid].Get(this, element);
-                        break;
 
                     case LayoutType.Radial:
                         //retn = layoutBoxPoolMap[(int) LayoutType.Radial].Get(element);
@@ -444,51 +442,14 @@ namespace UIForia.Layout {
             return null;
         }
 
-        private FastLayoutBox CreateOrUpdateLayoutBox(UIElement element) {
-            FastLayoutBox box = element.layoutBox;
-
-            if (box == null || element is UIImageElement || element is UITextElement) {
-                return CreateLayoutBox(element);
-            }
-
-            switch (element.style.LayoutType) {
-                case LayoutType.Unset:
-                    break;
-
-                case LayoutType.Flow:
-                    break;
-
-                case LayoutType.Flex:
-
-                    if (box is FastFlexLayoutBox) {
-                        box.UpdateStyleData();
-                        return box;
-                    }
-
-                    FastLayoutBox newBox = layoutBoxPoolMap[(int) LayoutType.Flex].Get(this, element);
-                    newBox.Replace(box);
-                    ReleaseLayoutBox(box);
-                    return newBox;
-
-                case LayoutType.Fixed:
-                    break;
-
-                case LayoutType.Grid:
-                    break;
-
-                case LayoutType.Radial:
-                    break;
-
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-
-            return null;
-        }
-
         private void ReleaseLayoutBox(FastLayoutBox box) {
-            if (box is FastFlexLayoutBox flexLayoutBox) {
-                layoutBoxPoolMap[(int) LayoutType.Flex].Release(flexLayoutBox);
+            switch (box) {
+                case FastFlexLayoutBox flexLayoutBox:
+                    layoutBoxPoolMap[(int) LayoutType.Flex].Release(flexLayoutBox);
+                    break;
+                case FastGridLayoutBox gridLayoutBox:
+                    layoutBoxPoolMap[(int) LayoutType.Grid].Release(gridLayoutBox);
+                    break;
             }
         }
 
@@ -502,7 +463,6 @@ namespace UIForia.Layout {
             }
 
         }
-
 
         private static bool PointInClippedArea(Vector2 point, UIElement element) {
             Vector2 screenPosition = element.layoutResult.screenPosition;
@@ -528,6 +488,7 @@ namespace UIForia.Layout {
             for (int i = 0; i < enabledBoxList.size; i++) {
                 UIElement element = layoutDatas[i].element;
 
+                // todo -- convert to flag 
                 if (element is IPointerQueryHandler handler) {
                     if (!handler.ContainsPoint(point)) {
                         continue;

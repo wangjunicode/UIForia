@@ -22,11 +22,11 @@ namespace UIForia.Layout {
         }
 
         public override float ComputeContentWidth(BlockSize blockWidth) {
-            throw new NotImplementedException();
+            throw new NotImplementedException("Should never call ComputeContentWidth on a transcluded layout box");
         }
 
         public override float ComputeContentHeight(float width, BlockSize blockWidth, BlockSize blockHeight) {
-            throw new NotImplementedException();
+            throw new NotImplementedException("Should never call ComputeContentHeight on a transcluded layout box");
         }
 
         protected override void PerformLayout() {

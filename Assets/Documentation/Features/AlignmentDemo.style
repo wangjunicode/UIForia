@@ -103,7 +103,7 @@ style fit-vertical {
     FlexLayoutCrossAxisAlignment = End;
     BackgroundColor = white;
     PreferredSize = 600px;
-    // MarginBottom = 10px;
+     MarginBottom = 10px;
 }
 
 style item-fill {

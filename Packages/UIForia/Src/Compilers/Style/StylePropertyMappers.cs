@@ -123,8 +123,8 @@ namespace UIForia.Compilers.Style {
                 {"radiallayoutradius", (targetStyle, property, context) => targetStyle.RadialLayoutRadius = MapFixedLength(property.children[0], context)},
 
                 {"transformposition", (targetStyle, property, context) => MapTransformPosition(targetStyle, property, context)},
-                {"transformpositionx", (targetStyle, property, context) => targetStyle.TransformPositionX = MapFixedLength(property.children[0], context)},
-                {"transformpositiony", (targetStyle, property, context) => targetStyle.TransformPositionY = MapFixedLength(property.children[0], context)},
+                {"transformpositionx", (targetStyle, property, context) => targetStyle.TransformPositionX = MapOffsetMeasurement(property.children[0], context)},
+                {"transformpositiony", (targetStyle, property, context) => targetStyle.TransformPositionY = MapOffsetMeasurement(property.children[0], context)},
                 {"transformscale", (targetStyle, property, context) => MapTransformScale(targetStyle, property, context)},
                 {"transformscalex", (targetStyle, property, context) => targetStyle.TransformScaleX = MapNumber(property.children[0], context)},
                 {"transformscaley", (targetStyle, property, context) => targetStyle.TransformScaleY = MapNumber(property.children[0], context)},
@@ -452,10 +452,10 @@ namespace UIForia.Compilers.Style {
         }
 
         private static void MapTransformPosition(UIStyle targetStyle, PropertyNode property, StyleCompileContext context) {
-            UIFixedLength x = MapFixedLength(property.children[0], context);
-            UIFixedLength y = x;
+            OffsetMeasurement x = MapOffsetMeasurement(property.children[0], context);
+            OffsetMeasurement y = x;
             if (property.children.Count > 1) {
-                y = MapFixedLength(property.children[1], context);
+                y = MapOffsetMeasurement(property.children[1], context);
             }
 
             targetStyle.TransformPositionX = x;

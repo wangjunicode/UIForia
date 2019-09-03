@@ -170,8 +170,8 @@ namespace UIForia.Editor {
             new PropertyGenerator<AnchorTarget>(StylePropertyId.AnchorTarget, AnchorTarget.Parent),
 
             // Transform
-            new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.TransformPositionX, new UIFixedLength(0)),
-            new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.TransformPositionY, new UIFixedLength(0)),
+            new AnimatedPropertyGenerator<OffsetMeasurement>(StylePropertyId.TransformPositionX, new OffsetMeasurement(0)),
+            new AnimatedPropertyGenerator<OffsetMeasurement>(StylePropertyId.TransformPositionY, new OffsetMeasurement(0)),
             new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.TransformPivotX, new UIFixedLength(0)),
             new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.TransformPivotY, new UIFixedLength(0)),
             new AnimatedPropertyGenerator<float>(StylePropertyId.TransformScaleX, 1),

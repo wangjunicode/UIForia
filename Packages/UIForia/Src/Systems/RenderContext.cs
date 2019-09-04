@@ -485,9 +485,10 @@ namespace UIForia.Rendering {
             if (spriteAtlasUpdates.size > 0) {
                 commandBuffer.SetRenderTarget(spriteAtlas);
                 Vector3 cameraOrigin = camera.transform.position;
-                cameraOrigin.x -= 0.5f * Screen.width;
-                cameraOrigin.y += (0.5f * Screen.height); // for some reason editor needs this minor adjustment
+                cameraOrigin.x -= 0.5f;
+                cameraOrigin.y += (0.5f); // for some reason editor needs this minor adjustment
                 cameraOrigin.z += 2;
+
                 Matrix4x4 origin = Matrix4x4.TRS(cameraOrigin, Quaternion.identity, Vector3.one);
 #if DEBUG
                 commandBuffer.BeginSample("UIForia Sprite Atlas Update");
@@ -713,9 +714,17 @@ namespace UIForia.Rendering {
             // assert camera & has texture
 
             Vector3 cameraOrigin = camera.transform.position;
-            cameraOrigin.x -= 0.5f * Screen.width;
-            cameraOrigin.y += (0.5f * Screen.height) - 2; // for some reason editor needs this minor adjustment
+            cameraOrigin.x -= 0.5f * (Screen.width);
+            cameraOrigin.y += 0.5f * (Screen.height); // for some reason editor needs this minor adjustment
             cameraOrigin.z += 2;
+            
+            if (Screen.width % 2 != 0) {
+              cameraOrigin.x -=  0.5f;
+            }
+
+            if (Screen.height % 2 != 0) {
+              cameraOrigin.y += 0.5f;
+            }
 
             Matrix4x4 origin = Matrix4x4.TRS(cameraOrigin, Quaternion.identity, Vector3.one);
 

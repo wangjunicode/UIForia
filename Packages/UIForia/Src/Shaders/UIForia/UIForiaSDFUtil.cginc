@@ -77,7 +77,18 @@ fixed4 UIForiaAlphaClipColor(fixed4 color, sampler2D clipTexture, float2 screenU
 // same as UnityPixelSnap except taht we add 0.5 to pixelPos after rounding
 inline float4 UIForiaPixelSnap (float4 pos) {
      float2 hpc = _ScreenParams.xy * 0.5f;
-     float2 pixelPos = round ((pos.xy / pos.w) * hpc) + 0.5;
+     float2 adjustment = float2(0, 0);
+     
+     if((int)_ScreenParams.y % 2 != 0) {
+        adjustment.y = 0.5;
+     }
+     
+     if((int)_ScreenParams.x % 2 != 0) {
+        //adjustment.x = 0.5;
+     }
+     adjustment.x = (_ScreenParams.x % 2 != 0) * 0.5;
+     adjustment.y = (_ScreenParams.y % 2 != 0) * 0.5;
+     float2 pixelPos = round ((pos.xy / pos.w) * hpc) + adjustment;
      pos.xy = pixelPos / hpc * pos.w;
      return pos;
 }
@@ -432,7 +443,7 @@ BorderData GetBorderData(float2 coords, float2 size, float4 packedBorderColors, 
         colorAbove = colorBelow;
         colorBelow = borderColorBottom;
     }
-      
+              
     if(sideOfLine == 1) {
         retn.color = colorAbove; 
         retn.size = sizeAbove;
@@ -440,9 +451,14 @@ BorderData GetBorderData(float2 coords, float2 size, float4 packedBorderColors, 
     else {
         retn.color = colorBelow;
         retn.size = sizeBelow;
-        if(d < 1 && !(corner.x - inset.x == 0 || corner.y - inset.y == 0)) {
-            retn.color = lerp(colorAbove, colorBelow, d);
+    }
+              
+    if(d < 1 && d > -1) {
+        d =  Map(d, -1, 1, 0, 1);
+        if(sideOfLine == -1) {
+            d = 1 - d;
         }
+        retn.color =  lerp(colorBelow, colorAbove, d);
     }
     
     float2 s = step(float2(borderLeft, size.y - borderBottom), p) - step(float2(size.x - borderRight, borderTop), p);
@@ -527,61 +543,45 @@ fixed4 SDFColor(SDFData sdfData, fixed4 borderColor, fixed4 contentColor, float 
     float minSize = min(size.x, size.y);
     float radius = clamp(minSize * sdfData.radius, 0, minSize);
     float2 center = ((sdfData.uv.xy - 0.5) * size);
-    
-    if(halfStrokeWidth < 1) {
-        halfStrokeWidth = 2;
+   
+    if(contentColor.a <= 0) {
+        contentColor = fixed4(borderColor.rgb, 0);
+    }
+     
+    if(halfStrokeWidth == 0 || borderColor.a <= 0) { // if has border but border alpha is 0 might need to handle that 
+        halfStrokeWidth = 1;
         borderColor = contentColor;
     }
-    else {
-     
-    }
-    
-    halfStrokeWidth = 2;
-    contentColor = fixed4(1, 0, 0, 1);
-    borderColor = fixed4(0, 1, 1, 1);
-    //halfStrokeWidth = 6;
-    //borderColor = contentColor;
-
+      
     float sdf = RectSDF(center, (size * 0.5) - halfStrokeWidth, radius - halfStrokeWidth);
     float retn = abs(sdf) - halfStrokeWidth;
-   
-    fixed4 innerColor = contentColor;
-    fixed4 outerColor = borderColor;
+    fixed4 innerColor = borderColor; 
+    fixed4 outerColor = contentColor;
    
    // contentColor = contentColor; //lerp(contentColor, fixed4(borderColor.rgb, 0), contentColor.a == 0);
    // borderColor = lerp(contentColor, borderColor, hasBorder);
-    
     // border to edge
-   /* if(sdf >= halfStrokeWidth * 0.5) {
+    if(sdf > halfStrokeWidth * 0.5) {
         innerColor = borderColor;
         outerColor = fixed4(borderColor.rgb, 0);
     }
-    else if(sdf >= 0) {
-       outerColor = fixed4(1, 0, 0, 1);
-       innerColor = fixed4(1, 0, 0, 1);
-    }
-    // content
-    else {
-       innerColor = borderColor;
-       outerColor = contentColor;
-    }
-    */
     
-    if(sdf == 0) {
-      innerColor = outerColor;
-      outerColor = fixed4(outerColor.rgb, 0);
-    }
-    else {
-          //innerColor = outerColor;
-   //   outerColor = fixed4(innerColor.rgb, 0);
-    }
-              
+   //if(sdf >= 0 && sdf > halfStrokeWidth * 0.5) {
+   //     innerColor = borderColor;
+   //     outerColor = fixed4(borderColor.rgb, 0);
+   //}
     
-   // if(sdf > 0) {
-   //    contentColor = lerp(fixed4(contentColor.rgb, 0), fixed4(borderColor.rgb, 0), hasBorder);
-   // }
+    float distanceChange = sqrt(ddx(retn)*ddx(retn)+ddy(retn) * ddy(retn));
+    // float distanceChange = abs(ddx(retn)) + abs(ddy(retn));
     
-    float distanceChange = fwidth(retn) * 0.5;
+    if(step(abs(ddx(retn)) * abs(ddy(retn)), 0))  {
+        distanceChange *= 0.5;
+        //return Green;
+         //distanceChange = abs(ddx(retn)) * abs(ddy(retn));
+    }
+   else {
+        distanceChange *= 0.81;
+   }
     float aa = smoothstep(distanceChange, -distanceChange, retn);
     return lerp(innerColor, outerColor, 1 - aa); // do not pre-multiply alpha here!
 }

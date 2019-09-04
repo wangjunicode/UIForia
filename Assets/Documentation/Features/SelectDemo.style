@@ -1,6 +1,12 @@
 style select-demo-root {
-    PreferredSize = 1pca;
-    Padding = 32px;
+    PreferredSize = 200px, 300px; //1pca;
+    // BackgroundColor = white;
+    Border = 20px;
+    BorderColor = Red;
+    BorderRadiusTopLeft = 25%;
+    BorderRadiusBottomLeft = 25%;
+    MarginTop = 20px;
+    MarginLeft = 20px;
 }
 
 style button-group {
@@ -10,12 +16,20 @@ style button-group {
 
 style button {
     BackgroundColor = white;
-    BorderRadius = 8px;
-    Padding = 0.5em, 1em;
-    MarginRight = 1em;
+    BorderColor = red;
+   // Border = 5px;
+    BorderRadius = 50%;
+    PreferredSize = 100px;
+
 }
 
 style repeat {
     PreferredSize = 200px 1cnt;
     MarginBottom = 10px;
+}
+
+style box {
+    PreferredSize = 100px;
+    BackgroundColor = red;
+    BorderRadius = 20%;
 }

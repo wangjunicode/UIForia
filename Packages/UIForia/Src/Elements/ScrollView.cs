@@ -21,11 +21,15 @@ namespace UIForia.Elements {
         public bool disableOverflowX;
         public bool disableOverflowY;
 
+        public float fadeTarget; 
+
         protected float lastScrollVerticalTimestamp;
         protected float lastScrollHorizontalTimestamp;
 
         protected UIElement childrenElement;
         // todo -- without layout system integration this is an overlay scroll bar only
+
+        private Size overflowSize;
 
         public override void OnEnable() {
             childrenElement = FindById("scroll-root");
@@ -34,50 +38,9 @@ namespace UIForia.Elements {
             horizontalHandle = FindById("scroll-handle-horizontal");
             horizontalTrack = FindById("scroll-track-horizontal");
         }
-        
-        [OnMouseWheel]
-        public void OnMouseWheel(MouseInputEvent evt) {
 
-            if (verticalTrack.isEnabled) {
-                lastScrollVerticalTimestamp = Time.realtimeSinceStartup;
-                float trackRectHeight = verticalTrack.layoutResult.actualSize.height;
-                float handleHeight = verticalHandle.layoutResult.actualSize.height;
-                float max = trackRectHeight - handleHeight;
-                float offset = (verticalHandle.layoutResult.screenPosition.y - verticalTrack.layoutResult.screenPosition.y) + (scrollSpeed * -evt.ScrollDelta.y);
-                offset = Mathf.Clamp(offset, 0, max);
-                ScrollToVerticalPercent(offset / max);
-                evt.StopPropagation();
-            }
-
-            if (horizontalTrack.isEnabled) {
-                
-                lastScrollHorizontalTimestamp = Time.realtimeSinceStartup;
-                float trackRectWidth = horizontalTrack.layoutResult.actualSize.width;
-                float handleWidth = horizontalHandle.layoutResult.actualSize.width;
-                float max = trackRectWidth - handleWidth;
-                float offset = (horizontalHandle.layoutResult.screenPosition.x - horizontalTrack.layoutResult.screenPosition.x) + (scrollSpeed * -evt.ScrollDelta.x);
-                float scrollPixels = overflowSize.width - layoutResult.actualSize.width;
-                offset = Mathf.Clamp(offset, 0, max);
-                float percentage = offset / max;
-                horizontalHandle.style.SetAlignmentOffsetX(new OffsetMeasurement(-percentage, OffsetMeasurementUnit.Percent), StyleState.Normal);
-                horizontalHandle.style.SetAlignmentOriginX(new OffsetMeasurement(percentage, OffsetMeasurementUnit.Percent), StyleState.Normal);
-                childrenElement.style.SetTransformPositionX(new OffsetMeasurement(-percentage * scrollPixels), StyleState.Normal);
-                evt.StopPropagation();
-            }
-        }
-
-        public void OnHoverHorizontal(MouseInputEvent evt) {
-            lastScrollHorizontalTimestamp = Time.realtimeSinceStartup;
-        }
-
-        public void OnHoverVertical(MouseInputEvent evt) {
-            lastScrollVerticalTimestamp = Time.realtimeSinceStartup;
-        }
-
-        private Size overflowSize;
-        
         public override void OnUpdate() {
-            Size allocatedSize = layoutResult.allocatedSize;
+            Size actualSize = layoutResult.actualSize;
             float minX = float.MaxValue;
             float minY = float.MaxValue;
             float maxX = float.MinValue;
@@ -95,35 +58,26 @@ namespace UIForia.Elements {
 
             overflowSize = new Size(maxX - minX, maxY - minY);
 
-            if (disableOverflowY) {
-               verticalTrack.SetEnabled(false);
-            }
-
-            if (disableOverflowX) {
+            if (disableOverflowX || overflowSize.width <= actualSize.width) {
                 horizontalTrack.SetEnabled(false);
             }
-
-            if (overflowSize.width <= allocatedSize.width) {
-                horizontalTrack.SetEnabled(false);
-            }
-            else if (!disableOverflowX) {
+            else {
                 horizontalTrack.SetEnabled(true);
-                float width = (allocatedSize.width / overflowSize.width) * allocatedSize.width;
-                float opacity = 1 - Mathf.Clamp01(Easing.Interpolate((Time.realtimeSinceStartup - lastScrollHorizontalTimestamp) / fadeTime, EasingFunction.CubicEaseInOut));
-                // horizontalHandle.style.SetPreferredWidth(width, StyleState.Normal);
-                // horizontalTrack.style.SetOpacity(opacity, StyleState.Normal);
-                // horizontalTrack.style.SetTransformPositionY(layoutResult.allocatedSize.height - horizontalTrack.layoutResult.actualSize.height, StyleState.Normal);
+                float width = (actualSize.width / overflowSize.width) * actualSize.width;
+                float opacity = 1 + fadeTarget - Mathf.Clamp01(Easing.Interpolate((Time.realtimeSinceStartup - lastScrollHorizontalTimestamp) / fadeTime, EasingFunction.CubicEaseInOut));
+                horizontalHandle.style.SetPreferredWidth(width, StyleState.Normal);
+//                horizontalTrack.style.SetOpacity(opacity, StyleState.Normal);
             }
 
-            if (overflowSize.height <= allocatedSize.height) {
+            if (disableOverflowY || overflowSize.height <= actualSize.height) {
                 verticalTrack.SetEnabled(false);
             }
-            else if (!disableOverflowY) {
+            else {
                 verticalTrack.SetEnabled(true);
-                float height = (allocatedSize.height / overflowSize.height) * allocatedSize.height;
-                float opacity = 1 - Mathf.Clamp01(Easing.Interpolate((Time.realtimeSinceStartup - lastScrollVerticalTimestamp) / fadeTime, EasingFunction.CubicEaseInOut));
+                float height = (actualSize.height / overflowSize.height) * actualSize.height;
+                float opacity = 1 + fadeTarget - Mathf.Clamp01(Easing.Interpolate((Time.realtimeSinceStartup - lastScrollVerticalTimestamp) / fadeTime, EasingFunction.CubicEaseInOut));
                 verticalHandle.style.SetPreferredHeight(height, StyleState.Normal);
-                verticalTrack.style.SetOpacity(opacity, StyleState.Normal);
+//                verticalTrack.style.SetOpacity(opacity, StyleState.Normal);
             }
         }
 
@@ -132,55 +86,58 @@ namespace UIForia.Elements {
             evt.StopPropagation();
         }
 
-        private void ScrollPageTowardsY(float y) {
-            
-            if (!verticalTrack.isEnabled) return;
-            lastScrollVerticalTimestamp = Time.realtimeSinceStartup;
-            float trackRectHeight = verticalTrack.layoutResult.actualSize.height;
-            float handleTop = verticalHandle.layoutResult.screenPosition.y;
-            float handleBottom = handleTop + verticalHandle.layoutResult.actualSize.height;
-            float direction = 0;
-            
-            if (y < handleTop) {
-                direction = -1;
-            }
-            else if (y > handleBottom) {
-                direction = 1;
-            }
-
-            float handleHeight = verticalHandle.layoutResult.actualSize.height;
-            float max = trackRectHeight - handleHeight;
-            float offset = (verticalHandle.layoutResult.screenPosition.y - verticalTrack.layoutResult.screenPosition.y);
-            offset += (trackRectHeight / overflowSize.height ) * direction;
-            ScrollToVerticalPercent(offset / max);
-        }
-
         public void OnClickHorizontal(MouseInputEvent evt) {
             ScrollPageTowardsX(evt.MousePosition.x);
             evt.StopPropagation();
         }
+        
+        [OnMouseWheel]
+        public void OnMouseWheel(MouseInputEvent evt) {
+            if (verticalTrack.isEnabled) {
+                float max = GetMaxHeight();
+                float offset = (verticalHandle.layoutResult.screenPosition.y - verticalTrack.layoutResult.screenPosition.y) + (scrollSpeed * -evt.ScrollDelta.y);
+                ScrollToVerticalPercent(offset / max);
+                evt.StopPropagation();
+            }
+
+            if (horizontalTrack.isEnabled) {
+                float max = GetMaxWidth();
+                float offset = (horizontalHandle.layoutResult.screenPosition.x - horizontalTrack.layoutResult.screenPosition.x) - (scrollSpeed * evt.ScrollDelta.x);
+                ScrollToHorizontalPercent(offset / max);
+                evt.StopPropagation();
+            }
+        }
+
+        public void OnHoverHorizontal(MouseInputEvent evt) {
+            lastScrollHorizontalTimestamp = Time.realtimeSinceStartup;
+        }
+
+        public void OnHoverVertical(MouseInputEvent evt) {
+            lastScrollVerticalTimestamp = Time.realtimeSinceStartup;
+        }
+
+        private void ScrollPageTowardsY(float y) {
+            float pageSize = verticalTrack.layoutResult.allocatedSize.height / overflowSize.height;
+            float handleTop = verticalHandle.layoutResult.screenPosition.y;
+
+            if (y < handleTop) {
+                pageSize = -pageSize;
+            }
+
+            float offset = handleTop / GetMaxWidth() + pageSize;
+            ScrollToHorizontalPercent(offset);
+        }
 
         private void ScrollPageTowardsX(float x) {
-            if (!horizontalTrack.isEnabled) return;
-            lastScrollVerticalTimestamp = Time.realtimeSinceStartup;
-            float trackRectWidth = horizontalTrack.layoutResult.allocatedSize.width;
-            float targetWidth = layoutResult.actualSize.width;
+            float pageSize = horizontalTrack.layoutResult.allocatedSize.width / overflowSize.width;
             float handleLeft = horizontalHandle.layoutResult.screenPosition.x;
-            float handleRight = handleLeft + horizontalHandle.layoutResult.allocatedSize.width;
-            float pageSize = trackRectWidth;
-            float direction = 0;
+
             if (x < handleLeft) {
-                direction = -1;
-            }
-            else if (x > handleRight) {
-                direction = 1;
+                pageSize = -pageSize;
             }
 
-            float offset = 0; // todo -- fix
-            
-            float handleWidth = horizontalHandle.layoutResult.allocatedSize.width;
-            float max = trackRectWidth - handleWidth;
-            horizontalHandle.style.SetTransformPositionX(offset * (max), StyleState.Normal);
+            float offset = handleLeft / GetMaxWidth() + pageSize;
+            ScrollToHorizontalPercent(offset);
         }
 
         [OnDragCreate]
@@ -237,8 +194,14 @@ namespace UIForia.Elements {
         }
 
         private void ScrollToVerticalPercent(float percentage) {
+            if (!verticalTrack.isEnabled) {
+                return;
+            }
+
             percentage = Mathf.Clamp01(percentage);
+            lastScrollVerticalTimestamp = Time.realtimeSinceStartup;
             float scrollPixels = overflowSize.height - layoutResult.actualSize.height;
+
             verticalHandle.style.SetAlignmentOffsetY(new OffsetMeasurement(-percentage, OffsetMeasurementUnit.Percent), StyleState.Normal);
             verticalHandle.style.SetAlignmentOriginY(new OffsetMeasurement(percentage, OffsetMeasurementUnit.Percent), StyleState.Normal);
             childrenElement.style.SetTransformPositionY(new OffsetMeasurement(-percentage * scrollPixels), StyleState.Normal);
@@ -248,12 +211,26 @@ namespace UIForia.Elements {
             if (!horizontalTrack.isEnabled) {
                 return;
             }
-            lastScrollVerticalTimestamp = Time.realtimeSinceStartup;
+
+            lastScrollHorizontalTimestamp = Time.realtimeSinceStartup;
             percentage = Mathf.Clamp01(percentage);
             float scrollPixels = overflowSize.width - layoutResult.actualSize.width;
+
             horizontalHandle.style.SetAlignmentOffsetX(new OffsetMeasurement(-percentage, OffsetMeasurementUnit.Percent), StyleState.Normal);
             horizontalHandle.style.SetAlignmentOriginX(new OffsetMeasurement(percentage, OffsetMeasurementUnit.Percent), StyleState.Normal);
             childrenElement.style.SetTransformPositionX(new OffsetMeasurement(-percentage * scrollPixels), StyleState.Normal);
+        }
+
+        private float GetMaxHeight() {
+            float trackRectHeight = verticalTrack.layoutResult.actualSize.height;
+            float handleHeight = verticalHandle.layoutResult.actualSize.height;
+            return trackRectHeight - handleHeight;
+        }
+
+        private float GetMaxWidth() {
+            float trackRectWidth = horizontalTrack.layoutResult.actualSize.width;
+            float handleWidth = horizontalHandle.layoutResult.actualSize.width;
+            return trackRectWidth - handleWidth;
         }
 
         public class ScrollbarDragEvent : DragEvent {
@@ -270,34 +247,17 @@ namespace UIForia.Elements {
 
             public override void Update() {
                 if ((orientation & ScrollbarOrientation.Vertical) != 0) {
-                    scrollbar.lastScrollVerticalTimestamp = Time.realtimeSinceStartup;
-                    float trackRectY = scrollbar.verticalTrack.layoutResult.screenPosition.y;
-                    float trackRectHeight = scrollbar.verticalTrack.layoutResult.actualSize.height;
-                    float handleHeight = scrollbar.verticalHandle.layoutResult.actualSize.height;
-                    float max = trackRectHeight - handleHeight;
-                    float offset = Mathf.Clamp(MousePosition.y - trackRectY - baseOffset.y, 0, max);
-                    float percentage = offset / max;
-                    scrollbar.verticalHandle.style.SetAlignmentOffsetY(new OffsetMeasurement(-percentage, OffsetMeasurementUnit.Percent), StyleState.Normal);
-                    scrollbar.verticalHandle.style.SetAlignmentOriginY(new OffsetMeasurement(percentage, OffsetMeasurementUnit.Percent), StyleState.Normal);
-                    float scrollPixels = scrollbar.overflowSize.height - scrollbar.layoutResult.actualSize.height;
-                    scrollbar.childrenElement.style.SetTransformPositionY(new OffsetMeasurement(-percentage * scrollPixels), StyleState.Normal);
+                    float max = scrollbar.GetMaxHeight();
+                    float offset = Mathf.Clamp(MousePosition.y - scrollbar.verticalTrack.layoutResult.screenPosition.y - baseOffset.y, 0, max);
+                    scrollbar.ScrollToVerticalPercent(offset / max);
                 }
 
                 if ((orientation & ScrollbarOrientation.Horizontal) != 0) {
-                    scrollbar.lastScrollHorizontalTimestamp = Time.realtimeSinceStartup;
-                    float trackRectX = scrollbar.horizontalTrack.layoutResult.screenPosition.x;
-                    float trackRectWidth = scrollbar.horizontalTrack.layoutResult.actualSize.width;
-                    float handleWidth = scrollbar.horizontalHandle.layoutResult.actualSize.width;
-                    float max = trackRectWidth - handleWidth;
-                    float offset = Mathf.Clamp(MousePosition.x - trackRectX - baseOffset.x, 0, max);
-                    float percentage = offset / max;
-                    scrollbar.horizontalHandle.style.SetAlignmentOffsetX(new OffsetMeasurement(-percentage, OffsetMeasurementUnit.Percent), StyleState.Normal);
-                    scrollbar.horizontalHandle.style.SetAlignmentOriginX(new OffsetMeasurement(percentage, OffsetMeasurementUnit.Percent), StyleState.Normal);
+                    float max = scrollbar.GetMaxWidth();
+                    float offset = Mathf.Clamp(MousePosition.x - scrollbar.horizontalTrack.layoutResult.screenPosition.x - baseOffset.x, 0, max);
+                    scrollbar.ScrollToHorizontalPercent(offset / max);
                 }
             }
-
         }
-
     }
-
 }

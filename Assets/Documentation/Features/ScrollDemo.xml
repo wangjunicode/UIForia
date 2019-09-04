@@ -4,7 +4,7 @@
     <Style path="Documentation/Features/ScrollDemo.style"/>
     <Contents style="container">
 
-        <ScrollView style="level-0">
+        <ScrollView style="level-0" fadeTarget="1f">
 
             <Div style="level-1">
 

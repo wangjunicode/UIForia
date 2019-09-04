@@ -34,14 +34,6 @@ namespace UIForia.Elements {
             horizontalHandle = FindById("scroll-handle-horizontal");
             horizontalTrack = FindById("scroll-track-horizontal");
         }
-
-        private void ScrollToVerticalPercent(float percentage) {
-            percentage = Mathf.Clamp01(percentage);
-            float scrollPixels = overflowSize.height - layoutResult.actualSize.height;
-            verticalHandle.style.SetAlignmentOffsetY(new OffsetMeasurement(-percentage, OffsetMeasurementUnit.Percent), StyleState.Normal);
-            verticalHandle.style.SetAlignmentOriginY(new OffsetMeasurement(percentage, OffsetMeasurementUnit.Percent), StyleState.Normal);
-            childrenElement.style.SetTransformPositionY(new OffsetMeasurement(-percentage * scrollPixels), StyleState.Normal);
-        }
         
         [OnMouseWheel]
         public void OnMouseWheel(MouseInputEvent evt) {
@@ -235,39 +227,33 @@ namespace UIForia.Elements {
         public override void HandleUIEvent(UIEvent evt) {
             if (evt is UIScrollEvent scrollEvent) {
                 if (scrollEvent.ScrollDestinationX >= 0) {
-                    ScrollToX(scrollEvent.ScrollDestinationX);
+                    ScrollToHorizontalPercent(scrollEvent.ScrollDestinationX);
                 }
 
                 if (scrollEvent.ScrollDestinationY >= 0) {
-                    ScrollToY(scrollEvent.ScrollDestinationY);
+                    ScrollToVerticalPercent(scrollEvent.ScrollDestinationY);
                 }
             }
         }
 
-        private void ScrollToY(float y) {
-            if (!verticalTrack.isEnabled) {
-                return;
-            }
-            
-            lastScrollVerticalTimestamp = Time.realtimeSinceStartup;
-            float trackRectHeight = verticalTrack.layoutResult.allocatedSize.height;
-            float handleHeight = verticalHandle.layoutResult.allocatedSize.height;
-            float max = trackRectHeight - handleHeight;
-            float offset = Mathf.Clamp(y, 0, 1);
-            verticalHandle.style.SetTransformPositionY(offset * (max), StyleState.Normal);
+        private void ScrollToVerticalPercent(float percentage) {
+            percentage = Mathf.Clamp01(percentage);
+            float scrollPixels = overflowSize.height - layoutResult.actualSize.height;
+            verticalHandle.style.SetAlignmentOffsetY(new OffsetMeasurement(-percentage, OffsetMeasurementUnit.Percent), StyleState.Normal);
+            verticalHandle.style.SetAlignmentOriginY(new OffsetMeasurement(percentage, OffsetMeasurementUnit.Percent), StyleState.Normal);
+            childrenElement.style.SetTransformPositionY(new OffsetMeasurement(-percentage * scrollPixels), StyleState.Normal);
         }
 
-        private void ScrollToX(float x) {
+        private void ScrollToHorizontalPercent(float percentage) {
             if (!horizontalTrack.isEnabled) {
                 return;
             }
-
             lastScrollVerticalTimestamp = Time.realtimeSinceStartup;
-            float trackRectWidth = horizontalTrack.layoutResult.allocatedSize.width;
-            float handleWidth = horizontalHandle.layoutResult.allocatedSize.width;
-            float max = trackRectWidth - handleWidth;
-            float offset = Mathf.Clamp(x, 0, 1);
-            horizontalHandle.style.SetTransformPositionX(offset * (max), StyleState.Normal);
+            percentage = Mathf.Clamp01(percentage);
+            float scrollPixels = overflowSize.width - layoutResult.actualSize.width;
+            horizontalHandle.style.SetAlignmentOffsetX(new OffsetMeasurement(-percentage, OffsetMeasurementUnit.Percent), StyleState.Normal);
+            horizontalHandle.style.SetAlignmentOriginX(new OffsetMeasurement(percentage, OffsetMeasurementUnit.Percent), StyleState.Normal);
+            childrenElement.style.SetTransformPositionX(new OffsetMeasurement(-percentage * scrollPixels), StyleState.Normal);
         }
 
         public class ScrollbarDragEvent : DragEvent {

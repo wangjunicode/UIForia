@@ -52,7 +52,7 @@ fixed4 UIForiaAlphaClipColor(fixed4 color, sampler2D clipTexture, float2 screenU
     float2 screenPos = float2(screenUV.x * _ScreenParams.x, screenUV.y * _ScreenParams.y);
     half2 unpackedSizeXY = UnpackSize(clipData.x);
     half2 unpackedSizeZW = UnpackSize(clipData.y);
-    
+            
     // point in rect, does not handle rotation, need to be sure box & point are in the same same aligned coordinate space
     float2 s = step(float2(unpackedSizeXY.x, unpackedSizeZW.y), screenPos) - step(float2(unpackedSizeZW.x , unpackedSizeXY.y), screenPos);
     
@@ -63,14 +63,16 @@ fixed4 UIForiaAlphaClipColor(fixed4 color, sampler2D clipTexture, float2 screenU
     
     x = Map(x, 0, 1, clipUvs.x, clipUvs.z);
     y = Map(y, 0, 1, clipUvs.y, clipUvs.w);
-
+    
      // x += (1 / _ScreenParams.x) * 0.5;
      // y += (1 / _ScreenParams.y) * 0.5;
 
     // y comes in [0 - 1], need to sample with [1, 0]
     fixed a = tex2Dlod(clipTexture, float4(x, 1 - y, 0, 0))[(int)clipData.z]; // z is the channel the target mask is on
-    retn = lerp(retn, fixed4(retn.rgb, lerp(color.a, a, 1 - a)), a < 1 && color.a > 0 && (clipUvs.z + clipUvs.w) != 0);
+    // retn = lerp(retn, fixed4(retn.rgb, lerp(color.a, a, 1 - a)), a < 1 && color.a > 0 && (clipUvs.z + clipUvs.w) != 0);
     retn = lerp(retn, fixed4(0, 0, 0, 0), (s.x * s.y) == 0); 
+    
+    
     return retn;
 }
                                    
@@ -79,12 +81,12 @@ inline float4 UIForiaPixelSnap (float4 pos) {
      float2 hpc = _ScreenParams.xy * 0.5f;
      float2 adjustment = float2(0, 0);
      
-     if((int)_ScreenParams.y % 2 != 0) {
+     if((uint)_ScreenParams.y % 2 != 0) {
         adjustment.y = 0.5;
      }
      
-     if((int)_ScreenParams.x % 2 != 0) {
-        //adjustment.x = 0.5;
+     if((uint)_ScreenParams.x % 2 != 0) {
+        adjustment.x = 0.5;
      }
      adjustment.x = (_ScreenParams.x % 2 != 0) * 0.5;
      adjustment.y = (_ScreenParams.y % 2 != 0) * 0.5;
@@ -542,8 +544,9 @@ fixed4 SDFColor(SDFData sdfData, fixed4 borderColor, fixed4 contentColor, float 
     float2 size = sdfData.size;
     float minSize = min(size.x, size.y);
     float radius = clamp(minSize * sdfData.radius, 0, minSize);
+    
     float2 center = ((sdfData.uv.xy - 0.5) * size);
-   
+
     if(contentColor.a <= 0) {
         contentColor = fixed4(borderColor.rgb, 0);
     }
@@ -561,27 +564,28 @@ fixed4 SDFColor(SDFData sdfData, fixed4 borderColor, fixed4 contentColor, float 
    // contentColor = contentColor; //lerp(contentColor, fixed4(borderColor.rgb, 0), contentColor.a == 0);
    // borderColor = lerp(contentColor, borderColor, hasBorder);
     // border to edge
-    if(sdf > halfStrokeWidth * 0.5) {
+    //if(sdf > halfStrokeWidth * 0.5) {
+    //    innerColor = borderColor;
+    //    outerColor = fixed4(borderColor.rgb, 0);
+    //}
+    
+    if(sdf >= 0) {
         innerColor = borderColor;
         outerColor = fixed4(borderColor.rgb, 0);
     }
     
-   //if(sdf >= 0 && sdf > halfStrokeWidth * 0.5) {
-   //     innerColor = borderColor;
-   //     outerColor = fixed4(borderColor.rgb, 0);
-   //}
+    float ddxRetn = ddx(retn);
+    float ddyRetn = ddy(retn);
+
+    float distanceChange = sqrt(ddxRetn * ddxRetn + ddyRetn * ddyRetn);
     
-    float distanceChange = sqrt(ddx(retn)*ddx(retn)+ddy(retn) * ddy(retn));
-    // float distanceChange = abs(ddx(retn)) + abs(ddy(retn));
-    
-    if(step(abs(ddx(retn)) * abs(ddy(retn)), 0))  {
+    if(step(abs(ddxRetn) * abs(ddyRetn), 0))  {
         distanceChange *= 0.5;
-        //return Green;
-         //distanceChange = abs(ddx(retn)) * abs(ddy(retn));
     }
-   else {
-        distanceChange *= 0.81;
-   }
+    else {
+        distanceChange *= 0.71;
+    }
+    
     float aa = smoothstep(distanceChange, -distanceChange, retn);
     return lerp(innerColor, outerColor, 1 - aa); // do not pre-multiply alpha here!
 }

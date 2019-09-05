@@ -127,7 +127,7 @@ namespace Src.Systems {
                     // ReSharper disable once PossibleNullReferenceException
                     current.renderBox.culled = false;
                     LightList<UIElement> children = current.element.children;
-
+ 
                     //  if((current.element.renderBox.typeFlags & RenderBoxFlag.PreRenderIcon) != 0) {
                     // will need to check if culled or not
 
@@ -298,7 +298,7 @@ namespace Src.Systems {
                                 break;
                         }
 
-                        if (!renderBox.culled) {
+                        if (!renderBox.culled && renderBox.visibility != Visibility.Hidden) {
                             drawList.Add(new DrawCommand(renderBox, DrawCommandType.BackgroundTransparent));
                         }
 

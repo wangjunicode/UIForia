@@ -74,7 +74,6 @@ namespace UIForia.Rendering {
         internal StructList<FixedRenderState> fixedRenderStateList;
 
         private Batch currentBatch;
-        private Material activeMaterial;
 
         private readonly MeshPool uiforiaMeshPool;
         private readonly UIForiaMaterialPool uiforiaMaterialPool;
@@ -86,7 +85,6 @@ namespace UIForia.Rendering {
         private static readonly int s_MaxTextureSize;
         private static readonly int s_MainTex = Shader.PropertyToID("_MainTex");
 
-        private readonly Material effectBlitMaterial;
         private readonly StructList<ScratchRenderTexture> scratchTextures;
         private readonly StructList<RenderOperation> renderCommandList;
         private readonly StructList<Batch> pendingBatches;
@@ -509,7 +507,7 @@ namespace UIForia.Rendering {
 
             StructList<TexturePacker.TextureData>.Release(ref spriteAtlasUpdates);
 
-            clipContext.Clip(camera, commandBuffer);
+          //  clipContext.Clip(camera, commandBuffer);
 
 #if DEBUG
             commandBuffer.BeginSample("UIForia Render Main");
@@ -774,18 +772,18 @@ namespace UIForia.Rendering {
 
                     case RenderOperationType.PushRenderTexture:
 
-                        if (rtStack.array[rtStack.size - 1].renderTexture != cmd.renderTexture) {
-                            // todo -- figure out the weirdness with perspective or view when texture is larger than camera texture
-                            commandBuffer.SetRenderTarget(cmd.renderTexture);
-                            int width = cmd.renderTexture.width / 2;
-                            int height = cmd.renderTexture.height / 2;
-                            Matrix4x4 projection = camera.projectionMatrix; //Matrix4x4.Ortho(-width, width, -height, height, 0.1f, 9999);
-                            commandBuffer.SetViewProjectionMatrices(cameraMatrix, projection);
-                            commandBuffer.ClearRenderTarget(true, true, cmd.color);
-                        }
-
-                        // always push so pop will pop the right texture, duplicate refs are ok
-                        rtStack.Push(new RenderArea(cmd.renderTexture, cmd.rect));
+//                        if (rtStack.array[rtStack.size - 1].renderTexture != cmd.renderTexture) {
+//                            // todo -- figure out the weirdness with perspective or view when texture is larger than camera texture
+//                            commandBuffer.SetRenderTarget(cmd.renderTexture);
+//                            int width = cmd.renderTexture.width / 2;
+//                            int height = cmd.renderTexture.height / 2;
+//                            Matrix4x4 projection = camera.projectionMatrix; //Matrix4x4.Ortho(-width, width, -height, height, 0.1f, 9999);
+//                            commandBuffer.SetViewProjectionMatrices(cameraMatrix, projection);
+//                            commandBuffer.ClearRenderTarget(true, true, cmd.color);
+//                        }
+//
+//                        // always push so pop will pop the right texture, duplicate refs are ok
+//                        rtStack.Push(new RenderArea(cmd.renderTexture, cmd.rect));
                         break;
 
                     case RenderOperationType.ClearRenderTextureRegion:
@@ -874,16 +872,22 @@ namespace UIForia.Rendering {
         }
 
         public void Destroy() {
+            Clear();
             clipContext?.Destroy();
             clipContext = null;
             UnityEngine.Object.Destroy(spriteAtlas);
             UnityEngine.Object.Destroy(spriteAtlasMaterial);
-
+            UnityEngine.Object.Destroy(textAtlas);
+            UnityEngine.Object.Destroy(pingPongTexture);
+            
             for (int i = 0; i < meshesToRelease.size; i++) {
                 meshesToRelease[i].Release();
             }
 
             uiforiaMeshPool.Destroy();
+            pathMaterialPool.Destroy();
+            uiforiaMaterialPool.Destroy();
+
         }
 
 //        public RenderTargetIdentifier GetNextRenderTarget() {

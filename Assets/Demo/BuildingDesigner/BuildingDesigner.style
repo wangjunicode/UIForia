@@ -59,6 +59,62 @@ style confirm-text-color { TextColor = @confirmColor; }
 style save-exit-text-color { TextColor = @saveExitColor; }
 style cancel-text-color { TextColor = @cancelColor; }
 
+style fake-select {
+    PreferredSize = 1cnt 1mn;
+    LayoutType = Stack;
+    BackgroundColor = White;
+    PaddingRight = 24px;
+}
+
+style fake-select-display {
+//    Border = 2px;
+//    BorderColor =  #b2b2b2;
+//    BorderRadius = 14px 0 0 14px;
+//    TextFontSize = 1em;
+//    //Padding = 6px 8px;
+//    PreferredSize = 1cnt 48px;
+//    FlexLayoutMainAxisAlignment = Center;
+//   
+//    [hover] {
+//        BorderColor = #00b5d9;
+//    }
+      BackgroundColor = Yellow;
+
+}
+
+style fake-select-chevron-holder {
+    LayoutBehavior = Ignored;
+    AlignmentBehaviorX = Parent;
+    AlignX = 100%;
+    BackgroundColor = #00b5d0;
+    PreferredSize = 24px 100%;
+    BorderColor = #006d82;
+    BorderRadius = 0 24px 24px 0;
+    Border = 1px;
+  //  PreferredSize = 32px, 100%;
+  //  FlexLayoutMainAxisAlignment = SpaceAround;
+  //  FlexLayoutCrossAxisAlignment = Center;
+  //  FlexLayoutDirection = Row;
+//        PreferredSize = 200px;
+//        BackgroundColor = Blue;
+//          AlignmentBehaviorX = LayoutBox;
+//          AlignmentBehaviorY = LayoutBox;
+//            AlignX = 50%;
+//            AlignY = 50%;
+
+}
+
+style fake-select-options {
+    Visibility = Hidden;
+//    PreferredSize = 100px;
+//    BackgroundColor = Red;
+//    AlignmentBehaviorX = LayoutBox;
+//    AlignmentBehaviorY = LayoutBox;
+//    AlignX = 100%;
+//    AlignY = 100%;
+   
+}
+
 animation open-shortcuts {
     [options] {
         duration = @durationDialog;

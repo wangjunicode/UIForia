@@ -71,6 +71,14 @@ namespace UIForia.Rendering {
             throw new Exception($"Batch size is too big. Tried to draw {objectCount} objects but batching supports at most {RenderContext.k_ObjectCount_Massive}");
         }
 
+        public void Destroy() {
+            UnityEngine.Object.Destroy(small);
+            UnityEngine.Object.Destroy(medium);
+            UnityEngine.Object.Destroy(large);
+            UnityEngine.Object.Destroy(huge);
+            UnityEngine.Object.Destroy(massive);
+        }
+
     }
 
 }

@@ -23,7 +23,8 @@
 <!--            -->
 <!--        </Repeat>-->
 <!--        -->
-<!--        <Select&#45;&#45;string selectedValue.read.write="selectedLanguage[0].Name" options="translations[0]" disableOverflowX="true" disabled="true" />-->
+        
+        <Select--string selectedValue.read.write="selectedLanguage[0].Name" options="translations[0]" disableOverflowX="true" disabled="true" />
 
 <!--        <Group style="button-group">-->
 <!--            <Group style="button" onMouseClick="ClearWords()">-->

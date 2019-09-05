@@ -847,9 +847,11 @@ namespace UIForia.Compilers.Style {
                 case "%":
                     return UIMeasurementUnit.Percentage;
 
+                case "mx":
                 case "intrinsic":
                     return UIMeasurementUnit.IntrinsicPreferred;
 
+                case "mn":
                 case "intrinsic-min":
                     return UIMeasurementUnit.IntrinsicMinimum;
 
@@ -858,7 +860,7 @@ namespace UIForia.Compilers.Style {
             }
 
             Debug.LogWarning($"You used a {unitNode.value} in line {unitNode.line} column {unitNode.column} in file {context.fileName} but this unit isn't supported. " +
-                             "Try px, %, pca, pcz, em, cnt, aw, ah, vw, vh or lh instead (see UIMeasurementUnit). Will fall back to px.");
+                             "Try px, %, pca, pcz, em, cnt, vw, or vh instead (see UIMeasurementUnit). Will fall back to px.");
 
             return UIMeasurementUnit.Pixel;
         }

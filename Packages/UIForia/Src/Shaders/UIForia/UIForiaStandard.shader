@@ -156,8 +156,8 @@ Shader "UIForia/Standard"
                     
                     alphaClip = alphaClip / 2.0 - ( 0.5 / scale) - weight;
                     
-                    o.texCoord1 = float4(alphaClip, scale, bias, weight);
-                    o.texCoord2 = float4(ShapeType_Text, outlineWidth, outlineSoftness, 0);
+                    o.texCoord1 = float4(alphaClip, scale, bias, objectIndex);
+                    o.texCoord2 = float4(ShapeType_Text, outlineWidth, outlineSoftness, weight);
                     o.texCoord3 = float4(underlayOffset, underlayScale, underlayBias);
 
                 }
@@ -171,7 +171,6 @@ Shader "UIForia/Standard"
                 // return fixed4(i.texCoord0.z, i.texCoord0.z, i.texCoord0.z, 1);
                 
                 float2 screenUV = i.texCoord4.yz / i.texCoord4.w;
-                
                 float4 clipRect = _ClipRects[(uint)i.texCoord1.w];
                 float4 clipUvs = _ClipUVs[(uint)i.texCoord1.w];
                 // todo -- returns cause branching here
@@ -198,14 +197,14 @@ Shader "UIForia/Standard"
                 
                 float scale	= i.texCoord1.y;
                 float bias = i.texCoord1.z;
-                float weight = i.texCoord1.w;
+                float weight = i.texCoord2.w;
                 float sd = (bias - c) * scale;
 
                 float outline = 0; // (outlineWidth * scaleRatio) * scale;
                 float softness = 0; //(outlineSoftness * scaleRatio) * scale;
 
                 fixed4 faceColor = UnpackColor(asuint(i.color.r)); // could just be mainColor?
-                // faceColor.a *= UIForiaAlphaClip(faceColor.a, _MaskTexture, screenUV, clipRect, clipUvs);
+
                 
                 fixed4 outlineColor = Green;//UnpackColor(asuint(i.color.g));
                 //fixed4 underlayColor = UnpackColor(asuint(i.color.b));
@@ -217,7 +216,9 @@ Shader "UIForia/Standard"
                 // glowColor.rgb *= glowColor.a;
                 
                 faceColor = GetTextColor(sd, faceColor, outlineColor, outline, softness);
-                
+                faceColor = UIForiaAlphaClipColor(faceColor, _MaskTexture, screenUV, clipRect, clipUvs);
+                faceColor.rgb *= faceColor.a;
+
                 #define underlayOffset i.texCoord3.xy
                 #define underlayScale i.texCoord3.z
                 #define underlayBias i.texCoord3.w

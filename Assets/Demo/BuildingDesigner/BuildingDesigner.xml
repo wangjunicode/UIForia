@@ -10,21 +10,41 @@
 
     <Contents>
 
-        <Group style="building-designer-root">
-
-            <Group style="building-designer-top-bar">
-
-                <Text>CONSTRUCTION MODE</Text>
-
-                
-                <Select--int style="select-height" options="brushTypes" onValueChanged="OnBrushTypeChanged"/>
+        <Group style="fake-select">
+            
+            <Group style="fake-select-display">
+                <Text>Basic</Text>
+            </Group>
+            
+            <Group style="fake-select-chevron-holder">
 
             </Group>
-
-            <Group></Group>
-            <Group></Group>
-
+            
+            <Group style="fake-select-options">
+                <Repeat list="brushTypes">
+                    <Group>{$item.Label}</Group>
+                </Repeat>
+            </Group>
+ 
         </Group>
+<!--        -->
+<!--        <Group style="building-designer-root">-->
+
+<!--            <Group style="building-designer-top-bar">-->
+
+<!--                <Text style.flexItemGrow="1">CONSTRUCTION MODE</Text>-->
+
+<!--                <Text>Type:</Text>-->
+
+<!--                -->
+<!--                &lt;!&ndash;                <Select&#45;&#45;int style="select-height" options="brushTypes" onValueChanged="OnBrushTypeChanged"/>&ndash;&gt;-->
+
+<!--            </Group>-->
+
+<!--            <Group></Group>-->
+<!--            <Group></Group>-->
+
+<!--        </Group>-->
         <!--                <Group style="top-left-area flex-horizontal-centered">-->
 
         <!--                    <Text>CONSTRUCTION MODE</Text>-->

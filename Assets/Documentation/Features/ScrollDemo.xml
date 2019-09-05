@@ -51,16 +51,16 @@
 
             <Div style="level-2-ignored"/>
         </ScrollView>
-        <Group style="big">
-            <Group style="big-child">
-                
-                <Div style="button" onMouseClick="ScrollUp($event)">Scroll up</Div>
-                <Div style="button" onMouseClick="ScrollRight($event)">Scroll right</Div>
-                <Div style="button" onMouseClick="ScrollDown($event)">Scroll down</Div>
-                <Div style="button" onMouseClick="ScrollLeft($event)">Scroll left</Div>
-                
-            </Group>
-        </Group>
+<!--        <Group style="big">-->
+<!--            <Group style="big-child">-->
+<!--                -->
+<!--                <Div style="button" onMouseClick="ScrollUp($event)">Scroll up</Div>-->
+<!--                <Div style="button" onMouseClick="ScrollRight($event)">Scroll right</Div>-->
+<!--                <Div style="button" onMouseClick="ScrollDown($event)">Scroll down</Div>-->
+<!--                <Div style="button" onMouseClick="ScrollLeft($event)">Scroll left</Div>-->
+<!--                -->
+<!--            </Group>-->
+<!--        </Group>-->
 
         <!--        <ScrollView>-->
         <!--            -->

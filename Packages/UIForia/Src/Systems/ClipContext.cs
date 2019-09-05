@@ -96,6 +96,7 @@ namespace UIForia.Rendering {
             Object.DestroyImmediate(countMaterial);
             Object.DestroyImmediate(clearCountMaterial);
             Object.DestroyImmediate(blitCountMaterial);
+            regionMesh?.Release();
             clipMaterialPool.Destroy();
             meshPool.Destroy();
         }
@@ -223,6 +224,8 @@ namespace UIForia.Rendering {
 
             regionMesh = GetRegionMesh(out requireRegionCounting);
 
+            clipTexture = RenderTexture.GetTemporary(Screen.width, Screen.height, 24, RenderTextureFormat.Default); // todo -- use lower resolution
+            
 #if DEBUG
             commandBuffer.BeginSample("UIFora Clip Draw");
 #endif

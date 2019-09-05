@@ -270,11 +270,11 @@ namespace UIForia.Rendering {
             Matrix4x4 matrix = element.layoutResult.matrix.ToMatrix4x4();
             // ctx.DrawBatchedGeometry(geometry, ranges.array[0], element.layoutResult.matrix.ToMatrix4x4());
             if (ranges.size == 1) {
-                ctx.DrawBatchedText(geometry, ranges.array[0], matrix, fontData);
+                ctx.DrawBatchedText(geometry, ranges.array[0], matrix, fontData, clipper);
             }
             else {
                 for (int i = 0; i < ranges.size; i++) {
-                    ctx.DrawBatchedText(geometry, ranges.array[i], matrix, fontData);
+                    ctx.DrawBatchedText(geometry, ranges.array[i], matrix, fontData, clipper);
                 }
 
                 // if all passed cull check, submit as one range

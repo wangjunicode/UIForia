@@ -7,7 +7,8 @@ namespace UIForia.Layout {
         Flex,
         Fixed,
         Grid,
-        Radial
+        Radial,
+        Stack
 
     }
 

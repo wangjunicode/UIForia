@@ -62,12 +62,6 @@ namespace UIForia.Layout {
         public LayoutFit selfLayoutFitHorizontal;
         public LayoutFit selfLayoutFitVertical;
 
-        public OffsetMeasurement parentAlignmentHorizontal;
-        public OffsetMeasurement parentAlignmentVertical;
-
-        public OffsetMeasurement selfAlignmentVertical;
-        public OffsetMeasurement selfAlignmentHorizontal;
-
         public UIElement element;
         public LayoutOwner owner;
 
@@ -298,9 +292,9 @@ namespace UIForia.Layout {
             float value = measurement.value;
 
             switch (measurement.unit) {
-                case UIMeasurementUnit.Content:
+                case UIMeasurementUnit.Content: {
 
-                        float contentHeight = ComputeContentHeight(width, blockWidth, blockHeight);
+                    float contentHeight = ComputeContentHeight(width, blockWidth, blockHeight);
                     // todo -- if block size changes the cached value is possibly wrong!
                     // float contentHeight = GetCachedHeightForWidth(width);
                     //
@@ -322,7 +316,7 @@ namespace UIForia.Layout {
                     if (baseVal < 0) baseVal = 0;
                     float retn = measurement.value * baseVal;
                     return retn > 0 ? retn : 0;
-
+                }
                 case UIMeasurementUnit.FitContent:
                     float min = GetIntrinsicMinHeight();
                     float pref = GetIntrinsicPreferredHeight();
@@ -340,8 +334,19 @@ namespace UIForia.Layout {
                 case UIMeasurementUnit.ViewportHeight:
                     return element.View.Viewport.height * value;
 
-                case UIMeasurementUnit.IntrinsicMinimum:
-                    return GetIntrinsicMinHeight();
+                case UIMeasurementUnit.IntrinsicMinimum: {
+                    float contentHeight =  GetIntrinsicMinHeight();
+                    float baseVal = contentHeight;
+
+                    baseVal += ResolveFixedSize(contentHeight, element.style.PaddingTop);
+                    baseVal += ResolveFixedSize(contentHeight, element.style.PaddingBottom);
+                    baseVal += ResolveFixedSize(contentHeight, element.style.BorderBottom);
+                    baseVal += ResolveFixedSize(contentHeight, element.style.BorderTop);
+
+                    if (baseVal < 0) baseVal = 0;
+                    float retn = measurement.value * baseVal;
+                    return retn > 0 ? retn : 0;
+                }
 
                 case UIMeasurementUnit.IntrinsicPreferred:
                     return GetIntrinsicPreferredHeight();

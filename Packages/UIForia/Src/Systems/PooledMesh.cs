@@ -69,22 +69,14 @@ namespace UIForia.Rendering.Vertigo {
 
     }
 
+
+    
     public class MeshPool {
 
         private readonly LightList<PooledMesh> dynamicPool;
-        private readonly LightList<PooledMesh> dynamicActive;
 
         public MeshPool() {
             this.dynamicPool = new LightList<PooledMesh>();
-            this.dynamicActive = new LightList<PooledMesh>();
-        }
-
-        public void ReleaseAll() {
-            while (dynamicActive.Count > 0) {
-                PooledMesh mesh = dynamicActive.RemoveLast();
-                mesh.isActive = false;
-                dynamicPool.Add(mesh);
-            }
         }
 
         public PooledMesh Get() {
@@ -97,7 +89,6 @@ namespace UIForia.Rendering.Vertigo {
             }
 
             retn.isActive = true;
-            dynamicActive.Add(retn);
             return retn;
         }
 

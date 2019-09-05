@@ -95,7 +95,9 @@ namespace Src.Systems {
         }
 
         public void OnDestroy() {
+            commandBuffer.Clear();
             renderContext.clipContext.Destroy();
+            renderContext.Destroy();
         }
 
         public void OnViewAdded(UIView view) {

@@ -1,12 +1,5 @@
 style select-demo-root {
-    PreferredSize = 200px, 300px; //1pca;
-    // BackgroundColor = white;
-    Border = 20px;
-    BorderColor = Red;
-    BorderRadiusTopLeft = 25%;
-    BorderRadiusBottomLeft = 25%;
-    MarginTop = 20px;
-    MarginLeft = 20px;
+    PreferredSize =1pca;
 }
 
 style button-group {

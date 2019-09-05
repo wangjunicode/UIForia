@@ -219,7 +219,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &1506585479
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -232,7 +232,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 35f2b5d632fd4d64b9acedec5215cda2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  typeName: Demo.ScrollDemo, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+  typeName: Documentation.Features.ScrollDemo, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+    PublicKeyToken=null
   camera: {fileID: 534669904}
   applicationId: Game App
   pos: {x: 200, y: 200}

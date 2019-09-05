@@ -242,7 +242,7 @@ namespace Src.Systems {
                     case RenderOpType.DrawBackground: {
                         renderBox.culled = false;
 
-                        switch (renderBox.element.style.ClipBehavior) {
+                        switch (renderBox.clipBehavior) {
                             case ClipBehavior.Never:
                                 renderBox.clipper = null;
                                 break;
@@ -262,7 +262,7 @@ namespace Src.Systems {
 
                                 // if current clipper is culled, mark as culled
                                 if (!clipData.isCulled) {
-                                    Rect renderBounds = renderBox.RenderBounds;
+                                    RenderBounds renderBounds = renderBox.RenderBounds;
 
                                     SVGXMatrix transform = wrapper.element.layoutResult.matrix;
 
@@ -314,7 +314,7 @@ namespace Src.Systems {
                         break;
 
                     case RenderOpType.PushClipShape: {
-                        Rect localBounds = renderBox.RenderBounds;
+                        RenderBounds localBounds = renderBox.RenderBounds;
 
                         SVGXMatrix transform = wrapper.element.layoutResult.matrix;
 

@@ -13,6 +13,10 @@ namespace UIForia.Text {
 
         TrimLineStart = 1 << 4 //allow lines to begin with whitespace
 
+        ,
+
+        CollapseWhitespaceAndTrim = Trim | CollapseWhitespace
+
     }
 
 }

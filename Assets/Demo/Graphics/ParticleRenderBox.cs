@@ -15,8 +15,6 @@ namespace Demo.Graphics {
 
         }
         
-        public override Rect RenderBounds { get; }
-
         protected GameObject particleRoot;
         protected ParticleData[] particleData;
 

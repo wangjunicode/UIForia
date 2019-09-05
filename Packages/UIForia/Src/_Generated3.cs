@@ -117,7 +117,7 @@ namespace UIForia.Rendering {
 		public const float TextFaceDilate = 0f;
 		public const UnderlayType TextUnderlayType = UIForia.Rendering.UnderlayType.Unset;
 		public const TextTransform TextTransform = UIForia.Text.TextTransform.None;
-		public const WhitespaceMode TextWhitespaceMode = UIForia.Text.WhitespaceMode.CollapseWhitespace;
+		public const WhitespaceMode TextWhitespaceMode = UIForia.Text.WhitespaceMode.CollapseWhitespaceAndTrim;
 		public static readonly UIFixedLength AnchorTop = new UIFixedLength(0f, UIFixedUnit.Pixel);
 		public static readonly UIFixedLength AnchorRight = new UIFixedLength(0f, UIFixedUnit.Pixel);
 		public static readonly UIFixedLength AnchorBottom = new UIFixedLength(0f, UIFixedUnit.Pixel);
@@ -357,7 +357,7 @@ namespace UIForia.Rendering {
 				case StylePropertyId.TextTransform:
 					 return new StyleProperty(StylePropertyId.TextTransform, (int)UIForia.Text.TextTransform.None);
 				case StylePropertyId.TextWhitespaceMode:
-					 return new StyleProperty(StylePropertyId.TextWhitespaceMode, (int)UIForia.Text.WhitespaceMode.CollapseWhitespace);
+					 return new StyleProperty(StylePropertyId.TextWhitespaceMode, (int)UIForia.Text.WhitespaceMode.CollapseWhitespaceAndTrim);
 				case StylePropertyId.AnchorTop:
 					 return new StyleProperty(StylePropertyId.AnchorTop, new UIFixedLength(0f, UIFixedUnit.Pixel));
 				case StylePropertyId.AnchorRight:

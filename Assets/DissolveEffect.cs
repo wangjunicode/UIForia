@@ -8,9 +8,7 @@ using Vertigo;
 
 [CustomPainter("Dissolve")]
 public class DissolveEffect : StandardRenderBox {
-
-    public override Rect RenderBounds => new Rect(0, 0, element.layoutResult.actualSize.width, element.layoutResult.actualSize.height);
-
+    
     public Material material;
     private UIForiaGeometry effectGeometry;
 

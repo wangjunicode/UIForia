@@ -6,18 +6,14 @@
     <Contents style="container">
         
         <Div style="button" onMouseClick="SelectDynamic(0)">
-            Dynamic 1
+            Dynamic 0
         </Div>
         
         <Div style="button" onMouseClick="SelectDynamic(1)">
-            Dynamic 2
+            Dynamic 1
         </Div>
         
         <Dynamic data="currentDynamicItem"/>
-        
-        <Text style.textFontSize="24">
-            Text here
-        </Text>
         
     </Contents>
 </UITemplate>

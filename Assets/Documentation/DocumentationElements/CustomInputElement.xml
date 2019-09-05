@@ -6,6 +6,7 @@
         style custom-event-box {
             PreferredSize = 100px;
             BackgroundColor = yellow;
+            AlignmentBehaviorX = LayoutBox;
         }
         
     </Style>

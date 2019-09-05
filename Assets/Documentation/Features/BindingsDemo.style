@@ -1,5 +1,6 @@
 style dynamic-style-inner {
     BackgroundColor = red;
+    TextFontAsset = url("Fonts/DIGITALDREAMFAT SDF");
 }
 
 style dynamic-style {

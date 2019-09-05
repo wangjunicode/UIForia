@@ -70,10 +70,10 @@ Shader "UIForia/Standard"
             #define Vert_BorderColors v.texCoord1.xy
             
             #define Vert_CharacterScale v.texCoord1.x
-            #define Vert_ShapeType objectInfo.x
             #define Vert_CharacterPackedOutline objectInfo.y
-            #define Vert_CharacterPackedUnderlay objectInfo.z
-            #define Vert_CharacterWeight objectInfo.w
+            // todo -- re-implement underlay
+            #define Vert_CharacterPackedUnderlay 0
+            #define Vert_CharacterWeight objectInfo.z
             
             #define Frag_SDFSize i.texCoord1.xy
             #define Frag_SDFBorderRadii i.texCoord1.z
@@ -82,9 +82,7 @@ Shader "UIForia/Standard"
             #define Frag_ShapeType i.texCoord2.x
             #define Frag_BorderColors i.texCoord3
             #define Frag_BorderSize i.color.zw
-            #define Frag_ColorMode i.texCoord2.y
-            
-         
+            #define Frag_ColorMode i.texCoord2.y        
             
             v2f vert (appdata v) {
                 v2f o;
@@ -94,9 +92,9 @@ Shader "UIForia/Standard"
                 float4 objectInfo = _ObjectData[objectIndex];
                 float4x4 transform = _TransformData[objectIndex];
                 
-                uint shapeType = objectInfo.x;
-                uint colorMode = objectInfo.w;
-                fixed4 colors = _ColorData[objectIndex];
+                uint shapeType = ((uint) objectInfo.x >> 16) & (1 << 16) - 1;
+                // t
+                uint colorMode = ((uint) objectInfo.x) & 0xffff;
                 
                 half2 size = UnpackSize(Vert_PackedSize);
                 v.vertex = mul(transform, float4(v.vertex.xyz, 1));
@@ -104,7 +102,7 @@ Shader "UIForia/Standard"
                 o.vertex = UnityObjectToClipPos(v.vertex);
                 float4 screenPos = ComputeScreenPos(o.vertex);
                 o.texCoord0 = v.texCoord0;
-                o.color = colors;
+                o.color = _ColorData[objectIndex];
                 
                 // this only works for 'flower' configuration meshes, not for quads. use a flag for the quad
                 o.texCoord4 = float4(lerp(0, 1, v.texCoord0.x == 0.5 && v.texCoord0.y == 0.5), screenPos.xyw);
@@ -168,11 +166,11 @@ Shader "UIForia/Standard"
             }            
           
             fixed4 frag (v2f i) : SV_Target {           
-                // return fixed4(i.texCoord0.z, i.texCoord0.z, i.texCoord0.z, 1);
                 
                 float2 screenUV = i.texCoord4.yz / i.texCoord4.w;
                 float4 clipRect = _ClipRects[(uint)i.texCoord1.w];
-                float4 clipUvs = _ClipUVs[(uint)i.texCoord1.w];
+                float4 clipUvs = _ClipUVs[(uint)i.texCoord1.w];               
+                float opacity = _ObjectData[(uint)i.texCoord1.w].w;
                 // todo -- returns cause branching here
                 // get rid of text and we can get rid of branching
                 fixed4 mainColor = ComputeColor(i.color.r, i.color.g, Frag_ColorMode, i.texCoord0.xy, _MainTexture);
@@ -185,6 +183,7 @@ Shader "UIForia/Standard"
                     sdfData.strokeWidth = borderData.size;
                     sdfData.radius = borderData.radius;
                     mainColor = SDFColor(sdfData, borderData.color, mainColor, i.texCoord4.x);
+                    mainColor.a *= opacity;
                     mainColor = UIForiaAlphaClipColor(mainColor, _MaskTexture, screenUV, clipRect, clipUvs);
                     mainColor.rgb *= mainColor.a;
                     return mainColor;
@@ -211,13 +210,14 @@ Shader "UIForia/Standard"
                 //fixed4 glowColor = UnpackColor(asuint(i.color.a));
                 
                 // underlayColor.rgb *= underlayColor.a;
-                faceColor.rgb *= faceColor.a;
+                //   faceColor.rgb *= faceColor.a;
                 // outlineColor.rgb *= outlineColor.a;
                 // glowColor.rgb *= glowColor.a;
                 
                 faceColor = GetTextColor(sd, faceColor, outlineColor, outline, softness);
+                faceColor.a *= opacity;
                 faceColor = UIForiaAlphaClipColor(faceColor, _MaskTexture, screenUV, clipRect, clipUvs);
-                faceColor.rgb *= faceColor.a;
+           //     faceColor.rgb *= faceColor.a;
 
                 #define underlayOffset i.texCoord3.xy
                 #define underlayScale i.texCoord3.z

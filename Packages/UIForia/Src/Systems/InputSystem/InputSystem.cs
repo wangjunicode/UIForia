@@ -439,7 +439,7 @@ namespace UIForia.Systems {
 
             if (m_MouseDownElements.Count == 0) return;
 
-            m_EventPropagator.origin = m_MouseDownElements[0];
+            m_EventPropagator.origin = m_MouseDownElements[m_MouseDownElements.Count - 1];
 
             for (int i = 0; i < m_MouseDownElements.Count; i++) {
                 UIElement element = m_MouseDownElements[i];

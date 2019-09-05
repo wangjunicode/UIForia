@@ -22,16 +22,33 @@ namespace UIForia.Rendering {
 
     }
 
+    public struct RenderBounds {
+
+        public float xMin;
+        public float yMin;
+        public float xMax;
+        public float yMax;
+
+        public RenderBounds(float xMin, float yMin, float xMax, float yMax) {
+            this.xMin = xMin;
+            this.yMin = yMin;
+            this.xMax = xMax;
+            this.yMax = yMax;
+        }
+
+    }
+    
     public abstract class RenderBox {
 
         internal string uniqueId;
 
         protected internal UIElement element;
 
+        public float opacity;
         public Visibility visibility;
         public Overflow overflowX;
         public Overflow overflowY;
-        public ClipBehavior clipBehavior = ClipBehavior.Normal;
+        public ClipBehavior clipBehavior;
         public bool culled;
         public Vector4 clipRect;
         public bool hasForeground;
@@ -44,20 +61,19 @@ namespace UIForia.Rendering {
         public bool didRender;
         protected ClipShape clipShape;
 
-        public virtual Rect RenderBounds => new Rect(
+        public virtual RenderBounds RenderBounds => new RenderBounds(
             element.layoutResult.localPosition.x,
             element.layoutResult.localPosition.y,
             element.layoutResult.actualSize.width,
             element.layoutResult.actualSize.height
         );
-
-        public virtual Rect ClipBounds => RenderBounds;
-
+        
         public virtual void OnInitialize() {
             overflowX = element.style.OverflowX;
             overflowY = element.style.OverflowY;
             zIndex = element.style.ZIndex;
             layer = element.style.Layer;
+            clipBehavior = element.style.ClipBehavior;
         }
 
         public virtual void OnDestroy() { }
@@ -77,6 +93,9 @@ namespace UIForia.Rendering {
                         break;
                     case StylePropertyId.Layer:
                         layer = property.AsInt;
+                        break;
+                    case StylePropertyId.ClipBehavior:
+                        clipBehavior = property.AsClipBehavior;
                         break;
                 }
             }

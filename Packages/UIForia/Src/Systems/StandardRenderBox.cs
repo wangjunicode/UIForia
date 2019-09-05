@@ -23,9 +23,7 @@ namespace UIForia.Rendering {
     }
 
     public class ImageRenderBox : StandardRenderBox {
-
-        public override Rect RenderBounds { get; }
-
+        
         private UIForiaGeometry imageGeometry;
 
         public override void OnInitialize() {
@@ -55,7 +53,7 @@ namespace UIForia.Rendering {
             this.geometry = new UIForiaGeometry();
         }
 
-        public override Rect RenderBounds => new Rect(0, 0, element.layoutResult.actualSize.width, element.layoutResult.actualSize.height);
+//        public override Rect RenderBounds => new Rect(0, 0, element.layoutResult.actualSize.width, element.layoutResult.actualSize.height);
 
         public override void OnInitialize() {
             base.OnInitialize();
@@ -289,7 +287,11 @@ namespace UIForia.Rendering {
             float borderRightAndBottom = VertigoUtil.PackSizeVector(border.right, border.bottom);
 
             geometry.packedColors = new Color(packedBackgroundColor, packedBackgroundTint, borderLeftAndTop, borderRightAndBottom);
-            geometry.objectData = new Vector4((int) ShapeType.RoundedRect, VertigoUtil.PackSizeVector(element.layoutResult.actualSize), packedBorderRadii, (int) colorMode);
+            
+            int val = BitUtil.SetHighLowBits(0, (int)colorMode);
+            
+//            geometry.objectData = new Vector4((int) ShapeType.RoundedRect, VertigoUtil.PackSizeVector(element.layoutResult.actualSize), packedBorderRadii, val);
+            geometry.objectData = new Vector4(val, VertigoUtil.PackSizeVector(element.layoutResult.actualSize), packedBorderRadii, element.style.Opacity);
             geometry.mainTexture = backgroundImage;
 
             ctx.DrawBatchedGeometry(geometry, range, element.layoutResult.matrix.ToMatrix4x4(), clipper);

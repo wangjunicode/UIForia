@@ -52,6 +52,7 @@ namespace UIForia.Systems {
             float retn = 0;
             Item[] items = itemList.array;
 
+            // todo -- doesn't account for wrapping
             for (int i = 0; i < itemList.size; i++) {
                 ref Item item = ref items[i];
                 FastLayoutBox child = item.layoutBox;
@@ -101,6 +102,13 @@ namespace UIForia.Systems {
         private float ComputeVerticalContentHeight(float width, BlockSize blockWidth, BlockSize blockHeight) {
             Item[] items = itemList.array;
 
+            blockWidth.size = width;
+            blockWidth.contentAreaSize = width
+                                         - ResolveFixedSize(width, paddingBox.left)
+                                         - ResolveFixedSize(width, paddingBox.right)
+                                         - ResolveFixedSize(width, borderBox.left)
+                                         - ResolveFixedSize(width, borderBox.right); 
+            
             float crossSize = 0;
             for (int i = 0; i < itemList.size; i++) {
                 ref Item item = ref items[i];
@@ -120,7 +128,7 @@ namespace UIForia.Systems {
             for (int i = 0; i < itemList.size; i++) {
                 ref Item item = ref items[i];
                 FastLayoutBox child = item.layoutBox;
-                child.GetHeight(crossSize - item.margin.left - item.margin.right, blockWidth, blockHeight, ref item.size);
+                child.GetHeight(item.outputWidth, blockWidth, blockHeight, ref item.size);
                 child.GetMarginVertical(blockHeight, ref item.margin);
                 retn += item.margin.top + item.size.prefHeight + item.margin.bottom;
             }
@@ -129,7 +137,6 @@ namespace UIForia.Systems {
         }
 
         public override float GetIntrinsicMinWidth() {
-            Item[] items = itemList.array;
             FastLayoutBox child = firstChild;
 
             if (direction == LayoutDirection.Horizontal) {

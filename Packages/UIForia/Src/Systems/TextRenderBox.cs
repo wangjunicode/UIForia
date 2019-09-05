@@ -20,12 +20,6 @@ namespace UIForia.Rendering {
         private readonly StructList<GeometryRange> ranges;
         private bool shouldUpdateMaterialProperties;
 
-        public override Rect RenderBounds => new Rect(
-            0, 0,
-            element.layoutResult.actualSize.width,
-            element.layoutResult.actualSize.height
-        );
-
         public TextRenderBox() {
             this.uniqueId = "UIForia::TextRenderBox";
             this.geometry = new UIForiaGeometry();
@@ -260,8 +254,8 @@ namespace UIForia.Rendering {
                 weight = ((weight * 0.25f) + textSpan.faceDilate) * textSpan.scaleRatioA * 0.5f;
 
                 float packedOutlineGlow = VertigoUtil.ColorToFloat(new Color(textSpan.outlineWidth, textSpan.outlineSoftness, textSpan.glowOuter, textSpan.glowOffset));
-
-                geometry.objectData = new Vector4((int) ShapeType.Text, packedOutlineGlow, packedUnderlay, weight);
+                int shapeType = BitUtil.SetHighLowBits((int)ShapeType.Text, 0);
+                geometry.objectData = new Vector4(shapeType, packedOutlineGlow, weight, element.style.Opacity); // should be text opacity instead?
                 geometry.packedColors = new Vector4(mainColor, outlineColor, underlayColor, glowColor);
             }
 

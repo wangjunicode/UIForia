@@ -1,5 +1,6 @@
 using SVGX;
 using UIForia.Attributes;
+using UIForia.Layout;
 using UIForia.Rendering;
 using UIForia.Systems;
 using UIForia.Text;
@@ -68,7 +69,7 @@ namespace UIForia.Elements {
             switch (property.propertyId) {
                 
                 case StylePropertyId.TextFontSize:
-                    textSpan.SetFontSize(property.AsInt);
+                    textSpan.SetFontSize(style.GetResolvedFontSize());
                     break;
 
                 case StylePropertyId.TextFontStyle:

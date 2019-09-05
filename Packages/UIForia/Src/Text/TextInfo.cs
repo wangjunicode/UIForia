@@ -545,7 +545,7 @@ namespace UIForia.Text {
 
             StructList<LineInfo2> lines = StructList<LineInfo2>.Get();
 
-            RunLayout(lines, float.MaxValue);
+            RunLayout(lines, width);
 
             if (lines.size == 0) {
                 lines.Release();

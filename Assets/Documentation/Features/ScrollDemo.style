@@ -9,9 +9,21 @@ style level-0 {
     FlexLayoutDirection = Column;
 }
 
+style <Text> {
+    TextColor = rgba(9, 8, 9, 255);
+    PreferredWidth = 400px;
+}
+
+style p {
+    PreferredWidth = 400px;
+    TextFontSize = 15;
+    TextFontAsset = url("Fonts/Gotham-Light SDF");
+    TextFaceDilate = 0;
+}
+
 style level-1 {
     PreferredSize = 1350px;
-    BackgroundColor = green;
+  //  BackgroundColor = green;
     FlexLayoutDirection = Column;
     TextFontSize = 1.4em;
 }

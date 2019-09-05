@@ -44,20 +44,12 @@ namespace Documentation.DocumentationElements {
         }
 
         public override void Update() {
-            origin.style.SetAnchorTarget(AnchorTarget.Screen, StyleState.Normal);
-            origin.style.SetAnchorLeft(new UIFixedLength(0), StyleState.Normal);
-            origin.style.SetAnchorTop(new UIFixedLength(0), StyleState.Normal);
-            origin.style.SetTransformBehavior(TransformBehavior.AnchorMinOffset, StyleState.Normal);
-            origin.style.SetTransformPositionX(new OffsetMeasurement(MousePosition.x - offset.x), StyleState.Normal);
-            origin.style.SetTransformPositionY(new OffsetMeasurement(MousePosition.y - offset.y), StyleState.Normal);
+            origin.style.SetAlignmentOffsetX(new OffsetMeasurement(MousePosition.x - offset.x), StyleState.Normal);
         }
 
         public override void Drop(bool success) {
             base.Drop(success);
-            origin.style.SetAnchorTarget(AnchorTarget.Parent, StyleState.Normal);
-            origin.style.SetTransformBehavior(TransformBehavior.LayoutOffset, StyleState.Normal);
-            origin.style.SetTransformPositionX(new OffsetMeasurement(0), StyleState.Normal);
-            origin.style.SetTransformPositionY(new OffsetMeasurement(0), StyleState.Normal);
+            origin.style.SetAlignmentOffsetX(new OffsetMeasurement(0), StyleState.Normal);
         }
 
     }
@@ -92,7 +84,7 @@ namespace Documentation.DocumentationElements {
 
         public DragEvent onDragCreate(MouseInputEvent evt) {
             // moves the element as the mouse moves
-            return new DemoDragEvent(this, evt.MousePosition);
+            return new DemoDragEvent(evt.Origin, evt.MousePosition);
         }
         
         public void OnDragMove(DragEvent evt) {

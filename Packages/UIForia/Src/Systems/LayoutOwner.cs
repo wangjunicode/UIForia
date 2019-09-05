@@ -104,6 +104,8 @@ namespace UIForia.Layout {
             LayoutData[] enabledBoxes = enabledBoxList.array;
             SVGXMatrix[] worldMatrices = worldMatrixList.array;
 
+            int screenWidth = Screen.width;
+            int screenHeight = Screen.height;
             for (int i = 1; i < count; i++) {
                 UIElement element = enabledBoxes[i].element;
                 int idx = enabledBoxes[i].idx;
@@ -118,7 +120,7 @@ namespace UIForia.Layout {
                 layoutResult.matrix = worldMatrices[idx];
                 layoutResult.screenPosition = layoutResult.matrix.position; // todo screen position should be aligned rect position pre transform
                 layoutResult.localPosition = element.layoutBox.alignedPosition;
-                layoutResult.clipRect = new Rect(0, 0, Screen.width, Screen.height); // todo -- temp
+                layoutResult.clipRect = new Rect(0, 0, screenWidth, screenHeight); // todo -- temp
                 layoutResult.zIndex = element.layoutBox.zIndex;
             }
         }
@@ -191,7 +193,7 @@ namespace UIForia.Layout {
                         childBox.traversalIndex = idx; // parent adding children depends on this
                         childElement.layoutBox = childBox;
 
-                        switch (childBox.element.style.LayoutBehavior) {
+                        switch (childBox.layoutBehavior) {
                             case LayoutBehavior.Ignored:
                             case LayoutBehavior.TranscludeChildren:
                                 childBox.parent = data.layoutBox;
@@ -222,7 +224,7 @@ namespace UIForia.Layout {
                     };
 
                     // always layout ignored elements
-                    if (data.element.style.LayoutBehavior == LayoutBehavior.Ignored) {
+                    if (data.layoutBox.layoutBehavior == LayoutBehavior.Ignored) {
                         ignoredLayoutList.Add(data.layoutBox);
                     }
 
@@ -307,7 +309,7 @@ namespace UIForia.Layout {
 
                 Vector2 alignedPosition = box.alignedPosition;
 
-                if (box.alignmentTargetY != AlignmentBehavior.Unset && box.alignmentTargetX != AlignmentBehavior.Default) {
+                if (box.alignmentTargetX != AlignmentBehavior.Unset && box.alignmentTargetX != AlignmentBehavior.Default) {
                     OffsetMeasurement originX = box.element.style.AlignmentOriginX;
                     OffsetMeasurement offsetX = box.element.style.AlignmentOffsetX;
                     AlignmentDirection direction = box.element.style.AlignmentDirectionX;

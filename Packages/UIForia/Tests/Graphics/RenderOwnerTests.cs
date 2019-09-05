@@ -99,7 +99,7 @@ public class RenderOwnerTests {
             hasForeground = true;
         }
 
-        public override Rect RenderBounds { get; }
+        public override RenderBounds RenderBounds { get; }
         public override void PaintBackground(RenderContext ctx) { }
 
     }

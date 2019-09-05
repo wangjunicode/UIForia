@@ -77,6 +77,8 @@ namespace UIForia.Layout {
         private float cachedPreferredWidth;
         private WidthCache widthCache;
 
+        public LayoutBehavior layoutBehavior;
+
         public LayoutBoxMetrics metrics;
 
         public struct LayoutBoxMetrics {
@@ -206,6 +208,7 @@ namespace UIForia.Layout {
             selfLayoutFitHorizontal = element.style.LayoutFitHorizontal;
             selfLayoutFitVertical = element.style.LayoutFitVertical;
 
+            layoutBehavior = element.style.LayoutBehavior;
             zIndex = element.style.ZIndex;
 
             if (element.style.LayoutBehavior == LayoutBehavior.Ignored) {

@@ -160,7 +160,7 @@ namespace UIForia.Editor {
             new AnimatedPropertyGenerator<float>(StylePropertyId.TextFaceDilate, 0f, InheritanceType.Inherited),
             new PropertyGenerator<UnderlayType>(StylePropertyId.TextUnderlayType, UnderlayType.Unset, InheritanceType.Inherited),
             new PropertyGenerator<TextTransform>(StylePropertyId.TextTransform, TextTransform.None, InheritanceType.Inherited),
-            new PropertyGenerator<UIForia.Text.WhitespaceMode>(StylePropertyId.TextWhitespaceMode, WhitespaceMode.CollapseWhitespace, InheritanceType.Inherited),
+            new PropertyGenerator<UIForia.Text.WhitespaceMode>(StylePropertyId.TextWhitespaceMode, WhitespaceMode.CollapseWhitespace | WhitespaceMode.Trim, InheritanceType.Inherited),
 
             // Anchors
             new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.AnchorTop, new UIFixedLength(0f)),

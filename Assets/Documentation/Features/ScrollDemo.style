@@ -10,7 +10,7 @@ style level-0 {
 }
 
 style level-1 {
-    PreferredSize = 350px;
+    PreferredSize = 1350px;
     BackgroundColor = green;
     FlexLayoutDirection = Column;
     TextFontSize = 1.4em;

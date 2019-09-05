@@ -4,11 +4,15 @@
     <Style path="Documentation/Features/ScrollDemo.style"/>
     <Contents style="container">
 
-        <ScrollView style="level-0">
+        <ScrollView style="level-0" fadeTarget="1f">
 
             <Div style="level-1">
 
                 <Group>
+                    <Div style="button" onMouseClick="ScrollUp($event)">Scroll up</Div>
+                    <Div style="button" onMouseClick="ScrollRight($event)">Scroll right</Div>
+                    <Div style="button" onMouseClick="ScrollDown($event)">Scroll down</Div>
+                    <Div style="button" onMouseClick="ScrollLeft($event)">Scroll left</Div>
                     <Paragraph>Autem in dolorum culpa rerum. Consequatur voluptate</Paragraph>
                     <Paragraph>dignissimos sed recusandae qui omnis possimus id. Officia</Paragraph>
                     <Paragraph>excepturi id omnis ut laboriosam blanditiis mollitia.</Paragraph>

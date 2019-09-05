@@ -119,6 +119,7 @@ namespace UIForia.Layout {
                 layoutResult.screenPosition = layoutResult.matrix.position; // todo screen position should be aligned rect position pre transform
                 layoutResult.localPosition = element.layoutBox.alignedPosition;
                 layoutResult.clipRect = new Rect(0, 0, Screen.width, Screen.height); // todo -- temp
+                layoutResult.zIndex = element.layoutBox.zIndex;
             }
         }
 
@@ -485,7 +486,7 @@ namespace UIForia.Layout {
             return false;
         }
 
-        public void GetElementsAtPoint(Vector2 point, IList<UIElement> retn) {
+        internal void GetElementsAtPoint(Vector2 point, LightList<FastLayoutBox> retn) {
             LayoutData[] layoutDatas = enabledBoxList.array;
 
             for (int i = 0; i < enabledBoxList.size; i++) {
@@ -516,7 +517,7 @@ namespace UIForia.Layout {
                     continue;
                 }
 
-                retn.Add(element);
+                retn.Add(element.layoutBox);
             }
         }
 

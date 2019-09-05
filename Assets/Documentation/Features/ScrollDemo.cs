@@ -2,9 +2,8 @@ using UIForia.Attributes;
 using UIForia.Elements;
 using UIForia.UIInput;
 using UIForia.Util;
-using UnityEngine;
 
-namespace Demo {
+namespace Documentation.Features {
 
     [Template("Documentation/Features/ScrollDemo.xml")]
     public class ScrollDemo : UIElement {
@@ -19,19 +18,19 @@ namespace Demo {
         }
 
         public void ScrollUp(MouseInputEvent evt) {
-            TriggerEvent(new UIScrollEvent(-1, 0));
+            evt.Origin.TriggerEvent(new UIScrollEvent(-1, 0));
         }
 
         public void ScrollRight(MouseInputEvent evt) {
-            TriggerEvent(new UIScrollEvent(1, -1));
+            evt.Origin.TriggerEvent(new UIScrollEvent(1, -1));
         }
 
         public void ScrollDown(MouseInputEvent evt) {
-            TriggerEvent(new UIScrollEvent(-1, 1));
+            evt.Origin.TriggerEvent(new UIScrollEvent(-1, 1));
         }
 
         public void ScrollLeft(MouseInputEvent evt) {
-            TriggerEvent(new UIScrollEvent(0, -1));
+            evt.Origin.TriggerEvent(new UIScrollEvent(0, -1));
         }
 
     }

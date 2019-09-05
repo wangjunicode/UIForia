@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <UITemplate>
     <Style>
+        
+        const scrollBarSize = 10px;
 
         style scrollview {
             OverflowX = scroll;
@@ -8,34 +10,32 @@
         }
 
         style scroll-track-vertical {
-            PreferredSize = 20px 1psz;
+            PreferredSize = @scrollBarSize 1psz;
             LayoutBehavior = Ignored;
             AlignX = 100%;
             AlignmentBehaviorX = Parent;
-            ZIndex = 1;
             BackgroundColor = darkGrey;
         }
 
         style scroll-handle-vertical {
             BorderRadius = 50%;
             BackgroundColor = grey;
-            PreferredWidth = 20px;
+            PreferredWidth = @scrollBarSize;
             AlignmentBehaviorY = Parent;
         }
 
         style scroll-track-horizontal {
-            PreferredSize = 0.97psz 20px;
+            PreferredSize = 0.97psz @scrollBarSize;
             LayoutBehavior = Ignored;
             AlignmentBehaviorY = Parent;
             AlignY = 100%;
-            ZIndex = 1;
             BackgroundColor = darkGrey;
         }
 
         style scroll-handle-horizontal {
             BorderRadius = 50%;
             BackgroundColor = grey;
-            PreferredHeight = 20px;
+            PreferredHeight = @scrollBarSize;
             AlignmentBehaviorX = Parent;
         }
 

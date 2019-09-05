@@ -49,6 +49,7 @@ namespace UIForia.Layout {
         public OffsetMeasurement transformPositionY;
 
         public int traversalIndex;
+        public int zIndex;
 
         public Size allocatedSize;
         public Size contentSize;
@@ -210,6 +211,8 @@ namespace UIForia.Layout {
 
             selfLayoutFitHorizontal = element.style.LayoutFitHorizontal;
             selfLayoutFitVertical = element.style.LayoutFitVertical;
+
+            zIndex = element.style.ZIndex;
 
             if (element.style.LayoutBehavior == LayoutBehavior.Ignored) {
                 flags |= LayoutRenderFlag.Ignored;
@@ -831,7 +834,7 @@ namespace UIForia.Layout {
                         break;
 
                     case StylePropertyId.ZIndex:
-                        // zIndex = property.AsInt;
+                        zIndex = property.AsInt;
                         break;
 
                     case StylePropertyId.Layer:

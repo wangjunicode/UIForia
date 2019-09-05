@@ -13,6 +13,7 @@ namespace UIForia.Systems {
         public readonly Application application;
         public readonly IStyleSystem styleSystem;
 
+        private static readonly IComparer<FastLayoutBox> comparer = new FastDepthComparer();
         private readonly LightList<LayoutOwner> layoutOwners;
 
         public FastLayoutSystem(Application application, IStyleSystem styleSystem) {
@@ -111,9 +112,21 @@ namespace UIForia.Systems {
 
 
         public IList<UIElement> QueryPoint(Vector2 point, IList<UIElement> retn) {
+            
+            LightList<FastLayoutBox> boxes = LightList<FastLayoutBox>.Get();
+            
             for (int i = 0; i < layoutOwners.size; i++) {
-                layoutOwners.array[i].GetElementsAtPoint(point, retn);
+                layoutOwners.array[i].GetElementsAtPoint(point, boxes);
             }
+
+            boxes.Sort(comparer);
+
+            for (var i = 0; i < boxes.Count; i++) {
+                retn.Add(boxes[i].element);
+            }
+
+            LightList<FastLayoutBox>.Release(ref boxes);
+            
             return retn;
         }
 

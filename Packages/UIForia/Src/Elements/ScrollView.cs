@@ -125,7 +125,7 @@ namespace UIForia.Elements {
             }
 
             float offset = handleTop / GetMaxWidth() + pageSize;
-            ScrollToHorizontalPercent(offset);
+            ScrollToVerticalPercent(offset);
         }
 
         private void ScrollPageTowardsX(float x) {

@@ -293,29 +293,13 @@ namespace UIForia.Rendering {
             Vector4 v = default;
             
             unsafe {
-                void* vp = &v;
-                byte * b = stackalloc byte[16];
-                b[0] = borderColorTop.r;
-                b[1] = borderColorTop.g;
-                b[2] = borderColorTop.b;
-                b[3] = borderColorTop.a;
-
-                b[4] = borderColorRight.r;
-                b[5] = borderColorRight.g;
-                b[6] = borderColorRight.b;
-                b[7] = borderColorRight.a;
-                
-                b[8] = borderColorBottom.r;
-                b[9] = borderColorBottom.g;
-                b[10] = borderColorBottom.b;
-                b[11] = borderColorBottom.a;
-
-                b[12] = borderColorLeft.r;
-                b[13] = borderColorLeft.g;
-                b[14] = borderColorLeft.b;
-                b[15] = borderColorLeft.a;
-                    
-                UnsafeUtility.MemCpy(vp, b, 16);
+                void * vp = &v;
+                Color32* b = stackalloc Color32[4];
+                b[0] = borderColorTop;
+                b[1] = borderColorRight;
+                b[2] = borderColorBottom;
+                b[3] = borderColorLeft;
+                UnsafeUtility.MemCpy(vp, b, sizeof(Color32) * 4);
             }
             
             geometry.miscData = v;

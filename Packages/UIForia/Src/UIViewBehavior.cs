@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Src.Systems;
 using SVGX;
 using UIForia.Elements;
+using UIForia.Layout;
 using UIForia.Rendering;
 using UIForia.Util;
 using UnityEngine;
@@ -44,6 +45,11 @@ namespace UIForia {
         private SimpleRectPacker worse;
         private StructList<BetterRectPacker.PackedRect> rects;
 
+        public static Vector2 s_ShadowSize;
+        public static float s_ShadowIntensity;
+        public static float s_ShadowOpacity;
+        public static Color s_ShadowColor;
+        
         public void Start() {
             type = Type.GetType(typeName);
 
@@ -158,7 +164,10 @@ namespace UIForia {
 
         private void DrawOverlay(RenderContext ctx) {
             path.Clear();
-
+            s_ShadowSize = shadowSize;
+            s_ShadowIntensity = shadowIntensity;
+            s_ShadowColor = shadowColor;
+            s_ShadowOpacity = shadowOpacity;
             VertigoRenderSystem renderSystem = application.RenderSystem as VertigoRenderSystem;
             LightList<ClipData> clippers = renderSystem.renderOwners[0].renderedClippers;
 

@@ -37,7 +37,7 @@ namespace UIForia.Rendering {
         }
 
     }
-    
+
     public abstract class RenderBox {
 
         internal string uniqueId;
@@ -50,16 +50,12 @@ namespace UIForia.Rendering {
         public Overflow overflowY;
         public ClipBehavior clipBehavior;
         public bool culled;
-        public Vector4 clipRect;
         public bool hasForeground;
         public int zIndex;
         public int layer;
-
+        protected Path2D clipPath;
         internal ClipData clipper;
-        public Texture clipTexture;
-        public Vector4 clipUVs;
         public bool didRender;
-        protected ClipShape clipShape;
 
         public virtual RenderBounds RenderBounds => new RenderBounds(
             element.layoutResult.localPosition.x,
@@ -103,16 +99,7 @@ namespace UIForia.Rendering {
 
         public abstract void PaintBackground(RenderContext ctx);
 
-        public virtual void PrePaintText() { }
-
-        public virtual void PrePaintTexture() { }
-
         public virtual void PaintForeground(RenderContext ctx) { }
-
-        public virtual bool ShouldCull(in Rect bounds) {
-            // can probably optimize rounded case & say if not in padding bounds, fail
-            return false; //RectExtensions.ContainOrOverlap(this.RenderBounds, bounds);
-        }
 
         public static float ResolveFixedSize(UIElement element, float baseSize, UIFixedLength length) {
             switch (length.unit) {
@@ -132,7 +119,6 @@ namespace UIForia.Rendering {
             }
         }
 
-        protected Path2D clipPath;
 
         public Path2D GetClipPathFromElement() {
 

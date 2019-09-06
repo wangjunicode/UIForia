@@ -11,6 +11,7 @@ using LineJoin = Vertigo.LineJoin;
 namespace UIForia.Rendering {
 
     public class Path2D : ShapeGenerator {
+
         // todo -- can probably get away with not instantiating point list & hole list.
         // add some data back to shape and we wont need to use point list for data storage
         // this class should be as light as possible since we probably have a bunch of them
@@ -27,7 +28,7 @@ namespace UIForia.Rendering {
         private SVGXFillStyle currentFillStyle;
         private SVGXStrokeStyle currentStrokeStyle;
         private FixedRenderState currentFixedRenderState;
-        
+
         private bool renderStateChanged;
         private bool matrixChanged;
 
@@ -40,7 +41,7 @@ namespace UIForia.Rendering {
             // can i get rid of draw call list and use object data instead?
             this.geometry = GeometryData.Create();
             this.drawCallList = new StructList<SVGXDrawCall2>(4);
-            this.transforms = new StructList<Matrix4x4>(4); 
+            this.transforms = new StructList<Matrix4x4>(4);
             this.objectDataList = new StructList<ObjectData>(4);
             this.fillStyles = null;
             this.strokeStyles = null;
@@ -163,6 +164,7 @@ namespace UIForia.Rendering {
             else {
                 drawCall.renderStateId = -1;
             }
+
             drawCallList.Add(drawCall);
         }
 
@@ -171,12 +173,13 @@ namespace UIForia.Rendering {
         }
 
         private int lastShapeCount = -1;
+
         internal void UpdateGeometry() {
             //if (!requiresGeometryUpdate) return;
             //if (lastShapeCount != shapeList.size) {
             //    
             //}
-            
+
             geometry.Clear(); // todo -- can be optimized for adding / updating only
 
             SVGXDrawCall2[] drawCalls = drawCallList.array;
@@ -222,7 +225,6 @@ namespace UIForia.Rendering {
                 drawCall.objectRange.start = rangeStart;
                 drawCall.objectRange.length = drawCall.shapeRange.length;
                 rangeStart = drawCall.objectRange.end;
-               
             }
         }
 
@@ -555,7 +557,8 @@ namespace UIForia.Rendering {
                 }
 
                 case ShapeType.Rhombus:
-                    break;
+                    throw new NotImplementedException();
+
                 case ShapeType.Triangle: {
                     int flags = BitUtil.SetHighLowBits((int) ShapeType.Triangle, paintMode);
                     objectData.geometryRange = GeometryGenerator.FillRect(geometry, position.x, position.y, size.x, size.y);
@@ -583,15 +586,15 @@ namespace UIForia.Rendering {
                 }
 
                 case ShapeType.Polygon:
-                    break;
+                    throw new NotImplementedException();
                 case ShapeType.Text:
-                    break;
+                    throw new NotImplementedException();
                 case ShapeType.Path:
-                    break;
+                    throw new NotImplementedException();
                 case ShapeType.ClosedPath:
-                    break;
+                    throw new NotImplementedException();
                 case ShapeType.Sprite:
-                    break;
+                    throw new NotImplementedException();
                 case ShapeType.Sector: {
                     Vector2 angleAndWidth = pointList.array[shape.pointRange.start].position;
                     float rotation = pointList.array[shape.pointRange.start + 1].position.x;

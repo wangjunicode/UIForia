@@ -184,13 +184,22 @@ half2 UnpackToHalf2(float value) {
 }
 
 float4 UnpackColor(uint input) {
-    return fixed4(
+    return float4(
         uint((input >> 0) & 0xff) / float(0xff),
         uint((input >> 8) & 0xff) / float(0xff),
         uint((input >> 16) & 0xff) / float(0xff),
         uint((input >> 24) & 0xff) / float(0xff)
     );
 }
+float4 UnpackColorInt(int input) {
+    return float4(
+        int((input >> 0) & 0xff) / float(0xff),
+        int((input >> 8) & 0xff) / float(0xff),
+        int((input >> 16) & 0xff) / float(0xff),
+        1//int((input >> 24) & 0xff) / float(0xff)
+    );
+}
+
 
 inline int and(int a, int b) {
     return a * b;
@@ -546,7 +555,7 @@ fixed4 SDFColor(SDFData sdfData, fixed4 borderColor, fixed4 contentColor, float 
     float radius = clamp(minSize * sdfData.radius, 0, minSize);
     
     float2 center = ((sdfData.uv.xy - 0.5) * size);
-
+    
     if(contentColor.a <= 0) {
         contentColor = fixed4(borderColor.rgb, 0);
     }

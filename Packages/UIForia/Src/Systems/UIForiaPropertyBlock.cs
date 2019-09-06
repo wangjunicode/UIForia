@@ -52,7 +52,7 @@ namespace UIForia.Rendering {
             matBlock.SetVectorArray(s_MiscDataKey, miscData);
             matBlock.SetVectorArray(s_ClipUVKey, clipUVs);
             matBlock.SetVectorArray(s_ClipRectKey, clipRects);
-
+            
             if (data.mainTexture != null) {
                 matBlock.SetTexture(s_MainTextureKey, data.mainTexture);
             }

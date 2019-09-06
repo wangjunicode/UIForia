@@ -1,19 +1,24 @@
-using SVGX;
 using UIForia.Rendering;
+using Unity.Mathematics;
 using UnityEngine;
-using Vertigo;
+using LineJoin = Vertigo.LineJoin;
 
 namespace UIForia.Elements {
 
     public enum ArrowRotation {
-        Left, Right, Up, Down   
+
+        Left,
+        Right,
+        Up,
+        Down
+
     }
 
     /// <summary>
     /// Renders an arrowhead that can be used as an arrow-like border or a chevron. Uses BackgroundColor as
     /// arrow color and respects margins.
     /// </summary>
-    public class Arrow : UIContainerElement, ISVGXPaintable {
+    public class Arrow : UIContainerElement, IElementBackgroundPainter {
 
         /// <summary>
         /// Sets the direction in which the arrow points. Defaults to left.
@@ -24,43 +29,48 @@ namespace UIForia.Elements {
             style.SetPainter("self", StyleState.Normal);
         }
 
-        public void Paint(VertigoContext ctx, in Matrix4x4 matrix) {
-            throw new System.NotImplementedException();
-        }
+        private Path2D path = new Path2D();
 
-        public void Paint(ImmediateRenderContext ctx, in SVGXMatrix matrix) {
-            ctx.SetTransform(matrix);
+        public void PaintBackground(RenderContext ctx) {
+            path.Clear();
+            Matrix4x4 m = layoutResult.matrix.ToMatrix4x4();
+            //  m *= Matrix4x4.Scale(new Vector3(0.1f, 0.1f, 0.1f));
+            path.SetTransform(m); //layoutResult.matrix.ToMatrix4x4());
 
-            ctx.BeginPath();
+            path.BeginPath();
 
-            float xMax = (layoutResult.ActualWidth - layoutResult.margin.left - layoutResult.margin.right);
-            float yMax = (layoutResult.ActualHeight - layoutResult.margin.top - layoutResult.margin.bottom);
+            float xMax = (layoutResult.actualSize.width - layoutResult.margin.left - layoutResult.margin.right);
+            float yMax = (layoutResult.actualSize.height - layoutResult.margin.top - layoutResult.margin.bottom);
             switch (Rotation) {
-                case ArrowRotation.Down: 
-                    ctx.MoveTo(0, 0);
-                    ctx.LineTo(xMax / 2, yMax);
-                    ctx.LineTo(layoutResult.ActualWidth, 0);
+                case ArrowRotation.Down:
+                    path.MoveTo(0, 0);
+                    path.LineTo(xMax / 2, yMax);
+                    path.LineTo(layoutResult.ActualWidth, 0);
                     break;
                 case ArrowRotation.Up:
-                    ctx.MoveTo(0, yMax);
-                    ctx.LineTo(xMax / 2, 0);
-                    ctx.LineTo(layoutResult.ActualWidth, yMax);
+                    path.MoveTo(0, yMax);
+                    path.LineTo(xMax / 2, 0);
+                    path.LineTo(layoutResult.ActualWidth, yMax);
                     break;
-                case ArrowRotation.Right: 
-                    ctx.MoveTo(0, 2);
-                    ctx.LineTo(xMax, yMax / 2);
-                    ctx.LineTo(0, layoutResult.ActualHeight);
+                case ArrowRotation.Right:
+                    path.MoveTo(0, 2);
+                    path.LineTo(xMax, yMax / 2);
+                    path.LineTo(0, layoutResult.ActualHeight);
                     break;
                 case ArrowRotation.Left:
-                    ctx.MoveTo(xMax, 2);
-                    ctx.LineTo(0, yMax / 2);
-                    ctx.LineTo(xMax, layoutResult.ActualHeight);
+                    path.MoveTo(xMax, 2);
+                    path.LineTo(0, yMax / 2);
+                    path.LineTo(xMax, layoutResult.ActualHeight);
                     break;
             }
-
-            ctx.SetStrokeWidth(2f);
-            ctx.SetStroke(style.BackgroundColor.r == -1 ? Color.grey : style.BackgroundColor);
-            ctx.Stroke();
+            
+            path.EndPath();
+            path.SetStrokeWidth(3f);
+            path.SetStroke(style.BackgroundColor.r == -1 ? Color.grey : style.BackgroundColor);
+            path.Stroke();
+            ctx.DrawPath(path);
         }
+
     }
+
 }

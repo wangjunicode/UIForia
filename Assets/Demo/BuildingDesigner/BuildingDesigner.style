@@ -60,10 +60,21 @@ style save-exit-text-color { TextColor = @saveExitColor; }
 style cancel-text-color { TextColor = @cancelColor; }
 
 style fake-select {
-    PreferredSize = 1cnt 1mn;
+    PreferredSize = 1cnt 48px;
     LayoutType = Stack;
     BackgroundColor = White;
-    PaddingRight = 24px;
+    PaddingRight = 48px;
+    PaddingLeft = 16px;
+    PaddingTop = 6px;
+    PaddingBottom = 8px;
+    BorderRadius = 8px;
+    TextFontSize = 32px;
+    TextFontAsset = url("Fonts/GothamNarrow-Medium SDF");
+    Border = 2px;
+    BorderColor = #B2B2B2;//rgba(178, 178, 178, 255);
+    [hover] {
+        BorderColor = #00B5D9;
+    }
 }
 
 style fake-select-display {
@@ -82,37 +93,47 @@ style fake-select-display {
 
 }
 
+style chevron-down {
+    PreferredSize = 10px 6px;
+    BackgroundImage = url("icons/ui_selectbox_down_chevron@2x");
+}
+
+style chevron-up {
+    MarginTop = 1px;
+    PreferredSize = 10px 6px;
+    BackgroundImage = url("icons/ui_selectbox_up_chevron@2x");
+}
+
+style <this> {
+    Padding = 100px;    
+}
+
 style fake-select-chevron-holder {
     LayoutBehavior = Ignored;
     AlignmentBehaviorX = Parent;
     AlignX = 100%;
     BackgroundColor = #00b5d0;
-    PreferredSize = 24px 100%;
+    PreferredSize = 32px 1psz;
     BorderColor = #006d82;
-    BorderRadius = 0 24px 24px 0;
-    Border = 1px;
-  //  PreferredSize = 32px, 100%;
-  //  FlexLayoutMainAxisAlignment = SpaceAround;
-  //  FlexLayoutCrossAxisAlignment = Center;
-  //  FlexLayoutDirection = Row;
-//        PreferredSize = 200px;
-//        BackgroundColor = Blue;
-//          AlignmentBehaviorX = LayoutBox;
-//          AlignmentBehaviorY = LayoutBox;
-//            AlignX = 50%;
-//            AlignY = 50%;
-
+    BorderRadius = 0 8px 8px 0;
+    Border = 2px;
+    FlexLayoutMainAxisAlignment = SpaceAround;
+    FlexLayoutCrossAxisAlignment = Center;
+    PaddingTop = 4px;
+    PaddingBottom = 4px;
+    [hover] {
+        BorderColor = #00B5D9;
+    }
 }
 
 style fake-select-options {
     Visibility = Hidden;
-//    PreferredSize = 100px;
-//    BackgroundColor = Red;
-//    AlignmentBehaviorX = LayoutBox;
-//    AlignmentBehaviorY = LayoutBox;
-//    AlignX = 100%;
-//    AlignY = 100%;
-   
+}
+
+style corner-cut-window {
+    PreferredSize = 800px 600px;
+    BackgroundColor = white;
+    Painter = "SeedWindow:TopLeft";
 }
 
 animation open-shortcuts {

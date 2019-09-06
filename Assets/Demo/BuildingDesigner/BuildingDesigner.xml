@@ -7,17 +7,20 @@
     <!--    <Style path="Demo/BuildingDesigner/BuildingDesignerMain.style" alias="designer-theme-main"/>-->
     <!--    <Style path="Demo/BuildingDesigner/BuildingDesignerFooter.style" alias="designer-theme-footer"/>-->
     <!--    <Style path="BasicElements/KlangButton/KlangButton.style" alias="klang-button"/>-->
-
+    
+    <Using namespace="UIForia.Elements"/>
+    
     <Contents>
-
+        
         <Group style="fake-select">
             
             <Group style="fake-select-display">
-                <Text>Basic</Text>
+                <Text>Basic is nothing ok if you say so</Text>
             </Group>
             
             <Group style="fake-select-chevron-holder">
-
+                <Div style="chevron-up"/>
+                <Div style="chevron-down"/>
             </Group>
             
             <Group style="fake-select-options">
@@ -27,6 +30,11 @@
             </Group>
  
         </Group>
+        
+<!--        <Group style="corner-cut-window">-->
+<!--            -->
+<!--        </Group>-->
+        
 <!--        -->
 <!--        <Group style="building-designer-root">-->
 

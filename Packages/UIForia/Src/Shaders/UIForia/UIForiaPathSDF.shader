@@ -75,7 +75,7 @@
                 v.vertex = mul(transform, float4(v.vertex.xyz, 1));
                 o.vertex = UnityObjectToClipPos(v.vertex);
                 // if pixel snapping is on some shapes get cut off. find a way to account for this
-                //  o.vertex = UIForiaPixelSnap(o.vertex);
+                o.vertex = UIForiaPixelSnap(o.vertex);
                 o.texCoord0 = v.texCoord0;
                 o.texCoord1 = v.texCoord1;
                 o.texCoord2 = float4(size.x, size.y, shapeType, colorMode);
@@ -114,7 +114,7 @@
             fixed4 frag (UIForiaPathFragData i) : SV_Target {              
                 float2 size = i.texCoord2.xy;
                 float minSize = min(size.x, size.y);
-            
+
                 float4 objectInfo = _ObjectData[(int)Frag_ObjectIndex];
                 float4 colorInfo = _ColorData[(int)Frag_ObjectIndex];
                 uint packedFlags = (objectInfo.x);
@@ -149,6 +149,7 @@
                 float2 p2 = float2(hDir * halfX, vDir * (halfY - cut));
                 int mainColorOnly = 0;
                 
+                
                 if(shapeType == ShapeType_Ellipse) {
                     halfStrokeWidth = halfStrokeWidth / max(size.x, size.y);
                     sdf = EllipseSDF(i.texCoord0.xy - 0.5, float2(0.49, 0.49));
@@ -181,8 +182,7 @@
                 
                 float tri = sdTriangle(center, p0, p1, p2);
 
-                sdf = lerp(lerp(sdf, subtractSDF(sdf, tri), cut != 0), tri, shapeType == ShapeType_Triangle);
-                
+               // sdf = lerp(lerp(sdf, subtractSDF(sdf, tri), cut != 0), tri, shapeType == ShapeType_Triangle);
                 // todo -- use alpha blend somehow to mix these colors
                // #if SHADOW
                     float n = smoothstep(-shadowIntensity, 2, sdf);
@@ -201,7 +201,6 @@
                 
                 float distanceChange = fwidth(sdf) * 0.5;
                 float aa = smoothstep(distanceChange, -distanceChange, sdf);
-                
                // #if PRE_MULTIPLY_ALPHA
                     inner.rgb *= inner.a;
                     outer.rgb *= outer.a;

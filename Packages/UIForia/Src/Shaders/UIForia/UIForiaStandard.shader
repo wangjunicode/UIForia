@@ -93,7 +93,6 @@ Shader "UIForia/Standard"
                 float4x4 transform = _TransformData[objectIndex];
                 
                 uint shapeType = ((uint) objectInfo.x >> 16) & (1 << 16) - 1;
-                // t
                 uint colorMode = ((uint) objectInfo.x) & 0xffff;
                 
                 half2 size = UnpackSize(Vert_PackedSize);
@@ -170,9 +169,12 @@ Shader "UIForia/Standard"
                 float2 screenUV = i.texCoord4.yz / i.texCoord4.w;
                 float4 clipRect = _ClipRects[(uint)i.texCoord1.w];
                 float4 clipUvs = _ClipUVs[(uint)i.texCoord1.w];               
-                float opacity = _ObjectData[(uint)i.texCoord1.w].w;
+                float opacity = _ObjectData[(uint)i.texCoord1.w].w;              
+                
+
                 // todo -- returns cause branching here
                 // get rid of text and we can get rid of branching
+                
                 fixed4 mainColor = ComputeColor(i.color.r, i.color.g, Frag_ColorMode, i.texCoord0.xy, _MainTexture);
                 if(Frag_ShapeType != ShapeType_Text) {
                     

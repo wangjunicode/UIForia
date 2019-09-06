@@ -14,6 +14,11 @@ namespace Src.Systems {
 
         // todo -- this doesn't actually pool right now
         public RenderBox GetCustomPainter(string painterId) {
+            
+            if (painterId == "self") {
+                return new SelfPaintedRenderBox();    
+            }
+            
             if (Application.s_CustomPainters.TryGetValue(painterId, out Type boxType)) {
                 return (RenderBox) Activator.CreateInstance(boxType);
             }
@@ -162,7 +167,8 @@ namespace Src.Systems {
             uvTransform = SVGXMatrix.identity,
             opacity = 1f,
             encodedTint = VertigoUtil.ColorToFloat(Color.clear),
-            gradientId = -1
+            gradientId = -1,
+            shadowOpacity = 1
         };
 
     }

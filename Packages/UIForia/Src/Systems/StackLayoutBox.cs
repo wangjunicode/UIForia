@@ -19,6 +19,8 @@ namespace UIForia.Layout {
 
             float contentAreaWidth = size.width - paddingBox.left - paddingBox.right - borderBox.left - borderBox.right;
             float contentAreaHeight = size.height - paddingBox.top - paddingBox.bottom - borderBox.top - borderBox.bottom;
+            float topOffset = paddingBox.top + borderBox.top;
+            float leftOffset = paddingBox.left + borderBox.left;
             
             while (ptr != null) {
                 ptr.GetWidth(blockWidth, ref sizeConstraints);
@@ -28,8 +30,8 @@ namespace UIForia.Layout {
                 ptr.GetMarginVertical(blockHeight, ref margin);
                 float clampedHeight = Mathf.Max(sizeConstraints.minHeight, Mathf.Min(sizeConstraints.maxHeight, sizeConstraints.prefHeight));
 
-                ptr.ApplyHorizontalLayout(0, blockWidth, contentAreaWidth, clampedWidth, 0, LayoutFit.None);
-                ptr.ApplyVerticalLayout(0, blockHeight, contentAreaHeight, clampedHeight, 0, LayoutFit.None);
+                ptr.ApplyHorizontalLayout(leftOffset, blockWidth, contentAreaWidth, clampedWidth, 0, LayoutFit.None);
+                ptr.ApplyVerticalLayout(topOffset, blockHeight, contentAreaHeight, clampedHeight, 0, LayoutFit.None);
                 
                 ptr = ptr.nextSibling;
             }

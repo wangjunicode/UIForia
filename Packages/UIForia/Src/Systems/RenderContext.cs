@@ -298,10 +298,10 @@ namespace UIForia.Rendering {
 
             if (geometry.mainTexture != null) {
                 // todo -- if UVs are transformed don't use sprite atlas
-                if (texturePacker.TryPackTexture(geometry.mainTexture, out uvs)) {
-                    texture = spriteAtlas;
-                    remapUvs = true;
-                }
+//                if (texturePacker.TryPackTexture(geometry.mainTexture, out uvs)) {
+//                    texture = spriteAtlas;
+//                    remapUvs = true;
+//                }
             }
 
             if (texture != null && currentBatch.uiforiaData.mainTexture != null && currentBatch.uiforiaData.mainTexture != texture) {

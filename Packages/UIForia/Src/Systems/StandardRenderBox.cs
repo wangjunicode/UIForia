@@ -5,6 +5,7 @@ using UIForia.Elements;
 using UIForia.Extensions;
 using UIForia.Layout;
 using UIForia.Util;
+using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
 using UnityEngine;
 using Vertigo;
@@ -274,13 +275,51 @@ namespace UIForia.Rendering {
             byte b3 = (byte) (((borderRadiusBottomRight * 1000)) * 0.5f);
 
             float packedBorderRadii = VertigoUtil.BytesToFloat(b0, b1, b2, b3);
+            
+            // HUGE FUCKING WARNING:
+            // the following code is what I humbly refer to as: "Making C# my bitch"
+            // Here's whats going on. We want to pass colors into the shader
+            // we want to use 32 bits for a color instead of 128 (4 floats per color)
+            // we can only send float values to the shaders thanks to unity limitations.
+            // if we want to reinterpret the value directly as a float, the language has some
+            // safety features that prevent float overflows, if the value we pass in is too large
+            // then we get one of bits in our float flipped. We don't want this since it gives
+            // the wrong value in the shader. For example if we pass in the color (128, 128, 128, 255)
+            // we actually decode (128, 128, 192, 255) in the shader. This is bad.
+            // 
+            // the below major hack skips the type system entirely but just setting bytes directly in memory 
+            // which the runtime never checks since we never assigned to a float value. Awesome!
+            
+            Vector4 v = default;
+            
+            unsafe {
+                void* vp = &v;
+                byte * b = stackalloc byte[16];
+                b[0] = borderColorTop.r;
+                b[1] = borderColorTop.g;
+                b[2] = borderColorTop.b;
+                b[3] = borderColorTop.a;
 
-            float packedBorderColorTop = VertigoUtil.ColorToFloat(borderColorTop);
-            float packedBorderColorRight = VertigoUtil.ColorToFloat(borderColorRight);
-            float packedBorderColorBottom = VertigoUtil.ColorToFloat(borderColorBottom);
-            float packedBorderColorLeft = VertigoUtil.ColorToFloat(borderColorLeft);
+                b[4] = borderColorRight.r;
+                b[5] = borderColorRight.g;
+                b[6] = borderColorRight.b;
+                b[7] = borderColorRight.a;
+                
+                b[8] = borderColorBottom.r;
+                b[9] = borderColorBottom.g;
+                b[10] = borderColorBottom.b;
+                b[11] = borderColorBottom.a;
 
-            geometry.miscData = new Vector4(packedBorderColorTop, packedBorderColorRight, packedBorderColorBottom, packedBorderColorLeft);
+                b[12] = borderColorLeft.r;
+                b[13] = borderColorLeft.g;
+                b[14] = borderColorLeft.b;
+                b[15] = borderColorLeft.a;
+                    
+                UnsafeUtility.MemCpy(vp, b, 16);
+            }
+            
+            geometry.miscData = v;
+            
             OffsetRect border = element.layoutResult.border;
 
             float borderLeftAndTop = VertigoUtil.PackSizeVector(border.left, border.top);

@@ -59,6 +59,69 @@ style confirm-text-color { TextColor = @confirmColor; }
 style save-exit-text-color { TextColor = @saveExitColor; }
 style cancel-text-color { TextColor = @cancelColor; }
 
+style <this> {
+    PreferredSize = 1pca;
+    BackgroundImage = url("image");
+}
+
+style menu-container {
+    AlignX = 100% Parent;
+    AlignY = 100% Parent;
+    FlexLayoutDirection = Horizontal;
+    FlexLayoutCrossAxisAlignment = End;
+}
+
+style menu-map {
+    PreferredSize = 192px;
+    BorderRadius = 50%;
+    Border = 7px;
+    BorderColor = Black;
+    BackgroundImage = url("image");
+    MarginBottom = 1em;
+    MarginRight = 1em;
+}
+
+style menu-item {
+    FlexLayoutCrossAxisAlignment = Center;
+    Margin = 0px 4px;
+    PreferredWidth = 74px;
+}
+
+style menu-image {
+    BackgroundFit = Fill;
+}
+
+style menu-label {
+    AlignY = 100% Parent;
+    AlignX = 50%;
+    TextColor = White;
+    Visibility = Hidden;
+}
+
+style weather {
+    PreferredSize = 50px;
+    BackgroundColor = Black;
+    BorderRadius = 50%;
+    LayoutBehavior = Ignored;
+    AlignmentOffsetX = -1w;
+    AlignmentOffsetY = 74px;
+    AlignmentBehaviorX = LayoutBox;
+    AlignmentBehaviorY = LayoutBox;
+    BackgroundImage = url("Sprites/StatusImageWeatherIconCloudy");
+    BackgroundFit = Contain;
+}
+
+style temp-gauge {
+   PreferredSize = 70px;
+    BackgroundColor = Black;
+    BorderRadius = 50%;
+    LayoutBehavior = Ignored;
+    AlignmentOffsetX = -0.8w;
+    AlignmentOffsetY = -32px;
+    AlignmentBehaviorX = LayoutBox;
+    AlignmentBehaviorY = LayoutBox;
+}
+
 style fake-select {
     PreferredSize = 1cnt 48px;
     LayoutType = Stack;
@@ -121,9 +184,6 @@ style fake-select-chevron-holder {
     FlexLayoutCrossAxisAlignment = Center;
     PaddingTop = 4px;
     PaddingBottom = 4px;
-    [hover] {
-        BorderColor = #00B5D9;
-    }
 }
 
 style fake-select-options {
@@ -134,6 +194,12 @@ style corner-cut-window {
     PreferredSize = 800px 600px;
     BackgroundColor = white;
     Painter = "SeedWindow:TopLeft";
+}
+
+style menu-icon {
+    BorderRadius = 50%;
+    BorderColor = Black;
+    Border = 3px;
 }
 
 animation open-shortcuts {

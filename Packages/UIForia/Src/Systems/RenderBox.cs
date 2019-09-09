@@ -58,8 +58,8 @@ namespace UIForia.Rendering {
         public bool didRender;
 
         public virtual RenderBounds RenderBounds => new RenderBounds(
-            element.layoutResult.localPosition.x,
-            element.layoutResult.localPosition.y,
+            0, //element.layoutResult.localPosition.x,
+            0, //element.layoutResult.localPosition.y,
             element.layoutResult.actualSize.width,
             element.layoutResult.actualSize.height
         );

@@ -282,7 +282,7 @@ namespace Src.Systems {
                                     else {
                                         objectScreenBounds = GetBounds(p0, p1, p2, p3);
                                     }
-
+                                    
                                     // cheap solution is to compare world space bounds for overlap better would be compare oriented bounds
                                     renderBox.culled = !clipData.aabb.OverlapAsRect(objectScreenBounds);
 

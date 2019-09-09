@@ -241,8 +241,21 @@ namespace UIForia.Compilers.Style {
                 }
             }
             else if (property.children.size == 2) {
-                targetStyle.AlignmentOriginX = MapOffsetMeasurement(context.GetValueForReference(property.children[0]), context);
-                targetStyle.AlignmentOffsetX = MapOffsetMeasurement(context.GetValueForReference(property.children[1]), context);
+                StyleASTNode value = context.GetValueForReference(property.children[0]);
+                OffsetMeasurement measurement = MapOffsetMeasurement(value, context);
+                targetStyle.AlignmentOriginX = measurement;
+                StyleASTNode resolved = context.GetValueForReference(property.children[1]);
+                if (resolved is StyleIdentifierNode identifierNode) {
+
+                    if (Enum.TryParse(identifierNode.name, true, out AlignmentBehavior behavior)) {
+                        targetStyle.AlignmentBehaviorX = behavior;
+                        targetStyle.AlignmentOffsetX = new OffsetMeasurement(-measurement.value, measurement.unit);
+                    }
+
+                }
+                else {
+                    targetStyle.AlignmentOffsetX = MapOffsetMeasurement(resolved, context);
+                }
             }
             else if (property.children.size == 3) {
                 targetStyle.AlignmentOriginX = MapOffsetMeasurement(context.GetValueForReference(property.children[0]), context);
@@ -282,8 +295,21 @@ namespace UIForia.Compilers.Style {
                 }
             }
             else if (property.children.size == 2) {
-                targetStyle.AlignmentOriginY = MapOffsetMeasurement(context.GetValueForReference(property.children[0]), context);
-                targetStyle.AlignmentOffsetY = MapOffsetMeasurement(context.GetValueForReference(property.children[1]), context);
+                StyleASTNode value = context.GetValueForReference(property.children[0]);
+                OffsetMeasurement measurement = MapOffsetMeasurement(value, context);
+                targetStyle.AlignmentOriginY = measurement;
+                StyleASTNode resolved = context.GetValueForReference(property.children[1]);
+                if (resolved is StyleIdentifierNode identifierNode) {
+
+                    if (Enum.TryParse(identifierNode.name, true, out AlignmentBehavior behavior)) {
+                        targetStyle.AlignmentBehaviorY = behavior;
+                        targetStyle.AlignmentOffsetY = new OffsetMeasurement(-measurement.value, measurement.unit);
+                    }
+
+                }
+                else {
+                    targetStyle.AlignmentOffsetY = MapOffsetMeasurement(resolved, context);
+                }
             }
             else if (property.children.size == 3) {
                 targetStyle.AlignmentOriginY = MapOffsetMeasurement(context.GetValueForReference(property.children[0]), context);

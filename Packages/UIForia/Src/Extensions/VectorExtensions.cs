@@ -13,7 +13,7 @@ namespace UIForia.Extensions {
         }
 
         public static bool OverlapAsRect(this Vector4 self, Vector4 other) {
-            return other.z > self.x && other.x < self.z && other.w > self.y && other.y < self.w;
+            return other.z >= self.x && other.x <= self.z && other.w >= self.y && other.y <= self.w;
         }
 
         public static Vector2 Project(this Vector2 v, Vector2 a, Vector2 b) {

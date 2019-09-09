@@ -293,7 +293,7 @@ namespace UIForia.Rendering {
             Vector4 v = default;
             
             unsafe {
-                void * vp = &v;
+                Vector4 * vp = &v;
                 Color32* b = stackalloc Color32[4];
                 b[0] = borderColorTop;
                 b[1] = borderColorRight;

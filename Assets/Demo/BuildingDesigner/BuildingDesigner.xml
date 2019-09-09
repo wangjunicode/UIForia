@@ -7,52 +7,89 @@
     <!--    <Style path="Demo/BuildingDesigner/BuildingDesignerMain.style" alias="designer-theme-main"/>-->
     <!--    <Style path="Demo/BuildingDesigner/BuildingDesignerFooter.style" alias="designer-theme-footer"/>-->
     <!--    <Style path="BasicElements/KlangButton/KlangButton.style" alias="klang-button"/>-->
-    
+
     <Using namespace="UIForia.Elements"/>
-    
+
     <Contents>
-        
-        <Group style="fake-select">
-            
-            <Group style="fake-select-display">
-                <Text>Basic is nothing ok if you say so</Text>
+
+        <Group style="menu-container">
+
+            <Group style="menu-item">
+                <Image src="'Prototyping/icon__menu_chat'"/>
+                <Text style="menu-label">Construction</Text>
             </Group>
-            
-            <Group style="fake-select-chevron-holder">
-                <Div style="chevron-up"/>
-                <Div style="chevron-down"/>
+            <Group style="menu-item">
+                <Image style="menu-image" src="'Prototyping/icon_plant_64'"/>
+                <Text style="menu-label">Construction</Text>
             </Group>
-            
-            <Group style="fake-select-options">
-                <Repeat list="brushTypes">
-                    <Group>{$item.Label}</Group>
-                </Repeat>
+            <Group style="menu-item">
+                <Image src="'Prototyping/icon__menu_build'"/>
+                <Text style="menu-label">Construction</Text>
             </Group>
- 
+            <Group style="menu-item">
+                <Image src="'Prototyping/icon_chop_64'"/>
+                <Text style="menu-label">Construction</Text>
+            </Group>
+            <Group style="menu-item">
+                <Image src="'Prototyping/icon__menu_schedule'"/>
+                <Text style="menu-label">Construction</Text>
+            </Group>
+            <Group style="menu-item">
+                <Image src="'Prototyping/icon__menu_stockpile'"/>
+                <Text style="menu-label">Construction</Text>
+            </Group>
+            <Group style="menu-item">
+                <Image src="'Prototyping/icon__menu_build'"/>
+                <Text style="menu-label">Construction</Text>
+            </Group>
+
+            <Group style="menu-map">
+                <Group style="weather"/>
+                <Group style="temp-gauge"/>
+            </Group>
+
         </Group>
-        
-<!--        <Group style="corner-cut-window">-->
-<!--            -->
-<!--        </Group>-->
-        
-<!--        -->
-<!--        <Group style="building-designer-root">-->
+        <!--        <Group style="fake-select">-->
+        <!--            -->
+        <!--            <Group style="fake-select-display">-->
+        <!--                <Text>Basic is nothing ok if you say so</Text>-->
+        <!--            </Group>-->
+        <!--            -->
+        <!--            <Group style="fake-select-chevron-holder">-->
+        <!--                <Div style="chevron-up"/>-->
+        <!--                <Div style="chevron-down"/>-->
+        <!--            </Group>-->
+        <!--            -->
+        <!--            <Group style="fake-select-options">-->
+        <!--                <Repeat list="brushTypes">-->
+        <!--                    <Group>{$item.Label}</Group>-->
+        <!--                </Repeat>-->
+        <!--            </Group>-->
+        <!-- -->
+        <!--        </Group>-->
 
-<!--            <Group style="building-designer-top-bar">-->
+        <!--        <Group style="corner-cut-window">-->
+        <!--            -->
+        <!--        </Group>-->
 
-<!--                <Text style.flexItemGrow="1">CONSTRUCTION MODE</Text>-->
+        <!--        -->
+        <!--        <Group style="building-designer-root">-->
 
-<!--                <Text>Type:</Text>-->
+        <!--            <Group style="building-designer-top-bar">-->
 
-<!--                -->
-<!--                &lt;!&ndash;                <Select&#45;&#45;int style="select-height" options="brushTypes" onValueChanged="OnBrushTypeChanged"/>&ndash;&gt;-->
+        <!--                <Text style.flexItemGrow="1">CONSTRUCTION MODE</Text>-->
 
-<!--            </Group>-->
+        <!--                <Text>Type:</Text>-->
 
-<!--            <Group></Group>-->
-<!--            <Group></Group>-->
+        <!--                -->
+        <!--                &lt;!&ndash;                <Select&#45;&#45;int style="select-height" options="brushTypes" onValueChanged="OnBrushTypeChanged"/>&ndash;&gt;-->
 
-<!--        </Group>-->
+        <!--            </Group>-->
+
+        <!--            <Group></Group>-->
+        <!--            <Group></Group>-->
+
+        <!--        </Group>-->
         <!--                <Group style="top-left-area flex-horizontal-centered">-->
 
         <!--                    <Text>CONSTRUCTION MODE</Text>-->

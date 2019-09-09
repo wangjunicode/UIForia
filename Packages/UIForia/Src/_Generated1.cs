@@ -894,39 +894,46 @@ namespace UIForia.Rendering {
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ScrollbarColor, value), state); }
         }
         
-        public UIForia.Rendering.UnderlayType ShadowType {
+        public UnityEngine.Color ShadowColor {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ShadowType, state).AsUnderlayType; }
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ShadowColor, state).AsColor; }
             [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ShadowType, (int)value), state); }
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ShadowColor, value), state); }
         }
         
-        public float ShadowOffsetX {
+        public UnityEngine.Color ShadowTint {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ShadowOffsetX, state).AsFloat; }
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ShadowTint, state).AsColor; }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ShadowTint, value), state); }
+        }
+        
+        public UIForia.OffsetMeasurement ShadowOffsetX {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ShadowOffsetX, state).AsOffsetMeasurement; }
             [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ShadowOffsetX, value), state); }
         }
         
-        public float ShadowOffsetY {
+        public UIForia.OffsetMeasurement ShadowOffsetY {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ShadowOffsetY, state).AsFloat; }
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ShadowOffsetY, state).AsOffsetMeasurement; }
             [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ShadowOffsetY, value), state); }
         }
         
-        public float ShadowSoftnessX {
+        public float ShadowSizeX {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ShadowSoftnessX, state).AsFloat; }
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ShadowSizeX, state).AsFloat; }
             [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ShadowSoftnessX, value), state); }
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ShadowSizeX, value), state); }
         }
         
-        public float ShadowSoftnessY {
+        public float ShadowSizeY {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ShadowSoftnessY, state).AsFloat; }
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ShadowSizeY, state).AsFloat; }
             [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ShadowSoftnessY, value), state); }
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ShadowSizeY, value), state); }
         }
         
         public float ShadowIntensity {
@@ -1830,39 +1837,46 @@ namespace UIForia.Rendering {
             set { SetProperty(new StyleProperty(StylePropertyId.ScrollbarColor, value)); }
         }
             
-        public UIForia.Rendering.UnderlayType ShadowType {
+        public UnityEngine.Color ShadowColor {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return (UIForia.Rendering.UnderlayType)FindEnumProperty(StylePropertyId.ShadowType); }
+            get { return FindColorProperty(StylePropertyId.ShadowColor); }
             [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.ShadowType, (int)value)); }
+            set { SetProperty(new StyleProperty(StylePropertyId.ShadowColor, value)); }
         }
             
-        public float ShadowOffsetX {
+        public UnityEngine.Color ShadowTint {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return FindFloatProperty(StylePropertyId.ShadowOffsetX); }
+            get { return FindColorProperty(StylePropertyId.ShadowTint); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.ShadowTint, value)); }
+        }
+            
+        public UIForia.OffsetMeasurement ShadowOffsetX {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return FindOffsetMeasurementProperty(StylePropertyId.ShadowOffsetX); }
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.ShadowOffsetX, value)); }
         }
             
-        public float ShadowOffsetY {
+        public UIForia.OffsetMeasurement ShadowOffsetY {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return FindFloatProperty(StylePropertyId.ShadowOffsetY); }
+            get { return FindOffsetMeasurementProperty(StylePropertyId.ShadowOffsetY); }
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.ShadowOffsetY, value)); }
         }
             
-        public float ShadowSoftnessX {
+        public float ShadowSizeX {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return FindFloatProperty(StylePropertyId.ShadowSoftnessX); }
+            get { return FindFloatProperty(StylePropertyId.ShadowSizeX); }
             [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.ShadowSoftnessX, value)); }
+            set { SetProperty(new StyleProperty(StylePropertyId.ShadowSizeX, value)); }
         }
             
-        public float ShadowSoftnessY {
+        public float ShadowSizeY {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return FindFloatProperty(StylePropertyId.ShadowSoftnessY); }
+            get { return FindFloatProperty(StylePropertyId.ShadowSizeY); }
             [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.ShadowSoftnessY, value)); }
+            set { SetProperty(new StyleProperty(StylePropertyId.ShadowSizeY, value)); }
         }
             
         public float ShadowIntensity {
@@ -3049,48 +3063,57 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UIForia.Rendering.UnderlayType ShadowType { 
+            public UnityEngine.Color ShadowColor { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.ShadowType, out property)) return property.AsUnderlayType;
-                    return DefaultStyleValues_Generated.ShadowType;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.ShadowColor, out property)) return property.AsColor;
+                    return DefaultStyleValues_Generated.ShadowColor;
                 }
             }
 
-            public float ShadowOffsetX { 
+            public UnityEngine.Color ShadowTint { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.ShadowOffsetX, out property)) return property.AsFloat;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.ShadowTint, out property)) return property.AsColor;
+                    return DefaultStyleValues_Generated.ShadowTint;
+                }
+            }
+
+            public UIForia.OffsetMeasurement ShadowOffsetX { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.ShadowOffsetX, out property)) return property.AsOffsetMeasurement;
                     return DefaultStyleValues_Generated.ShadowOffsetX;
                 }
             }
 
-            public float ShadowOffsetY { 
+            public UIForia.OffsetMeasurement ShadowOffsetY { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.ShadowOffsetY, out property)) return property.AsFloat;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.ShadowOffsetY, out property)) return property.AsOffsetMeasurement;
                     return DefaultStyleValues_Generated.ShadowOffsetY;
                 }
             }
 
-            public float ShadowSoftnessX { 
+            public float ShadowSizeX { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.ShadowSoftnessX, out property)) return property.AsFloat;
-                    return DefaultStyleValues_Generated.ShadowSoftnessX;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.ShadowSizeX, out property)) return property.AsFloat;
+                    return DefaultStyleValues_Generated.ShadowSizeX;
                 }
             }
 
-            public float ShadowSoftnessY { 
+            public float ShadowSizeY { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.ShadowSoftnessY, out property)) return property.AsFloat;
-                    return DefaultStyleValues_Generated.ShadowSoftnessY;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.ShadowSizeY, out property)) return property.AsFloat;
+                    return DefaultStyleValues_Generated.ShadowSizeY;
                 }
             }
 
@@ -4120,44 +4143,52 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.ScrollbarColor, state).AsColor;
         }
         
-        public void SetShadowType(in UIForia.Rendering.UnderlayType? value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.ShadowType, (int)value), state);
+        public void SetShadowColor(in UnityEngine.Color? value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.ShadowColor, value), state);
         }
 
-        public UIForia.Rendering.UnderlayType GetShadowType(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.ShadowType, state).AsUnderlayType;
+        public UnityEngine.Color GetShadowColor(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.ShadowColor, state).AsColor;
         }
         
-        public void SetShadowOffsetX(in float? value, StyleState state) {
+        public void SetShadowTint(in UnityEngine.Color? value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.ShadowTint, value), state);
+        }
+
+        public UnityEngine.Color GetShadowTint(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.ShadowTint, state).AsColor;
+        }
+        
+        public void SetShadowOffsetX(in UIForia.OffsetMeasurement? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.ShadowOffsetX, value), state);
         }
 
-        public float GetShadowOffsetX(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.ShadowOffsetX, state).AsFloat;
+        public UIForia.OffsetMeasurement GetShadowOffsetX(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.ShadowOffsetX, state).AsOffsetMeasurement;
         }
         
-        public void SetShadowOffsetY(in float? value, StyleState state) {
+        public void SetShadowOffsetY(in UIForia.OffsetMeasurement? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.ShadowOffsetY, value), state);
         }
 
-        public float GetShadowOffsetY(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.ShadowOffsetY, state).AsFloat;
+        public UIForia.OffsetMeasurement GetShadowOffsetY(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.ShadowOffsetY, state).AsOffsetMeasurement;
         }
         
-        public void SetShadowSoftnessX(in float? value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.ShadowSoftnessX, value), state);
+        public void SetShadowSizeX(in float? value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.ShadowSizeX, value), state);
         }
 
-        public float GetShadowSoftnessX(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.ShadowSoftnessX, state).AsFloat;
+        public float GetShadowSizeX(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.ShadowSizeX, state).AsFloat;
         }
         
-        public void SetShadowSoftnessY(in float? value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.ShadowSoftnessY, value), state);
+        public void SetShadowSizeY(in float? value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.ShadowSizeY, value), state);
         }
 
-        public float GetShadowSoftnessY(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.ShadowSoftnessY, state).AsFloat;
+        public float GetShadowSizeY(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.ShadowSizeY, state).AsFloat;
         }
         
         public void SetShadowIntensity(in float? value, StyleState state) {
@@ -4425,16 +4456,18 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.ScrollbarSize, ScrollbarSize);
 				case StylePropertyId.ScrollbarColor:
 					 return new StyleProperty(StylePropertyId.ScrollbarColor, ScrollbarColor);
-				case StylePropertyId.ShadowType:
-					 return new StyleProperty(StylePropertyId.ShadowType, (int)ShadowType);
+				case StylePropertyId.ShadowColor:
+					 return new StyleProperty(StylePropertyId.ShadowColor, ShadowColor);
+				case StylePropertyId.ShadowTint:
+					 return new StyleProperty(StylePropertyId.ShadowTint, ShadowTint);
 				case StylePropertyId.ShadowOffsetX:
 					 return new StyleProperty(StylePropertyId.ShadowOffsetX, ShadowOffsetX);
 				case StylePropertyId.ShadowOffsetY:
 					 return new StyleProperty(StylePropertyId.ShadowOffsetY, ShadowOffsetY);
-				case StylePropertyId.ShadowSoftnessX:
-					 return new StyleProperty(StylePropertyId.ShadowSoftnessX, ShadowSoftnessX);
-				case StylePropertyId.ShadowSoftnessY:
-					 return new StyleProperty(StylePropertyId.ShadowSoftnessY, ShadowSoftnessY);
+				case StylePropertyId.ShadowSizeX:
+					 return new StyleProperty(StylePropertyId.ShadowSizeX, ShadowSizeX);
+				case StylePropertyId.ShadowSizeY:
+					 return new StyleProperty(StylePropertyId.ShadowSizeY, ShadowSizeY);
 				case StylePropertyId.ShadowIntensity:
 					 return new StyleProperty(StylePropertyId.ShadowIntensity, ShadowIntensity);
 				default: throw new System.ArgumentOutOfRangeException(nameof(propertyId), propertyId, null);
@@ -4532,10 +4565,12 @@ namespace UIForia.Rendering {
                     case StylePropertyId.RenderLayer: return true;
                     case StylePropertyId.Layer: return true;
                     case StylePropertyId.ScrollbarColor: return true;
+                    case StylePropertyId.ShadowColor: return true;
+                    case StylePropertyId.ShadowTint: return true;
                     case StylePropertyId.ShadowOffsetX: return true;
                     case StylePropertyId.ShadowOffsetY: return true;
-                    case StylePropertyId.ShadowSoftnessX: return true;
-                    case StylePropertyId.ShadowSoftnessY: return true;
+                    case StylePropertyId.ShadowSizeX: return true;
+                    case StylePropertyId.ShadowSizeY: return true;
                     case StylePropertyId.ShadowIntensity: return true;
 
                 }

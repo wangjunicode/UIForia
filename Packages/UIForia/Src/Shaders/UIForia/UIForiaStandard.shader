@@ -168,7 +168,7 @@ Shader "UIForia/Standard"
                 
                 float2 screenUV = i.texCoord4.yz / i.texCoord4.w;
                 float4 clipRect = _ClipRects[(uint)i.texCoord1.w];
-                float4 clipUvs = _ClipUVs[(uint)i.texCoord1.w];               
+                float4 clipUvs = _ClipUVs[(uint)i.texCoord1.w];           
                 float opacity = _ObjectData[(uint)i.texCoord1.w].w;              
                 
 
@@ -184,8 +184,26 @@ Shader "UIForia/Standard"
                     sdfData.size = Frag_SDFSize;
                     sdfData.strokeWidth = borderData.size;
                     sdfData.radius = borderData.radius;
-                    mainColor = SDFColor(sdfData, borderData.color, mainColor, i.texCoord4.x);
+                    mainColor = SDFColor(sdfData, borderData.color, mainColor);
                     mainColor.a *= opacity;
+                    
+                    if(Frag_ColorMode == PaintMode_Shadow || Frag_ColorMode == PaintMode_ShadowTint) {
+                        float intensity = i.color.b;
+                        sdfData.strokeWidth = 3;
+                        float n = smoothstep(-intensity, 2, SDFRect2(sdfData));
+                        fixed4 shadowColor = fixed4(UnpackColor(asuint(i.color.r)).rgb, 1);
+                        fixed4 shadowTint = fixed4(UnpackColor(asuint(i.color.g)).rgb, 1);
+                        fixed4 shadowRetn = lerp(fixed4(shadowColor.rgb, 1 - n), shadowColor, (1 - n));                
+                        fixed4 tintedShadowColor = lerp(fixed4(shadowTint.rgb, 1 - n), shadowColor,  (1 - n));
+                        tintedShadowColor = lerp(shadowRetn, tintedShadowColor, n);
+                        
+                        shadowRetn = lerp(shadowRetn, tintedShadowColor, Frag_ColorMode == PaintMode_ShadowTint);
+                        shadowRetn.a *= 1; //colorInfo.b;
+                        mainColor = shadowRetn;
+                        mainColor.rgb *= mainColor.a;
+                        return mainColor;
+                    }
+                    
                     mainColor = UIForiaAlphaClipColor(mainColor, _MaskTexture, screenUV, clipRect, clipUvs);
                     mainColor.rgb *= mainColor.a;
                     return mainColor;

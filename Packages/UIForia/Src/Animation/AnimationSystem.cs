@@ -79,7 +79,7 @@ namespace UIForia.Animation {
                         styleAnimation.data.options)
                     );
                 }
-                
+
                 UITaskResult status = styleAnimation.Run(Time.deltaTime);
 
                 switch (status) {
@@ -117,11 +117,19 @@ namespace UIForia.Animation {
                             );
                             continue;
                         }
-                        
+
                         styleAnimation.state = UITaskState.Pending;
 
                         styleAnimation.ResetTriggers();
-                        // todo -- if direction != oldDirection -> invoke direction change
+                        if (styleAnimation.data.options.loopType == AnimationLoopType.PingPong) {
+                            if (styleAnimation.data.options.direction == AnimationDirection.Reverse) {
+                                styleAnimation.data.options.direction = AnimationDirection.Forward;
+                            }
+                            else {
+                                styleAnimation.data.options.direction = AnimationDirection.Reverse;
+                            }
+                        }
+
                         nextFrame.Add(styleAnimation);
                         break;
 

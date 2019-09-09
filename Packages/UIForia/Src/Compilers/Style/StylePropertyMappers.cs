@@ -200,13 +200,15 @@ namespace UIForia.Compilers.Style {
                 {"scrollbarsize", (targetStyle, property, context) => targetStyle.ScrollbarSize = MapMeasurement(property.children[0], context)},
                 {"scrollbarcolor", (targetStyle, property, context) => targetStyle.ScrollbarColor = MapColor(property, context)},
 
-                // shadows for things
-                {"shadowtype", (targetStyle, property, context) => targetStyle.ShadowType = MapEnum<UnderlayType>(property.children[0], context)},
+                // Shadows
+            //    {"shadowtype", (targetStyle, property, context) => targetStyle.ShadowType = MapEnum<UnderlayType>(property.children[0], context)},
                 {"shadowoffsetx", (targetStyle, property, context) => targetStyle.ShadowOffsetX = MapNumber(property.children[0], context)},
                 {"shadowoffsety", (targetStyle, property, context) => targetStyle.ShadowOffsetY = MapNumber(property.children[0], context)},
-                {"shadowsoftnessx", (targetStyle, property, context) => targetStyle.ShadowSoftnessX = MapNumber(property.children[0], context)},
-                {"shadowsoftnessy", (targetStyle, property, context) => targetStyle.ShadowSoftnessY = MapNumber(property.children[0], context)},
+                {"shadowsizex", (targetStyle, property, context) => targetStyle.ShadowSizeX = MapNumber(property.children[0], context)},
+                {"shadowsizey", (targetStyle, property, context) => targetStyle.ShadowSizeY = MapNumber(property.children[0], context)},
                 {"shadowintensity", (targetStyle, property, context) => targetStyle.ShadowIntensity = MapNumber(property.children[0], context)},
+                {"shadowcolor", (targetStyle, property, context) => targetStyle.ShadowColor = MapColor(property.children[0], context)},
+                {"shadowtint", (targetStyle, property, context) => targetStyle.ShadowTint = MapColor(property.children[0], context)},
             };
 
         private static void MapAlignmentX(UIStyle targetStyle, PropertyNode property, StyleCompileContext context) {

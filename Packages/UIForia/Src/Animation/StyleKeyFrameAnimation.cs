@@ -156,7 +156,7 @@ namespace UIForia.Animation {
 
             float duration = options.duration.Value * 0.001f;
             float iterationTime = duration;
-            
+
             if (options.iterations.Value > 0) {
                 iterationTime /= options.iterations.Value;
             }
@@ -168,11 +168,11 @@ namespace UIForia.Animation {
 
             float targetProgress = progress;
             bool isReversed = options.direction.HasValue && options.direction.Value == AnimationDirection.Reverse;
-            
+
             if (isReversed) {
                 targetProgress = 1 - targetProgress;
             }
-            
+
             ProcessedKeyFrameGroup[] groups = processedFrameGroups.array;
             for (int i = 0; i < processedFrameGroups.Count; i++) {
                 StylePropertyId propertyId = groups[i].propertyId;
@@ -195,7 +195,7 @@ namespace UIForia.Animation {
                     prev = next;
                     next = tmp;
                 }
-                
+
                 float t = Mathf.Clamp01(Easing.Interpolate(MathUtil.PercentOfRange(targetProgress, prev.time, next.time), options.timingFunction.Value));
 
                 switch (propertyId) {
@@ -280,6 +280,9 @@ namespace UIForia.Animation {
                     }
 
                     case StylePropertyId.Opacity:
+                    case StylePropertyId.ShadowIntensity:
+                    case StylePropertyId.ShadowSizeX:
+                    case StylePropertyId.ShadowSizeY:
                     case StylePropertyId.TransformScaleX:
                     case StylePropertyId.TransformScaleY:
                     case StylePropertyId.TransformRotation:
@@ -297,6 +300,7 @@ namespace UIForia.Animation {
                         break;
                     }
 
+                    case StylePropertyId.ShadowOffsetX:
                     case StylePropertyId.AlignmentOffsetX: {
                         Rect viewRect = target.View.Viewport;
                         if (target.layoutBox != null) {
@@ -308,6 +312,7 @@ namespace UIForia.Animation {
                         break;
                     }
 
+                    case StylePropertyId.ShadowOffsetY:
                     case StylePropertyId.AlignmentOffsetY: {
                         Rect viewRect = target.View.Viewport;
                         if (target.layoutBox != null) {
@@ -351,6 +356,8 @@ namespace UIForia.Animation {
                     case StylePropertyId.BorderColorBottom:
                     case StylePropertyId.BorderColorLeft:
                     case StylePropertyId.BackgroundColor:
+                    case StylePropertyId.ShadowColor:
+                    case StylePropertyId.ShadowTint:
                     case StylePropertyId.TextColor: {
 //                        float v0 = ResolveHeightMeasurement(target, viewport, prev.value.IsCalculated
 //                            ? prev.value.Evaluate<UIMeasurement>(null)

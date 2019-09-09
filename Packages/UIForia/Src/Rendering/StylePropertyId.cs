@@ -138,10 +138,12 @@ namespace UIForia.Rendering {
         ShadowType = 1701,
         ShadowOffsetX = 1702,
         ShadowOffsetY = 1703,
-        ShadowSoftnessX = 1704,
-        ShadowSoftnessY = 1705,
+        ShadowSizeX = 1704,
+        ShadowSizeY = 1705,
         ShadowIntensity = 1706,
-        
+        ShadowColor = 1707,
+        ShadowTint = 1708,
+
         AlignmentDirectionX = 2001,
         AlignmentDirectionY = 2002,
         
@@ -161,6 +163,7 @@ namespace UIForia.Rendering {
         CornerBevelTopRight = 3002,
         CornerBevelBottomLeft = 3003,
         CornerBevelBottomRight = 3004,
+
 
     }
 

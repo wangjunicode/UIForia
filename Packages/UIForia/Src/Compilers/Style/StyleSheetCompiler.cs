@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using UIForia.Animation;
 using UIForia.Exceptions;
+using UIForia.Parsing.Expression.AstNodes;
 using UIForia.Parsing.Style.AstNodes;
 using UIForia.Rendering;
 using UIForia.Util;
@@ -147,7 +148,14 @@ namespace UIForia.Compilers.Style {
                     options.duration = (int) StylePropertyMappers.MapNumber(value, context);
                 }
                 else if (optionName == nameof(AnimationOptions.iterations)) {
-                    options.iterations = (int) StylePropertyMappers.MapNumber(value, context);
+                    if (value is StyleIdentifierNode identifierNode) {
+                        if (identifierNode.name.ToLower() == "infinite") {
+                            options.iterations = -1;
+                        }
+                    }
+                    else if (value is StyleLiteralNode) {
+                        options.iterations = (int) StylePropertyMappers.MapNumber(value, context);
+                    }
                 }
                 else if (optionName == nameof(AnimationOptions.loopTime)) {
                     options.loopTime = StylePropertyMappers.MapNumber(value, context);

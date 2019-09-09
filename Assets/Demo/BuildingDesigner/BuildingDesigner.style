@@ -84,11 +84,45 @@ style menu-map {
 style menu-item {
     FlexLayoutCrossAxisAlignment = Center;
     Margin = 0px 4px;
-    PreferredWidth = 74px;
+    PreferredWidth = 64px;
 }
 
-style menu-image {
-    BackgroundFit = Fill;
+style menu-image { 
+    ShadowColor = Red;
+    ShadowOffsetX = 0;
+    ShadowTint = White;
+    run animation(animshadow);
+//    ShadowSizeX = -25;
+//    ShadowSizeY = -25;
+}
+
+animation animshadow {
+    [options] {
+        Duration = 500;
+        Iterations = Infinite;
+        LoopType = PingPong;
+        TimingFunction = CircularEaseIn;
+    }
+    [keyframes] {
+        0% {
+            ShadowIntensity = 0;
+            ShadowColor = Red;
+        }
+        
+        50% {
+            ShadowIntensity = 200;
+            ShadowColor = Purple;
+            ShadowSizeX = 10;
+            ShadowSizeY = 10;
+        }
+        
+        100% {
+            ShadowIntensity = 100;
+            ShadowColor = Green;
+            ShadowSizeX = -10;
+            ShadowSizeY = -10;
+        }
+    }
 }
 
 style menu-label {

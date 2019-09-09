@@ -191,15 +191,6 @@ float4 UnpackColor(uint input) {
         uint((input >> 24) & 0xff) / float(0xff)
     );
 }
-float4 UnpackColorInt(int input) {
-    return float4(
-        int((input >> 0) & 0xff) / float(0xff),
-        int((input >> 8) & 0xff) / float(0xff),
-        int((input >> 16) & 0xff) / float(0xff),
-        1//int((input >> 24) & 0xff) / float(0xff)
-    );
-}
-
 
 inline int and(int a, int b) {
     return a * b;
@@ -547,7 +538,21 @@ inline fixed4 GetTextColor(half d, fixed4 faceColor, fixed4 outlineColor, half o
     return faceColor;
 }
 
-fixed4 SDFColor(SDFData sdfData, fixed4 borderColor, fixed4 contentColor, float distFromCenter) {
+float SDFRect2(SDFData sdfData) {
+    float halfStrokeWidth = sdfData.strokeWidth * 0.5;
+    
+    float2 size = sdfData.size;
+    float minSize = min(size.x, size.y);
+    float radius = clamp(minSize * 0.5, 0, minSize);
+    
+    float2 center = ((sdfData.uv.xy - 0.5) * size);
+    
+    float sdf = RectSDF(center, (size * 0.5) - halfStrokeWidth, radius - halfStrokeWidth);
+    return sdf;
+    return abs(sdf) - halfStrokeWidth;
+}
+
+fixed4 SDFColor(SDFData sdfData, fixed4 borderColor, fixed4 contentColor) {
     float halfStrokeWidth = sdfData.strokeWidth * 0.5;
     
     float2 size = sdfData.size;
@@ -561,7 +566,7 @@ fixed4 SDFColor(SDFData sdfData, fixed4 borderColor, fixed4 contentColor, float 
     }
      
     if(halfStrokeWidth == 0 || borderColor.a <= 0) { // if has border but border alpha is 0 might need to handle that 
-        halfStrokeWidth = 1;
+        halfStrokeWidth = 3;
         borderColor = contentColor;
     }
       

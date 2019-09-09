@@ -93,6 +93,9 @@ namespace UIForia.Rendering {
                     case StylePropertyId.ClipBehavior:
                         clipBehavior = property.AsClipBehavior;
                         break;
+                    case StylePropertyId.Visibility:
+                        visibility = property.AsVisibility;
+                        break;
                 }
             }
         }

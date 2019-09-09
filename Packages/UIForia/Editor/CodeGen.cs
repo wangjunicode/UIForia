@@ -194,12 +194,14 @@ namespace UIForia.Editor {
             new AnimatedPropertyGenerator<Color>(StylePropertyId.ScrollbarColor, Color.black),
 
             // Shadow
-            new PropertyGenerator<UnderlayType>(StylePropertyId.ShadowType, UnderlayType.Unset),
-            new AnimatedPropertyGenerator<float>(StylePropertyId.ShadowOffsetX, 0),
-            new AnimatedPropertyGenerator<float>(StylePropertyId.ShadowOffsetY, 0),
-            new AnimatedPropertyGenerator<float>(StylePropertyId.ShadowSoftnessX, 0.1f),
-            new AnimatedPropertyGenerator<float>(StylePropertyId.ShadowSoftnessY, 0.1f),
-            new AnimatedPropertyGenerator<float>(StylePropertyId.ShadowIntensity, 0.7f),
+//            new PropertyGenerator<UnderlayType>(StylePropertyId.ShadowType, UnderlayType.Unset),
+            new AnimatedPropertyGenerator<Color>(StylePropertyId.ShadowColor, ColorUtil.UnsetValue), 
+            new AnimatedPropertyGenerator<Color>(StylePropertyId.ShadowTint, ColorUtil.UnsetValue), 
+            new AnimatedPropertyGenerator<OffsetMeasurement>(StylePropertyId.ShadowOffsetX, 0),
+            new AnimatedPropertyGenerator<OffsetMeasurement>(StylePropertyId.ShadowOffsetY, 0),
+            new AnimatedPropertyGenerator<float>(StylePropertyId.ShadowSizeX, 0f),
+            new AnimatedPropertyGenerator<float>(StylePropertyId.ShadowSizeY, 0f),
+            new AnimatedPropertyGenerator<float>(StylePropertyId.ShadowIntensity, 10),
         };
 
         [MenuItem("UIForia/Regenerate Style Stuff")]

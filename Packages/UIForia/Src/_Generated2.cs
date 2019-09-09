@@ -1588,16 +1588,18 @@ case "visibility":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_UIMeasurement("ScrollbarSize", UIForia.Rendering.StylePropertyId.ScrollbarSize, targetState.state, Compile<UIForia.Rendering.UIMeasurement>(value, measurementSources));                
                 case "scrollbarcolor":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_Color("ScrollbarColor", UIForia.Rendering.StylePropertyId.ScrollbarColor, targetState.state, Compile<UnityEngine.Color>(value, colorSources));                
-                case "shadowtype":
-                    return new UIForia.Bindings.StyleBindings.StyleBinding_UnderlayType("ShadowType", UIForia.Rendering.StylePropertyId.ShadowType, targetState.state, Compile<UIForia.Rendering.UnderlayType>(value, s_EnumSource_UnderlayType));                
+                case "shadowcolor":
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_Color("ShadowColor", UIForia.Rendering.StylePropertyId.ShadowColor, targetState.state, Compile<UnityEngine.Color>(value, colorSources));                
+                case "shadowtint":
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_Color("ShadowTint", UIForia.Rendering.StylePropertyId.ShadowTint, targetState.state, Compile<UnityEngine.Color>(value, colorSources));                
                 case "shadowoffsetx":
-                    return new UIForia.Bindings.StyleBindings.StyleBinding_float("ShadowOffsetX", UIForia.Rendering.StylePropertyId.ShadowOffsetX, targetState.state, Compile<float>(value, null));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_OffsetMeasurement("ShadowOffsetX", UIForia.Rendering.StylePropertyId.ShadowOffsetX, targetState.state, Compile<UIForia.OffsetMeasurement>(value, null));                
                 case "shadowoffsety":
-                    return new UIForia.Bindings.StyleBindings.StyleBinding_float("ShadowOffsetY", UIForia.Rendering.StylePropertyId.ShadowOffsetY, targetState.state, Compile<float>(value, null));                
-                case "shadowsoftnessx":
-                    return new UIForia.Bindings.StyleBindings.StyleBinding_float("ShadowSoftnessX", UIForia.Rendering.StylePropertyId.ShadowSoftnessX, targetState.state, Compile<float>(value, null));                
-                case "shadowsoftnessy":
-                    return new UIForia.Bindings.StyleBindings.StyleBinding_float("ShadowSoftnessY", UIForia.Rendering.StylePropertyId.ShadowSoftnessY, targetState.state, Compile<float>(value, null));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_OffsetMeasurement("ShadowOffsetY", UIForia.Rendering.StylePropertyId.ShadowOffsetY, targetState.state, Compile<UIForia.OffsetMeasurement>(value, null));                
+                case "shadowsizex":
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_float("ShadowSizeX", UIForia.Rendering.StylePropertyId.ShadowSizeX, targetState.state, Compile<float>(value, null));                
+                case "shadowsizey":
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_float("ShadowSizeY", UIForia.Rendering.StylePropertyId.ShadowSizeY, targetState.state, Compile<float>(value, null));                
                 case "shadowintensity":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_float("ShadowIntensity", UIForia.Rendering.StylePropertyId.ShadowIntensity, targetState.state, Compile<float>(value, null));                
                 

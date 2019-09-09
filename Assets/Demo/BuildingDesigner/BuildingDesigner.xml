@@ -11,33 +11,38 @@
     <Using namespace="UIForia.Elements"/>
 
     <Contents>
-
         <Group style="menu-container">
 
             <Group style="menu-item">
-                <Image src="'Prototyping/icon__menu_chat'"/>
+                <Image style="menu-image" src="'Prototyping/icon__menu_chat'"/>
                 <Text style="menu-label">Construction</Text>
             </Group>
+            
             <Group style="menu-item">
-                <Image style="menu-image" src="'Prototyping/icon_plant_64'"/>
+                <Image src="'Prototyping/icon_plant_64'"/>
                 <Text style="menu-label">Construction</Text>
             </Group>
+            
             <Group style="menu-item">
                 <Image src="'Prototyping/icon__menu_build'"/>
                 <Text style="menu-label">Construction</Text>
             </Group>
+            
             <Group style="menu-item">
                 <Image src="'Prototyping/icon_chop_64'"/>
                 <Text style="menu-label">Construction</Text>
             </Group>
+            
             <Group style="menu-item">
                 <Image src="'Prototyping/icon__menu_schedule'"/>
                 <Text style="menu-label">Construction</Text>
             </Group>
+            
             <Group style="menu-item">
                 <Image src="'Prototyping/icon__menu_stockpile'"/>
                 <Text style="menu-label">Construction</Text>
             </Group>
+            
             <Group style="menu-item">
                 <Image src="'Prototyping/icon__menu_build'"/>
                 <Text style="menu-label">Construction</Text>

@@ -141,12 +141,13 @@ namespace UIForia.Rendering {
 		public static readonly string Scrollbar = "";
 		public static readonly UIMeasurement ScrollbarSize = new UIMeasurement(15f, UIMeasurementUnit.Pixel);
 		public static readonly Color ScrollbarColor = new Color(0f, 0f, 0f, 1f);
-		public const UnderlayType ShadowType = UIForia.Rendering.UnderlayType.Unset;
-		public const float ShadowOffsetX = 0f;
-		public const float ShadowOffsetY = 0f;
-		public const float ShadowSoftnessX = 0.1f;
-		public const float ShadowSoftnessY = 0.1f;
-		public const float ShadowIntensity = 0.7f;
+		public static readonly Color ShadowColor = new Color(-1f, -1f, -1f, -1f);
+		public static readonly Color ShadowTint = new Color(-1f, -1f, -1f, -1f);
+		public static readonly OffsetMeasurement ShadowOffsetX = new OffsetMeasurement(0f, OffsetMeasurementUnit.Pixel);
+		public static readonly OffsetMeasurement ShadowOffsetY = new OffsetMeasurement(0f, OffsetMeasurementUnit.Pixel);
+		public const float ShadowSizeX = 0f;
+		public const float ShadowSizeY = 0f;
+		public const float ShadowIntensity = 10f;
 		public static StyleProperty GetPropertyValue(StylePropertyId propertyId) {
 
 			switch(propertyId) {
@@ -404,18 +405,20 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.ScrollbarSize, new UIMeasurement(15f, UIMeasurementUnit.Pixel));
 				case StylePropertyId.ScrollbarColor:
 					 return new StyleProperty(StylePropertyId.ScrollbarColor, new Color(0f, 0f, 0f, 1f));
-				case StylePropertyId.ShadowType:
-					 return new StyleProperty(StylePropertyId.ShadowType, (int)UIForia.Rendering.UnderlayType.Unset);
+				case StylePropertyId.ShadowColor:
+					 return new StyleProperty(StylePropertyId.ShadowColor, new Color(-1f, -1f, -1f, -1f));
+				case StylePropertyId.ShadowTint:
+					 return new StyleProperty(StylePropertyId.ShadowTint, new Color(-1f, -1f, -1f, -1f));
 				case StylePropertyId.ShadowOffsetX:
-					 return new StyleProperty(StylePropertyId.ShadowOffsetX, 0f);
+					 return new StyleProperty(StylePropertyId.ShadowOffsetX, new OffsetMeasurement(0f, OffsetMeasurementUnit.Pixel));
 				case StylePropertyId.ShadowOffsetY:
-					 return new StyleProperty(StylePropertyId.ShadowOffsetY, 0f);
-				case StylePropertyId.ShadowSoftnessX:
-					 return new StyleProperty(StylePropertyId.ShadowSoftnessX, 0.1f);
-				case StylePropertyId.ShadowSoftnessY:
-					 return new StyleProperty(StylePropertyId.ShadowSoftnessY, 0.1f);
+					 return new StyleProperty(StylePropertyId.ShadowOffsetY, new OffsetMeasurement(0f, OffsetMeasurementUnit.Pixel));
+				case StylePropertyId.ShadowSizeX:
+					 return new StyleProperty(StylePropertyId.ShadowSizeX, 0f);
+				case StylePropertyId.ShadowSizeY:
+					 return new StyleProperty(StylePropertyId.ShadowSizeY, 0f);
 				case StylePropertyId.ShadowIntensity:
-					 return new StyleProperty(StylePropertyId.ShadowIntensity, 0.7f);
+					 return new StyleProperty(StylePropertyId.ShadowIntensity, 10f);
 				default: throw new System.ArgumentOutOfRangeException(nameof(propertyId), propertyId, null);
 				}
 } 

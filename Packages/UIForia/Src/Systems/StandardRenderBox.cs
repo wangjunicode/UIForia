@@ -9,6 +9,7 @@ using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
 using UnityEngine;
 using Vertigo;
+using ColorMode = SVGX.ColorMode;
 
 namespace UIForia.Rendering {
 
@@ -24,7 +25,7 @@ namespace UIForia.Rendering {
     }
 
     public class ImageRenderBox : StandardRenderBox {
-        
+
         private UIForiaGeometry imageGeometry;
 
         public override void OnInitialize() {
@@ -45,9 +46,12 @@ namespace UIForia.Rendering {
 
         protected bool geometryNeedsUpdate;
         protected bool dataNeedsUpdate;
+        protected bool shadowNeedsUpdate;
+        protected bool hasShadow;
         protected Size lastSize;
         protected GeometryRange range;
         protected UIForiaGeometry geometry;
+        protected UIForiaGeometry shadowGeometry;
 
         public StandardRenderBox() {
             this.uniqueId = "UIForia::StandardRenderBox";
@@ -62,30 +66,94 @@ namespace UIForia.Rendering {
             lastSize = new Size(-1, -1);
             geometryNeedsUpdate = true;
             dataNeedsUpdate = true;
+            shadowNeedsUpdate = true;
+        }
+
+        private void UpdateShadow() {
+            shadowGeometry = shadowGeometry ?? new UIForiaGeometry();
+            shadowGeometry.Clear();
+
+            Size size = element.layoutResult.actualSize;
+
+            float width = size.width;
+            float height = size.height;
+            float min = Mathf.Min(width, height);
+
+            float bevelTopLeft = ResolveFixedSize(element, min, element.style.CornerBevelTopLeft);
+            float bevelTopRight = ResolveFixedSize(element, min, element.style.CornerBevelTopRight);
+            float bevelBottomRight = ResolveFixedSize(element, min, element.style.CornerBevelBottomRight);
+            float bevelBottomLeft = ResolveFixedSize(element, min, element.style.CornerBevelBottomLeft);
+
+            float radiusTopLeft = ResolveFixedSize(element, min, element.style.BorderRadiusTopLeft);
+            float radiusTopRight = ResolveFixedSize(element, min, element.style.BorderRadiusTopRight);
+            float radiusBottomRight = ResolveFixedSize(element, min, element.style.BorderRadiusBottomRight);
+            float radiusBottomLeft = ResolveFixedSize(element, min, element.style.BorderRadiusBottomLeft);
+
+            if (radiusBottomLeft > 0 ||
+                radiusBottomRight > 0 ||
+                radiusTopLeft > 0 ||
+                radiusTopRight > 0 ||
+                bevelTopRight > 0 ||
+                bevelTopLeft > 0 ||
+                bevelBottomLeft > 0 ||
+                bevelBottomRight > 0) {
+                shadowGeometry.ClipCornerRect(size, new CornerDefinition() {
+                    topLeftX = bevelTopLeft,
+                    topLeftY = bevelTopLeft,
+                    topRightX = bevelTopRight,
+                    topRightY = bevelTopRight,
+                    bottomRightX = bevelBottomRight,
+                    bottomRightY = bevelBottomRight,
+                    bottomLeftX = bevelBottomLeft,
+                    bottomLeftY = bevelBottomLeft,
+                });
+            }
+            else {
+                shadowGeometry.FillRect(size.width, size.height);
+            }
         }
 
         public override void OnStylePropertyChanged(StructList<StyleProperty> propertyList) {
             StyleProperty[] properties = propertyList.array;
             int count = propertyList.size;
 
-            bool uvsDirty;
-            bool colorsDirty;
-            bool geometryDirty;
 
             for (int i = 0; i < count; i++) {
                 ref StyleProperty property = ref properties[i];
 
                 switch (property.propertyId) {
                     case StylePropertyId.BackgroundColor:
-                        break;
-
                     case StylePropertyId.BorderColorTop:
-
                     case StylePropertyId.BorderColorRight:
-
                     case StylePropertyId.BorderColorBottom:
-
                     case StylePropertyId.BorderColorLeft:
+                    case StylePropertyId.BackgroundImage:
+                    case StylePropertyId.BackgroundFit:
+                    case StylePropertyId.BorderRadiusBottomLeft:
+                    case StylePropertyId.BorderRadiusBottomRight:
+                    case StylePropertyId.BorderRadiusTopLeft:
+                    case StylePropertyId.BorderRadiusTopRight:
+                    case StylePropertyId.CornerBevelTopLeft:
+                    case StylePropertyId.CornerBevelTopRight:
+                    case StylePropertyId.CornerBevelBottomRight:
+                    case StylePropertyId.CornerBevelBottomLeft:
+                    case StylePropertyId.BackgroundImageScaleX:
+                    case StylePropertyId.BackgroundImageScaleY:
+                    case StylePropertyId.BackgroundImageRotation:
+                    case StylePropertyId.BackgroundImageTileX:
+                    case StylePropertyId.BackgroundImageTileY:
+                    case StylePropertyId.BackgroundImageOffsetX:
+                    case StylePropertyId.BackgroundImageOffsetY:
+                        dataNeedsUpdate = true;
+                        break;
+                    case StylePropertyId.ShadowColor:
+                    case StylePropertyId.ShadowTint:
+                    case StylePropertyId.ShadowOffsetX:
+                    case StylePropertyId.ShadowOffsetY:
+                    case StylePropertyId.ShadowSizeX:
+                    case StylePropertyId.ShadowSizeY:
+                    case StylePropertyId.ShadowIntensity:
+                        shadowNeedsUpdate = true;
                         break;
                 }
             }
@@ -119,16 +187,18 @@ namespace UIForia.Rendering {
                 bevelTopLeft > 0 ||
                 bevelBottomLeft > 0 ||
                 bevelBottomRight > 0) {
-                geometry.ClipCornerRect(new Size(width, height), new CornerDefinition() {
-                    topLeftX = bevelTopLeft,
-                    topLeftY = bevelTopLeft,
-                    topRightX = bevelTopRight,
-                    topRightY = bevelTopRight,
-                    bottomRightX = bevelBottomRight,
-                    bottomRightY = bevelBottomRight,
-                    bottomLeftX = bevelBottomLeft,
-                    bottomLeftY = bevelBottomLeft,
-                });
+//                geometry.ClipCornerRect(size, new CornerDefinition() {
+//                    topLeftX = bevelTopLeft,
+//                    topLeftY = bevelTopLeft,
+//                    topRightX = bevelTopRight,
+//                    topRightY = bevelTopRight,
+//                    bottomRightX = bevelBottomRight,
+//                    bottomRightY = bevelBottomRight,
+//                    bottomLeftX = bevelBottomLeft,
+//                    bottomLeftY = bevelBottomLeft,
+//                });
+                geometry.FillRect(size.width, size.height);
+
             }
             else {
                 geometry.FillRect(size.width, size.height);
@@ -205,15 +275,7 @@ namespace UIForia.Rendering {
             range = new GeometryRange(0, geometry.positionList.size, 0, geometry.triangleList.size);
         }
 
-        // todo move material update out of paint function
-        public override void PaintBackground(RenderContext ctx) {
-            Size newSize = element.layoutResult.actualSize;
-
-            if (geometryNeedsUpdate || (newSize != lastSize)) {
-                UpdateGeometry(newSize);
-                lastSize = newSize;
-            }
-
+        private void UpdateMaterialData() {
             Color backgroundColor = element.style.BackgroundColor;
             Color backgroundTint = element.style.BackgroundTint;
             Texture backgroundImage = element.style.BackgroundImage;
@@ -222,8 +284,7 @@ namespace UIForia.Rendering {
             Color32 borderColorRight = element.style.BorderColorRight;
             Color32 borderColorBottom = element.style.BorderColorBottom;
             Color32 borderColorLeft = element.style.BorderColorLeft;
-            
-            // todo -- border also 0
+
             if (backgroundColor.a <= 0 && backgroundImage == null) {
                 didRender = false;
                 if (borderColorTop.a <= 0 && borderColorRight.a <= 0 && borderColorLeft.a <= 0 && borderColorBottom.a <= 0) {
@@ -275,7 +336,7 @@ namespace UIForia.Rendering {
             byte b3 = (byte) (((borderRadiusBottomRight * 1000)) * 0.5f);
 
             float packedBorderRadii = VertigoUtil.BytesToFloat(b0, b1, b2, b3);
-            
+
             // HUGE FUCKING WARNING:
             // the following code is what I humbly refer to as: "Making C# my bitch"
             // Here's whats going on. We want to pass colors into the shader
@@ -289,11 +350,11 @@ namespace UIForia.Rendering {
             // 
             // the below major hack skips the type system entirely but just setting bytes directly in memory 
             // which the runtime never checks since we never assigned to a float value. Awesome!
-            
+
             Vector4 v = default;
-            
+
             unsafe {
-                Vector4 * vp = &v;
+                Vector4* vp = &v;
                 Color32* b = stackalloc Color32[4];
                 b[0] = borderColorTop;
                 b[1] = borderColorRight;
@@ -301,24 +362,73 @@ namespace UIForia.Rendering {
                 b[3] = borderColorLeft;
                 UnsafeUtility.MemCpy(vp, b, sizeof(Color32) * 4);
             }
-            
+
             geometry.miscData = v;
-            
+
             OffsetRect border = element.layoutResult.border;
 
             float borderLeftAndTop = VertigoUtil.PackSizeVector(border.left, border.top);
             float borderRightAndBottom = VertigoUtil.PackSizeVector(border.right, border.bottom);
 
             geometry.packedColors = new Color(packedBackgroundColor, packedBackgroundTint, borderLeftAndTop, borderRightAndBottom);
-            
-            int val = BitUtil.SetHighLowBits(0, (int)colorMode);
-            
-//            geometry.objectData = new Vector4((int) ShapeType.RoundedRect, VertigoUtil.PackSizeVector(element.layoutResult.actualSize), packedBorderRadii, val);
+
+            int val = BitUtil.SetHighLowBits((int)ShapeType.RoundedRect, (int) colorMode);
+
             geometry.objectData = new Vector4(val, VertigoUtil.PackSizeVector(element.layoutResult.actualSize), packedBorderRadii, element.style.Opacity);
             geometry.mainTexture = backgroundImage;
+        }
+
+        // todo move material update out of paint function
+        public override void PaintBackground(RenderContext ctx) {
+            Size newSize = element.layoutResult.actualSize;
+
+            if (geometryNeedsUpdate || (newSize != lastSize)) {
+                UpdateGeometry(newSize);
+                lastSize = newSize;
+            }
+
+            if (dataNeedsUpdate) {
+                UpdateMaterialData();
+                dataNeedsUpdate = false;
+            }
+
+            if (element.style.ShadowColor.a > 0) {
+                UIStyleSet style = element.style;
+                shadowGeometry = shadowGeometry ?? new UIForiaGeometry();
+                shadowGeometry.Clear();
+                int paintMode = (int) ((style.ShadowTint.a > 0) ? PaintMode.ShadowTint : PaintMode.Shadow);
+                Vector2 position = element.layoutResult.localPosition;
+                Vector2 size = element.layoutResult.actualSize + new Vector2(style.ShadowSizeX, style.ShadowSizeY) + new Vector2(style.ShadowIntensity, style.ShadowIntensity);
+                position -= new Vector2(style.ShadowSizeX, style.ShadowSizeY) * 0.5f;
+                position -= new Vector2(style.ShadowIntensity, style.ShadowIntensity) * 0.5f;
+           //     position += new Vector2(style.ShadowOffsetX, style.ShadowOffsetY);
+                float x = MeasurementUtil.ResolveOffsetMeasurement(element.layoutBox, element.View.Viewport.width, element.View.Viewport.height, style.ShadowOffsetX, element.layoutResult.actualSize.width);
+                float y = MeasurementUtil.ResolveOffsetMeasurement(element.layoutBox, element.View.Viewport.width, element.View.Viewport.height, style.ShadowOffsetY, element.layoutResult.actualSize.height);
+                position.x += x;
+                position.y += y;
+                shadowGeometry.mainTexture = null;
+                int val = BitUtil.SetHighLowBits((int)ShapeType.RoundedRect, paintMode);
+                shadowGeometry.objectData = geometry.objectData;
+                shadowGeometry.objectData.x = val;
+                shadowGeometry.objectData.y = VertigoUtil.PackSizeVector(size);
+                Vector4 v = default;
+
+                unsafe {
+                    Vector4* vp = &v;
+                    Color32* b = stackalloc Color32[2];
+                    b[0] = style.ShadowColor;
+                    b[1] = style.ShadowTint;
+                    UnsafeUtility.MemCpy(vp, b, sizeof(Color32) * 2);
+                    v.z = style.ShadowIntensity;
+                }
+
+                shadowGeometry.packedColors = v;
+                shadowGeometry.miscData = default;
+                shadowGeometry.FillRect(size.x, size.y, position);
+                ctx.DrawBatchedGeometry(shadowGeometry, new GeometryRange(shadowGeometry.positionList.size, shadowGeometry.triangleList.size), element.layoutResult.matrix.ToMatrix4x4(), clipper);    
+            }
 
             ctx.DrawBatchedGeometry(geometry, range, element.layoutResult.matrix.ToMatrix4x4(), clipper);
-            
         }
 
     }

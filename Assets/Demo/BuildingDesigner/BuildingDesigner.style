@@ -1,113 +1,51 @@
-export const lightButtonHover = rgba(235, 235, 230, 255);
-export const blackButtonHover = rgba(20, 20, 20, 255);
-export const lightBlue = rgb(0, 181, 217);
-export const darkTextColor = rgb(51, 51, 51);
-export const darkGrey = rgb(51, 51, 51);
-export const lightGrey = rgb(100, 100, 100);
-export const lighterGrey = rgb(153, 153, 153);
-export const mediumGreen = rgb(2, 209, 116);
-
-export const whiteHover = rgba(200, 200, 200, 255);
-export const whiteFocus = rgba(210, 210, 210, 255);
-export const whiteActive = rgba(150, 150, 150, 255);
-export const whiteDisabled = rgba(150, 150, 150, 255);
-
-export const warningRed = rgba(150, 20, 20, 120);
-export const warningRedBorder = rgba(150, 20, 20, 255);
-
-export const darkBackground = rgba(0, 0, 0, 200);
-export const cursorDefault = url("Client/UI/Sprites/Cursors/ui_mouse_cursor_default");
-export const cursorTextInput = url("Client/UI/Sprites/Cursors/ui_mouse_cursor_text_input");
-export const cursorBuildingModePaint = url("icons/modes/paint/paint-brush");
-export const cursorBuildingModeFill = url("icons/modes/paint/paint-fill");
-export const cursorBuildingModePick = url("icons/modes/paint/paint-pick");
-export const cursorBuildingModeSelection = url("Client/UI/Sprites/Cursors/ui_mouse_cursor_rect_marquee");
-export const cursorFarmMode = url("Client/UI/Sprites/Cursors/ui_mouse_cursor_rect_marquee");
-export const cursorMove = url("Client/UI/Sprites/Cursors/ui_mouse_cursor_move");
-export const cursorClickable = url("Client/UI/Sprites/Cursors/ui_mouse_cursor_blue");
-
-export const confirmColor = rgb(100, 205, 125);
-export const saveExitColor = rgb(85, 179, 213);
-export const cancelColor = rgb(255, 30, 30);
-
+import "Demo/Theme.style" as theme;
 const durationDialog = 500;
-
-export const fontInputSansCompressed = url("Fonts/InputSansCompressed-Regular SDF");
-export const fontInputSansCompressedBlack = url("Fonts/InputSansCompressed-Black SDF");
-export const fontInputSansMedium = url("Fonts/InputSans-Medium SDF");
-export const fontInputSansBold = url("Fonts/InputSans-Bold SDF");
-export const fontGothamNarrow = url("Fonts/GothamNarrow-Medium SDF");
-export const fontGothamRnd = url("Fonts/GothamRnd-Medium SDF");
-export const fontGothamLight = url("Fonts/Gotham-Light SDF");
-export const fontGothamRndBold = url("Fonts/GothamRnd-Bold SDF");
-export const fontGothamBold = url("Fonts/Gotham-Bold SDF");
-export const fontGothamBook = url("Fonts/Gotham-Book SDF");
-export const fontGothamMedium = url("Fonts/Gotham-Medium SDF");
-export const fontEuroBold = url("Fonts/EurostileLTPro-BoldEx2 SDF");
-export const fontEuro = url("Fonts/EurostileLTPro SDF");
-
 const topBarFramePad = 0.7em;
 const topBarTextSize = 12px;
 const iconSize = 30px;
 
-style confirm-color { BackgroundColor = @confirmColor; }
-style save-exit-color { BackgroundColor = @saveExitColor; }
-style cancel-color { BackgroundColor = @cancelColor; }
-style color-grey { BackgroundColor = @lightGrey; }
-
-style confirm-text-color { TextColor = @confirmColor; }
-style save-exit-text-color { TextColor = @saveExitColor; }
-style cancel-text-color { TextColor = @cancelColor; }
+animation show {
+    [options] {
+        duration = 200;
+    }
+    
+    [keyframes] {
+        100% { AlignY = 100%; }
+    }
+}
+animation hide {
+    [options] {
+        duration = 200;
+    }
+    
+    [keyframes] {
+        100% { AlignY = -800%; }
+    }
+}
 
 style <this> {
-    PreferredSize = 1pca;
-    BackgroundImage = url("gamebg");
-}
-
-style transclude {
-    LayoutBehavior = TranscludeChildren;
-}
-
-style menu-container {
-    AlignX = 100% Parent;
-    AlignY = 100% Parent;
+    Padding = 100px;
+    LayoutBehavior = Ignored;
     FlexLayoutDirection = Horizontal;
     FlexLayoutCrossAxisAlignment = End;
+    AlignX = 100% Parent;
+    AlignY = 100% Parent;
+    [attr:placement="show"] {
+        run animation(show);
+    }
+    [attr:placement="hide"] {
+        run animation(hide);
+    }
 }
 
-style menu-map {
-    PreferredSize = 192px;
-    BorderRadius = 50%;
-    Border = 7px;
-    BorderColor = Black;
-    BackgroundImage = url("image");
-    MarginBottom = 1em;
-    MarginRight = 1em;
-}
+style confirm-color { BackgroundColor = @theme.confirmColor; }
+style save-exit-color { BackgroundColor = @theme.saveExitColor; }
+style cancel-color { BackgroundColor = @theme.cancelColor; }
+style color-grey { BackgroundColor = @theme.lightGrey; }
 
-style weather {
-    PreferredSize = 50px;
-    BackgroundColor = Black;
-    BorderRadius = 50%;
-    LayoutBehavior = Ignored;
-    AlignmentOffsetX = -1w;
-    AlignmentOffsetY = 74px;
-    AlignmentBehaviorX = LayoutBox;
-    AlignmentBehaviorY = LayoutBox;
-    BackgroundImage = url("Sprites/StatusImageWeatherIconCloudy");
-    BackgroundFit = Contain;
-}
-
-style temp-gauge {
-   PreferredSize = 70px;
-    BackgroundColor = Black;
-    BorderRadius = 50%;
-    LayoutBehavior = Ignored;
-    AlignmentOffsetX = -0.8w;
-    AlignmentOffsetY = -32px;
-    AlignmentBehaviorX = LayoutBox;
-    AlignmentBehaviorY = LayoutBox;
-}
+style confirm-text-color { TextColor = @theme.confirmColor; }
+style save-exit-text-color { TextColor = @theme.saveExitColor; }
+style cancel-text-color { TextColor = @theme.cancelColor; }
 
 style fake-select {
     PreferredSize = 1cnt 48px;
@@ -152,10 +90,6 @@ style chevron-up {
     MarginTop = 1px;
     PreferredSize = 10px 6px;
     BackgroundImage = url("icons/ui_selectbox_up_chevron@2x");
-}
-
-style <this> {
-    Padding = 100px;    
 }
 
 style fake-select-chevron-holder {
@@ -236,13 +170,13 @@ style building-designer-root {
     
     BackgroundColor = rgb(255, 0, 0);
     
-    TextFontAsset = @fontGothamBold;
+    TextFontAsset = @theme.fontGothamBold;
     
     LayoutType = Grid;
     GridLayoutRowTemplate = 1mx 1mx 1fr;
     GridLayoutColTemplate = 1mx;
     GridLayoutColAlignment = Start;
-    Cursor = @cursorDefault;
+    Cursor = @theme.cursorDefault;
 }
 
 style select-height {
@@ -275,7 +209,7 @@ style building-designer-help {
 style building-designer-top-bar {
     BackgroundColor = rgb(239, 239, 239);
     
-    TextColor = @darkGrey;
+    TextColor = @theme.darkGrey;
     TextTransform = UpperCase;
     TextFontSize = 1.1em;
     

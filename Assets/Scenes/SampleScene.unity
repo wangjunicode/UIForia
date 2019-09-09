@@ -232,8 +232,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 35f2b5d632fd4d64b9acedec5215cda2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  typeName: Demo.BuildingDesigner.BuildingDesigner, Assembly-CSharp, Version=0.0.0.0,
-    Culture=neutral, PublicKeyToken=null
+  typeName: Demo.UIForiaDemoRoot, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+    PublicKeyToken=null
   camera: {fileID: 534669904}
   applicationId: Game App
   pos: {x: 200, y: 200}

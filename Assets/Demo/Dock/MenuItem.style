@@ -1,9 +1,11 @@
+import "Demo/Theme.style" as theme;
+
 animation go-up {
     [options] {
         duration = 200;
     }
     [keyframes] {
-        100% { TransformPositionY = -20px; }
+        100% { TransformPositionY = -10px; }
     }
 }
 
@@ -22,11 +24,30 @@ style <this> {
     PreferredWidth = 64px;
 }
 
+style notification-count {
+    PreferredWidth = 24px;
+    BackgroundColor = red;
+    BorderColor = white;
+    Border = 2px;
+    BorderRadius = 50%;
+    LayoutBehavior = Ignored;
+    TextColor = white;
+    FlexLayoutCrossAxisAlignment = Center;
+    FlexLayoutMainAxisAlignment = Center;
+   
+    AlignmentBehaviorX = Parent;
+    AlignmentBehaviorY = Parent;
+    AlignX = 110%;
+    AlignY = -5px 0;
+    
+}
+
 style menu-label {
     AlignY = 100% Parent;
     AlignX = 50%;
     TextColor = White;
     Visibility = Hidden;
+    PreferredHeight = 22px;
     [attr:show="true"] {
         Visibility = Visible;
     }
@@ -35,6 +56,7 @@ style menu-label {
 
 style menu-image { 
     run animation(go-down);
+    run animation(animshadow);
 
     [hover] {
         run animation(go-up);
@@ -43,10 +65,10 @@ style menu-image {
 
 animation animshadow {
     [options] {
-        Duration = 500;
+        Duration = 10000;
         Iterations = Infinite;
         LoopType = PingPong;
-        TimingFunction = CircularEaseIn;
+        TimingFunction = Linear;
     }
     [keyframes] {
         0% {

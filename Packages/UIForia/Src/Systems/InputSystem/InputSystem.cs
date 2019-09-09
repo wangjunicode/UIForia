@@ -222,6 +222,9 @@ namespace UIForia.Systems {
             if (!IsDragging) {
                 ProcessMouseEvents();
             }
+            else {
+                RunMouseEvents(m_ExitedElements, InputEventType.MouseExit);
+            }
 
             ProcessDragEvents();
 

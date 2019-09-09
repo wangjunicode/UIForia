@@ -1,7 +1,0 @@
-<UITemplate>
-    <Style path="Demo/BuildingDesigner/MenuItem.style" alias="designer-theme-root"/>
-    <Contents style="menu-item">
-        <Image x-id="image" src="ImageUrl" style="menu-image"/>
-        <Text x-id="label" style="menu-label">{Label}</Text>
-    </Contents>
-</UITemplate>

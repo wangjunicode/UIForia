@@ -1,0 +1,47 @@
+export const lightButtonHover = rgba(235, 235, 230, 255);
+export const blackButtonHover = rgba(20, 20, 20, 255);
+export const lightBlue = rgb(0, 181, 217);
+export const darkTextColor = rgb(51, 51, 51);
+export const darkGrey = rgb(51, 51, 51);
+export const lightGrey = rgb(100, 100, 100);
+export const lighterGrey = rgb(153, 153, 153);
+export const mediumGreen = rgb(2, 209, 116);
+
+export const whiteHover = rgba(200, 200, 200, 255);
+export const whiteFocus = rgba(210, 210, 210, 255);
+export const whiteActive = rgba(150, 150, 150, 255);
+export const whiteDisabled = rgba(150, 150, 150, 255);
+
+export const warningRed = rgba(150, 20, 20, 120);
+export const warningRedBorder = rgba(150, 20, 20, 255);
+
+export const darkBackground = rgba(0, 0, 0, 200);
+export const cursorDefault = url("Client/UI/Sprites/Cursors/ui_mouse_cursor_default");
+export const cursorTextInput = url("Client/UI/Sprites/Cursors/ui_mouse_cursor_text_input");
+export const cursorBuildingModePaint = url("icons/modes/paint/paint-brush");
+export const cursorBuildingModeFill = url("icons/modes/paint/paint-fill");
+export const cursorBuildingModePick = url("icons/modes/paint/paint-pick");
+export const cursorBuildingModeSelection = url("Client/UI/Sprites/Cursors/ui_mouse_cursor_rect_marquee");
+export const cursorFarmMode = url("Client/UI/Sprites/Cursors/ui_mouse_cursor_rect_marquee");
+export const cursorMove = url("Client/UI/Sprites/Cursors/ui_mouse_cursor_move");
+export const cursorClickable = url("Client/UI/Sprites/Cursors/ui_mouse_cursor_blue");
+
+export const confirmColor = rgb(100, 205, 125);
+export const saveExitColor = rgb(85, 179, 213);
+export const cancelColor = rgb(255, 30, 30);
+
+
+
+export const fontInputSansCompressed = url("Fonts/InputSansCompressed-Regular SDF");
+export const fontInputSansCompressedBlack = url("Fonts/InputSansCompressed-Black SDF");
+export const fontInputSansMedium = url("Fonts/InputSans-Medium SDF");
+export const fontInputSansBold = url("Fonts/InputSans-Bold SDF");
+export const fontGothamNarrow = url("Fonts/GothamNarrow-Medium SDF");
+export const fontGothamRnd = url("Fonts/GothamRnd-Medium SDF");
+export const fontGothamLight = url("Fonts/Gotham-Light SDF");
+export const fontGothamRndBold = url("Fonts/GothamRnd-Bold SDF");
+export const fontGothamBold = url("Fonts/Gotham-Bold SDF");
+export const fontGothamBook = url("Fonts/Gotham-Book SDF");
+export const fontGothamMedium = url("Fonts/Gotham-Medium SDF");
+export const fontEuroBold = url("Fonts/EurostileLTPro-BoldEx2 SDF");
+export const fontEuro = url("Fonts/EurostileLTPro SDF");

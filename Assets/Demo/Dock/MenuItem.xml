@@ -1,0 +1,10 @@
+<UITemplate>
+    <Style path="Demo/Dock/MenuItem.style" />
+    <Contents style="menu-item">
+        <Group x-id="image" style="menu-image" >
+            <Image  src="ImageUrl" />
+            <Group if="NotificationCount != 0" style="notification-count">{NotificationCount}</Group>
+        </Group>
+        <Text x-id="label" style="menu-label">{Label}</Text>
+    </Contents>
+</UITemplate>

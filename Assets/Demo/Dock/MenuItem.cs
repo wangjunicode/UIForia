@@ -2,14 +2,16 @@ using UIForia.Attributes;
 using UIForia.Elements;
 using UIForia.UIInput;
 
-namespace Demo.BuildingDesigner {
+namespace Demo {
 
-    [Template("Demo/BuildingDesigner/MenuItem.xml")]
+    [Template("Demo/Dock/MenuItem.xml")]
     public class MenuItem : UIElement {
 
         public string ImageUrl;
 
         public string Label;
+
+        public int NotificationCount;
 
         private UIElement label;
 
@@ -20,14 +22,11 @@ namespace Demo.BuildingDesigner {
         [OnMouseEnter()]
         public void OnEnter(MouseInputEvent evt) {
             label.SetAttribute("show", "true");
-            // label.style.SetTextColor(Color.red, StyleState.Normal);
         }
 
         [OnMouseExit()]
         public void OnMouseExit(MouseInputEvent evt) {
-            // label.style.SetTextColor(Color.white, StyleState.Normal);
             label.SetAttribute("show", null);
         }
-
     }
 }

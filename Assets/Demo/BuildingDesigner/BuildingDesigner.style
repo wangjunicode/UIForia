@@ -61,7 +61,7 @@ style cancel-text-color { TextColor = @cancelColor; }
 
 style <this> {
     PreferredSize = 1pca;
-    BackgroundImage = url("image");
+    BackgroundImage = url("gamebg");
 }
 
 style transclude {

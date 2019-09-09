@@ -1,8 +1,6 @@
 using UIForia.Attributes;
 using UIForia.Elements;
-using UIForia.Rendering;
 using UIForia.UIInput;
-using UnityEngine;
 
 namespace Demo.BuildingDesigner {
 
@@ -16,7 +14,7 @@ namespace Demo.BuildingDesigner {
         private UIElement label;
 
         public override void OnCreate() {
-            label = FindById("image");
+            label = FindById("label");
         }
 
         [OnMouseEnter()]

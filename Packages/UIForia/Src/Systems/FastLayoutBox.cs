@@ -94,72 +94,53 @@ namespace UIForia.Layout {
 
             if (firstChild == null) {
                 firstChild = child;
+                firstChild.nextSibling = null;
                 OnChildAdded(child, 0);
                 return;
             }
 
             FastLayoutBox ptr = firstChild;
-            FastLayoutBox trail = null;
             int idx = 0;
-
-            if (ptr == null) {
-                firstChild = child;
-                child.nextSibling = null;
-                OnChildAdded(child, 0);
-                return;
-            }
+            FastLayoutBox prev = null;
 
             while (ptr != null) {
-                if (ptr.element.parent == child.element.parent) {
-                    if (ptr.element.siblingIndex > child.element.siblingIndex) {
-                        child.nextSibling = ptr.nextSibling;
-                        ptr.nextSibling = child;
+
+                // Assuming the depth traversal index has been set correctly at this point:
+                // We're iterating the linked list from start to end. As soon as the the child's depthTraversalIndex is smaller than the current ptr's the traversal has to stop
+                // and then we know we hit one of two cases: this is the first iteration and the prev pointer is null, which means the child has to be prepended to the parent
+                // OR we have to insert the child between prev and ptr.
+                if (ptr.element.depthTraversalIndex > child.element.depthTraversalIndex) {
+                    if (prev == null) {
+                        firstChild = child;
+                        child.nextSibling = ptr;
+                        OnChildAdded(child, 0);
+                    }
+                    else {
+                        prev.nextSibling = child;
+                        child.nextSibling = ptr;
                         OnChildAdded(child, idx);
-                        return;
                     }
-                } else {
-                    if (ptr.element.parent.depth == child.element.parent.depth) {
-                        // find common parent, compare sibling index
-                        UIElement left = ptr.element.parent;
-                        UIElement right = child.element.parent;
-                        bool loop = true;
-                        while (loop) {
-                            if (left.parent == right.parent) {
-                                if (left.siblingIndex > right.siblingIndex) {
-                                    child.nextSibling = ptr.nextSibling;
-                                    ptr.nextSibling = child;
-                                    OnChildAdded(child, idx);
-                                }
-                                break;
-                            }
-                            left = left.parent;
-                            right = right.parent;
-                        }
-                        
-                    } else {
-                        if (ptr.element.depth > child.element.depth) {
-                            child.nextSibling = ptr.nextSibling;
-                            ptr.nextSibling = child;
-                            OnChildAdded(child, idx);
-                            return;
-                        }
-                    }
+
+                    break;
                 }
 
-                trail = ptr;
-                ptr = ptr.nextSibling;
+                // Ok, in this case we did not yet hit 
                 idx++;
 
-                if (idx > 1000) {
+                if (ptr.nextSibling == null) {
+                    ptr.nextSibling = child;
+                    child.nextSibling = null;
+                    OnChildAdded(child, idx);
+                    break;
+                }
+
+                prev = ptr;
+                ptr = ptr.nextSibling;
+
+                if (idx > 10000) {
                     throw new Exception("fail layout");
                 }
             }
-
-            child.nextSibling = null;
-            trail.nextSibling = child;
-            OnChildAdded(child, idx);
-
-            //todo this always add to end, we actually want an insert 
         }
 
         public virtual void RemoveChild(FastLayoutBox child) {

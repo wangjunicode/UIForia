@@ -111,6 +111,8 @@ namespace UIForia.Elements {
         internal FastLayoutBox layoutBox;
         internal RenderBox renderBox;
 
+        internal int depthTraversalIndex;
+
         public UIView View { get; internal set; }
 
         protected internal UIElement() {

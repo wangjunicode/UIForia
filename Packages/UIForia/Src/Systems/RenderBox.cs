@@ -70,6 +70,7 @@ namespace UIForia.Rendering {
             zIndex = element.style.ZIndex;
             layer = element.style.Layer;
             clipBehavior = element.style.ClipBehavior;
+            visibility = element.style.Visibility;
         }
 
         public virtual void OnDestroy() { }

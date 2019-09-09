@@ -1,0 +1,72 @@
+animation go-up {
+    [options] {
+        duration = 200;
+    }
+    [keyframes] {
+        100% { TransformPositionY = -20px; }
+    }
+}
+
+animation go-down {
+    [options] {
+        duration = 200;
+    }
+    [keyframes] {
+        100% { TransformPositionY = 0; }
+    }
+}
+
+style <this> {
+    FlexLayoutCrossAxisAlignment = Center;
+    Margin = 0 4px;
+    PreferredWidth = 64px;
+}
+
+style menu-label {
+    AlignY = 100% Parent;
+    AlignX = 50%;
+    TextColor = White;
+    Visibility = Hidden;
+    [attr:show="true"] {
+        Visibility = Visible;
+        TextColor = red;
+    }
+}
+
+
+style menu-image { 
+    run animation(go-down);
+
+    [hover] {
+        run animation(go-up);
+    }
+}
+
+animation animshadow {
+    [options] {
+        Duration = 500;
+        Iterations = Infinite;
+        LoopType = PingPong;
+        TimingFunction = CircularEaseIn;
+    }
+    [keyframes] {
+        0% {
+            ShadowIntensity = 0;
+            ShadowColor = Red;
+        }
+        
+        50% {
+            ShadowIntensity = 200;
+            ShadowColor = Purple;
+            ShadowSizeX = 10;
+            ShadowSizeY = 10;
+        }
+        
+        100% {
+            ShadowIntensity = 100;
+            ShadowColor = Green;
+            ShadowSizeX = -10;
+            ShadowSizeY = -10;
+        }
+    }
+}

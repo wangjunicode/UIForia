@@ -392,9 +392,7 @@ namespace UIForia.Rendering {
                 dataNeedsUpdate = false;
             }
 
-            if (!didRender) {
-                return;
-            }
+        
 
             if (element.style.ShadowColor.a > 0) {
                 UIStyleSet style = element.style;
@@ -431,6 +429,10 @@ namespace UIForia.Rendering {
                 ctx.DrawBatchedGeometry(shadowGeometry, new GeometryRange(shadowGeometry.positionList.size, shadowGeometry.triangleList.size), element.layoutResult.matrix.ToMatrix4x4(), clipper);    
             }
 
+            if (!didRender) {
+                return;
+            }
+            
             ctx.DrawBatchedGeometry(geometry, range, element.layoutResult.matrix.ToMatrix4x4(), clipper);
         }
 

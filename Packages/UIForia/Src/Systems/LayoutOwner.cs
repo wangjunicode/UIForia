@@ -493,7 +493,9 @@ namespace UIForia.Layout {
 
             for (int i = 0; i < enabledBoxList.size; i++) {
                 UIElement element = layoutDatas[i].element;
-
+                        
+                if (element.style.Visibility == Visibility.Hidden) continue;
+                
                 // todo -- convert to flag 
                 if (element is IPointerQueryHandler handler) {
                     if (!handler.ContainsPoint(point)) {

@@ -48,6 +48,11 @@ style menu-label {
     TextColor = White;
     Visibility = Hidden;
     PreferredHeight = 22px;
+    TextUnderlayColor = black;
+    TextUnderlayDilate = 1;
+    TextUnderlayOffsetX = 0.1;
+    TextUnderlayOffsetY = 0.4;
+     
     [attr:show="true"] {
         Visibility = Visible;
     }

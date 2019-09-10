@@ -68,56 +68,13 @@ namespace UIForia.Rendering {
             dataNeedsUpdate = true;
             shadowNeedsUpdate = true;
         }
-
-        private void UpdateShadow() {
-            shadowGeometry = shadowGeometry ?? new UIForiaGeometry();
-            shadowGeometry.Clear();
-
-            Size size = element.layoutResult.actualSize;
-
-            float width = size.width;
-            float height = size.height;
-            float min = Mathf.Min(width, height);
-
-            float bevelTopLeft = ResolveFixedSize(element, min, element.style.CornerBevelTopLeft);
-            float bevelTopRight = ResolveFixedSize(element, min, element.style.CornerBevelTopRight);
-            float bevelBottomRight = ResolveFixedSize(element, min, element.style.CornerBevelBottomRight);
-            float bevelBottomLeft = ResolveFixedSize(element, min, element.style.CornerBevelBottomLeft);
-
-            float radiusTopLeft = ResolveFixedSize(element, min, element.style.BorderRadiusTopLeft);
-            float radiusTopRight = ResolveFixedSize(element, min, element.style.BorderRadiusTopRight);
-            float radiusBottomRight = ResolveFixedSize(element, min, element.style.BorderRadiusBottomRight);
-            float radiusBottomLeft = ResolveFixedSize(element, min, element.style.BorderRadiusBottomLeft);
-
-            if (radiusBottomLeft > 0 ||
-                radiusBottomRight > 0 ||
-                radiusTopLeft > 0 ||
-                radiusTopRight > 0 ||
-                bevelTopRight > 0 ||
-                bevelTopLeft > 0 ||
-                bevelBottomLeft > 0 ||
-                bevelBottomRight > 0) {
-                shadowGeometry.ClipCornerRect(size, new CornerDefinition() {
-                    topLeftX = bevelTopLeft,
-                    topLeftY = bevelTopLeft,
-                    topRightX = bevelTopRight,
-                    topRightY = bevelTopRight,
-                    bottomRightX = bevelBottomRight,
-                    bottomRightY = bevelBottomRight,
-                    bottomLeftX = bevelBottomLeft,
-                    bottomLeftY = bevelBottomLeft,
-                });
-            }
-            else {
-                shadowGeometry.FillRect(size.width, size.height);
-            }
-        }
-
+        
         public override void OnStylePropertyChanged(StructList<StyleProperty> propertyList) {
             StyleProperty[] properties = propertyList.array;
             int count = propertyList.size;
 
-
+            base.OnStylePropertyChanged(propertyList);
+            
             for (int i = 0; i < count; i++) {
                 ref StyleProperty property = ref properties[i];
 
@@ -144,6 +101,7 @@ namespace UIForia.Rendering {
                     case StylePropertyId.BackgroundImageTileY:
                     case StylePropertyId.BackgroundImageOffsetX:
                     case StylePropertyId.BackgroundImageOffsetY:
+                        case StylePropertyId.BackgroundTint:
                         dataNeedsUpdate = true;
                         break;
                     case StylePropertyId.ShadowColor:
@@ -161,7 +119,7 @@ namespace UIForia.Rendering {
 
         private void UpdateGeometry(in Size size) {
             geometryNeedsUpdate = false;
-
+            dataNeedsUpdate = true;
             geometry.Clear();
 
             float width = size.width;
@@ -391,8 +349,6 @@ namespace UIForia.Rendering {
                 UpdateMaterialData();
                 dataNeedsUpdate = false;
             }
-
-        
 
             if (element.style.ShadowColor.a > 0) {
                 UIStyleSet style = element.style;

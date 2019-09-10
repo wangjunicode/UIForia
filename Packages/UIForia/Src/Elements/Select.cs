@@ -49,7 +49,7 @@ namespace UIForia.Elements {
 
         public bool selecting = false;
         internal UIChildrenElement childrenElement;
-        internal ScrollView optionList;
+        internal UIElement optionList;
 
         [WriteBinding(nameof(selectedValue))]
         public event Action<T> onValueChanged;
@@ -133,7 +133,7 @@ namespace UIForia.Elements {
             onClear = OnClear;
             onRemove = OnRemove;
             childrenElement = FindById<UIChildrenElement>("option-children");
-            optionList = FindById<ScrollView>("option-list");
+            optionList = FindById<UIElement>("option-list");
 
             Application.InputSystem.RegisterFocusable(this);
 
@@ -186,7 +186,8 @@ namespace UIForia.Elements {
 
             if (selecting) {
                 AdjustOptionPosition();
-            }    
+            }
+            optionList.style.SetVisibility(selecting ? Visibility.Visible : Visibility.Hidden, StyleState.Normal);
         }
 
         private void SetSelectedValue(int index) {
@@ -365,8 +366,7 @@ namespace UIForia.Elements {
                 offset += childrenArray[i].layoutResult.ActualHeight;
             }
 
-            optionList.style.SetTransformPositionY(-Math.Min(maxOffset, Math.Max(offset, minOffset)), StyleState.Normal);
-            optionList.style.SetTransformBehaviorY(TransformBehavior.AnchorMinOffset, StyleState.Normal);
+            // optionList.style.SetTransformPositionY(-Math.Min(maxOffset, Math.Max(offset, minOffset)), StyleState.Normal);
         }
 
         public void SelectElement(MouseInputEvent evt) {

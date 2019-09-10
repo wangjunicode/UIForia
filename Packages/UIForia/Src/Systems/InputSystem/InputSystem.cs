@@ -1019,7 +1019,7 @@ namespace UIForia.Systems {
             MouseInputEvent mouseEvent = new MouseInputEvent(m_EventPropagator, eventType, modifiersThisFrame);
             m_CurrentMouseEvent = mouseEvent;
 
-            for (int i = 0; i < elements.Count; i++) {
+            for (int i = elements.Count - 1; i >= 0; i--) {
                 UIElement element = elements[i];
                 if (element.isDestroyed || element.isDisabled) {
                     continue;
@@ -1119,7 +1119,7 @@ namespace UIForia.Systems {
                 return;
             }
 
-            UIElement ptr = m_ElementsThisFrame[0];
+            UIElement ptr = m_ElementsThisFrame[m_ElementsThisFrame.Count - 1];
             while (ptr != null) {
                 if (ptr == m_FocusedElement) {
                     return;

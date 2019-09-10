@@ -42,20 +42,14 @@ namespace UIForia.Editor {
         private static readonly GUIContent s_Content = new GUIContent();
         private static readonly StylePropertyIdComparer s_StyleCompare = new StylePropertyIdComparer();
 
-        private static readonly Dictionary<Type, ValueTuple<int[], GUIContent[]>> m_EnumValueMap =
-            new Dictionary<Type, ValueTuple<int[], GUIContent[]>>();
+        private static readonly Dictionary<Type, ValueTuple<int[], GUIContent[]>> m_EnumValueMap = new Dictionary<Type, ValueTuple<int[], GUIContent[]>>();
 
         private Mesh mesh;
         private Material material;
         private int tab;
         private Application app;
 
-        public static readonly string[] s_TabNames = {
-            "Element",
-            "Applied Styles",
-            "Computed Style",
-            "Settings"
-        };
+        public static readonly string[] s_TabNames = {"Element", "Applied Styles", "Computed Style", "Settings"};
 
         public void Update() {
             if (!EditorApplication.isPlaying) {
@@ -64,12 +58,12 @@ namespace UIForia.Editor {
 
             if (app != UIForiaHierarchyWindow.s_SelectedApplication) {
                 if (app != null) {
-                    app.RenderSystem.DrawDebugOverlay -= DrawDebugOverlay;
+                    app.RenderSystem.DrawDebugOverlay2 -= DrawDebugOverlay;
                 }
 
                 app = UIForiaHierarchyWindow.s_SelectedApplication;
                 if (app != null) {
-                    app.RenderSystem.DrawDebugOverlay += DrawDebugOverlay;
+                    app.RenderSystem.DrawDebugOverlay2 += DrawDebugOverlay;
                 }
 
                 m_ExpandedMap.Clear();
@@ -140,7 +134,7 @@ namespace UIForia.Editor {
             else {
                 selectedElement.flags &= ~UIElementFlags.DebugLayout;
             }
-            
+
             GUILayout.BeginHorizontal();
             DrawStyleStateButton("Hover", StyleState.Hover);
             DrawStyleStateButton("Focus", StyleState.Focused);
@@ -188,31 +182,32 @@ namespace UIForia.Editor {
             }
 
             if (showComputedSources) {
-                properties.Sort((a, b) => {
-                    if (a.Item1 == b.Item1) return 0;
+                properties.Sort(
+                        (a, b) => {
+                            if (a.Item1 == b.Item1) return 0;
 
-                    bool aInstance = a.Item1.Contains("Instance");
-                    bool bInstance = b.Item1.Contains("Instance");
+                            bool aInstance = a.Item1.Contains("Instance");
+                            bool bInstance = b.Item1.Contains("Instance");
 
-                    if (aInstance && bInstance) {
-                        return string.Compare(a.Item1, b.Item1, StringComparison.Ordinal);
-                    }
+                            if (aInstance && bInstance) {
+                                return string.Compare(a.Item1, b.Item1, StringComparison.Ordinal);
+                            }
 
-                    if (aInstance) return -1;
-                    if (bInstance) return 1;
+                            if (aInstance) return -1;
+                            if (bInstance) return 1;
 
-                    bool aDefault = a.Item1.Contains("Default");
-                    bool bDefault = b.Item1.Contains("Default");
+                            bool aDefault = a.Item1.Contains("Default");
+                            bool bDefault = b.Item1.Contains("Default");
 
-                    if (aDefault && bDefault) {
-                        return string.Compare(a.Item1, b.Item1, StringComparison.Ordinal);
-                    }
+                            if (aDefault && bDefault) {
+                                return string.Compare(a.Item1, b.Item1, StringComparison.Ordinal);
+                            }
 
-                    if (aDefault) return 1;
-                    if (bDefault) return -1;
+                            if (aDefault) return 1;
+                            if (bDefault) return -1;
 
-                    return string.Compare(a.Item1, b.Item1, StringComparison.Ordinal);
-                });
+                            return string.Compare(a.Item1, b.Item1, StringComparison.Ordinal);
+                        });
 
                 GUILayout.Space(10);
                 string currentSource = properties[0].Item1;
@@ -246,14 +241,29 @@ namespace UIForia.Editor {
             }
         }
 
-        private void DrawDebugOverlay(ImmediateRenderContext ctx) {
+        private Path2D path = new Path2D();
+
+        private void DrawHorizontalDotted(float y) {
+            // path.BeginPath();
+            // path.SetStrokeWidth(3);
+            // path.SetStroke(Color.red);
+            // float x = 0;
+            // while (x < Screen.width + 5) {
+            //     path.MoveTo(x, y);
+            //     path.LineTo(x + 5, y);
+            //     x += 8;
+            // }
+            // path.EndPath();
+            // path.Stroke();
+        }
+        
+        private void DrawDebugOverlay(RenderContext ctx) {
             if (!drawDebugBox) return;
-            ctx.DisableScissorRect();
-            ctx.SetFillOpacity(1);
-            ctx.SetStrokeOpacity(1);
-            if (material == null) {
-                material = new Material(Resources.Load<Material>("UIForia/Materials/UIForiaDebug"));
-            }
+            // path.DisableScissorRect();
+            path.SetFillOpacity(1);
+            path.SetStrokeOpacity(1);
+
+            path.Clear();
 
             if (selectedElement != null) {
                 // RenderData data = drawList.Find((d) => d.element == selectedElement);
@@ -273,140 +283,109 @@ namespace UIForia.Editor {
                 float width = result.actualSize.width;
                 float height = result.actualSize.height;
 
-                Size renderSize = new Size(
-                    width + margin.left + margin.right,
-                    height + margin.top + margin.bottom
-                );
-
-                material.SetVector(s_SizeKey, new Vector4(renderSize.width, renderSize.height, 0, 0));
-                material.SetColor(s_ContentColorKey, contentColor);
-                material.SetColor(s_PaddingColorKey, paddingColor);
-                material.SetColor(s_BorderColorKey, borderColor);
-                material.SetColor(s_MarginColorKey, marginColor);
-
-                mesh = MeshUtil.ResizeStandardUIMesh(mesh, renderSize);
-
-                material.SetVector(s_MarginRectKey, new Vector4(
-                     width + margin.right + margin.left, height + margin.top + margin.bottom
-                ));
-
-                material.SetVector(s_BorderRectKey, new Vector4(
-                    margin.left,
-                    margin.top,
-                    renderSize.width - margin.Horizontal,
-                    renderSize.height - margin.Vertical
-                ));
-
-                material.SetVector(s_PaddingRectKey, new Vector4(
-                    margin.left + border.left,
-                    margin.top + border.top,
-                    renderSize.width - margin.Horizontal - border.Horizontal,
-                    renderSize.height - margin.Vertical - border.Vertical
-                ));
-
-                material.SetVector(s_ContentRectKey, new Vector4(
-                    margin.left + border.left + padding.left,
-                    margin.top + border.top + padding.top,
-                    renderSize.width - margin.Horizontal - border.Horizontal - padding.Horizontal,
-                    renderSize.height - margin.Vertical - border.Vertical - padding.Vertical
-                ));
+                Size renderSize = new Size(width + margin.left + margin.right, height + margin.top + margin.bottom);
 
                 float x = result.screenPosition.x;
                 float y = result.screenPosition.y;
 
-                ctx.DisableScissorRect();
-                ctx.SetTransform(SVGXMatrix.identity);
-                ctx.SetFill(contentColor);
+                // ctx.DisableScissorRect();
+                path.SetFill(contentColor);
                 float contentX = (result.screenPosition.x) + border.left + padding.left;
                 float contentY = (result.screenPosition.y) + border.top + padding.top;
                 float contentWidth = result.actualSize.width - border.Horizontal - padding.Horizontal;
                 float contentHeight = result.actualSize.height - border.Vertical - padding.Vertical;
-                float allocatedWidth = result.allocatedSize.width - border.Horizontal - padding.Horizontal;
-                float allocatedHeight = result.allocatedSize.height - border.Vertical - padding.Vertical;
-                ctx.FillRect(contentX, contentY, contentWidth, contentHeight);
+               // float actualWidth = result.allocatedSize.width - border.Horizontal - padding.Horizontal;
+               // float allocatedHeight = result.allocatedSize.height - border.Vertical - padding.Vertical;
+                path.BeginPath();
+                path.Rect(contentX, contentY, contentWidth, contentHeight);
+                path.Fill();
                 
-                ctx.SetFill(allocatedContentColor);
-                ctx.FillRect(contentX, contentY, allocatedWidth, allocatedHeight);
-
+                path.SetFill(allocatedContentColor);
+                path.BeginPath();
+                path.Rect(contentX, contentY, contentWidth, contentHeight);
+                path.Fill();
                 float paddingHorizontalWidth = width - padding.Horizontal - border.left;
                 float paddingVerticalHeight = height - border.Vertical;
 
-                ctx.SetFill(paddingColor);
+                path.SetFill(paddingColor);
                 if (padding.top > 0) {
-                    ctx.BeginPath();
-                    ctx.Rect(x + padding.left + border.left, y + border.top, paddingHorizontalWidth, padding.top);
-                    ctx.Fill();
+                    path.BeginPath();
+                    path.Rect(x + padding.left + border.left, y + border.top, paddingHorizontalWidth, padding.top);
+                    path.Fill();
                 }
 
                 if (padding.right > 0) {
-                    ctx.BeginPath();
-                    ctx.Rect(x + width - padding.right - border.right, y + border.top, padding.right, paddingVerticalHeight);
-                    ctx.Fill();
+                    path.BeginPath();
+                    path.Rect(x + width - padding.right - border.right, y + border.top, padding.right, paddingVerticalHeight);
+                    path.Fill();
                 }
 
                 if (padding.left > 0) {
-                    ctx.BeginPath();
-                    ctx.Rect(x + border.left, y + border.top, padding.left, paddingVerticalHeight);
-                    ctx.Fill();
+                    path.BeginPath();
+                    path.Rect(x + border.left, y + border.top, padding.left, paddingVerticalHeight);
+                    path.Fill();
                 }
 
                 if (padding.bottom > 0) {
-                    ctx.BeginPath();
-                    ctx.Rect(x + border.left + padding.left, y - border.top + height - padding.bottom, paddingHorizontalWidth, padding.bottom);
-                    ctx.Fill();
+                    path.BeginPath();
+                    path.Rect(x + border.left + padding.left, y - border.top + height - padding.bottom, paddingHorizontalWidth, padding.bottom);
+                    path.Fill();
                 }
 
-                ctx.SetFill(borderColor);
+                path.SetFill(borderColor);
 
                 if (border.top > 0) {
-                    ctx.BeginPath();
-                    ctx.Rect(x + border.left, y, width - border.Horizontal, border.top);
-                    ctx.Fill();
+                    path.BeginPath();
+                    path.Rect(x + border.left, y, width - border.Horizontal, border.top);
+                    path.Fill();
                 }
 
                 if (border.right > 0) {
-                    ctx.BeginPath();
-                    ctx.Rect(x + width - border.right, y, border.right, height);
-                    ctx.Fill();
+                    path.BeginPath();
+                    path.Rect(x + width - border.right, y, border.right, height);
+                    path.Fill();
                 }
 
                 if (border.left > 0) {
-                    ctx.BeginPath();
-                    ctx.Rect(x, y, border.left, height);
-                    ctx.Fill();
+                    path.BeginPath();
+                    path.Rect(x, y, border.left, height);
+                    path.Fill();
                 }
 
                 if (border.bottom > 0) {
-                    ctx.BeginPath();
-                    ctx.Rect(x + border.left, y + height - border.bottom, width - border.Horizontal, border.bottom);
-                    ctx.Fill();
+                    path.BeginPath();
+                    path.Rect(x + border.left, y + height - border.bottom, width - border.Horizontal, border.bottom);
+                    path.Fill();
                 }
 
-                ctx.SetFill(marginColor);
+                path.SetFill(marginColor);
                 if (margin.left > 0) {
-                    ctx.BeginPath();
-                    ctx.Rect(x - margin.left, y, margin.left, height);
-                    ctx.Fill();
+                    path.BeginPath();
+                    path.Rect(x - margin.left, y, margin.left, height);
+                    path.Fill();
                 }
 
                 if (margin.right > 0) {
-                    ctx.BeginPath();
-                    ctx.Rect(x + width, y, margin.right, height);
-                    ctx.Fill();
+                    path.BeginPath();
+                    path.Rect(x + width, y, margin.right, height);
+                    path.Fill();
                 }
 
                 if (margin.top > 0) {
-                    ctx.BeginPath();
-                    ctx.Rect(x - margin.left, y - margin.top, width + margin.Horizontal, margin.top);
-                    ctx.Fill();
+                    path.BeginPath();
+                    path.Rect(x - margin.left, y - margin.top, width + margin.Horizontal, margin.top);
+                    path.Fill();
                 }
 
                 if (margin.bottom > 0) {
-                    ctx.BeginPath();
-                    ctx.Rect(x - margin.left, y + height, width + margin.Horizontal, margin.bottom);
-                    ctx.Fill();
+                    path.BeginPath();
+                    path.Rect(x - margin.left, y + height, width + margin.Horizontal, margin.bottom);
+                    path.Fill();
                 }
-                
+                DrawHorizontalDotted(300);
+
+                ctx.DrawPath(path);
+
                 if (selectedElement.style.LayoutType != LayoutType.Grid) {
                     return;
                 }
@@ -417,25 +396,27 @@ namespace UIForia.Editor {
 
                 Rect contentRect = selectedElement.layoutResult.ContentRect;
 
-                ctx.SetTransform(SVGXMatrix.TRS(selectedElement.layoutResult.screenPosition + selectedElement.layoutResult.ContentRect.min, 0, Vector2.one));
-                ctx.BeginPath();
-                ctx.SetStrokeWidth(1);
-                ctx.SetStroke(Color.black);
+                path.SetTransform(SVGXMatrix.TRS(selectedElement.layoutResult.screenPosition + selectedElement.layoutResult.ContentRect.min, 0, Vector2.one).ToMatrix4x4());
+                path.BeginPath();
+                path.SetStrokeWidth(1);
+                path.SetStroke(Color.black);
 
                 StructList<GridTrack> rows = layoutBox.GetRowTracks();
                 StructList<GridTrack> cols = layoutBox.GetColTracks();
 
                 for (int i = 0; i < rows.Count; i++) {
-                    ctx.MoveTo(0, rows[i].position);
-                    ctx.LineTo(contentRect.width, rows[i].position);
+                    path.MoveTo(0, rows[i].position);
+                    path.LineTo(contentRect.width, rows[i].position);
                 }
 
                 for (int i = 0; i < cols.Count; i++) {
-                    ctx.MoveTo(cols[i].position, 0);
-                    ctx.LineTo(cols[i].position, contentRect.height);
+                    path.MoveTo(cols[i].position, 0);
+                    path.LineTo(cols[i].position, contentRect.height);
                 }
 
-                ctx.Stroke();
+                path.Stroke();
+
+                
             }
         }
 
@@ -480,8 +461,7 @@ namespace UIForia.Editor {
 
             if (descenderColor != newDescenderColor) {
                 descenderColor = newDescenderColor;
-                EditorPrefs.SetString("UIForia.Inspector.DescenderColor",
-                    ColorUtility.ToHtmlStringRGBA(descenderColor));
+                EditorPrefs.SetString("UIForia.Inspector.DescenderColor", ColorUtility.ToHtmlStringRGBA(descenderColor));
             }
 
             if (newShowBaseLine != showTextBaseline) {
@@ -546,8 +526,7 @@ namespace UIForia.Editor {
 
             DrawLabel("Rotation", layoutResult.rotation.ToString());
             DrawLabel("Clip Rect", $"X: {clipRect.x}, Y: {clipRect.y}, W: {clipRect.width}, H: {clipRect.height}");
-            DrawLabel("Content Rect",
-                $"X: {contentRect.x}, Y: {contentRect.y}, W: {contentRect.width}, H: {contentRect.height}");
+            DrawLabel("Content Rect", $"X: {contentRect.x}, Y: {contentRect.y}, W: {contentRect.width}, H: {contentRect.height}");
 
             DrawLabel("Render Layer", selectedElement.style.RenderLayer.ToString());
             DrawLabel("Z Index", layoutResult.zIndex.ToString());
@@ -557,9 +536,9 @@ namespace UIForia.Editor {
             DrawEnumWithValue<LayoutType>(selectedElement.style.GetComputedStyleProperty(StylePropertyId.LayoutType), false);
             DrawMeasurement(selectedElement.style.GetComputedStyleProperty(StylePropertyId.PreferredWidth), false);
             DrawMeasurement(selectedElement.style.GetComputedStyleProperty(StylePropertyId.PreferredHeight), false);
-            
+
             GUILayout.Space(16);
-            
+
             OffsetRect margin = app.LayoutSystem.GetMarginRect(selectedElement);
             DrawLabel("Margin Top", margin.top.ToString());
             DrawLabel("Margin Right", margin.right.ToString());
@@ -620,34 +599,34 @@ namespace UIForia.Editor {
             EditorGUIUtility.labelWidth = labelWidth;
 
             EditorGUILayout.BeginVertical();
-//
-//            UIStyleGroup instanceStyle = styleSet.GetInstanceStyle();
-//            if (instanceStyle != null) {
-//                baseStyles.Insert(0, instanceStyle);
-//            }
-//
-//            for (int i = 0; i < baseStyles.Count; i++) {
-//                UIStyleGroupContainer group = baseStyles[i];
-//                s_Content.text = $"{group.name} ({group.styleType.ToString()})";
-//
-//                if (group.normal != null) {
-//                    DrawStyle(s_Content.text + " [Normal]", group.normal);
-//                }
-//
-//                if (group.hover != null) {
-//                    DrawStyle(s_Content.text + " [Hover]", group.hover);
-//                }
-//
-//                if (group.focused != null) {
-//                    DrawStyle(s_Content.text + " [Focus]", group.focused);
-//                }
-//
-//                if (group.active != null) {
-//                    DrawStyle(s_Content.text + " [Active]", group.active);
-//                }
-//            }
-//
-//            ListPool<UIStyleGroup>.Release(ref baseStyles);
+            //
+            //            UIStyleGroup instanceStyle = styleSet.GetInstanceStyle();
+            //            if (instanceStyle != null) {
+            //                baseStyles.Insert(0, instanceStyle);
+            //            }
+            //
+            //            for (int i = 0; i < baseStyles.Count; i++) {
+            //                UIStyleGroupContainer group = baseStyles[i];
+            //                s_Content.text = $"{group.name} ({group.styleType.ToString()})";
+            //
+            //                if (group.normal != null) {
+            //                    DrawStyle(s_Content.text + " [Normal]", group.normal);
+            //                }
+            //
+            //                if (group.hover != null) {
+            //                    DrawStyle(s_Content.text + " [Hover]", group.hover);
+            //                }
+            //
+            //                if (group.focused != null) {
+            //                    DrawStyle(s_Content.text + " [Focus]", group.focused);
+            //                }
+            //
+            //                if (group.active != null) {
+            //                    DrawStyle(s_Content.text + " [Active]", group.active);
+            //                }
+            //            }
+            //
+            //            ListPool<UIStyleGroup>.Release(ref baseStyles);
             GUILayout.EndVertical();
         }
 
@@ -730,8 +709,8 @@ namespace UIForia.Editor {
                 case StylePropertyId.Painter:
                     return DrawString(property, isEditable);
 
-//                case StylePropertyId.BackgroundGridSize:
-//                case StylePropertyId.BackgroundLineSize:
+                //                case StylePropertyId.BackgroundGridSize:
+                //                case StylePropertyId.BackgroundLineSize:
                 case StylePropertyId.BackgroundImageOffsetX:
                 case StylePropertyId.BackgroundImageOffsetY:
                 case StylePropertyId.BackgroundImageScaleX:
@@ -739,10 +718,10 @@ namespace UIForia.Editor {
                     return DrawFloat(property, isEditable);
 
                 case StylePropertyId.BackgroundImageRotation:
-//                case StylePropertyId.BackgroundImageTileX:
-//                case StylePropertyId.BackgroundImageTileY:
-//                case StylePropertyId.BackgroundImageOffsetX:
-//                case StylePropertyId.BackgroundImageOffsetY:
+                    //                case StylePropertyId.BackgroundImageTileX:
+                    //                case StylePropertyId.BackgroundImageTileY:
+                    //                case StylePropertyId.BackgroundImageOffsetX:
+                    //                case StylePropertyId.BackgroundImageOffsetY:
                     return DrawFloat(property, isEditable);
 
                 case StylePropertyId.BackgroundImage:
@@ -853,33 +832,31 @@ namespace UIForia.Editor {
                 case StylePropertyId.TextFontStyle:
                     // todo -- this needs to be an EnumFlags popup
                     return DrawEnumWithValue<Text.FontStyle>(property, isEditable);
-//                    return DrawEnum<Text.FontStyle>(property, isEditable);
+                //                    return DrawEnum<Text.FontStyle>(property, isEditable);
 
                 case StylePropertyId.TextAlignment:
                     return DrawEnumWithValue<Text.TextAlignment>(property, isEditable);
 
                 case StylePropertyId.TextWhitespaceMode:
                     return DrawEnumWithValue<WhitespaceMode>(property, isEditable);
-//
+                //
                 case StylePropertyId.TextTransform:
                     return DrawEnumWithValue<TextTransform>(property, isEditable);
 
                 case StylePropertyId.AlignmentBehaviorX:
                 case StylePropertyId.AlignmentBehaviorY:
                     return DrawEnumWithValue<AlignmentBehavior>(property, isEditable);
-                
+
                 case StylePropertyId.AlignmentDirectionX:
                 case StylePropertyId.AlignmentDirectionY:
                     return DrawEnumWithValue<AlignmentDirection>(property, isEditable);
-                    
-                
-                
+
                 case StylePropertyId.AlignmentOffsetX:
                 case StylePropertyId.AlignmentOffsetY:
                 case StylePropertyId.AlignmentOriginX:
                 case StylePropertyId.AlignmentOriginY:
                     return DrawOffsetMeasurement(property, isEditable);
-                
+
                 case StylePropertyId.MinWidth:
                 case StylePropertyId.MaxWidth:
                 case StylePropertyId.PreferredWidth:
@@ -910,7 +887,7 @@ namespace UIForia.Editor {
                 case StylePropertyId.RenderLayer:
                     return DrawEnumWithValue<RenderLayer>(property, isEditable);
 
-//                default:
+                //                default:
                 //throw new ArgumentOutOfRangeException(property.propertyId.ToString());
             }
 
@@ -924,7 +901,7 @@ namespace UIForia.Editor {
 
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.PrefixLabel(StyleUtil.GetPropertyName(property));
-            Texture2D newTexture = (Texture2D) EditorGUILayout.ObjectField(texture, typeof(Texture2D), false);
+            Texture2D newTexture = (Texture2D)EditorGUILayout.ObjectField(texture, typeof(Texture2D), false);
             EditorGUILayout.EndHorizontal();
 
             GUI.enabled = true;
@@ -936,12 +913,12 @@ namespace UIForia.Editor {
         private static ValueTuple<int[], GUIContent[]> GetEnumValues<T>() {
             ValueTuple<int[], GUIContent[]> retn;
             if (!m_EnumValueMap.TryGetValue(typeof(T), out retn)) {
-                T[] vals = (T[]) Enum.GetValues(typeof(T));
+                T[] vals = (T[])Enum.GetValues(typeof(T));
                 int[] intValues = new int[vals.Length];
                 GUIContent[] contentValues = new GUIContent[vals.Length];
 
                 for (int i = 0; i < vals.Length; i++) {
-                    intValues[i] = (int) (object) vals[i];
+                    intValues[i] = (int)(object)vals[i];
                     contentValues[i] = new GUIContent(vals[i].ToString());
                 }
 
@@ -987,7 +964,7 @@ namespace UIForia.Editor {
             GUI.enabled = isEditable;
             string value = EditorGUILayout.TextField(s_Content, property.AsString);
             GUI.enabled = true;
-            return isEditable ? new StyleProperty(property.propertyId,  value) : property;
+            return isEditable ? new StyleProperty(property.propertyId, value) : property;
         }
 
         private static StyleProperty DrawFloat(StyleProperty property, bool isEditable) {
@@ -1003,7 +980,7 @@ namespace UIForia.Editor {
             GUILayout.BeginHorizontal();
             GUI.enabled = isEditable;
             float value = EditorGUILayout.FloatField(s_Content, property.AsUIFixedLength.value);
-            UIFixedUnit unit = (UIFixedUnit) EditorGUILayout.EnumPopup(property.AsUIFixedLength.unit);
+            UIFixedUnit unit = (UIFixedUnit)EditorGUILayout.EnumPopup(property.AsUIFixedLength.unit);
             GUI.enabled = true;
             GUILayout.EndHorizontal();
             return isEditable ? new StyleProperty(property.propertyId, new UIFixedLength(value, unit)) : property;
@@ -1014,7 +991,7 @@ namespace UIForia.Editor {
             GUILayout.BeginHorizontal();
             GUI.enabled = isEditable;
             float value = EditorGUILayout.FloatField(s_Content, property.AsUIFixedLength.value);
-            OffsetMeasurementUnit unit = (OffsetMeasurementUnit) EditorGUILayout.EnumPopup(property.AsUIFixedLength.unit);
+            OffsetMeasurementUnit unit = (OffsetMeasurementUnit)EditorGUILayout.EnumPopup(property.AsUIFixedLength.unit);
             GUI.enabled = true;
             GUILayout.EndHorizontal();
             return isEditable ? new StyleProperty(property.propertyId, new OffsetMeasurement(value, unit)) : property;
@@ -1025,7 +1002,7 @@ namespace UIForia.Editor {
             s_Content.text = StyleUtil.GetPropertyName(property);
             GUILayout.BeginHorizontal();
             float value = EditorGUILayout.FloatField(s_Content, property.AsGridTrackSize.minValue);
-            GridTemplateUnit unit = (GridTemplateUnit) EditorGUILayout.EnumPopup(property.AsGridTrackSize.minUnit);
+            GridTemplateUnit unit = (GridTemplateUnit)EditorGUILayout.EnumPopup(property.AsGridTrackSize.minUnit);
             GUI.enabled = true;
             GUILayout.EndHorizontal();
             return isEditable ? new StyleProperty(property.propertyId, new GridTrackSize(value, unit)) : property;
@@ -1036,7 +1013,7 @@ namespace UIForia.Editor {
             GUI.enabled = isEditable;
             GUILayout.BeginHorizontal();
             float value = EditorGUILayout.FloatField(s_Content, property.AsUIMeasurement.value);
-            UIMeasurementUnit unit = (UIMeasurementUnit) EditorGUILayout.EnumPopup(property.AsUIMeasurement.unit);
+            UIMeasurementUnit unit = (UIMeasurementUnit)EditorGUILayout.EnumPopup(property.AsUIMeasurement.unit);
             GUI.enabled = true;
             GUILayout.EndHorizontal();
             return isEditable ? new StyleProperty(property.propertyId, new UIMeasurement(value, unit)) : property;
@@ -1049,12 +1026,12 @@ namespace UIForia.Editor {
 
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.PrefixLabel(StyleUtil.GetPropertyName(property));
-            Texture2D newTexture = (Texture2D) EditorGUILayout.ObjectField(texture, typeof(Texture2D), false);
+            Texture2D newTexture = (Texture2D)EditorGUILayout.ObjectField(texture, typeof(Texture2D), false);
             EditorGUILayout.EndHorizontal();
 
             GUI.enabled = true;
             GUILayout.EndHorizontal();
-            return isEditable ? new StyleProperty(property.propertyId,  newTexture) : property;
+            return isEditable ? new StyleProperty(property.propertyId, newTexture) : property;
         }
 
         private static StyleProperty DrawFontAsset(StyleProperty property, bool isEditable) {
@@ -1062,12 +1039,11 @@ namespace UIForia.Editor {
             GUILayout.BeginHorizontal();
             FontAsset fontAsset = property.AsFont;
 
-            TMP_FontAsset newFont = (TMP_FontAsset) EditorGUILayout.ObjectField(StyleUtil.GetPropertyName(property),
-                fontAsset.textMeshProFont, typeof(TMP_FontAsset), false);
+            TMP_FontAsset newFont = (TMP_FontAsset)EditorGUILayout.ObjectField(StyleUtil.GetPropertyName(property), fontAsset.textMeshProFont, typeof(TMP_FontAsset), false);
 
             GUI.enabled = true;
             GUILayout.EndHorizontal();
-            return isEditable ? new StyleProperty(property.propertyId,  default(FontAsset)) : property;
+            return isEditable ? new StyleProperty(property.propertyId, default(FontAsset)) : property;
         }
 
         private static StyleProperty DrawGridTemplate(StyleProperty property, bool isEditable) {
@@ -1082,13 +1058,13 @@ namespace UIForia.Editor {
                 EditorGUILayout.LabelField(s_Content);
                 for (int i = 0; i < template.Count; i++) {
                     float value = EditorGUILayout.FloatField(template[i].minValue);
-                    GridTemplateUnit unit = (GridTemplateUnit) EditorGUILayout.EnumPopup(template[i].minUnit);
+                    GridTemplateUnit unit = (GridTemplateUnit)EditorGUILayout.EnumPopup(template[i].minUnit);
                 }
             }
 
             EditorGUILayout.EndHorizontal();
             GUI.enabled = true;
-            return isEditable ? new StyleProperty(property.propertyId,  default(IReadOnlyList<GridTrackSize>)) : property;
+            return isEditable ? new StyleProperty(property.propertyId, default(IReadOnlyList<GridTrackSize>)) : property;
         }
 
     }
@@ -1096,7 +1072,7 @@ namespace UIForia.Editor {
     public class StylePropertyIdComparer : IComparer<ValueTuple<string, StyleProperty>> {
 
         public int Compare(ValueTuple<string, StyleProperty> x, ValueTuple<string, StyleProperty> y) {
-            return (int) x.Item2.propertyId > (int) y.Item2.propertyId ? 1 : -1;
+            return (int)x.Item2.propertyId > (int)y.Item2.propertyId ? 1 : -1;
         }
 
     }

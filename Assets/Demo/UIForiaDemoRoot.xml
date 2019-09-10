@@ -4,7 +4,7 @@
     <Style path="Demo/UIForiaDemoRoot.style" />
 
     <Contents>
-        <Dock />
+<!--        <Dock />-->
         <BuildingDesigner />
     </Contents>
 

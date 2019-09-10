@@ -93,6 +93,10 @@ namespace UIForia.Editor {
             new AnimatedPropertyGenerator<float>(StylePropertyId.RadialLayoutEndAngle, 360f),
             new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.RadialLayoutRadius, new UIFixedLength(0.5f, UIFixedUnit.Percent)),
 
+            // Stack Layout
+            new AnimatedPropertyGenerator<float>(StylePropertyId.StackLayoutAlignHorizontal, 0), 
+            new AnimatedPropertyGenerator<float>(StylePropertyId.StackLayoutAlignVertical, 0),
+            
             // Alignment
             new PropertyGenerator<AlignmentDirection>(StylePropertyId.AlignmentDirectionX, AlignmentDirection.Start),
             new PropertyGenerator<AlignmentDirection>(StylePropertyId.AlignmentDirectionY, AlignmentDirection.Start),

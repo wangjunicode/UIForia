@@ -6,7 +6,8 @@ const iconSize = 30px;
 
 animation show {
     [options] {
-        duration = 200;
+        duration = 300;
+        timingFunction = CubicEaseIn;
     }
     
     [keyframes] {
@@ -15,21 +16,25 @@ animation show {
 }
 animation hide {
     [options] {
-        duration = 200;
+        duration = 300;
+        timingFunction = CubicEaseIn;
     }
     
     [keyframes] {
-        100% { AlignY = -800%; }
+        100% { AlignY = 200% 100%; }
     }
 }
 
 style <this> {
+  //  BackgroundColor = white;
+    PreferredSize = 800px 300px;
     Padding = 100px;
     LayoutBehavior = Ignored;
     FlexLayoutDirection = Horizontal;
     FlexLayoutCrossAxisAlignment = End;
     AlignX = 100% Parent;
     AlignY = 100% Parent;
+    
     [attr:placement="show"] {
         run animation(show);
     }
@@ -77,8 +82,7 @@ style fake-select-display {
 //    [hover] {
 //        BorderColor = #00b5d9;
 //    }
-      BackgroundColor = Yellow;
-
+    BackgroundColor = Yellow;
 }
 
 style chevron-down {

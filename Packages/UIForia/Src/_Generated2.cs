@@ -1432,6 +1432,10 @@ case "visibility":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_float("RadialLayoutEndAngle", UIForia.Rendering.StylePropertyId.RadialLayoutEndAngle, targetState.state, Compile<float>(value, null));                
                 case "radiallayoutradius":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_UIFixedLength("RadialLayoutRadius", UIForia.Rendering.StylePropertyId.RadialLayoutRadius, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
+                case "stacklayoutalignhorizontal":
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_float("StackLayoutAlignHorizontal", UIForia.Rendering.StylePropertyId.StackLayoutAlignHorizontal, targetState.state, Compile<float>(value, null));                
+                case "stacklayoutalignvertical":
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_float("StackLayoutAlignVertical", UIForia.Rendering.StylePropertyId.StackLayoutAlignVertical, targetState.state, Compile<float>(value, null));                
                 case "alignmentdirectionx":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_AlignmentDirection("AlignmentDirectionX", UIForia.Rendering.StylePropertyId.AlignmentDirectionX, targetState.state, Compile<UIForia.Layout.AlignmentDirection>(value, s_EnumSource_AlignmentDirection));                
                 case "alignmentdirectiony":

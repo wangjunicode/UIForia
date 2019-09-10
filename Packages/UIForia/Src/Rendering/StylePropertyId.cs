@@ -164,6 +164,8 @@ namespace UIForia.Rendering {
         CornerBevelBottomLeft = 3003,
         CornerBevelBottomRight = 3004,
 
+        StackLayoutAlignVertical = 4001,
+        StackLayoutAlignHorizontal = 4002,
 
     }
 

@@ -231,12 +231,11 @@ namespace UIForia.Rendering {
 
             if ((element.flags & UIElementFlags.EnabledThisFrame) != 0 || shouldUpdateMaterialProperties) {
                 shouldUpdateMaterialProperties = false;
-                float underlayX = (Mathf.Clamp(textSpan.underlayX, -1, 1) + 1) * 0.5f;
-                float underlayY = (Mathf.Clamp(textSpan.underlayY, -1, 1) + 1) * 0.5f;
-                float underlayDilate = (Mathf.Clamp(textSpan.underlayDilate, -1, 1) + 1) * 0.5f;
+                float underlayX = Mathf.Clamp(textSpan.underlayX, -1, 1);
+                float underlayY = Mathf.Clamp(textSpan.underlayY, -1, 1);
+                float underlayDilate = Mathf.Clamp(textSpan.underlayDilate, -1, 1);
                 float underlaySoftness = Mathf.Clamp01(textSpan.underlaySoftness);
 
-                float packedUnderlay = VertigoUtil.ColorToFloat(new Color(underlayX, underlayY, underlayDilate, underlaySoftness));
                 float mainColor = VertigoUtil.ColorToFloat(textSpan.textColor);
                 float outlineColor = VertigoUtil.ColorToFloat(textSpan.outlineColor);
                 float underlayColor = VertigoUtil.ColorToFloat(textSpan.underlayColor);
@@ -257,6 +256,7 @@ namespace UIForia.Rendering {
                 int shapeType = BitUtil.SetHighLowBits((int)ShapeType.Text, 0);
                 geometry.objectData = new Vector4(shapeType, packedOutlineGlow, weight, element.style.Opacity); // should be text opacity instead?
                 geometry.packedColors = new Vector4(mainColor, outlineColor, underlayColor, glowColor);
+                geometry.miscData = new Vector4(underlayX, underlayY, underlayDilate, underlaySoftness);
             }
 
             // ctx.DrawBatchedTextLine(geometry, ranges, matrix);

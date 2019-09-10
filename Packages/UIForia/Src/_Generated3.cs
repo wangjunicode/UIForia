@@ -112,8 +112,8 @@ namespace UIForia.Rendering {
 		public static readonly Color TextUnderlayColor = new Color(-1f, -1f, -1f, -1f);
 		public const float TextUnderlayX = 0f;
 		public const float TextUnderlayY = 0f;
-		public const float TextUnderlayDilate = 0.5f;
-		public const float TextUnderlaySoftness = 0.5f;
+		public const float TextUnderlayDilate = 0f;
+		public const float TextUnderlaySoftness = 0f;
 		public const float TextFaceDilate = 0f;
 		public const UnderlayType TextUnderlayType = UIForia.Rendering.UnderlayType.Unset;
 		public const TextTransform TextTransform = UIForia.Text.TextTransform.None;
@@ -348,9 +348,9 @@ namespace UIForia.Rendering {
 				case StylePropertyId.TextUnderlayY:
 					 return new StyleProperty(StylePropertyId.TextUnderlayY, 0f);
 				case StylePropertyId.TextUnderlayDilate:
-					 return new StyleProperty(StylePropertyId.TextUnderlayDilate, 0.5f);
+					 return new StyleProperty(StylePropertyId.TextUnderlayDilate, 0f);
 				case StylePropertyId.TextUnderlaySoftness:
-					 return new StyleProperty(StylePropertyId.TextUnderlaySoftness, 0.5f);
+					 return new StyleProperty(StylePropertyId.TextUnderlaySoftness, 0f);
 				case StylePropertyId.TextFaceDilate:
 					 return new StyleProperty(StylePropertyId.TextFaceDilate, 0f);
 				case StylePropertyId.TextUnderlayType:

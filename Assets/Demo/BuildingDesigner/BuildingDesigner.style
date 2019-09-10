@@ -61,7 +61,9 @@ style cancel-text-color { TextColor = @cancelColor; }
 
 style <this> {
     PreferredSize = 1pca;
-    BackgroundImage = url("image");
+   // BackgroundImage = url("image");
+    Padding = 0px;    
+
 }
 
 style menu-container {
@@ -88,12 +90,24 @@ style menu-item {
 }
 
 style menu-image { 
-    ShadowColor = Red;
-    ShadowOffsetX = 0;
-    ShadowTint = White;
-    run animation(animshadow);
+//    ShadowColor = Red;
+//    ShadowOffsetX = 0;
+//    ShadowTint = White;
+//    run animation(animshadow);
 //    ShadowSizeX = -25;
 //    ShadowSizeY = -25;
+}
+
+style tmp {
+
+    TextColor = White;
+    TextFontSize = 48;
+    TextUnderlayDilate = 0;
+    TextUnderlayX = 1;
+    TextUnderlayY = 1;
+    TextUnderlaySoftness = 1;
+    TextUnderlayDilate = 1;
+    TextUnderlayColor = Red;
 }
 
 animation animshadow {
@@ -129,7 +143,10 @@ style menu-label {
     AlignY = 100% Parent;
     AlignX = 50%;
     TextColor = White;
-    Visibility = Hidden;
+//    Visibility = Hidden;
+    TextUnderlayX = 1;
+    TextUnderlayY = 1;
+    TextUnderlayColor = Black;
 }
 
 style weather {
@@ -199,10 +216,6 @@ style chevron-up {
     MarginTop = 1px;
     PreferredSize = 10px 6px;
     BackgroundImage = url("icons/ui_selectbox_up_chevron@2x");
-}
-
-style <this> {
-    Padding = 100px;    
 }
 
 style fake-select-chevron-holder {

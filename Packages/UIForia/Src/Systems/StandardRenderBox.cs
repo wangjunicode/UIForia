@@ -286,8 +286,8 @@ namespace UIForia.Rendering {
             Color32 borderColorLeft = element.style.BorderColorLeft;
 
             if (backgroundColor.a <= 0 && backgroundImage == null) {
-                didRender = false;
                 if (borderColorTop.a <= 0 && borderColorRight.a <= 0 && borderColorLeft.a <= 0 && borderColorBottom.a <= 0) {
+                    didRender = false;
                     return;
                 }
             }
@@ -392,6 +392,10 @@ namespace UIForia.Rendering {
                 dataNeedsUpdate = false;
             }
 
+            if (!didRender) {
+                return;
+            }
+
             if (element.style.ShadowColor.a > 0) {
                 UIStyleSet style = element.style;
                 shadowGeometry = shadowGeometry ?? new UIForiaGeometry();
@@ -401,7 +405,6 @@ namespace UIForia.Rendering {
                 Vector2 size = element.layoutResult.actualSize + new Vector2(style.ShadowSizeX, style.ShadowSizeY) + new Vector2(style.ShadowIntensity, style.ShadowIntensity);
                 position -= new Vector2(style.ShadowSizeX, style.ShadowSizeY) * 0.5f;
                 position -= new Vector2(style.ShadowIntensity, style.ShadowIntensity) * 0.5f;
-           //     position += new Vector2(style.ShadowOffsetX, style.ShadowOffsetY);
                 float x = MeasurementUtil.ResolveOffsetMeasurement(element.layoutBox, element.View.Viewport.width, element.View.Viewport.height, style.ShadowOffsetX, element.layoutResult.actualSize.width);
                 float y = MeasurementUtil.ResolveOffsetMeasurement(element.layoutBox, element.View.Viewport.width, element.View.Viewport.height, style.ShadowOffsetY, element.layoutResult.actualSize.height);
                 position.x += x;

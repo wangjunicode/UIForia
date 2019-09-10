@@ -52,7 +52,7 @@ fixed4 UIForiaAlphaClipColor(fixed4 color, sampler2D clipTexture, float2 screenU
     float2 screenPos = float2(screenUV.x * _ScreenParams.x, screenUV.y * _ScreenParams.y);
     half2 unpackedSizeXY = UnpackSize(clipData.x);
     half2 unpackedSizeZW = UnpackSize(clipData.y);
-            
+                
     // point in rect, does not handle rotation, need to be sure box & point are in the same same aligned coordinate space
     float2 s = step(float2(unpackedSizeXY.x, unpackedSizeZW.y), screenPos) - step(float2(unpackedSizeZW.x , unpackedSizeXY.y), screenPos);
     
@@ -63,16 +63,11 @@ fixed4 UIForiaAlphaClipColor(fixed4 color, sampler2D clipTexture, float2 screenU
     
     x = Map(x, 0, 1, clipUvs.x, clipUvs.z);
     y = Map(y, 0, 1, clipUvs.y, clipUvs.w);
-    
-     // x += (1 / _ScreenParams.x) * 0.5;
-     // y += (1 / _ScreenParams.y) * 0.5;
 
     // y comes in [0 - 1], need to sample with [1, 0]
     fixed a = tex2Dlod(clipTexture, float4(x, 1 - y, 0, 0))[(int)clipData.z]; // z is the channel the target mask is on
-    // retn = lerp(retn, fixed4(retn.rgb, lerp(color.a, a, 1 - a)), a < 1 && color.a > 0 && (clipUvs.z + clipUvs.w) != 0);
-    retn = lerp(retn, fixed4(0, 0, 0, 0), (s.x * s.y) == 0); 
-    
-    
+    retn = lerp(retn, fixed4(retn.rgb, lerp(color.a, a, 1 - a)), a < 1 && color.a > 0 && (clipUvs.z + clipUvs.w) != 0);
+    retn = lerp(retn, fixed4(1, 0, 0, 1), (s.x * s.y) == 0);     
     return retn;
 }
                                    

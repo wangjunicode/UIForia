@@ -127,10 +127,11 @@ Shader "UIForia/Standard"
                     
                     fixed4 unpackedUnderlay = UnpackColor(asuint(Vert_CharacterPackedUnderlay));
                     
-                    fixed underlayX = (unpackedUnderlay.x * 2) - 1;
-                    fixed underlayY = (unpackedUnderlay.y * 2) - 1;
-                    fixed underlayDilate = (unpackedUnderlay.z * 2) - 1;
-                    fixed underlaySoftness = unpackedUnderlay.w;
+                    float4 underlayData = _MiscData[objectIndex];
+                    fixed underlayX = underlayData.x;
+                    fixed underlayY = underlayData.y;
+                    fixed underlayDilate = underlayData.z;
+                    fixed underlaySoftness = underlayData.w;
                     
                     // scale stuff can be moved to cpu, alpha clip & bias too
                     float2 pixelSize = o.vertex.w;
@@ -144,19 +145,20 @@ Shader "UIForia/Standard"
                     float underlayBias = (0.5 - weight) * underlayScale - 0.5 - ((underlayDilate * _FontScaleRatioC) * 0.5 * underlayScale);
                     
                     float2 underlayOffset = float2(
-                    -(underlayX * _FontScaleRatioC) * _FontGradientScale / _FontTextureWidth,
-                    -(underlayY * _FontScaleRatioC) * _FontGradientScale / _FontTextureHeight
+                        -(underlayX * _FontScaleRatioC) * _FontGradientScale / _FontTextureWidth,
+                        -(underlayY * _FontScaleRatioC) * _FontGradientScale / _FontTextureHeight
                     );
                     
                     float bias = (0.5 - weight) + (0.5 / scale);
                     float alphaClip = (1.0 - outlineWidth * _FontScaleRatioA - outlineSoftness * _FontScaleRatioA);
                     
                     alphaClip = alphaClip / 2.0 - ( 0.5 / scale) - weight;
-                    
+                   
+                    // o.vertex = UIForiaPixelSnap(o.vertex); // pixel snap is bad for text rendering
+
                     o.texCoord1 = float4(alphaClip, scale, bias, objectIndex);
                     o.texCoord2 = float4(ShapeType_Text, outlineWidth, outlineSoftness, weight);
                     o.texCoord3 = float4(underlayOffset, underlayScale, underlayBias);
-
                 }
                 
                 // todo -- more unpacking can be done in the vertex shader
@@ -171,7 +173,6 @@ Shader "UIForia/Standard"
                 float4 clipUvs = _ClipUVs[(uint)i.texCoord1.w];           
                 float opacity = _ObjectData[(uint)i.texCoord1.w].w;              
                 
-
                 // todo -- returns cause branching here
                 // get rid of text and we can get rid of branching
                 
@@ -187,6 +188,7 @@ Shader "UIForia/Standard"
                     mainColor = SDFColor(sdfData, borderData.color, mainColor);
                     mainColor.a *= opacity;
                     
+                    // todo -- this causes bad branching
                     if(Frag_ColorMode == PaintMode_Shadow || Frag_ColorMode == PaintMode_ShadowTint) {
                         float intensity = i.color.b;
                         sdfData.strokeWidth = 3;
@@ -212,6 +214,7 @@ Shader "UIForia/Standard"
                 float outlineWidth = 0; //i.texCoord2.y;
                 float outlineSoftness = 0; //i.texCoord2.z;
                 float c = tex2D(_FontTexture, i.texCoord0.zw).a;
+
                 float scaleRatio = _FontScaleRatioA;
                 
                 float scale	= i.texCoord1.y;
@@ -223,38 +226,26 @@ Shader "UIForia/Standard"
                 float softness = 0; //(outlineSoftness * scaleRatio) * scale;
 
                 fixed4 faceColor = UnpackColor(asuint(i.color.r)); // could just be mainColor?
-
                 
                 fixed4 outlineColor = Green;//UnpackColor(asuint(i.color.g));
-                //fixed4 underlayColor = UnpackColor(asuint(i.color.b));
+                fixed4 underlayColor = UnpackColor(asuint(i.color.b));
                 //fixed4 glowColor = UnpackColor(asuint(i.color.a));
                 
-                // underlayColor.rgb *= underlayColor.a;
-                //   faceColor.rgb *= faceColor.a;
-                // outlineColor.rgb *= outlineColor.a;
-                // glowColor.rgb *= glowColor.a;
-                
                 faceColor = GetTextColor(sd, faceColor, outlineColor, outline, softness);
-                faceColor.a *= opacity;
-                faceColor = UIForiaAlphaClipColor(faceColor, _MaskTexture, screenUV, clipRect, clipUvs);
-           //     faceColor.rgb *= faceColor.a;
 
                 #define underlayOffset i.texCoord3.xy
                 #define underlayScale i.texCoord3.z
                 #define underlayBias i.texCoord3.w
                 
+                int hasUnderlay = underlayColor.a > 0;
                 // todo -- pull underlay into a seperate shader
-                //  float d = tex2D(_FontTexture, i.texCoord0.xy + underlayOffset).a * underlayScale;
-                //  faceColor += underlayColor * saturate(d - underlayBias) * (1 - faceColor.a);
-                return faceColor;
-                
-                
-                
-                // clip(textureColor.a - 0.01);
-                // fixed maskAlpha = saturate(tex2D(_MaskTexture, i.texCoord0.xy).a / _MaskSoftness);
-                // maskAlpha = lerp(1 - maskAlpha, maskAlpha, _InvertMask);
-                // mainColor.a *= maskAlpha;
-                // return textureColor;// * fixed4(bgColor.rgb, 1) * 2;
+                float d = tex2D(_FontTexture, i.texCoord0.zw + i.texCoord3.xy).a * underlayScale;
+                underlayColor = faceColor + fixed4(underlayColor.rgb * underlayColor.a, underlayColor.a)  * (saturate(d - underlayBias)) * (1 - faceColor.a);
+			
+                faceColor = lerp(faceColor, underlayColor, 1);
+                faceColor.a *= opacity;
+                faceColor = UIForiaAlphaClipColor(faceColor, _MaskTexture, screenUV, clipRect, clipUvs);
+                return faceColor;               
 
             }
 

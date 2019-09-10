@@ -284,7 +284,7 @@ namespace Src.Systems {
                                     }
                                     
                                     // cheap solution is to compare world space bounds for overlap better would be compare oriented bounds
-                                    renderBox.culled = !clipData.aabb.OverlapAsRect(objectScreenBounds);
+                                     renderBox.culled = !clipData.aabb.OverlapAsRect(objectScreenBounds);
 
                                     if (!renderBox.culled) {
                                         renderBox.clipper = clipStack.array[clipStack.size - 1];

@@ -257,6 +257,7 @@ namespace UIForia.Rendering {
             currentBatch.uiforiaData.colors.Add(geometry.packedColors);
             currentBatch.uiforiaData.fontData = fontData;
 
+         
             if (clipper != null) {
                 // todo break batch if changed
                 currentBatch.uiforiaData.clipTexture = clipper.clipTexture != null ? clipper.clipTexture : currentBatch.uiforiaData.clipTexture;

@@ -1,0 +1,96 @@
+import "Demo/Theme.style" as theme;
+
+animation show {
+    [options] {
+        duration = 200;
+    }
+    
+    [keyframes] {
+        100% { AlignY = 100%; }
+    }
+}
+animation hide {
+    [options] {
+        duration = 200;
+    }
+    
+    [keyframes] {
+        100% { AlignY = 200%; }
+    }
+}
+
+style <this> {
+    AlignX = 100% Parent;
+    AlignY = 100% Parent;
+    LayoutBehavior = Ignored;
+    FlexLayoutDirection = Horizontal;
+    FlexLayoutCrossAxisAlignment = End;
+
+    [attr:placement="show"] {
+        run animation(show);
+    }
+    [attr:placement="hide"] {
+        run animation(hide);
+    }
+}
+
+style transclude {
+    LayoutBehavior = TranscludeChildren;
+}
+
+
+style menu-map {
+    PreferredSize = 192px;
+    BorderRadius = 50%;
+    Border = 7px;
+    BorderColor = Black;
+    BackgroundImage = url("image");
+    MarginBottom = 1em;
+    MarginRight = 1em;
+}
+
+style weather {
+    PreferredSize = 40px;
+    BackgroundColor = Black;
+    BorderRadius = 50%;
+    LayoutBehavior = Ignored;
+    AlignmentOffsetX = -1.3w;
+    AlignmentOffsetY = 64px;
+    AlignmentBehaviorX = LayoutBox;
+    AlignmentBehaviorY = LayoutBox;
+    BackgroundImage = url("Sprites/StatusImageWeatherIconCloudy");
+    BackgroundFit = Contain;
+}
+
+style temp-gauge {
+    PreferredSize = 60px;
+    BackgroundColor = Black;
+    BorderRadius = 50%;
+    LayoutBehavior = Ignored;
+    AlignmentOffsetX = -0.85w;
+    AlignmentOffsetY = -12px;
+    AlignmentBehaviorX = LayoutBox;
+    AlignmentBehaviorY = LayoutBox;
+}
+
+style clock {
+    PreferredSize = 80px;
+    BackgroundColor = Black;
+    BorderRadius = 50%;
+    LayoutBehavior = Ignored;
+    AlignmentOffsetX = -5px;
+    AlignmentOffsetY = -82px;
+    AlignmentBehaviorX = LayoutBox;
+    AlignmentBehaviorY = LayoutBox;
+}
+
+style date {
+    PreferredSize = 100px;
+    BackgroundColor = Black;
+    BorderRadius = 50%;
+    LayoutBehavior = Ignored;
+    AlignmentOffsetX = 0.89w;
+    AlignmentOffsetY = -108px;
+    AlignmentBehaviorX = LayoutBox;
+    AlignmentBehaviorY = LayoutBox;
+}

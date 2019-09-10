@@ -12,115 +12,68 @@
 
     <Contents>
 
-        <Group style="menu-container">
+        <Group>
+            <Group style="fake-select">
 
-            <Group style="menu-item">
-                <Image style="menu-image" src="'Prototyping/icon__menu_chat'"/>
-                <Text style="menu-label">A</Text>
-            </Group>
-            
-            <Group style="menu-item">
-                <Image src="'Prototyping/icon_plant_64'"/>
-                <Text style="menu-label">B</Text>
-            </Group>
-            
-            <Group style="menu-item">
-                <Image src="'Prototyping/icon__menu_build'"/>
-                <Text style="menu-label">C</Text>
-            </Group>
-            
-            <Group style="menu-item">
-                <Image src="'Prototyping/icon_chop_64'"/>
-                <Text style="menu-label">D</Text>
-            </Group>
-            
-            <Group style="menu-item">
-                <Image src="'Prototyping/icon__menu_schedule'"/>
-                <Text style="menu-label">E</Text>
-            </Group>
-            
-            <Group style="menu-item">
-                <Image src="'Prototyping/icon__menu_stockpile'"/>
-                <Text style="menu-label">F</Text>
-            </Group>
-            
-            <Group style="menu-item">
-                <Image src="'Prototyping/icon__menu_build'"/>
-                <Text style="menu-label">G</Text>
+                <Group style="fake-select-display">
+                    <Text>Basic is nothing ok if you say so</Text>
+                </Group>
+
+                <Group style="fake-select-chevron-holder">
+                    <Div style="chevron-up"/>
+                    <Div style="chevron-down"/>
+                </Group>
+
+                <Group style="fake-select-options">
+                    <Repeat list="BrushTypes">
+                        <Group>{$item.Label}</Group>
+                    </Repeat>
+                </Group>
+
             </Group>
 
-            <Group style="menu-map">
-                <Group style="weather"/>
-                <Group style="temp-gauge"/>
+            <Group style="corner-cut-window">
+
             </Group>
 
+            <Group style="building-designer-root">
+
+                <Group style="building-designer-top-bar">
+
+                    <Text style.flexItemGrow="1">CONSTRUCTION MODE</Text>
+
+                    <Text>Type:</Text>
+                    
+
+                </Group>
+
+                <Group></Group>
+                <Group></Group>
+
+            </Group>
+            <Group style="top-left-area flex-horizontal-centered">
+
+                <Text>CONSTRUCTION MODE</Text>
+
+                <!--                    <Group style="flex-horizontal-centered ml2">-->
+                <!--                        <Image src="'new_ui_icons/ui_icon_undo'" style="redo-button-image"/>-->
+                <!--                        <Div style="top-bar-text inactive">UNDO</Div>-->
+                <!--                    </Group>-->
+
+                <!--                    <Group style="flex-horizontal-centered ml1">-->
+                <!--                        <Image src="'new_ui_icons/ui_icon_redo'" style="redo-button-image"/>-->
+                <!--                        <Div style="top-bar-text inactive">REDO</Div>-->
+                <!--                    </Group>-->
+
+                <Div style="top-bar-text ml1 mr1">TYPE:</Div>
+                <Select--int style="top-bar-text mr1 fixed-width-type" options="BrushTypes" onValueChanged="OnBrushTypeChanged"/>
+
+                <Div style="flex-horizontal-centered">
+                    <Div style="top-bar-text ml1 mr1">STYLE:</Div>
+                </Div>
+
+            </Group>
         </Group>
-        <!--        <Group style="fake-select">-->
-        <!--            -->
-        <!--            <Group style="fake-select-display">-->
-        <!--                <Text>Basic is nothing ok if you say so</Text>-->
-        <!--            </Group>-->
-        <!--            -->
-        <!--            <Group style="fake-select-chevron-holder">-->
-        <!--                <Div style="chevron-up"/>-->
-        <!--                <Div style="chevron-down"/>-->
-        <!--            </Group>-->
-        <!--            -->
-        <!--            <Group style="fake-select-options">-->
-        <!--                <Repeat list="brushTypes">-->
-        <!--                    <Group>{$item.Label}</Group>-->
-        <!--                </Repeat>-->
-        <!--            </Group>-->
-        <!-- -->
-        <!--        </Group>-->
-
-        <!--        <Group style="corner-cut-window">-->
-        <!--            -->
-        <!--        </Group>-->
-
-        <!--        -->
-        <!--        <Group style="building-designer-root">-->
-
-        <!--            <Group style="building-designer-top-bar">-->
-
-        <!--                <Text style.flexItemGrow="1">CONSTRUCTION MODE</Text>-->
-
-        <!--                <Text>Type:</Text>-->
-
-        <!--                -->
-        <!--                &lt;!&ndash;                <Select&#45;&#45;int style="select-height" options="brushTypes" onValueChanged="OnBrushTypeChanged"/>&ndash;&gt;-->
-
-        <!--            </Group>-->
-
-        <!--            <Group></Group>-->
-        <!--            <Group></Group>-->
-
-        <!--        </Group>-->
-        <!--                <Group style="top-left-area flex-horizontal-centered">-->
-
-        <!--                    <Text>CONSTRUCTION MODE</Text>-->
-
-        <!--&lt;!&ndash;                    <Group style="flex-horizontal-centered ml2">&ndash;&gt;-->
-        <!--&lt;!&ndash;                        <Image src="'new_ui_icons/ui_icon_undo'" style="redo-button-image"/>&ndash;&gt;-->
-        <!--&lt;!&ndash;                        <Div style="top-bar-text inactive">UNDO</Div>&ndash;&gt;-->
-        <!--&lt;!&ndash;                    </Group>&ndash;&gt;-->
-
-        <!--&lt;!&ndash;                    <Group style="flex-horizontal-centered ml1">&ndash;&gt;-->
-        <!--&lt;!&ndash;                        <Image src="'new_ui_icons/ui_icon_redo'" style="redo-button-image"/>&ndash;&gt;-->
-        <!--&lt;!&ndash;                        <Div style="top-bar-text inactive">REDO</Div>&ndash;&gt;-->
-        <!--&lt;!&ndash;                    </Group>&ndash;&gt;-->
-
-        <!--                    <Div style="top-bar-text ml1 mr1">TYPE:</Div>-->
-        <!--                    <Select&#45;&#45;int style="top-bar-text mr1 fixed-width-type" options="BrushTypes" onValueChanged="OnBrushTypeChanged"/>-->
-
-        <!--                    <Div style="flex-horizontal-centered">-->
-        <!--                        <Div style="top-bar-text ml1 mr1">STYLE:</Div>-->
-        <!--&lt;!&ndash;                        <Select&#45;&#45;int disabled="!IsBasicSelected" style="top-bar-text mr1 fixed-width-style" options="BasicStyles" onValueChanged="OnBasicStyleChanged"/>&ndash;&gt;-->
-        <!--                    </Div>-->
-        <!--                    -->
-        <!--                </Group>-->
-        <!--            </Group>-->
-        <!--        </Group>-->
     </Contents>
 
 </UITemplate>

@@ -561,9 +561,9 @@ namespace UIForia.Rendering {
         }
 
         private UIStyleGroupContainer FindContainerForGroup(UIStyleGroup group) {
-            var count = styleGroupContainers.Count;
-            for (int i = 0; i < count; i++) {
-                for (int j = 0; j < styleGroupContainers[i].groups.Count; i++) {
+            for (int i = 0; i < styleGroupContainers.size; i++) {
+                int groupsCount = styleGroupContainers[i].groups.Count;
+                for (int j = 0; j < groupsCount; j++) {
                     if (styleGroupContainers[i].groups[j] == group) {
                         return styleGroupContainers[i];
                     }

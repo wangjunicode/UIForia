@@ -4,7 +4,7 @@ using UIForia.Attributes;
 using UIForia.Elements;
 using UIForia.Util;
 
-namespace Demo.BuildingDesigner {
+namespace Demo {
 
     public enum BrushSelectionCategory {
 
@@ -18,7 +18,7 @@ namespace Demo.BuildingDesigner {
     [Template("Demo/BuildingDesigner/BuildingDesigner")]
     public class BuildingDesigner : UIElement {
 
-        public RepeatableList<ISelectOption<int>> brushTypes = new RepeatableList<ISelectOption<int>> {
+        public RepeatableList<ISelectOption<int>> BrushTypes = new RepeatableList<ISelectOption<int>> {
             new SelectDemo.SelectOption<int>("Basic", (int) BrushSelectionCategory.Basic),
             new SelectDemo.SelectOption<int>("Blocks", (int) BrushSelectionCategory.Block),
             new SelectDemo.SelectOption<int>("Seed Templates", (int) BrushSelectionCategory.Template),
@@ -27,6 +27,7 @@ namespace Demo.BuildingDesigner {
         
         public Action<int> OnBrushTypeChanged => BrushTypeChanged;
 
+        
         private void BrushTypeChanged(int category) {
 //            switch (category) {
 //                case 2:

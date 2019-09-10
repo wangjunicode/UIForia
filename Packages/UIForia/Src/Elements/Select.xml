@@ -8,7 +8,7 @@
             LayoutType = Stack;
             BackgroundColor = white;
             BorderRadius = 8px;
-            TextFontSize = 32px;    
+            TextFontSize = 32px;
             Border = 2px;
             BorderColor = #B2B2B2;//rgba(178, 178, 178, 255);
             StackLayoutAlignVertical = Center;
@@ -29,17 +29,18 @@
             Padding = 4px 8px 4px 22px;
             FlexLayoutCrossAxisAlignment = Center;
             FlexLayoutDirection = Column;
-            BackgroundColor = red;
+            BackgroundColor = white;
             [hover] {
                 MinWidth = 1cnt;
                 TextColor = white;
                 BackgroundColor = #006d82;
-                BorderRadius = 4px;
+                // BorderRadius = 4px;
                 Overflow = Visible;
             }
         }
         
         style select-label {
+            MarginLeft = 8px;
             PreferredWidth = 1pca;
             [hover] {
                 MinWidth = 1cnt;
@@ -47,26 +48,27 @@
         }
         
         style selected-element-icon {
-            PreferredSize = 24px;
+            PreferredSize = 18px;
             BackgroundTint = black;
             LayoutBehavior = Ignored;
             AlignY = 50% Parent;
+            AlignX = 4px Parent;
             [hover] {
                 BackgroundTint = white;
             }
         }
 
         style fake-select-options {
-        // attention: load bearing comma
-            AlignY = 0, Parent;
+            // attention: load bearing comma
+            AlignY = -3px, Parent;
             AlignX = -10px, Parent;
-            BackgroundColor = red;
+            BackgroundColor = white;
             PreferredWidth = 1psz;
             BorderRadius = 4px;
             BorderColor = black;
             Border = 1px;
-            // ZIndex = 30;
             MaxHeight = 400px;
+            Padding = 8px 0;
         }
         
         style transclude {
@@ -90,7 +92,7 @@
         //    [hover] {
         //        BorderColor = #00b5d9;
         //    }
-            BackgroundColor = Yellow;
+            // BackgroundColor = Yellow;
         }
 
         style fake-select-chevron-holder {
@@ -153,21 +155,21 @@
 
     <Using namespace="UIForia.Elements" />
 
-    <Contents style="select">   
+    <Contents style="select">
 
-        <Group if="selectedIndex >= 0" style="fake-select-display" onMouseClick="BeginSelecting($event)">
+        <Group if="selectedIndex >= 0" style="fake-select-display">
             <Slot name="select-display" style="select-display">
                 {options[selectedIndex].Label}
             </Slot>
         </Group>
 
-        <Group if="selectedIndex &lt; 0" style="fake-select-display" onMouseClick="BeginSelecting($event)">
+        <Group if="selectedIndex &lt; 0" style="fake-select-display">
             <Slot name="select-placeholder" style="select-placeholder">
                 Select a value
             </Slot>
         </Group>
 
-        <Group style="fake-select-chevron-holder" onMouseClick="BeginSelecting($event)">
+        <Group style="fake-select-chevron-holder">
             <Div style="chevron-up"/>
             <Div style="chevron-down"/>
         </Group>

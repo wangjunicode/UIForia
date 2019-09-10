@@ -1,6 +1,6 @@
 // ------------------ TOP-BAR ------------------ 
 
-import "Theme.style" as theme;
+import "Demo/Theme.style" as theme;
 
 const topBarFramePad = 0.7em;
 const topBarTextSize = 12px;
@@ -13,7 +13,7 @@ style building-designer-top-bar {
     TextTransform = UpperCase;
     TextFontSize = 1.1em;
     
-    FlexLayoutDirection = Column;
+    FlexLayoutDirection = Row;
     FlexLayoutCrossAxisAlignment = Center;
     FlexLayoutMainAxisAlignment = Start;
         
@@ -25,6 +25,11 @@ style building-designer-top-bar {
     
     PreferredWidth = 1psz;
 }
+
+style top-bar-select {
+    PreferredHeight = 32px;
+}
+
 
 style top-bar-text {
     TextFontSize = @topBarTextSize;

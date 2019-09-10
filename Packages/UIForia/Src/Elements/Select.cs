@@ -339,6 +339,7 @@ namespace UIForia.Elements {
             }
         }
 
+        [OnMouseClick()]
         public void BeginSelecting(MouseInputEvent evt) {
             if (disabled) {
                 return;

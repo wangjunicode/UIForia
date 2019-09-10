@@ -90,7 +90,19 @@ namespace UIForia.Layout {
         }
 
         public override float GetIntrinsicPreferredHeight() {
-            throw new NotImplementedException();
+            float retn = 0;
+
+            FastLayoutBox ptr = firstChild;
+            
+            while (ptr != null) {
+                float height = ptr.GetIntrinsicPreferredHeight();
+                // ptr.GetMarginHorizontal();
+                if (height > retn) retn = height;
+                ptr = ptr.nextSibling;
+            }
+
+            return retn + paddingBox.top + paddingBox.bottom + borderBox.top + borderBox.bottom;
+            
         }
 
         public override float ComputeContentWidth(BlockSize blockWidth) {

@@ -441,7 +441,7 @@ namespace UIForia.Systems {
                 for (int i = track.startItemIndex; i < track.endItemIndex; i++) {
                     ref Item item = ref items[i];
                     FastLayoutBox child = item.layoutBox;
-                    child.GetHeight(child.size.width, blockWidth, blockHeight, ref item.size);
+                    child.GetHeight(item.outputWidth, blockWidth, blockHeight, ref item.size);
                     child.GetMarginVertical(blockHeight, ref item.margin);
                     item.outputHeight = item.size.prefHeight;
                     float heightAndMargin = item.outputHeight + item.margin.top + item.margin.bottom;

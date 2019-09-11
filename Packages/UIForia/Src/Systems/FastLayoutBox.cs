@@ -1037,7 +1037,7 @@ namespace UIForia.Layout {
             int idx = 0;
             FastLayoutBox ptr = firstChild;
             FastLayoutBox trail = null;
-            
+            MarkForLayout();
             while (ptr != null) {
                 if (ptr.element == element) {
                     break;
@@ -1046,16 +1046,24 @@ namespace UIForia.Layout {
                 trail = ptr;
                 ptr = ptr.nextSibling;
             }
-
-            if (ptr == null) return;
-            
+            if (ptr == null) {
+                if (this is TranscludeLayoutBox) {
+                    UIElement[] children = this.element.children.array;
+                    for (int i = 0; i < this.element.children.size; i++) {
+                        UIElement child = children[i];
+                        if (child.isDisabled && (child.flags & UIElementFlags.DisabledThisFrame) != 0) {
+                            child.layoutBox?.parent?.RemoveChildByElement(child);
+                        }
+                    }
+                }
+                return;
+            }
             if (ptr == firstChild) {
                 firstChild = firstChild.nextSibling;
             }
             else {
                 trail.nextSibling = ptr.nextSibling;
             }
-
             OnChildRemoved(ptr, idx);
         }
         

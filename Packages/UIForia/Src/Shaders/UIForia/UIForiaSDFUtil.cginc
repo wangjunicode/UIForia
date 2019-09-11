@@ -533,6 +533,20 @@ inline fixed4 GetTextColor(half d, fixed4 faceColor, fixed4 outlineColor, half o
     return faceColor;
 }
 
+    
+// sca is the sin/cos of the orientation
+// scb is the sin/cos of the aperture
+// ra = radius
+// rb = width
+float SDFArc(float2 p, float ta, float tb, float radius, float width) {
+    float2 sca = float2(sin(ta), cos(ta));
+    float2 scb = float2(sin(tb), cos(tb));
+    p = mul(float2x2(sca.x, sca.y, -sca.y, sca.x), p);
+    p.x = abs(p.x);
+    float k = (scb.y * p.x > scb.x * p.y) ? dot(p.xy, scb) : length(p.xy);
+    return sqrt(dot(p, p) + radius * radius - 2.0 * radius * k) - width;
+}
+            
 float SDFRect2(SDFData sdfData) {
     float halfStrokeWidth = sdfData.strokeWidth * 0.5;
     

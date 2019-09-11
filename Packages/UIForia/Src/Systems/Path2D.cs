@@ -484,13 +484,11 @@ namespace UIForia.Rendering {
                     Vector2 angleAndWidth = pointList.array[shape.pointRange.start].position;
                     int flags = BitUtil.SetHighLowBits((int) ShapeType.Sector, (int) fillStyle.paintMode);
                     objectData.geometryRange = GeometryGenerator.FillRect(geometry, position.x, position.y, size.x, size.y);
-                    Vector2 pivot = new Vector2(position.x + (size.x * 0.5f), -(position.y + (size.y * 0.5f)));
+//                    Vector2 pivot = new Vector2(position.x + (size.x * 0.5f), -(position.y + (size.y * 0.5f)));
                     float rotation = pointList.array[shape.pointRange.start + 1].position.x;
+                    
                     for (int i = objectData.geometryRange.vertexStart; i < objectData.geometryRange.vertexEnd; i++) {
-                        Vector2 v = VectorExtensions.Rotate(geometry.positionList.array[i], pivot, rotation);
-                        geometry.positionList.array[i].x = v.x;
-                        geometry.positionList.array[i].y = v.y;
-                        geometry.texCoordList1.array[i] = new Vector4(angleAndWidth.x, angleAndWidth.y, 0, 0);
+                        geometry.texCoordList1.array[i] = new Vector4(angleAndWidth.x, angleAndWidth.y, rotation, 0);
                     }
 
                     objectData.objectData = new Vector4(flags, s_CircleRadii, VertigoUtil.PackSizeVector(size), k_StrokeWidthZero);

@@ -162,11 +162,14 @@
                     cut = 0;
                     float angle = i.texCoord1.x;
                     float width = i.texCoord1.y;
+                    float rotation = i.texCoord1.z;
                     // if stroking the geometry is twice as large to account for weirdness 
                     // with stroke length going off the geometry and clipping horribly
-                    float sectorSize = minSize * lerp(0.5, 0.25, isStroke);
-                    sdf = sector(center, sectorSize, angle, width);
+                    float ta = 3.14 * 0.33;
+                    float tb = 3.14 * 0.66;
+                    sdf = SDFArc(center, ta, tb, (minSize * 0.5) - width - halfStrokeWidth, width);
                     if(isStroke) sdf = abs(sdf) - halfStrokeWidth;
+                    
                 }        
                 else if(shapeType == ShapeType_Triangle) {
                     // for triangle case already call sdTriangle for cut, but triangle never uses cut so we hijack the call since its expensive

@@ -15,7 +15,7 @@
             <Group style="weather"/>
             <Group style="temp-gauge"/>
             <Group style="clock"/>
-            <Group style="date"/>
+            <DateIndicator style="date"/>
 
         </Group>
 

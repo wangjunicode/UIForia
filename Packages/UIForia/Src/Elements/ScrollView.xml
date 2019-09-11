@@ -14,7 +14,7 @@
             LayoutBehavior = Ignored;
             AlignX = 100%;
             AlignmentBehaviorX = Parent;
-            BackgroundColor = darkGrey;
+            BackgroundColor = #b2b2b2ff;
         }
 
         style scroll-handle-vertical {
@@ -25,7 +25,7 @@
         }
 
         style scroll-track-horizontal {
-            PreferredSize = 0.97psz @scrollBarSize;
+            PreferredSize = 1psz @scrollBarSize;
             LayoutBehavior = Ignored;
             AlignmentBehaviorY = Parent;
             AlignY = 100%;

@@ -310,6 +310,7 @@ namespace UIForia.Rendering {
             // which the runtime never checks since we never assigned to a float value. Awesome!
 
             Vector4 v = default;
+            Vector4 v2 = default;
 
             unsafe {
                 Vector4* vp = &v;
@@ -328,7 +329,19 @@ namespace UIForia.Rendering {
             float borderLeftAndTop = VertigoUtil.PackSizeVector(border.left, border.top);
             float borderRightAndBottom = VertigoUtil.PackSizeVector(border.right, border.bottom);
 
-            geometry.packedColors = new Color(packedBackgroundColor, packedBackgroundTint, borderLeftAndTop, borderRightAndBottom);
+            Vector4 c = default;
+            unsafe {
+                Vector4* cp = &c;
+                Color32 * b = stackalloc Color32[2];
+                b[0] = backgroundColor;
+                b[1] = backgroundTint;
+                UnsafeUtility.MemCpy(cp, b, sizeof(Color32) * 2);
+                
+                c.z = borderLeftAndTop;
+                c.w = borderRightAndBottom;
+            }
+
+            geometry.packedColors = c;//new Color(packedBackgroundColor, packedBackgroundTint, borderLeftAndTop, borderRightAndBottom);
 
             int val = BitUtil.SetHighLowBits((int)ShapeType.RoundedRect, (int) colorMode);
 

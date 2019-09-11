@@ -69,6 +69,7 @@
             Border = 1px;
             MaxHeight = 400px;
             Padding = 8px 0;
+            ZIndex = 20;
         }
         
         style transclude {

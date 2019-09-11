@@ -57,11 +57,11 @@
             </Div>
 
 
-            <ScrollView style="previews-area">
+            <ScrollView style="previews-area" fadeTime="-1">
 
-                <Group if="CurrentBrushType == CategoryBASIC">
+                <Group if="CurrentBrushType == CategoryBASIC" style="grid-with-brushes">
 
-                    <Repeat list="GetBasicBrushes(CurrentBasicBrushStyle)" style="grid-with-brushes">
+                    <Repeat list="GetBasicBrushes(CurrentBasicBrushStyle)" style="transclude">
                         <Div style="brush-button" onMouseClick="SelectBrush($event, $item)">
                             <Image texture="$item.Texture" style="image-width"/>
                             <Text style="brush-label">{$item.Label}</Text>
@@ -115,9 +115,34 @@
 
             </ScrollView>
             
-            
+       
             
         </Group>
+        <Group style="building-designer-footer">
+
+            <Group style="flex-horizontal-centered footer-left-area">
+
+                <Div style="flex-vertical-centered footer-total-cost ml2 mr2">
+                    <Text>TOTAL</Text>
+                    <Text>COST</Text>
+                </Div>
+                <Group style="flex-horizontal-centered ml1 mr1">
+                    <Image src="PlaxinIconPath" style="footer-icon"/>
+                    <Text>{PlaxinCost} Plaxin</Text>
+                </Group>
+
+            </Group>
+
+            <Group style="flex-horizontal-centered footer-right-area">
+
+                <Div onMouseClick="ShowDialog('confirm-dialog')" style="footer-button confirm-button flex-horizontal-centered">CONFIRM</Div>
+                <Div onMouseClick="SaveAndExit()" style="footer-button save-exit-button flex-horizontal-centered">SAVE &amp; EXIT</Div>
+                <Div onMouseClick="ShowDialog('cancel-dialog')" style="footer-button cancel-button flex-horizontal-centered mr2">CANCEL</Div>
+
+            </Group>
+
+        </Group>
+
     </Contents>
 
 </UITemplate>

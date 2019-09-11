@@ -1,5 +1,6 @@
 using System;
 using Documentation.Features;
+using UIForia.Animation;
 using UIForia.Attributes;
 using UIForia.Elements;
 using UIForia.Rendering;
@@ -92,6 +93,25 @@ namespace Demo {
         private Color lightGrey = new Color(0.39f, 0.39f, 0.39f);
 
         public override void OnCreate() {
+
+            Texture2D[] textures = Resources.LoadAll<Texture2D>("building-previews");
+            
+            for (int i = 0; i < textures.Length; i++) {
+                Texture2D texture = textures[i];
+                if (texture.name.StartsWith("BASIC_BVL")) {
+                    BasicBevelBrushes.Add(MakeBrush(texture, i, "BASIC_BVL"));
+                } else if (texture.name.StartsWith("BASIC_PRP")) {
+                    BasicPerpBrushes.Add(MakeBrush(texture, i, "BASIC_PRP"));
+                } else if (texture.name.StartsWith("BASIC_RND")) {
+                    BasicRoundBrushes.Add(MakeBrush(texture, i, "BASIC_RND"));
+                } else if (texture.name.StartsWith("BLOCK")) {
+                    BlockBrushes.Add(MakeBrush(texture, i, "BLOCK"));
+                }
+
+            }
+            Application.styleImporter.ImportStyleSheetFromFile("Demo/BuildingDesigner/BuildingDesignerMain.style").TryGetAnimationData("open-dialog", out openDialogAnimation);
+            Application.styleImporter.ImportStyleSheetFromFile("Demo/BuildingDesigner/BuildingDesignerMain.style").TryGetAnimationData("close-dialog", out closeDialogAnimation);
+
             AvailableColors = new RepeatableList<Color>() {
                     new Color(0.1f, 0.6f, 0.6f),
                     new Color(0.2f, 0.7f, 0.5f),
@@ -108,6 +128,39 @@ namespace Demo {
             };
         }
 
+        private static Brush MakeBrush(Texture2D texture, int id, string prefix) {
+            return new Brush() {
+                    Label = texture.name.Replace(prefix, string.Empty).Replace("_", " ").Replace("-", ""),
+                    ID = id,
+                    Texture = texture
+            };
+        }
+
+        private AnimationData openDialogAnimation;
+        private AnimationData closeDialogAnimation;
+        public void ShowDialog(string id) {
+            if (dialogOpened) {
+                return;
+            }
+            
+            dialogOpened = true;
+            
+            UIElement confirmDialog = FindById(id);
+            
+            Application.Animate(confirmDialog, openDialogAnimation);
+        }
+        public void CloseDialog(string id) {
+            if (!dialogOpened) {
+                return;
+            }
+            
+            dialogOpened = false;
+            
+            UIElement confirmDialog = FindById(id);
+            
+            Application.Animate(confirmDialog, closeDialogAnimation);
+        }
+
         private void BrushTypeChanged(int category) {
             switch (category) {
                 case 2:
@@ -120,6 +173,16 @@ namespace Demo {
             }
 
             CurrentBrushType = (BrushSelection.Category)category;
+        }
+
+        public void SaveAndExit() {
+            if (dialogOpened) {
+                return;
+            }
+
+            // uiBuildingDesignController.SelectAllCells();
+            SaveBuilding();
+            // uiBuildingDesignController.AbortDesign();
         }
 
         public void OpenColorPalette() {

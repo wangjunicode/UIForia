@@ -177,6 +177,7 @@ Shader "UIForia/Standard"
                 // get rid of text and we can get rid of branching
                 
                 fixed4 mainColor = ComputeColor(i.color.r, i.color.g, Frag_ColorMode, i.texCoord0.xy, _MainTexture);
+                
                 if(Frag_ShapeType != ShapeType_Text) {
                     
                     BorderData borderData = GetBorderData(Frag_SDFCoords, Frag_SDFSize, Frag_BorderColors, Frag_BorderSize, Frag_SDFBorderRadii, mainColor);
@@ -241,8 +242,7 @@ Shader "UIForia/Standard"
                 // todo -- pull underlay into a seperate shader
                 float d = tex2D(_FontTexture, i.texCoord0.zw + i.texCoord3.xy).a * underlayScale;
                 underlayColor = faceColor + fixed4(underlayColor.rgb * underlayColor.a, underlayColor.a)  * (saturate(d - underlayBias)) * (1 - faceColor.a);
-			
-                faceColor = lerp(faceColor, underlayColor, 1);
+                faceColor = lerp(faceColor, underlayColor, hasUnderlay);
                 faceColor.a *= opacity;
                 faceColor = UIForiaAlphaClipColor(faceColor, _MaskTexture, screenUV, clipRect, clipUvs);
                 return faceColor;               

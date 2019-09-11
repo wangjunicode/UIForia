@@ -15,7 +15,7 @@ namespace UIForia.Elements {
         public UIElement horizontalHandle { get; protected set; }
         public UIElement horizontalTrack { get; protected set; }
 
-        public float scrollSpeed = 6.66f;
+        public float scrollSpeed = 50f;
         public float fadeTime = 2f;
 
         public bool disableOverflowX;
@@ -47,7 +47,7 @@ namespace UIForia.Elements {
             float maxY = float.MinValue;
             
             for (int i = 0; i < childrenElement.children.size; i++) {
-                if (childrenElement.children[i].style.ClipBehavior == ClipBehavior.Normal) {
+                if (childrenElement.children[i].isEnabled && childrenElement.children[i].style.ClipBehavior == ClipBehavior.Normal) {
                     Rect screenRect = childrenElement.children[i].layoutResult.ScreenRect;
                     if (screenRect.x < minX) minX = screenRect.x;
                     if (screenRect.y < minY) minY = screenRect.y;

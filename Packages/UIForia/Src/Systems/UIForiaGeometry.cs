@@ -12,7 +12,7 @@ namespace UIForia.Rendering {
         public StructList<Vector4> texCoordList1;
         public StructList<int> triangleList;
         
-        public Color packedColors;
+        public Vector4 packedColors;
         public Vector4 objectData;
         public Texture mainTexture;
         public Vector4 miscData;

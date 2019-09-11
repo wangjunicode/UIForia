@@ -3,12 +3,23 @@ import "Demo/Theme.style" as theme;
 
 const buttonSize = 60px;
 
+style flex-vertical-centered {
+    FlexLayoutDirection = Vertical;
+    FlexLayoutCrossAxisAlignment = Center;
+    
+}
+
+style flex-horizontal-centered {
+    FlexLayoutDirection = Horizontal;
+    FlexLayoutCrossAxisAlignment = Center;
+}
+
 style building-designer-footer {
     BackgroundColor = black;
     
     TextColor = rgb(200, 200, 200);
     
-    FlexLayoutDirection = Column;
+    FlexLayoutDirection = Row;
     FlexLayoutCrossAxisAlignment = Center;
     FlexLayoutMainAxisAlignment = Start;
         

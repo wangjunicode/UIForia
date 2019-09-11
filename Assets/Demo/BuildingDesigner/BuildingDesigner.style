@@ -30,12 +30,14 @@ style <this> {
     BackgroundColor = white;
     TextFontAsset = @theme.fontGothamBold;
     LayoutType = Grid;
-    GridLayoutRowTemplate = 1mx 1mx 1fr;
-    GridLayoutColTemplate = 1mx;
+    GridLayoutColTemplate = 1pca;
+    GridLayoutRowTemplate = 1mx 1fr 1mx;
     GridLayoutColAlignment = Start;
+        GridLayoutColAlignment = Fit;
+        GridLayoutRowAlignment = Fit;
     Cursor = @theme.cursorDefault;   
-    FlexLayoutDirection = Horizontal;
-    FlexLayoutCrossAxisAlignment = End;
+//    FlexLayoutDirection = Horizontal;
+//    FlexLayoutCrossAxisAlignment = End;
     AlignX = 100% Parent;
     AlignY = 100% Parent;
     

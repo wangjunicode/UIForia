@@ -16,13 +16,9 @@ animation button-normal {
     }
 
     [keyframes] {
-        0% {
-            BackgroundColor = #fff;
-            Border = 2px; 
-        }
         100% {
             BackgroundColor = #C8C8C8;
-            Border = 0px; 
+            BorderColor = #C8C8C8;
         }
     }
 }
@@ -31,15 +27,11 @@ animation button-hover {
     [options] {
         duration = @durationBase;
     }
-    
+
     [keyframes] {
-        0% {
-            BackgroundColor = #C8C8C8; 
-            Border = 0px; 
-        }
         100% {
             BackgroundColor = #fff;
-            Border = 2px; 
+            BorderColor = black;
         }
     }
 }
@@ -161,8 +153,14 @@ style dialog-button {
 
 style building-designer-main {
     BackgroundColor = @backgroundColor;
+    PreferredWidth = 1pca;
+    FlexItemGrow = 1;
+    FlexItemShrink = 1;
     FlexLayoutDirection = Row;
     FlexLayoutCrossAxisAlignment = Stretch;
+    GridLayoutColAlignment = Fit;
+    GridLayoutRowAlignment = Fit;
+    PreferredHeight = 100%;
 }
 
 style tools-area {
@@ -172,17 +170,16 @@ style tools-area {
 style previews-area {
     Padding = 10px;
     FlexItemGrow = 1;
-    PreferredHeight = 1pca;
+    FlexItemShrink = 1;
+    LayoutFitHorizontal = Fill;
+    LayoutFitVertical = Fill;
 }
 
 style grid-with-buttons {
     LayoutType = Grid;
     GridLayoutDirection = Horizontal;
-    // todo buuuuug
     GridLayoutColTemplate = 64px 64px;
-    GridLayoutCrossAxisAutoSize = 64px;
-    GridLayoutColGap = 10;
-    GridLayoutRowGap = 10;
+    GridLayoutRowAutoSize = 64px;
     GridLayoutColAlignment = Center;
     GridLayoutRowAlignment = Center;
 }
@@ -247,30 +244,37 @@ style palette-item {
     }
 }
 
+style transclude {
+    LayoutBehavior = TranscludeChildren;
+} 
+
+
 style grid-with-brushes {
-    LayoutType = Grid;
-    GridLayoutColTemplate = 1mx 1mx 1mx 1mx;
-    GridLayoutCrossAxisAutoSize = 250px;
-    GridLayoutColGap = 10;
-    GridLayoutRowGap = 10;
+    FlexLayoutWrap = Wrap;
+    FlexLayoutDirection = Horizontal;
+    PreferredWidth = 100%;
+    LayoutFitHorizontal = Fill;
+    Padding = 10px;
 }
 
 style brush-button {
     TextColor = @theme.lightGrey;
-
-    Padding = 4px;
+    PreferredWidth = @brushButtonSize;
+    Padding = 4px;  
+    MarginRight = 10px;
+    MarginBottom = 20px;
 
     BorderRadius = 10px;
 
     FlexLayoutCrossAxisAlignment = Center;
     FlexLayoutMainAxisAlignment = Center;
-    BorderColor = black; 
     
     MinWidth = @brushButtonSize;
+    Border = 2px;
     
     run animation(button-normal);
+    
     [hover] {
-        Border = 2px;
         run animation(button-hover);
     }
 }

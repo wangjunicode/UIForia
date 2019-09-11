@@ -135,7 +135,7 @@ namespace UIForia.Rendering {
         ScrollbarSize = 1502,
         ScrollbarColor = 1503,
         
-        ShadowType = 1701,
+        //ShadowType = 1701,
         ShadowOffsetX = 1702,
         ShadowOffsetY = 1703,
         ShadowSizeX = 1704,

@@ -20,7 +20,7 @@ namespace Demo {
         private ApplicationState state = new ApplicationState();
 
         public override void OnEnable() {
-            ChangePanel(UIPanel.Menu);
+            ChangePanel(UIPanel.Building);
         }
 
         public override void HandleUIEvent(UIEvent evt) {

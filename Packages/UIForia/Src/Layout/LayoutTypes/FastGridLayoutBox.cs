@@ -191,16 +191,15 @@ namespace UIForia.Layout.LayoutTypes {
 
                 switch (colAlignment) {
                     case GridAxisAlignment.Center:
-                        finalWidth -= placement.margin.left + placement.margin.right;
-                        colPosition = x + (spannedTracksWidth * 0.5f) - (finalWidth * 0.5f);
-                        ;
+                        colPosition = 0.5f;
                         break;
 
                     case GridAxisAlignment.End:
-
+                        colPosition = 1f;
                         break;
 
                     case GridAxisAlignment.Start:
+                        colPosition = 0f;
                         break;
 
                     case GridAxisAlignment.Grow:

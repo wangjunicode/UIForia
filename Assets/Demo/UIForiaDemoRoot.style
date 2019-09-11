@@ -2,5 +2,5 @@ import "Demo/Theme.style" as theme;
 
 style <this> {
     PreferredSize = 1pca;
-    BackgroundImage = url("gamebg");
+    BackgroundImage = url("gamebg2");
 }

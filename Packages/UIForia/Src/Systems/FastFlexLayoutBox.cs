@@ -166,7 +166,32 @@ namespace UIForia.Systems {
         }
 
         public override float GetIntrinsicMinHeight() {
-            throw new System.NotImplementedException();
+            FastLayoutBox child = firstChild;
+
+            if (direction == LayoutDirection.Vertical) {
+                float min = 0;
+
+                while (child != null) {
+                    min += child.GetIntrinsicMinHeight();
+                    child = child.nextSibling;
+                }
+
+                return min;
+            }
+
+            // intrinsic min for horizontal direction is the max child intrinsic width
+            float max = 0;
+
+            while (child != null) {
+                float childMin = child.GetIntrinsicMinHeight();
+                if (childMin > max) {
+                    max = childMin;
+                }
+
+                child = child.nextSibling;
+            }
+
+            return max;
         }
 
         public override float GetIntrinsicPreferredWidth() {
@@ -213,7 +238,46 @@ namespace UIForia.Systems {
         }
 
         public override float GetIntrinsicPreferredHeight() {
-            throw new System.NotImplementedException();
+            FastLayoutBox child = firstChild;
+
+            if (direction == LayoutDirection.Vertical) {
+                float retn = 0;
+
+                while (child != null) {
+                    retn += child.GetIntrinsicPreferredHeight();
+                    child = child.nextSibling;
+                }
+
+                float contentWidth = retn;
+
+                retn += ResolveFixedSize(contentWidth, element.style.PaddingTop);
+                retn += ResolveFixedSize(contentWidth, element.style.PaddingBottom);
+                retn += ResolveFixedSize(contentWidth, element.style.BorderTop);
+                retn += ResolveFixedSize(contentWidth, element.style.BorderBottom);
+
+                return retn;
+            }
+            else {
+                // intrinsic max for horizontal direction is the max child intrinsic height
+                float retn = 0;
+
+                while (child != null) {
+                    float childMax = child.GetIntrinsicPreferredHeight(); //(element.View.Viewport.width);
+                    if (childMax > retn) {
+                        retn = childMax;
+                    }
+
+                    child = child.nextSibling;
+                }
+
+                float contentWidth = retn;
+
+                retn += ResolveFixedSize(contentWidth, element.style.PaddingTop);
+                retn += ResolveFixedSize(contentWidth, element.style.PaddingBottom);
+                retn += ResolveFixedSize(contentWidth, element.style.BorderTop);
+                retn += ResolveFixedSize(contentWidth, element.style.BorderBottom);
+                return retn;
+            }
         }
 
         private Size PerformLayoutHorizontal(BlockSize blockWidth, BlockSize blockHeight, bool isDryRun) {

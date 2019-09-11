@@ -507,7 +507,7 @@ inline fixed4 ComputeColor(float packedBg, float packedTint, int colorMode, floa
     // tintColor.rgb *= tintColor.a;
     // textureColor.rgb *= textureColor.a;
     
-    textureColor = lerp(textureColor, textureColor + tintColor, tintTexture);
+    textureColor = lerp(textureColor, textureColor * tintColor, tintTexture);
     if (useTexture && letterBoxTexture && (texCoord.x < 0 || texCoord.x > 1) || (texCoord.y < 0 || texCoord.y > 1)) {
         return bgColor; // could return a letterbox color instead
     }

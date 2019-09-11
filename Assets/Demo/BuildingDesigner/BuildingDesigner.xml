@@ -1,78 +1,122 @@
 <UITemplate>
 
-    <!--    <Style path="Theme.style" alias="theme"/>-->
-    <!--    <Style path="Util.style" alias="util"/>-->
-    <Style path="Demo/BuildingDesigner/BuildingDesigner.style" alias="designer-theme-root"/>
-    <!--    <Style path="Demo/BuildingDesigner/BuildingDesignerTopBar.style" alias="designer-theme-top"/>-->
-    <!--    <Style path="Demo/BuildingDesigner/BuildingDesignerMain.style" alias="designer-theme-main"/>-->
-    <!--    <Style path="Demo/BuildingDesigner/BuildingDesignerFooter.style" alias="designer-theme-footer"/>-->
-    <!--    <Style path="BasicElements/KlangButton/KlangButton.style" alias="klang-button"/>-->
-
+    <Style path="Demo/BuildingDesigner/BuildingDesigner.style" />
+    <Style path="Demo/BuildingDesigner/BuildingDesignerTopBar.style" alias="top"/>
+    <Style path="Demo/BuildingDesigner/BuildingDesignerMain.style" alias="main"/>
+    <Style path="Demo/BuildingDesigner/BuildingDesignerFooter.style" alias="footer"/>
+    
     <Using namespace="UIForia.Elements"/>
+    <Using namespace="Demo"/>
 
     <Contents>
-        
-        <Group>
-            <Group style="fake-select">
-
-                <Group style="fake-select-display">
-                    <Text>Basic is nothing ok if you say so</Text>
-                </Group>
-
-                <Group style="fake-select-chevron-holder">
-                    <Div style="chevron-up"/>
-                    <Div style="chevron-down"/>
-                </Group>
-
-                <Group style="fake-select-options">
-                    <Repeat list="BrushTypes">
-                        <Group>{$item.Label}</Group>
-                    </Repeat>
-                </Group>
-
-            </Group>
-
-            <Group style="corner-cut-window">
-
-            </Group>
-
-            <Group style="building-designer-root">
-
-                <Group style="building-designer-top-bar">
-
-                    <Text style.flexItemGrow="1">CONSTRUCTION MODE</Text>
-
-                    <Text>Type:</Text>
-                    
-
-                </Group>
-
-                <Group></Group>
-                <Group></Group>
-
-            </Group>
+        <Group style="building-designer-top-bar">
             <Group style="top-left-area flex-horizontal-centered">
-
                 <Text>CONSTRUCTION MODE</Text>
-
-                <!--                    <Group style="flex-horizontal-centered ml2">-->
-                <!--                        <Image src="'new_ui_icons/ui_icon_undo'" style="redo-button-image"/>-->
-                <!--                        <Div style="top-bar-text inactive">UNDO</Div>-->
-                <!--                    </Group>-->
-
-                <!--                    <Group style="flex-horizontal-centered ml1">-->
-                <!--                        <Image src="'new_ui_icons/ui_icon_redo'" style="redo-button-image"/>-->
-                <!--                        <Div style="top-bar-text inactive">REDO</Div>-->
-                <!--                    </Group>-->
-
+<!--                <Group style="flex-horizontal-centered ml2">-->
+<!--                    <Image src="'new_ui_icons/ui_icon_undo'" style="redo-button-image"/>-->
+<!--                    <Div style="top-bar-text inactive">UNDO</Div>-->
+<!--                </Group>-->
+<!--                <Group style="flex-horizontal-centered ml1">-->
+<!--                    <Image src="'new_ui_icons/ui_icon_redo'" style="redo-button-image"/>-->
+<!--                    <Div style="top-bar-text inactive">REDO</Div>-->
+<!--                </Group>-->
+            </Group>
+    
+            <Group style="top-right-area flex-horizontal-centered">
                 <Div style="top-bar-text ml1 mr1">TYPE:</Div>
-                <Select--int style="top-bar-text mr1 fixed-width-type" options="BrushTypes" onValueChanged="OnBrushTypeChanged"/>
+                <Select--int style="top-bar-text mr1 fixed-width-type top-bar-select" 
+                             options="BrushTypes" 
+                             onValueChanged="OnBrushTypeChanged"
+                             selectedElementIcon="'icons/ui_icon_popover_checkmark@2x'"
+                />
+            </Group>
+        </Group>
 
-                <Div style="flex-horizontal-centered">
-                    <Div style="top-bar-text ml1 mr1">STYLE:</Div>
+        <Group style="building-designer-main">
+
+            <Div style="tools-area">
+                <Div style="grid-with-buttons">
+                    <Image x-id="SELECT"      src="'new_ui_icons/ui_icon_select'"       style="tools-button" onMouseClick="ToolButtonClicked(ToolButton.SELECT)"/>
+                    <Image x-id="GRID_UP"     src="'new_ui_icons/ui_icon_grid_up'"      style="tools-button" onMouseClick="ToolButtonClicked(ToolButton.GRID_UP)"/>
+                    <Image x-id="ERASER"      src="'new_ui_icons/ui_icon_eraser'"       style="tools-button" onMouseClick="ToolButtonClicked(ToolButton.ERASER)"/>
+                    <Image x-id="GRID_DOWN"   src="'new_ui_icons/ui_icon_grid_down'"    style="tools-button" onMouseClick="ToolButtonClicked(ToolButton.GRID_DOWN)"/>
+                    <Image x-id="BRUSH"       src="'new_ui_icons/ui_icon_paint_brush'"  style="tools-button" onMouseClick="ToolButtonClicked(ToolButton.BRUSH)"/>
+                    <Image x-id="MAGIC_WAND"  src="'new_ui_icons/ui_icon_magic_wand'"   style="tools-button" onMouseClick="ToolButtonClicked(ToolButton.MAGIC_WAND)"/>
+                    <Image x-id="BUCKET"      src="'new_ui_icons/ui_icon_paint_bucket'" style="tools-button" onMouseClick="ToolButtonClicked(ToolButton.BUCKET)"/>
+                    <Image x-id="DELETE_ALL"  src="'new_ui_icons/ui_icon_delete_all'"   style="tools-button" onMouseClick="ToolButtonClicked(ToolButton.DELETE_ALL)"/>
+                    <Image x-id="EYE_DROPPER" src="'new_ui_icons/ui_icon_eye_dropper'"  style="tools-button" onMouseClick="ToolButtonClicked(ToolButton.EYE_DROPPER)"/>
+                    <Div style.backgroundColor="SelectedColor" style="tools-button color-preview" onMouseClick="OpenColorPalette()">
+                        <Div if="IsPaletteOpened" style="color-palette">
+                            <Repeat list="AvailableColors" style="color-selection-container">
+                                <Div style.backgroundColor="$item" style="palette-item" onMouseClick="SelectColor($item)"/>
+                            </Repeat>
+                        </Div>
+                    </Div>
                 </Div>
 
-            </Group>
+            </Div>
+
+
+            <ScrollView style="previews-area">
+
+                <Group if="CurrentBrushType == CategoryBASIC">
+
+                    <Repeat list="GetBasicBrushes(CurrentBasicBrushStyle)" style="grid-with-brushes">
+                        <Div style="brush-button" onMouseClick="SelectBrush($event, $item)">
+                            <Image texture="$item.Texture" style="image-width"/>
+                            <Text style="brush-label">{$item.Label}</Text>
+                        </Div>
+                    </Repeat>
+
+                </Group>
+
+                <Group if="CurrentBrushType == CategoryBLOCK">
+
+                    <Repeat list="BlockBrushes" style="grid-with-brushes">
+                        <Div style="brush-button" onMouseClick="SelectBrush($event, $item)">
+                            <Image texture="$item.Texture" style="image-width"/>
+                            <Text style="brush-label">{$item.Label}</Text>
+                        </Div>
+                    </Repeat>
+
+                </Group>
+
+                <Group if="IsSeedTemplate">
+
+                    <Repeat list="TemplateSeedBrushes" style="grid-with-brushes">
+                        <Div style="brush-button" onMouseClick="SelectBrush($event, $item)">
+                            <Image texture="$item.Texture" style="image-width"/>
+                            <Text style="brush-label">{$item.Label}</Text>
+                        </Div>
+                    </Repeat>
+
+                </Group>
+
+                <Group if="IsPlayerTemplate">
+
+                    <Group style="grid-with-brushes">
+
+                        <Repeat list="TemplatePlayerBrushes" style="transclude-children" >
+                            <Div style="brush-button" onMouseClick="SelectBrush($event, $item)">
+                                <Image texture="$item.Texture" style="image-width"/>
+                                <Text style="brush-label">{$item.Label}</Text>
+                                <KlangButton style="remove-button" label="'X'"
+                                             onMouseClick="DeleteBrush($event, $item)"/>
+                            </Div>
+
+                        </Repeat>
+
+                        <Div style="brush-button" onMouseClick="SaveBuilding()">
+                            <Image src="'new_ui_icons/ui_save_blocks_plus_icon'" style="plus-sign"/>
+                        </Div>
+                    </Group>
+
+                </Group>
+
+            </ScrollView>
+            
+            
+            
         </Group>
     </Contents>
 

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using UIForia.Elements;
 using UnityEditor;
@@ -76,15 +77,23 @@ namespace UIForia.Editor {
                     treeView.selectMode = false;
                 }
                 else {
-                    s_SelectedElementId = s_SelectedApplication.InputSystem.DebugElementsThisFrame[0].id;
+                    s_SelectedElementId = s_SelectedApplication.InputSystem.DebugElementsThisFrame[s_SelectedApplication.InputSystem.DebugElementsThisFrame.Count - 1].id;
                     IList<int> selectedIds = new List<int>(s_SelectedApplication.InputSystem.DebugElementsThisFrame.Count);
-                    
-                    for (int i = 0; i < s_SelectedApplication.InputSystem.DebugElementsThisFrame.Count; i++) {
+
+                    int maxT = 0;
+                    int selectIdx = 0;
+                    for (int i = s_SelectedApplication.InputSystem.DebugElementsThisFrame.Count - 1; i >= 0; i--) {
+                        if (s_SelectedApplication.InputSystem.DebugElementsThisFrame[i].depthTraversalIndex > maxT) {
+                            maxT = s_SelectedApplication.InputSystem.DebugElementsThisFrame[i].depthTraversalIndex;
+                            selectIdx = i;
+                        }
                         selectedIds.Add(s_SelectedApplication.InputSystem.DebugElementsThisFrame[i].id);
                     }
+
+                    s_SelectedElementId = s_SelectedApplication.InputSystem.DebugElementsThisFrame[selectIdx].id;
                     treeView.SetSelection(selectedIds);
                     if (selectedIds.Count > 0) {
-                        treeView.FrameItem(selectedIds[0]);
+                        treeView.FrameItem(selectedIds[selectIdx]);
                     }
                 }
             }

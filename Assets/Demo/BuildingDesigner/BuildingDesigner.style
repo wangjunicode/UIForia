@@ -6,7 +6,8 @@ const iconSize = 30px;
 
 animation show {
     [options] {
-        duration = 200;
+        duration = 300;
+        timingFunction = CubicEaseIn;
     }
     
     [keyframes] {
@@ -15,21 +16,29 @@ animation show {
 }
 animation hide {
     [options] {
-        duration = 200;
+        duration = 300;
+        timingFunction = CubicEaseIn;
     }
     
     [keyframes] {
-        100% { AlignY = -800%; }
+        100% { AlignY = 200% 100%; }
     }
 }
 
 style <this> {
-    Padding = 100px;
-    LayoutBehavior = Ignored;
+    PreferredSize = 1024px 512px;
+    BackgroundColor = white;
+    TextFontAsset = @theme.fontGothamBold;
+    LayoutType = Grid;
+    GridLayoutRowTemplate = 1mx 1mx 1fr;
+    GridLayoutColTemplate = 1mx;
+    GridLayoutColAlignment = Start;
+    Cursor = @theme.cursorDefault;   
     FlexLayoutDirection = Horizontal;
     FlexLayoutCrossAxisAlignment = End;
     AlignX = 100% Parent;
     AlignY = 100% Parent;
+    
     [attr:placement="show"] {
         run animation(show);
     }
@@ -47,75 +56,11 @@ style confirm-text-color { TextColor = @theme.confirmColor; }
 style save-exit-text-color { TextColor = @theme.saveExitColor; }
 style cancel-text-color { TextColor = @theme.cancelColor; }
 
-style fake-select {
-    PreferredSize = 1cnt 48px;
-    LayoutType = Stack;
-    BackgroundColor = White;
-    PaddingRight = 48px;
-    PaddingLeft = 16px;
-    PaddingTop = 6px;
-    PaddingBottom = 8px;
-    BorderRadius = 8px;
-    TextFontSize = 32px;
-    TextFontAsset = url("Fonts/GothamNarrow-Medium SDF");
-    Border = 2px;
-    BorderColor = #B2B2B2;//rgba(178, 178, 178, 255);
-    [hover] {
-        BorderColor = #00B5D9;
-    }
-}
-
-style fake-select-display {
-//    Border = 2px;
-//    BorderColor =  #b2b2b2;
-//    BorderRadius = 14px 0 0 14px;
-//    TextFontSize = 1em;
-//    //Padding = 6px 8px;
-//    PreferredSize = 1cnt 48px;
-//    FlexLayoutMainAxisAlignment = Center;
-//   
-//    [hover] {
-//        BorderColor = #00b5d9;
-//    }
-      BackgroundColor = Yellow;
-
-}
-
-style chevron-down {
-    PreferredSize = 10px 6px;
-    BackgroundImage = url("icons/ui_selectbox_down_chevron@2x");
-}
-
-style chevron-up {
-    MarginTop = 1px;
-    PreferredSize = 10px 6px;
-    BackgroundImage = url("icons/ui_selectbox_up_chevron@2x");
-}
-
-style fake-select-chevron-holder {
-    LayoutBehavior = Ignored;
-    AlignmentBehaviorX = Parent;
-    AlignX = 100%;
-    BackgroundColor = #00b5d0;
-    PreferredSize = 32px 1psz;
-    BorderColor = #006d82;
-    BorderRadius = 0 8px 8px 0;
-    Border = 2px;
-    FlexLayoutMainAxisAlignment = SpaceAround;
-    FlexLayoutCrossAxisAlignment = Center;
-    PaddingTop = 4px;
-    PaddingBottom = 4px;
-}
-
-style fake-select-options {
-    Visibility = Hidden;
-}
-
-style corner-cut-window {
-    PreferredSize = 800px 600px;
-    BackgroundColor = white;
-    Painter = "SeedWindow:TopLeft";
-}
+//style corner-cut-window {
+//    PreferredSize = 800px 600px;
+//    BackgroundColor = white;
+//    Painter = "SeedWindow:TopLeft";
+//}
 
 style menu-icon {
     BorderRadius = 50%;
@@ -165,20 +110,6 @@ style screen-bottom-right {
     TransformBehaviorY = AnchorMaxOffset;
 }
 
-style building-designer-root {
-    PreferredSize = 1024px 512px;
-    
-    BackgroundColor = rgb(255, 0, 0);
-    
-    TextFontAsset = @theme.fontGothamBold;
-    
-    LayoutType = Grid;
-    GridLayoutRowTemplate = 1mx 1mx 1fr;
-    GridLayoutColTemplate = 1mx;
-    GridLayoutColAlignment = Start;
-    Cursor = @theme.cursorDefault;
-}
-
 style select-height {
     PreferredWidth = 400px;
 }
@@ -204,24 +135,4 @@ style building-designer-help {
         Border = 2px;
         BorderColor = lightGrey;
     }
-}
-
-style building-designer-top-bar {
-    BackgroundColor = rgb(239, 239, 239);
-    
-    TextColor = @theme.darkGrey;
-    TextTransform = UpperCase;
-    TextFontSize = 1.1em;
-    
-    FlexLayoutDirection = Horizontal;
-    FlexLayoutCrossAxisAlignment = Center;
-    FlexLayoutMainAxisAlignment = Start;
-        
-    BorderBottom = 3px;
-    BorderColor = rgb(175, 175, 175);
-    
-    Padding = @topBarFramePad;
-    PaddingLeft = 1.2em;
-    
-    PreferredSize = 1psz, 64px;
 }

@@ -348,6 +348,20 @@ namespace UIForia.Rendering {
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.RadialLayoutRadius, value), state); }
         }
         
+        public float StackLayoutAlignHorizontal {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.StackLayoutAlignHorizontal, state).AsFloat; }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.StackLayoutAlignHorizontal, value), state); }
+        }
+        
+        public float StackLayoutAlignVertical {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.StackLayoutAlignVertical, state).AsFloat; }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.StackLayoutAlignVertical, value), state); }
+        }
+        
         public UIForia.Layout.AlignmentDirection AlignmentDirectionX {
             [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.AlignmentDirectionX, state).AsAlignmentDirection; }
@@ -1289,6 +1303,20 @@ namespace UIForia.Rendering {
             get { return FindUIFixedLengthProperty(StylePropertyId.RadialLayoutRadius); }
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.RadialLayoutRadius, value)); }
+        }
+            
+        public float StackLayoutAlignHorizontal {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return FindFloatProperty(StylePropertyId.StackLayoutAlignHorizontal); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.StackLayoutAlignHorizontal, value)); }
+        }
+            
+        public float StackLayoutAlignVertical {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return FindFloatProperty(StylePropertyId.StackLayoutAlignVertical); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.StackLayoutAlignVertical, value)); }
         }
             
         public UIForia.Layout.AlignmentDirection AlignmentDirectionX {
@@ -2334,6 +2362,24 @@ namespace UIForia.Rendering {
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.RadialLayoutRadius, out property)) return property.AsUIFixedLength;
                     return DefaultStyleValues_Generated.RadialLayoutRadius;
+                }
+            }
+
+            public float StackLayoutAlignHorizontal { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.StackLayoutAlignHorizontal, out property)) return property.AsFloat;
+                    return DefaultStyleValues_Generated.StackLayoutAlignHorizontal;
+                }
+            }
+
+            public float StackLayoutAlignVertical { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.StackLayoutAlignVertical, out property)) return property.AsFloat;
+                    return DefaultStyleValues_Generated.StackLayoutAlignVertical;
                 }
             }
 
@@ -3519,6 +3565,22 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.RadialLayoutRadius, state).AsUIFixedLength;
         }
         
+        public void SetStackLayoutAlignHorizontal(in float? value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.StackLayoutAlignHorizontal, value), state);
+        }
+
+        public float GetStackLayoutAlignHorizontal(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.StackLayoutAlignHorizontal, state).AsFloat;
+        }
+        
+        public void SetStackLayoutAlignVertical(in float? value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.StackLayoutAlignVertical, value), state);
+        }
+
+        public float GetStackLayoutAlignVertical(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.StackLayoutAlignVertical, state).AsFloat;
+        }
+        
         public void SetAlignmentDirectionX(in UIForia.Layout.AlignmentDirection? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.AlignmentDirectionX, (int)value), state);
         }
@@ -4300,6 +4362,10 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.RadialLayoutEndAngle, RadialLayoutEndAngle);
 				case StylePropertyId.RadialLayoutRadius:
 					 return new StyleProperty(StylePropertyId.RadialLayoutRadius, RadialLayoutRadius);
+				case StylePropertyId.StackLayoutAlignHorizontal:
+					 return new StyleProperty(StylePropertyId.StackLayoutAlignHorizontal, StackLayoutAlignHorizontal);
+				case StylePropertyId.StackLayoutAlignVertical:
+					 return new StyleProperty(StylePropertyId.StackLayoutAlignVertical, StackLayoutAlignVertical);
 				case StylePropertyId.AlignmentDirectionX:
 					 return new StyleProperty(StylePropertyId.AlignmentDirectionX, (int)AlignmentDirectionX);
 				case StylePropertyId.AlignmentDirectionY:
@@ -4506,6 +4572,8 @@ namespace UIForia.Rendering {
                     case StylePropertyId.RadialLayoutStartAngle: return true;
                     case StylePropertyId.RadialLayoutEndAngle: return true;
                     case StylePropertyId.RadialLayoutRadius: return true;
+                    case StylePropertyId.StackLayoutAlignHorizontal: return true;
+                    case StylePropertyId.StackLayoutAlignVertical: return true;
                     case StylePropertyId.AlignmentOriginX: return true;
                     case StylePropertyId.AlignmentOriginY: return true;
                     case StylePropertyId.AlignmentOffsetX: return true;

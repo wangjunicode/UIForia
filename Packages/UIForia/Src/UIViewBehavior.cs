@@ -23,11 +23,8 @@ namespace UIForia {
             path = new Path2D();
         }
 
-
         private void DrawOverlay(RenderContext ctx) {
-            path.Clear();
 
-            ctx.DrawPath(path);
         }
 
         private void Update() {

@@ -1,6 +1,5 @@
 // ------------------ FOOTER ------------------ 
-import "Theme.style" as theme;
-import "BuildingDesigner/BuildingDesigner.style" as designerTheme;
+import "Demo/Theme.style" as theme;
 
 const buttonSize = 60px;
 
@@ -44,28 +43,28 @@ style footer-total-cost {
 }
 
 style confirm-button {
-    TextColor = @designerTheme.confirmColor;
+    TextColor = @theme.confirmColor;
         
     [hover] {
-        BackgroundColor = @designerTheme.confirmColor;
+        BackgroundColor = @theme.confirmColor;
         TextColor = white;
     }
 }
 
 style save-exit-button {
-    TextColor = @designerTheme.saveExitColor;
+    TextColor = @theme.saveExitColor;
     
     [hover] {
-        BackgroundColor = @designerTheme.saveExitColor;
+        BackgroundColor = @theme.saveExitColor;
         TextColor = white;
     }
 }
 
 style cancel-button {
-    TextColor = @designerTheme.cancelColor;
+    TextColor = @theme.cancelColor;
     
     [hover] {
-        BackgroundColor = @designerTheme.cancelColor;
+        BackgroundColor = @theme.cancelColor;
         TextColor = white;
     }
 }

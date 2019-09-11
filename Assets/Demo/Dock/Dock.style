@@ -2,7 +2,8 @@ import "Demo/Theme.style" as theme;
 
 animation show {
     [options] {
-        duration = 200;
+        duration = 300;
+        timingFunction = CubicEaseIn;
     }
     
     [keyframes] {
@@ -11,11 +12,12 @@ animation show {
 }
 animation hide {
     [options] {
-        duration = 200;
+        duration = 300;
+        timingFunction = CubicEaseIn;
     }
     
     [keyframes] {
-        100% { AlignY = 200%; }
+        100% { AlignY = 200% 100%; }
     }
 }
 
@@ -32,6 +34,7 @@ style <this> {
     [attr:placement="hide"] {
         run animation(hide);
     }
+    
 }
 
 style transclude {
@@ -60,6 +63,7 @@ style weather {
     AlignmentBehaviorY = LayoutBox;
     BackgroundImage = url("Sprites/StatusImageWeatherIconCloudy");
     BackgroundFit = Contain;
+   
 }
 
 style temp-gauge {

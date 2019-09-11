@@ -493,19 +493,17 @@ namespace UIForia.Layout {
 
             for (int i = 0; i < enabledBoxList.size; i++) {
                 UIElement element = layoutDatas[i].element;
-
+                        
+                if (element.style.Visibility == Visibility.Hidden) continue;
+                
                 // todo -- convert to flag 
                 if (element is IPointerQueryHandler handler) {
                     if (!handler.ContainsPoint(point)) {
                         continue;
                     }
                 }
-
-                if (!element.layoutResult.ScreenRect.ContainOrOverlap(point)) {
-                    continue;
-                }
-
-                else if (!element.layoutResult.ScreenRect.ContainOrOverlap(point) || PointInClippedArea(point, element)) {
+                
+                if (!element.layoutResult.ScreenRect.ContainOrOverlap(point) || PointInClippedArea(point, element)) {
                     continue;
                 }
 

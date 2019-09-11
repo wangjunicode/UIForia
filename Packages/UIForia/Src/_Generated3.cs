@@ -63,6 +63,8 @@ namespace UIForia.Rendering {
 		public const float RadialLayoutStartAngle = 0f;
 		public const float RadialLayoutEndAngle = 360f;
 		public static readonly UIFixedLength RadialLayoutRadius = new UIFixedLength(0.5f, UIFixedUnit.Percent);
+		public const float StackLayoutAlignHorizontal = 0f;
+		public const float StackLayoutAlignVertical = 0f;
 		public const AlignmentDirection AlignmentDirectionX = UIForia.Layout.AlignmentDirection.Start;
 		public const AlignmentDirection AlignmentDirectionY = UIForia.Layout.AlignmentDirection.Start;
 		public const AlignmentBehavior AlignmentBehaviorX = UIForia.Layout.AlignmentBehavior.Default;
@@ -249,6 +251,10 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.RadialLayoutEndAngle, 360f);
 				case StylePropertyId.RadialLayoutRadius:
 					 return new StyleProperty(StylePropertyId.RadialLayoutRadius, new UIFixedLength(0.5f, UIFixedUnit.Percent));
+				case StylePropertyId.StackLayoutAlignHorizontal:
+					 return new StyleProperty(StylePropertyId.StackLayoutAlignHorizontal, 0f);
+				case StylePropertyId.StackLayoutAlignVertical:
+					 return new StyleProperty(StylePropertyId.StackLayoutAlignVertical, 0f);
 				case StylePropertyId.AlignmentDirectionX:
 					 return new StyleProperty(StylePropertyId.AlignmentDirectionX, (int)UIForia.Layout.AlignmentDirection.Start);
 				case StylePropertyId.AlignmentDirectionY:

@@ -75,7 +75,7 @@
                 v.vertex = mul(transform, float4(v.vertex.xyz, 1));
                 o.vertex = UnityObjectToClipPos(v.vertex);
                 // if pixel snapping is on some shapes get cut off. find a way to account for this
-                o.vertex = UIForiaPixelSnap(o.vertex);
+               //  o.vertex = UIForiaPixelSnap(o.vertex);
                 o.texCoord0 = v.texCoord0;
                 o.texCoord1 = v.texCoord1;
                 o.texCoord2 = float4(size.x, size.y, shapeType, colorMode);

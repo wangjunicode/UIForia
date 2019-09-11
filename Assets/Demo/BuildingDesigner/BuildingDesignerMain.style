@@ -2,7 +2,7 @@
 //TODO: tooltips on brush-images (with cost)
 //TODO: grid with buttons doesn't stretch vertically
 
-import "Theme.style" as theme;
+import "Demo/Theme.style" as theme;
 
 const durationBase = 100;
 const durationDialog = 500;
@@ -136,7 +136,7 @@ style dialog-buttons {
     
     PreferredSize = 1cnt;
     
-    FlexLayoutDirection = Column;
+    FlexLayoutDirection = Row;
     FlexLayoutMainAxisAlignment = Center;
 }
 
@@ -161,7 +161,7 @@ style dialog-button {
 
 style building-designer-main {
     BackgroundColor = @backgroundColor;
-    FlexLayoutDirection = Column;
+    FlexLayoutDirection = Row;
     FlexLayoutCrossAxisAlignment = Stretch;
 }
 
@@ -177,6 +177,8 @@ style previews-area {
 
 style grid-with-buttons {
     LayoutType = Grid;
+    GridLayoutDirection = Horizontal;
+    // todo buuuuug
     GridLayoutColTemplate = 64px 64px;
     GridLayoutCrossAxisAutoSize = 64px;
     GridLayoutColGap = 10;

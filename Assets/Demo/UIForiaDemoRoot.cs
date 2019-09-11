@@ -33,12 +33,12 @@ namespace Demo {
             state.CurrentPanel = panel;
             switch (panel) {
                 case UIPanel.Menu:
-                    FindFirstByType<Dock>().SetAttribute("placement", "show");
-                    FindFirstByType<BuildingDesigner>().SetAttribute("placement", "hide");
+                    FindFirstByType<Dock>()?.SetAttribute("placement", "show");
+                    FindFirstByType<BuildingDesigner>()?.SetAttribute("placement", "hide");
                     break;
                 case UIPanel.Building:
-                    FindFirstByType<Dock>().SetAttribute("placement", "hide");
-                    FindFirstByType<BuildingDesigner>().SetAttribute("placement", "show");
+                    FindFirstByType<Dock>()?.SetAttribute("placement", "hide");
+                    FindFirstByType<BuildingDesigner>()?.SetAttribute("placement", "show");
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(panel), panel, null);

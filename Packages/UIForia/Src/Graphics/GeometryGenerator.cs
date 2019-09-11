@@ -845,40 +845,6 @@ namespace Vertigo {
             return div == 0 ? 0 : (v - bottom) / div;
         }
 
-        public static void Stroke(ShapeGenerator shapeGenerator, GeometryCache retn, in RenderState renderState) {
-            int shapeCount = shapeGenerator.shapeList.Count;
-            ShapeGenerator.ShapeDef[] shapes = shapeGenerator.shapeList.array;
-
-            for (int i = 0; i < shapeCount; i++) {
-                switch (shapes[i].shapeType) {
-                    case ShapeType.Unset:
-                        break;
-                    case ShapeType.Rect:
-                        break;
-                    case ShapeType.RoundedRect:
-                        break;
-                    case ShapeType.Circle:
-                        break;
-                    case ShapeType.Ellipse:
-                        break;
-                    case ShapeType.Triangle:
-                        break;
-                    case ShapeType.Path:
-                        // StrokeOpenPath(shapeGenerator.pointList, shapeGenerator.shapeList[i], retn, renderState);
-                        break;
-                    case ShapeType.ClosedPath:
-                        // StrokeClosedPath(shapeGenerator.pointList, shapeGenerator.shapeList[i], retn, renderState);
-                        break;
-                    case ShapeType.Polygon:
-                        break;
-                    case ShapeType.Rhombus:
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-            }
-        }
-
         private static void GenerateStartCap(in GeometryData data, ShapeGenerator.PathPoint[] pathPointArray, int startIdx, in RenderState renderState) {
             float halfStrokeWidth = renderState.strokeWidth * 0.5f;
             Vector2 start = pathPointArray[startIdx + 0].position;
@@ -1086,30 +1052,21 @@ namespace Vertigo {
             if (pointRange.length < 2) {
                 return default;
             }
-
-            float halfStrokeWidth = renderState.strokeWidth * 0.5f;
-            LineJoin join = renderState.lineJoin;
-            int miterLimit = renderState.miterLimit;
-
+            
             int vertexStart = data.positionList.size;
             int triangleStart = data.triangleList.size;
 
-            ComputeOpenPathSegments(pointRange, pathPoints, s_ScratchVector2);
-
-            int count = s_ScratchVector2.size;
-            Vector2[] midpoints = s_ScratchVector2.array;
-
-            GenerateStartCap(data, pathPoints.array, pointRange.start, renderState);
-
-            ShapeGenerator.PathPoint[] pathPointArray = pathPoints.array;
-
-            EnsureCapacityForStrokeTriangles(data, join, count / 2);
-
-            for (int i = 1; i < count; i++) {
-                CreateStrokeTriangles(data, midpoints[i - 1], pathPointArray[i].position, midpoints[i], halfStrokeWidth, join, miterLimit);
+            int pointStart = pointRange.start;
+            ShapeGenerator.PathPoint[] points = pathPoints.array;
+            
+            for (int i = pointStart + 1; i < pathPoints.size; i++) {
+                if (points[i].flags == ShapeGenerator.PointFlag.Move) {
+                    StrokePathSegment(data, pathPoints, new RangeInt(pointStart, i - pointStart), renderState);
+                    pointStart = i;
+                }
             }
 
-            GenerateEndCap(data, pathPoints.array, pointRange.end, renderState);
+            StrokePathSegment(data, pathPoints, new RangeInt(pointStart, pathPoints.size - pointStart), renderState);
 
             return new GeometryRange() {
                 vertexStart = vertexStart,
@@ -1119,6 +1076,33 @@ namespace Vertigo {
             };
         }
 
+        private static void StrokePathSegment(in GeometryData data, StructList<ShapeGenerator.PathPoint> pathPoints,  in RangeInt pointRange, in RenderState renderState) {
+            
+            if (pointRange.length < 2) {
+                return;
+            }
+            
+            float halfStrokeWidth = renderState.strokeWidth * 0.5f;
+            LineJoin join = renderState.lineJoin;
+            int miterLimit = renderState.miterLimit;
+            
+            ComputeOpenPathSegments(pointRange, pathPoints, s_ScratchVector2);
+
+            int count = s_ScratchVector2.size;
+            Vector2[] midpoints = s_ScratchVector2.array;
+
+            GenerateStartCap(data, pathPoints.array, pointRange.start, renderState);
+            
+            EnsureCapacityForStrokeTriangles(data, join, count / 2);
+
+            for (int i = 1; i < count - 1; i++) {
+                // todo -- replace w/ Vase, this sucks for lots of reasons
+                CreateStrokeTriangles(data, midpoints[i - 1], midpoints[i], midpoints[i + 1], halfStrokeWidth, join, miterLimit);
+            }
+
+            GenerateEndCap(data, pathPoints.array, pointRange.end, renderState);
+        }
+        
         public static GeometryRange StrokeClosedPath(in GeometryData data, StructList<ShapeGenerator.PathPoint> pathPoints, in RangeInt pointRange, in RenderState renderState) {
             if (pointRange.length < 2) {
                 return default;
@@ -1180,32 +1164,31 @@ namespace Vertigo {
         }
 
         private static void ComputeOpenPathSegments(RangeInt range, StructList<ShapeGenerator.PathPoint> points, StructList<Vector2> midpoints) {
-            int count = range.length - 2;
-            int ptIdx = 0;
+            int count = range.length;
             ShapeGenerator.PathPoint[] pointData = points.array;
 
-            midpoints.EnsureCapacity(count + 2);
+            midpoints.EnsureCapacity(count * 2);
             midpoints.size = 0;
 
             Vector2[] data = midpoints.array;
 
-            data[ptIdx].x = points[0].position.x;
-            data[ptIdx].y = points[0].position.y;
+            int start = range.start;
+            int end = range.start + count;
+            int ptIdx = 0;
+            data[ptIdx].x = points[start].position.x;
+            data[ptIdx].y = points[start].position.y;
             ptIdx++;
 
-            int start = range.start + 1;
-            int end = range.start + count;
-
-            for (int i = start; i < end; i++) {
-                Vector2 p0 = pointData[i + 0].position;
-                Vector2 p1 = pointData[i + 1].position;
+            for (int i = start + 1; i < end; i++) {
+                Vector2 p0 = pointData[i - 1].position;
+                Vector2 p1 = pointData[i - 0].position;
                 data[ptIdx].x = (p0.x + p1.x) * 0.5f;
                 data[ptIdx].y = (p0.y + p1.y) * 0.5f;
                 ptIdx++;
             }
 
-            data[ptIdx].x = points[end + 1].position.x;
-            data[ptIdx].y = points[end + 1].position.y;
+            data[ptIdx].x = points[end - 1].position.x;
+            data[ptIdx].y = points[end - 1].position.y;
             midpoints.size = ptIdx + 1;
         }
 

@@ -7,12 +7,11 @@ namespace UIForia.Layout {
     public class StackLayoutBox : FastLayoutBox {
 
         protected override void PerformLayout() {
-            
             BlockSize blockWidth = containingBoxWidth;
             BlockSize blockHeight = containingBoxHeight;
-            
+
             AdjustBlockSizes(ref blockWidth, ref blockHeight);
-            
+
             FastLayoutBox ptr = firstChild;
             SizeConstraints sizeConstraints = default;
             OffsetRect margin = default;
@@ -21,7 +20,10 @@ namespace UIForia.Layout {
             float contentAreaHeight = size.height - paddingBox.top - paddingBox.bottom - borderBox.top - borderBox.bottom;
             float topOffset = paddingBox.top + borderBox.top;
             float leftOffset = paddingBox.left + borderBox.left;
-            
+
+            float horizontalAlignment = element.style.StackLayoutAlignHorizontal;
+            float verticalAlignment = element.style.StackLayoutAlignVertical;
+
             while (ptr != null) {
                 ptr.GetWidth(blockWidth, ref sizeConstraints);
                 ptr.GetMarginHorizontal(blockWidth, ref margin);
@@ -30,9 +32,9 @@ namespace UIForia.Layout {
                 ptr.GetMarginVertical(blockHeight, ref margin);
                 float clampedHeight = Mathf.Max(sizeConstraints.minHeight, Mathf.Min(sizeConstraints.maxHeight, sizeConstraints.prefHeight));
 
-                ptr.ApplyHorizontalLayout(leftOffset, blockWidth, contentAreaWidth, clampedWidth, 0, LayoutFit.None);
-                ptr.ApplyVerticalLayout(topOffset, blockHeight, contentAreaHeight, clampedHeight, 0, LayoutFit.None);
-                
+                ptr.ApplyHorizontalLayout(leftOffset, blockWidth, contentAreaWidth, clampedWidth, horizontalAlignment, LayoutFit.None);
+                ptr.ApplyVerticalLayout(topOffset, blockHeight, contentAreaHeight, clampedHeight, verticalAlignment, LayoutFit.None);
+
                 ptr = ptr.nextSibling;
             }
 
@@ -51,16 +53,16 @@ namespace UIForia.Layout {
 
             BlockSize blockWidth = containingBoxWidth;
             BlockSize blockHeight = containingBoxHeight;
-            
+
             AdjustBlockSizes(ref blockWidth, ref blockHeight);
-            
+
             FastLayoutBox ptr = firstChild;
             SizeConstraints sizeConstraints = default;
             OffsetRect margin = default;
             while (ptr != null) {
                 ptr.GetWidth(blockWidth, ref sizeConstraints);
                 ptr.GetMarginHorizontal(blockWidth, ref margin);
-                float clampedWidth = Mathf.Max(sizeConstraints.minWidth, Mathf.Min(sizeConstraints.maxWidth, sizeConstraints.prefWidth)) + margin.left + margin.right;;
+                float clampedWidth = Mathf.Max(sizeConstraints.minWidth, Mathf.Min(sizeConstraints.maxWidth, sizeConstraints.prefWidth)) + margin.left + margin.right;
                 ptr.GetHeight(clampedWidth, blockWidth, blockHeight, ref sizeConstraints);
                 ptr.GetMarginVertical(blockHeight, ref margin);
                 float clampedHeight = Mathf.Max(sizeConstraints.minHeight, Mathf.Min(sizeConstraints.maxHeight, sizeConstraints.prefHeight)) + margin.top + margin.bottom;
@@ -73,18 +75,41 @@ namespace UIForia.Layout {
         }
 
         public override float GetIntrinsicPreferredWidth() {
-            throw new NotImplementedException();
+            float retn = 0;
+
+            FastLayoutBox ptr = firstChild;
+            
+            while (ptr != null) {
+                float width = ptr.GetIntrinsicPreferredWidth();
+                // ptr.GetMarginHorizontal();
+                if (width > retn) retn = width;
+                ptr = ptr.nextSibling;
+            }
+
+            return retn + paddingBox.left + paddingBox.right + borderBox.left + borderBox.right;
         }
 
         public override float GetIntrinsicPreferredHeight() {
-            throw new NotImplementedException();
+            float retn = 0;
+
+            FastLayoutBox ptr = firstChild;
+            
+            while (ptr != null) {
+                float height = ptr.GetIntrinsicPreferredHeight();
+                // ptr.GetMarginHorizontal();
+                if (height > retn) retn = height;
+                ptr = ptr.nextSibling;
+            }
+
+            return retn + paddingBox.top + paddingBox.bottom + borderBox.top + borderBox.bottom;
+            
         }
 
         public override float ComputeContentWidth(BlockSize blockWidth) {
             float retn = 0;
 
             BlockSize blockHeight = default;
-            
+
             if (prefHeight.unit == UIMeasurementUnit.Content) {
                 blockHeight.size = containingBoxHeight.size;
                 blockHeight.contentAreaSize = containingBoxHeight.contentAreaSize;
@@ -93,13 +118,13 @@ namespace UIForia.Layout {
                 blockHeight.size = size.height;
                 blockHeight.contentAreaSize = size.height - paddingBox.top - paddingBox.bottom - borderBox.top - borderBox.bottom;
             }
-            
+
             AdjustBlockSizes(ref blockWidth, ref blockHeight);
 
             FastLayoutBox ptr = firstChild;
             SizeConstraints sizeConstraints = default;
             OffsetRect margin = default;
-            
+
             while (ptr != null) {
                 ptr.GetWidth(blockWidth, ref sizeConstraints);
                 ptr.GetMarginHorizontal(blockWidth, ref margin);
@@ -115,14 +140,15 @@ namespace UIForia.Layout {
             float retn = 0;
 
             AdjustBlockSizes(ref blockWidth, ref blockHeight);
-            
+
             FastLayoutBox ptr = firstChild;
             SizeConstraints sizeConstraints = default;
             OffsetRect margin = default;
             while (ptr != null) {
                 ptr.GetWidth(blockWidth, ref sizeConstraints);
                 ptr.GetMarginHorizontal(blockWidth, ref margin);
-                float clampedWidth = Mathf.Max(sizeConstraints.minWidth, Mathf.Min(sizeConstraints.maxWidth, sizeConstraints.prefWidth)) + margin.left + margin.right;;
+                float clampedWidth = Mathf.Max(sizeConstraints.minWidth, Mathf.Min(sizeConstraints.maxWidth, sizeConstraints.prefWidth)) + margin.left + margin.right;
+                ;
                 ptr.GetHeight(clampedWidth, blockWidth, blockHeight, ref sizeConstraints);
                 ptr.GetMarginVertical(blockHeight, ref margin);
                 float clampedHeight = Mathf.Max(sizeConstraints.minHeight, Mathf.Min(sizeConstraints.maxHeight, sizeConstraints.prefHeight)) + margin.top + margin.bottom;
@@ -133,7 +159,6 @@ namespace UIForia.Layout {
 
             return retn;
         }
-        
 
     }
 

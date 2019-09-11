@@ -8,6 +8,7 @@ using UIForia.Parsing.Style.AstNodes;
 using UIForia.Rendering;
 using UIForia.Text;
 using UIForia.Util;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using FontStyle = UIForia.Text.FontStyle;
 using TextAlignment = UIForia.Text.TextAlignment;
@@ -110,6 +111,9 @@ namespace UIForia.Compilers.Style {
                 {"gridlayoutrowautosize", (targetStyle, property, context) => targetStyle.GridLayoutRowAutoSize = MapGridLayoutTemplate(property, context)},
                 {"gridlayoutcolgap", (targetStyle, property, context) => targetStyle.GridLayoutColGap = MapNumber(property.children[0], context)},
                 {"gridlayoutrowgap", (targetStyle, property, context) => targetStyle.GridLayoutRowGap = MapNumber(property.children[0], context)},
+                
+                {"stacklayoutalignhorizontal", (targetStyle, property, context) => targetStyle.StackLayoutAlignHorizontal = MapRelativeValue(property.children[0], context)},
+                {"stacklayoutalignvertical", (targetStyle, property, context) => targetStyle.StackLayoutAlignVertical = MapRelativeValue(property.children[0], context)},
 
                 {"flexitemgrow", (targetStyle, property, context) => targetStyle.FlexItemGrow = (int) MapNumber(property.children[0], context)},
                 {"flexitemshrink", (targetStyle, property, context) => targetStyle.FlexItemShrink = (int) MapNumber(property.children[0], context)},
@@ -239,7 +243,10 @@ namespace UIForia.Compilers.Style {
                 else {
                     OffsetMeasurement measurement = MapOffsetMeasurement(value, context);
                     targetStyle.AlignmentOriginX = measurement;
-                    targetStyle.AlignmentOffsetX = new OffsetMeasurement(-measurement.value, measurement.unit);
+                    
+                    if (measurement.unit == OffsetMeasurementUnit.Percent) {
+                        targetStyle.AlignmentOffsetX = new OffsetMeasurement(-measurement.value, measurement.unit);
+                    }
                 }
             }
             else if (property.children.size == 2) {
@@ -251,7 +258,9 @@ namespace UIForia.Compilers.Style {
 
                     if (Enum.TryParse(identifierNode.name, true, out AlignmentBehavior behavior)) {
                         targetStyle.AlignmentBehaviorX = behavior;
-                        targetStyle.AlignmentOffsetX = new OffsetMeasurement(-measurement.value, measurement.unit);
+                        if (measurement.unit == OffsetMeasurementUnit.Percent) {
+                            targetStyle.AlignmentOffsetX = new OffsetMeasurement(-measurement.value, measurement.unit);
+                        }
                     }
 
                 }
@@ -293,7 +302,9 @@ namespace UIForia.Compilers.Style {
                 else {
                     OffsetMeasurement measurement = MapOffsetMeasurement(value, context);
                     targetStyle.AlignmentOriginY = measurement;
-                    targetStyle.AlignmentOffsetY = new OffsetMeasurement(-measurement.value, measurement.unit);
+                    if (measurement.unit == OffsetMeasurementUnit.Percent) {
+                        targetStyle.AlignmentOffsetY = new OffsetMeasurement(-measurement.value, measurement.unit);
+                    }
                 }
             }
             else if (property.children.size == 2) {
@@ -305,7 +316,9 @@ namespace UIForia.Compilers.Style {
 
                     if (Enum.TryParse(identifierNode.name, true, out AlignmentBehavior behavior)) {
                         targetStyle.AlignmentBehaviorY = behavior;
-                        targetStyle.AlignmentOffsetY = new OffsetMeasurement(-measurement.value, measurement.unit);
+                        if (measurement.unit == OffsetMeasurementUnit.Percent) {
+                            targetStyle.AlignmentOffsetY = new OffsetMeasurement(-measurement.value, measurement.unit);
+                        }
                     }
 
                 }
@@ -1319,6 +1332,45 @@ namespace UIForia.Compilers.Style {
             byte blue = (byte) MapNumber(rgbaNode.blue, context);
 
             return new Color32(red, green, blue, 255);
+        }
+
+        internal static float MapRelativeValue(StyleASTNode node, StyleCompileContext context) {
+            node = context.GetValueForReference(node);
+
+            switch (node) {
+                case MeasurementNode measurementNode:
+                    if (TryParseFloat(measurementNode.value.rawValue, out float measurementValue)) {
+                        if (measurementNode.unit.value == "%") {
+                            measurementValue *= 0.01f;
+                        }
+                        else {
+                            throw new CompileException(context.fileName, node, $"This property only accepts % as a unit but you used a {measurementNode.unit.value}");
+                        }
+
+                        return measurementValue;
+                    }
+
+                    break;
+                case StyleIdentifierNode identifierNode: {
+                    switch (identifierNode.name.ToLower()) {
+                        case "start": return 0f;
+                        case "center": return 0.5f;
+                        case "end": return 1f;
+                        default: throw new CompileException(context.fileName, node, $"Expected a [start|center|end] but all I got was this lousy {node}");
+                    }
+                }
+                case StyleLiteralNode literalNode: {
+                    if (literalNode.type == StyleASTNodeType.NumericLiteral) {
+                        if (TryParseFloat(((StyleLiteralNode) node).rawValue, out float number)) {
+                            return number;
+                        }
+                    }
+
+                    break;
+                } 
+            }
+
+            throw new CompileException(context.fileName, node, $"Expected a numeric value but all I got was this lousy {node}");
         }
 
         internal static float MapNumber(StyleASTNode node, StyleCompileContext context) {

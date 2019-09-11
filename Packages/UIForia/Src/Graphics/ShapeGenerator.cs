@@ -112,14 +112,14 @@ namespace Vertigo {
         public void MoveTo(float x, float y) {
             lastPoint = new Vector2(x, y);
             currentPath.pointRange.length++;
-            pointList.Add(new PathPoint(lastPoint.x, lastPoint.y, PointFlag.Corner));
+            pointList.Add(new PathPoint(lastPoint.x, lastPoint.y, PointFlag.Move));
             buildingPath = true;
         }
 
         public void MoveTo(Vector2 position) {
             lastPoint = position;
             currentPath.pointRange.length++;
-            pointList.Add(new PathPoint(lastPoint.x, lastPoint.y, PointFlag.Corner));
+            pointList.Add(new PathPoint(lastPoint.x, lastPoint.y, PointFlag.Move));
             buildingPath = true;
         }
 
@@ -344,7 +344,8 @@ namespace Vertigo {
 
             Hole = 1 << 1,
             Corner = 1 << 2,
-            HoleStart = 1 << 3
+            HoleStart = 1 << 3,
+            Move = 1 << 4
 
         }
 

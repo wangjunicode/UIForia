@@ -112,7 +112,7 @@ namespace UIForia.Layout {
 
                 LayoutResult layoutResult = element.layoutResult;
 
-                // todo -- layout result might work better as a proxy to layoutBox data
+                // todo -- layout   result might work better as a proxy to layoutBox data
                 layoutResult.padding = element.layoutBox.paddingBox;
                 layoutResult.border = element.layoutBox.borderBox;
                 layoutResult.actualSize = element.layoutBox.size;

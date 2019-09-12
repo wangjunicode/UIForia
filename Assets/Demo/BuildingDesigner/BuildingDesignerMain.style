@@ -42,12 +42,7 @@ animation dialog-button-normal {
     }
         
     [keyframes] {
-        0% {
-            Border = 5px;
-        }
-        100% {
-            Border = 0px;
-        }
+        100% { Border = 0px; }
     }
 }
 
@@ -57,12 +52,7 @@ animation dialog-button-hover {
     }
     
     [keyframes] {
-        0% {
-            Border = 0px; 
-        }
-        100% {
-            Border = 5px;
-        }
+        100% { Border = 5px; }
     }
 }
 
@@ -73,13 +63,7 @@ animation open-dialog {
     }
     
     [keyframes] {
-        0% {
-            TransformPositionY = 500px;
-        }
-        
-        100% {
-            TransformPositionY = 0px;
-        }
+        100% { AlignY = 0% 0%; }
     }
 }
 
@@ -90,30 +74,21 @@ animation close-dialog {
     }
     
     [keyframes] {
-        0% {
-            TransformPositionY = 0px;
-        }
-        
-        100% {
-            TransformPositionY = 500px;
-        }
+        100% { AlignY = 100% 0%; }
     }
 }
 
 style dialog {
-    BackgroundColor = rgba(0, 0, 0, 250);
+    BackgroundColor = rgba(0, 0, 0, 230);
     TextColor = white;
-    
     TextFontStyle = UpperCase;
-    
     LayoutBehavior = Ignored;
+    AlignmentBehaviorY = Parent;
+    AlignY = 100% 0%;
     
     PreferredSize = 1pca;
     
-    TransformBehaviorY = AnchorMinOffset;
-    TransformPositionY = 600px;
-    
-    FlexLayoutDirection = Row;
+    FlexLayoutDirection = Column;
     FlexLayoutMainAxisAlignment = Center;
     FlexLayoutCrossAxisAlignment = Center;
 }

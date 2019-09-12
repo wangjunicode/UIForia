@@ -121,7 +121,6 @@ namespace Demo {
         public BrushSelection.Category CategoryTEMPLATE => BrushSelection.Category.TEMPLATE;
 
         public int PlaxinCost = 24;
-        public string PlaxinIconPath;
 
         public bool IsPlayerTemplate => CurrentBrushType == BrushSelection.Category.TEMPLATE && CurrentTemplateCategory == BrushSelection.TemplateCategory.PLAYER;
         public bool IsSeedTemplate => CurrentBrushType == BrushSelection.Category.TEMPLATE && CurrentTemplateCategory == BrushSelection.TemplateCategory.SEED;
@@ -197,6 +196,17 @@ namespace Demo {
             
             Application.Animate(confirmDialog, openDialogAnimation);
         }
+        
+        public void ConfirmDesign(string id) {
+            CloseDialog(id);
+            TriggerEvent(new UIPanelEvent(UIPanel.Menu));
+        }
+        
+        public void ExitBuildingDesigner(string id) {
+            CloseDialog(id);
+            TriggerEvent(new UIPanelEvent(UIPanel.Menu));
+        }
+        
         public void CloseDialog(string id) {
             if (!dialogOpened) {
                 return;
@@ -238,6 +248,7 @@ namespace Demo {
 
             // uiBuildingDesignController.SelectAllCells();
             SaveBuilding();
+            TriggerEvent(new UIPanelEvent(UIPanel.Menu));
             // uiBuildingDesignController.AbortDesign();
         }
 

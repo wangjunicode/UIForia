@@ -620,11 +620,10 @@ namespace UIForia.Layout {
 
                 BlockSize widthBlock = default;
                 widthBlock.size = layoutParent.size.width;
-                widthBlock.contentAreaSize = layoutParent.contentSize.width;
+                widthBlock.contentAreaSize = layoutParent.size.width - layoutParent.paddingBox.left - layoutParent.paddingBox.right - layoutParent.borderBox.left - layoutParent.borderBox.right;
                 BlockSize heightBlock = default;
                 heightBlock.size = layoutParent.size.height;
-                heightBlock.contentAreaSize = layoutParent.contentSize.height;
-
+                heightBlock.contentAreaSize = layoutParent.size.height - layoutParent.paddingBox.top - layoutParent.paddingBox.bottom - layoutParent.borderBox.top - layoutParent.borderBox.bottom;;
                 GetWidth(widthBlock, ref constraints);
                 float clampedWidth = Mathf.Max(constraints.minWidth, Mathf.Min(constraints.maxWidth, constraints.prefWidth));
                 GetHeight(clampedWidth, widthBlock, heightBlock, ref constraints);

@@ -6,8 +6,8 @@ const iconSize = 30px;
 
 animation show {
     [options] {
-        duration = 300;
-        timingFunction = CubicEaseIn;
+        duration = 600;
+        timingFunction = CubicEaseInOut;
     }
     
     [keyframes] {
@@ -16,8 +16,8 @@ animation show {
 }
 animation hide {
     [options] {
-        duration = 300;
-        timingFunction = CubicEaseIn;
+        duration = 600;
+        timingFunction = CubicEaseInOut;
     }
     
     [keyframes] {

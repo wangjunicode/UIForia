@@ -112,6 +112,11 @@ namespace UIForia.Layout {
 
                 LayoutResult layoutResult = element.layoutResult;
 
+                element.layoutBox.borderBox.top = element.layoutBox.ResolveFixedSize(element.layoutBox.size.width, element.style.BorderTop);
+                element.layoutBox.borderBox.right = element.layoutBox.ResolveFixedSize(element.layoutBox.size.width, element.style.BorderRight);
+                element.layoutBox.borderBox.bottom = element.layoutBox.ResolveFixedSize(element.layoutBox.size.width, element.style.BorderBottom);
+                element.layoutBox.borderBox.left = element.layoutBox.ResolveFixedSize(element.layoutBox.size.width, element.style.BorderLeft);
+                
                 // todo -- layout result might work better as a proxy to layoutBox data
                 layoutResult.padding = element.layoutBox.paddingBox;
                 layoutResult.border = element.layoutBox.borderBox;

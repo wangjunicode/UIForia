@@ -20,11 +20,11 @@ namespace Demo {
         private ApplicationState state = new ApplicationState();
 
         public override void OnEnable() {
-            ChangePanel(UIPanel.Building);
+            ChangePanel(UIPanel.Menu);
         }
 
         public override void HandleUIEvent(UIEvent evt) {
-            if (evt is DockEvent dockEvent) {
+            if (evt is UIPanelEvent dockEvent) {
                 ChangePanel(dockEvent.Panel);
             }
         }

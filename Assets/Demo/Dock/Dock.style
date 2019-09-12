@@ -2,8 +2,8 @@ import "Demo/Theme.style" as theme;
 
 animation show {
     [options] {
-        duration = 300;
-        timingFunction = CubicEaseIn;
+        duration = 600;
+        timingFunction = CubicEaseInOut;
     }
     
     [keyframes] {
@@ -12,8 +12,8 @@ animation show {
 }
 animation hide {
     [options] {
-        duration = 300;
-        timingFunction = CubicEaseIn;
+        duration = 600;
+        timingFunction = CubicEaseInOut;
     }
     
     [keyframes] {
@@ -23,7 +23,8 @@ animation hide {
 
 style <this> {
     AlignX = 100% Parent;
-    AlignY = 100% Parent;
+    AlignmentBehaviorY = Parent;
+    AlignY = 200% 100%;
     LayoutBehavior = Ignored;
     FlexLayoutDirection = Horizontal;
     FlexLayoutCrossAxisAlignment = End;

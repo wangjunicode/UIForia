@@ -60,6 +60,8 @@ style menu-label {
 
 
 style menu-image { 
+    ShadowOffsetY = 5;
+    ShadowOffsetX = 5;
     run animation(go-down);
     run animation(animshadow);
 
@@ -70,28 +72,23 @@ style menu-image {
 
 animation animshadow {
     [options] {
-        Duration = 10000;
+        Duration = 1000;
         Iterations = Infinite;
         LoopType = PingPong;
         TimingFunction = Linear;
     }
     [keyframes] {
         0% {
-            ShadowIntensity = 0;
-            ShadowColor = Red;
-        }
-        
-        50% {
-            ShadowIntensity = 200;
-            ShadowColor = Purple;
-            ShadowSizeX = 10;
-            ShadowSizeY = 10;
+            ShadowIntensity = 20;
+            ShadowColor = black;
+            ShadowSizeX = 1;
+            ShadowSizeY = 1;
         }
         
         100% {
-            ShadowIntensity = 100;
-            ShadowColor = Green;
-            ShadowSizeX = -10;
+            ShadowIntensity = 22;
+            ShadowColor = rgb(30, 30, 30);
+            ShadowSizeX = -1;
             ShadowSizeY = -10;
         }
     }

@@ -114,10 +114,8 @@
                 </Group>
 
             </ScrollView>
-            
-       
-            
         </Group>
+        
         <Group style="building-designer-footer">
 
             <Group style="flex-horizontal-centered footer-left-area">
@@ -127,7 +125,7 @@
                     <Text>COST</Text>
                 </Div>
                 <Group style="flex-horizontal-centered ml1 mr1">
-                    <Image src="PlaxinIconPath" style="footer-icon"/>
+                    <Image src="'ui_icon_plaxin_16@2x'" style="footer-icon"/>
                     <Text>{PlaxinCost} Plaxin</Text>
                 </Group>
 
@@ -140,6 +138,36 @@
                 <Div onMouseClick="ShowDialog('cancel-dialog')" style="footer-button cancel-button flex-horizontal-centered mr2">CANCEL</Div>
 
             </Group>
+
+        </Group>
+
+        <Group x-id="confirm-dialog" style="dialog">
+
+            <Text style="dialog-title">ARE YOU SURE YOU</Text>
+            <Text style="dialog-title">WANT TO CONFIRM?</Text>
+            <Div style="dialog-buttons">
+                <Div style="dialog-button color-grey" onMouseClick="CloseDialog('confirm-dialog')">NO</Div>
+                <Div onMouseClick="ConfirmDesign('confirm-dialog')" style="dialog-button confirm-color">YES</Div>
+            </Div>
+            <Text>CONSTRUCTION WILL BEGIN WHEN ALL</Text>
+            <Text>RESOURCES HAVE BEEN HAULED TO LOCATION.</Text>
+
+        </Group>
+
+        <Group x-id="cancel-dialog" style="dialog">
+
+            <Text style="dialog-title">ARE YOU SURE YOU</Text>
+            <Text style="dialog-title">WANT TO CANCEL?</Text>
+            <Div style="dialog-buttons">
+                <Div style="dialog-button color-grey" onMouseClick="CloseDialog('cancel-dialog')">NO</Div>
+                <Div onMouseClick="ExitBuildingDesigner('cancel-dialog')" style="dialog-button cancel-color">YES</Div>
+            </Div>
+            <Text>ALL PROGRESS WILL BE LOST. IF YOU WANT TO</Text>
+            <Div style="flex-horizontal-centered">
+                <Text>CONTINUE LATER, CHOOSE</Text>
+                <Text style="save-exit-text-color ml1 mr1">SAVE &amp; EXIT</Text>
+                <Text>INSTEAD</Text>
+            </Div>
 
         </Group>
 

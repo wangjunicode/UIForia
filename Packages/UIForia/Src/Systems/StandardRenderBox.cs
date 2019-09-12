@@ -358,7 +358,7 @@ namespace UIForia.Rendering {
                 lastSize = newSize;
             }
 
-            if (dataNeedsUpdate) {
+            if (true || dataNeedsUpdate) {
                 UpdateMaterialData();
                 dataNeedsUpdate = false;
             }

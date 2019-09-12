@@ -13,15 +13,15 @@ namespace Demo {
         public int NotificationCount;
     }
 
-    public class DockEvent : UIEvent {
+    public class UIPanelEvent : UIEvent {
 
         public readonly UIPanel Panel;
         
-        public DockEvent(UIPanel panel) : base("dockEvent") {
+        public UIPanelEvent(UIPanel panel) : base("panelEvent") {
             this.Panel = panel;
         }
 
-        public DockEvent(UIPanel panel, KeyboardInputEvent keyboardInputEvent) : base("dockEvent", keyboardInputEvent) {
+        public UIPanelEvent(UIPanel panel, KeyboardInputEvent keyboardInputEvent) : base("panelEvent", keyboardInputEvent) {
             this.Panel = panel;
         }
     }
@@ -44,7 +44,7 @@ namespace Demo {
         }
 
         private void OpenBuildMenu() {
-            TriggerEvent(new DockEvent(UIPanel.Building));
+            TriggerEvent(new UIPanelEvent(UIPanel.Building));
         }
 
         public void EnterMode(MenuItemData item) {

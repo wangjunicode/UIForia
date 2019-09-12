@@ -191,7 +191,7 @@ namespace UIForia.Layout {
 
             layoutBehavior = element.style.LayoutBehavior;
             zIndex = element.style.ZIndex;
-
+            
             if (element.style.LayoutBehavior == LayoutBehavior.Ignored) {
                 flags |= LayoutRenderFlag.Ignored;
             }
@@ -274,7 +274,6 @@ namespace UIForia.Layout {
             widthCache = default;
         }
 
-        
         public float ResolveHeight(float width, in BlockSize blockWidth, in BlockSize blockHeight, in UIMeasurement measurement) {
             float value = measurement.value;
 
@@ -485,8 +484,6 @@ namespace UIForia.Layout {
             // allocated size = size my parent told me to be
             // content size = extents of my content
         }
-        
-
 
         protected float GetCachedHeightForWidth(float width) {
             int intWidth = (int)width;

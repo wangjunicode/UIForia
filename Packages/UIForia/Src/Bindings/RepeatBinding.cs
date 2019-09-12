@@ -109,7 +109,6 @@ namespace UIForia.Bindings {
 
         public override bool OnUpdate() {
             
-            
             CreateOrDestroyChildren();
             
             for (int i = 0; i < enableBindingCount; i++) {

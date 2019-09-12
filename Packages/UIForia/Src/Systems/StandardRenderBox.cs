@@ -46,8 +46,6 @@ namespace UIForia.Rendering {
 
         protected bool geometryNeedsUpdate;
         protected bool dataNeedsUpdate;
-        protected bool shadowNeedsUpdate;
-        protected bool hasShadow;
         protected Size lastSize;
         protected GeometryRange range;
         protected UIForiaGeometry geometry;
@@ -57,16 +55,13 @@ namespace UIForia.Rendering {
             this.uniqueId = "UIForia::StandardRenderBox";
             this.geometry = new UIForiaGeometry();
         }
-
-//        public override Rect RenderBounds => new Rect(0, 0, element.layoutResult.actualSize.width, element.layoutResult.actualSize.height);
-
+        
         public override void OnInitialize() {
             base.OnInitialize();
             geometry.Clear();
             lastSize = new Size(-1, -1);
             geometryNeedsUpdate = true;
             dataNeedsUpdate = true;
-            shadowNeedsUpdate = true;
         }
         
         public override void OnStylePropertyChanged(StructList<StyleProperty> propertyList) {
@@ -104,15 +99,15 @@ namespace UIForia.Rendering {
                         case StylePropertyId.BackgroundTint:
                         dataNeedsUpdate = true;
                         break;
-                    case StylePropertyId.ShadowColor:
-                    case StylePropertyId.ShadowTint:
-                    case StylePropertyId.ShadowOffsetX:
-                    case StylePropertyId.ShadowOffsetY:
-                    case StylePropertyId.ShadowSizeX:
-                    case StylePropertyId.ShadowSizeY:
-                    case StylePropertyId.ShadowIntensity:
-                        shadowNeedsUpdate = true;
-                        break;
+//                    case StylePropertyId.ShadowColor:
+//                    case StylePropertyId.ShadowTint:
+//                    case StylePropertyId.ShadowOffsetX:
+//                    case StylePropertyId.ShadowOffsetY:
+//                    case StylePropertyId.ShadowSizeX:
+//                    case StylePropertyId.ShadowSizeY:
+//                    case StylePropertyId.ShadowIntensity:
+//                        shadowNeedsUpdate = true;
+//                        break;
                 }
             }
         }
@@ -310,7 +305,6 @@ namespace UIForia.Rendering {
             // which the runtime never checks since we never assigned to a float value. Awesome!
 
             Vector4 v = default;
-            Vector4 v2 = default;
 
             unsafe {
                 Vector4* vp = &v;
@@ -349,7 +343,6 @@ namespace UIForia.Rendering {
             geometry.mainTexture = backgroundImage;
         }
 
-        // todo move material update out of paint function
         public override void PaintBackground(RenderContext ctx) {
             Size newSize = element.layoutResult.actualSize;
 

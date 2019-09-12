@@ -48,7 +48,7 @@ namespace Src.Systems {
             Cull();
 
             DrawClipShapes(renderContext);
-        
+
             Draw(renderContext);
 
             wrapperList.QuickClear();
@@ -70,6 +70,7 @@ namespace Src.Systems {
             // if not destroy, create
             // finally, update styles
             element.renderBox.OnDestroy();
+            element.renderBox = null;
             // todo -- pool
             CreateRenderBox(element);
         }
@@ -127,7 +128,7 @@ namespace Src.Systems {
                     // ReSharper disable once PossibleNullReferenceException
                     current.renderBox.culled = false;
                     LightList<UIElement> children = current.element.children;
- 
+
                     //  if((current.element.renderBox.typeFlags & RenderBoxFlag.PreRenderIcon) != 0) {
                     // will need to check if culled or not
 
@@ -141,7 +142,7 @@ namespace Src.Systems {
                     if (current.renderBox.overflowX != Overflow.Visible || current.renderBox.overflowY != Overflow.Visible) {
                         wrapperStack.Push(new RenderBoxWrapper(current, RenderOpType.PopClipShape));
                     }
-                    
+
                     // if is post effect
                     // push render target
 
@@ -162,8 +163,7 @@ namespace Src.Systems {
                             if (child.renderBox == null) {
                                 CreateRenderBox(child);
                             }
-
-                            if ((child.flags & UIElementFlags.EnabledThisFrame) != 0) {
+                            else if ((child.flags & UIElementFlags.EnabledThisFrame) != 0) {
                                 UpdateRenderBox(child);
                             }
 
@@ -229,7 +229,7 @@ namespace Src.Systems {
             renderedClippers.Add(screenClip);
 
             clipStack.Push(screenClip);
-            
+
             for (int i = 0; i < wrapperList.size; i++) {
                 RenderBoxWrapper wrapper = wrappers[i];
 
@@ -252,7 +252,7 @@ namespace Src.Systems {
                                 break;
 
                             case ClipBehavior.View:
-                                 renderBox.clipper = renderBox.element.View.rootElement.renderBox.clipper;
+                                renderBox.clipper = renderBox.element.View.rootElement.renderBox.clipper;
 
                                 break;
 
@@ -282,9 +282,9 @@ namespace Src.Systems {
                                     else {
                                         objectScreenBounds = GetBounds(p0, p1, p2, p3);
                                     }
-                                    
+
                                     // cheap solution is to compare world space bounds for overlap better would be compare oriented bounds
-                                     renderBox.culled = !clipData.aabb.OverlapAsRect(objectScreenBounds);
+                                    renderBox.culled = !clipData.aabb.OverlapAsRect(objectScreenBounds);
 
                                     if (!renderBox.culled) {
                                         renderBox.clipper = clipStack.array[clipStack.size - 1];

@@ -1,12 +1,13 @@
 import "Demo/Theme.style" as theme;
-const durationDialog = 500;
+
+const durationDialog = 600;
 const topBarFramePad = 0.7em;
 const topBarTextSize = 12px;
 const iconSize = 30px;
 
 animation show {
     [options] {
-        duration = 600;
+        duration = @durationDialog;
         timingFunction = CubicEaseInOut;
     }
     
@@ -16,7 +17,7 @@ animation show {
 }
 animation hide {
     [options] {
-        duration = 600;
+        duration = @durationDialog;
         timingFunction = CubicEaseInOut;
     }
     
@@ -33,13 +34,12 @@ style <this> {
     GridLayoutColTemplate = 1pca;
     GridLayoutRowTemplate = 1mx 1fr 1mx;
     GridLayoutColAlignment = Start;
-        GridLayoutColAlignment = Fit;
-        GridLayoutRowAlignment = Fit;
+    GridLayoutColAlignment = Fit;
+    GridLayoutRowAlignment = Fit;
     Cursor = @theme.cursorDefault;   
-//    FlexLayoutDirection = Horizontal;
-//    FlexLayoutCrossAxisAlignment = End;
     AlignX = 100% Parent;
-    AlignY = 100% Parent;
+    AlignY = 200% 100%;
+    AlignmentBehaviorY = Parent;
     
     [attr:placement="show"] {
         run animation(show);
@@ -52,10 +52,8 @@ style <this> {
 style confirm-color { BackgroundColor = @theme.confirmColor; }
 style save-exit-color { BackgroundColor = @theme.saveExitColor; }
 style cancel-color { BackgroundColor = @theme.cancelColor; }
-style color-grey { BackgroundColor = @theme.lightGrey; }
 
 style confirm-text-color { TextColor = @theme.confirmColor; }
-style save-exit-text-color { TextColor = @theme.saveExitColor; }
 style cancel-text-color { TextColor = @theme.cancelColor; }
 
 //style corner-cut-window {
@@ -63,78 +61,3 @@ style cancel-text-color { TextColor = @theme.cancelColor; }
 //    BackgroundColor = white;
 //    Painter = "SeedWindow:TopLeft";
 //}
-
-style menu-icon {
-    BorderRadius = 50%;
-    BorderColor = Black;
-    Border = 3px;
-}
-
-animation open-shortcuts {
-    [options] {
-        duration = @durationDialog;
-        timingFunction = CubicEaseInOut;
-    }
-    
-    [keyframes] {
-        0% {
-            TransformPositionY = 450px;
-        }
-        
-        100% {
-            TransformPositionY = 30px;
-        }
-    }
-}
-
-animation close-shortcuts {
-    [options] {
-        duration = @durationDialog;
-        timingFunction = CubicEaseInOut;
-    }
-    
-    [keyframes] {
-        0% {
-            TransformPositionY = 30px;
-        }
-        
-        100% {
-            TransformPositionY = 450px;
-        }
-    }
-}
-
-style screen-bottom-right {
-    LayoutBehavior = Ignored;
-    AnchorBottom = 0;
-    AnchorRight = 0;
-    TransformBehaviorX = AnchorMaxOffset;
-    TransformBehaviorY = AnchorMaxOffset;
-}
-
-style select-height {
-    PreferredWidth = 400px;
-}
-
-style building-designer-help {
-    LayoutBehavior = Ignored;
-
-    BackgroundColor = rgba(0,0,0,250);
-    TextColor = rgb(200, 200, 200);
-
-    PreferredHeight = 450px;
-    PreferredWidth = 330px;
-    
-    BorderRadius = 10px;
-    
-    MarginRight = 20px;
-    
-    TransformPositionY = 450px;
-    TransformPositionX = -360px;
-    Border = 0px;
-    
-    [hover] {
-        Border = 2px;
-        BorderColor = lightGrey;
-    }
-}

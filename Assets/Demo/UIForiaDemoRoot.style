@@ -3,4 +3,5 @@ import "Demo/Theme.style" as theme;
 style <this> {
     PreferredSize = 1pca;
     BackgroundImage = url("gamebg2");
+    Cursor = @theme.cursorDefault;
 }

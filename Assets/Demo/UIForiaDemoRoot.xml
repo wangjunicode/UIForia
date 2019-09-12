@@ -2,10 +2,11 @@
 <UITemplate>
 
     <Style path="Demo/UIForiaDemoRoot.style" />
+    <Using namespace="Demo" />
 
     <Contents>
-        <Dock />
-        <BuildingDesigner />
+        <Dock isActive="currentPanel == UIPanel.Dock" />
+        <BuildingDesigner isActive="currentPanel == UIPanel.Building" />
     </Contents>
 
 </UITemplate>

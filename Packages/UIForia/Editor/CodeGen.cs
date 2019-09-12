@@ -206,6 +206,7 @@ namespace UIForia.Editor {
             new AnimatedPropertyGenerator<float>(StylePropertyId.ShadowSizeX, 0f),
             new AnimatedPropertyGenerator<float>(StylePropertyId.ShadowSizeY, 0f),
             new AnimatedPropertyGenerator<float>(StylePropertyId.ShadowIntensity, 10),
+            new AnimatedPropertyGenerator<float>(StylePropertyId.ShadowOpacity, 1f),
         };
 
         [MenuItem("UIForia/Regenerate Style Stuff (Don't!)")]

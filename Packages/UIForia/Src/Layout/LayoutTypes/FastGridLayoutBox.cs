@@ -35,7 +35,7 @@ namespace UIForia.Layout.LayoutTypes {
             return 0;
         }
 
-        public override float GetIntrinsicPreferredWidth() {
+        protected override float ComputeIntrinsicPreferredWidth() {
             return 0;
         }
 

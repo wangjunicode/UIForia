@@ -143,6 +143,7 @@ namespace UIForia.Rendering {
         ShadowIntensity = 1706,
         ShadowColor = 1707,
         ShadowTint = 1708,
+        ShadowOpacity = 1709,
 
         AlignmentDirectionX = 2001,
         AlignmentDirectionY = 2002,

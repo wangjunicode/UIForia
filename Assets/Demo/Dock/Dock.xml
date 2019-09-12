@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <UITemplate>
     <Style path="Demo/Dock/Dock.style"/>
+    <Style path="Demo/Theme.style" alias="theme" />
     <Contents>
 
         <Repeat list="MenuItems" style="transclude">
@@ -15,8 +16,7 @@
             <Group style="weather"/>
             <Group style="temp-gauge"/>
             <Group style="clock"/>
-            <DateIndicator style="date"/>
-
+            <Group style="date"/>
         </Group>
 
     </Contents>

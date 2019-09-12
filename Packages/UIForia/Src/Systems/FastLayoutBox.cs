@@ -210,7 +210,7 @@ namespace UIForia.Layout {
 
         public abstract float GetIntrinsicMinHeight();
 
-        public abstract float GetIntrinsicPreferredWidth();
+        protected abstract float ComputeIntrinsicPreferredWidth();
 
         public abstract float GetIntrinsicPreferredHeight();
 
@@ -266,6 +266,21 @@ namespace UIForia.Layout {
             }
 
             return 0;
+        }
+
+        public float GetIntrinsicPreferredWidth() {
+            float baseVal = ComputeIntrinsicPreferredWidth();
+            float width = baseVal;
+            // todo -- try not to fuck with style here
+            width += ResolveFixedSize(baseVal, element.style.PaddingLeft);
+            width += ResolveFixedSize(baseVal, element.style.PaddingRight);
+            width += ResolveFixedSize(baseVal, element.style.BorderRight);
+            width += ResolveFixedSize(baseVal, element.style.BorderLeft);
+            if (width < 0) {
+                width = 0;
+            }
+
+            return width;
         }
 
         public void InvalidatePreferredSizeCache() {
@@ -421,10 +436,6 @@ namespace UIForia.Layout {
 
         public void ApplyHorizontalLayout(float localX, in BlockSize containingWidth, float allocatedWidth, float preferredWidth, float alignment, LayoutFit layoutFit) {
             allocatedPosition.x = localX;
-
-            if (element.layoutBox != this) {
-                Debug.Log("Bad");
-            }
 
             pivotX = ResolveFixedWidth(element.style.TransformPivotX);
 

@@ -25,7 +25,7 @@ namespace UIForia.Layout {
             return imageElement.texture.height;
         }
 
-        public override float GetIntrinsicPreferredWidth() {
+        protected override float ComputeIntrinsicPreferredWidth() {
             if (imageElement.texture == null) {
                 return 0;
             }

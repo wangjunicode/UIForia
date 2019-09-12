@@ -1,3 +1,4 @@
+using SVGX;
 using UIForia;
 using UIForia.Rendering;
 using UnityEngine;
@@ -5,7 +6,7 @@ using UnityEngine;
 namespace Demo.Graphics {
 
     [CustomPainter("DemoParticles")]
-    public class ParticleRenderBox : RenderBox {
+    public class ParticleRenderBox : StandardRenderBox {
 
         public struct ParticleData {
 
@@ -34,12 +35,15 @@ namespace Demo.Graphics {
         }
 
         public override void PaintBackground(RenderContext ctx) {
+            base.PaintBackground(ctx);
             // todo -- solve the 'off screen doesn't render problem
             for (int i = 0; i < particleData.Length; i++) {
                 ref ParticleData data = ref particleData[i];
                 data.system.Simulate(Time.unscaledDeltaTime, false, false, true);
                 data.renderer.BakeMesh(data.mesh);
-                ctx.DrawMesh(data.mesh, data.renderer.material, element.layoutResult.matrix.ToMatrix4x4());
+                var mat = element.layoutResult.matrix;
+                mat *= SVGXMatrix.Translation(new Vector2(100, -200));
+                ctx.DrawMesh(data.mesh, data.renderer.material, mat.ToMatrix4x4());
             }
         }
 

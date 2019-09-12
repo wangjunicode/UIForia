@@ -11,20 +11,20 @@ style color-palette {
     BackgroundColor = black;    
     ZIndex = 4;
     AlignmentBehaviorX = Parent;
-    AlignX = 100% 0%;
+    AlignX = 110% 0%;
+    AlignY = Center;
+    AlignmentBehaviorY = Parent;
 }
 
 style color-selection-container {
-    LayoutType = Grid;
-    GridLayoutColTemplate = 40px 40px 40px 40px 40px 40px 40px 40px;
-    GridLayoutColGap = 2;
-    
     Border = 2px;
     BorderColor = black;
+    FlexLayoutDirection = Horizontal;
+    
 }
 
 style palette-item {
-    PreferredSize = 40px;
+    PreferredSize = 32px;
     
     Border = 0px;
     BorderColor = black;

@@ -30,7 +30,7 @@ namespace UIForia.Layout {
             return textInfo.GetIntrinsicMinHeight();
         }
 
-        public override float GetIntrinsicPreferredWidth() {
+        protected override float ComputeIntrinsicPreferredWidth() {
             return textInfo.GetIntrinsicWidth();
         }
 

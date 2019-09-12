@@ -4,21 +4,24 @@
     <Style>
 
         style select {
-            PreferredSize = 1mx 48px;
             LayoutType = Stack;
-            BackgroundColor = white;
-            BorderRadius = 8px;
-            TextFontSize = 32px;
-            Border = 2px;
-            BorderColor = #B2B2B2;//rgba(178, 178, 178, 255);
             StackLayoutAlignVertical = Center;
-            PaddingRight = 64px;
+            BackgroundColor = white;
+            PreferredSize = 1mx 48px;
+            TextFontSize = 32px;
+            BorderRadius = 8px;
+            Border = 2px;
+            BorderColor = #B2B2B2;
+            PaddingRight = 32px;
             PaddingLeft = 16px;
-            [attr:disabled] {
-                Opacity = 0.4;
-            }
             [hover] {
                 BorderColor = #00B5D9;
+            }
+            [attr:disabled] {
+                Opacity = 0.4;
+                [hover] {
+                    BorderColor = #B2B2B2;
+                }
             }
         }
 
@@ -26,7 +29,7 @@
             PreferredWidth = 1pca;
             MaxWidth = 1pca;
             TextColor = black;
-            Padding = 4px 8px 4px 22px;
+            Padding = 4px 8px 4px 4px;
             FlexLayoutCrossAxisAlignment = Center;
             FlexLayoutDirection = Column;
             BackgroundColor = white;
@@ -34,7 +37,6 @@
                 MinWidth = 1cnt;
                 TextColor = white;
                 BackgroundColor = #006d82;
-                // BorderRadius = 4px;
                 Overflow = Visible;
             }
         }
@@ -42,6 +44,7 @@
         style select-label {
             MarginLeft = 8px;
             PreferredWidth = 1pca;
+            AlignX = 26px Parent;
             [hover] {
                 MinWidth = 1cnt;
             }
@@ -58,7 +61,7 @@
             }
         }
 
-        style fake-select-options {
+        style select-options {
             // attention: load bearing comma
             AlignY = -3px, Parent;
             AlignX = -10px, Parent;
@@ -81,22 +84,7 @@
             BackgroundColor = white;
         }
 
-        style fake-select-display {
-        //    Border = 2px;
-        //    BorderColor =  #b2b2b2;
-        //    BorderRadius = 14px 0 0 14px;
-        //    TextFontSize = 1em;
-        //    //Padding = 6px 8px;
-        //    PreferredSize = 1cnt 48px;
-        //    FlexLayoutMainAxisAlignment = Center;
-        //
-        //    [hover] {
-        //        BorderColor = #00b5d9;
-        //    }
-            // BackgroundColor = Yellow;
-        }
-
-        style fake-select-chevron-holder {
+        style select-chevron-holder {
             LayoutBehavior = Ignored;
             AlignmentBehaviorX = Parent;
             AlignX = 100%;
@@ -109,6 +97,11 @@
             FlexLayoutCrossAxisAlignment = Center;
             PaddingTop = 4px;
             PaddingBottom = 4px;
+
+            [attr:disabled="select-disabled"] {
+                BorderColor = #666;
+                BackgroundColor = #999;
+            }
         }
 
         style chevron-down {
@@ -121,29 +114,7 @@
             PreferredSize = 10px 6px;
             BackgroundImage = url("icons/ui_selectbox_up_chevron@2x");
         }
-        style chevron-container {
-            BackgroundColor = #00b5d0;
-            BorderColor = #006d82;
-            BorderColorBottom = Red;
-            BorderRadius = 0;// 24px 24px 0 4px;
-            Border = 5px;
-            PreferredSize = 100px 101px;//100%;
-            FlexLayoutMainAxisAlignment = SpaceAround;
-            FlexLayoutCrossAxisAlignment = Center;
-            FlexLayoutDirection = Row;
-    
-            [attr:disabled="select-disabled"] {
-                BorderColor = #666;
-                BackgroundColor = #999;
-            }
-        }
 
-        style content-area {
-
-    
-            BorderRadius = 4px;
-        }
-        
         style select-display {
             TextColor = black;
         }
@@ -158,24 +129,24 @@
 
     <Contents style="select">
 
-        <Group if="selectedIndex >= 0" style="fake-select-display">
+        <Group if="selectedIndex >= 0" style="select-display">
             <Slot name="select-display" style="select-display">
                 {options[selectedIndex].Label}
             </Slot>
         </Group>
 
-        <Group if="selectedIndex &lt; 0" style="fake-select-display">
+        <Group if="selectedIndex &lt; 0" style="select-display">
             <Slot name="select-placeholder" style="select-placeholder">
                 Select a value
             </Slot>
         </Group>
 
-        <Group style="fake-select-chevron-holder">
+        <Group style="select-chevron-holder">
             <Div style="chevron-up"/>
             <Div style="chevron-down"/>
         </Group>
 
-        <Group onMouseClick="SelectElement($event)" style="fake-select-options" x-id="option-list">
+        <Group onMouseClick="SelectElement($event)" style="select-options" x-id="option-list">
             <Children x-id="option-children" style="transclude" x-type="template">
                 <Group style="select-option">
                     <Image src="selectedElementIcon" style="selected-element-icon" if="DisplaySelectedIcon($option__internal)" />

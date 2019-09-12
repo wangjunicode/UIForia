@@ -74,7 +74,7 @@ namespace UIForia.Layout {
             return retn;
         }
 
-        public override float GetIntrinsicPreferredWidth() {
+        protected override float ComputeIntrinsicPreferredWidth() {
             float retn = 0;
 
             FastLayoutBox ptr = firstChild;
@@ -86,7 +86,7 @@ namespace UIForia.Layout {
                 ptr = ptr.nextSibling;
             }
 
-            return retn + paddingBox.left + paddingBox.right + borderBox.left + borderBox.right;
+            return retn;
         }
 
         public override float GetIntrinsicPreferredHeight() {

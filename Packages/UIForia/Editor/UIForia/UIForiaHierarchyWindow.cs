@@ -93,7 +93,7 @@ namespace UIForia.Editor {
                     s_SelectedElementId = s_SelectedApplication.InputSystem.DebugElementsThisFrame[selectIdx].id;
                     treeView.SetSelection(selectedIds);
                     if (selectedIds.Count > 0) {
-                        treeView.FrameItem(selectedIds[selectIdx]);
+                        treeView.FrameItem(s_SelectedElementId);
                     }
                 }
             }

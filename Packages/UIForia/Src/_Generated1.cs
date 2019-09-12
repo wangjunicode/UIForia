@@ -957,6 +957,13 @@ namespace UIForia.Rendering {
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ShadowIntensity, value), state); }
         }
         
+        public float ShadowOpacity {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ShadowOpacity, state).AsFloat; }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ShadowOpacity, value), state); }
+        }
+        
     }
 
     public partial class UIStyle {
@@ -1912,6 +1919,13 @@ namespace UIForia.Rendering {
             get { return FindFloatProperty(StylePropertyId.ShadowIntensity); }
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.ShadowIntensity, value)); }
+        }
+            
+        public float ShadowOpacity {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return FindFloatProperty(StylePropertyId.ShadowOpacity); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.ShadowOpacity, value)); }
         }
             
         
@@ -3172,6 +3186,15 @@ namespace UIForia.Rendering {
                 }
             }
 
+            public float ShadowOpacity { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.ShadowOpacity, out property)) return property.AsFloat;
+                    return DefaultStyleValues_Generated.ShadowOpacity;
+                }
+            }
+
         
         public void SetVisibility(in UIForia.Rendering.Visibility? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.Visibility, (int)value), state);
@@ -4261,6 +4284,14 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.ShadowIntensity, state).AsFloat;
         }
         
+        public void SetShadowOpacity(in float? value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.ShadowOpacity, value), state);
+        }
+
+        public float GetShadowOpacity(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.ShadowOpacity, state).AsFloat;
+        }
+        
 
         public StyleProperty GetComputedStyleProperty(StylePropertyId propertyId) {
         			switch(propertyId) {
@@ -4536,6 +4567,8 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.ShadowSizeY, ShadowSizeY);
 				case StylePropertyId.ShadowIntensity:
 					 return new StyleProperty(StylePropertyId.ShadowIntensity, ShadowIntensity);
+				case StylePropertyId.ShadowOpacity:
+					 return new StyleProperty(StylePropertyId.ShadowOpacity, ShadowOpacity);
 				default: throw new System.ArgumentOutOfRangeException(nameof(propertyId), propertyId, null);
 				}  
         }
@@ -4640,6 +4673,7 @@ namespace UIForia.Rendering {
                     case StylePropertyId.ShadowSizeX: return true;
                     case StylePropertyId.ShadowSizeY: return true;
                     case StylePropertyId.ShadowIntensity: return true;
+                    case StylePropertyId.ShadowOpacity: return true;
 
                 }
     

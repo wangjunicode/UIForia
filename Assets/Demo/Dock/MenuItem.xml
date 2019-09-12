@@ -2,7 +2,7 @@
     <Style path="Demo/Dock/MenuItem.style" />
     <Contents style="menu-item">
         <Group x-id="image" style="menu-image" >
-            <Image  src="ImageUrl" />
+            <Image src="ImageUrl" Width="64" />
             <Group if="NotificationCount != 0" style="notification-count">{NotificationCount}</Group>
         </Group>
         <Text x-id="label" style="menu-label">{Label}</Text>

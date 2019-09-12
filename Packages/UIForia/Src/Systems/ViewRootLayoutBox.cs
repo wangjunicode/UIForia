@@ -20,7 +20,7 @@ namespace UIForia.Systems {
             return firstChild.GetIntrinsicMinHeight();
         }
 
-        public override float GetIntrinsicPreferredWidth() {
+        protected override float ComputeIntrinsicPreferredWidth() {
             if (firstChild == null) {
                 return 0;
             }

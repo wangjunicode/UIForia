@@ -272,9 +272,9 @@ namespace UIForia.Templates {
         protected void CompilePropertyBindings(ParsedTemplate template) {
             if (attributes == null || attributes.Count == 0) return;
 
-            try {
-                s_PropCompiler.SetCompiler(template.compiler);
-                for (int i = 0; i < attributes.Count; i++) {
+            s_PropCompiler.SetCompiler(template.compiler);
+            for (int i = 0; i < attributes.Count; i++) {
+                try {
                     if (attributes[i].isCompiled) continue;
 
                     if (attributes[i].key.StartsWith("x-") || attributes[i].key == "style") {
@@ -284,14 +284,12 @@ namespace UIForia.Templates {
                     attributes[i].isCompiled = true;
 
                     s_PropCompiler.CompileAttribute(template.rootElementTemplate.RootType, elementType, attributes[i], s_BindingList);
+                } catch (Exception e) {
+                    Debug.LogWarning($"There's a problem with your binding of {attributes[i].key}=\"{attributes[i].value}\" in the template {template.rootElementTemplate.RootType}");
+                    Debug.LogError(e);
                 }
             }
-            catch (Exception e) {
-                Debug.LogWarning($"There's a problem with your template {template.rootElementTemplate.RootType}");
-                Debug.LogError(e);
-            }
         }
-
 
         protected void ResolveBaseStyles(ParsedTemplate template) {
             List<UIStyleGroupContainer> list = ListPool<UIStyleGroupContainer>.Get();

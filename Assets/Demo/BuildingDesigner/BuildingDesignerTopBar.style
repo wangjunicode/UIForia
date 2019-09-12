@@ -28,32 +28,22 @@ style building-designer-top-bar {
 
 style top-bar-select {
     PreferredHeight = 32px;
-}
-
-
-style top-bar-text {
+    PreferredWidth = 1mx;
+    MarginRight = 10px;
     TextFontSize = @topBarTextSize;
 }
 
-style top-left-area {
-    PreferredWidth = 0.5pca;
-    FlexLayoutMainAxisAlignment = Start;
+style top-bar-text {
+    Margin = 0 10px;
 }
+
 style top-right-area {
-    PreferredWidth = 0.5pca;
-    FlexLayoutMainAxisAlignment = End;
+    AlignX = 100% Parent;
+    TextFontSize = @topBarTextSize;    
 }
 
 style redo-button-image {
     BackgroundColor = @theme.lightGrey;
     PreferredSize = @iconSize;
     MarginLeft = 5px;
-}
-
-style fixed-width-type {
-    PreferredWidth = 160px;
-}
-
-style fixed-width-style {
-    PreferredWidth = 200px;
 }

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UITemplate>
+
+    <Style path="Demo/BasicElements/Dialog/Dialog.style"/>
+    <Style path="Demo/Theme.style" alias="theme"/>
+    <Contents>
+        <Slot name="title" style="dialog-title" />
+        <Div style="dialog-buttons">
+            <Div style="dialog-button color-grey" onMouseClick="Cancel()">No</Div>
+            <Div onMouseClick="Confirm()" style="dialog-button" style.backgroundColor="confirmColor">Yes</Div>
+        </Div>
+        <Slot name="description" style="description" />
+    </Contents>
+</UITemplate>

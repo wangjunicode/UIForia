@@ -344,7 +344,7 @@ namespace UIForia.Systems {
             if (!IsDragging) {
                 CursorStyle newCursor = null;
                 if (m_ElementsThisFrame.Count > 0) {
-                    for (int i = 0; i < m_ElementsThisFrame.Count; i++) {
+                    for (int i = m_ElementsThisFrame.Count - 1; i >= 0; i--) {
                         UIElement element = m_ElementsThisFrame[i];
 
                         if (element.style.IsDefined(StylePropertyId.Cursor)) {

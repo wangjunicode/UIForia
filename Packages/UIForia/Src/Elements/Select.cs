@@ -44,7 +44,7 @@ namespace UIForia.Elements {
 
         public T selectedValue;
 
-        public string selectedElementIcon;
+        public string selectedElementIcon = "icons/ui_icon_popover_checkmark@2x";
 
         public bool disabled;
 

@@ -43,15 +43,16 @@ style notification-count {
 }
 
 style menu-label {
-    AlignY = 100% Parent;
     AlignX = 50%;
+    AlignY = 100% Parent;
     TextColor = White;
     Visibility = Hidden;
     PreferredHeight = 22px;
     TextUnderlayColor = black;
-    TextUnderlayDilate = 1;
-    TextUnderlayOffsetX = 0.1;
-    TextUnderlayOffsetY = 0.4;
+    TextUnderlayDilate = 0;
+    TextUnderlaySoftness = 1;
+    TextUnderlayX = 1;
+    TextUnderlayY = -1;
      
     [attr:show="true"] {
         Visibility = Visible;
@@ -61,35 +62,15 @@ style menu-label {
 
 style menu-image { 
     ShadowOffsetY = 5;
-    ShadowOffsetX = 5;
+    ShadowOffsetX = 3;
+    ShadowColor = black;
+    ShadowOpacity = 0.5;
+    ShadowSizeX = 1;
+    ShadowSizeY = 1;
     run animation(go-down);
-    run animation(animshadow);
 
     [hover] {
+        Cursor = @theme.cursorClickable;
         run animation(go-up);
-    }
-}
-
-animation animshadow {
-    [options] {
-        Duration = 1000;
-        Iterations = Infinite;
-        LoopType = PingPong;
-        TimingFunction = Linear;
-    }
-    [keyframes] {
-        0% {
-            ShadowIntensity = 20;
-            ShadowColor = black;
-            ShadowSizeX = 1;
-            ShadowSizeY = 1;
-        }
-        
-        100% {
-            ShadowIntensity = 22;
-            ShadowColor = rgb(30, 30, 30);
-            ShadowSizeX = -1;
-            ShadowSizeY = -10;
-        }
     }
 }

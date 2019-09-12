@@ -1,0 +1,130 @@
+import "Demo/Theme.style" as theme;
+
+const durationBase = 100;
+const durationDialog = 600;
+
+const backgroundColor = rgb(253, 253, 253);
+const brushButtonSize = 190px;
+
+animation show {
+    [options] {
+        duration = @durationDialog;
+        timingFunction = CubicEaseInOut;
+    }
+    
+    [keyframes] {
+        100% { AlignY = 100%; }
+    }
+}
+animation hide {
+    [options] {
+        duration = @durationDialog;
+        timingFunction = CubicEaseInOut;
+    }
+    
+    [keyframes] {
+        100% { AlignY = 200% 100%; }
+    }
+}
+
+
+animation dialog-button-normal {
+    [options] {
+        duration = @durationBase;
+    }
+        
+    [keyframes] {
+        100% { Border = 0px; }
+    }
+}
+
+animation dialog-button-hover {
+    [options] {
+        duration = @durationBase;
+    }
+    
+    [keyframes] {
+        100% { Border = 5px; }
+    }
+}
+
+animation show {
+    [options] {
+        duration = @durationDialog;
+        timingFunction = CubicEaseInOut;
+    }
+    
+    [keyframes] {
+        100% { AlignY = 0% 0%; }
+    }
+}
+
+animation hide {
+    [options] {
+        duration = @durationDialog;
+        timingFunction = CubicEaseInOut;
+    }
+    
+    [keyframes] {
+        100% { AlignY = 200% 100%; }
+    }
+}
+
+style <this> {
+    BackgroundColor = rgba(0, 0, 0, 230);
+    TextColor = white;
+    TextFontStyle = UpperCase;
+    LayoutBehavior = Ignored;
+    AlignmentBehaviorY = Parent;
+    AlignY = 100% 0%;
+    
+    PreferredSize = 1pca;
+    
+    FlexLayoutDirection = Column;
+    FlexLayoutMainAxisAlignment = Center;
+    FlexLayoutCrossAxisAlignment = Center;
+    
+    TextWhitespaceMode = PreserveNewLines CollapseWhitespace Trim;
+    TextAlignment = Center;
+    [attr:placement="show"] {
+        run animation(show);
+    }
+    [attr:placement="hide"] {
+        run animation(hide);
+    }
+}
+
+style color-grey { BackgroundColor = @theme.lightGrey; }
+
+style dialog-title {
+    TextFontSize = 25px;
+}
+
+style dialog-buttons {
+    MarginTop = 10px;
+    MarginBottom = 10px;
+    
+    PreferredSize = 1cnt;
+    
+    FlexLayoutDirection = Row;
+    FlexLayoutMainAxisAlignment = Center;
+}
+
+style dialog-button {
+    TextFontSize = 35px;
+    
+    PreferredSize = 120px;
+    BorderRadius = 60px;
+    
+    Margin = 15px;
+    
+    FlexLayoutMainAxisAlignment = Center;
+    FlexLayoutCrossAxisAlignment = Center;
+    
+    BorderColor = white;
+    
+    run animation(dialog-button-normal);
+    [hover] {
+        run animation(dialog-button-hover);
+    }
+}

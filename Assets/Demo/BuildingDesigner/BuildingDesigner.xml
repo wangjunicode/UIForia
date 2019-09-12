@@ -13,33 +13,27 @@
         <Group style="building-designer-top-bar">
             <Group style="top-left-area flex-horizontal-centered">
                 <Text>CONSTRUCTION MODE</Text>
-<!--                <Group style="flex-horizontal-centered ml2">-->
-<!--                    <Image src="'new_ui_icons/ui_icon_undo'" style="redo-button-image"/>-->
-<!--                    <Div style="top-bar-text inactive">UNDO</Div>-->
-<!--                </Group>-->
-<!--                <Group style="flex-horizontal-centered ml1">-->
-<!--                    <Image src="'new_ui_icons/ui_icon_redo'" style="redo-button-image"/>-->
-<!--                    <Div style="top-bar-text inactive">REDO</Div>-->
-<!--                </Group>-->
             </Group>
 
             <Group style="top-right-area flex-horizontal-centered">
-                <Div style="top-bar-text ml1 mr1">TYPE:</Div>
-                <Select--int style="top-bar-text mr1 fixed-width-type top-bar-select"
-                             options="BrushTypes"
+                <Div style="top-bar-text">TYPE:</Div>
+                <Select--int style="top-bar-select"
+                             options="brushTypes"
                              onValueChanged="OnBrushTypeChanged"
-                             selectedElementIcon="'icons/ui_icon_popover_checkmark@2x'"
                 />
 
                 <Div style="flex-horizontal-centered">
-                    <Div style="top-bar-text ml1 mr1">STYLE:</Div>
-                    <Select--int disabled="!IsBasicSelected" style="top-bar-text top-bar-select mr1 fixed-width-style" options="BasicStyles" onValueChanged="OnBasicStyleChanged"/>
+                    <Div style="top-bar-text">STYLE:</Div>
+                    <Select--int disabled="currentBrushType != Category.Basic" 
+                                 style="top-bar-select" 
+                                 options="basicStyles" 
+                                 onValueChanged="OnBasicStyleChanged"
+                    />
                 </Div>
             </Group>
         </Group>
 
         <Group style="building-designer-main">
-
             <Div style="tools-area">
                 <Div style="grid-with-buttons">
                     <Image x-id="SELECT"      src="'new_ui_icons/ui_icon_select'"       style="tools-button" onMouseClick="ToolButtonClicked(ToolButton.SELECT)"/>
@@ -51,126 +45,68 @@
                     <Image x-id="BUCKET"      src="'new_ui_icons/ui_icon_paint_bucket'" style="tools-button" onMouseClick="ToolButtonClicked(ToolButton.BUCKET)"/>
                     <Image x-id="DELETE_ALL"  src="'new_ui_icons/ui_icon_delete_all'"   style="tools-button" onMouseClick="ToolButtonClicked(ToolButton.DELETE_ALL)"/>
                     <Image x-id="EYE_DROPPER" src="'new_ui_icons/ui_icon_eye_dropper'"  style="tools-button" onMouseClick="ToolButtonClicked(ToolButton.EYE_DROPPER)"/>
-                    <ColorPicker availableColors="availableColors" selectedColor="selectedColor" style="tools-button" />
+                    <ColorPicker availableColors="availableColors" style="tools-button" />
                 </Div>
-
             </Div>
 
-
-            <ScrollView style="previews-area" fadeTime="-1">
-
-                <Group if="CurrentBrushType == CategoryBASIC" style="grid-with-brushes">
-
-                    <Repeat list="GetBasicBrushes(CurrentBasicBrushStyle)" style="transclude">
-                        <Div style="brush-button" onMouseClick="SelectBrush($event, $item)">
-                            <Image texture="$item.Texture" style="image-width"/>
-                            <Text style="brush-label">{$item.Label}</Text>
-                        </Div>
-                    </Repeat>
-
-                </Group>
-
-                <Group if="CurrentBrushType == CategoryBLOCK" style="grid-with-brushes">
-
-                    <Repeat list="BlockBrushes" style="transclude">
-                        <Div style="brush-button" onMouseClick="SelectBrush($event, $item)">
-                            <Image texture="$item.Texture" style="image-width"/>
-                            <Text style="brush-label">{$item.Label}</Text>
-                        </Div>
-                    </Repeat>
-
-                </Group>
-
-                <Group if="IsSeedTemplate" style="grid-with-brushes">
-
-                    <Repeat list="TemplateSeedBrushes" style="transclude">
-                        <Div style="brush-button" onMouseClick="SelectBrush($event, $item)">
-                            <Image texture="$item.Texture" style="image-width"/>
-                            <Text style="brush-label">{$item.Label}</Text>
-                        </Div>
-                    </Repeat>
-
-                </Group>
-
-                <Group if="IsPlayerTemplate">
-
-                    <Group style="grid-with-brushes">
-
-                        <Repeat list="TemplatePlayerBrushes" style="transclude-children" >
-                            <Div style="brush-button" onMouseClick="SelectBrush($event, $item)">
-                                <Image texture="$item.Texture" style="image-width"/>
-                                <Text style="brush-label">{$item.Label}</Text>
-                                <KlangButton style="remove-button" label="'X'"
-                                             onMouseClick="DeleteBrush($event, $item)"/>
-                            </Div>
-
-                        </Repeat>
-
-                        <Div style="brush-button" onMouseClick="SaveBuilding()">
-                            <Image src="'new_ui_icons/ui_save_blocks_plus_icon'" style="plus-sign"/>
-                        </Div>
-                    </Group>
-
-                </Group>
-
+            <ScrollView style="previews-area">
+                <Repeat list="GetBrushes()" style="grid-with-brushes">
+                    <Div style="brush-button" onMouseClick="SelectBrush($event, $item)">
+                        <Image texture="$item.Texture" style="image-width"/>
+                        <Text style="brush-label">{$item.Label}</Text>
+                    </Div>
+                </Repeat>
             </ScrollView>
         </Group>
         
         <Group style="building-designer-footer">
-
             <Group style="flex-horizontal-centered footer-left-area">
-
-                <Div style="flex-vertical-centered footer-total-cost ml2 mr2">
-                    <Text>TOTAL</Text>
-                    <Text>COST</Text>
+                <Div style="flex-vertical-centered footer-total-cost">
+                    <Text>Total</Text>
+                    <Text>Cost</Text>
                 </Div>
-                <Group style="flex-horizontal-centered ml1 mr1">
+                <Group style="flex-horizontal-centered footer-icon-container">
                     <Image src="'ui_icon_plaxin_16@2x'" style="footer-icon"/>
-                    <Text>{PlaxinCost} Plaxin</Text>
+                    <Text>24 Plaxin</Text>
                 </Group>
-
             </Group>
 
             <Group style="flex-horizontal-centered footer-right-area">
-
-                <Div onMouseClick="ShowDialog('confirm-dialog')" style="footer-button confirm-button flex-horizontal-centered">CONFIRM</Div>
+                <Div onMouseClick="ShowConfirmDialog()" style="footer-button confirm-button flex-horizontal-centered">CONFIRM</Div>
                 <Div onMouseClick="SaveAndExit()" style="footer-button save-exit-button flex-horizontal-centered">SAVE &amp; EXIT</Div>
-                <Div onMouseClick="ShowDialog('cancel-dialog')" style="footer-button cancel-button flex-horizontal-centered mr2">CANCEL</Div>
-
+                <Div onMouseClick="ShowCancelDialog()" style="footer-button cancel-button flex-horizontal-centered mr2">CANCEL</Div>
             </Group>
 
         </Group>
 
-        <Group x-id="confirm-dialog" style="dialog">
-
-            <Text style="dialog-title">ARE YOU SURE YOU</Text>
-            <Text style="dialog-title">WANT TO CONFIRM?</Text>
-            <Div style="dialog-buttons">
-                <Div style="dialog-button color-grey" onMouseClick="CloseDialog('confirm-dialog')">NO</Div>
-                <Div onMouseClick="ConfirmDesign('confirm-dialog')" style="dialog-button confirm-color">YES</Div>
-            </Div>
-            <Text>CONSTRUCTION WILL BEGIN WHEN ALL</Text>
-            <Text>RESOURCES HAVE BEEN HAULED TO LOCATION.</Text>
-
-        </Group>
-
-        <Group x-id="cancel-dialog" style="dialog">
-
-            <Text style="dialog-title">ARE YOU SURE YOU</Text>
-            <Text style="dialog-title">WANT TO CANCEL?</Text>
-            <Div style="dialog-buttons">
-                <Div style="dialog-button color-grey" onMouseClick="CloseDialog('cancel-dialog')">NO</Div>
-                <Div onMouseClick="ExitBuildingDesigner('cancel-dialog')" style="dialog-button cancel-color">YES</Div>
-            </Div>
-            <Text>ALL PROGRESS WILL BE LOST. IF YOU WANT TO</Text>
-            <Div style="flex-horizontal-centered">
-                <Text>CONTINUE LATER, CHOOSE</Text>
-                <Text style="save-exit-text-color ml1 mr1">SAVE &amp; EXIT</Text>
-                <Text>INSTEAD</Text>
-            </Div>
-
-        </Group>
-
+        <Dialog onConfirm="onConfirm" confirmColor="green" isVisible.read.write="showConfirm">
+            <SlotContent name="title">
+                Are you sure you 
+                want to confirm?
+            </SlotContent>
+            <SlotContent name="description">
+                Construction will begin when all
+                resources have been hauled to location.
+            </SlotContent>
+        </Dialog>
+        
+        <Dialog onConfirm="onCancel" confirmColor="red" isVisible.read.write="showCancel">
+            <SlotContent name="title">
+                Are you sure you 
+                want to cancel?
+            </SlotContent>
+            <SlotContent name="description" style="confirm-text-container">
+                <Group style="confirm-text-container">
+                    <Text>All progress will be lost. If you want to</Text>
+                    <Div style="flex-horizontal-centered">
+                        continue later, choose
+                        <Text style="save-exit-text"> save &amp; exit </Text>
+                         instead.
+                    </Div>
+                </Group>
+      
+            </SlotContent>
+        </Dialog>
     </Contents>
 
 </UITemplate>

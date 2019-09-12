@@ -194,7 +194,7 @@ namespace UIForia.Systems {
             return max;
         }
 
-        public override float GetIntrinsicPreferredWidth() {
+        protected override float ComputeIntrinsicPreferredWidth() {
             FastLayoutBox child = firstChild;
 
             if (direction == LayoutDirection.Horizontal) {
@@ -204,13 +204,6 @@ namespace UIForia.Systems {
                     retn += child.GetIntrinsicPreferredWidth();
                     child = child.nextSibling;
                 }
-
-                float contentWidth = retn;
-
-                retn += ResolveFixedSize(contentWidth, element.style.PaddingLeft);
-                retn += ResolveFixedSize(contentWidth, element.style.PaddingRight);
-                retn += ResolveFixedSize(contentWidth, element.style.BorderLeft);
-                retn += ResolveFixedSize(contentWidth, element.style.BorderRight);
 
                 return retn;
             }
@@ -226,13 +219,7 @@ namespace UIForia.Systems {
 
                     child = child.nextSibling;
                 }
-
-                float contentWidth = retn;
-
-                retn += ResolveFixedSize(contentWidth, element.style.PaddingLeft);
-                retn += ResolveFixedSize(contentWidth, element.style.PaddingRight);
-                retn += ResolveFixedSize(contentWidth, element.style.BorderLeft);
-                retn += ResolveFixedSize(contentWidth, element.style.BorderRight);
+                
                 return retn;
             }
         }
@@ -467,9 +454,24 @@ namespace UIForia.Systems {
                     layoutFit = LayoutFit.Shrink;
                 }
 
-                child.ApplyHorizontalLayout(item.mainAxisStart, blockWidth, item.outputWidth, item.size.prefWidth, 0, layoutFit);
+                float horizontalAlignment = 0;
 
-                child.GetHeight(child.size.width, blockWidth, blockHeight, ref item.size);
+                switch (mainAxisAlignment) {
+                    case MainAxisAlignment.Unset:
+                    case MainAxisAlignment.Start:
+                        horizontalAlignment = 0f;
+                        break;
+                    case MainAxisAlignment.Center:
+                        horizontalAlignment = 0.5f;
+                        break;
+                    case MainAxisAlignment.End:
+                        horizontalAlignment = 1f;
+                        break;
+                }
+                
+                child.ApplyHorizontalLayout(item.mainAxisStart, blockWidth, item.outputWidth, item.size.prefWidth, horizontalAlignment, layoutFit);
+
+                child.GetHeight(item.outputWidth, blockWidth, blockHeight, ref item.size);
                 child.GetMarginVertical(blockHeight, ref item.margin);
                 item.outputHeight = item.size.prefHeight;
                 float heightAndMargin = item.outputHeight + item.margin.top + item.margin.bottom;

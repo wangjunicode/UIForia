@@ -786,6 +786,12 @@ namespace UIForia {
             return m_Views.ToArray();
         }
 
+        public AnimationData GetAnimationFromFile(string fileName, string animationName) {
+            AnimationData data;
+            styleImporter.ImportStyleSheetFromFile(fileName).TryGetAnimationData(animationName, out data);
+            return data;
+        }
+        
         internal void InsertChild(UIElement parent, UIElement child, uint index) {
             if (child.parent != null) {
                 throw new NotImplementedException("Reparenting is not supported");

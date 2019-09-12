@@ -201,7 +201,7 @@ Shader "UIForia/Standard"
                         tintedShadowColor = lerp(shadowRetn, tintedShadowColor, n);
                         
                         shadowRetn = lerp(shadowRetn, tintedShadowColor, Frag_ColorMode == PaintMode_ShadowTint);
-                        shadowRetn.a *= 1; //colorInfo.b;
+                        shadowRetn.a *= i.color.a;
                         mainColor = shadowRetn;
                         mainColor.rgb *= mainColor.a;
                         return mainColor;

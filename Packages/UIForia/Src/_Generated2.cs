@@ -1606,6 +1606,8 @@ case "visibility":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_float("ShadowSizeY", UIForia.Rendering.StylePropertyId.ShadowSizeY, targetState.state, Compile<float>(value, null));                
                 case "shadowintensity":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_float("ShadowIntensity", UIForia.Rendering.StylePropertyId.ShadowIntensity, targetState.state, Compile<float>(value, null));                
+                case "shadowopacity":
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_float("ShadowOpacity", UIForia.Rendering.StylePropertyId.ShadowOpacity, targetState.state, Compile<float>(value, null));                
                 
 
             }

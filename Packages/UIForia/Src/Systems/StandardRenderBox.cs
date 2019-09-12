@@ -383,6 +383,7 @@ namespace UIForia.Rendering {
                     b[1] = style.ShadowTint;
                     UnsafeUtility.MemCpy(vp, b, sizeof(Color32) * 2);
                     v.z = style.ShadowIntensity;
+                    v.w = style.ShadowOpacity;
                 }
 
                 shadowGeometry.packedColors = v;

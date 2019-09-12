@@ -150,6 +150,7 @@ namespace UIForia.Rendering {
 		public const float ShadowSizeX = 0f;
 		public const float ShadowSizeY = 0f;
 		public const float ShadowIntensity = 10f;
+		public const float ShadowOpacity = 1f;
 		public static StyleProperty GetPropertyValue(StylePropertyId propertyId) {
 
 			switch(propertyId) {
@@ -425,6 +426,8 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.ShadowSizeY, 0f);
 				case StylePropertyId.ShadowIntensity:
 					 return new StyleProperty(StylePropertyId.ShadowIntensity, 10f);
+				case StylePropertyId.ShadowOpacity:
+					 return new StyleProperty(StylePropertyId.ShadowOpacity, 1f);
 				default: throw new System.ArgumentOutOfRangeException(nameof(propertyId), propertyId, null);
 				}
 } 

@@ -31,15 +31,23 @@ namespace Demo {
         
         public RepeatableList<MenuItemData> MenuItems;
 
+        public bool isActive;
+
+        [OnPropertyChanged("isActive")]
+        public void OnActiveChanged(string propertyName) {
+            SetAttribute("placement", isActive ? "show" : "hide");
+        }
+
         public override void OnCreate() {
             MenuItems = new RepeatableList<MenuItemData>() {
-                    new MenuItemData() { ImageUrl = "Prototyping/icon__menu_chat", Label = "Chat", NotificationCount = 3 },
-                    new MenuItemData() { ImageUrl = "Prototyping/icon_plant_64", Label = "Plants" },
-                    new MenuItemData() { ImageUrl = "Prototyping/icon__menu_build", Label = "Build things", OnClick = OpenBuildMenu},
-                    new MenuItemData() { ImageUrl = "Prototyping/icon_chop_64", Label = "Chop the wood" },
-                    new MenuItemData() { ImageUrl = "Prototyping/icon__menu_schedule", Label = "Schedules" },
-                    new MenuItemData() { ImageUrl = "Prototyping/icon__menu_stockpile", Label = "More things" },
-                    new MenuItemData() { ImageUrl = "Prototyping/icon__menu_build", Label = "Wiki and help" }
+                    new MenuItemData() { ImageUrl = "dock/Zones@2x", Label = "Zones" },
+                    new MenuItemData() { ImageUrl = "dock/Wiki@2x", Label = "Wiki" },
+                    new MenuItemData() { ImageUrl = "dock/Schedule@2x", Label = "Schedule" },
+                    new MenuItemData() { ImageUrl = "dock/Objects@2x", Label = "Objects" },
+                    new MenuItemData() { ImageUrl = "dock/ActivityLog@2x", Label = "Activity Log" },
+                    new MenuItemData() { ImageUrl = "dock/Chat@2x", Label = "Chat", NotificationCount = 3 },
+                    new MenuItemData() { ImageUrl = "dock/Construction@2x", Label = "Construction", OnClick = OpenBuildMenu },
+                    new MenuItemData() { ImageUrl = "dock/Farming@2x", Label = "Farming" },
             };
         }
 

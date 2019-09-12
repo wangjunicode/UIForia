@@ -13,7 +13,7 @@ namespace UIForia.Layout {
             throw new NotImplementedException("Should never call GetIntrinsicMinHeight on a transcluded layout box");
         }
 
-        public override float GetIntrinsicPreferredWidth() {
+        protected override float ComputeIntrinsicPreferredWidth() {
             throw new NotImplementedException("Should never call GetIntrinsicMaxWidth on a transcluded layout box");
         }
 

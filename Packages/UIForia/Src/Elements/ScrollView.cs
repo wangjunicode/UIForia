@@ -66,7 +66,7 @@ namespace UIForia.Elements {
                 float width = (actualSize.width / overflowSize.width) * actualSize.width;
                 float opacity = 1 + fadeTarget - Mathf.Clamp01(Easing.Interpolate((Time.realtimeSinceStartup - lastScrollHorizontalTimestamp) / fadeTime, EasingFunction.CubicEaseInOut));
                 horizontalHandle.style.SetPreferredWidth(width, StyleState.Normal);
-//                horizontalTrack.style.SetOpacity(opacity, StyleState.Normal);
+                horizontalTrack.style.SetOpacity(opacity, StyleState.Normal);
             }
 
             if (disableOverflowY || overflowSize.height <= actualSize.height) {
@@ -77,7 +77,7 @@ namespace UIForia.Elements {
                 float height = (actualSize.height / overflowSize.height) * actualSize.height;
                 float opacity = 1 + fadeTarget - Mathf.Clamp01(Easing.Interpolate((Time.realtimeSinceStartup - lastScrollVerticalTimestamp) / fadeTime, EasingFunction.CubicEaseInOut));
                 verticalHandle.style.SetPreferredHeight(height, StyleState.Normal);
-//                verticalTrack.style.SetOpacity(opacity, StyleState.Normal);
+                verticalTrack.style.SetOpacity(opacity, StyleState.Normal);
             }
         }
 

@@ -21,14 +21,15 @@ animation hide {
     }
 }
 
-style <this> {
+
+style <this> { 
     AlignX = 100% Parent;
-    AlignmentBehaviorY = Parent;
-    AlignY = 200% 100%;
+    AlignY = 100% Parent;
     LayoutBehavior = Ignored;
     FlexLayoutDirection = Horizontal;
     FlexLayoutCrossAxisAlignment = End;
-
+    TextFontAsset = url("Fonts/Gotham-Medium SDF");
+    
     [attr:placement="show"] {
         run animation(show);
     }
@@ -38,19 +39,15 @@ style <this> {
     
 }
 
-style transclude {
-    LayoutBehavior = TranscludeChildren;
-}
-
-
 style menu-map {
     PreferredSize = 192px;
     BorderRadius = 50%;
     Border = 7px;
     BorderColor = Black;
-    BackgroundImage = url("image");
+    BackgroundImage = url("dock/Minimap@2x");
     MarginBottom = 1em;
     MarginRight = 1em;
+    Painter = "DemoParticles";
 }
 
 style weather {
@@ -62,7 +59,7 @@ style weather {
     AlignmentOffsetY = 64px;
     AlignmentBehaviorX = LayoutBox;
     AlignmentBehaviorY = LayoutBox;
-    BackgroundImage = url("Sprites/StatusImageWeatherIconCloudy");
+    BackgroundImage = url("dock/Waether@2x");
     BackgroundFit = Contain;
    
 }
@@ -76,6 +73,7 @@ style temp-gauge {
     AlignmentOffsetY = -12px;
     AlignmentBehaviorX = LayoutBox;
     AlignmentBehaviorY = LayoutBox;
+    BackgroundImage = url("dock/Temperature@2x");
 }
 
 style clock {
@@ -87,6 +85,7 @@ style clock {
     AlignmentOffsetY = -82px;
     AlignmentBehaviorX = LayoutBox;
     AlignmentBehaviorY = LayoutBox;
+    BackgroundImage = url("dock/Clock@2x");
 }
 
 style date {
@@ -98,4 +97,5 @@ style date {
     AlignmentOffsetY = -108px;
     AlignmentBehaviorX = LayoutBox;
     AlignmentBehaviorY = LayoutBox;
+    BackgroundImage = url("dock/Calendar@2x");
 }

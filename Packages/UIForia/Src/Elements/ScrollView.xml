@@ -1,42 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
 <UITemplate>
     <Style>
-        
+
         const scrollBarSize = 10px;
+        const trackColor = #b2b2b2ff;
 
         style scrollview {
-            OverflowX = scroll;
-            OverflowY = scroll;
+            Overflow = scroll;
         }
 
         style scroll-track-vertical {
-            PreferredSize = @scrollBarSize 1psz;
             LayoutBehavior = Ignored;
-            AlignX = 100%;
-            AlignmentBehaviorX = Parent;
-            BackgroundColor = #b2b2b2ff;
+            PreferredSize = @scrollBarSize 1psz;
+            AlignX = 100% Parent;
+            BackgroundColor = @trackColor;
         }
 
         style scroll-handle-vertical {
-            BorderRadius = 50%;
-            BackgroundColor = grey;
             PreferredWidth = @scrollBarSize;
             AlignmentBehaviorY = Parent;
+            BorderRadius = 50%;
+            BackgroundColor = grey;
         }
 
         style scroll-track-horizontal {
-            PreferredSize = 1psz @scrollBarSize;
             LayoutBehavior = Ignored;
-            AlignmentBehaviorY = Parent;
-            AlignY = 100%;
-            BackgroundColor = darkGrey;
+            PreferredSize = 1psz @scrollBarSize;
+            AlignY = 100% Parent;
+            BackgroundColor = @trackColor;
         }
 
         style scroll-handle-horizontal {
-            BorderRadius = 50%;
-            BackgroundColor = grey;
             PreferredHeight = @scrollBarSize;
             AlignmentBehaviorX = Parent;
+            BorderRadius = 50%;
+            BackgroundColor = grey;
         }
 
     </Style>

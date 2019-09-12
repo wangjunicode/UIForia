@@ -51,6 +51,14 @@ style footer-button {
 
 style footer-total-cost {
     TextFontSize = 14px;
+    TextTransform = UpperCase;
+    MarginLeft = 20px;
+    MarginRight = 20px;
+}
+
+style footer-icon-container {
+    MarginLeft = 10px;
+    MarginRight = 10px;
 }
 
 style confirm-button {

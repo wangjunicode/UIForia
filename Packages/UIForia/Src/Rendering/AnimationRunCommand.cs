@@ -9,5 +9,8 @@ namespace UIForia.Rendering {
         public void Run(UIElement element) {
             element.Application.Animate(element, animationData);
         }
+
+        public bool IsExit { get; }
+
     }
 }

@@ -313,13 +313,18 @@ namespace UIForia.Rendering {
             LightList<IRunCommand>.Release(ref toRun);
         }
 
-        private void RunCommands(LightList<IRunCommand> runCommands) {
+        private void RunCommands(LightList<IRunCommand> runCommands, bool enter = true) {
             if (runCommands == null) {
                 return;
             }
 
             for (int index = 0; index < runCommands.Count; index++) {
-                runCommands[index].Run(element);
+                    runCommands[index].Run(element);
+                if (enter && !runCommands[index].IsExit) {
+                }
+                else if (!enter && runCommands[index].IsExit) {
+               //     runCommands[index].Run(element);
+                }
             }
         }
 
@@ -343,7 +348,7 @@ namespace UIForia.Rendering {
                 StyleEntry entry = styleEntries[i];
 
                 if (entry.state == StyleState.Normal) {
-                    RunCommands(entry.styleRunCommand.runCommands);
+                    RunCommands(entry.styleRunCommand.runCommands, false);
                 }
 
                 // if this a state we were in that is now invalid, mark it's properties for update
@@ -358,7 +363,6 @@ namespace UIForia.Rendering {
         }
 
         internal void UpdateInheritedStyles() {
-
             if (element.parent == null) {
                 return;
             }
@@ -366,15 +370,14 @@ namespace UIForia.Rendering {
             int count = StyleUtil.InheritedProperties.Count;
 
             UIStyleSet parentStyle = element.parent.style;
-            
+
             for (int i = 0; i < count; i++) {
-                int propertyId = (int)StyleUtil.InheritedProperties[i];
+                int propertyId = (int) StyleUtil.InheritedProperties[i];
                 int key = BitUtil.SetHighLowBits(1, propertyId);
                 propertyMap[key] = parentStyle.GetComputedStyleProperty(StyleUtil.InheritedProperties[i]);
             }
-            
         }
-        
+
         internal bool SetInheritedStyle(StyleProperty property) {
             if (propertyMap.ContainsKey((int) property.propertyId)) {
                 return false;
@@ -878,12 +881,13 @@ namespace UIForia.Rendering {
 
         public string GetStyleNames() {
             s_Builder.Clear();
-            
+
             for (int i = 0; i < styleGroupContainers.Count; i++) {
                 if (styleGroupContainers[i].styleType == StyleType.Shared) {
                     if (s_Builder.Length > 0) {
                         s_Builder.Append(" ");
                     }
+
                     s_Builder.Append(styleGroupContainers[i].name);
                 }
             }

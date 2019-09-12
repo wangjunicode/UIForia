@@ -265,7 +265,7 @@ style brush-button {
     MarginBottom = 20px;
 
     BorderRadius = 10px;
-
+    
     FlexLayoutCrossAxisAlignment = Center;
     FlexLayoutMainAxisAlignment = Center;
     
@@ -276,6 +276,7 @@ style brush-button {
     
     [hover] {
         run animation(button-hover);
+       // run exit animation(button-normal);
     }
 }
 

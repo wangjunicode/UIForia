@@ -473,6 +473,17 @@ namespace UIForia.Parsing.Style {
                     };
                     command.WithLocation(tokenStream.Current);
                     break;
+                case "exit":
+                    command = default;
+                    if (tokenStream.HasMoreTokens && tokenStream.Current.value == "animation") {
+                        tokenStream.Advance();
+                        command = new AnimationCommandNode() {
+                            animationName = ParseIdentifierInParentheses()
+                        };
+                    }
+
+
+                    break;
                 default: throw new ParseException(tokenStream.Current, "Please specify 'animation' as run command.");
             }
             

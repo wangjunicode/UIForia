@@ -82,15 +82,18 @@ namespace UIForia.Layout {
         public LayoutBoxMetrics metrics;
 
         public struct LayoutBoxMetrics {
+
             public int totalLayoutCount;
             public int contentHeightCacheHit;
             public int contentHeightCacheMiss;
             public int contentWidthCacheHit;
             public int contentWidthCacheMiss;
+
         }
-        
+
         public virtual void AddChild(FastLayoutBox child) {
             child.parent = this;
+            MarkForLayout();
 
             if (firstChild == null) {
                 firstChild = child;
@@ -104,7 +107,6 @@ namespace UIForia.Layout {
             FastLayoutBox prev = null;
 
             while (ptr != null) {
-
                 // Assuming the depth traversal index has been set correctly at this point:
                 // We're iterating the linked list from start to end. As soon as the the child's depthTraversalIndex is smaller than the current ptr's the traversal has to stop
                 // and then we know we hit one of two cases: this is the first iteration and the prev pointer is null, which means the child has to be prepended to the parent
@@ -146,6 +148,7 @@ namespace UIForia.Layout {
         public virtual void RemoveChild(FastLayoutBox child) {
             int idx = 0;
             FastLayoutBox ptr = firstChild;
+            MarkForLayout();
 
             Debug.Assert(child != null, "child != null");
 
@@ -155,7 +158,7 @@ namespace UIForia.Layout {
             }
 
             if (ptr == null) return;
-            
+
             if (child == firstChild) {
                 firstChild = firstChild.nextSibling;
             }
@@ -195,17 +198,15 @@ namespace UIForia.Layout {
             if (element.style.LayoutBehavior == LayoutBehavior.Ignored) {
                 flags |= LayoutRenderFlag.Ignored;
             }
-            
+
             MarkForLayout();
         }
 
         protected abstract void PerformLayout();
 
-        protected virtual void OnChildAdded(FastLayoutBox child, int index) {
-        }
+        protected virtual void OnChildAdded(FastLayoutBox child, int index) { }
 
-        protected virtual void OnChildRemoved(FastLayoutBox child, int index) {
-        }
+        protected virtual void OnChildRemoved(FastLayoutBox child, int index) { }
 
         public abstract float GetIntrinsicMinWidth();
 
@@ -274,13 +275,12 @@ namespace UIForia.Layout {
             widthCache = default;
         }
 
-        
+
         public float ResolveHeight(float width, in BlockSize blockWidth, in BlockSize blockHeight, in UIMeasurement measurement) {
             float value = measurement.value;
 
             switch (measurement.unit) {
                 case UIMeasurementUnit.Content: {
-
                     float contentHeight = ComputeContentHeight(width, blockWidth, blockHeight);
                     // todo -- if block size changes the cached value is possibly wrong!
                     // float contentHeight = GetCachedHeightForWidth(width);
@@ -322,7 +322,7 @@ namespace UIForia.Layout {
                     return element.View.Viewport.height * value;
 
                 case UIMeasurementUnit.IntrinsicMinimum: {
-                    float contentHeight =  GetIntrinsicMinHeight();
+                    float contentHeight = GetIntrinsicMinHeight();
                     float baseVal = contentHeight;
 
                     baseVal += ResolveFixedSize(contentHeight, element.style.PaddingTop);
@@ -428,6 +428,7 @@ namespace UIForia.Layout {
             if (element.layoutBox != this) {
                 Debug.Log("Bad");
             }
+
             pivotX = ResolveFixedWidth(element.style.TransformPivotX);
 
             if (selfLayoutFitHorizontal != LayoutFit.Unset) {
@@ -477,7 +478,7 @@ namespace UIForia.Layout {
             alignedPosition.x = originBase + originOffset + offset;
 
             // if content size changed we need to layout todo account for padding
-            if ((int)oldSize.width != (int)size.width) {
+            if ((int) oldSize.width != (int) size.width) {
                 flags |= LayoutRenderFlag.NeedsLayout;
             }
 
@@ -485,11 +486,10 @@ namespace UIForia.Layout {
             // allocated size = size my parent told me to be
             // content size = extents of my content
         }
-        
 
 
         protected float GetCachedHeightForWidth(float width) {
-            int intWidth = (int)width;
+            int intWidth = (int) width;
             if (widthCache.width0 == intWidth) {
                 return widthCache.height0;
             }
@@ -506,16 +506,18 @@ namespace UIForia.Layout {
         }
 
         protected void SetCachedHeightForWidth(float width, float height) {
-            int intWidth = (int)width;
+            int intWidth = (int) width;
             if (widthCache.next == 0) {
                 widthCache.next = 1;
                 widthCache.width0 = intWidth;
                 widthCache.height0 = height;
-            } else if (widthCache.next == 1) {
+            }
+            else if (widthCache.next == 1) {
                 widthCache.next = 2;
                 widthCache.width1 = intWidth;
                 widthCache.height1 = height;
-            } else {
+            }
+            else {
                 widthCache.next = 0;
                 widthCache.width2 = intWidth;
                 widthCache.height2 = height;
@@ -574,7 +576,7 @@ namespace UIForia.Layout {
             allocatedSize.height = allocatedHeight;
             containingBoxHeight = containingHeight;
 
-            if ((int)oldSize.height != (int)size.height) {
+            if ((int) oldSize.height != (int) size.height) {
                 flags |= LayoutRenderFlag.NeedsLayout;
             }
         }
@@ -583,7 +585,7 @@ namespace UIForia.Layout {
             output.minWidth = ResolveWidth(lastResolvedWidth, minWidth);
             output.maxWidth = ResolveWidth(lastResolvedWidth, maxWidth);
             output.prefWidth = ResolveWidth(lastResolvedWidth, prefWidth);
- 
+
             if (output.prefWidth < output.minWidth)
                 output.prefWidth = output.minWidth;
             if (output.prefWidth > output.maxWidth)
@@ -610,34 +612,34 @@ namespace UIForia.Layout {
             // todo -- this flag is never set 
             // if ((parent.flags & LayoutRenderFlag.Transclude) == 0) {
             // }
-                return parent;
+            return parent;
 
             // return parent.GetParent();
         }
-        
+
         public void Layout() {
             // todo -- size check
 
             if ((flags & LayoutRenderFlag.Ignored) != 0) {
                 FastLayoutBox layoutParent = ResolveLayoutParent();
                 SizeConstraints constraints = default;
-                
+
                 BlockSize widthBlock = default;
                 widthBlock.size = layoutParent.size.width;
                 widthBlock.contentAreaSize = layoutParent.contentSize.width;
                 BlockSize heightBlock = default;
                 heightBlock.size = layoutParent.size.height;
                 heightBlock.contentAreaSize = layoutParent.contentSize.height;
-                
+
                 GetWidth(widthBlock, ref constraints);
-                float clampedWidth = Mathf.Max(constraints.minWidth, Mathf.Min(constraints.maxWidth, constraints.prefWidth)); 
+                float clampedWidth = Mathf.Max(constraints.minWidth, Mathf.Min(constraints.maxWidth, constraints.prefWidth));
                 GetHeight(clampedWidth, widthBlock, heightBlock, ref constraints);
                 float clampedHeight = Mathf.Max(constraints.minHeight, Mathf.Min(constraints.maxHeight, constraints.prefHeight));
-                
+
                 ApplyHorizontalLayout(0, widthBlock, widthBlock.contentAreaSize, constraints.prefWidth, 0, LayoutFit.None);
                 ApplyVerticalLayout(0, heightBlock, heightBlock.contentAreaSize, clampedHeight, 0, LayoutFit.None);
             }
-            
+
             if ((flags & LayoutRenderFlag.NeedsLayout) == 0) {
                 return;
             }
@@ -650,7 +652,7 @@ namespace UIForia.Layout {
             FastLayoutBox child = firstChild;
             while (child != null) {
                 child.Layout();
-                
+
                 // todo find out who sets nextSibling to child
                 if (child == child.nextSibling) {
                     throw new Exception("Endless layout loop");
@@ -658,7 +660,6 @@ namespace UIForia.Layout {
 
                 child = child.nextSibling;
             }
-
         }
 
         protected virtual void OnChildSizeChanged(FastLayoutBox child) {
@@ -699,7 +700,7 @@ namespace UIForia.Layout {
             flags |= LayoutRenderFlag.NeedsLayout;
             owner.toLayout.Add(this);
 
-            parent?.ChildMarkedForLayout(this);
+            ResolveLayoutParent()?.ChildMarkedForLayout(this);
         }
 
         public virtual void OnStyleChanged(StructList<StyleProperty> changeList) {
@@ -1010,15 +1011,12 @@ namespace UIForia.Layout {
             }
         }
 
-        protected virtual void OnChildStyleChanged(FastLayoutBox child, StructList<StyleProperty> changeList) {
-        }
+        protected virtual void OnChildStyleChanged(FastLayoutBox child, StructList<StyleProperty> changeList) { }
 
-        public virtual void OnInitialize() {
-        }
+        public virtual void OnInitialize() { }
 
-        public virtual void OnDestroy() {
-        }
-        
+        public virtual void OnDestroy() { }
+
         private struct WidthCache {
 
             public int next;
@@ -1037,18 +1035,32 @@ namespace UIForia.Layout {
             int idx = 0;
             FastLayoutBox ptr = firstChild;
             FastLayoutBox trail = null;
-            
+            MarkForLayout();
+
             while (ptr != null) {
                 if (ptr.element == element) {
                     break;
                 }
+
                 idx++;
                 trail = ptr;
                 ptr = ptr.nextSibling;
             }
 
-            if (ptr == null) return;
-            
+            if (ptr == null) {
+                if (this is TranscludeLayoutBox) {
+                    UIElement[] children = this.element.children.array;
+                    for (int i = 0; i < this.element.children.size; i++) {
+                        UIElement child = children[i];
+                        if (child.isDisabled && (child.flags & UIElementFlags.DisabledThisFrame) != 0) {
+                            child.layoutBox?.parent?.RemoveChildByElement(child);
+                        }
+                    }
+                }
+
+                return;
+            }
+
             if (ptr == firstChild) {
                 firstChild = firstChild.nextSibling;
             }
@@ -1058,7 +1070,7 @@ namespace UIForia.Layout {
 
             OnChildRemoved(ptr, idx);
         }
-        
+
         internal void AdjustBlockSizes(ref BlockSize blockWidth, ref BlockSize blockHeight) {
             if (prefWidth.unit != UIMeasurementUnit.Content) {
                 blockWidth.size = size.width;
@@ -1082,9 +1094,10 @@ namespace UIForia.Layout {
                 }
             }
         }
+
     }
 
-    
+
     public struct BlockSize {
 
         public float size;

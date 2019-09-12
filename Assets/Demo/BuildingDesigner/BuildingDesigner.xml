@@ -70,9 +70,9 @@
 
                 </Group>
 
-                <Group if="CurrentBrushType == CategoryBLOCK">
+                <Group if="CurrentBrushType == CategoryBLOCK" style="grid-with-brushes">
 
-                    <Repeat list="BlockBrushes" style="grid-with-brushes">
+                    <Repeat list="BlockBrushes" style="transclude">
                         <Div style="brush-button" onMouseClick="SelectBrush($event, $item)">
                             <Image texture="$item.Texture" style="image-width"/>
                             <Text style="brush-label">{$item.Label}</Text>

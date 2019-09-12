@@ -65,6 +65,16 @@ namespace UIForia.Systems {
                 node.element = repeat;
                 node.template = repeat.template;
                 node.context = repeat.templateContext;
+                int enabledBindingCount = 0;
+                for (int i = 0; i < node.bindings.Length; i++) {
+                    if (!(node.bindings[i] is EnabledBinding)) {
+                        break;
+                    }
+
+                    enabledBindingCount++;
+                }
+
+                node.enableBindingCount = enabledBindingCount;
                 m_ReadBindingTree.AddItem(node);
             }
             else if (element is RenderBlockElement renderBlock) {

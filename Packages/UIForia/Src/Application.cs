@@ -453,34 +453,25 @@ namespace UIForia {
         }
 
         public void Update() {
-            // todo -- if parent changed we don't want to double update, best to iterate to array & diff a frame id
-//            updateTree.ConditionalTraversePreOrder(Time.frameCount, (element, frameId) => {
-//                if (element == null) return true; // when would element be null? root?
-//                if (element.isDisabled) return false;
-//                element.OnUpdate();
-//                return true;
-//            });
-
-            m_AnimationSystem.OnUpdate();
+            
+            m_InputSystem.OnUpdate();
 
             m_BindingSystem.OnUpdate();
 
             m_StyleSystem.OnUpdate();
 
+            m_AnimationSystem.OnUpdate();
+            
             SetTraversalIndex();
 
-            m_LayoutSystem.OnUpdate();
-
-            m_InputSystem.OnUpdate();
-
-            m_BeforeUpdateTaskSystem.OnUpdate();
-
             m_InputSystem.OnLateUpdate();
-
+            
             m_RoutingSystem.OnUpdate();
-
-            // todo -- run phase 1 of rendering in parallel to layout, do the gather phase at least
-
+            
+            m_LayoutSystem.OnUpdate();
+            
+            m_BeforeUpdateTaskSystem.OnUpdate();
+            
             m_RenderSystem.OnUpdate();
 
             m_AfterUpdateTaskSystem.OnUpdate();
@@ -618,7 +609,7 @@ namespace UIForia {
                 child.flags |= UIElementFlags.AncestorEnabled;
 
                 // if the element is itself disabled or destroyed, keep going
-                if ((child.flags & UIElementFlags.SelfAndAncestorEnabled) != UIElementFlags.SelfAndAncestorEnabled) {
+                if ((child.flags & UIElementFlags.Enabled) == 0) {
                     continue;
                 }
 
@@ -709,7 +700,7 @@ namespace UIForia {
                 child.flags |= UIElementFlags.DisabledThisFrame;
 
                 // if child is still disabled after OnDisable, traverse it's children
-                if ((child.flags & UIElementFlags.Enabled) == 0) {
+                if (!child.isEnabled) {
                     UIElement[] children = child.children.array;
                     int childCount = child.children.size;
                     if (stack.size + childCount >= stack.array.Length) {

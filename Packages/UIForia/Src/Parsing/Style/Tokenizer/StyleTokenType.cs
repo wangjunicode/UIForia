@@ -80,5 +80,7 @@ namespace UIForia.Parsing.Style.Tokenizer {
         QuestionMark,
 
         Run,
+        Exit
+
     }
 }

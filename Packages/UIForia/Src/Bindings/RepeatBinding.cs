@@ -108,10 +108,17 @@ namespace UIForia.Bindings {
         }
 
         public override bool OnUpdate() {
-            if (element.isDisabled) return false;
+            
+            
             CreateOrDestroyChildren();
+            
+            for (int i = 0; i < enableBindingCount; i++) {
+                bindings[i].Execute(element, context);
+            }
 
-            for (int i = 0; i < bindings.Length; i++) {
+            if (element.isDisabled) return false;
+
+            for (int i = enableBindingCount; i < bindings.Length; i++) {
                 bindings[i].Execute(element, context);
             }
 

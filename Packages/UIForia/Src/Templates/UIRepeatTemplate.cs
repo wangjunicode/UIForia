@@ -75,8 +75,7 @@ namespace UIForia.Templates {
             listExpression = template.compiler.Compile(template.RootType, elementType, listAttr.value, null);
 
             genericArgType = listExpression.YieldedType;
-
-
+            
             lengthAlias = "$length";
             indexAlias = "$index";
             itemAlias = "$item";

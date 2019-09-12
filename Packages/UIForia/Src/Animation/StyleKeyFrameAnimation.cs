@@ -280,6 +280,18 @@ namespace UIForia.Animation {
                     }
 
                     case StylePropertyId.Opacity:
+                    case StylePropertyId.TextUnderlayDilate:
+                    case StylePropertyId.TextUnderlaySoftness:
+                    case StylePropertyId.TextUnderlayX:
+                    case StylePropertyId.TextUnderlayY:
+                    case StylePropertyId.TextFaceDilate:
+                    case StylePropertyId.TextGlowInner:
+                    case StylePropertyId.TextGlowOuter:
+                    case StylePropertyId.TextGlowOffset:
+                    case StylePropertyId.TextGlowPower:
+                    case StylePropertyId.TextOutlineSoftness:
+                    case StylePropertyId.TextOutlineWidth:
+
                     case StylePropertyId.ShadowIntensity:
                     case StylePropertyId.ShadowSizeX:
                     case StylePropertyId.ShadowSizeY:
@@ -351,6 +363,9 @@ namespace UIForia.Animation {
                     }
 
                     case StylePropertyId.BorderColor:
+                    case StylePropertyId.TextUnderlayColor:
+                    case StylePropertyId.TextGlowColor:
+                    case StylePropertyId.TextOutlineColor:
                     case StylePropertyId.BorderColorTop:
                     case StylePropertyId.BorderColorRight:
                     case StylePropertyId.BorderColorBottom:

@@ -208,7 +208,7 @@ namespace UIForia.Editor {
             new AnimatedPropertyGenerator<float>(StylePropertyId.ShadowIntensity, 10),
         };
 
-        [MenuItem("UIForia/Regenerate Style Stuff")]
+        [MenuItem("UIForia/Regenerate Style Stuff (Don't!)")]
         public static void GenerateStyleProxies() {
             string generatedPath = Path.GetFullPath(Path.Combine(UnityEngine.Application.dataPath, "../Packages/UIForia/Src/_Generated1.cs"));
             string generatedPath2 = Path.GetFullPath(Path.Combine(UnityEngine.Application.dataPath, "../Packages/UIForia/Src/_Generated2.cs"));

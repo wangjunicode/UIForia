@@ -52,7 +52,47 @@ namespace Demo {
         public string Label;
         public Texture2D Texture;
     }
-
+    public static class BuildingTexts {
+        public static string Brush(string id) {
+            switch (id.ToUpperInvariant()) {
+                case "CEILING":
+                    return "Roof Tile";
+                case "CORNER_IN_BVL":
+                case "CORNER_IN_PRP":
+                case "CORNER_IN_RND":
+                    return "Inside Corner";
+                case "CORNER_OUT_BVL":
+                case "CORNER_OUT_PRP":
+                case "CORNER_OUT_RND":
+                    return "Outside Corner";
+                case "DOOR_BVL":
+                case "DOOR_PRP":
+                case "DOOR_RND":
+                    return "Door";
+                case "FLOOR":
+                    return "Floor Tile";
+                case "WALL":
+                case "WALL_IN_BVL":
+                case "WALL_IN_PRP":
+                case "WALL_IN_RND":
+                    return "Inside Wall";
+                case "WALL_OUT_BVL":
+                case "WALL_OUT_PRP":
+                case "WALL_OUT_RND":
+                    return "Outside Wall";
+                case "WINDOW_SMALL_BVL":
+                case "WINDOW_SMALL_PRP":
+                case "WINDOW_SMALL_RND":
+                    return "Window";
+                case "WINDOW_LARGE_BVL":
+                case "WINDOW_LARGE_PRP":
+                case "WINDOW_LARGE_RND":
+                    return "Large Window";
+                default:
+                    return id.Replace("_", " ").ToLower();
+            }
+        }
+    }
     [Template("Demo/BuildingDesigner/BuildingDesigner")]
     public class BuildingDesigner : UIElement {
 
@@ -96,8 +136,8 @@ namespace Demo {
         public RepeatableList<Brush> TemplateSeedBrushes = new RepeatableList<Brush>();
         public RepeatableList<Brush> TemplatePlayerBrushes = new RepeatableList<Brush>();
 
-        public RepeatableList<Color> AvailableColors;
-        public Color SelectedColor;
+        public RepeatableList<Color> availableColors;
+        public Color selectedColor;
 
         private bool dialogOpened;
         private UIElement prevTool;
@@ -123,25 +163,22 @@ namespace Demo {
             Application.styleImporter.ImportStyleSheetFromFile("Demo/BuildingDesigner/BuildingDesignerMain.style").TryGetAnimationData("open-dialog", out openDialogAnimation);
             Application.styleImporter.ImportStyleSheetFromFile("Demo/BuildingDesigner/BuildingDesignerMain.style").TryGetAnimationData("close-dialog", out closeDialogAnimation);
 
-            AvailableColors = new RepeatableList<Color>() {
+            availableColors = new RepeatableList<Color>() {
                     new Color(0.1f, 0.6f, 0.6f),
                     new Color(0.2f, 0.7f, 0.5f),
                     new Color(0.4f, 0.4f, 0.4f),
                     new Color(0.6f, 0.3f, 0.3f),
                     new Color(0.7f, 0.1f, 0.2f),
-                    new Color(0.8f, 0.7f, 0.1f),
-                    new Color(0.1f, 0.6f, 0.6f),
-                    new Color(0.2f, 0.7f, 0.5f),
-                    new Color(0.4f, 0.4f, 0.4f),
-                    new Color(0.6f, 0.3f, 0.3f),
-                    new Color(0.7f, 0.1f, 0.2f),
-                    new Color(0.8f, 0.7f, 0.1f),
+                    new Color(0.8f, 0.7f, 0.15f),
+                    new Color(0.16f, 0.6f, 0.62f),
+                    new Color(0.23f, 0.7f, 0.35f),
+                    new Color(0.81f, 0.67f, 0.1f),
             };
         }
 
         private static Brush MakeBrush(Texture2D texture, int id, string prefix) {
             return new Brush() {
-                    Label = texture.name.Replace(prefix, string.Empty).Replace("_", " ").Replace("-", ""),
+                    Label = BuildingTexts.Brush(texture.name.Substring(texture.name.LastIndexOf("-") + 1)),
                     ID = id,
                     Texture = texture
             };
@@ -204,15 +241,6 @@ namespace Demo {
             // uiBuildingDesignController.AbortDesign();
         }
 
-        public void OpenColorPalette() {
-            IsPaletteOpened = !IsPaletteOpened;
-        }
-
-        public void SelectColor(Color color) {
-            IsPaletteOpened = false;
-            SelectedColor = color;
-        }
-
         public RepeatableList<Brush> GetBasicBrushes(BrushSelection.BasicCategory style) {
             switch (style) {
                 case BrushSelection.BasicCategory.BEVEL:
@@ -223,8 +251,7 @@ namespace Demo {
                     return BasicRoundBrushes;
             }
         }
-        
-        
+
         public void SelectBrush(MouseInputEvent evt, Brush brush) {
             evt.StopPropagation();
             DeselectToolButton();

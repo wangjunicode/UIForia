@@ -1,0 +1,36 @@
+import "Demo/Theme.style" as theme;
+
+style <this> {
+    BorderRadius = 50%;
+    Border = 2px;
+    BorderColor = black;
+}
+
+style color-palette {
+    PreferredSize = 1cnt;
+    BackgroundColor = black;    
+    ZIndex = 4;
+    AlignmentBehaviorX = Parent;
+    AlignX = 100% 0%;
+}
+
+style color-selection-container {
+    LayoutType = Grid;
+    GridLayoutColTemplate = 40px 40px 40px 40px 40px 40px 40px 40px;
+    GridLayoutColGap = 2;
+    
+    Border = 2px;
+    BorderColor = black;
+}
+
+style palette-item {
+    PreferredSize = 40px;
+    
+    Border = 0px;
+    BorderColor = black;
+    
+    [hover] {
+        Border = 4px;
+        BorderColor = white;
+    }
+}

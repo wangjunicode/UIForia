@@ -51,13 +51,7 @@
                     <Image x-id="BUCKET"      src="'new_ui_icons/ui_icon_paint_bucket'" style="tools-button" onMouseClick="ToolButtonClicked(ToolButton.BUCKET)"/>
                     <Image x-id="DELETE_ALL"  src="'new_ui_icons/ui_icon_delete_all'"   style="tools-button" onMouseClick="ToolButtonClicked(ToolButton.DELETE_ALL)"/>
                     <Image x-id="EYE_DROPPER" src="'new_ui_icons/ui_icon_eye_dropper'"  style="tools-button" onMouseClick="ToolButtonClicked(ToolButton.EYE_DROPPER)"/>
-                    <Div style.backgroundColor="SelectedColor" style="tools-button color-preview" onMouseClick="OpenColorPalette()">
-                        <Div if="IsPaletteOpened" style="color-palette">
-                            <Repeat list="AvailableColors" style="color-selection-container">
-                                <Div style.backgroundColor="$item" style="palette-item" onMouseClick="SelectColor($item)"/>
-                            </Repeat>
-                        </Div>
-                    </Div>
+                    <ColorPicker availableColors="availableColors" selectedColor="selectedColor" style="tools-button" />
                 </Div>
 
             </Div>

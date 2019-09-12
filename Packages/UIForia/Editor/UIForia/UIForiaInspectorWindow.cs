@@ -719,7 +719,10 @@ namespace UIForia.Editor {
                     return DrawEnumWithValue<Overflow>(property, isEditable);
 
                 case StylePropertyId.BackgroundColor:
-                case StylePropertyId.BorderColor:
+                case StylePropertyId.BorderColorTop:
+                case StylePropertyId.BorderColorLeft:
+                case StylePropertyId.BorderColorRight:
+                case StylePropertyId.BorderColorBottom:
                     return DrawColor(property, isEditable);
 
                 case StylePropertyId.Visibility:

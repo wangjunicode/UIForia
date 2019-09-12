@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UITemplate>
+
+    <Style path="Demo/ColorPicker/ColorPicker.style" />
+    <Style path="Demo/Theme.style" alias="theme" />
+
+    <Contents>
+        <Repeat if="hasFocus" list="availableColors" style="color-palette color-selection-container">
+            <Div style.backgroundColor="$item" style="palette-item" onMouseClick="SelectColor($item)"/>
+        </Repeat>
+    </Contents>
+</UITemplate>

@@ -187,8 +187,6 @@ style grid-with-buttons {
 style tools-button {
     PreferredSize = 50px;
     BackgroundColor = @theme.lightGrey;
-    FlexLayoutCrossAxisAlignment = Center;
-    FlexLayoutMainAxisAlignment = Center;
     
     [active] {
         BackgroundColor = black;
@@ -204,45 +202,7 @@ style tools-active-button {
     BackgroundColor = black;
 }
 
-style color-preview {
-    BorderRadius = 50px;
-    Border = 2px;
-    BorderColor = black;
-}
 
-style color-palette {
-    PreferredSize = 1cnt;
-    
-    BackgroundColor = black;
-    
-    LayoutBehavior = Ignored;
-    
-    TransformBehaviorX = AnchorMaxOffset;
-    TransformPositionX = -1.05w;
-    
-    ZIndex = 4;
-}
-
-style color-selection-container {
-    LayoutType = Grid;
-    GridLayoutColTemplate = 40px 40px 40px 40px 40px 40px 40px 40px;
-    GridLayoutColGap = 2;
-    
-    Border = 2px;
-    BorderColor = black;
-}
-
-style palette-item {
-    PreferredSize = 40px;
-    
-    Border = 0px;
-    BorderColor = black;
-    
-    [hover] {
-        Border = 4px;
-        BorderColor = white;
-    }
-}
 
 style transclude {
     LayoutBehavior = TranscludeChildren;

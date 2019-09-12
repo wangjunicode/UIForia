@@ -16,6 +16,18 @@ namespace UIForia.Elements {
         T Value { get; }
 
     }
+    
+    public class SelectOption<T> : ISelectOption<T> {
+
+        public string Label { get; set; }
+        public T Value { get; set; }
+
+        public SelectOption(string label, T value) {
+            this.Label = label;
+            this.Value = value;
+        }
+
+    }
 
     [Template(TemplateType.Internal, "Elements/Select.xml")]
     public class Select<T> : UIElement, IFocusable {

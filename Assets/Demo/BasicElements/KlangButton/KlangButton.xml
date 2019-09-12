@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <UITemplate>
 
+    <Style path="Demo/Theme.style" alias="theme" />
     <Style path="Demo/BasicElements/KlangButton/KlangButton.style" />
 
     <Contents style="baseButton">

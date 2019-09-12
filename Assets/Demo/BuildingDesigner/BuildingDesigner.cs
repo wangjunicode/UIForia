@@ -56,9 +56,20 @@ namespace Demo {
     [Template("Demo/BuildingDesigner/BuildingDesigner")]
     public class BuildingDesigner : UIElement {
 
-        public RepeatableList<ISelectOption<int>> BrushTypes = new RepeatableList<ISelectOption<int>> {new SelectDemo.SelectOption<int>("Basic", (int)BrushSelection.Category.BASIC), new SelectDemo.SelectOption<int>("Blocks", (int)BrushSelection.Category.BLOCK), new SelectDemo.SelectOption<int>("Seed Templates", (int)BrushSelection.Category.TEMPLATE), new SelectDemo.SelectOption<int>("Player Templates", (int)BrushSelection.Category.TEMPLATE)};
+        public RepeatableList<ISelectOption<int>> BrushTypes = new RepeatableList<ISelectOption<int>> {
+                new SelectOption<int>("Basic", (int)BrushSelection.Category.BASIC), 
+                new SelectOption<int>("Blocks", (int)BrushSelection.Category.BLOCK), 
+                new SelectOption<int>("Seed Templates", (int)BrushSelection.Category.TEMPLATE), 
+                new SelectOption<int>("Player Templates", (int)BrushSelection.Category.TEMPLATE)
+        };
+        public RepeatableList<ISelectOption<int>> BasicStyles = new RepeatableList<ISelectOption<int>> {
+                new SelectOption<int>("Rounded Corners", (int)BrushSelection.BasicCategory.ROUND),
+                new SelectOption<int>("Bevel Corners", (int)BrushSelection.BasicCategory.BEVEL),
+                new SelectOption<int>("Perpendicular Corners", (int)BrushSelection.BasicCategory.PERP)
+        };
 
         public Action<int> OnBrushTypeChanged => BrushTypeChanged;
+        public Action<int> OnBasicStyleChanged => BasicStyleChanged;
 
         public BrushSelection.Category CurrentBrushType;
         public BrushSelection.BasicCategory CurrentBasicBrushStyle;
@@ -173,6 +184,14 @@ namespace Demo {
             }
 
             CurrentBrushType = (BrushSelection.Category)category;
+        }
+
+        private void BasicStyleChanged(int style) {
+            if (CurrentBrushType != BrushSelection.Category.BASIC) {
+                return;
+            }
+
+            CurrentBasicBrushStyle = (BrushSelection.BasicCategory)style;
         }
 
         public void SaveAndExit() {

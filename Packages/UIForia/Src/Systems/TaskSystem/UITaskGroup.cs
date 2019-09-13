@@ -39,6 +39,14 @@ namespace UIForia.Systems {
             }
         }
 
+        public void PauseTask(UITask task) {
+            int index = taskStatusPairs.FindIndex(task, (t, item) => item == t.task);
+            if (index != -1) {
+                task.OnPaused();
+                taskStatusPairs[index] = new TaskStatusPair(task, UITaskState.Paused);
+            }
+        }
+
         public override UITaskResult Run(float deltaTime) {
             TaskStatusPair[] pairs = taskStatusPairs.Array;
             int completedCount = 0;
@@ -46,16 +54,16 @@ namespace UIForia.Systems {
 
             for (int i = 0; i < taskStatusPairs.Count; i++) {
                 TaskStatusPair pair = pairs[i];
-                UITaskState state = pair.state;
+                UITaskState currentTaskState = pair.state;
                 UITask task = pair.task;
 
-                if (state == UITaskState.Uninitialized) {
-                    state = UITaskState.Pending;
+                if (currentTaskState == UITaskState.Uninitialized) {
+                    currentTaskState = UITaskState.Pending;
                     task.OnInitialized();
                 }
 
-                if ((state & (UITaskState.Pending | UITaskState.Running)) != 0) {
-                    UITaskResult result = task.Run(state == UITaskState.Pending ? 0 : deltaTime);
+                if ((currentTaskState & (UITaskState.Pending | UITaskState.Running)) != 0) {
+                    UITaskResult result = task.Run(currentTaskState == UITaskState.Pending ? 0 : deltaTime);
                     switch (result) {
                         case UITaskResult.Running:
                             break;
@@ -70,16 +78,19 @@ namespace UIForia.Systems {
                         case UITaskResult.Cancelled:
                             task.OnCancelled();
                             break;
+                        case UITaskResult.Paused: 
+                            task.OnPaused();
+                            break;
                         default:
                             throw new ArgumentOutOfRangeException();
                     }
                 }
 
-                if (state == UITaskState.Completed) {
+                if (currentTaskState == UITaskState.Completed) {
                     completedCount++;
                 }
 
-                if (state == UITaskState.Failed) {
+                if (currentTaskState == UITaskState.Failed) {
                     break;
                 }
             }

@@ -4,7 +4,7 @@ namespace UIForia.Systems {
 
     public abstract class UITask {
 
-        private const UITaskState k_CanBeEnded = UITaskState.Pending | UITaskState.Restarting | UITaskState.Running;
+        private const UITaskState k_CanBeEnded = UITaskState.Pending | UITaskState.Restarting | UITaskState.Running | UITaskState.Paused;
 
         internal IUITaskRunner owner;
         internal UITaskState state;
@@ -40,6 +40,7 @@ namespace UIForia.Systems {
         public virtual void OnFailed() { }
         public virtual void OnCancelled() { }
         public virtual void OnInitialized() { }
+        public virtual void OnPaused() { }
 
         public abstract UITaskResult Run(float deltaTime);
 

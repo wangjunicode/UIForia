@@ -20,7 +20,6 @@ namespace UIForia.Rendering {
 
         internal StyleState currentState;
         private UIStyleGroup instanceStyle;
-
         private StyleState containedStates;
 
         //private UIStyleGroupContainer implicitStyleContainer;
@@ -50,7 +49,7 @@ namespace UIForia.Rendering {
         public UIStyleSetStateProxy Focus => new UIStyleSetStateProxy(this, StyleState.Focused);
         public UIStyleSetStateProxy Active => new UIStyleSetStateProxy(this, StyleState.Active);
 
-        public IList<UIStyleGroupContainer> GetBaseStyles() {
+        internal List<UIStyleGroupContainer> GetBaseStyles() {
             List<UIStyleGroupContainer> retn = ListPool<UIStyleGroupContainer>.Get();
             for (int i = 0; i < styleGroupContainers.Count; i++) {
                 retn.Add(styleGroupContainers[i]);
@@ -319,11 +318,11 @@ namespace UIForia.Rendering {
             }
 
             for (int index = 0; index < runCommands.Count; index++) {
-                    runCommands[index].Run(element);
                 if (enter && !runCommands[index].IsExit) {
+                    runCommands[index].Run(element);
                 }
                 else if (!enter && runCommands[index].IsExit) {
-               //     runCommands[index].Run(element);
+                    runCommands[index].Run(element);
                 }
             }
         }
@@ -348,12 +347,13 @@ namespace UIForia.Rendering {
                 StyleEntry entry = styleEntries[i];
 
                 if (entry.state == StyleState.Normal) {
-                    RunCommands(entry.styleRunCommand.runCommands, false);
+                    RunCommands(entry.styleRunCommand.runCommands);
                 }
 
                 // if this a state we were in that is now invalid, mark it's properties for update
                 if ((entry.state & oldState) != 0 && (entry.state & state) != 0) {
                     AddMissingProperties(toUpdate, entry.styleRunCommand.style);
+                    RunCommands(entry.styleRunCommand.runCommands, false);
                 }
             }
 
@@ -861,6 +861,7 @@ namespace UIForia.Rendering {
             SetTransformBehaviorY(behavior, state);
         }
 
+#if UNITY_EDITOR
         /// <summary>
         ///  Keeping this for the debugger display
         /// </summary>
@@ -876,6 +877,15 @@ namespace UIForia.Rendering {
 
             return retn;
         }
+
+        /// <summary>
+        /// For Inspector / debugging only!
+        /// </summary>
+        /// <returns></returns>
+        internal UIStyleGroup GetInstanceStyle() {
+            return instanceStyle;
+        }
+#endif
 
         private static readonly StringBuilder s_Builder = new StringBuilder(128);
 

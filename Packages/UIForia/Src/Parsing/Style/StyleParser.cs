@@ -127,6 +127,7 @@ namespace UIForia.Parsing.Style {
                         tagName += tokenStream.Current.value;
                         AssertTokenTypeAndAdvance(StyleTokenType.GreaterThan);
                     }
+
                     AssertTokenTypeAndAdvance(StyleTokenType.GreaterThan);
                     break;
                 // styleId { ... }
@@ -182,30 +183,9 @@ namespace UIForia.Parsing.Style {
             }
         }
 
-        public static readonly ValueTuple<string, Type>[] s_SupportedVariableTypes = {
-            ValueTuple.Create("float", typeof(float)),
-            ValueTuple.Create("int", typeof(int)),
-            ValueTuple.Create("Color", typeof(Color)),
-            ValueTuple.Create("UIMeasurement", typeof(UIMeasurement)),
-            ValueTuple.Create("Measurement", typeof(UIMeasurement)),
-            ValueTuple.Create("UIFixedLength", typeof(UIFixedLength)),
-            ValueTuple.Create("FixedLength", typeof(UIFixedLength)),
-            ValueTuple.Create("TransformOffset", typeof(OffsetMeasurement)),
-            ValueTuple.Create("Offset", typeof(OffsetMeasurement)),
-        };
+        public static readonly ValueTuple<string, Type>[] s_SupportedVariableTypes = {ValueTuple.Create("float", typeof(float)), ValueTuple.Create("int", typeof(int)), ValueTuple.Create("Color", typeof(Color)), ValueTuple.Create("UIMeasurement", typeof(UIMeasurement)), ValueTuple.Create("Measurement", typeof(UIMeasurement)), ValueTuple.Create("UIFixedLength", typeof(UIFixedLength)), ValueTuple.Create("FixedLength", typeof(UIFixedLength)), ValueTuple.Create("TransformOffset", typeof(OffsetMeasurement)), ValueTuple.Create("Offset", typeof(OffsetMeasurement)),};
 
-        public static readonly ValueTuple<string, string>[] s_AnimationOptionNames = {
-            ValueTuple.Create(nameof(AnimationOptions.loopTime).ToLower(), nameof(AnimationOptions.loopTime)),
-            ValueTuple.Create(nameof(AnimationOptions.iterations).ToLower(), nameof(AnimationOptions.iterations)),
-            ValueTuple.Create(nameof(AnimationOptions.delay).ToLower(), nameof(AnimationOptions.delay)),
-            ValueTuple.Create(nameof(AnimationOptions.duration).ToLower(), nameof(AnimationOptions.duration)),
-            ValueTuple.Create(nameof(AnimationOptions.forwardStartDelay).ToLower(), nameof(AnimationOptions.forwardStartDelay)),
-            ValueTuple.Create(nameof(AnimationOptions.reverseStartDelay).ToLower(), nameof(AnimationOptions.reverseStartDelay)),
-            ValueTuple.Create(nameof(AnimationOptions.direction).ToLower(), nameof(AnimationOptions.direction)),
-            ValueTuple.Create(nameof(AnimationOptions.loopType).ToLower(), nameof(AnimationOptions.loopType)),
-            ValueTuple.Create(nameof(AnimationOptions.timingFunction).ToLower(), nameof(AnimationOptions.timingFunction)),
-            ValueTuple.Create(nameof(AnimationOptions.playbackType).ToLower(), nameof(AnimationOptions.playbackType))
-        };
+        public static readonly ValueTuple<string, string>[] s_AnimationOptionNames = {ValueTuple.Create(nameof(AnimationOptions.loopTime).ToLower(), nameof(AnimationOptions.loopTime)), ValueTuple.Create(nameof(AnimationOptions.iterations).ToLower(), nameof(AnimationOptions.iterations)), ValueTuple.Create(nameof(AnimationOptions.delay).ToLower(), nameof(AnimationOptions.delay)), ValueTuple.Create(nameof(AnimationOptions.duration).ToLower(), nameof(AnimationOptions.duration)), ValueTuple.Create(nameof(AnimationOptions.forwardStartDelay).ToLower(), nameof(AnimationOptions.forwardStartDelay)), ValueTuple.Create(nameof(AnimationOptions.reverseStartDelay).ToLower(), nameof(AnimationOptions.reverseStartDelay)), ValueTuple.Create(nameof(AnimationOptions.direction).ToLower(), nameof(AnimationOptions.direction)), ValueTuple.Create(nameof(AnimationOptions.loopType).ToLower(), nameof(AnimationOptions.loopType)), ValueTuple.Create(nameof(AnimationOptions.timingFunction).ToLower(), nameof(AnimationOptions.timingFunction)), ValueTuple.Create(nameof(AnimationOptions.playbackType).ToLower(), nameof(AnimationOptions.playbackType))};
 
         private void ParseAnimationVariables(AnimationRootNode rootNode) {
             while (tokenStream.HasMoreTokens && !AdvanceIfTokenType(StyleTokenType.BracesClose)) {
@@ -356,7 +336,9 @@ namespace UIForia.Parsing.Style {
 
                     case StyleTokenType.BracketOpen:
                         tokenStream.Advance();
-                        ParseStateOrAttributeGroup(styleRootNode);
+                        if (!TryParseCommand(styleRootNode)) {
+                            ParseStateOrAttributeGroup(styleRootNode);
+                        }
 
                         break;
 
@@ -369,7 +351,16 @@ namespace UIForia.Parsing.Style {
                         ParseProperty(styleRootNode);
                         break;
                     case StyleTokenType.Run:
-                        styleRootNode.AddChildNode(ParseRunNode());
+                        tokenStream.Advance();
+                        styleRootNode.AddChildNode(ParseRunAnimationNode(false, RunAction.Run));
+                        break;
+                    case StyleTokenType.Stop:
+                        tokenStream.Advance();
+                        styleRootNode.AddChildNode(ParseRunAnimationNode(false, RunAction.Stop));
+                        break;
+                    case StyleTokenType.Pause:
+                        tokenStream.Advance();
+                        styleRootNode.AddChildNode(ParseRunAnimationNode(false, RunAction.Pause));
                         break;
                     case StyleTokenType.BracesOpen: {
                         // At this point only unconsumed attribute/expression group bodies are allowed
@@ -391,9 +382,7 @@ namespace UIForia.Parsing.Style {
                     }
 
                     default:
-                        throw new ParseException(tokenStream.Current, "Expected either a boolean group operator (not / and), the start" +
-                                                                      " of a group (an open bracket) or a regular property identifier but found " +
-                                                                      tokenStream.Current.styleTokenType + " with value " + tokenStream.Current.value);
+                        throw new ParseException(tokenStream.Current, "Expected either a boolean group operator (not / and), the start" + " of a group (an open bracket) or a regular property identifier but found " + tokenStream.Current.styleTokenType + " with value " + tokenStream.Current.value);
                 }
             }
         }
@@ -419,8 +408,7 @@ namespace UIForia.Parsing.Style {
                     ParseAttributeGroup();
                     break;
                 default:
-                    throw new ParseException(tokenStream.Current, "Expected either a group state identifier (hover etc.)" +
-                                                                  " or an attribute identifier (attr:...)");
+                    throw new ParseException(tokenStream.Current, "Expected either a group state identifier (hover etc.)" + " or an attribute identifier (attr:...)");
             }
         }
 
@@ -435,10 +423,27 @@ namespace UIForia.Parsing.Style {
             string propertyName;
             if (AdvanceIfTokenType(StyleTokenType.Cursor)) {
                 propertyName = propertyNodeToken.value;
-            } else if (tokenStream.Current.styleTokenType == StyleTokenType.Run) {
-                styleRootNode.AddChildNode(ParseRunNode());
+            }
+            else if (AdvanceIfTokenType(StyleTokenType.Run)) {
+                styleRootNode.AddChildNode(ParseRunAnimationNode(false, RunAction.Run));
                 return;
-            } else {
+            }
+            else if (AdvanceIfTokenType(StyleTokenType.Pause)) {
+                styleRootNode.AddChildNode(ParseRunAnimationNode(false, RunAction.Pause));
+                return;
+            }
+            else if (AdvanceIfTokenType(StyleTokenType.Stop)) {
+                styleRootNode.AddChildNode(ParseRunAnimationNode(false, RunAction.Stop));
+                return;
+            }
+            else if (AdvanceIfTokenType(StyleTokenType.BracketOpen)) {
+                if (TryParseCommand(styleRootNode)) {
+                    return;
+                }
+
+                throw new ParseException(tokenStream.Current, "Not sure what you tried here but at this point only [enter] and [exit] run animation would be legal.");
+            }
+            else {
                 propertyName = AssertTokenTypeAndAdvance(StyleTokenType.Identifier);
             }
 
@@ -456,46 +461,62 @@ namespace UIForia.Parsing.Style {
             styleRootNode.AddChildNode(propertyNode);
         }
 
-        private RunNode ParseRunNode() {
-            
-            StyleToken runNodeToken = tokenStream.Current;
-            tokenStream.Advance();
-
-            CommandNode command;
-
-            string identifier = tokenStream.Current.value;
-            tokenStream.Advance();
-
-            switch (identifier) {
-                case "animation": 
-                    command = new AnimationCommandNode() {
-                            animationName = ParseIdentifierInParentheses()
-                    };
-                    command.WithLocation(tokenStream.Current);
-                    break;
-                case "exit":
-                    command = default;
-                    if (tokenStream.HasMoreTokens && tokenStream.Current.value == "animation") {
-                        tokenStream.Advance();
-                        command = new AnimationCommandNode() {
-                            animationName = ParseIdentifierInParentheses()
-                        };
-                    }
-
-
-                    break;
-                default: throw new ParseException(tokenStream.Current, "Please specify 'animation' as run command.");
+        /// <summary>
+        /// Consumes the stream only if the current token belongs to a command definition.
+        /// </summary>
+        /// <param name="styleRootNode"></param>
+        /// <returns>true in case the current token belongs to a command definition. False if it does not.</returns>
+        private bool TryParseCommand(StyleNodeContainer styleRootNode) {
+            switch (tokenStream.Current.styleTokenType) {
+                case StyleTokenType.Exit:
+                    tokenStream.Advance();
+                    AssertTokenTypeAndAdvance(StyleTokenType.BracketClose);
+                    styleRootNode.AddChildNode(ParseRunAnimationNode(true, ParseCommandAttribute()));
+                    return true;
+                case StyleTokenType.Enter:
+                    tokenStream.Advance();
+                    AssertTokenTypeAndAdvance(StyleTokenType.BracketClose);
+                    styleRootNode.AddChildNode(ParseRunAnimationNode(false, ParseCommandAttribute()));
+                    return true;
+                default:
+                    return false;
             }
-            
+        }
+
+        private RunAction ParseCommandAttribute() {
+            StyleTokenType styleTokenType = tokenStream.Current.styleTokenType;
+            tokenStream.Advance();
+
+            switch (styleTokenType) {
+                case StyleTokenType.Run: return RunAction.Run;
+                case StyleTokenType.Pause: return RunAction.Pause;
+                case StyleTokenType.Stop: return RunAction.Stop;
+                default:
+                    throw new ParseException(tokenStream.Previous, 
+                            $"The following command actions are supported: run, pause and stop. Found '{tokenStream.Previous.value}' instead.");
+            }
+        }
+
+        private RunNode ParseRunAnimationNode(bool isExit, RunAction runAction) {
+
+            StyleToken animationToken = tokenStream.Current;
+            AssertTokenTypeAndAdvance(StyleTokenType.Animation);
+
+            CommandNode command = new AnimationCommandNode() {
+                    animationName = ParseIdentifierInParentheses(),
+                    isExit = isExit,
+                    runAction = runAction,
+            };
+
+            command.WithLocation(tokenStream.Current);
             AssertTokenTypeAndAdvance(StyleTokenType.EndStatement);
 
             RunNode runNode = new RunNode {commmand = command};
-            runNode.WithLocation(runNodeToken);
+            runNode.WithLocation(animationToken);
             return runNode;
         }
 
         private StyleASTNode ParseIdentifierInParentheses() {
-
             AssertTokenTypeAndAdvance(StyleTokenType.ParenOpen);
 
             StyleASTNode identifier;
@@ -512,9 +533,9 @@ namespace UIForia.Parsing.Style {
 
             tokenStream.Advance();
             // todo: add support for parameters here
-            
+
             AssertTokenTypeAndAdvance(StyleTokenType.ParenClose);
-            
+
             return identifier;
         }
 
@@ -608,7 +629,7 @@ namespace UIForia.Parsing.Style {
 
         private StyleFunctionNode ParsePropertyFunction(string identifier) {
             StyleFunctionNode functionNode = StyleASTNodeFactory.StyleFunctionNode(identifier);
-            
+
             while (tokenStream.HasMoreTokens && !AdvanceIfTokenType(StyleTokenType.ParenClose)) {
                 functionNode.AddChildNode(ParsePropertyValue());
                 // we just ignore the comma for now
@@ -647,9 +668,7 @@ namespace UIForia.Parsing.Style {
             ConstReferenceNode constReferenceNode = StyleASTNodeFactory.ConstReferenceNode(AssertTokenTypeAndAdvance(StyleTokenType.Identifier));
 
             while (tokenStream.HasMoreTokens && AdvanceIfTokenType(StyleTokenType.Dot)) {
-                constReferenceNode.AddChildNode(
-                    StyleASTNodeFactory.DotAccessNode(AssertTokenTypeAndAdvance(StyleTokenType.Identifier)).WithLocation(tokenStream.Previous)
-                );
+                constReferenceNode.AddChildNode(StyleASTNodeFactory.DotAccessNode(AssertTokenTypeAndAdvance(StyleTokenType.Identifier)).WithLocation(tokenStream.Previous));
             }
 
             return constReferenceNode;
@@ -660,9 +679,7 @@ namespace UIForia.Parsing.Style {
             VariableReferenceNode refNode = new VariableReferenceNode(AssertTokenTypeAndAdvance(StyleTokenType.Identifier));
 
             while (tokenStream.HasMoreTokens && AdvanceIfTokenType(StyleTokenType.Dot)) {
-                refNode.AddChildNode(
-                    StyleASTNodeFactory.DotAccessNode(AssertTokenTypeAndAdvance(StyleTokenType.Identifier)).WithLocation(tokenStream.Previous)
-                );
+                refNode.AddChildNode(StyleASTNodeFactory.DotAccessNode(AssertTokenTypeAndAdvance(StyleTokenType.Identifier)).WithLocation(tokenStream.Previous));
             }
 
             return refNode;
@@ -777,8 +794,7 @@ namespace UIForia.Parsing.Style {
             bool invert = groupOperatorStack.Count > 0 && groupOperatorStack.Pop() == StyleOperatorType.Not;
 
             AttributeNodeContainer andAttribute = groupExpressionStack.Count > 0 ? groupExpressionStack.Pop() : null;
-            AttributeNodeContainer attributeNodeContainer =
-                StyleASTNodeFactory.AttributeGroupRootNode(attributeIdentifier, attributeValue, invert, andAttribute);
+            AttributeNodeContainer attributeNodeContainer = StyleASTNodeFactory.AttributeGroupRootNode(attributeIdentifier, attributeValue, invert, andAttribute);
             attributeNodeContainer.WithLocation(attributeToken);
 
             groupExpressionStack.Push(attributeNodeContainer);

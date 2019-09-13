@@ -67,10 +67,14 @@ style menu-image {
     ShadowOpacity = 0.5;
     ShadowSizeX = 1;
     ShadowSizeY = 1;
-    run animation(go-down);
 
     [hover] {
         Cursor = @theme.cursorClickable;
         run animation(go-up);
+        [exit] run animation(go-down);
+//        [enter] run animation(go-down);
+//        [exit] run log("bla");
+//        [exit] stop animation(go-down);
+//        [exit] pause animation(go-down);
     }
 }

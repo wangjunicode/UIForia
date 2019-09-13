@@ -110,12 +110,12 @@ style brush-button {
     
     MinWidth = @brushButtonSize;
     Border = 2px;
-    
-    
-    run animation(button-normal);
+    BackgroundColor = #f2f2f2;
+    BorderColor = #f2f2f2;
     
     [hover] {
         run animation(button-hover);
+        [exit] run animation(button-normal);
     }
 }
 

@@ -1,4 +1,6 @@
 using System;
+using System.Diagnostics.Eventing.Reader;
+using System.Runtime.Remoting;
 using UIForia.Elements;
 using UIForia.Rendering;
 using UIForia.Systems;
@@ -35,6 +37,53 @@ namespace UIForia.Animation {
             }
         }
 
+        public void PauseAnimation(UIElement element, AnimationData animationData) {
+            AnimationTask task = FindAnimationTask(element, animationData, thisFrame);
+            if (task == null) {
+                task = FindAnimationTask(element, animationData, nextFrame);
+            }
+
+            if (task == null) {
+                return;
+            }
+
+            if (task is StyleAnimation styleAnimation) {
+                styleAnimation.state = UITaskState.Paused;
+                task.OnPaused();
+            }
+        }
+
+        private AnimationTask FindAnimationTask(UIElement element, AnimationData animationData, LightList<AnimationTask> tasks) {
+            for (int index = 0; index < tasks.Count; index++) {
+                AnimationTask task = tasks[index];
+                if (task is StyleAnimation styleAnimation 
+                    && styleAnimation.target == element 
+                    && task.animationData.name == animationData.name
+                    && task.animationData.fileName == animationData.fileName) {
+
+                    return task;
+                }
+            }
+
+            return null;
+        }
+
+        public void StopAnimation(UIElement element, AnimationData animationData) {
+            AnimationTask task = FindAnimationTask(element, animationData, thisFrame);
+            if (task == null) {
+                task = FindAnimationTask(element, animationData, nextFrame);
+            }
+
+            if (task == null) {
+                return;
+            }
+
+            if (task is StyleAnimation styleAnimation) {
+                styleAnimation.state = UITaskState.Cancelled;
+                task.OnCancelled();
+            }
+        }
+
         private static AnimationOptions EnsureDefaultOptionValues(AnimationData data) {
             AnimationOptions options = new AnimationOptions();
             options.duration = data.options.duration ?? 1000;
@@ -63,12 +112,13 @@ namespace UIForia.Animation {
                     styleAnimation.state = UITaskState.Failed;
                     continue;
                 }
-                else if (styleAnimation.target.isDisabled) {
+
+                if (styleAnimation.target.isDisabled) {
                     // if stop on disable
-                    // task.OnPaused();
+                    task.OnPaused();
                     // task.OnCancel?(); handle restoring to start state?
-                    // styleAnimation.state = UITaskState.Pending;
-                    //continue;
+                    styleAnimation.state = UITaskState.Paused;
+                    continue;
                 }
 
                 if (styleAnimation.state == UITaskState.Uninitialized) {

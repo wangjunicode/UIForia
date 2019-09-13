@@ -265,7 +265,9 @@ namespace UIForia.Compilers.Style {
         }
 
         private void MapAnimationCommand(AnimationData[] styleSheetAnimations, UIStyleRunCommand cmd, AnimationCommandNode animationCommandNode) {
-            cmd.runCommands.Add(new AnimationRunCommand() {animationData = FindAnimationData(styleSheetAnimations, animationCommandNode.animationName)});
+            cmd.runCommands.Add(new AnimationRunCommand(animationCommandNode.isExit, animationCommandNode.runAction) {
+                    animationData = FindAnimationData(styleSheetAnimations, animationCommandNode.animationName),
+            });
         }
 
         private AnimationData FindAnimationData(AnimationData[] animations, StyleASTNode animationName) {
@@ -294,7 +296,7 @@ namespace UIForia.Compilers.Style {
                         break;
                     case RunNode runNode :
                         if (runNode.commmand is AnimationCommandNode animationCommandNode) {
-                            targetStyle.runCommands = new LightList<IRunCommand>(4);
+                            targetStyle.runCommands = targetStyle.runCommands ?? new LightList<IRunCommand>(4);
                             MapAnimationCommand(animations, targetStyle, animationCommandNode);
                         }
                         break;

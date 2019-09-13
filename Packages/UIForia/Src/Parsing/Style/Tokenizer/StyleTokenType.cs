@@ -79,8 +79,11 @@ namespace UIForia.Parsing.Style.Tokenizer {
         LessThanEqualTo,
         QuestionMark,
 
+        Exit,
+        Enter,
         Run,
-        Exit
+        Pause,
+        Stop,
 
     }
 }

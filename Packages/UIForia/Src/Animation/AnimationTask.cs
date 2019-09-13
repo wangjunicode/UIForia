@@ -5,6 +5,7 @@ namespace UIForia.Animation {
 
     public abstract class AnimationTask : UITask {
 
+        public readonly AnimationData animationData;
         public readonly AnimationTaskType type;
         public readonly IList<AnimationTriggerState> triggerStates;
         

@@ -782,6 +782,14 @@ namespace UIForia {
             m_AnimationSystem.Animate(element, animation);
         }
 
+        public void PauseAnimation(UIElement element, AnimationData animationData) {
+            m_AnimationSystem.PauseAnimation(element, animationData);
+        }
+
+        public void StopAnimation(UIElement element, AnimationData animationData) {
+            m_AnimationSystem.StopAnimation(element, animationData);
+        }
+
         public UIView[] GetViews() {
             return m_Views.ToArray();
         }

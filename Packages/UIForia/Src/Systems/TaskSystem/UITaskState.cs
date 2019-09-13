@@ -11,7 +11,8 @@ namespace UIForia.Systems {
         Running = 1 << 2,
         Completed = 1 << 3,
         Failed = 1 << 5,
-        Cancelled = 1 << 6
+        Cancelled = 1 << 6,
+        Paused = 1 << 7,
 
     }
 

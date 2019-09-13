@@ -4,6 +4,7 @@ namespace UIForia.Rendering {
     public interface IRunCommand {
         void Run(UIElement element);
         bool IsExit { get; }
+        RunAction RunAction { get; }
 
     }
 }

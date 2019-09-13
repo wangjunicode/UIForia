@@ -599,7 +599,7 @@ namespace UIForia.Editor {
         private void DrawStyles() {
             UIStyleSet styleSet = selectedElement.style;
 
-            IList<UIStyleGroupContainer> baseStyles = styleSet.GetBaseStyles();
+            List<UIStyleGroupContainer> baseStyles = styleSet.GetBaseStyles();
 
             float labelWidth = EditorGUIUtility.labelWidth;
             EditorGUIUtility.labelWidth = 100;
@@ -618,35 +618,80 @@ namespace UIForia.Editor {
             EditorGUIUtility.labelWidth = labelWidth;
 
             EditorGUILayout.BeginVertical();
-            //
-            //            UIStyleGroup instanceStyle = styleSet.GetInstanceStyle();
-            //            if (instanceStyle != null) {
-            //                baseStyles.Insert(0, instanceStyle);
-            //            }
-            //
-            //            for (int i = 0; i < baseStyles.Count; i++) {
-            //                UIStyleGroupContainer group = baseStyles[i];
-            //                s_Content.text = $"{group.name} ({group.styleType.ToString()})";
-            //
-            //                if (group.normal != null) {
-            //                    DrawStyle(s_Content.text + " [Normal]", group.normal);
-            //                }
-            //
-            //                if (group.hover != null) {
-            //                    DrawStyle(s_Content.text + " [Hover]", group.hover);
-            //                }
-            //
-            //                if (group.focused != null) {
-            //                    DrawStyle(s_Content.text + " [Focus]", group.focused);
-            //                }
-            //
-            //                if (group.active != null) {
-            //                    DrawStyle(s_Content.text + " [Active]", group.active);
-            //                }
-            //            }
-            //
-            //            ListPool<UIStyleGroup>.Release(ref baseStyles);
+            
+            UIStyleGroup instanceStyle = styleSet.GetInstanceStyle();
+            if (instanceStyle != null) {
+                s_Content.text = "Instance";
+                DrawStyleGroup(instanceStyle);
+            }
+            
+            for (int i = 0; i < baseStyles.Count; i++) {
+                UIStyleGroupContainer container = baseStyles[i];
+                s_Content.text = $"{container.name} ({container.styleType.ToString()})";
+
+                for (int j = 0; j < container.groups.Count; j++) {
+                    DrawStyleGroup(container.groups[j]);
+                }
+            }
+
+            ListPool<UIStyleGroupContainer>.Release(ref baseStyles);
             GUILayout.EndVertical();
+        }
+
+        private void DrawStyleGroup(UIStyleGroup group) {
+            if (group.normal.style != null) {
+                DrawStyle(s_Content.text + " [Normal]", group.normal.style);
+                DrawRunCommands(group.normal.runCommands);
+            }
+
+            if (group.hover.style != default) {
+                DrawStyle(s_Content.text + " [Hover]", group.hover.style);
+                DrawRunCommands(group.hover.runCommands);
+            }
+
+            if (group.focused.style != default) {
+                DrawStyle(s_Content.text + " [Focus]", group.focused.style);
+                DrawRunCommands(group.focused.runCommands);
+            }
+
+            if (group.active.style != default) {
+                DrawStyle(s_Content.text + " [Active]", group.active.style);
+                DrawRunCommands(group.active.runCommands);
+            }
+        }
+
+        private void DrawRunCommands(LightList<IRunCommand> runCommands) {
+            if (runCommands == null) {
+                return;
+            }
+
+            EditorGUI.indentLevel++;
+            EditorGUILayout.LabelField($"Run Commands");
+            EditorGUI.indentLevel++;
+            for (int i = 0; i < runCommands.size; i++) {    
+                if (runCommands[i] is AnimationRunCommand animationRunCommand) {
+                    s_Content.text = "Name";
+                    GUI.enabled = true;
+                    GUILayout.BeginHorizontal();
+                    EditorGUILayout.LabelField(s_Content);
+                    EditorGUILayout.TextField(animationRunCommand.animationData.name);
+                    GUILayout.EndHorizontal();
+                    EditorGUI.indentLevel++;
+                    s_Content.text = "File name";
+                    GUILayout.BeginHorizontal();
+                    EditorGUILayout.LabelField(s_Content);
+                    EditorGUILayout.TextField(animationRunCommand.animationData.fileName);
+                    GUILayout.EndHorizontal();
+                    s_Content.text = "isExit";
+                    GUILayout.BeginHorizontal();
+                    EditorGUILayout.LabelField(s_Content);
+                    EditorGUILayout.TextField(animationRunCommand.IsExit ? "yes" : "no");
+                    GUILayout.EndHorizontal();
+                    EditorGUI.indentLevel--;
+                }
+            }
+            EditorGUI.indentLevel--;
+            EditorGUI.indentLevel--;
         }
 
         public void OnGUI() {
@@ -703,7 +748,7 @@ namespace UIForia.Editor {
 
             if (expanded) {
                 EditorGUI.indentLevel++;
-                // todo -- sort? 
+                // todo -- sort?
                 for (int i = 0; i < style.PropertyCount; i++) {
                     DrawStyleProperty(style[i], false);
                 }

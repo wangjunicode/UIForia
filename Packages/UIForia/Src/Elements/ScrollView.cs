@@ -31,6 +31,8 @@ namespace UIForia.Elements {
 
         private Size overflowSize;
 
+        private Size previousChildrenSize;
+
         public override void OnEnable() {
             childrenElement = FindById("scroll-root");
             verticalHandle = FindById("scroll-handle-vertical");
@@ -57,6 +59,15 @@ namespace UIForia.Elements {
             }
 
             overflowSize = new Size(maxX - minX, maxY - minY);
+
+            if (previousChildrenSize != default && (int) previousChildrenSize.height > (int) overflowSize.height && (int) (overflowSize.height + childrenElement.style.TransformPositionY.value - layoutResult.ActualHeight) < 0) {
+                ScrollToVerticalPercent(100f);
+            }
+            if (previousChildrenSize != default && (int) previousChildrenSize.width > (int) overflowSize.width && (int) (overflowSize.width + childrenElement.style.TransformPositionX.value - layoutResult.ActualWidth) < 0) {
+                ScrollToHorizontalPercent(100f);
+            }
+
+            previousChildrenSize = overflowSize;
 
             if (disableOverflowX || overflowSize.width <= actualSize.width) {
                 horizontalTrack.SetEnabled(false);
@@ -193,7 +204,7 @@ namespace UIForia.Elements {
             }
         }
 
-        private void ScrollToVerticalPercent(float percentage) {
+        public void ScrollToVerticalPercent(float percentage) {
             if (!verticalTrack.isEnabled) {
                 return;
             }
@@ -207,7 +218,7 @@ namespace UIForia.Elements {
             childrenElement.style.SetTransformPositionY(new OffsetMeasurement(-percentage * scrollPixels), StyleState.Normal);
         }
 
-        private void ScrollToHorizontalPercent(float percentage) {
+        public void ScrollToHorizontalPercent(float percentage) {
             if (!horizontalTrack.isEnabled) {
                 return;
             }

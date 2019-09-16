@@ -59,7 +59,6 @@ style menu-label {
     }
 }
 
-
 style menu-image { 
     ShadowOffsetY = 5;
     ShadowOffsetX = 3;
@@ -67,6 +66,7 @@ style menu-image {
     ShadowOpacity = 0.5;
     ShadowSizeX = 1;
     ShadowSizeY = 1;
+    BorderRadius = 50%;
 
     [hover] {
         Cursor = @theme.cursorClickable;

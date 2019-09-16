@@ -28,7 +28,6 @@ animation hide {
 
 style <this> {
     PreferredSize = 1024px 512px;
-    BackgroundColor = white;
     TextFontAsset = @theme.fontGothamBold;
     LayoutType = Grid;
     GridLayoutColTemplate = 1pca;
@@ -40,7 +39,12 @@ style <this> {
     AlignX = 100% Parent;
     AlignY = 200% 100%;
     AlignmentBehaviorY = Parent;
-    
+    ShadowColor = black;
+    ShadowIntensity = 150;
+    ShadowOpacity = 0.5;
+    ShadowOffsetX = 10;
+    ShadowOffsetY = 20;
+    CornerBevelTopLeft = @theme.topLeftCornerBevel;
     [attr:placement="show"] {
         run animation(show);
     }

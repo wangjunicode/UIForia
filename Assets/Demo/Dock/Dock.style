@@ -21,7 +21,6 @@ animation hide {
     }
 }
 
-
 style <this> { 
     AlignX = 100% Parent;
     AlignY = 100% Parent;

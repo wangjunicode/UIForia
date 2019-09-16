@@ -16,6 +16,7 @@ namespace UIForia.Rendering {
         public Vector4 objectData;
         public Texture mainTexture;
         public Vector4 miscData;
+        public Vector4 cornerData;
 
         public UIForiaGeometry() {
             this.positionList = new StructList<Vector3>();

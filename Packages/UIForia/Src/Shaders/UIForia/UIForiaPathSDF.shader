@@ -149,7 +149,6 @@
                 float2 p2 = float2(hDir * halfX, vDir * (halfY - cut));
                 int mainColorOnly = 0;
                 
-                
                 if(shapeType == ShapeType_Ellipse) {
                     halfStrokeWidth = halfStrokeWidth / max(size.x, size.y);
                     sdf = EllipseSDF(i.texCoord0.xy - 0.5, float2(0.49, 0.49));

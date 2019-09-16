@@ -7,6 +7,7 @@ const topBarTextSize = 12px;
 const iconSize = 30px;
 
 style building-designer-top-bar {
+    CornerBevelTopLeft = @theme.topLeftCornerBevel;
     BackgroundColor = rgb(239, 239, 239);
     
     TextColor = @theme.darkGrey;

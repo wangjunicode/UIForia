@@ -11,6 +11,8 @@ namespace UIForia.Rendering {
         public StructList<Vector4> objectData1 = new StructList<Vector4>();
         public StructList<Vector4> clipUVs = new StructList<Vector4>();
         public StructList<Vector4> clipRects = new StructList<Vector4>();
+        public StructList<Vector4> cornerData = new StructList<Vector4>();
+        
         public Texture mainTexture;
         public Texture clipTexture;
         internal bool isActive;
@@ -28,6 +30,7 @@ namespace UIForia.Rendering {
             objectData1.size = 0;
             clipUVs.size = 0;
             clipRects.size = 0;
+            cornerData.size = 0;
         }
 
         public static LightList<UIForiaData> s_Pool = new LightList<UIForiaData>();

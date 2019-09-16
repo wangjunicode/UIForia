@@ -53,6 +53,7 @@ Shader "UIForia/Standard"
             float4 _ColorData[BATCH_SIZE];
             float4 _MiscData[BATCH_SIZE];
             float4 _ObjectData[BATCH_SIZE];
+            float4 _CornerData[BATCH_SIZE];
             float4 _ClipUVs[BATCH_SIZE];
             float4 _ClipRects[BATCH_SIZE];
             float4x4 _TransformData[BATCH_SIZE];
@@ -105,6 +106,7 @@ Shader "UIForia/Standard"
                 
                 // this only works for 'flower' configuration meshes, not for quads. use a flag for the quad
                 o.texCoord4 = float4(lerp(0, 1, v.texCoord0.x == 0.5 && v.texCoord0.y == 0.5), screenPos.xyw);
+             
                 
                 if(shapeType != ShapeType_Text) {
                      o.vertex = UIForiaPixelSnap(o.vertex); // pixel snap is bad for text rendering
@@ -166,12 +168,30 @@ Shader "UIForia/Standard"
                 return o;
             }            
           
+            float GetCornerBevel(float2 uv, float4 bevels) {
+                
+                float left = step(uv.x, 0.5); // 1 if left
+                float bottom = step(uv.y, 0.5); // 1 if bottom
+                
+                #define top (1 - bottom)
+                #define right (1 - left)  
+                float r = 0;
+                r += ((1 - bottom) * left) * bevels.x;
+                r += ((1 - bottom) * (1 - left)) * bevels.y;
+                r += (bottom * left) * bevels.z;
+                r += (bottom * (1 - left)) * bevels.w;
+                
+                return r;
+                
+            }
+            
             fixed4 frag (v2f i) : SV_Target {           
                 
                 float2 screenUV = i.texCoord4.yz / i.texCoord4.w;
                 float4 clipRect = _ClipRects[(uint)i.texCoord1.w];
                 float4 clipUvs = _ClipUVs[(uint)i.texCoord1.w];           
                 float opacity = _ObjectData[(uint)i.texCoord1.w].w;              
+                float4 cornerBevels = _CornerData[(uint)i.texCoord1.w];
                 
                 // todo -- returns cause branching here
                 // get rid of text and we can get rid of branching
@@ -179,21 +199,22 @@ Shader "UIForia/Standard"
                 fixed4 mainColor = ComputeColor(i.color.r, i.color.g, Frag_ColorMode, i.texCoord0.xy, _MainTexture);
                 
                 if(Frag_ShapeType != ShapeType_Text) {
-                    
+                    float bevel = GetCornerBevel(i.texCoord0.zw, cornerBevels);
                     BorderData borderData = GetBorderData(Frag_SDFCoords, Frag_SDFSize, Frag_BorderColors, Frag_BorderSize, Frag_SDFBorderRadii, mainColor);
                     SDFData sdfData;
                     sdfData.uv = Frag_SDFCoords;
                     sdfData.size = Frag_SDFSize;
                     sdfData.strokeWidth = borderData.size;
                     sdfData.radius = borderData.radius;
-                    mainColor = SDFColor(sdfData, borderData.color, mainColor);
+                    mainColor = SDFColor(sdfData, borderData.color, mainColor, bevel);
+                                        
                     mainColor.a *= opacity;
                     
                     // todo -- this causes bad branching
                     if(Frag_ColorMode == PaintMode_Shadow || Frag_ColorMode == PaintMode_ShadowTint) {
                         float intensity = i.color.b;
                         sdfData.strokeWidth = 3;
-                        float n = smoothstep(-intensity, 2, SDFRect2(sdfData));
+                        float n = smoothstep(-intensity, 2, SDFShadow(sdfData, intensity, bevel));
                         fixed4 shadowColor = fixed4(UnpackColor(asuint(i.color.r)).rgb, 1);
                         fixed4 shadowTint = fixed4(UnpackColor(asuint(i.color.g)).rgb, 1);
                         fixed4 shadowRetn = lerp(fixed4(shadowColor.rgb, 1 - n), shadowColor, (1 - n));                

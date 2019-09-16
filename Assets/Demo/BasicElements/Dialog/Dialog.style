@@ -72,6 +72,7 @@ animation hide {
 
 style <this> {
     BackgroundColor = rgba(0, 0, 0, 230);
+    CornerBevelTopLeft = @theme.topLeftCornerBevel;
     TextColor = white;
     TextFontStyle = UpperCase;
     LayoutBehavior = Ignored;

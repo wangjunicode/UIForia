@@ -1,4 +1,3 @@
-using SVGX;
 using UIForia;
 using UIForia.Rendering;
 using UnityEngine;
@@ -21,8 +20,9 @@ namespace Demo.Graphics {
 
         public override void OnInitialize() {
             base.OnInitialize();
-            particleRoot = Object.Instantiate(Resources.Load<GameObject>("Particles/Halo"));
+            particleRoot = Object.Instantiate(Resources.Load<GameObject>("Particles/pfx_button_charge"));
             particleRoot.name = "ParticleRenderBox";
+            //particleRoot.hideFlags |= HideFlags.HideInHierarchy | HideFlags.HideInInspector;
             ParticleSystem[] systems = particleRoot.GetComponentsInChildren<ParticleSystem>();
             particleData = new ParticleData[systems.Length];
             for (int i = 0; i < systems.Length; i++) {
@@ -41,9 +41,17 @@ namespace Demo.Graphics {
                 ref ParticleData data = ref particleData[i];
                 data.system.Simulate(Time.unscaledDeltaTime, false, false, true);
                 data.renderer.BakeMesh(data.mesh);
-                var mat = element.layoutResult.matrix;
-                mat *= SVGXMatrix.Translation(new Vector2(100, -200));
-                ctx.DrawMesh(data.mesh, data.renderer.material, mat.ToMatrix4x4());
+                Matrix4x4 mat = element.layoutResult.matrix.ToMatrix4x4();
+                ctx.DrawMesh(data.mesh, data.renderer.material, mat);
+            }
+        }
+
+        public override void OnDestroy() {
+            base.OnDestroy();
+            for (int i = 0; i < particleData.Length; i++) {
+                ref ParticleData data = ref particleData[i];
+                Object.Destroy(data.mesh);
+                Object.Destroy(particleRoot);
             }
         }
 

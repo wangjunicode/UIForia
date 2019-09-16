@@ -547,21 +547,38 @@ float SDFArc(float2 p, float ta, float tb, float radius, float width) {
     return sqrt(dot(p, p) + radius * radius - 2.0 * radius * k) - width;
 }
             
-float SDFRect2(SDFData sdfData) {
+float SDFCornerBevel(float2 uv, float2 size, float cutX, float cutY) {
+    fixed hDir = lerp(-1, 1, uv.x > 0.5);
+    fixed vDir = lerp(-1, 1, uv.y > 0.5);
+    float halfX = size.x * 0.5;
+    float halfY = size.y * 0.5;
+    float2 center = ((uv.xy - 0.5) * size);
+    float2 p0 = float2(hDir * (halfX - cutX), vDir * halfY);
+    float2 p1 = float2(hDir * size.x, vDir * size.y); // big on purpose so we don't get bad bleeding of non clipped edge
+    float2 p2 = float2(hDir * halfX, vDir * (halfY - cutY));
+    return sdTriangle(center, p0, p1, p2);
+}
+
+float SDFShadow(SDFData sdfData, float intensity, float cut) {
     float halfStrokeWidth = sdfData.strokeWidth * 0.5;
-    
     float2 size = sdfData.size;
     float minSize = min(size.x, size.y);
-    float radius = clamp(minSize * 0.5, 0, minSize);
+    float radius = clamp(minSize * sdfData.radius, 0, minSize);
+    
+    if(cut != 0) {
+        radius = 0.2 * minSize;
+    }
     
     float2 center = ((sdfData.uv.xy - 0.5) * size);
     
     float sdf = RectSDF(center, (size * 0.5) - halfStrokeWidth, radius - halfStrokeWidth);
+    float tri = SDFCornerBevel(sdfData.uv, size, cut, cut);
+    sdf = lerp(sdf, subtractSDF(sdf, tri), cut > 0);
     return sdf;
     return abs(sdf) - halfStrokeWidth;
 }
 
-fixed4 SDFColor(SDFData sdfData, fixed4 borderColor, fixed4 contentColor) {
+fixed4 SDFColor(SDFData sdfData, fixed4 borderColor, fixed4 contentColor, float cornerBevel) {
     float halfStrokeWidth = sdfData.strokeWidth * 0.5;
     
     float2 size = sdfData.size;
@@ -569,28 +586,26 @@ fixed4 SDFColor(SDFData sdfData, fixed4 borderColor, fixed4 contentColor) {
     float radius = clamp(minSize * sdfData.radius, 0, minSize);
     
     float2 center = ((sdfData.uv.xy - 0.5) * size);
+                       
+    float cutX = cornerBevel;
+    float cutY = cornerBevel;
     
     if(contentColor.a <= 0) {
         contentColor = fixed4(borderColor.rgb, 0);
     }
      
     if(halfStrokeWidth == 0 || borderColor.a <= 0) { // if has border but border alpha is 0 might need to handle that 
-        halfStrokeWidth = 3;
+        halfStrokeWidth = lerp(3, 0, cutX + cutY > 0);
         borderColor = contentColor;
     }
       
     float sdf = RectSDF(center, (size * 0.5) - halfStrokeWidth, radius - halfStrokeWidth);
+    float tri = SDFCornerBevel(sdfData.uv, size, cutX, cutY);
+    sdf = lerp(sdf, subtractSDF(sdf, tri), cutX + cutY > 0);
     float retn = abs(sdf) - halfStrokeWidth;
+    
     fixed4 innerColor = borderColor; 
     fixed4 outerColor = contentColor;
-   
-   // contentColor = contentColor; //lerp(contentColor, fixed4(borderColor.rgb, 0), contentColor.a == 0);
-   // borderColor = lerp(contentColor, borderColor, hasBorder);
-    // border to edge
-    //if(sdf > halfStrokeWidth * 0.5) {
-    //    innerColor = borderColor;
-    //    outerColor = fixed4(borderColor.rgb, 0);
-    //}
     
     if(sdf >= 0) {
         innerColor = borderColor;
@@ -601,15 +616,21 @@ fixed4 SDFColor(SDFData sdfData, fixed4 borderColor, fixed4 contentColor) {
     float ddyRetn = ddy(retn);
 
     float distanceChange = sqrt(ddxRetn * ddxRetn + ddyRetn * ddyRetn);
+    float aa = 0;
     
-    if(step(abs(ddxRetn) * abs(ddyRetn), 0))  {
-        distanceChange *= 0.5;
+    if(cutX + cutY > 0) {
+        aa = 1 - smoothstep(-1, 1, sdf);
     }
     else {
-        distanceChange *= 0.71;
+        if(step(abs(ddxRetn) * abs(ddyRetn), 0))  {
+            distanceChange *= 0.5;
+        }
+        else {
+            distanceChange *= 0.71;
+        }
+        aa = smoothstep(distanceChange, -distanceChange, retn);
     }
     
-    float aa = smoothstep(distanceChange, -distanceChange, retn);
     return lerp(innerColor, outerColor, 1 - aa); // do not pre-multiply alpha here!
 }
 

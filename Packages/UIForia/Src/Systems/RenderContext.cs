@@ -255,6 +255,7 @@ namespace UIForia.Rendering {
             currentBatch.uiforiaData.objectData0.Add(geometry.objectData);
             currentBatch.uiforiaData.objectData1.Add(geometry.miscData);
             currentBatch.uiforiaData.colors.Add(geometry.packedColors);
+            currentBatch.uiforiaData.cornerData.Add(geometry.cornerData);
             currentBatch.uiforiaData.fontData = fontData;
 
          
@@ -315,6 +316,7 @@ namespace UIForia.Rendering {
             currentBatch.uiforiaData.colors.Add(geometry.packedColors);
             currentBatch.uiforiaData.objectData0.Add(geometry.objectData);
             currentBatch.uiforiaData.objectData1.Add(geometry.miscData);
+            currentBatch.uiforiaData.cornerData.Add(geometry.cornerData);
 
             if (clipper != null) {
                 // todo break batch if changed
@@ -715,7 +717,7 @@ namespace UIForia.Rendering {
             Vector3 cameraOrigin = camera.transform.position;
             cameraOrigin.x -= 0.5f * (Screen.width);
             cameraOrigin.y += 0.5f * (Screen.height); // for some reason editor needs this minor adjustment
-            cameraOrigin.z += 2;
+            cameraOrigin.z += 200;
             
             if (Screen.width % 2 != 0) {
               cameraOrigin.x -=  0.5f;

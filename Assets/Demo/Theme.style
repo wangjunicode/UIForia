@@ -28,6 +28,7 @@ export const confirmColor = rgb(100, 205, 125);
 export const saveExitColor = rgb(85, 179, 213);
 export const cancelColor = rgb(255, 30, 30);
 
+export const topLeftCornerBevel = 20px;
 
 export const fontInputSansCompressed = url("Fonts/InputSansCompressed-Regular SDF");
 export const fontInputSansCompressedBlack = url("Fonts/InputSansCompressed-Black SDF");

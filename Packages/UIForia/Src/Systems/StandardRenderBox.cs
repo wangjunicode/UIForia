@@ -245,9 +245,8 @@ namespace UIForia.Rendering {
                 }
             }
 
+            
             didRender = true;
-            float packedBackgroundColor = VertigoUtil.ColorToFloat(backgroundColor);
-            float packedBackgroundTint = VertigoUtil.ColorToFloat(backgroundTint);
 
             PaintMode colorMode = PaintMode.None;
 
@@ -335,10 +334,19 @@ namespace UIForia.Rendering {
                 c.w = borderRightAndBottom;
             }
 
-            geometry.packedColors = c;//new Color(packedBackgroundColor, packedBackgroundTint, borderLeftAndTop, borderRightAndBottom);
+            geometry.packedColors = c;
 
             int val = BitUtil.SetHighLowBits((int)ShapeType.RoundedRect, (int) colorMode);
 
+            float viewWidth = element.View.Viewport.width;
+            float viewHeight = element.View.Viewport.height;
+            float emSize = 0; //element.style.GetResolvedFontSize(); expensive, cache this
+            float cornerBevelTopLeft = UIFixedLength.Resolve(element.style.CornerBevelTopLeft, halfMin, emSize, viewWidth, viewHeight);
+            float cornerBevelTopRight = UIFixedLength.Resolve(element.style.CornerBevelTopRight, halfMin, emSize, viewWidth, viewHeight);
+            float cornerBevelBottomRight = UIFixedLength.Resolve(element.style.CornerBevelBottomRight, halfMin, emSize, viewWidth, viewHeight);
+            float cornerBevelBottomLeft = UIFixedLength.Resolve(element.style.CornerBevelBottomLeft, halfMin, emSize, viewWidth, viewHeight);
+            
+            geometry.cornerData = new Vector4(cornerBevelTopLeft, cornerBevelTopRight, cornerBevelBottomLeft, cornerBevelBottomRight);
             geometry.objectData = new Vector4(val, VertigoUtil.PackSizeVector(element.layoutResult.actualSize), packedBorderRadii, element.style.Opacity);
             geometry.mainTexture = backgroundImage;
         }
@@ -351,12 +359,40 @@ namespace UIForia.Rendering {
                 lastSize = newSize;
             }
 
+            // todo -- fix caching issue here
             if (true || dataNeedsUpdate) {
                 UpdateMaterialData();
                 dataNeedsUpdate = false;
             }
 
             if (element.style.ShadowColor.a > 0) {
+                
+                float min = math.min(element.layoutResult.actualSize.width, element.layoutResult.actualSize.height);
+
+                if (min <= 0) min = 0.0001f;
+
+                float halfMin = min * 0.5f;
+
+                float borderRadiusTopLeft = ResolveFixedSize(element, min, element.style.BorderRadiusTopLeft);
+                float borderRadiusTopRight = ResolveFixedSize(element, min, element.style.BorderRadiusTopRight);
+                float borderRadiusBottomLeft = ResolveFixedSize(element, min, element.style.BorderRadiusBottomLeft);
+                float borderRadiusBottomRight = ResolveFixedSize(element, min, element.style.BorderRadiusBottomRight);
+
+                borderRadiusTopLeft = math.clamp(borderRadiusTopLeft, 0, halfMin) / min;
+                borderRadiusTopRight = math.clamp(borderRadiusTopRight, 0, halfMin) / min;
+                borderRadiusBottomLeft = math.clamp(borderRadiusBottomLeft, 0, halfMin) / min;
+                borderRadiusBottomRight = math.clamp(borderRadiusBottomRight, 0, halfMin) / min;
+
+                byte b0 = (byte) (((borderRadiusTopLeft * 1000)) * 0.5f);
+                byte b1 = (byte) (((borderRadiusTopRight * 1000)) * 0.5f);
+                byte b2 = (byte) (((borderRadiusBottomLeft * 1000)) * 0.5f);
+                byte b3 = (byte) (((borderRadiusBottomRight * 1000)) * 0.5f);
+
+                float packedBorderRadii = VertigoUtil.BytesToFloat(b0, b1, b2, b3);
+                
+                float viewWidth = element.View.Viewport.width;
+                float viewHeight = element.View.Viewport.height;
+                
                 UIStyleSet style = element.style;
                 shadowGeometry = shadowGeometry ?? new UIForiaGeometry();
                 shadowGeometry.Clear();
@@ -365,8 +401,8 @@ namespace UIForia.Rendering {
                 Vector2 size = element.layoutResult.actualSize + new Vector2(style.ShadowSizeX, style.ShadowSizeY) + new Vector2(style.ShadowIntensity, style.ShadowIntensity);
                 position -= new Vector2(style.ShadowSizeX, style.ShadowSizeY) * 0.5f;
                 position -= new Vector2(style.ShadowIntensity, style.ShadowIntensity) * 0.5f;
-                float x = MeasurementUtil.ResolveOffsetMeasurement(element.layoutBox, element.View.Viewport.width, element.View.Viewport.height, style.ShadowOffsetX, element.layoutResult.actualSize.width);
-                float y = MeasurementUtil.ResolveOffsetMeasurement(element.layoutBox, element.View.Viewport.width, element.View.Viewport.height, style.ShadowOffsetY, element.layoutResult.actualSize.height);
+                float x = MeasurementUtil.ResolveOffsetMeasurement(element.layoutBox, viewWidth, viewHeight, style.ShadowOffsetX, element.layoutResult.actualSize.width);
+                float y = MeasurementUtil.ResolveOffsetMeasurement(element.layoutBox, viewWidth, viewHeight, style.ShadowOffsetY, element.layoutResult.actualSize.height);
                 position.x += x;
                 position.y += y;
                 shadowGeometry.mainTexture = null;
@@ -374,6 +410,8 @@ namespace UIForia.Rendering {
                 shadowGeometry.objectData = geometry.objectData;
                 shadowGeometry.objectData.x = val;
                 shadowGeometry.objectData.y = VertigoUtil.PackSizeVector(size);
+                shadowGeometry.objectData.z = packedBorderRadii;
+
                 Vector4 v = default;
 
                 unsafe {
@@ -385,9 +423,15 @@ namespace UIForia.Rendering {
                     v.z = style.ShadowIntensity;
                     v.w = style.ShadowOpacity;
                 }
-
+                
+                float emSize = 0; //element.style.GetResolvedFontSize(); expensive, cache this
+                float cornerBevelTopLeft = UIFixedLength.Resolve(element.style.CornerBevelTopLeft, halfMin, emSize, viewWidth, viewHeight);
+                float cornerBevelTopRight = UIFixedLength.Resolve(element.style.CornerBevelTopRight, halfMin, emSize, viewWidth, viewHeight);
+                float cornerBevelBottomRight = UIFixedLength.Resolve(element.style.CornerBevelBottomRight, halfMin, emSize, viewWidth, viewHeight);
+                float cornerBevelBottomLeft = UIFixedLength.Resolve(element.style.CornerBevelBottomLeft, halfMin, emSize, viewWidth, viewHeight);
+            
+                shadowGeometry.cornerData = new Vector4(cornerBevelTopLeft, cornerBevelTopRight, cornerBevelBottomLeft, cornerBevelBottomRight);
                 shadowGeometry.packedColors = v;
-                shadowGeometry.miscData = default;
                 shadowGeometry.FillRect(size.x, size.y, position);
                 ctx.DrawBatchedGeometry(shadowGeometry, new GeometryRange(shadowGeometry.positionList.size, shadowGeometry.triangleList.size), element.layoutResult.matrix.ToMatrix4x4(), clipper);    
             }

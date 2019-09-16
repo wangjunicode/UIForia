@@ -183,31 +183,31 @@ namespace UIForia.Editor {
 
             if (showComputedSources) {
                 properties.Sort(
-                        (a, b) => {
-                            if (a.Item1 == b.Item1) return 0;
+                    (a, b) => {
+                        if (a.Item1 == b.Item1) return 0;
 
-                            bool aInstance = a.Item1.Contains("Instance");
-                            bool bInstance = b.Item1.Contains("Instance");
+                        bool aInstance = a.Item1.Contains("Instance");
+                        bool bInstance = b.Item1.Contains("Instance");
 
-                            if (aInstance && bInstance) {
-                                return string.Compare(a.Item1, b.Item1, StringComparison.Ordinal);
-                            }
-
-                            if (aInstance) return -1;
-                            if (bInstance) return 1;
-
-                            bool aDefault = a.Item1.Contains("Default");
-                            bool bDefault = b.Item1.Contains("Default");
-
-                            if (aDefault && bDefault) {
-                                return string.Compare(a.Item1, b.Item1, StringComparison.Ordinal);
-                            }
-
-                            if (aDefault) return 1;
-                            if (bDefault) return -1;
-
+                        if (aInstance && bInstance) {
                             return string.Compare(a.Item1, b.Item1, StringComparison.Ordinal);
-                        });
+                        }
+
+                        if (aInstance) return -1;
+                        if (bInstance) return 1;
+
+                        bool aDefault = a.Item1.Contains("Default");
+                        bool bDefault = b.Item1.Contains("Default");
+
+                        if (aDefault && bDefault) {
+                            return string.Compare(a.Item1, b.Item1, StringComparison.Ordinal);
+                        }
+
+                        if (aDefault) return 1;
+                        if (bDefault) return -1;
+
+                        return string.Compare(a.Item1, b.Item1, StringComparison.Ordinal);
+                    });
 
                 GUILayout.Space(10);
                 string currentSource = properties[0].Item1;
@@ -253,6 +253,7 @@ namespace UIForia.Editor {
                 path.LineTo(x + 5, y);
                 x += 8;
             }
+
             path.EndPath();
             path.Stroke();
         }
@@ -267,10 +268,11 @@ namespace UIForia.Editor {
                 path.LineTo(x, y + 5);
                 y += 8;
             }
+
             path.EndPath();
             path.Stroke();
         }
-        
+
         private void DrawDebugOverlay(RenderContext ctx) {
             if (!drawDebugBox) return;
             // path.DisableScissorRect();
@@ -308,12 +310,12 @@ namespace UIForia.Editor {
                 float contentY = (result.screenPosition.y) + border.top + padding.top;
                 float contentWidth = result.actualSize.width - border.Horizontal - padding.Horizontal;
                 float contentHeight = result.actualSize.height - border.Vertical - padding.Vertical;
-               // float actualWidth = result.allocatedSize.width - border.Horizontal - padding.Horizontal;
-               // float allocatedHeight = result.allocatedSize.height - border.Vertical - padding.Vertical;
+                // float actualWidth = result.allocatedSize.width - border.Horizontal - padding.Horizontal;
+                // float allocatedHeight = result.allocatedSize.height - border.Vertical - padding.Vertical;
                 path.BeginPath();
                 path.Rect(contentX, contentY, contentWidth, contentHeight);
                 path.Fill();
-                
+
                 path.SetFill(allocatedContentColor);
                 path.BeginPath();
                 path.Rect(contentX, contentY, contentWidth, contentHeight);
@@ -396,12 +398,12 @@ namespace UIForia.Editor {
                     path.Rect(x - margin.left, y + height, width + margin.Horizontal, margin.bottom);
                     path.Fill();
                 }
-                
+
                 DrawHorizontalDotted(contentY, contentColor);
                 DrawHorizontalDotted(contentY + contentHeight, contentColor);
                 DrawVerticalDotted(contentX, contentColor);
                 DrawVerticalDotted(contentX + contentWidth, contentColor);
-                
+
                 ctx.DrawPath(path);
 
                 if (selectedElement.style.LayoutType != LayoutType.Grid) {
@@ -433,8 +435,6 @@ namespace UIForia.Editor {
                 }
 
                 path.Stroke();
-
-                
             }
         }
 
@@ -618,13 +618,13 @@ namespace UIForia.Editor {
             EditorGUIUtility.labelWidth = labelWidth;
 
             EditorGUILayout.BeginVertical();
-            
+
             UIStyleGroup instanceStyle = styleSet.GetInstanceStyle();
             if (instanceStyle != null) {
                 s_Content.text = "Instance";
                 DrawStyleGroup(instanceStyle);
             }
-            
+
             for (int i = 0; i < baseStyles.Count; i++) {
                 UIStyleGroupContainer container = baseStyles[i];
                 s_Content.text = $"{container.name} ({container.styleType.ToString()})";
@@ -668,7 +668,7 @@ namespace UIForia.Editor {
             EditorGUI.indentLevel++;
             EditorGUILayout.LabelField($"Run Commands");
             EditorGUI.indentLevel++;
-            for (int i = 0; i < runCommands.size; i++) {    
+            for (int i = 0; i < runCommands.size; i++) {
                 if (runCommands[i] is AnimationRunCommand animationRunCommand) {
                     s_Content.text = "Name";
                     GUI.enabled = true;
@@ -690,6 +690,7 @@ namespace UIForia.Editor {
                     EditorGUI.indentLevel--;
                 }
             }
+
             EditorGUI.indentLevel--;
             EditorGUI.indentLevel--;
         }
@@ -782,6 +783,10 @@ namespace UIForia.Editor {
                 case StylePropertyId.BackgroundImageOffsetY:
                 case StylePropertyId.BackgroundImageScaleX:
                 case StylePropertyId.BackgroundImageScaleY:
+                case StylePropertyId.ShadowIntensity:
+                case StylePropertyId.ShadowOpacity:
+                case StylePropertyId.ShadowSizeX:
+                case StylePropertyId.ShadowSizeY:
                     return DrawFloat(property, isEditable);
 
                 case StylePropertyId.BackgroundImageRotation:
@@ -867,6 +872,8 @@ namespace UIForia.Editor {
 
                 case StylePropertyId.TransformPositionX:
                 case StylePropertyId.TransformPositionY:
+                case StylePropertyId.ShadowOffsetX:
+                case StylePropertyId.ShadowOffsetY:
                     return DrawOffsetMeasurement(property, isEditable);
 
                 case StylePropertyId.TransformScaleX:
@@ -888,6 +895,8 @@ namespace UIForia.Editor {
                 case StylePropertyId.__TextPropertyEnd__:
                     break;
                 case StylePropertyId.TextColor:
+                case StylePropertyId.ShadowColor:
+                case StylePropertyId.ShadowTint:
                     return DrawColor(property, isEditable);
 
                 case StylePropertyId.TextFontAsset:
@@ -968,7 +977,7 @@ namespace UIForia.Editor {
 
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.PrefixLabel(StyleUtil.GetPropertyName(property));
-            Texture2D newTexture = (Texture2D)EditorGUILayout.ObjectField(texture, typeof(Texture2D), false);
+            Texture2D newTexture = (Texture2D) EditorGUILayout.ObjectField(texture, typeof(Texture2D), false);
             EditorGUILayout.EndHorizontal();
 
             GUI.enabled = true;
@@ -980,12 +989,12 @@ namespace UIForia.Editor {
         private static ValueTuple<int[], GUIContent[]> GetEnumValues<T>() {
             ValueTuple<int[], GUIContent[]> retn;
             if (!m_EnumValueMap.TryGetValue(typeof(T), out retn)) {
-                T[] vals = (T[])Enum.GetValues(typeof(T));
+                T[] vals = (T[]) Enum.GetValues(typeof(T));
                 int[] intValues = new int[vals.Length];
                 GUIContent[] contentValues = new GUIContent[vals.Length];
 
                 for (int i = 0; i < vals.Length; i++) {
-                    intValues[i] = (int)(object)vals[i];
+                    intValues[i] = (int) (object) vals[i];
                     contentValues[i] = new GUIContent(vals[i].ToString());
                 }
 
@@ -1047,7 +1056,7 @@ namespace UIForia.Editor {
             GUILayout.BeginHorizontal();
             GUI.enabled = isEditable;
             float value = EditorGUILayout.FloatField(s_Content, property.AsUIFixedLength.value);
-            UIFixedUnit unit = (UIFixedUnit)EditorGUILayout.EnumPopup(property.AsUIFixedLength.unit);
+            UIFixedUnit unit = (UIFixedUnit) EditorGUILayout.EnumPopup(property.AsUIFixedLength.unit);
             GUI.enabled = true;
             GUILayout.EndHorizontal();
             return isEditable ? new StyleProperty(property.propertyId, new UIFixedLength(value, unit)) : property;
@@ -1058,7 +1067,7 @@ namespace UIForia.Editor {
             GUILayout.BeginHorizontal();
             GUI.enabled = isEditable;
             float value = EditorGUILayout.FloatField(s_Content, property.AsUIFixedLength.value);
-            OffsetMeasurementUnit unit = (OffsetMeasurementUnit)EditorGUILayout.EnumPopup(property.AsUIFixedLength.unit);
+            OffsetMeasurementUnit unit = (OffsetMeasurementUnit) EditorGUILayout.EnumPopup(property.AsUIFixedLength.unit);
             GUI.enabled = true;
             GUILayout.EndHorizontal();
             return isEditable ? new StyleProperty(property.propertyId, new OffsetMeasurement(value, unit)) : property;
@@ -1069,7 +1078,7 @@ namespace UIForia.Editor {
             s_Content.text = StyleUtil.GetPropertyName(property);
             GUILayout.BeginHorizontal();
             float value = EditorGUILayout.FloatField(s_Content, property.AsGridTrackSize.minValue);
-            GridTemplateUnit unit = (GridTemplateUnit)EditorGUILayout.EnumPopup(property.AsGridTrackSize.minUnit);
+            GridTemplateUnit unit = (GridTemplateUnit) EditorGUILayout.EnumPopup(property.AsGridTrackSize.minUnit);
             GUI.enabled = true;
             GUILayout.EndHorizontal();
             return isEditable ? new StyleProperty(property.propertyId, new GridTrackSize(value, unit)) : property;
@@ -1080,7 +1089,7 @@ namespace UIForia.Editor {
             GUI.enabled = isEditable;
             GUILayout.BeginHorizontal();
             float value = EditorGUILayout.FloatField(s_Content, property.AsUIMeasurement.value);
-            UIMeasurementUnit unit = (UIMeasurementUnit)EditorGUILayout.EnumPopup(property.AsUIMeasurement.unit);
+            UIMeasurementUnit unit = (UIMeasurementUnit) EditorGUILayout.EnumPopup(property.AsUIMeasurement.unit);
             GUI.enabled = true;
             GUILayout.EndHorizontal();
             return isEditable ? new StyleProperty(property.propertyId, new UIMeasurement(value, unit)) : property;
@@ -1093,7 +1102,7 @@ namespace UIForia.Editor {
 
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.PrefixLabel(StyleUtil.GetPropertyName(property));
-            Texture2D newTexture = (Texture2D)EditorGUILayout.ObjectField(texture, typeof(Texture2D), false);
+            Texture2D newTexture = (Texture2D) EditorGUILayout.ObjectField(texture, typeof(Texture2D), false);
             EditorGUILayout.EndHorizontal();
 
             GUI.enabled = true;
@@ -1106,7 +1115,7 @@ namespace UIForia.Editor {
             GUILayout.BeginHorizontal();
             FontAsset fontAsset = property.AsFont;
 
-            TMP_FontAsset newFont = (TMP_FontAsset)EditorGUILayout.ObjectField(StyleUtil.GetPropertyName(property), fontAsset.textMeshProFont, typeof(TMP_FontAsset), false);
+            TMP_FontAsset newFont = (TMP_FontAsset) EditorGUILayout.ObjectField(StyleUtil.GetPropertyName(property), fontAsset.textMeshProFont, typeof(TMP_FontAsset), false);
 
             GUI.enabled = true;
             GUILayout.EndHorizontal();
@@ -1125,7 +1134,7 @@ namespace UIForia.Editor {
                 EditorGUILayout.LabelField(s_Content);
                 for (int i = 0; i < template.Count; i++) {
                     float value = EditorGUILayout.FloatField(template[i].minValue);
-                    GridTemplateUnit unit = (GridTemplateUnit)EditorGUILayout.EnumPopup(template[i].minUnit);
+                    GridTemplateUnit unit = (GridTemplateUnit) EditorGUILayout.EnumPopup(template[i].minUnit);
                 }
             }
 
@@ -1139,7 +1148,7 @@ namespace UIForia.Editor {
     public class StylePropertyIdComparer : IComparer<ValueTuple<string, StyleProperty>> {
 
         public int Compare(ValueTuple<string, StyleProperty> x, ValueTuple<string, StyleProperty> y) {
-            return (int)x.Item2.propertyId > (int)y.Item2.propertyId ? 1 : -1;
+            return (int) x.Item2.propertyId > (int) y.Item2.propertyId ? 1 : -1;
         }
 
     }

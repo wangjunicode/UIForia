@@ -1,3 +1,4 @@
+using System;
 using System.Diagnostics;
 using JetBrains.Annotations;
 using UIForia.Util;
@@ -70,6 +71,25 @@ namespace UIForia {
         public override string ToString() {
             return $"{value} {unit}";
         }
+
+        public static float Resolve(UIFixedLength length, float relativeBase, float emSize, float viewportWidth, float viewportHeight) {
+            switch (length.unit) {
+                case UIFixedUnit.Unset:
+                case UIFixedUnit.Pixel:
+                    return length.value;
+                case UIFixedUnit.Percent:
+                    return length.value * relativeBase;
+                case UIFixedUnit.Em:
+                    return length.value * emSize;
+                case UIFixedUnit.ViewportWidth:
+                    return length.value * viewportWidth;
+                case UIFixedUnit.ViewportHeight:
+                    return length.value * viewportHeight;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
     }
 
 }

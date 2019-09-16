@@ -4,6 +4,8 @@
     <Style path="Demo/Theme.style" alias="theme" />
     <Contents>
 
+     
+        
         <Repeat list="MenuItems" style="transclude">
             <MenuItem ImageUrl="$item.ImageUrl"
                       Label="$item.Label"

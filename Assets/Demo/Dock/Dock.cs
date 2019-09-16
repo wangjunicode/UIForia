@@ -1,7 +1,6 @@
 using System;
 using UIForia.Attributes;
 using UIForia.Elements;
-using UIForia.UIInput;
 using UIForia.Util;
 
 namespace Demo {
@@ -11,19 +10,6 @@ namespace Demo {
         public string ImageUrl;
         public string Label;
         public int NotificationCount;
-    }
-
-    public class UIPanelEvent : UIEvent {
-
-        public readonly UIPanel Panel;
-        
-        public UIPanelEvent(UIPanel panel) : base("panelEvent") {
-            this.Panel = panel;
-        }
-
-        public UIPanelEvent(UIPanel panel, KeyboardInputEvent keyboardInputEvent) : base("panelEvent", keyboardInputEvent) {
-            this.Panel = panel;
-        }
     }
 
     [Template("Demo/Dock/Dock.xml")]
@@ -56,7 +42,7 @@ namespace Demo {
         }
 
         private void OpenChat() {
-            TriggerEvent(new UIPanelEvent(UIPanel.Chat));
+            TriggerEvent(new UIWindowEvent(UIWindow.Chat));
         }
 
         public void EnterMode(MenuItemData item) {

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UITemplate>
+
+    <Style path="Demo/Chat/Chat.style" />
+
+    <Contents>
+        <KlangWindow style="chat-window">
+            <SlotContent name="KlangWindow.Titlebar">
+                Chat
+            </SlotContent>
+            <Image src="'Screens/chat_dm@2x'" />
+        </KlangWindow>
+    </Contents>
+
+</UITemplate>

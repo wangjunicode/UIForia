@@ -45,7 +45,7 @@ namespace Demo {
                     new MenuItemData() { ImageUrl = "dock/Schedule@2x", Label = "Schedule" },
                     new MenuItemData() { ImageUrl = "dock/Objects@2x", Label = "Objects" },
                     new MenuItemData() { ImageUrl = "dock/ActivityLog@2x", Label = "Activity Log" },
-                    new MenuItemData() { ImageUrl = "dock/Chat@2x", Label = "Chat", NotificationCount = 3 },
+                    new MenuItemData() { ImageUrl = "dock/Chat@2x", Label = "Chat", NotificationCount = 3, OnClick = OpenChat},
                     new MenuItemData() { ImageUrl = "dock/Construction@2x", Label = "Construction", OnClick = OpenBuildMenu },
                     new MenuItemData() { ImageUrl = "dock/Farming@2x", Label = "Farming" },
             };
@@ -53,6 +53,10 @@ namespace Demo {
 
         private void OpenBuildMenu() {
             TriggerEvent(new UIPanelEvent(UIPanel.Building));
+        }
+
+        private void OpenChat() {
+            TriggerEvent(new UIPanelEvent(UIPanel.Chat));
         }
 
         public void EnterMode(MenuItemData item) {

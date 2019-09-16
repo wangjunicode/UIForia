@@ -1,0 +1,36 @@
+import "Demo/Theme.style" as theme;
+
+const durationDialog = 600;
+
+animation show {
+    [options] {
+        duration = @durationDialog;
+        timingFunction = CubicEaseInOut;
+    }
+    
+    [keyframes] {
+        100% { AlignY = 100%; }
+    }
+}
+animation hide {
+    [options] {
+        duration = @durationDialog;
+        timingFunction = CubicEaseInOut;
+    }
+    
+    [keyframes] {
+        100% { AlignY = 200% 100%; }
+    }
+}
+
+style chat-window {
+    PreferredSize = 1024px;
+    AlignY = 200% 100%;
+    AlignmentBehaviorY = Parent;
+    [attr:placement="show"] {
+        run animation(show);
+    }
+    [attr:placement="hide"] {
+        run animation(hide);
+    }
+}

@@ -43,6 +43,7 @@ namespace Demo {
         private bool showConfirm;
         
         private UIElement prevTool;
+        private ScrollView brushesContainer;
 
         [OnPropertyChanged("isActive")]
         public void OnActiveChanged(string propertyName) {
@@ -51,6 +52,8 @@ namespace Demo {
 
         public override void OnCreate() {
 
+            brushesContainer = FindById<ScrollView>("brushes-container");
+            
             brushTypes = new RepeatableList<ISelectOption<int>> {
                     new SelectOption<int>("Basic", (int)Category.Basic), 
                     new SelectOption<int>("Blocks", (int)Category.Block)
@@ -120,6 +123,8 @@ namespace Demo {
 
         private void BrushTypeChanged(int category) {
             currentBrushType = (Category)category;
+            brushesContainer.ScrollToHorizontalPercent(0f);
+            brushesContainer.ScrollToVerticalPercent(0f);
         }
 
         private void BasicStyleChanged(int style) {

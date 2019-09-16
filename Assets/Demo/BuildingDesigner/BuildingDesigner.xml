@@ -49,7 +49,7 @@
                 </Div>
             </Div>
 
-            <ScrollView style="previews-area">
+            <ScrollView x-id="brushes-container" style="previews-area">
                 <Repeat list="GetBrushes()" style="grid-with-brushes">
                     <Div style="brush-button" onMouseClick="SelectBrush($event, $item)">
                         <Image texture="$item.Texture" style="image-width"/>

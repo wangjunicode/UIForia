@@ -240,8 +240,8 @@ namespace UIForia {
                 onViewAdded?.Invoke(view);
             }
             else {
-                if (view.RootElement.GetType() != type) {
-                    throw new Exception($"A view named {name} with another root type ({view.RootElement.GetType()}) already exists.");
+                if (view.RootElement.GetChild(0).GetType() != type) {
+                    throw new Exception($"A view named {name} with another root type ({view.RootElement.GetChild(0).GetType()}) already exists.");
                 }
 
                 view.Viewport = rect;

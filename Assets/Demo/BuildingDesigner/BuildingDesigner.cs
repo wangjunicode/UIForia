@@ -1,9 +1,6 @@
 using System;
-using Documentation.Features;
-using UIForia.Animation;
 using UIForia.Attributes;
 using UIForia.Elements;
-using UIForia.Rendering;
 using UIForia.UIInput;
 using UIForia.Util;
 using UnityEngine;
@@ -122,9 +119,12 @@ namespace Demo {
         
 
         private void BrushTypeChanged(int category) {
+            var prev = currentBrushType;
             currentBrushType = (Category)category;
-            brushesContainer.ScrollToHorizontalPercent(0f);
-            brushesContainer.ScrollToVerticalPercent(0f);
+            if (prev != currentBrushType) {
+                brushesContainer.ScrollToHorizontalPercent(0f);
+                brushesContainer.ScrollToVerticalPercent(0f);
+            }
         }
 
         private void BasicStyleChanged(int style) {

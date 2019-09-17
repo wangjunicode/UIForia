@@ -1,12 +1,8 @@
+using System;
 using UIForia.Attributes;
 using UIForia.Elements;
 
 namespace Demo {
-
-    public enum UIPanel {
-        Dock,
-        Building
-    }
 
     [Template("Demo/UIForiaDemoRoot.xml")]
     public class UIForiaDemoRoot : UIElement {
@@ -14,8 +10,18 @@ namespace Demo {
         public UIPanel currentPanel = UIPanel.Dock;
 
         public override void HandleUIEvent(UIEvent evt) {
-            if (evt is UIPanelEvent dockEvent) {
-                currentPanel = dockEvent.Panel;
+            switch (evt) {
+                case UIPanelEvent dockEvent:
+                    currentPanel = dockEvent.Panel;
+                    break;
+                case UIWindowEvent windowEvent:
+                    switch (windowEvent.Window) {
+                        case UIWindow.Chat:
+                            Chat chat = FindFirstByType<Chat>();
+                            chat.SetEnabled(!chat.isEnabled);
+                            break;
+                    }
+                    break;
             }
         }
     }

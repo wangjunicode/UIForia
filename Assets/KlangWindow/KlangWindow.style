@@ -1,9 +1,10 @@
 
 
 style window-container {
-    PreferredSize = 600px, 400px;
+    PreferredSize = 600px 400px;
     GridLayoutColTemplate = 1mx, 1fr;
     GridLayoutRowTemplate = 64px, 1fr;
+    GridLayoutDirection = Horizontal;
     GridLayoutRowAlignment = Grow;
     GridLayoutColAlignment = Fit;
     LayoutType = Grid; 
@@ -16,14 +17,14 @@ style title-bar {
     TextColor = White;
     TextFontAsset = url("Gotham-Bold SDF");
     TextTransform = UpperCase;
-    FlexLayoutDirection = Column;
+    FlexLayoutDirection = Row;
     FlexLayoutCrossAxisAlignment = Center;
     TextFontSize = 1.1em;
     FlexLayoutMainAxisAlignment = SpaceBetween;
     PaddingLeft = 1em;
     PaddingRight = 1em;
-    GridItemColStart = 1;
-    GridItemRowStart = 0;
+//    GridItemColStart = 1;
+//    GridItemRowStart = 0;
 }
 
 style side-bar-runner {
@@ -45,8 +46,8 @@ style side-bar-slot {
 
 style colony-info-sidebar {
     BackgroundColor = Black;   
-    GridItemColStart = 0;
-    GridItemRowStart = 0;
+//    GridItemColStart = 0;
+//    GridItemRowStart = 0;
     PaddingTop = 64px;
     PaddingBottom = 20px;
 }
@@ -62,8 +63,8 @@ style close-button {
 }
 
 style body {
-    GridItemColStart = 1;
-    GridItemRowStart = 1;
+//    GridItemColStart = 1;
+//    GridItemRowStart = 1;
     BackgroundColor = White;
     LayoutType = Grid;
     GridLayoutColTemplate = 1fr, 1mn;
@@ -96,7 +97,7 @@ style colony-info-header-text {
     LayoutType = Grid;
 //    PreferredWidth = 800px;
     GridLayoutColTemplate = 1fr 1fr;
-    GridLayoutCrossAxisAutoSize = 1mx;
+    GridLayoutRowAutoSize = 1mx;
     Padding = 1em;
     TextFontSize = 1.1em;
     TextFontAsset = url("GothamNarrow-Medium SDF");
@@ -105,9 +106,9 @@ style colony-info-header-text {
 
 style colony-name {
     TextFontSize = 3em;
-    GridItemColStart = 0;
-    GridItemColSpan = 2;
-    GridItemRowStart = 0;
+//    GridItemColStart = 0;
+//    GridItemColSpan = 2;
+//    GridItemRowStart = 0;
     MarginBottom = 0.25em;
     TextFontAsset = url("GothamNarrow-Book SDF");
 }

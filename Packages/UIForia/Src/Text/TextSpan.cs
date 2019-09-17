@@ -972,7 +972,7 @@ namespace UIForia.Text {
                 case TextStyleProperty.UnderlaySoftness:
                 case TextStyleProperty.OutlineWidth:
                 case TextStyleProperty.OutlineSoftness:
-                    rebuildFlags |= RebuildFlag.Positions;
+                    rebuildFlags |= RebuildFlag.Positions | RebuildFlag.UVCoords;
                     shouldRebuild = true;
                     break;
 

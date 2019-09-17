@@ -352,12 +352,13 @@ namespace UIForia.Layout {
                 // todo -- when this stops happening for every element every frame we need to store local matrix and assign it properly to the localMatrices array in GatherBoxData()
                 SVGXMatrix m;
 
-                if (box.rotation == 0) {
+                float rotation = box.element.style.TransformRotation; // todo -- cache this properly
+                if (rotation == 0) {
                     m = new SVGXMatrix(box.scaleX, 0, 0, box.scaleY, alignedPosition.x, alignedPosition.y);
                 }
                 else {
-                    float ca = math.cos(-box.rotation * Mathf.Deg2Rad);
-                    float sa = math.sin(-box.rotation * Mathf.Deg2Rad);
+                    float ca = math.cos(-rotation * Mathf.Deg2Rad);
+                    float sa = math.sin(-rotation * Mathf.Deg2Rad);
                     m = new SVGXMatrix(ca * box.scaleX, sa * box.scaleX, -sa * box.scaleY, ca * box.scaleY, alignedPosition.x, alignedPosition.y);
                 }
 

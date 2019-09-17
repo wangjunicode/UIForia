@@ -221,16 +221,16 @@ namespace UIForia.Rendering {
 
         public override void PaintBackground(RenderContext ctx) {
             
-            if (textSpan.geometryVersion != lastGeometryVersion) {
+         //   if (textSpan.geometryVersion != lastGeometryVersion) {
                 lastGeometryVersion = textSpan.geometryVersion;
                 UpdateGeometry();
                 shouldUpdateMaterialProperties = true;
-            }
+          //  }
 
-            if (textSpan.fontAsset != fontData.fontAsset) {
+         //   if (textSpan.fontAsset != fontData.fontAsset) {
                 UpdateFontData();
                 shouldUpdateMaterialProperties = true;
-            }
+         //   }
 
             if ((element.flags & UIElementFlags.EnabledThisFrame) != 0 || shouldUpdateMaterialProperties) {
                 shouldUpdateMaterialProperties = false;

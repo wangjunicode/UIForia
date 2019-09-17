@@ -1,0 +1,57 @@
+style box {
+    PreferredSize = 1pca 200px;
+    TextFontSize = 2em;
+    Padding = 1em;
+    FlexLayoutMainAxisAlignment = Center;
+
+    [hover] {
+        TextColor = yellow;
+        TextUnderlayColor = black;
+        TextUnderlayDilate = 0.5;
+    }
+    
+}   
+
+style box-one {
+    BackgroundColor = Red;
+    BorderRadiusTopLeft = 50%;
+    TextColor = white;
+}
+
+style box-two {
+    BackgroundColor = White;
+}
+
+style box-three {
+    BackgroundColor = Blue;
+    BorderRadiusBottomRight = 50%;
+    TextColor = white;
+        
+    [hover] {
+        [enter] run animation(hover-box-in);
+        [exit] run animation(hover-box-out);
+    }
+
+}
+
+animation hover-box-in {
+    [options] {
+        Duration = 500;
+        TimingFunction = CubicEaseInOut;
+    }
+
+    [keyframes] {
+        100% { TransformRotation = 5;  }
+    }
+}
+
+animation hover-box-out {
+    [options] {
+        Duration = 500;
+        TimingFunction = CubicEaseInOut;
+    }
+
+    [keyframes] {
+        100% { TransformRotation = 0; }
+    }
+}

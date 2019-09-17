@@ -59,6 +59,7 @@ style menu-label {
     }
 }
 
+
 style menu-image { 
     ShadowOffsetY = 5;
     ShadowOffsetX = 3;

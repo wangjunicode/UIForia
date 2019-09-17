@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UITemplate>
+    
+    <Style src="Demo/Simple/Simple.style"/>
+    
+    <Contents>
+        
+        <Panel style="box box-one" onMouseClick="OnBoxClicked(1)">
+            Box one clicked {boxClicks1} times
+        </Panel>
+        
+        <Panel style="box box-two" onMouseClick="OnBoxClicked(2)">
+            Box two clicked {boxClicks2} times
+        </Panel>
+        
+        <Panel style="box box-three" onMouseClick="OnBoxClicked(3)">
+            Box three clicked {boxClicks3} times
+        </Panel>
+        
+    </Contents>
+</UITemplate>

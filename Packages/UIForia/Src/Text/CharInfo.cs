@@ -1,31 +1,49 @@
+using System.Diagnostics;
+using TMPro;
 using UnityEngine;
 
 namespace UIForia.Text {
 
+    [DebuggerDisplay("Char = {(char)character}")]
     public struct CharInfo {
 
-        // todo -- crunch this down or at least be sure not to incur silly copy costs
-
-        public char character;
+        // word (sic!) space
         public Vector2 topLeft;
         public Vector2 bottomRight;
-        public Vector2 layoutTopLeft;
-        public Vector2 layoutBottomRight;
-        public Vector2 shearValues;
-        public Vector2 uv0;
-        public Vector2 uv1;
-        public Vector2 uv2;
-        public Vector2 uv3;
-        public float ascender;
-        public float descender;
-        public int lineIndex;
-        public int wordIndex;
+        
+        /// <summary>
+        /// character sdf scale
+        /// </summary>
         public float scale;
+        
+        /// <summary>
+        /// point code
+        /// </summary>
+        public int character;
+        // todo -- pull glyph & adjustment into their own data structure, not part of charinfo
 
-        public float Width => bottomRight.x - topLeft.x;
-        public float Height => bottomRight.y - topLeft.y;
-        public Vector2 Center => topLeft + new Vector2(Width * 0.5f, Height * 0.5f);
+        public TextGlyph glyph;
+        public GlyphValueRecord glyphAdjustment;
 
+        // for sampling the font texture 
+        public Vector2 topLeftUV;
+        public Vector2 bottomRightUV;
+
+        // italic style
+        public float topShear;
+        public float bottomShear;
+
+        // local space, relative to parent element 
+        public float wordLayoutX;
+        public float wordLayoutY;
+
+        public int lineIndex;
+        public bool visible;
+
+        public float LayoutX => wordLayoutX + topLeft.x;
+        public float LayoutY => wordLayoutY + topLeft.y;
+        
+        public float MaxX => wordLayoutX + topLeft.x + (bottomRight.x - topLeft.x);
     }
 
 }

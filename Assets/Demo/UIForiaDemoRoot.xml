@@ -5,9 +5,9 @@
     <Using namespace="Demo" />
 
     <Contents>
-        <Chat />
         <Dock isActive="currentPanel == UIPanel.Dock" />
         <BuildingDesigner isActive="currentPanel == UIPanel.Building" />
+        <Chat />
     </Contents>
 
 </UITemplate>

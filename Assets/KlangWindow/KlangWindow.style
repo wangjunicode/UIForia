@@ -23,8 +23,8 @@ style title-bar {
     FlexLayoutMainAxisAlignment = SpaceBetween;
     PaddingLeft = 1em;
     PaddingRight = 1em;
-//    GridItemColStart = 1;
-//    GridItemRowStart = 0;
+    GridItemX = 1;
+    GridItemY = 0;
 }
 
 style side-bar-runner {
@@ -46,8 +46,8 @@ style side-bar-slot {
 
 style colony-info-sidebar {
     BackgroundColor = Black;   
-//    GridItemColStart = 0;
-//    GridItemRowStart = 0;
+    GridItemX = 0;
+    GridItemY = 0;
     PaddingTop = 64px;
     PaddingBottom = 20px;
 }
@@ -63,8 +63,8 @@ style close-button {
 }
 
 style body {
-//    GridItemColStart = 1;
-//    GridItemRowStart = 1;
+    GridItemX = 1;
+    GridItemY = 1;
     BackgroundColor = White;
     LayoutType = Grid;
     GridLayoutColTemplate = 1fr, 1mn;
@@ -106,9 +106,9 @@ style colony-info-header-text {
 
 style colony-name {
     TextFontSize = 3em;
-//    GridItemColStart = 0;
-//    GridItemColSpan = 2;
-//    GridItemRowStart = 0;
+    GridItemX = 0;
+    GridItemWidth = 2;
+    GridItemY = 0;
     MarginBottom = 0.25em;
     TextFontAsset = url("GothamNarrow-Book SDF");
 }

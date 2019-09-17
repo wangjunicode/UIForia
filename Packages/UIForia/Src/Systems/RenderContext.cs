@@ -236,7 +236,7 @@ namespace UIForia.Rendering {
                 FinalizeCurrentBatch();
             }
 
-            if (currentBatch.batchType == BatchType.Custom) {
+            if (currentBatch.batchType != BatchType.UIForia) {
                 FinalizeCurrentBatch();
             }
 
@@ -904,10 +904,10 @@ namespace UIForia.Rendering {
 
         public void DrawPath(Path2D path) {
             // path drawing always breaks batch for now
-            FinalizeCurrentBatch();
             path.UpdateGeometry();
 
             if (path.drawCallList.size == 0) return;
+            FinalizeCurrentBatch();
 
             int lastBlendStateId = -1;
 

@@ -1,30 +1,9 @@
-using SVGX;
 using UIForia.Util;
 using Unity.Mathematics;
 using UnityEngine;
 
 namespace UIForia.Text {
-
-    public struct WordInfo2 {
-
-        public WordType type;
-        public int charStart;
-        public int charEnd;
-        public float width;
-        public float height;
-        public float yOffset;
-
-    }
-
-    public enum WordType {
-
-        Whitespace,
-        NewLine,
-        Normal,
-        SoftHyphen
-
-    }
-
+    
     public static class TextUtil {
 
         // whitespace processing needs to happen in two phases. the first is where we collapse whitespace and handle new lines
@@ -116,13 +95,13 @@ namespace UIForia.Text {
             return writeIndex;
         }
 
-        public static StructList<WordInfo2> BreakIntoWords( char[] buffer, int bufferSize = -1) {
-            return BreakIntoWords(StructList<WordInfo2>.Get(), buffer, bufferSize);
+        public static StructList<WordInfo> BreakIntoWords( char[] buffer, int bufferSize = -1) {
+            return BreakIntoWords(StructList<WordInfo>.Get(), buffer, bufferSize);
         }
         
-        public static StructList<WordInfo2> BreakIntoWords(StructList<WordInfo2> retn, char[] buffer, int bufferSize = -1) {
+        public static StructList<WordInfo> BreakIntoWords(StructList<WordInfo> retn, char[] buffer, int bufferSize = -1) {
             if (retn == null) {
-                retn = new StructList<WordInfo2>();
+                retn = new StructList<WordInfo>();
             }
             
             if (bufferSize < 0) bufferSize = buffer.Length;
@@ -132,7 +111,7 @@ namespace UIForia.Text {
                 return retn;
             }
             
-            WordInfo2 currentWord = new WordInfo2();
+            WordInfo currentWord = new WordInfo();
             WordType previousType = WordType.Normal;
 
             char c = buffer[0];

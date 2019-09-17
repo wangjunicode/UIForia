@@ -9,20 +9,20 @@ public class TextUtilTests {
     [Test]
     public void BreakCharacterGroupsIntoWords() {
         string input = "some text";
-        StructList<WordInfo2> result = TextUtil.BreakIntoWords(input.ToCharArray());
+        StructList<WordInfo> result = TextUtil.BreakIntoWords(input.ToCharArray());
 
-        WordInfo2[] expected = {
-            new WordInfo2() {
+        WordInfo[] expected = {
+            new WordInfo() {
                 type = WordType.Normal,
                 charStart = 0,
                 charEnd = 4
             },
-            new WordInfo2() {
+            new WordInfo() {
                 type = WordType.Whitespace,
                 charStart = 4,
                 charEnd = 5
             },
-            new WordInfo2() {
+            new WordInfo() {
                 type = WordType.Normal,
                 charStart = 5,
                 charEnd = 9
@@ -39,20 +39,20 @@ public class TextUtilTests {
     [Test]
     public void BreakCharacterGroupsIntoWordsWithNewLine() {
         string input = "some\ntext";
-        StructList<WordInfo2> result = TextUtil.BreakIntoWords(input.ToCharArray());
+        StructList<WordInfo> result = TextUtil.BreakIntoWords(input.ToCharArray());
 
-        WordInfo2[] expected = {
-            new WordInfo2() {
+        WordInfo[] expected = {
+            new WordInfo() {
                 type = WordType.Normal,
                 charStart = 0,
                 charEnd = 4
             },
-            new WordInfo2() {
+            new WordInfo() {
                 type = WordType.NewLine,
                 charStart = 4,
                 charEnd = 5
             },
-            new WordInfo2() {
+            new WordInfo() {
                 type = WordType.Normal,
                 charStart = 5,
                 charEnd = 9
@@ -69,25 +69,25 @@ public class TextUtilTests {
     [Test]
     public void BreakCharacterGroupsIntoWordsWithSequentialNewLine() {
         string input = "some\n\ntext";
-        StructList<WordInfo2> result = TextUtil.BreakIntoWords(input.ToCharArray());
+        StructList<WordInfo> result = TextUtil.BreakIntoWords(input.ToCharArray());
 
-        WordInfo2[] expected = {
-            new WordInfo2() {
+        WordInfo[] expected = {
+            new WordInfo() {
                 type = WordType.Normal,
                 charStart = 0,
                 charEnd = 4
             },
-            new WordInfo2() {
+            new WordInfo() {
                 type = WordType.NewLine,
                 charStart = 4,
                 charEnd = 5
             },
-            new WordInfo2() {
+            new WordInfo() {
                 type = WordType.NewLine,
                 charStart = 5,
                 charEnd = 6
             },
-            new WordInfo2() {
+            new WordInfo() {
                 type = WordType.Normal,
                 charStart = 6,
                 charEnd = 10
@@ -104,30 +104,30 @@ public class TextUtilTests {
     [Test]
     public void BreakCharacterGroupsIntoWordsWithSpaceBrokenNewLine() {
         string input = "some\n   \ntext";
-        StructList<WordInfo2> result = TextUtil.BreakIntoWords(input.ToCharArray());
+        StructList<WordInfo> result = TextUtil.BreakIntoWords(input.ToCharArray());
 
-        WordInfo2[] expected = {
-            new WordInfo2() {
+        WordInfo[] expected = {
+            new WordInfo() {
                 type = WordType.Normal,
                 charStart = 0,
                 charEnd = 4
             },
-            new WordInfo2() {
+            new WordInfo() {
                 type = WordType.NewLine,
                 charStart = 4,
                 charEnd = 5
             },
-            new WordInfo2() {
+            new WordInfo() {
                 type = WordType.Whitespace,
                 charStart = 5,
                 charEnd = 8
             },
-            new WordInfo2() {
+            new WordInfo() {
                 type = WordType.NewLine,
                 charStart = 8,
                 charEnd = 9
             },
-            new WordInfo2() {
+            new WordInfo() {
                 type = WordType.Normal,
                 charStart = 9,
                 charEnd = 13
@@ -144,20 +144,20 @@ public class TextUtilTests {
     [Test]
     public void BreakCharacterGroupsIntoWordsWithSoftHyphen() {
         string input = "some\u00ADtext";
-        StructList<WordInfo2> result = TextUtil.BreakIntoWords(input.ToCharArray());
+        StructList<WordInfo> result = TextUtil.BreakIntoWords(input.ToCharArray());
 
-        WordInfo2[] expected = {
-            new WordInfo2() {
+        WordInfo[] expected = {
+            new WordInfo() {
                 type = WordType.Normal,
                 charStart = 0,
                 charEnd = 4
             },
-            new WordInfo2() {
+            new WordInfo() {
                 type = WordType.SoftHyphen,
                 charStart = 4,
                 charEnd = 5
             },
-            new WordInfo2() {
+            new WordInfo() {
                 type = WordType.Normal,
                 charStart = 5,
                 charEnd = 9

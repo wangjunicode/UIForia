@@ -447,7 +447,7 @@ namespace SVGX {
 
             TextInfo textInfo = renderShape.textInfo;
 
-            CharInfo2[] charInfos = textInfo.rootSpan.charInfoList.Array;
+            CharInfo[] charInfos = textInfo.rootSpan.charInfoList.Array;
             int charCount = textInfo.rootSpan.charInfoList.size;
 
             SVGXTextStyle textStyle = textInfo.spanList[0].textStyle;

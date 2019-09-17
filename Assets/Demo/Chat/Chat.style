@@ -1,5 +1,9 @@
 import "Demo/Theme.style" as theme;
 
+style <this> {
+    LayoutBehavior = Ignored;
+}
+
 style chat-window {
     PreferredSize = 1024px;
 }

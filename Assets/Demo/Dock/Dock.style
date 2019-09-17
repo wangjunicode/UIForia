@@ -46,7 +46,7 @@ style menu-map {
     BackgroundImage = url("dock/Minimap@2x");
     MarginBottom = 1em;
     MarginRight = 1em;
-    Painter = "DemoParticles";
+//    Painter = "DemoParticles";
 }
 
 style weather {

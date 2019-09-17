@@ -573,6 +573,9 @@ namespace Src.Systems {
 
         }
 
+        public void Destroy() {
+        }
+
     }
 
 }

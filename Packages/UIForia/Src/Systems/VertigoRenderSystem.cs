@@ -76,6 +76,9 @@ namespace Src.Systems {
 
         public void OnReset() {
             commandBuffer.Clear();
+            for (int i = 0; i < renderOwners.size; i++) {
+                renderOwners[i].Destroy();
+            }
             renderOwners.QuickClear();
             renderContext.clipContext.Destroy();
             renderContext.clipContext = new ClipContext();

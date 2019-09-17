@@ -1,6 +1,7 @@
 using UIForia.Elements;
 using UIForia.Text;
 using UIForia.Util;
+using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
 using Vertigo;
 using TextInfo = System.Globalization.TextInfo;
@@ -238,11 +239,6 @@ namespace UIForia.Rendering {
                 float underlayDilate = Mathf.Clamp(textSpan.underlayDilate, -1, 1);
                 float underlaySoftness = Mathf.Clamp01(textSpan.underlaySoftness);
 
-                float mainColor = VertigoUtil.ColorToFloat(textSpan.textColor);
-                float outlineColor = VertigoUtil.ColorToFloat(textSpan.outlineColor);
-                float underlayColor = VertigoUtil.ColorToFloat(textSpan.underlayColor);
-                float glowColor = VertigoUtil.ColorToFloat(textSpan.glowColor);
-
                 float weight = 0;
 
                 if ((textSpan.fontStyle & Text.FontStyle.Bold) != 0) {
@@ -254,11 +250,26 @@ namespace UIForia.Rendering {
 
                 weight = ((weight * 0.25f) + textSpan.faceDilate) * textSpan.scaleRatioA * 0.5f;
 
+                   
+                Vector4 packedColors = default;
+
+                unsafe {
+                    Vector4* vp = &packedColors;
+                    Color32* b = stackalloc Color32[4];
+                    b[0] = textSpan.textColor;
+                    b[1] = textSpan.outlineColor;
+                    b[2] = textSpan.underlayColor;
+                    b[3] = textSpan.glowColor;
+                    UnsafeUtility.MemCpy(vp, b, sizeof(Color32) * 4);
+                }
+                
                 float packedOutlineGlow = VertigoUtil.ColorToFloat(new Color(textSpan.outlineWidth, textSpan.outlineSoftness, textSpan.glowOuter, textSpan.glowOffset));
                 int shapeType = BitUtil.SetHighLowBits((int)ShapeType.Text, 0);
                 geometry.objectData = new Vector4(shapeType, packedOutlineGlow, weight, element.style.Opacity); // should be text opacity instead?
-                geometry.packedColors = new Vector4(mainColor, outlineColor, underlayColor, glowColor);
+                geometry.packedColors = packedColors;
                 geometry.miscData = new Vector4(underlayX, underlayY, underlayDilate, underlaySoftness);
+             
+                
             }
 
             // ctx.DrawBatchedTextLine(geometry, ranges, matrix);

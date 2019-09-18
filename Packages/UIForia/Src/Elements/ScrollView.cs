@@ -180,7 +180,7 @@ namespace UIForia.Elements {
             if (evt.IsMouseRightDown) return null;
             lastScrollVerticalTimestamp = Time.realtimeSinceStartup;
             float handlePosition = verticalHandle.layoutResult.screenPosition.y;
-            float baseOffset = evt.MouseDownPosition.y - handlePosition;
+            float baseOffset = evt.LeftMouseDownPosition.y - handlePosition;
             return new ScrollbarDragEvent(ScrollbarOrientation.Vertical, new Vector2(0, baseOffset), this);
         }
 
@@ -188,7 +188,7 @@ namespace UIForia.Elements {
             if (evt.IsMouseRightDown) return null;
             lastScrollHorizontalTimestamp = Time.realtimeSinceStartup;
             float handlePosition = horizontalHandle.layoutResult.screenPosition.x;
-            float baseOffset = evt.MouseDownPosition.x - handlePosition;
+            float baseOffset = evt.LeftMouseDownPosition.x - handlePosition;
             return new ScrollbarDragEvent(ScrollbarOrientation.Horizontal, new Vector2(baseOffset, 0), this);
         }
 

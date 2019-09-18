@@ -130,7 +130,6 @@ GameObject:
   m_Component:
   - component: {fileID: 534669905}
   - component: {fileID: 534669904}
-  - component: {fileID: 534669903}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -138,14 +137,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!81 &534669903
-AudioListener:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 534669902}
-  m_Enabled: 1
 --- !u!20 &534669904
 Camera:
   m_ObjectHideFlags: 0
@@ -232,7 +223,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 35f2b5d632fd4d64b9acedec5215cda2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  typeName: Demo.UIForiaDemoRoot, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+  typeName: Documentation.DocumentationRoot, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
     PublicKeyToken=null
   camera: {fileID: 534669904}
   applicationId: Game App

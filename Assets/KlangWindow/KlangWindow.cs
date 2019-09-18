@@ -56,7 +56,7 @@ namespace UI {
             const float growFactor = 3f;
 
             Rect screenRect = layoutResult.ScreenRect.Grow(growFactor);
-            Vector2 mouse = evt.MouseDownPosition;
+            Vector2 mouse = evt.LeftMouseDownPosition;
 
             WindowSide side = 0;
 
@@ -121,7 +121,7 @@ namespace UI {
                 return null;
             }
 
-            return new WindowDragEvent(this, evt.MouseDownPosition - layoutResult.screenPosition + View.Viewport.position);
+            return new WindowDragEvent(this, evt.LeftMouseDownPosition - layoutResult.screenPosition + View.Viewport.position);
         }
 
 

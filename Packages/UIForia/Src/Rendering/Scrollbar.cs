@@ -108,7 +108,7 @@ namespace UIForia {
         public override DragEvent CreateDragEvent(UIElement element, MouseInputEvent evt) {
             Rect trackRect = GetVerticalTrackRect(element);
             Rect handleRect = GetVerticalHandleRect(element);
-            return new DefaultScrollbarDragEvent(element, this, evt.MouseDownPosition.y - (trackRect.y + handleRect.y));
+            return new DefaultScrollbarDragEvent(element, this, evt.LeftMouseDownPosition.y - (trackRect.y + handleRect.y));
         }
         
         public override Size RunLayout(UIElement hostElement) {
@@ -152,8 +152,8 @@ namespace UIForia {
 
         protected override void OnMouseClick(UIElement element, MouseInputEvent evt) {
             Rect trackRect = GetVerticalTrackRect(element);
-            if (trackRect.Contains(evt.MouseDownPosition)) {
-                float y = evt.MouseDownPosition.y - element.layoutResult.screenPosition.y;
+            if (trackRect.Contains(evt.LeftMouseDownPosition)) {
+                float y = evt.LeftMouseDownPosition.y - element.layoutResult.screenPosition.y;
                 element.scrollOffset = new Vector2(element.scrollOffset.x, y / trackRect.height);
             }
         }

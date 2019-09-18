@@ -157,7 +157,6 @@ Shader "UIForia/Standard"
                     alphaClip = alphaClip / 2.0 - ( 0.5 / scale) - weight;
                    
                     // o.vertex = UIForiaPixelSnap(o.vertex); // pixel snap is bad for text rendering
-
                     o.texCoord1 = float4(alphaClip, scale, bias, objectIndex);
                     o.texCoord2 = float4(ShapeType_Text, outlineWidth, outlineSoftness, weight);
                     o.texCoord3 = float4(underlayOffset, underlayScale, underlayBias);

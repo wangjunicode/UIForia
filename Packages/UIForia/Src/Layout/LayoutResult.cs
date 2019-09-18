@@ -52,8 +52,8 @@ namespace UIForia.Layout {
         public Rect ContentRect => new Rect(
             padding.left + border.left,
             padding.top + border.top,
-            allocatedSize.width - padding.left - border.left - padding.right - border.right,
-            allocatedSize.height - padding.top - border.top - padding.bottom - border.bottom
+            actualSize.width - padding.left - border.left - padding.right - border.right,
+            actualSize.height - padding.top - border.top - padding.bottom - border.bottom
         );
 
 

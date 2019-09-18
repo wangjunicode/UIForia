@@ -13,11 +13,13 @@
             PreferredWidth = 500px;
             TextFontSize = 1.2em;
             MarginBottom = 20px;
+            Overflow = Hidden;
         }
 
         style input-element-text {
             Painter = "none";
             PreferredSize = 1pca 1cnt;
+            TextWhitespaceMode = NoWrap;
         }
 
         style placeholder {

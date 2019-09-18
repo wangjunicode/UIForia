@@ -61,10 +61,10 @@ namespace UIForia.Elements {
             overflowSize = new Size(maxX - minX, maxY - minY);
 
             if (previousChildrenSize != default && (int) previousChildrenSize.height > (int) overflowSize.height && (int) (overflowSize.height + childrenElement.style.TransformPositionY.value - layoutResult.ActualHeight) < 0) {
-                ScrollToVerticalPercent(100f);
+                ScrollToVerticalPercent(0);
             }
             if (previousChildrenSize != default && (int) previousChildrenSize.width > (int) overflowSize.width && (int) (overflowSize.width + childrenElement.style.TransformPositionX.value - layoutResult.ActualWidth) < 0) {
-                ScrollToHorizontalPercent(100f);
+                ScrollToHorizontalPercent(0);
             }
 
             previousChildrenSize = overflowSize;

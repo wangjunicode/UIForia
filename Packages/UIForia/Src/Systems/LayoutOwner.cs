@@ -180,7 +180,15 @@ namespace UIForia.Layout {
                     FastLayoutBox childBox = childElement.layoutBox;
 
                     if (childBox != null && (childElement.flags & UIElementFlags.EnabledThisFrame) != 0) {
+                        
                         childBox.UpdateStyleData();
+                        
+                        if (parentEnabledThisFrame) {
+                            tempChildList.Add(childBox);
+                        }
+                        else {
+                            data.layoutBox.AddChild(childBox);
+                        }
                     }
                     // todo -- EnabledThisFrame is borked because input runs after layout and we enable on click
                     else if (childBox == null) {

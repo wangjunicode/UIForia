@@ -362,12 +362,18 @@ namespace UIForia.Elements {
 
                 // ctx.DisableScissorRect();
                 var textInfo = inputElement.textElement.textInfo;
+                
+                
+                // float baseLineHeight = textInfo.rootSpan.textStyle.fontAsset.faceInfo.LineHeight;
+                // float scaledSize = textInfo.rootSpan.fontSize / textInfo.rootSpan.textStyle.fontAsset.faceInfo.PointSize;
+                // float lh = baseLineHeight * scaledSize;
+                //
                 if (inputElement.isSelecting) {
                     path.BeginPath();
                     path.SetStroke(inputElement.caretColor);
                     path.SetStrokeWidth(1f);
                     Vector2 p = textInfo.GetSelectionPosition(inputElement.selectionRange) - inputElement.textScroll;
-                    path.MoveTo(inputElement.layoutResult.ContentRect.min + p + new Vector2(0, -4f)); // todo remove + 4 on y
+                    path.MoveTo(inputElement.layoutResult.ContentRect.min + p); // todo remove + 4 on y
                     path.VerticalLineTo(inputElement.layoutResult.ContentRect.y + p.y + inputElement.style.GetResolvedFontSize());
                     path.EndPath();
                     path.Stroke();
@@ -378,7 +384,7 @@ namespace UIForia.Elements {
                     path.SetStroke(inputElement.caretColor);
                     path.SetStrokeWidth(1f);
                     Vector2 p = textInfo.GetCursorPosition(inputElement.selectionRange.cursorIndex) - inputElement.textScroll;
-                    path.MoveTo(inputElement.layoutResult.ContentRect.min + p + new Vector2(0, -4f)); // todo remove + 4 on y
+                    path.MoveTo(inputElement.layoutResult.ContentRect.min + p); // todo remove + 4 on y
                     path.VerticalLineTo(inputElement.layoutResult.ContentRect.y + p.y + inputElement.style.GetResolvedFontSize());
                     path.EndPath();
                     path.Stroke();
@@ -421,8 +427,15 @@ namespace UIForia.Elements {
         private UITextElement textElement;
         // internal TextInfo textInfo;
         internal string text;
+
+        private string m_placeholder;
+        public string placeholder {
+            get {
+                return string.IsNullOrEmpty(m_placeholder) ? "empty" : m_placeholder;
+            }
+            set { m_placeholder = value; }
+        }
         
-        public string placeholder;
         public event Action<FocusEvent> onFocus;
         public event Action<BlurEvent> onBlur;
         public bool autofocus;
@@ -478,6 +491,9 @@ namespace UIForia.Elements {
             textElement = FindFirstByType<UITextElement>();
             if (autofocus) {
                 Application.InputSystem.RequestFocus(this);
+            }
+            if (string.IsNullOrEmpty(m_placeholder)) {
+                FindById("placeholder-text").SetAttribute("empty", "true");
             }
         }
 
@@ -769,6 +785,9 @@ namespace UIForia.Elements {
         [UsedImplicitly]
         [OnDragCreate]
         protected TextSelectDragEvent CreateDragEvent(MouseInputEvent evt) {
+            if (!hasFocus) {
+                Application.InputSystem.RequestFocus(this);
+            }
             TextSelectDragEvent retn = new TextSelectDragEvent(this);
             Vector2 mouse = evt.MouseDownPosition - layoutResult.screenPosition - layoutResult.ContentRect.position;
             int indexAtPoint = textElement.textInfo.GetIndexAtPoint(mouse);
@@ -792,6 +811,7 @@ namespace UIForia.Elements {
 
         public void Blur() {
             hasFocus = false;
+            selectionRange = new SelectionRange(selectionRange.cursorIndex);
             onBlur?.Invoke(new BlurEvent());
         }
 
@@ -817,6 +837,7 @@ namespace UIForia.Elements {
 
             public override void OnComplete() {
                 _uiInputElement.isSelecting = false;
+                _uiInputElement.selectionRange = new SelectionRange(_uiInputElement.selectionRange.selectIndex, _uiInputElement.selectionRange.cursorIndex);
             }
         }
     }

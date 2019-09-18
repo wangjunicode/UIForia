@@ -4,6 +4,8 @@
     <Style>
 
         style &lt;this&gt; {
+            LayoutType = Stack;
+            PreferredHeight = 1cnt;
             Border = 2px;
             BorderColor = black;
             BackgroundColor = white;
@@ -15,14 +17,16 @@
 
         style input-element-text {
             Painter = "none";
-            PreferredSize = 1pca 1em;
+            PreferredSize = 1pca 1cnt;
         }
 
         style placeholder {
+            [attr:empty] {
+                Visibility = Hidden;
+            }
         }
         
         style placeholder-slot {
-            LayoutBehavior = Ignored;
             AlignY = 50% ParentContentArea;
             AlignX = 0% ParentContentArea;
             TextColor = rgb(150, 150, 150);
@@ -31,13 +35,12 @@
     </Style>
 
     <Contents style="input-element">
-        
+       
         <Text style="input-element-text"/>
-        
-        <Slot name="placeholder" style="placeholder-slot" if="ShowPlaceholder">
-            <Text style="placeholder">{placeholder}</Text>
-        </Slot>
 
+        <Slot name="placeholder" style="placeholder-slot" if="ShowPlaceholder">
+            <Text style="placeholder" x-id="placeholder-text">{placeholder}</Text>
+        </Slot>
     </Contents>
 
 </UITemplate>

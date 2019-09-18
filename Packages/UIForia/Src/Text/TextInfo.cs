@@ -227,7 +227,9 @@ namespace UIForia.Text {
                 // todo -- if text set to nowrap or pre-wrap need different layout algorithm
                 // todo -- use different algorithm for text with blocking spans in it
 
-                float baseLineHeight = span.textStyle.fontAsset.faceInfo.LineHeight;
+                // float baseLineHeight = span.textStyle.fontAsset.faceInfo.LineHeight;
+                // float scaledSize = span.fontSize / span.textStyle.fontAsset.faceInfo.PointSize;
+                // float lh = baseLineHeight * scaledSize;
                 float lineOffset = 0;
                 int end = span.wordInfoList.size;
                 for (int w = 0; w < end; w++) {
@@ -610,7 +612,7 @@ namespace UIForia.Text {
 
             if (charCount == 1) {
                 if (cursorIndex == charCount) {
-                    return new Vector2(charInfoList.Array[cursorIndex].MaxX, 0);
+                    return new Vector2(charInfoList.Array[cursorIndex - 1].MaxX, 0);
                 }
 
                 return new Vector2(2, 0); // using the left edge of character makes caret hard to see if border is present

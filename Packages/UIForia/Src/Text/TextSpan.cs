@@ -22,7 +22,6 @@ namespace UIForia.Text {
         internal TextSpan nextSibling;
         internal StructList<CharInfo2> charInfoList;
         internal StructList<WordInfo2> wordInfoList;
-        internal StructList<TextGeometry> geometryList;
         internal TextInfo textInfo;
 
         internal char[] rawContent;
@@ -280,7 +279,7 @@ namespace UIForia.Text {
             charInfoList.size = bufferSize;
 
             for (int i = 0; i < bufferSize; i++) {
-                charInfos[i].visible = false;// technically safer to set to default but this faster
+                charInfos[i].visible = false;// technically safer to set whole struct to default but this faster
                 charInfos[i].character = processedContent[i];
             }
 

@@ -17,31 +17,31 @@
             <Div>value</Div>
             <Div>read (default)</Div>
             <Div>
-                <Text>`read` on its own will not make much sense. The input field</Text>
+                <Text>'read' on its own will not make much sense. The input field</Text>
                 <Text>is going to read the value every frame from the property</Text>
                 <Text>thus overwriting any change immediately with the start value.</Text>
-                <Text>`read` really is only useful for display purposes e.g. if</Text>
+                <Text>'read' really is only useful for display purposes e.g. if</Text>
                 <Text>you use disabled.</Text>
             </Div>
             
             <Div>value</Div>
             <Div>read.write</Div>
             <Div>
-                <Text>`read.write` reads the property and puts its value into the input</Text>
+                <Text>'read.write' reads the property and puts its value into the input</Text>
                 <Text>field and will write the value back to the bound property</Text>
                 <Text>on every change. No additional change handler necessary.</Text>
-                <Text>Use this if you have default values or want to change the input`s</Text>
+                <Text>Use this if you have default values or want to change the input's</Text>
                 <Text>value from outside events.</Text>
             </Div>
             
             <Div>value</Div>
             <Div>write</Div>
             <Div>
-                `write` will only write the value back to the bound property.
+                'write' will only write the value back to the bound property.
             </Div>
         </Group>
 
-        <Label>Two inputs that copy each other`s values. The first input has autofocus enabled. It will gain focus every time it is enabled.</Label>
+        <Label>Two inputs that copy each other's values. The first input has autofocus enabled. It will gain focus every time it is enabled.</Label>
         <Input value.read.write="tv" autofocus="true"/>
         <Input value.read.write="tv"/>
         <Text style="text mb20">{tv}</Text>

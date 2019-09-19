@@ -1,3 +1,5 @@
+using System.Globalization;
+
 namespace Demo {
     public static class BuildingTexts {
         public static string Brush(string id) {
@@ -36,7 +38,7 @@ namespace Demo {
                 case "WINDOW_LARGE_RND":
                     return "Large Window";
                 default:
-                    return id.Replace("_", " ").ToLower();
+                    return id.Replace("_", " ");
             }
         }
     }

@@ -61,10 +61,10 @@ namespace UIForia.Elements {
             overflowSize = new Size(maxX - minX, maxY - minY);
 
             if (previousChildrenSize != default && (int) previousChildrenSize.height > (int) overflowSize.height && (int) (overflowSize.height + childrenElement.style.TransformPositionY.value - layoutResult.ActualHeight) < 0) {
-                ScrollToVerticalPercent(100f);
+                ScrollToVerticalPercent(0);
             }
             if (previousChildrenSize != default && (int) previousChildrenSize.width > (int) overflowSize.width && (int) (overflowSize.width + childrenElement.style.TransformPositionX.value - layoutResult.ActualWidth) < 0) {
-                ScrollToHorizontalPercent(100f);
+                ScrollToHorizontalPercent(0);
             }
 
             previousChildrenSize = overflowSize;
@@ -180,7 +180,7 @@ namespace UIForia.Elements {
             if (evt.IsMouseRightDown) return null;
             lastScrollVerticalTimestamp = Time.realtimeSinceStartup;
             float handlePosition = verticalHandle.layoutResult.screenPosition.y;
-            float baseOffset = evt.MouseDownPosition.y - handlePosition;
+            float baseOffset = evt.LeftMouseDownPosition.y - handlePosition;
             return new ScrollbarDragEvent(ScrollbarOrientation.Vertical, new Vector2(0, baseOffset), this);
         }
 
@@ -188,7 +188,7 @@ namespace UIForia.Elements {
             if (evt.IsMouseRightDown) return null;
             lastScrollHorizontalTimestamp = Time.realtimeSinceStartup;
             float handlePosition = horizontalHandle.layoutResult.screenPosition.x;
-            float baseOffset = evt.MouseDownPosition.x - handlePosition;
+            float baseOffset = evt.LeftMouseDownPosition.x - handlePosition;
             return new ScrollbarDragEvent(ScrollbarOrientation.Horizontal, new Vector2(baseOffset, 0), this);
         }
 

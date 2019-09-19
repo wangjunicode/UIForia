@@ -10,7 +10,7 @@ namespace Documentation {
     [Template("Documentation/Features/InputDemo")]
     public class InputDemo : UIElement {
         
-        public string tv = "my string to read";
+        public string tv = "my string to read my string to read my string to read my string to read my string to read";
 
         public static readonly string[] VALUES = {
             "anchor",

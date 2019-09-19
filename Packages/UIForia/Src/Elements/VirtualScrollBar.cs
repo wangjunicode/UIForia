@@ -73,13 +73,13 @@ namespace UIForia.Elements {
 
         [OnDragCreate]
         public ScrollbarDragEvent CreateDragEvent(MouseInputEvent evt) {
-            if (handleRect.Contains(evt.MouseDownPosition)) {
+            if (handleRect.Contains(evt.LeftMouseDownPosition)) {
                 float baseOffset;
                 if (orientation == ScrollbarOrientation.Vertical) {
-                    baseOffset = evt.MouseDownPosition.y - (trackRect.y + handlePosition.y);
+                    baseOffset = evt.LeftMouseDownPosition.y - (trackRect.y + handlePosition.y);
                 }
                 else {
-                    baseOffset = evt.MouseDownPosition.x - (trackRect.x + handlePosition.x);
+                    baseOffset = evt.LeftMouseDownPosition.x - (trackRect.x + handlePosition.x);
                 }
 
                 return new ScrollbarDragEvent(baseOffset, this);

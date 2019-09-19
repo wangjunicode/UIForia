@@ -11,9 +11,8 @@ namespace UIForia.Text {
         TrimEnd = 1 << 3,
         Trim = TrimStart | TrimEnd,
 
-        TrimLineStart = 1 << 4 //allow lines to begin with whitespace
-
-        ,
+        TrimLineStart = 1 << 4, //allow lines to begin with whitespace
+        NoWrap = 1 << 5,
 
         CollapseWhitespaceAndTrim = Trim | CollapseWhitespace
 

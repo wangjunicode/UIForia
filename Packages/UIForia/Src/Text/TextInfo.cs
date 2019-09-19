@@ -100,7 +100,6 @@ namespace UIForia.Text {
 
         // todo -- optimize for change types where possible and do partial layout for affect spans only
         public Size Layout(Vector2 offset, float width) {
-            lineInfoList.size = 0;
             RebuildSpanList();
             if (requiresLayout) {
                 requiresLayout = false;
@@ -176,7 +175,7 @@ namespace UIForia.Text {
                     for (int w = wordStart; w < wordEnd; w++) {
                         ref WordInfo wordInfo = ref words[w];
                         bool visible = wordInfo.type == WordType.Normal;
-                        
+
                         if (wordInfo.type == WordType.Normal || wordInfo.type == WordType.Whitespace) {
                             int charStart = wordInfo.charStart;
                             int charEnd = wordInfo.charEnd;
@@ -223,11 +222,15 @@ namespace UIForia.Text {
             for (int spanIndex = 0; spanIndex < spanCount; spanIndex++) {
                 TextSpan span = spans[spanIndex];
                 WordInfo[] wordInfos = span.wordInfoList.array;
+                bool allowWrapping = (span.textStyle.whitespaceMode & WhitespaceMode.NoWrap) == 0;
 
                 // todo -- if text set to nowrap or pre-wrap need different layout algorithm
                 // todo -- use different algorithm for text with blocking spans in it
 
-                float baseLineHeight = span.textStyle.fontAsset.faceInfo.LineHeight;
+                // float baseLineHeight = span.textStyle.fontAsset.faceInfo.LineHeight;
+                // float scaledSize = span.fontSize / span.textStyle.fontAsset.faceInfo.PointSize;
+                // float lh = baseLineHeight * scaledSize;
+
                 float lineOffset = 0;
                 int end = span.wordInfoList.size;
                 for (int w = 0; w < end; w++) {
@@ -235,7 +238,7 @@ namespace UIForia.Text {
 
                     switch (wordInfo.type) {
                         case WordType.Whitespace:
-                            if (currentLine.width + wordInfo.width > width) {
+                            if (allowWrapping && currentLine.width + wordInfo.width > width) {
                                 currentLine.spanEnd = spanIndex;
                                 currentLine.wordEnd = w;
                                 lines.Add(currentLine);
@@ -267,7 +270,7 @@ namespace UIForia.Text {
 
                         case WordType.Normal:
                             // if word is longer than the line, put on its own line
-                            if (wordInfo.width > width) {
+                            if (allowWrapping && wordInfo.width > width) {
                                 if (currentLine.wordCount > 0) {
                                     currentLine.spanEnd = spanIndex;
                                     currentLine.wordEnd = w;
@@ -289,7 +292,7 @@ namespace UIForia.Text {
                                 currentLine.y = lineOffset;
                             }
                             // if word is too long for the current line, break to next line
-                            else if (wordInfo.width + currentLine.width > width + 0.5) {
+                            else if (allowWrapping && wordInfo.width + currentLine.width > width + 0.5f) {
                                 currentLine.spanEnd = spanIndex;
                                 currentLine.wordEnd = w;
                                 lines.Add(currentLine);
@@ -610,7 +613,7 @@ namespace UIForia.Text {
 
             if (charCount == 1) {
                 if (cursorIndex == charCount) {
-                    return new Vector2(charInfoList.Array[cursorIndex].MaxX, 0);
+                    return new Vector2(charInfoList.Array[cursorIndex - 1].MaxX, 0);
                 }
 
                 return new Vector2(2, 0); // using the left edge of character makes caret hard to see if border is present
@@ -628,7 +631,6 @@ namespace UIForia.Text {
             LineInfo lineInfo = lineInfoList.Array[charInfo.lineIndex];
 
             return new Vector2(charInfo.LayoutX, lineInfo.y);
-
 
             // if (cursorIndex < charCount) {
             //     // use average of previous right and current left
@@ -655,7 +657,7 @@ namespace UIForia.Text {
 
             int lineIndex = FindNearestLine(point);
             LineInfo lineInfo = lineInfoList.Array[lineIndex];
-            
+
             int closestIndex = lineInfo.globalCharacterStartIndex;
 
             float closestDistance = float.MaxValue;
@@ -663,7 +665,7 @@ namespace UIForia.Text {
 
             for (int s = lineInfo.spanStart; s < lineInfo.spanEnd; s++) {
                 TextSpan span = spanList.array[s];
-                
+
                 for (int c = 0; c < span.charInfoList.size; c++) {
                     ref CharInfo charInfo = ref span.charInfoList.array[c];
                     float x1 = charInfo.LayoutX;
@@ -673,7 +675,7 @@ namespace UIForia.Text {
                         if (x1 + (x2 - x1) * 0.5f > point.x) {
                             return totalChars;
                         }
-                        
+
                         return totalChars + 1;
                     }
 
@@ -694,7 +696,7 @@ namespace UIForia.Text {
                     totalChars++;
                 }
             }
-            
+
             return closestIndex;
 
             // find y for mouse 
@@ -746,6 +748,154 @@ namespace UIForia.Text {
 
         public Rect GetLineRect(int lineRangeStart) {
             return lineInfoList[lineRangeStart].LineRect;
+        }
+
+        // private int FindNearestCharacterIndex(Vector2 point) {
+        //     int nearestLine = FindNearestLine(point);
+        //     int nearestWord = FindNearestWord(nearestLine, point);
+        //     return FindNearestCharacterIndex(nearestWord, point);
+        // }
+        //
+        // public SelectionRange SelectWordAtPoint(Vector2 mouse) {
+        //     
+        //     int charIndex = FindNearestCharacterIndex(mouse);
+        //     SelectionRange range = new SelectionRange(charIndex, FindCursorEdge(charIndex, point));
+        //     if (IsLastOnLine(charIndex)) {
+        //         return range;
+        //     }
+        //     
+        // }
+
+        public SelectionRange SelectLineAtPoint(Vector2 mouse) {
+            throw new NotImplementedException();
+        }
+
+        public SelectionRange MoveCursorLeft(SelectionRange range, bool maintainSelection, bool word) {
+            int selectionIndex = range.selectIndex;
+
+            if (maintainSelection) {
+                if (selectionIndex == -1) {
+                    selectionIndex = range.cursorIndex;
+                }
+            }
+            else {
+                selectionIndex = -1;
+            }
+
+            // if (!maintainSelection && range.HasSelection) {
+            //     return new SelectionRange(range.cursorIndex);
+            // }
+            //
+            // if (!maintainSelection || !range.HasSelection) {
+            //     selectionIndex = -1;
+            // }
+
+            int cursorIndex;
+            if (maintainSelection) {
+                cursorIndex = range.cursorIndex - 1;
+            }
+            else {
+                cursorIndex = Mathf.Min(range.cursorIndex, range.selectIndex > -1 ? range.selectIndex : range.cursorIndex);
+                if (!range.HasSelection) {
+                    cursorIndex--;
+                }
+            }
+
+            if (cursorIndex < 0) cursorIndex = 0;
+
+            return new SelectionRange(cursorIndex, selectionIndex);
+        }
+
+        public SelectionRange MoveCursorRight(SelectionRange range, bool select, bool word) {
+            int selectionIndex = range.selectIndex;
+
+            if (select) {
+                if (selectionIndex == -1) {
+                    selectionIndex = range.cursorIndex;
+                }
+            }
+            else {
+                selectionIndex = -1;
+            }
+
+            // if (!maintainSelection && range.HasSelection) {
+            //     return new SelectionRange(range.cursorIndex);
+            // }
+            //
+            // if (!maintainSelection || !range.HasSelection) {
+            //     selectionIndex = -1;
+            // }
+
+            int cursorIndex;
+            if (select) {
+                cursorIndex = range.cursorIndex + 1;
+            }
+            else {
+                cursorIndex = Mathf.Max(range.cursorIndex, range.selectIndex > -1 ? range.selectIndex : range.cursorIndex);
+                if (!range.HasSelection) {
+                    cursorIndex++;
+                }
+            }
+
+            int totalCount = GetRenderedCharacterCount();
+            if (cursorIndex > totalCount) cursorIndex = totalCount;
+
+            return new SelectionRange(cursorIndex, selectionIndex);
+        }
+
+        public int GetRenderedCharacterCount() {
+            int count = 0;
+            for (int i = 0; i < spanList.size; i++) {
+                count += spanList.array[i].charInfoList.size;
+            }
+
+            return count;
+        }
+
+        public SelectionRange MoveToStartOfLine(SelectionRange selectionRange, bool select) {
+
+            if (selectionRange.cursorIndex <= 0) {
+                return new SelectionRange(selectionRange.cursorIndex, select ? selectionRange.selectIndex : -1);
+            }
+
+            for (int i = 0; i < lineInfoList.size; i++) {
+                LineInfo lineInfo = lineInfoList.array[i];
+                if (selectionRange.cursorIndex >= lineInfo.globalCharacterStartIndex && selectionRange.cursorIndex < lineInfo.globalCharacterEndIndex) {
+                    if (select) {
+                        return new SelectionRange(lineInfo.globalCharacterStartIndex, Mathf.Max(selectionRange.selectIndex, selectionRange.cursorIndex));
+                    }
+                    return new SelectionRange(lineInfo.globalCharacterStartIndex);
+                }
+            }
+
+            // index is int.max or content size changed / we need to check for out of bounds 
+            LineInfo lastLine = lineInfoList.array[lineInfoList.size - 1];
+            if (select) {
+                return new SelectionRange(lastLine.globalCharacterStartIndex, selectionRange.selectIndex > -1 ? Mathf.Min(selectionRange.selectIndex, lastLine.globalCharacterEndIndex) : lastLine.globalCharacterEndIndex);}
+
+            return new SelectionRange(lastLine.globalCharacterStartIndex);
+        }
+
+        public SelectionRange MoveToEndOfLine(SelectionRange selectionRange, bool select) {
+            if (selectionRange.cursorIndex <= 0) {
+                return new SelectionRange(lineInfoList.array[0].globalCharacterEndIndex, select ? Mathf.Max(0, selectionRange.selectIndex) : -1);
+            }
+
+            for (int i = 0; i < lineInfoList.size; i++) {
+                LineInfo lineInfo = lineInfoList.array[i];
+                if (selectionRange.cursorIndex >= lineInfo.globalCharacterStartIndex && selectionRange.cursorIndex < lineInfo.globalCharacterEndIndex) {
+                    if (select) {
+                        return new SelectionRange(lineInfo.globalCharacterEndIndex, Mathf.Max(selectionRange.selectIndex, selectionRange.cursorIndex));
+                    }
+                    return new SelectionRange(lineInfo.globalCharacterEndIndex);
+                }
+            }
+
+            if (select) {
+                return new SelectionRange(lineInfoList.array[lineInfoList.size - 1].globalCharacterEndIndex, selectionRange.selectIndex);
+            }
+
+            return new SelectionRange(lineInfoList.array[lineInfoList.size - 1].globalCharacterEndIndex);        
         }
     }
 

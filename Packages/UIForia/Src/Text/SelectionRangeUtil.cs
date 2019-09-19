@@ -21,17 +21,17 @@ namespace UIForia.Text {
             }
 
             if (string.IsNullOrEmpty(source)) {
-                selectionRange = new SelectionRange(characters.Length - 1);
+                selectionRange = new SelectionRange(characters.Length);
                 return characters;
             }
-            
+
             int cursorIndex = source.Length > 0 ? Mathf.Clamp(selectionRange.cursorIndex, 0, source.Length) : 0;
             if (cursorIndex == 0) {
                 retn = characters + source;
                 selectionRange = new SelectionRange(characters.Length);
             }
             else if (cursorIndex == source.Length) {
-                retn += source;
+                retn = source + characters;
                 selectionRange = new SelectionRange(retn.Length);
             }
             else {
@@ -39,7 +39,6 @@ namespace UIForia.Text {
                 selectionRange = new SelectionRange(selectionRange.cursorIndex + characters.Length);
             }
 
-            selectionRange = new SelectionRange(cursorIndex);
             return retn;
         }
 
@@ -100,7 +99,7 @@ namespace UIForia.Text {
                 int min = (range.cursorIndex < range.selectIndex ? range.cursorIndex : range.selectIndex);
                 int max = (range.cursorIndex > range.selectIndex ? range.cursorIndex : range.selectIndex);
 
-                if (max - min == source.Length - 1) {
+                if (max - min == source.Length) {
                     range = new SelectionRange(0);
                     return string.Empty;
                 }
@@ -133,7 +132,7 @@ namespace UIForia.Text {
                 }
 
                 if (cursorIndex == source.Length) {
-                    range = new SelectionRange(range.cursorIndex - 1);
+                    range = new SelectionRange(range.cursorIndex);
                     return source.Substring(0, range.cursorIndex);
                 }
 

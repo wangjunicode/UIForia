@@ -53,6 +53,7 @@ style colony-info-sidebar {
 }
 
 style close-button {
+    LayoutType = Stack;
     PreferredSize = 24px;
     Border = 2px;
     BorderRadius = 50%;
@@ -62,6 +63,24 @@ style close-button {
     }
 }
 
+style left {
+    AlignX = 50% Parent;
+    AlignY = 50% Parent;
+    TransformPivot = 0.5;
+    PreferredSize = 16px 4x;
+    TransformRotation = 45;
+    BackgroundColor = black;
+}
+
+style right {
+    AlignX = 50% Parent;
+    AlignY = 50% Parent;
+    PreferredSize = 16px 4px;
+    TransformRotation = -45;
+    TransformPivot = 0.5;
+    BackgroundColor = black;
+}
+
 style body {
     GridItemX = 1;
     GridItemY = 1;
@@ -69,10 +88,6 @@ style body {
     LayoutType = Grid;
     GridLayoutColTemplate = 1fr, 1mn;
     GridLayoutRowTemplate = 1mx;
-}
-
-style body-main {
-    Padding = 2em;
 }
 
 style body-sidebar {

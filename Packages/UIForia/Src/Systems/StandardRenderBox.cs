@@ -131,7 +131,8 @@ namespace UIForia.Rendering {
             float radiusBottomRight = ResolveFixedSize(element, min, element.style.BorderRadiusBottomRight);
             float radiusBottomLeft = ResolveFixedSize(element, min, element.style.BorderRadiusBottomLeft);
 
-
+            Vector2 pivotOffset = new Vector2(-element.layoutBox.pivotX * size.width, -element.layoutBox.pivotY * size.height);
+            
             if (radiusBottomLeft > 0 ||
                 radiusBottomRight > 0 ||
                 radiusTopLeft > 0 ||
@@ -150,11 +151,11 @@ namespace UIForia.Rendering {
 //                    bottomLeftX = bevelBottomLeft,
 //                    bottomLeftY = bevelBottomLeft,
 //                });
-                geometry.FillRect(size.width, size.height);
+                geometry.FillRect(size.width, size.height, pivotOffset);
 
             }
             else {
-                geometry.FillRect(size.width, size.height);
+                geometry.FillRect(size.width, size.height, pivotOffset);
             }
 
             if (element.style.BackgroundImage != null) {
@@ -188,11 +189,12 @@ namespace UIForia.Rendering {
                 int posX = (int) ((width - (originalWidth * ratio)) / 2);
                 int posY = (int) ((height - (originalHeight * ratio)) / 2);
 
+                
                 switch (element.style.BackgroundFit) {
                     case BackgroundFit.Fill:
                         for (int i = 0; i < geometry.texCoordList0.size; i++) {
-                            float x = (bgPositionX + positions[i].x) / (bgScaleX * width);
-                            float y = (bgPositionY + positions[i].y) / (bgScaleY * -height);
+                            float x = (bgPositionX + positions[i].x - pivotOffset.x) / (bgScaleX * width);
+                            float y = (bgPositionY + positions[i].y + pivotOffset.y) / (bgScaleY * -height);
                             float newX = (cosX * x) - (sinX * y);
                             float newY = (sinX * x) + (cosX * y);
                             texCoord0[i].x = newX;
@@ -209,8 +211,8 @@ namespace UIForia.Rendering {
 
                     case BackgroundFit.Contain:
                         for (int i = 0; i < geometry.texCoordList0.size; i++) {
-                            float x = (posX + bgPositionX + positions[i].x) / (bgScaleX * newWidth);
-                            float y = (posY + bgPositionY + positions[i].y) / (bgScaleY * -newHeight);
+                            float x = (posX + bgPositionX + positions[i].x - pivotOffset.x) / (bgScaleX * newWidth);
+                            float y = (posY + bgPositionY + positions[i].y + pivotOffset.y) / (bgScaleY * -newHeight);
                             float newX = (cosX * x) - (sinX * y);
                             float newY = (sinX * x) + (cosX * y);
                             texCoord0[i].x = newX;

@@ -34,17 +34,19 @@ namespace UIForia.Layout {
         }
 
         public override void AddChild(FastLayoutBox child) {
-            parent.AddChild(child);
+            ResolveLayoutParent().AddChild(child);
+            // parent.AddChild(child);
         }
 
         public override void SetChildren(LightList<FastLayoutBox> container) {
+            var p = ResolveLayoutParent();
             for (int i = 0; i < container.size; i++) {
-                parent.AddChild(container[i]);
+                p.AddChild(container[i]);
             }
         }
 
         public override void RemoveChild(FastLayoutBox child) {
-            parent.RemoveChild(child);
+            ResolveLayoutParent().RemoveChild(child);
         }
         
     }

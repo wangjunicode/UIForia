@@ -3,26 +3,8 @@
 
     <Style path="KlangWindow/KlangWindow.style"/>
 
-    <Block id="quote">
-
-        <Variable type="string" name="heading"/>
-        <Variable type="string" name="text"/>
-
-        <Contents style="quote-container">
-
-            <Heading4>{heading}</Heading4>
-
-            <Group style="quote">
-                {text}
-            </Group>
-
-        </Contents>
-
-    </Block>
-
     <Contents style="window-container">
-
-        <Group style="colony-info-sidebar">
+        <Group style="colony-info-sidebar" if="!hideSideBar">
 
             <Slot x-id="side-bar" style="side-bar-slot" name="KlangWindow.Sidebar">
 
@@ -31,9 +13,7 @@
                 </Group>
 
                 <SidebarItem icon="'SpriteSettingOverwrite/ui_icon_traits_unfocused'" tooltip="'Tooltip Here'" onMouseClick="SelectSidebarItem($element)"/>
-
                 <SidebarItem icon="'SpriteSettingOverwrite/ui_icon_traits_unfocused'" onMouseClick="SelectSidebarItem($element)"/>
-
                 <SidebarItem icon="'SpriteSettingOverwrite/ui_icon_traits_unfocused'" onMouseClick="SelectSidebarItem($element)"/>
 
             </Slot>
@@ -48,59 +28,18 @@
             </Slot>
 
             <Slot name="KlangWindow.TitlebarButtons" x-id="title-button-group">
-                <Group style="close-button" onMouseClick="Close()"/>
+                <Group style="close-button" onMouseClick="Close()">
+                    <Div style="left"/>
+                    <Div style="right"/>
+                </Group>
             </Slot>
 
         </Group>
 
         <ScrollView style="body">
-
             <Group style="body-main">
-                <Group style="colony-info-head-section">
-                    <Image style="rounded-image" src="'icon_2'"/>
-<!--                    <Group style="colony-info-header-text">-->
-
-<!--                        <Heading1 style="colony-name">UIForia Gang</Heading1>-->
-
-<!--                        <Text>Founder</Text>-->
-<!--                        <Text>Weichselbaum</Text>-->
-
-<!--                        <Text>Age</Text>-->
-<!--                        <Text>10 months</Text>-->
-
-<!--                        <Text>Population</Text>-->
-<!--                        <Text>2</Text>-->
-
-<!--                    </Group>-->
-                    
-                    super long string here oh my god its so long how do you even fit all that inside of me?
-
-                </Group>
-
-                <Group style="quote-container">
-                    <Heading4>Motto</Heading4>
-                    <Group style="quote">
-                        Cut once, then measure twice
-                    </Group>
-                </Group>
+                <Children />
             </Group>
-
-<!--            <Group style="body-sidebar">-->
-
-<!--            </Group>-->
-
-            <!--                    <RenderBlock.Quote>-->
-            <!--                        <Parameter name="val" value="string"/>-->
-            <!--                    </RenderBlock.Quote>-->
-
-            <!--                    <RenderBlock blockId="quote" style="xxxx" heading="'motto'" text="'Cut once, then measure twice'"/>-->
-            <!--                    <RenderBlock blockId="quote" heading="'Main Language'" text="'English'"/>-->
-            <!--                    <RenderBlock id="quote" heading="'Description'" text="'Klang strives to develop....'"/>-->
-            <!--                    <RenderBlock id="quote" heading="'Join Colony Password'" text="'Klang strives to develop....'"/>-->
-            <!--                    -->
-            <!--                    <Thing tooltip="$block['quote1]')"/>-->
-            <!--                    -->
-            <!--                    <RenderBlockDeferred id="quote" as="quote1"/>-->
         </ScrollView>
 
     </Contents>

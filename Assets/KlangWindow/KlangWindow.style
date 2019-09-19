@@ -52,33 +52,37 @@ style colony-info-sidebar {
     PaddingBottom = 20px;
 }
 
-style close-button {
+style title-buttons {
+    FlexLayoutDirection = Horizontal;
+}
+
+style title-button {
     LayoutType = Stack;
     PreferredSize = 24px;
     Border = 2px;
     BorderRadius = 50%;
-    BorderColor = #F3514E;
-    [hover] {
-        BackgroundColor = #F3514E;
-    }
+    MarginRight = 10px;
 }
 
-style left {
-    AlignX = 50% Parent;
-    AlignY = 50% Parent;
-    TransformPivot = 0.5;
-    PreferredSize = 16px 4x;
+style left-leg {
     TransformRotation = 45;
-    BackgroundColor = black;
 }
 
-style right {
-    AlignX = 50% Parent;
-    AlignY = 50% Parent;
-    PreferredSize = 16px 4px;
+style right-leg {
     TransformRotation = -45;
-    TransformPivot = 0.5;
-    BackgroundColor = black;
+}
+
+style minus-bar {
+    MinHeight = 4px;
+    TransformRotation = 180;
+}
+
+style horizontal {
+    TransformRotation = 180;
+}
+
+style vertical {
+    TransformRotation = 90;
 }
 
 style body {

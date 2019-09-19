@@ -2,6 +2,7 @@
 <UITemplate>
 
     <Style path="KlangWindow/KlangWindow.style"/>
+    <Style path="KlangWindow/WindowTitleButton.style" alias="WindowTitleButton"/>
 
     <Contents style="window-container">
         <Group style="colony-info-sidebar" if="!hideSideBar">
@@ -27,11 +28,18 @@
                 </Heading3>
             </Slot>
 
-            <Slot name="KlangWindow.TitlebarButtons" x-id="title-button-group">
-                <Group style="close-button" onMouseClick="Close()">
-                    <Div style="left"/>
-                    <Div style="right"/>
-                </Group>
+            <Slot name="KlangWindow.TitlebarButtons" x-id="title-button-group" style="title-buttons">
+                <WindowTitleButton style="title-button maximize-button" x-variant="green">
+                    <Div style="horizontal title-button-part" />
+                    <Div style="vertical title-button-part" />
+                </WindowTitleButton>
+                <WindowTitleButton style="title-button minimize-button" x-variant="yellow">
+                    <Div style="minus-bar title-button-part" />
+                </WindowTitleButton>
+                <WindowTitleButton style="title-button close-button" x-variant="red" onMouseClick="Close()">
+                    <Div style="left-leg title-button-part" />
+                    <Div style="right-leg title-button-part" />
+                </WindowTitleButton>
             </Slot>
 
         </Group>

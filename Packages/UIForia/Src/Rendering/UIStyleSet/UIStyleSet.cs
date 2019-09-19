@@ -711,6 +711,7 @@ namespace UIForia.Rendering {
 
                                 if (isActive) {
                                     AddMissingProperties(toUpdate, availableStyles[nextIdx].styleRunCommand.style);
+                                    RunCommands(availableStyles[nextIdx].styleRunCommand.runCommands, false);
                                 }
 
                                 availableStyles.RemoveAt(nextIdx);

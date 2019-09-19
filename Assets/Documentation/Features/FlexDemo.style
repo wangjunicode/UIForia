@@ -9,7 +9,7 @@ style constrain {
     PreferredSize = 600px, 300px;
     
    FlexLayoutDirection = Vertical;
-   Overflow = Hidden;
+   // Overflow = Hidden;
 }
 
 style flex-demo {
@@ -39,7 +39,7 @@ style flex-demo-content {
 style circle-clip {
     BorderRadius = 50%;
 //    BorderRadiusTopRight = 20%;
-    Overflow = Hidden;
+    // Overflow = Hidden;
     FlexItemGrow = 0;
 }
 
@@ -110,7 +110,7 @@ style clip-test-item {
 }
 
 style not-clipped {
-    ClipBehavior = Never;
+    //ClipBehavior = Never;
 }
 
 style clip-test-more-clip {
@@ -118,7 +118,7 @@ style clip-test-more-clip {
      BackgroundColor = Red;
      BorderRadius = 50%;
      MarginLeft = 30px;   
-     Overflow = Hidden;
+     //Overflow = Hidden;
 }
 
 style clip-nested {

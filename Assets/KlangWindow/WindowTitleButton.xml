@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UITemplate>
+
+    <Style path="KlangWindow/WindowTitleButton.style"/>
+
+    <Contents>
+        <Children />
+    </Contents>
+</UITemplate>

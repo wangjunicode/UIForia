@@ -180,14 +180,25 @@ namespace UIForia.Layout {
                     FastLayoutBox childBox = childElement.layoutBox;
 
                     if (childBox != null && (childElement.flags & UIElementFlags.EnabledThisFrame) != 0) {
-                        
+
                         childBox.UpdateStyleData();
-                        
-                        if (parentEnabledThisFrame) {
-                            tempChildList.Add(childBox);
-                        }
-                        else {
-                            data.layoutBox.AddChild(childBox);
+
+                        switch (childBox.layoutBehavior) {
+                            case LayoutBehavior.Ignored:
+                            case LayoutBehavior.TranscludeChildren:
+                                childBox.parent = data.layoutBox;
+                                break;
+
+                            default: {
+                                if (parentEnabledThisFrame) {
+                                    tempChildList.Add(childBox);
+                                }
+                                else {
+                                    data.layoutBox.AddChild(childBox);
+                                }
+
+                                break;
+                            }
                         }
                     }
                     // todo -- EnabledThisFrame is borked because input runs after layout and we enable on click
@@ -367,20 +378,37 @@ namespace UIForia.Layout {
                 else {
                     float ca = math.cos(-rotation * Mathf.Deg2Rad);
                     float sa = math.sin(-rotation * Mathf.Deg2Rad);
-                    m = new SVGXMatrix(ca * box.scaleX, sa * box.scaleX, -sa * box.scaleY, ca * box.scaleY, alignedPosition.x, alignedPosition.y);
+                    var pivotLocation = new Vector2(box.pivotX * box.size.width, box.pivotY * box.size.height);
+                    m = new SVGXMatrix(ca * box.scaleX, -sa * box.scaleX, sa * box.scaleY, ca * box.scaleY, alignedPosition.x + pivotLocation.x, alignedPosition.y + pivotLocation.y);
                 }
-
-                if (box.pivotX == 0 && box.pivotY == 0) {
-                    localMatrices[i] = m;
-                }
-                else {
-                    pivot.m4 = box.pivotX * box.size.width;
-                    pivot.m5 = box.pivotY * box.size.height;
-                    inversePivot.m4 = -pivot.m4;
-                    inversePivot.m5 = -pivot.m5;
-
-                    localMatrices[i] = pivot * m * inversePivot;
-                }
+                
+                    
+                localMatrices[i] = m;
+                // if (box.pivotX == 0 && box.pivotY == 0) {
+                //     localMatrices[i] = m;
+                // }
+                // else {
+                //     pivot.m4 = box.pivotX * box.size.width;
+                //     pivot.m5 = box.pivotY * box.size.height;
+                //     inversePivot.m4 = -pivot.m4;
+                //     inversePivot.m5 = -pivot.m5;
+                //
+                //     localMatrices[i] = pivot * m * inversePivot;
+                // }
+                //
+                // if (rotation != 0) {
+                //     m = SVGXMatrix.TRS(alignedPosition, -rotation, new Vector2(box.scaleX, box.scaleY));
+                // }
+                // else {
+                //     m = SVGXMatrix.TranslateScale(alignedPosition.x, alignedPosition.y, box.scaleX, box.scaleY);
+                // }
+                //
+                // if (box.pivotX != 0 || box.pivotY != 0) {
+                //     SVGXMatrix pivotMat = SVGXMatrix.Translation(new Vector2(box.size.width * box.pivotX, box.size.height * box.pivotY));
+                //     m = pivotMat.Inverse() * m * pivotMat;
+                // }
+                //
+                // localMatrices[i] = m;
             }
         }
 

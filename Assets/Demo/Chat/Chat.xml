@@ -4,7 +4,7 @@
     <Style path="Demo/Chat/Chat.style" />
 
     <Contents>
-        <KlangWindow style="chat-window">
+        <KlangWindow style="chat-window" hideSideBar="true">
             <SlotContent name="KlangWindow.Titlebar">
                 Chat
             </SlotContent>

@@ -15,6 +15,7 @@ namespace UI {
     public class KlangWindow : UIElement, IPointerQueryHandler {
 
         public bool isOpen;
+        public bool hideSideBar;
 
         private UIElement titlebarButtons;
         private UIElement runner;
@@ -29,6 +30,9 @@ namespace UI {
         public event Action onClose;
 
         public override void OnEnable() {
+            if (!hideSideBar) {
+                allowedDragSides &= ~(WindowSide.Left);
+            }
             allowedDragSides &= ~(WindowSide.Left);
             runner = FindById("side-bar-runner");
             sidebar = FindById("side-bar");
@@ -53,6 +57,10 @@ namespace UI {
 
         [OnDragCreate]
         public DragEvent ResizeWindow(MouseInputEvent evt) {
+            if (!evt.IsMouseLeftDown) {
+                return null;
+            }
+
             const float growFactor = 3f;
 
             Rect screenRect = layoutResult.ScreenRect.Grow(growFactor);
@@ -116,6 +124,10 @@ namespace UI {
         }
 
         public DragEvent CreateDrag_TitleBar(MouseInputEvent evt) {
+            if (!evt.IsMouseLeftDown) {
+                return null;
+            }
+            
             titlebarButtons = titlebarButtons ?? FindById("title-button-group");
             if (evt.Origin.IsAncestorOf(titlebarButtons)) {
                 return null;

@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 namespace UIForia.Text {
@@ -13,7 +12,7 @@ namespace UIForia.Text {
             }
 
             if (string.IsNullOrEmpty(source)) {
-                selectionRange = new SelectionRange(characters.Length - 1, TextEdge.Right);
+                selectionRange = new SelectionRange(characters.Length);
                 return characters;
             }
 
@@ -22,50 +21,25 @@ namespace UIForia.Text {
             }
 
             if (string.IsNullOrEmpty(source)) {
-                selectionRange = new SelectionRange(characters.Length - 1, TextEdge.Right);
+                selectionRange = new SelectionRange(characters.Length - 1);
                 return characters;
             }
-
-            int cursorIndex = source.Length > 0 ? Mathf.Clamp(selectionRange.cursorIndex, 0, source.Length - 1) : 0;
-            TextEdge edge = selectionRange.cursorEdge;
-            if (selectionRange.cursorIndex == source.Length - 1) {
-                if (selectionRange.cursorEdge == TextEdge.Left) {
-                    string text = source.Substring(0, cursorIndex);
-                    string endText = source.Substring(cursorIndex);
-                    retn = text + characters + endText;
-                    cursorIndex += characters.Length;
-                }
-                else {
-                    retn = source + characters;
-                    cursorIndex += characters.Length;
-                }
+            
+            int cursorIndex = source.Length > 0 ? Mathf.Clamp(selectionRange.cursorIndex, 0, source.Length) : 0;
+            if (cursorIndex == 0) {
+                retn = characters + source;
+                selectionRange = new SelectionRange(characters.Length);
             }
-            else if (selectionRange.cursorIndex == 0) {
-                if (selectionRange.cursorEdge == TextEdge.Left) {
-                    retn = characters + source;
-                    cursorIndex = characters.Length;
-                    edge = TextEdge.Left;
-                }
-                else {
-                    string text = source.Substring(0, cursorIndex);
-                    string endText = source.Substring(cursorIndex);
-                    retn = text + characters + endText;
-                    cursorIndex += characters.Length;
-                }
+            else if (cursorIndex == source.Length) {
+                retn += source;
+                selectionRange = new SelectionRange(retn.Length);
             }
             else {
-                // todo optimize not to use substring here
-                if (selectionRange.cursorEdge == TextEdge.Right) {
-                    cursorIndex += characters.Length;
-                }
-
-                string text = source.Substring(0, cursorIndex);
-                string endText = source.Substring(cursorIndex);
-                retn = text + characters + endText;
-                cursorIndex += characters.Length;
+                retn = $"{source.Substring(0, selectionRange.cursorIndex)}{characters}{source.Substring(selectionRange.cursorIndex)}";
+                selectionRange = new SelectionRange(selectionRange.cursorIndex + characters.Length);
             }
 
-            selectionRange = new SelectionRange(cursorIndex, edge);
+            selectionRange = new SelectionRange(cursorIndex);
             return retn;
         }
 
@@ -73,61 +47,42 @@ namespace UIForia.Text {
             string retn = null;
 
             if (source.Length == 0) {
-                return String.Empty;
+                return string.Empty;
             }
 
-            int cursorIndex = Mathf.Clamp(selectionRange.cursorIndex, 0, source.Length - 1);
+            int cursorIndex = Mathf.Clamp(selectionRange.cursorIndex, 0, source.Length);
 
             if (selectionRange.HasSelection) {
                 int min = Mathf.Clamp((selectionRange.cursorIndex < selectionRange.selectIndex ? selectionRange.cursorIndex : selectionRange.selectIndex), 0, source.Length - 1);
                 int max = (selectionRange.cursorIndex > selectionRange.selectIndex ? selectionRange.cursorIndex : selectionRange.selectIndex);
 
-                if (selectionRange.selectEdge == TextEdge.Right) {
-                    max++;
-                }
-
-                if (cursorIndex == source.Length - 1 && selectionRange.cursorEdge == TextEdge.Right) {
+                if (cursorIndex == source.Length) {
                     retn = source.Substring(0, min);
+                    selectionRange = new SelectionRange(retn.Length);
                 }
                 else {
                     string part0 = source.Substring(0, min);
                     string part1 = source.Substring(max);
                     retn = part0 + part1;
+                    selectionRange = new SelectionRange(part0.Length);
                 }
 
-                if (selectionRange.selectEdge == TextEdge.Right) {
-                    if (min - 1 < 0) {
-                        selectionRange = new SelectionRange(0, TextEdge.Left);
-                    }
-                    else {
-                        selectionRange = new SelectionRange(min - 1, TextEdge.Right);
-                    }
-                }
-                else if (min == retn.Length) {
-                    selectionRange = new SelectionRange(min - 1, TextEdge.Right);
-                    return retn;
-                }
-                else {
-                    selectionRange = new SelectionRange(min, TextEdge.Left);
-                    return retn;
-                }
+                return retn;
+            }
+
+            if (cursorIndex == source.Length) {
+                return source;
+            }
+
+            if (cursorIndex == source.Length - 1) {
+                retn = source.Remove(source.Length - 1);
+                selectionRange = new SelectionRange(retn.Length);
             }
             else {
-                if (cursorIndex == source.Length - 1 && selectionRange.cursorEdge == TextEdge.Right) {
-                    return source;
-                }
-                else {
-                    if (cursorIndex == source.Length - 1) {
-                        retn = source.Remove(source.Length - 1);
-                        selectionRange = new SelectionRange(retn.Length - 1, TextEdge.Right);
-                    }
-                    else {
-                        string part0 = source.Substring(0, cursorIndex);
-                        string part1 = source.Substring(cursorIndex + 1);
-                        retn = part0 + part1;
-                        selectionRange = new SelectionRange(cursorIndex, TextEdge.Left);
-                    }
-                }
+                string part0 = source.Substring(0, cursorIndex);
+                string part1 = source.Substring(cursorIndex + 1);
+                retn = part0 + part1;
+                selectionRange = new SelectionRange(cursorIndex - 1);
             }
 
             return retn;
@@ -135,7 +90,7 @@ namespace UIForia.Text {
 
         public static string DeleteTextBackwards(string source, ref SelectionRange range) {
             if (string.IsNullOrEmpty(source)) {
-                range = new SelectionRange(0, TextEdge.Left);
+                range = new SelectionRange(0);
                 return string.Empty;
             }
 
@@ -146,53 +101,45 @@ namespace UIForia.Text {
                 int max = (range.cursorIndex > range.selectIndex ? range.cursorIndex : range.selectIndex);
 
                 if (max - min == source.Length - 1) {
-                    range = new SelectionRange(0, TextEdge.Left);
+                    range = new SelectionRange(0);
                     return string.Empty;
                 }
 
-                if (range.selectEdge == TextEdge.Right) {
-                    max++;
-                }
-
                 if (max == source.Length) {
-                    range = new SelectionRange(min - 1, TextEdge.Right);
+                    range = new SelectionRange(min);
                     return source.Substring(0, min);    
                 }
 
                 if (min == 0) {
-                    range = new SelectionRange(0, TextEdge.Left);
+                    range = new SelectionRange(0);
                     return source.Substring(max);
                 }
                 
                 string part0 = source.Substring(0, min);
                 string part1 = source.Substring(max);
-                range = new SelectionRange(min, TextEdge.Left);
+                range = new SelectionRange(min);
                 return part0 + part1;
             }
             else {
-                if (cursorIndex == 0 && range.cursorEdge == TextEdge.Left) {
+                if (cursorIndex == 0) {
                     return source;
                 }
 
-                if (range.cursorEdge == TextEdge.Left) {
-                    cursorIndex--;
-                }
-
-                cursorIndex = Mathf.Max(0, cursorIndex);
+                cursorIndex = Mathf.Max(0, cursorIndex - 1);
 
                 if (cursorIndex == 0) {
-                    range = new SelectionRange(0, TextEdge.Left);
+                    range = new SelectionRange(cursorIndex);
                     return source.Substring(1);
                 }
 
-                if (cursorIndex == source.Length - 1) {
-                    range = new SelectionRange(range.cursorIndex - 1, TextEdge.Right);
-                    return source.Substring(0, source.Length - 1);
+                if (cursorIndex == source.Length) {
+                    range = new SelectionRange(range.cursorIndex - 1);
+                    return source.Substring(0, range.cursorIndex);
                 }
 
                 string part0 = source.Substring(0, cursorIndex);
                 string part1 = source.Substring(cursorIndex + 1);
-                range = new SelectionRange(cursorIndex, TextEdge.Left);
+                range = new SelectionRange(cursorIndex);
                 return part0 + part1;
             }
         }

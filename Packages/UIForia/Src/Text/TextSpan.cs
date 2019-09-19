@@ -20,8 +20,9 @@ namespace UIForia.Text {
 
         internal TextSpan firstChild;
         internal TextSpan nextSibling;
-        internal StructList<CharInfo2> charInfoList;
-        internal StructList<WordInfo2> wordInfoList;
+        internal StructList<CharInfo> charInfoList;
+        internal StructList<WordInfo> wordInfoList;
+        internal StructList<TextGeometry> geometryList;
         internal TextInfo textInfo;
 
         internal char[] rawContent;
@@ -29,6 +30,8 @@ namespace UIForia.Text {
         internal char[] processedContent;
 
         internal RebuildFlag rebuildFlags;
+
+        public int geometryVersion;
         public bool isEnabled;
         public float longestWordSize;
         public bool isInline;
@@ -264,9 +267,13 @@ namespace UIForia.Text {
         private void UpdateBuffers() {
             int bufferSize = TextUtil.ProcessWhitespace(whitespaceMode, ref processedContent, rawContent, rawContentSize);
 
+            if (bufferSize == 0 && geometryVersion != 0) {
+                geometryVersion = 0;
+            }
+            
             // handle all kerning within a span as if there were no other spans. text info will handle 'gluing' spans together
             if (charInfoList == null) {
-                charInfoList = new StructList<CharInfo2>(bufferSize);
+                charInfoList = new StructList<CharInfo>(bufferSize);
             }
             else {
                 charInfoList.EnsureCapacity(bufferSize);
@@ -275,11 +282,11 @@ namespace UIForia.Text {
 
             TextUtil.TransformText(textTransform, processedContent, bufferSize); // affect kerning & glyph size
 
-            CharInfo2[] charInfos = charInfoList.array;
+            CharInfo[] charInfos = charInfoList.array;
             charInfoList.size = bufferSize;
 
             for (int i = 0; i < bufferSize; i++) {
-                charInfos[i].visible = false;// technically safer to set whole struct to default but this faster
+                charInfos[i].visible = false;// technically safer to set to default but this faster
                 charInfos[i].character = processedContent[i];
             }
 
@@ -423,7 +430,7 @@ namespace UIForia.Text {
         }
 
         // feature: word & character spacing modifier
-        private void ComputeWordAndCharacterSizes(StructList<CharInfo2> characterList, StructList<WordInfo2> wordInfoList) {
+        private void ComputeWordAndCharacterSizes(StructList<CharInfo> characterList, StructList<WordInfo> wordInfoList) {
             TextDisplayData textDisplayData = GetTextDisplayData();
 
             float smallCapsMultiplier = (textTransform == TextTransform.SmallCaps) ? 0.8f : 1f;
@@ -476,12 +483,12 @@ namespace UIForia.Text {
             // seems to me that this would produce weird results with multiline text
             float lineHeight = (fontAsset.faceInfo.Ascender - fontAsset.faceInfo.Descender) * fontScale;
 
-            CharInfo2[] characters = characterList.array;
-            WordInfo2[] words = wordInfoList.array;
+            CharInfo[] characters = characterList.array;
+            WordInfo[] words = wordInfoList.array;
             int wordCount = wordInfoList.size;
 
             for (int w = 0; w < wordCount; w++) {
-                WordInfo2 group = words[w];
+                WordInfo group = words[w];
                 int start = group.charStart;
                 int end = group.charEnd;
                 float xAdvance = 0;
@@ -492,7 +499,7 @@ namespace UIForia.Text {
                     Vector2 topLeftUV;
                     Vector2 bottomRightUV;
 
-                    ref CharInfo2 charInfo = ref characters[c];
+                    ref CharInfo charInfo = ref characters[c];
 
                     // todo -- pull glyph & adjustments into their own struct array
                     TextGlyph glyph = charInfo.glyph;
@@ -573,7 +580,7 @@ namespace UIForia.Text {
             }
         }
 
-        private static void FindGlyphs(FontAsset fontAsset, CharInfo2[] charInfos, int count) {
+        private static void FindGlyphs(FontAsset fontAsset, CharInfo[] charInfos, int count) {
             IntMap<TextGlyph> fontAssetCharacterDictionary = fontAsset.characterDictionary;
             // todo make a better struct based dictionary or make text glyph a class
             for (int i = 0; i < count; i++) {
@@ -581,7 +588,7 @@ namespace UIForia.Text {
             }
         }
 
-        private static void FindKerningInfo(FontAsset fontAsset, CharInfo2[] charInfos, int count) {
+        private static void FindKerningInfo(FontAsset fontAsset, CharInfo[] charInfos, int count) {
             IntMap<TextKerningPair> kerningDictionary = fontAsset.kerningDictionary;
             if (count < 2) {
                 return;
@@ -1212,7 +1219,7 @@ namespace UIForia.Text {
                 TextUtil.TransformText(textTransform, processedContent, bufferSize);
             }
 
-            CharInfo2[] charInfos = charInfoList.array;
+            CharInfo[] charInfos = charInfoList.array;
 
             if ((rebuildFlags & RebuildFlag.Casing) != 0 || (rebuildFlags & RebuildFlag.Whitespace) != 0) {
                 charInfoList.size = bufferSize;
@@ -1238,8 +1245,6 @@ namespace UIForia.Text {
 
             rebuildFlags = 0;
         }
-
-        public int geometryVersion;
 
     }
 

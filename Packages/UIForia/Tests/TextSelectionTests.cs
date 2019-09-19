@@ -9,28 +9,25 @@ public class TextSelectionTests {
         input = input.Remove(idx0, 1);
         int idx1 = input.IndexOf('|');
         input = input.Remove(idx1, 1);
-        if (idx1 == input.Length) {
-            return new SelectionRange(idx0, TextEdge.Left, idx1 - 1, TextEdge.Right);
-        }
-        return new SelectionRange(idx0, TextEdge.Left, idx1);
+        return new SelectionRange(idx0, idx1);
     }
     
     private SelectionRange GetCursorFromCharacter(ref string input, bool defaultToBefore = false) {
         int idx = input.IndexOf('|');
         if (idx < 0) {
             if (defaultToBefore) {
-                return new SelectionRange(0, TextEdge.Left);
+                return new SelectionRange(0);
             }
-            return new SelectionRange(input.Length - 1, TextEdge.Right);
+            return new SelectionRange(input.Length);
         }
 
         if (idx == input.Length - 1) {
             input = input.Remove(idx, 1);  
-            return new SelectionRange(input.Length - 1, TextEdge.Right);
+            return new SelectionRange(input.Length);
         }
         
         input = input.Remove(idx, 1);
-        SelectionRange range = new SelectionRange(idx, TextEdge.Left);
+        SelectionRange range = new SelectionRange(idx);
         return range;
     }
 
@@ -45,7 +42,7 @@ public class TextSelectionTests {
         string result = SelectionRangeUtil.InsertText(text, ref range, toAdd);
 
         Assert.AreEqual(toAdd, result);
-        AssertRangesEqual(new SelectionRange(toAdd.Length - 1, TextEdge.Right), range);
+        AssertRangesEqual(new SelectionRange(toAdd.Length), range);
     }
     
     [Test]
@@ -59,7 +56,7 @@ public class TextSelectionTests {
         string result = SelectionRangeUtil.InsertText(text, ref range, toAdd);
 
         Assert.AreEqual(text + toAdd, result);
-        AssertRangesEqual(new SelectionRange((text + toAdd).Length - 1, TextEdge.Right), range);
+        AssertRangesEqual(new SelectionRange((text + toAdd).Length), range);
     }
 
     [Test]
@@ -297,14 +294,12 @@ public class TextSelectionTests {
         }
         
         Assert.AreEqual(expected, result);
-        AssertRangesEqual(new SelectionRange(cursorIdx, edge), range);
+        AssertRangesEqual(new SelectionRange(cursorIdx), range);
     }
     
     public void AssertRangesEqual(in SelectionRange expected, in SelectionRange actual) {
         Assert.AreEqual(expected.cursorIndex, actual.cursorIndex);
-        Assert.AreEqual(expected.cursorEdge, actual.cursorEdge);
         Assert.AreEqual(expected.selectIndex, actual.selectIndex);
-        Assert.AreEqual(expected.selectEdge, actual.selectEdge);
     }
 
 }

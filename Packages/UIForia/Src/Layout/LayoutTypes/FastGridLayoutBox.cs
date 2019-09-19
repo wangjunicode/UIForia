@@ -980,7 +980,7 @@ namespace UIForia.Layout.LayoutTypes {
                 return;
             }
 
-            bool flowHorizontal = element.style.GridLayoutDirection == LayoutDirection.Horizontal;
+            bool flowVertical = element.style.GridLayoutDirection == LayoutDirection.Vertical;
             bool dense = element.style.GridLayoutDensity == GridLayoutDensity.Dense;
 
             int sparseStartX = 0;
@@ -999,7 +999,7 @@ namespace UIForia.Layout.LayoutTypes {
                     continue;
                 }
 
-                if (flowHorizontal) {
+                if (flowVertical) {
                     if (dense) {
                         cursorX = 0;
                         cursorY = 0;

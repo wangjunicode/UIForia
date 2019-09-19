@@ -243,7 +243,7 @@ namespace UIForia.Layout {
                     return value;
 
                 case UIMeasurementUnit.Em:
-                    return 0;
+                    return element.style.GetResolvedFontSize() * value;
 
                 case UIMeasurementUnit.ViewportWidth:
                     return element.View.Viewport.width * value;
@@ -325,7 +325,7 @@ namespace UIForia.Layout {
                     return value;
 
                 case UIMeasurementUnit.Em:
-                    return 0;
+                    return element.style.GetResolvedFontSize() * value;
 
                 case UIMeasurementUnit.ViewportWidth:
                     return element.View.Viewport.width * value;

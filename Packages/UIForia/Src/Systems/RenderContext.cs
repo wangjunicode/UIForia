@@ -137,7 +137,7 @@ namespace UIForia.Rendering {
             currentBatch.batchType = BatchType.Mesh;
             currentBatch.unpooledMesh = mesh;
             currentBatch.drawCallSize++;
-            currentBatch.uiforiaData = new UIForiaData();
+            currentBatch.uiforiaData = UIForiaData.Get();
             currentBatch.transformData.Add(transform);
             FinalizeCurrentBatch();
         }
@@ -207,7 +207,7 @@ namespace UIForia.Rendering {
 
             if (currentBatch.batchType == BatchType.Unset) {
                 currentBatch.batchType = BatchType.UIForia;
-                currentBatch.uiforiaData = new UIForiaData(); // todo -- pool
+                currentBatch.uiforiaData = UIForiaData.Get();
             }
 
             positionList.Add(new Vector3(0, 0, 0));
@@ -236,19 +236,19 @@ namespace UIForia.Rendering {
                 FinalizeCurrentBatch();
             }
 
-            if (currentBatch.batchType == BatchType.Custom) {
+            if (currentBatch.batchType != BatchType.UIForia) {
                 FinalizeCurrentBatch();
             }
 
             if (currentBatch.batchType == BatchType.Unset) {
                 currentBatch.batchType = BatchType.UIForia;
-                currentBatch.uiforiaData = new UIForiaData(); // todo -- pool
+                currentBatch.uiforiaData = UIForiaData.Get();
             }
 
             if (currentBatch.uiforiaData.fontData.fontAsset != null && currentBatch.uiforiaData.fontData.fontAsset != fontData.fontAsset) {
                 FinalizeCurrentBatch();
                 currentBatch.batchType = BatchType.UIForia;
-                currentBatch.uiforiaData = new UIForiaData(); // todo -- pool
+                currentBatch.uiforiaData = UIForiaData.Get();
             }
 
             currentBatch.transformData.Add(transform);
@@ -904,10 +904,10 @@ namespace UIForia.Rendering {
 
         public void DrawPath(Path2D path) {
             // path drawing always breaks batch for now
-            FinalizeCurrentBatch();
             path.UpdateGeometry();
 
             if (path.drawCallList.size == 0) return;
+            FinalizeCurrentBatch();
 
             int lastBlendStateId = -1;
 

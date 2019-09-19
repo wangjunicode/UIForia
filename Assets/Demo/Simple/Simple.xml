@@ -5,16 +5,20 @@
     
     <Contents>
         
-        <Panel style="box box-one" onMouseClick="OnBoxClicked(1)">
-            Box one clicked {boxClicks1} times
+        <Text onMouseClick="ToggleLanguage()" style="header">
+            {HeaderText}
+        </Text>
+        
+        <Panel style="box box-black" onMouseClick="OnBoxClicked(1)">
+            Clicked {boxClicks1} times
         </Panel>
         
-        <Panel style="box box-two" onMouseClick="OnBoxClicked(2)">
-            Box two clicked {boxClicks2} times
+        <Panel style="box box-red" onMouseClick="OnBoxClicked(2)">
+           Clicked {boxClicks2} times
         </Panel>
         
-        <Panel style="box box-three" onMouseClick="OnBoxClicked(3)">
-            Box three clicked {boxClicks3} times
+        <Panel style="box box-gold" onMouseClick="OnBoxClicked(3)">
+            Clicked {boxClicks3} times
         </Panel>
         
     </Contents>

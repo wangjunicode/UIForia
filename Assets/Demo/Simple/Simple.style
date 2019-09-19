@@ -1,36 +1,47 @@
+style <this> {
+    Padding = 20px;
+}
+
 style box {
     PreferredSize = 1pca 200px;
     TextFontSize = 2em;
     Padding = 1em;
     FlexLayoutMainAxisAlignment = Center;
+    TextColor = white;
 
-    [hover] {
-        TextColor = yellow;
-        TextUnderlayColor = black;
-        TextUnderlayDilate = 0.5;
-    }
+  //  [hover] {
+  //      TextColor = yellow;
+  //      TextUnderlayColor = black;
+  //      TextUnderlayDilate = 0.5;
+  //  }
     
 }   
 
-style box-one {
-    BackgroundColor = Red;
+style header {
+    TextFontSize = 72;
+    TextColor = White;
+    AlignX = 50% Parent;
+    Padding = 0.5em;
+}
+
+style box-black {
+    BackgroundColor = Black;
     BorderRadiusTopLeft = 50%;
     TextColor = white;
 }
 
-style box-two {
-    BackgroundColor = White;
+style box-red {
+    BackgroundColor = #dd0000;
 }
 
-style box-three {
-    BackgroundColor = Blue;
+style box-gold {
+    BackgroundColor = #ffce00;
     BorderRadiusBottomRight = 50%;
-    TextColor = white;
         
-    [hover] {
-        [enter] run animation(hover-box-in);
-        [exit] run animation(hover-box-out);
-    }
+  //  [hover] {
+  //      [enter] run animation(hover-box-in);
+  //      [exit] run animation(hover-box-out);
+  //  }
 
 }
 

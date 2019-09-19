@@ -16,7 +16,7 @@ namespace Src.Systems {
         public RenderBox GetCustomPainter(string painterId) {
             
             if (painterId == "self") {
-                return new SelfPaintedRenderBox();    
+                return new SelfPaintedRenderBox();
             }
             
             if (Application.s_CustomPainters.TryGetValue(painterId, out Type boxType)) {

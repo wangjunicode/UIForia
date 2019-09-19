@@ -40,7 +40,7 @@ namespace UIForia.Rendering {
             geometry.Clear();
             ranges.size = 0;
 
-            CharInfo2[] chars = textSpan.charInfoList.array;
+            CharInfo[] chars = textSpan.charInfoList.array;
 
             int charCount = textSpan.charInfoList.size;
 
@@ -54,7 +54,7 @@ namespace UIForia.Rendering {
             int renderedCharCount = 0;
 
             for (int i = 0; i < charCount; i++) {
-                ref CharInfo2 geo = ref chars[i];
+                ref CharInfo geo = ref chars[i];
 
                 if (geo.visible) {
                     if (currentLineIndex == -1) {
@@ -81,7 +81,7 @@ namespace UIForia.Rendering {
             Vector2 faceTextureUVBottomRight = new Vector2(1, 0);
 
             for (int i = 0; i < charCount; i++) {
-                ref CharInfo2 geo = ref chars[i];
+                ref CharInfo geo = ref chars[i];
 
                 if (!geo.visible) continue;
 
@@ -105,8 +105,8 @@ namespace UIForia.Rendering {
                 ref Vector4 uv2 = ref texCoord0[vertIdx + 2];
                 ref Vector4 uv3 = ref texCoord0[vertIdx + 3];
 
-                float charX = geo.layoutX + geo.topLeft.x;
-                float charY = geo.layoutY + geo.topLeft.y;
+                float charX = geo.wordLayoutX + geo.topLeft.x;
+                float charY = geo.wordLayoutY + geo.topLeft.y;
 
                 float charWidth = geo.bottomRight.x - geo.topLeft.x;
                 float charHeight = geo.bottomRight.y - geo.topLeft.y;

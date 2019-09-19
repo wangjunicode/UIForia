@@ -10,6 +10,14 @@ namespace Demo {
         public int boxClicks2;
         public int boxClicks3;
 
+        private bool isEnglish = true;
+        
+        public string HeaderText => isEnglish ? "The German Click Flag" : "Die Deutsche Klickfahne";
+
+        public void ToggleLanguage() {
+            isEnglish = !isEnglish;
+        }
+     
         public void OnBoxClicked(int boxIndex) {
             switch (boxIndex) {
                 case 1:

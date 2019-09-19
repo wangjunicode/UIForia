@@ -57,6 +57,7 @@ namespace UIForia.Util {
 
         public void Clear() {
             Array.Clear(array, 0, size);
+            size = 0;
         }
 
         private static readonly LightList<StructStack<T>> s_Pool = new LightList<StructStack<T>>();

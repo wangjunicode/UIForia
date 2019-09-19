@@ -1,9 +1,9 @@
 using System;
-using System.Diagnostics;
 using UIForia.Attributes;
 using UIForia.Elements;
 using UIForia.UIInput;
 using UIForia.Util;
+using UnityEngine;
 
 namespace Documentation {
     
@@ -33,7 +33,7 @@ namespace Documentation {
         public string rwValue;
 
         public string regularValue;
-        public Action<FocusEvent> FocusedMe => (evt) => UnityEngine.Debug.Log("Focused");
+        public Action<FocusEvent> FocusedMe => (evt) => Debug.Log("Focused");
 
         public RepeatableList<string> autocompleteList;
 

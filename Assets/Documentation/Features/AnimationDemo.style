@@ -27,7 +27,7 @@ style circle-blue {
 style circle-yellow-bg {
     BackgroundColor = #FFEB3BFF;
     PreferredSize = 12px; 
-    FlexItemSelfAlignment = Center;
+    AlignX = Center;
 }
 
 style circle-red-bg {

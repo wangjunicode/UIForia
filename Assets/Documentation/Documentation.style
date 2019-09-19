@@ -14,7 +14,7 @@ style main-container {
     GridLayoutColTemplate = 300px 1fr;
     GridLayoutRowTemplate = 1fr;
     GridLayoutRowAlignment = Fit;    
-    GridLayoutColAlignment = Fit;    
+    GridLayoutColAlignment = Fit;
     TextFontAsset = url("GothamNarrow-Medium SDF");
 }
 
@@ -95,7 +95,7 @@ style parameter-list {
     LayoutType = Grid;
     PreferredSize = 0.7vw 1cnt;
     GridLayoutColTemplate = 300px 300px 1fr; 
-    GridLayoutCrossAxisAutoSize = 1mx;
+    GridLayoutRowAutoSize = 1mx;
     BackgroundColor = rgba(20, 20, 20, 120);
     GridLayoutRowGap = 20;
     Padding = 20px;
@@ -104,7 +104,7 @@ style parameter-list {
 }
 
 style caption {
-    GridItemColSpan = 3;
+    GridItemWidth = 3;
     MarginBottom = 20px;
 }
 

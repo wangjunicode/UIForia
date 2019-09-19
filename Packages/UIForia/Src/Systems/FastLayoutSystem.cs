@@ -102,7 +102,7 @@ namespace UIForia.Systems {
         }
 
         public void OnElementDestroyed(UIElement element) {
-            element.layoutBox?.parent.RemoveChild(element.layoutBox);
+            element.layoutBox?.parent?.RemoveChild(element.layoutBox);
             // todo -- recycle all children boxes
         }
 

@@ -206,7 +206,7 @@ namespace UIForia.Layout {
                                 else {
                                     data.layoutBox.AddChild(childBox);
                                 }
-
+ 
                                 break;
                             }
                         }

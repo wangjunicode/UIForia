@@ -34,7 +34,7 @@ style menu_grid_two {
     Border = 0.25px;
     BorderRadius = 5px;
     BorderColor = black;
-    GridItemRowStart = 1;
+    GridItemY = 1;
     TransformPivotX = 0,0;
   
    
@@ -52,7 +52,7 @@ style menu_grid_three {
     GridLayoutRowTemplate = 1fr 1fr 1fr 1fr 1fr 1fr;
     GridLayoutColGap = 5;
     GridLayoutRowGap = 5;
-    GridItemRowSpan = 2;
+    GridItemHeight = 2;
    
    
 }
@@ -62,24 +62,20 @@ style menu_grid_four {
     GridLayoutDirection = Horizontal;
   
     GridLayoutRowTemplate = 1fr;
-    GridItemColSpan = 2;
+    GridItemWidth = 2;
     TextColor = white;
     
-    GridItemColSelfAlignment = Center;
+    AlignX = Center;
     
     [hover] {
         TextGlowColor = black;
     }
-    
-    
-    
 }
 
 style buttons {
-    GridItemColSelfAlignment = End;
-    GridItemRowSelfAlignment = Start;
+    AlignY = End;
+    AlignX = Start;
     PreferredSize = 32;
-  
 }
 
 
@@ -88,8 +84,8 @@ style grow {
 }
 
 style cell1 {
-    griditemcolspan = 2;
-    griditemrowspan = 2;
+    GridItemWidth = 2;
+    GridItemHeight = 2;
     BackgroundImage = url("Images/2");
     
     [hover] {
@@ -99,8 +95,8 @@ style cell1 {
 }
 
 style cell2 {
-    GridItemColSpan = 1;
-    GridItemRowSpan = 2;
+    GridItemWidth = 1;
+    GridItemHeight = 2;
     BackgroundColor = white;
     BackgroundImage = url("Images/2");
     Border = 0.25px;
@@ -114,8 +110,8 @@ style cell2 {
 }
 
 style cell3 {
-    GridItemColSpan = 1;
-    GridItemRowSpan = 1;
+    GridItemWidth = 1;
+    GridItemHeight = 1;
     BackgroundColor = blue;
     Border = 0.25px;
     BorderRadius = 5px;

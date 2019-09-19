@@ -1,22 +1,35 @@
-using UIForia.Layout;
 using UnityEngine;
 
 namespace UIForia.Text {
 
-    public struct LineInfo2 {
+    public struct LineInfo {
 
+        // screen coords
         public float width;
         public float height;
         public float x;
         public float y;
+        
+        public Rect LineRect => new Rect(x, y, width, height);
+
+        // indices 
+        // word index into the first span
         public int wordStart;
+        // ... into the last span
         public int wordEnd;
 
+        // index into the span array of this line
         public int spanStart;
         public int spanEnd;
-        public int wordCount;
 
-        public LineInfo2(int spanStart, int wordStart, float width = 0) {
+        // total word count across all spans in this line
+        public int wordCount;
+        public int globalCharacterStartIndex;
+        public int globalCharacterEndIndex;
+
+        public int LastWordIndex => wordEnd - 1;
+
+        public LineInfo(int spanStart, int wordStart, float width = 0) {
             this.wordStart = wordStart;
             this.wordEnd = 0;
             this.spanStart = spanStart;
@@ -26,45 +39,8 @@ namespace UIForia.Text {
             this.width = width;
             this.height = 0;
             this.wordCount = 0;
-        }
-
-    }
-
-    public struct LineInfo {
-
-        public int wordStart;
-        public int wordCount;
-        public Vector2 position;
-        public float width;
-        public float height;
-
-        public float MaxY => position.y + height;
-        public int LastWordIndex => wordStart + wordCount - 1;
-
-        public LineInfo(int wordStart, Vector2 position, float height) {
-            this.width = 0;
-            this.height = height;
-            this.wordCount = 0;
-            this.wordStart = wordStart;
-            this.position = position;
-        }
-
-        public LineInfo(RangeInt wordRange, Vector2 position, float height) {
-            this.width = 0;
-            this.height = height;
-            this.wordCount = 0;
-            this.wordStart = wordRange.start;
-            this.wordCount = wordRange.length;
-            this.position = position;
-        }
-
-        public LineInfo(RangeInt wordRange, Vector2 position, Size size) {
-            this.width = size.width;
-            this.height = size.height;
-            this.wordCount = 0;
-            this.wordStart = wordRange.start;
-            this.wordCount = wordRange.length;
-            this.position = position;
+            this.globalCharacterStartIndex = 0;
+            this.globalCharacterEndIndex = 0;
         }
 
     }

@@ -45,7 +45,7 @@ namespace UIForia.Layout {
 
         protected override void PerformLayout() {
             
-            float topOffset = paddingBox.top - borderBox.top;
+            float topOffset = paddingBox.top + borderBox.top;
             float leftOffset = paddingBox.left + borderBox.left;
 
             // need a greedy size or some way to know

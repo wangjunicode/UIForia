@@ -156,7 +156,7 @@ Shader "UIForia/Standard"
                     
                     alphaClip = alphaClip / 2.0 - ( 0.5 / scale) - weight;
                    
-                    // o.vertex = UIForiaPixelSnap(o.vertex); // pixel snap is bad for text rendering
+                   // o.vertex = UIForiaPixelSnap(o.vertex); // pixel snap is bad for text rendering
 
                     o.texCoord1 = float4(alphaClip, scale, bias, objectIndex);
                     o.texCoord2 = float4(ShapeType_Text, outlineWidth, outlineSoftness, weight);
@@ -259,11 +259,12 @@ Shader "UIForia/Standard"
                 #define underlayScale i.texCoord3.z
                 #define underlayBias i.texCoord3.w
                 
-                int hasUnderlay = underlayColor.a > 0;
+                int hasUnderlay = 0;//underlayColor.a > 0;
                 // todo -- pull underlay into a seperate shader
                 float d = tex2D(_FontTexture, i.texCoord0.zw + i.texCoord3.xy).a * underlayScale;
                 underlayColor = faceColor + fixed4(underlayColor.rgb * underlayColor.a, underlayColor.a)  * (saturate(d - underlayBias)) * (1 - faceColor.a);
                 faceColor = lerp(faceColor, underlayColor, hasUnderlay);
+           //     faceColor.rgb *= faceColor.a;
                 faceColor.a *= opacity;
                 faceColor = UIForiaAlphaClipColor(faceColor, _MaskTexture, screenUV, clipRect, clipUvs);
                 return faceColor;               

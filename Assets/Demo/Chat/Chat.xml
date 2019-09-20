@@ -37,32 +37,37 @@
                     </Group>
                 </Div>
                 <Div style="chat-messages">
-                    <Heading1>This is the beginning of your direct message history with @Vondi</Heading1>
-                    <Group style="message">
-                        <Image src="'icon_1'" style="user-icon-message" />
-                        <Group style="message-content">
-                            <Group style="message-info-line">
-                                <Text style="name">Svenson</Text>
-                                <Text style="date">01/16/2019</Text>
+                    <Group style="fill-container">
+                        <ScrollView style="message-scroll-view">
+                            <Heading1>This is the beginning of your direct message history with @Vondi</Heading1>
+                            <Group style="message">
+                                <Image src="'icon_1'" style="user-icon-message" />
+                                <Group style="message-content">
+                                    <Group style="message-info-line">
+                                        <Text style="name">Svenson</Text>
+                                        <Text style="date">01/16/2019</Text>
+                                    </Group>
+                                    <Text style="text">hey maður!</Text>
+                                </Group>
                             </Group>
-                            <Text style="text">hey maður!</Text>
-                        </Group>
-                    </Group>
-                    <Group style="message">
-                        <Image src="'icon_1'" style="user-icon-message" />
-                        <Group style="message-content">
-                            <Group style="message-info-line">
-                                <Text style="name">Svenson</Text>
-                                <Text style="date">01/16/2019</Text>
+                            <Group style="message">
+                                <Image src="'icon_3'" style="user-icon-message" />
+                                <Group style="message-content">
+                                    <Group style="message-info-line">
+                                        <Text style="name">Vondi</Text>
+                                        <Text style="date">02/16/2019</Text>
+                                    </Group>
+                                    <Text style="text">hvað er að frétta?</Text>
+                                </Group>
                             </Group>
-                            <Text style="text">hey maður!</Text>
+                        </ScrollView>
+                            
+                        <Group style="input-container">
+                            <Input style="message-input" placeholder="'Message Vondi...'"  />
+                            <Image src="'Prototyping/icon__086-095'"
+                                   style="emoji"
+                            />
                         </Group>
-                    </Group>
-                    <Group style="input-container">
-                        <Input style="message-input" placeholder="'Message Vondi...'"  />
-                        <Image src="'Prototyping/icon__086-095'"
-                               style="emoji"
-                        />
                     </Group>
                 </Div>
             </Group>

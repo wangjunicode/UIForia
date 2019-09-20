@@ -10,7 +10,8 @@ style chat-window {
 }
 
 style chat-body {
-    FlexLayoutDirection = Horizontal;
+    LayoutType = Grid;
+    GridLayoutColTemplate = 1mx 1fr;
     Padding = 20px;
     PreferredSize = 1pca;
 }
@@ -94,14 +95,14 @@ style unread {
 }
 
 style chat-messages {
-    Padding = 30px 20px 10px 20px;
+    MarginLeft = 20px;
     LayoutFitHorizontal = Fill;
 }
 
 style <Heading1> {
     TextFontSize = 1.1em;
     TextColor = @theme.darkGrey;
-    Margin = 10px 0 20px 0;
+    Margin = 0 0 20px 0;
 }
 
 style message {
@@ -141,27 +142,41 @@ style date {
     TextFontAsset = @theme.fontGothamLight;
     TextFontSize = 0.8em;
 }
+style message-scroll-view {
+    LayoutFitHorizontal = Fill;
+    FlexLayoutCrossAxisAlignment = End;
+}
+
+style fill-container {
+    PreferredHeight = 1pca;
+    LayoutFitHorizontal = Fill;
+}
 
 style input-container {
-    Padding = 20px;
+    Padding = 0 20px;
     BorderRadius = 4px;
     BackgroundColor = @theme.lightestGrey;
     FlexLayoutDirection = Horizontal;
     FlexLayoutCrossAxisAlignment = Center;
     LayoutFitHorizontal = Fill;
+    AlignY = 100% Parent;
 }
 
 style message-input {
     Border = 0;
     TextFontSize = 1em;
-    Padding = 0;
+    Padding = 20px 0;
     Margin = 0;
     BackgroundColor = @theme.lightestGrey;
+    PreferredSize = 1cnt;
+    MaxWidth = 1pca;
+    FlexItemGrow = 1;
     LayoutFitHorizontal = Fill;
+    Cursor = @theme.cursorTextInput;
 }
 
 style emoji {
     PreferredSize = 28px;
-    Margin = 0 5px;
+    Margin = 20px 5px;
     AlignX = 100% ParentContentArea;
 }

@@ -89,7 +89,7 @@ style body {
     GridItemX = 1;
     GridItemY = 1;
     BackgroundColor = White;
-    // CornerBevelBottomRight = 20px;
+    CornerBevelBottomRight = 20px;
     LayoutType = Grid;
     GridLayoutColTemplate = 1fr, 1mn;
     GridLayoutRowTemplate = 1mx;

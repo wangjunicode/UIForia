@@ -19,7 +19,8 @@
 
         style input-element-text {
             Painter = "none";
-            PreferredSize = 1pca 1cnt;
+            // PreferredSize = 100% 1cnt;
+            LayoutFitHorizontal = Fill;
             TextWhitespaceMode = NoWrap;
         }
 

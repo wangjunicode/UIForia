@@ -61,7 +61,7 @@ namespace UIForia.Text {
                 }
                 else {
                     string part0 = source.Substring(0, min);
-                    string part1 = source.Substring(max);
+                    string part1 = source.Substring(Mathf.Min(max, source.Length));
                     retn = part0 + part1;
                     selectionRange = new SelectionRange(part0.Length);
                 }
@@ -99,12 +99,12 @@ namespace UIForia.Text {
                 int min = (range.cursorIndex < range.selectIndex ? range.cursorIndex : range.selectIndex);
                 int max = (range.cursorIndex > range.selectIndex ? range.cursorIndex : range.selectIndex);
 
-                if (max - min == source.Length) {
+                if (max - min >= source.Length) {
                     range = new SelectionRange(0);
                     return string.Empty;
                 }
 
-                if (max == source.Length) {
+                if (max >= source.Length) {
                     range = new SelectionRange(min);
                     return source.Substring(0, min);    
                 }

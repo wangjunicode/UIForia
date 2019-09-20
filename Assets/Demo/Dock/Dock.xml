@@ -15,10 +15,11 @@
         </Repeat>
 
         <Group style="menu-map">
-            <Group style="weather"/>
+            <Group style="weather" onMouseClick="ToggleParticles()"/>
             <Group style="temp-gauge"/>
             <Group style="clock"/>
             <Group style="date"/>
+            <Group if="showParticles" style="particles"/>
         </Group>
 
     </Contents>

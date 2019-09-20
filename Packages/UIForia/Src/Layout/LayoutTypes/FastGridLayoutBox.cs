@@ -60,7 +60,7 @@ namespace UIForia.Layout.LayoutTypes {
             for (int i = 0; i < placementCount; i++) {
                 ref GridPlacement placement = ref placements[i];
                 placement.layoutBox.GetWidth(widthBlock, ref placement.size);
-                placement.layoutBox.GetMarginHorizontal(widthBlock, ref placement.margin);
+                placement.layoutBox.GetMarginHorizontal(placement.size.prefWidth, ref placement.margin);
                 placement.outputWidth = placement.size.prefWidth + placement.margin.left + placement.margin.right;
             }
 
@@ -71,7 +71,7 @@ namespace UIForia.Layout.LayoutTypes {
             for (int i = 0; i < placementCount; i++) {
                 ref GridPlacement placement = ref placements[i];
                 placement.layoutBox.GetHeight(placement.layoutBox.size.width, widthBlock, heightBlock, ref placement.size);
-                placement.layoutBox.GetMarginVertical(heightBlock, ref placement.margin);
+                placement.layoutBox.GetMarginVertical(placement.size.prefHeight, ref placement.margin);
                 placement.outputHeight = placement.size.prefHeight + placement.margin.top + placement.margin.bottom;
             }
 
@@ -97,7 +97,7 @@ namespace UIForia.Layout.LayoutTypes {
             for (int i = 0; i < placementCount; i++) {
                 ref GridPlacement placement = ref placements[i];
                 placement.layoutBox.GetWidth(widthBlock, ref placement.size);
-                placement.layoutBox.GetMarginHorizontal(widthBlock, ref placement.margin);
+                placement.layoutBox.GetMarginHorizontal(placement.size.prefWidth, ref placement.margin);
                 placement.outputWidth = placement.size.prefWidth + placement.margin.left + placement.margin.right;
             }
 
@@ -108,7 +108,7 @@ namespace UIForia.Layout.LayoutTypes {
             for (int i = 0; i < placementCount; i++) {
                 ref GridPlacement placement = ref placements[i];
                 placement.layoutBox.GetHeight(placement.layoutBox.size.width, widthBlock, heightBlock, ref placement.size);
-                placement.layoutBox.GetMarginVertical(heightBlock, ref placement.margin);
+                placement.layoutBox.GetMarginVertical(placement.size.prefHeight, ref placement.margin);
                 placement.outputHeight = placement.size.prefHeight + placement.margin.top + placement.margin.bottom;
             }
 
@@ -137,7 +137,7 @@ namespace UIForia.Layout.LayoutTypes {
             for (int i = 0; i < placementCount; i++) {
                 ref GridPlacement placement = ref placements[i];
                 placement.layoutBox.GetWidth(widthBlock, ref placement.size);
-                placement.layoutBox.GetMarginHorizontal(widthBlock, ref placement.margin);
+                placement.layoutBox.GetMarginHorizontal(placement.size.prefWidth, ref placement.margin);
                 placement.outputWidth = placement.size.prefWidth + placement.margin.left + placement.margin.right;
             }
 
@@ -150,7 +150,7 @@ namespace UIForia.Layout.LayoutTypes {
             for (int i = 0; i < placementCount; i++) {
                 ref GridPlacement placement = ref placements[i];
                 placement.layoutBox.GetHeight(placement.layoutBox.size.width, widthBlock, heightBlock, ref placement.size);
-                placement.layoutBox.GetMarginVertical(heightBlock, ref placement.margin);
+                placement.layoutBox.GetMarginVertical(placement.size.prefHeight, ref placement.margin);
                 placement.outputHeight = placement.size.prefHeight + placement.margin.top + placement.margin.bottom;
             }
 

@@ -121,10 +121,10 @@ namespace UIForia.Editor {
             new AnimatedPropertyGenerator<UIMeasurement>(StylePropertyId.PreferredHeight, UIMeasurement.Content100),
 
             // Margin
-            new AnimatedPropertyGenerator<UIMeasurement>(StylePropertyId.MarginTop, new UIMeasurement(0)),
-            new AnimatedPropertyGenerator<UIMeasurement>(StylePropertyId.MarginRight, new UIMeasurement(0)),
-            new AnimatedPropertyGenerator<UIMeasurement>(StylePropertyId.MarginBottom, new UIMeasurement(0)),
-            new AnimatedPropertyGenerator<UIMeasurement>(StylePropertyId.MarginLeft, new UIMeasurement(0)),
+            new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.MarginTop, new UIFixedLength(0)),
+            new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.MarginRight, new UIFixedLength(0)),
+            new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.MarginBottom, new UIFixedLength(0)),
+            new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.MarginLeft, new UIFixedLength(0)),
 
             // Border
             new AnimatedPropertyGenerator<Color>(StylePropertyId.BorderColor, ColorUtil.UnsetValue),

@@ -21,6 +21,12 @@ animation hide {
     }
 }
 
+style particles {
+    Painter = "DemoParticles";
+    PreferredSize = 1px;
+    ZIndex = 5;
+}
+
 style <this> { 
     AlignX = 100% Parent;
     AlignY = 100% Parent;

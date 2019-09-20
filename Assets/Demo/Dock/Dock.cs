@@ -1,6 +1,7 @@
 using System;
 using UIForia.Attributes;
 using UIForia.Elements;
+using UIForia.Rendering;
 using UIForia.Util;
 
 namespace Demo {
@@ -18,12 +19,16 @@ namespace Demo {
         public RepeatableList<MenuItemData> MenuItems;
 
         public bool isActive;
-
+        private bool showParticles;
         [OnPropertyChanged("isActive")]
         public void OnActiveChanged(string propertyName) {
             SetAttribute("placement", isActive ? "show" : "hide");
         }
 
+        public void ToggleParticles() {
+            showParticles = !showParticles;
+        }
+        
         public override void OnCreate() {
             MenuItems = new RepeatableList<MenuItemData>() {
                     new MenuItemData() { ImageUrl = "dock/Zones@2x", Label = "Zones" },

@@ -26,10 +26,10 @@ namespace UIForia.Layout {
 
             while (ptr != null) {
                 ptr.GetWidth(blockWidth, ref sizeConstraints);
-                ptr.GetMarginHorizontal(blockWidth, ref margin);
+                ptr.GetMarginHorizontal(sizeConstraints.prefWidth, ref margin);
                 float clampedWidth = Mathf.Max(sizeConstraints.minWidth, Mathf.Min(sizeConstraints.maxWidth, sizeConstraints.prefWidth));
                 ptr.GetHeight(clampedWidth, blockWidth, blockHeight, ref sizeConstraints);
-                ptr.GetMarginVertical(blockHeight, ref margin);
+                ptr.GetMarginVertical(sizeConstraints.prefHeight, ref margin);
                 float clampedHeight = Mathf.Max(sizeConstraints.minHeight, Mathf.Min(sizeConstraints.maxHeight, sizeConstraints.prefHeight));
 
                 ptr.ApplyHorizontalLayout(leftOffset, blockWidth, contentAreaWidth, clampedWidth, horizontalAlignment, LayoutFit.None);
@@ -61,10 +61,10 @@ namespace UIForia.Layout {
             OffsetRect margin = default;
             while (ptr != null) {
                 ptr.GetWidth(blockWidth, ref sizeConstraints);
-                ptr.GetMarginHorizontal(blockWidth, ref margin);
+                ptr.GetMarginHorizontal(sizeConstraints.prefWidth, ref margin);
                 float clampedWidth = Mathf.Max(sizeConstraints.minWidth, Mathf.Min(sizeConstraints.maxWidth, sizeConstraints.prefWidth)) + margin.left + margin.right;
                 ptr.GetHeight(clampedWidth, blockWidth, blockHeight, ref sizeConstraints);
-                ptr.GetMarginVertical(blockHeight, ref margin);
+                ptr.GetMarginVertical(sizeConstraints.prefHeight, ref margin);
                 float clampedHeight = Mathf.Max(sizeConstraints.minHeight, Mathf.Min(sizeConstraints.maxHeight, sizeConstraints.prefHeight)) + margin.top + margin.bottom;
 
                 if (clampedHeight < retn) retn = clampedHeight;
@@ -127,7 +127,7 @@ namespace UIForia.Layout {
 
             while (ptr != null) {
                 ptr.GetWidth(blockWidth, ref sizeConstraints);
-                ptr.GetMarginHorizontal(blockWidth, ref margin);
+                ptr.GetMarginHorizontal(sizeConstraints.prefWidth, ref margin);
                 float clampedWidth = Mathf.Max(sizeConstraints.minWidth, Mathf.Min(sizeConstraints.maxWidth, sizeConstraints.prefWidth)) + margin.left + margin.right;
                 if (clampedWidth > retn) retn = clampedWidth;
                 ptr = ptr.nextSibling;
@@ -146,11 +146,11 @@ namespace UIForia.Layout {
             OffsetRect margin = default;
             while (ptr != null) {
                 ptr.GetWidth(blockWidth, ref sizeConstraints);
-                ptr.GetMarginHorizontal(blockWidth, ref margin);
+                ptr.GetMarginHorizontal(sizeConstraints.prefWidth, ref margin);
                 float clampedWidth = Mathf.Max(sizeConstraints.minWidth, Mathf.Min(sizeConstraints.maxWidth, sizeConstraints.prefWidth)) + margin.left + margin.right;
-                ;
+                
                 ptr.GetHeight(clampedWidth, blockWidth, blockHeight, ref sizeConstraints);
-                ptr.GetMarginVertical(blockHeight, ref margin);
+                ptr.GetMarginVertical(sizeConstraints.prefHeight, ref margin);
                 float clampedHeight = Mathf.Max(sizeConstraints.minHeight, Mathf.Min(sizeConstraints.maxHeight, sizeConstraints.prefHeight)) + margin.top + margin.bottom;
 
                 if (clampedHeight > retn) retn = clampedHeight;

@@ -33,10 +33,10 @@ namespace UIForia.Layout {
         public OffsetRect paddingBox;
         public OffsetRect borderBox;
 
-        public UIMeasurement marginTop;
-        public UIMeasurement marginRight;
-        public UIMeasurement marginBottom;
-        public UIMeasurement marginLeft;
+        public UIFixedLength marginTop;
+        public UIFixedLength marginRight;
+        public UIFixedLength marginBottom;
+        public UIFixedLength marginLeft;
 
         public UIMeasurement minWidth;
         public UIMeasurement maxWidth;
@@ -781,19 +781,19 @@ namespace UIForia.Layout {
 
                     // todo -- margin should be a fixed measurement probably
                     case StylePropertyId.MarginLeft:
-                        marginLeft = property.AsUIMeasurement;
+                        marginLeft = property.AsUIFixedLength;
                         break;
 
                     case StylePropertyId.MarginRight:
-                        marginRight = property.AsUIMeasurement;
+                        marginRight = property.AsUIFixedLength;
                         break;
 
                     case StylePropertyId.MarginTop:
-                        marginTop = property.AsUIMeasurement;
+                        marginTop = property.AsUIFixedLength;
                         break;
 
                     case StylePropertyId.MarginBottom:
-                        marginBottom = property.AsUIMeasurement;
+                        marginBottom = property.AsUIFixedLength;
                         break;
 
                     case StylePropertyId.PreferredWidth:
@@ -927,86 +927,14 @@ namespace UIForia.Layout {
             }
         }
 
-        public void GetMarginHorizontal(BlockSize blockWidth, ref OffsetRect margin) {
-            switch (marginLeft.unit) {
-                case UIMeasurementUnit.Pixel:
-                    margin.left = marginLeft.value;
-                    break;
-
-                case UIMeasurementUnit.Em:
-                    margin.left = element.style.GetResolvedFontSize() * marginLeft.value;
-                    break;
-
-                case UIMeasurementUnit.Percentage:
-                case UIMeasurementUnit.ParentContentArea:
-                    margin.left = blockWidth.contentAreaSize * marginLeft.value;
-                    break;
-                case UIMeasurementUnit.ParentSize:
-                    margin.left = blockWidth.size * marginLeft.value;
-                    break;
-            }
-
-            switch (marginRight.unit) {
-                case UIMeasurementUnit.Pixel:
-                    margin.right = marginRight.value;
-                    break;
-
-                case UIMeasurementUnit.Em:
-                    margin.right = element.style.GetResolvedFontSize() * marginRight.value;
-                    break;
-
-                case UIMeasurementUnit.Percentage:
-                case UIMeasurementUnit.ParentContentArea:
-                    margin.right = blockWidth.contentAreaSize * marginRight.value;
-                    break;
-                case UIMeasurementUnit.ParentSize:
-                    margin.right = blockWidth.size * marginRight.value;
-                    break;
-            }
-
-            margin.left = Math.Max(margin.left, 0);
-            margin.right = Math.Max(margin.right, 0);
+        public void GetMarginHorizontal(float width, ref OffsetRect margin) {
+            margin.left = Math.Max(ResolveFixedSize(width, marginLeft), 0);
+            margin.right = Math.Max(ResolveFixedSize(width, marginRight), 0);
         }
 
-        public void GetMarginVertical(BlockSize blockHeight, ref OffsetRect margin) {
-            switch (marginTop.unit) {
-                case UIMeasurementUnit.Pixel:
-                    margin.top = marginTop.value;
-                    break;
-
-                case UIMeasurementUnit.Em:
-                    margin.top = element.style.GetResolvedFontSize() * marginTop.value;
-                    break;
-
-                case UIMeasurementUnit.Percentage:
-                case UIMeasurementUnit.ParentContentArea:
-                    margin.top = blockHeight.contentAreaSize * marginTop.value;
-                    break;
-                case UIMeasurementUnit.ParentSize:
-                    margin.top = blockHeight.size * marginTop.value;
-                    break;
-            }
-
-            switch (marginBottom.unit) {
-                case UIMeasurementUnit.Pixel:
-                    margin.bottom = marginBottom.value;
-                    break;
-
-                case UIMeasurementUnit.Em:
-                    margin.bottom = element.style.GetResolvedFontSize() * marginBottom.value;
-                    break;
-
-                case UIMeasurementUnit.Percentage:
-                case UIMeasurementUnit.ParentContentArea:
-                    margin.bottom = blockHeight.contentAreaSize * marginBottom.value;
-                    break;
-                case UIMeasurementUnit.ParentSize:
-                    margin.bottom = blockHeight.size * marginBottom.value;
-                    break;
-            }
-
-            margin.top = Math.Max(margin.top, 0);
-            margin.bottom = Math.Max(margin.bottom, 0);
+        public void GetMarginVertical(float height, ref OffsetRect margin) {
+            margin.top = Math.Max(ResolveFixedSize(height, marginTop), 0);
+            margin.bottom = Math.Max(ResolveFixedSize(height, marginBottom), 0);
         }
 
         protected virtual void OnChildStyleChanged(FastLayoutBox child, StructList<StyleProperty> changeList) { }

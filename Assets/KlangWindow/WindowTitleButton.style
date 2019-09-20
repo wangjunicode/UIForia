@@ -6,7 +6,7 @@ style <this> {
 
     [attr:variant="red"] {
         BorderColor = #F3514E;
-        BackgroundColor = rgba(243, 81, 78, 200);
+        //BackgroundColor = rgba(243, 81, 78, 200);
         [hover] {
             BackgroundColor = #F3514E;
         }
@@ -14,7 +14,7 @@ style <this> {
 
     [attr:variant="yellow"] {
         BorderColor = yellow;
-        BackgroundColor = lightyellow;
+        //BackgroundColor = lightyellow;
         [hover] {
             BackgroundColor = yellow;
         }
@@ -22,7 +22,7 @@ style <this> {
 
     [attr:variant="green"] {
         BorderColor = green;
-        BackgroundColor = lightgreen;
+        //BackgroundColor = lightgreen;
         [hover] {
             BackgroundColor = green;
         }

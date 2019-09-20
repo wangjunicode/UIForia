@@ -29,11 +29,11 @@
             </Slot>
 
             <Slot name="KlangWindow.TitlebarButtons" x-id="title-button-group" style="title-buttons">
-                <WindowTitleButton style="title-button maximize-button" x-variant="green">
+                <WindowTitleButton style="title-button maximize-button" x-variant="green" onMouseClick="Maximize()">
                     <Div style="horizontal title-button-part" />
                     <Div style="vertical title-button-part" />
                 </WindowTitleButton>
-                <WindowTitleButton style="title-button minimize-button" x-variant="yellow">
+                <WindowTitleButton style="title-button minimize-button" x-variant="yellow" onMouseClick="Minimize()">
                     <Div style="minus-bar title-button-part" />
                 </WindowTitleButton>
                 <WindowTitleButton style="title-button close-button" x-variant="red" onMouseClick="Close()">
@@ -44,7 +44,7 @@
 
         </Group>
 
-        <Group style="body">
+        <Group style="body" x-id="body">
             <ScrollView>
                 <Group style="body-main">
                     <Children />

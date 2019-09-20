@@ -55,6 +55,24 @@ namespace UI {
             onClose?.Invoke();
         }
 
+        public void Maximize() {
+            if (GetAttribute("minmax") == "maximize") {
+                SetAttribute("minmax", "restore");
+            }
+            else {
+                SetAttribute("minmax", "maximize");
+            }
+        }
+        
+        public void Minimize() {
+            if (GetAttribute("minmax") == "minimize") {
+                SetAttribute("minmax", "restore");
+            }
+            else {
+                SetAttribute("minmax", "minimize");
+            }
+        }
+
         [OnDragCreate]
         public DragEvent ResizeWindow(MouseInputEvent evt) {
             if (!evt.IsMouseLeftDown) {

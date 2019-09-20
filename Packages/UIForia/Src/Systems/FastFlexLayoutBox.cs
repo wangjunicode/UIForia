@@ -57,7 +57,7 @@ namespace UIForia.Systems {
                 ref Item item = ref items[i];
                 FastLayoutBox child = item.layoutBox;
                 child.GetWidth(blockWidth, ref item.size);
-                child.GetMarginHorizontal(blockWidth, ref item.margin);
+                child.GetMarginHorizontal(item.size.prefWidth, ref item.margin);
                 item.outputWidth = item.size.prefWidth;
                 retn += item.size.prefWidth + item.margin.left + item.margin.right;
             }
@@ -73,7 +73,7 @@ namespace UIForia.Systems {
                 ref Item item = ref items[i];
                 FastLayoutBox child = item.layoutBox;
                 child.GetWidth(blockWidth, ref item.size);
-                child.GetMarginHorizontal(blockWidth, ref item.margin);
+                child.GetMarginHorizontal(item.size.prefWidth, ref item.margin);
                 float value = item.size.prefWidth + item.margin.left + item.margin.right;
                 if (value > retn) {
                     retn = value;
@@ -114,7 +114,7 @@ namespace UIForia.Systems {
                 ref Item item = ref items[i];
                 FastLayoutBox child = item.layoutBox;
                 child.GetWidth(blockWidth, ref item.size);
-                child.GetMarginHorizontal(blockWidth, ref item.margin);
+                child.GetMarginHorizontal(item.size.prefWidth, ref item.margin);
                 item.outputWidth = item.size.prefWidth;
                 float totalWidth = item.margin.left + item.size.prefWidth + item.margin.right;
                 if (crossSize < totalWidth) {
@@ -129,7 +129,7 @@ namespace UIForia.Systems {
                 ref Item item = ref items[i];
                 FastLayoutBox child = item.layoutBox;
                 child.GetHeight(item.outputWidth, blockWidth, blockHeight, ref item.size);
-                child.GetMarginVertical(blockHeight, ref item.margin);
+                child.GetMarginVertical(item.size.prefHeight, ref item.margin);
                 retn += item.margin.top + item.size.prefHeight + item.margin.bottom;
             }
 
@@ -288,7 +288,7 @@ namespace UIForia.Systems {
                 ref Item item = ref items[i];
                 FastLayoutBox child = item.layoutBox;
                 child.GetWidth(blockWidth, ref item.size);
-                child.GetMarginHorizontal(blockWidth, ref item.margin);
+                child.GetMarginHorizontal(item.size.prefWidth, ref item.margin);
                 item.outputWidth = item.size.prefWidth;
                 track.growPieces += item.growFactor;
                 track.shrinkPieces += item.shrinkFactor;
@@ -347,7 +347,7 @@ namespace UIForia.Systems {
                 shrinkPieces += item.shrinkFactor;
                 FastLayoutBox child = item.layoutBox;
                 child.GetWidth(blockWidth, ref item.size);
-                child.GetMarginHorizontal(blockWidth, ref item.margin);
+                child.GetMarginHorizontal(item.size.prefWidth, ref item.margin);
                 item.outputWidth = item.size.prefWidth;
             }
 
@@ -359,7 +359,7 @@ namespace UIForia.Systems {
                 ref Item item = ref items[i];
                 FastLayoutBox child = item.layoutBox;
                 child.GetHeight(track.crossSize - item.margin.left - item.margin.right, blockWidth, blockHeight, ref item.size);
-                child.GetMarginVertical(blockHeight, ref item.margin);
+                child.GetMarginVertical(item.size.prefHeight, ref item.margin);
                 item.outputHeight = item.size.prefHeight;
                 track.mainSize += item.margin.top + item.size.prefHeight + item.margin.bottom;
                 float horizontalAlignment = 0;
@@ -429,7 +429,7 @@ namespace UIForia.Systems {
                     ref Item item = ref items[i];
                     FastLayoutBox child = item.layoutBox;
                     child.GetHeight(item.outputWidth, blockWidth, blockHeight, ref item.size);
-                    child.GetMarginVertical(blockHeight, ref item.margin);
+                    child.GetMarginVertical(item.size.prefHeight, ref item.margin);
                     item.outputHeight = item.size.prefHeight;
                     float heightAndMargin = item.outputHeight + item.margin.top + item.margin.bottom;
                     track.maxItemHeight = track.maxItemHeight > heightAndMargin ? track.maxItemHeight : heightAndMargin;
@@ -472,7 +472,7 @@ namespace UIForia.Systems {
                 child.ApplyHorizontalLayout(item.mainAxisStart, blockWidth, item.outputWidth, item.size.prefWidth, horizontalAlignment, layoutFit);
 
                 child.GetHeight(item.outputWidth, blockWidth, blockHeight, ref item.size);
-                child.GetMarginVertical(blockHeight, ref item.margin);
+                child.GetMarginVertical(item.size.prefHeight, ref item.margin);
                 item.outputHeight = item.size.prefHeight;
                 float heightAndMargin = item.outputHeight + item.margin.top + item.margin.bottom;
                 track.maxItemHeight = track.maxItemHeight > heightAndMargin ? track.maxItemHeight : heightAndMargin;

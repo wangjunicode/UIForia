@@ -60,10 +60,10 @@ namespace UIForia.Layout.LayoutTypes {
         internal UIFixedLength borderRadiusBottomLeft;
         internal UIFixedLength borderRadiusBottomRight;
 
-        internal UIMeasurement marginTop;
-        internal UIMeasurement marginRight;
-        internal UIMeasurement marginBottom;
-        internal UIMeasurement marginLeft;
+        internal UIFixedLength marginTop;
+        internal UIFixedLength marginRight;
+        internal UIFixedLength marginBottom;
+        internal UIFixedLength marginLeft;
 
         internal float transformRotation;
         internal float transformScaleX;
@@ -140,19 +140,19 @@ namespace UIForia.Layout.LayoutTypes {
 
 
         public float GetMarginTop(float width) {
-            return ResolveMarginVertical(width, marginTop);
+            throw new NotImplementedException();
         }
 
         public float GetMarginBottom(float width) {
-            return ResolveMarginVertical(width, marginBottom);
+            throw new NotImplementedException();
         }
 
         public float GetMarginLeft() {
-            return ResolveMarginHorizontal(marginLeft);
+            throw new NotImplementedException();
         }
 
         public float GetMarginRight() {
-            return ResolveMarginHorizontal(marginRight);
+            throw new NotImplementedException();
         }
 
         // need layout when
@@ -387,44 +387,44 @@ namespace UIForia.Layout.LayoutTypes {
             }
         }
 
-        protected float ResolveMarginVertical(float width, UIMeasurement margin) {
-            AnchorTarget anchorTarget;
-            switch (margin.unit) {
-                case UIMeasurementUnit.Pixel:
-                    return margin.value * view.ScaleFactor;
-
-                case UIMeasurementUnit.Content:
-                    return GetContentHeight(width) * margin.value;
-
-                case UIMeasurementUnit.ParentSize:
-                    if (parent.prefWidth.IsContentBased) {
-                        return 0f;
-                    }
-
-                    return parent.allocatedHeight * margin.value;
-
-                case UIMeasurementUnit.ViewportWidth:
-                    return view.Viewport.width * margin.value;
-
-                case UIMeasurementUnit.ViewportHeight:
-                    return view.Viewport.height * margin.value;
-
-                case UIMeasurementUnit.ParentContentArea:
-                    if (parent.prefHeight.IsContentBased) {
-                        return 0f;
-                    }
-
-                    return parent.allocatedHeight * margin.value -
-                           (parent.style == null ? 0 : parent.PaddingBorderVertical);
-
-                case UIMeasurementUnit.Em:
-                    return style.GetResolvedFontSize() * margin.value;
-
-                case UIMeasurementUnit.Unset:
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-        }
+        // protected float ResolveMarginVertical(float width, UIFixedLength margin) {
+        //     AnchorTarget anchorTarget;
+        //     switch (margin.unit) {
+        //         case UIMeasurementUnit.Pixel:
+        //             return margin.value * view.ScaleFactor;
+        //
+        //         case UIMeasurementUnit.Content:
+        //             return GetContentHeight(width) * margin.value;
+        //
+        //         case UIMeasurementUnit.ParentSize:
+        //             if (parent.prefWidth.IsContentBased) {
+        //                 return 0f;
+        //             }
+        //
+        //             return parent.allocatedHeight * margin.value;
+        //
+        //         case UIMeasurementUnit.ViewportWidth:
+        //             return view.Viewport.width * margin.value;
+        //
+        //         case UIMeasurementUnit.ViewportHeight:
+        //             return view.Viewport.height * margin.value;
+        //
+        //         case UIMeasurementUnit.ParentContentArea:
+        //             if (parent.prefHeight.IsContentBased) {
+        //                 return 0f;
+        //             }
+        //
+        //             return parent.allocatedHeight * margin.value -
+        //                    (parent.style == null ? 0 : parent.PaddingBorderVertical);
+        //
+        //         case UIMeasurementUnit.Em:
+        //             return style.GetResolvedFontSize() * margin.value;
+        //
+        //         case UIMeasurementUnit.Unset:
+        //         default:
+        //             throw new ArgumentOutOfRangeException();
+        //     }
+        // }
 
 
         public virtual void OnStylePropertyChanged(StructList<StyleProperty> property) { }
@@ -1100,19 +1100,19 @@ namespace UIForia.Layout.LayoutTypes {
 
                     // todo -- margin should be a fixed measurement probably
                     case StylePropertyId.MarginLeft:
-                        marginLeft = property.AsUIMeasurement;
+                        marginLeft = property.AsUIFixedLength;
                         break;
 
                     case StylePropertyId.MarginRight:
-                        marginRight = property.AsUIMeasurement;
+                        marginRight = property.AsUIFixedLength;
                         break;
 
                     case StylePropertyId.MarginTop:
-                        marginTop = property.AsUIMeasurement;
+                        marginTop = property.AsUIFixedLength;
                         break;
 
                     case StylePropertyId.MarginBottom:
-                        marginBottom = property.AsUIMeasurement;
+                        marginBottom = property.AsUIFixedLength;
                         break;
 
                     case StylePropertyId.TransformPivotX:

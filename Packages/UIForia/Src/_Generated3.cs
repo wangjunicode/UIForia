@@ -82,10 +82,10 @@ namespace UIForia.Rendering {
 		public static readonly UIMeasurement MinHeight = new UIMeasurement(0f, UIMeasurementUnit.Pixel);
 		public static readonly UIMeasurement MaxHeight = new UIMeasurement(3.402823E+38f, UIMeasurementUnit.Pixel);
 		public static readonly UIMeasurement PreferredHeight = new UIMeasurement(1f, UIMeasurementUnit.Content);
-		public static readonly UIMeasurement MarginTop = new UIMeasurement(0f, UIMeasurementUnit.Pixel);
-		public static readonly UIMeasurement MarginRight = new UIMeasurement(0f, UIMeasurementUnit.Pixel);
-		public static readonly UIMeasurement MarginBottom = new UIMeasurement(0f, UIMeasurementUnit.Pixel);
-		public static readonly UIMeasurement MarginLeft = new UIMeasurement(0f, UIMeasurementUnit.Pixel);
+		public static readonly UIFixedLength MarginTop = new UIFixedLength(0f, UIFixedUnit.Pixel);
+		public static readonly UIFixedLength MarginRight = new UIFixedLength(0f, UIFixedUnit.Pixel);
+		public static readonly UIFixedLength MarginBottom = new UIFixedLength(0f, UIFixedUnit.Pixel);
+		public static readonly UIFixedLength MarginLeft = new UIFixedLength(0f, UIFixedUnit.Pixel);
 		public static readonly Color BorderColor = new Color(-1f, -1f, -1f, -1f);
 		public static readonly UIFixedLength BorderTop = new UIFixedLength(0f, UIFixedUnit.Pixel);
 		public static readonly UIFixedLength BorderRight = new UIFixedLength(0f, UIFixedUnit.Pixel);
@@ -292,13 +292,13 @@ namespace UIForia.Rendering {
 				case StylePropertyId.PreferredHeight:
 					 return new StyleProperty(StylePropertyId.PreferredHeight, new UIMeasurement(1f, UIMeasurementUnit.Content));
 				case StylePropertyId.MarginTop:
-					 return new StyleProperty(StylePropertyId.MarginTop, new UIMeasurement(0f, UIMeasurementUnit.Pixel));
+					 return new StyleProperty(StylePropertyId.MarginTop, new UIFixedLength(0f, UIFixedUnit.Pixel));
 				case StylePropertyId.MarginRight:
-					 return new StyleProperty(StylePropertyId.MarginRight, new UIMeasurement(0f, UIMeasurementUnit.Pixel));
+					 return new StyleProperty(StylePropertyId.MarginRight, new UIFixedLength(0f, UIFixedUnit.Pixel));
 				case StylePropertyId.MarginBottom:
-					 return new StyleProperty(StylePropertyId.MarginBottom, new UIMeasurement(0f, UIMeasurementUnit.Pixel));
+					 return new StyleProperty(StylePropertyId.MarginBottom, new UIFixedLength(0f, UIFixedUnit.Pixel));
 				case StylePropertyId.MarginLeft:
-					 return new StyleProperty(StylePropertyId.MarginLeft, new UIMeasurement(0f, UIMeasurementUnit.Pixel));
+					 return new StyleProperty(StylePropertyId.MarginLeft, new UIFixedLength(0f, UIFixedUnit.Pixel));
 				case StylePropertyId.BorderColor:
 					 return new StyleProperty(StylePropertyId.BorderColor, new Color(-1f, -1f, -1f, -1f));
 				case StylePropertyId.BorderTop:

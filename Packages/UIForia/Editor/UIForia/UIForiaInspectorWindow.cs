@@ -294,7 +294,7 @@ namespace UIForia.Editor {
 
                 OffsetRect padding = selectedElement.layoutResult.padding;
                 OffsetRect border = selectedElement.layoutResult.border;
-                OffsetRect margin = app.LayoutSystem.GetMarginRect(selectedElement);
+                OffsetRect margin = selectedElement.layoutResult.margin;
 
                 float width = result.actualSize.width;
                 float height = result.actualSize.height;
@@ -558,7 +558,7 @@ namespace UIForia.Editor {
 
             GUILayout.Space(16);
 
-            OffsetRect margin = app.LayoutSystem.GetMarginRect(selectedElement);
+            OffsetRect margin = selectedElement.layoutResult.margin;
             DrawLabel("Margin Top", margin.top.ToString());
             DrawLabel("Margin Right", margin.right.ToString());
             DrawLabel("Margin Bottom", margin.bottom.ToString());

@@ -115,6 +115,10 @@ namespace UIForia.Layout {
                 // todo -- layout   result might work better as a proxy to layoutBox data
                 layoutResult.padding = element.layoutBox.paddingBox;
                 layoutResult.border = element.layoutBox.borderBox;
+                
+                element.layoutBox.GetMarginHorizontal(layoutResult.actualSize.width, ref layoutResult.margin);
+                element.layoutBox.GetMarginVertical(layoutResult.actualSize.height, ref layoutResult.margin);
+                        
                 layoutResult.actualSize = element.layoutBox.size;
                 layoutResult.allocatedSize = element.layoutBox.allocatedSize;
                 layoutResult.matrix = worldMatrices[idx];

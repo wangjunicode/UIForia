@@ -64,10 +64,10 @@ namespace UIForia.Compilers.Style {
                 {"cursor", (targetStyle, property, context) => targetStyle.Cursor = MapCursor(property, context)},
 
                 {"margin", (targetStyle, valueParts, context) => MapMargins(targetStyle, valueParts, context)},
-                {"margintop", (targetStyle, property, context) => targetStyle.MarginTop = MapMeasurement(property.children[0], context)},
-                {"marginright", (targetStyle, property, context) => targetStyle.MarginRight = MapMeasurement(property.children[0], context)},
-                {"marginbottom", (targetStyle, property, context) => targetStyle.MarginBottom = MapMeasurement(property.children[0], context)},
-                {"marginleft", (targetStyle, property, context) => targetStyle.MarginLeft = MapMeasurement(property.children[0], context)},
+                {"margintop", (targetStyle, property, context) => targetStyle.MarginTop = MapFixedLength(property.children[0], context)},
+                {"marginright", (targetStyle, property, context) => targetStyle.MarginRight = MapFixedLength(property.children[0], context)},
+                {"marginbottom", (targetStyle, property, context) => targetStyle.MarginBottom = MapFixedLength(property.children[0], context)},
+                {"marginleft", (targetStyle, property, context) => targetStyle.MarginLeft = MapFixedLength(property.children[0], context)},
 
                 {"padding", (targetStyle, valueParts, context) => MapPaddings(targetStyle, valueParts, context)},
                 {"paddingtop", (targetStyle, property, context) => targetStyle.PaddingTop = MapFixedLength(property.children[0], context)},
@@ -704,7 +704,7 @@ namespace UIForia.Compilers.Style {
             // - 3 values: first values sets top, 2nd sets left and right, 3rd sets bottom
             // - 4 values set all 4 margins from top to left, clockwise
 
-            UIMeasurement value1 = MapMeasurement(property.children[0], context);
+            UIFixedLength value1 = MapFixedLength(property.children[0], context);
 
             if (property.children.Count == 1) {
                 targetStyle.MarginTop = value1;
@@ -713,24 +713,24 @@ namespace UIForia.Compilers.Style {
                 targetStyle.MarginLeft = value1;
             }
             else if (property.children.Count == 2) {
-                UIMeasurement value2 = MapMeasurement(property.children[1], context);
+                UIFixedLength value2 = MapFixedLength(property.children[1], context);
                 targetStyle.MarginTop = value1;
                 targetStyle.MarginRight = value2;
                 targetStyle.MarginBottom = value1;
                 targetStyle.MarginLeft = value2;
             }
             else if (property.children.Count == 3) {
-                UIMeasurement value2 = MapMeasurement(property.children[1], context);
-                UIMeasurement value3 = MapMeasurement(property.children[2], context);
+                UIFixedLength value2 = MapFixedLength(property.children[1], context);
+                UIFixedLength value3 = MapFixedLength(property.children[2], context);
                 targetStyle.MarginTop = value1;
                 targetStyle.MarginRight = value2;
                 targetStyle.MarginBottom = value3;
                 targetStyle.MarginLeft = value2;
             }
             else if (property.children.Count > 3) {
-                UIMeasurement value2 = MapMeasurement(property.children[1], context);
-                UIMeasurement value3 = MapMeasurement(property.children[2], context);
-                UIMeasurement value4 = MapMeasurement(property.children[3], context);
+                UIFixedLength value2 = MapFixedLength(property.children[1], context);
+                UIFixedLength value3 = MapFixedLength(property.children[2], context);
+                UIFixedLength value4 = MapFixedLength(property.children[3], context);
                 targetStyle.MarginTop = value1;
                 targetStyle.MarginRight = value2;
                 targetStyle.MarginBottom = value3;

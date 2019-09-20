@@ -6,7 +6,8 @@ style <this> {
 }
 
 style chat-window {
-    PreferredSize = 1024px;
+    PreferredSize = 1024px 600px;
+    MinHeight = 500px;
 }
 
 style chat-body {
@@ -144,7 +145,6 @@ style date {
 }
 style message-scroll-view {
     LayoutFitHorizontal = Fill;
-    FlexLayoutCrossAxisAlignment = End;
 }
 
 style fill-container {
@@ -168,7 +168,7 @@ style message-input {
     Padding = 20px 0;
     Margin = 0;
     BackgroundColor = @theme.lightestGrey;
-    PreferredSize = 1cnt;
+    PreferredSize = 0 1cnt;
     MaxWidth = 1pca;
     FlexItemGrow = 1;
     LayoutFitHorizontal = Fill;

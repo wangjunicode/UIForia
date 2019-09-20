@@ -1,3 +1,46 @@
+animation maximize {
+    [options] {
+        duration = 340;
+        timingFunction = CubicEaseInOut;
+    }
+    
+    [keyframes] {
+        100% {
+            AlignX = 0%;
+            AlignY = 0%;
+            TransformPosition = 0;
+            PreferredSize = 1vw 1vh;
+        }
+    }
+}
+
+animation minimize {
+    [options] {
+        duration = 340;
+        timingFunction = CubicEaseInOut;
+    }
+    
+    [keyframes] {
+        100% {
+            PreferredHeight = 64px;
+            MinHeight = 64;
+        }
+    }
+}
+
+animation restore {
+    [options] {
+        duration = 340;
+        timingFunction = CubicEaseInOut;
+    }
+
+    [keyframes] {
+        100% {
+            PreferredSize = 1024px 500px;
+            MinHeight = 500px;
+        }
+    }
+}
 
 
 style window-container {
@@ -9,6 +52,17 @@ style window-container {
     GridLayoutColAlignment = Fit;
     LayoutType = Grid; 
     LayoutBehavior = Ignored;
+    AlignmentBehaviorX = Parent;
+    AlignmentBehaviorY = Parent;
+    [attr:minmax="maximize"] {
+        [enter] run animation(maximize);
+    }
+    [attr:minmax="minimize"] {
+        [enter] run animation(minimize);
+    }
+    [attr:minmax="restore"] {
+        [enter] run animation(restore);
+    }
 }
 
 style title-bar {

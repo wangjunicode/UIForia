@@ -1,5 +1,7 @@
+using System;
 using UIForia.Attributes;
 using UIForia.Elements;
+using UIForia.Util;
 
 namespace Demo {
     
@@ -7,9 +9,12 @@ namespace Demo {
     public class Chat : UIElement {
 
         public string message;
-        
+
+        public Action onClose;
+
         public override void OnCreate() {
         //    SetEnabled(false);
+            onClose = () => SetEnabled(false);
         }
     }
 }

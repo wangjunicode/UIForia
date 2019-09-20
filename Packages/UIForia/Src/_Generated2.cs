@@ -1509,13 +1509,13 @@ case "visibility":
                 case "preferredheight":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_UIMeasurement("PreferredHeight", UIForia.Rendering.StylePropertyId.PreferredHeight, targetState.state, Compile<UIForia.Rendering.UIMeasurement>(value, measurementSources));                
                 case "margintop":
-                    return new UIForia.Bindings.StyleBindings.StyleBinding_UIMeasurement("MarginTop", UIForia.Rendering.StylePropertyId.MarginTop, targetState.state, Compile<UIForia.Rendering.UIMeasurement>(value, measurementSources));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_UIFixedLength("MarginTop", UIForia.Rendering.StylePropertyId.MarginTop, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
                 case "marginright":
-                    return new UIForia.Bindings.StyleBindings.StyleBinding_UIMeasurement("MarginRight", UIForia.Rendering.StylePropertyId.MarginRight, targetState.state, Compile<UIForia.Rendering.UIMeasurement>(value, measurementSources));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_UIFixedLength("MarginRight", UIForia.Rendering.StylePropertyId.MarginRight, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
                 case "marginbottom":
-                    return new UIForia.Bindings.StyleBindings.StyleBinding_UIMeasurement("MarginBottom", UIForia.Rendering.StylePropertyId.MarginBottom, targetState.state, Compile<UIForia.Rendering.UIMeasurement>(value, measurementSources));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_UIFixedLength("MarginBottom", UIForia.Rendering.StylePropertyId.MarginBottom, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
                 case "marginleft":
-                    return new UIForia.Bindings.StyleBindings.StyleBinding_UIMeasurement("MarginLeft", UIForia.Rendering.StylePropertyId.MarginLeft, targetState.state, Compile<UIForia.Rendering.UIMeasurement>(value, measurementSources));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_UIFixedLength("MarginLeft", UIForia.Rendering.StylePropertyId.MarginLeft, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
                 case "bordercolor":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_Color("BorderColor", UIForia.Rendering.StylePropertyId.BorderColor, targetState.state, Compile<UnityEngine.Color>(value, colorSources));                
                 case "bordertop":

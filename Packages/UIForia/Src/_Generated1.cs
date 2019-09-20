@@ -481,30 +481,30 @@ namespace UIForia.Rendering {
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.PreferredHeight, value), state); }
         }
         
-        public UIForia.Rendering.UIMeasurement MarginTop {
+        public UIForia.UIFixedLength MarginTop {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.MarginTop, state).AsUIMeasurement; }
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.MarginTop, state).AsUIFixedLength; }
             [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.MarginTop, value), state); }
         }
         
-        public UIForia.Rendering.UIMeasurement MarginRight {
+        public UIForia.UIFixedLength MarginRight {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.MarginRight, state).AsUIMeasurement; }
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.MarginRight, state).AsUIFixedLength; }
             [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.MarginRight, value), state); }
         }
         
-        public UIForia.Rendering.UIMeasurement MarginBottom {
+        public UIForia.UIFixedLength MarginBottom {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.MarginBottom, state).AsUIMeasurement; }
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.MarginBottom, state).AsUIFixedLength; }
             [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.MarginBottom, value), state); }
         }
         
-        public UIForia.Rendering.UIMeasurement MarginLeft {
+        public UIForia.UIFixedLength MarginLeft {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.MarginLeft, state).AsUIMeasurement; }
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.MarginLeft, state).AsUIFixedLength; }
             [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.MarginLeft, value), state); }
         }
@@ -1452,30 +1452,30 @@ namespace UIForia.Rendering {
             set { SetProperty(new StyleProperty(StylePropertyId.PreferredHeight, value)); }
         }
             
-        public UIForia.Rendering.UIMeasurement MarginTop {
+        public UIForia.UIFixedLength MarginTop {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return FindUIMeasurementProperty(StylePropertyId.MarginTop); }
+            get { return FindUIFixedLengthProperty(StylePropertyId.MarginTop); }
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.MarginTop, value)); }
         }
             
-        public UIForia.Rendering.UIMeasurement MarginRight {
+        public UIForia.UIFixedLength MarginRight {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return FindUIMeasurementProperty(StylePropertyId.MarginRight); }
+            get { return FindUIFixedLengthProperty(StylePropertyId.MarginRight); }
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.MarginRight, value)); }
         }
             
-        public UIForia.Rendering.UIMeasurement MarginBottom {
+        public UIForia.UIFixedLength MarginBottom {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return FindUIMeasurementProperty(StylePropertyId.MarginBottom); }
+            get { return FindUIFixedLengthProperty(StylePropertyId.MarginBottom); }
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.MarginBottom, value)); }
         }
             
-        public UIForia.Rendering.UIMeasurement MarginLeft {
+        public UIForia.UIFixedLength MarginLeft {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return FindUIMeasurementProperty(StylePropertyId.MarginLeft); }
+            get { return FindUIFixedLengthProperty(StylePropertyId.MarginLeft); }
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.MarginLeft, value)); }
         }
@@ -2565,38 +2565,38 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UIForia.Rendering.UIMeasurement MarginTop { 
+            public UIForia.UIFixedLength MarginTop { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.MarginTop, out property)) return property.AsUIMeasurement;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.MarginTop, out property)) return property.AsUIFixedLength;
                     return DefaultStyleValues_Generated.MarginTop;
                 }
             }
 
-            public UIForia.Rendering.UIMeasurement MarginRight { 
+            public UIForia.UIFixedLength MarginRight { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.MarginRight, out property)) return property.AsUIMeasurement;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.MarginRight, out property)) return property.AsUIFixedLength;
                     return DefaultStyleValues_Generated.MarginRight;
                 }
             }
 
-            public UIForia.Rendering.UIMeasurement MarginBottom { 
+            public UIForia.UIFixedLength MarginBottom { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.MarginBottom, out property)) return property.AsUIMeasurement;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.MarginBottom, out property)) return property.AsUIFixedLength;
                     return DefaultStyleValues_Generated.MarginBottom;
                 }
             }
 
-            public UIForia.Rendering.UIMeasurement MarginLeft { 
+            public UIForia.UIFixedLength MarginLeft { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.MarginLeft, out property)) return property.AsUIMeasurement;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.MarginLeft, out property)) return property.AsUIFixedLength;
                     return DefaultStyleValues_Generated.MarginLeft;
                 }
             }
@@ -3764,36 +3764,36 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.PreferredHeight, state).AsUIMeasurement;
         }
         
-        public void SetMarginTop(in UIForia.Rendering.UIMeasurement? value, StyleState state) {
+        public void SetMarginTop(in UIForia.UIFixedLength? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.MarginTop, value), state);
         }
 
-        public UIForia.Rendering.UIMeasurement GetMarginTop(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.MarginTop, state).AsUIMeasurement;
+        public UIForia.UIFixedLength GetMarginTop(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.MarginTop, state).AsUIFixedLength;
         }
         
-        public void SetMarginRight(in UIForia.Rendering.UIMeasurement? value, StyleState state) {
+        public void SetMarginRight(in UIForia.UIFixedLength? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.MarginRight, value), state);
         }
 
-        public UIForia.Rendering.UIMeasurement GetMarginRight(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.MarginRight, state).AsUIMeasurement;
+        public UIForia.UIFixedLength GetMarginRight(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.MarginRight, state).AsUIFixedLength;
         }
         
-        public void SetMarginBottom(in UIForia.Rendering.UIMeasurement? value, StyleState state) {
+        public void SetMarginBottom(in UIForia.UIFixedLength? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.MarginBottom, value), state);
         }
 
-        public UIForia.Rendering.UIMeasurement GetMarginBottom(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.MarginBottom, state).AsUIMeasurement;
+        public UIForia.UIFixedLength GetMarginBottom(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.MarginBottom, state).AsUIFixedLength;
         }
         
-        public void SetMarginLeft(in UIForia.Rendering.UIMeasurement? value, StyleState state) {
+        public void SetMarginLeft(in UIForia.UIFixedLength? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.MarginLeft, value), state);
         }
 
-        public UIForia.Rendering.UIMeasurement GetMarginLeft(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.MarginLeft, state).AsUIMeasurement;
+        public UIForia.UIFixedLength GetMarginLeft(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.MarginLeft, state).AsUIFixedLength;
         }
         
         public void SetBorderColor(in UnityEngine.Color? value, StyleState state) {

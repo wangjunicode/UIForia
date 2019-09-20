@@ -813,15 +813,15 @@ namespace UIForia.Rendering {
             );
         }
 
-        public void SetMargin(ContentBoxRect value, StyleState state) {
+        public void SetMargin(FixedLengthRect value, StyleState state) {
             SetMarginTop(value.top, state);
             SetMarginRight(value.right, state);
             SetMarginBottom(value.bottom, state);
             SetMarginLeft(value.bottom, state);
         }
 
-        public ContentBoxRect GetMargin(StyleState state) {
-            return new ContentBoxRect(
+        public FixedLengthRect GetMargin(StyleState state) {
+            return new FixedLengthRect(
                 GetMarginTop(state),
                 GetMarginRight(state),
                 GetMarginBottom(state),

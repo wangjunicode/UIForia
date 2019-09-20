@@ -1,15 +1,10 @@
-using System;
 using System.Diagnostics;
-using SVGX;
-using UIForia.Elements;
-using UIForia.Extensions;
 using UIForia.Layout;
 using UIForia.Util;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
 using UnityEngine;
 using Vertigo;
-using ColorMode = SVGX.ColorMode;
 
 namespace UIForia.Rendering {
 

@@ -1,6 +1,5 @@
 using UIForia.Attributes;
 using UIForia.Elements;
-using UIForia.Rendering;
 
 namespace Demo {
 
@@ -18,8 +17,7 @@ namespace Demo {
                     switch (windowEvent.Window) {
                         case UIWindow.Chat:
                             Chat chat = FindFirstByType<Chat>();
-                            chat.SetEnabled(!chat.isEnabled);
-                            chat.style.SetVisibility(chat.isEnabled ? Visibility.Visible : Visibility.Hidden, StyleState.Normal);
+                            chat.SetEnabled(!chat.isEnabled); 
                             break;
                     }
                     break;

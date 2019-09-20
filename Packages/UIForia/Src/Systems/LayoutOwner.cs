@@ -372,17 +372,12 @@ namespace UIForia.Layout {
                 SVGXMatrix m;
 
                 float rotation = box.element.style.TransformRotation; // todo -- cache this properly
-                if (rotation == 0) {
-                    m = new SVGXMatrix(box.scaleX, 0, 0, box.scaleY, alignedPosition.x, alignedPosition.y);
-                }
-                else {
-                    float ca = math.cos(-rotation * Mathf.Deg2Rad);
-                    float sa = math.sin(-rotation * Mathf.Deg2Rad);
-                    var pivotLocation = new Vector2(box.pivotX * box.size.width, box.pivotY * box.size.height);
-                    m = new SVGXMatrix(ca * box.scaleX, -sa * box.scaleX, sa * box.scaleY, ca * box.scaleY, alignedPosition.x + pivotLocation.x, alignedPosition.y + pivotLocation.y);
-                }
                 
-                    
+                float ca = math.cos(-rotation * Mathf.Deg2Rad);
+                float sa = math.sin(-rotation * Mathf.Deg2Rad);
+                var pivotLocation = new Vector2(box.pivotX * box.size.width, box.pivotY * box.size.height);
+                m = new SVGXMatrix(ca * box.scaleX, -sa * box.scaleX, sa * box.scaleY, ca * box.scaleY, alignedPosition.x + pivotLocation.x, alignedPosition.y + pivotLocation.y);
+
                 localMatrices[i] = m;
                 // if (box.pivotX == 0 && box.pivotY == 0) {
                 //     localMatrices[i] = m;

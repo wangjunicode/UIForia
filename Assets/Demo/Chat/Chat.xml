@@ -8,7 +8,64 @@
             <SlotContent name="KlangWindow.Titlebar">
                 Chat
             </SlotContent>
-            <Image src="'Screens/chat_dm@2x'" />
+            <Group style="chat-body">
+                <Div style="chat-nav">
+                    <Group style="chat-nav-header">
+                        <Heading2>Direct Messages</Heading2>
+                        <Div style="expander">+</Div>
+                    </Group>
+                    <Group style="current-chat">
+                        <Image src="'icon_3'" style="user-icon" />
+                        <Text>Vondi</Text>
+                        <Div style="status">
+                            <Div style="online" />
+                        </Div>
+                    </Group>
+                    <Group style="current-chat">
+                        <Image src="'icon_5'" style="user-icon" />
+                        <Text>Byrne</Text>
+                        <Div style="status">
+                            <Div style="unread">3</Div>
+                        </Div>
+                    </Group>
+                    <Group style="current-chat">
+                        <Image src="'icon_9'" style="user-icon" />
+                        <Text>Little</Text>
+                        <Div style="status">
+                            <Div style="offline" />
+                        </Div>
+                    </Group>
+                </Div>
+                <Div style="chat-messages">
+                    <Heading1>This is the beginning of your direct message history with @Vondi</Heading1>
+                    <Group style="message">
+                        <Image src="'icon_1'" style="user-icon-message" />
+                        <Group style="message-content">
+                            <Group style="message-info-line">
+                                <Text style="name">Svenson</Text>
+                                <Text style="date">01/16/2019</Text>
+                            </Group>
+                            <Text style="text">hey maður!</Text>
+                        </Group>
+                    </Group>
+                    <Group style="message">
+                        <Image src="'icon_1'" style="user-icon-message" />
+                        <Group style="message-content">
+                            <Group style="message-info-line">
+                                <Text style="name">Svenson</Text>
+                                <Text style="date">01/16/2019</Text>
+                            </Group>
+                            <Text style="text">hey maður!</Text>
+                        </Group>
+                    </Group>
+                    <Group style="input-container">
+                        <Input style="message-input" placeholder="'Message Vondi...'"  />
+                        <Image src="'Prototyping/icon__086-095'"
+                               style="emoji"
+                        />
+                    </Group>
+                </Div>
+            </Group>
         </KlangWindow>
     </Contents>
 

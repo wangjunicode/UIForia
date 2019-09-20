@@ -39,7 +39,6 @@ style <Text> {
 style constraint {
     PreferredSize = 700px;
     LayoutFitVertical = Fill;
-     
 }
 
 style <this> {

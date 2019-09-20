@@ -2,8 +2,166 @@ import "Demo/Theme.style" as theme;
 
 style <this> {
     LayoutBehavior = Ignored;
+    TextFontAsset = @theme.fontGothamLight;
 }
 
 style chat-window {
     PreferredSize = 1024px;
+}
+
+style chat-body {
+    FlexLayoutDirection = Horizontal;
+    Padding = 20px;
+    PreferredSize = 1pca;
+}
+
+style chat-nav {
+    PreferredSize = 300px 1pca;
+    BackgroundColor = @theme.lightestGrey;
+    Padding = 10px;
+}
+
+style chat-nav-header {
+    FlexLayoutDirection = Horizontal;
+    FlexLayoutMainAxisAlignment = SpaceBetween;
+    FlexLayoutCrossAxisAlignment = Center;
+    PreferredWidth = 1pca;
+    Margin = 0 0 10px 0;
+    Padding = 0 3px 0 10px;
+}
+
+style <Heading2> {
+    TextTransform = UpperCase;
+    TextFontSize = 0.9em;
+    TextFontAsset = @theme.fontGothamBold;
+    TextColor = @theme.lighterGrey;
+}
+
+style expander {
+    Padding = 2px 5px;
+    MarginRight = 4px;
+    [hover] {
+        BackgroundColor = @theme.lightGrey;
+    }
+}
+
+style current-chat {
+    PreferredSize = 1pca 40px;
+    FlexLayoutDirection = Horizontal;
+    FlexLayoutCrossAxisAlignment = Center;
+    BorderRadius = 4px;
+    Padding = 0 10px;
+ 
+    [hover] {
+        BackgroundColor = @theme.lightGrey;
+    }
+}
+
+style user-icon {
+    PreferredSize = 25px;
+    Margin = 0 10xp 0 0g;
+}
+
+style status {
+    PreferredSize = 25px;
+    FlexLayoutCrossAxisAlignment = Center;
+    FlexLayoutMainAxisAlignment = Center;
+    PaddingRight = 10px;
+    AlignX = 100% Parent;
+}
+
+style online {
+    PreferredSize = 10px;
+    BackgroundColor = rgb(2, 209, 116);
+    BorderRadius = 50%;
+}
+
+style offline {
+    PreferredSize = 10px;
+    BackgroundColor = @theme.lighterGrey;
+    BorderRadius = 50%;
+}
+
+style unread {
+    PreferredSize = 20px;
+    BackgroundColor = red;
+    TextColor = white;
+    TextFontAsset = @theme.fontGothamBold;
+    TextFontSize = 12px;
+    BorderRadius = 50%;
+    FlexLayoutCrossAxisAlignment = Center;
+    FlexLayoutMainAxisAlignment = Center;
+}
+
+style chat-messages {
+    Padding = 30px 20px 10px 20px;
+    LayoutFitHorizontal = Fill;
+}
+
+style <Heading1> {
+    TextFontSize = 1.1em;
+    TextColor = @theme.darkGrey;
+    Margin = 10px 0 20px 0;
+}
+
+style message {
+    BorderColor = @theme.lightestGrey;
+    BorderTop = 1px;
+    LayoutFitHorizontal = Fill;
+    FlexLayoutDirection = Horizontal;
+    Padding = 20px 0;
+}
+
+style message-content {
+    FlexLayoutDirection = Vertical;   
+}
+
+style message-info-line {
+    FlexLayoutDirection = Horizontal;
+    FlexLayoutCrossAxisAlignment = Center;
+    MarginBottom = 10px;
+}
+
+style user-icon-message {
+    PreferredSize = 40px;
+    MarginRight = 20px;
+}
+
+style text {
+    LayoutFitHorizontal = Fill;
+}
+
+style name {
+    TextFontAsset = @theme.fontGothamBold;
+    TextFontSize = 1em;
+    MarginRight = 15px;
+}
+
+style date {
+    TextFontAsset = @theme.fontGothamLight;
+    TextFontSize = 0.8em;
+}
+
+style input-container {
+    Padding = 20px;
+    BorderRadius = 4px;
+    BackgroundColor = @theme.lightestGrey;
+    FlexLayoutDirection = Horizontal;
+    FlexLayoutCrossAxisAlignment = Center;
+    LayoutFitHorizontal = Fill;
+}
+
+style message-input {
+    Border = 0;
+    TextFontSize = 1em;
+    Padding = 0;
+    Margin = 0;
+    BackgroundColor = @theme.lightestGrey;
+    LayoutFitHorizontal = Fill;
+}
+
+style emoji {
+    PreferredSize = 28px;
+    Margin = 0 5px;
+    AlignX = 100% ParentContentArea;
 }

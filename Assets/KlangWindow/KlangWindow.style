@@ -74,11 +74,11 @@ style right-leg {
 
 style minus-bar {
     MinHeight = 4px;
-    TransformRotation = 180;
+    TransformRotation = 0;
 }
 
 style horizontal {
-    TransformRotation = 180;
+    TransformRotation = 0;
 }
 
 style vertical {
@@ -89,6 +89,7 @@ style body {
     GridItemX = 1;
     GridItemY = 1;
     BackgroundColor = White;
+    // CornerBevelBottomRight = 20px;
     LayoutType = Grid;
     GridLayoutColTemplate = 1fr, 1mn;
     GridLayoutRowTemplate = 1mx;

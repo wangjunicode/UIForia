@@ -5,6 +5,7 @@ export const darkTextColor = rgb(51, 51, 51);
 export const darkGrey = rgb(51, 51, 51);
 export const lightGrey = #cccccc;
 export const lighterGrey = rgb(153, 153, 153);
+export const lightestGrey = rgb(242, 242, 242);
 export const mediumGreen = rgb(2, 209, 116);
 
 export const whiteHover = rgba(200, 200, 200, 255);

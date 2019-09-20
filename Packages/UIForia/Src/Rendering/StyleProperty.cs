@@ -366,6 +366,7 @@ namespace UIForia.Rendering {
         public UnderlayType AsUnderlayType => (UnderlayType) int0;
         public LayoutFit AsLayoutFit => (LayoutFit) int0;
         public BackgroundFit AsBackgroundFit => (BackgroundFit) int0;
+        public ClipBounds AsClipBounds => (ClipBounds) int0;
 
         public AlignmentBehavior AsAlignmentBehavior => (AlignmentBehavior) int0;
         public AlignmentDirection AsAlignmentDirection => (AlignmentDirection)int0;

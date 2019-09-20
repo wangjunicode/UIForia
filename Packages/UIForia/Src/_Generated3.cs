@@ -21,6 +21,7 @@ namespace UIForia.Rendering {
 		public const Overflow OverflowX = UIForia.Rendering.Overflow.Visible;
 		public const Overflow OverflowY = UIForia.Rendering.Overflow.Visible;
 		public const ClipBehavior ClipBehavior = UIForia.Layout.ClipBehavior.Normal;
+		public const ClipBounds ClipBounds = UIForia.Rendering.ClipBounds.BorderBox;
 		public static readonly Color BackgroundColor = new Color(-1f, -1f, -1f, -1f);
 		public static readonly Color BackgroundTint = new Color(-1f, -1f, -1f, -1f);
 		public static readonly UIFixedLength BackgroundImageOffsetX = new UIFixedLength(0f, UIFixedUnit.Pixel);
@@ -168,6 +169,8 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.OverflowY, (int)UIForia.Rendering.Overflow.Visible);
 				case StylePropertyId.ClipBehavior:
 					 return new StyleProperty(StylePropertyId.ClipBehavior, (int)UIForia.Layout.ClipBehavior.Normal);
+				case StylePropertyId.ClipBounds:
+					 return new StyleProperty(StylePropertyId.ClipBounds, (int)UIForia.Rendering.ClipBounds.BorderBox);
 				case StylePropertyId.BackgroundColor:
 					 return new StyleProperty(StylePropertyId.BackgroundColor, new Color(-1f, -1f, -1f, -1f));
 				case StylePropertyId.BackgroundTint:

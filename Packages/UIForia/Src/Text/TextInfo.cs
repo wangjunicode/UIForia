@@ -1,4 +1,5 @@
 using System;
+using System.Text;
 using SVGX;
 using UIForia.Layout;
 using UIForia.Util;
@@ -37,25 +38,25 @@ namespace UIForia.Text {
             this.requiresLayout = true;
 
             rootSpan.inheritedStyle = new SVGXInheritedTextStyle() {
-                    alignment = TextAlignment.Left,
-                    textTransform = TextTransform.None,
-                    whitespaceMode = WhitespaceMode.CollapseWhitespace,
-                    textColor = new Color32(0, 0, 0, 255),
-                    faceDilate = 0,
-                    fontAsset = FontAsset.defaultFontAsset,
-                    fontSize = 18,
-                    fontStyle = FontStyle.Normal,
-                    glowColor = new Color32(0, 0, 0, 0),
-                    underlayColor = new Color32(0, 0, 0, 0),
-                    glowOffset = 0,
-                    underlayX = 0,
-                    underlayY = 0,
-                    underlayDilate = 0,
-                    underlaySoftness = 0,
-                    glowOuter = 0,
-                    outlineColor = new Color32(0, 0, 0, 0),
-                    outlineSoftness = 0,
-                    outlineWidth = 0
+                alignment = TextAlignment.Left,
+                textTransform = TextTransform.None,
+                whitespaceMode = WhitespaceMode.CollapseWhitespace,
+                textColor = new Color32(0, 0, 0, 255),
+                faceDilate = 0,
+                fontAsset = FontAsset.defaultFontAsset,
+                fontSize = 18,
+                fontStyle = FontStyle.Normal,
+                glowColor = new Color32(0, 0, 0, 0),
+                underlayColor = new Color32(0, 0, 0, 0),
+                glowOffset = 0,
+                underlayX = 0,
+                underlayY = 0,
+                underlayDilate = 0,
+                underlaySoftness = 0,
+                glowOuter = 0,
+                outlineColor = new Color32(0, 0, 0, 0),
+                outlineSoftness = 0,
+                outlineWidth = 0
             };
             rootSpan.inheritStyleProperties = inheritStyleProperties;
             rootSpan.textStyle = style;
@@ -581,6 +582,28 @@ namespace UIForia.Text {
 
         }
 
+        private static readonly StringBuilder s_StringBuilder = new StringBuilder(128);
+        
+        public string GetSelectedString(SelectionRange selectionRange) {
+            // todo -- not at all optimized, searches every character right now and adds 1 by 1
+            int idx = 0;
+            int min = Mathf.Min(selectionRange.cursorIndex, selectionRange.selectIndex);
+            int max = Mathf.Max(selectionRange.cursorIndex, selectionRange.selectIndex);
+            for (int i = 0; i < spanList.size; i++) {
+                int size = spanList.array[i].charInfoList.size;
+                CharInfo[] charInfos = spanList.array[i].charInfoList.array;
+                for (int c = 0; c < size; c++) {
+                    if (idx >= min && idx < max) {
+                        s_StringBuilder.Append((char) charInfos[c].character);
+                    }
+                    idx++;
+                }
+            }
+            string retn = s_StringBuilder.ToString();
+            s_StringBuilder.Clear();
+            return retn;
+        }
+
         public Vector2 GetSelectionPosition(SelectionRange selectionRange) {
             return GetCursorPosition(selectionRange.selectIndex);
         }
@@ -766,8 +789,12 @@ namespace UIForia.Text {
         //     
         // }
 
-        public SelectionRange SelectLineAtPoint(Vector2 mouse) {
-            throw new NotImplementedException();
+        public SelectionRange SelectLineAtPoint(Vector2 point) {
+            int idx = FindNearestLine(point);
+            return new SelectionRange(
+                lineInfoList.array[idx].globalCharacterEndIndex + 1, // might be wrong for multi line
+                lineInfoList.array[idx].globalCharacterStartIndex
+            );
         }
 
         public SelectionRange MoveCursorLeft(SelectionRange range, bool maintainSelection, bool word) {
@@ -853,7 +880,6 @@ namespace UIForia.Text {
         }
 
         public SelectionRange MoveToStartOfLine(SelectionRange selectionRange, bool select) {
-
             if (selectionRange.cursorIndex <= 0) {
                 return new SelectionRange(selectionRange.cursorIndex, select ? selectionRange.selectIndex : -1);
             }
@@ -864,6 +890,7 @@ namespace UIForia.Text {
                     if (select) {
                         return new SelectionRange(lineInfo.globalCharacterStartIndex, Mathf.Max(selectionRange.selectIndex, selectionRange.cursorIndex));
                     }
+
                     return new SelectionRange(lineInfo.globalCharacterStartIndex);
                 }
             }
@@ -871,7 +898,8 @@ namespace UIForia.Text {
             // index is int.max or content size changed / we need to check for out of bounds 
             LineInfo lastLine = lineInfoList.array[lineInfoList.size - 1];
             if (select) {
-                return new SelectionRange(lastLine.globalCharacterStartIndex, selectionRange.selectIndex > -1 ? Mathf.Min(selectionRange.selectIndex, lastLine.globalCharacterEndIndex) : lastLine.globalCharacterEndIndex);}
+                return new SelectionRange(lastLine.globalCharacterStartIndex, selectionRange.selectIndex > -1 ? Mathf.Min(selectionRange.selectIndex, lastLine.globalCharacterEndIndex) : lastLine.globalCharacterEndIndex);
+            }
 
             return new SelectionRange(lastLine.globalCharacterStartIndex);
         }
@@ -887,6 +915,7 @@ namespace UIForia.Text {
                     if (select) {
                         return new SelectionRange(lineInfo.globalCharacterEndIndex, Mathf.Max(selectionRange.selectIndex, selectionRange.cursorIndex));
                     }
+
                     return new SelectionRange(lineInfo.globalCharacterEndIndex);
                 }
             }
@@ -895,8 +924,9 @@ namespace UIForia.Text {
                 return new SelectionRange(lineInfoList.array[lineInfoList.size - 1].globalCharacterEndIndex, selectionRange.selectIndex);
             }
 
-            return new SelectionRange(lineInfoList.array[lineInfoList.size - 1].globalCharacterEndIndex);        
+            return new SelectionRange(lineInfoList.array[lineInfoList.size - 1].globalCharacterEndIndex);
         }
+
     }
 
 }

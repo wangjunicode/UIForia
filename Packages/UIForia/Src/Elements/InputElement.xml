@@ -14,6 +14,7 @@
             TextFontSize = 1.2em;
             MarginBottom = 20px;
             Overflow = Hidden;
+            ClipBounds = ContentBox;
         }
 
         style input-element-text {

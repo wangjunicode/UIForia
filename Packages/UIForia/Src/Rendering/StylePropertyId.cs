@@ -5,6 +5,7 @@ namespace UIForia.Rendering {
         OverflowX = 1,
         OverflowY = 2,
         ClipBehavior = 3,
+        ClipBounds = 4,
         
         BackgroundColor = 100,
         BorderColor = 101,

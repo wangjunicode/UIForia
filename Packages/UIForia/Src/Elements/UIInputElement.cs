@@ -326,7 +326,7 @@ namespace UIForia.Elements {
     }
 
 
-    public abstract class UIInputElement : UIElement, IFocusableEvented, IStylePropertiesDidChangeHandler {
+    public abstract class UIInputElement : UIElement, IFocusableEvented {
 
         [CustomPainter("UIForia::Input")]
         internal class InputElementPainter : StandardRenderBox  {
@@ -353,24 +353,13 @@ namespace UIForia.Elements {
                 // float baseLineHeight = textInfo.rootSpan.textStyle.fontAsset.faceInfo.LineHeight;
                 // float scaledSize = textInfo.rootSpan.fontSize / textInfo.rootSpan.textStyle.fontAsset.faceInfo.PointSize;
                 // float lh = baseLineHeight * scaledSize;
-                //
-                if (inputElement.isSelecting) {
-                    path.BeginPath();
-                    path.SetStroke(inputElement.caretColor);
-                    path.SetStrokeWidth(1f);
-                    Vector2 p = textInfo.GetSelectionPosition(inputElement.selectionRange) - inputElement.textScroll;
-                    path.MoveTo(inputElement.layoutResult.ContentRect.min + p); // todo remove + 4 on y
-                    path.VerticalLineTo(inputElement.layoutResult.ContentRect.y + p.y + inputElement.style.GetResolvedFontSize());
-                    path.EndPath();
-                    path.Stroke();
-                }
 
                 if (!inputElement.isSelecting && inputElement.hasFocus && blinkState) {
                     path.BeginPath();
                     path.SetStroke(inputElement.caretColor);
                     path.SetStrokeWidth(1f);
                     Vector2 p = textInfo.GetCursorPosition(inputElement.selectionRange.cursorIndex) - inputElement.textScroll;
-                    path.MoveTo(inputElement.layoutResult.ContentRect.min + p); // todo remove + 4 on y
+                    path.MoveTo(inputElement.layoutResult.ContentRect.min + p);
                     path.VerticalLineTo(inputElement.layoutResult.ContentRect.y + p.y + inputElement.style.GetResolvedFontSize());
                     path.EndPath();
                     path.Stroke();
@@ -391,7 +380,6 @@ namespace UIForia.Elements {
                         }
                     }
                     else {
-                        // todo the highlight is wrong when scrolled
                         Rect rect = textInfo.GetLineRect(lineRange.start);
                         Vector2 cursorPosition = textInfo.GetCursorPosition(inputElement.selectionRange.cursorIndex) - inputElement.textScroll;
                         Vector2 selectPosition = textInfo.GetSelectionPosition(inputElement.selectionRange) - inputElement.textScroll;
@@ -400,7 +388,10 @@ namespace UIForia.Elements {
                         minX += contentRect.x;
                         maxX += contentRect.x;
                         rect.y += contentRect.y;
-                        path.Rect(minX, rect.y, maxX - minX, rect.height);
+                        float x = Mathf.Max(minX, contentRect.x);
+                        float cursorToContentEnd = contentRect.width - x;
+                        float cursorToMax = maxX - x;
+                        path.Rect(x, rect.y, Mathf.Min(cursorToContentEnd, cursorToMax), rect.height);
                     }
     
                     path.Fill();
@@ -481,11 +472,11 @@ namespace UIForia.Elements {
         
         
         public override void OnUpdate() {
-            if (isReady) {
+           // if (isReady) {
                 ScrollToCursor();
-            }
+           // }
 
-            isReady = true;
+           // isReady = true;
         }
 
         protected void EmitTextChanged() {
@@ -532,7 +523,8 @@ namespace UIForia.Elements {
              //   selectionRange = textElement.textInfo.SelectWordAtPoint(mouse);
             }
             else if (evt.IsTripleClick) {
-             //  selectionRange = textElement.textInfo.SelectLineAtPoint(mouse);
+               selectionRange = textElement.textInfo.SelectLineAtPoint(mouse);
+               
             }
             else {
                 selectionRange = new SelectionRange(textElement.textInfo.GetIndexAtPoint(mouse));
@@ -572,13 +564,12 @@ namespace UIForia.Elements {
                 return;
             }
 
-//            selectionRange = textInfo.InsertText(selectionRange, c);
             HandleCharactersEntered(c.ToString());
             ScrollToCursor();
         }
 
         protected void ScrollToCursor() {
-            if (textElement == null || textElement.textInfo == null) {
+            if (!hasFocus || textElement == null || textElement.textInfo == null) {
                 return;
             }
 
@@ -624,7 +615,6 @@ namespace UIForia.Elements {
             evt.StopPropagation();
             if (HasDisabledAttr()) return;
             keyLockTimestamp = Time.unscaledTime;
-//            selectionRange = textInfo.DeleteTextBackwards(selectionRange);
             blinkStartTime = Time.unscaledTime;
             HandleCharactersDeletedBackwards();
             ScrollToCursor();
@@ -636,7 +626,6 @@ namespace UIForia.Elements {
             evt.StopPropagation();
             if (!CanTriggerHeldKey()) return;
             timestamp = Time.unscaledTime;
-            //selectionRange = textInfo.DeleteTextBackwards(selectionRange);
             blinkStartTime = Time.unscaledTime;
             HandleCharactersDeletedBackwards();
             ScrollToCursor();
@@ -648,8 +637,6 @@ namespace UIForia.Elements {
             evt.StopPropagation();
             if (!CanTriggerHeldKey()) return;
             timestamp = Time.unscaledTime;
-
-            //selectionRange = textInfo.DeleteTextForwards(selectionRange);
             blinkStartTime = Time.unscaledTime;
             HandleCharactersDeletedForwards();
             ScrollToCursor();
@@ -726,7 +713,7 @@ namespace UIForia.Elements {
         [OnKeyDownWithFocus(KeyCode.C, KeyboardModifiers.Control)]
         protected void HandleCopy(KeyboardInputEvent evt) {
             if (evt.onlyControl && selectionRange.HasSelection) {
-              //  clipboard = textInfo.GetSelectedString(selectionRange);
+                clipboard = textElement.textInfo.GetSelectedString(selectionRange);
                 evt.StopPropagation();
             }
         }
@@ -736,8 +723,7 @@ namespace UIForia.Elements {
         protected void HandleCut(KeyboardInputEvent evt) {
             if (GetAttribute("disabled") != null) return;
             if (evt.onlyControl && selectionRange.HasSelection) {
-            //    clipboard = textInfo.GetSelectedString(selectionRange);
-                //selectionRange = textInfo.DeleteTextBackwards(selectionRange);
+                clipboard = textElement.textInfo.GetSelectedString(selectionRange);
                 HandleCharactersDeletedBackwards();
                 evt.StopPropagation();
             }
@@ -824,11 +810,6 @@ namespace UIForia.Elements {
             hasFocus = false;
             selectionRange = new SelectionRange(selectionRange.cursorIndex);
             onBlur?.Invoke(new BlurEvent());
-        }
-
-        public void OnStylePropertiesDidChange() {
-           // textInfo.SetSpanStyle(0, style.GetTextStyle());
-           // textInfo.Layout();
         }
 
         protected class TextSelectDragEvent : DragEvent {

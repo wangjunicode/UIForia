@@ -57,13 +57,27 @@ namespace UIForia.Rendering {
         internal ClipData clipper;
         public bool didRender;
 
-        public virtual RenderBounds RenderBounds => new RenderBounds(
-            0, //element.layoutResult.localPosition.x,
-            0, //element.layoutResult.localPosition.y,
-            element.layoutResult.actualSize.width,
-            element.layoutResult.actualSize.height
-        );
-        
+        public virtual RenderBounds RenderBounds {
+            get {
+                switch (element.style.ClipBounds) { // todo -- cache this
+                    case ClipBounds.ContentBox: {
+                        OffsetRect border = element.layoutResult.border;
+                        OffsetRect padding = element.layoutResult.padding;
+                        return new RenderBounds(
+                            border.left + padding.left,
+                            border.top + padding.top,
+                            element.layoutResult.actualSize.width - border.right - padding.right,
+                            element.layoutResult.actualSize.height - border.bottom - padding.bottom
+                        );
+                    }
+                    case ClipBounds.BorderBox:
+                        return new RenderBounds(0, 0, element.layoutResult.actualSize.width, element.layoutResult.actualSize.height);
+                }
+
+                return new RenderBounds(0, 0, element.layoutResult.actualSize.width, element.layoutResult.actualSize.height);
+            }
+        }
+
         public virtual void OnInitialize() {
             overflowX = element.style.OverflowX;
             overflowY = element.style.OverflowY;
@@ -125,7 +139,6 @@ namespace UIForia.Rendering {
 
 
         public Path2D GetClipPathFromElement() {
-
             Size size = element.layoutResult.actualSize;
             float elementWidth = size.width;
             float elementHeight = size.height;
@@ -134,8 +147,8 @@ namespace UIForia.Rendering {
             if (element is UITextElement) {
                 return null;
             }
-            
-            
+
+
             float bevelTopLeft = ResolveFixedSize(element, min, element.style.CornerBevelTopLeft);
             float bevelTopRight = ResolveFixedSize(element, min, element.style.CornerBevelTopRight);
             float bevelBottomRight = ResolveFixedSize(element, min, element.style.CornerBevelBottomRight);
@@ -145,7 +158,7 @@ namespace UIForia.Rendering {
             float radiusTopRight = ResolveFixedSize(element, min, element.style.BorderRadiusTopRight);
             float radiusBottomRight = ResolveFixedSize(element, min, element.style.BorderRadiusBottomRight);
             float radiusBottomLeft = ResolveFixedSize(element, min, element.style.BorderRadiusBottomLeft);
-            
+
             if (radiusBottomLeft > 0 ||
                 radiusBottomRight > 0 ||
                 radiusTopLeft > 0 ||
@@ -155,19 +168,19 @@ namespace UIForia.Rendering {
                 bevelBottomLeft > 0 ||
                 bevelBottomRight > 0) {
                 // todo -- decorated rect w/ cut
-                
+
                 // todo -- if padding or border box would be larger enough to ignore cut / radius we can return null here also
                 if (element.layoutResult.padding.top > 0 &&
-                    element.layoutResult.padding.bottom > 0 && 
+                    element.layoutResult.padding.bottom > 0 &&
                     element.layoutResult.padding.right > 0 &&
                     element.layoutResult.padding.left > 0) {
                     return null;
                 }
-                
+
                 clipPath = clipPath ?? new Path2D();
                 clipPath.Clear(); // todo -- only clear if changed
 
-                
+
                 clipPath.BeginPath();
                 clipPath.SetFill(Color.white);
                 clipPath.RoundedRect(0, 0, size.width, size.height, radiusTopLeft, radiusTopRight, radiusBottomRight, radiusBottomLeft);
@@ -178,7 +191,7 @@ namespace UIForia.Rendering {
                 return null;
             }
         }
-        
+
         public virtual Path2D GetClipShape() {
             return GetClipPathFromElement();
         }

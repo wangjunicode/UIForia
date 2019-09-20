@@ -54,6 +54,13 @@ namespace UIForia.Rendering {
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ClipBehavior, (int)value), state); }
         }
         
+        public UIForia.Rendering.ClipBounds ClipBounds {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ClipBounds, state).AsClipBounds; }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ClipBounds, (int)value), state); }
+        }
+        
         public UnityEngine.Color BackgroundColor {
             [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.BackgroundColor, state).AsColor; }
@@ -1016,6 +1023,13 @@ namespace UIForia.Rendering {
             get { return (UIForia.Layout.ClipBehavior)FindEnumProperty(StylePropertyId.ClipBehavior); }
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.ClipBehavior, (int)value)); }
+        }
+            
+        public UIForia.Rendering.ClipBounds ClipBounds {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return (UIForia.Rendering.ClipBounds)FindEnumProperty(StylePropertyId.ClipBounds); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.ClipBounds, (int)value)); }
         }
             
         public UnityEngine.Color BackgroundColor {
@@ -1998,6 +2012,16 @@ namespace UIForia.Rendering {
                     if (propertyMap.TryGetValue((int) StylePropertyId.ClipBehavior, out property)) return property.AsClipBehavior;
                     if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.ClipBehavior), out property)) return property.AsClipBehavior;
                     return DefaultStyleValues_Generated.ClipBehavior;
+                }
+            }
+
+            public UIForia.Rendering.ClipBounds ClipBounds { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.ClipBounds, out property)) return property.AsClipBounds;
+                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.ClipBounds), out property)) return property.AsClipBounds;
+                    return DefaultStyleValues_Generated.ClipBounds;
                 }
             }
 
@@ -3252,6 +3276,14 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.ClipBehavior, state).AsClipBehavior;
         }
         
+        public void SetClipBounds(in UIForia.Rendering.ClipBounds? value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.ClipBounds, (int)value), state);
+        }
+
+        public UIForia.Rendering.ClipBounds GetClipBounds(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.ClipBounds, state).AsClipBounds;
+        }
+        
         public void SetBackgroundColor(in UnityEngine.Color? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.BackgroundColor, value), state);
         }
@@ -4309,6 +4341,8 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.OverflowY, (int)OverflowY);
 				case StylePropertyId.ClipBehavior:
 					 return new StyleProperty(StylePropertyId.ClipBehavior, (int)ClipBehavior);
+				case StylePropertyId.ClipBounds:
+					 return new StyleProperty(StylePropertyId.ClipBounds, (int)ClipBounds);
 				case StylePropertyId.BackgroundColor:
 					 return new StyleProperty(StylePropertyId.BackgroundColor, BackgroundColor);
 				case StylePropertyId.BackgroundTint:
@@ -4686,6 +4720,7 @@ namespace UIForia.Rendering {
                     case StylePropertyId.Visibility: return true;
                     case StylePropertyId.Opacity: return true;
                     case StylePropertyId.ClipBehavior: return true;
+                    case StylePropertyId.ClipBounds: return true;
                     case StylePropertyId.TextColor: return true;
                     case StylePropertyId.TextFontAsset: return true;
                     case StylePropertyId.TextFontSize: return true;

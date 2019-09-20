@@ -34,6 +34,7 @@ namespace UIForia.Editor {
             new PropertyGenerator<Overflow>(StylePropertyId.OverflowX, Overflow.Visible),
             new PropertyGenerator<Overflow>(StylePropertyId.OverflowY, Overflow.Visible),
             new PropertyGenerator<ClipBehavior>(StylePropertyId.ClipBehavior, ClipBehavior.Normal, InheritanceType.Inherited),
+            new PropertyGenerator<ClipBounds>(StylePropertyId.ClipBounds, ClipBounds.BorderBox, InheritanceType.Inherited),
 
             // Background
             new AnimatedPropertyGenerator<Color>(StylePropertyId.BackgroundColor, ColorUtil.UnsetValue),

@@ -2,6 +2,7 @@
 <UITemplate>
 
     <Style path="Demo/Chat/Chat.style" />
+    <Style path="Demo/Theme.style" alias="theme" />
 
     <Contents>
         <KlangWindow style="chat-window" hideSideBar="true" onClose="onClose">
@@ -38,32 +39,24 @@
                 </Div>
                 <Div style="chat-messages">
                     <Group style="fill-container">
-                        <ScrollView style="message-scroll-view">
+                        <ScrollView x-id="scrollview" style="message-scroll-view">
                             <Heading1>This is the beginning of your direct message history with @Vondi</Heading1>
-                            <Group style="message">
-                                <Image src="'icon_1'" style="user-icon-message" />
-                                <Group style="message-content">
-                                    <Group style="message-info-line">
-                                        <Text style="name">Svenson</Text>
-                                        <Text style="date">01/16/2019</Text>
+                            <Repeat list="messages">
+                                <Group style="message">
+                                    <Image src="$item.icon" style="user-icon-message" />
+                                    <Group style="message-content">
+                                        <Group style="message-info-line">
+                                            <Text style="name">{$item.sender}</Text>
+                                            <Text style="date">{$item.date}</Text>
+                                        </Group>
+                                        <Text style="text">{$item.text}</Text>
                                     </Group>
-                                    <Text style="text">hey maður!</Text>
                                 </Group>
-                            </Group>
-                            <Group style="message">
-                                <Image src="'icon_3'" style="user-icon-message" />
-                                <Group style="message-content">
-                                    <Group style="message-info-line">
-                                        <Text style="name">Vondi</Text>
-                                        <Text style="date">02/16/2019</Text>
-                                    </Group>
-                                    <Text style="text">hvað er að frétta?</Text>
-                                </Group>
-                            </Group>
+                            </Repeat>
                         </ScrollView>
                             
                         <Group style="input-container">
-                            <Input style="message-input" placeholder="'Message Vondi...'"  />
+                            <Input style="message-input" placeholder="'Message Vondi...'" value.read.write="message"  />
                             <Image src="'Prototyping/icon__086-095'"
                                    style="emoji"
                             />

@@ -380,7 +380,7 @@ namespace UIForia.Layout {
                 float ca = math.cos(-rotation * Mathf.Deg2Rad);
                 float sa = math.sin(-rotation * Mathf.Deg2Rad);
                 var pivotLocation = new Vector2(box.pivotX * box.size.width, box.pivotY * box.size.height);
-                m = new SVGXMatrix(ca * box.scaleX, -sa * box.scaleX, sa * box.scaleY, ca * box.scaleY, alignedPosition.x + pivotLocation.x, alignedPosition.y + pivotLocation.y);
+                m = new SVGXMatrix(ca * box.scaleX, sa * box.scaleX, -sa * box.scaleY, ca * box.scaleY, alignedPosition.x + pivotLocation.x, alignedPosition.y + pivotLocation.y);
 
                 localMatrices[i] = m;
                 // if (box.pivotX == 0 && box.pivotY == 0) {

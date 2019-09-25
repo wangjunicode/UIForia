@@ -20,7 +20,7 @@ namespace Demo.Graphics {
 
         public override void OnInitialize() {
             base.OnInitialize();
-            particleRoot = Object.Instantiate(Resources.Load<GameObject>("Particles/pfx_button_charge"));
+            particleRoot = Object.Instantiate(Resources.Load<GameObject>("Particles/pfx_button_scrambled"));
             particleRoot.name = "ParticleRenderBox";
             //particleRoot.hideFlags |= HideFlags.HideInHierarchy | HideFlags.HideInInspector;
             ParticleSystem[] systems = particleRoot.GetComponentsInChildren<ParticleSystem>();

@@ -3,23 +3,23 @@
     
     <Style src="Demo/Simple/Simple.style"/>
     
-    <Contents>
+    <Contents style="container">
         
         <Text onMouseClick="ToggleLanguage()" style="header">
             {HeaderText}
         </Text>
         
-        <Panel style="box box-black" onMouseClick="OnBoxClicked(1)">
+        <Div style="box box-black" onMouseClick="OnBoxClicked(1)">
             Clicked {boxClicks1} times
-        </Panel>
+        </Div>
         
-        <Panel style="box box-red" onMouseClick="OnBoxClicked(2)">
+        <Div style="box box-red" onMouseClick="OnBoxClicked(2)">
            Clicked {boxClicks2} times
-        </Panel>
+        </Div>
         
-        <Panel style="box box-gold" onMouseClick="OnBoxClicked(3)">
+        <Div style="box box-gold" onMouseClick="OnBoxClicked(3)">
             Clicked {boxClicks3} times
-        </Panel>
+        </Div>
         
     </Contents>
 </UITemplate>

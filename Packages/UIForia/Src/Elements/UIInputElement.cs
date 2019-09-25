@@ -368,7 +368,7 @@ namespace UIForia.Elements {
                 if (inputElement.selectionRange.HasSelection) {
                     RangeInt lineRange = new RangeInt(0, 1); //textInfo.GetLineRange(selectionRange));textInfo.GetLineRange(selectionRange);
                     path.BeginPath();
-                    path.SetFill(new Color(0.5f, 0, 0, 0.5f));
+                    path.SetFill(new Color32(184, 255, 255,  255));
     
                     if (lineRange.length > 1) {
                         // todo this doesn't really work yet

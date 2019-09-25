@@ -462,12 +462,12 @@ namespace UIForia {
 
             m_AnimationSystem.OnUpdate();
             
-            SetTraversalIndex();
-
             m_InputSystem.OnLateUpdate();
             
             m_RoutingSystem.OnUpdate();
             
+            SetTraversalIndex();
+
             m_LayoutSystem.OnUpdate();
             
             m_BeforeUpdateTaskSystem.OnUpdate();

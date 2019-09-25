@@ -1,4 +1,4 @@
-style <this> {
+style container {
     Padding = 20px;
 }
 
@@ -9,11 +9,11 @@ style box {
     FlexLayoutMainAxisAlignment = Center;
     TextColor = white;
 
-  //  [hover] {
-  //      TextColor = yellow;
-  //      TextUnderlayColor = black;
-  //      TextUnderlayDilate = 0.5;
-  //  }
+//    [hover] {
+//        TextColor = yellow;
+//        TextUnderlayColor = black;
+//        TextUnderlayDilate = 0.5;
+//    }
     
 }   
 
@@ -38,10 +38,10 @@ style box-gold {
     BackgroundColor = #ffce00;
     BorderRadiusBottomRight = 50%;
         
-  //  [hover] {
-  //      [enter] run animation(hover-box-in);
-  //      [exit] run animation(hover-box-out);
-  //  }
+//    [hover] {
+//        [enter] run animation(hover-box-in);
+//        [exit] run animation(hover-box-out);
+//    }
 
 }
 

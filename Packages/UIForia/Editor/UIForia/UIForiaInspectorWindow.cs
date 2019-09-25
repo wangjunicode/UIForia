@@ -97,11 +97,11 @@ namespace UIForia.Editor {
                 contentColor = new Color32(140, 182, 193, 175);
             }
 
-            if (!ColorUtility.TryParseHtmlString(EditorPrefs.GetString("UIForia.Inspector.PaddingColor"), out borderColor)) {
+            if (!ColorUtility.TryParseHtmlString(EditorPrefs.GetString("UIForia.Inspector.BorderColor"), out borderColor)) {
                 borderColor = new Color32(253, 221, 155, 175);
             }
 
-            if (!ColorUtility.TryParseHtmlString(EditorPrefs.GetString("UIForia.Inspector.BorderColor"), out paddingColor)) {
+            if (!ColorUtility.TryParseHtmlString(EditorPrefs.GetString("UIForia.Inspector.PaddingColor"), out paddingColor)) {
                 paddingColor = new Color32(253, 221, 155, 175);
             }
 

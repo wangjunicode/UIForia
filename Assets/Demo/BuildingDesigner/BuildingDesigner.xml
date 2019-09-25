@@ -10,6 +10,7 @@
     <Using namespace="Demo"/>
 
     <Contents>
+        
         <Group style="building-designer-top-bar">
             <Group style="top-left-area flex-horizontal-centered">
                 <Text>CONSTRUCTION MODE</Text>
@@ -107,6 +108,7 @@
       
             </SlotContent>
         </Dialog>
+        
     </Contents>
 
 </UITemplate>

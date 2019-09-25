@@ -7,7 +7,7 @@
     <Contents>
         <Dock isActive="currentPanel == UIPanel.Dock" />
         <BuildingDesigner isActive="currentPanel == UIPanel.Building" />
-        <Chat />
+        <Chat if="false"/>
     </Contents>
 
 </UITemplate>

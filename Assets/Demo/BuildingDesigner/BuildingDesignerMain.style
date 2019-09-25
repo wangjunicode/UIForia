@@ -1,7 +1,3 @@
-// ------------------ MAIN ------------------ 
-//TODO: tooltips on brush-images (with cost)
-//TODO: grid with buttons doesn't stretch vertically
-
 import "Demo/Theme.style" as theme;
 
 const durationBase = 100;
@@ -128,10 +124,6 @@ style brush-label {
 
 style remove-button {
     LayoutBehavior = Ignored;
-    AnchorRight = 8px;
-    AnchorTop = 8px;
-    TransformBehaviorX = AnchorMaxOffset;
-    TransformBehaviorY = AnchorMinOffset;
     
     BorderRadius = 20px;
     

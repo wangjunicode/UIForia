@@ -1,34 +1,32 @@
 ﻿using System;
-using UIForia.Rendering;
+using UIForia.Elements;
 using UnityEngine;
 
 namespace UIForia {
-
+    
     public class UIViewBehavior : MonoBehaviour {
 
         public Type type;
         public string typeName;
         public new Camera camera;
-        private Path2D path;
         private Application application;
-        public string applicationId = "Game App";
-
 
         public void Start() {
             type = Type.GetType(typeName);
-
             if (type == null) return;
-            application = GameApplication.Create(applicationId, type, camera);
-            application.RenderSystem.DrawDebugOverlay2 += DrawOverlay;
-            path = new Path2D();
+            // 1. creates the application
+            application = GameApplication.Create( "Game App", type, camera);
+            application.onElementRegistered += DoDependencyInjection;
         }
 
-        private void DrawOverlay(RenderContext ctx) {
-
+        // optional!
+        private void DoDependencyInjection(UIElement element) {
+            // DiContainer.Inject(element);
         }
 
         private void Update() {
             if (type == null) return;
+            // 2. update the application every frame
             application?.Update();
         }
 

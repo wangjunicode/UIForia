@@ -15,6 +15,7 @@ animation show {
         100% { AlignY = 100%; }
     }
 }
+
 animation hide {
     [options] {
         duration = @durationDialog;
@@ -26,6 +27,8 @@ animation hide {
     }
 }
 
+// using pro tools here: <this> always references the 
+// <Contents> of the style's element
 style <this> {
     PreferredSize = 1024px 512px;
     TextFontAsset = @theme.fontGothamBold;
@@ -36,14 +39,17 @@ style <this> {
     GridLayoutColAlignment = Fit;
     GridLayoutRowAlignment = Fit;
     Cursor = @theme.cursorDefault;   
+    // default alignment: off screen
     AlignX = 100% Parent;
     AlignY = 200% 100%;
     AlignmentBehaviorY = Parent;
+    // drop shadow
     ShadowColor = black;
     ShadowIntensity = 150;
     ShadowOpacity = 0.5;
     ShadowOffsetX = 10;
     ShadowOffsetY = 20;
+    // look, ma, beveled corners!
     CornerBevelTopLeft = @theme.topLeftCornerBevel;
     [attr:placement="show"] {
         run animation(show);
@@ -59,9 +65,3 @@ style cancel-color { BackgroundColor = @theme.cancelColor; }
 
 style confirm-text-color { TextColor = @theme.confirmColor; }
 style cancel-text-color { TextColor = @theme.cancelColor; }
-
-//style corner-cut-window {
-//    PreferredSize = 800px 600px;
-//    BackgroundColor = white;
-//    Painter = "SeedWindow:TopLeft";
-//}

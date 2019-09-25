@@ -1,5 +1,3 @@
-// ------------------ TOP-BAR ------------------ 
-
 import "Demo/Theme.style" as theme;
 
 const topBarFramePad = 0.7em;

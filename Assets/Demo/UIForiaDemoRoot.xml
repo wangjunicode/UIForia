@@ -1,13 +1,15 @@
-<?xml version="1.0" encoding="utf-8"?>
 <UITemplate>
 
+    <!-- Zero to many style sheets per template! -->
     <Style path="Demo/UIForiaDemoRoot.style" />
+    
+    <!-- Import namespaces if you reference types in expressions -->
     <Using namespace="Demo" />
 
     <Contents>
         <Dock isActive="currentPanel == UIPanel.Dock" />
         <BuildingDesigner isActive="currentPanel == UIPanel.Building" />
-        <Chat if="false"/>
+        <Chat />
     </Contents>
 
 </UITemplate>

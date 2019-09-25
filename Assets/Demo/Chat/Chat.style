@@ -7,9 +7,9 @@ style <this> {
 
 style chat-window {
     PreferredSize = 1024px 600px;
-    MinHeight = 500px;
-    // Center the window by default
-    TransformPosition = 50%;
+    MinWidth = 1024px;
+    MinHeight = 600px;
+    TransformPosition = 0.05vw 0.05vh;
 }
 
 style chat-body {
@@ -131,9 +131,7 @@ style user-icon-message {
     MarginRight = 20px;
 }
 
-style text {
-    LayoutFitHorizontal = Fill;
-}
+style text { LayoutFitHorizontal = Fill; }
 
 style name {
     TextFontAsset = @theme.fontGothamBold;
@@ -146,16 +144,17 @@ style date {
     TextFontSize = 0.8em;
 }
 
-style message-scroll-view {
-    LayoutFitHorizontal = Fill;
-    PreferredHeight = 0;
-}
-
 style fill-container {
     PreferredHeight = 1pca;
     LayoutFitHorizontal = Fill;
     LayoutType = Grid;
+    GridLayoutColTemplate = 1fr;
     GridLayoutRowTemplate = 1fr 1mx;
+}
+
+style message-scroll-view {
+    LayoutFitHorizontal = Fill;
+    PreferredHeight = 0;
 }
 
 style input-container {

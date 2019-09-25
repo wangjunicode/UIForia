@@ -2,8 +2,8 @@ import "Demo/Theme.style" as theme;
 
 animation show {
     [options] {
-        duration = 600;
-        timingFunction = CubicEaseInOut;
+        Duration = 600;
+        TimingFunction = CubicEaseInOut;
     }
     
     [keyframes] {
@@ -12,8 +12,8 @@ animation show {
 }
 animation hide {
     [options] {
-        duration = 600;
-        timingFunction = CubicEaseInOut;
+        Duration = 600;
+        TimingFunction = CubicEaseInOut;
     }
     
     [keyframes] {

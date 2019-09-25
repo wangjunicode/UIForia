@@ -1,11 +1,13 @@
 <UITemplate>
 
+    <!-- Many style sheets per template! -->
     <Style path="Demo/BuildingDesigner/BuildingDesigner.style" />
     <Style path="Demo/Theme.style" alias="theme" />
     <Style path="Demo/BuildingDesigner/BuildingDesignerTopBar.style" alias="top"/>
     <Style path="Demo/BuildingDesigner/BuildingDesignerMain.style" alias="main"/>
     <Style path="Demo/BuildingDesigner/BuildingDesignerFooter.style" alias="footer"/>
-    
+
+    <!-- Import namespaces if you reference types in expressions -->
     <Using namespace="UIForia.Elements"/>
     <Using namespace="Demo"/>
 
@@ -37,6 +39,7 @@
         <Group style="building-designer-main">
             <Div style="tools-area">
                 <Div style="grid-with-buttons">
+                    <!-- Asset paths must be relative to your Resources directory -->
                     <Image x-id="SELECT"      src="'new_ui_icons/ui_icon_select'"       style="tools-button" onMouseClick="ToolButtonClicked(ToolButton.SELECT)"/>
                     <Image x-id="GRID_UP"     src="'new_ui_icons/ui_icon_grid_up'"      style="tools-button" onMouseClick="ToolButtonClicked(ToolButton.GRID_UP)"/>
                     <Image x-id="ERASER"      src="'new_ui_icons/ui_icon_eraser'"       style="tools-button" onMouseClick="ToolButtonClicked(ToolButton.ERASER)"/>

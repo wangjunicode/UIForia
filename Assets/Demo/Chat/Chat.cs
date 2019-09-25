@@ -15,6 +15,7 @@ namespace Demo {
         public Action onClose;
 
         public override void OnCreate() {
+            SetEnabled(false);
             onClose = () => SetEnabled(false);
             CreateDummyData();
         }
@@ -49,6 +50,5 @@ namespace Demo {
                 }
             };
         }
-
     }
 }

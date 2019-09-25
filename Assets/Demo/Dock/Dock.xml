@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <UITemplate>
+
     <Style path="Demo/Dock/Dock.style"/>
     <Style path="Demo/Theme.style" alias="theme" />
-    <Contents>
 
-     
-        
+    <Contents>
         <Repeat list="MenuItems" style="transclude">
             <MenuItem ImageUrl="$item.ImageUrl"
                       Label="$item.Label"

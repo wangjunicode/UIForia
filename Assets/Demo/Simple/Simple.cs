@@ -12,7 +12,9 @@ namespace Demo {
 
         private bool isEnglish = true;
         
-        public string HeaderText => isEnglish ? "The German Click Flag" : "Die Deutsche Klickfahne";
+        public string HeaderText => isEnglish 
+                ? "The German Click Flag" 
+                : "Die Deutsche Klickfahne";
 
         public void ToggleLanguage() {
             isEnglish = !isEnglish;
@@ -31,7 +33,5 @@ namespace Demo {
                     break;
             }
         }
-
     }
-
 }

@@ -20,6 +20,7 @@ namespace Demo {
 
         public bool isActive;
         private bool showParticles;
+
         [OnPropertyChanged("isActive")]
         public void OnActiveChanged(string propertyName) {
             SetAttribute("placement", isActive ? "show" : "hide");

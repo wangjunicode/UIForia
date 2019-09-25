@@ -30,6 +30,7 @@ style particles {
 style <this> { 
     AlignX = 100% Parent;
     AlignY = 100% Parent;
+    PaddingBottom = 10px;
     LayoutBehavior = Ignored;
     FlexLayoutDirection = Horizontal;
     FlexLayoutCrossAxisAlignment = End;

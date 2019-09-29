@@ -978,7 +978,11 @@ namespace UIForia.Layout {
                     for (int i = 0; i < this.element.children.size; i++) {
                         UIElement child = children[i];
                         if (child.isDisabled && (child.flags & UIElementFlags.DisabledThisFrame) != 0) {
-                            child.layoutBox?.parent?.RemoveChildByElement(child);
+                            var childParent = child.layoutBox?.parent;
+                            while (childParent != null && childParent is TranscludeLayoutBox) {
+                                childParent = childParent.parent;
+                            }
+                            childParent?.RemoveChildByElement(child);
                         }
                     }
                 }

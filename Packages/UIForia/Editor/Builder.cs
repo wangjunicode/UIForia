@@ -13,10 +13,16 @@ namespace UIForia {
             Shader shader = Shader.Find("UIForia/BatchedTransparent");
             Material svgxMaterial = new Material(shader);
             
+            Shader uiforiaStd = Shader.Find("UIForia/Standard");
+            Material uiforiaStdMaterial = new Material(uiforiaStd);
+            
             AssetDatabase.CreateAsset(svgxMaterial, "Assets/Resources/UIForiaMaterial.mat");
             asset.svgxMaterial = svgxMaterial;
-            AssetDatabase.CreateAsset(asset, "Assets/Resources/UIForiaSettings.asset");
 
+            AssetDatabase.CreateAsset(uiforiaStdMaterial, "Assets/Resources/UIForiaStandardMaterial.mat");
+            asset.batchedMaterial = uiforiaStdMaterial;
+
+            AssetDatabase.CreateAsset(asset, "Assets/Resources/UIForiaSettings.asset");
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
             EditorUtility.FocusProjectWindow();

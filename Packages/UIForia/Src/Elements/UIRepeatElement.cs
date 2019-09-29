@@ -54,6 +54,7 @@ namespace UIForia.Elements {
         internal RepeatableList<T> list;
         
         public UIRepeatElement(UITemplate template, TemplateScope scope) {
+            flags |= UIElementFlags.BuiltIn;
             this.template = template;
             this.scope = scope;
         }

@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using NUnit.Framework;
 using Tests.Mocks;
 using UIForia;
@@ -192,7 +191,7 @@ style myStyle {
         Assert.AreEqual(2, containers[0].groups.Count);
 
         Assert.IsTrue(Mathf.Approximately(0.1f, containers[0].groups[0].normal.style.MarginTop.value));
-        Assert.AreEqual(UIMeasurementUnit.Percentage, containers[0].groups[0].normal.style.MarginTop.unit);
+        Assert.AreEqual(UIFixedUnit.Percent, containers[0].groups[0].normal.style.MarginTop.unit);
         Assert.AreEqual(20, containers[0].groups[0].hover.style.MarginLeft.value);
         Assert.AreEqual(20, containers[0].groups[1].normal.style.MarginTop.value);
     }
@@ -201,9 +200,9 @@ style myStyle {
     public void UseMarginPropertyShorthand() {
         var nodes = StyleParser.Parse(@"
             
-export const m1 = 10pca;
+export const m1 = 10%;
 export const m2 = @m3;
-export const m3 = 10pca;
+export const m3 = 10%;
 export const m4 = @m2;
             
 style myStyle {
@@ -217,14 +216,14 @@ style myStyle {
         var containers = styleSheet.styleGroupContainers;
         Assert.AreEqual(1, containers.Length);
 
-        Assert.AreEqual(10, containers[0].groups[0].normal.style.MarginTop.value);
-        Assert.AreEqual(10, containers[0].groups[0].normal.style.MarginRight.value);
+        Assert.AreEqual(0.1f,  containers[0].groups[0].normal.style.MarginTop.value);
+        Assert.AreEqual(0.1f, containers[0].groups[0].normal.style.MarginRight.value);
         Assert.AreEqual(10, containers[0].groups[0].normal.style.MarginBottom.value);
-        Assert.AreEqual(10, containers[0].groups[0].normal.style.MarginLeft.value);
-        Assert.AreEqual(UIMeasurementUnit.ParentContentArea, containers[0].groups[0].normal.style.MarginTop.unit);
-        Assert.AreEqual(UIMeasurementUnit.ParentContentArea, containers[0].groups[0].normal.style.MarginRight.unit);
-        Assert.AreEqual(UIMeasurementUnit.Pixel, containers[0].groups[0].normal.style.MarginBottom.unit);
-        Assert.AreEqual(UIMeasurementUnit.ParentContentArea, containers[0].groups[0].normal.style.MarginLeft.unit);
+        Assert.AreEqual(0.1f, containers[0].groups[0].normal.style.MarginLeft.value);
+        Assert.AreEqual(UIFixedUnit.Percent, containers[0].groups[0].normal.style.MarginTop.unit);
+        Assert.AreEqual(UIFixedUnit.Percent, containers[0].groups[0].normal.style.MarginRight.unit);
+        Assert.AreEqual(UIFixedUnit.Pixel, containers[0].groups[0].normal.style.MarginBottom.unit);
+        Assert.AreEqual(UIFixedUnit.Percent, containers[0].groups[0].normal.style.MarginLeft.unit);
     }
 
     [Test]
@@ -493,8 +492,8 @@ style myStyle {
         var styleGroup = styleSheet.styleGroupContainers;
         Assert.AreEqual(1, styleGroup.Length);
 
-        Assert.AreEqual(new GridTrackSize(1, GridTemplateUnit.FractionalRemaining), styleGroup[0].groups[0].normal.style.GridLayoutColAutoSize);
-        Assert.AreEqual(new GridTrackSize(42, GridTemplateUnit.Pixel), styleGroup[0].groups[0].normal.style.GridLayoutRowAutoSize);
+        Assert.AreEqual(new GridTrackSize(1, GridTemplateUnit.FractionalRemaining), styleGroup[0].groups[0].normal.style.GridLayoutColAutoSize[0]);
+        Assert.AreEqual(new GridTrackSize(42, GridTemplateUnit.Pixel), styleGroup[0].groups[0].normal.style.GridLayoutRowAutoSize[0]);
     }
 
     [Test]

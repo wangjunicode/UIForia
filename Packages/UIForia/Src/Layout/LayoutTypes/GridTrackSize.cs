@@ -138,14 +138,8 @@ namespace UIForia.Layout.LayoutTypes {
             return obj is GridTrackSize && Equals((GridTrackSize) obj);
         }
 
-        public override int GetHashCode() {
-            unchecked {
-                var hashCode = minValue.GetHashCode();
-                hashCode = (hashCode * 397) ^ maxValue.GetHashCode();
-                hashCode = (hashCode * 397) ^ (int) minUnit;
-                hashCode = (hashCode * 397) ^ (int) maxUnit;
-                return hashCode;
-            }
+        public override string ToString() {
+            return $"(minValue = {minValue}, minUnit = {(minUnit)}, maxValue = {(maxValue)}, maxUnit = {(maxUnit)})";
         }
 
     }

@@ -842,7 +842,7 @@ namespace UIForia.Compilers.Style {
                     if (TryParseFloat(measurementNode.value.rawValue, out float measurementValue)) {
                         UIFixedUnit unit = MapFixedUnit(measurementNode.unit, context);
                         if (unit == UIFixedUnit.Percent) {
-                            measurementValue *= 0.01f;
+                            measurementValue /= 100f;
                         }
 
                         return new UIFixedLength(measurementValue, unit);

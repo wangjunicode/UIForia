@@ -81,7 +81,7 @@ namespace UIForia.Text {
                 string part0 = source.Substring(0, cursorIndex);
                 string part1 = source.Substring(cursorIndex + 1);
                 retn = part0 + part1;
-                selectionRange = new SelectionRange(cursorIndex - 1);
+                selectionRange = new SelectionRange(cursorIndex);
             }
 
             return retn;

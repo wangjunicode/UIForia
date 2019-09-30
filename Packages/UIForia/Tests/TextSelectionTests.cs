@@ -282,17 +282,11 @@ public class TextSelectionTests {
     
     public void AssertSelection(string result, in SelectionRange range, string expected) {
         int cursorIdx = expected.IndexOf('|');
-        TextEdge edge = TextEdge.Left;
         
         if (cursorIdx >= 0) {
             expected = expected.Remove(cursorIdx, 1);
         }
 
-        if (cursorIdx == expected.Length) {
-            cursorIdx--;
-            edge = TextEdge.Right;
-        }
-        
         Assert.AreEqual(expected, result);
         AssertRangesEqual(new SelectionRange(cursorIdx), range);
     }

@@ -1,12 +1,9 @@
 using System;
 using System.Diagnostics;
-using SVGX;
 using UIForia.Elements;
 using UIForia.Rendering;
-using UIForia.Systems;
 using UIForia.Util;
 using UnityEngine;
-using Debug = UnityEngine.Debug;
 
 namespace UIForia.Layout {
 
@@ -145,23 +142,7 @@ namespace UIForia.Layout {
         }
 
         public virtual void RemoveChild(FastLayoutBox child) {
-            int idx = 0;
-            FastLayoutBox ptr = firstChild;
-
-            Debug.Assert(child != null, "child != null");
-
-            while (ptr != null && ptr != child) {
-                idx++;
-                ptr = ptr.nextSibling;
-            }
-
-            if (ptr == null) return;
-
-            if (child == firstChild) {
-                firstChild = firstChild.nextSibling;
-            }
-
-            OnChildRemoved(child, idx);
+            RemoveChildByElement(child.element);
         }
 
         public virtual void UpdateStyleData() {

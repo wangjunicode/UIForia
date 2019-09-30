@@ -82,8 +82,10 @@ namespace UIForia.Util {
             if (index < 0 || index >= backingStore.Count) {
                 return;
             }
-            onItemRemoved?.Invoke(backingStore[index], index);
+
+            T item = backingStore[index];
             backingStore.RemoveAt(index);
+            onItemRemoved?.Invoke(item, index);
         }
 
         public T Find(Predicate<T> fn) {

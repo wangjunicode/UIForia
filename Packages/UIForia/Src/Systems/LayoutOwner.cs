@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using SVGX;
 using UIForia.Elements;
 using UIForia.Extensions;
@@ -9,7 +10,6 @@ using UIForia.Systems;
 using UIForia.Util;
 using Unity.Mathematics;
 using UnityEngine;
-
 
 namespace UIForia.Layout {
 
@@ -253,7 +253,7 @@ namespace UIForia.Layout {
 
 #if DEBUG
                     if ((childBox.element.flags & UIElementFlags.DebugLayout) != 0) {
-                        System.Diagnostics.Debugger.Break();
+                        Debugger.Break();
                     }
 #endif
                     queue.Enqueue(idx);
@@ -530,7 +530,7 @@ namespace UIForia.Layout {
             for (int i = 0; i < enabledBoxList.size; i++) {
                 UIElement element = layoutDatas[i].element;
                         
-                if (element.style.Visibility == Visibility.Hidden) continue;
+                if (element.isDestroyed || element.style.Visibility == Visibility.Hidden) continue;
                 
                 // todo -- convert to flag 
                 if (element is IPointerQueryHandler handler) {

@@ -58,6 +58,7 @@ style previews-area {
 
 style grid-with-buttons {
     LayoutType = Grid;
+    GridLayoutDirection = Column;
     GridLayoutColTemplate = 64px 64px;
     GridLayoutRowAutoSize = 64px;
     GridLayoutColGap = 10;

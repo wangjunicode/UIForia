@@ -51,7 +51,7 @@ namespace UIForia.Rendering {
 		public static readonly GridItemPlacement GridItemY = new GridItemPlacement(-1);
 		public static readonly GridItemPlacement GridItemWidth = new GridItemPlacement(1);
 		public static readonly GridItemPlacement GridItemHeight = new GridItemPlacement(1);
-		public const LayoutDirection GridLayoutDirection = UIForia.Layout.LayoutDirection.Column;
+		public const LayoutDirection GridLayoutDirection = UIForia.Layout.LayoutDirection.Horizontal;
 		public const GridLayoutDensity GridLayoutDensity = UIForia.Layout.GridLayoutDensity.Sparse;
 		public static readonly IReadOnlyList<UIForia.Layout.LayoutTypes.GridTrackSize> GridLayoutColTemplate = ListPool<GridTrackSize>.Empty;
 		public static readonly IReadOnlyList<UIForia.Layout.LayoutTypes.GridTrackSize> GridLayoutRowTemplate = ListPool<GridTrackSize>.Empty;
@@ -230,7 +230,7 @@ namespace UIForia.Rendering {
 				case StylePropertyId.GridItemHeight:
 					 return new StyleProperty(StylePropertyId.GridItemHeight, new GridItemPlacement(1));
 				case StylePropertyId.GridLayoutDirection:
-					 return new StyleProperty(StylePropertyId.GridLayoutDirection, (int)UIForia.Layout.LayoutDirection.Column);
+					 return new StyleProperty(StylePropertyId.GridLayoutDirection, (int)UIForia.Layout.LayoutDirection.Horizontal);
 				case StylePropertyId.GridLayoutDensity:
 					 return new StyleProperty(StylePropertyId.GridLayoutDensity, (int)UIForia.Layout.GridLayoutDensity.Sparse);
 				case StylePropertyId.GridLayoutColTemplate:

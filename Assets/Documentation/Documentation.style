@@ -93,6 +93,7 @@ style mb20 {
 
 style parameter-list {
     LayoutType = Grid;
+    GridLayoutDirection = Column;
     PreferredSize = 0.7vw 1cnt;
     GridLayoutColTemplate = 300px 300px 1fr; 
     GridLayoutRowAutoSize = 1mx;

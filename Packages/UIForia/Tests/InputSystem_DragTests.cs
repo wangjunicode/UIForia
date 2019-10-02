@@ -25,7 +25,7 @@ public class InputSystem_DragTests {
     
         <UITemplate>
             <Contents style.layoutType='LayoutType.Flex'>
-                <Group onDragCreate='{CreateDragFromChild($event, 0)}' style.preferredWidth='100f' style.preferredHeight='100f'/>
+                <Group onDragCreate='CreateDragFromChild($event, 0)' style.preferredWidth='100f' style.preferredHeight='100f'/>
             </Contents>
         </UITemplate>
 
@@ -65,6 +65,7 @@ public class InputSystem_DragTests {
     [Test]
     public void DragCreate_CreateFromAnnotation() {
         MockApplication testView = new MockApplication(typeof(DragTestThing));
+        testView.Update();
         testView.SetViewportRect(new Rect(0, 0, 1000, 1000));
         DragTestThing root = (DragTestThing) testView.RootElement.GetChild(0);
         root.ignoreChildDrag = true;
@@ -83,6 +84,7 @@ public class InputSystem_DragTests {
     [Test]
     public void DragCreate_CreateFromChildTemplate() {
         MockApplication testView = new MockApplication(typeof(DragTestThing));
+        testView.Update();
         testView.SetViewportRect(new Rect(0, 0, 1000, 1000));
 
         testView.InputSystem.MouseDown(new Vector2(20, 20));
@@ -171,6 +173,7 @@ public class InputSystem_DragTests {
     [Test]
     public void DragEnter_Fires() {
         MockApplication testView = new MockApplication(typeof(DragHandlerTestThing));
+        testView.Update();
         testView.SetViewportRect(new Rect(0, 0, 1000, 1000));
         DragHandlerTestThing root = (DragHandlerTestThing) testView.RootElement.GetChild(0);
         testView.Update();
@@ -195,6 +198,7 @@ public class InputSystem_DragTests {
     [Test]
     public void DragEnter_DoesNotFireAgainForSamePosition() {
         MockApplication testView = new MockApplication(typeof(DragHandlerTestThing));
+        testView.Update();
         testView.SetViewportRect(new Rect(0, 0, 1000, 1000));
         DragHandlerTestThing root = (DragHandlerTestThing) testView.RootElement.GetChild(0);
         testView.Update();
@@ -217,6 +221,7 @@ public class InputSystem_DragTests {
     [Test]
     public void DragEnter_DoesNotFireAgainForPositionSameElement() {
         MockApplication testView = new MockApplication(typeof(DragHandlerTestThing));
+        testView.Update();
         testView.SetViewportRect(new Rect(0, 0, 1000, 1000));
         DragHandlerTestThing root = (DragHandlerTestThing) testView.RootElement.GetChild(0);
         testView.Update();
@@ -239,6 +244,7 @@ public class InputSystem_DragTests {
     [Test]
     public void DragEnter_FiresForNewElement() {
         MockApplication testView = new MockApplication(typeof(DragHandlerTestThing));
+        testView.Update();
         testView.SetViewportRect(new Rect(0, 0, 1000, 1000));
         DragHandlerTestThing root = (DragHandlerTestThing) testView.RootElement.GetChild(0);
         testView.Update();
@@ -262,6 +268,7 @@ public class InputSystem_DragTests {
     [Test]
     public void DragEnter_FiresForReEnteringElement() {
         MockApplication testView = new MockApplication(typeof(DragHandlerTestThing));
+        testView.Update();
         testView.SetViewportRect(new Rect(0, 0, 1000, 1000));
         DragHandlerTestThing root = (DragHandlerTestThing) testView.RootElement.GetChild(0);
 
@@ -287,6 +294,7 @@ public class InputSystem_DragTests {
     [Test]
     public void DragExit_FiresAndPropagates() {
         MockApplication testView = new MockApplication(typeof(DragHandlerTestThing));
+        testView.Update();
         testView.SetViewportRect(new Rect(0, 0, 1000, 1000));
         DragHandlerTestThing root = (DragHandlerTestThing) testView.RootElement.GetChild(0);
 
@@ -309,6 +317,7 @@ public class InputSystem_DragTests {
     [Test]
     public void DragExit_FireOnlyForExitedElement() {
         MockApplication testView = new MockApplication(typeof(DragHandlerTestThing));
+        testView.Update();
         testView.SetViewportRect(new Rect(0, 0, 1000, 1000));
         DragHandlerTestThing root = (DragHandlerTestThing) testView.RootElement.GetChild(0);
 
@@ -331,6 +340,7 @@ public class InputSystem_DragTests {
     [Test]
     public void DragExit_FireAgainWhenReenteredElement() {
         MockApplication testView = new MockApplication(typeof(DragHandlerTestThing));
+        testView.Update();
         testView.SetViewportRect(new Rect(0, 0, 1000, 1000));
         DragHandlerTestThing root = (DragHandlerTestThing) testView.RootElement.GetChild(0);
 
@@ -394,6 +404,7 @@ public class InputSystem_DragTests {
     [Test]
     public void DragMove_FiresAndPropagates() {
         MockApplication testView = new MockApplication(typeof(DragHandlerTestThing_Move));
+        testView.Update();
         testView.SetViewportRect(new Rect(0, 0, 1000, 1000));
         DragHandlerTestThing_Move root = (DragHandlerTestThing_Move) testView.RootElement.GetChild(0);
 
@@ -414,6 +425,7 @@ public class InputSystem_DragTests {
     [Test]
     public void DragMove_FiresAgainWhenMovedAndContains() {
         MockApplication testView = new MockApplication(typeof(DragHandlerTestThing_Move));
+        testView.Update();
         testView.SetViewportRect(new Rect(0, 0, 1000, 1000));
         DragHandlerTestThing_Move root = (DragHandlerTestThing_Move) testView.RootElement.GetChild(0);
 
@@ -435,6 +447,7 @@ public class InputSystem_DragTests {
     [Test]
     public void DragMove_DoesNotFireAgainWhenNotMovedAndContains() {
         MockApplication testView = new MockApplication(typeof(DragHandlerTestThing_Move));
+        testView.Update();
         testView.SetViewportRect(new Rect(0, 0, 1000, 1000));
         DragHandlerTestThing_Move root = (DragHandlerTestThing_Move) testView.RootElement.GetChild(0);
 
@@ -497,6 +510,7 @@ public class InputSystem_DragTests {
     [Test]
     public void DragMove_FiresAndPropagatesWithDragEvent() {
         MockApplication testView = new MockApplication(typeof(DragHandlerTestThing_MoveWithDragEvent));
+        testView.Update();
         testView.SetViewportRect(new Rect(0, 0, 1000, 1000));
         DragHandlerTestThing_MoveWithDragEvent root = (DragHandlerTestThing_MoveWithDragEvent) testView.RootElement.GetChild(0);
 

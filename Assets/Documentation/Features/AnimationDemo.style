@@ -49,8 +49,8 @@ style orbit-container {
     PreferredSize = 48px;
     RadialLayoutEndAngle = 130;
     RadialLayoutRadius = 28;
-    TransformRotation = 0;
     TransformPivot = 0.5 0.5;
+    [enter] run animation(orbit-slowly);
 }
 
 style orbit {
@@ -79,4 +79,16 @@ style orbit-4 {
 
 style orbit-5 {
     PreferredSize = 0.13pca;
+}
+
+animation orbit-slowly {
+    [options] {
+        Duration = 1000;
+        Iterations = Infinite;
+    }
+    
+    [keyframes] {
+        0% { TransformRotation = 0; }
+        100% { TransformRotation = 359; }
+    }
 }

@@ -15,3 +15,11 @@ style section {
 style visibility-test {
     BackgroundColor = rgb(200, 20, 20);
 }
+
+style simple-border {
+    Border = 5px;
+    BorderColor = red green yellow blue;
+    PreferredSize = 80px;
+    FlexLayoutMainAxisAlignment = Center;
+    FlexLayoutCrossAxisAlignment = Center;
+}

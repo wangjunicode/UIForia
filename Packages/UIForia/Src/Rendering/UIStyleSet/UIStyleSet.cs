@@ -312,6 +312,19 @@ namespace UIForia.Rendering {
             LightList<IRunCommand>.Release(ref toRun);
         }
 
+        /// <summary>
+        /// Runs all runCommands that are applicable for the current state.
+        /// </summary>
+        internal void RunCommands() {
+            StyleEntry[] styleEntries = availableStyles.Array;
+            for (int i = 0; i < availableStyles.Count; i++) {
+                StyleEntry entry = styleEntries[i];
+                if ((entry.state & currentState) != 0) {
+                    RunCommands(entry.styleRunCommand.runCommands);
+                }
+            }
+        }
+
         private void RunCommands(LightList<IRunCommand> runCommands, bool enter = true) {
             if (runCommands == null) {
                 return;

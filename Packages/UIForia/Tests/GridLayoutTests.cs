@@ -494,7 +494,7 @@ public class GridLayoutTests {
         MockApplication mockView = new MockApplication(typeof(GridLayout6Children));
         GridLayout6Children root = (GridLayout6Children) mockView.RootElement.GetChild(0);
         mockView.Update();
-
+        
         root.style.SetGridLayoutRowAutoSize(GridTrackSize.MaxContent, StyleState.Normal);
         root.GetChildAt(0).style.SetPreferredWidth(400f, StyleState.Normal);
         root.GetChildAt(3).style.SetPreferredWidth(600f, StyleState.Normal);
@@ -647,7 +647,6 @@ public class GridLayoutTests {
     public void ColumnMargin_ShouldOffsetFromCell() {
         MockApplication mockView = new MockApplication(typeof(GridLayoutThing3Children));
         GridLayoutThing3Children root = (GridLayoutThing3Children) mockView.RootElement.GetChild(0);
-        // mockView.Update();
 
         root.style.SetGridLayoutDirection(LayoutDirection.Horizontal, StyleState.Normal);
 
@@ -656,7 +655,6 @@ public class GridLayoutTests {
             new GridTrackSize(100f),
             new GridTrackSize(100f)
         }, StyleState.Normal);
-
 
         root.style.SetGridLayoutRowAutoSize(new GridTrackSize(100), StyleState.Normal);
         

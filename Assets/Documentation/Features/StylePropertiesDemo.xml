@@ -24,6 +24,35 @@
                 </Div>
             </Div>
         </Group>
+        
+        <Group style="section">
+            <Heading2>Borders</Heading2>
+            <Paragraph>
+                Border = [ top: UIFixedLength, right: UIFixedLength, bottom: UIFixedLength, left: UIFixedLength ]
+            </Paragraph>
+            <Paragraph>
+                Border = [ top: UIFixedLength, left+right: UIFixedLength, bottom: UIFixedLength]
+            </Paragraph>
+            <Paragraph>
+                Border = [ top+bottom: UIFixedLength, left+right: UIFixedLength ]
+            </Paragraph>
+            <Paragraph>
+                Border = [ top+bottom+left+right: UIFixedLength ]
+            </Paragraph>
+            <Paragraph>
+                BorderLeft / BorderRight / BorderTop / BorderBottom
+            </Paragraph>
+
+            <Paragraph>Let's start with a simple border:</Paragraph>
+            <Div>
+                <Group style="simple-border">meh</Group>
+            </Div>
+
+            <Paragraph>Now what happens if we nest boxes with borders?</Paragraph>
+            <Div>
+                <Group style="simple-border"><Group style="simple-border">meh</Group></Group>
+            </Div>
+        </Group>
 
     </Contents>
 </UITemplate>

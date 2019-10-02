@@ -55,6 +55,7 @@ namespace UIForia.Layout {
             this.layoutBoxPoolMap[(int) LayoutType.Flex] = new FastLayoutBoxPool<FastFlexLayoutBox>();
             this.layoutBoxPoolMap[(int) LayoutType.Grid] = new FastLayoutBoxPool<FastGridLayoutBox>();
             this.layoutBoxPoolMap[(int)LayoutType.Stack] = new FastLayoutBoxPool<StackLayoutBox>();
+            this.layoutBoxPoolMap[(int)LayoutType.Radial] = new FastLayoutBoxPool<RadialLayoutBox>();
             this.layoutBoxPoolMap[TextLayoutPoolKey] = new FastLayoutBoxPool<FastTextLayoutBox>();
             this.layoutBoxPoolMap[ImageLayoutPoolKey] = new FastLayoutBoxPool<FastImageLayoutBox>();
             this.layoutBoxPoolMap[TranscludedLayoutPoolKey] = new FastLayoutBoxPool<TranscludeLayoutBox>();
@@ -471,8 +472,7 @@ namespace UIForia.Layout {
                         return layoutBoxPoolMap[(int) LayoutType.Grid].Get(this, element);
 
                     case LayoutType.Radial:
-                        //retn = layoutBoxPoolMap[(int) LayoutType.Radial].Get(element);
-                        break;
+                        return layoutBoxPoolMap[(int) LayoutType.Radial].Get(this, element);
                     case LayoutType.Stack:
                         return layoutBoxPoolMap[(int) LayoutType.Stack].Get(this, element);
 

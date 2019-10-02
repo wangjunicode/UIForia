@@ -11,7 +11,7 @@
             
             <Div x-id="one_blue_arc" style="circle arc-blue"/>
             
-            <Div if="false" x-id="one_blueOrbit" style="orbit-container">
+            <Div x-id="one_blueOrbit" style="orbit-container">
                 <Div style="circle orbit orbit-0"/>
                 <Div style="circle orbit orbit-1"/>
                 <Div style="circle orbit orbit-2"/>

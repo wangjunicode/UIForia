@@ -1,6 +1,5 @@
 using UIForia.Attributes;
 using UIForia.Elements;
-using UnityEngine;
 
 #pragma warning disable 0414
 namespace Documentation.Features {
@@ -17,14 +16,6 @@ namespace Documentation.Features {
             hover = true;
         }
 
-        public void OnHoverEnd() {
-            hover = false;
-        }
-
-        public override void OnUpdate() {
-            Debug.Log("Updated");    
-        }
-        
         [OnMouseClick]
         public void OnMouseClick() {
             if (variableStyle == string.Empty) {

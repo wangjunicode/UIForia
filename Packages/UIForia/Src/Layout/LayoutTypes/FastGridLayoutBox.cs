@@ -980,7 +980,7 @@ namespace UIForia.Layout.LayoutTypes {
                 return;
             }
 
-            bool flowVertical = element.style.GridLayoutDirection == LayoutDirection.Vertical;
+            bool flowHorizontal = element.style.GridLayoutDirection == LayoutDirection.Horizontal;
             bool dense = element.style.GridLayoutDensity == GridLayoutDensity.Dense;
 
             int sparseStartX = 0;
@@ -999,7 +999,7 @@ namespace UIForia.Layout.LayoutTypes {
                     continue;
                 }
 
-                if (flowVertical) {
+                if (flowHorizontal) {
                     if (dense) {
                         cursorX = 0;
                         cursorY = 0;
@@ -1139,11 +1139,29 @@ namespace UIForia.Layout.LayoutTypes {
             for (int i = 0; i < properties.Count; i++) {
                 StyleProperty property = properties[i];
                 switch (property.propertyId) {
+                    case StylePropertyId.PreferredHeight:
+                    case StylePropertyId.PreferredWidth:
+                    case StylePropertyId.MaxHeight:
+                    case StylePropertyId.MaxWidth:
+                    case StylePropertyId.MarginTop:
+                    case StylePropertyId.MarginRight:
+                    case StylePropertyId.MarginBottom:
+                    case StylePropertyId.MarginLeft:
+                    case StylePropertyId.PaddingTop:
+                    case StylePropertyId.PaddingRight:
+                    case StylePropertyId.PaddingBottom:
+                    case StylePropertyId.PaddingLeft:
+                    case StylePropertyId.GridLayoutColAutoSize:
+                    case StylePropertyId.GridLayoutRowAutoSize:
+                    case StylePropertyId.GridLayoutColTemplate:
+                    case StylePropertyId.GridLayoutRowTemplate:
                     case StylePropertyId.LayoutBehavior:
                     case StylePropertyId.GridItemHeight:
                     case StylePropertyId.GridItemWidth:
                     case StylePropertyId.GridItemY:
                     case StylePropertyId.GridItemX:
+                    case StylePropertyId.GridLayoutColGap:
+                    case StylePropertyId.GridLayoutRowGap:
                         placementDirty = true;
                         markedForLayout = true;
                         CreateOrUpdatePlacement(child);
@@ -1152,6 +1170,7 @@ namespace UIForia.Layout.LayoutTypes {
             }
 
             if (markedForLayout) {
+                placementDirty = true;
                 MarkForLayout();
             }
         }

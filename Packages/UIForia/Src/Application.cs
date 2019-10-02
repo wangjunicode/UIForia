@@ -619,6 +619,9 @@ namespace UIForia {
                 child.OnEnable();
                 // }
 
+                // We need to run all runCommands now otherwise animations in [normal] style groups won't run after enabling.
+                child.style.RunCommands();
+
                 if ((child.flags & UIElementFlags.HasBeenEnabled) == 0) {
                     child.View.ElementCreated(child);
                 }

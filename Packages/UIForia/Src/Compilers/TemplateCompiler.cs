@@ -411,7 +411,7 @@ namespace UIForia.Compilers {
                 Expression bindingNode = ctx.BindingNodeExpr;
 
                 // merge bindings, outer ones win, take the base bindings and replace duplicates with outer ones
-                MergeAttributes(templateNode, compiled.attributes);
+                MergeAttributes(templateNode, compiled.attributes, templateNode.attributes);
 
                 ProcessBindings(templateNode, ctx, hasTextBindings);
 
@@ -702,7 +702,6 @@ namespace UIForia.Compilers {
             return false;
         }
 
-
         private bool UpdateContextTree(TemplateNode templateNode, CompilationContext ctx, out int aliasCount) {
             int contextIdx = -1;
             aliasCount = 0;
@@ -922,17 +921,21 @@ namespace UIForia.Compilers {
             );
         }
 
-        private static void MergeAttributes(TemplateNode templateNode, StructList<AttributeDefinition2> outer) {
-            StructList<AttributeDefinition2> mergedAttributes = StructList<AttributeDefinition2>.GetMinSize(templateNode.attributes.size + outer.size);
+        private static void MergeAttributes(TemplateNode templateNode, StructList<AttributeDefinition2> innerList, StructList<AttributeDefinition2> outer) {
+            StructList<AttributeDefinition2> mergedAttributes = StructList<AttributeDefinition2>.GetMinSize(innerList.size + outer.size);
 
             // match on type & name, might have to track source also in case of binding context
 
             // add all outer ones
-            mergedAttributes.AddRange(outer);
+            for (int i = 0; i < outer.size; i++) {
+                if (outer.array[i].type == AttributeType.Attribute) {
+                    mergedAttributes.Add(outer.array[i]);
+                }
+            }
 
             int outerCount = outer.size;
             AttributeDefinition2[] mergedArray = mergedAttributes.array;
-            AttributeDefinition2[] inner = templateNode.attributes.array;
+            AttributeDefinition2[] inner = innerList.array;
 
             for (int i = 0; i < inner.Length; i++) {
                 // for each inner attribute

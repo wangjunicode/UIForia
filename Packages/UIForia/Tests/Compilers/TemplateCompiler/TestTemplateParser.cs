@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq.Expressions;
-using Mono.Linq.Expressions;
 using NUnit.Framework;
 using Tests.Mocks;
 using UIForia.Attributes;
@@ -9,7 +5,6 @@ using UIForia.Compilers;
 using UIForia.Elements;
 using UIForia.Exceptions;
 using UIForia.Systems;
-using UnityEngine;
 using static Tests.Compilers.TemplateCompiler.TestTemplateUtils;
 
 [TestFixture]
@@ -22,8 +17,6 @@ public class TestTemplateParser {
             <Div attr:id='hello0'/>
 
             <CompileTestChildElement attr:id='hello1' floatValue='4f'>
-
-           
 
             </CompileTestChildElement>
 
@@ -50,7 +43,7 @@ public class TestTemplateParser {
     }
 
     [Test]
-    public void ParseTemplate2() {
+    public void AttributesSetInProperOrder() {
         MockApplication application = MockApplication.CreateWithoutView();
 
         TemplateCompiler compiler = new TemplateCompiler(application);
@@ -83,10 +76,20 @@ public class TestTemplateParser {
         Assert.AreEqual("hello2", r.children[2].attributes[0].value);
         Assert.AreEqual("isChild", r.children[2].attributes[1].name);
         Assert.AreEqual("yep", r.children[2].attributes[1].value);
+        
+    }
+
+    [Test]
+    public void CreateAnElementFromTemplate() {
+        MockApplication application = MockApplication.CreateWithoutView();
+
+        TemplateCompiler compiler = new TemplateCompiler(application);
+
+        CompiledTemplate compiledTemplate = compiler.GetCompiledTemplate(typeof(CompileTestElement));
 
         UIElement element = application.CreateElementFromPool(typeof(CompileTestElement), null, compiledTemplate.childCount);
-        compiledTemplate.Create(element, new TemplateScope2(application, new LinqBindingNode(), null));
         
+        Assert.IsInstanceOf<CompileTestElement>(compiledTemplate.Create(element, new TemplateScope2(application, new LinqBindingNode(), null)));
     }
 
     [Template(TemplateType.String, @"

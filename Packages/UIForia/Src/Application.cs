@@ -98,8 +98,13 @@ namespace UIForia {
 
         // todo -- override that accepts an index into an array instead of a type, to save a dictionary lookup
         // todo -- don't create a list for every type, maybe a single pool list w/ sorting & a jump search or similar
+        /// Returns the shell of a UI Element, space is allocated for children but no child data is associated yet, only a parent, view, and depth
         public UIElement CreateElementFromPool(Type type, UIElement parent, int childCount) {
-            UIElement retn = elementPool.Get(type, parent.depth + 1);
+            int depth = 0;
+            if (parent != null) {
+                depth = parent.depth + 1;
+            }
+            UIElement retn = elementPool.Get(type, depth);
             retn.children = LightList<UIElement>.GetMinSize(childCount);
             retn.children.size = childCount;
             if (parent != null) {

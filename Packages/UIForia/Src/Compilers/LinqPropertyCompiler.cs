@@ -53,8 +53,8 @@ namespace UIForia.Compilers {
             );
 
             // todo -- never null check _root or _element
-            ParameterExpression rootExpr = compiler.AddVariable(new Parameter(ctx.rootType.rawType, "_root", ParameterFlags.NeverNull), Expression.Convert(compiler.GetParameter("root"), ctx.rootType.rawType));
-            ParameterExpression elementExpr = compiler.AddVariable(new Parameter(ctx.elementType.rawType, "_element", ParameterFlags.NeverNull), Expression.Convert(compiler.GetParameter("element"), ctx.elementType.rawType));
+            ParameterExpression rootExpr = compiler.AddVariable(new Parameter(ctx.rootType.rawType, "__root", ParameterFlags.NeverNull), Expression.Convert(compiler.GetParameter("__root"), ctx.rootType.rawType));
+            ParameterExpression elementExpr = compiler.AddVariable(new Parameter(ctx.elementType.rawType, "__element", ParameterFlags.NeverNull), Expression.Convert(compiler.GetParameter("__element"), ctx.elementType.rawType));
             
             // if is content binding
                 // assign root = element

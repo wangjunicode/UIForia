@@ -6,6 +6,7 @@ using SVGX;
 using UIForia.Compilers.Style;
 using UIForia.Elements;
 using UIForia.Layout.LayoutTypes;
+using UIForia.Selectors;
 using UIForia.Systems;
 using UIForia.Templates;
 using UIForia.Util;
@@ -972,6 +973,13 @@ namespace UIForia.Rendering {
             };
         }
 
+        public void AddSelectorStyleGroup(Selector selector) {
+            throw new NotImplementedException();
+        }
+
+        public void RemoveSelectorStyleGroup(Selector selector) {
+            throw new NotImplementedException();
+        }
     }
 
 }

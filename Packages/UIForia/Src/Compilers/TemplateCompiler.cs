@@ -536,7 +536,7 @@ namespace UIForia.Compilers {
             if (hasTextBindings) {
                 bindings.Add(CompileTextBinding(templateNode));
             }
-
+            
             if (ctx.elementType.requiresUpdateFn) {
                 // null is a stand in for 'use the default update binding'
                 bindings.Add(new BindingDefinition() {

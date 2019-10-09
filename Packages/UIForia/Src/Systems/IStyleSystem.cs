@@ -11,14 +11,6 @@ namespace UIForia.Systems {
 
         void SetStyleProperty(UIElement element, StyleProperty propertyValue);
 
-        void UpdateSelectors();
-
-        void UpdateBindings();
-
-        void UpdateAnimations();
-
-        void Flush();
-
     }
 
 }

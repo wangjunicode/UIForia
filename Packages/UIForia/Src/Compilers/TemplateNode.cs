@@ -4,7 +4,7 @@ using UIForia.Util;
 
 namespace UIForia.Compilers {
 
-    public class TemplateNode {
+    public sealed class TemplateNode {
 
         public LightList<DirectiveDefinition> directives;
         public StructList<AttributeDefinition2> attributes;

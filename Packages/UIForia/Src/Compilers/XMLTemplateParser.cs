@@ -8,6 +8,7 @@ using UIForia.Elements;
 using UIForia.Exceptions;
 using UIForia.Parsing.Expression;
 using UIForia.Templates;
+using UIForia.Text;
 using UIForia.Util;
 
 namespace UIForia.Compilers {
@@ -38,7 +39,6 @@ namespace UIForia.Compilers {
         public Application application;
 
         private readonly XmlParserContext parserContext;
-        private static readonly TextElementParser s_TextElementParser = new TextElementParser();
 
         [ThreadStatic] private static string[] s_NamespaceLookup;
 

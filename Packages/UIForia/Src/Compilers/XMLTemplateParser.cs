@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Xml;
 using System.Xml.Linq;
 using UIForia.Elements;
@@ -37,6 +38,7 @@ namespace UIForia.Compilers {
         public Application application;
 
         private readonly XmlParserContext parserContext;
+        private static readonly TextElementParser s_TextElementParser = new TextElementParser();
 
         [ThreadStatic] private static string[] s_NamespaceLookup;
 
@@ -58,6 +60,8 @@ namespace UIForia.Compilers {
             nameSpaceManager.AddNamespace("attr", "attr");
             nameSpaceManager.AddNamespace("evt", "evt");
             nameSpaceManager.AddNamespace("style", "style");
+            nameSpaceManager.AddNamespace("ctx", "ctx");
+            nameSpaceManager.AddNamespace("ctxvar", "ctxvar");
             for (int i = 0; i < s_Directives.Length; i++) {
                 nameSpaceManager.AddNamespace(s_Directives[i], s_Directives[i]);
             }
@@ -66,9 +70,8 @@ namespace UIForia.Compilers {
         }
 
         internal TemplateAST Parse(ProcessedType processedType) {
-            
             string template = processedType.GetTemplateFromApplication(application);
-            
+
             XElement root = XElement.Load(new XmlTextReader(template, XmlNodeType.Element, parserContext));
 
             root.MergeTextNodes();
@@ -194,6 +197,16 @@ namespace UIForia.Compilers {
                         case "evt":
                             attributeType = AttributeType.Event;
                             break;
+                        case "ctx":
+                            attributeType = AttributeType.Context;
+                            break;
+                        case "ctxvar":
+                            attributeType = AttributeType.ContextVariable;
+                            break;
+                        case "alias":
+                            attributeType = AttributeType.Alias;
+                            break;
+
                         default:
                             throw new ArgumentOutOfRangeException("Unknown attribute prefix: " + prefix);
                     }
@@ -209,22 +222,36 @@ namespace UIForia.Compilers {
                 switch (node.NodeType) {
                     case XmlNodeType.Text: {
                         XText textNode = (XText) node;
+
                         if (string.IsNullOrWhiteSpace(textNode.Value)) {
                             continue;
                         }
 
-                        if (typeof(UITextElement).IsAssignableFrom(parent.processedType.rawType)) {
-                            parent.textContent += textNode.Value;
-                            continue;
+                        string textContent = textNode.Value.Trim(); // maybe don't trim & let text style handle it
+
+                        if (parent.children.Count == 0) {
+                            TemplateNode templateNode = TemplateNode.Get();
+                            templateNode.parent = parent;
+                            templateNode.astRoot = parent.astRoot;
+                            templateNode.processedType = TypeProcessor.GetProcessedType(typeof(UITextElement));
+                            templateNode.textContent = ProcessTextContent(textContent);
+                            parent.children.Add(templateNode);
+                            templateNode = TemplateNode.Get();
+                        }
+                        else if (typeof(UITextElement).IsAssignableFrom(parent.children[parent.children.size - 1].processedType.rawType)) {
+                            AppendTextContent(parent.children[parent.children.size - 1].textContent, textContent);
+                        }
+                        else {
+                            // add a new child
+                            TemplateNode templateNode = TemplateNode.Get();
+                            templateNode.parent = parent;
+                            templateNode.astRoot = parent.astRoot;
+                            templateNode.processedType = TypeProcessor.GetProcessedType(typeof(UITextElement));
+                            templateNode.textContent = ProcessTextContent(textContent);
+                            parent.children.Add(templateNode);
+                            templateNode = TemplateNode.Get();
                         }
 
-                        TemplateNode templateNode = TemplateNode.Get();
-                        templateNode.parent = parent;
-                        templateNode.astRoot = parent.astRoot;
-                        templateNode.processedType = TypeProcessor.GetProcessedType(typeof(UITextElement));
-                        templateNode.textContent = textNode.Value;
-                        parent.children.Add(templateNode);
-                        templateNode = TemplateNode.Get();
                         continue;
                     }
 
@@ -257,6 +284,13 @@ namespace UIForia.Compilers {
                 throw new TemplateParseException(node, $"Unable to handle node type: {node.NodeType}");
             }
 
+
+            if (parent.children.Count == 1 && typeof(UITextElement).IsAssignableFrom(parent.processedType.rawType) && typeof(UITextElement).IsAssignableFrom(parent.children[0].processedType.rawType)) {
+                parent.textContent = parent.children[0].textContent;
+                TemplateNode.Release(ref parent.children.array[0]);
+                parent.children.Clear();
+            }
+
             if (parent.parent != null && parent.processedType.requiresTemplateExpansion && parent.children.Count > 0) {
                 TemplateNode childrenSlotNode = TemplateNode.Get();
                 for (int i = 0; i < parent.children.size; i++) {
@@ -280,6 +314,127 @@ namespace UIForia.Compilers {
                     TemplateNode.Release(ref childrenSlotNode);
                 }
             }
+        }
+
+        private static bool Escape(string input, ref int ptr, out char result) {
+            // xml parser might already do this for us
+            if (StringCompare(input, ref ptr, "amp;", '&', out result)) return true;
+            if (StringCompare(input, ref ptr, "lt;", '<', out result)) return true;
+            if (StringCompare(input, ref ptr, "amp;", '>', out result)) return true;
+            if (StringCompare(input, ref ptr, "amp;", '"', out result)) return true;
+            if (StringCompare(input, ref ptr, "amp;", '\'', out result)) return true;
+            if (StringCompare(input, ref ptr, "obrc;", '{', out result)) return true;
+            if (StringCompare(input, ref ptr, "cbrc;", '}', out result)) return true;
+            return false;
+        }
+
+        private static bool StringCompare(string input, ref int ptr, string target, char match, out char result) {
+            result = '\0';
+
+            if (ptr + target.Length - 1 >= input.Length) {
+                return false;
+            }
+
+            for (int i = 0; i < target.Length; i++) {
+                if (target[i] != input[ptr + i]) {
+                    return false;
+                }
+            }
+
+            ptr += target.Length;
+            result = match;
+            return true;
+        }
+
+
+        public static void ProcessTextExpressions(string input, LightList<string> outputList) {
+            //input = input.Trim(); // todo -- let style handle this 
+            int ptr = 0;
+            int level = 0;
+
+            StringBuilder builder = TextUtil.StringBuilder;
+            builder.Clear();
+            
+            
+            while (ptr < input.Length) {
+                char current = input[ptr++];
+                if (current == '&') {
+                    // todo -- escape probably needs to go the other way round
+                    if (Escape(input, ref ptr, out char result)) {
+                        builder.Append(result);
+                        continue;
+                    }
+                }
+
+                if (current == '{') {
+                    if (level == 0) {
+                        if (builder.Length > 0) {
+                            builder.Append("'");
+                            outputList.Add("'" + builder.ToString());
+                            builder.Clear();
+                        }
+                        level++;
+                        continue;
+                    }
+                    level++;
+                }
+
+                if (current == '}') {
+                    level--;
+                    if (level == 0) {
+                        if (builder.Length > 0) {
+                            outputList.Add(builder.ToString());
+                            builder.Clear();
+                        }
+
+                        continue;
+                    }
+                }
+
+                builder.Append(current);
+            }
+
+            if (level != 0) {
+                throw new Exception($"Error processing {input} into expressions. Too many unmatched braces");
+            }
+
+            if (builder.Length > 0) {
+                outputList.Add("'" + builder + "'");
+            }
+
+            builder.Clear();
+        }
+
+
+        private static LightList<string> ProcessTextContent(string input) {
+            LightList<string> output = LightList<string>.Get();
+
+            ProcessTextExpressions(input, output);
+            
+            for (int i = 0; i < output.Count; i++) {
+                if (output[i] == "''") {
+                    output.RemoveAt(i--);
+                }
+            }
+            
+            return output;
+        }
+
+        private static void AppendTextContent(LightList<string> target, string input) {
+            
+            LightList<string> output = LightList<string>.Get();
+
+            ProcessTextExpressions(input, output);
+            
+            for (int i = 0; i < output.Count; i++) {
+                if (output[i] == "''") {
+                    output.RemoveAt(i--);
+                }
+            }
+            
+            target.AddRange(output);
+            LightList<string>.Release(ref output);
+            
         }
 
         private UsingDeclaration ParseUsing(XElement element) {

@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using JetBrains.Annotations;
+using UIForia.Compilers;
 using UIForia.Elements.Routing;
 using UIForia.Expressions;
 using UIForia.Layout;
 using UIForia.Rendering;
 using UIForia.Routing;
+using UIForia.Systems;
 using UIForia.Templates;
 using UIForia.UIInput;
 using UIForia.Util;
@@ -93,7 +95,6 @@ namespace UIForia.Elements {
     public class UIElement : IHierarchical {
 
         public readonly int id;
-        public readonly UIStyleSet style;
 
         internal LightList<UIElement> children; // todo -- replace w/ linked list & child count
 
@@ -108,10 +109,16 @@ namespace UIForia.Elements {
 
         internal FastLayoutBox layoutBox;
         internal RenderBox renderBox;
+        public readonly UIStyleSet style;
+        internal LinqBindingNode bindingNode;
 
         internal int depthTraversalIndex;
+        internal StructList<ElementAttribute> attributes;
 
         public UIView View { get; internal set; }
+
+        // todo -- move this
+        public ArrayContainer<StoredTemplate> storedTemplates;
 
         protected internal UIElement() {
             this.id = Application.NextElementId;
@@ -188,44 +195,50 @@ namespace UIForia.Elements {
         }
 
         public UIElement InsertChild(uint idx, UIElement element) {
-            if (element == null || element == this || element.isDestroyed) {
-                return null;
-            }
-
-            if (View == null) {
-                element.parent = this;
-                element.View = null;
-                element.siblingIndex = children.Count;
-                element.depth = depth + 1;
-                children.Insert((int) idx, element);
-            }
-            else {
-                Application.InsertChild(this, element, (uint) children.Count);
-            }
-
-            return element;
+            throw new NotImplementedException();
+            // if (element == null || element == this || element.isDestroyed) {
+            //     return null;
+            // }
+            //
+            // if (View == null) {
+            //     element.parent = this;
+            //     element.View = null;
+            //     element.siblingIndex = children.Count;
+            //     element.depth = depth + 1;
+            //     children.Insert((int) idx, element);
+            // }
+            // else {
+            //     Application.InsertChild(this, element, (uint) children.Count);
+            // }
+            //
+            // return element;
         }
 
         public UIElement AddChild(UIElement element) {
+            throw new NotImplementedException();
             // todo -- if <Children/> is defined in the template, attach child to that element instead
-            if (element == null || element == this || element.isDestroyed) {
-                return null;
-            }
-
-            if (View == null) {
-                element.parent = this;
-                element.View = null;
-                element.siblingIndex = children.Count;
-                element.depth = depth + 1;
-                children.Add(element);
-            }
-            else {
-                Application.InsertChild(this, element, (uint) children.Count);
-            }
-
-            return element;
+            // if (element == null || element == this || element.isDestroyed) {
+            //     return null;
+            // }
+            //
+            // if (View == null) {
+            //     element.parent = this;
+            //     element.View = null;
+            //     element.siblingIndex = children.Count;
+            //     element.depth = depth + 1;
+            //     children.Add(element);
+            // }
+            // else {
+            //     Application.InsertChild(this, element, (uint) children.Count);
+            // }
+            //
+            // return element;
         }
 
+        public UIElement AddChild(in StoredTemplate storedTemplate) {
+            throw new NotImplementedException();
+           // return Application.InsertChild(this, storedTemplate, (uint)children.Count);
+        }
 
         public void TriggerEvent(UIEvent evt) {
             evt.origin = this;
@@ -361,82 +374,83 @@ namespace UIForia.Elements {
         }
 
         public List<ElementAttribute> GetAttributes(List<ElementAttribute> retn = null) {
-            return s_ColdDataMap.GetOrDefault(id).GetAttributes(retn);
+            retn = retn ?? new List<ElementAttribute>();
+            if (attributes == null || attributes.size == 0) {
+                return retn;
+            }
+
+            for (int i = 0; i < attributes.size; i++) {
+                retn.Add(attributes.array[i]);
+            }
+
+            return retn;
         }
 
         public void SetAttribute(string name, string value) {
-            ElementColdData coldData = s_ColdDataMap.GetOrDefault(id);
-            string oldValue = coldData.GetAttribute(name).value;
-            coldData.SetAttribute(name, value);
-            s_ColdDataMap[id] = coldData;
-            Application.OnAttributeSet(this, name, value, oldValue);
+            if (attributes == null) {
+                attributes = StructList<ElementAttribute>.Get();
+            }
+
+            ElementAttribute[] attrs = attributes.array;
+            int attrCount = attributes.size;
+            
+            for (int i = 0; i < attrCount; i++) {
+                if (attrs[i].name == name) {
+                    if (attrs[i].value == value) {
+                        return;
+                    }
+                    else {
+                        string oldValue = attrs[i].value;
+                        attrs[i] = new ElementAttribute(name, value);
+                        Application.OnAttributeSet(this, name, value, oldValue);
+                        return;
+                    }
+                }    
+            }
+            
+            attributes.Add(new ElementAttribute(name, value));
+            Application.OnAttributeSet(this, name, value, null);
+        }
+
+        public bool TryGetAttribute(string key, out string value) {
+            if (attributes == null) {
+                value = null;
+                return false;
+            }
+
+            ElementAttribute[] attrs = attributes.array;
+            int attrCount = attributes.size;
+            
+            for (int i = 0; i < attrCount; i++) {
+                if (attrs[i].name == key) {
+                    value = attrs[i].value;
+                    return true;
+                }    
+            }
+
+            value = null;
+            return false;
         }
 
         public string GetAttribute(string attr) {
-            ElementColdData coldData = s_ColdDataMap.GetOrDefault(id);
-            if (coldData.TryGetAttribute(attr, out ElementAttribute retn)) {
-                return retn.value;
+            if (attributes == null) {
+                return null;
+            }
+
+            ElementAttribute[] attrs = attributes.array;
+            int attrCount = attributes.size;
+            
+            for (int i = 0; i < attrCount; i++) {
+                if (attrs[i].name == attr) {
+                    return attrs[i].value;
+                }    
             }
 
             return null;
-        }
-
-        public void OnAttributeAdded(Action<ElementAttribute> handler) {
-            ElementColdData coldData = s_ColdDataMap.GetOrDefault(id);
-            coldData.onAttributeAdded += handler;
-            s_ColdDataMap[id] = coldData;
-        }
-
-        public void OnAttributeChanged(Action<ElementAttribute> handler) {
-            ElementColdData coldData = s_ColdDataMap.GetOrDefault(id);
-            coldData.onAttributeChanged += handler;
-            s_ColdDataMap[id] = coldData;
-        }
-
-        public void OnAttributeRemoved(Action<ElementAttribute> handler) {
-            ElementColdData coldData = s_ColdDataMap.GetOrDefault(id);
-            coldData.onAttributeRemoved += handler;
-            s_ColdDataMap[id] = coldData;
         }
 
         public bool HasAttribute(string name) {
-            return s_ColdDataMap.GetOrDefault(id).GetAttribute(name).value != null;
-        }
-
-        // todo -- remove
-        public IRouterElement GetNearestRouter() {
-            UIElement ptr = this;
-            ElementColdData coldData = s_ColdDataMap.GetOrDefault(id);
-            if (coldData.nearestRouter != null) {
-                return coldData.nearestRouter;
-            }
-
-            while (ptr != null) {
-                if (ptr is IRouterElement routeElement) {
-                    coldData.nearestRouter = routeElement;
-                    s_ColdDataMap[id] = coldData;
-                    return routeElement;
-                }
-
-                ptr = ptr.parent;
-            }
-
-            return null;
-        }
-
-        // todo remove
-        public RouteParameter GetRouteParameter(string name) {
-            UIElement ptr = this;
-
-            while (ptr != null) {
-                if (ptr is RouteElement routeElement) {
-                    return routeElement.CurrentMatch.GetParameter(name);
-                }
-
-                ptr = ptr.parent;
-            }
-
-            return default;
+            return GetAttribute(name) != null;
         }
 
         public int UniqueId => id;
@@ -483,30 +497,7 @@ namespace UIForia.Elements {
             return false;
         }
 
-        internal UIElementTypeData GetTypeData() {
-            UIElementTypeData typeData = default;
-            Type elementType = GetType();
-            if (s_TypeDataMap.TryGetValue(elementType, out typeData)) {
-                return typeData;
-            }
-            else {
-                typeData.requiresUpdate = ReflectionUtil.IsOverride(elementType.GetMethod(nameof(OnUpdate)));
-                //typeData.attributes = elementType.GetCustomAttributes();
-                s_TypeDataMap[elementType] = typeData;
-                return typeData;
-            }
-        }
-
-        private static readonly Dictionary<Type, UIElementTypeData> s_TypeDataMap = new Dictionary<Type, UIElementTypeData>();
-
-
-        internal struct UIElementTypeData {
-
-            public bool requiresUpdate;
-            // public Attribute[] attributes;
-
-        }
-
+        
     }
 
 }

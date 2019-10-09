@@ -49,6 +49,10 @@ namespace UIForia.Util {
             array[size++] = item;
         }
 
+        public T PeekAt(int index) {
+            return array[index];
+        }
+
         public T PopUnchecked() {
             T obj = array[--size];
             array[size] = default;

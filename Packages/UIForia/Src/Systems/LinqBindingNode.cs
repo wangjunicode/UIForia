@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using UIForia.Compilers;
 using UIForia.Elements;
 using UIForia.Util;
@@ -26,6 +27,7 @@ namespace UIForia.Systems {
         }
 
         public void AddChild(LinqBindingNode childNode) {
+            childNode.system = system;
             children.Add(childNode);
         }
 
@@ -65,8 +67,8 @@ namespace UIForia.Systems {
                 contextStack.Push(contextWrapper);
             }
 
-            while (iteratorIndex < children.Count) {
-                LinqBindingNode child = children.Array[iteratorIndex++];
+            while (iteratorIndex < children.size) {
+                LinqBindingNode child = children.array[iteratorIndex++];
 
                 if (child.phase != activePhase) {
                     child.Update(contextStack);
@@ -89,6 +91,7 @@ namespace UIForia.Systems {
 
             bindingNode.phase = system.previousPhase;
             children.Add(bindingNode);
+            bindingNode.system = system;
             if (iteratorIndex >= 0 && iteratorIndex > index) {
                 iteratorIndex = index;
             }
@@ -101,6 +104,7 @@ namespace UIForia.Systems {
 
             for (int i = 0; i < childrenToAdd.Count; i++) {
                 childrenToAdd[i].phase = system.previousPhase;
+                childrenToAdd[i].system = system;
                 children.Add(childrenToAdd[i]);
             }
 
@@ -116,8 +120,9 @@ namespace UIForia.Systems {
             }
         }
 
-        public static LinqBindingNode Get(Application application, UIElement element, UIElement rootElement) {
-            LinqBindingNode node = new LinqBindingNode();
+        [UsedImplicitly] // called from template functions, 
+        public static LinqBindingNode Get(Application application, UIElement rootElement, UIElement element) {
+            LinqBindingNode node = new LinqBindingNode(); // todo -- pool
             node.root = rootElement;
             node.element = element;
             node.system = application.LinqBindingSystem;

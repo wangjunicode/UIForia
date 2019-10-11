@@ -84,6 +84,7 @@ namespace UIForia.Elements {
                 options.onItemRemoved += onRemove;
                 options.onClear += onClear;
                 for (int i = 0; i < options.Count; i++) {
+                    // todo -- remove this and bake into repeat
                     childrenElement.AddChild(childrenElement.InstantiateTemplate());
                 }
 

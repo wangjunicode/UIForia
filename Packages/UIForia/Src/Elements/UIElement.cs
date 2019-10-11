@@ -3,11 +3,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using JetBrains.Annotations;
 using UIForia.Compilers;
-using UIForia.Elements.Routing;
 using UIForia.Expressions;
 using UIForia.Layout;
 using UIForia.Rendering;
-using UIForia.Routing;
 using UIForia.Systems;
 using UIForia.Templates;
 using UIForia.UIInput;
@@ -94,7 +92,7 @@ namespace UIForia.Elements {
     [DebuggerDisplay("{" + nameof(ToString) + "()}")]
     public class UIElement : IHierarchical {
 
-        public readonly int id;
+        public int id; // todo -- internal with accessor
 
         internal LightList<UIElement> children; // todo -- replace w/ linked list & child count
 
@@ -103,23 +101,22 @@ namespace UIForia.Elements {
         internal UIElementFlags flags;
         internal UIElement parent;
 
-        public readonly LayoutResult layoutResult;
+        public LayoutResult layoutResult;
 
+        // todo -- move to per-instance object since its always set anyway
         internal static IntMap<ElementColdData> s_ColdDataMap = new IntMap<ElementColdData>();
 
         internal FastLayoutBox layoutBox;
         internal RenderBox renderBox;
-        public readonly UIStyleSet style;
+        public UIStyleSet style; // todo -- make internal with accessor
         internal LinqBindingNode bindingNode;
 
         internal int depthTraversalIndex;
         internal StructList<ElementAttribute> attributes;
 
         public UIView View { get; internal set; }
-
-        // todo -- move this
-        public ArrayContainer<StoredTemplate> storedTemplates;
-
+        
+        // not actually used since we get elements from the pool as uninitialized
         protected internal UIElement() {
             this.id = Application.NextElementId;
             this.style = new UIStyleSet(this);
@@ -128,7 +125,7 @@ namespace UIForia.Elements {
             this.children = LightList<UIElement>.Get();
         }
 
-        public Application Application => View.Application;
+        public Application Application => View.application;
 
         public UIChildrenElement TranscludedChildren {
             get { return s_ColdDataMap.GetOrDefault(id).transcludedChildren; }
@@ -154,7 +151,7 @@ namespace UIForia.Elements {
         public int depth { get; internal set; }
         public int siblingIndex { get; internal set; }
 
-        public IInputProvider Input => View.Application.InputSystem;
+        public IInputProvider Input => View.application.InputSystem;
 
         public int ChildCount => children?.Count ?? 0;
 
@@ -191,7 +188,7 @@ namespace UIForia.Elements {
         public virtual void HandleUIEvent(UIEvent evt) { }
 
         public void Destroy() {
-            View.Application.DoDestroyElement(this);
+            View.application.DoDestroyElement(this);
         }
 
         public UIElement InsertChild(uint idx, UIElement element) {
@@ -215,29 +212,23 @@ namespace UIForia.Elements {
         }
 
         public UIElement AddChild(UIElement element) {
-            throw new NotImplementedException();
             // todo -- if <Children/> is defined in the template, attach child to that element instead
-            // if (element == null || element == this || element.isDestroyed) {
-            //     return null;
-            // }
-            //
-            // if (View == null) {
-            //     element.parent = this;
-            //     element.View = null;
-            //     element.siblingIndex = children.Count;
-            //     element.depth = depth + 1;
-            //     children.Add(element);
-            // }
-            // else {
-            //     Application.InsertChild(this, element, (uint) children.Count);
-            // }
-            //
-            // return element;
-        }
-
-        public UIElement AddChild(in StoredTemplate storedTemplate) {
-            throw new NotImplementedException();
-           // return Application.InsertChild(this, storedTemplate, (uint)children.Count);
+            if (element == null || element == this || element.isDestroyed) {
+                return null;
+            }
+            
+            if (View == null) {
+                element.parent = this;
+                element.View = null;
+                element.siblingIndex = children.Count;
+                element.depth = depth + 1;
+                children.Add(element);
+            }
+            else {
+                Application.InsertChild(this, element, (uint) children.Count);
+            }
+            
+            return element;
         }
 
         public void TriggerEvent(UIEvent evt) {
@@ -256,10 +247,10 @@ namespace UIForia.Elements {
             }
 
             if (active && isSelfDisabled) {
-                View.Application.DoEnableElement(this);
+                View.application.DoEnableElement(this);
             }
             else if (!active && isSelfEnabled) {
-                View.Application.DoDisableElement(this);
+                View.application.DoDisableElement(this);
             }
         }
 

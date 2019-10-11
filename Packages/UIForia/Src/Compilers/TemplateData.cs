@@ -19,12 +19,12 @@ namespace UIForia.Compilers {
             sharedBindingLambdas.Add(expression);
             return sharedBindingLambdas.Count - 1;
         }
-        
+
         public int AddTemplate(LambdaExpression expression) {
             templateLambdas.Add(expression);
             return templateLambdas.size - 1;
         }
-        
+
         internal LightList<LambdaExpression> contextProviderLambdas = new LightList<LambdaExpression>();
         internal LightList<LambdaExpression> sharedBindingLambdas = new LightList<LambdaExpression>();
         internal LightList<LambdaExpression> instanceBindingFns = new LightList<LambdaExpression>();
@@ -38,14 +38,13 @@ namespace UIForia.Compilers {
 
         // load dll and copy array or call compile on all the fns.
         public void Build() {
-            
             if (templateFns != null) return;
-            
+
             contextProviderFns = new Func<UIElement, UIElement, TemplateContext>[contextProviderLambdas.Count];
 
             for (int i = 0; i < contextProviderLambdas.Count; i++) {
                 contextProviderFns[i] = (Func<UIElement, UIElement, TemplateContext>) contextProviderLambdas[i].Compile();
-            Debug.Log(sharedBindingLambdas[i].ToCSharpCode());
+                Debug.Log(sharedBindingLambdas[i].ToCSharpCode());
             }
 
             sharedBindingFns = new Action<UIElement, UIElement, StructStack<TemplateContextWrapper>>[sharedBindingLambdas.Count];
@@ -56,23 +55,22 @@ namespace UIForia.Compilers {
                     sharedBindingFns[i] = onUpdate;
                 }
                 else {
-                Debug.Log(sharedBindingLambdas[i].ToCSharpCode());
+                 //   Debug.Log(sharedBindingLambdas[i].ToCSharpCode());
                     sharedBindingFns[i] = (Action<UIElement, UIElement, StructStack<TemplateContextWrapper>>) sharedBindingLambdas[i].Compile();
                 }
             }
 
             sharedBindingFns.size = sharedBindingLambdas.size;
             templateFns = new LightList<Func<UIElement, TemplateScope2, UIElement>>(templateLambdas.size);
-            
+
             for (int i = 0; i < templateLambdas.size; i++) {
-          Debug.Log(templateLambdas[i].ToCSharpCode());
+                Debug.Log(templateLambdas[i].ToCSharpCode());
                 templateFns[i] = (Func<UIElement, TemplateScope2, UIElement>) templateLambdas[i].Compile();
             }
 
             templateFns.size = templateLambdas.size;
         }
 
-      
     }
 
 }

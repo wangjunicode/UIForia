@@ -34,14 +34,14 @@ namespace UIForia.Elements {
                 }
             }
 
-            View.Application.DestroyChildren(this);
+            View.application.DestroyChildren(this);
 
             if (data != null) {
                 if (!typeof(IDynamicElement).IsAssignableFrom(data.ElementType)) {
                     return;
                 }
 
-                UIElement child = View.Application.CreateElement(data.ElementType);
+                UIElement child = View.application.CreateElement(data.ElementType);
                 if (child != null) {
                     ((IDynamicElement)child).SetData(data);
                     AddChild(child);

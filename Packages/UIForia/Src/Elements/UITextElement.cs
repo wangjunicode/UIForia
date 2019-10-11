@@ -1,6 +1,5 @@
 using SVGX;
 using UIForia.Attributes;
-using UIForia.Layout;
 using UIForia.Rendering;
 using UIForia.Systems;
 using UIForia.Text;
@@ -16,13 +15,13 @@ namespace UIForia.Elements {
 
         private bool shouldUpdateSpanStyle;
         private SVGXTextStyle spanStyle;
-
-        public UITextElement(string text = "") {
-            this.text = text ?? string.Empty;
-            this.flags = flags | UIElementFlags.TextElement
-                               | UIElementFlags.BuiltIn
-                               | UIElementFlags.Primitive;
-        }
+        
+//        public UITextElement() {
+//            this.text = text ?? string.Empty;
+//            this.flags = flags | UIElementFlags.TextElement
+//                               | UIElementFlags.BuiltIn
+//                               | UIElementFlags.Primitive;
+//        }
 
         internal TextInfo TextInfo => textInfo;
 

@@ -5,13 +5,6 @@ using UIForia.Util;
 
 namespace UIForia.Elements {
 
-    public struct ElementPool2 {
-
-        public StructList<DepthKeyedElement> activeElements;
-        public LightList<UIElement> pooledElements;
-
-    }
-
     public struct DepthKeyedElement {
 
         public int depth;

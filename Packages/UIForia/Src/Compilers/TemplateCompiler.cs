@@ -37,6 +37,7 @@ namespace UIForia.Compilers {
         private static readonly FieldInfo s_Scope_CompiledTemplate = typeof(TemplateScope2).GetField(nameof(TemplateScope2.compiledTemplate));
         private static readonly FieldInfo s_Element_Parent = typeof(UIElement).GetField(nameof(UIElement.parent), BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
         private static readonly PropertyInfo s_Element_Application = typeof(UIElement).GetProperty(nameof(UIElement.Application), BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+        private static readonly PropertyInfo s_Element_BindingNode = typeof(UIElement).GetProperty(nameof(UIElement.bindingNode), BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
 
         private static readonly ConstructorInfo s_ElementAttributeCtor = typeof(ElementAttribute).GetConstructor(new[] {typeof(string), typeof(string)});
         private static readonly ConstructorInfo s_TemplateScope_Ctor = typeof(TemplateScope2).GetConstructor(new[] {typeof(Application), typeof(LinqBindingNode), typeof(StructList<SlotUsage>)});
@@ -142,8 +143,16 @@ namespace UIForia.Compilers {
             }
 
             compilationStack.Push(processedType.rawType);
-
-            TemplateAST ast = xmlTemplateParser.Parse(processedType);
+            
+            TemplateAST ast = null;
+            TemplateDefinition templateDefinition = processedType.GetTemplateFromApplication(application);
+            
+            if (templateDefinition.language == TemplateLanguage.XML) {
+                ast = xmlTemplateParser.Parse(templateDefinition.contents, templateDefinition.filePath, processedType);
+            }
+            else {
+                throw new NotImplementedException("Only XML templates are currently supported");
+            }
 
             CompiledTemplate compiledTemplate = Compile(ast);
 
@@ -198,6 +207,12 @@ namespace UIForia.Compilers {
 
                 ctx.AddStatement(Expression.Assign(ctx.rootParam, createRootExpression));
 
+//                ctx.AddStatement(Expression.Assign(
+//                    Expression.MakeMemberAccess(ctx.rootParam, s_Element_BindingNode), 
+//                    Expression.Call(s_Element_BindingNode)
+//                    )
+//                );
+                
                 ProcessBindings(ast.root, ctx, false);
 
                 BlockExpression createUnscopedBlock = ctx.PopBlock();
@@ -632,7 +647,8 @@ namespace UIForia.Compilers {
             }
 
             for (int i = 0; i < templateNode.textContent.size; i++) {
-                if (templateNode.textContent.array[i][0] == '{' && templateNode.textContent.array[i][templateNode.textContent.array[i].Length - 1] == '}') {
+                
+                if (templateNode.textContent.array[i].isExpression) {
                     return true;
                 }
             }
@@ -658,38 +674,46 @@ namespace UIForia.Compilers {
         }
 
         private BindingDefinition CompileTextBinding(TemplateNode templateNode) {
-            LightList<string> expressionParts = templateNode.textContent;
+            StructList<TextExpression> expressionParts = templateNode.textContent;
 
             SetCompilerSignature();
 
+            Type rootType = templateNode.astRoot.root.processedType.rawType;
+            ParameterExpression rootExpr = linqCompiler.GetParameter("__root");
             linqCompiler.AddNamespace("UIForia.Util");
+            linqCompiler.AddNamespace("UIForia.Text");
+            ParameterExpression rootParam = linqCompiler.AddVariable(new Parameter(rootType, "__castRoot", ParameterFlags.NeverNull), Expression.Convert(rootExpr, rootType));
             linqCompiler.AddVariable(new Parameter<UITextElement>("__textElement", ParameterFlags.NeverNull), Expression.Convert(linqCompiler.GetParameter("__element"), typeof(UITextElement)));
             linqCompiler.AddVariable(new Parameter<StringBuilder>("__stringBuilder", ParameterFlags.NeverNull), "TextUtil.StringBuilder");
+            linqCompiler.SetImplicitContext(rootParam);
 
             // todo -- more can be done here to get rid of allocations
             // todo -- don't always call set text
             // if binding is not shared we can store last frame's evaluation results & diff them against this frames w/o doing a string join
-
             for (int i = 0; i < expressionParts.size; i++) {
                 // text joiner
                 // convert text expression outputs to an array 
                 // output = ["text", expression, "here"].Join();
                 // later -> visit any non const expressions and break apart by top level string-to-string + operator
 
-                if (expressionParts[i][0] == '{' && expressionParts[i][expressionParts[i].Length - 1] == '}') {
-                    linqCompiler.Statement("__stringBuilder.Append(" + expressionParts[i].Substring(1, expressionParts[i].Length - 2) + ")");
+                if (expressionParts[i].isExpression) {
+                    linqCompiler.Statement($"__stringBuilder.Append({expressionParts[i].text})");
                 }
                 else {
-                    linqCompiler.Statement("__stringBuilder.Append('" + expressionParts[i] + "')");
+                    linqCompiler.Statement($"__stringBuilder.Append('{expressionParts[i].text}')");
                 }
             }
 
             linqCompiler.Statement("__textElement.SetText(__stringBuilder.ToString())");
+            linqCompiler.Statement("__stringBuilder.Clear()");
             linqCompiler.Log();
 
             int bindingId = application.templateData.AddSharedBindingLambda(linqCompiler.BuildLambda());
 
             linqCompiler.Reset();
+            
+            expressionParts.Release();
+            templateNode.textContent = null;
 
             // todo -- revisit shared & constant
             return new BindingDefinition() {

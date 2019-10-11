@@ -434,6 +434,31 @@ public class TestTemplateParser {
         TemplateParseException exception = Assert.Throws<TemplateParseException>(() => { compiler.GetCompiledTemplate(typeof(UnmatchedSlotContent)); });
     }
 
+    [Template(TemplateType.String, @"
+        <UITemplate>
+            <Content>
+                <Text>Hello {value}</Text>
+            </Content>
+        </UITemplate>
+    
+    ")]
+    public class BindingTestThing2 : UIElement {
+
+        public string value =>"World";
+
+    }
+    
+    [Test]
+    public void SimpleBindingSmokeTest() {
+        MockApplication application = new MockApplication(typeof(BindingTestThing2));
+        UIElement element = application.RootElement.GetChild(0);
+        Assert.IsInstanceOf<BindingTestThing2>(element);
+        application.Update();
+        UITextElement textElement = element.GetChild(0) as UITextElement;
+        Assert.NotNull(textElement);
+        Assert.AreEqual("Hello World", textElement.text);
+    }
+
 //    [Test]
 //    public void CompileSlotDefaultToTemplateFunction() {
 //        MockApplication application = MockApplication.CreateWithoutView();

@@ -1,9 +1,11 @@
 using System;
+using System.Diagnostics;
 using UIForia.Parsing.Expression;
 using UIForia.Util;
 
 namespace UIForia.Compilers {
 
+    [DebuggerDisplay("{processedType.rawType.ToString()}")]
     public sealed class TemplateNode {
 
         public LightList<DirectiveDefinition> directives;
@@ -11,7 +13,7 @@ namespace UIForia.Compilers {
         public LightList<TemplateNode> children;
         public TemplateAST astRoot;
         public TemplateNode parent;
-        public LightList<string> textContent;
+        public StructList<TextExpression> textContent;
         public ProcessedType processedType;
         public string slotName;
 

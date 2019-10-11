@@ -21,7 +21,7 @@ namespace UIForia.Compilers.ExpressionResolvers {
 
             public override DragEvent Evaluate(ExpressionContext context) {
                 UIElement element = (UIElement) context.currentObject;
-                return element.View.Application.InputSystem.CurrentDragEvent;
+                return element.View.application.InputSystem.CurrentDragEvent;
             }
 
             public override bool IsConstant() {

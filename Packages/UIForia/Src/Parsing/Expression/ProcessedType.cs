@@ -2,12 +2,21 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using UIForia.Attributes;
+using UIForia.Compilers;
 using UIForia.Elements;
 using UIForia.Exceptions;
 using UIForia.Util;
 using Debug = UnityEngine.Debug;
 
 namespace UIForia.Parsing.Expression {
+
+    public struct TemplateDefinition {
+
+        public string contents;
+        public TemplateLanguage language;
+        public string filePath;
+
+    }
 
     [DebuggerDisplay("{rawType.Name}")]
     public struct ProcessedType {
@@ -29,7 +38,7 @@ namespace UIForia.Parsing.Expression {
             );
         }
 
-        public string GetTemplate(string templateRoot) {
+        public TemplateDefinition GetTemplate(string templateRoot) {
             if (templateAttr == null) {
                 throw new Exception($"Template not defined for {rawType.Name}");
             }
@@ -42,7 +51,14 @@ namespace UIForia.Parsing.Expression {
                         throw new TemplateParseException(templateRoot, $"Cannot find template in (internal) path {templatePath}.");
                     }
 
-                    return file;
+                    TemplateLanguage language = TemplateLanguage.XML;
+//                    if (Path.GetExtension(templatePath) == "xml") {
+//                    }
+
+                    return new TemplateDefinition() {
+                        contents = file,
+                        language = language
+                    };
                 }
 
                 case TemplateType.File: {
@@ -52,15 +68,23 @@ namespace UIForia.Parsing.Expression {
                         throw new TemplateParseException(templateRoot, $"Cannot find template in path {templatePath}.");
                     }
 
-                    return file;
+                    TemplateLanguage language = TemplateLanguage.XML;
+
+                    return new TemplateDefinition() {
+                        contents = file,
+                        language = language
+                    };
                 }
 
                 default:
-                    return templateAttr.template;
+                    return new TemplateDefinition() {
+                        contents = templateAttr.template,
+                        language = TemplateLanguage.XML
+                    };
             }
         }
 
-        public string GetTemplateFromApplication(Application application) {
+        public TemplateDefinition GetTemplateFromApplication(Application application) {
             if (templateAttr == null) {
                 throw new Exception($"Template not defined for {rawType.Name}");
             }
@@ -73,7 +97,11 @@ namespace UIForia.Parsing.Expression {
                         throw new TemplateParseException(application.TemplateRootPath, $"Cannot find template in (internal) path {templatePath}.");
                     }
 
-                    return file;
+                    return new TemplateDefinition() {
+                        contents = file,
+                        filePath = GetTemplatePath(),
+                        language = TemplateLanguage.XML
+                    };
                 }
 
                 case TemplateType.File: {
@@ -83,11 +111,17 @@ namespace UIForia.Parsing.Expression {
                         throw new TemplateParseException(application.TemplateRootPath, $"Cannot find template in path {templatePath}.");
                     }
 
-                    return file;
+                    return new TemplateDefinition() {
+                        contents = file,
+                        language = TemplateLanguage.XML
+                    };
                 }
 
                 default:
-                    return templateAttr.template;
+                    return new TemplateDefinition() {
+                        contents = templateAttr.template,
+                        language = TemplateLanguage.XML
+                    };
             }
         }
 

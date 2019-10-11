@@ -406,6 +406,10 @@ namespace UIForia.Compilers {
             AddStatement(Visit(ExpressionParser.Parse(input)));
         }
 
+        public void RawExpression(Expression expression) {
+            AddStatement(expression);
+        }
+
         private void EnsureReturnLabel() {
             if (returnLabel != null) {
                 return;

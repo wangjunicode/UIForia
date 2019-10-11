@@ -32,8 +32,7 @@ namespace UIForia.Compilers {
     // <ConstTree
     // <Shadow:
     // elements can start & end with : so we can have anonymous elements
-
-
+    
     public class XMLTemplateParser {
 
         public Application application;
@@ -69,8 +68,7 @@ namespace UIForia.Compilers {
             this.parserContext = new XmlParserContext(null, nameSpaceManager, null, XmlSpace.None);
         }
 
-        internal TemplateAST Parse(ProcessedType processedType) {
-            string template = processedType.GetTemplateFromApplication(application);
+        internal TemplateAST Parse(string template, string filePath, ProcessedType processedType) {
 
             XElement root = XElement.Load(new XmlTextReader(template, XmlNodeType.Element, parserContext));
 
@@ -111,7 +109,7 @@ namespace UIForia.Compilers {
             ParseAttributes(rootNode, contentElement);
             ParseChildren(rootNode, contentElement.Nodes(), namespaces);
 
-            retn.fileName = processedType.GetTemplatePath();
+            retn.fileName = filePath;
             retn.root = rootNode;
             retn.usings = usings;
             retn.styles = styles;
@@ -230,24 +228,29 @@ namespace UIForia.Compilers {
                         string textContent = textNode.Value.Trim(); // maybe don't trim & let text style handle it
 
                         if (parent.children.Count == 0) {
+                            StructList<TextExpression> list = StructList<TextExpression>.Get();
+                            TextTemplateProcessor.ProcessTextExpressions(textContent, list);
                             TemplateNode templateNode = TemplateNode.Get();
                             templateNode.parent = parent;
                             templateNode.astRoot = parent.astRoot;
                             templateNode.processedType = TypeProcessor.GetProcessedType(typeof(UITextElement));
-                            templateNode.textContent = ProcessTextContent(textContent);
+                            templateNode.textContent = list;
                             parent.children.Add(templateNode);
                             templateNode = TemplateNode.Get();
                         }
                         else if (typeof(UITextElement).IsAssignableFrom(parent.children[parent.children.size - 1].processedType.rawType)) {
-                            AppendTextContent(parent.children[parent.children.size - 1].textContent, textContent);
+                           throw new NotImplementedException();
+                           //AppendTextContent(parent.children[parent.children.size - 1].textContent, textContent);
                         }
                         else {
                             // add a new child
                             TemplateNode templateNode = TemplateNode.Get();
+                            StructList<TextExpression> list = StructList<TextExpression>.Get();
+                            TextTemplateProcessor.ProcessTextExpressions(textContent, list);
                             templateNode.parent = parent;
                             templateNode.astRoot = parent.astRoot;
                             templateNode.processedType = TypeProcessor.GetProcessedType(typeof(UITextElement));
-                            templateNode.textContent = ProcessTextContent(textContent);
+                            templateNode.textContent = list;
                             parent.children.Add(templateNode);
                             templateNode = TemplateNode.Get();
                         }

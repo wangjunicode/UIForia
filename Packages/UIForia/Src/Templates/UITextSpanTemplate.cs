@@ -20,7 +20,7 @@ namespace UIForia.Templates {
         protected override Type elementType => typeof(TextSpanElement);
 
         public override UIElement CreateScoped(TemplateScope inputScope) {
-            TextSpanElement element = new TextSpanElement(RawText);
+            TextSpanElement element = new TextSpanElement();
             element.templateContext = new ExpressionContext(inputScope.rootElement, element);
             element.children = LightList<UIElement>.Get();
             element.OriginTemplate = this;

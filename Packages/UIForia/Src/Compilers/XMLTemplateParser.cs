@@ -369,8 +369,7 @@ namespace UIForia.Compilers {
                 if (current == '{') {
                     if (level == 0) {
                         if (builder.Length > 0) {
-                            builder.Append("'");
-                            outputList.Add("'" + builder.ToString());
+                            outputList.Add(builder.ToString());
                             builder.Clear();
                         }
                         level++;
@@ -399,7 +398,7 @@ namespace UIForia.Compilers {
             }
 
             if (builder.Length > 0) {
-                outputList.Add("'" + builder + "'");
+                outputList.Add(builder.ToString());
             }
 
             builder.Clear();

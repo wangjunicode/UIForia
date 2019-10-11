@@ -35,6 +35,7 @@ namespace UIForia.Compilers {
         public Expression rootParam;
         public Expression templateData;
         public Expression templateScope;
+        public Expression lexicalScope;
         public Expression applicationExpr;
         private Expression slotUsage;
         private ParameterExpression slotUsageListVar;
@@ -215,6 +216,9 @@ namespace UIForia.Compilers {
             this.statementStacks.PeekUnchecked().Add(expression);
         }
 
+        public void Log(string value) {
+            this.statementStacks.PeekUnchecked().Add(Expression.Call(typeof(UnityEngine.Debug).GetMethod("Log", new Type[] {typeof(object)}), Expression.Constant(value)));
+        }
     }
 
 }

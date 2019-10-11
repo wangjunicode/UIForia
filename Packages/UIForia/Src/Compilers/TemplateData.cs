@@ -45,6 +45,7 @@ namespace UIForia.Compilers {
 
             for (int i = 0; i < contextProviderLambdas.Count; i++) {
                 contextProviderFns[i] = (Func<UIElement, UIElement, TemplateContext>) contextProviderLambdas[i].Compile();
+            Debug.Log(sharedBindingLambdas[i].ToCSharpCode());
             }
 
             sharedBindingFns = new Action<UIElement, UIElement, StructStack<TemplateContextWrapper>>[sharedBindingLambdas.Count];
@@ -55,17 +56,20 @@ namespace UIForia.Compilers {
                     sharedBindingFns[i] = onUpdate;
                 }
                 else {
-                    Debug.Log(sharedBindingLambdas[i].ToCSharpCode());
+                Debug.Log(sharedBindingLambdas[i].ToCSharpCode());
                     sharedBindingFns[i] = (Action<UIElement, UIElement, StructStack<TemplateContextWrapper>>) sharedBindingLambdas[i].Compile();
                 }
             }
 
+            sharedBindingFns.size = sharedBindingLambdas.size;
             templateFns = new LightList<Func<UIElement, TemplateScope2, UIElement>>(templateLambdas.size);
             
             for (int i = 0; i < templateLambdas.size; i++) {
+          Debug.Log(templateLambdas[i].ToCSharpCode());
                 templateFns[i] = (Func<UIElement, TemplateScope2, UIElement>) templateLambdas[i].Compile();
             }
-            
+
+            templateFns.size = templateLambdas.size;
         }
 
       

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UIForia.Elements;
 using UIForia.Exceptions;
 using UIForia.Parsing.Expression;
@@ -66,7 +67,7 @@ namespace UIForia.Compilers {
                 string target = slotList[i];
                 for (int j = i + 1; j < slotList.size; j++) {
                     if (slotList[j] == target) {
-                        throw new TemplateParseException(fileName, $"Invalid slot input, you provided the slot name {target} multiple times");
+                        throw TemplateParseException.DuplicateSlotName(fileName, target);
                     }
                 }
             }
@@ -79,7 +80,7 @@ namespace UIForia.Compilers {
                     if (slotId != SlotDefinition.k_UnassignedParent) {
                         SlotDefinition parentSlotDef = slotDefinitions[slotId];
                         if (slotList.Contains(parentSlotDef.tagName)) {
-                            throw new TemplateParseException(fileName, $"Invalid slot hierarchy, the template {elementType.rawType} defines {slotDefinition.tagName} to be a child of {parentSlotDef.tagName}. You can only provide one of these.");
+                            throw TemplateParseException.InvalidSlotHierarchy(fileName, elementType.rawType, slotDefinition.tagName, parentSlotDef.tagName);
                         }
                     }
                     else {
@@ -89,19 +90,13 @@ namespace UIForia.Compilers {
             }
         }
 
-        public string GetValidSlotNameMessage() {
-            string retn = "";
-            retn = elementType.rawType.Name;
-            if (slotDefinitions == null) {
-                return retn + " does not define any input slots";
+        public IList<string> GetValidSlotNames() {
+            if (slotDefinitions == null || slotDefinitions.size == 0) {
+                return null;
             }
-
-            retn += " defines the following slot inputs: ";
+            LightList<string> retn = new LightList<string>();
             for (int i = 0; i < slotDefinitions.Count; i++) {
-                retn += slotDefinitions[i].tagName;
-                if (i != slotDefinitions.size - 1) {
-                    retn += ", ";
-                }
+                retn.Add(slotDefinitions[i].tagName);
             }
 
             return retn;

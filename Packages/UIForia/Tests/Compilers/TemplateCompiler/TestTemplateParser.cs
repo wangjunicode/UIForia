@@ -1,3 +1,4 @@
+using Mono.Linq.Expressions;
 using NUnit.Framework;
 using Tests.Mocks;
 using UIForia.Attributes;
@@ -5,6 +6,7 @@ using UIForia.Compilers;
 using UIForia.Elements;
 using UIForia.Exceptions;
 using UIForia.Systems;
+using UnityEngine;
 using static Tests.Compilers.TemplateCompiler.TestTemplateUtils;
 
 [TestFixture]
@@ -174,19 +176,19 @@ public class TestTemplateParser {
         </Content>
     </UITemplate>
     ")]
-    public class TemplateWithSlotsSimple : UIElement { }
+    public class InnerTemplate : UIElement { }
 
     [Template(TemplateType.String, @"
     <UITemplate>    
         <Content>
-            <TemplateWithSlotsSimple>
+            <InnerTemplate>
                 <Slot:Slot0>
                     <Text>Replaced Slot0 Content</Text>
                 </Slot:Slot0>
                 <Slot:Slot0>
                     <Text>Replaced Slot0 Content</Text>
                 </Slot:Slot0>
-            </TemplateWithSlotsSimple>
+            </InnerTemplate>
         </Content>
     </UITemplate>
     ")]
@@ -206,11 +208,11 @@ public class TestTemplateParser {
     [Template(TemplateType.String, @"
     <UITemplate>    
         <Content>
-            <TemplateWithSlotsSimple>
+            <InnerTemplate>
                 <Slot:NotHere>
                     <Text>Replaced NotHere Content</Text>
                 </Slot:NotHere>
-            </TemplateWithSlotsSimple>
+            </InnerTemplate>
         </Content>
     </UITemplate>
     ")]
@@ -247,13 +249,12 @@ public class TestTemplateParser {
 
         TemplateCompiler compiler = new TemplateCompiler(application);
 
-        CompiledTemplate compiledTemplate = compiler.GetCompiledTemplate(typeof(TemplateWithSlotsSimple));
+        CompiledTemplate compiledTemplate = compiler.GetCompiledTemplate(typeof(InnerTemplate));
 
-        UIElement element = new TemplateWithSlotsSimple();
+        LinqBindingNode linqBindingNode = new LinqBindingNode();
+        UIElement element = compiledTemplate.Create(null, new TemplateScope2(application, linqBindingNode, null));
 
-        compiledTemplate.Create(element, new TemplateScope2(application, null, null));
-
-        AssertElementHierarchy(new ElementAssertion(typeof(TemplateWithSlotsSimple)) {
+        AssertElementHierarchy(new ElementAssertion(typeof(InnerTemplate)) {
             children = new[] {
                 new ElementAssertion(typeof(UITextElement)) {
                     textContent = "Outer Content"
@@ -272,7 +273,7 @@ public class TestTemplateParser {
     [Template(TemplateType.String, @"
     <UITemplate>    
         <Content>
-            <TemplateWithSlotsSimple>
+            <InnerTemplate>
 
                 <Slot:Slot0>
 
@@ -280,27 +281,28 @@ public class TestTemplateParser {
  
                 </Slot:Slot0>
 
-            </TemplateWithSlotsSimple>
+            </InnerTemplate>
         </Content>
     </UITemplate>
     ")]
-    public class TestSimpleSlotReplace : UIElement { }
+    public class RootTemplate : UIElement { }
 
     [Test]
     public void SimpleSlotReplace() {
         MockApplication application = MockApplication.CreateWithoutView();
 
         TemplateCompiler compiler = new TemplateCompiler(application);
+        LinqBindingNode linqBindingNode = new LinqBindingNode();
 
-        CompiledTemplate compiledTemplate = compiler.GetCompiledTemplate(typeof(TestSimpleSlotReplace));
+        CompiledTemplate compiledTemplate = compiler.GetCompiledTemplate(typeof(RootTemplate));
+        
+        UIElement element = application.CreateElementFromPool(typeof(RootTemplate), null, compiledTemplate.childCount);
 
-        UIElement element = new TestSimpleSlotReplace();
+        compiledTemplate.Create(element, new TemplateScope2(application, linqBindingNode, null));
 
-        compiledTemplate.Create(element, new TemplateScope2(application, null, null));
-
-        AssertElementHierarchy(new ElementAssertion(typeof(TestSimpleSlotReplace)) {
+        AssertElementHierarchy(new ElementAssertion(typeof(RootTemplate)) {
             children = new[] {
-                new ElementAssertion(typeof(TemplateWithSlotsSimple)) {
+                new ElementAssertion(typeof(InnerTemplate)) {
                     children = new[] {
                         new ElementAssertion(typeof(UITextElement)) {
                             textContent = "Outer Content"
@@ -326,9 +328,7 @@ public class TestTemplateParser {
 
         CompiledTemplate compiledTemplate = compiler.GetCompiledTemplate(typeof(TemplateReplaceInnerSlot));
 
-        UIElement element = new TemplateReplaceInnerSlot();
-
-        compiledTemplate.Create(element, new TemplateScope2(application, null, null));
+        UIElement element = compiledTemplate.Create(null, new TemplateScope2(application, new LinqBindingNode(), null));
 
         AssertElementHierarchy(new ElementAssertion(typeof(TemplateReplaceInnerSlot)) {
             children = new[] {
@@ -368,10 +368,8 @@ public class TestTemplateParser {
         TemplateCompiler compiler = new TemplateCompiler(application);
 
         CompiledTemplate compiledTemplate = compiler.GetCompiledTemplate(typeof(TemplateReplaceOuterSlot));
-
-        UIElement element = new TemplateReplaceOuterSlot();
-
-        compiledTemplate.Create(element, new TemplateScope2(application, null, null));
+        
+        UIElement element = compiledTemplate.Create(null, new TemplateScope2(application, new LinqBindingNode(), null));
 
         AssertElementHierarchy(new ElementAssertion(typeof(TemplateReplaceOuterSlot)) {
             children = new[] {
@@ -404,6 +402,7 @@ public class TestTemplateParser {
         TemplateCompiler compiler = new TemplateCompiler(application);
 
         TemplateParseException exception = Assert.Throws<TemplateParseException>(() => { compiler.GetCompiledTemplate(typeof(TemplateReplaceInnerAndOuterSlot)); });
+        Assert.AreEqual(TemplateParseException.InvalidSlotHierarchy("", typeof(TemplateWithNestedSlots), "Slot1", "Slot0").Message, exception.Message);
     }
 
     [Test]
@@ -413,6 +412,8 @@ public class TestTemplateParser {
         TemplateCompiler compiler = new TemplateCompiler(application);
 
         TemplateParseException exception = Assert.Throws<TemplateParseException>(() => { compiler.GetCompiledTemplate(typeof(DuplicateSlotInput)); });
+        Assert.AreEqual(TemplateParseException.DuplicateSlotName("", "Slot0").Message, exception.Message);
+
     }
 
     [Test]
@@ -433,21 +434,21 @@ public class TestTemplateParser {
         TemplateParseException exception = Assert.Throws<TemplateParseException>(() => { compiler.GetCompiledTemplate(typeof(UnmatchedSlotContent)); });
     }
 
-    [Test]
-    public void CompileSlotDefaultToTemplateFunction() {
-        MockApplication application = MockApplication.CreateWithoutView();
-
-        TemplateCompiler compiler = new TemplateCompiler(application);
-
-        CompiledTemplate compiledTemplate = compiler.GetCompiledTemplate(typeof(CompileAsTemplateFn));
-
-        UIElement element = new CompileAsTemplateFn();
-
-        compiledTemplate.Create(element, new TemplateScope2(application, null, null));
-
-        Assert.IsNotNull(element.storedTemplates);
-        
-    }
+//    [Test]
+//    public void CompileSlotDefaultToTemplateFunction() {
+//        MockApplication application = MockApplication.CreateWithoutView();
+//
+//        TemplateCompiler compiler = new TemplateCompiler(application);
+//
+//        CompiledTemplate compiledTemplate = compiler.GetCompiledTemplate(typeof(CompileAsTemplateFn));
+//
+//        UIElement element = new CompileAsTemplateFn();
+//
+//        compiledTemplate.Create(element, new TemplateScope2(application, null, null));
+//
+//        Assert.IsNotNull(element.storedTemplates);
+//        
+//    }
 
     
 }

@@ -48,7 +48,7 @@ namespace UIForia.Elements {
             }
         }
 
-        public UIElement Get(Type type, int depth) {
+        public UIElement Get(Type type) {
             if (poolMap.TryGetValue(type, out LightList<UIElement> elements)) {
                 if (elements.Count > 0) {
                     return elements.RemoveLast();

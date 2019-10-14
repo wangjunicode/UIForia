@@ -1,4 +1,4 @@
-namespace UIForia.Parsing.Expression {
+namespace UIForia.Parsing.Expressions {
 
     public enum ASTNodeType {
 

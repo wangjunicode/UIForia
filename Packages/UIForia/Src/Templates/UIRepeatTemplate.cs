@@ -4,7 +4,7 @@ using UIForia.Compilers.ExpressionResolvers;
 using UIForia.Elements;
 using UIForia.Exceptions;
 using UIForia.Expressions;
-using UIForia.Parsing.Expression;
+using UIForia.Parsing.Expressions;
 using UIForia.Util;
 
 namespace UIForia.Templates {

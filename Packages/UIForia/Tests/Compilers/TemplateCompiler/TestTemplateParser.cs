@@ -444,7 +444,7 @@ public class TestTemplateParser {
     ")]
     public class BindingTestThing2 : UIElement {
 
-        public string value =>"World";
+        public string value = "World";
 
     }
     

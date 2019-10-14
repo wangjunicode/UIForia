@@ -7,7 +7,7 @@ using UIForia.Bindings;
 using UIForia.Compilers;
 using UIForia.Elements;
 using UIForia.Expressions;
-using UIForia.Parsing.Expression;
+using UIForia.Parsing.Expressions;
 using UIForia.Util;
 using UnityEngine;
 using static Tests.TestUtils;

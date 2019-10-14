@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using UIForia.Exceptions;
 
-namespace UIForia.Parsing.Expression.AstNodes {
+namespace UIForia.Parsing.Expressions.AstNodes {
 
     public class OperatorNodeDebugView {
 

@@ -8,7 +8,7 @@ using UIForia.Templates;
 using UIForia.Util;
 using UnityEngine;
 
-namespace UIForia.Parsing.Expression {
+namespace UIForia.Parsing.Expressions {
 
     // todo -- deprecate
     public class TemplateParser {
@@ -60,7 +60,7 @@ namespace UIForia.Parsing.Expression {
         }
 
         private ParsedTemplate ParseTemplateFromType(Type type) {
-            ProcessedType processedType = TypeProcessor.GetProcessedType(type);
+            ProcessedType processedType = TypeProcessor.FindProcessedType(type);
 
             TemplateDefinition template = processedType.GetTemplate(app.TemplateRootPath);
             if (template.contents == null) {

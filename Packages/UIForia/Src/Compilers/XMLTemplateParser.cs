@@ -6,7 +6,8 @@ using System.Xml;
 using System.Xml.Linq;
 using UIForia.Elements;
 using UIForia.Exceptions;
-using UIForia.Parsing.Expression;
+using UIForia.Parsing;
+using UIForia.Parsing.Expressions;
 using UIForia.Templates;
 using UIForia.Text;
 using UIForia.Util;
@@ -137,13 +138,13 @@ namespace UIForia.Compilers {
 
             if (directives.Contains("DefineSlot")) {
                 templateNode.slotName = element.Name.LocalName;
-                templateNode.processedType = TypeProcessor.GetProcessedType(typeof(UISlotDefinition));
+                templateNode.processedType = TypeProcessor.FindProcessedType(typeof(UISlotDefinition));
                 return;
             }
 
             if (directives.Contains("Slot")) {
                 templateNode.slotName = element.Name.LocalName;
-                templateNode.processedType = TypeProcessor.GetProcessedType(typeof(UISlotContent));
+                templateNode.processedType = TypeProcessor.FindProcessedType(typeof(UISlotContent));
                 return;
             }
 
@@ -233,7 +234,7 @@ namespace UIForia.Compilers {
                             TemplateNode templateNode = TemplateNode.Get();
                             templateNode.parent = parent;
                             templateNode.astRoot = parent.astRoot;
-                            templateNode.processedType = TypeProcessor.GetProcessedType(typeof(UITextElement));
+                            templateNode.processedType = TypeProcessor.FindProcessedType(typeof(UITextElement));
                             templateNode.textContent = list;
                             parent.children.Add(templateNode);
                             templateNode = TemplateNode.Get();
@@ -249,7 +250,7 @@ namespace UIForia.Compilers {
                             TextTemplateProcessor.ProcessTextExpressions(textContent, list);
                             templateNode.parent = parent;
                             templateNode.astRoot = parent.astRoot;
-                            templateNode.processedType = TypeProcessor.GetProcessedType(typeof(UITextElement));
+                            templateNode.processedType = TypeProcessor.FindProcessedType(typeof(UITextElement));
                             templateNode.textContent = list;
                             parent.children.Add(templateNode);
                             templateNode = TemplateNode.Get();
@@ -268,7 +269,7 @@ namespace UIForia.Compilers {
 
                         ParseAttributes(templateNode, element);
 
-                        if (!parent.processedType.requiresTemplateExpansion && templateNode.processedType == typeof(UISlotContent)) {
+                        if (!parent.processedType.requiresTemplateExpansion && templateNode.processedType.rawType == typeof(UISlotContent)) {
                             throw new TemplateParseException(node, $"Slot cannot be added for type {parent.processedType.rawType} because it is a text or container type and does not accept slots.");
                         }
 
@@ -308,7 +309,7 @@ namespace UIForia.Compilers {
                 if (childrenSlotNode.children.Count > 0) {
                     childrenSlotNode.astRoot = parent.astRoot;
                     childrenSlotNode.parent = parent;
-                    childrenSlotNode.processedType = TypeProcessor.GetProcessedType(typeof(UIChildrenElement));
+                    childrenSlotNode.processedType = TypeProcessor.FindProcessedType(typeof(UIChildrenElement));
                     childrenSlotNode.slotName = "Children";
                     childrenSlotNode.directives.Add(new DirectiveDefinition("Slot"));
                     parent.children.Add(childrenSlotNode);

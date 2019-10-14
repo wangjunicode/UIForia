@@ -1,7 +1,7 @@
 using System;
 using System.Diagnostics;
 
-namespace UIForia.Parsing.Expression {
+namespace UIForia.Parsing.Expressions {
 
     // order is important because this is a sort key
     [Flags]

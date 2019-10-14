@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using UIForia.Expressions;
 using UIForia.Layout;
-using UIForia.Parsing.Expression.AstNodes;
+using UIForia.Parsing.Expressions.AstNodes;
 using UIForia.Rendering;
 using UIForia.Util;
 

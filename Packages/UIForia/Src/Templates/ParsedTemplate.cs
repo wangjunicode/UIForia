@@ -5,7 +5,7 @@ using UIForia.Compilers.ExpressionResolvers;
 using UIForia.Compilers.Style;
 using UIForia.Elements;
 using UIForia.Exceptions;
-using UIForia.Parsing.Expression;
+using UIForia.Parsing.Expressions;
 using UIForia.Rendering;
 using UIForia.Util;
 

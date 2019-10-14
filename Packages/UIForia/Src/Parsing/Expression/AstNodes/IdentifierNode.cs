@@ -1,4 +1,4 @@
-namespace UIForia.Parsing.Expression.AstNodes {
+namespace UIForia.Parsing.Expressions.AstNodes {
 
     public class IdentifierNode : ASTNode {
 

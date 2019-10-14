@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
-using UIForia.Parsing.Expression.Tokenizer;
+using UIForia.Parsing.Expressions.Tokenizer;
 using UIForia.Util;
 
-namespace UIForia.Parsing.Expression.AstNodes {
+namespace UIForia.Parsing.Expressions.AstNodes {
 
     public abstract class ASTNode {
 

@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
+using UIForia.Parsing;
+using UIForia.Parsing.Expressions;
 using UIForia.Util;
 
 namespace UIForia.Elements {
@@ -12,6 +14,10 @@ namespace UIForia.Elements {
 
     }
 
+    [AttributeUsage(AttributeTargets.Class)]
+    public class PoolableElementAttribute : Attribute { }
+
+    [PoolableElement]
     public class ElementPool {
 
         public Dictionary<Type, LightList<UIElement>> poolMap = new Dictionary<Type, LightList<UIElement>>();
@@ -40,21 +46,38 @@ namespace UIForia.Elements {
                 }
             }
         }
+        
+        public UIElement Get(ProcessedType type) {
 
-        public UIElement Get(Type type) {
-            if (poolMap.TryGetValue(type, out LightList<UIElement> elements)) {
-                if (elements.Count > 0) {
-                    return elements.RemoveLast();
-                }
-
-                return (UIElement) FormatterServices.GetUninitializedObject(type);
-            }
-            else {
-                return (UIElement) FormatterServices.GetUninitializedObject(type);
-            }
+            return type.CreateInstance();
+//            if (type.isPoolable) {
+//                UIElement x = (UIElement) FormatterServices.GetUninitializedObject(type.rawType);
+                
+//            }
+            
+            // todo -- support pooling for all types with [PoolableElement] attribute on it
+            // todo -- for non poolable type generate a function that is equivalent to new ElementType() instead of using activator
+            // fn = () => new StronglyTypedThing();
+            // return ctorMap.Get(type)();
+            
+            return (UIElement) Activator.CreateInstance(type.rawType);
+//            if (poolMap.TryGetValue(type, out LightList<UIElement> elements)) {
+//                if (elements.Count > 0) {
+//                    return elements.RemoveLast();
+//                }
+//
+//                return (UIElement) FormatterServices.GetUninitializedObject(type);
+//            }
+//            else {
+//                return (UIElement) FormatterServices.GetUninitializedObject(type);
+//            }
         }
 
         public void Release(UIElement element) {
+//            if (element.pool != null) {
+//                element.pool.Release(element);
+//            }
+            return; // we don't support pooling yet
             Type type = element.GetType();
 
             if (poolMap.TryGetValue(type, out LightList<UIElement> elements)) {

@@ -5,7 +5,8 @@ using UIForia.Bindings;
 using UIForia.Compilers.ExpressionResolvers;
 using UIForia.Elements;
 using UIForia.Expressions;
-using UIForia.Parsing.Expression;
+using UIForia.Parsing;
+using UIForia.Parsing.Expressions;
 using UIForia.Util;
 using UnityEngine;
 

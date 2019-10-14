@@ -1,5 +1,5 @@
 using System;
-using UIForia.Parsing.Expression;
+using UIForia.Parsing.Expressions;
 using UIForia.Systems;
 
 namespace UIForia.Compilers {

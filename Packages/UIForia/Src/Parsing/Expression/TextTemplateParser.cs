@@ -2,7 +2,7 @@ using System;
 using System.Text;
 using UIForia.Util;
 
-namespace UIForia.Parsing.Expression {
+namespace UIForia.Parsing.Expressions {
 
     public static class TextTemplateProcessor {
 

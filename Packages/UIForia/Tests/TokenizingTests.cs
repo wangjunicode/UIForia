@@ -1,7 +1,7 @@
 ﻿﻿using System.Collections.Generic;
  using NUnit.Framework;
  using UIForia.Exceptions;
- using UIForia.Parsing.Expression.Tokenizer;
+ using UIForia.Parsing.Expressions.Tokenizer;
  using UIForia.Util;
 
  [TestFixture]

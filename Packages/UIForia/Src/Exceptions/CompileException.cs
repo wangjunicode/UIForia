@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
 using UIForia.Compilers;
-using UIForia.Parsing.Expression.AstNodes;
+using UIForia.Parsing.Expressions.AstNodes;
 using UIForia.Parsing.Style.AstNodes;
 using Expression = UIForia.Expressions.Expression;
 

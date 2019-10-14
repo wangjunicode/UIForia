@@ -7,7 +7,7 @@ using UIForia.Extensions;
 using UIForia.Compilers.AliasSource;
 using UIForia.Exceptions;
 using UIForia.Expressions;
-using UIForia.Parsing.Expression;
+using UIForia.Parsing.Expressions;
 using UIForia.Util;
 using UnityEngine;
 using Debug = System.Diagnostics.Debug;

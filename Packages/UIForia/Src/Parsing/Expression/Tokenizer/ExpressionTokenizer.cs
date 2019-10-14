@@ -4,7 +4,7 @@ using UIForia.Exceptions;
 using UIForia.Util;
 using UnityEngine;
 
-namespace UIForia.Parsing.Expression.Tokenizer {
+namespace UIForia.Parsing.Expressions.Tokenizer {
 
     public static class ExpressionTokenizer {
 

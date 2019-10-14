@@ -10,7 +10,7 @@ using UIForia.Compilers.ExpressionResolvers;
 using UIForia.Compilers.Style;
 using UIForia.Elements;
 using UIForia.Expressions;
-using UIForia.Parsing.Expression;
+using UIForia.Parsing.Expressions;
 using UIForia.UIInput;
 using UIForia.Util;
 using UnityEngine;

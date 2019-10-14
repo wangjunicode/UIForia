@@ -7,8 +7,8 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using UIForia.Exceptions;
-using UIForia.Parsing.Expression;
-using UIForia.Parsing.Expression.AstNodes;
+using UIForia.Parsing.Expressions;
+using UIForia.Parsing.Expressions.AstNodes;
 using UIForia.Util;
 using Debug = UnityEngine.Debug;
 

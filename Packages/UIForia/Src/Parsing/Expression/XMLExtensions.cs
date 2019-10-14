@@ -3,7 +3,7 @@ using System.Linq;
 using System.Xml;
 using System.Xml.Linq;
 
-namespace UIForia.Parsing.Expression {
+namespace UIForia.Parsing.Expressions {
 
     public static class XMLExtensions {
 

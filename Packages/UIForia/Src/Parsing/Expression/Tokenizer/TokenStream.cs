@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 using UIForia.Util;
 using UnityEngine;
 
-namespace UIForia.Parsing.Expression.Tokenizer {
+namespace UIForia.Parsing.Expressions.Tokenizer {
 
     public struct TokenStream {
 

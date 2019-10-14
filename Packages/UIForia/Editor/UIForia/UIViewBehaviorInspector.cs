@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
-using UIForia.Parsing.Expression;
+using UIForia.Parsing;
+using UIForia.Parsing.Expressions;
 using UIForia.Util;
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -14,7 +15,7 @@ namespace UIForia.Editor {
         private string[] names;
         
         public void OnEnable() {
-            StructList<ProcessedType> typeData = TypeProcessor.GetTemplateTypes();
+            LightList<ProcessedType> typeData = TypeProcessor.GetTemplateTypes();
 
             List<Type> validTypes = new List<Type>();
             for (int i = 0; i < typeData.size; i++) {

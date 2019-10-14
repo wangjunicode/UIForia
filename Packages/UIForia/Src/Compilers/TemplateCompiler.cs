@@ -6,7 +6,8 @@ using System.Text;
 using Mono.Linq.Expressions;
 using UIForia.Elements;
 using UIForia.Exceptions;
-using UIForia.Parsing.Expression;
+using UIForia.Parsing;
+using UIForia.Parsing.Expressions;
 using UIForia.Systems;
 using UIForia.Util;
 using UnityEngine;
@@ -114,7 +115,7 @@ namespace UIForia.Compilers {
         }
 
         public CompiledTemplate GetCompiledTemplate(Type type) {
-            return GetCompiledTemplate(TypeProcessor.GetProcessedType(type));
+            return GetCompiledTemplate(TypeProcessor.FindProcessedType(type));
         }
 
         public CompiledTemplate GetCompiledTemplate(ProcessedType processedType) {
@@ -351,7 +352,7 @@ namespace UIForia.Compilers {
 
             while (ptr != null) {
                 // more than 4 levels of nesting will explode fosho
-                if (ptr.processedType == typeof(UISlotDefinition)) {
+                if (ptr.processedType.rawType == typeof(UISlotDefinition)) {
                     slotData[idx++] = template.GetSlotId(ptr.slotName);
 
                     if (slotData.slotType == SlotType.Element && ptr.HasAttribute("template")) {
@@ -519,6 +520,7 @@ namespace UIForia.Compilers {
             }
 
             if (!hasTextBindings && templateNode.textContent != null) {
+                // ((UITextElement)element).text = "string value";
                 ctx.AddStatement(Expression.Assign(
                     Expression.MakeMemberAccess(
                         Expression.Convert(nodeExpr, typeof(UITextElement)),
@@ -529,6 +531,7 @@ namespace UIForia.Compilers {
             }
 
             if (requiresBindingNode) {
+                // parentBindingNode.AddChild(currentBindingNode);
                 ctx.AddStatement(Expression.Call(ctx.ParentBindingNodeExpr, s_BindingNode_AddChild, ctx.BindingNodeExpr));
                 ctx.PopBinding();
             }

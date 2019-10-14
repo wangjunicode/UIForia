@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using NUnit.Framework;
 using UIForia;
 using UIForia.Exceptions;
-using UIForia.Parsing.Expression;
-using UIForia.Parsing.Expression.AstNodes;
+using UIForia.Parsing.Expressions;
+using UIForia.Parsing.Expressions.AstNodes;
 using UnityEngine;
 using static Tests.TestUtils;
 

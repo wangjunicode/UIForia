@@ -12,7 +12,8 @@ using UIForia.Elements;
 using UIForia.Exceptions;
 using UIForia.Extensions;
 using UIForia.Layout;
-using UIForia.Parsing.Expression;
+using UIForia.Parsing;
+using UIForia.Parsing.Expressions;
 using UIForia.Rendering;
 using UIForia.Routing;
 using UIForia.Systems;
@@ -82,7 +83,6 @@ namespace UIForia {
         public static readonly UIForiaSettings Settings;
         private ElementPool elementPool;
         internal LightList<SlotUsageTemplate> slotUsageTemplates = new LightList<SlotUsageTemplate>(128);
-        internal TemplateCache templateCache = new TemplateCache();
 
         static Application() {
             ArrayPool<UIElement>.SetMaxPoolSize(64);
@@ -403,6 +403,7 @@ namespace UIForia {
                 for (int i = 0; i < toInternalDestroy.Count; i++) {
                     view.ElementDestroyed(toInternalDestroy[i]);
                     toInternalDestroy[i].InternalDestroy();
+                    elementPool.Release(toInternalDestroy[i]);
                     elementMap.Remove(toInternalDestroy[i].id);
                 }
             }
@@ -796,7 +797,7 @@ namespace UIForia {
             }
 
             TemplateScope2 templateScope = new TemplateScope2(this, bindingNode, null);
-            UIElement root = elementPool.Get(template.elementType.rawType);
+            UIElement root = elementPool.Get(template.elementType);
             root.siblingIndex = index;
 
             if (parent.isEnabled) {
@@ -903,25 +904,8 @@ namespace UIForia {
         // todo we will want to not compile this here, explore jitting this
         internal int AddSlotUsageTemplate(Expression<SlotUsageTemplate> lambda) {
             slotUsageTemplates.Add(lambda.Compile());
-            Debug.Log("Slot");
-            Debug.Log(lambda.ToCSharpCode());
-            Debug.Log("");
             return slotUsageTemplates.Count - 1;
         }
-
-//        internal bool TryCreateSlot(StructList<SlotUsage> slots, string targetSlot, LinqBindingNode bindingNode, UIElement parent, out UIElement element) {
-//            SlotUsage[] array = slots.array;
-//            for (int i = 0; i < slots.size; i++) {
-//                if (array[i].slotName == targetSlot) {
-//                    element = slotUsageTemplates[array[i].templateId].Invoke(this, bindingNode, parent, array[i].lexicalScope);
-//                    element.View = parent.View;
-//                    return true;
-//                }
-//            }
-//
-//            element = null;
-//            return false;
-//        }
 
         internal UIElement CreateElementRoot(Type type) {
             CompiledTemplate compiledTemplate = templateCompiler.GetCompiledTemplate(type);
@@ -961,12 +945,11 @@ namespace UIForia {
             element.parent = parent;
             return element;
         }
-
         
         // todo -- override that accepts an index into an array instead of a type, to save a dictionary lookup
         // todo -- don't create a list for every type, maybe a single pool list w/ sorting & a jump search or similar
         /// Returns the shell of a UI Element, space is allocated for children but no child data is associated yet, only a parent, view, and depth
-        public UIElement CreateElementFromPool(Type type, UIElement parent, int childCount) {
+        public UIElement CreateElementFromPool(ProcessedType type, UIElement parent, int childCount) {
             UIElement retn = elementPool.Get(type);
             // todo -- register element in type map for selectors
             retn.id = ElementIdGenerator++;
@@ -979,21 +962,14 @@ namespace UIForia {
             retn.layoutResult = new LayoutResult(); // todo pool
             return retn;
         }
-        
+
+        public UIElement CreateElementFromPool(Type type, UIElement parent, int childCount) {
+            return CreateElementFromPool(TypeProcessor.GetProcessedType(type), parent, childCount);
+        }
+
         // Doesn't expect to create the root
         internal void HydrateTemplate(int templateId, UIElement root, TemplateScope2 scope) {
             templateData.templateFns[templateId](root, scope);
-        }
-
-        internal class TemplateCache {
-
-            internal LightList<CompiledTemplate> compiledTemplates = new LightList<CompiledTemplate>();
-
-            public void Add(CompiledTemplate retn) {
-                retn.templateId = compiledTemplates.Count;
-                compiledTemplates.Add(retn);
-            }
-
         }
 
     }

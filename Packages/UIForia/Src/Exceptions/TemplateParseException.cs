@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Xml;
-using UIForia.Parsing.Expression.AstNodes;
-using UIForia.Parsing.Expression.Tokenizer;
+using UIForia.Parsing.Expressions.AstNodes;
+using UIForia.Parsing.Expressions.Tokenizer;
 using UIForia.Text;
 using UIForia.Util;
 

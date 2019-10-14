@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
-using UIForia.Parsing.Expression;
+using UIForia.Parsing;
+using UIForia.Parsing.Expressions;
 using UIForia.Util;
 
 namespace UIForia.Compilers {
@@ -69,7 +70,7 @@ namespace UIForia.Compilers {
             if (textContent == null) return retn;
             
             for (int i = 0; i < textContent.Count; i++) {
-                retn += textContent[i];
+                retn += textContent[i].text;
             }
 
             return retn;

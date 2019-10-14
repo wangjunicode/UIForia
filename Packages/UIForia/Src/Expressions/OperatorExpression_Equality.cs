@@ -1,5 +1,5 @@
 ﻿using System;
-using UIForia.Parsing.Expression.AstNodes;
+using UIForia.Parsing.Expressions.AstNodes;
 
 namespace UIForia.Expressions {
 

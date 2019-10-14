@@ -409,7 +409,7 @@ namespace UIForia.Elements {
         }
 
         public bool DisplaySelectedIcon(ISelectOption<T> option) {
-            var index = options.IndexOf(option); //todo pass index directly as param
+            int index = options.IndexOf(option); //todo pass index directly as param
             return selectedElementIcon != null && selectedIndex == index;
         }
 

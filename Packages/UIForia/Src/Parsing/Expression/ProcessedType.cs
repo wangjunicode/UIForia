@@ -32,21 +32,25 @@ namespace UIForia.Parsing {
         public readonly TemplateAttribute templateAttr;
         public readonly bool requiresTemplateExpansion;
         public readonly bool requiresUpdateFn;
-        public readonly bool isPoolable;
         private object rawCtorFn;
+        private Action<object> clearFn;
+        
         internal int totalReleased;
         internal LightList<UIElement> poolList;
-        private static readonly MethodInfo s_GetPooledInstanceMethodRef;
-        private static readonly LinqCompiler s_Compiler;
-        private static readonly FieldInfo s_constructorFnAccess;
-        private static readonly MethodInfo s_CreateCtorMethodRef;
         private Func<ProcessedType, UIElement, UIElement> constructionFn;
+        
+        private static readonly LinqCompiler s_Compiler;
+        private static readonly FieldInfo s_rawCtorFnRef;
 
+        static ProcessedType() {
+            s_Compiler = new LinqCompiler();
+            s_rawCtorFnRef = typeof(ProcessedType).GetField(nameof(rawCtorFn), BindingFlags.Instance | BindingFlags.NonPublic);
+        }
+        
         public ProcessedType(Type rawType, TemplateAttribute templateAttr) {
             this.rawType = rawType;
             this.templateAttr = templateAttr;
             this.requiresUpdateFn = ReflectionUtil.IsOverride(rawType.GetMethod(nameof(UIElement.OnUpdate)));
-            this.isPoolable = rawType.GetCustomAttribute<PoolableElementAttribute>() != null;
             CreateCtor();
             CompileClear(rawType);
             this.requiresTemplateExpansion = (
@@ -55,11 +59,6 @@ namespace UIForia.Parsing {
                 !typeof(UISlotDefinition).IsAssignableFrom(rawType) &&
                 !typeof(UISlotContent).IsAssignableFrom(rawType)
             );
-        }
-
-        public UIElement GetPooledInstance() {
-            UIElement retn = (UIElement) FormatterServices.GetUninitializedObject(rawType);
-            return retn;
         }
 
         public void CreateCtor() {
@@ -82,13 +81,13 @@ namespace UIForia.Parsing {
             ParameterExpression typeParam = s_Compiler.GetParameter("processedType");
             ParameterExpression retnParam = s_Compiler.GetParameter("instance");
             ParameterExpression castVal = s_Compiler.AddVariable(genericType, "castVal");
-            MemberExpression typeConstructorFn = System.Linq.Expressions.Expression.MakeMemberAccess(typeParam, typeof(ProcessedType).GetField(nameof(rawCtorFn), BindingFlags.Instance | BindingFlags.NonPublic));
+            MemberExpression typeConstructorFn = Expression.MakeMemberAccess(typeParam, s_rawCtorFnRef);
 
-            UnaryExpression converted = System.Linq.Expressions.Expression.Convert(typeConstructorFn, genericType);
+            UnaryExpression converted = Expression.Convert(typeConstructorFn, genericType);
             s_Compiler.Assign(castVal, converted);
-            s_Compiler.RawExpression(System.Linq.Expressions.Expression.Invoke(
+            s_Compiler.RawExpression(Expression.Invoke(
                     castVal,
-                    System.Linq.Expressions.Expression.Convert(retnParam, rawType)
+                    Expression.Convert(retnParam, rawType)
                 )
             );
             s_Compiler.RawExpression(retnParam);
@@ -98,46 +97,6 @@ namespace UIForia.Parsing {
             s_Compiler.Reset();
         }
 
-        static ProcessedType() {
-            s_Compiler = new LinqCompiler();
-            s_GetPooledInstanceMethodRef = typeof(ProcessedType).GetMethod("GetPooledInstance");
-            s_constructorFnAccess = typeof(ProcessedType).GetField("constructorFn");
-            s_CreateCtorMethodRef = typeof(ProcessedType).GetMethod("CreateCtor");
-        }
-
-        public void MakeConstructor() {
-            s_Compiler.SetSignature(new Parameter<ProcessedType>("processedType", ParameterFlags.NeverNull));
-            ParameterExpression typeParam = s_Compiler.GetParameter("processedType");
-            MethodCallExpression getElement = System.Linq.Expressions.Expression.Call(typeParam, s_GetPooledInstanceMethodRef);
-            MemberExpression constructorFunctionAccess = System.Linq.Expressions.Expression.MakeMemberAccess(typeParam, s_constructorFnAccess);
-
-            MethodCallExpression createFn = System.Linq.Expressions.Expression.Call(typeParam, s_CreateCtorMethodRef);
-
-            ParameterExpression retnParam = s_Compiler.AddVariable(typeof(UIElement), "retn");
-            ParameterExpression p = s_Compiler.AddVariable(typeof(object), "x");
-            s_Compiler.Assign(p, constructorFunctionAccess);
-            s_Compiler.Assign(retnParam, getElement);
-
-            s_Compiler.IfEqual(p, System.Linq.Expressions.Expression.Default(typeof(object)), () => {
-                s_Compiler.RawExpression(createFn);
-                s_Compiler.Assign(p, constructorFunctionAccess);
-            });
-
-            Type genericType = ReflectionUtil.CreateGenericType(typeof(Action<>), rawType);
-            ParameterExpression castVal = s_Compiler.AddVariable(genericType, "z");
-
-            UnaryExpression converted = System.Linq.Expressions.Expression.Convert(p, genericType);
-
-            s_Compiler.Assign(castVal, converted);
-            s_Compiler.RawExpression(System.Linq.Expressions.Expression.Invoke(
-                    castVal,
-                    System.Linq.Expressions.Expression.Convert(retnParam, rawType)
-                )
-            );
-            s_Compiler.RawExpression(retnParam);
-
-//            constructionFn = (Action<ProcessedType, UIElement>) s_Compiler.BuildLambda().Compile();
-        }
 
         public TemplateDefinition GetTemplate(string templateRoot) {
             if (templateAttr == null) {
@@ -277,7 +236,7 @@ namespace UIForia.Parsing {
         }
 
 
-        public static Action<object> CompileClear(Type type) {
+        private void CompileClear(Type type) {
             s_Compiler.SetSignature(new Parameter<object>("element", ParameterFlags.NeverNull));
 
             ParameterExpression parameterExpression = s_Compiler.GetParameter("element");
@@ -294,9 +253,8 @@ namespace UIForia.Parsing {
             }
 
             Debug.Log(s_Compiler.BuildLambda().ToCSharpCode());
-            Action<object> retn = (Action<object>) s_Compiler.BuildLambda().Compile();
+            clearFn = (Action<object>) s_Compiler.BuildLambda().Compile();
             s_Compiler.Reset();
-            return retn;
         }
 
     }

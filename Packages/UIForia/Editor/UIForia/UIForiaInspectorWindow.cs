@@ -760,6 +760,11 @@ namespace UIForia.Editor {
 
         private static StyleProperty DrawStyleProperty(StyleProperty property, bool isEditable) {
             switch (property.propertyId) {
+                
+                case StylePropertyId.LayoutFitHorizontal:
+                case StylePropertyId.LayoutFitVertical:
+                    return DrawEnumWithValue<LayoutFit>(property, isEditable);
+                
                 case StylePropertyId.OverflowX:
                 case StylePropertyId.OverflowY:
                     return DrawEnumWithValue<Overflow>(property, isEditable);

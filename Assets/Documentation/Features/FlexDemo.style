@@ -1,30 +1,24 @@
-style container {
-   PreferredSize = 800px;
-   FlexLayoutDirection = Column;
+style <this> {
+    FlexLayoutDirection = Column;
 }
 
 style constrain {
 //   BackgroundColor = yellow;
 //   BackgroundImage = url(image);
-    PreferredSize = 600px, 300px;
-    
-   FlexLayoutDirection = Vertical;
+//    PreferredSize = 600px, 300px;    
+    FlexLayoutDirection = Vertical;
    // Overflow = Hidden;
 }
 
 style flex-demo {
-    PreferredSize = 1cnt, 1cnt;
     FlexLayoutMainAxisAlignment = Start;
-    FlexLayoutDirection = Horizontal;
+    FlexLayoutDirection = Column;
     TextFontSize = 32;
     TextColor = black;
-//    BackgroundColor = Green;
-    //MarginBottom = 1em;
+    MarginBottom = 1em;
 }
 
-style flex-demo-content {
-    FlexItemGrow = 1;
-    FlexItemShrink = 1;
+style flex-demo-content { 
     TextColor = white;
     TextFaceDilate = 0.4;
     TextFontStyle = Italic;
@@ -32,8 +26,18 @@ style flex-demo-content {
     BackgroundColor = Green;
     FlexLayoutDirection = Horizontal;
     FlexLayoutCrossAxisAlignment = Center;
-  //  Padding = 10px;
-    PreferredSize = 300px;
+    Padding = 10px;
+    PreferredWidth = 100%;
+}
+
+style flex-demo-content-child1 {
+    PreferredWidth = 190px;
+    BackgroundColor = yellow;
+    PreferredHeight = 600px;
+}
+style flex-demo-content-child {
+    FlexItemGrow = 1;
+    BackgroundColor = yellow;
 }
 
 style circle-clip {
@@ -91,11 +95,9 @@ style flex-grow-2 {
 
 style flex-item {
     PreferredSize = 1cnt;
-    MaxWidth = 2cnt;
-    FlexItemGrow = 1;
     Padding = 1em 0.25em;
     BackgroundColor = red;
-   // Margin = 0 10px;
+    Margin = 0 10px;
     TextAlignment = Center;
     FlexLayoutMainAxisAlignment = Center;
     TextWhitespaceMode = PreserveNewLines TrimLineStart;
@@ -114,11 +116,11 @@ style not-clipped {
 }
 
 style clip-test-more-clip {
-     PreferredSize = 100px;
-     BackgroundColor = Red;
-     BorderRadius = 50%;
-     MarginLeft = 30px;   
-     //Overflow = Hidden;
+    PreferredSize = 100px;
+    BackgroundColor = Red;
+    BorderRadius = 50%;
+    MarginLeft = 30px;   
+    //Overflow = Hidden;
 }
 
 style clip-nested {

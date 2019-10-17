@@ -848,24 +848,9 @@ namespace UIForia.Util {
         }
 
         public static LinqAccessor GetLinqPropertyAccessors(Type baseType, Type propertyType, string propertyName) {
-            List<LinqAccessor> linqList;
-
-            if (linqDelegates.TryGetValue(baseType, out linqList)) {
-                for (int i = 0; i < linqList.Count; i++) {
-                    if (linqList[i].fieldName == propertyName) {
-                        return linqList[i];
-                    }
-                }
-            }
-            else {
-                linqList = new List<LinqAccessor>();
-                linqDelegates[baseType] = linqList;
-            }
-
             Delegate getter = CreatePropertyGetter(baseType, propertyName);
             Delegate setter = CreatePropertySetter(baseType, propertyType, propertyName);
             LinqAccessor linqEntry = new LinqAccessor(propertyName, getter, setter);
-            linqList.Add(linqEntry);
 
             return linqEntry;
         }
@@ -875,24 +860,9 @@ namespace UIForia.Util {
         }
 
         public static LinqAccessor GetLinqFieldAccessors(Type baseType, Type fieldType, string fieldName) {
-            List<LinqAccessor> linqList;
-
-            if (linqDelegates.TryGetValue(baseType, out linqList)) {
-                for (int i = 0; i < linqList.Count; i++) {
-                    if (linqList[i].fieldName == fieldName) {
-                        return linqList[i];
-                    }
-                }
-            }
-            else {
-                linqList = new List<LinqAccessor>();
-                linqDelegates[baseType] = linqList;
-            }
-
             Delegate getter = CreateFieldGetter(baseType, fieldName);
             Delegate setter = CreateFieldSetter(baseType, fieldType, fieldName);
             LinqAccessor linqEntry = new LinqAccessor(fieldName, getter, setter);
-            linqList.Add(linqEntry);
 
             return linqEntry;
         }

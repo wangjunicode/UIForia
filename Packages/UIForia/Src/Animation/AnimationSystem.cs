@@ -129,8 +129,8 @@ namespace UIForia.Animation {
                         styleAnimation.data.options)
                     );
                 }
-
-                UITaskResult status = styleAnimation.Run(Time.deltaTime);
+                
+                UITaskResult status = styleAnimation.Run(Time.unscaledDeltaTime);
 
                 switch (status) {
                     case UITaskResult.Running:

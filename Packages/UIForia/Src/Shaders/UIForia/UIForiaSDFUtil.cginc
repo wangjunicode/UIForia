@@ -13,6 +13,14 @@ const float SQRT_2 = 1.4142135623730951;
 #define PaintMode_Shadow (1 << 4)
 #define PaintMode_ShadowTint (1 << 5)
 
+fixed4 UIForiaColorSpace(fixed4 color) {
+    #ifdef UNITY_COLORSPACE_GAMMA
+        return color;
+    #else
+        return fixed4(GammaToLinearSpace(color.rgb), color.a);
+    #endif
+}
+
 // remap input from one range to an other            
 inline float Map(float s, float a1, float a2, float b1, float b2) {
     return b1 + (s - a1) * (b2 - b1) / ( a2 - a1);
@@ -373,10 +381,10 @@ BorderData GetBorderData(float2 coords, float2 size, float4 packedBorderColors, 
     #define top (1 - bottom)
     #define right (1 - left)  
     
-    fixed4 borderColorTop = UnpackColor(asuint(packedBorderColors.x));
-    fixed4 borderColorRight = UnpackColor(asuint(packedBorderColors.y));
-    fixed4 borderColorBottom = UnpackColor(asuint(packedBorderColors.z));
-    fixed4 borderColorLeft = UnpackColor(asuint(packedBorderColors.w));
+    fixed4 borderColorTop = UIForiaColorSpace(UnpackColor(asuint(packedBorderColors.x)));
+    fixed4 borderColorRight = UIForiaColorSpace(UnpackColor(asuint(packedBorderColors.y)));
+    fixed4 borderColorBottom = UIForiaColorSpace(UnpackColor(asuint(packedBorderColors.z)));
+    fixed4 borderColorLeft = UIForiaColorSpace(UnpackColor(asuint(packedBorderColors.w)));
     BorderData retn;
 
     uint packedRadiiUInt = asuint(packedRadii);
@@ -491,6 +499,8 @@ inline fixed4 MeshBorderAA(fixed4 mainColor, float2 size, float distFromCenter) 
      
      return mainColor;
 }
+
+
             
 inline fixed4 ComputeColor(float packedBg, float packedTint, int colorMode, float2 texCoord, sampler2D _MainTexture) {
 
@@ -499,8 +509,8 @@ inline fixed4 ComputeColor(float packedBg, float packedTint, int colorMode, floa
     int tintTexture = (colorMode & PaintMode_TextureTint) != 0;
     int letterBoxTexture = (colorMode & PaintMode_LetterBoxTexture) != 0;
 
-    fixed4 bgColor = UnpackColor(asuint(packedBg));
-    fixed4 tintColor = UnpackColor(asuint(packedTint));
+    fixed4 bgColor = UIForiaColorSpace(UnpackColor(asuint(packedBg)));
+    fixed4 tintColor = UIForiaColorSpace(UnpackColor(asuint(packedTint)));
     fixed4 textureColor = tex2D(_MainTexture, texCoord);
 
     // bgColor.rgb *= bgColor.a;

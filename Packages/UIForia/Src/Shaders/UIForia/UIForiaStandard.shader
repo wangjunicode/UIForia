@@ -245,7 +245,7 @@ Shader "UIForia/Standard"
                 float outline = 0; // (outlineWidth * scaleRatio) * scale;
                 float softness = 0; //(outlineSoftness * scaleRatio) * scale;
 
-                fixed4 faceColor = UnpackColor(asuint(i.color.r)); // could just be mainColor?
+                fixed4 faceColor = UIForiaColorSpace(UnpackColor(asuint(i.color.r))); // could just be mainColor?
                 
                 fixed4 outlineColor = Green;//UnpackColor(asuint(i.color.g));
                 fixed4 underlayColor = UnpackColor(asuint(i.color.b));

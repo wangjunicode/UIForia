@@ -55,7 +55,7 @@ namespace UIForia.Compilers {
                     sharedBindingFns[i] = onUpdate;
                 }
                 else {
-                 //   Debug.Log(sharedBindingLambdas[i].ToCSharpCode());
+                    Debug.Log(sharedBindingLambdas[i].ToCSharpCode());
                     sharedBindingFns[i] = (Action<UIElement, UIElement, StructStack<TemplateContextWrapper>>) sharedBindingLambdas[i].Compile();
                 }
             }

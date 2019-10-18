@@ -1,6 +1,8 @@
 using System.IO;
 using UnityEngine;
 
+
+
 namespace UIForia {
 
     public class UIForiaSettings : ScriptableObject {

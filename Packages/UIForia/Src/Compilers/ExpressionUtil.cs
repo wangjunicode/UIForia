@@ -2,12 +2,22 @@ using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
+using JetBrains.Annotations;
 using UIForia.Extensions;
 using UIForia.Util;
 
 namespace UIForia.Compilers {
 
     internal static class ExpressionUtil {
+
+        // used in expressions to output comments in compiled functions
+        public static void Comment(string comment) { }
+        
+        // used in expressions to output comments in compiled functions
+        public static void CommentNewLineBefore(string comment) { }
+        
+        // used in expressions to output comments in compiled functions
+        public static void CommentNewLineAfter(string comment) { }
 
         internal struct ParameterConversion {
 

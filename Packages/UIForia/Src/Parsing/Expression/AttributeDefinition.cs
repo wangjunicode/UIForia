@@ -52,12 +52,14 @@ namespace UIForia.Parsing.Expressions {
 
         public readonly string key;
         public readonly string value;
+        public readonly string rawValue;
         public int line;
         public int column;
         public AttributeType type;
         public AttributeFlags flags;
         
-        public AttributeDefinition2(AttributeType type, AttributeFlags flags,  string key, string value, int line = -1, int column = -1) {
+        public AttributeDefinition2(string rawValue, AttributeType type, AttributeFlags flags,  string key, string value, int line = -1, int column = -1) {
+            this.rawValue = rawValue;
             this.type = type;
             this.flags = flags;
             this.key = key;

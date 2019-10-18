@@ -25,6 +25,7 @@ namespace UIForia.Compilers {
 
     public class CompilationContext {
 
+        public bool outputComments;
         public ProcessedType rootType;
         public ProcessedType elementType;
 
@@ -48,6 +49,7 @@ namespace UIForia.Compilers {
         private readonly LightStack<ParameterExpression> hierarchyStack;
 
         public CompilationContext() {
+            this.outputComments = true;
             this.variables = new LightList<ParameterExpression>();
             this.bindingNodeStack = new LightStack<Expression>();
             this.statementStacks = new LightStack<LightList<Expression>>();
@@ -220,6 +222,41 @@ namespace UIForia.Compilers {
         public void Log(string value) {
             this.statementStacks.PeekUnchecked().Add(Expression.Call(typeof(UnityEngine.Debug).GetMethod("Log", new Type[] {typeof(object)}), Expression.Constant(value)));
         }
+
+        public void Assign(Expression target, Expression value) {
+            AddStatement(Expression.Assign(target, value));
+        }
+
+        public void Return(Expression arg) {
+            AddStatement(arg);
+        }
+
+        public void IfEqualsNull(Expression target, BlockExpression block) {
+            AddStatement(Expression.IfThen(Expression.Equal(target, Expression.Constant(null)), block));
+        }
+
+        private static MethodInfo s_Comment = typeof(ExpressionUtil).GetMethod(nameof(ExpressionUtil.Comment), BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);
+        private static MethodInfo s_CommentNewLineBefore = typeof(ExpressionUtil).GetMethod(nameof(ExpressionUtil.CommentNewLineBefore), BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);
+        private static MethodInfo s_CommentNewLineAfter = typeof(ExpressionUtil).GetMethod(nameof(ExpressionUtil.CommentNewLineAfter), BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);        
+        
+        public void Comment(string comment) {
+            if (outputComments) {
+                AddStatement(Expression.Call(s_Comment, Expression.Constant(comment)));
+            }
+        }
+
+        public void CommentNewLineBefore(string comment) {
+            if (outputComments) {
+                AddStatement(Expression.Call(s_CommentNewLineBefore, Expression.Constant(comment)));
+            }
+        }
+        
+        public void CommentNewLineAfter(string comment) {
+            if (outputComments) {
+                AddStatement(Expression.Call(s_CommentNewLineAfter, Expression.Constant(comment)));
+            }
+        }
+
     }
 
 }

@@ -34,11 +34,11 @@ namespace UIForia.Parsing {
         public readonly bool requiresUpdateFn;
         private object rawCtorFn;
         private Action<object> clearFn;
-        
+
         internal int totalReleased;
         internal LightList<UIElement> poolList;
         private Func<ProcessedType, UIElement, UIElement> constructionFn;
-        
+
         private static readonly LinqCompiler s_Compiler;
         private static readonly FieldInfo s_rawCtorFnRef;
 
@@ -46,13 +46,12 @@ namespace UIForia.Parsing {
             s_Compiler = new LinqCompiler();
             s_rawCtorFnRef = typeof(ProcessedType).GetField(nameof(rawCtorFn), BindingFlags.Instance | BindingFlags.NonPublic);
         }
-        
+
         public ProcessedType(Type rawType, TemplateAttribute templateAttr) {
             this.rawType = rawType;
             this.templateAttr = templateAttr;
             this.requiresUpdateFn = ReflectionUtil.IsOverride(rawType.GetMethod(nameof(UIElement.OnUpdate)));
-            CreateCtor();
-            CompileClear(rawType);
+            // CompileClear(rawType);
             this.requiresTemplateExpansion = (
                 !typeof(UIContainerElement).IsAssignableFrom(rawType) &&
                 !typeof(UITextElement).IsAssignableFrom(rawType) &&
@@ -64,13 +63,21 @@ namespace UIForia.Parsing {
         public void CreateCtor() {
             ReflectionUtil.TypeArray1[0] = rawType;
             Type genericType = ReflectionUtil.CreateGenericType(typeof(Action<>), ReflectionUtil.TypeArray1);
-            ConstructorInfo constructor = rawType.GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, Type.EmptyTypes, null);
-            DynamicMethod helperMethod = new DynamicMethod(string.Empty, typeof(void), ReflectionUtil.TypeArray1, rawType.Module, true);
-            ILGenerator ilGenerator = helperMethod.GetILGenerator();
-            ilGenerator.Emit(OpCodes.Ldarg_0);
-            ilGenerator.Emit(OpCodes.Call, constructor);
-            ilGenerator.Emit(OpCodes.Ret);
-            rawCtorFn = helperMethod.CreateDelegate(genericType);
+            try {
+                ConstructorInfo constructor = rawType.GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, Type.EmptyTypes, null);
+                if (constructor == null) {
+                    throw new Exception($"{rawType} must define a default constructor for UIForia to function properly");
+                }
+                DynamicMethod helperMethod = new DynamicMethod(string.Empty, typeof(void), ReflectionUtil.TypeArray1, rawType.Module, true);
+                ILGenerator ilGenerator = helperMethod.GetILGenerator();
+                ilGenerator.Emit(OpCodes.Ldarg_0);
+                ilGenerator.Emit(OpCodes.Call, constructor);
+                ilGenerator.Emit(OpCodes.Ret);
+                rawCtorFn = helperMethod.CreateDelegate(genericType);
+            }
+            catch (Exception e) {
+                Debug.Log(e.Message);
+            }
 
             s_Compiler.SetSignature(
                 new Parameter<ProcessedType>("processedType", ParameterFlags.NeverNull),
@@ -92,7 +99,7 @@ namespace UIForia.Parsing {
             );
             s_Compiler.RawExpression(retnParam);
             LambdaExpression lambda = s_Compiler.BuildLambda();
-            Debug.Log(lambda.ToCSharpCode());
+//            Debug.Log(lambda.ToCSharpCode());
             constructionFn = (Func<ProcessedType, UIElement, UIElement>) lambda.Compile();
             s_Compiler.Reset();
         }
@@ -215,6 +222,11 @@ namespace UIForia.Parsing {
 
         public UIElement CreateInstance() {
             UIElement instance = null;
+            
+            if (constructionFn == null) {
+                CreateCtor(); // todo move this, don't create if we don't use it in dynamic case but needs to be pre-compiled and available for AOT case
+            }
+            
             if (poolList != null && poolList.size > 0) {
                 return constructionFn(this, poolList.RemoveLast());
             }
@@ -230,7 +242,7 @@ namespace UIForia.Parsing {
                     poolList = new LightList<UIElement>();
                 }
 
-                // clear(element);
+                clearFn(element);
                 poolList.Add(element);
             }
         }
@@ -249,6 +261,10 @@ namespace UIForia.Parsing {
 
             for (int i = 0; i < fields.Length; i++) {
                 Type fieldType = fields[i].FieldType;
+                if (fields[i].IsInitOnly) {
+                    throw new Exception("UIForia elements cannot have readonly fields when building for AOT platforms or production");
+                }
+
                 s_Compiler.Assign(Expression.Field(cast, fields[i]), Expression.Default(fieldType));
             }
 

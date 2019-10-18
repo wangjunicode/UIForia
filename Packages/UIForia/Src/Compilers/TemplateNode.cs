@@ -19,6 +19,7 @@ namespace UIForia.Compilers {
         public string slotName;
 
         [ThreadStatic] private static LightList<TemplateNode> s_Pool;
+        public string originalString;
 
         public TemplateNode() {
             this.directives = new LightList<DirectiveDefinition>(4);
@@ -74,6 +75,18 @@ namespace UIForia.Compilers {
             }
 
             return retn;
+        }
+
+        public bool IsTextConstant() {
+            if (textContent == null || textContent.size == 0) return false;
+            
+            for (int i = 0; i < textContent.Count; i++) {
+                if (textContent.array[i].isExpression) {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
     }

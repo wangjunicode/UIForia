@@ -414,28 +414,7 @@ namespace UIForia.Util {
         }
 
         public static Type CreateGenericType(Type baseType, params Type[] genericArguments) {
-            // todo -- not sure we need this layer of caching anymore once Expression Compiler is replaced
-            for (int i = 0; i < generics.Count; i++) {
-                GenericTypeEntry entry = generics[i];
-                if (entry.baseType != baseType || genericArguments.Length != entry.paramTypes.Length) {
-                    continue;
-                }
-
-                if (!TypeParamsMatch(entry.paramTypes, genericArguments)) {
-                    continue;
-                }
-
-                return entry.retnType;
-            }
-
-            Type outputType = baseType.MakeGenericType(genericArguments);
-            GenericTypeEntry newType = new GenericTypeEntry(
-                baseType,
-                genericArguments,
-                outputType
-            );
-            generics.Add(newType);
-            return outputType;
+            return baseType.MakeGenericType(genericArguments);;
         }
 
         public static Type[] SetTempTypeArray(Type type, Type type1) {

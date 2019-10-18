@@ -11,6 +11,7 @@ using UIForia.Parsing.Expressions;
 using UIForia.Templates;
 using UIForia.Text;
 using UIForia.Util;
+using UnityEngine;
 
 namespace UIForia.Compilers {
 
@@ -33,10 +34,8 @@ namespace UIForia.Compilers {
     // <ConstTree
     // <Shadow:
     // elements can start & end with : so we can have anonymous elements
-    
-    public class XMLTemplateParser {
 
-        public Application application;
+    public class XMLTemplateParser {
 
         private readonly XmlParserContext parserContext;
 
@@ -54,8 +53,7 @@ namespace UIForia.Compilers {
             "Repeat",
         };
 
-        public XMLTemplateParser(Application application) {
-            this.application = application;
+        public XMLTemplateParser() {
             XmlNamespaceManager nameSpaceManager = new XmlNamespaceManager(new NameTable());
             nameSpaceManager.AddNamespace("attr", "attr");
             nameSpaceManager.AddNamespace("evt", "evt");
@@ -70,14 +68,12 @@ namespace UIForia.Compilers {
         }
 
         internal TemplateAST Parse(string template, string filePath, ProcessedType processedType) {
-
             XElement root = XElement.Load(new XmlTextReader(template, XmlNodeType.Element, parserContext));
-
             root.MergeTextNodes();
 
             IEnumerable<XElement> styleElements = root.GetChildren("Style");
             IEnumerable<XElement> usingElements = root.GetChildren("Using");
-            IEnumerable<XElement> contentElements = root.GetChildren("Content");
+            IEnumerable<XElement> contentElements = root.GetChildren("Contents");
 
             TemplateAST retn = new TemplateAST();
 
@@ -98,7 +94,9 @@ namespace UIForia.Compilers {
                 styles.Add(ParseStyleSheet("someId", styleElement));
             }
 
-            if (contentElements.Count() != 1) { }
+            if (contentElements.Count() != 1) {
+                Debug.Log(processedType.rawType + " has invalid content");
+            }
 
             XElement contentElement = contentElements.First();
 
@@ -120,6 +118,7 @@ namespace UIForia.Compilers {
         }
 
         private static readonly char[] s_DotArray = {'.'};
+        private static bool outputComments = true;
 
         private static void ParseElementTag(TemplateNode templateNode, XElement element, LightList<string> namespaces) {
             string directives = element.Name.Namespace.NamespaceName;
@@ -162,6 +161,7 @@ namespace UIForia.Compilers {
             if (templateNode.processedType.rawType == null) {
                 throw new Exception("Unresolved tag name: " + element.Name.LocalName);
             }
+
         }
 
         private static void ParseAttributes(TemplateNode templateNode, XElement node) {
@@ -211,8 +211,18 @@ namespace UIForia.Compilers {
                     }
                 }
 
+                string raw = string.Empty;
+                if (outputComments) {
+                    if (!string.IsNullOrEmpty(prefix)) {
+                        raw = prefix + ":" + name + "=\"" + attr.Value + "\"";
+                    }
+                    else {
+                        raw = name + "=" + "=\"" + attr.Value + "\"";
+                    }
+                }
+
                 // todo -- set flag properly
-                templateNode.attributes.Add(new AttributeDefinition2(attributeType, 0, name, attr.Value.Trim(), line, column));
+                templateNode.attributes.Add(new AttributeDefinition2(raw, attributeType, 0, name, attr.Value, line, column));
             }
         }
 
@@ -240,8 +250,8 @@ namespace UIForia.Compilers {
                             templateNode = TemplateNode.Get();
                         }
                         else if (typeof(UITextElement).IsAssignableFrom(parent.children[parent.children.size - 1].processedType.rawType)) {
-                           throw new NotImplementedException();
-                           //AppendTextContent(parent.children[parent.children.size - 1].textContent, textContent);
+                            throw new NotImplementedException();
+                            //AppendTextContent(parent.children[parent.children.size - 1].textContent, textContent);
                         }
                         else {
                             // add a new child
@@ -277,6 +287,42 @@ namespace UIForia.Compilers {
 
                         ParseChildren(templateNode, element.Nodes(), namespaces);
 
+                        if (outputComments) {
+                            string attrString = string.Empty;
+                            if (templateNode.attributes.size > 0) {
+                                LightList<string> str = LightList<string>.Get();
+                                for (int i = 0; i < templateNode.attributes.size; i++) {
+                                    str.Add(templateNode.attributes.array[i].rawValue);
+                                }
+
+                                attrString = StringUtil.ListToString((IList<string>) str, " ");
+                                LightList<string>.Release(ref str);
+                            }
+
+                            if (attrString.Length == 0) {
+                                templateNode.originalString = $"<{element.Name} {attrString}/>";
+                            }
+                            else {
+                                templateNode.originalString = $"<{element.Name} {attrString}/>";
+                            }
+
+                            if (templateNode.textContent != null && templateNode.textContent.size > 0) {
+                                templateNode.originalString += "    '";
+                                for (int i = 0; i < templateNode.textContent.size; i++) {
+                                    if (templateNode.textContent.array[i].isExpression) {
+                                        templateNode.originalString += "{";
+                                        templateNode.originalString += templateNode.textContent.array[i].text;
+                                        templateNode.originalString += "}";
+                                    }
+                                    else {
+                                        templateNode.originalString += templateNode.textContent.array[i].text;
+                                    }
+                                }
+
+                                templateNode.originalString += "'";
+                            }
+                        }
+
                         templateNode = TemplateNode.Get();
                         continue;
                     }
@@ -287,7 +333,6 @@ namespace UIForia.Compilers {
 
                 throw new TemplateParseException(node, $"Unable to handle node type: {node.NodeType}");
             }
-
 
             if (parent.children.Count == 1 && typeof(UITextElement).IsAssignableFrom(parent.processedType.rawType) && typeof(UITextElement).IsAssignableFrom(parent.children[0].processedType.rawType)) {
                 parent.textContent = parent.children[0].textContent;
@@ -358,8 +403,8 @@ namespace UIForia.Compilers {
 
             StringBuilder builder = TextUtil.StringBuilder;
             builder.Clear();
-            
-            
+
+
             while (ptr < input.Length) {
                 char current = input[ptr++];
                 if (current == '&') {
@@ -376,9 +421,11 @@ namespace UIForia.Compilers {
                             outputList.Add(builder.ToString());
                             builder.Clear();
                         }
+
                         level++;
                         continue;
                     }
+
                     level++;
                 }
 
@@ -413,31 +460,29 @@ namespace UIForia.Compilers {
             LightList<string> output = LightList<string>.Get();
 
             ProcessTextExpressions(input, output);
-            
+
             for (int i = 0; i < output.Count; i++) {
                 if (output[i] == "''") {
                     output.RemoveAt(i--);
                 }
             }
-            
+
             return output;
         }
 
         private static void AppendTextContent(LightList<string> target, string input) {
-            
             LightList<string> output = LightList<string>.Get();
 
             ProcessTextExpressions(input, output);
-            
+
             for (int i = 0; i < output.Count; i++) {
                 if (output[i] == "''") {
                     output.RemoveAt(i--);
                 }
             }
-            
+
             target.AddRange(output);
             LightList<string>.Release(ref output);
-            
         }
 
         private UsingDeclaration ParseUsing(XElement element) {

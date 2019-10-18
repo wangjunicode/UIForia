@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UITemplate>
+    <Contents>
+        <Text>I am text</Text>
+        <Div attr:some-attr="this-is-attr" floatVal="42f">
+            <Text>I am also {expr} text</Text>
+        </Div>
+    </Contents>
+</UITemplate>

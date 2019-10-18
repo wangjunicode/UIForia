@@ -14,7 +14,7 @@ public class TestTemplateParser {
 
     [Template(TemplateType.String, @"
     <UITemplate>
-        <Content attr:stuff='yep'>
+        <Contents attr:stuff='yep'>
 
             <Div attr:id='hello0'/>
 
@@ -24,18 +24,18 @@ public class TestTemplateParser {
 
             <CompileTestChildElement attr:id='hello2' floatValue='14f'/>
 
-        </Content>
+        </Contents>
     </UITemplate>
     ")]
     public class CompileTestElement : UIElement { }
 
     [Template(TemplateType.String, @"
         <UITemplate>
-        <Content attr:isChild='yep'>
+        <Contents attr:isChild='yep'>
 
            <Text>{floatValue}</Text>
 
-        </Content>
+        </Contents>
         </UITemplate>
     ")]
     public class CompileTestChildElement : UIElement {
@@ -89,14 +89,14 @@ public class TestTemplateParser {
 
         CompiledTemplate compiledTemplate = compiler.GetCompiledTemplate(typeof(CompileTestElement));
 
-        UIElement element = application.CreateElementFromPool(typeof(CompileTestElement), null, compiledTemplate.childCount);
+        UIElement element = application.CreateElementFromPoolWithType(typeof(CompileTestElement), null, compiledTemplate.childCount);
         
         Assert.IsInstanceOf<CompileTestElement>(compiledTemplate.Create(element, new TemplateScope2(application, new LinqBindingNode(), null)));
     }
 
     [Template(TemplateType.String, @"
     <UITemplate>    
-        <Content>
+        <Contents>
             <Div>
                 <Text>Outer Content</Text>
                 <DefineSlot:Slot0>
@@ -106,40 +106,40 @@ public class TestTemplateParser {
                     </DefineSlot:Slot1>
                 </DefineSlot:Slot0>
             </Div>
-        </Content>
+        </Contents>
     </UITemplate>
     ")]
     public class TemplateWithNestedSlots : UIElement { }
 
     [Template(TemplateType.String, @"
     <UITemplate>    
-        <Content>
+        <Contents>
             <TemplateWithNestedSlots>
                 <Slot:Slot1>
                     <Text>Replaced Slot1 Content</Text>
                 </Slot:Slot1>
             </TemplateWithNestedSlots>
-        </Content>
+        </Contents>
     </UITemplate>
     ")]
     public class TemplateReplaceInnerSlot : UIElement { }
 
     [Template(TemplateType.String, @"
     <UITemplate>    
-        <Content>
+        <Contents>
             <TemplateWithNestedSlots>
                 <Slot:Slot0>
                     <Text>Replaced Slot0 Content</Text>
                 </Slot:Slot0>
             </TemplateWithNestedSlots>
-        </Content>
+        </Contents>
     </UITemplate>
     ")]
     public class TemplateReplaceOuterSlot : UIElement { }
 
     [Template(TemplateType.String, @"
     <UITemplate>    
-        <Content>
+        <Contents>
             <TemplateWithNestedSlots>
                 <Slot:Slot0>
                     <Text>Replaced Slot0 Content</Text>
@@ -148,39 +148,39 @@ public class TestTemplateParser {
                     <Text>Replaced Slot1 Content</Text>
                 </Slot:Slot1>
             </TemplateWithNestedSlots>
-        </Content>
+        </Contents>
     </UITemplate>
     ")]
     public class TemplateReplaceInnerAndOuterSlot : UIElement { }
 
     [Template(TemplateType.String, @"
     <UITemplate>    
-        <Content>
+        <Contents>
             <TemplateWithSlots>
                 <Slot:Slot0>
                     <Text>Replaced Slot0 Content</Text>
                 </Slot:Slot0>
             </TemplateWithSlots>
-        </Content>
+        </Contents>
     </UITemplate>
     ")]
     public class TemplateUsingSlots : UIElement { }
 
     [Template(TemplateType.String, @"
     <UITemplate>    
-        <Content>
+        <Contents>
             <Text>Outer Content</Text>
             <DefineSlot:Slot0>
                 <Text>Default SlotContent</Text>
             </DefineSlot:Slot0>
-        </Content>
+        </Contents>
     </UITemplate>
     ")]
     public class InnerTemplate : UIElement { }
 
     [Template(TemplateType.String, @"
     <UITemplate>    
-        <Content>
+        <Contents>
             <InnerTemplate>
                 <Slot:Slot0>
                     <Text>Replaced Slot0 Content</Text>
@@ -189,38 +189,38 @@ public class TestTemplateParser {
                     <Text>Replaced Slot0 Content</Text>
                 </Slot:Slot0>
             </InnerTemplate>
-        </Content>
+        </Contents>
     </UITemplate>
     ")]
     public class DuplicateSlotInput : UIElement { }
 
     [Template(TemplateType.String, @"
     <UITemplate>    
-        <Content>
+        <Contents>
             <Slot:Slot0>
                 <Text>Replaced Slot0 Content</Text>
             </Slot:Slot0>
-        </Content>
+        </Contents>
     </UITemplate>
     ")]
     public class OrphanedSlotContent : UIElement { }
 
     [Template(TemplateType.String, @"
     <UITemplate>    
-        <Content>
+        <Contents>
             <InnerTemplate>
                 <Slot:NotHere>
                     <Text>Replaced NotHere Content</Text>
                 </Slot:NotHere>
             </InnerTemplate>
-        </Content>
+        </Contents>
     </UITemplate>
     ")]
     public class UnmatchedSlotContent : UIElement { }
 
     [Template(TemplateType.String, @"
          <UITemplate>    
-             <Content>
+             <Contents>
      
                  <DefineSlot:TemplateSlot attr:template='true'>
      
@@ -232,7 +232,7 @@ public class TestTemplateParser {
      
                  <Children/>
      
-             </Content>
+             </Contents>
          </UITemplate>
          ")]
          public class CompileAsTemplateFn : UIElement {
@@ -272,7 +272,7 @@ public class TestTemplateParser {
 
     [Template(TemplateType.String, @"
     <UITemplate>    
-        <Content>
+        <Contents>
             <InnerTemplate>
 
                 <Slot:Slot0>
@@ -282,7 +282,7 @@ public class TestTemplateParser {
                 </Slot:Slot0>
 
             </InnerTemplate>
-        </Content>
+        </Contents>
     </UITemplate>
     ")]
     public class RootTemplate : UIElement { }
@@ -296,7 +296,7 @@ public class TestTemplateParser {
 
         CompiledTemplate compiledTemplate = compiler.GetCompiledTemplate(typeof(RootTemplate));
         
-        UIElement element = application.CreateElementFromPool(typeof(RootTemplate), null, compiledTemplate.childCount);
+        UIElement element = application.CreateElementFromPoolWithType(typeof(RootTemplate), null, compiledTemplate.childCount);
 
         compiledTemplate.Create(element, new TemplateScope2(application, linqBindingNode, null));
 
@@ -436,9 +436,9 @@ public class TestTemplateParser {
 
     [Template(TemplateType.String, @"
         <UITemplate>
-            <Content>
+            <Contents>
                 <Text>Hello {value}</Text>
-            </Content>
+            </Contents>
         </UITemplate>
     
     ")]

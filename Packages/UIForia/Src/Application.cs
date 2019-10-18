@@ -19,6 +19,7 @@ using UIForia.Routing;
 using UIForia.Systems;
 using UIForia.Systems.Input;
 using UIForia.Util;
+using UnityEditor;
 using UnityEngine;
 
 namespace UIForia {
@@ -34,7 +35,7 @@ namespace UIForia {
         public static int NextElementId => ElementIdGenerator++;
         private string templateRootPath;
 
-      //  protected readonly BindingSystem m_BindingSystem;
+        //  protected readonly BindingSystem m_BindingSystem;
         protected readonly IStyleSystem m_StyleSystem;
         protected ILayoutSystem m_LayoutSystem;
         protected IRenderSystem m_RenderSystem;
@@ -69,7 +70,7 @@ namespace UIForia {
         internal TemplateCompiler templateCompiler;
 
         protected internal readonly List<UIView> m_Views;
-        
+
         internal static readonly Dictionary<string, Type> s_CustomPainters;
         internal static readonly Dictionary<string, Scrollbar> s_Scrollbars;
 
@@ -208,7 +209,6 @@ namespace UIForia {
         public float Width => Screen.width;
         public float Height => Screen.height;
 
-       
 
         public void SetCamera(Camera camera) {
             Camera = camera;
@@ -810,7 +810,7 @@ namespace UIForia {
 
             parent.children.Insert(index, root);
         }
-        
+
         internal void InsertChild(UIElement parent, UIElement child, uint index) {
             if (child.parent != null) {
                 throw new NotImplementedException("Reparenting is not supported");
@@ -827,7 +827,7 @@ namespace UIForia {
             if (hasView) {
                 throw new NotImplementedException("Changing views is not supported");
             }
-            
+
             bool parentEnabled = parent.isEnabled;
 
             LightStack<UIElement> stack = LightStack<UIElement>.Get();
@@ -900,7 +900,7 @@ namespace UIForia {
 
             onViewsSorted?.Invoke(m_Views.ToArray());
         }
-        
+
         // todo we will want to not compile this here, explore jitting this
         internal int AddSlotUsageTemplate(Expression<SlotUsageTemplate> lambda) {
             slotUsageTemplates.Add(lambda.Compile());
@@ -945,7 +945,7 @@ namespace UIForia {
             element.parent = parent;
             return element;
         }
-        
+
         // todo -- override that accepts an index into an array instead of a type, to save a dictionary lookup
         // todo -- don't create a list for every type, maybe a single pool list w/ sorting & a jump search or similar
         /// Returns the shell of a UI Element, space is allocated for children but no child data is associated yet, only a parent, view, and depth
@@ -957,19 +957,64 @@ namespace UIForia {
             retn.children = LightList<UIElement>.GetMinSize(childCount);
             retn.children.size = childCount; // children get assigned in the template function but we need to setup the list here
             retn.style = new UIStyleSet(retn); // todo -- pool this
-            retn.flags = UIElementFlags.Enabled | UIElementFlags.Alive; 
+            retn.flags = UIElementFlags.Enabled | UIElementFlags.Alive;
             retn.parent = parent;
             retn.layoutResult = new LayoutResult(); // todo pool
             return retn;
         }
 
-        public UIElement CreateElementFromPool(Type type, UIElement parent, int childCount) {
+        public UIElement CreateElementFromPoolWithType(Type type, UIElement parent, int childCount) {
             return CreateElementFromPool(TypeProcessor.GetProcessedType(type), parent, childCount);
         }
 
         // Doesn't expect to create the root
         internal void HydrateTemplate(int templateId, UIElement root, TemplateScope2 scope) {
             templateData.templateFns[templateId](root, scope);
+        }
+        
+        internal void HydrateTemplate2(int templateId, UIElement root, TemplateScope2 scope) {
+            templateData.templateFns[templateId](root, scope);
+            // templateData.GetTemplate(id)(root, scope);
+        }
+
+
+        public static UIElement CreateElementFromPool<T>(UIElement parent, int attrCount, int childCount) where T : UIElement {
+            return null;
+        }
+
+        public static void BuildTemplates(TemplateSettings settings) {
+         //   AssetDatabase.CreateFolder("Assets", "UIForia_Generated");
+
+//            //TemplateCompiler2 compiler = new TemplateCompiler2();
+//            PreCompiledTemplateData templateData = new PreCompiledTemplateData();
+//
+//            compiler.CompileTemplates(typeof(UITextElement), templateData);
+//
+//            templateData.Write(settings.preCompiledTemplatePath);
+        }
+
+        
+    }
+
+    public interface ICompiledTemplateData {
+
+        void LoadTemplates();
+
+        void GenerateCode();
+
+    }
+
+
+    public static partial class CompiledTemplateData {
+
+        public static Action[] str;
+
+        public static void Comment(string comment) { }
+
+        public static Action TemplateName = () => { };
+
+        public static void Load() {
+            str[0] = TemplateName;
         }
 
     }

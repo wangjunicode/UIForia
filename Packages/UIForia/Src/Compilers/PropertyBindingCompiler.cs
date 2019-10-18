@@ -56,7 +56,7 @@ namespace UIForia.Compilers {
 
             list.Add(aliasSource);
         }
-      
+
         // todo ensure each binding has at most one .read and one .write and that both are different values
         public void CompileAttribute(Type rootType, Type elementType, AttributeDefinition attributeDefinition, LightList<Binding> output) {
             this.rootType = rootType;

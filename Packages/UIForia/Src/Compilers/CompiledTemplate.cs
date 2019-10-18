@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using UIForia.Elements;
 using UIForia.Exceptions;
 using UIForia.Parsing;
@@ -12,11 +13,12 @@ namespace UIForia.Compilers {
 
         internal ProcessedType elementType;
         internal AttributeDefinition2[] attributes;
-        public string fileName;
+        public string filePath;
         public int templateId;
         public StructList<SlotDefinition> slotDefinitions;
         public int childCount;
-        
+        public LambdaExpression templateFn;
+
         public bool TryGetSlotData(string slotName, out SlotDefinition slotDefinition) {
             if (slotDefinitions == null) {
                 slotDefinition = default;
@@ -68,7 +70,7 @@ namespace UIForia.Compilers {
                 string target = slotList[i];
                 for (int j = i + 1; j < slotList.size; j++) {
                     if (slotList[j] == target) {
-                        throw TemplateParseException.DuplicateSlotName(fileName, target);
+                        throw TemplateParseException.DuplicateSlotName(filePath, target);
                     }
                 }
             }
@@ -81,7 +83,7 @@ namespace UIForia.Compilers {
                     if (slotId != SlotDefinition.k_UnassignedParent) {
                         SlotDefinition parentSlotDef = slotDefinitions[slotId];
                         if (slotList.Contains(parentSlotDef.tagName)) {
-                            throw TemplateParseException.InvalidSlotHierarchy(fileName, elementType.rawType, slotDefinition.tagName, parentSlotDef.tagName);
+                            throw TemplateParseException.InvalidSlotHierarchy(filePath, elementType.rawType, slotDefinition.tagName, parentSlotDef.tagName);
                         }
                     }
                     else {

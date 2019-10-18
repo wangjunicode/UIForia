@@ -3,7 +3,7 @@ using UIForia.Util;
 
 namespace UIForia.Compilers {
 
-    internal readonly struct TemplateScope2 {
+    public readonly struct TemplateScope2 {
 
         public readonly Application application;
         public readonly StructList<SlotUsage> slotInputs;

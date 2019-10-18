@@ -55,8 +55,8 @@ namespace UIForia.Parsing.Expressions {
                         if (currentType == null) {
                             continue;
                         }
-
-                        if (!filteredOut && currentType.IsClass) {
+//
+                        if (!filteredOut && currentType.IsClass && !currentType.IsGenericTypeDefinition) {
                             Attribute[] attrs = Attribute.GetCustomAttributes(currentType, false);
                             Application.ProcessClassAttributes(currentType, attrs);
 
@@ -78,6 +78,7 @@ namespace UIForia.Parsing.Expressions {
 
                                 ProcessedType processedType = new ProcessedType(currentType, templateAttr);
 
+                                processedType.CreateCtor();
                                 if (templateAttr != null) {
                                     templateTypes.Add(processedType);
                                 }
@@ -322,6 +323,7 @@ namespace UIForia.Parsing.Expressions {
         }
 
         internal static ProcessedType GetProcessedType(Type type) {
+            FilterAssemblies();
             typeMap.TryGetValue(type, out ProcessedType retn);
             return retn;
         }

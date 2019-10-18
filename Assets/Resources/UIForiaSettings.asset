@@ -16,3 +16,4 @@ MonoBehaviour:
   svgxMaterial: {fileID: 2100000, guid: 82a43e99b87829b4390236a419a3dc16, type: 2}
   batchedMaterial: {fileID: 2100000, guid: 8a162f9dda8ba294792c09f94567f7d4, type: 2}
   defaultNamespaces: []
+  usePreCompiledTemplates: 1

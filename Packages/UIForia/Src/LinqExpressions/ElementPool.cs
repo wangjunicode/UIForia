@@ -12,33 +12,6 @@ namespace UIForia.LinqExpressions {
 
     public class Gen<T> { }
 
-    public class Ex : Gen<Vector3> { }
-
-    public class ElementPool {
-
-        public T MK<T, U>(U data) {
-            return default;
-        }
-
-        private Dictionary<Type, LightList<object>> pools;
-        private Dictionary<Type, Action<object>> resetFunctions;
-
-        public T Get<T>() where T : UIElement {
-//            pools.TryGetValue(typeof(T), out Type type);
-            return null;
-        }
-
-        public void Release<T>(T element) where T : UIElement {
-            if (!resetFunctions.TryGetValue(typeof(T), out Action<object> reset)) {
-                reset = LinqExpressions.CompileClear(typeof(T));
-                resetFunctions[typeof(T)] = reset;
-            }
-
-            reset(element);
-        }
-
-    }
-
     public static class LinqExpressions {
 
         private static readonly List<Expression> s_ExpressionList = new List<Expression>(24);

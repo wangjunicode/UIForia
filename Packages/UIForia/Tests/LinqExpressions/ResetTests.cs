@@ -1,20 +1,11 @@
 using System;
-using System.Diagnostics;
-using System.Linq.Expressions;
-using System.Reflection;
-using System.Reflection.Emit;
-using System.Runtime.Serialization;
-using Mono.Linq.Expressions;
 using NUnit.Framework;
 using UIForia.Attributes;
-using UIForia.Compilers;
 using UIForia.Elements;
 using UIForia.Layout;
 using UIForia.LinqExpressions;
 using UIForia.Parsing;
-using UIForia.Util;
-using Debug = UnityEngine.Debug;
-
+using UnityEngine;
 
 [TestFixture]
 public class ResetTests {
@@ -160,7 +151,7 @@ public class ResetTests {
 
         Assert.NotNull(element.GetCallback());
         Assert.NotNull(element.layoutResult);
-        Action<object> clear = UIForia.LinqExpressions.LinqExpressions.CompileClear(typeof(ResetThing));
+        Action<object> clear = LinqExpressions.CompileClear(typeof(ResetThing));
         clear(element);
         Assert.AreEqual(default(int), element.autoInt);
         Assert.AreEqual(default(Action), element.GetCallback());

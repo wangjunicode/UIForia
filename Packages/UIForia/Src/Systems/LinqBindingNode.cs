@@ -7,7 +7,7 @@ using LinqBinding = System.Action<UIForia.Elements.UIElement, UIForia.Elements.U
 
 namespace UIForia.Systems {
 
-    internal class LinqBindingNode {
+    public class LinqBindingNode {
 
         internal UIElement root;
         internal UIElement element;
@@ -19,6 +19,7 @@ namespace UIForia.Systems {
 
         internal LinqBinding enabledBinding;
         internal LinqBindingSystem system;
+        public LinqBinding updateBindings;
 
         internal TemplateContextWrapper contextWrapper;
 

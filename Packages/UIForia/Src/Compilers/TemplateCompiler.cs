@@ -28,7 +28,7 @@ namespace UIForia.Compilers {
         private readonly Dictionary<Type, CompiledTemplate> templateMap;
         private readonly XMLTemplateParser xmlTemplateParser;
 
-        private static readonly MethodInfo s_CreateFromPool = typeof(Application).GetMethod("CreateElementFromPool");
+        private static readonly MethodInfo s_CreateFromPool = typeof(Application).GetMethod(nameof(Application.CreateElementFromPoolWithType));
         private static readonly MethodInfo s_BindingNodePool_Get = typeof(LinqBindingNode).GetMethod("Get", BindingFlags.Static | BindingFlags.Public);
         private static readonly MethodInfo s_GetStructList_ElementAttr = typeof(StructList<ElementAttribute>).GetMethod(nameof(StructList<ElementAttribute>.GetMinSize), new[] {typeof(int)});
         private static readonly FieldInfo s_StructList_ElementAttr_Size = typeof(StructList<ElementAttribute>).GetField("size");
@@ -36,9 +36,6 @@ namespace UIForia.Compilers {
         private static readonly FieldInfo s_Scope_ApplicationField = typeof(TemplateScope2).GetField("application");
         private static readonly FieldInfo s_ScopeBindingNodeField = typeof(TemplateScope2).GetField(nameof(TemplateScope2.bindingNode));
         private static readonly FieldInfo s_Scope_CompiledTemplate = typeof(TemplateScope2).GetField(nameof(TemplateScope2.compiledTemplate));
-        private static readonly FieldInfo s_Element_Parent = typeof(UIElement).GetField(nameof(UIElement.parent), BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
-        private static readonly PropertyInfo s_Element_Application = typeof(UIElement).GetProperty(nameof(UIElement.Application), BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
-        private static readonly PropertyInfo s_Element_BindingNode = typeof(UIElement).GetProperty(nameof(UIElement.bindingNode), BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
 
         private static readonly ConstructorInfo s_ElementAttributeCtor = typeof(ElementAttribute).GetConstructor(new[] {typeof(string), typeof(string)});
         private static readonly ConstructorInfo s_TemplateScope_Ctor = typeof(TemplateScope2).GetConstructor(new[] {typeof(Application), typeof(LinqBindingNode), typeof(StructList<SlotUsage>)});
@@ -80,7 +77,7 @@ namespace UIForia.Compilers {
             this.propertyCompiler = new LinqPropertyCompiler(linqCompiler);
             this.templateMap = new Dictionary<Type, CompiledTemplate>();
             this.compilationStack = new LightStack<Type>();
-            this.xmlTemplateParser = new XMLTemplateParser(application);
+            this.xmlTemplateParser = new XMLTemplateParser();
 
 //            linqCompiler.PushAliasResolver("$siblingIndex", new AliasResolver());
 //            linqCompiler.PushAliasResolver("$parent", new AliasResolver());
@@ -385,7 +382,7 @@ namespace UIForia.Compilers {
                     Expression.Call(ctx.applicationExpr, s_Application_CreateSlot,
                         ctx.templateScope != null
                             ? Expression.Field(ctx.templateScope, s_TemplateScope_SlotInputList) //scope.slotInputList
-                            : Expression.Field(ctx.lexicalScope, s_LexicalScope_SlotInputList),
+                            : Expression.Field(ctx.lexicalScope, s_LexicalScope_SlotInputList), // lexicalScope.slotInputList
                         Expression.Constant(templateNode.slotName),
                         ctx.BindingNodeExpr,
                         ctx.ParentExpr,
@@ -471,7 +468,7 @@ namespace UIForia.Compilers {
 
                     for (int i = 0; i < templateNode.children.size; i++) {
                         if (!expandedTemplate.TryGetSlotData(templateNode.children[i].slotName, out SlotDefinition slotDefinition)) {
-                            throw TemplateParseException.UnmatchedSlotName(template.fileName, ctx.elementType.rawType, templateNode.children[i].slotName, template.GetValidSlotNames());    
+                            throw TemplateParseException.UnmatchedSlotName(template.filePath, ctx.elementType.rawType, templateNode.children[i].slotName, template.GetValidSlotNames());    
                         }
                         ctx.AddStatement(
                             Expression.Assign(
@@ -605,10 +602,16 @@ namespace UIForia.Compilers {
 
             for (int i = 0; i < bindings.size; i++) {
                 if (bindings.array[i].isConstant) {
+                    // inline into creation function
                     // todo -- get value & remove from shared or instance list, assign value directly to target property.
                 }
             }
 
+            if (bindings.size == 0) {
+                bindings.Release();
+                return;
+            }
+            
             if (requiresOwnList) {
                 // todo -- this, but I think event subscriptions are now the only bindings requiring their own data and they probably work differently (ie not a real binding)
                 // bindingNode_1.bindings = new ListSpan(LightList<LinqBindingNode>.GetMinSize(4), 0, 4);
@@ -616,6 +619,9 @@ namespace UIForia.Compilers {
                 // bindingNode_1.bindings.array[1] = templateData.sharedBindings[253];
                 // bindingNode_1.bindings.array[2] = templateData.instanceBindings[14].Get();
                 // bindingNode_1.bindings.array[3] = templateData.sharedBindings[254];
+                
+                // () => element.onEvent += () => {};
+                
                 ctx.AddStatement(
                     Expression.Assign(
                         Expression.Field(ctx.BindingNodeExpr, s_BindingNode_BindingList),
@@ -985,9 +991,9 @@ namespace UIForia.Compilers {
 
             // add all outer ones
             for (int i = 0; i < outer.size; i++) {
-                if (outer.array[i].type == AttributeType.Attribute) {
+               // if (outer.array[i].type == AttributeType.Attribute) {
                     mergedAttributes.Add(outer.array[i]);
-                }
+              //  }
             }
 
             int outerCount = outer.size;

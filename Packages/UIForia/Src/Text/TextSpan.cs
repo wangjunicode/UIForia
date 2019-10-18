@@ -92,40 +92,6 @@ namespace UIForia.Text {
 
         public void InsertChild(TextSpan child, uint index) {
             throw new NotImplementedException();
-            if (child.parent == this) return;
-
-            if (child.textInfo != null) return;
-
-            if (firstChild == null) {
-                firstChild = child;
-            }
-            else {
-                if (index == 0) {
-                    child.nextSibling = firstChild;
-                    firstChild = child;
-                }
-                else {
-                    TextSpan ptr = firstChild;
-                    TextSpan trail = null;
-
-                    for (int i = 0; i < index; i++) {
-                        trail = ptr;
-                        ptr = ptr.nextSibling;
-                        if (ptr == null) {
-                            trail.nextSibling = child;
-                            break;
-                        }
-                    }
-                }
-            }
-
-            child.textInfo = textInfo;
-            child.parent = this;
-            textInfo.RebuildSpans();
-
-            if (inheritStyleProperties) {
-                child.inheritedStyle = Merge(inheritedStyle);
-            }
         }
 
         public void RemoveChild(TextSpan child) {

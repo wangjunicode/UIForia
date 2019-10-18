@@ -726,7 +726,6 @@ namespace UIForia.Text {
             // find word for x
             // find char for x
             // return index
-            return 0;
         }
 
         private int FindNearestLine(Vector2 point) {

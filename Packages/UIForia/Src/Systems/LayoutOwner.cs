@@ -84,6 +84,8 @@ namespace UIForia.Layout {
 
             UpdateAlignments();
 
+            ComputeLocalTransforms();
+            
             ComputeWorldTransforms();
 
             OutputLayoutResults();
@@ -312,19 +314,14 @@ namespace UIForia.Layout {
             enabledThisFrame.Remove(element); // todo -- rethink this, maybe a counter is enough
         }
 
-        private void UpdateAlignments() {
+        private void ComputeLocalTransforms() {
             LayoutData[] enabledBoxes = enabledBoxList.array;
             SVGXMatrix[] localMatrices = localMatrixList.array;
 
             SVGXMatrix pivot = SVGXMatrix.identity;
-            SVGXMatrix inversePivot = pivot;
-
             float viewportWidth = view.Viewport.width;
             float viewportHeight = view.Viewport.height;
-
-            // todo -- this can be done without dereferencing box or parent and also in parallel
-
-            for (int i = 0; i < enabledBoxList.size; i++) {
+             for (int i = 0; i < enabledBoxList.size; i++) {
                 FastLayoutBox box = enabledBoxes[i].layoutBox;
 
                 // also if no changes in here we don't need to rebuild clip groups if we also didn't layout 
@@ -332,42 +329,6 @@ namespace UIForia.Layout {
                 // todo -- lots of ways to avoid doing this. only need it for self aligning things or things with a transform position not in pixels
 
                 Vector2 alignedPosition = box.alignedPosition;
-
-                if (box.alignmentTargetX != AlignmentBehavior.Unset && box.alignmentTargetX != AlignmentBehavior.Default) {
-                    OffsetMeasurement originX = box.element.style.AlignmentOriginX;
-                    OffsetMeasurement offsetX = box.element.style.AlignmentOffsetX;
-                    AlignmentDirection direction = box.element.style.AlignmentDirectionX;
-
-                    float originBase = MeasurementUtil.ResolveOriginBaseX(box, view.position.x, box.alignmentTargetX, direction);
-                    float originSize = MeasurementUtil.ResolveOffsetOriginSizeX(box, viewportWidth, box.alignmentTargetX);
-                    float originOffset = MeasurementUtil.ResolveOffsetMeasurement(box, viewportWidth, viewportHeight, originX, originSize);
-                    float offset = MeasurementUtil.ResolveOffsetMeasurement(box, viewportWidth, viewportHeight, offsetX, box.size.width);
-
-                    if (direction == AlignmentDirection.End) {
-                        alignedPosition.x = (originBase + originSize) - (originOffset + offset) - box.size.width;
-                    }
-                    else {
-                        alignedPosition.x = originBase + originOffset + offset;
-                    }
-                }
-
-                if (box.alignmentTargetY != AlignmentBehavior.Unset && box.alignmentTargetY != AlignmentBehavior.Default) {
-                    OffsetMeasurement originY = box.element.style.AlignmentOriginY;
-                    OffsetMeasurement offsetY = box.element.style.AlignmentOffsetY;
-                    AlignmentDirection direction = box.element.style.AlignmentDirectionY;
-
-                    float originBase = MeasurementUtil.ResolveOriginBaseY(box, view.position.y, box.alignmentTargetY, direction);
-                    float originSize = MeasurementUtil.ResolveOffsetOriginSizeY(box, viewportHeight, box.alignmentTargetY);
-                    float originOffset = MeasurementUtil.ResolveOffsetMeasurement(box, viewportWidth, viewportHeight, originY, originSize);
-                    float offset = MeasurementUtil.ResolveOffsetMeasurement(box, viewportWidth, viewportHeight, offsetY, box.size.height);
-
-                    if (direction == AlignmentDirection.End) {
-                        alignedPosition.y = (originBase + originSize) - (originOffset + offset) - box.size.height;
-                    }
-                    else {
-                        alignedPosition.y = originBase + originOffset + offset;
-                    }
-                }
 
                 // todo -- don't do this for elements that aren't transformed
                 alignedPosition.x += MeasurementUtil.ResolveOffsetMeasurement(box, viewportWidth, viewportHeight, box.transformPositionX, box.size.width);
@@ -384,31 +345,61 @@ namespace UIForia.Layout {
                 m = new SVGXMatrix(ca * box.scaleX, sa * box.scaleX, -sa * box.scaleY, ca * box.scaleY, alignedPosition.x + pivotLocation.x, alignedPosition.y + pivotLocation.y);
 
                 localMatrices[i] = m;
-                // if (box.pivotX == 0 && box.pivotY == 0) {
-                //     localMatrices[i] = m;
-                // }
-                // else {
-                //     pivot.m4 = box.pivotX * box.size.width;
-                //     pivot.m5 = box.pivotY * box.size.height;
-                //     inversePivot.m4 = -pivot.m4;
-                //     inversePivot.m5 = -pivot.m5;
-                //
-                //     localMatrices[i] = pivot * m * inversePivot;
-                // }
-                //
-                // if (rotation != 0) {
-                //     m = SVGXMatrix.TRS(alignedPosition, -rotation, new Vector2(box.scaleX, box.scaleY));
-                // }
-                // else {
-                //     m = SVGXMatrix.TranslateScale(alignedPosition.x, alignedPosition.y, box.scaleX, box.scaleY);
-                // }
-                //
-                // if (box.pivotX != 0 || box.pivotY != 0) {
-                //     SVGXMatrix pivotMat = SVGXMatrix.Translation(new Vector2(box.size.width * box.pivotX, box.size.height * box.pivotY));
-                //     m = pivotMat.Inverse() * m * pivotMat;
-                // }
-                //
-                // localMatrices[i] = m;
+                
+            }
+        }
+
+        private void UpdateAlignments() {
+            LayoutData[] enabledBoxes = enabledBoxList.array;
+            
+            float viewportWidth = view.Viewport.width;
+            float viewportHeight = view.Viewport.height;
+
+            // todo -- this can be done without dereferencing box or parent and also in parallel
+
+            for (int i = 0; i < enabledBoxList.size; i++) {
+                FastLayoutBox box = enabledBoxes[i].layoutBox;
+
+                // also if no changes in here we don't need to rebuild clip groups if we also didn't layout 
+                // same for world matrix computation
+                // todo -- lots of ways to avoid doing this. only need it for self aligning things or things with a transform position not in pixels
+                
+                if (box.alignmentTargetX != AlignmentBehavior.Unset && box.alignmentTargetX != AlignmentBehavior.Default) {
+                    OffsetMeasurement originX = box.element.style.AlignmentOriginX;
+                    OffsetMeasurement offsetX = box.element.style.AlignmentOffsetX;
+                    AlignmentDirection direction = box.element.style.AlignmentDirectionX;
+
+                    float originBase = MeasurementUtil.ResolveOriginBaseX(box, view.position.x, box.alignmentTargetX, direction);
+                    float originSize = MeasurementUtil.ResolveOffsetOriginSizeX(box, viewportWidth, box.alignmentTargetX);
+                    float originOffset = MeasurementUtil.ResolveOffsetMeasurement(box, viewportWidth, viewportHeight, originX, originSize);
+                    float offset = MeasurementUtil.ResolveOffsetMeasurement(box, viewportWidth, viewportHeight, offsetX, box.size.width);
+
+                    if (direction == AlignmentDirection.End) {
+                        box.alignedPosition.x = (originBase + originSize) - (originOffset + offset) - box.size.width;
+                    }
+                    else {
+                        box.alignedPosition.x = originBase + originOffset + offset;
+                    }
+                }
+
+                if (box.alignmentTargetY != AlignmentBehavior.Unset && box.alignmentTargetY != AlignmentBehavior.Default) {
+                    OffsetMeasurement originY = box.element.style.AlignmentOriginY;
+                    OffsetMeasurement offsetY = box.element.style.AlignmentOffsetY;
+                    AlignmentDirection direction = box.element.style.AlignmentDirectionY;
+
+                    float originBase = MeasurementUtil.ResolveOriginBaseY(box, view.position.y, box.alignmentTargetY, direction);
+                    float originSize = MeasurementUtil.ResolveOffsetOriginSizeY(box, viewportHeight, box.alignmentTargetY);
+                    float originOffset = MeasurementUtil.ResolveOffsetMeasurement(box, viewportWidth, viewportHeight, originY, originSize);
+                    float offset = MeasurementUtil.ResolveOffsetMeasurement(box, viewportWidth, viewportHeight, offsetY, box.size.height);
+
+                    if (direction == AlignmentDirection.End) {
+                        box.alignedPosition.y = (originBase + originSize) - (originOffset + offset) - box.size.height;
+                    }
+                    else {
+                        box.alignedPosition.y = originBase + originOffset + offset;
+                    }
+                }
+
             }
         }
 

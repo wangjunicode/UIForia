@@ -77,7 +77,14 @@ namespace UIForia.Util {
                     return viewportX;
 
                 case AlignmentBehavior.Screen:
-                    return 0;
+                    FastLayoutBox ptr = box.ResolveLayoutParent();
+                    float output = 0;
+                    while (ptr != null) {
+                        output -= ptr.alignedPosition.x;
+                        ptr = ptr.ResolveLayoutParent();
+                    }
+                    
+                    return output;
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(target), target, null);
@@ -114,7 +121,14 @@ namespace UIForia.Util {
                     return viewportY;
 
                 case AlignmentBehavior.Screen:
-                    return 0;
+                    FastLayoutBox ptr = box.ResolveLayoutParent();
+                    float output = 0;
+                    while (ptr != null) {
+                        output -= ptr.alignedPosition.y;
+                        ptr = ptr.ResolveLayoutParent();
+                    }
+                    
+                    return output;
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(target), target, null);

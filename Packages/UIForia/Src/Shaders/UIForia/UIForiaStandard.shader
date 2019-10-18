@@ -205,7 +205,6 @@ Shader "UIForia/Standard"
                     sdfData.strokeWidth = borderData.size;
                     sdfData.radius = borderData.radius;
                     mainColor = SDFColor(sdfData, borderData.color, mainColor, bevel);
-                                        
                     mainColor.a *= opacity;
                     
                     // todo -- this causes bad branching

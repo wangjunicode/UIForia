@@ -34,6 +34,18 @@ namespace UIForia.Compilers.Style {
                 // Alignment
                 {"alignmentbehaviorx", (targetStyle, property, context) => targetStyle.AlignmentBehaviorX = MapEnum<AlignmentBehavior>(property.children[0], context)},
                 {"alignmentbehaviory", (targetStyle, property, context) => targetStyle.AlignmentBehaviorY = MapEnum<AlignmentBehavior>(property.children[0], context)},
+                {"alignmentbehavior", (targetStyle, property, context) => {
+                        if (property.children.size == 1) {
+                            AlignmentBehavior target = MapEnum<AlignmentBehavior>(property.children[0], context);
+                            targetStyle.AlignmentBehaviorX = target;
+                            targetStyle.AlignmentBehaviorY = target;
+                        }
+                        else {
+                            targetStyle.AlignmentBehaviorX = MapEnum<AlignmentBehavior>(property.children[0], context);
+                            targetStyle.AlignmentBehaviorY = MapEnum<AlignmentBehavior>(property.children[1], context);
+                        }
+                    }
+                },
                 {"alignmentoriginx", (targetStyle, property, context) => targetStyle.AlignmentOriginX = MapOffsetMeasurement(property.children[0], context)},
                 {"alignmentoriginy", (targetStyle, property, context) => targetStyle.AlignmentOriginY = MapOffsetMeasurement(property.children[0], context)},
                 {"alignmentoffsetx", (targetStyle, property, context) => targetStyle.AlignmentOffsetX = MapOffsetMeasurement(property.children[0], context)},

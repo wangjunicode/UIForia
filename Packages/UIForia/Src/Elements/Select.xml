@@ -31,7 +31,7 @@
             TextColor = black;
             Padding = 4px 8px 4px 4px;
             FlexLayoutCrossAxisAlignment = Center;
-            FlexLayoutDirection = Column;
+            FlexLayoutDirection = Horizontal;
             BackgroundColor = white;
             [hover] {
                 MinWidth = 1cnt;
@@ -106,13 +106,13 @@
 
         style chevron-down {
             PreferredSize = 10px 6px;
-            BackgroundImage = url("icons/ui_selectbox_down_chevron@2x");
+            BackgroundImage = url("UIForia/icons/ui_selectbox_down_chevron@2x");
         }
 
         style chevron-up {
             MarginTop = 1px;
             PreferredSize = 10px 6px;
-            BackgroundImage = url("icons/ui_selectbox_up_chevron@2x");
+            BackgroundImage = url("UIForia/icons/ui_selectbox_up_chevron@2x");
         }
 
         style select-display {

@@ -111,11 +111,11 @@ namespace UIForia.Text {
                     return metrics;
                 }
 
-                LineInfo lastLine = lineInfoList[lineInfoList.Count - 1];
+                LineInfo lastLine = lineInfoList[lineInfoList.size - 1];
                 float maxWidth = 0;
 
-                LineInfo[] lineInfos = lineInfoList.Array;
-                for (int i = 0; i < lineInfoList.Count; i++) {
+                LineInfo[] lineInfos = lineInfoList.array;
+                for (int i = 0; i < lineInfoList.size; i++) {
                     lineInfos[i].x += offset.x;
                     lineInfos[i].y += offset.y;
                     maxWidth = Mathf.Max(maxWidth, lineInfos[i].width);
@@ -135,7 +135,7 @@ namespace UIForia.Text {
             LineInfo[] lines = lineInfoList.array;
             int lineCount = lineInfoList.size;
 
-            TextSpan[] spans = spanList.Array;
+            TextSpan[] spans = spanList.array;
 
             float lineOffsetY = lines[0].y;
 
@@ -217,8 +217,8 @@ namespace UIForia.Text {
             currentLine.spanStart = 0;
             currentLine.wordStart = 0;
 
-            int spanCount = spanList.Count;
-            TextSpan[] spans = spanList.Array;
+            int spanCount = spanList.size;
+            TextSpan[] spans = spanList.array;
 
             for (int spanIndex = 0; spanIndex < spanCount; spanIndex++) {
                 TextSpan span = spans[spanIndex];
@@ -328,9 +328,9 @@ namespace UIForia.Text {
 
             // todo -- something is weird with too many lines here check it out
 
-            LineInfo[] lineArray = lines.array;
+            LineInfo[] linearray = lines.array;
             for (int i = 0; i < lines.size; i++) {
-                ref LineInfo lineInfo = ref lineArray[i];
+                ref LineInfo lineInfo = ref linearray[i];
                 lineInfo.spanEnd++;
                 // align via baseline
                 if (lineInfo.spanStart != lineInfo.spanEnd) {
@@ -438,8 +438,8 @@ namespace UIForia.Text {
         }
 
         private float ComputeIntrinsicMinWidth() {
-            int spanCount = spanList.Count;
-            TextSpan[] spans = spanList.Array;
+            int spanCount = spanList.size;
+            TextSpan[] spans = spanList.array;
 
             float maxWidth = 0;
 
@@ -612,19 +612,64 @@ namespace UIForia.Text {
             StructList<CharInfo> charInfoList = rootSpan.charInfoList;
             StructList<WordInfo> wordInfoList = rootSpan.wordInfoList;
 
-            int lineIndex = charInfoList.Array[idx].lineIndex;
-            int wordIndex = lineInfoList.Array[lineIndex].wordStart;
-            int startChar = wordInfoList.Array[wordIndex].charStart;
+            int lineIndex = charInfoList.array[idx].lineIndex;
+            int wordIndex = lineInfoList.array[lineIndex].wordStart;
+            int startChar = wordInfoList.array[wordIndex].charStart;
             return idx == startChar;
         }
 
         private bool IsLastOnLine(int idx) {
             StructList<CharInfo> charInfoList = rootSpan.charInfoList;
             StructList<WordInfo> wordInfoList = rootSpan.wordInfoList;
-            int lineIndex = charInfoList.Array[idx].lineIndex;
-            int wordIndex = lineInfoList.Array[lineIndex].LastWordIndex;
-            int endChar = wordInfoList.Array[wordIndex].LastCharacterIndex;
+            int lineIndex = charInfoList.array[idx].lineIndex;
+            int wordIndex = lineInfoList.array[lineIndex].LastWordIndex;
+            int endChar = wordInfoList.array[wordIndex].LastCharacterIndex;
             return idx == endChar;
+        }
+
+        private int GetPreviousWordEdge(int characterIdx) {
+            if (IsFirstOnLine(characterIdx)) {
+                return characterIdx;
+            }
+            
+            StructList<CharInfo> charInfoList = rootSpan.charInfoList;
+            
+            int lineIndex = charInfoList.array[characterIdx].lineIndex;
+            LineInfo lineInfo = lineInfoList.array[lineIndex];
+
+            for (int i = lineInfo.spanEnd - 1; i >= lineInfo.spanStart; i--) {
+                StructList<WordInfo> wordList = spanList[i].wordInfoList;
+                for (int j = wordList.size - 1; j >= 0; j--) {
+                    if (wordList[j].charEnd >= characterIdx && wordList[j].charStart <= characterIdx) {
+                        return wordList[j > 0 ? j - 1 : 0].charStart;
+                    }
+                }
+            }
+
+            return characterIdx;
+        }
+        
+        private int GetNextWordEdge(int characterIdx) {
+            if (IsLastOnLine(characterIdx)) {
+                // one more for the right edge
+                return characterIdx + 1;
+            }
+            
+            StructList<CharInfo> charInfoList = rootSpan.charInfoList;
+            
+            int lineIndex = charInfoList.array[characterIdx].lineIndex;
+            LineInfo lineInfo = lineInfoList.array[lineIndex];
+
+            for (int i = 0; i < lineInfo.spanEnd; i++) {
+                StructList<WordInfo> wordList = spanList[i].wordInfoList;
+                for (int j = 0; j < wordList.size; j++) {
+                    if (wordList[j].charStart <= characterIdx && wordList[j].charEnd >= characterIdx) {
+                        return wordList[j == wordList.size - 1 ? j : j + 1].charEnd;
+                    }
+                }
+            }
+
+            return characterIdx;
         }
 
         public Vector2 GetCursorPosition(int cursorIndex) {
@@ -636,28 +681,28 @@ namespace UIForia.Text {
 
             if (charCount == 1) {
                 if (cursorIndex == charCount) {
-                    return new Vector2(charInfoList.Array[cursorIndex - 1].MaxX, 0);
+                    return new Vector2(charInfoList.array[cursorIndex - 1].MaxX, 0);
                 }
 
                 return new Vector2(2, 0); // using the left edge of character makes caret hard to see if border is present
             }
 
             if (cursorIndex < 0) {
-                return new Vector2(charInfoList.Array[0].LayoutX, lineInfoList.Array[0].y);
+                return new Vector2(charInfoList.array[0].LayoutX, lineInfoList.array[0].y);
             }
 
             if (cursorIndex >= charCount) {
-                return new Vector2(charInfoList.Array[charCount - 1].MaxX, lineInfoList.Array[lineInfoList.size - 1].y);
+                return new Vector2(charInfoList.array[charCount - 1].MaxX, lineInfoList.array[lineInfoList.size - 1].y);
             }
 
-            CharInfo charInfo = charInfoList.Array[cursorIndex];
-            LineInfo lineInfo = lineInfoList.Array[charInfo.lineIndex];
+            CharInfo charInfo = charInfoList.array[cursorIndex];
+            LineInfo lineInfo = lineInfoList.array[charInfo.lineIndex];
 
             return new Vector2(charInfo.LayoutX, lineInfo.y);
 
             // if (cursorIndex < charCount) {
             //     // use average of previous right and current left
-            //     CharInfo prev = charInfoList.Array[cursorIndex - 1];
+            //     CharInfo prev = charInfoList.array[cursorIndex - 1];
             //     float prevX = prev.MaxX;
             //     float x = charInfo.layoutX;
             //     float half = (prevX + x) * 0.5f;
@@ -665,7 +710,7 @@ namespace UIForia.Text {
             // }
             // else {
             //     // use average of previous right and current left
-            //     CharInfo next = charInfoList.Array[cursorIndex + 1];
+            //     CharInfo next = charInfoList.array[cursorIndex + 1];
             //     float nextX = next.MaxX;
             //     float x = charInfo.MaxX;
             //     float half = (nextX + x) * 0.5f;
@@ -679,7 +724,7 @@ namespace UIForia.Text {
             }
 
             int lineIndex = FindNearestLine(point);
-            LineInfo lineInfo = lineInfoList.Array[lineIndex];
+            LineInfo lineInfo = lineInfoList.array[lineIndex];
 
             int closestIndex = lineInfo.globalCharacterStartIndex;
 
@@ -729,8 +774,8 @@ namespace UIForia.Text {
         }
 
         private int FindNearestLine(Vector2 point) {
-            int lineCount = lineInfoList.Count;
-            LineInfo[] lineInfos = lineInfoList.Array;
+            int lineCount = lineInfoList.size;
+            LineInfo[] lineInfos = lineInfoList.array;
 
             if (point.y <= lineInfos[0].y) {
                 return 0;
@@ -772,21 +817,66 @@ namespace UIForia.Text {
             return lineInfoList[lineRangeStart].LineRect;
         }
 
-        // private int FindNearestCharacterIndex(Vector2 point) {
-        //     int nearestLine = FindNearestLine(point);
-        //     int nearestWord = FindNearestWord(nearestLine, point);
-        //     return FindNearestCharacterIndex(nearestWord, point);
-        // }
-        //
-        // public SelectionRange SelectWordAtPoint(Vector2 mouse) {
-        //     
-        //     int charIndex = FindNearestCharacterIndex(mouse);
-        //     SelectionRange range = new SelectionRange(charIndex, FindCursorEdge(charIndex, point));
-        //     if (IsLastOnLine(charIndex)) {
-        //         return range;
-        //     }
-        //     
-        // }
+        public SelectionRange SelectWordAtPoint(Vector2 point) {
+            
+            int nearestLine = FindNearestLine(point);
+            int closestIndex = 0;
+            int spanIndex = -1;
+            float closestDistance = float.MaxValue;
+            LineInfo line = lineInfoList.array[nearestLine];
+
+            for (int lineSpanIdx = line.spanStart; lineSpanIdx < line.spanEnd; lineSpanIdx++) {
+
+                WordInfo[] wordInfos = spanList[lineSpanIdx].wordInfoList.array;
+                float wordX = line.x;
+                for (int i = line.wordStart; i < line.wordStart + line.wordCount; i++) {
+                    WordInfo word = wordInfos[i];
+                    float x1 = wordX;
+                    wordX += word.width;
+                    float x2 = wordX;
+
+                    if (point.x >= x1 && point.x <= x2) {
+                        int wordCharEnd = word.charEnd;
+                        if (IsLastOnLine(wordCharEnd)) {
+                            // this is how we select up until the right edge
+                            wordCharEnd++;
+                        }
+
+                        return new SelectionRange(wordCharEnd, word.charStart);
+                    }
+
+                    float distToX1 = Mathf.Abs(point.x - x1);
+                    float distToX2 = Mathf.Abs(point.x - x2);
+                    if (distToX1 < closestDistance) {
+                        closestIndex = i;
+                        spanIndex = lineSpanIdx;
+                        closestDistance = distToX1;
+                    }
+
+                    if (distToX2 < closestDistance) {
+                        closestIndex = i;
+                        spanIndex = lineSpanIdx;
+                        closestDistance = distToX2;
+                    }
+                }
+            }
+
+            int charEndIdx = spanList[spanIndex].wordInfoList[closestIndex].charEnd;
+            int charStartIdx = spanList[spanIndex].wordInfoList[closestIndex].charStart;
+
+            if (IsLastOnLine(charEndIdx)) {
+                // this is how we select up until the right edge
+                return new SelectionRange(
+                    charEndIdx + 1,
+                    charStartIdx
+                );            
+            }
+
+            return new SelectionRange(
+                charEndIdx,
+                charStartIdx
+            );
+        }
 
         public SelectionRange SelectLineAtPoint(Vector2 point) {
             int idx = FindNearestLine(point);
@@ -808,22 +898,17 @@ namespace UIForia.Text {
                 selectionIndex = -1;
             }
 
-            // if (!maintainSelection && range.HasSelection) {
-            //     return new SelectionRange(range.cursorIndex);
-            // }
-            //
-            // if (!maintainSelection || !range.HasSelection) {
-            //     selectionIndex = -1;
-            // }
-
             int cursorIndex;
             if (maintainSelection) {
-                cursorIndex = range.cursorIndex - 1;
+                cursorIndex = word ? GetPreviousWordEdge(range.cursorIndex) : range.cursorIndex - 1;
             }
             else {
                 cursorIndex = Mathf.Min(range.cursorIndex, range.selectIndex > -1 ? range.selectIndex : range.cursorIndex);
-                if (!range.HasSelection) {
+                if (!range.HasSelection && !word) {
                     cursorIndex--;
+                }
+                else if (word) {
+                    cursorIndex = GetPreviousWordEdge(cursorIndex);
                 }
             }
 
@@ -844,22 +929,17 @@ namespace UIForia.Text {
                 selectionIndex = -1;
             }
 
-            // if (!maintainSelection && range.HasSelection) {
-            //     return new SelectionRange(range.cursorIndex);
-            // }
-            //
-            // if (!maintainSelection || !range.HasSelection) {
-            //     selectionIndex = -1;
-            // }
-
             int cursorIndex;
             if (select) {
-                cursorIndex = range.cursorIndex + 1;
+                cursorIndex = word ? GetNextWordEdge(range.cursorIndex) : range.cursorIndex + 1;
             }
             else {
                 cursorIndex = Mathf.Max(range.cursorIndex, range.selectIndex > -1 ? range.selectIndex : range.cursorIndex);
-                if (!range.HasSelection) {
+                if (!range.HasSelection && !word) {
                     cursorIndex++;
+                }
+                else if (word) {
+                    cursorIndex = GetNextWordEdge(cursorIndex);
                 }
             }
 
@@ -925,7 +1005,5 @@ namespace UIForia.Text {
 
             return new SelectionRange(lineInfoList.array[lineInfoList.size - 1].globalCharacterEndIndex);
         }
-
     }
-
 }

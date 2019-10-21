@@ -472,11 +472,11 @@ namespace UIForia.Elements {
         
         
         public override void OnUpdate() {
-           // if (isReady) {
+           if (isReady) {
                 ScrollToCursor();
-           // }
+           }
 
-           // isReady = true;
+           isReady = true;
         }
 
         protected void EmitTextChanged() {
@@ -520,11 +520,10 @@ namespace UIForia.Elements {
             mouse += textScroll;
 
             if (evt.IsDoubleClick) {
-             //   selectionRange = textElement.textInfo.SelectWordAtPoint(mouse);
+                selectionRange = textElement.textInfo.SelectWordAtPoint(mouse);
             }
             else if (evt.IsTripleClick) {
                selectionRange = textElement.textInfo.SelectLineAtPoint(mouse);
-               
             }
             else {
                 selectionRange = new SelectionRange(textElement.textInfo.GetIndexAtPoint(mouse));

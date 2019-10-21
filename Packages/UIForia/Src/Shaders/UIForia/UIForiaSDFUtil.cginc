@@ -585,7 +585,7 @@ float SDFShadow(SDFData sdfData, float intensity, float cut) {
     float tri = SDFCornerBevel(sdfData.uv, size, cut, cut);
     sdf = lerp(sdf, subtractSDF(sdf, tri), cut > 0);
     return sdf;
-    return abs(sdf) - halfStrokeWidth;
+    // return abs(sdf) - halfStrokeWidth;
 }
 
 fixed4 SDFColor(SDFData sdfData, fixed4 borderColor, fixed4 contentColor, float cornerBevel) {

@@ -6,9 +6,22 @@ namespace UIForia {
 
     public class TemplateSettings {
 
-        public string templateResolutionBasePath;
+        public string assemblyName;
+        public string outputPath;
+        public string codeFileExtension;
         public string preCompiledTemplatePath;
-
+        public string templateResolutionBasePath;
+        public string applicationName;
+        
+        public TemplateSettings() {
+            this.applicationName = "DefaultApplication";
+            this.assemblyName = "UIForia.Application";
+            this.outputPath = Path.Combine(UnityEngine.Application.dataPath, "__UIForiaGenerated__");
+            this.preCompiledTemplatePath = "Assets/__UIForiaGenerated__";
+            this.codeFileExtension = "cs";
+            this.templateResolutionBasePath = Path.Combine(UnityEngine.Application.dataPath);
+        }
+        
         private static readonly string s_InternalNonStreamingPath = Path.Combine(UnityEngine.Application.dataPath, "..", "Packages", "UIForia", "Src");
 
         public virtual string TryReadFile(string templatePath) {

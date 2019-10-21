@@ -102,7 +102,7 @@ namespace UIForia.Compilers {
 
             TemplateNode rootNode = TemplateNode.Get();
             rootNode.astRoot = retn;
-
+            rootNode.astRoot.fileName = filePath;
             rootNode.processedType = processedType;
 
             ParseAttributes(rootNode, contentElement);
@@ -173,6 +173,7 @@ namespace UIForia.Compilers {
                 int column = ((IXmlLineInfo) attr).LinePosition;
 
                 AttributeType attributeType = AttributeType.Property;
+                AttributeFlags flags = 0;
 
                 if (prefix == string.Empty) {
                     if (attr.Name.LocalName.StartsWith("style.")) {
@@ -187,9 +188,13 @@ namespace UIForia.Compilers {
                 }
                 else {
                     switch (prefix) {
-                        case "attr":
+                        case "attr": {
                             attributeType = AttributeType.Attribute;
+                            if (attr.Value[0] != '{' || attr.Value[attr.Value.Length - 1] != '}') {
+                                flags |= AttributeFlags.Const;
+                            }
                             break;
+                        }
                         case "style":
                             attributeType = AttributeType.Style;
                             break;
@@ -220,9 +225,9 @@ namespace UIForia.Compilers {
                         raw = name + "=" + "=\"" + attr.Value + "\"";
                     }
                 }
-
+                    
                 // todo -- set flag properly
-                templateNode.attributes.Add(new AttributeDefinition2(raw, attributeType, 0, name, attr.Value, line, column));
+                templateNode.attributes.Add(new AttributeDefinition2(raw, attributeType, flags, name, attr.Value, line, column));
             }
         }
 

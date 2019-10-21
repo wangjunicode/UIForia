@@ -949,9 +949,9 @@ namespace UIForia {
         // todo -- override that accepts an index into an array instead of a type, to save a dictionary lookup
         // todo -- don't create a list for every type, maybe a single pool list w/ sorting & a jump search or similar
         /// Returns the shell of a UI Element, space is allocated for children but no child data is associated yet, only a parent, view, and depth
-        public UIElement CreateElementFromPool(ProcessedType type, UIElement parent, int childCount) {
+        public UIElement CreateElementFromPool(ProcessedType type, UIElement parent, int childCount, int attributeCount) {
             UIElement retn = elementPool.Get(type);
-            // todo -- register element in type map for selectors
+            // todo -- register element in type map for selectors, might need to support subclass matching ie <KlangButton> and <OtherButton> with matching on <Button>
             retn.id = ElementIdGenerator++;
             // todo -- make children a linked list instead
             retn.children = LightList<UIElement>.GetMinSize(childCount);
@@ -963,8 +963,8 @@ namespace UIForia {
             return retn;
         }
 
-        public UIElement CreateElementFromPoolWithType(Type type, UIElement parent, int childCount) {
-            return CreateElementFromPool(TypeProcessor.GetProcessedType(type), parent, childCount);
+        public UIElement CreateElementFromPoolWithType(Type type, UIElement parent, int childCount, int attrCount) {
+            return CreateElementFromPool(TypeProcessor.GetProcessedType(type), parent, childCount, attrCount);
         }
 
         // Doesn't expect to create the root
@@ -996,27 +996,7 @@ namespace UIForia {
         
     }
 
-    public interface ICompiledTemplateData {
-
-        void LoadTemplates();
-
-        void GenerateCode();
-
-    }
 
 
-    public static partial class CompiledTemplateData {
-
-        public static Action[] str;
-
-        public static void Comment(string comment) { }
-
-        public static Action TemplateName = () => { };
-
-        public static void Load() {
-            str[0] = TemplateName;
-        }
-
-    }
 
 }

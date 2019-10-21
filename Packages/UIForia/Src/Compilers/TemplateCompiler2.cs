@@ -5,6 +5,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using Mono.Linq.Expressions;
 using UIForia.Attributes;
+using UIForia.Compilers;
 using UIForia.Elements;
 using UIForia.Exceptions;
 using UIForia.Parsing;
@@ -62,6 +63,7 @@ namespace UIForia.Compilers {
         private static readonly FieldInfo s_LexicalScope_data = typeof(LexicalScope).GetField(nameof(LexicalScope.data), BindingFlags.Instance | BindingFlags.Public);
         private static readonly FieldInfo s_LexicalScope_SlotInputList = typeof(LexicalScope).GetField(nameof(LexicalScope.slotInputList), BindingFlags.Instance | BindingFlags.Public);
 
+        private CompiledTemplateData templateData;
 
         public TemplateCompiler2(TemplateSettings settings) {
             this.settings = settings;
@@ -72,7 +74,9 @@ namespace UIForia.Compilers {
             this.xmlTemplateParser = new XMLTemplateParser();
         }
 
-        public void CompileTemplates(Type rootType, ICompiledTemplateData templateData) {
+        public void CompileTemplates(Type rootType, CompiledTemplateData templateData) {
+            this.templateData = templateData;
+
             if (!typeof(UIElement).IsAssignableFrom(rootType)) { }
 
             if (typeof(UIContainerElement).IsAssignableFrom(rootType)) { }
@@ -82,7 +86,11 @@ namespace UIForia.Compilers {
             // CompiledTemplate root = GetCompiledTemplate();
 
             GetCompiledTemplate(TypeProcessor.GetProcessedType(rootType));
-            
+
+//            foreach (KeyValuePair<Type,CompiledTemplate> keyValuePair in templateMap) {
+//                templateData.AddTemplate();
+//            }
+
             // start at root template
             // parse / compile all other templates
 
@@ -94,7 +102,6 @@ namespace UIForia.Compilers {
         }
 
         private CompiledTemplate GetCompiledTemplate(ProcessedType processedType) {
-            
             if (typeof(UIContainerElement).IsAssignableFrom(processedType.rawType)) {
                 return null;
             }
@@ -138,8 +145,6 @@ namespace UIForia.Compilers {
 
             templateMap[processedType.rawType] = compiledTemplate;
 
-            // templateData.AddTemplate("applicationId", retn);
-
             return compiledTemplate;
         }
 
@@ -171,6 +176,7 @@ namespace UIForia.Compilers {
 
                     return new TemplateDefinition() {
                         contents = file,
+                        filePath = templateAttr.template,
                         language = TemplateLanguage.XML
                     };
                 }
@@ -178,6 +184,7 @@ namespace UIForia.Compilers {
                 default:
                     return new TemplateDefinition() {
                         contents = templateAttr.template,
+                        filePath = "NONE", // todo make unique
                         language = TemplateLanguage.XML
                     };
             }
@@ -221,10 +228,10 @@ namespace UIForia.Compilers {
         }
 
         private CompiledTemplate Compile(TemplateAST ast) {
-            CompiledTemplate retn = new CompiledTemplate();
+            CompiledTemplate retn = templateData.CreateTemplate(ast.fileName);
 
             retn.childCount = ast.root.children.size;
-            
+
             LightList<string> namespaces = LightList<string>.Get();
 
             if (ast.usings != null) {
@@ -256,7 +263,8 @@ namespace UIForia.Compilers {
                 Expression createRootExpression = Expression.Call(ctx.applicationExpr, s_CreateFromPool,
                     Expression.Constant(processedType.rawType),
                     Expression.Default(typeof(UIElement)),
-                    Expression.Constant(ast.root.children.size)
+                    Expression.Constant(ast.root.children.size),
+                    Expression.Constant(ast.root.GetAttributeCount())
                 );
 
                 // root = templateScope.application.CreateFromPool<Type>(attrCount, childCount);
@@ -270,11 +278,11 @@ namespace UIForia.Compilers {
             ctx.Return(ctx.rootParam);
 
             LightList<string>.Release(ref namespaces);
-            
+
             retn.templateFn = Expression.Lambda(ctx.Finalize(typeof(UIElement)), rootParam, scopeParam);
-            
+
             UnityEngine.Debug.Log(retn.templateFn.ToCSharpCode());
-            
+
             return retn;
         }
 
@@ -302,56 +310,135 @@ namespace UIForia.Compilers {
         }
 
         private ParameterExpression Visit(TemplateNode templateNode, in CompilationContext ctx, CompiledTemplate template) {
-            
             ProcessedType processedType = templateNode.processedType;
             Type type = processedType.rawType;
             ParameterExpression nodeExpr = ctx.ElementExpr;
-            
+
             ctx.elementType = processedType;
             ctx.CommentNewLineBefore($"{templateNode.originalString}");
+            int trueAttrCount = templateNode.GetAttributeCount();
 
-            if (processedType.rawType == typeof(UISlotDefinition)) {
-                 return VisitSlotDefinition(templateNode, ctx, template);
-            }
+            TemplateNodeType templateNodeType = templateNode.GetTemplateType();
 
-            if (processedType.rawType == typeof(UISlotContent)) {
-                return null;
-            }
-            
-            if (typeof(UIContainerElement).IsAssignableFrom(processedType.rawType)) {
-                ctx.Assign(nodeExpr, Expression.Call(ctx.applicationExpr, s_CreateFromPool, Expression.Constant(type), ctx.ParentExpr, Expression.Constant(templateNode.children.size)));
-                VisitChildren(templateNode, ctx, template);
-                return nodeExpr;
-            }
-
-            if ((typeof(UITextElement).IsAssignableFrom(processedType.rawType))) {
-
-                ctx.Assign(nodeExpr, Expression.Call(ctx.applicationExpr, s_CreateFromPool, Expression.Constant(type), ctx.ParentExpr, Expression.Constant(templateNode.children.size)));
-                if (templateNode.textContent != null && templateNode.textContent.size > 0) {
-                    if (templateNode.IsTextConstant()) {
-                        // ((UITextElement)element).text = "string value";
-                        ctx.Assign(Expression.MakeMemberAccess(Expression.Convert(nodeExpr, typeof(UITextElement)), s_TextElement_Text), Expression.Constant(templateNode.GetStringContent()));
-                    }
+            switch (templateNodeType) {
+                case TemplateNodeType.SlotDefinition: {
+                    return VisitSlotDefinition(templateNode, ctx, template);
                 }
-                VisitChildren(templateNode, ctx, template);
-                return nodeExpr;
+
+                case TemplateNodeType.SlotContent: {
+                    break;
+                }
+
+                case TemplateNodeType.HydrateElement: {
+                    Expression bindingNode = ctx.BindingNodeExpr;
+
+                    CompiledTemplate expandedTemplate = GetCompiledTemplate(processedType);
+
+                    ctx.Assign(nodeExpr, Expression.Call(ctx.applicationExpr, s_CreateFromPool, Expression.Constant(type), ctx.ParentExpr, Expression.Constant(templateNode.children.size), Expression.Constant(trueAttrCount)));
+
+                 //   MergeTemplateAttributes(templateNode, expandedTemplate.attributes, templateNode.attributes);
+
+//                    OutputConstantAttributes(templateNode);
+
+
+                    OutputAttributes(ctx, templateNode);
+
+                    OutputBindings(ctx, templateNode);
+                    
+//                    ProcessBindings(templateNode, ctx, hasTextBindings);
+
+                    // templateScope = new TemplateScope2(application, bindingNode, null);
+                    Expression templateScopeCtor = Expression.New(s_TemplateScope_Ctor, ctx.applicationExpr, bindingNode, Expression.Default(typeof(StructList<SlotUsage>)));
+
+                    // scope.application.HydrateTemplate(templateId, targetElement, templateScope)
+                    ctx.AddStatement(Expression.Call(ctx.applicationExpr, s_Application_HydrateTemplate, Expression.Constant(expandedTemplate.templateId), nodeExpr, templateScopeCtor));
+
+                    break;
+                }
+
+                case TemplateNodeType.HydrateElementWithChildren: {
+                    break;
+                }
+
+                case TemplateNodeType.TextElement: {
+                    ctx.Assign(nodeExpr, Expression.Call(ctx.applicationExpr, s_CreateFromPool, Expression.Constant(type), ctx.ParentExpr, Expression.Constant(templateNode.children.size), Expression.Constant(trueAttrCount)));
+                    if (templateNode.textContent != null && templateNode.textContent.size > 0) {
+                        if (templateNode.IsTextConstant()) {
+                            // ((UITextElement)element).text = "string value";
+                            ctx.Assign(Expression.MakeMemberAccess(Expression.Convert(nodeExpr, typeof(UITextElement)), s_TextElement_Text), Expression.Constant(templateNode.GetStringContent()));
+                        }
+                    }
+
+                    VisitChildren(templateNode, ctx, template);
+                    return nodeExpr;
+                }
+
+                case TemplateNodeType.ContainerElement: {
+                    ctx.Assign(nodeExpr, Expression.Call(ctx.applicationExpr, s_CreateFromPool, Expression.Constant(type), ctx.ParentExpr, Expression.Constant(templateNode.children.size),  Expression.Constant(trueAttrCount)));
+                    
+                    OutputAttributes(ctx, templateNode);
+
+                    VisitChildren(templateNode, ctx, template);
+                    return nodeExpr;
+                }
             }
-          
-//            CompiledTemplate expandedTemplate = null;
-//
-//            if (processedType.requiresTemplateExpansion) {
-//                expandedTemplate = GetCompiledTemplate(processedType);
-//
-//                //templateNode == usage in template, child count must be INTERNAL child count
-//                ctx.Assign(nodeExpr, Expression.Call(ctx.applicationExpr, s_CreateFromPool, Expression.Constant(type), ctx.ParentExpr, Expression.Constant(expandedTemplate.childCount)));
-//            }
-//            else {
-//                ctx.Assign(nodeExpr, Expression.Call(ctx.applicationExpr, s_CreateFromPool, Expression.Constant(type), ctx.ParentExpr, Expression.Constant(templateNode.children.size)));
-//            }
 
             return nodeExpr;
         }
 
+        private static void OutputAttributes(CompilationContext ctx, TemplateNode template) {
+            if (template.GetAttributeCount() > 0) {
+                
+                int attrIdx = 0;
+                
+                for (int i = 0; i < template.attributes.size; i++) {
+                    ref AttributeDefinition2 attr = ref template.attributes.array[i];
+
+                    if (template.attributes[i].type == AttributeType.Attribute) {
+                        
+                        // targetElement_x.attributeList.array[x] = new ElementAttribute("key", "value"); will be empty string for attributes that are bound
+                        MemberExpression listAccess = Expression.MakeMemberAccess(ctx.ElementExpr, s_ElementAttributeList);
+                        MemberExpression arrayAccess = Expression.MakeMemberAccess(listAccess, s_StructList_ElementAttr_Array);
+                        IndexExpression arrayIndex = Expression.ArrayAccess(arrayAccess, Expression.Constant(attrIdx++));
+                        
+                        if ((attr.flags & AttributeFlags.Const) != 0) {
+                            ctx.Assign(arrayIndex, Expression.New(s_ElementAttributeCtor, Expression.Constant(attr.key), Expression.Constant(attr.value)));
+                        }
+                        else {
+                            ctx.Assign(arrayIndex, Expression.New(s_ElementAttributeCtor, Expression.Constant(attr.key), Expression.Constant(string.Empty)));
+                        }
+                    }
+                }
+                
+            }    
+        }
+
+        private void OutputBindings(CompilationContext ctx, TemplateNode templateNode) {
+            if (templateNode.GetBindingCount() > 0) {
+                
+                int attrIdx = 0;
+
+                CompiledBinding binding = templateData.AddBinding(templateNode);
+                LinqCompiler bindingCompiler = new LinqCompiler();
+                
+                for (int i = 0; i < templateNode.attributes.size; i++) {
+                    
+                }
+
+                if (templateNode.processedType.requiresUpdateFn) {
+                    bindingCompiler.Statement("__element.Update()");        
+                }
+
+                binding.bindingFn = bindingCompiler.BuildLambda();
+                
+                // scope.PushBindingNode(LinqBinding.Get(targetElement_x));
+
+                // scope.PopBindingNode();
+
+            }  
+            
+        }
+        
         private ParameterExpression VisitSlotDefinition(TemplateNode templateNode, CompilationContext ctx, CompiledTemplate template) {
             ProcessedType processedType = templateNode.processedType;
 
@@ -480,6 +567,50 @@ namespace UIForia.Compilers {
                         : Expression.Field(parentCtx.lexicalScope, s_LexicalScope_SlotInputList)
                 )
             );
+        }
+
+        /// <summary>
+        /// Merges all attributes from the root of a hydrated template with those declared at the template usage site. The outer ones override inner ones.
+        /// </summary>
+        /// <param name="templateNode"></param>
+        /// <param name="innerList"></param>
+        /// <param name="outer"></param>
+        private static void MergeTemplateAttributes(TemplateNode templateNode, StructList<AttributeDefinition2> innerList, StructList<AttributeDefinition2> outer) {
+            StructList<AttributeDefinition2> mergedAttributes = StructList<AttributeDefinition2>.GetMinSize(innerList.size + outer.size);
+
+            // match on type & name, might have to track source also in case of binding context
+
+            // add all outer ones
+            mergedAttributes.AddRange(outer);
+
+            int outerCount = outer.size;
+            AttributeDefinition2[] mergedArray = mergedAttributes.array;
+            AttributeDefinition2[] inner = innerList.array;
+
+            for (int i = 0; i < inner.Length; i++) {
+                // for each inner attribute
+                // if no match found, add it, be sure to set context flag
+                string key = inner[i].key;
+                AttributeType attributeType = inner[i].type;
+
+                bool contains = false;
+                for (int j = 0; j < outerCount; j++) {
+                    // if key and type matches, break out of the loop
+                    if (mergedArray[j].key == key && mergedArray[j].type == attributeType) {
+                        contains = true;
+                        break;
+                    }
+                }
+
+                if (!contains) {
+                    AttributeDefinition2 attr = inner[i];
+                    attr.flags |= AttributeFlags.RootContext;
+                    mergedAttributes.Add(attr);
+                }
+            }
+
+            templateNode.attributes.Release();
+            templateNode.attributes = mergedAttributes;
         }
 
     }

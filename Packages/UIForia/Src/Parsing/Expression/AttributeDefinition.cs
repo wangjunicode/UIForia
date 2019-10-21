@@ -57,7 +57,7 @@ namespace UIForia.Parsing.Expressions {
         public int column;
         public AttributeType type;
         public AttributeFlags flags;
-        
+
         public AttributeDefinition2(string rawValue, AttributeType type, AttributeFlags flags,  string key, string value, int line = -1, int column = -1) {
             this.rawValue = rawValue;
             this.type = type;

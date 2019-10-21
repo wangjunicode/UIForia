@@ -2,8 +2,9 @@
 <UITemplate>
     <Contents>
         <Text>I am text</Text>
-        <Div attr:some-attr="this-is-attr" floatVal="42f">
+        <Div attr:nonconst="{computed}" attr:first="true" attr:some-attr="this-is-attr" floatVal="42f">
             <Text>I am also {expr} text</Text>
         </Div>
+        <LoadTemplateHydrate/>
     </Contents>
 </UITemplate>

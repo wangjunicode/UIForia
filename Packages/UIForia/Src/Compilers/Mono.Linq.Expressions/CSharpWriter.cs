@@ -73,7 +73,7 @@ namespace Mono.Linq.Expressions {
             WriteLine();
         }
 
-        void VisitParameters(LambdaExpression node) {
+        protected void VisitParameters(LambdaExpression node) {
             VisitParenthesizedList(node.Parameters, parameter => {
                 VisitType(parameter.Type);
                 WriteSpace();
@@ -102,7 +102,7 @@ namespace Mono.Linq.Expressions {
             return name;
         }
 
-        void VisitLambdaBody(LambdaExpression node) {
+        protected void VisitLambdaBody(LambdaExpression node) {
             if (node.Body.NodeType != ExpressionType.Block)
                 VisitSingleExpressionBody(node);
             else

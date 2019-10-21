@@ -89,7 +89,7 @@ public class TestTemplateParser {
 
         CompiledTemplate compiledTemplate = compiler.GetCompiledTemplate(typeof(CompileTestElement));
 
-        UIElement element = application.CreateElementFromPoolWithType(typeof(CompileTestElement), null, compiledTemplate.childCount);
+        UIElement element = application.CreateElementFromPoolWithType(typeof(CompileTestElement), null, compiledTemplate.childCount, 0);
         
         Assert.IsInstanceOf<CompileTestElement>(compiledTemplate.Create(element, new TemplateScope2(application, new LinqBindingNode(), null)));
     }
@@ -296,7 +296,7 @@ public class TestTemplateParser {
 
         CompiledTemplate compiledTemplate = compiler.GetCompiledTemplate(typeof(RootTemplate));
         
-        UIElement element = application.CreateElementFromPoolWithType(typeof(RootTemplate), null, compiledTemplate.childCount);
+        UIElement element = application.CreateElementFromPoolWithType(typeof(RootTemplate), null, compiledTemplate.childCount, 0);
 
         compiledTemplate.Create(element, new TemplateScope2(application, linqBindingNode, null));
 

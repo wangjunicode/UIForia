@@ -47,6 +47,9 @@ namespace Src.Systems {
             }
 
             application.StyleSystem.onStylePropertyChanged += HandleStylePropertyChanged;
+            application.onViewsSorted += uiViews => {
+                renderOwners.Sort((o1, o2) => o1.view.Depth.CompareTo(o2.view.Depth));
+            };
         }
 
         private void HandleStylePropertyChanged(UIElement element, StructList<StyleProperty> propertyList) {

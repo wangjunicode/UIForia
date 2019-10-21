@@ -1,11 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.Linq.Expressions;
 using Src.Systems;
 using UIForia.Animation;
 using UIForia.AttributeProcessors;
 using UIForia.Bindings;
-using UIForia.Compilers;
 using UIForia.Compilers.Style;
 using UIForia.Elements;
 using UIForia.Extensions;
@@ -291,6 +289,12 @@ namespace UIForia {
 
         public void Refresh() {
             onWillRefresh?.Invoke();
+            
+            // kill all but the first view
+            m_Views.Sort((v1, v2) => v1.id.CompareTo(v2.id));
+            for (int i = m_Views.Count - 1; i > 0; i--) {
+                m_Views[i].Destroy();
+            }
 
             foreach (ISystem system in m_Systems) {
                 system.OnReset();
@@ -307,20 +311,7 @@ namespace UIForia {
             m_AfterUpdateTaskSystem.OnReset();
             m_BeforeUpdateTaskSystem.OnReset();
 
-            // copy the list here because there might be view-sorting going on during view.initialize() 
-            LightList<UIView> views = LightList<UIView>.Get();
-            views.AddRange(m_Views);
-
-            // todo -- store root view, rehydrate. kill the rest
-            for (int i = 0; i < views.Count; i++) {
-                for (int j = 0; j < m_Systems.Count; j++) {
-                    m_Systems[j].OnViewAdded(views[i]);
-                }
-
-                views[i].Initialize();
-            }
-
-            LightList<UIView>.Release(ref views);
+            m_Views[0].Initialize();
 
             onRefresh?.Invoke();
             onNextRefresh?.Invoke();

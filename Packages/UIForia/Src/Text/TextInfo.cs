@@ -776,6 +776,9 @@ namespace UIForia.Text {
         private int FindNearestLine(Vector2 point) {
             int lineCount = lineInfoList.size;
             LineInfo[] lineInfos = lineInfoList.array;
+            if (lineCount == 0) {
+                return -1;
+            }
 
             if (point.y <= lineInfos[0].y) {
                 return 0;
@@ -820,6 +823,10 @@ namespace UIForia.Text {
         public SelectionRange SelectWordAtPoint(Vector2 point) {
             
             int nearestLine = FindNearestLine(point);
+            if (nearestLine < 0) {
+                return default;
+            }
+
             int closestIndex = 0;
             int spanIndex = -1;
             float closestDistance = float.MaxValue;
@@ -880,6 +887,9 @@ namespace UIForia.Text {
 
         public SelectionRange SelectLineAtPoint(Vector2 point) {
             int idx = FindNearestLine(point);
+            if (idx < 0) {
+                return default;
+            }
             return new SelectionRange(
                 lineInfoList.array[idx].globalCharacterEndIndex + 1, // might be wrong for multi line
                 lineInfoList.array[idx].globalCharacterStartIndex

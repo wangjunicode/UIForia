@@ -131,7 +131,7 @@ namespace UIForia.Text {
                     return source.Substring(1);
                 }
 
-                if (cursorIndex == source.Length) {
+                if (cursorIndex >= source.Length) {
                     range = new SelectionRange(range.cursorIndex);
                     return source.Substring(0, range.cursorIndex);
                 }

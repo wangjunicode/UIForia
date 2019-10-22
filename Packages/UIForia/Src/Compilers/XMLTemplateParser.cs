@@ -175,44 +175,51 @@ namespace UIForia.Compilers {
                 AttributeType attributeType = AttributeType.Property;
                 AttributeFlags flags = 0;
 
-                if (prefix == string.Empty) {
-                    if (attr.Name.LocalName.StartsWith("style.")) {
-                        attributeType = AttributeType.Style;
-                        name = attr.Name.LocalName.Substring("style.".Length);
-                    }
-
-                    if (attr.Name.LocalName.StartsWith("x-")) {
-                        attributeType = AttributeType.Attribute;
-                        name = attr.Name.LocalName.Substring("x-.".Length);
-                    }
+                if (name == "if") {
+                    attributeType = AttributeType.Conditional;
                 }
                 else {
-                    switch (prefix) {
-                        case "attr": {
-                            attributeType = AttributeType.Attribute;
-                            if (attr.Value[0] != '{' || attr.Value[attr.Value.Length - 1] != '}') {
-                                flags |= AttributeFlags.Const;
-                            }
-                            break;
-                        }
-                        case "style":
-                            attributeType = AttributeType.Style;
-                            break;
-                        case "evt":
-                            attributeType = AttributeType.Event;
-                            break;
-                        case "ctx":
-                            attributeType = AttributeType.Context;
-                            break;
-                        case "ctxvar":
-                            attributeType = AttributeType.ContextVariable;
-                            break;
-                        case "alias":
-                            attributeType = AttributeType.Alias;
-                            break;
 
-                        default:
-                            throw new ArgumentOutOfRangeException("Unknown attribute prefix: " + prefix);
+                    if (prefix == string.Empty) {
+                        if (attr.Name.LocalName.StartsWith("style.")) {
+                            attributeType = AttributeType.Style;
+                            name = attr.Name.LocalName.Substring("style.".Length);
+                        }
+
+                        if (attr.Name.LocalName.StartsWith("x-")) {
+                            attributeType = AttributeType.Attribute;
+                            name = attr.Name.LocalName.Substring("x-.".Length);
+                        }
+                    }
+                    else {
+                        switch (prefix) {
+                            case "attr": {
+                                attributeType = AttributeType.Attribute;
+                                if (attr.Value[0] != '{' || attr.Value[attr.Value.Length - 1] != '}') {
+                                    flags |= AttributeFlags.Const;
+                                }
+
+                                break;
+                            }
+                            case "style":
+                                attributeType = AttributeType.Style;
+                                break;
+                            case "evt":
+                                attributeType = AttributeType.Event;
+                                break;
+                            case "ctx":
+                                attributeType = AttributeType.Context;
+                                break;
+                            case "ctxvar":
+                                attributeType = AttributeType.ContextVariable;
+                                break;
+                            case "alias":
+                                attributeType = AttributeType.Alias;
+                                break;
+
+                            default:
+                                throw new ArgumentOutOfRangeException("Unknown attribute prefix: " + prefix);
+                        }
                     }
                 }
 

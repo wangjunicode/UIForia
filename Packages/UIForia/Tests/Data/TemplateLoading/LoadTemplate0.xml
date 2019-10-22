@@ -2,9 +2,17 @@
 <UITemplate>
     <Contents>
         <Text>I am text</Text>
-        <Div attr:nonconst="{computed}" attr:first="true" attr:some-attr="this-is-attr" floatVal="42f">
+        <LoadTemplateHydrate if="refTypeThing.intVal > 145" 
+                             attr:nonconst="{computed}"
+                             attr:first="true"
+                             attr:some-attr="this-is-attr" 
+                             floatVal="42f"
+                             evt:onMouseDown="HandleDown()"
+                             intVal="refTypeThing.intVal"
+                             intVal2="refTypeThing.intVal">
+            
             <Text>I am also {expr} text</Text>
-        </Div>
-        <LoadTemplateHydrate/>
+            
+        </LoadTemplateHydrate>
     </Contents>
 </UITemplate>

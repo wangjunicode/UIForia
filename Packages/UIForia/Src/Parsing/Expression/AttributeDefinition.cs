@@ -3,7 +3,6 @@ using System.Diagnostics;
 
 namespace UIForia.Parsing.Expressions {
 
-    // order is important because this is a sort key
     [Flags]
     public enum AttributeType : ushort {
 
@@ -14,6 +13,7 @@ namespace UIForia.Parsing.Expressions {
         Style = 1 << 4,
         Attribute = 1 << 5,
         Event = 1 << 6,
+        Conditional = 1 << 7
 
     }
 
@@ -66,6 +66,16 @@ namespace UIForia.Parsing.Expressions {
             this.value = value;
             this.line = line;
             this.column = column;
+        }
+
+        public string StrippedValue {
+            get {
+                if (value[0] == '{' && value[value.Length -1] == '}') {
+                    return value.Substring(1, value.Length - 2);
+                }
+
+                return value;
+            }
         }
 
     }

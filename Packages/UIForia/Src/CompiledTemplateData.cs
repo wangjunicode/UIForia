@@ -34,9 +34,9 @@ namespace UIForia {
             binding.filePath = templateNode.astRoot.fileName;
             binding.elementTag = templateNode.originalString;
             binding.bindingId = compiledBindings.size;
+            binding.guid = GUID.Generate().ToString();
             compiledBindings.Add(binding);
             return binding;
-
         }
 
     }

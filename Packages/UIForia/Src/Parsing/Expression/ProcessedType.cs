@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -34,7 +35,7 @@ namespace UIForia.Parsing {
         public readonly bool requiresUpdateFn;
         private object rawCtorFn;
         private Action<object> clearFn;
-
+        private StructList<PropertyChangeHandlerDesc> methods;
         internal int totalReleased;
         internal LightList<UIElement> poolList;
         private Func<ProcessedType, UIElement, UIElement> constructionFn;
@@ -51,6 +52,7 @@ namespace UIForia.Parsing {
             this.rawType = rawType;
             this.templateAttr = templateAttr;
             this.requiresUpdateFn = ReflectionUtil.IsOverride(rawType.GetMethod(nameof(UIElement.OnUpdate)));
+
             // CompileClear(rawType);
             this.requiresTemplateExpansion = (
                 !typeof(UIContainerElement).IsAssignableFrom(rawType) &&
@@ -58,6 +60,40 @@ namespace UIForia.Parsing {
                 !typeof(UISlotDefinition).IsAssignableFrom(rawType) &&
                 !typeof(UISlotContent).IsAssignableFrom(rawType)
             );
+        }
+
+        public struct PropertyChangeHandlerDesc {
+
+            public MethodInfo methodInfo;
+            public string memberName;
+
+        }
+
+        public void GetChangeHandlers(string memberName, StructList<PropertyChangeHandlerDesc> retn) {
+            if (methods == null) {
+                MethodInfo[] candidates = rawType.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                for (int i = 0; i < candidates.Length; i++) {
+                    IEnumerable<OnPropertyChanged> attrs = candidates[i].GetCustomAttributes<OnPropertyChanged>();
+                    methods = methods ?? new StructList<PropertyChangeHandlerDesc>();
+                    foreach (OnPropertyChanged a in attrs) {
+                        methods.Add(new PropertyChangeHandlerDesc() {
+                            methodInfo = candidates[i],
+                            memberName = a.propertyName
+                        });
+                    }
+                }
+            }
+
+            if (methods == null) {
+                return;
+            }
+            
+            for (int i = 0; i < methods.size; i++) {
+                if (methods.array[i].memberName == memberName) {
+                    retn.Add(methods[i]);
+                }
+            }
+            
         }
 
         public void CreateCtor() {
@@ -68,6 +104,7 @@ namespace UIForia.Parsing {
                 if (constructor == null) {
                     throw new Exception($"{rawType} must define a default constructor for UIForia to function properly");
                 }
+
                 DynamicMethod helperMethod = new DynamicMethod(string.Empty, typeof(void), ReflectionUtil.TypeArray1, rawType.Module, true);
                 ILGenerator ilGenerator = helperMethod.GetILGenerator();
                 ilGenerator.Emit(OpCodes.Ldarg_0);
@@ -222,11 +259,11 @@ namespace UIForia.Parsing {
 
         public UIElement CreateInstance() {
             UIElement instance = null;
-            
+
             if (constructionFn == null) {
                 CreateCtor(); // todo move this, don't create if we don't use it in dynamic case but needs to be pre-compiled and available for AOT case
             }
-            
+
             if (poolList != null && poolList.size > 0) {
                 return constructionFn(this, poolList.RemoveLast());
             }

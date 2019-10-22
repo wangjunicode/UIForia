@@ -28,6 +28,10 @@ namespace UIForia.Compilers {
             this.children = new LightList<TemplateNode>();
         }
 
+        public Type RootType => astRoot.root.processedType.rawType;
+
+        public Type ElementType => processedType.rawType;
+        
         internal static TemplateNode Get() {
             if (s_Pool == null) {
                 s_Pool = new LightList<TemplateNode>(32);

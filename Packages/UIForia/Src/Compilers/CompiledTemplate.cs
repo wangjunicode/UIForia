@@ -17,6 +17,7 @@ namespace UIForia.Compilers {
         public string filePath;
         public string elementTag;
         public int bindingId;
+        public string guid;
         public LambdaExpression bindingFn;
 
     }
@@ -28,16 +29,9 @@ namespace UIForia.Compilers {
         public string filePath;
         public int templateId;
         public StructList<SlotDefinition> slotDefinitions;
-        public LightList<CompiledBinding> compiledBindings;
         public int childCount;
         public LambdaExpression templateFn;
         public GUID guid;
-
-        public CompiledBinding AddBinding(TemplateNode templateNode) {
-            compiledBindings = compiledBindings ?? new LightList<CompiledBinding>();
-            CompiledBinding binding = new CompiledBinding();    
-            binding.
-        }
         
         public bool TryGetSlotData(string slotName, out SlotDefinition slotDefinition) {
             if (slotDefinitions == null) {

@@ -187,8 +187,13 @@ namespace UIForia.Exceptions {
             return new CompileException($"Unable to find a suitable constructor on type {type} that accepts {BuildArgumentList()}");
         }
 
+        public static CompileException UnresolvedMethod(Type type, string methodName) {
+            return new CompileException($"Unable to find a method called `{methodName}` on type {type}");
+        }
 
-
+        public static CompileException UnresolvedFieldOrProperty(Type type, string fieldOrPropertyName) {
+            return new CompileException($"Unable to find a field or property called `{fieldOrPropertyName}` on type {type}");
+        }
     }
 
     public static class CompileExceptions {

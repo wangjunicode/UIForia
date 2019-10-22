@@ -3,25 +3,25 @@
 
     <Style>
 
-        style &lt;this&gt; {
+        style input {
             LayoutType = Stack;
             PreferredHeight = 1cnt;
             Border = 2px;
             BorderColor = black;
             BackgroundColor = white;
-            Padding = 6px 8px 4px;
+            Padding = 4px 8px;
             PreferredWidth = 500px;
             TextFontSize = 1.2em;
-            MarginBottom = 20px;
+            MarginBottom = 10px;
             Overflow = Hidden;
             ClipBounds = ContentBox;
         }
 
         style input-element-text {
-            Painter = "none";
-            // PreferredSize = 100% 1cnt;
             LayoutFitHorizontal = Fill;
             TextWhitespaceMode = NoWrap;
+            MinHeight = 1.2em;
+            AlignY = 50% ParentContentArea;
         }
 
         style placeholder {
@@ -31,6 +31,7 @@
         }
         
         style placeholder-slot {
+            PreferredHeight = 1em;
             AlignY = 50% ParentContentArea;
             AlignX = 0% ParentContentArea;
             TextColor = rgb(150, 150, 150);
@@ -38,9 +39,8 @@
 
     </Style>
 
-    <Contents style="input-element">
-       
-        <Text style="input-element-text"/>
+    <Contents style="input">
+        <Text x-id="input-element-text" style="input-element-text"/>
 
         <Slot name="placeholder" style="placeholder-slot" if="ShowPlaceholder">
             <Text style="placeholder" x-id="placeholder-text">{placeholder}</Text>

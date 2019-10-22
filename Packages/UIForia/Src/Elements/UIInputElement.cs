@@ -326,7 +326,7 @@ namespace UIForia.Elements {
     }
 
 
-    public abstract class UIInputElement : UIElement, IFocusableEvented {
+    public abstract class UIInputElement : BaseInputElement, IFocusableEvented {
 
         [CustomPainter("UIForia::Input")]
         internal class InputElementPainter : StandardRenderBox  {
@@ -360,7 +360,7 @@ namespace UIForia.Elements {
                     path.SetStrokeWidth(1f);
                     Vector2 p = textInfo.GetCursorPosition(inputElement.selectionRange.cursorIndex) - inputElement.textScroll;
                     path.MoveTo(inputElement.layoutResult.ContentRect.min + p);
-                    path.VerticalLineTo(inputElement.layoutResult.ContentRect.y + p.y + inputElement.style.GetResolvedFontSize());
+                    path.VerticalLineTo(inputElement.layoutResult.ContentRect.y + p.y + inputElement.textElement.layoutResult.localPosition.y + inputElement.style.GetResolvedFontSize());
                     path.EndPath();
                     path.Stroke();
                 }
@@ -416,7 +416,6 @@ namespace UIForia.Elements {
         public event Action<FocusEvent> onFocus;
         public event Action<BlurEvent> onBlur;
         public bool autofocus;
-        public bool disabled;
 
         protected float holdDebounce = 0.05f;
         protected float timestamp;
@@ -454,23 +453,19 @@ namespace UIForia.Elements {
             text = text ?? string.Empty;
             style.SetPainter("UIForia::Input", StyleState.Normal);
             Application.InputSystem.RegisterFocusable(this);
-            if (disabled) {
-                SetAttribute("disabled", "true");
-            }
         }
 
         public override void OnEnable() {
-            textElement = FindFirstByType<UITextElement>();
+            textElement = FindById<UITextElement>("input-element-text");
             if (autofocus) {
                 Application.InputSystem.RequestFocus(this);
             }
+
             if (string.IsNullOrEmpty(m_placeholder)) {
-                FindById("placeholder-text").SetAttribute("empty", "true");
+                FindById("placeholder-text")?.SetAttribute("empty", "true");
             }
         }
 
-        
-        
         public override void OnUpdate() {
            if (isReady) {
                 ScrollToCursor();
@@ -748,11 +743,11 @@ namespace UIForia.Elements {
             }
         }
 
-        protected bool HasDisabledAttr() {
+        public bool HasDisabledAttr() {
             return GetAttribute("disabled") != null;
         }
 
-        protected bool CanTriggerHeldKey() {
+        public bool CanTriggerHeldKey() {
             if (GetAttribute("disabled") != null) return false;
 
             if (Time.unscaledTime - keyLockTimestamp < 0.5f) {

@@ -579,9 +579,10 @@ namespace UIForia.Layout {
         }
 
         public void GetHeight(float width, in BlockSize blockWidth, in BlockSize blockHeight, ref SizeConstraints output) {
-            output.minHeight = ResolveHeight(width, blockWidth, blockHeight, minHeight);
-            output.maxHeight = ResolveHeight(width, blockWidth, blockHeight, maxHeight);
-            output.prefHeight = ResolveHeight(width, blockWidth, blockHeight, prefHeight);
+            float clampedWidth = Mathf.Clamp(width, output.minWidth, output.maxWidth);
+            output.minHeight = ResolveHeight(clampedWidth, blockWidth, blockHeight, minHeight);
+            output.maxHeight = ResolveHeight(clampedWidth, blockWidth, blockHeight, maxHeight);
+            output.prefHeight = ResolveHeight(clampedWidth, blockWidth, blockHeight, prefHeight);
 
             if (output.prefHeight < output.minHeight)
                 output.prefHeight = output.minHeight;

@@ -2,6 +2,7 @@ using UIForia.Attributes;
 using UIForia.Layout;
 using UIForia.Rendering;
 using UIForia.UIInput;
+using UIForia.Util;
 using UnityEngine;
 
 namespace UIForia.Elements {
@@ -51,10 +52,11 @@ namespace UIForia.Elements {
             for (int i = 0; i < childrenElement.children.size; i++) {
                 if (childrenElement.children[i].isEnabled && childrenElement.children[i].style.ClipBehavior == ClipBehavior.Normal) {
                     Rect screenRect = childrenElement.children[i].layoutResult.ScreenRect;
-                    if (screenRect.x < minX) minX = screenRect.x;
-                    if (screenRect.y < minY) minY = screenRect.y;
-                    if (screenRect.xMax > maxX) maxX = screenRect.xMax;
-                    if (screenRect.yMax > maxY) maxY = screenRect.yMax;
+                    OffsetRect margin = childrenElement.children[i].layoutResult.margin;
+                    if (screenRect.x - margin.left < minX) minX = screenRect.x - margin.left;
+                    if (screenRect.y - margin.top < minY) minY = screenRect.y - margin.top;
+                    if (screenRect.xMax + margin.right > maxX) maxX = screenRect.xMax + margin.right;
+                    if (screenRect.yMax + margin.bottom > maxY) maxY = screenRect.yMax + margin.bottom;
                 }
             }
 

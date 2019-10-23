@@ -19,6 +19,8 @@ namespace UIForia.Test.TestData {
         public int intVal2 { get; set; }
         public string computed = "i-am-computed";
 
+        public void HandleStuffDone() { }
+
     }
 
 }

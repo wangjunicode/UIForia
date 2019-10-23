@@ -601,6 +601,7 @@ namespace UIForia {
 
                 if ((child.flags & UIElementFlags.HasBeenEnabled) == 0) {
                     child.View.ElementCreated(child);
+                    // run once bindings if present
                 }
 
                 // register the flag set even if we get disabled via OnEnable, we just want to track that OnEnable was called at least once

@@ -379,6 +379,11 @@ namespace UIForia.Compilers {
                     statements.Add(assign.Right);
                     variables.Remove(returnVar);
                 }
+
+                if (statements.Last is LabelExpression) {
+                    statements.Add(Expression.Default(typeof(void)));
+                }
+                
             }
             else if (returnType != typeof(void)) {
                 statements.Insert(0, Expression.Assign(returnVar, Expression.Default(returnVar.Type)));
@@ -918,7 +923,7 @@ namespace UIForia.Compilers {
                 AddStatement(Expression.Assign(nullableAccessVar, Expression.Convert(continuation, nullableAccessVar.Type)));
 
                 BlockExpression innerBlock = PopBlock();
-                AddStatement(Expression.IfThenElse(Expression.Equal(call2, Expression.Constant(true)), innerBlock, Expression.Block(typeof(void), Expression.Goto(returnLabel))));
+                AddStatement(Expression.IfThenElse(Expression.Equal(call2, Expression.Constant(true)), innerBlock, Expression.Block(typeof(void), Expression.Goto(labelStack.Peek()))));
 
                 Expression outerBlock = PopBlock();
                 AddStatement(Expression.IfThen(condition, outerBlock));
@@ -929,7 +934,7 @@ namespace UIForia.Compilers {
             PushBlock();
             // todo -- only do this if bounds checking enabled
             // todo -- allow user override behavior
-            AddStatement(Expression.Goto(returnLabel));
+            AddStatement(Expression.Goto(labelStack.Peek()));
 
             BlockExpression block = PopBlock();
 

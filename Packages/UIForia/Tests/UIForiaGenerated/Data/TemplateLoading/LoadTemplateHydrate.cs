@@ -6,7 +6,7 @@ namespace UIForia.Generated {
 
     public partial class UIForiaGeneratedTemplates_TestApp {
         
-        public Func<UIElement, TemplateScope2, UIElement> Template_e2b341cce736bd3469011f20e8329d88 = (UIForia.Elements.UIElement root, UIForia.Compilers.TemplateScope2 scope) =>
+        public Func<UIElement, TemplateScope2, UIElement> Template_8c7d3e5f42e4b38438e56af4c75d8ab4 = (UIForia.Elements.UIElement root, UIForia.Compilers.TemplateScope2 scope) =>
         {
             UIForia.Elements.UIElement targetElement_1;
 

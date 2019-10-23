@@ -359,6 +359,9 @@ namespace UIForia.Compilers {
                         )
                     );
 
+                    // element.OnCreate()
+                    //  
+
                     break;
                 }
 
@@ -415,19 +418,61 @@ namespace UIForia.Compilers {
             }
         }
 
+        private readonly LinqCompiler bindingCompiler = new LinqCompiler();
 
         private void OutputBindings(CompilationContext ctx, TemplateNode templateNode) {
-            // todo -- handle nested access <Element thing.value.x="144f"/>
+            // todo -- handle nested access <Element thing.value.x="144f" keydown="" key-filter:keydown.keyup.withfocus="[allDown(shift, c, k), NoneOf()]"/>
             // todo -- handle .once
             // todo -- handle .enabled bindings
             // todo -- handle .read.write bindings
             // todo -- handle event subscription
 
-            if (templateNode.GetBindingCount() > 0) {
-                int attrIdx = 0;
+            if (templateNode.attributes == null || templateNode.attributes.size == 0) {
+                return;
+            }
+
+            {
+                bindingCompiler.Reset();
+                CompiledBinding binding = null;
+                bindingCompiler.SetSignature(
+                    new Parameter<UIElement>("__root", ParameterFlags.NeverNull),
+                    new Parameter<UIElement>("__element", ParameterFlags.NeverNull)
+                );
+
+                ParameterExpression castElement = bindingCompiler.AddVariable(
+                    new Parameter(templateNode.ElementType, "__castElement", ParameterFlags.NeverNull), Expression.Convert(bindingCompiler.GetParameter("__element"), templateNode.ElementType)
+                );
+
+                ParameterExpression castRoot = bindingCompiler.AddVariable(
+                    new Parameter(templateNode.RootType, "__castRoot", ParameterFlags.NeverNull), Expression.Convert(bindingCompiler.GetParameter("__root"), templateNode.RootType)
+                );
+
+                for (int i = 0; i < templateNode.attributes.size; i++) {
+                    AttributeDefinition2 attr = templateNode.attributes.array[i];
+                    
+                    if (attr.type == AttributeType.Property && (attr.flags & AttributeFlags.Const) != 0) {
+                        binding = binding ?? templateData.AddBinding(templateNode);
+                        CompilePropertyBinding(templateNode, attr);
+                    }
+
+                    if (ReflectionUtil.IsEvent(templateNode.ElementType, attr.key, out EventInfo eventInfo)) {
+                        
+                    }
+                    
+                }
+
+                if (binding != null) {
+                    binding.bindingFn = bindingCompiler.BuildLambda();
+                }
+                
+                // LinqBindingNode.Get(scope.application, targetElement_1, enabledBindingId, updateBindingId, onceBindingId);
+                
+            }
+
+            {
+                bindingCompiler.Reset();
 
                 CompiledBinding binding = templateData.AddBinding(templateNode);
-                LinqCompiler bindingCompiler = new LinqCompiler();
 
                 bindingCompiler.SetSignature(
                     new Parameter<UIElement>("__root", ParameterFlags.NeverNull),
@@ -438,7 +483,7 @@ namespace UIForia.Compilers {
                     new Parameter(templateNode.ElementType, "__castElement", ParameterFlags.NeverNull), Expression.Convert(bindingCompiler.GetParameter("__element"), templateNode.ElementType)
                 );
 
-                bindingCompiler.AddVariable(
+                ParameterExpression castRoot = bindingCompiler.AddVariable(
                     new Parameter(templateNode.RootType, "__castRoot", ParameterFlags.NeverNull), Expression.Convert(bindingCompiler.GetParameter("__root"), templateNode.RootType)
                 );
 
@@ -448,10 +493,16 @@ namespace UIForia.Compilers {
                     if (attributeDefinition.type == AttributeType.Conditional) {
                         try {
                             bindingCompiler.BeginIsolatedSection();
-                            bindingCompiler.SetImplicitContext(bindingCompiler.GetVariable("__castRoot"));
+                            if ((attributeDefinition.flags & AttributeFlags.RootContext) != 0) {
+                                bindingCompiler.SetImplicitContext(bindingCompiler.GetVariable("__castElement"));
+                            }
+                            else {
+                                bindingCompiler.SetImplicitContext(castRoot);
+                            }
+
                             bindingCompiler.Statement($"__castElement.SetEnabled({attributeDefinition.value})");
                             bindingCompiler.CommentNewLineBefore($"if=\"{attributeDefinition.value}\"");
-                            bindingCompiler.IfEqual(Expression.MakeMemberAccess(bindingCompiler.GetVariable("__castElement"), s_Element_IsEnabled), Expression.Constant(false), () => { bindingCompiler.RawExpression(Expression.Goto(bindingCompiler.GetReturnLabel())); });
+                            bindingCompiler.IfEqual(Expression.MakeMemberAccess(castElement, s_Element_IsEnabled), Expression.Constant(false), () => { bindingCompiler.RawExpression(Expression.Goto(bindingCompiler.GetReturnLabel())); });
                         }
                         catch (Exception e) {
                             bindingCompiler.EndIsolatedSection();
@@ -469,58 +520,19 @@ namespace UIForia.Compilers {
                     if (attributeDefinition.type == AttributeType.Attribute && (attributeDefinition.flags & AttributeFlags.Const) == 0) {
                         // __castElement.SetAttribute("attribute-name", computedValue);
                         bindingCompiler.CommentNewLineBefore($"{attributeDefinition.key}=\"{attributeDefinition.value}\"");
-                        bindingCompiler.SetImplicitContext(bindingCompiler.GetVariable("__castRoot"));
+                        if ((attributeDefinition.flags & AttributeFlags.RootContext) != 0) {
+                            bindingCompiler.SetImplicitContext(castElement);
+                        }
+                        else {
+                            bindingCompiler.SetImplicitContext(castRoot);
+                        }
+
                         bindingCompiler.Statement($"__castElement.SetAttribute('{attributeDefinition.key}', {attributeDefinition.StrippedValue})");
                         continue;
                     }
 
-                    if (attributeDefinition.type == AttributeType.Property) {
-                        LHSStatementChain left = null;
-                        Expression right = null;
-                        bindingCompiler.CommentNewLineBefore($"{attributeDefinition.key}=\"{attributeDefinition.value}\"");
-                        bindingCompiler.BeginIsolatedSection();
-                        try {
-                            bindingCompiler.SetImplicitContext(bindingCompiler.GetVariable("__castElement"));
-                            left = bindingCompiler.AssignableStatement(attributeDefinition.key);
-                        }
-                        catch (Exception e) {
-                            bindingCompiler.EndIsolatedSection();
-                            Debug.LogError(e);
-                            continue;
-                        }
-
-                        //castElement.value = root.value
-                        bindingCompiler.SetImplicitContext(bindingCompiler.GetVariable("__castRoot"));
-                        Expression accessor = bindingCompiler.AccessorStatement(left.targetExpression.Type, attributeDefinition.value);
-                        if (accessor is ConstantExpression) {
-                            right = accessor;
-                        }
-                        else {
-                            right = bindingCompiler.AddVariable(left.targetExpression.Type, "__right");
-                            bindingCompiler.Assign(right, accessor);
-                        }
-
-                        StructList<ProcessedType.PropertyChangeHandlerDesc> changeHandlers = StructList<ProcessedType.PropertyChangeHandlerDesc>.Get();
-                        templateNode.processedType.GetChangeHandlers(attributeDefinition.key, changeHandlers);
-
-                        bool isProperty = ReflectionUtil.IsProperty(castElement.Type, attributeDefinition.key);
-
-                        // if there is a change handler or the member is a property we need to check for changes
-                        // otherwise field values can be assigned w/o checking
-                        if (changeHandlers.size > 0 || isProperty) {
-                            bindingCompiler.IfNotEqual(left, right, () => {
-                                bindingCompiler.Assign(left, right);
-                                for (int j = 0; j < changeHandlers.size; j++) {
-                                    bindingCompiler.Statement($"__castElement.{changeHandlers[j].methodInfo.Name}()");
-                                }
-                            });
-                        }
-                        else {
-                            bindingCompiler.Assign(left, right);
-                        }
-
-                        bindingCompiler.EndIsolatedSection();
-                        changeHandlers.Release();
+                    if (attributeDefinition.type == AttributeType.Property && (attributeDefinition.flags & AttributeFlags.Const) == 0) {
+                        CompilePropertyBinding(templateNode, attributeDefinition);
                     }
                 }
 
@@ -530,6 +542,59 @@ namespace UIForia.Compilers {
 
                 binding.bindingFn = bindingCompiler.BuildLambda();
             }
+        }
+
+        private void CompilePropertyBinding(TemplateNode templateNode, in AttributeDefinition2 attributeDefinition) {
+            LHSStatementChain left = null;
+            Expression right = null;
+
+            ParameterExpression castElement = bindingCompiler.GetVariable("__castElement");
+            ParameterExpression castRoot = bindingCompiler.GetVariable("__castRoot");
+
+            bindingCompiler.CommentNewLineBefore($"{attributeDefinition.key}=\"{attributeDefinition.value}\"");
+            bindingCompiler.BeginIsolatedSection();
+            try {
+                bindingCompiler.SetImplicitContext(castElement);
+                left = bindingCompiler.AssignableStatement(attributeDefinition.key);
+            }
+            catch (Exception e) {
+                bindingCompiler.EndIsolatedSection();
+                Debug.LogError(e);
+                return;
+            }
+
+            //castElement.value = root.value
+            bindingCompiler.SetImplicitContext(castRoot);
+            Expression accessor = bindingCompiler.AccessorStatement(left.targetExpression.Type, attributeDefinition.value);
+            if (accessor is ConstantExpression) {
+                right = accessor;
+            }
+            else {
+                right = bindingCompiler.AddVariable(left.targetExpression.Type, "__right");
+                bindingCompiler.Assign(right, accessor);
+            }
+
+            StructList<ProcessedType.PropertyChangeHandlerDesc> changeHandlers = StructList<ProcessedType.PropertyChangeHandlerDesc>.Get();
+            templateNode.processedType.GetChangeHandlers(attributeDefinition.key, changeHandlers);
+
+            bool isProperty = ReflectionUtil.IsProperty(castElement.Type, attributeDefinition.key);
+
+            // if there is a change handler or the member is a property we need to check for changes
+            // otherwise field values can be assigned w/o checking
+            if (changeHandlers.size > 0 || isProperty) {
+                bindingCompiler.IfNotEqual(left, right, () => {
+                    bindingCompiler.Assign(left, right);
+                    for (int j = 0; j < changeHandlers.size; j++) {
+                        bindingCompiler.Statement($"__castElement.{changeHandlers[j].methodInfo.Name}()");
+                    }
+                });
+            }
+            else {
+                bindingCompiler.Assign(left, right);
+            }
+
+            bindingCompiler.EndIsolatedSection();
+            changeHandlers.Release();
         }
 
         private ParameterExpression VisitSlotDefinition(TemplateNode templateNode, CompilationContext ctx, CompiledTemplate template) {

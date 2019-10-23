@@ -168,12 +168,18 @@ namespace UIForia.Compilers {
             foreach (XAttribute attr in node.Attributes()) {
                 string prefix = attr.Name.NamespaceName;
                 string name = attr.Name.LocalName.Trim();
-
+                
+              
                 int line = ((IXmlLineInfo) attr).LineNumber;
                 int column = ((IXmlLineInfo) attr).LinePosition;
 
                 AttributeType attributeType = AttributeType.Property;
                 AttributeFlags flags = 0;
+                
+                if (name.Contains(".once")) {
+                    name = name.Replace(".once", "");
+                    flags |= AttributeFlags.Const;
+                }
 
                 if (name == "if") {
                     attributeType = AttributeType.Conditional;
@@ -223,6 +229,8 @@ namespace UIForia.Compilers {
                     }
                 }
 
+             
+                
                 string raw = string.Empty;
                 if (outputComments) {
                     if (!string.IsNullOrEmpty(prefix)) {

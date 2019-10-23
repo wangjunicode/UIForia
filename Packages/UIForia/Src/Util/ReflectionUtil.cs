@@ -135,6 +135,11 @@ namespace UIForia.Util {
         public static bool IsField(Type type, string fieldName) {
             return type.GetField(fieldName, InstanceBindFlags) != null;
         }
+        
+        public static bool IsEvent(Type type, string evtName, out EventInfo evtInfo) {
+            evtInfo = type.GetEvent(evtName, InstanceBindFlags);
+            return evtInfo != null;
+        }
 
         public static bool IsField(Type type, string fieldName, out FieldInfo fieldInfo) {
             fieldInfo = type.GetField(fieldName, InstanceBindFlags);

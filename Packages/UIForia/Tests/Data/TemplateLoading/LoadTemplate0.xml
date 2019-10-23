@@ -1,13 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <UITemplate>
     <Contents>
+        
         <Text>I am text</Text>
+        
         <LoadTemplateHydrate if="refTypeThing.intVal > 145" 
                              attr:nonconst="{computed}"
                              attr:first="true"
                              attr:some-attr="this-is-attr" 
-                             floatVal="42f"
-                             evt:onMouseDown="HandleDown()"
+                             floatVal.once="42f"
+                             onDidSomething="HandleStuffDone"
+                             onMouseDown="HandleDown($event, 'stuff')"
                              intVal="refTypeThing.intVal"
                              intVal2="refTypeThing.intVal">
             

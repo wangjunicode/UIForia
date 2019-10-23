@@ -58,6 +58,9 @@ namespace UIForia.Systems {
                 return;
             }
 
+            // if element.runOnceBindings != null
+                // element.runOnce();
+                
             iteratorIndex = 0;
 
             int activePhase = system.currentPhase;

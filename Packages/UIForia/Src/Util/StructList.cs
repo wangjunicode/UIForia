@@ -78,6 +78,20 @@ namespace UIForia.Util {
             size += collection.Length;
         }
 
+        public void AddRange(IList<T> collection, int resizeFactor = 1) {
+            
+            if (size + collection.Count >= array.Length) {
+                System.Array.Resize(ref array, size + collection.Count * resizeFactor);
+            }
+
+            int idx = size;
+            for (int i = 0; i < collection.Count; i++) {
+                array[idx++] = collection[i];
+            }
+
+            size += collection.Count;
+        }
+
         public void AddRange(T[] collection, int start, int count) {
             if (size + count >= array.Length) {
                 System.Array.Resize(ref array, size + count * 2);
@@ -368,7 +382,7 @@ namespace UIForia.Util {
             isInPool = true;
             s_Pool.Add(this);
         }
-        
+
         public void Release() {
             Clear();
             if (isInPool) return;

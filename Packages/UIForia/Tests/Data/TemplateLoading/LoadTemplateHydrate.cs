@@ -1,6 +1,7 @@
 using System;
 using JetBrains.Annotations;
 using UIForia.Attributes;
+using UIForia.Compilers;
 using UIForia.Elements;
 
 namespace UIForia.Test.TestData {
@@ -12,7 +13,8 @@ namespace UIForia.Test.TestData {
         public int intVal;
         public int intVal2 { get; set; }
 
-        public event Action onDidSomething;
+        [AliasGenericParameter(0, "valueName")]
+        public event Action<string> onDidSomething;
         
         public override void OnUpdate() {}
 

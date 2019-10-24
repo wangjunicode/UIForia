@@ -161,7 +161,7 @@ namespace UIForia.Util {
         }
 
         public static bool HasInstanceMethod(Type type, string methodName, out LightList<MethodInfo> methodInfos) {
-            MethodInfo[] publicMethods = type.GetMethods(PublicInstance);
+            MethodInfo[] publicMethods = type.GetMethods(InstanceBindFlags);
 
             LightList<MethodInfo> retn = LightList<MethodInfo>.Get();
 

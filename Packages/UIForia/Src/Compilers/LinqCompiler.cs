@@ -45,6 +45,7 @@ namespace UIForia.Compilers {
         private readonly Dictionary<string, int> variableNames;
         private readonly LightStack<LabelTarget> labelStack;
         private int sectionCount = 0;
+        private bool outputComments = true;
 
         private Type returnType;
         private LabelTarget returnLabel;
@@ -253,7 +254,7 @@ namespace UIForia.Compilers {
         public ParameterExpression GetVariable(string name) {
             return currentBlock.ResolveVariable(name);
         }
-        
+
         public ParameterExpression GetParameter(string name) {
             for (int i = 0; i < parameters.Count; i++) {
                 if (parameters[i].name == name) {
@@ -383,7 +384,6 @@ namespace UIForia.Compilers {
                 if (statements.Last is LabelExpression) {
                     statements.Add(Expression.Default(typeof(void)));
                 }
-                
             }
             else if (returnType != typeof(void)) {
                 statements.Insert(0, Expression.Assign(returnVar, Expression.Default(returnVar.Type)));
@@ -398,10 +398,10 @@ namespace UIForia.Compilers {
             BlockExpression blockExpression;
 
             if (variables != null && variables.Count > 0) {
-                blockExpression = Expression.Block(returnType, variables, statements);
+                blockExpression = Expression.Block(returnType ?? typeof(void), variables, statements);
             }
             else {
-                blockExpression = Expression.Block(returnType, statements);
+                blockExpression = Expression.Block(returnType ?? typeof(void), statements);
             }
 
             lambdaExpression = Expression.Lambda(blockExpression, MakeParameterArray(parameters));
@@ -419,7 +419,7 @@ namespace UIForia.Compilers {
         public Expression Statement(string input) {
             return AddStatement(Visit(ExpressionParser.Parse(input)));
         }
-        
+
 
         public Expression RawExpression(Expression expression) {
             return AddStatement(expression);
@@ -552,7 +552,6 @@ namespace UIForia.Compilers {
         public void Assign(Expression left, Expression right) {
             currentBlock.AddStatement(Expression.Assign(left, right));
         }
-
 
         public Expression Constant(object value) {
             return Expression.Constant(value);
@@ -821,7 +820,8 @@ namespace UIForia.Compilers {
                 return true;
             }
 
-            throw CompileException.UnresolvedFieldOrProperty(head.Type, fieldOrPropertyName);
+            accessExpression = head;
+            return false;
         }
 
         private Expression MakeFieldAccess(Expression head, FieldInfo fieldInfo) {
@@ -1318,8 +1318,9 @@ namespace UIForia.Compilers {
             return VisitAccessExpressionParts(head, parts, ref start);
         }
 
-        private bool TryCreateVariableExpression(Expression expressionHead, string propertyRead, out Expression expression) {
+        private bool TryCreateVariableExpression(Expression expressionHead, MemberAccessExpressionNode node, ref int start, out Expression expression) {
             Type exprType = expressionHead.Type;
+            string propertyRead = node.identifier;
             if (ReflectionUtil.IsField(exprType, propertyRead)) {
                 expression = MemberAccess(expressionHead, propertyRead);
                 return true;
@@ -1329,7 +1330,10 @@ namespace UIForia.Compilers {
                 return true;
             }
             else if (ReflectionUtil.HasInstanceMethod(exprType, propertyRead, out LightList<MethodInfo> methodInfos)) {
-                throw new NotImplementedException();
+                InvokeNode invoke = node.parts[0] as InvokeNode;
+                start = 1;
+                expression = MakeMethodCall(expressionHead, methodInfos, invoke.parameters);
+                return true;
             }
 
             expression = null;
@@ -1460,7 +1464,7 @@ namespace UIForia.Compilers {
             // then check variables
             // then check types
             if (implicitContext.HasValue) {
-                if (TryCreateVariableExpression(implicitContext.Value.expression, accessNode.identifier, out Expression head)) {
+                if (TryCreateVariableExpression(implicitContext.Value.expression, accessNode, ref start, out Expression head)) {
                     return VisitAccessExpressionParts(head, parts, ref start);
                 }
             }
@@ -1676,9 +1680,25 @@ namespace UIForia.Compilers {
         public void AddLabelTarget() { }
 
         private bool RequiresNullCheck(Expression head) {
-            return shouldNullCheck &&
-                   head.Type.IsClass &&
-                   !wasNullChecked.Contains(head) &&
+            if (!shouldNullCheck || !head.Type.IsClass) {
+                return false;
+            }
+            
+            if (currentBlock.TryGetUserVariable(head, out Parameter p)) {
+                if((p.flags & ParameterFlags.NeverNull) != 0) {
+                    return false;
+                }
+            }
+
+            if (parent != null) {
+                if (parent.currentBlock.TryGetUserVariable(head, out Parameter p0)) {
+                    if((p0.flags & ParameterFlags.NeverNull) != 0) {
+                        return false;
+                    }
+                }
+            }
+            
+            return !wasNullChecked.Contains(head) &&
                    (!ResolveParameter(head, out Parameter parameter) || (parameter.flags & ParameterFlags.NeverNull) == 0);
         }
 
@@ -1755,7 +1775,7 @@ namespace UIForia.Compilers {
             ASTNode astRoot = ExpressionParser.Parse(input);
             return Visit(typeof(T), astRoot);
         }
-        
+
         private Expression Visit(ASTNode node) {
             return Visit(null, node);
         }
@@ -2190,6 +2210,19 @@ namespace UIForia.Compilers {
             return retn;
         }
 
+        public LinqCompiler CreateClosure(IList<Parameter> parameters, Type retnType) {
+            LinqCompiler nested = s_CompilerPool.Get();
+            nested.parameters.Clear();
+            nested.parameters.AddRange(parameters);
+            
+            returnType = retnType ?? typeof(void);
+            nested.SetImplicitContext(implicitContext, ParameterFlags.NeverNull);
+            nested.parent = this;
+            nested.id = GetNextCompilerId();
+            nested.labelStack.array[0] = Expression.Label("retn_" + nested.id);
+            return nested;
+        }
+        
         private Expression VisitNew(NewExpressionNode newNode) {
             TypeLookup typeLookup = newNode.typeLookup;
 
@@ -2519,7 +2552,7 @@ namespace UIForia.Compilers {
         public void EndIsolatedSection() {
             AddStatement(Expression.Label(labelStack.Pop()));
         }
-        
+
         public LabelTarget GetReturnLabel() {
             return labelStack.PeekAtUnchecked(0);
         }
@@ -2527,8 +2560,7 @@ namespace UIForia.Compilers {
         private static readonly MethodInfo s_Comment = typeof(ExpressionUtil).GetMethod(nameof(ExpressionUtil.Comment), BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);
         private static readonly MethodInfo s_CommentNewLineBefore = typeof(ExpressionUtil).GetMethod(nameof(ExpressionUtil.CommentNewLineBefore), BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);
         private static readonly MethodInfo s_CommentNewLineAfter = typeof(ExpressionUtil).GetMethod(nameof(ExpressionUtil.CommentNewLineAfter), BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);
-        
-        private bool outputComments = true;
+
 
         public void Comment(string comment) {
             if (outputComments) {
@@ -2541,13 +2573,37 @@ namespace UIForia.Compilers {
                 AddStatement(Expression.Call(s_CommentNewLineBefore, Expression.Constant(comment)));
             }
         }
-        
+
         public void CommentNewLineAfter(string comment) {
             if (outputComments) {
                 AddStatement(Expression.Call(s_CommentNewLineAfter, Expression.Constant(comment)));
             }
         }
+
         
+        public void CallStatic(MethodInfo methodName) {
+            RawExpression(Expression.Call(null, methodName));
+        }
+        
+        
+        public void CallStatic(MethodInfo methodName, Expression p0) {
+            RawExpression(Expression.Call(null, methodName, p0));
+        }
+        
+        
+        public void CallStatic(MethodInfo methodName, Expression p0, Expression p1) {
+            RawExpression(Expression.Call(null, methodName, p0, p1));
+        }
+        
+        
+        public void CallStatic(MethodInfo methodName, Expression p0, Expression p1, Expression p2) {
+            RawExpression(Expression.Call(null, methodName, p0, p1, p2));
+        }
+
+        public void Release() {
+            s_CompilerPool.Release(this);
+        }
+
     }
 
     public struct Parameter<T> {

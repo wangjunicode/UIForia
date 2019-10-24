@@ -979,6 +979,8 @@ namespace Mono.Linq.Expressions {
         private static MethodInfo s_CommentNewLineBefore = typeof(ExpressionUtil).GetMethod(nameof(ExpressionUtil.CommentNewLineBefore), BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);
         private static MethodInfo s_CommentNewLineAfter = typeof(ExpressionUtil).GetMethod(nameof(ExpressionUtil.CommentNewLineAfter), BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);
 
+        private static MethodInfo s_SubscribeEvent = typeof(TemplateCompiler2.EventUtil).GetMethod("Subscribe");
+        
         protected override Expression VisitMethodCall(MethodCallExpression node) {
             MethodInfo method = node.Method;
 
@@ -1005,6 +1007,16 @@ namespace Mono.Linq.Expressions {
                 lastWasComment = true;
                 return null;
             }
+//            else if (method == s_SubscribeEvent) {
+//                // when generating code we can use the event subscription syntax (evt += xxx) 
+//                // however when using Linq we don't have access to this and must use reflection
+//                // this branch catches event subscriptions and rewrites it to use a proper non reflection syntax.
+//                string targetName = ((ParameterExpression) node.Arguments[0]).Name;
+//                string eventName = ((ConstantExpression) node.Arguments[1]).Value.ToString();
+//                string handlerName = ((ParameterExpression) node.Arguments[2]).Name;
+//                WriteToken($"{targetName}.{eventName} += {handlerName}");
+//                return null;
+//            }
             
             if (node.Object != null) {
                 Visit(node.Object);

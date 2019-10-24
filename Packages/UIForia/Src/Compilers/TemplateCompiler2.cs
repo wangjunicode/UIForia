@@ -18,14 +18,12 @@ namespace UIForia.Compilers {
 
     public class TemplateCompiler2 {
 
-        private LinqCompiler linqCompiler;
-        private LinqPropertyCompiler propertyCompiler;
-        private Dictionary<Type, CompiledTemplate> templateMap;
-        private LightStack<Type> compilationStack;
-        private XMLTemplateParser xmlTemplateParser;
+        private readonly Dictionary<Type, CompiledTemplate> templateMap;
+        private readonly LightStack<Type> compilationStack;
+        private readonly XMLTemplateParser xmlTemplateParser;
+        private readonly LinqCompiler bindingCompiler = new LinqCompiler();
 
         private TemplateSettings settings;
-
 
         private static readonly MethodInfo s_CreateFromPool = typeof(Application).GetMethod(nameof(Application.CreateElementFromPoolWithType));
         private static readonly MethodInfo s_BindingNodePool_Get = typeof(LinqBindingNode).GetMethod("Get", BindingFlags.Static | BindingFlags.Public);
@@ -70,7 +68,6 @@ namespace UIForia.Compilers {
         public TemplateCompiler2(TemplateSettings settings) {
             this.settings = settings;
             this.linqCompiler = new LinqCompiler();
-            this.propertyCompiler = new LinqPropertyCompiler(linqCompiler);
             this.templateMap = new Dictionary<Type, CompiledTemplate>();
             this.compilationStack = new LightStack<Type>();
             this.xmlTemplateParser = new XMLTemplateParser();
@@ -418,7 +415,126 @@ namespace UIForia.Compilers {
             }
         }
 
-        private readonly LinqCompiler bindingCompiler = new LinqCompiler();
+        private void CompileEventBinding(TemplateNode templateNode, in AttributeDefinition2 attr, EventInfo eventInfo) {
+            bool hasReturnType = false;
+            Type type = GetProxyTypeForEvent(eventInfo, out hasReturnType);
+
+            Type[] eventHandlerTypes = eventInfo.EventHandlerType.GetGenericArguments();
+
+            if (type.IsGenericTypeDefinition) {
+                type = ReflectionUtil.CreateGenericType(type, eventHandlerTypes);
+            }
+
+            Type returnType = hasReturnType ? eventHandlerTypes[eventHandlerTypes.Length - 1] : null;
+
+            int parameterCount = eventHandlerTypes.Length;
+            
+            if (hasReturnType) {
+                parameterCount--;
+            }
+            
+            LightList<Parameter> parameters = LightList<Parameter>.Get();
+            IEnumerable<AliasGenericParameterAttribute> attrNameAliases = eventInfo.GetCustomAttributes<AliasGenericParameterAttribute>();
+            
+            for (int i = 0; i < parameterCount; i++) {
+                string argName = "arg" + i;
+                foreach(AliasGenericParameterAttribute a in attrNameAliases){
+                    if (a.parameterIndex == i) {
+                        argName = a.aliasName;
+                        break;
+                    }
+                }
+                parameters.Add(new Parameter(eventHandlerTypes[i], argName));
+            }
+            
+            LinqCompiler compiler = bindingCompiler.CreateClosure(parameters, returnType);
+            LightList<Parameter>.Release(ref parameters);
+
+            compiler.Statement(attr.value);
+
+            LambdaExpression lambda = compiler.BuildLambda();
+            ParameterExpression evtFn = bindingCompiler.AddVariable(lambda.Type, "evtFn");
+            bindingCompiler.Assign(evtFn, lambda);
+            
+            bindingCompiler.CallStatic(s_EventUtil_Subscribe, bindingCompiler.GetVariable("__castElement"), Expression.Constant(attr.key), evtFn);
+            compiler.Release();
+            
+        }
+        
+        private static readonly MethodInfo s_EventUtil_Subscribe = typeof(EventUtil).GetMethod("Subscribe");
+
+        public static class EventUtil {
+
+            public static void Subscribe(object target, string eventName, Delegate handler) {
+                target.GetType().GetEvent(eventName).AddEventHandler(target, handler);
+            }
+
+        }
+
+        private Type GetProxyTypeForEvent(EventInfo eventInfo, out bool hasReturnType) {
+            Type handlerType = eventInfo.EventHandlerType;
+
+            Type[] args = handlerType.GetGenericArguments();
+
+            if (ReflectionUtil.IsAction(handlerType)) {
+                hasReturnType = false;
+
+                switch (args.Length) {
+                    case 0:
+                        return typeof(EventProxy_Action);
+                    case 1:
+                        return typeof(EventProxy_Action<>);
+                    case 2:
+                        return typeof(EventProxy_Action<,>);
+                    case 3:
+                        return typeof(EventProxy_Action<,,>);
+                    case 4:
+                        return typeof(EventProxy_Action<,,,>);
+                    case 5:
+                        return typeof(EventProxy_Action<,,,,>);
+                    case 6:
+                        return typeof(EventProxy_Action<,,,,>);
+                    case 7:
+                        return typeof(EventProxy_Action<,,,,,>);
+                    case 8:
+                        return typeof(EventProxy_Action<,,,,,,>);
+                    default:
+                        throw new CompileException("Cannot handle event subscription for more than 8 arguments, are you crazy!?");
+                }
+            }
+            else if (ReflectionUtil.IsFunc(handlerType)) {
+                // todo -- not sure how non Func delegates are handled maybe validate input is actually a func type
+
+                hasReturnType = true;
+                switch (args.Length) {
+                    case 1:
+                        return typeof(EventProxy_Func<>);
+                    case 2:
+                        return typeof(EventProxy_Func<,>);
+                    case 3:
+                        return typeof(EventProxy_Func<,,>);
+                    case 4:
+                        return typeof(EventProxy_Func<,,,>);
+                    case 5:
+                        return typeof(EventProxy_Func<,,,,>);
+                    case 6:
+                        return typeof(EventProxy_Func<,,,,>);
+                    case 7:
+                        return typeof(EventProxy_Func<,,,,,>);
+                    case 8:
+                        return typeof(EventProxy_Func<,,,,,,>);
+                    default:
+                        throw new CompileException("Cannot handle event subscription for more than 8 arguments, are you crazy!?");
+                }
+            }
+
+            hasReturnType = false;
+            return null;
+        }
+
+        // need a destroy binding to unsubscribe proxy
+        // if element.flags & HasEventProxies
+        // GetProxies(element).Foreach(() => remove());
 
         private void OutputBindings(CompilationContext ctx, TemplateNode templateNode) {
             // todo -- handle nested access <Element thing.value.x="144f" keydown="" key-filter:keydown.keyup.withfocus="[allDown(shift, c, k), NoneOf()]"/>
@@ -449,24 +565,22 @@ namespace UIForia.Compilers {
 
                 for (int i = 0; i < templateNode.attributes.size; i++) {
                     AttributeDefinition2 attr = templateNode.attributes.array[i];
-                    
+
                     if (attr.type == AttributeType.Property && (attr.flags & AttributeFlags.Const) != 0) {
                         binding = binding ?? templateData.AddBinding(templateNode);
                         CompilePropertyBinding(templateNode, attr);
                     }
 
                     if (ReflectionUtil.IsEvent(templateNode.ElementType, attr.key, out EventInfo eventInfo)) {
-                        
+                        CompileEventBinding(templateNode, attr, eventInfo);
                     }
-                    
                 }
 
                 if (binding != null) {
                     binding.bindingFn = bindingCompiler.BuildLambda();
                 }
-                
+
                 // LinqBindingNode.Get(scope.application, targetElement_1, enabledBindingId, updateBindingId, onceBindingId);
-                
             }
 
             {
@@ -487,52 +601,59 @@ namespace UIForia.Compilers {
                     new Parameter(templateNode.RootType, "__castRoot", ParameterFlags.NeverNull), Expression.Convert(bindingCompiler.GetParameter("__root"), templateNode.RootType)
                 );
 
-                for (int i = 0; i < templateNode.attributes.size; i++) {
-                    ref AttributeDefinition2 attributeDefinition = ref templateNode.attributes.array[i];
+                if (false) {
+                    for (int i = 0; i < templateNode.attributes.size; i++) {
+                        ref AttributeDefinition2 attributeDefinition = ref templateNode.attributes.array[i];
 
-                    if (attributeDefinition.type == AttributeType.Conditional) {
-                        try {
-                            bindingCompiler.BeginIsolatedSection();
+                        // todo remove
+                        if (ReflectionUtil.IsEvent(templateNode.ElementType, attributeDefinition.key, out EventInfo eventInfo)) {
+                            continue;
+                        }
+
+                        if (attributeDefinition.type == AttributeType.Conditional) {
+                            try {
+                                bindingCompiler.BeginIsolatedSection();
+                                if ((attributeDefinition.flags & AttributeFlags.RootContext) != 0) {
+                                    bindingCompiler.SetImplicitContext(bindingCompiler.GetVariable("__castElement"));
+                                }
+                                else {
+                                    bindingCompiler.SetImplicitContext(castRoot);
+                                }
+
+                                bindingCompiler.Statement($"__castElement.SetEnabled({attributeDefinition.value})");
+                                bindingCompiler.CommentNewLineBefore($"if=\"{attributeDefinition.value}\"");
+                                bindingCompiler.IfEqual(Expression.MakeMemberAccess(castElement, s_Element_IsEnabled), Expression.Constant(false), () => { bindingCompiler.RawExpression(Expression.Goto(bindingCompiler.GetReturnLabel())); });
+                            }
+                            catch (Exception e) {
+                                bindingCompiler.EndIsolatedSection();
+                                Debug.LogError(e);
+                            }
+
+                            bindingCompiler.EndIsolatedSection();
+                            break; // cannot have more than 1 conditional
+                        }
+                    }
+
+                    for (int i = 0; i < templateNode.attributes.size; i++) {
+                        AttributeDefinition2 attributeDefinition = templateNode.attributes.array[i];
+
+                        if (attributeDefinition.type == AttributeType.Attribute && (attributeDefinition.flags & AttributeFlags.Const) == 0) {
+                            // __castElement.SetAttribute("attribute-name", computedValue);
+                            bindingCompiler.CommentNewLineBefore($"{attributeDefinition.key}=\"{attributeDefinition.value}\"");
                             if ((attributeDefinition.flags & AttributeFlags.RootContext) != 0) {
-                                bindingCompiler.SetImplicitContext(bindingCompiler.GetVariable("__castElement"));
+                                bindingCompiler.SetImplicitContext(castElement);
                             }
                             else {
                                 bindingCompiler.SetImplicitContext(castRoot);
                             }
 
-                            bindingCompiler.Statement($"__castElement.SetEnabled({attributeDefinition.value})");
-                            bindingCompiler.CommentNewLineBefore($"if=\"{attributeDefinition.value}\"");
-                            bindingCompiler.IfEqual(Expression.MakeMemberAccess(castElement, s_Element_IsEnabled), Expression.Constant(false), () => { bindingCompiler.RawExpression(Expression.Goto(bindingCompiler.GetReturnLabel())); });
-                        }
-                        catch (Exception e) {
-                            bindingCompiler.EndIsolatedSection();
-                            Debug.LogError(e);
+                            bindingCompiler.Statement($"__castElement.SetAttribute('{attributeDefinition.key}', {attributeDefinition.StrippedValue})");
+                            continue;
                         }
 
-                        bindingCompiler.EndIsolatedSection();
-                        break; // cannot have more than 1 conditional
-                    }
-                }
-
-                for (int i = 0; i < templateNode.attributes.size; i++) {
-                    AttributeDefinition2 attributeDefinition = templateNode.attributes.array[i];
-
-                    if (attributeDefinition.type == AttributeType.Attribute && (attributeDefinition.flags & AttributeFlags.Const) == 0) {
-                        // __castElement.SetAttribute("attribute-name", computedValue);
-                        bindingCompiler.CommentNewLineBefore($"{attributeDefinition.key}=\"{attributeDefinition.value}\"");
-                        if ((attributeDefinition.flags & AttributeFlags.RootContext) != 0) {
-                            bindingCompiler.SetImplicitContext(castElement);
+                        if (attributeDefinition.type == AttributeType.Property && (attributeDefinition.flags & AttributeFlags.Const) == 0) {
+                            CompilePropertyBinding(templateNode, attributeDefinition);
                         }
-                        else {
-                            bindingCompiler.SetImplicitContext(castRoot);
-                        }
-
-                        bindingCompiler.Statement($"__castElement.SetAttribute('{attributeDefinition.key}', {attributeDefinition.StrippedValue})");
-                        continue;
-                    }
-
-                    if (attributeDefinition.type == AttributeType.Property && (attributeDefinition.flags & AttributeFlags.Const) == 0) {
-                        CompilePropertyBinding(templateNode, attributeDefinition);
                     }
                 }
 
@@ -770,6 +891,17 @@ namespace UIForia.Compilers {
             templateNode.attributes = mergedAttributes;
         }
 
+    }
+
+    public class AliasGenericParameterAttribute : Attribute {
+
+        public string aliasName;
+        public int parameterIndex;
+
+        public AliasGenericParameterAttribute(int index, string aliasName) {
+            this.parameterIndex = index;
+            this.aliasName = aliasName;
+        }
     }
 
 }

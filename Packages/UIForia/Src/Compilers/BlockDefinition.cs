@@ -92,6 +92,22 @@ namespace UIForia.Compilers {
             return variables[variables.size - 1].expression;
         }
 
+        public bool TryGetUserVariable(Expression expression, out Parameter parameter) {
+            for (int i = 0; i < variables.size; i++) {
+                if (variables[i].expression == expression) {
+                    parameter = variables[i];
+                    return true;
+                }
+            }
+
+            if (parent != null) {
+                return TryGetUserVariable(expression, out parameter);
+            }
+
+            parameter = default;
+            return false;
+        }
+
     }
 
 }

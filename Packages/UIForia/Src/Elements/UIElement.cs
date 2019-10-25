@@ -229,7 +229,7 @@ namespace UIForia.Elements {
 
         public void TriggerEvent(UIEvent evt) {
             evt.origin = this;
-            UIElement ptr = this.parent;
+            UIElement ptr = this;
             while (evt.IsPropagating() && ptr != null) {
                 ptr.HandleUIEvent(evt);
                 ptr = ptr.parent;

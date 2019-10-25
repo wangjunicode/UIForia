@@ -73,8 +73,11 @@ fixed4 UIForiaAlphaClipColor(fixed4 color, sampler2D clipTexture, float2 screenU
     y = Map(y, 0, 1, clipUvs.y, clipUvs.w);
 
     // y comes in [0 - 1], need to sample with [1, 0]
-    fixed a = tex2Dlod(clipTexture, float4(x, 1 - y, 0, 0))[(int)clipData.z]; // z is the channel the target mask is on
-    retn = lerp(retn, fixed4(retn.rgb, lerp(color.a, a, 1 - a)), a < 1 && color.a > 0 && (clipUvs.z + clipUvs.w) != 0);
+    // todo -- this is the nested clipping feature using complex shapes. currently not working, probably 
+    // the data input is wrong for non text things. text works but this might be a bug in that the wrong
+    // data gets pushed into the clipData vector
+   // fixed a = tex2Dlod(clipTexture, float4(x, 1 - y, 0, 0))[(int)clipData.z]; // z is the channel the target mask is on
+   // retn = lerp(retn, fixed4(retn.rgb, lerp(color.a, a, 1 - a)), a < 1 && color.a > 0 && (clipUvs.z + clipUvs.w) != 0);
     retn = lerp(retn, fixed4(0, 0, 0, 0), (s.x * s.y) == 0);     
     return retn;
 }

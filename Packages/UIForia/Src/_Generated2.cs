@@ -1556,6 +1556,12 @@ case "visibility":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_float("TextOutlineWidth", UIForia.Rendering.StylePropertyId.TextOutlineWidth, targetState.state, Compile<float>(value, null));                
                 case "textoutlinecolor":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_Color("TextOutlineColor", UIForia.Rendering.StylePropertyId.TextOutlineColor, targetState.state, Compile<UnityEngine.Color>(value, colorSources));                
+                case "caretcolor":
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_Color("CaretColor", UIForia.Rendering.StylePropertyId.CaretColor, targetState.state, Compile<UnityEngine.Color>(value, colorSources));                
+                case "selectionbackgroundcolor":
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_Color("SelectionBackgroundColor", UIForia.Rendering.StylePropertyId.SelectionBackgroundColor, targetState.state, Compile<UnityEngine.Color>(value, colorSources));                
+                case "selectiontextcolor":
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_Color("SelectionTextColor", UIForia.Rendering.StylePropertyId.SelectionTextColor, targetState.state, Compile<UnityEngine.Color>(value, colorSources));                
                 case "textoutlinesoftness":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_float("TextOutlineSoftness", UIForia.Rendering.StylePropertyId.TextOutlineSoftness, targetState.state, Compile<float>(value, null));                
                 case "textglowcolor":

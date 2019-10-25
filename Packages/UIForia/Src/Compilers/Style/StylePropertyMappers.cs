@@ -8,7 +8,6 @@ using UIForia.Parsing.Style.AstNodes;
 using UIForia.Rendering;
 using UIForia.Text;
 using UIForia.Util;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using FontStyle = UIForia.Text.FontStyle;
 using TextAlignment = UIForia.Text.TextAlignment;
@@ -178,6 +177,9 @@ namespace UIForia.Compilers.Style {
 
                 // Text
                 {"textcolor", (targetStyle, property, context) => targetStyle.TextColor = MapColor(property, context)},
+                {"caretcolor", (targetStyle, property, context) => targetStyle.CaretColor = MapColor(property, context)},
+                {"selectionbackgroundcolor", (targetStyle, property, context) => targetStyle.SelectionBackgroundColor = MapColor(property, context)},
+                {"selectiontextcolor", (targetStyle, property, context) => targetStyle.SelectionTextColor = MapColor(property, context)},
                 {"textfontasset", (targetStyle, property, context) => targetStyle.TextFontAsset = MapFont(property.children[0], context)},
                 {"textfontstyle", (targetStyle, property, context) => targetStyle.TextFontStyle = MapTextFontStyle(property, context)},
                 {"textfontsize", (targetStyle, property, context) => targetStyle.TextFontSize = MapFixedLength(property.children[0], context)},

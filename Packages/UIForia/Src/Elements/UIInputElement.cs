@@ -4,7 +4,6 @@ using System.Text;
 using JetBrains.Annotations;
 using UIForia.Attributes;
 using UIForia.Rendering;
-using UIForia.Systems;
 using UIForia.Text;
 using UIForia.UIInput;
 using UnityEngine;
@@ -356,7 +355,7 @@ namespace UIForia.Elements {
 
                 if (!inputElement.isSelecting && inputElement.hasFocus && blinkState) {
                     path.BeginPath();
-                    path.SetStroke(inputElement.caretColor);
+                    path.SetStroke(inputElement.style.CaretColor);
                     path.SetStrokeWidth(1f);
                     Vector2 p = textInfo.GetCursorPosition(inputElement.selectionRange.cursorIndex) - inputElement.textScroll;
                     path.MoveTo(inputElement.layoutResult.ContentRect.min + p);
@@ -368,7 +367,7 @@ namespace UIForia.Elements {
                 if (inputElement.selectionRange.HasSelection) {
                     RangeInt lineRange = new RangeInt(0, 1); //textInfo.GetLineRange(selectionRange));textInfo.GetLineRange(selectionRange);
                     path.BeginPath();
-                    path.SetFill(new Color32(184, 255, 255,  255));
+                    path.SetFill(inputElement.style.SelectionBackgroundColor);
     
                     if (lineRange.length > 1) {
                         // todo this doesn't really work yet
@@ -408,7 +407,7 @@ namespace UIForia.Elements {
         private string m_placeholder;
         public string placeholder {
             get {
-                return string.IsNullOrEmpty(m_placeholder) ? "empty" : m_placeholder;
+                return string.IsNullOrEmpty(m_placeholder) ? "" : m_placeholder;
             }
             set { m_placeholder = value; }
         }
@@ -420,7 +419,6 @@ namespace UIForia.Elements {
         protected float holdDebounce = 0.05f;
         protected float timestamp;
 
-        public Color caretColor = Color.black;
         public float caretBlinkRate = 0.85f;
         protected float blinkStartTime;
 

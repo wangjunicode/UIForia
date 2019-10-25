@@ -649,6 +649,27 @@ namespace UIForia.Rendering {
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.TextOutlineColor, value), state); }
         }
         
+        public UnityEngine.Color CaretColor {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.CaretColor, state).AsColor; }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.CaretColor, value), state); }
+        }
+        
+        public UnityEngine.Color SelectionBackgroundColor {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.SelectionBackgroundColor, state).AsColor; }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.SelectionBackgroundColor, value), state); }
+        }
+        
+        public UnityEngine.Color SelectionTextColor {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.SelectionTextColor, state).AsColor; }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.SelectionTextColor, value), state); }
+        }
+        
         public float TextOutlineSoftness {
             [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.TextOutlineSoftness, state).AsFloat; }
@@ -1618,6 +1639,27 @@ namespace UIForia.Rendering {
             get { return FindColorProperty(StylePropertyId.TextOutlineColor); }
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.TextOutlineColor, value)); }
+        }
+            
+        public UnityEngine.Color CaretColor {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return FindColorProperty(StylePropertyId.CaretColor); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.CaretColor, value)); }
+        }
+            
+        public UnityEngine.Color SelectionBackgroundColor {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return FindColorProperty(StylePropertyId.SelectionBackgroundColor); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.SelectionBackgroundColor, value)); }
+        }
+            
+        public UnityEngine.Color SelectionTextColor {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return FindColorProperty(StylePropertyId.SelectionTextColor); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.SelectionTextColor, value)); }
         }
             
         public float TextOutlineSoftness {
@@ -2785,6 +2827,36 @@ namespace UIForia.Rendering {
                     if (propertyMap.TryGetValue((int) StylePropertyId.TextOutlineColor, out property)) return property.AsColor;
                     if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.TextOutlineColor), out property)) return property.AsColor;
                     return DefaultStyleValues_Generated.TextOutlineColor;
+                }
+            }
+
+            public UnityEngine.Color CaretColor { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.CaretColor, out property)) return property.AsColor;
+                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.CaretColor), out property)) return property.AsColor;
+                    return DefaultStyleValues_Generated.CaretColor;
+                }
+            }
+
+            public UnityEngine.Color SelectionBackgroundColor { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.SelectionBackgroundColor, out property)) return property.AsColor;
+                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.SelectionBackgroundColor), out property)) return property.AsColor;
+                    return DefaultStyleValues_Generated.SelectionBackgroundColor;
+                }
+            }
+
+            public UnityEngine.Color SelectionTextColor { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.SelectionTextColor, out property)) return property.AsColor;
+                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.SelectionTextColor), out property)) return property.AsColor;
+                    return DefaultStyleValues_Generated.SelectionTextColor;
                 }
             }
 
@@ -3956,6 +4028,30 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.TextOutlineColor, state).AsColor;
         }
         
+        public void SetCaretColor(in UnityEngine.Color? value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.CaretColor, value), state);
+        }
+
+        public UnityEngine.Color GetCaretColor(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.CaretColor, state).AsColor;
+        }
+        
+        public void SetSelectionBackgroundColor(in UnityEngine.Color? value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.SelectionBackgroundColor, value), state);
+        }
+
+        public UnityEngine.Color GetSelectionBackgroundColor(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.SelectionBackgroundColor, state).AsColor;
+        }
+        
+        public void SetSelectionTextColor(in UnityEngine.Color? value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.SelectionTextColor, value), state);
+        }
+
+        public UnityEngine.Color GetSelectionTextColor(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.SelectionTextColor, state).AsColor;
+        }
+        
         public void SetTextOutlineSoftness(in float? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.TextOutlineSoftness, value), state);
         }
@@ -4511,6 +4607,12 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.TextOutlineWidth, TextOutlineWidth);
 				case StylePropertyId.TextOutlineColor:
 					 return new StyleProperty(StylePropertyId.TextOutlineColor, TextOutlineColor);
+				case StylePropertyId.CaretColor:
+					 return new StyleProperty(StylePropertyId.CaretColor, CaretColor);
+				case StylePropertyId.SelectionBackgroundColor:
+					 return new StyleProperty(StylePropertyId.SelectionBackgroundColor, SelectionBackgroundColor);
+				case StylePropertyId.SelectionTextColor:
+					 return new StyleProperty(StylePropertyId.SelectionTextColor, SelectionTextColor);
 				case StylePropertyId.TextOutlineSoftness:
 					 return new StyleProperty(StylePropertyId.TextOutlineSoftness, TextOutlineSoftness);
 				case StylePropertyId.TextGlowColor:
@@ -4672,6 +4774,9 @@ namespace UIForia.Rendering {
                     case StylePropertyId.TextFontSize: return true;
                     case StylePropertyId.TextOutlineWidth: return true;
                     case StylePropertyId.TextOutlineColor: return true;
+                    case StylePropertyId.CaretColor: return true;
+                    case StylePropertyId.SelectionBackgroundColor: return true;
+                    case StylePropertyId.SelectionTextColor: return true;
                     case StylePropertyId.TextOutlineSoftness: return true;
                     case StylePropertyId.TextGlowColor: return true;
                     case StylePropertyId.TextGlowOffset: return true;
@@ -4728,6 +4833,9 @@ namespace UIForia.Rendering {
                     case StylePropertyId.TextAlignment: return true;
                     case StylePropertyId.TextOutlineWidth: return true;
                     case StylePropertyId.TextOutlineColor: return true;
+                    case StylePropertyId.CaretColor: return true;
+                    case StylePropertyId.SelectionBackgroundColor: return true;
+                    case StylePropertyId.SelectionTextColor: return true;
                     case StylePropertyId.TextOutlineSoftness: return true;
                     case StylePropertyId.TextGlowColor: return true;
                     case StylePropertyId.TextGlowOffset: return true;

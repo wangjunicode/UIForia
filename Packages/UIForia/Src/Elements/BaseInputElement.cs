@@ -20,6 +20,9 @@ namespace UIForia.Elements {
             if (disabled) {
                 SetAttribute("disabled", "true");
             }
+            else {
+                SetAttribute("disabled", null);
+            }
         }
 
     }

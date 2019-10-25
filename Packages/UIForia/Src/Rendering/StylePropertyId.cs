@@ -109,6 +109,9 @@ namespace UIForia.Rendering {
         TextWhitespaceMode = 1020,
         TextFaceDilate = 1021,
         TextOutlineSoftness = 1022,
+        CaretColor = 1023,
+        SelectionBackgroundColor = 1024,
+        SelectionTextColor = 1025,
         __TextPropertyEnd__ = 1099,
 
         MinWidth = 1100,

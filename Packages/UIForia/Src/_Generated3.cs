@@ -106,6 +106,9 @@ namespace UIForia.Rendering {
 		public const TextAlignment TextAlignment = UIForia.Text.TextAlignment.Left;
 		public const float TextOutlineWidth = 0f;
 		public static readonly Color TextOutlineColor = new Color(0f, 0f, 0f, 1f);
+		public static readonly Color CaretColor = new Color(0f, 0f, 0f, 1f);
+		public static readonly Color SelectionBackgroundColor = new Color(0.7215686f, 1f, 1f, 1f);
+		public static readonly Color SelectionTextColor = new Color(0f, 0f, 0f, 1f);
 		public const float TextOutlineSoftness = 0f;
 		public static readonly Color TextGlowColor = new Color(-1f, -1f, -1f, -1f);
 		public const float TextGlowOffset = 0f;
@@ -339,6 +342,12 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.TextOutlineWidth, 0f);
 				case StylePropertyId.TextOutlineColor:
 					 return new StyleProperty(StylePropertyId.TextOutlineColor, new Color(0f, 0f, 0f, 1f));
+				case StylePropertyId.CaretColor:
+					 return new StyleProperty(StylePropertyId.CaretColor, new Color(0f, 0f, 0f, 1f));
+				case StylePropertyId.SelectionBackgroundColor:
+					 return new StyleProperty(StylePropertyId.SelectionBackgroundColor, new Color(0.7215686f, 1f, 1f, 1f));
+				case StylePropertyId.SelectionTextColor:
+					 return new StyleProperty(StylePropertyId.SelectionTextColor, new Color(0f, 0f, 0f, 1f));
 				case StylePropertyId.TextOutlineSoftness:
 					 return new StyleProperty(StylePropertyId.TextOutlineSoftness, 0f);
 				case StylePropertyId.TextGlowColor:

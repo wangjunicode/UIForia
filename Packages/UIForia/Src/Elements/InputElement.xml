@@ -10,7 +10,7 @@
             BorderColor = black;
             BackgroundColor = white;
             Padding = 4px 8px;
-            PreferredWidth = 500px;
+            PreferredWidth = 1cnt;
             TextFontSize = 1.2em;
             MarginBottom = 10px;
             Overflow = Hidden;
@@ -18,7 +18,7 @@
         }
 
         style input-element-text {
-            LayoutFitHorizontal = Fill;
+            
             TextWhitespaceMode = NoWrap;
             MinHeight = 1.2em;
             AlignY = 50% ParentContentArea;

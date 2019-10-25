@@ -14,12 +14,6 @@ using Debug = UnityEngine.Debug;
 
 namespace UIForia.Compilers {
 
-    public interface ILinqAliasResolver {
-
-        Expression Resolve(string aliasName, LinqCompiler compiler);
-
-    }
-
     public class LinqCompiler {
 
         // todo -- event / delegate subscription
@@ -56,16 +50,8 @@ namespace UIForia.Compilers {
         private int blockIdGen;
         private int subCompilerId;
         private int id;
-
-        private struct AliasResolver {
-
-            public string aliasName;
-            public ILinqAliasResolver resolver;
-
-        }
-
+        public Func<string, LinqCompiler, Expression> resolveAlias;
         private Action<LinqCompiler, Expression> nullCheckHandler;
-        private StructStack<AliasResolver> aliasResolvers;
 
         public LinqCompiler() {
             this.parameters = new StructList<Parameter>();
@@ -76,22 +62,6 @@ namespace UIForia.Compilers {
             this.labelStack = new LightStack<LabelTarget>();
             labelStack.Push(Expression.Label("retn"));
             PushBlock();
-        }
-
-        public void PushAliasResolver(string aliasName, ILinqAliasResolver resolver) {
-            aliasResolvers = aliasResolvers ?? new StructStack<AliasResolver>();
-            aliasResolvers.Push(new AliasResolver() {
-                aliasName = aliasName[0] == '$' ? aliasName : '$' + aliasName,
-                resolver = resolver
-            });
-        }
-
-        public void PopAliasResolver() {
-            if (aliasResolvers == null || aliasResolvers.size == 0) {
-                return;
-            }
-
-            aliasResolvers.Pop();
         }
 
         private BlockDefinition2 currentBlock {
@@ -416,10 +386,13 @@ namespace UIForia.Compilers {
             Return(ExpressionParser.Parse(input));
         }
 
+        public Expression Value(string input) {
+            return Visit(ExpressionParser.Parse(input));
+        }
+        
         public Expression Statement(string input) {
             return AddStatement(Visit(ExpressionParser.Parse(input)));
         }
-
 
         public Expression RawExpression(Expression expression) {
             return AddStatement(expression);
@@ -507,6 +480,14 @@ namespace UIForia.Compilers {
                     currentBlock.AddStatement(Expression.Assign(assignments[i].right, assignments[i].left));
                 }
             }
+        }
+
+        public void Assign(string lhsInput, Expression right, bool checkLHSNull = true) {
+            bool wasNullChecked = shouldNullCheck;
+            SetNullCheckingEnabled(checkLHSNull);
+            LHSStatementChain left = AssignableStatement(lhsInput);
+            SetNullCheckingEnabled(wasNullChecked);
+            Assign(left, right);
         }
 
         public void Assign(string lhsInput, string rhsInput) {
@@ -1433,18 +1414,18 @@ namespace UIForia.Compilers {
             return retn;
         }
 
+
         private Expression ResolveAlias(string aliasName) {
-            if (aliasResolvers == null) {
+            if (resolveAlias == null) {
                 throw CompileException.MissingAliasResolver(aliasName);
             }
 
-            for (int i = aliasResolvers.size - 1; i >= 0; i--) {
-                if (aliasResolvers.array[i].aliasName == aliasName) {
-                    return aliasResolvers.array[i].resolver.Resolve(aliasName, this);
-                }
+            Expression retn = resolveAlias(aliasName, this);
+            if (retn == null) {
+                throw CompileException.MissingAliasResolver(aliasName);
             }
 
-            throw CompileException.MissingAliasResolver(aliasName);
+            return retn;
         }
 
         private Expression VisitAccessExpression(MemberAccessExpressionNode accessNode) {
@@ -1683,21 +1664,21 @@ namespace UIForia.Compilers {
             if (!shouldNullCheck || !head.Type.IsClass) {
                 return false;
             }
-            
+
             if (currentBlock.TryGetUserVariable(head, out Parameter p)) {
-                if((p.flags & ParameterFlags.NeverNull) != 0) {
+                if ((p.flags & ParameterFlags.NeverNull) != 0) {
                     return false;
                 }
             }
 
             if (parent != null) {
                 if (parent.currentBlock.TryGetUserVariable(head, out Parameter p0)) {
-                    if((p0.flags & ParameterFlags.NeverNull) != 0) {
+                    if ((p0.flags & ParameterFlags.NeverNull) != 0) {
                         return false;
                     }
                 }
             }
-            
+
             return !wasNullChecked.Contains(head) &&
                    (!ResolveParameter(head, out Parameter parameter) || (parameter.flags & ParameterFlags.NeverNull) == 0);
         }
@@ -2214,7 +2195,7 @@ namespace UIForia.Compilers {
             LinqCompiler nested = s_CompilerPool.Get();
             nested.parameters.Clear();
             nested.parameters.AddRange(parameters);
-            
+
             returnType = retnType ?? typeof(void);
             nested.SetImplicitContext(implicitContext, ParameterFlags.NeverNull);
             nested.parent = this;
@@ -2222,7 +2203,7 @@ namespace UIForia.Compilers {
             nested.labelStack.array[0] = Expression.Label("retn_" + nested.id);
             return nested;
         }
-        
+
         private Expression VisitNew(NewExpressionNode newNode) {
             TypeLookup typeLookup = newNode.typeLookup;
 
@@ -2580,28 +2561,41 @@ namespace UIForia.Compilers {
             }
         }
 
-        
+
         public void CallStatic(MethodInfo methodName) {
             RawExpression(Expression.Call(null, methodName));
         }
-        
-        
+
+
         public void CallStatic(MethodInfo methodName, Expression p0) {
             RawExpression(Expression.Call(null, methodName, p0));
         }
-        
-        
+
+
         public void CallStatic(MethodInfo methodName, Expression p0, Expression p1) {
             RawExpression(Expression.Call(null, methodName, p0, p1));
         }
-        
-        
+
+
         public void CallStatic(MethodInfo methodName, Expression p0, Expression p1, Expression p2) {
             RawExpression(Expression.Call(null, methodName, p0, p1, p2));
         }
 
         public void Release() {
             s_CompilerPool.Release(this);
+        }
+
+        // todo -- not the most elegant way to do this
+        public Type GetExpressionType(string expression) {
+            LinqCompiler compiler = s_CompilerPool.Get();
+            compiler.parent = this;
+            compiler.SetImplicitContext(implicitContext, ParameterFlags.NeverNull);
+            compiler.parent = this;
+            compiler.id = GetNextCompilerId();
+            compiler.labelStack.array[0] = Expression.Label("retn_" + compiler.id);
+            Expression expr = compiler.Statement(expression);
+            s_CompilerPool.Release(compiler);
+            return expr.Type;
         }
 
     }

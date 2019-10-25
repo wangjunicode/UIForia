@@ -7,6 +7,20 @@ using LinqBinding = System.Action<UIForia.Elements.UIElement, UIForia.Elements.U
 
 namespace UIForia.Systems {
 
+    public class ContextVariable {
+
+        public int id;
+        public string name;
+        public ContextVariable next;
+
+    }
+
+    public class ContextVariable<T> : ContextVariable {
+
+        public T value;
+
+    }
+
     public class LinqBindingNode {
 
         internal UIElement root;
@@ -23,8 +37,34 @@ namespace UIForia.Systems {
 
         internal TemplateContextWrapper contextWrapper;
 
+        internal ContextVariable localVariable;
+        
         public LinqBindingNode() {
             this.children = new LightList<LinqBindingNode>(4);
+        }
+
+        public void CreateLocalContextVariable(ContextVariable variable) {
+            
+        }
+
+        public ContextVariable GetContextVariable(int id) {
+            return null;
+        }
+
+        public ContextVariable GetLocalContextVariable(string variableName) {
+//            if (localVariable == null) {
+//                return default; // should never hit this since we only use this via generated code that is pre-validated
+//            }
+//
+//            ContextVariable ptr = localVariable;
+//            while (ptr != null) {
+//                if (ptr.name == variableName) {
+//                    return (T) ptr;
+//                }
+//                ptr = ptr.next;
+//            }
+
+            return default; // should never hit this
         }
 
         public void AddChild(LinqBindingNode childNode) {

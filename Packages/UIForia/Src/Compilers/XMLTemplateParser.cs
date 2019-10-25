@@ -176,6 +176,7 @@ namespace UIForia.Compilers {
                 AttributeType attributeType = AttributeType.Property;
                 AttributeFlags flags = 0;
                 
+                // todo -- not valid everywhere
                 if (name.Contains(".once")) {
                     name = name.Replace(".once", "");
                     flags |= AttributeFlags.Const;

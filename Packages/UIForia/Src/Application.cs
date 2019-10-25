@@ -67,7 +67,7 @@ namespace UIForia {
         public event Action<UIView> onViewRemoved;
 
         internal TemplateData templateData;
-        internal TemplateCompiler templateCompiler;
+        internal TemplateCompiler2 templateCompiler;
 
         protected internal readonly List<UIView> m_Views;
 
@@ -109,9 +109,8 @@ namespace UIForia {
             }
 
             s_ApplicationList.Add(this);
-
             this.templateData = new TemplateData(); // todo -- load this from elsewhere in the pre-generated case
-            this.templateCompiler = new TemplateCompiler(this);
+            this.templateCompiler = new TemplateCompiler2(default); // todo shouldn't be default
 
             this.elementPool = new ElementPool();
 
@@ -909,13 +908,14 @@ namespace UIForia {
         }
 
         internal UIElement CreateElementRoot(Type type) {
-            CompiledTemplate compiledTemplate = templateCompiler.GetCompiledTemplate(type);
-            LinqBindingNode bindingNode = new LinqBindingNode();
-            bindingNode.system = linqBindingSystem;
-            UIElement element = compiledTemplate.Create(null, new TemplateScope2(this, bindingNode, null));
-            element.bindingNode = bindingNode;
-            bindingNode.element = element;
-            return element;
+            return default;
+//            CompiledTemplate compiledTemplate = templateCompiler.GetCompiledTemplate(type);
+//            LinqBindingNode bindingNode = new LinqBindingNode();
+//            bindingNode.system = linqBindingSystem;
+//            UIElement element = compiledTemplate.Create(null, new TemplateScope2(this, bindingNode, null));
+//            element.bindingNode = bindingNode;
+//            bindingNode.element = element;
+//            return element;
         }
 
         internal UIElement CreateSlot(StructList<SlotUsage> slots, string targetSlot, LinqBindingNode bindingNode, UIElement parent, UIElement root, CompiledTemplate defaultTemplateData, int defaultTemplateId) {

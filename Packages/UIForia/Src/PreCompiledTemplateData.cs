@@ -60,7 +60,7 @@ namespace UIForia.Generated {
                 for (int b = 0; b < compiledBindings.size; b++) {
                     CompiledBinding binding = compiledBindings[b];
                     if (binding.filePath == compiledTemplate.filePath) {
-                        bindingCode += $"public Action<UIElement, UIElement> Binding_{binding.guid} = ";
+                        bindingCode += $"public Action<UIElement, UIElement> Binding_{compiledBindings.array[b].bindingType}_{binding.guid} = ";
                         bindingCode += binding.bindingFn.ToTemplateBodyFunction();
                         bindingCode += "\n";
                     }
@@ -115,7 +115,7 @@ namespace UIForia.Generated {
             builder.AppendLine($"Action<UIElement, UIElement>[] bindings = new Action<{nameof(UIElement)}, {nameof(UIElement)}>[{compiledBindings.size}];");
 
             for (int i = 0; i < compiledBindings.size; i++) {
-                builder.AppendLine($"{new string(' ', 12)}bindings[{i}] = Binding_{compiledBindings.array[i].guid};");
+                builder.AppendLine($"{new string(' ', 12)}bindings[{i}] = Binding_{compiledBindings.array[i].bindingType}_{compiledBindings.array[i].guid};");
             }
             
             builder.AppendLine($"{new string(' ', 12)}return bindings;");

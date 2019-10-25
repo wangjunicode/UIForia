@@ -109,7 +109,7 @@ namespace UIForia.Elements {
         internal FastLayoutBox layoutBox;
         internal RenderBox renderBox;
         public UIStyleSet style; // todo -- make internal with accessor
-        internal LinqBindingNode bindingNode;
+        public LinqBindingNode bindingNode; // todo -- make internal with accessor
 
         internal int depthTraversalIndex;
         internal StructList<ElementAttribute> attributes;

@@ -101,7 +101,7 @@ namespace UIForia.Compilers {
             }
 
             if (parent != null) {
-                return TryGetUserVariable(expression, out parameter);
+                return parent.TryGetUserVariable(expression, out parameter);
             }
 
             parameter = default;

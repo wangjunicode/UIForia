@@ -23,17 +23,22 @@ namespace UIForia.Compilers {
 
     }
 
+    public struct CompilationData {
+
+        public Type elementType;
+
+    }
+
     public class CompilationContext {
 
         public bool outputComments;
         public ProcessedType rootType;
         public ProcessedType elementType;
+        public CompiledTemplate compiledTemplate;
 
-        public LightStack<Expression> bindingNodeStack;
         public LightList<ParameterExpression> variables;
         public LightStack<LightList<Expression>> statementStacks;
-        public LightStack<TemplateContextDefinition> contextProviderStack;
-
+        
         public Expression rootParam;
         public Expression templateData;
         public Expression templateScope;
@@ -51,56 +56,15 @@ namespace UIForia.Compilers {
         public CompilationContext() {
             this.outputComments = true;
             this.variables = new LightList<ParameterExpression>();
-            this.bindingNodeStack = new LightStack<Expression>();
             this.statementStacks = new LightStack<LightList<Expression>>();
             this.hierarchyStack = new LightStack<ParameterExpression>();
         }
 
-        public int AllocateBindingNode() {
-            // find binding node for current depth. create it if it doesn't exist. might result in extra vars         
-            ParameterExpression bindingNode = null;
-            string targetName = "bindingNode_" + currentDepth;
-            for (int i = 0; i < variables.Count; i++) {
-                if (variables[i].Name == targetName) {
-                    bindingNode = variables[i];
-                    break;
-                }
-            }
-
-            if (bindingNode == null) {
-                bindingNode = Expression.Parameter(typeof(LinqBindingNode), targetName);
-                variables.Add(bindingNode);
-            }
-
-            return statementStacks.PeekUnchecked().size - 1;
-        }
-
-        public void RemoveStatement(int id) {
-            statementStacks.PeekUnchecked().RemoveAt(id);
-        }
-
-        public void Clear() {
-            this.currentDepth = 0;
-            this.maxDepth = 0;
-            this.applicationExpr = null;
-            this.rootParam = null;
-            this.templateData = null;
-            this.rootType = default;
-            this.elementType = default;
-            this.variables.Clear();
-            this.bindingNodeStack.Clear();
-            this.statementStacks.Clear();
-            this.hierarchyStack.Clear();
-        }
-
         public ParameterExpression ParentExpr => hierarchyStack.PeekAtUnchecked(hierarchyStack.Count - 2);
         public ParameterExpression ElementExpr => hierarchyStack.PeekUnchecked();
-        public Expression BindingNodeExpr => bindingNodeStack.PeekUnchecked();
-        public Expression ParentBindingNodeExpr => bindingNodeStack.PeekAtUnchecked(bindingNodeStack.Count - 2);
 
-        public void Initialize(ParameterExpression parent, Expression bindingNode) {
+        public void Initialize(ParameterExpression parent) {
             hierarchyStack.Push(parent);
-            bindingNodeStack.Push(bindingNode);
             PushBlock();
         }
 
@@ -160,41 +124,9 @@ namespace UIForia.Compilers {
             }
         }
 
-        public void PushBinding() {
-            currentDepth++;
-
-            string targetName = "bindingNode" + currentDepth;
-            for (int i = 0; i < variables.size; i++) {
-                if (variables[i].Type == typeof(UIElement) && variables[i].Name == targetName) {
-                    bindingNodeStack.Push(variables[i]);
-                    return;
-                }
-            }
-
-            ParameterExpression bindingNode = Expression.Parameter(typeof(LinqBindingNode), targetName);
-            variables.Add(bindingNode);
-            bindingNodeStack.Push(bindingNode);
-        }
-
-        public void PopBinding() {
-            bindingNodeStack.Pop();
-        }
-
         public void PopScope() {
             currentDepth--;
             hierarchyStack.Pop();
-        }
-
-        public ParameterExpression GetVariable(Type type, string name) {
-            for (int i = 0; i < variables.Count; i++) {
-                if (variables[i].Type == type && variables[i].Name == name) {
-                    return variables[i];
-                }
-            }
-
-            ParameterExpression variable = Expression.Parameter(type, name);
-            variables.Add(variable);
-            return variable;
         }
 
         public void PushBlock() {
@@ -219,10 +151,6 @@ namespace UIForia.Compilers {
             this.statementStacks.PeekUnchecked().Add(expression);
         }
 
-        public void Log(string value) {
-            this.statementStacks.PeekUnchecked().Add(Expression.Call(typeof(UnityEngine.Debug).GetMethod("Log", new Type[] {typeof(object)}), Expression.Constant(value)));
-        }
-
         public void Assign(Expression target, Expression value) {
             AddStatement(Expression.Assign(target, value));
         }
@@ -237,8 +165,8 @@ namespace UIForia.Compilers {
 
         private static MethodInfo s_Comment = typeof(ExpressionUtil).GetMethod(nameof(ExpressionUtil.Comment), BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);
         private static MethodInfo s_CommentNewLineBefore = typeof(ExpressionUtil).GetMethod(nameof(ExpressionUtil.CommentNewLineBefore), BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);
-        private static MethodInfo s_CommentNewLineAfter = typeof(ExpressionUtil).GetMethod(nameof(ExpressionUtil.CommentNewLineAfter), BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);        
-        
+        private static MethodInfo s_CommentNewLineAfter = typeof(ExpressionUtil).GetMethod(nameof(ExpressionUtil.CommentNewLineAfter), BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);
+
         public void Comment(string comment) {
             if (outputComments) {
                 AddStatement(Expression.Call(s_Comment, Expression.Constant(comment)));
@@ -255,6 +183,10 @@ namespace UIForia.Compilers {
             if (outputComments) {
                 AddStatement(Expression.Call(s_CommentNewLineAfter, Expression.Constant(comment)));
             }
+        }
+
+        public void PushContextVariable(string aliasName) {
+            
         }
 
     }

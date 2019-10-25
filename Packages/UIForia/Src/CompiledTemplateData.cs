@@ -29,9 +29,10 @@ namespace UIForia {
             return compiledTemplate;
         }
 
-        public CompiledBinding AddBinding(TemplateNode templateNode) {
+        public CompiledBinding AddBinding(TemplateNode templateNode, CompiledBindingType bindingType) {
             CompiledBinding binding = new CompiledBinding();
             binding.filePath = templateNode.astRoot.fileName;
+            binding.bindingType = bindingType;
             binding.elementTag = templateNode.originalString;
             binding.bindingId = compiledBindings.size;
             binding.guid = GUID.Generate().ToString();

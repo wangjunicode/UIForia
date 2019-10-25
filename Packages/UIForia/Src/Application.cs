@@ -75,6 +75,8 @@ namespace UIForia {
         public static readonly UIForiaSettings Settings;
         private ElementPool elementPool;
 
+        private Type lastKnownGoodRootElementType;
+
         static Application() {
             ArrayPool<UIElement>.SetMaxPoolSize(64);
             s_AttributeProcessors = new List<IAttributeProcessor>();
@@ -289,15 +291,22 @@ namespace UIForia {
 
         public void Refresh() {
             onWillRefresh?.Invoke();
-            
+
             // kill all but the first view
-            m_Views.Sort((v1, v2) => v1.id.CompareTo(v2.id));
-            for (int i = m_Views.Count - 1; i > 0; i--) {
-                m_Views[i].Destroy();
-            }
 
             foreach (ISystem system in m_Systems) {
                 system.OnReset();
+            }
+
+            // if the user refreshes the app with a broken template this check and the stored lastKnownGoodRootElementType will 
+            // make sure a subsequent refresh can succeed.
+            if (m_Views.Count > 0) {
+                m_Views.Sort((v1, v2) => v1.id.CompareTo(v2.id));
+                Type type = m_Views[0].RootElement.GetChild(0).GetType();
+                lastKnownGoodRootElementType = type;
+                for (int i = m_Views.Count - 1; i >= 0; i--) {
+                    m_Views[i].Destroy();
+                }
             }
 
             onReady = null;
@@ -310,9 +319,9 @@ namespace UIForia {
 
             m_AfterUpdateTaskSystem.OnReset();
             m_BeforeUpdateTaskSystem.OnReset();
-
-            m_Views[0].Initialize();
-
+            
+            CreateView("Default View", new Rect(0, 0, Width, Height), lastKnownGoodRootElementType);
+            
             onRefresh?.Invoke();
             onNextRefresh?.Invoke();
             onNextRefresh = null;
@@ -444,7 +453,7 @@ namespace UIForia {
         }
 
         public void Update() {
-            
+
             m_InputSystem.OnUpdate();
 
             m_BindingSystem.OnUpdate();
@@ -651,11 +660,12 @@ namespace UIForia {
                 return;
             }
 
-            if (element.isDisabled) {
+            bool wasDisabled = element.isDisabled;
+            element.flags &= ~(UIElementFlags.Enabled);
+            
+            if (wasDisabled) {
                 return;
             }
-
-            element.flags &= ~(UIElementFlags.Enabled);
 
             // don't really need the stack here but it should give us a properly sized array since so many systems need light stacks of elements
             LightStack<UIElement> stack = LightStack<UIElement>.Get();

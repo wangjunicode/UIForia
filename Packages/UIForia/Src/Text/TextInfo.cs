@@ -500,7 +500,10 @@ namespace UIForia.Text {
             }
 
             intrinsics.prefWidth = maxWidth;
-            intrinsics.prefHeight = lines[lines.size - 1].y + lines[lines.size - 1].height;
+            // the lines can be empty after layout if the text contains only of whitespace characters (including line breaks)
+            if (lines.size > 0) {
+                intrinsics.prefHeight = lines[lines.size - 1].y + lines[lines.size - 1].height;
+            }
 
             StructList<LineInfo>.Release(ref lines);
         }

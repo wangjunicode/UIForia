@@ -1,7 +1,5 @@
 using UIForia.Rendering;
-using Unity.Mathematics;
 using UnityEngine;
-using LineJoin = Vertigo.LineJoin;
 
 namespace UIForia.Elements {
 

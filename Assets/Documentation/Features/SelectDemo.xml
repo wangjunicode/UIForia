@@ -5,42 +5,42 @@
 
     <Contents style="select-demo-root">
 
-<!--        <Input />-->
+        <Input />
         
         
-<!--        <Repeat list="words" style="repeat">-->
-<!--            -->
-<!--            <Text>Select your favourite translation for the word: {$item}</Text>-->
-<!--            <Select&#45;&#45;string selectedValue.read.write="selectedLanguage[$index].Name" options="translations[$index]" disableOverflowX="true">-->
-<!--                <SlotContent name="select-placeholder">Select your word</SlotContent>-->
-<!--                <Group>this is a template {$option.Label}</Group>-->
-<!--    -->
-<!--            </Select&#45;&#45;string>-->
+        <Repeat list="words" style="repeat">
+            
+            <Text>Select your favourite translation for the word: {$item}</Text>
+            <Select--string selectedValue.read.write="selectedLanguage[$index].Name" options="translations[$index]" disableOverflowX="true">
+                <SlotContent name="select-placeholder">Select your word</SlotContent>
+                <Group>this is a template {$option.Label}</Group>
+    
+            </Select--string>
 
-<!--            <Group style="button" onMouseClick="ClearTranslations($index)">-->
-<!--                Reset List-->
-<!--            </Group>-->
-<!--            -->
-<!--        </Repeat>-->
-<!--        -->
+            <Group style="button" onMouseClick="ClearTranslations($index)">
+                Reset List
+            </Group>
+            
+        </Repeat>
+        
         
         <Select--string selectedValue.read.write="selectedLanguage[0].Name" options="translations[0]" disableOverflowX="true" disabled="true" />
 
-<!--        <Group style="button-group">-->
-<!--            <Group style="button" onMouseClick="ClearWords()">-->
-<!--                Clear-->
-<!--            </Group>-->
+        <Group style="button-group">
+            <Group style="button" onMouseClick="ClearWords()">
+                Clear
+            </Group>
 
-<!--            <Group style="button" onMouseClick="AddWords()">-->
-<!--                Add words-->
-<!--            </Group>-->
-<!--        </Group>-->
+            <Group style="button" onMouseClick="AddWords()">
+                Add words
+            </Group>
+        </Group>
 
-<!--        <Group style="box"></Group>-->
-<!--        <Group style="box"></Group>-->
-<!--        <Group style="box"></Group>-->
-<!--        <Group style="box"></Group>-->
-<!--        <Group style="box"></Group>-->
+        <Group style="box"></Group>
+        <Group style="box"></Group>
+        <Group style="box"></Group>
+        <Group style="box"></Group>
+        <Group style="box"></Group>
     </Contents>
 
 </UITemplate>

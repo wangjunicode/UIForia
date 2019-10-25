@@ -276,6 +276,7 @@ namespace Src.Systems {
 
                                     // if contained by resulting screen aligned rect or overlaps it, we will draw 
                                     Vector4 objectScreenBounds;
+                                    // todo -- this should handle overflow and not clip if overflow is visible but 'actual size' is not
                                     if (transform.IsTranslationOnly) {
                                         objectScreenBounds = new Vector4(p0.x, p0.y, p2.x, p2.y);
                                     }

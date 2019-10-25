@@ -155,14 +155,14 @@ namespace UIForia.Systems {
         public void FocusNext() {
             int initialIndex = focusableIndex;
             do {
-                focusableIndex = focusableIndex + 1 == focusables.Count ? 0 : focusableIndex + 1;
+                focusableIndex = focusableIndex == 0 ? focusables.Count - 1 : focusableIndex - 1;
             } while (!(RequestFocus(focusables[focusableIndex]) || focusableIndex == initialIndex));
         }
 
         public void FocusPrevious() {
             int initialIndex = focusableIndex;
             do {
-                focusableIndex = focusableIndex == 0 ? focusables.Count - 1 : focusableIndex - 1;
+                focusableIndex = focusableIndex + 1 == focusables.Count ? 0 : focusableIndex + 1;
             } while (!(RequestFocus(focusables[focusableIndex]) || focusableIndex == initialIndex));
         }
 
@@ -1015,7 +1015,7 @@ namespace UIForia.Systems {
             if (elements.Count == 0) return;
 
             m_EventPropagator.Reset(m_MouseState);
-            m_EventPropagator.origin = elements[0];
+            m_EventPropagator.origin = elements[elements.Count - 1];
             MouseInputEvent mouseEvent = new MouseInputEvent(m_EventPropagator, eventType, modifiersThisFrame);
             m_CurrentMouseEvent = mouseEvent;
 

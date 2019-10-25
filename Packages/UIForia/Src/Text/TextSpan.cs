@@ -469,6 +469,12 @@ namespace UIForia.Text {
 
                     // todo -- pull glyph & adjustments into their own struct array
                     TextGlyph glyph = charInfo.glyph;
+                    if (glyph == null) {
+                        // todo -- replace missing glyph with a question mark?
+                        Debug.Log($"Missing glyph for character '{(char)charInfo.character}' (char code {charInfo.character}) in font {fontAsset.name}");
+                        continue;
+                    }
+
                     GlyphValueRecord glyphAdjustments = charInfo.glyphAdjustment;
 
                     float currentElementScale = fontScale * fontScaleMultiplier * glyph.scale;

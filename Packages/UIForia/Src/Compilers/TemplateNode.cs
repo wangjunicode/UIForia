@@ -19,8 +19,10 @@ namespace UIForia.Compilers {
         public ProcessedType processedType;
         public string slotName;
 
-        [ThreadStatic] private static LightList<TemplateNode> s_Pool;
         public string originalString;
+        public SlotType slotType;
+        
+        [ThreadStatic] private static LightList<TemplateNode> s_Pool;
 
         public TemplateNode() {
             this.directives = new LightList<DirectiveDefinition>(4);
@@ -99,6 +101,10 @@ namespace UIForia.Compilers {
                 return TemplateNodeType.Root;
             }
 
+            if (processedType.rawType == typeof(UIChildrenElement)) {
+                return TemplateNodeType.Children;
+            }
+            
             if (processedType.rawType == typeof(UISlotDefinition)) {
                 return TemplateNodeType.SlotDefinition;
             }

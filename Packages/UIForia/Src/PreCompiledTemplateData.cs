@@ -12,6 +12,9 @@ namespace UIForia {
 
     public class PreCompiledTemplateData : CompiledTemplateData {
 
+        private static readonly string s_Indent8 = new string(' ', 8);
+        private static readonly string s_Indent12 = new string(' ', 12);
+        
         public PreCompiledTemplateData(TemplateSettings templateSettings) : base(templateSettings) { }
 
         public void LoadTemplates() {
@@ -45,24 +48,34 @@ namespace UIForia.Generated {
     public partial class UIForiaGeneratedTemplates_::APPNAME:: {
         
         public Func<UIElement, TemplateScope2, UIElement> Template_::GUID:: = ::CODE:: 
-
         ::BINDINGS::
-
+        ::SLOTS::
     }
 
 }
                 ".Trim();
 
                 string bindingCode = string.Empty;
+                string slotCode = string.Empty;
                 CompiledTemplate compiledTemplate = compiledTemplates[i];
 
                 // todo -- optimize search or sort by file name at least
                 for (int b = 0; b < compiledBindings.size; b++) {
                     CompiledBinding binding = compiledBindings[b];
                     if (binding.filePath == compiledTemplate.filePath) {
-                        bindingCode += $"public Action<UIElement, UIElement> Binding_{compiledBindings.array[b].bindingType}_{binding.guid} = ";
+                        bindingCode += $"\n{s_Indent8}public Action<UIElement, UIElement> Binding_{compiledBindings.array[b].bindingType}_{binding.guid} = ";
                         bindingCode += binding.bindingFn.ToTemplateBodyFunction();
                         bindingCode += "\n";
+                    }
+                }
+
+                // todo -- optimize search or sort by file name at least
+                for (int s = 0; s < compiledSlots.size; s++) {
+                    CompiledSlot compiledSlot = compiledSlots[s];
+                    if (compiledSlot.filePath == compiledTemplate.filePath) {
+                        slotCode += $"\n{s_Indent8}public Func<UIElement, TemplateScope2, UIElement> {compiledSlot.GetVariableName()} = ";
+                        slotCode += compiledSlot.templateFn.ToTemplateBodyFunction();
+                        slotCode += "\n";
                     }
                 }
                 
@@ -70,6 +83,7 @@ namespace UIForia.Generated {
                 template = template.Replace("::GUID::", compiledTemplates[i].guid.ToString());
                 template = template.Replace("::CODE::", templateBody);
                 template = template.Replace("::BINDINGS::", bindingCode);
+                template = template.Replace("::SLOTS::", slotCode);
                 template = template.Replace("::APPNAME::", templateSettings.applicationName);
                 File.WriteAllText(file, template);
             }
@@ -91,34 +105,48 @@ namespace UIForia.Generated {
             ::BINDING_CODE::
         }
 
+        public Func<UIElement, TemplateScope2, UIElement>[] LoadSlots() {
+            ::SLOT_CODE::
+        }
+
     }
 
 }".Trim();
 
             string arrayName = "templates";
 
-            string initCode = $"Func<UIElement, TemplateScope2, UIElement>[] {arrayName} = new Func<{nameof(UIElement)}, {nameof(TemplateScope2)}, {nameof(UIElement)}>[{compiledTemplates.size}];";
+            string initCode = $"Func<UIElement, TemplateScope2, UIElement>[] templates = new Func<{nameof(UIElement)}, {nameof(TemplateScope2)}, {nameof(UIElement)}>[{compiledTemplates.size}];";
             StringBuilder builder = new StringBuilder();
             builder.AppendLine(initCode);
 
             for (int i = 0; i < compiledTemplates.size; i++) {
-                builder.AppendLine($"{new string(' ', 12)}{arrayName}[{i}] = Template_{compiledTemplates.array[i].guid.ToString()}; // {compiledTemplates.array[i].filePath}");
+                builder.AppendLine($"{s_Indent12}templates[{i}] = Template_{compiledTemplates.array[i].guid.ToString()}; // {compiledTemplates.array[i].filePath}");
             }
 
-            builder.AppendLine($"{new string(' ', 12)}return {arrayName};");
+            builder.AppendLine($"{s_Indent12}return templates;");
 
             loadFn = loadFn.Replace("::APPNAME::", templateSettings.applicationName);
             loadFn = loadFn.Replace("::TEMPLATE_CODE::", builder.ToString());
             builder.Clear();
 
-            arrayName = "bindings";
+
+            builder.AppendLine($"Func<UIElement, TemplateScope2, UIElement>[] slots = new Func<{nameof(UIElement)}, {nameof(TemplateScope2)}, {nameof(UIElement)}>[{compiledSlots.size}];");
+            
+            for (int i = 0; i < compiledSlots.size; i++) {
+                builder.AppendLine($"{s_Indent12}slots[{i}] = {compiledSlots.array[i].GetVariableName()};");
+            }
+            
+            builder.AppendLine($"{s_Indent12}return slots;");
+            loadFn = loadFn.Replace("::SLOT_CODE::", builder.ToString());
+
+            builder.Clear();
             builder.AppendLine($"Action<UIElement, UIElement>[] bindings = new Action<{nameof(UIElement)}, {nameof(UIElement)}>[{compiledBindings.size}];");
 
             for (int i = 0; i < compiledBindings.size; i++) {
-                builder.AppendLine($"{new string(' ', 12)}bindings[{i}] = Binding_{compiledBindings.array[i].bindingType}_{compiledBindings.array[i].guid};");
+                builder.AppendLine($"{s_Indent12}bindings[{i}] = Binding_{compiledBindings.array[i].bindingType}_{compiledBindings.array[i].guid};");
             }
             
-            builder.AppendLine($"{new string(' ', 12)}return bindings;");
+            builder.AppendLine($"{s_Indent12}return bindings;");
 
             loadFn = loadFn.Replace("::BINDING_CODE::", builder.ToString());
 

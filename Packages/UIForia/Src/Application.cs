@@ -796,7 +796,7 @@ namespace UIForia {
                 ptr = ptr.parent;
             }
 
-            TemplateScope2 templateScope = new TemplateScope2(this, bindingNode, null);
+            TemplateScope2 templateScope = new TemplateScope2(this, null);
             UIElement root = elementPool.Get(template.elementType);
             root.siblingIndex = index;
 
@@ -918,34 +918,40 @@ namespace UIForia {
 //            return element;
         }
 
-        internal UIElement CreateSlot(StructList<SlotUsage> slots, string targetSlot, LinqBindingNode bindingNode, UIElement parent, UIElement root, CompiledTemplate defaultTemplateData, int defaultTemplateId) {
-            UIElement element;
-
-            // if we have no slot usages for this slot, create the default version of the slot
-            if (slots == null) {
-                element = slotUsageTemplates[defaultTemplateId].Invoke(this, bindingNode, parent, new LexicalScope(root, defaultTemplateData, null));
-                element.View = parent.View;
-                element.parent = parent;
-                return element;
-            }
-
-            // handle creating slot override
-            SlotUsage[] array = slots.array;
-            for (int i = 0; i < slots.size; i++) {
-                if (array[i].slotName == targetSlot) {
-                    element = slotUsageTemplates[array[i].templateId].Invoke(this, bindingNode, parent, array[i].lexicalScope);
-                    element.parent = parent;
-                    element.View = parent.View;
-                    return element;
-                }
-            }
-
-            // handle creating slot default if no match was found
-            element = slotUsageTemplates[defaultTemplateId].Invoke(this, bindingNode, parent, new LexicalScope(root, defaultTemplateData, slots));
-            element.View = parent.View;
-            element.parent = parent;
-            return element;
+        // might be the same as HydrateTemplate really but with templateId not hard coded
+        internal UIElement CreateSlot(int templateId, UIElement root, TemplateScope2 scope) {
+            // todo -- something needs to create the slot root element, either here or in the slot function
+            return null;
         }
+
+//        internal UIElement CreateSlot(StructList<SlotUsage> slots, string targetSlot, LinqBindingNode bindingNode, UIElement parent, UIElement root, CompiledTemplate defaultTemplateData, int defaultTemplateId) {
+//            UIElement element;
+//
+//            // if we have no slot usages for this slot, create the default version of the slot
+//            if (slots == null) {
+//                element = slotUsageTemplates[defaultTemplateId].Invoke(this, bindingNode, parent, new LexicalScope(root, defaultTemplateData, null));
+//                element.View = parent.View;
+//                element.parent = parent;
+//                return element;
+//            }
+//
+//            // handle creating slot override
+//            SlotUsage[] array = slots.array;
+//            for (int i = 0; i < slots.size; i++) {
+//                if (array[i].slotName == targetSlot) {
+//                    element = slotUsageTemplates[array[i].templateId].Invoke(this, bindingNode, parent, array[i].lexicalScope);
+//                    element.parent = parent;
+//                    element.View = parent.View;
+//                    return element;
+//                }
+//            }
+//
+//            // handle creating slot default if no match was found
+//            element = slotUsageTemplates[defaultTemplateId].Invoke(this, bindingNode, parent, new LexicalScope(root, defaultTemplateData, slots));
+//            element.View = parent.View;
+//            element.parent = parent;
+//            return element;
+//        }
 
         // todo -- override that accepts an index into an array instead of a type, to save a dictionary lookup
         // todo -- don't create a list for every type, maybe a single pool list w/ sorting & a jump search or similar
@@ -968,6 +974,22 @@ namespace UIForia {
             return CreateElementFromPool(TypeProcessor.GetProcessedType(type), parent, childCount, attrCount);
         }
 
+        public static int ResolveSlotId(string slotName, StructList<SlotUsage> slotList, int defaultId) {
+            
+            if (slotList == null) {
+                return defaultId;
+            }
+
+            for (int i = 0; i < slotList.size; i++) {
+                if (slotList.array[i].slotName == slotName) {
+                    return slotList.array[i].slotId;
+                }
+            }
+
+            return defaultId;
+            
+        }
+        
         // Doesn't expect to create the root
         internal void HydrateTemplate(int templateId, UIElement root, TemplateScope2 scope) {
             templateData.templateFns[templateId](root, scope);

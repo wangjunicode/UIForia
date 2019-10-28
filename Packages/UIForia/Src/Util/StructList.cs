@@ -263,6 +263,12 @@ namespace UIForia.Util {
 
             return retn;
         }
+        
+        public static StructList<T> PreSize(int size) {
+            StructList<T> list = GetMinSize(size);
+            list.size = size;
+            return list;
+        }
 
         private static void SwapIfGreater(T[] keys, IComparer<T> comparer, int a, int b) {
             if (a == b || comparer.Compare(keys[a], keys[b]) <= 0)

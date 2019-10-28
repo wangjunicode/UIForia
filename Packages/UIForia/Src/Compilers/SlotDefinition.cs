@@ -1,16 +1,7 @@
 using System;
-using UIForia.Elements;
 
 namespace UIForia.Compilers {
 
-    public enum SlotType : ushort {
-
-        Element = 0,
-        Template = 1
-
-    }
-
-    
     public struct SlotDefinition {
 
         public const byte k_UnassignedParent = 255;
@@ -31,7 +22,7 @@ namespace UIForia.Compilers {
             this.parentSlotId_1 = k_UnassignedParent;
             this.parentSlotId_2 = k_UnassignedParent;
             this.parentSlotId_3 = k_UnassignedParent;
-            this.slotType = SlotType.Element;
+            this.slotType = SlotType.Override;
         }
         
         public int this[int i] {

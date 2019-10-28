@@ -137,12 +137,14 @@ namespace UIForia.Compilers {
 
             if (directives.Contains("DefineSlot")) {
                 templateNode.slotName = element.Name.LocalName;
+                templateNode.slotType = SlotType.Default;
                 templateNode.processedType = TypeProcessor.FindProcessedType(typeof(UISlotDefinition));
                 return;
             }
 
             if (directives.Contains("Slot")) {
                 templateNode.slotName = element.Name.LocalName;
+                templateNode.slotType = SlotType.Override;
                 templateNode.processedType = TypeProcessor.FindProcessedType(typeof(UISlotContent));
                 return;
             }
@@ -377,6 +379,7 @@ namespace UIForia.Compilers {
                     childrenSlotNode.parent = parent;
                     childrenSlotNode.processedType = TypeProcessor.FindProcessedType(typeof(UIChildrenElement));
                     childrenSlotNode.slotName = "Children";
+                    childrenSlotNode.slotType = SlotType.Children;
                     childrenSlotNode.directives.Add(new DirectiveDefinition("Slot"));
                     parent.children.Add(childrenSlotNode);
                 }

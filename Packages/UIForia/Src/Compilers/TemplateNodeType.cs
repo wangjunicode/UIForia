@@ -8,7 +8,7 @@ namespace UIForia.Compilers {
         TextElement,
         SlotDefinition,
         SlotContent,
-        HydrateElementWithChildren
+        Children
 
     }
 

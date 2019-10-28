@@ -2,6 +2,7 @@ using System;
 using System.Linq.Expressions;
 using System.Reflection;
 using UIForia.Elements;
+using UIForia.Exceptions;
 using UIForia.Parsing;
 using UIForia.Parsing.Expressions;
 using UIForia.Systems;
@@ -40,9 +41,7 @@ namespace UIForia.Compilers {
         public LightStack<LightList<Expression>> statementStacks;
         
         public Expression rootParam;
-        public Expression templateData;
         public Expression templateScope;
-        public Expression lexicalScope;
         public Expression applicationExpr;
         private Expression slotUsage;
         private ParameterExpression slotUsageListVar;
@@ -124,6 +123,22 @@ namespace UIForia.Compilers {
             }
         }
 
+        public ParameterExpression GetVariable(Type type, string name) {
+            for (int i = 0; i < variables.size; i++) {
+                if (variables[i].Name == name) {
+                    if (variables[i].Type != type) {
+                        throw new CompileException("Variable already taken: " + name);
+                    }
+
+                    return variables[i];
+                }
+            }
+
+            ParameterExpression param = Expression.Parameter(type, name);
+            variables.Add(param);
+            return param;
+        }
+        
         public void PopScope() {
             currentDepth--;
             hierarchyStack.Pop();

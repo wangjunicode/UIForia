@@ -15,7 +15,15 @@
                              intVal="$ctxVar0 + $ctxVar1"
                              intVal2="refTypeThing.intVal">
             
-            <Text>I am also {expr} text</Text>
+            <ThingWithParameters intParam="$ctxVar0">
+                <Slot:ThingSlot>
+                    Hello Override
+                </Slot:ThingSlot>
+            </ThingWithParameters>
+            
+            <DefineSlot:SomeSlot>
+                I am groot
+            </DefineSlot:SomeSlot>
             
         </LoadTemplateHydrate>
     </Contents>

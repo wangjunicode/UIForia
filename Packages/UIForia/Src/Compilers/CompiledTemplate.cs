@@ -10,6 +10,21 @@ using UnityEditor;
 
 namespace UIForia.Compilers {
 
+    public class CompiledSlot {
+
+        public string filePath;
+        public int slotId;
+        public GUID guid;
+        public string slotName;
+        public SlotType slotType;
+        public LambdaExpression templateFn;
+
+        public string GetVariableName() {
+            return $"Slot_{slotType}_{slotName}_{guid}";
+        }
+        
+    }
+    
     public class CompiledTemplate {
 
         internal ProcessedType elementType;
@@ -20,7 +35,8 @@ namespace UIForia.Compilers {
         public int childCount;
         public LambdaExpression templateFn;
         public GUID guid;
-        
+        public string slotName;
+
         public bool TryGetSlotData(string slotName, out SlotDefinition slotDefinition) {
             if (slotDefinitions == null) {
                 slotDefinition = default;
@@ -106,6 +122,8 @@ namespace UIForia.Compilers {
 
             return retn;
         }
+
+       
 
     }
 

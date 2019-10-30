@@ -137,6 +137,14 @@ namespace UIForia.Util {
             return false;
         }
 
+        public LightStack<T> Clone(LightStack<T> cloneTarget = null) {
+            cloneTarget = cloneTarget ?? new LightStack<T>(size);
+            cloneTarget.EnsureCapacity(size);
+            Array.Copy(array, 0, cloneTarget.array, 0, size);
+            cloneTarget.size = size;
+            return cloneTarget;
+        }
+
     }
 
 }

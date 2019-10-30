@@ -1,4 +1,5 @@
 using System;
+using UIForia.Util;
 
 namespace UIForia.Compilers {
 
@@ -9,14 +10,16 @@ namespace UIForia.Compilers {
         public string tagName;
         public short slotId;
         public SlotType slotType;
+        public StructStack<ContextVariableDefinition> contextVariables;
         
         public byte parentSlotId_0;
         public byte parentSlotId_1;
         public byte parentSlotId_2;
         public byte parentSlotId_3;
 
-        public SlotDefinition(string tagName) {
+        public SlotDefinition(string tagName, StructStack<ContextVariableDefinition> contextVariables) {
             this.tagName = tagName;
+            this.contextVariables = contextVariables;
             this.slotId = -1;
             this.parentSlotId_0 = k_UnassignedParent;
             this.parentSlotId_1 = k_UnassignedParent;

@@ -24,7 +24,23 @@ namespace UIForia.Compilers {
         }
         
     }
-    
+
+    public enum ContextVariableAccessType {
+
+        Public, 
+        Private
+
+    }
+
+    public struct ContextVariableDefinition {
+
+        public int id;
+        public Type type;
+        public string name;
+        public ContextVariableAccessType accessType;
+
+    }
+
     public class CompiledTemplate {
 
         internal ProcessedType elementType;
@@ -36,6 +52,8 @@ namespace UIForia.Compilers {
         public LambdaExpression templateFn;
         public GUID guid;
         public string slotName;
+        
+        public StructStack<ContextVariableDefinition> contextStack;
 
         public bool TryGetSlotData(string slotName, out SlotDefinition slotDefinition) {
             if (slotDefinitions == null) {

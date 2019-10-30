@@ -1,30 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <UITemplate>
     <Contents>
-        
+
         <Text>I am text</Text>
-        
-        <LoadTemplateHydrate if="refTypeThing.intVal > 145" 
+
+        <LoadTemplateHydrate if="refTypeThing.intVal > 145"
                              ctxvar:ctxVar0.once="14244"
                              ctxvar:ctxVar1.once="144"
                              attr:nonconst="{computed}"
                              attr:first="true"
-                             attr:some-attr="this-is-attr" 
+                             attr:some-attr="this-is-attr"
                              floatVal.once="42f"
                              onDidSomething="HandleStuffDone(valueName)"
                              intVal="$ctxVar0 + $ctxVar1"
                              intVal2="refTypeThing.intVal">
-            
+
             <ThingWithParameters intParam="$ctxVar0">
                 <Slot:ThingSlot>
-                    Hello Override
+                    
+                    Hello Override {$ctxVar0}
+                    
                 </Slot:ThingSlot>
             </ThingWithParameters>
-            
+
             <DefineSlot:SomeSlot>
                 I am groot
             </DefineSlot:SomeSlot>
-            
+
         </LoadTemplateHydrate>
     </Contents>
-</UITemplate>
+    
+</UITemplate>  

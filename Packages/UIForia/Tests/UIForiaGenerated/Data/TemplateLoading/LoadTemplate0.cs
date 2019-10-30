@@ -6,7 +6,7 @@ namespace UIForia.Generated {
 
     public partial class UIForiaGeneratedTemplates_TestApp {
         
-        public Func<UIElement, TemplateScope2, UIElement> Template_77fcce9dffb4f7b46b167aa882b5e8a6 = (UIForia.Elements.UIElement root, UIForia.Compilers.TemplateScope2 scope) =>
+        public Func<UIElement, TemplateScope2, UIElement> Template_ad0f13290ef810b4baaab7d79c7f050c = (UIForia.Elements.UIElement root, UIForia.Compilers.TemplateScope2 scope) =>
         {
             UIForia.Elements.UIElement targetElement_1;
             UIForia.Util.StructList<UIForia.Compilers.SlotUsage> slotUsage;
@@ -28,7 +28,7 @@ namespace UIForia.Generated {
             targetElement_1.attributes.array[2] = new UIForia.Elements.ElementAttribute("some-attr", "this-is-attr");
             UIForia.Systems.LinqBindingNode.Get(scope.application, root, targetElement_1);
             slotUsage = UIForia.Util.StructList<UIForia.Compilers.SlotUsage>.PreSize(1);
-            // Slot_Children_Children_bada918c25d9cf647b08dcee49e711f9
+            // Slot_Children_Children_8eb41d19fe5704d428ab4fd01220c291
             slotUsage.array[0] = new UIForia.Compilers.SlotUsage("Children", 0);
 
             // Data/TemplateLoading/LoadTemplateHydrate.xml
@@ -38,7 +38,7 @@ namespace UIForia.Generated {
             return root;
         }; 
         
-        public Action<UIElement, UIElement> Binding_OnCreate_5cd7aa1ce1f93434ca9fd9d4ed00dd10 = (UIForia.Elements.UIElement __root, UIForia.Elements.UIElement __element) =>
+        public Action<UIElement, UIElement> Binding_OnCreate_34b8dae9d24300b42987a759a71ff767 = (UIForia.Elements.UIElement __root, UIForia.Elements.UIElement __element) =>
         {
             UIForia.Test.TestData.LoadTemplateHydrate __castElement;
             UIForia.Test.TestData.LoadTemplate0 __castRoot;
@@ -65,7 +65,7 @@ namespace UIForia.Generated {
             __castElement.onDidSomething += evtFn;
         };
 
-        public Action<UIElement, UIElement> Binding_OnUpdate_225a39346c85d634287095999c831fe9 = (UIForia.Elements.UIElement __root, UIForia.Elements.UIElement __element) =>
+        public Action<UIElement, UIElement> Binding_OnUpdate_e836368690ffea449abb7084964a06b8 = (UIForia.Elements.UIElement __root, UIForia.Elements.UIElement __element) =>
         {
             UIForia.Test.TestData.LoadTemplateHydrate __castElement;
             UIForia.Test.TestData.LoadTemplate0 __castRoot;
@@ -123,7 +123,7 @@ namespace UIForia.Generated {
             return;
         };
 
-        public Action<UIElement, UIElement> Binding_OnUpdate_dcaef7f434cce6f48983f402243d51ac = (UIForia.Elements.UIElement __root, UIForia.Elements.UIElement __element) =>
+        public Action<UIElement, UIElement> Binding_OnUpdate_4870dc68a8757ec419258564e5210559 = (UIForia.Elements.UIElement __root, UIForia.Elements.UIElement __element) =>
         {
             UIForia.Test.TestData.ThingWithParameters __castElement;
             UIForia.Test.TestData.LoadTemplate0 __castRoot;
@@ -141,8 +141,25 @@ namespace UIForia.Generated {
             return;
         };
 
+        public Action<UIElement, UIElement> Binding_OnUpdate_1a9eeb14d0d5e4949a107c9393e6dc0b = (UIForia.Elements.UIElement __root, UIForia.Elements.UIElement __element) =>
+        {
+            UIForia.Elements.UITextElement __castElement;
+            UIForia.Test.TestData.LoadTemplate0 __castRoot;
+            System.Text.StringBuilder __stringBuilder;
+            int ctxvar_ctxVar0;
+
+            __castElement = ((UIForia.Elements.UITextElement)__element);
+            __castRoot = ((UIForia.Test.TestData.LoadTemplate0)__root);
+            __stringBuilder = UIForia.Text.TextUtil.StringBuilder;
+            __stringBuilder.Append("Hello Override ");
+            ctxvar_ctxVar0 = ((UIForia.Systems.ContextVariable<int>)__castElement.bindingNode.GetContextVariable(0)).value;
+            __stringBuilder.Append(ctxvar_ctxVar0);
+            __castElement.SetText(__stringBuilder.ToString());
+            __stringBuilder.Clear();
+        };
+
         
-        public Func<UIElement, TemplateScope2, UIElement> Slot_Children_Children_bada918c25d9cf647b08dcee49e711f9 = (UIForia.Elements.UIElement root, UIForia.Compilers.TemplateScope2 scope) =>
+        public Func<UIElement, TemplateScope2, UIElement> Slot_Children_Children_8eb41d19fe5704d428ab4fd01220c291 = (UIForia.Elements.UIElement root, UIForia.Compilers.TemplateScope2 scope) =>
         {
             UIForia.Elements.UISlotContent slotRoot;
             UIForia.Elements.UIElement targetElement_1;
@@ -154,7 +171,7 @@ namespace UIForia.Generated {
             targetElement_1 = scope.application.CreateElementFromPoolWithType(typeof(UIForia.Test.TestData.ThingWithParameters), slotRoot, 1, 0);
             UIForia.Systems.LinqBindingNode.Get(scope.application, slotRoot, targetElement_1);
             slotUsage = UIForia.Util.StructList<UIForia.Compilers.SlotUsage>.PreSize(1);
-            // Slot_Override_ThingSlot_dc37025bd6ea9fb46a0f56d7539bb0e8
+            // Slot_Override_ThingSlot_40c4115120eee3d408ee3b88e0d782af
             slotUsage.array[0] = new UIForia.Compilers.SlotUsage("ThingSlot", 2);
 
             // Data/TemplateLoading/ThingWithParameters.xml
@@ -168,7 +185,7 @@ namespace UIForia.Generated {
             return slotRoot;
         };
 
-        public Func<UIElement, TemplateScope2, UIElement> Slot_Override_ThingSlot_dc37025bd6ea9fb46a0f56d7539bb0e8 = (UIForia.Elements.UIElement root, UIForia.Compilers.TemplateScope2 scope) =>
+        public Func<UIElement, TemplateScope2, UIElement> Slot_Override_ThingSlot_40c4115120eee3d408ee3b88e0d782af = (UIForia.Elements.UIElement root, UIForia.Compilers.TemplateScope2 scope) =>
         {
             UIForia.Elements.UISlotContent slotRoot;
             UIForia.Elements.UIElement targetElement_1;
@@ -177,12 +194,12 @@ namespace UIForia.Generated {
 
             // 
             targetElement_1 = scope.application.CreateElementFromPoolWithType(typeof(UIForia.Elements.UITextElement), slotRoot, 0, 0);
-            ((UIForia.Elements.UITextElement)targetElement_1).text = "Hello Override";
+            UIForia.Systems.LinqBindingNode.Get(scope.application, slotRoot, targetElement_1);
             slotRoot.children.array[0] = targetElement_1;
             return slotRoot;
         };
 
-        public Func<UIElement, TemplateScope2, UIElement> Slot_Default_SomeSlot_e3c55711eaf392949812d73327c72284 = (UIForia.Elements.UIElement root, UIForia.Compilers.TemplateScope2 scope) =>
+        public Func<UIElement, TemplateScope2, UIElement> Slot_Default_SomeSlot_c51ac020e855e58418a44d747983db34 = (UIForia.Elements.UIElement root, UIForia.Compilers.TemplateScope2 scope) =>
         {
             UIForia.Elements.UISlotContent slotRoot;
             UIForia.Elements.UIElement targetElement_1;

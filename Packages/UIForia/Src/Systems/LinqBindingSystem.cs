@@ -70,25 +70,24 @@ namespace UIForia.Systems {
 
         public void OnAttributeSet(UIElement element, string attributeName, string currentValue, string previousValue) { }
 
-
         public void AddElementHierarchy(UIElement element) {
             // element binding node won't be null if adding via hierarchy
-            Assert.IsNotNull(element.bindingNode, "element.bindingNode != null");
-            // binding node might be empty. if it is, add the children instead
-            if (element.bindingNode.bindings.list != null) {
-                LinqBindingNode parentNode = GetBindingNode(element.parent);
-                if (parentNode == null) {
-                    rootNodes.Add(element.bindingNode);
-                }
-                else {
-                    parentNode.InsertChild(element.bindingNode);
-                }
-            }
-            else {
-                for (int i = 0; i < element.children.size; i++) {
-                    AddElementHierarchy(element.children[i]);
-                }
-            }
+//            Assert.IsNotNull(element.bindingNode, "element.bindingNode != null");
+//            // binding node might be empty. if it is, add the children instead
+//            if (element.bindingNode.bindings.list != null) {
+//                LinqBindingNode parentNode = GetBindingNode(element.parent);
+//                if (parentNode == null) {
+//                    rootNodes.Add(element.bindingNode);
+//                }
+//                else {
+//                    parentNode.InsertChild(element.bindingNode);
+//                }
+//            }
+//            else {
+//                for (int i = 0; i < element.children.size; i++) {
+//                    AddElementHierarchy(element.children[i]);
+//                }
+//            }
         }
 
     }

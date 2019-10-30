@@ -1,15 +1,11 @@
 using System;
 using System.Collections.Generic;
-using System.Linq.Expressions;
-using Mono.Linq.Expressions;
 using Src.Systems;
 using UIForia.Animation;
-using UIForia.AttributeProcessors;
 using UIForia.Bindings;
 using UIForia.Compilers;
 using UIForia.Compilers.Style;
 using UIForia.Elements;
-using UIForia.Exceptions;
 using UIForia.Extensions;
 using UIForia.Layout;
 using UIForia.Parsing;
@@ -19,7 +15,6 @@ using UIForia.Routing;
 using UIForia.Systems;
 using UIForia.Systems.Input;
 using UIForia.Util;
-using UnityEditor;
 using UnityEngine;
 
 namespace UIForia {
@@ -66,8 +61,7 @@ namespace UIForia {
         public event Action<UIView[]> onViewsSorted;
         public event Action<UIView> onViewRemoved;
 
-        internal TemplateData templateData;
-        internal TemplateCompiler2 templateCompiler;
+        internal CompiledTemplateData templateData;
 
         protected internal readonly List<UIView> m_Views;
 
@@ -83,7 +77,6 @@ namespace UIForia {
 
         public static readonly UIForiaSettings Settings;
         private ElementPool elementPool;
-        internal LightList<SlotUsageTemplate> slotUsageTemplates = new LightList<SlotUsageTemplate>(128);
 
         static Application() {
             ArrayPool<UIElement>.SetMaxPoolSize(64);
@@ -99,18 +92,13 @@ namespace UIForia {
         // todo -- replace the static version with this one
         public UIForiaSettings settings => Settings;
 
-        protected Application(string id, string templateRootPath = null, ResourceManager resourceManager = null) {
-            this.id = id;
-            this.templateRootPath = templateRootPath;
-
-            // todo -- exceptions in constructors aren't good practice
-            if (s_ApplicationList.Find(id, (app, _id) => app.id == _id) != null) {
-                throw new Exception($"Applications must have a unique id. Id {id} was already taken.");
+        protected Application(TemplateSettings settings, ResourceManager resourceManager) {
+            id = settings.applicationName;
+            if (s_ApplicationList.Find(settings.applicationName, (app, _id) => app.id == _id) != null) {
+                throw new Exception($"Applications must have a unique id. Id {settings.applicationName} was already taken.");
             }
 
             s_ApplicationList.Add(this);
-            this.templateData = new TemplateData(); // todo -- load this from elsewhere in the pre-generated case
-            this.templateCompiler = new TemplateCompiler2(default); // todo shouldn't be default
 
             this.elementPool = new ElementPool();
 
@@ -123,12 +111,11 @@ namespace UIForia {
             m_LayoutSystem = new FastLayoutSystem(this, m_StyleSystem);
             m_InputSystem = new GameInputSystem(m_LayoutSystem);
             m_RenderSystem = new VertigoRenderSystem(Camera.current, this);
-            //       m_RenderSystem = new SVGXRenderSystem(this, null, m_LayoutSystem);
             m_RoutingSystem = new RoutingSystem();
             m_AnimationSystem = new AnimationSystem();
             linqBindingSystem = new LinqBindingSystem();
 
-            styleImporter = new StyleSheetImporter(this);
+//            styleImporter = new StyleSheetImporter(this);
             templateParser = new TemplateParser(this);
 
             elementMap = new IntMap<UIElement>();
@@ -144,9 +131,62 @@ namespace UIForia {
             m_BeforeUpdateTaskSystem = new UITaskSystem();
             m_AfterUpdateTaskSystem = new UITaskSystem();
 
-            if (settings.usePreCompiledTemplates) {
-                // todo -- load templates
+#if UNITY_EDITOR
+            Applications.Add(this);
+#endif
+            templateData = new PreCompiledTemplateData(settings);
+
+            templateData.LoadTemplates();
+
+            UIView view = CreateView();
+            
+            UIElement rootElement = templateData.templates[0].Invoke(null, new TemplateScope2(this, null));
+
+            view.AddChild(rootElement);
+
+        }
+
+        protected Application(string id, string templateRootPath = null, ResourceManager resourceManager = null) {
+            this.id = id;
+            this.templateRootPath = templateRootPath;
+
+            // todo -- exceptions in constructors aren't good practice
+            if (s_ApplicationList.Find(id, (app, _id) => app.id == _id) != null) {
+                throw new Exception($"Applications must have a unique id. Id {id} was already taken.");
             }
+
+            s_ApplicationList.Add(this);
+
+            this.elementPool = new ElementPool();
+
+            this.resourceManager = resourceManager ?? new ResourceManager();
+
+            this.m_Systems = new List<ISystem>();
+            this.m_Views = new List<UIView>();
+
+            m_StyleSystem = new StyleSystem();
+            m_LayoutSystem = new FastLayoutSystem(this, m_StyleSystem);
+            m_InputSystem = new GameInputSystem(m_LayoutSystem);
+            m_RenderSystem = new VertigoRenderSystem(Camera.current, this);
+            m_RoutingSystem = new RoutingSystem();
+            m_AnimationSystem = new AnimationSystem();
+            linqBindingSystem = new LinqBindingSystem();
+
+//            styleImporter = new StyleSheetImporter(settings.);
+            templateParser = new TemplateParser(this);
+
+            elementMap = new IntMap<UIElement>();
+
+            m_Systems.Add(m_StyleSystem);
+            m_Systems.Add(linqBindingSystem);
+            m_Systems.Add(m_RoutingSystem);
+            m_Systems.Add(m_InputSystem);
+            m_Systems.Add(m_AnimationSystem);
+            m_Systems.Add(m_LayoutSystem);
+            m_Systems.Add(m_RenderSystem);
+
+            m_BeforeUpdateTaskSystem = new UITaskSystem();
+            m_AfterUpdateTaskSystem = new UITaskSystem();
 
 #if UNITY_EDITOR
             Applications.Add(this);
@@ -242,6 +282,19 @@ namespace UIForia {
             return view;
         }
 
+        public UIView CreateView() {
+            UIView view = new UIView(this);
+            m_Views.Add(view);
+            
+            for (int i = 0; i < m_Systems.Count; i++) {
+                m_Systems[i].OnViewAdded(view);
+            }
+            
+            onViewAdded?.Invoke(view);
+
+            return view;
+        }
+        
         public UIView CreateView(string name, Rect rect) {
             UIView view = new UIView(nextViewId++, name, this, rect, m_Views.Count);
 
@@ -783,32 +836,32 @@ namespace UIForia {
         }
 
         internal void InsertChild(UIElement parent, CompiledTemplate template, int index) {
-            UIElement ptr = parent;
-            LinqBindingNode bindingNode = null;
-
-            while (ptr != null) {
-                bindingNode = ptr.bindingNode;
-
-                if (bindingNode != null) {
-                    break;
-                }
-
-                ptr = ptr.parent;
-            }
-
-            TemplateScope2 templateScope = new TemplateScope2(this, null);
-            UIElement root = elementPool.Get(template.elementType);
-            root.siblingIndex = index;
-
-            if (parent.isEnabled) {
-                root.flags |= UIElementFlags.AncestorEnabled;
-            }
-
-            root.depth = parent.depth + 1;
-            root.View = parent.View;
-            template.Create(root, templateScope);
-
-            parent.children.Insert(index, root);
+//            UIElement ptr = parent;
+//            LinqBindingNode bindingNode = null;
+//
+//            while (ptr != null) {
+//                bindingNode = ptr.bindingNode;
+//
+//                if (bindingNode != null) {
+//                    break;
+//                }
+//
+//                ptr = ptr.parent;
+//            }
+//
+//            TemplateScope2 templateScope = new TemplateScope2(this, null);
+//            UIElement root = elementPool.Get(template.elementType);
+//            root.siblingIndex = index;
+//
+//            if (parent.isEnabled) {
+//                root.flags |= UIElementFlags.AncestorEnabled;
+//            }
+//
+//            root.depth = parent.depth + 1;
+//            root.View = parent.View;
+//            template.Create(root, templateScope);
+//
+//            parent.children.Insert(index, root);
         }
 
         internal void InsertChild(UIElement parent, UIElement child, uint index) {
@@ -901,72 +954,37 @@ namespace UIForia {
             onViewsSorted?.Invoke(m_Views.ToArray());
         }
 
-        // todo we will want to not compile this here, explore jitting this
-        internal int AddSlotUsageTemplate(Expression<SlotUsageTemplate> lambda) {
-            slotUsageTemplates.Add(lambda.Compile());
-            return slotUsageTemplates.Count - 1;
-        }
-
-        internal UIElement CreateElementRoot(Type type) {
-            return default;
-//            CompiledTemplate compiledTemplate = templateCompiler.GetCompiledTemplate(type);
-//            LinqBindingNode bindingNode = new LinqBindingNode();
-//            bindingNode.system = linqBindingSystem;
-//            UIElement element = compiledTemplate.Create(null, new TemplateScope2(this, bindingNode, null));
-//            element.bindingNode = bindingNode;
-//            bindingNode.element = element;
-//            return element;
-        }
-
         // might be the same as HydrateTemplate really but with templateId not hard coded
         internal UIElement CreateSlot(int templateId, UIElement root, TemplateScope2 scope) {
             // todo -- something needs to create the slot root element, either here or in the slot function
             return null;
         }
 
-//        internal UIElement CreateSlot(StructList<SlotUsage> slots, string targetSlot, LinqBindingNode bindingNode, UIElement parent, UIElement root, CompiledTemplate defaultTemplateData, int defaultTemplateId) {
-//            UIElement element;
-//
-//            // if we have no slot usages for this slot, create the default version of the slot
-//            if (slots == null) {
-//                element = slotUsageTemplates[defaultTemplateId].Invoke(this, bindingNode, parent, new LexicalScope(root, defaultTemplateData, null));
-//                element.View = parent.View;
-//                element.parent = parent;
-//                return element;
-//            }
-//
-//            // handle creating slot override
-//            SlotUsage[] array = slots.array;
-//            for (int i = 0; i < slots.size; i++) {
-//                if (array[i].slotName == targetSlot) {
-//                    element = slotUsageTemplates[array[i].templateId].Invoke(this, bindingNode, parent, array[i].lexicalScope);
-//                    element.parent = parent;
-//                    element.View = parent.View;
-//                    return element;
-//                }
-//            }
-//
-//            // handle creating slot default if no match was found
-//            element = slotUsageTemplates[defaultTemplateId].Invoke(this, bindingNode, parent, new LexicalScope(root, defaultTemplateData, slots));
-//            element.View = parent.View;
-//            element.parent = parent;
-//            return element;
-//        }
-
         // todo -- override that accepts an index into an array instead of a type, to save a dictionary lookup
         // todo -- don't create a list for every type, maybe a single pool list w/ sorting & a jump search or similar
+        // todo -- register element in type map for selectors, might need to support subclass matching ie <KlangButton> and <OtherButton> with matching on <Button>
+        // todo -- make children a linked list instead
         /// Returns the shell of a UI Element, space is allocated for children but no child data is associated yet, only a parent, view, and depth
         public UIElement CreateElementFromPool(ProcessedType type, UIElement parent, int childCount, int attributeCount) {
+            // children get assigned in the template function but we need to setup the list here
             UIElement retn = elementPool.Get(type);
-            // todo -- register element in type map for selectors, might need to support subclass matching ie <KlangButton> and <OtherButton> with matching on <Button>
-            retn.id = ElementIdGenerator++;
-            // todo -- make children a linked list instead
-            retn.children = LightList<UIElement>.GetMinSize(childCount);
-            retn.children.size = childCount; // children get assigned in the template function but we need to setup the list here
-            retn.style = new UIStyleSet(retn); // todo -- pool this
+
+            retn.id = NextElementId;
+            retn.style = new UIStyleSet(retn);
+            retn.layoutResult = new LayoutResult();
             retn.flags = UIElementFlags.Enabled | UIElementFlags.Alive;
+
+            retn.children = LightList<UIElement>.Get();
+            retn.children.EnsureCapacity(childCount);
+            retn.children.size = childCount;
+
+            if (attributeCount > 0) {
+                retn.attributes = new StructList<ElementAttribute>(attributeCount);
+                retn.attributes.size = attributeCount;
+            }
+
             retn.parent = parent;
-            retn.layoutResult = new LayoutResult(); // todo pool
+            retn.View = parent?.View;
             return retn;
         }
 
@@ -975,7 +993,6 @@ namespace UIForia {
         }
 
         public static int ResolveSlotId(string slotName, StructList<SlotUsage> slotList, int defaultId) {
-            
             if (slotList == null) {
                 return defaultId;
             }
@@ -987,39 +1004,13 @@ namespace UIForia {
             }
 
             return defaultId;
-            
         }
-        
+
         // Doesn't expect to create the root
         internal void HydrateTemplate(int templateId, UIElement root, TemplateScope2 scope) {
-            templateData.templateFns[templateId](root, scope);
-        }
-        
-        internal void HydrateTemplate2(int templateId, UIElement root, TemplateScope2 scope) {
-            templateData.templateFns[templateId](root, scope);
-            // templateData.GetTemplate(id)(root, scope);
+            templateData.templates[templateId](root, scope);
         }
 
-
-        public static UIElement CreateElementFromPool<T>(UIElement parent, int attrCount, int childCount) where T : UIElement {
-            return null;
-        }
-
-        public static void BuildTemplates(TemplateSettings settings) {
-         //   AssetDatabase.CreateFolder("Assets", "UIForia_Generated");
-
-//            //TemplateCompiler2 compiler = new TemplateCompiler2();
-//            PreCompiledTemplateData templateData = new PreCompiledTemplateData();
-//
-//            compiler.CompileTemplates(typeof(UITextElement), templateData);
-//
-//            templateData.Write(settings.preCompiledTemplatePath);
-        }
-
-        
     }
-
-
-
 
 }

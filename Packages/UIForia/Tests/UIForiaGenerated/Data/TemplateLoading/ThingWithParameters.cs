@@ -6,7 +6,7 @@ namespace UIForia.Generated {
 
     public partial class UIForiaGeneratedTemplates_TestApp {
         
-        public Func<UIElement, TemplateScope2, UIElement> Template_bc24e635c5a64ff47934d1c752f1ee0f = (UIForia.Elements.UIElement root, UIForia.Compilers.TemplateScope2 scope) =>
+        public Func<UIElement, TemplateScope2, UIElement> Template_c70b37a912bf5b74a81de1c65dc67470 = (UIForia.Elements.UIElement root, UIForia.Compilers.TemplateScope2 scope) =>
         {
             UIForia.Elements.UIElement targetElement_1;
 
@@ -22,7 +22,7 @@ namespace UIForia.Generated {
         }; 
         
         
-        public Func<UIElement, TemplateScope2, UIElement> Slot_Default_ThingSlot_a9285a831ee18904f9543084d78255c4 = (UIForia.Elements.UIElement root, UIForia.Compilers.TemplateScope2 scope) =>
+        public Func<UIElement, TemplateScope2, UIElement> Slot_Default_ThingSlot_52c23999ccfd3204aa2c447a360efbcc = (UIForia.Elements.UIElement root, UIForia.Compilers.TemplateScope2 scope) =>
         {
             UIForia.Elements.UISlotContent slotRoot;
             UIForia.Elements.UIElement targetElement_1;

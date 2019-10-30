@@ -4,6 +4,10 @@ namespace UIForia {
         
         public RuntimeTemplateData(TemplateSettings settings) : base(settings) { }
 
+        public override void LoadTemplates() {
+            throw new System.NotImplementedException();
+        }
+
     }
 
 }

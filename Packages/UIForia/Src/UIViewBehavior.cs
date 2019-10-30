@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using UIForia.Elements;
 using UnityEngine;
 
@@ -10,12 +11,36 @@ namespace UIForia {
         public string typeName;
         public new Camera camera;
         private Application application;
+        public bool usePreCompiledTemplates;
+        
+        [HideInInspector]
+        public string applicationName = "Game App";
+        
+      
 
+        public TemplateSettings GetTemplateSettings() {
+            TemplateSettings settings = new TemplateSettings();
+            settings.applicationName = applicationName;
+            settings.assemblyName = "Assembly-CSharp";
+            settings.outputPath = Path.Combine(UnityEngine.Application.dataPath, "UIForiaGenerated");
+            settings.codeFileExtension = "cs";
+            settings.preCompiledTemplatePath = "Assets/UIForia_Generated/" + applicationName;
+            settings.templateResolutionBasePath = Path.Combine(UnityEngine.Application.dataPath);
+            return settings;
+        }
+        
         public void Start() {
             type = Type.GetType(typeName);
             if (type == null) return;
             // 1. creates the application
-            application = GameApplication.Create( "Game App", type, camera);
+            if (true || usePreCompiledTemplates) {
+                TemplateSettings settings = GetTemplateSettings();
+                application = GameApplication.Create(settings, camera);
+            }
+            else {
+             //  application = GameApplication.Create(applicationName, type, camera);
+            }
+
             application.onElementRegistered += DoDependencyInjection;
         }
 

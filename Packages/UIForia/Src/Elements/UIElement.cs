@@ -76,25 +76,12 @@ namespace UIForia.Elements {
 
     }
 
-    public struct ArrayContainer<T> {
-
-        public T[] array;
-        public int size;
-
-        public ArrayContainer(T[] array, int size = 0) {
-            this.array = array;
-            this.size = size;
-        }
-
-    }
-
-
     [DebuggerDisplay("{" + nameof(ToString) + "()}")]
     public class UIElement : IHierarchical {
 
         public int id; // todo -- internal with accessor
 
-        internal LightList<UIElement> children; // todo -- replace w/ linked list & child count
+        public LightList<UIElement> children; // todo -- replace w/ linked list & child count
 
         public ExpressionContext templateContext; // todo -- can probably be moved to binding system
         
@@ -112,18 +99,12 @@ namespace UIForia.Elements {
         public LinqBindingNode bindingNode; // todo -- make internal with accessor
 
         internal int depthTraversalIndex;
-        internal StructList<ElementAttribute> attributes;
+        public StructList<ElementAttribute> attributes;
 
         public UIView View { get; internal set; }
         
         // not actually used since we get elements from the pool as uninitialized
-        protected internal UIElement() {
-            this.id = Application.NextElementId;
-            this.style = new UIStyleSet(this);
-            this.layoutResult = new LayoutResult();
-            this.flags = UIElementFlags.Enabled | UIElementFlags.Alive;
-            this.children = LightList<UIElement>.Get();
-        }
+        protected internal UIElement() { }
 
         public Application Application => View.application;
 
@@ -151,7 +132,9 @@ namespace UIForia.Elements {
         public int depth { get; internal set; }
         public int siblingIndex { get; internal set; }
 
-        public IInputProvider Input => View.application.InputSystem;
+        public TemplateMetaData templateMetaData; // todo - internal / private / whatever
+        
+        public IInputProvider Input => View.application.InputSystem; // todo -- remove
 
         public int ChildCount => children?.Count ?? 0;
 

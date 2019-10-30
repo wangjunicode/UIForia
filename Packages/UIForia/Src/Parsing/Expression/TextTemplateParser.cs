@@ -18,6 +18,18 @@ namespace UIForia.Parsing.Expressions {
             return false;
         }
 
+        public static bool TextExpressionIsConstant(StructList<TextExpression> test) {
+            if (test == null || test.size == 0) return true;
+
+            for (int i = 0; i < test.Count; i++) {
+                if (test.array[i].isExpression) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+        
         private static bool StringCompare(string input, ref int ptr, string target, char match, out char result) {
             result = '\0';
 

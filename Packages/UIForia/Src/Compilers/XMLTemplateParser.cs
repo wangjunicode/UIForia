@@ -163,21 +163,20 @@ namespace UIForia.Compilers {
             if (templateNode.processedType.rawType == null) {
                 throw new Exception("Unresolved tag name: " + element.Name.LocalName);
             }
-
         }
 
         private static void ParseAttributes(TemplateNode templateNode, XElement node) {
             foreach (XAttribute attr in node.Attributes()) {
                 string prefix = attr.Name.NamespaceName;
                 string name = attr.Name.LocalName.Trim();
-                
-              
+
+
                 int line = ((IXmlLineInfo) attr).LineNumber;
                 int column = ((IXmlLineInfo) attr).LinePosition;
 
                 AttributeType attributeType = AttributeType.Property;
                 AttributeFlags flags = 0;
-                
+
                 // todo -- not valid everywhere
                 if (name.Contains(".once")) {
                     name = name.Replace(".once", "");
@@ -187,53 +186,56 @@ namespace UIForia.Compilers {
                 if (name == "if") {
                     attributeType = AttributeType.Conditional;
                 }
-                else {
-
-                    if (prefix == string.Empty) {
-                        if (attr.Name.LocalName.StartsWith("style.")) {
-                            attributeType = AttributeType.Style;
-                            name = attr.Name.LocalName.Substring("style.".Length);
-                        }
-
-                        if (attr.Name.LocalName.StartsWith("x-")) {
-                            attributeType = AttributeType.Attribute;
-                            name = attr.Name.LocalName.Substring("x-.".Length);
-                        }
+                else if (prefix == string.Empty) {
+                    if (attr.Name.LocalName == "style") {
+                        attributeType = AttributeType.Style;
+                        name = "style";
                     }
-                    else {
-                        switch (prefix) {
-                            case "attr": {
-                                attributeType = AttributeType.Attribute;
-                                if (attr.Value[0] != '{' || attr.Value[attr.Value.Length - 1] != '}') {
-                                    flags |= AttributeFlags.Const;
-                                }
-
-                                break;
-                            }
-                            case "style":
-                                attributeType = AttributeType.Style;
-                                break;
-                            case "evt":
-                                attributeType = AttributeType.Event;
-                                break;
-                            case "ctx":
-                                attributeType = AttributeType.Context;
-                                break;
-                            case "ctxvar":
-                                attributeType = AttributeType.ContextVariable;
-                                break;
-                            case "alias":
-                                attributeType = AttributeType.Alias;
-                                break;
-
-                            default:
-                                throw new ArgumentOutOfRangeException("Unknown attribute prefix: " + prefix);
+                    else if (attr.Name.LocalName.StartsWith("style.")) {
+                        attributeType = AttributeType.Style;
+                        name = attr.Name.LocalName.Substring("style.".Length);
+                        flags |= AttributeFlags.StyleProperty;
+                    }
+                    else if (attr.Name.LocalName.StartsWith("x-")) {
+                        attributeType = AttributeType.Attribute;
+                        name = attr.Name.LocalName.Substring("x-".Length);
+                        if (name[0] != '{' || name[name.Length - 1] != '}') {
+                            flags |= AttributeFlags.Const;
                         }
                     }
                 }
+                else {
+                    switch (prefix) {
+                        case "attr": {
+                            attributeType = AttributeType.Attribute;
+                            if (attr.Value[0] != '{' || attr.Value[attr.Value.Length - 1] != '}') {
+                                flags |= AttributeFlags.Const;
+                            }
 
-             
-                
+                            break;
+                        }
+                        case "style":
+                            attributeType = AttributeType.Style;
+                            break;
+                        case "evt":
+                            attributeType = AttributeType.Event;
+                            break;
+                        case "ctx":
+                            attributeType = AttributeType.Context;
+                            break;
+                        case "ctxvar":
+                            attributeType = AttributeType.ContextVariable;
+                            break;
+                        case "alias":
+                            attributeType = AttributeType.Alias;
+                            break;
+
+                        default:
+                            throw new ArgumentOutOfRangeException("Unknown attribute prefix: " + prefix);
+                    }
+                }
+
+
                 string raw = string.Empty;
                 if (outputComments) {
                     if (!string.IsNullOrEmpty(prefix)) {
@@ -243,7 +245,7 @@ namespace UIForia.Compilers {
                         raw = name + "=" + "=\"" + attr.Value + "\"";
                     }
                 }
-                    
+
                 // todo -- set flag properly
                 templateNode.attributes.Add(new AttributeDefinition2(raw, attributeType, flags, name, attr.Value, line, column));
             }

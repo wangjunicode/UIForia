@@ -9,7 +9,7 @@ namespace UIForia.Elements {
     [TemplateTagName("Text")]
     public class UITextElement : UIElement, IStyleChangeHandler {
 
-        internal string text;
+        public string text;
         internal TextInfo textInfo;
         internal TextSpan textSpan;
 

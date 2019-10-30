@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Text.RegularExpressions;
 using UnityEngine;
 
 namespace UIForia {
@@ -23,6 +24,8 @@ namespace UIForia {
         }
         
         private static readonly string s_InternalNonStreamingPath = Path.Combine(UnityEngine.Application.dataPath, "..", "Packages", "UIForia", "Src");
+
+        public string StrippedApplicationName => Regex.Replace(applicationName, @"\s", "" );
 
         public virtual string TryReadFile(string templatePath) {
             try {

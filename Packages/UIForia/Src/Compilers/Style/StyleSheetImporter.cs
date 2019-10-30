@@ -7,14 +7,13 @@ namespace UIForia.Compilers.Style {
 
     public class StyleSheetImporter {
 
-        public readonly Application app;
         private readonly List<string> m_CurrentlyImportingStylesheets;
         private readonly Dictionary<string, StyleSheet> m_CachedStyleSheets;
         private readonly StyleSheetCompiler m_Compiler;
         
-        public StyleSheetImporter(Application app) {
-            this.app = app;
-            m_Compiler = new StyleSheetCompiler(this);
+        public StyleSheetImporter(string basePath) {
+            
+            m_Compiler = new StyleSheetCompiler();
             m_CurrentlyImportingStylesheets = new List<string>();
             m_CachedStyleSheets = new Dictionary<string, StyleSheet>();
         }
@@ -60,7 +59,7 @@ namespace UIForia.Compilers.Style {
 //                path = app == null ? UnityEngine.Application.dataPath + "/" + fileName : app.TemplateRootPath + "/" + fileName;
 //            }
 
-            path = app == null ? UnityEngine.Application.dataPath + "/" + fileName : Application.Settings.GetStylePath(app.TemplateRootPath, fileName);
+            path = string.Empty; //app == null ? UnityEngine.Application.dataPath + "/" + fileName : Application.Settings.GetStylePath(app.TemplateRootPath, fileName);
             
             if (File.Exists(path)) {
                 string contents = File.ReadAllText(path);

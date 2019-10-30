@@ -483,29 +483,24 @@ namespace UIForia.Compilers {
         }
 
         public void Assign(string lhsInput, Expression right, bool checkLHSNull = true) {
-            bool wasNullChecked = shouldNullCheck;
+            bool check = shouldNullCheck;
             SetNullCheckingEnabled(checkLHSNull);
             LHSStatementChain left = AssignableStatement(lhsInput);
-            SetNullCheckingEnabled(wasNullChecked);
+            SetNullCheckingEnabled(check);
             Assign(left, right);
         }
 
+        public void Assign(Expression target, string rhsInput, bool checkLHSNull = true) {
+            bool check = shouldNullCheck;
+            SetNullCheckingEnabled(checkLHSNull);
+            Assign(target, Visit(target.Type, ExpressionParser.Parse(rhsInput)));
+            SetNullCheckingEnabled(check);
+        }
+        
         public void Assign(string lhsInput, string rhsInput) {
             LHSStatementChain left = AssignableStatement(lhsInput);
             Expression right = Visit(left.targetExpression.Type, ExpressionParser.Parse(rhsInput));
             Assign(left, right);
-//
-//            if (left.assignments == null) {
-//                currentBlock.AddStatement(Expression.Assign(left.targetExpression, expression));
-//                return;
-//            }
-//
-//            LHSAssignment[] assignments = left.assignments.array;
-//            // this avoid one unneeded copy since undoctored this would write to a local that is unused
-//            assignments[left.assignments.size - 1].left = expression;
-//            for (int i = left.assignments.size - 1; i >= 0; i--) {
-//                currentBlock.AddStatement(Expression.Assign(assignments[i].right, assignments[i].left));
-//            }
         }
 
         public void Assign(LHSStatementChain left, Expression expression) {

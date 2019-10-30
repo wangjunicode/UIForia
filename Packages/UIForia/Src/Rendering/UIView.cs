@@ -85,29 +85,35 @@ public class UIView {
         this.sizeChanged = true;
     }
 
+    internal UIView(Application application) {
+        this.id = 0;
+        this.name = "Default";
+        this.application = application;
+        this.visibleElements = new LightList<UIElement>(32);
+        this.rootElement = (UIViewRootElement) application.CreateElementFromPoolWithType(typeof(UIViewRootElement), null, 0, 0);
+        this.rootElement.flags |= UIElementFlags.Enabled;
+        this.rootElement.flags |= UIElementFlags.AncestorEnabled;
+        this.rootElement.View = this;
+        this.sizeChanged = true;
+    }
+
     public UIElement AddChild(UIElement element) {
         application.InsertChild(rootElement, element, (uint) rootElement.children.Count);
         return element;
     }
 
     internal void Initialize() {
-        elementCount = 1;
-        sizeChanged = true;
-        rootElement.children.Clear();
-        if (m_ElementType == null) {
-            return;
-        }
-
-        UIElement child = null;
-        if (m_Template != null) {
-            throw new NotImplementedException();
-            child = application.templateParser.ParseTemplateFromString(m_ElementType, m_Template).Create();
-        }
-        else {
-            child = application.CreateElementRoot(m_ElementType);
-        }
-
-        application.InsertChild(rootElement, child, (uint) rootElement.children.size);
+        throw new NotImplementedException("Initialize should no longer be called");
+//        elementCount = 1;
+//        sizeChanged = true;
+//        rootElement.children.Clear();
+//        if (m_ElementType == null) {
+//            return;
+//        }
+//
+//        UIElement child = null;
+//
+//        application.InsertChild(rootElement, child, (uint) rootElement.children.size);
     }
 
     public int GetElementCount() {

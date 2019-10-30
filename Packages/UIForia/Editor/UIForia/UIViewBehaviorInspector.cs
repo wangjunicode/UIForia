@@ -1,10 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
+using UIForia.Compilers;
 using UIForia.Parsing;
 using UIForia.Parsing.Expressions;
 using UIForia.Util;
 using UnityEditor;
 using UnityEditor.SceneManagement;
+using UnityEngine;
 
 namespace UIForia.Editor {
 
@@ -66,6 +69,20 @@ namespace UIForia.Editor {
                 EditorSceneManager.MarkSceneDirty(behavior.gameObject.scene);
             }
 
+            if (GUILayout.Button("Generate Code")) {
+
+                TemplateSettings settings = behavior.GetTemplateSettings();
+                TemplateCompiler2 compiler = new TemplateCompiler2(settings);
+                
+                // maybe this should also know the root type for an application
+                PreCompiledTemplateData compiledOutput = new PreCompiledTemplateData(settings);
+
+                compiler.CompileTemplates(behavior.type, compiledOutput);
+
+                compiledOutput.GenerateCode();
+
+            }
+            
             EditorGUILayout.ObjectField(serializedObject.FindProperty("camera"));
             serializedObject.FindProperty("typeName").stringValue = behavior.typeName;
             serializedObject.ApplyModifiedProperties();

@@ -1,10 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <UITemplate>
+    <Style>
+        style style-one {}
+        
+        style style-two {}
+    </Style>
     <Contents>
 
         <Text>I am text</Text>
 
         <LoadTemplateHydrate if="refTypeThing.intVal > 145"
+                             style="style-one style-two"
                              ctxvar:ctxVar0.once="14244"
                              ctxvar:ctxVar1.once="144"
                              attr:nonconst="{computed}"

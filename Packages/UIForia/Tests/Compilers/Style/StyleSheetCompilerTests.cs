@@ -17,7 +17,7 @@ using TextAlignment = UIForia.Text.TextAlignment;
 public class StyleSheetCompilerTests {
 
     public static StyleSheetCompiler NewStyleSheetCompiler() {
-        return new StyleSheetCompiler(new StyleSheetImporter(new MockApplication(typeof(ViewTestThing))));
+        return new StyleSheetCompiler(new StyleSheetImporter("might-be-wrong"));
     }
 
     [Test]

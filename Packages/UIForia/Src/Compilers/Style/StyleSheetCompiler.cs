@@ -10,18 +10,21 @@ namespace UIForia.Compilers.Style {
     public class StyleSheetCompiler {
 
         private readonly StyleSheetImporter styleSheetImporter;
-        private static readonly UIStyle s_ScratchStyle = new UIStyle();
 
         private StyleCompileContext context;
+        private ResourceManager resourceManager;
+        
+        private static readonly UIStyle s_ScratchStyle = new UIStyle();
 
-        public StyleSheetCompiler(StyleSheetImporter styleSheetImporter) {
+        public StyleSheetCompiler(StyleSheetImporter styleSheetImporter, ResourceManager resourceManager) {
             this.styleSheetImporter = styleSheetImporter;
+            this.resourceManager = resourceManager;
         }
 
         public StyleSheet Compile(string styleId, LightList<StyleASTNode> rootNodes) {
             // todo -- remove this allocation
             try {
-                context = new StyleSheetConstantImporter(styleSheetImporter).CreateContext(rootNodes);
+                context = StyleCompileContext.Create(styleSheetImporter, resourceManager); //new StyleSheetConstantImporter(styleSheetImporter).CreateContext(rootNodes);
             }
             catch (CompileException e) {
                 e.SetFileName(styleId);

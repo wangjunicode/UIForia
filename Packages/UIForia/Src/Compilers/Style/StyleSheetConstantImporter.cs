@@ -13,19 +13,18 @@ namespace UIForia.Compilers.Style {
 
         private static readonly Func<StyleConstant, string, bool> s_FindStyleConstant = (element, name) => element.name == name;
 
-        private StyleSheetImporter styleSheetImporter;
+        private readonly StyleSheetImporter styleSheetImporter;
+        private readonly List<string> currentlyResolvingConstants;
 
-        private List<string> currentlyResolvingConstants = new List<string>();
-
-        
         public StyleSheetConstantImporter(StyleSheetImporter styleSheetImporter) {
             this.styleSheetImporter = styleSheetImporter;
+            this.currentlyResolvingConstants = new List<string>();
         }
-
-        public Application application => styleSheetImporter.app;
-
+        
         public StyleCompileContext CreateContext(LightList<StyleASTNode> rootNodes) {
-            StyleCompileContext context = new StyleCompileContext(styleSheetImporter.app);
+            
+            StyleCompileContext context = new StyleCompileContext(); //todo -- this needs to be pooled
+            
             // first all imports must be collected as they can be referenced in exports and consts
             for (int index = 0; index < rootNodes.Count; index++) {
                 switch (rootNodes[index]) {

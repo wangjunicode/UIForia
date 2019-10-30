@@ -79,12 +79,6 @@ namespace UIForia.Compilers {
             return slotDefinition.slotId;
         }
 
-        internal UIElement Create(UIElement root, TemplateScope2 scope) {
-            // todo -- get rid of the build call here
-            scope.application.templateData.Build();
-            return scope.application.templateData.templateFns[templateId](root, scope);
-        }
-
         public int GetSlotId(string slotName) {
             if (slotDefinitions == null) {
                 throw new ArgumentOutOfRangeException(slotName, $"Slot name {slotName} was not registered");
@@ -98,7 +92,6 @@ namespace UIForia.Compilers {
 
             throw new ArgumentOutOfRangeException(slotName, $"Slot name {slotName} was not registered");
         }
-
 
         public void ValidateSlotHierarchy(LightList<string> slotList) {
             // ensure no duplicates

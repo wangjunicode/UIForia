@@ -6,7 +6,7 @@ namespace UIForia.Generated {
 
     public partial class UIForiaGeneratedTemplates_TestApp {
         
-        public Func<UIElement, TemplateScope2, UIElement> Template_ad0f13290ef810b4baaab7d79c7f050c = (UIForia.Elements.UIElement root, UIForia.Compilers.TemplateScope2 scope) =>
+        public Func<UIElement, TemplateScope2, UIElement> Template_7c97eaf000fc49d42bf30d4893e75002 = (UIForia.Elements.UIElement root, UIForia.Compilers.TemplateScope2 scope) =>
         {
             UIForia.Elements.UIElement targetElement_1;
             UIForia.Util.StructList<UIForia.Compilers.SlotUsage> slotUsage;
@@ -21,14 +21,14 @@ namespace UIForia.Generated {
             ((UIForia.Elements.UITextElement)targetElement_1).text = "I am text";
             root.children.array[0] = targetElement_1;
 
-            // <LoadTemplateHydrate if=="refTypeThing.intVal > 145" ctxvar:ctxVar0="14244" ctxvar:ctxVar1="144" attr:nonconst="{computed}" attr:first="true" attr:some-attr="this-is-attr" floatVal=="42f" onDidSomething=="HandleStuffDone(valueName)" intVal=="$ctxVar0 + $ctxVar1" intVal2=="refTypeThing.intVal"/>
+            // <LoadTemplateHydrate if=="refTypeThing.intVal > 145" style=="style-one style-two" ctxvar:ctxVar0="14244" ctxvar:ctxVar1="144" attr:nonconst="{computed}" attr:first="true" attr:some-attr="this-is-attr" floatVal=="42f" onDidSomething=="HandleStuffDone(valueName)" intVal=="$ctxVar0 + $ctxVar1" intVal2=="refTypeThing.intVal"/>
             targetElement_1 = scope.application.CreateElementFromPoolWithType(typeof(UIForia.Test.TestData.LoadTemplateHydrate), root, 1, 3);
             targetElement_1.attributes.array[0] = new UIForia.Elements.ElementAttribute("nonconst", "");
             targetElement_1.attributes.array[1] = new UIForia.Elements.ElementAttribute("first", "true");
             targetElement_1.attributes.array[2] = new UIForia.Elements.ElementAttribute("some-attr", "this-is-attr");
             UIForia.Systems.LinqBindingNode.Get(scope.application, root, targetElement_1);
             slotUsage = UIForia.Util.StructList<UIForia.Compilers.SlotUsage>.PreSize(1);
-            // Slot_Children_Children_8eb41d19fe5704d428ab4fd01220c291
+            // Slot_Children_Children_e25aef31cc869454b8efe1e5db5b7cc2
             slotUsage.array[0] = new UIForia.Compilers.SlotUsage("Children", 0);
 
             // Data/TemplateLoading/LoadTemplateHydrate.xml
@@ -38,16 +38,23 @@ namespace UIForia.Generated {
             return root;
         }; 
         
-        public Action<UIElement, UIElement> Binding_OnCreate_34b8dae9d24300b42987a759a71ff767 = (UIForia.Elements.UIElement __root, UIForia.Elements.UIElement __element) =>
+        public Action<UIElement, UIElement> Binding_OnCreate_3e13d42ef20baa64fad48deafa99e640 = (UIForia.Elements.UIElement __root, UIForia.Elements.UIElement __element) =>
         {
             UIForia.Test.TestData.LoadTemplateHydrate __castElement;
             UIForia.Test.TestData.LoadTemplate0 __castRoot;
+            UIForia.Util.LightList<UIForia.Rendering.UIStyle> styleList;
             UIForia.Systems.ContextVariable<int> ctxVar_ctxVar0;
             UIForia.Systems.ContextVariable<int> ctxVar_ctxVar1;
             System.Action<string> evtFn;
 
             __castElement = ((UIForia.Test.TestData.LoadTemplateHydrate)__element);
             __castRoot = ((UIForia.Test.TestData.LoadTemplate0)__root);
+            styleList = UIForia.Util.LightList<UIForia.Rendering.UIStyle>.PreSize(1);
+            // style-two
+            styleList.array[0] = __element.templateMetaData.GetStyleById(0);
+            // style-two
+            styleList.array[1] = __element.templateMetaData.GetStyleById(0);
+            // __element.style.Initialize(styleList);
             __castElement.bindingNode.CreateLocalContextVariable(new UIForia.Systems.ContextVariable<int>());
             ctxVar_ctxVar0 = ((UIForia.Systems.ContextVariable<int>)__castElement.bindingNode.GetLocalContextVariable("varName"));
             ctxVar_ctxVar0.value = 14244;
@@ -65,7 +72,7 @@ namespace UIForia.Generated {
             __castElement.onDidSomething += evtFn;
         };
 
-        public Action<UIElement, UIElement> Binding_OnUpdate_e836368690ffea449abb7084964a06b8 = (UIForia.Elements.UIElement __root, UIForia.Elements.UIElement __element) =>
+        public Action<UIElement, UIElement> Binding_OnUpdate_4874c4eed91e31f4aaaf4dbd81cae5c9 = (UIForia.Elements.UIElement __root, UIForia.Elements.UIElement __element) =>
         {
             UIForia.Test.TestData.LoadTemplateHydrate __castElement;
             UIForia.Test.TestData.LoadTemplate0 __castRoot;
@@ -123,7 +130,7 @@ namespace UIForia.Generated {
             return;
         };
 
-        public Action<UIElement, UIElement> Binding_OnUpdate_4870dc68a8757ec419258564e5210559 = (UIForia.Elements.UIElement __root, UIForia.Elements.UIElement __element) =>
+        public Action<UIElement, UIElement> Binding_OnUpdate_10584e347bba4814faec7bc37597c5d3 = (UIForia.Elements.UIElement __root, UIForia.Elements.UIElement __element) =>
         {
             UIForia.Test.TestData.ThingWithParameters __castElement;
             UIForia.Test.TestData.LoadTemplate0 __castRoot;
@@ -141,7 +148,7 @@ namespace UIForia.Generated {
             return;
         };
 
-        public Action<UIElement, UIElement> Binding_OnUpdate_1a9eeb14d0d5e4949a107c9393e6dc0b = (UIForia.Elements.UIElement __root, UIForia.Elements.UIElement __element) =>
+        public Action<UIElement, UIElement> Binding_OnUpdate_5530bd855f965fa4b9d0ee2ef334f0a2 = (UIForia.Elements.UIElement __root, UIForia.Elements.UIElement __element) =>
         {
             UIForia.Elements.UITextElement __castElement;
             UIForia.Test.TestData.LoadTemplate0 __castRoot;
@@ -159,7 +166,7 @@ namespace UIForia.Generated {
         };
 
         
-        public Func<UIElement, TemplateScope2, UIElement> Slot_Children_Children_8eb41d19fe5704d428ab4fd01220c291 = (UIForia.Elements.UIElement root, UIForia.Compilers.TemplateScope2 scope) =>
+        public Func<UIElement, TemplateScope2, UIElement> Slot_Children_Children_e25aef31cc869454b8efe1e5db5b7cc2 = (UIForia.Elements.UIElement root, UIForia.Compilers.TemplateScope2 scope) =>
         {
             UIForia.Elements.UISlotContent slotRoot;
             UIForia.Elements.UIElement targetElement_1;
@@ -171,7 +178,7 @@ namespace UIForia.Generated {
             targetElement_1 = scope.application.CreateElementFromPoolWithType(typeof(UIForia.Test.TestData.ThingWithParameters), slotRoot, 1, 0);
             UIForia.Systems.LinqBindingNode.Get(scope.application, slotRoot, targetElement_1);
             slotUsage = UIForia.Util.StructList<UIForia.Compilers.SlotUsage>.PreSize(1);
-            // Slot_Override_ThingSlot_40c4115120eee3d408ee3b88e0d782af
+            // Slot_Override_ThingSlot_d4449d5421b98ad42a861a3b48b5d7d3
             slotUsage.array[0] = new UIForia.Compilers.SlotUsage("ThingSlot", 2);
 
             // Data/TemplateLoading/ThingWithParameters.xml
@@ -185,7 +192,7 @@ namespace UIForia.Generated {
             return slotRoot;
         };
 
-        public Func<UIElement, TemplateScope2, UIElement> Slot_Override_ThingSlot_40c4115120eee3d408ee3b88e0d782af = (UIForia.Elements.UIElement root, UIForia.Compilers.TemplateScope2 scope) =>
+        public Func<UIElement, TemplateScope2, UIElement> Slot_Override_ThingSlot_d4449d5421b98ad42a861a3b48b5d7d3 = (UIForia.Elements.UIElement root, UIForia.Compilers.TemplateScope2 scope) =>
         {
             UIForia.Elements.UISlotContent slotRoot;
             UIForia.Elements.UIElement targetElement_1;
@@ -199,7 +206,7 @@ namespace UIForia.Generated {
             return slotRoot;
         };
 
-        public Func<UIElement, TemplateScope2, UIElement> Slot_Default_SomeSlot_c51ac020e855e58418a44d747983db34 = (UIForia.Elements.UIElement root, UIForia.Compilers.TemplateScope2 scope) =>
+        public Func<UIElement, TemplateScope2, UIElement> Slot_Default_SomeSlot_17def6760df59e842abc7dce3bf68c53 = (UIForia.Elements.UIElement root, UIForia.Compilers.TemplateScope2 scope) =>
         {
             UIForia.Elements.UISlotContent slotRoot;
             UIForia.Elements.UIElement targetElement_1;

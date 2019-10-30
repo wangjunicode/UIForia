@@ -31,11 +31,7 @@ public class TestTemplateLoading {
         compiledOutput.GenerateCode();
 
         compiledOutput.LoadTemplates();
-
-        Assembly assembly = AppDomain.CurrentDomain.GetAssemblyByName("UIForia.Test");
-
-        Debug.Log(assembly);
-        // MockApplication application = new MockApplication(settings, compiledOutput);
+        
     }
 
 }

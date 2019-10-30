@@ -2,12 +2,12 @@ using System;
 using System.Collections.Generic;
 using UIForia.Exceptions;
 using UIForia.Parsing.Style.AstNodes;
-using UIForia.Rendering;
 using UIForia.Util;
 
 namespace UIForia.Compilers.Style {
 
     public class StyleCompileContext {
+
         private static readonly Func<StyleConstant, string, bool> s_FindStyleConstant = (element, name) => element.name == name;
 
         public string fileName;
@@ -15,15 +15,15 @@ namespace UIForia.Compilers.Style {
         public Dictionary<string, LightList<StyleConstant>> importedStyleConstants;
         public Dictionary<string, StyleConstant> constantsWithReferences;
         public LightList<StyleConstant> constants;
-        public Application application;
-
-        public StyleCompileContext(Application application) {
-            this.application = application;
+        public ResourceManager resourceManager;
+        
+        public StyleCompileContext(ResourceManager resourceManager) {
             this.importedStyleConstants = new Dictionary<string, LightList<StyleConstant>>();
             this.constantsWithReferences = new Dictionary<string, StyleConstant>();
             this.constants = new LightList<StyleConstant>();
+            this.resourceManager = resourceManager;
         }
-        
+
         public void Release() {
             importedStyleConstants.Clear();
             constantsWithReferences.Clear();
@@ -45,7 +45,7 @@ namespace UIForia.Compilers.Style {
                         return c.value;
                     }
                 }
-                
+
                 if (referenceNode.children.Count > 0) {
                     if (importedStyleConstants.ContainsKey(referenceNode.identifier)) {
                         DotAccessNode importedConstant = (DotAccessNode) referenceNode.children[0];
@@ -63,7 +63,7 @@ namespace UIForia.Compilers.Style {
                     throw new CompileException(referenceNode,
                         "Constants cannot reference members of other constants.");
                 }
-                
+
 
                 throw new CompileException(referenceNode, $"Couldn't resolve reference {referenceNode}. Known references are: {PrintConstants()}");
             }
@@ -81,5 +81,11 @@ namespace UIForia.Compilers.Style {
 
             return result;
         }
+
+        public static StyleCompileContext Create(StyleSheetImporter styleSheetImporter, ResourceManager resourceManager1) {
+            throw new NotImplementedException();
+        }
+
     }
+
 }

@@ -17,12 +17,18 @@ namespace UIForia {
         
         public PreCompiledTemplateData(TemplateSettings templateSettings) : base(templateSettings) { }
 
-        public void LoadTemplates() {
-            // todo read data from template settings input object
+        public override void LoadTemplates() {
             Assembly assembly = AppDomain.CurrentDomain.GetAssemblyByName(templateSettings.assemblyName);
-            Type type = assembly.GetType("UIForia.Generated.UIForiaGeneratedTemplates_" + templateSettings.applicationName);
-            ITemplateLoader loader = (ITemplateLoader) Activator.CreateInstance(type);
-            templates = loader.LoadTemplates();
+            Type type = assembly.GetType("UIForia.Generated.UIForiaGeneratedTemplates_" + templateSettings.StrippedApplicationName);
+            try {
+                ITemplateLoader loader = (ITemplateLoader) Activator.CreateInstance(type);
+                templates = loader.LoadTemplates();
+                slots = loader.LoadSlots();
+                bindings = loader.LoadBindings();
+            }
+            catch (Exception e) {
+                throw e;
+            }
         }
 
         public void GenerateCode() {
@@ -84,7 +90,7 @@ namespace UIForia.Generated {
                 template = template.Replace("::CODE::", templateBody);
                 template = template.Replace("::BINDINGS::", bindingCode);
                 template = template.Replace("::SLOTS::", slotCode);
-                template = template.Replace("::APPNAME::", templateSettings.applicationName);
+                template = template.Replace("::APPNAME::", templateSettings.StrippedApplicationName);
                 File.WriteAllText(file, template);
             }
 
@@ -125,7 +131,7 @@ namespace UIForia.Generated {
 
             builder.AppendLine($"{s_Indent12}return templates;");
 
-            loadFn = loadFn.Replace("::APPNAME::", templateSettings.applicationName);
+            loadFn = loadFn.Replace("::APPNAME::", templateSettings.StrippedApplicationName);
             loadFn = loadFn.Replace("::TEMPLATE_CODE::", builder.ToString());
             builder.Clear();
 

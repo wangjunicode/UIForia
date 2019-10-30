@@ -12,8 +12,13 @@ namespace UIForia {
         protected LightList<CompiledSlot> compiledSlots;
         protected LightList<CompiledBinding> compiledBindings;
         
-        protected Func<UIElement, TemplateScope2, UIElement>[] templates;
+        public Func<UIElement, TemplateScope2, UIElement>[] templates;
+        public Func<UIElement, TemplateScope2, UIElement>[] slots;
+        public Action<UIElement, UIElement>[] bindings;
+        
         protected TemplateSettings templateSettings;
+
+        public abstract void LoadTemplates();
         
         protected CompiledTemplateData(TemplateSettings templateSettings) {
             this.templateSettings = templateSettings;

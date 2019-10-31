@@ -190,7 +190,7 @@ namespace UIForia.Elements {
             if (!disabled && HasAttribute("disabled")) {
                 SetAttribute("disabled", null);
                 //EnableAllChildren(this);
-            } 
+            }
             else if (disabled && !HasAttribute("disabled")) {
                 SetAttribute("disabled", disabledAttributeValue);
 //                DisableAllChildren(this);
@@ -374,16 +374,16 @@ namespace UIForia.Elements {
             float offset = 0;
             float maxOffset = layoutResult.screenPosition.y - clippingElement.layoutResult.screenPosition.y;
             float minOffset = optionList.layoutResult.screenPosition.y - optionList.style.TransformPositionY.value + optionList.layoutResult.AllocatedHeight - (clippingElement.layoutResult.screenPosition.y + clippingElement.layoutResult.AllocatedHeight);
-            UIElement[] childrenArray = childrenElement.children.Array;
+            UIElement[] childrenArray = childrenElement.children.array;
             for (int i = 0; i < selectedIndex; i++) {
                 offset += childrenArray[i].layoutResult.ActualHeight;
             }
 
-            // optionList.style.SetTransformPositionY(-Math.Min(maxOffset, Math.Max(offset, minOffset)), StyleState.Normal);
+            optionList.style.SetTransformPositionY(-Math.Min(maxOffset, Math.Max(offset, minOffset)), StyleState.Normal);
         }
 
         public void SelectElement(MouseInputEvent evt) {
-            UIElement[] childrenArray = childrenElement.children.Array;
+            UIElement[] childrenArray = childrenElement.children.array;
             int count = childrenElement.children.Count;
             for (int i = 0; i < count; i++) {
                 if (childrenArray[i].layoutResult.ScreenRect.Contains(evt.MousePosition)) {

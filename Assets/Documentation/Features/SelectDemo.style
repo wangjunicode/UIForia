@@ -1,19 +1,22 @@
 style select-demo-root {
-    PreferredSize =1pca;
+    PreferredSize = 1pca;
 }
 
 style button-group {
-    FlexLayoutDirection = Column;
-    //MarginTop = 12px;
+    FlexLayoutDirection = Horizontal;
+    MarginTop = 12px;
 }
 
 style button {
     BackgroundColor = white;
-    BorderColor = red;
-   // Border = 5px;
-    BorderRadius = 50%;
-    PreferredSize = 100px;
-
+    BorderColor = black;
+    Border = 1px;
+    BorderRadius = 5px;
+    PreferredSize = 1cnt;
+    Margin = 5px;
+    Padding = 20px;
+    FlexLayoutMainAxisAlignment = Center;
+    FlexLayoutCrossAxisAlignment = Center;
 }
 
 style repeat {
@@ -21,8 +24,8 @@ style repeat {
     MarginBottom = 10px;
 }
 
-style box {
-    PreferredSize = 100px;
-    BackgroundColor = red;
-    BorderRadius = 20%;
+style select {
+    TextFontSize = 14px;
+    PreferredHeight = 30px;
+    MinWidth = 170px;
 }

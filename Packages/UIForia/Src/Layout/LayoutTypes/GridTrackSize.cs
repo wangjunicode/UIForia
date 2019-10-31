@@ -83,16 +83,16 @@ namespace UIForia.Layout.LayoutTypes {
     [DebuggerDisplay("(minValue = {minValue}, minUnit = {(minUnit)}, maxValue = {(maxValue)}, maxUnit = {(maxUnit)})")]
     public struct GridTrackSize {
 
-        public readonly float minValue;
-        public readonly float maxValue;
+        public float minValue;
+        public float maxValue;
 
         public float value;
         public GridTemplateUnit unit;
         public GridTrackSizeType type;
         public GridTrackSize[] pattern;
 
-        public readonly GridTemplateUnit minUnit;
-        public readonly GridTemplateUnit maxUnit;
+        public GridTemplateUnit minUnit;
+        public GridTemplateUnit maxUnit;
 
         public GridTrackSize(float value, GridTemplateUnit unit = GridTemplateUnit.Pixel) {
             this.minUnit = unit;

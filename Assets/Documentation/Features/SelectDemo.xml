@@ -4,17 +4,13 @@
     <Style path="Documentation/Features/SelectDemo.style"/>
 
     <Contents style="select-demo-root">
-
-        <Input />
-        
         
         <Repeat list="words" style="repeat">
             
-            <Text>Select your favourite translation for the word: {$item}</Text>
-            <Select--string selectedValue.read.write="selectedLanguage[$index].Name" options="translations[$index]" disableOverflowX="true">
+            <Heading1>Select your favourite translation for the word: {$item}</Heading1>
+            <Select--string style="select" selectedValue.read.write="selectedLanguage[$index].Name" options="translations[$index]" disableOverflowX="true">
                 <SlotContent name="select-placeholder">Select your word</SlotContent>
                 <Group>this is a template {$option.Label}</Group>
-    
             </Select--string>
 
             <Group style="button" onMouseClick="ClearTranslations($index)">
@@ -24,7 +20,7 @@
         </Repeat>
         
         
-        <Select--string selectedValue.read.write="selectedLanguage[0].Name" options="translations[0]" disableOverflowX="true" disabled="true" />
+        <Select--string style="select" selectedValue.read.write="selectedLanguage[0].Name" options="translations[0]" disableOverflowX="true" disabled="true" />
 
         <Group style="button-group">
             <Group style="button" onMouseClick="ClearWords()">
@@ -36,11 +32,6 @@
             </Group>
         </Group>
 
-        <Group style="box"></Group>
-        <Group style="box"></Group>
-        <Group style="box"></Group>
-        <Group style="box"></Group>
-        <Group style="box"></Group>
     </Contents>
 
 </UITemplate>

@@ -347,8 +347,7 @@ namespace UIForia.Elements {
                 Rect contentRect = inputElement.layoutResult.ContentRect;
 
                 var textInfo = inputElement.textElement.textInfo;
-                
-                
+
                 // float baseLineHeight = textInfo.rootSpan.textStyle.fontAsset.faceInfo.LineHeight;
                 // float scaledSize = textInfo.rootSpan.fontSize / textInfo.rootSpan.textStyle.fontAsset.faceInfo.PointSize;
                 // float lh = baseLineHeight * scaledSize;
@@ -359,7 +358,7 @@ namespace UIForia.Elements {
                     path.SetStrokeWidth(1f);
                     Vector2 p = textInfo.GetCursorPosition(inputElement.selectionRange.cursorIndex) - inputElement.textScroll;
                     path.MoveTo(inputElement.layoutResult.ContentRect.min + p);
-                    path.VerticalLineTo(inputElement.layoutResult.ContentRect.y + p.y + inputElement.textElement.layoutResult.localPosition.y + inputElement.style.GetResolvedFontSize());
+                    path.VerticalLineTo(inputElement.layoutResult.ContentRect.yMax);
                     path.EndPath();
                     path.Stroke();
                 }

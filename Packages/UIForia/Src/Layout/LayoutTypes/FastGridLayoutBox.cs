@@ -518,13 +518,13 @@ namespace UIForia.Layout.LayoutTypes {
 
                 for (int j = placement.x; j < xMax; j++) {
                     GridTrack spanned = colTrackList.array[j];
-                    if ((track.minUnit & GridTemplateUnit.Fixed) != 0) {
+                    if ((track.maxUnit & GridTemplateUnit.Fixed) != 0) {
                         baseWidth -= spanned.size;
                         if (baseWidth <= 0) {
                             break;
                         }
                     }
-                    else if (track.minUnit != GridTemplateUnit.FractionalRemaining) {
+                    else if (track.maxUnit != GridTemplateUnit.FractionalRemaining) {
                         pieces++;
                     }
                 }
@@ -534,7 +534,7 @@ namespace UIForia.Layout.LayoutTypes {
                 }
 
                 if (baseWidth > 0) {
-                    maxSize = Mathf.Max(maxSize, track.minValue * (baseWidth / pieces));
+                    maxSize = Mathf.Max(maxSize, track.maxValue * (baseWidth / pieces));
                 }
             }
 

@@ -80,6 +80,19 @@
                     <Div style="flex-item">Item 1</Div>
                 </Div>
             </Div>
+            
+            <Heading3>Hover over a child to trigger a content size change. Should affect the parent</Heading3>
+            <Div style="flex-parent">
+                <Div style="flex-content-child-grow">
+                    <Div style="flex-item-grow">Item 1</Div>
+                </Div>
+                <Div style="flex-content-child-grow">
+                    <Div style="flex-item-grow">Item 1</Div>
+                </Div>
+                <Div style="flex-content-child-grow">
+                    <Div style="flex-item-grow">Item 1</Div>
+                </Div>
+            </Div>
         </Div>
     </Contents>
 </UITemplate>

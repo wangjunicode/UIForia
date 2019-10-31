@@ -281,6 +281,12 @@ namespace UIForia.Systems {
         private void ProcessMouseInput() {
             LightList<UIElement> queryResults = (LightList<UIElement>) m_LayoutSystem.QueryPoint(m_MouseState.mousePosition, LightList<UIElement>.Get());
 
+            if (queryResults.Count == 17) {
+                Debug.Log("process input");
+                foreach (UIElement el in queryResults) {
+                    Debug.Log($"{el.GetType()}");
+                }
+            }
             if (!IsDragging) {
                 LightList<UIElement> ancestorElements = LightList<UIElement>.Get();
 

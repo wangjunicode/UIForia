@@ -631,7 +631,6 @@ namespace UIForia.Compilers.Style {
 
                             break;
                         case "minmax":
-                            trackSizeType = GridTrackSizeType.MinMax;
                             if (functionNode.children.Count != 2) {
                                 throw new CompileException(context.fileName, trackSize, $"Had a hard time parsing that track size: {trackSize}. minmax() must have two arguments.");
                             }
@@ -639,12 +638,20 @@ namespace UIForia.Compilers.Style {
                             size.type = GridTrackSizeType.MinMax;
                             size.pattern = MapGridTrackSizePattern(0, functionNode.children, context, false);
 
+                            if (size.pattern.Length != 2) {
+                                throw new CompileException(context.fileName, trackSize, $"Had a hard time parsing that track size: {trackSize}. minmax functions need to get exactly 2 arguments but I found {size.pattern.Length}.");
+                            }
+
+                            size.minUnit = size.pattern[0].unit;
+                            size.minValue = size.pattern[0].value;
+
+                            size.maxUnit = size.pattern[1].unit;
+                            size.maxValue = size.pattern[1].value;
+                            
                             break;
                         default:
                             throw new CompileException(context.fileName, trackSize, $"Had a hard time parsing that track size: {trackSize}. Expected a known track size function (repeat, grow, shrink) but all I got was {functionNode.identifier}");
                     }
-
-                    GridTrackSize[] pattern = new GridTrackSize[functionNode.children.Count];
 
                     return size;
 

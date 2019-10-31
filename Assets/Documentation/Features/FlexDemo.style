@@ -34,10 +34,17 @@ style flex-demo-content-child1 {
     PreferredWidth = 190px;
     BackgroundColor = yellow;
     PreferredHeight = 600px;
+    [hover] {
+        PreferredWidth = 490px;
+        FlexItemGrow = 3;
+    }
 }
 style flex-demo-content-child {
     FlexItemGrow = 1;
     BackgroundColor = yellow;
+    [hover] {
+        FlexItemGrow = 3;
+    }
 }
 
 style circle-clip {
@@ -168,4 +175,28 @@ style img6 {
 style img7 {
     PreferredSize = 100px;
     BackgroundImage = url(icon_7);
+}
+
+style flex-parent {
+    PreferredSize = 1cnt;
+    FlexLayoutDirection = Horizontal;
+    BackgroundColor = green;
+}
+
+style flex-content-child-grow {
+    PreferredWidth = 1cnt;
+    BackgroundColor = yellow;
+//    [hover] {
+//        PreferredWidth = 90px;
+//    }
+}
+
+style flex-item-grow {
+    BackgroundColor = red;
+    PreferredSize = 90px;
+    [hover] {
+        LayoutFit = Fill;
+        PreferredWidth = 1pca;
+        BackgroundColor = blue;
+    }
 }

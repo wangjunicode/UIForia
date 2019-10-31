@@ -43,7 +43,7 @@ namespace Src.Systems {
             this.renderOwners = new LightList<RenderOwner>();
 
             if (this.camera != null) {
-                this.camera.AddCommandBuffer(CameraEvent.BeforeForwardOpaque, commandBuffer);
+                this.camera.AddCommandBuffer(CameraEvent.AfterEverything, commandBuffer);
             }
 
             application.StyleSystem.onStylePropertyChanged += HandleStylePropertyChanged;
@@ -71,7 +71,7 @@ namespace Src.Systems {
         }
 
         private void ReplaceRenderBox(UIElement element, string painterId) {
-            throw new NotImplementedException();
+            renderOwners[0].CreateRenderBox(element);
         }
 
         public event Action<ImmediateRenderContext> DrawDebugOverlay;

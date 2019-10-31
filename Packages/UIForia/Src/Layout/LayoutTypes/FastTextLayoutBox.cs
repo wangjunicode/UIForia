@@ -50,6 +50,7 @@ namespace UIForia.Layout {
 
             // need a greedy size or some way to know
             // if text were multiple lines it would probably work
+            textInfo.ForceLayout();
             contentSize = textInfo.Layout(new Vector2(leftOffset, topOffset), size.width - paddingBox.left - paddingBox.right - borderBox.right - borderBox.left);
 
 //            actualWidth = size.width + PaddingHorizontal + BorderHorizontal;

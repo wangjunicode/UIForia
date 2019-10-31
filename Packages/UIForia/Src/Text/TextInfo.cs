@@ -1,6 +1,7 @@
 using System;
 using System.Text;
 using SVGX;
+using UIForia.Elements;
 using UIForia.Layout;
 using UIForia.Util;
 using UnityEngine;
@@ -64,6 +65,10 @@ namespace UIForia.Text {
         }
 
         public bool LayoutDirty => requiresSpanListRebuild; // todo remove
+
+        public void ForceLayout() {
+            requiresLayout = true;
+        }
 
         internal void RebuildSpans() {
             requiresSpanListRebuild = true;
@@ -817,6 +822,21 @@ namespace UIForia.Text {
             }
 
             return closestIndex;
+        }
+
+        public Rect GetLineRectFromCharacterIndex(int characterIdx) {
+            if (characterIdx > rootSpan.charInfoList.size - 1) {
+                return default;
+            }
+
+            StructList<CharInfo> charInfoList = rootSpan.charInfoList;
+            int lineIndex = charInfoList.array[characterIdx].lineIndex;
+            if (lineIndex < 0) {
+                return default;
+            }
+            
+            LineInfo lineInfo = lineInfoList[lineIndex];
+            return new Rect(lineInfo.x, lineInfo.y, lineInfo.width, lineInfo.height);
         }
 
         public Rect GetLineRect(int lineRangeStart) {

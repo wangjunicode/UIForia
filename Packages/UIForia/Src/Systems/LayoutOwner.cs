@@ -165,7 +165,9 @@ namespace UIForia.Layout {
                 UIElement[] childrenElements = data.element.children.array;
 
                 bool parentEnabledThisFrame = (data.element.flags & UIElementFlags.EnabledThisFrame) != 0;
-
+                if (childCount == 0 && parentEnabledThisFrame) {
+                    parentBox.MarkForLayout();
+                }
                 // Things to look for
                 // layout type changed
                 // behavior changed

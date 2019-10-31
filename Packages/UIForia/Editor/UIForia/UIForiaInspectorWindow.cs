@@ -134,6 +134,13 @@ namespace UIForia.Editor {
             else {
                 selectedElement.flags &= ~UIElementFlags.DebugLayout;
             }
+            
+            DrawLabel("Cache Value width0", selectedElement.layoutBox.widthCache.width0.ToString());
+            DrawLabel("Cache Value width1", selectedElement.layoutBox.widthCache.width1.ToString());
+            DrawLabel("Cache Value width2", selectedElement.layoutBox.widthCache.width2.ToString());
+            DrawLabel("Cache Value height0", selectedElement.layoutBox.widthCache.height0.ToString());
+            DrawLabel("Cache Value height1", selectedElement.layoutBox.widthCache.height1.ToString());
+            DrawLabel("Cache Value height2", selectedElement.layoutBox.widthCache.height2.ToString());
 
             GUILayout.BeginHorizontal();
             DrawStyleStateButton("Hover", StyleState.Hover);

@@ -8,17 +8,45 @@ using UnityEngine;
 namespace UIForia.Layout {
 
     public struct SizeConstraints {
-
         public float minWidth;
         public float maxWidth;
         public float prefWidth;
         public float minHeight;
         public float maxHeight;
         public float prefHeight;
+    }
 
+    public struct BlockSize {
+        public int elementId;
+        public float size;
+        public float contentAreaSize;
     }
 
     public abstract class FastLayoutBox {
+
+        public struct WidthCache {
+
+            public int next;
+
+            public int width0;
+            public int width1;
+            public int width2;
+
+            public float height0;
+            public float height1;
+            public float height2;
+
+        }
+
+        public struct LayoutBoxMetrics {
+
+            public int totalLayoutCount;
+            public int contentHeightCacheHit;
+            public int contentHeightCacheMiss;
+            public int contentWidthCacheHit;
+            public int contentWidthCacheMiss;
+
+        }
 
         public LayoutRenderFlag flags;
 
@@ -72,21 +100,11 @@ namespace UIForia.Layout {
         public AlignmentBehavior alignmentTargetX;
         public AlignmentBehavior alignmentTargetY;
         private float cachedPreferredWidth;
-        private WidthCache widthCache;
+        public WidthCache widthCache;
 
         public LayoutBehavior layoutBehavior;
 
         public LayoutBoxMetrics metrics;
-
-        public struct LayoutBoxMetrics {
-
-            public int totalLayoutCount;
-            public int contentHeightCacheHit;
-            public int contentHeightCacheMiss;
-            public int contentWidthCacheHit;
-            public int contentWidthCacheMiss;
-
-        }
 
         public virtual void AddChild(FastLayoutBox child) {
             child.parent = this;
@@ -142,7 +160,16 @@ namespace UIForia.Layout {
         }
 
         public virtual void RemoveChild(FastLayoutBox child) {
-            RemoveChildByElement(child.element);
+            if (child is TranscludeLayoutBox) {
+                var ptr = child.ResolveLayoutParent().firstChild;
+                while (ptr != null) {
+                    RemoveChild(ptr);
+                    ptr = ptr.nextSibling;
+                }
+            }
+            else {
+                RemoveChildByElement(child.element);
+            }
         }
 
         public virtual void UpdateStyleData() {
@@ -200,7 +227,7 @@ namespace UIForia.Layout {
 
             switch (measurement.unit) {
                 case UIMeasurementUnit.Content: {
-                    float width = ComputeContentWidth(resolvedBlockSize);
+                    float width = GetContentWidth(resolvedBlockSize);
                     // todo implement cache for content width
                     metrics.contentWidthCacheMiss++;
                     float baseVal = width;
@@ -267,6 +294,12 @@ namespace UIForia.Layout {
         public void InvalidatePreferredSizeCache() {
             cachedPreferredWidth = -1;
             widthCache = default;
+            widthCache.width0 = -1;
+            widthCache.width1 = -1;
+            widthCache.width2 = -1;
+            widthCache.height0 = -1;
+            widthCache.height1 = -1;
+            widthCache.height2 = -1;
         }
 
         public float ResolveHeight(float width, in BlockSize blockWidth, in BlockSize blockHeight, in UIMeasurement measurement) {
@@ -274,7 +307,7 @@ namespace UIForia.Layout {
 
             switch (measurement.unit) {
                 case UIMeasurementUnit.Content: {
-                    float contentHeight = ComputeContentHeight(width, blockWidth, blockHeight);
+                    float contentHeight = GetContentHeight(width, blockWidth, blockHeight);
                     // todo -- if block size changes the cached value is possibly wrong!
                     // float contentHeight = GetCachedHeightForWidth(width);
                     //
@@ -476,42 +509,6 @@ namespace UIForia.Layout {
             // content size = extents of my content
         }
 
-        protected float GetCachedHeightForWidth(float width) {
-            int intWidth = (int) width;
-            if (widthCache.width0 == intWidth) {
-                return widthCache.height0;
-            }
-
-            if (widthCache.width1 == intWidth) {
-                return widthCache.height1;
-            }
-
-            if (widthCache.width2 == intWidth) {
-                return widthCache.height2;
-            }
-
-            return -1;
-        }
-
-        protected void SetCachedHeightForWidth(float width, float height) {
-            int intWidth = (int) width;
-            if (widthCache.next == 0) {
-                widthCache.next = 1;
-                widthCache.width0 = intWidth;
-                widthCache.height0 = height;
-            }
-            else if (widthCache.next == 1) {
-                widthCache.next = 2;
-                widthCache.width1 = intWidth;
-                widthCache.height1 = height;
-            }
-            else {
-                widthCache.next = 0;
-                widthCache.width2 = intWidth;
-                widthCache.height2 = height;
-            }
-        }
-
         public void ApplyVerticalLayout(float localY, in BlockSize containingHeight, float allocatedHeight, float preferredHeight, float alignment, LayoutFit layoutFit) {
             allocatedPosition.y = localY;
 
@@ -679,6 +676,7 @@ namespace UIForia.Layout {
         }
 
         public void MarkForLayout() {
+            InvalidatePreferredSizeCache();
             if ((flags & LayoutRenderFlag.NeedsLayout) != 0) {
                 return;
             }
@@ -925,18 +923,84 @@ namespace UIForia.Layout {
 
         public virtual void OnDestroy() { }
 
-        private struct WidthCache {
+        internal void AdjustBlockSizes(ref BlockSize blockWidth, ref BlockSize blockHeight) {
+            if (prefWidth.unit != UIMeasurementUnit.Content) {
+                blockWidth.size = size.width;
+                blockWidth.contentAreaSize = size.width - paddingBox.left - paddingBox.right - borderBox.left - borderBox.right;
+            }
+            else {
+                blockWidth.contentAreaSize -= (paddingBox.left + paddingBox.right + borderBox.left + borderBox.right);
+                if (blockWidth.contentAreaSize < 0) {
+                    blockWidth.contentAreaSize = 0;
+                }
+            }
 
-            public int next;
+            if (prefHeight.unit != UIMeasurementUnit.Content) {
+                blockHeight.size = size.height;
+                blockHeight.contentAreaSize = size.height - paddingBox.top - paddingBox.bottom - borderBox.top - borderBox.bottom;
+            }
+            else {
+                blockHeight.contentAreaSize -= (paddingBox.top + paddingBox.bottom + borderBox.top + borderBox.bottom);
+                if (blockHeight.contentAreaSize < 0) {
+                    blockHeight.contentAreaSize = 0;
+                }
+            }
+        }
 
-            public int width0;
-            public int width1;
-            public int width2;
+        // caching goes here // 
 
-            public float height0;
-            public float height1;
-            public float height2;
+        private float GetContentWidth(BlockSize resolvedBlockSize) {
+            if (cachedPreferredWidth == -1) {
+                cachedPreferredWidth = ComputeContentWidth(resolvedBlockSize);
+            }
 
+            return cachedPreferredWidth;
+        }
+
+        private float GetContentHeight(float width, BlockSize blockWidth, BlockSize blockHeight) {
+            float cachedHeight = GetCachedHeightForWidth(width);
+            if (cachedHeight == -1) {
+                cachedHeight = ComputeContentHeight(width, blockWidth, blockHeight);
+                SetCachedHeightForWidth(width, cachedHeight);
+            }
+
+            return cachedHeight;
+        }
+
+        protected float GetCachedHeightForWidth(float width) {
+            int intWidth = (int) width;
+            if (widthCache.width0 == intWidth) {
+                return widthCache.height0;
+            }
+
+            if (widthCache.width1 == intWidth) {
+                return widthCache.height1;
+            }
+
+            if (widthCache.width2 == intWidth) {
+                return widthCache.height2;
+            }
+
+            return -1;
+        }
+
+        protected void SetCachedHeightForWidth(float width, float height) {
+            int intWidth = (int) width;
+            if (widthCache.next == 0) {
+                widthCache.next = 1;
+                widthCache.width0 = intWidth;
+                widthCache.height0 = height;
+            }
+            else if (widthCache.next == 1) {
+                widthCache.next = 2;
+                widthCache.width1 = intWidth;
+                widthCache.height1 = height;
+            }
+            else {
+                widthCache.next = 0;
+                widthCache.width2 = intWidth;
+                widthCache.height2 = height;
+            }
         }
 
         public void RemoveChildByElement(UIElement element) {
@@ -982,38 +1046,5 @@ namespace UIForia.Layout {
             OnChildRemoved(ptr, idx);
         }
 
-        internal void AdjustBlockSizes(ref BlockSize blockWidth, ref BlockSize blockHeight) {
-            if (prefWidth.unit != UIMeasurementUnit.Content) {
-                blockWidth.size = size.width;
-                blockWidth.contentAreaSize = size.width - paddingBox.left - paddingBox.right - borderBox.left - borderBox.right;
-            }
-            else {
-                blockWidth.contentAreaSize -= (paddingBox.left + paddingBox.right + borderBox.left + borderBox.right);
-                if (blockWidth.contentAreaSize < 0) {
-                    blockWidth.contentAreaSize = 0;
-                }
-            }
-
-            if (prefHeight.unit != UIMeasurementUnit.Content) {
-                blockHeight.size = size.height;
-                blockHeight.contentAreaSize = size.height - paddingBox.top - paddingBox.bottom - borderBox.top - borderBox.bottom;
-            }
-            else {
-                blockHeight.contentAreaSize -= (paddingBox.top + paddingBox.bottom + borderBox.top + borderBox.bottom);
-                if (blockHeight.contentAreaSize < 0) {
-                    blockHeight.contentAreaSize = 0;
-                }
-            }
-        }
-
     }
-
-
-    public struct BlockSize {
-
-        public float size;
-        public float contentAreaSize;
-
-    }
-
 }

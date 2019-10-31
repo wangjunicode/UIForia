@@ -75,7 +75,7 @@ namespace Src.Systems {
             CreateRenderBox(element);
         }
 
-        private void CreateRenderBox(UIElement element) {
+        public void CreateRenderBox(UIElement element) {
             string painterId = element.style.Painter;
             RenderBox painter = null;
 
@@ -103,6 +103,11 @@ namespace Src.Systems {
             painter.visibility = element.style.Visibility;
             painter.uniqueId = painterId;
             painter.OnInitialize();
+            if (element.renderBox != null) {
+                // todo -- pool
+                element.renderBox.OnDestroy();
+                element.renderBox.element = null;
+            }
             element.renderBox = painter;
         }
 

@@ -31,7 +31,7 @@
 
             </ScrollView>
 
-            <ScrollView style="demo-panel" x-router="demo" x-defaultRoute="/input">
+            <ScrollView style="demo-panel" x-router="demo" x-defaultRoute="/SelectDemo">
 
                 <Group x-route="/index">
                     <Heading1>UIForia Documentation</Heading1>

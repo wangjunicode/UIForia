@@ -88,7 +88,9 @@ namespace UIForia.Routing {
 
                 router.AddRoute(route);
 
-                element.SetEnabled(false);
+                if (router.defaultRoute != path) {
+                    element.SetEnabled(false);
+                }
             }
             
         }

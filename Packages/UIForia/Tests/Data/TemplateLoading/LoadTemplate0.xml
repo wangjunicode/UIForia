@@ -5,14 +5,17 @@
         
         style style-two {}
     </Style>
+    
+    <Style path="Data/TemplateLoading/LoadTemplate0.style"/>
+    
     <Contents>
 
         <Text>I am text</Text>
 
         <LoadTemplateHydrate if="refTypeThing.intVal > 145"
-                             style="style-one style-two"
                              ctxvar:ctxVar0.once="14244"
                              ctxvar:ctxVar1.once="144"
+                             style="style-one style-two {'style-three' + floatVal}"
                              attr:nonconst="{computed}"
                              attr:first="true"
                              attr:some-attr="this-is-attr"

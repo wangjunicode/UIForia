@@ -5,7 +5,6 @@ using System.Text;
 using Mono.Linq.Expressions;
 using UIForia.Compilers;
 using UIForia.Elements;
-using UIForia.Generated;
 using UnityEditor;
 
 namespace UIForia {
@@ -14,7 +13,7 @@ namespace UIForia {
 
         private static readonly string s_Indent8 = new string(' ', 8);
         private static readonly string s_Indent12 = new string(' ', 12);
-        
+
         public PreCompiledTemplateData(TemplateSettings templateSettings) : base(templateSettings) { }
 
         public override void LoadTemplates() {
@@ -40,58 +39,9 @@ namespace UIForia {
             }
 
             Directory.CreateDirectory(path);
-
+            
             for (int i = 0; i < compiledTemplates.size; i++) {
-                string file = Path.Combine(path, Path.ChangeExtension(compiledTemplates.array[i].filePath, extension));
-                Directory.CreateDirectory(Path.GetDirectoryName(file));
-                string template = @"
-using System;
-using UIForia.Compilers;
-using UIForia.Elements;
-
-namespace UIForia.Generated {
-
-    public partial class UIForiaGeneratedTemplates_::APPNAME:: {
-        
-        public Func<UIElement, TemplateScope2, UIElement> Template_::GUID:: = ::CODE:: 
-        ::BINDINGS::
-        ::SLOTS::
-    }
-
-}
-                ".Trim();
-
-                string bindingCode = string.Empty;
-                string slotCode = string.Empty;
-                CompiledTemplate compiledTemplate = compiledTemplates[i];
-
-                // todo -- optimize search or sort by file name at least
-                for (int b = 0; b < compiledBindings.size; b++) {
-                    CompiledBinding binding = compiledBindings[b];
-                    if (binding.filePath == compiledTemplate.filePath) {
-                        bindingCode += $"\n{s_Indent8}public Action<UIElement, UIElement> Binding_{compiledBindings.array[b].bindingType}_{binding.guid} = ";
-                        bindingCode += binding.bindingFn.ToTemplateBodyFunction();
-                        bindingCode += "\n";
-                    }
-                }
-
-                // todo -- optimize search or sort by file name at least
-                for (int s = 0; s < compiledSlots.size; s++) {
-                    CompiledSlot compiledSlot = compiledSlots[s];
-                    if (compiledSlot.filePath == compiledTemplate.filePath) {
-                        slotCode += $"\n{s_Indent8}public Func<UIElement, TemplateScope2, UIElement> {compiledSlot.GetVariableName()} = ";
-                        slotCode += compiledSlot.templateFn.ToTemplateBodyFunction();
-                        slotCode += "\n";
-                    }
-                }
-                
-                string templateBody = compiledTemplates[i].templateFn.ToTemplateBodyFunction();
-                template = template.Replace("::GUID::", compiledTemplates[i].guid.ToString());
-                template = template.Replace("::CODE::", templateBody);
-                template = template.Replace("::BINDINGS::", bindingCode);
-                template = template.Replace("::SLOTS::", slotCode);
-                template = template.Replace("::APPNAME::", templateSettings.StrippedApplicationName);
-                File.WriteAllText(file, template);
+                GenerateTemplateCode(path, i, extension);
             }
 
             string loadFn = @"
@@ -119,8 +69,6 @@ namespace UIForia.Generated {
 
 }".Trim();
 
-            string arrayName = "templates";
-
             string initCode = $"Func<UIElement, TemplateScope2, UIElement>[] templates = new Func<{nameof(UIElement)}, {nameof(TemplateScope2)}, {nameof(UIElement)}>[{compiledTemplates.size}];";
             StringBuilder builder = new StringBuilder();
             builder.AppendLine(initCode);
@@ -135,13 +83,12 @@ namespace UIForia.Generated {
             loadFn = loadFn.Replace("::TEMPLATE_CODE::", builder.ToString());
             builder.Clear();
 
-
             builder.AppendLine($"Func<UIElement, TemplateScope2, UIElement>[] slots = new Func<{nameof(UIElement)}, {nameof(TemplateScope2)}, {nameof(UIElement)}>[{compiledSlots.size}];");
-            
+
             for (int i = 0; i < compiledSlots.size; i++) {
                 builder.AppendLine($"{s_Indent12}slots[{i}] = {compiledSlots.array[i].GetVariableName()};");
             }
-            
+
             builder.AppendLine($"{s_Indent12}return slots;");
             loadFn = loadFn.Replace("::SLOT_CODE::", builder.ToString());
 
@@ -151,7 +98,7 @@ namespace UIForia.Generated {
             for (int i = 0; i < compiledBindings.size; i++) {
                 builder.AppendLine($"{s_Indent12}bindings[{i}] = Binding_{compiledBindings.array[i].bindingType}_{compiledBindings.array[i].guid};");
             }
-            
+
             builder.AppendLine($"{s_Indent12}return bindings;");
 
             loadFn = loadFn.Replace("::BINDING_CODE::", builder.ToString());
@@ -165,6 +112,59 @@ namespace UIForia.Generated {
 
             File.WriteAllText(initPath, loadFn);
             AssetDatabase.Refresh();
+        }
+
+        private void GenerateTemplateCode(string path, int i, string extension) {
+            string file = Path.Combine(path, Path.ChangeExtension(compiledTemplates.array[i].filePath, extension));
+            Directory.CreateDirectory(Path.GetDirectoryName(file));
+            string template = @"
+using System;
+using UIForia.Compilers;
+using UIForia.Elements;
+
+namespace UIForia.Generated {
+
+    public partial class UIForiaGeneratedTemplates_::APPNAME:: {
+        
+        public Func<UIElement, TemplateScope2, UIElement> Template_::GUID:: = ::CODE:: 
+        ::BINDINGS::
+        ::SLOTS::
+    }
+
+}
+                ".Trim();
+
+            string bindingCode = string.Empty;
+            string slotCode = string.Empty;
+            CompiledTemplate compiledTemplate = compiledTemplates[i];
+
+            // todo -- optimize search or sort by file name at least
+            for (int b = 0; b < compiledBindings.size; b++) {
+                CompiledBinding binding = compiledBindings[b];
+                if (binding.filePath == compiledTemplate.filePath) {
+                    bindingCode += $"\n{s_Indent8}public Action<UIElement, UIElement> Binding_{compiledBindings.array[b].bindingType}_{binding.guid} = ";
+                    bindingCode += binding.bindingFn.ToTemplateBodyFunction();
+                    bindingCode += "\n";
+                }
+            }
+
+            // todo -- optimize search or sort by file name at least
+            for (int s = 0; s < compiledSlots.size; s++) {
+                CompiledSlot compiledSlot = compiledSlots[s];
+                if (compiledSlot.filePath == compiledTemplate.filePath) {
+                    slotCode += $"\n{s_Indent8}public Func<UIElement, TemplateScope2, UIElement> {compiledSlot.GetVariableName()} = ";
+                    slotCode += compiledSlot.templateFn.ToTemplateBodyFunction();
+                    slotCode += "\n";
+                }
+            }
+
+            string templateBody = compiledTemplates[i].templateFn.ToTemplateBodyFunction();
+            template = template.Replace("::GUID::", compiledTemplates[i].guid.ToString());
+            template = template.Replace("::CODE::", templateBody);
+            template = template.Replace("::BINDINGS::", bindingCode);
+            template = template.Replace("::SLOTS::", slotCode);
+            template = template.Replace("::APPNAME::", templateSettings.StrippedApplicationName);
+            File.WriteAllText(file, template);
         }
 
     }

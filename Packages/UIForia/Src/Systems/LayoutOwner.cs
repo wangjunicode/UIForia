@@ -38,7 +38,7 @@ namespace UIForia.Layout {
 
         public LayoutOwner(UIView view) {
             this.view = view;
-            this.root = view.RootElement.layoutBox;
+            this.root = view.dummyRoot.layoutBox;
 
             this.queue = new Queue<int>(32);
 

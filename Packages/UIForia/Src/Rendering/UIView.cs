@@ -34,7 +34,13 @@ public class UIView {
     public Rect Viewport { get; set; }
     // this might want to be changed but so many test expect this that I dont' want to right now
 
-    public UIElement RootElement => rootElement;
+    public UIElement RootElement {
+        get {
+            if (dummyRoot?.children == null) return null;
+            return dummyRoot.GetChild(0);
+        }
+    }
+
     public float ScaleFactor { get; set; } = 1f;
 
     internal Matrix4x4 matrix;
@@ -47,7 +53,7 @@ public class UIView {
     public RenderTexture renderTexture;
 
     internal LightList<UIElement> visibleElements;
-    internal UIViewRootElement rootElement;
+    internal UIViewRootElement dummyRoot;
     private int elementCount;
 
     public bool focusOnMouseDown;
@@ -63,10 +69,10 @@ public class UIView {
         this.m_ElementType = elementType;
         this.position = viewportRect.position;
         this.visibleElements = new LightList<UIElement>(32);
-        this.rootElement = new UIViewRootElement();
-        this.rootElement.flags |= UIElementFlags.Enabled;
-        this.rootElement.flags |= UIElementFlags.AncestorEnabled;
-        this.rootElement.View = this;
+        this.dummyRoot = new UIViewRootElement();
+        this.dummyRoot.flags |= UIElementFlags.Enabled;
+        this.dummyRoot.flags |= UIElementFlags.AncestorEnabled;
+        this.dummyRoot.View = this;
         this.sizeChanged = true;
     }
 
@@ -78,10 +84,10 @@ public class UIView {
         this.Depth = depth;
         this.position = viewportRect.position;
         this.visibleElements = new LightList<UIElement>(32);
-        this.rootElement = new UIViewRootElement();
-        this.rootElement.flags |= UIElementFlags.Enabled;
-        this.rootElement.flags |= UIElementFlags.AncestorEnabled;
-        this.rootElement.View = this;
+        this.dummyRoot = new UIViewRootElement();
+        this.dummyRoot.flags |= UIElementFlags.Enabled;
+        this.dummyRoot.flags |= UIElementFlags.AncestorEnabled;
+        this.dummyRoot.View = this;
         this.sizeChanged = true;
     }
 
@@ -90,15 +96,15 @@ public class UIView {
         this.name = "Default";
         this.application = application;
         this.visibleElements = new LightList<UIElement>(32);
-        this.rootElement = (UIViewRootElement) application.CreateElementFromPoolWithType(typeof(UIViewRootElement), null, 0, 0);
-        this.rootElement.flags |= UIElementFlags.Enabled;
-        this.rootElement.flags |= UIElementFlags.AncestorEnabled;
-        this.rootElement.View = this;
+        this.dummyRoot = (UIViewRootElement) application.CreateElementFromPoolWithType(typeof(UIViewRootElement), null, 0, 0);
+        this.dummyRoot.flags |= UIElementFlags.Enabled;
+        this.dummyRoot.flags |= UIElementFlags.AncestorEnabled;
+        this.dummyRoot.View = this;
         this.sizeChanged = true;
     }
 
     public UIElement AddChild(UIElement element) {
-        application.InsertChild(rootElement, element, (uint) rootElement.children.Count);
+        application.InsertChild(dummyRoot, element, (uint) dummyRoot.children.Count);
         return element;
     }
 
@@ -167,15 +173,17 @@ public class UIView {
     }
 
     public UIElement CreateElement<T>() {
-        ParsedTemplate parsedTemplate = application.templateParser.GetParsedTemplate(typeof(T));
-        if (parsedTemplate == null) {
-            return null;
-        }
+        throw new NotImplementedException();
 
-        // todo -- shouldn't auto - add to child list
-        UIElement element = parsedTemplate.Create();
-        rootElement.AddChild(element);
-        return element;
+//        ParsedTemplate parsedTemplate = application.templateParser.GetParsedTemplate(typeof(T));
+//        if (parsedTemplate == null) {
+//            return null;
+//        }
+//
+//        // todo -- shouldn't auto - add to child list
+//        UIElement element = parsedTemplate.Create();
+//        rootElement.AddChild(element);
+//        return element;
     }
 
     /// <summary>

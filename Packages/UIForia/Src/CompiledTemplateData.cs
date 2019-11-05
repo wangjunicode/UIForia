@@ -1,6 +1,8 @@
 using System;
 using UIForia.Compilers;
+using UIForia.Compilers.Style;
 using UIForia.Elements;
+using UIForia.Templates;
 using UIForia.Util;
 using UnityEditor;
 
@@ -11,13 +13,14 @@ namespace UIForia {
         protected LightList<CompiledTemplate> compiledTemplates;
         protected LightList<CompiledSlot> compiledSlots;
         protected LightList<CompiledBinding> compiledBindings;
-        
+        protected StyleSheetImporter styleImporter;
+
         public Func<UIElement, TemplateScope2, UIElement>[] templates;
         public Func<UIElement, TemplateScope2, UIElement>[] slots;
         public Action<UIElement, UIElement>[] bindings;
         
-        protected TemplateSettings templateSettings;
-
+        public readonly TemplateSettings templateSettings;
+        
         public abstract void LoadTemplates();
         
         protected CompiledTemplateData(TemplateSettings templateSettings) {
@@ -25,6 +28,7 @@ namespace UIForia {
             this.compiledSlots = new LightList<CompiledSlot>();
             this.compiledTemplates = new LightList<CompiledTemplate>(128);
             this.compiledBindings = new LightList<CompiledBinding>(128);
+            this.styleImporter = new StyleSheetImporter(templateSettings.templateResolutionBasePath);
         }
 
         public CompiledTemplate CreateTemplate(string filePath) {
@@ -56,6 +60,10 @@ namespace UIForia {
             binding.guid = GUID.Generate().ToString();
             compiledBindings.Add(binding);
             return binding;
+        }
+        
+        public StyleSheet ImportStyleSheet(in StyleDefinition styleDefinition) {
+            return styleImporter.Import(styleDefinition);
         }
 
     }

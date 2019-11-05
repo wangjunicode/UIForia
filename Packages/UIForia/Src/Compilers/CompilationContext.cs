@@ -1,34 +1,13 @@
 using System;
 using System.Linq.Expressions;
 using System.Reflection;
+using UIForia.Compilers.Style;
 using UIForia.Elements;
 using UIForia.Exceptions;
 using UIForia.Parsing;
-using UIForia.Parsing.Expressions;
-using UIForia.Systems;
 using UIForia.Util;
 
 namespace UIForia.Compilers {
-
-    public struct StoredTemplate {
-
-        public string templateName;
-        public int templateId;
-        public UIElement closureRoot;
-
-        public StoredTemplate(string templateName, int templateId, UIElement closureRoot) {
-            this.templateName = templateName;
-            this.templateId = templateId;
-            this.closureRoot = closureRoot;
-        }
-
-    }
-
-    public struct CompilationData {
-
-        public Type elementType;
-
-    }
 
     public class CompilationContext {
 
@@ -39,7 +18,7 @@ namespace UIForia.Compilers {
 
         public LightList<ParameterExpression> variables;
         public LightStack<LightList<Expression>> statementStacks;
-        
+
         public Expression rootParam;
         public Expression templateScope;
         public Expression applicationExpr;
@@ -49,6 +28,7 @@ namespace UIForia.Compilers {
         private int currentDepth;
         private int maxDepth;
         private int bindingNodeCount;
+        private StructList<StyleSheetLookup> styleSheets;
 
         private readonly LightStack<ParameterExpression> hierarchyStack;
 
@@ -67,38 +47,70 @@ namespace UIForia.Compilers {
             PushBlock();
         }
 
-        private static readonly MethodInfo s_StructList_SlotUsage_GetMinSize = typeof(StructList<SlotUsage>).GetMethod(nameof(StructList<SlotUsage>.GetMinSize), new[] {typeof(int)});
-        private static readonly MethodInfo s_StructList_SlotUsage_Release = typeof(StructList<SlotUsage>).GetMethod(nameof(StructList<SlotUsage>.Release), BindingFlags.Static);
-        private static readonly MethodInfo s_StructList_SlotUsage_ReleaseSelf = typeof(StructList<SlotUsage>).GetMethod(nameof(StructList<SlotUsage>.Release), BindingFlags.Instance | BindingFlags.Public);
-        private static readonly FieldInfo s_StructList_SlotUsage_Size = typeof(StructList<SlotUsage>).GetField(nameof(StructList<SlotUsage>.size));
+        public void AddStyleSheet(string alias, StyleSheet styleSheet) {
+            styleSheets = styleSheets ?? new StructList<StyleSheetLookup>();
 
-        private const string k_SlotUsageListName = "slotUsageList";
-
-        public Expression GetSlotUsageArray(int slotCount) {
-            if (slotUsageListVar == null) {
-                slotUsageListVar = Expression.Parameter(typeof(StructList<SlotUsage>), k_SlotUsageListName);
-                variables.Add(slotUsageListVar);
+            if (!string.IsNullOrEmpty(alias)) {
+                for (int i = 0; i < styleSheets.size; i++) {
+                    if (styleSheets.array[i].alias == alias) {
+                        throw new CompileException("Duplicate style sheet alias: " + alias);
+                    }
+                }
             }
 
-            Expression getSlotList = Expression.Call(null, s_StructList_SlotUsage_GetMinSize, Expression.Constant(slotCount));
-
-            AddStatement(
-                Expression.Assign(slotUsageListVar, getSlotList)
-            );
-
-            AddStatement(
-                Expression.Assign(
-                    Expression.Field(slotUsageListVar, s_StructList_SlotUsage_Size), Expression.Constant(slotCount)
-                )
-            );
-
-            return slotUsageListVar;
+            styleSheets.Add(new StyleSheetLookup() {
+                alias = alias,
+                styleSheet = styleSheet
+            });
         }
 
-        public void ReleaseSlotUsage() {
-            AddStatement(
-                Expression.Call(slotUsageListVar, s_StructList_SlotUsage_ReleaseSelf)
-            );
+        private struct StyleSheetLookup {
+
+            public string alias;
+            public StyleSheet styleSheet;
+
+        }
+
+        private static readonly char[] s_SplitChar = new char[] {'.'};
+
+        public int ResolveStyleName(string name) {
+            if (styleSheets == null) return -1;
+
+            string alias = string.Empty;
+
+            if (name.Contains(".")) {
+                string[] split = name.Split(s_SplitChar, StringSplitOptions.RemoveEmptyEntries);
+                if (split.Length == 2) {
+                    alias = split[0];
+                    name = split[1];
+                }
+
+                throw new CompileException("Invalid style alias: " + name);
+            }
+
+            if (alias != string.Empty) {
+                for (int i = 0; i < styleSheets.size; i++) {
+                    if (styleSheets.array[i].alias == alias) {
+                        StyleSheet sheet = styleSheets.array[i].styleSheet;
+                        for (int j = 0; j < sheet.styleGroupContainers.Length; j++) {
+                            UIStyleGroupContainer styleGroupContainer = sheet.styleGroupContainers[j];
+                            if (styleGroupContainer.name == name) {
+                                return styleGroupContainer.id;
+                            }
+                        }
+                    }
+                }
+            }
+            else {
+                for (int i = 0; i < styleSheets.size; i++) {
+                    StyleSheet sheet = styleSheets.array[i].styleSheet;
+                    if (sheet.TryResolveStyleName(name, out UIStyleGroupContainer retn)) {
+                        return retn.id;
+                    }
+                }
+            }
+
+            return -1;
         }
 
         public void PushScope() {
@@ -138,7 +150,7 @@ namespace UIForia.Compilers {
             variables.Add(param);
             return param;
         }
-        
+
         public void PopScope() {
             currentDepth--;
             hierarchyStack.Pop();
@@ -193,16 +205,14 @@ namespace UIForia.Compilers {
                 AddStatement(Expression.Call(s_CommentNewLineBefore, Expression.Constant(comment)));
             }
         }
-        
+
         public void CommentNewLineAfter(string comment) {
             if (outputComments) {
                 AddStatement(Expression.Call(s_CommentNewLineAfter, Expression.Constant(comment)));
             }
         }
 
-        public void PushContextVariable(string aliasName) {
-            
-        }
+        public void PushContextVariable(string aliasName) { }
 
     }
 

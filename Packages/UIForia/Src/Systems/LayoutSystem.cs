@@ -70,7 +70,7 @@ namespace UIForia.Systems {
 
         private void CollectLayoutBoxes(UIView view) {
             LightStack<UIElement> stack = LightStack<UIElement>.Get();
-            UIElement rootElement = view.rootElement;
+            UIElement rootElement = view.dummyRoot;
 
             for (int i = 0; i < rootElement.children.Count; i++) {
                 stack.Push(rootElement.children[i]);
@@ -125,7 +125,7 @@ namespace UIForia.Systems {
             m_VisibleBoxList.QuickClear();
             view.visibleElements.QuickClear();
 
-            UIElement rootElement = view.rootElement;
+            UIElement rootElement = view.dummyRoot;
 
             LayoutBox rootBox = m_LayoutBoxMap.GetOrDefault(rootElement.id);
             rootBox.element.layoutResult.matrix = new SVGXMatrix(1, 0, 0, 1, view.position.x, view.position.y);
@@ -448,11 +448,11 @@ namespace UIForia.Systems {
         public void OnDestroy() { }
 
         public void OnViewAdded(UIView view) {
-            CreateLayoutBox(view.rootElement);
+            CreateLayoutBox(view.dummyRoot);
         }
 
         public void OnViewRemoved(UIView view) {
-            m_LayoutBoxMap.GetOrDefault(view.rootElement.id)?.Release();
+            m_LayoutBoxMap.GetOrDefault(view.dummyRoot.id)?.Release();
             for (int i = 0; i < m_TextLayoutBoxes.size; i++) {
                 if (m_TextLayoutBoxes[i].element.View == view) {
                     m_TextLayoutBoxes.RemoveAt(i--);

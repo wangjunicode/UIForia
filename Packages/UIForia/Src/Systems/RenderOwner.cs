@@ -33,8 +33,8 @@ namespace Src.Systems {
             this.wrapperStack = new StructStack<RenderBoxWrapper>(16);
             this.drawList = new StructList<DrawCommand>(0); // resized on first use
             this.renderedClippers = new LightList<ClipData>();
-            this.view.RootElement.renderBox = new RootRenderBox();
-            this.view.RootElement.renderBox.element = view.RootElement;
+            this.view.dummyRoot.renderBox = new RootRenderBox();
+            this.view.dummyRoot.renderBox.element = view.dummyRoot;
             this.clipDataPool = new LightList<ClipData>();
             this.culledClippers = new LightList<ClipData>();
         }
@@ -109,7 +109,7 @@ namespace Src.Systems {
 
         // this is intended to be run while layout is running (ie in parallel)
         public void GatherBoxDataParallel() {
-            UIElement root = view.rootElement;
+            UIElement root = view.dummyRoot;
 
             wrapperList.QuickClear();
 
@@ -252,7 +252,7 @@ namespace Src.Systems {
                                 break;
 
                             case ClipBehavior.View:
-                                renderBox.clipper = renderBox.element.View.rootElement.renderBox.clipper;
+                                renderBox.clipper = renderBox.element.View.dummyRoot.renderBox.clipper;
 
                                 break;
 

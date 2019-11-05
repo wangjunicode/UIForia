@@ -4,9 +4,9 @@ using UIForia.Elements;
 
 namespace UIForia.Generated {
 
-    public partial class UIForiaGeneratedTemplates_TestApp {
+    public partial class UIForiaGeneratedTemplates_LoadTemplateFromFile {
         
-        public Func<UIElement, TemplateScope2, UIElement> Template_c70b37a912bf5b74a81de1c65dc67470 = (UIForia.Elements.UIElement root, UIForia.Compilers.TemplateScope2 scope) =>
+        public Func<UIElement, TemplateScope2, UIElement> Template_30edf6ceb73738c4897ae7a5539fc310 = (UIForia.Elements.UIElement root, UIForia.Compilers.TemplateScope2 scope) =>
         {
             UIForia.Elements.UIElement targetElement_1;
 
@@ -22,7 +22,7 @@ namespace UIForia.Generated {
         }; 
         
         
-        public Func<UIElement, TemplateScope2, UIElement> Slot_Default_ThingSlot_52c23999ccfd3204aa2c447a360efbcc = (UIForia.Elements.UIElement root, UIForia.Compilers.TemplateScope2 scope) =>
+        public Func<UIElement, TemplateScope2, UIElement> Slot_Default_ThingSlot_0ad5313594992bd4d97b855ccdb6fd86 = (UIForia.Elements.UIElement root, UIForia.Compilers.TemplateScope2 scope) =>
         {
             UIForia.Elements.UISlotContent slotRoot;
             UIForia.Elements.UIElement targetElement_1;

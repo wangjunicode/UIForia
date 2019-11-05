@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
-using UIForia.Elements;
 using UIForia.Exceptions;
 using UIForia.Parsing;
 using UIForia.Parsing.Expressions;

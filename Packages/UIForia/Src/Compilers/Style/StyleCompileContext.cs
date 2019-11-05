@@ -15,13 +15,11 @@ namespace UIForia.Compilers.Style {
         public Dictionary<string, LightList<StyleConstant>> importedStyleConstants;
         public Dictionary<string, StyleConstant> constantsWithReferences;
         public LightList<StyleConstant> constants;
-        public ResourceManager resourceManager;
         
-        public StyleCompileContext(ResourceManager resourceManager) {
+        public StyleCompileContext() {
             this.importedStyleConstants = new Dictionary<string, LightList<StyleConstant>>();
             this.constantsWithReferences = new Dictionary<string, StyleConstant>();
             this.constants = new LightList<StyleConstant>();
-            this.resourceManager = resourceManager;
         }
 
         public void Release() {
@@ -60,8 +58,7 @@ namespace UIForia.Compilers.Style {
                         return importedStyleConstant.value;
                     }
 
-                    throw new CompileException(referenceNode,
-                        "Constants cannot reference members of other constants.");
+                    throw new CompileException(referenceNode, "Constants cannot reference members of other constants.");
                 }
 
 
@@ -82,7 +79,7 @@ namespace UIForia.Compilers.Style {
             return result;
         }
 
-        public static StyleCompileContext Create(StyleSheetImporter styleSheetImporter, ResourceManager resourceManager1) {
+        public static StyleCompileContext Create(StyleSheetImporter styleSheetImporter) {
             throw new NotImplementedException();
         }
 

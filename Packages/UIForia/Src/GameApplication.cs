@@ -5,7 +5,7 @@ namespace UIForia {
 
     public class GameApplication : Application {
         
-        protected GameApplication(TemplateSettings settings, ResourceManager resourceManager) : base(settings, resourceManager) { }
+        protected GameApplication(CompiledTemplateData templateData, ResourceManager resourceManager) : base(templateData, resourceManager) { }
 //        public static GameApplication Create<T>(string applicationId, Camera camera, string templateRootPath = null, Action<Application> onBootstrap = null) where T : UIElement {
 //            return Create(applicationId, typeof(T), camera, templateRootPath, onBootstrap);
 //        }
@@ -23,9 +23,9 @@ namespace UIForia {
 //            return retn;
 //        }
         
-        public static GameApplication Create(TemplateSettings templateSettings, Camera camera, Action<Application> onBootstrap = null) {
+        public static GameApplication Create(CompiledTemplateData templateData, Camera camera, Action<Application> onBootstrap = null) {
             
-            GameApplication retn = new GameApplication(templateSettings, null);
+            GameApplication retn = new GameApplication(templateData, null);
             
             onBootstrap?.Invoke(retn);
             

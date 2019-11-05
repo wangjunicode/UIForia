@@ -3,16 +3,18 @@ using UIForia.Rendering;
 
 namespace UIForia.Compilers.Style {
 
-    // can this become a struct?
+    // todo -- conver to struct
     public class UIStyleGroupContainer {
 
+        public int id;
         public string name;
         public StyleType styleType;
         public IReadOnlyList<UIStyleGroup> groups; // can this become an int[]?
 
         public readonly bool hasAttributeStyles;
-        
-        public UIStyleGroupContainer(string name, StyleType styleType, IReadOnlyList<UIStyleGroup> groups) {
+
+        public UIStyleGroupContainer(int id, string name, StyleType styleType, IReadOnlyList<UIStyleGroup> groups) {
+            this.id = id;
             this.name = name;
             this.styleType = styleType;
             this.groups = groups;

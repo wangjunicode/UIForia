@@ -76,7 +76,7 @@ namespace UIForia.Templates {
                 return;
             }
 
-            templateToExpand = app.templateParser.GetParsedTemplate(rootType);
+            templateToExpand = null;// app.templateParser.GetParsedTemplate(rootType);
 
             ResolveBaseStyles(template);
             CompileStyleBindings(template);

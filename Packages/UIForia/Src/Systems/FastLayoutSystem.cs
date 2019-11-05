@@ -45,13 +45,13 @@ namespace UIForia.Systems {
         public void OnDestroy() { }
 
         public void OnViewAdded(UIView view) {
-            view.RootElement.layoutBox = new ViewRootLayoutBox();
-            view.RootElement.layoutBox.element = view.RootElement;
-            view.RootElement.layoutBox.flags |= LayoutRenderFlag.NeedsLayout;
+            view.dummyRoot.layoutBox = new ViewRootLayoutBox();
+            view.dummyRoot.layoutBox.element = view.RootElement;
+            view.dummyRoot.layoutBox.flags |= LayoutRenderFlag.NeedsLayout;
 
             LayoutOwner owner = new LayoutOwner(view);
 
-            view.RootElement.layoutBox.owner = owner;
+            view.dummyRoot.layoutBox.owner = owner;
 
             layoutOwners.Add(owner);
         }

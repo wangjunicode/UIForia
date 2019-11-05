@@ -68,8 +68,6 @@ namespace UIForia {
         internal static readonly Dictionary<string, Type> s_CustomPainters;
         internal static readonly Dictionary<string, Scrollbar> s_Scrollbars;
 
-        public readonly TemplateParser templateParser;
-
         private static readonly LightList<Application> s_ApplicationList;
 
         private readonly UITaskSystem m_BeforeUpdateTaskSystem;
@@ -92,13 +90,15 @@ namespace UIForia {
         // todo -- replace the static version with this one
         public UIForiaSettings settings => Settings;
 
-        protected Application(TemplateSettings settings, ResourceManager resourceManager) {
-            id = settings.applicationName;
-            if (s_ApplicationList.Find(settings.applicationName, (app, _id) => app.id == _id) != null) {
-                throw new Exception($"Applications must have a unique id. Id {settings.applicationName} was already taken.");
-            }
+        protected Application(CompiledTemplateData compiledTemplateData, ResourceManager resourceManager) {
+            TemplateSettings templateSettings = compiledTemplateData.templateSettings;
+            id = templateSettings.applicationName;
 
-            s_ApplicationList.Add(this);
+//            if (s_ApplicationList.Find(templateSettings.applicationName, (app, _id) => app.id == _id) != null) {
+//                throw new Exception($"Applications must have a unique id. Id {templateSettings.applicationName} was already taken.");
+//            }
+//
+//            s_ApplicationList.Add(this);
 
             this.elementPool = new ElementPool();
 
@@ -114,9 +114,6 @@ namespace UIForia {
             m_RoutingSystem = new RoutingSystem();
             m_AnimationSystem = new AnimationSystem();
             linqBindingSystem = new LinqBindingSystem();
-
-//            styleImporter = new StyleSheetImporter(this);
-            templateParser = new TemplateParser(this);
 
             elementMap = new IntMap<UIElement>();
 
@@ -134,16 +131,14 @@ namespace UIForia {
 #if UNITY_EDITOR
             Applications.Add(this);
 #endif
-            templateData = new PreCompiledTemplateData(settings);
 
-            templateData.LoadTemplates();
+            templateData = compiledTemplateData;
 
             UIView view = CreateView();
-            
+
             UIElement rootElement = templateData.templates[0].Invoke(null, new TemplateScope2(this, null));
 
             view.AddChild(rootElement);
-
         }
 
         protected Application(string id, string templateRootPath = null, ResourceManager resourceManager = null) {
@@ -171,9 +166,6 @@ namespace UIForia {
             m_RoutingSystem = new RoutingSystem();
             m_AnimationSystem = new AnimationSystem();
             linqBindingSystem = new LinqBindingSystem();
-
-//            styleImporter = new StyleSheetImporter(settings.);
-            templateParser = new TemplateParser(this);
 
             elementMap = new IntMap<UIElement>();
 
@@ -285,16 +277,16 @@ namespace UIForia {
         public UIView CreateView() {
             UIView view = new UIView(this);
             m_Views.Add(view);
-            
+
             for (int i = 0; i < m_Systems.Count; i++) {
                 m_Systems[i].OnViewAdded(view);
             }
-            
+
             onViewAdded?.Invoke(view);
 
             return view;
         }
-        
+
         public UIView CreateView(string name, Rect rect) {
             UIView view = new UIView(nextViewId++, name, this, rect, m_Views.Count);
 
@@ -318,20 +310,23 @@ namespace UIForia {
             }
 
             onViewRemoved?.Invoke(view);
-            DestroyElement(view.rootElement);
+            DestroyElement(view.dummyRoot);
             return view;
         }
 
         public UIElement CreateElement(Type type) {
-            if (type == null) {
-                return null;
-            }
-
-            return templateParser.GetParsedTemplate(type)?.Create();
+            throw new NotImplementedException();
+//            if (type == null) {
+//                return null;
+//            }
+//
+//            return templateParser.GetParsedTemplate(type)?.Create();
         }
 
         public T CreateElement<T>() where T : UIElement {
-            return templateParser.GetParsedTemplate(typeof(T))?.Create() as T;
+            throw new NotImplementedException();
+
+//            return templateParser.GetParsedTemplate(typeof(T))?.Create() as T;
         }
 
         public void Refresh() {
@@ -345,7 +340,6 @@ namespace UIForia {
             onUpdate = null;
 
             elementMap.Clear();
-            templateParser.Reset();
             styleImporter.Reset();
             resourceManager.Reset();
 
@@ -517,7 +511,7 @@ namespace UIForia {
             LightStack<UIElement> stack = LightStack<UIElement>.Get();
 
             for (int i = 0; i < m_Views.Count; i++) {
-                stack.Push(m_Views[i].rootElement);
+                stack.Push(m_Views[i].dummyRoot);
             }
 
             while (stack.size > 0) {
@@ -547,7 +541,7 @@ namespace UIForia {
             LightStack<UIElement> stack = LightStack<UIElement>.Get();
 
             for (int i = 0; i < m_Views.Count; i++) {
-                stack.Push(m_Views[i].rootElement);
+                stack.Push(m_Views[i].dummyRoot);
             }
 
             int idx = 0;
@@ -929,8 +923,6 @@ namespace UIForia {
             }
 
             LightStack<UIElement>.Release(ref stack);
-
-            linqBindingSystem.AddElementHierarchy(child);
 
             if (parentEnabled && child.isEnabled) {
                 child.flags |= UIElementFlags.EnabledThisFrame;

@@ -23,7 +23,6 @@ namespace UIForia.Rendering {
         private UIStyleGroup instanceStyle;
         private StyleState containedStates;
 
-        //private UIStyleGroupContainer implicitStyleContainer;
         private readonly LightList<StyleEntry> availableStyles;
         private readonly LightList<UIStyleGroupContainer> styleGroupContainers; // probably only need to store the names
         internal readonly IntMap<StyleProperty> propertyMap;
@@ -130,10 +129,11 @@ namespace UIForia.Rendering {
                 CreateStyleGroups(baseStyles[i], toUpdate);
             }
 
-            UIStyleGroupContainer implicitStyle = template.GetImplicitStyle(element.GetDisplayName());
-            if (implicitStyle != null) {
-                CreateStyleGroups(implicitStyle, toUpdate);
-            }
+            // todo -- reimplement without ParsedTemplate
+//            UIStyleGroupContainer implicitStyle = template.GetImplicitStyle(element.GetDisplayName());
+//            if (implicitStyle != null) {
+//                CreateStyleGroups(implicitStyle, toUpdate);
+//            }
 
             SortStyles();
 
@@ -182,10 +182,6 @@ namespace UIForia.Rendering {
                 CreateStyleEntry(toUpdate, instanceStyle, instanceStyle.focused, StyleType.Instance, StyleState.Focused, 0);
                 CreateStyleEntry(toUpdate, instanceStyle, instanceStyle.active, StyleType.Instance, StyleState.Active, 0);
             }
-
-//            if (implicitStyleContainer != null) {
-//                CreateStyleGroups(implicitStyleContainer, toUpdate);
-//            }
 
             for (int i = 0; i < count; i++) {
                 CreateStyleGroups(updatedStyleArray[i], toUpdate);
@@ -903,6 +899,10 @@ namespace UIForia.Rendering {
 #endif
 
         private static readonly StringBuilder s_Builder = new StringBuilder(128);
+
+        public void SetBaseStyles(LightList<UIStyleGroupContainer> styles) {
+            throw new NotImplementedException();
+        }
 
         public string GetStyleNames() {
             s_Builder.Clear();

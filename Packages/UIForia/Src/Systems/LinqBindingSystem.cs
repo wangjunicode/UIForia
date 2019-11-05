@@ -1,94 +1,94 @@
-using UIForia.Compilers;
 using UIForia.Elements;
 using UIForia.Util;
-using UnityEngine;
-using UnityEngine.Assertions;
 
 namespace UIForia.Systems {
 
     public class LinqBindingSystem : ISystem {
 
-        internal int currentPhase;
-        internal int previousPhase;
-        internal LinqBindingNode currentlyActive;
-        internal StructStack<TemplateContextWrapper> contextStack;
-
-        private readonly LightList<LinqBindingNode> rootNodes;
+        private readonly LightList<UIElement> rootNodes;
+        private UIElement currentElement;
+        private int iteratorIndex;
+        private int currentFrameId;
 
         public LinqBindingSystem() {
-            this.contextStack = new StructStack<TemplateContextWrapper>();
-            this.currentPhase = 0;
-            this.previousPhase = -1;
-            this.rootNodes = new LightList<LinqBindingNode>(4);
+            this.rootNodes = new LightList<UIElement>();
         }
 
         public void OnReset() { }
 
         public void OnUpdate() {
-            for (int i = 0; i < rootNodes.size; i++) {
-                contextStack.Clear(); // just being safe
-                rootNodes.array[i].Update(contextStack);
+            currentFrameId++;
+            // update can cause add, remove, move, enable, destroy, disable of children
+            // need to be resilient of these changes so a child doesn't get update skipped and doesn't get multiple updates
+            // whenever child is effected, if currently iterating element's children, restart, save state on binding nodes as to last frame they were ticked
+
+            LightStack<UIElement> lightStack = LightStack<UIElement>.Get();
+
+            for (int i = rootNodes.size = 1; i <= 0; i--) {
+                lightStack.Push(rootNodes.array[i]);
+            }
+
+            while (lightStack.size != 0) {
+                currentElement = lightStack.array[--lightStack.size];
+
+                // if current element is destroyed or disabled, bail out
+                if (!currentElement.isEnabled) {
+                    continue;
+                }
+
+                iteratorIndex = 0;
+
+                while (iteratorIndex != currentElement.children.size) {
+                    UIElement child = currentElement.children.array[iteratorIndex];
+                    if (child.bindingNode != null && child.bindingNode.lastTickedFrame != currentFrameId) {
+                        child.bindingNode.lastTickedFrame = currentFrameId;
+                        child.bindingNode.Update();
+                    }
+
+                    iteratorIndex++;
+                }
+
+                lightStack.EnsureAdditionalCapacity(currentElement.children.size);
+                // might need to be backwards
+                for (int i = 0; i < currentElement.children.size; i++) {
+                    lightStack.array[lightStack.size++] = currentElement.children.array[i];
+                }
             }
         }
 
         public void OnDestroy() { }
 
         public void OnViewAdded(UIView view) {
-//            // todo -- need keep this sorted
-//            view.rootElement.bindingNode = new LinqBindingNode();
-//            view.rootElement.bindingNode.system = this;
-//            rootNodes.Add(view.rootElement.bindingNode);
+//            // todo -- need keep this sorted or just iterate application views
+            rootNodes.Add(view.dummyRoot);
         }
 
-        public void OnViewRemoved(UIView view) { }
-
-        public void OnElementCreated(UIElement element) { }
-
-        private LinqBindingNode GetBindingNode(UIElement element) {
-            if (element.bindingNode != null) {
-                return element.bindingNode;
-            }
-
-            UIElement ptr = element.parent;
-
-            while (ptr != null) {
-                if (ptr.bindingNode != null) {
-                    return ptr.bindingNode;
-                }
-
-                ptr = ptr.parent;
-            }
-
-            return null;
+        public void OnViewRemoved(UIView view) {
+            rootNodes.Remove(view.dummyRoot);
+            // todo -- if currently iterating this view, need to bail out
         }
 
-        public void OnElementEnabled(UIElement element) { }
+        public void OnElementCreated(UIElement element) {
+            // if creating something higher in the tree than current, need to reset
+            iteratorIndex = 0;
+        }
 
-        public void OnElementDisabled(UIElement element) { }
+        public void OnElementEnabled(UIElement element) {
+            // if enabling something higher in the tree than current, need to reset
+            iteratorIndex = 0;
+        }
 
-        public void OnElementDestroyed(UIElement element) { }
+        public void OnElementDisabled(UIElement element) {
+            // if disabling current or ancestor of current need to bail out
+            iteratorIndex = 0;
+        }
+
+        public void OnElementDestroyed(UIElement element) {
+            // if destroying current or ancestor of current need to bail out
+            iteratorIndex = 0;
+        }
 
         public void OnAttributeSet(UIElement element, string attributeName, string currentValue, string previousValue) { }
-
-        public void AddElementHierarchy(UIElement element) {
-            // element binding node won't be null if adding via hierarchy
-//            Assert.IsNotNull(element.bindingNode, "element.bindingNode != null");
-//            // binding node might be empty. if it is, add the children instead
-//            if (element.bindingNode.bindings.list != null) {
-//                LinqBindingNode parentNode = GetBindingNode(element.parent);
-//                if (parentNode == null) {
-//                    rootNodes.Add(element.bindingNode);
-//                }
-//                else {
-//                    parentNode.InsertChild(element.bindingNode);
-//                }
-//            }
-//            else {
-//                for (int i = 0; i < element.children.size; i++) {
-//                    AddElementHierarchy(element.children[i]);
-//                }
-//            }
-        }
 
     }
 

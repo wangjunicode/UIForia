@@ -20,7 +20,7 @@ style button {
 }
 
 style repeat {
-    PreferredSize = 200px 1cnt;
+    PreferredSize = 500px 1cnt;
     MarginBottom = 10px;
 }
 

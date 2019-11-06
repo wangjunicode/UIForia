@@ -43,7 +43,7 @@ namespace Src.Systems {
             this.renderOwners = new LightList<RenderOwner>();
 
             if (this.camera != null) {
-                this.camera.AddCommandBuffer(CameraEvent.AfterEverything, commandBuffer);
+                this.camera.AddCommandBuffer(CameraEvent.BeforeForwardOpaque, commandBuffer);
             }
 
             application.StyleSystem.onStylePropertyChanged += HandleStylePropertyChanged;

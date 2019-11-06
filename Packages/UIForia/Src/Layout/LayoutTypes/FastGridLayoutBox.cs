@@ -821,7 +821,7 @@ namespace UIForia.Layout.LayoutTypes {
         }
 
         private void Place() {
-            if (!placementDirty) {
+            if (!placementDirty && (flags & LayoutRenderFlag.NeedsLayout) == 0) {
                 return;
             }
 
@@ -833,6 +833,10 @@ namespace UIForia.Layout.LayoutTypes {
             FastLayoutBox child = firstChild;
 
             while (child != null) {
+                if (child.element.isDisabled) {
+                    child = child.nextSibling;
+                    continue;
+                }
                 GridItemPlacement x = child.element.style.GridItemX;
                 GridItemPlacement y = child.element.style.GridItemY;
                 GridItemPlacement width = child.element.style.GridItemWidth;

@@ -21,6 +21,7 @@
             AlignmentBehaviorY = Parent;
             BorderRadius = 50%;
             BackgroundColor = grey;
+            LayoutFit = Shrink;
         }
 
         style scroll-track-horizontal {
@@ -28,6 +29,7 @@
             PreferredSize = 1psz @scrollBarSize;
             AlignY = 100% Parent;
             BackgroundColor = @trackColor;
+            LayoutFit = Shrink;
         }
 
         style scroll-handle-horizontal {

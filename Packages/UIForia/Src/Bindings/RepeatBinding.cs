@@ -35,7 +35,9 @@ namespace UIForia.Bindings {
             UIElement newItem = template.CreateScoped(repeat.scope);
             // root object isn't being assigned. make it assigned 
             newItem.templateContext.rootObject = element.templateContext.rootObject;
-            element.InsertChild((uint) index, newItem);
+            if ((element.flags & UIElementFlags.Alive) != 0) {
+                element.InsertChild((uint)index, newItem);
+            }
         }
 
         private void OnItemRemoved(U item, int index) {

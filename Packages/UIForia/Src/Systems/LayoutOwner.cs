@@ -34,8 +34,6 @@ namespace UIForia.Layout {
 
         private readonly Dictionary<int, FastLayoutBoxPool> layoutBoxPoolMap;
 
-        private static readonly DepthComparer s_DepthComparer = new DepthComparer();
-
         public LayoutOwner(UIView view) {
             this.view = view;
             this.root = view.RootElement.layoutBox;
@@ -488,28 +486,17 @@ namespace UIForia.Layout {
             }
         }
 
-        public class DepthComparer : IComparer<FastLayoutBox> {
-
-            public int Compare(FastLayoutBox a, FastLayoutBox b) {
-//                if (a.zIndex != b.zIndex) {
-//                    return a.zIndex - b.zIndex;
-//                }
-                return a.traversalIndex - b.traversalIndex;
-            }
-
-        }
-
         private static bool PointInClippedArea(Vector2 point, UIElement element) {
             Vector2 screenPosition = element.layoutResult.screenPosition;
 
             if (element.style.OverflowX != Overflow.Visible) {
-                if (point.x < screenPosition.x || point.x > screenPosition.x + element.layoutResult.allocatedSize.width) {
+                if (point.x < screenPosition.x || point.x > screenPosition.x + element.layoutResult.actualSize.width) {
                     return true;
                 }
             }
 
             if (element.style.OverflowY != Overflow.Visible) {
-                if (point.y < screenPosition.y || point.y > screenPosition.y + element.layoutResult.allocatedSize.height) {
+                if (point.y < screenPosition.y || point.y > screenPosition.y + element.layoutResult.actualSize.height) {
                     return true;
                 }
             }

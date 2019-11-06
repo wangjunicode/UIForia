@@ -149,6 +149,11 @@ namespace UIForia.Animation {
         public override UITaskResult Run(float deltaTime) {
             status.elapsedTotalTime += deltaTime;
             status.elapsedIterationTime += deltaTime;
+            if (data.options.delay > status.elapsedTotalTime) {
+                return UITaskResult.Running;
+            }
+
+            float elapsedIterationTime = status.elapsedIterationTime - data.options.delay ?? 0f;
 
             Rect viewport = target.View.Viewport;
 
@@ -161,7 +166,7 @@ namespace UIForia.Animation {
                 iterationTime /= options.iterations.Value;
             }
 
-            float progress = Mathf.Clamp01(status.elapsedIterationTime / duration);
+            float progress = Mathf.Clamp01(elapsedIterationTime / duration);
 
             status.iterationProgress = progress;
             status.frameCount++;
@@ -174,13 +179,14 @@ namespace UIForia.Animation {
             }
 
             ProcessedKeyFrameGroup[] groups = processedFrameGroups.array;
+            ProcessedKeyFrame next = default;
             for (int i = 0; i < processedFrameGroups.Count; i++) {
                 StylePropertyId propertyId = groups[i].propertyId;
                 ProcessedKeyFrame[] frames = groups[i].frames.array;
                 int frameCount = groups[i].frames.size;
 
                 ProcessedKeyFrame prev = frames[0];
-                ProcessedKeyFrame next = frames[frameCount - 1];
+                next = frames[frameCount - 1];
 
                 for (int j = 1; j < frameCount; j++) {
                     if (frames[j].time > targetProgress) {
@@ -394,7 +400,12 @@ namespace UIForia.Animation {
                 }
             }
 
-            return progress == 1f ? UITaskResult.Completed : UITaskResult.Running;
+            if (progress >= 1f) {
+                target.style.SetAnimatedProperty(next.value.styleProperty);
+                return UITaskResult.Completed;
+            }
+
+            return UITaskResult.Running;
         }
 
     }

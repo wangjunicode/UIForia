@@ -74,7 +74,6 @@ namespace UIForia.Systems {
         private readonly EventPropagator m_EventPropagator;
         private readonly List<ValueTuple<MouseEventHandler, UIElement, ExpressionContext>> m_MouseEventCaptureList;
         private readonly List<ValueTuple<DragEventHandler, UIElement, ExpressionContext>> m_DragEventCaptureList;
-        protected static readonly ZIndexComparerAscending s_DepthComparer = new ZIndexComparerAscending();
         private static readonly Event s_Event = new Event();
 
         public KeyboardModifiers KeyboardModifiers => modifiersThisFrame;
@@ -281,12 +280,6 @@ namespace UIForia.Systems {
         private void ProcessMouseInput() {
             LightList<UIElement> queryResults = (LightList<UIElement>) m_LayoutSystem.QueryPoint(m_MouseState.mousePosition, LightList<UIElement>.Get());
 
-            if (queryResults.Count == 17) {
-                Debug.Log("process input");
-                foreach (UIElement el in queryResults) {
-                    Debug.Log($"{el.GetType()}");
-                }
-            }
             if (!IsDragging) {
                 LightList<UIElement> ancestorElements = LightList<UIElement>.Get();
 
@@ -296,16 +289,15 @@ namespace UIForia.Systems {
                      * Every following element must be a parent of the first.
                      * This makes no sense for drag events but a lot for every other.
                      */
-                    UIElement last = queryResults[queryResults.size - 1];
-                    
-                    for (int index = 0; index < queryResults.size - 1; index++) {
+                    UIElement firstElement = queryResults[0];
+                    ancestorElements.Add(firstElement);
+
+                    for (int index = 1; index < queryResults.size; index++) {
                         UIElement element = queryResults[index];
-                        if (IsParentOf(element, last)) {
+                        if (IsParentOf(element, firstElement)) {
                             ancestorElements.Add(element);
                         }
                     }
-                    
-                    ancestorElements.Add(last);
 
                     LightList<UIElement>.Release(ref queryResults);
                     queryResults = ancestorElements;
@@ -344,13 +336,10 @@ namespace UIForia.Systems {
                 m_ActiveElements.Clear();
             }
 
-            m_EnteredElements.Sort(s_DepthComparer);
-            m_ElementsThisFrame.Sort(s_DepthComparer);
-
             if (!IsDragging) {
                 CursorStyle newCursor = null;
                 if (m_ElementsThisFrame.Count > 0) {
-                    for (int i = m_ElementsThisFrame.Count - 1; i >= 0; i--) {
+                    for (int i = 0; i < m_ElementsThisFrame.Count; i++) {
                         UIElement element = m_ElementsThisFrame[i];
 
                         if (element.style.IsDefined(StylePropertyId.Cursor)) {
@@ -448,7 +437,7 @@ namespace UIForia.Systems {
 
             if (m_MouseDownElements.Count == 0) return;
 
-            m_EventPropagator.origin = m_MouseDownElements[m_MouseDownElements.Count - 1];
+            m_EventPropagator.origin = m_MouseDownElements[0];
 
             for (int i = 0; i < m_MouseDownElements.Count; i++) {
                 UIElement element = m_MouseDownElements[i];
@@ -1021,11 +1010,11 @@ namespace UIForia.Systems {
             if (elements.Count == 0) return;
 
             m_EventPropagator.Reset(m_MouseState);
-            m_EventPropagator.origin = elements[elements.Count - 1];
+            m_EventPropagator.origin = elements[0];
             MouseInputEvent mouseEvent = new MouseInputEvent(m_EventPropagator, eventType, modifiersThisFrame);
             m_CurrentMouseEvent = mouseEvent;
 
-            for (int i = elements.Count - 1; i >= 0; i--) {
+            for (int i = 0; i < elements.Count; i++) {
                 UIElement element = elements[i];
                 if (element.isDestroyed || element.isDisabled) {
                     continue;
@@ -1125,7 +1114,7 @@ namespace UIForia.Systems {
                 return;
             }
 
-            UIElement ptr = m_ElementsThisFrame[m_ElementsThisFrame.Count - 1];
+            UIElement ptr = m_ElementsThisFrame[0];
             while (ptr != null) {
                 if (ptr == m_FocusedElement) {
                     return;

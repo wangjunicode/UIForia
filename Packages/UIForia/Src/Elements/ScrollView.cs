@@ -60,7 +60,7 @@ namespace UIForia.Elements {
                 }
             }
 
-            overflowSize = new Size(maxX - minX, maxY - minY);
+            overflowSize = new Size(maxX - minX, maxY + layoutResult.padding.bottom - minY);
 
             if (previousChildrenSize != default && (int) previousChildrenSize.height > (int) overflowSize.height && (int) (overflowSize.height + childrenElement.style.TransformPositionY.value - layoutResult.ActualHeight) < 0) {
                 ScrollToVerticalPercent(0);
@@ -87,6 +87,7 @@ namespace UIForia.Elements {
             }
             else {
                 verticalTrack.SetEnabled(true);
+                // todo fix bug: settings preferred height does not immediately update the height
                 float height = (actualSize.height / overflowSize.height) * actualSize.height;
                 float opacity = 1 + fadeTarget - Mathf.Clamp01(Easing.Interpolate((Time.realtimeSinceStartup - lastScrollVerticalTimestamp) / fadeTime, EasingFunction.CubicEaseInOut));
                 verticalHandle.style.SetPreferredHeight(height, StyleState.Normal);

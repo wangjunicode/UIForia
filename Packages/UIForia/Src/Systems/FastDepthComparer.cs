@@ -13,17 +13,17 @@ namespace UIForia.Systems {
             // }
 
             if (a.element.View.Depth != b.element.View.Depth) {
-                return a.element.View.Depth - b.element.View.Depth;
+                return b.element.View.Depth - a.element.View.Depth;
             }
 
             if (a.zIndex != b.zIndex) {
-                return a.zIndex - b.zIndex;
+                return b.zIndex - a.zIndex;
             }
 
             // SiblingRenderOrder
 
             if (a.parent == b.parent) {
-                return a.element.siblingIndex - b.element.siblingIndex;
+                return b.element.siblingIndex - a.element.siblingIndex;
             }
 
             UIElement left = a.element;
@@ -32,7 +32,7 @@ namespace UIForia.Systems {
                 for (int i = 0; i < a.element.depth - b.element.depth; i++) {
                     left = left.parent;
                     if (left == b.element) {
-                        return 1;
+                        return -1;
                     }
                 }
             }
@@ -40,7 +40,7 @@ namespace UIForia.Systems {
                 for (int i = 0; i < b.element.depth - a.element.depth; i++) {
                     right = right.parent;
                     if (right == a.element) {
-                        return -1;
+                        return 1;
                     }
                 }
             }
@@ -48,7 +48,7 @@ namespace UIForia.Systems {
             bool loop = true;
             while (loop) {
                 if (left.parent == right.parent) {
-                    return left.siblingIndex - right.siblingIndex;
+                    return right.siblingIndex - left.siblingIndex;
                 }
                 left = left.parent;
                 right = right.parent;
@@ -58,7 +58,7 @@ namespace UIForia.Systems {
 
             // traversal index -- break ties between things at the same depth
             
-            return a.traversalIndex - b.traversalIndex;
+            return b.traversalIndex - a.traversalIndex;
 
         }
 

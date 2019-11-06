@@ -185,7 +185,38 @@ namespace UIForia.Parsing.Style {
 
         public static readonly ValueTuple<string, Type>[] s_SupportedVariableTypes = {ValueTuple.Create("float", typeof(float)), ValueTuple.Create("int", typeof(int)), ValueTuple.Create("Color", typeof(Color)), ValueTuple.Create("UIMeasurement", typeof(UIMeasurement)), ValueTuple.Create("Measurement", typeof(UIMeasurement)), ValueTuple.Create("UIFixedLength", typeof(UIFixedLength)), ValueTuple.Create("FixedLength", typeof(UIFixedLength)), ValueTuple.Create("TransformOffset", typeof(OffsetMeasurement)), ValueTuple.Create("Offset", typeof(OffsetMeasurement)),};
 
-        public static readonly ValueTuple<string, string>[] s_AnimationOptionNames = {ValueTuple.Create(nameof(AnimationOptions.loopTime).ToLower(), nameof(AnimationOptions.loopTime)), ValueTuple.Create(nameof(AnimationOptions.iterations).ToLower(), nameof(AnimationOptions.iterations)), ValueTuple.Create(nameof(AnimationOptions.delay).ToLower(), nameof(AnimationOptions.delay)), ValueTuple.Create(nameof(AnimationOptions.duration).ToLower(), nameof(AnimationOptions.duration)), ValueTuple.Create(nameof(AnimationOptions.forwardStartDelay).ToLower(), nameof(AnimationOptions.forwardStartDelay)), ValueTuple.Create(nameof(AnimationOptions.reverseStartDelay).ToLower(), nameof(AnimationOptions.reverseStartDelay)), ValueTuple.Create(nameof(AnimationOptions.direction).ToLower(), nameof(AnimationOptions.direction)), ValueTuple.Create(nameof(AnimationOptions.loopType).ToLower(), nameof(AnimationOptions.loopType)), ValueTuple.Create(nameof(AnimationOptions.timingFunction).ToLower(), nameof(AnimationOptions.timingFunction)), ValueTuple.Create(nameof(AnimationOptions.playbackType).ToLower(), nameof(AnimationOptions.playbackType))};
+        public static readonly ValueTuple<string, string>[] s_AnimationOptionNames = {
+            ValueTuple.Create(
+                nameof(AnimationOptions.loopTime).ToLower(),
+                nameof(AnimationOptions.loopTime)),
+            ValueTuple.Create(
+                nameof(AnimationOptions.iterations).ToLower(),
+                nameof(AnimationOptions.iterations)),
+            ValueTuple.Create(
+                nameof(AnimationOptions.delay).ToLower(),
+                nameof(AnimationOptions.delay)),
+            ValueTuple.Create(
+                nameof(AnimationOptions.duration).ToLower(),
+                nameof(AnimationOptions.duration)),
+            ValueTuple.Create(
+                nameof(AnimationOptions.forwardStartDelay).ToLower(),
+                nameof(AnimationOptions.forwardStartDelay)),
+            ValueTuple.Create(
+                nameof(AnimationOptions.reverseStartDelay).ToLower(),
+                nameof(AnimationOptions.reverseStartDelay)),
+            ValueTuple.Create(
+                nameof(AnimationOptions.direction).ToLower(),
+                nameof(AnimationOptions.direction)),
+            ValueTuple.Create(
+                nameof(AnimationOptions.loopType).ToLower(),
+                nameof(AnimationOptions.loopType)),
+            ValueTuple.Create(
+                nameof(AnimationOptions.timingFunction).ToLower(),
+                nameof(AnimationOptions.timingFunction)),
+            ValueTuple.Create(
+                nameof(AnimationOptions.playbackType).ToLower(),
+                nameof(AnimationOptions.playbackType))
+        };
 
         private void ParseAnimationVariables(AnimationRootNode rootNode) {
             while (tokenStream.HasMoreTokens && !AdvanceIfTokenType(StyleTokenType.BracesClose)) {

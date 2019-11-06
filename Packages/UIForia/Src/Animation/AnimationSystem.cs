@@ -19,12 +19,13 @@ namespace UIForia.Animation {
             nextFrame = new LightList<AnimationTask>();
         }
 
-        public void Animate(UIElement element, AnimationData styleAnimation) {
+        public AnimationTask Animate(UIElement element, AnimationData styleAnimation) {
             styleAnimation.options = EnsureDefaultOptionValues(styleAnimation);
             switch (styleAnimation.options.playbackType) {
                 case AnimationPlaybackType.KeyFrame: {
-                    thisFrame.Add(new StyleKeyFrameAnimation(element, styleAnimation));
-                    break;
+                    StyleKeyFrameAnimation animationTask = new StyleKeyFrameAnimation(element, styleAnimation);
+                    thisFrame.Add(animationTask);
+                    return animationTask;
                 }
 
                 case AnimationPlaybackType.Parallel:
@@ -35,6 +36,8 @@ namespace UIForia.Animation {
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+
+            return null;
         }
 
         public void PauseAnimation(UIElement element, AnimationData animationData) {

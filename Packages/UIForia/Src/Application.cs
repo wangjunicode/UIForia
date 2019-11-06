@@ -7,6 +7,7 @@ using UIForia.Bindings;
 using UIForia.Compilers.Style;
 using UIForia.Elements;
 using UIForia.Extensions;
+using UIForia.Layout;
 using UIForia.Parsing.Expression;
 using UIForia.Rendering;
 using UIForia.Routing;
@@ -782,8 +783,8 @@ namespace UIForia {
             return s_Scrollbars.GetOrDefault(name);
         }
 
-        public void Animate(UIElement element, AnimationData animation) {
-            m_AnimationSystem.Animate(element, animation);
+        public AnimationTask Animate(UIElement element, AnimationData animation) {
+            return m_AnimationSystem.Animate(element, animation);
         }
 
         public void PauseAnimation(UIElement element, AnimationData animationData) {

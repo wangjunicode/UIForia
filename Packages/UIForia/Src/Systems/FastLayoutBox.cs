@@ -227,7 +227,7 @@ namespace UIForia.Layout {
 
             switch (measurement.unit) {
                 case UIMeasurementUnit.Content: {
-                    float width = GetContentWidth(resolvedBlockSize);
+                    float width = ComputeContentWidth(resolvedBlockSize);
                     // todo implement cache for content width
                     metrics.contentWidthCacheMiss++;
                     float baseVal = width;
@@ -307,7 +307,7 @@ namespace UIForia.Layout {
 
             switch (measurement.unit) {
                 case UIMeasurementUnit.Content: {
-                    float contentHeight = GetContentHeight(width, blockWidth, blockHeight);
+                    float contentHeight = ComputeContentHeight(width, blockWidth, blockHeight);
                     // todo -- if block size changes the cached value is possibly wrong!
                     // float contentHeight = GetCachedHeightForWidth(width);
                     //

@@ -32,7 +32,7 @@
             Padding = 4px 8px 4px 4px;
             FlexLayoutCrossAxisAlignment = Center;
             FlexLayoutDirection = Horizontal;
-            BackgroundColor = white;
+            BackgroundColor = clear;
             [hover] {
                 MinWidth = 1cnt;
                 TextColor = white;
@@ -53,12 +53,15 @@
         style selected-element-icon {
             PreferredSize = 18px;
             BackgroundTint = black;
-            LayoutBehavior = Ignored;
             AlignY = 50% Parent;
             AlignX = 4px Parent;
             [hover] {
                 BackgroundTint = white;
             }
+        }
+        
+        style options-container {
+            
         }
 
         style select-options {
@@ -85,7 +88,6 @@
         }
 
         style select-chevron-holder {
-            LayoutBehavior = Ignored;
             AlignmentBehaviorX = Parent;
             AlignX = 100%;
             BackgroundColor = #00b5d0;
@@ -147,7 +149,7 @@
         </Group>
 
         <ScrollView onMouseClick="SelectElement($event)" style="select-options" x-id="option-list">
-            <Children x-id="option-children" style="transclude" x-type="template">
+            <Children x-id="option-children" style="options-container" x-type="template">
                 <Group style="select-option">
                     <Image src="selectedElementIcon" style="selected-element-icon" if="DisplaySelectedIcon($option__internal)" />
                     <Div style="select-label">{$option__internal.Label}</Div>

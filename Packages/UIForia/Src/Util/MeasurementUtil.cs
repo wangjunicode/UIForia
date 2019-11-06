@@ -81,6 +81,7 @@ namespace UIForia.Util {
                     float output = 0;
                     while (ptr != null) {
                         output -= ptr.alignedPosition.x;
+                        output -= ptr.transformPositionX.value;
                         ptr = ptr.ResolveLayoutParent();
                     }
                     
@@ -125,6 +126,7 @@ namespace UIForia.Util {
                     float output = 0;
                     while (ptr != null) {
                         output -= ptr.alignedPosition.y;
+                        output -= ptr.transformPositionY.value;
                         ptr = ptr.ResolveLayoutParent();
                     }
                     

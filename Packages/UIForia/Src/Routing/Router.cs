@@ -206,6 +206,9 @@ namespace UIForia.Routing {
 
         public void AddRoute(Route route) {
             this.m_RouteHandlers.Add(route);
+            if (activeRoute == null && route.path == defaultRoute) {
+                activeRoute = route;
+            }
         }
 
         public void AddTransition(string fromPath, string toPath, Func<float, RouteTransitionState> action) {

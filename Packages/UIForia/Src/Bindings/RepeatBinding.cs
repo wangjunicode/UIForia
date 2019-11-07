@@ -42,7 +42,9 @@ namespace UIForia.Bindings {
 
         private void OnItemRemoved(U item, int index) {
             if (template == null) return;
-            Application.DestroyElement(element.children[index]);
+            if (!element.isDestroyed && element.children != null) {
+                Application.DestroyElement(element.children[index]);
+            }
         }
 
         private void OnItemMoved(U item, int index, int newIndex) {

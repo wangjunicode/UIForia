@@ -12,6 +12,8 @@ namespace UIForia {
         
         Action<UIElement, UIElement>[] LoadBindings();
 
+        TemplateMetaData[] LoadTemplateMetaData();
+
     }
 
 }

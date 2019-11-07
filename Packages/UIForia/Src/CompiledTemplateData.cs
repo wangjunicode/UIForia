@@ -15,9 +15,11 @@ namespace UIForia {
         protected LightList<CompiledBinding> compiledBindings;
         protected StyleSheetImporter styleImporter;
 
+        public TemplateMetaData[] templateMetaData;
         public Func<UIElement, TemplateScope2, UIElement>[] templates;
         public Func<UIElement, TemplateScope2, UIElement>[] slots;
         public Action<UIElement, UIElement>[] bindings;
+        public UIStyleGroupContainer[] styles;
         
         public readonly TemplateSettings templateSettings;
         
@@ -37,6 +39,7 @@ namespace UIForia {
             compiledTemplate.guid = GUID.Generate();
             compiledTemplate.templateId = compiledTemplates.size;
             compiledTemplates.Add(compiledTemplate);
+            compiledTemplate.templateMetaData = new TemplateMetaData(compiledTemplate.templateId, filePath, null);
             return compiledTemplate;
         }
 

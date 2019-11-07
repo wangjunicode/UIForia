@@ -4,7 +4,9 @@ using System.Reflection;
 using System.Text;
 using Mono.Linq.Expressions;
 using UIForia.Compilers;
+using UIForia.Compilers.Style;
 using UIForia.Elements;
+using UIForia.Rendering;
 using UnityEditor;
 
 namespace UIForia {
@@ -24,6 +26,10 @@ namespace UIForia {
                 templates = loader.LoadTemplates();
                 slots = loader.LoadSlots();
                 bindings = loader.LoadBindings();
+                templateMetaData = loader.LoadTemplateMetaData();
+                for (int i = 0; i < templateMetaData.Length; i++) {
+                    templateMetaData[i].compiledTemplateData = this;
+                }
             }
             catch (Exception e) {
                 throw e;
@@ -39,7 +45,7 @@ namespace UIForia {
             }
 
             Directory.CreateDirectory(path);
-            
+
             for (int i = 0; i < compiledTemplates.size; i++) {
                 GenerateTemplateCode(path, i, extension);
             }
@@ -56,7 +62,11 @@ namespace UIForia.Generated {
         public Func<UIElement, TemplateScope2, UIElement>[] LoadTemplates() {
             ::TEMPLATE_CODE::
         }
-    
+
+        public TemplateMetaData[] LoadTemplateMetaData() {
+            ::TEMPLATE_META_CODE::
+        }
+
         public Action<UIElement, UIElement>[] LoadBindings() {
             ::BINDING_CODE::
         }
@@ -69,6 +79,9 @@ namespace UIForia.Generated {
 
 }".Trim();
 
+            loadFn = loadFn.Replace("::APPNAME::", templateSettings.StrippedApplicationName);
+
+            // Print Template Code
             string initCode = $"Func<UIElement, TemplateScope2, UIElement>[] templates = new Func<{nameof(UIElement)}, {nameof(TemplateScope2)}, {nameof(UIElement)}>[{compiledTemplates.size}];";
             StringBuilder builder = new StringBuilder();
             builder.AppendLine(initCode);
@@ -79,10 +92,29 @@ namespace UIForia.Generated {
 
             builder.AppendLine($"{s_Indent12}return templates;");
 
-            loadFn = loadFn.Replace("::APPNAME::", templateSettings.StrippedApplicationName);
             loadFn = loadFn.Replace("::TEMPLATE_CODE::", builder.ToString());
             builder.Clear();
 
+            // Print Template Meta Data Code
+            builder.AppendLine($"{nameof(TemplateMetaData)}[] templateData = new {nameof(TemplateMetaData)}[{compiledTemplates.size}];");
+            builder.AppendLine($"{s_Indent12}{nameof(TemplateMetaData)} template;");
+
+            for (int i = 0; i < compiledTemplates.size; i++) {
+                builder.AppendLine($"{s_Indent12}template = new {nameof(TemplateMetaData)}({compiledTemplates[i].templateId}, \"{compiledTemplates[i].filePath}\", null);");
+                // todo -- reference style ids
+                // todo -- maybe other references?
+                // referencedStyles[0] = new StyleReference(styleSheets[4], "alias");
+                // referencedStyles[1] = new StyleReference(styleSheets[5], "alias");
+                builder.AppendLine($"{s_Indent12}templateData[{i}] = template;");
+            }
+
+            builder.AppendLine($"{s_Indent12}return templateData;");
+
+            loadFn = loadFn.Replace("::TEMPLATE_META_CODE::", builder.ToString());
+
+            builder.Clear();
+
+            // Print Slot Code
             builder.AppendLine($"Func<UIElement, TemplateScope2, UIElement>[] slots = new Func<{nameof(UIElement)}, {nameof(TemplateScope2)}, {nameof(UIElement)}>[{compiledSlots.size}];");
 
             for (int i = 0; i < compiledSlots.size; i++) {
@@ -93,6 +125,8 @@ namespace UIForia.Generated {
             loadFn = loadFn.Replace("::SLOT_CODE::", builder.ToString());
 
             builder.Clear();
+
+            // Print Binding Code
             builder.AppendLine($"Action<UIElement, UIElement>[] bindings = new Action<{nameof(UIElement)}, {nameof(UIElement)}>[{compiledBindings.size}];");
 
             for (int i = 0; i < compiledBindings.size; i++) {
@@ -114,6 +148,60 @@ namespace UIForia.Generated {
             AssetDatabase.Refresh();
         }
 
+        private void GenerateStyleCode(StyleSheet styleSheet) {
+            string template = @"
+using System;
+using UIForia.Compilers;
+using UIForia.Elements;
+
+namespace UIForia.Generated {
+
+    public partial class UIForiaGeneratedTemplates_::APPNAME:: {
+
+        ::STYLE_CODE::     
+
+    }
+
+}";
+
+
+            StringBuilder builder = new StringBuilder();
+
+            for (int i = 0; i < styleSheet.styleGroupContainers.Length; i++) {
+                SerializeStyleGroup(builder, styleSheet.styleGroupContainers[i]);
+            }
+            
+        }
+
+        private void SerializeStyleGroup(StringBuilder builder, UIStyleGroupContainer groupContainer) {
+            string styleTemplate = @"
+public UIStyleGroupContainer Style_::GUID::() {
+    UIStyleGroupContainer retn;
+        ::STYLE_CODE::
+    return retn;
+}".Replace("::GUID::", groupContainer.guid.ToString());
+            StringBuilder fnBuilder = new StringBuilder(512);
+            fnBuilder.AppendLine("retn = new UIStyleGroupContainer();");
+            
+            for (int i = 0; i < groupContainer.groups.Count; i++) {
+                fnBuilder.AppendLine($"group = new {nameof(UIStyleGroup)}()");
+                UIStyleGroup group = groupContainer.groups[i];
+                fnBuilder.AppendLine($"runCommand = new {nameof(UIStyleRunCommand)}()");
+                
+                for (int j = 0; j < group.normal.style.PropertyCount; j++) { 
+                    // todo -- need to serialize all this somehow into code
+                    // or need to parse styles in exactly the same order as originally done so the ids match
+                    // or stringify the contents directly into code and parse that in order. 
+                }
+                
+                fnBuilder.AppendLine($"style = new {nameof(UIStyle)}[{group.normal.style.PropertyCount}]");
+                
+            }
+            
+            builder.AppendLine(styleTemplate.Replace("::STYLE_CODE::", fnBuilder.ToString()));
+            
+        }
+        
         private void GenerateTemplateCode(string path, int i, string extension) {
             string file = Path.Combine(path, Path.ChangeExtension(compiledTemplates.array[i].filePath, extension));
             Directory.CreateDirectory(Path.GetDirectoryName(file));

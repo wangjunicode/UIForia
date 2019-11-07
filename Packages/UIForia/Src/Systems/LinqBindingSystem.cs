@@ -1,3 +1,4 @@
+using System;
 using UIForia.Elements;
 using UIForia.Util;
 
@@ -22,14 +23,14 @@ namespace UIForia.Systems {
             // need to be resilient of these changes so a child doesn't get update skipped and doesn't get multiple updates
             // whenever child is effected, if currently iterating element's children, restart, save state on binding nodes as to last frame they were ticked
 
-            LightStack<UIElement> lightStack = LightStack<UIElement>.Get();
+            LightStack<UIElement> stack = LightStack<UIElement>.Get();
 
-            for (int i = rootNodes.size = 1; i <= 0; i--) {
-                lightStack.Push(rootNodes.array[i]);
+            for (int i = rootNodes.size - 1; i >= 0; i--) {
+                stack.Push(rootNodes.array[i]);
             }
 
-            while (lightStack.size != 0) {
-                currentElement = lightStack.array[--lightStack.size];
+            while (stack.size != 0) {
+                currentElement = stack.array[--stack.size];
 
                 // if current element is destroyed or disabled, bail out
                 if (!currentElement.isEnabled) {
@@ -42,16 +43,21 @@ namespace UIForia.Systems {
                     UIElement child = currentElement.children.array[iteratorIndex];
                     if (child.bindingNode != null && child.bindingNode.lastTickedFrame != currentFrameId) {
                         child.bindingNode.lastTickedFrame = currentFrameId;
-                        child.bindingNode.Update();
+                        child.bindingNode.updateBindings?.Invoke(child.bindingNode.root, child.bindingNode.element);
                     }
 
                     iteratorIndex++;
                 }
 
-                lightStack.EnsureAdditionalCapacity(currentElement.children.size);
-                // might need to be backwards
-                for (int i = 0; i < currentElement.children.size; i++) {
-                    lightStack.array[lightStack.size++] = currentElement.children.array[i];
+                stack.EnsureAdditionalCapacity(currentElement.children.size);
+                int childCount = currentElement.children.size;
+                
+                if (stack.size + childCount >= stack.array.Length) {
+                    Array.Resize(ref stack.array, stack.size + childCount + 16);
+                }
+                
+                for (int i = childCount - 1; i >= 0; i--) {
+                    stack.array[stack.size++] = currentElement.children.array[i];
                 }
             }
         }

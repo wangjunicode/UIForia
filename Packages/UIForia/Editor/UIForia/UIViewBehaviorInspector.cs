@@ -72,7 +72,7 @@ namespace UIForia.Editor {
             if (GUILayout.Button("Generate Code")) {
 
                 TemplateSettings settings = behavior.GetTemplateSettings();
-                TemplateCompiler2 compiler = new TemplateCompiler2(settings);
+                TemplateCompiler compiler = new TemplateCompiler(settings);
                 
                 // maybe this should also know the root type for an application
                 PreCompiledTemplateData compiledOutput = new PreCompiledTemplateData(settings);

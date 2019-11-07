@@ -45,10 +45,7 @@ namespace UIForia.Rendering {
             s_NameMap.TryGetValue((int) propertyId, out name);
             return name;
         }
-
-        public static Type GetPropertyType(StylePropertyId propertyId) {
-            return typeof(UIFixedLength);
-        }
+        
 
     }
 

@@ -1,5 +1,6 @@
 using System.IO;
 using NUnit.Framework;
+using Tests;
 using Tests.Mocks;
 using UIForia;
 using UIForia.Compilers;
@@ -21,16 +22,21 @@ public class TestTemplateLoading {
         return settings;
     }
 
-    public CompiledTemplateData GetTemplateData<T>(TemplateSettings settings) {
-        TemplateCompiler2 compiler = new TemplateCompiler2(settings);
+    public CompiledTemplateData GetTemplateData<T>(string appName) {
+        
+        TemplateSettings settings = Setup(appName);
+
+        TemplateCompiler compiler = new TemplateCompiler(settings);
 
         // maybe this should also know the root type for an application
-        //var compiledOutput = new RuntimeTemplateData(settings);
-        var compiledOutput = new PreCompiledTemplateData(settings);
+  //      CompiledTemplateData compiledOutput = new RuntimeTemplateData(settings);
+        CompiledTemplateData compiledOutput = new PreCompiledTemplateData(settings);
 
         compiler.CompileTemplates(typeof(T), compiledOutput);
-        
-        compiledOutput.GenerateCode();
+
+        if (compiledOutput is PreCompiledTemplateData preCompiledTemplateData) {
+            preCompiledTemplateData.GenerateCode();
+        }
         
         compiledOutput.LoadTemplates();
 
@@ -41,26 +47,33 @@ public class TestTemplateLoading {
     [Test]
     public void LoadTemplateFromFile() {
 
-        TemplateSettings settings = Setup(nameof(LoadTemplateFromFile));
-//        
-//        TemplateCompiler2 compiler = new TemplateCompiler2(settings);
-//
-//        // maybe this should also know the root type for an application
-//        PreCompiledTemplateData compiledOutput = new PreCompiledTemplateData(settings);
-//
-//        compiler.CompileTemplates(typeof(LoadTemplate0), compiledOutput);
-//        
-//        compiledOutput.GenerateCode();
-//        
-//        compiledOutput.LoadTemplates();
-        CompiledTemplateData templates = GetTemplateData<LoadTemplate0>(settings);
+        CompiledTemplateData templates = GetTemplateData<LoadTemplate0>(nameof(LoadTemplateFromFile));
         
         MockApplication app = new MockApplication(templates, null);
-        Assert.IsInstanceOf<LoadTemplate0>(app.GetView(0).RootElement);
-        LoadTemplate0 root = (LoadTemplate0)app.GetView(0).RootElement;
+        
+        LoadTemplate0 root =  ElementTestUtil.AssertElementType<LoadTemplate0>(app.GetView(0).RootElement);
+        
         Assert.AreEqual(2, root.ChildCount);
         Assert.IsInstanceOf<UITextElement>(root.GetChild(0));
-        Assert.IsInstanceOf<LoadTemplateHydrate>(root.GetChild(1));
+        
+        LoadTemplateHydrate hydrate = ElementTestUtil.AssertElementType<LoadTemplateHydrate>(root.GetChild(1));
+        
+        ElementTestUtil.AssertHasAttribute(hydrate, "nonconst");
+        ElementTestUtil.AssertHasAttribute(hydrate, "some-attr", "this-is-attr");
+        ElementTestUtil.AssertHasAttribute(hydrate, "first", "true");
+        
+        Assert.AreEqual(42f, hydrate.floatVal);
+        
+        app.Update();
+        
+        Assert.AreEqual(14244 + 144, hydrate.intVal);
+        
+        
+
+//        ElementTestUtil.HarnessElement(hydrate, (el) => {
+//            
+//        });
+
     }
 
     [Test]

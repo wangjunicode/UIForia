@@ -82,6 +82,16 @@ namespace UIForia.Compilers.Style {
             return false;
         }
 
+        public UIStyleGroupContainer GetStyleByName(string name) {
+            for (int i = 0; i < styleGroupContainers.Length; i++) {
+                if (styleGroupContainers[i].name == name) {
+                    return styleGroupContainers[i];
+                }
+            }
+
+            return null;
+        }
+
     }
 
 }

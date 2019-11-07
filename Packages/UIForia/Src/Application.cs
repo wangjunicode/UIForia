@@ -957,10 +957,10 @@ namespace UIForia {
         // todo -- register element in type map for selectors, might need to support subclass matching ie <KlangButton> and <OtherButton> with matching on <Button>
         // todo -- make children a linked list instead
         /// Returns the shell of a UI Element, space is allocated for children but no child data is associated yet, only a parent, view, and depth
-        public UIElement CreateElementFromPool(ProcessedType type, UIElement parent, int childCount, int attributeCount) {
+        public UIElement CreateElementFromPool(ProcessedType type, UIElement parent, int childCount, int attributeCount, int originTemplateId) {
             // children get assigned in the template function but we need to setup the list here
             UIElement retn = elementPool.Get(type);
-
+            retn.templateMetaData = templateData.templateMetaData[originTemplateId];
             retn.id = NextElementId;
             retn.style = new UIStyleSet(retn);
             retn.layoutResult = new LayoutResult();
@@ -980,8 +980,8 @@ namespace UIForia {
             return retn;
         }
 
-        public UIElement CreateElementFromPoolWithType(Type type, UIElement parent, int childCount, int attrCount) {
-            return CreateElementFromPool(TypeProcessor.GetProcessedType(type), parent, childCount, attrCount);
+        public UIElement CreateElementFromPoolWithType(Type type, UIElement parent, int childCount, int attrCount, int originTemplateId) {
+            return CreateElementFromPool(TypeProcessor.GetProcessedType(type), parent, childCount, attrCount, originTemplateId);
         }
 
         public static int ResolveSlotId(string slotName, StructList<SlotUsage> slotList, int defaultId) {

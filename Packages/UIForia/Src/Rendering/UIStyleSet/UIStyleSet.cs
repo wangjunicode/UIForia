@@ -9,6 +9,7 @@ using UIForia.Layout.LayoutTypes;
 using UIForia.Selectors;
 using UIForia.Systems;
 using UIForia.Templates;
+using UIForia.Text;
 using UIForia.Util;
 using UnityEngine;
 
@@ -898,26 +899,33 @@ namespace UIForia.Rendering {
         }
 #endif
 
-        private static readonly StringBuilder s_Builder = new StringBuilder(128);
 
         public void SetBaseStyles(LightList<UIStyleGroupContainer> styles) {
-            throw new NotImplementedException();
+            // todo -- this could be a lot faster, this is happening every frame in dynamic bindings :(
+            
+            for (int i = 0; i < styles.size; i++) {
+                if (styles[i] == null) {
+                    styles.RemoveAt(i--);
+                }
+            }
+            
+            UpdateSharedStyles(styles); 
         }
 
         public string GetStyleNames() {
-            s_Builder.Clear();
+            TextUtil.StringBuilder.Clear();
 
             for (int i = 0; i < styleGroupContainers.Count; i++) {
                 if (styleGroupContainers[i].styleType == StyleType.Shared) {
-                    if (s_Builder.Length > 0) {
-                        s_Builder.Append(" ");
+                    if (TextUtil.StringBuilder.Length > 0) {
+                        TextUtil.StringBuilder.Append(" ");
                     }
 
-                    s_Builder.Append(styleGroupContainers[i].name);
+                    TextUtil.StringBuilder.Append(styleGroupContainers[i].name);
                 }
             }
 
-            return s_Builder.ToString();
+            return TextUtil.StringBuilder.ToString();
         }
 
         // todo -- explore caching this value

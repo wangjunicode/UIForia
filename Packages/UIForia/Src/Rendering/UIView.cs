@@ -96,7 +96,7 @@ public class UIView {
         this.name = "Default";
         this.application = application;
         this.visibleElements = new LightList<UIElement>(32);
-        this.dummyRoot = (UIViewRootElement) application.CreateElementFromPoolWithType(typeof(UIViewRootElement), null, 0, 0);
+        this.dummyRoot = (UIViewRootElement) application.CreateElementFromPoolWithType(typeof(UIViewRootElement), null, 0, 0, 0);
         this.dummyRoot.flags |= UIElementFlags.Enabled;
         this.dummyRoot.flags |= UIElementFlags.AncestorEnabled;
         this.dummyRoot.View = this;

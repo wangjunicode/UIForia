@@ -51,7 +51,7 @@ namespace UIForia.Compilers {
         public LambdaExpression templateFn;
         public GUID guid;
         public string slotName;
-        
+        public TemplateMetaData templateMetaData;
         public StructStack<ContextVariableDefinition> contextStack;
 
         public bool TryGetSlotData(string slotName, out SlotDefinition slotDefinition) {

@@ -1,11 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using TMPro;
 using UIForia.Layout;
 using UIForia.Layout.LayoutTypes;
 using UIForia.Rendering;
-using UIForia.Systems;
 using UIForia.Text;
 using UIForia.Util;
 using UnityEditor;
@@ -245,6 +243,16 @@ namespace UIForia.Rendering {
 
     public static partial class StyleUtil {
         
+        public static System.Type GetPropertyType(StylePropertyId propertyId) {
+            switch (propertyId) {
+
+            __REPLACE_StyleUtil_GetPropertyType
+            }
+
+            return null;
+
+        }
+
       public static bool CanAnimate(StylePropertyId propertyId) {
                 switch (propertyId) {
     
@@ -325,8 +333,19 @@ __REPLACE_StyleBindingCompiler_DoCompile
                     retn += $"                    case StylePropertyId.{properties[i].propertyIdName}: return true;\n";
                 }
             }
-
             template = template.Replace("__REPLACE_StyleUtil__IsInherited", retn);
+            retn = "";
+            
+            for (int i = 0; i < properties.Length; i++) {
+                if (!properties[i].type.IsGenericType) {
+                    retn += $"                    case StylePropertyId.{properties[i].propertyIdName}: return typeof({properties[i].type});\n";
+                }
+                else {
+                    retn += $"                    case StylePropertyId.{properties[i].propertyIdName}: return typeof(System.Collections.Generic.IReadOnlyList<{typeof(GridTrackSize)}>);\n";
+                }
+            }
+            
+            template = template.Replace("__REPLACE_StyleUtil_GetPropertyType", retn);
             retn = "";
 
             for (int i = 0; i < properties.Length; i++) {

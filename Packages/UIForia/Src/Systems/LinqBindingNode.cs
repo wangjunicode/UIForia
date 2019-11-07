@@ -20,49 +20,86 @@ namespace UIForia.Systems {
 
         public T value;
 
+        public ContextVariable(int id, string name) {
+            this.id = id;
+            this.name = name;
+        }
+
+    }
+
+    public class ContextVariableReference {
+
+        public int id;
+        public ContextVariable reference;
+        public ContextVariableReference next;
+
     }
 
     public class LinqBindingNode {
 
         internal UIElement root;
         internal UIElement element;
-        internal LightList<LinqBindingNode> children;
 
         internal int lastTickedFrame;
 
         internal Action<UIElement, UIElement> createdBinding;
         internal Action<UIElement, UIElement> enabledBinding;
         internal Action<UIElement, UIElement> updateBindings;
-
-        internal TemplateContextWrapper contextWrapper;
-
+        
         internal ContextVariable localVariable;
-        private LinqBindingNode parent;
+        internal ContextVariableReference resolvedVariable;
+        internal LinqBindingNode parent;
 
-        public void CreateLocalContextVariable(ContextVariable variable) { }
+        public void CreateLocalContextVariable(ContextVariable variable) {
+            if (localVariable == null) {
+                localVariable = variable;
+                return;
+            }
 
-        public ContextVariable GetContextVariable(int id) {
-            return null;
+            ContextVariable ptr = localVariable;
+            while (true) {
+                if (ptr.next == null) {
+                    ptr.next = variable;
+                    return;
+                }
+
+                ptr = ptr.next;
+            }
         }
 
+        // todo -- optimize w/ ContextVariableReference
+        public ContextVariable GetContextVariable(int id) {
+            
+            ContextVariable ptr = localVariable;
+            while (ptr != null) {
+                if (ptr.id == id) {
+                    return ptr;
+                }
+
+                ptr = ptr.next;
+            }
+
+            return parent?.GetContextVariable(id);
+        }
+
+        // todo -- maybe make generic
         public ContextVariable GetLocalContextVariable(string variableName) {
-//            if (localVariable == null) {
-//                return default; // should never hit this since we only use this via generated code that is pre-validated
-//            }
-//
-//            ContextVariable ptr = localVariable;
-//            while (ptr != null) {
-//                if (ptr.name == variableName) {
-//                    return (T) ptr;
-//                }
-//                ptr = ptr.next;
-//            }
+            // should never be null since we only use this via generated code that is pre-validated
+
+            ContextVariable ptr = localVariable;
+            while (ptr != null) {
+                if (ptr.name == variableName) {
+                    return ptr;
+                }
+
+                ptr = ptr.next;
+            }
 
             return default; // should never hit this
         }
-        
-        public void Update() {
-            updateBindings?.Invoke(root, element);
+
+     //   public void Update() {
+        //    updateBindings?.Invoke(root, element);
 //
 //            if (!element.isEnabled) {
 //                return;
@@ -92,16 +129,28 @@ namespace UIForia.Systems {
 //            }
 //
 //            iteratorIndex = -1;
-        }
+      //  }
 
         [UsedImplicitly] // called from template functions, 
         public static LinqBindingNode Get(Application application, UIElement rootElement, UIElement element, int createdId, int enabledId, int updatedId) {
             LinqBindingNode node = new LinqBindingNode(); // todo -- pool
             node.root = rootElement;
             node.element = element;
+            element.bindingNode = node;
             
+            UIElement ptr = element.parent;
+            while (ptr != null) {
+                if (ptr.bindingNode != null) {
+                    node.parent = ptr.bindingNode;
+                    break;
+                }
+
+                ptr = ptr.parent;
+            }
+
             if (createdId != -1) {
                 node.createdBinding = application.templateData.bindings[createdId];
+                node.createdBinding?.Invoke(rootElement, element);
             }
 
             if (enabledId != -1) {
@@ -112,15 +161,6 @@ namespace UIForia.Systems {
                 node.updateBindings = application.templateData.bindings[updatedId];
             }
 
-            UIElement ptr = element.parent;
-            while (ptr != null) {
-                if (ptr.bindingNode != null) {
-                    node.parent = ptr.bindingNode;
-                    break;
-                }
-                ptr = ptr.parent;
-            }
-            
             return node;
         }
 

@@ -1,36 +1,54 @@
+using System;
 using System.Collections.Generic;
 using UIForia.Compilers.Style;
 
 namespace UIForia.Compilers {
 
+    public struct StyleSheetReference {
+
+        public string alias;
+        public StyleSheet styleSheet;
+
+        public StyleSheetReference(string alias, StyleSheet styleSheet) {
+            this.alias = alias;
+            this.styleSheet = styleSheet;
+        }
+
+    }
+    
     public class TemplateMetaData {
 
         public int id;
         public string filePath;
         public int usages;
-        public UIStyleGroupContainer[] styleReferences; // dictionary? sorted by name? trie?
+        public StyleSheetReference[] styleReferences; // dictionary? sorted by name? trie?
 
-        public UIStyleGroupContainer implicitRootStyle;
-        public Dictionary<string, UIStyleGroupContainer> implicitStyleMap;
+        public CompiledTemplateData compiledTemplateData;
         
-        public TemplateMetaData(int id, string filePath, UIStyleGroupContainer[] styleReferences) {
+        public TemplateMetaData(int id, string filePath, StyleSheetReference[] styleReferences) {
             this.id = id;
             this.filePath = filePath;
             this.styleReferences = styleReferences;
         }
         
         public UIStyleGroupContainer ResolveStyleByName(string name) {
-            if (styleReferences == null) return default;
-            
-            for (int i = 0; i < styleReferences.Length; i++) {
-                
+
+            if (name.Contains(".")) {
+                throw new NotImplementedException("Cannot resolve style name with aliases yet");    
             }
             
-            return default;
+            for (int i = 0; i < styleReferences.Length; i++) {
+                if (styleReferences[i].alias == name) {
+                    return styleReferences[i].styleSheet.GetStyleByName(name);
+                }
+
+            }
+            
+            return null;
         }
 
-        public UIStyleGroupContainer GetStyleById(int id) {
-            return default;
+        public UIStyleGroupContainer GetStyleById(int styleId) {
+            return compiledTemplateData.styles[styleId];
         }
 
     }

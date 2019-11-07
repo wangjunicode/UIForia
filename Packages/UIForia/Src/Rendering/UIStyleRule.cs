@@ -3,7 +3,7 @@ using UIForia.Parsing.Style;
 
 namespace UIForia.Rendering {
 
-    public class UIStyleRule {
+    public sealed class UIStyleRule {
 
         /// <summary>
         /// true if this rule was preceded by a `not` keyword

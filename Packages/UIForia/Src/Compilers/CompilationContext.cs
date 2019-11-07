@@ -31,6 +31,11 @@ namespace UIForia.Compilers {
         private StructList<StyleSheetLookup> styleSheets;
 
         private readonly LightStack<ParameterExpression> hierarchyStack;
+        
+        private static readonly MethodInfo s_Comment = typeof(ExpressionUtil).GetMethod(nameof(ExpressionUtil.Comment), BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);
+        private static readonly MethodInfo s_CommentNewLineBefore = typeof(ExpressionUtil).GetMethod(nameof(ExpressionUtil.CommentNewLineBefore), BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);
+        private static readonly MethodInfo s_CommentNewLineAfter = typeof(ExpressionUtil).GetMethod(nameof(ExpressionUtil.CommentNewLineAfter), BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);
+        private static readonly char[] s_SplitChar = {'.'};
 
         public CompilationContext() {
             this.outputComments = true;
@@ -71,7 +76,6 @@ namespace UIForia.Compilers {
 
         }
 
-        private static readonly char[] s_SplitChar = new char[] {'.'};
 
         public int ResolveStyleName(string name) {
             if (styleSheets == null) return -1;
@@ -189,10 +193,6 @@ namespace UIForia.Compilers {
         public void IfEqualsNull(Expression target, BlockExpression block) {
             AddStatement(Expression.IfThen(Expression.Equal(target, Expression.Constant(null)), block));
         }
-
-        private static MethodInfo s_Comment = typeof(ExpressionUtil).GetMethod(nameof(ExpressionUtil.Comment), BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);
-        private static MethodInfo s_CommentNewLineBefore = typeof(ExpressionUtil).GetMethod(nameof(ExpressionUtil.CommentNewLineBefore), BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);
-        private static MethodInfo s_CommentNewLineAfter = typeof(ExpressionUtil).GetMethod(nameof(ExpressionUtil.CommentNewLineAfter), BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);
 
         public void Comment(string comment) {
             if (outputComments) {

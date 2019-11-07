@@ -14,8 +14,11 @@ namespace UIForia {
             templates = new Func<UIElement, TemplateScope2, UIElement>[compiledTemplates.size];
             bindings = new Action<UIElement, UIElement>[compiledBindings.size];
             slots = new Func<UIElement, TemplateScope2, UIElement>[compiledSlots.size];
+            templateMetaData = new TemplateMetaData[compiledTemplates.size];
+            
             for (int i = 0; i < templates.Length; i++) {
                 templates[i] = (Func<UIElement, TemplateScope2, UIElement>) compiledTemplates[i].templateFn.Compile();
+                templateMetaData[i] = compiledTemplates[i].templateMetaData;
             }
 
             for (int i = 0; i < slots.Length; i++) {

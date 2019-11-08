@@ -45,7 +45,7 @@ style <Anchor> {
 
 style button-group {
     LayoutType = Flex;
-    FlexLayoutDirection = Column;
+    FlexLayoutDirection = Horizontal;
     TextFontSize = 18px;
 }
 

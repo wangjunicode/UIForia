@@ -1,105 +1,101 @@
 <?xml version="1.0" encoding="utf-8"?>
 <UITemplate>
 
-    <Style path="Documentation/Features/AlignmentDemo.style"/>
+    <Style path="Documentation/Features/AlignmentDemo.style" />
+    <Style src="Documentation/Documentation.style" alias="theme" />
 
     <Contents>
         
-<!--        <Heading1>The Flexbox Layout Guide</Heading1>-->
+        <Heading1>Learn all about Alignments here!</Heading1>
         
-    
-        <ScrollView style="demo-container">
-            <Group style="container fit-vertical ">
-                <Group style="group1 item-shrink color1 x-align" />
-                <Group style="group1 item-fill color1" />
-                <Group style="group1 item-grow color1" />
-                <Group style="group1 item-dont-grow color1" />
+        <Group style="button-group">
+            <Div style="button" onMouseClick="SetAlignmentTarget(AlignmentTarget.Screen)">Screen</Div>
+            <Div style="button" onMouseClick="SetAlignmentTarget(AlignmentTarget.Parent)">Parent</Div>
+            <Div style="button" onMouseClick="SetAlignmentTarget(AlignmentTarget.ParentContentArea)">Parent Content Area</Div>
+            <Div style="button" onMouseClick="SetAlignmentTarget(AlignmentTarget.LayoutBox)">Layout Box</Div>
+<!--            <Div style="button" onMouseClick="SetAlignmentTarget(AlignmentTarget.View)">View</Div>-->
+        </Group>
+
+        <Text>Current Anchor Target is {alignmentTarget}</Text>
+
+        <Group style="align-demo-root">
+            <Group style="grid-cell">
+                <Group style="align-left-top" style.alignmentTargetX="alignmentTarget" style.alignmentTargetY="alignmentTarget">
+                    <Image style="icon" src="'icon_1'" />
+                    <Image style="icon" src="'icon_2'" />
+                    <Image style="icon" src="'icon_3'" />
+                    <Image style="icon" src="'icon_4'" />
+                </Group>
             </Group>
-    
-            <Group style="fit container">
-                <Group style="group1 h-item-shrink  color2" />
-                <Group style="group1 h-item-fill color2" />
-                <Group style="group1 h-item-grow color2"/>
-                <Group style="group1 h-item-dont-grow color2" />
+
+            <Group style="grid-cell">
+                <Group style="align-top-center" style.alignmentTargetX="alignmentTarget" style.alignmentTargetY="alignmentTarget">
+                    <Div style="center-this">
+                        <Image style="icon" src="'icon_2'" />
+                        <Image style="icon" src="'icon_6'" />
+                        <Image style="icon" src="'icon_3'" />
+                        <Image style="icon" src="'icon_8'" />
+                    </Div>
+                </Group>
+            </Group>
+            <Group style="grid-cell">
+                <Group style="align-top-right" style.alignmentTargetX="alignmentTarget" style.alignmentTargetY="alignmentTarget">
+                    <Image style="icon" src="'icon_3'" />
+                    <Image style="icon" src="'icon_1'" />
+                    <Image style="icon" src="'icon_2'" />
+                    <Image style="icon" src="'icon_9'" />
+                </Group>
             </Group>
 
-<!--            <Group style="stack-vertical container g1">-->
-<!--                <Group style="group1 color3" />-->
-<!--                <Group style="group1 color3" />-->
-<!--                <Group style="group1 color3" />-->
-<!--            </Group>-->
+            <Group style="grid-cell">
+                <Group style="align-left-center" style.alignmentTargetX="alignmentTarget" style.alignmentTargetY="alignmentTarget">
+                    <Image style="icon" src="'icon_2'" />
+                    <Image style="icon" src="'icon_5'" />
+                    <Image style="icon" src="'icon_8'" />
+                    <Image style="icon" src="'icon_1'" />
+                </Group>
+            </Group>
+            <Group style="grid-cell">
+                <Group style="align-center-center" style.alignmentTargetX="alignmentTarget" style.alignmentTargetY="alignmentTarget">
+                    <Image style="icon" src="'icon_3'" />
+                    <Image style="icon" src="'icon_4'" />
+                    <Image style="icon" src="'icon_9'" />
+                    <Image style="icon" src="'icon_5'" />
+                </Group>
+            </Group>
+            <Group style="grid-cell">
+                <Group style="align-right-center" style.alignmentTargetX="alignmentTarget" style.alignmentTargetY="alignmentTarget">
+                    <Image style="icon" src="'icon_5'" />
+                    <Image style="icon" src="'icon_6'" />
+                    <Image style="icon" src="'icon_7'" />
+                    <Image style="icon" src="'icon_8'" />
+                </Group>
+            </Group>
 
-<!--            <Group style="stack-horizontal container">-->
-<!--                <Group style="group1  color4" />-->
-<!--                <Group style="group1 y-align  color4" />-->
-<!--                <Group style="group1  color4" />-->
-<!--            </Group>-->
-
-
-<!--            <Group style="fit container">-->
-<!--                <Group style="group1 h-item-shrink  color2" />-->
-<!--                <Group style="group1 h-item-fill color2" />-->
-<!--                <Group style="group1 h-item-grow color2"/>-->
-<!--                <Group style="group1 h-item-dont-grow color2" />-->
-<!--            </Group>-->
-
-<!--            <Group style=" stack-horizontal container">-->
-<!--                <Group style="group1  color4" />-->
-<!--                <Group style="group1 y-align  color4" />-->
-<!--                <Group style="group1  color4" />-->
-<!--            </Group>-->
-
-<!--            <Group style="content-size-box-horizontal-wrap">-->
-<!--                <Group style="group-big color3" />-->
-<!--                <Group style="group2 color3" />-->
-<!--                <Group style="group2 color3" />-->
-<!--                <Group style="group2 color3 g1" />-->
-<!--                <Group style="group2 color3" />-->
-<!--                <Group style="group-big color3" />-->
-<!--                <Group style="group2 color3" />-->
-<!--                <Group style="group2 color3" />-->
-<!--                <Group style="groupA color3">-->
-<!--                    <Group style="group3 color1" />-->
-<!--                    <Group style="group3 color2" />-->
-<!--                    <Group style="group3 color4" />-->
-<!--                </Group>-->
-<!--                <Group style="groupA color3">-->
-<!--                    <Group style="group3 color1" />-->
-<!--                    <Group style="group3 color2" />-->
-<!--                    <Group style="group3 color4" />-->
-<!--                </Group>-->
-<!--                <Group style="group2 color3" />-->
-<!--                <Group style="group2 color3" />-->
-<!--                <Group style="group2 color3" />-->
-<!--                <Group style="group2 color3" />-->
-<!--                <Group style="group2 color3" />-->
-<!--                <Group style="group2 color3" />-->
-<!--                <Group style="group2 color3" />-->
-<!--                <Group style="group2 color3" />-->
-<!--                <Group style="group2 color3" />-->
-<!--                <Group style="group2 color3" />-->
-<!--            </Group>-->
-
-<!--            <Group style="content-size-box-vertical-wrap no-clip">-->
-<!--                <Group style="group2 color3" />-->
-<!--                <Group style="group2 color3" />-->
-<!--                <Group style="group2 color3" />-->
-<!--                <Group style="group2 color3" />-->
-<!--                <Group style="group2 color3" />-->
-<!--                <Group style="group2 color3" />-->
-<!--                <Group style="group2 color3" />-->
-<!--                <Group style="group2 color3" />-->
-<!--                <Group style="group2 color3" />-->
-<!--                <Group style="group2 color3" />-->
-<!--                <Group style="group2 color3" />-->
-<!--                <Group style="group2 color3" />-->
-<!--                <Group style="group2 color3" />-->
-<!--                <Group style="group2 color3" />-->
-<!--                <Group style="group2 color3" />-->
-<!--                <Group style="group2 color3" />-->
-<!--                <Group style="group2 color3" />-->
-
-<!--            </Group>-->
-        </ScrollView>
+            <Group style="grid-cell">
+                <Group style="align-left-bottom" style.alignmentTargetX="alignmentTarget" style.alignmentTargetY="alignmentTarget">
+                    <Image style="icon" src="'icon_5'" />
+                    <Image style="icon" src="'icon_6'" />
+                    <Image style="icon" src="'icon_7'" />
+                    <Image style="icon" src="'icon_8'" />
+                </Group>
+            </Group>
+            <Group style="grid-cell">
+                <Group style="align-center-bottom" style.alignmentTargetX="alignmentTarget" style.alignmentTargetY="alignmentTarget">
+                    <Image style="icon" src="'icon_5'" />
+                    <Image style="icon" src="'icon_6'" />
+                    <Image style="icon" src="'icon_7'" />
+                    <Image style="icon" src="'icon_8'" />
+                </Group>
+            </Group>
+            <Group style="grid-cell">
+                <Group style="align-right-bottom" style.alignmentTargetX="alignmentTarget" style.alignmentTargetY="alignmentTarget">
+                    <Image style="icon" src="'icon_5'" />
+                    <Image style="icon" src="'icon_6'" />
+                    <Image style="icon" src="'icon_7'" />
+                    <Image style="icon" src="'icon_8'" />
+                </Group>
+            </Group>
+        </Group>
     </Contents>
 </UITemplate>

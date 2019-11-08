@@ -35,8 +35,8 @@ style notification-count {
     FlexLayoutCrossAxisAlignment = Center;
     FlexLayoutMainAxisAlignment = Center;
    
-    AlignmentBehaviorX = Parent;
-    AlignmentBehaviorY = Parent;
+    AlignmentTargetX = Parent;
+    AlignmentTargetY = Parent;
     AlignX = 110%;
     AlignY = -5px 0;
     

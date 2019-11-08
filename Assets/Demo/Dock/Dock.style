@@ -63,8 +63,8 @@ style weather {
     LayoutBehavior = Ignored;
     AlignmentOffsetX = -1.3w;
     AlignmentOffsetY = 64px;
-    AlignmentBehaviorX = LayoutBox;
-    AlignmentBehaviorY = LayoutBox;
+    AlignmentTargetX = LayoutBox;
+    AlignmentTargetY = LayoutBox;
     BackgroundImage = url("dock/Waether@2x");
     BackgroundFit = Contain;
    
@@ -77,8 +77,8 @@ style temp-gauge {
     LayoutBehavior = Ignored;
     AlignmentOffsetX = -0.85w;
     AlignmentOffsetY = -12px;
-    AlignmentBehaviorX = LayoutBox;
-    AlignmentBehaviorY = LayoutBox;
+    AlignmentTargetX = LayoutBox;
+    AlignmentTargetY = LayoutBox;
     BackgroundImage = url("dock/Temperature@2x");
 }
 
@@ -89,8 +89,8 @@ style clock {
     LayoutBehavior = Ignored;
     AlignmentOffsetX = -5px;
     AlignmentOffsetY = -82px;
-    AlignmentBehaviorX = LayoutBox;
-    AlignmentBehaviorY = LayoutBox;
+    AlignmentTargetX = LayoutBox;
+    AlignmentTargetY = LayoutBox;
     BackgroundImage = url("dock/Clock@2x");
 }
 
@@ -101,7 +101,7 @@ style date {
     LayoutBehavior = Ignored;
     AlignmentOffsetX = 0.89w;
     AlignmentOffsetY = -108px;
-    AlignmentBehaviorX = LayoutBox;
-    AlignmentBehaviorY = LayoutBox;
+    AlignmentTargetX = LayoutBox;
+    AlignmentTargetY = LayoutBox;
     BackgroundImage = url("dock/Calendar@2x");
 }

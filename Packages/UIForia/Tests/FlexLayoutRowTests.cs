@@ -393,7 +393,7 @@ public class FlexLayoutRowTests {
         
         root.style.SetFlexLayoutCrossAxisAlignment(CrossAxisAlignment.Center, StyleState.Normal);
         
-        root.GetChild(1).style.SetAlignmentBehaviorY(AlignmentBehavior.LayoutBox, StyleState.Normal);
+        root.GetChild(1).style.SetAlignmentTargetY(AlignmentTarget.LayoutBox, StyleState.Normal);
         root.GetChild(1).style.SetAlignmentOriginY(0f, StyleState.Normal);
         root.GetChild(1).style.SetAlignmentOffsetY(new OffsetMeasurement(0f, OffsetMeasurementUnit.Percent), StyleState.Normal);
         

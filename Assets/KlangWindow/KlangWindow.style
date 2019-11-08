@@ -52,8 +52,8 @@ style window-container {
     GridLayoutColAlignment = Fit;
     LayoutType = Grid; 
     LayoutBehavior = Ignored;
-    AlignmentBehaviorX = Parent;
-    AlignmentBehaviorY = Parent;
+    AlignmentTargetX = Parent;
+    AlignmentTargetY = Parent;
     [attr:minmax="maximize"] {
         [enter] run animation(maximize);
     }

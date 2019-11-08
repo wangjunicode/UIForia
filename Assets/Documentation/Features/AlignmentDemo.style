@@ -160,7 +160,7 @@ style group2 {
 }
 
 style x-align {
-    AlignmentBehaviorX = LayoutBox;
+    AlignmentTargetX = LayoutBox;
 //    AlignX = Center;
     run animation(left-to-right);
 //    Align = Start | Center | End; // AlignmentOffset = -50% of the element width and AlignmentOrigin = 50% of the
@@ -168,7 +168,7 @@ style x-align {
 } 
 
 style y-align {
-    AlignmentBehaviorY = LayoutBox;
+    AlignmentTargetY = LayoutBox;
     AlignmentDirectionY = Start;
     run animation(top-to-bottom);
 }

@@ -10,10 +10,10 @@ style color-palette {
     PreferredSize = 1cnt;
     BackgroundColor = black;    
     ZIndex = 4;
-    AlignmentBehaviorX = Parent;
+    AlignmentTargetX = Parent;
     AlignX = 110% 0%;
     AlignY = Center;
-    AlignmentBehaviorY = Parent;
+    AlignmentTargetY = Parent;
 }
 
 style color-selection-container {

@@ -38,8 +38,8 @@ style top-blue {
 }
 
 style <Text> {
-    AlignmentBehaviorX = Parent;
-    AlignmentBehaviorY = Parent;
+    AlignmentTargetX = Parent;
+    AlignmentTargetY = Parent;
     AlignX = Center;
     AlignY = Center;
     BackgroundColor = Yellow;

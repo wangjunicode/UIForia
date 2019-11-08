@@ -101,8 +101,8 @@ namespace UIForia.Editor {
             // Alignment
             new PropertyGenerator<AlignmentDirection>(StylePropertyId.AlignmentDirectionX, AlignmentDirection.Start),
             new PropertyGenerator<AlignmentDirection>(StylePropertyId.AlignmentDirectionY, AlignmentDirection.Start),
-            new PropertyGenerator<AlignmentBehavior>(StylePropertyId.AlignmentBehaviorX, AlignmentBehavior.Default),
-            new PropertyGenerator<AlignmentBehavior>(StylePropertyId.AlignmentBehaviorY, AlignmentBehavior.Default),
+            new PropertyGenerator<AlignmentTarget>(StylePropertyId.AlignmentTargetX, AlignmentTarget.Default),
+            new PropertyGenerator<AlignmentTarget>(StylePropertyId.AlignmentTargetY, AlignmentTarget.Default),
             new AnimatedPropertyGenerator<OffsetMeasurement>(StylePropertyId.AlignmentOriginX, new OffsetMeasurement(0)),
             new AnimatedPropertyGenerator<OffsetMeasurement>(StylePropertyId.AlignmentOriginY, new OffsetMeasurement(0)),
             new AnimatedPropertyGenerator<OffsetMeasurement>(StylePropertyId.AlignmentOffsetX, new OffsetMeasurement(0)),

@@ -46,17 +46,17 @@ namespace UIForia.Util {
             return maxY - minY;
         }
 
-        public static float ResolveOriginBaseX(FastLayoutBox box, float viewportX, AlignmentBehavior target, AlignmentDirection direction) {
+        public static float ResolveOriginBaseX(FastLayoutBox box, float viewportX, AlignmentTarget target, AlignmentDirection direction) {
             switch (target) {
-                case AlignmentBehavior.Unset:
-                case AlignmentBehavior.Default:
-                case AlignmentBehavior.LayoutBox:
+                case AlignmentTarget.Unset:
+                case AlignmentTarget.Default:
+                case AlignmentTarget.LayoutBox:
                     return box.allocatedPosition.x;
 
-                case AlignmentBehavior.Parent:
+                case AlignmentTarget.Parent:
                     return 0;
 
-                case AlignmentBehavior.ParentContentArea:
+                case AlignmentTarget.ParentContentArea:
                     FastLayoutBox parentBox = box.ResolveLayoutParent();
                     if (direction == AlignmentDirection.Start) {
                         return parentBox.paddingBox.left + parentBox.borderBox.left;
@@ -65,18 +65,18 @@ namespace UIForia.Util {
                         return parentBox.paddingBox.right + parentBox.borderBox.right;
                     }
 
-                case AlignmentBehavior.Template:
+                case AlignmentTarget.Template:
                     // todo handle transclusion
                     return 0;
 
-                case AlignmentBehavior.TemplateContentArea:
+                case AlignmentTarget.TemplateContentArea:
                     // todo handle transclusion
                     return 0;
 
-                case AlignmentBehavior.View:
+                case AlignmentTarget.View:
                     return viewportX;
 
-                case AlignmentBehavior.Screen:
+                case AlignmentTarget.Screen:
                     FastLayoutBox ptr = box.ResolveLayoutParent();
                     float output = 0;
                     while (ptr != null) {
@@ -92,17 +92,17 @@ namespace UIForia.Util {
             }
         }
 
-        public static float ResolveOriginBaseY(FastLayoutBox box, float viewportY, AlignmentBehavior target, AlignmentDirection direction) {
+        public static float ResolveOriginBaseY(FastLayoutBox box, float viewportY, AlignmentTarget target, AlignmentDirection direction) {
             switch (target) {
-                case AlignmentBehavior.Unset:
-                case AlignmentBehavior.Default:
-                case AlignmentBehavior.LayoutBox:
+                case AlignmentTarget.Unset:
+                case AlignmentTarget.Default:
+                case AlignmentTarget.LayoutBox:
                     return box.allocatedPosition.y;
 
-                case AlignmentBehavior.Parent:
+                case AlignmentTarget.Parent:
                     return 0;
 
-                case AlignmentBehavior.ParentContentArea:
+                case AlignmentTarget.ParentContentArea:
                     FastLayoutBox parentBox = box.ResolveLayoutParent();
 
                     if (direction == AlignmentDirection.Start) {
@@ -112,16 +112,16 @@ namespace UIForia.Util {
                         return parentBox.paddingBox.bottom + parentBox.borderBox.bottom;
                     }
 
-                case AlignmentBehavior.Template:
+                case AlignmentTarget.Template:
                     throw new NotImplementedException();
                 
-                case AlignmentBehavior.TemplateContentArea:
+                case AlignmentTarget.TemplateContentArea:
                     throw new NotImplementedException();
 
-                case AlignmentBehavior.View:
+                case AlignmentTarget.View:
                     return viewportY;
 
-                case AlignmentBehavior.Screen:
+                case AlignmentTarget.Screen:
                     FastLayoutBox ptr = box.ResolveLayoutParent();
                     float output = 0;
                     while (ptr != null) {
@@ -138,31 +138,31 @@ namespace UIForia.Util {
         }
 
 
-        public static float ResolveOffsetOriginSizeX(FastLayoutBox box, float viewportWidth, AlignmentBehavior target) {
+        public static float ResolveOffsetOriginSizeX(FastLayoutBox box, float viewportWidth, AlignmentTarget target) {
             switch (target) {
-                case AlignmentBehavior.Unset:
-                case AlignmentBehavior.Default:
-                case AlignmentBehavior.LayoutBox:
+                case AlignmentTarget.Unset:
+                case AlignmentTarget.Default:
+                case AlignmentTarget.LayoutBox:
                     return box.allocatedSize.width;
 
-                case AlignmentBehavior.Parent:
+                case AlignmentTarget.Parent:
                     return box.ResolveLayoutParent().size.width;
 
-                case AlignmentBehavior.ParentContentArea:
+                case AlignmentTarget.ParentContentArea:
                     return box.ResolveLayoutParent().contentSize.width;
 
-                case AlignmentBehavior.Template:
+                case AlignmentTarget.Template:
                     // todo handle transclusion
                     return 0;
 
-                case AlignmentBehavior.TemplateContentArea:
+                case AlignmentTarget.TemplateContentArea:
                     // todo handle transclusion
                     return 0;
 
-                case AlignmentBehavior.View:
+                case AlignmentTarget.View:
                     return viewportWidth;
 
-                case AlignmentBehavior.Screen:
+                case AlignmentTarget.Screen:
                     return box.element.Application.Width;
 
                 default:
@@ -170,31 +170,31 @@ namespace UIForia.Util {
             }
         }
 
-        public static float ResolveOffsetOriginSizeY(FastLayoutBox box, float viewportHeight, AlignmentBehavior target) {
+        public static float ResolveOffsetOriginSizeY(FastLayoutBox box, float viewportHeight, AlignmentTarget target) {
             switch (target) {
-                case AlignmentBehavior.Unset:
-                case AlignmentBehavior.Default:
-                case AlignmentBehavior.LayoutBox:
+                case AlignmentTarget.Unset:
+                case AlignmentTarget.Default:
+                case AlignmentTarget.LayoutBox:
                     return box.allocatedSize.height;
 
-                case AlignmentBehavior.Parent:
+                case AlignmentTarget.Parent:
                     return box.ResolveLayoutParent().size.height;
 
-                case AlignmentBehavior.ParentContentArea:
+                case AlignmentTarget.ParentContentArea:
                     return box.ResolveLayoutParent().contentSize.height;
 
-                case AlignmentBehavior.Template:
+                case AlignmentTarget.Template:
                     // todo handle transclusion
                     return 0;
 
-                case AlignmentBehavior.TemplateContentArea:
+                case AlignmentTarget.TemplateContentArea:
                     // todo handle transclusion
                     return 0;
 
-                case AlignmentBehavior.View:
+                case AlignmentTarget.View:
                     return viewportHeight;
 
-                case AlignmentBehavior.Screen:
+                case AlignmentTarget.Screen:
                     return box.element.Application.Height;
 
                 default:

@@ -68,8 +68,8 @@ namespace UIForia.Rendering {
 		public const float StackLayoutAlignVertical = 0f;
 		public const AlignmentDirection AlignmentDirectionX = UIForia.Layout.AlignmentDirection.Start;
 		public const AlignmentDirection AlignmentDirectionY = UIForia.Layout.AlignmentDirection.Start;
-		public const AlignmentBehavior AlignmentBehaviorX = UIForia.Layout.AlignmentBehavior.Default;
-		public const AlignmentBehavior AlignmentBehaviorY = UIForia.Layout.AlignmentBehavior.Default;
+		public const AlignmentTarget AlignmentTargetX = UIForia.Layout.AlignmentTarget.Default;
+		public const AlignmentTarget AlignmentTargetY = UIForia.Layout.AlignmentTarget.Default;
 		public static readonly OffsetMeasurement AlignmentOriginX = new OffsetMeasurement(0f, OffsetMeasurementUnit.Pixel);
 		public static readonly OffsetMeasurement AlignmentOriginY = new OffsetMeasurement(0f, OffsetMeasurementUnit.Pixel);
 		public static readonly OffsetMeasurement AlignmentOffsetX = new OffsetMeasurement(0f, OffsetMeasurementUnit.Pixel);
@@ -266,10 +266,10 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.AlignmentDirectionX, (int)UIForia.Layout.AlignmentDirection.Start);
 				case StylePropertyId.AlignmentDirectionY:
 					 return new StyleProperty(StylePropertyId.AlignmentDirectionY, (int)UIForia.Layout.AlignmentDirection.Start);
-				case StylePropertyId.AlignmentBehaviorX:
-					 return new StyleProperty(StylePropertyId.AlignmentBehaviorX, (int)UIForia.Layout.AlignmentBehavior.Default);
-				case StylePropertyId.AlignmentBehaviorY:
-					 return new StyleProperty(StylePropertyId.AlignmentBehaviorY, (int)UIForia.Layout.AlignmentBehavior.Default);
+				case StylePropertyId.AlignmentTargetX:
+					 return new StyleProperty(StylePropertyId.AlignmentTargetX, (int)UIForia.Layout.AlignmentTarget.Default);
+				case StylePropertyId.AlignmentTargetY:
+					 return new StyleProperty(StylePropertyId.AlignmentTargetY, (int)UIForia.Layout.AlignmentTarget.Default);
 				case StylePropertyId.AlignmentOriginX:
 					 return new StyleProperty(StylePropertyId.AlignmentOriginX, new OffsetMeasurement(0f, OffsetMeasurementUnit.Pixel));
 				case StylePropertyId.AlignmentOriginY:

@@ -383,18 +383,18 @@ namespace UIForia.Rendering {
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.AlignmentDirectionY, (int)value), state); }
         }
         
-        public UIForia.Layout.AlignmentBehavior AlignmentBehaviorX {
+        public UIForia.Layout.AlignmentTarget AlignmentTargetX {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.AlignmentBehaviorX, state).AsAlignmentBehavior; }
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.AlignmentTargetX, state).AsAlignmentTarget; }
             [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.AlignmentBehaviorX, (int)value), state); }
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.AlignmentTargetX, (int)value), state); }
         }
         
-        public UIForia.Layout.AlignmentBehavior AlignmentBehaviorY {
+        public UIForia.Layout.AlignmentTarget AlignmentTargetY {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.AlignmentBehaviorY, state).AsAlignmentBehavior; }
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.AlignmentTargetY, state).AsAlignmentTarget; }
             [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.AlignmentBehaviorY, (int)value), state); }
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.AlignmentTargetY, (int)value), state); }
         }
         
         public UIForia.OffsetMeasurement AlignmentOriginX {
@@ -1375,18 +1375,18 @@ namespace UIForia.Rendering {
             set { SetProperty(new StyleProperty(StylePropertyId.AlignmentDirectionY, (int)value)); }
         }
             
-        public UIForia.Layout.AlignmentBehavior AlignmentBehaviorX {
+        public UIForia.Layout.AlignmentTarget AlignmentTargetX {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return (UIForia.Layout.AlignmentBehavior)FindEnumProperty(StylePropertyId.AlignmentBehaviorX); }
+            get { return (UIForia.Layout.AlignmentTarget)FindEnumProperty(StylePropertyId.AlignmentTargetX); }
             [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.AlignmentBehaviorX, (int)value)); }
+            set { SetProperty(new StyleProperty(StylePropertyId.AlignmentTargetX, (int)value)); }
         }
             
-        public UIForia.Layout.AlignmentBehavior AlignmentBehaviorY {
+        public UIForia.Layout.AlignmentTarget AlignmentTargetY {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return (UIForia.Layout.AlignmentBehavior)FindEnumProperty(StylePropertyId.AlignmentBehaviorY); }
+            get { return (UIForia.Layout.AlignmentTarget)FindEnumProperty(StylePropertyId.AlignmentTargetY); }
             [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.AlignmentBehaviorY, (int)value)); }
+            set { SetProperty(new StyleProperty(StylePropertyId.AlignmentTargetY, (int)value)); }
         }
             
         public UIForia.OffsetMeasurement AlignmentOriginX {
@@ -2481,21 +2481,21 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UIForia.Layout.AlignmentBehavior AlignmentBehaviorX { 
+            public UIForia.Layout.AlignmentTarget AlignmentTargetX { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.AlignmentBehaviorX, out property)) return property.AsAlignmentBehavior;
-                    return DefaultStyleValues_Generated.AlignmentBehaviorX;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.AlignmentTargetX, out property)) return property.AsAlignmentTarget;
+                    return DefaultStyleValues_Generated.AlignmentTargetX;
                 }
             }
 
-            public UIForia.Layout.AlignmentBehavior AlignmentBehaviorY { 
+            public UIForia.Layout.AlignmentTarget AlignmentTargetY { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.AlignmentBehaviorY, out property)) return property.AsAlignmentBehavior;
-                    return DefaultStyleValues_Generated.AlignmentBehaviorY;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.AlignmentTargetY, out property)) return property.AsAlignmentTarget;
+                    return DefaultStyleValues_Generated.AlignmentTargetY;
                 }
             }
 
@@ -3724,20 +3724,20 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.AlignmentDirectionY, state).AsAlignmentDirection;
         }
         
-        public void SetAlignmentBehaviorX(in UIForia.Layout.AlignmentBehavior? value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.AlignmentBehaviorX, (int)value), state);
+        public void SetAlignmentTargetX(in UIForia.Layout.AlignmentTarget? value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.AlignmentTargetX, (int)value), state);
         }
 
-        public UIForia.Layout.AlignmentBehavior GetAlignmentBehaviorX(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.AlignmentBehaviorX, state).AsAlignmentBehavior;
+        public UIForia.Layout.AlignmentTarget GetAlignmentTargetX(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.AlignmentTargetX, state).AsAlignmentTarget;
         }
         
-        public void SetAlignmentBehaviorY(in UIForia.Layout.AlignmentBehavior? value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.AlignmentBehaviorY, (int)value), state);
+        public void SetAlignmentTargetY(in UIForia.Layout.AlignmentTarget? value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.AlignmentTargetY, (int)value), state);
         }
 
-        public UIForia.Layout.AlignmentBehavior GetAlignmentBehaviorY(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.AlignmentBehaviorY, state).AsAlignmentBehavior;
+        public UIForia.Layout.AlignmentTarget GetAlignmentTargetY(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.AlignmentTargetY, state).AsAlignmentTarget;
         }
         
         public void SetAlignmentOriginX(in UIForia.OffsetMeasurement? value, StyleState state) {
@@ -4531,10 +4531,10 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.AlignmentDirectionX, (int)AlignmentDirectionX);
 				case StylePropertyId.AlignmentDirectionY:
 					 return new StyleProperty(StylePropertyId.AlignmentDirectionY, (int)AlignmentDirectionY);
-				case StylePropertyId.AlignmentBehaviorX:
-					 return new StyleProperty(StylePropertyId.AlignmentBehaviorX, (int)AlignmentBehaviorX);
-				case StylePropertyId.AlignmentBehaviorY:
-					 return new StyleProperty(StylePropertyId.AlignmentBehaviorY, (int)AlignmentBehaviorY);
+				case StylePropertyId.AlignmentTargetX:
+					 return new StyleProperty(StylePropertyId.AlignmentTargetX, (int)AlignmentTargetX);
+				case StylePropertyId.AlignmentTargetY:
+					 return new StyleProperty(StylePropertyId.AlignmentTargetY, (int)AlignmentTargetY);
 				case StylePropertyId.AlignmentOriginX:
 					 return new StyleProperty(StylePropertyId.AlignmentOriginX, AlignmentOriginX);
 				case StylePropertyId.AlignmentOriginY:

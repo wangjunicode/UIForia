@@ -31,17 +31,17 @@ namespace UIForia.Compilers.Style {
                 {"clipbounds", (targetStyle, property, context) => targetStyle.ClipBounds = MapEnum<ClipBounds>(property.children[0], context)},
 
                 // Alignment
-                {"alignmentbehaviorx", (targetStyle, property, context) => targetStyle.AlignmentBehaviorX = MapEnum<AlignmentBehavior>(property.children[0], context)},
-                {"alignmentbehaviory", (targetStyle, property, context) => targetStyle.AlignmentBehaviorY = MapEnum<AlignmentBehavior>(property.children[0], context)},
-                {"alignmentbehavior", (targetStyle, property, context) => {
+                {"alignmenttargetx", (targetStyle, property, context) => targetStyle.AlignmentTargetX = MapEnum<AlignmentTarget>(property.children[0], context)},
+                {"alignmenttargety", (targetStyle, property, context) => targetStyle.AlignmentTargetY = MapEnum<AlignmentTarget>(property.children[0], context)},
+                {"alignmenttarget", (targetStyle, property, context) => {
                         if (property.children.size == 1) {
-                            AlignmentBehavior target = MapEnum<AlignmentBehavior>(property.children[0], context);
-                            targetStyle.AlignmentBehaviorX = target;
-                            targetStyle.AlignmentBehaviorY = target;
+                            AlignmentTarget target = MapEnum<AlignmentTarget>(property.children[0], context);
+                            targetStyle.AlignmentTargetX = target;
+                            targetStyle.AlignmentTargetY = target;
                         }
                         else {
-                            targetStyle.AlignmentBehaviorX = MapEnum<AlignmentBehavior>(property.children[0], context);
-                            targetStyle.AlignmentBehaviorY = MapEnum<AlignmentBehavior>(property.children[1], context);
+                            targetStyle.AlignmentTargetX = MapEnum<AlignmentTarget>(property.children[0], context);
+                            targetStyle.AlignmentTargetY = MapEnum<AlignmentTarget>(property.children[1], context);
                         }
                     }
                 },
@@ -271,7 +271,7 @@ namespace UIForia.Compilers.Style {
                 if (value is StyleIdentifierNode identifierNode1) {
                     MapShorthandAlignmentX(targetStyle, context, identifierNode1, value);
                     if (value2 is StyleIdentifierNode identifierNode2) {
-                        targetStyle.AlignmentBehaviorX = MapEnum<AlignmentBehavior>(identifierNode2, context);
+                        targetStyle.AlignmentTargetX = MapEnum<AlignmentTarget>(identifierNode2, context);
                     }
                     else {
                         targetStyle.AlignmentOffsetX = MapOffsetMeasurement(value2, context);
@@ -281,7 +281,7 @@ namespace UIForia.Compilers.Style {
                     OffsetMeasurement measurement = MapOffsetMeasurement(value, context);
                     targetStyle.AlignmentOriginX = measurement;
                     if (value2 is StyleIdentifierNode identifierNode2) {
-                        targetStyle.AlignmentBehaviorX = MapEnum<AlignmentBehavior>(identifierNode2, context);
+                        targetStyle.AlignmentTargetX = MapEnum<AlignmentTarget>(identifierNode2, context);
                         if (measurement.unit == OffsetMeasurementUnit.Percent) {
                             targetStyle.AlignmentOffsetX = new OffsetMeasurement(-measurement.value, measurement.unit);
                         }
@@ -294,7 +294,13 @@ namespace UIForia.Compilers.Style {
             else if (property.children.size == 3) {
                 targetStyle.AlignmentOriginX = MapOffsetMeasurement(context.GetValueForReference(property.children[0]), context);
                 targetStyle.AlignmentOffsetX = MapOffsetMeasurement(context.GetValueForReference(property.children[1]), context);
-                targetStyle.AlignmentDirectionX = MapEnum<AlignmentDirection>(context.GetValueForReference(property.children[2]), context);
+                targetStyle.AlignmentTargetX = MapEnum<AlignmentTarget>(context.GetValueForReference(property.children[2]), context);
+            }
+            else if (property.children.size == 4) {
+                targetStyle.AlignmentOriginX = MapOffsetMeasurement(context.GetValueForReference(property.children[0]), context);
+                targetStyle.AlignmentOffsetX = MapOffsetMeasurement(context.GetValueForReference(property.children[1]), context);
+                targetStyle.AlignmentTargetX = MapEnum<AlignmentTarget>(context.GetValueForReference(property.children[2]), context);
+                targetStyle.AlignmentDirectionX = MapEnum<AlignmentDirection>(context.GetValueForReference(property.children[3]), context);
             }
         }
 
@@ -320,7 +326,7 @@ namespace UIForia.Compilers.Style {
                 if (value is StyleIdentifierNode identifierNode1) {
                     MapShorthandAlignmentY(targetStyle, context, identifierNode1, value);
                     if (value2 is StyleIdentifierNode identifierNode2) {
-                        targetStyle.AlignmentBehaviorY = MapEnum<AlignmentBehavior>(identifierNode2, context);
+                        targetStyle.AlignmentTargetY = MapEnum<AlignmentTarget>(identifierNode2, context);
                     }
                     else {
                         targetStyle.AlignmentOffsetY = MapOffsetMeasurement(value2, context);
@@ -330,7 +336,7 @@ namespace UIForia.Compilers.Style {
                     OffsetMeasurement measurement = MapOffsetMeasurement(value, context);
                     targetStyle.AlignmentOriginY = measurement;
                     if (value2 is StyleIdentifierNode identifierNode2) {
-                        targetStyle.AlignmentBehaviorY = MapEnum<AlignmentBehavior>(identifierNode2, context);
+                        targetStyle.AlignmentTargetY = MapEnum<AlignmentTarget>(identifierNode2, context);
                         if (measurement.unit == OffsetMeasurementUnit.Percent) {
                             targetStyle.AlignmentOffsetY = new OffsetMeasurement(-measurement.value, measurement.unit);
                         }
@@ -343,7 +349,13 @@ namespace UIForia.Compilers.Style {
             else if (property.children.size == 3) {
                 targetStyle.AlignmentOriginY = MapOffsetMeasurement(context.GetValueForReference(property.children[0]), context);
                 targetStyle.AlignmentOffsetY = MapOffsetMeasurement(context.GetValueForReference(property.children[1]), context);
-                targetStyle.AlignmentDirectionY = MapEnum<AlignmentDirection>(context.GetValueForReference(property.children[2]), context);
+                targetStyle.AlignmentTargetY = MapEnum<AlignmentTarget>(context.GetValueForReference(property.children[2]), context);
+            }
+            else if (property.children.size == 4) {
+                targetStyle.AlignmentOriginY = MapOffsetMeasurement(context.GetValueForReference(property.children[0]), context);
+                targetStyle.AlignmentOffsetY = MapOffsetMeasurement(context.GetValueForReference(property.children[1]), context);
+                targetStyle.AlignmentTargetY = MapEnum<AlignmentTarget>(context.GetValueForReference(property.children[2]), context);
+                targetStyle.AlignmentDirectionY = MapEnum<AlignmentDirection>(context.GetValueForReference(property.children[3]), context);
             }
         }
 

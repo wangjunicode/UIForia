@@ -59,10 +59,6 @@
                 BackgroundTint = white;
             }
         }
-        
-        style options-container {
-            
-        }
 
         style select-options {
             // attention: load bearing comma
@@ -88,7 +84,7 @@
         }
 
         style select-chevron-holder {
-            AlignmentBehaviorX = Parent;
+            AlignmentTargetX = Parent;
             AlignX = 100%;
             BackgroundColor = #00b5d0;
             PreferredSize = 32px 1psz;

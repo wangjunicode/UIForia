@@ -368,7 +368,7 @@ namespace UIForia.Rendering {
         public BackgroundFit AsBackgroundFit => (BackgroundFit) int0;
         public ClipBounds AsClipBounds => (ClipBounds) int0;
 
-        public AlignmentBehavior AsAlignmentBehavior => (AlignmentBehavior) int0;
+        public AlignmentTarget AsAlignmentTarget => (AlignmentTarget) int0;
         public AlignmentDirection AsAlignmentDirection => (AlignmentDirection)int0;
 
         public static bool operator ==(in StyleProperty a, in StyleProperty b) {

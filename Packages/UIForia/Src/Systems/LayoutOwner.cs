@@ -364,7 +364,7 @@ namespace UIForia.Layout {
                 // same for world matrix computation
                 // todo -- lots of ways to avoid doing this. only need it for self aligning things or things with a transform position not in pixels
                 
-                if (box.alignmentTargetX != AlignmentBehavior.Unset && box.alignmentTargetX != AlignmentBehavior.Default) {
+                if (box.alignmentTargetX != AlignmentTarget.Unset && box.alignmentTargetX != AlignmentTarget.Default) {
                     OffsetMeasurement originX = box.element.style.AlignmentOriginX;
                     OffsetMeasurement offsetX = box.element.style.AlignmentOffsetX;
                     AlignmentDirection direction = box.element.style.AlignmentDirectionX;
@@ -382,7 +382,7 @@ namespace UIForia.Layout {
                     }
                 }
 
-                if (box.alignmentTargetY != AlignmentBehavior.Unset && box.alignmentTargetY != AlignmentBehavior.Default) {
+                if (box.alignmentTargetY != AlignmentTarget.Unset && box.alignmentTargetY != AlignmentTarget.Default) {
                     OffsetMeasurement originY = box.element.style.AlignmentOriginY;
                     OffsetMeasurement offsetY = box.element.style.AlignmentOffsetY;
                     AlignmentDirection direction = box.element.style.AlignmentDirectionY;
@@ -486,6 +486,10 @@ namespace UIForia.Layout {
             }
         }
 
+        private static bool IsElementDisrespectingParentClipping(UIElement element) {
+            return element.style.ClipBehavior == ClipBehavior.Never || element.style.ZIndex > 0;
+        }
+
         private static bool PointInClippedArea(Vector2 point, UIElement element) {
             Vector2 screenPosition = element.layoutResult.screenPosition;
 
@@ -522,9 +526,19 @@ namespace UIForia.Layout {
                 if (!element.layoutResult.ScreenRect.ContainOrOverlap(point) || PointInClippedArea(point, element)) {
                     continue;
                 }
-
+                
+                if (IsElementDisrespectingParentClipping(element)) {
+                    retn.Add(element.layoutBox);
+                    continue;
+                }
+                
                 UIElement ptr = element.parent;
+
                 while (ptr != null && !PointInClippedArea(point, ptr)) {
+                    if (IsElementDisrespectingParentClipping(ptr)) {
+                        retn.Add(element.layoutBox);
+                        break;
+                    }
                     ptr = ptr.parent;
                 }
 

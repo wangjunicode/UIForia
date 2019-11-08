@@ -18,7 +18,7 @@
 
         style scroll-handle-vertical {
             PreferredWidth = @scrollBarSize;
-            AlignmentBehaviorY = Parent;
+            AlignmentTargetY = Parent;
             BorderRadius = 50%;
             BackgroundColor = grey;
             LayoutFit = Shrink;
@@ -34,7 +34,7 @@
 
         style scroll-handle-horizontal {
             PreferredHeight = @scrollBarSize;
-            AlignmentBehaviorX = Parent;
+            AlignmentTargetX = Parent;
             BorderRadius = 50%;
             BackgroundColor = grey;
         }

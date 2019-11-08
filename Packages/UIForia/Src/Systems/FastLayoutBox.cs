@@ -97,8 +97,8 @@ namespace UIForia.Layout {
         public float scaleX;
         public float scaleY;
 
-        public AlignmentBehavior alignmentTargetX;
-        public AlignmentBehavior alignmentTargetY;
+        public AlignmentTarget alignmentTargetX;
+        public AlignmentTarget alignmentTargetY;
         private float cachedPreferredWidth;
         public WidthCache widthCache;
 
@@ -192,8 +192,8 @@ namespace UIForia.Layout {
             scaleX = element.style.TransformScaleX;
             scaleY = element.style.TransformScaleY;
 
-            alignmentTargetX = element.style.AlignmentBehaviorX;
-            alignmentTargetY = element.style.AlignmentBehaviorY;
+            alignmentTargetX = element.style.AlignmentTargetX;
+            alignmentTargetY = element.style.AlignmentTargetY;
 
             selfLayoutFitHorizontal = element.style.LayoutFitHorizontal;
             selfLayoutFitVertical = element.style.LayoutFitVertical;
@@ -849,12 +849,12 @@ namespace UIForia.Layout {
                         transformPositionY = property.AsOffsetMeasurement;
                         break;
 
-                    case StylePropertyId.AlignmentBehaviorX:
-                        alignmentTargetX = property.AsAlignmentBehavior;
+                    case StylePropertyId.AlignmentTargetX:
+                        alignmentTargetX = property.AsAlignmentTarget;
                         break;
 
-                    case StylePropertyId.AlignmentBehaviorY:
-                        alignmentTargetY = property.AsAlignmentBehavior;
+                    case StylePropertyId.AlignmentTargetY:
+                        alignmentTargetY = property.AsAlignmentTarget;
                         break;
                     case StylePropertyId.LayoutFitHorizontal:
                         selfLayoutFitHorizontal = property.AsLayoutFit;

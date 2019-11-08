@@ -930,7 +930,7 @@ namespace UIForia.Compilers.Style {
                     return UIMeasurementUnit.ParentContentArea;
 
                 case "psz":
-                    return UIMeasurementUnit.ParentSize;
+                    return UIMeasurementUnit.BlockSize;
 
                 case "em":
                     return UIMeasurementUnit.Em;

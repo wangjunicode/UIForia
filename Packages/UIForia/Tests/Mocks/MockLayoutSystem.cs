@@ -3,10 +3,10 @@ using UIForia.Systems;
 
 namespace Tests.Mocks {
 
-    public class MockLayoutSystem : FastLayoutSystem {
+    public class MockLayoutSystem : AwesomeLayoutSystem {
 
-        public MockLayoutSystem(Application application, IStyleSystem styleSystem)
-            : base(application, styleSystem) { }
+        public MockLayoutSystem(Application application)
+            : base(application) { }
 
     }
 

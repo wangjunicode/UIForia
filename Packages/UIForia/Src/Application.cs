@@ -798,7 +798,7 @@ namespace UIForia {
         public UIView[] GetViews() {
             return m_Views.ToArray();
         }
-
+        
         public AnimationData GetAnimationFromFile(string fileName, string animationName) {
             AnimationData data;
             styleImporter.ImportStyleSheetFromFile(fileName).TryGetAnimationData(animationName, out data);

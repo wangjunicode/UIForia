@@ -1,4 +1,5 @@
 ﻿using System;
+using UIForia.Layout;
 
 [Flags]
 internal enum UIElementFlags {
@@ -18,10 +19,50 @@ internal enum UIElementFlags {
 
     Registered = 1 << 14,
 
-    DebugLayout = 1 << 15,
-
     EnabledThisFrame = 1 << 16,
     DisabledThisFrame = 1 << 17,
 
+    // Layout Flags
+    DebugLayout = 1 << 15,
+    LayoutSizeWidthDirty = 1 << 18,
+    LayoutSizeHeightDirty = 1 << 19,
+    LayoutBoxModelWidthDirty = 1 << 20,
+    LayoutBoxModelHeightDirty = 1 << 21,
+    LayoutHierarchyDirty = 1 << 22,
+    LayoutTransformDirty = 1 << 23,
+    LayoutAlignmentWidthDirty = 1 << 24,
+    LayoutAlignmentHeightDirty = 1 << 25,
+    LayoutFitWidthDirty = 1 << 26,
+    LayoutFitHeightDirty = 1 << 27,
+    LayoutTypeDirty = 1 << 28,
+    LayoutBehaviorDirty = 1 << 29,
+    LayoutBorderPaddingHorizontalDirty = 1 << 30,
+    LayoutBorderPaddingVerticalDirty = 1 << 31,
+
+    DefaultLayoutDirty = (
+        LayoutSizeWidthDirty |
+        LayoutSizeHeightDirty |
+        LayoutBoxModelWidthDirty |
+        LayoutBoxModelHeightDirty |
+        LayoutTypeDirty |
+        LayoutBehaviorDirty
+    ),
+
+    LayoutFlags = (
+        LayoutSizeWidthDirty |
+        LayoutSizeHeightDirty |
+        LayoutBoxModelWidthDirty |
+        LayoutBoxModelHeightDirty |
+        LayoutHierarchyDirty |
+        LayoutTransformDirty |
+        LayoutAlignmentWidthDirty |
+        LayoutAlignmentHeightDirty |
+        LayoutFitWidthDirty |
+        LayoutFitHeightDirty |
+        LayoutTypeDirty |
+        LayoutBehaviorDirty |
+        LayoutBorderPaddingHorizontalDirty |
+        LayoutBorderPaddingVerticalDirty
+    )
 
 }

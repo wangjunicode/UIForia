@@ -134,7 +134,7 @@ namespace UIForia.Layout.LayoutTypes {
 
             Size size = default;
 
-            if (style.FlexLayoutDirection == LayoutDirection.Column) {
+            if (style.FlexLayoutDirection == LayoutDirection.Vertical) {
                 size = RunColumnLayout(false);
                 for (int i = 0; i < children.Count; i++) {
                     Item item = items[i];
@@ -179,7 +179,7 @@ namespace UIForia.Layout.LayoutTypes {
                 return 0;
             }
 
-            if (style.FlexLayoutDirection == LayoutDirection.Column) {
+            if (style.FlexLayoutDirection == LayoutDirection.Vertical) {
                 Size size = RunColumnLayout(true);
                 return size.width;
             }
@@ -197,7 +197,7 @@ namespace UIForia.Layout.LayoutTypes {
             float cachedWidth = allocatedWidth;
             allocatedWidth = width;
             Size size;
-            if (style.FlexLayoutDirection == LayoutDirection.Column) {
+            if (style.FlexLayoutDirection == LayoutDirection.Vertical) {
                 size = RunColumnLayout(true);
             }
             else {
@@ -402,7 +402,7 @@ namespace UIForia.Layout.LayoutTypes {
                 }
             }
 
-            if (style.FlexLayoutDirection == LayoutDirection.Row) {
+            if (style.FlexLayoutDirection == LayoutDirection.Horizontal) {
                 for (int i = track.startItemIndex; i < track.endItemIndex; i++) {
                     itemList[i].mainAxisStart = itemList[i].margin.top + mainAxisOffset + offset;
                     offset += itemList[i].mainSize + spacerSize;

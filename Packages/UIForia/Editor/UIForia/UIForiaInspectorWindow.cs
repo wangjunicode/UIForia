@@ -413,35 +413,27 @@ namespace UIForia.Editor {
 
                 ctx.DrawPath(path);
 
-                if (selectedElement.style.LayoutType != LayoutType.Grid) {
-                    return;
-                }
-
-                if (!(selectedElement.Application.LayoutSystem.GetBoxForElement(selectedElement) is GridLayoutBox layoutBox)) {
-                    return;
-                }
-
-                Rect contentRect = selectedElement.layoutResult.ContentRect;
-
-                path.SetTransform(SVGXMatrix.TRS(selectedElement.layoutResult.screenPosition + selectedElement.layoutResult.ContentRect.min, 0, Vector2.one).ToMatrix4x4());
-                path.BeginPath();
-                path.SetStrokeWidth(1);
-                path.SetStroke(Color.black);
-
-                StructList<GridTrack> rows = layoutBox.GetRowTracks();
-                StructList<GridTrack> cols = layoutBox.GetColTracks();
-
-                for (int i = 0; i < rows.Count; i++) {
-                    path.MoveTo(0, rows[i].position);
-                    path.LineTo(contentRect.width, rows[i].position);
-                }
-
-                for (int i = 0; i < cols.Count; i++) {
-                    path.MoveTo(cols[i].position, 0);
-                    path.LineTo(cols[i].position, contentRect.height);
-                }
-
-                path.Stroke();
+//                Rect contentRect = selectedElement.layoutResult.ContentRect;
+//
+//                path.SetTransform(SVGXMatrix.TRS(selectedElement.layoutResult.screenPosition + selectedElement.layoutResult.ContentRect.min, 0, Vector2.one).ToMatrix4x4());
+//                path.BeginPath();
+//                path.SetStrokeWidth(1);
+//                path.SetStroke(Color.black);
+//
+//                StructList<GridTrack> rows = layoutBox.GetRowTracks();
+//                StructList<GridTrack> cols = layoutBox.GetColTracks();
+//
+//                for (int i = 0; i < rows.Count; i++) {
+//                    path.MoveTo(0, rows[i].position);
+//                    path.LineTo(contentRect.width, rows[i].position);
+//                }
+//
+//                for (int i = 0; i < cols.Count; i++) {
+//                    path.MoveTo(cols[i].position, 0);
+//                    path.LineTo(cols[i].position, contentRect.height);
+//                }
+//
+//                path.Stroke();
             }
         }
 

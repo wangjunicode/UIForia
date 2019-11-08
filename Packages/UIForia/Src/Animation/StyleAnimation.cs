@@ -106,7 +106,7 @@ namespace UIForia.Animation {
                 case UIMeasurementUnit.Content:
                     return element.layoutResult.actualSize.width * measurement.value;
 
-                case UIMeasurementUnit.ParentSize:
+                case UIMeasurementUnit.BlockSize:
                     if (element.parent.style.PreferredWidth.IsContentBased) {
                         return 0f;
                     }
@@ -149,7 +149,7 @@ namespace UIForia.Animation {
                 case UIMeasurementUnit.Content:
                     return element.layoutResult.actualSize.height * measurement.value;
 
-                case UIMeasurementUnit.ParentSize:
+                case UIMeasurementUnit.BlockSize:
                     if (element.parent.style.PreferredHeight.IsContentBased) {
                         return 0f;
                     }

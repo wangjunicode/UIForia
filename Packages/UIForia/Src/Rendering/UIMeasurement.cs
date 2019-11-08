@@ -39,14 +39,14 @@ namespace UIForia.Rendering {
 
         public bool IsFixed => !IsParentBased;
 
-        public bool IsParentBased => (unit & (UIMeasurementUnit.ParentSize | UIMeasurementUnit.ParentContentArea)) != 0;
+        public bool IsParentBased => (unit & (UIMeasurementUnit.BlockSize | UIMeasurementUnit.ParentContentArea)) != 0;
 
         public bool IsContentBased => unit == UIMeasurementUnit.Content;
         
         //public bool IsContentRelative => (unit & (UIUnit.Content | UIUnit.FitContent | UIUnit.MaxContent | UIUnit.MinContent)) != 0;
 
         public static UIMeasurement ParentContentArea => new UIMeasurement(1f, UIMeasurementUnit.ParentContentArea);
-        public static UIMeasurement Parent100 => new UIMeasurement(1f, UIMeasurementUnit.ParentSize);
+        public static UIMeasurement Parent100 => new UIMeasurement(1f, UIMeasurementUnit.BlockSize);
         public static UIMeasurement Content100 => new UIMeasurement(1f, UIMeasurementUnit.Content);
         public static UIMeasurement Unset => new UIMeasurement(FloatUtil.UnsetValue);
 
@@ -66,7 +66,7 @@ namespace UIForia.Rendering {
         }
 
         public static UIMeasurement ParentSize(float percentage) {
-            return new UIMeasurement(percentage, UIMeasurementUnit.ParentSize);
+            return new UIMeasurement(percentage, UIMeasurementUnit.BlockSize);
         }
         
         public static bool operator ==(UIMeasurement self, UIMeasurement other) {

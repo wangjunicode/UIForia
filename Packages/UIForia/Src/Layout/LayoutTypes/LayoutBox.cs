@@ -137,8 +137,7 @@ namespace UIForia.Layout.LayoutTypes {
                 return new Rect(x, y, Mathf.Max(0, width), Mathf.Max(0, height));
             }
         }
-
-
+        
         public float GetMarginTop(float width) {
             throw new NotImplementedException();
         }
@@ -548,7 +547,7 @@ namespace UIForia.Layout.LayoutTypes {
                 case UIMeasurementUnit.Content:
                     return Mathf.Max(0, PaddingBorderHorizontal + (GetContentWidth() * widthMeasurement.value));
 
-                case UIMeasurementUnit.ParentSize:
+                case UIMeasurementUnit.BlockSize:
                     if (parent == null) return view.Viewport.width;
                     if (!IsIgnored && parent.prefWidth.IsContentBased) {
                         return 0f;
@@ -762,7 +761,7 @@ namespace UIForia.Layout.LayoutTypes {
 
                     return Mathf.Max(0, PaddingBorderVertical + (contentHeight * height.value));
 
-                case UIMeasurementUnit.ParentSize:
+                case UIMeasurementUnit.BlockSize:
                     if (parent == null) return view.Viewport.height;
                     if (!IsIgnored && parent.prefHeight.IsContentBased) {
                         return 0f;
@@ -808,7 +807,7 @@ namespace UIForia.Layout.LayoutTypes {
                 case UIMeasurementUnit.Content:
                     return GetContentWidth() * margin.value;
 
-                case UIMeasurementUnit.ParentSize:
+                case UIMeasurementUnit.BlockSize:
                     if (parent.prefWidth.IsContentBased) {
                         return 0f;
                     }
@@ -919,7 +918,7 @@ namespace UIForia.Layout.LayoutTypes {
                 case UIMeasurementUnit.Content:
                     return Mathf.Max(0, PaddingBorderHorizontal + (GetContentWidth() * widthMeasurement.value));
 
-                case UIMeasurementUnit.ParentSize:
+                case UIMeasurementUnit.BlockSize:
                     if (parent.prefWidth.IsContentBased) {
                         return 0f;
                     }
@@ -963,7 +962,7 @@ namespace UIForia.Layout.LayoutTypes {
                 case UIMeasurementUnit.Content:
                     return Mathf.Max(0, PaddingBorderVertical + (GetContentHeight(width) * heightMeasurement.value));
 
-                case UIMeasurementUnit.ParentSize:
+                case UIMeasurementUnit.BlockSize:
                     if (parent.prefHeight.IsContentBased) {
                         return 0f;
                     }

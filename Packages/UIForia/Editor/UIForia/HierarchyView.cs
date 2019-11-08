@@ -186,7 +186,6 @@ public class HierarchyView : TreeView {
         GUI.Label(args.rowRect, s_Content, s_ElementNameStyle);
         r.x += v.x + 5f;
         r.width -= v.x + 5f;
-        LayoutBox box = item.element.Application.LayoutSystem.GetBoxForElement(item.element);
 
         List<string> names = ListPool<string>.Get();
 
@@ -206,7 +205,7 @@ public class HierarchyView : TreeView {
         s_Content.text = styleName; // + "(children: " + box.children.Count + ", id: " + item.element.id + ")";
 
         if (showChildrenAndId) {
-            s_Content.text += "(children: " + box?.children.Count + ", id: " + item.element?.id + ")";
+            s_Content.text += "(id: " + item.element?.id + ")";
         }
 
         textStyle.textColor = AdjustColor(UIForiaEditorTheme.elementStyleNormal, item.element);

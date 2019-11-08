@@ -8,7 +8,7 @@ namespace UIForia.Layout {
         Unset = UnitConstants.Unset,
         Pixel = UnitConstants.Pixel,
         Content = UnitConstants.Content,
-        ParentSize = UnitConstants.ParentSize,
+        BlockSize = UnitConstants.ParentSize,
         ViewportWidth = UnitConstants.ViewportWidth,
         ViewportHeight = UnitConstants.ViewportHeight,
         ParentContentArea = UnitConstants.ParentContentArea,

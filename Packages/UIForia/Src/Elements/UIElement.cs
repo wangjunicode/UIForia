@@ -7,6 +7,7 @@ using UIForia.Expressions;
 using UIForia.Layout;
 using UIForia.Rendering;
 using UIForia.Routing;
+using UIForia.Systems;
 using UIForia.Templates;
 using UIForia.UIInput;
 using UIForia.Util;
@@ -96,6 +97,7 @@ namespace UIForia.Elements {
         public readonly UIStyleSet style;
 
         internal LightList<UIElement> children; // todo -- replace w/ linked list & child count
+        internal LayoutHistory layoutHistory;
 
         public ExpressionContext templateContext; // todo -- can probably be moved to binding system
         
@@ -107,6 +109,7 @@ namespace UIForia.Elements {
         internal static IntMap<ElementColdData> s_ColdDataMap = new IntMap<ElementColdData>();
 
         internal FastLayoutBox layoutBox;
+        internal AwesomeLayoutBox awesomeLayoutBox;
         internal RenderBox renderBox;
 
         internal int depthTraversalIndex;
@@ -117,7 +120,7 @@ namespace UIForia.Elements {
             this.id = Application.NextElementId;
             this.style = new UIStyleSet(this);
             this.layoutResult = new LayoutResult();
-            this.flags = UIElementFlags.Enabled | UIElementFlags.Alive;
+            this.flags = UIElementFlags.Enabled | UIElementFlags.Alive | UIElementFlags.DefaultLayoutDirty;
             this.children = LightList<UIElement>.Get();
         }
 
@@ -499,6 +502,13 @@ namespace UIForia.Elements {
 
         private static readonly Dictionary<Type, UIElementTypeData> s_TypeDataMap = new Dictionary<Type, UIElementTypeData>();
 
+        public UIElement this[int i] {
+            get { return GetChild(i); }
+        }
+        
+        public UIElement this[string id] {
+            get { return FindById(id); }
+        }
 
         internal struct UIElementTypeData {
 

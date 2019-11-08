@@ -43,7 +43,7 @@ namespace UIForia.Rendering {
 		public static readonly UIFixedLength CornerBevelBottomLeft = new UIFixedLength(0f, UIFixedUnit.Pixel);
 		public const int FlexItemGrow = 0;
 		public const int FlexItemShrink = 0;
-		public const LayoutDirection FlexLayoutDirection = UIForia.Layout.LayoutDirection.Column;
+		public const LayoutDirection FlexLayoutDirection = UIForia.Layout.LayoutDirection.Vertical;
 		public const LayoutWrap FlexLayoutWrap = UIForia.Layout.LayoutWrap.None;
 		public const MainAxisAlignment FlexLayoutMainAxisAlignment = UIForia.Layout.MainAxisAlignment.Start;
 		public const CrossAxisAlignment FlexLayoutCrossAxisAlignment = UIForia.Layout.CrossAxisAlignment.Start;
@@ -217,7 +217,7 @@ namespace UIForia.Rendering {
 				case StylePropertyId.FlexItemShrink:
 					 return new StyleProperty(StylePropertyId.FlexItemShrink, 0);
 				case StylePropertyId.FlexLayoutDirection:
-					 return new StyleProperty(StylePropertyId.FlexLayoutDirection, (int)UIForia.Layout.LayoutDirection.Column);
+					 return new StyleProperty(StylePropertyId.FlexLayoutDirection, (int)UIForia.Layout.LayoutDirection.Vertical);
 				case StylePropertyId.FlexLayoutWrap:
 					 return new StyleProperty(StylePropertyId.FlexLayoutWrap, (int)UIForia.Layout.LayoutWrap.None);
 				case StylePropertyId.FlexLayoutMainAxisAlignment:

@@ -17,7 +17,7 @@ namespace Tests.Mocks {
         public MockApplication(Type elementType, string template = null, ResourceManager resourceManager = null, bool createView = true) : base(GUID.Generate().ToString(), null, resourceManager) {
             
             TemplateRootPath = Path.GetFullPath(Path.Combine(UnityEngine.Application.dataPath, "../Packages/UIForia/Tests"));
-            MockLayoutSystem layoutSystem = new MockLayoutSystem(this, m_StyleSystem);
+            MockLayoutSystem layoutSystem = new MockLayoutSystem(this);
             MockRenderSystem renderSystem = new MockRenderSystem(null, this);
             MockInputSystem inputSystem = new MockInputSystem(layoutSystem);
             m_Systems[m_Systems.IndexOf(m_RenderSystem)] = renderSystem;

@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using UIForia.Layout;
 using UnityEngine;
 
@@ -202,6 +203,29 @@ namespace UIForia.Util {
             }
         }
 
+        [DebuggerStepThrough]
+        public static float ResolveFixedSize(float baseSize, float viewWidth, float viewHeight, float emSize, UIFixedLength fixedSize) {
+            switch (fixedSize.unit) {
+                case UIFixedUnit.Pixel:
+                    return fixedSize.value;
+
+                case UIFixedUnit.Percent:
+                    return baseSize * fixedSize.value;
+
+                case UIFixedUnit.ViewportHeight:
+                    return viewHeight * fixedSize.value;
+
+                case UIFixedUnit.ViewportWidth:
+                    return viewWidth * fixedSize.value;
+
+                case UIFixedUnit.Em:
+                    return emSize * fixedSize.value;
+
+                default:
+                    return 0;
+            }
+        }
+        
         public static float ResolveOffsetMeasurement(FastLayoutBox box, float viewportWidth, float viewportHeight, in OffsetMeasurement measurement, float percentageRelativeVal) {
             switch (measurement.unit) {
                 case OffsetMeasurementUnit.Unset:

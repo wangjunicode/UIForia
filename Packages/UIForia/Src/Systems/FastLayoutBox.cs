@@ -265,7 +265,7 @@ namespace UIForia.Layout {
                 case UIMeasurementUnit.IntrinsicPreferred:
                     return GetIntrinsicPreferredWidth();
 
-                case UIMeasurementUnit.ParentSize:
+                case UIMeasurementUnit.BlockSize:
                     return resolvedBlockSize.size * measurement.value;
 
                 case UIMeasurementUnit.Percentage:
@@ -364,7 +364,7 @@ namespace UIForia.Layout {
                 case UIMeasurementUnit.IntrinsicPreferred:
                     return GetIntrinsicPreferredHeight();
 
-                case UIMeasurementUnit.ParentSize:
+                case UIMeasurementUnit.BlockSize:
                     return blockHeight.size * measurement.value;
 
                 case UIMeasurementUnit.Percentage:
@@ -475,14 +475,12 @@ namespace UIForia.Layout {
                     if (allocatedWidth > preferredWidth) {
                         size.width = allocatedWidth;
                     }
-
                     break;
 
                 case LayoutFit.Shrink:
                     if (allocatedWidth < preferredWidth) {
                         size.width = allocatedWidth;
                     }
-
                     break;
 
                 case LayoutFit.Fill:

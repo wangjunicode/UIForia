@@ -181,7 +181,8 @@ namespace UIForia.Util {
                     return box.ResolveLayoutParent().size.height;
 
                 case AlignmentTarget.ParentContentArea:
-                    return box.ResolveLayoutParent().contentSize.height;
+                    FastLayoutBox parent = box.ResolveLayoutParent();
+                    return parent.size.height - parent.paddingBox.bottom - parent.paddingBox.top - parent.borderBox.bottom - parent.borderBox.top;
 
                 case AlignmentTarget.Template:
                     // todo handle transclusion

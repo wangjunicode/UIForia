@@ -1,6 +1,4 @@
-style <this> {
-    PreferredSize = 1pca;
-}
+import "Documentation/Documentation.style" as theme;
 
 style parent {
     PreferredSize = 300px;
@@ -41,7 +39,7 @@ style align-top-center {
 
 style align-center-center {
     AlignX = Center Parent;
-    AlignY = Center Parent;
+    AlignY = 50% -50% Parent End;
 }
 
 style align-right-center {
@@ -76,7 +74,7 @@ style button {
     BorderColor = black;
     Margin = 3px 5px 20px;
     [hover] {
-        Cursor = url("Cursors/hand");
+        Cursor = @theme.cursorHand;
         BackgroundColor = rgba(200, 220, 220, 200);
     }
 }

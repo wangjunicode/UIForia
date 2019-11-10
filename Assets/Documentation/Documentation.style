@@ -4,18 +4,25 @@ export const buttonBackgroundHoverColor = rgb(220, 195, 90);
 export const buttonBackgroundSelectedColor = rgb(220, 95, 190);
 export const buttonBackgroundSelectedHoverColor = rgb(220, 95, 190);
 
+export const fontGothamLight = url("Fonts/Gotham-Light SDF")
+export const fontGothamNarrowMedium = url("GothamNarrow-Medium SDF");
+export const fontGothamBold = url("Gotham-Bold SDF");
+export const fontDigitalDreamFat = url("Fonts/DIGITALDREAMFAT SDF");
+
+export const cursorHand = url("Cursors/hand");
+
 style root-container {
     PreferredSize = 1vw 1vh;
 }
 
 style main-container {
     LayoutType = Grid;
-    PreferredSize = 1vw 1vh;
-    GridLayoutColTemplate = 300px 1fr;
+    PreferredSize = 1pca;
+    GridLayoutColTemplate = 1mx 1fr;
     GridLayoutRowTemplate = 1fr;
     GridLayoutRowAlignment = Fit;    
     GridLayoutColAlignment = Fit;
-    TextFontAsset = url("GothamNarrow-Medium SDF");
+    TextFontAsset = @fontGothamNarrowMedium;
 }
 
 style <Heading1> {
@@ -37,7 +44,7 @@ style <Anchor> {
     PreferredWidth = 280px;
 
     [hover] {
-        Cursor = url("Cursors/hand");
+        Cursor = @cursorHand;
         BorderColor = black;
         BackgroundColor = rgba(190, 190, 190, 120);
     }
@@ -60,7 +67,7 @@ style button {
     [hover] {
         BackgroundColor = @buttonBackgroundHoverColor;
         TextColor = black;
-        Cursor = url("Cursors/hand");
+        Cursor = @cursorHand;
     }
 }
 
@@ -76,6 +83,9 @@ style button-selected {
 style navigation {
     Padding = 20px;
     BackgroundColor = white;
+    [attr:collapsed="true"] {
+        PreferredSize = 0;
+    }
 }
 
 style demo-panel {
@@ -86,6 +96,30 @@ style demo-panel {
     PreferredSize = 0;
 }
 
+style burger {
+    ZIndex = 200;
+    LayoutBehavior = Ignored;
+    AlignX = 5px 0px Parent;
+    AlignY = 5px 0px Parent;
+    PreferredSize = 20px 15px;
+    Border = 1px;
+    BorderRadius = 4px;
+    BorderColor = rgb(90, 90, 90);
+    Padding = 3px 0;
+    BackgroundColor = white;
+    [hover] {
+        Cursor = @cursorHand;
+        BackgroundColor = rgb(230, 230, 230);
+    }
+}
+
+style burger-patty {
+    PreferredSize = 10px 2px;
+    BorderTop = 1px;
+    BorderColor = rgb(90, 90, 90);
+    AlignX = Center ParentContentArea;
+    Margin = 1px 0;
+}
 
 style mb20 {
     MarginBottom = 20px;
@@ -93,7 +127,7 @@ style mb20 {
 
 style parameter-list {
     LayoutType = Grid;
-    PreferredSize = 0.7vw 1cnt;
+    PreferredSize = 1pca 1cnt;
     GridLayoutColTemplate = 300px 300px 1fr; 
     GridLayoutRowAutoSize = 1mx;
     BackgroundColor = rgba(20, 20, 20, 120);

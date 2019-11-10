@@ -1,3 +1,5 @@
+import "Documentation/Documentation.style" as theme;
+
 style big-child {
     PreferredSize = 300px;
     BackgroundColor = rgba(240, 240, 10, 255);
@@ -17,7 +19,7 @@ style <Text> {
 style p {
     PreferredWidth = 400px;
     TextFontSize = 15;
-    TextFontAsset = url("Fonts/Gotham-Light SDF");
+    TextFontAsset = @theme.fontGothamLight;
     TextFaceDilate = 0;
 }
 

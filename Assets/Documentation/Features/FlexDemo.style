@@ -1,3 +1,5 @@
+import "Documentation/Documentation.style" as theme;
+
 style <this> {
     FlexLayoutDirection = Column;
 }
@@ -139,7 +141,7 @@ style clip-nested {
 
 style special-text {
     TextColor = White;
-    TextFontAsset = url("Fonts/DIGITALDREAMFAT SDF");
+    TextFontAsset = @theme.fontDigitalDreamFat;
 }
 
 style img1 {

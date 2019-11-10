@@ -14,5 +14,4 @@ style <InputElement<String>> {
     PreferredWidth = 500px;
     TextFontSize = 1em;
     MarginBottom = 20px;
-    TextFontAsset = url("Fonts/Gotham-Medium SDF2");
 }

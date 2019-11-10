@@ -1,3 +1,5 @@
+import "Documentation/Documentation.style" as theme;
+
 animation maximize {
     [options] {
         duration = 340;
@@ -69,7 +71,7 @@ style title-bar {
     BackgroundColor = Black;
     PreferredHeight = 64px;
     TextColor = White;
-    TextFontAsset = url("Gotham-Bold SDF");
+    TextFontAsset = @theme.fontGothamBold;
     TextTransform = UpperCase;
     FlexLayoutDirection = Row;
     FlexLayoutCrossAxisAlignment = Center;
@@ -174,7 +176,7 @@ style colony-info-header-text {
     GridLayoutRowAutoSize = 1mx;
     Padding = 1em;
     TextFontSize = 1.1em;
-    TextFontAsset = url("GothamNarrow-Medium SDF");
+    TextFontAsset = @theme.fontGothamNarrowMedium;
     GridLayoutRowGap = 8;
 }
 
@@ -184,7 +186,6 @@ style colony-name {
     GridItemWidth = 2;
     GridItemY = 0;
     MarginBottom = 0.25em;
-    TextFontAsset = url("GothamNarrow-Book SDF");
 }
 
 style quote-container {

@@ -31,18 +31,8 @@ export const cancelColor = rgb(255, 30, 30);
 
 export const topLeftCornerBevel = 20px;
 
-export const fontInputSansCompressed = url("Fonts/InputSansCompressed-Regular SDF");
-export const fontInputSansCompressedBlack = url("Fonts/InputSansCompressed-Black SDF");
-export const fontInputSansMedium = url("Fonts/InputSans-Medium SDF");
-export const fontInputSansBold = url("Fonts/InputSans-Bold SDF");
 export const fontGothamNarrow = url("Fonts/GothamNarrow-Medium SDF");
-export const fontGothamRnd = url("Fonts/GothamRnd-Medium SDF");
 export const fontGothamLight = url("Fonts/Gotham-Light SDF");
-export const fontGothamRndBold = url("Fonts/GothamRnd-Bold SDF");
 export const fontGothamBold = url("Fonts/Gotham-Bold SDF");
-export const fontGothamBook = url("Fonts/Gotham-Book SDF");
-export const fontGothamMedium = url("Fonts/Gotham-Medium SDF");
-export const fontEuroBold = url("Fonts/EurostileLTPro-BoldEx2 SDF");
-export const fontEuro = url("Fonts/EurostileLTPro SDF");
 
 style transclude { LayoutBehavior = TranscludeChildren; }

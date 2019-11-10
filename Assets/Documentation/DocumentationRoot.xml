@@ -3,9 +3,10 @@
     <Style src="Documentation/Documentation.style"/>
     <Contents style="root-container">
         <Group style="main-container">
+            
+            <Group style="burger" onMouseClick="ToggleMenu()"><Div style="burger-patty" /><Div style="burger-patty" /></Group>
 
-            <ScrollView style="navigation">
-
+            <ScrollView style="navigation" x-id="nav">
                 <Heading1>Choose a feature</Heading1>
                 <Anchor href="'/index'">Home</Anchor>
                 <Anchor href="'/AlignmentDemo'">Alignment Demo</Anchor>

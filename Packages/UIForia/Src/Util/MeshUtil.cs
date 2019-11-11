@@ -13,6 +13,7 @@ namespace UIForia.Util {
 
         public static Mesh CreateStandardUIMesh(Size size, Color32 color32 = default(Color32)) {
             Mesh mesh = new Mesh();
+            mesh.name = "UIForiaStandard";
 
             Vector2 uv1 = new Vector2();
             Vector4 tangent = new Vector4();
@@ -42,6 +43,7 @@ namespace UIForia.Util {
 
         public static Mesh CreateStandardUIMesh(Vector2 offset, Size size, Color32 color32) {
             Mesh mesh = new Mesh();
+            mesh.name = "UIForiaStandard";
 
             s_VertexHelper.AddVert(new Vector3(offset.x + 0, offset.y + 0), color32, new Vector2(0f, 1f));
             s_VertexHelper.AddVert(new Vector3(offset.x + 0, offset.y + -size.height), color32, new Vector2(0f, 0f));
@@ -58,6 +60,7 @@ namespace UIForia.Util {
 
         public static Mesh CreateDoubleCutoutMesh(Size size, Rect cutout1, Rect cutout2, Color color0, Color color1, Color color2) {
             Mesh mesh = new Mesh();
+            mesh.name = "UIForiaDoubleCutout";
 
             Vector3 v0 = new Vector3(0, 0, 0);
             Vector3 v1 = new Vector3(0, -size.height, 0);
@@ -129,6 +132,7 @@ namespace UIForia.Util {
 
         public static Mesh CreateCutoutMesh(Size size, Rect cutout, Color color) {
             Mesh mesh = new Mesh();
+            mesh.name = "UIForiaCutout";
 
             Vector2 uv1 = new Vector2();
             Vector4 tangent = new Vector4();
@@ -180,7 +184,8 @@ namespace UIForia.Util {
 
         public static Mesh CreateTriangle(Size size, float offset = 0) {
             Mesh mesh = new Mesh();
-
+            mesh.name = "UIForiaTriangle";
+            
             Vector3 normal0 = new Vector3(-1, 0, 0);
             Vector3 normal1 = new Vector3(0, 1, 0);
             Vector3 normal2 = new Vector3(1, 0, 0);
@@ -199,7 +204,8 @@ namespace UIForia.Util {
 
         public static Mesh CreateDiamond(Size size) {
             Mesh mesh = new Mesh();
-
+            mesh.name = "UIForiaDiamond";
+            
             // top, right, bottom, left
 
             Vector3 normal0 = new Vector3(0, 1, 0);
@@ -227,7 +233,10 @@ namespace UIForia.Util {
         }
 
         public static Mesh ResizeStandardUIMesh(Mesh mesh, Size size) {
-            if (mesh == null) mesh = new Mesh();
+            if (mesh == null) {
+                mesh = new Mesh();
+                mesh.name = "UIForiaStandard";
+            }
 
             Bounds bounds = mesh.bounds;
             if (bounds.size.x == size.width && bounds.size.y == size.height) {

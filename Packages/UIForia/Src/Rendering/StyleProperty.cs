@@ -448,6 +448,10 @@ namespace UIForia.Rendering {
             return new StyleProperty(StylePropertyId.BackgroundColor, color);
         }
 
+        public static StyleProperty BackgroundTint(Color color) {
+            return new StyleProperty(StylePropertyId.BackgroundTint, color);
+        }
+
         public static StyleProperty BackgroundImage(Texture2D texture) {
             return new StyleProperty(StylePropertyId.BackgroundImage, texture);
         }

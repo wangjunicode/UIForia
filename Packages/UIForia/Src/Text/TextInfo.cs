@@ -23,6 +23,7 @@ namespace UIForia.Text {
         internal StructList<LineInfo> lineInfoList;
         internal LightList<TextSpan> spanList;
         internal TextSpan rootSpan;
+        public event Action onTextLayoutRequired;
 
         private Size metrics;
         private bool requiresSpanListRebuild;
@@ -63,15 +64,14 @@ namespace UIForia.Text {
             rootSpan.textStyle = style;
             rootSpan.SetText(content);
         }
-
-        public bool LayoutDirty => requiresSpanListRebuild; // todo remove
-
+        
         public void ForceLayout() {
             requiresLayout = true;
         }
 
         internal void RebuildSpans() {
             requiresSpanListRebuild = true;
+            onTextLayoutRequired?.Invoke();
         }
 
         private void RebuildSpanList() {
@@ -1038,5 +1038,6 @@ namespace UIForia.Text {
 
             return new SelectionRange(lineInfoList.array[lineInfoList.size - 1].globalCharacterEndIndex);
         }
+        
     }
 }

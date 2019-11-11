@@ -24,6 +24,9 @@ namespace UIForia.Systems {
         }
 
         private void HandleStylePropertyChanged(UIElement element, StructList<StyleProperty> properties) {
+            bool checkAlignHorizontal = false;
+            bool updateAlignVertical = false;
+
             for (int i = 0; i < properties.size; i++) {
                 ref StyleProperty property = ref properties.array[i];
                 // todo -- these flags can maybe probably be baked into setting the property
@@ -44,12 +47,14 @@ namespace UIForia.Systems {
                     case StylePropertyId.AlignmentBehaviorX:
                     case StylePropertyId.AlignmentOriginX:
                     case StylePropertyId.AlignmentOffsetX:
-                        element.flags |= UIElementFlags.LayoutAlignmentWidthDirty;
+                    case StylePropertyId.AlignmentDirectionX:
+                        checkAlignHorizontal = true;
                         break;
                     case StylePropertyId.AlignmentBehaviorY:
                     case StylePropertyId.AlignmentOriginY:
                     case StylePropertyId.AlignmentOffsetY:
-                        element.flags |= UIElementFlags.LayoutAlignmentHeightDirty;
+                    case StylePropertyId.AlignmentDirectionY:
+                        updateAlignVertical = true;
                         break;
                     case StylePropertyId.MinWidth:
                     case StylePropertyId.MaxWidth:
@@ -84,10 +89,20 @@ namespace UIForia.Systems {
                 }
             }
 
-            if (element.awesomeLayoutBox != null) {
-                element.awesomeLayoutBox.OnStyleChanged(properties);
+            AwesomeLayoutBox layoutBox = element.awesomeLayoutBox;
+            if (layoutBox != null) {
+                
+                if (checkAlignHorizontal) {
+                    layoutBox.UpdateRequiresHorizontalAlignment();
+                }
+
+                if (updateAlignVertical) {
+                    layoutBox.UpdateRequiresVerticalAlignment();
+                }
+
+                layoutBox.OnStyleChanged(properties);
                 // don't need to null check since root box will never have a style changed
-                element.awesomeLayoutBox.OnChildStyleChanged(element.awesomeLayoutBox, properties);
+                layoutBox.OnChildStyleChanged(element.awesomeLayoutBox, properties);
             }
         }
 
@@ -121,7 +136,12 @@ namespace UIForia.Systems {
         }
 
         public void OnViewRemoved(UIView view) {
-            throw new NotImplementedException("Todo");
+            for (int i = 0; i < runners.size; i++) {
+                if (runners[i].rootElement == view.rootElement) {
+                    runners.RemoveAt(i);
+                    return;
+                }
+            }
         }
 
         public void OnElementEnabled(UIElement element) { }

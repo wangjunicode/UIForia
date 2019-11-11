@@ -64,7 +64,6 @@ namespace UIForia {
         public static readonly List<IAttributeProcessor> s_AttributeProcessors;
 
         internal static readonly Dictionary<string, Type> s_CustomPainters;
-        internal static readonly Dictionary<string, Scrollbar> s_Scrollbars;
 
         public readonly TemplateParser templateParser;
 
@@ -83,7 +82,6 @@ namespace UIForia {
             s_AttributeProcessors = new List<IAttributeProcessor>();
             s_ApplicationList = new LightList<Application>();
             s_CustomPainters = new Dictionary<string, Type>();
-            s_Scrollbars = new Dictionary<string, Scrollbar>();
             Settings = Resources.Load<UIForiaSettings>("UIForiaSettings");
             if (Settings == null) {
                 throw new Exception("UIForiaSettings are missing. Use the UIForia/Create UIForia Settings to create it");
@@ -133,7 +131,7 @@ namespace UIForia {
 
             m_StyleSystem = new StyleSystem();
             m_BindingSystem = new BindingSystem();
-            m_LayoutSystem = new FastLayoutSystem(this, m_StyleSystem);
+            m_LayoutSystem = new AwesomeLayoutSystem(this);
             m_InputSystem = new GameInputSystem(m_LayoutSystem);
             m_RenderSystem = new VertigoRenderSystem(Camera.current, this);
             //       m_RenderSystem = new SVGXRenderSystem(this, null, m_LayoutSystem);
@@ -175,18 +173,6 @@ namespace UIForia {
                     }
 
                     s_CustomPainters.Add(paintAttr.name, type);
-                }
-                else if (attr is CustomScrollbarAttribute scrollbarAttr) {
-                    if (type.GetConstructor(Type.EmptyTypes) == null || !(typeof(Scrollbar)).IsAssignableFrom(type)) {
-                        throw new Exception($"Classes marked with [{nameof(CustomScrollbarAttribute)}] must provide a parameterless constructor" +
-                                            $" and the class must extend {nameof(Scrollbar)}. Ensure that {type.FullName} conforms to these rules");
-                    }
-
-                    if (s_Scrollbars.ContainsKey(scrollbarAttr.name)) {
-                        throw new Exception($"Failed to register a custom scrollbar with the name {scrollbarAttr.name} from type {type.FullName} because it was already registered.");
-                    }
-
-                    s_Scrollbars.Add(scrollbarAttr.name, (Scrollbar) Activator.CreateInstance(type));
                 }
             }
         }
@@ -775,13 +761,13 @@ namespace UIForia {
             return null; //s_CustomPainters.GetOrDefault(name);
         }
 
-        public static Scrollbar GetCustomScrollbar(string name) {
-            if (string.IsNullOrEmpty(name)) {
-                return s_Scrollbars["UIForia.Default"];
-            }
-
-            return s_Scrollbars.GetOrDefault(name);
-        }
+//        public static Scrollbar GetCustomScrollbar(string name) {
+//            if (string.IsNullOrEmpty(name)) {
+//                return s_Scrollbars["UIForia.Default"];
+//            }
+//
+//            return s_Scrollbars.GetOrDefault(name);
+//        }
 
         public AnimationTask Animate(UIElement element, AnimationData animation) {
             return m_AnimationSystem.Animate(element, animation);

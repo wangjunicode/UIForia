@@ -77,19 +77,6 @@ namespace UIForia.Editor {
 
         private SearchField searchField;
         private string searchString = string.Empty;
-        private static readonly int s_SizeKey = Shader.PropertyToID("_Size");
-        private static readonly int s_ContentColorKey = Shader.PropertyToID("_ContentColor");
-        private static readonly int s_PaddingColorKey = Shader.PropertyToID("_PaddingColor");
-        private static readonly int s_BorderColorKey = Shader.PropertyToID("_BorderColor");
-        private static readonly int s_MarginColorKey = Shader.PropertyToID("_MarginColor");
-        private static readonly int s_MarginRectKey = Shader.PropertyToID("_MarginRect");
-        private static readonly int s_BorderRectKey = Shader.PropertyToID("_BorderRect");
-        private static readonly int s_PaddingRectKey = Shader.PropertyToID("_PaddingRect");
-        private static readonly int s_ContentRectKey = Shader.PropertyToID("_ContentRect");
-        private static readonly int s_BaseLineKey = Shader.PropertyToID("_BaseLine");
-        private static readonly int s_DescenderKey = Shader.PropertyToID("_Descender");
-        private static readonly int s_BaseLineColorKey = Shader.PropertyToID("_BaseLineColor");
-        private static readonly int s_DescenderColorKey = Shader.PropertyToID("_DescenderColor");
 
         private void OnEnable() {
             searchField = new SearchField();
@@ -134,13 +121,13 @@ namespace UIForia.Editor {
             else {
                 selectedElement.flags &= ~UIElementFlags.DebugLayout;
             }
-            
-            DrawLabel("Cache Value width0", selectedElement.layoutBox.widthCache.width0.ToString());
-            DrawLabel("Cache Value width1", selectedElement.layoutBox.widthCache.width1.ToString());
-            DrawLabel("Cache Value width2", selectedElement.layoutBox.widthCache.width2.ToString());
-            DrawLabel("Cache Value height0", selectedElement.layoutBox.widthCache.height0.ToString());
-            DrawLabel("Cache Value height1", selectedElement.layoutBox.widthCache.height1.ToString());
-            DrawLabel("Cache Value height2", selectedElement.layoutBox.widthCache.height2.ToString());
+//            
+//            DrawLabel("Cache Value width0", selectedElement.layoutBox.widthCache.width0.ToString());
+//            DrawLabel("Cache Value width1", selectedElement.layoutBox.widthCache.width1.ToString());
+//            DrawLabel("Cache Value width2", selectedElement.layoutBox.widthCache.width2.ToString());
+//            DrawLabel("Cache Value height0", selectedElement.layoutBox.widthCache.height0.ToString());
+//            DrawLabel("Cache Value height1", selectedElement.layoutBox.widthCache.height1.ToString());
+//            DrawLabel("Cache Value height2", selectedElement.layoutBox.widthCache.height2.ToString());
 
             GUILayout.BeginHorizontal();
             DrawStyleStateButton("Hover", StyleState.Hover);
@@ -288,7 +275,7 @@ namespace UIForia.Editor {
             path.SetFillOpacity(1);
             path.SetStrokeOpacity(1);
 
-            if (selectedElement != null) {
+            if (selectedElement != null && selectedElement.isEnabled) {
                 // RenderData data = drawList.Find((d) => d.element == selectedElement);
                 //if (data == null) {
                 //    return;

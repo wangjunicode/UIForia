@@ -328,7 +328,7 @@ namespace UIForia.Systems {
             return retn;
         }
 
-        private Size PerformLayoutVertical() {
+        private Size  PerformLayoutVertical() {
             Item[] items = itemList.array;
 
             BlockSize blockWidth = containingBoxWidth;

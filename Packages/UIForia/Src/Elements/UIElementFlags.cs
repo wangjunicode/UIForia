@@ -30,8 +30,8 @@ internal enum UIElementFlags {
     LayoutBoxModelHeightDirty = 1 << 21,
     LayoutHierarchyDirty = 1 << 22,
     LayoutTransformDirty = 1 << 23,
-    LayoutAlignmentWidthDirty = 1 << 24,
-    LayoutAlignmentHeightDirty = 1 << 25,
+    LayoutAlignmentHorizontalDirty = 1 << 24,
+    LayoutAlignmentVerticalDirty = 1 << 25,
     LayoutFitWidthDirty = 1 << 26,
     LayoutFitHeightDirty = 1 << 27,
     LayoutTypeDirty = 1 << 28,
@@ -55,8 +55,8 @@ internal enum UIElementFlags {
         LayoutBoxModelHeightDirty |
         LayoutHierarchyDirty |
         LayoutTransformDirty |
-        LayoutAlignmentWidthDirty |
-        LayoutAlignmentHeightDirty |
+        LayoutAlignmentHorizontalDirty |
+        LayoutAlignmentVerticalDirty |
         LayoutFitWidthDirty |
         LayoutFitHeightDirty |
         LayoutTypeDirty |

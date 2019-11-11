@@ -180,7 +180,6 @@ public class BasicLayoutTests {
         Assert.AreEqual(3, blockProvider.awesomeLayoutBox.childCount);
         Assert.AreEqual(1000, blockUser.awesomeLayoutBox.finalWidth);
         
-
     }
     
 }

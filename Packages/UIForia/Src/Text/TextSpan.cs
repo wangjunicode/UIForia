@@ -213,6 +213,7 @@ namespace UIForia.Text {
             SetRawContentFromString(text);
 
             UpdateBuffers();
+            
         }
 
         public void SetText(char[] characters) {

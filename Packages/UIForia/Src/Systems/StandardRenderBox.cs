@@ -126,7 +126,8 @@ namespace UIForia.Rendering {
             float radiusBottomRight = ResolveFixedSize(element, min, element.style.BorderRadiusBottomRight);
             float radiusBottomLeft = ResolveFixedSize(element, min, element.style.BorderRadiusBottomLeft);
 
-            Vector2 pivotOffset = new Vector2(-element.layoutBox.pivotX * size.width, -element.layoutBox.pivotY * size.height);
+            Vector2 pivotOffset = element.layoutResult.pivotOffset;
+            //new Vector2(-element.layoutBox.pivotX * size.width, -element.layoutBox.pivotY * size.height);
             
             if (radiusBottomLeft > 0 ||
                 radiusBottomRight > 0 ||
@@ -241,7 +242,6 @@ namespace UIForia.Rendering {
                     return;
                 }
             }
-
             
             didRender = true;
 

@@ -365,40 +365,40 @@ namespace UIForia.Layout {
                 // todo -- lots of ways to avoid doing this. only need it for self aligning things or things with a transform position not in pixels
                 
                 if (box.alignmentTargetX != AlignmentBehavior.Unset && box.alignmentTargetX != AlignmentBehavior.Default) {
-                    OffsetMeasurement originX = box.element.style.AlignmentOriginX;
-                    OffsetMeasurement offsetX = box.element.style.AlignmentOffsetX;
-                    AlignmentDirection direction = box.element.style.AlignmentDirectionX;
-
-                    float originBase = MeasurementUtil.ResolveOriginBaseX(box, view.position.x, box.alignmentTargetX, direction);
-                    float originSize = MeasurementUtil.ResolveOffsetOriginSizeX(box, viewportWidth, box.alignmentTargetX);
-                    float originOffset = MeasurementUtil.ResolveOffsetMeasurement(box, viewportWidth, viewportHeight, originX, originSize);
-                    float offset = MeasurementUtil.ResolveOffsetMeasurement(box, viewportWidth, viewportHeight, offsetX, box.size.width);
-
-                    if (direction == AlignmentDirection.End) {
-                        box.alignedPosition.x = (originBase + originSize) - (originOffset + offset) - box.size.width;
-                    }
-                    else {
-                        box.alignedPosition.x = originBase + originOffset + offset;
-                    }
+//                    OffsetMeasurement originX = box.element.style.AlignmentOriginX;
+//                    OffsetMeasurement offsetX = box.element.style.AlignmentOffsetX;
+//                    AlignmentDirection direction = box.element.style.AlignmentDirectionX;
+//
+//                    float originBase = MeasurementUtil.ResolveOriginBaseX(box, view.position.x, box.alignmentTargetX, direction);
+//                    float originSize = MeasurementUtil.ResolveOffsetOriginSizeX(box, viewportWidth, box.alignmentTargetX);
+//                    float originOffset = MeasurementUtil.ResolveOffsetMeasurement(box, viewportWidth, viewportHeight, originX, originSize);
+//                    float offset = MeasurementUtil.ResolveOffsetMeasurement(box, viewportWidth, viewportHeight, offsetX, box.size.width);
+//
+//                    if (direction == AlignmentDirection.End) {
+//                        box.alignedPosition.x = (originBase + originSize) - (originOffset + offset) - box.size.width;
+//                    }
+//                    else {
+//                        box.alignedPosition.x = originBase + originOffset + offset;
+//                    }
                 }
 
-                if (box.alignmentTargetY != AlignmentBehavior.Unset && box.alignmentTargetY != AlignmentBehavior.Default) {
-                    OffsetMeasurement originY = box.element.style.AlignmentOriginY;
-                    OffsetMeasurement offsetY = box.element.style.AlignmentOffsetY;
-                    AlignmentDirection direction = box.element.style.AlignmentDirectionY;
-
-                    float originBase = MeasurementUtil.ResolveOriginBaseY(box, view.position.y, box.alignmentTargetY, direction);
-                    float originSize = MeasurementUtil.ResolveOffsetOriginSizeY(box, viewportHeight, box.alignmentTargetY);
-                    float originOffset = MeasurementUtil.ResolveOffsetMeasurement(box, viewportWidth, viewportHeight, originY, originSize);
-                    float offset = MeasurementUtil.ResolveOffsetMeasurement(box, viewportWidth, viewportHeight, offsetY, box.size.height);
-
-                    if (direction == AlignmentDirection.End) {
-                        box.alignedPosition.y = (originBase + originSize) - (originOffset + offset) - box.size.height;
-                    }
-                    else {
-                        box.alignedPosition.y = originBase + originOffset + offset;
-                    }
-                }
+//                if (box.alignmentTargetY != AlignmentBehavior.Unset && box.alignmentTargetY != AlignmentBehavior.Default) {
+//                    OffsetMeasurement originY = box.element.style.AlignmentOriginY;
+//                    OffsetMeasurement offsetY = box.element.style.AlignmentOffsetY;
+//                    AlignmentDirection direction = box.element.style.AlignmentDirectionY;
+//
+//                    float originBase = MeasurementUtil.ResolveOriginBaseY(box, view.position.y, box.alignmentTargetY, direction);
+//                    float originSize = MeasurementUtil.ResolveOffsetOriginSizeY(box, viewportHeight, box.alignmentTargetY);
+//                    float originOffset = MeasurementUtil.ResolveOffsetMeasurement(box, viewportWidth, viewportHeight, originY, originSize);
+//                    float offset = MeasurementUtil.ResolveOffsetMeasurement(box, viewportWidth, viewportHeight, offsetY, box.size.height);
+//
+//                    if (direction == AlignmentDirection.End) {
+//                        box.alignedPosition.y = (originBase + originSize) - (originOffset + offset) - box.size.height;
+//                    }
+//                    else {
+//                        box.alignedPosition.y = originBase + originOffset + offset;
+//                    }
+//                }
 
             }
         }

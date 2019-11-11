@@ -23,7 +23,7 @@ namespace UIForia.Systems {
             throw new NotImplementedException();
         }
 
-        public override void RunLayoutVertical() {
+        public override void RunLayoutVertical(int frameId) {
             throw new NotImplementedException();
         }
 

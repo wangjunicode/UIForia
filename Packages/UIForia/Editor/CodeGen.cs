@@ -170,13 +170,6 @@ namespace UIForia.Editor {
             new PropertyGenerator<TextTransform>(StylePropertyId.TextTransform, TextTransform.None, InheritanceType.Inherited),
             new PropertyGenerator<UIForia.Text.WhitespaceMode>(StylePropertyId.TextWhitespaceMode, WhitespaceMode.CollapseWhitespace | WhitespaceMode.Trim, InheritanceType.Inherited),
 
-            // Anchors
-            new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.AnchorTop, new UIFixedLength(0f)),
-            new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.AnchorRight, new UIFixedLength(0f)),
-            new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.AnchorBottom, new UIFixedLength(0f)),
-            new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.AnchorLeft, new UIFixedLength(0f)),
-            new PropertyGenerator<AnchorTarget>(StylePropertyId.AnchorTarget, AnchorTarget.Parent),
-
             // Transform
             new AnimatedPropertyGenerator<OffsetMeasurement>(StylePropertyId.TransformPositionX, new OffsetMeasurement(0)),
             new AnimatedPropertyGenerator<OffsetMeasurement>(StylePropertyId.TransformPositionY, new OffsetMeasurement(0)),

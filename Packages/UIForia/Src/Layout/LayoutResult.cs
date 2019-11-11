@@ -1,4 +1,5 @@
 ﻿using SVGX;
+using UIForia.Elements;
 using UIForia.Rendering;
 using UIForia.Util;
 using UnityEngine;
@@ -10,7 +11,6 @@ namespace UIForia.Layout {
         public float localRotation;
         public Vector2 localScale;
         public Vector2 localPosition;
-
 
         public Vector2 scale;
         public Vector2 screenPosition;
@@ -30,11 +30,13 @@ namespace UIForia.Layout {
         public ResolvedBorderRadius borderRadius;
 
         public SVGXMatrix matrix;
+        public SVGXMatrix localMatrix;
+        public Vector2 pivotOffset;
 
-        public Size scrollbarHorizontalSize;
-        public Size scrollbarVerticalSize;
-        public Size contentSize;
-
+        public Vector2 allocatedPosition; // where the parent told this element to be
+        public Vector2 alignedPosition;   // where the element wants to be (might be relative to allocated, might not be) 
+        // local position = actual position post transform
+        
         public Rect ScreenRect => new Rect(screenPosition, new Vector2(actualSize.width, actualSize.height));
         public Rect AllocatedRect => new Rect(screenPosition, new Vector2(allocatedSize.width, allocatedSize.height));
 
@@ -49,6 +51,9 @@ namespace UIForia.Layout {
         public float ContentWidth => allocatedSize.width - padding.left - border.left - padding.right - border.right;
         public float ContentHeight => allocatedSize.height - padding.top - border.top - padding.bottom - border.bottom;
 
+        public LayoutResult layoutParent;
+        public UIElement element;
+
         public Rect ContentRect => new Rect(
             padding.left + border.left,
             padding.top + border.top,
@@ -56,13 +61,8 @@ namespace UIForia.Layout {
             actualSize.height - padding.top - border.top - padding.bottom - border.bottom
         );
 
-
-        public bool HasScrollbarVertical => scrollbarVerticalSize.IsDefined();
-        public bool HasScrollbarHorizontal => scrollbarHorizontalSize.IsDefined();
-
-        public LayoutResult() {
-            scrollbarVerticalSize = Size.Unset;
-            scrollbarHorizontalSize = Size.Unset;
+        internal LayoutResult(UIElement element) {
+            this.element = element;
             this.matrix = SVGXMatrix.identity;
         }
 

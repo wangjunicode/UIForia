@@ -16,7 +16,10 @@ namespace UIForia.Systems {
         WidthBlockProvider = 1 << 4,
         HeightBlockProvider = 1 << 5,
 
-        RequireLayoutVertical = VerticalSizeChanged
+        RequireLayoutVertical = VerticalSizeChanged,
+
+        RequireAlignmentHorizontal = 1 << 6,
+        RequireAlignmentVertical = 1 << 7
 
     }
 

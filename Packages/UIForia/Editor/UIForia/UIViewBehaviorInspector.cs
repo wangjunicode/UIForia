@@ -33,7 +33,6 @@ namespace UIForia.Editor {
         }
         
         public override void OnInspectorGUI() {
-            base.OnInspectorGUI();
             serializedObject.Update();
             UIViewBehavior behavior = (UIViewBehavior) target;
             string typeName = serializedObject.FindProperty("typeName").stringValue;

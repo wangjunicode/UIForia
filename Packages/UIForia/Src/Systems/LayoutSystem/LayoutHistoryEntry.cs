@@ -15,9 +15,7 @@ namespace UIForia.Systems {
     }
 
     public struct LayoutFrameData {
-
-        public int ReasonCount => entries.size; 
-
+        
         public StructList<LayoutFrameDataEntry> entries;
         
         public LayoutFrameData(StructList<LayoutFrameDataEntry> entries) {
@@ -45,7 +43,9 @@ namespace UIForia.Systems {
         StyleSizeChanged,
         FinalSizeChanged,
         DescendentStyleSizeChanged,
-        BorderPaddingChanged
+        BorderPaddingChanged,
+
+        TextContentChanged
 
     }
 

@@ -77,19 +77,6 @@ namespace UIForia.Elements {
 
     }
 
-    public struct ArrayContainer<T> {
-
-        public T[] array;
-        public int size;
-
-        public ArrayContainer(T[] array, int size = 0) {
-            this.array = array;
-            this.size = size;
-        }
-
-    }
-
-
     [DebuggerDisplay("{" + nameof(ToString) + "()}")]
     public class UIElement : IHierarchical {
 
@@ -119,7 +106,7 @@ namespace UIForia.Elements {
         protected internal UIElement() {
             this.id = Application.NextElementId;
             this.style = new UIStyleSet(this);
-            this.layoutResult = new LayoutResult();
+            this.layoutResult = new LayoutResult(this);
             this.flags = UIElementFlags.Enabled | UIElementFlags.Alive | UIElementFlags.DefaultLayoutDirty;
             this.children = LightList<UIElement>.Get();
         }

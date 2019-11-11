@@ -137,7 +137,6 @@ namespace UIForia.Rendering {
             }
         }
 
-
         public Path2D GetClipPathFromElement() {
             Size size = element.layoutResult.actualSize;
             float elementWidth = size.width;
@@ -147,7 +146,6 @@ namespace UIForia.Rendering {
             if (element is UITextElement) {
                 return null;
             }
-
 
             float bevelTopLeft = ResolveFixedSize(element, min, element.style.CornerBevelTopLeft);
             float bevelTopRight = ResolveFixedSize(element, min, element.style.CornerBevelTopRight);
@@ -178,8 +176,7 @@ namespace UIForia.Rendering {
                 }
 
                 clipPath = clipPath ?? new Path2D();
-                clipPath.Clear(); // todo -- only clear if changed
-
+                clipPath.Clear(); // todo -- only clear if changed    
 
                 clipPath.BeginPath();
                 clipPath.SetFill(Color.white);

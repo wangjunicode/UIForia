@@ -445,10 +445,10 @@ namespace UIForia.Systems {
                     continue;
                 }
 
-                if (element.layoutResult.HasScrollbarVertical || element.layoutResult.HasScrollbarHorizontal) {
-                    Scrollbar scrollbar = Application.GetCustomScrollbar(element.style.Scrollbar);
-                    m_CurrentDragEvent = scrollbar.CreateDragEvent(element, mouseEvent);
-                }
+//                if (element.layoutResult.HasScrollbarVertical || element.layoutResult.HasScrollbarHorizontal) {
+//                    Scrollbar scrollbar = Application.GetCustomScrollbar(element.style.Scrollbar);
+//                    m_CurrentDragEvent = scrollbar.CreateDragEvent(element, mouseEvent);
+//                }
 
                 if (m_CurrentDragEvent == null) {
                     DragCreatorGroup dragCreatorGroup;

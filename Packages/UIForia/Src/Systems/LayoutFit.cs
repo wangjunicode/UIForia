@@ -2,7 +2,7 @@ namespace UIForia.Layout {
 
     public enum LayoutFit {
 
-        Unset,
+        Unset = 0,
         Default,
         None,
         Grow,

@@ -346,10 +346,11 @@ namespace UIForia.Animation {
                         Rect viewRect = target.View.Viewport;
 
                         if (target.layoutBox != null) {
-                            float originSize = MeasurementUtil.ResolveOffsetOriginSizeX(target.layoutBox, viewRect.width, target.layoutBox.alignmentTargetX);
-                            float v0 = MeasurementUtil.ResolveOffsetMeasurement(target.layoutBox, viewRect.width, viewRect.height, prev.value.styleProperty.AsOffsetMeasurement, originSize);
-                            float v1 = MeasurementUtil.ResolveOffsetMeasurement(target.layoutBox, viewRect.width, viewRect.height, next.value.styleProperty.AsOffsetMeasurement, originSize);
-                            target.style.SetAnimatedProperty(new StyleProperty(StylePropertyId.AlignmentOriginX, new OffsetMeasurement(Mathf.Lerp(v0, v1, t))));
+                            throw new NotImplementedException();
+//                            float originSize = MeasurementUtil.ResolveOffsetOriginSizeX(target.layoutBox, viewRect.width, target.layoutBox.alignmentTargetX);
+//                            float v0 = MeasurementUtil.ResolveOffsetMeasurement(target.layoutBox, viewRect.width, viewRect.height, prev.value.styleProperty.AsOffsetMeasurement, originSize);
+//                            float v1 = MeasurementUtil.ResolveOffsetMeasurement(target.layoutBox, viewRect.width, viewRect.height, next.value.styleProperty.AsOffsetMeasurement, originSize);
+//                            target.style.SetAnimatedProperty(new StyleProperty(StylePropertyId.AlignmentOriginX, new OffsetMeasurement(Mathf.Lerp(v0, v1, t))));
                         }
 
                         break;
@@ -359,7 +360,7 @@ namespace UIForia.Animation {
                         Rect viewRect = target.View.Viewport;
 
                         if (target.layoutBox != null) {
-                            float originSize = MeasurementUtil.ResolveOffsetOriginSizeY(target.layoutBox, viewRect.width, target.layoutBox.alignmentTargetY);
+                            float originSize = MeasurementUtil.ResolveOffsetOriginSizeY(target.layoutResult, viewRect.width, target.layoutBox.alignmentTargetY);
                             float v0 = MeasurementUtil.ResolveOffsetMeasurement(target.layoutBox, viewRect.width, viewRect.height, prev.value.styleProperty.AsOffsetMeasurement, originSize);
                             float v1 = MeasurementUtil.ResolveOffsetMeasurement(target.layoutBox, viewRect.width, viewRect.height, next.value.styleProperty.AsOffsetMeasurement, originSize);
                             target.style.SetAnimatedProperty(new StyleProperty(StylePropertyId.AlignmentOriginY, new OffsetMeasurement(Mathf.Lerp(v0, v1, t))));

@@ -19,11 +19,13 @@ namespace UIForia.Systems {
         public override void RunLayoutHorizontal(int frameId) {
             LayoutSize size = default;
             firstChild.GetWidths(ref size);
-            firstChild.ApplyLayoutHorizontal(0, size.preferred, size.preferred, LayoutFit.None, frameId);
+            firstChild.ApplyLayoutHorizontal(0, 0, size.preferred, size.preferred, LayoutFit.None, frameId);
         }
 
-        public override void RunLayoutVertical() {
-            throw new NotImplementedException();
+        public override void RunLayoutVertical(int frameId) {
+            LayoutSize size = default;
+            firstChild.GetHeights(ref size);
+            firstChild.ApplyLayoutVertical(0, 0, size.preferred, size.preferred, LayoutFit.None, frameId);
         }
 
     }

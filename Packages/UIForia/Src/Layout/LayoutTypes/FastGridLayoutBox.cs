@@ -739,6 +739,8 @@ namespace UIForia.Layout.LayoutTypes {
 
             GridTrackSize repeatFill = default;
 
+            trackList.EnsureCapacity(templateList.Count);
+
             for (int i = 0; i < templateList.Count; i++) {
                 GridTrackSize template = templateList[i];
 

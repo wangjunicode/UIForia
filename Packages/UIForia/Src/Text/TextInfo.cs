@@ -545,7 +545,7 @@ namespace UIForia.Text {
             return intrinsics.minHeight;
         }
 
-        public float ComputeHeightForWidth(float width, BlockSize blockWidth, BlockSize blockHeight) {
+        public float ComputeHeightForWidth(float width) {
             // todo -- if has span content that is not text we need to use block width & height to resolve their sizes
 
             // can't use intrinsics here if we have content that is not text

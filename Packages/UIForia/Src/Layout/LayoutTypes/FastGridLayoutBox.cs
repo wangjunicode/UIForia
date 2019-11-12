@@ -88,7 +88,7 @@ namespace UIForia.Layout.LayoutTypes {
             }
 
             AdjustBlockSizes(ref widthBlock, ref heightBlock);
-            
+
             Place();
 
             GridPlacement[] placements = placementList.array;
@@ -128,7 +128,7 @@ namespace UIForia.Layout.LayoutTypes {
             BlockSize heightBlock = containingBoxHeight;
 
             AdjustBlockSizes(ref widthBlock, ref heightBlock);
-            
+
             Place();
 
             GridPlacement[] placements = placementList.array;
@@ -402,7 +402,7 @@ namespace UIForia.Layout.LayoutTypes {
             // grow until max size reached
             // fr has no max size but has more grow factor
             // maybe grow everything except frs first
-            
+
             intrinsics.Release();
             flexes.Release();
         }
@@ -837,6 +837,7 @@ namespace UIForia.Layout.LayoutTypes {
                     child = child.nextSibling;
                     continue;
                 }
+
                 GridItemPlacement x = child.element.style.GridItemX;
                 GridItemPlacement y = child.element.style.GridItemY;
                 GridItemPlacement width = child.element.style.GridItemWidth;

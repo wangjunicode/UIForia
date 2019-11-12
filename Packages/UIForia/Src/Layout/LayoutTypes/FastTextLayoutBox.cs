@@ -19,7 +19,7 @@ namespace UIForia.Layout {
         }
 
         public override float ComputeContentHeight(float width, BlockSize blockWidth, BlockSize blockHeight) {
-            return textInfo.ComputeHeightForWidth(width, blockWidth, blockHeight);
+            return textInfo.ComputeHeightForWidth(width);
         }
 
         public override float GetIntrinsicMinWidth() {

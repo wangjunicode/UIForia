@@ -20,6 +20,7 @@
             PreferredWidth = 100%;
             PreferredHeight = 100px;
             BackgroundColor = Orange;
+            TextWhitespaceMode = PreserveNewLines;
         }
         
         style content-size {
@@ -27,6 +28,10 @@
             FlexLayoutDirection = Horizontal;
             PreferredHeight = 150px;
             BackgroundColor = white;
+        }
+        
+        style transclude {
+            LayoutBehavior = TranscludeChildren;
         }
         
         style centerX {
@@ -50,9 +55,12 @@
         <Div style="block-provider">
             <Div style="box centerX" style.backgroundColor="Color.red" x-id="one"/>
             <Div style="box centerX" style.backgroundColor="Color.white" x-id="two"/>    
-            <Div x-id="content-size" style="content-size">
+            <Div x-id="content-size" style="transclude">
                 <Div x-id="block-user" style="block-user"/>
-                Text here {Time}
+                <Text>Text here {Time}</Text>
+                <Text>Text here {Time}</Text>
+                <Text>Text here {Time}</Text>
+                <Text>Text here {Time}</Text>
             </Div>
 <!--            <Div style="ignore-me"/>-->
         </Div>

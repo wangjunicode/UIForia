@@ -293,7 +293,6 @@ namespace UIForia.Systems {
                     return 0; //GetIntrinsicPreferredWidth();
 
                 case UIMeasurementUnit.BlockSize: {
-                    
                     // ignored elements can use the output size of their parent since it has been resolved already
                     if ((flags & AwesomeLayoutBoxFlags.Ignored) != 0) {
                         LayoutResult parentResult = element.layoutResult.layoutParent;
@@ -316,7 +315,7 @@ namespace UIForia.Systems {
                 case UIMeasurementUnit.ParentContentArea: {
                     AwesomeLayoutBox ptr = parent;
                     float paddingBorder = 0;
-                    
+
                     // ignored elements can use the output size of their parent since it has been resolved already
                     if ((flags & AwesomeLayoutBoxFlags.Ignored) != 0) {
                         LayoutResult parentResult = element.layoutResult.layoutParent;
@@ -414,7 +413,7 @@ namespace UIForia.Systems {
                 case UIMeasurementUnit.ParentContentArea: {
                     AwesomeLayoutBox ptr = parent;
                     float paddingBorder = 0;
-                    
+
                     // ignored elements can use the output size of their parent since it has been resolved already
                     if ((flags & AwesomeLayoutBoxFlags.Ignored) != 0) {
                         LayoutResult parentResult = element.layoutResult.layoutParent;
@@ -520,6 +519,21 @@ namespace UIForia.Systems {
             public float marginStart;
             public float marginEnd;
 
+            public float Clamped {
+                get {
+                    float f = preferred;
+                    if (preferred > maximum) {
+                        f = maximum;
+                    }
+
+                    if (minimum > f) {
+                        f = minimum;
+                    }
+
+                    return f;
+                }
+            }
+
         }
 
 
@@ -618,7 +632,6 @@ namespace UIForia.Systems {
 
             flags &= ~AwesomeLayoutBoxFlags.RequireAlignmentVertical;
         }
-
 
     }
 

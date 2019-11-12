@@ -1,5 +1,4 @@
 using System;
-using UIForia.Layout;
 using UIForia.Rendering;
 using UIForia.Util;
 
@@ -7,6 +6,8 @@ namespace UIForia.Systems {
 
     public class AwesomeTranscludedLayoutBox : AwesomeLayoutBox {
 
+        private LightList<AwesomeLayoutBox> childList;
+        
         protected override float ComputeContentWidth() {
             throw new NotImplementedException();
         }
@@ -16,7 +17,8 @@ namespace UIForia.Systems {
         }
 
         public override void OnChildrenChanged(LightList<AwesomeLayoutBox> childList) {
-            throw new NotImplementedException();
+            this.childList = this.childList ?? new LightList<AwesomeLayoutBox>(childList.size);
+            this.childList.AddRange(childList);
         }
 
         public override void RunLayoutHorizontal(int frameId) {
@@ -30,7 +32,7 @@ namespace UIForia.Systems {
         public override void OnStyleChanged(StructList<StyleProperty> propertyList) {}
 
         public LightList<AwesomeLayoutBox> GetChildren() {
-            throw new NotImplementedException();
+            return childList;
         }
 
     }

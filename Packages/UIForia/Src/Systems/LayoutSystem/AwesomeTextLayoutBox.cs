@@ -65,7 +65,7 @@ namespace UIForia.Systems {
 
         protected override float ComputeContentHeight() {
             // todo -- might need to subtract padding / border from this value
-            return textInfo.ComputeContentWidth(finalWidth);
+            return textInfo.ComputeHeightForWidth(finalWidth);
         }
 
         public override void OnChildrenChanged(LightList<AwesomeLayoutBox> childList) {
@@ -74,7 +74,7 @@ namespace UIForia.Systems {
 
         public override void RunLayoutHorizontal(int frameId) {
             textAlreadyDirty = false;
-            textInfo.ForceLayout(); // might not need this
+            // textInfo.ForceLayout(); // might not need this
             float topOffset = paddingBorderVerticalStart;
             float leftOffset = paddingBorderHorizontalStart;
             textInfo.Layout(new Vector2(leftOffset, topOffset), finalWidth - paddingBorderHorizontalStart - paddingBorderHorizontalEnd);

@@ -299,7 +299,7 @@ namespace UIForia.Systems {
                         // break track case
                         if (track.startItemIndex == i) {
                             // single item track
-                            track.endItemIndex -= 1;
+                            track.endItemIndex = i;
                             totalContentHeight += LayoutTrackHorizontal(totalContentHeight, blockWidth, blockHeight, track, isDryRun, applyWrapping);
                             track = default;
                             track.startItemIndex = i;
@@ -311,6 +311,9 @@ namespace UIForia.Systems {
                             track = default;
                             track.startItemIndex = i;
                             track.endItemIndex = i;
+                            if (i + 1 == itemList.size) {
+                                track.endItemIndex = i + 1;
+                            }
                         }
                     }
                 }

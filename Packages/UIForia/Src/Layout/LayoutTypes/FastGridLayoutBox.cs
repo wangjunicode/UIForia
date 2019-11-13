@@ -79,6 +79,10 @@ namespace UIForia.Layout.LayoutTypes {
 
             PositionTracks(rowTrackList, element.style.GridLayoutRowGap);
 
+            if (colTrackList.size == 0) {
+                return 0;
+            }
+
             return colTrackList.array[colTrackList.size - 1].position + colTrackList.array[colTrackList.size - 1].size;
         }
 
@@ -116,6 +120,10 @@ namespace UIForia.Layout.LayoutTypes {
 
             PositionTracks(rowTrackList, element.style.GridLayoutRowGap);
 
+            if (rowTrackList.size == 0) {
+                return 0;
+            }
+            
             return rowTrackList.array[rowTrackList.size - 1].position + rowTrackList.array[rowTrackList.size - 1].size;
         }
 

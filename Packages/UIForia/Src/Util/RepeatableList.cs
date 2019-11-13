@@ -78,6 +78,15 @@ namespace UIForia.Util {
             backingStore.Insert(index, item);
         }
 
+        public void Upsert(int index, T item) {
+            if (index < Count) {
+                backingStore[index] = item;
+            }
+            else {
+                Insert(index, item);
+            }
+        }
+
         public void RemoveAt(int index) {
             if (index < 0 || index >= backingStore.Count) {
                 return;

@@ -154,7 +154,7 @@ namespace UIForia.Elements {
             ScrollToHorizontalPercent(offset);
         }
 
-        [OnDragCreate]
+        [OnDragCreate(EventPhase.Capture)]
         public DragEvent OnMiddleMouseDrag(MouseInputEvent evt) {
             if (!evt.IsMouseMiddleDown) {
                 return null;

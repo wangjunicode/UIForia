@@ -1,0 +1,179 @@
+---
+title: Roadmap
+sitemap: false
+permalink: /roadmap
+excluded_in_search: true
+---
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>UIForia RoadMap 2020</title>
+  <meta charset="utf-8" />
+
+  <link rel="stylesheet" href="/uiforia.css">
+</head>
+
+<body>
+  <header>
+    <a href="/"><img class="uiforia-logo" src="img/uiforialogo.png" /></a>
+    <h1>User Interface Euphoria</h1>
+  </header>
+
+  <section>
+    <h2>Coming up next</h2>
+    <p>
+      By the end of 2019 we will have finished all of the ground work needed
+      for our 2020 road map. This includes a reworked graphics and layout system,
+      a new compiler for templates and expressions and a lot of other cool things.
+    </p>
+    <p>
+      This document, however, focuses on the next year and gives a broad overview
+      of features we aim to implement with some prioritization. We assigned priority
+      numbers from 1 to 3 to the features that indicate critical (1), important (2)
+      and features that are nice to have (3). If we run out of time we'll probably
+      postpone nice to have features to a later milestone.
+    </p>
+    <p>
+      Note that this document is being kept up to date, which also means we might have
+      learned something along the way and change our milestone priorities or even add
+      new features to them.
+    </p>
+  </section>
+
+  <section>
+    <h2>UIForia Milestone 2020.1</h2>
+
+    <dl>
+      <dd>Mobile Support (1)</dd>
+      <dd>New Unity Input integration (2)</dd>
+      <dd>Consoles (3)</dd>
+      <dd>WebGL (3)</dd>
+    </dl>
+
+    <p>
+      Supporting all major platforms requires a code generating build step and an update to our
+      input system to support gestures, touch and controllers. Since SEED is our main customer
+      we would aim for mobile first with support for consoles and WebGL as nice to have.
+    </p>
+
+    <h2>UIForia Milestone 2020.2</h2>
+    <dl>
+      <dd>Resolution scaling (1)</dd>
+      <dd>Forms (1)</dd>
+      <dd>Improve font rendering (3)</dd>
+      <dd>Support Multi Channel SDF Text (3)</dd>
+    </dl>
+
+    <p>
+      In the second milestone we'll focus on adding support for different display densities.
+      We know this from the web where pixel measurements are scaled up 2x or 3x depending on
+      the dpi / ppi. This will be crucial for supporting all sorts of displays on all platforms.
+    </p>
+    <p>
+      Form support will be a parallel major point of this milestone. We hope to design a form
+      system that can validate (built-in and custom validators) all input fields. All current
+      input fields will be equipped with optional form support as well, so they can be used in
+      a form or standalone.
+    </p>
+    <p>
+      Improved font rendering will be a bonus goal here, since we have to see along the way how
+      important improvements actually are when we see it in different settings.
+    </p>
+
+    <h2>UIForia Milestone 2020.3</h2>
+    <dl>
+      <dd>Style Variables (1)</dd>
+      <dd>SVG Support (2)</dd>
+      <dd>Path definitions in Style Sheets (2)</dd>
+    </dl>
+
+    <p>
+      Style variables will enable you to pass data to style sheets in some way so that you can
+      use a variable as a property value. This might include support for property value functions
+      like calc().
+    </p>
+    <p>
+      For a long time we prepared the graphics system to support custom painters and an API that
+      makes it easy to draw all kinds of shapes. It's actually being done with SVG support in mind
+      and in milestone we'll probably be ready to natively render SVGs. This will definitely
+      come hand in hand with a path definition API for style sheets.
+    </p>
+
+    <h2>UIForia Milestone 2020.4</h2>
+    <dl>
+      <dd>Custom Layout Types (1)</dd>
+      <dd>Hex/Radial Layout Types (1)</dd>
+      <dd>Render Blocks (2)</dd>
+      <dd>Render Portals (2)</dd>
+    </dl>
+
+    <p>
+      Layout is hard. We currently support Flex, Stack and Grid layouts but don't have a
+      production ready version of hex and radial layout. That's going to change!
+      Also long planned: custom layout types. Our layout API should be stable enough at this
+      point to open it up for user defined layout types.
+    </p>
+    <p>
+      Render blocks and portals are a planned extension to our template language, which will make
+      it easier to compose elements via portals and reuse template snippets (blocks). There will
+      be a more in-depth definition of those later ;)
+    </p>
+
+    <h2>UIForia Milestone 2020.5</h2>
+    <dl>
+      <dd>Slivers (1)</dd>
+      <dd>Attribute Event Listeners (1)</dd>
+      <dd>Async Loading (2)</dd>
+    </dl>
+
+    <p>
+      We get inspiration from a lot of other frameworks, so thanks to flutter we aim to add
+      our own version of <a href="https://flutter.dev/docs/development/ui/advanced/slivers" rel="noopener">Slivers</a> to UIForia.
+    </p>
+    <p>
+      Attribute listeners will make it super easy to add an event callback to custom elements
+      that are triggered when certain attributes change.
+    </p>
+    <p>
+      Async loading is an idea for optimizing apps that use a huge amount of ui elements or
+      elements that have very expensive initialization costs. We need to do some more research
+      on a live example (SEED) to flesh out this feature.
+    </p>
+
+    <h2>UIForia Milestone 2020.6</h2>
+    <dl>
+      <dd>Testing Framework (1)</dd>
+      <dd>Addressable Assets integration (1)</dd>
+      <dd>Effect Framework (Graphics) (2)</dd>
+      <dd>WISYWIG Editor (3)</dd>
+    </dl>
+
+    <p>
+      If we haven't done it by then we definitely will create a user friendly testing framework
+      to test custom UIForia elements. We'll use if for internal testing as well so there might
+      be APIs by then we just need to polish and open up.
+    </p>
+    <p>
+      <a href="https://docs.unity3d.com/Packages/com.unity.addressables@0.4/manual/index.html" rel="noopener">Addressable Assets</a> is yet another Unity feature we'll add support for.
+    </p>
+    <p>
+      The final milestone of the year will bring a new API to more easily add custom effects
+      to your elements. You can use a lot of cool things right now as well, like particles,
+      but the effect framework aims a bit higher in terms of freedom and usability.
+    </p>
+    <p>
+      As far as Unity editor support goes we have some tools to debug your application element
+      hierarchy and see all the element property values. As bonus task for this milestone we'll
+      try to make a more designer friendly tool, a WISYWIG editor, that makes in-editor element
+      placement and configuration a piece of cake.
+    </p>
+  </section>
+
+  <footer>
+    <a href="https://www.klang-games.com/legal">Impressum / Privacy Statement</a>
+  </footer>
+</body>
+
+</html>

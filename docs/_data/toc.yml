@@ -1,0 +1,33 @@
+- title: Documentation
+  url: docs
+  links:
+    - title: "News"
+      url: "news"
+    - title: "Roadmap 2020"
+      url: "roadmap"
+    - title: "Getting Started"
+      url: "docs/getting-started"
+      children:
+        - title: Features
+          url: "docs/getting-started#getting-started"
+        - title: Development
+          url: "docs/getting-started#development"
+        - title: Customization
+          url: "docs/getting-started#customization"
+    - title: "Animations"
+      url: "docs/animations/Animation"
+    - title: "Layout"
+      children:
+        - title: Concepts
+          url: "docs/layout/layout-concepts"
+        - title: FlexBox
+          url: "docs/layout/flex"
+        - title: Grid
+          url: "docs/layout/grid"
+    - title: "Misc"
+      url: "docs/misc"
+      children:
+        - title: "Colors"
+          url: "docs/misc#list-of-all-supported-colors"
+    - title: "About"
+      url: "about"

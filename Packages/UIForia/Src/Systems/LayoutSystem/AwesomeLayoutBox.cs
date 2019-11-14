@@ -161,6 +161,7 @@ namespace UIForia.Systems {
             paddingBorderHorizontalStart = paddingLeft + borderLeft;
             paddingBorderHorizontalEnd = paddingRight + borderRight;
 
+            // todo -- should probably be when content area size changes, not just overall size
             if (newWidth != finalWidth) {
                 flags |= AwesomeLayoutBoxFlags.RequireLayoutHorizontal;
                 element.layoutHistory.AddLogEntry(LayoutDirection.Horizontal, frameId, LayoutReason.FinalSizeChanged, string.Empty);
@@ -294,50 +295,103 @@ namespace UIForia.Systems {
 
                 case UIMeasurementUnit.BlockSize: {
                     // ignored elements can use the output size of their parent since it has been resolved already
-                    if ((flags & AwesomeLayoutBoxFlags.Ignored) != 0) {
-                        LayoutResult parentResult = element.layoutResult.layoutParent;
-                        return Math.Max(0, parentResult.actualSize.width * measurement.value);
-                    }
-
-                    AwesomeLayoutBox ptr = parent;
-                    while (ptr != null) {
-                        if ((ptr.flags & AwesomeLayoutBoxFlags.WidthBlockProvider) != 0) {
-                            Assert.AreNotEqual(-1, ptr.finalWidth);
-                            return Math.Max(0, ptr.finalWidth * measurement.value);
-                        }
-
-                        ptr = ptr.parent;
-                    }
-
-                    return Math.Max(0, element.View.Viewport.width * measurement.value);
+                    return ComputeBlockWidth(measurement.value);
                 }
                 case UIMeasurementUnit.Percentage:
                 case UIMeasurementUnit.ParentContentArea: {
-                    AwesomeLayoutBox ptr = parent;
-                    float paddingBorder = 0;
-
-                    // ignored elements can use the output size of their parent since it has been resolved already
-                    if ((flags & AwesomeLayoutBoxFlags.Ignored) != 0) {
-                        LayoutResult parentResult = element.layoutResult.layoutParent;
-                        paddingBorder = parentResult.padding.left + parentResult.padding.right + parentResult.border.left + parentResult.padding.right;
-                        return Math.Max(0, (parentResult.actualSize.width - paddingBorder) * measurement.value);
-                    }
-
-                    while (ptr != null) {
-                        paddingBorder += ptr.paddingBorderHorizontalStart + ptr.paddingBorderHorizontalEnd;
-                        if ((ptr.flags & AwesomeLayoutBoxFlags.WidthBlockProvider) != 0) {
-                            Assert.AreNotEqual(-1, ptr.finalWidth);
-                            return Math.Max(0, (ptr.finalWidth - paddingBorder) * measurement.value);
-                        }
-
-                        ptr = ptr.parent;
-                    }
-
-                    return Math.Max(0, (element.View.Viewport.width - paddingBorder) * measurement.value);
+                    return ComputeBlockContentWidth(measurement.value);
                 }
             }
 
             return 0;
+        }
+
+        protected float ComputeBlockContentWidth(float value) {
+            AwesomeLayoutBox ptr = parent;
+            float paddingBorder = 0;
+
+            // ignored elements can use the output size of their parent since it has been resolved already
+            if ((flags & AwesomeLayoutBoxFlags.Ignored) != 0) {
+                LayoutResult parentResult = element.layoutResult.layoutParent;
+                paddingBorder = parentResult.padding.left + parentResult.padding.right + parentResult.border.left + parentResult.padding.right;
+                return Math.Max(0, (parentResult.actualSize.width - paddingBorder) * value);
+            }
+
+            while (ptr != null) {
+                paddingBorder += ptr.paddingBorderHorizontalStart + ptr.paddingBorderHorizontalEnd;
+                if ((ptr.flags & AwesomeLayoutBoxFlags.WidthBlockProvider) != 0) {
+                    Assert.AreNotEqual(-1, ptr.finalWidth);
+                    return Math.Max(0, (ptr.finalWidth - paddingBorder) * value);
+                }
+
+                ptr = ptr.parent;
+            }
+
+            return Math.Max(0, (element.View.Viewport.width - paddingBorder) * value);
+        }
+
+        protected float ComputeBlockWidth(float value) {
+            if ((flags & AwesomeLayoutBoxFlags.Ignored) != 0) {
+                LayoutResult parentResult = element.layoutResult.layoutParent;
+                return Math.Max(0, parentResult.actualSize.width * value);
+            }
+
+            AwesomeLayoutBox ptr = parent;
+            while (ptr != null) {
+                if ((ptr.flags & AwesomeLayoutBoxFlags.WidthBlockProvider) != 0) {
+                    Assert.AreNotEqual(-1, ptr.finalWidth);
+                    return Math.Max(0, ptr.finalWidth * value);
+                }
+
+                ptr = ptr.parent;
+            }
+
+            return Math.Max(0, element.View.Viewport.width * value);
+        }
+
+        protected float ComputeBlockContentHeight(float value) {
+            AwesomeLayoutBox ptr = parent;
+            float paddingBorder = 0;
+
+            // ignored elements can use the output size of their parent since it has been resolved already
+            if ((flags & AwesomeLayoutBoxFlags.Ignored) != 0) {
+                LayoutResult parentResult = element.layoutResult.layoutParent;
+                paddingBorder = parentResult.padding.top + parentResult.padding.bottom + parentResult.border.top + parentResult.padding.bottom;
+                return Math.Max(0, (parentResult.actualSize.height - paddingBorder) * value);
+            }
+
+            while (ptr != null) {
+                paddingBorder += ptr.paddingBorderVerticalStart + ptr.paddingBorderVerticalEnd;
+                if ((ptr.flags & AwesomeLayoutBoxFlags.HeightBlockProvider) != 0) {
+                    Assert.AreNotEqual(-1, ptr.finalHeight);
+                    return Math.Max(0, (ptr.finalHeight - paddingBorder) * value);
+                }
+
+                ptr = ptr.parent;
+            }
+
+            return Math.Max(0, (element.View.Viewport.height - paddingBorder) * value);
+        }
+
+        protected float ComputeBlockHeight(float value) {
+            AwesomeLayoutBox ptr = parent;
+
+            // ignored elements can use the output size of their parent since it has been resolved already
+            if ((flags & AwesomeLayoutBoxFlags.Ignored) != 0) {
+                LayoutResult parentResult = element.layoutResult.layoutParent;
+                return Math.Max(0, (parentResult.actualSize.height) * value);
+            }
+
+            while (ptr != null) {
+                if ((ptr.flags & AwesomeLayoutBoxFlags.HeightBlockProvider) != 0) {
+                    Assert.AreNotEqual(-1, ptr.finalHeight);
+                    return Math.Max(0, ptr.finalHeight * value);
+                }
+
+                ptr = ptr.parent;
+            }
+
+            return Math.Max(0, element.View.Viewport.height * value);
         }
 
         public float ResolveHeight(in UIMeasurement measurement) {
@@ -389,49 +443,12 @@ namespace UIForia.Systems {
                     throw new NotImplementedException();
 
                 case UIMeasurementUnit.BlockSize: {
-                    AwesomeLayoutBox ptr = parent;
-
-                    // ignored elements can use the output size of their parent since it has been resolved already
-                    if ((flags & AwesomeLayoutBoxFlags.Ignored) != 0) {
-                        LayoutResult parentResult = element.layoutResult.layoutParent;
-                        return Math.Max(0, (parentResult.actualSize.height) * measurement.value);
-                    }
-
-                    while (ptr != null) {
-                        if ((ptr.flags & AwesomeLayoutBoxFlags.HeightBlockProvider) != 0) {
-                            Assert.AreNotEqual(-1, ptr.finalHeight);
-                            return Math.Max(0, ptr.finalHeight * measurement.value);
-                        }
-
-                        ptr = ptr.parent;
-                    }
-
-                    return Math.Max(0, element.View.Viewport.height * measurement.value);
+                    return ComputeBlockHeight(value);
                 }
 
                 case UIMeasurementUnit.Percentage:
                 case UIMeasurementUnit.ParentContentArea: {
-                    AwesomeLayoutBox ptr = parent;
-                    float paddingBorder = 0;
-
-                    // ignored elements can use the output size of their parent since it has been resolved already
-                    if ((flags & AwesomeLayoutBoxFlags.Ignored) != 0) {
-                        LayoutResult parentResult = element.layoutResult.layoutParent;
-                        paddingBorder = parentResult.padding.top + parentResult.padding.bottom + parentResult.border.top + parentResult.padding.bottom;
-                        return Math.Max(0, (parentResult.actualSize.height - paddingBorder) * measurement.value);
-                    }
-
-                    while (ptr != null) {
-                        paddingBorder += ptr.paddingBorderVerticalStart + ptr.paddingBorderVerticalEnd;
-                        if ((ptr.flags & AwesomeLayoutBoxFlags.HeightBlockProvider) != 0) {
-                            Assert.AreNotEqual(-1, ptr.finalHeight);
-                            return Math.Max(0, (ptr.finalHeight - paddingBorder) * measurement.value);
-                        }
-
-                        ptr = ptr.parent;
-                    }
-
-                    return Math.Max(0, (element.View.Viewport.height - paddingBorder) * measurement.value);
+                    return ComputeBlockContentHeight(value);
                 }
             }
 

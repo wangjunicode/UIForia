@@ -125,6 +125,11 @@ namespace UIForia.Compilers.Style {
                 {"gridlayoutcolgap", (targetStyle, property, context) => targetStyle.GridLayoutColGap = MapNumber(property.children[0], context)},
                 {"gridlayoutrowgap", (targetStyle, property, context) => targetStyle.GridLayoutRowGap = MapNumber(property.children[0], context)},
                 
+                {"alignitemshorizontal", (targetStyle, property, context) => targetStyle.AlignItemsHorizontal = MapItemAlignment(property, context)},
+                {"alignitemsvertical", (targetStyle, property, context) => targetStyle.AlignItemsVertical = MapItemAlignment(property, context)},
+                {"fititemshorizontal", (targetStyle, property, context) => targetStyle.FitItemsHorizontal = MapEnum<LayoutFit>(property.children[0], context)},
+                {"fititemsvertical", (targetStyle, property, context) => targetStyle.FitItemsVertical = MapEnum<LayoutFit>(property.children[0], context)},
+                
                 {"stacklayoutalignhorizontal", (targetStyle, property, context) => targetStyle.StackLayoutAlignHorizontal = MapRelativeValue(property.children[0], context)},
                 {"stacklayoutalignvertical", (targetStyle, property, context) => targetStyle.StackLayoutAlignVertical = MapRelativeValue(property.children[0], context)},
 
@@ -165,11 +170,6 @@ namespace UIForia.Compilers.Style {
 
                 {"layouttype", (targetStyle, property, context) => targetStyle.LayoutType = MapEnum<LayoutType>(property.children[0], context)},
                 {"layoutbehavior", (targetStyle, property, context) => targetStyle.LayoutBehavior = MapEnum<LayoutBehavior>(property.children[0], context)},
-                {"anchortarget", (targetStyle, property, context) => targetStyle.AnchorTarget = MapEnum<AnchorTarget>(property.children[0], context)},
-                {"anchortop", (targetStyle, property, context) => targetStyle.AnchorTop = MapFixedLength(property.children[0], context)},
-                {"anchorright", (targetStyle, property, context) => targetStyle.AnchorRight = MapFixedLength(property.children[0], context)},
-                {"anchorbottom", (targetStyle, property, context) => targetStyle.AnchorBottom = MapFixedLength(property.children[0], context)},
-                {"anchorleft", (targetStyle, property, context) => targetStyle.AnchorLeft = MapFixedLength(property.children[0], context)},
                 {"zindex", (targetStyle, property, context) => targetStyle.ZIndex = (int) MapNumber(property.children[0], context)},
                 {"renderlayer", (targetStyle, property, context) => targetStyle.RenderLayer = MapEnum<RenderLayer>(property.children[0], context)},
                 {"renderlayeroffset", (targetStyle, property, context) => targetStyle.RenderLayerOffset = (int) MapNumber(property.children[0], context)},
@@ -247,6 +247,35 @@ namespace UIForia.Compilers.Style {
             }
         }
 
+        private static float MapItemAlignment(PropertyNode propertyNode, StyleCompileContext context) {
+            StyleASTNode value = context.GetValueForReference(propertyNode.children[0]);
+
+            if (value is StyleIdentifierNode identifierNode) {
+                switch (identifierNode.name.ToLower()) {
+                    case "start":
+                        return 0;
+                    case "center":
+                        return 0.5f;
+                    case "end":
+                        return 1f;
+                }
+            }
+            else if (value is MeasurementNode measurementNode){
+                if (measurementNode.unit.value != "%") {
+                    return 0;
+                }
+                else {
+                    float r = MapNumber(measurementNode.value, context);
+                    r = r * 0.01f;
+                    return r;
+                }
+            }
+            else if (value.type == StyleASTNodeType.NumericLiteral) {
+                return MapNumber(value, context);
+            }
+            throw new CompileException("Unable to parse alignment value");
+        }
+        
         private static void MapAlignmentX(UIStyle targetStyle, PropertyNode property, StyleCompileContext context) {
             if (property.children.size == 1) {
                 // single value mode
@@ -584,6 +613,9 @@ namespace UIForia.Compilers.Style {
                 case MeasurementNode measurementNode:
                     GridTemplateUnit unit = MapGridTemplateUnit(measurementNode.unit, context);
                     float value = MapNumber(measurementNode.value, context);
+                    if (unit == GridTemplateUnit.Percent) {
+                        value *= 0.01f;
+                    }
                     return new GridTrackSize(value, unit);
 
                 case StyleFunctionNode functionNode:
@@ -630,16 +662,16 @@ namespace UIForia.Compilers.Style {
                             size.pattern = MapGridTrackSizePattern(1, functionNode.children, context, true);
 
                             break;
-                        case "minmax":
+                        case "grow":
                             if (functionNode.children.Count != 2) {
-                                throw new CompileException(context.fileName, trackSize, $"Had a hard time parsing that track size: {trackSize}. minmax() must have two arguments.");
+                                throw new CompileException(context.fileName, trackSize, $"Had a hard time parsing that track size: {trackSize}. grow() must have two arguments.");
                             }
 
                             size.type = GridTrackSizeType.MinMax;
                             size.pattern = MapGridTrackSizePattern(0, functionNode.children, context, false);
 
                             if (size.pattern.Length != 2) {
-                                throw new CompileException(context.fileName, trackSize, $"Had a hard time parsing that track size: {trackSize}. minmax functions need to get exactly 2 arguments but I found {size.pattern.Length}.");
+                                throw new CompileException(context.fileName, trackSize, $"Had a hard time parsing that track size: {trackSize}. grow functions need to get exactly 2 arguments but I found {size.pattern.Length}.");
                             }
 
                             size.minUnit = size.pattern[0].unit;
@@ -1032,6 +1064,8 @@ namespace UIForia.Compilers.Style {
                     return GridTemplateUnit.ParentContentArea;
                 case "psz":
                     return GridTemplateUnit.ParentSize;
+                case "%":
+                    return GridTemplateUnit.Percent;
             }
 
             Debug.LogWarning($"You used a {unitNode.value} in line {unitNode.line} column {unitNode.column} in file {context.fileName} but this unit isn't supported. " +

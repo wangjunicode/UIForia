@@ -35,11 +35,6 @@
         <Group style="box placed3"/>
         <Group style="box"/>
         <Group style="box"/>
-        <!--
-         this box causes the last column to have a size, which should resolve to 100px,
-         without this box the col is mx sized but the entire width of the last placed3 box is already consumed by previous col
-         -->
-        <Group style="box"/>
     </Contents>
 
 </UITemplate>

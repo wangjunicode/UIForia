@@ -334,6 +334,48 @@ namespace UIForia.Rendering {
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.GridLayoutRowAlignment, (int)value), state); }
         }
         
+        public float AlignItemsHorizontal {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.AlignItemsHorizontal, state).AsFloat; }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.AlignItemsHorizontal, value), state); }
+        }
+        
+        public float AlignItemsVertical {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.AlignItemsVertical, state).AsFloat; }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.AlignItemsVertical, value), state); }
+        }
+        
+        public UIForia.Layout.LayoutFit FitItemsVertical {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.FitItemsVertical, state).AsLayoutFit; }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.FitItemsVertical, (int)value), state); }
+        }
+        
+        public UIForia.Layout.LayoutFit FitItemsHorizontal {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.FitItemsHorizontal, state).AsLayoutFit; }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.FitItemsHorizontal, (int)value), state); }
+        }
+        
+        public UIForia.Layout.MainAxisAlignment AlignContentHorizontal {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.AlignContentHorizontal, state).AsMainAxisAlignment; }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.AlignContentHorizontal, (int)value), state); }
+        }
+        
+        public UIForia.Layout.MainAxisAlignment AlignContentVertical {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.AlignContentVertical, state).AsMainAxisAlignment; }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.AlignContentVertical, (int)value), state); }
+        }
+        
         public float RadialLayoutStartAngle {
             [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.RadialLayoutStartAngle, state).AsFloat; }
@@ -773,41 +815,6 @@ namespace UIForia.Rendering {
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.TextWhitespaceMode, state).AsWhitespaceMode; }
             [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.TextWhitespaceMode, (int)value), state); }
-        }
-        
-        public UIForia.UIFixedLength AnchorTop {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.AnchorTop, state).AsUIFixedLength; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.AnchorTop, value), state); }
-        }
-        
-        public UIForia.UIFixedLength AnchorRight {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.AnchorRight, state).AsUIFixedLength; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.AnchorRight, value), state); }
-        }
-        
-        public UIForia.UIFixedLength AnchorBottom {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.AnchorBottom, state).AsUIFixedLength; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.AnchorBottom, value), state); }
-        }
-        
-        public UIForia.UIFixedLength AnchorLeft {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.AnchorLeft, state).AsUIFixedLength; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.AnchorLeft, value), state); }
-        }
-        
-        public UIForia.Rendering.AnchorTarget AnchorTarget {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.AnchorTarget, state).AsAnchorTarget; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.AnchorTarget, (int)value), state); }
         }
         
         public UIForia.OffsetMeasurement TransformPositionX {
@@ -1326,6 +1333,48 @@ namespace UIForia.Rendering {
             set { SetProperty(new StyleProperty(StylePropertyId.GridLayoutRowAlignment, (int)value)); }
         }
             
+        public float AlignItemsHorizontal {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return FindFloatProperty(StylePropertyId.AlignItemsHorizontal); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.AlignItemsHorizontal, value)); }
+        }
+            
+        public float AlignItemsVertical {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return FindFloatProperty(StylePropertyId.AlignItemsVertical); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.AlignItemsVertical, value)); }
+        }
+            
+        public UIForia.Layout.LayoutFit FitItemsVertical {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return (UIForia.Layout.LayoutFit)FindEnumProperty(StylePropertyId.FitItemsVertical); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.FitItemsVertical, (int)value)); }
+        }
+            
+        public UIForia.Layout.LayoutFit FitItemsHorizontal {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return (UIForia.Layout.LayoutFit)FindEnumProperty(StylePropertyId.FitItemsHorizontal); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.FitItemsHorizontal, (int)value)); }
+        }
+            
+        public UIForia.Layout.MainAxisAlignment AlignContentHorizontal {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return (UIForia.Layout.MainAxisAlignment)FindEnumProperty(StylePropertyId.AlignContentHorizontal); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.AlignContentHorizontal, (int)value)); }
+        }
+            
+        public UIForia.Layout.MainAxisAlignment AlignContentVertical {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return (UIForia.Layout.MainAxisAlignment)FindEnumProperty(StylePropertyId.AlignContentVertical); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.AlignContentVertical, (int)value)); }
+        }
+            
         public float RadialLayoutStartAngle {
             [System.Diagnostics.DebuggerStepThrough]
             get { return FindFloatProperty(StylePropertyId.RadialLayoutStartAngle); }
@@ -1765,41 +1814,6 @@ namespace UIForia.Rendering {
             get { return (UIForia.Text.WhitespaceMode)FindEnumProperty(StylePropertyId.TextWhitespaceMode); }
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.TextWhitespaceMode, (int)value)); }
-        }
-            
-        public UIForia.UIFixedLength AnchorTop {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return FindUIFixedLengthProperty(StylePropertyId.AnchorTop); }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.AnchorTop, value)); }
-        }
-            
-        public UIForia.UIFixedLength AnchorRight {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return FindUIFixedLengthProperty(StylePropertyId.AnchorRight); }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.AnchorRight, value)); }
-        }
-            
-        public UIForia.UIFixedLength AnchorBottom {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return FindUIFixedLengthProperty(StylePropertyId.AnchorBottom); }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.AnchorBottom, value)); }
-        }
-            
-        public UIForia.UIFixedLength AnchorLeft {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return FindUIFixedLengthProperty(StylePropertyId.AnchorLeft); }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.AnchorLeft, value)); }
-        }
-            
-        public UIForia.Rendering.AnchorTarget AnchorTarget {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return (UIForia.Rendering.AnchorTarget)FindEnumProperty(StylePropertyId.AnchorTarget); }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.AnchorTarget, (int)value)); }
         }
             
         public UIForia.OffsetMeasurement TransformPositionX {
@@ -2418,6 +2432,60 @@ namespace UIForia.Rendering {
                 }
             }
 
+            public float AlignItemsHorizontal { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.AlignItemsHorizontal, out property)) return property.AsFloat;
+                    return DefaultStyleValues_Generated.AlignItemsHorizontal;
+                }
+            }
+
+            public float AlignItemsVertical { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.AlignItemsVertical, out property)) return property.AsFloat;
+                    return DefaultStyleValues_Generated.AlignItemsVertical;
+                }
+            }
+
+            public UIForia.Layout.LayoutFit FitItemsVertical { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.FitItemsVertical, out property)) return property.AsLayoutFit;
+                    return DefaultStyleValues_Generated.FitItemsVertical;
+                }
+            }
+
+            public UIForia.Layout.LayoutFit FitItemsHorizontal { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.FitItemsHorizontal, out property)) return property.AsLayoutFit;
+                    return DefaultStyleValues_Generated.FitItemsHorizontal;
+                }
+            }
+
+            public UIForia.Layout.MainAxisAlignment AlignContentHorizontal { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.AlignContentHorizontal, out property)) return property.AsMainAxisAlignment;
+                    return DefaultStyleValues_Generated.AlignContentHorizontal;
+                }
+            }
+
+            public UIForia.Layout.MainAxisAlignment AlignContentVertical { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.AlignContentVertical, out property)) return property.AsMainAxisAlignment;
+                    return DefaultStyleValues_Generated.AlignContentVertical;
+                }
+            }
+
             public float RadialLayoutStartAngle { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
@@ -3007,51 +3075,6 @@ namespace UIForia.Rendering {
                     if (propertyMap.TryGetValue((int) StylePropertyId.TextWhitespaceMode, out property)) return property.AsWhitespaceMode;
                     if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.TextWhitespaceMode), out property)) return property.AsWhitespaceMode;
                     return DefaultStyleValues_Generated.TextWhitespaceMode;
-                }
-            }
-
-            public UIForia.UIFixedLength AnchorTop { 
-                [System.Diagnostics.DebuggerStepThrough]
-                get { 
-                    StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.AnchorTop, out property)) return property.AsUIFixedLength;
-                    return DefaultStyleValues_Generated.AnchorTop;
-                }
-            }
-
-            public UIForia.UIFixedLength AnchorRight { 
-                [System.Diagnostics.DebuggerStepThrough]
-                get { 
-                    StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.AnchorRight, out property)) return property.AsUIFixedLength;
-                    return DefaultStyleValues_Generated.AnchorRight;
-                }
-            }
-
-            public UIForia.UIFixedLength AnchorBottom { 
-                [System.Diagnostics.DebuggerStepThrough]
-                get { 
-                    StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.AnchorBottom, out property)) return property.AsUIFixedLength;
-                    return DefaultStyleValues_Generated.AnchorBottom;
-                }
-            }
-
-            public UIForia.UIFixedLength AnchorLeft { 
-                [System.Diagnostics.DebuggerStepThrough]
-                get { 
-                    StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.AnchorLeft, out property)) return property.AsUIFixedLength;
-                    return DefaultStyleValues_Generated.AnchorLeft;
-                }
-            }
-
-            public UIForia.Rendering.AnchorTarget AnchorTarget { 
-                [System.Diagnostics.DebuggerStepThrough]
-                get { 
-                    StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.AnchorTarget, out property)) return property.AsAnchorTarget;
-                    return DefaultStyleValues_Generated.AnchorTarget;
                 }
             }
 
@@ -3668,6 +3691,54 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.GridLayoutRowAlignment, state).AsGridAxisAlignment;
         }
         
+        public void SetAlignItemsHorizontal(in float? value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.AlignItemsHorizontal, value), state);
+        }
+
+        public float GetAlignItemsHorizontal(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.AlignItemsHorizontal, state).AsFloat;
+        }
+        
+        public void SetAlignItemsVertical(in float? value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.AlignItemsVertical, value), state);
+        }
+
+        public float GetAlignItemsVertical(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.AlignItemsVertical, state).AsFloat;
+        }
+        
+        public void SetFitItemsVertical(in UIForia.Layout.LayoutFit? value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.FitItemsVertical, (int)value), state);
+        }
+
+        public UIForia.Layout.LayoutFit GetFitItemsVertical(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.FitItemsVertical, state).AsLayoutFit;
+        }
+        
+        public void SetFitItemsHorizontal(in UIForia.Layout.LayoutFit? value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.FitItemsHorizontal, (int)value), state);
+        }
+
+        public UIForia.Layout.LayoutFit GetFitItemsHorizontal(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.FitItemsHorizontal, state).AsLayoutFit;
+        }
+        
+        public void SetAlignContentHorizontal(in UIForia.Layout.MainAxisAlignment? value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.AlignContentHorizontal, (int)value), state);
+        }
+
+        public UIForia.Layout.MainAxisAlignment GetAlignContentHorizontal(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.AlignContentHorizontal, state).AsMainAxisAlignment;
+        }
+        
+        public void SetAlignContentVertical(in UIForia.Layout.MainAxisAlignment? value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.AlignContentVertical, (int)value), state);
+        }
+
+        public UIForia.Layout.MainAxisAlignment GetAlignContentVertical(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.AlignContentVertical, state).AsMainAxisAlignment;
+        }
+        
         public void SetRadialLayoutStartAngle(in float? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.RadialLayoutStartAngle, value), state);
         }
@@ -4172,46 +4243,6 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.TextWhitespaceMode, state).AsWhitespaceMode;
         }
         
-        public void SetAnchorTop(in UIForia.UIFixedLength? value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.AnchorTop, value), state);
-        }
-
-        public UIForia.UIFixedLength GetAnchorTop(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.AnchorTop, state).AsUIFixedLength;
-        }
-        
-        public void SetAnchorRight(in UIForia.UIFixedLength? value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.AnchorRight, value), state);
-        }
-
-        public UIForia.UIFixedLength GetAnchorRight(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.AnchorRight, state).AsUIFixedLength;
-        }
-        
-        public void SetAnchorBottom(in UIForia.UIFixedLength? value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.AnchorBottom, value), state);
-        }
-
-        public UIForia.UIFixedLength GetAnchorBottom(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.AnchorBottom, state).AsUIFixedLength;
-        }
-        
-        public void SetAnchorLeft(in UIForia.UIFixedLength? value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.AnchorLeft, value), state);
-        }
-
-        public UIForia.UIFixedLength GetAnchorLeft(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.AnchorLeft, state).AsUIFixedLength;
-        }
-        
-        public void SetAnchorTarget(in UIForia.Rendering.AnchorTarget? value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.AnchorTarget, (int)value), state);
-        }
-
-        public UIForia.Rendering.AnchorTarget GetAnchorTarget(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.AnchorTarget, state).AsAnchorTarget;
-        }
-        
         public void SetTransformPositionX(in UIForia.OffsetMeasurement? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.TransformPositionX, value), state);
         }
@@ -4517,6 +4548,18 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.GridLayoutColAlignment, (int)GridLayoutColAlignment);
 				case StylePropertyId.GridLayoutRowAlignment:
 					 return new StyleProperty(StylePropertyId.GridLayoutRowAlignment, (int)GridLayoutRowAlignment);
+				case StylePropertyId.AlignItemsHorizontal:
+					 return new StyleProperty(StylePropertyId.AlignItemsHorizontal, AlignItemsHorizontal);
+				case StylePropertyId.AlignItemsVertical:
+					 return new StyleProperty(StylePropertyId.AlignItemsVertical, AlignItemsVertical);
+				case StylePropertyId.FitItemsVertical:
+					 return new StyleProperty(StylePropertyId.FitItemsVertical, (int)FitItemsVertical);
+				case StylePropertyId.FitItemsHorizontal:
+					 return new StyleProperty(StylePropertyId.FitItemsHorizontal, (int)FitItemsHorizontal);
+				case StylePropertyId.AlignContentHorizontal:
+					 return new StyleProperty(StylePropertyId.AlignContentHorizontal, (int)AlignContentHorizontal);
+				case StylePropertyId.AlignContentVertical:
+					 return new StyleProperty(StylePropertyId.AlignContentVertical, (int)AlignContentVertical);
 				case StylePropertyId.RadialLayoutStartAngle:
 					 return new StyleProperty(StylePropertyId.RadialLayoutStartAngle, RadialLayoutStartAngle);
 				case StylePropertyId.RadialLayoutEndAngle:
@@ -4643,16 +4686,6 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.TextTransform, (int)TextTransform);
 				case StylePropertyId.TextWhitespaceMode:
 					 return new StyleProperty(StylePropertyId.TextWhitespaceMode, (int)TextWhitespaceMode);
-				case StylePropertyId.AnchorTop:
-					 return new StyleProperty(StylePropertyId.AnchorTop, AnchorTop);
-				case StylePropertyId.AnchorRight:
-					 return new StyleProperty(StylePropertyId.AnchorRight, AnchorRight);
-				case StylePropertyId.AnchorBottom:
-					 return new StyleProperty(StylePropertyId.AnchorBottom, AnchorBottom);
-				case StylePropertyId.AnchorLeft:
-					 return new StyleProperty(StylePropertyId.AnchorLeft, AnchorLeft);
-				case StylePropertyId.AnchorTarget:
-					 return new StyleProperty(StylePropertyId.AnchorTarget, (int)AnchorTarget);
 				case StylePropertyId.TransformPositionX:
 					 return new StyleProperty(StylePropertyId.TransformPositionX, TransformPositionX);
 				case StylePropertyId.TransformPositionY:
@@ -4789,10 +4822,6 @@ namespace UIForia.Rendering {
                     case StylePropertyId.TextUnderlayDilate: return true;
                     case StylePropertyId.TextUnderlaySoftness: return true;
                     case StylePropertyId.TextFaceDilate: return true;
-                    case StylePropertyId.AnchorTop: return true;
-                    case StylePropertyId.AnchorRight: return true;
-                    case StylePropertyId.AnchorBottom: return true;
-                    case StylePropertyId.AnchorLeft: return true;
                     case StylePropertyId.TransformPositionX: return true;
                     case StylePropertyId.TransformPositionY: return true;
                     case StylePropertyId.TransformPivotX: return true;

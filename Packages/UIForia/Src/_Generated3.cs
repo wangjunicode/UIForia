@@ -61,6 +61,12 @@ namespace UIForia.Rendering {
 		public const float GridLayoutRowGap = 0f;
 		public const GridAxisAlignment GridLayoutColAlignment = UIForia.Layout.GridAxisAlignment.Grow;
 		public const GridAxisAlignment GridLayoutRowAlignment = UIForia.Layout.GridAxisAlignment.Grow;
+		public const float AlignItemsHorizontal = 0f;
+		public const float AlignItemsVertical = 0f;
+		public const LayoutFit FitItemsVertical = UIForia.Layout.LayoutFit.Unset;
+		public const LayoutFit FitItemsHorizontal = UIForia.Layout.LayoutFit.Unset;
+		public const MainAxisAlignment AlignContentHorizontal = UIForia.Layout.MainAxisAlignment.Start;
+		public const MainAxisAlignment AlignContentVertical = UIForia.Layout.MainAxisAlignment.Start;
 		public const float RadialLayoutStartAngle = 0f;
 		public const float RadialLayoutEndAngle = 360f;
 		public static readonly UIFixedLength RadialLayoutRadius = new UIFixedLength(0.5f, UIFixedUnit.Percent);
@@ -124,11 +130,6 @@ namespace UIForia.Rendering {
 		public const UnderlayType TextUnderlayType = UIForia.Rendering.UnderlayType.Unset;
 		public const TextTransform TextTransform = UIForia.Text.TextTransform.None;
 		public const WhitespaceMode TextWhitespaceMode = UIForia.Text.WhitespaceMode.CollapseWhitespaceAndTrim;
-		public static readonly UIFixedLength AnchorTop = new UIFixedLength(0f, UIFixedUnit.Pixel);
-		public static readonly UIFixedLength AnchorRight = new UIFixedLength(0f, UIFixedUnit.Pixel);
-		public static readonly UIFixedLength AnchorBottom = new UIFixedLength(0f, UIFixedUnit.Pixel);
-		public static readonly UIFixedLength AnchorLeft = new UIFixedLength(0f, UIFixedUnit.Pixel);
-		public const AnchorTarget AnchorTarget = UIForia.Rendering.AnchorTarget.Parent;
 		public static readonly OffsetMeasurement TransformPositionX = new OffsetMeasurement(0f, OffsetMeasurementUnit.Pixel);
 		public static readonly OffsetMeasurement TransformPositionY = new OffsetMeasurement(0f, OffsetMeasurementUnit.Pixel);
 		public static readonly UIFixedLength TransformPivotX = new UIFixedLength(0f, UIFixedUnit.Pixel);
@@ -252,6 +253,18 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.GridLayoutColAlignment, (int)UIForia.Layout.GridAxisAlignment.Grow);
 				case StylePropertyId.GridLayoutRowAlignment:
 					 return new StyleProperty(StylePropertyId.GridLayoutRowAlignment, (int)UIForia.Layout.GridAxisAlignment.Grow);
+				case StylePropertyId.AlignItemsHorizontal:
+					 return new StyleProperty(StylePropertyId.AlignItemsHorizontal, 0f);
+				case StylePropertyId.AlignItemsVertical:
+					 return new StyleProperty(StylePropertyId.AlignItemsVertical, 0f);
+				case StylePropertyId.FitItemsVertical:
+					 return new StyleProperty(StylePropertyId.FitItemsVertical, (int)UIForia.Layout.LayoutFit.Unset);
+				case StylePropertyId.FitItemsHorizontal:
+					 return new StyleProperty(StylePropertyId.FitItemsHorizontal, (int)UIForia.Layout.LayoutFit.Unset);
+				case StylePropertyId.AlignContentHorizontal:
+					 return new StyleProperty(StylePropertyId.AlignContentHorizontal, (int)UIForia.Layout.MainAxisAlignment.Start);
+				case StylePropertyId.AlignContentVertical:
+					 return new StyleProperty(StylePropertyId.AlignContentVertical, (int)UIForia.Layout.MainAxisAlignment.Start);
 				case StylePropertyId.RadialLayoutStartAngle:
 					 return new StyleProperty(StylePropertyId.RadialLayoutStartAngle, 0f);
 				case StylePropertyId.RadialLayoutEndAngle:
@@ -378,16 +391,6 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.TextTransform, (int)UIForia.Text.TextTransform.None);
 				case StylePropertyId.TextWhitespaceMode:
 					 return new StyleProperty(StylePropertyId.TextWhitespaceMode, (int)UIForia.Text.WhitespaceMode.CollapseWhitespaceAndTrim);
-				case StylePropertyId.AnchorTop:
-					 return new StyleProperty(StylePropertyId.AnchorTop, new UIFixedLength(0f, UIFixedUnit.Pixel));
-				case StylePropertyId.AnchorRight:
-					 return new StyleProperty(StylePropertyId.AnchorRight, new UIFixedLength(0f, UIFixedUnit.Pixel));
-				case StylePropertyId.AnchorBottom:
-					 return new StyleProperty(StylePropertyId.AnchorBottom, new UIFixedLength(0f, UIFixedUnit.Pixel));
-				case StylePropertyId.AnchorLeft:
-					 return new StyleProperty(StylePropertyId.AnchorLeft, new UIFixedLength(0f, UIFixedUnit.Pixel));
-				case StylePropertyId.AnchorTarget:
-					 return new StyleProperty(StylePropertyId.AnchorTarget, (int)UIForia.Rendering.AnchorTarget.Parent);
 				case StylePropertyId.TransformPositionX:
 					 return new StyleProperty(StylePropertyId.TransformPositionX, new OffsetMeasurement(0f, OffsetMeasurementUnit.Pixel));
 				case StylePropertyId.TransformPositionY:

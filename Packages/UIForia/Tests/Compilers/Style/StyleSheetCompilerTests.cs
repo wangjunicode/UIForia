@@ -960,16 +960,10 @@ style size2 {
     public void CompileAnchoring() {
         var nodes = StyleParser.Parse(@"
 export const layout = Fixed;
-export const anchorRight = 20%;
 
 style anchoring { 
     LayoutType = @layout;
     LayoutBehavior = Ignored;
-    AnchorTarget = Viewport;
-    AnchorTop = 10px;
-    AnchorRight = @anchorRight;
-    AnchorBottom = 400px;
-    AnchorLeft = 90vh;
     ZIndex = 3;
     RenderLayer = Screen;
     RenderLayerOffset = 22;
@@ -981,11 +975,6 @@ style anchoring {
         var styleGroup = styleSheet.styleGroupContainers;
         Assert.AreEqual(LayoutType.Fixed, styleGroup[0].groups[0].normal.style.LayoutType);
         Assert.AreEqual(LayoutBehavior.Ignored, styleGroup[0].groups[0].normal.style.LayoutBehavior);
-        Assert.AreEqual(AnchorTarget.Viewport, styleGroup[0].groups[0].normal.style.AnchorTarget);
-        Assert.AreEqual(new UIFixedLength(10), styleGroup[0].groups[0].normal.style.AnchorTop);
-        Assert.AreEqual(new UIFixedLength(0.2f, UIFixedUnit.Percent), styleGroup[0].groups[0].normal.style.AnchorRight);
-        Assert.AreEqual(new UIFixedLength(400), styleGroup[0].groups[0].normal.style.AnchorBottom);
-        Assert.AreEqual(new UIFixedLength(90, UIFixedUnit.ViewportHeight), styleGroup[0].groups[0].normal.style.AnchorLeft);
         Assert.AreEqual(3, styleGroup[0].groups[0].normal.style.ZIndex);
         Assert.AreEqual(RenderLayer.Screen, styleGroup[0].groups[0].normal.style.RenderLayer);
         Assert.AreEqual(22, styleGroup[0].groups[0].normal.style.RenderLayerOffset);

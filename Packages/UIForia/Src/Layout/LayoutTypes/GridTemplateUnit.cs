@@ -16,8 +16,10 @@ namespace UIForia.Layout.LayoutTypes {
         FractionalRemaining = UnitConstants.FractionalRemaining,
         MinContent = UnitConstants.MinContent,
         MaxContent = UnitConstants.MaxContent,
+        Percent = UnitConstants.Percent,
 
-        Fixed = Pixel | ParentSize | ParentContentArea | Em | ViewportWidth | ViewportHeight
+        Fixed = Pixel | Percent | ParentSize | ParentContentArea | Em | ViewportWidth | ViewportHeight,
+
 
     }
 

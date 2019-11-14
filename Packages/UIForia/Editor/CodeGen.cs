@@ -88,6 +88,14 @@ namespace UIForia.Editor {
             new AnimatedPropertyGenerator<float>(StylePropertyId.GridLayoutRowGap, 0),
             new PropertyGenerator<GridAxisAlignment>(StylePropertyId.GridLayoutColAlignment, GridAxisAlignment.Grow),
             new PropertyGenerator<GridAxisAlignment>(StylePropertyId.GridLayoutRowAlignment, GridAxisAlignment.Grow),
+            
+            // Layout Alignment
+            new PropertyGenerator<float>(StylePropertyId.AlignItemsHorizontal, 0),
+            new PropertyGenerator<float>(StylePropertyId.AlignItemsVertical, 0),
+            new PropertyGenerator<LayoutFit>(StylePropertyId.FitItemsVertical, 0),
+            new PropertyGenerator<LayoutFit>(StylePropertyId.FitItemsHorizontal, 0),
+            new PropertyGenerator<MainAxisAlignment>(StylePropertyId.AlignContentHorizontal, MainAxisAlignment.Start),
+            new PropertyGenerator<MainAxisAlignment>(StylePropertyId.AlignContentVertical, MainAxisAlignment.Start),
 
             // Radial Layout
             new AnimatedPropertyGenerator<float>(StylePropertyId.RadialLayoutStartAngle, 0f),

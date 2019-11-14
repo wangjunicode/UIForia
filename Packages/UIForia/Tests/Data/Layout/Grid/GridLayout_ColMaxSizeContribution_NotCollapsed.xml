@@ -3,27 +3,27 @@
     <Style>
 
         style container {
-        LayoutType = Grid;
-        GridLayoutRowTemplate = 100px, 100px, 100px, 100px;
-        GridLayoutDirection = Vertical;
-        GridLayoutDensity = Dense;
-        FitItemsHorizontal = Fill;
-        FitItemsVertical = Fill;
+            LayoutType = Grid;
+            GridLayoutRowTemplate = 100px, 100px, 100px, 100px;
+            GridLayoutDirection = Vertical;
+            GridLayoutDensity = Dense;
+            FitItemsHorizontal = Fill;
+            FitItemsVertical = Fill;
         }
 
         style placed1 {
-        GridItemHeight = 2;
-        BackgroundColor = green;
+            GridItemHeight = 2;
+            BackgroundColor = green;
         }
 
         style placed3 {
-        GridItemWidth = 2;
-        BackgroundColor = white;
+            GridItemWidth = 2;
+            BackgroundColor = white;
         }
 
         style box {
-        PreferredSize = 100px;
-        BackgroundColor = blue;
+            PreferredSize = 100px;
+            BackgroundColor = blue;
         }
 
     </Style>

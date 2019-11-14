@@ -10,11 +10,14 @@ style constraint {
 
 style grid5x5 {
     LayoutType = Grid;
-    GridLayoutDirection = Row;
-    GridLayoutRowTemplate = 100px 1fr 3fr 100px 100px;
+    GridLayoutDirection = Horizontal;
+    GridLayoutColTemplate = 100px 100px 1fr 100px 100px;
+    // GridLayoutRowTemplate = 100px 1fr 3fr 100px 100px;
 //    GridLayoutRowTemplate = 100px 100px 100px 100px 100px;
-    GridLayoutColTemplate = 1mx 100px 100px 100px 100px;
+//    GridLayoutColTemplate = 1mx 100px 100px 100px 100px;
     PreferredSize = 1pca;
+    AlignItemsHorizontal = Center;
+    FitItemsHorizontal = Fill;
 }
 
 style grid5x5-parent {

@@ -82,6 +82,7 @@ namespace UIForia.Systems {
                 }
 
                 if ((flags & UIElementFlags.LayoutFlags) != 0) {
+                    
                     if ((flags & (UIElementFlags.LayoutTypeDirty | UIElementFlags.LayoutBehaviorDirty)) != 0) {
                         UpdateLayoutTypeOrBehavior(currentElement);
                         flags &= ~(UIElementFlags.LayoutTypeDirty | UIElementFlags.LayoutBehaviorDirty);
@@ -121,22 +122,23 @@ namespace UIForia.Systems {
 
                         MarkContentParentsVerticalDirty(currentElement);
                     }
-
-                    if ((currentElement.awesomeLayoutBox.flags & AwesomeLayoutBoxFlags.RequireAlignmentHorizontal) != 0) {
-                        alignHorizontalList.Add(currentElement);
-                    }
-
-                    if ((currentElement.awesomeLayoutBox.flags & AwesomeLayoutBoxFlags.RequireAlignmentVertical) != 0) {
-                        alignVerticalList.Add(currentElement);
-                    }
-
+                    
                     if ((flags & UIElementFlags.LayoutTransformDirty) != 0) {
                         // if element has identity transform remove from toTransform list
                         // otherwise add if not already member
                         flags &= ~UIElementFlags.LayoutTransformDirty;
                     }
+                    
+                }
+                
+                if ((currentElement.awesomeLayoutBox.flags & AwesomeLayoutBoxFlags.RequireAlignmentHorizontal) != 0) {
+                    alignHorizontalList.Add(currentElement);
                 }
 
+                if ((currentElement.awesomeLayoutBox.flags & AwesomeLayoutBoxFlags.RequireAlignmentVertical) != 0) {
+                    alignVerticalList.Add(currentElement);
+                }
+                
                 currentElement.flags = flags; // write changes back to element
 
                 UIElement[] childArray = currentElement.children.array;
@@ -488,6 +490,8 @@ namespace UIForia.Systems {
                 case LayoutType.Fixed:
                     break;
                 case LayoutType.Grid:
+                    currentElement.awesomeLayoutBox = new AwesomeGridLayoutBox();
+                    currentElement.awesomeLayoutBox.Initialize(currentElement, frameId);
                     break;
                 case LayoutType.Radial:
                     break;

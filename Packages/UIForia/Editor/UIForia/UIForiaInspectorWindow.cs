@@ -30,7 +30,7 @@ namespace UIForia.Editor {
         private Color borderColor = new Color32(253, 221, 155, 175);
         private Color marginColor = new Color32(249, 204, 157, 175);
         private Color paddingColor = new Color32(196, 208, 139, 175);
-        private Color baseLineColor = Color.red;
+        private Color allocatedSpaceColor = Color.red;
         private Color descenderColor = Color.blue;
         private Color outlineColor = new Color32(196, 208, 139, 175);
         private Material lineMaterial;
@@ -96,8 +96,8 @@ namespace UIForia.Editor {
                 marginColor = new Color32(253, 221, 155, 175);
             }
 
-            if (!ColorUtility.TryParseHtmlString(EditorPrefs.GetString("UIForia.Inspector.BaseLineColor"), out baseLineColor)) {
-                baseLineColor = Color.red;
+            if (!ColorUtility.TryParseHtmlString(EditorPrefs.GetString("UIForia.Inspector.AllocatedSpaceColor"), out allocatedSpaceColor)) {
+                allocatedSpaceColor = Color.red;
             }
 
             if (!ColorUtility.TryParseHtmlString(EditorPrefs.GetString("UIForia.Inspector.DescenderColor"), out descenderColor)) {
@@ -299,6 +299,17 @@ namespace UIForia.Editor {
                 float y = result.screenPosition.y;
 
                 // ctx.DisableScissorRect();
+
+                float allocatedX = result.allocatedPosition.x;
+                float allocatedY = result.allocatedPosition.y;
+                float allocatedW = result.allocatedSize.width;
+                float allocatedH = result.allocatedSize.height;
+                
+                path.SetFill(allocatedSpaceColor);
+                path.BeginPath();
+                path.Rect(allocatedX, allocatedY, allocatedW, allocatedH);
+                path.Fill();
+                
                 path.SetFill(contentColor);
                 float contentX = (result.screenPosition.x) + border.left + padding.left;
                 float contentY = (result.screenPosition.y) + border.top + padding.top;
@@ -435,7 +446,7 @@ namespace UIForia.Editor {
             Color newBorderColor = EditorGUILayout.ColorField("Border Color", borderColor);
             Color newMarginColor = EditorGUILayout.ColorField("Margin Color", marginColor);
 
-            Color newBaseLineColor = EditorGUILayout.ColorField("Text Baseline Color", baseLineColor);
+            Color newBaseLineColor = EditorGUILayout.ColorField("Allocated Space Color", allocatedSpaceColor);
             Color newDescenderColor = EditorGUILayout.ColorField("Text Descender Color", descenderColor);
 
             if (newContentColor != contentColor) {
@@ -458,9 +469,9 @@ namespace UIForia.Editor {
                 EditorPrefs.SetString("UIForia.Inspector.MarginColor", "#" + ColorUtility.ToHtmlStringRGBA(marginColor));
             }
 
-            if (baseLineColor != newBaseLineColor) {
-                baseLineColor = newBaseLineColor;
-                EditorPrefs.SetString("UIForia.Inspector.BaseLineColor", "#" + ColorUtility.ToHtmlStringRGBA(baseLineColor));
+            if (allocatedSpaceColor != newBaseLineColor) {
+                allocatedSpaceColor = newBaseLineColor;
+                EditorPrefs.SetString("UIForia.Inspector.AllocatedSpaceColor", "#" + ColorUtility.ToHtmlStringRGBA(allocatedSpaceColor));
             }
 
             if (descenderColor != newDescenderColor) {

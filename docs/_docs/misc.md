@@ -7,3 +7,5 @@ layout: page
 
 ## List of all supported colors
 {% include colors.html %}
+
+## Types

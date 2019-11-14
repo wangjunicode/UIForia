@@ -5,7 +5,52 @@
       url: "news"
     - title: "Roadmap 2020"
       url: "roadmap"
-    - title: "Getting Started"
+    - title: "Layout"
+      url: "docs/layout"
+      children:
+        - title: Concepts
+          url: "docs/layout"
+        - title: FlexBox
+          url: "docs/layout/flex"
+        - title: Grid
+          url: "docs/layout/grid"
+    - title: "Style"
+      url: "docs/style"
+      children:
+        - title: "Style Guide"
+          url: "docs/style"
+        - title: "Style Properties"
+          url: "docs/style/style-properties"
+        - title: "Units - %, px, vw etc."
+          url: "docs/style/style-units"
+    - title: "Input"
+      url: "docs/input"
+    - title: "Data Binding"
+      url: "docs/data-binding"
+    - title: "Expressions"
+      url: "docs/expressions"
+    - title: "Configuration"
+      url: "docs/configuration"
+    - title: "Painter API"
+      url: "docs/painter-api"
+      children:
+        - title: "Background Painters"
+        - title: "Foreground Painters (effects)"
+        - title: "Particles"
+    - title: "Routers"
+      url: "docs/routers"
+    - title: "Animations"
+      url: "docs/animations"
+    - title: "Editor Tools"
+      url: "docs/tools"
+    - title: "Misc"
+      url: "docs/misc"
+      children:
+        - title: "Colors"
+          url: "docs/misc#list-of-all-supported-colors"
+    - title: "About"
+      url: "about"
+    - title: "Contributing to the docs"
       url: "docs/getting-started"
       children:
         - title: Features
@@ -14,20 +59,3 @@
           url: "docs/getting-started#development"
         - title: Customization
           url: "docs/getting-started#customization"
-    - title: "Animations"
-      url: "docs/animations/Animation"
-    - title: "Layout"
-      children:
-        - title: Concepts
-          url: "docs/layout/layout-concepts"
-        - title: FlexBox
-          url: "docs/layout/flex"
-        - title: Grid
-          url: "docs/layout/grid"
-    - title: "Misc"
-      url: "docs/misc"
-      children:
-        - title: "Colors"
-          url: "docs/misc#list-of-all-supported-colors"
-    - title: "About"
-      url: "about"

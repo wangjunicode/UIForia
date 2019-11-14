@@ -138,7 +138,7 @@ ctx.Fill();
 If you use `Stroke()` and `Fill()`, the order in which you declare them will affect how they are rendered. In the example below, the first circle is drawn with the stroke on top of the fill, whereas the second circle is drawn with the fill on top of the stroke.
 
   
-![strokeAndFill] (assets/strokeAndFill.png)
+![strokeAndFill](assets/strokeAndFill.png)
 
 
   
@@ -262,7 +262,7 @@ Sets the stroke color, gradient, or texture.
   
 In this example, we draw three rectangles using three different colors. 
   
-![rectangles] (assets/rectangles.png)
+![rectangles](assets/rectangles.png)
 
 ```html ca
  public void Paint(UIElement element, ImmediateRenderContext ctx, SVGXMatrix matrix) {

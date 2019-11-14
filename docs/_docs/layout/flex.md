@@ -73,7 +73,7 @@ style flex-space-around {
 }
 ```
 
-![flex-align] (assets/flex-alignment.png)
+![flex-align](/assets/img/flex-alignment.png)
 
     
 #### `FlexCrossAxisAlignment`     
@@ -134,7 +134,7 @@ style flex-item {
 }
 ```
 
-![flex-align] (assets/flex-grow.png)
+![flex-align](/assets/img/flex-grow.png)
   
 #### `FlexItemShrink : int`   
  When there is not enough space to fit all elements, define what ratio of that extra space gets deducted from the element  

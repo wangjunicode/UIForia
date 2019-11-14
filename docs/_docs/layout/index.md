@@ -7,6 +7,7 @@ layout: page
 ---
 
 # Layout Concepts and common terms explained
+  ![BoxModel](/assets/img/boxmodel.png)
 
 ## LayoutBox
 

@@ -44,9 +44,9 @@ style container {
 ```
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Column 1 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp; &nbsp;&nbsp;&nbsp;&nbsp;          Column 2
-![grid-layout] (assets/grid-layout.png)
+![grid-layout](/assets/img/grid-layout.png)
 
-We can examine the grid layout created above within the [UIForia Hierarchy](Inspector.md). We have created 2 columns and 2 rows.
+We can examine the grid layout created above within the [UIForia Hierarchy](/docs/tools#uiforia-inspector). We have created 2 columns and 2 rows.
 
 The columns and rows use `pca` for measurement, which stands for Parent Content Area: the measure of the parents size minus its padding and border.
 
@@ -54,7 +54,7 @@ The columns and rows use `pca` for measurement, which stands for Parent Content 
   
 **Row:** 0.25pca assigned to `GridLayoutRowTemplate` will extend to a quarter of the parent size minus its padding and border. 
     
-Additional measurement types can be found in the [Style Units](StyleUnits.md)
+Additional measurement types can be found in the [Style Units](/docs/style/style-units)
     
 
 
@@ -86,7 +86,7 @@ style grid-three {
 }
 ```
 
-![grid-colandrow] (assets/grid-styling.png)  
+![grid-colandrow](/assets/img/grid-styling.png)  
 
 <br/>
 
@@ -107,7 +107,7 @@ style container {
 }
 
 ```
-![grid-gap] (assets/grid-gap.png)  
+![grid-gap](/assets/img/grid-gap.png)  
 
 <br/>
 
@@ -124,8 +124,8 @@ style grid-three {
     GridLayoutRowTemplate = 1fr 1fr 1fr 1fr 1fr 1fr;
 }
 ```
-![grid-colandrow] (assets/grid-colandrow0.png)  
-*(As mentioned above, we are hoovering over the element to view the nested grid items in column 1, row 1. Check out the [UIForia Hierarchy] (Inspector.md) for more details.)*
+![grid-colandrow](/assets/img/grid-colandrow0.png)  
+*(As mentioned above, we are hoovering over the element to view the nested grid items in column 1, row 1. Check out the [UIForia Hierarchy](/docs/tools#uiforia-inspector) for more details.)*
 
 
 <br/>
@@ -138,7 +138,7 @@ Elements will automatically be placed in the nearest available location. In this
 
 However, if we want to swap the location of `grid-two` and `grid-three`, we can set `GridItemRowStart = 1` within **style grid-two**
   
-![grid-colandrow] (assets/grid-colandrow1.png)  
+![grid-colandrow](/assets/img/grid-colandrow1.png)  
 
 We have access to both `GridItemColStart` and `GridItemRowStart`, which define the line where the row or column begin.
 
@@ -167,7 +167,7 @@ style grid_three {
 }
 ```
 
-![grid-span] (assets/grid-span.png)  
+![grid-span](/assets/img/grid-span.png)  
 
 <br/>
 
@@ -199,7 +199,7 @@ style cell-3 {
     BackgroundColor = teal;
 }
 ```
-![grid-nested] (assets/grid-nested.png)  
+![grid-nested](/assets/img/grid-nested.png)  
 
 We'll clean it up now by adding gaps:
 ```
@@ -213,7 +213,7 @@ style grid_three {
 }
 ```
 
-![grid-gaps] (assets/grid-gap2.png) 
+![grid-gaps](/assets/img/grid-gap2.png) 
 
 <br/>
 
@@ -235,7 +235,7 @@ style title {
 }
 ```
 
-![grid-gaps] (assets/grid-text.png) 
+![grid-gaps](/assets/img/grid-text.png) 
 
 `TextFontAsset` sets the text font to Burbank, located in the **Fonts** folder inside **Resources**
   
@@ -243,7 +243,7 @@ style title {
    
 `TextTransform` modifies the capitalization of text.
 
-The full list of style properties for text can be found [here] (StyleProperties.md)
+The full list of style properties for text can be found [here](StyleProperties.md)
 
 <br/>
 
@@ -257,5 +257,5 @@ We could use `FlexItemGrow`, which defines the ratio of extra space an element w
 Assign `FlexItemGrow = 1` to the `title` element, which will grow its size until it hits the element we create called `<Div style="description">`
  
 
-![grid-grow] (assets/grid-grow.png) 
+![grid-grow](/assets/img/grid-grow.png) 
 

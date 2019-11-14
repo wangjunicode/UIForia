@@ -20,7 +20,7 @@
 Background Color paints the background of the element. It will accept color values in the following forms:
 * rgba(byte, byte, byte, byte) 
 * rgb(byte, byte, byte) 
-* #AABBCCDD (hex form by channel r, g, b, a)
+* #RRGGBBAA (hex form by channel r, g, b, a)
 * any of the following color names: `black`, `blue`, `clear`, `cyan`, `gray`, `grey`, `green`, `magenta`, `red`, `white`, `yellow`
 
 #### Background Tint : Color

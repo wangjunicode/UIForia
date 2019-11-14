@@ -217,7 +217,7 @@ For visual examples of easing functions, see https://easings.net
 
 
 ## Menu Warning Example
-![] (/static/img/animation-warning.gif)
+![](/static/img/animation-warning.gif)
 In the example above, we have a warning icon with a yellow arc orbiting around it. 
 
 In [keyframes] we set `TransformRotation` to orbit 360 degrees around the image.

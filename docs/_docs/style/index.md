@@ -126,7 +126,7 @@ style button {
 ## Colors
 The colors are defined by CSS color values.
   
-[Full list of colors supported by UIForia](Colors)
+[Full list of colors supported by UIForia](docs/misc#list-of-all-supported-colors)
   
 
 **Color Names**  

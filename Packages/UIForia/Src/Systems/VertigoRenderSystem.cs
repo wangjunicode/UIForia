@@ -39,7 +39,7 @@ namespace Src.Systems {
             this.camera = camera;
             this.commandBuffer = new CommandBuffer(); // todo -- per view
             this.commandBuffer.name = "UIForia Main Command Buffer";
-            this.renderContext = new RenderContext(application.settings.batchedMaterial);
+            this.renderContext = new RenderContext(application.settings.batchedMaterial, application.settings.sdfPathMaterial, application.settings.spriteAtlasMaterial);
             this.renderOwners = new LightList<RenderOwner>();
 
             if (this.camera != null) {

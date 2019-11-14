@@ -8,6 +8,8 @@ namespace UIForia {
         public bool loadTemplatesFromStreamingAssets = false;
         public Material svgxMaterial;
         public Material batchedMaterial;
+        public Material sdfPathMaterial;
+        public Material spriteAtlasMaterial;
         public string[] defaultNamespaces;
         
         internal static string s_InternalStreamingPath;

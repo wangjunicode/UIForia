@@ -104,7 +104,7 @@ namespace UIForia.Rendering {
             s_MaxTextureSize = Mathf.Min(maxTextureSize, 4096);
         }
 
-        internal RenderContext(Material batchedMaterial) {
+        internal RenderContext(Material batchedMaterial, Material sdfPath, Material spriteAtlas) {
             this.pendingBatches = new StructList<Batch>();
             this.uiforiaMeshPool = new MeshPool();
             this.uiforiaMaterialPool = new UIForiaMaterialPool(batchedMaterial);
@@ -118,12 +118,12 @@ namespace UIForia.Rendering {
             this.areaStack = new StructStack<RenderArea>();
             this.fixedRenderStateList = new StructList<FixedRenderState>();
             this.clipContext = new ClipContext();
-            this.pathMaterialPool = new UIForiaMaterialPool(new Material(Shader.Find("UIForia/UIForiaPathSDF")));
+            this.pathMaterialPool = new UIForiaMaterialPool(sdfPath);
             this.textAtlas = new RenderTexture(Screen.width, Screen.height, 0, RenderTextureFormat.DefaultHDR);
             this.spriteAtlas = new RenderTexture(Screen.width, Screen.height, 0, RenderTextureFormat.DefaultHDR);
             this.spriteAtlas.name = "UIForia Sprite Atlas";
             this.textAtlas.name = "UIForia Text Atlas";
-            this.spriteAtlasMaterial = new Material(Shader.Find("UIForia/UIForiaSpriteAtlas"));
+            this.spriteAtlasMaterial = spriteAtlas;
             this.texturePacker = new TexturePacker(Screen.width, Screen.height);
             this.propertyBlock = new MaterialPropertyBlock();
             this.meshesToRelease = new LightList<PooledMesh>();

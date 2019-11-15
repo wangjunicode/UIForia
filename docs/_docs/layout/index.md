@@ -7,13 +7,56 @@ layout: page
 ---
 
 # Layout Concepts and common terms explained
+
   ![BoxModel](/assets/img/boxmodel.png)
+  
+Unlike CSS there is only one box model in UIForia, which is the equivalent to the CSS border-box model.
+The actual size of an element is the sum of the border and padding values and the content box. 
+Consider an element with the following spec:
 
-## LayoutBox
+```
+PreferredSize = 100px;
+Padding = 8px;
+Border = 2px;
+```
 
-## ContentBox
+The actual size of the element will be 100px by 100px and the content box will be 90px by 90px.
 
-## Allocated Size
+## LayoutBox and Allocated Size
 
-## Actual Size
+When an element gets laid out and its content size is calculated it passes this size (or parts of it) 
+down to its children. The details vary between `LayoutType`s of course but the principle is the same
+across all of them.
 
+Let’s say there is an element that takes up the whole screen and has one child with a fixed
+`PreferredSize`. The parent would allocate the available space of its content box for the
+child.
+
+When styling the child you might want to center it in the `LayoutBox` the parent allocated:
+```
+style child {
+    PreferredSize = 100px;
+    AlignX = Center LayoutBox;
+    AlignY = Center LayoutBox;
+}
+``` 
+
+Or you might want to grow the child into the `LayoutBox`. The `PreferredSize` is really
+just a size the child _should_ have.
+```
+style child {
+    PreferredSize = 100px;
+    LayoutFit = Grow;
+}
+```
+
+## ContentBox and Actual Size
+
+The actual size of an element is the `PreferredSize` after growing or shrinking including borders 
+and paddings. The content box is what the element’s LayoutType would use to determine the 
+children’s LayoutBoxes, among other things of course.
+
+## Overflow
+
+Overflow happens when an element’s actual size is bigger than its LayoutBox (allocated size)
+or when its position is out that boxes’ bounds because of alignment for example.

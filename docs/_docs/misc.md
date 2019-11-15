@@ -2,6 +2,8 @@
 title: Miscellaneous
 description: Useful things, cheat sheets and so on without their own category
 layout: page
+tags:
+ - colors
 ---
 
 
@@ -9,3 +11,4 @@ layout: page
 {% include colors.html %}
 
 ## Types
+

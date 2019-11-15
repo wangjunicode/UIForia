@@ -1,10 +1,6 @@
 - title: Documentation
   url: docs
   links:
-    - title: "News"
-      url: "news"
-    - title: "Roadmap 2020"
-      url: "roadmap"
     - title: "Layout"
       url: "docs/layout"
       children:
@@ -23,6 +19,25 @@
           url: "docs/style/style-properties"
         - title: "Units - %, px, vw etc."
           url: "docs/style/style-units"
+    - title: "Built-in elements"
+      url: "docs/elements"
+      children:
+        - title: Text
+          url: "docs/elements#text"
+        - title: Containers
+          url: "docs/elements#containers"
+        - title: Repeat
+          url: "docs/elements#repeat"
+        - title: InputElement
+          url: "docs/elements#InputElement"
+        - title: Select
+          url: "docs/elements#select"
+        - title: ScrollView
+          url: "docs/elements#scrollview"
+        - title: Dynamic
+          url: "docs/elements#dynamic"
+    - title: "Element Life-Cycle"
+      url: "docs/circle-of-life"
     - title: "Input"
       url: "docs/input"
     - title: "Data Binding"

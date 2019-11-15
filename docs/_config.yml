@@ -18,10 +18,10 @@
 # You can create any custom variable you would like, and they will be accessible
 # in the templates via {{ site.myvariable }}.
 
-title: UIForia Documentation
+title: UIForia
 email: uiforia@klang-games.com
 description: >- # this means to ignore newlines until "baseurl:"
-  UIForia - The documentation Klang's next gen Unity UI Framework.
+  UIForia - Klang's next gen Unity UI Framework.
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "https://uiforia.io" # the base hostname & protocol for your site, e.g. http://example.com
 

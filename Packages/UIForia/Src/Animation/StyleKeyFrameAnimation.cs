@@ -233,6 +233,7 @@ namespace UIForia.Animation {
                     case StylePropertyId.BorderTop:
                     case StylePropertyId.BorderBottom:
                     case StylePropertyId.MarginTop:
+                    case StylePropertyId.TextFontSize:
                     case StylePropertyId.MarginBottom: {
                         float v0 = ResolveFixedHeight(target, viewport, prev.value.IsCalculated
                             ? prev.value.Evaluate<UIFixedLength>(null)

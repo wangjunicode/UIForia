@@ -452,10 +452,6 @@ namespace UIForia.Rendering {
             return new StyleProperty(StylePropertyId.BackgroundImage, texture);
         }
 
-        public static StyleProperty BorderColor(Color color) {
-            return new StyleProperty(StylePropertyId.BorderColor, color);
-        }
-
         public static StyleProperty Opacity(float opacity) {
             return new StyleProperty(StylePropertyId.Opacity, opacity);
         }
@@ -606,26 +602,6 @@ namespace UIForia.Rendering {
 
         public static StyleProperty PreferredHeight(UIMeasurement preferredHeight) {
             return new StyleProperty(StylePropertyId.PreferredHeight, preferredHeight);
-        }
-
-        public static StyleProperty AnchorTop(UIFixedLength anchor) {
-            return new StyleProperty(StylePropertyId.AnchorTop, anchor);
-        }
-
-        public static StyleProperty AnchorRight(UIFixedLength anchor) {
-            return new StyleProperty(StylePropertyId.AnchorRight, anchor);
-        }
-
-        public static StyleProperty AnchorBottom(UIFixedLength anchor) {
-            return new StyleProperty(StylePropertyId.AnchorBottom, anchor);
-        }
-
-        public static StyleProperty AnchorLeft(UIFixedLength anchor) {
-            return new StyleProperty(StylePropertyId.AnchorLeft, anchor);
-        }
-
-        public static StyleProperty AnchorTarget(AnchorTarget anchorTarget) {
-            return new StyleProperty(StylePropertyId.AnchorTarget, (int) anchorTarget);
         }
 
         public static StyleProperty ZIndex(int zIndex) {

@@ -304,12 +304,12 @@ namespace UIForia.Editor {
                 float allocatedY = result.allocatedPosition.y;
                 float allocatedW = result.allocatedSize.width;
                 float allocatedH = result.allocatedSize.height;
-                
+
                 path.SetFill(allocatedSpaceColor);
                 path.BeginPath();
                 path.Rect(allocatedX, allocatedY, allocatedW, allocatedH);
                 path.Fill();
-                
+
                 path.SetFill(contentColor);
                 float contentX = (result.screenPosition.x) + border.left + padding.left;
                 float contentY = (result.screenPosition.y) + border.top + padding.top;
@@ -757,21 +757,24 @@ namespace UIForia.Editor {
 
         private static StyleProperty DrawStyleProperty(StyleProperty property, bool isEditable) {
             switch (property.propertyId) {
-                
                 case StylePropertyId.LayoutFitHorizontal:
                 case StylePropertyId.LayoutFitVertical:
                     return DrawEnumWithValue<LayoutFit>(property, isEditable);
-                
+
                 case StylePropertyId.OverflowX:
                 case StylePropertyId.OverflowY:
                     return DrawEnumWithValue<Overflow>(property, isEditable);
 
                 case StylePropertyId.BackgroundColor:
+                case StylePropertyId.BackgroundTint:
                 case StylePropertyId.BorderColorTop:
                 case StylePropertyId.BorderColorLeft:
                 case StylePropertyId.BorderColorRight:
                 case StylePropertyId.BorderColorBottom:
                     return DrawColor(property, isEditable);
+
+                case StylePropertyId.BackgroundFit:
+                    return DrawEnumWithValue<BackgroundFit>(property, isEditable);
 
                 case StylePropertyId.Visibility:
                     return DrawEnumWithValue<Visibility>(property, isEditable);
@@ -779,8 +782,56 @@ namespace UIForia.Editor {
                 case StylePropertyId.Painter:
                     return DrawString(property, isEditable);
 
-                //                case StylePropertyId.BackgroundGridSize:
-                //                case StylePropertyId.BackgroundLineSize:
+                case StylePropertyId.TextOutlineWidth:
+                case StylePropertyId.TextGlowOffset:
+                case StylePropertyId.TextGlowOuter:
+                case StylePropertyId.TextGlowInner:
+                case StylePropertyId.TextGlowPower:
+                case StylePropertyId.TextUnderlayX:
+                case StylePropertyId.TextUnderlayY:
+                case StylePropertyId.TextUnderlayDilate:
+                case StylePropertyId.TextUnderlaySoftness:
+                case StylePropertyId.TextFaceDilate:
+                case StylePropertyId.TextOutlineSoftness:
+                    return DrawFloat(property, isEditable);
+
+                case StylePropertyId.Layer:
+                    return DrawInt(property, isEditable);
+
+                case StylePropertyId.TextOutlineColor:
+                case StylePropertyId.TextGlowColor:
+                case StylePropertyId.TextUnderlayColor:
+                case StylePropertyId.CaretColor:
+                case StylePropertyId.SelectionBackgroundColor:
+                case StylePropertyId.SelectionTextColor:
+                    return DrawColor(property, isEditable);
+
+                case StylePropertyId.TextUnderlayType:
+                    return DrawEnumWithValue<UnderlayType>(property, isEditable);
+
+                case StylePropertyId.RadialLayoutStartAngle:
+                case StylePropertyId.RadialLayoutEndAngle:
+                    return DrawFloat(property, isEditable);
+
+                case StylePropertyId.RadialLayoutRadius:
+                case StylePropertyId.CornerBevelTopLeft:
+                case StylePropertyId.CornerBevelTopRight:
+                case StylePropertyId.CornerBevelBottomLeft:
+                case StylePropertyId.CornerBevelBottomRight:
+                    return DrawFixedLength(property, isEditable);
+
+                case StylePropertyId.AlignItemsHorizontal:
+                case StylePropertyId.AlignItemsVertical:
+                    return DrawFloat(property, isEditable);
+                
+                case StylePropertyId.AlignContentHorizontal:
+                case StylePropertyId.AlignContentVertical:
+                    return DrawEnumWithValue<MainAxisAlignment>(property, isEditable);
+                
+                case StylePropertyId.FitItemsHorizontal:
+                case StylePropertyId.FitItemsVertical:
+                    return DrawEnumWithValue<LayoutFit>(property, isEditable);
+
                 case StylePropertyId.BackgroundImageOffsetX:
                 case StylePropertyId.BackgroundImageOffsetY:
                 case StylePropertyId.BackgroundImageScaleX:
@@ -789,13 +840,9 @@ namespace UIForia.Editor {
                 case StylePropertyId.ShadowOpacity:
                 case StylePropertyId.ShadowSizeX:
                 case StylePropertyId.ShadowSizeY:
-                    return DrawFloat(property, isEditable);
-
                 case StylePropertyId.BackgroundImageRotation:
-                    //                case StylePropertyId.BackgroundImageTileX:
-                    //                case StylePropertyId.BackgroundImageTileY:
-                    //                case StylePropertyId.BackgroundImageOffsetX:
-                    //                case StylePropertyId.BackgroundImageOffsetY:
+                case StylePropertyId.BackgroundImageTileX:
+                case StylePropertyId.BackgroundImageTileY:
                     return DrawFloat(property, isEditable);
 
                 case StylePropertyId.BackgroundImage:
@@ -949,15 +996,6 @@ namespace UIForia.Editor {
                 case StylePropertyId.LayoutBehavior:
                     return DrawEnumWithValue<LayoutBehavior>(property, isEditable);
 
-                case StylePropertyId.AnchorTop:
-                case StylePropertyId.AnchorRight:
-                case StylePropertyId.AnchorBottom:
-                case StylePropertyId.AnchorLeft:
-                    return DrawFixedLength(property, isEditable);
-
-                case StylePropertyId.AnchorTarget:
-                    return DrawEnumWithValue<AnchorTarget>(property, isEditable);
-
                 case StylePropertyId.ZIndex:
                 case StylePropertyId.RenderLayerOffset:
                     return DrawInt(property, isEditable);
@@ -965,8 +1003,15 @@ namespace UIForia.Editor {
                 case StylePropertyId.RenderLayer:
                     return DrawEnumWithValue<RenderLayer>(property, isEditable);
 
-                //                default:
-                //throw new ArgumentOutOfRangeException(property.propertyId.ToString());
+                case StylePropertyId.ClipBehavior:
+                    return DrawEnumWithValue<ClipBehavior>(property, isEditable);
+
+                case StylePropertyId.ClipBounds:
+                    return DrawEnumWithValue<ClipBounds>(property, isEditable);
+
+                default:
+                    Debug.Log(property.propertyId.ToString() + " has no inspector");
+                    return StyleProperty.Unset(property.propertyId);
             }
 
             return StyleProperty.Unset(property.propertyId);

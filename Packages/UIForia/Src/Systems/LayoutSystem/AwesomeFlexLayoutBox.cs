@@ -10,12 +10,10 @@ namespace UIForia.Systems {
 
         private StructList<FlexItem> items;
         private LayoutDirection direction;
-        private MainAxisAlignment mainAxisAlignment;
         private CrossAxisAlignment crossAxisAlignment;
 
         protected override void OnInitialize() {
             direction = element.style.FlexLayoutDirection;
-            mainAxisAlignment = element.style.FlexLayoutMainAxisAlignment;
             crossAxisAlignment = element.style.FlexLayoutCrossAxisAlignment;
         }
 
@@ -146,6 +144,7 @@ namespace UIForia.Systems {
                 item.layoutBox.GetWidths(ref item.widthData);
                 item.baseWidth = Mathf.Max(item.widthData.minimum, Mathf.Min(item.widthData.preferred, item.widthData.maximum));
                 item.availableSize = item.baseWidth;
+                // available size is equal to base size but we need to take up base size + margin in the layout
                 track.remaining -= item.baseWidth + item.widthData.marginStart + item.widthData.marginEnd;
             }
 
@@ -159,29 +158,42 @@ namespace UIForia.Systems {
             float offset = 0;
             float inset = paddingBorderHorizontalStart;
             float spacerSize = 0;
+            MainAxisAlignment alignment = element.style.AlignContentHorizontal;
 
             if (track.remaining > 0) {
-                GetMainAxisOffsets(track.remaining, inset, out offset, out spacerSize);
-            }
+                if (alignment == MainAxisAlignment.Default) {
+                    alignment = MainAxisAlignment.Start;
+                }
 
+                GetAlignmentOffsets(track.remaining, inset, alignment, out offset, out spacerSize);
+            }
+            
+            float itemAlignment = element.style.AlignItemsHorizontal;
+            float gap = element.style.GridLayoutColGap;
+            
             for (int i = 0; i < items.size; i++) {
                 ref FlexItem item = ref items.array[i];
-                float x = inset + item.widthData.marginStart + offset;
+                float x = inset + offset + item.widthData.marginStart;
                 offset += item.availableSize + spacerSize;
                 LayoutFit fit = LayoutFit.None;
 
-                if (item.growPieces > 0 || item.shrinkPieces > 0) {
+                float elementWidth = item.baseWidth;
+                float originOffset = item.availableSize * itemAlignment;
+                float alignedPosition = x + originOffset + (elementWidth * -itemAlignment);
+                
+                if (item.growPieces > 0 || item.shrinkPieces > 0) { // todo -- more correct would be to track if we grew or not
                     fit = LayoutFit.Fill;
                 }
-
-                item.layoutBox.ApplyLayoutHorizontal(x, x, item.baseWidth, item.availableSize, fit, frameId);
+                
+                item.layoutBox.ApplyLayoutHorizontal(x, alignedPosition, item.baseWidth, item.availableSize, fit, frameId);
+                offset += item.widthData.marginStart + item.widthData.marginEnd + gap;
             }
         }
 
-        private void GetMainAxisOffsets(float remaining, float inset, out float offset, out float spacerSize) {
+        private void GetAlignmentOffsets(float remaining, float inset, MainAxisAlignment alignment, out float offset, out float spacerSize) {
             offset = 0;
             spacerSize = 0;
-            switch (mainAxisAlignment) {
+            switch (alignment) {
                 case MainAxisAlignment.Unset:
                 case MainAxisAlignment.Start:
                     break;
@@ -214,7 +226,7 @@ namespace UIForia.Systems {
                 }
 
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(mainAxisAlignment), mainAxisAlignment, null);
+                    throw new ArgumentOutOfRangeException(nameof(alignment), alignment, null);
             }
         }
 
@@ -295,16 +307,15 @@ namespace UIForia.Systems {
         }
 
         private void ShrinkHorizontal(ref Track track) {
-            
             int startIndex = track.startIndex;
             int endIndex = track.endIndex;
             int pieces = 0;
-            
+
             // todo -- do on item creation
             for (int i = startIndex; i < endIndex; i++) {
                 pieces += items.array[i].shrinkPieces;
             }
-            
+
             float overflow = -track.remaining;
 
             bool allocate = pieces > 0;
@@ -339,12 +350,12 @@ namespace UIForia.Systems {
 
         private float ShrinkVertical(float remaining) {
             int pieces = 0;
-            
+
             // todo -- do on item creation
             for (int i = 0; i < items.size; i++) {
                 pieces += items.array[i].shrinkPieces;
             }
-            
+
             float overflow = -remaining;
 
             bool allocate = pieces > 0;
@@ -390,30 +401,28 @@ namespace UIForia.Systems {
         private void RunLayoutVerticalStep_HorizontalDirection(int frameId) {
             float contentStartY = paddingBorderVerticalStart;
             float adjustedHeight = finalHeight - (paddingBorderVerticalStart + paddingBorderVerticalEnd);
-            LayoutFit verticalLayoutFit = LayoutFit.None;
-            float verticalAlignment = 0;
 
-            switch (crossAxisAlignment) {
-                case CrossAxisAlignment.Unset:
-                case CrossAxisAlignment.Start:
-                    verticalAlignment = 0;
-                    break;
-                case CrossAxisAlignment.Center:
-                    verticalAlignment = 0.5f;
-                    break;
-                case CrossAxisAlignment.End:
-                    verticalAlignment = 1f;
-                    break;
-                case CrossAxisAlignment.Stretch:
-                    verticalLayoutFit = LayoutFit.Fill;
-                    break;
-            }
+            // todo -- once tracks get implemented we want to be able to use space-between and space-around to vertically align the tracks
+            // track heights are equal to the max height of all contents in that track
+            // when we only have 1 track the allocated height for every box is the full height of this element's content area and align content vertical does nothing
+            
+            // MainAxisAlignment contentAlignment = element.style.AlignContentVertical;
 
+            // 2 options for horizontal height sizing:
+            // 1. use the full content area height of this element
+            // 2. use the tallest child's height + margin
+            // if using the tallest child then we can center/start/end as normal
+            // however it might be awkward if AlignContentVertical = Center is used and that just centers the allocated rects, not the actual content
+            // so for now I have implemented option 1 for the case where we are not wrapping / only have 1 track
+
+            float verticalAlignment = element.style.AlignItemsVertical;
+            LayoutFit verticalLayoutFit = element.style.FitItemsVertical;
+            
             for (int i = 0; i < items.size; i++) {
                 ref FlexItem item = ref items.array[i];
 
                 item.layoutBox.GetHeights(ref item.heightData);
-                item.baseHeight = Mathf.Max(item.heightData.minimum, Mathf.Min(item.heightData.preferred, item.heightData.maximum));
+                item.baseHeight = item.heightData.Clamped;
 
                 float allocatedHeight = adjustedHeight - (item.heightData.marginStart + item.heightData.marginEnd);
                 float originBase = contentStartY + item.heightData.marginStart;
@@ -456,7 +465,12 @@ namespace UIForia.Systems {
             float spacerSize = 0;
 
             if (remaining > 0) {
-                GetMainAxisOffsets(remaining, inset, out offset, out spacerSize);
+                MainAxisAlignment alignment = element.style.AlignContentVertical;
+                if (alignment == default) {
+                    alignment = MainAxisAlignment.Start;
+                }
+
+                GetAlignmentOffsets(remaining, inset, alignment, out offset, out spacerSize);
             }
 
             for (int i = 0; i < items.size; i++) {

@@ -271,10 +271,6 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.RadialLayoutEndAngle, 360f);
 				case StylePropertyId.RadialLayoutRadius:
 					 return new StyleProperty(StylePropertyId.RadialLayoutRadius, new UIFixedLength(0.5f, UIFixedUnit.Percent));
-				case StylePropertyId.StackLayoutAlignHorizontal:
-					 return new StyleProperty(StylePropertyId.StackLayoutAlignHorizontal, 0f);
-				case StylePropertyId.StackLayoutAlignVertical:
-					 return new StyleProperty(StylePropertyId.StackLayoutAlignVertical, 0f);
 				case StylePropertyId.AlignmentDirectionX:
 					 return new StyleProperty(StylePropertyId.AlignmentDirectionX, (int)UIForia.Layout.AlignmentDirection.Start);
 				case StylePropertyId.AlignmentDirectionY:
@@ -315,8 +311,6 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.MarginBottom, new UIFixedLength(0f, UIFixedUnit.Pixel));
 				case StylePropertyId.MarginLeft:
 					 return new StyleProperty(StylePropertyId.MarginLeft, new UIFixedLength(0f, UIFixedUnit.Pixel));
-				case StylePropertyId.BorderColor:
-					 return new StyleProperty(StylePropertyId.BorderColor, new Color(-1f, -1f, -1f, -1f));
 				case StylePropertyId.BorderTop:
 					 return new StyleProperty(StylePropertyId.BorderTop, new UIFixedLength(0f, UIFixedUnit.Pixel));
 				case StylePropertyId.BorderRight:
@@ -421,12 +415,6 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.RenderLayer, (int)UIForia.Rendering.RenderLayer.Default);
 				case StylePropertyId.Layer:
 					 return new StyleProperty(StylePropertyId.Layer, 0);
-				case StylePropertyId.Scrollbar:
-					 return new StyleProperty(StylePropertyId.Scrollbar, "");
-				case StylePropertyId.ScrollbarSize:
-					 return new StyleProperty(StylePropertyId.ScrollbarSize, new UIMeasurement(15f, UIMeasurementUnit.Pixel));
-				case StylePropertyId.ScrollbarColor:
-					 return new StyleProperty(StylePropertyId.ScrollbarColor, new Color(0f, 0f, 0f, 1f));
 				case StylePropertyId.ShadowColor:
 					 return new StyleProperty(StylePropertyId.ShadowColor, new Color(-1f, -1f, -1f, -1f));
 				case StylePropertyId.ShadowTint:

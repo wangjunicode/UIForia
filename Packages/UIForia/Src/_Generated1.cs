@@ -397,20 +397,6 @@ namespace UIForia.Rendering {
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.RadialLayoutRadius, value), state); }
         }
         
-        public float StackLayoutAlignHorizontal {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.StackLayoutAlignHorizontal, state).AsFloat; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.StackLayoutAlignHorizontal, value), state); }
-        }
-        
-        public float StackLayoutAlignVertical {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.StackLayoutAlignVertical, state).AsFloat; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.StackLayoutAlignVertical, value), state); }
-        }
-        
         public UIForia.Layout.AlignmentDirection AlignmentDirectionX {
             [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.AlignmentDirectionX, state).AsAlignmentDirection; }
@@ -549,13 +535,6 @@ namespace UIForia.Rendering {
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.MarginLeft, state).AsUIFixedLength; }
             [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.MarginLeft, value), state); }
-        }
-        
-        public UnityEngine.Color BorderColor {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.BorderColor, state).AsColor; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.BorderColor, value), state); }
         }
         
         public UIForia.UIFixedLength BorderTop {
@@ -920,27 +899,6 @@ namespace UIForia.Rendering {
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.Layer, state).AsInt; }
             [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.Layer, value), state); }
-        }
-        
-        public string Scrollbar {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.Scrollbar, state).AsString; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.Scrollbar, value), state); }
-        }
-        
-        public UIForia.Rendering.UIMeasurement ScrollbarSize {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ScrollbarSize, state).AsUIMeasurement; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ScrollbarSize, value), state); }
-        }
-        
-        public UnityEngine.Color ScrollbarColor {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ScrollbarColor, state).AsColor; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ScrollbarColor, value), state); }
         }
         
         public UnityEngine.Color ShadowColor {
@@ -1395,21 +1353,7 @@ namespace UIForia.Rendering {
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.RadialLayoutRadius, value)); }
         }
-            
-        public float StackLayoutAlignHorizontal {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return FindFloatProperty(StylePropertyId.StackLayoutAlignHorizontal); }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.StackLayoutAlignHorizontal, value)); }
-        }
-            
-        public float StackLayoutAlignVertical {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return FindFloatProperty(StylePropertyId.StackLayoutAlignVertical); }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.StackLayoutAlignVertical, value)); }
-        }
-            
+
         public UIForia.Layout.AlignmentDirection AlignmentDirectionX {
             [System.Diagnostics.DebuggerStepThrough]
             get { return (UIForia.Layout.AlignmentDirection)FindEnumProperty(StylePropertyId.AlignmentDirectionX); }
@@ -1548,13 +1492,6 @@ namespace UIForia.Rendering {
             get { return FindUIFixedLengthProperty(StylePropertyId.MarginLeft); }
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.MarginLeft, value)); }
-        }
-            
-        public UnityEngine.Color BorderColor {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return FindColorProperty(StylePropertyId.BorderColor); }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.BorderColor, value)); }
         }
             
         public UIForia.UIFixedLength BorderTop {
@@ -1920,28 +1857,7 @@ namespace UIForia.Rendering {
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.Layer, value)); }
         }
-            
-        public string Scrollbar {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return GetProperty(StylePropertyId.Scrollbar).AsString; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.Scrollbar, value)); }
-        }
-            
-        public UIForia.Rendering.UIMeasurement ScrollbarSize {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return FindUIMeasurementProperty(StylePropertyId.ScrollbarSize); }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.ScrollbarSize, value)); }
-        }
-            
-        public UnityEngine.Color ScrollbarColor {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return FindColorProperty(StylePropertyId.ScrollbarColor); }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.ScrollbarColor, value)); }
-        }
-            
+        
         public UnityEngine.Color ShadowColor {
             [System.Diagnostics.DebuggerStepThrough]
             get { return FindColorProperty(StylePropertyId.ShadowColor); }
@@ -2513,23 +2429,7 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public float StackLayoutAlignHorizontal { 
-                [System.Diagnostics.DebuggerStepThrough]
-                get { 
-                    StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.StackLayoutAlignHorizontal, out property)) return property.AsFloat;
-                    return DefaultStyleValues_Generated.StackLayoutAlignHorizontal;
-                }
-            }
-
-            public float StackLayoutAlignVertical { 
-                [System.Diagnostics.DebuggerStepThrough]
-                get { 
-                    StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.StackLayoutAlignVertical, out property)) return property.AsFloat;
-                    return DefaultStyleValues_Generated.StackLayoutAlignVertical;
-                }
-            }
+        
 
             public UIForia.Layout.AlignmentDirection AlignmentDirectionX { 
                 [System.Diagnostics.DebuggerStepThrough]
@@ -2708,15 +2608,6 @@ namespace UIForia.Rendering {
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.MarginLeft, out property)) return property.AsUIFixedLength;
                     return DefaultStyleValues_Generated.MarginLeft;
-                }
-            }
-
-            public UnityEngine.Color BorderColor { 
-                [System.Diagnostics.DebuggerStepThrough]
-                get { 
-                    StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.BorderColor, out property)) return property.AsColor;
-                    return DefaultStyleValues_Generated.BorderColor;
                 }
             }
 
@@ -3214,34 +3105,7 @@ namespace UIForia.Rendering {
                     return DefaultStyleValues_Generated.Layer;
                 }
             }
-
-            public string Scrollbar { 
-                [System.Diagnostics.DebuggerStepThrough]
-                get { 
-                    StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.Scrollbar, out property)) return property.AsString;
-                    return DefaultStyleValues_Generated.Scrollbar;
-                }
-            }
-
-            public UIForia.Rendering.UIMeasurement ScrollbarSize { 
-                [System.Diagnostics.DebuggerStepThrough]
-                get { 
-                    StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarSize, out property)) return property.AsUIMeasurement;
-                    return DefaultStyleValues_Generated.ScrollbarSize;
-                }
-            }
-
-            public UnityEngine.Color ScrollbarColor { 
-                [System.Diagnostics.DebuggerStepThrough]
-                get { 
-                    StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollbarColor, out property)) return property.AsColor;
-                    return DefaultStyleValues_Generated.ScrollbarColor;
-                }
-            }
-
+        
             public UnityEngine.Color ShadowColor { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
@@ -3762,23 +3626,7 @@ namespace UIForia.Rendering {
         public UIForia.UIFixedLength GetRadialLayoutRadius(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.RadialLayoutRadius, state).AsUIFixedLength;
         }
-        
-        public void SetStackLayoutAlignHorizontal(in float? value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.StackLayoutAlignHorizontal, value), state);
-        }
 
-        public float GetStackLayoutAlignHorizontal(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.StackLayoutAlignHorizontal, state).AsFloat;
-        }
-        
-        public void SetStackLayoutAlignVertical(in float? value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.StackLayoutAlignVertical, value), state);
-        }
-
-        public float GetStackLayoutAlignVertical(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.StackLayoutAlignVertical, state).AsFloat;
-        }
-        
         public void SetAlignmentDirectionX(in UIForia.Layout.AlignmentDirection? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.AlignmentDirectionX, (int)value), state);
         }
@@ -3937,14 +3785,6 @@ namespace UIForia.Rendering {
 
         public UIForia.UIFixedLength GetMarginLeft(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.MarginLeft, state).AsUIFixedLength;
-        }
-        
-        public void SetBorderColor(in UnityEngine.Color? value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.BorderColor, value), state);
-        }
-
-        public UnityEngine.Color GetBorderColor(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.BorderColor, state).AsColor;
         }
         
         public void SetBorderTop(in UIForia.UIFixedLength? value, StyleState state) {
@@ -4362,31 +4202,7 @@ namespace UIForia.Rendering {
         public int GetLayer(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.Layer, state).AsInt;
         }
-        
-        public void SetScrollbar(string value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.Scrollbar, value), state);
-        }
 
-        public string GetScrollbar(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.Scrollbar, state).AsString;
-        }
-        
-        public void SetScrollbarSize(in UIForia.Rendering.UIMeasurement? value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.ScrollbarSize, value), state);
-        }
-
-        public UIForia.Rendering.UIMeasurement GetScrollbarSize(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.ScrollbarSize, state).AsUIMeasurement;
-        }
-        
-        public void SetScrollbarColor(in UnityEngine.Color? value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.ScrollbarColor, value), state);
-        }
-
-        public UnityEngine.Color GetScrollbarColor(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.ScrollbarColor, state).AsColor;
-        }
-        
         public void SetShadowColor(in UnityEngine.Color? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.ShadowColor, value), state);
         }
@@ -4566,10 +4382,6 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.RadialLayoutEndAngle, RadialLayoutEndAngle);
 				case StylePropertyId.RadialLayoutRadius:
 					 return new StyleProperty(StylePropertyId.RadialLayoutRadius, RadialLayoutRadius);
-				case StylePropertyId.StackLayoutAlignHorizontal:
-					 return new StyleProperty(StylePropertyId.StackLayoutAlignHorizontal, StackLayoutAlignHorizontal);
-				case StylePropertyId.StackLayoutAlignVertical:
-					 return new StyleProperty(StylePropertyId.StackLayoutAlignVertical, StackLayoutAlignVertical);
 				case StylePropertyId.AlignmentDirectionX:
 					 return new StyleProperty(StylePropertyId.AlignmentDirectionX, (int)AlignmentDirectionX);
 				case StylePropertyId.AlignmentDirectionY:
@@ -4610,8 +4422,6 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.MarginBottom, MarginBottom);
 				case StylePropertyId.MarginLeft:
 					 return new StyleProperty(StylePropertyId.MarginLeft, MarginLeft);
-				case StylePropertyId.BorderColor:
-					 return new StyleProperty(StylePropertyId.BorderColor, BorderColor);
 				case StylePropertyId.BorderTop:
 					 return new StyleProperty(StylePropertyId.BorderTop, BorderTop);
 				case StylePropertyId.BorderRight:
@@ -4716,12 +4526,6 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.RenderLayer, (int)RenderLayer);
 				case StylePropertyId.Layer:
 					 return new StyleProperty(StylePropertyId.Layer, Layer);
-				case StylePropertyId.Scrollbar:
-					 return new StyleProperty(StylePropertyId.Scrollbar, Scrollbar);
-				case StylePropertyId.ScrollbarSize:
-					 return new StyleProperty(StylePropertyId.ScrollbarSize, ScrollbarSize);
-				case StylePropertyId.ScrollbarColor:
-					 return new StyleProperty(StylePropertyId.ScrollbarColor, ScrollbarColor);
 				case StylePropertyId.ShadowColor:
 					 return new StyleProperty(StylePropertyId.ShadowColor, ShadowColor);
 				case StylePropertyId.ShadowTint:
@@ -4774,8 +4578,6 @@ namespace UIForia.Rendering {
                     case StylePropertyId.RadialLayoutStartAngle: return true;
                     case StylePropertyId.RadialLayoutEndAngle: return true;
                     case StylePropertyId.RadialLayoutRadius: return true;
-                    case StylePropertyId.StackLayoutAlignHorizontal: return true;
-                    case StylePropertyId.StackLayoutAlignVertical: return true;
                     case StylePropertyId.AlignmentOriginX: return true;
                     case StylePropertyId.AlignmentOriginY: return true;
                     case StylePropertyId.AlignmentOffsetX: return true;
@@ -4790,7 +4592,6 @@ namespace UIForia.Rendering {
                     case StylePropertyId.MarginRight: return true;
                     case StylePropertyId.MarginBottom: return true;
                     case StylePropertyId.MarginLeft: return true;
-                    case StylePropertyId.BorderColor: return true;
                     case StylePropertyId.BorderTop: return true;
                     case StylePropertyId.BorderRight: return true;
                     case StylePropertyId.BorderBottom: return true;
@@ -4833,7 +4634,6 @@ namespace UIForia.Rendering {
                     case StylePropertyId.RenderLayerOffset: return true;
                     case StylePropertyId.RenderLayer: return true;
                     case StylePropertyId.Layer: return true;
-                    case StylePropertyId.ScrollbarColor: return true;
                     case StylePropertyId.ShadowColor: return true;
                     case StylePropertyId.ShadowTint: return true;
                     case StylePropertyId.ShadowOffsetX: return true;

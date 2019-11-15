@@ -177,7 +177,6 @@ namespace UIForia.Rendering {
             geometry.triangleList.size = triIndex;
         }
 
-
         public override void OnStylePropertyChanged(StructList<StyleProperty> propertyList) {
             StyleProperty[] properties = propertyList.array;
             int count = propertyList.size;

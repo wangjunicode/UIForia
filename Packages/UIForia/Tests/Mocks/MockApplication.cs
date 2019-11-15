@@ -12,6 +12,16 @@ using Application = UIForia.Application;
 
 namespace Tests.Mocks {
 
+    public class MockApplication<T> : MockApplication where T : UIElement {
+
+        public MockApplication(string template = null, ResourceManager resourceManager = null, bool createView = true) : base(typeof(T), template, resourceManager, createView) { }
+
+        public T GetRootElement() {
+            return GetView(0).RootElement.GetChild(0) as T;
+        }
+
+    }
+
     public class MockApplication : Application {
 
         public MockApplication(Type elementType, string template = null, ResourceManager resourceManager = null, bool createView = true) : base(GUID.Generate().ToString(), null, resourceManager) {

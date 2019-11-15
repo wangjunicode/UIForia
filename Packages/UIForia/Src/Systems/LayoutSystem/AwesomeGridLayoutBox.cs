@@ -17,7 +17,9 @@ namespace UIForia.Systems {
         shrink(baseSize, shrinkLimit)
         flex(baseSize, fr)
         clamp(baseSize, min, max)
-                
+                        
+        1fr 100px ==  clamp(0, 0, 1fr) clamp(100px, 100px, 100px)
+          
         A grid is a 2d layout box that works by taking a template definition on the row and column axis
         Items can be placed explicitly in numbered grid cells or placed implicitly using one of two placement
         algorithms(explained later)
@@ -533,6 +535,7 @@ namespace UIForia.Systems {
                             contribution -= spanned.resolvedMinSize;
                             if (contribution < 0) contribution = 0;
                         }
+
                         if (contribution < minContribution) {
                             minContribution = contribution;
                             valid = true;
@@ -750,9 +753,10 @@ namespace UIForia.Systems {
                 float elementWidth = placement.outputWidth - placement.widthData.marginStart - placement.widthData.marginEnd;
                 float x = startTrack.position;
                 float layoutBoxWidth = (endTrack.position + endTrack.size) - x;
+                //+ (placement.widthData.marginStart - placement.widthData.marginEnd);
                 float originBase = x + placement.widthData.marginStart;
                 float originOffset = layoutBoxWidth * alignment;
-                float offset = layoutBoxWidth * -alignment;
+                float offset = elementWidth * -alignment;
                 float alignedPosition = originBase + originOffset + offset;
                 placement.layoutBox.ApplyLayoutHorizontal(x, alignedPosition, elementWidth, layoutBoxWidth, fit, frameId);
             }
@@ -843,9 +847,10 @@ namespace UIForia.Systems {
                 float elementHeight = placement.outputHeight - placement.heightData.marginStart - placement.heightData.marginEnd;
                 float y = startTrack.position;
                 float layoutBoxHeight = (endTrack.position + endTrack.size) - y;
+                //+ (placement.heightData.marginStart + placement.heightData.marginEnd);
                 float originBase = y + placement.heightData.marginStart;
                 float originOffset = layoutBoxHeight * alignment;
-                float offset = layoutBoxHeight * -alignment;
+                float offset = elementHeight * -alignment;
                 float alignedPosition = originBase + originOffset + offset;
                 placement.layoutBox.ApplyLayoutVertical(y, alignedPosition, elementHeight, layoutBoxHeight, fit, frameId);
             }
@@ -1202,8 +1207,8 @@ namespace UIForia.Systems {
             bool flowHorizontal = element.style.GridLayoutDirection == LayoutDirection.Horizontal;
             bool dense = element.style.GridLayoutDensity == GridLayoutDensity.Dense;
 
-            int sparseStartX = 0;
-            int sparseStartY = 0;
+            int sparseStartX = 0; // purposefully not reading autoCursor value because that results in weird behavior for sparse grids (this is not the same as css!)
+            int sparseStartY = 0; // purposefully not reading autoCursor value because that results in weird behavior for sparse grids (this is not the same as css!)
 
             for (int i = 0; i < placementList.size; i++) {
                 ref GridPlacement placement = ref placementList.array[i];
@@ -1250,8 +1255,14 @@ namespace UIForia.Systems {
                     placement.y = cursorY;
                     EnsureImplicitTrackCapacity(colTrackList, cursorX + width, ref colSizeAutoPtr, autoColSizePattern);
                     EnsureImplicitTrackCapacity(rowTrackList, cursorY + height, ref rowSizeAutoPtr, autoRowSizePattern);
-                    rowTrackList.array[cursorY].autoPlacementCursor = cursorX + width;
-                    colTrackList.array[cursorX].autoPlacementCursor = cursorY;
+//                    rowTrackList.array[cursorY].autoPlacementCursor = cursorX + width;
+                        colTrackList.array[cursorX].autoPlacementCursor = cursorY;
+                    //for (int j = cursorX; j < cursorX + width; j++) {
+                    //}
+                    for (int j = cursorY; j < cursorY + height; j++) {
+                        rowTrackList.array[j].autoPlacementCursor = cursorX + width;
+                    }
+
                 }
                 else {
                     if (dense) {
@@ -1282,8 +1293,11 @@ namespace UIForia.Systems {
                     sparseStartY = cursorY;
                     placement.x = cursorX;
                     placement.y = cursorY;
-                    colTrackList.array[cursorX].autoPlacementCursor = cursorY;
+//                    colTrackList.array[cursorX].autoPlacementCursor = cursorY;
                     rowTrackList.array[cursorY].autoPlacementCursor = cursorX;
+                    for (int j = cursorX; j < cursorX + width; j++) {
+                        colTrackList.array[j].autoPlacementCursor = cursorY + height;
+                    }
                     EnsureImplicitTrackCapacity(colTrackList, cursorX + width, ref colSizeAutoPtr, autoColSizePattern);
                     EnsureImplicitTrackCapacity(rowTrackList, cursorY + height, ref rowSizeAutoPtr, autoRowSizePattern);
                 }
@@ -1376,6 +1390,7 @@ namespace UIForia.Systems {
             public float fixedSizeMin;
             public float resolvedMinSize;
             public float resolvedMaxSize;
+
 
             public GridTrack(in GridTrackSize template) {
                 this.minValue = template.minValue;

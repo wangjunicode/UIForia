@@ -68,8 +68,8 @@ namespace UIForia.Layout.LayoutTypes {
             float topOffset = paddingBox.top + borderBox.top;
             float leftOffset = paddingBox.left + borderBox.left;
 
-            float horizontalAlignment = element.style.StackLayoutAlignHorizontal;
-            float verticalAlignment = element.style.StackLayoutAlignVertical;
+            float horizontalAlignment = 0;
+            float verticalAlignment = 0;
 
             float step = ((maxAngle - startAngle)) / childCount;
             Vector2 center = new Vector2(containingBoxWidth.contentAreaSize * 0.5f, containingBoxHeight.contentAreaSize * 0.5f);

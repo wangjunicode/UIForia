@@ -249,7 +249,7 @@ Shader "UIForia/Standard"
                 fixed4 outlineColor = Green;//UnpackColor(asuint(i.color.g));
                 fixed4 underlayColor = UnpackColor(asuint(i.color.b));
                 //fixed4 glowColor = UnpackColor(asuint(i.color.a));
-                
+                faceColor.a *= opacity;
                 faceColor = GetTextColor(sd, faceColor, outlineColor, outline, softness);
 
                 #define underlayOffset i.texCoord3.xy
@@ -262,7 +262,6 @@ Shader "UIForia/Standard"
                 underlayColor = faceColor + fixed4(underlayColor.rgb * underlayColor.a, underlayColor.a)  * (saturate(d - underlayBias)) * (1 - faceColor.a);
                 faceColor = lerp(faceColor, underlayColor, hasUnderlay);
            //     faceColor.rgb *= faceColor.a;
-                faceColor.a *= opacity;
                 faceColor = UIForiaAlphaClipColor(faceColor, _MaskTexture, screenUV, clipRect, clipUvs);
                 return faceColor;               
 

@@ -3,43 +3,33 @@
     <Style>
 
         style container {
-        LayoutType = Grid;
-        GridLayoutRowTemplate = 100px, 100px, 100px, 100px;
-        GridLayoutDirection = Vertical;
-        GridLayoutDensity = Dense;
-        FitItemsHorizontal = Fill;
-        FitItemsVertical = Fill;
+            FlexLayoutDirection = Horizontal;
+            PreferredSize = 2cnt;
+            AlignContentHorizontal = End;   
+            AlignItemsVertical = Center;
+            FitItemsVertical = Fill;
         }
 
-        style placed1 {
-        GridItemHeight = 2;
-        BackgroundColor = green;
+        style  w100h100 {
+            PreferredSize = 80px 90px;
+            BackgroundColor = red;
+            MarginLeft = 10px;
+            MarginRight = 10px;
+            MarginTop = 10px;
         }
 
-        style placed3 {
-        GridItemWidth = 2;
-        BackgroundColor = white;
-        }
-
-        style box {
-        PreferredSize = 100px;
-        BackgroundColor = blue;
-        }
-
+        style grow {
+            FlexItemGrow = 1;
+            BackgroundColor = white;
+            LayoutFitVertical = None;
+        }   
+        
+        // todo -- implement vertical case of flex box with new allocated box margin version
     </Style>
 
     <Contents style="container">
-        <Group style="box"/>
-        <Group style="box placed1"/>
-        <Group style="box placed3"/>
-        <Group style="box placed3"/>
-        <Group style="box"/>
-        <Group style="box"/>
-        <!--
-         this box causes the last column to have a size, which should resolve to 100px,
-         without this box the col is mx sized but the entire width of the last placed3 box is already consumed by previous col
-         -->
-        <Group style="box"/>
+        <Group style='w100h100'/>
+        <Group style='w100h100 grow'/>
+        <Group style='w100h100'/>
     </Contents>
-
 </UITemplate>

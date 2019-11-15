@@ -119,7 +119,6 @@ namespace UIForia.Animation {
                         break;
                     }
 
-                    case StylePropertyId.BorderColor:
                     case StylePropertyId.BackgroundColor:
                     case StylePropertyId.TextColor: {
                         throw new NotImplementedException();
@@ -205,8 +204,6 @@ namespace UIForia.Animation {
                 float t = Mathf.Clamp01(Easing.Interpolate(MathUtil.PercentOfRange(targetProgress, prev.time, next.time), options.timingFunction.Value));
 
                 switch (propertyId) {
-                    case StylePropertyId.AnchorLeft:
-                    case StylePropertyId.AnchorRight:
                     case StylePropertyId.TransformPivotX:
                     case StylePropertyId.TransformPositionX:
                     case StylePropertyId.PaddingLeft:
@@ -228,8 +225,6 @@ namespace UIForia.Animation {
                         break;
                     }
 
-                    case StylePropertyId.AnchorTop:
-                    case StylePropertyId.AnchorBottom:
                     case StylePropertyId.TransformPivotY:
                     case StylePropertyId.TransformPositionY:
                     case StylePropertyId.PaddingTop:
@@ -369,7 +364,6 @@ namespace UIForia.Animation {
                         break;
                     }
 
-                    case StylePropertyId.BorderColor:
                     case StylePropertyId.TextUnderlayColor:
                     case StylePropertyId.TextGlowColor:
                     case StylePropertyId.TextOutlineColor:

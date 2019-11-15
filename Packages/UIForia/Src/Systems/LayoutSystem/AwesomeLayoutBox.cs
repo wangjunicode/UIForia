@@ -96,7 +96,7 @@ namespace UIForia.Systems {
 
         public abstract void OnChildrenChanged(LightList<AwesomeLayoutBox> childList);
 
-        public void ApplyLayoutHorizontal(float localX, float offset, float size, float availableSize, LayoutFit defaultFit, int frameId) {
+        public void ApplyLayoutHorizontal(float localX, float alignedPosition, float size, float availableSize, LayoutFit defaultFit, int frameId) {
             baseWidth = size;
             baseLocalX = localX;
 
@@ -119,6 +119,7 @@ namespace UIForia.Systems {
                 case LayoutFit.Grow:
                     if (availableSize > size) {
                         newWidth = availableSize;
+                        alignedPosition = localX;
                     }
 
                     break;
@@ -126,6 +127,7 @@ namespace UIForia.Systems {
                 case LayoutFit.Shrink:
                     if (availableSize < size) {
                         newWidth = availableSize;
+                        alignedPosition = localX;
                     }
 
                     break;
@@ -146,7 +148,7 @@ namespace UIForia.Systems {
             LayoutResult layoutResult = element.layoutResult;
 
             // todo -- layout result change flags (and maybe history entry if enabled)
-            layoutResult.alignedPosition.x = offset;
+            layoutResult.alignedPosition.x = alignedPosition;
             layoutResult.allocatedPosition.x = localX;
             layoutResult.padding.left = paddingLeft;
             layoutResult.padding.right = paddingRight;
@@ -169,11 +171,11 @@ namespace UIForia.Systems {
             }
         }
 
-        public void ApplyLayoutVertical(float localY, float offset, float size, float availableSize, LayoutFit defaultFit, int frameId) {
+        public void ApplyLayoutVertical(float localY, float alignedY, float size, float availableSize, LayoutFit defaultFit, int frameId) {
             baseHeight = size;
             baseLocalY = localY;
 
-            LayoutFit fit = element.style.LayoutFitHorizontal;
+            LayoutFit fit = element.style.LayoutFitVertical;
             if (fit == LayoutFit.Default || fit == LayoutFit.Unset) {
                 fit = defaultFit;
             }
@@ -190,6 +192,7 @@ namespace UIForia.Systems {
                 case LayoutFit.Grow:
                     if (availableSize > size) {
                         newHeight = availableSize;
+                        alignedY = localY;
                     }
 
                     break;
@@ -197,12 +200,14 @@ namespace UIForia.Systems {
                 case LayoutFit.Shrink:
                     if (availableSize < size) {
                         newHeight = availableSize;
+                        alignedY = localY;
                     }
 
                     break;
 
                 case LayoutFit.Fill:
                     newHeight = availableSize;
+                    alignedY = localY;
                     break;
             }
 
@@ -218,7 +223,7 @@ namespace UIForia.Systems {
 
             // todo -- layout result change flags (and maybe history entry if enabled)
 
-            layoutResult.alignedPosition.y = offset;
+            layoutResult.alignedPosition.y = alignedY;
             layoutResult.allocatedPosition.y = localY;
             layoutResult.padding.top = paddingTop;
             layoutResult.padding.bottom = paddingBottom;
@@ -465,6 +470,9 @@ namespace UIForia.Systems {
             size.maximum = ResolveWidth(element.style.MaxWidth);
             size.marginStart = MeasurementUtil.ResolveFixedSize(0, 0, 0, 0, element.style.MarginLeft);
             size.marginEnd = MeasurementUtil.ResolveFixedSize(0, 0, 0, 0, element.style.MarginRight);
+            // todo -- not sure this is right or desired
+            element.layoutResult.margin.left = size.marginStart;
+            element.layoutResult.margin.right = size.marginEnd;
         }
 
         public void GetHeights(ref LayoutSize size) {
@@ -473,6 +481,9 @@ namespace UIForia.Systems {
             size.maximum = ResolveHeight(element.style.MaxHeight);
             size.marginStart = MeasurementUtil.ResolveFixedSize(0, 0, 0, 0, element.style.MarginTop);
             size.marginEnd = MeasurementUtil.ResolveFixedSize(0, 0, 0, 0, element.style.MarginBottom);
+            // todo -- not sure this is right or desired
+            element.layoutResult.margin.top = size.marginStart;
+            element.layoutResult.margin.bottom = size.marginEnd;
         }
 
         public virtual void OnStyleChanged(StructList<StyleProperty> propertyList) { }

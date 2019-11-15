@@ -32,8 +32,8 @@ namespace UIForia.Compilers.Style {
 
                 // Alignment
                 {"alignmentbehaviorx", (targetStyle, property, context) => targetStyle.AlignmentBehaviorX = MapEnum<AlignmentBehavior>(property.children[0], context)},
-                {"alignmentbehaviory", (targetStyle, property, context) => targetStyle.AlignmentBehaviorY = MapEnum<AlignmentBehavior>(property.children[0], context)},
-                {"alignmentbehavior", (targetStyle, property, context) => {
+                {"alignmentbehaviory", (targetStyle, property, context) => targetStyle.AlignmentBehaviorY = MapEnum<AlignmentBehavior>(property.children[0], context)}, {
+                    "alignmentbehavior", (targetStyle, property, context) => {
                         if (property.children.size == 1) {
                             AlignmentBehavior target = MapEnum<AlignmentBehavior>(property.children[0], context);
                             targetStyle.AlignmentBehaviorX = target;
@@ -110,10 +110,27 @@ namespace UIForia.Compilers.Style {
                 {"cornerbevelbottomright", (targetStyle, property, context) => targetStyle.CornerBevelBottomRight = MapFixedLength(property.children[0], context)},
                 {"cornerbevelbottomleft", (targetStyle, property, context) => targetStyle.CornerBevelBottomLeft = MapFixedLength(property.children[0], context)},
 
-                {"griditemx", (targetStyle, property, context) => targetStyle.GridItemX = MapGridItemPlacement(property, context)},
-                {"griditemy", (targetStyle, property, context) => targetStyle.GridItemY = MapGridItemPlacement(property, context)},
-                {"griditemwidth", (targetStyle, property, context) => targetStyle.GridItemWidth = MapGridItemPlacement(property, context)},
-                {"griditemheight", (targetStyle, property, context) => targetStyle.GridItemHeight = MapGridItemPlacement(property, context)},
+                {"griditemx", (targetStyle, property, context) => targetStyle.GridItemX = MapGridItemPlacement(property.children[0], context)},
+                {"griditemy", (targetStyle, property, context) => targetStyle.GridItemY = MapGridItemPlacement(property.children[0], context)},
+                {"griditemwidth", (targetStyle, property, context) => targetStyle.GridItemWidth = MapGridItemPlacement(property.children[0], context)},
+                {"griditemheight", (targetStyle, property, context) => targetStyle.GridItemHeight = MapGridItemPlacement(property.children[0], context)}, {
+                    "griditem", (targetStyle, property, context) => {
+                        if (property.children.size == 2) {
+                            targetStyle.GridItemX = MapGridItemPlacement(property.children[0], context);
+                            targetStyle.GridItemY = MapGridItemPlacement(property.children[1], context);
+                        }
+                        else if (property.children.size == 4) {
+                            targetStyle.GridItemX = MapGridItemPlacement(property.children[0], context);
+                            targetStyle.GridItemY = MapGridItemPlacement(property.children[1], context);
+                            targetStyle.GridItemWidth = MapGridItemPlacement(property.children[2], context);
+                            targetStyle.GridItemHeight = MapGridItemPlacement(property.children[3], context);
+                        }
+                        else {
+                            throw new CompileException(context.fileName, property, $"Invalid GridItem style {property}.");
+                        }
+                    }
+                },
+
                 {"gridlayoutcolalignment", (targetStyle, property, context) => targetStyle.GridLayoutColAlignment = MapEnum<GridAxisAlignment>(property.children[0], context)},
                 {"gridlayoutrowalignment", (targetStyle, property, context) => targetStyle.GridLayoutRowAlignment = MapEnum<GridAxisAlignment>(property.children[0], context)},
                 {"gridlayoutdensity", (targetStyle, property, context) => targetStyle.GridLayoutDensity = MapEnum<GridLayoutDensity>(property.children[0], context)},
@@ -124,14 +141,26 @@ namespace UIForia.Compilers.Style {
                 {"gridlayoutrowautosize", (targetStyle, property, context) => targetStyle.GridLayoutRowAutoSize = MapGridLayoutTemplate(property, context)},
                 {"gridlayoutcolgap", (targetStyle, property, context) => targetStyle.GridLayoutColGap = MapNumber(property.children[0], context)},
                 {"gridlayoutrowgap", (targetStyle, property, context) => targetStyle.GridLayoutRowGap = MapNumber(property.children[0], context)},
+
+                {"alignitemshorizontal", (targetStyle, property, context) => targetStyle.AlignItemsHorizontal = MapItemAlignment(property.children[0], context)},
+                {"alignitemsvertical", (targetStyle, property, context) => targetStyle.AlignItemsVertical = MapItemAlignment(property.children[0], context)},
                 
-                {"alignitemshorizontal", (targetStyle, property, context) => targetStyle.AlignItemsHorizontal = MapItemAlignment(property, context)},
-                {"alignitemsvertical", (targetStyle, property, context) => targetStyle.AlignItemsVertical = MapItemAlignment(property, context)},
+                {"aligncontenthorizontal", (targetStyle, property, context) => targetStyle.AlignContentHorizontal = MapEnum<MainAxisAlignment>(property.children[0], context)},
+                {"aligncontentvertical", (targetStyle, property, context) => targetStyle.AlignContentVertical = MapEnum<MainAxisAlignment>(property.children[0], context)},
+                
+                {"alignitems", (targetStyle, property, context) => {
+                    if (property.children.size == 1) {
+                        targetStyle.AlignItemsHorizontal = MapItemAlignment(property.children[0], context);
+                        targetStyle.AlignItemsVertical = MapItemAlignment(property.children[0], context);
+                    }
+                    else if (property.children.size == 2) {
+                        targetStyle.AlignItemsHorizontal = MapItemAlignment(property.children[0], context);
+                        targetStyle.AlignItemsVertical = MapItemAlignment(property.children[1], context);
+                    }
+                }},
+                
                 {"fititemshorizontal", (targetStyle, property, context) => targetStyle.FitItemsHorizontal = MapEnum<LayoutFit>(property.children[0], context)},
                 {"fititemsvertical", (targetStyle, property, context) => targetStyle.FitItemsVertical = MapEnum<LayoutFit>(property.children[0], context)},
-                
-                {"stacklayoutalignhorizontal", (targetStyle, property, context) => targetStyle.StackLayoutAlignHorizontal = MapRelativeValue(property.children[0], context)},
-                {"stacklayoutalignvertical", (targetStyle, property, context) => targetStyle.StackLayoutAlignVertical = MapRelativeValue(property.children[0], context)},
 
                 {"flexitemgrow", (targetStyle, property, context) => targetStyle.FlexItemGrow = (int) MapNumber(property.children[0], context)},
                 {"flexitemshrink", (targetStyle, property, context) => targetStyle.FlexItemShrink = (int) MapNumber(property.children[0], context)},
@@ -215,13 +244,8 @@ namespace UIForia.Compilers.Style {
 
                 {"painter", (targetStyle, property, context) => targetStyle.Painter = MapPainter(property, context)},
 
-                // Scrollbar
-                {"scrollbar", (targetStyle, property, context) => targetStyle.Scrollbar = MapString(property.children[0], context)},
-                {"scrollbarsize", (targetStyle, property, context) => targetStyle.ScrollbarSize = MapMeasurement(property.children[0], context)},
-                {"scrollbarcolor", (targetStyle, property, context) => targetStyle.ScrollbarColor = MapColor(property, context)},
-
                 // Shadows
-            //    {"shadowtype", (targetStyle, property, context) => targetStyle.ShadowType = MapEnum<UnderlayType>(property.children[0], context)},
+                //    {"shadowtype", (targetStyle, property, context) => targetStyle.ShadowType = MapEnum<UnderlayType>(property.children[0], context)},
                 {"shadowoffsetx", (targetStyle, property, context) => targetStyle.ShadowOffsetX = MapNumber(property.children[0], context)},
                 {"shadowoffsety", (targetStyle, property, context) => targetStyle.ShadowOffsetY = MapNumber(property.children[0], context)},
                 {"shadowsizex", (targetStyle, property, context) => targetStyle.ShadowSizeX = MapNumber(property.children[0], context)},
@@ -238,7 +262,8 @@ namespace UIForia.Compilers.Style {
 
                 targetStyle.LayoutFitHorizontal = layoutFit;
                 targetStyle.LayoutFitVertical = layoutFit;
-            } else if (property.children.Count > 1) {
+            }
+            else if (property.children.Count > 1) {
                 var layoutFitX = MapEnum<LayoutFit>(property.children[0], context);
                 var layoutFitY = MapEnum<LayoutFit>(property.children[1], context);
 
@@ -247,8 +272,8 @@ namespace UIForia.Compilers.Style {
             }
         }
 
-        private static float MapItemAlignment(PropertyNode propertyNode, StyleCompileContext context) {
-            StyleASTNode value = context.GetValueForReference(propertyNode.children[0]);
+        private static float MapItemAlignment(StyleASTNode node, StyleCompileContext context) {
+            StyleASTNode value = context.GetValueForReference(node);
 
             if (value is StyleIdentifierNode identifierNode) {
                 switch (identifierNode.name.ToLower()) {
@@ -260,7 +285,7 @@ namespace UIForia.Compilers.Style {
                         return 1f;
                 }
             }
-            else if (value is MeasurementNode measurementNode){
+            else if (value is MeasurementNode measurementNode) {
                 if (measurementNode.unit.value != "%") {
                     return 0;
                 }
@@ -273,9 +298,10 @@ namespace UIForia.Compilers.Style {
             else if (value.type == StyleASTNodeType.NumericLiteral) {
                 return MapNumber(value, context);
             }
+
             throw new CompileException("Unable to parse alignment value");
         }
-        
+
         private static void MapAlignmentX(UIStyle targetStyle, PropertyNode property, StyleCompileContext context) {
             if (property.children.size == 1) {
                 // single value mode
@@ -287,7 +313,7 @@ namespace UIForia.Compilers.Style {
                 else {
                     OffsetMeasurement measurement = MapOffsetMeasurement(value, context);
                     targetStyle.AlignmentOriginX = measurement;
-                    
+
                     if (measurement.unit == OffsetMeasurementUnit.Percent) {
                         targetStyle.AlignmentOffsetX = new OffsetMeasurement(-measurement.value, measurement.unit);
                     }
@@ -296,7 +322,7 @@ namespace UIForia.Compilers.Style {
             else if (property.children.size == 2) {
                 StyleASTNode value = context.GetValueForReference(property.children[0]);
                 StyleASTNode value2 = context.GetValueForReference(property.children[1]);
-                
+
                 if (value is StyleIdentifierNode identifierNode1) {
                     MapShorthandAlignmentX(targetStyle, context, identifierNode1, value);
                     if (value2 is StyleIdentifierNode identifierNode2) {
@@ -345,7 +371,7 @@ namespace UIForia.Compilers.Style {
             else if (property.children.size == 2) {
                 StyleASTNode value = context.GetValueForReference(property.children[0]);
                 StyleASTNode value2 = context.GetValueForReference(property.children[1]);
-                
+
                 if (value is StyleIdentifierNode identifierNode1) {
                     MapShorthandAlignmentY(targetStyle, context, identifierNode1, value);
                     if (value2 is StyleIdentifierNode identifierNode2) {
@@ -516,8 +542,8 @@ namespace UIForia.Compilers.Style {
             return new CursorStyle(null, MapTexture(property.children[0], context), new Vector2(hotSpotX, hotSpotY));
         }
 
-        private static GridItemPlacement MapGridItemPlacement(PropertyNode property, StyleCompileContext context) {
-            StyleASTNode dereferencedValue = context.GetValueForReference(property.children[0]);
+        private static GridItemPlacement MapGridItemPlacement(StyleASTNode node, StyleCompileContext context) {
+            StyleASTNode dereferencedValue = context.GetValueForReference(node);
 
             switch (dereferencedValue.type) {
                 case StyleASTNodeType.NumericLiteral:
@@ -529,7 +555,7 @@ namespace UIForia.Compilers.Style {
                     return new GridItemPlacement(number);
 
                 case StyleASTNodeType.StringLiteral:
-                    string placementName = MapString(property.children[0], context);
+                    string placementName = MapString(node, context);
                     if (string.IsNullOrEmpty(placementName) || string.IsNullOrWhiteSpace(placementName) || placementName == ".") {
                         return new GridItemPlacement(IntUtil.UnsetValue);
                     }
@@ -538,7 +564,7 @@ namespace UIForia.Compilers.Style {
                     }
             }
 
-            throw new CompileException(context.fileName, property, $"Had a hard time parsing that grid item placement: {property}.");
+            throw new CompileException(context.fileName, node, $"Had a hard time parsing that grid item placement: {node}.");
         }
 
         private static void MapTransformBehavior(UIStyle targetStyle, PropertyNode property, StyleCompileContext context) {
@@ -616,6 +642,7 @@ namespace UIForia.Compilers.Style {
                     if (unit == GridTemplateUnit.Percent) {
                         value *= 0.01f;
                     }
+
                     return new GridTrackSize(value, unit);
 
                 case StyleFunctionNode functionNode:
@@ -679,7 +706,7 @@ namespace UIForia.Compilers.Style {
 
                             size.maxUnit = size.pattern[1].unit;
                             size.maxValue = size.pattern[1].value;
-                            
+
                             break;
                         default:
                             throw new CompileException(context.fileName, trackSize, $"Had a hard time parsing that track size: {trackSize}. Expected a known track size function (repeat, grow, shrink) but all I got was {functionNode.identifier}");
@@ -1461,7 +1488,7 @@ namespace UIForia.Compilers.Style {
                     }
 
                     break;
-                } 
+                }
             }
 
             throw new CompileException(context.fileName, node, $"Expected a numeric value but all I got was this lousy {node}");

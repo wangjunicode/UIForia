@@ -1446,10 +1446,6 @@ case "visibility":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_float("RadialLayoutEndAngle", UIForia.Rendering.StylePropertyId.RadialLayoutEndAngle, targetState.state, Compile<float>(value, null));                
                 case "radiallayoutradius":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_UIFixedLength("RadialLayoutRadius", UIForia.Rendering.StylePropertyId.RadialLayoutRadius, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
-                case "stacklayoutalignhorizontal":
-                    return new UIForia.Bindings.StyleBindings.StyleBinding_float("StackLayoutAlignHorizontal", UIForia.Rendering.StylePropertyId.StackLayoutAlignHorizontal, targetState.state, Compile<float>(value, null));                
-                case "stacklayoutalignvertical":
-                    return new UIForia.Bindings.StyleBindings.StyleBinding_float("StackLayoutAlignVertical", UIForia.Rendering.StylePropertyId.StackLayoutAlignVertical, targetState.state, Compile<float>(value, null));                
                 case "alignmentdirectionx":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_AlignmentDirection("AlignmentDirectionX", UIForia.Rendering.StylePropertyId.AlignmentDirectionX, targetState.state, Compile<UIForia.Layout.AlignmentDirection>(value, s_EnumSource_AlignmentDirection));                
                 case "alignmentdirectiony":
@@ -1490,8 +1486,6 @@ case "visibility":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_UIFixedLength("MarginBottom", UIForia.Rendering.StylePropertyId.MarginBottom, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
                 case "marginleft":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_UIFixedLength("MarginLeft", UIForia.Rendering.StylePropertyId.MarginLeft, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
-                case "bordercolor":
-                    return new UIForia.Bindings.StyleBindings.StyleBinding_Color("BorderColor", UIForia.Rendering.StylePropertyId.BorderColor, targetState.state, Compile<UnityEngine.Color>(value, colorSources));                
                 case "bordertop":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_UIFixedLength("BorderTop", UIForia.Rendering.StylePropertyId.BorderTop, targetState.state, Compile<UIForia.UIFixedLength>(value, fixedSources));                
                 case "borderright":
@@ -1596,12 +1590,6 @@ case "visibility":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_RenderLayer("RenderLayer", UIForia.Rendering.StylePropertyId.RenderLayer, targetState.state, Compile<UIForia.Rendering.RenderLayer>(value, s_EnumSource_RenderLayer));                
                 case "layer":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_int("Layer", UIForia.Rendering.StylePropertyId.Layer, targetState.state, Compile<int>(value, null));                
-                case "scrollbar":
-                    return new UIForia.Bindings.StyleBindings.StyleBinding_string("Scrollbar", UIForia.Rendering.StylePropertyId.Scrollbar, targetState.state, Compile<string>(value, null));                
-                case "scrollbarsize":
-                    return new UIForia.Bindings.StyleBindings.StyleBinding_UIMeasurement("ScrollbarSize", UIForia.Rendering.StylePropertyId.ScrollbarSize, targetState.state, Compile<UIForia.Rendering.UIMeasurement>(value, measurementSources));                
-                case "scrollbarcolor":
-                    return new UIForia.Bindings.StyleBindings.StyleBinding_Color("ScrollbarColor", UIForia.Rendering.StylePropertyId.ScrollbarColor, targetState.state, Compile<UnityEngine.Color>(value, colorSources));                
                 case "shadowcolor":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_Color("ShadowColor", UIForia.Rendering.StylePropertyId.ShadowColor, targetState.state, Compile<UnityEngine.Color>(value, colorSources));                
                 case "shadowtint":

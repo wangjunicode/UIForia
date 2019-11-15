@@ -1094,11 +1094,6 @@ namespace UIForia.Layout.LayoutTypes {
                     case StylePropertyId.MinHeight:
                     case StylePropertyId.MaxHeight:
                     case StylePropertyId.PreferredHeight:
-                    case StylePropertyId.AnchorTop:
-                    case StylePropertyId.AnchorRight:
-                    case StylePropertyId.AnchorBottom:
-                    case StylePropertyId.AnchorLeft:
-                    case StylePropertyId.AnchorTarget:
                         invalidatePreferredSizeCache = true;
                         break;
                 }

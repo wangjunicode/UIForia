@@ -102,10 +102,6 @@ namespace UIForia.Editor {
             new AnimatedPropertyGenerator<float>(StylePropertyId.RadialLayoutEndAngle, 360f),
             new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.RadialLayoutRadius, new UIFixedLength(0.5f, UIFixedUnit.Percent)),
 
-            // Stack Layout
-            new AnimatedPropertyGenerator<float>(StylePropertyId.StackLayoutAlignHorizontal, 0), 
-            new AnimatedPropertyGenerator<float>(StylePropertyId.StackLayoutAlignVertical, 0),
-            
             // Alignment
             new PropertyGenerator<AlignmentDirection>(StylePropertyId.AlignmentDirectionX, AlignmentDirection.Start),
             new PropertyGenerator<AlignmentDirection>(StylePropertyId.AlignmentDirectionY, AlignmentDirection.Start),
@@ -135,7 +131,6 @@ namespace UIForia.Editor {
             new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.MarginLeft, new UIFixedLength(0)),
 
             // Border
-            new AnimatedPropertyGenerator<Color>(StylePropertyId.BorderColor, ColorUtil.UnsetValue),
             new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.BorderTop, new UIFixedLength(0)),
             new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.BorderRight, new UIFixedLength(0)),
             new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.BorderBottom, new UIFixedLength(0)),
@@ -196,11 +191,6 @@ namespace UIForia.Editor {
             new AnimatedPropertyGenerator<int>(StylePropertyId.RenderLayerOffset, 0),
             new AnimatedPropertyGenerator<RenderLayer>(StylePropertyId.RenderLayer, RenderLayer.Default),
             new AnimatedPropertyGenerator<int>(StylePropertyId.Layer, 0, InheritanceType.Inherited),
-
-            // Scrollbar
-            new PropertyGenerator<string>(StylePropertyId.Scrollbar, string.Empty),
-            new PropertyGenerator<UIMeasurement>(StylePropertyId.ScrollbarSize, new UIMeasurement(15f)),
-            new AnimatedPropertyGenerator<Color>(StylePropertyId.ScrollbarColor, Color.black),
 
             // Shadow
 //            new PropertyGenerator<UnderlayType>(StylePropertyId.ShadowType, UnderlayType.Unset),

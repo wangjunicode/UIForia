@@ -8,7 +8,6 @@ namespace UIForia.Rendering {
         ClipBounds = 4,
         
         BackgroundColor = 100,
-        BorderColor = 101,
         BackgroundImage = 102,
         Painter = 103,
         BackgroundImageOffsetX = 109,
@@ -124,20 +123,10 @@ namespace UIForia.Rendering {
         LayoutType = 1201,
         LayoutBehavior = 1202,
 
-        AnchorTop = 1301,
-        AnchorRight = 1302,
-        AnchorBottom = 1303,
-        AnchorLeft = 1304,
-        AnchorTarget = 1305,
-
         ZIndex = 1401,
         RenderLayer = 1402,
         RenderLayerOffset = 1403,
         Layer = 1404,
-        
-        Scrollbar = 1501,
-        ScrollbarSize = 1502,
-        ScrollbarColor = 1503,
         
         //ShadowType = 1701,
         ShadowOffsetX = 1702,
@@ -169,9 +158,6 @@ namespace UIForia.Rendering {
         CornerBevelBottomLeft = 3003,
         CornerBevelBottomRight = 3004,
 
-        StackLayoutAlignVertical = 4001,
-        StackLayoutAlignHorizontal = 4002,
-        
         AlignItemsHorizontal = 7001,
         AlignItemsVertical = 7002,
         FitItemsHorizontal = 7003,

@@ -21,8 +21,8 @@ namespace UIForia.Layout {
             float topOffset = paddingBox.top + borderBox.top;
             float leftOffset = paddingBox.left + borderBox.left;
 
-            float horizontalAlignment = element.style.StackLayoutAlignHorizontal;
-            float verticalAlignment = element.style.StackLayoutAlignVertical;
+            float horizontalAlignment = 0;
+            float verticalAlignment = 0;
 
             while (ptr != null) {
                 ptr.GetWidth(blockWidth, ref sizeConstraints);

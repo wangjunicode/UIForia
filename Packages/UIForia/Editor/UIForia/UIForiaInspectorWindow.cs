@@ -824,9 +824,9 @@ namespace UIForia.Editor {
                 case StylePropertyId.AlignItemsVertical:
                     return DrawFloat(property, isEditable);
                 
-                case StylePropertyId.AlignContentHorizontal:
-                case StylePropertyId.AlignContentVertical:
-                    return DrawEnumWithValue<MainAxisAlignment>(property, isEditable);
+                case StylePropertyId.DistributeExtraSpaceHorizontal:
+                case StylePropertyId.DistributeExtraSpaceVertical:
+                    return DrawEnumWithValue<SpaceDistribution>(property, isEditable);
                 
                 case StylePropertyId.FitItemsHorizontal:
                 case StylePropertyId.FitItemsVertical:
@@ -888,7 +888,7 @@ namespace UIForia.Editor {
                     return DrawEnumWithValue<LayoutDirection>(property, isEditable);
 
                 case StylePropertyId.FlexLayoutMainAxisAlignment:
-                    return DrawEnumWithValue<MainAxisAlignment>(property, isEditable);
+                    return DrawEnumWithValue<SpaceDistribution>(property, isEditable);
 
                 case StylePropertyId.FlexLayoutCrossAxisAlignment:
                     return DrawEnumWithValue<CrossAxisAlignment>(property, isEditable);

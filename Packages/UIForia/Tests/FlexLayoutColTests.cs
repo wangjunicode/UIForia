@@ -145,7 +145,7 @@ public class FlexLayoutColTests {
         MockApplication mockView = new MockApplication(typeof(FlexColLayoutThing), template);
         mockView.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
         FlexColLayoutThing root = (FlexColLayoutThing) mockView.RootElement.GetChild(0);
-        root.style.SetFlexLayoutMainAxisAlignment(MainAxisAlignment.End, StyleState.Normal);
+        root.style.SetFlexLayoutMainAxisAlignment(SpaceDistribution.AfterContent, StyleState.Normal);
         mockView.Update();
         
         Assert.AreEqual(new Rect(0, 200, 100, 100), root.child0.layoutResult.ScreenRect);
@@ -168,7 +168,7 @@ public class FlexLayoutColTests {
         MockApplication mockView = new MockApplication(typeof(FlexColLayoutThing), template);
         mockView.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
         FlexColLayoutThing root = (FlexColLayoutThing) mockView.RootElement.GetChild(0);
-        root.style.SetFlexLayoutMainAxisAlignment(MainAxisAlignment.Start, StyleState.Normal);
+        root.style.SetFlexLayoutMainAxisAlignment(SpaceDistribution.BeforeContent, StyleState.Normal);
         mockView.Update();
         
         Assert.AreEqual(new Rect(0, 0, 100, 100), root.child0.layoutResult.ScreenRect);
@@ -191,7 +191,7 @@ public class FlexLayoutColTests {
         MockApplication mockView = new MockApplication(typeof(FlexColLayoutThing), template);
         mockView.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
         FlexColLayoutThing root = (FlexColLayoutThing) mockView.RootElement.GetChild(0);
-        root.style.SetFlexLayoutMainAxisAlignment(MainAxisAlignment.SpaceBetween, StyleState.Normal);
+        root.style.SetFlexLayoutMainAxisAlignment(SpaceDistribution.BetweenContent, StyleState.Normal);
         mockView.Update();
         
         Assert.AreEqual(new Rect(0, 0, 100, 100), root.child0.layoutResult.ScreenRect);
@@ -214,7 +214,7 @@ public class FlexLayoutColTests {
         MockApplication mockView = new MockApplication(typeof(FlexColLayoutThing), template);
         mockView.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
         FlexColLayoutThing root = (FlexColLayoutThing) mockView.RootElement.GetChild(0);
-        root.style.SetFlexLayoutMainAxisAlignment(MainAxisAlignment.SpaceAround, StyleState.Normal);
+        root.style.SetFlexLayoutMainAxisAlignment(SpaceDistribution.AroundContent, StyleState.Normal);
         mockView.Update();
         
         Assert.AreEqual(new Rect(0, 50, 100, 100), root.child0.layoutResult.ScreenRect);

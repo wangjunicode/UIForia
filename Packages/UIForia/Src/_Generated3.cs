@@ -45,7 +45,7 @@ namespace UIForia.Rendering {
 		public const int FlexItemShrink = 0;
 		public const LayoutDirection FlexLayoutDirection = UIForia.Layout.LayoutDirection.Vertical;
 		public const LayoutWrap FlexLayoutWrap = UIForia.Layout.LayoutWrap.None;
-		public const MainAxisAlignment FlexLayoutMainAxisAlignment = UIForia.Layout.MainAxisAlignment.Start;
+		public const SpaceDistribution FlexLayoutMainAxisAlignment = UIForia.Layout.SpaceDistribution.BeforeContent;
 		public const CrossAxisAlignment FlexLayoutCrossAxisAlignment = UIForia.Layout.CrossAxisAlignment.Start;
 		public static readonly GridItemPlacement GridItemX = new GridItemPlacement(-1);
 		public static readonly GridItemPlacement GridItemY = new GridItemPlacement(-1);
@@ -65,13 +65,11 @@ namespace UIForia.Rendering {
 		public const float AlignItemsVertical = 0f;
 		public const LayoutFit FitItemsVertical = UIForia.Layout.LayoutFit.Unset;
 		public const LayoutFit FitItemsHorizontal = UIForia.Layout.LayoutFit.Unset;
-		public const MainAxisAlignment AlignContentHorizontal = UIForia.Layout.MainAxisAlignment.Start;
-		public const MainAxisAlignment AlignContentVertical = UIForia.Layout.MainAxisAlignment.Start;
+		public const SpaceDistribution DistributeExtraSpaceHorizontal = UIForia.Layout.SpaceDistribution.AfterContent;
+		public const SpaceDistribution DistributeExtraSpaceVertical = UIForia.Layout.SpaceDistribution.AfterContent;
 		public const float RadialLayoutStartAngle = 0f;
 		public const float RadialLayoutEndAngle = 360f;
 		public static readonly UIFixedLength RadialLayoutRadius = new UIFixedLength(0.5f, UIFixedUnit.Percent);
-		public const float StackLayoutAlignHorizontal = 0f;
-		public const float StackLayoutAlignVertical = 0f;
 		public const AlignmentDirection AlignmentDirectionX = UIForia.Layout.AlignmentDirection.Start;
 		public const AlignmentDirection AlignmentDirectionY = UIForia.Layout.AlignmentDirection.Start;
 		public const AlignmentBehavior AlignmentBehaviorX = UIForia.Layout.AlignmentBehavior.Default;
@@ -92,7 +90,6 @@ namespace UIForia.Rendering {
 		public static readonly UIFixedLength MarginRight = new UIFixedLength(0f, UIFixedUnit.Pixel);
 		public static readonly UIFixedLength MarginBottom = new UIFixedLength(0f, UIFixedUnit.Pixel);
 		public static readonly UIFixedLength MarginLeft = new UIFixedLength(0f, UIFixedUnit.Pixel);
-		public static readonly Color BorderColor = new Color(-1f, -1f, -1f, -1f);
 		public static readonly UIFixedLength BorderTop = new UIFixedLength(0f, UIFixedUnit.Pixel);
 		public static readonly UIFixedLength BorderRight = new UIFixedLength(0f, UIFixedUnit.Pixel);
 		public static readonly UIFixedLength BorderBottom = new UIFixedLength(0f, UIFixedUnit.Pixel);
@@ -145,9 +142,6 @@ namespace UIForia.Rendering {
 		public const int RenderLayerOffset = 0;
 		public const RenderLayer RenderLayer = UIForia.Rendering.RenderLayer.Default;
 		public const int Layer = 0;
-		public static readonly string Scrollbar = "";
-		public static readonly UIMeasurement ScrollbarSize = new UIMeasurement(15f, UIMeasurementUnit.Pixel);
-		public static readonly Color ScrollbarColor = new Color(0f, 0f, 0f, 1f);
 		public static readonly Color ShadowColor = new Color(-1f, -1f, -1f, -1f);
 		public static readonly Color ShadowTint = new Color(-1f, -1f, -1f, -1f);
 		public static readonly OffsetMeasurement ShadowOffsetX = new OffsetMeasurement(0f, OffsetMeasurementUnit.Pixel);
@@ -222,7 +216,7 @@ namespace UIForia.Rendering {
 				case StylePropertyId.FlexLayoutWrap:
 					 return new StyleProperty(StylePropertyId.FlexLayoutWrap, (int)UIForia.Layout.LayoutWrap.None);
 				case StylePropertyId.FlexLayoutMainAxisAlignment:
-					 return new StyleProperty(StylePropertyId.FlexLayoutMainAxisAlignment, (int)UIForia.Layout.MainAxisAlignment.Start);
+					 return new StyleProperty(StylePropertyId.FlexLayoutMainAxisAlignment, (int)UIForia.Layout.SpaceDistribution.BeforeContent);
 				case StylePropertyId.FlexLayoutCrossAxisAlignment:
 					 return new StyleProperty(StylePropertyId.FlexLayoutCrossAxisAlignment, (int)UIForia.Layout.CrossAxisAlignment.Start);
 				case StylePropertyId.GridItemX:
@@ -261,10 +255,10 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.FitItemsVertical, (int)UIForia.Layout.LayoutFit.Unset);
 				case StylePropertyId.FitItemsHorizontal:
 					 return new StyleProperty(StylePropertyId.FitItemsHorizontal, (int)UIForia.Layout.LayoutFit.Unset);
-				case StylePropertyId.AlignContentHorizontal:
-					 return new StyleProperty(StylePropertyId.AlignContentHorizontal, (int)UIForia.Layout.MainAxisAlignment.Start);
-				case StylePropertyId.AlignContentVertical:
-					 return new StyleProperty(StylePropertyId.AlignContentVertical, (int)UIForia.Layout.MainAxisAlignment.Start);
+				case StylePropertyId.DistributeExtraSpaceHorizontal:
+					 return new StyleProperty(StylePropertyId.DistributeExtraSpaceHorizontal, (int)UIForia.Layout.SpaceDistribution.AfterContent);
+				case StylePropertyId.DistributeExtraSpaceVertical:
+					 return new StyleProperty(StylePropertyId.DistributeExtraSpaceVertical, (int)UIForia.Layout.SpaceDistribution.AfterContent);
 				case StylePropertyId.RadialLayoutStartAngle:
 					 return new StyleProperty(StylePropertyId.RadialLayoutStartAngle, 0f);
 				case StylePropertyId.RadialLayoutEndAngle:

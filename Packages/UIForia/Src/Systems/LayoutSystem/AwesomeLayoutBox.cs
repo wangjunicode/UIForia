@@ -134,6 +134,7 @@ namespace UIForia.Systems {
 
                 case LayoutFit.Fill:
                     newWidth = availableSize;
+                    alignedPosition = localX;
                     break;
             }
 
@@ -538,6 +539,39 @@ namespace UIForia.Systems {
 
             // layoutHistory.Add(new WidthLayout(LayoutReason.));
         }
+
+        public void MarkContentParentsHorizontalDirty(int frameId,LayoutReason reason) {
+            AwesomeLayoutBox ptr = parent;
+
+            while (ptr != null) {
+                // once we hit a block provider we can safely stop traversing since the provider doesn't care about content size changing
+                if ((ptr.flags & AwesomeLayoutBoxFlags.WidthBlockProvider) != 0) {
+                    break;
+                }
+
+                // can't break out if already flagged for layout because parent of parent might not be and might be content sized
+                ptr.flags |= AwesomeLayoutBoxFlags.RequireLayoutHorizontal;
+                ptr.element.layoutHistory.AddLogEntry(LayoutDirection.Horizontal, frameId, reason);
+                ptr = ptr.parent;
+            }
+        }
+
+          public void MarkContentParentsVerticalDirty(int frameId,LayoutReason reason) {
+            AwesomeLayoutBox ptr = parent;
+
+            while (ptr != null) {
+                // once we hit a block provider we can safely stop traversing since the provider doesn't care about content size changing
+                if ((ptr.flags & AwesomeLayoutBoxFlags.HeightBlockProvider) != 0) {
+                    break;
+                }
+
+                // can't break out if already flagged for layout because parent of parent might not be and might be content sized
+                ptr.flags |= AwesomeLayoutBoxFlags.RequireLayoutVertical;
+                ptr.element.layoutHistory.AddLogEntry(LayoutDirection.Vertical, frameId, reason);
+                ptr = ptr.parent;
+            }
+        }
+
 
         public struct LayoutSize {
 

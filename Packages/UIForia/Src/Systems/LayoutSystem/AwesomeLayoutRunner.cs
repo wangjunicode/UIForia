@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using SVGX;
 using UIForia.Elements;
@@ -20,7 +21,8 @@ namespace UIForia.Systems {
         internal LightList<UIElement> transformList;
         internal LightList<AwesomeLayoutBox> ignoredList;
         internal LightStack<AwesomeLayoutBox> layoutStack;
-
+        internal LightList<UIElement> enabledElements;
+        
         public AwesomeLayoutRunner(UIElement rootElement) {
             this.rootElement = rootElement;
             this.rootElement.awesomeLayoutBox = new AwesomeRootLayoutBox();
@@ -31,6 +33,7 @@ namespace UIForia.Systems {
             this.alignVerticalList = new LightList<UIElement>();
             this.transformList = new LightList<UIElement>();
             this.layoutStack = new LightStack<AwesomeLayoutBox>();
+            this.enabledElements = new LightList<UIElement>(32);
         }
 
         public void RunLayout() {
@@ -48,7 +51,8 @@ namespace UIForia.Systems {
 
         public void GatherLayoutData() {
             hierarchyRebuildList.Clear();
-
+            enabledElements.Clear();
+            
             if (rootElement.isDisabled) return;
 
             LightStack<UIElement> stack = LightStack<UIElement>.Get();
@@ -80,6 +84,8 @@ namespace UIForia.Systems {
                     currentElement.flags = flags; // might have changed above
                     continue;
                 }
+                
+                enabledElements.Add(currentElement);
 
                 if ((flags & UIElementFlags.LayoutFlags) != 0) {
                     
@@ -542,8 +548,8 @@ namespace UIForia.Systems {
 
                 elementBox.flags |= (AwesomeLayoutBoxFlags.RequireLayoutHorizontal | AwesomeLayoutBoxFlags.RequireLayoutVertical);
 
-                MarkContentParentsHorizontalDirty(element);
-                MarkContentParentsVerticalDirty(element);
+                element.awesomeLayoutBox.MarkContentParentsHorizontalDirty(frameId, LayoutReason.DescendentStyleSizeChanged);
+                element.awesomeLayoutBox.MarkContentParentsVerticalDirty(frameId, LayoutReason.DescendentStyleSizeChanged);
 
                 elementBox.SetChildren(childList);
                 element.flags &= ~UIElementFlags.LayoutHierarchyDirty;
@@ -551,6 +557,46 @@ namespace UIForia.Systems {
             }
 
             LightList<AwesomeLayoutBox>.Release(ref childList);
+        }
+
+        // this is a really good candidate for doing in parallel with rendering since this data is not required while rendering
+        public void QueryPoint(Vector2 point, IList<UIElement> retn) {
+            for (int i = 0; i < enabledElements.size; i++) {
+                UIElement element = enabledElements.array[i];
+                
+                // if offscreen or clipped or invisible continue
+                // how do i know if the thing is clipped or not?
+                // only real way is via render + read back, but thats nasty
+                // cant use the render box result can I?
+                // divide into large and small?
+                // if area is big then just check it
+                // if area is small partition it into buckets?
+                
+                // first step might be to find all elements who's aabb contains or overlaps point
+                // then figure out which of those elements real geometry contains the point via polygon check
+                // then figure out which of those elements are culled, remove those
+                
+                // traverse from the root
+                
+                // if element is culled and is clipper continue
+                
+                
+                // when we encounter a clipper push it on our stack
+                
+                // visit children
+                
+                // pop clipper if needed
+                
+                if (element.layoutResult.matrix.IsTranslationOnly) {
+                    
+                }
+                else {
+                    
+                }
+                
+                // if transform, alignment, or position changed, traverse and children dirty (will need to re-bucket these) 
+                
+            }
         }
 
     }

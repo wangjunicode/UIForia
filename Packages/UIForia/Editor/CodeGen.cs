@@ -68,7 +68,7 @@ namespace UIForia.Editor {
             // Flex Layout
             new PropertyGenerator<LayoutDirection>(StylePropertyId.FlexLayoutDirection, LayoutDirection.Vertical),
             new PropertyGenerator<LayoutWrap>(StylePropertyId.FlexLayoutWrap, LayoutWrap.None),
-            new PropertyGenerator<MainAxisAlignment>(StylePropertyId.FlexLayoutMainAxisAlignment, MainAxisAlignment.Start),
+            new PropertyGenerator<SpaceDistribution>(StylePropertyId.FlexLayoutMainAxisAlignment, SpaceDistribution.BeforeContent),
             new PropertyGenerator<CrossAxisAlignment>(StylePropertyId.FlexLayoutCrossAxisAlignment, CrossAxisAlignment.Start),
 
             // Grid Item
@@ -94,8 +94,8 @@ namespace UIForia.Editor {
             new PropertyGenerator<float>(StylePropertyId.AlignItemsVertical, 0),
             new PropertyGenerator<LayoutFit>(StylePropertyId.FitItemsVertical, 0),
             new PropertyGenerator<LayoutFit>(StylePropertyId.FitItemsHorizontal, 0),
-            new PropertyGenerator<MainAxisAlignment>(StylePropertyId.AlignContentHorizontal, MainAxisAlignment.Start),
-            new PropertyGenerator<MainAxisAlignment>(StylePropertyId.AlignContentVertical, MainAxisAlignment.Start),
+            new PropertyGenerator<SpaceDistribution>(StylePropertyId.DistributeExtraSpaceHorizontal, SpaceDistribution.AfterContent),
+            new PropertyGenerator<SpaceDistribution>(StylePropertyId.DistributeExtraSpaceVertical, SpaceDistribution.AfterContent),
 
             // Radial Layout
             new AnimatedPropertyGenerator<float>(StylePropertyId.RadialLayoutStartAngle, 0f),

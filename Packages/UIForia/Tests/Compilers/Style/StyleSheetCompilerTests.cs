@@ -673,13 +673,13 @@ style myStyle {
         Assert.AreEqual(1, styleGroup.Length);
 
         Assert.AreEqual(CrossAxisAlignment.Stretch, styleGroup[0].groups[0].normal.style.FlexLayoutCrossAxisAlignment);
-        Assert.AreEqual(MainAxisAlignment.SpaceAround, styleGroup[0].groups[0].normal.style.FlexLayoutMainAxisAlignment);
+        Assert.AreEqual(SpaceDistribution.AroundContent, styleGroup[0].groups[0].normal.style.FlexLayoutSpaceDistribution);
     }
 
     [Test]
     public void CompileFlexProperties() {
         var nodes = StyleParser.Parse(@"
-export const wrap = WrapReverse;
+export const wrap = WrapHorizontal;
 export const grow = 1;
 
 style myStyle {
@@ -696,7 +696,6 @@ style myStyle {
 
         Assert.AreEqual(1, styleGroup[0].groups[0].normal.style.FlexItemGrow);
         Assert.AreEqual(0, styleGroup[0].groups[0].normal.style.FlexItemShrink);
-        Assert.AreEqual(LayoutWrap.WrapReverse, styleGroup[0].groups[0].normal.style.FlexLayoutWrap);
     }
 
     [Test]

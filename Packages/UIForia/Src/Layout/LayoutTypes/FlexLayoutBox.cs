@@ -12,7 +12,7 @@ namespace UIForia.Layout.LayoutTypes {
 
         public OffsetRect padding;
         public OffsetRect border;
-        public MainAxisAlignment mainAxisAlignment;
+        public SpaceDistribution spaceDistribution;
         public CrossAxisAlignment crossAxisAlignment;
 
         public struct Item {
@@ -57,7 +57,7 @@ namespace UIForia.Layout.LayoutTypes {
             items.Clear();
             items.EnsureCapacity(children.Count);
             this.crossAxisAlignment = style.FlexLayoutCrossAxisAlignment;
-            this.mainAxisAlignment = style.FlexLayoutMainAxisAlignment;
+            this.spaceDistribution = style.FlexLayoutSpaceDistribution;
             Item[] itemList = items.Array;
             for (int i = 0; i < children.Count; i++) {
                 LayoutBox child = children[i];
@@ -80,7 +80,7 @@ namespace UIForia.Layout.LayoutTypes {
                     case StylePropertyId.FlexLayoutCrossAxisAlignment:
                     case StylePropertyId.FlexLayoutMainAxisAlignment:
                         crossAxisAlignment = style.FlexLayoutCrossAxisAlignment;
-                        mainAxisAlignment = style.FlexLayoutMainAxisAlignment;
+                        spaceDistribution = style.FlexLayoutSpaceDistribution;
                         Item[] itemList = items.Array;
                         for (int i = 0; i < children.Count; i++) {
                             CrossAxisAlignment childCrossAlignment = default; //children[i].style.FlexItemSelfAlignment;
@@ -364,18 +364,18 @@ namespace UIForia.Layout.LayoutTypes {
             float offset = 0;
 
             if (track.remainingSpace > 0) {
-                switch (mainAxisAlignment) {
-                    case MainAxisAlignment.Unset:
-                    case MainAxisAlignment.Start:
+                switch (spaceDistribution) {
+                    case SpaceDistribution.Unset:
+                    case SpaceDistribution.BeforeContent:
                         break;
-                    case MainAxisAlignment.Center:
+                    case SpaceDistribution.CenterContent:
                         mainAxisOffset *= 0.5f;
                         offset = mainAxisOffset + track.remainingSpace * 0.5f;
                         break;
-                    case MainAxisAlignment.End:
+                    case SpaceDistribution.AfterContent:
                         offset = track.remainingSpace;
                         break;
-                    case MainAxisAlignment.SpaceBetween: {
+                    case SpaceDistribution.BetweenContent: {
                         if (itemCount == 1) {
                             offset = track.remainingSpace * 0.5f;
                             break;
@@ -386,7 +386,7 @@ namespace UIForia.Layout.LayoutTypes {
                         break;
                     }
 
-                    case MainAxisAlignment.SpaceAround: {
+                    case SpaceDistribution.AroundContent: {
                         if (itemCount == 1) {
                             offset = track.remainingSpace * 0.5f;
                             break;
@@ -398,7 +398,7 @@ namespace UIForia.Layout.LayoutTypes {
                     }
 
                     default:
-                        throw new ArgumentOutOfRangeException(nameof(mainAxisAlignment), mainAxisAlignment, null);
+                        throw new ArgumentOutOfRangeException(nameof(spaceDistribution), spaceDistribution, null);
                 }
             }
 

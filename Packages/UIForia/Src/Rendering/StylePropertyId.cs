@@ -162,8 +162,8 @@ namespace UIForia.Rendering {
         AlignItemsVertical = 7002,
         FitItemsHorizontal = 7003,
         FitItemsVertical = 7004,
-        AlignContentVertical = 7005,
-        AlignContentHorizontal = 7006,
+        DistributeExtraSpaceVertical = 7005,
+        DistributeExtraSpaceHorizontal = 7006,
 
     }
 

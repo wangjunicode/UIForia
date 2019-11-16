@@ -145,8 +145,18 @@ namespace UIForia.Compilers.Style {
                 {"alignitemshorizontal", (targetStyle, property, context) => targetStyle.AlignItemsHorizontal = MapItemAlignment(property.children[0], context)},
                 {"alignitemsvertical", (targetStyle, property, context) => targetStyle.AlignItemsVertical = MapItemAlignment(property.children[0], context)},
                 
-                {"aligncontenthorizontal", (targetStyle, property, context) => targetStyle.AlignContentHorizontal = MapEnum<MainAxisAlignment>(property.children[0], context)},
-                {"aligncontentvertical", (targetStyle, property, context) => targetStyle.AlignContentVertical = MapEnum<MainAxisAlignment>(property.children[0], context)},
+                {"distributeextraspacehorizontal", (targetStyle, property, context) => targetStyle.DistributeExtraSpaceHorizontal = MapEnum<SpaceDistribution>(property.children[0], context)},
+                {"distributeextraspacevertical", (targetStyle, property, context) => targetStyle.DistributeExtraSpaceVertical = MapEnum<SpaceDistribution>(property.children[0], context)},
+                {"distributeextraspace", (targetStyle, property, context) => {
+                    if (property.children.size == 1) {
+                        targetStyle.DistributeExtraSpaceHorizontal = MapEnum<SpaceDistribution>(property.children[0], context);
+                        targetStyle.DistributeExtraSpaceVertical = MapEnum<SpaceDistribution>(property.children[0], context);
+                    }
+                    else if (property.children.size == 2) {
+                        targetStyle.DistributeExtraSpaceHorizontal = MapEnum<SpaceDistribution>(property.children[0], context);
+                        targetStyle.DistributeExtraSpaceVertical = MapEnum<SpaceDistribution>(property.children[1], context);
+                    }
+                }},
                 
                 {"alignitems", (targetStyle, property, context) => {
                     if (property.children.size == 1) {
@@ -166,7 +176,7 @@ namespace UIForia.Compilers.Style {
                 {"flexitemshrink", (targetStyle, property, context) => targetStyle.FlexItemShrink = (int) MapNumber(property.children[0], context)},
                 {"flexlayoutwrap", (targetStyle, property, context) => targetStyle.FlexLayoutWrap = MapEnum<LayoutWrap>(property.children[0], context)},
                 {"flexlayoutdirection", (targetStyle, property, context) => targetStyle.FlexLayoutDirection = MapEnum<LayoutDirection>(property.children[0], context)},
-                {"flexlayoutmainaxisalignment", (targetStyle, property, context) => targetStyle.FlexLayoutMainAxisAlignment = MapEnum<MainAxisAlignment>(property.children[0], context)},
+                {"flexlayoutmainaxisalignment", (targetStyle, property, context) => targetStyle.FlexLayoutSpaceDistribution = MapEnum<SpaceDistribution>(property.children[0], context)},
                 {"flexlayoutcrossaxisalignment", (targetStyle, property, context) => targetStyle.FlexLayoutCrossAxisAlignment = MapEnum<CrossAxisAlignment>(property.children[0], context)},
 
                 {"radiallayoutstartangle", (targetStyle, property, context) => targetStyle.RadialLayoutStartAngle = MapNumber(property.children[0], context)},

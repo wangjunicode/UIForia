@@ -3,10 +3,8 @@ namespace UIForia.Layout {
     public enum LayoutWrap {
 
         Unset = 0,
-        None = 1,
-        Wrap = 2,
-        Reverse = 3,
-        WrapReverse = 4
+        None = 0,
+        WrapHorizontal = 1,
 
     }
 

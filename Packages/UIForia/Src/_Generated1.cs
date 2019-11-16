@@ -222,9 +222,9 @@ namespace UIForia.Rendering {
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.FlexLayoutWrap, (int)value), state); }
         }
         
-        public UIForia.Layout.MainAxisAlignment FlexLayoutMainAxisAlignment {
+        public UIForia.Layout.SpaceDistribution FlexLayoutSpaceDistribution {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.FlexLayoutMainAxisAlignment, state).AsMainAxisAlignment; }
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.FlexLayoutMainAxisAlignment, state).AsSpaceDistribution; }
             [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.FlexLayoutMainAxisAlignment, (int)value), state); }
         }
@@ -362,18 +362,18 @@ namespace UIForia.Rendering {
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.FitItemsHorizontal, (int)value), state); }
         }
         
-        public UIForia.Layout.MainAxisAlignment AlignContentHorizontal {
+        public UIForia.Layout.SpaceDistribution DistributeExtraSpaceHorizontal {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.AlignContentHorizontal, state).AsMainAxisAlignment; }
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.DistributeExtraSpaceHorizontal, state).AsSpaceDistribution; }
             [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.AlignContentHorizontal, (int)value), state); }
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.DistributeExtraSpaceHorizontal, (int)value), state); }
         }
         
-        public UIForia.Layout.MainAxisAlignment AlignContentVertical {
+        public UIForia.Layout.SpaceDistribution DistributeExtraSpaceVertical {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.AlignContentVertical, state).AsMainAxisAlignment; }
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.DistributeExtraSpaceVertical, state).AsSpaceDistribution; }
             [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.AlignContentVertical, (int)value), state); }
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.DistributeExtraSpaceVertical, (int)value), state); }
         }
         
         public float RadialLayoutStartAngle {
@@ -1179,9 +1179,9 @@ namespace UIForia.Rendering {
             set { SetProperty(new StyleProperty(StylePropertyId.FlexLayoutWrap, (int)value)); }
         }
             
-        public UIForia.Layout.MainAxisAlignment FlexLayoutMainAxisAlignment {
+        public UIForia.Layout.SpaceDistribution FlexLayoutSpaceDistribution {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return (UIForia.Layout.MainAxisAlignment)FindEnumProperty(StylePropertyId.FlexLayoutMainAxisAlignment); }
+            get { return (UIForia.Layout.SpaceDistribution)FindEnumProperty(StylePropertyId.FlexLayoutMainAxisAlignment); }
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.FlexLayoutMainAxisAlignment, (int)value)); }
         }
@@ -1319,18 +1319,18 @@ namespace UIForia.Rendering {
             set { SetProperty(new StyleProperty(StylePropertyId.FitItemsHorizontal, (int)value)); }
         }
             
-        public UIForia.Layout.MainAxisAlignment AlignContentHorizontal {
+        public UIForia.Layout.SpaceDistribution DistributeExtraSpaceHorizontal {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return (UIForia.Layout.MainAxisAlignment)FindEnumProperty(StylePropertyId.AlignContentHorizontal); }
+            get { return (UIForia.Layout.SpaceDistribution)FindEnumProperty(StylePropertyId.DistributeExtraSpaceHorizontal); }
             [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.AlignContentHorizontal, (int)value)); }
+            set { SetProperty(new StyleProperty(StylePropertyId.DistributeExtraSpaceHorizontal, (int)value)); }
         }
             
-        public UIForia.Layout.MainAxisAlignment AlignContentVertical {
+        public UIForia.Layout.SpaceDistribution DistributeExtraSpaceVertical {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return (UIForia.Layout.MainAxisAlignment)FindEnumProperty(StylePropertyId.AlignContentVertical); }
+            get { return (UIForia.Layout.SpaceDistribution)FindEnumProperty(StylePropertyId.DistributeExtraSpaceVertical); }
             [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.AlignContentVertical, (int)value)); }
+            set { SetProperty(new StyleProperty(StylePropertyId.DistributeExtraSpaceVertical, (int)value)); }
         }
             
         public float RadialLayoutStartAngle {
@@ -1353,7 +1353,7 @@ namespace UIForia.Rendering {
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.RadialLayoutRadius, value)); }
         }
-
+            
         public UIForia.Layout.AlignmentDirection AlignmentDirectionX {
             [System.Diagnostics.DebuggerStepThrough]
             get { return (UIForia.Layout.AlignmentDirection)FindEnumProperty(StylePropertyId.AlignmentDirectionX); }
@@ -1857,7 +1857,7 @@ namespace UIForia.Rendering {
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.Layer, value)); }
         }
-        
+            
         public UnityEngine.Color ShadowColor {
             [System.Diagnostics.DebuggerStepThrough]
             get { return FindColorProperty(StylePropertyId.ShadowColor); }
@@ -2204,11 +2204,11 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UIForia.Layout.MainAxisAlignment FlexLayoutMainAxisAlignment { 
+            public UIForia.Layout.SpaceDistribution FlexLayoutSpaceDistribution { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.FlexLayoutMainAxisAlignment, out property)) return property.AsMainAxisAlignment;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.FlexLayoutMainAxisAlignment, out property)) return property.AsSpaceDistribution;
                     return DefaultStyleValues_Generated.FlexLayoutMainAxisAlignment;
                 }
             }
@@ -2384,21 +2384,21 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UIForia.Layout.MainAxisAlignment AlignContentHorizontal { 
+            public UIForia.Layout.SpaceDistribution DistributeExtraSpaceHorizontal { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.AlignContentHorizontal, out property)) return property.AsMainAxisAlignment;
-                    return DefaultStyleValues_Generated.AlignContentHorizontal;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.DistributeExtraSpaceHorizontal, out property)) return property.AsSpaceDistribution;
+                    return DefaultStyleValues_Generated.DistributeExtraSpaceHorizontal;
                 }
             }
 
-            public UIForia.Layout.MainAxisAlignment AlignContentVertical { 
+            public UIForia.Layout.SpaceDistribution DistributeExtraSpaceVertical { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.AlignContentVertical, out property)) return property.AsMainAxisAlignment;
-                    return DefaultStyleValues_Generated.AlignContentVertical;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.DistributeExtraSpaceVertical, out property)) return property.AsSpaceDistribution;
+                    return DefaultStyleValues_Generated.DistributeExtraSpaceVertical;
                 }
             }
 
@@ -2428,8 +2428,6 @@ namespace UIForia.Rendering {
                     return DefaultStyleValues_Generated.RadialLayoutRadius;
                 }
             }
-
-        
 
             public UIForia.Layout.AlignmentDirection AlignmentDirectionX { 
                 [System.Diagnostics.DebuggerStepThrough]
@@ -3105,7 +3103,7 @@ namespace UIForia.Rendering {
                     return DefaultStyleValues_Generated.Layer;
                 }
             }
-        
+
             public UnityEngine.Color ShadowColor { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
@@ -3427,12 +3425,12 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.FlexLayoutWrap, state).AsLayoutWrap;
         }
         
-        public void SetFlexLayoutMainAxisAlignment(in UIForia.Layout.MainAxisAlignment? value, StyleState state) {
+        public void SetFlexLayoutMainAxisAlignment(in UIForia.Layout.SpaceDistribution? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.FlexLayoutMainAxisAlignment, (int)value), state);
         }
 
-        public UIForia.Layout.MainAxisAlignment GetFlexLayoutMainAxisAlignment(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.FlexLayoutMainAxisAlignment, state).AsMainAxisAlignment;
+        public UIForia.Layout.SpaceDistribution GetFlexLayoutMainAxisAlignment(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.FlexLayoutMainAxisAlignment, state).AsSpaceDistribution;
         }
         
         public void SetFlexLayoutCrossAxisAlignment(in UIForia.Layout.CrossAxisAlignment? value, StyleState state) {
@@ -3587,20 +3585,20 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.FitItemsHorizontal, state).AsLayoutFit;
         }
         
-        public void SetAlignContentHorizontal(in UIForia.Layout.MainAxisAlignment? value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.AlignContentHorizontal, (int)value), state);
+        public void SetDistributeExtraSpaceHorizontal(in UIForia.Layout.SpaceDistribution? value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.DistributeExtraSpaceHorizontal, (int)value), state);
         }
 
-        public UIForia.Layout.MainAxisAlignment GetAlignContentHorizontal(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.AlignContentHorizontal, state).AsMainAxisAlignment;
+        public UIForia.Layout.SpaceDistribution GetDistributeExtraSpaceHorizontal(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.DistributeExtraSpaceHorizontal, state).AsSpaceDistribution;
         }
         
-        public void SetAlignContentVertical(in UIForia.Layout.MainAxisAlignment? value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.AlignContentVertical, (int)value), state);
+        public void SetDistributeExtraSpaceVertical(in UIForia.Layout.SpaceDistribution? value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.DistributeExtraSpaceVertical, (int)value), state);
         }
 
-        public UIForia.Layout.MainAxisAlignment GetAlignContentVertical(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.AlignContentVertical, state).AsMainAxisAlignment;
+        public UIForia.Layout.SpaceDistribution GetDistributeExtraSpaceVertical(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.DistributeExtraSpaceVertical, state).AsSpaceDistribution;
         }
         
         public void SetRadialLayoutStartAngle(in float? value, StyleState state) {
@@ -3626,7 +3624,7 @@ namespace UIForia.Rendering {
         public UIForia.UIFixedLength GetRadialLayoutRadius(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.RadialLayoutRadius, state).AsUIFixedLength;
         }
-
+        
         public void SetAlignmentDirectionX(in UIForia.Layout.AlignmentDirection? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.AlignmentDirectionX, (int)value), state);
         }
@@ -4202,7 +4200,7 @@ namespace UIForia.Rendering {
         public int GetLayer(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.Layer, state).AsInt;
         }
-
+        
         public void SetShadowColor(in UnityEngine.Color? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.ShadowColor, value), state);
         }
@@ -4333,7 +4331,7 @@ namespace UIForia.Rendering {
 				case StylePropertyId.FlexLayoutWrap:
 					 return new StyleProperty(StylePropertyId.FlexLayoutWrap, (int)FlexLayoutWrap);
 				case StylePropertyId.FlexLayoutMainAxisAlignment:
-					 return new StyleProperty(StylePropertyId.FlexLayoutMainAxisAlignment, (int)FlexLayoutMainAxisAlignment);
+					 return new StyleProperty(StylePropertyId.FlexLayoutMainAxisAlignment, (int)FlexLayoutSpaceDistribution);
 				case StylePropertyId.FlexLayoutCrossAxisAlignment:
 					 return new StyleProperty(StylePropertyId.FlexLayoutCrossAxisAlignment, (int)FlexLayoutCrossAxisAlignment);
 				case StylePropertyId.GridItemX:
@@ -4372,10 +4370,10 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.FitItemsVertical, (int)FitItemsVertical);
 				case StylePropertyId.FitItemsHorizontal:
 					 return new StyleProperty(StylePropertyId.FitItemsHorizontal, (int)FitItemsHorizontal);
-				case StylePropertyId.AlignContentHorizontal:
-					 return new StyleProperty(StylePropertyId.AlignContentHorizontal, (int)AlignContentHorizontal);
-				case StylePropertyId.AlignContentVertical:
-					 return new StyleProperty(StylePropertyId.AlignContentVertical, (int)AlignContentVertical);
+				case StylePropertyId.DistributeExtraSpaceHorizontal:
+					 return new StyleProperty(StylePropertyId.DistributeExtraSpaceHorizontal, (int)DistributeExtraSpaceHorizontal);
+				case StylePropertyId.DistributeExtraSpaceVertical:
+					 return new StyleProperty(StylePropertyId.DistributeExtraSpaceVertical, (int)DistributeExtraSpaceVertical);
 				case StylePropertyId.RadialLayoutStartAngle:
 					 return new StyleProperty(StylePropertyId.RadialLayoutStartAngle, RadialLayoutStartAngle);
 				case StylePropertyId.RadialLayoutEndAngle:

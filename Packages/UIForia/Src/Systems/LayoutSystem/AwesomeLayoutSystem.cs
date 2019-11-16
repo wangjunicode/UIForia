@@ -155,6 +155,11 @@ namespace UIForia.Systems {
         public void OnElementCreated(UIElement element) { }
 
         public IList<UIElement> QueryPoint(Vector2 point, IList<UIElement> retn) {
+            
+            for (int i = 0; i < runners.size; i++) {
+                runners[i].QueryPoint(point, retn);
+            }
+            
             return retn;
         }
 

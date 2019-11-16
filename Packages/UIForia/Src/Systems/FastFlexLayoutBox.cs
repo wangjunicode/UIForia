@@ -11,13 +11,13 @@ namespace UIForia.Systems {
 
         private StructList<Item> itemList;
         private LayoutDirection direction;
-        private MainAxisAlignment mainAxisAlignment;
+        private SpaceDistribution spaceDistribution;
         private CrossAxisAlignment crossAxisAlignment;
 
         public override void UpdateStyleData() {
             base.UpdateStyleData();
             direction = element.style.FlexLayoutDirection;
-            mainAxisAlignment = element.style.FlexLayoutMainAxisAlignment;
+            spaceDistribution = element.style.FlexLayoutSpaceDistribution;
             crossAxisAlignment = element.style.FlexLayoutCrossAxisAlignment;
         }
 
@@ -280,7 +280,7 @@ namespace UIForia.Systems {
 
             Size retn = default;
 
-            bool applyWrapping = element.style.FlexLayoutWrap == LayoutWrap.Wrap;
+            bool applyWrapping = element.style.FlexLayoutWrap == LayoutWrap.WrapHorizontal;
             float contentAreaWidth = size.width - paddingBox.left - paddingBox.right - borderBox.left - borderBox.right;
             float largestTrackWidth = 0;
 
@@ -456,15 +456,15 @@ namespace UIForia.Systems {
 
                 float horizontalAlignment = 0;
 
-                switch (mainAxisAlignment) {
-                    case MainAxisAlignment.Unset:
-                    case MainAxisAlignment.Start:
+                switch (spaceDistribution) {
+                    case SpaceDistribution.Unset:
+                    case SpaceDistribution.BeforeContent:
                         horizontalAlignment = 0f;
                         break;
-                    case MainAxisAlignment.Center:
+                    case SpaceDistribution.CenterContent:
                         horizontalAlignment = 0.5f;
                         break;
-                    case MainAxisAlignment.End:
+                    case SpaceDistribution.AfterContent:
                         horizontalAlignment = 1f;
                         break;
                 }
@@ -518,21 +518,21 @@ namespace UIForia.Systems {
             float offset = 0;
 
             if (track.remainingSpace > 0) {
-                switch (mainAxisAlignment) {
-                    case MainAxisAlignment.Unset:
-                    case MainAxisAlignment.Start:
+                switch (spaceDistribution) {
+                    case SpaceDistribution.Unset:
+                    case SpaceDistribution.BeforeContent:
                         break;
 
-                    case MainAxisAlignment.Center:
+                    case SpaceDistribution.CenterContent:
                         mainAxisOffset *= 0.5f;
                         offset = mainAxisOffset + track.remainingSpace * 0.5f;
                         break;
 
-                    case MainAxisAlignment.End:
+                    case SpaceDistribution.AfterContent:
                         offset = track.remainingSpace;
                         break;
 
-                    case MainAxisAlignment.SpaceBetween: {
+                    case SpaceDistribution.BetweenContent: {
                         if (itemCount == 1) {
                             offset = track.remainingSpace * 0.5f;
                             break;
@@ -543,7 +543,7 @@ namespace UIForia.Systems {
                         break;
                     }
 
-                    case MainAxisAlignment.SpaceAround: {
+                    case SpaceDistribution.AroundContent: {
                         if (itemCount == 1) {
                             offset = track.remainingSpace * 0.5f;
                             break;
@@ -569,21 +569,21 @@ namespace UIForia.Systems {
             float offset = 0;
 
             if (track.remainingSpace > 0) {
-                switch (mainAxisAlignment) {
-                    case MainAxisAlignment.Unset:
-                    case MainAxisAlignment.Start:
+                switch (spaceDistribution) {
+                    case SpaceDistribution.Unset:
+                    case SpaceDistribution.BeforeContent:
                         break;
 
-                    case MainAxisAlignment.Center:
+                    case SpaceDistribution.CenterContent:
                         mainAxisOffset *= 0.5f;
                         offset = mainAxisOffset + track.remainingSpace * 0.5f;
                         break;
 
-                    case MainAxisAlignment.End:
+                    case SpaceDistribution.AfterContent:
                         offset = track.remainingSpace;
                         break;
 
-                    case MainAxisAlignment.SpaceBetween: {
+                    case SpaceDistribution.BetweenContent: {
                         if (itemCount == 1) {
                             offset = track.remainingSpace * 0.5f;
                             break;
@@ -594,7 +594,7 @@ namespace UIForia.Systems {
                         break;
                     }
 
-                    case MainAxisAlignment.SpaceAround: {
+                    case SpaceDistribution.AroundContent: {
                         if (itemCount == 1) {
                             offset = track.remainingSpace * 0.5f;
                             break;
@@ -829,7 +829,7 @@ namespace UIForia.Systems {
 
                     case StylePropertyId.FlexLayoutMainAxisAlignment:
                         changed = true;
-                        mainAxisAlignment = property.AsMainAxisAlignment;
+                        spaceDistribution = property.AsSpaceDistribution;
                         break;
 
                     case StylePropertyId.FlexLayoutCrossAxisAlignment:

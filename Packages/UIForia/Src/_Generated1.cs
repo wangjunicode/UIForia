@@ -222,20 +222,6 @@ namespace UIForia.Rendering {
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.FlexLayoutWrap, (int)value), state); }
         }
         
-        public UIForia.Layout.SpaceDistribution FlexLayoutSpaceDistribution {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.FlexLayoutMainAxisAlignment, state).AsSpaceDistribution; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.FlexLayoutMainAxisAlignment, (int)value), state); }
-        }
-        
-        public UIForia.Layout.CrossAxisAlignment FlexLayoutCrossAxisAlignment {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.FlexLayoutCrossAxisAlignment, state).AsCrossAxisAlignment; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.FlexLayoutCrossAxisAlignment, (int)value), state); }
-        }
-        
         public UIForia.Layout.LayoutTypes.GridItemPlacement GridItemX {
             [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.GridItemX, state).AsGridItemPlacement; }
@@ -1177,20 +1163,6 @@ namespace UIForia.Rendering {
             get { return (UIForia.Layout.LayoutWrap)FindEnumProperty(StylePropertyId.FlexLayoutWrap); }
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.FlexLayoutWrap, (int)value)); }
-        }
-            
-        public UIForia.Layout.SpaceDistribution FlexLayoutSpaceDistribution {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return (UIForia.Layout.SpaceDistribution)FindEnumProperty(StylePropertyId.FlexLayoutMainAxisAlignment); }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.FlexLayoutMainAxisAlignment, (int)value)); }
-        }
-            
-        public UIForia.Layout.CrossAxisAlignment FlexLayoutCrossAxisAlignment {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return (UIForia.Layout.CrossAxisAlignment)FindEnumProperty(StylePropertyId.FlexLayoutCrossAxisAlignment); }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.FlexLayoutCrossAxisAlignment, (int)value)); }
         }
             
         public UIForia.Layout.LayoutTypes.GridItemPlacement GridItemX {
@@ -2201,24 +2173,6 @@ namespace UIForia.Rendering {
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.FlexLayoutWrap, out property)) return property.AsLayoutWrap;
                     return DefaultStyleValues_Generated.FlexLayoutWrap;
-                }
-            }
-
-            public UIForia.Layout.SpaceDistribution FlexLayoutSpaceDistribution { 
-                [System.Diagnostics.DebuggerStepThrough]
-                get { 
-                    StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.FlexLayoutMainAxisAlignment, out property)) return property.AsSpaceDistribution;
-                    return DefaultStyleValues_Generated.FlexLayoutMainAxisAlignment;
-                }
-            }
-
-            public UIForia.Layout.CrossAxisAlignment FlexLayoutCrossAxisAlignment { 
-                [System.Diagnostics.DebuggerStepThrough]
-                get { 
-                    StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.FlexLayoutCrossAxisAlignment, out property)) return property.AsCrossAxisAlignment;
-                    return DefaultStyleValues_Generated.FlexLayoutCrossAxisAlignment;
                 }
             }
 
@@ -3425,22 +3379,6 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.FlexLayoutWrap, state).AsLayoutWrap;
         }
         
-        public void SetFlexLayoutMainAxisAlignment(in UIForia.Layout.SpaceDistribution? value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.FlexLayoutMainAxisAlignment, (int)value), state);
-        }
-
-        public UIForia.Layout.SpaceDistribution GetFlexLayoutMainAxisAlignment(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.FlexLayoutMainAxisAlignment, state).AsSpaceDistribution;
-        }
-        
-        public void SetFlexLayoutCrossAxisAlignment(in UIForia.Layout.CrossAxisAlignment? value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.FlexLayoutCrossAxisAlignment, (int)value), state);
-        }
-
-        public UIForia.Layout.CrossAxisAlignment GetFlexLayoutCrossAxisAlignment(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.FlexLayoutCrossAxisAlignment, state).AsCrossAxisAlignment;
-        }
-        
         public void SetGridItemX(in UIForia.Layout.LayoutTypes.GridItemPlacement? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.GridItemX, value), state);
         }
@@ -4330,10 +4268,6 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.FlexLayoutDirection, (int)FlexLayoutDirection);
 				case StylePropertyId.FlexLayoutWrap:
 					 return new StyleProperty(StylePropertyId.FlexLayoutWrap, (int)FlexLayoutWrap);
-				case StylePropertyId.FlexLayoutMainAxisAlignment:
-					 return new StyleProperty(StylePropertyId.FlexLayoutMainAxisAlignment, (int)FlexLayoutSpaceDistribution);
-				case StylePropertyId.FlexLayoutCrossAxisAlignment:
-					 return new StyleProperty(StylePropertyId.FlexLayoutCrossAxisAlignment, (int)FlexLayoutCrossAxisAlignment);
 				case StylePropertyId.GridItemX:
 					 return new StyleProperty(StylePropertyId.GridItemX, GridItemX);
 				case StylePropertyId.GridItemY:

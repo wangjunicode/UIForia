@@ -523,80 +523,6 @@ namespace UIForia.Bindings.StyleBindings {
 
     }
         
-    public class StyleBinding_MainAxisAlignment : StyleBinding {
-
-        public readonly Expression<UIForia.Layout.SpaceDistribution> expression;
-        public readonly StylePropertyId propertyId;
-        
-        public StyleBinding_MainAxisAlignment(string propertyName, StylePropertyId propertyId, StyleState state, Expression<UIForia.Layout.SpaceDistribution> expression)
-            : base(propertyName, state) {
-            this.propertyId = propertyId;
-            this.expression = expression;
-        }
-
-        public override void Execute(UIElement element, ExpressionContext context) {
-            if (!element.style.IsInState(state)) return;
-
-            var oldValue = element.style.propertyMap[(int)propertyId].AsSpaceDistribution;
-            var value = expression.Evaluate(context);
-            if (value != oldValue) {
-                element.style.SetProperty(new StyleProperty(propertyId, (int)value), state);
-            }
-        }
-
-        public override bool IsConstant() {
-            return expression.IsConstant();
-        }
-
-        public override void Apply(UIStyle style, ExpressionContext context) {
-            var value = expression.Evaluate(context);
-            style.SetProperty(new StyleProperty(propertyId, (int)value));
-        }
-
-        public override void Apply(UIStyleSet styleSet, ExpressionContext context) {
-            var value = expression.Evaluate(context);
-            styleSet.SetProperty(new StyleProperty(propertyId, (int)value), state);
-        }
-
-    }
-        
-    public class StyleBinding_CrossAxisAlignment : StyleBinding {
-
-        public readonly Expression<UIForia.Layout.CrossAxisAlignment> expression;
-        public readonly StylePropertyId propertyId;
-        
-        public StyleBinding_CrossAxisAlignment(string propertyName, StylePropertyId propertyId, StyleState state, Expression<UIForia.Layout.CrossAxisAlignment> expression)
-            : base(propertyName, state) {
-            this.propertyId = propertyId;
-            this.expression = expression;
-        }
-
-        public override void Execute(UIElement element, ExpressionContext context) {
-            if (!element.style.IsInState(state)) return;
-
-            var oldValue = element.style.propertyMap[(int)propertyId].AsCrossAxisAlignment;
-            var value = expression.Evaluate(context);
-            if (value != oldValue) {
-                element.style.SetProperty(new StyleProperty(propertyId, (int)value), state);
-            }
-        }
-
-        public override bool IsConstant() {
-            return expression.IsConstant();
-        }
-
-        public override void Apply(UIStyle style, ExpressionContext context) {
-            var value = expression.Evaluate(context);
-            style.SetProperty(new StyleProperty(propertyId, (int)value));
-        }
-
-        public override void Apply(UIStyleSet styleSet, ExpressionContext context) {
-            var value = expression.Evaluate(context);
-            styleSet.SetProperty(new StyleProperty(propertyId, (int)value), state);
-        }
-
-    }
-        
     public class StyleBinding_GridItemPlacement : StyleBinding {
 
         public readonly Expression<UIForia.Layout.LayoutTypes.GridItemPlacement> expression;
@@ -760,6 +686,43 @@ namespace UIForia.Bindings.StyleBindings {
             if (!element.style.IsInState(state)) return;
 
             var oldValue = element.style.propertyMap[(int)propertyId].AsLayoutFit;
+            var value = expression.Evaluate(context);
+            if (value != oldValue) {
+                element.style.SetProperty(new StyleProperty(propertyId, (int)value), state);
+            }
+        }
+
+        public override bool IsConstant() {
+            return expression.IsConstant();
+        }
+
+        public override void Apply(UIStyle style, ExpressionContext context) {
+            var value = expression.Evaluate(context);
+            style.SetProperty(new StyleProperty(propertyId, (int)value));
+        }
+
+        public override void Apply(UIStyleSet styleSet, ExpressionContext context) {
+            var value = expression.Evaluate(context);
+            styleSet.SetProperty(new StyleProperty(propertyId, (int)value), state);
+        }
+
+    }
+        
+    public class StyleBinding_SpaceDistribution : StyleBinding {
+
+        public readonly Expression<UIForia.Layout.SpaceDistribution> expression;
+        public readonly StylePropertyId propertyId;
+        
+        public StyleBinding_SpaceDistribution(string propertyName, StylePropertyId propertyId, StyleState state, Expression<UIForia.Layout.SpaceDistribution> expression)
+            : base(propertyName, state) {
+            this.propertyId = propertyId;
+            this.expression = expression;
+        }
+
+        public override void Execute(UIElement element, ExpressionContext context) {
+            if (!element.style.IsInState(state)) return;
+
+            var oldValue = element.style.propertyMap[(int)propertyId].AsSpaceDistribution;
             var value = expression.Evaluate(context);
             if (value != oldValue) {
                 element.style.SetProperty(new StyleProperty(propertyId, (int)value), state);
@@ -1313,11 +1276,10 @@ namespace UIForia.Compilers {
         private static readonly EnumAliasSource<UIForia.Rendering.BackgroundFit> s_EnumSource_BackgroundFit = new EnumAliasSource<UIForia.Rendering.BackgroundFit>();
         private static readonly EnumAliasSource<UIForia.Layout.LayoutDirection> s_EnumSource_LayoutDirection = new EnumAliasSource<UIForia.Layout.LayoutDirection>();
         private static readonly EnumAliasSource<UIForia.Layout.LayoutWrap> s_EnumSource_LayoutWrap = new EnumAliasSource<UIForia.Layout.LayoutWrap>();
-        private static readonly EnumAliasSource<UIForia.Layout.SpaceDistribution> s_EnumSource_MainAxisAlignment = new EnumAliasSource<UIForia.Layout.SpaceDistribution>();
-        private static readonly EnumAliasSource<UIForia.Layout.CrossAxisAlignment> s_EnumSource_CrossAxisAlignment = new EnumAliasSource<UIForia.Layout.CrossAxisAlignment>();
         private static readonly EnumAliasSource<UIForia.Layout.GridLayoutDensity> s_EnumSource_GridLayoutDensity = new EnumAliasSource<UIForia.Layout.GridLayoutDensity>();
         private static readonly EnumAliasSource<UIForia.Layout.GridAxisAlignment> s_EnumSource_GridAxisAlignment = new EnumAliasSource<UIForia.Layout.GridAxisAlignment>();
         private static readonly EnumAliasSource<UIForia.Layout.LayoutFit> s_EnumSource_LayoutFit = new EnumAliasSource<UIForia.Layout.LayoutFit>();
+        private static readonly EnumAliasSource<UIForia.Layout.SpaceDistribution> s_EnumSource_SpaceDistribution = new EnumAliasSource<UIForia.Layout.SpaceDistribution>();
         private static readonly EnumAliasSource<UIForia.Layout.AlignmentDirection> s_EnumSource_AlignmentDirection = new EnumAliasSource<UIForia.Layout.AlignmentDirection>();
         private static readonly EnumAliasSource<UIForia.Layout.AlignmentBehavior> s_EnumSource_AlignmentBehavior = new EnumAliasSource<UIForia.Layout.AlignmentBehavior>();
         private static readonly EnumAliasSource<UIForia.Text.FontStyle> s_EnumSource_FontStyle = new EnumAliasSource<UIForia.Text.FontStyle>();
@@ -1396,10 +1358,6 @@ case "visibility":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_LayoutDirection("FlexLayoutDirection", UIForia.Rendering.StylePropertyId.FlexLayoutDirection, targetState.state, Compile<UIForia.Layout.LayoutDirection>(value, s_EnumSource_LayoutDirection));                
                 case "flexlayoutwrap":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_LayoutWrap("FlexLayoutWrap", UIForia.Rendering.StylePropertyId.FlexLayoutWrap, targetState.state, Compile<UIForia.Layout.LayoutWrap>(value, s_EnumSource_LayoutWrap));                
-                case "flexlayoutmainaxisalignment":
-                    return new UIForia.Bindings.StyleBindings.StyleBinding_MainAxisAlignment("FlexLayoutMainAxisAlignment", UIForia.Rendering.StylePropertyId.FlexLayoutMainAxisAlignment, targetState.state, Compile<UIForia.Layout.SpaceDistribution>(value, s_EnumSource_MainAxisAlignment));                
-                case "flexlayoutcrossaxisalignment":
-                    return new UIForia.Bindings.StyleBindings.StyleBinding_CrossAxisAlignment("FlexLayoutCrossAxisAlignment", UIForia.Rendering.StylePropertyId.FlexLayoutCrossAxisAlignment, targetState.state, Compile<UIForia.Layout.CrossAxisAlignment>(value, s_EnumSource_CrossAxisAlignment));                
                 case "griditemx":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_GridItemPlacement("GridItemX", UIForia.Rendering.StylePropertyId.GridItemX, targetState.state, Compile<UIForia.Layout.LayoutTypes.GridItemPlacement>(value, null));                
                 case "griditemy":
@@ -1437,9 +1395,9 @@ case "visibility":
                 case "fititemshorizontal":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_LayoutFit("FitItemsHorizontal", UIForia.Rendering.StylePropertyId.FitItemsHorizontal, targetState.state, Compile<UIForia.Layout.LayoutFit>(value, s_EnumSource_LayoutFit));                
                 case "distributeextraspacehorizontal":
-                    return new UIForia.Bindings.StyleBindings.StyleBinding_MainAxisAlignment("DistributeExtraSpaceHorizontal", UIForia.Rendering.StylePropertyId.DistributeExtraSpaceHorizontal, targetState.state, Compile<UIForia.Layout.SpaceDistribution>(value, s_EnumSource_MainAxisAlignment));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_SpaceDistribution("DistributeExtraSpaceHorizontal", UIForia.Rendering.StylePropertyId.DistributeExtraSpaceHorizontal, targetState.state, Compile<UIForia.Layout.SpaceDistribution>(value, s_EnumSource_SpaceDistribution));                
                 case "distributeextraspacevertical":
-                    return new UIForia.Bindings.StyleBindings.StyleBinding_MainAxisAlignment("DistributeExtraSpaceVertical", UIForia.Rendering.StylePropertyId.DistributeExtraSpaceVertical, targetState.state, Compile<UIForia.Layout.SpaceDistribution>(value, s_EnumSource_MainAxisAlignment));                
+                    return new UIForia.Bindings.StyleBindings.StyleBinding_SpaceDistribution("DistributeExtraSpaceVertical", UIForia.Rendering.StylePropertyId.DistributeExtraSpaceVertical, targetState.state, Compile<UIForia.Layout.SpaceDistribution>(value, s_EnumSource_SpaceDistribution));                
                 case "radiallayoutstartangle":
                     return new UIForia.Bindings.StyleBindings.StyleBinding_float("RadialLayoutStartAngle", UIForia.Rendering.StylePropertyId.RadialLayoutStartAngle, targetState.state, Compile<float>(value, null));                
                 case "radiallayoutendangle":

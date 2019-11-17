@@ -657,26 +657,6 @@ style myStyle {
     }
     
     [Test]
-    public void CompileFlexAlignments() {
-        var nodes = StyleParser.Parse(@"
-const axis = Stretch;
-
-style myStyle {
-    FlexLayoutCrossAxisAlignment = @axis;
-    FlexLayoutMainAxisAlignment = SpaceAround;
-}
-        ".Trim());
-
-        StyleSheet styleSheet = NewStyleSheetCompiler().Compile("test", nodes);
-
-        var styleGroup = styleSheet.styleGroupContainers;
-        Assert.AreEqual(1, styleGroup.Length);
-
-        Assert.AreEqual(CrossAxisAlignment.Stretch, styleGroup[0].groups[0].normal.style.FlexLayoutCrossAxisAlignment);
-        Assert.AreEqual(SpaceDistribution.AroundContent, styleGroup[0].groups[0].normal.style.FlexLayoutSpaceDistribution);
-    }
-
-    [Test]
     public void CompileFlexProperties() {
         var nodes = StyleParser.Parse(@"
 export const wrap = WrapHorizontal;
@@ -958,7 +938,7 @@ style size2 {
     [Test]
     public void CompileAnchoring() {
         var nodes = StyleParser.Parse(@"
-export const layout = Fixed;
+export const layout = Flex;
 
 style anchoring { 
     LayoutType = @layout;
@@ -972,7 +952,6 @@ style anchoring {
 
         StyleSheet styleSheet = NewStyleSheetCompiler().Compile("test", nodes);
         var styleGroup = styleSheet.styleGroupContainers;
-        Assert.AreEqual(LayoutType.Fixed, styleGroup[0].groups[0].normal.style.LayoutType);
         Assert.AreEqual(LayoutBehavior.Ignored, styleGroup[0].groups[0].normal.style.LayoutBehavior);
         Assert.AreEqual(3, styleGroup[0].groups[0].normal.style.ZIndex);
         Assert.AreEqual(RenderLayer.Screen, styleGroup[0].groups[0].normal.style.RenderLayer);

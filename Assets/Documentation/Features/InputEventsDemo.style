@@ -46,7 +46,7 @@ style dragme {
 
 style section {
     LayoutType = Flex;
-    FlexLayoutDirection = Row;
+    FlexLayoutDirection = Vertical;
     MarginBottom = 20px;
 }
 
@@ -109,8 +109,6 @@ style changes-on-hover-and-active {
 
 style context-menu {
     LayoutBehavior = Ignored;
-    AnchorTarget = Screen;
-    TransformBehavior = AnchorMinOffset;
     BorderColor = rgb(50, 50, 50);
     BackgroundColor = grey;
     Border = 1px;

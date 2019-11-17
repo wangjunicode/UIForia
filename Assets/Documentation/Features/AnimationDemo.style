@@ -2,7 +2,7 @@ style container {
     PreferredSize = 1pca;
     BackgroundColor = black;
     Padding = 50px;
-    FlexLayoutDirection = Column;
+    FlexLayoutDirection = Horizontal;
 }
 
 style one-container {
@@ -39,8 +39,7 @@ style circle-red-bg {
 style two-container {
     PreferredSize = 48px;
     MarginLeft = 50px;
-    FlexLayoutMainAxisAlignment = Center;
-    FlexLayoutCrossAxisAlignment = Center;
+    DistributeExtraSpace = CenterContent;
 }
 
 style orbit-container {

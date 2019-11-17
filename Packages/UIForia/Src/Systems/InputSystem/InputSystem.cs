@@ -278,6 +278,18 @@ namespace UIForia.Systems {
         }
 
         private void ProcessMouseInput() {
+            
+            // if element does not have state requested -> hover flag, drag listener, pointer events = none, don't add
+            // buckets feel like a lot of overhead
+            // for each element, track if has overflowing children 
+            // if it does not and element is culled, skip directly to children's children and repeat
+            // if aabb yMin is below screen height or aabb ymax is less than 0 -> cull
+            
+            // broadphase culling and input querying are related
+            // neither uses render bounds, just obb and aabb
+            // if dragging only attempt intersections with elements who have drag responders
+            // if not dragging only attempt intersections with elements who have hover state (if mouse is present) or drag create or mouse / touch interactions
+            
             LightList<UIElement> queryResults = (LightList<UIElement>) m_LayoutSystem.QueryPoint(m_MouseState.mousePosition, LightList<UIElement>.Get());
 
             if (!IsDragging) {

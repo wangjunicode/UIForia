@@ -153,22 +153,22 @@ public class HierarchyView : TreeView {
         s_Content.text = item.element.GetDisplayName();
 
         if (showLayoutStats) {
-            if (item.element.layoutBox != null) {
-                FastLayoutBox.LayoutBoxMetrics metrics = item.element.layoutBox.metrics;
-                string wMetrics = $"w: {metrics.contentWidthCacheHit}, {metrics.contentWidthCacheMiss}";
-                string hMetrics = $"h: {metrics.contentHeightCacheHit}, {metrics.contentHeightCacheMiss}";
-                string total = $"t: {metrics.totalLayoutCount}";
-                
-                if ((!(item.element is UITextElement) && item.element.layoutBox.firstChild == null) || item.element.layoutBox.prefWidth.unit != UIMeasurementUnit.Content && item.element.layoutBox.minWidth.unit != UIMeasurementUnit.Content && item.element.layoutBox.maxWidth.unit != UIMeasurementUnit.Content) {
-                    wMetrics = "";
-                }
-                
-                if ((!(item.element is UITextElement) && item.element.layoutBox.firstChild == null) || item.element.layoutBox.prefHeight.unit != UIMeasurementUnit.Content && item.element.layoutBox.minHeight.unit != UIMeasurementUnit.Content && item.element.layoutBox.maxHeight.unit != UIMeasurementUnit.Content) {
-                    hMetrics = "";
-                }
-                
-                s_Content.text += $" ({wMetrics} {hMetrics} {total})";
-            }
+//            if (item.element.layoutBox != null) {
+//                FastLayoutBox.LayoutBoxMetrics metrics = item.element.layoutBox.metrics;
+//                string wMetrics = $"w: {metrics.contentWidthCacheHit}, {metrics.contentWidthCacheMiss}";
+//                string hMetrics = $"h: {metrics.contentHeightCacheHit}, {metrics.contentHeightCacheMiss}";
+//                string total = $"t: {metrics.totalLayoutCount}";
+//                
+//                if ((!(item.element is UITextElement) && item.element.layoutBox.firstChild == null) || item.element.layoutBox.prefWidth.unit != UIMeasurementUnit.Content && item.element.layoutBox.minWidth.unit != UIMeasurementUnit.Content && item.element.layoutBox.maxWidth.unit != UIMeasurementUnit.Content) {
+//                    wMetrics = "";
+//                }
+//                
+//                if ((!(item.element is UITextElement) && item.element.layoutBox.firstChild == null) || item.element.layoutBox.prefHeight.unit != UIMeasurementUnit.Content && item.element.layoutBox.minHeight.unit != UIMeasurementUnit.Content && item.element.layoutBox.maxHeight.unit != UIMeasurementUnit.Content) {
+//                    hMetrics = "";
+//                }
+//                
+//                s_Content.text += $" ({wMetrics} {hMetrics} {total})";
+//            }
         }
         
         if (item.element.isEnabled && item.element.renderBox != null) {

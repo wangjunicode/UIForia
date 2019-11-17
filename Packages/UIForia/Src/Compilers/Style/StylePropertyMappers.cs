@@ -176,8 +176,6 @@ namespace UIForia.Compilers.Style {
                 {"flexitemshrink", (targetStyle, property, context) => targetStyle.FlexItemShrink = (int) MapNumber(property.children[0], context)},
                 {"flexlayoutwrap", (targetStyle, property, context) => targetStyle.FlexLayoutWrap = MapEnum<LayoutWrap>(property.children[0], context)},
                 {"flexlayoutdirection", (targetStyle, property, context) => targetStyle.FlexLayoutDirection = MapEnum<LayoutDirection>(property.children[0], context)},
-                {"flexlayoutmainaxisalignment", (targetStyle, property, context) => targetStyle.FlexLayoutSpaceDistribution = MapEnum<SpaceDistribution>(property.children[0], context)},
-                {"flexlayoutcrossaxisalignment", (targetStyle, property, context) => targetStyle.FlexLayoutCrossAxisAlignment = MapEnum<CrossAxisAlignment>(property.children[0], context)},
 
                 {"radiallayoutstartangle", (targetStyle, property, context) => targetStyle.RadialLayoutStartAngle = MapNumber(property.children[0], context)},
                 {"radiallayoutendangle", (targetStyle, property, context) => targetStyle.RadialLayoutEndAngle = MapNumber(property.children[0], context)},

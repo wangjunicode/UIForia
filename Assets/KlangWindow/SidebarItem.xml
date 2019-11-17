@@ -5,8 +5,7 @@
         style side-bar-item {
             PreferredSize = 64px;
             Padding = 4px;
-            FlexLayoutMainAxisAlignment = Center;
-            FlexLayoutCrossAxisAlignment = Center;
+            DistributeExtraSpace = CenterContent;
         }
         
         style side-bar-icon {

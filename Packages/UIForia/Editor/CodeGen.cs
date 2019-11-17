@@ -68,8 +68,6 @@ namespace UIForia.Editor {
             // Flex Layout
             new PropertyGenerator<LayoutDirection>(StylePropertyId.FlexLayoutDirection, LayoutDirection.Vertical),
             new PropertyGenerator<LayoutWrap>(StylePropertyId.FlexLayoutWrap, LayoutWrap.None),
-            new PropertyGenerator<SpaceDistribution>(StylePropertyId.FlexLayoutMainAxisAlignment, SpaceDistribution.BeforeContent),
-            new PropertyGenerator<CrossAxisAlignment>(StylePropertyId.FlexLayoutCrossAxisAlignment, CrossAxisAlignment.Start),
 
             // Grid Item
             new PropertyGenerator<GridItemPlacement>(StylePropertyId.GridItemX, new GridItemPlacement(-1)),

@@ -10,13 +10,7 @@ namespace UIForia.Systems {
 
     public abstract class AwesomeLayoutBox {
 
-        public float baseLocalX;
-        public float baseWidth;
         public float finalWidth;
-        public float allocatedWidth;
-
-        public float baseLocalY;
-        public float baseHeight;
         public float finalHeight;
 
         public float paddingBorderHorizontalStart;
@@ -46,7 +40,7 @@ namespace UIForia.Systems {
             element.layoutHistory = element.layoutHistory ?? new LayoutHistory(element);
             element.layoutHistory.AddLogEntry(LayoutDirection.Horizontal, frameId, LayoutReason.Initialized, boxName);
             element.layoutHistory.AddLogEntry(LayoutDirection.Vertical, frameId, LayoutReason.Initialized, boxName);
-            flags |= AwesomeLayoutBoxFlags.RequireLayoutHorizontal | AwesomeLayoutBoxFlags.RequireLayoutVertical;
+            flags |= AwesomeLayoutBoxFlags.RequireLayoutHorizontal | AwesomeLayoutBoxFlags.RequireLayoutVertical | AwesomeLayoutBoxFlags.RequiresMatrixUpdate;
             UpdateBlockProviderWidth();
             UpdateBlockProviderHeight();
 
@@ -97,11 +91,7 @@ namespace UIForia.Systems {
         public abstract void OnChildrenChanged(LightList<AwesomeLayoutBox> childList);
 
         public void ApplyLayoutHorizontal(float localX, float alignedPosition, float size, float availableSize, LayoutFit defaultFit, int frameId) {
-            baseWidth = size;
-            baseLocalX = localX;
-
-            allocatedWidth = availableSize;
-
+            
             LayoutFit fit = element.style.LayoutFitHorizontal;
             if (fit == LayoutFit.Default || fit == LayoutFit.Unset) {
                 fit = defaultFit;
@@ -147,7 +137,9 @@ namespace UIForia.Systems {
 
             // write to layout result here? would need to flag layout result for changes anyway
             LayoutResult layoutResult = element.layoutResult;
-
+            
+            float previousPosition = layoutResult.alignedPosition.x; 
+            
             // todo -- layout result change flags (and maybe history entry if enabled)
             layoutResult.alignedPosition.x = alignedPosition;
             layoutResult.allocatedPosition.x = localX;
@@ -164,6 +156,10 @@ namespace UIForia.Systems {
             paddingBorderHorizontalStart = paddingLeft + borderLeft;
             paddingBorderHorizontalEnd = paddingRight + borderRight;
 
+            if ((flags & AwesomeLayoutBoxFlags.RequireAlignmentHorizontal) != 0 && !Mathf.Approximately(previousPosition, alignedPosition)) {
+                flags |= AwesomeLayoutBoxFlags.RequiresMatrixUpdate;
+            }
+            
             // todo -- should probably be when content area size changes, not just overall size
             if (newWidth != finalWidth) {
                 flags |= AwesomeLayoutBoxFlags.RequireLayoutHorizontal;
@@ -172,10 +168,8 @@ namespace UIForia.Systems {
             }
         }
 
-        public void ApplyLayoutVertical(float localY, float alignedY, float size, float availableSize, LayoutFit defaultFit, int frameId) {
-            baseHeight = size;
-            baseLocalY = localY;
-
+        public void ApplyLayoutVertical(float localY, float alignedPosition, float size, float availableSize, LayoutFit defaultFit, int frameId) {
+            
             LayoutFit fit = element.style.LayoutFitVertical;
             if (fit == LayoutFit.Default || fit == LayoutFit.Unset) {
                 fit = defaultFit;
@@ -193,7 +187,7 @@ namespace UIForia.Systems {
                 case LayoutFit.Grow:
                     if (availableSize > size) {
                         newHeight = availableSize;
-                        alignedY = localY;
+                        alignedPosition = localY;
                     }
 
                     break;
@@ -201,16 +195,18 @@ namespace UIForia.Systems {
                 case LayoutFit.Shrink:
                     if (availableSize < size) {
                         newHeight = availableSize;
-                        alignedY = localY;
+                        alignedPosition = localY;
                     }
 
                     break;
 
                 case LayoutFit.Fill:
                     newHeight = availableSize;
-                    alignedY = localY;
+                    alignedPosition = localY;
                     break;
             }
+            
+            // if aligned position changed -> flag for matrix recalc 
 
             Vector2 viewSize = element.View.Viewport.size;
             float emSize = 0; // todo -- read off of style (cached)
@@ -223,8 +219,10 @@ namespace UIForia.Systems {
             LayoutResult layoutResult = element.layoutResult;
 
             // todo -- layout result change flags (and maybe history entry if enabled)
-
-            layoutResult.alignedPosition.y = alignedY;
+            
+            float previousPosition = layoutResult.alignedPosition.y;
+            
+            layoutResult.alignedPosition.y = alignedPosition;
             layoutResult.allocatedPosition.y = localY;
             layoutResult.padding.top = paddingTop;
             layoutResult.padding.bottom = paddingBottom;
@@ -238,6 +236,10 @@ namespace UIForia.Systems {
 
             paddingBorderVerticalStart = paddingTop + borderTop;
             paddingBorderVerticalEnd = paddingBottom + borderBottom;
+            
+            if ((flags & AwesomeLayoutBoxFlags.RequireAlignmentVertical) != 0 && !Mathf.Approximately(previousPosition, alignedPosition)) { 
+                flags |= AwesomeLayoutBoxFlags.RequiresMatrixUpdate;
+            }
 
             if (newHeight != finalHeight) {
                 flags |= AwesomeLayoutBoxFlags.RequireLayoutVertical;

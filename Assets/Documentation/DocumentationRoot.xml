@@ -16,18 +16,15 @@
                 <Anchor href="'/DynamicDemo'">Dynamic</Anchor>
                 <Anchor href="'/FlexDemo'">FlexDemo</Anchor>
                 <Anchor href="'/GridDemo'">GridDemo</Anchor>
-                <Anchor href="'/OrderOrder'">OrderOrder</Anchor>
                 <Anchor href="'/RepeatALot'">Repeat Element</Anchor>
                 <Anchor href="'/ScrollDemo'">Scrolling</Anchor>
                 <Anchor href="'/TransclusionDemo'">Transclusion</Anchor>
-                <Anchor href="'/TransformPlayground'">Transform Playground</Anchor>
+<!--                <Anchor href="'/TransformPlayground'">Transform Playground</Anchor>-->
                 <Anchor href="'/SelectDemo'">Select / DropDown</Anchor>
                 <Anchor href="'/StylePropertiesDemo'">Style Properties</Anchor>
                 <Anchor href="'/RepeatExample'">Repeat Example</Anchor>
-                <Anchor href="'/RenderSystemShowcase'">Render System</Anchor>
                 <Anchor href="'/Window'">Window System</Anchor>
                 <Anchor href="'/Checkbox'">Checkbox</Anchor>
-                <Anchor href="'/Test'">Test</Anchor>
 
             </ScrollView>
 
@@ -48,17 +45,14 @@
                 <DynamicDemo x-route="/DynamicDemo"/>
                 <FlexDemo x-route="/FlexDemo"/>
                 <GridDemo x-route="/GridDemo"/>
-                <OrderOrder x-route="/OrderOrder"/>
                 <RepeatALot x-route="/RepeatALot"/>
                 <ScrollDemo x-route="/ScrollDemo"/>
                 <TransclusionDemo x-route="/TransclusionDemo"/>
-                <TransformPlayground x-route="/TransformPlayground"/>
+<!--                <TransformPlayground x-route="/TransformPlayground"/>-->
                 <RepeatExample x-route="/RepeatExample"/>
-                <RenderSystemShowcase x-route="/RenderSystemShowcase"/>
                 <StylePropertiesDemo x-route="/StylePropertiesDemo"/>
                 <WindowDemo x-route="/Window"/>
                 <CheckboxDemo x-route="/Checkbox"/>
-                <Test x-route="/Test"/>
                 
             </ScrollView>
 

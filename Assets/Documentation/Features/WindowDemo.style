@@ -4,7 +4,7 @@ style window-demo-container {
 }
 
 style create-button-row {
-    FlexLayoutDirection = Column;
+    FlexLayoutDirection = Horizontal;
 }
 
 style button {

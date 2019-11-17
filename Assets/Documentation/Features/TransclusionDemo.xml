@@ -10,7 +10,7 @@
 
         style transcluded {
             LayoutBehavior = TranscludeChildren;
-            FlexLayoutDirection = Column;
+            FlexLayoutDirection = Horizontal;
             Padding = 50px;
         }
 

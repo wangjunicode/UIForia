@@ -95,11 +95,11 @@ namespace UIForia.Elements {
 
         internal static IntMap<ElementColdData> s_ColdDataMap = new IntMap<ElementColdData>();
 
-        internal FastLayoutBox layoutBox;
         internal AwesomeLayoutBox awesomeLayoutBox;
         internal RenderBox renderBox;
 
         internal int depthTraversalIndex;
+        internal int enableStateChangedFrameId;
 
         public UIView View { get; internal set; }
 
@@ -145,9 +145,12 @@ namespace UIForia.Elements {
 
         public bool isSelfDisabled => (flags & UIElementFlags.Enabled) == 0;
 
-        public bool isEnabled => !isDestroyed && (flags & UIElementFlags.SelfAndAncestorEnabled) == UIElementFlags.SelfAndAncestorEnabled;
+        public bool isEnabled => (flags & UIElementFlags.AliveEnabledAncestorEnabled) == (UIElementFlags.AliveEnabledAncestorEnabled);
+            //!isDestroyed && (flags & UIElementFlags.SelfAndAncestorEnabled) == UIElementFlags.SelfAndAncestorEnabled;
 
-        public bool isDisabled => isDestroyed || (flags & UIElementFlags.Enabled) == 0 || (flags & UIElementFlags.AncestorEnabled) == 0;
+        public bool isDisabled => (flags & UIElementFlags.AliveEnabledAncestorEnabled) != (UIElementFlags.AliveEnabledAncestorEnabled);
+        
+        //isDestroyed || (flags & UIElementFlags.Enabled) == 0 || (flags & UIElementFlags.AncestorEnabled) == 0;
 
         public bool hasDisabledAncestor => (flags & UIElementFlags.AncestorEnabled) == 0;
 

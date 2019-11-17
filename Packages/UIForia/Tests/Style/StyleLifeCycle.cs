@@ -19,26 +19,26 @@ namespace Style {
             Assert.AreEqual(element.style.BorderTop.value, 10);
         }
         
-        [Test]
-        public void DoNotPublishChangesIfElementIsNotEnabled() {
-            string template = @"
-            <UITemplate>
-                <Style path='Templates/FlexLayoutColTests/FlexLayoutColTests.style'/>
-                <Contents style.layoutType='LayoutType.Flex' style.flexLayoutDirection='LayoutDirection.Column' style.preferredWidth='500f' style.preferredHeight='500f'>
-                    <Group x-id='child0' style='w100h100'/>
-                </Contents>
-            </UITemplate>
-            ";
-            MockApplication app = new MockApplication(typeof(FlexLayoutRowTests.FlexRowLayoutThing), template);
-            int callCount = 0;
-            app.StyleSystem.onStylePropertyChanged += (element, list) => { callCount++; }; 
-            app.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
-            FlexLayoutRowTests.FlexRowLayoutThing root = (FlexLayoutRowTests.FlexRowLayoutThing) app.RootElement.GetChild(0);
-            root.SetEnabled(false);
-            app.Update();
-            Assert.AreEqual(0, callCount);
-            Assert.AreEqual(100f, app.RootElement.FindById("child0").style.PreferredWidth.value);
-        }
+//        [Test]
+//        public void DoNotPublishChangesIfElementIsNotEnabled() {
+//            string template = @"
+//            <UITemplate>
+//                <Style path='Templates/FlexLayoutColTests/FlexLayoutColTests.style'/>
+//                <Contents style.layoutType='LayoutType.Flex' style.flexLayoutDirection='LayoutDirection.Column' style.preferredWidth='500f' style.preferredHeight='500f'>
+//                    <Group x-id='child0' style='w100h100'/>
+//                </Contents>
+//            </UITemplate>
+//            ";
+//            MockApplication app = new MockApplication(typeof(FlexLayoutRowTests.FlexRowLayoutThing), template);
+//            int callCount = 0;
+//            app.StyleSystem.onStylePropertyChanged += (element, list) => { callCount++; }; 
+//            app.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
+//            FlexLayoutRowTests.FlexRowLayoutThing root = (FlexLayoutRowTests.FlexRowLayoutThing) app.RootElement.GetChild(0);
+//            root.SetEnabled(false);
+//            app.Update();
+//            Assert.AreEqual(0, callCount);
+//            Assert.AreEqual(100f, app.RootElement.FindById("child0").style.PreferredWidth.value);
+//        }
 
     }
 

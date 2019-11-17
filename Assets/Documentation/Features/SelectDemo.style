@@ -15,8 +15,7 @@ style button {
     PreferredSize = 1cnt;
     Margin = 5px;
     Padding = 20px;
-    FlexLayoutMainAxisAlignment = Center;
-    FlexLayoutCrossAxisAlignment = Center;
+    DistributeExtraSpace = CenterContent;
 }
 
 style repeat {

@@ -7,9 +7,66 @@ using UIForia.Layout;
 using UIForia.Util;
 using UnityEngine;
 using UnityEngine.Assertions;
+using UnityEngine.Profiling;
 using Debug = System.Diagnostics.Debug;
 
 namespace UIForia.Systems {
+
+    public struct AxisAlignedBounds {
+
+        public float xMin;
+        public float yMin;
+        public float xMax;
+        public float yMax;
+
+    }
+
+    public struct OrientedBounds {
+
+        public Vector2 p0;
+        public Vector2 p1;
+        public Vector2 p2;
+        public Vector2 p3;
+
+    }
+
+    // this is crazy, but by using a struct as our array type, even though it just contains a reference, 
+    // causes a massive performance increase. The reason is we avoid mono doing `Object.virt_stelemref_class_small_idepth`,
+    // which is a complete undocumented part of mono that runs when you assign a reference type to an array slot.
+    // By having a struct type on the array (even though its just a wrapper around our reference type),
+    // we can increase the performance of array usage DRAMATICALLY. Example: Converting from using LightStack<UIElement>
+    // to StructStack<ElemRef> improved performance of layout by over 300%!!!!!!!!!
+
+    // source code reference is in the mono project: mono/mono/metadata/marshal.c
+    // there is even a comment there that says: 
+    // "Arrays are sealed but are covariant on their element type, We can't use any of the fast paths."
+    // this means that arrays of reference types are always way slower than arrays of values type because of 
+    // polymorphism and interfaces. Anyway, with this optimization and some other small changes
+    // we brought the no-op layout run time of around 4000 elements from ~2.5ms down to ~0.2ms with deep profiling on
+
+    // the bonus here is that this probably incurs no performance overhead with il2cpp because the struct is the same
+    // size as the pointer so dereferencing it should yield identical performance (I haven't verified this though)
+
+    // as far as I can tell, reading from ref typed arrays do not have this stelemref overhead, only writing.
+    internal struct ElemRef {
+
+        public UIElement element;
+
+        public ElemRef(UIElement element) {
+            this.element = element;
+        }
+
+    }
+
+    internal struct BoxRef {
+
+        public AwesomeLayoutBox box;
+
+        public BoxRef(AwesomeLayoutBox box) {
+            this.box = box;
+        }
+
+    }
 
     public class AwesomeLayoutRunner {
 
@@ -20,9 +77,11 @@ namespace UIForia.Systems {
         internal LightList<UIElement> alignVerticalList;
         internal LightList<UIElement> transformList;
         internal LightList<AwesomeLayoutBox> ignoredList;
-        internal LightStack<AwesomeLayoutBox> layoutStack;
         internal LightList<UIElement> enabledElements;
-        
+        internal StructStack<ElemRef> elemRefStack;
+        internal StructStack<BoxRef> boxRefStack;
+        internal LightList<UIElement> matrixUpdateList;
+
         public AwesomeLayoutRunner(UIElement rootElement) {
             this.rootElement = rootElement;
             this.rootElement.awesomeLayoutBox = new AwesomeRootLayoutBox();
@@ -32,41 +91,60 @@ namespace UIForia.Systems {
             this.alignHorizontalList = new LightList<UIElement>();
             this.alignVerticalList = new LightList<UIElement>();
             this.transformList = new LightList<UIElement>();
-            this.layoutStack = new LightStack<AwesomeLayoutBox>();
             this.enabledElements = new LightList<UIElement>(32);
+            this.elemRefStack = new StructStack<ElemRef>(32);
+            this.boxRefStack = new StructStack<BoxRef>(32);
+            this.matrixUpdateList = new LightList<UIElement>();
         }
 
         public void RunLayout() {
+            frameId = rootElement.Application.frameId;
+
+            if (rootElement.isDisabled) {
+                return;
+            }
+
+            hierarchyRebuildList.Clear();
+            enabledElements.Clear();
+
             GatherLayoutData();
-            RunHorizontalLayout();
+            RebuildHierarchy();
+            PerformLayout();
             ApplyHorizontalAlignments();
-            RunVerticalLayout();
             ApplyVerticalAlignments();
             ApplyTransforms();
             ApplyLayoutResults();
-            frameId++;
+            ApplyBoxSizeChanges();
         }
 
-        private void ApplyTransforms() { }
+        private void ApplyTransforms() {
+            for (int i = 0; i < transformList.size; i++) {
+                UIElement currentElement = transformList.array[i];
+                LayoutResult result = currentElement.layoutResult;
+
+                Vector2 position = new Vector2(currentElement.style.TransformPositionX.value, currentElement.style.TransformPositionY.value);
+                Vector2 scale = new Vector2(1, 1);
+                float rotation = currentElement.style.TransformRotation;
+
+                result.transformMatrix = SVGXMatrix.TRS(position, rotation, scale);
+            }
+
+            transformList.Clear();
+        }
 
         public void GatherLayoutData() {
-            hierarchyRebuildList.Clear();
-            enabledElements.Clear();
-            
-            if (rootElement.isDisabled) return;
+            elemRefStack.array[elemRefStack.size++].element = rootElement;
 
-            LightStack<UIElement> stack = LightStack<UIElement>.Get();
-
-            stack.array[stack.size++] = rootElement;
-
-            while (stack.size > 0) {
-                UIElement currentElement = stack.array[--stack.size];
+            while (elemRefStack.size > 0) {
+                UIElement currentElement = elemRefStack.array[--elemRefStack.size].element;
 
                 UIElementFlags flags = currentElement.flags;
 
+                bool enabled = (flags & UIElementFlags.AliveEnabledAncestorEnabled) == (UIElementFlags.AliveEnabledAncestorEnabled);
+
                 // if the element was just enabled or disabled we need to make sure the parent rebuilds it's hierarchy
-                if ((flags & (UIElementFlags.EnabledThisFrame | UIElementFlags.DisabledThisFrame)) != 0) {
-                    if (currentElement.isEnabled) {
+                if (currentElement.enableStateChangedFrameId == frameId) {
+                    if (enabled) {
                         flags |= UIElementFlags.LayoutHierarchyDirty;
                         hierarchyRebuildList.Add(currentElement);
                     }
@@ -80,15 +158,12 @@ namespace UIForia.Systems {
                     }
                 }
 
-                if (currentElement.isDisabled) {
+                if (!enabled) {
                     currentElement.flags = flags; // might have changed above
                     continue;
                 }
-                
-                enabledElements.Add(currentElement);
 
                 if ((flags & UIElementFlags.LayoutFlags) != 0) {
-                    
                     if ((flags & (UIElementFlags.LayoutTypeDirty | UIElementFlags.LayoutBehaviorDirty)) != 0) {
                         UpdateLayoutTypeOrBehavior(currentElement);
                         flags &= ~(UIElementFlags.LayoutTypeDirty | UIElementFlags.LayoutBehaviorDirty);
@@ -128,15 +203,25 @@ namespace UIForia.Systems {
 
                         MarkContentParentsVerticalDirty(currentElement);
                     }
-                    
+
                     if ((flags & UIElementFlags.LayoutTransformDirty) != 0) {
                         // if element has identity transform remove from toTransform list
                         // otherwise add if not already member
+                        transformList.Add(currentElement);
+                        currentElement.awesomeLayoutBox.flags |= AwesomeLayoutBoxFlags.RequiresMatrixUpdate;
                         flags &= ~UIElementFlags.LayoutTransformDirty;
                     }
-                    
                 }
-                
+
+                // temp
+                LayoutResult result = currentElement.layoutResult;
+
+                Vector2 position = new Vector2(currentElement.style.TransformPositionX.value, currentElement.style.TransformPositionY.value);
+                Vector2 scale = new Vector2(1, 1);
+                float rotation = currentElement.style.TransformRotation;
+
+                result.transformMatrix = SVGXMatrix.TRS(position, rotation, scale);
+
                 if ((currentElement.awesomeLayoutBox.flags & AwesomeLayoutBoxFlags.RequireAlignmentHorizontal) != 0) {
                     alignHorizontalList.Add(currentElement);
                 }
@@ -144,25 +229,23 @@ namespace UIForia.Systems {
                 if ((currentElement.awesomeLayoutBox.flags & AwesomeLayoutBoxFlags.RequireAlignmentVertical) != 0) {
                     alignVerticalList.Add(currentElement);
                 }
-                
+
                 currentElement.flags = flags; // write changes back to element
 
                 UIElement[] childArray = currentElement.children.array;
                 int childCount = currentElement.children.size;
 
-                stack.EnsureAdditionalCapacity(childCount);
+                if (elemRefStack.size + childCount > elemRefStack.array.Length) {
+                    elemRefStack.EnsureAdditionalCapacity(childCount);
+                }
 
                 for (int i = childCount - 1; i >= 0; i--) {
-                    stack.array[stack.size++] = childArray[i];
+                    elemRefStack.array[elemRefStack.size++].element = childArray[i];
                 }
             }
 
-            LightStack<UIElement>.Release(ref stack);
-
-            RebuildHierarchy(frameId, hierarchyRebuildList, ignoredList);
-
             // we sort so that parents are done before their children, may not be needed though
-            ignoredList.Sort((a, b) => a.element.depthTraversalIndex - b.element.depthTraversalIndex);
+            // ignoredList.Sort((a, b) => a.element.depthTraversalIndex - b.element.depthTraversalIndex);
         }
 
         private void ApplyHorizontalAlignments() {
@@ -186,11 +269,20 @@ namespace UIForia.Systems {
                 float originOffset = MeasurementUtil.ResolveOffsetMeasurement(element, viewportWidth, viewportHeight, originX, originSize);
                 float offset = MeasurementUtil.ResolveOffsetMeasurement(element, viewportWidth, viewportHeight, offsetX, box.finalWidth);
 
+                float previousPosition = result.alignedPosition.x;
+
                 if (direction == AlignmentDirection.End) {
                     result.alignedPosition.x = (originBase + originSize) - (originOffset + offset) - box.finalWidth;
                 }
                 else {
                     result.alignedPosition.x = originBase + originOffset + offset;
+                }
+
+                if (!Mathf.Approximately(previousPosition, result.alignedPosition.x)) {
+                    if ((box.flags & AwesomeLayoutBoxFlags.RequiresMatrixUpdate) != 0) {
+                        box.flags |= AwesomeLayoutBoxFlags.RequiresMatrixUpdate;
+                        matrixUpdateList.Add(box.element);
+                    }
                 }
             }
 
@@ -218,164 +310,235 @@ namespace UIForia.Systems {
                 float originOffset = MeasurementUtil.ResolveOffsetMeasurement(element, viewportWidth, viewportHeight, originY, originSize);
                 float offset = MeasurementUtil.ResolveOffsetMeasurement(element, viewportWidth, viewportHeight, offsetY, box.finalHeight);
 
+                float previousPosition = result.alignedPosition.y;
+
                 if (direction == AlignmentDirection.End) {
                     result.alignedPosition.y = (originBase + originSize) - (originOffset + offset) - box.finalHeight;
                 }
                 else {
                     result.alignedPosition.y = originBase + originOffset + offset;
                 }
+
+                if (!Mathf.Approximately(previousPosition, result.alignedPosition.y)) {
+                    if ((box.flags & AwesomeLayoutBoxFlags.RequiresMatrixUpdate) != 0) {
+                        box.flags |= AwesomeLayoutBoxFlags.RequiresMatrixUpdate;
+                        matrixUpdateList.Add(box.element);
+                    }
+                }
             }
 
             alignVerticalList.Clear();
         }
 
-        private void ApplyLayoutResults() {
-            LightStack<UIElement> stack = LightStack<UIElement>.Get();
-            stack.Push(rootElement);
+        private void PerformLayoutStep(AwesomeLayoutBox rootBox) {
+            boxRefStack.Push(new BoxRef() {box = rootBox});
 
-            while (stack.size > 0) {
-                UIElement element = stack.array[--stack.size];
-                LayoutResult result = element.layoutResult;
-
-                // wrong?
-                result.localPosition.x = result.alignedPosition.x;
-                result.localPosition.y = result.alignedPosition.y;
-
-                ref SVGXMatrix localMatrix = ref result.localMatrix;
-
-                Vector2 pivot = default;
-                float ca = 1;
-                float sa = 0;
-                float scaleX = 1;
-                float scaleY = 1;
-
-                localMatrix.m0 = ca * scaleX;
-                localMatrix.m1 = sa * scaleX;
-                localMatrix.m2 = -sa * scaleY;
-                localMatrix.m3 = ca * scaleY;
-                localMatrix.m4 = result.alignedPosition.x; // does not account for transform (yet)
-                localMatrix.m5 = result.alignedPosition.y;
-
-                if (element.parent != null) {
-                    result.matrix = element.parent.layoutResult.matrix * localMatrix;
-                }
-                else {
-                    result.matrix = localMatrix;
-                }
-
-                result.screenPosition = result.matrix.position; // todo -- this should be world space pivot position? 
-
-                for (int i = 0; i < element.children.size; i++) {
-                    UIElement child = element.children.array[i];
-                    if (child.isEnabled) {
-                        stack.Push(child);
-                    }
-                }
-            }
-
-            stack.Release();
-        }
-
-        // pivot default = center
-        // padding / border / size changed (any dimension) -> re-render
-        // transform changed -> re-render
-        // layoutResult.aabb.position;
-        // want to know what is transformed
-        // want to know what is overflowing
-        // want to know what is aligned out of parent bounds
-        // build dynamic quad tree (every frame?)
-        // screen position = top left of transformed box.
-        // need 4 corner points of each box to really handle rotation and picking, or top / bottom w/ stored rotation value
-        // 3d? kind of not a part of layout which is 2d, 3d animations etc require a perspective camera and more data, seems like a rendering issue not layout
-        // maybe whats that a view is: 3d element
-
-        public void RunHorizontalLayout() {
-            RunHorizontalLayout(rootElement.awesomeLayoutBox);
-
-            for (int i = 0; i < ignoredList.size; i++) {
-                // todo -- only need to update sizes if ignored parent size changed
-                AwesomeLayoutBox box = ignoredList.array[i];
-                AwesomeLayoutBox.LayoutSize size = default;
-                box.GetWidths(ref size);
-                // todo -- account for margin on ignored element
-                float outputSize = Mathf.Max(size.minimum, Mathf.Min(size.preferred, size.maximum));
-                box.ApplyLayoutHorizontal(0, 0, outputSize, outputSize, LayoutFit.None, frameId);
-                RunHorizontalLayout(box);
-            }
-        }
-
-        private void RunHorizontalLayout(AwesomeLayoutBox rootBox) {
-            layoutStack.Push(rootBox);
-
-            while (layoutStack.size > 0) {
-                AwesomeLayoutBox layoutBox = layoutStack.array[--layoutStack.size];
-
+            while (boxRefStack.size > 0) {
+                AwesomeLayoutBox layoutBox = boxRefStack.array[--boxRefStack.size].box;
+#if DEBUG
                 bool needsDebugger = (layoutBox.element.flags & UIElementFlags.DebugLayout) != 0;
 
+                if (needsDebugger) {
+                    Debugger.Break();
+                }
+
                 if (needsDebugger || (layoutBox.flags & AwesomeLayoutBoxFlags.RequireLayoutHorizontal) != 0) {
-#if DEBUG
-                    if (needsDebugger) {
-                        Debugger.Break();
-                    }
-#endif
                     layoutBox.RunLayoutHorizontal(frameId);
                     layoutBox.element.layoutHistory.AddLayoutHorizontalCall(frameId);
                     layoutBox.flags &= ~AwesomeLayoutBoxFlags.RequireLayoutHorizontal;
                 }
 
-                layoutStack.EnsureAdditionalCapacity(layoutBox.childCount);
-
-                AwesomeLayoutBox ptr = layoutBox.firstChild;
-                while (ptr != null) {
-                    layoutStack.array[layoutStack.size++] = ptr;
-                    ptr = ptr.nextSibling;
-                }
-            }
-        }
-
-        public void RunVerticalLayout() {
-            RunVerticalLayout(rootElement.awesomeLayoutBox);
-
-            for (int i = 0; i < ignoredList.size; i++) {
-                // todo -- only need to update sizes if ignored parent size changed
-                AwesomeLayoutBox box = ignoredList.array[i];
-                AwesomeLayoutBox.LayoutSize size = default;
-                box.GetHeights(ref size);
-                float outputSize = Mathf.Max(size.minimum, Mathf.Min(size.preferred, size.maximum));
-                box.ApplyLayoutVertical(0, 0, outputSize, outputSize, LayoutFit.None, frameId);
-                RunVerticalLayout(box);
-            }
-        }
-
-        private void RunVerticalLayout(AwesomeLayoutBox rootBox) {
-            layoutStack.Push(rootBox);
-
-            while (layoutStack.size > 0) {
-                AwesomeLayoutBox layoutBox = layoutStack.array[--layoutStack.size];
-
-                bool needsDebugger = (layoutBox.element.flags & UIElementFlags.DebugLayout) != 0;
-
                 if (needsDebugger || (layoutBox.flags & AwesomeLayoutBoxFlags.RequireLayoutVertical) != 0) {
-#if DEBUG
-                    if (needsDebugger) {
-                        Debugger.Break();
-                    }
-#endif
                     layoutBox.RunLayoutVertical(frameId);
-                    layoutBox.element.layoutHistory.AddLayoutHorizontalCall(frameId);
+                    layoutBox.element.layoutHistory.AddLayoutVerticalCall(frameId);
                     layoutBox.flags &= ~AwesomeLayoutBoxFlags.RequireLayoutVertical;
                 }
+#else
+                if ((layoutBox.flags & AwesomeLayoutBoxFlags.RequireLayoutHorizontal) != 0) {
+                    layoutBox.RunLayoutHorizontal(frameId);
+                    layoutBox.flags &= ~AwesomeLayoutBoxFlags.RequireLayoutHorizontal;
+                }
 
-                layoutStack.EnsureAdditionalCapacity(layoutBox.childCount);
+                if ((layoutBox.flags & AwesomeLayoutBoxFlags.RequireLayoutVertical) != 0) {
+                    layoutBox.RunLayoutVertical(frameId);
+                    layoutBox.flags &= ~AwesomeLayoutBoxFlags.RequireLayoutVertical;
+                }
+#endif
+
+                // if we need to update this element's matrix then add to the list
+                // this can happen if the parent assigned a different position to 
+                // this element (and the element doesn't have an alignment override)
+                if ((layoutBox.flags & AwesomeLayoutBoxFlags.RequiresMatrixUpdate) != 0) {
+                    matrixUpdateList.Add(layoutBox.element);
+                }
+
+                if (boxRefStack.size + layoutBox.childCount > boxRefStack.array.Length) {
+                    boxRefStack.EnsureAdditionalCapacity(layoutBox.childCount);
+                }
 
                 AwesomeLayoutBox ptr = layoutBox.firstChild;
                 while (ptr != null) {
-                    layoutStack.array[layoutStack.size++] = ptr;
+                    boxRefStack.array[boxRefStack.size++].box = ptr;
                     ptr = ptr.nextSibling;
                 }
             }
         }
-        
+
+        private void PerformLayout() {
+            PerformLayoutStep(rootElement.awesomeLayoutBox);
+
+            for (int i = 0; i < ignoredList.size; i++) {
+                AwesomeLayoutBox ignoredBox = ignoredList.array[i];
+                AwesomeLayoutBox.LayoutSize size = default;
+                // todo -- account for margin on ignored element
+
+                ignoredBox.GetWidths(ref size);
+                float outputSize = size.Clamped;
+                ignoredBox.ApplyLayoutHorizontal(0, 0, outputSize, outputSize, LayoutFit.None, frameId);
+
+                ignoredBox.GetHeights(ref size);
+                outputSize = size.Clamped;
+                ignoredBox.ApplyLayoutVertical(0, 0, outputSize, outputSize, LayoutFit.None, frameId);
+
+                PerformLayoutStep(ignoredBox);
+            }
+        }
+
+        private void ApplyLayoutResults() {
+            int size = matrixUpdateList.size;
+            UIElement[] array = matrixUpdateList.array;
+
+            for (int i = 0; i < size; i++) {
+                UIElement startElement = array[i];
+                AwesomeLayoutBox box = startElement.awesomeLayoutBox;
+
+                if ((box.flags & AwesomeLayoutBoxFlags.RequiresMatrixUpdate) == 0) {
+                    continue;
+                }
+
+                elemRefStack.Push(new ElemRef(startElement));
+
+                while (elemRefStack.size > 0) {
+                    UIElement currentElement = elemRefStack.array[--elemRefStack.size].element;
+                    AwesomeLayoutBox currentBox = currentElement.awesomeLayoutBox;
+                    LayoutResult result = currentElement.layoutResult;
+                    currentBox.flags &= ~AwesomeLayoutBoxFlags.RequiresMatrixUpdate;
+
+                    result.localPosition.x = result.alignedPosition.x;
+                    result.localPosition.y = result.alignedPosition.y;
+
+                    ref SVGXMatrix localMatrix = ref result.localMatrix;
+
+                    // localMatrix = localMatrix * result.transformMatrix;
+
+                    float px = currentElement.style.TransformPivotX.value;
+                    float py = currentElement.style.TransformPivotX.value;
+
+                    SVGXMatrix pivotMat = SVGXMatrix.identity;
+                    
+                    if (px != 0 && py != 0) {
+                    }
+
+                    Vector2 pivot = new Vector2(0.5f * result.actualSize.width, 0.5f * result.actualSize.height);
+
+                    float ca = Mathf.Cos(currentElement.style.TransformRotation * Mathf.Deg2Rad);
+                    float sa = Mathf.Sin(currentElement.style.TransformRotation * Mathf.Deg2Rad);
+                    float scaleX = 1;
+                    float scaleY = 1;
+
+                    localMatrix.m0 = ca * scaleX;
+                    localMatrix.m1 = sa * scaleX;
+                    localMatrix.m2 = -sa * scaleY;
+                    localMatrix.m3 = ca * scaleY;
+                    localMatrix.m4 = result.alignedPosition.x;
+                    localMatrix.m5 = result.alignedPosition.y;
+
+                    if (currentElement.parent != null) {
+                        // result.matrix = element.parent.layoutResult.matrix * localMatrix;
+                        ref SVGXMatrix m = ref result.matrix;
+                        ref SVGXMatrix left = ref currentElement.parent.layoutResult.matrix;
+                        ref SVGXMatrix right = ref localMatrix;
+                        m.m0 = left.m0 * right.m0 + left.m2 * right.m1;
+                        m.m1 = left.m1 * right.m0 + left.m3 * right.m1;
+                        m.m2 = left.m0 * right.m2 + left.m2 * right.m3;
+                        m.m3 = left.m1 * right.m2 + left.m3 * right.m3;
+                        m.m4 = left.m0 * right.m4 + left.m2 * right.m5 + left.m4;
+                        m.m5 = left.m1 * right.m4 + left.m3 * right.m5 + left.m5;
+                    }
+                    else {
+                        result.matrix = localMatrix;
+                    }
+
+                    result.screenPosition.x = result.matrix.m4;
+                    result.screenPosition.y = result.matrix.m5;
+
+                    int childCount = currentElement.children.size;
+                    if (elemRefStack.size + childCount > elemRefStack.array.Length) {
+                        elemRefStack.EnsureAdditionalCapacity(childCount);
+                    }
+
+                    for (int childIdx = 0; childIdx < childCount; childIdx++) {
+                        UIElement child = currentElement.children.array[childIdx];
+                        bool enabled = (child.flags & UIElementFlags.AliveEnabledAncestorEnabled) == (UIElementFlags.AliveEnabledAncestorEnabled);
+                        if (enabled) {
+                            elemRefStack.array[elemRefStack.size++].element = child;
+                        }
+                    }
+                }
+            }
+
+            matrixUpdateList.Clear();
+        }
+
+        private void ApplyBoxSizeChanges() {
+            // for anything that had a matrix update or a size change we need to recompute bounding boxes
+
+            elemRefStack.array[elemRefStack.size++].element = rootElement;
+
+            while (elemRefStack.size > 0) {
+                UIElement currentElement = elemRefStack.array[--elemRefStack.size].element;
+                LayoutResult result = currentElement.layoutResult;
+
+                const float x = 0;
+                const float y = 0;
+
+                float width = result.actualSize.width;
+                float height = result.actualSize.height;
+
+                OrientedBounds orientedBounds = default;
+                ref SVGXMatrix m = ref result.matrix;
+
+                // inlined svgxMatrix.Transform(point)
+                // takes runtime for ~4000 elements from 4.5ms to 0.47ms w/ deep profile on
+                orientedBounds.p0.x = m.m0 * x + m.m2 * y + m.m4;
+                orientedBounds.p0.y = m.m1 * x + m.m3 * y + m.m5;
+
+                orientedBounds.p1.x = m.m0 * width + m.m2 * y + m.m4;
+                orientedBounds.p1.y = m.m1 * width + m.m3 * y + m.m5;
+
+                orientedBounds.p2.x = m.m0 * width + m.m2 * height + m.m4;
+                orientedBounds.p2.y = m.m1 * width + m.m3 * height + m.m5;
+
+                orientedBounds.p3.x = m.m0 * x + m.m2 * height + m.m4;
+                orientedBounds.p3.y = m.m1 * x + m.m3 * height + m.m5;
+
+                result.orientedBounds = orientedBounds;
+
+                int childCount = currentElement.children.size;
+                if (elemRefStack.size + childCount > elemRefStack.array.Length) {
+                    elemRefStack.EnsureAdditionalCapacity(childCount);
+                }
+
+                for (int childIdx = 0; childIdx < childCount; childIdx++) {
+                    UIElement child = currentElement.children.array[childIdx];
+                    bool enabled = (child.flags & UIElementFlags.AliveEnabledAncestorEnabled) == (UIElementFlags.AliveEnabledAncestorEnabled);
+                    if (enabled) {
+                        elemRefStack.array[elemRefStack.size++].element = child;
+                    }
+                }
+            }
+        }
+
         private void MarkContentParentsHorizontalDirty(UIElement currentElement) {
             AwesomeLayoutBox ptr = currentElement.awesomeLayoutBox.parent;
 
@@ -466,11 +629,10 @@ namespace UIForia.Systems {
             LayoutType layoutType = currentElement.style.LayoutType;
 
             if (currentElement.awesomeLayoutBox != null) {
-                
                 if (currentElement.awesomeLayoutBox is AwesomeTextLayoutBox) {
                     return;
                 }
-                
+
                 if (currentElement.awesomeLayoutBox.layoutBoxType == layoutType) {
                     return;
                 }
@@ -483,38 +645,35 @@ namespace UIForia.Systems {
                 currentElement.awesomeLayoutBox.Initialize(currentElement, frameId);
                 return;
             }
-            
+
             switch (layoutType) {
                 case LayoutType.Unset:
-                    break;
-                case LayoutType.Flow:
-                    break;
                 case LayoutType.Flex:
                     currentElement.awesomeLayoutBox = new AwesomeFlexLayoutBox();
                     currentElement.awesomeLayoutBox.Initialize(currentElement, frameId);
-                    break;
-                case LayoutType.Fixed:
                     break;
                 case LayoutType.Grid:
                     currentElement.awesomeLayoutBox = new AwesomeGridLayoutBox();
                     currentElement.awesomeLayoutBox.Initialize(currentElement, frameId);
                     break;
                 case LayoutType.Radial:
-                    break;
+                    throw new NotImplementedException();
                 case LayoutType.Stack:
+                    currentElement.awesomeLayoutBox = new AwesomeStackLayoutBox();
+                    currentElement.awesomeLayoutBox.Initialize(currentElement, frameId);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
         }
 
-        private void RebuildHierarchy(int frameId, LightList<UIElement> list, LightList<AwesomeLayoutBox> ignoredBoxes) {
+        private void RebuildHierarchy() {
             // do this back to front so parent always works with final children
             LightList<AwesomeLayoutBox> childList = LightList<AwesomeLayoutBox>.Get();
 
             // input list is already in depth traversal order, so iterating backwards will effectively walk up the leaves
-            for (int i = list.size - 1; i >= 0; i--) {
-                UIElement element = list.array[i];
+            for (int i = hierarchyRebuildList.size - 1; i >= 0; i--) {
+                UIElement element = hierarchyRebuildList.array[i];
                 Assert.IsTrue(element.isEnabled);
                 AwesomeLayoutBox elementBox = element.awesomeLayoutBox;
 
@@ -533,7 +692,7 @@ namespace UIForia.Systems {
                             break;
                         case LayoutBehavior.Ignored:
                             child.layoutResult.layoutParent = element.layoutResult; // not 100% sure of this
-                            ignoredBoxes.Add(child.awesomeLayoutBox);
+                            ignoredList.Add(child.awesomeLayoutBox);
                             break;
                         case LayoutBehavior.TranscludeChildren:
                             childList.AddRange(((AwesomeTranscludedLayoutBox) child.awesomeLayoutBox).GetChildren());
@@ -563,7 +722,7 @@ namespace UIForia.Systems {
         public void QueryPoint(Vector2 point, IList<UIElement> retn) {
             for (int i = 0; i < enabledElements.size; i++) {
                 UIElement element = enabledElements.array[i];
-                
+
                 // if offscreen or clipped or invisible continue
                 // how do i know if the thing is clipped or not?
                 // only real way is via render + read back, but thats nasty
@@ -571,31 +730,26 @@ namespace UIForia.Systems {
                 // divide into large and small?
                 // if area is big then just check it
                 // if area is small partition it into buckets?
-                
+
                 // first step might be to find all elements who's aabb contains or overlaps point
                 // then figure out which of those elements real geometry contains the point via polygon check
                 // then figure out which of those elements are culled, remove those
-                
+
                 // traverse from the root
-                
+
                 // if element is culled and is clipper continue
-                
-                
+
+
                 // when we encounter a clipper push it on our stack
-                
+
                 // visit children
-                
+
                 // pop clipper if needed
-                
-                if (element.layoutResult.matrix.IsTranslationOnly) {
-                    
-                }
-                else {
-                    
-                }
-                
+
+                if (element.layoutResult.matrix.IsTranslationOnly) { }
+                else { }
+
                 // if transform, alignment, or position changed, traverse and children dirty (will need to re-bucket these) 
-                
             }
         }
 

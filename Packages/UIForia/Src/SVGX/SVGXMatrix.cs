@@ -67,14 +67,22 @@ namespace SVGX {
         }
 
         public static SVGXMatrix operator *(in SVGXMatrix left, in SVGXMatrix right) {
-            return new SVGXMatrix(
-                left.m0 * right.m0 + left.m2 * right.m1,
-                left.m1 * right.m0 + left.m3 * right.m1,
-                left.m0 * right.m2 + left.m2 * right.m3,
-                left.m1 * right.m2 + left.m3 * right.m3,
-                left.m0 * right.m4 + left.m2 * right.m5 + left.m4,
-                left.m1 * right.m4 + left.m3 * right.m5 + left.m5
-            );
+            SVGXMatrix m = default;
+            m.m0 = left.m0 * right.m0 + left.m2 * right.m1;
+            m.m1 = left.m1 * right.m0 + left.m3 * right.m1;
+            m.m2 = left.m0 * right.m2 + left.m2 * right.m3;
+            m.m3 = left.m1 * right.m2 + left.m3 * right.m3;
+            m.m4 = left.m0 * right.m4 + left.m2 * right.m5 + left.m4;
+            m.m5 = left.m1 * right.m4 + left.m3 * right.m5 + left.m5;
+            return m;
+            //return new SVGXMatrix(
+            //    left.m0 * right.m0 + left.m2 * right.m1,
+            //    left.m1 * right.m0 + left.m3 * right.m1,
+            //    left.m0 * right.m2 + left.m2 * right.m3,
+            //    left.m1 * right.m2 + left.m3 * right.m3,
+            //    left.m0 * right.m4 + left.m2 * right.m5 + left.m4,
+            //    left.m1 * right.m4 + left.m3 * right.m5 + left.m5
+            //);
         }
 
         public SVGXMatrix Inverse() {
@@ -200,8 +208,8 @@ namespace SVGX {
             Matrix4x4 matrix = default;
 
             matrix.m00 = m0;
-            matrix.m01 = m2;
-            matrix.m10 = m1;
+            matrix.m01 = -m2;
+            matrix.m10 = -m1;
             matrix.m11 = m3;
             matrix.m03 = m4;
             matrix.m13 = -m5;

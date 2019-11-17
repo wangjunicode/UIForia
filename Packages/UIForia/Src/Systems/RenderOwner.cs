@@ -168,7 +168,7 @@ namespace Src.Systems {
                             if (child.renderBox == null) {
                                 CreateRenderBox(child);
                             }
-                            else if ((child.flags & UIElementFlags.EnabledThisFrame) != 0) {
+                            else if ((child.enableStateChangedFrameId == child.Application.frameId)) { // todo -- don't deref application
                                 UpdateRenderBox(child);
                             }
 

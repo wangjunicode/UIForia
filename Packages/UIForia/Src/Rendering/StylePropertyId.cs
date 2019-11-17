@@ -45,8 +45,6 @@ namespace UIForia.Rendering {
 
         FlexLayoutWrap = 300,
         FlexLayoutDirection = 301,
-        FlexLayoutMainAxisAlignment = 302,
-        FlexLayoutCrossAxisAlignment = 303,
 
         FlexItemGrow = 402,
         FlexItemShrink = 403,

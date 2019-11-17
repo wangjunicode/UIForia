@@ -5,7 +5,7 @@
 
         style select {
             LayoutType = Stack;
-            StackLayoutAlignVertical = Center;
+            DistributeExtraSpaceVertical = CenterContent;
             BackgroundColor = white;
             PreferredSize = 1mx 48px;
             TextFontSize = 32px;
@@ -30,7 +30,7 @@
             MaxWidth = 1pca;
             TextColor = black;
             Padding = 4px 8px 4px 4px;
-            FlexLayoutCrossAxisAlignment = Center;
+            DistributeExtraSpaceVertical = CenterContent;
             FlexLayoutDirection = Horizontal;
             BackgroundColor = clear;
             [hover] {
@@ -95,8 +95,8 @@
             BorderColor = #006d82;
             BorderRadius = 0 8px 8px 0;
             Border = 2px;
-            FlexLayoutMainAxisAlignment = SpaceAround;
-            FlexLayoutCrossAxisAlignment = Center;
+            DistributeExtraSpaceVertical = AroundContent;
+            DistributeExtraSpaceHorizontal = CenterContent;
             PaddingTop = 4px;
             PaddingBottom = 4px;
 

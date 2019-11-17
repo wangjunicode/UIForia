@@ -45,8 +45,6 @@ namespace UIForia.Rendering {
 		public const int FlexItemShrink = 0;
 		public const LayoutDirection FlexLayoutDirection = UIForia.Layout.LayoutDirection.Vertical;
 		public const LayoutWrap FlexLayoutWrap = UIForia.Layout.LayoutWrap.None;
-		public const SpaceDistribution FlexLayoutMainAxisAlignment = UIForia.Layout.SpaceDistribution.BeforeContent;
-		public const CrossAxisAlignment FlexLayoutCrossAxisAlignment = UIForia.Layout.CrossAxisAlignment.Start;
 		public static readonly GridItemPlacement GridItemX = new GridItemPlacement(-1);
 		public static readonly GridItemPlacement GridItemY = new GridItemPlacement(-1);
 		public static readonly GridItemPlacement GridItemWidth = new GridItemPlacement(1);
@@ -215,10 +213,6 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.FlexLayoutDirection, (int)UIForia.Layout.LayoutDirection.Vertical);
 				case StylePropertyId.FlexLayoutWrap:
 					 return new StyleProperty(StylePropertyId.FlexLayoutWrap, (int)UIForia.Layout.LayoutWrap.None);
-				case StylePropertyId.FlexLayoutMainAxisAlignment:
-					 return new StyleProperty(StylePropertyId.FlexLayoutMainAxisAlignment, (int)UIForia.Layout.SpaceDistribution.BeforeContent);
-				case StylePropertyId.FlexLayoutCrossAxisAlignment:
-					 return new StyleProperty(StylePropertyId.FlexLayoutCrossAxisAlignment, (int)UIForia.Layout.CrossAxisAlignment.Start);
 				case StylePropertyId.GridItemX:
 					 return new StyleProperty(StylePropertyId.GridItemX, new GridItemPlacement(-1));
 				case StylePropertyId.GridItemY:

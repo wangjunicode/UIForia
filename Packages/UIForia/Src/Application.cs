@@ -59,6 +59,7 @@ namespace UIForia {
         public event Action<UIView[]> onViewsSorted;
         public event Action<UIView> onViewRemoved;
 
+        internal int frameId;
         protected internal readonly List<UIView> m_Views;
 
         public static readonly List<IAttributeProcessor> s_AttributeProcessors;
@@ -74,7 +75,8 @@ namespace UIForia {
 
         public static readonly UIForiaSettings Settings;
         private ElementPool elementPool;
-
+        private StructStack<ElemRef> elemRefStack;
+        
         private Type lastKnownGoodRootElementType;
 
         static Application() {
@@ -115,6 +117,7 @@ namespace UIForia {
             this.id = id;
             this.templateRootPath = templateRootPath;
 
+            this.elemRefStack = new StructStack<ElemRef>(32);
             // todo -- exceptions in constructors aren't good practice
             if (s_ApplicationList.Find(id, (app, _id) => app.id == _id) != null) {
                 throw new Exception($"Applications must have a unique id. Id {id} was already taken.");
@@ -198,7 +201,7 @@ namespace UIForia {
         public Camera Camera { get; private set; }
 
         public ResourceManager ResourceManager => resourceManager;
-        
+
         public float Width => Screen.width;
         public float Height => Screen.height;
 
@@ -306,9 +309,9 @@ namespace UIForia {
 
             m_AfterUpdateTaskSystem.OnReset();
             m_BeforeUpdateTaskSystem.OnReset();
-            
+
             CreateView("Default View", new Rect(0, 0, Width, Height), lastKnownGoodRootElementType);
-            
+
             onRefresh?.Invoke();
             onNextRefresh?.Invoke();
             onNextRefresh = null;
@@ -403,7 +406,7 @@ namespace UIForia {
                     element.parent.children[i].siblingIndex = i;
                 }
             }
-            
+
             for (int i = 0; i < m_Systems.Count; i++) {
                 m_Systems[i].OnElementDestroyed(element);
             }
@@ -440,7 +443,7 @@ namespace UIForia {
         }
 
         public void Update() {
-
+            frameId++;
             m_InputSystem.OnUpdate();
 
             m_BindingSystem.OnUpdate();
@@ -448,17 +451,17 @@ namespace UIForia {
             m_StyleSystem.OnUpdate();
 
             m_AnimationSystem.OnUpdate();
-            
+
             m_InputSystem.OnLateUpdate();
-            
+
             m_RoutingSystem.OnUpdate();
-            
-            SetTraversalIndex();
+
+//            SetTraversalIndex();
 
             m_LayoutSystem.OnUpdate();
-            
+
             m_BeforeUpdateTaskSystem.OnUpdate();
-            
+
             m_RenderSystem.OnUpdate();
 
             m_AfterUpdateTaskSystem.OnUpdate();
@@ -467,70 +470,6 @@ namespace UIForia {
 
             m_Views[0].SetSize(Screen.width, Screen.height);
 
-            UnsetEnabledThisFrame();
-        }
-
-        // todo -- get rid of this
-        private void UnsetEnabledThisFrame() {
-            LightStack<UIElement> stack = LightStack<UIElement>.Get();
-
-            for (int i = 0; i < m_Views.Count; i++) {
-                stack.Push(m_Views[i].rootElement);
-            }
-
-            while (stack.size > 0) {
-                UIElement currentElement = stack.array[--stack.size];
-
-                currentElement.flags &= ~(UIElementFlags.EnabledThisFrame | UIElementFlags.DisabledThisFrame);
-
-                if (currentElement.children == null) {
-                    continue;
-                }
-
-                UIElement[] childArray = currentElement.children.array;
-
-                int childCount = currentElement.children.size;
-
-                stack.EnsureAdditionalCapacity(childCount);
-
-                for (int i = 0; i < childCount; i++) {
-                    stack.array[stack.size++] = childArray[i];
-                }
-            }
-
-            LightStack<UIElement>.Release(ref stack);
-        }
-
-        private void SetTraversalIndex() {
-            LightStack<UIElement> stack = LightStack<UIElement>.Get();
-
-            for (int i = 0; i < m_Views.Count; i++) {
-                stack.Push(m_Views[i].rootElement);
-            }
-
-            int idx = 0;
-
-            while (stack.size > 0) {
-                UIElement currentElement = stack.array[--stack.size];
-
-                currentElement.depthTraversalIndex = idx++;
-
-                UIElement[] childArray = currentElement.children.array;
-                int childCount = currentElement.children.size;
-
-                stack.EnsureAdditionalCapacity(childCount);
-
-                for (int i = childCount - 1; i >= 0; i--) {
-                    // todo -- direct flag check
-                    if (childArray[i].isDisabled) {
-                        continue;
-                    }
-
-                    stack.array[stack.size++] = childArray[i];
-                }
-            }
-
-            LightStack<UIElement>.Release(ref stack);
         }
 
         /// <summary>
@@ -581,17 +520,15 @@ namespace UIForia {
                 return;
             }
 
-            // don't really need the stack here but it should give us a properly sized array since so many systems need light stacks of elements
-            LightStack<UIElement> stack = LightStack<UIElement>.Get();
 
             // if element is now enabled we need to walk it's children
             // and set enabled ancestor flags until we find a self-disabled child
-            stack.array[stack.size++] = element;
+            elemRefStack.array[elemRefStack.size++].element = element;
 
             // stack operations in the following code are inlined since this is a very hot path
-            while (stack.size > 0) {
+            while (elemRefStack.size > 0) {
                 // inline stack pop
-                UIElement child = stack.array[--stack.size];
+                UIElement child = elemRefStack.array[--elemRefStack.size].element;
 
                 child.flags |= UIElementFlags.AncestorEnabled;
 
@@ -618,21 +555,19 @@ namespace UIForia {
 
                 // only continue if calling enable didn't re-disable the element
                 if ((child.flags & UIElementFlags.SelfAndAncestorEnabled) == UIElementFlags.SelfAndAncestorEnabled) {
-                    child.flags |= UIElementFlags.EnabledThisFrame;
+                    child.enableStateChangedFrameId = frameId;
                     UIElement[] children = child.children.array;
                     int childCount = child.children.size;
-                    if (stack.size + childCount >= stack.array.Length) {
-                        Array.Resize(ref stack.array, stack.size + childCount + 16);
+                    if (elemRefStack.size + childCount >= elemRefStack.array.Length) {
+                        Array.Resize(ref elemRefStack.array, elemRefStack.size + childCount + 16);
                     }
 
                     for (int i = childCount - 1; i >= 0; i--) {
                         // inline stack push
-                        stack.array[stack.size++] = children[i];
+                        elemRefStack.array[elemRefStack.size++].element = children[i];
                     }
                 }
             }
-
-            LightStack<UIElement>.Release(ref stack);
 
             for (int i = 0; i < m_Systems.Count; i++) {
                 m_Systems[i].OnElementEnabled(element);
@@ -649,22 +584,21 @@ namespace UIForia {
 
             bool wasDisabled = element.isDisabled;
             element.flags &= ~(UIElementFlags.Enabled);
-            
+
             if (wasDisabled) {
                 return;
             }
 
             // don't really need the stack here but it should give us a properly sized array since so many systems need light stacks of elements
-            LightStack<UIElement> stack = LightStack<UIElement>.Get();
 
             // if element is now enabled we need to walk it's children
             // and set enabled ancestor flags until we find a self-disabled child
-            stack.array[stack.size++] = element;
+            elemRefStack.array[elemRefStack.size++].element = element;
 
             // stack operations in the following code are inlined since this is a very hot path
-            while (stack.size > 0) {
+            while (elemRefStack.size > 0) {
                 // inline stack pop
-                UIElement child = stack.array[--stack.size];
+                UIElement child = elemRefStack.array[--elemRefStack.size].element;
 
                 child.flags &= ~(UIElementFlags.AncestorEnabled);
 
@@ -679,7 +613,7 @@ namespace UIForia {
                 // if (child.flags & UIElementFlags.RequiresEnableCall) {
                 child.OnDisable();
                 // }
-                
+
                 // todo -- maybe do this on enable instead
                 if (child.style.currentState != StyleState.Normal) {
                     // todo -- maybe just have a clear states method
@@ -688,19 +622,19 @@ namespace UIForia {
                     child.style.ExitState(StyleState.Focused);
                 }
 
-                child.flags |= UIElementFlags.DisabledThisFrame;
+                child.enableStateChangedFrameId = frameId;
 
                 // if child is still disabled after OnDisable, traverse it's children
                 if (!child.isEnabled) {
                     UIElement[] children = child.children.array;
                     int childCount = child.children.size;
-                    if (stack.size + childCount >= stack.array.Length) {
-                        Array.Resize(ref stack.array, stack.size + childCount + 16);
+                    if (elemRefStack.size + childCount >= elemRefStack.array.Length) {
+                        Array.Resize(ref elemRefStack.array, elemRefStack.size + childCount + 16);
                     }
 
                     for (int i = childCount - 1; i >= 0; i--) {
                         // inline stack push
-                        stack.array[stack.size++] = children[i];
+                        elemRefStack.array[elemRefStack.size++].element = children[i];
                     }
                 }
             }
@@ -709,8 +643,6 @@ namespace UIForia {
             if (element.parent.isEnabled) {
                 element.flags |= UIElementFlags.AncestorEnabled;
             }
-
-            LightStack<UIElement>.Release(ref stack);
 
             for (int i = 0; i < m_Systems.Count; i++) {
                 m_Systems[i].OnElementDisabled(element);
@@ -784,13 +716,13 @@ namespace UIForia {
         public UIView[] GetViews() {
             return m_Views.ToArray();
         }
-        
+
         public AnimationData GetAnimationFromFile(string fileName, string animationName) {
             AnimationData data;
             styleImporter.ImportStyleSheetFromFile(fileName).TryGetAnimationData(animationName, out data);
             return data;
         }
-        
+
         internal void InsertChild(UIElement parent, UIElement child, uint index) {
             if (child.parent != null) {
                 throw new NotImplementedException("Reparenting is not supported");
@@ -810,14 +742,13 @@ namespace UIForia {
 
             bool parentEnabled = parent.isEnabled;
 
-            LightStack<UIElement> stack = LightStack<UIElement>.Get();
             UIView view = parent.View;
-            stack.Push(child);
+            elemRefStack.Push( new ElemRef() {element = child});
 
             view.BeginAddingElements();
 
-            while (stack.Count > 0) {
-                UIElement current = stack.Pop();
+            while (elemRefStack.Count > 0) {
+                UIElement current = elemRefStack.Pop().element;
 
                 current.depth = current.parent.depth + 1;
 
@@ -851,7 +782,7 @@ namespace UIForia {
                 // reverse this?
                 for (int i = 0; i < childCount; i++) {
                     children[i].siblingIndex = i;
-                    stack.Push(children[i]);
+                    elemRefStack.Push( new ElemRef() {element = children[i]});
                 }
             }
 
@@ -861,10 +792,8 @@ namespace UIForia {
 
             view.EndAddingElements();
 
-            LightStack<UIElement>.Release(ref stack);
-
             if (parentEnabled && child.isEnabled) {
-                child.flags |= UIElementFlags.EnabledThisFrame;
+                child.enableStateChangedFrameId = frameId;
                 child.flags &= ~UIElementFlags.Enabled;
                 DoEnableElement(child);
             }

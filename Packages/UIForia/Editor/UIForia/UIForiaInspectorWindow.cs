@@ -887,12 +887,6 @@ namespace UIForia.Editor {
                 case StylePropertyId.FlexLayoutDirection:
                     return DrawEnumWithValue<LayoutDirection>(property, isEditable);
 
-                case StylePropertyId.FlexLayoutMainAxisAlignment:
-                    return DrawEnumWithValue<SpaceDistribution>(property, isEditable);
-
-                case StylePropertyId.FlexLayoutCrossAxisAlignment:
-                    return DrawEnumWithValue<CrossAxisAlignment>(property, isEditable);
-
                 case StylePropertyId.FlexItemGrow:
                 case StylePropertyId.FlexItemShrink:
                     return DrawInt(property, isEditable);

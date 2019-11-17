@@ -6,7 +6,7 @@ style big-child {
 style level-0 {
     PreferredSize = 400px;
     BackgroundColor = red;
-    FlexLayoutDirection = Column;
+    FlexLayoutDirection = Horizontal;
 }
 
 style <Text> {
@@ -24,34 +24,31 @@ style p {
 style level-1 {
     PreferredSize = 1350px;
   //  BackgroundColor = green;
-    FlexLayoutDirection = Column;
+    FlexLayoutDirection = Horizontal;
     TextFontSize = 1.4em;
 }
 
 style level-2-a {
     PreferredSize = 100px;
     BackgroundColor = yellow;
-    FlexLayoutDirection = Column;
+    FlexLayoutDirection = Horizontal;
 }
 
 style level-2-b {
     PreferredSize = 100px;
     BackgroundColor = white;
-    FlexLayoutDirection = Column;
+    FlexLayoutDirection = Horizontal;
 }
 
 style level-2-c {
     PreferredSize = 600px;
     BackgroundColor = black;
-    FlexLayoutDirection = Column;
+    FlexLayoutDirection = Horizontal;
 }
 style level-2-ignored {
     BackgroundImage = url("image");
     PreferredSize = 140px;
     LayoutBehavior = Ignored;
-    AnchorTop = 100px;
-    TransformBehaviorY = AnchorMinOffset;
-    TransformPositionY = 30px;
 }
 
 style big {

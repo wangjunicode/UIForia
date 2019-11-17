@@ -3,8 +3,7 @@ style red {
 }
 
 style container {
-    LayoutType = Flex;
-    FlexLayoutDirection = Column;
+    FlexLayoutDirection = Horizontal;
     PreferredSize = 300px;
 }
 

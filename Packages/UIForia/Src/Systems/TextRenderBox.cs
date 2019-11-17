@@ -1,4 +1,5 @@
 using UIForia.Elements;
+using UIForia.Systems;
 using UIForia.Text;
 using UIForia.Util;
 using Unity.Collections.LowLevel.Unsafe;
@@ -231,7 +232,7 @@ namespace UIForia.Rendering {
                 shouldUpdateMaterialProperties = true;
          //   }
 
-            if ((element.flags & UIElementFlags.EnabledThisFrame) != 0 || shouldUpdateMaterialProperties) {
+            if (shouldUpdateMaterialProperties) {
                 shouldUpdateMaterialProperties = false;
                 float underlayX = Mathf.Clamp(textSpan.underlayX, -1, 1);
                 float underlayY = Mathf.Clamp(textSpan.underlayY, -1, 1);
@@ -267,7 +268,6 @@ namespace UIForia.Rendering {
                 geometry.objectData = new Vector4(shapeType, packedOutlineGlow, weight, element.style.Opacity); // should be text opacity instead?
                 geometry.packedColors = packedColors;
                 geometry.miscData = new Vector4(underlayX, underlayY, underlayDilate, underlaySoftness);
-             
                 
             }
 
@@ -277,6 +277,22 @@ namespace UIForia.Rendering {
             // ctx.DrawBatchedGeometry(geometry, ranges.array[0], element.layoutResult.matrix.ToMatrix4x4());
             if (ranges.size == 1) {
                 ctx.DrawBatchedText(geometry, ranges.array[0], matrix, fontData, clipper);
+                
+                // temp
+                
+                Path2D path = new Path2D();
+                path.SetStroke(Color.green);
+                OrientedBounds orientedBox = element.layoutResult.orientedBounds;
+                path.BeginPath();
+                path.MoveTo(orientedBox.p0);
+                path.LineTo(orientedBox.p1);
+                path.LineTo(orientedBox.p2);
+                path.LineTo(orientedBox.p3);
+                path.ClosePath();
+                path.Stroke();
+                ctx.DrawPath(path);
+                // end temp
+                
             }
             else {
                 for (int i = 0; i < ranges.size; i++) {

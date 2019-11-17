@@ -19,15 +19,10 @@ internal enum UIElementFlags {
 
     Registered = 1 << 14,
 
-    EnabledThisFrame = 1 << 16,
-    DisabledThisFrame = 1 << 17,
-
     // Layout Flags
     DebugLayout = 1 << 15,
     LayoutSizeWidthDirty = 1 << 18,
     LayoutSizeHeightDirty = 1 << 19,
-    LayoutBoxModelWidthDirty = 1 << 20,
-    LayoutBoxModelHeightDirty = 1 << 21,
     LayoutHierarchyDirty = 1 << 22,
     LayoutTransformDirty = 1 << 23,
     LayoutAlignmentHorizontalDirty = 1 << 24,
@@ -39,11 +34,11 @@ internal enum UIElementFlags {
     LayoutBorderPaddingHorizontalDirty = 1 << 30,
     LayoutBorderPaddingVerticalDirty = 1 << 31,
 
+    AliveEnabledAncestorEnabled = Alive | Enabled | AncestorEnabled,
+    
     DefaultLayoutDirty = (
         LayoutSizeWidthDirty |
         LayoutSizeHeightDirty |
-        LayoutBoxModelWidthDirty |
-        LayoutBoxModelHeightDirty |
         LayoutTypeDirty |
         LayoutBehaviorDirty
     ),
@@ -51,8 +46,6 @@ internal enum UIElementFlags {
     LayoutFlags = (
         LayoutSizeWidthDirty |
         LayoutSizeHeightDirty |
-        LayoutBoxModelWidthDirty |
-        LayoutBoxModelHeightDirty |
         LayoutHierarchyDirty |
         LayoutTransformDirty |
         LayoutAlignmentHorizontalDirty |

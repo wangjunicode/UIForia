@@ -1,6 +1,7 @@
 ﻿using SVGX;
 using UIForia.Elements;
 using UIForia.Rendering;
+using UIForia.Systems;
 using UIForia.Util;
 using UnityEngine;
 
@@ -53,6 +54,8 @@ namespace UIForia.Layout {
 
         public LayoutResult layoutParent;
         public UIElement element;
+        public OrientedBounds orientedBounds;
+        public SVGXMatrix transformMatrix;
 
         public Rect ContentRect => new Rect(
             padding.left + border.left,
@@ -64,6 +67,7 @@ namespace UIForia.Layout {
         internal LayoutResult(UIElement element) {
             this.element = element;
             this.matrix = SVGXMatrix.identity;
+            this.transformMatrix = SVGXMatrix.identity;
         }
 
     }

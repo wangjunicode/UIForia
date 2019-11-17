@@ -19,7 +19,9 @@ namespace UIForia.Systems {
         RequireLayoutVertical = VerticalSizeChanged,
 
         RequireAlignmentHorizontal = 1 << 6,
-        RequireAlignmentVertical = 1 << 7
+        RequireAlignmentVertical = 1 << 7,
+
+        RequiresMatrixUpdate = 1 << 8,
 
     }
 

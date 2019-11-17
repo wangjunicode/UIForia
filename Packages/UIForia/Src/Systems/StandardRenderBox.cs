@@ -398,8 +398,8 @@ namespace UIForia.Rendering {
                 Vector2 size = element.layoutResult.actualSize + new Vector2(style.ShadowSizeX, style.ShadowSizeY) + new Vector2(style.ShadowIntensity, style.ShadowIntensity);
                 position -= new Vector2(style.ShadowSizeX, style.ShadowSizeY) * 0.5f;
                 position -= new Vector2(style.ShadowIntensity, style.ShadowIntensity) * 0.5f;
-                float x = MeasurementUtil.ResolveOffsetMeasurement(element.layoutBox, viewWidth, viewHeight, style.ShadowOffsetX, element.layoutResult.actualSize.width);
-                float y = MeasurementUtil.ResolveOffsetMeasurement(element.layoutBox, viewWidth, viewHeight, style.ShadowOffsetY, element.layoutResult.actualSize.height);
+                float x = 0; // todo -- pivot n stuff MeasurementUtil.ResolveOffsetMeasurement(element.layoutBox, viewWidth, viewHeight, style.ShadowOffsetX, element.layoutResult.actualSize.width);
+                float y = 0; // todo -- pivot n stuff MeasurementUtil.ResolveOffsetMeasurement(element.layoutBox, viewWidth, viewHeight, style.ShadowOffsetY, element.layoutResult.actualSize.height);
                 position.x += x;
                 position.y += y;
                 shadowGeometry.mainTexture = null;
@@ -430,7 +430,7 @@ namespace UIForia.Rendering {
                 shadowGeometry.cornerData = new Vector4(cornerBevelTopLeft, cornerBevelTopRight, cornerBevelBottomLeft, cornerBevelBottomRight);
                 shadowGeometry.packedColors = v;
                 Size s = element.layoutResult.actualSize;
-                Vector2 pivotOffset = new Vector2(-element.layoutBox.pivotX * s.width, -element.layoutBox.pivotY * s.height);
+                Vector2 pivotOffset = default; // todo -- this! new Vector2(-element.layoutBox.pivotX * s.width, -element.layoutBox.pivotY * s.height);
                 shadowGeometry.FillRect(size.x, size.y, pivotOffset + position);
                 ctx.DrawBatchedGeometry(shadowGeometry, new GeometryRange(shadowGeometry.positionList.size, shadowGeometry.triangleList.size), element.layoutResult.matrix.ToMatrix4x4(), clipper);    
             }

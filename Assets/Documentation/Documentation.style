@@ -45,15 +45,14 @@ style <Anchor> {
 
 style button-group {
     LayoutType = Flex;
-    FlexLayoutDirection = Column;
+    FlexLayoutDirection = Horizontal;
     TextFontSize = 18px;
 }
 
 style button {
     Padding = 10px;
     Margin = 10px;
-    FlexLayoutCrossAxisAlignment = Center;
-    FlexLayoutMainAxisAlignment = Center;
+    DistributeExtraSpace = CenterContent;
     BorderRadius = 3px;
     BackgroundColor = @buttonBackgroundColor;
     TextColor = black;

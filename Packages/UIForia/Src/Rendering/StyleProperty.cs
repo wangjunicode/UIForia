@@ -350,7 +350,6 @@ namespace UIForia.Rendering {
 
         public IReadOnlyList<GridTrackSize> AsGridTrackTemplate => (IReadOnlyList<GridTrackSize>) objectField;
 
-        public AnchorTarget AsAnchorTarget => (AnchorTarget) int0;
         public RenderLayer AsRenderLayer => (RenderLayer) int0;
         public Texture2D AsTexture2D => (Texture2D) objectField;
         public GridLayoutDensity AsGridLayoutDensity => (GridLayoutDensity) int0;

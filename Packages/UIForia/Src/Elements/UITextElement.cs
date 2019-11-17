@@ -57,7 +57,6 @@ namespace UIForia.Elements {
 
             this.text = newText;
             textSpan.SetText(text);
-            layoutBox?.MarkForLayout();
         }
 
         public override string GetDisplayName() {

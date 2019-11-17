@@ -46,8 +46,6 @@ public class BasicLayoutTests {
         
         MockApplication app = new MockApplication(typeof(BasicLayoutTest_GathersDirtyData));
         
-        UIElement viewRoot = app.RootElement;
-
         BasicLayoutTest_GathersDirtyData root = app.RootElement.children[0] as BasicLayoutTest_GathersDirtyData;
 
         app.Update();
@@ -61,9 +59,9 @@ public class BasicLayoutTests {
         Assert.AreEqual(100, two.awesomeLayoutBox.finalWidth);
         Assert.AreEqual(100, three.awesomeLayoutBox.finalWidth);
         
-        Assert.AreEqual(0, one.awesomeLayoutBox.baseLocalX);
-        Assert.AreEqual(100, two.awesomeLayoutBox.baseLocalX);
-        Assert.AreEqual(200, three.awesomeLayoutBox.baseLocalX);
+        Assert.AreEqual(0, one.layoutResult.localPosition.x);
+        Assert.AreEqual(100, two.layoutResult.localPosition.x);
+        Assert.AreEqual(200, three.layoutResult.localPosition.x);
 
         root.FindById("one").SetEnabled(false);
         
@@ -73,8 +71,8 @@ public class BasicLayoutTests {
         Assert.AreEqual(100, two.awesomeLayoutBox.finalWidth);
         Assert.AreEqual(100, three.awesomeLayoutBox.finalWidth);
         
-        Assert.AreEqual(0, two.awesomeLayoutBox.baseLocalX);
-        Assert.AreEqual(100, three.awesomeLayoutBox.baseLocalX);
+        Assert.AreEqual(0, two.layoutResult.localPosition.x);
+        Assert.AreEqual(100, three.layoutResult.localPosition.x);
 
         app.Update();
         

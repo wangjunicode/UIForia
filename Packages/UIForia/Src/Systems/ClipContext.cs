@@ -54,17 +54,16 @@ namespace UIForia.Rendering {
         private PooledMesh regionMesh;
         private bool requireRegionCounting;
 
-        public ClipContext() {
-            this.clipDrawMaterial =  new Material(Shader.Find("UIForia/UIForiaPathSDF"));
-
-            this.clearMaterial = new Material(Shader.Find("UIForia/UIForiaClearClipRegions"));
+        public ClipContext(UIForiaSettings settings) {
+            this.clipDrawMaterial = settings.sdfPathMaterial;
+            this.clearMaterial = settings.clearClipRegionsMaterial;
             this.clearCountMaterial = new Material(clearMaterial);
 
             this.clearMaterial.SetColor(s_Color, Color.white);
             this.clearCountMaterial.SetColor(s_Color, new Color(0, 0, 0, 0));
 
-            this.countMaterial = new Material(Shader.Find("UIForia/UIForiaClipCount"));
-            this.blitCountMaterial = new Material(Shader.Find("UIForia/UIForiaClipBlit"));
+            this.countMaterial = settings.clipCountMaterial;
+            this.blitCountMaterial = settings.clipBlitMaterial;
             this.clipMaterialPool = new ClipMaterialPool(clipDrawMaterial);
             this.positionList = new StructList<Vector3>();
             this.texCoordList0 = new StructList<Vector4>();

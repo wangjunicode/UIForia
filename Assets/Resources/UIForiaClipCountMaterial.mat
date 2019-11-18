@@ -7,8 +7,8 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: UIForiaMaterial
-  m_Shader: {fileID: 4800000, guid: 79ba7bc7fd7bbd4498d9b3a264077bd4, type: 3}
+  m_Name: UIForiaClipCountMaterial
+  m_Shader: {fileID: 4800000, guid: 7168df5d188adac4e990f1e87ecb247a, type: 3}
   m_ShaderKeywords: 
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -19,6 +19,5 @@ Material:
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs: []
-    m_Floats:
-    - _StencilRef: 1
+    m_Floats: []
     m_Colors: []

@@ -12,7 +12,6 @@ namespace UIForia.Elements {
         internal TemplateScope templateScope;
 
         internal UIChildrenElement() {
-            flags |= UIElementFlags.BuiltIn;
         }
 
         public override void OnCreate() {

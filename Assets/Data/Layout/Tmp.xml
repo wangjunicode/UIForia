@@ -3,21 +3,81 @@
     <Style>
 
         style container {
-            FlexLayoutDirection = Vertical;
-            PreferredSize = 100px 600px;
+            FlexLayoutDirection = Horizontal;
+            PreferredSize = 1vw 1vh;
         }
 
         style child {
-            PreferredSize = 300px;
+            PreferredSize = 300px 200px;
             BackgroundColor = red;
-            FlexItemShrink = 1;
-        }
+            LayoutBehavior = Ignored;
+            AlignX = Center Parent;
+            AlignY = Center Parent;
+            run animation(rot);
+                     run animation(scale);
+            TransformPivot = 50% 50%;
 
+        }
+        
+        style child-2 {
+            PreferredSize = 100px 100px;
+            BackgroundColor = blue;
+            LayoutBehavior = Ignored;
+            AlignX = Center Parent;
+            AlignY = Center Parent;
+            TransformPivot = 50% 50%;
+            run animation(rot);
+        }
+        
+        style grow {
+            FlexItemGrow = 1;
+            BackgroundColor = green;
+            PreferredSize = 300px 100px;
+            MaxWidth = 100px;
+        }
+        
+          animation rot {
+            [options] {
+                iterations = -1;
+                duration = 5000;
+            }
+            [keyframes] {
+                0%{
+                    TransformRotation = 0;
+                }
+                100% {
+                    TransformRotation = 360;
+                }
+            }
+        }
+        
+           animation scale {
+            [options] {
+                iterations = -1;
+                duration = 5000;
+            }
+            [keyframes] {
+                0%{
+                    TransformScaleX = 1;
+                    TransformScaleY = 1;
+                }
+                50% {
+                    TransformScaleX = 1.8;
+                    TransformScaleY = 1.8;
+                }
+                100% {
+                    TransformScaleX = 1;
+                    TransformScaleY = 1;
+                }
+            }
+        }
+        
+        
     </Style>
 
     <Contents style="container">
-        <Group style='child'/>
-        <Group style='child'/>
-        <Group style='child'/>
+        <Group style='child'>
+            <Group style="child-2"/>
+        </Group>
     </Contents>
 </UITemplate>

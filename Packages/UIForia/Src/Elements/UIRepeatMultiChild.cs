@@ -6,7 +6,7 @@ namespace UIForia.Elements {
     public sealed class RepeatMultiChildContainerElement : UIElement {
 
         public RepeatMultiChildContainerElement() {
-            flags |= UIElementFlags.BuiltIn | UIElementFlags.ImplicitElement;
+            flags |= UIElementFlags.ImplicitElement;
         }
 
         public override void OnCreate() {

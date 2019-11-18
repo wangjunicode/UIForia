@@ -94,7 +94,6 @@ public class ResetTests {
     [Test]
     public void Clears() {
         ResetThing element = new ResetThing();
-        element.flags |= UIElementFlags.TextElement;
 
         element.autoInt = 1414;
         element.SetCallback(() => { });

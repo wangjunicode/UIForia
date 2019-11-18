@@ -22,7 +22,6 @@ namespace UIForia.Elements {
         private IDynamicData previousData;
 
         public UIDynamicElement() {
-            flags |= UIElementFlags.BuiltIn;
         }
 
         [OnPropertyChanged(nameof(data))]

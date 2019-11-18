@@ -19,7 +19,6 @@ namespace UIForia.Systems {
         public float paddingBorderVerticalEnd;
 
         public AwesomeLayoutBoxFlags flags;
-        public float currentHorizontalSize;
         public float cachedContentWidth;
         public float cachedContentHeight;
         public LayoutType layoutBoxType;
@@ -29,6 +28,9 @@ namespace UIForia.Systems {
         public AwesomeLayoutBox firstChild;
         public AwesomeLayoutBox nextSibling;
         public AwesomeLayoutBox parent;
+        public float transformX;
+        public float transformY;
+        public float transformRotation;
 
         public void Initialize(UIElement element, int frameId) {
             this.element = element;

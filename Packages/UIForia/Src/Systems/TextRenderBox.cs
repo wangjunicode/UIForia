@@ -111,7 +111,7 @@ namespace UIForia.Rendering {
 
                 float charWidth = geo.bottomRight.x - geo.topLeft.x;
                 float charHeight = geo.bottomRight.y - geo.topLeft.y;
-
+                
                 p0.x = charX + geo.topShear;
                 p0.y = -charY;
                 p0.z = 0;
@@ -278,20 +278,20 @@ namespace UIForia.Rendering {
             if (ranges.size == 1) {
                 ctx.DrawBatchedText(geometry, ranges.array[0], matrix, fontData, clipper);
                 
-                // temp
-                
-                Path2D path = new Path2D();
-                path.SetStroke(Color.green);
-                OrientedBounds orientedBox = element.layoutResult.orientedBounds;
-                path.BeginPath();
-                path.MoveTo(orientedBox.p0);
-                path.LineTo(orientedBox.p1);
-                path.LineTo(orientedBox.p2);
-                path.LineTo(orientedBox.p3);
-                path.ClosePath();
-                path.Stroke();
-                ctx.DrawPath(path);
-                // end temp
+//                // temp
+//                
+//                Path2D path = new Path2D();
+//                path.SetStroke(Color.green);
+//                OrientedBounds orientedBox = element.layoutResult.orientedBounds;
+//                path.BeginPath();
+//                path.MoveTo(orientedBox.p0);
+//                path.LineTo(orientedBox.p1);
+//                path.LineTo(orientedBox.p2);
+//                path.LineTo(orientedBox.p3);
+//                path.ClosePath();
+//                path.Stroke();
+//                ctx.DrawPath(path);
+//                // end temp
                 
             }
             else {

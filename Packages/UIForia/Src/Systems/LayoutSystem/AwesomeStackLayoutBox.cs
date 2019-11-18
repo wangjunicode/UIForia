@@ -1,8 +1,12 @@
 using UIForia.Layout;
+using UIForia.Rendering;
 using UIForia.Util;
 
 namespace UIForia.Systems {
 
+    // stack ignores extra space distribution since we never have any, items are always allocated the entire space so 
+    // that fit properties will fill the whole layout box
+    // aligning items works though
     public class AwesomeStackLayoutBox : AwesomeLayoutBox {
 
         protected override float ComputeContentWidth() {
@@ -35,47 +39,65 @@ namespace UIForia.Systems {
 
         public override void OnChildrenChanged(LightList<AwesomeLayoutBox> childList) { }
 
+        public override void OnStyleChanged(StructList<StyleProperty> propertyList) {
+            for (int i = 0; i < propertyList.size; i++) {
+                // note: space distribution is ignored, we don't care if it changes
+                switch (propertyList.array[i].propertyId) {
+                    case StylePropertyId.AlignItemsHorizontal:
+                    case StylePropertyId.FitItemsHorizontal:
+                        flags |= AwesomeLayoutBoxFlags.RequireLayoutHorizontal;
+                        // todo -- log history entry
+                        break;
+                    case StylePropertyId.AlignItemsVertical:
+                    case StylePropertyId.FitItemsVertical:
+                        flags |= AwesomeLayoutBoxFlags.RequireLayoutVertical;
+                        // todo -- log history entry
+                        break;
+                }
+            }
+        }
+
         public override void RunLayoutHorizontal(int frameId) {
             AwesomeLayoutBox ptr = firstChild;
 
             float contentAreaWidth = finalWidth - (paddingBorderHorizontalStart + paddingBorderHorizontalEnd);
 
             float alignment = element.style.AlignItemsHorizontal;
+
+            float inset = paddingBorderHorizontalStart;
             
             while (ptr != null) {
                 LayoutSize size = default;
                 ptr.GetWidths(ref size);
                 float clampedWidth = size.Clamped;
-                // todo - i think margin / alignment are not correct
-                // todo distribute extra space (around and between are converted to center since thats what makes sense
-                float x = 0;
-                float originBase = x + size.marginStart;
+
+                float x = inset + size.marginStart;
+                float originBase = x;
                 float originOffset = contentAreaWidth * alignment;
-                float offset = clampedWidth * -alignment;
-                float alignedPosition = originBase + originOffset + offset;
+                float alignedPosition = originBase + originOffset + (clampedWidth * -alignment);
                 ptr.ApplyLayoutHorizontal(x, alignedPosition, clampedWidth, contentAreaWidth, LayoutFit.None, frameId);
                 ptr = ptr.nextSibling;
             }
         }
 
+
         public override void RunLayoutVertical(int frameId) {
-              AwesomeLayoutBox ptr = firstChild;
+            AwesomeLayoutBox ptr = firstChild;
 
             float contentAreaHeight = finalHeight - (paddingBorderVerticalStart + paddingBorderVerticalEnd);
 
             float alignment = element.style.AlignItemsVertical;
-            
+            float inset = paddingBorderVerticalStart;
+
             while (ptr != null) {
                 LayoutSize size = default;
                 ptr.GetHeights(ref size);
                 float clampedHeight = size.Clamped;
-                // todo - i think margin / alignment are not correct
-                // todo distribute extra space (around and between are converted to center since thats what makes sense
-                float y = 0;
-                float originBase = y + size.marginStart;
+
+                float y = inset + size.marginStart;
+                float originBase = y;
                 float originOffset = contentAreaHeight * alignment;
-                float offset = clampedHeight * -alignment;
-                float alignedPosition = originBase + originOffset + offset;
+                float alignedPosition = originBase + originOffset + (clampedHeight * -alignment);
                 ptr.ApplyLayoutVertical(y, alignedPosition, clampedHeight, contentAreaHeight, LayoutFit.None, frameId);
                 ptr = ptr.nextSibling;
             }

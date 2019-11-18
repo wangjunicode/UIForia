@@ -80,15 +80,15 @@ namespace UIForia.Editor {
                     s_SelectedElementId = s_SelectedApplication.InputSystem.DebugElementsThisFrame[s_SelectedApplication.InputSystem.DebugElementsThisFrame.Count - 1].id;
                     IList<int> selectedIds = new List<int>(s_SelectedApplication.InputSystem.DebugElementsThisFrame.Count);
 
-                    int maxT = 0;
                     int selectIdx = 0;
-                    for (int i = s_SelectedApplication.InputSystem.DebugElementsThisFrame.Count - 1; i >= 0; i--) {
-                        if (s_SelectedApplication.InputSystem.DebugElementsThisFrame[i].depthTraversalIndex > maxT) {
-                            maxT = s_SelectedApplication.InputSystem.DebugElementsThisFrame[i].depthTraversalIndex;
-                            selectIdx = i;
-                        }
-                        selectedIds.Add(s_SelectedApplication.InputSystem.DebugElementsThisFrame[i].id);
-                    }
+                    // todo -- removed depth traversal index, this need to be updated
+//                    for (int i = s_SelectedApplication.InputSystem.DebugElementsThisFrame.Count - 1; i >= 0; i--) {
+//                        if (s_SelectedApplication.InputSystem.DebugElementsThisFrame[i].depthTraversalIndex > maxT) {
+//                            maxT = s_SelectedApplication.InputSystem.DebugElementsThisFrame[i].depthTraversalIndex;
+//                            selectIdx = i;
+//                        }
+//                        selectedIds.Add(s_SelectedApplication.InputSystem.DebugElementsThisFrame[i].id);
+//                    }
 
                     s_SelectedElementId = s_SelectedApplication.InputSystem.DebugElementsThisFrame[selectIdx].id;
                     treeView.SetSelection(selectedIds);

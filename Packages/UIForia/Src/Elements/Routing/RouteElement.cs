@@ -15,11 +15,7 @@ namespace UIForia.Elements.Routing {
         public RouteMatch CurrentMatch => match;
         public bool IsRouteMatched => match.IsMatch;
         public virtual string FullPath => path;
-
-        public RouteElement() {
-            flags |= UIElementFlags.BuiltIn;
-        }
-
+        
         public override void OnCreate() {
             
             UIElement ptr = parent;

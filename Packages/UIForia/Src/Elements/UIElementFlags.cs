@@ -1,59 +1,53 @@
 ﻿using System;
-using UIForia.Layout;
 
 [Flags]
 internal enum UIElementFlags {
 
-    TextElement = 1 << 0,
-    ImplicitElement = 1 << 1,
-    Enabled = 1 << 2,
-    AncestorEnabled = 1 << 3,
-    Alive = 1 << 4,
-    Primitive = 1 << 6,
-    HasBeenEnabled = 1 << 7,
-    Created = 1 << 8,
-    VirtualElement = 1 << 9,
-    TemplateRoot = 1 << 10,
-    BuiltIn = 1 << 11,
+    // Element Flags
+    ImplicitElement = 1,
+    Enabled = 1 << 1,
+    AncestorEnabled = 1 << 2,
+    Alive = 1 << 3,
+    HasBeenEnabled = 1 << 4,
+    Primitive = 1 << 5,
+    Created = 1 << 6, // can maybe get rid fo this when revisiting 
+    TemplateRoot = 1 << 7,
+    
     SelfAndAncestorEnabled = Alive | Enabled | AncestorEnabled,
-
-    Registered = 1 << 14,
-
+    
     // Layout Flags
-    DebugLayout = 1 << 15,
-    LayoutSizeWidthDirty = 1 << 18,
-    LayoutSizeHeightDirty = 1 << 19,
-    LayoutHierarchyDirty = 1 << 22,
-    LayoutTransformDirty = 1 << 23,
-    LayoutAlignmentHorizontalDirty = 1 << 24,
-    LayoutAlignmentVerticalDirty = 1 << 25,
-    LayoutFitWidthDirty = 1 << 26,
-    LayoutFitHeightDirty = 1 << 27,
-    LayoutTypeDirty = 1 << 28,
-    LayoutBehaviorDirty = 1 << 29,
-    LayoutBorderPaddingHorizontalDirty = 1 << 30,
-    LayoutBorderPaddingVerticalDirty = 1 << 31,
+    DebugLayout = 1 << 16,
+    LayoutSizeWidthDirty = 1 << 17,
+    LayoutSizeHeightDirty = 1 << 18,
+    LayoutHierarchyDirty = 1 << 19,
+    LayoutTransformNotIdentity = 1 << 20,
+    LayoutTransformDirty = 1 << 21,
+    LayoutAlignmentHorizontalDirty = 1 << 22,
+    LayoutAlignmentVerticalDirty = 1 << 23,
+    LayoutFitWidthDirty = 1 << 24,
+    LayoutFitHeightDirty = 1 << 25,
+    LayoutTypeOrBehaviorDirty = 1 << 26,
+    LayoutBorderPaddingHorizontalDirty = 1 << 27,
+    LayoutBorderPaddingVerticalDirty = 1 << 28,
 
     AliveEnabledAncestorEnabled = Alive | Enabled | AncestorEnabled,
     
     DefaultLayoutDirty = (
         LayoutSizeWidthDirty |
         LayoutSizeHeightDirty |
-        LayoutTypeDirty |
-        LayoutBehaviorDirty
+        LayoutTypeOrBehaviorDirty 
     ),
 
     LayoutFlags = (
         LayoutSizeWidthDirty |
         LayoutSizeHeightDirty |
         LayoutHierarchyDirty |
-        LayoutTransformDirty |
+        LayoutTransformNotIdentity |
         LayoutAlignmentHorizontalDirty |
         LayoutAlignmentVerticalDirty |
         LayoutFitWidthDirty |
         LayoutFitHeightDirty |
-        LayoutTypeDirty |
-        LayoutBehaviorDirty |
+        LayoutTypeOrBehaviorDirty |
         LayoutBorderPaddingHorizontalDirty |
         LayoutBorderPaddingVerticalDirty
     )

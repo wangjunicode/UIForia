@@ -11,7 +11,7 @@ namespace UIForia.Rendering {
         public StructList<Vector4> texCoordList0;
         public StructList<Vector4> texCoordList1;
         public StructList<int> triangleList;
-        
+
         public Vector4 packedColors;
         public Vector4 objectData;
         public Texture mainTexture;
@@ -191,9 +191,10 @@ namespace UIForia.Rendering {
             ref Vector4 uv2 = ref texCoord0[startVert + 2];
             ref Vector4 uv3 = ref texCoord0[startVert + 3];
 
-            p0.x = position.x + 0;
+            p0.x = (position.x + 0);
             p0.y = -position.y;
             p0.z = 0;
+
 
             p1.x = position.x + width;
             p1.y = -position.y;
@@ -206,6 +207,11 @@ namespace UIForia.Rendering {
             p3.x = position.x;
             p3.y = -(position.y + height);
             p3.z = 0;
+            
+//            p0 -= new Vector3(100, -100, 0);
+//            p1 -= new Vector3(100, -100, 0);
+//            p2 -= new Vector3(100, -100, 0);
+//            p3 -= new Vector3(100, -100, 0);
 
             uv0.x = 0;
             uv0.y = 1;
@@ -252,7 +258,6 @@ namespace UIForia.Rendering {
             }
         }
 
-        
     }
 
 }

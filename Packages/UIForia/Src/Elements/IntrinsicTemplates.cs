@@ -7,7 +7,7 @@ namespace UIForia.Elements {
     public class UIGroupElement : UIContainerElement {
 
         public UIGroupElement() {
-            flags |= UIElementFlags.BuiltIn;
+            
         }
 
         public override string GetDisplayName() {
@@ -20,7 +20,7 @@ namespace UIForia.Elements {
     public class UIPanelElement : UIContainerElement {
 
         public UIPanelElement() {
-            flags |= UIElementFlags.BuiltIn;
+            
         }
 
         public override string GetDisplayName() {
@@ -33,7 +33,7 @@ namespace UIForia.Elements {
     public class UISectionElement : UIContainerElement {
         
         public UISectionElement() {
-            flags |= UIElementFlags.BuiltIn;
+            
         }
 
         public override string GetDisplayName() {
@@ -46,7 +46,7 @@ namespace UIForia.Elements {
     public class UIDivElement : UIContainerElement {
 
         public UIDivElement() {
-            flags |= UIElementFlags.BuiltIn;
+            
         }
 
         public override string GetDisplayName() {
@@ -59,7 +59,7 @@ namespace UIForia.Elements {
     public class UIHeaderElement : UIContainerElement {
 
         public UIHeaderElement() {
-            flags |= UIElementFlags.BuiltIn;
+            
         }
 
         public override string GetDisplayName() {
@@ -72,7 +72,7 @@ namespace UIForia.Elements {
     public class UIFooterElement : UIContainerElement {
         
         public UIFooterElement() {
-            flags |= UIElementFlags.BuiltIn;
+            
         }
 
         public override string GetDisplayName() {
@@ -87,7 +87,7 @@ namespace UIForia.Elements {
         public string forElement;
         
         public UILabelElement(string text = "") : base(text) {
-            flags |= UIElementFlags.BuiltIn;
+            
         }
 
         [OnMouseClick]
@@ -108,7 +108,7 @@ namespace UIForia.Elements {
     public class UIParagraphElement : UITextElement {
 
         public UIParagraphElement(string text = "") : base(text) {
-            flags |= UIElementFlags.BuiltIn;
+            
         }
 
         public override string GetDisplayName() {
@@ -121,7 +121,7 @@ namespace UIForia.Elements {
     public class UIHeading1Element : UITextElement {
 
         public UIHeading1Element(string text = "") : base(text) {
-            flags |= UIElementFlags.BuiltIn;
+            
         }
 
         public override string GetDisplayName() {
@@ -134,7 +134,7 @@ namespace UIForia.Elements {
     public class UIHeading2Element : UITextElement {
 
         public UIHeading2Element(string text = "") : base(text) {
-            flags |= UIElementFlags.BuiltIn;
+            
         }
 
         public override string GetDisplayName() {
@@ -147,7 +147,7 @@ namespace UIForia.Elements {
     public class UIHeading3Element : UITextElement {
 
         public UIHeading3Element(string text = "") : base(text) {
-            flags |= UIElementFlags.BuiltIn;
+            
         }
 
         public override string GetDisplayName() {
@@ -160,7 +160,7 @@ namespace UIForia.Elements {
     public class UIHeading4Element : UITextElement {
 
         public UIHeading4Element(string text = "") : base(text) {
-            flags |= UIElementFlags.BuiltIn;
+            
         }
 
         public override string GetDisplayName() {
@@ -173,7 +173,7 @@ namespace UIForia.Elements {
     public class UIHeading5Element : UITextElement {
 
         public UIHeading5Element(string text = "") : base(text) {
-            flags |= UIElementFlags.BuiltIn;
+            
         }
 
         public override string GetDisplayName() {
@@ -186,7 +186,7 @@ namespace UIForia.Elements {
     public class UIHeading6Element : UITextElement {
 
         public UIHeading6Element(string text = "") : base(text) {
-            flags |= UIElementFlags.BuiltIn;
+            
         }
 
         public override string GetDisplayName() {

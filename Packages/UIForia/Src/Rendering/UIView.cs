@@ -10,7 +10,6 @@ using Application = UIForia.Application;
 public class UIViewRootElement : UIElement {
 
     public UIViewRootElement() {
-        flags |= UIElementFlags.BuiltIn;
         flags |= UIElementFlags.ImplicitElement;
         flags |= UIElementFlags.Created;
     }

@@ -26,24 +26,25 @@ namespace UIForia.Systems {
         private void HandleStylePropertyChanged(UIElement element, StructList<StyleProperty> properties) {
             bool checkAlignHorizontal = false;
             bool updateAlignVertical = false;
-
+            bool updateTransform = false;
             for (int i = 0; i < properties.size; i++) {
                 ref StyleProperty property = ref properties.array[i];
                 // todo -- these flags can maybe probably be baked into setting the property
                 switch (property.propertyId) {
                     case StylePropertyId.LayoutType:
-                        element.flags |= UIElementFlags.LayoutTypeDirty;
-                        break;
                     case StylePropertyId.LayoutBehavior:
-                        element.flags |= UIElementFlags.LayoutBehaviorDirty;
+                        element.flags |= UIElementFlags.LayoutTypeOrBehaviorDirty;
                         break;
                     case StylePropertyId.TransformRotation:
                     case StylePropertyId.TransformPositionX:
                     case StylePropertyId.TransformPositionY:
                     case StylePropertyId.TransformScaleX:
                     case StylePropertyId.TransformScaleY:
-                        element.flags |= UIElementFlags.LayoutTransformDirty;
+                    case StylePropertyId.TransformPivotX:
+                    case StylePropertyId.TransformPivotY:
+                        updateTransform = true;
                         break;
+
                     case StylePropertyId.AlignmentBehaviorX:
                     case StylePropertyId.AlignmentOriginX:
                     case StylePropertyId.AlignmentOffsetX:
@@ -89,9 +90,26 @@ namespace UIForia.Systems {
                 }
             }
 
+            if (updateTransform) {
+                float rotation = element.style.TransformRotation;
+                float scaleX = element.style.TransformScaleX;
+                float scaleY = element.style.TransformScaleY;
+                float positionX = element.style.TransformPositionX.value;
+                float positionY = element.style.TransformPositionY.value;
+
+                if (rotation != 0 || scaleX != 1 || scaleY != 1 || positionX != 0 || positionY != 0) {
+                    element.flags |= UIElementFlags.LayoutTransformNotIdentity;
+                }
+                else {
+                    element.flags &= ~UIElementFlags.LayoutTransformNotIdentity;
+                }
+
+                element.flags |= UIElementFlags.LayoutTransformDirty;
+                
+            }
+
             AwesomeLayoutBox layoutBox = element.awesomeLayoutBox;
             if (layoutBox != null) {
-                
                 if (checkAlignHorizontal) {
                     layoutBox.UpdateRequiresHorizontalAlignment();
                 }
@@ -155,11 +173,10 @@ namespace UIForia.Systems {
         public void OnElementCreated(UIElement element) { }
 
         public IList<UIElement> QueryPoint(Vector2 point, IList<UIElement> retn) {
-            
             for (int i = 0; i < runners.size; i++) {
                 runners[i].QueryPoint(point, retn);
             }
-            
+
             return retn;
         }
 

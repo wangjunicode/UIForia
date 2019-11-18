@@ -12,7 +12,6 @@ namespace UIForia.Elements {
         public string path;
 
         public UIRouterLinkElement() {
-            flags |= UIElementFlags.BuiltIn;
         }
 
         [OnMouseClick]

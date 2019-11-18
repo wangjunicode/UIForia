@@ -174,13 +174,11 @@ namespace UIForia.Editor {
             // Transform
             new AnimatedPropertyGenerator<OffsetMeasurement>(StylePropertyId.TransformPositionX, new OffsetMeasurement(0)),
             new AnimatedPropertyGenerator<OffsetMeasurement>(StylePropertyId.TransformPositionY, new OffsetMeasurement(0)),
-            new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.TransformPivotX, new UIFixedLength(0)),
-            new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.TransformPivotY, new UIFixedLength(0)),
+            new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.TransformPivotX, new UIFixedLength(0.5f, UIFixedUnit.Percent)),
+            new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.TransformPivotY, new UIFixedLength(0.5f, UIFixedUnit.Percent)),
             new AnimatedPropertyGenerator<float>(StylePropertyId.TransformScaleX, 1),
             new AnimatedPropertyGenerator<float>(StylePropertyId.TransformScaleY, 1),
             new AnimatedPropertyGenerator<float>(StylePropertyId.TransformRotation, 0),
-            new PropertyGenerator<TransformBehavior>(StylePropertyId.TransformBehaviorX, TransformBehavior.LayoutOffset),
-            new PropertyGenerator<TransformBehavior>(StylePropertyId.TransformBehaviorY, TransformBehavior.LayoutOffset),
 
             // Layout
             new PropertyGenerator<LayoutType>(StylePropertyId.LayoutType, LayoutType.Flex),

@@ -5,7 +5,6 @@ namespace UIForia.Elements {
         public readonly string slotId;
 
         protected internal UISlotDefinition() {
-            flags |= UIElementFlags.BuiltIn;
         }
 
         public UISlotDefinition(string slotId) : this() {
@@ -22,7 +21,6 @@ namespace UIForia.Elements {
         public readonly string slotId;
 
         protected internal UISlotContent() {
-            flags |= UIElementFlags.BuiltIn;
         }
 
         public UISlotContent(string slotId) : this() {

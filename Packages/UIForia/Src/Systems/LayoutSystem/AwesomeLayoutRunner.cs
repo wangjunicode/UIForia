@@ -7,7 +7,6 @@ using UIForia.Layout;
 using UIForia.Util;
 using UnityEngine;
 using UnityEngine.Assertions;
-using UnityEngine.Profiling;
 using Debug = System.Diagnostics.Debug;
 
 namespace UIForia.Systems {
@@ -122,11 +121,13 @@ namespace UIForia.Systems {
                 UIElement currentElement = transformList.array[i];
                 LayoutResult result = currentElement.layoutResult;
 
-                Vector2 position = new Vector2(currentElement.style.TransformPositionX.value, currentElement.style.TransformPositionY.value);
-                Vector2 scale = new Vector2(1, 1);
-                float rotation = currentElement.style.TransformRotation;
-
-                result.transformMatrix = SVGXMatrix.TRS(position, rotation, scale);
+                result.transformMatrix = SVGXMatrix.TRS(
+                    currentElement.awesomeLayoutBox.transformX,
+                    currentElement.awesomeLayoutBox.transformY,
+                    currentElement.style.TransformRotation,
+                    currentElement.style.TransformScaleX,
+                    currentElement.style.TransformScaleY
+                );
             }
 
             transformList.Clear();
@@ -164,9 +165,9 @@ namespace UIForia.Systems {
                 }
 
                 if ((flags & UIElementFlags.LayoutFlags) != 0) {
-                    if ((flags & (UIElementFlags.LayoutTypeDirty | UIElementFlags.LayoutBehaviorDirty)) != 0) {
+                    if ((flags & UIElementFlags.LayoutTypeOrBehaviorDirty) != 0) {
                         UpdateLayoutTypeOrBehavior(currentElement);
-                        flags &= ~(UIElementFlags.LayoutTypeDirty | UIElementFlags.LayoutBehaviorDirty);
+                        flags &= ~UIElementFlags.LayoutTypeOrBehaviorDirty;
 
                         if ((flags & UIElementFlags.LayoutHierarchyDirty) == 0) {
                             flags |= UIElementFlags.LayoutHierarchyDirty;
@@ -207,20 +208,13 @@ namespace UIForia.Systems {
                     if ((flags & UIElementFlags.LayoutTransformDirty) != 0) {
                         // if element has identity transform remove from toTransform list
                         // otherwise add if not already member
-                        transformList.Add(currentElement);
+                        transformList.Add(currentElement); // mark to get transform recomputed
+                        // mark to update matrix, don't actually add it to the list, that will happen later
+                        // because many things can cause this flag to be set, be sure we only add it to list once.
                         currentElement.awesomeLayoutBox.flags |= AwesomeLayoutBoxFlags.RequiresMatrixUpdate;
                         flags &= ~UIElementFlags.LayoutTransformDirty;
                     }
                 }
-
-                // temp
-                LayoutResult result = currentElement.layoutResult;
-
-                Vector2 position = new Vector2(currentElement.style.TransformPositionX.value, currentElement.style.TransformPositionY.value);
-                Vector2 scale = new Vector2(1, 1);
-                float rotation = currentElement.style.TransformRotation;
-
-                result.transformMatrix = SVGXMatrix.TRS(position, rotation, scale);
 
                 if ((currentElement.awesomeLayoutBox.flags & AwesomeLayoutBoxFlags.RequireAlignmentHorizontal) != 0) {
                     alignHorizontalList.Add(currentElement);
@@ -333,6 +327,9 @@ namespace UIForia.Systems {
         private void PerformLayoutStep(AwesomeLayoutBox rootBox) {
             boxRefStack.Push(new BoxRef() {box = rootBox});
 
+            float viewWidth = rootBox.element.View.Viewport.width;
+            float viewHeight = rootBox.element.View.Viewport.height;
+
             while (boxRefStack.size > 0) {
                 AwesomeLayoutBox layoutBox = boxRefStack.array[--boxRefStack.size].box;
 #if DEBUG
@@ -365,6 +362,16 @@ namespace UIForia.Systems {
                 }
 #endif
 
+                if ((layoutBox.element.flags & UIElementFlags.LayoutTransformNotIdentity) != 0) {
+                    float x = MeasurementUtil.ResolveOffsetMeasurement(layoutBox.element, viewWidth, viewHeight, layoutBox.element.style.TransformPositionX, layoutBox.finalWidth);
+                    float y = MeasurementUtil.ResolveOffsetMeasurement(layoutBox.element, viewWidth, viewHeight, layoutBox.element.style.TransformPositionY, layoutBox.finalHeight);
+                    if (!Mathf.Approximately(x, layoutBox.transformX) || !Mathf.Approximately(y, layoutBox.transformY)) {
+                        layoutBox.transformX = x;
+                        layoutBox.transformY = y;
+                        layoutBox.flags |= AwesomeLayoutBoxFlags.RequiresMatrixUpdate;
+                    }
+                }
+
                 // if we need to update this element's matrix then add to the list
                 // this can happen if the parent assigned a different position to 
                 // this element (and the element doesn't have an alignment override)
@@ -394,11 +401,11 @@ namespace UIForia.Systems {
 
                 ignoredBox.GetWidths(ref size);
                 float outputSize = size.Clamped;
-                ignoredBox.ApplyLayoutHorizontal(0, 0, outputSize, outputSize, LayoutFit.None, frameId);
+                ignoredBox.ApplyLayoutHorizontal(0, 0, outputSize, ignoredBox.parent?.finalWidth ?? outputSize, LayoutFit.None, frameId);
 
                 ignoredBox.GetHeights(ref size);
                 outputSize = size.Clamped;
-                ignoredBox.ApplyLayoutVertical(0, 0, outputSize, outputSize, LayoutFit.None, frameId);
+                ignoredBox.ApplyLayoutVertical(0, 0, outputSize, ignoredBox.parent?.finalHeight ?? outputSize, LayoutFit.None, frameId);
 
                 PerformLayoutStep(ignoredBox);
             }
@@ -429,22 +436,14 @@ namespace UIForia.Systems {
 
                     ref SVGXMatrix localMatrix = ref result.localMatrix;
 
-                    // localMatrix = localMatrix * result.transformMatrix;
+                    float px = MeasurementUtil.ResolveFixedSize(result.actualSize.width, 0, 0, 0, currentElement.style.TransformPivotX);
+                    float py = MeasurementUtil.ResolveFixedSize(result.actualSize.height, 0, 0, 0, currentElement.style.TransformPivotY);
 
-                    float px = currentElement.style.TransformPivotX.value;
-                    float py = currentElement.style.TransformPivotX.value;
-
-                    SVGXMatrix pivotMat = SVGXMatrix.identity;
-                    
-                    if (px != 0 && py != 0) {
-                    }
-
-                    Vector2 pivot = new Vector2(0.5f * result.actualSize.width, 0.5f * result.actualSize.height);
-
-                    float ca = Mathf.Cos(currentElement.style.TransformRotation * Mathf.Deg2Rad);
-                    float sa = Mathf.Sin(currentElement.style.TransformRotation * Mathf.Deg2Rad);
-                    float scaleX = 1;
-                    float scaleY = 1;
+                    float rotation = currentElement.style.TransformRotation * Mathf.Deg2Rad;
+                    float ca = Mathf.Cos(rotation);
+                    float sa = Mathf.Sin(rotation);
+                    float scaleX = currentElement.style.TransformScaleX;
+                    float scaleY = currentElement.style.TransformScaleY;
 
                     localMatrix.m0 = ca * scaleX;
                     localMatrix.m1 = sa * scaleX;
@@ -453,6 +452,16 @@ namespace UIForia.Systems {
                     localMatrix.m4 = result.alignedPosition.x;
                     localMatrix.m5 = result.alignedPosition.y;
 
+                    localMatrix = SVGXMatrix.TRS(result.alignedPosition.x, result.alignedPosition.y, rotation, scaleX, scaleY);
+                    
+                    if (px != 0 || py != 0) {
+                        SVGXMatrix pivot = new SVGXMatrix(1, 0, 0, 1, px, py);
+                        SVGXMatrix pivotBack = pivot;
+                        pivotBack.m4 = -px;
+                        pivotBack.m5 = -py;
+                        localMatrix = pivot * localMatrix * pivotBack;
+                    }
+                       
                     if (currentElement.parent != null) {
                         // result.matrix = element.parent.layoutResult.matrix * localMatrix;
                         ref SVGXMatrix m = ref result.matrix;
@@ -508,8 +517,7 @@ namespace UIForia.Systems {
                 OrientedBounds orientedBounds = default;
                 ref SVGXMatrix m = ref result.matrix;
 
-                // inlined svgxMatrix.Transform(point)
-                // takes runtime for ~4000 elements from 4.5ms to 0.47ms w/ deep profile on
+                // inlined svgxMatrix.Transform(point), takes runtime for ~4000 elements from 4.5ms to 0.47ms w/ deep profile on
                 orientedBounds.p0.x = m.m0 * x + m.m2 * y + m.m4;
                 orientedBounds.p0.y = m.m1 * x + m.m3 * y + m.m5;
 
@@ -621,6 +629,7 @@ namespace UIForia.Systems {
             // if the behavior is ignored add it to the ignored list
             if (layoutBehavior == LayoutBehavior.Ignored && (currentElement.awesomeLayoutBox.flags & AwesomeLayoutBoxFlags.Ignored) == 0) {
                 currentElement.awesomeLayoutBox.flags |= AwesomeLayoutBoxFlags.Ignored;
+                currentElement.awesomeLayoutBox.parent = currentElement.parent.awesomeLayoutBox;
                 ignoredList.Add(currentElement.awesomeLayoutBox);
             }
         }

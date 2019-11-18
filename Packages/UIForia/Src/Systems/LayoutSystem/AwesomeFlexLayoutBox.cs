@@ -258,7 +258,7 @@ namespace UIForia.Systems {
                 float offset = 0;
                 float spacerSize = 0;
 
-                GetAlignmentOffsets(track.remaining, paddingBorderHorizontalStart, track.endIndex - track.startIndex, alignment, out offset, out spacerSize);
+                SpaceDistributionUtil.GetAlignmentOffsets(track.remaining, paddingBorderHorizontalStart, track.endIndex - track.startIndex, alignment, out offset, out spacerSize);
 
                 int startIdx = track.startIndex;
                 int endIdx = track.endIndex;
@@ -318,7 +318,7 @@ namespace UIForia.Systems {
                 alignment = SpaceDistribution.AfterContent;
             }
 
-            GetAlignmentOffsets(track.remaining, inset, track.endIndex - track.startIndex, alignment, out offset, out spacerSize);
+            SpaceDistributionUtil.GetAlignmentOffsets(track.remaining, inset, track.endIndex - track.startIndex, alignment, out offset, out spacerSize);
 
             float itemAlignment = element.style.AlignItemsHorizontal;
             float gap = 0; //element.style.GridLayoutColGap;
@@ -342,52 +342,6 @@ namespace UIForia.Systems {
 
                 item.layoutBox.ApplyLayoutHorizontal(x, alignedPosition, item.baseWidth, item.availableSize, fit, frameId);
                 offset += item.widthData.marginStart + item.widthData.marginEnd + gap;
-            }
-        }
-
-        private static void GetAlignmentOffsets(float remaining, float inset, int contentCount, SpaceDistribution alignment, out float offset, out float spacerSize) {
-            if (remaining <= 0) {
-                offset = 0;
-                spacerSize = 0;
-                return;
-            }
-
-            offset = 0;
-            spacerSize = 0;
-            switch (alignment) {
-                case SpaceDistribution.Unset:
-                case SpaceDistribution.AfterContent:
-                    break;
-                case SpaceDistribution.CenterContent:
-                    offset = inset * 0.5f + remaining * 0.5f;
-                    break;
-                case SpaceDistribution.BeforeContent:
-                    offset = remaining;
-                    break;
-                case SpaceDistribution.BetweenContent: {
-                    if (contentCount == 1) {
-                        offset = remaining * 0.5f;
-                        break;
-                    }
-
-                    spacerSize = remaining / (contentCount - 1);
-                    offset = 0;
-                    break;
-                }
-
-                case SpaceDistribution.AroundContent: {
-                    if (contentCount == 1) {
-                        offset = remaining * 0.5f;
-                        break;
-                    }
-
-                    spacerSize = (remaining / contentCount);
-                    offset = spacerSize * 0.5f;
-                    break;
-                }
-
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(alignment), alignment, null);
             }
         }
 
@@ -720,7 +674,7 @@ namespace UIForia.Systems {
                 alignment = SpaceDistribution.AfterContent;
             }
 
-            GetAlignmentOffsets(remaining, inset, childCount, alignment, out offset, out spacerSize);
+            SpaceDistributionUtil.GetAlignmentOffsets(remaining, inset, childCount, alignment, out offset, out spacerSize);
             float itemAlignment = element.style.AlignItemsVertical;
             float gap = 0; //element.style.GridLayoutColGap;
 
@@ -820,7 +774,7 @@ namespace UIForia.Systems {
             float offset = 0;
             float spacerSize = 0;
 
-            GetAlignmentOffsets(remainingHeight, paddingBorderVerticalStart, wrappedTracks.size, spaceDistribution, out offset, out spacerSize);
+            SpaceDistributionUtil.GetAlignmentOffsets(remainingHeight, paddingBorderVerticalStart, wrappedTracks.size, spaceDistribution, out offset, out spacerSize);
 
             for (int i = 0; i < wrappedTracks.size; i++) {
                 ref Track track = ref wrappedTracks.array[i];

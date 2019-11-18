@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using SVGX;
 using UIForia.Layout;
 using UIForia.Util;
 using Unity.Collections.LowLevel.Unsafe;
@@ -438,8 +439,10 @@ namespace UIForia.Rendering {
             if (!didRender) {
                 return;
             }
-            
-            ctx.DrawBatchedGeometry(geometry, range, element.layoutResult.matrix.ToMatrix4x4(), clipper);
+
+            SVGXMatrix matrix = element.layoutResult.matrix;
+            //SVGXMatrix matrix = SVGXMatrix.Translation(new Vector2(50, 50)) * element.layoutResult.matrix *  SVGXMatrix.Translation(new Vector2(-50, -50));
+            ctx.DrawBatchedGeometry(geometry, range, matrix.ToMatrix4x4(), clipper);
         }
 
     }

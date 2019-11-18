@@ -18,9 +18,6 @@ namespace UIForia.Elements {
 
         public UITextElement(string text = "") {
             this.text = text ?? string.Empty;
-            this.flags = flags | UIElementFlags.TextElement
-                               | UIElementFlags.BuiltIn
-                               | UIElementFlags.Primitive;
         }
 
         internal TextInfo TextInfo => textInfo;

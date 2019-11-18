@@ -437,7 +437,6 @@ namespace UIForia.Elements {
         private bool isReady;
 
         public UIInputElement() {
-            flags |= UIElementFlags.BuiltIn;
             selectionRange = new SelectionRange(0);
         }
 

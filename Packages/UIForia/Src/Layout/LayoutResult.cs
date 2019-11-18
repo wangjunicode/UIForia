@@ -41,7 +41,7 @@ namespace UIForia.Layout {
         public Rect ScreenRect => new Rect(screenPosition, new Vector2(actualSize.width, actualSize.height));
         public Rect AllocatedRect => new Rect(allocatedPosition, new Vector2(allocatedSize.width, allocatedSize.height));
 
-        public Rect LocalRect => new Rect(localPosition, new Vector2(actualSize.width, actualSize.height));
+        public Rect LocalRect => new Rect(alignedPosition, new Vector2(actualSize.width, actualSize.height));
 
         public float AllocatedWidth => allocatedSize.width; // this should be size with padding & border already subtracted
         public float AllocatedHeight => allocatedSize.height;

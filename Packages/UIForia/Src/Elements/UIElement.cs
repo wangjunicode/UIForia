@@ -98,7 +98,6 @@ namespace UIForia.Elements {
         internal AwesomeLayoutBox awesomeLayoutBox;
         internal RenderBox renderBox;
 
-        internal int depthTraversalIndex;
         internal int enableStateChangedFrameId;
 
         public UIView View { get; internal set; }
@@ -132,8 +131,6 @@ namespace UIForia.Elements {
             }
         }
 
-        public Vector2 scrollOffset { get; internal set; }
-
         public int depth { get; internal set; }
         public int siblingIndex { get; internal set; }
 
@@ -152,17 +149,7 @@ namespace UIForia.Elements {
         
         //isDestroyed || (flags & UIElementFlags.Enabled) == 0 || (flags & UIElementFlags.AncestorEnabled) == 0;
 
-        public bool hasDisabledAncestor => (flags & UIElementFlags.AncestorEnabled) == 0;
-
         public bool isDestroyed => (flags & UIElementFlags.Alive) == 0;
-
-        public bool isBuiltIn => (flags & UIElementFlags.BuiltIn) != 0;
-
-        internal bool isPrimitive => (flags & UIElementFlags.Primitive) != 0;
-
-        public bool isCreated => (flags & UIElementFlags.Created) != 0;
-
-        public bool isRegistered => (flags & UIElementFlags.Registered) != 0;
 
         public virtual void OnCreate() { }
 
@@ -260,8 +247,8 @@ namespace UIForia.Elements {
             Stack<UIElement> elementStack = StackPool<UIElement>.Get();
             elementStack.Push(this);
             while (elementStack.Count > 0) {
-                var element = elementStack.Pop();
-                if (element.isPrimitive || element.children == null) {
+                UIElement element = elementStack.Pop();
+                if (element.children == null) {
                     continue;
                 }
 
@@ -286,7 +273,7 @@ namespace UIForia.Elements {
 
         [PublicAPI]
         public T FindFirstByType<T>() where T : UIElement {
-            if (isPrimitive || children == null) {
+            if (children == null) {
                 return null;
             }
 
@@ -314,7 +301,7 @@ namespace UIForia.Elements {
 
         public List<T> FindByType<T>(List<T> retn = null) where T : UIElement {
             retn = retn ?? new List<T>();
-            if (isPrimitive || children == null) {
+            if (children == null) {
                 return retn;
             }
 

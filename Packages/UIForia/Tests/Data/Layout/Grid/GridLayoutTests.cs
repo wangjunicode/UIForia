@@ -412,27 +412,27 @@ namespace Layout {
             
             mockView.Update();
             
-            Assert.AreEqual(new Vector2(0, 0), root[0].layoutResult.localPosition);
-            Assert.AreEqual(new Vector2(100, 0), root[1].layoutResult.localPosition);
-            Assert.AreEqual(new Vector2(200, 0), root[2].layoutResult.localPosition);
+            Assert.AreEqual(new Vector2(0, 0), root[0].layoutResult.alignedPosition);
+            Assert.AreEqual(new Vector2(100, 0), root[1].layoutResult.alignedPosition);
+            Assert.AreEqual(new Vector2(200, 0), root[2].layoutResult.alignedPosition);
             
             root.style.SetAlignItemsHorizontal(0.5f, StyleState.Normal);
             root.style.SetAlignItemsVertical(0.5f, StyleState.Normal);
             
             mockView.Update();
             
-            Assert.AreEqual(new Vector2(25, 25), root[0].layoutResult.localPosition);
-            Assert.AreEqual(new Vector2(125, 25), root[1].layoutResult.localPosition);
-            Assert.AreEqual(new Vector2(225, 25), root[2].layoutResult.localPosition);
+            Assert.AreEqual(new Vector2(25, 25), root[0].layoutResult.alignedPosition);
+            Assert.AreEqual(new Vector2(125, 25), root[1].layoutResult.alignedPosition);
+            Assert.AreEqual(new Vector2(225, 25), root[2].layoutResult.alignedPosition);
             
             root.style.SetAlignItemsHorizontal(1f, StyleState.Normal);
             root.style.SetAlignItemsVertical(1f, StyleState.Normal);
             
             mockView.Update();
             
-            Assert.AreEqual(new Vector2(50, 50), root[0].layoutResult.localPosition);
-            Assert.AreEqual(new Vector2(150, 50), root[1].layoutResult.localPosition);
-            Assert.AreEqual(new Vector2(250, 50), root[2].layoutResult.localPosition);
+            Assert.AreEqual(new Vector2(50, 50), root[0].layoutResult.alignedPosition);
+            Assert.AreEqual(new Vector2(150, 50), root[1].layoutResult.alignedPosition);
+            Assert.AreEqual(new Vector2(250, 50), root[2].layoutResult.alignedPosition);
 
         }
     }

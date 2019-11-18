@@ -28,8 +28,6 @@
                 <Anchor href="'/RenderSystemShowcase'">Render System</Anchor>
                 <Anchor href="'/Window'">Window System</Anchor>
                 <Anchor href="'/Checkbox'">Checkbox</Anchor>
-                <Anchor href="'/Test'">Test</Anchor>
-
             </ScrollView>
 
             <ScrollView style="demo-panel" x-router="demo" x-defaultRoute="/AlignmentDemo">
@@ -59,8 +57,6 @@
                 <StylePropertiesDemo x-route="/StylePropertiesDemo"/>
                 <WindowDemo x-route="/Window"/>
                 <CheckboxDemo x-route="/Checkbox"/>
-                <Test x-route="/Test"/>
-                
             </ScrollView>
 
         </Group>

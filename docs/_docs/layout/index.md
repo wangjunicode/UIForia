@@ -1,5 +1,6 @@
 ---
 id: LayoutConcepts
+showInMain: true
 title: Layout Concepts and common terms explained
 tags: 
  - layout
@@ -7,6 +8,11 @@ layout: page
 ---
 
 # Layout Concepts and common terms explained
+
+## Views
+
+
+## Box Model
 
   ![BoxModel](/assets/img/boxmodel.png)
   

@@ -2,6 +2,7 @@
 id: Templates
 title: Templates
 layout: page
+order: 0
 ---
 ## Writing XML Templates
 Using XML markup, you can define the hierarchical structure of the user interface.

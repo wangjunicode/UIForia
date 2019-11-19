@@ -1,8 +1,19 @@
 ---
-id: StyleGuide
-title: Style Guide
+title: Style Sheets
+showInMain: true
+description: Learn how to write style sheets
 layout: page
+order: 2
+tags:
+  - uiforia
+  - style
+  - syntax
 ---
+
+# Style Sheets
+
+
+
 
 ## Syntax
 

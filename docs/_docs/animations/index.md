@@ -1,5 +1,6 @@
 ---
 id: Animation
+showInMain: true
 title:  Animation
 tags: 
  - animation

@@ -18509,7 +18509,12 @@ html body .md-typeset .headerlink {
 }
 
 .section-index .entry {
-    padding: .75rem
+    padding: .75rem;
+    min-height: 150px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+.section-index .entry:hover {
+    background: rgba(222, 222, 222, 0.2);
 }
 
 .section-index h5 {

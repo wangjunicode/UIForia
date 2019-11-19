@@ -1,10 +1,10 @@
 ---
-id: StyleUnits
 title: Style Units
+description: px, pca, %, vh, vw, all style units explained
 layout: page
 ---
 
-## Units
+# Units
 ### UIMeasurement 
 Used for things that need to measured and can relate to other element sizes.
  * `Pixel`  in style sheets: `px` -- one device pixel
@@ -14,8 +14,6 @@ Used for things that need to measured and can relate to other element sizes.
  * `Content` in style sheets: `cnt` the size of the element's content
  * `ViewWidth` in style sheets: `vw` the width of the root element in the element's hierarchy
  * `ViewHeight` in style sheets: `vh` the height of the root element in the element's hierarchy
- * `AnchorWidth` in style sheets: `aw` the absolute distance between the element's `AnchorLeft` and `AnchorRight`
- * `AnchorHeight` in stylesheets: `ah` the absolute distance between the element's `AnchorTop` and `AnchorBottom`
  
 ### UIFixedLength
 Used for tings that have lengths relative to an element.

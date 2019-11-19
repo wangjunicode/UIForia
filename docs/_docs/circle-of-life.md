@@ -1,6 +1,7 @@
 ---
 title: Element Life-Cycle
 layout: page
+order: 1
 tags:
 - core
 ---

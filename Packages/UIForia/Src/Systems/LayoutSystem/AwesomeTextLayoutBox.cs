@@ -12,6 +12,7 @@ namespace UIForia.Systems {
         private TextInfo textInfo;
         public Action onTextContentChanged;
         private bool textAlreadyDirty;
+        private bool ignoreUpdate;
         
         protected override void OnInitialize() {
             onTextContentChanged = onTextContentChanged ?? HandleTextContentChanged;
@@ -22,6 +23,7 @@ namespace UIForia.Systems {
         }
 
         private void HandleTextContentChanged() {
+            if (ignoreUpdate) return;
             flags |= (AwesomeLayoutBoxFlags.RequireLayoutHorizontal | AwesomeLayoutBoxFlags.RequireLayoutHorizontal);
             finalWidth = -1;
             finalHeight = -1;
@@ -59,8 +61,11 @@ namespace UIForia.Systems {
         }
 
         protected override float ComputeContentWidth() {
+            ignoreUpdate = true;
             // by definition when computing width in the width pass we only care about its natural width
-            return textInfo.ComputeContentWidth(float.MaxValue);
+            float retn = textInfo.ComputeContentWidth(float.MaxValue);
+            ignoreUpdate = false;
+            return retn;
         }
 
         protected override float ComputeContentHeight() {
@@ -74,7 +79,7 @@ namespace UIForia.Systems {
 
         public override void RunLayoutHorizontal(int frameId) {
             textAlreadyDirty = false;
-            // textInfo.ForceLayout(); // might not need this
+            textInfo.ForceLayout(); // might not need this
             float topOffset = paddingBorderVerticalStart;
             float leftOffset = paddingBorderHorizontalStart;
             textInfo.Layout(new Vector2(leftOffset, topOffset), finalWidth - paddingBorderHorizontalStart - paddingBorderHorizontalEnd);

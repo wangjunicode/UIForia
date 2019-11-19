@@ -546,9 +546,9 @@ namespace UIForia {
                 // We need to run all runCommands now otherwise animations in [normal] style groups won't run after enabling.
                 child.style.RunCommands();
 
-                if ((child.flags & UIElementFlags.HasBeenEnabled) == 0) {
-                    child.View.ElementCreated(child);
-                }
+//                if ((child.flags & UIElementFlags.HasBeenEnabled) == 0) {
+//                    child.View.ElementCreated(child);
+//                }
 
                 // register the flag set even if we get disabled via OnEnable, we just want to track that OnEnable was called at least once
                 child.flags |= UIElementFlags.HasBeenEnabled;

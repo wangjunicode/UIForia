@@ -258,7 +258,7 @@ namespace UIForia.Systems {
                 float offset = 0;
                 float spacerSize = 0;
 
-                SpaceDistributionUtil.GetAlignmentOffsets(track.remaining, paddingBorderHorizontalStart, track.endIndex - track.startIndex, alignment, out offset, out spacerSize);
+                SpaceDistributionUtil.GetAlignmentOffsets(track.remaining, track.endIndex - track.startIndex, alignment, out offset, out spacerSize);
 
                 int startIdx = track.startIndex;
                 int endIdx = track.endIndex;
@@ -318,7 +318,7 @@ namespace UIForia.Systems {
                 alignment = SpaceDistribution.AfterContent;
             }
 
-            SpaceDistributionUtil.GetAlignmentOffsets(track.remaining, inset, track.endIndex - track.startIndex, alignment, out offset, out spacerSize);
+            SpaceDistributionUtil.GetAlignmentOffsets(track.remaining, track.endIndex - track.startIndex, alignment, out offset, out spacerSize);
 
             float itemAlignment = element.style.AlignItemsHorizontal;
             float gap = 0; //element.style.GridLayoutColGap;
@@ -674,7 +674,7 @@ namespace UIForia.Systems {
                 alignment = SpaceDistribution.AfterContent;
             }
 
-            SpaceDistributionUtil.GetAlignmentOffsets(remaining, inset, childCount, alignment, out offset, out spacerSize);
+            SpaceDistributionUtil.GetAlignmentOffsets(remaining, childCount, alignment, out offset, out spacerSize);
             float itemAlignment = element.style.AlignItemsVertical;
             float gap = 0; //element.style.GridLayoutColGap;
 
@@ -702,47 +702,46 @@ namespace UIForia.Systems {
 
         private void RunLayoutHorizontalStep_VerticalDirection(int frameId) {
             float contentStartX = paddingBorderHorizontalStart;
-            float horizontalAlignment = 0;
-            LayoutFit fit = LayoutFit.None;
+            LayoutFit fit = element.style.FitItemsHorizontal;
 
             float adjustedWidth = finalWidth - (paddingBorderHorizontalStart + paddingBorderHorizontalEnd);
 
+            float inset = paddingBorderHorizontalStart;
+            float spacerSize = 0;
+
+            SpaceDistribution alignment = element.style.DistributeExtraSpaceHorizontal;
+
+            if (alignment == SpaceDistribution.Default) {
+                alignment = SpaceDistribution.AfterContent;
+            }
+
+            float itemAlignment = element.style.AlignItemsVertical;
+            float gap = 0; //element.style.GridLayoutColGap;
+
             for (int i = 0; i < items.size; i++) {
                 ref FlexItem item = ref items.array[i];
+                float offset = 0;
                 item.layoutBox.GetWidths(ref item.widthData);
-                item.baseWidth = Mathf.Max(item.widthData.minimum, Mathf.Min(item.widthData.preferred, item.widthData.maximum));
+                item.baseWidth = item.widthData.Clamped;
+
+                SpaceDistributionUtil.GetAlignmentOffsets(adjustedWidth - item.baseWidth, 1, alignment, out offset, out spacerSize);
+
+                float x = inset + item.widthData.marginStart + offset;
+                offset += item.baseWidth + spacerSize;
 
                 float availableWidth = adjustedWidth - (item.widthData.marginStart + item.widthData.marginEnd);
                 float originBase = contentStartX + item.widthData.marginStart;
-                float originOffset = availableWidth * horizontalAlignment;
-                float offset = item.baseWidth * -horizontalAlignment;
+                float originOffset = (x - inset) + availableWidth * itemAlignment;
+                float alignedPosition = originBase + originOffset + (item.baseWidth * -itemAlignment);
 
-                item.layoutBox.ApplyLayoutHorizontal(
-                    originBase,
-                    originBase + originOffset + offset,
-                    item.baseWidth,
-                    availableWidth,
-                    fit,
-                    frameId
-                );
+                item.layoutBox.ApplyLayoutHorizontal(x, alignedPosition, item.baseWidth, availableWidth, fit, frameId);
+
+                offset += item.widthData.marginStart + item.widthData.marginEnd + gap;
             }
         }
 
         private void RunLayoutVerticalStep_HorizontalDirection_Wrapped(int frameId) {
             float contentStartY = paddingBorderVerticalStart;
-
-            // todo -- once tracks get implemented we want to be able to use space-between and space-around to vertically align the tracks
-            // track heights are equal to the max height of all contents in that track
-            // when we only have 1 track the allocated height for every box is the full height of this element's content area and align content vertical does nothing
-
-            // MainAxisAlignment contentAlignment = element.style.AlignContentVertical;
-
-            // 2 options for horizontal height sizing:
-            // 1. use the full content area height of this element
-            // 2. use the tallest child's height + margin
-            // if using the tallest child then we can center/start/end as normal
-            // however it might be awkward if AlignContentVertical = Center is used and that just centers the allocated rects, not the actual content
-            // so for now I have implemented option 1 for the case where we are not wrapping / only have 1 track
 
             float verticalAlignment = element.style.AlignItemsVertical;
             LayoutFit verticalLayoutFit = element.style.FitItemsVertical;
@@ -774,7 +773,7 @@ namespace UIForia.Systems {
             float offset = 0;
             float spacerSize = 0;
 
-            SpaceDistributionUtil.GetAlignmentOffsets(remainingHeight, paddingBorderVerticalStart, wrappedTracks.size, spaceDistribution, out offset, out spacerSize);
+            SpaceDistributionUtil.GetAlignmentOffsets(remainingHeight, wrappedTracks.size, spaceDistribution, out offset, out spacerSize);
 
             for (int i = 0; i < wrappedTracks.size; i++) {
                 ref Track track = ref wrappedTracks.array[i];
@@ -787,7 +786,7 @@ namespace UIForia.Systems {
                     ref FlexItem item = ref items.array[j];
 
                     float allocatedHeight = height - (item.heightData.marginStart + item.heightData.marginEnd);
-                    float originBase = y + item.heightData.marginStart;
+                    float originBase = (y - paddingBorderVerticalStart) + item.heightData.marginStart;
                     float originOffset = allocatedHeight * verticalAlignment;
 
                     item.layoutBox.ApplyLayoutVertical(

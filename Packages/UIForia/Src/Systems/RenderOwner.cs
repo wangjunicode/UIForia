@@ -55,7 +55,6 @@ namespace Src.Systems {
             drawList.QuickClear();
         }
 
-
         private void DrawClipShapes(RenderContext ctx) {
             for (int i = 0; i < renderedClippers.size; i++) {
                 ClipData clipData = renderedClippers.array[i];
@@ -520,7 +519,6 @@ namespace Src.Systems {
             public RenderBox renderBox;
             public int layer;
             public int zIndex;
-            public int siblingIndex;
             public int traversalIndex;
 
             public RenderBoxWrapper(UIElement element) {
@@ -528,7 +526,6 @@ namespace Src.Systems {
                 this.element = element;
                 this.renderBox = element.renderBox;
                 this.zIndex = renderBox.zIndex;
-                this.siblingIndex = element.siblingIndex;
                 this.traversalIndex = -1;
                 this.layer = renderBox.layer;
             }
@@ -539,7 +536,6 @@ namespace Src.Systems {
                 this.renderBox = element.renderBox;
                 this.zIndex = wrapper.zIndex;
                 this.layer = wrapper.layer;
-                this.siblingIndex = wrapper.siblingIndex;
                 this.traversalIndex = -1;
             }
 

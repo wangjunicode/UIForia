@@ -71,22 +71,22 @@
 <!--        </Div>-->
         
         <Div style="flex-demo">
-            <Heading3>Very tricky flex layout</Heading3>
-            <Div style="flex-demo-content">
-                <Div style="flex-demo-content-child1">
-                    <Div style="flex-item">Item 1</Div>
-                </Div>
-                <Div style="flex-demo-content-child">
-                    <Div style="flex-item">Item 1</Div>
-                </Div>
-            </Div>
-            
-            <Heading3>Hover over a child to trigger a content size change. Should affect the parent</Heading3>
+<!--            <Heading3>Very tricky flex layout</Heading3>-->
+<!--            <Div style="flex-demo-content">-->
+<!--                <Div style="flex-demo-content-child1">-->
+<!--                    <Div style="flex-item">Item 1</Div>-->
+<!--                </Div>-->
+<!--                <Div style="flex-demo-content-child">-->
+<!--                    <Div style="flex-item">Item 1</Div>-->
+<!--                </Div>-->
+<!--            </Div>-->
+<!--            -->
+<!--            <Heading3>Hover over a child to trigger a content size change. Should affect the parent</Heading3>-->
             <Div style="flex-parent">
                 <Div style="flex-content-child-grow">
                     <Div style="flex-item-grow">Item 1</Div>
                 </Div>
-                <Div style="flex-content-child-grow">
+                <Div x-check-me="check-me" style="flex-content-child-grow">
                     <Div style="flex-item-grow">Item 1</Div>
                 </Div>
                 <Div style="flex-content-child-grow">

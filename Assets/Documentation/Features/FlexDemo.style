@@ -1,17 +1,17 @@
 style <this> {
-    FlexLayoutDirection = Horizontal;
+   // FlexLayoutDirection = Horizontal;
 }
 
 style constrain {
 //   BackgroundColor = yellow;
 //   BackgroundImage = url(image);
-//    PreferredSize = 600px, 300px;    
+    PreferredSize = 600px, 300px;    
     FlexLayoutDirection = Vertical;
    // Overflow = Hidden;
 }
 
 style flex-demo {
-    FlexLayoutDirection = Horizontal;
+    FlexLayoutDirection = Vertical;
     TextFontSize = 32;
     TextColor = black;
     MarginBottom = 1em;
@@ -177,7 +177,7 @@ style img7 {
 }
 
 style flex-parent {
-    PreferredSize = 1cnt;
+    PreferredSize = 600px;
     FlexLayoutDirection = Horizontal;
     BackgroundColor = green;
 }
@@ -185,17 +185,16 @@ style flex-parent {
 style flex-content-child-grow {
     PreferredWidth = 1cnt;
     BackgroundColor = yellow;
-//    [hover] {
+    [hover] {
 //        PreferredWidth = 90px;
-//    }
+    }
 }
 
 style flex-item-grow {
     BackgroundColor = red;
     PreferredSize = 90px;
     [hover] {
-        LayoutFit = Fill;
-        PreferredWidth = 1pca;
+        PreferredWidth = 300px;//0.5pca;
         BackgroundColor = blue;
     }
 }

@@ -7,26 +7,19 @@
             PreferredSize = 1vw 1vh;
         }
 
-        style child {
-            PreferredSize = 300px 200px;
-            BackgroundColor = red;
+        style parent {
+            PreferredSize = 500px 500px;
+            BackgroundColor = white;
             LayoutBehavior = Ignored;
             AlignX = Center Parent;
             AlignY = Center Parent;
-            run animation(rot);
-                     run animation(scale);
-            TransformPivot = 50% 50%;
-
+            DistributeExtraSpaceHorizontal = BetweenContent;
+            DistributeExtraSpaceVertical = CenterContent;
         }
         
         style child-2 {
             PreferredSize = 100px 100px;
             BackgroundColor = blue;
-            LayoutBehavior = Ignored;
-            AlignX = Center Parent;
-            AlignY = Center Parent;
-            TransformPivot = 50% 50%;
-            run animation(rot);
         }
         
         style grow {
@@ -76,7 +69,9 @@
     </Style>
 
     <Contents style="container">
-        <Group style='child'>
+        <Group style='parent'>
+            <Group style="child-2"/>
+            <Group style="child-2"/>
             <Group style="child-2"/>
         </Group>
     </Contents>

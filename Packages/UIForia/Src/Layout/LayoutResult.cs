@@ -55,6 +55,8 @@ namespace UIForia.Layout {
         public LayoutResult layoutParent;
         public UIElement element;
         public OrientedBounds orientedBounds;
+        public AxisAlignedBounds axisAlignedBounds;
+        
         public SVGXMatrix transformMatrix;
 
         public Rect ContentRect => new Rect(

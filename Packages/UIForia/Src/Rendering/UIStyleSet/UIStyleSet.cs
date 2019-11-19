@@ -20,7 +20,7 @@ namespace UIForia.Rendering {
 
         internal StyleState currentState;
         private UIStyleGroup instanceStyle;
-        private StyleState containedStates;
+        internal StyleState containedStates;
 
         //private UIStyleGroupContainer implicitStyleContainer;
         private readonly LightList<StyleEntry> availableStyles;

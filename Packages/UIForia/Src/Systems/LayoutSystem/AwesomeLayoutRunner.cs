@@ -4,6 +4,7 @@ using System.Diagnostics;
 using SVGX;
 using UIForia.Elements;
 using UIForia.Layout;
+using UIForia.Rendering;
 using UIForia.Util;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -26,6 +27,40 @@ namespace UIForia.Systems {
         public Vector2 p1;
         public Vector2 p2;
         public Vector2 p3;
+
+        public AxisAlignedBounds GetAxisAlignedBounds() {
+            float xMin = float.MaxValue;
+            float xMax = float.MinValue;
+            float yMin = float.MaxValue;
+            float yMax = float.MinValue;
+
+            if (p0.x < xMin) xMin = p0.x;
+            if (p1.x < xMin) xMin = p1.x;
+            if (p2.x < xMin) xMin = p2.x;
+            if (p3.x < xMin) xMin = p3.x;
+
+            if (p0.x > xMax) xMax = p0.x;
+            if (p1.x > xMax) xMax = p1.x;
+            if (p2.x > xMax) xMax = p2.x;
+            if (p3.x > xMax) xMax = p3.x;
+
+            if (p0.y < yMin) yMin = p0.y;
+            if (p1.y < yMin) yMin = p1.y;
+            if (p2.y < yMin) yMin = p2.y;
+            if (p3.y < yMin) yMin = p3.y;
+
+            if (p0.y > yMax) yMax = p0.y;
+            if (p1.y > yMax) yMax = p1.y;
+            if (p2.y > yMax) yMax = p2.y;
+            if (p3.y > yMax) yMax = p3.y;
+
+            return new AxisAlignedBounds() {
+                xMin = xMin,
+                xMax = xMax,
+                yMin = yMin,
+                yMax = yMax
+            };
+        }
 
     }
 
@@ -117,18 +152,18 @@ namespace UIForia.Systems {
         }
 
         private void ApplyTransforms() {
-            for (int i = 0; i < transformList.size; i++) {
-                UIElement currentElement = transformList.array[i];
-                LayoutResult result = currentElement.layoutResult;
-
-                result.transformMatrix = SVGXMatrix.TRS(
-                    currentElement.awesomeLayoutBox.transformX,
-                    currentElement.awesomeLayoutBox.transformY,
-                    currentElement.style.TransformRotation,
-                    currentElement.style.TransformScaleX,
-                    currentElement.style.TransformScaleY
-                );
-            }
+//            for (int i = 0; i < transformList.size; i++) {
+//                UIElement currentElement = transformList.array[i];
+//                LayoutResult result = currentElement.layoutResult;
+//
+//                result.transformMatrix = SVGXMatrix.TRS(
+//                    currentElement.awesomeLayoutBox.transformX,
+//                    currentElement.awesomeLayoutBox.transformY,
+//                    currentElement.style.TransformRotation,
+//                    currentElement.style.TransformScaleX,
+//                    currentElement.style.TransformScaleY
+//                );
+//            }
 
             transformList.Clear();
         }
@@ -194,7 +229,7 @@ namespace UIForia.Systems {
                         currentElement.layoutHistory.AddLogEntry(LayoutDirection.Horizontal, frameId, LayoutReason.StyleSizeChanged);
                         flags &= ~UIElementFlags.LayoutSizeWidthDirty;
 
-                        MarkContentParentsHorizontalDirty(currentElement);
+                        currentElement.awesomeLayoutBox.MarkContentParentsHorizontalDirty(frameId, LayoutReason.DescendentStyleSizeChanged);
                     }
 
                     if ((flags & UIElementFlags.LayoutSizeHeightDirty) != 0) {
@@ -202,17 +237,16 @@ namespace UIForia.Systems {
                         currentElement.layoutHistory.AddLogEntry(LayoutDirection.Vertical, frameId, LayoutReason.StyleSizeChanged);
                         flags &= ~UIElementFlags.LayoutSizeHeightDirty;
 
-                        MarkContentParentsVerticalDirty(currentElement);
+                        currentElement.awesomeLayoutBox.MarkContentParentsVerticalDirty(frameId, LayoutReason.DescendentStyleSizeChanged);
                     }
 
                     if ((flags & UIElementFlags.LayoutTransformDirty) != 0) {
-                        // if element has identity transform remove from toTransform list
-                        // otherwise add if not already member
-                        transformList.Add(currentElement); // mark to get transform recomputed
+                        //  transformList.Add(currentElement); // mark to get transform recomputed
                         // mark to update matrix, don't actually add it to the list, that will happen later
                         // because many things can cause this flag to be set, be sure we only add it to list once.
                         currentElement.awesomeLayoutBox.flags |= AwesomeLayoutBoxFlags.RequiresMatrixUpdate;
                         flags &= ~UIElementFlags.LayoutTransformDirty;
+                        matrixUpdateList.Add(currentElement);
                     }
                 }
 
@@ -232,6 +266,9 @@ namespace UIForia.Systems {
                 if (elemRefStack.size + childCount > elemRefStack.array.Length) {
                     elemRefStack.EnsureAdditionalCapacity(childCount);
                 }
+
+                //temp
+                enabledElements.Add(currentElement);
 
                 for (int i = childCount - 1; i >= 0; i--) {
                     elemRefStack.array[elemRefStack.size++].element = childArray[i];
@@ -300,7 +337,7 @@ namespace UIForia.Systems {
                 AlignmentBehavior alignmentTargetY = element.style.AlignmentBehaviorY;
 
                 float originBase = MeasurementUtil.ResolveOriginBaseY(result, view.position.y, alignmentTargetY, direction);
-                float originSize = MeasurementUtil.ResolveOffsetOriginSizeY(result, viewportWidth, alignmentTargetY);
+                float originSize = MeasurementUtil.ResolveOffsetOriginSizeY(result, viewportHeight, alignmentTargetY);
                 float originOffset = MeasurementUtil.ResolveOffsetMeasurement(element, viewportWidth, viewportHeight, originY, originSize);
                 float offset = MeasurementUtil.ResolveOffsetMeasurement(element, viewportWidth, viewportHeight, offsetY, box.finalHeight);
 
@@ -332,35 +369,32 @@ namespace UIForia.Systems {
 
             while (boxRefStack.size > 0) {
                 AwesomeLayoutBox layoutBox = boxRefStack.array[--boxRefStack.size].box;
-#if DEBUG
-                bool needsDebugger = (layoutBox.element.flags & UIElementFlags.DebugLayout) != 0;
 
-                if (needsDebugger) {
-                    Debugger.Break();
-                }
-
-                if (needsDebugger || (layoutBox.flags & AwesomeLayoutBoxFlags.RequireLayoutHorizontal) != 0) {
+                if ((layoutBox.flags & AwesomeLayoutBoxFlags.RequireLayoutHorizontal) != 0) {
                     layoutBox.RunLayoutHorizontal(frameId);
                     layoutBox.element.layoutHistory.AddLayoutHorizontalCall(frameId);
                     layoutBox.flags &= ~AwesomeLayoutBoxFlags.RequireLayoutHorizontal;
                 }
 
-                if (needsDebugger || (layoutBox.flags & AwesomeLayoutBoxFlags.RequireLayoutVertical) != 0) {
-                    layoutBox.RunLayoutVertical(frameId);
-                    layoutBox.element.layoutHistory.AddLayoutVerticalCall(frameId);
-                    layoutBox.flags &= ~AwesomeLayoutBoxFlags.RequireLayoutVertical;
+                if (boxRefStack.size + layoutBox.childCount > boxRefStack.array.Length) {
+                    boxRefStack.EnsureAdditionalCapacity(layoutBox.childCount);
                 }
-#else
-                if ((layoutBox.flags & AwesomeLayoutBoxFlags.RequireLayoutHorizontal) != 0) {
-                    layoutBox.RunLayoutHorizontal(frameId);
-                    layoutBox.flags &= ~AwesomeLayoutBoxFlags.RequireLayoutHorizontal;
+
+                AwesomeLayoutBox ptr = layoutBox.firstChild;
+                while (ptr != null) {
+                    boxRefStack.array[boxRefStack.size++].box = ptr;
+                    ptr = ptr.nextSibling;
                 }
+            }
+
+            boxRefStack.Push(new BoxRef() {box = rootBox});
+            while (boxRefStack.size > 0) {
+                AwesomeLayoutBox layoutBox = boxRefStack.array[--boxRefStack.size].box;
 
                 if ((layoutBox.flags & AwesomeLayoutBoxFlags.RequireLayoutVertical) != 0) {
                     layoutBox.RunLayoutVertical(frameId);
                     layoutBox.flags &= ~AwesomeLayoutBoxFlags.RequireLayoutVertical;
                 }
-#endif
 
                 if ((layoutBox.element.flags & UIElementFlags.LayoutTransformNotIdentity) != 0) {
                     float x = MeasurementUtil.ResolveOffsetMeasurement(layoutBox.element, viewWidth, viewHeight, layoutBox.element.style.TransformPositionX, layoutBox.finalWidth);
@@ -415,6 +449,9 @@ namespace UIForia.Systems {
             int size = matrixUpdateList.size;
             UIElement[] array = matrixUpdateList.array;
 
+            float viewWidth = rootElement.View.Viewport.width;
+            float viewHeight = rootElement.View.Viewport.height;
+
             for (int i = 0; i < size; i++) {
                 UIElement startElement = array[i];
                 AwesomeLayoutBox box = startElement.awesomeLayoutBox;
@@ -436,6 +473,9 @@ namespace UIForia.Systems {
 
                     ref SVGXMatrix localMatrix = ref result.localMatrix;
 
+                    float x = MeasurementUtil.ResolveOffsetMeasurement(currentElement, viewWidth, viewHeight, currentElement.style.TransformPositionX, currentBox.finalWidth);
+                    float y = MeasurementUtil.ResolveOffsetMeasurement(currentElement, viewWidth, viewHeight, currentElement.style.TransformPositionY, currentBox.finalHeight);
+                    
                     float px = MeasurementUtil.ResolveFixedSize(result.actualSize.width, 0, 0, 0, currentElement.style.TransformPivotX);
                     float py = MeasurementUtil.ResolveFixedSize(result.actualSize.height, 0, 0, 0, currentElement.style.TransformPivotY);
 
@@ -449,11 +489,9 @@ namespace UIForia.Systems {
                     localMatrix.m1 = sa * scaleX;
                     localMatrix.m2 = -sa * scaleY;
                     localMatrix.m3 = ca * scaleY;
-                    localMatrix.m4 = result.alignedPosition.x;
-                    localMatrix.m5 = result.alignedPosition.y;
+                    localMatrix.m4 = result.alignedPosition.x + x;
+                    localMatrix.m5 = result.alignedPosition.y + y;
 
-                    localMatrix = SVGXMatrix.TRS(result.alignedPosition.x, result.alignedPosition.y, rotation, scaleX, scaleY);
-                    
                     if (px != 0 || py != 0) {
                         SVGXMatrix pivot = new SVGXMatrix(1, 0, 0, 1, px, py);
                         SVGXMatrix pivotBack = pivot;
@@ -461,8 +499,9 @@ namespace UIForia.Systems {
                         pivotBack.m5 = -py;
                         localMatrix = pivot * localMatrix * pivotBack;
                     }
-                       
+
                     if (currentElement.parent != null) {
+                        // inlined this because according to the profiler this is a lot faster now
                         // result.matrix = element.parent.layoutResult.matrix * localMatrix;
                         ref SVGXMatrix m = ref result.matrix;
                         ref SVGXMatrix left = ref currentElement.parent.layoutResult.matrix;
@@ -478,8 +517,8 @@ namespace UIForia.Systems {
                         result.matrix = localMatrix;
                     }
 
-                    result.screenPosition.x = result.matrix.m4;
-                    result.screenPosition.y = result.matrix.m5;
+                    result.screenPosition.x = result.matrix.m4; // maybe should be aabb position?
+                    result.screenPosition.y = result.matrix.m5; // maybe should be aabb position?
 
                     int childCount = currentElement.children.size;
                     if (elemRefStack.size + childCount > elemRefStack.array.Length) {
@@ -504,6 +543,8 @@ namespace UIForia.Systems {
 
             elemRefStack.array[elemRefStack.size++].element = rootElement;
 
+            // todo -- only do this if matrix or size changed
+
             while (elemRefStack.size > 0) {
                 UIElement currentElement = elemRefStack.array[--elemRefStack.size].element;
                 LayoutResult result = currentElement.layoutResult;
@@ -514,7 +555,7 @@ namespace UIForia.Systems {
                 float width = result.actualSize.width;
                 float height = result.actualSize.height;
 
-                OrientedBounds orientedBounds = default;
+                ref OrientedBounds orientedBounds = ref result.orientedBounds;
                 ref SVGXMatrix m = ref result.matrix;
 
                 // inlined svgxMatrix.Transform(point), takes runtime for ~4000 elements from 4.5ms to 0.47ms w/ deep profile on
@@ -530,9 +571,39 @@ namespace UIForia.Systems {
                 orientedBounds.p3.x = m.m0 * x + m.m2 * height + m.m4;
                 orientedBounds.p3.y = m.m1 * x + m.m3 * height + m.m5;
 
-                result.orientedBounds = orientedBounds;
+                float xMin = float.MaxValue;
+                float xMax = float.MinValue;
+                float yMin = float.MaxValue;
+                float yMax = float.MinValue;
+
+                if (orientedBounds.p0.x < xMin) xMin = orientedBounds.p0.x;
+                if (orientedBounds.p1.x < xMin) xMin = orientedBounds.p1.x;
+                if (orientedBounds.p2.x < xMin) xMin = orientedBounds.p2.x;
+                if (orientedBounds.p3.x < xMin) xMin = orientedBounds.p3.x;
+
+                if (orientedBounds.p0.x > xMax) xMax = orientedBounds.p0.x;
+                if (orientedBounds.p1.x > xMax) xMax = orientedBounds.p1.x;
+                if (orientedBounds.p2.x > xMax) xMax = orientedBounds.p2.x;
+                if (orientedBounds.p3.x > xMax) xMax = orientedBounds.p3.x;
+
+                if (orientedBounds.p0.y < yMin) yMin = orientedBounds.p0.y;
+                if (orientedBounds.p1.y < yMin) yMin = orientedBounds.p1.y;
+                if (orientedBounds.p2.y < yMin) yMin = orientedBounds.p2.y;
+                if (orientedBounds.p3.y < yMin) yMin = orientedBounds.p3.y;
+
+                if (orientedBounds.p0.y > yMax) yMax = orientedBounds.p0.y;
+                if (orientedBounds.p1.y > yMax) yMax = orientedBounds.p1.y;
+                if (orientedBounds.p2.y > yMax) yMax = orientedBounds.p2.y;
+                if (orientedBounds.p3.y > yMax) yMax = orientedBounds.p3.y;
+
+                result.axisAlignedBounds.xMin = xMin;
+                result.axisAlignedBounds.xMax = xMax;
+                result.axisAlignedBounds.yMin = yMin;
+                result.axisAlignedBounds.yMax = yMax;
+
 
                 int childCount = currentElement.children.size;
+
                 if (elemRefStack.size + childCount > elemRefStack.array.Length) {
                     elemRefStack.EnsureAdditionalCapacity(childCount);
                 }
@@ -544,38 +615,6 @@ namespace UIForia.Systems {
                         elemRefStack.array[elemRefStack.size++].element = child;
                     }
                 }
-            }
-        }
-
-        private void MarkContentParentsHorizontalDirty(UIElement currentElement) {
-            AwesomeLayoutBox ptr = currentElement.awesomeLayoutBox.parent;
-
-            while (ptr != null) {
-                // once we hit a block provider we can safely stop traversing since the provider doesn't care about content size changing
-                if ((ptr.flags & AwesomeLayoutBoxFlags.WidthBlockProvider) != 0) {
-                    break;
-                }
-
-                // can't break out if already flagged for layout because parent of parent might not be and might be content sized
-                ptr.flags |= AwesomeLayoutBoxFlags.RequireLayoutHorizontal;
-                ptr.element.layoutHistory.AddLogEntry(LayoutDirection.Horizontal, frameId, LayoutReason.DescendentStyleSizeChanged);
-                ptr = ptr.parent;
-            }
-        }
-
-        private void MarkContentParentsVerticalDirty(UIElement currentElement) {
-            AwesomeLayoutBox ptr = currentElement.awesomeLayoutBox.parent;
-
-            while (ptr != null) {
-                // once we hit a block provider we can safely stop traversing since the provider doesn't care about content size changing
-                if ((ptr.flags & AwesomeLayoutBoxFlags.HeightBlockProvider) != 0) {
-                    break;
-                }
-
-                // can't break out if already flagged for layout because parent of parent might not be and might be content sized
-                ptr.flags |= AwesomeLayoutBoxFlags.RequireLayoutVertical;
-                ptr.element.layoutHistory.AddLogEntry(LayoutDirection.Vertical, frameId, LayoutReason.DescendentStyleSizeChanged);
-                ptr = ptr.parent;
             }
         }
 
@@ -727,38 +766,68 @@ namespace UIForia.Systems {
             LightList<AwesomeLayoutBox>.Release(ref childList);
         }
 
-        // this is a really good candidate for doing in parallel with rendering since this data is not required while rendering
+        public enum QueryFilter {
+
+            Hover,
+            MouseHandler,
+            DragHandler,
+            TouchHandler
+
+        }
+
+        private void BuildClipData() {
+            // if size changed || matrix changed
+
+            elemRefStack.array[elemRefStack.size++].element = rootElement;
+
+            while (elemRefStack.size != 0) {
+                UIElement currentElement = elemRefStack.array[--elemRefStack.size].element;
+                LayoutResult layoutResult = currentElement.layoutResult;
+                ClipData clipData = default;
+
+                if (!clipData.isCulled) {
+                    if (layoutResult.matrix.IsTranslationOnly) { }
+                }
+            }
+        }
+
+        public void QueryPoint(Vector2 point, QueryFilter filter, IList<UIElement> retn) {
+            for (int i = 0; i < enabledElements.size; i++) {
+                UIElement element = enabledElements.array[i];
+
+                switch (filter) {
+                    case QueryFilter.Hover:
+                        if ((element.style.containedStates & StyleState.Hover) != 0) { }
+
+                        break;
+                    case QueryFilter.MouseHandler:
+                        break;
+                    case QueryFilter.DragHandler:
+                        break;
+                    case QueryFilter.TouchHandler:
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(filter), filter, null);
+                }
+            }
+        }
+
         public void QueryPoint(Vector2 point, IList<UIElement> retn) {
             for (int i = 0; i < enabledElements.size; i++) {
                 UIElement element = enabledElements.array[i];
 
-                // if offscreen or clipped or invisible continue
-                // how do i know if the thing is clipped or not?
-                // only real way is via render + read back, but thats nasty
-                // cant use the render box result can I?
-                // divide into large and small?
-                // if area is big then just check it
-                // if area is small partition it into buckets?
+                // todo -- slow 
+                if (element.style.Visibility == Visibility.Hidden) {
+                    continue;
+                }
 
-                // first step might be to find all elements who's aabb contains or overlaps point
-                // then figure out which of those elements real geometry contains the point via polygon check
-                // then figure out which of those elements are culled, remove those
+                LayoutResult layoutResult = element.layoutResult;
 
-                // traverse from the root
+                ref AxisAlignedBounds aabb = ref layoutResult.axisAlignedBounds;
 
-                // if element is culled and is clipper continue
-
-
-                // when we encounter a clipper push it on our stack
-
-                // visit children
-
-                // pop clipper if needed
-
-                if (element.layoutResult.matrix.IsTranslationOnly) { }
-                else { }
-
-                // if transform, alignment, or position changed, traverse and children dirty (will need to re-bucket these) 
+                if (point.x >= aabb.xMin && point.x <= aabb.xMax && point.y >= aabb.yMin && point.y <= aabb.yMax) {
+                    retn.Add(element);
+                }
             }
         }
 

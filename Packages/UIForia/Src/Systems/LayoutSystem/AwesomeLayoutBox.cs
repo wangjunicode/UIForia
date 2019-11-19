@@ -93,7 +93,6 @@ namespace UIForia.Systems {
         public abstract void OnChildrenChanged(LightList<AwesomeLayoutBox> childList);
 
         public void ApplyLayoutHorizontal(float localX, float alignedPosition, float size, float availableSize, LayoutFit defaultFit, int frameId) {
-            
             LayoutFit fit = element.style.LayoutFitHorizontal;
             if (fit == LayoutFit.Default || fit == LayoutFit.Unset) {
                 fit = defaultFit;
@@ -139,9 +138,9 @@ namespace UIForia.Systems {
 
             // write to layout result here? would need to flag layout result for changes anyway
             LayoutResult layoutResult = element.layoutResult;
-            
-            float previousPosition = layoutResult.alignedPosition.x; 
-            
+
+            float previousPosition = layoutResult.alignedPosition.x;
+
             // todo -- layout result change flags (and maybe history entry if enabled)
             layoutResult.alignedPosition.x = alignedPosition;
             layoutResult.allocatedPosition.x = localX;
@@ -151,17 +150,16 @@ namespace UIForia.Systems {
             layoutResult.border.right = borderRight;
             layoutResult.actualSize.width = newWidth;
             layoutResult.allocatedSize.width = availableSize;
-            layoutResult.pivot.x = newWidth * 0.5f; // todo -- resolve pivot
 
             // todo -- margin
 
             paddingBorderHorizontalStart = paddingLeft + borderLeft;
             paddingBorderHorizontalEnd = paddingRight + borderRight;
 
-            if ((flags & AwesomeLayoutBoxFlags.RequireAlignmentHorizontal) != 0 && !Mathf.Approximately(previousPosition, alignedPosition)) {
+            if ((flags & AwesomeLayoutBoxFlags.RequireAlignmentHorizontal) == 0 && !Mathf.Approximately(previousPosition, alignedPosition)) {
                 flags |= AwesomeLayoutBoxFlags.RequiresMatrixUpdate;
             }
-            
+
             // todo -- should probably be when content area size changes, not just overall size
             if (newWidth != finalWidth) {
                 flags |= AwesomeLayoutBoxFlags.RequireLayoutHorizontal;
@@ -171,7 +169,6 @@ namespace UIForia.Systems {
         }
 
         public void ApplyLayoutVertical(float localY, float alignedPosition, float size, float availableSize, LayoutFit defaultFit, int frameId) {
-            
             LayoutFit fit = element.style.LayoutFitVertical;
             if (fit == LayoutFit.Default || fit == LayoutFit.Unset) {
                 fit = defaultFit;
@@ -207,7 +204,7 @@ namespace UIForia.Systems {
                     alignedPosition = localY;
                     break;
             }
-            
+
             // if aligned position changed -> flag for matrix recalc 
 
             Vector2 viewSize = element.View.Viewport.size;
@@ -221,9 +218,9 @@ namespace UIForia.Systems {
             LayoutResult layoutResult = element.layoutResult;
 
             // todo -- layout result change flags (and maybe history entry if enabled)
-            
+
             float previousPosition = layoutResult.alignedPosition.y;
-            
+
             layoutResult.alignedPosition.y = alignedPosition;
             layoutResult.allocatedPosition.y = localY;
             layoutResult.padding.top = paddingTop;
@@ -238,8 +235,8 @@ namespace UIForia.Systems {
 
             paddingBorderVerticalStart = paddingTop + borderTop;
             paddingBorderVerticalEnd = paddingBottom + borderBottom;
-            
-            if ((flags & AwesomeLayoutBoxFlags.RequireAlignmentVertical) != 0 && !Mathf.Approximately(previousPosition, alignedPosition)) { 
+
+            if ((flags & AwesomeLayoutBoxFlags.RequireAlignmentVertical) != 0 && !Mathf.Approximately(previousPosition, alignedPosition)) {
                 flags |= AwesomeLayoutBoxFlags.RequiresMatrixUpdate;
             }
 
@@ -544,39 +541,36 @@ namespace UIForia.Systems {
             // layoutHistory.Add(new WidthLayout(LayoutReason.));
         }
 
-        public void MarkContentParentsHorizontalDirty(int frameId,LayoutReason reason) {
+        public void MarkContentParentsHorizontalDirty(int frameId, LayoutReason reason) {
             AwesomeLayoutBox ptr = parent;
 
             while (ptr != null) {
                 // once we hit a block provider we can safely stop traversing since the provider doesn't care about content size changing
-                if ((ptr.flags & AwesomeLayoutBoxFlags.WidthBlockProvider) != 0) {
-                    break;
-                }
+                bool stop = (ptr.flags & AwesomeLayoutBoxFlags.WidthBlockProvider) != 0;
 
                 // can't break out if already flagged for layout because parent of parent might not be and might be content sized
                 ptr.flags |= AwesomeLayoutBoxFlags.RequireLayoutHorizontal;
                 ptr.element.layoutHistory.AddLogEntry(LayoutDirection.Horizontal, frameId, reason);
+                if (stop) break;
                 ptr = ptr.parent;
             }
         }
 
-          public void MarkContentParentsVerticalDirty(int frameId,LayoutReason reason) {
+        public void MarkContentParentsVerticalDirty(int frameId, LayoutReason reason) {
             AwesomeLayoutBox ptr = parent;
 
             while (ptr != null) {
                 // once we hit a block provider we can safely stop traversing since the provider doesn't care about content size changing
-                if ((ptr.flags & AwesomeLayoutBoxFlags.HeightBlockProvider) != 0) {
-                    break;
-                }
+                bool stop = (ptr.flags & AwesomeLayoutBoxFlags.HeightBlockProvider) != 0;
 
                 // can't break out if already flagged for layout because parent of parent might not be and might be content sized
                 ptr.flags |= AwesomeLayoutBoxFlags.RequireLayoutVertical;
                 ptr.element.layoutHistory.AddLogEntry(LayoutDirection.Vertical, frameId, reason);
+                if (stop) break;
                 ptr = ptr.parent;
             }
         }
-
-
+        
         public struct LayoutSize {
 
             public float preferred;

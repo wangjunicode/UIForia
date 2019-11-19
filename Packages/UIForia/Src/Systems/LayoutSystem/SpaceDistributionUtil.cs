@@ -5,7 +5,7 @@ namespace UIForia.Layout {
 
     public static class SpaceDistributionUtil {
 
-        public static void GetAlignmentOffsets(float remaining, float inset, int contentCount, SpaceDistribution alignment, out float offset, out float spacerSize) {
+        public static void GetAlignmentOffsets(float remaining, int contentCount, SpaceDistribution alignment, out float offset, out float spacerSize) {
             if (remaining <= 0) {
                 offset = 0;
                 spacerSize = 0;
@@ -19,7 +19,7 @@ namespace UIForia.Layout {
                 case SpaceDistribution.AfterContent:
                     break;
                 case SpaceDistribution.CenterContent:
-                    offset = inset * 0.5f + remaining * 0.5f;
+                    offset = remaining * 0.5f;
                     break;
                 case SpaceDistribution.BeforeContent:
                     offset = remaining;

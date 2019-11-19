@@ -278,20 +278,7 @@ namespace UIForia.Rendering {
             if (ranges.size == 1) {
                 ctx.DrawBatchedText(geometry, ranges.array[0], matrix, fontData, clipper);
                 
-//                // temp
-//                
-//                Path2D path = new Path2D();
-//                path.SetStroke(Color.green);
-//                OrientedBounds orientedBox = element.layoutResult.orientedBounds;
-//                path.BeginPath();
-//                path.MoveTo(orientedBox.p0);
-//                path.LineTo(orientedBox.p1);
-//                path.LineTo(orientedBox.p2);
-//                path.LineTo(orientedBox.p3);
-//                path.ClosePath();
-//                path.Stroke();
-//                ctx.DrawPath(path);
-//                // end temp
+
                 
             }
             else {

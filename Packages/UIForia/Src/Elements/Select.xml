@@ -5,7 +5,7 @@
 
         style select {
             LayoutType = Stack;
-            DistributeExtraSpaceVertical = CenterContent;
+            AlignItemsVertical = Center Parent;
             BackgroundColor = white;
             PreferredSize = 1mx 48px;
             TextFontSize = 32px;
@@ -37,14 +37,13 @@
                 MinWidth = 1cnt;
                 TextColor = white;
                 BackgroundColor = #006d82;
-                Overflow = Visible;
+                ClipBehavior = Never;
             }
         }
         
         style select-label {
-            MarginLeft = 8px;
-            PreferredWidth = 1pca;
-            AlignX = 26px Parent;
+            PaddingLeft = 30px;
+            LayoutFitHorizontal = Grow;
             [hover] {
                 MinWidth = 1cnt;
             }
@@ -52,6 +51,7 @@
         
         style selected-element-icon {
             PreferredSize = 18px;
+            LayoutBehavior = Ignored;
             BackgroundTint = black;
             AlignY = 50% Parent;
             AlignX = 4px Parent;
@@ -94,8 +94,8 @@
             PreferredSize = 32px 1psz;
             BorderColor = #006d82;
             BorderRadius = 0 8px 8px 0;
-            Border = 2px;
-            DistributeExtraSpaceVertical = AroundContent;
+            //Border = 2px;
+            DistributeExtraSpaceVertical = CenterContent;
             DistributeExtraSpaceHorizontal = CenterContent;
             PaddingTop = 4px;
             PaddingBottom = 4px;

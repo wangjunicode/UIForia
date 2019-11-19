@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using SVGX;
 using UIForia.Layout;
+using UIForia.Systems;
 using UIForia.Util;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
@@ -51,7 +52,7 @@ namespace UIForia.Rendering {
             this.uniqueId = "UIForia::StandardRenderBox";
             this.geometry = new UIForiaGeometry();
         }
-        
+
         public override void OnInitialize() {
             base.OnInitialize();
             geometry.Clear();
@@ -59,13 +60,13 @@ namespace UIForia.Rendering {
             geometryNeedsUpdate = true;
             dataNeedsUpdate = true;
         }
-        
+
         public override void OnStylePropertyChanged(StructList<StyleProperty> propertyList) {
             StyleProperty[] properties = propertyList.array;
             int count = propertyList.size;
 
             base.OnStylePropertyChanged(propertyList);
-            
+
             for (int i = 0; i < count; i++) {
                 ref StyleProperty property = ref properties[i];
 
@@ -92,7 +93,7 @@ namespace UIForia.Rendering {
                     case StylePropertyId.BackgroundImageTileY:
                     case StylePropertyId.BackgroundImageOffsetX:
                     case StylePropertyId.BackgroundImageOffsetY:
-                        case StylePropertyId.BackgroundTint:
+                    case StylePropertyId.BackgroundTint:
                         dataNeedsUpdate = true;
                         break;
 //                    case StylePropertyId.ShadowColor:
@@ -129,7 +130,7 @@ namespace UIForia.Rendering {
 
             Vector2 pivotOffset = element.layoutResult.pivotOffset;
             //new Vector2(-element.layoutBox.pivotX * size.width, -element.layoutBox.pivotY * size.height);
-            
+
             if (radiusBottomLeft > 0 ||
                 radiusBottomRight > 0 ||
                 radiusTopLeft > 0 ||
@@ -149,7 +150,6 @@ namespace UIForia.Rendering {
 //                    bottomLeftY = bevelBottomLeft,
 //                });
                 geometry.FillRect(size.width, size.height, pivotOffset);
-
             }
             else {
                 geometry.FillRect(size.width, size.height, pivotOffset);
@@ -186,7 +186,7 @@ namespace UIForia.Rendering {
                 int posX = (int) ((width - (originalWidth * ratio)) / 2);
                 int posY = (int) ((height - (originalHeight * ratio)) / 2);
 
-                
+
                 switch (element.style.BackgroundFit) {
                     case BackgroundFit.Fill:
                         for (int i = 0; i < geometry.texCoordList0.size; i++) {
@@ -243,7 +243,7 @@ namespace UIForia.Rendering {
                     return;
                 }
             }
-            
+
             didRender = true;
 
             PaintMode colorMode = PaintMode.None;
@@ -323,18 +323,18 @@ namespace UIForia.Rendering {
             Vector4 c = default;
             unsafe {
                 Vector4* cp = &c;
-                Color32 * b = stackalloc Color32[2];
+                Color32* b = stackalloc Color32[2];
                 b[0] = backgroundColor;
                 b[1] = backgroundTint;
                 UnsafeUtility.MemCpy(cp, b, sizeof(Color32) * 2);
-                
+
                 c.z = borderLeftAndTop;
                 c.w = borderRightAndBottom;
             }
 
             geometry.packedColors = c;
 
-            int val = BitUtil.SetHighLowBits((int)ShapeType.RoundedRect, (int) colorMode);
+            int val = BitUtil.SetHighLowBits((int) ShapeType.RoundedRect, (int) colorMode);
 
             float viewWidth = element.View.Viewport.width;
             float viewHeight = element.View.Viewport.height;
@@ -343,7 +343,7 @@ namespace UIForia.Rendering {
             float cornerBevelTopRight = UIFixedLength.Resolve(element.style.CornerBevelTopRight, halfMin, emSize, viewWidth, viewHeight);
             float cornerBevelBottomRight = UIFixedLength.Resolve(element.style.CornerBevelBottomRight, halfMin, emSize, viewWidth, viewHeight);
             float cornerBevelBottomLeft = UIFixedLength.Resolve(element.style.CornerBevelBottomLeft, halfMin, emSize, viewWidth, viewHeight);
-            
+
             geometry.cornerData = new Vector4(cornerBevelTopLeft, cornerBevelTopRight, cornerBevelBottomLeft, cornerBevelBottomRight);
             geometry.objectData = new Vector4(val, VertigoUtil.PackSizeVector(element.layoutResult.actualSize), packedBorderRadii, element.style.Opacity);
             geometry.mainTexture = backgroundImage;
@@ -364,7 +364,6 @@ namespace UIForia.Rendering {
             }
 
             if (element.style.ShadowColor.a > 0) {
-                
                 float min = math.min(element.layoutResult.actualSize.width, element.layoutResult.actualSize.height);
 
                 if (min <= 0) min = 0.0001f;
@@ -387,10 +386,10 @@ namespace UIForia.Rendering {
                 byte b3 = (byte) (((borderRadiusBottomRight * 1000)) * 0.5f);
 
                 float packedBorderRadii = VertigoUtil.BytesToFloat(b0, b1, b2, b3);
-                
+
                 float viewWidth = element.View.Viewport.width;
                 float viewHeight = element.View.Viewport.height;
-                
+
                 UIStyleSet style = element.style;
                 shadowGeometry = shadowGeometry ?? new UIForiaGeometry();
                 shadowGeometry.Clear();
@@ -404,7 +403,7 @@ namespace UIForia.Rendering {
                 position.x += x;
                 position.y += y;
                 shadowGeometry.mainTexture = null;
-                int val = BitUtil.SetHighLowBits((int)ShapeType.RoundedRect, paintMode);
+                int val = BitUtil.SetHighLowBits((int) ShapeType.RoundedRect, paintMode);
                 shadowGeometry.objectData = geometry.objectData;
                 shadowGeometry.objectData.x = val;
                 shadowGeometry.objectData.y = VertigoUtil.PackSizeVector(size);
@@ -421,19 +420,19 @@ namespace UIForia.Rendering {
                     v.z = style.ShadowIntensity;
                     v.w = style.ShadowOpacity;
                 }
-                
+
                 float emSize = 0; //element.style.GetResolvedFontSize(); expensive, cache this
                 float cornerBevelTopLeft = UIFixedLength.Resolve(element.style.CornerBevelTopLeft, halfMin, emSize, viewWidth, viewHeight);
                 float cornerBevelTopRight = UIFixedLength.Resolve(element.style.CornerBevelTopRight, halfMin, emSize, viewWidth, viewHeight);
                 float cornerBevelBottomRight = UIFixedLength.Resolve(element.style.CornerBevelBottomRight, halfMin, emSize, viewWidth, viewHeight);
                 float cornerBevelBottomLeft = UIFixedLength.Resolve(element.style.CornerBevelBottomLeft, halfMin, emSize, viewWidth, viewHeight);
-            
+
                 shadowGeometry.cornerData = new Vector4(cornerBevelTopLeft, cornerBevelTopRight, cornerBevelBottomLeft, cornerBevelBottomRight);
                 shadowGeometry.packedColors = v;
                 Size s = element.layoutResult.actualSize;
                 Vector2 pivotOffset = default; // todo -- this! new Vector2(-element.layoutBox.pivotX * s.width, -element.layoutBox.pivotY * s.height);
                 shadowGeometry.FillRect(size.x, size.y, pivotOffset + position);
-                ctx.DrawBatchedGeometry(shadowGeometry, new GeometryRange(shadowGeometry.positionList.size, shadowGeometry.triangleList.size), element.layoutResult.matrix.ToMatrix4x4(), clipper);    
+                ctx.DrawBatchedGeometry(shadowGeometry, new GeometryRange(shadowGeometry.positionList.size, shadowGeometry.triangleList.size), element.layoutResult.matrix.ToMatrix4x4(), clipper);
             }
 
             if (!didRender) {
@@ -443,6 +442,18 @@ namespace UIForia.Rendering {
             SVGXMatrix matrix = element.layoutResult.matrix;
             //SVGXMatrix matrix = SVGXMatrix.Translation(new Vector2(50, 50)) * element.layoutResult.matrix *  SVGXMatrix.Translation(new Vector2(-50, -50));
             ctx.DrawBatchedGeometry(geometry, range, matrix.ToMatrix4x4(), clipper);
+//
+//            Path2D path = new Path2D();
+//            path.SetStroke(Color.green);
+//            AxisAlignedBounds aabb = element.layoutResult.axisAlignedBounds;
+//            path.BeginPath();
+//            path.MoveTo(aabb.xMin, aabb.yMin);
+//            path.LineTo(aabb.xMax, aabb.yMin);
+//            path.LineTo(aabb.xMax, aabb.yMax);
+//            path.LineTo(aabb.xMin, aabb.yMax);
+//            path.ClosePath();
+//            path.Stroke();
+//            ctx.DrawPath(path);
         }
 
     }

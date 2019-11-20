@@ -6,21 +6,38 @@ namespace UIForia {
 
     public static class Builder {
 
-        [MenuItem("UIForia/Create UIForia Settings")]
+        [MenuItem("UIForia/Create UIForia Settings and Materials")]
         public static void CreateOptionsObject() {
          
             UIForiaSettings asset = ScriptableObject.CreateInstance<UIForiaSettings>();
-            Shader shader = Shader.Find("UIForia/BatchedTransparent");
-            Material svgxMaterial = new Material(shader);
-            
-            Shader uiforiaStd = Shader.Find("UIForia/Standard");
-            Material uiforiaStdMaterial = new Material(uiforiaStd);
-            
-            AssetDatabase.CreateAsset(svgxMaterial, "Assets/Resources/UIForiaMaterial.mat");
+            Material svgxMaterial = new Material(Shader.Find("UIForia/BatchedTransparent"));
+            Material uiforiaStdMaterial = new Material(Shader.Find("UIForia/Standard"));
+            Material sdfPathMaterial = new Material(Shader.Find("UIForia/UIForiaPathSDF"));
+            Material spriteAtlasMaterial = new Material(Shader.Find("UIForia/UIForiaSpriteAtlas"));
+            Material clearClipRegionsMaterial = new Material(Shader.Find("UIForia/UIForiaClearClipRegions"));
+            Material clipCountMaterial = new Material(Shader.Find("UIForia/UIForiaClipCount"));
+            Material clipBlitMaterial = new Material(Shader.Find("UIForia/UIForiaClipBlit"));
+
+            AssetDatabase.CreateAsset(svgxMaterial, "Assets/Resources/UIForiaSVGXMaterial.mat");
             asset.svgxMaterial = svgxMaterial;
 
             AssetDatabase.CreateAsset(uiforiaStdMaterial, "Assets/Resources/UIForiaStandardMaterial.mat");
             asset.batchedMaterial = uiforiaStdMaterial;
+
+            AssetDatabase.CreateAsset(sdfPathMaterial, "Assets/Resources/UIForiaSDFPathMaterial.mat");
+            asset.sdfPathMaterial = sdfPathMaterial;
+
+            AssetDatabase.CreateAsset(spriteAtlasMaterial, "Assets/Resources/UIForiaSpriteAtlasMaterial.mat");
+            asset.spriteAtlasMaterial = spriteAtlasMaterial;
+
+            AssetDatabase.CreateAsset(clearClipRegionsMaterial, "Assets/Resources/UIForiaClearClipRegionsMaterial.mat");
+            asset.clearClipRegionsMaterial = clearClipRegionsMaterial;
+
+            AssetDatabase.CreateAsset(clipCountMaterial, "Assets/Resources/UIForiaClipCountMaterial.mat");
+            asset.clipCountMaterial = clipCountMaterial;
+
+            AssetDatabase.CreateAsset(clipBlitMaterial, "Assets/Resources/UIForiaClipBlitMaterial.mat");
+            asset.clipBlitMaterial = clipBlitMaterial;
 
             AssetDatabase.CreateAsset(asset, "Assets/Resources/UIForiaSettings.asset");
             AssetDatabase.SaveAssets();

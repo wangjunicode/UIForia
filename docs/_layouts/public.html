@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+<head>
+    <meta charset="utf-8" />
+    <title>{% if page.title %}{{ page.title }}{% else %}{{ site.title }}{% endif %}</title>
+
+    <link rel="stylesheet" href="{{ site.baseurl }}/assets/css/uiforia.css">
+    
+
+    <!-- Begin Mailchimp Signup Form -->
+    <link href="//cdn-images.mailchimp.com/embedcode/classic-10_7.css" rel="stylesheet" type="text/css">
+</head>
+<body class="td-section">
+<header>
+    <a href="/"><img class="uiforia-logo" src="{{ site.baseurl }}/assets/img/uiforia_logo_black.svg" /></a>
+    <h1>User Interface Euphoria</h1>
+</header>
+<div class="container-fluid td-outer">
+    <div class="td-main">
+        <div class="row flex-xl-nowrap">
+            
+            <main class="col-12 col-md-9 col-xl-8 pl-md-5" role="main">
+               
+                <div class="td-content">
+                    {{ content }}
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <footer>
+        <a href="https://www.klang-games.com/legal">Impressum / Privacy Statement</a>
+    </footer>
+</div>
+{% include scripts.html %}
+</body>
+</html>

@@ -414,7 +414,7 @@ namespace UIForia.Systems {
                 OffsetMeasurement originX = box.element.style.AlignmentOriginX;
                 OffsetMeasurement offsetX = box.element.style.AlignmentOffsetX;
                 AlignmentDirection direction = box.element.style.AlignmentDirectionX;
-                AlignmentBehavior alignmentTargetX = element.style.AlignmentBehaviorX;
+                AlignmentTarget alignmentTargetX = element.style.AlignmentTargetX;
 
                 float originBase = MeasurementUtil.ResolveOriginBaseX(result, view.position.x, alignmentTargetX, direction);
                 float originSize = MeasurementUtil.ResolveOffsetOriginSizeX(result, viewportWidth, alignmentTargetX);
@@ -455,7 +455,7 @@ namespace UIForia.Systems {
                 OffsetMeasurement originY = box.element.style.AlignmentOriginY;
                 OffsetMeasurement offsetY = box.element.style.AlignmentOffsetY;
                 AlignmentDirection direction = box.element.style.AlignmentDirectionY;
-                AlignmentBehavior alignmentTargetY = element.style.AlignmentBehaviorY;
+                AlignmentTarget alignmentTargetY = element.style.AlignmentTargetY;
 
                 float originBase = MeasurementUtil.ResolveOriginBaseY(result, view.position.y, alignmentTargetY, direction);
                 float originSize = MeasurementUtil.ResolveOffsetOriginSizeY(result, viewportHeight, alignmentTargetY);

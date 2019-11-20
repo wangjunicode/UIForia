@@ -1,6 +1,8 @@
+import "Documentation/Documentation.style" as theme;
+
 style dynamic-style-inner {
     BackgroundColor = red;
-    TextFontAsset = url("Fonts/DIGITALDREAMFAT SDF");
+    TextFontAsset = @theme.fontDigitalDreamFat;
 }
 
 style dynamic-style {

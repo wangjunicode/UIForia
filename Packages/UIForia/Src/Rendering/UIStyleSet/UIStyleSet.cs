@@ -869,12 +869,7 @@ namespace UIForia.Rendering {
             SetTransformPositionX(position.x, state);
             SetTransformPositionY(position.y, state);
         }
-
-        public void SetTransformBehavior(TransformBehavior behavior, StyleState state) {
-            SetTransformBehaviorX(behavior, state);
-            SetTransformBehaviorY(behavior, state);
-        }
-
+        
 #if UNITY_EDITOR
         /// <summary>
         ///  Keeping this for the debugger display

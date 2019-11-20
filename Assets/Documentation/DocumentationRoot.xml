@@ -3,11 +3,13 @@
     <Style src="Documentation/Documentation.style"/>
     <Contents style="root-container">
         <Group style="main-container">
+            
+            <Group style="burger" onMouseClick="ToggleMenu()"><Div style="burger-patty" /><Div style="burger-patty" /></Group>
 
-            <ScrollView style="navigation">
-
+            <ScrollView style="navigation" x-id="nav">
                 <Heading1>Choose a feature</Heading1>
                 <Anchor href="'/index'">Home</Anchor>
+                <Anchor href="'/AlignmentDemo'">Alignment Demo</Anchor>
                 <Anchor href="'/AnimationDemo'">Animation</Anchor>
                 <Anchor href="'/BindingsDemo'">Bindings</Anchor>
                 <Anchor href="'/input'">Input</Anchor>
@@ -19,7 +21,6 @@
                 <Anchor href="'/RepeatALot'">Repeat Element</Anchor>
                 <Anchor href="'/ScrollDemo'">Scrolling</Anchor>
                 <Anchor href="'/TransclusionDemo'">Transclusion</Anchor>
-<!--                <Anchor href="'/TransformPlayground'">Transform Playground</Anchor>-->
                 <Anchor href="'/SelectDemo'">Select / DropDown</Anchor>
                 <Anchor href="'/StylePropertiesDemo'">Style Properties</Anchor>
                 <Anchor href="'/RepeatExample'">Repeat Example</Anchor>
@@ -28,7 +29,7 @@
 
             </ScrollView>
 
-            <ScrollView style="demo-panel" x-router="demo" x-defaultRoute="/SelectDemo">
+            <ScrollView style="demo-panel" x-router="demo" x-defaultRoute="/AlignmentDemo">
 
                 <Group x-route="/index">
                     <Heading1>UIForia Documentation</Heading1>
@@ -36,6 +37,7 @@
                     <Paragraph>Choose a demo from the menu on the left.</Paragraph>
                 </Group>
 
+                <AlignmentDemo x-route="/AlignmentDemo"/>
                 <AnimationDemo x-route="/AnimationDemo"/>
                 <InputDemo x-route="/input"/>
                 <InputEventsDemo x-route="/inputEvents"/>
@@ -48,7 +50,7 @@
                 <RepeatALot x-route="/RepeatALot"/>
                 <ScrollDemo x-route="/ScrollDemo"/>
                 <TransclusionDemo x-route="/TransclusionDemo"/>
-<!--                <TransformPlayground x-route="/TransformPlayground"/>-->
+                <TransformPlayground x-route="/TransformPlayground"/>
                 <RepeatExample x-route="/RepeatExample"/>
                 <StylePropertiesDemo x-route="/StylePropertiesDemo"/>
                 <WindowDemo x-route="/Window"/>

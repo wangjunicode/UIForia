@@ -656,9 +656,9 @@ namespace UIForia.Systems {
 
         public void UpdateRequiresHorizontalAlignment() {
             UIStyleSet style = element.style;
-            AlignmentBehavior alignment = style.AlignmentBehaviorX;
+            AlignmentTarget alignment = style.AlignmentTargetX;
 
-            if (alignment != AlignmentBehavior.Default && alignment != AlignmentBehavior.Unset) {
+            if (alignment != AlignmentTarget.Default && alignment != AlignmentTarget.Unset) {
                 flags |= LayoutBoxFlags.RequireAlignmentHorizontal;
                 return;
             }
@@ -683,9 +683,9 @@ namespace UIForia.Systems {
 
         public void UpdateRequiresVerticalAlignment() {
             UIStyleSet style = element.style;
-            AlignmentBehavior alignment = style.AlignmentBehaviorY;
+            AlignmentTarget alignment = style.AlignmentTargetY;
 
-            if (alignment != AlignmentBehavior.Default && alignment != AlignmentBehavior.Unset) {
+            if (alignment != AlignmentTarget.Default && alignment != AlignmentTarget.Unset) {
                 flags |= LayoutBoxFlags.RequireAlignmentVertical;
                 return;
             }

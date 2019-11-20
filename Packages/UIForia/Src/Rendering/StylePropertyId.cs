@@ -145,8 +145,8 @@ namespace UIForia.Rendering {
         AlignmentOffsetX = 2005,
         AlignmentOffsetY = 2006,
         
-        AlignmentBehaviorX = 2007,
-        AlignmentBehaviorY = 2008,
+        AlignmentTargetX = 2007,
+        AlignmentTargetY = 2008,
         
         LayoutFitHorizontal = 2009,
         LayoutFitVertical = 2010,

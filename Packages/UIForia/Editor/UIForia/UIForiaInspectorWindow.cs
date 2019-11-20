@@ -962,9 +962,9 @@ namespace UIForia.Editor {
                 case StylePropertyId.TextTransform:
                     return DrawEnumWithValue<TextTransform>(property, isEditable);
 
-                case StylePropertyId.AlignmentBehaviorX:
-                case StylePropertyId.AlignmentBehaviorY:
-                    return DrawEnumWithValue<AlignmentBehavior>(property, isEditable);
+                case StylePropertyId.AlignmentTargetX:
+                case StylePropertyId.AlignmentTargetY:
+                    return DrawEnumWithValue<AlignmentTarget>(property, isEditable);
 
                 case StylePropertyId.AlignmentDirectionX:
                 case StylePropertyId.AlignmentDirectionY:

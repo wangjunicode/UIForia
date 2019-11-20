@@ -7,7 +7,7 @@ namespace UIForia.Layout {
 
     }
 
-    public enum AlignmentBehavior {
+    public enum AlignmentTarget {
 
         Unset = 0,
         LayoutBox,

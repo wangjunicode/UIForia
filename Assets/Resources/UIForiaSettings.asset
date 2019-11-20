@@ -13,6 +13,12 @@ MonoBehaviour:
   m_Name: UIForiaSettings
   m_EditorClassIdentifier: 
   loadTemplatesFromStreamingAssets: 0
-  svgxMaterial: {fileID: 2100000, guid: 82a43e99b87829b4390236a419a3dc16, type: 2}
-  batchedMaterial: {fileID: 2100000, guid: 8a162f9dda8ba294792c09f94567f7d4, type: 2}
+  svgxMaterial: {fileID: 2100000, guid: e7aef28a3bc261049886752b28512890, type: 2}
+  batchedMaterial: {fileID: 2100000, guid: 4dc394c0ea0dcef47a801ce5701a3168, type: 2}
+  sdfPathMaterial: {fileID: 2100000, guid: ffe4b467a58bf1a4d87801400d798dc0, type: 2}
+  spriteAtlasMaterial: {fileID: 2100000, guid: 73ed400cb33c39b4f89f031f5d5d6fc1, type: 2}
+  clearClipRegionsMaterial: {fileID: 2100000, guid: 776c45ebb87cccc4fb34655b5250ad00,
+    type: 2}
+  clipCountMaterial: {fileID: 2100000, guid: 4bc03d3ad7d8ec3458a91254e27ba6fe, type: 2}
+  clipBlitMaterial: {fileID: 2100000, guid: a4230dfbd25023e4393882700780c4da, type: 2}
   defaultNamespaces: []

@@ -62,13 +62,13 @@ namespace UIForia.Systems {
                         updateTransform = true;
                         break;
 
-                    case StylePropertyId.AlignmentBehaviorX:
+                    case StylePropertyId.AlignmentTargetX:
                     case StylePropertyId.AlignmentOriginX:
                     case StylePropertyId.AlignmentOffsetX:
                     case StylePropertyId.AlignmentDirectionX:
                         checkAlignHorizontal = true;
                         break;
-                    case StylePropertyId.AlignmentBehaviorY:
+                    case StylePropertyId.AlignmentTargetY:
                     case StylePropertyId.AlignmentOriginY:
                     case StylePropertyId.AlignmentOffsetY:
                     case StylePropertyId.AlignmentDirectionY:

@@ -853,10 +853,6 @@ style rotate1 { TransformRotation = 90; }
 
 const pivotOffset = PivotOffset;
 
-style transBeh1 { TransformBehavior = LayoutOffset AnchorMinOffset; }
-style transBeh2 { TransformBehavior = PivotOffset; }
-style transBeh3 { TransformBehaviorX = @pivotOffset; }
-style transBeh4 { TransformBehaviorY = AnchorMaxOffset; }
 
         ".Trim());
 
@@ -883,17 +879,7 @@ style transBeh4 { TransformBehaviorY = AnchorMaxOffset; }
 
         Assert.AreEqual(90, styleGroup[6].groups[0].normal.style.TransformRotation);
 
-        Assert.AreEqual(TransformBehavior.LayoutOffset, styleGroup[7].groups[0].normal.style.TransformBehaviorX);
-        Assert.AreEqual(TransformBehavior.AnchorMinOffset, styleGroup[7].groups[0].normal.style.TransformBehaviorY);
-
-        Assert.AreEqual(TransformBehavior.PivotOffset, styleGroup[8].groups[0].normal.style.TransformBehaviorX);
-        Assert.AreEqual(TransformBehavior.PivotOffset, styleGroup[8].groups[0].normal.style.TransformBehaviorY);
-
-        Assert.AreEqual(TransformBehavior.PivotOffset, styleGroup[9].groups[0].normal.style.TransformBehaviorX);
-        Assert.AreEqual(TransformBehavior.Unset, styleGroup[9].groups[0].normal.style.TransformBehaviorY);
-
-        Assert.AreEqual(TransformBehavior.Unset, styleGroup[10].groups[0].normal.style.TransformBehaviorX);
-        Assert.AreEqual(TransformBehavior.AnchorMaxOffset, styleGroup[10].groups[0].normal.style.TransformBehaviorY);
+    
     }
 
     [Test]

@@ -1,207 +1,86 @@
-style <this> {
-    BackgroundColor = rgb(20, 0, 20);
-    PreferredSize = 1pca;
-    TextColor = white;
-    TextFontSize = 1.6em;
-//    Padding = 20px;
-    //FlexLayoutWrap = Wrap;
+import "Documentation/Documentation.style" as theme;
+
+style parent {
+    PreferredSize = 300px;
+    BackgroundColor = red;
+    FlexLayoutDirection = Vertical; 
 }
 
-style vertical-content-sized-container {
-    FlexLayoutDirection = Horizontal;
-    PreferredSize = 1cnt;
-    BackgroundColor = white;
-}
-style group5 {
-    PreferredSize = 1cnt;
-    Margin = 3px;
-}
-
-style no-clip {
-    ClipBehavior = Never;
-}
-
-style demo-container {
-    FlexLayoutDirection = Horizontal;
-    FlexLayoutWrap = Wrap;
-    PreferredSize = 1pca 500px;
-}
-
-style <Heading1> {
-    Margin = 5px 0 10px;
-}
-
-style container {
-    Margin = 0 10px 0 10px;
-    LayoutFitVertical = Fill;
-}
-
-style content-size-box-horizontal-wrap {
-    PreferredSize = 800px 1cnt;
-    FlexLayoutDirection = Horizontal;
-    BackgroundColor = grey;
-    FlexLayoutWrap = Wrap;
-}
-
-style content-size-box-vertical-wrap {
-    PreferredSize = 1cnt 800px;
-    BackgroundColor = grey;
-    FlexLayoutWrap = Wrap;
-    Overflow = Hidden;
-}
-
-style group-big {
-    PreferredSize = 791px 100px;
-    Margin = 5px;
-}
-
-style groupA {
-    PreferredSize = 1cnt;
-    Border = 1px;
-    BorderColor = black;
-}
-
-style group3 {
-    PreferredSize = 10%;
-}
-
-style color1 { BackgroundColor = rgb(20, 100, 20); }  
-style color2 { BackgroundColor = rgb(20, 200, 120); }  
-style color3 { BackgroundColor = rgb(190, 200, 20); }  
-style color4 { BackgroundColor = rgb(20, 140, 120); }  
-
-style stack-vertical {
-    FlexLayoutDirection = Vertical;
-    FlexLayoutCrossAxisAlignment = Stretch;
-    BackgroundColor = white;
-    PreferredSize = 150px 500px;
-    Padding = 20px;
-    MarginBottom = 10px;
-//   Border = 0 10px 0 0;
-//   BorderColor = rgb(200, 90, 0);
-}
-
-style stack-horizontal {
-    FlexLayoutDirection = Horizontal;
-    FlexLayoutCrossAxisAlignment = Center;
-    BackgroundColor = white;
-    PreferredSize = 500px 150px;
-}
-
-style g1 {
+style align-demo-root {
+    LayoutType = Grid;
+    Padding = 30px;
     FlexItemGrow = 1;
+    GridLayoutColTemplate = 300px 300px 300px;
+    GridLayoutRowTemplate = 300px 300px 300px;
+    GridLayoutColGap = 20;
+    GridLayoutRowGap = 20;
 }
 
-style fit {
-    FlexLayoutDirection = Horizontal;
-    FlexLayoutCrossAxisAlignment = Center;
-    BackgroundColor = white;
-    PreferredSize = 500px;
-}
-
-style fit-vertical {
-    FlexLayoutCrossAxisAlignment = End;
-    BackgroundColor = white;
-    PreferredSize = 600px;
-     MarginBottom = 10px;
-}
-
-style item-fill {
-    LayoutFitHorizontal = Fill;
-}
-
-style item-shrink {
-    PreferredHeight = 1000px;
-    FlexItemShrink = 1;
-}
-
-style item-grow {
-    PreferredWidth = 100px;
-    LayoutFitHorizontal = Grow;
-}
-
-style item-dont-grow {
-    PreferredWidth = 120px;
-    LayoutFitHorizontal = Grow;
-}
-
-style h-item-fill {
-    LayoutFitVertical = Fill;
-}
-
-style h-item-shrink {
-    PreferredHeight = 100px;
-    LayoutFitVertical = Shrink;
-}
-
-style h-item-grow {
-    PreferredHeight = 100px;
-    LayoutFitVertical = Grow;
-}
-
-style h-item-dont-grow {
-    PreferredHeight = 120px;
-    LayoutFitVertical = Grow;
-}
-
-style group1 {
-    PreferredSize = 100px 100px;
-    BackgroundColor = rgba(0, 120, 0, 200);
-    Margin = 5px 10px 10px 5px;
-//    Border = 5x;
-//    BorderColor = black;
-}
-
-style group2 {
-    PreferredSize = 100px;
-    BackgroundColor = rgb(77, 101, 20);
-    Margin = 5px;
-    
-}
-
-style x-align {
-    AlignmentBehaviorX = LayoutBox;
-//    AlignX = Center;
-    run animation(left-to-right);
-//    Align = Start | Center | End; // AlignmentOffset = -50% of the element width and AlignmentOrigin = 50% of the
-//    Align = 25%;  
+style grid-cell {
+    BackgroundColor = rgb(49, 120, 230);
+    BorderColor = black;
+    Border = 20px;
 } 
 
-style y-align {
-    AlignmentBehaviorY = LayoutBox;
-    AlignmentDirectionY = Start;
-    run animation(top-to-bottom);
+style align-left-top {
+    AlignX = 20px 0px Parent Start;
+    AlignY = 20px 0px Parent Start;
 }
 
-animation left-to-right {
+style align-left-center {
+    AlignX = 20px 0px Parent;
+    AlignY = Center Parent;
+}
 
-    [options] {
-        duration = 2000;
-        timingFunction = SineEaseIn;
-    }
+style align-top-center {
+    AlignX = Center Parent;
+    AlignY = 20px 0px Parent;
+}
 
-    [keyframes] {
-        0% { AlignX = 50%; }
-        50% { AlignX = 0%; }
-        100% { AlignX = 100%; }
+style align-center-center {
+    AlignX = Center Parent;
+    AlignY = 50% -50% Parent End;
+}
+
+style align-right-center {
+    AlignX = 20px 0px Parent End;
+    AlignY = Center Parent;
+}
+
+style align-top-right {
+    AlignX = 20px 0px Parent End;
+    AlignY = 20px 0px Parent;
+}
+
+style align-left-bottom {
+    AlignX = 20px 0px Parent;
+    AlignY = 20px 0px Parent End;
+}
+
+style align-center-bottom {
+    AlignX = Center Parent;
+    AlignY = 20px 0px Parent End;
+}
+
+style align-right-bottom {
+    AlignX = 20px 0px Parent End;
+    AlignY = 20px 0px Parent End;
+}
+
+style button {
+    PreferredSize = 1cnt 40px;
+    Padding = 10px;
+    Border = 1px;
+    BorderColor = black;
+    Margin = 3px 5px 20px;
+    [hover] {
+        Cursor = @theme.cursorHand;
+        BackgroundColor = rgba(200, 220, 220, 200);
     }
 }
 
-animation top-to-bottom {
-
-    [options] {
-        duration = 2000;
-        timingFunction = CubicEaseInOut;
-    }
-
-    [keyframes] {
-        0% { 
-            AlignmentOriginY = 0;
-            AlignmentOffsetY = 0;
-        }
-        100% { 
-            AlignmentOriginY = 100%;
-            AlignmentOffsetY = -100%;
-        }
-    }
+style icon {
+    Margin = 4px;
+    PreferredSize = 40px;
+    ZIndex = 1;
 }

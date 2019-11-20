@@ -144,6 +144,10 @@ namespace Src.Systems {
                     wrapperList.EnsureAdditionalCapacity(currentElement.children.size * 2);
                 }
 
+                if (elemRefStack.size + currentElement.children.size >= elemRefStack.array.Length) {
+                    elemRefStack.EnsureAdditionalCapacity(currentElement.children.size);
+                }
+
                 for (int i = 0; i < currentElement.children.size; i++) {
                     UIElement child = currentElement.children.array[i];
                     if ((child.flags & UIElementFlags.EnabledFlagSet) == UIElementFlags.EnabledFlagSet) {
@@ -160,7 +164,7 @@ namespace Src.Systems {
                 }
             }
 
-          //  wrapperList.Sort(s_RenderComparer);
+            //  wrapperList.Sort(s_RenderComparer);
 
 
 //            while (wrapperStack.size > 0) {
@@ -221,7 +225,7 @@ namespace Src.Systems {
 //                }
 //            }
 
-            //   wrapperList.Sort(s_RenderComparer);
+              wrapperList.Sort(s_RenderComparer);
 
 //            if (!printed) {
 //                printed = true;
@@ -407,7 +411,7 @@ namespace Src.Systems {
                 if (a.renderOperation != b.renderOperation) {
                     return (int) a.renderOperation - (int) b.renderOperation;
                 }
-                
+
                 if (rbA.layer != rbB.layer) {
                     return rbA.layer - rbB.layer;
                 }

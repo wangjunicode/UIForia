@@ -42,7 +42,7 @@ style <this> {
     // default alignment: off screen
     AlignX = 100% Parent;
     AlignY = 200% 100%;
-    AlignmentBehaviorY = Parent;
+    AlignmentTargetY = Parent;
     // drop shadow
     ShadowColor = black;
     ShadowIntensity = 150;

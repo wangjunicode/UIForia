@@ -1,0 +1,120 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background-color: white;
+  font-family: arial, Helvetica, sans-serif;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+  min-width: 320px;
+}
+
+header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  margin: 30px 0;
+}
+
+.uiforia-logo {
+  width: 90%;
+  max-width: 600px;
+
+}
+
+h1 {
+  margin-left: 10px;
+  margin-right: 10px;
+  font-size: 1.4em;
+}
+
+form {
+
+    width: 90%;
+    max-width: 600px;
+    display: inline-block;
+}
+
+.mc-field-group {
+  width: 100%;
+  max-width: 600px;
+  margin: 20px 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.mc-field-group > label {
+  display: block;
+  margin: 0 5px;
+  font-size: 1.2em;
+}
+
+.mc-field-group > input {
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid rgba(30, 30, 30, 0.8);
+  display: block;
+  flex-grow: 1;
+}
+
+.mce_inline_error {
+  margin: 0 0 1em 0;
+  padding: 5px 10px;
+  background-color: rgba(200, 20, 20, 0.1);
+  font-weight: bold;
+  z-index: 1;
+  color: #000;
+}
+
+div.mce_inline_error {
+  background: none;
+  padding: 0 10px;
+  color: rgba(200, 20, 20, 0.7);
+}
+
+.button {
+  border: 1px solid rgba(30, 30, 30, 0.5);
+  background: rgb(2, 209, 116);
+  color: white;
+  text-shadow: 0 0 2px black;
+  padding: 10px 20px;
+  border-radius: 4px;
+  font-size: 1.2em;
+  -webkit-appearance: none;
+}
+
+.button:hover {
+  background-color: rgb(2, 179, 96);
+}
+
+.logolink {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.klang {
+  max-height: 90px;
+}
+
+section {
+  max-width: 800px;
+  padding: 20px;
+}
+
+footer {
+  margin-top: 40px;
+  display: flex;
+  justify-content: center;
+}
+
+footer a {
+  color: rgba(30, 30, 30, 0.8);
+}

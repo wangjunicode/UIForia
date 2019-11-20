@@ -76,7 +76,7 @@ style <this> {
     TextColor = white;
     TextFontStyle = UpperCase;
     LayoutBehavior = Ignored;
-    AlignmentBehaviorY = Parent;
+    AlignmentTargetY = Parent;
     AlignY = 100% 0%;
     
     PreferredSize = 1pca;

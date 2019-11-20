@@ -8,7 +8,7 @@ namespace UIForia.Rendering {
 
         private struct Edge {
 
-            public Edge(Vector2 from, Vector2 to) {
+            public Edge(in Vector2 from, in Vector2 to) {
                 this.from = from;
                 this.to = to;
             }
@@ -18,58 +18,63 @@ namespace UIForia.Rendering {
 
         }
 
+        [ThreadStatic] private static StructList<Edge> s_Edges;
 
-        public static void GetIntersectedPolygon(StructList<Vector2> subjectPoly, StructList<Vector2> clipPoly, ref StructList<Vector2> outputList) {
-                
-            if (subjectPoly.size < 3 || clipPoly.size < 3) {
+        public static void GetIntersectedPolygon(StructList<Vector2> subjectPoly, StructList<Vector2> clipPolyList, ref StructList<Vector2> outputList) {
+            s_Edges = s_Edges ?? new StructList<Edge>();
+
+            if (subjectPoly.size < 3 || clipPolyList.size < 3) {
                 throw new ArgumentException();
             }
 
-            if (subjectPoly.size == 4 && clipPoly.size == 4) {
+            if (subjectPoly.size == 4 && clipPolyList.size == 4) {
                 // todo -- if both are rectangles then just do a rect intersect
             }
 
             if (outputList == null) {
                 outputList = StructList<Vector2>.Get();
             }
-                
+
             StructList<Vector2> inputList = StructList<Vector2>.Get();
             outputList.AddRange(subjectPoly);
             inputList.AddRange(outputList);
-                
+
             //	Make sure it's clockwise
 //                if (!IsClockwise(subjectPoly)) {
 ////                    outputList.Reverse();
 //                }
 
             int idx = 0;
-            StructList<Edge> edges = StructList<Edge>.GetMinSize(subjectPoly.size);
+            s_Edges.size = 0;
+            StructList<Edge> edgeList = s_Edges;
 
-            for (int k = clipPoly.size - 1; k > 0; k--) {
-                edges.array[idx++] = new Edge(clipPoly[k], clipPoly[k - 1]);
+            int clipPolyCount = clipPolyList.size;
+            Vector2[] clipPoly = clipPolyList.array;
+            for (int k = clipPolyCount - 1; k > 0; k--) {
+                edgeList.array[idx++] = new Edge(clipPoly[k], clipPoly[k - 1]);
             }
 
-            edges.array[idx++] = new Edge(clipPoly[0], clipPoly[clipPoly.size - 1]);
-            edges.size = idx;
+            edgeList.array[idx++] = new Edge(clipPoly[0], clipPoly[clipPolyCount - 1]);
+            edgeList.size = idx;
 
             //	Walk around the clip polygon clockwise
             // input list = last frame output list
-            for (int i = 0; i < edges.size; i++) {
-                Edge clipEdge = edges[i];
+            for (int i = 0; i < edgeList.size; i++) {
+                ref Edge clipEdge = ref edgeList.array[i];
                 StructList<Vector2> swap = inputList;
                 inputList = outputList;
                 outputList = swap;
                 outputList.size = 0;
 
                 //	Sometimes when the polygons don't intersect
-                if (inputList.Count == 0) {
+                if (inputList.size == 0) {
                     break;
                 }
 
-                Vector2 S = inputList[inputList.Count - 1];
+                Vector2 S = inputList.array[inputList.size - 1];
 
-                for (int inputIdx = 0; inputIdx < inputList.Count; inputIdx++) {
-                    Vector2 E = inputList[inputIdx];
+                for (int inputIdx = 0; inputIdx < inputList.size; inputIdx++) {
+                    ref Vector2 E = ref inputList.array[inputIdx];
                     bool sInside = IsInside(clipEdge, S);
                     if (IsInside(clipEdge, E)) {
                         if (!sInside) {
@@ -97,7 +102,6 @@ namespace UIForia.Rendering {
             }
 
             StructList<Vector2>.Release(ref inputList);
-                
         }
 
         private static bool GetIntersect(in Vector2 line1From, in Vector2 line1To, in Vector2 line2From, in Vector2 line2To, out Vector2 intersect) {
@@ -127,8 +131,13 @@ namespace UIForia.Rendering {
         }
 
         private static bool IsInside(Edge edge, Vector2 test) {
-            Vector2 tmp1 = edge.to - edge.from;
-            Vector2 tmp2 = test - edge.to;
+            Vector2 tmp1 = default;
+            Vector2 tmp2 = default;
+
+            tmp1.x = edge.to.x - edge.from.x;
+            tmp1.x = edge.to.y - edge.from.y;
+            tmp2.x = test.x - edge.to.x;
+            tmp2.y = test.y - edge.to.y;
 
             float x = (tmp1.x * tmp2.y) - (tmp1.y * tmp2.x);
 
@@ -154,7 +163,7 @@ namespace UIForia.Rendering {
 
             throw new ArgumentException("All the points in the polygon are colinear");
         }
-            
+
         private static bool? IsLeftOf(Edge edge, Vector2 test) {
             Vector2 tmp1 = edge.to - edge.from;
             Vector2 tmp2 = test - edge.to;
@@ -172,7 +181,7 @@ namespace UIForia.Rendering {
                 return null;
             }
         }
-            
+
     }
 
 }

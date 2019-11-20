@@ -14,7 +14,7 @@ namespace Demo.Graphics {
             public ParticleSystemRenderer renderer;
 
         }
-        
+
         protected GameObject particleRoot;
         protected ParticleData[] particleData;
 

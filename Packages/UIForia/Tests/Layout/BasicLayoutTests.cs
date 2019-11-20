@@ -54,10 +54,10 @@ public class BasicLayoutTests {
         UIElement two = root[1];
         UIElement three = root[2];
         
-        Assert.AreEqual(3, root.awesomeLayoutBox.childCount);
-        Assert.AreEqual(100, one.awesomeLayoutBox.finalWidth);
-        Assert.AreEqual(100, two.awesomeLayoutBox.finalWidth);
-        Assert.AreEqual(100, three.awesomeLayoutBox.finalWidth);
+        Assert.AreEqual(3, root.layoutBox.childCount);
+        Assert.AreEqual(100, one.layoutBox.finalWidth);
+        Assert.AreEqual(100, two.layoutBox.finalWidth);
+        Assert.AreEqual(100, three.layoutBox.finalWidth);
         
         Assert.AreEqual(0, one.layoutResult.localPosition.x);
         Assert.AreEqual(100, two.layoutResult.localPosition.x);
@@ -67,9 +67,9 @@ public class BasicLayoutTests {
         
         app.Update();
 
-        Assert.AreEqual(2, root.awesomeLayoutBox.childCount);
-        Assert.AreEqual(100, two.awesomeLayoutBox.finalWidth);
-        Assert.AreEqual(100, three.awesomeLayoutBox.finalWidth);
+        Assert.AreEqual(2, root.layoutBox.childCount);
+        Assert.AreEqual(100, two.layoutBox.finalWidth);
+        Assert.AreEqual(100, three.layoutBox.finalWidth);
         
         Assert.AreEqual(0, two.layoutResult.localPosition.x);
         Assert.AreEqual(100, three.layoutResult.localPosition.x);
@@ -90,24 +90,24 @@ public class BasicLayoutTests {
         UIElement toggle = root["disable-me"];
         UIElement wrapper = root[0];
       
-        Assert.AreEqual(200, root.awesomeLayoutBox.finalWidth);
-        Assert.AreEqual(200, wrapper.awesomeLayoutBox.finalWidth);
-        Assert.AreEqual(100, toggle.awesomeLayoutBox.finalWidth);
+        Assert.AreEqual(200, root.layoutBox.finalWidth);
+        Assert.AreEqual(200, wrapper.layoutBox.finalWidth);
+        Assert.AreEqual(100, toggle.layoutBox.finalWidth);
         
         toggle.SetEnabled(false);
         
         app.Update();
 
-        Assert.AreEqual(100, root.awesomeLayoutBox.finalWidth);
-        Assert.AreEqual(100, wrapper.awesomeLayoutBox.finalWidth);
+        Assert.AreEqual(100, root.layoutBox.finalWidth);
+        Assert.AreEqual(100, wrapper.layoutBox.finalWidth);
         
         toggle.SetEnabled(true);
         
         app.Update();
         
-        Assert.AreEqual(200, root.awesomeLayoutBox.finalWidth);
-        Assert.AreEqual(200, wrapper.awesomeLayoutBox.finalWidth);
-        Assert.AreEqual(100, toggle.awesomeLayoutBox.finalWidth);
+        Assert.AreEqual(200, root.layoutBox.finalWidth);
+        Assert.AreEqual(200, wrapper.layoutBox.finalWidth);
+        Assert.AreEqual(100, toggle.layoutBox.finalWidth);
     }
 
     [Test]
@@ -127,8 +127,8 @@ public class BasicLayoutTests {
         
         app.Update();
 
-        Assert.AreEqual(3, blockProvider.awesomeLayoutBox.childCount);
-        Assert.AreEqual(300, blockUser.awesomeLayoutBox.finalWidth);
+        Assert.AreEqual(3, blockProvider.layoutBox.childCount);
+        Assert.AreEqual(300, blockUser.layoutBox.finalWidth);
         
         blockProvider.style.SetPreferredWidth(200f, StyleState.Normal);
         app.Update();
@@ -140,8 +140,8 @@ public class BasicLayoutTests {
         Assert.IsFalse(one.layoutHistory.RanLayoutInFrame(LayoutDirection.Horizontal, 1));
         Assert.IsFalse(two.layoutHistory.RanLayoutInFrame(LayoutDirection.Horizontal, 1));
         
-        Assert.AreEqual(200, blockProvider.awesomeLayoutBox.finalWidth);
-        Assert.AreEqual(200, blockUser.awesomeLayoutBox.finalWidth);
+        Assert.AreEqual(200, blockProvider.layoutBox.finalWidth);
+        Assert.AreEqual(200, blockUser.layoutBox.finalWidth);
         
         app.Update();
         
@@ -175,8 +175,8 @@ public class BasicLayoutTests {
         
         app.Update();
 
-        Assert.AreEqual(3, blockProvider.awesomeLayoutBox.childCount);
-        Assert.AreEqual(1000, blockUser.awesomeLayoutBox.finalWidth);
+        Assert.AreEqual(3, blockProvider.layoutBox.childCount);
+        Assert.AreEqual(1000, blockUser.layoutBox.finalWidth);
         
     }
     

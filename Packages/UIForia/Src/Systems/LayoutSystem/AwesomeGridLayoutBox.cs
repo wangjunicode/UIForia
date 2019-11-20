@@ -96,7 +96,7 @@ namespace UIForia.Systems {
                         track.fixedSizeMin = element.View.Viewport.height * track.minValue;
                         break;
                     case GridTemplateUnit.Percent: {
-                        if ((flags & AwesomeLayoutBoxFlags.WidthBlockProvider) != 0) {
+                        if ((flags & LayoutBoxFlags.WidthBlockProvider) != 0) {
                             float w = element.layoutResult.actualSize.width - (paddingBorderHorizontalStart + paddingBorderHorizontalEnd);
                             if (w < 0) w = 0;
                             track.fixedSizeMin = w * track.minValue;
@@ -137,7 +137,7 @@ namespace UIForia.Systems {
                         track.fixedSizeMax = element.View.Viewport.height * track.maxValue;
                         break;
                     case GridTemplateUnit.Percent: {
-                        if ((flags & AwesomeLayoutBoxFlags.WidthBlockProvider) != 0) {
+                        if ((flags & LayoutBoxFlags.WidthBlockProvider) != 0) {
                             float w = element.layoutResult.actualSize.width - (paddingBorderHorizontalStart + paddingBorderHorizontalEnd);
                             if (w < 0) w = 0;
                             track.fixedSizeMax = w * track.maxValue;
@@ -188,7 +188,7 @@ namespace UIForia.Systems {
                         track.fixedSizeMin = element.View.Viewport.height * track.minValue;
                         break;
                     case GridTemplateUnit.Percent: {
-                        if ((flags & AwesomeLayoutBoxFlags.HeightBlockProvider) != 0) {
+                        if ((flags & LayoutBoxFlags.HeightBlockProvider) != 0) {
                             float w = element.layoutResult.actualSize.height - (paddingBorderVerticalStart + paddingBorderVerticalEnd);
                             if (w < 0) w = 0;
                             track.fixedSizeMin = w * track.minValue;
@@ -233,7 +233,7 @@ namespace UIForia.Systems {
                         // as a percentage of this element's resolved height. If we have an unresolvable height we follow the BlockContentHeight
                         // algorithm as normal in all layout boxes. (ie check the ancestors until a resolvable height is found or the view height
                         // if no resolvable heights are found)
-                        if ((flags & AwesomeLayoutBoxFlags.HeightBlockProvider) != 0) {
+                        if ((flags & LayoutBoxFlags.HeightBlockProvider) != 0) {
                             float w = element.layoutResult.actualSize.height - (paddingBorderVerticalStart + paddingBorderVerticalEnd);
                             if (w < 0) w = 0;
                             track.fixedSizeMax = w * track.maxValue;
@@ -645,36 +645,36 @@ namespace UIForia.Systems {
                     case StylePropertyId.GridLayoutDensity:
                     case StylePropertyId.GridLayoutDirection:
                         placementDirty = true;
-                        flags |= AwesomeLayoutBoxFlags.RequireLayoutHorizontal | AwesomeLayoutBoxFlags.RequireLayoutVertical;
+                        flags |= LayoutBoxFlags.RequireLayoutHorizontal | LayoutBoxFlags.RequireLayoutVertical;
                         break;
 
                     case StylePropertyId.GridLayoutColAutoSize:
                     case StylePropertyId.GridLayoutColTemplate:
                         placementDirty = true;
                         // todo -- history entry?
-                        flags |= AwesomeLayoutBoxFlags.RequireLayoutHorizontal;
+                        flags |= LayoutBoxFlags.RequireLayoutHorizontal;
                         break;
                     case StylePropertyId.GridLayoutRowAutoSize:
                     case StylePropertyId.GridLayoutRowTemplate:
-                        flags |= AwesomeLayoutBoxFlags.RequireLayoutVertical;
+                        flags |= LayoutBoxFlags.RequireLayoutVertical;
                         placementDirty = true;
                         break;
 
                     case StylePropertyId.GridLayoutColGap:
-                        flags |= AwesomeLayoutBoxFlags.RequireLayoutHorizontal;
+                        flags |= LayoutBoxFlags.RequireLayoutHorizontal;
                         break;
 
                     case StylePropertyId.GridLayoutRowGap:
-                        flags |= AwesomeLayoutBoxFlags.RequireLayoutVertical;
+                        flags |= LayoutBoxFlags.RequireLayoutVertical;
                         // todo -- don't need to compute sizes again, just need to reposition tracks and assign sizes to children
                         break;
                     case StylePropertyId.FitItemsHorizontal:
                     case StylePropertyId.AlignItemsHorizontal:
-                        flags |= AwesomeLayoutBoxFlags.RequireLayoutHorizontal;
+                        flags |= LayoutBoxFlags.RequireLayoutHorizontal;
                         break;
                     case StylePropertyId.FitItemsVertical:
                     case StylePropertyId.AlignItemsVertical:
-                        flags |= AwesomeLayoutBoxFlags.RequireLayoutVertical;
+                        flags |= LayoutBoxFlags.RequireLayoutVertical;
                         // todo -- don't need to layout but do need to apply sizes again so these values update on children
                         break;
                 }
@@ -693,7 +693,7 @@ namespace UIForia.Systems {
                     case StylePropertyId.GridItemHeight:
                         placementDirty = true;
                         // todo -- history entry?
-                        flags |= (AwesomeLayoutBoxFlags.RequireLayoutHorizontal | AwesomeLayoutBoxFlags.RequireLayoutVertical);
+                        flags |= (LayoutBoxFlags.RequireLayoutHorizontal | LayoutBoxFlags.RequireLayoutVertical);
                         break;
                 }
             }

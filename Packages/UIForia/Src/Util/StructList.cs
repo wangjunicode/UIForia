@@ -194,14 +194,40 @@ namespace UIForia.Util {
             size -= count;
         }
 
-        public void Sort(IComparer<T> comparison) {
-            if (size < 2) return;
-            IntroSort(array, 0, size - 1, 2 * FloorLog2(size), comparison);
+//        public void Sort(IComparer<T> comparison) {
+//            if (size < 2) return;
+//            IntroSort(array, 0, size - 1, 2 * FloorLog2(size), comparison);
+//        }
+//
+//        public void Sort(int start, int length, IComparer<T> comparison) {
+//            if (size < 2) return;
+//            IntroSort(array, start, length + start - 1, 2 * FloorLog2(length), comparison);
+//        }
+
+
+        private class Cmp : IComparer<T> {
+
+            public Comparison<T> cmp;
+
+            public int Compare(T x, T y) {
+                return cmp.Invoke(x, y);
+            }
+
         }
 
-        public void Sort(int start, int length, IComparer<T> comparison) {
+        private static Cmp s_Comparer = new Cmp();
+
+        public void Sort(IComparer<T> comparison) {
             if (size < 2) return;
-            IntroSort(array, start, length + start - 1, 2 * FloorLog2(length), comparison);
+            System.Array.Sort(array, 0, size, comparison);
+        }
+
+        // NOT FUCKING THREAD SAFE
+        public void Sort(Comparison<T> comparison) {
+            if (size < 2) return;
+            s_Comparer.cmp = comparison;
+            System.Array.Sort(array, 0, size, s_Comparer);
+            s_Comparer.cmp = null;
         }
 
         internal static int FloorLog2(int n) {
@@ -368,7 +394,7 @@ namespace UIForia.Util {
             isInPool = true;
             s_Pool.Add(this);
         }
-        
+
         public void Release() {
             Clear();
             if (isInPool) return;

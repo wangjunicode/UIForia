@@ -95,7 +95,7 @@ namespace UIForia.Elements {
 
         internal static IntMap<ElementColdData> s_ColdDataMap = new IntMap<ElementColdData>();
 
-        internal AwesomeLayoutBox awesomeLayoutBox;
+        internal AwesomeLayoutBox layoutBox;
         internal RenderBox renderBox;
 
         internal int enableStateChangedFrameId;
@@ -142,10 +142,10 @@ namespace UIForia.Elements {
 
         public bool isSelfDisabled => (flags & UIElementFlags.Enabled) == 0;
 
-        public bool isEnabled => (flags & UIElementFlags.AliveEnabledAncestorEnabled) == (UIElementFlags.AliveEnabledAncestorEnabled);
+        public bool isEnabled => (flags & UIElementFlags.EnabledFlagSet) == (UIElementFlags.EnabledFlagSet);
             //!isDestroyed && (flags & UIElementFlags.SelfAndAncestorEnabled) == UIElementFlags.SelfAndAncestorEnabled;
 
-        public bool isDisabled => (flags & UIElementFlags.AliveEnabledAncestorEnabled) != (UIElementFlags.AliveEnabledAncestorEnabled);
+        public bool isDisabled => (flags & UIElementFlags.EnabledFlagSet) != (UIElementFlags.EnabledFlagSet);
         
         //isDestroyed || (flags & UIElementFlags.Enabled) == 0 || (flags & UIElementFlags.AncestorEnabled) == 0;
 

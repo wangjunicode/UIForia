@@ -30,7 +30,7 @@ internal enum UIElementFlags {
     LayoutBorderPaddingHorizontalDirty = 1 << 27,
     LayoutBorderPaddingVerticalDirty = 1 << 28,
 
-    AliveEnabledAncestorEnabled = Alive | Enabled | AncestorEnabled,
+    EnabledFlagSet = Alive | Enabled | AncestorEnabled,
     
     DefaultLayoutDirty = (
         LayoutSizeWidthDirty |
@@ -50,6 +50,7 @@ internal enum UIElementFlags {
         LayoutTypeOrBehaviorDirty |
         LayoutBorderPaddingHorizontalDirty |
         LayoutBorderPaddingVerticalDirty
-    )
+    ),
+
 
 }

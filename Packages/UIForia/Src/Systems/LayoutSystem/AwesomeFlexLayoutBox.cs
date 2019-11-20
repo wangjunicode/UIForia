@@ -120,26 +120,26 @@ namespace UIForia.Systems {
                 switch (property.propertyId) {
                     case StylePropertyId.FlexLayoutWrap:
                     case StylePropertyId.FlexLayoutDirection:
-                        flags |= (AwesomeLayoutBoxFlags.RequireLayoutHorizontal | AwesomeLayoutBoxFlags.RequireLayoutVertical);
+                        flags |= (LayoutBoxFlags.RequireLayoutHorizontal | LayoutBoxFlags.RequireLayoutVertical);
                         // todo - notify parent of layout
                         break;
                     case StylePropertyId.DistributeExtraSpaceHorizontal:
-                        flags |= AwesomeLayoutBoxFlags.RequireLayoutHorizontal;
+                        flags |= LayoutBoxFlags.RequireLayoutHorizontal;
                         break;
 
                     case StylePropertyId.DistributeExtraSpaceVertical:
-                        flags |= AwesomeLayoutBoxFlags.RequireLayoutVertical;
+                        flags |= LayoutBoxFlags.RequireLayoutVertical;
                         break;
 
                     case StylePropertyId.AlignItemsHorizontal:
-                        flags |= AwesomeLayoutBoxFlags.RequireLayoutHorizontal;
+                        flags |= LayoutBoxFlags.RequireLayoutHorizontal;
                         break;
                     case StylePropertyId.AlignItemsVertical:
                     case StylePropertyId.FitItemsHorizontal:
-                        flags |= AwesomeLayoutBoxFlags.RequireLayoutHorizontal;
+                        flags |= LayoutBoxFlags.RequireLayoutHorizontal;
                         break;
                     case StylePropertyId.FitItemsVertical:
-                        flags |= AwesomeLayoutBoxFlags.RequireLayoutVertical;
+                        flags |= LayoutBoxFlags.RequireLayoutVertical;
                         break;
                 }
             }

@@ -31,6 +31,23 @@ namespace UIForia.Systems {
                 ref StyleProperty property = ref properties.array[i];
                 // todo -- these flags can maybe probably be baked into setting the property
                 switch (property.propertyId) {
+                    
+                    case StylePropertyId.ClipBehavior:
+                        
+                        if (element.layoutBox != null) {
+                            element.layoutBox.flags |= LayoutBoxFlags.RecomputeClipping;
+                            element.layoutBox.clipBehavior = property.AsClipBehavior;
+                        }
+                        break;
+                    
+                    case StylePropertyId.ClipBounds:
+                        
+                        break;
+                    case StylePropertyId.OverflowX:
+                    case StylePropertyId.OverflowY:
+                        element.layoutBox?.UpdateClipper();
+                        break;
+
                     case StylePropertyId.LayoutType:
                     case StylePropertyId.LayoutBehavior:
                         element.flags |= UIElementFlags.LayoutTypeOrBehaviorDirty;
@@ -61,13 +78,13 @@ namespace UIForia.Systems {
                     case StylePropertyId.MaxWidth:
                     case StylePropertyId.PreferredWidth:
                         element.flags |= UIElementFlags.LayoutSizeWidthDirty;
-                        element.awesomeLayoutBox?.UpdateBlockProviderWidth();
+                        element.layoutBox?.UpdateBlockProviderWidth();
                         break;
                     case StylePropertyId.MinHeight:
                     case StylePropertyId.MaxHeight:
                     case StylePropertyId.PreferredHeight:
                         element.flags |= UIElementFlags.LayoutSizeHeightDirty;
-                        element.awesomeLayoutBox?.UpdateBlockProviderHeight();
+                        element.layoutBox?.UpdateBlockProviderHeight();
                         break;
                     case StylePropertyId.PaddingLeft:
                     case StylePropertyId.PaddingRight:
@@ -105,10 +122,9 @@ namespace UIForia.Systems {
                 }
 
                 element.flags |= UIElementFlags.LayoutTransformDirty;
-                
             }
 
-            AwesomeLayoutBox layoutBox = element.awesomeLayoutBox;
+            AwesomeLayoutBox layoutBox = element.layoutBox;
             if (layoutBox != null) {
                 if (checkAlignHorizontal) {
                     layoutBox.UpdateRequiresHorizontalAlignment();
@@ -120,7 +136,7 @@ namespace UIForia.Systems {
 
                 layoutBox.OnStyleChanged(properties);
                 // don't need to null check since root box will never have a style changed
-                layoutBox.OnChildStyleChanged(element.awesomeLayoutBox, properties);
+                layoutBox.OnChildStyleChanged(element.layoutBox, properties);
             }
         }
 

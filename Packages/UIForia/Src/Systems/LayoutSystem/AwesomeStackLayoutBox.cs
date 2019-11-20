@@ -45,12 +45,12 @@ namespace UIForia.Systems {
                 switch (propertyList.array[i].propertyId) {
                     case StylePropertyId.AlignItemsHorizontal:
                     case StylePropertyId.FitItemsHorizontal:
-                        flags |= AwesomeLayoutBoxFlags.RequireLayoutHorizontal;
+                        flags |= LayoutBoxFlags.RequireLayoutHorizontal;
                         // todo -- log history entry
                         break;
                     case StylePropertyId.AlignItemsVertical:
                     case StylePropertyId.FitItemsVertical:
-                        flags |= AwesomeLayoutBoxFlags.RequireLayoutVertical;
+                        flags |= LayoutBoxFlags.RequireLayoutVertical;
                         // todo -- log history entry
                         break;
                 }

@@ -19,12 +19,12 @@ namespace UIForia.Systems {
             textInfo = ((UITextElement) element).textInfo;
             textInfo.onTextLayoutRequired += onTextContentChanged;
             textAlreadyDirty = true;
-            flags |= (AwesomeLayoutBoxFlags.RequireLayoutHorizontal | AwesomeLayoutBoxFlags.RequireLayoutHorizontal);
+            flags |= (LayoutBoxFlags.RequireLayoutHorizontal | LayoutBoxFlags.RequireLayoutHorizontal);
         }
 
         private void HandleTextContentChanged() {
             if (ignoreUpdate) return;
-            flags |= (AwesomeLayoutBoxFlags.RequireLayoutHorizontal | AwesomeLayoutBoxFlags.RequireLayoutHorizontal);
+            flags |= (LayoutBoxFlags.RequireLayoutHorizontal | LayoutBoxFlags.RequireLayoutHorizontal);
             finalWidth = -1;
             finalHeight = -1;
             if (textAlreadyDirty) return;
@@ -34,9 +34,9 @@ namespace UIForia.Systems {
             while (ptr != null) {
 
                 // once we hit a block provider we can safely stop traversing since the provider's parent doesn't care about content size changing
-                bool stop = (ptr.flags & AwesomeLayoutBoxFlags.WidthBlockProvider) != 0;
+                bool stop = (ptr.flags & LayoutBoxFlags.WidthBlockProvider) != 0;
                 // can't break out if already flagged for layout because parent of parent might not be and might be content sized
-                ptr.flags |= AwesomeLayoutBoxFlags.RequireLayoutHorizontal;
+                ptr.flags |= LayoutBoxFlags.RequireLayoutHorizontal;
                 ptr.element.layoutHistory.AddLogEntry(LayoutDirection.Horizontal, -1, LayoutReason.DescendentStyleSizeChanged);
                 if (stop) break;
                 ptr = ptr.parent;
@@ -46,10 +46,10 @@ namespace UIForia.Systems {
             
             while (ptr != null) {
                 // once we hit a block provider we can safely stop traversing since the provider's parent doesn't care about content size changing
-                bool stop = (ptr.flags & AwesomeLayoutBoxFlags.HeightBlockProvider) != 0;
+                bool stop = (ptr.flags & LayoutBoxFlags.HeightBlockProvider) != 0;
 
                 // can't break out if already flagged for layout because parent of parent might not be and might be content sized
-                ptr.flags |= AwesomeLayoutBoxFlags.RequireLayoutVertical;
+                ptr.flags |= LayoutBoxFlags.RequireLayoutVertical;
                 ptr.element.layoutHistory.AddLogEntry(LayoutDirection.Vertical, -1, LayoutReason.DescendentStyleSizeChanged);
                 if (stop) break;
                 ptr = ptr.parent;

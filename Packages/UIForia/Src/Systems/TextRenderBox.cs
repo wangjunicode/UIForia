@@ -49,7 +49,7 @@ namespace UIForia.Rendering {
             int triIndex = 0;
 
             int currentLineIndex = -1;
-            
+
             GeometryRange range = new GeometryRange();
 
             int renderedCharCount = 0;
@@ -77,7 +77,7 @@ namespace UIForia.Rendering {
             Vector4[] texCoord0 = geometry.texCoordList0.array;
             Vector4[] texCoord1 = geometry.texCoordList1.array;
             int[] triangles = geometry.triangleList.array;
-            
+
             Vector2 faceTextureUVTopLeft = new Vector2(0, 1);
             Vector2 faceTextureUVBottomRight = new Vector2(1, 0);
 
@@ -111,7 +111,7 @@ namespace UIForia.Rendering {
 
                 float charWidth = geo.bottomRight.x - geo.topLeft.x;
                 float charHeight = geo.bottomRight.y - geo.topLeft.y;
-                
+
                 p0.x = charX + geo.topShear;
                 p0.y = -charY;
                 p0.z = 0;
@@ -181,7 +181,7 @@ namespace UIForia.Rendering {
         public override void OnStylePropertyChanged(StructList<StyleProperty> propertyList) {
             StyleProperty[] properties = propertyList.array;
             int count = propertyList.size;
-            
+
             base.OnStylePropertyChanged(propertyList);
 
             for (int i = 0; i < count; i++) {
@@ -220,17 +220,16 @@ namespace UIForia.Rendering {
         }
 
         public override void PaintBackground(RenderContext ctx) {
-            
-         //   if (textSpan.geometryVersion != lastGeometryVersion) {
+            if (textSpan.geometryVersion != lastGeometryVersion) {
                 lastGeometryVersion = textSpan.geometryVersion;
                 UpdateGeometry();
                 shouldUpdateMaterialProperties = true;
-          //  }
+            }
 
-         //   if (textSpan.fontAsset != fontData.fontAsset) {
+            if (textSpan.fontAsset != fontData.fontAsset) {
                 UpdateFontData();
                 shouldUpdateMaterialProperties = true;
-         //   }
+            }
 
             if (shouldUpdateMaterialProperties) {
                 shouldUpdateMaterialProperties = false;
@@ -250,7 +249,7 @@ namespace UIForia.Rendering {
 
                 weight = ((weight * 0.25f) + textSpan.faceDilate) * textSpan.scaleRatioA * 0.5f;
 
-                   
+
                 Vector4 packedColors = default;
 
                 unsafe {
@@ -262,24 +261,21 @@ namespace UIForia.Rendering {
                     b[3] = textSpan.glowColor;
                     UnsafeUtility.MemCpy(vp, b, sizeof(Color32) * 4);
                 }
-                
+
                 float packedOutlineGlow = VertigoUtil.ColorToFloat(new Color(textSpan.outlineWidth, textSpan.outlineSoftness, textSpan.glowOuter, textSpan.glowOffset));
-                int shapeType = BitUtil.SetHighLowBits((int)ShapeType.Text, 0);
+                int shapeType = BitUtil.SetHighLowBits((int) ShapeType.Text, 0);
                 geometry.objectData = new Vector4(shapeType, packedOutlineGlow, weight, element.style.Opacity); // should be text opacity instead?
                 geometry.packedColors = packedColors;
                 geometry.miscData = new Vector4(underlayX, underlayY, underlayDilate, underlaySoftness);
-                
             }
 
             // ctx.DrawBatchedTextLine(geometry, ranges, matrix);
-            
-            Matrix4x4 matrix = element.layoutResult.matrix.ToMatrix4x4();
+
+            Matrix4x4 matrix = default;
+            element.layoutResult.matrix.GetMatrix4x4(ref matrix);
             // ctx.DrawBatchedGeometry(geometry, ranges.array[0], element.layoutResult.matrix.ToMatrix4x4());
             if (ranges.size == 1) {
                 ctx.DrawBatchedText(geometry, ranges.array[0], matrix, fontData, clipper);
-                
-
-                
             }
             else {
                 for (int i = 0; i < ranges.size; i++) {

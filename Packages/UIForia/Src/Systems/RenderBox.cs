@@ -56,6 +56,7 @@ namespace UIForia.Rendering {
         protected Path2D clipPath;
         internal ClipData clipper;
         public bool didRender;
+        public int traversalIndex;
 
         public virtual RenderBounds RenderBounds {
             get {

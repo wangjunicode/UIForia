@@ -218,6 +218,18 @@ namespace SVGX {
 
             return matrix;
         }
+        
+        public void GetMatrix4x4(ref Matrix4x4 matrix) {
+            matrix.m00 = m0;
+            matrix.m01 = -m2;
+            matrix.m10 = -m1;
+            matrix.m11 = m3;
+            matrix.m03 = m4;
+            matrix.m13 = -m5;
+            matrix.m22 = 1;
+            matrix.m33 = 1;
+        }
+
 
         public override string ToString() {
             string output = string.Format("[SVGXMatrix] a: {0}, b: {1}, c: {2}, d: {3}, e: {4}, f: {5}", m0, m1, m2, m3, m4, m5);

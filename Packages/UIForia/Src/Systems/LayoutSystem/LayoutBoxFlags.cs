@@ -3,7 +3,7 @@ using System;
 namespace UIForia.Systems {
 
     [Flags]
-    public enum AwesomeLayoutBoxFlags {
+    public enum LayoutBoxFlags {
 
         None = 0,
         HorizontalSizeChanged = 1,
@@ -22,6 +22,10 @@ namespace UIForia.Systems {
         RequireAlignmentVertical = 1 << 7,
 
         RequiresMatrixUpdate = 1 << 8,
+
+        RecomputeClipping = 1 << 9,
+
+        Clipper = 1 << 10
 
     }
 

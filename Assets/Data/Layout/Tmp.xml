@@ -5,73 +5,31 @@
         style container {
             FlexLayoutDirection = Horizontal;
             PreferredSize = 1vw 1vh;
+            Painter = "ClipBounds";
         }
 
-        style parent {
+        style clipper {
             PreferredSize = 500px 500px;
             BackgroundColor = white;
             LayoutBehavior = Ignored;
             AlignX = Center Parent;
             AlignY = Center Parent;
-            DistributeExtraSpaceHorizontal = BetweenContent;
-            DistributeExtraSpaceVertical = CenterContent;
+            Overflow = Hidden;
         }
         
         style child-2 {
-            PreferredSize = 100px 100px;
+            PreferredSize = 600px 100px;
             BackgroundColor = blue;
-        }
-        
-        style grow {
-            FlexItemGrow = 1;
-            BackgroundColor = green;
-            PreferredSize = 300px 100px;
-            MaxWidth = 100px;
-        }
-        
-          animation rot {
-            [options] {
-                iterations = -1;
-                duration = 5000;
+            [hover] {
+                BackgroundColor = red;
             }
-            [keyframes] {
-                0%{
-                    TransformRotation = 0;
-                }
-                100% {
-                    TransformRotation = 360;
-                }
-            }
+            TransformRotation = 45;
         }
-        
-           animation scale {
-            [options] {
-                iterations = -1;
-                duration = 5000;
-            }
-            [keyframes] {
-                0%{
-                    TransformScaleX = 1;
-                    TransformScaleY = 1;
-                }
-                50% {
-                    TransformScaleX = 1.8;
-                    TransformScaleY = 1.8;
-                }
-                100% {
-                    TransformScaleX = 1;
-                    TransformScaleY = 1;
-                }
-            }
-        }
-        
         
     </Style>
 
     <Contents style="container">
-        <Group style='parent'>
-            <Group style="child-2"/>
-            <Group style="child-2"/>
+        <Group style='clipper'>
             <Group style="child-2"/>
         </Group>
     </Contents>

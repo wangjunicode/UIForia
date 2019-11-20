@@ -50,7 +50,7 @@ namespace UIForia.Util {
 //                        output -= ptr.transformPositionX.value;
 //                        ptr = ptr.ResolveLayoutParent();
 //                    }
-                    
+
                     return output;
 
                 default:
@@ -80,7 +80,7 @@ namespace UIForia.Util {
 
                 case AlignmentBehavior.Template:
                     throw new NotImplementedException();
-                
+
                 case AlignmentBehavior.TemplateContentArea:
                     throw new NotImplementedException();
 
@@ -97,7 +97,7 @@ namespace UIForia.Util {
 //                        output -= ptr.transformPositionY.value;
 //                        ptr = ptr.ResolveLayoutParent();
 //                    }
-                    
+
 //                    return output;
 
                 default:
@@ -194,9 +194,8 @@ namespace UIForia.Util {
                     return 0;
             }
         }
-        
-       
-           public static float ResolveOffsetMeasurement(UIElement element, float viewportWidth, float viewportHeight, in OffsetMeasurement measurement, float percentageRelativeVal) {
+
+        public static float ResolveOffsetMeasurement(UIElement element, float viewportWidth, float viewportHeight, in OffsetMeasurement measurement, float percentageRelativeVal) {
             switch (measurement.unit) {
                 case OffsetMeasurementUnit.Unset:
                     return 0;
@@ -241,23 +240,23 @@ namespace UIForia.Util {
                 case OffsetMeasurementUnit.ViewportHeight:
                     return viewportHeight * measurement.value;
 
-                case OffsetMeasurementUnit.ParentWidth:          
+                case OffsetMeasurementUnit.ParentWidth:
                     throw new NotImplementedException();
-                    // if box.parent is null the box is the root, otherwise call ResolveLayoutParent to handle transclusion
+                // if box.parent is null the box is the root, otherwise call ResolveLayoutParent to handle transclusion
 //                    if (box.parent == null) return 0;
 //                    return box.ResolveLayoutParent().size.width * measurement.value;
 
                 case OffsetMeasurementUnit.ParentHeight:
                     throw new NotImplementedException();
 
-                    // if box.parent is null the box is the root, otherwise call ResolveLayoutParent to handle transclusion
+                // if box.parent is null the box is the root, otherwise call ResolveLayoutParent to handle transclusion
 //                    if (box.parent == null) return 0;
 //                    return box.ResolveLayoutParent().size.height * measurement.value;
 
                 case OffsetMeasurementUnit.ParentContentAreaWidth:
                     throw new NotImplementedException();
 
-                    // if box.parent is null the box is the root, otherwise call ResolveLayoutParent to handle transclusion
+                // if box.parent is null the box is the root, otherwise call ResolveLayoutParent to handle transclusion
 //                    if (box.parent == null) return 0;
 //                    return box.ResolveLayoutParent().contentSize.width * measurement.value;
 

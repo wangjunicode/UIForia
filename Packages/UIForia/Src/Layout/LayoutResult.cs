@@ -55,9 +55,11 @@ namespace UIForia.Layout {
         public LayoutResult layoutParent;
         public UIElement element;
         public OrientedBounds orientedBounds;
-        public AxisAlignedBounds axisAlignedBounds;
+        public Vector4 axisAlignedBounds;
         
         public SVGXMatrix transformMatrix;
+        internal ClipData clipper;
+        public bool isCulled;
 
         public Rect ContentRect => new Rect(
             padding.left + border.left,

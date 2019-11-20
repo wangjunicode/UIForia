@@ -1,6 +1,7 @@
 using System;
 using UIForia.Elements;
 using UIForia.Layout;
+using UIForia.Rendering;
 using UIForia.Templates;
 using UIForia.Util;
 using UnityEngine;
@@ -95,6 +96,7 @@ public class UIView {
         this.rootElement = new UIViewRootElement();
         this.rootElement.flags |= UIElementFlags.Enabled;
         this.rootElement.flags |= UIElementFlags.AncestorEnabled;
+        this.rootElement.style.SetClipBehavior(ClipBehavior.Never, StyleState.Normal);
         this.rootElement.View = this;
         this.sizeChanged = true;
     }

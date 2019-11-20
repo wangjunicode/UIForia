@@ -54,7 +54,7 @@ public class RenderOwnerTests {
         app.Update();
 
         ((VertigoRenderSystem) app.RenderSystem).renderOwners[0].GatherBoxDataParallel();
-        StructList<RenderOwner.RenderBoxWrapper> elements = ((VertigoRenderSystem) app.RenderSystem).renderOwners[0].WrapperList;
+        StructList<RenderOwner.RenderBoxWrapper> elements = null; //((VertigoRenderSystem) app.RenderSystem).renderOwners[0].WrapperList;
 
         for (int i = 0; i < elements.size; i++) {
             if (elements[i].renderOp != RenderOwner.RenderOpType.DrawBackground) {
@@ -153,7 +153,7 @@ public class RenderOwnerTests {
         app.Update();
 
         ((VertigoRenderSystem) app.RenderSystem).renderOwners[0].GatherBoxDataParallel();
-        StructList<RenderOwner.RenderBoxWrapper> elements = ((VertigoRenderSystem) app.RenderSystem).renderOwners[0].WrapperList;
+        StructList<RenderOwner.RenderBoxWrapper> elements = null;//((VertigoRenderSystem) app.RenderSystem).renderOwners[0].WrapperList;
 
         for (int i = 0; i < elements.size; i++) {
             if (elements[i].renderOp != RenderOwner.RenderOpType.DrawBackground && elements[i].renderOp != RenderOwner.RenderOpType.DrawForeground) {

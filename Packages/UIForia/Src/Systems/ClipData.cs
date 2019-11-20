@@ -1,3 +1,5 @@
+using UIForia.Elements;
+using UIForia.Systems;
 using UIForia.Util;
 using UnityEngine;
 
@@ -26,10 +28,13 @@ namespace UIForia.Rendering {
         internal LightList<ClipData> dependents;
         internal Vector4 packedBoundsAndChannel;
         internal int regionDrawCount;
+        public StructList<ElemRef> clipList;
+        public OrientedBounds orientedBounds;
 
         internal ClipData() {
             intersected = new StructList<Vector2>();
             dependents = new LightList<ClipData>();
+            clipList = new StructList<ElemRef>();
         }
 
         public void Clear() {
@@ -43,6 +48,14 @@ namespace UIForia.Rendering {
             intersected.size = 0;
             worldBounds = default;
             dependents.QuickClear();
+        }
+
+        public bool RequiresUpdate() {
+            return true;
+        }
+
+        public bool ContainsPoint(in Vector2 point) {
+            return PolygonUtil.PointInPolygon(point, intersected.array, intersected.size);
         }
 
     }

@@ -18,7 +18,7 @@ namespace UIForia.Systems {
         public float paddingBorderVerticalStart;
         public float paddingBorderVerticalEnd;
 
-        public AwesomeLayoutBoxFlags flags;
+        public LayoutBoxFlags flags;
         public float cachedContentWidth;
         public float cachedContentHeight;
         public LayoutType layoutBoxType;
@@ -31,6 +31,8 @@ namespace UIForia.Systems {
         public float transformX;
         public float transformY;
         public float transformRotation;
+        public ClipData clipData;
+        public ClipBehavior clipBehavior;
 
         public void Initialize(UIElement element, int frameId) {
             this.element = element;
@@ -42,13 +44,15 @@ namespace UIForia.Systems {
             element.layoutHistory = element.layoutHistory ?? new LayoutHistory(element);
             element.layoutHistory.AddLogEntry(LayoutDirection.Horizontal, frameId, LayoutReason.Initialized, boxName);
             element.layoutHistory.AddLogEntry(LayoutDirection.Vertical, frameId, LayoutReason.Initialized, boxName);
-            flags |= AwesomeLayoutBoxFlags.RequireLayoutHorizontal | AwesomeLayoutBoxFlags.RequireLayoutVertical | AwesomeLayoutBoxFlags.RequiresMatrixUpdate;
+            flags |= LayoutBoxFlags.RequireLayoutHorizontal | LayoutBoxFlags.RequireLayoutVertical | LayoutBoxFlags.RequiresMatrixUpdate;
+            clipBehavior = element.style.ClipBehavior;
             UpdateBlockProviderWidth();
             UpdateBlockProviderHeight();
 
             UpdateRequiresHorizontalAlignment();
             UpdateRequiresVerticalAlignment();
 
+            UpdateClipper();
             OnInitialize();
         }
 
@@ -156,13 +160,15 @@ namespace UIForia.Systems {
             paddingBorderHorizontalStart = paddingLeft + borderLeft;
             paddingBorderHorizontalEnd = paddingRight + borderRight;
 
-            if ((flags & AwesomeLayoutBoxFlags.RequireAlignmentHorizontal) == 0 && !Mathf.Approximately(previousPosition, alignedPosition)) {
-                flags |= AwesomeLayoutBoxFlags.RequiresMatrixUpdate;
+            if ((flags & LayoutBoxFlags.RequireAlignmentHorizontal) == 0 && !Mathf.Approximately(previousPosition, alignedPosition)) {
+                flags |= LayoutBoxFlags.RequiresMatrixUpdate;
+                flags |= LayoutBoxFlags.RecomputeClipping;
             }
 
             // todo -- should probably be when content area size changes, not just overall size
             if (newWidth != finalWidth) {
-                flags |= AwesomeLayoutBoxFlags.RequireLayoutHorizontal;
+                flags |= LayoutBoxFlags.RequireLayoutHorizontal;
+                flags |= LayoutBoxFlags.RecomputeClipping;
                 element.layoutHistory.AddLogEntry(LayoutDirection.Horizontal, frameId, LayoutReason.FinalSizeChanged, string.Empty);
                 finalWidth = newWidth;
             }
@@ -236,12 +242,12 @@ namespace UIForia.Systems {
             paddingBorderVerticalStart = paddingTop + borderTop;
             paddingBorderVerticalEnd = paddingBottom + borderBottom;
 
-            if ((flags & AwesomeLayoutBoxFlags.RequireAlignmentVertical) != 0 && !Mathf.Approximately(previousPosition, alignedPosition)) {
-                flags |= AwesomeLayoutBoxFlags.RequiresMatrixUpdate;
+            if ((flags & LayoutBoxFlags.RequireAlignmentVertical) != 0 && !Mathf.Approximately(previousPosition, alignedPosition)) {
+                flags |= LayoutBoxFlags.RequiresMatrixUpdate;
             }
 
             if (newHeight != finalHeight) {
-                flags |= AwesomeLayoutBoxFlags.RequireLayoutVertical;
+                flags |= LayoutBoxFlags.RequireLayoutVertical;
                 element.layoutHistory.AddLogEntry(LayoutDirection.Vertical, frameId, LayoutReason.FinalSizeChanged, string.Empty);
                 finalHeight = newHeight;
             }
@@ -318,7 +324,7 @@ namespace UIForia.Systems {
             float paddingBorder = 0;
 
             // ignored elements can use the output size of their parent since it has been resolved already
-            if ((flags & AwesomeLayoutBoxFlags.Ignored) != 0) {
+            if ((flags & LayoutBoxFlags.Ignored) != 0) {
                 LayoutResult parentResult = element.layoutResult.layoutParent;
                 paddingBorder = parentResult.padding.left + parentResult.padding.right + parentResult.border.left + parentResult.padding.right;
                 return Math.Max(0, (parentResult.actualSize.width - paddingBorder) * value);
@@ -326,7 +332,7 @@ namespace UIForia.Systems {
 
             while (ptr != null) {
                 paddingBorder += ptr.paddingBorderHorizontalStart + ptr.paddingBorderHorizontalEnd;
-                if ((ptr.flags & AwesomeLayoutBoxFlags.WidthBlockProvider) != 0) {
+                if ((ptr.flags & LayoutBoxFlags.WidthBlockProvider) != 0) {
                     Assert.AreNotEqual(-1, ptr.finalWidth);
                     return Math.Max(0, (ptr.finalWidth - paddingBorder) * value);
                 }
@@ -338,14 +344,14 @@ namespace UIForia.Systems {
         }
 
         protected float ComputeBlockWidth(float value) {
-            if ((flags & AwesomeLayoutBoxFlags.Ignored) != 0) {
+            if ((flags & LayoutBoxFlags.Ignored) != 0) {
                 LayoutResult parentResult = element.layoutResult.layoutParent;
                 return Math.Max(0, parentResult.actualSize.width * value);
             }
 
             AwesomeLayoutBox ptr = parent;
             while (ptr != null) {
-                if ((ptr.flags & AwesomeLayoutBoxFlags.WidthBlockProvider) != 0) {
+                if ((ptr.flags & LayoutBoxFlags.WidthBlockProvider) != 0) {
                     Assert.AreNotEqual(-1, ptr.finalWidth);
                     return Math.Max(0, ptr.finalWidth * value);
                 }
@@ -361,7 +367,7 @@ namespace UIForia.Systems {
             float paddingBorder = 0;
 
             // ignored elements can use the output size of their parent since it has been resolved already
-            if ((flags & AwesomeLayoutBoxFlags.Ignored) != 0) {
+            if ((flags & LayoutBoxFlags.Ignored) != 0) {
                 LayoutResult parentResult = element.layoutResult.layoutParent;
                 paddingBorder = parentResult.padding.top + parentResult.padding.bottom + parentResult.border.top + parentResult.padding.bottom;
                 return Math.Max(0, (parentResult.actualSize.height - paddingBorder) * value);
@@ -369,7 +375,7 @@ namespace UIForia.Systems {
 
             while (ptr != null) {
                 paddingBorder += ptr.paddingBorderVerticalStart + ptr.paddingBorderVerticalEnd;
-                if ((ptr.flags & AwesomeLayoutBoxFlags.HeightBlockProvider) != 0) {
+                if ((ptr.flags & LayoutBoxFlags.HeightBlockProvider) != 0) {
                     Assert.AreNotEqual(-1, ptr.finalHeight);
                     return Math.Max(0, (ptr.finalHeight - paddingBorder) * value);
                 }
@@ -384,13 +390,13 @@ namespace UIForia.Systems {
             AwesomeLayoutBox ptr = parent;
 
             // ignored elements can use the output size of their parent since it has been resolved already
-            if ((flags & AwesomeLayoutBoxFlags.Ignored) != 0) {
+            if ((flags & LayoutBoxFlags.Ignored) != 0) {
                 LayoutResult parentResult = element.layoutResult.layoutParent;
                 return Math.Max(0, (parentResult.actualSize.height) * value);
             }
 
             while (ptr != null) {
-                if ((ptr.flags & AwesomeLayoutBoxFlags.HeightBlockProvider) != 0) {
+                if ((ptr.flags & LayoutBoxFlags.HeightBlockProvider) != 0) {
                     Assert.AreNotEqual(-1, ptr.finalHeight);
                     return Math.Max(0, ptr.finalHeight * value);
                 }
@@ -502,7 +508,7 @@ namespace UIForia.Systems {
             cachedContentWidth = -1;
 
             if (contentSizedWidth) {
-                flags |= AwesomeLayoutBoxFlags.RequireLayoutHorizontal;
+                flags |= LayoutBoxFlags.RequireLayoutHorizontal;
                 parent?.OnChildWidthDirty(this);
             }
         }
@@ -529,7 +535,7 @@ namespace UIForia.Systems {
             }
 
             if ((dirtyFlag & LayoutDirtyFlag.LayoutHorizontal) != 0) {
-                flags |= AwesomeLayoutBoxFlags.RequireLayoutHorizontal;
+                flags |= LayoutBoxFlags.RequireLayoutHorizontal;
                 finalWidth = -1;
             }
 
@@ -546,10 +552,10 @@ namespace UIForia.Systems {
 
             while (ptr != null) {
                 // once we hit a block provider we can safely stop traversing since the provider doesn't care about content size changing
-                bool stop = (ptr.flags & AwesomeLayoutBoxFlags.WidthBlockProvider) != 0;
+                bool stop = (ptr.flags & LayoutBoxFlags.WidthBlockProvider) != 0;
 
                 // can't break out if already flagged for layout because parent of parent might not be and might be content sized
-                ptr.flags |= AwesomeLayoutBoxFlags.RequireLayoutHorizontal;
+                ptr.flags |= LayoutBoxFlags.RequireLayoutHorizontal;
                 ptr.element.layoutHistory.AddLogEntry(LayoutDirection.Horizontal, frameId, reason);
                 if (stop) break;
                 ptr = ptr.parent;
@@ -561,16 +567,16 @@ namespace UIForia.Systems {
 
             while (ptr != null) {
                 // once we hit a block provider we can safely stop traversing since the provider doesn't care about content size changing
-                bool stop = (ptr.flags & AwesomeLayoutBoxFlags.HeightBlockProvider) != 0;
+                bool stop = (ptr.flags & LayoutBoxFlags.HeightBlockProvider) != 0;
 
                 // can't break out if already flagged for layout because parent of parent might not be and might be content sized
-                ptr.flags |= AwesomeLayoutBoxFlags.RequireLayoutVertical;
+                ptr.flags |= LayoutBoxFlags.RequireLayoutVertical;
                 ptr.element.layoutHistory.AddLogEntry(LayoutDirection.Vertical, frameId, reason);
                 if (stop) break;
                 ptr = ptr.parent;
             }
         }
-        
+
         public struct LayoutSize {
 
             public float preferred;
@@ -617,10 +623,10 @@ namespace UIForia.Systems {
             );
 
             if (contentBased) {
-                flags &= ~AwesomeLayoutBoxFlags.WidthBlockProvider;
+                flags &= ~LayoutBoxFlags.WidthBlockProvider;
             }
             else {
-                flags |= AwesomeLayoutBoxFlags.WidthBlockProvider;
+                flags |= LayoutBoxFlags.WidthBlockProvider;
             }
         }
 
@@ -632,10 +638,19 @@ namespace UIForia.Systems {
             );
 
             if (contentBased) {
-                flags &= ~AwesomeLayoutBoxFlags.HeightBlockProvider;
+                flags &= ~LayoutBoxFlags.HeightBlockProvider;
             }
             else {
-                flags |= AwesomeLayoutBoxFlags.HeightBlockProvider;
+                flags |= LayoutBoxFlags.HeightBlockProvider;
+            }
+        }
+
+        public void UpdateClipper() {
+            if (element.style.OverflowX != Overflow.Visible || element.style.OverflowY != Overflow.Visible) {
+                flags |= LayoutBoxFlags.Clipper;
+            }
+            else {
+                flags &= ~LayoutBoxFlags.Clipper;
             }
         }
 
@@ -644,26 +659,26 @@ namespace UIForia.Systems {
             AlignmentBehavior alignment = style.AlignmentBehaviorX;
 
             if (alignment != AlignmentBehavior.Default && alignment != AlignmentBehavior.Unset) {
-                flags |= AwesomeLayoutBoxFlags.RequireAlignmentHorizontal;
+                flags |= LayoutBoxFlags.RequireAlignmentHorizontal;
                 return;
             }
 
             if (style.AlignmentOffsetX.value != 0) {
-                flags |= AwesomeLayoutBoxFlags.RequireAlignmentHorizontal;
+                flags |= LayoutBoxFlags.RequireAlignmentHorizontal;
                 return;
             }
 
             if (style.AlignmentOriginX.value != 0) {
-                flags |= AwesomeLayoutBoxFlags.RequireAlignmentHorizontal;
+                flags |= LayoutBoxFlags.RequireAlignmentHorizontal;
                 return;
             }
 
             if (style.AlignmentDirectionX != AlignmentDirection.Start) {
-                flags |= AwesomeLayoutBoxFlags.RequireAlignmentHorizontal;
+                flags |= LayoutBoxFlags.RequireAlignmentHorizontal;
                 return;
             }
 
-            flags &= ~AwesomeLayoutBoxFlags.RequireAlignmentHorizontal;
+            flags &= ~LayoutBoxFlags.RequireAlignmentHorizontal;
         }
 
         public void UpdateRequiresVerticalAlignment() {
@@ -671,26 +686,26 @@ namespace UIForia.Systems {
             AlignmentBehavior alignment = style.AlignmentBehaviorY;
 
             if (alignment != AlignmentBehavior.Default && alignment != AlignmentBehavior.Unset) {
-                flags |= AwesomeLayoutBoxFlags.RequireAlignmentVertical;
+                flags |= LayoutBoxFlags.RequireAlignmentVertical;
                 return;
             }
 
             if (style.AlignmentOffsetY.value != 0) {
-                flags |= AwesomeLayoutBoxFlags.RequireAlignmentVertical;
+                flags |= LayoutBoxFlags.RequireAlignmentVertical;
                 return;
             }
 
             if (style.AlignmentOriginY.value != 0) {
-                flags |= AwesomeLayoutBoxFlags.RequireAlignmentVertical;
+                flags |= LayoutBoxFlags.RequireAlignmentVertical;
                 return;
             }
 
             if (style.AlignmentDirectionY != AlignmentDirection.Start) {
-                flags |= AwesomeLayoutBoxFlags.RequireAlignmentVertical;
+                flags |= LayoutBoxFlags.RequireAlignmentVertical;
                 return;
             }
 
-            flags &= ~AwesomeLayoutBoxFlags.RequireAlignmentVertical;
+            flags &= ~LayoutBoxFlags.RequireAlignmentVertical;
         }
 
     }

@@ -58,7 +58,7 @@ namespace UIForia.Routing {
         public event Action onRouteUpdate;
         internal readonly LightList<RouteParameter> m_RouteParameters;
         public readonly bool isDefaultRoute;
-        internal readonly LightList<Route> subRoutes; 
+        internal readonly LightList<Route> subRoutes;
 
         public Route(string path, UIElement element, string defaultRouteParamValue = null) {
             this.path = path;
@@ -85,17 +85,17 @@ namespace UIForia.Routing {
             if (path == "*") {
                 return new RouteMatch(matchPath, false, parentMatch, null);
             }
-            
+
             LightList<RouteParameter> routeParameters = LightList<RouteParameter>.Get();
 
             // note: /test/url does not match /test/url/
-            
+
             string[] pathSegments = path.Split('/');
             string[] destinationPathSegments = matchPath.Split('/');
 
             for (int i = 0; i < pathSegments.Length; i++) {
                 if (string.IsNullOrEmpty(pathSegments[i])) continue;
-                
+
                 if (destinationPathSegments.Length <= i) {
                     return new RouteMatch(matchPath, false, parentMatch, routeParameters);
                 }
@@ -117,7 +117,6 @@ namespace UIForia.Routing {
         }
 
         public static RouteMatch Match(Route route, string matchPath, bool parentMatch = false) {
-
             // if a subroute matches this path then the parent shall always be active
             for (int i = 0; i < route.subRoutes.Count; i++) {
                 RouteMatch routeMatch = Match(route.subRoutes[i], matchPath, true);
@@ -137,15 +136,14 @@ namespace UIForia.Routing {
         private bool isInitialized;
         private int historyIndex;
 
-        private readonly LightList<Route> m_HistoryStack;
-        private readonly LightList<Route> m_ForwardHistoryStack;
+        private readonly LightList<string> m_HistoryStack;
+        private readonly LightList<string> m_ForwardHistoryStack;
         private readonly LightList<Route> m_RouteHandlers;
         private readonly LightList<RouteTransition> m_Transitions;
         private readonly LightList<RouteTransition> m_ActiveTransitions;
         private readonly LightList<RouteParameter> m_CurrentRouteParameters;
         private readonly LightList<Route> m_ActiveParentRoutes;
         private readonly LightList<Route> m_TargetParentRoutes;
-
 
         private Route activeRoute;
         private Route targetRoute;
@@ -158,8 +156,8 @@ namespace UIForia.Routing {
             this.name = name;
             this.defaultRoute = defaultRoute;
 
-            m_HistoryStack = new LightList<Route>();
-            m_ForwardHistoryStack = new LightList<Route>();
+            m_HistoryStack = new LightList<string>();
+            m_ForwardHistoryStack = new LightList<string>();
             m_RouteHandlers = new LightList<Route>();
             m_Transitions = new LightList<RouteTransition>();
             m_ActiveTransitions = new LightList<RouteTransition>();
@@ -180,12 +178,12 @@ namespace UIForia.Routing {
                 return;
             }
 
-            Route lastRoute = m_HistoryStack.RemoveLast();
+            string lastRoute = m_HistoryStack.RemoveLast();
             m_ForwardHistoryStack.Add(lastRoute);
 
-            Route route = m_HistoryStack.RemoveLast();
+            string route = m_HistoryStack.RemoveLast();
             historyIndex = historyIndex - 2;
-            GoTo(route.path, true);
+            GoTo(route, true);
         }
 
         public void GoForwards() {
@@ -193,7 +191,7 @@ namespace UIForia.Routing {
                 return;
             }
 
-            GoTo(m_ForwardHistoryStack.RemoveLast().path, true);
+            GoTo(m_ForwardHistoryStack.RemoveLast(), true);
         }
 
         public Route ActiveRoute => activeRoute;
@@ -220,7 +218,6 @@ namespace UIForia.Routing {
             isInitialized = true;
 
             if (defaultRoute == null) {
-
                 for (int i = 0; i < m_RouteHandlers.Count; i++) {
                     if (m_RouteHandlers[i].isDefaultRoute) {
                         GoTo(m_RouteHandlers[i].path);
@@ -291,18 +288,17 @@ namespace UIForia.Routing {
                     }
 
                     return;
-                } 
+                }
             }
         }
 
         private void EnterRoute(RouteMatch match) {
-
             for (int i = 0; i < m_ActiveParentRoutes.Count; i++) {
                 if (!m_TargetParentRoutes.Contains(m_ActiveParentRoutes[i])) {
                     m_ActiveParentRoutes[i]?.Exit();
                 }
             }
-            
+
             for (int i = 0; i < m_TargetParentRoutes.Count; i++) {
                 if (!m_ActiveParentRoutes.Contains(m_TargetParentRoutes[i])) {
                     m_TargetParentRoutes[i]?.Enter();
@@ -312,12 +308,13 @@ namespace UIForia.Routing {
             m_ActiveParentRoutes.Clear();
             m_ActiveParentRoutes.AddRange(m_TargetParentRoutes);
             m_TargetParentRoutes.Clear();
-            
+
             if (targetRoute != activeRoute) {
                 if (!m_ActiveParentRoutes.Contains(activeRoute)) {
                     // only exit the currently active route if it isn't a parent of the target route
                     activeRoute?.Exit();
                 }
+
                 targetRoute.Enter();
                 activeRoute = targetRoute;
             }
@@ -330,14 +327,14 @@ namespace UIForia.Routing {
             match.Release();
 
             historyIndex++;
-            m_HistoryStack.Add(activeRoute);
+            m_HistoryStack.Add(targetUrl);
             tickElapsed = 0;
             CurrentUrl = targetUrl;
         }
 
         private void GatherTransitions(string path) {
             if (CurrentUrl == null) return;
-            
+
             for (int i = 0; i < m_Transitions.Count; i++) {
                 if (IsTransitionApplicable(m_Transitions[i], path)) {
                     m_ActiveTransitions.Add(m_Transitions[i]);
@@ -376,6 +373,7 @@ namespace UIForia.Routing {
                         return true;
                     }
                 }
+
                 ptr = ptr.Parent;
             }
 

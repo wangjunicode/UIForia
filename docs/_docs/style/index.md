@@ -3,7 +3,7 @@ title: Style Sheets
 showInMain: true
 description: Learn how to write style sheets
 layout: page
-order: 2
+order: 10
 tags:
   - uiforia
   - style
@@ -28,8 +28,12 @@ Keyword           | Description
 `[attr:attrName]` | Used inside a style definition to create an attribute sub-style-group. See the attribute section below for more.
 `not` / `and`     | Used in conjunction with attribute style definitions. See the attribute section below for more.
 
+### Syntax Highlighting
+There aren't any IDE plugins yet, but we created a Rider file type configuration file that gives you at
+least some syntax highlighting and autocomplete for all the keywords, although, of course, no syntax checking.
 
-
+[Download the file here](/assets/UIForiaStyle.xml) and copy it into your Rider's `config/filetypes` directory. The `.style` extension 
+should be mapped accordingly after a restart.
 
 ## Create an element style
   

@@ -5,6 +5,7 @@ title: Layout Concepts and common terms explained
 tags: 
  - layout
 layout: page
+order: 10
 ---
 
 # Layout Concepts and common terms explained

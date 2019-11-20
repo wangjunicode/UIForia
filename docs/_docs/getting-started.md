@@ -123,6 +123,10 @@ public class UIViewBehavior : MonoBehaviour {
 Great, now fill that `MyAppRoot.cs` with some life:
 
 ```C#
+using UIForia.Attributes;
+using UIForia.Elements;
+
+[Template("MyAppRoot.xml")]
 public class MyAppRoot : UIElement {
     public string safeWord = "bananas";
 }
@@ -132,9 +136,7 @@ Open your `MyAppRoot.xml` and add this:
 
 ```xml
 <UITemplate>
-
     <Style path="MyAppRoot.style" />
-    
     <Contents>
         The safe word is {safeWord}!
     </Contents>

@@ -4,6 +4,7 @@ showInMain: true
 tags: 
  - build
 layout: page
+order: 20
 ---
 
 # Production Build Setup

@@ -101,21 +101,70 @@ different containers throughout your template.
 All containers are equivalent in terms of behavior or default styles. They take no
 parameters and simply add another layer to your element hierarchy.
 You can of course make your own containers by inheriting from `UIContainerElement` 
-instead of `UIElement`. Then you won't need any accompanying template. 
+instead of `UIElement`. Then you won't need any accompanying template.
+
+A very simple button element might not need its own template for example.
+
+```c#
+public class Button : UIContainerElement {}
+```
+
+It's not doing anything on its own but you can start to use the element name for your 
+app's theme and create an [element style group](/docs/style/#create-an-element-style):
+
+```
+style <Button> {
+    Border = 1px;
+    BorderRadius = 3px;
+    BorderColor = black;
+    [hover] {
+        BackgroundColor = rgba(200, 240, 200, 128);
+    } 
+}
+```
 
 ## Repeat
+This one emulates a for-each loop. The `<Repeat>` element takes one required and a couple
+of optional parameters:
+
+| Parameter   | Required | Type                | Description                                                                                                                                             |
+|-------------|----------|---------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------|
+| list        | (x)      | `RepeatableList<T>` | Data data that you want to iterate                                                                                                                      |
+| as          |          | `string`            |  Change the variable alias of the current iteration item from the default `item` to something else. The alias can then be   referred to as `$yourItem`. |
+| lengthAlias |          | `string`            |  Similar to `as` the `lengthAlias` changes the variable alias that refers to the length of the list.                                                    |
+| indexAs     |          | `string`            |  Same as above, `indexAs` gives the index variable a new name.                                                                                          |
 
 ``` xml
 <Repeat list="data.entries">
-    $item.name
-    $index
+    <Div>{$item.name}  is the value at index {$index} / {$length}</Div>
 </Repeat>
 ```
 
 ### RepeatableList
-
 As of right now you have to wrap your data in a `RepeatableList<T>` to use the `Repeat` element.
+Items added to RepeatableList will result in new elements being created, removing items will destroy the elements.
+Right now you have to keep that fact in mind when using `<Repeat>`. Rather than removing and adding items
+to the list, which will cause some significant garbage when done every frame, you could instead use 
+`RepeatableList.Upsert` to change the data at an index. Since bindings run every frame you will see your
+data being updated. But instead of deleting and recreating a `UIElement` for the changed value UIForia 
+will just update its bound values.
 
+```
+[Template("MyElement.xml")]
+public class MyElement : UIElement {
+
+    public RepeatableList<string> currentlyActiveUserNames;
+    
+    public override void OnCreate() {
+        currentlyActiveUserNames = new [] { "foo", "bar" };
+    }
+    
+    public override void OnUpdate() {
+        List<string> users = ActiveUserSystem.GetActiveUsers();
+        currentlyActiveUserNames.ReplaceList(users);       
+    }
+}
+```
 
 ## InputElement
 

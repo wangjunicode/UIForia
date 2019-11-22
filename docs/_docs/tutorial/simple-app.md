@@ -247,7 +247,7 @@ centering and a dynamic style group in case our condition is true.
 `MyAppRoot.style`:
 ```
 style empty {
-    BackgroundColor = rgba(200, 0, 0, 0.5);
+    BackgroundColor = rgba(200, 0, 0, 128);
 }
 ```
 

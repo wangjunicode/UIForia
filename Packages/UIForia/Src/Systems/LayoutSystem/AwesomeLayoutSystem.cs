@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
 using UIForia.Elements;
+using UIForia.Layout;
 using UIForia.Rendering;
 using UIForia.Util;
 using UnityEngine;
+using UnityEngine.Assertions;
 
 namespace UIForia.Systems {
 
@@ -17,31 +19,106 @@ namespace UIForia.Systems {
             this.runners = new LightList<AwesomeLayoutRunner>();
 
             for (int i = 0; i < application.m_Views.Count; i++) {
-                runners.Add(new AwesomeLayoutRunner(application.m_Views[i].rootElement));
+                runners.Add(new AwesomeLayoutRunner(this, application.m_Views[i].rootElement));
             }
 
             application.StyleSystem.onStylePropertyChanged += HandleStylePropertyChanged;
+        }
+
+        private void CreateLayoutBox(UIElement currentElement) {
+            if (currentElement is UITextElement) {
+                currentElement.layoutBox = new AwesomeTextLayoutBox();
+            }
+            else if (currentElement is UIImageElement) {
+                currentElement.layoutBox = new AwesomeImageLayoutBox();
+            }
+            else {
+                switch (currentElement.style.LayoutType) {
+                    default:
+                    case LayoutType.Unset:
+                    case LayoutType.Flex:
+                        currentElement.layoutBox = new AwesomeFlexLayoutBox();
+                        break;
+                    case LayoutType.Grid:
+                        currentElement.layoutBox = new AwesomeGridLayoutBox();
+                        break;
+                    case LayoutType.Radial:
+                        throw new NotImplementedException();
+                    case LayoutType.Stack:
+                        currentElement.layoutBox = new AwesomeStackLayoutBox();
+                        break;
+                }
+            }
+
+            currentElement.layoutBox.Initialize(currentElement, application.frameId);
+        }
+
+        private void ChangeLayoutBox(UIElement currentElement, LayoutType layoutType) {
+            if (currentElement is UITextElement || currentElement is UIImageElement) {
+                return;
+            }
+
+            Assert.IsNotNull(currentElement.layoutBox);
+
+            currentElement.layoutBox.Destroy();
+            // todo -- pool layoutbox
+
+            switch (layoutType) {
+                default:
+                case LayoutType.Unset:
+                case LayoutType.Flex:
+                    currentElement.layoutBox = new AwesomeFlexLayoutBox();
+                    break;
+                case LayoutType.Grid:
+                    currentElement.layoutBox = new AwesomeGridLayoutBox();
+                    break;
+                case LayoutType.Radial:
+                    throw new NotImplementedException();
+                case LayoutType.Stack:
+                    currentElement.layoutBox = new AwesomeStackLayoutBox();
+                    break;
+            }
+
+            currentElement.layoutBox.Initialize(currentElement, application.frameId);
+
+            // parent will need to update children
+            if (currentElement.parent?.layoutBox != null) {
+                currentElement.parent.layoutBox.flags |= LayoutBoxFlags.GatherChildren;
+            }
         }
 
         private void HandleStylePropertyChanged(UIElement element, StructList<StyleProperty> properties) {
             bool checkAlignHorizontal = false;
             bool updateAlignVertical = false;
             bool updateTransform = false;
+
+            // if it was just enabled, let the system handle that as normal
+            if (element.enableStateChangedFrameId == application.frameId) {
+                return;
+            }
+
+            if (element.layoutBox == null) {
+                // create box here
+                CreateLayoutBox(element);
+                return;
+            }
+
+            // assume box didn't change
+            // if it did, it'll be updated later anyway
+
             for (int i = 0; i < properties.size; i++) {
                 ref StyleProperty property = ref properties.array[i];
                 // todo -- these flags can maybe probably be baked into setting the property
                 switch (property.propertyId) {
-                    
                     case StylePropertyId.ClipBehavior:
-                        
-                        if (element.layoutBox != null) {
-                            element.layoutBox.flags |= LayoutBoxFlags.RecomputeClipping;
-                            element.layoutBox.clipBehavior = property.AsClipBehavior;
-                        }
+
+                        element.layoutBox.flags |= LayoutBoxFlags.RecomputeClipping;
+                        element.layoutBox.clipBehavior = property.AsClipBehavior;
+
                         break;
-                    
+
                     case StylePropertyId.ClipBounds:
-                        
+
                         break;
                     case StylePropertyId.OverflowX:
                     case StylePropertyId.OverflowY:
@@ -49,6 +126,9 @@ namespace UIForia.Systems {
                         break;
 
                     case StylePropertyId.LayoutType:
+                        ChangeLayoutBox(element, property.AsLayoutType);
+                        break;
+
                     case StylePropertyId.LayoutBehavior:
                         element.flags |= UIElementFlags.LayoutTypeOrBehaviorDirty;
                         break;
@@ -78,13 +158,13 @@ namespace UIForia.Systems {
                     case StylePropertyId.MaxWidth:
                     case StylePropertyId.PreferredWidth:
                         element.flags |= UIElementFlags.LayoutSizeWidthDirty;
-                        element.layoutBox?.UpdateBlockProviderWidth();
+                        element.layoutBox.UpdateBlockProviderWidth();
                         break;
                     case StylePropertyId.MinHeight:
                     case StylePropertyId.MaxHeight:
                     case StylePropertyId.PreferredHeight:
                         element.flags |= UIElementFlags.LayoutSizeHeightDirty;
-                        element.layoutBox?.UpdateBlockProviderHeight();
+                        element.layoutBox.UpdateBlockProviderHeight();
                         break;
                     case StylePropertyId.PaddingLeft:
                     case StylePropertyId.PaddingRight:
@@ -143,30 +223,15 @@ namespace UIForia.Systems {
         public void OnReset() { }
 
         public void OnUpdate() {
-            // flags
-            // width dirty
-            // height dirty
-            // box model dirty 
-            // hierarchy dirty
-            // layout type dirty
-            // layout behavior dirty
-            // transform dirty
-            // alignment dirty
-            // fit dirty
-
             for (int i = 0; i < runners.size; i++) {
                 runners[i].RunLayout();
             }
         }
 
-        // ideally we have gatherers and runners
-        // each view and each ignored element can have its own runner
-        // run all views then run all ignored
-
         public void OnDestroy() { }
 
         public void OnViewAdded(UIView view) {
-            runners.Add(new AwesomeLayoutRunner(view.rootElement));
+            runners.Add(new AwesomeLayoutRunner(this, view.rootElement));
         }
 
         public void OnViewRemoved(UIView view) {
@@ -180,9 +245,16 @@ namespace UIForia.Systems {
 
         public void OnElementEnabled(UIElement element) { }
 
-        public void OnElementDisabled(UIElement element) { }
+        public void OnElementDisabled(UIElement element) {
+            // disable / destroy layout box?
+        }
 
-        public void OnElementDestroyed(UIElement element) { }
+        public void OnElementDestroyed(UIElement element) {
+            if (element.layoutBox != null) {
+                element.layoutBox.Destroy();
+                element.layoutBox = null;
+            }
+        }
 
         public void OnAttributeSet(UIElement element, string attributeName, string currentValue, string previousValue) { }
 
@@ -201,7 +273,13 @@ namespace UIForia.Systems {
         }
 
         public AwesomeLayoutRunner GetLayoutRunner(UIElement viewRoot) {
-            return runners[0]; // todo -- implement for real
+            for (int i = 0; i < runners.size; i++) {
+                if (runners.array[i].rootElement == viewRoot) {
+                    return runners.array[i];
+                }
+            }
+
+            return null;
         }
 
     }

@@ -13,7 +13,7 @@ namespace UIForia.Systems {
         public Action onTextContentChanged;
         private bool textAlreadyDirty;
         private bool ignoreUpdate;
-        
+
         protected override void OnInitialize() {
             onTextContentChanged = onTextContentChanged ?? HandleTextContentChanged;
             textInfo = ((UITextElement) element).textInfo;
@@ -32,7 +32,6 @@ namespace UIForia.Systems {
             AwesomeLayoutBox ptr = parent;
 
             while (ptr != null) {
-
                 // once we hit a block provider we can safely stop traversing since the provider's parent doesn't care about content size changing
                 bool stop = (ptr.flags & LayoutBoxFlags.WidthBlockProvider) != 0;
                 // can't break out if already flagged for layout because parent of parent might not be and might be content sized
@@ -43,7 +42,7 @@ namespace UIForia.Systems {
             }
 
             ptr = parent;
-            
+
             while (ptr != null) {
                 // once we hit a block provider we can safely stop traversing since the provider's parent doesn't care about content size changing
                 bool stop = (ptr.flags & LayoutBoxFlags.HeightBlockProvider) != 0;
@@ -73,20 +72,16 @@ namespace UIForia.Systems {
             return textInfo.ComputeHeightForWidth(finalWidth);
         }
 
-        public override void OnChildrenChanged(LightList<AwesomeLayoutBox> childList) {
-            
-        }
+        public override void OnChildrenChanged(LightList<AwesomeLayoutBox> childList) { }
 
-        public override void RunLayoutHorizontal(int frameId) {
+        public override void RunLayoutHorizontal(int frameId) { }
+
+        public override void RunLayoutVertical(int frameId) {
             textAlreadyDirty = false;
             textInfo.ForceLayout(); // might not need this
             float topOffset = paddingBorderVerticalStart;
             float leftOffset = paddingBorderHorizontalStart;
             textInfo.Layout(new Vector2(leftOffset, topOffset), finalWidth - paddingBorderHorizontalStart - paddingBorderHorizontalEnd);
-        }
-
-        public override void RunLayoutVertical(int frameId) {
-            
         }
 
     }

@@ -36,23 +36,7 @@ namespace UIForia.Systems {
 
         public void Initialize(UIElement element, int frameId) {
             this.element = element;
-            cachedContentWidth = -1;
-            cachedContentHeight = -1;
-            finalWidth = -1;
-            finalHeight = -1;
-            string boxName = GetType().ToString();
-            element.layoutHistory = element.layoutHistory ?? new LayoutHistory(element);
-            element.layoutHistory.AddLogEntry(LayoutDirection.Horizontal, frameId, LayoutReason.Initialized, boxName);
-            element.layoutHistory.AddLogEntry(LayoutDirection.Vertical, frameId, LayoutReason.Initialized, boxName);
-            flags |= LayoutBoxFlags.RequireLayoutHorizontal | LayoutBoxFlags.RequireLayoutVertical | LayoutBoxFlags.RequiresMatrixUpdate;
-            clipBehavior = element.style.ClipBehavior;
-            UpdateBlockProviderWidth();
-            UpdateBlockProviderHeight();
 
-            UpdateRequiresHorizontalAlignment();
-            UpdateRequiresVerticalAlignment();
-
-            UpdateClipper();
             OnInitialize();
         }
 
@@ -82,6 +66,7 @@ namespace UIForia.Systems {
                 firstChild = layoutBoxes[0];
                 firstChild.parent = this;
                 firstChild.element.layoutResult.layoutParent = result;
+                firstChild.nextSibling = null;
                 AwesomeLayoutBox ptr = firstChild;
                 for (int i = 1; i < layoutBoxes.size; i++) {
                     layoutBoxes.array[i].parent = this;
@@ -134,7 +119,7 @@ namespace UIForia.Systems {
             }
 
             Vector2 viewSize = element.View.Viewport.size;
-            float emSize = 0; // todo -- read off of style (cached)
+            float emSize = element.style.GetResolvedFontSize();
             float paddingLeft = MeasurementUtil.ResolveFixedSize(newWidth, viewSize.x, viewSize.y, emSize, element.style.PaddingLeft);
             float paddingRight = MeasurementUtil.ResolveFixedSize(newWidth, viewSize.x, viewSize.y, emSize, element.style.PaddingRight);
             float borderLeft = MeasurementUtil.ResolveFixedSize(newWidth, viewSize.x, viewSize.y, emSize, element.style.BorderLeft);
@@ -266,7 +251,8 @@ namespace UIForia.Systems {
                         width = cachedContentWidth; // todo -- might not need to resolve size for padding / border in this case
                     }
                     else {
-                        width = ComputeContentWidth();
+                        cachedContentWidth = ComputeContentWidth();
+                        width = cachedContentWidth;
                     }
 
                     float baseVal = width;
@@ -332,6 +318,7 @@ namespace UIForia.Systems {
 
             while (ptr != null) {
                 paddingBorder += ptr.paddingBorderHorizontalStart + ptr.paddingBorderHorizontalEnd;
+
                 if ((ptr.flags & LayoutBoxFlags.WidthBlockProvider) != 0) {
                     Assert.AreNotEqual(-1, ptr.finalWidth);
                     return Math.Max(0, (ptr.finalWidth - paddingBorder) * value);
@@ -418,7 +405,7 @@ namespace UIForia.Systems {
                         height = cachedContentHeight;
                     }
                     else {
-                        height = ComputeContentHeight();
+                        height = cachedContentHeight = ComputeContentHeight();
                     }
 
                     float baseVal = height;
@@ -498,55 +485,6 @@ namespace UIForia.Systems {
 
         public virtual void OnChildStyleChanged(AwesomeLayoutBox child, StructList<StyleProperty> propertyList) { }
 
-        protected virtual void OnChildWidthDirty(AwesomeLayoutBox child) {
-            bool contentSizedWidth = (
-                element.style.PreferredWidth.unit == UIMeasurementUnit.Content ||
-                element.style.MinWidth.unit == UIMeasurementUnit.Content ||
-                element.style.MaxWidth.unit == UIMeasurementUnit.Content
-            );
-
-            cachedContentWidth = -1;
-
-            if (contentSizedWidth) {
-                flags |= LayoutBoxFlags.RequireLayoutHorizontal;
-                parent?.OnChildWidthDirty(this);
-            }
-        }
-
-        protected virtual void OnChildHeightDirty(AwesomeLayoutBox child) { }
-
-        protected void MarkForLayout(LayoutDirtyFlag dirtyFlag) {
-            // if parent depends on this child size
-            // pref / min / max is content size -> also mark parent for layout
-
-            // if the width was content sized we need to tell our parent that our size changed
-            if ((dirtyFlag & LayoutDirtyFlag.InvalidateSizeHorizontal) != 0) {
-                bool contentSizedWidth = (
-                    element.style.PreferredWidth.unit == UIMeasurementUnit.Content ||
-                    element.style.MinWidth.unit == UIMeasurementUnit.Content ||
-                    element.style.MaxWidth.unit == UIMeasurementUnit.Content
-                );
-
-                cachedContentWidth = -1;
-
-                if (contentSizedWidth) {
-                    parent?.OnChildWidthDirty(this);
-                }
-            }
-
-            if ((dirtyFlag & LayoutDirtyFlag.LayoutHorizontal) != 0) {
-                flags |= LayoutBoxFlags.RequireLayoutHorizontal;
-                finalWidth = -1;
-            }
-
-            if ((dirtyFlag & LayoutDirtyFlag.InvalidateSizeVertical) != 0) {
-                cachedContentWidth = -1;
-                finalWidth = -1;
-            }
-
-            // layoutHistory.Add(new WidthLayout(LayoutReason.));
-        }
-
         public void MarkContentParentsHorizontalDirty(int frameId, LayoutReason reason) {
             AwesomeLayoutBox ptr = parent;
 
@@ -556,7 +494,7 @@ namespace UIForia.Systems {
 
                 // can't break out if already flagged for layout because parent of parent might not be and might be content sized
                 ptr.flags |= LayoutBoxFlags.RequireLayoutHorizontal;
-                ptr.element.layoutHistory.AddLogEntry(LayoutDirection.Horizontal, frameId, reason);
+                //  ptr.element.layoutHistory.AddLogEntry(LayoutDirection.Horizontal, frameId, reason);
                 if (stop) break;
                 ptr = ptr.parent;
             }
@@ -571,7 +509,7 @@ namespace UIForia.Systems {
 
                 // can't break out if already flagged for layout because parent of parent might not be and might be content sized
                 ptr.flags |= LayoutBoxFlags.RequireLayoutVertical;
-                ptr.element.layoutHistory.AddLogEntry(LayoutDirection.Vertical, frameId, reason);
+                //   ptr.element.layoutHistory.AddLogEntry(LayoutDirection.Vertical, frameId, reason);
                 if (stop) break;
                 ptr = ptr.parent;
             }
@@ -599,19 +537,6 @@ namespace UIForia.Systems {
                     return f;
                 }
             }
-
-        }
-
-
-        [Flags]
-        public enum LayoutDirtyFlag {
-
-            LayoutHorizontal = 1,
-            LayoutVertical = 1 << 1,
-            InvalidateSizeHorizontal = 1 << 2,
-            InvalidateSizeVertical = 1 << 3,
-
-            All = LayoutHorizontal | LayoutVertical | InvalidateSizeHorizontal | InvalidateSizeVertical
 
         }
 
@@ -706,6 +631,26 @@ namespace UIForia.Systems {
             }
 
             flags &= ~LayoutBoxFlags.RequireAlignmentVertical;
+        }
+
+        public void Enable() {
+            cachedContentWidth = -1;
+            cachedContentHeight = -1;
+            finalWidth = -1;
+            finalHeight = -1;
+            string boxName = GetType().ToString();
+            element.layoutHistory = element.layoutHistory ?? new LayoutHistory(element);
+            element.layoutHistory.AddLogEntry(LayoutDirection.Horizontal, -1, LayoutReason.Initialized, boxName);
+            element.layoutHistory.AddLogEntry(LayoutDirection.Vertical, -1, LayoutReason.Initialized, boxName);
+            flags |= LayoutBoxFlags.RequireLayoutHorizontal | LayoutBoxFlags.RequireLayoutVertical | LayoutBoxFlags.RequiresMatrixUpdate;
+            clipBehavior = element.style.ClipBehavior;
+            UpdateBlockProviderWidth();
+            UpdateBlockProviderHeight();
+
+            UpdateRequiresHorizontalAlignment();
+            UpdateRequiresVerticalAlignment();
+
+            UpdateClipper();
         }
 
     }

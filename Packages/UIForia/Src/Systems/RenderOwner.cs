@@ -41,7 +41,7 @@ namespace Src.Systems {
         }
 
         private void DrawClipShapes(RenderContext ctx) {
-            LightList<ClipData> clippers = view.Application.LayoutSystem.GetLayoutRunner(null).clipperList;
+            LightList<ClipData> clippers = view.Application.LayoutSystem.GetLayoutRunner(view.rootElement).clipperList;
             for (int i = 0; i < clippers.size; i++) {
                 ClipData clipData = clippers.array[i];
                 if (!clipData.isCulled && clipData.visibleBoxCount > 0) {
@@ -164,68 +164,7 @@ namespace Src.Systems {
                 }
             }
 
-            //  wrapperList.Sort(s_RenderComparer);
-
-
-//            while (wrapperStack.size > 0) {
-//                ref RenderBoxWrapper current = ref wrapperStack.array[--wrapperStack.size];
-//
-//                current.traversalIndex = idx++;
-//                wrapperList.Add(current);
-//
-//                if (current.renderOp == RenderOpType.DrawBackground) {
-//                    current.renderBox = current.renderBox;
-//                    // ReSharper disable once PossibleNullReferenceException
-//                    current.renderBox.culled = false;
-//                    LightList<UIElement> children = current.renderBox.element.children;
-//
-//                    if (current.element.renderBox.hasForeground) {
-//                        wrapperStack.Push(new RenderBoxWrapper(current, RenderOpType.DrawForeground));
-//                    }
-//
-//                    if (children != null) {
-//                        int childCount = children.size;
-//
-//                        wrapperList.EnsureAdditionalCapacity(childCount);
-//                        wrapperStack.EnsureAdditionalCapacity(childCount);
-//
-//                        for (int i = childCount - 1; i >= 0; i--) {
-//                            UIElement child = children.array[i];
-//
-//                            if ((child.flags & UIElementFlags.EnabledFlagSet) != UIElementFlags.EnabledFlagSet) {
-//                                continue;
-//                            }
-//
-//                            if (child.renderBox == null) {
-//                                CreateRenderBox(child);
-//                            }
-//                            else if (child.enableStateChangedFrameId == frameId) {
-//                                UpdateRenderBox(child);
-//                            }
-//
-////
-//                            ref RenderBoxWrapper wrapper = ref wrapperStack.array[wrapperStack.size++];
-//                            wrapper.renderOp = RenderOpType.DrawBackground;
-//                            wrapper.element = child;
-//                            wrapper.layer = child.renderBox.layer;
-//                            wrapper.traversalIndex = -1;
-//                            wrapper.renderBox = child.renderBox;
-//                            wrapper.zIndex = child.renderBox.zIndex;
-////                            wrapperStack.Push(new RenderBoxWrapper(child));
-//                        }
-//                    }
-//
-////                    if (current.renderBox.overflowX != Overflow.Visible || current.renderBox.overflowY != Overflow.Visible) {
-////                        // clips get pushed even if culled? need to handle overflowing if parent if offscreen but child is not
-////                        wrapperStack.Push(new RenderBoxWrapper(current, RenderOpType.PushClipShape));
-////                    }
-//
-//                    // if is post effect
-//                    // pop render target
-//                }
-//            }
-
-              wrapperList.Sort(s_RenderComparer);
+            wrapperList.Sort(s_RenderComparer);
 
 //            if (!printed) {
 //                printed = true;
@@ -237,6 +176,7 @@ namespace Src.Systems {
 
         private bool printed = false; // todo remove
 
+        // todo -- can completely get rid of this
         private void Cull() {
             // first do an easy screen cull
             // screen is always aligned

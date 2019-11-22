@@ -30,8 +30,10 @@ namespace UIForia.Rendering {
         internal int regionDrawCount;
         public StructList<ElemRef> clipList;
         public OrientedBounds orientedBounds;
-
-        internal ClipData() {
+        public UIElement element;
+        
+        internal ClipData(UIElement element) {
+            this.element = element;
             intersected = new StructList<Vector2>();
             dependents = new LightList<ClipData>();
             clipList = new StructList<ElemRef>();

@@ -117,6 +117,10 @@ namespace UIForia.Util {
 
         private const int HandCopyThreshold = 8;
 
+        public void Reverse() {
+            System.Array.Reverse(array, 0, size);
+        }
+
         public void AddRange(StructList<T> collection, int start, int count) {
             if (size + count >= array.Length) {
                 System.Array.Resize(ref array, size + count * 2);

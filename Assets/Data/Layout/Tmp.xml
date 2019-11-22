@@ -5,15 +5,13 @@
         style container {
             FlexLayoutDirection = Horizontal;
             PreferredSize = 1vw 1vh;
-            Painter = "ClipBounds";
+            AlignItemsVertical = Center;
         }
 
         style clipper {
             PreferredSize = 500px 500px;
             BackgroundColor = white;
-            LayoutBehavior = Ignored;
-            AlignX = Center Parent;
-            AlignY = Center Parent;
+
             Overflow = Hidden;
         }
         
@@ -23,14 +21,14 @@
             [hover] {
                 BackgroundColor = red;
             }
-            TransformRotation = 45;
+           // TransformRotation = 45;
         }
         
     </Style>
 
     <Contents style="container">
+        <Image src="'icons/delete'"/>
         <Group style='clipper'>
-            <Group style="child-2"/>
         </Group>
     </Contents>
 </UITemplate>

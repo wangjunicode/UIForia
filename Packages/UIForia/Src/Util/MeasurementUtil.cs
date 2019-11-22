@@ -43,15 +43,15 @@ namespace UIForia.Util {
 
                 case AlignmentTarget.Screen:
                     throw new NotImplementedException();
-//                    FastLayoutBox ptr = box.ResolveLayoutParent();
-                    float output = 0;
-//                    while (ptr != null) {
-//                        output -= ptr.alignedPosition.x;
-//                        output -= ptr.transformPositionX.value;
-//                        ptr = ptr.ResolveLayoutParent();
-//                    }
-
-                    return output;
+////                    FastLayoutBox ptr = box.ResolveLayoutParent();
+//                    float output = 0;
+////                    while (ptr != null) {
+////                        output -= ptr.alignedPosition.x;
+////                        output -= ptr.transformPositionX.value;
+////                        ptr = ptr.ResolveLayoutParent();
+////                    }
+//
+//                    return output;
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(target), target, null);

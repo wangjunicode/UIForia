@@ -443,7 +443,7 @@ namespace UIForia {
         }
 
         public void Update() {
-            frameId++;
+            
             m_InputSystem.OnUpdate();
 
             m_BindingSystem.OnUpdate();
@@ -469,6 +469,8 @@ namespace UIForia {
             onUpdate?.Invoke();
 
             m_Views[0].SetSize(Screen.width, Screen.height);
+            
+            frameId++;
 
         }
 

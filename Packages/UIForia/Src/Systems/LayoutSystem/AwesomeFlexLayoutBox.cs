@@ -285,65 +285,6 @@ namespace UIForia.Systems {
             }
         }
 
-        private void RunLayoutHorizontalStep_HorizontalDirection(int frameId) {
-            Track track = new Track();
-            track.remaining = finalWidth - (paddingBorderHorizontalStart + paddingBorderHorizontalEnd);
-            track.startIndex = 0;
-            track.endIndex = childCount;
-
-            for (int i = 0; i < items.size; i++) {
-                ref FlexItem item = ref items.array[i];
-                item.grew = 0;
-                item.shrunk = 0;
-                item.layoutBox.GetWidths(ref item.widthData);
-                item.baseWidth = item.widthData.Clamped;
-                item.availableSize = item.baseWidth;
-                // available size is equal to base size but we need to take up base size + margin in the layout
-                track.remaining -= item.baseWidth + item.widthData.marginStart + item.widthData.marginEnd;
-            }
-
-            if (track.remaining > 0) {
-                GrowHorizontal(ref track);
-            }
-            else if (track.remaining < 0) {
-                ShrinkHorizontal(ref track);
-            }
-
-            float offset = 0;
-            float inset = paddingBorderHorizontalStart;
-            float spacerSize = 0;
-            SpaceDistribution alignment = element.style.DistributeExtraSpaceHorizontal;
-
-            if (alignment == SpaceDistribution.Default) {
-                alignment = SpaceDistribution.AfterContent;
-            }
-
-            SpaceDistributionUtil.GetAlignmentOffsets(track.remaining, track.endIndex - track.startIndex, alignment, out offset, out spacerSize);
-
-            float itemAlignment = element.style.AlignItemsHorizontal;
-            float gap = 0; //element.style.GridLayoutColGap;
-
-            for (int i = 0; i < items.size; i++) {
-                ref FlexItem item = ref items.array[i];
-                float x = inset + offset + item.widthData.marginStart;
-                offset += item.availableSize + spacerSize;
-                LayoutFit fit = LayoutFit.None;
-
-                float elementWidth = item.baseWidth;
-                float originOffset = item.availableSize * itemAlignment;
-                float alignedPosition = x + originOffset + (elementWidth * -itemAlignment);
-
-                if (item.grew == 1) {
-                    fit = LayoutFit.Grow;
-                }
-                else if (item.shrunk == 1) {
-                    fit = LayoutFit.Shrink;
-                }
-
-                item.layoutBox.ApplyLayoutHorizontal(x, alignedPosition, item.baseWidth, item.availableSize, fit, frameId);
-                offset += item.widthData.marginStart + item.widthData.marginEnd + gap;
-            }
-        }
 
         private void GrowHorizontal(ref Track track) {
             int pieces = 0;
@@ -599,6 +540,66 @@ namespace UIForia.Systems {
             }
         }
 
+        private void RunLayoutHorizontalStep_HorizontalDirection(int frameId) {
+            Track track = new Track();
+            track.remaining = finalWidth - (paddingBorderHorizontalStart + paddingBorderHorizontalEnd);
+            track.startIndex = 0;
+            track.endIndex = childCount;
+
+            for (int i = 0; i < items.size; i++) {
+                ref FlexItem item = ref items.array[i];
+                item.grew = 0;
+                item.shrunk = 0;
+                item.layoutBox.GetWidths(ref item.widthData);
+                item.baseWidth = item.widthData.Clamped;
+                item.availableSize = item.baseWidth;
+                // available size is equal to base size but we need to take up base size + margin in the layout
+                track.remaining -= item.baseWidth + item.widthData.marginStart + item.widthData.marginEnd;
+            }
+
+            if (track.remaining > 0) {
+                GrowHorizontal(ref track);
+            }
+            else if (track.remaining < 0) {
+                ShrinkHorizontal(ref track);
+            }
+
+            float offset = 0;
+            float inset = paddingBorderHorizontalStart;
+            float spacerSize = 0;
+            SpaceDistribution alignment = element.style.DistributeExtraSpaceHorizontal;
+
+            if (alignment == SpaceDistribution.Default) {
+                alignment = SpaceDistribution.AfterContent;
+            }
+
+            SpaceDistributionUtil.GetAlignmentOffsets(track.remaining, track.endIndex - track.startIndex, alignment, out offset, out spacerSize);
+
+            float itemAlignment = element.style.AlignItemsHorizontal;
+            float gap = 0; //element.style.GridLayoutColGap;
+
+            for (int i = 0; i < items.size; i++) {
+                ref FlexItem item = ref items.array[i];
+                float x = inset + offset + item.widthData.marginStart;
+                offset += item.availableSize + spacerSize;
+                LayoutFit fit = LayoutFit.None;
+
+                float elementWidth = item.baseWidth;
+                float originOffset = item.availableSize * itemAlignment;
+                float alignedPosition = x + originOffset + (elementWidth * -itemAlignment);
+
+                if (item.grew == 1) {
+                    fit = LayoutFit.Grow;
+                }
+                else if (item.shrunk == 1) {
+                    fit = LayoutFit.Shrink;
+                }
+
+                item.layoutBox.ApplyLayoutHorizontal(x, alignedPosition, item.baseWidth, item.availableSize, fit, frameId);
+                offset += item.widthData.marginStart + item.widthData.marginEnd + gap;
+            }
+        }
+
         private void RunLayoutVerticalStep_HorizontalDirection(int frameId) {
             float contentStartY = paddingBorderVerticalStart;
             float adjustedHeight = finalHeight - (paddingBorderVerticalStart + paddingBorderVerticalEnd);
@@ -619,22 +620,36 @@ namespace UIForia.Systems {
             float verticalAlignment = element.style.AlignItemsVertical;
             LayoutFit verticalLayoutFit = element.style.FitItemsVertical;
 
+            SpaceDistribution alignment = element.style.DistributeExtraSpaceVertical;
+
+            if (alignment == SpaceDistribution.Default) {
+                alignment = SpaceDistribution.AfterContent;
+            }
+
+            float offset = 0;
+            float inset = paddingBorderHorizontalStart;
+            float spacerSize = 0;
+
             for (int i = 0; i < items.size; i++) {
                 ref FlexItem item = ref items.array[i];
+
 
                 item.layoutBox.GetHeights(ref item.heightData);
                 item.baseHeight = item.heightData.Clamped;
 
+                // todo -- margin?
+
+                SpaceDistributionUtil.GetAlignmentOffsets(adjustedHeight - item.baseHeight + item.widthData.marginStart + item.widthData.marginEnd, 1, alignment, out offset, out spacerSize);
+
                 float allocatedHeight = adjustedHeight - (item.heightData.marginStart + item.heightData.marginEnd);
                 float originBase = contentStartY + item.heightData.marginStart;
                 float originOffset = allocatedHeight * verticalAlignment;
-                float offset = item.baseHeight * -verticalAlignment;
 
                 // if distance from top of this element to child allocated rect >= margin top -- ignore margin top
                 // subtract diff to margin clamped to 0
                 item.layoutBox.ApplyLayoutVertical(
                     contentStartY + item.heightData.marginStart,
-                    originBase + originOffset + offset,
+                    originBase + originOffset + (item.baseHeight * -verticalAlignment),
                     item.baseHeight,
                     allocatedHeight,
                     verticalLayoutFit,
@@ -724,9 +739,9 @@ namespace UIForia.Systems {
                 item.layoutBox.GetWidths(ref item.widthData);
                 item.baseWidth = item.widthData.Clamped;
 
-                SpaceDistributionUtil.GetAlignmentOffsets(adjustedWidth - item.baseWidth, 1, alignment, out offset, out spacerSize);
+                SpaceDistributionUtil.GetAlignmentOffsets(adjustedWidth - item.baseWidth - item.widthData.marginStart - item.widthData.marginEnd, 1, alignment, out offset, out spacerSize);
 
-                float x = inset + item.widthData.marginStart + offset;
+                float x = inset + offset;
                 offset += item.baseWidth + spacerSize;
 
                 float availableWidth = adjustedWidth - (item.widthData.marginStart + item.widthData.marginEnd);
@@ -833,20 +848,7 @@ namespace UIForia.Systems {
             public bool IsEmpty => startIndex == endIndex;
 
         }
-
-        public struct FlexBehavior {
-
-            public int factor;
-            public FlexTarget target;
-
-        }
-
-        public enum FlexTarget {
-
-            Element,
-            LayoutBox
-
-        }
+        
 
     }
 

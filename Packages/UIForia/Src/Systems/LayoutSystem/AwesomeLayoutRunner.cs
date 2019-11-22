@@ -67,10 +67,12 @@ namespace UIForia.Systems {
 
         private readonly ClipData screenClipper;
         private readonly ClipData viewClipper;
-        
+        private AwesomeLayoutSystem layoutSystem;
+
         private static readonly StructList<Vector2> s_SubjectRect = new StructList<Vector2>(4);
 
-        public AwesomeLayoutRunner(UIElement rootElement) {
+        public AwesomeLayoutRunner(AwesomeLayoutSystem layoutSystem, UIElement rootElement) {
+            this.layoutSystem = layoutSystem;
             this.rootElement = rootElement;
             this.rootElement.layoutBox = new AwesomeRootLayoutBox();
             this.rootElement.layoutBox.Initialize(rootElement, 0);
@@ -83,11 +85,16 @@ namespace UIForia.Systems {
             this.boxRefStack = new StructStack<BoxRef>(32);
             this.matrixUpdateList = new LightList<UIElement>();
             this.clipperList = new LightList<ClipData>();
-            this.screenClipper = new ClipData();
-            this.viewClipper = new ClipData();
+            this.screenClipper = new ClipData(null);
+            this.viewClipper = new ClipData(rootElement);
             this.clipStack = new LightStack<ClipData>();
         }
 
+        // for next time:
+        // new scheme makes sure layout boxes exist when needed
+        // update gather phase
+        // if a hierarchy got enabled, treat it differently
+        // not currently working!
         public void RunLayout() {
             frameId = rootElement.Application.frameId;
 
@@ -95,12 +102,19 @@ namespace UIForia.Systems {
                 return;
             }
 
+
             clipperList.Clear();
             hierarchyRebuildList.Clear();
             queryableElements.Clear();
 
-            GatherLayoutData();
-            RebuildHierarchy();
+            if (rootElement.enableStateChangedFrameId == frameId) {
+                EnableHierarchy(rootElement);
+            }
+            else {
+                GatherLayoutData();
+                RebuildHierarchy();
+            }
+
             PerformLayout();
             ApplyHorizontalAlignments();
             ApplyVerticalAlignments();
@@ -154,7 +168,6 @@ namespace UIForia.Systems {
 
             viewClipper.isCulled = false; // todo -- wrong
 
-//            clipStack.Push(screenClipper);
             clipStack.Push(viewClipper);
 
             clipperList.Add(screenClipper);
@@ -162,6 +175,7 @@ namespace UIForia.Systems {
 
             screenClipper.clipList.Clear();
             viewClipper.clipList.Clear();
+
             while (elemRefStack.size > 0) {
                 UIElement currentElement = elemRefStack.array[--elemRefStack.size].element;
 
@@ -173,79 +187,48 @@ namespace UIForia.Systems {
 
                 UIElementFlags flags = currentElement.flags;
 
-                bool enabled = (flags & UIElementFlags.EnabledFlagSet) == UIElementFlags.EnabledFlagSet;
+                // bool enabled = (flags & UIElementFlags.EnabledFlagSet) == UIElementFlags.EnabledFlagSet;
+
 
                 // if the element was just enabled or disabled we need to make sure the parent rebuilds it's hierarchy
-                if (currentElement.enableStateChangedFrameId == frameId) {
-                    if (enabled) {
-                        flags |= UIElementFlags.LayoutHierarchyDirty;
-                        hierarchyRebuildList.Add(currentElement);
-                    }
-
-                    // because we operate depth first the parent has already been processed
-                    // if it wasn't already marked to be the parent isn't already marked to rebuild it's hierarchy by itself or
-                    // a previous sibling of currentElement, mark it as such and add it to the rebuild list
-                    if (currentElement.parent != null && (currentElement.parent.flags & UIElementFlags.LayoutHierarchyDirty) == 0) {
-                        currentElement.parent.flags |= UIElementFlags.LayoutHierarchyDirty;
-                        hierarchyRebuildList.Add(currentElement.parent);
-                    }
-                }
-
-                if (!enabled) {
-                    currentElement.flags = flags; // might have changed above
-                    continue;
-                }
+//                if (currentElement.enableStateChangedFrameId == frameId) {
+//                    // because we operate depth first the parent has already been processed
+//                    // if it wasn't already marked to be the parent isn't already marked to rebuild it's hierarchy by itself or
+//                    // a previous sibling of currentElement, mark it as such and add it to the rebuild list
+//
+//                    // could move to where children are pushed to stack?
+//
+//                    if (enabled) {
+//                        EnableHierarchy(currentElement);
+//                        continue;
+//                    }
+//
+//                    if (currentElement.parent != null && (currentElement.parent.layoutBox. &UIElementFlags.LayoutHierarchyDirty) == 0) {
+//                        currentElement.parent.flags |= UIElementFlags.LayoutHierarchyDirty;
+//                        hierarchyRebuildList.Add(currentElement.parent);
+//                    }
+//
+//                    if (enabled) {
+//                        EnableHierarchy(currentElement);
+//                        continue;
+//                    }
+//                }
+//
+//                if (!enabled) {
+//                    currentElement.flags = flags; // might have changed above
+//                    continue;
+//                }
 
                 AwesomeLayoutBox layoutBox = currentElement.layoutBox;
 
-                if ((flags & UIElementFlags.LayoutFlags) != 0) {
-                    if ((flags & UIElementFlags.LayoutTypeOrBehaviorDirty) != 0) {
-                        UpdateLayoutTypeOrBehavior(currentElement);
-                        layoutBox = currentElement.layoutBox;
-                        flags &= ~UIElementFlags.LayoutTypeOrBehaviorDirty;
+                if ((layoutBox.flags & LayoutBoxFlags.HorizontalSizeChanged) != 0) {
+                    layoutBox.flags &= ~LayoutBoxFlags.HorizontalSizeChanged;
+                    layoutBox.MarkContentParentsHorizontalDirty(frameId, LayoutReason.DescendentStyleSizeChanged);
+                }
 
-                        if ((flags & UIElementFlags.LayoutHierarchyDirty) == 0) {
-                            flags |= UIElementFlags.LayoutHierarchyDirty;
-                            hierarchyRebuildList.Add(currentElement);
-                        }
-                    }
-
-                    // if padding or border is dirty, we need a layout but our size didn't change so our parent doesn't need to layout even if it is content based
-                    if ((flags & UIElementFlags.LayoutBorderPaddingHorizontalDirty) != 0) {
-                        layoutBox.flags |= LayoutBoxFlags.RequireLayoutHorizontal;
-                        currentElement.layoutHistory.AddLogEntry(LayoutDirection.Horizontal, frameId, LayoutReason.BorderPaddingChanged);
-                        flags &= ~UIElementFlags.LayoutBorderPaddingHorizontalDirty;
-                    }
-
-                    // if padding or border is dirty, we need a layout but our size didn't change so our parent doesn't need to layout even if it is content based
-                    if ((flags & UIElementFlags.LayoutBorderPaddingVerticalDirty) != 0) {
-                        layoutBox.flags |= LayoutBoxFlags.RequireLayoutVertical;
-                        currentElement.layoutHistory.AddLogEntry(LayoutDirection.Vertical, frameId, LayoutReason.BorderPaddingChanged);
-                        flags &= ~UIElementFlags.LayoutBorderPaddingVerticalDirty;
-                    }
-
-                    if ((flags & UIElementFlags.LayoutSizeWidthDirty) != 0) {
-                        layoutBox.flags |= LayoutBoxFlags.RequireLayoutHorizontal;
-                        currentElement.layoutHistory.AddLogEntry(LayoutDirection.Horizontal, frameId, LayoutReason.StyleSizeChanged);
-                        flags &= ~UIElementFlags.LayoutSizeWidthDirty;
-
-                        layoutBox.MarkContentParentsHorizontalDirty(frameId, LayoutReason.DescendentStyleSizeChanged);
-                    }
-
-                    if ((flags & UIElementFlags.LayoutSizeHeightDirty) != 0) {
-                        layoutBox.flags |= LayoutBoxFlags.RequireLayoutVertical;
-                        currentElement.layoutHistory.AddLogEntry(LayoutDirection.Vertical, frameId, LayoutReason.StyleSizeChanged);
-                        flags &= ~UIElementFlags.LayoutSizeHeightDirty;
-
-                        layoutBox.MarkContentParentsVerticalDirty(frameId, LayoutReason.DescendentStyleSizeChanged);
-                    }
-
-                    if ((flags & UIElementFlags.LayoutTransformDirty) != 0) {
-                        // mark to update matrix, don't actually add it to the list, that will happen later
-                        // because many things can cause this flag to be set, be sure we only add it to list once.
-                        layoutBox.flags |= LayoutBoxFlags.RequiresMatrixUpdate;
-                        flags &= ~UIElementFlags.LayoutTransformDirty;
-                    }
+                if ((layoutBox.flags & LayoutBoxFlags.VerticalSizeChanged) != 0) {
+                    layoutBox.flags &= ~LayoutBoxFlags.VerticalSizeChanged;
+                    layoutBox.MarkContentParentsVerticalDirty(frameId, LayoutReason.DescendentStyleSizeChanged);
                 }
 
                 if ((layoutBox.flags & LayoutBoxFlags.RequireAlignmentHorizontal) != 0) {
@@ -256,7 +239,10 @@ namespace UIForia.Systems {
                     alignVerticalList.Add(currentElement);
                 }
 
-                // todo -- cache
+                if ((layoutBox.flags & LayoutBoxFlags.GatherChildren) != 0) {
+                    hierarchyRebuildList.Add(currentElement);
+                }
+
                 switch (layoutBox.clipBehavior) {
                     case ClipBehavior.Never:
 
@@ -308,8 +294,8 @@ namespace UIForia.Systems {
                 }
 
                 if ((layoutBox.flags & LayoutBoxFlags.Clipper) != 0) {
-                    layoutBox.clipData = layoutBox.clipData ?? new ClipData();
-                    layoutBox.clipData.parent = clipStack.size != 0 ? clipStack.array[clipStack.size - 1] : screenClipper; // todo -- view clipper not screen
+                    layoutBox.clipData = layoutBox.clipData ?? new ClipData(layoutBox.element);
+                    layoutBox.clipData.parent = clipStack.size != 0 ? clipStack.array[clipStack.size - 1] : screenClipper;
                     layoutBox.clipData.clipList.Clear();
                     clipStack.Push(layoutBox.clipData);
                     clipperList.Add(layoutBox.clipData);
@@ -325,35 +311,152 @@ namespace UIForia.Systems {
                     elemRefStack.EnsureAdditionalCapacity(childCount);
                 }
 
-                // todo -- presize to view.enabled count and inline
-                if (queryableElements.size + 1 >= queryableElements.array.Length) {
-                    queryableElements.EnsureCapacity(queryableElements.size + 1);
-                }
-
-                // todo -- do this after clipping?
-                queryableElements.array[queryableElements.size++].element = currentElement;
-
                 // push null to signify we need to pop the clip stack later
                 if ((layoutBox.flags & LayoutBoxFlags.Clipper) != 0) {
                     elemRefStack.array[elemRefStack.size++].element = null;
                 }
 
+                bool needsGather = false;
+
+                // if any child had it's type changed, enabled, disabled, or behavior changed, need to gather
+
                 for (int i = childCount - 1; i >= 0; i--) {
-                    elemRefStack.array[elemRefStack.size++].element = childArray[i];
+                    UIElement child = childArray[i];
+
+                    bool childEnabled = (child.flags & UIElementFlags.EnabledFlagSet) == UIElementFlags.EnabledFlagSet;
+
+                    if (child.enableStateChangedFrameId == frameId) {
+                        needsGather = true;
+
+                        if (childEnabled) {
+                            EnableHierarchy(child);
+                        }
+                    }
+                    else if (childEnabled) {
+                        // if child was previously enabled, it will definitely have a layout box
+                        needsGather ^= (child.layoutBox.flags & LayoutBoxFlags.TypeOrBehaviorChanged) != 0;
+                        elemRefStack.array[elemRefStack.size++].element = childArray[i];
+                    }
+                }
+
+                if (needsGather) {
+                    hierarchyRebuildList.Add(currentElement);
                 }
             }
 
             clipStack.Pop(); // view
         }
 
+        private void EnableHierarchy(UIElement currentElement) {
+            UpdateLayoutTypeOrBehavior(currentElement);
+
+            AwesomeLayoutBox layoutBox = currentElement.layoutBox;
+
+            bool isClipper = (currentElement.layoutBox.flags & LayoutBoxFlags.Clipper) != 0;
+
+            if (isClipper) {
+                layoutBox.clipData = layoutBox.clipData ?? new ClipData(layoutBox.element);
+                layoutBox.clipData.parent = clipStack.size != 0 ? clipStack.array[clipStack.size - 1] : screenClipper;
+                layoutBox.clipData.clipList.Clear();
+                clipStack.Push(layoutBox.clipData);
+                clipperList.Add(layoutBox.clipData);
+            }
+
+            LightList<AwesomeLayoutBox> list = LightList<AwesomeLayoutBox>.Get();
+            for (int i = 0; i > currentElement.children.size; i++) {
+                UIElement child = currentElement.children.array[i];
+
+                if ((child.flags & UIElementFlags.EnabledFlagSet) != UIElementFlags.EnabledFlagSet) {
+                    continue;
+                }
+
+                EnableHierarchy(child);
+
+                switch (child.style.LayoutBehavior) {
+                    default:
+                    case LayoutBehavior.Unset:
+                    case LayoutBehavior.Normal:
+                        list.Add(child.layoutBox);
+                        break;
+                    case LayoutBehavior.Ignored:
+                        ignoredList.Add(child.layoutBox);
+                        break;
+                    case LayoutBehavior.TranscludeChildren:
+                        list.AddRange(((AwesomeTranscludedLayoutBox) child.layoutBox).GetChildren());
+                        break;
+                }
+            }
+
+
+            switch (layoutBox.clipBehavior) {
+                case ClipBehavior.Never:
+
+                    if (currentElement.layoutResult.clipper != null) {
+                        layoutBox.flags |= LayoutBoxFlags.RecomputeClipping;
+                        currentElement.layoutResult.clipper = null;
+                    }
+
+                    break;
+
+                default:
+                case ClipBehavior.Normal: {
+                    ClipData currentClipper = clipStack.array[clipStack.size - 1];
+                    StructList<ElemRef> clipList = currentClipper.clipList;
+
+                    if (currentElement.layoutResult.clipper != currentClipper) {
+                        layoutBox.flags |= LayoutBoxFlags.RecomputeClipping;
+                        currentElement.layoutResult.clipper = currentClipper;
+                    }
+
+                    // this is inlined because it was identified as a hot point, inlining this makes it run significantly faster
+                    if (clipList.size + 1 > clipList.array.Length) {
+                        Array.Resize(ref clipList.array, (clipList.size + 1) * 2);
+                    }
+
+                    clipList.array[clipList.size++].element = currentElement;
+
+                    break;
+                }
+                case ClipBehavior.View: {
+                    if (currentElement.layoutResult.clipper != viewClipper) {
+                        layoutBox.flags |= LayoutBoxFlags.RecomputeClipping;
+                        currentElement.layoutResult.clipper = viewClipper;
+                    }
+
+                    viewClipper.clipList.Add(new ElemRef(currentElement));
+                    break;
+                }
+
+                case ClipBehavior.Screen: {
+                    if (currentElement.layoutResult.clipper != screenClipper) {
+                        layoutBox.flags |= LayoutBoxFlags.RecomputeClipping;
+                        currentElement.layoutResult.clipper = screenClipper;
+                    }
+
+                    screenClipper.clipList.Add(new ElemRef(currentElement));
+                    break;
+                }
+            }
+
+            if (isClipper) {
+                clipStack.Pop();
+            }
+
+            currentElement.layoutBox.Enable();
+            currentElement.layoutBox.SetChildren(list);
+            LightList<AwesomeLayoutBox>.Release(ref list);
+        }
 
         private void UpdateClippers() {
-
             for (int i = 1; i < clipperList.size; i++) {
                 ClipData clipper = clipperList.array[i];
+                clipper.isCulled = false;
+                clipper.intersected.size = 0;
+                clipper.visibleBoxCount = 0;
 
                 if (clipper.parent.isCulled) {
                     clipper.aabb = default;
+                    clipper.isCulled = true;
                     for (int j = 0; j < clipper.clipList.size; j++) {
                         UIElement element = clipper.clipList.array[j].element;
                         element.layoutResult.isCulled = true;
@@ -362,16 +465,19 @@ namespace UIForia.Systems {
                     continue;
                 }
 
-                OrientedBounds bounds = clipper.orientedBounds;
-                s_SubjectRect.array[0] = bounds.p0;
-                s_SubjectRect.array[1] = bounds.p1;
-                s_SubjectRect.array[2] = bounds.p2;
-                s_SubjectRect.array[3] = bounds.p3;
-                s_SubjectRect.size = 4;
-                clipper.intersected.size = 0;
-                clipper.visibleBoxCount = 0;
-                SutherlandHodgman.GetIntersectedPolygon(s_SubjectRect, clipper.parent.intersected, ref clipper.intersected);
-                clipper.isCulled = clipper.intersected.size == 0;
+                if (i != 1 && (clipper.element.layoutResult.actualSize.width == 0 || clipper.element.layoutResult.actualSize.height == 0)) {
+                    clipper.isCulled = true;
+                }
+                else {
+                    OrientedBounds bounds = clipper.orientedBounds;
+                    s_SubjectRect.array[0] = bounds.p0;
+                    s_SubjectRect.array[1] = bounds.p1;
+                    s_SubjectRect.array[2] = bounds.p2;
+                    s_SubjectRect.array[3] = bounds.p3;
+                    s_SubjectRect.size = 4;
+                    SutherlandHodgman.GetIntersectedPolygon(s_SubjectRect, clipper.parent.intersected, ref clipper.intersected);
+                    clipper.isCulled = clipper.intersected.size == 0;
+                }
 
                 if (clipper.isCulled) {
                     clipper.aabb = default;
@@ -384,16 +490,17 @@ namespace UIForia.Systems {
                     clipper.aabb = PolygonUtil.GetBounds(clipper.intersected);
 
                     // definitely culled = clipper culled || aabb doesnt overlap clipper aabb
-                    // let the gpu handle per pixel clipping
+                    // let the gpu handle per pixel clipping, this is just a broadphase
                     for (int j = 0; j < clipper.clipList.size; j++) {
                         UIElement element = clipper.clipList.array[j].element;
-                        if(element == rootElement) continue;
+                        if (element == rootElement) continue;
                         ref Vector4 aabb = ref element.layoutResult.axisAlignedBounds;
                         bool overlappingOrContains = aabb.z >= clipper.aabb.x && aabb.x <= clipper.aabb.z && aabb.w >= clipper.aabb.y && aabb.y <= clipper.aabb.w;
-                        element.layoutResult.isCulled = !overlappingOrContains;
-                        //!clipper.aabb.OverlapAsRect(element.layoutResult.axisAlignedBounds);
+                        element.layoutResult.isCulled = !overlappingOrContains || (element.layoutResult.actualSize.width == 0 || element.layoutResult.actualSize.height == 0);
+
                         if (!element.layoutResult.isCulled) {
                             clipper.visibleBoxCount++;
+                            queryableElements.Add(new ElemRef(element)); // todo -- inline, or just avoid and iterate non culled clipper lists instead
                         }
                     }
                 }
@@ -492,13 +599,12 @@ namespace UIForia.Systems {
             // that widths are final before heights are computed, this is critical for the system to work.
 
             // todo -- profile removing box stack and just using single list (queryableElements?)
-
             while (boxRefStack.size > 0) {
                 AwesomeLayoutBox layoutBox = boxRefStack.array[--boxRefStack.size].box;
 
                 if ((layoutBox.flags & LayoutBoxFlags.RequireLayoutHorizontal) != 0) {
                     layoutBox.RunLayoutHorizontal(frameId);
-                    layoutBox.element.layoutHistory.AddLayoutHorizontalCall(frameId);
+//                    layoutBox.element.layoutHistory.AddLayoutHorizontalCall(frameId);
                     layoutBox.flags &= ~LayoutBoxFlags.RequireLayoutHorizontal;
                 }
 
@@ -572,19 +678,21 @@ namespace UIForia.Systems {
         }
 
         private void ApplyLayoutResults() {
-            int size = matrixUpdateList.size;
-            UIElement[] array = matrixUpdateList.array;
+            int size = queryableElements.size; //matrixUpdateList.size;
+            //UIElement[] array = queryableElements.array; //matrixUpdateList.array;
+            ElemRef[] array = queryableElements.array; //matrixUpdateList.array;
 
             float viewWidth = rootElement.View.Viewport.width;
             float viewHeight = rootElement.View.Viewport.height;
 
             for (int i = 0; i < size; i++) {
-                UIElement startElement = array[i];
+                UIElement startElement = array[i].element;
                 AwesomeLayoutBox box = startElement.layoutBox;
 
                 // this element might have been processed by it's parent traversing, this check makes sure we only traverse an element hierarchy once
 
-                if ((box.flags & LayoutBoxFlags.RequiresMatrixUpdate) != 0) {
+                // todo fix this
+                if (true || (box.flags & LayoutBoxFlags.RequiresMatrixUpdate) != 0) {
                     elemRefStack.Push(new ElemRef(startElement));
 
                     while (elemRefStack.size > 0) {
@@ -806,7 +914,7 @@ namespace UIForia.Systems {
             LayoutType layoutType = currentElement.style.LayoutType;
 
             if (currentElement.layoutBox != null) {
-                if (currentElement.layoutBox is AwesomeTextLayoutBox) {
+                if (currentElement.layoutBox is AwesomeImageLayoutBox || currentElement.layoutBox is AwesomeTextLayoutBox) {
                     return;
                 }
 
@@ -819,6 +927,12 @@ namespace UIForia.Systems {
 
             if (currentElement is UITextElement) {
                 currentElement.layoutBox = new AwesomeTextLayoutBox();
+                currentElement.layoutBox.Initialize(currentElement, frameId);
+                return;
+            }
+
+            if (currentElement is UIImageElement) {
+                currentElement.layoutBox = new AwesomeImageLayoutBox();
                 currentElement.layoutBox.Initialize(currentElement, frameId);
                 return;
             }
@@ -845,6 +959,8 @@ namespace UIForia.Systems {
         }
 
         private void RebuildHierarchy() {
+            if (hierarchyRebuildList.size == 0) return;
+
             // do this back to front so parent always works with final children
             LightList<AwesomeLayoutBox> childList = LightList<AwesomeLayoutBox>.Get();
 
@@ -875,6 +991,7 @@ namespace UIForia.Systems {
                             ignoredList.Add(child.layoutBox);
                             break;
                         case LayoutBehavior.TranscludeChildren:
+                            child.layoutResult.layoutParent = element.layoutResult; // not 100% sure of this
                             childList.AddRange(((AwesomeTranscludedLayoutBox) child.layoutBox).GetChildren());
                             break;
                         default:
@@ -882,11 +999,12 @@ namespace UIForia.Systems {
                     }
                 }
 
-                element.layoutHistory.AddLogEntry(LayoutDirection.Horizontal, frameId, LayoutReason.HierarchyChanged, string.Empty);
-                element.layoutHistory.AddLogEntry(LayoutDirection.Vertical, frameId, LayoutReason.HierarchyChanged, string.Empty);
+                // element.layoutHistory.AddLogEntry(LayoutDirection.Horizontal, frameId, LayoutReason.HierarchyChanged, string.Empty);
+                // element.layoutHistory.AddLogEntry(LayoutDirection.Vertical, frameId, LayoutReason.HierarchyChanged, string.Empty);
 
                 elementBox.flags |= (LayoutBoxFlags.RequireLayoutHorizontal | LayoutBoxFlags.RequireLayoutVertical);
 
+                // todo this is called too many times, need a 'first frame' initialize method
                 element.layoutBox.MarkContentParentsHorizontalDirty(frameId, LayoutReason.DescendentStyleSizeChanged);
                 element.layoutBox.MarkContentParentsVerticalDirty(frameId, LayoutReason.DescendentStyleSizeChanged);
 

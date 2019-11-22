@@ -25,7 +25,11 @@ namespace UIForia.Systems {
 
         RecomputeClipping = 1 << 9,
 
-        Clipper = 1 << 10
+        Clipper = 1 << 10,
+
+        GatherChildren = 1 << 11,
+
+        TypeOrBehaviorChanged = 1 << 12
 
     }
 

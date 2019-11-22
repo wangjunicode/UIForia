@@ -14,6 +14,7 @@
             PreferredSize = @scrollBarSize 1psz;
             AlignX = 100% Parent;
             BackgroundColor = @trackColor;
+            BorderRadius = 3px;
         }
 
         style scroll-handle-vertical {
@@ -30,6 +31,7 @@
             AlignY = 100% Parent;
             BackgroundColor = @trackColor;
             LayoutFit = Shrink;
+            BorderRadius = 2px;
         }
 
         style scroll-handle-horizontal {

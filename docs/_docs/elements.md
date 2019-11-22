@@ -30,6 +30,7 @@ There are a couple of ways to get your text on screen.
 reasons. Since they are individual elements they are of course also treated as separate things
 by the [layout type](/docs/layout). When being used in a grid they might be three different 
 columns. You also have the advantage of adding styles to the text nodes.
+
 ```xml
 <UITemplate>
     <Contents>
@@ -37,8 +38,9 @@ columns. You also have the advantage of adding styles to the text nodes.
         <Text style="bold-text">Young son, it argues a distemper'd head</Text>
         <Text>So soon to bid good morrow to thy bed:</Text>
     </Contents>
-</UITemplate> 
-```
+</UITemplate>
+ ```
+
 3. There are couple of other aliases for text elements.
  - `<Heading1>`
  - `<Heading2>`
@@ -129,7 +131,7 @@ of optional parameters:
 
 | Parameter   | Required | Type                | Description                                                                                                                                             |
 |-------------|----------|---------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------|
-| list        | (x)      | `RepeatableList<T>` | Data data that you want to iterate                                                                                                                      |
+| list        | (x)      | `RepeatableList<T>` | Data that you want to iterate                                                                                                                      |
 | as          |          | `string`            |  Change the variable alias of the current iteration item from the default `item` to something else. The alias can then be   referred to as `$yourItem`. |
 | lengthAlias |          | `string`            |  Similar to `as` the `lengthAlias` changes the variable alias that refers to the length of the list.                                                    |
 | indexAs     |          | `string`            |  Same as above, `indexAs` gives the index variable a new name.                                                                                          |

@@ -55,15 +55,15 @@ namespace UIForia.Rendering {
         private bool requireRegionCounting;
 
         public ClipContext(UIForiaSettings settings) {
-            this.clipDrawMaterial = settings.sdfPathMaterial;
-            this.clearMaterial = settings.clearClipRegionsMaterial;
+            this.clipDrawMaterial = new Material(settings.sdfPathMaterial);
+            this.clearMaterial = new Material(settings.clearClipRegionsMaterial);
             this.clearCountMaterial = new Material(clearMaterial);
 
             this.clearMaterial.SetColor(s_Color, Color.white);
             this.clearCountMaterial.SetColor(s_Color, new Color(0, 0, 0, 0));
 
-            this.countMaterial = settings.clipCountMaterial;
-            this.blitCountMaterial = settings.clipBlitMaterial;
+            this.countMaterial = new Material(settings.clipCountMaterial);
+            this.blitCountMaterial = new Material(settings.clipBlitMaterial);
             this.clipMaterialPool = new ClipMaterialPool(clipDrawMaterial);
             this.positionList = new StructList<Vector3>();
             this.texCoordList0 = new StructList<Vector4>();
@@ -85,7 +85,6 @@ namespace UIForia.Rendering {
             depthState.writeEnabled = true;
 
             MaterialUtil.SetupState(clipDrawMaterial, new FixedRenderState(blendState, depthState));
-            
         }
 
         public void Destroy() {
@@ -209,7 +208,7 @@ namespace UIForia.Rendering {
 
             batchesToRender.Clear();
             Gather();
-            
+
             Vector3 cameraOrigin = camera.transform.position;
             cameraOrigin.x -= 0.5f * Screen.width;
             cameraOrigin.y += (0.5f * Screen.height);
@@ -224,7 +223,7 @@ namespace UIForia.Rendering {
             regionMesh = GetRegionMesh(out requireRegionCounting);
 
             clipTexture = RenderTexture.GetTemporary(Screen.width, Screen.height, 24, RenderTextureFormat.Default); // todo -- use lower resolution
-            
+
 #if DEBUG
             commandBuffer.BeginSample("UIFora Clip Draw");
 #endif
@@ -236,12 +235,12 @@ namespace UIForia.Rendering {
             commandBuffer.DrawMesh(regionMesh.mesh, origin, clearMaterial, 0, 0);
 
             // todo -- handle multiple shapes from one path
-            
+
             ClipBatch batch = new ClipBatch();
             batch.transforms = StructList<Matrix4x4>.Get();
             batch.colorData = StructList<Vector4>.Get();
             batch.objectData = StructList<Vector4>.Get();
-            
+
             for (int i = 0; i < clippers.size; i++) {
                 ClipData clipData = clippers[i];
                 Path2D clipPath = clipData.clipPath;
@@ -336,7 +335,7 @@ namespace UIForia.Rendering {
             triangleList.size = 0;
             // todo handle texture n stuff
             batchesToRender.Add(clipBatch);
-            
+
             if (createNewBatch) {
                 clipBatch = new ClipBatch();
                 clipBatch.transforms = StructList<Matrix4x4>.Get();
@@ -396,7 +395,7 @@ namespace UIForia.Rendering {
                     clipBatch.objectData.array[insertIdx] = path.objectDataList.array[objIdx].objectData;
                     clipBatch.colorData.array[insertIdx] = path.objectDataList.array[objIdx].colorData;
                     Matrix4x4 matrix;
-                    
+
                     if (path.transforms != null) {
                         matrix = path.transforms.array[drawCall.transformIdx];
                     }

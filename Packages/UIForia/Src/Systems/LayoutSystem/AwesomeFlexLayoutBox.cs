@@ -279,7 +279,7 @@ namespace UIForia.Systems {
                         fit = LayoutFit.Shrink;
                     }
 
-                    item.layoutBox.ApplyLayoutHorizontal(x, alignedPosition, item.baseWidth, item.availableSize, fit, frameId);
+                    item.layoutBox.ApplyLayoutHorizontal(x, alignedPosition, item.widthData, item.baseWidth, item.availableSize, fit, frameId);
                     offset += item.widthData.marginStart + item.widthData.marginEnd + gap;
                 }
             }
@@ -595,13 +595,12 @@ namespace UIForia.Systems {
                     fit = LayoutFit.Shrink;
                 }
 
-                item.layoutBox.ApplyLayoutHorizontal(x, alignedPosition, item.baseWidth, item.availableSize, fit, frameId);
+                item.layoutBox.ApplyLayoutHorizontal(x, alignedPosition, item.widthData, item.baseWidth, item.availableSize, fit, frameId);
                 offset += item.widthData.marginStart + item.widthData.marginEnd + gap;
             }
         }
 
         private void RunLayoutVerticalStep_HorizontalDirection(int frameId) {
-            float contentStartY = paddingBorderVerticalStart;
             float adjustedHeight = finalHeight - (paddingBorderVerticalStart + paddingBorderVerticalEnd);
 
             // todo -- once tracks get implemented we want to be able to use space-between and space-around to vertically align the tracks
@@ -617,7 +616,7 @@ namespace UIForia.Systems {
             // however it might be awkward if AlignContentVertical = Center is used and that just centers the allocated rects, not the actual content
             // so for now I have implemented option 1 for the case where we are not wrapping / only have 1 track
 
-            float verticalAlignment = element.style.AlignItemsVertical;
+            float itemAlignment = element.style.AlignItemsVertical;
             LayoutFit verticalLayoutFit = element.style.FitItemsVertical;
 
             SpaceDistribution alignment = element.style.DistributeExtraSpaceVertical;
@@ -626,30 +625,23 @@ namespace UIForia.Systems {
                 alignment = SpaceDistribution.AfterContent;
             }
 
-            float offset = 0;
-            float inset = paddingBorderHorizontalStart;
-            float spacerSize = 0;
+            float inset = paddingBorderVerticalStart;
 
             for (int i = 0; i < items.size; i++) {
                 ref FlexItem item = ref items.array[i];
-
-
                 item.layoutBox.GetHeights(ref item.heightData);
                 item.baseHeight = item.heightData.Clamped;
+                float offset = 0;
+                SpaceDistributionUtil.GetAlignmentOffsets(adjustedHeight - (item.baseHeight + item.heightData.marginStart + item.heightData.marginEnd), 1, alignment, out offset, out _);
 
-                // todo -- margin?
-
-                SpaceDistributionUtil.GetAlignmentOffsets(adjustedHeight - item.baseHeight + item.widthData.marginStart + item.widthData.marginEnd, 1, alignment, out offset, out spacerSize);
-
+                float y = inset + offset + item.heightData.marginStart;
                 float allocatedHeight = adjustedHeight - (item.heightData.marginStart + item.heightData.marginEnd);
-                float originBase = contentStartY + item.heightData.marginStart;
-                float originOffset = allocatedHeight * verticalAlignment;
-
-                // if distance from top of this element to child allocated rect >= margin top -- ignore margin top
-                // subtract diff to margin clamped to 0
+                float originOffset = allocatedHeight * itemAlignment;
+                float alignedPosition = y + originOffset + (item.baseHeight * -itemAlignment);
                 item.layoutBox.ApplyLayoutVertical(
-                    contentStartY + item.heightData.marginStart,
-                    originBase + originOffset + (item.baseHeight * -verticalAlignment),
+                    y,
+                    alignedPosition,
+                    item.heightData,
                     item.baseHeight,
                     allocatedHeight,
                     verticalLayoutFit,
@@ -710,7 +702,7 @@ namespace UIForia.Systems {
                     fit = LayoutFit.Shrink;
                 }
 
-                item.layoutBox.ApplyLayoutVertical(y, alignedPosition, item.baseHeight, item.availableSize, fit, frameId);
+                item.layoutBox.ApplyLayoutVertical(y, alignedPosition, item.heightData, item.baseHeight, item.availableSize, fit, frameId);
                 offset += item.heightData.marginStart + item.heightData.marginEnd + gap;
             }
         }
@@ -749,7 +741,7 @@ namespace UIForia.Systems {
                 float originOffset = (x - inset) + availableWidth * itemAlignment;
                 float alignedPosition = originBase + originOffset + (item.baseWidth * -itemAlignment);
 
-                item.layoutBox.ApplyLayoutHorizontal(x, alignedPosition, item.baseWidth, availableWidth, fit, frameId);
+                item.layoutBox.ApplyLayoutHorizontal(x, alignedPosition, item.widthData, item.baseWidth, availableWidth, fit, frameId);
 
                 offset += item.widthData.marginStart + item.widthData.marginEnd + gap;
             }
@@ -774,10 +766,10 @@ namespace UIForia.Systems {
                     item.layoutBox.GetHeights(ref item.heightData);
                     item.baseHeight = item.heightData.Clamped;
 
-                    // todo -- margins?
+                    float height = item.baseHeight + item.heightData.marginStart + item.heightData.marginEnd;
 
-                    if (item.baseHeight > maxHeight) {
-                        maxHeight = item.baseHeight;
+                    if (height > maxHeight) {
+                        maxHeight = height;
                     }
                 }
 
@@ -807,6 +799,7 @@ namespace UIForia.Systems {
                     item.layoutBox.ApplyLayoutVertical(
                         y + item.heightData.marginStart,
                         originBase + originOffset + (item.baseHeight * -verticalAlignment),
+                        item.heightData,
                         item.baseHeight,
                         allocatedHeight,
                         verticalLayoutFit,
@@ -848,7 +841,6 @@ namespace UIForia.Systems {
             public bool IsEmpty => startIndex == endIndex;
 
         }
-        
 
     }
 

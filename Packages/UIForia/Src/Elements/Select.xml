@@ -7,12 +7,12 @@
             LayoutType = Stack;
             AlignItemsVertical = Center Parent;
             BackgroundColor = white;
-            PreferredSize = 1mx 48px;
+            PreferredSize = 1cnt 48px;
             TextFontSize = 32px;
             BorderRadius = 8px;
             Border = 2px;
             BorderColor = #B2B2B2;
-            PaddingRight = 32px;
+            PaddingRight = 16px;
             PaddingLeft = 16px;
             [hover] {
                 BorderColor = #00B5D9;
@@ -26,13 +26,12 @@
         }
 
         style select-option {
-            PreferredWidth = 1pca;
-            MaxWidth = 1pca;
             TextColor = black;
             Padding = 4px 8px 4px 4px;
             DistributeExtraSpaceVertical = CenterContent;
             FlexLayoutDirection = Horizontal;
             BackgroundColor = clear;
+            LayoutFitHorizontal = Grow;
             [hover] {
                 MinWidth = 1cnt;
                 TextColor = white;
@@ -65,7 +64,7 @@
             AlignY = -3px, Parent;
             AlignX = -10px, Parent;
             BackgroundColor = white;
-            PreferredWidth = 1psz;
+            LayoutFitHorizontal = FillParent;
             BorderRadius = 4px;
             BorderColor = black;
             Border = 1px;
@@ -84,6 +83,7 @@
         }
 
         style select-chevron-holder {
+            LayoutBehavior = Ignored;
             AlignmentTargetX = Parent;
             AlignX = 100%;
             BackgroundColor = #00b5d0;
@@ -115,9 +115,14 @@
 
         style select-display {
             TextColor = black;
+            MarginRight = 16px;
         }
         
         style select-placeholder {
+            TextColor = #666;
+        }
+        
+         style options-container {
             TextColor = #666;
         }
 
@@ -145,7 +150,7 @@
         </Group>
 
         <ScrollView onMouseClick="SelectElement($event)" style="select-options" x-id="option-list">
-            <Children x-id="option-children" style="options-container" x-type="template">
+            <Children x-id="option-children" style="transclude" x-type="template">
                 <Group style="select-option">
                     <Image src="selectedElementIcon" style="selected-element-icon" if="DisplaySelectedIcon($option__internal)" />
                     <Div style="select-label">{$option__internal.Label}</Div>

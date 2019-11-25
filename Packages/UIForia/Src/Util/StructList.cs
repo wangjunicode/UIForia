@@ -118,7 +118,12 @@ namespace UIForia.Util {
         private const int HandCopyThreshold = 8;
 
         public void Reverse() {
-            System.Array.Reverse(array, 0, size);
+            int max = size / 2;
+            for (int i = 0; i < max; i++) {
+                T tmp = array[i];
+                array[i] = array[size - i - 1];
+                array[size - i - 1] = tmp;
+            }
         }
 
         public void AddRange(StructList<T> collection, int start, int count) {
@@ -340,12 +345,10 @@ namespace UIForia.Util {
             int i = lo;
             int j = hi - 1;
             while (i < j) {
-                do
-                    ;
-                while (comparer.Compare(keys[++i], key) < 0);
-                do
-                    ;
-                while (comparer.Compare(key, keys[--j]) < 0);
+                do { } while (comparer.Compare(keys[++i], key) < 0);
+
+                do { } while (comparer.Compare(key, keys[--j]) < 0);
+
                 if (i < j)
                     Swap(keys, i, j);
                 else

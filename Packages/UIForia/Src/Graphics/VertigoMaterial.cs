@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using UIForia.Util;
 using UnityEngine;
+#pragma warning disable 649
 
 namespace Vertigo {
 

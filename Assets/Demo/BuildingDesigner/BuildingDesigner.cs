@@ -1,5 +1,6 @@
 using System;
 using System.Globalization;
+using JetBrains.Annotations;
 using UIForia.Attributes;
 using UIForia.Elements;
 using UIForia.UIInput;
@@ -43,8 +44,10 @@ namespace Demo {
         private RepeatableList<Brush> basicPerpBrushes = new RepeatableList<Brush>();
         private RepeatableList<Brush> blockBrushes = new RepeatableList<Brush>();
 
-        private bool showCancel;
-        private bool showConfirm;
+        [UsedImplicitly]
+        public bool showCancel;
+        [UsedImplicitly]
+        public bool showConfirm;
         
         private UIElement prevTool;
         private ScrollView brushesContainer;

@@ -48,6 +48,24 @@ namespace UIForia.Rendering {
         protected UIForiaGeometry geometry;
         protected UIForiaGeometry shadowGeometry;
 
+        protected Color32 borderColorTop;
+        protected Color32 borderColorRight;
+        protected Color32 borderColorBottom;
+        protected Color32 borderColorLeft;
+        protected Color32 backgroundColor;
+        protected Color32 backgroundTint;
+        protected Texture backgroundImage;
+
+        protected UIFixedLength borderRadiusTopLeft;
+        protected UIFixedLength borderRadiusTopRight;
+        protected UIFixedLength borderRadiusBottomLeft;
+        protected UIFixedLength borderRadiusBottomRight;
+
+        protected UIFixedLength cornerBevelTopLeft;
+        protected UIFixedLength cornerBevelTopRight;
+        protected UIFixedLength cornerBevelBottomLeft;
+        protected UIFixedLength cornerBevelBottomRight;
+
         public StandardRenderBox() {
             this.uniqueId = "UIForia::StandardRenderBox";
             this.geometry = new UIForiaGeometry();
@@ -61,31 +79,102 @@ namespace UIForia.Rendering {
             dataNeedsUpdate = true;
         }
 
+        public override void Enable() {
+            borderColorTop = element.style.BorderColorTop;
+            borderColorRight = element.style.BorderColorRight;
+            borderColorBottom = element.style.BorderColorBottom;
+            borderColorLeft = element.style.BorderColorLeft;
+            backgroundColor = element.style.BackgroundColor;
+            backgroundTint = element.style.BackgroundTint;
+            backgroundImage = element.style.BackgroundImage;
+            borderRadiusTopLeft = element.style.BorderRadiusTopLeft;
+            borderRadiusTopRight = element.style.BorderRadiusTopRight;
+            borderRadiusBottomLeft = element.style.BorderRadiusBottomLeft;
+            borderRadiusBottomRight = element.style.BorderRadiusBottomRight;
+            cornerBevelTopLeft = element.style.CornerBevelTopLeft;
+            cornerBevelTopRight = element.style.CornerBevelTopRight;
+            cornerBevelBottomRight = element.style.CornerBevelBottomRight;
+            cornerBevelBottomLeft = element.style.CornerBevelBottomLeft;
+            opacity = element.style.Opacity;
+        }
+
         public override void OnStylePropertyChanged(StructList<StyleProperty> propertyList) {
             StyleProperty[] properties = propertyList.array;
             int count = propertyList.size;
 
             base.OnStylePropertyChanged(propertyList);
-
+            
             for (int i = 0; i < count; i++) {
                 ref StyleProperty property = ref properties[i];
 
                 switch (property.propertyId) {
+                    case StylePropertyId.BackgroundTint:
+                        backgroundTint = property.AsColor;
+                        dataNeedsUpdate = true;
+                        break;
                     case StylePropertyId.BackgroundColor:
+                        backgroundColor = property.AsColor;
+                        dataNeedsUpdate = true;
+                        dataNeedsUpdate = true;
+                        break;
                     case StylePropertyId.BorderColorTop:
+                        borderColorTop = property.AsColor;
+                        dataNeedsUpdate = true;
+                        break;
                     case StylePropertyId.BorderColorRight:
+                        borderColorRight = property.AsColor;
+                        dataNeedsUpdate = true;
+                        break;
                     case StylePropertyId.BorderColorBottom:
+                        borderColorBottom = property.AsColor;
+                        dataNeedsUpdate = true;
+                        break;
                     case StylePropertyId.BorderColorLeft:
+                        borderColorLeft = property.AsColor;
+                        dataNeedsUpdate = true;
+                        break;
                     case StylePropertyId.BackgroundImage:
-                    case StylePropertyId.BackgroundFit:
+                        backgroundImage = property.AsTexture;
+                        dataNeedsUpdate = true;
+                        break;
                     case StylePropertyId.BorderRadiusBottomLeft:
+                        borderRadiusBottomLeft = property.AsUIFixedLength;
+                        dataNeedsUpdate = true;
+                        break;
                     case StylePropertyId.BorderRadiusBottomRight:
+                        borderRadiusBottomRight = property.AsUIFixedLength;
+                        dataNeedsUpdate = true;
+                        break;
                     case StylePropertyId.BorderRadiusTopLeft:
+                        borderRadiusTopLeft = property.AsUIFixedLength;
+                        dataNeedsUpdate = true;
+                        break;
                     case StylePropertyId.BorderRadiusTopRight:
+                        borderRadiusTopRight = property.AsUIFixedLength;
+                        dataNeedsUpdate = true;
+                        break;
+                    case StylePropertyId.Opacity:
+                        opacity = property.AsFloat;
+                        dataNeedsUpdate = true;
+                        break;
                     case StylePropertyId.CornerBevelTopLeft:
+                        cornerBevelTopLeft = property.AsUIFixedLength;
+                        dataNeedsUpdate = true;
+                        break;
                     case StylePropertyId.CornerBevelTopRight:
+                        cornerBevelTopRight = property.AsUIFixedLength;
+                        dataNeedsUpdate = true;
+                        break;
                     case StylePropertyId.CornerBevelBottomRight:
+                        cornerBevelBottomRight = property.AsUIFixedLength;
+                        dataNeedsUpdate = true;
+                        break;
                     case StylePropertyId.CornerBevelBottomLeft:
+                        cornerBevelBottomLeft = property.AsUIFixedLength;
+                        dataNeedsUpdate = true;
+                        break;
+                    
+                    case StylePropertyId.BackgroundFit:
                     case StylePropertyId.BackgroundImageScaleX:
                     case StylePropertyId.BackgroundImageScaleY:
                     case StylePropertyId.BackgroundImageRotation:
@@ -93,16 +182,15 @@ namespace UIForia.Rendering {
                     case StylePropertyId.BackgroundImageTileY:
                     case StylePropertyId.BackgroundImageOffsetX:
                     case StylePropertyId.BackgroundImageOffsetY:
-                    case StylePropertyId.BackgroundTint:
+                    case StylePropertyId.ShadowColor:
+                    case StylePropertyId.ShadowTint:
+                    case StylePropertyId.ShadowOffsetX:
+                    case StylePropertyId.ShadowOffsetY:
+                    case StylePropertyId.ShadowSizeX:
+                    case StylePropertyId.ShadowSizeY:
+                    case StylePropertyId.ShadowIntensity:
                         dataNeedsUpdate = true;
                         break;
-//                    case StylePropertyId.ShadowColor:
-//                    case StylePropertyId.ShadowTint:
-//                    case StylePropertyId.ShadowOffsetX:
-//                    case StylePropertyId.ShadowOffsetY:
-//                    case StylePropertyId.ShadowSizeX:
-//                    case StylePropertyId.ShadowSizeY:
-//                    case StylePropertyId.ShadowIntensity:
 //                        shadowNeedsUpdate = true;
 //                        break;
                 }
@@ -118,15 +206,15 @@ namespace UIForia.Rendering {
             float height = size.height;
             float min = Mathf.Min(width, height);
 
-            float bevelTopLeft = ResolveFixedSize(element, min, element.style.CornerBevelTopLeft);
-            float bevelTopRight = ResolveFixedSize(element, min, element.style.CornerBevelTopRight);
-            float bevelBottomRight = ResolveFixedSize(element, min, element.style.CornerBevelBottomRight);
-            float bevelBottomLeft = ResolveFixedSize(element, min, element.style.CornerBevelBottomLeft);
+            float bevelTopLeft = ResolveFixedSize(element, min, cornerBevelTopLeft);
+            float bevelTopRight = ResolveFixedSize(element, min, cornerBevelTopRight);
+            float bevelBottomRight = ResolveFixedSize(element, min, cornerBevelBottomRight);
+            float bevelBottomLeft = ResolveFixedSize(element, min, cornerBevelBottomLeft);
 
-            float radiusTopLeft = ResolveFixedSize(element, min, element.style.BorderRadiusTopLeft);
-            float radiusTopRight = ResolveFixedSize(element, min, element.style.BorderRadiusTopRight);
-            float radiusBottomRight = ResolveFixedSize(element, min, element.style.BorderRadiusBottomRight);
-            float radiusBottomLeft = ResolveFixedSize(element, min, element.style.BorderRadiusBottomLeft);
+            float radiusTopLeft = ResolveFixedSize(element, min, borderRadiusTopLeft);
+            float radiusTopRight = ResolveFixedSize(element, min, borderRadiusTopRight);
+            float radiusBottomRight = ResolveFixedSize(element, min, borderRadiusBottomRight);
+            float radiusBottomLeft = ResolveFixedSize(element, min, borderRadiusBottomLeft);
 
             Vector2 pivotOffset = element.layoutResult.pivotOffset;
             //new Vector2(-element.layoutBox.pivotX * size.width, -element.layoutBox.pivotY * size.height);
@@ -155,7 +243,7 @@ namespace UIForia.Rendering {
                 geometry.FillRect(size.width, size.height, pivotOffset);
             }
 
-            if (element.style.BackgroundImage != null) {
+            if (backgroundImage != null) {
                 Vector3[] positions = geometry.positionList.array;
                 Vector4[] texCoord0 = geometry.texCoordList0.array;
 
@@ -228,19 +316,9 @@ namespace UIForia.Rendering {
         }
 
         private void UpdateMaterialData() {
-            Color backgroundColor = element.style.BackgroundColor;
-            Color backgroundTint = element.style.BackgroundTint;
-            Texture backgroundImage = element.style.BackgroundImage;
-
-            Color32 borderColorTop = element.style.BorderColorTop;
-            Color32 borderColorRight = element.style.BorderColorRight;
-            Color32 borderColorBottom = element.style.BorderColorBottom;
-            Color32 borderColorLeft = element.style.BorderColorLeft;
-
             if (backgroundColor.a <= 0 && backgroundImage == null) {
-                if (borderColorTop.a <= 0 && borderColorRight.a <= 0 && borderColorLeft.a <= 0 && borderColorBottom.a <= 0) {
+                if (borderColorTop.a + borderColorBottom.a + borderColorLeft.a + borderColorRight.a == 0) {
                     didRender = false;
-                    return;
                 }
             }
 
@@ -270,20 +348,20 @@ namespace UIForia.Rendering {
 
             float halfMin = min * 0.5f;
 
-            float borderRadiusTopLeft = ResolveFixedSize(element, min, element.style.BorderRadiusTopLeft);
-            float borderRadiusTopRight = ResolveFixedSize(element, min, element.style.BorderRadiusTopRight);
-            float borderRadiusBottomLeft = ResolveFixedSize(element, min, element.style.BorderRadiusBottomLeft);
-            float borderRadiusBottomRight = ResolveFixedSize(element, min, element.style.BorderRadiusBottomRight);
+            float resolvedBorderRadiusTopLeft = ResolveFixedSize(element, min, borderRadiusTopLeft);
+            float resolvedBorderRadiusTopRight = ResolveFixedSize(element, min, borderRadiusTopRight);
+            float resolvedBorderRadiusBottomLeft = ResolveFixedSize(element, min, borderRadiusBottomLeft);
+            float resolvedBorderRadiusBottomRight = ResolveFixedSize(element, min, borderRadiusBottomRight);
 
-            borderRadiusTopLeft = math.clamp(borderRadiusTopLeft, 0, halfMin) / min;
-            borderRadiusTopRight = math.clamp(borderRadiusTopRight, 0, halfMin) / min;
-            borderRadiusBottomLeft = math.clamp(borderRadiusBottomLeft, 0, halfMin) / min;
-            borderRadiusBottomRight = math.clamp(borderRadiusBottomRight, 0, halfMin) / min;
+            resolvedBorderRadiusTopLeft = Clamp(resolvedBorderRadiusTopLeft, 0, halfMin) / min;
+            resolvedBorderRadiusTopRight = Clamp(resolvedBorderRadiusTopRight, 0, halfMin) / min;
+            resolvedBorderRadiusBottomLeft = Clamp(resolvedBorderRadiusBottomLeft, 0, halfMin) / min;
+            resolvedBorderRadiusBottomRight = Clamp(resolvedBorderRadiusBottomRight, 0, halfMin) / min;
 
-            byte b0 = (byte) (((borderRadiusTopLeft * 1000)) * 0.5f);
-            byte b1 = (byte) (((borderRadiusTopRight * 1000)) * 0.5f);
-            byte b2 = (byte) (((borderRadiusBottomLeft * 1000)) * 0.5f);
-            byte b3 = (byte) (((borderRadiusBottomRight * 1000)) * 0.5f);
+            byte b0 = (byte) (((resolvedBorderRadiusTopLeft * 1000)) * 0.5f);
+            byte b1 = (byte) (((resolvedBorderRadiusTopRight * 1000)) * 0.5f);
+            byte b2 = (byte) (((resolvedBorderRadiusBottomLeft * 1000)) * 0.5f);
+            byte b3 = (byte) (((resolvedBorderRadiusBottomRight * 1000)) * 0.5f);
 
             float packedBorderRadii = VertigoUtil.BytesToFloat(b0, b1, b2, b3);
 
@@ -339,14 +417,20 @@ namespace UIForia.Rendering {
             float viewWidth = element.View.Viewport.width;
             float viewHeight = element.View.Viewport.height;
             float emSize = 0; //element.style.GetResolvedFontSize(); expensive, cache this
-            float cornerBevelTopLeft = UIFixedLength.Resolve(element.style.CornerBevelTopLeft, halfMin, emSize, viewWidth, viewHeight);
-            float cornerBevelTopRight = UIFixedLength.Resolve(element.style.CornerBevelTopRight, halfMin, emSize, viewWidth, viewHeight);
-            float cornerBevelBottomRight = UIFixedLength.Resolve(element.style.CornerBevelBottomRight, halfMin, emSize, viewWidth, viewHeight);
-            float cornerBevelBottomLeft = UIFixedLength.Resolve(element.style.CornerBevelBottomLeft, halfMin, emSize, viewWidth, viewHeight);
+            float resolvedCornerBevelTopLeft = UIFixedLength.Resolve(cornerBevelTopLeft, halfMin, emSize, viewWidth, viewHeight);
+            float resolvedCornerBevelTopRight = UIFixedLength.Resolve(cornerBevelTopRight, halfMin, emSize, viewWidth, viewHeight);
+            float resolvedCornerBevelBottomRight = UIFixedLength.Resolve(cornerBevelBottomRight, halfMin, emSize, viewWidth, viewHeight);
+            float resolvedCornerBevelBottomLeft = UIFixedLength.Resolve(cornerBevelBottomLeft, halfMin, emSize, viewWidth, viewHeight);
 
-            geometry.cornerData = new Vector4(cornerBevelTopLeft, cornerBevelTopRight, cornerBevelBottomLeft, cornerBevelBottomRight);
-            geometry.objectData = new Vector4(val, VertigoUtil.PackSizeVector(element.layoutResult.actualSize), packedBorderRadii, element.style.Opacity);
+            geometry.cornerData = new Vector4(resolvedCornerBevelTopLeft, resolvedCornerBevelTopRight, resolvedCornerBevelBottomLeft, resolvedCornerBevelBottomRight);
+            geometry.objectData = new Vector4(val, VertigoUtil.PackSizeVector(element.layoutResult.actualSize), packedBorderRadii, opacity);
             geometry.mainTexture = backgroundImage;
+        }
+
+        private static float Clamp(float test, float min, float max) {
+            if (test < min) return min;
+            if (test > max) return max;
+            return test;
         }
 
         public override void PaintBackground(RenderContext ctx) {
@@ -358,7 +442,7 @@ namespace UIForia.Rendering {
             }
 
             // todo -- fix caching issue here
-            if (true || dataNeedsUpdate) {
+            if (dataNeedsUpdate) {
                 UpdateMaterialData();
                 dataNeedsUpdate = false;
             }
@@ -370,20 +454,20 @@ namespace UIForia.Rendering {
 
                 float halfMin = min * 0.5f;
 
-                float borderRadiusTopLeft = ResolveFixedSize(element, min, element.style.BorderRadiusTopLeft);
-                float borderRadiusTopRight = ResolveFixedSize(element, min, element.style.BorderRadiusTopRight);
-                float borderRadiusBottomLeft = ResolveFixedSize(element, min, element.style.BorderRadiusBottomLeft);
-                float borderRadiusBottomRight = ResolveFixedSize(element, min, element.style.BorderRadiusBottomRight);
+                float resolvedBorderRadiusTopLeft = ResolveFixedSize(element, min, borderRadiusTopLeft);
+                float resolvedBorderRadiusTopRight = ResolveFixedSize(element, min, borderRadiusTopRight);
+                float resolvedBorderRadiusBottomLeft = ResolveFixedSize(element, min, borderRadiusBottomLeft);
+                float resolvedBorderRadiusBottomRight = ResolveFixedSize(element, min, borderRadiusBottomRight);
 
-                borderRadiusTopLeft = math.clamp(borderRadiusTopLeft, 0, halfMin) / min;
-                borderRadiusTopRight = math.clamp(borderRadiusTopRight, 0, halfMin) / min;
-                borderRadiusBottomLeft = math.clamp(borderRadiusBottomLeft, 0, halfMin) / min;
-                borderRadiusBottomRight = math.clamp(borderRadiusBottomRight, 0, halfMin) / min;
+                resolvedBorderRadiusTopLeft = Clamp(resolvedBorderRadiusTopLeft, 0, halfMin) / min;
+                resolvedBorderRadiusTopRight = Clamp(resolvedBorderRadiusTopRight, 0, halfMin) / min;
+                resolvedBorderRadiusBottomLeft = Clamp(resolvedBorderRadiusBottomLeft, 0, halfMin) / min;
+                resolvedBorderRadiusBottomRight = Clamp(resolvedBorderRadiusBottomRight, 0, halfMin) / min;
 
-                byte b0 = (byte) (((borderRadiusTopLeft * 1000)) * 0.5f);
-                byte b1 = (byte) (((borderRadiusTopRight * 1000)) * 0.5f);
-                byte b2 = (byte) (((borderRadiusBottomLeft * 1000)) * 0.5f);
-                byte b3 = (byte) (((borderRadiusBottomRight * 1000)) * 0.5f);
+                byte b0 = (byte) (((resolvedBorderRadiusTopLeft * 1000)) * 0.5f);
+                byte b1 = (byte) (((resolvedBorderRadiusTopRight * 1000)) * 0.5f);
+                byte b2 = (byte) (((resolvedBorderRadiusBottomLeft * 1000)) * 0.5f);
+                byte b3 = (byte) (((resolvedBorderRadiusBottomRight * 1000)) * 0.5f);
 
                 float packedBorderRadii = VertigoUtil.BytesToFloat(b0, b1, b2, b3);
 
@@ -422,12 +506,12 @@ namespace UIForia.Rendering {
                 }
 
                 float emSize = 0; //element.style.GetResolvedFontSize(); expensive, cache this
-                float cornerBevelTopLeft = UIFixedLength.Resolve(element.style.CornerBevelTopLeft, halfMin, emSize, viewWidth, viewHeight);
-                float cornerBevelTopRight = UIFixedLength.Resolve(element.style.CornerBevelTopRight, halfMin, emSize, viewWidth, viewHeight);
-                float cornerBevelBottomRight = UIFixedLength.Resolve(element.style.CornerBevelBottomRight, halfMin, emSize, viewWidth, viewHeight);
-                float cornerBevelBottomLeft = UIFixedLength.Resolve(element.style.CornerBevelBottomLeft, halfMin, emSize, viewWidth, viewHeight);
+                float resolvedCornerBevelTopLeft = UIFixedLength.Resolve(cornerBevelTopLeft, halfMin, emSize, viewWidth, viewHeight);
+                float resolvedCornerBevelTopRight = UIFixedLength.Resolve(cornerBevelTopRight, halfMin, emSize, viewWidth, viewHeight);
+                float resolvedCornerBevelBottomRight = UIFixedLength.Resolve(cornerBevelBottomRight, halfMin, emSize, viewWidth, viewHeight);
+                float resolvedCornerBevelBottomLeft = UIFixedLength.Resolve(cornerBevelBottomLeft, halfMin, emSize, viewWidth, viewHeight);
 
-                shadowGeometry.cornerData = new Vector4(cornerBevelTopLeft, cornerBevelTopRight, cornerBevelBottomLeft, cornerBevelBottomRight);
+                shadowGeometry.cornerData = new Vector4(resolvedCornerBevelTopLeft, resolvedCornerBevelTopRight, resolvedCornerBevelBottomRight, resolvedCornerBevelBottomLeft);
                 shadowGeometry.packedColors = v;
                 Size s = element.layoutResult.actualSize;
                 Vector2 pivotOffset = default; // todo -- this! new Vector2(-element.layoutBox.pivotX * s.width, -element.layoutBox.pivotY * s.height);
@@ -439,21 +523,9 @@ namespace UIForia.Rendering {
                 return;
             }
 
-            SVGXMatrix matrix = element.layoutResult.matrix;
-            //SVGXMatrix matrix = SVGXMatrix.Translation(new Vector2(50, 50)) * element.layoutResult.matrix *  SVGXMatrix.Translation(new Vector2(-50, -50));
-            ctx.DrawBatchedGeometry(geometry, range, matrix.ToMatrix4x4(), clipper);
-//
-//            Path2D path = new Path2D();
-//            path.SetStroke(Color.green);
-//            AxisAlignedBounds aabb = element.layoutResult.axisAlignedBounds;
-//            path.BeginPath();
-//            path.MoveTo(aabb.xMin, aabb.yMin);
-//            path.LineTo(aabb.xMax, aabb.yMin);
-//            path.LineTo(aabb.xMax, aabb.yMax);
-//            path.LineTo(aabb.xMin, aabb.yMax);
-//            path.ClosePath();
-//            path.Stroke();
-//            ctx.DrawPath(path);
+            Matrix4x4 matrix = default;
+            element.layoutResult.matrix.GetMatrix4x4(ref matrix);
+            ctx.DrawBatchedGeometry(geometry, range, matrix, clipper);
         }
 
     }

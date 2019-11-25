@@ -963,14 +963,6 @@ namespace Mono.Linq.Expressions {
             return node;
         }
 
-        private struct MethodArgModifier {
-
-            public Expression expression;
-            public bool isOut;
-            public bool isRef;
-
-        }
-
         protected override Expression VisitMethodCall(MethodCallExpression node) {
             var method = node.Method;
 

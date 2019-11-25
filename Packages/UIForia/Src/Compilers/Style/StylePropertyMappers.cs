@@ -653,12 +653,10 @@ namespace UIForia.Compilers.Style {
 
                 case StyleFunctionNode functionNode:
 
-                    GridTrackSizeType trackSizeType;
                     GridTrackSize size = default;
 
                     switch (functionNode.identifier.ToLower()) {
                         case "repeat":
-                            trackSizeType = GridTrackSizeType.Repeat;
                             if (functionNode.children.Count < 2) {
                                 throw new CompileException(context.fileName, trackSize, $"Had a hard time parsing that track size: {trackSize}. Repeat must have at least two arguments.");
                             }

@@ -5,7 +5,8 @@
         style container {
             FlexLayoutDirection = Horizontal;
             PreferredSize = 1vw 1vh;
-            AlignItemsVertical = Center;
+            AlignItems = Center;
+            DistributeExtraSpace = CenterContent;
         }
 
         style clipper {
@@ -27,8 +28,10 @@
     </Style>
 
     <Contents style="container">
-        <Image src="'icons/delete'"/>
-        <Group style='clipper'>
-        </Group>
+    
+        <Select--string options="options">
+            
+        </Select--string>
+        
     </Contents>
 </UITemplate>

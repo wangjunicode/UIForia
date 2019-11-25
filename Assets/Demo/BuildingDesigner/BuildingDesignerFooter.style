@@ -5,13 +5,12 @@ const buttonSize = 60px;
 
 style flex-vertical-centered {
     FlexLayoutDirection = Vertical;
-    FlexLayoutCrossAxisAlignment = Center;
-    
+    DistributeExtraSpaceHorizontal = CenterContent;
 }
 
 style flex-horizontal-centered {
     FlexLayoutDirection = Horizontal;
-    FlexLayoutCrossAxisAlignment = Center;
+    DistributeExtraSpaceVertical = CenterContent;
 }
 
 style building-designer-footer {
@@ -19,9 +18,8 @@ style building-designer-footer {
     
     TextColor = rgb(200, 200, 200);
     
-    FlexLayoutDirection = Row;
-    FlexLayoutCrossAxisAlignment = Center;
-    FlexLayoutMainAxisAlignment = Start;
+    FlexLayoutDirection = Horizontal;
+    DistributeExtraSpaceVertical = CenterContent;
         
     PreferredWidth = 1psz;
     PreferredHeight = 1cnt;
@@ -35,12 +33,11 @@ style footer-icon {
 
 style footer-left-area {
     PreferredWidth = 0.6pca;
-    FlexLayoutMainAxisAlignment = Start;
 }
 
 style footer-right-area {
     PreferredWidth = 0.4pca;
-    FlexLayoutMainAxisAlignment = End;
+    DistributeExtraSpaceHorizontal = BeforeContent;
 }
 
 style footer-button {

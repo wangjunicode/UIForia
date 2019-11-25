@@ -44,10 +44,10 @@ namespace UIForia {
         protected readonly List<ISystem> m_Systems;
 
         public event Action<UIElement> onElementRegistered;
-        public event Action<UIElement> onElementCreated;
+//        public event Action<UIElement> onElementCreated;
         public event Action<UIElement> onElementDestroyed;
         public event Action<UIElement> onElementEnabled;
-        public event Action<UIElement> onElementDisabled;
+//        public event Action<UIElement> onElementDisabled;
 
         public event Action onWillRefresh;
         public event Action onRefresh;
@@ -338,9 +338,9 @@ namespace UIForia {
             onUpdate = null;
             onDestroy = null;
             onNextRefresh = null;
-            onElementCreated = null;
+//            onElementCreated = null;
             onElementEnabled = null;
-            onElementDisabled = null;
+//            onElementDisabled = null;
             onElementDestroyed = null;
             onElementRegistered = null;
         }

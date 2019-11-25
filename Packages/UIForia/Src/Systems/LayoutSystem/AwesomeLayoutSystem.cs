@@ -13,6 +13,7 @@ namespace UIForia.Systems {
 
         private Application application;
         private LightList<AwesomeLayoutRunner> runners;
+        internal int traversalIndex;
 
         public AwesomeLayoutSystem(Application application) {
             this.application = application;
@@ -25,7 +26,7 @@ namespace UIForia.Systems {
             application.StyleSystem.onStylePropertyChanged += HandleStylePropertyChanged;
         }
 
-        private void CreateLayoutBox(UIElement currentElement) {
+        internal void CreateLayoutBox(UIElement currentElement) {
             if (currentElement is UITextElement) {
                 currentElement.layoutBox = new AwesomeTextLayoutBox();
             }
@@ -53,28 +54,46 @@ namespace UIForia.Systems {
             currentElement.layoutBox.Initialize(currentElement, application.frameId);
         }
 
-        private void ChangeLayoutBox(UIElement currentElement, LayoutType layoutType) {
+        internal void ChangeLayoutBox(UIElement currentElement, LayoutType layoutType) {
+            Assert.IsNotNull(currentElement.layoutBox);
+
             if (currentElement is UITextElement || currentElement is UIImageElement) {
                 return;
             }
 
-            Assert.IsNotNull(currentElement.layoutBox);
+            if (currentElement.style.LayoutType == layoutType) {
+                return;
+            }
 
-            currentElement.layoutBox.Destroy();
             // todo -- pool layoutbox
 
             switch (layoutType) {
                 default:
                 case LayoutType.Unset:
                 case LayoutType.Flex:
+                    if (currentElement.layoutBox is AwesomeFlexLayoutBox) {
+                        return;
+                    }
+
+                    currentElement.layoutBox.Destroy();
                     currentElement.layoutBox = new AwesomeFlexLayoutBox();
                     break;
                 case LayoutType.Grid:
+                    if (currentElement.layoutBox is AwesomeGridLayoutBox) {
+                        return;
+                    }
+
+                    currentElement.layoutBox.Destroy();
                     currentElement.layoutBox = new AwesomeGridLayoutBox();
                     break;
                 case LayoutType.Radial:
                     throw new NotImplementedException();
                 case LayoutType.Stack:
+                    if (currentElement.layoutBox is AwesomeStackLayoutBox) {
+                        return;
+                    }
+
+                    currentElement.layoutBox.Destroy();
                     currentElement.layoutBox = new AwesomeStackLayoutBox();
                     break;
             }
@@ -157,32 +176,33 @@ namespace UIForia.Systems {
                     case StylePropertyId.MinWidth:
                     case StylePropertyId.MaxWidth:
                     case StylePropertyId.PreferredWidth:
-                        element.flags |= UIElementFlags.LayoutSizeWidthDirty;
                         element.layoutBox.UpdateBlockProviderWidth();
                         break;
                     case StylePropertyId.MinHeight:
                     case StylePropertyId.MaxHeight:
                     case StylePropertyId.PreferredHeight:
-                        element.flags |= UIElementFlags.LayoutSizeHeightDirty;
                         element.layoutBox.UpdateBlockProviderHeight();
                         break;
                     case StylePropertyId.PaddingLeft:
                     case StylePropertyId.PaddingRight:
                     case StylePropertyId.BorderLeft:
                     case StylePropertyId.BorderRight:
-                        element.flags |= UIElementFlags.LayoutBorderPaddingHorizontalDirty;
+                        element.layoutBox.flags |= LayoutBoxFlags.ContentAreaWidthChanged;
                         break;
                     case StylePropertyId.PaddingTop:
                     case StylePropertyId.PaddingBottom:
                     case StylePropertyId.BorderTop:
                     case StylePropertyId.BorderBottom:
-                        element.flags |= UIElementFlags.LayoutBorderPaddingVerticalDirty;
+                        element.layoutBox.flags |= LayoutBoxFlags.ContentAreaHeightChanged;
                         break;
                     case StylePropertyId.LayoutFitHorizontal:
                         element.flags |= UIElementFlags.LayoutFitWidthDirty;
                         break;
                     case StylePropertyId.LayoutFitVertical:
                         element.flags |= UIElementFlags.LayoutFitHeightDirty;
+                        break;
+                    case StylePropertyId.ZIndex:
+                        element.layoutBox.zIndex = property.AsInt;
                         break;
                 }
             }
@@ -201,28 +221,27 @@ namespace UIForia.Systems {
                     element.flags &= ~UIElementFlags.LayoutTransformNotIdentity;
                 }
 
-                element.flags |= UIElementFlags.LayoutTransformDirty;
+                element.layoutBox.flags |= LayoutBoxFlags.TransformDirty;
             }
 
             AwesomeLayoutBox layoutBox = element.layoutBox;
-            if (layoutBox != null) {
-                if (checkAlignHorizontal) {
-                    layoutBox.UpdateRequiresHorizontalAlignment();
-                }
-
-                if (updateAlignVertical) {
-                    layoutBox.UpdateRequiresVerticalAlignment();
-                }
-
-                layoutBox.OnStyleChanged(properties);
-                // don't need to null check since root box will never have a style changed
-                layoutBox.OnChildStyleChanged(element.layoutBox, properties);
+            if (checkAlignHorizontal) {
+                layoutBox.UpdateRequiresHorizontalAlignment();
             }
+
+            if (updateAlignVertical) {
+                layoutBox.UpdateRequiresVerticalAlignment();
+            }
+
+            layoutBox.OnStyleChanged(properties);
+            // don't need to null check since root box will never have a style changed
+            layoutBox.OnChildStyleChanged(element.layoutBox, properties);
         }
 
         public void OnReset() { }
 
         public void OnUpdate() {
+            traversalIndex = 0;
             for (int i = 0; i < runners.size; i++) {
                 runners[i].RunLayout();
             }

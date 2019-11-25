@@ -37,11 +37,8 @@ style building-designer-main {
     PreferredWidth = 1pca;
     FlexItemGrow = 1;
     FlexItemShrink = 1;
-    FlexLayoutDirection = Row;
-    FlexLayoutCrossAxisAlignment = Stretch;
-    GridLayoutColAlignment = Fit;
-    GridLayoutRowAlignment = Fit;
-    PreferredHeight = 100%;
+    FlexLayoutDirection = Horizontal;
+    FitItemsHorizontal = Fill;
 }
 
 style tools-area {
@@ -68,7 +65,8 @@ style grid-with-buttons {
 }
 
 style confirm-text-container {
-    FlexLayoutCrossAxisAlignment = Center;
+    DistributeExtraSpaceVertical = CenterContent;
+    AlignItemsVertical = Center;
     PreferredWidth = 1pca;
 }
 
@@ -85,7 +83,7 @@ style tools-button {
 }
 
 style grid-with-brushes {
-    FlexLayoutWrap = Wrap;
+    FlexLayoutWrap = WrapHorizontal;
     FlexLayoutDirection = Horizontal;
     PreferredWidth = 100%;
     LayoutFitHorizontal = Fill;
@@ -97,12 +95,11 @@ style brush-button {
     PreferredWidth = @brushButtonSize;
     Padding = 4px;  
     MarginRight = 10px;
-    MarginBottom = 20px;
+    MarginBottom = 10px;
 
     BorderRadius = 10px;
     
-    FlexLayoutCrossAxisAlignment = Center;
-    FlexLayoutMainAxisAlignment = Center;
+    DistributeExtraSpace = CenterContent;
     
     MinWidth = @brushButtonSize;
     Border = 2px;

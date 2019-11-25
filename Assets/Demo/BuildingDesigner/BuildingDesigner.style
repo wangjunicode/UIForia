@@ -30,19 +30,14 @@ animation hide {
 // using pro tools here: <this> always references the 
 // <Contents> of the style's element
 style <this> {
+    OverflowY = Hidden;
     PreferredSize = 1024px 512px;
     TextFontAsset = @theme.fontGothamBold;
-    LayoutType = Grid;
-    GridLayoutColTemplate = 1pca;
-    GridLayoutRowTemplate = 1mx 1fr 1mx;
-    GridLayoutColAlignment = Start;
-    GridLayoutColAlignment = Fit;
-    GridLayoutRowAlignment = Fit;
     Cursor = @theme.cursorDefault;   
     // default alignment: off screen
-    AlignX = 100% Parent;
-    AlignY = 200% 100%;
-    AlignmentTargetY = Parent;
+    // AlignX = 100% Parent;
+    // AlignY = 200% 100%;
+    // AlignmentTargetY = Parent;
     // drop shadow
     ShadowColor = black;
     ShadowIntensity = 150;

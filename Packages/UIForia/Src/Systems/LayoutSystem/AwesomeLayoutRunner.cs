@@ -90,11 +90,6 @@ namespace UIForia.Systems {
             this.clipStack = new LightStack<ClipData>();
         }
 
-        // for next time:
-        // new scheme makes sure layout boxes exist when needed
-        // update gather phase
-        // if a hierarchy got enabled, treat it differently
-        // not currently working!
         public void RunLayout() {
             frameId = rootElement.Application.frameId;
 
@@ -102,29 +97,9 @@ namespace UIForia.Systems {
                 return;
             }
 
-
             clipperList.Clear();
             hierarchyRebuildList.Clear();
             queryableElements.Clear();
-
-            if (rootElement.enableStateChangedFrameId == frameId) {
-                EnableHierarchy(rootElement);
-            }
-            else {
-                GatherLayoutData();
-                RebuildHierarchy();
-            }
-
-            PerformLayout();
-            ApplyHorizontalAlignments();
-            ApplyVerticalAlignments();
-            ApplyLayoutResults();
-            ApplyBoxSizeChanges();
-            UpdateClippers();
-        }
-
-        public void GatherLayoutData() {
-            elemRefStack.array[elemRefStack.size++].element = rootElement;
 
             screenClipper.orientedBounds.p0 = new Vector2(0, 0);
             screenClipper.orientedBounds.p1 = new Vector2(Screen.width, 0);
@@ -176,6 +151,29 @@ namespace UIForia.Systems {
             screenClipper.clipList.Clear();
             viewClipper.clipList.Clear();
 
+            if (rootElement.enableStateChangedFrameId == frameId) {
+                EnableHierarchy(rootElement);
+                rootElement.layoutBox.flags |= LayoutBoxFlags.RequiresMatrixUpdate;
+                matrixUpdateList.Add(rootElement);
+            }
+            else {
+                GatherLayoutData();
+                RebuildHierarchy();
+            }
+
+            clipStack.Pop(); // view
+
+            PerformLayout();
+            ApplyHorizontalAlignments();
+            ApplyVerticalAlignments();
+            ApplyLayoutResults();
+            ApplyBoxSizeChanges();
+            UpdateClippers();
+        }
+
+        public void GatherLayoutData() {
+            elemRefStack.array[elemRefStack.size++].element = rootElement;
+
             while (elemRefStack.size > 0) {
                 UIElement currentElement = elemRefStack.array[--elemRefStack.size].element;
 
@@ -187,39 +185,9 @@ namespace UIForia.Systems {
 
                 UIElementFlags flags = currentElement.flags;
 
-                // bool enabled = (flags & UIElementFlags.EnabledFlagSet) == UIElementFlags.EnabledFlagSet;
-
-
-                // if the element was just enabled or disabled we need to make sure the parent rebuilds it's hierarchy
-//                if (currentElement.enableStateChangedFrameId == frameId) {
-//                    // because we operate depth first the parent has already been processed
-//                    // if it wasn't already marked to be the parent isn't already marked to rebuild it's hierarchy by itself or
-//                    // a previous sibling of currentElement, mark it as such and add it to the rebuild list
-//
-//                    // could move to where children are pushed to stack?
-//
-//                    if (enabled) {
-//                        EnableHierarchy(currentElement);
-//                        continue;
-//                    }
-//
-//                    if (currentElement.parent != null && (currentElement.parent.layoutBox. &UIElementFlags.LayoutHierarchyDirty) == 0) {
-//                        currentElement.parent.flags |= UIElementFlags.LayoutHierarchyDirty;
-//                        hierarchyRebuildList.Add(currentElement.parent);
-//                    }
-//
-//                    if (enabled) {
-//                        EnableHierarchy(currentElement);
-//                        continue;
-//                    }
-//                }
-//
-//                if (!enabled) {
-//                    currentElement.flags = flags; // might have changed above
-//                    continue;
-//                }
-
                 AwesomeLayoutBox layoutBox = currentElement.layoutBox;
+
+                layoutBox.traversalIndex = layoutSystem.traversalIndex++;
 
                 if ((layoutBox.flags & LayoutBoxFlags.HorizontalSizeChanged) != 0) {
                     layoutBox.flags &= ~LayoutBoxFlags.HorizontalSizeChanged;
@@ -239,6 +207,12 @@ namespace UIForia.Systems {
                     alignVerticalList.Add(currentElement);
                 }
 
+                if ((layoutBox.flags & LayoutBoxFlags.TransformDirty) != 0) {
+                    layoutBox.flags |= LayoutBoxFlags.RequiresMatrixUpdate;
+                    layoutBox.flags &= ~LayoutBoxFlags.TransformDirty;
+                    matrixUpdateList.Add(currentElement);
+                }
+
                 if ((layoutBox.flags & LayoutBoxFlags.GatherChildren) != 0) {
                     hierarchyRebuildList.Add(currentElement);
                 }
@@ -250,6 +224,9 @@ namespace UIForia.Systems {
                             layoutBox.flags |= LayoutBoxFlags.RecomputeClipping;
                             currentElement.layoutResult.clipper = null;
                         }
+
+                        currentElement.layoutResult.isCulled = false;
+                        queryableElements.Add(new ElemRef(layoutBox.element)); // todo -- inline, or just avoid and iterate non culled clipper lists instead
 
                         break;
 
@@ -330,6 +307,8 @@ namespace UIForia.Systems {
 
                         if (childEnabled) {
                             EnableHierarchy(child);
+                            child.layoutBox.flags |= LayoutBoxFlags.RequiresMatrixUpdate;
+                            matrixUpdateList.Add(child);
                         }
                     }
                     else if (childEnabled) {
@@ -343,14 +322,30 @@ namespace UIForia.Systems {
                     hierarchyRebuildList.Add(currentElement);
                 }
             }
-
-            clipStack.Pop(); // view
         }
 
         private void EnableHierarchy(UIElement currentElement) {
-            UpdateLayoutTypeOrBehavior(currentElement);
+            if (currentElement.layoutBox == null) {
+                layoutSystem.CreateLayoutBox(currentElement);
+            }
+            else {
+                layoutSystem.ChangeLayoutBox(currentElement, currentElement.style.LayoutType);
+            }
+
+            Debug.Assert(currentElement.layoutBox != null, "currentElement.layoutBox != null");
 
             AwesomeLayoutBox layoutBox = currentElement.layoutBox;
+            layoutBox.traversalIndex = layoutSystem.traversalIndex++;
+
+            currentElement.layoutBox.Enable();
+
+            if ((layoutBox.flags & LayoutBoxFlags.RequireAlignmentHorizontal) != 0) {
+                alignHorizontalList.Add(currentElement);
+            }
+
+            if ((layoutBox.flags & LayoutBoxFlags.RequireAlignmentVertical) != 0) {
+                alignVerticalList.Add(currentElement);
+            }
 
             bool isClipper = (currentElement.layoutBox.flags & LayoutBoxFlags.Clipper) != 0;
 
@@ -363,7 +358,8 @@ namespace UIForia.Systems {
             }
 
             LightList<AwesomeLayoutBox> list = LightList<AwesomeLayoutBox>.Get();
-            for (int i = 0; i > currentElement.children.size; i++) {
+
+            for (int i = 0; i < currentElement.children.size; i++) {
                 UIElement child = currentElement.children.array[i];
 
                 if ((child.flags & UIElementFlags.EnabledFlagSet) != UIElementFlags.EnabledFlagSet) {
@@ -379,14 +375,18 @@ namespace UIForia.Systems {
                         list.Add(child.layoutBox);
                         break;
                     case LayoutBehavior.Ignored:
+                        child.layoutResult.layoutParent = currentElement.layoutResult; // todo -- multiple ignore levels?
                         ignoredList.Add(child.layoutBox);
                         break;
                     case LayoutBehavior.TranscludeChildren:
-                        list.AddRange(((AwesomeTranscludedLayoutBox) child.layoutBox).GetChildren());
+                        child.layoutBox.GetChildren(list);
                         break;
                 }
             }
 
+            if (isClipper) {
+                clipStack.Pop();
+            }
 
             switch (layoutBox.clipBehavior) {
                 case ClipBehavior.Never:
@@ -395,6 +395,9 @@ namespace UIForia.Systems {
                         layoutBox.flags |= LayoutBoxFlags.RecomputeClipping;
                         currentElement.layoutResult.clipper = null;
                     }
+
+                    currentElement.layoutResult.isCulled = false;
+                    queryableElements.Add(new ElemRef(layoutBox.element)); // todo -- inline, or just avoid and iterate non culled clipper lists instead
 
                     break;
 
@@ -438,11 +441,6 @@ namespace UIForia.Systems {
                 }
             }
 
-            if (isClipper) {
-                clipStack.Pop();
-            }
-
-            currentElement.layoutBox.Enable();
             currentElement.layoutBox.SetChildren(list);
             LightList<AwesomeLayoutBox>.Release(ref list);
         }
@@ -579,10 +577,10 @@ namespace UIForia.Systems {
                 }
 
                 if (!Mathf.Approximately(previousPosition, result.alignedPosition.y)) {
-                    if ((box.flags & LayoutBoxFlags.RequiresMatrixUpdate) != 0) {
-                        box.flags |= LayoutBoxFlags.RequiresMatrixUpdate;
-                        matrixUpdateList.Add(box.element);
-                    }
+                    //  if ((box.flags & LayoutBoxFlags.RequiresMatrixUpdate) != 0) {
+                    box.flags |= LayoutBoxFlags.RequiresMatrixUpdate;
+                    matrixUpdateList.Add(box.element);
+                    //   }
                 }
             }
 
@@ -598,9 +596,12 @@ namespace UIForia.Systems {
             // Resolve all widths first, then process heights. These operations cannot be interleaved for we can't be sure
             // that widths are final before heights are computed, this is critical for the system to work.
 
-            // todo -- profile removing box stack and just using single list (queryableElements?)
             while (boxRefStack.size > 0) {
                 AwesomeLayoutBox layoutBox = boxRefStack.array[--boxRefStack.size].box;
+
+                if ((layoutBox.flags & LayoutBoxFlags.ContentAreaWidthChanged) != 0) {
+                    layoutBox.UpdateContentAreaWidth();
+                }
 
                 if ((layoutBox.flags & LayoutBoxFlags.RequireLayoutHorizontal) != 0) {
                     layoutBox.RunLayoutHorizontal(frameId);
@@ -621,6 +622,10 @@ namespace UIForia.Systems {
 
             while (boxRefStack.size > 0) {
                 AwesomeLayoutBox layoutBox = boxRefStack.array[--boxRefStack.size].box;
+
+                if ((layoutBox.flags & LayoutBoxFlags.ContentAreaHeightChanged) != 0) {
+                    layoutBox.UpdateContentAreaHeight();
+                }
 
                 if ((layoutBox.flags & LayoutBoxFlags.RequireLayoutVertical) != 0) {
                     layoutBox.RunLayoutVertical(frameId);
@@ -667,32 +672,31 @@ namespace UIForia.Systems {
 
                 ignoredBox.GetWidths(ref size);
                 float outputSize = size.Clamped;
-                ignoredBox.ApplyLayoutHorizontal(0, 0, outputSize, ignoredBox.parent?.finalWidth ?? outputSize, LayoutFit.None, frameId);
+                ignoredBox.ApplyLayoutHorizontal(0, 0, size, outputSize, ignoredBox.parent?.finalWidth ?? outputSize, LayoutFit.None, frameId);
 
                 ignoredBox.GetHeights(ref size);
                 outputSize = size.Clamped;
-                ignoredBox.ApplyLayoutVertical(0, 0, outputSize, ignoredBox.parent?.finalHeight ?? outputSize, LayoutFit.None, frameId);
+                ignoredBox.ApplyLayoutVertical(0, 0, size, outputSize, ignoredBox.parent?.finalHeight ?? outputSize, LayoutFit.None, frameId);
 
                 PerformLayoutStep(ignoredBox);
             }
         }
 
         private void ApplyLayoutResults() {
-            int size = queryableElements.size; //matrixUpdateList.size;
-            //UIElement[] array = queryableElements.array; //matrixUpdateList.array;
-            ElemRef[] array = queryableElements.array; //matrixUpdateList.array;
+            int size = matrixUpdateList.size;
+            UIElement[] array = matrixUpdateList.array;
+//            ElemRef[] array = queryableElements.array; //matrixUpdateList.array;
 
             float viewWidth = rootElement.View.Viewport.width;
             float viewHeight = rootElement.View.Viewport.height;
 
             for (int i = 0; i < size; i++) {
-                UIElement startElement = array[i].element;
+                UIElement startElement = array[i];
                 AwesomeLayoutBox box = startElement.layoutBox;
 
                 // this element might have been processed by it's parent traversing, this check makes sure we only traverse an element hierarchy once
 
-                // todo fix this
-                if (true || (box.flags & LayoutBoxFlags.RequiresMatrixUpdate) != 0) {
+                if ((box.flags & LayoutBoxFlags.RequiresMatrixUpdate) != 0) {
                     elemRefStack.Push(new ElemRef(startElement));
 
                     while (elemRefStack.size > 0) {
@@ -855,109 +859,6 @@ namespace UIForia.Systems {
             }
         }
 
-        private void UpdateLayoutTypeOrBehavior(UIElement currentElement) {
-            if (currentElement == rootElement) return;
-            // if had box and was ignored
-            // if behavior is no longer ignored
-            // we need to remove the box from the ignored list
-
-            // if became transcluded -> give it a transcluded box
-            LayoutBehavior layoutBehavior = currentElement.style.LayoutBehavior;
-
-            // we don't have a layout box yet, create it here
-            if (currentElement.layoutBox == null) {
-                // if we are transcluded, create a transcluded box and exit 
-                if (layoutBehavior == LayoutBehavior.TranscludeChildren) {
-                    currentElement.layoutBox = new AwesomeTranscludedLayoutBox();
-                    currentElement.layoutBox.Initialize(currentElement, frameId);
-                    return;
-                }
-
-                // otherwise create the normal box
-                UpdateLayoutBoxType(currentElement);
-            }
-            else {
-                // if we have a layout box and it is currently ignored, if the behavior changed to something that isn't ignored,
-                // we need to remove that box from the ignored list
-                bool isIgnored = (currentElement.layoutBox.flags & LayoutBoxFlags.Ignored) == 0;
-                if (isIgnored && layoutBehavior != LayoutBehavior.Ignored) {
-                    ignoredList.Remove(currentElement.layoutBox);
-                }
-
-                // if we already have a layout box we need to check for change in type and in behavior
-                // if behavior is transcluded, check if box was previously transcluded
-                if (layoutBehavior == LayoutBehavior.TranscludeChildren) {
-                    if (!(currentElement.layoutBox is AwesomeTranscludedLayoutBox)) {
-                        // if not already transcluded, destroy the old box and create the new one
-                        currentElement.layoutBox.Destroy();
-                        currentElement.layoutBox = new AwesomeTranscludedLayoutBox();
-                        currentElement.layoutBox.Initialize(currentElement, frameId);
-                        return;
-                    }
-                }
-
-                UpdateLayoutBoxType(currentElement);
-            }
-
-            Debug.Assert(currentElement.layoutBox != null, "currentElement.awesomeLayoutBox != null");
-
-            // if we have a layout box and it has no ignored flag, that is is not in the list
-            // if the behavior is ignored add it to the ignored list
-            if (layoutBehavior == LayoutBehavior.Ignored && (currentElement.layoutBox.flags & LayoutBoxFlags.Ignored) == 0) {
-                currentElement.layoutBox.flags |= LayoutBoxFlags.Ignored;
-                currentElement.layoutBox.parent = currentElement.parent.layoutBox;
-                ignoredList.Add(currentElement.layoutBox);
-            }
-        }
-
-        private void UpdateLayoutBoxType(UIElement currentElement) {
-            LayoutType layoutType = currentElement.style.LayoutType;
-
-            if (currentElement.layoutBox != null) {
-                if (currentElement.layoutBox is AwesomeImageLayoutBox || currentElement.layoutBox is AwesomeTextLayoutBox) {
-                    return;
-                }
-
-                if (currentElement.layoutBox.layoutBoxType == layoutType) {
-                    return;
-                }
-
-                currentElement.layoutBox.Destroy();
-            }
-
-            if (currentElement is UITextElement) {
-                currentElement.layoutBox = new AwesomeTextLayoutBox();
-                currentElement.layoutBox.Initialize(currentElement, frameId);
-                return;
-            }
-
-            if (currentElement is UIImageElement) {
-                currentElement.layoutBox = new AwesomeImageLayoutBox();
-                currentElement.layoutBox.Initialize(currentElement, frameId);
-                return;
-            }
-
-            switch (layoutType) {
-                case LayoutType.Unset:
-                case LayoutType.Flex:
-                    currentElement.layoutBox = new AwesomeFlexLayoutBox();
-                    currentElement.layoutBox.Initialize(currentElement, frameId);
-                    break;
-                case LayoutType.Grid:
-                    currentElement.layoutBox = new AwesomeGridLayoutBox();
-                    currentElement.layoutBox.Initialize(currentElement, frameId);
-                    break;
-                case LayoutType.Radial:
-                    throw new NotImplementedException();
-                case LayoutType.Stack:
-                    currentElement.layoutBox = new AwesomeStackLayoutBox();
-                    currentElement.layoutBox.Initialize(currentElement, frameId);
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-        }
-
         private void RebuildHierarchy() {
             if (hierarchyRebuildList.size == 0) return;
 
@@ -992,7 +893,7 @@ namespace UIForia.Systems {
                             break;
                         case LayoutBehavior.TranscludeChildren:
                             child.layoutResult.layoutParent = element.layoutResult; // not 100% sure of this
-                            childList.AddRange(((AwesomeTranscludedLayoutBox) child.layoutBox).GetChildren());
+                            child.layoutBox.GetChildren(childList);
                             break;
                         default:
                             throw new ArgumentOutOfRangeException();

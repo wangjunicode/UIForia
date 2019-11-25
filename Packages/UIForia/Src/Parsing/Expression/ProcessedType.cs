@@ -15,6 +15,25 @@ namespace UIForia.Parsing.Expression {
     [DebuggerDisplay("{rawType.Name}")]
     public struct ProcessedType {
 
+        public bool Equals(ProcessedType other) {
+            return Equals(rawType, other.rawType) && Equals(templateAttr, other.templateAttr) && Equals(getResolvers, other.getResolvers) && requiresTemplateExpansion == other.requiresTemplateExpansion && isContextProvider == other.isContextProvider;
+        }
+
+        public override bool Equals(object obj) {
+            return obj is ProcessedType other && Equals(other);
+        }
+
+        public override int GetHashCode() {
+            unchecked {
+                var hashCode = (rawType != null ? rawType.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (templateAttr != null ? templateAttr.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (getResolvers != null ? getResolvers.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ requiresTemplateExpansion.GetHashCode();
+                hashCode = (hashCode * 397) ^ isContextProvider.GetHashCode();
+                return hashCode;
+            }
+        }
+
         private static readonly Type[] s_Signature = {
             typeof(IList<ExpressionAliasResolver>),
             typeof(AttributeList)

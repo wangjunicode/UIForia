@@ -21,7 +21,11 @@ namespace UIForia.LinqExpressions {
         }
 
         private Dictionary<Type, LightList<object>> pools;
-        private Dictionary<Type, Action<object>> resetFunctions;
+        private readonly Dictionary<Type, Action<object>> resetFunctions;
+        
+        public ElementPool(Dictionary<Type, Action<object>> resetFunctions) {
+            this.resetFunctions = resetFunctions;
+        }
 
         public T Get<T>() where T : UIElement {
 //            pools.TryGetValue(typeof(T), out Type type);
@@ -110,8 +114,6 @@ namespace UIForia.LinqExpressions {
 
             return field;
         }
-
-        private static readonly MethodInfo s_FieldSetValue = typeof(FieldInfo).GetMethod(nameof(FieldInfo.SetValue), new[] {typeof(object), typeof(object)});
 
         // todo -- we need to know if this being compiled for dev or not.
         // In production mode we generate valid C# code and thus need to know how to assign

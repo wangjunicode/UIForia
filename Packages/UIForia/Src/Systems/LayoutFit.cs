@@ -7,7 +7,8 @@ namespace UIForia.Layout {
         None,
         Grow,
         Shrink,
-        Fill
+        Fill,
+        FillParent
 
     }
 

@@ -4,6 +4,7 @@ using UIForia.Text;
 using UIForia.Util;
 using UnityEngine;
 using UnityEngine.Rendering;
+#pragma warning disable 649
 
 namespace Vertigo {
 
@@ -128,7 +129,9 @@ namespace Vertigo {
 
         public void EnableUVTilingOffset(Vector2 uvTiling, Vector2 uvOffset) { }
 
+#pragma warning disable 414
         private MaterialUsage materialUsage = MaterialUsage.Instance;
+#pragma warning restore 414
 
         public void SetMaterialUsageType(MaterialUsage materialUsage) { }
 

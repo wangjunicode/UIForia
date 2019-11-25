@@ -18,7 +18,9 @@ public class ResetTests {
         public readonly int readonlyValue = 12;
         public int someOtherValue = 12;
 
+#pragma warning disable 414
         private float x;
+#pragma warning restore 414
 
         public void SetCallback(Action action) {
             this.callback = action;

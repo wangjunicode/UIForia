@@ -29,7 +29,12 @@ namespace UIForia.Systems {
 
         GatherChildren = 1 << 11,
 
-        TypeOrBehaviorChanged = 1 << 12
+        TypeOrBehaviorChanged = 1 << 12,
+
+        TransformDirty = 1 << 13,
+
+        ContentAreaWidthChanged = 1 << 14,
+        ContentAreaHeightChanged = 1 << 15
 
     }
 

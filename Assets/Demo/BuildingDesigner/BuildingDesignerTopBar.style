@@ -12,10 +12,9 @@ style building-designer-top-bar {
     TextTransform = UpperCase;
     TextFontSize = 1.1em;
     
-    FlexLayoutDirection = Row;
-    FlexLayoutCrossAxisAlignment = Center;
-    FlexLayoutMainAxisAlignment = Start;
-        
+    FlexLayoutDirection = Horizontal;
+    DistributeExtraSpaceHorizontal = BetweenContent;
+    DistributeExtraSpaceVertical = CenterContent;
     BorderBottom = 3px;
     BorderColor = rgb(175, 175, 175);
     
@@ -26,8 +25,8 @@ style building-designer-top-bar {
 }
 
 style top-bar-select {
+    PreferredWidth = 1cnt;
     PreferredHeight = 32px;
-    PreferredWidth = 1mx;
     MarginRight = 10px;
     TextFontSize = @topBarTextSize;
 }
@@ -37,7 +36,7 @@ style top-bar-text {
 }
 
 style top-right-area {
-    AlignX = 100% Parent;
+//    AlignX = 100% Parent;
     TextFontSize = @topBarTextSize;    
 }
 

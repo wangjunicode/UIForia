@@ -5,6 +5,7 @@ using UIForia.Rendering;
 using UIForia.Systems;
 using UIForia.Util;
 using UnityEngine;
+using Debug = System.Diagnostics.Debug;
 
 namespace Src.Systems {
 
@@ -127,6 +128,7 @@ namespace Src.Systems {
             while (elemRefStack.size > 0) {
                 UIElement currentElement = elemRefStack.array[--elemRefStack.size].element;
                 RenderBox renderBox = currentElement.renderBox;
+
                 renderBox.clipper = currentElement.layoutResult.clipper;
                 renderBox.traversalIndex = idx++;
 
@@ -148,15 +150,18 @@ namespace Src.Systems {
                     elemRefStack.EnsureAdditionalCapacity(currentElement.children.size);
                 }
 
-                for (int i = 0; i < currentElement.children.size; i++) {
+                for (int i = currentElement.children.size - 1; i >= 0; i--) {
                     UIElement child = currentElement.children.array[i];
                     if ((child.flags & UIElementFlags.EnabledFlagSet) == UIElementFlags.EnabledFlagSet) {
                         // todo change check on painter
                         if (child.renderBox == null) {
                             CreateRenderBox(child);
+                            Debug.Assert(child.renderBox != null, "child.renderBox != null");
+                            child.renderBox.Enable();
                         }
                         else if (child.enableStateChangedFrameId == frameId) {
                             UpdateRenderBox(child);
+                            child.renderBox.Enable();
                         }
 
                         elemRefStack.array[elemRefStack.size++].element = child;
@@ -174,7 +179,7 @@ namespace Src.Systems {
 //            }
         }
 
-        private bool printed = false; // todo remove
+//        private bool printed = false; // todo remove
 
         // todo -- can completely get rid of this
         private void Cull() {

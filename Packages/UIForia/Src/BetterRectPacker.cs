@@ -77,7 +77,6 @@ namespace UIForia {
                 return false;
             }
 
-            int start = 0;
             int end = Gather(0, width);
             // if nothing has an xmax less than width 
             PackedRect[] packedRects = sortedRectList.array;

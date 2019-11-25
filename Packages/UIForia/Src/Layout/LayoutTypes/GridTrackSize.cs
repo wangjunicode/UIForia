@@ -83,6 +83,20 @@ namespace UIForia.Layout.LayoutTypes {
     [DebuggerDisplay("(minValue = {minValue}, minUnit = {(minUnit)}, maxValue = {(maxValue)}, maxUnit = {(maxUnit)})")]
     public struct GridTrackSize {
 
+        public override int GetHashCode() {
+            unchecked {
+                var hashCode = minValue.GetHashCode();
+                hashCode = (hashCode * 397) ^ maxValue.GetHashCode();
+                hashCode = (hashCode * 397) ^ value.GetHashCode();
+                hashCode = (hashCode * 397) ^ (int) unit;
+                hashCode = (hashCode * 397) ^ (int) type;
+                hashCode = (hashCode * 397) ^ (pattern != null ? pattern.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (int) minUnit;
+                hashCode = (hashCode * 397) ^ (int) maxUnit;
+                return hashCode;
+            }
+        }
+
         public float minValue;
         public float maxValue;
 

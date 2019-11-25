@@ -106,10 +106,10 @@ namespace UIForia.Editor {
             Application oldApp = Application.Find(inspectedAppId);
 
             if (oldApp != null) {
-                oldApp.onElementCreated -= Refresh;
+               // oldApp.onElementCreated -= Refresh;
                 oldApp.onElementDestroyed -= Refresh;
                 oldApp.onViewAdded -= Refresh;
-                oldApp.onElementDisabled -= Refresh;
+             //   oldApp.onElementDisabled -= Refresh;
                 oldApp.onElementEnabled -= Refresh;
                 oldApp.onRefresh -= OnRefresh;
             }
@@ -127,10 +127,10 @@ namespace UIForia.Editor {
                 treeView = new HierarchyView(app.GetViews(), state);
                 treeView.onSelectionChanged += OnElementSelectionChanged;
 
-                app.onElementCreated += Refresh;
+            //   app.onElementCreated += Refresh;
                 app.onElementDestroyed += Refresh;
                 app.onViewAdded += Refresh;
-                app.onElementDisabled += Refresh;
+             //   app.onElementDisabled += Refresh;
                 app.onElementEnabled += Refresh;
                 app.onRefresh += OnRefresh;
             }

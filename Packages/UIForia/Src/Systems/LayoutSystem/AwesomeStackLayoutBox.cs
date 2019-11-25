@@ -10,17 +10,7 @@ namespace UIForia.Systems {
     public class AwesomeStackLayoutBox : AwesomeLayoutBox {
 
         protected override float ComputeContentWidth() {
-            AwesomeLayoutBox ptr = firstChild;
-            float retn = 0f;
-            while (ptr != null) {
-                LayoutSize size = default;
-                ptr.GetWidths(ref size);
-                float clampedWidth = size.Clamped + size.marginStart + size.marginEnd;
-                if (clampedWidth > retn) retn = clampedWidth;
-                ptr = ptr.nextSibling;
-            }
-
-            return retn;
+            return GetIntrinsicPreferredWidth();
         }
 
         protected override float ComputeContentHeight() {
@@ -31,6 +21,23 @@ namespace UIForia.Systems {
                 ptr.GetHeights(ref size);
                 float clampedHeight = size.Clamped + size.marginStart + size.marginEnd;
                 if (clampedHeight > retn) retn = clampedHeight;
+                ptr = ptr.nextSibling;
+            }
+
+            return retn;
+        }
+
+        public override float GetIntrinsicPreferredWidth() {
+            AwesomeLayoutBox ptr = firstChild;
+            float retn = 0f;
+            
+            while (ptr != null) {
+                LayoutSize size = default;
+                ptr.GetWidths(ref size);
+                float width = ptr.GetIntrinsicPreferredWidth();
+                // todo clamp to min/max?
+                float clampedWidth = width + size.marginStart + size.marginEnd;
+                if (clampedWidth > retn) retn = clampedWidth;
                 ptr = ptr.nextSibling;
             }
 
@@ -65,7 +72,7 @@ namespace UIForia.Systems {
             float alignment = element.style.AlignItemsHorizontal;
 
             float inset = paddingBorderHorizontalStart;
-            
+
             while (ptr != null) {
                 LayoutSize size = default;
                 ptr.GetWidths(ref size);
@@ -75,11 +82,10 @@ namespace UIForia.Systems {
                 float originBase = x;
                 float originOffset = contentAreaWidth * alignment;
                 float alignedPosition = originBase + originOffset + (clampedWidth * -alignment);
-                ptr.ApplyLayoutHorizontal(x, alignedPosition, clampedWidth, contentAreaWidth, LayoutFit.None, frameId);
+                ptr.ApplyLayoutHorizontal(x, alignedPosition, size, clampedWidth, contentAreaWidth, LayoutFit.None, frameId);
                 ptr = ptr.nextSibling;
             }
         }
-
 
         public override void RunLayoutVertical(int frameId) {
             AwesomeLayoutBox ptr = firstChild;
@@ -98,7 +104,7 @@ namespace UIForia.Systems {
                 float originBase = y;
                 float originOffset = contentAreaHeight * alignment;
                 float alignedPosition = originBase + originOffset + (clampedHeight * -alignment);
-                ptr.ApplyLayoutVertical(y, alignedPosition, clampedHeight, contentAreaHeight, LayoutFit.None, frameId);
+                ptr.ApplyLayoutVertical(y, alignedPosition, size, clampedHeight, contentAreaHeight, LayoutFit.None, frameId);
                 ptr = ptr.nextSibling;
             }
         }

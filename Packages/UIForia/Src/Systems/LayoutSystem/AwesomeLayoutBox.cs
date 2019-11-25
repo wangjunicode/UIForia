@@ -33,6 +33,8 @@ namespace UIForia.Systems {
         public float transformRotation;
         public ClipData clipData;
         public ClipBehavior clipBehavior;
+        public int traversalIndex;
+        public int zIndex;
 
         public void Initialize(UIElement element, int frameId) {
             this.element = element;
@@ -81,8 +83,50 @@ namespace UIForia.Systems {
 
         public abstract void OnChildrenChanged(LightList<AwesomeLayoutBox> childList);
 
-        public void ApplyLayoutHorizontal(float localX, float alignedPosition, float size, float availableSize, LayoutFit defaultFit, int frameId) {
+        public void UpdateContentAreaWidth() {
+            flags &= ~LayoutBoxFlags.ContentAreaWidthChanged;
+            Vector2 viewSize = element.View.Viewport.size;
+            float emSize = element.style.GetResolvedFontSize();
+            float paddingLeft = MeasurementUtil.ResolveFixedSize(finalWidth, viewSize.x, viewSize.y, emSize, element.style.PaddingLeft);
+            float paddingRight = MeasurementUtil.ResolveFixedSize(finalWidth, viewSize.x, viewSize.y, emSize, element.style.PaddingRight);
+            float borderLeft = MeasurementUtil.ResolveFixedSize(finalWidth, viewSize.x, viewSize.y, emSize, element.style.BorderLeft);
+            float borderRight = MeasurementUtil.ResolveFixedSize(finalWidth, viewSize.x, viewSize.y, emSize, element.style.BorderRight);
+
+            // write to layout result here? would need to flag layout result for changes anyway
+            LayoutResult layoutResult = element.layoutResult;
+
+            layoutResult.padding.left = paddingLeft;
+            layoutResult.padding.right = paddingRight;
+            layoutResult.border.left = borderLeft;
+            layoutResult.border.right = borderRight;
+
+            paddingBorderHorizontalStart = paddingLeft + borderLeft;
+            paddingBorderHorizontalEnd = paddingRight + borderRight;
+        }
+
+        public void UpdateContentAreaHeight() {
+            flags &= ~LayoutBoxFlags.ContentAreaHeightChanged;
+            Vector2 viewSize = element.View.Viewport.size;
+            float emSize = element.style.GetResolvedFontSize();
+            LayoutResult layoutResult = element.layoutResult;
+            
+            float paddingTop = MeasurementUtil.ResolveFixedSize(finalHeight, viewSize.x, viewSize.y, emSize, element.style.PaddingTop);
+            float paddingBottom = MeasurementUtil.ResolveFixedSize(finalHeight, viewSize.x, viewSize.y, emSize, element.style.PaddingBottom);
+            float borderTop = MeasurementUtil.ResolveFixedSize(finalHeight, viewSize.x, viewSize.y, emSize, element.style.BorderTop);
+            float borderBottom = MeasurementUtil.ResolveFixedSize(finalHeight, viewSize.x, viewSize.y, emSize, element.style.BorderBottom);
+            
+            layoutResult.padding.top = paddingTop;
+            layoutResult.padding.bottom = paddingBottom;
+            layoutResult.border.top = borderTop;
+            layoutResult.border.bottom = borderBottom;
+            
+            paddingBorderVerticalStart = paddingTop + borderTop;
+            paddingBorderVerticalEnd = paddingBottom + borderBottom;
+        }
+
+        public void ApplyLayoutHorizontal(float localX, float alignedPosition, in LayoutSize reportedSize, float size, float availableSize, LayoutFit defaultFit, int frameId) {
             LayoutFit fit = element.style.LayoutFitHorizontal;
+            
             if (fit == LayoutFit.Default || fit == LayoutFit.Unset) {
                 fit = defaultFit;
             }
@@ -116,14 +160,12 @@ namespace UIForia.Systems {
                     newWidth = availableSize;
                     alignedPosition = localX;
                     break;
-            }
 
-            Vector2 viewSize = element.View.Viewport.size;
-            float emSize = element.style.GetResolvedFontSize();
-            float paddingLeft = MeasurementUtil.ResolveFixedSize(newWidth, viewSize.x, viewSize.y, emSize, element.style.PaddingLeft);
-            float paddingRight = MeasurementUtil.ResolveFixedSize(newWidth, viewSize.x, viewSize.y, emSize, element.style.PaddingRight);
-            float borderLeft = MeasurementUtil.ResolveFixedSize(newWidth, viewSize.x, viewSize.y, emSize, element.style.BorderLeft);
-            float borderRight = MeasurementUtil.ResolveFixedSize(newWidth, viewSize.x, viewSize.y, emSize, element.style.BorderRight);
+                case LayoutFit.FillParent:
+                    newWidth = parent.finalWidth;
+                    alignedPosition = 0; //localX;
+                    break;
+            }
 
             // write to layout result here? would need to flag layout result for changes anyway
             LayoutResult layoutResult = element.layoutResult;
@@ -133,17 +175,12 @@ namespace UIForia.Systems {
             // todo -- layout result change flags (and maybe history entry if enabled)
             layoutResult.alignedPosition.x = alignedPosition;
             layoutResult.allocatedPosition.x = localX;
-            layoutResult.padding.left = paddingLeft;
-            layoutResult.padding.right = paddingRight;
-            layoutResult.border.left = borderLeft;
-            layoutResult.border.right = borderRight;
             layoutResult.actualSize.width = newWidth;
             layoutResult.allocatedSize.width = availableSize;
-
-            // todo -- margin
-
-            paddingBorderHorizontalStart = paddingLeft + borderLeft;
-            paddingBorderHorizontalEnd = paddingRight + borderRight;
+            layoutResult.margin.left = reportedSize.marginStart;
+            layoutResult.margin.right = reportedSize.marginEnd;
+            
+            UpdateContentAreaWidth();
 
             if ((flags & LayoutBoxFlags.RequireAlignmentHorizontal) == 0 && !Mathf.Approximately(previousPosition, alignedPosition)) {
                 flags |= LayoutBoxFlags.RequiresMatrixUpdate;
@@ -159,7 +196,7 @@ namespace UIForia.Systems {
             }
         }
 
-        public void ApplyLayoutVertical(float localY, float alignedPosition, float size, float availableSize, LayoutFit defaultFit, int frameId) {
+        public void ApplyLayoutVertical(float localY, float alignedPosition, in LayoutSize reportedSize, float size, float availableSize, LayoutFit defaultFit, int frameId) {
             LayoutFit fit = element.style.LayoutFitVertical;
             if (fit == LayoutFit.Default || fit == LayoutFit.Unset) {
                 fit = defaultFit;
@@ -197,14 +234,6 @@ namespace UIForia.Systems {
             }
 
             // if aligned position changed -> flag for matrix recalc 
-
-            Vector2 viewSize = element.View.Viewport.size;
-            float emSize = 0; // todo -- read off of style (cached)
-            float paddingTop = MeasurementUtil.ResolveFixedSize(newHeight, viewSize.x, viewSize.y, emSize, element.style.PaddingTop);
-            float paddingBottom = MeasurementUtil.ResolveFixedSize(newHeight, viewSize.x, viewSize.y, emSize, element.style.PaddingBottom);
-            float borderTop = MeasurementUtil.ResolveFixedSize(newHeight, viewSize.x, viewSize.y, emSize, element.style.BorderTop);
-            float borderBottom = MeasurementUtil.ResolveFixedSize(newHeight, viewSize.x, viewSize.y, emSize, element.style.BorderBottom);
-
             // write to layout result here? would need to flag layout result for changes anyway
             LayoutResult layoutResult = element.layoutResult;
 
@@ -214,18 +243,14 @@ namespace UIForia.Systems {
 
             layoutResult.alignedPosition.y = alignedPosition;
             layoutResult.allocatedPosition.y = localY;
-            layoutResult.padding.top = paddingTop;
-            layoutResult.padding.bottom = paddingBottom;
-            layoutResult.border.top = borderTop;
-            layoutResult.border.bottom = borderBottom;
+
             layoutResult.actualSize.height = newHeight;
             layoutResult.allocatedSize.height = availableSize;
             layoutResult.pivot.y = newHeight * 0.5f; // todo -- resolve pivot
 
             // todo -- margin
 
-            paddingBorderVerticalStart = paddingTop + borderTop;
-            paddingBorderVerticalEnd = paddingBottom + borderBottom;
+            UpdateContentAreaHeight();
 
             if ((flags & LayoutBoxFlags.RequireAlignmentVertical) != 0 && !Mathf.Approximately(previousPosition, alignedPosition)) {
                 flags |= LayoutBoxFlags.RequiresMatrixUpdate;
@@ -290,7 +315,7 @@ namespace UIForia.Systems {
                     return 0; //GetIntrinsicMinWidth();
 
                 case UIMeasurementUnit.IntrinsicPreferred:
-                    return 0; //GetIntrinsicPreferredWidth();
+                    return GetIntrinsicPreferredWidth();
 
                 case UIMeasurementUnit.BlockSize: {
                     // ignored elements can use the output size of their parent since it has been resolved already
@@ -303,6 +328,35 @@ namespace UIForia.Systems {
             }
 
             return 0;
+        }
+
+        public virtual float GetIntrinsicPreferredWidth() {
+            float width = 0;
+
+            // todo -- this cached value is only valid if the current block size is the same as when the size was computed
+            // probably makes sense to hold at least 2 versions of content cache, 1 for baseline one for 2nd pass (ie fit)
+            if (cachedContentWidth >= 0) {
+                width = cachedContentWidth; // todo -- might not need to resolve size for padding / border in this case
+            }
+            else {
+                cachedContentWidth = ComputeContentWidth();
+                width = cachedContentWidth;
+            }
+
+            float baseVal = width;
+            // todo -- try not to fuck with style here
+            // todo -- view and em size
+            Vector2 viewSize = element.View.Viewport.size;
+            baseVal += MeasurementUtil.ResolveFixedSize(width, viewSize.x, viewSize.y, 0, element.style.PaddingLeft);
+            baseVal += MeasurementUtil.ResolveFixedSize(width, viewSize.x, viewSize.y, 0, element.style.PaddingRight);
+            baseVal += MeasurementUtil.ResolveFixedSize(width, viewSize.x, viewSize.y, 0, element.style.BorderRight);
+            baseVal += MeasurementUtil.ResolveFixedSize(width, viewSize.x, viewSize.y, 0, element.style.BorderLeft);
+
+            if (baseVal < 0) baseVal = 0;
+
+            float retn = baseVal;
+
+            return retn > 0 ? retn : 0;
         }
 
         protected float ComputeBlockContentWidth(float value) {
@@ -643,6 +697,12 @@ namespace UIForia.Systems {
             element.layoutHistory.AddLogEntry(LayoutDirection.Horizontal, -1, LayoutReason.Initialized, boxName);
             element.layoutHistory.AddLogEntry(LayoutDirection.Vertical, -1, LayoutReason.Initialized, boxName);
             flags |= LayoutBoxFlags.RequireLayoutHorizontal | LayoutBoxFlags.RequireLayoutVertical | LayoutBoxFlags.RequiresMatrixUpdate;
+            if (element.style.LayoutBehavior == LayoutBehavior.Ignored) {
+                flags |= LayoutBoxFlags.Ignored;
+            }
+
+            zIndex = element.style.ZIndex;
+
             clipBehavior = element.style.ClipBehavior;
             UpdateBlockProviderWidth();
             UpdateBlockProviderHeight();
@@ -651,6 +711,14 @@ namespace UIForia.Systems {
             UpdateRequiresVerticalAlignment();
 
             UpdateClipper();
+        }
+
+        internal void GetChildren(LightList<AwesomeLayoutBox> list) {
+            AwesomeLayoutBox ptr = firstChild;
+            while (ptr != null) {
+                list.Add(ptr);
+                ptr = ptr.nextSibling;
+            }
         }
 
     }

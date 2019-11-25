@@ -23,10 +23,9 @@ animation hide {
     }
     
     [keyframes] {
-        100% { AlignY = 200% 100%; }
+        100% { AlignY = 100% 0%; }
     }
 }
-
 
 animation dialog-button-normal {
     [options] {
@@ -48,28 +47,6 @@ animation dialog-button-hover {
     }
 }
 
-animation show {
-    [options] {
-        duration = @durationDialog;
-        timingFunction = CubicEaseInOut;
-    }
-    
-    [keyframes] {
-        100% { AlignY = 0% 0%; }
-    }
-}
-
-animation hide {
-    [options] {
-        duration = @durationDialog;
-        timingFunction = CubicEaseInOut;
-    }
-    
-    [keyframes] {
-        100% { AlignY = 200% 100%; }
-    }
-}
-
 style <this> {
     BackgroundColor = rgba(0, 0, 0, 230);
     CornerBevelTopLeft = @theme.topLeftCornerBevel;
@@ -81,10 +58,9 @@ style <this> {
     
     PreferredSize = 1pca;
     
-    FlexLayoutDirection = Column;
-    FlexLayoutMainAxisAlignment = Center;
-    FlexLayoutCrossAxisAlignment = Center;
-    
+    FlexLayoutDirection = Vertical;
+    DistributeExtraSpace = CenterContent;
+
     TextWhitespaceMode = PreserveNewLines CollapseWhitespace Trim;
     TextAlignment = Center;
     [attr:placement="show"] {
@@ -107,8 +83,8 @@ style dialog-buttons {
     
     PreferredSize = 1cnt;
     
-    FlexLayoutDirection = Row;
-    FlexLayoutMainAxisAlignment = Center;
+    FlexLayoutDirection = Horizontal;
+    DistributeExtraSpaceVertical = CenterContent;
 }
 
 style dialog-button {
@@ -118,14 +94,12 @@ style dialog-button {
     BorderRadius = 60px;
     
     Margin = 15px;
-    
-    FlexLayoutMainAxisAlignment = Center;
-    FlexLayoutCrossAxisAlignment = Center;
+    DistributeExtraSpace = CenterContent;
     
     BorderColor = white;
-    
-    run animation(dialog-button-normal);
+
     [hover] {
-        run animation(dialog-button-hover);
+        [enter] run animation(dialog-button-hover);
+        [exit] run animation(dialog-button-normal);
     }
 }

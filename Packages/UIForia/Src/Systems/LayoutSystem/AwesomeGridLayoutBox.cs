@@ -758,7 +758,7 @@ namespace UIForia.Systems {
                 float originOffset = layoutBoxWidth * alignment;
                 float offset = elementWidth * -alignment;
                 float alignedPosition = originBase + originOffset + offset;
-                placement.layoutBox.ApplyLayoutHorizontal(x, alignedPosition, elementWidth, layoutBoxWidth, fit, frameId);
+                placement.layoutBox.ApplyLayoutHorizontal(x, alignedPosition, placement.widthData, elementWidth, layoutBoxWidth, fit, frameId);
             }
         }
 
@@ -852,7 +852,7 @@ namespace UIForia.Systems {
                 float originOffset = layoutBoxHeight * alignment;
                 float offset = elementHeight * -alignment;
                 float alignedPosition = originBase + originOffset + offset;
-                placement.layoutBox.ApplyLayoutVertical(y, alignedPosition, elementHeight, layoutBoxHeight, fit, frameId);
+                placement.layoutBox.ApplyLayoutVertical(y, alignedPosition, placement.heightData, elementHeight, layoutBoxHeight, fit, frameId);
             }
         }
 

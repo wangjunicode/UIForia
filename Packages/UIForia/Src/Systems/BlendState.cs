@@ -6,6 +6,30 @@ namespace Src.Systems {
     [StructLayout(LayoutKind.Explicit)]
     public struct BlendState {
 
+        public bool Equals(BlendState other) {
+            return m_WriteMask == other.m_WriteMask && m_SourceColorBlendMode == other.m_SourceColorBlendMode && m_DestinationColorBlendMode == other.m_DestinationColorBlendMode && m_SourceAlphaBlendMode == other.m_SourceAlphaBlendMode && m_DestinationAlphaBlendMode == other.m_DestinationAlphaBlendMode && m_ColorBlendOperation == other.m_ColorBlendOperation && m_AlphaBlendOperation == other.m_AlphaBlendOperation && m_Padding == other.m_Padding && check0 == other.check0 && check1 == other.check1;
+        }
+
+        public override bool Equals(object obj) {
+            return obj is BlendState other && Equals(other);
+        }
+
+        public override int GetHashCode() {
+            unchecked {
+                var hashCode = m_WriteMask.GetHashCode();
+                hashCode = (hashCode * 397) ^ m_SourceColorBlendMode.GetHashCode();
+                hashCode = (hashCode * 397) ^ m_DestinationColorBlendMode.GetHashCode();
+                hashCode = (hashCode * 397) ^ m_SourceAlphaBlendMode.GetHashCode();
+                hashCode = (hashCode * 397) ^ m_DestinationAlphaBlendMode.GetHashCode();
+                hashCode = (hashCode * 397) ^ m_ColorBlendOperation.GetHashCode();
+                hashCode = (hashCode * 397) ^ m_AlphaBlendOperation.GetHashCode();
+                hashCode = (hashCode * 397) ^ m_Padding.GetHashCode();
+                hashCode = (hashCode * 397) ^ check0;
+                hashCode = (hashCode * 397) ^ check1;
+                return hashCode;
+            }
+        }
+
         [FieldOffset(0)] public byte m_WriteMask;
         [FieldOffset(1)] public byte m_SourceColorBlendMode;
         [FieldOffset(2)] public byte m_DestinationColorBlendMode;

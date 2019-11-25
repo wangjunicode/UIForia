@@ -114,12 +114,18 @@ namespace UIForia.Util {
                     return layoutResult.allocatedSize.width;
 
                 case AlignmentTarget.Parent:
+                    if (layoutResult.layoutParent == null) {
+                        return viewportWidth;
+                    }
+
                     return layoutResult.layoutParent.actualSize.width;
 
                 case AlignmentTarget.ParentContentArea:
-                    return layoutResult.layoutParent.actualSize.width;
+                    if (layoutResult.layoutParent == null) {
+                        return viewportWidth;
+                    }
 
-//                    return box.ResolveLayoutParent().contentSize.width;
+                    return layoutResult.layoutParent.actualSize.width;
 
                 case AlignmentTarget.Template:
                     // todo handle transclusion
@@ -148,9 +154,15 @@ namespace UIForia.Util {
                     return result.allocatedSize.height;
 
                 case AlignmentTarget.Parent:
+                    if (result.layoutParent == null) {
+                        return viewportHeight;
+                    }
                     return result.layoutParent.actualSize.height;
 
                 case AlignmentTarget.ParentContentArea:
+                    if (result.layoutParent == null) {
+                        return viewportHeight;
+                    }
                     return result.layoutParent.ContentHeight;
 
                 case AlignmentTarget.Template:

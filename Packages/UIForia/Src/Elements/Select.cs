@@ -54,7 +54,7 @@ namespace UIForia.Elements {
         private UIElement clippingElement;
 
         public RepeatableList<ISelectOption<T>> options;
-        private RepeatableList<ISelectOption<T>> previousOptions;
+//        private RepeatableList<ISelectOption<T>> previousOptions;
         private Action<ISelectOption<T>, int> onInsert;
         private Action<ISelectOption<T>, int> onRemove;
         private Action onClear;
@@ -71,13 +71,13 @@ namespace UIForia.Elements {
 
         [OnPropertyChanged(nameof(options))]
         private void OnSelectionChanged(string propertyName) {
-            if (previousOptions != options) {
-                if (previousOptions != null) {
-                    previousOptions.onItemInserted -= onInsert;
-                    options.onItemRemoved -= onRemove;
-                    options.onClear -= onClear;
-                }
-            }
+//            if (previousOptions != options) {
+//                if (previousOptions != null) {
+//                    previousOptions.onItemInserted -= onInsert;
+//                    options.onItemRemoved -= onRemove;
+//                    options.onClear -= onClear;
+//                }
+//            }
 
             if (options != null) {
                 options.onItemInserted += onInsert;

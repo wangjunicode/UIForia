@@ -142,7 +142,7 @@ namespace UIForia.Editor {
             Application oldApp = Application.Find(inspectedAppId);
 
             if (oldApp != null) {
-                oldApp.onElementCreated -= OnElementCreatedOrDestroyed;
+//                oldApp.onElementCreated -= OnElementCreatedOrDestroyed;
                 oldApp.onElementDestroyed -= OnElementCreatedOrDestroyed;
                 oldApp.onRefresh -= OnRefresh;
             }
@@ -159,7 +159,7 @@ namespace UIForia.Editor {
 
                 treeView = new SkipTreeView(state);
                 treeView.onSelectionChanged += OnSelectionChanged;
-                app.onElementCreated += OnElementCreatedOrDestroyed;
+//                app.onElementCreated += OnElementCreatedOrDestroyed;
                 app.onElementDestroyed += OnElementCreatedOrDestroyed;
                 app.onRefresh += OnRefresh;
             }

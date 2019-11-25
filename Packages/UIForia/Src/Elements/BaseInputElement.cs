@@ -1,12 +1,8 @@
-using System;
 using UIForia.Attributes;
 
 namespace UIForia.Elements {
     public abstract class BaseInputElement : UIElement {
 
-        [WriteBinding(nameof(disabled))]
-        public event Action<bool> onDisabledChanged;
-        
         public bool disabled;
 
         public override void OnCreate() {

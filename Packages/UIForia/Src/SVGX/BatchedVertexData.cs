@@ -455,14 +455,14 @@ namespace SVGX {
             float outlineWidth = 0; //Mathf.Clamp01(textStyle.outlineWidth);
             float outlineSoftness = 0; //textStyle.outlineSoftness;
 
-            Color32 glowColor = Color.green;
-            float glowOuter = 0; //textStyle.glowOuter;
-            float glowOffset = 0; //textStyle.glowOffset;
-            float z = renderShape.zIndex;
+            //Color32 glowColor = Color.green;
+            //float glowOuter = 0; //textStyle.glowOuter;
+            //float glowOffset = 0; //textStyle.glowOffset;
+            //float z = renderShape.zIndex;
             
-            Vector4 glowAndRenderData = new Vector4(renderData, new StyleColor(glowColor).rgba, glowOuter, glowOffset);
+        //    Vector4 glowAndRenderData = new Vector4(renderData, new StyleColor(glowColor).rgba, glowOuter, glowOffset);
 
-            int isStroke = 0;
+          //  int isStroke = 0;
 
             Vector4 outline = new Vector4(outlineWidth, outlineSoftness, VertigoUtil.ColorToFloat(textStyle.outlineColor ?? Color.black), 0);
 

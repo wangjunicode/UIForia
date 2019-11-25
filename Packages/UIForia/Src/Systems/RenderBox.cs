@@ -194,6 +194,8 @@ namespace UIForia.Rendering {
             return GetClipPathFromElement();
         }
 
+        public virtual void Enable() { }
+
     }
 
 }

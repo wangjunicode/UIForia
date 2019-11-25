@@ -20,7 +20,7 @@ namespace UIForia.Bindings {
                 
                 textElement.SetText(expression.Evaluate(context));
 
-            } catch (Exception e) {
+            } catch (Exception) {
                 
                 Debug.Log($"Had a problem evaluating text node. Context: current object is '{context.currentObject}' aux is '{context.aux}' and root object is '{context.rootObject}'");
                 

@@ -183,7 +183,6 @@ namespace UIForia.Rendering {
             // for each line pack into text atlas
             // if line won't fit, break in half up to 3 times
             // if part of line still won't fit, draw directly & maybe break batch
-            
         }
 
         public void DrawBatchedTextLine(Size size, UIForiaData geometry, GeometryRange range, FontData fontData, in Matrix4x4 matrix, ClipData clipper = null) {
@@ -258,7 +257,7 @@ namespace UIForia.Rendering {
             currentBatch.uiforiaData.cornerData.Add(geometry.cornerData);
             currentBatch.uiforiaData.fontData = fontData;
 
-         
+
             if (clipper != null) {
                 // todo break batch if changed
                 currentBatch.uiforiaData.clipTexture = clipper.clipTexture != null ? clipper.clipTexture : currentBatch.uiforiaData.clipTexture;
@@ -271,7 +270,7 @@ namespace UIForia.Rendering {
                 // (2 ^ 16) / 10
                 currentBatch.uiforiaData.clipRects.Add(new Vector4(0, VertigoUtil.PackSizeVector(6553f, 6553f)));
             }
-            
+
             UpdateUIForiaGeometry(geometry, range);
         }
 
@@ -298,7 +297,7 @@ namespace UIForia.Rendering {
             bool remapUvs = false;
             Vector4 uvs = default;
 
-            if (geometry.mainTexture != null) {
+            if (!ReferenceEquals(geometry.mainTexture, null)) {
                 // todo -- if UVs are transformed don't use sprite atlas
 //                if (texturePacker.TryPackTexture(geometry.mainTexture, out uvs)) {
 //                    texture = spriteAtlas;
@@ -306,37 +305,51 @@ namespace UIForia.Rendering {
 //                }
             }
 
-            if (texture != null && currentBatch.uiforiaData.mainTexture != null && currentBatch.uiforiaData.mainTexture != texture) {
+            if (!ReferenceEquals(texture, null) && !ReferenceEquals(currentBatch.uiforiaData.mainTexture, null) && !ReferenceEquals(currentBatch.uiforiaData.mainTexture, texture)) {
                 FinalizeCurrentBatch();
                 currentBatch.batchType = BatchType.UIForia;
                 currentBatch.uiforiaData = UIForiaData.Get();
             }
 
-            currentBatch.uiforiaData.mainTexture = texture != null ? texture : currentBatch.uiforiaData.mainTexture;
-            currentBatch.uiforiaData.colors.Add(geometry.packedColors);
-            currentBatch.uiforiaData.objectData0.Add(geometry.objectData);
-            currentBatch.uiforiaData.objectData1.Add(geometry.miscData);
-            currentBatch.uiforiaData.cornerData.Add(geometry.cornerData);
+            currentBatch.uiforiaData.mainTexture = !ReferenceEquals(texture, null) ? texture : currentBatch.uiforiaData.mainTexture;
+
+            if (currentBatch.uiforiaData.colors.size + 1 >= currentBatch.uiforiaData.colors.array.Length) {
+                Array.Resize(ref currentBatch.uiforiaData.colors.array, (currentBatch.uiforiaData.colors.size + 1) * 2);
+                Array.Resize(ref currentBatch.uiforiaData.objectData0.array, (currentBatch.uiforiaData.objectData0.size + 1) * 2);
+                Array.Resize(ref currentBatch.uiforiaData.objectData1.array, (currentBatch.uiforiaData.objectData1.size + 1) * 2);
+                Array.Resize(ref currentBatch.uiforiaData.cornerData.array, (currentBatch.uiforiaData.cornerData.size + 1) * 2);
+                Array.Resize(ref currentBatch.uiforiaData.clipUVs.array, (currentBatch.uiforiaData.clipUVs.size + 1) * 2);
+                Array.Resize(ref currentBatch.uiforiaData.clipRects.array, (currentBatch.uiforiaData.clipRects.size + 1) * 2);
+            }
+
+            currentBatch.uiforiaData.colors.array[currentBatch.uiforiaData.colors.size++] = geometry.packedColors;
+            currentBatch.uiforiaData.objectData0.array[currentBatch.uiforiaData.objectData0.size++] = geometry.objectData;
+            currentBatch.uiforiaData.objectData1.array[currentBatch.uiforiaData.objectData1.size++] = geometry.miscData;
+            currentBatch.uiforiaData.cornerData.array[currentBatch.uiforiaData.cornerData.size++] = geometry.cornerData;
 
             if (clipper != null) {
                 // todo break batch if changed
-                currentBatch.uiforiaData.clipTexture = clipper.clipTexture != null ? clipper.clipTexture : currentBatch.uiforiaData.clipTexture;
-                currentBatch.uiforiaData.clipUVs.Add(clipper.clipUVs);
-                currentBatch.uiforiaData.clipRects.Add(clipper.packedBoundsAndChannel);
+                currentBatch.uiforiaData.clipTexture = !ReferenceEquals(clipper.clipTexture, null) ? clipper.clipTexture : currentBatch.uiforiaData.clipTexture;
+                currentBatch.uiforiaData.clipUVs.array[currentBatch.uiforiaData.clipUVs.size++] = clipper.clipUVs;
+                currentBatch.uiforiaData.clipRects.array[currentBatch.uiforiaData.clipRects.size++] = clipper.packedBoundsAndChannel;
             }
             else {
-                currentBatch.uiforiaData.clipUVs.Add(default);
-                // in order to always draw the thing we take the max fixed float with 0.1 precision we can fit in 16 bits for clip size
-                // (2 ^ 16) / 10
-                currentBatch.uiforiaData.clipRects.Add(new Vector4(0, VertigoUtil.PackSizeVector(6553f, 6553f)));
+                // todo -- get rid of this limitation
+                // in order to always draw the thing we take the max fixed float with 0.1 precision we can fit in 16 bits for clip size (2 ^ 16) / 10
+                currentBatch.uiforiaData.clipUVs.array[currentBatch.uiforiaData.clipUVs.size++] = default;
+                currentBatch.uiforiaData.clipRects.array[currentBatch.uiforiaData.clipRects.size++] = new Vector4(0, VertigoUtil.PackSizeVector(6553f, 6553f));
             }
 
-            currentBatch.transformData.Add(transform);
+            if (currentBatch.transformData.size + 1 >= currentBatch.transformData.array.Length) {
+                Array.Resize(ref currentBatch.transformData.array, (currentBatch.transformData.size + 1) * 2);
+            }
+
+            currentBatch.transformData.array[currentBatch.transformData.size++] = transform;
 
             int vertexStart = positionList.size;
 
             UpdateUIForiaGeometry(geometry, range);
-            
+
             if (remapUvs) {
                 // remap x & y to sprite sheet uvs
                 int vertexEnd = positionList.size;
@@ -510,7 +523,7 @@ namespace UIForia.Rendering {
 
             StructList<TexturePacker.TextureData>.Release(ref spriteAtlasUpdates);
 
-          //  clipContext.Clip(camera, commandBuffer);
+            //  clipContext.Clip(camera, commandBuffer);
 
 #if DEBUG
             commandBuffer.BeginSample("UIForia Render Main");
@@ -718,13 +731,13 @@ namespace UIForia.Rendering {
             cameraOrigin.x -= 0.5f * (Screen.width);
             cameraOrigin.y += 0.5f * (Screen.height); // for some reason editor needs this minor adjustment
             cameraOrigin.z += 200;
-            
+
             if (Screen.width % 2 != 0) {
-              cameraOrigin.x -=  0.5f;
+                cameraOrigin.x -= 0.5f;
             }
 
             if (Screen.height % 2 != 0) {
-              cameraOrigin.y += 0.5f;
+                cameraOrigin.y += 0.5f;
             }
 
             Matrix4x4 origin = Matrix4x4.TRS(cameraOrigin, Quaternion.identity, Vector3.one);
@@ -882,7 +895,7 @@ namespace UIForia.Rendering {
             UnityEngine.Object.Destroy(spriteAtlasMaterial);
             UnityEngine.Object.Destroy(textAtlas);
             UnityEngine.Object.Destroy(pingPongTexture);
-            
+
             for (int i = 0; i < meshesToRelease.size; i++) {
                 meshesToRelease[i].Release();
             }
@@ -890,7 +903,6 @@ namespace UIForia.Rendering {
             uiforiaMeshPool.Destroy();
             pathMaterialPool.Destroy();
             uiforiaMaterialPool.Destroy();
-
         }
 
 //        public RenderTargetIdentifier GetNextRenderTarget() {

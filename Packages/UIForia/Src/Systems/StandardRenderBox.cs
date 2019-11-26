@@ -54,6 +54,7 @@ namespace UIForia.Rendering {
         protected Color32 borderColorLeft;
         protected Color32 backgroundColor;
         protected Color32 backgroundTint;
+        protected Color32 shadowColor;
         protected Texture backgroundImage;
 
         protected UIFixedLength borderRadiusTopLeft;
@@ -95,6 +96,7 @@ namespace UIForia.Rendering {
             cornerBevelTopRight = element.style.CornerBevelTopRight;
             cornerBevelBottomRight = element.style.CornerBevelBottomRight;
             cornerBevelBottomLeft = element.style.CornerBevelBottomLeft;
+            shadowColor = element.style.ShadowColor;
             opacity = element.style.Opacity;
         }
 
@@ -173,6 +175,10 @@ namespace UIForia.Rendering {
                         cornerBevelBottomLeft = property.AsUIFixedLength;
                         dataNeedsUpdate = true;
                         break;
+                    case StylePropertyId.ShadowColor:
+                        shadowColor = property.AsColor;
+                        dataNeedsUpdate = true;
+                        break;
                     
                     case StylePropertyId.BackgroundFit:
                     case StylePropertyId.BackgroundImageScaleX:
@@ -182,7 +188,6 @@ namespace UIForia.Rendering {
                     case StylePropertyId.BackgroundImageTileY:
                     case StylePropertyId.BackgroundImageOffsetX:
                     case StylePropertyId.BackgroundImageOffsetY:
-                    case StylePropertyId.ShadowColor:
                     case StylePropertyId.ShadowTint:
                     case StylePropertyId.ShadowOffsetX:
                     case StylePropertyId.ShadowOffsetY:
@@ -243,7 +248,7 @@ namespace UIForia.Rendering {
                 geometry.FillRect(size.width, size.height, pivotOffset);
             }
 
-            if (backgroundImage != null) {
+            if (!ReferenceEquals(backgroundImage, null)) {
                 Vector3[] positions = geometry.positionList.array;
                 Vector4[] texCoord0 = geometry.texCoordList0.array;
 
@@ -316,7 +321,7 @@ namespace UIForia.Rendering {
         }
 
         private void UpdateMaterialData() {
-            if (backgroundColor.a <= 0 && backgroundImage == null) {
+            if (backgroundColor.a <= 0 && ReferenceEquals(backgroundImage, null)) {
                 if (borderColorTop.a + borderColorBottom.a + borderColorLeft.a + borderColorRight.a == 0) {
                     didRender = false;
                 }
@@ -447,7 +452,7 @@ namespace UIForia.Rendering {
                 dataNeedsUpdate = false;
             }
 
-            if (element.style.ShadowColor.a > 0) {
+            if (shadowColor.a > 0) {
                 float min = math.min(element.layoutResult.actualSize.width, element.layoutResult.actualSize.height);
 
                 if (min <= 0) min = 0.0001f;

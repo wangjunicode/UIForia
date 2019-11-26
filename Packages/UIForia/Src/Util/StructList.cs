@@ -47,7 +47,7 @@ namespace UIForia.Util {
             set { size = value; }
         }
 
-        public void Add(in T item) {
+        public void Add(T item) {
             if (size + 1 > array.Length) {
                 System.Array.Resize(ref array, (size + 1) * 2);
             }

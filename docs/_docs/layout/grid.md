@@ -8,7 +8,44 @@ layout: page
 # Grid
 Grid is a 2-dimensional system, which allows for both columns and rows, unlike flexbox which is 1-dimensional (rows or columns).
 
-<br/>
+
+## Auto Size
+`auto` in a grid will always default to content size. Use `LayoutFit` on your grid items to fit into the cell space.
+
+## Block providers and Grid
+In a grid not only elements can be block providers but also spanned cells. 
+
+```
+style grid1 {
+    GridLayoutColTemplate = 100px grow(100px, 1mx) 100px;
+}
+style grid-auto-item {
+    PreferredWidth = 300px;
+    MinWidth = auto;
+}
+```
+
+`grink(base, fr grow, fr shrink, shrink-limit, grow-limit)`
+`grow(base, max)` -> `clamp(base, fr grow, fr shrink, base, grow-limit)`
+`grow(base, fr grow, 400px)` -> `clamp(base, 3fr, 0, base, 400px)`
+`shrink(base, shrink-limit)` -> `clamp(base, fr grow, fr shrink, shrink-limit, base)`
+`shrink(base, fr shrink, shrink-limit)` -> `clamp(base, fr grow, fr shrink, shrink-limit, base)`
+ 
+ 1. The base size is allocated
+ 2. If there is overflow the elements tries to shrink down to the `shrink-limit`.
+ 3. If there is underflow the elements tries to grow to the `grow-limit`.
+ 4. If there is still space left in the whole grid container we allocate the `fr` space.
+ 
+ That means in case the grid is content sized there will never be extra space to grow or shrink
+ and `fr` will always be 0. This 
+ 
+ `GridLayoutColTemplate = 100px 1fr 100px;`
+ `GridLayoutColTemplate = 100px grink(0, 1fr, 1fr, 0, infinite) 100px;`
+ `GridLayoutColTemplate = grink(100px, 0, 0, 100px, 100px)`
+
+Elements may become block providers based on their `PreferredSize` not on `Min-` or `MaxSize`s.
+
+
 
 ---------------------------------------------------------------
 ## Grid Container
@@ -24,7 +61,6 @@ style container {
     LayoutType = Grid;
 }
 ```
-<br/>
 
 ---------------------------------------------------------------
 

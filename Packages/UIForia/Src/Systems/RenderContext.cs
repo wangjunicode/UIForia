@@ -7,6 +7,7 @@ using UIForia.Rendering.Vertigo;
 using UIForia.Text;
 using UIForia.Util;
 using UnityEngine;
+using UnityEngine.Assertions;
 using UnityEngine.Rendering;
 using Object = System.Object;
 using PooledMesh = UIForia.Rendering.Vertigo.PooledMesh;
@@ -314,14 +315,16 @@ namespace UIForia.Rendering {
             currentBatch.uiforiaData.mainTexture = !ReferenceEquals(texture, null) ? texture : currentBatch.uiforiaData.mainTexture;
 
             if (currentBatch.uiforiaData.colors.size + 1 >= currentBatch.uiforiaData.colors.array.Length) {
+                
                 Array.Resize(ref currentBatch.uiforiaData.colors.array, (currentBatch.uiforiaData.colors.size + 1) * 2);
                 Array.Resize(ref currentBatch.uiforiaData.objectData0.array, (currentBatch.uiforiaData.objectData0.size + 1) * 2);
                 Array.Resize(ref currentBatch.uiforiaData.objectData1.array, (currentBatch.uiforiaData.objectData1.size + 1) * 2);
+                
                 Array.Resize(ref currentBatch.uiforiaData.cornerData.array, (currentBatch.uiforiaData.cornerData.size + 1) * 2);
                 Array.Resize(ref currentBatch.uiforiaData.clipUVs.array, (currentBatch.uiforiaData.clipUVs.size + 1) * 2);
                 Array.Resize(ref currentBatch.uiforiaData.clipRects.array, (currentBatch.uiforiaData.clipRects.size + 1) * 2);
             }
-
+            
             currentBatch.uiforiaData.colors.array[currentBatch.uiforiaData.colors.size++] = geometry.packedColors;
             currentBatch.uiforiaData.objectData0.array[currentBatch.uiforiaData.objectData0.size++] = geometry.objectData;
             currentBatch.uiforiaData.objectData1.array[currentBatch.uiforiaData.objectData1.size++] = geometry.miscData;

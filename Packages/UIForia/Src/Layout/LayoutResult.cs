@@ -60,6 +60,7 @@ namespace UIForia.Layout {
 
         internal ClipData clipper;
         public bool isCulled;
+        public bool rebuildGeometry;
 
         public Rect ContentRect => new Rect(
             padding.left + border.left,

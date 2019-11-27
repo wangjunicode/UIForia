@@ -66,7 +66,6 @@ style grid-with-buttons {
 
 style confirm-text-container {
     DistributeExtraSpaceVertical = CenterContent;
-    AlignItemsVertical = Center;
     PreferredWidth = 1pca;
 }
 

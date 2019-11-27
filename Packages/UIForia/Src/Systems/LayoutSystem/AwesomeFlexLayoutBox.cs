@@ -525,6 +525,20 @@ namespace UIForia.Systems {
             return -overflow;
         }
 
+        protected override bool IsAutoWidthContentBased() {
+            return direction != LayoutDirection.Vertical;
+        }
+
+        protected override float ResolveAutoWidth(AwesomeLayoutBox child, float factor) {
+            
+            if (direction == LayoutDirection.Vertical) {
+                return child.ComputeBlockContentWidth(factor);
+            }
+
+            return child.GetContentWidth(factor);
+        }
+
+
         public override void RunLayoutVertical(int frameId) {
             if (childCount == 0) return;
             if (direction == LayoutDirection.Horizontal) {
@@ -709,8 +723,10 @@ namespace UIForia.Systems {
 
         private void RunLayoutHorizontalStep_VerticalDirection(int frameId) {
             float contentStartX = paddingBorderHorizontalStart;
-            LayoutFit fit = element.style.FitItemsHorizontal;
+            LayoutFit fit = LayoutFit.Grow;
 
+                fit = element.style.FitItemsHorizontal;
+            
             float adjustedWidth = finalWidth - (paddingBorderHorizontalStart + paddingBorderHorizontalEnd);
 
             float inset = paddingBorderHorizontalStart;

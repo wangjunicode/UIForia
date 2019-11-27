@@ -16,7 +16,9 @@ namespace UIForia.Layout {
         Percentage = UnitConstants.Percent,
         IntrinsicMinimum = UnitConstants.MinContent,
         IntrinsicPreferred = UnitConstants.MaxContent,
-        FitContent = UnitConstants.FitContent
+        FitContent = UnitConstants.FitContent,
+
+        Auto = 0
 
     }
 

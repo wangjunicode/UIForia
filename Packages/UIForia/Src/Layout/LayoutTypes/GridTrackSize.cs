@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using System.Runtime.InteropServices;
 
 namespace UIForia.Layout.LayoutTypes {
 
@@ -32,7 +31,7 @@ namespace UIForia.Layout.LayoutTypes {
     }
 
     public struct GridItemPlacement {
-        
+
         public readonly int index;
         public readonly string name;
 
@@ -55,7 +54,7 @@ namespace UIForia.Layout.LayoutTypes {
         public static implicit operator GridItemPlacement(int value) {
             return new GridItemPlacement(value);
         }
-        
+
         public static bool operator ==(in GridItemPlacement a, in GridItemPlacement b) {
             return a.index == b.index && a.name == b.name;
         }
@@ -63,7 +62,7 @@ namespace UIForia.Layout.LayoutTypes {
         public static bool operator !=(GridItemPlacement a, GridItemPlacement b) {
             return a.index != b.index || a.name != b.name;
         }
-        
+
         public bool Equals(in GridItemPlacement other) {
             return index == other.index && string.Equals(name, other.name);
         }
@@ -82,20 +81,6 @@ namespace UIForia.Layout.LayoutTypes {
 
     [DebuggerDisplay("(minValue = {minValue}, minUnit = {(minUnit)}, maxValue = {(maxValue)}, maxUnit = {(maxUnit)})")]
     public struct GridTrackSize {
-
-        public override int GetHashCode() {
-            unchecked {
-                var hashCode = minValue.GetHashCode();
-                hashCode = (hashCode * 397) ^ maxValue.GetHashCode();
-                hashCode = (hashCode * 397) ^ value.GetHashCode();
-                hashCode = (hashCode * 397) ^ (int) unit;
-                hashCode = (hashCode * 397) ^ (int) type;
-                hashCode = (hashCode * 397) ^ (pattern != null ? pattern.GetHashCode() : 0);
-                hashCode = (hashCode * 397) ^ (int) minUnit;
-                hashCode = (hashCode * 397) ^ (int) maxUnit;
-                return hashCode;
-            }
-        }
 
         public float minValue;
         public float maxValue;
@@ -154,6 +139,20 @@ namespace UIForia.Layout.LayoutTypes {
 
         public override string ToString() {
             return $"(minValue = {minValue}, minUnit = {(minUnit)}, maxValue = {(maxValue)}, maxUnit = {(maxUnit)})";
+        }
+
+        public override int GetHashCode() {
+            unchecked {
+                var hashCode = minValue.GetHashCode();
+                hashCode = (hashCode * 397) ^ maxValue.GetHashCode();
+                hashCode = (hashCode * 397) ^ value.GetHashCode();
+                hashCode = (hashCode * 397) ^ (int) unit;
+                hashCode = (hashCode * 397) ^ (int) type;
+                hashCode = (hashCode * 397) ^ (pattern != null ? pattern.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (int) minUnit;
+                hashCode = (hashCode * 397) ^ (int) maxUnit;
+                return hashCode;
+            }
         }
 
     }

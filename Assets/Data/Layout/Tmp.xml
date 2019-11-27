@@ -2,36 +2,33 @@
 
     <Style>
 
+        // todo use this as a test! (also for horizontal)
         style container {
-            FlexLayoutDirection = Horizontal;
             PreferredSize = 1vw 1vh;
-            AlignItems = Center;
-            DistributeExtraSpace = CenterContent;
-        }
-
-        style clipper {
-            PreferredSize = 500px 500px;
+            LayoutType = Grid;
+            GridLayoutDirection = Vertical;
+            GridLayoutRowTemplate = 100px grow(150px, 300px) 100px;
             BackgroundColor = white;
-
-            Overflow = Hidden;
         }
         
-        style child-2 {
-            PreferredSize = 600px 100px;
+        style child0 {
+            PreferredSize = 100px 100px;
+            BackgroundColor = red;
+            GridItem = 1 0;
+        }
+        
+        style child1 {
+            PreferredSize = 100px 1pca;
             BackgroundColor = blue;
-            [hover] {
-                BackgroundColor = red;
-            }
-           // TransformRotation = 45;
+            GridItem = 0 0 1 2;
         }
-        
+     
     </Style>
 
     <Contents style="container">
-    
-        <Select--string options="options">
-            
-        </Select--string>
+        
+        <Div style="child0"/>
+        <Div style="child1"/>
         
     </Contents>
 </UITemplate>

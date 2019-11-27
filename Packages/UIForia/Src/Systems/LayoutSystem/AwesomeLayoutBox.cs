@@ -99,6 +99,7 @@ namespace UIForia.Systems {
             layoutResult.padding.right = paddingRight;
             layoutResult.border.left = borderLeft;
             layoutResult.border.right = borderRight;
+            layoutResult.rebuildGeometry = true;
 
             paddingBorderHorizontalStart = paddingLeft + borderLeft;
             paddingBorderHorizontalEnd = paddingRight + borderRight;
@@ -109,24 +110,25 @@ namespace UIForia.Systems {
             Vector2 viewSize = element.View.Viewport.size;
             float emSize = element.style.GetResolvedFontSize();
             LayoutResult layoutResult = element.layoutResult;
-            
+
             float paddingTop = MeasurementUtil.ResolveFixedSize(finalHeight, viewSize.x, viewSize.y, emSize, element.style.PaddingTop);
             float paddingBottom = MeasurementUtil.ResolveFixedSize(finalHeight, viewSize.x, viewSize.y, emSize, element.style.PaddingBottom);
             float borderTop = MeasurementUtil.ResolveFixedSize(finalHeight, viewSize.x, viewSize.y, emSize, element.style.BorderTop);
             float borderBottom = MeasurementUtil.ResolveFixedSize(finalHeight, viewSize.x, viewSize.y, emSize, element.style.BorderBottom);
-            
+
             layoutResult.padding.top = paddingTop;
             layoutResult.padding.bottom = paddingBottom;
             layoutResult.border.top = borderTop;
             layoutResult.border.bottom = borderBottom;
-            
+            layoutResult.rebuildGeometry = true;
+
             paddingBorderVerticalStart = paddingTop + borderTop;
             paddingBorderVerticalEnd = paddingBottom + borderBottom;
         }
 
         public void ApplyLayoutHorizontal(float localX, float alignedPosition, in LayoutSize reportedSize, float size, float availableSize, LayoutFit defaultFit, int frameId) {
             LayoutFit fit = element.style.LayoutFitHorizontal;
-            
+
             if (fit == LayoutFit.Default || fit == LayoutFit.Unset) {
                 fit = defaultFit;
             }
@@ -179,7 +181,7 @@ namespace UIForia.Systems {
             layoutResult.allocatedSize.width = availableSize;
             layoutResult.margin.left = reportedSize.marginStart;
             layoutResult.margin.right = reportedSize.marginEnd;
-            
+
             UpdateContentAreaWidth();
 
             if ((flags & LayoutBoxFlags.RequireAlignmentHorizontal) == 0 && !Mathf.Approximately(previousPosition, alignedPosition)) {
@@ -263,37 +265,49 @@ namespace UIForia.Systems {
             }
         }
 
+        protected virtual float ResolveAutoWidth(AwesomeLayoutBox child, float factor) {
+            return child.GetContentWidth(factor);
+        }
+
+        public float GetContentWidth(float factor) {
+            float width = 0;
+
+            // todo -- this cached value is only valid if the current block size is the same as when the size was computed
+            // probably makes sense to hold at least 2 versions of content cache, 1 for baseline one for 2nd pass (ie fit)
+            if (cachedContentWidth >= 0) {
+                width = cachedContentWidth; // todo -- might not need to resolve size for padding / border in this case
+            }
+            else {
+                cachedContentWidth = ComputeContentWidth();
+                width = cachedContentWidth;
+            }
+
+            float baseVal = width;
+            // todo -- try not to fuck with style here
+            // todo -- view and em size
+            Vector2 viewSize = element.View.Viewport.size;
+            baseVal += MeasurementUtil.ResolveFixedSize(width, viewSize.x, viewSize.y, 0, element.style.PaddingLeft);
+            baseVal += MeasurementUtil.ResolveFixedSize(width, viewSize.x, viewSize.y, 0, element.style.PaddingRight);
+            baseVal += MeasurementUtil.ResolveFixedSize(width, viewSize.x, viewSize.y, 0, element.style.BorderRight);
+            baseVal += MeasurementUtil.ResolveFixedSize(width, viewSize.x, viewSize.y, 0, element.style.BorderLeft);
+
+            if (baseVal < 0) baseVal = 0;
+
+            float retn = factor * baseVal;
+
+            return retn > 0 ? retn : 0;
+        }
+
         public float ResolveWidth(in UIMeasurement measurement) {
             float value = measurement.value;
 
             switch (measurement.unit) {
+                case UIMeasurementUnit.Auto: {
+                    return parent.ResolveAutoWidth(this, measurement.value);
+                }
+
                 case UIMeasurementUnit.Content: {
-                    float width = 0;
-
-                    // todo -- this cached value is only valid if the current block size is the same as when the size was computed
-                    // probably makes sense to hold at least 2 versions of content cache, 1 for baseline one for 2nd pass (ie fit)
-                    if (cachedContentWidth >= 0) {
-                        width = cachedContentWidth; // todo -- might not need to resolve size for padding / border in this case
-                    }
-                    else {
-                        cachedContentWidth = ComputeContentWidth();
-                        width = cachedContentWidth;
-                    }
-
-                    float baseVal = width;
-                    // todo -- try not to fuck with style here
-                    // todo -- view and em size
-                    Vector2 viewSize = element.View.Viewport.size;
-                    baseVal += MeasurementUtil.ResolveFixedSize(width, viewSize.x, viewSize.y, 0, element.style.PaddingLeft);
-                    baseVal += MeasurementUtil.ResolveFixedSize(width, viewSize.x, viewSize.y, 0, element.style.PaddingRight);
-                    baseVal += MeasurementUtil.ResolveFixedSize(width, viewSize.x, viewSize.y, 0, element.style.BorderRight);
-                    baseVal += MeasurementUtil.ResolveFixedSize(width, viewSize.x, viewSize.y, 0, element.style.BorderLeft);
-
-                    if (baseVal < 0) baseVal = 0;
-
-                    float retn = measurement.value * baseVal;
-
-                    return retn > 0 ? retn : 0;
+                    return GetContentWidth(measurement.value);
                 }
 
                 case UIMeasurementUnit.FitContent:
@@ -359,7 +373,7 @@ namespace UIForia.Systems {
             return retn > 0 ? retn : 0;
         }
 
-        protected float ComputeBlockContentWidth(float value) {
+        public float ComputeBlockContentWidth(float value) {
             AwesomeLayoutBox ptr = parent;
             float paddingBorder = 0;
 
@@ -372,6 +386,12 @@ namespace UIForia.Systems {
 
             while (ptr != null) {
                 paddingBorder += ptr.paddingBorderHorizontalStart + ptr.paddingBorderHorizontalEnd;
+
+                if (ptr.CanProvideHorizontalBlockSize(this, out float blockSize)) {
+                    // ignore padding on provided element
+                    paddingBorder -= (ptr.paddingBorderHorizontalStart + ptr.paddingBorderHorizontalEnd);
+                    return Math.Max(0, (blockSize - paddingBorder) * value);
+                }
 
                 if ((ptr.flags & LayoutBoxFlags.WidthBlockProvider) != 0) {
                     Assert.AreNotEqual(-1, ptr.finalWidth);
@@ -391,7 +411,12 @@ namespace UIForia.Systems {
             }
 
             AwesomeLayoutBox ptr = parent;
+
             while (ptr != null) {
+                if (ptr.CanProvideHorizontalBlockSize(this, out float blockSize)) {
+                    return Math.Max(0, blockSize * value);
+                }
+
                 if ((ptr.flags & LayoutBoxFlags.WidthBlockProvider) != 0) {
                     Assert.AreNotEqual(-1, ptr.finalWidth);
                     return Math.Max(0, ptr.finalWidth * value);
@@ -402,6 +427,17 @@ namespace UIForia.Systems {
 
             return Math.Max(0, element.View.Viewport.width * value);
         }
+
+        public virtual bool CanProvideHorizontalBlockSize(AwesomeLayoutBox child, out float blockSize) {
+            blockSize = 0;
+            return false;
+        }
+
+        public virtual bool CanProvideVerticalBlockSize(AwesomeLayoutBox child, out float blockSize) {
+            blockSize = 0;
+            return false;
+        }
+
 
         protected float ComputeBlockContentHeight(float value) {
             AwesomeLayoutBox ptr = parent;
@@ -416,6 +452,13 @@ namespace UIForia.Systems {
 
             while (ptr != null) {
                 paddingBorder += ptr.paddingBorderVerticalStart + ptr.paddingBorderVerticalEnd;
+
+                if (ptr.CanProvideVerticalBlockSize(this, out float blockSize)) {
+                    // ignore padding on provided element
+                    paddingBorder -= (ptr.paddingBorderVerticalStart + ptr.paddingBorderVerticalEnd);
+                    return Math.Max(0, (blockSize - paddingBorder) * value);
+                }
+
                 if ((ptr.flags & LayoutBoxFlags.HeightBlockProvider) != 0) {
                     Assert.AreNotEqual(-1, ptr.finalHeight);
                     return Math.Max(0, (ptr.finalHeight - paddingBorder) * value);
@@ -437,6 +480,12 @@ namespace UIForia.Systems {
             }
 
             while (ptr != null) {
+                
+                if (ptr.CanProvideVerticalBlockSize(this, out float blockSize)) {
+                    // ignore padding on provided element
+                    return Math.Max(0, blockSize * value);
+                }
+
                 if ((ptr.flags & LayoutBoxFlags.HeightBlockProvider) != 0) {
                     Assert.AreNotEqual(-1, ptr.finalHeight);
                     return Math.Max(0, ptr.finalHeight * value);
@@ -594,14 +643,28 @@ namespace UIForia.Systems {
 
         }
 
+        protected virtual bool IsAutoWidthContentBased() {
+            return true;
+        }
+
         public void UpdateBlockProviderWidth() {
+            UIMeasurementUnit pref = element.style.PreferredWidth.unit;
+            UIMeasurementUnit min = element.style.MinWidth.unit;
+            UIMeasurementUnit max = element.style.MaxWidth.unit;
+
             bool contentBased = (
-                element.style.PreferredWidth.unit == UIMeasurementUnit.Content ||
-                element.style.MinWidth.unit == UIMeasurementUnit.Content ||
-                element.style.MaxWidth.unit == UIMeasurementUnit.Content
+                pref == UIMeasurementUnit.Content ||
+                min == UIMeasurementUnit.Content ||
+                max == UIMeasurementUnit.Content
             );
 
-            if (contentBased) {
+            bool autoSized = (
+                pref == UIMeasurementUnit.Auto ||
+                min == UIMeasurementUnit.Auto ||
+                max == UIMeasurementUnit.Auto
+            );
+
+            if (contentBased || (autoSized && parent != null && parent.IsAutoWidthContentBased())) {
                 flags &= ~LayoutBoxFlags.WidthBlockProvider;
             }
             else {

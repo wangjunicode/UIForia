@@ -26,6 +26,13 @@ namespace UIForia.Systems {
         
         
     */
+
+    public struct GridCellDefinition {
+
+        public GridTrackSize baseSize;
+
+    }
+
     public class AwesomeGridLayoutBox : AwesomeLayoutBox {
 
         private bool placementDirty;
@@ -33,6 +40,8 @@ namespace UIForia.Systems {
         private readonly StructList<GridTrack> rowTrackList;
         private readonly StructList<GridPlacement> placementList;
         private static readonly StructList<GridRegion> s_OccupiedAreas = new StructList<GridRegion>(32);
+        private StructList<int> deferredList;
+        private bool finalSizeResolutionMode;
 
         public int RowCount => rowTrackList.size;
         public int ColCount => colTrackList.size;
@@ -43,6 +52,160 @@ namespace UIForia.Systems {
             this.rowTrackList = new StructList<GridTrack>(4);
         }
 
+        public override bool CanProvideHorizontalBlockSize(AwesomeLayoutBox layoutBox, out float blockSize) {
+            blockSize = 0;
+            if (finalSizeResolutionMode) {
+                for (int i = 0; i < placementList.size; i++) {
+                    if (placementList.array[i].layoutBox == layoutBox) {
+                        ref GridPlacement placement = ref placementList.array[i];
+
+                        for (int x = placement.x; x < placement.x + placement.width; x++) {
+                            ref GridTrack track = ref colTrackList.array[x];
+
+                            if ((track.minUnit & (GridTemplateUnit.MaxContent | GridTemplateUnit.MinContent)) != 0) {
+                                blockSize = 0;
+                                return false;
+                            }
+
+                            // todo -- base unit
+
+                            if ((track.maxUnit & (GridTemplateUnit.MaxContent | GridTemplateUnit.MinContent)) != 0) {
+                                blockSize = 0;
+                                return false;
+                            }
+
+                            blockSize += track.size;
+                        }
+
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+            else {
+                for (int i = 0; i < placementList.size; i++) {
+                    if (placementList.array[i].layoutBox == layoutBox) {
+                        ref GridPlacement placement = ref placementList.array[i];
+
+                        for (int x = placement.x; x < placement.x + placement.width; x++) {
+                            ref GridTrack track = ref colTrackList.array[x];
+
+                            // todo -- implement base units
+                            // first pass uses base size
+                            if ((track.minUnit & (GridTemplateUnit.MaxContent | GridTemplateUnit.MinContent)) != 0) {
+                                blockSize = 0;
+                                return false;
+                            }
+
+                            if ((track.maxUnit & (GridTemplateUnit.MaxContent | GridTemplateUnit.MinContent)) != 0) {
+                                blockSize = 0;
+                                return false;
+                            }
+
+                            blockSize += track.fixedSizeMin; // todo -- min is probably wrong, should be base
+                        }
+
+                        deferredList = deferredList ?? new StructList<int>();
+
+                        bool contains = false;
+
+                        for (int j = 0; j < deferredList.size; j++) {
+                            if (deferredList.array[j] == i) {
+                                contains = true;
+                                break;
+                            }
+                        }
+
+                        if (!contains) {
+                            deferredList.Add(i);
+                        }
+
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+        }
+
+        public override bool CanProvideVerticalBlockSize(AwesomeLayoutBox layoutBox, out float blockSize) {
+            blockSize = 0;
+            if (finalSizeResolutionMode) {
+                for (int i = 0; i < placementList.size; i++) {
+                    if (placementList.array[i].layoutBox == layoutBox) {
+                        ref GridPlacement placement = ref placementList.array[i];
+
+                        for (int y = placement.y; y < placement.y + placement.height; y++) {
+                            ref GridTrack track = ref rowTrackList.array[y];
+
+                            if ((track.minUnit & (GridTemplateUnit.MaxContent | GridTemplateUnit.MinContent)) != 0) {
+                                blockSize = 0;
+                                return false;
+                            }
+
+                            // todo -- base unit
+
+                            if ((track.maxUnit & (GridTemplateUnit.MaxContent | GridTemplateUnit.MinContent)) != 0) {
+                                blockSize = 0;
+                                return false;
+                            }
+
+                            blockSize += track.size;
+                        }
+
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+            else {
+                for (int i = 0; i < placementList.size; i++) {
+                    if (placementList.array[i].layoutBox == layoutBox) {
+                        ref GridPlacement placement = ref placementList.array[i];
+
+                        for (int y = placement.y; y < placement.y + placement.height; y++) {
+                            ref GridTrack track = ref rowTrackList.array[y];
+
+                            // todo -- implement base units
+                            // first pass uses base size
+                            if ((track.minUnit & (GridTemplateUnit.MaxContent | GridTemplateUnit.MinContent)) != 0) {
+                                blockSize = 0;
+                                return false;
+                            }
+
+                            if ((track.maxUnit & (GridTemplateUnit.MaxContent | GridTemplateUnit.MinContent)) != 0) {
+                                blockSize = 0;
+                                return false;
+                            }
+
+                            blockSize += track.fixedSizeMin; // todo -- min is probably wrong, should be base
+                        }
+
+                        deferredList = deferredList ?? new StructList<int>();
+
+                        bool contains = false;
+
+                        for (int j = 0; j < deferredList.size; j++) {
+                            if (deferredList.array[j] == i) {
+                                contains = true;
+                                break;
+                            }
+                        }
+
+                        if (!contains) {
+                            deferredList.Add(i);
+                        }
+
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+        }
+
         protected override float ComputeContentWidth() {
             if (firstChild == null) {
                 return 0;
@@ -50,10 +213,10 @@ namespace UIForia.Systems {
 
             Place();
 
-            ComputeItemWidths();
-
             // first pass, get fixed sizes
             ComputeHorizontalFixedTrackSizes();
+
+            ComputeItemWidths();
 
             // now compute the intrinsic sizes
             ComputeContentWidthContributionSizes();
@@ -65,6 +228,17 @@ namespace UIForia.Systems {
             for (int i = 0; i < colTrackList.size; i++) {
                 retn += colTrackList.array[i].resolvedMinSize;
             }
+
+            // useResolvedForBlockSize = true;
+            // foreach item in toClamp list
+            // min / max / preferred need to be re-computed if block based
+            // but this time use final track sizes instead of initial base sizes
+            //    item.outputWidth = item.GetWidths().Clamped;
+            // useResolvedForBlockSize = false;
+
+            // min content
+            // pref %
+            // max bsz
 
             retn += element.style.GridLayoutColGap * (colTrackList.size - 1);
             // fr values are always 0 when computing content width
@@ -708,10 +882,10 @@ namespace UIForia.Systems {
 
             // todo -- some of these might not be dirty if we did a content layout pass, can used cached values already
 
-            ComputeItemWidths();
-
             // first pass, get fixed sizes
             ComputeHorizontalFixedTrackSizes();
+
+            ComputeItemWidths();
 
             // now compute the intrinsic sizes
             ComputeContentWidthContributionSizes();
@@ -741,10 +915,26 @@ namespace UIForia.Systems {
                 // todo -- support shrink(baseSize, shrinkLimit)
             }
 
-            PositionTracks(colTrackList, element.style.GridLayoutColGap);
+            PositionTracks(colTrackList, element.style.GridLayoutColGap, paddingBorderHorizontalStart);
 
             float alignment = element.style.AlignItemsHorizontal;
             LayoutFit fit = element.style.FitItemsHorizontal;
+
+            if (deferredList != null) {
+                // if we needed to defer size resolution (only happens for block sized children for which the grid cells can provide a block size)
+                // go through each of those and ask for their widths again. This will recursively end up calling CanProvideHorizontalBlockSize
+                // which will now give the final size of each cell (thanks to the finalSizeResolutionMode) instead of the base. This fixes
+                // issues where the grid grew or shrunk in size since providing the initial block size on the initial run.
+                finalSizeResolutionMode = true;
+                for (int i = 0; i < deferredList.size; i++) {
+                    ref GridPlacement placement = ref placementList.array[deferredList.array[i]];
+                    placement.layoutBox.GetWidths(ref placement.widthData);
+                    placement.outputWidth = placement.widthData.Clamped + placement.widthData.marginStart + placement.widthData.marginEnd;
+                }
+
+                finalSizeResolutionMode = false;
+                deferredList.size = 0;
+            }
 
             for (int i = 0; i < placementList.size; i++) {
                 ref GridPlacement placement = ref placementList.array[i];
@@ -762,8 +952,8 @@ namespace UIForia.Systems {
             }
         }
 
-        private static void PositionTracks(StructList<GridTrack> trackList, float gap) {
-            float offset = 0;
+        private static void PositionTracks(StructList<GridTrack> trackList, float gap, float inset) {
+            float offset = inset;
             for (int i = 0; i < trackList.size; i++) {
                 ref GridTrack track = ref trackList.array[i];
                 track.position = offset;
@@ -802,10 +992,11 @@ namespace UIForia.Systems {
 
             // todo -- some of these might not be dirty if we did a content layout pass, can used cached values already
 
-            ComputeItemHeights();
 
             // first pass, get fixed sizes
             ComputeVerticalFixedTrackSizes();
+
+            ComputeItemHeights();
 
             // now compute the intrinsic sizes
             ComputeContentHeightContributionSizes();
@@ -835,10 +1026,26 @@ namespace UIForia.Systems {
                 // todo -- support shrink(baseSize, shrinkLimit)
             }
 
-            PositionTracks(rowTrackList, element.style.GridLayoutRowGap);
+            PositionTracks(rowTrackList, element.style.GridLayoutRowGap, paddingBorderVerticalStart);
 
             float alignment = element.style.AlignItemsVertical;
             LayoutFit fit = element.style.FitItemsVertical;
+
+            if (deferredList != null) {
+                // if we needed to defer size resolution (only happens for block sized children for which the grid cells can provide a block size)
+                // go through each of those and ask for their widths again. This will recursively end up calling CanProvideHorizontalBlockSize
+                // which will now give the final size of each cell (thanks to the finalSizeResolutionMode) instead of the base. This fixes
+                // issues where the grid grew or shrunk in size since providing the initial block size on the initial run.
+                finalSizeResolutionMode = true;
+                for (int i = 0; i < deferredList.size; i++) {
+                    ref GridPlacement placement = ref placementList.array[deferredList.array[i]];
+                    placement.layoutBox.GetHeights(ref placement.heightData);
+                    placement.outputHeight = placement.heightData.Clamped + placement.heightData.marginStart + placement.heightData.marginEnd;
+                }
+
+                finalSizeResolutionMode = false;
+                deferredList.size = 0;
+            }
 
             for (int i = 0; i < placementList.size; i++) {
                 ref GridPlacement placement = ref placementList.array[i];
@@ -1256,13 +1463,12 @@ namespace UIForia.Systems {
                     EnsureImplicitTrackCapacity(colTrackList, cursorX + width, ref colSizeAutoPtr, autoColSizePattern);
                     EnsureImplicitTrackCapacity(rowTrackList, cursorY + height, ref rowSizeAutoPtr, autoRowSizePattern);
 //                    rowTrackList.array[cursorY].autoPlacementCursor = cursorX + width;
-                        colTrackList.array[cursorX].autoPlacementCursor = cursorY;
+                    colTrackList.array[cursorX].autoPlacementCursor = cursorY;
                     //for (int j = cursorX; j < cursorX + width; j++) {
                     //}
                     for (int j = cursorY; j < cursorY + height; j++) {
                         rowTrackList.array[j].autoPlacementCursor = cursorX + width;
                     }
-
                 }
                 else {
                     if (dense) {
@@ -1298,6 +1504,7 @@ namespace UIForia.Systems {
                     for (int j = cursorX; j < cursorX + width; j++) {
                         colTrackList.array[j].autoPlacementCursor = cursorY + height;
                     }
+
                     EnsureImplicitTrackCapacity(colTrackList, cursorX + width, ref colSizeAutoPtr, autoColSizePattern);
                     EnsureImplicitTrackCapacity(rowTrackList, cursorY + height, ref rowSizeAutoPtr, autoRowSizePattern);
                 }

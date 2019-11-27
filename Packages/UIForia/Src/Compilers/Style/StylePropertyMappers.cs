@@ -32,8 +32,8 @@ namespace UIForia.Compilers.Style {
 
                 // Alignment
                 {"alignmenttargetx", (targetStyle, property, context) => targetStyle.AlignmentTargetX = MapEnum<AlignmentTarget>(property.children[0], context)},
-                {"alignmenttargety", (targetStyle, property, context) => targetStyle.AlignmentTargetY = MapEnum<AlignmentTarget>(property.children[0], context)},
-                {"alignmenttarget", (targetStyle, property, context) => {
+                {"alignmenttargety", (targetStyle, property, context) => targetStyle.AlignmentTargetY = MapEnum<AlignmentTarget>(property.children[0], context)}, {
+                    "alignmenttarget", (targetStyle, property, context) => {
                         if (property.children.size == 1) {
                             AlignmentTarget target = MapEnum<AlignmentTarget>(property.children[0], context);
                             targetStyle.AlignmentTargetX = target;
@@ -144,31 +144,32 @@ namespace UIForia.Compilers.Style {
 
                 {"alignitemshorizontal", (targetStyle, property, context) => targetStyle.AlignItemsHorizontal = MapItemAlignment(property.children[0], context)},
                 {"alignitemsvertical", (targetStyle, property, context) => targetStyle.AlignItemsVertical = MapItemAlignment(property.children[0], context)},
-                
+
                 {"distributeextraspacehorizontal", (targetStyle, property, context) => targetStyle.DistributeExtraSpaceHorizontal = MapEnum<SpaceDistribution>(property.children[0], context)},
-                {"distributeextraspacevertical", (targetStyle, property, context) => targetStyle.DistributeExtraSpaceVertical = MapEnum<SpaceDistribution>(property.children[0], context)},
-                {"distributeextraspace", (targetStyle, property, context) => {
-                    if (property.children.size == 1) {
-                        targetStyle.DistributeExtraSpaceHorizontal = MapEnum<SpaceDistribution>(property.children[0], context);
-                        targetStyle.DistributeExtraSpaceVertical = MapEnum<SpaceDistribution>(property.children[0], context);
+                {"distributeextraspacevertical", (targetStyle, property, context) => targetStyle.DistributeExtraSpaceVertical = MapEnum<SpaceDistribution>(property.children[0], context)}, {
+                    "distributeextraspace", (targetStyle, property, context) => {
+                        if (property.children.size == 1) {
+                            targetStyle.DistributeExtraSpaceHorizontal = MapEnum<SpaceDistribution>(property.children[0], context);
+                            targetStyle.DistributeExtraSpaceVertical = MapEnum<SpaceDistribution>(property.children[0], context);
+                        }
+                        else if (property.children.size == 2) {
+                            targetStyle.DistributeExtraSpaceHorizontal = MapEnum<SpaceDistribution>(property.children[0], context);
+                            targetStyle.DistributeExtraSpaceVertical = MapEnum<SpaceDistribution>(property.children[1], context);
+                        }
                     }
-                    else if (property.children.size == 2) {
-                        targetStyle.DistributeExtraSpaceHorizontal = MapEnum<SpaceDistribution>(property.children[0], context);
-                        targetStyle.DistributeExtraSpaceVertical = MapEnum<SpaceDistribution>(property.children[1], context);
+                }, {
+                    "alignitems", (targetStyle, property, context) => {
+                        if (property.children.size == 1) {
+                            targetStyle.AlignItemsHorizontal = MapItemAlignment(property.children[0], context);
+                            targetStyle.AlignItemsVertical = MapItemAlignment(property.children[0], context);
+                        }
+                        else if (property.children.size == 2) {
+                            targetStyle.AlignItemsHorizontal = MapItemAlignment(property.children[0], context);
+                            targetStyle.AlignItemsVertical = MapItemAlignment(property.children[1], context);
+                        }
                     }
-                }},
-                
-                {"alignitems", (targetStyle, property, context) => {
-                    if (property.children.size == 1) {
-                        targetStyle.AlignItemsHorizontal = MapItemAlignment(property.children[0], context);
-                        targetStyle.AlignItemsVertical = MapItemAlignment(property.children[0], context);
-                    }
-                    else if (property.children.size == 2) {
-                        targetStyle.AlignItemsHorizontal = MapItemAlignment(property.children[0], context);
-                        targetStyle.AlignItemsVertical = MapItemAlignment(property.children[1], context);
-                    }
-                }},
-                
+                },
+
                 {"fititemshorizontal", (targetStyle, property, context) => targetStyle.FitItemsHorizontal = MapEnum<LayoutFit>(property.children[0], context)},
                 {"fititemsvertical", (targetStyle, property, context) => targetStyle.FitItemsVertical = MapEnum<LayoutFit>(property.children[0], context)},
 
@@ -932,7 +933,11 @@ namespace UIForia.Compilers.Style {
         private static UIMeasurement MapMeasurement(StyleASTNode value, StyleCompileContext context) {
             value = context.GetValueForReference(value);
             switch (value) {
-                case MeasurementNode measurementNode:
+                case StyleIdentifierNode identifierNode: {
+                    UIMeasurementUnit unit = MapUnit(identifierNode.name, context, identifierNode.line, identifierNode.column);
+                    return new UIMeasurement(1, unit);
+                }
+                case MeasurementNode measurementNode: {
                     UIMeasurementUnit unit = MapUnit(measurementNode.unit, context);
                     if (TryParseFloat(measurementNode.value.rawValue, out float measurementValue)) {
                         if (unit == UIMeasurementUnit.Percentage) {
@@ -944,7 +949,7 @@ namespace UIForia.Compilers.Style {
                     else {
                         return new UIMeasurement(1f, unit);
                     }
-
+                }
                 case StyleLiteralNode literalNode:
                     if (TryParseFloat(literalNode.rawValue, out float literalValue)) {
                         return new UIMeasurement(literalValue);
@@ -982,10 +987,10 @@ namespace UIForia.Compilers.Style {
             throw new CompileException(context.fileName, value, $"Cannot parse value, expected a numeric literal or measurement {value}.");
         }
 
-        private static UIMeasurementUnit MapUnit(UnitNode unitNode, StyleCompileContext context) {
-            if (unitNode == null) return UIMeasurementUnit.Pixel;
+        private static UIMeasurementUnit MapUnit(string value, StyleCompileContext context, int line, int column) {
+            if (value == null) return UIMeasurementUnit.Pixel;
 
-            switch (unitNode.value) {
+            switch (value) {
                 case "px":
                     return UIMeasurementUnit.Pixel;
 
@@ -1010,6 +1015,8 @@ namespace UIForia.Compilers.Style {
 
                 case "%":
                     return UIMeasurementUnit.Percentage;
+                case "auto":
+                    return UIMeasurementUnit.Auto;
 
                 case "mx":
                 case "intrinsic":
@@ -1023,10 +1030,15 @@ namespace UIForia.Compilers.Style {
                     return UIMeasurementUnit.FitContent;
             }
 
-            Debug.LogWarning($"You used a {unitNode.value} in line {unitNode.line} column {unitNode.column} in file {context.fileName} but this unit isn't supported. " +
+            Debug.LogWarning($"You used a {value} in line {line} column {column} in file {context.fileName} but this unit isn't supported. " +
                              "Try px, %, pca, pcz, em, cnt, vw, or vh instead (see UIMeasurementUnit). Will fall back to px.");
 
             return UIMeasurementUnit.Pixel;
+        }
+
+        private static UIMeasurementUnit MapUnit(UnitNode unitNode, StyleCompileContext context) {
+            if (unitNode == null) return UIMeasurementUnit.Pixel;
+            return MapUnit(unitNode.value, context, unitNode.line, unitNode.column);
         }
 
         private static UIFixedUnit MapAlignmentUnit(UnitNode unitNode, StyleCompileContext context) {

@@ -117,7 +117,6 @@ namespace UIForia.Rendering {
                     case StylePropertyId.BackgroundColor:
                         backgroundColor = property.AsColor;
                         dataNeedsUpdate = true;
-                        dataNeedsUpdate = true;
                         break;
                     case StylePropertyId.BorderColorTop:
                         borderColorTop = property.AsColor;
@@ -421,7 +420,7 @@ namespace UIForia.Rendering {
 
             float viewWidth = element.View.Viewport.width;
             float viewHeight = element.View.Viewport.height;
-            float emSize = 0; //element.style.GetResolvedFontSize(); expensive, cache this
+            float emSize = element.style.GetResolvedFontSize();
             float resolvedCornerBevelTopLeft = UIFixedLength.Resolve(cornerBevelTopLeft, halfMin, emSize, viewWidth, viewHeight);
             float resolvedCornerBevelTopRight = UIFixedLength.Resolve(cornerBevelTopRight, halfMin, emSize, viewWidth, viewHeight);
             float resolvedCornerBevelBottomRight = UIFixedLength.Resolve(cornerBevelBottomRight, halfMin, emSize, viewWidth, viewHeight);
@@ -437,13 +436,15 @@ namespace UIForia.Rendering {
             if (test > max) return max;
             return test;
         }
-
+        
         public override void PaintBackground(RenderContext ctx) {
+            
             Size newSize = element.layoutResult.actualSize;
 
-            if (geometryNeedsUpdate || (newSize != lastSize)) {
+            if (geometryNeedsUpdate || (newSize != lastSize) || element.layoutResult.rebuildGeometry) {
                 UpdateGeometry(newSize);
                 lastSize = newSize;
+                element.layoutResult.rebuildGeometry = false; // kind of a hack, change this
             }
 
             // todo -- fix caching issue here
@@ -518,7 +519,6 @@ namespace UIForia.Rendering {
 
                 shadowGeometry.cornerData = new Vector4(resolvedCornerBevelTopLeft, resolvedCornerBevelTopRight, resolvedCornerBevelBottomRight, resolvedCornerBevelBottomLeft);
                 shadowGeometry.packedColors = v;
-                Size s = element.layoutResult.actualSize;
                 Vector2 pivotOffset = default; // todo -- this! new Vector2(-element.layoutBox.pivotX * s.width, -element.layoutBox.pivotY * s.height);
                 shadowGeometry.FillRect(size.x, size.y, pivotOffset + position);
                 ctx.DrawBatchedGeometry(shadowGeometry, new GeometryRange(shadowGeometry.positionList.size, shadowGeometry.triangleList.size), element.layoutResult.matrix.ToMatrix4x4(), clipper);

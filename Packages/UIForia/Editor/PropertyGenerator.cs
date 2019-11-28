@@ -128,11 +128,6 @@ namespace UIForia.Editor {
                 return $"new {nameof(UIFixedLength)}({length.value.ToString(CultureInfo.InvariantCulture)}f, {nameof(UIFixedUnit)}.{v})";
             }
 
-            if (defaultValue is GridTrackSize) {
-                GridTrackSize size = (GridTrackSize) defaultValue;
-                return $"new {nameof(GridTrackSize)}({size.minValue.ToString(CultureInfo.InvariantCulture)}f, {nameof(GridTemplateUnit)}.{Enum.GetName(typeof(GridTemplateUnit), size.minUnit)})";
-            }
-
             if (defaultValue is Color) {
                 Color c = (Color) defaultValue;
                 return $"new Color({c.r.ToString(CultureInfo.InvariantCulture)}f, {c.g.ToString(CultureInfo.InvariantCulture)}f, {c.b.ToString(CultureInfo.InvariantCulture)}f, {c.a.ToString(CultureInfo.InvariantCulture)}f)";

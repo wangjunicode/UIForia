@@ -2,33 +2,31 @@
 
     <Style>
 
-        // todo use this as a test! (also for horizontal)
         style container {
-            PreferredSize = 1vw 1vh;
-            LayoutType = Grid;
-            GridLayoutDirection = Vertical;
-            GridLayoutRowTemplate = 100px grow(150px, 300px) 100px;
-            BackgroundColor = white;
+            FlexLayoutDirection = Horizontal;
+            PreferredSize = 600px;
+            BackgroundColor = Yellow;
+            FlexLayoutWrap = WrapHorizontal;
         }
-        
-        style child0 {
-            PreferredSize = 100px 100px;
+
+        style child {
+            PreferredSize = 200px 100px;
             BackgroundColor = red;
-            GridItem = 1 0;
         }
         
-        style child1 {
-            PreferredSize = 100px 1pca;
-            BackgroundColor = blue;
-            GridItem = 0 0 1 2;
+        style grow {
+            FlexItemGrow = 1;
+            BackgroundColor = green;
+            PreferredSize = 300px 100px;
         }
-     
+        
     </Style>
 
     <Contents style="container">
-        
-        <Div style="child0"/>
-        <Div style="child1"/>
-        
+        <Group style='child'/>
+        <Group style='child'/>
+        <Group style='grow'/>
+        <Group style='child'/>
+        <Group style='child'/>
     </Contents>
 </UITemplate>

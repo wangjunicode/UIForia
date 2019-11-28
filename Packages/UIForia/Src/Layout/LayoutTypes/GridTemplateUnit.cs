@@ -13,13 +13,16 @@ namespace UIForia.Layout.LayoutTypes {
         ViewportWidth = UnitConstants.ViewportWidth,
         ViewportHeight = UnitConstants.ViewportHeight,
 
-        FractionalRemaining = UnitConstants.FractionalRemaining,
         MinContent = UnitConstants.MinContent,
         MaxContent = UnitConstants.MaxContent,
         Percent = UnitConstants.Percent,
 
         Fixed = Pixel | Percent | ParentSize | ParentContentArea | Em | ViewportWidth | ViewportHeight,
 
+
+        Intrinsic = MinContent | MaxContent,
+
+        FractionalRemaining = UnitConstants.FractionalRemaining // todo -- remove this, only here for parsing atm
 
     }
 

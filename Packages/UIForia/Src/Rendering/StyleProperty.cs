@@ -152,34 +152,6 @@ namespace UIForia.Rendering {
         }
 
         [DebuggerStepThrough]
-        public StyleProperty(StylePropertyId propertyId, in GridTrackSize trackSize) {
-            this.propertyId = propertyId;
-            this.int0 = 0;
-            this.hasValue = true;
-            this.float1 = 0;
-            this.objectField = null;
-            this.float0 = trackSize.minValue;
-            this.int1 = (int) trackSize.minUnit;
-        }
-
-        [DebuggerStepThrough]
-        public StyleProperty(StylePropertyId propertyId, in GridTrackSize? trackSize) {
-            this.propertyId = propertyId;
-            this.int0 = 0;
-            this.int1 = 0;
-            this.hasValue = false;
-            this.float0 = 0;
-            this.float1 = 0;
-            this.objectField = null;
-            if (trackSize.HasValue) {
-                GridTrackSize val = trackSize.Value;
-                this.float0 = val.minValue;
-                this.int1 = (int) val.minUnit;
-                this.hasValue = true;
-            }
-        }
-
-        [DebuggerStepThrough]
         public StyleProperty(StylePropertyId propertyId, float float0) {
             this.propertyId = propertyId;
             this.int0 = 0;
@@ -333,7 +305,6 @@ namespace UIForia.Rendering {
         public LayoutDirection AsLayoutDirection => (LayoutDirection) int0;
         public LayoutWrap AsLayoutWrap => (LayoutWrap) int0;
 
-        public GridTrackSize AsGridTrackSize => new GridTrackSize(float0, (GridTemplateUnit) int1);
         public UIMeasurement AsUIMeasurement => new UIMeasurement(float0, (UIMeasurementUnit) int1);
         public UIFixedLength AsUIFixedLength => new UIFixedLength(float0, (UIFixedUnit) int1);
         public OffsetMeasurement AsOffsetMeasurement => new OffsetMeasurement(float0, (OffsetMeasurementUnit) int1);
@@ -495,11 +466,11 @@ namespace UIForia.Rendering {
             return new StyleProperty(StylePropertyId.GridLayoutDirection, (int) direction);
         }
 
-        public static StyleProperty GridLayoutColAutoSize(GridTrackSize autoColSize) {
+        public static StyleProperty GridLayoutColAutoSize(IReadOnlyList<GridTrackSize> autoColSize) {
             return new StyleProperty(StylePropertyId.GridLayoutColAutoSize, autoColSize);
         }
 
-        public static StyleProperty GridLayoutRowAutoSize(GridTrackSize autoRowSize) {
+        public static StyleProperty GridLayoutRowAutoSize(IReadOnlyList<GridTrackSize> autoRowSize) {
             return new StyleProperty(StylePropertyId.GridLayoutRowAutoSize, autoRowSize);
         }
 

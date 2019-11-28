@@ -188,13 +188,11 @@ namespace UIForia.Systems {
 
                 layoutBox.traversalIndex = layoutSystem.traversalIndex++;
 
-                if ((layoutBox.flags & LayoutBoxFlags.HorizontalSizeChanged) != 0) {
-                    layoutBox.flags &= ~LayoutBoxFlags.HorizontalSizeChanged;
+                if ((layoutBox.flags & LayoutBoxFlags.RequireLayoutHorizontal) != 0) {
                     layoutBox.MarkContentParentsHorizontalDirty(frameId, LayoutReason.DescendentStyleSizeChanged);
                 }
 
-                if ((layoutBox.flags & LayoutBoxFlags.VerticalSizeChanged) != 0) {
-                    layoutBox.flags &= ~LayoutBoxFlags.VerticalSizeChanged;
+                if ((layoutBox.flags & LayoutBoxFlags.RequireLayoutVertical) != 0) {
                     layoutBox.MarkContentParentsVerticalDirty(frameId, LayoutReason.DescendentStyleSizeChanged);
                 }
 

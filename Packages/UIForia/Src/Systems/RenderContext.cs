@@ -299,6 +299,23 @@ namespace UIForia.Rendering {
             Vector4 uvs = default;
 
             if (!ReferenceEquals(geometry.mainTexture, null)) {
+                // if !textureAtlas.CanBeAtlased(geometry.mainTexture)
+                //     break batch as needed
+                // AtlasResult result = textureAtlas.Reference(geometry.mainTexture, out uvRect)
+                // if result == AtlasResult.AtlasFullyOccupied -- atlas has no space for texture because every existing texture in atlas will render and cannot be evicted
+                //     start new atlas
+                // else if result == AtlasResult.Success
+                //      cool, render and move on
+                // else if result == AtlasResult.TextureTooLarge
+                //      nope, can't be atlased, break batch but don't start a new atlas
+                
+                // Vector4 uvRect = default;
+                // if(textureAtlas.Reference(geometry.mainTexture, out uvRect)) {
+                //     remap uvs = true;
+                // }
+                // else
+                // break batch
+                
                 // todo -- if UVs are transformed don't use sprite atlas
 //                if (texturePacker.TryPackTexture(geometry.mainTexture, out uvs)) {
 //                    texture = spriteAtlas;

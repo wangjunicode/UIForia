@@ -6,6 +6,7 @@ using UIForia.Layout;
 using UIForia.Layout.LayoutTypes;
 using UIForia.Parsing.Style.AstNodes;
 using UIForia.Rendering;
+using UIForia.Systems;
 using UIForia.Text;
 using UIForia.Util;
 using UnityEngine;
@@ -628,120 +629,234 @@ namespace UIForia.Compilers.Style {
             return gridTrackSizes;
         }
 
+        public static GridCellSize MapGridCellSize(StyleASTNode node, StyleCompileContext context) {
+            GridCellSize cellSize = default;
+
+            if (node is MeasurementNode measurementNode) {
+                cellSize.unit = MapGridTemplateUnit(measurementNode.unit, context);
+
+                float value = MapNumber(measurementNode.value, context);
+                if (cellSize.unit == GridTemplateUnit.Percent) {
+                    value *= 0.01f;
+                }
+
+                cellSize.value = value;
+                return cellSize;
+            }
+
+            throw new CompileException("Failed to map Grid Cell Size");
+        }
 
         private static GridTrackSize MapGridTrackSize(StyleASTNode trackSize, StyleCompileContext context) {
             StyleASTNode dereferencedValue = context.GetValueForReference(trackSize);
+
+            // 1fr
+            // 100px
+
+            // grow(base, frs, growLimit)
+            // shrink(base, frs, shrinkLimit)
+            // stretch(base, shrinkLimit, growLimit
+            // stretch(base, frs, shrinkLimit, growLimit
+            // stretch(base, shrink frs, shrinkLimit, grow frs, growLimit)
+
             switch (dereferencedValue) {
                 case StyleLiteralNode literalNode:
-                    if (literalNode.type == StyleASTNodeType.StringLiteral && literalNode.rawValue.ToLower() == "auto") {
-                        // todo revisit this default value and replace this with something else like 1mx? 
-                        return GridTrackSize.Unset;
-                    }
-                    else if (literalNode.type == StyleASTNodeType.NumericLiteral && TryParseFloat(literalNode.rawValue, out float number)) {
-                        return new GridTrackSize(number);
+                    if (literalNode.type == StyleASTNodeType.NumericLiteral && TryParseFloat(literalNode.rawValue, out float number)) {
+                        GridCellDefinition cellDefinition = default;
+                        cellDefinition.baseSize.value = number;
+                        cellDefinition.baseSize.unit = GridTemplateUnit.Pixel;
+                        cellDefinition.growFactor = 0;
+                        cellDefinition.shrinkFactor = 0;
+                        cellDefinition.shrinkLimit.value = number;
+                        cellDefinition.shrinkLimit.unit = GridTemplateUnit.Pixel;
+                        cellDefinition.growLimit.value = number;
+                        cellDefinition.growLimit.unit = GridTemplateUnit.Pixel;
+                        return new GridTrackSize(cellDefinition);
                     }
 
                     throw new CompileException(context.fileName, literalNode, $"Could not create a grid track size out of the value {literalNode}.");
 
-                case MeasurementNode measurementNode:
+                case MeasurementNode measurementNode: {
                     GridTemplateUnit unit = MapGridTemplateUnit(measurementNode.unit, context);
+
                     float value = MapNumber(measurementNode.value, context);
                     if (unit == GridTemplateUnit.Percent) {
                         value *= 0.01f;
                     }
 
-                    return new GridTrackSize(value, unit);
+                    GridCellDefinition cellDefinition = default;
+
+                    if (unit != GridTemplateUnit.FractionalRemaining) {
+                        cellDefinition.baseSize.value = value;
+                        cellDefinition.baseSize.unit = unit;
+                        cellDefinition.growFactor = 0;
+                        cellDefinition.shrinkFactor = 0;
+                        cellDefinition.shrinkLimit.value = value;
+                        cellDefinition.shrinkLimit.unit = unit;
+                        cellDefinition.growLimit.value = value;
+                        cellDefinition.growLimit.unit = unit;
+                    }
+                    else {
+                        cellDefinition.baseSize.value = 0;
+                        cellDefinition.baseSize.unit = GridTemplateUnit.Pixel;
+                        cellDefinition.growFactor = (int) value;
+                        cellDefinition.shrinkFactor = 0;
+                        cellDefinition.shrinkLimit.value = 0;
+                        cellDefinition.shrinkLimit.unit = GridTemplateUnit.Pixel;
+                        cellDefinition.growLimit.value = float.MaxValue;
+                        cellDefinition.growLimit.unit = GridTemplateUnit.Pixel;
+                    }
+
+                    return new GridTrackSize(cellDefinition);
+                }
 
                 case StyleFunctionNode functionNode:
 
-                    GridTrackSize size = default;
-
                     switch (functionNode.identifier.ToLower()) {
-                        case "repeat":
-                            if (functionNode.children.Count < 2) {
-                                throw new CompileException(context.fileName, trackSize, $"Had a hard time parsing that track size: {trackSize}. Repeat must have at least two arguments.");
+                        case "cell": {
+                            // cell(base, shrink, grow, factor = 1)
+                            // cell(base, shrink, grow, factor)
+
+                            GridCellDefinition cellDefinition = default;
+
+                            if (functionNode.children.Count != 3 && functionNode.children.Count != 4 && functionNode.children.Count != 5) {
+                                throw new CompileException(context.fileName, trackSize, $"Had a hard time parsing that track size: {trackSize}. cell() must have three, four, or five arguments.");
                             }
 
-                            StyleASTNode firstChild = context.GetValueForReference(functionNode.children[0]);
-                            if (firstChild is StyleLiteralNode literalNode) {
-                                if (literalNode.type != StyleASTNodeType.NumericLiteral) {
-                                    throw new CompileException(context.fileName, trackSize, $"Had a hard time parsing that track size: {trackSize}. The first argument of repeat() must be a positive integer > 0 or one of the keywords {k_RepeatFill} or {k_RepeatFit}.");
-                                }
+                            if (functionNode.children.Count == 3) {
+                                StyleASTNode arg0 = context.GetValueForReference(functionNode.children[0]);
+                                StyleASTNode arg1 = context.GetValueForReference(functionNode.children[1]);
+                                StyleASTNode arg2 = context.GetValueForReference(functionNode.children[2]);
 
-                                float v = MapNumber(literalNode, context);
-                                if (Mathf.Floor(v) != v || v < 1) {
-                                    throw new CompileException(context.fileName, trackSize, $"Had a hard time parsing that track size: {trackSize}. The first argument of repeat() must be a positive integer > 0 or one of the keywords {k_RepeatFill} or {k_RepeatFit}.");
-                                }
+                                cellDefinition.baseSize = MapGridCellSize(arg0, context);
 
-                                size.value = v;
-                                size.type = GridTrackSizeType.Repeat;
+                                cellDefinition.shrinkFactor = 1;
+                                cellDefinition.shrinkLimit = MapGridCellSize(arg1, context);
+
+                                cellDefinition.growFactor = 1;
+                                cellDefinition.growLimit = MapGridCellSize(arg2, context);
+                                return new GridTrackSize(cellDefinition);
                             }
-                            else if (firstChild is StyleIdentifierNode identifierNode) {
-                                if (identifierNode.name == k_RepeatFill) {
-                                    size.type = GridTrackSizeType.RepeatFill;
-                                }
-                                else if (identifierNode.name == k_RepeatFit) {
-                                    size.type = GridTrackSizeType.RepeatFit;
-                                }
-                                else {
-                                    throw new CompileException(context.fileName, trackSize, $"Had a hard time parsing that track size: {trackSize}. The first argument of repeat() must be a positive integer > 0 or one of the keywords {k_RepeatFill} or {k_RepeatFit}.");
-                                }
+                            else if (functionNode.children.Count == 4) {
+                                StyleASTNode arg0 = context.GetValueForReference(functionNode.children[0]);
+                                StyleASTNode arg1 = context.GetValueForReference(functionNode.children[1]);
+                                StyleASTNode arg2 = context.GetValueForReference(functionNode.children[2]);
+                                StyleASTNode arg3 = context.GetValueForReference(functionNode.children[3]);
+
+                                int factor = (int) MapNumber(arg3, context);
+                                cellDefinition.baseSize = MapGridCellSize(arg0, context);
+
+                                cellDefinition.shrinkFactor = factor;
+                                cellDefinition.shrinkLimit = MapGridCellSize(arg1, context);
+
+                                cellDefinition.growFactor = factor;
+                                cellDefinition.growLimit = MapGridCellSize(arg2, context);
+                                return new GridTrackSize(cellDefinition);
+                            }
+                            else if (functionNode.children.Count == 5) {
+                                // cell(base, shrink, shrink factor, grow, grow factor)
+
+                                StyleASTNode arg0 = context.GetValueForReference(functionNode.children[0]);
+                                StyleASTNode arg1 = context.GetValueForReference(functionNode.children[1]);
+                                StyleASTNode arg2 = context.GetValueForReference(functionNode.children[2]);
+                                StyleASTNode arg3 = context.GetValueForReference(functionNode.children[3]);
+                                StyleASTNode arg4 = context.GetValueForReference(functionNode.children[4]);
+
+                                cellDefinition.baseSize = MapGridCellSize(arg0, context);
+
+                                cellDefinition.shrinkLimit = MapGridCellSize(arg1, context);
+                                cellDefinition.shrinkFactor = (int) MapNumber(arg2, context);
+
+                                cellDefinition.growLimit = MapGridCellSize(arg3, context);
+                                cellDefinition.growFactor = (int) MapNumber(arg4, context);
+                                ;
+                                return new GridTrackSize(cellDefinition);
+                            }
+
+                            return default;
+                        }
+                        case "shrink": {
+                            if (functionNode.children.Count != 2 && functionNode.children.Count != 3) {
+                                throw new CompileException(context.fileName, trackSize, $"Had a hard time parsing that track size: {trackSize}. shrnk() must have two arguments.");
+                            }
+
+                            GridCellDefinition cellDefinition = default;
+
+                            if (functionNode.children.Count == 2) {
+                                StyleASTNode arg0 = context.GetValueForReference(functionNode.children[0]);
+                                StyleASTNode arg1 = context.GetValueForReference(functionNode.children[1]);
+
+                                cellDefinition.baseSize = MapGridCellSize(arg0, context);
+
+                                cellDefinition.shrinkFactor = 1;
+                                cellDefinition.shrinkLimit = MapGridCellSize(arg1, context);
+
+                                cellDefinition.growFactor = 0;
+                                cellDefinition.growLimit.value = 0;
+                                cellDefinition.growLimit.unit = GridTemplateUnit.Pixel;
                             }
                             else {
-                                throw new CompileException(context.fileName, trackSize, $"Had a hard time parsing that track size: {trackSize}. The first argument of repeat() must be a positive integer > 0 or one of the keywords {k_RepeatFill} or {k_RepeatFit}.");
+                                StyleASTNode arg0 = context.GetValueForReference(functionNode.children[0]);
+                                StyleASTNode arg1 = context.GetValueForReference(functionNode.children[1]);
+                                StyleASTNode arg2 = context.GetValueForReference(functionNode.children[2]);
+
+                                cellDefinition.baseSize = MapGridCellSize(arg0, context);
+                                cellDefinition.shrinkLimit = MapGridCellSize(arg1, context);
+                                cellDefinition.shrinkFactor = (int) MapNumber(arg2, context);
+
+                                cellDefinition.growFactor = 0;
+                                cellDefinition.growLimit.value = 0;
+                                cellDefinition.growLimit.unit = GridTemplateUnit.Pixel;
                             }
 
-                            size.pattern = MapGridTrackSizePattern(1, functionNode.children, context, true);
+                            return new GridTrackSize(cellDefinition);
+                        }
+                        case "grow": {
+                            GridCellDefinition cellDefinition = default;
 
-                            break;
-                        case "grow":
-                            if (functionNode.children.Count != 2) {
-                                throw new CompileException(context.fileName, trackSize, $"Had a hard time parsing that track size: {trackSize}. grow() must have two arguments.");
+                            if (functionNode.children.Count != 2 && functionNode.children.Count != 3) {
+                                throw new CompileException(context.fileName, trackSize, $"Had a hard time parsing that track size: {trackSize}. grow() must have two or three arguments.");
                             }
 
-                            size.type = GridTrackSizeType.MinMax;
-                            size.pattern = MapGridTrackSizePattern(0, functionNode.children, context, false);
+                            if (functionNode.children.Count == 2) {
+                                StyleASTNode arg0 = context.GetValueForReference(functionNode.children[0]);
+                                StyleASTNode arg1 = context.GetValueForReference(functionNode.children[1]);
 
-                            if (size.pattern.Length != 2) {
-                                throw new CompileException(context.fileName, trackSize, $"Had a hard time parsing that track size: {trackSize}. grow functions need to get exactly 2 arguments but I found {size.pattern.Length}.");
+                                cellDefinition.baseSize = MapGridCellSize(arg0, context);
+
+                                cellDefinition.growFactor = 1;
+                                cellDefinition.growLimit = MapGridCellSize(arg1, context);
+
+                                cellDefinition.shrinkFactor = 0;
+                                cellDefinition.shrinkLimit.value = 0;
+                                cellDefinition.shrinkLimit.unit = GridTemplateUnit.Pixel;
+
+                                return new GridTrackSize(cellDefinition);
                             }
+                            else {
+                                StyleASTNode arg0 = context.GetValueForReference(functionNode.children[0]);
+                                StyleASTNode arg1 = context.GetValueForReference(functionNode.children[1]);
+                                StyleASTNode arg2 = context.GetValueForReference(functionNode.children[1]);
 
-                            size.minUnit = size.pattern[0].unit;
-                            size.minValue = size.pattern[0].value;
+                                cellDefinition.baseSize = MapGridCellSize(arg0, context);
 
-                            size.maxUnit = size.pattern[1].unit;
-                            size.maxValue = size.pattern[1].value;
+                                cellDefinition.growLimit = MapGridCellSize(arg1, context);
+                                cellDefinition.growFactor = (int) MapNumber(arg2, context);
 
-                            break;
+                                cellDefinition.shrinkFactor = 0;
+                                cellDefinition.shrinkLimit.value = 0;
+                                cellDefinition.shrinkLimit.unit = GridTemplateUnit.Pixel;
+
+                                return new GridTrackSize(cellDefinition);
+                            }
+                        }
                         default:
                             throw new CompileException(context.fileName, trackSize, $"Had a hard time parsing that track size: {trackSize}. Expected a known track size function (repeat, grow, shrink) but all I got was {functionNode.identifier}");
                     }
 
-                    return size;
-
                 default:
                     throw new CompileException(context.fileName, trackSize, $"Had a hard time parsing that track size: {trackSize}.");
             }
-        }
-
-        private static GridTrackSize[] MapGridTrackSizePattern(int startIndex, LightList<StyleASTNode> nodes, StyleCompileContext context, bool allowGrowOrShrink) {
-            GridTrackSize[] retn = new GridTrackSize[nodes.Count - startIndex];
-
-            for (int index = startIndex; index < nodes.Count; index++) {
-                StyleASTNode argument = context.GetValueForReference(nodes[index]);
-                GridTrackSize trackSize = MapGridTrackSize(argument, context);
-                if (trackSize.type == GridTrackSizeType.Repeat) {
-                    throw new CompileException(argument, "You cannot nest repeats.");
-                }
-
-                if (!allowGrowOrShrink && (trackSize.type == GridTrackSizeType.MinMax)) {
-                    throw new CompileException(argument, "You cannot nest MinMaxes into each other.");
-                }
-
-                retn[index - startIndex] = trackSize;
-            }
-
-            return retn;
         }
 
         private static void MapBorders(UIStyle targetStyle, PropertyNode property, StyleCompileContext context) {

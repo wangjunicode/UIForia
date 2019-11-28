@@ -56,16 +56,7 @@ namespace UIForia.Rendering {
 
             return false;
         }
-
-        private GridTrackSize FindGridTrackSizeProperty(StylePropertyId propertyId) {
-            for (int i = 0; i < PropertyCount; i++) {
-                if (array[i].propertyId == propertyId) {
-                    return array[i].AsGridTrackSize;
-                }
-            }
-
-            return GridTrackSize.Unset;
-        }
+        
 
         private UIMeasurement FindUIMeasurementProperty(StylePropertyId propertyId) {
             for (int i = 0; i < PropertyCount; i++) {

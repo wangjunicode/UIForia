@@ -1113,18 +1113,7 @@ namespace UIForia.Editor {
             GUILayout.EndHorizontal();
             return isEditable ? new StyleProperty(property.propertyId, new OffsetMeasurement(value, unit)) : property;
         }
-
-        private static StyleProperty DrawGridTrackSize(StyleProperty property, bool isEditable) {
-            GUI.enabled = isEditable;
-            s_Content.text = StyleUtil.GetPropertyName(property);
-            GUILayout.BeginHorizontal();
-            float value = EditorGUILayout.FloatField(s_Content, property.AsGridTrackSize.minValue);
-            GridTemplateUnit unit = (GridTemplateUnit) EditorGUILayout.EnumPopup(property.AsGridTrackSize.minUnit);
-            GUI.enabled = true;
-            GUILayout.EndHorizontal();
-            return isEditable ? new StyleProperty(property.propertyId, new GridTrackSize(value, unit)) : property;
-        }
-
+        
         private static StyleProperty DrawMeasurement(StyleProperty property, bool isEditable) {
             s_Content.text = StyleUtil.GetPropertyName(property);
             GUI.enabled = isEditable;
@@ -1174,8 +1163,8 @@ namespace UIForia.Editor {
             else {
                 EditorGUILayout.LabelField(s_Content);
                 for (int i = 0; i < template.Count; i++) {
-                    float value = EditorGUILayout.FloatField(template[i].minValue);
-                    GridTemplateUnit unit = (GridTemplateUnit) EditorGUILayout.EnumPopup(template[i].minUnit);
+                  //  float value = EditorGUILayout.FloatField(template[i].minValue);
+                  //  GridTemplateUnit unit = (GridTemplateUnit) EditorGUILayout.EnumPopup(template[i].minUnit);
                 }
             }
 

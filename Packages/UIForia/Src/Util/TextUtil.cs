@@ -1,3 +1,4 @@
+using System.Text;
 using UIForia.Util;
 using Unity.Mathematics;
 using UnityEngine;
@@ -5,6 +6,8 @@ using UnityEngine;
 namespace UIForia.Text {
     
     public static class TextUtil {
+        
+        public static StringBuilder StringBuilder = new StringBuilder(1024);
 
         // whitespace processing needs to happen in two phases. the first is where we collapse whitespace and handle new lines
         // the second is what to do with trailing space and wrapping.

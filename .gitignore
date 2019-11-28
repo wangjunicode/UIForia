@@ -37,7 +37,7 @@ sysinfo.txt
 /Assets/Plugins/Editor/JetBrains/JetBrains.Rider.Unity.Editor.Plugin.Repacked.dll
 /Assets/StreamingAssets/UIForia/
 /Assets/StreamingAssets/UIForiaInternal/
-
+/Packages/UIForia/Tests/UIForiaGenerated/
 .DS_Store
 
 node_modules

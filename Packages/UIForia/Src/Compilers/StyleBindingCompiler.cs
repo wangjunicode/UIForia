@@ -5,7 +5,7 @@ using UIForia.Bindings.StyleBindings;
 using UIForia.Compilers.AliasSource;
 using UIForia.Expressions;
 using UIForia.Layout;
-using UIForia.Parsing.Expression;
+using UIForia.Parsing.Expressions;
 using UIForia.Rendering;
 using UIForia.Util;
 using UnityEngine;

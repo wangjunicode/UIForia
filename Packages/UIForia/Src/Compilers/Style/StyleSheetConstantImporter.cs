@@ -13,27 +13,24 @@ namespace UIForia.Compilers.Style {
 
         private static readonly Func<StyleConstant, string, bool> s_FindStyleConstant = (element, name) => element.name == name;
 
-        private StyleSheetImporter styleSheetImporter;
+        private readonly StyleSheetImporter styleSheetImporter;
+        private readonly List<string> currentlyResolvingConstants;
 
-        private List<string> currentlyResolvingConstants = new List<string>();
-
-        
         public StyleSheetConstantImporter(StyleSheetImporter styleSheetImporter) {
             this.styleSheetImporter = styleSheetImporter;
+            this.currentlyResolvingConstants = new List<string>();
         }
 
-        public Application application => styleSheetImporter.app;
-
         public StyleCompileContext CreateContext(LightList<StyleASTNode> rootNodes) {
-            StyleCompileContext context = new StyleCompileContext(styleSheetImporter.app);
+            StyleCompileContext context = new StyleCompileContext();
+
             // first all imports must be collected as they can be referenced in exports and consts
-            for (int index = 0; index < rootNodes.Count; index++) {
-                switch (rootNodes[index]) {
+            for (int i = 0; i < rootNodes.size; i++) {
+                switch (rootNodes[i]) {
                     case ImportNode importNode:
                         StyleSheet importedStyle = styleSheetImporter.ImportStyleSheetFromFile(importNode.source);
 
-                        LightList<StyleConstant> importedStyleConstants = LightList<StyleConstant>.Get();
-                        context.importedStyleConstants.Add(importNode.alias, importedStyleConstants);
+                        LightList<StyleConstant> importedStyleConstants = new LightList<StyleConstant>(importedStyle.constants.Length);
 
                         for (int constantIndex = 0; constantIndex < importedStyle.constants.Length; constantIndex++) {
                             StyleConstant importedStyleConstant = importedStyle.constants[constantIndex];
@@ -42,12 +39,14 @@ namespace UIForia.Compilers.Style {
                             }
                         }
 
+                        context.importedStyleConstants.Add(importNode.alias, importedStyleConstants);
+
                         break;
                 }
             }
 
             // collect all constants that could be referenced
-            for (int index = 0; index < rootNodes.Count; index++) {
+            for (int index = 0; index < rootNodes.size; index++) {
                 switch (rootNodes[index]) {
                     case ExportNode exportNode:
                         TransformConstNode(context, exportNode.constNode, true);
@@ -79,26 +78,22 @@ namespace UIForia.Compilers.Style {
                 }
             }
 
-            StyleConstant referencedConstant;
             if (constant.constReferenceNode.children.Count > 0) {
                 if (context.importedStyleConstants.ContainsKey(constant.constReferenceNode.identifier)) {
                     DotAccessNode importedConstant = (DotAccessNode) constant.constReferenceNode.children[0];
 
-                    referencedConstant = context.importedStyleConstants[constant.constReferenceNode.identifier]
+                    StyleConstant importedStyleConstant = context.importedStyleConstants[constant.constReferenceNode.identifier]
                         .Find(importedConstant.propertyName, s_FindStyleConstant);
 
-                    if (referencedConstant.name == null) {
+                    if (importedStyleConstant.name == null) {
                         throw new CompileException(importedConstant, "Could not find referenced property in imported scope.");
                     }
                 }
-                else {
-                    throw new CompileException(constant.constReferenceNode, 
-                        "Constants cannot reference members of other constants.");
-                }
+
+                throw new CompileException(constant.constReferenceNode, "Constants cannot reference members of other constants.");
             }
-            else {
-                referencedConstant = ResolveReference(context, constant.constReferenceNode);
-            }
+
+            StyleConstant referencedConstant = ResolveReference(context, constant.constReferenceNode);
 
             StyleConstant styleConstant = new StyleConstant {
                 name = constant.name,
@@ -115,7 +110,8 @@ namespace UIForia.Compilers.Style {
                 throw new CompileException(constReference, "Circular dependency detected!");
             }
 
-            foreach (var constant in context.constants) {
+            for (int i = 0; i < context.constants.Count; i++) {
+                StyleConstant constant = context.constants[i];
                 if (constant.name == constReference.identifier) {
                     // reference resolved
                     return constant;
@@ -133,8 +129,7 @@ namespace UIForia.Compilers.Style {
                 return resolvedConstant;
             }
 
-            throw new CompileException(constReference, $"Could not resolve reference {constReference}. "
-             + "Known references are: " + context.PrintConstants());
+            throw new CompileException(constReference, $"Could not resolve reference {constReference}. Known references are: " + context.PrintConstants());
         }
 
         private void TransformConstNode(StyleCompileContext context, ConstNode constNode, bool exported) {
@@ -153,5 +148,7 @@ namespace UIForia.Compilers.Style {
                 });
             }
         }
+
     }
+
 }

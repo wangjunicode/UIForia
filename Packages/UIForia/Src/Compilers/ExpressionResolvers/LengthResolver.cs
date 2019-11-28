@@ -3,7 +3,7 @@ using System.Reflection;
 using JetBrains.Annotations;
 using UIForia.Exceptions;
 using UIForia.Expressions;
-using UIForia.Parsing.Expression.AstNodes;
+using UIForia.Parsing.Expressions.AstNodes;
 using UIForia.Util;
 
 namespace UIForia.Compilers.ExpressionResolvers {

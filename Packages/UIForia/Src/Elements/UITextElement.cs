@@ -9,17 +9,13 @@ namespace UIForia.Elements {
     [TemplateTagName("Text")]
     public class UITextElement : UIElement, IStyleChangeHandler {
 
-        internal string text;
+        public string text;
         internal TextInfo textInfo;
         internal TextSpan textSpan;
 
         private bool shouldUpdateSpanStyle;
         private SVGXTextStyle spanStyle;
-
-        public UITextElement(string text = "") {
-            this.text = text ?? string.Empty;
-        }
-
+        
         internal TextInfo TextInfo => textInfo;
 
         public override void OnEnable() {

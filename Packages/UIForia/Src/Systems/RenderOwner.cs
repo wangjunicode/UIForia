@@ -42,7 +42,7 @@ namespace Src.Systems {
         }
 
         private void DrawClipShapes(RenderContext ctx) {
-            LightList<ClipData> clippers = view.Application.LayoutSystem.GetLayoutRunner(view.rootElement).clipperList;
+            LightList<ClipData> clippers = view.application.LayoutSystem.GetLayoutRunner(view.dummyRoot).clipperList;
             for (int i = 0; i < clippers.size; i++) {
                 ClipData clipData = clippers.array[i];
                 if (!clipData.isCulled && clipData.visibleBoxCount > 0) {
@@ -115,7 +115,7 @@ namespace Src.Systems {
 
         // this is intended to be run while layout is running (ie in parallel)
         public void GatherBoxDataParallel() {
-            UIElement root = view.rootElement;
+            UIElement root = view.dummyRoot;
 
             int frameId = root.Application.frameId;
 

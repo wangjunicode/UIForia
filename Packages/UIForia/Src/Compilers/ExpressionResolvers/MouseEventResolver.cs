@@ -21,7 +21,7 @@ namespace UIForia.Compilers.ExpressionResolvers {
 
             public override MouseInputEvent Evaluate(ExpressionContext context) {
                 UIElement element = (UIElement) context.currentObject;
-                return element.View.Application.InputSystem.CurrentMouseEvent;
+                return element.View.application.InputSystem.CurrentMouseEvent;
             }
 
             public override bool IsConstant() {

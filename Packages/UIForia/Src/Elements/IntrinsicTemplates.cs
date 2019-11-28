@@ -6,9 +6,7 @@ namespace UIForia.Elements {
     [TemplateTagName("Group")]
     public class UIGroupElement : UIContainerElement {
 
-        public UIGroupElement() {
-            
-        }
+ 
 
         public override string GetDisplayName() {
             return "Group";
@@ -19,10 +17,7 @@ namespace UIForia.Elements {
     [TemplateTagName("Panel")]
     public class UIPanelElement : UIContainerElement {
 
-        public UIPanelElement() {
-            
-        }
-
+      
         public override string GetDisplayName() {
             return "Panel";
         }
@@ -32,9 +27,7 @@ namespace UIForia.Elements {
     [TemplateTagName("Section")]
     public class UISectionElement : UIContainerElement {
         
-        public UISectionElement() {
-            
-        }
+       
 
         public override string GetDisplayName() {
             return "Section";
@@ -45,9 +38,6 @@ namespace UIForia.Elements {
     [TemplateTagName("Div")]
     public class UIDivElement : UIContainerElement {
 
-        public UIDivElement() {
-            
-        }
 
         public override string GetDisplayName() {
             return "Div";
@@ -58,10 +48,6 @@ namespace UIForia.Elements {
     [TemplateTagName("Header")]
     public class UIHeaderElement : UIContainerElement {
 
-        public UIHeaderElement() {
-            
-        }
-
         public override string GetDisplayName() {
             return "Header";
         }
@@ -71,9 +57,7 @@ namespace UIForia.Elements {
     [TemplateTagName("Footer")]
     public class UIFooterElement : UIContainerElement {
         
-        public UIFooterElement() {
-            
-        }
+  
 
         public override string GetDisplayName() {
             return "Footer";
@@ -85,10 +69,6 @@ namespace UIForia.Elements {
     public class UILabelElement : UITextElement {
 
         public string forElement;
-        
-        public UILabelElement(string text = "") : base(text) {
-            
-        }
 
         [OnMouseClick]
         public void OnClick() {
@@ -107,10 +87,6 @@ namespace UIForia.Elements {
     [TemplateTagName("Paragraph")]
     public class UIParagraphElement : UITextElement {
 
-        public UIParagraphElement(string text = "") : base(text) {
-            
-        }
-
         public override string GetDisplayName() {
             return "Paragraph";
         }
@@ -119,10 +95,6 @@ namespace UIForia.Elements {
 
     [TemplateTagName("Heading1")]
     public class UIHeading1Element : UITextElement {
-
-        public UIHeading1Element(string text = "") : base(text) {
-            
-        }
 
         public override string GetDisplayName() {
             return "Heading1";
@@ -133,10 +105,6 @@ namespace UIForia.Elements {
     [TemplateTagName("Heading2")]
     public class UIHeading2Element : UITextElement {
 
-        public UIHeading2Element(string text = "") : base(text) {
-            
-        }
-
         public override string GetDisplayName() {
             return "Heading2";
         }
@@ -145,11 +113,7 @@ namespace UIForia.Elements {
 
     [TemplateTagName("Heading3")]
     public class UIHeading3Element : UITextElement {
-
-        public UIHeading3Element(string text = "") : base(text) {
-            
-        }
-
+        
         public override string GetDisplayName() {
             return "Heading3";
         }
@@ -158,10 +122,7 @@ namespace UIForia.Elements {
 
     [TemplateTagName("Heading4")]
     public class UIHeading4Element : UITextElement {
-
-        public UIHeading4Element(string text = "") : base(text) {
-            
-        }
+        
 
         public override string GetDisplayName() {
             return "Heading4";
@@ -172,9 +133,6 @@ namespace UIForia.Elements {
     [TemplateTagName("Heading5")]
     public class UIHeading5Element : UITextElement {
 
-        public UIHeading5Element(string text = "") : base(text) {
-            
-        }
 
         public override string GetDisplayName() {
             return "Heading5";
@@ -184,11 +142,7 @@ namespace UIForia.Elements {
 
     [TemplateTagName("Heading6")]
     public class UIHeading6Element : UITextElement {
-
-        public UIHeading6Element(string text = "") : base(text) {
-            
-        }
-
+        
         public override string GetDisplayName() {
             return "Heading6";
         }

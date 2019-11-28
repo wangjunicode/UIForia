@@ -6,8 +6,10 @@ using SVGX;
 using UIForia.Compilers.Style;
 using UIForia.Elements;
 using UIForia.Layout.LayoutTypes;
+using UIForia.Selectors;
 using UIForia.Systems;
 using UIForia.Templates;
+using UIForia.Text;
 using UIForia.Util;
 using UnityEngine;
 
@@ -22,7 +24,6 @@ namespace UIForia.Rendering {
         private UIStyleGroup instanceStyle;
         internal StyleState containedStates;
 
-        //private UIStyleGroupContainer implicitStyleContainer;
         private readonly LightList<StyleEntry> availableStyles;
         private readonly LightList<UIStyleGroupContainer> styleGroupContainers; // probably only need to store the names
         internal readonly IntMap<StyleProperty> propertyMap;
@@ -129,10 +130,11 @@ namespace UIForia.Rendering {
                 CreateStyleGroups(baseStyles[i], toUpdate);
             }
 
-            UIStyleGroupContainer implicitStyle = template.GetImplicitStyle(element.GetDisplayName());
-            if (implicitStyle != null) {
-                CreateStyleGroups(implicitStyle, toUpdate);
-            }
+            // todo -- reimplement without ParsedTemplate
+//            UIStyleGroupContainer implicitStyle = template.GetImplicitStyle(element.GetDisplayName());
+//            if (implicitStyle != null) {
+//                CreateStyleGroups(implicitStyle, toUpdate);
+//            }
 
             SortStyles();
 
@@ -181,10 +183,6 @@ namespace UIForia.Rendering {
                 CreateStyleEntry(toUpdate, instanceStyle, instanceStyle.focused, StyleType.Instance, StyleState.Focused, 0);
                 CreateStyleEntry(toUpdate, instanceStyle, instanceStyle.active, StyleType.Instance, StyleState.Active, 0);
             }
-
-//            if (implicitStyleContainer != null) {
-//                CreateStyleGroups(implicitStyleContainer, toUpdate);
-//            }
 
             for (int i = 0; i < count; i++) {
                 CreateStyleGroups(updatedStyleArray[i], toUpdate);
@@ -896,22 +894,33 @@ namespace UIForia.Rendering {
         }
 #endif
 
-        private static readonly StringBuilder s_Builder = new StringBuilder(128);
+
+        public void SetBaseStyles(LightList<UIStyleGroupContainer> styles) {
+            // todo -- this could be a lot faster, this is happening every frame in dynamic bindings :(
+            
+            for (int i = 0; i < styles.size; i++) {
+                if (styles[i] == null) {
+                    styles.RemoveAt(i--);
+                }
+            }
+            
+            UpdateSharedStyles(styles); 
+        }
 
         public string GetStyleNames() {
-            s_Builder.Clear();
+            TextUtil.StringBuilder.Clear();
 
             for (int i = 0; i < styleGroupContainers.Count; i++) {
                 if (styleGroupContainers[i].styleType == StyleType.Shared) {
-                    if (s_Builder.Length > 0) {
-                        s_Builder.Append(" ");
+                    if (TextUtil.StringBuilder.Length > 0) {
+                        TextUtil.StringBuilder.Append(" ");
                     }
 
-                    s_Builder.Append(styleGroupContainers[i].name);
+                    TextUtil.StringBuilder.Append(styleGroupContainers[i].name);
                 }
             }
 
-            return s_Builder.ToString();
+            return TextUtil.StringBuilder.ToString();
         }
 
         // todo -- explore caching this value
@@ -967,6 +976,13 @@ namespace UIForia.Rendering {
             };
         }
 
+        public void AddSelectorStyleGroup(Selector selector) {
+            throw new NotImplementedException();
+        }
+
+        public void RemoveSelectorStyleGroup(Selector selector) {
+            throw new NotImplementedException();
+        }
     }
 
 }

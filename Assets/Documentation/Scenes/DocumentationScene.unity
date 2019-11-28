@@ -225,6 +225,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   typeName: Tmp, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
   camera: {fileID: 534669904}
+  usePreCompiledTemplates: 0
+  applicationName: Game App
 --- !u!4 &1506585480
 Transform:
   m_ObjectHideFlags: 0

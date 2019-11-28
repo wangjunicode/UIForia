@@ -186,7 +186,7 @@ public class StyleTests {
                             style = baseStyle
                     }
             };
-            UIStyleGroupContainer container = new UIStyleGroupContainer("Name", StyleType.Shared, new[] {group});
+            UIStyleGroupContainer container = new UIStyleGroupContainer(0, "Name", StyleType.Shared, new[] {group});
             root.style.AddStyleGroupContainer(container);
 
             Assert.AreEqual(5, ComputedValue<int>(root, propName));
@@ -217,7 +217,7 @@ public class StyleTests {
             };
             group.styleType = StyleType.Shared;
 
-            UIStyleGroupContainer container = new UIStyleGroupContainer("Name", StyleType.Shared, new[] {group});
+            UIStyleGroupContainer container = new UIStyleGroupContainer(0, "Name", StyleType.Shared, new[] {group});
             root.style.AddStyleGroupContainer(container);
 
             Assert.AreEqual(15, ComputedValue<int>(root, propName));
@@ -245,7 +245,7 @@ public class StyleTests {
                             style = baseStyle
                     }
             };
-            UIStyleGroupContainer container = new UIStyleGroupContainer("Name", StyleType.Shared, new[] {group});
+            UIStyleGroupContainer container = new UIStyleGroupContainer(0, "Name", StyleType.Shared, new[] {group});
             root.style.AddStyleGroupContainer(container);
             
             Assert.AreEqual(5, ComputedValue<int>(root, propName));
@@ -368,7 +368,7 @@ public class StyleTests {
                             style = baseStyle
                     }
             };
-            UIStyleGroupContainer container = new UIStyleGroupContainer("Name", StyleType.Shared, new[] {group});
+            UIStyleGroupContainer container = new UIStyleGroupContainer(0, "Name", StyleType.Shared, new[] {group});
             root.style.AddStyleGroupContainer(container);
             Assert.AreEqual(new UIMeasurement(5000), ComputedValue<UIMeasurement>(root, propName));
 
@@ -396,7 +396,7 @@ public class StyleTests {
                         style = baseStyle
                     }
             };
-            UIStyleGroupContainer container = new UIStyleGroupContainer("Name", StyleType.Shared, new[] {group});
+            UIStyleGroupContainer container = new UIStyleGroupContainer(0, "Name", StyleType.Shared, new[] {group});
             root.style.AddStyleGroupContainer(container);
             Assert.AreEqual(new UIMeasurement(1500), ComputedValue<UIMeasurement>(root, propName));
 
@@ -423,7 +423,7 @@ public class StyleTests {
                             style = baseStyle
                     }
             };
-            UIStyleGroupContainer container = new UIStyleGroupContainer("Name", StyleType.Shared, new[] {group});
+            UIStyleGroupContainer container = new UIStyleGroupContainer(0, "Name", StyleType.Shared, new[] {group});
             root.style.AddStyleGroupContainer(container);
             Assert.AreEqual(new UIMeasurement(500), ComputedValue<UIMeasurement>(root, propName));
 

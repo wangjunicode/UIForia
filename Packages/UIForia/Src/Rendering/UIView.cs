@@ -1,11 +1,9 @@
 using System;
 using UIForia.Elements;
 using UIForia.Layout;
-using UIForia.Rendering;
 using UIForia.Templates;
 using UIForia.Util;
 using UnityEngine;
-using UnityEngine.Rendering;
 using Application = UIForia.Application;
 
 public class UIViewRootElement : UIElement {
@@ -35,27 +33,27 @@ public class UIView {
     public Rect Viewport { get; set; }
     // this might want to be changed but so many test expect this that I dont' want to right now
 
-    public UIElement RootElement => rootElement;
+    public UIElement RootElement {
+        get {
+            if (dummyRoot?.children == null) return null;
+            return dummyRoot.GetChild(0);
+        }
+    }
+
     public float ScaleFactor { get; set; } = 1f;
 
     internal Matrix4x4 matrix;
-    internal Size size;
 
     internal Vector3 position;
-    internal Vector3 scale;
-    internal Quaternion rotation;
 
     public readonly int id;
-    public readonly Application Application;
+    public readonly Application application;
     public readonly string name;
     public RenderTexture renderTexture;
 
-    internal LightList<UIElement> elements;
     internal LightList<UIElement> visibleElements;
-    internal UIViewRootElement rootElement;
+    internal UIViewRootElement dummyRoot;
     private int elementCount;
-    
-    public bool clipOverflow;
 
     public bool focusOnMouseDown;
     public bool sizeChanged;
@@ -63,87 +61,73 @@ public class UIView {
     internal UIView(int id, string name, Application app, Rect viewportRect, int depth, Type elementType, string template = null) {
         this.id = id;
         this.name = name;
-        this.Application = app;
+        this.application = app;
         this.Viewport = viewportRect;
         this.Depth = depth;
         this.m_Template = template;
         this.m_ElementType = elementType;
-        this.rotation = Quaternion.identity;
-        this.scale = Vector3.one;
         this.position = viewportRect.position;
-        this.size = new Size(Screen.width, Screen.height);
-        this.elements = new LightList<UIElement>(32);
         this.visibleElements = new LightList<UIElement>(32);
-        this.rootElement = new UIViewRootElement();
-        this.rootElement.flags |= UIElementFlags.Enabled;
-        this.rootElement.flags |= UIElementFlags.AncestorEnabled;
-        this.rootElement.View = this;
+        this.dummyRoot = new UIViewRootElement();
+        this.dummyRoot.flags |= UIElementFlags.Enabled;
+        this.dummyRoot.flags |= UIElementFlags.AncestorEnabled;
+        this.dummyRoot.View = this;
         this.sizeChanged = true;
     }
 
     internal UIView(int id, string name, Application app, Rect viewportRect, int depth) {
         this.id = id;
         this.name = name;
-        this.Application = app;
+        this.application = app;
         this.Viewport = viewportRect;
         this.Depth = depth;
-        this.rotation = Quaternion.identity;
-        this.scale = Vector3.one;
         this.position = viewportRect.position;
-        this.size = new Size(Screen.width, Screen.height);
-        this.elements = new LightList<UIElement>(32);
         this.visibleElements = new LightList<UIElement>(32);
-        this.rootElement = new UIViewRootElement();
-        this.rootElement.flags |= UIElementFlags.Enabled;
-        this.rootElement.flags |= UIElementFlags.AncestorEnabled;
-        this.rootElement.style.SetClipBehavior(ClipBehavior.Never, StyleState.Normal);
-        this.rootElement.View = this;
+        this.dummyRoot = new UIViewRootElement();
+        this.dummyRoot.flags |= UIElementFlags.Enabled;
+        this.dummyRoot.flags |= UIElementFlags.AncestorEnabled;
+        this.dummyRoot.View = this;
+        this.sizeChanged = true;
+    }
+
+    internal UIView(Application application) {
+        this.id = 0;
+        this.name = "Default";
+        this.application = application;
+        this.visibleElements = new LightList<UIElement>(32);
+        this.dummyRoot = (UIViewRootElement) application.CreateElementFromPoolWithType(typeof(UIViewRootElement), null, 0, 0, 0);
+        this.dummyRoot.flags |= UIElementFlags.Enabled;
+        this.dummyRoot.flags |= UIElementFlags.AncestorEnabled;
+        this.dummyRoot.View = this;
         this.sizeChanged = true;
     }
 
     public UIElement AddChild(UIElement element) {
-        Application.InsertChild(rootElement, element, (uint) rootElement.children.Count);
+        application.InsertChild(dummyRoot, element, (uint) dummyRoot.children.Count);
         return element;
     }
 
     internal void Initialize() {
-        elementCount = 1;
-        sizeChanged = true;
-        rootElement.children.Clear();
-        if (m_ElementType == null) {
-            return;
-        }
-        
-        UIElement child = null;
-        if (m_Template != null) {
-            child = Application.templateParser.ParseTemplateFromString(m_ElementType, m_Template).Create();
-        }
-        else {
-            child = Application.templateParser.GetParsedTemplate(m_ElementType).Create();
-        }
-
-        if (child != null) {
-            this.rootElement.AddChild(child);
-        }
+        throw new NotImplementedException("Initialize should no longer be called");
+//        elementCount = 1;
+//        sizeChanged = true;
+//        rootElement.children.Clear();
+//        if (m_ElementType == null) {
+//            return;
+//        }
+//
+//        UIElement child = null;
+//
+//        application.InsertChild(rootElement, child, (uint) rootElement.children.size);
     }
-    
+
     public int GetElementCount() {
         return elementCount;
     }
 
-    public void SetZIndex() { }
-
-    public void SetCamera(Camera camera, CameraEvent renderHook) { }
-
-    public void SetRenderTexture(RenderTexture texture) { }
-
     public void Destroy() {
-        this.Application.RemoveView(this);
+        application.RemoveView(this);
     }
-
-    public void BeginAddingElements() { }
-
-    public void EndAddingElements() { }
 
     internal void ElementRegistered(UIElement element) {
         elementCount++;
@@ -175,6 +159,7 @@ public class UIView {
         if (position != Viewport.position) {
             sizeChanged = true;
         }
+
         Viewport = new Rect(position.x, position.y, Viewport.width, Viewport.height);
     }
 
@@ -182,24 +167,22 @@ public class UIView {
         if (width != Viewport.width || height != Viewport.height) {
             sizeChanged = true;
         }
+
         Viewport = new Rect(Viewport.x, Viewport.y, width, height);
     }
 
     public UIElement CreateElement<T>() {
-        ParsedTemplate parsedTemplate = Application.templateParser.GetParsedTemplate(typeof(T));
-        if (parsedTemplate == null) {
-            return null;
-        }
+        throw new NotImplementedException();
 
-        try {
-            // todo -- shouldn't auto - add to child list
-            UIElement element = parsedTemplate.Create();
-            rootElement.AddChild(element);
-            return element;
-        }
-        catch {
-            throw;
-        }
+//        ParsedTemplate parsedTemplate = application.templateParser.GetParsedTemplate(typeof(T));
+//        if (parsedTemplate == null) {
+//            return null;
+//        }
+//
+//        // todo -- shouldn't auto - add to child list
+//        UIElement element = parsedTemplate.Create();
+//        rootElement.AddChild(element);
+//        return element;
     }
 
     /// <summary>
@@ -207,7 +190,7 @@ public class UIView {
     /// </summary>
     /// <returns>true in case the depth has been changed in order to get focus</returns>
     public bool RequestFocus() {
-        var views = Application.GetViews();
+        var views = application.GetViews();
         if (focusOnMouseDown && Depth < views.Length - 1) {
             for (var index = 0; index < views.Length; index++) {
                 UIView view = views[index];
@@ -215,11 +198,13 @@ public class UIView {
                     view.Depth--;
                 }
             }
+
             Depth = views.Length - 1;
-            Application.SortViews();
+            application.SortViews();
             return true;
         }
 
         return false;
     }
+
 }

@@ -8,8 +8,9 @@ using UIForia.Templates;
 using UIForia.Util;
 using UnityEngine;
 
-namespace UIForia.Parsing.Expression {
+namespace UIForia.Parsing.Expressions {
 
+    // todo -- deprecate
     public class TemplateParser {
 
         private readonly Dictionary<Type, ParsedTemplate> parsedTemplates = new Dictionary<Type, ParsedTemplate>();
@@ -59,22 +60,23 @@ namespace UIForia.Parsing.Expression {
         }
 
         private ParsedTemplate ParseTemplateFromType(Type type) {
-            ProcessedType processedType = TypeProcessor.GetProcessedType(type);
+            ProcessedType processedType = TypeProcessor.FindProcessedType(type);
 
-            string template = processedType.GetTemplate(app.TemplateRootPath);
-            if (template == null) {
+            TemplateDefinition template = processedType.GetTemplate(app.TemplateRootPath);
+            if (template.contents == null) {
                 throw new TemplateParseException(processedType.GetTemplatePath(), "Template not found");
             }
 
-            XDocument doc = Parse(type, template);
-
-            try {
-                return ParseTemplate(processedType.GetTemplatePath(), processedType.rawType, doc);
-            }
-            catch (TemplateParseException pe) {
-                pe.SetFileName(processedType.GetTemplatePath());
-                throw;
-            }
+            return null;
+//            XDocument doc = Parse(type, template);
+//
+//            try {
+//                return ParseTemplate(processedType.GetTemplatePath(), processedType.rawType, doc);
+//            }
+//            catch (TemplateParseException pe) {
+//                pe.SetFileName(processedType.GetTemplatePath());
+//                throw;
+//            }
         }
 
         private XDocument Parse(Type rootType, string template) {

@@ -10,8 +10,6 @@
 //
 //namespace LifeCycle {
 //
-//    // todo --- these tests don't make sense anymore w/o ready, rewrite them!
-//    
 //    [TestFixture]
 //    public class LifeCycleTests {
 //
@@ -61,6 +59,7 @@
 //            public static List<string> output;
 //
 //            public Action<UIElement> onCreate;
+//            public Action<UIElement> onReady;
 //            public Action<UIElement> onEnable;
 //            public Action<UIElement> onDisable;
 //            public Action<UIElement> onUpdate;
@@ -90,6 +89,11 @@
 //                output.Add(name + ".create");
 //                onCreate?.Invoke(this);
 //            }
+//
+////            public override void OnReady() {
+////                output.Add(name + ".ready");
+////                onReady?.Invoke(this);
+////            }
 //
 //            public override void OnEnable() {
 //                output.Add(name + ".enable");
@@ -125,6 +129,7 @@
 //            Assert.AreEqual(new[] {
 //                "root.create",
 //                "root.enable",
+//                "root.ready"
 //            }, list.ToArray());
 //        }
 //
@@ -256,7 +261,7 @@
 //                new LifeCycleElement("child1")
 //            );
 //
-//            root.onCreate = (e) => {
+//            root.onReady = (e) => {
 //                e.SetEnabled(false);
 //                e.SetEnabled(true);
 //            };
@@ -360,7 +365,7 @@
 //
 //            LifeCycleElement root = new LifeCycleElement("root");
 //
-//            root.onCreate = (el) => {
+//            root.onReady = (el) => {
 //                LifeCycleElement child0 = new LifeCycleElement("child0");
 //                child0.onCreate = (e) => { e.AddChild(new LifeCycleElement("child0_0")); };
 //                el.AddChild(child0);
@@ -391,7 +396,7 @@
 //
 //            LifeCycleElement root = new LifeCycleElement("root");
 //
-//            root.onCreate = (el) => {
+//            root.onReady = (el) => {
 //                LifeCycleElement child0 = new LifeCycleElement("child0");
 //                child0.onCreate = (e) => { e.AddChild(new LifeCycleElement("child0_0")); };
 //                child0.SetEnabled(false);
@@ -463,7 +468,7 @@
 //                LifeCycleElement lifeCycleElement = new LifeCycleElement("s1");
 //                root.AddChild(lifeCycleElement);
 //
-//                lifeCycleElement.onCreate = s1e => { uiElement.AddChild(new LifeCycleElement("child0_sub1")); };
+//                lifeCycleElement.onReady = s1e => { uiElement.AddChild(new LifeCycleElement("child0_sub1")); };
 //            };
 //
 //            view.AddChild(root);
@@ -472,11 +477,15 @@
 //                "root.create",
 //                "child0.create",
 //                "s1.create",
-//                "child0_sub1.create",
 //                "root.enable",
 //                "child0.enable",
 //                "s1.enable",
+//                "root.ready",
+//                "child0.ready",
+//                "s1.ready",
+//                "child0_sub1.create",
 //                "child0_sub1.enable",
+//                "child0_sub1.ready",
 //            }, list.ToArray());
 //        }
 //

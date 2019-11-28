@@ -8,7 +8,9 @@ namespace UIForia.Rendering {
         public LightList<IRunCommand> runCommands { get; internal set; }
 
         public static UIStyleRunCommand CreateInstance() {
-            return new UIStyleRunCommand() {style = new UIStyle()};
+            return new UIStyleRunCommand() {
+                style = new UIStyle()
+            };
         }
 
     }

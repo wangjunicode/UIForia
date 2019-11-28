@@ -1,16 +1,8 @@
 using System;
-using UIForia.Elements;
+using UIForia.Util;
 
 namespace UIForia.Compilers {
 
-    public enum SlotType : ushort {
-
-        Element = 0,
-        Template = 1
-
-    }
-
-    
     public struct SlotDefinition {
 
         public const byte k_UnassignedParent = 255;
@@ -18,20 +10,22 @@ namespace UIForia.Compilers {
         public string tagName;
         public short slotId;
         public SlotType slotType;
+        public StructStack<ContextVariableDefinition> contextVariables;
         
         public byte parentSlotId_0;
         public byte parentSlotId_1;
         public byte parentSlotId_2;
         public byte parentSlotId_3;
 
-        public SlotDefinition(string tagName) {
+        public SlotDefinition(string tagName, StructStack<ContextVariableDefinition> contextVariables) {
             this.tagName = tagName;
+            this.contextVariables = contextVariables;
             this.slotId = -1;
             this.parentSlotId_0 = k_UnassignedParent;
             this.parentSlotId_1 = k_UnassignedParent;
             this.parentSlotId_2 = k_UnassignedParent;
             this.parentSlotId_3 = k_UnassignedParent;
-            this.slotType = SlotType.Element;
+            this.slotType = SlotType.Override;
         }
         
         public int this[int i] {

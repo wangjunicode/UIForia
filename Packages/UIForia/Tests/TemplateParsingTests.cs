@@ -3,7 +3,7 @@
  using UIForia.Attributes;
  using UIForia.Elements;
  using UIForia.Exceptions;
- using UIForia.Parsing.Expression;
+ using UIForia.Parsing.Expressions;
  using UIForia.Templates;
  using UnityEngine;
 

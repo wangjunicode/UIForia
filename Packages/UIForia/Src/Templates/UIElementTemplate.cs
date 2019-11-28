@@ -5,7 +5,8 @@ using UIForia.Bindings;
 using UIForia.Compilers.ExpressionResolvers;
 using UIForia.Elements;
 using UIForia.Expressions;
-using UIForia.Parsing.Expression;
+using UIForia.Parsing;
+using UIForia.Parsing.Expressions;
 using UIForia.Util;
 using UnityEngine;
 
@@ -75,17 +76,7 @@ namespace UIForia.Templates {
                 return;
             }
 
-            templateToExpand = app.templateParser.GetParsedTemplate(rootType);
-
-            Action<IList<ExpressionAliasResolver>, AttributeList> getResolvers = TypeProcessor.GetProcessedType(elementType).getResolvers;
-
-            if (getResolvers != null) {
-                resolvers = ListPool<ExpressionAliasResolver>.Get();
-                getResolvers.Invoke(resolvers, new AttributeList(attributes));
-                for (int i = 0; i < resolvers.Count; i++) {
-                    template.compiler.AddAliasResolver(resolvers[i]);
-                }
-            }
+            templateToExpand = null;// app.templateParser.GetParsedTemplate(rootType);
 
             ResolveBaseStyles(template);
             CompileStyleBindings(template);

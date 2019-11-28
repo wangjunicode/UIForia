@@ -2,11 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using UIForia.Exceptions;
-using UIForia.Parsing.Expression.AstNodes;
-using UIForia.Parsing.Expression.Tokenizer;
+using UIForia.Parsing.Expressions.AstNodes;
+using UIForia.Parsing.Expressions.Tokenizer;
 using UIForia.Util;
 
-namespace UIForia.Parsing.Expression {
+namespace UIForia.Parsing.Expressions {
 
     public struct ExpressionParser {
 

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
 using UIForia.Compilers;
-using UIForia.Parsing.Expression.AstNodes;
+using UIForia.Parsing.Expressions.AstNodes;
 using UIForia.Parsing.Style.AstNodes;
 using Expression = UIForia.Expressions.Expression;
 
@@ -47,6 +47,10 @@ namespace UIForia.Exceptions {
 
         // todo -- add more debug info to these and make them actually useful. These are basically placeholder but need help to be really useful to people
 
+        public static CompileException MissingAliasResolver(string aliasName) {
+            return new CompileException($"No alias resolvers were registered that could handle alias {aliasName}");
+        }
+        
         public static CompileException NoStatementsRootBlock() {
             return new CompileException($"Cannot compile the lambda because there are not statements emitted in the main block of the function");
         }
@@ -183,8 +187,13 @@ namespace UIForia.Exceptions {
             return new CompileException($"Unable to find a suitable constructor on type {type} that accepts {BuildArgumentList()}");
         }
 
+        public static CompileException UnresolvedMethod(Type type, string methodName) {
+            return new CompileException($"Unable to find a method called `{methodName}` on type {type}");
+        }
 
-
+        public static CompileException UnresolvedFieldOrProperty(Type type, string fieldOrPropertyName) {
+            return new CompileException($"Unable to find a field or property called `{fieldOrPropertyName}` on type {type}");
+        }
     }
 
     public static class CompileExceptions {

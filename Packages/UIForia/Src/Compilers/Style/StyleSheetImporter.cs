@@ -1,45 +1,95 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using UIForia.Exceptions;
 using UIForia.Parsing.Style;
+using UIForia.Templates;
+using UIForia.Util;
 
 namespace UIForia.Compilers.Style {
 
     public class StyleSheetImporter {
 
-        public readonly Application app;
-        private readonly List<string> m_CurrentlyImportingStylesheets;
-        private readonly Dictionary<string, StyleSheet> m_CachedStyleSheets;
-        private readonly StyleSheetCompiler m_Compiler;
+        private readonly string basePath;
+        private readonly List<string> currentlyImportingStylesheets;
+        private readonly Dictionary<string, StyleSheet> cachedStyleSheets;
+        private readonly StyleSheetCompiler compiler;
+        private int importedStyleGroupCount;
         
-        public StyleSheetImporter(Application app) {
-            this.app = app;
-            m_Compiler = new StyleSheetCompiler(this);
-            m_CurrentlyImportingStylesheets = new List<string>();
-            m_CachedStyleSheets = new Dictionary<string, StyleSheet>();
+        public StyleSheetImporter(string basePath) {
+            this.basePath = basePath;
+            this.compiler = new StyleSheetCompiler(this);
+            this.currentlyImportingStylesheets = new List<string>();
+            this.cachedStyleSheets = new Dictionary<string, StyleSheet>();
         }
+
+        public int ImportedStyleSheetCount => cachedStyleSheets.Count;
         
+        public int NextStyleGroupId => importedStyleGroupCount++;
+
+        public StyleSheet Import(in StyleDefinition styleDefinition) {
+            string path = Path.Combine(basePath, styleDefinition.importPath);
+
+            if (cachedStyleSheets.TryGetValue(path, out StyleSheet retn)) {
+                return retn;
+            }
+
+            StyleSheet sheet = default;
+
+            string contents = null;
+
+            if (styleDefinition.body != null) {
+                contents = styleDefinition.body;
+            }
+            else if (File.Exists(path)) {
+                contents = File.ReadAllText(path);
+            }
+            else {
+                throw new ParseException(path + " failed to parse style, file doesn't exist or body is not defined");
+            }
+
+            currentlyImportingStylesheets.Add(path);
+
+            try {
+                sheet = compiler.Compile(path, StyleParser.Parse(contents));
+                if (sheet != null) {
+                    cachedStyleSheets.Add(path, sheet);
+                }
+            }
+            catch (ParseException ex) {
+                cachedStyleSheets.Add(path, new StyleSheet(null, null, null)); // don't reparse failed styles
+                ex.SetFileName(path);
+                throw;
+            }
+
+            currentlyImportingStylesheets.Remove(path);
+
+            return sheet;
+        }
+
         public StyleSheet ImportStyleSheetFromString(string id, string literalTemplate) {
-            if (id != null && m_CachedStyleSheets.TryGetValue(id, out StyleSheet sheet)) {
+            if (id != null && cachedStyleSheets.TryGetValue(id, out StyleSheet sheet)) {
                 return sheet;
             }
 
             try {
-                StyleSheet styleSheet = m_Compiler.Compile(id, StyleParser.Parse(literalTemplate));
+                StyleSheet styleSheet = compiler.Compile(id, StyleParser.Parse(literalTemplate));
                 if (id != null) {
-                    m_CachedStyleSheets.Add(id, styleSheet);
+                    cachedStyleSheets.Add(id, styleSheet);
                 }
 
                 return styleSheet;
             }
             catch (ParseException ex) {
-                ex.SetFileName(id); 
+                ex.SetFileName(id);
                 throw;
             }
         }
 
         public StyleSheet ImportStyleSheetFromFile(string fileName) {
-            if (m_CurrentlyImportingStylesheets.Contains(fileName)) {
+            string path = Path.Combine(basePath, fileName);
+
+            if (currentlyImportingStylesheets.Contains(path)) {
                 throw new CompileException($"Cannot import style sheet '{fileName}' because it references itself.");
             }
 
@@ -49,24 +99,11 @@ namespace UIForia.Compilers.Style {
 
             // pass 2: recursively add imported consts and compile whole file for each F(n-1) until F(1) is hit again
 
-            
-            // null check is for test cases without an app so that the importer can be used stand-alone
-
-            string path = null;
-//            if (Application.Settings.loadTemplatesFromStreamingAssets) {
-//                path = Path.Combine(Application.Settings.StreamingAssetPath, fileName);
-//            }
-//            else {
-//                path = app == null ? UnityEngine.Application.dataPath + "/" + fileName : app.TemplateRootPath + "/" + fileName;
-//            }
-
-            path = app == null ? UnityEngine.Application.dataPath + "/" + fileName : Application.Settings.GetStylePath(app.TemplateRootPath, fileName);
-            
             if (File.Exists(path)) {
                 string contents = File.ReadAllText(path);
-                m_CurrentlyImportingStylesheets.Add(fileName);
+                currentlyImportingStylesheets.Add(path);
                 StyleSheet result = ImportStyleSheetFromString(fileName, contents);
-                m_CurrentlyImportingStylesheets.Remove(fileName);
+                currentlyImportingStylesheets.Remove(fileName);
                 return result;
             }
 
@@ -74,8 +111,18 @@ namespace UIForia.Compilers.Style {
         }
 
         public void Reset() {
-            m_CachedStyleSheets.Clear();
-            m_CurrentlyImportingStylesheets.Clear();
+            cachedStyleSheets.Clear();
+            currentlyImportingStylesheets.Clear();
+        }
+
+        public StyleSheet[] GetImportedStyleSheets() {
+            StyleSheet[] retn = new StyleSheet[cachedStyleSheets.Count];
+            
+            foreach (KeyValuePair<string, StyleSheet> kvp in cachedStyleSheets) {
+                retn[kvp.Value.id] = kvp.Value;
+            }
+
+            return retn;
         }
 
     }

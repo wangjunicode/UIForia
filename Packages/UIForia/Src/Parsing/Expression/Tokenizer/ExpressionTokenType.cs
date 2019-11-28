@@ -1,4 +1,4 @@
-namespace UIForia.Parsing.Expression.Tokenizer {
+namespace UIForia.Parsing.Expressions.Tokenizer {
 
     public enum ExpressionTokenType {
         

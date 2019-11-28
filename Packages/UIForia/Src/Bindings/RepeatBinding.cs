@@ -53,7 +53,7 @@ namespace UIForia.Bindings {
 
         private void OnClear() {
             if (template == null) return;
-            element.View.Application.DestroyChildren(element);
+            element.View.application.DestroyChildren(element);
         }
 
         public void CreateOrDestroyChildren() {
@@ -77,11 +77,11 @@ namespace UIForia.Bindings {
                     // previousReference.onItemMoved -= OnItemMoved;
                     previousReference.onItemRemoved -= onRemoved;
                     previousReference.onClear -= onClear;
-                    element.View.Application.DestroyChildren(element);
+                    element.View.application.DestroyChildren(element);
                     previousReference = null;
                 }
 
-                element.View.Application.DestroyChildren(element);
+                element.View.application.DestroyChildren(element);
                 return;
             }
 
@@ -94,7 +94,7 @@ namespace UIForia.Bindings {
                 // previousReference.onItemMoved -= OnItemMoved;
                 previousReference.onItemRemoved -= onRemoved;
                 previousReference.onClear -= onClear;
-                element.View.Application.DestroyChildren(element);
+                element.View.application.DestroyChildren(element);
             }
 
             previousReference = list;

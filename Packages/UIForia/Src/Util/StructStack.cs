@@ -49,6 +49,10 @@ namespace UIForia.Util {
             array[size++] = item;
         }
 
+        public T PeekAt(int index) {
+            return array[index];
+        }
+
         public T PopUnchecked() {
             T obj = array[--size];
             array[size] = default;
@@ -77,6 +81,14 @@ namespace UIForia.Util {
 
         public T PeekUnchecked() {
             return array[size - 1];
+        }
+        
+        public StructStack<T> Clone(StructStack<T> cloneTarget = null) {
+            cloneTarget = cloneTarget ?? new StructStack<T>(size);
+            cloneTarget.EnsureCapacity(size);
+            Array.Copy(array, 0, cloneTarget.array, 0, size);
+            cloneTarget.size = size;
+            return cloneTarget;
         }
 
     }

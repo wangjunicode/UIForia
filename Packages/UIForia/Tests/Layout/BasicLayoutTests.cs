@@ -17,7 +17,7 @@ public class BasicLayoutTests {
         UIElement viewRoot = app.RootElement;
         BasicLayoutTest_GathersDirtyData root = app.RootElement.children[0] as BasicLayoutTest_GathersDirtyData;
          
-        AwesomeLayoutRunner runner = new AwesomeLayoutRunner(null, app.GetView(0).rootElement);
+        AwesomeLayoutRunner runner = new AwesomeLayoutRunner(null, app.GetView(0).dummyRoot);
         
         runner.GatherLayoutData();
 

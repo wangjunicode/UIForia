@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UITemplate>
+    <Contents>
+        
+        <DefineSlot:ThingSlot>
+            Hello Default
+        </DefineSlot:ThingSlot>
+        
+    </Contents>
+</UITemplate>

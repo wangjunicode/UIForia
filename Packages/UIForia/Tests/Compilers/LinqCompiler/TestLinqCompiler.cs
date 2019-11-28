@@ -11,8 +11,8 @@ using UIForia.Elements;
 using UIForia.Exceptions;
 using UIForia.Expressions;
 using UIForia.Extensions;
-using UIForia.Parsing.Expression;
-using UIForia.Parsing.Expression.AstNodes;
+using UIForia.Parsing.Expressions;
+using UIForia.Parsing.Expressions.AstNodes;
 using UIForia.Test.NamespaceTest.SomeNamespace;
 using UnityEngine;
 using Expression = System.Linq.Expressions.Expression;
@@ -46,11 +46,11 @@ public class TestLinqCompiler {
         public const float ConstFloatValue = 14242;
         public LinqThing self => this;
         public Indexable indexable;
-        
+
         public Func<int, int> FnReturningFunction() {
             return (int val) => val;
         }
-        
+
         public int GetIntValue(float val) {
             return (int) val;
         }
@@ -105,7 +105,7 @@ public class TestLinqCompiler {
         }
 
     }
-    
+
     public struct StructValueHolder<T> {
 
         public T value;
@@ -246,14 +246,14 @@ public class TestLinqCompiler {
         compiler.Return("thing.floatValue");
         compiler.Log();
         AssertStringsEqual(@"
-       (TestLinqCompiler.LinqThing thing) =>
+        (TestLinqCompiler.LinqThing thing) =>
         {
             float retn_val;
 
             retn_val = default(float);
             if (thing == null)
             {
-                goto retn;
+                return default(float);
             }
             retn_val = thing.floatValue;
         retn:
@@ -699,20 +699,20 @@ public class TestLinqCompiler {
         AssertStringsEqual(@"
         (TestLinqCompiler.LinqThing thing, TestLinqCompiler.LinqThing thing2, TestLinqCompiler.ExpressionErrorLogger logger) =>
         {
-        float retn_val;
+            float retn_val;
 
-        retn_val = default(float);
-        if (thing == null)
-        {
-            logger.error = ""thing was null"";
-            goto retn;
-        }
-        if (thing2 == null)
-        {
-            logger.error = ""thing2 was null"";
-            goto retn;
-        }
-        retn_val = thing.floatValue + thing2.floatValue;
+            retn_val = default(float);
+            if (thing == null)
+            {
+                logger.error = ""thing was null"";
+                return default(float);
+            }
+            if (thing2 == null)
+            {
+                logger.error = ""thing2 was null"";
+                return default(float);
+            }
+            retn_val = thing.floatValue + thing2.floatValue;
         retn:
             return retn_val;
         }
@@ -2294,7 +2294,7 @@ public class TestLinqCompiler {
             {
                 int ternaryOutput_0;
 
-                if (thing.floatValue > (float)5)
+                if (thing.floatValue > ((float)5))
                 {
                     ternaryOutput_0 = 1;
                 }
@@ -2328,7 +2328,7 @@ public class TestLinqCompiler {
             {
                 int ternaryOutput_0;
 
-                if (thing.floatValue > (float)5)
+                if (thing.floatValue > ((float)5))
                 {
                     ternaryOutput_0 = 1;
                 }
@@ -2532,13 +2532,12 @@ public class TestLinqCompiler {
 
     [Test]
     public void CompileChained_Invoke() {
-        
         LinqCompiler compiler = new LinqCompiler();
-        
+
         compiler.SetSignature<int>(
             new Parameter<LinqThing>("thing", ParameterFlags.NeverNull)
         );
-        
+
         LinqThing thing = new LinqThing();
         compiler.Return("thing.FnReturningFunction()(123)");
         compiler.Log();
@@ -2553,27 +2552,26 @@ public class TestLinqCompiler {
             nullCheck = thing.FnReturningFunction();
             if (nullCheck == null)
             {
-                goto retn;
+                return default(int);
             }
             retn_val = nullCheck(123);
         retn:
             return retn_val;
         }
         ", compiler.Print());
-        
+
         Func<LinqThing, int> fn = compiler.Compile<Func<LinqThing, int>>();
         Assert.AreEqual(123, fn(thing));
     }
-    
+
     [Test]
     public void CompileChained_Index() {
-        
         LinqCompiler compiler = new LinqCompiler();
-        
+
         compiler.SetSignature<int>(
             new Parameter<LinqThing>("thing", ParameterFlags.NeverNull)
         );
-        
+
         LinqThing thing = new LinqThing();
         compiler.SetNullCheckingEnabled(false);
         compiler.Return("thing.indexable[123456][2]");
@@ -2582,41 +2580,39 @@ public class TestLinqCompiler {
         AssertStringsEqual(@"
         (TestLinqCompiler.LinqThing thing) =>
         {
-            return (int)thing.indexable[123456][2];
+            return ((int)thing.indexable[123456][2]);
         }
         ", compiler.Print());
-        
+
         Func<LinqThing, int> fn = compiler.Compile<Func<LinqThing, int>>();
-        Assert.AreEqual((int)thing.indexable[123456][2], fn(thing));
+        Assert.AreEqual((int) thing.indexable[123456][2], fn(thing));
+    }
+
+    public class StaticThing {
+
+        public static int value;
+
+        public static void Increment() {
+            value++;
+        }
+
     }
 
     [Test]
-    public void CompileAlias_Identifier() {
+    public void CompileStatement_StaticMethodCall() {
         LinqCompiler compiler = new LinqCompiler();
-        compiler.SetSignature<int>();
-
-        compiler.AddAliasResolver("intAlias", () => ExpressionParser.Parse("12"));
-        compiler.AddAliasResolver("intAlias(,,)", () => ExpressionParser.Parse("12"));
-        compiler.AddAliasResolver("intAlias[,]", () => ExpressionParser.Parse("12"));
-        compiler.AddAliasResolver("intAlias.*()", () => ExpressionParser.Parse("12"));
-        compiler.AddAliasResolver("item", () => {
-            //int idx = FindRepeatContextIndex(element, template);
-            // return ExpressionParser.Parse(((RepeatContext)contexts[idx]).item);
-            // return ExpressionParser.Parse(((SelectContext)contexts[idx]).option);
-            // return Func<>();
-            // return ExpressionParser.Parse(ClassPath.FindContext(element, context, "item"));
-            // $event.name
-            // $event();
-            return ExpressionParser.Parse("12");
-        });
-
-        compiler.Return("$intAlias");
-
+        compiler.SetSignature();
+        StaticThing.value = 10;
+        compiler.Statement("TestLinqCompiler.StaticThing.Increment()");
+        compiler.Log();
+        Action fn = compiler.Compile<Action>();
+        fn();
+        Assert.AreEqual(11, StaticThing.value);
         AssertStringsEqual(@"
+        () =>
         {
-            return 12;
-        }            
-        ", compiler.Print());
+            TestLinqCompiler.StaticThing.Increment();
+        }", compiler.Print());
     }
 
     public void AssertStringsEqual(string a, string b) {

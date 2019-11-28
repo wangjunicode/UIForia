@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.Reflection;
 using UIForia.Exceptions;
 using UIForia.Expressions;
-using UIForia.Parsing.Expression.AstNodes;
+using UIForia.Parsing.Expressions.AstNodes;
 using UIForia.Util;
 using Debug = UnityEngine.Debug;
 

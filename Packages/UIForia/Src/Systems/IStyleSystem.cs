@@ -10,7 +10,7 @@ namespace UIForia.Systems {
         event Action<UIElement, StructList<StyleProperty>> onStylePropertyChanged;
 
         void SetStyleProperty(UIElement element, StyleProperty propertyValue);
-        
+
     }
 
 }

@@ -1,6 +1,8 @@
 using System;
+using System.Linq;
 using UIForia.Animation;
 using UIForia.Exceptions;
+using UIForia.Parsing.Style;
 using UIForia.Parsing.Style.AstNodes;
 using UIForia.Rendering;
 using UIForia.Util;
@@ -9,40 +11,46 @@ namespace UIForia.Compilers.Style {
 
     public class StyleSheetCompiler {
 
-        private readonly StyleSheetImporter styleSheetImporter;
-        private static readonly UIStyle s_ScratchStyle = new UIStyle();
-
         private StyleCompileContext context;
+        private readonly StyleSheetImporter styleSheetImporter;
+        
+        private LightList<UIStyleGroup> scratchGroupList;
+
+        private static readonly UIStyle s_ScratchStyle = new UIStyle();
 
         public StyleSheetCompiler(StyleSheetImporter styleSheetImporter) {
             this.styleSheetImporter = styleSheetImporter;
+            this.scratchGroupList = new LightList<UIStyleGroup>(32);
         }
 
-        public StyleSheet Compile(string styleId, LightList<StyleASTNode> rootNodes) {
-            // todo -- remove this allocation
+        public StyleSheet Compile(string filePath, string contents) {
+            return Compile(filePath, StyleParser.Parse(contents));
+        }
+        
+        // todo -- deprecate, use other method
+        public StyleSheet Compile(string filePath, LightList<StyleASTNode> rootNodes) {
             try {
-                context = new StyleSheetConstantImporter(styleSheetImporter).CreateContext(rootNodes);
+                context = new StyleCompileContext(); // todo resolve constants. should be done a per file level, should store all used constants without needing to later reference other files
+                //StyleCompileContext.Create(styleSheetImporter); //new StyleSheetConstantImporter(styleSheetImporter).CreateContext(rootNodes);
             }
             catch (CompileException e) {
-                e.SetFileName(styleId);
+                e.SetFileName(filePath);
                 throw;
             }
 
-            context.fileName = styleId;
+            context.fileName = filePath;
 
             // todo add imported style groups
 
-            rootNodes.Sort(
-                    (node1, node2) => {
-                        int left = (int)node1.type;
-                        int right = (int)node2.type;
-                        if (left == right)
-                            return 0;
-                        return left > right ? 1 : -1;
-                    });
+            rootNodes.Sort((node1, node2) => {
+                int left = (int) node1.type;
+                int right = (int) node2.type;
+                return left - right;
+            });
 
             int containerCount = 0;
             int animationCount = 0;
+
             for (int index = 0; index < rootNodes.Count; index++) {
                 switch (rootNodes[index]) {
                     case StyleRootNode _:
@@ -55,8 +63,9 @@ namespace UIForia.Compilers.Style {
             }
 
             StyleSheet styleSheet = new StyleSheet(
-                context.constants.ToArray(),
-                containerCount > 0 
+                styleSheetImporter.ImportedStyleSheetCount,
+                context.constants?.ToArray(),
+                containerCount > 0
                     ? new UIStyleGroupContainer[containerCount]
                     : ArrayPool<UIStyleGroupContainer>.Empty,
                 animationCount > 0
@@ -82,7 +91,6 @@ namespace UIForia.Compilers.Style {
             }
 
             context.Release();
-
             return styleSheet;
         }
 
@@ -100,6 +108,7 @@ namespace UIForia.Compilers.Style {
                 // todo throw error or log warning?
                 return new AnimationKeyFrame[0];
             }
+
             AnimationKeyFrame[] frames = new AnimationKeyFrame[animNode.keyFrameNodes.Count];
             for (int i = 0; i < animNode.keyFrameNodes.Count; i++) {
                 KeyFrameNode keyFrameNode = animNode.keyFrameNodes[i];
@@ -128,11 +137,11 @@ namespace UIForia.Compilers.Style {
 
         private AnimationOptions CompileAnimationOptions(AnimationRootNode animNode) {
             AnimationOptions options = new AnimationOptions();
-            
+
             if (animNode.optionNodes == null) {
                 return options;
             }
-            
+
             LightList<AnimationOptionNode> optionNodes = animNode.optionNodes;
             if (optionNodes == null) {
                 return options;
@@ -141,7 +150,7 @@ namespace UIForia.Compilers.Style {
             for (int i = 0; i < optionNodes.Count; i++) {
                 string optionName = optionNodes[i].optionName;
                 StyleASTNode value = optionNodes[i].value;
-                
+
                 if (optionName == nameof(AnimationOptions.duration)) {
                     options.duration = (int) StylePropertyMappers.MapNumber(value, context);
                 }
@@ -171,10 +180,10 @@ namespace UIForia.Compilers.Style {
                     options.playbackType = StylePropertyMappers.MapEnum<AnimationPlaybackType>(value, context);
                 }
                 else if (optionName == nameof(AnimationOptions.forwardStartDelay)) {
-                    options.forwardStartDelay = (int)StylePropertyMappers.MapNumber(value, context);
+                    options.forwardStartDelay = (int) StylePropertyMappers.MapNumber(value, context);
                 }
                 else if (optionName == nameof(AnimationOptions.reverseStartDelay)) {
-                    options.reverseStartDelay = (int)StylePropertyMappers.MapNumber(value, context);
+                    options.reverseStartDelay = (int) StylePropertyMappers.MapNumber(value, context);
                 }
                 else if (optionName == nameof(AnimationOptions.timingFunction)) {
                     options.timingFunction = StylePropertyMappers.MapEnum<EasingFunction>(value, context);
@@ -193,15 +202,18 @@ namespace UIForia.Compilers.Style {
             defaultGroup.name = styleRoot.identifier ?? styleRoot.tagName;
             StyleType styleType = styleRoot.tagName != null ? StyleType.Implicit : StyleType.Shared;
 
-            LightList<UIStyleGroup> styleGroups = new LightList<UIStyleGroup>(4);
-            styleGroups.Add(defaultGroup);
+            scratchGroupList.size = 0;
+            
+            scratchGroupList.Add(defaultGroup);
 
-            CompileStyleGroups(styleRoot, styleType, styleGroups, defaultGroup, styleSheetAnimations);
+            CompileStyleGroups(styleRoot, styleType, scratchGroupList, defaultGroup, styleSheetAnimations);
 
-            return new UIStyleGroupContainer(defaultGroup.name, styleType, styleGroups);
+            return new UIStyleGroupContainer(styleSheetImporter.NextStyleGroupId, defaultGroup.name, styleType, scratchGroupList.ToArray());
         }
-
+        
+        
         private void CompileStyleGroups(StyleNodeContainer root, StyleType styleType, LightList<UIStyleGroup> groups, UIStyleGroup targetGroup, AnimationData[] styleSheetAnimations) {
+
             for (int index = 0; index < root.children.Count; index++) {
                 StyleASTNode node = root.children[index];
                 switch (node) {
@@ -226,8 +238,8 @@ namespace UIForia.Compilers.Style {
                     case RunNode runNode:
                         if (runNode.commmand is AnimationCommandNode animationCommandNode) {
                             UIStyleRunCommand cmd = new UIStyleRunCommand() {
-                                    style = targetGroup.normal.style,
-                                    runCommands = targetGroup.normal.runCommands ?? new LightList<IRunCommand>(4)
+                                style = targetGroup.normal.style,
+                                runCommands = targetGroup.normal.runCommands ?? new LightList<IRunCommand>(4)
                             };
                             MapAnimationCommand(styleSheetAnimations, cmd, animationCommandNode);
                             targetGroup.normal = cmd;
@@ -264,7 +276,7 @@ namespace UIForia.Compilers.Style {
 
         private void MapAnimationCommand(AnimationData[] styleSheetAnimations, UIStyleRunCommand cmd, AnimationCommandNode animationCommandNode) {
             cmd.runCommands.Add(new AnimationRunCommand(animationCommandNode.isExit, animationCommandNode.runAction) {
-                    animationData = FindAnimationData(styleSheetAnimations, animationCommandNode.animationName),
+                animationData = FindAnimationData(styleSheetAnimations, animationCommandNode.animationName),
             });
         }
 
@@ -276,11 +288,12 @@ namespace UIForia.Compilers.Style {
                     if (animation.name == identifier.name) {
                         return animation;
                     }
-                } else {
+                }
+                else {
                     throw new CompileException(animationName, "Could not find an animation with that name or reference.");
                 }
             }
-            
+
             throw new CompileException(animationName, "Could not find an animation with that name or reference.");
         }
 
@@ -292,11 +305,12 @@ namespace UIForia.Compilers.Style {
                         // add to normal ui style set
                         StylePropertyMappers.MapProperty(targetStyle.style, propertyNode, context);
                         break;
-                    case RunNode runNode :
+                    case RunNode runNode:
                         if (runNode.commmand is AnimationCommandNode animationCommandNode) {
                             targetStyle.runCommands = targetStyle.runCommands ?? new LightList<IRunCommand>(4);
                             MapAnimationCommand(animations, targetStyle, animationCommandNode);
                         }
+
                         break;
                     default:
                         throw new CompileException(node, $"You cannot have a {node} at this level.");

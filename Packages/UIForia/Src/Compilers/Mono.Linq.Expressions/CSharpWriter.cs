@@ -32,6 +32,7 @@ using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using UIForia.Compilers;
 using UIForia.Extensions;
 using UIForia.Util;
 using UnityEngine;
@@ -72,7 +73,7 @@ namespace Mono.Linq.Expressions {
             WriteLine();
         }
 
-        void VisitParameters(LambdaExpression node) {
+        protected void VisitParameters(LambdaExpression node) {
             VisitParenthesizedList(node.Parameters, parameter => {
                 VisitType(parameter.Type);
                 WriteSpace();
@@ -101,7 +102,7 @@ namespace Mono.Linq.Expressions {
             return name;
         }
 
-        void VisitLambdaBody(LambdaExpression node) {
+        protected void VisitLambdaBody(LambdaExpression node) {
             if (node.Body.NodeType != ExpressionType.Block)
                 VisitSingleExpressionBody(node);
             else
@@ -231,11 +232,11 @@ namespace Mono.Linq.Expressions {
             }
 
             string typeName = type.ToString();
-            
+
             if (!printNamespaces && type.Namespace != null) {
                 typeName = typeName.Substring(type.Namespace.Length + 1);
             }
-            
+
             for (int i = 0; i < typeName.Length; i++) {
                 if (typeName[i] == '`') {
                     i++;
@@ -334,7 +335,7 @@ namespace Mono.Linq.Expressions {
         }
 
         public static bool printNamespaces = true;
-        
+
         private static string GetPrintableTypeName(Type type) {
             string typeName = printNamespaces ? type.FullName : type.Name;
             if (typeName.Contains("+")) {
@@ -368,6 +369,7 @@ namespace Mono.Linq.Expressions {
             });
         }
 
+        private bool lastWasComment = false;
         void VisitBlockExpressions(BlockExpression node) {
             for (int i = 0; i < node.Expressions.Count; i++) {
                 var expression = node.Expressions[i];
@@ -389,10 +391,17 @@ namespace Mono.Linq.Expressions {
 
                 Write(expression);
 
-                if (!IsActualStatement(expression))
+                if (!IsActualStatement(expression)) {
                     continue;
+                }
 
-                WriteToken(";");
+                if (lastWasComment) {
+                    lastWasComment = false;
+                }
+                else {
+                    WriteToken(";");
+                }
+
                 WriteLine();
             }
         }
@@ -452,6 +461,7 @@ namespace Mono.Linq.Expressions {
                 WriteLine();
                 Indent();
             }
+
             Visit(node.Left);
             WriteSpace();
             WriteToken(GetBinaryOperator(node.NodeType));
@@ -475,7 +485,7 @@ namespace Mono.Linq.Expressions {
         static bool IsPower(ExpressionType type) {
             return type == ExpressionType.Power || type == ExpressionType.PowerAssign;
         }
-        
+
         public static HashSet<BinaryExpression> IndentExpressions = new HashSet<BinaryExpression>();
         public static HashSet<BinaryExpression> OutdentExpressions = new HashSet<BinaryExpression>();
 
@@ -701,10 +711,12 @@ namespace Mono.Linq.Expressions {
 
         void VisitConvert(UnaryExpression node) {
             WriteToken("(");
+            WriteToken("(");
             VisitType(node.Type);
             WriteToken(")");
 
             VisitParenthesizedExpression(node.Operand);
+            WriteToken(")");
         }
 
         void VisitConvertChecked(UnaryExpression node) {
@@ -963,13 +975,55 @@ namespace Mono.Linq.Expressions {
             return node;
         }
 
-        protected override Expression VisitMethodCall(MethodCallExpression node) {
-            var method = node.Method;
+        private static MethodInfo s_Comment = typeof(ExpressionUtil).GetMethod(nameof(ExpressionUtil.Comment), BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);
+        private static MethodInfo s_CommentNewLineBefore = typeof(ExpressionUtil).GetMethod(nameof(ExpressionUtil.CommentNewLineBefore), BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);
+        private static MethodInfo s_CommentNewLineAfter = typeof(ExpressionUtil).GetMethod(nameof(ExpressionUtil.CommentNewLineAfter), BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);
 
-            if (node.Object != null)
+        private static MethodInfo s_SubscribeEvent = typeof(EventUtil).GetMethod("Subscribe");
+        
+        protected override Expression VisitMethodCall(MethodCallExpression node) {
+            MethodInfo method = node.Method;
+
+            if (method == s_Comment) {
+                ConstantExpression commentValue = node.Arguments[0] as ConstantExpression;
+                string comment = commentValue.Value as string;
+                WriteToken("// " + comment);
+                lastWasComment = true;
+                return null;
+            }
+            else if (method == s_CommentNewLineBefore) {
+                ConstantExpression commentValue = node.Arguments[0] as ConstantExpression;
+                string comment = commentValue.Value as string;
+                WriteLine();
+                WriteToken("// " + comment);
+                lastWasComment = true;
+                return null;
+            }
+            else if (method == s_CommentNewLineAfter) {
+                ConstantExpression commentValue = node.Arguments[0] as ConstantExpression;
+                string comment = commentValue.Value as string;
+                WriteToken("// " + comment);
+                WriteLine();
+                lastWasComment = true;
+                return null;
+            }
+            else if (method == s_SubscribeEvent) {
+                // when generating code we can use the event subscription syntax (evt += xxx) 
+                // however when using Linq we don't have access to this and must use reflection
+                // this branch catches event subscriptions and rewrites it to use a proper non reflection syntax.
+                string targetName = ((ParameterExpression) node.Arguments[0]).Name;
+                string eventName = ((ConstantExpression) node.Arguments[1]).Value.ToString();
+                string handlerName = ((ParameterExpression) node.Arguments[2]).Name;
+                WriteToken($"{targetName}.{eventName} += {handlerName}");
+                return null;
+            }
+            
+            if (node.Object != null) {
                 Visit(node.Object);
-            else
+            }
+            else {
                 VisitType(method.DeclaringType);
+            }
 
             WriteToken(".");
 

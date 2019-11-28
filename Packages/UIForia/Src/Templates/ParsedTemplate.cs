@@ -5,7 +5,7 @@ using UIForia.Compilers.ExpressionResolvers;
 using UIForia.Compilers.Style;
 using UIForia.Elements;
 using UIForia.Exceptions;
-using UIForia.Parsing.Expression;
+using UIForia.Parsing.Expressions;
 using UIForia.Rendering;
 using UIForia.Util;
 
@@ -39,7 +39,6 @@ namespace UIForia.Templates {
         public static readonly ExpressionAliasResolver s_RouteResolver = new RouteResolver("route");
         
         // todo -- I don't think these are used
-        public static readonly ExpressionAliasResolver s_RouteParameterResolver = new RouteParameterResolver("$routeParams");
         public static readonly ExpressionAliasResolver s_ContentSizeResolver = new ContentSizeResolver();
         public static readonly ExpressionAliasResolver s_UrlResolver = new UrlResolver("$url");
         public static readonly ExpressionAliasResolver s_RgbResolver = new ColorResolver("$rgb");
@@ -72,7 +71,6 @@ namespace UIForia.Templates {
             compiler.AddAliasResolver(s_ElementResolver);
             compiler.AddAliasResolver(s_ParentResolver);
             compiler.AddAliasResolver(s_RouteResolver);
-            compiler.AddAliasResolver(s_RouteParameterResolver);
             compiler.AddAliasResolver(s_ContentSizeResolver);
             compiler.AddAliasResolver(s_UrlResolver);
             compiler.AddAliasResolver(s_RgbResolver);
@@ -249,11 +247,6 @@ namespace UIForia.Templates {
             return aliasedUiStyleGroupContainer.container;
         }
 
-        public struct AliasedUIStyleGroupContainer {
-            // alias will be used by the inspector
-            public string alias;
-            public UIStyleGroupContainer container;
-        }
     }
 
 }

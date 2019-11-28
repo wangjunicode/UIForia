@@ -32,32 +32,73 @@ using System.Linq.Expressions;
 
 namespace Mono.Linq.Expressions {
 
-	public static class CSharp {
+    public class TemplateWriter : CSharpWriter {
 
-		public static string ToCSharpCode (this Expression self)
-		{
-			if (self == null)
-				throw new ArgumentNullException ("self");
+        public TemplateWriter(IFormatter formatter) : base(formatter) { }
 
-			return ToCode (writer => writer.Write (self));
-		}
+        public override void Write(LambdaExpression expression) {
+            VisitTemplateSignature(expression);
+            Indent();
+            Indent();
+            VisitLambdaBody(expression);
+            Dedent();
+            Dedent();
+            WriteToken(";");
+        }
 
-		public static string ToCSharpCode (this LambdaExpression self)
-		{
-			if (self == null)
-				throw new ArgumentNullException ("self");
+        private void VisitTemplateSignature(LambdaExpression node) {
+            VisitParameters(node);
+            WriteSpace();
+            WriteToken("=>");
+            WriteLine();
+        }
 
-			return ToCode (writer => writer.Write (self));
-		}
+    }
+    
+    public static class CSharp {
 
-		static string ToCode (Action<CSharpWriter> writer)
-		{
-			var @string = new StringWriter ();
-			var csharp = new CSharpWriter (new TextFormatter (@string));
+        public static string ToCSharpCode(this Expression self) {
+            if (self == null) {
+                throw new ArgumentNullException(nameof(self));
+            }
 
-			writer (csharp);
+            return ToCode(writer => writer.Write(self));
+        }
 
-			return @string.ToString ();
-		}
-	}
+        public static string ToCSharpCode(this LambdaExpression self) {
+            if (self == null) {
+                throw new ArgumentNullException(nameof(self));
+            }
+
+            return ToCode(writer => writer.Write(self));
+        }
+
+        public static string ToTemplateBodyFunction(this LambdaExpression self) {
+            if (self == null) {
+                throw new ArgumentNullException(nameof(self));
+            }
+
+            return ToLambda(writer => writer.Write(self));
+        }
+
+        static string ToLambda(Action<TemplateWriter> writer) {
+            var @string = new StringWriter();
+            var csharp = new TemplateWriter(new TextFormatter(@string));
+
+            writer(csharp);
+
+            return @string.ToString();
+        }
+        
+        static string ToCode(Action<CSharpWriter> writer) {
+            var @string = new StringWriter();
+            var csharp = new CSharpWriter(new TextFormatter(@string));
+
+            writer(csharp);
+
+            return @string.ToString();
+        }
+
+    }
+
 }

@@ -381,7 +381,7 @@ namespace UIForia.Util {
                 System.Array.Resize(ref array, (size + capacity) * 2);
             }
         }
-        
+
         private class Cmp : IComparer<T> {
 
             public Comparison<T> cmp;
@@ -495,6 +495,22 @@ namespace UIForia.Util {
             }
 
             return new LightList<T>(Mathf.Min(8, minSize));
+        }
+
+        public static LightList<T> PreSize(int size) {
+            LightList<T> list = GetMinSize(size);
+            list.size = size;
+            return list;
+        }
+
+        public void Release() {
+            if (isPooled) {
+                return;
+            }
+
+            isPooled = true;
+            Clear();
+            s_LightListPool.Add(this);
         }
 
         public static void Release(ref LightList<T> toRelease) {

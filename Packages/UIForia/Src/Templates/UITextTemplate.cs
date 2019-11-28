@@ -5,7 +5,7 @@ using UIForia.Bindings;
 using UIForia.Elements;
 using UIForia.Expressions;
 using UIForia.Extensions;
-using UIForia.Parsing.Expression;
+using UIForia.Parsing.Expressions;
 using UIForia.Util;
 
 namespace UIForia.Templates {
@@ -79,28 +79,28 @@ namespace UIForia.Templates {
         public override UIElement CreateScoped(TemplateScope inputScope) {
             UITextElement element = null;
             if (elementType == typeof(UILabelElement)) {
-                element = new UILabelElement(RawText);
+                element = new UILabelElement();
             }
             else if (elementType == typeof(UIParagraphElement)) {
-                element = new UIParagraphElement(RawText);
+                element = new UIParagraphElement();
             }
             else if (elementType == typeof(UIHeading1Element)) {
-                element = new UIHeading1Element(RawText);
+                element = new UIHeading1Element();
             }
             else if (elementType == typeof(UIHeading2Element)) {
-                element = new UIHeading2Element(RawText);
+                element = new UIHeading2Element();
             }
             else if (elementType == typeof(UIHeading3Element)) {
-                element = new UIHeading3Element(RawText);
+                element = new UIHeading3Element();
             }
             else if (elementType == typeof(UIHeading4Element)) {
-                element = new UIHeading4Element(RawText);
+                element = new UIHeading4Element();
             }
             else if (elementType == typeof(UIHeading5Element)) {
-                element = new UIHeading5Element(RawText);
+                element = new UIHeading5Element();
             }
             else if (elementType == typeof(UIHeading6Element)) {
-                element = new UIHeading6Element(RawText);
+                element = new UIHeading6Element();
             }
             else if (elementType == typeof(UITextElement)) {
                 element = new UITextElement();

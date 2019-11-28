@@ -22,3 +22,4 @@ MonoBehaviour:
   clipCountMaterial: {fileID: 2100000, guid: 4bc03d3ad7d8ec3458a91254e27ba6fe, type: 2}
   clipBlitMaterial: {fileID: 2100000, guid: a4230dfbd25023e4393882700780c4da, type: 2}
   defaultNamespaces: []
+  usePreCompiledTemplates: 1

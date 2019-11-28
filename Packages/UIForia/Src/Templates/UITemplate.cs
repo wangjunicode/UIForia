@@ -10,7 +10,7 @@ using UIForia.Compilers.ExpressionResolvers;
 using UIForia.Compilers.Style;
 using UIForia.Elements;
 using UIForia.Expressions;
-using UIForia.Parsing.Expression;
+using UIForia.Parsing.Expressions;
 using UIForia.UIInput;
 using UIForia.Util;
 using UnityEngine;
@@ -175,17 +175,7 @@ namespace UIForia.Templates {
                 Debug.Log($"{elementType} must be a subclass of {typeof(UIElement)} in order to be used in templates");
                 return;
             }
-
-            Action<IList<ExpressionAliasResolver>, AttributeList> getResolvers = TypeProcessor.GetProcessedType(elementType).getResolvers;
-
-            if (getResolvers != null) {
-                resolvers = ListPool<ExpressionAliasResolver>.Get();
-                getResolvers.Invoke(resolvers, new AttributeList(attributes));
-                for (int i = 0; i < resolvers.Count; i++) {
-                    template.compiler.AddAliasResolver(resolvers[i]);
-                }
-            }
-
+            
             ResolveBaseStyles(template);
             CompileStyleBindings(template);
             CompileInputBindings(template, false);

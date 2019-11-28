@@ -20,7 +20,7 @@ namespace UIForia.Systems {
             this.runners = new LightList<AwesomeLayoutRunner>();
 
             for (int i = 0; i < application.m_Views.Count; i++) {
-                runners.Add(new AwesomeLayoutRunner(this, application.m_Views[i].rootElement));
+                runners.Add(new AwesomeLayoutRunner(this, application.m_Views[i].dummyRoot));
             }
 
             application.StyleSystem.onStylePropertyChanged += HandleStylePropertyChanged;
@@ -250,12 +250,12 @@ namespace UIForia.Systems {
         public void OnDestroy() { }
 
         public void OnViewAdded(UIView view) {
-            runners.Add(new AwesomeLayoutRunner(this, view.rootElement));
+            runners.Add(new AwesomeLayoutRunner(this, view.dummyRoot));
         }
 
         public void OnViewRemoved(UIView view) {
             for (int i = 0; i < runners.size; i++) {
-                if (runners[i].rootElement == view.rootElement) {
+                if (runners[i].rootElement == view.dummyRoot) {
                     runners.RemoveAt(i);
                     return;
                 }

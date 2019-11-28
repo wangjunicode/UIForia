@@ -9,17 +9,16 @@ using UIForia.Extensions;
 using UIForia.Util;
 using Debug = UnityEngine.Debug;
 
-namespace UIForia.Parsing.Expression {
+namespace UIForia.Parsing.Expressions {
 
     public static class TypeProcessor {
 
         public static bool processedTypes;
-        private static readonly StructList<ProcessedType> templateTypes = new StructList<ProcessedType>(64);
+        private static readonly LightList<ProcessedType> templateTypes = new LightList<ProcessedType>(64);
         public static readonly Dictionary<Type, ProcessedType> typeMap = new Dictionary<Type, ProcessedType>();
         public static readonly Dictionary<string, ProcessedType> templateTypeMap = new Dictionary<string, ProcessedType>();
         public static readonly Dictionary<string, LightList<Assembly>> s_NamespaceMap = new Dictionary<string, LightList<Assembly>>();
         private static readonly string[] s_SingleNamespace = new string[1];
-
 
         private static void FilterAssemblies() {
             if (processedTypes) return;
@@ -56,8 +55,8 @@ namespace UIForia.Parsing.Expression {
                         if (currentType == null) {
                             continue;
                         }
-
-                        if (!filteredOut && currentType.IsClass) {
+//
+                        if (!filteredOut && currentType.IsClass && !currentType.IsGenericTypeDefinition) {
                             Attribute[] attrs = Attribute.GetCustomAttributes(currentType, false);
                             Application.ProcessClassAttributes(currentType, attrs);
 
@@ -79,6 +78,7 @@ namespace UIForia.Parsing.Expression {
 
                                 ProcessedType processedType = new ProcessedType(currentType, templateAttr);
 
+                                processedType.CreateCtor();
                                 if (templateAttr != null) {
                                     templateTypes.Add(processedType);
                                 }
@@ -182,6 +182,7 @@ namespace UIForia.Parsing.Expression {
                         return retn;
                     }
                 }
+
                 LightList<Assembly> lastDitchAssemblies = s_NamespaceMap.GetOrDefault("null");
                 if (lastDitchAssemblies != null) {
                     typename = typeLookup.typeName;
@@ -243,11 +244,11 @@ namespace UIForia.Parsing.Expression {
         }
 
         public static Type ResolveType(TypeLookup typeLookup, IReadOnlyList<string> namespaces = null) {
-            
+
             if (typeLookup.resolvedType != null) {
                 return typeLookup.resolvedType;
             }
-            
+
             FilterAssemblies();
 
             // base type will valid or an exception will be thrown
@@ -264,7 +265,7 @@ namespace UIForia.Parsing.Expression {
             if (typeLookup.isArray) {
                 baseType = baseType.MakeArrayType();
             }
-            
+
             return baseType;
         }
 
@@ -321,7 +322,13 @@ namespace UIForia.Parsing.Expression {
             return null;
         }
 
-        public static ProcessedType GetProcessedType(Type type) {
+        internal static ProcessedType GetProcessedType(Type type) {
+            FilterAssemblies();
+            typeMap.TryGetValue(type, out ProcessedType retn);
+            return retn;
+        }
+
+        public static ProcessedType FindProcessedType(Type type) {
             FilterAssemblies();
             if (typeMap.TryGetValue(type, out ProcessedType retn)) {
                 return retn;
@@ -371,7 +378,7 @@ namespace UIForia.Parsing.Expression {
             return name.IndexOf("-firstpass", StringComparison.Ordinal) == -1;
         }
 
-        public static StructList<ProcessedType> GetTemplateTypes() {
+        public static LightList<ProcessedType> GetTemplateTypes() {
             FilterAssemblies();
             return templateTypes;
         }

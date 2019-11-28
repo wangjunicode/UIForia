@@ -1,9 +1,13 @@
 using System;
 using System.Collections.Generic;
-using UIForia.Parsing.Expression;
+using System.IO;
+using UIForia.Compilers;
+using UIForia.Parsing;
+using UIForia.Parsing.Expressions;
 using UIForia.Util;
 using UnityEditor;
 using UnityEditor.SceneManagement;
+using UnityEngine;
 
 namespace UIForia.Editor {
 
@@ -14,7 +18,7 @@ namespace UIForia.Editor {
         private string[] names;
         
         public void OnEnable() {
-            StructList<ProcessedType> typeData = TypeProcessor.GetTemplateTypes();
+            LightList<ProcessedType> typeData = TypeProcessor.GetTemplateTypes();
 
             List<Type> validTypes = new List<Type>();
             for (int i = 0; i < typeData.size; i++) {
@@ -33,6 +37,7 @@ namespace UIForia.Editor {
         }
         
         public override void OnInspectorGUI() {
+//            base.OnInspectorGUI();
             serializedObject.Update();
             UIViewBehavior behavior = (UIViewBehavior) target;
             string typeName = serializedObject.FindProperty("typeName").stringValue;
@@ -64,6 +69,20 @@ namespace UIForia.Editor {
                 EditorSceneManager.MarkSceneDirty(behavior.gameObject.scene);
             }
 
+            if (GUILayout.Button("Generate Code")) {
+
+                TemplateSettings settings = behavior.GetTemplateSettings();
+                TemplateCompiler compiler = new TemplateCompiler(settings);
+                
+                // maybe this should also know the root type for an application
+                PreCompiledTemplateData compiledOutput = new PreCompiledTemplateData(settings);
+
+                compiler.CompileTemplates(behavior.type, compiledOutput);
+
+                compiledOutput.GenerateCode();
+
+            }
+            
             EditorGUILayout.ObjectField(serializedObject.FindProperty("camera"));
             serializedObject.FindProperty("typeName").stringValue = behavior.typeName;
             serializedObject.ApplyModifiedProperties();

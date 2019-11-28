@@ -9,11 +9,6 @@ namespace UIForia.Editor {
         private static void UIForiaHierarchy() {
             EditorWindow.GetWindow<UIForiaHierarchyWindow>("UIForia Hierarchy");
         }
-
-        [MenuItem("Window/UIForia Tree Inspector")]
-        private static void UIForiaTreeInspector() {
-            EditorWindow.GetWindow<UIForiaTreeDebuggerWindow>("UIForia Tree Inspector");
-        }
         
         [MenuItem("Window/UIForia Inspector")]
         private static void UIForiaInspector() {
@@ -26,6 +21,13 @@ namespace UIForia.Editor {
                 Application.RefreshAll();
             }
         }
+        
+        [MenuItem("UIForia/Pre Compile Templates %t")]
+        public static void CompileTemplates() {
+            // for now compiles all templates, probably don't want this in the future
+//            Application.BuildTemplates(typeof());
+        }
+        
     }
 
 }

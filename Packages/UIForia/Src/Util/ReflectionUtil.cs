@@ -135,6 +135,11 @@ namespace UIForia.Util {
         public static bool IsField(Type type, string fieldName) {
             return type.GetField(fieldName, InstanceBindFlags) != null;
         }
+        
+        public static bool IsEvent(Type type, string evtName, out EventInfo evtInfo) {
+            evtInfo = type.GetEvent(evtName, InstanceBindFlags);
+            return evtInfo != null;
+        }
 
         public static bool IsField(Type type, string fieldName, out FieldInfo fieldInfo) {
             fieldInfo = type.GetField(fieldName, InstanceBindFlags);
@@ -156,7 +161,7 @@ namespace UIForia.Util {
         }
 
         public static bool HasInstanceMethod(Type type, string methodName, out LightList<MethodInfo> methodInfos) {
-            MethodInfo[] publicMethods = type.GetMethods(PublicInstance);
+            MethodInfo[] publicMethods = type.GetMethods(InstanceBindFlags);
 
             LightList<MethodInfo> retn = LightList<MethodInfo>.Get();
 
@@ -414,28 +419,7 @@ namespace UIForia.Util {
         }
 
         public static Type CreateGenericType(Type baseType, params Type[] genericArguments) {
-            // todo -- not sure we need this layer of caching anymore once Expression Compiler is replaced
-            for (int i = 0; i < generics.Count; i++) {
-                GenericTypeEntry entry = generics[i];
-                if (entry.baseType != baseType || genericArguments.Length != entry.paramTypes.Length) {
-                    continue;
-                }
-
-                if (!TypeParamsMatch(entry.paramTypes, genericArguments)) {
-                    continue;
-                }
-
-                return entry.retnType;
-            }
-
-            Type outputType = baseType.MakeGenericType(genericArguments);
-            GenericTypeEntry newType = new GenericTypeEntry(
-                baseType,
-                genericArguments,
-                outputType
-            );
-            generics.Add(newType);
-            return outputType;
+            return baseType.MakeGenericType(genericArguments);;
         }
 
         public static Type[] SetTempTypeArray(Type type, Type type1) {

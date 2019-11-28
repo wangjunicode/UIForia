@@ -12,37 +12,6 @@ namespace UIForia.LinqExpressions {
 
     public class Gen<T> { }
 
-    public class Ex : Gen<Vector3> { }
-
-    public class ElementPool {
-
-        public T MK<T, U>(U data) {
-            return default;
-        }
-
-        private Dictionary<Type, LightList<object>> pools;
-        private readonly Dictionary<Type, Action<object>> resetFunctions;
-        
-        public ElementPool(Dictionary<Type, Action<object>> resetFunctions) {
-            this.resetFunctions = resetFunctions;
-        }
-
-        public T Get<T>() where T : UIElement {
-//            pools.TryGetValue(typeof(T), out Type type);
-            return null;
-        }
-
-        public void Release<T>(T element) where T : UIElement {
-            if (!resetFunctions.TryGetValue(typeof(T), out Action<object> reset)) {
-                reset = LinqExpressions.CompileClear(typeof(T));
-                resetFunctions[typeof(T)] = reset;
-            }
-
-            reset(element);
-        }
-
-    }
-
     public static class LinqExpressions {
 
         private static readonly List<Expression> s_ExpressionList = new List<Expression>(24);
@@ -114,6 +83,8 @@ namespace UIForia.LinqExpressions {
 
             return field;
         }
+
+        private static readonly MethodInfo s_FieldSetValue = typeof(FieldInfo).GetMethod(nameof(FieldInfo.SetValue), new[] {typeof(object), typeof(object)});
 
         // todo -- we need to know if this being compiled for dev or not.
         // In production mode we generate valid C# code and thus need to know how to assign

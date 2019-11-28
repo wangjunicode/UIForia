@@ -1330,8 +1330,9 @@ namespace UIForia.Compilers.Style {
                     if (assetInfo.SpriteName != null) {
                         throw new CompileException(urlNode, "SpriteAtlas access is coming soon!");
                     }
-
-                    return context.application.ResourceManager.GetTexture(assetInfo.Path);
+        
+                    throw new NotImplementedException("Todo -- implement TextureAsset wrapper around Texture2D for async loading and non compile time resolution");
+//                    return nulnew TextureAsset(assetInfocontext.GetTexture(assetInfo.Path);
                 case StyleLiteralNode literalNode:
                     string value = literalNode.rawValue;
                     if (value == "unset" || value == "default" || value == "null") {
@@ -1353,7 +1354,8 @@ namespace UIForia.Compilers.Style {
                         throw new CompileException(urlNode, "SpriteAtlas access is coming soon!");
                     }
 
-                    return context.application.ResourceManager.GetFont(assetInfo.Path);
+//                    return context.resourceManager?.GetFont(assetInfo.Path);
+                    throw new NotImplementedException("Todo -- implement FontAsset wrapper around TMP_FontAsset for async loading and runtime time resolution");
                 // return ResourceManager.GetFont(TransformUrlNode(urlNode, context));
                 case StyleLiteralNode literalNode:
                     string value = literalNode.rawValue;

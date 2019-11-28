@@ -1,6 +1,6 @@
 using System;
 
-namespace UIForia.Parsing.Expression {
+namespace UIForia.Parsing.Expressions {
 
     public struct ImportDeclaration {
 

@@ -11,6 +11,10 @@ namespace UIForia.Compilers {
         public string fileName;
         public bool extends;
 
+        public int GetStyleId(int i) {
+            return 0;
+        }
+
     }
 
 }

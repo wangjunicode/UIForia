@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using JetBrains.Annotations;
+using UIForia.Compilers;
 using UIForia.Elements.Routing;
 using UIForia.Expressions;
 using UIForia.Layout;
@@ -80,37 +81,43 @@ namespace UIForia.Elements {
     [DebuggerDisplay("{" + nameof(ToString) + "()}")]
     public class UIElement : IHierarchical {
 
-        public readonly int id;
-        public readonly UIStyleSet style;
+        public int id; // todo -- internal with accessor
 
-        internal LightList<UIElement> children; // todo -- replace w/ linked list & child count
         internal LayoutHistory layoutHistory;
+        public LightList<UIElement> children; // todo -- replace w/ linked list & child count
 
         public ExpressionContext templateContext; // todo -- can probably be moved to binding system
         
         internal UIElementFlags flags;
         internal UIElement parent;
 
-        public readonly LayoutResult layoutResult;
+        public LayoutResult layoutResult;
 
+        // todo -- move to per-instance object since its always set anyway
         internal static IntMap<ElementColdData> s_ColdDataMap = new IntMap<ElementColdData>();
 
         internal AwesomeLayoutBox layoutBox;
         internal RenderBox renderBox;
+        public UIStyleSet style; // todo -- make internal with accessor
+        public LinqBindingNode bindingNode; // todo -- make internal with accessor
 
         internal int enableStateChangedFrameId;
+        public StructList<ElementAttribute> attributes;
 
         public UIView View { get; internal set; }
 
-        protected internal UIElement() {
-            this.id = Application.NextElementId;
-            this.style = new UIStyleSet(this);
-            this.layoutResult = new LayoutResult(this);
-            this.flags = UIElementFlags.Enabled | UIElementFlags.Alive | UIElementFlags.DefaultLayoutDirty;
-            this.children = LightList<UIElement>.Get();
-        }
+//        protected internal UIElement() {
+//            this.id = Application.NextElementId;
+//            this.style = new UIStyleSet(this);
+//            this.layoutResult = new LayoutResult(this);
+//            this.flags = UIElementFlags.Enabled | UIElementFlags.Alive | UIElementFlags.DefaultLayoutDirty;
+//            this.children = LightList<UIElement>.Get();
+//        }
+//        
+        // not actually used since we get elements from the pool as uninitialized
+        protected internal UIElement() { }
 
-        public Application Application => View.Application;
+        public Application Application => View.application;
 
         public UIChildrenElement TranscludedChildren {
             get { return s_ColdDataMap.GetOrDefault(id).transcludedChildren; }
@@ -134,7 +141,9 @@ namespace UIForia.Elements {
         public int depth { get; internal set; }
         public int siblingIndex { get; internal set; }
 
-        public IInputProvider Input => View.Application.InputSystem;
+        public TemplateMetaData templateMetaData; // todo - internal / private / whatever
+        
+        public IInputProvider Input => View.application.InputSystem; // todo -- remove
 
         public int ChildCount => children?.Count ?? 0;
 
@@ -164,26 +173,27 @@ namespace UIForia.Elements {
         public virtual void HandleUIEvent(UIEvent evt) { }
 
         public void Destroy() {
-            View.Application.DoDestroyElement(this);
+            View.application.DoDestroyElement(this);
         }
 
         public UIElement InsertChild(uint idx, UIElement element) {
-            if (element == null || element == this || element.isDestroyed) {
-                return null;
-            }
-
-            if (View == null) {
-                element.parent = this;
-                element.View = null;
-                element.siblingIndex = children.Count;
-                element.depth = depth + 1;
-                children.Insert((int) idx, element);
-            }
-            else {
-                Application.InsertChild(this, element, (uint) children.Count);
-            }
-
-            return element;
+            throw new NotImplementedException();
+            // if (element == null || element == this || element.isDestroyed) {
+            //     return null;
+            // }
+            //
+            // if (View == null) {
+            //     element.parent = this;
+            //     element.View = null;
+            //     element.siblingIndex = children.Count;
+            //     element.depth = depth + 1;
+            //     children.Insert((int) idx, element);
+            // }
+            // else {
+            //     Application.InsertChild(this, element, (uint) children.Count);
+            // }
+            //
+            // return element;
         }
 
         public UIElement AddChild(UIElement element) {
@@ -191,7 +201,7 @@ namespace UIForia.Elements {
             if (element == null || element == this || element.isDestroyed) {
                 return null;
             }
-
+            
             if (View == null) {
                 element.parent = this;
                 element.View = null;
@@ -202,10 +212,9 @@ namespace UIForia.Elements {
             else {
                 Application.InsertChild(this, element, (uint) children.Count);
             }
-
+            
             return element;
         }
-
 
         public void TriggerEvent(UIEvent evt) {
             evt.origin = this;
@@ -223,10 +232,10 @@ namespace UIForia.Elements {
             }
 
             if (active && isSelfDisabled) {
-                View.Application.DoEnableElement(this);
+                View.application.DoEnableElement(this);
             }
             else if (!active && isSelfEnabled) {
-                View.Application.DoDisableElement(this);
+                View.application.DoDisableElement(this);
             }
         }
 
@@ -341,82 +350,83 @@ namespace UIForia.Elements {
         }
 
         public List<ElementAttribute> GetAttributes(List<ElementAttribute> retn = null) {
-            return s_ColdDataMap.GetOrDefault(id).GetAttributes(retn);
+            retn = retn ?? new List<ElementAttribute>();
+            if (attributes == null || attributes.size == 0) {
+                return retn;
+            }
+
+            for (int i = 0; i < attributes.size; i++) {
+                retn.Add(attributes.array[i]);
+            }
+
+            return retn;
         }
 
         public void SetAttribute(string name, string value) {
-            ElementColdData coldData = s_ColdDataMap.GetOrDefault(id);
-            string oldValue = coldData.GetAttribute(name).value;
-            coldData.SetAttribute(name, value);
-            s_ColdDataMap[id] = coldData;
-            Application.OnAttributeSet(this, name, value, oldValue);
+            if (attributes == null) {
+                attributes = StructList<ElementAttribute>.Get();
+            }
+
+            ElementAttribute[] attrs = attributes.array;
+            int attrCount = attributes.size;
+            
+            for (int i = 0; i < attrCount; i++) {
+                if (attrs[i].name == name) {
+                    if (attrs[i].value == value) {
+                        return;
+                    }
+                    else {
+                        string oldValue = attrs[i].value;
+                        attrs[i] = new ElementAttribute(name, value);
+                        Application.OnAttributeSet(this, name, value, oldValue);
+                        return;
+                    }
+                }    
+            }
+            
+            attributes.Add(new ElementAttribute(name, value));
+            Application.OnAttributeSet(this, name, value, null);
+        }
+
+        public bool TryGetAttribute(string key, out string value) {
+            if (attributes == null) {
+                value = null;
+                return false;
+            }
+
+            ElementAttribute[] attrs = attributes.array;
+            int attrCount = attributes.size;
+            
+            for (int i = 0; i < attrCount; i++) {
+                if (attrs[i].name == key) {
+                    value = attrs[i].value;
+                    return true;
+                }    
+            }
+
+            value = null;
+            return false;
         }
 
         public string GetAttribute(string attr) {
-            ElementColdData coldData = s_ColdDataMap.GetOrDefault(id);
-            if (coldData.TryGetAttribute(attr, out ElementAttribute retn)) {
-                return retn.value;
+            if (attributes == null) {
+                return null;
+            }
+
+            ElementAttribute[] attrs = attributes.array;
+            int attrCount = attributes.size;
+            
+            for (int i = 0; i < attrCount; i++) {
+                if (attrs[i].name == attr) {
+                    return attrs[i].value;
+                }    
             }
 
             return null;
-        }
-
-        public void OnAttributeAdded(Action<ElementAttribute> handler) {
-            ElementColdData coldData = s_ColdDataMap.GetOrDefault(id);
-            coldData.onAttributeAdded += handler;
-            s_ColdDataMap[id] = coldData;
-        }
-
-        public void OnAttributeChanged(Action<ElementAttribute> handler) {
-            ElementColdData coldData = s_ColdDataMap.GetOrDefault(id);
-            coldData.onAttributeChanged += handler;
-            s_ColdDataMap[id] = coldData;
-        }
-
-        public void OnAttributeRemoved(Action<ElementAttribute> handler) {
-            ElementColdData coldData = s_ColdDataMap.GetOrDefault(id);
-            coldData.onAttributeRemoved += handler;
-            s_ColdDataMap[id] = coldData;
         }
 
         public bool HasAttribute(string name) {
-            return s_ColdDataMap.GetOrDefault(id).GetAttribute(name).value != null;
-        }
-
-        // todo -- remove
-        public IRouterElement GetNearestRouter() {
-            UIElement ptr = this;
-            ElementColdData coldData = s_ColdDataMap.GetOrDefault(id);
-            if (coldData.nearestRouter != null) {
-                return coldData.nearestRouter;
-            }
-
-            while (ptr != null) {
-                if (ptr is IRouterElement routeElement) {
-                    coldData.nearestRouter = routeElement;
-                    s_ColdDataMap[id] = coldData;
-                    return routeElement;
-                }
-
-                ptr = ptr.parent;
-            }
-
-            return null;
-        }
-
-        // todo remove
-        public RouteParameter GetRouteParameter(string name) {
-            UIElement ptr = this;
-
-            while (ptr != null) {
-                if (ptr is RouteElement routeElement) {
-                    return routeElement.CurrentMatch.GetParameter(name);
-                }
-
-                ptr = ptr.parent;
-            }
-
-            return default;
+            return GetAttribute(name) != null;
         }
 
         public int UniqueId => id;
@@ -494,6 +504,7 @@ namespace UIForia.Elements {
 
         }
 
+        
     }
 
 }

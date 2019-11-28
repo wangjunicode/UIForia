@@ -2,7 +2,7 @@ using System;
 using System.Text;
 using UIForia.Util;
 
-namespace UIForia.Parsing.Expression {
+namespace UIForia.Parsing.Expressions {
 
     public static class TextTemplateProcessor {
 
@@ -18,6 +18,18 @@ namespace UIForia.Parsing.Expression {
             return false;
         }
 
+        public static bool TextExpressionIsConstant(StructList<TextExpression> test) {
+            if (test == null || test.size == 0) return true;
+
+            for (int i = 0; i < test.Count; i++) {
+                if (test.array[i].isExpression) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+        
         private static bool StringCompare(string input, ref int ptr, string target, char match, out char result) {
             result = '\0';
 

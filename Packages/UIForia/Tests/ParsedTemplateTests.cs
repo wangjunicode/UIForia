@@ -4,7 +4,7 @@ using UIForia;
 using UIForia.Attributes;
 using UIForia.Elements;
 using UIForia.Extensions;
-using UIForia.Parsing.Expression;
+using UIForia.Parsing.Expressions;
 using UIForia.Templates;
 
 [TestFixture]

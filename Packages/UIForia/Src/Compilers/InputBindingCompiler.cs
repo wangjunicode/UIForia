@@ -5,7 +5,7 @@ using System.Reflection;
 using UIForia.Attributes;
 using UIForia.Compilers.ExpressionResolvers;
 using UIForia.Expressions;
-using UIForia.Parsing.Expression;
+using UIForia.Parsing.Expressions;
 using UIForia.UIInput;
 using UIForia.Util;
 

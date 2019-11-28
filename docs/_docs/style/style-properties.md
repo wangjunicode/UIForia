@@ -34,6 +34,11 @@ layout: page
 [`BorderRadiusLeft`](#borderradiusleft--uifixedlength)  
 [`BorderRadiusRight`](#borderradiusright--uifixedlength)  
 
+[`CornerBevelTopLeft`](#cornerbeveltopleft--uifixedlength)  
+[`CornerBevelTopRight`](#cornerbeveltopright--uifixedlength)  
+[`CornerBevelBottomLeft`](#cornerbevelbottomleft--uifixedlength)  
+[`CornerBevelBottomRight`](#cornerbevelbottomright--uifixedlength)  
+
 **Layout**  
 [`LayoutType`](#layouttype--layouttype)   
 [`LayoutBehavior`](#layoutbehavior--layoutbehavior)     
@@ -301,7 +306,9 @@ Sets a rounded border on the right-side of an element.
 
 #### `BorderRadiusTop` : [UIFixedLength](style-units#uifixedlength) 
 Sets a rounded border at the top of an element.
-  
+
+#### `CornerBevelTopLeft` : [UIFixedLength](style-units#uifixedlength) 
+
 
 ```
 Border = 4px //sets border around element to 4 pixels

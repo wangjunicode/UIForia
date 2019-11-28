@@ -219,6 +219,30 @@ namespace UIForia.Elements {
             horizontalHandle.style.SetAlignmentOriginX(new OffsetMeasurement(percentage, OffsetMeasurementUnit.Percent), StyleState.Normal);
             childrenElement.style.SetTransformPositionX(new OffsetMeasurement(-percentage * scrollPixels), StyleState.Normal);
         }
+        
+        public void ScrollElementIntoView(UIElement element) {
+
+            float localPositionY = element.layoutResult.localPosition.y;
+            float elementHeight = element.layoutResult.ActualHeight;
+            float elementBottom = localPositionY + elementHeight;
+
+            float trackHeight = layoutResult.ActualHeight;
+            float scrollViewHeight = childrenElement.GetChild(0).layoutResult.AllocatedHeight;
+            float minY = layoutResult.localPosition.y;
+            if (elementBottom + childrenElement.style.TransformPositionY.value <= trackHeight
+                && localPositionY + childrenElement.style.TransformPositionY.value >= 0) {
+                return;
+            }
+
+            if (localPositionY < 0) {
+                // scrolls up to the upper edge of the element
+                ScrollToVerticalPercent((localPositionY - minY) / (trackHeight - scrollViewHeight));
+            }
+            else {
+                // scrolls down but keeps the element at the lower edge of the scrollView
+                ScrollToVerticalPercent((elementBottom - trackHeight - minY) / (scrollViewHeight - trackHeight));
+            }
+        }
 
         private float GetMaxHeight() {
             float trackRectHeight = verticalTrack.layoutResult.actualSize.height;

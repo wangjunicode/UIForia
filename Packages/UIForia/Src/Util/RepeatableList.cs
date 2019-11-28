@@ -87,6 +87,16 @@ namespace UIForia.Util {
             }
         }
 
+        public void ReplaceList(List<T> list) {
+            for (int i = 0; i < list.Count; i++) {
+                Upsert(i, list[i]);
+            }
+
+            if (Count > list.Count) {
+                RemoveRange(Count, Count - list.Count);
+            }
+        }
+
         public void RemoveAt(int index) {
             if (index < 0 || index >= backingStore.Count) {
                 return;

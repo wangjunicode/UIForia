@@ -10,6 +10,30 @@ order: 10
 
 # Layout Concepts and common terms explained
 
+## Block Sizes
+When using one of the block sizes (`bca`, `bsz`) the size of the element is dependent on the next 
+_block size provider_ up in the hierarchy.
+
+```
+style container     { PreferredSize = 500px; }
+style content-sized { PreferredSize = 1cnt; }
+style child         { PreferredSize = 1bsz; }
+```
+
+```xml
+<Div x-id="div1" style="container">
+    <Div x-id="div2" style="content-sized">
+        <Div x-id="div3" style="child" />
+    </Div>
+</Div>
+```
+
+In this example the child will be 500px wide and high, just like the container div, although there's 
+a content-sized container in between. 
+
+## LayoutFit
+
+
 ## Views
 
 

@@ -13,6 +13,7 @@
             <Div style="button" onMouseClick="SetAlignmentTarget(AlignmentTarget.Parent)">Parent</Div>
             <Div style="button" onMouseClick="SetAlignmentTarget(AlignmentTarget.ParentContentArea)">Parent Content Area</Div>
             <Div style="button" onMouseClick="SetAlignmentTarget(AlignmentTarget.LayoutBox)">Layout Box</Div>
+            <Div style="button" onMouseClick="SetAlignmentTarget(AlignmentTarget.Unset)">Unset</Div>
 <!--            <Div style="button" onMouseClick="SetAlignmentTarget(AlignmentTarget.View)">View</Div>-->
         </Group>
 

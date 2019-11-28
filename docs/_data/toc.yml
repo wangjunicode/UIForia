@@ -68,11 +68,11 @@
     - title: "About"
       url: "about"
     - title: "Contributing to the docs"
-      url: "docs/getting-started"
+      url: "docs/contributing-documentation"
       children:
         - title: Features
-          url: "docs/getting-started#getting-started"
+          url: "docs/contributing-documentation#getting-started"
         - title: Development
-          url: "docs/getting-started#development"
+          url: "docs/contributing-documentation#development"
         - title: Customization
-          url: "docs/getting-started#customization"
+          url: "docs/contributing-documentation#customization"

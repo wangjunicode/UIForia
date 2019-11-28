@@ -23,7 +23,7 @@ style grid-cell {
 } 
 
 style align-left-top {
-    AlignX = 20px 0px Parent Start;
+    AlignX = 0px 0.01sw Parent Start;
     AlignY = 20px 0px Parent Start;
 }
 

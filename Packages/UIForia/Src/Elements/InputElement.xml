@@ -32,7 +32,7 @@
         }
         
         style placeholder-slot {
-            PreferredHeight = 1em;
+            PreferredHeight = 1.2em;
             AlignY = 50% ParentContentArea;
             AlignX = 0% ParentContentArea;
             TextColor = rgb(150, 150, 150);

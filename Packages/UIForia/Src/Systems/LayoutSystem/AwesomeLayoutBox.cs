@@ -700,7 +700,7 @@ namespace UIForia.Systems {
             UIStyleSet style = element.style;
             AlignmentTarget alignment = style.AlignmentTargetX;
 
-            if (alignment != AlignmentTarget.Default && alignment != AlignmentTarget.Unset) {
+            if (alignment != AlignmentTarget.Unset) {
                 flags |= LayoutBoxFlags.RequireAlignmentHorizontal;
                 return;
             }
@@ -727,7 +727,7 @@ namespace UIForia.Systems {
             UIStyleSet style = element.style;
             AlignmentTarget alignment = style.AlignmentTargetY;
 
-            if (alignment != AlignmentTarget.Default && alignment != AlignmentTarget.Unset) {
+            if (alignment != AlignmentTarget.Unset) {
                 flags |= LayoutBoxFlags.RequireAlignmentVertical;
                 return;
             }

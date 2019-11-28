@@ -12,7 +12,6 @@ namespace UIForia.Util {
         public static float ResolveOriginBaseX(LayoutResult result, float viewportX, AlignmentTarget target, AlignmentDirection direction) {
             switch (target) {
                 case AlignmentTarget.Unset:
-                case AlignmentTarget.Default:
                 case AlignmentTarget.LayoutBox:
                     return result.allocatedPosition.x;
 
@@ -61,7 +60,6 @@ namespace UIForia.Util {
         public static float ResolveOriginBaseY(LayoutResult result, float viewportY, AlignmentTarget target, AlignmentDirection direction) {
             switch (target) {
                 case AlignmentTarget.Unset:
-                case AlignmentTarget.Default:
                 case AlignmentTarget.LayoutBox:
                     return result.allocatedPosition.y;
 
@@ -109,7 +107,6 @@ namespace UIForia.Util {
         public static float ResolveOffsetOriginSizeX(LayoutResult layoutResult, float viewportWidth, AlignmentTarget target) {
             switch (target) {
                 case AlignmentTarget.Unset:
-                case AlignmentTarget.Default:
                 case AlignmentTarget.LayoutBox:
                     return layoutResult.allocatedSize.width;
 
@@ -149,7 +146,6 @@ namespace UIForia.Util {
         public static float ResolveOffsetOriginSizeY(LayoutResult result, float viewportHeight, AlignmentTarget target) {
             switch (target) {
                 case AlignmentTarget.Unset:
-                case AlignmentTarget.Default:
                 case AlignmentTarget.LayoutBox:
                     return result.allocatedSize.height;
 

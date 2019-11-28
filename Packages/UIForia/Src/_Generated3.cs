@@ -70,8 +70,8 @@ namespace UIForia.Rendering {
 		public static readonly UIFixedLength RadialLayoutRadius = new UIFixedLength(0.5f, UIFixedUnit.Percent);
 		public const AlignmentDirection AlignmentDirectionX = UIForia.Layout.AlignmentDirection.Start;
 		public const AlignmentDirection AlignmentDirectionY = UIForia.Layout.AlignmentDirection.Start;
-		public const AlignmentTarget AlignmentTargetX = UIForia.Layout.AlignmentTarget.Default;
-		public const AlignmentTarget AlignmentTargetY = UIForia.Layout.AlignmentTarget.Default;
+		public const AlignmentTarget AlignmentTargetX = UIForia.Layout.AlignmentTarget.Unset;
+		public const AlignmentTarget AlignmentTargetY = UIForia.Layout.AlignmentTarget.Unset;
 		public static readonly OffsetMeasurement AlignmentOriginX = new OffsetMeasurement(0f, OffsetMeasurementUnit.Pixel);
 		public static readonly OffsetMeasurement AlignmentOriginY = new OffsetMeasurement(0f, OffsetMeasurementUnit.Pixel);
 		public static readonly OffsetMeasurement AlignmentOffsetX = new OffsetMeasurement(0f, OffsetMeasurementUnit.Pixel);
@@ -262,9 +262,9 @@ namespace UIForia.Rendering {
 				case StylePropertyId.AlignmentDirectionY:
 					 return new StyleProperty(StylePropertyId.AlignmentDirectionY, (int)UIForia.Layout.AlignmentDirection.Start);
 				case StylePropertyId.AlignmentTargetX:
-					 return new StyleProperty(StylePropertyId.AlignmentTargetX, (int)UIForia.Layout.AlignmentTarget.Default);
+					 return new StyleProperty(StylePropertyId.AlignmentTargetX, (int)UIForia.Layout.AlignmentTarget.Unset);
 				case StylePropertyId.AlignmentTargetY:
-					 return new StyleProperty(StylePropertyId.AlignmentTargetY, (int)UIForia.Layout.AlignmentTarget.Default);
+					 return new StyleProperty(StylePropertyId.AlignmentTargetY, (int)UIForia.Layout.AlignmentTarget.Unset);
 				case StylePropertyId.AlignmentOriginX:
 					 return new StyleProperty(StylePropertyId.AlignmentOriginX, new OffsetMeasurement(0f, OffsetMeasurementUnit.Pixel));
 				case StylePropertyId.AlignmentOriginY:

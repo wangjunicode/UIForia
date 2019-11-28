@@ -364,7 +364,7 @@ namespace UIForia.Layout {
                 // same for world matrix computation
                 // todo -- lots of ways to avoid doing this. only need it for self aligning things or things with a transform position not in pixels
                 
-                if (box.alignmentTargetX != AlignmentTarget.Unset && box.alignmentTargetX != AlignmentTarget.Default) {
+                if (box.alignmentTargetX != AlignmentTarget.Unset && box.alignmentTargetX != AlignmentTarget.Unset) {
                     OffsetMeasurement originX = box.element.style.AlignmentOriginX;
                     OffsetMeasurement offsetX = box.element.style.AlignmentOffsetX;
                     AlignmentDirection direction = box.element.style.AlignmentDirectionX;
@@ -382,7 +382,7 @@ namespace UIForia.Layout {
                     }
                 }
 
-                if (box.alignmentTargetY != AlignmentTarget.Unset && box.alignmentTargetY != AlignmentTarget.Default) {
+                if (box.alignmentTargetY != AlignmentTarget.Unset && box.alignmentTargetY != AlignmentTarget.Unset) {
                     OffsetMeasurement originY = box.element.style.AlignmentOriginY;
                     OffsetMeasurement offsetY = box.element.style.AlignmentOffsetY;
                     AlignmentDirection direction = box.element.style.AlignmentDirectionY;

@@ -11,7 +11,6 @@ namespace UIForia.Layout {
 
         Unset = 0,
         LayoutBox,
-        Default,
         Parent,
         ParentContentArea,
         Template,

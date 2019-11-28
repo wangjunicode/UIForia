@@ -143,7 +143,7 @@ and if value's unit is `%` it will **also** set the `AlignmentOffset` to the neg
 which would be `-25%` in this case. Further up we explained how to perfectly center an element or move it from
 left to right within the targeted element. With this shorthand you can animate `AlignX` from `0%` to `100%`
 and your element would move! 
-Setting `AlignX = 20px` would only set the `AlignmentOriginX` and **not** the `AlignmentOffsetX` as expected!
+Setting `AlignX = 20px` would, as expected, only set the `AlignmentOriginX` and **not** the `AlignmentOffsetX`!
 
 `AlignX = 100% 0%`: this combination will set `AlignmentOriginX = 100%` and `AlignmentOffsetX = 0%`.
 The element would be moved to the end of its targeted box but would would stick on its outside rather than

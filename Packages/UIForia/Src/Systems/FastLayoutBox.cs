@@ -849,6 +849,12 @@ namespace UIForia.Layout {
                         transformPositionY = property.AsOffsetMeasurement;
                         break;
 
+                    case StylePropertyId.TransformScaleX:
+                        scaleX = property.AsFloat;
+                        break;
+                    case StylePropertyId.TransformScaleY:
+                        scaleY = property.AsFloat;
+                        break;
                     case StylePropertyId.AlignmentTargetX:
                         alignmentTargetX = property.AsAlignmentTarget;
                         break;

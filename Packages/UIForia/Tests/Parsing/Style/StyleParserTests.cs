@@ -533,12 +533,12 @@ style s { BrokenUrl = url() }
         Assert.AreEqual(1, nodes.Count);
         AnimationRootNode rootNode = nodes[0] as AnimationRootNode;
 
-        KeyFrameNode keyFrameNode0 = rootNode.keyFrameNodes[0];
+        KeyFrameNode keyFrameNode0 = rootNode.keyframeNodes[0];
         Assert.AreEqual("0", keyFrameNode0.identifier);
         Assert.AreEqual(1, keyFrameNode0.children.Count);
         Assert.AreEqual(StyleASTNodeType.Property, keyFrameNode0.children[0].type);
 
-        KeyFrameNode keyFrameNode1 = rootNode.keyFrameNodes[1];
+        KeyFrameNode keyFrameNode1 = rootNode.keyframeNodes[1];
         Assert.AreEqual("100", keyFrameNode1.identifier);
         Assert.AreEqual(1, keyFrameNode1.children.Count);
         Assert.AreEqual(StyleASTNodeType.Property, keyFrameNode1.children[0].type);
@@ -566,18 +566,18 @@ style s { BrokenUrl = url() }
         Assert.AreEqual(1, nodes.Count);
         AnimationRootNode rootNode = nodes[0] as AnimationRootNode;
 
-        KeyFrameNode keyFrameNode0 = rootNode.keyFrameNodes[0];
+        KeyFrameNode keyFrameNode0 = rootNode.keyframeNodes[0];
         Assert.AreEqual("0", keyFrameNode0.identifier);
         Assert.AreEqual(2, keyFrameNode0.children.Count);
         Assert.AreEqual(StyleASTNodeType.Property, keyFrameNode0.children[0].type);
         Assert.AreEqual(StyleASTNodeType.Property, keyFrameNode0.children[1].type);
 
-        KeyFrameNode keyFrameNode1 = rootNode.keyFrameNodes[1];
+        KeyFrameNode keyFrameNode1 = rootNode.keyframeNodes[1];
         Assert.AreEqual("50", keyFrameNode1.identifier);
         Assert.AreEqual(1, keyFrameNode1.children.Count);
         Assert.AreEqual(StyleASTNodeType.Property, keyFrameNode1.children[0].type);
 
-        KeyFrameNode keyFrameNode2 = rootNode.keyFrameNodes[2];
+        KeyFrameNode keyFrameNode2 = rootNode.keyframeNodes[2];
         Assert.AreEqual("100", keyFrameNode2.identifier);
         Assert.AreEqual(2, keyFrameNode2.children.Count);
         Assert.AreEqual(StyleASTNodeType.Property, keyFrameNode2.children[0].type);

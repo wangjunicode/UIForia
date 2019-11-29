@@ -9,8 +9,9 @@ namespace UIForia.Animation {
         public readonly AnimationTaskType type;
         public readonly IList<AnimationTriggerState> triggerStates;
         
-        protected AnimationTask(AnimationTaskType type, IList<AnimationTrigger> triggers) {
+        protected AnimationTask(AnimationTaskType type, AnimationData animationData, IList<AnimationTrigger> triggers) {
             this.type = type;
+            this.animationData = animationData;
             if (triggers != null) {
                 triggerStates = new List<AnimationTriggerState>(triggers.Count);
                 for (int i = 0; i < triggers.Count; i++) {

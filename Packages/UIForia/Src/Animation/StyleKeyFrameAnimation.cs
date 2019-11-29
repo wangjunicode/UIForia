@@ -149,15 +149,15 @@ namespace UIForia.Animation {
         public override UITaskResult Run(float deltaTime) {
             status.elapsedTotalTime += deltaTime;
             status.elapsedIterationTime += deltaTime;
-            if (data.options.delay > status.elapsedTotalTime) {
+            if (animationData.options.delay > status.elapsedTotalTime) {
                 return UITaskResult.Running;
             }
 
-            float elapsedIterationTime = status.elapsedIterationTime - data.options.delay ?? 0f;
+            float elapsedIterationTime = status.elapsedIterationTime - animationData.options.delay ?? 0f;
 
             Rect viewport = target.View.Viewport;
 
-            AnimationOptions options = data.options;
+            AnimationOptions options = animationData.options;
 
             float duration = options.duration.Value * 0.001f;
             float iterationTime = duration;

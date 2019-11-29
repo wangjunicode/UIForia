@@ -1,7 +1,31 @@
+import "Documentation/Documentation.style" as theme;
+
 style container {
     PreferredSize = 1pca;
     Padding = 50px;
     FlexLayoutDirection = Column;
+}
+
+style button-container {
+    FlexLayoutDirection = Horizontal;
+    MarginBottom = 30px;
+}
+
+style button {
+    Padding = 10px;
+    CornerBevelBottomRight = 10px;
+    Border = 4px;
+    BackgroundColor = rgba(120, 100, 100, 190);
+    Margin = 5px;
+    [hover] {
+        BackgroundColor = rgba(220, 200, 200, 190);
+        Cursor = @theme.cursorHand;
+    }
+}
+
+style input {
+    TextFontSize = 16px;
+    PreferredSize = 200px 30px;
 }
 
 style one-container {
@@ -92,6 +116,12 @@ animation orbit-slowly {
     }
 }
 
+style anim-container {
+    BackgroundColor = rgba(200, 220, 220, 200);
+    Padding = 50px;
+    MarginBottom = 30px;
+}
+
 style anims {
     Margin = 20px;
     [attr:anim="bounce"] { [enter] run animation(bounce); }
@@ -146,6 +176,7 @@ animation shake {
 }
 
 animation headShake {
+    [options] { TimingFunction = QuadraticEaseInOut; }
     [keyframes] {
         0%, 50% { TransformPositionX = 0; TransformRotation = 0; }
         6% { TransformPositionX = -6px; TransformRotation = -9; }

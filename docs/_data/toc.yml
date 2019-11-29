@@ -12,6 +12,17 @@
           url: "docs/layout/flex"
         - title: Grid
           url: "docs/layout/grid"
+    - title: "Alignments"
+      url: "docs/alignments"
+      children:
+        - title: "AlignmentTarget"
+          url: "docs/alignments#alignmenttarget"
+        - title: "AlignmentOrigin and AlignmentOffset"
+          url: "docs/alignments#alignmentorigin-and-alignmentoffset"
+        - title: "AlignmentDirection"
+          url: "docs/alignments#alignmentdirection"
+        - title: "AlignX AlignY"
+          url: "docs/alignments#alignx-aligny"
     - title: "Style"
       url: "docs/style"
       children:

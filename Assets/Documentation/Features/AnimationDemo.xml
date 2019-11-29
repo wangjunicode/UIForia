@@ -4,30 +4,12 @@
     <Style path="Documentation/Features/AnimationDemo.style"/>
 
     <Contents style="container">
-
-        <Div style="one-container">
-            
-            <Div x-id="one_blue" style="circle circle-blue"/>
-            
-            <Div x-id="one_blue_arc" style="circle arc-blue"/>
-            
-            <Div x-id="one_blueOrbit" style="orbit-container">
-                <Div style="circle orbit orbit-0"/>
-                <Div style="circle orbit orbit-1"/>
-                <Div style="circle orbit orbit-2"/>
-                <Div style="circle orbit orbit-3"/>
-                <Div style="circle orbit orbit-4"/>
-                <Div style="circle orbit orbit-5"/>
-            </Div>
-            
-        </Div>
-
-<!--        <Div style="two-container">-->
-
-<!--            <Div x-id="two_red-bg" style="circle circle-red-bg"/>-->
-<!--            <Div x-id="two_yellow-bg" style="circle circle-yellow-bg"/>-->
-<!--            -->
-<!--        </Div>-->
+        <Div style="anims" x-anim="bounce">A simple text that you can animate</Div>
+        <Div style="anims" x-anim="flash">A simple text that you can animate</Div>
+        <Div style="anims" x-anim="pulse">A simple text that you can animate</Div>
+        <Div style="anims" x-anim="rubberBand">A simple text that you can animate</Div>
+        <Div style="anims" x-anim="shake">A simple text that you can animate</Div>
+        <Text style="anims" x-anim="headShake">A simple text that you can animate</Text>
     </Contents>
 
 </UITemplate>

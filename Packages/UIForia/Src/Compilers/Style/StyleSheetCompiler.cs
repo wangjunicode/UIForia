@@ -4,6 +4,7 @@ using UIForia.Exceptions;
 using UIForia.Parsing.Style.AstNodes;
 using UIForia.Rendering;
 using UIForia.Util;
+using UnityEditor.UIElements;
 
 namespace UIForia.Compilers.Style {
 
@@ -96,14 +97,20 @@ namespace UIForia.Compilers.Style {
         }
 
         private AnimationKeyFrame[] CompileKeyFrames(AnimationRootNode animNode) {
-            if (animNode.keyFrameNodes == null) {
+            if (animNode.keyframeNodes == null) {
                 // todo throw error or log warning?
                 return new AnimationKeyFrame[0];
             }
-            AnimationKeyFrame[] frames = new AnimationKeyFrame[animNode.keyFrameNodes.Count];
-            for (int i = 0; i < animNode.keyFrameNodes.Count; i++) {
-                KeyFrameNode keyFrameNode = animNode.keyFrameNodes[i];
-                float time = float.Parse(keyFrameNode.identifier) / 100;
+
+            int keyframeCount = 0;
+            for (int i = 0; i < animNode.keyframeNodes.Count; i++) {
+                keyframeCount += animNode.keyframeNodes[i].keyframes.Count;
+            }
+
+            AnimationKeyFrame[] frames = new AnimationKeyFrame[keyframeCount];
+            int nextKeyframeIndex = 0;
+            for (int i = 0; i < animNode.keyframeNodes.Count; i++) {
+                KeyFrameNode keyFrameNode = animNode.keyframeNodes[i];
 
                 for (int j = 0; j < keyFrameNode.children.Count; j++) {
                     PropertyNode propertyNode = (PropertyNode) keyFrameNode.children[j];
@@ -116,10 +123,16 @@ namespace UIForia.Compilers.Style {
                 for (int j = 0; j < count; j++) {
                     keyValues[j] = new StyleKeyFrameValue(s_ScratchStyle[j]);
                 }
-
+    
                 keyValues.size = count;
-                frames[i] = new AnimationKeyFrame(time);
-                frames[i].properties = keyValues;
+
+                for (int keyframeIndex = 0; keyframeIndex < keyFrameNode.keyframes.Count; keyframeIndex++) {
+                    float time = keyFrameNode.keyframes[keyframeIndex] / 100f;
+                    frames[nextKeyframeIndex] = new AnimationKeyFrame(time);
+                    frames[nextKeyframeIndex].properties = keyValues;
+                    nextKeyframeIndex++;
+                }
+
                 s_ScratchStyle.PropertyCount = 0;
             }
 

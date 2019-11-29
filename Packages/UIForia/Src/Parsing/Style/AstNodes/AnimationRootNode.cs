@@ -8,7 +8,7 @@ namespace UIForia.Parsing.Style.AstNodes {
 
         public LightList<VariableDefinitionNode> variableNodes;
         public LightList<AnimationOptionNode> optionNodes;
-        public LightList<KeyFrameNode> keyFrameNodes;
+        public LightList<KeyFrameNode> keyframeNodes;
             
         public AnimationRootNode(string animName) {
             this.animName = animName;
@@ -26,8 +26,8 @@ namespace UIForia.Parsing.Style.AstNodes {
         }
 
         public void AddKeyFrameNode(KeyFrameNode keyFrameNode) {
-            keyFrameNodes = keyFrameNodes ?? new LightList<KeyFrameNode>(4);
-            keyFrameNodes.Add(keyFrameNode);
+            keyframeNodes = keyframeNodes ?? new LightList<KeyFrameNode>(4);
+            keyframeNodes.Add(keyFrameNode);
         }
 
         public override void Release() {
@@ -47,12 +47,12 @@ namespace UIForia.Parsing.Style.AstNodes {
                 LightList<AnimationOptionNode>.Release(ref optionNodes);
             }
             
-            if (keyFrameNodes != null) {
-                for (int i = 0; i < keyFrameNodes.Count; i++) {
-                    keyFrameNodes[i].Release();
+            if (keyframeNodes != null) {
+                for (int i = 0; i < keyframeNodes.Count; i++) {
+                    keyframeNodes[i].Release();
                 }
-                keyFrameNodes.Clear();
-                LightList<KeyFrameNode>.Release(ref keyFrameNodes);
+                keyframeNodes.Clear();
+                LightList<KeyFrameNode>.Release(ref keyframeNodes);
             }
         }
 

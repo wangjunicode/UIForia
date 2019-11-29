@@ -297,10 +297,15 @@ namespace UIForia.Parsing.Style {
             while (tokenStream.HasMoreTokens && !AdvanceIfTokenType(StyleTokenType.BracesClose)) {
                 string value = AssertTokenTypeAndAdvance(StyleTokenType.Number);
                 AssertTokenTypeAndAdvance(StyleTokenType.Mod);
-                AssertTokenTypeAndAdvance(StyleTokenType.BracesOpen);
 
-                KeyFrameNode keyFrameNode = new KeyFrameNode();
-                keyFrameNode.identifier = value;
+                KeyFrameNode keyFrameNode = StyleASTNodeFactory.KeyFrameNode(int.Parse(value));
+
+                while (AdvanceIfTokenType(StyleTokenType.Comma)) {
+                    keyFrameNode.keyframes.Add(int.Parse(AssertTokenTypeAndAdvance(StyleTokenType.Number)));
+                    AssertTokenTypeAndAdvance(StyleTokenType.Mod);
+                }
+
+                AssertTokenTypeAndAdvance(StyleTokenType.BracesOpen);
 
                 while (tokenStream.HasMoreTokens && !AdvanceIfTokenType(StyleTokenType.BracesClose)) {
                     ParseProperties(keyFrameNode);

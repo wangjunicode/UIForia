@@ -50,7 +50,6 @@
                 <RepeatALot x-route="/RepeatALot"/>
                 <ScrollDemo x-route="/ScrollDemo"/>
                 <TransclusionDemo x-route="/TransclusionDemo"/>
-                <TransformPlayground x-route="/TransformPlayground"/>
                 <RepeatExample x-route="/RepeatExample"/>
                 <StylePropertiesDemo x-route="/StylePropertiesDemo"/>
                 <WindowDemo x-route="/Window"/>

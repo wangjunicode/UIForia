@@ -111,12 +111,7 @@ namespace UIForia.Systems {
             screenClipper.intersected.array[3] = screenClipper.orientedBounds.p3;
             screenClipper.intersected.size = 4;
 
-            screenClipper.aabb = new Vector4(
-                screenClipper.orientedBounds.p0.x,
-                screenClipper.orientedBounds.p0.y,
-                screenClipper.orientedBounds.p2.x,
-                screenClipper.orientedBounds.p2.y
-            );
+            screenClipper.aabb = new Vector4(screenClipper.orientedBounds.p0.x, screenClipper.orientedBounds.p0.y, screenClipper.orientedBounds.p2.x, screenClipper.orientedBounds.p2.y);
 
             screenClipper.isCulled = false;
 
@@ -133,12 +128,7 @@ namespace UIForia.Systems {
             viewClipper.intersected.array[3] = viewClipper.orientedBounds.p3;
             viewClipper.intersected.size = 4;
 
-            viewClipper.aabb = new Vector4(
-                viewClipper.orientedBounds.p0.x,
-                viewClipper.orientedBounds.p0.y,
-                viewClipper.orientedBounds.p2.x,
-                viewClipper.orientedBounds.p2.y
-            );
+            viewClipper.aabb = new Vector4(viewClipper.orientedBounds.p0.x, viewClipper.orientedBounds.p0.y, viewClipper.orientedBounds.p2.x, viewClipper.orientedBounds.p2.y);
 
             viewClipper.isCulled = false; // todo -- wrong
 
@@ -316,7 +306,18 @@ namespace UIForia.Systems {
                 }
 
                 if (needsGather) {
-                    hierarchyRebuildList.Add(currentElement);
+                    UIElement ptr = currentElement;
+                    while (ptr != null) {
+                        
+                        if (ptr.style.LayoutBehavior != LayoutBehavior.TranscludeChildren) {
+                            if (!hierarchyRebuildList.Contains(ptr)) {
+                                hierarchyRebuildList.Add(ptr);
+                            }
+                        
+                            break;
+                        }
+                        ptr = ptr.parent;
+                    }
                 }
             }
         }
@@ -366,17 +367,18 @@ namespace UIForia.Systems {
                 EnableHierarchy(child);
 
                 switch (child.style.LayoutBehavior) {
-                    default:
-                    case LayoutBehavior.Unset:
-                    case LayoutBehavior.Normal:
-                        list.Add(child.layoutBox);
-                        break;
                     case LayoutBehavior.Ignored:
+                        child.layoutBox.parent = currentElement.layoutBox;
                         child.layoutResult.layoutParent = currentElement.layoutResult; // todo -- multiple ignore levels?
                         ignoredList.Add(child.layoutBox);
                         break;
                     case LayoutBehavior.TranscludeChildren:
+                        child.layoutBox.parent = currentElement.layoutBox;
+                        child.layoutResult.layoutParent = currentElement.layoutResult; // todo -- multiple ignore levels?
                         child.layoutBox.GetChildren(list);
+                        break;
+                    default:
+                        list.Add(child.layoutBox);
                         break;
                 }
             }
@@ -532,12 +534,13 @@ namespace UIForia.Systems {
                     result.alignedPosition.x = originBase + originOffset + offset;
                 }
 
-                if (!Mathf.Approximately(previousPosition, result.alignedPosition.x)) {
-                    if ((box.flags & LayoutBoxFlags.RequiresMatrixUpdate) != 0) {
+                // todo -- this is caching problem! fix it!
+              //  if (!Mathf.Approximately(previousPosition, result.alignedPosition.x)) {
+                 //   if ((box.flags & LayoutBoxFlags.RequiresMatrixUpdate) != 0) {
                         box.flags |= LayoutBoxFlags.RequiresMatrixUpdate;
                         matrixUpdateList.Add(box.element);
-                    }
-                }
+                 //   }
+               // }
             }
 
             alignHorizontalList.Clear();
@@ -573,12 +576,14 @@ namespace UIForia.Systems {
                     result.alignedPosition.y = originBase + originOffset + offset;
                 }
 
-                if (!Mathf.Approximately(previousPosition, result.alignedPosition.y)) {
+                // todo -- this is caching problem! fix it!
+
+                // if (!Mathf.Approximately(previousPosition, result.alignedPosition.y)) {
                     //  if ((box.flags & LayoutBoxFlags.RequiresMatrixUpdate) != 0) {
                     box.flags |= LayoutBoxFlags.RequiresMatrixUpdate;
                     matrixUpdateList.Add(box.element);
                     //   }
-                }
+                // }
             }
 
             alignVerticalList.Clear();
@@ -602,7 +607,7 @@ namespace UIForia.Systems {
 
                 if ((layoutBox.flags & LayoutBoxFlags.RequireLayoutHorizontal) != 0) {
                     layoutBox.RunLayoutHorizontal(frameId);
-//                    layoutBox.element.layoutHistory.AddLayoutHorizontalCall(frameId);
+                    //                    layoutBox.element.layoutHistory.AddLayoutHorizontalCall(frameId);
                     layoutBox.flags &= ~LayoutBoxFlags.RequireLayoutHorizontal;
                 }
 
@@ -682,7 +687,7 @@ namespace UIForia.Systems {
         private void ApplyLayoutResults() {
             int size = matrixUpdateList.size;
             UIElement[] array = matrixUpdateList.array;
-//            ElemRef[] array = queryableElements.array; //matrixUpdateList.array;
+            //            ElemRef[] array = queryableElements.array; //matrixUpdateList.array;
 
             float viewWidth = rootElement.View.Viewport.width;
             float viewHeight = rootElement.View.Viewport.height;
@@ -879,7 +884,8 @@ namespace UIForia.Systems {
                         continue;
                     }
 
-                    switch (child.style.LayoutBehavior) { // todo -- flag on box instead would be faster
+                    switch (child.style.LayoutBehavior) {
+                        // todo -- flag on box instead would be faster
                         case LayoutBehavior.Unset:
                         case LayoutBehavior.Normal:
                             childList.Add(child.layoutBox);
@@ -923,7 +929,8 @@ namespace UIForia.Systems {
 
         }
 
-        public void QueryPoint(Vector2 point, QueryFilter filter, IList<UIElement> retn) { }
+        public void QueryPoint(Vector2 point, QueryFilter filter, IList<UIElement> retn) {
+        }
 
         public void QueryPoint(Vector2 point, IList<UIElement> retn) {
             if (!new Rect(0, 0, Screen.width, Screen.height).Contains(point)) {

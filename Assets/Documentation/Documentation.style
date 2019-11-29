@@ -82,6 +82,7 @@ style button-selected {
 style navigation {
     Padding = 20px;
     BackgroundColor = white;
+    PreferredHeight = 1pca;
     [attr:collapsed="true"] {
         PreferredSize = 0;
     }
@@ -92,7 +93,7 @@ style demo-panel {
     BorderLeft = 2px;
     BorderColor = #2c2e53;
     BackgroundColor = @boringBackgroundColor;
-    PreferredSize = 0;
+    PreferredSize = 1pca;
 }
 
 style burger {

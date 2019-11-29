@@ -19,15 +19,14 @@ namespace UIForia.Util {
                     return 0;
 
                 case AlignmentTarget.ParentContentArea:
-                    throw new NotImplementedException();
+                    LayoutResult parentResult = result.layoutParent;
 
-//                    FastLayoutBox parentBox = el.ResolveLayoutParent();
-//                    if (direction == AlignmentDirection.Start) {
-//                        return parentBox.paddingBox.left + parentBox.borderBox.left;
-//                    }
-//                    else {
-//                        return parentBox.paddingBox.right + parentBox.borderBox.right;
-//                    }
+                    if (direction == AlignmentDirection.Start) {
+                        return parentResult.padding.top + parentResult.border.top;
+                    }
+                    else {
+                        return parentResult.padding.bottom + parentResult.border.bottom;
+                    }
 
                 case AlignmentTarget.Template:
                     // todo handle transclusion

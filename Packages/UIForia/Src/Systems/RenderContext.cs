@@ -331,40 +331,43 @@ namespace UIForia.Rendering {
 
             currentBatch.uiforiaData.mainTexture = !ReferenceEquals(texture, null) ? texture : currentBatch.uiforiaData.mainTexture;
 
-            if (currentBatch.uiforiaData.colors.size + 1 >= currentBatch.uiforiaData.colors.array.Length) {
-                
-                Array.Resize(ref currentBatch.uiforiaData.colors.array, (currentBatch.uiforiaData.colors.size + 1) * 2);
-                Array.Resize(ref currentBatch.uiforiaData.objectData0.array, (currentBatch.uiforiaData.objectData0.size + 1) * 2);
-                Array.Resize(ref currentBatch.uiforiaData.objectData1.array, (currentBatch.uiforiaData.objectData1.size + 1) * 2);
-                
-                Array.Resize(ref currentBatch.uiforiaData.cornerData.array, (currentBatch.uiforiaData.cornerData.size + 1) * 2);
-                Array.Resize(ref currentBatch.uiforiaData.clipUVs.array, (currentBatch.uiforiaData.clipUVs.size + 1) * 2);
-                Array.Resize(ref currentBatch.uiforiaData.clipRects.array, (currentBatch.uiforiaData.clipRects.size + 1) * 2);
-            }
+            // todo -- optimize these adds, fix out of bounds 
             
-            currentBatch.uiforiaData.colors.array[currentBatch.uiforiaData.colors.size++] = geometry.packedColors;
-            currentBatch.uiforiaData.objectData0.array[currentBatch.uiforiaData.objectData0.size++] = geometry.objectData;
-            currentBatch.uiforiaData.objectData1.array[currentBatch.uiforiaData.objectData1.size++] = geometry.miscData;
-            currentBatch.uiforiaData.cornerData.array[currentBatch.uiforiaData.cornerData.size++] = geometry.cornerData;
+            // if (currentBatch.uiforiaData.colors.size + 1 >= currentBatch.uiforiaData.colors.array.Length) {
+            //     
+            //     Array.Resize(ref currentBatch.uiforiaData.colors.array, (currentBatch.uiforiaData.colors.size + 1) * 2);
+            //     Array.Resize(ref currentBatch.uiforiaData.objectData0.array, (currentBatch.uiforiaData.objectData0.size + 1) * 2);
+            //     Array.Resize(ref currentBatch.uiforiaData.objectData1.array, (currentBatch.uiforiaData.objectData1.size + 1) * 2);
+            //     
+            //     Array.Resize(ref currentBatch.uiforiaData.cornerData.array, (currentBatch.uiforiaData.cornerData.size + 1) * 2);
+            //     Array.Resize(ref currentBatch.uiforiaData.clipUVs.array, (currentBatch.uiforiaData.clipUVs.size + 1) * 2);
+            //     Array.Resize(ref currentBatch.uiforiaData.clipRects.array, (currentBatch.uiforiaData.clipRects.size + 1) * 2);
+            // }
+            
+            currentBatch.uiforiaData.colors.Add(geometry.packedColors);
+            currentBatch.uiforiaData.objectData0.Add(geometry.objectData);
+            currentBatch.uiforiaData.objectData1.Add(geometry.miscData);
+            currentBatch.uiforiaData.cornerData.Add(geometry.cornerData);
+            
+            // currentBatch.uiforiaData.colors.array[currentBatch.uiforiaData.colors.size++] = geometry.packedColors;
+            // currentBatch.uiforiaData.objectData0.array[currentBatch.uiforiaData.objectData0.size++] = geometry.objectData;
+            // currentBatch.uiforiaData.objectData1.array[currentBatch.uiforiaData.objectData1.size++] = geometry.miscData;
+            // currentBatch.uiforiaData.cornerData.array[currentBatch.uiforiaData.cornerData.size++] = geometry.cornerData;
 
             if (clipper != null) {
                 // todo break batch if changed
                 currentBatch.uiforiaData.clipTexture = !ReferenceEquals(clipper.clipTexture, null) ? clipper.clipTexture : currentBatch.uiforiaData.clipTexture;
-                currentBatch.uiforiaData.clipUVs.array[currentBatch.uiforiaData.clipUVs.size++] = clipper.clipUVs;
-                currentBatch.uiforiaData.clipRects.array[currentBatch.uiforiaData.clipRects.size++] = clipper.packedBoundsAndChannel;
+                currentBatch.uiforiaData.clipUVs.Add(clipper.clipUVs);
+                currentBatch.uiforiaData.clipRects.Add(clipper.packedBoundsAndChannel);
             }
             else {
                 // todo -- get rid of this limitation
                 // in order to always draw the thing we take the max fixed float with 0.1 precision we can fit in 16 bits for clip size (2 ^ 16) / 10
-                currentBatch.uiforiaData.clipUVs.array[currentBatch.uiforiaData.clipUVs.size++] = default;
-                currentBatch.uiforiaData.clipRects.array[currentBatch.uiforiaData.clipRects.size++] = new Vector4(0, VertigoUtil.PackSizeVector(6553f, 6553f));
+                currentBatch.uiforiaData.clipUVs.Add(default);
+                currentBatch.uiforiaData.clipRects.Add(new Vector4(0, VertigoUtil.PackSizeVector(6553f, 6553f)));
             }
 
-            if (currentBatch.transformData.size + 1 >= currentBatch.transformData.array.Length) {
-                Array.Resize(ref currentBatch.transformData.array, (currentBatch.transformData.size + 1) * 2);
-            }
-
-            currentBatch.transformData.array[currentBatch.transformData.size++] = transform;
+            currentBatch.transformData.Add(transform);
 
             int vertexStart = positionList.size;
 

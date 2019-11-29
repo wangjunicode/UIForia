@@ -777,11 +777,32 @@ namespace UIForia.Systems {
         }
 
         internal void GetChildren(LightList<AwesomeLayoutBox> list) {
-            AwesomeLayoutBox ptr = firstChild;
-            while (ptr != null) {
-                list.Add(ptr);
-                ptr = ptr.nextSibling;
+
+            for (int i = 0; i < element.children.size; i++) {
+                var child = element.children.array[i];
+                if(!child.isEnabled) continue;
+                switch (child.style.LayoutBehavior) {
+                    case LayoutBehavior.Ignored:
+                        child.layoutBox.parent = this;
+                        child.layoutResult.layoutParent = element.layoutResult; // todo -- multiple ignore levels?
+                        // ignoredList.Add(child.layoutBox);
+                        break;
+                    case LayoutBehavior.TranscludeChildren:
+                        child.layoutBox.parent = this;
+                        child.layoutResult.layoutParent = element.layoutResult; // todo -- multiple ignore levels?
+                        child.layoutBox.GetChildren(list);
+                        break;
+                    default:
+                        list.Add(child.layoutBox);
+                        break;
+                }
             }
+            
+            // AwesomeLayoutBox ptr = firstChild;
+            // while (ptr != null) {
+            //     list.Add(ptr);
+            //     ptr = ptr.nextSibling;
+            // }
         }
 
     }

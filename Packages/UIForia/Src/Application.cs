@@ -523,14 +523,15 @@ namespace UIForia {
             }
 
 
+            StructStack<ElemRef> stack = StructStack<ElemRef>.Get();
             // if element is now enabled we need to walk it's children
             // and set enabled ancestor flags until we find a self-disabled child
-            elemRefStack.array[elemRefStack.size++].element = element;
+            stack.array[stack.size++].element = element;
 
             // stack operations in the following code are inlined since this is a very hot path
-            while (elemRefStack.size > 0) {
+            while (stack.size > 0) {
                 // inline stack pop
-                UIElement child = elemRefStack.array[--elemRefStack.size].element;
+                UIElement child = stack.array[--stack.size].element;
 
                 child.flags |= UIElementFlags.AncestorEnabled;
 
@@ -560,13 +561,13 @@ namespace UIForia {
                     child.enableStateChangedFrameId = frameId;
                     UIElement[] children = child.children.array;
                     int childCount = child.children.size;
-                    if (elemRefStack.size + childCount >= elemRefStack.array.Length) {
-                        Array.Resize(ref elemRefStack.array, elemRefStack.size + childCount + 16);
+                    if (stack.size + childCount >= stack.array.Length) {
+                        Array.Resize(ref stack.array, stack.size + childCount + 16);
                     }
 
                     for (int i = childCount - 1; i >= 0; i--) {
                         // inline stack push
-                        elemRefStack.array[elemRefStack.size++].element = children[i];
+                        stack.array[stack.size++].element = children[i];
                     }
                 }
             }
@@ -574,6 +575,8 @@ namespace UIForia {
             for (int i = 0; i < m_Systems.Count; i++) {
                 m_Systems[i].OnElementEnabled(element);
             }
+            
+            StructStack<ElemRef>.Release(ref stack);
 
             onElementEnabled?.Invoke(element);
         }
@@ -595,12 +598,13 @@ namespace UIForia {
 
             // if element is now enabled we need to walk it's children
             // and set enabled ancestor flags until we find a self-disabled child
-            elemRefStack.array[elemRefStack.size++].element = element;
+            StructStack<ElemRef> stack = StructStack<ElemRef>.Get();
+            stack.array[stack.size++].element = element;
 
             // stack operations in the following code are inlined since this is a very hot path
-            while (elemRefStack.size > 0) {
+            while (stack.size > 0) {
                 // inline stack pop
-                UIElement child = elemRefStack.array[--elemRefStack.size].element;
+                UIElement child = stack.array[--stack.size].element;
 
                 child.flags &= ~(UIElementFlags.AncestorEnabled);
 
@@ -630,13 +634,13 @@ namespace UIForia {
                 if (!child.isEnabled) {
                     UIElement[] children = child.children.array;
                     int childCount = child.children.size;
-                    if (elemRefStack.size + childCount >= elemRefStack.array.Length) {
-                        Array.Resize(ref elemRefStack.array, elemRefStack.size + childCount + 16);
+                    if (stack.size + childCount >= stack.array.Length) {
+                        Array.Resize(ref stack.array, stack.size + childCount + 16);
                     }
 
                     for (int i = childCount - 1; i >= 0; i--) {
                         // inline stack push
-                        elemRefStack.array[elemRefStack.size++].element = children[i];
+                        stack.array[stack.size++].element = children[i];
                     }
                 }
             }
@@ -646,6 +650,8 @@ namespace UIForia {
                 element.flags |= UIElementFlags.AncestorEnabled;
             }
 
+            StructStack<ElemRef>.Release(ref stack);
+            
             for (int i = 0; i < m_Systems.Count; i++) {
                 m_Systems[i].OnElementDisabled(element);
             }

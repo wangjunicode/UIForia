@@ -1,7 +1,6 @@
 style container {
     PreferredSize = 1pca;
     Padding = 50px;
-    FlexLayoutDirection = Horizontal;
 }
 
 style one-container {

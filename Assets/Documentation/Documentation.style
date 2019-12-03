@@ -5,9 +5,9 @@ export const buttonBackgroundSelectedColor = rgb(220, 95, 190);
 export const buttonBackgroundSelectedHoverColor = rgb(220, 95, 190);
 
 export const fontGothamLight = url("Fonts/Gotham-Light SDF")
-export const fontGothamNarrowMedium = url("GothamNarrow-Medium SDF");
-export const fontGothamBold = url("Gotham-Bold SDF");
-export const fontDigitalDreamFat = url("Fonts/DIGITALDREAMFAT SDF");
+export const fontGothamNarrowMedium = url("Fonts/GothamNarrow-Medium SDF");
+export const fontGothamBold = url("Fonts/Gotham-Bold SDF");
+export const fontDigitalDreamFat = url("Fonts/DigitaldreamFat SDF");
 
 export const cursorHand = url("Cursors/hand");
 

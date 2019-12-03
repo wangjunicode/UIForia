@@ -700,6 +700,9 @@ namespace UIForia.Text {
             }
 
             if (cursorIndex >= charCount) {
+                if (lineInfoList.size == 0) {
+                    return new Vector2(2, 0);
+                }
                 return new Vector2(charInfoList.array[charCount - 1].MaxX, lineInfoList.array[lineInfoList.size - 1].y);
             }
 
@@ -732,6 +735,9 @@ namespace UIForia.Text {
             }
 
             int lineIndex = FindNearestLine(point);
+            if (lineInfoList.size == 0) {
+                return 0;
+            }
             LineInfo lineInfo = lineInfoList.array[lineIndex];
 
             int closestIndex = lineInfo.globalCharacterStartIndex;

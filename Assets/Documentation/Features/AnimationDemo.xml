@@ -19,7 +19,44 @@
             <Div style="button" onMouseClick="ChangeAnimation('swing')">Swing</Div>
             <Div style="button" onMouseClick="ChangeAnimation('tada')">Tada</Div>
             <Div style="button" onMouseClick="ChangeAnimation('wobble')">Wobble</Div>
+<!--            <Div style="button" onMouseClick="ChangeAnimation('jello')">jello</Div>-->
+        </Group>
+        <Group style="button-container">
+            <Div style="button" onMouseClick="ChangeAnimation('heartBeat')">heartBeat</Div>
             <Div style="button" onMouseClick="ChangeAnimation('bounceIn')">bounceIn</Div>
+            <Div style="button" onMouseClick="ChangeAnimation('bounceOut')">bounceOut</Div>
+            <Div style="button" onMouseClick="ChangeAnimation('bounceInDown')">bounceInDown</Div>
+            <Div style="button" onMouseClick="ChangeAnimation('bounceInUp')">bounceInUp</Div>
+            <Div style="button" onMouseClick="ChangeAnimation('bounceInLeft')">bounceInLeft</Div>
+            <Div style="button" onMouseClick="ChangeAnimation('bounceInRight')">bounceInRight</Div>
+        </Group>
+        <Group style="button-container">
+            <Div style="button" onMouseClick="ChangeAnimation('bounceOutDown')">bounceOutDown</Div>
+            <Div style="button" onMouseClick="ChangeAnimation('bounceOutLeft')">bounceOutLeft</Div>
+            <Div style="button" onMouseClick="ChangeAnimation('bounceOutRight')">bounceOutRight</Div>
+            <Div style="button" onMouseClick="ChangeAnimation('bounceOutUp')">bounceOutUp</Div>
+            <Div style="button" onMouseClick="ChangeAnimation('fadeIn')">fadeIn</Div>
+            <Div style="button" onMouseClick="ChangeAnimation('fadeInDown')">fadeInDown</Div>
+            <Div style="button" onMouseClick="ChangeAnimation('fadeInDownBig')">fadeInDownBig</Div>
+        </Group>
+        <Group style="button-container">
+            <Div style="button" onMouseClick="ChangeAnimation('fadeInLeft')">fadeInLeft</Div>
+            <Div style="button" onMouseClick="ChangeAnimation('fadeInLeftBig')">fadeInLeftBig</Div>
+            <Div style="button" onMouseClick="ChangeAnimation('fadeInRight')">fadeInRight</Div>
+            <Div style="button" onMouseClick="ChangeAnimation('fadeInRightBig')">fadeInRightBig</Div>
+            <Div style="button" onMouseClick="ChangeAnimation('fadeInUp')">fadeInUp</Div>
+            <Div style="button" onMouseClick="ChangeAnimation('fadeInUpBig')">fadeInUpBig</Div>
+            <Div style="button" onMouseClick="ChangeAnimation('fadeOut')">fadeOut</Div>
+            <Div style="button" onMouseClick="ChangeAnimation('fadeOutDown')">fadeOutDown</Div>
+            <Div style="button" onMouseClick="ChangeAnimation('fadeOutDownBig')">fadeOutDownBig</Div>
+        </Group>
+        <Group style="button-container">
+            <Div style="button" onMouseClick="ChangeAnimation('fadeOutLeft')">fadeOutLeft</Div>
+            <Div style="button" onMouseClick="ChangeAnimation('fadeOutLeftBig')">fadeOutLeftBig</Div>
+            <Div style="button" onMouseClick="ChangeAnimation('fadeOutRightBig')">fadeOutRightBig</Div>
+            <Div style="button" onMouseClick="ChangeAnimation('fadeOutUp')">fadeOutUp</Div>
+            <Div style="button" onMouseClick="ChangeAnimation('fadeOutUpBig')">fadeOutUpBig</Div>
+            <Div style="button" onMouseClick="ChangeAnimation('rotateIn')">rotateIn</Div>
         </Group>
 
         <Heading2>Result</Heading2>

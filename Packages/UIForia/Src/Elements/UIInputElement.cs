@@ -196,6 +196,11 @@ namespace UIForia.Elements {
             formatter = formatter ?? GetFormatter();
         }
 
+        public void Reset() {
+            selectionRange = new SelectionRange(0, text.Length);
+            HandleCharactersDeletedForwards();
+        }
+
         [OnPropertyChanged(nameof(value))]
         protected void OnInputValueChanged(string name) {
             string oldText = text;

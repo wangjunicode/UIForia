@@ -149,6 +149,11 @@ namespace UIForia.Animation {
         public override UITaskResult Run(float deltaTime) {
             status.elapsedTotalTime += deltaTime;
             status.elapsedIterationTime += deltaTime;
+
+            if (state == UITaskState.Cancelled) {
+                return UITaskResult.Cancelled;
+            }
+            
             if (animationData.options.delay > status.elapsedTotalTime) {
                 return UITaskResult.Running;
             }

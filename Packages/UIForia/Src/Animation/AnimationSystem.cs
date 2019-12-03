@@ -20,6 +20,12 @@ namespace UIForia.Animation {
         }
 
         public AnimationTask Animate(UIElement element, ref AnimationData styleAnimation) {
+            AnimationTask task = FindAnimationTask(element, ref styleAnimation, thisFrame);
+            if (task != null) {
+                task.state = UITaskState.Running;
+                return task;
+            }
+            
             styleAnimation.options = EnsureDefaultOptionValues(styleAnimation);
             switch (styleAnimation.options.playbackType) {
                 case AnimationPlaybackType.KeyFrame: {

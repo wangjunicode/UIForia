@@ -2,6 +2,9 @@
 <UITemplate>
 
     <Style path="Documentation/Features/AnimationDemo.style"/>
+    <Using namespace="UIForia.Rendering" />
+    <Using namespace="UIForia.Animation" />
+    <Using namespace="UIForia.Systems" />
 
     <Contents style="container">
 
@@ -13,6 +16,10 @@
             <Div style="button" onMouseClick="ChangeAnimation('rubberBand')">Rubber Band</Div>
             <Div style="button" onMouseClick="ChangeAnimation('shake')">Shake</Div>
             <Div style="button" onMouseClick="ChangeAnimation('headShake')">Head Shake</Div>
+            <Div style="button" onMouseClick="ChangeAnimation('swing')">Swing</Div>
+            <Div style="button" onMouseClick="ChangeAnimation('tada')">Tada</Div>
+            <Div style="button" onMouseClick="ChangeAnimation('wobble')">Wobble</Div>
+            <Div style="button" onMouseClick="ChangeAnimation('bounceIn')">bounceIn</Div>
         </Group>
 
         <Heading2>Result</Heading2>
@@ -23,14 +30,28 @@
         <Group style="details-container" if="animationData.name != null">
             <Label>Name: {animationData.name}</Label>
 
-            <Label>Set duration</Label>
-            <InputElement--int style="input" value.read="animationData.options.duration" onValueChanged="OnDurationChanged" />
-            <InputElement--int style="input" value.read="animationData.options.duration" onValueChanged="OnDurationChanged" />
+            <Label>Duration (in milliseconds)</Label>
+            <InputElement--int style="input" value.read.write="duration" />
+            
+            <Label>Delay (in seconds)</Label>
+            <InputElement--float style="input" value.read.write="delay" />
+            
+            <Label>Iterations (-1 is infinite)</Label>
+            <InputElement--int style="input" value.read.write="iterations" />
+            
+            <Label>Easing Function</Label>
+            <Select--EasingFunction style="input" options="timingFunctions" selectedValue.read.write="timingFunction" />
+            
+            <Label>Animation Direction</Label>
+            <Select--AnimationDirection style="input" options="directions" selectedValue.read.write="direction" />
 
-            <Div style="button" onMouseClick="RunAnimationAgain()">Run</Div>
-            <Div>{animationTask.state}</Div>
-            <Div style="button" onMouseClick="PauseAnimation()">Pause</Div>
-            <Div style="button" onMouseClick="ResumeAnimation()">Resume</Div>
+            <Group style="button-container" if="animationTask != null">
+                <Div style="button" if="ShowRunButton" onMouseClick="RunAnimationAgain()">Run</Div>
+                <Div style="button" if="ShowPauseButton" onMouseClick="PauseAnimation()">Pause</Div>
+                <Div style="button" if="ShowResumeButton" onMouseClick="ResumeAnimation()">Resume</Div>
+                <Div style="button" if="ShowStopButton" onMouseClick="StopAnimation()">Stop!</Div>
+            </Group>
+            <Div>Animation Task Status: {animationTask.state}</Div>
         </Group>
         
         

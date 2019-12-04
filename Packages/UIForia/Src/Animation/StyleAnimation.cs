@@ -14,13 +14,11 @@ namespace UIForia.Animation {
 
         public UIElement target;
         public AnimationState status;
-        public AnimationData data;
 
         protected static readonly KeyFrameSorter KeyFrameSorter = new KeyFrameSorter();
 
-        protected StyleAnimation(UIElement target, AnimationData data) : base(AnimationTaskType.Style, data.triggers) {
+        protected StyleAnimation(UIElement target, AnimationData data) : base(AnimationTaskType.Style, data, data.triggers) {
             this.target = target;
-            this.data = data;
             ResetTriggers();
         }
 
@@ -38,7 +36,7 @@ namespace UIForia.Animation {
                 return;
             }
 
-            StyleAnimationEvent evt = new StyleAnimationEvent(AnimationEventType.Trigger, target, status, data.options);
+            StyleAnimationEvent evt = new StyleAnimationEvent(AnimationEventType.Trigger, target, status, animationData.options);
 
             float progress = status.iterationProgress;
             for (int i = 0; i < triggerStates.Count; i++) {

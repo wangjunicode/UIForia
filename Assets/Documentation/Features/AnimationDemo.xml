@@ -2,14 +2,96 @@
 <UITemplate>
 
     <Style path="Documentation/Features/AnimationDemo.style"/>
+    <Using namespace="UIForia.Rendering" />
+    <Using namespace="UIForia.Animation" />
+    <Using namespace="UIForia.Systems" />
 
     <Contents style="container">
-        <Div style="anims" x-anim="bounce">A simple text that you can animate</Div>
-        <Div style="anims" x-anim="flash">A simple text that you can animate</Div>
-        <Div style="anims" x-anim="pulse">A simple text that you can animate</Div>
-        <Div style="anims" x-anim="rubberBand">A simple text that you can animate</Div>
-        <Div style="anims" x-anim="shake">A simple text that you can animate</Div>
-        <Text style="anims" x-anim="headShake">A simple text that you can animate</Text>
+
+        <Heading2>Click on an animation type to see the result</Heading2>
+        <Group style="button-container">
+            <Div style="button" onMouseClick="ChangeAnimation('bounce')">Bounce</Div>
+            <Div style="button" onMouseClick="ChangeAnimation('flash')">Flash</Div>
+            <Div style="button" onMouseClick="ChangeAnimation('pulse')">Pulse</Div>
+            <Div style="button" onMouseClick="ChangeAnimation('rubberBand')">Rubber Band</Div>
+            <Div style="button" onMouseClick="ChangeAnimation('shake')">Shake</Div>
+            <Div style="button" onMouseClick="ChangeAnimation('headShake')">Head Shake</Div>
+            <Div style="button" onMouseClick="ChangeAnimation('swing')">Swing</Div>
+            <Div style="button" onMouseClick="ChangeAnimation('tada')">Tada</Div>
+            <Div style="button" onMouseClick="ChangeAnimation('wobble')">Wobble</Div>
+<!--            <Div style="button" onMouseClick="ChangeAnimation('jello')">jello</Div>-->
+        </Group>
+        <Group style="button-container">
+            <Div style="button" onMouseClick="ChangeAnimation('heartBeat')">heartBeat</Div>
+            <Div style="button" onMouseClick="ChangeAnimation('bounceIn')">bounceIn</Div>
+            <Div style="button" onMouseClick="ChangeAnimation('bounceOut')">bounceOut</Div>
+            <Div style="button" onMouseClick="ChangeAnimation('bounceInDown')">bounceInDown</Div>
+            <Div style="button" onMouseClick="ChangeAnimation('bounceInUp')">bounceInUp</Div>
+            <Div style="button" onMouseClick="ChangeAnimation('bounceInLeft')">bounceInLeft</Div>
+            <Div style="button" onMouseClick="ChangeAnimation('bounceInRight')">bounceInRight</Div>
+        </Group>
+        <Group style="button-container">
+            <Div style="button" onMouseClick="ChangeAnimation('bounceOutDown')">bounceOutDown</Div>
+            <Div style="button" onMouseClick="ChangeAnimation('bounceOutLeft')">bounceOutLeft</Div>
+            <Div style="button" onMouseClick="ChangeAnimation('bounceOutRight')">bounceOutRight</Div>
+            <Div style="button" onMouseClick="ChangeAnimation('bounceOutUp')">bounceOutUp</Div>
+            <Div style="button" onMouseClick="ChangeAnimation('fadeIn')">fadeIn</Div>
+            <Div style="button" onMouseClick="ChangeAnimation('fadeInDown')">fadeInDown</Div>
+            <Div style="button" onMouseClick="ChangeAnimation('fadeInDownBig')">fadeInDownBig</Div>
+        </Group>
+        <Group style="button-container">
+            <Div style="button" onMouseClick="ChangeAnimation('fadeInLeft')">fadeInLeft</Div>
+            <Div style="button" onMouseClick="ChangeAnimation('fadeInLeftBig')">fadeInLeftBig</Div>
+            <Div style="button" onMouseClick="ChangeAnimation('fadeInRight')">fadeInRight</Div>
+            <Div style="button" onMouseClick="ChangeAnimation('fadeInRightBig')">fadeInRightBig</Div>
+            <Div style="button" onMouseClick="ChangeAnimation('fadeInUp')">fadeInUp</Div>
+            <Div style="button" onMouseClick="ChangeAnimation('fadeInUpBig')">fadeInUpBig</Div>
+            <Div style="button" onMouseClick="ChangeAnimation('fadeOut')">fadeOut</Div>
+            <Div style="button" onMouseClick="ChangeAnimation('fadeOutDown')">fadeOutDown</Div>
+            <Div style="button" onMouseClick="ChangeAnimation('fadeOutDownBig')">fadeOutDownBig</Div>
+        </Group>
+        <Group style="button-container">
+            <Div style="button" onMouseClick="ChangeAnimation('fadeOutLeft')">fadeOutLeft</Div>
+            <Div style="button" onMouseClick="ChangeAnimation('fadeOutLeftBig')">fadeOutLeftBig</Div>
+            <Div style="button" onMouseClick="ChangeAnimation('fadeOutRightBig')">fadeOutRightBig</Div>
+            <Div style="button" onMouseClick="ChangeAnimation('fadeOutUp')">fadeOutUp</Div>
+            <Div style="button" onMouseClick="ChangeAnimation('fadeOutUpBig')">fadeOutUpBig</Div>
+            <Div style="button" onMouseClick="ChangeAnimation('rotateIn')">rotateIn</Div>
+        </Group>
+
+        <Heading2>Result</Heading2>
+        <Group style="anim-container">
+            <Div style="anims" x-id="animation-target">A simple text that you can animate</Div>
+        </Group>
+
+        <Group style="details-container" if="animationData.name != null">
+            <Label>Name: {animationData.name}</Label>
+
+            <Label>Duration (in milliseconds)</Label>
+            <InputElement--int style="input" value.read.write="duration" />
+            
+            <Label>Delay (in seconds)</Label>
+            <InputElement--float style="input" value.read.write="delay" />
+            
+            <Label>Iterations (-1 is infinite)</Label>
+            <InputElement--int style="input" value.read.write="iterations" />
+            
+            <Label>Easing Function</Label>
+            <Select--EasingFunction style="input" options="timingFunctions" selectedValue.read.write="timingFunction" />
+            
+            <Label>Animation Direction</Label>
+            <Select--AnimationDirection style="input" options="directions" selectedValue.read.write="direction" />
+
+            <Group style="button-container" if="animationTask != null">
+                <Div style="button" if="ShowRunButton" onMouseClick="RunAnimationAgain()">Run</Div>
+                <Div style="button" if="ShowPauseButton" onMouseClick="PauseAnimation()">Pause</Div>
+                <Div style="button" if="ShowResumeButton" onMouseClick="ResumeAnimation()">Resume</Div>
+                <Div style="button" if="ShowStopButton" onMouseClick="StopAnimation()">Stop!</Div>
+            </Group>
+            <Div>Animation Task Status: {animationTask.state}</Div>
+        </Group>
+        
+        
     </Contents>
 
 </UITemplate>

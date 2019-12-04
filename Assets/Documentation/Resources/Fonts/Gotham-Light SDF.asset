@@ -1,4 +1,4 @@
-﻿﻿%YAML 1.1
+%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!114 &11400000
 MonoBehaviour:
@@ -12,19 +12,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 71c1514a6bd24e1e882cebbe1904ce04, type: 3}
   m_Name: Gotham-Light SDF
   m_EditorClassIdentifier: 
-  hashCode: 626198778
+  hashCode: 0
   material: {fileID: 21191236422924862}
-  materialHashCode: 168598065
+  materialHashCode: 0
   fontAssetType: 1
   m_fontInfo:
     Name: Gotham
     PointSize: 93
-    Scale: 1
+    Scale: 0
     CharacterCount: 212
     LineHeight: 111.625
     Baseline: 0
     Ascender: 89.3125
-    CapHeight: 65.125
+    CapHeight: 0
     Descender: -22.375
     CenterLine: 0
     SuperscriptOffset: 89.3125
@@ -34,7 +34,7 @@ MonoBehaviour:
     UnderlineThickness: 4.65
     strikethrough: 24.34091
     strikethroughThickness: 4.65
-    TabWidth: 278.75
+    TabWidth: 0
     Padding: 9
     AtlasWidth: 1024
     AtlasHeight: 1024
@@ -43,10 +43,10 @@ MonoBehaviour:
   - id: 32
     x: 10
     y: 1033
-    width: 27.875
-    height: 111.6875
+    width: 0
+    height: 0
     xOffset: 0
-    yOffset: 89.3125
+    yOffset: 0
     xAdvance: 27.875
     scale: 1
   - id: 33

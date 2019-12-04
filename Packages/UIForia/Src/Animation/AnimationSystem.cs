@@ -19,7 +19,7 @@ namespace UIForia.Animation {
             nextFrame = new LightList<AnimationTask>();
         }
 
-        public AnimationTask Animate(UIElement element, AnimationData styleAnimation) {
+        public AnimationTask Animate(UIElement element, ref AnimationData styleAnimation) {
             styleAnimation.options = EnsureDefaultOptionValues(styleAnimation);
             switch (styleAnimation.options.playbackType) {
                 case AnimationPlaybackType.KeyFrame: {
@@ -40,10 +40,10 @@ namespace UIForia.Animation {
             return null;
         }
 
-        public void PauseAnimation(UIElement element, AnimationData animationData) {
-            AnimationTask task = FindAnimationTask(element, animationData, thisFrame);
+        public void PauseAnimation(UIElement element, ref AnimationData animationData) {
+            AnimationTask task = FindAnimationTask(element, ref animationData, thisFrame);
             if (task == null) {
-                task = FindAnimationTask(element, animationData, nextFrame);
+                task = FindAnimationTask(element, ref animationData, nextFrame);
             }
 
             if (task == null) {
@@ -56,7 +56,22 @@ namespace UIForia.Animation {
             }
         }
 
-        private AnimationTask FindAnimationTask(UIElement element, AnimationData animationData, LightList<AnimationTask> tasks) {
+        public void ResumeAnimation(UIElement element, ref AnimationData animationData) {
+            AnimationTask task = FindAnimationTask(element, ref animationData, thisFrame);
+            if (task == null) {
+                task = FindAnimationTask(element, ref animationData, nextFrame);
+            }
+
+            if (task == null) {
+                return;
+            }
+
+            if (task is StyleAnimation styleAnimation) {
+                styleAnimation.state = UITaskState.Running;
+            }
+        }
+
+        private AnimationTask FindAnimationTask(UIElement element, ref AnimationData animationData, LightList<AnimationTask> tasks) {
             for (int index = 0; index < tasks.Count; index++) {
                 AnimationTask task = tasks[index];
                 if (task is StyleAnimation styleAnimation 
@@ -71,10 +86,10 @@ namespace UIForia.Animation {
             return null;
         }
 
-        public void StopAnimation(UIElement element, AnimationData animationData) {
-            AnimationTask task = FindAnimationTask(element, animationData, thisFrame);
+        public void StopAnimation(UIElement element, ref AnimationData animationData) {
+            AnimationTask task = FindAnimationTask(element, ref animationData, thisFrame);
             if (task == null) {
-                task = FindAnimationTask(element, animationData, nextFrame);
+                task = FindAnimationTask(element, ref animationData, nextFrame);
             }
 
             if (task == null) {
@@ -108,8 +123,13 @@ namespace UIForia.Animation {
 
             for (int i = 0; i < thisFrame.Count; i++) {
                 AnimationTask task = thisFrame[i];
-
+                
                 StyleAnimation styleAnimation = (StyleAnimation) task;
+
+                if (styleAnimation.state == UITaskState.Paused) {
+                    nextFrame.Add(styleAnimation);
+                    continue;
+                }
 
                 if (styleAnimation.target.isDestroyed) {
                     styleAnimation.state = UITaskState.Failed;
@@ -124,26 +144,28 @@ namespace UIForia.Animation {
                     continue;
                 }
 
+                AnimationData styleAnimationAnimationData = styleAnimation.animationData;
                 if (styleAnimation.state == UITaskState.Uninitialized) {
-                    styleAnimation.data.onStart?.Invoke(new StyleAnimationEvent(
+                    styleAnimation.state = UITaskState.Running;
+                    styleAnimationAnimationData.onStart?.Invoke(new StyleAnimationEvent(
                         AnimationEventType.Start,
                         styleAnimation.target,
                         styleAnimation.status,
-                        styleAnimation.data.options)
+                        styleAnimationAnimationData.options)
                     );
                 }
-                
+
                 UITaskResult status = styleAnimation.Run(Time.unscaledDeltaTime);
 
                 switch (status) {
                     case UITaskResult.Running:
                         styleAnimation.RunTriggers();
 
-                        styleAnimation.data.onTick?.Invoke(new StyleAnimationEvent(
+                        styleAnimationAnimationData.onTick?.Invoke(new StyleAnimationEvent(
                             AnimationEventType.Tick,
                             styleAnimation.target,
                             styleAnimation.status,
-                            styleAnimation.data.options)
+                            styleAnimationAnimationData.options)
                         );
 
                         nextFrame.Add(styleAnimation);
@@ -155,18 +177,18 @@ namespace UIForia.Animation {
                         styleAnimation.status.elapsedIterationTime = 0f;
                         styleAnimation.state = UITaskState.Completed;
 
-                        if (styleAnimation.status.currentIteration == styleAnimation.data.options.iterations) {
-                            styleAnimation.data.onCompleted?.Invoke(new StyleAnimationEvent(
+                        if (styleAnimation.status.currentIteration == styleAnimationAnimationData.options.iterations) {
+                            styleAnimationAnimationData.onCompleted?.Invoke(new StyleAnimationEvent(
                                 AnimationEventType.Complete,
                                 styleAnimation.target,
                                 styleAnimation.status,
-                                styleAnimation.data.options)
+                                styleAnimationAnimationData.options)
                             );
-                            styleAnimation.data.onEnd?.Invoke(new StyleAnimationEvent(
+                            styleAnimationAnimationData.onEnd?.Invoke(new StyleAnimationEvent(
                                 AnimationEventType.End,
                                 styleAnimation.target,
                                 styleAnimation.status,
-                                styleAnimation.data.options)
+                                styleAnimationAnimationData.options)
                             );
                             continue;
                         }
@@ -174,12 +196,12 @@ namespace UIForia.Animation {
                         styleAnimation.state = UITaskState.Pending;
 
                         styleAnimation.ResetTriggers();
-                        if (styleAnimation.data.options.loopType == AnimationLoopType.PingPong) {
-                            if (styleAnimation.data.options.direction == AnimationDirection.Reverse) {
-                                styleAnimation.data.options.direction = AnimationDirection.Forward;
+                        if (styleAnimationAnimationData.options.loopType == AnimationLoopType.PingPong) {
+                            if (styleAnimationAnimationData.options.direction == AnimationDirection.Reverse) {
+                                styleAnimationAnimationData.options.direction = AnimationDirection.Forward;
                             }
                             else {
-                                styleAnimation.data.options.direction = AnimationDirection.Reverse;
+                                styleAnimationAnimationData.options.direction = AnimationDirection.Reverse;
                             }
                         }
 
@@ -194,11 +216,11 @@ namespace UIForia.Animation {
                     case UITaskResult.Failed:
                     case UITaskResult.Cancelled:
                         styleAnimation.state = UITaskState.Failed;
-                        styleAnimation.data.onCanceled?.Invoke(new StyleAnimationEvent(
+                        styleAnimationAnimationData.onCanceled?.Invoke(new StyleAnimationEvent(
                             AnimationEventType.Cancel,
                             styleAnimation.target,
                             styleAnimation.status,
-                            styleAnimation.data.options)
+                            styleAnimationAnimationData.options)
                         );
                         break;
                     default:

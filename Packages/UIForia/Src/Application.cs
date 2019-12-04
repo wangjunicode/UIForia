@@ -710,15 +710,19 @@ namespace UIForia {
 //        }
 
         public AnimationTask Animate(UIElement element, AnimationData animation) {
-            return m_AnimationSystem.Animate(element, animation);
+            return m_AnimationSystem.Animate(element, ref animation);
         }
 
         public void PauseAnimation(UIElement element, AnimationData animationData) {
-            m_AnimationSystem.PauseAnimation(element, animationData);
+            m_AnimationSystem.PauseAnimation(element, ref animationData);
+        }
+
+        public void ResumeAnimation(UIElement element, AnimationData animationData) {
+            m_AnimationSystem.ResumeAnimation(element, ref animationData);
         }
 
         public void StopAnimation(UIElement element, AnimationData animationData) {
-            m_AnimationSystem.StopAnimation(element, animationData);
+            m_AnimationSystem.StopAnimation(element, ref animationData);
         }
 
         public UIView[] GetViews() {

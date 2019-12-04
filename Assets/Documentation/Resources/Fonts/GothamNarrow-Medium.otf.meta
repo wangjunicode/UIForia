@@ -1,5 +1,5 @@
-﻿﻿fileFormatVersion: 2
-guid: 37ece2d4a0c74f042b02daf73b397fb9
+fileFormatVersion: 2
+guid: a69905d661081784f9b5fc408d52ff22
 TrueTypeFontImporter:
   externalObjects: {}
   serializedVersion: 4
@@ -8,8 +8,9 @@ TrueTypeFontImporter:
   characterSpacing: 0
   characterPadding: 1
   includeFontData: 1
-  fontName: 
-  fontNames: []
+  fontName: Gotham Narrow
+  fontNames:
+  - Gotham Narrow
   fallbackFontReferences: []
   customCharacters: 
   fontRenderingMode: 0

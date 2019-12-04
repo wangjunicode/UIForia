@@ -14,6 +14,9 @@ namespace UIForia.Systems {
         Cancelled = 1 << 6,
         Paused = 1 << 7,
 
+        ReRunnable = Uninitialized | Completed | Failed | Cancelled,
+        Pausable = Pending | Restarting | Running,
+        Stoppable = Pausable | Paused,
     }
 
 }

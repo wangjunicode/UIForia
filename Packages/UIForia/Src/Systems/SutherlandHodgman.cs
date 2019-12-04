@@ -139,7 +139,7 @@ namespace UIForia.Rendering {
             float dotPerp = (direction1.x * direction2.y) - (direction1.y * direction2.x);
 
             // If it's 0, it means the lines are parallel so have infinite intersection points
-            if (Math.Abs(dotPerp) <= 0.000000001f) {
+            if (Mathf.Abs(dotPerp) <= 0.000000001f) {
                 return null;
             }
 

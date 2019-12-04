@@ -177,11 +177,13 @@ namespace UIForia.Systems {
                     case StylePropertyId.MaxWidth:
                     case StylePropertyId.PreferredWidth:
                         element.layoutBox.UpdateBlockProviderWidth();
+                        element.layoutBox.MarkForLayoutHorizontal();
                         break;
                     case StylePropertyId.MinHeight:
                     case StylePropertyId.MaxHeight:
                     case StylePropertyId.PreferredHeight:
                         element.layoutBox.UpdateBlockProviderHeight();
+                        element.layoutBox.MarkForLayoutVertical();
                         break;
                     case StylePropertyId.PaddingLeft:
                     case StylePropertyId.PaddingRight:

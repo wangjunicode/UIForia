@@ -7,6 +7,7 @@ using UIForia.Elements;
 using UIForia.Layout;
 using UIForia.Layout.LayoutTypes;
 using UIForia.Rendering;
+using UIForia.Systems;
 using UIForia.Text;
 using UIForia.Util;
 using UnityEditor;
@@ -521,6 +522,12 @@ namespace UIForia.Editor {
             List<ElementAttribute> attributes = selectedElement.GetAttributes();
             if (attributes != null) {
                 DrawAttributes(attributes);
+            }
+
+            AwesomeLayoutBox ptr = selectedElement.layoutBox.firstChild;
+            while (ptr != null) {
+                DrawLabel("", ptr.element.ToString());
+                ptr = ptr.nextSibling;
             }
 
             GUI.enabled = true;

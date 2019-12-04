@@ -68,8 +68,13 @@ namespace UIForia.Systems {
         }
 
         protected override float ComputeContentHeight() {
+            ignoreUpdate = true;
+            
             // todo -- might need to subtract padding / border from this value
-            return textInfo.ComputeHeightForWidth(finalWidth);
+            float retn = textInfo.ComputeHeightForWidth(finalWidth);
+            ignoreUpdate = false;
+
+            return retn;
         }
 
         public override void OnChildrenChanged(LightList<AwesomeLayoutBox> childList) { }

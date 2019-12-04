@@ -926,6 +926,7 @@ namespace UIForia.Rendering {
 
                 case UIFixedUnit.Em:
                 case UIFixedUnit.Percent:
+                    
                     if (element.parent != null) {
                         return element.parent.style.GetResolvedFontSize() * fontSize.value;
                     }

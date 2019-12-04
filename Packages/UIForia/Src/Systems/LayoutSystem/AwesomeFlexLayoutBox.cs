@@ -74,10 +74,8 @@ namespace UIForia.Systems {
                         item.layoutBox.GetHeights(ref item.heightData);
                         item.baseHeight = item.heightData.Clamped;
 
-                        // todo -- margins?
-
-                        if (item.baseHeight > maxHeight) {
-                            maxHeight = item.baseHeight;
+                        if (item.baseHeight + item.heightData.marginStart + item.heightData.marginEnd > maxHeight) {
+                            maxHeight = item.baseHeight + item.heightData.marginStart + item.heightData.marginEnd;
                         }
                     }
 
@@ -743,14 +741,12 @@ namespace UIForia.Systems {
 
             for (int i = 0; i < items.size; i++) {
                 ref FlexItem item = ref items.array[i];
-                float offset = 0;
                 item.layoutBox.GetWidths(ref item.widthData);
                 item.baseWidth = item.widthData.Clamped;
 
-                SpaceDistributionUtil.GetAlignmentOffsets(adjustedWidth - item.baseWidth - item.widthData.marginStart - item.widthData.marginEnd, 1, alignment, out offset, out spacerSize);
+                SpaceDistributionUtil.GetAlignmentOffsets(adjustedWidth - item.baseWidth - item.widthData.marginStart - item.widthData.marginEnd, 1, alignment, out float offset, out spacerSize);
 
                 float x = inset + offset;
-                offset += item.baseWidth + spacerSize;
 
                 float availableWidth = adjustedWidth - (item.widthData.marginStart + item.widthData.marginEnd);
                 float originBase = contentStartX + item.widthData.marginStart;
@@ -759,7 +755,6 @@ namespace UIForia.Systems {
 
                 item.layoutBox.ApplyLayoutHorizontal(x, alignedPosition, item.widthData, item.baseWidth, availableWidth, fit, frameId);
 
-                offset += item.widthData.marginStart + item.widthData.marginEnd + gap;
             }
         }
 

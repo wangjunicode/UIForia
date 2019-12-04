@@ -22,10 +22,10 @@ namespace UIForia.Util {
                     LayoutResult parentResult = result.layoutParent;
 
                     if (direction == AlignmentDirection.Start) {
-                        return parentResult.padding.top + parentResult.border.top;
+                        return parentResult.padding.left + parentResult.border.left;
                     }
                     else {
-                        return parentResult.padding.bottom + parentResult.border.bottom;
+                        return parentResult.padding.right + parentResult.border.right;
                     }
 
                 case AlignmentTarget.Template:
@@ -121,7 +121,7 @@ namespace UIForia.Util {
                         return viewportWidth;
                     }
 
-                    return layoutResult.layoutParent.actualSize.width;
+                    return Mathf.Max(0, layoutResult.layoutParent.ContentWidth);
 
                 case AlignmentTarget.Template:
                     // todo handle transclusion
@@ -158,7 +158,7 @@ namespace UIForia.Util {
                     if (result.layoutParent == null) {
                         return viewportHeight;
                     }
-                    return result.layoutParent.ContentHeight;
+                    return Mathf.Max(0, result.layoutParent.ContentHeight);
 
                 case AlignmentTarget.Template:
                     // todo handle transclusion

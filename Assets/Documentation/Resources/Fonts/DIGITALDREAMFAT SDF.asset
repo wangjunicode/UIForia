@@ -112,19 +112,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 71c1514a6bd24e1e882cebbe1904ce04, type: 3}
   m_Name: DigitaldreamFat SDF
   m_EditorClassIdentifier: 
-  hashCode: 0
+  hashCode: 1968856775
   material: {fileID: -526848335257786436}
-  materialHashCode: 0
+  materialHashCode: -75906580
   fontAssetType: 1
   m_fontInfo:
     Name: Digital dream Fat
     PointSize: 115
-    Scale: 0
+    Scale: 1
     CharacterCount: 99
     LineHeight: 119.25
     Baseline: 0
     Ascender: 92
-    CapHeight: 0
+    CapHeight: 84.625
     Descender: -27.3125
     CenterLine: 0
     SuperscriptOffset: 92
@@ -134,7 +134,7 @@ MonoBehaviour:
     UnderlineThickness: 2.3000002
     strikethrough: 23.522728
     strikethroughThickness: 2.3000002
-    TabWidth: 0
+    TabWidth: 920
     Padding: 9
     AtlasWidth: 1024
     AtlasHeight: 1024
@@ -143,10 +143,10 @@ MonoBehaviour:
   - id: 32
     x: 10
     y: 1033
-    width: 0
-    height: 0
+    width: 92
+    height: 119.3125
     xOffset: 0
-    yOffset: 0
+    yOffset: 92
     xAdvance: 92
     scale: 1
   - id: 33

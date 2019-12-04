@@ -12,6 +12,5 @@ style <InputElement<String>> {
     BorderColor = black;
     BackgroundColor = white;
     PreferredWidth = 500px;
-    TextFontSize = 1em;
     MarginBottom = 20px;
 }

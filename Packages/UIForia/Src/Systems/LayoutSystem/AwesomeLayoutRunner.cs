@@ -179,11 +179,21 @@ namespace UIForia.Systems {
                 layoutBox.traversalIndex = layoutSystem.traversalIndex++;
 
                 if ((layoutBox.flags & LayoutBoxFlags.RequireLayoutHorizontal) != 0) {
-                    layoutBox.MarkContentParentsHorizontalDirty(frameId, LayoutReason.DescendentStyleSizeChanged);
+                    if (currentElement.style.LayoutBehavior == LayoutBehavior.TranscludeChildren) {
+                        layoutBox.flags &= ~LayoutBoxFlags.RequireLayoutHorizontal;
+                    }
+                    else {
+                        layoutBox.MarkContentParentsHorizontalDirty(frameId, LayoutReason.DescendentStyleSizeChanged);
+                    }
                 }
 
                 if ((layoutBox.flags & LayoutBoxFlags.RequireLayoutVertical) != 0) {
-                    layoutBox.MarkContentParentsVerticalDirty(frameId, LayoutReason.DescendentStyleSizeChanged);
+                    if (currentElement.style.LayoutBehavior == LayoutBehavior.TranscludeChildren) {
+                        layoutBox.flags &= ~LayoutBoxFlags.RequireLayoutVertical;
+                    }
+                    else {
+                        layoutBox.MarkContentParentsVerticalDirty(frameId, LayoutReason.DescendentStyleSizeChanged);
+                    }
                 }
 
                 if ((layoutBox.flags & LayoutBoxFlags.RequireAlignmentHorizontal) != 0) {
@@ -765,6 +775,7 @@ namespace UIForia.Systems {
                         result.screenPosition.y = result.matrix.m5; // maybe should be aabb position?
 
                         int childCount = currentElement.children.size;
+                        elemRefStack.EnsureAdditionalCapacity(childCount);
 
                         for (int childIdx = 0; childIdx < childCount; childIdx++) {
                             UIElement child = currentElement.children.array[childIdx];
@@ -849,6 +860,10 @@ namespace UIForia.Systems {
                 }
 
                 int childCount = currentElement.children.size;
+                
+                if (elemRefStack.size + childCount >= elemRefStack.array.Length) {
+                    elemRefStack.EnsureAdditionalCapacity(childCount);
+                }
 
                 // no need to size check since we are reusing the stack
 

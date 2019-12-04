@@ -8,6 +8,8 @@ style container {
 style button-container {
     FlexLayoutDirection = Horizontal;
     MarginBottom = 10px;
+    FlexLayoutWrap = WrapHorizontal;
+    MaxWidth = 800px;
 }
 
 style button {

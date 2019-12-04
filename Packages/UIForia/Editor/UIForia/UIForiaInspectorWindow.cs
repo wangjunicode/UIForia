@@ -934,9 +934,6 @@ namespace UIForia.Editor {
                 case StylePropertyId.TransformBehaviorY:
                     return DrawEnumWithValue<TransformBehavior>(property, isEditable);
 
-                case StylePropertyId.__TextPropertyStart__:
-                case StylePropertyId.__TextPropertyEnd__:
-                    break;
                 case StylePropertyId.TextColor:
                 case StylePropertyId.ShadowColor:
                 case StylePropertyId.ShadowTint:

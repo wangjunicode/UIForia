@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UIForia.Compilers;
 using UIForia.Compilers.Style;
 using UIForia.Elements;
@@ -22,6 +23,7 @@ namespace UIForia {
         public UIStyleGroupContainer[] styles;
         
         public readonly TemplateSettings templateSettings;
+        public readonly Dictionary<Type, int> templateTypeMap = new Dictionary<Type, int>();
         
         public abstract void LoadTemplates();
         
@@ -67,6 +69,15 @@ namespace UIForia {
         
         public StyleSheet ImportStyleSheet(in StyleDefinition styleDefinition) {
             return styleImporter.Import(styleDefinition);
+        }
+
+        public Func<UIElement, TemplateScope2, UIElement> GetTemplate<T>() where T : UIElement {
+            
+            if (templateTypeMap.TryGetValue(typeof(T), out int id)) {
+                return templates[id];
+            }
+
+            return null;
         }
 
     }

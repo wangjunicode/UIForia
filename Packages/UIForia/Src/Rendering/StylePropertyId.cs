@@ -83,7 +83,6 @@ namespace UIForia.Rendering {
         TransformBehaviorX = 907,
         TransformBehaviorY = 908,
 
-        __TextPropertyStart__ = 1000,
         TextColor =  1001,
         TextFontAsset =  1002,
         TextFontSize =  1003,
@@ -109,7 +108,6 @@ namespace UIForia.Rendering {
         CaretColor = 1023,
         SelectionBackgroundColor = 1024,
         SelectionTextColor = 1025,
-        __TextPropertyEnd__ = 1099,
 
         MinWidth = 1100,
         MaxWidth = 1101,

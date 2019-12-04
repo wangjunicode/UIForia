@@ -291,7 +291,6 @@ namespace UIForia.Rendering {
             }
 
             LightList<StylePropertyId> toUpdate = LightList<StylePropertyId>.Get();
-            LightList<IRunCommand> toRun = LightList<IRunCommand>.Get();
 
             StyleEntry[] styleEntries = availableStyles.Array;
             for (int i = 0; i < availableStyles.Count; i++) {
@@ -307,7 +306,6 @@ namespace UIForia.Rendering {
             UpdatePropertyMap(toUpdate);
 
             LightList<StylePropertyId>.Release(ref toUpdate);
-            LightList<IRunCommand>.Release(ref toRun);
         }
 
         /// <summary>
@@ -382,6 +380,8 @@ namespace UIForia.Rendering {
 
             UIStyleSet parentStyle = element.parent.style;
 
+            if (parentStyle == null) return;
+            
             for (int i = 0; i < count; i++) {
                 int propertyId = (int) StyleUtil.InheritedProperties[i];
                 int key = BitUtil.SetHighLowBits(1, propertyId);

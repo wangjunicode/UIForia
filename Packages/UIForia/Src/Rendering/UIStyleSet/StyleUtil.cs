@@ -16,8 +16,6 @@ namespace UIForia.Rendering {
             InheritedProperties = new List<StylePropertyId>();
             StylePropertyId[] values = (StylePropertyId[]) Enum.GetValues(typeof(StylePropertyId));
             StylePropertyId[] ignored = {
-                StylePropertyId.__TextPropertyStart__,
-                StylePropertyId.__TextPropertyEnd__
             };
             int idx = 0;
             StylePropertyIdList = new StylePropertyId[values.Length - ignored.Length];

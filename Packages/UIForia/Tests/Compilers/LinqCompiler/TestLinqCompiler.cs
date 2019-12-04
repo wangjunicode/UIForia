@@ -330,16 +330,16 @@ public class TestLinqCompiler {
             retn_val = default(float);
             if (thing == null)
             {
-                goto retn;
+                return default(float);
             }
             nullCheck = thing.vec3Array;
             if (nullCheck == null)
             {
-                goto retn;
+                return default(float);
             }
             if (0 >= nullCheck.Length)
             {
-                goto retn;
+               return default(float);
             }
             retn_val = nullCheck[0].x;
         retn:
@@ -372,7 +372,7 @@ public class TestLinqCompiler {
             toBoundsCheck = thing.vec3Array;
             if (0 >= toBoundsCheck.Length)
             {
-                goto retn;
+                return default(float);
             }
             retn_val = toBoundsCheck[0].x;
         retn:
@@ -412,11 +412,11 @@ public class TestLinqCompiler {
             nullCheck = thing.vec3Array;
             if (nullCheck == null)
             {
-                goto retn;
+                return default(UnityEngine.Vector3);
             }
             if (1 >= nullCheck.Length)
             {
-                goto retn;
+                return default(UnityEngine.Vector3);
             }
             retn_val = nullCheck[1];
         retn:
@@ -472,17 +472,17 @@ public class TestLinqCompiler {
             retn_val = default(UnityEngine.Vector3);
             if (thing == null)
             {
-                goto retn;
+                return default(UnityEngine.Vector3);
             }
             nullCheck = thing.vec3Array;
             if (nullCheck == null)
             {
-                goto retn;
+                return default(UnityEngine.Vector3);
             }
             indexer = (arg0 + thing.intVal) - arg1;
             if ((indexer < 0) || (indexer >= nullCheck.Length))
             {
-                goto retn;
+                return default(UnityEngine.Vector3);
             }
             retn_val = nullCheck[indexer];
         retn:
@@ -522,12 +522,12 @@ public class TestLinqCompiler {
             retn_val = default(UnityEngine.Vector3);
             if (thing == null)
             {
-                goto retn;
+                return default(UnityEngine.Vector3);
             }
             nullCheck = thing.vec3Array;
             if (nullCheck == null)
             {
-                goto retn;
+                return default(UnityEngine.Vector3);
             }
             retn_val = nullCheck[(arg0 + thing.intVal) - arg1];
         retn:
@@ -610,9 +610,9 @@ public class TestLinqCompiler {
                 toBoundsCheck = thing.vec3Array;
                 if ((indexer < 0) || (indexer >= toBoundsCheck.Length))
                 {
-                    goto retn;
+                    return default(UnityEngine.Vector3);
                 }
-                nullableAccess = (UnityEngine.Vector3?)toBoundsCheck[indexer];
+                nullableAccess = ((UnityEngine.Vector3?)toBoundsCheck[indexer]);
             }
             retn_val = nullableAccess ?? UnityEngine.Vector3.one;
         retn:
@@ -762,7 +762,7 @@ public class TestLinqCompiler {
             retn_val = default(System.Func<int>);
             if (root == null)
             {
-                goto retn;
+                return default(System.Func<int>);
             }
             vectors = root.vec3Array;
             retn_val = () =>
@@ -772,7 +772,7 @@ public class TestLinqCompiler {
                 retn_val_1 = default(int);
                 if (root == null)
                 {
-                    goto retn_1;
+                    return default(int);
                 }
                 retn_val_1 = root.intVal;
             retn_1:
@@ -853,6 +853,7 @@ public class TestLinqCompiler {
         compiler.SetSignature<string>(new Parameter<Tuple<string>>("s"));
         compiler.Return("s.Item1 + 1");
         Tuple<string> s = new Tuple<string>("hello");
+        compiler.Log();
         Assert.AreEqual("hello1", compiler.Compile<Func<Tuple<string>, string>>()(s));
     }
 
@@ -871,7 +872,7 @@ public class TestLinqCompiler {
             retn_val = default(string);
             if (s == null)
             {
-                goto retn;
+                return default(string);
             }
             retn_val = string.Concat(""1"", s.Item1);
                 retn:
@@ -923,7 +924,7 @@ public class TestLinqCompiler {
             nullCheck = root.refValueHolderVec3;
             if (nullCheck == null)
             {
-                goto retn;
+                return default(float);
             }
             retn_val = nullCheck.value.z;
         retn:
@@ -952,12 +953,12 @@ public class TestLinqCompiler {
             nullCheck = root.nestedValueHolder;
             if (nullCheck == null)
             {
-                goto retn;
+                return default(float);
             }
             nullCheck_0 = nullCheck.value;
             if (nullCheck_0 == null)
             {
-                goto retn;
+                return default(float);
             }
             retn_val = nullCheck_0.value.z;
         retn:
@@ -1165,7 +1166,7 @@ public class TestLinqCompiler {
                 {
                     goto retn;
                 }
-                nullableAccess = (float?)toBoundsCheck[3].z;
+                nullableAccess = ((float?)toBoundsCheck[3].z);
             }
             right = nullableAccess ?? 2f;
             if (element.floatValue != right)
@@ -1216,7 +1217,7 @@ public class TestLinqCompiler {
                 {
                     goto retn;
                 }
-                nullableAccess = (float?)toBoundsCheck[3].z;
+                nullableAccess = ((float?)toBoundsCheck[3].z);
             }
             right = nullableAccess ?? 2f;
             if (element.floatValue != right)
@@ -1260,7 +1261,7 @@ public class TestLinqCompiler {
             nullableAccess = default(float?);
             if (root.vec3List != null)
             {
-                nullableAccess = (float?)root.vec3List[3].z;
+                nullableAccess = ((float?)root.vec3List[3].z);
             }
             return nullableAccess ?? 2f;
         }
@@ -1297,7 +1298,7 @@ public class TestLinqCompiler {
             {
                 if (root.vec3Dic.TryGetValue(""two"", out outVar) == true)
                 {
-                    nullableAccess = (float?)outVar.z;
+                    nullableAccess = ((float?)outVar.z);
                 }
                 else
                 {
@@ -1853,7 +1854,7 @@ public class TestLinqCompiler {
         AssertStringsEqual(@"
         (TestLinqCompiler.LinqThing thing) =>
         {
-            return (System.Collections.Generic.IReadOnlyList<UnityEngine.Vector3>)thing.vec3Array;
+            return ((System.Collections.Generic.IReadOnlyList<UnityEngine.Vector3>)thing.vec3Array);
         }
         ", compiler.Print());
     }
@@ -1993,11 +1994,11 @@ public class TestLinqCompiler {
             nullCheck = UIForia.Test.NamespaceTest.SomeNamespace.NamespaceTestClass.FloatArray;
             if (nullCheck == null)
             {
-                goto retn;
+                return default(float);
             }
             if (0 >= nullCheck.Length)
             {
-                goto retn;
+                return default(float);
             }
             retn_val = nullCheck[0];
         retn:
@@ -2414,22 +2415,22 @@ public class TestLinqCompiler {
             retn_val = default(TestLinqCompiler.LinqThing);
             if (thing == null)
             {
-                goto retn;
+                return default(TestLinqCompiler.LinqThing);
             }
             nullCheck = thing.Method();
             if (nullCheck == null)
             {
-                goto retn;
+                return default(TestLinqCompiler.LinqThing);
             }
             nullCheck_0 = nullCheck.self;
             if (nullCheck_0 == null)
             {
-                goto retn;
+                return default(TestLinqCompiler.LinqThing);
             }
             nullCheck_1 = nullCheck_0.Method();
             if (nullCheck_1 == null)
             {
-                goto retn;
+                return default(TestLinqCompiler.LinqThing);
             }
             retn_val = nullCheck_1.Method();
         retn:
@@ -2468,22 +2469,22 @@ public class TestLinqCompiler {
             retn_val = default(TestLinqCompiler.LinqThing);
             if (thing == null)
             {
-                goto retn;
+                return default(TestLinqCompiler.LinqThing);
             }
             nullCheck = thing.Method(1);
             if (nullCheck == null)
             {
-                goto retn;
+                return default(TestLinqCompiler.LinqThing);
             }
             nullCheck_0 = nullCheck.Method();
             if (nullCheck_0 == null)
             {
-                goto retn;
+                return default(TestLinqCompiler.LinqThing);
             }
             nullCheck_1 = nullCheck_0.Method(1, 2);
             if (nullCheck_1 == null)
             {
-                goto retn;
+                return default(TestLinqCompiler.LinqThing);
             }
             retn_val = nullCheck_1.Method(1, 2, 3);
         retn:
@@ -2511,16 +2512,16 @@ public class TestLinqCompiler {
             retn_val = default(TestLinqCompiler.LinqThing);
             if (thing == null)
             {
-                goto retn;
+                return default(TestLinqCompiler.LinqThing);
             }
             nullCheck = thing.vec3Array;
             if (nullCheck == null)
             {
-                goto retn;
+                return default(TestLinqCompiler.LinqThing);
             }
             if (0 >= nullCheck.Length)
             {
-                goto retn;
+                return default(TestLinqCompiler.LinqThing);
             }
             retn_val = thing.Method(thing.GetIntValue(nullCheck[0].y));
         retn:

@@ -68,8 +68,6 @@ public class TestTemplateLoading {
         
         Assert.AreEqual(14244 + 144, hydrate.intVal);
         
-        
-
 //        ElementTestUtil.HarnessElement(hydrate, (el) => {
 //            
 //        });

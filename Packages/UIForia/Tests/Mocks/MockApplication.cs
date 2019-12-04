@@ -49,9 +49,9 @@ namespace Tests.Mocks {
             m_RenderSystem = renderSystem;
             m_LayoutSystem = layoutSystem;
 
-            if (createView) {
-                CreateView("Test View", new Rect(), elementType, template);
-            }
+//            if (createView) {
+//                CreateView("Test View", new Rect(), elementType, template);
+//            }
         }
 
         public new MockInputSystem InputSystem => (MockInputSystem) m_InputSystem;

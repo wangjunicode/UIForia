@@ -409,9 +409,8 @@ namespace UIForia.Compilers {
             else {
                 returnLabel = Expression.Label(returnType, "retn_" + id);
             }
-            
+
             labelStack.Push(returnLabel);
-            
         }
 
         public void Return(ASTNode ast) {
@@ -1621,8 +1620,6 @@ namespace UIForia.Compilers {
                 head = newHead;
             }
 
-//            EnsureReturnLabel(); 
-
             Expression lengthExpr = null;
 
             if (head.Type.IsArray) {
@@ -1634,15 +1631,11 @@ namespace UIForia.Compilers {
 
             if (indexer is ConstantExpression constantExpression && constantExpression.Value is int intVal) {
                 if (intVal < 0) {
-                    currentBlock.AddStatement(Expression.Return(labelStack.PeekAtUnchecked(0)));
+                    currentBlock.AddStatement(ExitSection());
                     return head;
                 }
 
-                AddStatement(Expression.IfThen(
-                    Expression.GreaterThanOrEqual(indexer, lengthExpr),
-//                    Expression.Return(labelStack.PeekAtUnchecked(0))
-                    Expression.Goto(labelStack.Peek())
-                ));
+                AddStatement(Expression.IfThen(Expression.GreaterThanOrEqual(indexer, lengthExpr), ExitSection()));
                 return head;
             }
 
@@ -1651,7 +1644,7 @@ namespace UIForia.Compilers {
                     Expression.LessThan(indexer, Expression.Constant(0)),
                     Expression.GreaterThanOrEqual(indexer, lengthExpr)
                 ),
-                Expression.Goto(labelStack.Peek())
+                ExitSection() //Expression.Goto(labelStack.Peek())
             );
             currentBlock.AddStatement(expr);
             return head;
@@ -2551,6 +2544,7 @@ namespace UIForia.Compilers {
         }
 
         public void BeginIsolatedSection() {
+            EnsureReturnLabel();
             labelStack.Push(Expression.Label("section_" + id + "_" + sectionCount));
             sectionCount++;
         }
@@ -2559,15 +2553,10 @@ namespace UIForia.Compilers {
             AddStatement(Expression.Label(labelStack.Pop()));
         }
 
-        public LabelTarget GetReturnLabel() {
-            return labelStack.PeekAtUnchecked(0);
-        }
-
         private static readonly MethodInfo s_Comment = typeof(ExpressionUtil).GetMethod(nameof(ExpressionUtil.Comment), BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);
         private static readonly MethodInfo s_CommentNewLineBefore = typeof(ExpressionUtil).GetMethod(nameof(ExpressionUtil.CommentNewLineBefore), BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);
         private static readonly MethodInfo s_CommentNewLineAfter = typeof(ExpressionUtil).GetMethod(nameof(ExpressionUtil.CommentNewLineAfter), BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);
-
-
+        
         public void Comment(string comment) {
             if (outputComments) {
                 AddStatement(Expression.Call(s_Comment, Expression.Constant(comment)));

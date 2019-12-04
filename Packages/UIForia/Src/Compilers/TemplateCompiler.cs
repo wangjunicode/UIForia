@@ -975,7 +975,6 @@ namespace UIForia.Compilers {
                 // if(!element.isEnabled) return
                 compiler.IfEqual(Expression.MakeMemberAccess(castElement, s_Element_IsEnabled), Expression.Constant(false), () => {
                     LabelTarget returnTarget = Expression.Label("early_out");
-                    compiler.RawExpression(Expression.Label(returnTarget));
                     compiler.RawExpression(Expression.Return(returnTarget));
                 });
             }

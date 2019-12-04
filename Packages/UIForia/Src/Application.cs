@@ -46,8 +46,10 @@ namespace UIForia {
         protected readonly List<ISystem> m_Systems;
 
         public event Action<UIElement> onElementRegistered;
+
 //        public event Action<UIElement> onElementCreated;
         public event Action<UIElement> onElementDestroyed;
+
         public event Action<UIElement> onElementEnabled;
 //        public event Action<UIElement> onElementDisabled;
 
@@ -76,7 +78,7 @@ namespace UIForia {
         public static readonly UIForiaSettings Settings;
         private ElementPool elementPool;
         private StructStack<ElemRef> elemRefStack;
-        
+
         private Type lastKnownGoodRootElementType;
 
         static Application() {
@@ -96,18 +98,13 @@ namespace UIForia {
             TemplateSettings templateSettings = compiledTemplateData.templateSettings;
             id = templateSettings.applicationName;
 
-//            if (s_ApplicationList.Find(templateSettings.applicationName, (app, _id) => app.id == _id) != null) {
-//                throw new Exception($"Applications must have a unique id. Id {templateSettings.applicationName} was already taken.");
-//            }
-//
-//            s_ApplicationList.Add(this);
-
             this.elementPool = new ElementPool();
 
             this.resourceManager = resourceManager ?? new ResourceManager();
 
             this.m_Systems = new List<ISystem>();
             this.m_Views = new List<UIView>();
+            this.elemRefStack = new StructStack<ElemRef>(32);
 
             m_StyleSystem = new StyleSystem();
             m_LayoutSystem = new AwesomeLayoutSystem(this);
@@ -136,11 +133,38 @@ namespace UIForia {
 
             templateData = compiledTemplateData;
 
-            UIView view = CreateView();
-
             UIElement rootElement = templateData.templates[0].Invoke(null, new TemplateScope2(this, null));
 
-            view.AddChild(rootElement);
+            UIView view = new UIView(this, "Default", rootElement, Matrix4x4.identity, new Size(Screen.width, Screen.height));
+            
+            m_Views.Add(view);
+
+            for (int i = 0; i < m_Systems.Count; i++) {
+                m_Systems[i].OnViewAdded(view);
+            }
+
+        }
+
+        public UIView CreateView<T>(string name, Size size, in Matrix4x4 matrix) where T : UIElement {
+            Func<UIElement, TemplateScope2, UIElement> template = templateData.GetTemplate<T>();
+
+            if (template != null) {
+                UIElement element = template.Invoke(null, new TemplateScope2(this, null));
+                UIView view = new UIView(this, name, element, matrix, size);
+                m_Views.Add(view);
+
+                for (int i = 0; i < m_Systems.Count; i++) {
+                    m_Systems[i].OnViewAdded(view);
+                }
+
+                return view;
+            }
+
+            return null;
+        }
+
+        public UIView CreateView<T>(string name, Size size) where T : UIElement {
+            return CreateView<T>(name, size, Matrix4x4.identity);
         }
 
         protected Application(string id, string templateRootPath = null, ResourceManager resourceManager = null) {
@@ -239,59 +263,29 @@ namespace UIForia {
 
         private int nextViewId = 0;
 
-        public UIView CreateView(string name, Rect rect, Type type, string template = null) {
-            UIView view = GetView(name);
-
-            if (view == null) {
-                view = new UIView(nextViewId++, name, this, rect, m_Views.Count, type, template);
-                m_Views.Add(view);
-
-                for (int i = 0; i < m_Systems.Count; i++) {
-                    m_Systems[i].OnViewAdded(view);
-                }
-
-                view.Initialize();
-
-                onViewAdded?.Invoke(view);
-            }
-            else {
-                if (view.RootElement.GetChild(0).GetType() != type) {
-                    throw new Exception($"A view named {name} with another root type ({view.RootElement.GetChild(0).GetType()}) already exists.");
-                }
-
-                view.Viewport = rect;
-            }
-
-            return view;
-        }
-
-        public UIView CreateView() {
-            UIView view = new UIView(this);
-            m_Views.Add(view);
-
-            for (int i = 0; i < m_Systems.Count; i++) {
-                m_Systems[i].OnViewAdded(view);
-            }
-
-            onViewAdded?.Invoke(view);
-
-            return view;
-        }
-
-        public UIView CreateView(string name, Rect rect) {
-            UIView view = new UIView(nextViewId++, name, this, rect, m_Views.Count);
-
-            m_Views.Add(view);
-
-            for (int i = 0; i < m_Systems.Count; i++) {
-                m_Systems[i].OnViewAdded(view);
-            }
-
-            view.Initialize();
-
-            onViewAdded?.Invoke(view);
-            return view;
-        }
+//        public UIView CreateView(string name, Rect rect, Type type, string template = null) {
+//            UIView view = GetView(name);
+//
+//            if (view == null) {
+//                view = new UIView(nextViewId++, name, this, rect, m_Views.Count, type, template);
+//                m_Views.Add(view);
+//
+//                for (int i = 0; i < m_Systems.Count; i++) {
+//                    m_Systems[i].OnViewAdded(view);
+//                }
+//
+//                onViewAdded?.Invoke(view);
+//            }
+//            else {
+//                if (view.RootElement.GetChild(0).GetType() != type) {
+//                    throw new Exception($"A view named {name} with another root type ({view.RootElement.GetChild(0).GetType()}) already exists.");
+//                }
+//
+//                view.Viewport = rect;
+//            }
+//
+//            return view;
+//        }
 
         public UIView RemoveView(UIView view) {
             if (!m_Views.Remove(view)) return null;
@@ -350,7 +344,8 @@ namespace UIForia {
             m_AfterUpdateTaskSystem.OnReset();
             m_BeforeUpdateTaskSystem.OnReset();
 
-            CreateView("Default View", new Rect(0, 0, Width, Height), lastKnownGoodRootElementType);
+            throw new NotImplementedException("Need to re-implement refresh()");
+             // CreateView("Default View", new Rect(0, 0, Width, Height), lastKnownGoodRootElementType);
 
             onRefresh?.Invoke();
             onNextRefresh?.Invoke();
@@ -473,15 +468,15 @@ namespace UIForia {
             m_StyleSystem.OnUpdate();
 
             m_AnimationSystem.OnUpdate();
-            
+
             m_InputSystem.OnLateUpdate();
-            
+
             m_RoutingSystem.OnUpdate();
 
             m_LayoutSystem.OnUpdate();
-            
+
             m_BeforeUpdateTaskSystem.OnUpdate();
-            
+
             m_RenderSystem.OnUpdate();
 
             m_AfterUpdateTaskSystem.OnUpdate();
@@ -489,9 +484,8 @@ namespace UIForia {
             onUpdate?.Invoke();
 
             m_Views[0].SetSize(Screen.width, Screen.height);
-            
-            frameId++;
 
+            frameId++;
         }
 
         /// <summary>
@@ -774,8 +768,8 @@ namespace UIForia {
             bool parentEnabled = parent.isEnabled;
 
             UIView view = parent.View;
-            elemRefStack.Push( new ElemRef() {element = child});
-            
+            elemRefStack.Push(new ElemRef() {element = child});
+
             while (elemRefStack.Count > 0) {
                 UIElement current = elemRefStack.Pop().element;
 
@@ -809,7 +803,7 @@ namespace UIForia {
                 // reverse this?
                 for (int i = 0; i < childCount; i++) {
                     children[i].siblingIndex = i;
-                    elemRefStack.Push( new ElemRef() {element = children[i]});
+                    elemRefStack.Push(new ElemRef() {element = children[i]});
                 }
             }
 

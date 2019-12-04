@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UI;
 using UIForia.Attributes;
@@ -15,19 +16,21 @@ namespace Documentation.Features {
         public void OnButtonClick() {
             
             Vector2 position = layoutResult.screenPosition;
+            throw new NotImplementedException("We need a formal window system!");
+//            UIView view = Application.CreateView("Window " + windowViews.Count, new Rect(position.x, position.y, 800, 600));
+//            view.focusOnMouseDown = true;
+//            KlangWindow window = Application.CreateElement<KlangWindow>();
+//
+//            window.onClose += () => {
+//                windowViews.Remove(view);
+//                view.Destroy();
+//            };
+//            
+//            windowViews.Add(view);
+//            
+//            view.AddChild(window);
             
-            UIView view = Application.CreateView("Window " + windowViews.Count, new Rect(position.x, position.y, 800, 600));
-            view.focusOnMouseDown = true;
-            KlangWindow window = Application.CreateElement<KlangWindow>();
-
-            window.onClose += () => {
-                windowViews.Remove(view);
-                view.Destroy();
-            };
-            
-            windowViews.Add(view);
-            
-            view.AddChild(window);
+            //UIWindow window = Application.WindowSystem.Create<WindowType>();
 
         }
 

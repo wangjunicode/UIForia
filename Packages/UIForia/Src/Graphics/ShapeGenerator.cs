@@ -12,6 +12,8 @@ namespace Vertigo {
         protected Vector2 lastPoint;
         protected PathDef currentPath;
 
+        internal bool requiresGeometryUpdate;
+
         internal StructList<PathPoint> pointList;
         internal StructList<PathPoint> holeList;
         internal StructList<ShapeDef> shapeList;
@@ -28,7 +30,7 @@ namespace Vertigo {
 
         public void LineTo(float x, float y) {
             if (!buildingPath) return;
-
+            requiresGeometryUpdate = true;
             if (inHole) {
                 holeList.Add(new PathPoint(x, y, PointFlag.Corner | PointFlag.Hole));
                 currentPath.holeRange.length++;
@@ -50,6 +52,7 @@ namespace Vertigo {
         }
 
         public void CubicBezierTo(float c0x, float c0y, float c1x, float c1y, float x, float y) {
+            requiresGeometryUpdate = true;
             int pointCount = 0;
             Vector2 end = new Vector2(x, y);
             // todo flags
@@ -67,6 +70,7 @@ namespace Vertigo {
         }
 
         public void RectTo(float x, float y) {
+            requiresGeometryUpdate = true;
             Vector2 start = lastPoint;
             HorizontalLineTo(x);
             VerticalLineTo(y);
@@ -75,6 +79,8 @@ namespace Vertigo {
         }
 
         public void BeginPath(float x, float y) {
+            requiresGeometryUpdate = true;
+
             if (buildingPath) {
                 // delete old path if it hasn't ended
                 pointList.size = currentPath.pointRange.start;
@@ -94,6 +100,8 @@ namespace Vertigo {
         }
 
         public void BeginPath() {
+            requiresGeometryUpdate = true;
+
             if (buildingPath) {
                 // delete old path if it hasn't ended
                 pointList.size = currentPath.pointRange.start;
@@ -105,11 +113,13 @@ namespace Vertigo {
             currentPath = new PathDef();
             currentPath.pointRange.start = pointList.size;
             currentPath.holeRange.start = holeList.size;
-           
+
             inHole = false; // just in case
         }
 
         public void MoveTo(float x, float y) {
+            requiresGeometryUpdate = true;
+
             lastPoint = new Vector2(x, y);
             currentPath.pointRange.length++;
             pointList.Add(new PathPoint(lastPoint.x, lastPoint.y, PointFlag.Move));
@@ -117,6 +127,8 @@ namespace Vertigo {
         }
 
         public void MoveTo(Vector2 position) {
+            requiresGeometryUpdate = true;
+
             lastPoint = position;
             currentPath.pointRange.length++;
             pointList.Add(new PathPoint(lastPoint.x, lastPoint.y, PointFlag.Move));
@@ -124,6 +136,8 @@ namespace Vertigo {
         }
 
         public void ClosePath() {
+            requiresGeometryUpdate = true;
+
             if (!buildingPath) return;
             currentShapeRange.length++;
             buildingPath = false;
@@ -140,6 +154,8 @@ namespace Vertigo {
         }
 
         public void EndPath() {
+            requiresGeometryUpdate = true;
+
             if (!buildingPath) return;
             currentShapeRange.length++;
             buildingPath = false;
@@ -156,6 +172,8 @@ namespace Vertigo {
         }
 
         public void BeginHole(float x, float y) {
+            requiresGeometryUpdate = true;
+
             inHole = true;
             holeList.Add(new PathPoint(x, y, PointFlag.Corner | PointFlag.Hole | PointFlag.HoleStart));
             currentPath.holeRange.length++;
@@ -164,18 +182,24 @@ namespace Vertigo {
         }
 
         public void CloseHole() {
+            requiresGeometryUpdate = true;
+
             inHole = false;
         }
 
         public int Rect(float x, float y, float width, float height) {
+            requiresGeometryUpdate = true;
+
             ShapeDef shapeDef = new ShapeDef(ShapeType.Rect);
             shapeDef.bounds = new Rect(x, y, width, height);
             shapeList.Add(shapeDef);
             currentShapeRange.length++;
             return shapeList.size - 1;
         }
-        
+
         public int Rect(in Rect rect) {
+            requiresGeometryUpdate = true;
+
             ShapeDef shapeDef = new ShapeDef(ShapeType.Rect);
             shapeDef.bounds = rect;
             shapeList.Add(shapeDef);
@@ -184,6 +208,8 @@ namespace Vertigo {
         }
 
         public int RoundedRect(float x, float y, float width, float height, float r0, float r1, float r2, float r3) {
+            requiresGeometryUpdate = true;
+
             ShapeDef shapeDef = new ShapeDef(ShapeType.RoundedRect);
             shapeDef.pointRange = new RangeInt(pointList.size, 2);
             pointList.Add(new PathPoint(r0, r1));
@@ -195,6 +221,8 @@ namespace Vertigo {
         }
 
         public int Circle(float x, float y, float r) {
+            requiresGeometryUpdate = true;
+
             currentShapeRange.length++;
             float diameter = r * 2;
             ShapeDef shapeDef = new ShapeDef(ShapeType.Circle);
@@ -204,6 +232,8 @@ namespace Vertigo {
         }
 
         public int Sector(float x, float y, float radius, float rotation, float angle, float width) {
+            requiresGeometryUpdate = true;
+
             currentShapeRange.length++;
             float diameter = radius * 2;
             ShapeDef shapeDef = new ShapeDef(ShapeType.Sector);
@@ -215,8 +245,10 @@ namespace Vertigo {
             shapeList.Add(shapeDef);
             return shapeList.Count - 1;
         }
-        
+
         public int Ellipse(float x, float y, float rw, float rh) {
+            requiresGeometryUpdate = true;
+
             currentShapeRange.length++;
             ShapeDef shapeDef = new ShapeDef(ShapeType.Ellipse);
             shapeDef.bounds = new Rect(x, y, rw * 2, rh * 2);
@@ -225,6 +257,8 @@ namespace Vertigo {
         }
 
         public int RegularPolygon(float x, float y, float width, float height, int sides) {
+            requiresGeometryUpdate = true;
+
             currentShapeRange.length++;
             if (sides < 3) sides = 3;
             ShapeDef shapeDef = new ShapeDef(ShapeType.Polygon);
@@ -237,6 +271,8 @@ namespace Vertigo {
         }
 
         public int Triangle(float x0, float y0, float x1, float y1, float x2, float y2) {
+            requiresGeometryUpdate = true;
+
             currentShapeRange.length++;
             ShapeDef shapeDef = new ShapeDef(ShapeType.Triangle);
             shapeDef.pointRange.start = pointList.size;
@@ -262,6 +298,8 @@ namespace Vertigo {
         }
 
         public int Rhombus(float x, float y, float width, float height) {
+            requiresGeometryUpdate = true;
+
             currentShapeRange.length++;
             ShapeDef shapeDef = new ShapeDef(ShapeType.Rhombus);
             shapeDef.bounds = new Rect(x, y, width, height);
@@ -337,6 +375,7 @@ namespace Vertigo {
             inHole = false;
             buildingPath = false;
             lastPoint = Vector2.zero;
+            requiresGeometryUpdate = true;
         }
 
         [Flags]

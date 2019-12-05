@@ -924,9 +924,11 @@ namespace UIForia.Systems {
 
                 elementBox.flags |= (LayoutBoxFlags.RequireLayoutHorizontal | LayoutBoxFlags.RequireLayoutVertical);
 
-                // todo this is called too many times, need a 'first frame' initialize method
-                element.layoutBox.MarkContentParentsHorizontalDirty(frameId, LayoutReason.DescendentStyleSizeChanged);
-                element.layoutBox.MarkContentParentsVerticalDirty(frameId, LayoutReason.DescendentStyleSizeChanged);
+                elementBox.cachedContentWidth = -1;
+                elementBox.cachedContentHeight = -1;
+                
+                elementBox.MarkContentParentsHorizontalDirty(frameId, LayoutReason.DescendentStyleSizeChanged);
+                elementBox.MarkContentParentsVerticalDirty(frameId, LayoutReason.DescendentStyleSizeChanged);
 
                 elementBox.SetChildren(childList);
                 element.flags &= ~UIElementFlags.LayoutHierarchyDirty;

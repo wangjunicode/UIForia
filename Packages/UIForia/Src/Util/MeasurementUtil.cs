@@ -3,6 +3,7 @@ using System.Diagnostics;
 using UIForia.Elements;
 using UIForia.Layout;
 using UIForia.Systems;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace UIForia.Util {
@@ -40,16 +41,14 @@ namespace UIForia.Util {
                     return viewportX;
 
                 case AlignmentTarget.Screen:
-                    throw new NotImplementedException();
-////                    FastLayoutBox ptr = box.ResolveLayoutParent();
-//                    float output = 0;
-////                    while (ptr != null) {
-////                        output -= ptr.alignedPosition.x;
-////                        output -= ptr.transformPositionX.value;
-////                        ptr = ptr.ResolveLayoutParent();
-////                    }
-//
-//                    return output;
+                    LayoutResult ptr = result.layoutParent;
+                    float output = 0;
+                    while (ptr != null) {
+                        output -= ptr.alignedPosition.x;
+                        ptr = ptr.layoutParent;
+                    }
+
+                    return output;
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(target), target, null);
@@ -85,17 +84,14 @@ namespace UIForia.Util {
                     return viewportY;
 
                 case AlignmentTarget.Screen:
-                    throw new NotImplementedException();
+                    LayoutResult ptr = result.layoutParent;
+                    float output = 0;
+                    while (ptr != null) {
+                        output -= ptr.alignedPosition.y;
+                        ptr = ptr.layoutParent;
+                    }
 
-//                    FastLayoutBox ptr = box.ResolveLayoutParent();
-//                    float output = 0;
-//                    while (ptr != null) {
-//                        output -= ptr.alignedPosition.y;
-//                        output -= ptr.transformPositionY.value;
-//                        ptr = ptr.ResolveLayoutParent();
-//                    }
-
-//                    return output;
+                    return output;
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(target), target, null);
@@ -152,12 +148,14 @@ namespace UIForia.Util {
                     if (result.layoutParent == null) {
                         return viewportHeight;
                     }
+
                     return result.layoutParent.actualSize.height;
 
                 case AlignmentTarget.ParentContentArea:
                     if (result.layoutParent == null) {
                         return viewportHeight;
                     }
+
                     return Mathf.Max(0, result.layoutParent.ContentHeight);
 
                 case AlignmentTarget.Template:

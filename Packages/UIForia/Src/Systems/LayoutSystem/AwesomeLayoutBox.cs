@@ -596,7 +596,7 @@ namespace UIForia.Systems {
 
                 // can't break out if already flagged for layout because parent of parent might not be and might be content sized
                 ptr.flags |= LayoutBoxFlags.RequireLayoutHorizontal;
-                cachedContentWidth = -1;
+                ptr.cachedContentWidth = -1;
 
                 //  ptr.element.layoutHistory.AddLogEntry(LayoutDirection.Horizontal, frameId, reason);
                 if (stop) break;
@@ -613,7 +613,7 @@ namespace UIForia.Systems {
 
                 // can't break out if already flagged for layout because parent of parent might not be and might be content sized
                 ptr.flags |= LayoutBoxFlags.RequireLayoutVertical;
-                cachedContentHeight = -1;
+                ptr.cachedContentHeight = -1;
                 //   ptr.element.layoutHistory.AddLogEntry(LayoutDirection.Vertical, frameId, reason);
                 if (stop) break;
                 ptr = ptr.parent;

@@ -429,7 +429,7 @@ namespace Vertigo {
 
             float xMax = x + width;
             float yMax = -(y + height);
-            
+
             const int p0_index = 0;
             const int p1_index = 1;
             const int p2_index = 2;
@@ -469,7 +469,7 @@ namespace Vertigo {
             triangles[startTriangle + 7] = startVert + p2_index;
             triangles[startTriangle + 8] = startVert + p2_inset_index;
 
-            triangles[startTriangle + 9] =  startVert + p2_inset_index;
+            triangles[startTriangle + 9] = startVert + p2_inset_index;
             triangles[startTriangle + 10] = startVert + p1_inset_index;
             triangles[startTriangle + 11] = startVert + p1_index;
 
@@ -1020,10 +1020,8 @@ namespace Vertigo {
                 data.texCoordList0.size += 6;
                 data.texCoordList1.size += 6;
                 data.triangleList.size += 6;
-              
             }
             else if (renderState.lineCap == LineCap.Square) {
-
                 data.positionList.EnsureAdditionalCapacity(4);
                 data.texCoordList0.EnsureAdditionalCapacity(4);
                 data.texCoordList1.EnsureAdditionalCapacity(4);
@@ -1052,13 +1050,13 @@ namespace Vertigo {
             if (pointRange.length < 2) {
                 return default;
             }
-            
+
             int vertexStart = data.positionList.size;
             int triangleStart = data.triangleList.size;
 
             int pointStart = pointRange.start;
             ShapeGenerator.PathPoint[] points = pathPoints.array;
-            
+
             for (int i = pointStart + 1; i < pathPoints.size; i++) {
                 if (points[i].flags == ShapeGenerator.PointFlag.Move) {
                     StrokePathSegment(data, pathPoints, new RangeInt(pointStart, i - pointStart), renderState);
@@ -1076,23 +1074,22 @@ namespace Vertigo {
             };
         }
 
-        private static void StrokePathSegment(in GeometryData data, StructList<ShapeGenerator.PathPoint> pathPoints,  in RangeInt pointRange, in RenderState renderState) {
-            
+        private static void StrokePathSegment(in GeometryData data, StructList<ShapeGenerator.PathPoint> pathPoints, in RangeInt pointRange, in RenderState renderState) {
             if (pointRange.length < 2) {
                 return;
             }
-            
+
             float halfStrokeWidth = renderState.strokeWidth * 0.5f;
             LineJoin join = renderState.lineJoin;
             int miterLimit = renderState.miterLimit;
-            
+
             ComputeOpenPathSegments(pointRange, pathPoints, s_ScratchVector2);
 
             int count = s_ScratchVector2.size;
             Vector2[] midpoints = s_ScratchVector2.array;
 
             GenerateStartCap(data, pathPoints.array, pointRange.start, renderState);
-            
+
             EnsureCapacityForStrokeTriangles(data, join, count / 2);
 
             for (int i = 1; i < count - 1; i++) {
@@ -1102,7 +1099,7 @@ namespace Vertigo {
 
             GenerateEndCap(data, pathPoints.array, pointRange.end, renderState);
         }
-        
+
         public static GeometryRange StrokeClosedPath(in GeometryData data, StructList<ShapeGenerator.PathPoint> pathPoints, in RangeInt pointRange, in RenderState renderState) {
             if (pointRange.length < 2) {
                 return default;
@@ -1294,10 +1291,22 @@ namespace Vertigo {
 //                colors[vertIdx + 2] = Color.red;
 //                colors[vertIdx + 3] = Color.red;
 
-                positions[vertIdx + 0] = v0;
-                positions[vertIdx + 1] = v1;
-                positions[vertIdx + 2] = v2;
-                positions[vertIdx + 3] = v3;
+                ref Vector3 pos = ref positions[vertIdx + 0];
+                pos.x = v0.x;
+                pos.y = v0.y;
+                pos = ref positions[vertIdx + 1];
+                pos.x = v1.x;
+                pos.y = v1.y;
+                pos = ref positions[vertIdx + 2];
+                pos.x = v2.x;
+                pos.y = v2.y;
+                pos = ref positions[vertIdx + 3];
+                pos.x = v3.x;
+                pos.y = v3.y;
+//                positions[vertIdx + 0] = v0;
+//                positions[vertIdx + 1] = v1;
+//                positions[vertIdx + 2] = v2;
+//                positions[vertIdx + 3] = v3;
 
                 triangles[triangleIdx + 0] = vertIdx + 0;
                 triangles[triangleIdx + 1] = vertIdx + 1;
@@ -1360,10 +1369,23 @@ namespace Vertigo {
                     triangleIdx += 6;
                 }
 
-                positions[vertIdx + 0] = v4;
-                positions[vertIdx + 1] = v5;
-                positions[vertIdx + 2] = v6;
-                positions[vertIdx + 3] = v7;
+//
+//                positions[vertIdx + 0] = v4;
+//                positions[vertIdx + 1] = v5;
+//                positions[vertIdx + 2] = v6;
+//                positions[vertIdx + 3] = v7;
+                ref Vector3 pos3 = ref positions[vertIdx + 0];
+                pos3.x = v4.x;
+                pos3.y = v4.y;
+                pos3 = ref positions[vertIdx + 1];
+                pos3.x = v5.x;
+                pos3.y = v5.y;
+                pos3 = ref positions[vertIdx + 2];
+                pos3.x = v6.x;
+                pos3.y = v6.y;
+                pos3 = ref positions[vertIdx + 3];
+                pos3.x = v7.x;
+                pos3.y = v7.y;
 
 //                colors[vertIdx + 0] = Color.red;
 //                colors[vertIdx + 1] = Color.red;
@@ -1390,11 +1412,23 @@ namespace Vertigo {
                 Vector2 v5 = p1 + t2;
                 Vector2 v6 = p2 + t2;
                 Vector2 v7 = p2 - t2;
-
-                positions[vertIdx + 0] = v0;
-                positions[vertIdx + 1] = v1;
-                positions[vertIdx + 2] = v2;
-                positions[vertIdx + 3] = v3;
+//
+//                positions[vertIdx + 0] = v0;
+//                positions[vertIdx + 1] = v1;
+//                positions[vertIdx + 2] = v2;
+//                positions[vertIdx + 3] = v3;
+                ref Vector3 pos = ref positions[vertIdx + 0];
+                pos.x = v0.x;
+                pos.y = v0.y;
+                pos = ref positions[vertIdx + 1];
+                pos.x = v1.x;
+                pos.y = v1.y;
+                pos = ref positions[vertIdx + 2];
+                pos.x = v2.x;
+                pos.y = v2.y;
+                pos = ref positions[vertIdx + 3];
+                pos.x = v3.x;
+                pos.y = v3.y;
 
 //                colors[vertIdx + 0] = Color.white;
 //                colors[vertIdx + 1] = Color.white;
@@ -1509,10 +1543,23 @@ namespace Vertigo {
                     }
                 }
 
-                positions[vertIdx + 0] = v4;
-                positions[vertIdx + 1] = v5;
-                positions[vertIdx + 2] = v6;
-                positions[vertIdx + 3] = v7;
+//                positions[vertIdx + 0] = v4;
+//                positions[vertIdx + 1] = v5;
+//                positions[vertIdx + 2] = v6;
+//                positions[vertIdx + 3] = v7;
+
+                ref Vector3 pos2 = ref positions[vertIdx + 0];
+                pos2.x = v4.x;
+                pos2.y = v4.y;
+                pos2 = ref positions[vertIdx + 1];
+                pos2.x = v5.x;
+                pos2.y = v5.y;
+                pos2 = ref positions[vertIdx + 2];
+                pos2.x = v6.x;
+                pos2.y = v6.y;
+                pos2 = ref positions[vertIdx + 3];
+                pos2.x = v7.x;
+                pos2.y = v7.y;
 
 //                colors[vertIdx + 0] = Color.white;
 //                colors[vertIdx + 1] = Color.white;

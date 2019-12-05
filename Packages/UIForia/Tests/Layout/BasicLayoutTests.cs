@@ -9,37 +9,6 @@ using UIForia.Systems;
 [TestFixture]
 public class BasicLayoutTests {
 
-    [Test]
-    public void GathersDirtyData() {
-        
-        MockApplication app = new MockApplication(typeof(BasicLayoutTest_GathersDirtyData));
-        
-        UIElement viewRoot = app.RootElement;
-        BasicLayoutTest_GathersDirtyData root = app.RootElement.children[0] as BasicLayoutTest_GathersDirtyData;
-         
-        AwesomeLayoutRunner runner = new AwesomeLayoutRunner(null, app.GetView(0).rootElement);
-        
-        runner.GatherLayoutData();
-
-        Assert.AreEqual(5, runner.hierarchyRebuildList.size);
-        Assert.AreEqual(runner.hierarchyRebuildList[0], viewRoot);
-        Assert.AreEqual(runner.hierarchyRebuildList[1], root);
-        Assert.AreEqual(runner.hierarchyRebuildList[2], root.GetChild(0));
-        Assert.AreEqual(runner.hierarchyRebuildList[3], root.GetChild(1));
-        Assert.AreEqual(runner.hierarchyRebuildList[4], root.GetChild(2));
-        
-        app.Update();
-        
-        runner.GatherLayoutData();
-        Assert.AreEqual(0, runner.hierarchyRebuildList.size);
-
-        root.FindById("one").SetEnabled(false);
-        
-        runner.GatherLayoutData();
-        Assert.AreEqual(1, runner.hierarchyRebuildList.size);
-        Assert.AreEqual(runner.hierarchyRebuildList[0], root);
-        
-    }
     
     [Test]
     public void RunWidthLayout() {

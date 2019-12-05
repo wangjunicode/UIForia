@@ -171,14 +171,10 @@ namespace Src.Systems {
                 }
             }
 
-            s_RenderComparer.cnt = 0;
-            StructList<RenderOperationWrapper>.swapCalls = 0;
-//            wrapperList.QuickSort(s_RenderComparer);
-
+            
             RegularSortList();
 //            BubbleSortWrapperList();
 
-//            UnityEngine.Debug.Log(s_RenderComparer.cnt + " item count: " + wrapperList.size + " swaps: " + StructList<RenderOperationWrapper>.swapCalls);
 
 //            if (!printed) {
 //                printed = true;
@@ -377,10 +373,8 @@ namespace Src.Systems {
 
         private class DepthComparer2 : IComparer<RenderOperationWrapper> {
 
-            public int cnt;
 
             public int Compare(RenderOperationWrapper a, RenderOperationWrapper b) {
-                cnt++;
                 RenderBox rbA = a.renderBox;
                 RenderBox rbB = b.renderBox;
 

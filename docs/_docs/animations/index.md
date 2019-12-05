@@ -2,84 +2,164 @@
 id: Animation
 showInMain: true
 title:  Animation
-tags: 
+tags:
+ - uiforia 
  - animation
 layout: page
 order: 30
 ---
 
 # Animations
+With Animations you can animate from one [style property](StyleProperties.md) value to another. Most numeric style properties can
+be animated, like sizes, alignment offsets and transforms.
 
-Hierarchical animations are made easy with UIForia. Animations are declarative via style sheets and integrated with the game via eventing. 
+You can either define your animation in a style sheet (the recommended way) or create one on the spot with the C# API.
+Mixing both is possible as well, as you can load an animation definition from a style sheet in C#, customize it and pass it
+to the animation API.
 
-There are options for options for delay, offset, loop timing, loop direction control, and multiple curve types.   
-  
-Multiple types: Sequences, groups, properties, key-frames
 
-Animations can be styled with [UIForia Style Properties](StyleProperties.md)
-                              
 
-## Animation in the Stylesheet
-You can implement animations within the stylesheet. The structure is the same as creating a style for an element, except replace `style` with `animation`:
+## Defining Animations in Style Sheets
 ```
-animation name {
-    [options] {
-        duration = 1000;
-        iterations = 1;
-        timingFunction = CubicEaseInOut;
-    }
+animation pulse {
+    [options] { TimingFunction = QuadraticEaseInOut; }
     [keyframes] {
-        0% { 
-            BackgroundColor = purple;
-            PreferredWidth = 50px;        
-        }
-        100% {
-             BackgroundColor = purple;
-             PreferredWidth = 550px;
-        }
+        0% { TransformScale = 1; }
+        50% { TransformScale = 1.105; }
+        100% { TransformScale = 1; }
     }
 }
 ```
 
-`run animation(name)` in the element will execute the properties you have set in the animation:
+![pulse](/assets/img/animation_pulse.gif)
+
+
+The `animation` keyword starts the definition block, followed by a name that you choose, which would be `pulse` in this example.
+Inside there may be an optional `[options]` block, which lets you define easing functions, duration, delay and other parameters for
+the animation. The `[keyframes]` block is required and you need to add at least one keyframe.
+
+You don't have to start your animation at keyframe `0%` (or end at `100%`) if you want to animate from whatever style property 
+value is currently set to something else. This is usually handy when there's code that changes styles as well.
+
+### Keyframe groups
 ```
-style name {
-    run animation(name);
+animation bounce {
+    [keyframes] {
+        0%, 20%, 53%, 80%, 100% { TransformPositionY = 0; }
+        40%, 43% { TransformPositionY = -30px; }
+        70% { TransformPositionY = -15px; }
+        90% { TransformPositionY = -4px; }
+    }
 }
 ```
 
+![bounce](/assets/img/animation_bounce.gif)
 
-You have access to ```[options]``` and ```[keyframes]``` within the stylesheet. In order to implement more complicated features like state or triggers, you will need to declare those data structures and their properties in your C# script.
+Here's an example of an animation with a group of keyframes defining a common style property value.
 
-## Animation Properties
+Have a look at UIForia's documentation app in [the "Animation" section](https://github.com/klanggames/UIForia/blob/master/Assets/Documentation/Features/AnimationDemo.style)!
 
-**AnimationData**:
-  
-`AnimationOptions` sets the settings, timing, and direction of your animations.  
-`AnimationKeyFrame` sets styles per keyframe.   
-`AnimationTrigger` sets animation triggers.     
-`AnimationState` is a readonly property for returning state values.
+## Run Animations
+Now that you know how to define an animation we'll look at how to run them. The easiest way would be via [style groups](/docs/style):
+```
+style container {
+    run animation(fadeIn);
+}
 
----------------------------------------------------------------
+animation fadeIn {
+    [options] { TimingFunction = QuadraticEaseInOut; }
+    [keyframes] {
+        0% { Opacity = 0; }
+        100% { Opacity = 1; }
+    }
+}
+```
+![fadeIn](/assets/img/animation_fadeIn.gif)
 
+The animation in this example will now be triggered when the style group `container` becomes active. Any property in a
+style group is by default assigned to the `normal` style state group, which is implicitly there. Other style state
+groups have to be defined:
+```
+style container {
+    run animation(fadeIn);
+    [hover] { }
+    [active] { }
+    [focus] { }
+}
+```
 
-### [options] 
-In milliseconds 
-  
-Properties        | Description         | Type
------------------ |-----------------    |---------                                    
- loopTime         | sets the duration of a loop | float
- iterations       | sets the number of times the animation runs | int
- delay            | sets a delay                    | duration
- forwardStartDelay| sets a delay at the beginning                    | int
- reverseStartDelay|                     | int
- direction        | can be set to `Forward` or `Reverse`  | AnimationDirection
- loopType         | can be set to `Constant` or `PingPong`| AnimationLoopType
- timingFunction   | sets the [Easing function](#easing-functions)  | EasingFunction
- playbackType     |  determines ow the animation should be played. Set to `KeyFrame`, `Parallel`, or `Sequential` | animationPlaybackType
+You can run animation when any of the states are entered: `[hover] { run animation(flash); }`.
 
+### Run Animations on Exit
+The previous examples can be read as: when the state is entered run the animation.
+But sometimes you want to run another animation (maybe the inverse) once a state is exited. When hovered a button's background
+color might change via animations. But when that state is exited the regular background color should be restored.
+To make things easy there are two convenient attributes that you can add to run definitions:
+ 
+`[enter]`, which marks a run definition to execute when the state is entered and `[exit]`, which does the opposite.
 
-<br/>
+Let's look at a full example for our demo buttons:
+
+```
+style button {
+    Padding = 7px;
+    CornerBevelBottomRight = 7px;
+    Border = 3px;
+    BackgroundColor = rgba(120, 100, 100, 190);
+    Margin = 3px;
+    TextFontAsset = @theme.fontGothamBold;
+    TextFontSize = 11px;
+    TextColor = rgb(240, 240, 230);
+    [hover] {
+        Cursor = @theme.cursorHand;
+        [enter] run animation(button-hover);
+        [exit] run animation(button-normal);
+    }
+}
+
+animation button-hover {
+    [options] { TimingFunction = QuadraticEaseInOut; }
+    [keyframes] { 
+        100% { 
+            BackgroundColor = rgba(220, 200, 200, 190);
+            TextColor = rgb(40, 40, 30);
+        }
+    }
+}
+
+animation button-normal {
+    [options] { TimingFunction = QuadraticEaseInOut; }
+    [keyframes] { 
+        100% {
+            BackgroundColor = rgba(120, 100, 100, 190);
+            TextColor = rgb(240, 240, 230);
+        }
+    }
+}
+```
+![hover state](/assets/img/animation_hover_state.gif)
+
+Notice how the `[enter]` animation stops as soon as the cursor leaves the button and the `[exit]` animation immediately kicks in.
+
+## The `[options]` section
+```
+    [options] {
+        TimingFunction = QuadraticEaseInOut;
+        Duration = 750;
+        Delay = 0.2;
+        Direction = Forward;
+        TimingFunction = QuadraticEaseInOut;
+    }
+```
+
+| Properties     | Description                                                                                                                      | Type               | Default |
+|:---------------|:---------------------------------------------------------------------------------------------------------------------------------|:-------------------|:--------|
+| Iterations     | Defines how many times the anmiation should be repeated. Special values: -1 or Infinite will loop the animation for ever.        | int                | 1       |
+| Duration       | Duration of the whole animation in ms.                                                                                           | duration           | 1000    |
+| Delay          | Delay the animation in seconds.                                                                                                  | duration           | 0       |
+| Direction      | Values: `Forward` or `Reverse`. Play the animation from 0% to 100% when using `Forward` or from 100% to 0% if `Reverse` is used. | AnimationDirection | Forward |
+| TimingFunction | Choose an [easing function](#easing-functions) to adjust the change rate of the style properties between keyframes.              | EasingFunction     | Linear  |
+
 
 ---------------------------------------------------------------
 
@@ -204,7 +284,7 @@ animation easeIn {
 
  
 
-For visual examples of easing functions, see https://easings.net
+For visual examples of easing functions, see <https://easings.net>
 
 <br/>
 

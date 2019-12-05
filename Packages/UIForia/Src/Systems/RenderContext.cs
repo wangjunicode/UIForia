@@ -245,7 +245,7 @@ namespace UIForia.Rendering {
                 currentBatch.uiforiaData = UIForiaData.Get();
             }
 
-            if (currentBatch.uiforiaData.fontData.fontAsset != null && currentBatch.uiforiaData.fontData.fontAsset != fontData.fontAsset) {
+            if (!ReferenceEquals(currentBatch.uiforiaData.fontData.fontAsset, null) && !ReferenceEquals(currentBatch.uiforiaData.fontData.fontAsset, fontData.fontAsset)) {
                 FinalizeCurrentBatch();
                 currentBatch.batchType = BatchType.UIForia;
                 currentBatch.uiforiaData = UIForiaData.Get();
@@ -261,7 +261,7 @@ namespace UIForia.Rendering {
 
             if (clipper != null) {
                 // todo break batch if changed
-                currentBatch.uiforiaData.clipTexture = clipper.clipTexture != null ? clipper.clipTexture : currentBatch.uiforiaData.clipTexture;
+                currentBatch.uiforiaData.clipTexture = !ReferenceEquals(clipper.clipTexture, null) ? clipper.clipTexture : currentBatch.uiforiaData.clipTexture;
                 currentBatch.uiforiaData.clipUVs.Add(clipper.clipUVs);
                 currentBatch.uiforiaData.clipRects.Add(clipper.packedBoundsAndChannel);
             }

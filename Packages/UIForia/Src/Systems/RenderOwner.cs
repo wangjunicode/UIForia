@@ -13,7 +13,6 @@ namespace Src.Systems {
 
         internal UIView view;
         internal readonly RenderBoxPool painterPool;
-        internal readonly StructList<DrawCommand> drawList;
         private readonly StructStack<ElemRef> elemRefStack;
         private readonly StructList<RenderOperationWrapper> wrapperList;
 
@@ -22,7 +21,6 @@ namespace Src.Systems {
         public RenderOwner(UIView view, Camera camera) {
             this.view = view;
             this.painterPool = new RenderBoxPool();
-            this.drawList = new StructList<DrawCommand>(0); // resized on first use
             this.view.RootElement.renderBox = new RootRenderBox();
             this.view.RootElement.renderBox.element = view.RootElement;
             this.elemRefStack = new StructStack<ElemRef>(32);
@@ -32,13 +30,11 @@ namespace Src.Systems {
         public void Render(RenderContext renderContext) {
             GatherBoxDataParallel();
 
-            Cull();
-
             DrawClipShapes(renderContext);
 
             Draw(renderContext);
 
-            drawList.QuickClear();
+//            drawList.QuickClear();
         }
 
         private void DrawClipShapes(RenderContext ctx) {
@@ -104,9 +100,9 @@ namespace Src.Systems {
         private struct RenderOperationWrapper {
 
             public RenderBox renderBox;
-            public RenderOpType renderOperation;
+            public DrawCommandType renderOperation;
 
-            public RenderOperationWrapper(RenderBox renderBox, RenderOpType renderOpType) {
+            public RenderOperationWrapper(RenderBox renderBox, DrawCommandType renderOpType) {
                 this.renderBox = renderBox;
                 this.renderOperation = renderOpType;
             }
@@ -129,17 +125,22 @@ namespace Src.Systems {
                 UIElement currentElement = elemRefStack.array[--elemRefStack.size].element;
                 RenderBox renderBox = currentElement.renderBox;
 
+                renderBox.culled = renderBox.element.layoutResult.isCulled;
                 renderBox.clipper = currentElement.layoutResult.clipper;
                 renderBox.traversalIndex = idx++;
 
-                ref RenderOperationWrapper backgroundOp = ref wrapperList.array[wrapperList.size++];
-                backgroundOp.renderBox = renderBox;
-                backgroundOp.renderOperation = RenderOpType.DrawBackground;
+                if (!renderBox.culled && renderBox.visibility != Visibility.Hidden) {
+                    
+                    ref RenderOperationWrapper backgroundOp = ref wrapperList.array[wrapperList.size++];
+                    backgroundOp.renderBox = renderBox;
+                    backgroundOp.renderOperation = DrawCommandType.BackgroundTransparent;
 
-                if (renderBox.hasForeground) {
-                    ref RenderOperationWrapper foreground = ref wrapperList.array[wrapperList.size++];
-                    foreground.renderBox = renderBox;
-                    foreground.renderOperation = RenderOpType.DrawForeground;
+                    if (renderBox.hasForeground) {
+                        ref RenderOperationWrapper foreground = ref wrapperList.array[wrapperList.size++];
+                        foreground.renderBox = renderBox;
+                        foreground.renderOperation = DrawCommandType.ForegroundTransparent;
+                    }
+                    
                 }
 
                 if (wrapperList.size + (currentElement.children.size * 2) >= wrapperList.array.Length) {
@@ -166,10 +167,18 @@ namespace Src.Systems {
 
                         elemRefStack.array[elemRefStack.size++].element = child;
                     }
+
                 }
             }
 
-            wrapperList.Sort(s_RenderComparer);
+            s_RenderComparer.cnt = 0;
+            StructList<RenderOperationWrapper>.swapCalls = 0;
+//            wrapperList.QuickSort(s_RenderComparer);
+
+            RegularSortList();
+//            BubbleSortWrapperList();
+
+//            UnityEngine.Debug.Log(s_RenderComparer.cnt + " item count: " + wrapperList.size + " swaps: " + StructList<RenderOperationWrapper>.swapCalls);
 
 //            if (!printed) {
 //                printed = true;
@@ -181,67 +190,109 @@ namespace Src.Systems {
 
 //        private bool printed = false; // todo remove
 
-        // todo -- can completely get rid of this
-        private void Cull() {
-            // first do an easy screen cull
-            // screen is always aligned
-            // if world space rect is not inside the screen, fail immediately
+        private void RegularSortList() {
+            wrapperList.Sort(s_RenderComparer);
+        }
 
-            for (int i = 0; i < wrapperList.size; i++) {
-                ref RenderOperationWrapper wrapper = ref wrapperList.array[i];
+        private void BubbleSortWrapperList() {
+            bool keepIterating = true;
 
-                RenderBox renderBox = wrapper.renderBox;
+            int count = wrapperList.size - 1;
+            RenderOperationWrapper[] array = wrapperList.array;
 
-                switch (wrapper.renderOperation) {
-                    default:
-                    case RenderOpType.Unset:
-                        break;
+            while (keepIterating) {
+                keepIterating = false;
+                for (int i = 0; i < count; i++) {
+                    ref RenderOperationWrapper x = ref array[i];
+                    ref RenderOperationWrapper y = ref array[i + 1];
 
-                    case RenderOpType.DrawBackground: {
-                        renderBox.culled = renderBox.element.layoutResult.isCulled;
+                    int val = 0;
+                    RenderBox rbA = x.renderBox;
+                    RenderBox rbB = y.renderBox;
 
-                        if (!renderBox.culled && renderBox.visibility != Visibility.Hidden) {
-                            drawList.Add(new DrawCommand(renderBox, DrawCommandType.BackgroundTransparent));
-                        }
-
-                        break;
+                    if (x.renderOperation != y.renderOperation) {
+                        val = (int) x.renderOperation - (int) y.renderOperation;
+                    }
+                    else if (rbA.layer != rbB.layer) {
+                        val = rbA.layer - rbB.layer;
+                    }
+                    else if (rbA.zIndex != rbB.zIndex) {
+                        val = rbA.zIndex - rbB.zIndex;
+                    }
+                    else {
+                        val = rbA.traversalIndex - rbB.traversalIndex;
                     }
 
-                    case RenderOpType.DrawForeground:
-
-                        if (!renderBox.culled) {
-                            drawList.Add(new DrawCommand(renderBox, DrawCommandType.ForegroundTransparent));
-                        }
-
-                        break;
-
-                    case RenderOpType.PushClipShape: {
-                        break;
+                    if (val > 0) {
+                        array[i] = y;
+                        array[i + 1] = x;
+                        keepIterating = true;
                     }
-
-                    case RenderOpType.PopClipShape: {
-                        break;
-                    }
-                    case RenderOpType.PushPostEffect:
-                        break;
-
-                    case RenderOpType.PopPostEffect:
-                        break;
                 }
             }
         }
 
+//        // todo -- can completely get rid of this
+//        private void Cull() {
+//            // first do an easy screen cull
+//            // screen is always aligned
+//            // if world space rect is not inside the screen, fail immediately
+//
+//            for (int i = 0; i < wrapperList.size; i++) {
+//                ref RenderOperationWrapper wrapper = ref wrapperList.array[i];
+//
+//                RenderBox renderBox = wrapper.renderBox;
+//
+//                switch (wrapper.renderOperation) {
+//                    default:
+//                    case RenderOpType.Unset:
+//                        break;
+//
+//                    case RenderOpType.DrawBackground: {
+//                        renderBox.culled = renderBox.element.layoutResult.isCulled;
+//
+//                        if (!renderBox.culled && renderBox.visibility != Visibility.Hidden) {
+//                            drawList.Add(new DrawCommand(renderBox, DrawCommandType.BackgroundTransparent));
+//                        }
+//
+//                        break;
+//                    }
+//
+//                    case RenderOpType.DrawForeground:
+//
+//                        if (!renderBox.culled) {
+//                            drawList.Add(new DrawCommand(renderBox, DrawCommandType.ForegroundTransparent));
+//                        }
+//
+//                        break;
+//
+//                    case RenderOpType.PushClipShape: {
+//                        break;
+//                    }
+//
+//                    case RenderOpType.PopClipShape: {
+//                        break;
+//                    }
+//                    case RenderOpType.PushPostEffect:
+//                        break;
+//
+//                    case RenderOpType.PopPostEffect:
+//                        break;
+//                }
+//            }
+//        }
+
         private void Draw(RenderContext renderContext) {
-            DrawCommand[] commands = drawList.array;
-            int commandCount = drawList.size;
+            RenderOperationWrapper[] commands = wrapperList.array;
+            int commandCount = wrapperList.size;
 
             // bad api usage, fix this while supporting on the fly clipper creation
             renderContext.clipContext.ConstructClipData();
 
             for (int i = 0; i < commandCount; i++) {
-                ref DrawCommand cmd = ref commands[i];
+                ref RenderOperationWrapper cmd = ref commands[i];
 
-                switch (cmd.commandType) {
+                switch (cmd.renderOperation) {
                     case DrawCommandType.BackgroundTransparent:
                         cmd.renderBox.PaintBackground(renderContext);
                         break;
@@ -261,7 +312,6 @@ namespace Src.Systems {
                 }
             }
         }
-
 
         public enum DrawCommandType {
 
@@ -325,31 +375,12 @@ namespace Src.Systems {
 
         }
 
-        private class DepthComparer : IComparer<RenderBoxWrapper> {
-
-            // todo -- find a way to not incur copy cost with structs here
-            public int Compare(RenderBoxWrapper a, RenderBoxWrapper b) {
-                if (a.layer != b.layer) {
-                    return a.layer - b.layer;
-                }
-
-                // view might be a layer
-//                if (a.viewDepthIdx != b.viewDepthIdx) {
-//                    return a.viewDepthIdx > b.viewDepthIdx ? -1 : 1;
-//                }
-
-                if (a.zIndex != b.zIndex) {
-                    return a.zIndex - b.zIndex;
-                }
-
-                return a.traversalIndex - b.traversalIndex;
-            }
-
-        }
-
         private class DepthComparer2 : IComparer<RenderOperationWrapper> {
 
+            public int cnt;
+
             public int Compare(RenderOperationWrapper a, RenderOperationWrapper b) {
+                cnt++;
                 RenderBox rbA = a.renderBox;
                 RenderBox rbB = b.renderBox;
 

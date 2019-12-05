@@ -36,7 +36,7 @@ namespace UIForia.Systems {
                 bool stop = (ptr.flags & LayoutBoxFlags.WidthBlockProvider) != 0;
                 // can't break out if already flagged for layout because parent of parent might not be and might be content sized
                 ptr.flags |= LayoutBoxFlags.RequireLayoutHorizontal;
-                ptr.element.layoutHistory.AddLogEntry(LayoutDirection.Horizontal, -1, LayoutReason.DescendentStyleSizeChanged);
+//                ptr.element.layoutHistory.AddLogEntry(LayoutDirection.Horizontal, -1, LayoutReason.DescendentStyleSizeChanged);
                 if (stop) break;
                 ptr = ptr.parent;
             }
@@ -49,7 +49,7 @@ namespace UIForia.Systems {
 
                 // can't break out if already flagged for layout because parent of parent might not be and might be content sized
                 ptr.flags |= LayoutBoxFlags.RequireLayoutVertical;
-                ptr.element.layoutHistory.AddLogEntry(LayoutDirection.Vertical, -1, LayoutReason.DescendentStyleSizeChanged);
+//                ptr.element.layoutHistory.AddLogEntry(LayoutDirection.Vertical, -1, LayoutReason.DescendentStyleSizeChanged);
                 if (stop) break;
                 ptr = ptr.parent;
             }

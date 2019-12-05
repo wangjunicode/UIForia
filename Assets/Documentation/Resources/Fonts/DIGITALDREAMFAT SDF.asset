@@ -110,7 +110,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 71c1514a6bd24e1e882cebbe1904ce04, type: 3}
-  m_Name: DigitaldreamFat SDF
+  m_Name: DIGITALDREAMFAT SDF
   m_EditorClassIdentifier: 
   hashCode: 1968856775
   material: {fileID: -526848335257786436}

@@ -55,8 +55,8 @@ namespace UIForia.Rendering {
             retn.isActive = true;
             return retn;
         }
-        
-        
+
+
     }
     
 }

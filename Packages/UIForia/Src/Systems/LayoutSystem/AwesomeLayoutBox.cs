@@ -21,7 +21,6 @@ namespace UIForia.Systems {
         public LayoutBoxFlags flags;
         public float cachedContentWidth;
         public float cachedContentHeight;
-        public LayoutType layoutBoxType;
 
         public int childCount;
         public UIElement element;
@@ -30,7 +29,6 @@ namespace UIForia.Systems {
         public AwesomeLayoutBox parent;
         public float transformX;
         public float transformY;
-        public float transformRotation;
         public ClipData clipData;
         public ClipBehavior clipBehavior;
         public int traversalIndex;
@@ -258,7 +256,7 @@ namespace UIForia.Systems {
 
             if (newHeight != finalHeight) {
                 flags |= LayoutBoxFlags.RequireLayoutVertical;
-                element.layoutHistory.AddLogEntry(LayoutDirection.Vertical, frameId, LayoutReason.FinalSizeChanged, string.Empty);
+              //  element.layoutHistory.AddLogEntry(LayoutDirection.Vertical, frameId, LayoutReason.FinalSizeChanged, string.Empty);
                 finalHeight = newHeight;
             }
         }
@@ -758,11 +756,11 @@ namespace UIForia.Systems {
             cachedContentHeight = -1;
             finalWidth = -1;
             finalHeight = -1;
-            string boxName = GetType().ToString();
-            element.layoutHistory = element.layoutHistory ?? new LayoutHistory(element);
-            element.layoutHistory.AddLogEntry(LayoutDirection.Horizontal, -1, LayoutReason.Initialized, boxName);
-            element.layoutHistory.AddLogEntry(LayoutDirection.Vertical, -1, LayoutReason.Initialized, boxName);
+//            element.layoutHistory = element.layoutHistory ?? new LayoutHistory(element);
+//            element.layoutHistory.AddLogEntry(LayoutDirection.Horizontal, -1, LayoutReason.Initialized, boxName);
+//            element.layoutHistory.AddLogEntry(LayoutDirection.Vertical, -1, LayoutReason.Initialized, boxName);
             flags |= LayoutBoxFlags.RequireLayoutHorizontal | LayoutBoxFlags.RequireLayoutVertical | LayoutBoxFlags.RequiresMatrixUpdate;
+            
             if (element.style.LayoutBehavior == LayoutBehavior.Ignored) {
                 flags |= LayoutBoxFlags.Ignored;
             }

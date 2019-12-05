@@ -43,10 +43,6 @@ namespace UIForia.Systems {
 
         public AwesomeLayoutBox box;
 
-        public BoxRef(AwesomeLayoutBox box) {
-            this.box = box;
-        }
-
     }
 
     public class AwesomeLayoutRunner {
@@ -62,11 +58,11 @@ namespace UIForia.Systems {
         internal StructStack<BoxRef> boxRefStack;
         internal LightList<UIElement> matrixUpdateList;
         internal LightList<ClipData> clipperList;
-        private LightStack<ClipData> clipStack;
-
+        
+        private readonly LightStack<ClipData> clipStack;
         private readonly ClipData screenClipper;
         private readonly ClipData viewClipper;
-        private AwesomeLayoutSystem layoutSystem;
+        private readonly AwesomeLayoutSystem layoutSystem;
 
         private static readonly StructList<Vector2> s_SubjectRect = new StructList<Vector2>(4);
 
@@ -99,6 +95,7 @@ namespace UIForia.Systems {
             clipperList.Clear();
             hierarchyRebuildList.Clear();
             queryableElements.Clear();
+            ignoredList.Clear();
 
             screenClipper.orientedBounds.p0 = new Vector2(0, 0);
             screenClipper.orientedBounds.p1 = new Vector2(Screen.width, 0);
@@ -196,6 +193,10 @@ namespace UIForia.Systems {
                     }
                 }
 
+                if ((layoutBox.flags & LayoutBoxFlags.Ignored) != 0) {
+                    ignoredList.Add(layoutBox);    
+                }
+                
                 if ((layoutBox.flags & LayoutBoxFlags.RequireAlignmentHorizontal) != 0) {
                     alignHorizontalList.Add(currentElement);
                 }
@@ -318,14 +319,14 @@ namespace UIForia.Systems {
                 if (needsGather) {
                     UIElement ptr = currentElement;
                     while (ptr != null) {
-                        
                         if (ptr.style.LayoutBehavior != LayoutBehavior.TranscludeChildren) {
                             if (!hierarchyRebuildList.Contains(ptr)) {
                                 hierarchyRebuildList.Add(ptr);
                             }
-                        
+
                             break;
                         }
+
                         ptr = ptr.parent;
                     }
                 }
@@ -378,7 +379,6 @@ namespace UIForia.Systems {
 
                 switch (child.style.LayoutBehavior) {
                     case LayoutBehavior.Ignored:
-                        child.layoutBox.parent = currentElement.layoutBox;
                         child.layoutResult.layoutParent = currentElement.layoutResult; // todo -- multiple ignore levels?
                         ignoredList.Add(child.layoutBox);
                         break;
@@ -482,7 +482,8 @@ namespace UIForia.Systems {
                     s_SubjectRect.array[2] = bounds.p2;
                     s_SubjectRect.array[3] = bounds.p3;
                     s_SubjectRect.size = 4;
-                    SutherlandHodgman.GetIntersectedPolygon(s_SubjectRect, clipper.parent.intersected, ref clipper.intersected);
+                    
+                    SutherlandHodgman.GetIntersectedPolygon(s_SubjectRect, clipper.parent.intersected, clipper.intersected);
                     clipper.isCulled = clipper.intersected.size == 0;
                 }
 
@@ -545,12 +546,12 @@ namespace UIForia.Systems {
                 }
 
                 // todo -- this is caching problem! fix it!
-              //  if (!Mathf.Approximately(previousPosition, result.alignedPosition.x)) {
-                 //   if ((box.flags & LayoutBoxFlags.RequiresMatrixUpdate) != 0) {
-                        box.flags |= LayoutBoxFlags.RequiresMatrixUpdate;
-                        matrixUpdateList.Add(box.element);
-                 //   }
-               // }
+                //  if (!Mathf.Approximately(previousPosition, result.alignedPosition.x)) {
+                //   if ((box.flags & LayoutBoxFlags.RequiresMatrixUpdate) != 0) {
+                box.flags |= LayoutBoxFlags.RequiresMatrixUpdate;
+                matrixUpdateList.Add(box.element);
+                //   }
+                // }
             }
 
             alignHorizontalList.Clear();
@@ -589,10 +590,10 @@ namespace UIForia.Systems {
                 // todo -- this is caching problem! fix it!
 
                 // if (!Mathf.Approximately(previousPosition, result.alignedPosition.y)) {
-                    //  if ((box.flags & LayoutBoxFlags.RequiresMatrixUpdate) != 0) {
-                    box.flags |= LayoutBoxFlags.RequiresMatrixUpdate;
-                    matrixUpdateList.Add(box.element);
-                    //   }
+                //  if ((box.flags & LayoutBoxFlags.RequiresMatrixUpdate) != 0) {
+                box.flags |= LayoutBoxFlags.RequiresMatrixUpdate;
+                matrixUpdateList.Add(box.element);
+                //   }
                 // }
             }
 
@@ -860,7 +861,7 @@ namespace UIForia.Systems {
                 }
 
                 int childCount = currentElement.children.size;
-                
+
                 if (elemRefStack.size + childCount >= elemRefStack.array.Length) {
                     elemRefStack.EnsureAdditionalCapacity(childCount);
                 }
@@ -944,8 +945,7 @@ namespace UIForia.Systems {
 
         }
 
-        public void QueryPoint(Vector2 point, QueryFilter filter, IList<UIElement> retn) {
-        }
+        public void QueryPoint(Vector2 point, QueryFilter filter, IList<UIElement> retn) { }
 
         public void QueryPoint(Vector2 point, IList<UIElement> retn) {
             if (!new Rect(0, 0, Screen.width, Screen.height).Contains(point)) {

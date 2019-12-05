@@ -203,10 +203,10 @@ namespace UIForia.Util {
             size -= count;
         }
 
-//        public void Sort(IComparer<T> comparison) {
-//            if (size < 2) return;
-//            IntroSort(array, 0, size - 1, 2 * FloorLog2(size), comparison);
-//        }
+        public void IntroSort(IComparer<T> comparison) {
+            if (size < 2) return;
+            IntroSort(array, 0, size - 1, 2 * FloorLog2(size), comparison);
+        }
 //
 //        public void Sort(int start, int length, IComparer<T> comparison) {
 //            if (size < 2) return;
@@ -285,7 +285,9 @@ namespace UIForia.Util {
             return retn;
         }
 
+        public static int swapCalls = 0;
         private static void SwapIfGreater(T[] keys, IComparer<T> comparer, int a, int b) {
+            swapCalls++;
             if (a == b || comparer.Compare(keys[a], keys[b]) <= 0)
                 return;
             T key = keys[a];
@@ -300,6 +302,100 @@ namespace UIForia.Util {
             a[i] = a[j];
             a[j] = obj;
         }
+        
+        public void QuickSort(IComparer<T> comparer) {
+            QuickSort(array, 0, size - 1, comparer);
+        }
+
+        private static void QuickSort(T[] array, int startIndex, int endIndex, IComparer<T> comparer) {
+            while (true) {
+                int left = startIndex;
+                int right = endIndex;
+                int pivot = startIndex;
+                startIndex++;
+
+                while (endIndex >= startIndex) {
+                    
+                    int cmpStart_pivot = comparer.Compare(array[startIndex], array[pivot]);
+                    int cmpEnd_pivot = comparer.Compare(array[endIndex], array[pivot]);
+
+                    if (cmpStart_pivot >= 0 && cmpEnd_pivot < 0) {
+                        T obj = array[startIndex];
+                        array[startIndex] = array[endIndex];
+                        array[endIndex] = obj;
+                    }
+                    else if (cmpStart_pivot >= 0) {
+                        endIndex--;
+                    }
+                    else if (cmpEnd_pivot < 0) {
+                        startIndex++;
+                    }
+                    else {
+                        endIndex--;
+                        startIndex++;
+                    }
+                }
+
+                T tmp = array[pivot];
+                array[pivot] = array[endIndex];
+                array[endIndex] = tmp;
+                pivot = endIndex;
+
+                if (pivot > left) {
+                    QuickSort(array, left, pivot, comparer);
+                }
+
+                if (right > pivot + 1) {
+                    startIndex = pivot + 1;
+                    endIndex = right;
+                    continue;
+                }
+
+                break;
+            }
+        }
+
+//         private static void QuickSort(T[] array, int startIndex, int endIndex, IComparer<T> comparer) {
+//            while (true) {
+//                int left = startIndex;
+//                int right = endIndex;
+//                int pivot = startIndex;
+//                startIndex++;
+//
+//                while (endIndex >= startIndex) {
+//                    int cmpStart = comparer.Compare(array[startIndex], array[pivot]);
+//
+//                    if (cmpStart >= 0 && comparer.Compare(array[endIndex], array[pivot]) < 0) {
+//                        Swap(array, startIndex, endIndex);
+//                    }
+//                    else if (comparer.Compare(array[startIndex], array[pivot]) >= 0) {
+//                        endIndex--;
+//                    }
+//                    else if (comparer.Compare(array[endIndex], array[pivot]) < 0) {
+//                        startIndex++;
+//                    }
+//                    else {
+//                        endIndex--;
+//                        startIndex++;
+//                    }
+//                }
+//
+//                Swap(array, pivot, endIndex);
+//                pivot = endIndex;
+//
+//                if (pivot > left) {
+//                    QuickSort(array, left, pivot, comparer);
+//                }
+//
+//                if (right > pivot + 1) {
+//                    startIndex = pivot + 1;
+//                    endIndex = right;
+//                    continue;
+//                }
+//
+//                break;
+//            }
+//        }
 
         private static void IntroSort(T[] keys, int lo, int hi, int depthLimit, IComparer<T> comparer) {
             int num1;

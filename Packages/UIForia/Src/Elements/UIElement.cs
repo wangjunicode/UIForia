@@ -84,7 +84,7 @@ namespace UIForia.Elements {
         public readonly UIStyleSet style;
 
         internal LightList<UIElement> children; // todo -- replace w/ linked list & child count
-        internal LayoutHistory layoutHistory;
+//        internal LayoutHistory layoutHistory;
 
         public ExpressionContext templateContext; // todo -- can probably be moved to binding system
         

@@ -58,7 +58,7 @@ namespace UIForia.Systems {
         internal StructStack<BoxRef> boxRefStack;
         internal LightList<UIElement> matrixUpdateList;
         internal LightList<ClipData> clipperList;
-        
+
         private readonly LightStack<ClipData> clipStack;
         private readonly ClipData screenClipper;
         private readonly ClipData viewClipper;
@@ -194,9 +194,9 @@ namespace UIForia.Systems {
                 }
 
                 if ((layoutBox.flags & LayoutBoxFlags.Ignored) != 0) {
-                    ignoredList.Add(layoutBox);    
+                    ignoredList.Add(layoutBox);
                 }
-                
+
                 if ((layoutBox.flags & LayoutBoxFlags.RequireAlignmentHorizontal) != 0) {
                     alignHorizontalList.Add(currentElement);
                 }
@@ -482,7 +482,7 @@ namespace UIForia.Systems {
                     s_SubjectRect.array[2] = bounds.p2;
                     s_SubjectRect.array[3] = bounds.p3;
                     s_SubjectRect.size = 4;
-                    
+
                     SutherlandHodgman.GetIntersectedPolygon(s_SubjectRect, clipper.parent.intersected, clipper.intersected);
                     clipper.isCulled = clipper.intersected.size == 0;
                 }
@@ -600,11 +600,9 @@ namespace UIForia.Systems {
             alignVerticalList.Clear();
         }
 
-        private void PerformLayoutStep(AwesomeLayoutBox rootBox) {
+        private void PerformLayoutStepHorizontal(AwesomeLayoutBox rootBox) {
             boxRefStack.Push(new BoxRef() {box = rootBox});
 
-            float viewWidth = rootBox.element.View.Viewport.width;
-            float viewHeight = rootBox.element.View.Viewport.height;
 
             // Resolve all widths first, then process heights. These operations cannot be interleaved for we can't be sure
             // that widths are final before heights are computed, this is critical for the system to work.
@@ -618,7 +616,6 @@ namespace UIForia.Systems {
 
                 if ((layoutBox.flags & LayoutBoxFlags.RequireLayoutHorizontal) != 0) {
                     layoutBox.RunLayoutHorizontal(frameId);
-                    //                    layoutBox.element.layoutHistory.AddLayoutHorizontalCall(frameId);
                     layoutBox.flags &= ~LayoutBoxFlags.RequireLayoutHorizontal;
                 }
 
@@ -630,6 +627,11 @@ namespace UIForia.Systems {
                     ptr = ptr.nextSibling;
                 }
             }
+        }
+
+        private void PerformLayoutStepVertical(AwesomeLayoutBox rootBox) {
+            float viewWidth = rootBox.element.View.Viewport.width;
+            float viewHeight = rootBox.element.View.Viewport.height;
 
             boxRefStack.Push(new BoxRef() {box = rootBox});
 
@@ -672,6 +674,11 @@ namespace UIForia.Systems {
             }
         }
 
+        private void PerformLayoutStep(AwesomeLayoutBox rootBox) {
+            PerformLayoutStepHorizontal(rootBox);
+            PerformLayoutStepVertical(rootBox);
+        }
+
         private void PerformLayout() {
             // save size checks later while traversing
             boxRefStack.EnsureCapacity(elemRefStack.array.Length);
@@ -686,12 +693,12 @@ namespace UIForia.Systems {
                 ignoredBox.GetWidths(ref size);
                 float outputSize = size.Clamped;
                 ignoredBox.ApplyLayoutHorizontal(0, 0, size, outputSize, ignoredBox.parent?.finalWidth ?? outputSize, LayoutFit.None, frameId);
-
+                PerformLayoutStepHorizontal(ignoredBox);
+                
                 ignoredBox.GetHeights(ref size);
                 outputSize = size.Clamped;
                 ignoredBox.ApplyLayoutVertical(0, 0, size, outputSize, ignoredBox.parent?.finalHeight ?? outputSize, LayoutFit.None, frameId);
-
-                PerformLayoutStep(ignoredBox);
+                PerformLayoutStepVertical(ignoredBox);
             }
         }
 
@@ -926,7 +933,7 @@ namespace UIForia.Systems {
 
                 elementBox.cachedContentWidth = -1;
                 elementBox.cachedContentHeight = -1;
-                
+
                 elementBox.MarkContentParentsHorizontalDirty(frameId, LayoutReason.DescendentStyleSizeChanged);
                 elementBox.MarkContentParentsVerticalDirty(frameId, LayoutReason.DescendentStyleSizeChanged);
 

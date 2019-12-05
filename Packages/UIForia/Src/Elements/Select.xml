@@ -12,7 +12,7 @@
             BorderRadius = 8px;
             Border = 2px;
             BorderColor = #B2B2B2;
-            PaddingRight = 16px;
+            PaddingRight = 32px;
             PaddingLeft = 16px;
             [hover] {
                 BorderColor = #00B5D9;

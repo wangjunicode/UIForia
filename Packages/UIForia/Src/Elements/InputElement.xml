@@ -8,7 +8,7 @@
             PreferredHeight = 1cnt;
             Border = 2px;
             BorderColor = black;
-            BackgroundColor = white;
+            //BackgroundColor = white;
             Padding = 4px 8px;
             PreferredWidth = 1cnt;
             MinWidth = 20px;

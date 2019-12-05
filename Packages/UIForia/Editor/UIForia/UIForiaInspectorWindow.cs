@@ -882,7 +882,7 @@ namespace UIForia.Editor {
                     return DrawEnumWithValue<GridAxisAlignment>(property, isEditable);
 
                 case StylePropertyId.FlexLayoutWrap:
-                    return DrawEnumWithValue<WrapMode>(property, isEditable);
+                    return DrawEnumWithValue<LayoutWrap>(property, isEditable);
 
                 case StylePropertyId.FlexLayoutDirection:
                     return DrawEnumWithValue<LayoutDirection>(property, isEditable);
@@ -929,10 +929,6 @@ namespace UIForia.Editor {
 
                 case StylePropertyId.TransformRotation:
                     return DrawFloat(property, isEditable);
-
-                case StylePropertyId.TransformBehaviorX:
-                case StylePropertyId.TransformBehaviorY:
-                    return DrawEnumWithValue<TransformBehavior>(property, isEditable);
 
                 case StylePropertyId.TextColor:
                 case StylePropertyId.ShadowColor:
@@ -1004,8 +1000,6 @@ namespace UIForia.Editor {
                     Debug.Log(property.propertyId.ToString() + " has no inspector");
                     return StyleProperty.Unset(property.propertyId);
             }
-
-            return StyleProperty.Unset(property.propertyId);
         }
 
         private static StyleProperty DrawCursor(StyleProperty property, bool isEditable) {
@@ -1160,8 +1154,8 @@ namespace UIForia.Editor {
             else {
                 EditorGUILayout.LabelField(s_Content);
                 for (int i = 0; i < template.Count; i++) {
-                  //  float value = EditorGUILayout.FloatField(template[i].minValue);
-                  //  GridTemplateUnit unit = (GridTemplateUnit) EditorGUILayout.EnumPopup(template[i].minUnit);
+                  float value = EditorGUILayout.FloatField(template[i].cell.baseSize.value);
+                  GridTemplateUnit unit = (GridTemplateUnit) EditorGUILayout.EnumPopup(template[i].cell.baseSize.unit);
                 }
             }
 

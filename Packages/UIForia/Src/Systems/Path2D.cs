@@ -53,8 +53,6 @@ namespace UIForia.Rendering {
         }
 
         public new void Clear() {
-            requiresGeometryUpdate = true;
-
             base.Clear();
             matrixChanged = false;
             drawCallList.QuickClear();
@@ -74,17 +72,14 @@ namespace UIForia.Rendering {
             }
         }
 
-        public void SetUVTransform() { }
+        public void SetUVTransform() {
+        }
 
         public void SetStroke(in Color color) {
-            requiresGeometryUpdate = true;
-
             currentStrokeStyle.encodedColor = VertigoUtil.ColorToFloat(color);
         }
 
         public void SetFill(in Color? color) {
-            requiresGeometryUpdate = true;
-
             if (color.HasValue) {
                 currentFillStyle.encodedColor = VertigoUtil.ColorToFloat(color.Value);
                 currentFillStyle.paintMode |= PaintMode.Color;
@@ -107,8 +102,6 @@ namespace UIForia.Rendering {
 //        }
 
         public void SetFill(Texture texture) {
-            requiresGeometryUpdate = true;
-
             if (texture != null) {
                 currentFillStyle.texture = texture;
                 currentFillStyle.paintMode |= PaintMode.Texture;
@@ -120,26 +113,18 @@ namespace UIForia.Rendering {
         }
 
         public void SetFillOpacity(float opacity) {
-            requiresGeometryUpdate = true;
-
             currentFillStyle.opacity = opacity;
         }
 
         public void SetStrokeOpacity(float opacity) {
-            requiresGeometryUpdate = true;
-
             currentStrokeStyle.opacity = opacity;
         }
 
         public void SetStrokeWidth(float width) {
-            requiresGeometryUpdate = true;
-
             currentStrokeStyle.strokeWidth = width;
         }
 
         public void Stroke() {
-            requiresGeometryUpdate = true;
-
             strokeStyles = strokeStyles ?? StructList<SVGXStrokeStyle>.Get();
             int styleIdx = strokeStyles.size;
             strokeStyles.Add(currentStrokeStyle);
@@ -151,8 +136,6 @@ namespace UIForia.Rendering {
         }
 
         public void Fill(FillMode fillMode = FillMode.Normal) {
-            requiresGeometryUpdate = true;
-
             if (currentShapeRange.length == 0) return;
             fillStyles = fillStyles ?? StructList<SVGXFillStyle>.Get();
             int styleIdx = fillStyles.size;
@@ -192,15 +175,7 @@ namespace UIForia.Rendering {
 
         private int lastShapeCount = -1;
 
-        internal bool requiresGeometryUpdate;
-
         internal void UpdateGeometry() {
-            if (!requiresGeometryUpdate) return;
-            requiresGeometryUpdate = false;
-            //if (lastShapeCount != shapeList.size) {
-            //    
-            //}
-
             geometry.Clear(); // todo -- can be optimized for adding / updating only
 
             SVGXDrawCall2[] drawCalls = drawCallList.array;
@@ -249,7 +224,6 @@ namespace UIForia.Rendering {
             }
         }
 
-
         private static float EncodeCornerRadii(float width, float height, Vector2 top, Vector2 bottom) {
             float min = math.min(width, height);
 
@@ -275,7 +249,8 @@ namespace UIForia.Rendering {
             return VertigoUtil.BytesToFloat(b0, b1, b2, b3);
         }
 
-        private void GenerateShadowStrokeGeometry() { }
+        private void GenerateShadowStrokeGeometry() {
+        }
 
         private void GenerateStrokeGeometry(ref ShapeDef shape, in SVGXStrokeStyle strokeStyle) {
             float strokeWidth = strokeStyle.strokeWidth;
@@ -640,65 +615,48 @@ namespace UIForia.Rendering {
 
         public void SetStrokeJoin(LineJoin joinType) {
             currentStrokeStyle.lineJoin = joinType;
-            requiresGeometryUpdate = true;
         }
 
         public void SetShadowColor(Color shadowColor) {
-            requiresGeometryUpdate = true;
-
             currentFillStyle.shadowColor = shadowColor;
         }
 
         public void SetShadowTint(Color color) {
-            requiresGeometryUpdate = true;
-
             currentFillStyle.shadowTint = color;
         }
 
         public void SetShadowOffset(Vector2 shadowOffset) {
-            requiresGeometryUpdate = true;
-
             currentFillStyle.shadowOffsetX = shadowOffset.x;
             currentFillStyle.shadowOffsetY = shadowOffset.y;
         }
 
         public void SetShadowOffset(float x, float y) {
-            requiresGeometryUpdate = true;
-
             currentFillStyle.shadowOffsetX = x;
             currentFillStyle.shadowOffsetY = y;
         }
 
         public void SetShadowSize(float x, float y) {
-            requiresGeometryUpdate = true;
-
             currentFillStyle.shadowSizeX = x;
             currentFillStyle.shadowSizeY = y;
         }
 
         public void SetShadowSize(Vector2 size) {
-            requiresGeometryUpdate = true;
-
             currentFillStyle.shadowSizeX = size.x;
             currentFillStyle.shadowSizeY = size.y;
         }
 
         public void SetShadowIntensity(float shadowIntensity) {
-            requiresGeometryUpdate = true;
-
             if (shadowIntensity < 0) shadowIntensity = 0;
             currentFillStyle.shadowIntensity = shadowIntensity;
         }
 
         public void SetShadowOpacity(float shadowOpacity) {
-            requiresGeometryUpdate = true;
-
             currentFillStyle.shadowOpacity = shadowOpacity;
         }
 
         public void SetDepthState(in DepthState? depthState) {
             renderStateChanged = true;
-            requiresGeometryUpdate = true;
+
 
             if (!depthState.HasValue) {
                 currentFixedRenderState.depthState = DepthState.Default;
@@ -710,7 +668,7 @@ namespace UIForia.Rendering {
 
         public void SetBlendState(in BlendState? blendState) {
             renderStateChanged = true;
-            requiresGeometryUpdate = true;
+
 
             if (!blendState.HasValue) {
                 currentFixedRenderState.blendState = BlendState.Default;

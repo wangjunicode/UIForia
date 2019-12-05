@@ -672,10 +672,12 @@ namespace UIForia.Systems {
             UIMeasurementUnit max = element.style.MaxWidth.unit;
 
             bool contentBased = (pref == UIMeasurementUnit.Content || min == UIMeasurementUnit.Content || max == UIMeasurementUnit.Content);
+            
+            bool intrinsic = (pref == UIMeasurementUnit.IntrinsicPreferred || min == UIMeasurementUnit.IntrinsicPreferred || max == UIMeasurementUnit.IntrinsicPreferred);
 
             bool autoSized = (pref == UIMeasurementUnit.Auto || min == UIMeasurementUnit.Auto || max == UIMeasurementUnit.Auto);
 
-            if (contentBased || (autoSized && parent != null && parent.IsAutoWidthContentBased())) {
+            if (contentBased  || intrinsic || (autoSized && parent != null && parent.IsAutoWidthContentBased())) {
                 flags &= ~LayoutBoxFlags.WidthBlockProvider;
             }
             else {

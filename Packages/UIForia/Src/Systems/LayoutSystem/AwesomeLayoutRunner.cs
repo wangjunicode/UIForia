@@ -620,7 +620,6 @@ namespace UIForia.Systems {
                 }
 
                 // no need to size check the stack, same size as element stack which was already sized
-
                 AwesomeLayoutBox ptr = layoutBox.firstChild;
                 while (ptr != null) {
                     boxRefStack.array[boxRefStack.size++].box = ptr;
@@ -681,7 +680,7 @@ namespace UIForia.Systems {
 
         private void PerformLayout() {
             // save size checks later while traversing
-            boxRefStack.EnsureCapacity(elemRefStack.array.Length);
+            boxRefStack.EnsureCapacity(elemRefStack.array.Length * 4);
 
             PerformLayoutStep(rootElement.layoutBox);
 
@@ -958,11 +957,11 @@ namespace UIForia.Systems {
         public void QueryPoint(Vector2 point, QueryFilter filter, IList<UIElement> retn) { }
 
         public void QueryPoint(Vector2 point, IList<UIElement> retn) {
-            if (!new Rect(0, 0, Screen.width, Screen.height).Contains(point)) {
+            if (!new Rect(0, 0, Screen.width, Screen.height).Contains(point) || rootElement.isDisabled) {
                 return;
             }
 
-            for (int i = 0; i < queryableElements.size; i++) {
+            for (int i = 1; i < queryableElements.size; i++) {
                 UIElement element = queryableElements.array[i].element;
                 LayoutResult layoutResult = element.layoutResult;
 

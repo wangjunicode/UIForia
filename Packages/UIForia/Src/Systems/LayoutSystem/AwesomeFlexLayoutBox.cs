@@ -804,7 +804,7 @@ namespace UIForia.Systems {
                     ref FlexItem item = ref items.array[j];
 
                     float allocatedHeight = height - (item.heightData.marginStart + item.heightData.marginEnd);
-                    float originBase = (y - paddingBorderVerticalStart) + item.heightData.marginStart;
+                    float originBase = y + item.heightData.marginStart;
                     float originOffset = allocatedHeight * verticalAlignment;
 
                     item.layoutBox.ApplyLayoutVertical(

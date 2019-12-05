@@ -128,6 +128,22 @@ namespace UIForia.Util {
                 onItemRemoved?.Invoke(item, i);
             }
         }
+
+        public void Move(int oldIndex, int insertIndex) {
+            if (insertIndex == -1) {
+                insertIndex = Count - 1;
+            }
+
+            if ((uint) oldIndex >= Count) return;
+            if ((uint) insertIndex >= Count) return;
+            T item = backingStore[oldIndex];
+            RemoveAt(oldIndex);
+            if (insertIndex >= Count) {
+                Add(item);
+            } else {
+                Insert(insertIndex, item);
+            }
+        }
     }
 
 }

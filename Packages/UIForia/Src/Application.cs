@@ -384,6 +384,7 @@ namespace UIForia {
                 }
 
                 current.flags &= ~(UIElementFlags.Alive);
+                current.enableStateChangedFrameId = frameId;
                 current.OnDestroy();
                 toInternalDestroy.Add(current);
 

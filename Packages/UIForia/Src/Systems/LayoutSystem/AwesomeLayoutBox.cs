@@ -45,9 +45,12 @@ namespace UIForia.Systems {
             OnDestroy();
             flags = 0;
             element = null;
-            parent = null;
             nextSibling = null;
             firstChild = null;
+            if (parent != null) {
+                parent.flags |= LayoutBoxFlags.GatherChildren;
+                parent = null;
+            }
         }
 
         protected virtual void OnDestroy() {}
@@ -65,16 +68,20 @@ namespace UIForia.Systems {
                 firstChild = layoutBoxes[0];
                 firstChild.parent = this;
                 firstChild.element.layoutResult.layoutParent = result;
-                firstChild.nextSibling = null;
+                
+                for (int i = 0; i < layoutBoxes.size; i++) {
+                    layoutBoxes.array[i].parent = this;
+                    layoutBoxes.array[i].nextSibling = null;
+                    layoutBoxes.array[i].element.layoutResult.layoutParent = result;
+                }
+
                 AwesomeLayoutBox ptr = firstChild;
                 for (int i = 1; i < layoutBoxes.size; i++) {
-                    layoutBoxes.array[i].parent = this;
-                    layoutBoxes.array[i].element.layoutResult.layoutParent = result;
                     ptr.nextSibling = layoutBoxes.array[i];
                     ptr = ptr.nextSibling;
                 }
             }
-
+            
             OnChildrenChanged(layoutBoxes);
         }
 

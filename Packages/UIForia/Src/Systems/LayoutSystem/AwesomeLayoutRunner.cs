@@ -291,7 +291,7 @@ namespace UIForia.Systems {
                     elemRefStack.array[elemRefStack.size++].element = null;
                 }
 
-                bool needsGather = false;
+                bool needsGather = (layoutBox.flags & LayoutBoxFlags.GatherChildren) != 0;
 
                 // if any child had it's type changed, enabled, disabled, or behavior changed, need to gather
 
@@ -938,6 +938,7 @@ namespace UIForia.Systems {
                 elementBox.MarkContentParentsVerticalDirty(frameId, LayoutReason.DescendentStyleSizeChanged);
 
                 elementBox.SetChildren(childList);
+                elementBox.flags &= ~LayoutBoxFlags.GatherChildren;
                 element.flags &= ~UIElementFlags.LayoutHierarchyDirty;
                 childList.size = 0;
             }

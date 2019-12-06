@@ -5,6 +5,7 @@ using Tests.Mocks;
 using UIForia;
 using UIForia.Compilers;
 using UIForia.Elements;
+using UIForia.Rendering;
 using UIForia.Test.TestData;
 using Application = UnityEngine.Application;
 
@@ -23,13 +24,12 @@ public class TestTemplateLoading {
     }
 
     public CompiledTemplateData GetTemplateData<T>(string appName) {
-        
         TemplateSettings settings = Setup(appName);
 
         TemplateCompiler compiler = new TemplateCompiler(settings);
 
         // maybe this should also know the root type for an application
-  //      CompiledTemplateData compiledOutput = new RuntimeTemplateData(settings);
+//        CompiledTemplateData compiledOutput = new RuntimeTemplateData(settings);
         CompiledTemplateData compiledOutput = new PreCompiledTemplateData(settings);
 
         compiler.CompileTemplates(typeof(T), compiledOutput);
@@ -37,46 +37,35 @@ public class TestTemplateLoading {
         if (compiledOutput is PreCompiledTemplateData preCompiledTemplateData) {
             preCompiledTemplateData.GenerateCode();
         }
-        
+
         compiledOutput.LoadTemplates();
 
         return compiledOutput;
-        
     }
-    
+
     [Test]
     public void LoadTemplateFromFile() {
-
         CompiledTemplateData templates = GetTemplateData<LoadTemplate0>(nameof(LoadTemplateFromFile));
-        
+
         MockApplication app = new MockApplication(templates, null);
-        
-        LoadTemplate0 root =  ElementTestUtil.AssertElementType<LoadTemplate0>(app.GetView(0).RootElement);
-        
+
+        LoadTemplate0 root = ElementTestUtil.AssertElementType<LoadTemplate0>(app.GetView(0).RootElement);
+
         Assert.AreEqual(2, root.ChildCount);
         Assert.IsInstanceOf<UITextElement>(root.GetChild(0));
-        
+
         LoadTemplateHydrate hydrate = ElementTestUtil.AssertElementType<LoadTemplateHydrate>(root.GetChild(1));
-        
+
         ElementTestUtil.AssertHasAttribute(hydrate, "nonconst");
         ElementTestUtil.AssertHasAttribute(hydrate, "some-attr", "this-is-attr");
         ElementTestUtil.AssertHasAttribute(hydrate, "first", "true");
-        
+
         Assert.AreEqual(42f, hydrate.floatVal);
-        
+
         app.Update();
-        
+
         Assert.AreEqual(14244 + 144, hydrate.intVal);
-        
-//        ElementTestUtil.HarnessElement(hydrate, (el) => {
-//            
-//        });
-
-    }
-
-    [Test]
-    public void VerifyHierarchy() {
-        
+        Assert.AreEqual(hydrate.style.PreferredWidth, new UIMeasurement(300));
     }
 
 }

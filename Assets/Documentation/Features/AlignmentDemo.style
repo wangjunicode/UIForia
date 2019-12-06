@@ -20,10 +20,11 @@ style grid-cell {
     BackgroundColor = rgb(49, 120, 230);
     BorderColor = black;
     Border = 20px;
+    LayoutFit = Fill;
 } 
 
 style align-left-top {
-    AlignX = 0px 0.01sw Parent Start;
+    AlignX = 20px 0px Parent Start;
     AlignY = 20px 0px Parent Start;
 }
 

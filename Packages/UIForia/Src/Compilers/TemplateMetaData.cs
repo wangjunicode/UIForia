@@ -24,11 +24,13 @@ namespace UIForia.Compilers {
         public StyleSheetReference[] styleReferences; // dictionary? sorted by name? trie?
 
         public CompiledTemplateData compiledTemplateData;
+        internal UIStyleGroupContainer[] styleMap;
         
-        public TemplateMetaData(int id, string filePath, StyleSheetReference[] styleReferences) {
+        public TemplateMetaData(int id, string filePath, UIStyleGroupContainer[] styleMap, StyleSheetReference[] styleReferences) {
             this.id = id;
             this.filePath = filePath;
             this.styleReferences = styleReferences;
+            this.styleMap = styleMap;
         }
         
         public UIStyleGroupContainer ResolveStyleByName(string name) {
@@ -48,7 +50,7 @@ namespace UIForia.Compilers {
         }
 
         public UIStyleGroupContainer GetStyleById(int styleId) {
-            return compiledTemplateData.styles[styleId];
+            return styleMap[styleId];
         }
 
     }

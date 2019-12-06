@@ -60,6 +60,12 @@ namespace UIForia.Compilers {
             nameSpaceManager.AddNamespace("style", "style");
             nameSpaceManager.AddNamespace("ctx", "ctx");
             nameSpaceManager.AddNamespace("ctxvar", "ctxvar");
+            nameSpaceManager.AddNamespace("mouse", "mouse");
+            nameSpaceManager.AddNamespace("key", "key");
+            nameSpaceManager.AddNamespace("touch", "touch");
+            nameSpaceManager.AddNamespace("touch", "touch");
+            nameSpaceManager.AddNamespace("controller", "controller");
+            
             for (int i = 0; i < s_Directives.Length; i++) {
                 nameSpaceManager.AddNamespace(s_Directives[i], s_Directives[i]);
             }
@@ -91,7 +97,7 @@ namespace UIForia.Compilers {
             }
 
             foreach (XElement styleElement in styleElements) {
-                styles.Add(ParseStyleSheet("someId", styleElement));
+                styles.Add(ParseStyleSheet(filePath, styleElement));
             }
 
             if (contentElements.Count() != 1) {
@@ -214,6 +220,18 @@ namespace UIForia.Compilers {
 
                             break;
                         }
+                        case "mouse":
+                            attributeType = AttributeType.Mouse;
+                            break;
+                        case "key":
+                            attributeType = AttributeType.Key;
+                            break;
+                        case "touch":
+                            attributeType = AttributeType.Touch;
+                            break;
+                        case "controller":
+                            attributeType = AttributeType.Controller;
+                            break;
                         case "style":
                             attributeType = AttributeType.Style;
                             break;
@@ -561,7 +579,7 @@ namespace UIForia.Compilers {
                     throw new TemplateParseException(styleElement, "Expected 'path' or 'src' to be null when a body is provided to a style tag");
                 }
 
-                return new StyleDefinition(alias, templateId, rawText);
+                return new StyleDefinition(alias, templateId + ".style", rawText);
             }
 
             // if we have no body then expect path to be set

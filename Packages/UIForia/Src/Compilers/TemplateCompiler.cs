@@ -12,6 +12,7 @@ using UIForia.Parsing.Expressions;
 using UIForia.Rendering;
 using UIForia.Systems;
 using UIForia.Templates;
+using UIForia.UIInput;
 using UIForia.Util;
 using UnityEngine;
 
@@ -28,8 +29,11 @@ namespace UIForia.Compilers {
         private readonly LightStack<Type> compilationStack;
         private readonly XMLTemplateParser xmlTemplateParser;
         private readonly Dictionary<Type, CompiledTemplate> templateMap;
-        private readonly LightStack<AliasResolver> resolvers;
+        private readonly LightStack<ContextVarAliasResolver> resolvers;
 
+        private const string k_InputEventAliasName = "$evt";
+        private const string k_InputEventParameterName = "__evt";
+        private const string k_InputHandlerVarName = "__inputHandler";
         private const string k_CastElement = "__castElement";
         private const string k_CastRoot = "__castRoot";
         private static readonly char[] s_StyleSeparator = new char[] {' '};
@@ -54,6 +58,8 @@ namespace UIForia.Compilers {
         private static readonly FieldInfo s_LightList_Element_Array = typeof(LightList<UIElement>).GetField(nameof(LightList<UIElement>.array), BindingFlags.Public | BindingFlags.Instance);
         private static readonly FieldInfo s_TextElement_Text = typeof(UITextElement).GetField(nameof(UITextElement.text), BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
 
+        private static readonly FieldInfo s_UIElement_inputHandlerGroup = typeof(UIElement).GetField(nameof(UIElement.inputHandlers), BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+
         private static readonly MethodInfo s_LightList_UIStyleGroupContainer_PreSize = typeof(LightList<UIStyleGroupContainer>).GetMethod(nameof(LightList<UIStyleGroupContainer>.PreSize), BindingFlags.Public | BindingFlags.Static);
         private static readonly MethodInfo s_LightList_UIStyle_Release = typeof(LightList<UIStyleGroupContainer>).GetMethod(nameof(LightList<UIStyleGroupContainer>.Release), BindingFlags.Public | BindingFlags.Instance);
         private static readonly FieldInfo s_LightList_UIStyleGroupContainer_Array = typeof(LightList<UIStyleGroupContainer>).GetField(nameof(LightList<UIStyleGroupContainer>.array), BindingFlags.Public | BindingFlags.Instance);
@@ -61,6 +67,9 @@ namespace UIForia.Compilers {
         private static readonly MethodInfo s_Application_CreateSlot = typeof(Application).GetMethod(nameof(Application.CreateSlot), BindingFlags.NonPublic | BindingFlags.Instance);
         private static readonly MethodInfo s_Application_HydrateTemplate = typeof(Application).GetMethod(nameof(Application.HydrateTemplate), BindingFlags.NonPublic | BindingFlags.Instance);
         private static readonly MethodInfo s_Application_s_ResolveSlotId = typeof(Application).GetMethod(nameof(Application.ResolveSlotId), BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);
+
+        private static readonly MethodInfo s_InputHandlerGroup_AddMouseEvent = typeof(InputHandlerGroup).GetMethod(nameof(InputHandlerGroup.AddMouseEvent));
+        private static readonly MethodInfo s_InputHandlerGroup_AddKeyboardEvent = typeof(InputHandlerGroup).GetMethod(nameof(InputHandlerGroup.AddKeyboardEvent));
 
         private static readonly PropertyInfo s_Element_IsEnabled = typeof(UIElement).GetProperty(nameof(UIElement.isEnabled));
         private static readonly FieldInfo s_Element_BindingNode = typeof(UIElement).GetField(nameof(UIElement.bindingNode));
@@ -81,7 +90,7 @@ namespace UIForia.Compilers {
             this.updateCompiler = new LinqCompiler();
             this.enabledCompiler = new LinqCompiler();
             this.createdCompiler = new LinqCompiler();
-            this.resolvers = new LightStack<AliasResolver>();
+            this.resolvers = new LightStack<ContextVarAliasResolver>();
 
             Func<string, LinqCompiler, Expression> resolveAlias = ResolveAlias;
 
@@ -315,9 +324,7 @@ namespace UIForia.Compilers {
             Expression parentChildListArray = Expression.Field(parentChildList, s_LightList_Element_Array);
 
             // childList[idx] = Visit()
-            for (int i = 0;
-                i < node.children.Count;
-                i++) {
+            for (int i = 0; i < node.children.Count; i++) {
                 Expression visit = Visit(node.children[i], ctx, retn);
                 // will be null for stored templates
                 if (visit != null) {
@@ -533,6 +540,7 @@ namespace UIForia.Compilers {
 
             StructList<AttributeDefinition2> perFrameStyles = null;
             StructList<DynamicStyleData> dynamicStyleData = null;
+            StructList<AttributeDefinition2> inputList = null;
 
             // todo -- handle nested access <Element thing.value.x="144f" keydown="" key-filter:keydown.keyup.withfocus="[allDown(shift, c, k), NoneOf()]"/>
             // todo -- handle .read.write bindings
@@ -564,7 +572,7 @@ namespace UIForia.Compilers {
 
                         createdCompiler.RawExpression(createVariable);
 
-                        PushAliasResolver(aliasId, attr.key, expressionType);
+                        PushContextVarAliasResolver(aliasId, attr.key, expressionType);
 
                         if ((attr.flags & AttributeFlags.Const) != 0) {
                             // already incremented created count
@@ -617,16 +625,18 @@ namespace UIForia.Compilers {
 
                                 string[] parts = attr.value.Split(' ');
 
-                                ParameterExpression styleList = createdCompiler.AddVariable(new Parameter<LightList<UIStyle>>("styleList"), Expression.Call(null, s_LightList_UIStyleGroupContainer_PreSize, Expression.Constant(list.size)));
+                                ParameterExpression styleList = createdCompiler.AddVariable(new Parameter<LightList<UIStyleGroupContainer>>("styleList"), Expression.Call(null, s_LightList_UIStyleGroupContainer_PreSize, Expression.Constant(parts.Length)));
 
                                 Expression styleListArray = Expression.MakeMemberAccess(styleList, s_LightList_UIStyleGroupContainer_Array);
 
                                 for (int p = 0; p < parts.Length; p++) {
                                     int styleId = ctx.ResolveStyleName(parts[p]);
                                     IndexExpression arrayIndex = Expression.ArrayAccess(styleListArray, Expression.Constant(p));
-                                    createdCompiler.Comment(parts[i]);
+                                    createdCompiler.Comment(parts[p]);
                                     createdCompiler.Assign(arrayIndex, $"__element.{nameof(UIElement.templateMetaData)}.GetStyleById({styleId})", false);
                                 }
+
+                                createdCompiler.Statement($"{k_CastElement}.style.internal_Initialize(styleList)");
 
                                 list.QuickRelease();
                             }
@@ -695,11 +705,19 @@ namespace UIForia.Compilers {
 
                         break;
                     }
+                    case AttributeType.Key:
+                    case AttributeType.Touch:
+                    case AttributeType.Controller:
+                    case AttributeType.Mouse: {
+                        inputList = inputList ?? StructList<AttributeDefinition2>.Get();
+                        inputList.Add(attr);
+                        break;
+                    }
+
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
             }
-
 
             if (templateNode.processedType.requiresUpdateFn) {
                 updateBindingCount++;
@@ -712,6 +730,7 @@ namespace UIForia.Compilers {
                 updateCompiler.AddNamespace("UIForia.Util");
                 updateCompiler.AddNamespace("UIForia.Text");
                 updateCompiler.AddVariable(new Parameter<StringBuilder>("__stringBuilder", ParameterFlags.NeverNull), "TextUtil.StringBuilder");
+                updateCompiler.SetImplicitContext(updateCompiler.GetVariable(k_CastRoot));
                 StructList<TextExpression> expressionParts = templateNode.textContent;
 
                 for (int i = 0; i < expressionParts.size; i++) {
@@ -792,6 +811,25 @@ namespace UIForia.Compilers {
                 perFrameStyles.QuickRelease();
             }
 
+            if (inputList != null) {
+                createdBindingCount++;
+                // todo -- if element already has event handlers (from template internals or from c#) we need to grow that list (not yet implemented)
+                createdCompiler.Assign(createdCompiler.Value(k_CastElement + "." + nameof(UIElement.inputHandlers)), Expression.New(typeof(InputHandlerGroup)));
+
+                for (int i = 0; i < inputList.size; i++) {
+                    switch (inputList.array[i].type) {
+                        case AttributeType.Mouse:
+                            CompileMouseInputBinding(createdCompiler, inputList.array[i]);
+                            break;
+                        case AttributeType.Key:
+                            CompileKeyboardInputBinding(createdCompiler, inputList.array[i]);
+                            break;
+                    }
+                }
+
+                inputList.QuickRelease();
+            }
+
             int createdBindingId = -1;
             int enabledBindingId = -1;
             int updateBindingId = -1;
@@ -829,38 +867,78 @@ namespace UIForia.Compilers {
             }
         }
 
-        public struct AliasResolver {
+        private enum AliasResolverType {
+
+            MouseEvent,
+            KeyEvent,
+            TouchEvent,
+            Element,
+            Parent,
+            ContextVariable,
+            ControllerEvent,
+
+            Root
+
+        }
+
+        private struct ContextVarAliasResolver {
 
             public string name;
             public string strippedName;
             public Type type;
             public int id;
+            public AliasResolverType resolverType;
 
-            public AliasResolver(string name, Type type, int id) {
+            public ContextVarAliasResolver(string name, Type type, int id, AliasResolverType resolverType) {
                 this.name = name[0] == '$' ? name : '$' + name;
                 this.strippedName = name.Substring(0);
                 this.type = type;
                 this.id = id;
+                this.resolverType = resolverType;
             }
 
             public Expression Resolve(LinqCompiler compiler) {
-                ParameterExpression el = compiler.GetVariable(k_CastElement);
-                Expression access = Expression.MakeMemberAccess(el, s_Element_BindingNode);
-                Expression call = Expression.Call(access, s_LinqBindingNode_GetContextVariable, Expression.Constant(id));
-                Type contextVarType = ReflectionUtil.CreateGenericType(typeof(ContextVariable<>), type);
+                switch (resolverType) {
+                    case AliasResolverType.MouseEvent:
+                        return compiler.Value(k_InputEventParameterName + "." + nameof(GenericInputEvent.AsMouseInputEvent));
 
-                UnaryExpression convert = Expression.Convert(call, contextVarType);
-                ParameterExpression variable = compiler.AddVariable(type, $"ctxvar_{strippedName}");
+                    case AliasResolverType.KeyEvent:
+                        return compiler.Value(k_InputEventParameterName + "." + nameof(GenericInputEvent.AsKeyInputEvent));
 
-                compiler.Assign(variable, Expression.MakeMemberAccess(convert, contextVarType.GetField("value")));
-                return variable;
+                    case AliasResolverType.TouchEvent:
+                    case AliasResolverType.ControllerEvent:
+                        throw new NotImplementedException();
+
+                    case AliasResolverType.Element:
+                        return compiler.GetParameter(k_CastElement);
+
+                    case AliasResolverType.Root:
+                        return compiler.GetParameter(k_CastRoot);
+
+                    case AliasResolverType.Parent:
+                        return compiler.Value(k_CastElement + ".parent");
+
+                    case AliasResolverType.ContextVariable: {
+                        ParameterExpression el = compiler.GetVariable(k_CastElement);
+                        Expression access = Expression.MakeMemberAccess(el, s_Element_BindingNode);
+                        Expression call = Expression.Call(access, s_LinqBindingNode_GetContextVariable, Expression.Constant(id));
+                        Type contextVarType = ReflectionUtil.CreateGenericType(typeof(ContextVariable<>), type);
+
+                        UnaryExpression convert = Expression.Convert(call, contextVarType);
+                        ParameterExpression variable = compiler.AddVariable(type, $"ctxvar_{strippedName}");
+
+                        compiler.Assign(variable, Expression.MakeMemberAccess(convert, contextVarType.GetField("value")));
+                        return variable;
+                    }
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
             }
 
         }
 
-        private void PushAliasResolver(int id, string name, Type type) {
-            AliasResolver resolver = new AliasResolver(name, type, id);
-            resolvers.Push(resolver);
+        private void PushContextVarAliasResolver(int id, string name, Type type) {
+            resolvers.Push(new ContextVarAliasResolver(name, type, id, AliasResolverType.ContextVariable));
         }
 
         private void PopAliasResolver() {
@@ -869,7 +947,7 @@ namespace UIForia.Compilers {
 
         private Expression ResolveAlias(string aliasName, LinqCompiler compiler) {
             for (int i = 0; i < resolvers.size; i++) {
-                AliasResolver resolver = resolvers.PeekAtUnchecked(i);
+                ContextVarAliasResolver resolver = resolvers.PeekAtUnchecked(i);
                 if (resolver.name == aliasName) {
                     return resolver.Resolve(compiler);
                 }
@@ -918,6 +996,200 @@ namespace UIForia.Compilers {
             ParameterExpression target = compiler.AddVariable(contextVarType, $"ctxVar_{attr.key}");
             compiler.Assign(target, cast);
             compiler.Assign($"ctxVar_{attr.key}.value", compiler.Value(attr.value), false);
+        }
+
+        private void CompileKeyboardInputBinding(LinqCompiler compiler, in AttributeDefinition2 attr) {
+            LightList<Parameter> parameters = LightList<Parameter>.Get();
+            parameters.Add(new Parameter<GenericInputEvent>(k_InputEventParameterName, ParameterFlags.NeverNull | ParameterFlags.NeverOutOfBounds));
+
+            resolvers.Push(new ContextVarAliasResolver(k_InputEventAliasName, typeof(KeyboardInputEvent), NextContextId, AliasResolverType.KeyEvent));
+
+            compiler.SetImplicitContext(compiler.GetVariable(k_CastRoot));
+            
+             // todo -- eliminate generated closure by passing in template root and element from input system
+            LinqCompiler closure = compiler.CreateClosure(parameters, typeof(void));
+
+            closure.Statement(attr.value);
+            LambdaExpression lambda = closure.BuildLambda();
+
+            Expression target = Expression.Field(compiler.GetVariable(k_CastElement), s_UIElement_inputHandlerGroup);
+
+            InputEventType evtType = 0;
+            KeyboardModifiers modifiers = KeyboardModifiers.None;
+            EventPhase eventPhase = EventPhase.Bubble;
+
+            bool requireFocus = false;
+
+            string evtTypeName = attr.key;
+
+            if (attr.key.Contains(".")) {
+                evtTypeName = attr.key.Substring(0, attr.key.IndexOf('.'));
+                bool isCapture = attr.key.Contains(".capture");
+                bool isShift = attr.key.Contains(".shift");
+                bool isControl = attr.key.Contains(".ctrl") || attr.key.Contains(".control");
+                bool isCommand = attr.key.Contains(".cmd") || attr.key.Contains(".command");
+                bool isAlt = attr.key.Contains(".alt");
+
+                requireFocus = attr.key.Contains(".focus");
+
+                if (isShift) {
+                    modifiers |= KeyboardModifiers.Shift;
+                }
+
+                if (isControl) {
+                    modifiers |= KeyboardModifiers.Control;
+                }
+
+                if (isCommand) {
+                    modifiers |= KeyboardModifiers.Command;
+                }
+
+                if (isAlt) {
+                    modifiers |= KeyboardModifiers.Alt;
+                }
+
+                if (isCapture) {
+                    eventPhase = EventPhase.Capture;
+                }
+            }
+            
+            switch (evtTypeName) {
+                case "down":
+                    evtType = InputEventType.KeyDown;
+                    break;
+                case "up":
+                    evtType = InputEventType.KeyUp;
+                    break;
+                case "helddown":
+                    evtType = InputEventType.KeyHeldDown;
+                    break;
+                default:
+                    throw new CompileException("Invalid keyboard event in template: " + attr.key);
+            }
+            
+             MethodCallExpression expression = Expression.Call(target, s_InputHandlerGroup_AddKeyboardEvent,
+                Expression.Constant(evtType),
+                Expression.Constant(modifiers),
+                Expression.Constant(requireFocus),
+                Expression.Constant(eventPhase),
+                Expression.Constant(KeyCodeUtil.AnyKey),
+                Expression.Constant('\0'),
+                lambda
+            );
+
+            compiler.RawExpression(expression);
+
+            closure.Release();
+            LightList<Parameter>.Release(ref parameters);
+            resolvers.Pop();
+            
+        }
+
+        private void CompileMouseInputBinding(LinqCompiler compiler, in AttributeDefinition2 attr) {
+            // 1 list of event handler typeof(Action<InputEvent>);
+            // input call appropriate conversion fn from input event before resolving $evt
+
+            LightList<Parameter> parameters = LightList<Parameter>.Get();
+            parameters.Add(new Parameter<GenericInputEvent>(k_InputEventParameterName, ParameterFlags.NeverNull | ParameterFlags.NeverOutOfBounds));
+
+            resolvers.Push(new ContextVarAliasResolver(k_InputEventAliasName, typeof(MouseInputEvent), NextContextId, AliasResolverType.MouseEvent));
+
+            compiler.SetImplicitContext(compiler.GetVariable(k_CastRoot));
+            // todo -- eliminate generated closure by passing in template root and element from input system
+            LinqCompiler closure = compiler.CreateClosure(parameters, typeof(void));
+
+            closure.Statement(attr.value);
+            LambdaExpression lambda = closure.BuildLambda();
+
+            Expression target = Expression.Field(compiler.GetVariable(k_CastElement), s_UIElement_inputHandlerGroup);
+
+            InputEventType evtType = 0;
+            KeyboardModifiers modifiers = KeyboardModifiers.None;
+            EventPhase eventPhase = EventPhase.Bubble;
+
+            bool requireFocus = false;
+
+            string evtTypeName = attr.key;
+
+            if (attr.key.Contains(".")) {
+                evtTypeName = attr.key.Substring(0, attr.key.IndexOf('.'));
+                bool isCapture = attr.key.Contains(".capture");
+                bool isShift = attr.key.Contains(".shift");
+                bool isControl = attr.key.Contains(".ctrl") || attr.key.Contains(".control");
+                bool isCommand = attr.key.Contains(".cmd") || attr.key.Contains(".command");
+                bool isAlt = attr.key.Contains(".alt");
+
+                requireFocus = attr.key.Contains(".focus");
+
+                if (isShift) {
+                    modifiers |= KeyboardModifiers.Shift;
+                }
+
+                if (isControl) {
+                    modifiers |= KeyboardModifiers.Control;
+                }
+
+                if (isCommand) {
+                    modifiers |= KeyboardModifiers.Command;
+                }
+
+                if (isAlt) {
+                    modifiers |= KeyboardModifiers.Alt;
+                }
+
+                if (isCapture) {
+                    eventPhase = EventPhase.Capture;
+                }
+            }
+
+            switch (evtTypeName) {
+                case "click":
+                    evtType = InputEventType.MouseClick;
+                    break;
+                case "down":
+                    evtType = InputEventType.MouseDown;
+                    break;
+                case "up":
+                    evtType = InputEventType.MouseUp;
+                    break;
+                case "enter":
+                    evtType = InputEventType.MouseEnter;
+                    break;
+                case "exit":
+                    evtType = InputEventType.MouseExit;
+                    break;
+                case "helddown":
+                    evtType = InputEventType.MouseHeldDown;
+                    break;
+                case "move":
+                    evtType = InputEventType.MouseMove;
+                    break;
+                case "hover":
+                    evtType = InputEventType.MouseHover;
+                    break;
+                case "scroll":
+                    evtType = InputEventType.MouseScroll;
+                    break;
+                case "context":
+                    evtType = InputEventType.MouseContext;
+                    break;
+                default:
+                    throw new CompileException("Invalid mouse event in template: " + attr.key);
+            }
+
+            MethodCallExpression expression = Expression.Call(target, s_InputHandlerGroup_AddMouseEvent,
+                Expression.Constant(evtType),
+                Expression.Constant(modifiers),
+                Expression.Constant(requireFocus),
+                Expression.Constant(eventPhase),
+                lambda
+            );
+
+            compiler.RawExpression(expression);
+
+            closure.Release();
+            LightList<Parameter>.Release(ref parameters);
+            resolvers.Pop();
         }
 
         private static void CompileEventBinding(LinqCompiler compiler, in AttributeDefinition2 attr, EventInfo eventInfo) {
@@ -973,10 +1245,7 @@ namespace UIForia.Compilers {
                 compiler.CommentNewLineBefore($"if=\"{attr.value}\"");
 
                 // if(!element.isEnabled) return
-                compiler.IfEqual(Expression.MakeMemberAccess(castElement, s_Element_IsEnabled), Expression.Constant(false), () => {
-                    LabelTarget returnTarget = Expression.Label("early_out");
-                    compiler.RawExpression(Expression.Return(returnTarget));
-                });
+                compiler.IfEqual(Expression.MakeMemberAccess(castElement, s_Element_IsEnabled), Expression.Constant(false), () => { compiler.Return(); });
             }
             catch (Exception e) {
                 compiler.EndIsolatedSection();

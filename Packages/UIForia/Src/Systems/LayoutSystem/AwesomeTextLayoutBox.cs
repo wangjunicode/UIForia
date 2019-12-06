@@ -27,6 +27,8 @@ namespace UIForia.Systems {
             flags |= (LayoutBoxFlags.RequireLayoutHorizontal | LayoutBoxFlags.RequireLayoutHorizontal);
             finalWidth = -1;
             finalHeight = -1;
+            cachedContentWidth = -1;
+            cachedContentHeight = -1;
             if (textAlreadyDirty) return;
             textAlreadyDirty = true;
             AwesomeLayoutBox ptr = parent;
@@ -36,7 +38,8 @@ namespace UIForia.Systems {
                 bool stop = (ptr.flags & LayoutBoxFlags.WidthBlockProvider) != 0;
                 // can't break out if already flagged for layout because parent of parent might not be and might be content sized
                 ptr.flags |= LayoutBoxFlags.RequireLayoutHorizontal;
-                ptr.element.layoutHistory.AddLogEntry(LayoutDirection.Horizontal, -1, LayoutReason.DescendentStyleSizeChanged);
+                ptr.cachedContentWidth = -1;
+//                ptr.element.layoutHistory.AddLogEntry(LayoutDirection.Horizontal, -1, LayoutReason.DescendentStyleSizeChanged);
                 if (stop) break;
                 ptr = ptr.parent;
             }
@@ -49,7 +52,8 @@ namespace UIForia.Systems {
 
                 // can't break out if already flagged for layout because parent of parent might not be and might be content sized
                 ptr.flags |= LayoutBoxFlags.RequireLayoutVertical;
-                ptr.element.layoutHistory.AddLogEntry(LayoutDirection.Vertical, -1, LayoutReason.DescendentStyleSizeChanged);
+                ptr.cachedContentHeight = -1;
+//                ptr.element.layoutHistory.AddLogEntry(LayoutDirection.Vertical, -1, LayoutReason.DescendentStyleSizeChanged);
                 if (stop) break;
                 ptr = ptr.parent;
             }
@@ -68,8 +72,13 @@ namespace UIForia.Systems {
         }
 
         protected override float ComputeContentHeight() {
+            ignoreUpdate = true;
+            
             // todo -- might need to subtract padding / border from this value
-            return textInfo.ComputeHeightForWidth(finalWidth);
+            float retn = textInfo.ComputeHeightForWidth(finalWidth);
+            ignoreUpdate = false;
+
+            return retn;
         }
 
         public override void OnChildrenChanged(LightList<AwesomeLayoutBox> childList) { }

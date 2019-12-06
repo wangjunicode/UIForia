@@ -8,18 +8,16 @@
             PreferredHeight = 1cnt;
             Border = 2px;
             BorderColor = black;
-            BackgroundColor = white;
+            //BackgroundColor = white;
             Padding = 4px 8px;
             PreferredWidth = 1cnt;
-            MinWidth = 1.2em;
-            TextFontSize = 1.2em;
+            MinWidth = 20px;
             MarginBottom = 10px;
             Overflow = Hidden;
             ClipBounds = ContentBox;
         }
 
         style input-element-text {
-            
             TextWhitespaceMode = NoWrap;
             MinHeight = 1em;
             AlignY = 50% ParentContentArea;
@@ -32,7 +30,7 @@
         }
         
         style placeholder-slot {
-            PreferredHeight = 1.2em;
+            PreferredHeight = 1cnt;
             AlignY = 50% ParentContentArea;
             AlignX = 0% ParentContentArea;
             TextColor = rgb(150, 150, 150);

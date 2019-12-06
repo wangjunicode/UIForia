@@ -15,32 +15,27 @@ namespace UIForia {
         
         [HideInInspector]
         public string applicationName = "Game App";
-        
-      
 
         public TemplateSettings GetTemplateSettings() {
             TemplateSettings settings = new TemplateSettings();
             settings.applicationName = applicationName;
             settings.assemblyName = "Assembly-CSharp";
             settings.outputPath = Path.Combine(UnityEngine.Application.dataPath, "UIForiaGenerated");
-            settings.codeFileExtension = "cs";
+            settings.codeFileExtension = "generated.cs";
             settings.preCompiledTemplatePath = "Assets/UIForia_Generated/" + applicationName;
             settings.templateResolutionBasePath = Path.Combine(UnityEngine.Application.dataPath);
             return settings;
         }
-        
-            // todo -- unbreak this!
             
         public void Start() {
             type = Type.GetType(typeName);
             if (type == null) return;
             // 1. creates the application
-            if (true || usePreCompiledTemplates) {
-                TemplateSettings settings = GetTemplateSettings();
-                // application = GameApplication.Create(settings, camera);
+            if (usePreCompiledTemplates) {
             }
             else {
-             //  application = GameApplication.Create(applicationName, type, camera);
+                TemplateSettings settings = GetTemplateSettings();
+                application = GameApplication.Create(type, settings, camera);
             }
 
             application.onElementRegistered += DoDependencyInjection;

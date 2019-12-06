@@ -21,7 +21,6 @@ namespace UIForia.Systems {
         public LayoutBoxFlags flags;
         public float cachedContentWidth;
         public float cachedContentHeight;
-        public LayoutType layoutBoxType;
 
         public int childCount;
         public UIElement element;
@@ -30,7 +29,6 @@ namespace UIForia.Systems {
         public AwesomeLayoutBox parent;
         public float transformX;
         public float transformY;
-        public float transformRotation;
         public ClipData clipData;
         public ClipBehavior clipBehavior;
         public int traversalIndex;
@@ -38,22 +36,24 @@ namespace UIForia.Systems {
 
         public void Initialize(UIElement element, int frameId) {
             this.element = element;
-
             OnInitialize();
         }
 
-        protected virtual void OnInitialize() { }
+        protected virtual void OnInitialize() {}
 
         public void Destroy() {
             OnDestroy();
             flags = 0;
             element = null;
-            parent = null;
             nextSibling = null;
             firstChild = null;
+            if (parent != null) {
+                parent.flags |= LayoutBoxFlags.GatherChildren;
+                parent = null;
+            }
         }
 
-        protected virtual void OnDestroy() { }
+        protected virtual void OnDestroy() {}
 
         protected abstract float ComputeContentWidth();
 
@@ -68,16 +68,20 @@ namespace UIForia.Systems {
                 firstChild = layoutBoxes[0];
                 firstChild.parent = this;
                 firstChild.element.layoutResult.layoutParent = result;
-                firstChild.nextSibling = null;
+                
+                for (int i = 0; i < layoutBoxes.size; i++) {
+                    layoutBoxes.array[i].parent = this;
+                    layoutBoxes.array[i].nextSibling = null;
+                    layoutBoxes.array[i].element.layoutResult.layoutParent = result;
+                }
+
                 AwesomeLayoutBox ptr = firstChild;
                 for (int i = 1; i < layoutBoxes.size; i++) {
-                    layoutBoxes.array[i].parent = this;
-                    layoutBoxes.array[i].element.layoutResult.layoutParent = result;
                     ptr.nextSibling = layoutBoxes.array[i];
                     ptr = ptr.nextSibling;
                 }
             }
-
+            
             OnChildrenChanged(layoutBoxes);
         }
 
@@ -193,7 +197,6 @@ namespace UIForia.Systems {
             if (newWidth != finalWidth) {
                 flags |= LayoutBoxFlags.RequireLayoutHorizontal;
                 flags |= LayoutBoxFlags.RecomputeClipping;
-                element.layoutHistory.AddLogEntry(LayoutDirection.Horizontal, frameId, LayoutReason.FinalSizeChanged, string.Empty);
                 finalWidth = newWidth;
             }
         }
@@ -254,13 +257,13 @@ namespace UIForia.Systems {
 
             UpdateContentAreaHeight();
 
-            if ((flags & LayoutBoxFlags.RequireAlignmentVertical) != 0 && !Mathf.Approximately(previousPosition, alignedPosition)) {
+            if ((flags & LayoutBoxFlags.RequireAlignmentVertical) == 0 && !Mathf.Approximately(previousPosition, alignedPosition)) {
                 flags |= LayoutBoxFlags.RequiresMatrixUpdate;
             }
 
             if (newHeight != finalHeight) {
                 flags |= LayoutBoxFlags.RequireLayoutVertical;
-                element.layoutHistory.AddLogEntry(LayoutDirection.Vertical, frameId, LayoutReason.FinalSizeChanged, string.Empty);
+              //  element.layoutHistory.AddLogEntry(LayoutDirection.Vertical, frameId, LayoutReason.FinalSizeChanged, string.Empty);
                 finalHeight = newHeight;
             }
         }
@@ -286,10 +289,11 @@ namespace UIForia.Systems {
             // todo -- try not to fuck with style here
             // todo -- view and em size
             Vector2 viewSize = element.View.Viewport.size;
-            baseVal += MeasurementUtil.ResolveFixedSize(width, viewSize.x, viewSize.y, 0, element.style.PaddingLeft);
-            baseVal += MeasurementUtil.ResolveFixedSize(width, viewSize.x, viewSize.y, 0, element.style.PaddingRight);
-            baseVal += MeasurementUtil.ResolveFixedSize(width, viewSize.x, viewSize.y, 0, element.style.BorderRight);
-            baseVal += MeasurementUtil.ResolveFixedSize(width, viewSize.x, viewSize.y, 0, element.style.BorderLeft);
+            float emSize = element.style.GetResolvedFontSize();
+            baseVal += MeasurementUtil.ResolveFixedSize(width, viewSize.x, viewSize.y, emSize, element.style.PaddingLeft);
+            baseVal += MeasurementUtil.ResolveFixedSize(width, viewSize.x, viewSize.y, emSize, element.style.PaddingRight);
+            baseVal += MeasurementUtil.ResolveFixedSize(width, viewSize.x, viewSize.y, emSize, element.style.BorderRight);
+            baseVal += MeasurementUtil.ResolveFixedSize(width, viewSize.x, viewSize.y, emSize, element.style.BorderLeft);
 
             if (baseVal < 0) baseVal = 0;
 
@@ -361,10 +365,12 @@ namespace UIForia.Systems {
             // todo -- try not to fuck with style here
             // todo -- view and em size
             Vector2 viewSize = element.View.Viewport.size;
-            baseVal += MeasurementUtil.ResolveFixedSize(width, viewSize.x, viewSize.y, 0, element.style.PaddingLeft);
-            baseVal += MeasurementUtil.ResolveFixedSize(width, viewSize.x, viewSize.y, 0, element.style.PaddingRight);
-            baseVal += MeasurementUtil.ResolveFixedSize(width, viewSize.x, viewSize.y, 0, element.style.BorderRight);
-            baseVal += MeasurementUtil.ResolveFixedSize(width, viewSize.x, viewSize.y, 0, element.style.BorderLeft);
+            float emSize = element.style.GetResolvedFontSize();
+
+            baseVal += MeasurementUtil.ResolveFixedSize(width, viewSize.x, viewSize.y, emSize, element.style.PaddingLeft);
+            baseVal += MeasurementUtil.ResolveFixedSize(width, viewSize.x, viewSize.y, emSize, element.style.PaddingRight);
+            baseVal += MeasurementUtil.ResolveFixedSize(width, viewSize.x, viewSize.y, emSize, element.style.BorderRight);
+            baseVal += MeasurementUtil.ResolveFixedSize(width, viewSize.x, viewSize.y, emSize, element.style.BorderLeft);
 
             if (baseVal < 0) baseVal = 0;
 
@@ -438,7 +444,6 @@ namespace UIForia.Systems {
             return false;
         }
 
-
         protected float ComputeBlockContentHeight(float value) {
             AwesomeLayoutBox ptr = parent;
             float paddingBorder = 0;
@@ -480,7 +485,6 @@ namespace UIForia.Systems {
             }
 
             while (ptr != null) {
-                
                 if (ptr.CanProvideVerticalBlockSize(this, out float blockSize)) {
                     // ignore padding on provided element
                     return Math.Max(0, blockSize * value);
@@ -584,9 +588,11 @@ namespace UIForia.Systems {
             element.layoutResult.margin.bottom = size.marginEnd;
         }
 
-        public virtual void OnStyleChanged(StructList<StyleProperty> propertyList) { }
+        public virtual void OnStyleChanged(StructList<StyleProperty> propertyList) {
+        }
 
-        public virtual void OnChildStyleChanged(AwesomeLayoutBox child, StructList<StyleProperty> propertyList) { }
+        public virtual void OnChildStyleChanged(AwesomeLayoutBox child, StructList<StyleProperty> propertyList) {
+        }
 
         public void MarkContentParentsHorizontalDirty(int frameId, LayoutReason reason) {
             AwesomeLayoutBox ptr = parent;
@@ -597,6 +603,8 @@ namespace UIForia.Systems {
 
                 // can't break out if already flagged for layout because parent of parent might not be and might be content sized
                 ptr.flags |= LayoutBoxFlags.RequireLayoutHorizontal;
+                ptr.cachedContentWidth = -1;
+
                 //  ptr.element.layoutHistory.AddLogEntry(LayoutDirection.Horizontal, frameId, reason);
                 if (stop) break;
                 ptr = ptr.parent;
@@ -612,6 +620,7 @@ namespace UIForia.Systems {
 
                 // can't break out if already flagged for layout because parent of parent might not be and might be content sized
                 ptr.flags |= LayoutBoxFlags.RequireLayoutVertical;
+                ptr.cachedContentHeight = -1;
                 //   ptr.element.layoutHistory.AddLogEntry(LayoutDirection.Vertical, frameId, reason);
                 if (stop) break;
                 ptr = ptr.parent;
@@ -647,37 +656,38 @@ namespace UIForia.Systems {
             return true;
         }
 
+        public void MarkForLayoutHorizontal(int frameId = -1) {
+            flags |= LayoutBoxFlags.RequireLayoutHorizontal;
+            MarkContentParentsHorizontalDirty(frameId, LayoutReason.StyleSizeChanged);
+        }
+        
+        public void MarkForLayoutVertical(int frameId = -1) {
+            flags |= LayoutBoxFlags.RequireAlignmentVertical;
+            MarkContentParentsVerticalDirty(frameId, LayoutReason.StyleSizeChanged);
+        }
+        
         public void UpdateBlockProviderWidth() {
             UIMeasurementUnit pref = element.style.PreferredWidth.unit;
             UIMeasurementUnit min = element.style.MinWidth.unit;
             UIMeasurementUnit max = element.style.MaxWidth.unit;
 
-            bool contentBased = (
-                pref == UIMeasurementUnit.Content ||
-                min == UIMeasurementUnit.Content ||
-                max == UIMeasurementUnit.Content
-            );
+            bool contentBased = (pref == UIMeasurementUnit.Content || min == UIMeasurementUnit.Content || max == UIMeasurementUnit.Content);
+            
+            bool intrinsic = (pref == UIMeasurementUnit.IntrinsicPreferred || min == UIMeasurementUnit.IntrinsicPreferred || max == UIMeasurementUnit.IntrinsicPreferred);
 
-            bool autoSized = (
-                pref == UIMeasurementUnit.Auto ||
-                min == UIMeasurementUnit.Auto ||
-                max == UIMeasurementUnit.Auto
-            );
+            bool autoSized = (pref == UIMeasurementUnit.Auto || min == UIMeasurementUnit.Auto || max == UIMeasurementUnit.Auto);
 
-            if (contentBased || (autoSized && parent != null && parent.IsAutoWidthContentBased())) {
+            if (contentBased  || intrinsic || (autoSized && parent != null && parent.IsAutoWidthContentBased())) {
                 flags &= ~LayoutBoxFlags.WidthBlockProvider;
             }
             else {
                 flags |= LayoutBoxFlags.WidthBlockProvider;
             }
+
         }
 
         public void UpdateBlockProviderHeight() {
-            bool contentBased = (
-                element.style.PreferredHeight.unit == UIMeasurementUnit.Content ||
-                element.style.MinHeight.unit == UIMeasurementUnit.Content ||
-                element.style.MaxHeight.unit == UIMeasurementUnit.Content
-            );
+            bool contentBased = (element.style.PreferredHeight.unit == UIMeasurementUnit.Content || element.style.MinHeight.unit == UIMeasurementUnit.Content || element.style.MaxHeight.unit == UIMeasurementUnit.Content);
 
             if (contentBased) {
                 flags &= ~LayoutBoxFlags.HeightBlockProvider;
@@ -755,11 +765,11 @@ namespace UIForia.Systems {
             cachedContentHeight = -1;
             finalWidth = -1;
             finalHeight = -1;
-            string boxName = GetType().ToString();
-            element.layoutHistory = element.layoutHistory ?? new LayoutHistory(element);
-            element.layoutHistory.AddLogEntry(LayoutDirection.Horizontal, -1, LayoutReason.Initialized, boxName);
-            element.layoutHistory.AddLogEntry(LayoutDirection.Vertical, -1, LayoutReason.Initialized, boxName);
+//            element.layoutHistory = element.layoutHistory ?? new LayoutHistory(element);
+//            element.layoutHistory.AddLogEntry(LayoutDirection.Horizontal, -1, LayoutReason.Initialized, boxName);
+//            element.layoutHistory.AddLogEntry(LayoutDirection.Vertical, -1, LayoutReason.Initialized, boxName);
             flags |= LayoutBoxFlags.RequireLayoutHorizontal | LayoutBoxFlags.RequireLayoutVertical | LayoutBoxFlags.RequiresMatrixUpdate;
+            
             if (element.style.LayoutBehavior == LayoutBehavior.Ignored) {
                 flags |= LayoutBoxFlags.Ignored;
             }
@@ -777,11 +787,31 @@ namespace UIForia.Systems {
         }
 
         internal void GetChildren(LightList<AwesomeLayoutBox> list) {
-            AwesomeLayoutBox ptr = firstChild;
-            while (ptr != null) {
-                list.Add(ptr);
-                ptr = ptr.nextSibling;
+            for (int i = 0; i < element.children.size; i++) {
+                var child = element.children.array[i];
+                if (!child.isEnabled) continue;
+                switch (child.style.LayoutBehavior) {
+                    case LayoutBehavior.Ignored:
+                        child.layoutBox.parent = this;
+                        child.layoutResult.layoutParent = element.layoutResult; // todo -- multiple ignore levels?
+                        // ignoredList.Add(child.layoutBox);
+                        break;
+                    case LayoutBehavior.TranscludeChildren:
+                        child.layoutBox.parent = this;
+                        child.layoutResult.layoutParent = element.layoutResult; // todo -- multiple ignore levels?
+                        child.layoutBox.GetChildren(list);
+                        break;
+                    default:
+                        list.Add(child.layoutBox);
+                        break;
+                }
             }
+
+            // AwesomeLayoutBox ptr = firstChild;
+            // while (ptr != null) {
+            //     list.Add(ptr);
+            //     ptr = ptr.nextSibling;
+            // }
         }
 
     }

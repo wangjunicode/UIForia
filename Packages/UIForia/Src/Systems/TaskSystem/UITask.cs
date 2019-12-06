@@ -7,7 +7,7 @@ namespace UIForia.Systems {
         private const UITaskState k_CanBeEnded = UITaskState.Pending | UITaskState.Restarting | UITaskState.Running | UITaskState.Paused;
 
         internal IUITaskRunner owner;
-        internal UITaskState state;
+        public UITaskState state { get; internal set; }
 
         public float StartTime { get; internal set; }
         public float RestartTime { get; internal set; }

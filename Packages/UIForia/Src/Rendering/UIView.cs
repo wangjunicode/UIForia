@@ -1,6 +1,7 @@
 using System;
 using UIForia.Elements;
 using UIForia.Layout;
+using UIForia.Rendering;
 using UIForia.Templates;
 using UIForia.Util;
 using UnityEngine;
@@ -64,6 +65,8 @@ public class UIView {
         this.visibleElements = new LightList<UIElement>(32);
         this.dummyRoot = new UIViewRootElement();
         this.dummyRoot.flags |= UIElementFlags.EnabledFlagSet;
+        this.dummyRoot.style = new UIStyleSet(dummyRoot);
+        this.dummyRoot.layoutResult = new LayoutResult(dummyRoot);
         this.dummyRoot.View = this;
         this.dummyRoot.children = new LightList<UIElement>(1);
         this.dummyRoot.AddChild(element);

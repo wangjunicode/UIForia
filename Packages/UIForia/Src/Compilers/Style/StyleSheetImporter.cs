@@ -15,7 +15,7 @@ namespace UIForia.Compilers.Style {
         private readonly Dictionary<string, StyleSheet> cachedStyleSheets;
         private readonly StyleSheetCompiler compiler;
         private int importedStyleGroupCount;
-        
+
         public StyleSheetImporter(string basePath) {
             this.basePath = basePath;
             this.compiler = new StyleSheetCompiler(this);
@@ -24,10 +24,10 @@ namespace UIForia.Compilers.Style {
         }
 
         public int ImportedStyleSheetCount => cachedStyleSheets.Count;
-        
+
         public int NextStyleGroupId => importedStyleGroupCount++;
 
-        public StyleSheet Import(in StyleDefinition styleDefinition) {
+        public StyleSheet Import(in StyleDefinition styleDefinition, bool storeContents = false) {
             string path = Path.Combine(basePath, styleDefinition.importPath);
 
             if (cachedStyleSheets.TryGetValue(path, out StyleSheet retn)) {
@@ -53,6 +53,8 @@ namespace UIForia.Compilers.Style {
             try {
                 sheet = compiler.Compile(path, StyleParser.Parse(contents));
                 if (sheet != null) {
+                    sheet.path = styleDefinition.importPath;
+                    sheet.source = storeContents ? contents : null;
                     cachedStyleSheets.Add(path, sheet);
                 }
             }
@@ -63,7 +65,7 @@ namespace UIForia.Compilers.Style {
             }
 
             currentlyImportingStylesheets.Remove(path);
-
+            
             return sheet;
         }
 
@@ -117,11 +119,13 @@ namespace UIForia.Compilers.Style {
 
         public StyleSheet[] GetImportedStyleSheets() {
             StyleSheet[] retn = new StyleSheet[cachedStyleSheets.Count];
-            
+
             foreach (KeyValuePair<string, StyleSheet> kvp in cachedStyleSheets) {
                 retn[kvp.Value.id] = kvp.Value;
             }
 
+            Array.Sort(retn, (a, b) => a.id - b.id);
+            
             return retn;
         }
 

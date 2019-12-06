@@ -401,6 +401,7 @@ namespace UIForia {
                 }
 
                 current.flags &= ~(UIElementFlags.Alive);
+                current.enableStateChangedFrameId = frameId;
                 current.OnDestroy();
                 toInternalDestroy.Add(current);
 
@@ -525,14 +526,15 @@ namespace UIForia {
             }
 
 
+            StructStack<ElemRef> stack = StructStack<ElemRef>.Get();
             // if element is now enabled we need to walk it's children
             // and set enabled ancestor flags until we find a self-disabled child
-            elemRefStack.array[elemRefStack.size++].element = element;
+            stack.array[stack.size++].element = element;
 
             // stack operations in the following code are inlined since this is a very hot path
-            while (elemRefStack.size > 0) {
+            while (stack.size > 0) {
                 // inline stack pop
-                UIElement child = elemRefStack.array[--elemRefStack.size].element;
+                UIElement child = stack.array[--stack.size].element;
 
                 child.flags |= UIElementFlags.AncestorEnabled;
 
@@ -563,13 +565,13 @@ namespace UIForia {
                     child.enableStateChangedFrameId = frameId;
                     UIElement[] children = child.children.array;
                     int childCount = child.children.size;
-                    if (elemRefStack.size + childCount >= elemRefStack.array.Length) {
-                        Array.Resize(ref elemRefStack.array, elemRefStack.size + childCount + 16);
+                    if (stack.size + childCount >= stack.array.Length) {
+                        Array.Resize(ref stack.array, stack.size + childCount + 16);
                     }
 
                     for (int i = childCount - 1; i >= 0; i--) {
                         // inline stack push
-                        elemRefStack.array[elemRefStack.size++].element = children[i];
+                        stack.array[stack.size++].element = children[i];
                     }
                 }
             }
@@ -577,6 +579,8 @@ namespace UIForia {
             for (int i = 0; i < m_Systems.Count; i++) {
                 m_Systems[i].OnElementEnabled(element);
             }
+            
+            StructStack<ElemRef>.Release(ref stack);
 
             onElementEnabled?.Invoke(element);
         }
@@ -597,12 +601,13 @@ namespace UIForia {
 
             // if element is now enabled we need to walk it's children
             // and set enabled ancestor flags until we find a self-disabled child
-            elemRefStack.array[elemRefStack.size++].element = element;
+            StructStack<ElemRef> stack = StructStack<ElemRef>.Get();
+            stack.array[stack.size++].element = element;
 
             // stack operations in the following code are inlined since this is a very hot path
-            while (elemRefStack.size > 0) {
+            while (stack.size > 0) {
                 // inline stack pop
-                UIElement child = elemRefStack.array[--elemRefStack.size].element;
+                UIElement child = stack.array[--stack.size].element;
 
                 child.flags &= ~(UIElementFlags.AncestorEnabled);
 
@@ -632,13 +637,13 @@ namespace UIForia {
                 if (!child.isEnabled) {
                     UIElement[] children = child.children.array;
                     int childCount = child.children.size;
-                    if (elemRefStack.size + childCount >= elemRefStack.array.Length) {
-                        Array.Resize(ref elemRefStack.array, elemRefStack.size + childCount + 16);
+                    if (stack.size + childCount >= stack.array.Length) {
+                        Array.Resize(ref stack.array, stack.size + childCount + 16);
                     }
 
                     for (int i = childCount - 1; i >= 0; i--) {
                         // inline stack push
-                        elemRefStack.array[elemRefStack.size++].element = children[i];
+                        stack.array[stack.size++].element = children[i];
                     }
                 }
             }
@@ -648,6 +653,8 @@ namespace UIForia {
                 element.flags |= UIElementFlags.AncestorEnabled;
             }
 
+            StructStack<ElemRef>.Release(ref stack);
+            
             for (int i = 0; i < m_Systems.Count; i++) {
                 m_Systems[i].OnElementDisabled(element);
             }
@@ -698,15 +705,19 @@ namespace UIForia {
         }
 
         public AnimationTask Animate(UIElement element, AnimationData animation) {
-            return m_AnimationSystem.Animate(element, animation);
+            return m_AnimationSystem.Animate(element, ref animation);
         }
 
         public void PauseAnimation(UIElement element, AnimationData animationData) {
-            m_AnimationSystem.PauseAnimation(element, animationData);
+            m_AnimationSystem.PauseAnimation(element, ref animationData);
+        }
+
+        public void ResumeAnimation(UIElement element, AnimationData animationData) {
+            m_AnimationSystem.ResumeAnimation(element, ref animationData);
         }
 
         public void StopAnimation(UIElement element, AnimationData animationData) {
-            m_AnimationSystem.StopAnimation(element, animationData);
+            m_AnimationSystem.StopAnimation(element, ref animationData);
         }
 
         public UIView[] GetViews() {
@@ -788,7 +799,7 @@ namespace UIForia {
 
                 if ((current.flags & UIElementFlags.Created) == 0) {
                     current.flags |= UIElementFlags.Created;
-                    current.style.Initialize();
+//                    current.style.Initialize();
                     for (int i = 0; i < m_Systems.Count; i++) {
                         m_Systems[i].OnElementCreated(current);
                     }

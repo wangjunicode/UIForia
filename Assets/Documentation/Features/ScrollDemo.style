@@ -13,21 +13,20 @@ style level-0 {
 
 style <Text> {
     TextColor = rgba(9, 8, 9, 255);
-    PreferredWidth = 400px;
 }
 
 style p {
     PreferredWidth = 400px;
-    TextFontSize = 15;
+    TextFontSize = 18;
     TextFontAsset = @theme.fontGothamLight;
-    TextFaceDilate = 0;
+    TextFaceDilate = 0.5;
 }
 
 style level-1 {
-    PreferredSize = 1350px;
+    // PreferredSize = 1350px;
   //  BackgroundColor = green;
     FlexLayoutDirection = Horizontal;
-    TextFontSize = 1.4em;
+    TextFontSize = 28px;
 }
 
 style level-2-a {
@@ -64,7 +63,7 @@ style button {
     Border = 2px;
     BorderColor = black;
     TextColor = white;
-    PreferredSize = 200px 60px;
+    PreferredSize = 1cnt 1cnt;
     Padding = 10px 40px;
     Margin = 10px;
     BackgroundColor = rgba(190, 80, 80, 240);

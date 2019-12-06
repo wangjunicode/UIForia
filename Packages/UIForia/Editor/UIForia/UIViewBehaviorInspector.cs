@@ -16,8 +16,10 @@ namespace UIForia.Editor {
 
         private Type[] types;
         private string[] names;
+        private bool didEnable;
         
         public void OnEnable() {
+            didEnable = true;
             LightList<ProcessedType> typeData = TypeProcessor.GetTemplateTypes();
 
             List<Type> validTypes = new List<Type>();
@@ -37,7 +39,6 @@ namespace UIForia.Editor {
         }
         
         public override void OnInspectorGUI() {
-//            base.OnInspectorGUI();
             serializedObject.Update();
             UIViewBehavior behavior = (UIViewBehavior) target;
             string typeName = serializedObject.FindProperty("typeName").stringValue;
@@ -51,6 +52,7 @@ namespace UIForia.Editor {
             EditorGUILayout.PrefixLabel("Root Template");
 
             if (types == null || types.Length == 0) {
+                if(!didEnable) OnEnable();
                 EditorGUILayout.EndHorizontal();
                 return;
             }

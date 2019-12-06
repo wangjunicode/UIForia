@@ -1,5 +1,5 @@
-﻿﻿fileFormatVersion: 2
-guid: b22f52915c22888438f0e65d68162428
+fileFormatVersion: 2
+guid: 039232b894d806a4b996d7430286e0a0
 TrueTypeFontImporter:
   externalObjects: {}
   serializedVersion: 4
@@ -8,8 +8,9 @@ TrueTypeFontImporter:
   characterSpacing: 0
   characterPadding: 1
   includeFontData: 1
-  fontName: 
-  fontNames: []
+  fontName: Digital dream Fat
+  fontNames:
+  - Digital dream Fat
   fallbackFontReferences: []
   customCharacters: 
   fontRenderingMode: 0

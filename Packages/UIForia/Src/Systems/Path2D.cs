@@ -72,7 +72,8 @@ namespace UIForia.Rendering {
             }
         }
 
-        public void SetUVTransform() { }
+        public void SetUVTransform() {
+        }
 
         public void SetStroke(in Color color) {
             currentStrokeStyle.encodedColor = VertigoUtil.ColorToFloat(color);
@@ -175,11 +176,6 @@ namespace UIForia.Rendering {
         private int lastShapeCount = -1;
 
         internal void UpdateGeometry() {
-            //if (!requiresGeometryUpdate) return;
-            //if (lastShapeCount != shapeList.size) {
-            //    
-            //}
-
             geometry.Clear(); // todo -- can be optimized for adding / updating only
 
             SVGXDrawCall2[] drawCalls = drawCallList.array;
@@ -228,7 +224,6 @@ namespace UIForia.Rendering {
             }
         }
 
-
         private static float EncodeCornerRadii(float width, float height, Vector2 top, Vector2 bottom) {
             float min = math.min(width, height);
 
@@ -254,7 +249,8 @@ namespace UIForia.Rendering {
             return VertigoUtil.BytesToFloat(b0, b1, b2, b3);
         }
 
-        private void GenerateShadowStrokeGeometry() { }
+        private void GenerateShadowStrokeGeometry() {
+        }
 
         private void GenerateStrokeGeometry(ref ShapeDef shape, in SVGXStrokeStyle strokeStyle) {
             float strokeWidth = strokeStyle.strokeWidth;
@@ -486,7 +482,7 @@ namespace UIForia.Rendering {
                     objectData.geometryRange = GeometryGenerator.FillRect(geometry, position.x, position.y, size.x, size.y);
 //                    Vector2 pivot = new Vector2(position.x + (size.x * 0.5f), -(position.y + (size.y * 0.5f)));
                     float rotation = pointList.array[shape.pointRange.start + 1].position.x;
-                    
+
                     for (int i = objectData.geometryRange.vertexStart; i < objectData.geometryRange.vertexEnd; i++) {
                         geometry.texCoordList1.array[i] = new Vector4(angleAndWidth.x, angleAndWidth.y, rotation, 0);
                     }
@@ -660,6 +656,8 @@ namespace UIForia.Rendering {
 
         public void SetDepthState(in DepthState? depthState) {
             renderStateChanged = true;
+
+
             if (!depthState.HasValue) {
                 currentFixedRenderState.depthState = DepthState.Default;
             }
@@ -670,6 +668,8 @@ namespace UIForia.Rendering {
 
         public void SetBlendState(in BlendState? blendState) {
             renderStateChanged = true;
+
+
             if (!blendState.HasValue) {
                 currentFixedRenderState.blendState = BlendState.Default;
             }

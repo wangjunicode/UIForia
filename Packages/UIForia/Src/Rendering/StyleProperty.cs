@@ -323,7 +323,6 @@ namespace UIForia.Rendering {
         public RenderLayer AsRenderLayer => (RenderLayer) int0;
         public Texture2D AsTexture2D => (Texture2D) objectField;
         public GridLayoutDensity AsGridLayoutDensity => (GridLayoutDensity) int0;
-        public TransformBehavior AsTransformBehavior => (TransformBehavior) int0;
         public LayoutType AsLayoutType => (LayoutType) int0;
         public TextTransform AsTextTransform => (TextTransform) int0;
         public LayoutBehavior AsLayoutBehavior => (LayoutBehavior) int0;

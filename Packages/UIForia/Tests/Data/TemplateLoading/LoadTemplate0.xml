@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <UITemplate>
     <Style>
-        style style-one {}
+        style style-one {
+            PreferredWidth = 300px;    
+        }
         
         style style-two {}
     </Style>
@@ -13,9 +15,11 @@
         <Text>I am text</Text>
 
         <LoadTemplateHydrate if="refTypeThing.intVal > 145"
+                             style="style-one style-two  {'style-three' + floatVal}"
+                             mouse:down="HandleMouseDown($evt)"
+                             mouse:up="HandleMouseDown(2)"
                              ctxvar:ctxVar0.once="14244"
                              ctxvar:ctxVar1.once="144"
-                             style="style-one style-two {'style-three' + floatVal}"
                              attr:nonconst="{computed}"
                              attr:first="true"
                              attr:some-attr="this-is-attr"

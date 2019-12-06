@@ -149,15 +149,15 @@ namespace UIForia.Elements {
             optionList = FindById<UIElement>("option-list");
 
             Application.InputSystem.RegisterFocusable(this);
-
-            UIElement potentialClippingParent = parent;
-            while (clippingElement == null) {
-                if (potentialClippingParent == View.RootElement || potentialClippingParent.style.OverflowY != Overflow.Visible) {
-                    clippingElement = potentialClippingParent;
-                }
-
-                potentialClippingParent = potentialClippingParent.parent;
-            }
+//
+//            UIElement potentialClippingParent = parent;
+//            while (clippingElement == null) {
+//                if (potentialClippingParent == View.RootElement || potentialClippingParent.style.OverflowY != Overflow.Visible) {
+//                    clippingElement = potentialClippingParent;
+//                }
+//
+//                potentialClippingParent = potentialClippingParent.parent;
+//            }
 
             if (disabled) {
                 SetAttribute("disabled", disabledAttributeValue);
@@ -372,13 +372,13 @@ namespace UIForia.Elements {
         }
 
         public void AdjustOptionPosition() {
-            float offset = 0;
-            float maxOffset = layoutResult.screenPosition.y - clippingElement.layoutResult.screenPosition.y;
-            float minOffset = optionList.layoutResult.screenPosition.y - optionList.style.TransformPositionY.value + optionList.layoutResult.AllocatedHeight - (clippingElement.layoutResult.screenPosition.y + clippingElement.layoutResult.AllocatedHeight);
-            UIElement[] childrenArray = childrenElement.children.Array;
-            for (int i = 0; i < selectedIndex; i++) {
-                offset += childrenArray[i].layoutResult.ActualHeight;
-            }
+//            float offset = 0;
+//            float maxOffset = layoutResult.screenPosition.y - clippingElement.layoutResult.screenPosition.y;
+//            float minOffset = optionList.layoutResult.screenPosition.y - optionList.style.TransformPositionY.value + optionList.layoutResult.AllocatedHeight - (clippingElement.layoutResult.screenPosition.y + clippingElement.layoutResult.AllocatedHeight);
+//            UIElement[] childrenArray = childrenElement.children.Array;
+//            for (int i = 0; i < selectedIndex; i++) {
+//                offset += childrenArray[i].layoutResult.ActualHeight;
+//            }
 
             // optionList.style.SetTransformPositionY(-Math.Min(maxOffset, Math.Max(offset, minOffset)), StyleState.Normal);
         }

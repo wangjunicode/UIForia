@@ -818,34 +818,38 @@ namespace UIForia.Compilers.Style {
                                 throw new CompileException(context.fileName, trackSize, $"Had a hard time parsing that track size: {trackSize}. grow() must have two or three arguments.");
                             }
 
+                            StyleASTNode arg0 = context.GetValueForReference(functionNode.children[0]);
+                            StyleASTNode arg1 = context.GetValueForReference(functionNode.children[1]);
+
+                            cellDefinition.baseSize = MapGridCellSize(arg0, context);
+                            if (cellDefinition.baseSize.unit == GridTemplateUnit.FractionalRemaining) {
+                                throw new CompileException(context.fileName, trackSize, $"You have an error in your {trackSize}. The base size cannot be fr.");
+                            }
+
+                            cellDefinition.shrinkFactor = 0;
+                            cellDefinition.shrinkLimit.value = 0;
+                            cellDefinition.shrinkLimit.unit = GridTemplateUnit.Pixel;
+
+                            GridCellSize secondArgSize = MapGridCellSize(arg1, context);
+
                             if (functionNode.children.Count == 2) {
-                                StyleASTNode arg0 = context.GetValueForReference(functionNode.children[0]);
-                                StyleASTNode arg1 = context.GetValueForReference(functionNode.children[1]);
-
-                                cellDefinition.baseSize = MapGridCellSize(arg0, context);
-
-                                cellDefinition.growFactor = 1;
-                                cellDefinition.growLimit = MapGridCellSize(arg1, context);
-
-                                cellDefinition.shrinkFactor = 0;
-                                cellDefinition.shrinkLimit.value = 0;
-                                cellDefinition.shrinkLimit.unit = GridTemplateUnit.Pixel;
+                                
+                                if (secondArgSize.unit == GridTemplateUnit.FractionalRemaining) {
+                                    cellDefinition.growFactor = (int) secondArgSize.value;
+                                    cellDefinition.growLimit = new GridCellSize(float.MaxValue, GridTemplateUnit.Pixel);
+                                }
+                                else {
+                                    cellDefinition.growFactor = 1;
+                                    cellDefinition.growLimit = secondArgSize;
+                                }
 
                                 return new GridTrackSize(cellDefinition);
                             }
                             else {
-                                StyleASTNode arg0 = context.GetValueForReference(functionNode.children[0]);
-                                StyleASTNode arg1 = context.GetValueForReference(functionNode.children[1]);
-                                StyleASTNode arg2 = context.GetValueForReference(functionNode.children[1]);
+                                StyleASTNode arg2 = context.GetValueForReference(functionNode.children[2]);
 
-                                cellDefinition.baseSize = MapGridCellSize(arg0, context);
-
-                                cellDefinition.growLimit = MapGridCellSize(arg1, context);
+                                cellDefinition.growLimit = secondArgSize;
                                 cellDefinition.growFactor = (int) MapNumber(arg2, context);
-
-                                cellDefinition.shrinkFactor = 0;
-                                cellDefinition.shrinkLimit.value = 0;
-                                cellDefinition.shrinkLimit.unit = GridTemplateUnit.Pixel;
 
                                 return new GridTrackSize(cellDefinition);
                             }

@@ -13,7 +13,11 @@ namespace UIForia.Parsing.Expressions {
         Style = 1 << 4,
         Attribute = 1 << 5,
         Event = 1 << 6,
-        Conditional = 1 << 7
+        Conditional = 1 << 7,
+        Mouse = 1 << 8,
+        Key = 1 << 9,
+        Controller = 1 << 10,
+        Touch = 1 << 11
 
     }
 

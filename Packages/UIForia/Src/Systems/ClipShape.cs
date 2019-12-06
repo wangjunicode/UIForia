@@ -12,58 +12,58 @@ using ShapeType = Vertigo.ShapeType;
 
 namespace UIForia.Rendering {
 
-    public class Polygon {
-
-        public StructList<Vector2> pointList;
-
-        public Polygon() {
-            this.pointList = new StructList<Vector2>();
-        }
-
-        public Polygon Clip(Polygon subject) {
-            Polygon retn = new Polygon();
-            retn.pointList = new StructList<Vector2>();
-            SutherlandHodgman.GetIntersectedPolygon(subject.pointList, pointList, ref retn.pointList);
-            return retn;
-        }
-
-        public Rect GetBounds() {
-            float minX = float.MaxValue;
-            float minY = float.MaxValue;
-            float maxX = float.MinValue;
-            float maxY = float.MinValue;
-            for (int i = 0; i < pointList.size; i++) {
-                Vector2 point = pointList.array[i];
-                if (point.x < minX) minX = point.x;
-                if (point.x > maxX) maxX = point.x;
-                if (point.y < minY) minY = point.y;
-                if (point.y > maxY) maxY = point.y;
-            }
-
-            return new Rect(minX, minY, maxX - minX, maxY - minY);
-        }
-
-        public void Rotate(float angle) {
-            Rect bounds = GetBounds();
-            Vector2 pivot = bounds.center;
-
-            for (int i = 0; i < pointList.size; i++) {
-                pointList[i] = pointList[i].Rotate(pivot, angle);
-            }
-        }
-
-        public Polygon GetScreenRect() {
-            Polygon retn = new Polygon();
-            Rect bounds = GetBounds();
-            retn.pointList = new StructList<Vector2>();
-            retn.pointList.Add(new Vector2(bounds.x, bounds.y));
-            retn.pointList.Add(new Vector2(bounds.xMax, bounds.y));
-            retn.pointList.Add(new Vector2(bounds.xMax, bounds.yMax));
-            retn.pointList.Add(new Vector2(bounds.x, bounds.yMax));
-            return retn;
-        }
-
-    }
+//    public class Polygon {
+//
+//        public StructList<Vector2> pointList;
+//
+//        public Polygon() {
+//            this.pointList = new StructList<Vector2>();
+//        }
+//
+//        public Polygon Clip(Polygon subject) {
+//            Polygon retn = new Polygon();
+//            retn.pointList = new StructList<Vector2>();
+//            SutherlandHodgman.GetIntersectedPolygon(subject.pointList, pointList, ref retn.pointList);
+//            return retn;
+//        }
+//
+//        public Rect GetBounds() {
+//            float minX = float.MaxValue;
+//            float minY = float.MaxValue;
+//            float maxX = float.MinValue;
+//            float maxY = float.MinValue;
+//            for (int i = 0; i < pointList.size; i++) {
+//                Vector2 point = pointList.array[i];
+//                if (point.x < minX) minX = point.x;
+//                if (point.x > maxX) maxX = point.x;
+//                if (point.y < minY) minY = point.y;
+//                if (point.y > maxY) maxY = point.y;
+//            }
+//
+//            return new Rect(minX, minY, maxX - minX, maxY - minY);
+//        }
+//
+//        public void Rotate(float angle) {
+//            Rect bounds = GetBounds();
+//            Vector2 pivot = bounds.center;
+//
+//            for (int i = 0; i < pointList.size; i++) {
+//                pointList[i] = pointList[i].Rotate(pivot, angle);
+//            }
+//        }
+//
+//        public Polygon GetScreenRect() {
+//            Polygon retn = new Polygon();
+//            Rect bounds = GetBounds();
+//            retn.pointList = new StructList<Vector2>();
+//            retn.pointList.Add(new Vector2(bounds.x, bounds.y));
+//            retn.pointList.Add(new Vector2(bounds.xMax, bounds.y));
+//            retn.pointList.Add(new Vector2(bounds.xMax, bounds.yMax));
+//            retn.pointList.Add(new Vector2(bounds.x, bounds.yMax));
+//            return retn;
+//        }
+//
+//    }
 
     public class ClipShape {
 

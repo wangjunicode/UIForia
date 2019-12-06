@@ -383,6 +383,11 @@ namespace UIForia.Compilers {
                 throw new InvalidArgumentException("Return expects a null value because the signature of the currently compiled function expects a void return value");
             }
 
+            if (returnType == typeof(void)) {
+                AddStatement(ExitSection());
+                return;
+            }
+
             Return(ExpressionParser.Parse(input));
         }
 
@@ -1414,6 +1419,9 @@ namespace UIForia.Compilers {
 
         private Expression ResolveAlias(string aliasName) {
             if (resolveAlias == null) {
+                if (parent.resolveAlias != null) {
+                    return parent.resolveAlias(aliasName, this);
+                }
                 throw CompileException.MissingAliasResolver(aliasName);
             }
 

@@ -7,7 +7,9 @@ using UIForia.Compilers;
 using UIForia.Compilers.Style;
 using UIForia.Elements;
 using UIForia.Rendering;
+using UIForia.Util;
 using UnityEditor;
+using UnityEngine;
 
 namespace UIForia {
 
@@ -21,12 +23,27 @@ namespace UIForia {
         public override void LoadTemplates() {
             Assembly assembly = AppDomain.CurrentDomain.GetAssemblyByName(templateSettings.assemblyName);
             Type type = assembly.GetType("UIForia.Generated.UIForiaGeneratedTemplates_" + templateSettings.StrippedApplicationName);
+
             try {
                 ITemplateLoader loader = (ITemplateLoader) Activator.CreateInstance(type);
+                string[] files = loader.StyleFilePaths;
+
+                styleImporter.Reset(); // reset because in testing we will already have parsed files, nuke these
+
+                LightList<UIStyleGroupContainer> styleList = new LightList<UIStyleGroupContainer>(128);
+
+                for (int i = 0; i < files.Length; i++) {
+                    StyleSheet sheet = styleImporter.ImportStyleSheetFromFile(files[i]);
+                    styleList.EnsureAdditionalCapacity(sheet.styleGroupContainers.Length);
+                    for (int j = 0; j < sheet.styleGroupContainers.Length; j++) {
+                        styleList.array[styleList.size++] = sheet.styleGroupContainers[j];
+                    }
+                }
                 templates = loader.LoadTemplates();
                 slots = loader.LoadSlots();
                 bindings = loader.LoadBindings();
-                templateMetaData = loader.LoadTemplateMetaData();
+                templateMetaData = loader.LoadTemplateMetaData(styleList.array);
+
                 for (int i = 0; i < templateMetaData.Length; i++) {
                     templateMetaData[i].compiledTemplateData = this;
                 }
@@ -50,20 +67,55 @@ namespace UIForia {
                 GenerateTemplateCode(path, i, extension);
             }
 
+            StyleSheet[] sheets = styleImporter.GetImportedStyleSheets();
+            
+            string styleFilePathArray = "";
+            
+            if (sheets.Length > 0) {
+                string streamingAssetPath = Path.Combine(UnityEngine.Application.dataPath, "StreamingAssets", "UIForia", templateSettings.StrippedApplicationName);
+
+                if (Directory.Exists(streamingAssetPath)) {
+                    Directory.Delete(streamingAssetPath, true);
+                }
+
+                Directory.CreateDirectory(streamingAssetPath);
+
+                for (int i = 0; i < sheets.Length; i++) {
+                    string filepath = Path.Combine(streamingAssetPath, sheets[i].path);
+                    string directory = Path.GetDirectoryName(filepath);
+                    if (!Directory.Exists(directory)) {
+                        Directory.CreateDirectory(directory);
+                    }
+
+                    styleFilePathArray += s_Indent12 + "@\"" + filepath + "\",\n";
+                    
+                    File.WriteAllText(filepath, sheets[i].source);
+                }
+            }
+            
+            
+
             string loadFn = @"
 using System;
 using UIForia.Compilers;
 using UIForia.Elements;
+using UIForia.Compilers.Style;
 
 namespace UIForia.Generated {
 
     public partial class UIForiaGeneratedTemplates_::APPNAME:: : ITemplateLoader {
         
+        public string[] StyleFilePaths => styleFilePaths;
+
+        private string[] styleFilePaths = {
+::STYLE_FILE_PATHS::
+        };
+
         public Func<UIElement, TemplateScope2, UIElement>[] LoadTemplates() {
             ::TEMPLATE_CODE::
         }
 
-        public TemplateMetaData[] LoadTemplateMetaData() {
+        public TemplateMetaData[] LoadTemplateMetaData(UIStyleGroupContainer[] styleMap) {
             ::TEMPLATE_META_CODE::
         }
 
@@ -79,6 +131,8 @@ namespace UIForia.Generated {
 
 }".Trim();
 
+            loadFn = loadFn.Replace("::STYLE_FILE_PATHS::", styleFilePathArray);
+            
             loadFn = loadFn.Replace("::APPNAME::", templateSettings.StrippedApplicationName);
 
             // Print Template Code
@@ -100,7 +154,7 @@ namespace UIForia.Generated {
             builder.AppendLine($"{s_Indent12}{nameof(TemplateMetaData)} template;");
 
             for (int i = 0; i < compiledTemplates.size; i++) {
-                builder.AppendLine($"{s_Indent12}template = new {nameof(TemplateMetaData)}({compiledTemplates[i].templateId}, \"{compiledTemplates[i].filePath}\", null);");
+                builder.AppendLine($"{s_Indent12}template = new {nameof(TemplateMetaData)}({compiledTemplates[i].templateId}, \"{compiledTemplates[i].filePath}\", styleMap, null);");
                 // todo -- reference style ids
                 // todo -- maybe other references?
                 // referencedStyles[0] = new StyleReference(styleSheets[4], "alias");
@@ -170,7 +224,6 @@ namespace UIForia.Generated {
             for (int i = 0; i < styleSheet.styleGroupContainers.Length; i++) {
                 SerializeStyleGroup(builder, styleSheet.styleGroupContainers[i]);
             }
-            
         }
 
         private void SerializeStyleGroup(StringBuilder builder, UIStyleGroupContainer groupContainer) {
@@ -182,26 +235,24 @@ public UIStyleGroupContainer Style_::GUID::() {
 }".Replace("::GUID::", groupContainer.guid.ToString());
             StringBuilder fnBuilder = new StringBuilder(512);
             fnBuilder.AppendLine("retn = new UIStyleGroupContainer();");
-            
+
             for (int i = 0; i < groupContainer.groups.Count; i++) {
                 fnBuilder.AppendLine($"group = new {nameof(UIStyleGroup)}()");
                 UIStyleGroup group = groupContainer.groups[i];
                 fnBuilder.AppendLine($"runCommand = new {nameof(UIStyleRunCommand)}()");
-                
-                for (int j = 0; j < group.normal.style.PropertyCount; j++) { 
+
+                for (int j = 0; j < group.normal.style.PropertyCount; j++) {
                     // todo -- need to serialize all this somehow into code
                     // or need to parse styles in exactly the same order as originally done so the ids match
                     // or stringify the contents directly into code and parse that in order. 
                 }
-                
+
                 fnBuilder.AppendLine($"style = new {nameof(UIStyle)}[{group.normal.style.PropertyCount}]");
-                
             }
-            
+
             builder.AppendLine(styleTemplate.Replace("::STYLE_CODE::", fnBuilder.ToString()));
-            
         }
-        
+
         private void GenerateTemplateCode(string path, int i, string extension) {
             string file = Path.Combine(path, Path.ChangeExtension(compiledTemplates.array[i].filePath, extension));
             Directory.CreateDirectory(Path.GetDirectoryName(file));

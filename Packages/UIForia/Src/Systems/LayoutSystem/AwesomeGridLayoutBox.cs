@@ -300,7 +300,7 @@ namespace UIForia.Systems {
                 case GridTemplateUnit.MaxContent:
                     return -1;
                 default:
-                    throw new ArgumentOutOfRangeException();
+                    throw new ArgumentOutOfRangeException(cellSize.unit.ToString());
             }
         }
 

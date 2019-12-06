@@ -1,15 +1,40 @@
-﻿using UIForia.Elements;
+﻿using System;
+using UIForia.Elements;
 using UnityEngine;
 
 namespace UIForia.UIInput {
+
+    public struct GenericInputEventHandler {
+
+        public readonly InputEventType type;
+        public readonly KeyboardModifiers modifiers;
+        public readonly Action<GenericInputEvent> handler;
+
+    }
+    
+    public struct GenericInputEvent {
+
+        public readonly InputEventType type;
+        public readonly KeyboardModifiers modifiers;
+        public readonly EventPropagator source;
+        
+        public char character;
+        public KeyCode keyCode;
+        public bool isFocused;
+        
+        public MouseInputEvent AsMouseInputEvent => new MouseInputEvent(source, type, modifiers);
+        
+        public KeyboardInputEvent AsKeyInputEvent => new KeyboardInputEvent(type, keyCode, character, modifiers, isFocused);
+
+    }
 
     public struct MouseInputEvent {
 
         public readonly InputEventType type;
         public readonly KeyboardModifiers modifiers;
-        
+
         private readonly EventPropagator source;
-        
+
         public MouseInputEvent(EventPropagator source, InputEventType type, KeyboardModifiers modifiers) {
             this.source = source;
             this.type = type;
@@ -19,7 +44,7 @@ namespace UIForia.UIInput {
         public void Consume() {
             source.isConsumed = true;
         }
-        
+
         public void StopPropagation() {
             source.shouldStopPropagation = true;
         }
@@ -27,7 +52,7 @@ namespace UIForia.UIInput {
         public UIElement Origin => source.origin;
 
         public bool IsConsumed => source.isConsumed;
-        
+
         public bool Alt => (modifiers & KeyboardModifiers.Alt) != 0;
 
         public bool Shift => (modifiers & KeyboardModifiers.Shift) != 0;
@@ -51,14 +76,14 @@ namespace UIForia.UIInput {
         public bool IsMouseRightDown => source.mouseState.isRightMouseDown;
         public bool IsMouseRightDownThisFrame => source.mouseState.isRightMouseDownThisFrame;
         public bool IsMouseRightUpThisFrame => source.mouseState.isRightMouseUpThisFrame;
-        
+
         public bool IsMouseMiddleDown => source.mouseState.isMiddleMouseDown;
         public bool IsMouseMiddleDownThisFrame => source.mouseState.isMiddleMouseDownThisFrame;
         public bool IsMouseMiddleUpThisFrame => source.mouseState.isMiddleMouseUpThisFrame;
 
         public bool IsDoubleClick => source.mouseState.isDoubleClick;
         public bool IsTripleClick => source.mouseState.isTripleClick;
-        
+
         public Vector2 ScrollDelta => source.mouseState.scrollDelta;
 
         public Vector2 MousePosition => source.mouseState.mousePosition;
@@ -67,7 +92,7 @@ namespace UIForia.UIInput {
         public Vector2 RightMouseDownPosition => source.mouseState.rightMouseButtonState.downPosition;
         public Vector2 MiddleMouseDownPosition => source.mouseState.middleMouseButtonState.downPosition;
         public Vector2 DragDelta => source.mouseState.MouseDelta;
-        
+
     }
 
 }

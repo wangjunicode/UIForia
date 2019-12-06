@@ -14,27 +14,27 @@ tags:
 Alignments change the position of elements after they have been laid out. You can adjust an element's
 position by absolute `px`, relative `%` and more. Here's a list of all units:
 
-OffsetMeasurementUnit  | Description
-----------------------:|:----------------------------------------------
- px | just plain pixels
- em | the current font-size 
- w  | the **actual width** of the element, contains the element's margin
- h  | the **actual height** of the element, contains the element's margin
- alw | the **allocated width**, which the element could grow into
- alh | the **allocated height**, which the element could grow into
- cw | the element's **content width**, which is the space the element's children take up **excluding** their **margin**
- ch | the element's **content height**, which is the space the element's children take up **excluding** their **margin**
- caw | the element's **content area width**, which is the space the element's children take up **including** their **margin**
- cah | the element's **content area height**, which is the space the element's children take up **including** their **margin**
- pw | the width of the parent, **includes** its **padding** and **border**
- ph | the height of the parent, **includes** its **padding** and **border**
- pcaw | the width of the parent's content area, **excludes** its **padding** and **border**
- pcah | the height of the parent's content area, **excludes** its **padding** and **border**
- vw | the width of the view the element is in
- vh | the height of the view the element is in
- sw | the application's screen width
- sh | the application's screen height
- %  | a value between 0 and 100, relative to the property it is used for 
+| OffsetMeasurementUnit | Description                                                                                                             |
+|----------------------:|:------------------------------------------------------------------------------------------------------------------------|
+|                    px | just plain pixels                                                                                                       |
+|                    em | the current font-size                                                                                                   |
+|                     w | the **actual width** of the element, contains the element's margin                                                      |
+|                     h | the **actual height** of the element, contains the element's margin                                                     |
+|                   alw | the **allocated width**, which the element could grow into                                                              |
+|                   alh | the **allocated height**, which the element could grow into                                                             |
+|                    cw | the element's **content width**, which is the space the element's children take up **excluding** their **margin**       |
+|                    ch | the element's **content height**, which is the space the element's children take up **excluding** their **margin**      |
+|                   caw | the element's **content area width**, which is the space the element's children take up **including** their **margin**  |
+|                   cah | the element's **content area height**, which is the space the element's children take up **including** their **margin** |
+|                    pw | the width of the parent, **includes** its **padding** and **border**                                                    |
+|                    ph | the height of the parent, **includes** its **padding** and **border**                                                   |
+|                  pcaw | the width of the parent's content area, **excludes** its **padding** and **border**                                     |
+|                  pcah | the height of the parent's content area, **excludes** its **padding** and **border**                                    |
+|                    vw | the width of the view the element is in                                                                                 |
+|                    vh | the height of the view the element is in                                                                                |
+|                    sw | the application's screen width                                                                                          |
+|                    sh | the application's screen height                                                                                         |
+|                     % | a value between 0 and 100, relative to the property it is used for                                                      |
 
 Except for `px` and `%` all units expect the fractional notation. `0.5w` is 50% of the actual width for example.
 
@@ -42,16 +42,20 @@ Below you'll find all alignment style properties explained. Open the the [UIFori
 to try out a live demo. You'll find it under the menu item `Alignment Demo`.
 
 ## AlignmentTarget
+```
+AlignmentTarget[X|Y] = *AlignmentTarget ...
+```
+ 
 The AlignmentTarget properties define the box, which the AlignmentOrigin will be relative to.
 Here's a list currently supported targets:
 
-AlignmentTarget   | Description
-----------------: | :---------------------------------------------------------
-LayoutBox         | (default) The origin will be relative to the element's [layout box](/docs/layout/#layoutbox-and-allocated-size)
-Parent            | the parent's box includes the parent's border and padding
-ParentContentArea | the parent's content area is the space inside the padding, the [content box](/docs/layout/#box-model)
-View              | the element's parent view
-Screen            | the application's available screen space
+|   AlignmentTarget | Description                                                                                                     |
+|------------------:|:----------------------------------------------------------------------------------------------------------------|
+|         LayoutBox | (default) The origin will be relative to the element's [layout box](/docs/layout/#layoutbox-and-allocated-size) |
+|            Parent | the parent's box includes the parent's border and padding                                                       |
+| ParentContentArea | the parent's content area is the space inside the padding, the [content box](/docs/layout/#box-model)           |
+|              View | the element's parent view                                                                                       |
+|            Screen | the application's available screen space                                                                        |
 
 Just setting the target will move the element to the origin of the targeted box. X and Y targets may be different and
 will be calculated independently. Setting the AlignmentTarget of an element and all its children to `Parent` will make
@@ -76,6 +80,11 @@ And then there are the individual properties:
 Note: you cannot set an `AlignmentTarget` in an animation!
 
 ## AlignmentOrigin and AlignmentOffset
+```
+AlignmentOrigin[X|Y] = *OffsetMeasurement ...
+AlignmentOffset[X|Y] = *OffsetMeasurement ...
+```
+
 The AlignmentOrigin defines how far away from the targeted `AlignmentTarget` the element should start. When using any other 
 `OffsetMeasurementUnit` than `%` you'll might confuse `AlignmentOrigin` and `AlignmentOffset` since they appear to do the 
 same thing.
@@ -88,19 +97,26 @@ Setting an `AlignmentTarget = Parent` and an `AlignmentOrigin = 50%` will move t
 The element is not yet centered though. Here's an example of how a (blue) child that has half the parent's size would be 
 aligned in that case:
 
-{% raw %}<div style="width: 100%; height: 60px; background: yellow; position: relative; padding: 10px 0;"><div style="position: absolute; left: 50%; width: 50%; height: 40px; background: blue;"></div></div>{% endraw %}
+<div style="width: 100%; height: 60px; background: yellow; position: relative; padding: 10px 0;">
+    <div style="position: absolute; left: 50%; width: 50%; height: 40px; background: blue;"></div>
+</div>
 
 If you'd want to center the blue element in the yellow one you have to move it back to the left by half its own size.
 Setting `AlignmentOffset = -50%` would do the trick. A `%` value in `AlignmentOffset` always resolves to the relative size of
 the element itself. Now the blue element is perfectly centered: 
 
-{% raw %}<div style="width: 100%; height: 60px; background: yellow; position: relative; padding: 10px 0;"><div style="position: absolute; left: 25%; width: 50%; height: 40px; background: blue;"></div></div>{% endraw %}
+<div style="width: 100%; height: 60px; background: yellow; position: relative; padding: 10px 0;">
+    <div style="position: absolute; left: 25%; width: 50%; height: 40px; background: blue;"></div>
+</div>
 
 AlignmentOrigin and AlignmentOffset **can** be animated. Moving an element from the left edge of the parent to the right edge,
 like a progress bar maybe, would be as simple as animating the `AlignmentOrigin` from `0%` to `100%` and the `AlignmentOffset`
 from `0%` to `-100%`. Doing the same in css is a bit more tedious, so we won't include a live example here ;).
 
 ## AlignmentDirection
+```
+AlignmentDirection[X|Y] = [Start | End] ...
+```
 The `AlignmentDirection` is by default `Start`, which means setting that the element will be aligned at the start of the 
 targeted box (top left). But you could also set `AlignmentDirection = End` if you'd rather offset your element from the 
 bottom/right of your target. `AlignmentDirection` is, like the other properties above, a shorthand that sets both axes when
@@ -129,45 +145,45 @@ AlignmentOrigin = 20px;
 Note: `AlignmentDirection` **cannot** be used in animations!
 
 ## AlignX AlignY
+`AlignX = AlignmentOrigin [AlignmentOffset] [AlignmentTarget] [AlignmentDirection]`
+
 Now that you know all about the individual alignment properties, there's also a neat shorthand that lets you do all of
 the above in just one line (per axis though).
 `AlignX` and `AlignY` can each be used with one to four arguments, with a handy twist. We'll explain all combinations 
 for `AlignX` only to not repeat too much information since `AlignY` works exactly the same.
 
-The syntax is as follows:
-
-`AlignX = AlignmentOrigin [AlignmentOffset] [AlignmentTarget] [AlignmentDirection]`
-
-`AlignX = 25%`: only one argument will set the `AlignmentOrigin` to the provided value (20% in the example)
+### `AlignX = 25%`
+Only one argument will set the `AlignmentOrigin` to the provided value (20% in the example)
 and if value's unit is `%` it will **also** set the `AlignmentOffset` to the negative of the provided value,
 which would be `-25%` in this case. Further up we explained how to perfectly center an element or move it from
 left to right within the targeted element. With this shorthand you can animate `AlignX` from `0%` to `100%`
 and your element would move! 
 Setting `AlignX = 20px` would, as expected, only set the `AlignmentOriginX` and **not** the `AlignmentOffsetX`!
 
-`AlignX = 100% 0%`: this combination will set `AlignmentOriginX = 100%` and `AlignmentOffsetX = 0%`.
+### `AlignX = 100% 0%`
+This combination will set `AlignmentOriginX = 100%` and `AlignmentOffsetX = 0%`.
+
 The element would be moved to the end of its targeted box but would would stick on its outside rather than
 being aligned to the right side. If we change the example to `AlignX = 100% -0.5w` the element's center would 
 be on the right edge of the targeted box. `-0.5w` is equivalent to `-50%` when used as a `AlignmentOffset` btw.
 
-`AlignX = 20px 0px ParentContentArea`: here we define `AlignmentOriginX`, `AlignmentOffsetX` and the 
-`AlignmentTargetX`.
+### `AlignX = 20px 0px ParentContentArea`
+Here we define `AlignmentOriginX`, `AlignmentOffsetX` and the `AlignmentTargetX`.
  
- There's a small gotcha here; we have to write `0px` **not omitting** the
- unit since the style parser would interpret the token after the `0` as its unit. `0ParentContentArea` is not
- a thing though!
- 
- `AlignX = 0% 0% Parent End`: you can push your element to the end of its parent, aligning both their right
- edges like this.
- 
- Remember that `AlignmentTarget` and `AlignmentDirection` cannot be animated, which means that the `AlignX` 
- shorthand can only be animated when used with one or two arguments!
- 
- ### One more thing
- We have one more shorthand for you. All `AlignmentOrigin` and `AlignmentOffset` property values have a shorthand
- for the `0%`, `50%` and `100%` values, which are `Start`, `Center`, `End`.
- 
- Setting `AlignX = Center` is equivalent with `AlignX = 50%`, which is equivalent with `AlignX = 50% -50%` if you
- forgot. Awesome, right? But you can use it in a confusing, yet correct way, too: `AlignX = Start Start Parent End`.
- If you read the rest of this document you might know what it means :)
- 
+There's a small gotcha here; we have to write `0px` **not omitting** the
+unit since the style parser would interpret the token after the `0` as its unit. `0ParentContentArea` is not
+a thing though!
+
+### `AlignX = 0% 0% Parent End`
+You can push your element to the end of its parent, aligning both their right edges like this.
+
+Remember that `AlignmentTarget` and `AlignmentDirection` cannot be animated, which means that the `AlignX` 
+shorthand can only be animated when used with one or two arguments!
+
+### One more thing
+We have one more shorthand for you. All `AlignmentOrigin` and `AlignmentOffset` property values have a shorthand
+for the `0%`, `50%` and `100%` values, which are `Start`, `Center`, `End`.
+
+Setting `AlignX = Center` is equivalent with `AlignX = 50%`, which is equivalent with `AlignX = 50% -50%` if you
+forgot. Awesome, right? But you can use it in a confusing, yet correct way, too: `AlignX = Start Start Parent End`.
+If you read the rest of this document you might know what it means :)

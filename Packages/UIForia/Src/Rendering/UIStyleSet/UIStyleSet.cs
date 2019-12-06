@@ -108,39 +108,45 @@ namespace UIForia.Rendering {
             LightList<StyleProperty>.Release(ref inherited);
         }
 
+        public void internal_Initialize(LightList<UIStyleGroupContainer> baseStyles) {
+           SetBaseStyles(baseStyles);
+           LightList<UIStyleGroupContainer>.Release(ref baseStyles);
+        }
+        
         internal void Initialize() {
-            UITemplate originTemplate = element.OriginTemplate;
-
-            if (originTemplate == null) {
-                return;
-            }
-
-            UIStyleGroupContainer[] baseStyles = originTemplate.baseStyles;
-
-            containedStates = 0;
-            hasAttributeStyles = false;
-
-            ParsedTemplate template = originTemplate.SourceTemplate;
-
-            LightList<StylePropertyId> toUpdate = LightList<StylePropertyId>.Get();
-            styleGroupContainers.EnsureCapacity(baseStyles.Length);
-
-            for (int i = 0; i < baseStyles.Length; i++) {
-                styleGroupContainers.AddUnchecked(baseStyles[i]);
-                CreateStyleGroups(baseStyles[i], toUpdate);
-            }
-
-            // todo -- reimplement without ParsedTemplate
-//            UIStyleGroupContainer implicitStyle = template.GetImplicitStyle(element.GetDisplayName());
-//            if (implicitStyle != null) {
-//                CreateStyleGroups(implicitStyle, toUpdate);
+            throw new NotImplementedException();
+//            UITemplate originTemplate = element.OriginTemplate;
+//
+//            if (originTemplate == null) {
+//                return;
 //            }
-
-            SortStyles();
-
-            UpdatePropertyMap(toUpdate);
-
-            LightList<StylePropertyId>.Release(ref toUpdate);
+//
+//            UIStyleGroupContainer[] baseStyles = originTemplate.baseStyles;
+//
+//            containedStates = 0;
+//            hasAttributeStyles = false;
+//
+//            ParsedTemplate template = originTemplate.SourceTemplate;
+//
+//            LightList<StylePropertyId> toUpdate = LightList<StylePropertyId>.Get();
+//            styleGroupContainers.EnsureCapacity(baseStyles.Length);
+//
+//            for (int i = 0; i < baseStyles.Length; i++) {
+//                styleGroupContainers.AddUnchecked(baseStyles[i]);
+//                CreateStyleGroups(baseStyles[i], toUpdate);
+//            }
+//
+//            // todo -- reimplement without ParsedTemplate
+////            UIStyleGroupContainer implicitStyle = template.GetImplicitStyle(element.GetDisplayName());
+////            if (implicitStyle != null) {
+////                CreateStyleGroups(implicitStyle, toUpdate);
+////            }
+//
+//            SortStyles();
+//
+//            UpdatePropertyMap(toUpdate);
+//
+//            LightList<StylePropertyId>.Release(ref toUpdate);
         }
 
         private void AppendSharedStyles(LightList<UIStyleGroupContainer> updatedStyles, int index) {
@@ -935,6 +941,7 @@ namespace UIForia.Rendering {
 
                 case UIFixedUnit.Em:
                 case UIFixedUnit.Percent:
+                    
                     if (element.parent != null) {
                         return element.parent.style.GetResolvedFontSize() * fontSize.value;
                     }

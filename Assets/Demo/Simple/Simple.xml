@@ -4,19 +4,22 @@
     
     <Contents style="container">
         
-        <Text onMouseClick="ToggleLanguage()" style="header">
+        <Text evt:onMouseClick="ToggleLanguage()" style="header">
             {HeaderText}
         </Text>
         
-        <Div style="box box-black" onMouseClick="OnBoxClicked(1)">
+        <Div style="box box-black">
+<!--            onMouseClick="OnBoxClicked(1)">-->
             Clicked {boxClicks1} times
         </Div>
         
-        <Div style="box box-red" onMouseClick="OnBoxClicked(2)">
+        <Div style="box box-red">
+<!--            onMouseClick="OnBoxClicked(2)">-->
            Clicked {boxClicks2} times
         </Div>
         
-        <Div style="box box-gold" onMouseClick="OnBoxClicked(3)">
+        <Div style="box box-gold">
+<!--            onMouseClick="OnBoxClicked(3)">-->
             Clicked {boxClicks3} times
         </Div>
         

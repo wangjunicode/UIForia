@@ -16,6 +16,55 @@ using UnityEngine;
 
 namespace UIForia.Elements {
 
+    public class InputHandlerGroup {
+
+        public struct HandlerData {
+
+            public InputEventType eventType;
+            public KeyboardModifiers modifiers;
+            public KeyCode keyCode;
+            public char character;
+            public bool requireFocus;
+            public EventPhase eventPhase;
+            public Action<GenericInputEvent> handler;
+
+        }
+        
+        public InputEventType handledEvents;
+        public LightList<HandlerData> eventHandlers;
+
+        public InputHandlerGroup() {
+            eventHandlers = new LightList<HandlerData>(2);
+        }
+
+        public void AddMouseEvent(InputEventType eventType, KeyboardModifiers modifiers, bool requiresFocus, EventPhase phase, Action<GenericInputEvent> handler) {
+            handledEvents |= eventType;
+            eventHandlers.Add(new HandlerData() {
+                eventType = eventType,
+                eventPhase = phase,
+                keyCode = 0,
+                character = '\0',
+                requireFocus = requiresFocus,
+                modifiers = modifiers,
+                handler = handler
+            });
+        }
+        
+        public void AddKeyboardEvent(InputEventType eventType, KeyboardModifiers modifiers, bool requiresFocus, EventPhase phase, KeyCode keyCode, char character, Action<GenericInputEvent> handler) {
+            handledEvents |= eventType;
+             eventHandlers.Add(new HandlerData() {
+                eventType = eventType,
+                eventPhase = phase,
+                keyCode = keyCode,
+                character = character,
+                requireFocus = requiresFocus,
+                modifiers = modifiers,
+                handler = handler
+            });
+        }
+
+    }
+
     public struct UIElementRef {
 
         private readonly int id;
@@ -83,11 +132,12 @@ namespace UIForia.Elements {
 
         public int id; // todo -- internal with accessor
 
-        internal LayoutHistory layoutHistory;
+        public InputHandlerGroup inputHandlers; // todo -- internal with accessor
+
         public LightList<UIElement> children; // todo -- replace w/ linked list & child count
 
         public ExpressionContext templateContext; // todo -- can probably be moved to binding system
-        
+
         internal UIElementFlags flags;
         internal UIElement parent;
 
@@ -142,7 +192,7 @@ namespace UIForia.Elements {
         public int siblingIndex { get; internal set; }
 
         public TemplateMetaData templateMetaData; // todo - internal / private / whatever
-        
+
         public IInputProvider Input => View.application.InputSystem; // todo -- remove
 
         public int ChildCount => children?.Count ?? 0;
@@ -152,10 +202,10 @@ namespace UIForia.Elements {
         public bool isSelfDisabled => (flags & UIElementFlags.Enabled) == 0;
 
         public bool isEnabled => (flags & UIElementFlags.EnabledFlagSet) == (UIElementFlags.EnabledFlagSet);
-            //!isDestroyed && (flags & UIElementFlags.SelfAndAncestorEnabled) == UIElementFlags.SelfAndAncestorEnabled;
+        //!isDestroyed && (flags & UIElementFlags.SelfAndAncestorEnabled) == UIElementFlags.SelfAndAncestorEnabled;
 
         public bool isDisabled => (flags & UIElementFlags.EnabledFlagSet) != (UIElementFlags.EnabledFlagSet);
-        
+
         //isDestroyed || (flags & UIElementFlags.Enabled) == 0 || (flags & UIElementFlags.AncestorEnabled) == 0;
 
         public bool isDestroyed => (flags & UIElementFlags.Alive) == 0;
@@ -201,7 +251,7 @@ namespace UIForia.Elements {
             if (element == null || element == this || element.isDestroyed) {
                 return null;
             }
-            
+
             if (View == null) {
                 element.parent = this;
                 element.View = null;
@@ -212,7 +262,7 @@ namespace UIForia.Elements {
             else {
                 Application.InsertChild(this, element, (uint) children.Count);
             }
-            
+
             return element;
         }
 
@@ -266,7 +316,7 @@ namespace UIForia.Elements {
                         bool isSameElement = element.children[i].templateContext.rootObject == this;
                         // special case for slots: if the child belongs to the parent and is also a slot definition we can assume the slot originated also from this element
                         bool isSlotDefinitionId = element.children[i].templateContext.currentObject is UISlotDefinition slotDefinition && slotDefinition.templateContext.rootObject == parent;
-                        if (isSlotDefinitionId || isSameElement) {  
+                        if (isSlotDefinitionId || isSameElement) {
                             return element.children[i] as T;
                         }
                     }
@@ -369,7 +419,7 @@ namespace UIForia.Elements {
 
             ElementAttribute[] attrs = attributes.array;
             int attrCount = attributes.size;
-            
+
             for (int i = 0; i < attrCount; i++) {
                 if (attrs[i].name == name) {
                     if (attrs[i].value == value) {
@@ -381,9 +431,9 @@ namespace UIForia.Elements {
                         Application.OnAttributeSet(this, name, value, oldValue);
                         return;
                     }
-                }    
+                }
             }
-            
+
             attributes.Add(new ElementAttribute(name, value));
             Application.OnAttributeSet(this, name, value, null);
         }
@@ -396,12 +446,12 @@ namespace UIForia.Elements {
 
             ElementAttribute[] attrs = attributes.array;
             int attrCount = attributes.size;
-            
+
             for (int i = 0; i < attrCount; i++) {
                 if (attrs[i].name == key) {
                     value = attrs[i].value;
                     return true;
-                }    
+                }
             }
 
             value = null;
@@ -415,11 +465,11 @@ namespace UIForia.Elements {
 
             ElementAttribute[] attrs = attributes.array;
             int attrCount = attributes.size;
-            
+
             for (int i = 0; i < attrCount; i++) {
                 if (attrs[i].name == attr) {
                     return attrs[i].value;
-                }    
+                }
             }
 
             return null;
@@ -492,7 +542,7 @@ namespace UIForia.Elements {
         public UIElement this[int i] {
             get { return GetChild(i); }
         }
-        
+
         public UIElement this[string id] {
             get { return FindById(id); }
         }
@@ -504,7 +554,6 @@ namespace UIForia.Elements {
 
         }
 
-        
     }
 
 }

@@ -4,15 +4,15 @@
     <Style path="Documentation/Features/ScrollDemo.style"/>
     <Contents style="container">
 
-        <Div style="level-0">
+        <ScrollView style="level-0">
 
             <Div style="level-1">
 
                 <Group>
-<!--                    <Div style="button" onMouseClick="ScrollUp($event)">Scroll up</Div>-->
-<!--                    <Div style="button" onMouseClick="ScrollRight($event)">Scroll right</Div>-->
-<!--                    <Div style="button" onMouseClick="ScrollDown($event)">Scroll down</Div>-->
-<!--                    <Div style="button" onMouseClick="ScrollLeft($event)">Scroll left</Div>-->
+                    <Div style="button" onMouseClick="ScrollUp($event)">Scroll up</Div>
+                    <Div style="button" onMouseClick="ScrollRight($event)">Scroll right</Div>
+                    <Div style="button" onMouseClick="ScrollDown($event)">Scroll down</Div>
+                    <Div style="button" onMouseClick="ScrollLeft($event)">Scroll left</Div>
 
                     <Text style="p">
                         Autem in dolorum culpa rerum. Consequatur voluptate dignissimos sed recusandae qui omnis possimus id. Officia excepturi id omnis ut laboriosam blanditiis
@@ -45,46 +45,46 @@
                     </Text>
 
                 </Group>
-                <!--                <Div style="level-2-a"/>-->
+                                <Div style="level-2-a"/>
 
-                <!--                <Div style="level-2-b"/>-->
+                                <Div style="level-2-b"/>
 
             </Div>
 
-            <!--            <Div style="level-1">-->
+                        <Div style="level-1">
 
-            <!--                <Div style="level-2-a"/>-->
+                            <Div style="level-2-a"/>
 
-            <!--                <Div style="level-2-b d"/>-->
+                            <Div style="level-2-b d"/>
 
-            <!--                <Div style="level-2-c">-->
-            <!--                    <Div style="level-2-ignored"/>-->
-            <!--                </Div>-->
+                            <Div style="level-2-c">
+                                <Div style="level-2-ignored"/>
+                            </Div>
 
-            <!--            </Div>-->
+                        </Div>
 
-            <!--            <Div style="level-2-ignored"/>-->
-        </Div>
-        <!--        <Group style="big">-->
-        <!--            <Group style="big-child">-->
+                        <Div style="level-2-ignored"/>
+        </ScrollView>
+                <Group style="big">
+                    <Group style="big-child">
 
-        <!--                <Div style="button" onMouseClick="ScrollUp($event)">Scroll up</Div>-->
-        <!--                <Div style="button" onMouseClick="ScrollRight($event)">Scroll right</Div>-->
-        <!--                <Div style="button" onMouseClick="ScrollDown($event)">Scroll down</Div>-->
-        <!--                <Div style="button" onMouseClick="ScrollLeft($event)">Scroll left</Div>-->
+                        <Div style="button" onMouseClick="ScrollUp($event)">Scroll up</Div>
+                        <Div style="button" onMouseClick="ScrollRight($event)">Scroll right</Div>
+                        <Div style="button" onMouseClick="ScrollDown($event)">Scroll down</Div>
+                        <Div style="button" onMouseClick="ScrollLeft($event)">Scroll left</Div>
 
-        <!--            </Group>-->
-        <!--        </Group>-->
+                    </Group>
+                </Group>
 
-        <!--        <ScrollView>-->
+                <ScrollView>
 
-        <!--            <Repeat style="scroll-container" list="list">-->
-        <!--                <Text>This is content {$index}</Text>-->
-        <!--            </Repeat>-->
+                    <Repeat style="scroll-container" list="list">
+                        <Text>This is content {$index}</Text>
+                    </Repeat>
 
-        <!--        </ScrollView>-->
+                </ScrollView>
 
-        <!--        content-->
+                content
 
     </Contents>
 </UITemplate>

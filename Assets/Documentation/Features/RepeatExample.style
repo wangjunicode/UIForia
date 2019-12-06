@@ -4,7 +4,6 @@ style container {
 
 style dict {
     LayoutBehavior = Ignored;
-    TransformBehaviorY = AnchorMinOffset;
     TransformPositionY = 0;
     PreferredSize = 1pca 1cnt;
 }

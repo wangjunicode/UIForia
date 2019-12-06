@@ -41,7 +41,7 @@ namespace UIForia {
             compiledTemplate.guid = GUID.Generate();
             compiledTemplate.templateId = compiledTemplates.size;
             compiledTemplates.Add(compiledTemplate);
-            compiledTemplate.templateMetaData = new TemplateMetaData(compiledTemplate.templateId, filePath, null);
+            compiledTemplate.templateMetaData = new TemplateMetaData(compiledTemplate.templateId, filePath, null, null);
             return compiledTemplate;
         }
 
@@ -68,7 +68,7 @@ namespace UIForia {
         }
         
         public StyleSheet ImportStyleSheet(in StyleDefinition styleDefinition) {
-            return styleImporter.Import(styleDefinition);
+            return styleImporter.Import(styleDefinition, true);
         }
 
         public Func<UIElement, TemplateScope2, UIElement> GetTemplate<T>() where T : UIElement {

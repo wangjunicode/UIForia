@@ -11,33 +11,21 @@ namespace UIForia.Rendering {
 
         private struct Edge {
 
-            public Vector2 to;
             public Vector2 from;
+            public Vector2 to;
 
         }
 
         /// <summary>
         /// This clips the subject polygon against the clip polygon (gets the intersection of the two polygons)
         /// </summary>
-        /// <remarks>
-        /// Based on the psuedocode from:
-        /// http://en.wikipedia.org/wiki/Sutherland%E2%80%93Hodgman
-        /// </remarks>
-        /// <param name="subjectPoly">Can be concave or convex</param>
-        /// <param name="clipPoly">Must be convex</param>
-        /// <returns>The intersection of the two polygons (or null)</returns>
-        public static void GetIntersectedPolygon(StructList<Vector2> subjectPoly, StructList<Vector2> clipPoly, ref StructList<Vector2> outputList) {
+        public static void GetIntersectedPolygon(StructList<Vector2> subjectPoly, StructList<Vector2> clipPoly, StructList<Vector2> outputList) {
             if (subjectPoly.size < 3 || clipPoly.size < 3) {
-                throw new ArgumentException(string.Format("The polygons passed in must have at least 3 points: subject={0}, clip={1}", subjectPoly.size.ToString(), clipPoly.size.ToString()));
-            }
-
-            if (outputList == null) {
-                outputList = new StructList<Vector2>();
+                throw new ArgumentException(string.Format("The polygons passed in must have at least 3 Vector2s: subject={0}, clip={1}", subjectPoly.size.ToString(), clipPoly.size.ToString()));
             }
 
             outputList.size = 0;
             outputList.AddRange(subjectPoly);
-            s_InputList = s_InputList ?? new StructList<Vector2>();
 
             //	Make sure it's clockwise
             if (!IsClockwise(subjectPoly)) {
@@ -45,13 +33,13 @@ namespace UIForia.Rendering {
             }
 
             s_EdgeList = s_EdgeList ?? new StructList<Edge>();
+            s_InputList = s_InputList ?? new StructList<Vector2>(subjectPoly.size);
 
             IterateEdgesClockwise(clipPoly, s_EdgeList);
 
             //	Walk around the clip polygon clockwise
-            for (int edgeIdx = 0; edgeIdx < s_EdgeList.size; edgeIdx++) {
-                ref Edge clipEdge = ref s_EdgeList.array[edgeIdx];
-
+            for (int i = 0; i < s_EdgeList.size; i++) {
+                ref Edge clipEdge = ref s_EdgeList.array[i];
                 s_InputList.size = 0;
                 s_InputList.AddRange(outputList);
                 outputList.size = 0;
@@ -63,28 +51,28 @@ namespace UIForia.Rendering {
 
                 Vector2 S = s_InputList.array[s_InputList.size - 1];
 
-                for (int i = 0; i < s_InputList.size; i++) {
-                    ref Vector2 E = ref s_InputList.array[i];
+                for (int index = 0; index < s_InputList.size; index++) {
+                    ref Vector2 E = ref s_InputList.array[index];
                     if (IsInside(clipEdge, E)) {
                         if (!IsInside(clipEdge, S)) {
-                            Vector2? point = GetIntersect(S, E, clipEdge.from, clipEdge.to);
-                            if (point == null) {
+                            Vector2? v = GetIntersect(S, E, clipEdge.from, clipEdge.to);
+                            if (v == null) {
                                 throw new ApplicationException("Line segments don't intersect"); //	may be colinear, or may be a bug
                             }
                             else {
-                                outputList.Add(point.Value);
+                                outputList.Add(v.Value);
                             }
                         }
 
                         outputList.Add(E);
                     }
                     else if (IsInside(clipEdge, S)) {
-                        Vector2? point = GetIntersect(S, E, clipEdge.from, clipEdge.to);
-                        if (point == null) {
+                        Vector2? Vector2 = GetIntersect(S, E, clipEdge.from, clipEdge.to);
+                        if (Vector2 == null) {
                             throw new ApplicationException("Line segments don't intersect"); //	may be colinear, or may be a bug
                         }
                         else {
-                            outputList.Add(point.Value);
+                            outputList.Add(Vector2.Value);
                         }
                     }
 
@@ -93,11 +81,6 @@ namespace UIForia.Rendering {
             }
         }
 
-        #region Private Methods
-
-        /// <summary>
-        /// This iterates through the edges of the polygon, always clockwise
-        /// </summary>
         private static void IterateEdgesClockwise(StructList<Vector2> polygon, StructList<Edge> output) {
             output.EnsureCapacity(polygon.size);
             output.size = 0;
@@ -133,58 +116,45 @@ namespace UIForia.Rendering {
         /// Got this here:
         /// http://stackoverflow.com/questions/14480124/how-do-i-detect-triangle-and-rectangle-intersection
         /// </remarks>
-        private static Vector2? GetIntersect(Vector2 line1From, Vector2 line1To, Vector2 line2From, Vector2 line2To) {
+        private static Vector2? GetIntersect(in Vector2 line1From, in Vector2 line1To, in Vector2 line2From, in Vector2 line2To) {
             Vector2 direction1 = line1To - line1From;
             Vector2 direction2 = line2To - line2From;
             float dotPerp = (direction1.x * direction2.y) - (direction1.y * direction2.x);
 
-            // If it's 0, it means the lines are parallel so have infinite intersection points
-            if (Math.Abs(dotPerp) <= 0.000000001f) {
+            // 0 means the lines are parallel so have infinite intersection Vector2s
+            if (Mathf.Abs(dotPerp) <= 0.000000001f) {
                 return null;
             }
 
             Vector2 c = line2From - line1From;
             float t = (c.x * direction2.y - c.y * direction2.x) / dotPerp;
-
-            return line1From + (direction1 * t);
+            return line1From + (t * direction1);
         }
 
         private static bool IsInside(in Edge edge, in Vector2 test) {
-            Vector2 tmp1 = default;
-            Vector2 tmp2 = default;
+            float tmp1X = edge.to.x - edge.from.x;
+            float tmp1Y = edge.to.y - edge.from.y;
+            float tmp2X = test.x - edge.to.x;
+            float tmp2Y = test.y - edge.to.y;
 
-            tmp1.x = edge.to.x - edge.from.x;
-            tmp1.x = edge.to.y - edge.from.y;
-            tmp2.x = test.x - edge.to.x;
-            tmp2.y = test.y - edge.to.y;
-
-            float x = (tmp1.x * tmp2.y) - (tmp1.y * tmp2.x);
-
-            if (x < 0) {
-                return true;
-            }
-            else if (x > 0) {
-                return false;
-            }
-            else {
-                return true;
-            }
+            //	co-linear values should be considered inside so test with <= instead of <
+            return (tmp1X * tmp2Y) - (tmp1Y * tmp2X) <= 0;
         }
 
         private static bool IsClockwise(StructList<Vector2> polygon) {
             for (int i = 2; i < polygon.size; i++) {
                 bool? isLeft = IsLeftOf(polygon.array[0], polygon.array[1], polygon.array[i]);
-                if (isLeft != null) //	some of the points may be colinear.  That's ok as long as the overall is a polygon
-                {
+                //	some of the points may be co-linear.  That's ok as long as the overall is a polygon
+                if (isLeft != null) {
                     return !isLeft.Value;
                 }
             }
 
-            throw new ArgumentException("All the points in the polygon are colinear");
+            throw new ArgumentException("All the Vector2s in the polygon are colinear");
         }
 
         /// <summary>
-        /// Tells if the test point lies on the left side of the edge line
+        /// Tells if the test Vector2 lies on the left side of the edge line
         /// </summary>
         private static bool? IsLeftOf(in Vector2 from, in Vector2 to, in Vector2 test) {
             float tmp1X = to.x - from.x;
@@ -204,8 +174,6 @@ namespace UIForia.Rendering {
                 return null;
             }
         }
-
-        #endregion
 
     }
 

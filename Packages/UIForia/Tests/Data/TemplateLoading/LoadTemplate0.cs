@@ -1,5 +1,6 @@
 using UIForia.Attributes;
 using UIForia.Elements;
+using UIForia.UIInput;
 
 namespace UIForia.Test.TestData {
 
@@ -20,6 +21,9 @@ namespace UIForia.Test.TestData {
         public string computed = "i-am-computed";
 
         public void HandleStuffDone(string g) { }
+        public void HandleMouseDown(int v) { }
+        
+        public void HandleMouseDown(MouseInputEvent evt) { }
 
     }
 

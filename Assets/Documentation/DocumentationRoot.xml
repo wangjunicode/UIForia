@@ -4,7 +4,10 @@
     <Contents style="root-container">
         <Group style="main-container">
             
-            <Group style="burger" onMouseClick="ToggleMenu()"><Div style="burger-patty" /><Div style="burger-patty" /></Group>
+            <Group style="burger" onMouseClick="ToggleMenu()">
+                <Div style="burger-patty" />
+                <Div style="burger-patty" />
+            </Group>
 
             <ScrollView style="navigation" x-id="nav">
                 <Heading1>Choose a feature</Heading1>
@@ -29,7 +32,7 @@
 
             </ScrollView>
 
-            <ScrollView style="demo-panel" x-router="demo" x-defaultRoute="/AlignmentDemo">
+            <ScrollView style="demo-panel" x-router="demo" x-defaultRoute="/ScrollDemo">
 
                 <Group x-route="/index">
                     <Heading1>UIForia Documentation</Heading1>
@@ -50,7 +53,6 @@
                 <RepeatALot x-route="/RepeatALot"/>
                 <ScrollDemo x-route="/ScrollDemo"/>
                 <TransclusionDemo x-route="/TransclusionDemo"/>
-                <TransformPlayground x-route="/TransformPlayground"/>
                 <RepeatExample x-route="/RepeatExample"/>
                 <StylePropertiesDemo x-route="/StylePropertiesDemo"/>
                 <WindowDemo x-route="/Window"/>

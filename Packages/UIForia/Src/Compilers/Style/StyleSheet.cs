@@ -5,6 +5,8 @@ namespace UIForia.Compilers.Style {
 
     public class StyleSheet {
 
+        internal string path;
+        internal string source;
         internal readonly int id;
         internal readonly StyleConstant[] constants;
         internal readonly AnimationData[] animations;

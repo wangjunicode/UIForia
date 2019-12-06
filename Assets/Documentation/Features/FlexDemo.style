@@ -218,7 +218,7 @@ style no-clip {
 
 style demo-container {
     FlexLayoutDirection = Horizontal;
-    FlexLayoutWrap = Wrap;
+    FlexLayoutWrap = WrapHorizontal;
     PreferredSize = 1pca 500px;
 }
 
@@ -235,13 +235,13 @@ style content-size-box-horizontal-wrap {
     PreferredSize = 800px 1cnt;
     FlexLayoutDirection = Horizontal;
     BackgroundColor = grey;
-    FlexLayoutWrap = Wrap;
+    FlexLayoutWrap = WrapHorizontal;
 }
 
 style content-size-box-vertical-wrap {
     PreferredSize = 1cnt 800px;
     BackgroundColor = grey;
-    FlexLayoutWrap = Wrap;
+    FlexLayoutWrap = WrapHorizontal;
     Overflow = Hidden;
 }
 

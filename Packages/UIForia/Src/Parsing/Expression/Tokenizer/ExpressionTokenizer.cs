@@ -145,14 +145,18 @@ namespace UIForia.Parsing.Expressions.Tokenizer {
             if (context.IsConsumed()) return;
             int start = context.ptr;
             char first = context.input[context.ptr];
+            
             if (!char.IsLetter(first) && first != '_' && first != '$') return;
 
             context.Save();
-            while (context.HasMore()
-                   && (char.IsLetterOrDigit(context.input[context.ptr])
-                       || context.input[context.ptr] == '_'
-                       || context.input[context.ptr] == '-'
-                       || context.input[context.ptr] == '$')) {
+            
+            while (context.HasMore()) {
+                char character = context.input[context.ptr];
+                
+                if (!(char.IsLetterOrDigit(character) || character == '_' || character == '-' || character == '$')) {
+                    break;
+                }
+
                 context.Advance();
             }
 
@@ -165,16 +169,15 @@ namespace UIForia.Parsing.Expressions.Tokenizer {
         }
 
         private static ExpressionToken TransformIdentifierToTokenType(TokenizerContext context, string identifier) {
-            string identifierLowerCase = identifier.ToLower();
-            switch (identifierLowerCase) {
-                case "null": return new ExpressionToken(ExpressionTokenType.Null, identifierLowerCase, context.line, context.column);
-                case "true": return new ExpressionToken(ExpressionTokenType.Boolean, identifierLowerCase, context.line, context.column);
-                case "false": return new ExpressionToken(ExpressionTokenType.Boolean, identifierLowerCase, context.line, context.column);
-                case "as": return new ExpressionToken(ExpressionTokenType.As, identifierLowerCase, context.line, context.column);
-                case "is": return new ExpressionToken(ExpressionTokenType.Is, identifierLowerCase, context.line, context.column);
-                case "new": return new ExpressionToken(ExpressionTokenType.New, identifierLowerCase, context.line, context.column);
-                case "typeof": return new ExpressionToken(ExpressionTokenType.TypeOf, identifierLowerCase, context.line, context.column);
-                case "default": return new ExpressionToken(ExpressionTokenType.Default, identifierLowerCase, context.line, context.column);
+            switch (identifier) {
+                case "null": return new ExpressionToken(ExpressionTokenType.Null, identifier, context.line, context.column);
+                case "true": return new ExpressionToken(ExpressionTokenType.Boolean, identifier, context.line, context.column);
+                case "false": return new ExpressionToken(ExpressionTokenType.Boolean, identifier, context.line, context.column);
+                case "as": return new ExpressionToken(ExpressionTokenType.As, identifier, context.line, context.column);
+                case "is": return new ExpressionToken(ExpressionTokenType.Is, identifier, context.line, context.column);
+                case "new": return new ExpressionToken(ExpressionTokenType.New, identifier, context.line, context.column);
+                case "typeof": return new ExpressionToken(ExpressionTokenType.TypeOf, identifier, context.line, context.column);
+                case "default": return new ExpressionToken(ExpressionTokenType.Default, identifier, context.line, context.column);
 
                 default: {
                     return new ExpressionToken(ExpressionTokenType.Identifier, identifier, context.line, context.column);

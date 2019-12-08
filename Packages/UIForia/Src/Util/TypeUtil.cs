@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Reflection.Emit;
 using System.Threading;
 using UIForia.Extensions;
+using UnityEngine;
 
 namespace UIForia.Util {
 
@@ -217,8 +218,6 @@ namespace UIForia.Util {
 
         internal static bool IsConvertible(Type type) {
             type = type.GetNonNullableType();
-            if (type.IsEnum)
-                return true;
             switch (Type.GetTypeCode(type)) {
                 case TypeCode.Boolean:
                 case TypeCode.Char:
@@ -234,7 +233,7 @@ namespace UIForia.Util {
                 case TypeCode.Double:
                     return true;
                 default:
-                    return false;
+                    return type.IsEnum;
             }
         }
 
@@ -261,56 +260,65 @@ namespace UIForia.Util {
             return true;
         }
 
-        internal static MethodInfo GetUserDefinedCoercionMethod(
-            Type convertFrom,
-            Type convertToType,
-            bool implicitOnly) {
+        internal static MethodInfo GetUserDefinedCoercionMethod(Type convertFrom, Type convertToType, bool implicitOnly) {
             Type nonNullableType1 = convertFrom.GetNonNullableType();
             Type nonNullableType2 = convertToType.GetNonNullableType();
-            MethodInfo[] methods1 = nonNullableType1.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
-            MethodInfo conversionOperator1 = FindConversionOperator(methods1, convertFrom, convertToType, implicitOnly);
-            if (conversionOperator1 != (MethodInfo) null)
+            
+            MethodInfo[] methodInfos1 = ReflectionUtil.GetStaticMethods(nonNullableType1);
+            MethodInfo conversionOperator1 = FindConversionOperator(methodInfos1, convertFrom, convertToType, implicitOnly);
+            
+            if (conversionOperator1 != null) {
                 return conversionOperator1;
-            MethodInfo[] methods2 = nonNullableType2.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
-            MethodInfo conversionOperator2 = FindConversionOperator(methods2, convertFrom, convertToType, implicitOnly);
-            if (conversionOperator2 != (MethodInfo) null)
-                return conversionOperator2;
-            if (!AreEquivalent(nonNullableType1, convertFrom) || !AreEquivalent(nonNullableType2, convertToType)) {
-                MethodInfo conversionOperator3 = FindConversionOperator(methods1, nonNullableType1, nonNullableType2, implicitOnly);
-                if (conversionOperator3 == (MethodInfo) null)
-                    conversionOperator3 = FindConversionOperator(methods2, nonNullableType1, nonNullableType2, implicitOnly);
-                if (conversionOperator3 != (MethodInfo) null)
-                    return conversionOperator3;
             }
 
-            return (MethodInfo) null;
+            MethodInfo[] methodInfos2 = ReflectionUtil.GetStaticMethods(nonNullableType2);
+            MethodInfo conversionOperator2 = FindConversionOperator(methodInfos2, convertFrom, convertToType, implicitOnly);
+
+            if (conversionOperator2 != null) {
+                return conversionOperator2;
+            }
+
+            if (!AreEquivalent(nonNullableType1, convertFrom) || !AreEquivalent(nonNullableType2, convertToType)) {
+                MethodInfo conversionOperator3 = FindConversionOperator(methodInfos1, nonNullableType1, nonNullableType2, implicitOnly);
+
+                if (conversionOperator3 == null) {
+                    conversionOperator3 = FindConversionOperator(methodInfos2, nonNullableType1, nonNullableType2, implicitOnly);
+                }
+
+                return conversionOperator3;
+            }
+
+            return null;
         }
 
         internal static bool TryGetUserDefinedCoercionMethod(Type convertFrom, Type convertToType, bool implicitOnly, out MethodInfo info) {
+
             Type nonNullableType1 = convertFrom.GetNonNullableType();
             Type nonNullableType2 = convertToType.GetNonNullableType();
-            MethodInfo[] methods1 = nonNullableType1.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
-            MethodInfo conversionOperator1 = FindConversionOperator(methods1, convertFrom, convertToType, implicitOnly);
+            MethodInfo[] methodInfos1 = ReflectionUtil.GetStaticMethods(nonNullableType1);
 
-            if (conversionOperator1 != (MethodInfo) null) {
+            MethodInfo conversionOperator1 = FindConversionOperator(methodInfos1, convertFrom, convertToType, implicitOnly);
+
+            if (conversionOperator1 != null) {
                 info = conversionOperator1;
                 return true;
             }
 
-            MethodInfo[] methods2 = nonNullableType2.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
-            MethodInfo conversionOperator2 = FindConversionOperator(methods2, convertFrom, convertToType, implicitOnly);
-            if (conversionOperator2 != (MethodInfo) null) {
+            MethodInfo[] methodInfos2 = ReflectionUtil.GetStaticMethods(nonNullableType2);
+            MethodInfo conversionOperator2 = FindConversionOperator(methodInfos2, convertFrom, convertToType, implicitOnly);
+            
+            if (conversionOperator2 != null) {
                 info = conversionOperator2;
                 return true;
             }
 
             if (!AreEquivalent(nonNullableType1, convertFrom) || !AreEquivalent(nonNullableType2, convertToType)) {
-                MethodInfo conversionOperator3 = FindConversionOperator(methods1, nonNullableType1, nonNullableType2, implicitOnly);
-                if (conversionOperator3 == (MethodInfo) null) {
-                    conversionOperator3 = FindConversionOperator(methods2, nonNullableType1, nonNullableType2, implicitOnly);
+                MethodInfo conversionOperator3 = FindConversionOperator(methodInfos1, nonNullableType1, nonNullableType2, implicitOnly);
+                if (conversionOperator3 == null) {
+                    conversionOperator3 = FindConversionOperator(methodInfos2, nonNullableType1, nonNullableType2, implicitOnly);
                 }
-
-                if (conversionOperator3 != (MethodInfo) null) {
+                
+                if (conversionOperator3 != null) {
                     info = conversionOperator3;
                     return true;
                 }
@@ -321,12 +329,31 @@ namespace UIForia.Util {
         }
 
         internal static MethodInfo FindConversionOperator(MethodInfo[] methods, Type typeFrom, Type typeTo, bool implicitOnly) {
-            foreach (MethodInfo method in methods) {
-                if ((method.Name == "op_Implicit" || !implicitOnly && method.Name == "op_Explicit") && (AreEquivalent(method.ReturnType, typeTo) && AreEquivalent(method.GetParametersCached()[0].ParameterType, typeFrom)))
-                    return method;
+            for (int i = 0; i < methods.Length; i++) {
+                MethodInfo method = methods[i];
+                
+                string name = method.Name;
+                
+                if(name.Length != 11) continue;
+
+                if (name[0] != 'o' && name[1] != 'p' && name[3] != '_') {
+                    continue;
+                }
+                
+                if ((string.Equals(name, "op_Implicit") || !implicitOnly && string.Equals(name, "op_Explicit"))) {
+                    
+                    if((AreEquivalent(method.ReturnType, typeTo))) {
+
+                        if (AreEquivalent(method.GetParameters()[0].ParameterType, typeFrom)) {
+                            return method;
+                        }
+                        
+                    }
+                    
+                }
             }
 
-            return (MethodInfo) null;
+            return null;
         }
 
         private static bool IsImplicitNumericConversion(Type source, Type destination) {

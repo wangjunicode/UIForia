@@ -22,6 +22,6 @@
 <!--            onMouseClick="OnBoxClicked(3)">-->
             Clicked {boxClicks3} times
         </Div>
-        
+
     </Contents>
 </UITemplate>

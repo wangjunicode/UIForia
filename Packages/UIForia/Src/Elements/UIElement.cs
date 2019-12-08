@@ -142,10 +142,7 @@ namespace UIForia.Elements {
         internal UIElement parent;
 
         public LayoutResult layoutResult;
-
-        // todo -- move to per-instance object since its always set anyway
-        internal static IntMap<ElementColdData> s_ColdDataMap = new IntMap<ElementColdData>();
-
+        
         internal AwesomeLayoutBox layoutBox;
         internal RenderBox renderBox;
         public UIStyleSet style; // todo -- make internal with accessor
@@ -168,25 +165,7 @@ namespace UIForia.Elements {
         protected internal UIElement() { }
 
         public Application Application => View.application;
-
-        public UIChildrenElement TranscludedChildren {
-            get { return s_ColdDataMap.GetOrDefault(id).transcludedChildren; }
-            internal set {
-                ElementColdData coldData = s_ColdDataMap.GetOrDefault(id);
-                coldData.transcludedChildren = value;
-                s_ColdDataMap[id] = coldData;
-            }
-        }
-
-        public UITemplate OriginTemplate {
-            get { return s_ColdDataMap.GetOrDefault(id).templateRef; }
-            internal set {
-                ElementColdData coldData = s_ColdDataMap.GetOrDefault(id);
-                coldData.templateRef = value;
-                coldData.InitializeAttributes();
-                s_ColdDataMap[id] = coldData;
-            }
-        }
+        
 
         public int depth { get; internal set; }
         public int siblingIndex { get; internal set; }
@@ -345,10 +324,6 @@ namespace UIForia.Elements {
                     continue;
                 }
 
-                if (children[i]?.OriginTemplate is UIElementTemplate) {
-                    continue;
-                }
-
                 UIElement childResult = children[i].FindFirstByType<T>();
                 if (childResult != null) {
                     return (T) childResult;
@@ -371,10 +346,6 @@ namespace UIForia.Elements {
 
 
                 if (children[i] is UIChildrenElement) {
-                    continue;
-                }
-
-                if (children[i]?.OriginTemplate is UIElementTemplate) {
                     continue;
                 }
 
@@ -499,9 +470,6 @@ namespace UIForia.Elements {
         }
 
         internal void InternalDestroy() {
-            ElementColdData coldData = s_ColdDataMap.GetOrDefault(id);
-            coldData.Destroy();
-            s_ColdDataMap.Remove(id);
             LightList<UIElement>.Release(ref children);
             parent = null;
         }

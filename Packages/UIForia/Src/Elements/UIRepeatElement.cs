@@ -16,9 +16,7 @@ namespace UIForia.Elements {
         internal string itemAlias;
         internal string indexAlias;
         internal string lengthAlias;
-        internal UITemplate template;
-        internal TemplateScope scope;
-        
+
         public event Action onListPopulated;
         public event Action onListEmptied;
 
@@ -53,10 +51,6 @@ namespace UIForia.Elements {
 
         internal RepeatableList<T> list;
         
-        public UIRepeatElement(UITemplate template, TemplateScope scope) {
-            this.template = template;
-            this.scope = scope;
-        }
       
         public override string GetDisplayName() {
             return "Repeat";

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Text;
 using JetBrains.Annotations;
 using UIForia.Extensions;
 using UIForia.Util;
@@ -12,10 +13,10 @@ namespace UIForia.Compilers {
 
         // used in expressions to output comments in compiled functions
         public static void Comment(string comment) { }
-        
+
         // used in expressions to output comments in compiled functions
         public static void CommentNewLineBefore(string comment) { }
-        
+
         // used in expressions to output comments in compiled functions
         public static void CommentNewLineAfter(string comment) { }
 
@@ -49,22 +50,21 @@ namespace UIForia.Compilers {
 
         }
 
-        internal static MethodInfo SelectEligibleMethod(IList<MethodInfo> methodInfos, Expression[] arguments, out StructList<ParameterConversion> winningConversions) {
+        internal static MethodInfo SelectEligibleMethod(IList<MethodInfo> methodInfos, Expression[] arguments, StructList<ParameterConversion> winningConversions) {
             if (methodInfos.Count == 0) {
-                winningConversions = null;
                 return null;
             }
-            
+
             if (methodInfos.Count == 1) {
-                winningConversions = null;
-                if (CheckCandidate(new Candidate(methodInfos[0].GetParametersCached()), arguments, out int unused, out winningConversions)) {
+                if (CheckCandidate(new Candidate(methodInfos[0].GetParameters()), arguments, out int unused, winningConversions)) {
                     return methodInfos[0];
                 }
 
                 return null;
             }
-
+            
             StructList<Candidate> candidates = StructList<Candidate>.GetMinSize(methodInfos.Count);
+            StructList<ParameterConversion> conversions = StructList<ParameterConversion>.Get();
 
             int argCount = arguments.Length;
 
@@ -90,14 +90,14 @@ namespace UIForia.Compilers {
                 }
             }
 
-            winningConversions = null;
-            
             int winner = -1;
             int winnerPoints = -1;
+
             for (int i = 0; i < candidates.Count; i++) {
                 int candidatePoints;
-                StructList<ParameterConversion> conversions;
-                if (!CheckCandidate(candidates[i], arguments, out candidatePoints, out conversions)) {
+                conversions.QuickClear();
+
+                if (!CheckCandidate(candidates[i], arguments, out candidatePoints, conversions)) {
                     continue;
                 }
 
@@ -105,53 +105,53 @@ namespace UIForia.Compilers {
                 if (BestScoreSoFar(candidatePoints, winnerPoints)) {
                     winner = i;
                     winnerPoints = candidatePoints;
-                    if (winningConversions != null) {
-                        StructList<ParameterConversion>.Release(ref winningConversions);
-                    }
 
-                    winningConversions = conversions;
+                    winningConversions.QuickClear();
+                    winningConversions.AddRange(conversions);
                 }
             }
 
+            StructList<ParameterConversion>.Release(ref conversions);
+            
             if (winner != -1) {
                 MethodInfo retn = candidates[winner].methodInfo;
                 StructList<Candidate>.Release(ref candidates);
                 return retn;
             }
-            StructList<Candidate>.Release(ref candidates);
+
             return null;
         }
 
-        internal static ConstructorInfo SelectEligibleConstructor(Type type, Expression[] arguments, out StructList<ParameterConversion> winningConversions) {
+        internal static ConstructorInfo SelectEligibleConstructor(Type type, Expression[] arguments, StructList<ParameterConversion> winningConversions) {
             ConstructorInfo[] constructors = type.GetConstructors(BindingFlags.Instance | BindingFlags.Public);
 
             if (constructors.Length == 0) {
-                winningConversions = null;
                 return null;
             }
 
             if (constructors.Length == 1) {
-                winningConversions = null;
-                if (CheckCandidate(new Candidate(constructors[0].GetParametersCached()), arguments, out int unused, out winningConversions)) {
+                if (CheckCandidate(new Candidate(constructors[0].GetParametersCached()), arguments, out int unused, winningConversions)) {
                     return constructors[0];
                 }
 
                 return null;
             }
 
-            Candidate[] candidates = new Candidate[constructors.Length];
-            winningConversions = null;
+            StructList<Candidate> candidates = StructList<Candidate>.GetMinSize(constructors.Length);
+            StructList<ParameterConversion> conversions = StructList<ParameterConversion>.Get();
 
-            for (int i = 0; i < candidates.Length; i++) {
+            for (int i = 0; i < constructors.Length; i++) {
                 candidates[i] = new Candidate(constructors[i].GetParametersCached());
             }
 
             int winner = -1;
             int winnerPoints = 0;
+
             for (int i = 0; i < constructors.Length; i++) {
                 int candidatePoints;
-                StructList<ParameterConversion> conversions;
-                if (!CheckCandidate(candidates[i], arguments, out candidatePoints, out conversions)) {
+                conversions.QuickClear();
+
+                if (!CheckCandidate(candidates[i], arguments, out candidatePoints, conversions)) {
                     continue;
                 }
 
@@ -159,13 +159,13 @@ namespace UIForia.Compilers {
                 if (BestScoreSoFar(candidatePoints, winnerPoints)) {
                     winner = i;
                     winnerPoints = candidatePoints;
-                    if (winningConversions != null) {
-                        StructList<ParameterConversion>.Release(ref winningConversions);
-                    }
-
-                    winningConversions = conversions;
+                    winningConversions.QuickClear();
+                    winningConversions.AddRange(conversions);
                 }
             }
+
+            StructList<Candidate>.Release(ref candidates);
+            StructList<ParameterConversion>.Release(ref conversions);
 
             if (winner != -1) {
                 return constructors[winner];
@@ -195,9 +195,8 @@ namespace UIForia.Compilers {
             return winnerPoints < candidatePoints;
         }
 
-        private static bool CheckCandidate(Candidate candidate, Expression[] context, out int candidatePoints, out StructList<ParameterConversion> conversions) {
+        private static bool CheckCandidate(Candidate candidate, Expression[] context, out int candidatePoints, StructList<ParameterConversion> conversions) {
             candidatePoints = 0;
-
 
             if (context.Length > candidate.dependencies.Length) {
                 candidatePoints = 0;
@@ -205,7 +204,6 @@ namespace UIForia.Compilers {
                 return false;
             }
 
-            conversions = StructList<ParameterConversion>.Get();
             for (int i = 0; i < candidate.dependencies.Length; i++) {
                 if (i < context.Length) {
                     Type paramType = candidate.dependencies[i].ParameterType;

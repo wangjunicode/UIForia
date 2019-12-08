@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using UIForia.Elements;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 namespace UIForia {
     
@@ -35,7 +37,9 @@ namespace UIForia {
             }
             else {
                 TemplateSettings settings = GetTemplateSettings();
+             
                 application = GameApplication.Create(type, settings, camera);
+              
             }
 
             application.onElementRegistered += DoDependencyInjection;

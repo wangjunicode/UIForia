@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using Src.Systems;
 using UIForia.Animation;
 using UIForia.Bindings;
@@ -16,6 +18,7 @@ using UIForia.Systems;
 using UIForia.Systems.Input;
 using UIForia.Util;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 namespace UIForia {
 
@@ -170,7 +173,6 @@ namespace UIForia {
         protected Application(string id, string templateRootPath = null, ResourceManager resourceManager = null) {
             this.id = id;
             this.templateRootPath = templateRootPath;
-
             this.elemRefStack = new StructStack<ElemRef>(32);
             // todo -- exceptions in constructors aren't good practice
             if (s_ApplicationList.Find(id, (app, _id) => app.id == _id) != null) {
@@ -462,6 +464,24 @@ namespace UIForia {
         }
 
         public void Update() {
+            TemplateSettings settings = new TemplateSettings();
+            settings.applicationName = frameId.ToString();
+            settings.assemblyName = "Assembly-CSharp";
+            settings.outputPath = Path.Combine(UnityEngine.Application.dataPath, "UIForiaGenerated");
+            settings.codeFileExtension = "generated.cs";
+            settings.preCompiledTemplatePath = "Assets/UIForia_Generated/" + frameId;
+            settings.templateResolutionBasePath = Path.Combine(UnityEngine.Application.dataPath);
+            TemplateCompiler compiler = new TemplateCompiler(settings);
+
+            CompiledTemplateData compiledOutput = new RuntimeTemplateData(settings);
+
+            Debug.Log("Starting");
+            Stopwatch watch = new Stopwatch();
+            watch.Start();
+            compiler.CompileTemplates(m_Views[0].RootElement.GetType(), compiledOutput);
+            watch.Stop();
+            Debug.Log("loaded app in " + watch.ElapsedMilliseconds);
+            
             m_InputSystem.OnUpdate();
 
             linqBindingSystem.OnUpdate();

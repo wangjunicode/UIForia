@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using UIForia.Compilers;
-using UIForia.Compilers.ExpressionResolvers;
 using UIForia.Elements;
 using UIForia.Exceptions;
 using UIForia.Expressions;
@@ -12,28 +11,11 @@ using UnityEngine;
 
 namespace UIForia.Animation {
 
-    public class VariableResolver<T> : ExpressionAliasResolver {
-
-        public T value;
-
-        public VariableResolver(string aliasName, T value) : base(aliasName) {
-            this.value = value;
-        }
-
-        public override Expression CompileAsValueExpression(CompilerContext context) {
-            return new ConstantExpression<T>(value);
-        }
-
-    }
+   
 
     public class StyleKeyFrameAnimation : StyleAnimation {
 
         private readonly LightList<ProcessedKeyFrameGroup> processedFrameGroups;
-        private static readonly ExpressionCompiler expressionCompiler;
-
-        static StyleKeyFrameAnimation() {
-            expressionCompiler = new ExpressionCompiler(true);
-        }
 
         public StyleKeyFrameAnimation(UIElement target, AnimationData data) : base(target, data) {
             processedFrameGroups = new LightList<ProcessedKeyFrameGroup>();
@@ -76,7 +58,7 @@ namespace UIForia.Animation {
                     case StylePropertyId.MarginLeft:
                     case StylePropertyId.MarginRight: {
                         UIFixedLength val = target.style.GetComputedStyleProperty(property.propertyId).AsUIFixedLength;
-                        expressionCompiler.SetAliasResolver(new VariableResolver<UIFixedLength>("startVal", ResolveFixedWidth(target, target.View.Viewport, val)));
+                        // expressionCompiler.SetAliasResolver(new VariableResolver<UIFixedLength>("startVal", ResolveFixedWidth(target, target.View.Viewport, val)));
                         break;
                     }
 
@@ -89,7 +71,7 @@ namespace UIForia.Animation {
                     case StylePropertyId.MarginTop:
                     case StylePropertyId.MarginBottom: {
                         UIFixedLength val = target.style.GetComputedStyleProperty(property.propertyId).AsUIFixedLength;
-                        expressionCompiler.SetAliasResolver(new VariableResolver<UIFixedLength>("startVal", ResolveFixedHeight(target, target.View.Viewport, val)));
+                       //  expressionCompiler.SetAliasResolver(new VariableResolver<UIFixedLength>("startVal", ResolveFixedHeight(target, target.View.Viewport, val)));
                         break;
                     }
 
@@ -97,7 +79,7 @@ namespace UIForia.Animation {
                     case StylePropertyId.MinWidth:
                     case StylePropertyId.MaxWidth: {
                         UIMeasurement val = target.style.GetComputedStyleProperty(property.propertyId).AsUIMeasurement;
-                        expressionCompiler.SetAliasResolver(new VariableResolver<UIMeasurement>("startVal", ResolveWidthMeasurement(target, target.View.Viewport, val)));
+                      //  expressionCompiler.SetAliasResolver(new VariableResolver<UIMeasurement>("startVal", ResolveWidthMeasurement(target, target.View.Viewport, val)));
                         break;
                     }
 
@@ -105,7 +87,7 @@ namespace UIForia.Animation {
                     case StylePropertyId.MinHeight:
                     case StylePropertyId.MaxHeight: {
                         UIMeasurement val = target.style.GetComputedStyleProperty(property.propertyId).AsUIMeasurement;
-                        expressionCompiler.SetAliasResolver(new VariableResolver<UIMeasurement>("startVal", ResolveHeightMeasurement(target, target.View.Viewport, val)));
+                      //  expressionCompiler.SetAliasResolver(new VariableResolver<UIMeasurement>("startVal", ResolveHeightMeasurement(target, target.View.Viewport, val)));
                         break;
                     }
 
@@ -115,7 +97,7 @@ namespace UIForia.Animation {
                     case StylePropertyId.TransformRotation:
                     case StylePropertyId.GridLayoutColGap:
                     case StylePropertyId.GridLayoutRowGap: {
-                        expressionCompiler.SetAliasResolver(new VariableResolver<float>("startVal", target.style.GetComputedStyleProperty(property.propertyId).AsFloat));
+                       // expressionCompiler.SetAliasResolver(new VariableResolver<float>("startVal", target.style.GetComputedStyleProperty(property.propertyId).AsFloat));
                         break;
                     }
 

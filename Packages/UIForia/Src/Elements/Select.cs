@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using UIForia.Attributes;
-using UIForia.Compilers.ExpressionResolvers;
 using UIForia.Rendering;
 using UIForia.Templates;
 using UIForia.UIInput;
@@ -400,12 +399,7 @@ namespace UIForia.Elements {
             evt.StopPropagation();
             evt.Consume();
         }
-
-        private static void GetAliasResolvers(IList<ExpressionAliasResolver> resolvers, AttributeList attributes) {
-            resolvers.Add(new SelectOptionAliasResolver<T>("$option", false));
-            resolvers.Add(new SelectOptionAliasResolver<T>("$option__internal", true));
-        }
-
+        
         public bool Focus() {
             return GetAttribute("disabled") == null;
         }

@@ -43,6 +43,8 @@ namespace UIForia.Util {
         public const BindingFlags StaticFlags = BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
         public const BindingFlags InstanceBindFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
         public const BindingFlags InterfaceBindFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.Static;
+        private static readonly LRUCache<Type, MethodInfo[]> s_InstanceMethodCache = new LRUCache<Type, MethodInfo[]>(128);
+        private static readonly LRUCache<Type, MethodInfo[]> s_StaticMethodCache = new LRUCache<Type, MethodInfo[]>(128);
 
         private static readonly List<GenericTypeEntry> generics = new List<GenericTypeEntry>();
         private static readonly List<DelegateEntry> staticDelegates = new List<DelegateEntry>();
@@ -63,7 +65,6 @@ namespace UIForia.Util {
         public static readonly Type[] TypeArray4 = new Type[4];
 
         public static Type GetArrayElementTypeOrThrow(Type targetType) {
-
             targetType = Nullable.GetUnderlyingType(targetType) ?? targetType;
 
             if (targetType.IsArray) {
@@ -135,7 +136,7 @@ namespace UIForia.Util {
         public static bool IsField(Type type, string fieldName) {
             return type.GetField(fieldName, InstanceBindFlags) != null;
         }
-        
+
         public static bool IsEvent(Type type, string evtName, out EventInfo evtInfo) {
             evtInfo = type.GetEvent(evtName, InstanceBindFlags);
             return evtInfo != null;
@@ -160,14 +161,54 @@ namespace UIForia.Util {
             return methodInfo != null;
         }
 
+        public static MethodInfo[] GetInstanceMethods(Type type) {
+            if (s_InstanceMethodCache.TryGet(type, out MethodInfo[] v)) {
+                return v;
+            }
+            else {
+                MethodInfo[] methods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance);
+                s_InstanceMethodCache.Add(type, methods);
+                return methods;
+            }
+        }
+
+        public static MethodInfo[] GetStaticMethods(Type type) {
+            if (s_StaticMethodCache.TryGet(type, out MethodInfo[] v)) {
+                return v;
+            }
+            else {
+                MethodInfo[] methods = type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
+                s_StaticMethodCache.Add(type, methods);
+                return methods;
+            }
+        }
+//        
+//        public static void GetPublicStaticMethods(Type type, LightList<MethodInfo> retn) {
+//            MethodInfo[] methods = GetInstanceMethods(type);
+//            for (int i = 0; i < methods.Length; i++) {
+//                if (methods[i].IsPublic){
+//                    retn.Add(methods[i]);
+//                }
+//            }
+//        }
+//
+//        public static void GetPublicInstanceMethods(Type type, LightList<MethodInfo> retn) {
+//            MethodInfo[] methods = GetInstanceMethods(type);
+//            for (int i = 0; i < methods.Length; i++) {
+//                if (!methods[i].IsStatic && methods[i].IsPublic) {
+//                    retn.Add(methods[i]);
+//                }
+//            }
+//        }
+
         public static bool HasInstanceMethod(Type type, string methodName, out LightList<MethodInfo> methodInfos) {
-            MethodInfo[] publicMethods = type.GetMethods(InstanceBindFlags);
+            MethodInfo[] methods = GetInstanceMethods(type);
 
             LightList<MethodInfo> retn = LightList<MethodInfo>.Get();
 
-            for (int i = 0; i < publicMethods.Length; i++) {
-                if (publicMethods[i].Name == methodName) {
-                    retn.Add(publicMethods[i]);
+            for (int i = 0; i < methods.Length; i++) {
+                if (methods[i].IsStatic && methods[i].Name == methodName) {
+                    retn.Add(methods[i]);
                 }
             }
 
@@ -181,25 +222,16 @@ namespace UIForia.Util {
             return true;
         }
 
-        public static bool HasStaticMethod(Type type, string methodName, out LightList<MethodInfo> methodInfos) {
-            MethodInfo[] publicMethods = type.GetMethods(StaticFlags | BindingFlags.Public);
+        public static bool HasStaticMethod(Type type, string methodName, LightList<MethodInfo> retn) {
+            MethodInfo[] methods = GetInstanceMethods(type);
 
-            LightList<MethodInfo> retn = LightList<MethodInfo>.Get();
-
-            for (int i = 0; i < publicMethods.Length; i++) {
-                if (publicMethods[i].Name == methodName) {
-                    retn.Add(publicMethods[i]);
+            for (int i = 0; i < methods.Length; i++) {
+                if (methods[i].IsStatic && methods[i].Name == methodName) {
+                    retn.Add(methods[i]);
                 }
             }
 
-            if (retn.Count == 0) {
-                LightList<MethodInfo>.Release(ref retn);
-                methodInfos = null;
-                return false;
-            }
-
-            methodInfos = retn;
-            return true;
+            return retn.size != 0;
         }
 
         public static Type GetFieldType(Type type, string fieldName) {
@@ -419,7 +451,8 @@ namespace UIForia.Util {
         }
 
         public static Type CreateGenericType(Type baseType, params Type[] genericArguments) {
-            return baseType.MakeGenericType(genericArguments);;
+            return baseType.MakeGenericType(genericArguments);
+            ;
         }
 
         public static Type[] SetTempTypeArray(Type type, Type type1) {
@@ -1016,11 +1049,10 @@ namespace UIForia.Util {
             if (generic == typeof(Action<,,,,,,>)) return true;
             return false;
         }
-        
-        public static bool IsFunc(Type type) {
 
+        public static bool IsFunc(Type type) {
             if (!type.IsGenericType) return false;
-            
+
             Type generic = null;
             if (type.IsGenericTypeDefinition) {
                 generic = type;
@@ -1039,97 +1071,104 @@ namespace UIForia.Util {
             return false;
         }
 
-        public static MethodInfo GetImplicitConversion(Type targetType, Type inputType) {
-            MethodInfo[] infos = targetType.GetMethods(BindingFlags.Public | BindingFlags.Static);
+//        public static MethodInfo GetImplicitConversion(Type targetType, Type inputType) {
+//            LightList<MethodInfo> infos = LightList<MethodInfo>.Get();
+//            GetStaticMethods(targetType, infos);
+//            for (int i = 0; i < infos.size; i++) {
+//                if (!infos.array[i].IsStatic || !infos.array[i].IsPublic) {
+//                    continue;
+//                }
+//
+//                if (infos[i].Name == "op_Implicit" && infos[i].ReturnType == targetType) {
+//                    ParameterInfo pi = infos[i].GetParameters().FirstOrDefault();
+//                    if (pi != null && pi.ParameterType == inputType) {
+//                        LightList<MethodInfo>.Release(ref infos);
+//                        return infos[i];
+//                    }
+//                }
+//            }
+//
+//            LightList<MethodInfo>.Release(ref infos);
+//
+//            return null;
+//        }
+
+//        public static MethodInfo GetBinaryOperator(string opName, Type leftType, Type rightType) {
+//            MethodInfo[] infos = leftType.GetMethods(BindingFlags.Public | BindingFlags.Static);
+//            for (int i = 0; i < infos.Length; i++) {
+//                if (infos[i].Name == opName && infos[i].ReturnType == leftType) {
+//                    ParameterInfo[] pi = infos[i].GetParameters();
+//                    if (pi.Length != 2) {
+//                        continue;
+//                    }
+//
+//                    if (pi[0].ParameterType == leftType && pi[1].ParameterType == rightType) {
+//                        return infos[i];
+//                    }
+//                }
+//            }
+//
+//            return null;
+//        }
+//
+//        // todo don't require bool return type
+//        public static MethodInfo GetComparisonOperator(string opName, Type leftType, Type rightType) {
+//            MethodInfo[] infos = leftType.GetMethods(BindingFlags.Public | BindingFlags.Static);
+//            for (int i = 0; i < infos.Length; i++) {
+//                if (infos[i].Name == opName && infos[i].ReturnType == typeof(bool)) {
+//                    ParameterInfo[] pi = infos[i].GetParameters();
+//                    if (pi.Length != 2) {
+//                        continue;
+//                    }
+//
+//                    if (pi[0].ParameterType == leftType && pi[1].ParameterType == rightType) {
+//                        return infos[i];
+//                    }
+//                }
+//            }
+//
+//            return null;
+//        }
+//
+//        public static MethodInfo GetUnaryOperator(string opName, Type type) {
+//            MethodInfo[] infos = type.GetMethods(BindingFlags.Public | BindingFlags.Static);
+//            for (int i = 0; i < infos.Length; i++) {
+//                if (infos[i].Name == opName) {
+//                    ParameterInfo[] pi = infos[i].GetParameters();
+//                    if (pi.Length != 1) {
+//                        continue;
+//                    }
+//
+//                    if (pi[0].ParameterType == type) {
+//                        return infos[i];
+//                    }
+//                }
+//            }
+//
+//            return null;
+//        }
+
+//        public static List<MethodInfo> GetMethodsWithName(Type type, string targetName) {
+//            MethodInfo[] infos = type.GetMethods(InstanceBindFlags | StaticFlags);
+//            List<MethodInfo> retn = new List<MethodInfo>();
+//            for (int i = 0; i < infos.Length; i++) {
+//                if (infos[i].Name == targetName) {
+//                    retn.Add(infos[i]);
+//                }
+//            }
+//
+//            return retn;
+//        }
+
+        public static void GetPublicInstanceMethodsWithName(Type type, string targetName, LightList<MethodInfo> retn) {
+            MethodInfo[] infos = GetInstanceMethods(type);
+
             for (int i = 0; i < infos.Length; i++) {
-                if (infos[i].Name == "op_Implicit" && infos[i].ReturnType == targetType) {
-                    ParameterInfo pi = infos[i].GetParameters().FirstOrDefault();
-                    if (pi != null && pi.ParameterType == inputType) {
-                        return infos[i];
-                    }
-                }
-            }
-
-            return null;
-        }
-
-        public static MethodInfo GetBinaryOperator(string opName, Type leftType, Type rightType) {
-            MethodInfo[] infos = leftType.GetMethods(BindingFlags.Public | BindingFlags.Static);
-            for (int i = 0; i < infos.Length; i++) {
-                if (infos[i].Name == opName && infos[i].ReturnType == leftType) {
-                    ParameterInfo[] pi = infos[i].GetParameters();
-                    if (pi.Length != 2) {
-                        continue;
-                    }
-
-                    if (pi[0].ParameterType == leftType && pi[1].ParameterType == rightType) {
-                        return infos[i];
-                    }
-                }
-            }
-
-            return null;
-        }
-
-        // todo don't require bool return type
-        public static MethodInfo GetComparisonOperator(string opName, Type leftType, Type rightType) {
-            MethodInfo[] infos = leftType.GetMethods(BindingFlags.Public | BindingFlags.Static);
-            for (int i = 0; i < infos.Length; i++) {
-                if (infos[i].Name == opName && infos[i].ReturnType == typeof(bool)) {
-                    ParameterInfo[] pi = infos[i].GetParameters();
-                    if (pi.Length != 2) {
-                        continue;
-                    }
-
-                    if (pi[0].ParameterType == leftType && pi[1].ParameterType == rightType) {
-                        return infos[i];
-                    }
-                }
-            }
-
-            return null;
-        }
-
-        public static MethodInfo GetUnaryOperator(string opName, Type type) {
-            MethodInfo[] infos = type.GetMethods(BindingFlags.Public | BindingFlags.Static);
-            for (int i = 0; i < infos.Length; i++) {
-                if (infos[i].Name == opName) {
-                    ParameterInfo[] pi = infos[i].GetParameters();
-                    if (pi.Length != 1) {
-                        continue;
-                    }
-
-                    if (pi[0].ParameterType == type) {
-                        return infos[i];
-                    }
-                }
-            }
-
-            return null;
-        }
-
-        public static List<MethodInfo> GetMethodsWithName(Type type, string targetName) {
-            MethodInfo[] infos = type.GetMethods(InstanceBindFlags | StaticFlags);
-            List<MethodInfo> retn = new List<MethodInfo>();
-            for (int i = 0; i < infos.Length; i++) {
-                if (infos[i].Name == targetName) {
+                if (string.Equals(infos[i].Name, targetName)) {
                     retn.Add(infos[i]);
                 }
             }
-
-            return retn;
-        }
-
-        public static LightList<MethodInfo> GetInstanceMethodsWithName(Type type, string targetName) {
-            MethodInfo[] infos = type.GetMethods(InstanceBindFlags);
-            LightList<MethodInfo> retn = LightList<MethodInfo>.Get();
-            for (int i = 0; i < infos.Length; i++) {
-                if (infos[i].Name == targetName) {
-                    retn.Add(infos[i]);
-                }
-            }
-
-            return retn;
+            
         }
 
         public static bool IsConstantField(Type rootType, string fieldName) {

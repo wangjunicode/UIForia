@@ -24,7 +24,12 @@ namespace UIForia.Parsing.Style.Tokenizer {
                 return;
             }
 
-            while (context.HasMore() && char.IsWhiteSpace(context.input[context.ptr])) {
+            while (context.ptr < context.input.Length) {
+                char c = context.input[context.ptr];
+                if (!(c == ' ' || c >= '\t' && c <= '\r' || (c == ' ' || c == '\x0085'))) {
+                    break;
+                }
+
                 context.Advance();
             }
         }
@@ -116,11 +121,14 @@ namespace UIForia.Parsing.Style.Tokenizer {
             if (!char.IsLetter(first) && first != '_' && first != '$') return;
 
             context.Save();
-            while (context.HasMore()
-                   && (char.IsLetterOrDigit(context.input[context.ptr])
-                       || context.input[context.ptr] == '_'
-                       || context.input[context.ptr] == '-'
-                       || context.input[context.ptr] == '$')) {
+
+            while (context.HasMore()) {
+                char character = context.input[context.ptr];
+
+                if (!(char.IsLetterOrDigit(character) || character == '_' || character == '-' || character == '$')) {
+                    break;
+                }
+
                 context.Advance();
             }
 
@@ -133,32 +141,32 @@ namespace UIForia.Parsing.Style.Tokenizer {
         }
 
         private static StyleToken TransformIdentifierToTokenType(TokenizerContext context, string identifier) {
-            string identifierLowerCase = identifier.ToLower();
-            switch (identifierLowerCase) {
-                case "use": return new StyleToken(StyleTokenType.Use, identifierLowerCase, context.line, context.column);
-                case "and": return new StyleToken(StyleTokenType.And, identifierLowerCase, context.line, context.column);
-                case "not": return new StyleToken(StyleTokenType.Not, identifierLowerCase, context.line, context.column);
-                case "style": return new StyleToken(StyleTokenType.Style, identifierLowerCase, context.line, context.column);
-                case "animation": return new StyleToken(StyleTokenType.Animation, identifierLowerCase, context.line, context.column);
-                case "texture": return new StyleToken(StyleTokenType.Texture, identifierLowerCase, context.line, context.column);
-                case "audio": return new StyleToken(StyleTokenType.Audio, identifierLowerCase, context.line, context.column);
-                case "cursor": return new StyleToken(StyleTokenType.Cursor, identifierLowerCase, context.line, context.column);
-                case "export": return new StyleToken(StyleTokenType.Export, identifierLowerCase, context.line, context.column);
-                case "const": return new StyleToken(StyleTokenType.Const, identifierLowerCase, context.line, context.column);
-                case "import": return new StyleToken(StyleTokenType.Import, identifierLowerCase, context.line, context.column);
-                case "attr": return new StyleToken(StyleTokenType.AttributeSpecifier, identifierLowerCase, context.line, context.column);
-                case "true": return new StyleToken(StyleTokenType.Boolean, identifierLowerCase, context.line, context.column);
-                case "false": return new StyleToken(StyleTokenType.Boolean, identifierLowerCase, context.line, context.column);
-                case "from": return new StyleToken(StyleTokenType.From, identifierLowerCase, context.line, context.column);
-                case "as": return new StyleToken(StyleTokenType.As, identifierLowerCase, context.line, context.column);
-                case "rgba": return new StyleToken(StyleTokenType.Rgba, identifierLowerCase, context.line, context.column);
-                case "rgb": return new StyleToken(StyleTokenType.Rgb, identifierLowerCase, context.line, context.column);
-                case "url": return new StyleToken(StyleTokenType.Url, identifierLowerCase, context.line, context.column);
-                case "exit": return new StyleToken(StyleTokenType.Exit, identifierLowerCase, context.line, context.column);
-                case "enter": return new StyleToken(StyleTokenType.Enter, identifierLowerCase, context.line, context.column);
-                case "run": return new StyleToken(StyleTokenType.Run, identifierLowerCase, context.line, context.column);
-                case "pause": return new StyleToken(StyleTokenType.Pause, identifierLowerCase, context.line, context.column);
-                case "stop": return new StyleToken(StyleTokenType.Stop, identifierLowerCase, context.line, context.column);
+//            string identifierLowerCase = identifier.ToLower();
+            switch (identifier) {
+                case "use": return new StyleToken(StyleTokenType.Use, identifier, context.line, context.column);
+                case "and": return new StyleToken(StyleTokenType.And, identifier, context.line, context.column);
+                case "not": return new StyleToken(StyleTokenType.Not, identifier, context.line, context.column);
+                case "style": return new StyleToken(StyleTokenType.Style, identifier, context.line, context.column);
+                case "animation": return new StyleToken(StyleTokenType.Animation, identifier, context.line, context.column);
+                case "texture": return new StyleToken(StyleTokenType.Texture, identifier, context.line, context.column);
+                case "audio": return new StyleToken(StyleTokenType.Audio, identifier, context.line, context.column);
+                case "cursor": return new StyleToken(StyleTokenType.Cursor, identifier, context.line, context.column);
+                case "export": return new StyleToken(StyleTokenType.Export, identifier, context.line, context.column);
+                case "const": return new StyleToken(StyleTokenType.Const, identifier, context.line, context.column);
+                case "import": return new StyleToken(StyleTokenType.Import, identifier, context.line, context.column);
+                case "attr": return new StyleToken(StyleTokenType.AttributeSpecifier, identifier, context.line, context.column);
+                case "true": return new StyleToken(StyleTokenType.Boolean, identifier, context.line, context.column);
+                case "false": return new StyleToken(StyleTokenType.Boolean, identifier, context.line, context.column);
+                case "from": return new StyleToken(StyleTokenType.From, identifier, context.line, context.column);
+                case "as": return new StyleToken(StyleTokenType.As, identifier, context.line, context.column);
+                case "rgba": return new StyleToken(StyleTokenType.Rgba, identifier, context.line, context.column);
+                case "rgb": return new StyleToken(StyleTokenType.Rgb, identifier, context.line, context.column);
+                case "url": return new StyleToken(StyleTokenType.Url, identifier, context.line, context.column);
+                case "exit": return new StyleToken(StyleTokenType.Exit, identifier, context.line, context.column);
+                case "enter": return new StyleToken(StyleTokenType.Enter, identifier, context.line, context.column);
+                case "run": return new StyleToken(StyleTokenType.Run, identifier, context.line, context.column);
+                case "pause": return new StyleToken(StyleTokenType.Pause, identifier, context.line, context.column);
+                case "stop": return new StyleToken(StyleTokenType.Stop, identifier, context.line, context.column);
                 default: {
                     return new StyleToken(StyleTokenType.Identifier, identifier, context.line, context.column);
                 }

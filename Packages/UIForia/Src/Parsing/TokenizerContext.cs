@@ -31,7 +31,7 @@ namespace UIForia.Parsing {
         }
 
         public TokenizerContext Advance() {
-            if (IsConsumed()) return this;
+            if (ptr >= input.Length) return this;
             if (input[ptr] == '\n') {
                 line++;
                 column = 1;

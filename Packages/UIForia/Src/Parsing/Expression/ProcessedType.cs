@@ -71,7 +71,7 @@ namespace UIForia.Parsing {
 
         public void GetChangeHandlers(string memberName, StructList<PropertyChangeHandlerDesc> retn) {
             if (methods == null) {
-                MethodInfo[] candidates = rawType.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                var candidates = ReflectionUtil.GetInstanceMethods(rawType);
                 for (int i = 0; i < candidates.Length; i++) {
                     IEnumerable<OnPropertyChanged> attrs = candidates[i].GetCustomAttributes<OnPropertyChanged>();
                     methods = methods ?? new StructList<PropertyChangeHandlerDesc>();
@@ -82,18 +82,18 @@ namespace UIForia.Parsing {
                         });
                     }
                 }
+
             }
 
             if (methods == null) {
                 return;
             }
-            
+
             for (int i = 0; i < methods.size; i++) {
                 if (methods.array[i].memberName == memberName) {
                     retn.Add(methods[i]);
                 }
             }
-            
         }
 
         public void CreateCtor() {

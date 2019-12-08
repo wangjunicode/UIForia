@@ -115,7 +115,7 @@ namespace UIForia.Compilers {
         }
 
         private void PushBlock() {
-            BlockDefinition2 block = s_BlockPool.Get();
+            BlockDefinition2 block = new BlockDefinition2();
             block.parent = blockStack.Peek();
             block.compiler = this;
             block.blockId = blockIdGen++;
@@ -288,6 +288,16 @@ namespace UIForia.Compilers {
             }
 
             AddStatement(Expression.Assign(variable, value));
+            return variable;
+        }
+        
+        public ParameterExpression AddVariableUnchecked(Parameter parameter, Expression value) {
+            ParameterExpression variable = currentBlock.AddUserVariable(parameter);
+            if ((parameter.flags & ParameterFlags.NeverNull) != 0) {
+                wasNullChecked.Add(parameter.expression); // todo -- hack :(
+            }
+
+            AddStatement(ExpressionFactory.AssignUnchecked(variable, value));
             return variable;
         }
 
@@ -839,7 +849,9 @@ namespace UIForia.Compilers {
 
             head = NullCheck(head);
 
-            MethodInfo info = ExpressionUtil.SelectEligibleMethod(methodInfos, args, out StructList<ExpressionUtil.ParameterConversion> conversions);
+            StructList<ExpressionUtil.ParameterConversion> conversions = StructList<ExpressionUtil.ParameterConversion>.Get();
+            
+            MethodInfo info = ExpressionUtil.SelectEligibleMethod(methodInfos, args, conversions);
 
             if (info == null || !info.IsPublic) {
                 throw CompileException.UnresolvedMethodOverload(head.Type, methodInfos[0].Name, args.Select(a => a.Type).ToArray());
@@ -853,6 +865,8 @@ namespace UIForia.Compilers {
                 args[i] = conversions[i].Convert();
             }
 
+            conversions.Release();
+            
             return Expression.Call(head, info, args);
         }
 
@@ -1196,13 +1210,19 @@ namespace UIForia.Compilers {
                 args[i] = Visit(parameters[i]);
             }
 
-            if (!ReflectionUtil.HasStaticMethod(type, propertyName, out LightList<MethodInfo> methodInfos)) {
+            LightList<MethodInfo> methodInfos = LightList<MethodInfo>.Get();
+            
+            if (!ReflectionUtil.HasStaticMethod(type, propertyName, methodInfos)) {
+                LightList<MethodInfo>.Release(ref methodInfos);
                 throw CompileException.UnresolvedStaticMethod(type, propertyName);
             }
 
-            MethodInfo info = ExpressionUtil.SelectEligibleMethod(methodInfos, args, out StructList<ExpressionUtil.ParameterConversion> conversions);
+            StructList<ExpressionUtil.ParameterConversion> conversions = StructList<ExpressionUtil.ParameterConversion>.Get();
+            
+            MethodInfo info = ExpressionUtil.SelectEligibleMethod(methodInfos, args, conversions);
 
             if (info == null) {
+                LightList<MethodInfo>.Release(ref methodInfos);
                 throw CompileException.UnresolvedMethodOverload(type, propertyName, args.Select(a => a.Type).ToArray());
             }
 
@@ -1213,7 +1233,8 @@ namespace UIForia.Compilers {
             for (int i = 0; i < conversions.size; i++) {
                 args[i] = conversions[i].Convert();
             }
-
+            
+            conversions.Release();
             LightList<MethodInfo>.Release(ref methodInfos);
 
             return Expression.Call(null, info, args);
@@ -1537,8 +1558,11 @@ namespace UIForia.Compilers {
                     }
 
                     case PartType.DotInvoke:
-                        LightList<MethodInfo> methods = ReflectionUtil.GetInstanceMethodsWithName(lastExpression.Type, part.name);
+                        LightList<MethodInfo> methods = LightList<MethodInfo>.Get();
+                        ReflectionUtil.GetPublicInstanceMethodsWithName(lastExpression.Type, part.name, methods);
+                        
                         if (methods.size == 0) {
+                            LightList<MethodInfo>.Release(ref methods);
                             throw CompileException.UnresolvedMethod(lastExpression.Type, part.name);
                         }
 
@@ -2248,9 +2272,10 @@ namespace UIForia.Compilers {
                 arguments[i] = argument;
             }
 
-            StructList<ExpressionUtil.ParameterConversion> conversions;
+            StructList<ExpressionUtil.ParameterConversion> conversions = StructList<ExpressionUtil.ParameterConversion>.Get();
 
-            ConstructorInfo constructor = ExpressionUtil.SelectEligibleConstructor(type, arguments, out conversions);
+            ConstructorInfo constructor = ExpressionUtil.SelectEligibleConstructor(type, arguments, conversions);
+            
             if (constructor == null) {
                 throw CompileException.UnresolvedConstructor(type, arguments.Select((e) => e.Type).ToArray());
             }
@@ -2567,19 +2592,19 @@ namespace UIForia.Compilers {
         
         public void Comment(string comment) {
             if (outputComments) {
-                AddStatement(Expression.Call(s_Comment, Expression.Constant(comment)));
+                AddStatement(ExpressionFactory.CallStaticUnchecked(s_Comment, Expression.Constant(comment)));
             }
         }
 
         public void CommentNewLineBefore(string comment) {
             if (outputComments) {
-                AddStatement(Expression.Call(s_CommentNewLineBefore, Expression.Constant(comment)));
+                AddStatement(ExpressionFactory.CallStaticUnchecked(s_CommentNewLineBefore, Expression.Constant(comment)));
             }
         }
 
         public void CommentNewLineAfter(string comment) {
             if (outputComments) {
-                AddStatement(Expression.Call(s_CommentNewLineAfter, Expression.Constant(comment)));
+                AddStatement(ExpressionFactory.CallStaticUnchecked(s_CommentNewLineAfter, Expression.Constant(comment)));
             }
         }
 
@@ -2599,8 +2624,8 @@ namespace UIForia.Compilers {
         }
 
 
-        public void CallStatic(MethodInfo methodName, Expression p0, Expression p1, Expression p2) {
-            RawExpression(Expression.Call(null, methodName, p0, p1, p2));
+        public void CallStatic(MethodInfo methodInfo, Expression p0, Expression p1, Expression p2) {
+            RawExpression(ExpressionFactory.CallStaticUnchecked(methodInfo, p0, p1, p2));
         }
 
         public void Release() {

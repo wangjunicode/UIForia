@@ -1,6 +1,5 @@
 using System;
 using NUnit.Framework;
-using UIForia.Compilers.AliasSource;
 using UIForia.Elements;
 
 namespace Tests {
@@ -31,19 +30,7 @@ namespace Tests {
 
         }
 
-        public class TestAliasSource : IAliasSource {
-
-            public object value;
-
-            public TestAliasSource(object value) {
-                this.value = value;
-            }
-
-            public object ResolveAlias(string alias, object data = null) {
-                return value;
-            }
-
-        }
+     
 
         public class FakeRootElement : UIElement {
 

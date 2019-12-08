@@ -646,50 +646,51 @@ namespace UIForia.Systems {
         }
 
         public void OnElementCreated(UIElement element) {
-            UITemplate template = element.OriginTemplate;
-
-            if (template == null) return;
-
-            MouseEventHandler[] mouseHandlers = template.mouseEventHandlers;
-            DragEventCreator[] dragEventCreators = template.dragEventCreators;
-            DragEventHandler[] dragEventHandlers = template.dragEventHandlers;
-            KeyboardEventHandler[] keyboardHandlers = template.keyboardEventHandlers;
-
-            if (mouseHandlers != null && mouseHandlers.Length > 0) {
-                InputEventType handledEvents = 0;
-
-                for (int i = 0; i < mouseHandlers.Length; i++) {
-                    handledEvents |= mouseHandlers[i].eventType;
-                }
-
-                m_MouseHandlerMap[element.id] = new MouseHandlerGroup(element.templateContext, mouseHandlers, handledEvents);
-            }
-
-            if (dragEventHandlers != null && dragEventHandlers.Length > 0) {
-                InputEventType handledEvents = 0;
-
-                for (int i = 0; i < dragEventHandlers.Length; i++) {
-                    handledEvents |= dragEventHandlers[i].eventType;
-                }
-
-                m_DragHandlerMap[element.id] = new DragHandlerGroup(element.templateContext, dragEventHandlers, handledEvents);
-            }
-
-            if (keyboardHandlers != null && keyboardHandlers.Length > 0) {
-                m_KeyboardEventTree.AddItem(new KeyboardEventTreeNode(element, keyboardHandlers));
-            }
-
-            if (dragEventCreators != null && dragEventCreators.Length > 0) {
-                m_DragCreatorMap[element.id] = new DragCreatorGroup(element.templateContext, dragEventCreators);
-            }
-
-            if (element.children == null) {
-                return;
-            }
-
-            for (int i = 0; i < element.children.Count; i++) {
-                OnElementCreated(element.children[i]);
-            }
+            return;
+//            UITemplate template = element.OriginTemplate;
+//
+//            if (template == null) return;
+//
+//            MouseEventHandler[] mouseHandlers = template.mouseEventHandlers;
+//            DragEventCreator[] dragEventCreators = template.dragEventCreators;
+//            DragEventHandler[] dragEventHandlers = template.dragEventHandlers;
+//            KeyboardEventHandler[] keyboardHandlers = template.keyboardEventHandlers;
+//
+//            if (mouseHandlers != null && mouseHandlers.Length > 0) {
+//                InputEventType handledEvents = 0;
+//
+//                for (int i = 0; i < mouseHandlers.Length; i++) {
+//                    handledEvents |= mouseHandlers[i].eventType;
+//                }
+//
+//                m_MouseHandlerMap[element.id] = new MouseHandlerGroup(element.templateContext, mouseHandlers, handledEvents);
+//            }
+//
+//            if (dragEventHandlers != null && dragEventHandlers.Length > 0) {
+//                InputEventType handledEvents = 0;
+//
+//                for (int i = 0; i < dragEventHandlers.Length; i++) {
+//                    handledEvents |= dragEventHandlers[i].eventType;
+//                }
+//
+//                m_DragHandlerMap[element.id] = new DragHandlerGroup(element.templateContext, dragEventHandlers, handledEvents);
+//            }
+//
+//            if (keyboardHandlers != null && keyboardHandlers.Length > 0) {
+//                m_KeyboardEventTree.AddItem(new KeyboardEventTreeNode(element, keyboardHandlers));
+//            }
+//
+//            if (dragEventCreators != null && dragEventCreators.Length > 0) {
+//                m_DragCreatorMap[element.id] = new DragCreatorGroup(element.templateContext, dragEventCreators);
+//            }
+//
+//            if (element.children == null) {
+//                return;
+//            }
+//
+//            for (int i = 0; i < element.children.Count; i++) {
+//                OnElementCreated(element.children[i]);
+//            }
         }
 
         public void OnAttributeSet(UIElement element, string attributeName, string currentValue, string attributeValue) { }

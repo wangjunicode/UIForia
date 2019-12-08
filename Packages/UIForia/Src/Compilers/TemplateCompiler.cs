@@ -64,6 +64,7 @@ namespace UIForia.Compilers {
         private static readonly FieldInfo s_UIElement_StyleSet = typeof(UIElement).GetField(nameof(UIElement.style), BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
         private static readonly FieldInfo s_UIElement_TemplateMetaData = typeof(UIElement).GetField(nameof(UIElement.templateMetaData), BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
         private static readonly MethodInfo s_UIElement_OnUpdate = typeof(UIElement).GetMethod(nameof(UIElement.OnUpdate), BindingFlags.Instance | BindingFlags.Public);
+        private static readonly MethodInfo s_UIElement_SetAttribute = typeof(UIElement).GetMethod(nameof(UIElement.SetAttribute), BindingFlags.Instance | BindingFlags.Public);
         
         private static readonly MethodInfo s_StyleSet_InternalInitialize = typeof(UIStyleSet).GetMethod(nameof(UIStyleSet.internal_Initialize), BindingFlags.Instance | BindingFlags.Public);
 
@@ -1282,7 +1283,10 @@ namespace UIForia.Compilers {
                 compiler.SetImplicitContext(compiler.GetVariable(k_CastRoot));
             }
 
-            compiler.Statement($"{k_CastElement}.SetAttribute('{attr.key}', {attr.StrippedValue})");
+            ParameterExpression element = compiler.GetVariable(k_CastElement);
+            Expression value = compiler.Value(attr.StrippedValue);
+            ExpressionFactory.CallInstanceUnchecked(element, s_UIElement_SetAttribute, Expression.Constant(attr.key), value);
+//            compiler.Statement($"{k_CastElement}.SetAttribute('{attr.key}', {attr.StrippedValue})");
         }
 
         private static void CompilePropertyBinding(LinqCompiler compiler, TemplateNode templateNode, in AttributeDefinition2 attributeDefinition) {

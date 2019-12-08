@@ -4,7 +4,7 @@
     
     <Contents style="container">
         
-        <Text evt:onMouseClick="ToggleLanguage()" style="header">
+        <Text mouse:click="ToggleLanguage()" style="header">
             {HeaderText}
         </Text>
         

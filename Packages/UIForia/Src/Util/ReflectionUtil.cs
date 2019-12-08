@@ -201,25 +201,16 @@ namespace UIForia.Util {
 //            }
 //        }
 
-        public static bool HasInstanceMethod(Type type, string methodName, out LightList<MethodInfo> methodInfos) {
+        public static bool HasInstanceMethod(Type type, string methodName, LightList<MethodInfo> retn) {
             MethodInfo[] methods = GetInstanceMethods(type);
-
-            LightList<MethodInfo> retn = LightList<MethodInfo>.Get();
-
+            
             for (int i = 0; i < methods.Length; i++) {
-                if (methods[i].IsStatic && methods[i].Name == methodName) {
+                if (methods[i].Name == methodName) {
                     retn.Add(methods[i]);
                 }
             }
 
-            if (retn.Count == 0) {
-                LightList<MethodInfo>.Release(ref retn);
-                methodInfos = null;
-                return false;
-            }
-
-            methodInfos = retn;
-            return true;
+            return retn.size != 0;
         }
 
         public static bool HasStaticMethod(Type type, string methodName, LightList<MethodInfo> retn) {

@@ -17,8 +17,8 @@ style box {
     FlexLayoutMainAxisAlignment = Center;
 
     [hover] {
-//        TextColor = blue;
-//        TextUnderlayColor = black;
+        TextColor = blue;
+        TextUnderlayColor = black;
     }
 }   
 

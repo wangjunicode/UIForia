@@ -290,7 +290,7 @@ namespace UIForia.Compilers {
             AddStatement(Expression.Assign(variable, value));
             return variable;
         }
-        
+
         public ParameterExpression AddVariableUnchecked(Parameter parameter, Expression value) {
             ParameterExpression variable = currentBlock.AddUserVariable(parameter);
             if ((parameter.flags & ParameterFlags.NeverNull) != 0) {
@@ -850,7 +850,7 @@ namespace UIForia.Compilers {
             head = NullCheck(head);
 
             StructList<ExpressionUtil.ParameterConversion> conversions = StructList<ExpressionUtil.ParameterConversion>.Get();
-            
+
             MethodInfo info = ExpressionUtil.SelectEligibleMethod(methodInfos, args, conversions);
 
             if (info == null || !info.IsPublic) {
@@ -866,7 +866,7 @@ namespace UIForia.Compilers {
             }
 
             conversions.Release();
-            
+
             return Expression.Call(head, info, args);
         }
 
@@ -1211,14 +1211,14 @@ namespace UIForia.Compilers {
             }
 
             LightList<MethodInfo> methodInfos = LightList<MethodInfo>.Get();
-            
+
             if (!ReflectionUtil.HasStaticMethod(type, propertyName, methodInfos)) {
                 LightList<MethodInfo>.Release(ref methodInfos);
                 throw CompileException.UnresolvedStaticMethod(type, propertyName);
             }
 
             StructList<ExpressionUtil.ParameterConversion> conversions = StructList<ExpressionUtil.ParameterConversion>.Get();
-            
+
             MethodInfo info = ExpressionUtil.SelectEligibleMethod(methodInfos, args, conversions);
 
             if (info == null) {
@@ -1233,7 +1233,7 @@ namespace UIForia.Compilers {
             for (int i = 0; i < conversions.size; i++) {
                 args[i] = conversions[i].Convert();
             }
-            
+
             conversions.Release();
             LightList<MethodInfo>.Release(ref methodInfos);
 
@@ -1333,11 +1333,17 @@ namespace UIForia.Compilers {
                 expression = MemberAccess(expressionHead, propertyRead);
                 return true;
             }
-            else if (ReflectionUtil.HasInstanceMethod(exprType, propertyRead, out LightList<MethodInfo> methodInfos)) {
-                InvokeNode invoke = node.parts[0] as InvokeNode;
-                start = 1;
-                expression = MakeMethodCall(expressionHead, methodInfos, invoke.parameters);
-                return true;
+            else {
+                LightList<MethodInfo> methodInfos = LightList<MethodInfo>.Get();
+                if (ReflectionUtil.HasInstanceMethod(exprType, propertyRead, methodInfos)) {
+                    InvokeNode invoke = node.parts[0] as InvokeNode;
+                    start = 1;
+                    expression = MakeMethodCall(expressionHead, methodInfos, invoke.parameters);
+                    LightList<MethodInfo>.Release(ref methodInfos);
+                    return true;
+                }
+
+                LightList<MethodInfo>.Release(ref methodInfos);
             }
 
             expression = null;
@@ -1443,6 +1449,7 @@ namespace UIForia.Compilers {
                 if (parent.resolveAlias != null) {
                     return parent.resolveAlias(aliasName, this);
                 }
+
                 throw CompileException.MissingAliasResolver(aliasName);
             }
 
@@ -1560,7 +1567,7 @@ namespace UIForia.Compilers {
                     case PartType.DotInvoke:
                         LightList<MethodInfo> methods = LightList<MethodInfo>.Get();
                         ReflectionUtil.GetPublicInstanceMethodsWithName(lastExpression.Type, part.name, methods);
-                        
+
                         if (methods.size == 0) {
                             LightList<MethodInfo>.Release(ref methods);
                             throw CompileException.UnresolvedMethod(lastExpression.Type, part.name);
@@ -2275,7 +2282,7 @@ namespace UIForia.Compilers {
             StructList<ExpressionUtil.ParameterConversion> conversions = StructList<ExpressionUtil.ParameterConversion>.Get();
 
             ConstructorInfo constructor = ExpressionUtil.SelectEligibleConstructor(type, arguments, conversions);
-            
+
             if (constructor == null) {
                 throw CompileException.UnresolvedConstructor(type, arguments.Select((e) => e.Type).ToArray());
             }
@@ -2589,7 +2596,7 @@ namespace UIForia.Compilers {
         private static readonly MethodInfo s_Comment = typeof(ExpressionUtil).GetMethod(nameof(ExpressionUtil.Comment), BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);
         private static readonly MethodInfo s_CommentNewLineBefore = typeof(ExpressionUtil).GetMethod(nameof(ExpressionUtil.CommentNewLineBefore), BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);
         private static readonly MethodInfo s_CommentNewLineAfter = typeof(ExpressionUtil).GetMethod(nameof(ExpressionUtil.CommentNewLineAfter), BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);
-        
+
         public void Comment(string comment) {
             if (outputComments) {
                 AddStatement(ExpressionFactory.CallStaticUnchecked(s_Comment, Expression.Constant(comment)));
@@ -2608,21 +2615,17 @@ namespace UIForia.Compilers {
             }
         }
 
-
         public void CallStatic(MethodInfo methodName) {
             RawExpression(Expression.Call(null, methodName));
         }
-
 
         public void CallStatic(MethodInfo methodName, Expression p0) {
             RawExpression(Expression.Call(null, methodName, p0));
         }
 
-
         public void CallStatic(MethodInfo methodName, Expression p0, Expression p1) {
             RawExpression(Expression.Call(null, methodName, p0, p1));
         }
-
 
         public void CallStatic(MethodInfo methodInfo, Expression p0, Expression p1, Expression p2) {
             RawExpression(ExpressionFactory.CallStaticUnchecked(methodInfo, p0, p1, p2));

@@ -72,7 +72,7 @@ namespace UIForia.Systems {
         private readonly LightList<PressedKey> m_PressedKeys;
 
         private readonly EventPropagator m_EventPropagator;
-        private readonly List<ValueTuple<MouseEventHandler, UIElement, ExpressionContext>> m_MouseEventCaptureList;
+        private readonly List<ValueTuple<Action<GenericInputEvent>, UIElement>> m_MouseEventCaptureList;
         private readonly List<ValueTuple<DragEventHandler, UIElement, ExpressionContext>> m_DragEventCaptureList;
         private static readonly Event s_Event = new Event();
 
@@ -108,7 +108,7 @@ namespace UIForia.Systems {
             this.m_KeyboardEventTree = new SkipTree<KeyboardEventTreeNode>();
 
             this.m_EventPropagator = new EventPropagator();
-            this.m_MouseEventCaptureList = new List<ValueTuple<MouseEventHandler, UIElement, ExpressionContext>>();
+            this.m_MouseEventCaptureList = new List<ValueTuple<Action<GenericInputEvent>, UIElement>>();
             this.m_DragEventCaptureList = new List<ValueTuple<DragEventHandler, UIElement, ExpressionContext>>();
             this.m_FocusedElement = null;
             this.focusables = new List<IFocusable>();
@@ -1038,30 +1038,28 @@ namespace UIForia.Systems {
                     continue;
                 }
 
-                MouseHandlerGroup mouseHandlerGroup;
-
-                if (!m_MouseHandlerMap.TryGetValue(element.id, out mouseHandlerGroup)) {
+                if (element.inputHandlers == null || (element.inputHandlers.handledEvents & eventType) == 0) {
                     continue;
                 }
 
-                if ((mouseHandlerGroup.handledEvents & eventType) == 0) {
-                    continue;
-                }
-
-                MouseEventHandler[] handlers = mouseHandlerGroup.handlers;
-
-                for (int j = 0; j < handlers.Length; j++) {
-                    MouseEventHandler handler = handlers[j];
+                LightList<InputHandlerGroup.HandlerData> handlers = element.inputHandlers.eventHandlers;
+                
+                for (int j = 0; j < handlers.size; j++) {
+                    var handler = handlers.array[j];
+                    
                     if (handler.eventType != eventType) {
                         continue;
                     }
 
                     if (handler.eventPhase != EventPhase.Bubble) {
-                        m_MouseEventCaptureList.Add(ValueTuple.Create(handler, element, mouseHandlerGroup.context));
+                        m_MouseEventCaptureList.Add(ValueTuple.Create(handler.handler, element));
                         continue;
                     }
 
-                    handler.Invoke(element, mouseHandlerGroup.context, mouseEvent);
+                    if ((handler.modifiers & modifiersThisFrame) == handler.modifiers) {
+                        handler.handler.Invoke(new GenericInputEvent(eventType, modifiersThisFrame, m_EventPropagator, '\0', default, element == m_FocusedElement));
+                    }
+//                    handler.Invoke(element, mouseHandlerGroup.context, mouseEvent);
 
                     if (m_EventPropagator.shouldStopPropagation) {
                         break;
@@ -1075,11 +1073,10 @@ namespace UIForia.Systems {
             }
 
             for (int i = 0; i < m_MouseEventCaptureList.Count; i++) {
-                MouseEventHandler handler = m_MouseEventCaptureList[i].Item1;
+                Action<GenericInputEvent> handler = m_MouseEventCaptureList[i].Item1;
                 UIElement element = m_MouseEventCaptureList[i].Item2;
-                ExpressionContext context = m_MouseEventCaptureList[i].Item3;
 
-                handler.Invoke(element, context, mouseEvent);
+                handler.Invoke(new GenericInputEvent(eventType, modifiersThisFrame, m_EventPropagator, '\0', default, element == m_FocusedElement));
 
                 if (m_EventPropagator.shouldStopPropagation) {
                     m_MouseEventCaptureList.Clear();

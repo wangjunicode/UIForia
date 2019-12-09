@@ -169,6 +169,25 @@ public class MyElement : UIElement {
 ```
 
 ## InputElement
+The InputElement supports generic typed values. It's one of the basic form elements (forms is an upcoming feature, stay tuned).
+
+| Parameter      | Required | Type                                   | Description                                                                                      |
+|:---------------|:---------|:---------------------------------------|:-------------------------------------------------------------------------------------------------|
+| value          | (x)      | T                                      | That's the value that is being displayed in the input field                                      |
+| placeholder    |          | string                                 | A value that should be displayed if the `value` is empty, a placeholder.                         |
+| autofocus      |          | bool                                   | Set this to true and the input element tries to grab the [focus](/docs/input#ifocusable)         |
+| caretBlinkRate |          | float                                  | (experimental) change how quickly the caret blinks... or maybe you don't                         |
+| MaxLength      |          | int                                    | Limit the number of characters that can be typed                                                 |
+| formatter      |          | UIForia.Elements.IInputFormatter       | The default formatters support formatting float, double and int.                                 |
+| deserializer   |          | UIForia.Elements.IInputDeserializer<T> | The default deserializer will output strings as-is, and parse int, float, and double.            |
+| serializer     |          | UIForia.Elements.IInputSerializer<T>   | Used ToString by default to serialize.                                                           |
+| onValueChanged |          | event Action<T>                        | Subscribe to this event if your wrapping element needs to do things when the input value changed |
+
+Custom formatting / serialization might be necessary if you have number fields with very unique needs.
+The defaults will work well for most basic cases but might not be what you want if you're trying to display
+numbers with a super high precision.  
+
+### Examples
 
 ``` xml
 <Input value.read.write="name" placeholder="'Enter your name'" />
@@ -180,14 +199,54 @@ is a shorthand for the generic version:
 <InputElement--string value.read.write="name" placeholder="'Enter your name'" />
 ```
 
-
+`value` is an `int`:
 ``` xml
 <InputElement--int value.read.write="age" placeholder="'Enter your age'" />
 ```
 
 ## Select
 
+
 ## ScrollView
+Use this element if you want to define a fixed size area that may have children occupying more than that space.
+The ScrollView element must not be content sized, otherwise you'll never see any scroll bars. Basically any other size will work.
+
+| Parameter        | Required | Type  | Description                                                                                                           |
+|:-----------------|:---------|:------|:----------------------------------------------------------------------------------------------------------------------|
+| scrollSpeed      |          | float | Default: 50                                                                                                           |
+| fadeTime         |          | float | Default: 2 - the time it takes until the scroll handles start to fade out                                             |
+| fadeTarget       |          | float | By default the scroll handles disappear. Set this parameter to a value between 0 and 1 to change their final opacity. |
+| disableOverflowX |          | bool  | Disables horizontal scrolling                                                                                         |
+| disableOverflowY |          | bool  | Disables vertical scrolling                                                                                           |
+
+### ScrollView API
+Use `FindBy` in your element to get a reference to the ScrollView, then you may use one of the following
+methods to change the scroll position.
+
+#### `ScrollElementIntoView(UIElement element)`
+The passed in element must be a child of the ScrollView, of course. The resulting
+scroll position will be so that the element's top or bottom edge aligns with the 
+ScrollView's upper or lower edge, depending on the necessary scroll direction.
+
+#### `ScrollToHorizontalPercent(float percentage)`
+`percentage` must be a value between 0 and 1. 
+
+#### `ScrollToVerticalPercent(float percentage)`
+`percentage` must be a value between 0 and 1.
+ 
+#### UIScrollEvent
+ScrollViews also consume UIScrollEvents. When any child of a ScrollView raises
+this event the scroll position will be changed to the event's `ScrollDestinationX`
+or `ScrollDestinationY` properties. If any of them is smaller than 0 there
+will be no scrolling in that axis.
+
+To raise an event you'd do this:
+
+```
+public void ScrollUp(MouseInputEvent evt) {
+    TriggerEvent(new UIScrollEvent(-1, 0));
+}
+```
 
 ## Dynamic
 

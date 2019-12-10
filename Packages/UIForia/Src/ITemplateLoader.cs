@@ -7,15 +7,17 @@ namespace UIForia {
 
     public interface ITemplateLoader{
 
-        Func<UIElement, TemplateScope2, UIElement>[] LoadTemplates();
+        Func<UIElement, TemplateScope, UIElement>[] LoadTemplates();
         
-        Func<UIElement, TemplateScope2, UIElement>[] LoadSlots();
+        Func<UIElement, TemplateScope, UIElement>[] LoadSlots();
         
         Action<UIElement, UIElement>[] LoadBindings();
 
         TemplateMetaData[] LoadTemplateMetaData(UIStyleGroupContainer[] styleListArray);
 
         string[] StyleFilePaths { get; }
+
+        UIElement ConstructElement(int typeId);
 
     }
 

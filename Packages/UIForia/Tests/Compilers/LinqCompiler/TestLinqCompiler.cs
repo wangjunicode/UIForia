@@ -9,7 +9,6 @@ using UIForia.Bindings;
 using UIForia.Compilers;
 using UIForia.Elements;
 using UIForia.Exceptions;
-using UIForia.Expressions;
 using UIForia.Extensions;
 using UIForia.Parsing.Expressions;
 using UIForia.Parsing.Expressions.AstNodes;
@@ -129,14 +128,11 @@ public class TestLinqCompiler {
     private static readonly Type LinqType = typeof(LinqThing);
 
     public abstract class LinqBinding {
-
-        public abstract void Execute(ExpressionContext ctx);
-
+        
     }
 
     public class ReadBinding : LinqBinding {
 
-        public override void Execute(ExpressionContext ctx) { }
 
     }
 

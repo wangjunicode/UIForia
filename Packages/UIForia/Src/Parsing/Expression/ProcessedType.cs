@@ -39,18 +39,22 @@ namespace UIForia.Parsing {
         internal int totalReleased;
         internal LightList<UIElement> poolList;
         private Func<ProcessedType, UIElement, UIElement> constructionFn;
-
+        public readonly string tagName;
         private static readonly LinqCompiler s_Compiler;
         private static readonly FieldInfo s_rawCtorFnRef;
+        public int id;
+        public int references;
 
         static ProcessedType() {
             s_Compiler = new LinqCompiler();
             s_rawCtorFnRef = typeof(ProcessedType).GetField(nameof(rawCtorFn), BindingFlags.Instance | BindingFlags.NonPublic);
         }
 
-        public ProcessedType(Type rawType, TemplateAttribute templateAttr) {
+        public ProcessedType(Type rawType, TemplateAttribute templateAttr, string tagName = null) {
+            this.id = -1; // set by TypeProcessor
             this.rawType = rawType;
             this.templateAttr = templateAttr;
+            this.tagName = tagName;
             this.requiresUpdateFn = ReflectionUtil.IsOverride(rawType.GetMethod(nameof(UIElement.OnUpdate)));
 
             // CompileClear(rawType);
@@ -68,6 +72,8 @@ namespace UIForia.Parsing {
             public string memberName;
 
         }
+
+        public bool IsUnresolvedGeneric { get; set; }
 
         public void GetChangeHandlers(string memberName, StructList<PropertyChangeHandlerDesc> retn) {
             if (methods == null) {

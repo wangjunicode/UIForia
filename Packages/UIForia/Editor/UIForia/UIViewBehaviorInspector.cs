@@ -18,6 +18,11 @@ namespace UIForia.Editor {
         private string[] names;
         private bool didEnable;
         
+        [UnityEditor.Callbacks.DidReloadScripts]
+        private static void OnScriptsReloaded() {
+            // todo try to track if pre-compiled templates are out of date or not
+        }
+        
         public void OnEnable() {
             didEnable = true;
             LightList<ProcessedType> typeData = TypeProcessor.GetTemplateTypes();
@@ -71,6 +76,8 @@ namespace UIForia.Editor {
                 EditorSceneManager.MarkSceneDirty(behavior.gameObject.scene);
             }
 
+            behavior.usePreCompiledTemplates = GUILayout.Toggle(behavior.usePreCompiledTemplates, "Use Precompiled");
+            
             if (GUILayout.Button("Generate Code")) {
 
                 TemplateSettings settings = behavior.GetTemplateSettings();

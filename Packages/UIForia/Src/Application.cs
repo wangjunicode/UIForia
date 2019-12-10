@@ -1,24 +1,18 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
 using Src.Systems;
 using UIForia.Animation;
-using UIForia.Bindings;
 using UIForia.Compilers;
 using UIForia.Compilers.Style;
 using UIForia.Elements;
-using UIForia.Extensions;
 using UIForia.Layout;
 using UIForia.Parsing;
-using UIForia.Parsing.Expressions;
 using UIForia.Rendering;
 using UIForia.Routing;
 using UIForia.Systems;
 using UIForia.Systems.Input;
 using UIForia.Util;
 using UnityEngine;
-using Debug = UnityEngine.Debug;
 
 namespace UIForia {
 
@@ -136,7 +130,7 @@ namespace UIForia {
 
             templateData = compiledTemplateData;
 
-            UIElement rootElement = templateData.templates[0].Invoke(null, new TemplateScope2(this, null));
+            UIElement rootElement = templateData.templates[0].Invoke(null, new TemplateScope(this, null));
 
             UIView view = new UIView(this, "Default", rootElement, Matrix4x4.identity, new Size(Screen.width, Screen.height));
             
@@ -149,10 +143,10 @@ namespace UIForia {
         }
 
         public UIView CreateView<T>(string name, Size size, in Matrix4x4 matrix) where T : UIElement {
-            Func<UIElement, TemplateScope2, UIElement> template = templateData.GetTemplate<T>();
+            Func<UIElement, TemplateScope, UIElement> template = templateData.GetTemplate<T>();
 
             if (template != null) {
-                UIElement element = template.Invoke(null, new TemplateScope2(this, null));
+                UIElement element = template.Invoke(null, new TemplateScope(this, null));
                 UIView view = new UIView(this, name, element, matrix, size);
                 m_Views.Add(view);
 
@@ -464,24 +458,24 @@ namespace UIForia {
         }
 
         public void Update() {
-            TemplateSettings settings = new TemplateSettings();
-            settings.applicationName = frameId.ToString();
-            settings.assemblyName = "Assembly-CSharp";
-            settings.outputPath = Path.Combine(UnityEngine.Application.dataPath, "UIForiaGenerated");
-            settings.codeFileExtension = "generated.cs";
-            settings.preCompiledTemplatePath = "Assets/UIForia_Generated/" + frameId;
-            settings.templateResolutionBasePath = Path.Combine(UnityEngine.Application.dataPath);
-            TemplateCompiler compiler = new TemplateCompiler(settings);
-
-            CompiledTemplateData compiledOutput = new RuntimeTemplateData(settings);
-
-            Debug.Log("Starting");
-            Stopwatch watch = new Stopwatch();
-            watch.Start();
-            compiler.CompileTemplates(m_Views[0].RootElement.GetType(), compiledOutput);
-            watch.Stop();
-            Debug.Log("loaded app in " + watch.ElapsedMilliseconds);
-            
+//            TemplateSettings settings = new TemplateSettings();
+//            settings.applicationName = frameId.ToString();
+//            settings.assemblyName = "Assembly-CSharp";
+//            settings.outputPath = Path.Combine(UnityEngine.Application.dataPath, "UIForiaGenerated");
+//            settings.codeFileExtension = "generated.cs";
+//            settings.preCompiledTemplatePath = "Assets/UIForia_Generated/" + frameId;
+//            settings.templateResolutionBasePath = Path.Combine(UnityEngine.Application.dataPath);
+//            TemplateCompiler compiler = new TemplateCompiler(settings);
+//
+//            CompiledTemplateData compiledOutput = new RuntimeTemplateData(settings);
+//
+//            Debug.Log("Starting");
+//            Stopwatch watch = new Stopwatch();
+//            watch.Start();
+//            compiler.CompileTemplates(m_Views[0].RootElement.GetType(), compiledOutput);
+//            watch.Stop();
+//            Debug.Log("loaded app in " + watch.ElapsedMilliseconds);
+//            
             m_InputSystem.OnUpdate();
 
             linqBindingSystem.OnUpdate();
@@ -713,17 +707,13 @@ namespace UIForia {
         }
 
         public static Application Find(string appId) {
-            return s_ApplicationList.Find(appId, (app, _id) => app.id == _id);
+            return Applications.Find((app) => app.id == appId);
         }
 
         public static bool HasCustomPainter(string name) {
             return s_CustomPainters.ContainsKey(name);
         }
-
-        public static ISVGXElementPainter GetCustomPainter(string name) {
-            return null; //s_CustomPainters.GetOrDefault(name);
-        }
-
+        
         public AnimationTask Animate(UIElement element, AnimationData animation) {
             return m_AnimationSystem.Animate(element, ref animation);
         }
@@ -865,7 +855,7 @@ namespace UIForia {
         }
 
         // might be the same as HydrateTemplate really but with templateId not hard coded
-        internal UIElement CreateSlot(int templateId, UIElement root, TemplateScope2 scope) {
+        public UIElement CreateSlot(int templateId, UIElement root, TemplateScope scope) {
             // todo -- something needs to create the slot root element, either here or in the slot function
             return null;
         }
@@ -875,9 +865,9 @@ namespace UIForia {
         // todo -- register element in type map for selectors, might need to support subclass matching ie <KlangButton> and <OtherButton> with matching on <Button>
         // todo -- make children a linked list instead
         /// Returns the shell of a UI Element, space is allocated for children but no child data is associated yet, only a parent, view, and depth
-        public UIElement CreateElementFromPool(ProcessedType type, UIElement parent, int childCount, int attributeCount, int originTemplateId) {
+        public UIElement CreateElementFromPool(int typeId, UIElement parent, int childCount, int attributeCount, int originTemplateId) {
             // children get assigned in the template function but we need to setup the list here
-            UIElement retn = elementPool.Get(type);
+            UIElement retn = templateData.ConstructElement(typeId);
             retn.templateMetaData = templateData.templateMetaData[originTemplateId];
             retn.id = NextElementId;
             retn.style = new UIStyleSet(retn);
@@ -898,8 +888,8 @@ namespace UIForia {
             return retn;
         }
 
-        public UIElement CreateElementFromPoolWithType(Type type, UIElement parent, int childCount, int attrCount, int originTemplateId) {
-            return CreateElementFromPool(TypeProcessor.GetProcessedType(type), parent, childCount, attrCount, originTemplateId);
+        public UIElement CreateElementFromPoolWithType(int typeId, UIElement parent, int childCount, int attrCount, int originTemplateId) {
+            return CreateElementFromPool(typeId, parent, childCount, attrCount, originTemplateId);
         }
 
         public static int ResolveSlotId(string slotName, StructList<SlotUsage> slotList, int defaultId) {
@@ -917,8 +907,17 @@ namespace UIForia {
         }
 
         // Doesn't expect to create the root
-        internal void HydrateTemplate(int templateId, UIElement root, TemplateScope2 scope) {
+        public void HydrateTemplate(int templateId, UIElement root, TemplateScope scope) {
             templateData.templates[templateId](root, scope);
+        }
+
+        public void AddTemplateChildren(SlotTemplateElement slotTemplateElement, int templateId, int count) {
+            if (templateId < 0) return;
+            TemplateScope scope = new TemplateScope(this, null);
+            for (int i = 0; i < count; i++) {
+                UIElement child = templateData.slots[templateId](slotTemplateElement, scope);
+                InsertChild(slotTemplateElement, child, (uint) slotTemplateElement.children.Count);
+            }
         }
 
     }

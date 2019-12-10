@@ -17,7 +17,9 @@ namespace UIForia.Parsing.Expressions {
         Mouse = 1 << 8,
         Key = 1 << 9,
         Controller = 1 << 10,
-        Touch = 1 << 11
+        Touch = 1 << 11,
+
+        Slot = 1 << 12
 
     }
 

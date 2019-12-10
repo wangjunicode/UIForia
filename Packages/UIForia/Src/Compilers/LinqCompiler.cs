@@ -7,6 +7,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using UIForia.Exceptions;
+using UIForia.Parsing;
 using UIForia.Parsing.Expressions;
 using UIForia.Parsing.Expressions.AstNodes;
 using UIForia.Util;
@@ -222,7 +223,7 @@ namespace UIForia.Compilers {
         }
 
         public ParameterExpression GetVariable(string name) {
-            return currentBlock.ResolveVariable(name);
+            return currentBlock.ResolveVariable(name) ?? parent?.currentBlock.ResolveVariable(name);
         }
 
         public ParameterExpression GetParameter(string name) {
@@ -1447,7 +1448,12 @@ namespace UIForia.Compilers {
         private Expression ResolveAlias(string aliasName) {
             if (resolveAlias == null) {
                 if (parent.resolveAlias != null) {
-                    return parent.resolveAlias(aliasName, this);
+                    Expression resolvedAlias = parent.resolveAlias(aliasName, this);
+                    if (resolvedAlias == null) {
+                        throw CompileException.MissingAliasResolver(aliasName);
+                    }
+
+                    return resolvedAlias;
                 }
 
                 throw CompileException.MissingAliasResolver(aliasName);
@@ -2360,6 +2366,15 @@ namespace UIForia.Compilers {
 //                return variable;
 //            }
 
+
+//            if (implicitContext != null) {
+//                LightList<MethodInfo> methodInfos = LightList<MethodInfo>.Get();
+//                ReflectionUtil.GetPublicInstanceMethodsWithName(implicitContext.Value.expression.Type, identifierNode.name, methodInfos);
+//                if (methodInfos.size > 0) {
+//                    Debug.Log("Method found");
+//                }
+//            }
+            
             throw CompileException.UnresolvedIdentifier(identifierNode.name);
         }
 
@@ -2635,15 +2650,18 @@ namespace UIForia.Compilers {
             s_CompilerPool.Release(this);
         }
 
-        // todo -- not the most elegant way to do this
+        // todo -- not the most elegant way to do this but it works
         public Type GetExpressionType(string expression) {
             LinqCompiler compiler = s_CompilerPool.Get();
             compiler.parent = this;
+            compiler.SetNullCheckingEnabled(false);
+            compiler.SetOutOfBoundsCheckingEnabled(false);
             compiler.SetImplicitContext(implicitContext, ParameterFlags.NeverNull);
             compiler.parent = this;
             compiler.id = GetNextCompilerId();
-            compiler.labelStack.array[0] = Expression.Label("retn_" + compiler.id);
             Expression expr = compiler.Statement(expression);
+            compiler.SetNullCheckingEnabled(true);
+            compiler.SetOutOfBoundsCheckingEnabled(true);
             s_CompilerPool.Release(compiler);
             return expr.Type;
         }

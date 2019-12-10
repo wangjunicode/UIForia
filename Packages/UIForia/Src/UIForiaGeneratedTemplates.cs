@@ -8,7 +8,7 @@ namespace UIForia.Generated {
     public partial class UIForiaGeneratedTemplates {
 
         private readonly MethodInfo methodInfo;
-        internal Func<UIElement, TemplateScope2, UIElement>[] templates;
+        internal Func<UIElement, TemplateScope, UIElement>[] templates;
         
         public UIForiaGeneratedTemplates(string appName) {
             methodInfo = GetType().GetMethod("LoadApp_" + appName, BindingFlags.Instance | BindingFlags.NonPublic);

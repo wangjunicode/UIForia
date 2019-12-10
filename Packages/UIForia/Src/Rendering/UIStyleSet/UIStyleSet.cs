@@ -242,7 +242,7 @@ namespace UIForia.Rendering {
                     hasAttributeStyles = true;
                 }
 
-                if (group.rule == null || group.rule != null & group.rule.IsApplicableTo(element)) {
+                if (group.rule == null || group.rule != null && group.rule.IsApplicableTo(element)) {
                     int ruleCount = group.CountRules();
                     CreateStyleEntry(toUpdate, group, group.normal, groupContainer.styleType, StyleState.Normal, ruleCount);
                     CreateStyleEntry(toUpdate, group, group.hover, groupContainer.styleType, StyleState.Hover, ruleCount);

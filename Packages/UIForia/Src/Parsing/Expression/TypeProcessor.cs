@@ -3,13 +3,24 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using Mono.Linq.Expressions;
 using UIForia.Attributes;
 using UIForia.Elements;
 using UIForia.Extensions;
 using UIForia.Util;
 using Debug = UnityEngine.Debug;
 
-namespace UIForia.Parsing.Expressions {
+namespace UIForia.Parsing {
+
+    public class GenericElementTypeResolvedByAttribute : Attribute {
+
+        public readonly string propertyName;
+
+        public GenericElementTypeResolvedByAttribute(string propertyName) {
+            this.propertyName = propertyName;
+        }
+
+    }
 
     public static class TypeProcessor {
 
@@ -18,6 +29,8 @@ namespace UIForia.Parsing.Expressions {
         public static readonly Dictionary<Type, ProcessedType> typeMap = new Dictionary<Type, ProcessedType>();
         public static readonly Dictionary<string, ProcessedType> templateTypeMap = new Dictionary<string, ProcessedType>();
         public static readonly Dictionary<string, LightList<Assembly>> s_NamespaceMap = new Dictionary<string, LightList<Assembly>>();
+        public static readonly Dictionary<string, ProcessedType> s_GenericMap = new Dictionary<string, ProcessedType>();
+
         private static readonly string[] s_SingleNamespace = new string[1];
 
         private static void FilterAssemblies() {
@@ -55,28 +68,30 @@ namespace UIForia.Parsing.Expressions {
                         if (currentType == null) {
                             continue;
                         }
+
 //
+                        if (!filteredOut && currentType.IsClass && currentType.Name[0] != '<' && currentType.IsGenericTypeDefinition) {
+                            if (currentType.IsSubclassOf(typeof(UIElement))) {
+                                Attribute[] attrs = Attribute.GetCustomAttributes(currentType, false);
+                                string tagName = GetTemplateAttribute(currentType, attrs, out TemplateAttribute templateAttr);
+
+                                // todo -- support namespaces in the look up map
+                                tagName = tagName.Split('`')[0];
+
+                                ProcessedType processedType = new ProcessedType(currentType, templateAttr, tagName);
+                                processedType.IsUnresolvedGeneric = true;
+                                s_GenericMap.Add(tagName, processedType);
+                            }
+                        }
+
                         if (!filteredOut && currentType.IsClass && !currentType.IsGenericTypeDefinition) {
                             Attribute[] attrs = Attribute.GetCustomAttributes(currentType, false);
                             Application.ProcessClassAttributes(currentType, attrs);
 
                             if (typeof(UIElement).IsAssignableFrom(currentType)) {
-                                string tagName = currentType.Name;
-                                TemplateAttribute templateAttr = null;
+                                string tagName = GetTemplateAttribute(currentType, attrs, out TemplateAttribute templateAttr);
 
-                                for (int index = 0; index < attrs.Length; index++) {
-                                    Attribute attr = attrs[index];
-
-                                    if (attr is TemplateTagNameAttribute templateTagNameAttr) {
-                                        tagName = templateTagNameAttr.tagName;
-                                    }
-
-                                    if (attr is TemplateAttribute templateAttribute) {
-                                        templateAttr = templateAttribute;
-                                    }
-                                }
-
-                                ProcessedType processedType = new ProcessedType(currentType, templateAttr);
+                                ProcessedType processedType = new ProcessedType(currentType, templateAttr, tagName);
 
                                 processedType.CreateCtor();
                                 if (templateAttr != null) {
@@ -88,6 +103,7 @@ namespace UIForia.Parsing.Expressions {
                                 }
 
                                 templateTypeMap.Add(tagName, processedType);
+                                processedType.id = typeMap.Count;
                                 typeMap[currentType] = processedType;
                             }
                         }
@@ -115,6 +131,25 @@ namespace UIForia.Parsing.Expressions {
             watch.Stop();
             Debug.Log($"Loaded types in: {watch.ElapsedMilliseconds} ms from {count} assemblies");
             GC.Collect();
+        }
+
+        private static string GetTemplateAttribute(Type currentType, Attribute[] attrs, out TemplateAttribute templateAttr) {
+            string tagName = currentType.Name;
+            templateAttr = null;
+
+            for (int index = 0; index < attrs.Length; index++) {
+                Attribute attr = attrs[index];
+
+                if (attr is TemplateTagNameAttribute templateTagNameAttr) {
+                    tagName = templateTagNameAttr.tagName;
+                }
+
+                if (attr is TemplateAttribute templateAttribute) {
+                    templateAttr = templateAttribute;
+                }
+            }
+
+            return tagName;
         }
 
         private static Type ResolveSimpleType(string typeName) {
@@ -244,7 +279,6 @@ namespace UIForia.Parsing.Expressions {
         }
 
         public static Type ResolveType(TypeLookup typeLookup, IReadOnlyList<string> namespaces = null) {
-
             if (typeLookup.resolvedType != null) {
                 return typeLookup.resolvedType;
             }
@@ -325,25 +359,9 @@ namespace UIForia.Parsing.Expressions {
         internal static ProcessedType GetProcessedType(Type type) {
             FilterAssemblies();
             typeMap.TryGetValue(type, out ProcessedType retn);
-            return retn;
-        }
-
-        public static ProcessedType FindProcessedType(Type type) {
-            FilterAssemblies();
-            if (typeMap.TryGetValue(type, out ProcessedType retn)) {
-                return retn;
+            if (retn != null) {
+                retn.references++;
             }
-
-            if (!(typeof(UIElement).IsAssignableFrom(type))) {
-                throw new Exception($"Cannot get a ProcessedType from a non {nameof(UIElement)} type. Tried to call with {type}");
-            }
-
-            Debug.Assert(type.IsGenericType);
-
-            Type openType = type.GetGenericTypeDefinition();
-            ProcessedType baseProcessedType = typeMap[openType];
-
-            retn = new ProcessedType(type, baseProcessedType.templateAttr);
             return retn;
         }
 
@@ -387,32 +405,40 @@ namespace UIForia.Parsing.Expressions {
 
         public static ProcessedType ResolveTagName(string tagName, IReadOnlyList<string> namespaces) {
             FilterAssemblies();
-            
-            if (templateTypeMap.TryGetValue(tagName, out ProcessedType retnType)) {
+
+            ProcessedType retnType = null;
+
+            if (templateTypeMap.TryGetValue(tagName, out retnType)) {
+                retnType.references++;
                 return retnType;
             }
 
-            if (tagName.Contains("--")) {
-                string[] nameParts = tagName.Split(s_GenericSplitter, StringSplitOptions.RemoveEmptyEntries);
-                string genericTagName = nameParts[0] + "`1"; // todo support more than 1 level generics
-                ProcessedType genericProcessedType = templateTypeMap.GetOrDefault(genericTagName);
-
-                if (!genericProcessedType.rawType.IsGenericType) {
-                    throw new Exception($"Tried to make an element with tag {tagName} but {nameParts[0]} is not a generic element type");
-                }
-
-                Type genericType = ResolveType(new TypeLookup(nameParts[1]), namespaces);
-
-                if (genericType == null) {
-                    throw new Exception($"Tried to make an element with tag {tagName} but {nameParts[1]} could not be resolved");
-                }
-
-                Type elementType = ReflectionUtil.CreateGenericType(genericProcessedType.rawType, genericType);
-                ProcessedType retn = new ProcessedType(elementType, genericProcessedType.templateAttr);
-                templateTypeMap[tagName] = retn;
-                typeMap[retn.rawType] = retn;
-                return retn;
+            if (s_GenericMap.TryGetValue(tagName, out ProcessedType processedType)) {
+                return processedType;
             }
+
+//            if (tagName.Contains("--")) {
+//                string[] nameParts = tagName.Split(s_GenericSplitter, StringSplitOptions.RemoveEmptyEntries);
+//                string genericTagName = nameParts[0] + "`1"; // todo support more than 1 level generics
+//                ProcessedType genericProcessedType = templateTypeMap.GetOrDefault(genericTagName);
+//
+//                if (!genericProcessedType.rawType.IsGenericType) {
+//                    throw new Exception($"Tried to make an element with tag {tagName} but {nameParts[0]} is not a generic element type");
+//                }
+//
+//                Type genericType = ResolveType(new TypeLookup(nameParts[1]), namespaces);
+//
+//                if (genericType == null) {
+//                    throw new Exception($"Tried to make an element with tag {tagName} but {nameParts[1]} could not be resolved");
+//                }
+//
+//                Type elementType = ReflectionUtil.CreateGenericType(genericProcessedType.rawType, genericType);
+//                ProcessedType retn = new ProcessedType(elementType, genericProcessedType.templateAttr);
+//                retn.id = typeMap.Count;
+//                templateTypeMap[tagName] = retn;
+//                typeMap[retn.rawType] = retn;
+//                return retn;
+//            }
 
             throw new Exception("Unable to resolve tag name: " + tagName);
         }
@@ -422,50 +448,19 @@ namespace UIForia.Parsing.Expressions {
             return s_NamespaceMap.ContainsKey(toCheck);
         }
 
-
-        // todo -- remove this when old expression compiler is no longer used
-        public static Type ResolveType(Type originType, string name, IReadOnlyList<string> namespaces) {
-            string subtypeName = originType.FullName + "+" + name;
-            subtypeName = subtypeName + ", " + originType.Assembly.FullName;
-            Type retn = Type.GetType(subtypeName);
+        public static ProcessedType AddResolvedGenericElementType(Type newType, TemplateAttribute templateAttr, string tagName) {
+            ProcessedType retn = null;
+            if (!typeMap.TryGetValue(newType, out retn)) {
+                retn = new ProcessedType(newType, templateAttr, tagName);
+                retn.id = typeMap.Count;
+                typeMap.Add(retn.rawType, retn);
+            }
 
             if (retn != null) {
-                return retn;
+                retn.references++;
             }
-
-            FilterAssemblies();
-
-            LightList<Assembly> assemblies = s_NamespaceMap.GetOrDefault(originType.Namespace ?? "null");
-            if (assemblies != null) {
-                string typeName = originType.Namespace ?? "null" + "." + name + ", ";
-                for (int i = 0; i < assemblies.Count; i++) {
-                    Assembly assembly = assemblies[i];
-                    string fullTypeName = typeName + assembly.FullName;
-
-                    retn = Type.GetType(fullTypeName);
-
-                    if (retn != null) {
-                        return retn;
-                    }
-                }
-            }
-
-            if (originType.FullName.Contains("+")) {
-                Assembly assembly = originType.Assembly;
-                string[] parentTypePath = originType.FullName.Split('+');
-                string typeName = string.Empty;
-                string assemblyName = ", " + assembly.FullName;
-                for (int i = 0; i < parentTypePath.Length - 1; i++) {
-                    typeName += parentTypePath[i] + "+";
-                    string fullTypeName = typeName + name + assemblyName;
-                    retn = Type.GetType(fullTypeName);
-                    if (retn != null) {
-                        return retn;
-                    }
-                }
-            }
-
-            return ResolveType(name, namespaces);
+            
+            return retn;
         }
 
     }

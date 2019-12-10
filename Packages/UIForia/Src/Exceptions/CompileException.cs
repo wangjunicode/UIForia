@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
 using UIForia.Compilers;
+using UIForia.Parsing;
 using UIForia.Parsing.Expressions.AstNodes;
 using UIForia.Parsing.Style.AstNodes;
-using Expression = UIForia.Expressions.Expression;
 
 namespace UIForia.Exceptions {
 
@@ -194,6 +194,23 @@ namespace UIForia.Exceptions {
         public static CompileException UnresolvedFieldOrProperty(Type type, string fieldOrPropertyName) {
             return new CompileException($"Unable to find a field or property called `{fieldOrPropertyName}` on type {type}");
         }
+
+        public static CompileException UnresolvedGenericElement(ProcessedType processedType) {
+            return new CompileException($"Unable to resolve the concrete type for " + processedType.rawType);
+        }
+
+        public static CompileException GenericElementMissingResolver(ProcessedType processedType) {
+            return new CompileException($"{processedType.rawType} requires a class attribute of type {nameof(GenericElementTypeResolvedByAttribute)} in order to be used in a template");
+        }
+
+        public static CompileException UnresolvableGenericElement(ProcessedType processedType, string value) {
+            return new CompileException($"{processedType.rawType} requires a class attribute of type {nameof(GenericElementTypeResolvedByAttribute)} in order to be used in a template and a value that is not null or default also declared in the template");
+        }
+
+        public static CompileException UnmatchedSlot(string slotName, string path) {
+            return new CompileException($"Unable to find a matching slot with the name {slotName} in template {path}");
+        }
+
     }
 
     public static class CompileExceptions {

@@ -6,6 +6,7 @@ namespace UIForia.Compilers {
         Override,
         Template,
         Default,
+        Block,
         Children
 
     }

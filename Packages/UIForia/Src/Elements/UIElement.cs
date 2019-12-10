@@ -4,7 +4,6 @@ using System.Diagnostics;
 using JetBrains.Annotations;
 using UIForia.Compilers;
 using UIForia.Elements.Routing;
-using UIForia.Expressions;
 using UIForia.Layout;
 using UIForia.Rendering;
 using UIForia.Routing;
@@ -128,16 +127,14 @@ namespace UIForia.Elements {
     }
 
     [DebuggerDisplay("{" + nameof(ToString) + "()}")]
-    public class UIElement : IHierarchical {
+    public abstract class UIElement : IHierarchical {
 
         public int id; // todo -- internal with accessor
 
         public InputHandlerGroup inputHandlers; // todo -- internal with accessor
 
         public LightList<UIElement> children; // todo -- replace w/ linked list & child count
-
-        public ExpressionContext templateContext; // todo -- can probably be moved to binding system
-
+        
         internal UIElementFlags flags;
         internal UIElement parent;
 
@@ -225,7 +222,7 @@ namespace UIForia.Elements {
             // return element;
         }
 
-        public UIElement AddChild(UIElement element) {
+        internal UIElement AddChild(UIElement element) {
             // todo -- if <Children/> is defined in the template, attach child to that element instead
             if (element == null || element == this || element.isDestroyed) {
                 return null;
@@ -292,12 +289,12 @@ namespace UIForia.Elements {
 
                 for (int i = 0; i < element.children.Count; i++) {
                     if (element.children[i].GetAttribute("id") == elementId) {
-                        bool isSameElement = element.children[i].templateContext.rootObject == this;
+                        bool isSameElement = false; //element.children[i].templateContext.rootObject == this;
                         // special case for slots: if the child belongs to the parent and is also a slot definition we can assume the slot originated also from this element
-                        bool isSlotDefinitionId = element.children[i].templateContext.currentObject is UISlotDefinition slotDefinition && slotDefinition.templateContext.rootObject == parent;
-                        if (isSlotDefinitionId || isSameElement) {
-                            return element.children[i] as T;
-                        }
+//                        bool isSlotDefinitionId = element.children[i].templateContext.currentObject is UISlotDefinition slotDefinition && slotDefinition.templateContext.rootObject == parent;
+//                        if (isSlotDefinitionId || isSameElement) {
+//                            return element.children[i] as T;
+//                        }
                     }
 
                     elementStack.Push(element.children[i]);

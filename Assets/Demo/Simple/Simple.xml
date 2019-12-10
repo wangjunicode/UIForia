@@ -8,6 +8,11 @@
             {HeaderText}
         </Text>
         
+        <Repeat list="words">
+            {$item}
+<!--            Text-->
+        </Repeat>
+        
         <Div style="box box-black">
 <!--            onMouseClick="OnBoxClicked(1)">-->
             Clicked {boxClicks1} times

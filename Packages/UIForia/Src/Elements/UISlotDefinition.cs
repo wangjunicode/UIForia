@@ -4,12 +4,9 @@ namespace UIForia.Elements {
 
         public readonly string slotId;
 
-        protected internal UISlotDefinition() {
+        public UISlotDefinition() {
         }
 
-        public UISlotDefinition(string slotId) : this() {
-            this.slotId = slotId;
-        }
 
         public override string GetDisplayName() {
             return "DefineSlot:" + slotId;
@@ -20,12 +17,7 @@ namespace UIForia.Elements {
 
         public readonly string slotId;
 
-        protected internal UISlotContent() {
-        }
-
-        public UISlotContent(string slotId) : this() {
-            this.slotId = slotId;
-        }
+        public UISlotContent() {}
 
         public override string GetDisplayName() {
             return "Slot:" + slotId;

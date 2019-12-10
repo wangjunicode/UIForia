@@ -15,10 +15,11 @@ namespace UIForia {
         protected LightList<CompiledSlot> compiledSlots;
         protected LightList<CompiledBinding> compiledBindings;
         protected StyleSheetImporter styleImporter;
+        protected Func<int, UIElement> constructElement;
 
         public TemplateMetaData[] templateMetaData;
-        public Func<UIElement, TemplateScope2, UIElement>[] templates;
-        public Func<UIElement, TemplateScope2, UIElement>[] slots;
+        public Func<UIElement, TemplateScope, UIElement>[] templates;
+        public Func<UIElement, TemplateScope, UIElement>[] slots;
         public Action<UIElement, UIElement>[] bindings;
         public UIStyleGroupContainer[] styles;
         
@@ -71,13 +72,17 @@ namespace UIForia {
             return styleImporter.Import(styleDefinition, true);
         }
 
-        public Func<UIElement, TemplateScope2, UIElement> GetTemplate<T>() where T : UIElement {
+        public Func<UIElement, TemplateScope, UIElement> GetTemplate<T>() where T : UIElement {
             
             if (templateTypeMap.TryGetValue(typeof(T), out int id)) {
                 return templates[id];
             }
 
             return null;
+        }
+
+        public UIElement ConstructElement(int typeId) {
+            return constructElement.Invoke(typeId);
         }
 
     }

@@ -62,7 +62,7 @@ namespace UIForia.Compilers {
             }
 
             for (int i = 0; i < slotDefinitions.Count; i++) {
-                if (slotDefinitions[i].tagName == slotName) {
+                if (slotDefinitions[i].slotName == slotName) {
                     slotDefinition = slotDefinitions[i];
                     return true;
                 }
@@ -85,7 +85,7 @@ namespace UIForia.Compilers {
             }
 
             for (int i = 0; i < slotDefinitions.Count; i++) {
-                if (slotDefinitions.array[i].tagName == slotName) {
+                if (slotDefinitions.array[i].slotName == slotName) {
                     return slotDefinitions[i].slotId;
                 }
             }
@@ -111,8 +111,8 @@ namespace UIForia.Compilers {
                     int slotId = slotDefinition[j];
                     if (slotId != SlotDefinition.k_UnassignedParent) {
                         SlotDefinition parentSlotDef = slotDefinitions[slotId];
-                        if (slotList.Contains(parentSlotDef.tagName)) {
-                            throw TemplateParseException.InvalidSlotHierarchy(filePath, elementType.rawType, slotDefinition.tagName, parentSlotDef.tagName);
+                        if (slotList.Contains(parentSlotDef.slotName)) {
+                            throw TemplateParseException.InvalidSlotHierarchy(filePath, elementType.rawType, slotDefinition.slotName, parentSlotDef.slotName);
                         }
                     }
                     else {
@@ -128,13 +128,11 @@ namespace UIForia.Compilers {
             }
             LightList<string> retn = new LightList<string>();
             for (int i = 0; i < slotDefinitions.Count; i++) {
-                retn.Add(slotDefinitions[i].tagName);
+                retn.Add(slotDefinitions[i].slotName);
             }
 
             return retn;
         }
-
-       
 
     }
 

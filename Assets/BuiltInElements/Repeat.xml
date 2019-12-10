@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UITemplate>
+    
+    <Contents>
+        
+        <Children slot:type="Template" 
+                  count="list != null ? list.Count : 0"
+                  onSlotCreated="SlotCreated()"
+                  onSlotDestroyed="SlotDestroyed()"
+                  ctx:item="list[$element.siblingIndex]" 
+                  ctx:list="list" 
+                  ctx:length="list.Count"/>
+        
+    </Contents>
+    
+</UITemplate>

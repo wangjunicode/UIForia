@@ -56,6 +56,7 @@ namespace UIForia.Compilers {
         public XMLTemplateParser() {
             XmlNamespaceManager nameSpaceManager = new XmlNamespaceManager(new NameTable());
             nameSpaceManager.AddNamespace("attr", "attr");
+            nameSpaceManager.AddNamespace("slot", "slot");
             nameSpaceManager.AddNamespace("evt", "evt");
             nameSpaceManager.AddNamespace("style", "style");
             nameSpaceManager.AddNamespace("ctx", "ctx");
@@ -65,7 +66,7 @@ namespace UIForia.Compilers {
             nameSpaceManager.AddNamespace("touch", "touch");
             nameSpaceManager.AddNamespace("touch", "touch");
             nameSpaceManager.AddNamespace("controller", "controller");
-            
+
             for (int i = 0; i < s_Directives.Length; i++) {
                 nameSpaceManager.AddNamespace(s_Directives[i], s_Directives[i]);
             }
@@ -127,44 +128,65 @@ namespace UIForia.Compilers {
         private static bool outputComments = true;
 
         private static void ParseElementTag(TemplateNode templateNode, XElement element, LightList<string> namespaces) {
-            string directives = element.Name.Namespace.NamespaceName;
+            string namespacePath = element.Name.Namespace.NamespaceName;
             string tagName = element.Name.LocalName;
 
-            if (directives.Contains('.')) {
-                string[] directiveList = directives.Split(s_DotArray, StringSplitOptions.RemoveEmptyEntries);
+            // todo -- remove directive code and replace w/ normal namespacing
+//            if (namespacePath.Contains('.')) {
+//                string[] directiveList = namespacePath.Split(s_DotArray, StringSplitOptions.RemoveEmptyEntries);
+//
+//                for (int i = 0; i < directiveList.Length; i++) {
+//                    templateNode.directives.Add(new DirectiveDefinition(directiveList[i]));
+//                }
+//            }
+//            else if (!string.IsNullOrWhiteSpace(namespacePath) && !string.IsNullOrEmpty(namespacePath)) {
+//                templateNode.directives.Add(new DirectiveDefinition(namespacePath));
+//            }
+//
+//            if (namespacePath.Contains("DefineSlot")) {
+//                templateNode.slotName = element.Name.LocalName;
+//                templateNode.slotType = SlotType.Default;
+//                templateNode.processedType = TypeProcessor.FindProcessedType(typeof(UISlotDefinition));
+//                return;
+//            }
+//
+//            if (namespacePath.Contains("Slot")) {
+//                templateNode.slotName = element.Name.LocalName;
+//                templateNode.slotType = SlotType.Override;
+//                templateNode.processedType = TypeProcessor.FindProcessedType(typeof(UISlotContent));
+//                return;
+//            }
 
-                for (int i = 0; i < directiveList.Length; i++) {
-                    templateNode.directives.Add(new DirectiveDefinition(directiveList[i]));
-                }
-            }
-            else if (!string.IsNullOrWhiteSpace(directives) && !string.IsNullOrEmpty(directives)) {
-                templateNode.directives.Add(new DirectiveDefinition(directives));
-            }
-
-            if (directives.Contains("DefineSlot")) {
+//            int lastIdx = tagName.LastIndexOf('.');
+            if (string.Equals(tagName, "Children")) {
                 templateNode.slotName = element.Name.LocalName;
-                templateNode.slotType = SlotType.Default;
-                templateNode.processedType = TypeProcessor.FindProcessedType(typeof(UISlotDefinition));
+                templateNode.slotType = SlotType.Children;
+                templateNode.processedType = TypeProcessor.GetProcessedType(typeof(UISlotDefinition));
                 return;
             }
-
-            if (directives.Contains("Slot")) {
+            else if (string.Equals(tagName, "Slot")) {
                 templateNode.slotName = element.Name.LocalName;
                 templateNode.slotType = SlotType.Override;
-                templateNode.processedType = TypeProcessor.FindProcessedType(typeof(UISlotContent));
+                templateNode.processedType = TypeProcessor.GetProcessedType(typeof(UISlotContent));
                 return;
             }
-
-            int lastIdx = tagName.LastIndexOf('.');
-
-            if (lastIdx > 0) {
-                s_NamespaceLookup = s_NamespaceLookup ?? new string[1];
-                s_NamespaceLookup[0] = tagName.Substring(0, lastIdx);
-                templateNode.processedType = TypeProcessor.ResolveTagName(tagName.Substring(lastIdx), s_NamespaceLookup);
+            else if (string.Equals(tagName, "DefineSlot")) {
+                templateNode.slotName = element.Name.LocalName;
+                templateNode.slotType = SlotType.Default;
+                templateNode.processedType = TypeProcessor.GetProcessedType(typeof(UISlotDefinition));
+                return;
             }
             else {
-                templateNode.processedType = TypeProcessor.ResolveTagName(tagName, namespaces);
+                s_NamespaceLookup = s_NamespaceLookup ?? new string[1];
+                s_NamespaceLookup[0] = namespacePath;
+                templateNode.processedType = TypeProcessor.ResolveTagName(tagName, s_NamespaceLookup);
             }
+//            if (lastIdx > 0) {
+//                
+//            }
+//            else {
+//                templateNode.processedType = TypeProcessor.ResolveTagName(tagName, namespaces);
+//            }
 
             if (templateNode.processedType.rawType == null) {
                 throw new Exception("Unresolved tag name: " + element.Name.LocalName);
@@ -220,6 +242,10 @@ namespace UIForia.Compilers {
 
                             break;
                         }
+                        case "slot": {
+                            attributeType = AttributeType.Slot;
+                            break;
+                        }
                         case "mouse":
                             attributeType = AttributeType.Mouse;
                             break;
@@ -260,7 +286,7 @@ namespace UIForia.Compilers {
                         raw = prefix + ":" + name + "=\"" + attr.Value + "\"";
                     }
                     else {
-                        raw = name + "=" + "=\"" + attr.Value + "\"";
+                        raw = name + "=\"" + attr.Value + "\"";
                     }
                 }
 
@@ -287,7 +313,7 @@ namespace UIForia.Compilers {
                             TemplateNode templateNode = TemplateNode.Get();
                             templateNode.parent = parent;
                             templateNode.astRoot = parent.astRoot;
-                            templateNode.processedType = TypeProcessor.FindProcessedType(typeof(UITextElement));
+                            templateNode.processedType = TypeProcessor.GetProcessedType(typeof(UITextElement));
                             templateNode.textContent = list;
                             parent.children.Add(templateNode);
                             templateNode = TemplateNode.Get();
@@ -303,7 +329,7 @@ namespace UIForia.Compilers {
                             TextTemplateProcessor.ProcessTextExpressions(textContent, list);
                             templateNode.parent = parent;
                             templateNode.astRoot = parent.astRoot;
-                            templateNode.processedType = TypeProcessor.FindProcessedType(typeof(UITextElement));
+                            templateNode.processedType = TypeProcessor.GetProcessedType(typeof(UITextElement));
                             templateNode.textContent = list;
                             parent.children.Add(templateNode);
                             templateNode = TemplateNode.Get();
@@ -321,6 +347,8 @@ namespace UIForia.Compilers {
                         ParseElementTag(templateNode, element, namespaces);
 
                         ParseAttributes(templateNode, element);
+
+                        PostProcessSlotTemplate(templateNode);
 
                         if (!parent.processedType.requiresTemplateExpansion && templateNode.processedType.rawType == typeof(UISlotContent)) {
                             throw new TemplateParseException(node, $"Slot cannot be added for type {parent.processedType.rawType} because it is a text or container type and does not accept slots.");
@@ -394,10 +422,11 @@ namespace UIForia.Compilers {
                     }
                 }
 
+                // todo -- maybe kill this and replace with slot
                 if (childrenSlotNode.children.Count > 0) {
                     childrenSlotNode.astRoot = parent.astRoot;
                     childrenSlotNode.parent = parent;
-                    childrenSlotNode.processedType = TypeProcessor.FindProcessedType(typeof(UIChildrenElement));
+                    childrenSlotNode.processedType = TypeProcessor.GetProcessedType(typeof(UIChildrenElement));
                     childrenSlotNode.slotName = "Children";
                     childrenSlotNode.slotType = SlotType.Children;
                     childrenSlotNode.directives.Add(new DirectiveDefinition("Slot"));
@@ -406,6 +435,28 @@ namespace UIForia.Compilers {
                 else {
                     TemplateNode.Release(ref childrenSlotNode);
                 }
+            }
+        }
+
+        private static void PostProcessSlotTemplate(TemplateNode templateNode) {
+            if (templateNode.slotType != SlotType.Children && templateNode.slotType != SlotType.Default) {
+                return;
+            }
+            
+            for (int i = 0; i < templateNode.attributes.size; i++) {
+                ref AttributeDefinition2 attr = ref templateNode.attributes.array[i];
+
+                if (attr.type != AttributeType.Slot || attr.key != "type") {
+                    continue;
+                }
+                
+                if (string.Equals(attr.value, "template", StringComparison.InvariantCultureIgnoreCase)) {
+                    templateNode.attributes.SwapRemoveAt(i);
+                    templateNode.slotType = SlotType.Template;
+                    templateNode.processedType = TypeProcessor.GetProcessedType(typeof(SlotTemplateElement));
+                    return;
+                }
+
             }
         }
 

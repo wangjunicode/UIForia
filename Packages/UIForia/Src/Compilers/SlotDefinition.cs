@@ -1,4 +1,5 @@
 using System;
+using UIForia.Parsing.Expressions;
 using UIForia.Util;
 
 namespace UIForia.Compilers {
@@ -7,7 +8,7 @@ namespace UIForia.Compilers {
 
         public const byte k_UnassignedParent = 255;
         
-        public string tagName;
+        public string slotName;
         public short slotId;
         public SlotType slotType;
         public StructStack<ContextVariableDefinition> contextVariables;
@@ -16,16 +17,18 @@ namespace UIForia.Compilers {
         public byte parentSlotId_1;
         public byte parentSlotId_2;
         public byte parentSlotId_3;
+        public StructList<AttributeDefinition2> contextAttributes;
 
-        public SlotDefinition(string tagName, StructStack<ContextVariableDefinition> contextVariables) {
-            this.tagName = tagName;
+        public SlotDefinition(string slotName, StructStack<ContextVariableDefinition> contextVariables, SlotType slotType) {
+            this.slotName = slotName;
             this.contextVariables = contextVariables;
             this.slotId = -1;
             this.parentSlotId_0 = k_UnassignedParent;
             this.parentSlotId_1 = k_UnassignedParent;
             this.parentSlotId_2 = k_UnassignedParent;
             this.parentSlotId_3 = k_UnassignedParent;
-            this.slotType = SlotType.Override;
+            this.slotType = slotType;
+            this.contextAttributes = null;
         }
         
         public int this[int i] {
@@ -62,6 +65,9 @@ namespace UIForia.Compilers {
                 }
             }
         }
+
+        public bool IsTemplate => slotType == SlotType.Template;
+
     }
 
 }

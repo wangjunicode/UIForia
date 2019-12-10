@@ -32,7 +32,7 @@ namespace UIForia.Compilers {
 
         internal Func<UIElement, UIElement, TemplateContext>[] contextProviderFns;
         internal LightList<Action<UIElement, UIElement, StructStack<TemplateContextWrapper>>> sharedBindingFns;
-        internal LightList<Func<UIElement, TemplateScope2, UIElement>> templateFns;
+        internal LightList<Func<UIElement, TemplateScope, UIElement>> templateFns;
 
         public static readonly Action<UIElement, UIElement, StructStack<TemplateContextWrapper>> onUpdate = (a, b, c) => b.OnUpdate();
 
@@ -61,11 +61,11 @@ namespace UIForia.Compilers {
             }
 
             sharedBindingFns.size = sharedBindingLambdas.size;
-            templateFns = new LightList<Func<UIElement, TemplateScope2, UIElement>>(templateLambdas.size);
+            templateFns = new LightList<Func<UIElement, TemplateScope, UIElement>>(templateLambdas.size);
 
             for (int i = 0; i < templateLambdas.size; i++) {
                 Debug.Log(templateLambdas[i].ToCSharpCode());
-                templateFns[i] = (Func<UIElement, TemplateScope2, UIElement>) templateLambdas[i].Compile();
+                templateFns[i] = (Func<UIElement, TemplateScope, UIElement>) templateLambdas[i].Compile();
             }
 
             templateFns.size = templateLambdas.size;

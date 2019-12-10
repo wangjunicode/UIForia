@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using NUnit.Framework;
 using UIForia;
 using UIForia.Exceptions;
+using UIForia.Parsing;
 using UIForia.Parsing.Expressions;
 using UIForia.Parsing.Expressions.AstNodes;
 using UnityEngine;

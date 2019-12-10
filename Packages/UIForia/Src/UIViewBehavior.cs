@@ -34,10 +34,12 @@ namespace UIForia {
             if (type == null) return;
             // 1. creates the application
             if (usePreCompiledTemplates) {
+                TemplateSettings settings = GetTemplateSettings();
+                CompiledTemplateData compiledOutput = new PreCompiledTemplateData(settings);
+                application = GameApplication.CreatePrecompiled(compiledOutput, camera);
             }
             else {
                 TemplateSettings settings = GetTemplateSettings();
-             
                 application = GameApplication.Create(type, settings, camera);
               
             }

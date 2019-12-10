@@ -8,9 +8,7 @@ namespace UIForia.Elements {
     [TemplateTagName("Children")]
     public class UIChildrenElement : UISlotContent {
 
-
-
-        internal UIChildrenElement() {
+        public UIChildrenElement() {
         }
 
         public override void OnCreate() {

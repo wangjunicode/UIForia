@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using NUnit.Framework;
 using UIForia;
+using UIForia.Parsing;
 using UIForia.Parsing.Expressions;
 using UnityEngine;
 
@@ -15,12 +16,7 @@ public class TypeProcessorTests {
         public enum NestedEnum { }
 
     }
-
-    [Test]
-    public void ResolveWithNamespace() {
-        Type t = TypeProcessor.ResolveType(typeof(Thing), "Vector3", new List<string>() {"UnityEngine"});
-        Assert.AreEqual(typeof(Vector3), t);
-    }
+    
     
     [Test]
     public void ResolveArrayType() {
@@ -128,10 +124,6 @@ public class TypeProcessorTests {
         Assert.AreEqual(typeof(List<Dictionary<Color, KeyValuePair<float, int>>>), t6);
     }
 
-    [Test]
-    public void ResolveSubEnumType() {
-        Type t = TypeProcessor.ResolveType(typeof(Thing), "NestedEnum", new List<string>());
-        Assert.AreEqual(typeof(Thing.NestedEnum), t);
-    }
+   
 
 }

@@ -6,54 +6,75 @@ namespace UIForia.Generated {
 
     public partial class UIForiaGeneratedTemplates_GameApp {
         
-        public Func<UIElement, TemplateScope2, UIElement> Template_4983d08d89d9bfa4d862d9ac7366d6a5 = (UIForia.Elements.UIElement root, UIForia.Compilers.TemplateScope2 scope) =>
+        public Func<UIElement, TemplateScope, UIElement> Template_26ce8b7cec8f0b74fb351221db057e73 = (UIForia.Elements.UIElement root, UIForia.Compilers.TemplateScope scope) =>
         {
             UIForia.Elements.UIElement targetElement_1;
+            UIForia.Util.StructList<UIForia.Compilers.SlotUsage> slotUsage;
             UIForia.Elements.UIElement targetElement_2;
 
             if (root == null)
             {
-                root = scope.application.CreateElementFromPoolWithType(typeof(Demo.Simple), default(UIForia.Elements.UIElement), 4, 0, 0);
+
+                // new Demo.Simple
+                root = scope.application.CreateElementFromPoolWithType(41, default(UIForia.Elements.UIElement), 5, 0, 0);
             }
 
-            // <Text evt:onMouseClick="ToggleLanguage()" style=="header"/>    '{HeaderText}'
-            targetElement_1 = scope.application.CreateElementFromPoolWithType(typeof(UIForia.Elements.UITextElement), root, 0, 0, 0);
+            // <Text mouse:click="ToggleLanguage()" style="header"/>    '{HeaderText}'
+            targetElement_1 = scope.application.CreateElementFromPoolWithType(78, root, 0, 0, 0);
             UIForia.Systems.LinqBindingNode.Get(scope.application, root, targetElement_1, 0, -1, 1);
             root.children.array[0] = targetElement_1;
 
-            // <Div style=="box box-black"/>
-            targetElement_1 = scope.application.CreateElementFromPoolWithType(typeof(UIForia.Elements.UIDivElement), root, 1, 0, 0);
-            UIForia.Systems.LinqBindingNode.Get(scope.application, root, targetElement_1, 2, -1, -1);
+            // <Repeat list="words"/>
+            targetElement_1 = scope.application.CreateElementFromPoolWithType(180, root, 1, 0, 0);
+            UIForia.Systems.LinqBindingNode.Get(scope.application, root, targetElement_1, -1, -1, 4);
+            slotUsage = UIForia.Util.StructList<UIForia.Compilers.SlotUsage>.PreSize(1);
+            // Slot_Children_Children_f534fec48178ddb49bee35b7b7dbc42e
+            slotUsage.array[0] = new UIForia.Compilers.SlotUsage("Children", 0);
 
-            // 
-            targetElement_2 = scope.application.CreateElementFromPoolWithType(typeof(UIForia.Elements.UITextElement), targetElement_1, 0, 0, 0);
-            UIForia.Systems.LinqBindingNode.Get(scope.application, root, targetElement_2, -1, -1, 3);
-            targetElement_1.children.array[0] = targetElement_2;
+            // BuiltInElements/Repeat.xml
+            scope.application.HydrateTemplate(1, targetElement_1, new UIForia.Compilers.TemplateScope(scope.application, slotUsage));
+            slotUsage.Release();
             root.children.array[1] = targetElement_1;
 
-            // <Div style=="box box-red"/>
-            targetElement_1 = scope.application.CreateElementFromPoolWithType(typeof(UIForia.Elements.UIDivElement), root, 1, 0, 0);
-            UIForia.Systems.LinqBindingNode.Get(scope.application, root, targetElement_1, 4, -1, -1);
+            // <Div style="box box-black"/>
 
-            // 
-            targetElement_2 = scope.application.CreateElementFromPoolWithType(typeof(UIForia.Elements.UITextElement), targetElement_1, 0, 0, 0);
-            UIForia.Systems.LinqBindingNode.Get(scope.application, root, targetElement_2, -1, -1, 5);
-            targetElement_1.children.array[0] = targetElement_2;
-            root.children.array[2] = targetElement_1;
-
-            // <Div style=="box box-gold"/>
-            targetElement_1 = scope.application.CreateElementFromPoolWithType(typeof(UIForia.Elements.UIDivElement), root, 1, 0, 0);
+            // new UIForia.Elements.UIDivElement
+            targetElement_1 = scope.application.CreateElementFromPoolWithType(52, root, 1, 0, 0);
             UIForia.Systems.LinqBindingNode.Get(scope.application, root, targetElement_1, 6, -1, -1);
 
             // 
-            targetElement_2 = scope.application.CreateElementFromPoolWithType(typeof(UIForia.Elements.UITextElement), targetElement_1, 0, 0, 0);
+            targetElement_2 = scope.application.CreateElementFromPoolWithType(78, targetElement_1, 0, 0, 0);
             UIForia.Systems.LinqBindingNode.Get(scope.application, root, targetElement_2, -1, -1, 7);
             targetElement_1.children.array[0] = targetElement_2;
+            root.children.array[2] = targetElement_1;
+
+            // <Div style="box box-red"/>
+
+            // new UIForia.Elements.UIDivElement
+            targetElement_1 = scope.application.CreateElementFromPoolWithType(52, root, 1, 0, 0);
+            UIForia.Systems.LinqBindingNode.Get(scope.application, root, targetElement_1, 8, -1, -1);
+
+            // 
+            targetElement_2 = scope.application.CreateElementFromPoolWithType(78, targetElement_1, 0, 0, 0);
+            UIForia.Systems.LinqBindingNode.Get(scope.application, root, targetElement_2, -1, -1, 9);
+            targetElement_1.children.array[0] = targetElement_2;
             root.children.array[3] = targetElement_1;
+
+            // <Div style="box box-gold"/>
+
+            // new UIForia.Elements.UIDivElement
+            targetElement_1 = scope.application.CreateElementFromPoolWithType(52, root, 1, 0, 0);
+            UIForia.Systems.LinqBindingNode.Get(scope.application, root, targetElement_1, 10, -1, -1);
+
+            // 
+            targetElement_2 = scope.application.CreateElementFromPoolWithType(78, targetElement_1, 0, 0, 0);
+            UIForia.Systems.LinqBindingNode.Get(scope.application, root, targetElement_2, -1, -1, 11);
+            targetElement_1.children.array[0] = targetElement_2;
+            root.children.array[4] = targetElement_1;
             return root;
         }; 
         
-        public Action<UIElement, UIElement> Binding_OnCreate_41969f3d202973f488a0e2688ccafdcf = (UIForia.Elements.UIElement __root, UIForia.Elements.UIElement __element) =>
+        public Action<UIElement, UIElement> Binding_OnCreate_fa31f8094b181cf4c982850475d27b4e = (UIForia.Elements.UIElement __root, UIForia.Elements.UIElement __element) =>
         {
             UIForia.Elements.UITextElement __castElement;
             Demo.Simple __castRoot;
@@ -65,9 +86,14 @@ namespace UIForia.Generated {
             // header
             styleList.array[0] = __element.templateMetaData.GetStyleById(1);
             __element.style.internal_Initialize(styleList);
+            __castElement.inputHandlers = new UIForia.Elements.InputHandlerGroup();
+            __castElement.inputHandlers.AddMouseEvent(UIForia.UIInput.InputEventType.MouseClick, UIForia.UIInput.KeyboardModifiers.None, false, UIForia.UIInput.EventPhase.Bubble, (UIForia.UIInput.GenericInputEvent __evt) =>
+            {
+                __castRoot.ToggleLanguage();
+            });
         };
 
-        public Action<UIElement, UIElement> Binding_OnUpdate_4219fd0cfa46f644f8d540b6b8919cf8 = (UIForia.Elements.UIElement __root, UIForia.Elements.UIElement __element) =>
+        public Action<UIElement, UIElement> Binding_OnUpdate_7825b51faad674042954fb98fb9c08b9 = (UIForia.Elements.UIElement __root, UIForia.Elements.UIElement __element) =>
         {
             UIForia.Elements.UITextElement __castElement;
             Demo.Simple __castRoot;
@@ -79,7 +105,39 @@ namespace UIForia.Generated {
             UIForia.Text.TextUtil.StringBuilder.Clear();
         };
 
-        public Action<UIElement, UIElement> Binding_OnCreate_533cc72a8d901c1409b103736c99f0d6 = (UIForia.Elements.UIElement __root, UIForia.Elements.UIElement __element) =>
+        public Action<UIElement, UIElement> Binding_OnUpdate_edd5fe3c9d71c6743b264619de0290b1 = (UIForia.Elements.UIElement __root, UIForia.Elements.UIElement __element) =>
+        {
+            BuiltInElements.Repeat<string> __castElement;
+            Demo.Simple __castRoot;
+            System.Collections.Generic.List<string> __right;
+
+            __castElement = ((BuiltInElements.Repeat<string>)__element);
+            __castRoot = ((Demo.Simple)__root);
+
+            // list="words"
+            __right = __castRoot.words;
+            __castElement.list = __right;
+        section_0_1:
+            __castElement.OnUpdate();
+        retn:
+            return;
+        };
+
+        public Action<UIElement, UIElement> Binding_OnUpdate_2ff67f44b1581d04f83ef7c40d401b02 = (UIForia.Elements.UIElement __root, UIForia.Elements.UIElement __element) =>
+        {
+            UIForia.Elements.UITextElement __castElement;
+            Demo.Simple __castRoot;
+            string ctxvar_item;
+
+            __castElement = ((UIForia.Elements.UITextElement)__element);
+            __castRoot = ((Demo.Simple)__root);
+            ctxvar_item = ((UIForia.Systems.ContextVariable<string>)__castElement.bindingNode.GetContextVariable(2)).value;
+            UIForia.Text.TextUtil.StringBuilder.Append(ctxvar_item.ToString());
+            ((UIForia.Elements.UITextElement)__castElement).SetText(UIForia.Text.TextUtil.StringBuilder.ToString());
+            UIForia.Text.TextUtil.StringBuilder.Clear();
+        };
+
+        public Action<UIElement, UIElement> Binding_OnCreate_705878f8b6060af45b83cd90cbafc5fc = (UIForia.Elements.UIElement __root, UIForia.Elements.UIElement __element) =>
         {
             UIForia.Elements.UIDivElement __castElement;
             Demo.Simple __castRoot;
@@ -95,7 +153,7 @@ namespace UIForia.Generated {
             __element.style.internal_Initialize(styleList);
         };
 
-        public Action<UIElement, UIElement> Binding_OnUpdate_54bfde3312de0c242ab3e2f88c268c5e = (UIForia.Elements.UIElement __root, UIForia.Elements.UIElement __element) =>
+        public Action<UIElement, UIElement> Binding_OnUpdate_71fc4338b0c5e9f498b09d2c319fc430 = (UIForia.Elements.UIElement __root, UIForia.Elements.UIElement __element) =>
         {
             UIForia.Elements.UITextElement __castElement;
             Demo.Simple __castRoot;
@@ -109,7 +167,7 @@ namespace UIForia.Generated {
             UIForia.Text.TextUtil.StringBuilder.Clear();
         };
 
-        public Action<UIElement, UIElement> Binding_OnCreate_1d706c3a952e47a4c9e914ba83aa762c = (UIForia.Elements.UIElement __root, UIForia.Elements.UIElement __element) =>
+        public Action<UIElement, UIElement> Binding_OnCreate_4ae708f41b575c54a818c38125574905 = (UIForia.Elements.UIElement __root, UIForia.Elements.UIElement __element) =>
         {
             UIForia.Elements.UIDivElement __castElement;
             Demo.Simple __castRoot;
@@ -125,7 +183,7 @@ namespace UIForia.Generated {
             __element.style.internal_Initialize(styleList);
         };
 
-        public Action<UIElement, UIElement> Binding_OnUpdate_24de277288e959c4d858f5895c77f22d = (UIForia.Elements.UIElement __root, UIForia.Elements.UIElement __element) =>
+        public Action<UIElement, UIElement> Binding_OnUpdate_3a67287d08f6a5f4aa77303837cb4124 = (UIForia.Elements.UIElement __root, UIForia.Elements.UIElement __element) =>
         {
             UIForia.Elements.UITextElement __castElement;
             Demo.Simple __castRoot;
@@ -139,7 +197,7 @@ namespace UIForia.Generated {
             UIForia.Text.TextUtil.StringBuilder.Clear();
         };
 
-        public Action<UIElement, UIElement> Binding_OnCreate_327fe70a6ac59b14d908e1c8c873b436 = (UIForia.Elements.UIElement __root, UIForia.Elements.UIElement __element) =>
+        public Action<UIElement, UIElement> Binding_OnCreate_401ff9034ef3d324f94176b8b8ec515a = (UIForia.Elements.UIElement __root, UIForia.Elements.UIElement __element) =>
         {
             UIForia.Elements.UIDivElement __castElement;
             Demo.Simple __castRoot;
@@ -155,7 +213,7 @@ namespace UIForia.Generated {
             __element.style.internal_Initialize(styleList);
         };
 
-        public Action<UIElement, UIElement> Binding_OnUpdate_0b6948b56aacb2a449931ca73c9cd300 = (UIForia.Elements.UIElement __root, UIForia.Elements.UIElement __element) =>
+        public Action<UIElement, UIElement> Binding_OnUpdate_2b232864b8913644ba023e668988f4e5 = (UIForia.Elements.UIElement __root, UIForia.Elements.UIElement __element) =>
         {
             UIForia.Elements.UITextElement __castElement;
             Demo.Simple __castRoot;
@@ -170,6 +228,20 @@ namespace UIForia.Generated {
         };
 
         
+        public Func<UIElement, TemplateScope, UIElement> Slot_Children_Children_f534fec48178ddb49bee35b7b7dbc42e = (UIForia.Elements.UIElement root, UIForia.Compilers.TemplateScope scope) =>
+        {
+            UIForia.Elements.UISlotContent slotRoot;
+            UIForia.Elements.UIElement targetElement_1;
+
+            slotRoot = ((UIForia.Elements.UISlotContent)scope.application.CreateElementFromPoolWithType(77, default(UIForia.Elements.UIElement), 1, 0, 0));
+
+            // 
+            targetElement_1 = scope.application.CreateElementFromPoolWithType(78, slotRoot, 0, 0, 0);
+            UIForia.Systems.LinqBindingNode.Get(scope.application, slotRoot, targetElement_1, -1, -1, 5);
+            slotRoot.children.array[0] = targetElement_1;
+            return slotRoot;
+        };
+
     }
 
 }

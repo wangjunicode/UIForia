@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UIForia.Attributes;
 using UIForia.Elements;
 
@@ -10,6 +11,10 @@ namespace Demo {
         public int boxClicks2;
         public int boxClicks3;
 
+        public List<string> words = new List<string>() {
+            "Matt","is", "the","greatest"
+        };
+        
         private bool isEnglish = true;
         
         public string HeaderText => isEnglish 

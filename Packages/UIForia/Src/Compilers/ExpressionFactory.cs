@@ -23,10 +23,12 @@ namespace UIForia.Compilers {
         }
 
         public static MethodCallExpression CallInstanceUnchecked(Expression target, MethodInfo method, params Expression[] arguments) {
+            if(method == null) throw new NullReferenceException();
             return GetInstanceCall0Factory().Invoke(method, target, new ReadOnlyCollection<Expression>(arguments));
         }
 
         public static Expression CallStaticUnchecked(MethodInfo method, params Expression[] arguments) {
+            if(method == null) throw new NullReferenceException();
             return GetStaticCallFactory().Invoke(method, new ReadOnlyCollection<Expression>(arguments));
         }
 

@@ -18,10 +18,11 @@ namespace UIForia.Compilers {
         public StructList<TextExpression> textContent;
         public ProcessedType processedType;
         public string slotName;
+        public int slotInstanceCount;
 
         public string originalString;
         public SlotType slotType;
-        
+
         [ThreadStatic] private static LightList<TemplateNode> s_Pool;
 
         public TemplateNode() {
@@ -33,7 +34,8 @@ namespace UIForia.Compilers {
         public Type RootType => astRoot.root.processedType.rawType;
 
         public Type ElementType => processedType.rawType;
-        
+        public bool IsTemplateSlot { get; set; }
+
         internal static TemplateNode Get() {
             if (s_Pool == null) {
                 s_Pool = new LightList<TemplateNode>(32);
@@ -101,10 +103,10 @@ namespace UIForia.Compilers {
                 return TemplateNodeType.Root;
             }
 
-            if (processedType.rawType == typeof(UIChildrenElement)) {
-                return TemplateNodeType.Children;
+            if (processedType.rawType == typeof(SlotTemplateElement)) {
+                return TemplateNodeType.SlotTemplate;
             }
-            
+
             if (processedType.rawType == typeof(UISlotDefinition)) {
                 return TemplateNodeType.SlotDefinition;
             }
@@ -137,23 +139,13 @@ namespace UIForia.Compilers {
             return retn;
         }
 
-        public int GetBindingCount() {
-            int retn = 0;
-            
-            if (attributes != null) {
-
-                for (int i = 0; i < attributes.size; i++) {
-                    if (attributes[i].type == AttributeType.Property) {
-                        retn++;
-                    }
-                    else if (attributes[i].type == AttributeType.Attribute && (attributes[i].flags & AttributeFlags.Const) == 0) {
-                        retn++;
-                    }
+        public StructList<AttributeDefinition2> RemoveContextVarAttributes() {
+            StructList<AttributeDefinition2> retn = new StructList<AttributeDefinition2>(4);
+            for (int i = 0; i < attributes.size; i++) {
+                if (attributes.array[i].type == AttributeType.ContextVariable || attributes.array[i].type == AttributeType.Context) {
+                    attributes.RemoveAt(i, out AttributeDefinition2 attr);
+                    retn.Add(attr);
                 }
-            }
-
-            if (processedType.requiresUpdateFn) {
-                retn++;
             }
 
             return retn;

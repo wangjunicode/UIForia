@@ -8,7 +8,8 @@ namespace UIForia.Compilers {
         TextElement,
         SlotDefinition,
         SlotContent,
-        Children
+        SlotTemplate,
+
 
     }
 

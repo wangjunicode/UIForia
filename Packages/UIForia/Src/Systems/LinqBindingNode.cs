@@ -79,6 +79,20 @@ namespace UIForia.Systems {
                 ptr = ptr.next;
             }
 
+            if (parent == null) {
+                    
+                UIElement elemPtr = element.parent;
+                while (elemPtr != null) {
+                    if (elemPtr.bindingNode != null) {
+                        parent = elemPtr.bindingNode;
+                        break;
+                    }
+
+                    elemPtr = elemPtr.parent;
+                }
+
+            }
+            
             return parent?.GetContextVariable(id);
         }
 

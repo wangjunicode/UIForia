@@ -1,8 +1,13 @@
 using System;
+using System.Collections.Generic;
+using System.Linq.Expressions;
+using System.Reflection;
 using Mono.Linq.Expressions;
 using UIForia.Compilers;
 using UIForia.Compilers.Style;
 using UIForia.Elements;
+using UIForia.Exceptions;
+using UIForia.Parsing;
 using UIForia.Util;
 using UnityEngine;
 
@@ -11,19 +16,20 @@ namespace UIForia {
     public class RuntimeTemplateData : CompiledTemplateData {
 
         public RuntimeTemplateData(TemplateSettings settings) : base(settings) { }
+        private Dictionary<int, Func<UIElement>> constructorFnMap;
 
         public override void LoadTemplates() {
-            templates = new Func<UIElement, TemplateScope2, UIElement>[compiledTemplates.size];
+            templates = new Func<UIElement, TemplateScope, UIElement>[compiledTemplates.size];
             bindings = new Action<UIElement, UIElement>[compiledBindings.size];
-            slots = new Func<UIElement, TemplateScope2, UIElement>[compiledSlots.size];
+            slots = new Func<UIElement, TemplateScope, UIElement>[compiledSlots.size];
             templateMetaData = new TemplateMetaData[compiledTemplates.size];
 
             for (int i = 0; i < templates.Length; i++) {
-                templates[i] = (Func<UIElement, TemplateScope2, UIElement>) compiledTemplates[i].templateFn.Compile();
+                templates[i] = (Func<UIElement, TemplateScope, UIElement>) compiledTemplates[i].templateFn.Compile();
             }
 
             for (int i = 0; i < slots.Length; i++) {
-                slots[i] = (Func<UIElement, TemplateScope2, UIElement>) compiledSlots[i].templateFn.Compile();
+                slots[i] = (Func<UIElement, TemplateScope, UIElement>) compiledSlots[i].templateFn.Compile();
             }
 
             for (int i = 0; i < bindings.Length; i++) {
@@ -53,6 +59,28 @@ namespace UIForia {
                 templateMetaData[i].styleMap = styleList.array;
             }
 
+            constructorFnMap = new Dictionary<int, Func<UIElement>>(37); 
+            
+            foreach (KeyValuePair<Type, ProcessedType> kvp in TypeProcessor.typeMap) {
+                if (kvp.Key.IsAbstract || kvp.Value.references == 0) {
+                    continue;
+                }
+
+                ConstructorInfo ctor = kvp.Key.GetConstructor(Type.EmptyTypes);
+                
+                if (ctor == null) {
+                    throw new CompileException(kvp.Key + " must provide a default constructor in order to be used in templates");
+                }
+                
+                constructorFnMap[kvp.Value.id] = Expression.Lambda<Func<UIElement>>(Expression.New(ctor)).Compile();
+            }
+
+            constructElement = DoConstructElement;
+
+        }
+
+        private UIElement DoConstructElement(int typeId) {
+            return constructorFnMap[typeId].Invoke();
         }
 
     }

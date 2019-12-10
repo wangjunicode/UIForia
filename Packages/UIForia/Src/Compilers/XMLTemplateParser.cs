@@ -450,7 +450,7 @@ namespace UIForia.Compilers {
                     continue;
                 }
                 
-                if (string.Equals(attr.value, "template", StringComparison.InvariantCultureIgnoreCase)) {
+                if (string.Equals(attr.value, "template", StringComparison.OrdinalIgnoreCase)) {
                     templateNode.attributes.SwapRemoveAt(i);
                     templateNode.slotType = SlotType.Template;
                     templateNode.processedType = TypeProcessor.GetProcessedType(typeof(SlotTemplateElement));

@@ -11,6 +11,7 @@
                 <Anchor href="'/index'">Home</Anchor>
                 <Anchor href="'/AlignmentDemo'">Alignment Demo</Anchor>
                 <Anchor href="'/AnimationDemo'">Animation</Anchor>
+                <Anchor href="'/SoundSystemDemo'">Sound Demo</Anchor>
                 <Anchor href="'/BindingsDemo'">Bindings</Anchor>
                 <Anchor href="'/input'">Input</Anchor>
                 <Anchor href="'/inputEvents'">Input Events</Anchor>
@@ -40,6 +41,7 @@
 
                 <AlignmentDemo x-route="/AlignmentDemo"/>
                 <AnimationDemo x-route="/AnimationDemo"/>
+                <SoundSystemDemo x-route="/SoundSystemDemo"/>
                 <InputDemo x-route="/input"/>
                 <InputEventsDemo x-route="/inputEvents"/>
                 <SelectDemo x-route="/SelectDemo"/>

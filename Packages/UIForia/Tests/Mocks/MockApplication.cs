@@ -1,11 +1,8 @@
 using System;
 using System.IO;
 using Src.Systems;
-using SVGX;
 using UIForia;
-
 using UIForia.Elements;
-using UIForia.Rendering;
 using UnityEditor;
 using UnityEngine;
 using Application = UIForia.Application;

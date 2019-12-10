@@ -36,7 +36,6 @@ style <Heading2> {
 }
 
 style <Anchor> {
-
     MarginBottom = 6px;
     Padding = 4px;
     BorderLeft = 2px;

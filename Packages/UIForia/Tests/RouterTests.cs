@@ -86,8 +86,8 @@ public class RouterTests {
         
         app.Update();
 
-        var innerRouteElement = app.RootElement.FindById<UIElement>("inner-route");
-        var friendsElement = app.RootElement.FindById<UIElement>("friends");
+        var innerRouteElement = app.RootElement.GetChild(0).FindById<UIElement>("inner-route");
+        var friendsElement = app.RootElement.GetChild(0).FindById<UIElement>("friends");
         Assert.IsInstanceOf<UIDivElement>(innerRouteElement);
         Assert.True(uiElement1.isEnabled);
         Assert.True(innerRouteElement.isEnabled);
@@ -120,12 +120,12 @@ public class RouterTests {
         MockApplication app = new MockApplication(typeof(RoutesWithDefaults));
         app.Update();
        
-        var helpElement = app.RootElement.FindById<UIGroupElement>("help");
-        var faqRoute1 = app.RootElement.FindById<UIDivElement>("faq-route1");
-        var faqRoute2 = app.RootElement.FindById<UIDivElement>("faq-route2");
-        var faqRoute3 = app.RootElement.FindById<UIDivElement>("faq-route3");
+        var helpElement = app.RootElement.GetChild(0).FindById<UIGroupElement>("help");
+        var faqRoute1 = app.RootElement.GetChild(0).FindById<UIDivElement>("faq-route1");
+        var faqRoute2 = app.RootElement.GetChild(0).FindById<UIDivElement>("faq-route2");
+        var faqRoute3 = app.RootElement.GetChild(0).FindById<UIDivElement>("faq-route3");
         
-        var friendsElement = app.RootElement.FindById<UIElement>("friends");
+        var friendsElement = app.RootElement.GetChild(0).FindById<UIElement>("friends");
         Assert.True(helpElement.isEnabled);
         Assert.True(faqRoute1.isEnabled);
         Assert.True(faqRoute2.isDisabled);
@@ -138,11 +138,11 @@ public class RouterTests {
         MockApplication app = new MockApplication(typeof(RoutesWithDefaults));
         app.Update();
        
-        var helpElement = app.RootElement.FindById<UIGroupElement>("help");
-        var faqRoute1 = app.RootElement.FindById<UIDivElement>("faq-route1");
-        var faqRoute2 = app.RootElement.FindById<UIDivElement>("faq-route2");
-        var faqRoute3 = app.RootElement.FindById<UIDivElement>("faq-route3");
-        var friendsElement = app.RootElement.FindById<UIElement>("friends");
+        var helpElement = app.RootElement.GetChild(0).FindById<UIGroupElement>("help");
+        var faqRoute1 = app.RootElement.GetChild(0).FindById<UIDivElement>("faq-route1");
+        var faqRoute2 = app.RootElement.GetChild(0).FindById<UIDivElement>("faq-route2");
+        var faqRoute3 = app.RootElement.GetChild(0).FindById<UIDivElement>("faq-route3");
+        var friendsElement = app.RootElement.GetChild(0).FindById<UIElement>("friends");
         
         // starting at faq1 and go to users friends
         app.RootElement.Application.RoutingSystem.FindRouter("game").GoTo("/user/1/friends");
@@ -188,10 +188,10 @@ public class RouterTests {
         MockApplication app = new MockApplication(typeof(GameViewWithLotsOfRouters));
         app.Update();
        
-        var characterDetail = app.RootElement.FindById<UIDivElement>("characterDetail");
-        var friendsElement = app.RootElement.FindById<UIGroupElement>("friends");
-        var chatWithChristian = app.RootElement.FindById<UIDivElement>("chatWithChristian");
-        var chatWithMatt = app.RootElement.FindById<UIDivElement>("chatWithMatt");
+        var characterDetail = app.RootElement.GetChild(0).FindById<UIDivElement>("characterDetail");
+        var friendsElement = app.RootElement.GetChild(0).FindById<UIGroupElement>("friends");
+        var chatWithChristian = app.RootElement.GetChild(0).FindById<UIDivElement>("chatWithChristian");
+        var chatWithMatt = app.RootElement.GetChild(0).FindById<UIDivElement>("chatWithMatt");
         
         Assert.True(characterDetail.isEnabled);
         Assert.True(friendsElement.isDisabled);

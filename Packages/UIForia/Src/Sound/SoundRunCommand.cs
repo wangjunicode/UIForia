@@ -1,13 +1,13 @@
 using System;
-using UIForia.Animation;
 using UIForia.Elements;
+using UIForia.Rendering;
 
-namespace UIForia.Rendering {
-    public class AnimationRunCommand : IRunCommand {
+namespace UIForia.Sound {
+    public class SoundRunCommand : IRunCommand {
 
-        public AnimationData animationData;
+        public UISoundData soundData;
 
-        public AnimationRunCommand(bool isExit, RunAction runAction = RunAction.Run) {
+        public SoundRunCommand(bool isExit, RunAction runAction = RunAction.Run) {
             IsExit = isExit;
             RunAction = runAction;
         }
@@ -15,16 +15,16 @@ namespace UIForia.Rendering {
         public void Run(UIElement element) {
             switch (RunAction) {
                 case RunAction.Run:
-                    element.Application.Animate(element, animationData);
+                    element.Application.SoundSystem.PlaySound(element, soundData);
                     break;
                 case RunAction.Pause:
-                    element.Application.PauseAnimation(element, animationData);
+                    element.Application.SoundSystem.PauseSound(element, soundData);
                     break;
                 case RunAction.Resume:
-                    element.Application.ResumeAnimation(element, animationData);
+                    element.Application.SoundSystem.SoundResumed(element, soundData);
                     break;
                 case RunAction.Stop:
-                    element.Application.StopAnimation(element, animationData);
+                    element.Application.SoundSystem.StopSound(element, soundData);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

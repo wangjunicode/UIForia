@@ -69,6 +69,8 @@
       url: "docs/routers"
     - title: "Animations"
       url: "docs/animations"
+    - title: "Stylable Sound"
+      url: "docs/sound"
     - title: "Editor Tools"
       url: "docs/tools"
     - title: "Misc"

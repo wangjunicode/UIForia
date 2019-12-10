@@ -8,6 +8,7 @@ using UIForia.Layout.LayoutTypes;
 using UIForia.Parsing.Style;
 using UIForia.Parsing.Style.AstNodes;
 using UIForia.Rendering;
+using UIForia.Sound;
 using UIForia.Util;
 using UnityEngine;
 using FontStyle = UIForia.Text.FontStyle;
@@ -246,10 +247,10 @@ style myStyle {
         var containers = styleSheet.styleGroupContainers;
         Assert.AreEqual(1, containers.Length);
 
-        Assert.AreEqual(10 * 0.01f, containers[0].groups[0].normal.style.PaddingTop.value);
-        Assert.AreEqual(10 * 0.01f, containers[0].groups[0].normal.style.PaddingRight.value);
+        Assert.IsTrue(Mathf.Approximately(10 * 0.01f, containers[0].groups[0].normal.style.PaddingTop.value));
+        Assert.IsTrue(Mathf.Approximately(10 * 0.01f, containers[0].groups[0].normal.style.PaddingRight.value));
         Assert.AreEqual(20, containers[0].groups[0].normal.style.PaddingBottom.value);
-        Assert.AreEqual(10 * 0.01f, containers[0].groups[0].normal.style.PaddingLeft.value);
+        Assert.IsTrue(Mathf.Approximately(10 * 0.01f, containers[0].groups[0].normal.style.PaddingLeft.value));
         Assert.AreEqual(UIFixedUnit.Percent, containers[0].groups[0].normal.style.PaddingTop.unit);
         Assert.AreEqual(UIFixedUnit.Percent, containers[0].groups[0].normal.style.PaddingRight.unit);
         Assert.AreEqual(UIFixedUnit.Pixel, containers[0].groups[0].normal.style.PaddingBottom.unit);
@@ -277,10 +278,10 @@ style myStyle {
         var containers = styleSheet.styleGroupContainers;
         Assert.AreEqual(1, containers.Length);
 
-        Assert.AreEqual(10 * 0.01f, containers[0].groups[0].normal.style.BorderTop.value);
-        Assert.AreEqual(10 * 0.01f, containers[0].groups[0].normal.style.BorderRight.value);
+        Assert.IsTrue(Mathf.Approximately(10 * 0.01f, containers[0].groups[0].normal.style.BorderTop.value));
+        Assert.IsTrue(Mathf.Approximately(10 * 0.01f, containers[0].groups[0].normal.style.BorderRight.value));
         Assert.AreEqual(20, containers[0].groups[0].normal.style.BorderBottom.value);
-        Assert.AreEqual(10 * 0.01f, containers[0].groups[0].normal.style.BorderLeft.value);
+        Assert.IsTrue(Mathf.Approximately(10 * 0.01f, containers[0].groups[0].normal.style.BorderLeft.value));
         Assert.AreEqual(UIFixedUnit.Percent, containers[0].groups[0].normal.style.BorderTop.unit);
         Assert.AreEqual(UIFixedUnit.Percent, containers[0].groups[0].normal.style.BorderRight.unit);
         Assert.AreEqual(UIFixedUnit.Pixel, containers[0].groups[0].normal.style.BorderBottom.unit);
@@ -999,7 +1000,7 @@ export const red = red;
 
 style teXt { 
     TextColor = @red;
-    TextFontAsset = url(""Gotham-Medium SDF"");
+    TextFontAsset = url(""Fonts/GothamNarrow-Medium SDF"");
     TextFontStyle = bold italic superscript underline highlight smallcaps;
     TextFontSize = 14;
     TextAlignment = Center;
@@ -1010,7 +1011,7 @@ style teXt {
         StyleSheet styleSheet = NewStyleSheetCompiler().Compile("test", nodes);
         var styleGroup = styleSheet.styleGroupContainers;
         Assert.AreEqual(Color.red, styleGroup[0].groups[0].normal.style.TextColor);
-        Assert.AreEqual("Gotham-Medium SDF", styleGroup[0].groups[0].normal.style.TextFontAsset.name);
+        Assert.AreEqual("GothamNarrow-Medium SDF", styleGroup[0].groups[0].normal.style.TextFontAsset.name);
         Assert.AreEqual(FontStyle.Normal
                         | FontStyle.Bold
                         | FontStyle.Italic
@@ -1199,4 +1200,52 @@ style xyz {
 //        var styleContainer = styleSheet.styleGroupContainers;
 //        Assert.IsInstanceOf<Sprite>(styleContainer[0].groups[0].normal.style.BackgroundImage);
 //    }
+// Pitch = 0.4;
+// PitchRange = range(0.1, 0.5);
+// Tempo = 23.9;
+// Duration = 50%; //%
+// Duration = 2s; //%
+// Iterations = 1; 
+// Iterations = Infinite; // -1
+// MixerGroup = stringhere;
+// MixerGroup = "Master Group 1";
+// Volume 
+    [Test]
+    public void RunSound() {
+        var nodes = StyleParser.Parse(@"
+                sound notification {
+                    Asset = ""sounds/notification1"";
+                    MixerGroup = ""Master Group 1"";
+                    Duration = 2s;
+                    Iterations = Infinite;
+                    Pitch = -0.4;
+                    PitchRange = range(0.1, 0.4);
+                    Tempo = 23.9;
+                    Volume = 0.9;
+                }
+
+                style someStyle {
+                    run sound(notification);
+                }
+            ".Trim());
+        StyleSheet styleSheet = NewStyleSheetCompiler().Compile("test", nodes);
+        Assert.AreEqual(1, styleSheet.styleGroupContainers.Length);
+        UIStyleGroupContainer container = styleSheet.styleGroupContainers[0];
+        Assert.AreEqual("someStyle", container.name);
+        Assert.AreEqual(1, container.groups[0].normal.runCommands.Count);
+        
+        Assert.AreEqual(1, styleSheet.sounds.Length);
+        UISoundData soundData = styleSheet.sounds[0];
+        
+        Assert.AreEqual("sounds/notification1", soundData.Asset);
+        Assert.AreEqual("Master Group 1", soundData.MixerGroup);
+        Assert.AreEqual(UITimeMeasurementUnit.Seconds, soundData.Duration.unit);
+        Assert.AreEqual(2f, soundData.Duration.value);
+        Assert.AreEqual(-1, soundData.Iterations);
+        Assert.AreEqual(-0.4f, soundData.Pitch);
+        Assert.AreEqual(0.1f, soundData.PitchRange.Min);
+        Assert.AreEqual(0.4f, soundData.PitchRange.Max);
+        Assert.AreEqual(23.9f, soundData.Tempo);
+        Assert.AreEqual(0.9f, soundData.Volume);
+    }
 }

@@ -6,6 +6,7 @@ using UIForia.Layout;
 using UIForia.Layout.LayoutTypes;
 using UIForia.Parsing.Style.AstNodes;
 using UIForia.Rendering;
+using UIForia.Sound;
 using UIForia.Text;
 using UIForia.Util;
 using UnityEngine;
@@ -424,19 +425,19 @@ namespace UIForia.Compilers.Style {
                         string propertyValue = identifierNode.name.ToLower();
 
                         if (propertyValue.Contains("bold")) {
-                            style |= Text.FontStyle.Bold;
+                            style |= FontStyle.Bold;
                         }
 
                         if (propertyValue.Contains("italic")) {
-                            style |= Text.FontStyle.Italic;
+                            style |= FontStyle.Italic;
                         }
 
                         if (propertyValue.Contains("underline")) {
-                            style |= Text.FontStyle.Underline;
+                            style |= FontStyle.Underline;
                         }
 
                         if (propertyValue.Contains("strikethrough")) {
-                            style |= Text.FontStyle.StrikeThrough;
+                            style |= FontStyle.StrikeThrough;
                         }
 
                         break;
@@ -1057,7 +1058,7 @@ namespace UIForia.Compilers.Style {
             switch (value) {
                 case MeasurementNode measurementNode:
                     if (TryParseFloat(measurementNode.value.rawValue, out float measurementValue)) {
-                        OffsetMeasurementUnit unit = MapTransformUnit(measurementNode.unit, context);
+                        OffsetMeasurementUnit unit = MapOffsetMeasurementUnit(measurementNode.unit, context);
                         if (unit == OffsetMeasurementUnit.Percent) {
                             measurementValue *= 0.01f;
                         }
@@ -1078,7 +1079,7 @@ namespace UIForia.Compilers.Style {
             throw new CompileException(context.fileName, value, $"Cannot parse value, expected a numeric literal or measurement {value}.");
         }
 
-        private static OffsetMeasurementUnit MapTransformUnit(UnitNode unitNode, StyleCompileContext context) {
+        private static OffsetMeasurementUnit MapOffsetMeasurementUnit(UnitNode unitNode, StyleCompileContext context) {
             if (unitNode == null) return OffsetMeasurementUnit.Pixel;
 
             switch (unitNode.value) {
@@ -1123,9 +1124,53 @@ namespace UIForia.Compilers.Style {
             }
 
             Debug.LogWarning($"You used a {unitNode.value} in line {unitNode.line} column {unitNode.column} in file {context.fileName} but this unit isn't supported. " +
-                             "Try px, w, h, alw, alh, cw, ch, em, caw, cah, vw, vh, pw, ph, pcaw, pcah, sw, or sh instead (see TransformUnit). Will fall back to px.");
+                             "Try px, w, h, alw, alh, cw, ch, em, caw, cah, vw, vh, pw, ph, pcaw, pcah, sw, or sh instead (see OffsetMeasurementUnit). Will fall back to px.");
 
             return OffsetMeasurementUnit.Pixel;
+        }
+
+        internal static UITimeMeasurement MapUITimeMeasurement(StyleASTNode value, StyleCompileContext context) {
+            value = context.GetValueForReference(value);
+            switch (value) {
+                case MeasurementNode measurementNode:
+                    if (TryParseFloat(measurementNode.value.rawValue, out float measurementValue)) {
+                        UITimeMeasurementUnit unit = MapUITimeMeasurementUnit(measurementNode.unit, context);
+                        if (unit == UITimeMeasurementUnit.Percentage) {
+                            measurementValue *= 0.01f;
+                        }
+
+                        return new UITimeMeasurement(measurementValue, unit);
+                    }
+
+                    break;
+
+                case StyleLiteralNode literalNode:
+                    if (TryParseFloat(literalNode.rawValue, out float literalValue)) {
+                        return new UITimeMeasurement(literalValue);
+                    }
+
+                    break;
+            }
+
+            throw new CompileException(context.fileName, value, $"Cannot parse value, expected a numeric literal or measurement {value}.");
+        }
+        
+        internal static UITimeMeasurementUnit MapUITimeMeasurementUnit(UnitNode unitNode, StyleCompileContext context) {
+            if (unitNode == null) return UITimeMeasurementUnit.Milliseconds;
+
+            switch (unitNode.value) {
+                case "%":
+                    return UITimeMeasurementUnit.Percentage;
+                case "s":
+                    return UITimeMeasurementUnit.Seconds;
+                case "ms":
+                    return UITimeMeasurementUnit.Milliseconds;
+            }
+
+            Debug.LogWarning($"You used a {unitNode.value} in line {unitNode.line} column {unitNode.column} in file {context.fileName} but this unit isn't supported. " +
+                             "Try %, s or ms instead (see UITimeMeasurementUnit). Will fall back to ms.");
+
+            return UITimeMeasurementUnit.Milliseconds;
         }
 
         private static void MapOverflows(UIStyle targetStyle, PropertyNode property, StyleCompileContext context) {
@@ -1445,6 +1490,17 @@ namespace UIForia.Compilers.Style {
             throw new CompileException(context.fileName, node, $"Expected a numeric value but all I got was this lousy {node}");
         }
 
+        internal static float MapNumberOrInfinite(StyleASTNode node, StyleCompileContext context) {
+            node = context.GetValueForReference(node);
+            if (node is StyleIdentifierNode identifierNode) {
+                if (identifierNode.name.ToLower() == "infinite") {
+                    return -1;
+                }
+            }
+
+            return MapNumber(node, context);
+        }
+
         internal static float MapNumber(StyleASTNode node, StyleCompileContext context) {
             node = context.GetValueForReference(node);
             if (node is StyleIdentifierNode identifierNode) {
@@ -1462,7 +1518,25 @@ namespace UIForia.Compilers.Style {
             throw new CompileException(context.fileName, node, $"Expected a numeric value but all I got was this lousy {node}");
         }
 
-        private static string MapString(StyleASTNode node, StyleCompileContext context) {
+        internal static FloatRange MapFloatRange(StyleASTNode node, StyleCompileContext context) {
+            if (node is StyleFunctionNode functionNode) {
+                if (functionNode.identifier.ToLower() != "range") {
+                    throw new CompileException(context.fileName, node, $"Expected a range function node but got this: {node}");
+                }
+
+                if (functionNode.children.size != 2) {
+                    throw new CompileException(context.fileName, node, $"Expected two arguments but got {functionNode.children.size}");
+                }
+
+                float min = MapNumber(functionNode.children[0], context);
+                float max = MapNumber(functionNode.children[1], context);
+                return new FloatRange(min, max);
+            }
+
+            throw new CompileException(context.fileName, node, $"Expected a random function node but got this: {node}");
+        }
+
+        internal static string MapString(StyleASTNode node, StyleCompileContext context) {
             node = context.GetValueForReference(node);
 
             if (node is StyleIdentifierNode identifierNode) {

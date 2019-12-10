@@ -58,7 +58,7 @@ namespace UIForia.Parsing.Style.Tokenizer {
         Style,
         Animation,
         Texture,
-        Audio,
+        Sound,
         Cursor,
         
         BooleanAnd,
@@ -82,6 +82,7 @@ namespace UIForia.Parsing.Style.Tokenizer {
         Exit,
         Enter,
         Run,
+        Resume,
         Pause,
         Stop,
 

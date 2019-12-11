@@ -2,314 +2,276 @@
 id: Animation
 showInMain: true
 title:  Animation
-tags: 
+tags:
+ - uiforia 
  - animation
 layout: page
 order: 30
 ---
 
 # Animations
+With Animations you can animate from one [style property](/docs/style) value to another. Most numeric style properties can
+be animated, like sizes, alignment offsets and transforms.
 
-Hierarchical animations are made easy with UIForia. Animations are declarative via style sheets and integrated with the game via eventing. 
+You can either define your animation in a style sheet (the recommended way) or create one on the spot with the C# API.
+Mixing both is possible as well, as you can load an animation definition from a style sheet in C#, customize it and pass it
+to the animation API.
 
-There are options for options for delay, offset, loop timing, loop direction control, and multiple curve types.   
-  
-Multiple types: Sequences, groups, properties, key-frames
-
-Animations can be styled with [UIForia Style Properties](StyleProperties.md)
-                              
-
-## Animation in the Stylesheet
-You can implement animations within the stylesheet. The structure is the same as creating a style for an element, except replace `style` with `animation`:
+## Defining Animations in Style Sheets
 ```
-animation name {
-    [options] {
-        duration = 1000;
-        iterations = 1;
-        timingFunction = CubicEaseInOut;
-    }
+animation pulse {
+    [options] { TimingFunction = QuadraticEaseInOut; }
     [keyframes] {
-        0% { 
-            BackgroundColor = purple;
-            PreferredWidth = 50px;        
+        0% { TransformScale = 1; }
+        50% { TransformScale = 1.105; }
+        100% { TransformScale = 1; }
+    }
+}
+```
+
+![pulse](/assets/img/animation_pulse.gif)
+
+
+The `animation` keyword starts the definition block, followed by a name that you choose, which would be `pulse` in this example.
+Inside there may be an optional `[options]` block, which lets you define easing functions, duration, delay and other parameters for
+the animation. The `[keyframes]` block is required and you need to add at least one keyframe.
+
+You don't have to start your animation at keyframe `0%` (or end at `100%`) if you want to animate from whatever style property 
+value is currently set to something else. This is usually handy when there's code that changes styles as well.
+
+### Keyframe groups
+```
+animation bounce {
+    [keyframes] {
+        0%, 20%, 53%, 80%, 100% { TransformPositionY = 0; }
+        40%, 43% { TransformPositionY = -30px; }
+        70% { TransformPositionY = -15px; }
+        90% { TransformPositionY = -4px; }
+    }
+}
+```
+
+![bounce](/assets/img/animation_bounce.gif)
+
+Here's an example of an animation with a group of keyframes defining a common style property value.
+
+Have a look at UIForia's documentation app in [the "Animation" section](https://github.com/klanggames/UIForia/blob/master/Assets/Documentation/Features/AnimationDemo.style)!
+
+## Run Animations
+Now that you know how to define an animation we'll look at how to run them. The easiest way would be via [style groups](/docs/style):
+```
+style container {
+    run animation(fadeIn);
+}
+
+animation fadeIn {
+    [options] { TimingFunction = QuadraticEaseInOut; }
+    [keyframes] {
+        0% { Opacity = 0; }
+        100% { Opacity = 1; }
+    }
+}
+```
+![fadeIn](/assets/img/animation_fadeIn.gif)
+
+The animation in this example will now be triggered when the style group `container` becomes active. Any property in a
+style group is by default assigned to the `normal` style state group, which is implicitly there. Other style state
+groups have to be defined and you might already know them:
+```
+style container {
+    run animation(fadeIn);
+    [hover] { }
+    [active] { }
+    [focus] { }
+}
+```
+
+You can run animation when any of the states are entered: `[hover] { run animation(flash); }`.
+
+The same applies to attribute style groups, which means you could trigger an animation by setting / unsetting an element's
+attribute value.
+
+groups have to be defined and you might already know them:
+```
+style container {
+    [attr:display="show"] {
+        run animation(fadeIn);
+    }
+}
+```
+```c#
+element.SetAttribute("display", "show");
+```
+
+### Run Animations on Exit
+The previous examples can be read as: when the state is entered run the animation.
+But sometimes you want to run another animation (maybe the inverse) once a state is exited. When hovered a button's background
+color might change via animations. But when that state is exited the regular background color should be restored.
+To make things easy there are two convenient attributes that you can add to run definitions:
+ 
+`[enter]`, which marks a run definition to execute when the state is entered and `[exit]`, which does the opposite.
+
+Let's look at a full example for our demo buttons:
+
+```
+style button {
+    Padding = 7px;
+    CornerBevelBottomRight = 7px;
+    Border = 3px;
+    BackgroundColor = rgba(120, 100, 100, 190);
+    Margin = 3px;
+    TextFontAsset = @theme.fontGothamBold;
+    TextFontSize = 11px;
+    TextColor = rgb(240, 240, 230);
+    [hover] {
+        Cursor = @theme.cursorHand;
+        [enter] run animation(button-hover);
+        [exit] run animation(button-normal);
+    }
+}
+
+animation button-hover {
+    [options] { TimingFunction = QuadraticEaseInOut; }
+    [keyframes] { 
+        100% { 
+            BackgroundColor = rgba(220, 200, 200, 190);
+            TextColor = rgb(40, 40, 30);
         }
+    }
+}
+
+animation button-normal {
+    [options] { TimingFunction = QuadraticEaseInOut; }
+    [keyframes] { 
         100% {
-             BackgroundColor = purple;
-             PreferredWidth = 550px;
+            BackgroundColor = rgba(120, 100, 100, 190);
+            TextColor = rgb(240, 240, 230);
         }
     }
 }
 ```
+![hover state](/assets/img/animation_hover_state.gif)
 
-`run animation(name)` in the element will execute the properties you have set in the animation:
+Notice how the `[enter]` animation stops as soon as the cursor leaves the button and the `[exit]` animation immediately kicks in.
+
+## The `[options]` section
+In the previous examples we already used the `[options]` block a couple of times to change our animation settings. 
+Let's look at all the options that are currently supported:
+
 ```
-style name {
-    run animation(name);
-}
+    [options] {
+        Iterations = Infinite;
+        Duration = 750;
+        Delay = 0.2;
+        Direction = Forward;
+        TimingFunction = QuadraticEaseInOut;
+    }
 ```
 
+| Properties     | Description                                                                                                                      | Type               | Default |
+|:---------------|:---------------------------------------------------------------------------------------------------------------------------------|:-------------------|:--------|
+| Iterations     | Defines how many times the anmiation should be repeated. Special values: -1 or Infinite will loop the animation for ever.        | int                | 1       |
+| Duration       | Duration of the whole animation in ms.                                                                                           | duration           | 1000    |
+| Delay          | Delay the animation in seconds.                                                                                                  | duration           | 0       |
+| Direction      | Values: `Forward` or `Reverse`. Play the animation from 0% to 100% when using `Forward` or from 100% to 0% if `Reverse` is used. | AnimationDirection | Forward |
+| TimingFunction | Choose an [easing function](#timing-functions) to adjust the change rate of the style properties between keyframes.              | EasingFunction     | Linear  |
 
-You have access to ```[options]``` and ```[keyframes]``` within the stylesheet. In order to implement more complicated features like state or triggers, you will need to declare those data structures and their properties in your C# script.
+## C# Animation API
+Animations done via style sheets are very powerful already but sometimes you just need them to be extra customized.
+With the Animation API you can load an animation definition from a style sheet or create your own from scratch.
+It also gives you the power to pause, resume and stop a running animation. And you can subscribe to the animation's
+life-cycle events.
 
-## Animation Properties
+(Try not to over-use the C# API since style sheet based animations are always easier to read and maintain.)
 
-**AnimationData**:
-  
-`AnimationOptions` sets the settings, timing, and direction of your animations.  
-`AnimationKeyFrame` sets styles per keyframe.   
-`AnimationTrigger` sets animation triggers.     
-`AnimationState` is a readonly property for returning state values.
-
----------------------------------------------------------------
-
-
-### [options] 
-In milliseconds 
-  
-Properties        | Description         | Type
------------------ |-----------------    |---------                                    
- loopTime         | sets the duration of a loop | float
- iterations       | sets the number of times the animation runs | int
- delay            | sets a delay                    | duration
- forwardStartDelay| sets a delay at the beginning                    | int
- reverseStartDelay|                     | int
- direction        | can be set to `Forward` or `Reverse`  | AnimationDirection
- loopType         | can be set to `Constant` or `PingPong`| AnimationLoopType
- timingFunction   | sets the [Easing function](#easing-functions)  | EasingFunction
- playbackType     |  determines ow the animation should be played. Set to `KeyFrame`, `Parallel`, or `Sequential` | animationPlaybackType
-
-
-<br/>
-
----------------------------------------------------------------
-
-
-
-### [keyframes] 
-Keyframes in UIForia are inspired by CSS Animations. You can set UIForia's styling properties to any number of keyframes. 
-
-Properties        | Description         | Type
------------------ |-----------------    |---------                                    
- key             |  keyframe time values, for e.g. 0%, 50%, 100%         | float
- property        |  name of style property                              | StyleProperty
- 
- Keyframe values can be set to any values between 0% and 100% to define the states with each property.
- 
+### Load Animation From Style Sheet
+Inside your `UIElement` you can get a copy of any animation definition from your style sheets.
 ```
- [keyframes] {
-    0% {
-        PreferredWidth = 50px;
-    }
-    50% {
-        PreferredWidth = 80px;
-    }
-    100% {
-        PreferredWidth = 100px;
-    }
- }
- ```
+AnimationData flashAnimationData = Application.GetAnimationFromFile("Documentation/Features/AnimationDemo.style", "flash");
+```
 
-<br/>
+You can change all the options or even add keyframes:
+```
+flashAnimationData.options.duration = 1200;
+animationData.frames.Add(new AnimationKeyFrame(0.3f, new StyleKeyFrameValue[] {
+        new StyleKeyFrameValue(StylePropertyId.PreferredWidth, "200px"), 
+}));
+```
 
----------------------------------------------------------------
+Then run the animation on any element you want:
+```
+Application.Animate(animationTarget, flashAnimationData);
+```
 
-### AnimationTrigger
+Note that we refer to keyframes in code with floats between 0 and 1. The keyframe at
+`30%` of the animation was therefore defined as `0.3f`. 
 
- Properties       | Description                                 | Type          
------------------ | ------------------------------------------- |---------                         
- time             | frames                                      | float         
- fun              | animation function that gets triggered      | StyleProperty 
-  
+### UIForia.Animation.AnimationTrigger
+AnimationTriggers are custom event callbacks that get triggered on specific keyframes.
+
 ```
 AnimationTrigger[] triggers = {
-                new AnimationTrigger(0.65f, (StyleAnimationEvent evt) => {
-                    float start = (int) evt.options.duration * 0.65f;
-                    float end = (int) evt.options.duration * 0.9f;
-                    int duration = (int) (end - start);
-                    one_BlueOrbit.SetEnabled(true);
-                    Application.Animate(one_BlueOrbit, OrbitFadeAnim(duration));
-                })
+    new AnimationTrigger(0.65f, (StyleAnimationEvent evt) => {
+        float start = (int) evt.options.duration * 0.65f;
+        float end = (int) evt.options.duration * 0.9f;
+        int duration = (int) (end - start);
+        one_BlueOrbit.SetEnabled(true);
+        Application.Animate(one_BlueOrbit, OrbitFadeAnim(duration));
+    })
 };
 ```
 
-<br/>
+When the animation reaches `65%` of its runtime the custom `StyleAnimationEvent` will be run.
+In that example we start another customized animation at this keyframe.   
 
----------------------------------------------------------------
+## Event Callbacks
+There are five built in event callbacks that you might choose over an animation trigger:
+- onStart
+- onEnd
+- onCanceled
+- onCompleted
+- onTick
 
- 
-### StyleAnimationEvent
-
- Properties        | Description         | Type
- ----------------- |-----------------    |---------                                    
-  type             |                     | 
-  target           |                     |
-  state            |                     |
-  options          |                     | 
-  
-<br/>
-
----------------------------------------------------------------
-
-  
-### AnimationState
-
- Properties        | Description                    | Type
- ----------------- |-----------------               |---------                                    
-  target           |                                | UIelement
- elapsedTotalTime  | returns elapsed total time (milliseconds)  | float
- elapsedIterationTime |  returns iteration time (milliseconds)  | float
- currentIteration  | returns the current iteration              | int
- iterationCount     | returns number of iterations              | int
- frameCount         |  returns number of frames                 | int
- totalProgress      |  returns total progress                   | int
- iterationProgress  |   returns iteration progress              | int
-`status` <br/>     |                    |  UITaskState         
-
-int `currentIteration`
-
-
----------------------------------------------------------------
- 
-     
-### Easing Functions 
- Easing functions can be created by setting the name of the function to the `timeFunction` property:
- 
- BackEaseIn, &nbsp; BackEaseOut, &nbsp; BackEaseInOut, &nbsp; BounceEaseIn, &nbsp; BounceEaseOut, &nbsp; BounceEaseInOut, &nbsp; 
-  CubicEaseIn, &nbsp; CubicEaseOut, &nbsp; CubicEaseInOut, &nbsp; QuarticEaseIn, &nbsp; CircularEaseIn, &nbsp; CircularEaseOut, &nbsp; CircularEaseInOut, 
-  &nbsp; ExponentialEaseIn, &nbsp;  ExponentialEaseOut, ExponentialEaseInOut, &nbsp; ElasticEaseIn, &nbsp; ElasticEaseOut, &nbsp; ElasticEaseInOut, &nbsp; 
-  Linear, &nbsp; QuadraticEaseIn, &nbsp;   QuadraticEaseOut, &nbsp;  QuadraticEaseInOut, &nbsp; QuarticEaseOut, &nbsp; QuarticEaseInOut,  &nbsp; QuinticEaseIn,
-  &nbsp; QuinticEaseOut, &nbsp; QuinticEaseInOut,&nbsp; SineEaseIn, &nbsp; SineEaseOut, &nbsp; SineEaseInOut  
- 
-
- 
-    
-**QuinticEaseInEaseIn Example**
-
-``` 
-animation easeIn {
-          [options] {
-              duration = 3200;
-              timingFunction = QuinticEaseIn;
-          }
-          [keyframes] {
-              0% {PreferredSize = 48px;}
-              100% {PreferredSize = 150px;}
-          }
-}
-```   
-
-![QuadEaseIn](https://media.giphy.com/media/ZCeMiLnmm4kufD0JgI/giphy.gif)
-
- 
-
- 
-
-For visual examples of easing functions, see https://easings.net
-
-<br/>
-
----------------------------------------------------------------
-
-
-
-
-
-
-
-
-
-## Menu Warning Example
-![](/static/img/animation-warning.gif)
-In the example above, we have a warning icon with a yellow arc orbiting around it. 
-
-In [keyframes] we set `TransformRotation` to orbit 360 degrees around the image.
-
-**Stylesheet:**
+To run custom code as soon as an animation is done you'd do this:
 ```
-style image {
-      BackgroundImage = url("Images/warning");
-      LayoutBehavior = Ignored;
-      PreferredSize = 35px;
-      TransformBehavior = AnchorMaxOffset;
-      TransformPosition = 0.5pcaw -0.5h;
-}
-
-animation warning {
-
-    [options] {
-        duration = 2000;
-        iterations = -1;
-    }
-    [keyframes] {
-        0% { 
-            TransformRotation = 0;
-        }
-        100% {
-            TransformRotation = -360;
-        }
-    }
-}
-
-style orbit-container {
-       LayoutType = Radial;
-       PreferredSize = 35px;
-       RadialLayoutEndAngle = 50;
-       RadialLayoutRadius = 20;
-       TransformRotation = 0;
-       TransformPivot = 0.5 0.5;
-       
-       run animation(warning); 
-}
-
-style orbit {
-    BackgroundColor = yellow;
-}
-
-style orbit-0 {
-    PreferredSize= 2px;
-}
-
-style circle {
-    BorderRadius = 50%;
-    TransformPivot = 0.5 0.5; 
-}
+animationData.onCompleted = (StyleAnimationEvent evt) => { };
 ```
 
+### Timing Functions 
+The `TimingFunction` option can be one of the following: 
+- Linear (which is the default)
+- QuadraticEaseIn
+- QuadraticEaseOut
+- QuadraticEaseInOut
+- CubicEaseIn
+- CubicEaseOut
+- CubicEaseInOut
+- QuarticEaseIn
+- QuarticEaseOut
+- QuarticEaseInOut
+- QuinticEaseIn
+- QuinticEaseOut
+- QuinticEaseInOut
+- SineEaseIn
+- SineEaseOut
+- SineEaseInOut
+- CircularEaseIn
+- CircularEaseOut
+- CircularEaseInOut
+- ExponentialEaseIn
+- ExponentialEaseOut
+- ExponentialEaseInOut
+- ElasticEaseIn
+- ElasticEaseOut
+- ElasticEaseInOut
+- BackEaseIn
+- BackEaseOut
+- BackEaseInOut
+- BounceEaseIn
+- BounceEaseOut
+- BounceEaseInOut
 
+For visual examples of easing functions, see <https://easings.net>
 
-
-
-
-
-  
-
-## Animation in C#
-**AnimationData** struct must be used as a type when creating a new animation object and using its properties.
-
-
-Example using AnimationOptions:
-  
-```
-public AnimationData RedBgAnim() {
-            AnimationOptions options = new AnimationOptions() {
-                duration = 3200, 
-                iterations = -1 // infinite iterations
-            };
-}
-```
-
-### Triggers
-In order to use triggers, create a new object `AnimationTrigger` and set the `time` and `fn` values:
-
-
-```C#
-  AnimationTrigger[] triggers = {
-                new AnimationTrigger(0.65f, (StyleAnimationEvent evt) => {
-                    float start = (int) evt.options.duration * 0.65f;
-                    float end = (int) evt.options.duration * 0.9f;
-                    int duration = (int) (end - start);
-                    one_BlueOrbit.SetEnabled(true);
-                    Application.Animate(one_BlueOrbit, OrbitFadeAnim(duration));
-                })
- };
-```
+#### Custom Easing Functions
+Custom easing function are currently not supported :(

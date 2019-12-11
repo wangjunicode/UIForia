@@ -83,7 +83,6 @@
             <Div>Animation Task Status: {animationTask.state}</Div>
         </Group>
         
-        
     </Contents>
 
 </UITemplate>

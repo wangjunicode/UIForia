@@ -11,6 +11,7 @@ using UIForia.Layout;
 using UIForia.Parsing.Expression;
 using UIForia.Rendering;
 using UIForia.Routing;
+using UIForia.Sound;
 using UIForia.Systems;
 using UIForia.Systems.Input;
 using UIForia.Util;
@@ -36,6 +37,7 @@ namespace UIForia {
         protected IInputSystem m_InputSystem;
         protected RoutingSystem m_RoutingSystem;
         protected AnimationSystem m_AnimationSystem;
+        protected UISoundSystem m_UISoundSystem;
 
         protected ResourceManager resourceManager;
 
@@ -140,6 +142,7 @@ namespace UIForia {
             //       m_RenderSystem = new SVGXRenderSystem(this, null, m_LayoutSystem);
             m_RoutingSystem = new RoutingSystem();
             m_AnimationSystem = new AnimationSystem();
+            m_UISoundSystem = new UISoundSystem();
 
             styleImporter = new StyleSheetImporter(this);
             templateParser = new TemplateParser(this);
@@ -197,6 +200,7 @@ namespace UIForia {
         public ILayoutSystem LayoutSystem => m_LayoutSystem;
         public IInputSystem InputSystem => m_InputSystem;
         public RoutingSystem RoutingSystem => m_RoutingSystem;
+        public UISoundSystem SoundSystem => m_UISoundSystem;
 
         public Camera Camera { get; private set; }
 

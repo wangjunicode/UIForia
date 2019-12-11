@@ -25,7 +25,7 @@ Keyword           | Description
 `as`              | Renames a constant in the local context. More details in the section about imports.
 `from`            | Specify the style file location that should be imported. More details in the section about imports.
 `style`           | Creates a style definition.
-`[attr:attrName]` | Used inside a style definition to create an attribute sub-style-group. See the attribute section below for more.
+`[attr:attrName]` | Used inside a style group to create an attribute style group. See the attribute section below for more.
 `not` / `and`     | Used in conjunction with attribute style definitions. See the attribute section below for more.
 
 ### Syntax Highlighting

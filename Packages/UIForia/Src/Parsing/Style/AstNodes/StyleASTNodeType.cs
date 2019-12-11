@@ -36,6 +36,7 @@ namespace UIForia.Parsing.Style.AstNodes {
         Const = 110,
         Export = 120,
         AnimationDeclaration = 130,
+        SoundDeclaration = 135,
         StyleGroup = 140,
     }
 

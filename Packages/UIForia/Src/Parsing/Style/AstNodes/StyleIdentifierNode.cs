@@ -19,8 +19,6 @@ namespace UIForia.Parsing.Style.AstNodes {
     public class StyleIdentifierNode : StyleASTNode {
 
         public string name;
-        
-        public bool IsAlias => name[0] == '$';
 
         public override void Release() {
             StyleASTNodeFactory.s_IdentifierPool.Release(this);

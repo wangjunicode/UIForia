@@ -141,7 +141,7 @@ namespace UIForia.Parsing.Style.Tokenizer {
                 case "style": return new StyleToken(StyleTokenType.Style, identifierLowerCase, context.line, context.column);
                 case "animation": return new StyleToken(StyleTokenType.Animation, identifierLowerCase, context.line, context.column);
                 case "texture": return new StyleToken(StyleTokenType.Texture, identifierLowerCase, context.line, context.column);
-                case "audio": return new StyleToken(StyleTokenType.Audio, identifierLowerCase, context.line, context.column);
+                case "sound": return new StyleToken(StyleTokenType.Sound, identifierLowerCase, context.line, context.column);
                 case "cursor": return new StyleToken(StyleTokenType.Cursor, identifierLowerCase, context.line, context.column);
                 case "export": return new StyleToken(StyleTokenType.Export, identifierLowerCase, context.line, context.column);
                 case "const": return new StyleToken(StyleTokenType.Const, identifierLowerCase, context.line, context.column);

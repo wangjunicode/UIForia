@@ -3,6 +3,7 @@ import "Documentation/Documentation.style" as theme;
 style container {
     PreferredSize = 1pca;
     Padding = 50px;
+    run animation(fadeIn);
 }
 
 style button-container {
@@ -22,9 +23,29 @@ style button {
     TextFontSize = 11px;
     TextColor = rgb(240, 240, 230);
     [hover] {
-        BackgroundColor = rgba(220, 200, 200, 190);
-        TextColor = rgb(40, 40, 30);
         Cursor = @theme.cursorHand;
+        [enter] run animation(button-hover);
+        [exit] run animation(button-normal);
+    }
+}
+
+animation button-hover {
+    [options] { TimingFunction = QuadraticEaseInOut; }
+    [keyframes] { 
+        100% { 
+            BackgroundColor = rgba(220, 200, 200, 190);
+            TextColor = rgb(40, 40, 30);
+        }
+    }
+}
+
+animation button-normal {
+    [options] { TimingFunction = QuadraticEaseInOut; }
+    [keyframes] { 
+        100% {
+            BackgroundColor = rgba(120, 100, 100, 190);
+            TextColor = rgb(240, 240, 230);
+        }
     }
 }
 

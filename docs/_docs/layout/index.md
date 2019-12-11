@@ -11,7 +11,7 @@ order: 10
 # Layout Concepts and common terms explained
 
 ## Block Sizes
-When using one of the block sizes (`bca`, `bsz`) the size of the element is dependent on the next 
+When using one of the block sizes (`pca`, `psz`) the size of the element is dependent on the next 
 _block size provider_ up in the hierarchy.
 
 ```

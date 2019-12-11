@@ -1237,15 +1237,15 @@ style xyz {
         Assert.AreEqual(1, styleSheet.sounds.Length);
         UISoundData soundData = styleSheet.sounds[0];
         
-        Assert.AreEqual("sounds/notification1", soundData.Asset);
-        Assert.AreEqual("Master Group 1", soundData.MixerGroup);
-        Assert.AreEqual(UITimeMeasurementUnit.Seconds, soundData.Duration.unit);
-        Assert.AreEqual(2f, soundData.Duration.value);
-        Assert.AreEqual(-1, soundData.Iterations);
-        Assert.AreEqual(-0.4f, soundData.Pitch);
-        Assert.AreEqual(0.1f, soundData.PitchRange.Min);
-        Assert.AreEqual(0.4f, soundData.PitchRange.Max);
-        Assert.AreEqual(23.9f, soundData.Tempo);
-        Assert.AreEqual(0.9f, soundData.Volume);
+        Assert.AreEqual("sounds/notification1", soundData.asset);
+        Assert.AreEqual("Master Group 1", soundData.mixerGroup);
+        Assert.AreEqual(UITimeMeasurementUnit.Seconds, soundData.duration.unit);
+        Assert.AreEqual(2f, soundData.duration.value);
+        Assert.AreEqual(-1, soundData.iterations);
+        Assert.AreEqual(-0.4f, soundData.pitch);
+        Assert.AreEqual(0.1f, soundData.pitchRange.Min);
+        Assert.AreEqual(0.4f, soundData.pitchRange.Max);
+        Assert.AreEqual(23.9f, soundData.tempo);
+        Assert.AreEqual(0.9f, soundData.volume);
     }
 }

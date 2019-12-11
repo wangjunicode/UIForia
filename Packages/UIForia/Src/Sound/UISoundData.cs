@@ -1,15 +1,15 @@
 namespace UIForia.Sound {
     public struct UISoundData {
-        public string Name;
-        public string StyleSheetFileName;
+        public string name;
+        public string styleSheetFileName;
 
-        public string Asset;
-        public float Pitch;
-        public float Volume;
-        public FloatRange PitchRange;
-        public float Tempo;
-        public UITimeMeasurement Duration;
-        public int Iterations;
-        public string MixerGroup;
+        public string asset;
+        public float pitch;
+        public float volume;
+        public FloatRange pitchRange;
+        public float tempo;
+        public UITimeMeasurement duration;
+        public int iterations;
+        public string mixerGroup;
     }
 }

@@ -110,8 +110,8 @@ namespace UIForia.Compilers.Style {
 
         private UISoundData CompileSound(SoundRootNode soundRootNode) {
             UISoundData data = CompileSoundProperties(soundRootNode);
-            data.Name = soundRootNode.identifier;
-            data.StyleSheetFileName = context.fileName;
+            data.name = soundRootNode.identifier;
+            data.styleSheetFileName = context.fileName;
             return data;
         }
 
@@ -233,39 +233,39 @@ namespace UIForia.Compilers.Style {
         private UISoundData CompileSoundProperties(SoundRootNode soundRootNode) {
             UISoundData soundData = new UISoundData();
             // set defaults
-            soundData.Duration = new UITimeMeasurement(1, UITimeMeasurementUnit.Percentage);
-            soundData.Pitch = 1;
-            soundData.Iterations = 1;
-            soundData.Tempo = 1;
+            soundData.duration = new UITimeMeasurement(1, UITimeMeasurementUnit.Percentage);
+            soundData.pitch = 1;
+            soundData.iterations = 1;
+            soundData.tempo = 1;
 
             for (int i = 0; i < soundRootNode.children.Count; i++) {
                 StyleASTNode property = soundRootNode.children[i];
                 if (property is SoundPropertyNode soundPropertyNode) {
                     StyleASTNode value = soundPropertyNode.value;
                     switch (soundPropertyNode.name) {
-                        case nameof(UISoundData.Asset):
-                            soundData.Asset = StylePropertyMappers.MapString(value, context);
+                        case nameof(UISoundData.asset):
+                            soundData.asset = StylePropertyMappers.MapString(value, context);
                             break;
-                        case nameof(UISoundData.Duration):
-                            soundData.Duration = StylePropertyMappers.MapUITimeMeasurement(value, context);
+                        case nameof(UISoundData.duration):
+                            soundData.duration = StylePropertyMappers.MapUITimeMeasurement(value, context);
                             break;
-                        case nameof(UISoundData.Iterations):
-                            soundData.Iterations = (int) StylePropertyMappers.MapNumberOrInfinite(value, context);
+                        case nameof(UISoundData.iterations):
+                            soundData.iterations = (int) StylePropertyMappers.MapNumberOrInfinite(value, context);
                             break;
-                        case nameof(UISoundData.Pitch):
-                            soundData.Pitch = StylePropertyMappers.MapNumber(value, context);
+                        case nameof(UISoundData.pitch):
+                            soundData.pitch = StylePropertyMappers.MapNumber(value, context);
                             break;
-                        case nameof(UISoundData.PitchRange):
-                            soundData.PitchRange = StylePropertyMappers.MapFloatRange(value, context);
+                        case nameof(UISoundData.pitchRange):
+                            soundData.pitchRange = StylePropertyMappers.MapFloatRange(value, context);
                             break;
-                        case nameof(UISoundData.Tempo):
-                            soundData.Tempo = StylePropertyMappers.MapNumber(value, context);
+                        case nameof(UISoundData.tempo):
+                            soundData.tempo = StylePropertyMappers.MapNumber(value, context);
                             break;
-                        case nameof(UISoundData.Volume):
-                            soundData.Volume = StylePropertyMappers.MapNumber(value, context);
+                        case nameof(UISoundData.volume):
+                            soundData.volume = StylePropertyMappers.MapNumber(value, context);
                             break;
-                        case nameof(UISoundData.MixerGroup):
-                            soundData.MixerGroup = StylePropertyMappers.MapString(value, context);
+                        case nameof(UISoundData.mixerGroup):
+                            soundData.mixerGroup = StylePropertyMappers.MapString(value, context);
                             break;
                     }
                 }
@@ -397,7 +397,7 @@ namespace UIForia.Compilers.Style {
                 UISoundData sound = soundData[index];
                 StyleASTNode value = context.GetValueForReference(name);
                 if (value is StyleIdentifierNode identifier) {
-                    if (sound.Name == identifier.name) {
+                    if (sound.name == identifier.name) {
                         return sound;
                     }
                 }

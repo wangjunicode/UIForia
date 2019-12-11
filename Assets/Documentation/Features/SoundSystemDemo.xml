@@ -15,6 +15,6 @@
             <Button style="button pong-button">Pong Button</Button>
         </Group>
 
-        <Div>Current Sound {currentSound.Name}</Div>
+        <Div>Current Sound {currentSound.name}</Div>
     </Contents>
 </UITemplate>

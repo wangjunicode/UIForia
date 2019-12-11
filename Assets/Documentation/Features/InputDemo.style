@@ -7,7 +7,7 @@ style <Label> {
     }
 }
 
-style <InputElement<String>> {
+style input {
     Border = 2px;
     BorderColor = black;
     BackgroundColor = white;

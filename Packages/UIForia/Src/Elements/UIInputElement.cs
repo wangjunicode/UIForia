@@ -578,7 +578,10 @@ namespace UIForia.Elements {
             else if (cursor.x - textScroll.x < rect.xMin) {
                 textScroll.x = (cursor.x - rect.x);
                 if (textScroll.x < 0) textScroll.x = 0;
-                
+            }
+            
+            if (VisibleTextRect.width >= textElement.layoutResult.ActualWidth) {
+                textScroll.x = 0;
             }
  
             textElement.style.SetTransformPositionX(-textScroll.x, StyleState.Normal);

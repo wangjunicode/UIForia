@@ -4,29 +4,29 @@
     
     <Contents style="container">
         
-        <Text mouse:click="ToggleLanguage()" style="header">
-            {HeaderText}
-        </Text>
+<!--        <Text mouse:click="ToggleLanguage()" style="header">-->
+<!--            {HeaderText}-->
+<!--        </Text>-->
         
         <Repeat list="words">
-            {$item}
-<!--            Text-->
+            Text
+<!--            {$thing}-->
         </Repeat>
         
-        <Div style="box box-black">
-<!--            onMouseClick="OnBoxClicked(1)">-->
-            Clicked {boxClicks1} times
-        </Div>
-        
-        <Div style="box box-red">
-<!--            onMouseClick="OnBoxClicked(2)">-->
-           Clicked {boxClicks2} times
-        </Div>
-        
-        <Div style="box box-gold">
-<!--            onMouseClick="OnBoxClicked(3)">-->
-            Clicked {boxClicks3} times
-        </Div>
+<!--        <Div style="box box-black">-->
+<!--&lt;!&ndash;            onMouseClick="OnBoxClicked(1)">&ndash;&gt;-->
+<!--            Clicked {boxClicks1} times-->
+<!--        </Div>-->
+<!--        -->
+<!--        <Div style="box box-red">-->
+<!--&lt;!&ndash;            onMouseClick="OnBoxClicked(2)">&ndash;&gt;-->
+<!--           Clicked {boxClicks2} times-->
+<!--        </Div>-->
+<!--        -->
+<!--        <Div style="box box-gold">-->
+<!--&lt;!&ndash;            onMouseClick="OnBoxClicked(3)">&ndash;&gt;-->
+<!--            Clicked {boxClicks3} times-->
+<!--        </Div>-->
 
     </Contents>
 </UITemplate>

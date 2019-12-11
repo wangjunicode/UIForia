@@ -1,9 +1,6 @@
 using System;
 using JetBrains.Annotations;
-using UIForia.Compilers;
 using UIForia.Elements;
-using UIForia.Util;
-using UnityEngine;
 using LinqBinding = System.Action<UIForia.Elements.UIElement, UIForia.Elements.UIElement, UIForia.Util.StructStack<UIForia.Compilers.TemplateContextWrapper>>;
 
 namespace UIForia.Systems {
@@ -37,9 +34,10 @@ namespace UIForia.Systems {
 
     public class LinqBindingNode {
 
+        public UIElement slotRootContext;
+        
         internal UIElement root;
         internal UIElement element;
-
         internal int lastTickedFrame;
 
         internal Action<UIElement, UIElement> createdBinding;
@@ -111,45 +109,13 @@ namespace UIForia.Systems {
 
             return default; // should never hit this
         }
-
-     //   public void Update() {
-        //    updateBindings?.Invoke(root, element);
-//
-//            if (!element.isEnabled) {
-//                return;
-//            }
-//
-//            iteratorIndex = 0;
-//
-//            int activePhase = system.currentPhase;
-//
-//            // todo if doing an out of order binding run we need to be sure the context stack is saved / restored 
-//
-//            if (contextWrapper.context != null) {
-//                contextStack.Push(contextWrapper);
-//            }
-//
-//            while (iteratorIndex < children.size) {
-//                LinqBindingNode child = children.array[iteratorIndex++];
-//
-//                if (child.phase != activePhase) {
-//                    child.Update(contextStack);
-//                    system.currentlyActive = this;
-//                }
-//            }
-//
-//            if (contextWrapper.context != null) {
-//                contextStack.Pop();
-//            }
-//
-//            iteratorIndex = -1;
-      //  }
-
+        
         [UsedImplicitly] // called from template functions, 
-        public static LinqBindingNode Get(Application application, UIElement rootElement, UIElement element, int createdId, int enabledId, int updatedId) {
+        public static LinqBindingNode Get(Application application, UIElement rootElement, UIElement element, UIElement slotRootContext, int createdId, int enabledId, int updatedId) {
             LinqBindingNode node = new LinqBindingNode(); // todo -- pool
             node.root = rootElement;
             node.element = element;
+            node.slotRootContext = slotRootContext;
             element.bindingNode = node;
             
             UIElement ptr = element.parent;

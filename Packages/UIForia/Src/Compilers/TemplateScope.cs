@@ -1,4 +1,5 @@
-using UIForia.Systems;
+using System.Diagnostics;
+using UIForia.Elements;
 using UIForia.Util;
 
 namespace UIForia.Compilers {
@@ -7,10 +8,13 @@ namespace UIForia.Compilers {
 
         public readonly Application application;
         public readonly StructList<SlotUsage> slotInputs;
-
-        public TemplateScope(Application application, StructList<SlotUsage> slotInputs) {
+        public readonly UIElement slotUsageContext;
+        
+        [DebuggerStepThrough]
+        public TemplateScope(Application application, StructList<SlotUsage> slotInputs, UIElement slotUsageContext) {
             this.application = application;
             this.slotInputs = slotInputs;
+            this.slotUsageContext = slotUsageContext;
         }
 
     }

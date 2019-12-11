@@ -564,7 +564,7 @@ namespace UIForia.Util {
         
         public void RemoveAt(int index, out T retn) {
             --size;
-            retn = array[size];
+            retn = array[index];
             System.Array.Copy(array, index + 1, array, index, size - index);
             array[size] = default;
         }

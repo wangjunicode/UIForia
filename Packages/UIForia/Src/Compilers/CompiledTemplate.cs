@@ -25,19 +25,12 @@ namespace UIForia.Compilers {
         
     }
 
-    public enum ContextVariableAccessType {
-
-        Public, 
-        Private
-
-    }
-
     public struct ContextVariableDefinition {
 
         public int id;
         public Type type;
         public string name;
-        public ContextVariableAccessType accessType;
+        public bool isExposed;
 
     }
 

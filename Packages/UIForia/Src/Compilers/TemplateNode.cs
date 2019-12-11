@@ -24,6 +24,7 @@ namespace UIForia.Compilers {
         public SlotType slotType;
 
         [ThreadStatic] private static LightList<TemplateNode> s_Pool;
+        public StructList<AttributeDefinition2> contextVariables;
 
         public TemplateNode() {
             this.directives = new LightList<DirectiveDefinition>(4);
@@ -139,11 +140,11 @@ namespace UIForia.Compilers {
             return retn;
         }
 
-        public StructList<AttributeDefinition2> RemoveContextVarAttributes() {
-            StructList<AttributeDefinition2> retn = new StructList<AttributeDefinition2>(4);
+        public StructList<AttributeDefinition2> RemoveContextVarAttributes(StructList<AttributeDefinition2> retn) {
             for (int i = 0; i < attributes.size; i++) {
                 if (attributes.array[i].type == AttributeType.ContextVariable || attributes.array[i].type == AttributeType.Context) {
                     attributes.RemoveAt(i, out AttributeDefinition2 attr);
+                    i--;
                     retn.Add(attr);
                 }
             }

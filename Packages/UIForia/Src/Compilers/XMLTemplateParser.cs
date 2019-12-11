@@ -246,6 +246,10 @@ namespace UIForia.Compilers {
                             attributeType = AttributeType.Slot;
                             break;
                         }
+                        case "slotctx": {
+                            attributeType = AttributeType.SlotContext;
+                            break;
+                        }
                         case "mouse":
                             attributeType = AttributeType.Mouse;
                             break;
@@ -348,6 +352,17 @@ namespace UIForia.Compilers {
 
                         ParseAttributes(templateNode, element);
 
+//                        StructList<AttributeDefinition2> contextVarAttributes = StructList<AttributeDefinition2>.Get();
+//                        
+//                        templateNode.RemoveContextVarAttributes(contextVarAttributes);
+//                        
+//                        if (contextVarAttributes.size == 0) {
+//                            StructList<AttributeDefinition2>.Release(ref contextVarAttributes);
+//                        }
+//                        else {
+//                            templateNode.contextVariables = contextVarAttributes;
+//                        }
+
                         PostProcessSlotTemplate(templateNode);
 
                         if (!parent.processedType.requiresTemplateExpansion && templateNode.processedType.rawType == typeof(UISlotContent)) {
@@ -442,21 +457,20 @@ namespace UIForia.Compilers {
             if (templateNode.slotType != SlotType.Children && templateNode.slotType != SlotType.Default) {
                 return;
             }
-            
+
             for (int i = 0; i < templateNode.attributes.size; i++) {
                 ref AttributeDefinition2 attr = ref templateNode.attributes.array[i];
 
                 if (attr.type != AttributeType.Slot || attr.key != "type") {
                     continue;
                 }
-                
+
                 if (string.Equals(attr.value, "template", StringComparison.OrdinalIgnoreCase)) {
                     templateNode.attributes.SwapRemoveAt(i);
                     templateNode.slotType = SlotType.Template;
                     templateNode.processedType = TypeProcessor.GetProcessedType(typeof(SlotTemplateElement));
                     return;
                 }
-
             }
         }
 

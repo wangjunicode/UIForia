@@ -18,8 +18,8 @@ namespace UIForia.Parsing.Expressions {
         Key = 1 << 9,
         Controller = 1 << 10,
         Touch = 1 << 11,
-
-        Slot = 1 << 12
+        Slot = 1 << 12,
+        SlotContext = 1 << 13
 
     }
 
@@ -30,7 +30,8 @@ namespace UIForia.Parsing.Expressions {
         Const = 1 << 1,
         EnableOnly = 1 << 2,
         RootContext = 1 << 3,
-        StyleProperty = 1 << 4
+        StyleProperty = 1 << 4,
+        UseSlotRootContext = 1 << 5
 
     }
     

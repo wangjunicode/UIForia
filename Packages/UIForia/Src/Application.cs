@@ -130,23 +130,22 @@ namespace UIForia {
 
             templateData = compiledTemplateData;
 
-            UIElement rootElement = templateData.templates[0].Invoke(null, new TemplateScope(this, null));
+            UIElement rootElement = templateData.templates[0].Invoke(null, new TemplateScope(this, null, null));
 
             UIView view = new UIView(this, "Default", rootElement, Matrix4x4.identity, new Size(Screen.width, Screen.height));
-            
+
             m_Views.Add(view);
 
             for (int i = 0; i < m_Systems.Count; i++) {
                 m_Systems[i].OnViewAdded(view);
             }
-
         }
 
         public UIView CreateView<T>(string name, Size size, in Matrix4x4 matrix) where T : UIElement {
             Func<UIElement, TemplateScope, UIElement> template = templateData.GetTemplate<T>();
 
             if (template != null) {
-                UIElement element = template.Invoke(null, new TemplateScope(this, null));
+                UIElement element = template.Invoke(null, new TemplateScope(this, null, null));
                 UIView view = new UIView(this, name, element, matrix, size);
                 m_Views.Add(view);
 
@@ -341,7 +340,7 @@ namespace UIForia {
             m_BeforeUpdateTaskSystem.OnReset();
 
             throw new NotImplementedException("Need to re-implement refresh()");
-             // CreateView("Default View", new Rect(0, 0, Width, Height), lastKnownGoodRootElementType);
+            // CreateView("Default View", new Rect(0, 0, Width, Height), lastKnownGoodRootElementType);
 
             onRefresh?.Invoke();
             onNextRefresh?.Invoke();
@@ -593,7 +592,7 @@ namespace UIForia {
             for (int i = 0; i < m_Systems.Count; i++) {
                 m_Systems[i].OnElementEnabled(element);
             }
-            
+
             StructStack<ElemRef>.Release(ref stack);
 
             onElementEnabled?.Invoke(element);
@@ -668,7 +667,7 @@ namespace UIForia {
             }
 
             StructStack<ElemRef>.Release(ref stack);
-            
+
             for (int i = 0; i < m_Systems.Count; i++) {
                 m_Systems[i].OnElementDisabled(element);
             }
@@ -713,7 +712,7 @@ namespace UIForia {
         public static bool HasCustomPainter(string name) {
             return s_CustomPainters.ContainsKey(name);
         }
-        
+
         public AnimationTask Animate(UIElement element, AnimationData animation) {
             return m_AnimationSystem.Animate(element, ref animation);
         }
@@ -855,9 +854,12 @@ namespace UIForia {
         }
 
         // might be the same as HydrateTemplate really but with templateId not hard coded
-        public UIElement CreateSlot(int templateId, UIElement root, TemplateScope scope) {
+        public UIElement CreateSlot(int templateId, UIElement root, UIElement parent, TemplateScope scope) {
             // todo -- something needs to create the slot root element, either here or in the slot function
-            return null;
+            UIElement retn = templateData.slots[templateId](root, scope);
+            retn.parent = parent;
+            retn.View = parent?.View;
+            return retn;
         }
 
         // todo -- override that accepts an index into an array instead of a type, to save a dictionary lookup
@@ -913,9 +915,12 @@ namespace UIForia {
 
         public void AddTemplateChildren(SlotTemplateElement slotTemplateElement, int templateId, int count) {
             if (templateId < 0) return;
-            TemplateScope scope = new TemplateScope(this, null);
+
+            TemplateScope scope = new TemplateScope(this, null, null);
+
             for (int i = 0; i < count; i++) {
-                UIElement child = templateData.slots[templateId](slotTemplateElement, scope);
+                UIElement root = slotTemplateElement.bindingNode.root;
+                UIElement child = templateData.slots[templateId](root, scope);
                 InsertChild(slotTemplateElement, child, (uint) slotTemplateElement.children.Count);
             }
         }

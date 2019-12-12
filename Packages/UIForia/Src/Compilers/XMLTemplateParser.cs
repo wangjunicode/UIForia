@@ -159,19 +159,19 @@ namespace UIForia.Compilers {
 
 //            int lastIdx = tagName.LastIndexOf('.');
             if (string.Equals(tagName, "Children")) {
-                templateNode.slotName = element.Name.LocalName;
+                //templateNode.slotName = "children";
                 templateNode.slotType = SlotType.Children;
                 templateNode.processedType = TypeProcessor.GetProcessedType(typeof(UISlotDefinition));
                 return;
             }
             else if (string.Equals(tagName, "Slot")) {
-                templateNode.slotName = element.Name.LocalName;
+               // templateNode.slotName = element.Name.LocalName;
                 templateNode.slotType = SlotType.Override;
-                templateNode.processedType = TypeProcessor.GetProcessedType(typeof(UISlotContent));
+                templateNode.processedType = TypeProcessor.GetProcessedType(typeof(UISlotOverride));
                 return;
             }
             else if (string.Equals(tagName, "DefineSlot")) {
-                templateNode.slotName = element.Name.LocalName;
+              //  templateNode.slotName = element.Name.LocalName;
                 templateNode.slotType = SlotType.Default;
                 templateNode.processedType = TypeProcessor.GetProcessedType(typeof(UISlotDefinition));
                 return;
@@ -283,7 +283,6 @@ namespace UIForia.Compilers {
                     }
                 }
 
-
                 string raw = string.Empty;
                 if (outputComments) {
                     if (!string.IsNullOrEmpty(prefix)) {
@@ -320,6 +319,9 @@ namespace UIForia.Compilers {
                             templateNode.processedType = TypeProcessor.GetProcessedType(typeof(UITextElement));
                             templateNode.textContent = list;
                             parent.children.Add(templateNode);
+                            if (outputComments) {
+                                BuildOriginalString(templateNode, "Text");
+                            }
                             templateNode = TemplateNode.Get();
                         }
                         else if (typeof(UITextElement).IsAssignableFrom(parent.children[parent.children.size - 1].processedType.rawType)) {
@@ -336,6 +338,9 @@ namespace UIForia.Compilers {
                             templateNode.processedType = TypeProcessor.GetProcessedType(typeof(UITextElement));
                             templateNode.textContent = list;
                             parent.children.Add(templateNode);
+                            if (outputComments) {
+                                BuildOriginalString(templateNode, "Text");
+                            }
                             templateNode = TemplateNode.Get();
                         }
 
@@ -365,7 +370,7 @@ namespace UIForia.Compilers {
 
                         PostProcessSlotTemplate(templateNode);
 
-                        if (!parent.processedType.requiresTemplateExpansion && templateNode.processedType.rawType == typeof(UISlotContent)) {
+                        if (!parent.processedType.requiresTemplateExpansion && templateNode.processedType.rawType == typeof(UISlotOverride)) {
                             throw new TemplateParseException(node, $"Slot cannot be added for type {parent.processedType.rawType} because it is a text or container type and does not accept slots.");
                         }
 
@@ -374,39 +379,7 @@ namespace UIForia.Compilers {
                         ParseChildren(templateNode, element.Nodes(), namespaces);
 
                         if (outputComments) {
-                            string attrString = string.Empty;
-                            if (templateNode.attributes.size > 0) {
-                                LightList<string> str = LightList<string>.Get();
-                                for (int i = 0; i < templateNode.attributes.size; i++) {
-                                    str.Add(templateNode.attributes.array[i].rawValue);
-                                }
-
-                                attrString = StringUtil.ListToString((IList<string>) str, " ");
-                                LightList<string>.Release(ref str);
-                            }
-
-                            if (attrString.Length == 0) {
-                                templateNode.originalString = $"<{element.Name} {attrString}/>";
-                            }
-                            else {
-                                templateNode.originalString = $"<{element.Name} {attrString}/>";
-                            }
-
-                            if (templateNode.textContent != null && templateNode.textContent.size > 0) {
-                                templateNode.originalString += "    '";
-                                for (int i = 0; i < templateNode.textContent.size; i++) {
-                                    if (templateNode.textContent.array[i].isExpression) {
-                                        templateNode.originalString += "{";
-                                        templateNode.originalString += templateNode.textContent.array[i].text;
-                                        templateNode.originalString += "}";
-                                    }
-                                    else {
-                                        templateNode.originalString += templateNode.textContent.array[i].text;
-                                    }
-                                }
-
-                                templateNode.originalString += "'";
-                            }
+                            BuildOriginalString(templateNode, element.Name.LocalName);
                         }
 
                         templateNode = TemplateNode.Get();
@@ -431,7 +404,7 @@ namespace UIForia.Compilers {
                 for (int i = 0; i < parent.children.size; i++) {
                     Type type = parent.children[i].processedType.rawType;
 
-                    if (type != typeof(UISlotContent)) {
+                    if (type != typeof(UISlotOverride)) {
                         childrenSlotNode.children.Add(parent.children[i]);
                         parent.children.RemoveAt(i--);
                     }
@@ -442,14 +415,49 @@ namespace UIForia.Compilers {
                     childrenSlotNode.astRoot = parent.astRoot;
                     childrenSlotNode.parent = parent;
                     childrenSlotNode.processedType = TypeProcessor.GetProcessedType(typeof(UIChildrenElement));
-                    childrenSlotNode.slotName = "Children";
+                    //childrenSlotNode.slotName = "Children";
                     childrenSlotNode.slotType = SlotType.Children;
-                    childrenSlotNode.directives.Add(new DirectiveDefinition("Slot"));
                     parent.children.Add(childrenSlotNode);
                 }
                 else {
                     TemplateNode.Release(ref childrenSlotNode);
                 }
+            }
+        }
+
+        private static void BuildOriginalString(TemplateNode templateNode, string elementName) {
+            string attrString = string.Empty;
+            if (templateNode.attributes.size > 0) {
+                LightList<string> str = LightList<string>.Get();
+                for (int i = 0; i < templateNode.attributes.size; i++) {
+                    str.Add(templateNode.attributes.array[i].rawValue);
+                }
+
+                attrString = StringUtil.ListToString((IList<string>) str, " ");
+                LightList<string>.Release(ref str);
+            }
+
+            if (attrString.Length == 0) {
+                templateNode.originalString = $"<{elementName} {attrString}/>";
+            }
+            else {
+                templateNode.originalString = $"<{elementName} {attrString}/>";
+            }
+
+            if (templateNode.textContent != null && templateNode.textContent.size > 0) {
+                templateNode.originalString += "    '";
+                for (int i = 0; i < templateNode.textContent.size; i++) {
+                    if (templateNode.textContent.array[i].isExpression) {
+                        templateNode.originalString += "{";
+                        templateNode.originalString += templateNode.textContent.array[i].text;
+                        templateNode.originalString += "}";
+                    }
+                    else {
+                        templateNode.originalString += templateNode.textContent.array[i].text;
+                    }
+                }
+
+                templateNode.originalString += "'";
             }
         }
 

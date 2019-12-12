@@ -12,6 +12,7 @@ using UIForia.Attributes;
 using UIForia.Compilers;
 using UIForia.Elements;
 using UIForia.Exceptions;
+using UIForia.Parsing.Expressions;
 using UIForia.Util;
 using Debug = UnityEngine.Debug;
 
@@ -62,7 +63,7 @@ namespace UIForia.Parsing {
                 !typeof(UIContainerElement).IsAssignableFrom(rawType) &&
                 !typeof(UITextElement).IsAssignableFrom(rawType) &&
                 !typeof(UISlotDefinition).IsAssignableFrom(rawType) &&
-                !typeof(UISlotContent).IsAssignableFrom(rawType)
+                !typeof(UISlotOverride).IsAssignableFrom(rawType)
             );
         }
 
@@ -314,6 +315,10 @@ namespace UIForia.Parsing {
             Debug.Log(s_Compiler.BuildLambda().ToCSharpCode());
             clearFn = (Action<object>) s_Compiler.BuildLambda().Compile();
             s_Compiler.Reset();
+        }
+
+        public void ValidateAttributes(StructList<AttributeDefinition2> attributes) {
+            
         }
 
     }

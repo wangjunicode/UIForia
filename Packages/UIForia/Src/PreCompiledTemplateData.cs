@@ -481,6 +481,7 @@ namespace UIForia.Generated {
             for (int s = 0; s < compiledSlots.size; s++) {
                 CompiledSlot compiledSlot = compiledSlots[s];
                 if (compiledSlot.filePath == compiledTemplate.filePath) {
+                    slotCode += $"\n{s_Indent8}// {compiledSlot.GetComment()}";
                     slotCode += $"\n{s_Indent8}public Func<UIElement, TemplateScope, UIElement> {compiledSlot.GetVariableName()} = ";
                     slotCode += compiledSlot.templateFn.ToTemplateBodyFunction();
                     slotCode += "\n";

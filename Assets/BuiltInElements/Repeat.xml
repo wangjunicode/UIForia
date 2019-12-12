@@ -4,7 +4,9 @@
     <Contents>
 
         <Panel>
-            <Children/>
+            <DefineSlot slot:name="slot0">
+                List size = {list.Count}
+            </DefineSlot>
         </Panel>
         
 <!--        <Children slot:type="Template"-->

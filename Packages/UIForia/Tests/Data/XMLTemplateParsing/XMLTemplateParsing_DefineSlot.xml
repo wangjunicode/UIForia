@@ -1,0 +1,7 @@
+<UITemplate>
+    <Contents>
+        <Div>
+            <DefineSlot slot:name="my-slot"/>
+        </Div>
+    </Contents>
+</UITemplate>

@@ -6,7 +6,7 @@ using UIForia.Templates;
 namespace UIForia.Elements {
 
     [TemplateTagName("Children")]
-    public class UIChildrenElement : UISlotContent {
+    public class UIChildrenElement : UISlotOverride {
 
         public UIChildrenElement() {
         }

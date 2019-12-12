@@ -9,7 +9,7 @@
 <!--        </Text>-->
         
         <Repeat list="words">
-            Text
+<!--            Text-->
 <!--            {$thing}-->
         </Repeat>
         

@@ -1,11 +1,11 @@
 using UIForia.Attributes;
 using UIForia.Rendering;
-using UIForia.Util;
 using UnityEngine;
 
 namespace UIForia.Elements {
 
-    public class UIImageElement : UIElement {
+    [TemplateTagName("Image")]
+    public class UIImageElement : UITerminalElement {
 
         public string src;
         public Texture2D texture;

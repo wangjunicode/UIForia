@@ -51,7 +51,7 @@ namespace UIForia.Compilers {
 
         private static readonly ConstructorInfo s_SlotUsage_Ctor = typeof(SlotUsage).GetConstructor(new[] {typeof(string), typeof(int)});
 
-        private static readonly ConstructorInfo s_TemplateScope_Ctor = typeof(TemplateScope).GetConstructor(new[] {typeof(Application), typeof(StructList<SlotUsage>)});
+        private static readonly ConstructorInfo s_TemplateScope_Ctor = typeof(TemplateScope).GetConstructor(new[] {typeof(Application), typeof(StructList<SlotUsage>), typeof(UIElement)});
         private static readonly FieldInfo s_TemplateScope_SlotList = typeof(TemplateScope).GetField(nameof(TemplateScope.slotInputs));
         private static readonly FieldInfo s_TemplateScope_ApplicationField = typeof(TemplateScope).GetField(nameof(TemplateScope.application));
 
@@ -281,8 +281,6 @@ namespace UIForia.Compilers {
         private CompiledTemplate Compile(TemplateAST ast) {
             CompiledTemplate retn = templateData.CreateTemplate(ast.fileName);
 
-            retn.childCount = ast.root.children.size;
-
             LightList<string> namespaces = LightList<string>.Get();
             if (ast.usings != null) {
                 for (int i = 0; i < ast.usings.size; i++) {
@@ -315,7 +313,6 @@ namespace UIForia.Compilers {
 
             {
                 ctx.PushBlock();
-
 
                 ctx.CommentNewLineBefore("new " + processedType.rawType);
                 Expression createRootExpression = ExpressionFactory.CallInstanceUnchecked(ctx.applicationExpr, s_CreateFromPool,
@@ -410,7 +407,7 @@ namespace UIForia.Compilers {
 
             ProcessedType processedType = templateNode.processedType;
             ctx.elementType = processedType; // replace w/ stack push of (processedType, variableExpression)?
-            ctx.CommentNewLineBefore($"{templateNode.originalString}");
+            ctx.CommentNewLineBefore(templateNode.originalString);
             int trueAttrCount = templateNode.GetAttributeCount();
 
             int ctxVarCount = 0;
@@ -504,7 +501,7 @@ namespace UIForia.Compilers {
                     }
 
                     // templateScope = new TemplateScope2(application, slotUsages ?? null);
-                    Expression templateScopeCtor = Expression.New(s_TemplateScope_Ctor, ctx.applicationExpr, slotUsageExpr);
+                    Expression templateScopeCtor = Expression.New(s_TemplateScope_Ctor, ctx.applicationExpr, slotUsageExpr, Expression.Default(typeof(UIElement)));
 
                     // scope.application.HydrateTemplate(templateId, targetElement, templateScope)
                     ctx.CommentNewLineBefore(expandedTemplate.filePath);
@@ -563,8 +560,7 @@ namespace UIForia.Compilers {
 
             return nodeExpr;
         }
-
-
+        
         private StructList<CompileTimeSlotUsage> VisitHydratedChildren(TemplateNode node, CompilationContext ctx, CompiledTemplate template, CompiledTemplate expandedTemplate) {
             StructList<CompileTimeSlotUsage> slotList = StructList<CompileTimeSlotUsage>.Get();
 
@@ -590,15 +586,16 @@ namespace UIForia.Compilers {
                     continue;
                 }
 
-                throw CompileException.UnmatchedSlot(node.slotName, expandedTemplate.filePath);
+                throw CompileException.UnmatchedSlot(node.GetSlotName(), expandedTemplate.filePath);
             }
 
             return slotList;
         }
 
         private bool TryFindMatchingSlot(StructList<SlotDefinition> slotDefinitions, TemplateNode child, out SlotDefinition slotDefinition) {
+            string slotName = child.GetSlotName();
             for (int i = 0; i < slotDefinitions.size; i++) {
-                if (slotDefinitions.array[i].slotName == child.slotName) {
+                if (slotDefinitions.array[i].slotName == slotName) {
                     slotDefinition = slotDefinitions.array[i];
                     return true;
                 }
@@ -672,6 +669,8 @@ namespace UIForia.Compilers {
                 // ReSharper disable once PossibleNullReferenceException
                 ref AttributeDefinition2 attr = ref templateNode.attributes.array[i];
                 switch (attr.type) {
+                    case AttributeType.Slot:
+                        break;
                     case AttributeType.Context:
                     case AttributeType.ContextVariable: {
                         createdBindingCount++;
@@ -989,6 +988,7 @@ namespace UIForia.Compilers {
                         ctx.applicationExpr,
                         ctx.rootParam,
                         ctx.ElementExpr,
+                        ctx.ContextExpr,
                         Expression.Constant(createdBindingId),
                         Expression.Constant(enabledBindingId),
                         Expression.Constant(updateBindingId)
@@ -1468,6 +1468,7 @@ namespace UIForia.Compilers {
         private ParameterExpression VisitTemplateSlot(TemplateNode templateNode, CompilationContext ctx, CompiledTemplate template) {
             // templateNode.ElementType = typeof(SlotTemplateElement);
 
+            string slotName = templateNode.GetSlotName();
 
             // template slots need to generate an element immediately. this element has no children but a binding node that will define it based on it's 'slot:count' attribute expression
             // this element's children then become the actual slot data
@@ -1491,13 +1492,13 @@ namespace UIForia.Compilers {
             MemberExpression field = Expression.Field(ExpressionFactory.Convert(ctx.ElementExpr, typeof(SlotTemplateElement)), typeof(SlotTemplateElement).GetField(nameof(SlotTemplateElement.templateId)));
             MemberExpression slotList = Expression.Field(ctx.templateScope, s_TemplateScope_SlotList);
 
-            MethodCallExpression resolvedId = Expression.Call(null, s_Application_s_ResolveSlotId, Expression.Constant(templateNode.slotName), slotList, Expression.Constant(-1));
+            MethodCallExpression resolvedId = Expression.Call(null, s_Application_s_ResolveSlotId, Expression.Constant(slotName), slotList, Expression.Constant(-1));
 
             ctx.Assign(field, resolvedId);
 
 //            StructList<AttributeDefinition2> contextVarAttributes = templateNode.RemoveContextVarAttributes();
 
-            SlotDefinition slotDefinition = new SlotDefinition(templateNode.slotName, null, SlotType.Template);
+            SlotDefinition slotDefinition = new SlotDefinition(slotName, null, SlotType.Template);
             // needs a ref to context variables
 
 //            slotDefinition.contextAttributes = contextVarAttributes;
@@ -1512,14 +1513,14 @@ namespace UIForia.Compilers {
         private ParameterExpression VisitSlotDefinition(TemplateNode templateNode, CompilationContext ctx, CompiledTemplate template) {
             ProcessedType processedType = templateNode.processedType;
             ctx.elementType = processedType;
-
+            string slotName = templateNode.GetSlotName();
             // slot names are unique per template (but not globally)
-            if (template.TryGetSlotData(templateNode.slotName, out _)) {
-                throw new TemplateParseException("todo -- file", "Duplicate slot detected: " + templateNode.slotName);
+            if (template.TryGetSlotData(slotName, out _)) {
+                throw new TemplateParseException("todo -- file", "Duplicate slot detected: " + templateNode.GetSlotName());
             }
 
             StructStack<ContextVariableDefinition> contextStack = template.contextStack?.Clone();
-            SlotDefinition slotDefinition = new SlotDefinition(templateNode.slotName, contextStack, SlotType.Default);
+            SlotDefinition slotDefinition = new SlotDefinition(templateNode.GetSlotName(), contextStack, SlotType.Default);
             slotDefinition.contextAttributes = templateNode.attributes.Clone();
             slotDefinition.contextVariables = contextVarStack.Clone();
 
@@ -1529,7 +1530,7 @@ namespace UIForia.Compilers {
             CompiledSlot compiledSlot = CompileSlot(templateNode, ctx, template, slotDefinition);
             Expression slotList = Expression.MakeMemberAccess(ctx.templateScope, s_TemplateScope_SlotList);
             Expression templateScopeCtor = Expression.New(s_TemplateScope_Ctor, ctx.applicationExpr, slotList, Expression.Default(typeof(UIElement)));
-            Expression resolveSlot = Expression.Call(null, s_Application_s_ResolveSlotId, Expression.Constant(templateNode.slotName), slotList, Expression.Constant(compiledSlot.slotId));
+            Expression resolveSlot = Expression.Call(null, s_Application_s_ResolveSlotId, Expression.Constant(slotName), slotList, Expression.Constant(compiledSlot.slotId));
             ctx.Assign(ctx.ElementExpr, Expression.Call(ctx.applicationExpr, s_Application_CreateSlot, resolveSlot, ctx.rootParam, ctx.ParentExpr, templateScopeCtor));
 
             return nodeExpr;
@@ -1537,14 +1538,14 @@ namespace UIForia.Compilers {
 
         private CompiledSlot CompileSlot(TemplateNode templateNode, CompilationContext parentCtx, CompiledTemplate template, SlotDefinition slotDefinition = default) {
             // want a fresh set of variables but keep the style / file / binding data / etc contexts
-            CompiledSlot retn = templateData.CreateSlot(templateNode.astRoot.fileName, templateNode.slotName, templateNode.slotType);
+            CompiledSlot retn = templateData.CreateSlot(templateNode.astRoot.fileName, templateNode.GetSlotName(), templateNode.slotType);
             ParameterExpression rootParam = Expression.Parameter(typeof(UIElement), "root");
             ParameterExpression scopeParam = Expression.Parameter(typeof(TemplateScope), "scope");
             LightList<string> namespaces = LightList<string>.Get();
 
             // todo -- use parent context for style & imports n stuff
             CompilationContext ctx = new CompilationContext();
-            ParameterExpression slotRootParam = ctx.GetVariable(typeof(UISlotContent), "slotRoot");
+            ParameterExpression slotRootParam = ctx.GetVariable(typeof(UISlotOverride), "slotRoot");
             ctx.rootType = parentCtx.rootType;
             ctx.rootParam = slotRootParam;
             ctx.templateScope = scopeParam;
@@ -1554,7 +1555,7 @@ namespace UIForia.Compilers {
             ctx.compiledTemplate = parentCtx.compiledTemplate; // todo -- might be wrong
 
             Expression createRootExpression = Expression.Call(ctx.applicationExpr, s_CreateFromPool,
-                Expression.Constant(TypeProcessor.GetProcessedType(typeof(UISlotContent)).id),
+                Expression.Constant(TypeProcessor.GetProcessedType(typeof(UISlotOverride)).id),
                 Expression.Default(typeof(UIElement)), // todo -- parent is null, fix this
                 Expression.Constant(templateNode.children.size), // todo -- probably not child count since slots aren't real children and might be actually be templates
                 Expression.Constant(templateNode.GetAttributeCount()),
@@ -1577,7 +1578,7 @@ namespace UIForia.Compilers {
 
 
             // slotRootParam = templateScope.application.CreateFromPool<Type>(attrCount, childCount);
-            ctx.Assign(slotRootParam, Expression.Convert(createRootExpression, typeof(UISlotContent)));
+            ctx.Assign(slotRootParam, Expression.Convert(createRootExpression, typeof(UISlotOverride)));
             CompileElementData(templateNode, ctx);
 
             VisitChildren(templateNode, ctx, template); // todo -- what if these are themselves slots?

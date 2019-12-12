@@ -1,0 +1,11 @@
+<UITemplate>
+    <Contents>
+        Hello Before
+        <XMLTemplateParsing_DefineSlot>
+            <Slot slot:name="my-slot">
+                Hello Between
+            </Slot>
+        </XMLTemplateParsing_DefineSlot>
+        Hello After
+    </Contents>
+</UITemplate>

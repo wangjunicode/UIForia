@@ -13,11 +13,11 @@ namespace UIForia.Elements {
         }
     }
     
-    public class UISlotContent : UIElement {
+    public class UISlotOverride : UIElement {
 
         public readonly string slotId;
 
-        public UISlotContent() {}
+        public UISlotOverride() {}
 
         public override string GetDisplayName() {
             return "Slot:" + slotId;

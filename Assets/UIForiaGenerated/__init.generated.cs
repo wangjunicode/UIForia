@@ -10,14 +10,13 @@ namespace UIForia.Generated {
         public string[] StyleFilePaths => styleFilePaths;
 
         private string[] styleFilePaths = {
-            @"C:/Seed/UIForia/UIElements/Assets\StreamingAssets\UIForia\GameApp\Demo/Simple/Simple.style",
+            @"C:/Users/Matt/RiderProjects/UIForia/Assets\StreamingAssets\UIForia\GameApp\Demo/Simple/Simple.style",
 
         };
 
         public Func<UIElement, TemplateScope, UIElement>[] LoadTemplates() {
             Func<UIElement, TemplateScope, UIElement>[] templates = new Func<UIElement, TemplateScope, UIElement>[2];
-            templates[0] = Template_c557efc21297629428d443404b6bd07b; // Demo/Simple/Simple.xml
-            templates[1] = Template_96f16a46e62b7254fa04bfc7ebd77d51; // BuiltInElements/Repeat.xml
+            templates[1] = Template_c94e139042b0bee4789648cc70495ee9; // BuiltInElements/Repeat.xml
             return templates;
 
         }
@@ -34,16 +33,15 @@ namespace UIForia.Generated {
         }
 
         public Action<UIElement, UIElement>[] LoadBindings() {
-            Action<UIElement, UIElement>[] bindings = new Action<UIElement, UIElement>[1];
-            bindings[0] = Binding_OnUpdate_f0e9f42ba2deb6949b53b910c9586353;
+            Action<UIElement, UIElement>[] bindings = new Action<UIElement, UIElement>[2];
+            bindings[0] = Binding_OnUpdate_302a4b8c9c00fdb4d987841733b359a3;
             return bindings;
 
         }
 
         public Func<UIElement, TemplateScope, UIElement>[] LoadSlots() {
-            Func<UIElement, TemplateScope, UIElement>[] slots = new Func<UIElement, TemplateScope, UIElement>[2];
-            slots[0] = Slot_Children_Children_4e903e138f8a6264ab32bb56f508e4cb;
-            slots[1] = Slot_Children_Children_421d5557a5c700842a20beaa6ee1995c;
+            Func<UIElement, TemplateScope, UIElement>[] slots = new Func<UIElement, TemplateScope, UIElement>[1];
+            slots[0] = Slot_Default_slot0_b58a08bc1fa09954aab106ced9ace6dc;
             return slots;
 
         }
@@ -54,12 +52,10 @@ namespace UIForia.Generated {
                     return new Demo.Simple();
                 case 50:
                     return new UIForia.Elements.UIPanelElement();
-                case 66:
-                    return new UIForia.Elements.UIChildrenElement();
                 case 76:
                     return new UIForia.Elements.UISlotDefinition();
                 case 77:
-                    return new UIForia.Elements.UISlotContent();
+                    return new UIForia.Elements.UISlotOverride();
                 case 78:
                     return new UIForia.Elements.UITextElement();
                 case 180:

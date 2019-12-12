@@ -8,17 +8,14 @@ using UIForia.Util;
 namespace UIForia.Compilers {
 
     [DebuggerDisplay("{processedType.rawType.ToString()}")]
-    public sealed class TemplateNode {
+    public class TemplateNode {
 
-        public LightList<DirectiveDefinition> directives;
         public StructList<AttributeDefinition2> attributes;
         public LightList<TemplateNode> children;
         public TemplateAST astRoot;
         public TemplateNode parent;
         public StructList<TextExpression> textContent;
         public ProcessedType processedType;
-        public string slotName;
-        public int slotInstanceCount;
 
         public string originalString;
         public SlotType slotType;
@@ -27,7 +24,6 @@ namespace UIForia.Compilers {
         public StructList<AttributeDefinition2> contextVariables;
 
         public TemplateNode() {
-            this.directives = new LightList<DirectiveDefinition>(4);
             this.attributes = new StructList<AttributeDefinition2>();
             this.children = new LightList<TemplateNode>();
         }
@@ -35,7 +31,6 @@ namespace UIForia.Compilers {
         public Type RootType => astRoot.root.processedType.rawType;
 
         public Type ElementType => processedType.rawType;
-        public bool IsTemplateSlot { get; set; }
 
         internal static TemplateNode Get() {
             if (s_Pool == null) {
@@ -56,7 +51,6 @@ namespace UIForia.Compilers {
             }
 
             node.processedType = default;
-            node.directives.Clear();
             node.attributes.Clear();
             node.children.Clear();
             node.parent = null;
@@ -112,7 +106,7 @@ namespace UIForia.Compilers {
                 return TemplateNodeType.SlotDefinition;
             }
 
-            if (processedType.rawType == typeof(UISlotContent)) {
+            if (processedType.rawType == typeof(UISlotOverride)) {
                 return TemplateNodeType.SlotContent;
             }
 
@@ -150,6 +144,16 @@ namespace UIForia.Compilers {
             }
 
             return retn;
+        }
+
+        public string GetSlotName() {
+            for (int i = 0; i < attributes.size; i++) {
+                if (attributes.array[i].type == AttributeType.Slot || attributes.array[i].key == "name") {
+                    return attributes.array[i].value;
+                }
+            }
+
+            return "default";
         }
 
     }

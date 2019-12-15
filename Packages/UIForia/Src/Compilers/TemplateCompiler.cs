@@ -124,7 +124,7 @@ namespace UIForia.Compilers {
 
         private int NextContextId => contextId++;
 
-        public virtual void CompileTemplates(Type rootType, CompiledTemplateData templateData) {
+        public void CompileTemplates(Type rootType, CompiledTemplateData templateData) {
             this.templateData = templateData;
 
             if (!typeof(UIElement).IsAssignableFrom(rootType)) { }
@@ -341,6 +341,7 @@ namespace UIForia.Compilers {
             }
 
             ctx.PushScope();
+            
             Expression parentChildList = Expression.Field(ctx.ParentExpr, s_Element_ChildrenList);
 
             Expression parentChildListArray = Expression.Field(parentChildList, s_LightList_Element_Array);

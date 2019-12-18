@@ -1,0 +1,9 @@
+<UITemplate>
+    <Contents>
+        <TemplateStructure_SlotOverride_Expand>
+            <Slot slot:name="override-me">
+                Override successful
+            </Slot>
+        </TemplateStructure_SlotOverride_Expand>
+    </Contents>
+</UITemplate>

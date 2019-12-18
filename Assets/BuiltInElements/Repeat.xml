@@ -4,20 +4,30 @@
     <Contents>
 
         <Panel>
-            <DefineSlot slot:name="slot0">
-                List size = {list.Count}
-            </DefineSlot>
+            
+            I am repeat
+
+            <ExposeSlot>
+                <ExternSlot slot:name="slot0">
+                    Extern Default content
+                </ExternSlot>
+            </ExposeSlot>
+
         </Panel>
-        
-<!--        <Children slot:type="Template"-->
-<!--                  count="list != null ? list.Count : 0"-->
-<!--                  onSlotCreated="SlotCreated()"-->
-<!--                  onSlotDestroyed="SlotDestroyed()"-->
-<!--                  ctx:item="$list[$element.siblingIndex]"-->
-<!--                  ctx:list="list"-->
-<!--                  ctx:length="list.Count"/>-->
-<!--                  slotctx:item="$list[$element.siblingIndex]"/>-->
-        
+
+        <Children>
+            Default children
+        </Children>
+
+        <!--        <Children slot:type="Template"-->
+        <!--                  count="list != null ? list.Count : 0"-->
+        <!--                  onSlotCreated="SlotCreated()"-->
+        <!--                  onSlotDestroyed="SlotDestroyed()"-->
+        <!--                  ctx:item="$list[$element.siblingIndex]"-->
+        <!--                  ctx:list="list"-->
+        <!--                  ctx:length="list.Count"/>-->
+        <!--                  slotctx:item="$list[$element.siblingIndex]"/>-->
+
     </Contents>
 
 </UITemplate>

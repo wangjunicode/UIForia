@@ -72,28 +72,34 @@ namespace TemplateParsing_XML {
             Assert.AreEqual(1, templateRoot.ChildCount);
 
             ContainerNode child = AssertAndReturn<ContainerNode>("Div", templateRoot[0]);
-            SlotDefinitionNode definitionNode = AssertAndReturn<SlotDefinitionNode>(child[0]);
+            SlotNode node = AssertAndReturn<SlotNode>(child[0]);
 
-            Assert.AreEqual("my-slot", definitionNode.slotName);
+            Assert.AreEqual("my-slot", node.slotName);
         }
 
         [Template("Data/XMLTemplateParsing/XMLTemplateParsing_DefineSlotNameTwice.xml")]
         public class XMLTemplateParsing_DefineSlotNameTwice : UIElement { }
 
+        // [Test]
+        // public void DefineSlotNameTwice() {
+        //     ProcessedType processedType = TypeProcessor.GetProcessedType(typeof(XMLTemplateParsing_DefineSlotNameTwice));
+        //     TemplateCache cache = new TemplateCache(Setup("App"));
+        //     ParseException parseException = Assert.Throws<ParseException>(() => { cache.GetParsedTemplate(processedType); });
+        //     Assert.AreEqual(ParseException.MultipleSlotsWithSameName(processedType.templateAttr.template, "my-slot").Message, parseException.Message);
+        // }
+
         [Test]
         public void DefineSlotNameTwice() {
             ProcessedType processedType = TypeProcessor.GetProcessedType(typeof(XMLTemplateParsing_DefineSlotNameTwice));
             TemplateCache cache = new TemplateCache(Setup("App"));
-            ParseException parseException = Assert.Throws<ParseException>(() => { cache.GetParsedTemplate(processedType); });
-            Assert.AreEqual(ParseException.MultipleSlotsWithSameName(cache.GetTemplateFilePath(processedType), "my-slot").Message, parseException.Message);
+            Assert.DoesNotThrow(() => { cache.GetParsedTemplate(processedType); });
         }
 
         [Template("Data/XMLTemplateParsing/XMLTemplateParsing_OverrideSlot.xml")]
         public class XMLTemplateParsing_OverrideSlot : UIElement { }
-        
+
         [Test]
         public void OverrideSlot() {
-
             ProcessedType processedType = TypeProcessor.GetProcessedType(typeof(XMLTemplateParsing_OverrideSlot));
             TemplateCache cache = new TemplateCache(Setup("App"));
             RootTemplateNode templateRoot = cache.GetParsedTemplate(processedType);
@@ -104,7 +110,7 @@ namespace TemplateParsing_XML {
             AssertTrimmedText("Hello After", templateRoot[2]);
 
             ExpandedTemplateNode expandedTemplateNode = AssertAndReturn<ExpandedTemplateNode>(templateRoot[1]);
-            SlotOverrideNode overrideNode = AssertAndReturn<SlotOverrideNode>(expandedTemplateNode[0]);
+            SlotOverrideNode overrideNode = AssertAndReturn<SlotOverrideNode>(expandedTemplateNode.slotOverrideNodes[0]);
             Assert.AreEqual("my-slot", overrideNode.slotName);
             AssertTrimmedText("Hello Between", overrideNode[0]);
         }
@@ -129,7 +135,7 @@ namespace TemplateParsing_XML {
 
             RootTemplateNode expandedRoot = expandedTemplate.expandedRoot;
             AssertTrimmedText("I am expanded!", expandedRoot[0]);
-            
+
             AssertAndReturn<TextNode>(templateRoot[2]);
         }
 
@@ -137,12 +143,12 @@ namespace TemplateParsing_XML {
             TextNode textNode = AssertAndReturn<TextNode>(templateNode);
             Assert.AreEqual(expected, textNode.rawTextContent);
         }
-        
+
         private static void AssertTrimmedText(string expected, TemplateNode2 templateNode) {
             TextNode textNode = AssertAndReturn<TextNode>(templateNode);
             Assert.AreEqual(expected, textNode.rawTextContent.Trim());
         }
-        
+
         private static T AssertAndReturn<T>(object b) where T : TemplateNode2 {
             Assert.IsInstanceOf<T>(b);
             return (T) b;

@@ -1,4 +1,5 @@
 using System.Linq.Expressions;
+using UIForia.Parsing;
 using UnityEditor;
 
 namespace UIForia.Compilers {

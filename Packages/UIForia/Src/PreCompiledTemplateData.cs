@@ -22,48 +22,54 @@ namespace UIForia {
         private static readonly string s_Indent16 = new string(' ', 16);
         private static readonly string s_Indent20 = new string(' ', 20);
 
+        public TemplateSettings templateSettings;
         public PreCompiledTemplateData(TemplateSettings templateSettings) : base(templateSettings) { }
 
-        public override void LoadTemplates() {
-            Assembly assembly = AppDomain.CurrentDomain.GetAssemblyByName(templateSettings.assemblyName);
-            Type type = assembly.GetType("UIForia.Generated.UIForiaGeneratedTemplates_" + templateSettings.StrippedApplicationName);
-
-            try {
-                ITemplateLoader loader = (ITemplateLoader) Activator.CreateInstance(type);
-                string[] files = loader.StyleFilePaths;
-
-                styleImporter.Reset(); // reset because in testing we will already have parsed files, nuke these
-
-                LightList<UIStyleGroupContainer> styleList = new LightList<UIStyleGroupContainer>(128);
-
-                for (int i = 0; i < files.Length; i++) {
-                    StyleSheet sheet = styleImporter.ImportStyleSheetFromFile(files[i]);
-                    styleList.EnsureAdditionalCapacity(sheet.styleGroupContainers.Length);
-                    for (int j = 0; j < sheet.styleGroupContainers.Length; j++) {
-                        styleList.array[styleList.size++] = sheet.styleGroupContainers[j];
-                    }
-                }
-
-                templates = loader.LoadTemplates();
-                slots = loader.LoadSlots();
-                bindings = loader.LoadBindings();
-                templateMetaData = loader.LoadTemplateMetaData(styleList.array);
-
-                for (int i = 0; i < templateMetaData.Length; i++) {
-                    templateMetaData[i].compiledTemplateData = this;
-                }
-
-                constructElement = loader.ConstructElement;
-                
-            }
-            catch (Exception e) {
-                throw e;
-            }
+        public static CompiledTemplateData LoadTemplates(TemplateSettings settings) {
+            PreCompiledTemplateData retn = new PreCompiledTemplateData(settings);
+            return null;
+        }
+        
+        public void LoadTemplates() {
+//            Assembly assembly = AppDomain.CurrentDomain.GetAssemblyByName(templateSettings.assemblyName);
+//            Type type = assembly.GetType("UIForia.Generated.UIForiaGeneratedTemplates_" + templateSettings.StrippedApplicationName);
+//
+//            try {
+//                ITemplateLoader loader = (ITemplateLoader) Activator.CreateInstance(type);
+//                string[] files = loader.StyleFilePaths;
+//
+//                styleImporter.Reset(); // reset because in testing we will already have parsed files, nuke these
+//
+//                LightList<UIStyleGroupContainer> styleList = new LightList<UIStyleGroupContainer>(128);
+//
+//                for (int i = 0; i < files.Length; i++) {
+//                    StyleSheet sheet = styleImporter.ImportStyleSheetFromFile(files[i]);
+//                    styleList.EnsureAdditionalCapacity(sheet.styleGroupContainers.Length);
+//                    for (int j = 0; j < sheet.styleGroupContainers.Length; j++) {
+//                        styleList.array[styleList.size++] = sheet.styleGroupContainers[j];
+//                    }
+//                }
+//
+//                templates = loader.LoadTemplates();
+//                slots = loader.LoadSlots();
+//                bindings = loader.LoadBindings();
+//                templateMetaData = loader.LoadTemplateMetaData(styleList.array);
+//
+//                for (int i = 0; i < templateMetaData.Length; i++) {
+//                    templateMetaData[i].compiledTemplateData = this;
+//                }
+//
+//                constructElement = loader.ConstructElement;
+//                
+//            }
+//            catch (Exception e) {
+//                throw e;
+//            }
         }
 
         public void GenerateCode() {
-            string path = templateSettings.outputPath;
-            string extension = "." + templateSettings.codeFileExtension;
+            string path = "";//templateSettings.outputPath;
+            string extension = ""; //"." + templateSettings.codeFileExtension;
 
             if (Directory.Exists(path)) {
                 Directory.Delete(path, true);

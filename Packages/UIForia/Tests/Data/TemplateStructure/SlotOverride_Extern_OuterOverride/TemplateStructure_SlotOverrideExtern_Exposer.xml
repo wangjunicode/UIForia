@@ -1,0 +1,12 @@
+<UITemplate>
+    <Contents>
+
+        <TemplateStructure_SlotOverrideExternOuterOverride_Definer>
+            
+            <ExternSlot slot:name="override-me">
+                Override from exposer layer
+            </ExternSlot>
+            
+        </TemplateStructure_SlotOverrideExternOuterOverride_Definer>
+    </Contents>
+</UITemplate>

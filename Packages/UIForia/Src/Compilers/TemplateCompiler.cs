@@ -456,7 +456,7 @@ namespace UIForia.Compilers {
                 case TemplateNodeType.HydrateElement: {
                     // var oldStack = stack;
                     // stack = new stack
-                    // when jumping into a new template we need to store current variable stack state, then restore after compiling.
+                    // when jumping into a new tplate we need to store current variable stack state, then restore after compiling.
                     CompiledTemplate expandedTemplate = GetCompiledTemplate(processedType); // probably needs a ref to old stack for slot alias resolution
                     // stack = old stack
 

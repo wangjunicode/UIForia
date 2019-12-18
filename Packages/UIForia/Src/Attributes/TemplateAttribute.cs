@@ -9,6 +9,8 @@ namespace UIForia.Attributes {
         File
 
     }
+    
+    [AttributeUsage(AttributeTargets.Class, Inherited = false)]
     public class TemplateAttribute : Attribute {
         public readonly string template;
         public readonly TemplateType templateType;

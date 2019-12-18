@@ -1,3 +1,5 @@
+using UIForia.Elements;
+
 namespace UIForia.Compilers {
 
     public readonly struct CompileTimeSlotUsage {
@@ -19,10 +21,12 @@ namespace UIForia.Compilers {
 
         public readonly string slotName;
         public readonly int slotId;
-
-        public SlotUsage(string slotName, int slotId) {
+        public readonly UIElement outerContext;
+        
+        public SlotUsage(string slotName, int slotId, UIElement outerContext) {
             this.slotName = slotName;
             this.slotId = slotId;
+            this.outerContext = outerContext;
         }
 
     }

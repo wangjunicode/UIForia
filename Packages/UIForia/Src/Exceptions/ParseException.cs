@@ -1,5 +1,5 @@
 using System;
-using UIForia.Compilers;
+using UIForia.Parsing;
 using UIForia.Parsing.Style.Tokenizer;
 
 namespace UIForia.Exceptions {
@@ -42,6 +42,10 @@ namespace UIForia.Exceptions {
 
         public static ParseException UnnamedSlotOverride(string fileName, in TemplateLineInfo templateLineInfo) {
             return new ParseException(fileName + " -> Invalid slot override at line: " + templateLineInfo + " a slot:name attribute is required");
+        }
+
+        public static ParseException SlotNotFound(string fileName, string slotName, TemplateLineInfo templateLineInfo) {
+            return new ParseException(fileName + $" -> A slot with the name {slotName} does not exist to override at line: " + templateLineInfo);
         }
 
     }

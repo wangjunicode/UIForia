@@ -1,0 +1,8 @@
+<UITemplate>
+    <Contents>
+
+        <DefineSlot slot:name="override-me">
+            Not overridden
+        </DefineSlot>
+    </Contents>
+</UITemplate>

@@ -130,7 +130,7 @@ namespace UIForia {
 
             templateData = compiledTemplateData;
 
-            UIElement rootElement = templateData.templates[0].Invoke(null, new TemplateScope(this, null, null));
+            UIElement rootElement = templateData.templates[0].Invoke(null, new TemplateScope(this, null));
 
             UIView view = new UIView(this, "Default", rootElement, Matrix4x4.identity, new Size(Screen.width, Screen.height));
 
@@ -145,7 +145,7 @@ namespace UIForia {
             Func<UIElement, TemplateScope, UIElement> template = templateData.GetTemplate<T>();
 
             if (template != null) {
-                UIElement element = template.Invoke(null, new TemplateScope(this, null, null));
+                UIElement element = template.Invoke(null, new TemplateScope(this, null));
                 UIView view = new UIView(this, name, element, matrix, size);
                 m_Views.Add(view);
 
@@ -862,6 +862,17 @@ namespace UIForia {
             return retn;
         }
 
+        public UIElement CreateSlot2(string slotName, TemplateScope scope, int defaultSlotId, UIElement root, UIElement parent) {
+            int slotId = ResolveSlotId(slotName, scope.slotInputs, defaultSlotId);
+            UIElement retn = templateData.slots[slotId](root, scope);
+            retn.bindingNode = new LinqBindingNode();
+            retn.bindingNode.innerContext = root;
+            retn.bindingNode.outerContext = root;
+            retn.parent = parent;
+            retn.View = parent?.View;
+            return retn;
+        }
+
         // todo -- override that accepts an index into an array instead of a type, to save a dictionary lookup
         // todo -- don't create a list for every type, maybe a single pool list w/ sorting & a jump search or similar
         // todo -- register element in type map for selectors, might need to support subclass matching ie <KlangButton> and <OtherButton> with matching on <Button>
@@ -916,7 +927,7 @@ namespace UIForia {
         public void AddTemplateChildren(SlotTemplateElement slotTemplateElement, int templateId, int count) {
             if (templateId < 0) return;
 
-            TemplateScope scope = new TemplateScope(this, null, null);
+            TemplateScope scope = new TemplateScope(this, null);
 
             for (int i = 0; i < count; i++) {
                 UIElement root = slotTemplateElement.bindingNode.root;

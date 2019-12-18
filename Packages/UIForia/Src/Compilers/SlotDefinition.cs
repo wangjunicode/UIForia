@@ -1,4 +1,5 @@
 using System;
+using UIForia.Parsing;
 using UIForia.Parsing.Expressions;
 using UIForia.Util;
 

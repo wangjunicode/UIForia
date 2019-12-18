@@ -1,0 +1,7 @@
+<UITemplate>
+    <Contents>
+        <DefineSlot slot:name="override-me">
+            Override failed
+        </DefineSlot>
+    </Contents>
+</UITemplate>

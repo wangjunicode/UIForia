@@ -12,16 +12,5 @@ namespace UIForia.Elements {
             return "DefineSlot:" + slotId;
         }
     }
-    
-    public class UISlotOverride : UIElement {
-
-        public readonly string slotId;
-
-        public UISlotOverride() {}
-
-        public override string GetDisplayName() {
-            return "Slot:" + slotId;
-        }
-    }
 
 }

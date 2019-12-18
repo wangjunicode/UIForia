@@ -3,19 +3,20 @@ using System.Collections.Generic;
 using UIForia.Compilers;
 using UIForia.Compilers.Style;
 using UIForia.Elements;
+using UIForia.Parsing;
 using UIForia.Templates;
 using UIForia.Util;
 using UnityEditor;
 
 namespace UIForia {
 
-    public abstract class CompiledTemplateData {
+    public class CompiledTemplateData {
 
-        protected LightList<CompiledTemplate> compiledTemplates;
-        protected LightList<CompiledSlot> compiledSlots;
-        protected LightList<CompiledBinding> compiledBindings;
-        protected StyleSheetImporter styleImporter;
-        protected Func<int, UIElement> constructElement;
+        public LightList<CompiledTemplate> compiledTemplates;
+        public LightList<CompiledSlot> compiledSlots;
+        public LightList<CompiledBinding> compiledBindings;
+        public StyleSheetImporter styleImporter;
+        public Func<int, UIElement> constructElement;
 
         public TemplateMetaData[] templateMetaData;
         public Func<UIElement, TemplateScope, UIElement>[] templates;
@@ -23,12 +24,12 @@ namespace UIForia {
         public Action<UIElement, UIElement>[] bindings;
         public UIStyleGroupContainer[] styles;
         
-        public readonly TemplateSettings templateSettings;
         public readonly Dictionary<Type, int> templateTypeMap = new Dictionary<Type, int>();
+        public TemplateSettings templateSettings;
+
+//        public abstract void LoadTemplates();
         
-        public abstract void LoadTemplates();
-        
-        protected CompiledTemplateData(TemplateSettings templateSettings) {
+        public CompiledTemplateData(TemplateSettings templateSettings) {
             this.templateSettings = templateSettings;
             this.compiledSlots = new LightList<CompiledSlot>();
             this.compiledTemplates = new LightList<CompiledTemplate>(128);

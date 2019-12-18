@@ -9,11 +9,14 @@
 <!--        </Text>-->
         
         <Repeat list="words">
-<!--            Text-->
-<!--            {$thing}-->
+            <Panel>
+                Children!
+            </Panel>
         </Repeat>
         
-<!--        <Div style="box box-black">-->
+        <Div style="box box-black">
+                Text
+        </Div>
 <!--&lt;!&ndash;            onMouseClick="OnBoxClicked(1)">&ndash;&gt;-->
 <!--            Clicked {boxClicks1} times-->
 <!--        </Div>-->

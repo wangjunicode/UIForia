@@ -18,7 +18,7 @@ namespace UIForia {
         public RuntimeTemplateData(TemplateSettings settings) : base(settings) { }
         private Dictionary<int, Func<UIElement>> constructorFnMap;
 
-        public override void LoadTemplates() {
+        public void LoadTemplates() {
             templates = new Func<UIElement, TemplateScope, UIElement>[compiledTemplates.size];
             bindings = new Action<UIElement, UIElement>[compiledBindings.size];
             slots = new Func<UIElement, TemplateScope, UIElement>[compiledSlots.size];

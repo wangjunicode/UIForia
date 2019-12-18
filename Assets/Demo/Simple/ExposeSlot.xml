@@ -1,0 +1,12 @@
+<UITemplate>
+    <Contents>
+
+        <Panel>
+            Next child is a slot
+            <DefineSlot slot:name="slot0">
+                I am default exposed content
+            </DefineSlot>
+        </Panel>
+        
+    </Contents>
+</UITemplate>

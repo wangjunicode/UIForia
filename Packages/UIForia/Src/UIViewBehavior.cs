@@ -1,12 +1,11 @@
 ﻿using System;
-using System.Diagnostics;
 using System.IO;
+using UIForia.Compilers;
 using UIForia.Elements;
 using UnityEngine;
-using Debug = UnityEngine.Debug;
 
 namespace UIForia {
-    
+
     public class UIViewBehavior : MonoBehaviour {
 
         public Type type;
@@ -14,36 +13,33 @@ namespace UIForia {
         public new Camera camera;
         private Application application;
         public bool usePreCompiledTemplates;
-        
-        [HideInInspector]
-        public string applicationName = "Game App";
+
+        [HideInInspector] public string applicationName = "Game App 2";
 
         public TemplateSettings GetTemplateSettings() {
             TemplateSettings settings = new TemplateSettings();
             settings.applicationName = applicationName;
             settings.assemblyName = "Assembly-CSharp";
-            settings.outputPath = Path.Combine(UnityEngine.Application.dataPath, "UIForiaGenerated");
+            settings.outputPath = Path.Combine(UnityEngine.Application.dataPath, "UIForiaGenerated2");
             settings.codeFileExtension = "generated.cs";
-            settings.preCompiledTemplatePath = "Assets/UIForia_Generated/" + applicationName;
+            settings.preCompiledTemplatePath = "Assets/UIForia_Generated2/" + applicationName;
             settings.templateResolutionBasePath = Path.Combine(UnityEngine.Application.dataPath);
             return settings;
         }
-            
+
         public void Start() {
             type = Type.GetType(typeName);
             if (type == null) return;
+            
             // 1. creates the application
-            if (usePreCompiledTemplates) {
-                TemplateSettings settings = GetTemplateSettings();
-                CompiledTemplateData compiledOutput = new PreCompiledTemplateData(settings);
-                application = GameApplication.CreatePrecompiled(compiledOutput, camera);
-            }
-            else {
-                TemplateSettings settings = GetTemplateSettings();
-                application = GameApplication.Create(type, settings, camera);
-              
-            }
-
+            
+            TemplateSettings settings = GetTemplateSettings();
+            
+            CompiledTemplateData compiledTemplates = usePreCompiledTemplates
+                ? TemplateLoader.LoadPrecompiledTemplates(settings)
+                : TemplateLoader.LoadRuntimeTemplates(type, settings);
+            
+            application = GameApplication.Create(compiledTemplates, camera);
             application.onElementRegistered += DoDependencyInjection;
         }
 

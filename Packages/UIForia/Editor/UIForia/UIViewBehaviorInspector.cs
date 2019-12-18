@@ -79,16 +79,17 @@ namespace UIForia.Editor {
             behavior.usePreCompiledTemplates = GUILayout.Toggle(behavior.usePreCompiledTemplates, "Use Precompiled");
             
             if (GUILayout.Button("Generate Code")) {
-
-                TemplateSettings settings = behavior.GetTemplateSettings();
-                TemplateCompiler compiler = new TemplateCompiler(settings);
                 
-                // maybe this should also know the root type for an application
-                PreCompiledTemplateData compiledOutput = new PreCompiledTemplateData(settings);
-
-                compiler.CompileTemplates(behavior.type, compiledOutput);
-
-                compiledOutput.GenerateCode();
+                TemplateCodeGenerator.Generate(behavior.type, behavior.GetTemplateSettings());
+                
+//                TemplateCompiler compiler = new TemplateCompiler(settings);
+//                
+//                // maybe this should also know the root type for an application
+//                PreCompiledTemplateData compiledOutput = new PreCompiledTemplateData(settings);
+//
+//                compiler.CompileTemplates(behavior.type, compiledOutput);
+//
+//                compiledOutput.GenerateCode();
 
             }
             

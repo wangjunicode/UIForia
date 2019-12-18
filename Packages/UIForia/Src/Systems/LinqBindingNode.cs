@@ -47,6 +47,8 @@ namespace UIForia.Systems {
         internal ContextVariable localVariable;
         internal ContextVariableReference resolvedVariable;
         internal LinqBindingNode parent;
+        public UIElement innerContext;
+        public UIElement outerContext;
 
         public void CreateLocalContextVariable(ContextVariable variable) {
             if (localVariable == null) {

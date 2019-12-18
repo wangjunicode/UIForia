@@ -160,10 +160,6 @@ namespace UIForia.Animation {
             }
             
             float duration = options.duration?.AsSeconds() ?? 1;
-            if (duration - delay <= status.elapsedTotalTime) {
-                return UITaskResult.Completed;
-            }
-
             float elapsedIterationTime = status.elapsedIterationTime - delay;
             float progress = Mathf.Clamp01(elapsedIterationTime / duration);
 

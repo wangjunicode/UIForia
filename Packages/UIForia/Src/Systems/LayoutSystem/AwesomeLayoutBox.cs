@@ -570,8 +570,10 @@ namespace UIForia.Systems {
             size.preferred = ResolveWidth(element.style.PreferredWidth);
             size.minimum = ResolveWidth(element.style.MinWidth);
             size.maximum = ResolveWidth(element.style.MaxWidth);
-            size.marginStart = MeasurementUtil.ResolveFixedSize(0, 0, 0, 0, element.style.MarginLeft);
-            size.marginEnd = MeasurementUtil.ResolveFixedSize(0, 0, 0, 0, element.style.MarginRight);
+            Vector2 viewSize = element.View.Viewport.size;
+            float emSize = element.style.GetResolvedFontSize();
+            size.marginStart = MeasurementUtil.ResolveFixedSize(0, viewSize.x, viewSize.y, emSize, element.style.MarginLeft);
+            size.marginEnd = MeasurementUtil.ResolveFixedSize(0, viewSize.x, viewSize.y, emSize, element.style.MarginRight);
             // todo -- not sure this is right or desired
             element.layoutResult.margin.left = size.marginStart;
             element.layoutResult.margin.right = size.marginEnd;
@@ -581,8 +583,10 @@ namespace UIForia.Systems {
             size.preferred = ResolveHeight(element.style.PreferredHeight);
             size.minimum = ResolveHeight(element.style.MinHeight);
             size.maximum = ResolveHeight(element.style.MaxHeight);
-            size.marginStart = MeasurementUtil.ResolveFixedSize(0, 0, 0, 0, element.style.MarginTop);
-            size.marginEnd = MeasurementUtil.ResolveFixedSize(0, 0, 0, 0, element.style.MarginBottom);
+            Vector2 viewSize = element.View.Viewport.size;
+            float emSize = element.style.GetResolvedFontSize();
+            size.marginStart = MeasurementUtil.ResolveFixedSize(0, viewSize.x, viewSize.y, emSize, element.style.MarginTop);
+            size.marginEnd = MeasurementUtil.ResolveFixedSize(0, viewSize.x, viewSize.y, emSize, element.style.MarginBottom);
             // todo -- not sure this is right or desired
             element.layoutResult.margin.top = size.marginStart;
             element.layoutResult.margin.bottom = size.marginEnd;

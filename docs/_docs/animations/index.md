@@ -168,13 +168,14 @@ Let's look at all the options that are currently supported:
     }
 ```
 
-| Properties     | Description                                                                                                                      | Type               | Default |
-|:---------------|:---------------------------------------------------------------------------------------------------------------------------------|:-------------------|:--------|
-| Iterations     | Defines how many times the anmiation should be repeated. Special values: -1 or Infinite will loop the animation for ever.        | int                | 1       |
-| Duration       | Duration of the whole animation in ms.                                                                                           | duration           | 1000    |
-| Delay          | Delay the animation in seconds.                                                                                                  | duration           | 0       |
-| Direction      | Values: `Forward` or `Reverse`. Play the animation from 0% to 100% when using `Forward` or from 100% to 0% if `Reverse` is used. | AnimationDirection | Forward |
-| TimingFunction | Choose an [easing function](#timing-functions) to adjust the change rate of the style properties between keyframes.              | EasingFunction     | Linear  |
+| Properties     | Description                                                                                                                      | Type               | Default  |
+|:---------------|:---------------------------------------------------------------------------------------------------------------------------------|:-------------------|:---------|
+| Iterations     | Defines how many times the anmiation should be repeated. Special values: -1 or Infinite will loop the animation for ever.        | int                | 1        |
+| Duration       | Duration of the whole animation.                                                                                                 | duration           | 1000     |
+| Delay          | Delays the start of the animation.                                                                                               | duration           | 0        |
+| Direction      | Values: `Forward` or `Reverse`. Play the animation from 0% to 100% when using `Forward` or from 100% to 0% if `Reverse` is used. | AnimationDirection | Forward  |
+| LoopType       | Values: `Constant` (default) or `PingPong`. Plays the animation in reverse until the duration or iteration count is met.         | AnimationLoopType  | Constant |
+| TimingFunction | Choose an [easing function](#timing-functions) to adjust the change rate of the style properties between keyframes.              | EasingFunction     | Linear   |
 
 ## C# Animation API
 Animations done via style sheets are very powerful already but sometimes you just need them to be extra customized.
@@ -211,13 +212,15 @@ AnimationTriggers are custom event callbacks that get triggered on specific keyf
 
 ```
 AnimationTrigger[] triggers = {
-    new AnimationTrigger(0.65f, (StyleAnimationEvent evt) => {
-        float start = (int) evt.options.duration * 0.65f;
-        float end = (int) evt.options.duration * 0.9f;
-        int duration = (int) (end - start);
-        one_BlueOrbit.SetEnabled(true);
-        Application.Animate(one_BlueOrbit, OrbitFadeAnim(duration));
-    })
+        new AnimationTrigger(0.65f, (StyleAnimationEvent evt) => {
+            if (evt.options.duration.HasValue) {
+                float start = evt.options.duration.Value.AsSeconds() * 0.65f;
+                float end = evt.options.duration.Value.AsSeconds() * 0.9f;
+                int duration = (int) (end - start);
+                one_BlueOrbit.SetEnabled(true);
+                Application.Animate(one_BlueOrbit, OrbitFadeAnim(duration));
+            }
+        })
 };
 ```
 
@@ -275,3 +278,51 @@ For visual examples of easing functions, see <https://easings.net>
 
 #### Custom Easing Functions
 Custom easing function are currently not supported :(
+
+## Sprite Animations
+Basic sprite animations are here! We support sprite based animations based on individual images.
+Put all your sprite images into some directory under `Resources` and make sure they all start with the
+same prefix and end with their frame number. The image `SpriteAnimation/Frame_2.png` would match
+this `PathPrefix` configuration: `PathPrefix = "SpriteAnimation/Frame_";`.
+
+Currently all frames are being played linearly, so if you want a particular frame to last a little
+longer you'll have to use the `C#` API to add a [Trigger](/docs/animations/index#uiforiaanimationanimationtrigger)
+that pauses the animation for a while. Note that `AnimationTrigger.time` will return the current frame count
+instead of a keyframe.
+
+The `spritesheet` group takes a subset of `AnimationOptions` known from animation `[options]` groups with
+some small differences:
+- Duration will does not limit the animation to 1 second by default, instead the every frame will get screen time
+- TimingFunction is not supported
+
+Well, here's the full list again:
+
+| Properties     | Description                                                                                                                      | Type               | Default  |
+|:---------------|:---------------------------------------------------------------------------------------------------------------------------------|:-------------------|:---------|
+| Fps            | Defines the frames per second.                                                                                                   | int                | 30       |
+| StartFrame     | The first frame to use from your sprite animation.                                                                               | int                | 0        |
+| EndFrame       | The last frame to use from your sprite animation.                                                                                | int                | 0        |
+| PathPrefix     | Common cath and prefix that is shared by all your sprite frames. Totally required!                                               | string             |          |
+| Iterations     | Defines how many times the anmiation should be repeated. Special values: -1 or Infinite will loop the animation for ever.        | int                | 1        |
+| Duration       | Duration of the whole animation.                                                                                                 | UITimeMeasurement  | **100%**     |
+| Delay          | Delays the start of the animation.                                                                                               | UITimeMeasurement  | 0ms      |
+| Direction      | Values: `Forward` or `Reverse`. Play the animation from 0% to 100% when using `Forward` or from 100% to 0% if `Reverse` is used. | AnimationDirection | Forward  |
+| LoopType       | Values: `Constant` (default) or `PingPong`. Plays the animation in reverse until the duration or iteration count is met.         | AnimationLoopType  | Constant |
+| TimingFunction | **NOT SUPPORTED**                                                                                                                      | -                  | -        |
+
+An example of a `spritesheet` group:
+```
+spritesheet walk {
+    PathPrefix = "SpriteAnimation/Frame_";
+    StartFrame = 4;
+    EndFrame = 10;
+    Fps = 10;
+    Delay = 1;
+    Iterations = Infinite;
+}
+```
+
+...and for more, please have a look at our AnimationDemo 
+- [style](https://github.com/klanggames/UIForia/blob/master/Assets/Documentation/Features/AnimationDemo.style)
+- [xml](https://github.com/klanggames/UIForia/blob/master/Assets/Documentation/Features/AnimationDemo.xml)
+- [and backging class](https://github.com/klanggames/UIForia/blob/master/Assets/Documentation/Features/AnimationDemo.cs)

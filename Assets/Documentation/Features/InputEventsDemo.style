@@ -3,7 +3,7 @@ const codeColor = rgba(20, 20, 20, 40);
 
 animation flash {
     [options] {
-        duration = 500;
+        Duration = 500;
     }
 
     [keyframes] {

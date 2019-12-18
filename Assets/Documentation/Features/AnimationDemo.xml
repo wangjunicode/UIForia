@@ -83,6 +83,29 @@
             <Div>Animation Task Status: {animationTask.state}</Div>
         </Group>
         
+        <Heading2>SpriteSheet Animations</Heading2>
+        <Paragraph>Let's see if the animation plays when you hover the center of the squares.</Paragraph>
+        <Div style="flex-horizontal">
+            <Group style="spritesheet-container">
+                <Group style="spritesheet-panel" x-spriteanimation="idle" />
+            </Group>
+            <Group style="spritesheet-container">
+                <Group style="spritesheet-panel" x-spriteanimation="walk" />
+            </Group>
+            <Group style="spritesheet-container">
+                <Group style="spritesheet-panel" x-spriteanimation="kick" />
+            </Group>
+            <Group style="spritesheet-container">
+                <Group style="spritesheet-panel" x-spriteanimation="hurt" />
+            </Group>
+            <Group style="spritesheet-container">
+                <Group style="spritesheet-panel" x-spriteanimation="sneak" />
+            </Group>
+            <Group style="spritesheet-container">
+                <Group style="spritesheet-panel" x-spriteanimation="flipbook" />
+            </Group>
+        </Div>
+        
     </Contents>
 
 </UITemplate>

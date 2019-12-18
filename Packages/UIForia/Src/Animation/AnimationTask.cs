@@ -5,12 +5,10 @@ namespace UIForia.Animation {
 
     public abstract class AnimationTask : UITask {
 
-        public readonly AnimationData animationData;
-        public readonly AnimationTaskType type;
+        public AnimationData animationData;
         public readonly IList<AnimationTriggerState> triggerStates;
         
-        protected AnimationTask(AnimationTaskType type, AnimationData animationData, IList<AnimationTrigger> triggers) {
-            this.type = type;
+        protected AnimationTask(AnimationData animationData, IList<AnimationTrigger> triggers) {
             this.animationData = animationData;
             if (triggers != null) {
                 triggerStates = new List<AnimationTriggerState>(triggers.Count);

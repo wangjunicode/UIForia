@@ -80,6 +80,11 @@ namespace UIForia.Parsing.Style {
                     tokenStream.Advance();
                     ParseAnimation();
                     break;
+                
+                case StyleTokenType.SpriteSheet:
+                    tokenStream.Advance();
+                    ParseSpriteSheet();
+                    break;
 
                 case StyleTokenType.Import:
                     ParseImportNode();
@@ -197,6 +202,47 @@ namespace UIForia.Parsing.Style {
             }
         }
 
+        private void ParseSpriteSheet() {
+            StyleToken initialStyleToken = tokenStream.Current;
+            SpriteSheetNode rootNode = StyleASTNodeFactory.SpriteSheetNode(initialStyleToken);
+            rootNode.WithLocation(initialStyleToken);
+            tokenStream.Advance();
+            AssertTokenTypeAndAdvance(StyleTokenType.BracesOpen);
+            SpriteSheetParseLoop(rootNode);
+            nodes.Add(rootNode);
+        }
+
+        private void SpriteSheetParseLoop(SpriteSheetNode rootNode) {
+            while (tokenStream.HasMoreTokens && !AdvanceIfTokenType(StyleTokenType.BracesClose)) {
+                StyleToken typeToken = tokenStream.Current;
+                string optionName = AssertTokenTypeAndAdvance(StyleTokenType.Identifier).ToLower();
+                bool typeFound = false;
+                for (int index = 0; index < s_SpriteSheetOptionNames.Length; index++) {
+                    string name = s_SpriteSheetOptionNames[index].Item1;
+                    if (name == optionName) {
+                        AssertTokenTypeAndAdvance(StyleTokenType.EqualSign);
+                        StyleToken variableToken = tokenStream.Current;
+
+                        PropertyNode propertyNode = StyleASTNodeFactory.PropertyNode(s_SpriteSheetOptionNames[index].Item2);
+                        propertyNode.AddChildNode(ParsePropertyValue());
+                        propertyNode.WithLocation(variableToken);
+
+                        rootNode.AddChildNode(propertyNode);
+
+                        typeFound = true;
+
+                        break;
+                    }
+                }
+
+                if (!typeFound) {
+                    throw new ParseException(typeToken, $"{optionName} is not a supported spritesheet option. Valid values are: {FormatOptionList(s_SpriteSheetOptionNames)}\n");
+                }
+
+                AssertTokenTypeAndAdvance(StyleTokenType.EndStatement);
+            }
+        }
+
         public static readonly ValueTuple<string, Type>[] s_SupportedVariableTypes = {
                 ValueTuple.Create("float", typeof(float)), 
                 ValueTuple.Create("int", typeof(int)), 
@@ -237,9 +283,42 @@ namespace UIForia.Parsing.Style {
             ValueTuple.Create(
                 nameof(AnimationOptions.timingFunction).ToLower(),
                 nameof(AnimationOptions.timingFunction)),
-            ValueTuple.Create(
-                nameof(AnimationOptions.playbackType).ToLower(),
-                nameof(AnimationOptions.playbackType))
+        };
+
+        public static readonly ValueTuple<string, string>[] s_SpriteSheetOptionNames = {
+                ValueTuple.Create(
+                        nameof(AnimationOptions.iterations).ToLower(),
+                        nameof(AnimationOptions.iterations)),
+                ValueTuple.Create(
+                        nameof(AnimationOptions.delay).ToLower(),
+                        nameof(AnimationOptions.delay)),
+                ValueTuple.Create(
+                        nameof(AnimationOptions.duration).ToLower(),
+                        nameof(AnimationOptions.duration)),
+                ValueTuple.Create(
+                        nameof(AnimationOptions.direction).ToLower(),
+                        nameof(AnimationOptions.direction)),
+                ValueTuple.Create(
+                        nameof(AnimationOptions.loopType).ToLower(),
+                        nameof(AnimationOptions.loopType)),
+                ValueTuple.Create(
+                        nameof(AnimationOptions.forwardStartDelay).ToLower(),
+                        nameof(AnimationOptions.forwardStartDelay)),
+                ValueTuple.Create(
+                        nameof(AnimationOptions.reverseStartDelay).ToLower(),
+                        nameof(AnimationOptions.reverseStartDelay)),
+                ValueTuple.Create(
+                        nameof(AnimationOptions.fps).ToLower(),
+                        nameof(AnimationOptions.fps)),
+                ValueTuple.Create(
+                        nameof(AnimationOptions.endFrame).ToLower(),
+                        nameof(AnimationOptions.endFrame)),
+                ValueTuple.Create(
+                        nameof(AnimationOptions.startFrame).ToLower(),
+                        nameof(AnimationOptions.startFrame)),
+                ValueTuple.Create(
+                        nameof(AnimationOptions.pathPrefix).ToLower(),
+                        nameof(AnimationOptions.pathPrefix))
         };
 
         private void ParseAnimationVariables(AnimationRootNode rootNode) {

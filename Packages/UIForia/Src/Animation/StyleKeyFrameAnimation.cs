@@ -153,23 +153,18 @@ namespace UIForia.Animation {
                 return UITaskResult.Cancelled;
             }
             
-            if (animationData.options.delay > status.elapsedTotalTime) {
+            AnimationOptions options = animationData.options;
+            float delay = options.delay?.AsSeconds() ?? 0; 
+            if (delay > status.elapsedTotalTime) {
                 return UITaskResult.Running;
             }
-
-            float elapsedIterationTime = status.elapsedIterationTime - animationData.options.delay ?? 0f;
-
-            Rect viewport = target.View.Viewport;
-
-            AnimationOptions options = animationData.options;
-
-            float duration = options.duration.Value * 0.001f;
-            float iterationTime = duration;
-
-            if (options.iterations.Value > 0) {
-                iterationTime /= options.iterations.Value;
+            
+            float duration = options.duration?.AsSeconds() ?? 1;
+            if (duration - delay <= status.elapsedTotalTime) {
+                return UITaskResult.Completed;
             }
 
+            float elapsedIterationTime = status.elapsedIterationTime - delay;
             float progress = Mathf.Clamp01(elapsedIterationTime / duration);
 
             status.iterationProgress = progress;
@@ -182,6 +177,7 @@ namespace UIForia.Animation {
                 targetProgress = 1 - targetProgress;
             }
 
+            Rect viewport = target.View.Viewport;
             ProcessedKeyFrameGroup[] groups = processedFrameGroups.array;
             ProcessedKeyFrame next = default;
             for (int i = 0; i < processedFrameGroups.Count; i++) {

@@ -29,9 +29,107 @@ style button {
     }
 }
 
+style flex-horizontal {
+    FlexLayoutDirection = Horizontal;
+}
+
+style spritesheet-container {
+    Padding = 20px;
+    Border = 2px;
+    BorderColor = red;
+    BackgroundColor = rgb(0, 0, 0);
+    MarginRight = 10px;
+}
+
+style spritesheet-panel {
+    PreferredSize = 32px;
+    [attr:spriteanimation="idle"] {
+        [hover] {
+            [enter] run animation(idle);
+        }
+    }
+    [attr:spriteanimation="walk"] {
+        [hover] {
+            [enter] run animation(walk);
+        }
+    }
+    [attr:spriteanimation="kick"] {
+        [hover] {
+            [enter] run animation(kick);
+        }
+    }
+    [attr:spriteanimation="hurt"] {
+        [hover] {
+            [enter] run animation(hurt);
+        }
+    }
+    [attr:spriteanimation="sneak"] {
+        [hover] {
+            [enter] run animation(sneak);
+        }
+    }
+    [attr:spriteanimation="flipbook"] {
+        [hover] {
+            [enter] run animation(flipbook);
+        }
+    }
+}
+
+spritesheet idle {
+    PathPrefix = "SpriteAnimation/Frame_";
+    StartFrame = 2;
+    EndFrame = 3;
+    Fps = 8;
+    Iterations = Infinite;
+}
+
+spritesheet walk {
+    PathPrefix = "SpriteAnimation/Frame_";
+    StartFrame = 4;
+    EndFrame = 10;
+    Fps = 10;
+    Iterations = Infinite;
+}
+
+spritesheet kick {
+    PathPrefix = "SpriteAnimation/Frame_";
+    StartFrame = 11;
+    EndFrame = 14;
+    Fps = 10;
+    Iterations = Infinite;
+}
+
+spritesheet hurt {
+    PathPrefix = "SpriteAnimation/Frame_";
+    StartFrame = 14;
+    EndFrame = 17;
+    Fps = 8;
+    Iterations = 1;
+}
+
+spritesheet sneak {
+    PathPrefix = "SpriteAnimation/Frame_";
+    StartFrame = 18;
+    EndFrame = 24;
+    Fps = 6;
+    Delay = 500ms;
+    Iterations = Infinite;
+}
+
+spritesheet flipbook {
+    PathPrefix = "SpriteAnimation/";
+    StartFrame = 1;
+    EndFrame = 24;
+    Duration = 3s;
+    Fps = 12;
+    Direction = Forward;
+    LoopType = PingPong;
+    Iterations = 3;
+}
+
 animation button-hover {
     [options] { TimingFunction = QuadraticEaseInOut; }
-    [keyframes] { 
+    [keyframes] {
         100% { 
             BackgroundColor = rgba(220, 200, 200, 190);
             TextColor = rgb(40, 40, 30);
@@ -131,7 +229,7 @@ style orbit-5 {
 
 animation orbit-slowly {
     [options] {
-        Duration = 1000;
+        Duration = 1000ms;
         Iterations = Infinite;
     }
     

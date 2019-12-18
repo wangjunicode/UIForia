@@ -3,6 +3,7 @@ using UIForia.Animation;
 using UIForia.Attributes;
 using UIForia.Elements;
 using UIForia.Rendering;
+using UIForia.Sound;
 using UIForia.Systems;
 using UIForia.Util;
 
@@ -27,8 +28,8 @@ namespace Documentation.Features {
 
         public AnimationData animationData;
 
-        public int duration;
-        public float delay;
+        public UITimeMeasurement duration;
+        public UITimeMeasurement delay;
         public int iterations;
         public EasingFunction timingFunction;
         public AnimationDirection direction;
@@ -50,8 +51,8 @@ namespace Documentation.Features {
         public void ChangeAnimation(string animation) {
             animationData = Application.GetAnimationFromFile("Documentation/Features/AnimationDemo.style", animation);
             animationTask = Application.Animate(animationTarget, animationData);
-            duration = animationData.options.duration ?? 1000;
-            delay = animationData.options.delay ?? 0f;
+            duration = animationData.options.duration ?? new UITimeMeasurement(1, UITimeMeasurementUnit.Seconds);
+            delay = animationData.options.delay ?? new UITimeMeasurement();
             iterations = animationData.options.iterations ?? 1;
             timingFunction = animationData.options.timingFunction ?? EasingFunction.Linear;
             direction = animationData.options.direction ?? AnimationDirection.Forward;

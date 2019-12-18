@@ -57,6 +57,7 @@ namespace UIForia.Parsing.Style.Tokenizer {
         // top level identifier block names
         Style,
         Animation,
+        SpriteSheet,
         Texture,
         Sound,
         Cursor,

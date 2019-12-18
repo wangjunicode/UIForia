@@ -203,7 +203,7 @@ namespace UIForia.Elements {
 
             verticalHandle.style.SetAlignmentOffsetY(new OffsetMeasurement(-percentage, OffsetMeasurementUnit.Percent), StyleState.Normal);
             verticalHandle.style.SetAlignmentOriginY(new OffsetMeasurement(percentage, OffsetMeasurementUnit.Percent), StyleState.Normal);
-            childrenElement.style.SetTransformPositionY(new OffsetMeasurement(-percentage * scrollPixels), StyleState.Normal);
+            childrenElement.style.SetAlignmentOffsetY(new OffsetMeasurement(-percentage * scrollPixels), StyleState.Normal);
         }
 
         public void ScrollToHorizontalPercent(float percentage) {

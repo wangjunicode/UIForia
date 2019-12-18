@@ -5,6 +5,7 @@ using UIForia.Elements;
 using UIForia.Extensions;
 using UIForia.Layout;
 using UIForia.Rendering;
+using UIForia.Sound;
 using UIForia.UIInput;
 using UIForia.Util;
 using UnityEngine;
@@ -111,7 +112,7 @@ namespace UI {
 
         public void SelectSidebarItem(UIElement element) {
             AnimationOptions options = new AnimationOptions();
-            options.duration = 250;
+            options.duration = new UITimeMeasurement(250);
             options.timingFunction = EasingFunction.CubicEaseIn;
 
             if (currentSidebarItem == null) {

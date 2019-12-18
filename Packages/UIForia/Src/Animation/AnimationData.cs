@@ -5,6 +5,7 @@ namespace UIForia.Animation {
 
     public struct AnimationData {
 
+        public AnimationType animationType;
         public string name;
         public string fileName;
         public AnimationOptions options;
@@ -17,7 +18,8 @@ namespace UIForia.Animation {
         public Action<StyleAnimationEvent> onCompleted;
         public Action<StyleAnimationEvent> onTick;
 
-        public AnimationData(AnimationOptions options, IList<AnimationKeyFrame> frames = null, IList<AnimationTrigger> triggers = null) {
+        public AnimationData(AnimationOptions options, IList<AnimationKeyFrame> frames = null, IList<AnimationTrigger> triggers = null, AnimationType animationType = AnimationType.KeyFrame) {
+            this.animationType = animationType;
             this.options = options;
             this.triggers = null;
             this.onStart = null;

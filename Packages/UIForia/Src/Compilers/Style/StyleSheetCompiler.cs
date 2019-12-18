@@ -51,6 +51,7 @@ namespace UIForia.Compilers.Style {
                         containerCount++;
                         break;
                     case AnimationRootNode _:
+                    case SpriteSheetNode _:
                         animationCount++;
                         break;
                     case SoundRootNode _:
@@ -79,6 +80,10 @@ namespace UIForia.Compilers.Style {
             for (int index = 0; index < rootNodes.Count; index++) {
                 switch (rootNodes[index]) {
                     // we sorted the root nodes so all animations run first
+                    case SpriteSheetNode spriteSheetNode:
+                        styleSheet.animations[animationIndex] = CompileSpriteSheetAnimation(spriteSheetNode, styleSheet.animations, styleSheet.sounds);
+                        animationIndex++;
+                        break;
                     case AnimationRootNode animNode:
                         styleSheet.animations[animationIndex] = CompileAnimation(animNode, styleSheet.animations, styleSheet.sounds);
                         animationIndex++;
@@ -99,10 +104,20 @@ namespace UIForia.Compilers.Style {
             return styleSheet;
         }
 
+        private AnimationData CompileSpriteSheetAnimation(SpriteSheetNode node, AnimationData[] styleSheetAnimations, UISoundData[] uiSoundData) {
+            AnimationData data = new AnimationData();
+            data.name = node.identifier;
+            data.fileName = context.fileName;
+            data.animationType = AnimationType.SpriteSheet;
+            data.options = CompileSpriteSheetOptions(node);
+            return data;
+        }
+
         private AnimationData CompileAnimation(AnimationRootNode animNode, AnimationData[] styleSheetAnimations, UISoundData[] uiSoundData) {
             AnimationData data = new AnimationData();
             data.name = animNode.animName;
             data.fileName = context.fileName;
+            data.animationType = AnimationType.KeyFrame;
             data.frames = CompileKeyFrames(animNode, styleSheetAnimations, uiSoundData);
             data.options = CompileAnimationOptions(animNode);
             return data;
@@ -184,46 +199,97 @@ namespace UIForia.Compilers.Style {
             for (int i = 0; i < optionNodes.Count; i++) {
                 string optionName = optionNodes[i].optionName;
                 StyleASTNode value = optionNodes[i].value;
-                
-                if (optionName == nameof(AnimationOptions.duration)) {
-                    options.duration = (int) StylePropertyMappers.MapNumber(value, context);
+
+                switch (optionName) {
+                    case nameof(AnimationOptions.duration):
+                        options.duration = StylePropertyMappers.MapUITimeMeasurement(value, context);
+                        break;
+                    case nameof(AnimationOptions.iterations):
+                        options.iterations = (int) StylePropertyMappers.MapNumberOrInfinite(value, context);
+                        break;
+                    case nameof(AnimationOptions.loopTime):
+                        options.loopTime = StylePropertyMappers.MapNumber(value, context);
+                        break;
+                    case nameof(AnimationOptions.delay):
+                        options.delay = StylePropertyMappers.MapUITimeMeasurement(value, context);
+                        break;
+                    case nameof(AnimationOptions.direction):
+                        options.direction = StylePropertyMappers.MapEnum<AnimationDirection>(value, context);
+                        break;
+                    case nameof(AnimationOptions.loopType):
+                        options.loopType = StylePropertyMappers.MapEnum<AnimationLoopType>(value, context);
+                        break;
+                    case nameof(AnimationOptions.forwardStartDelay):
+                        options.forwardStartDelay = (int)StylePropertyMappers.MapNumber(value, context);
+                        break;
+                    case nameof(AnimationOptions.reverseStartDelay):
+                        options.reverseStartDelay = (int)StylePropertyMappers.MapNumber(value, context);
+                        break;
+                    case nameof(AnimationOptions.timingFunction):
+                        options.timingFunction = StylePropertyMappers.MapEnum<EasingFunction>(value, context);
+                        break;
+                    default:
+                        throw new CompileException(optionNodes[i], "Invalid option argument for animation");
                 }
-                else if (optionName == nameof(AnimationOptions.iterations)) {
-                    if (value is StyleIdentifierNode identifierNode) {
-                        if (identifierNode.name.ToLower() == "infinite") {
-                            options.iterations = -1;
-                        }
+            }
+
+            return options;
+        }
+
+        private AnimationOptions CompileSpriteSheetOptions(SpriteSheetNode node) {
+            AnimationOptions options = new AnimationOptions();
+
+            LightList<StyleASTNode> spriteSheetProperties = node.children;
+            if (spriteSheetProperties == null) {
+                return options;
+            }
+
+            for (int i = 0; i < spriteSheetProperties.Count; i++) {
+                if (spriteSheetProperties[i] is PropertyNode property) {
+                    string optionName = property.identifier;
+                    StyleASTNode value = property.children[0];
+
+                    switch (optionName) {
+                        case nameof(AnimationOptions.iterations):
+                            options.iterations = (int)StylePropertyMappers.MapNumberOrInfinite(value, context);
+                            break;
+                        case nameof(AnimationOptions.delay):
+                            options.delay = StylePropertyMappers.MapUITimeMeasurement(value, context);
+                            break;
+                        case nameof(AnimationOptions.duration):
+                            options.duration = StylePropertyMappers.MapUITimeMeasurement(value, context);
+                            break;
+                        case nameof(AnimationOptions.loopType):
+                            options.loopType = StylePropertyMappers.MapEnum<AnimationLoopType>(value, context);
+                            break;
+                        case nameof(AnimationOptions.direction):
+                            options.direction = StylePropertyMappers.MapEnum<AnimationDirection>(value, context);
+                            break;
+                        case nameof(AnimationOptions.forwardStartDelay):
+                            options.forwardStartDelay = (int)StylePropertyMappers.MapNumber(value, context);
+                            break;
+                        case nameof(AnimationOptions.reverseStartDelay):
+                            options.reverseStartDelay = (int)StylePropertyMappers.MapNumber(value, context);
+                            break;
+                        case nameof(AnimationOptions.fps):
+                            options.fps = (int)StylePropertyMappers.MapNumber(value, context);
+                            break;
+                        case nameof(AnimationOptions.startFrame):
+                            options.startFrame = (int)StylePropertyMappers.MapNumber(value, context);
+                            break;
+                        case nameof(AnimationOptions.endFrame):
+                            options.endFrame = (int)StylePropertyMappers.MapNumber(value, context);
+                            break;
+                        case nameof(AnimationOptions.pathPrefix):
+                            options.pathPrefix = StylePropertyMappers.MapString(value, context);
+                            break;
+
+                        default:
+                            throw new CompileException(property, "Invalid option argument for animation");
                     }
-                    else if (value is StyleLiteralNode) {
-                        options.iterations = (int) StylePropertyMappers.MapNumber(value, context);
-                    }
-                }
-                else if (optionName == nameof(AnimationOptions.loopTime)) {
-                    options.loopTime = StylePropertyMappers.MapNumber(value, context);
-                }
-                else if (optionName == nameof(AnimationOptions.delay)) {
-                    options.delay = StylePropertyMappers.MapNumber(value, context);
-                }
-                else if (optionName == nameof(AnimationOptions.direction)) {
-                    options.direction = StylePropertyMappers.MapEnum<AnimationDirection>(value, context);
-                }
-                else if (optionName == nameof(AnimationOptions.loopType)) {
-                    options.loopType = StylePropertyMappers.MapEnum<AnimationLoopType>(value, context);
-                }
-                else if (optionName == nameof(AnimationOptions.playbackType)) {
-                    options.playbackType = StylePropertyMappers.MapEnum<AnimationPlaybackType>(value, context);
-                }
-                else if (optionName == nameof(AnimationOptions.forwardStartDelay)) {
-                    options.forwardStartDelay = (int)StylePropertyMappers.MapNumber(value, context);
-                }
-                else if (optionName == nameof(AnimationOptions.reverseStartDelay)) {
-                    options.reverseStartDelay = (int)StylePropertyMappers.MapNumber(value, context);
-                }
-                else if (optionName == nameof(AnimationOptions.timingFunction)) {
-                    options.timingFunction = StylePropertyMappers.MapEnum<EasingFunction>(value, context);
                 }
                 else {
-                    throw new CompileException(optionNodes[i], "Invalid option argument for animation");
+                    throw new CompileException(spriteSheetProperties[i], "Invalid option argument for animation");
                 }
             }
 

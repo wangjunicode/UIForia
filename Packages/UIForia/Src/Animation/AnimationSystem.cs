@@ -1,6 +1,7 @@
 using System;
 using UIForia.Elements;
 using UIForia.Rendering;
+using UIForia.Sound;
 using UIForia.Systems;
 using UIForia.Util;
 using UnityEngine;
@@ -18,24 +19,20 @@ namespace UIForia.Animation {
         }
 
         public AnimationTask Animate(UIElement element, ref AnimationData styleAnimation) {
-            styleAnimation.options = EnsureDefaultOptionValues(styleAnimation);
-            switch (styleAnimation.options.playbackType) {
-                case AnimationPlaybackType.KeyFrame: {
+            switch (styleAnimation.animationType) {
+                case AnimationType.KeyFrame: 
+                    styleAnimation.options = EnsureDefaultAnimationOptionValues(styleAnimation);
                     StyleKeyFrameAnimation animationTask = new StyleKeyFrameAnimation(element, styleAnimation);
                     thisFrame.Add(animationTask);
                     return animationTask;
-                }
-
-                case AnimationPlaybackType.Parallel:
-//                    package.task = taskSystem.AddTask(new ParallelStyleAnimation2());
-                    break;
-                case AnimationPlaybackType.Sequential:
-                    break;
+                case AnimationType.SpriteSheet:
+                    styleAnimation.options = EnsureDefaultSpriteAnimationOptionValues(styleAnimation);
+                    SpriteSheetAnimation spriteSheetTask = new SpriteSheetAnimation(element, styleAnimation);
+                    thisFrame.Add(spriteSheetTask);
+                    return spriteSheetTask;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
-
-            return null;
         }
 
         public void PauseAnimation(UIElement element, ref AnimationData animationData) {
@@ -100,14 +97,32 @@ namespace UIForia.Animation {
             }
         }
 
-        private static AnimationOptions EnsureDefaultOptionValues(AnimationData data) {
+        private static AnimationOptions EnsureDefaultAnimationOptionValues(AnimationData data) {
             AnimationOptions options = new AnimationOptions();
-            options.duration = data.options.duration ?? 1000;
+            options.duration = data.options.duration ?? new UITimeMeasurement(1000);
             options.iterations = data.options.iterations ?? 1;
             options.timingFunction = data.options.timingFunction ?? EasingFunction.Linear;
-            options.delay = data.options.delay ?? 0f;
+            options.delay = data.options.delay ?? new UITimeMeasurement?();
             options.direction = data.options.direction ?? AnimationDirection.Forward;
             options.loopType = data.options.loopType ?? AnimationLoopType.Constant;
+            options.forwardStartDelay = data.options.forwardStartDelay ?? 0;
+            options.reverseStartDelay = data.options.reverseStartDelay ?? 0;
+            return options;
+        }
+
+        private static AnimationOptions EnsureDefaultSpriteAnimationOptionValues(AnimationData data) {
+            AnimationOptions options = new AnimationOptions();
+            options.duration = data.options.duration ?? new UITimeMeasurement(1, UITimeMeasurementUnit.Percentage);
+            options.iterations = data.options.iterations ?? 1;
+            options.delay = data.options.delay ?? new UITimeMeasurement?();
+            options.direction = data.options.direction ?? AnimationDirection.Forward;
+            options.loopType = data.options.loopType ?? AnimationLoopType.Constant;
+            options.forwardStartDelay = data.options.forwardStartDelay ?? 0;
+            options.reverseStartDelay = data.options.reverseStartDelay ?? 0;
+            options.fps = data.options.fps ?? 30;
+            options.startFrame = data.options.startFrame ?? 0;
+            options.endFrame = data.options.endFrame;
+            options.pathPrefix = data.options.pathPrefix;
             return options;
         }
 
@@ -142,7 +157,7 @@ namespace UIForia.Animation {
                     continue;
                 }
 
-                AnimationData styleAnimationAnimationData = styleAnimation.animationData;
+                ref AnimationData styleAnimationAnimationData = ref styleAnimation.animationData;
                 if (styleAnimation.state == UITaskState.Uninitialized) {
                     styleAnimation.state = UITaskState.Running;
                     styleAnimationAnimationData.onStart?.Invoke(new StyleAnimationEvent(

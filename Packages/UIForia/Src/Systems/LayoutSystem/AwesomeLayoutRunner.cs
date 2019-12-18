@@ -312,6 +312,9 @@ namespace UIForia.Systems {
                     else if (childEnabled) {
                         // if child was previously enabled, it will definitely have a layout box
                         needsGather ^= (child.layoutBox.flags & LayoutBoxFlags.TypeOrBehaviorChanged) != 0;
+                        if (elemRefStack.array.Length <= elemRefStack.size) {
+                            elemRefStack.EnsureAdditionalCapacity(childCount);
+                        }
                         elemRefStack.array[elemRefStack.size++].element = childArray[i];
                     }
                 }

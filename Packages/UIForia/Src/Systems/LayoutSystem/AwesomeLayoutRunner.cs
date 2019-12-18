@@ -968,7 +968,8 @@ namespace UIForia.Systems {
                 UIElement element = queryableElements.array[i].element;
                 LayoutResult layoutResult = element.layoutResult;
 
-                if (layoutResult.isCulled) {
+                // todo - for some reason the layoutbox can be null. matt, pls fix k thx bye
+                if (layoutResult.isCulled || element.layoutBox == null) {
                     continue;
                 }
 

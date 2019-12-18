@@ -171,8 +171,8 @@ Let's look at all the options that are currently supported:
 | Properties     | Description                                                                                                                      | Type               | Default  |
 |:---------------|:---------------------------------------------------------------------------------------------------------------------------------|:-------------------|:---------|
 | Iterations     | Defines how many times the anmiation should be repeated. Special values: -1 or Infinite will loop the animation for ever.        | int                | 1        |
-| Duration       | Duration of the whole animation.                                                                                                 | duration           | 1000     |
-| Delay          | Delays the start of the animation.                                                                                               | duration           | 0        |
+| Duration       | Duration of the whole animation.                                                                                                 | UITimeMeasurement  | 1000ms   |
+| Delay          | Delays the start of the animation.                                                                                               | UITimeMeasurement  | 0ms      |
 | Direction      | Values: `Forward` or `Reverse`. Play the animation from 0% to 100% when using `Forward` or from 100% to 0% if `Reverse` is used. | AnimationDirection | Forward  |
 | LoopType       | Values: `Constant` (default) or `PingPong`. Plays the animation in reverse until the duration or iteration count is met.         | AnimationLoopType  | Constant |
 | TimingFunction | Choose an [easing function](#timing-functions) to adjust the change rate of the style properties between keyframes.              | EasingFunction     | Linear   |

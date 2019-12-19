@@ -325,4 +325,4 @@ spritesheet walk {
 ...and for more, please have a look at our AnimationDemo 
 - [style](https://github.com/klanggames/UIForia/blob/master/Assets/Documentation/Features/AnimationDemo.style)
 - [xml](https://github.com/klanggames/UIForia/blob/master/Assets/Documentation/Features/AnimationDemo.xml)
-- [and backging class](https://github.com/klanggames/UIForia/blob/master/Assets/Documentation/Features/AnimationDemo.cs)
+- [and backing class](https://github.com/klanggames/UIForia/blob/master/Assets/Documentation/Features/AnimationDemo.cs)

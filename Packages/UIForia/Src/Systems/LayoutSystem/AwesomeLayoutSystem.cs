@@ -22,6 +22,11 @@ namespace UIForia.Systems {
             for (int i = 0; i < application.m_Views.Count; i++) {
                 runners.Add(new AwesomeLayoutRunner(this, application.m_Views[i].rootElement));
             }
+            
+            application.onViewsSorted += uiViews => {
+                runners.Sort((a, b) => 
+                    Array.IndexOf(uiViews, b.rootElement.View) - Array.IndexOf(uiViews, a.rootElement.View));
+            };
 
             application.StyleSystem.onStylePropertyChanged += HandleStylePropertyChanged;
         }
@@ -252,7 +257,7 @@ namespace UIForia.Systems {
         public void OnDestroy() { }
 
         public void OnViewAdded(UIView view) {
-            runners.Add(new AwesomeLayoutRunner(this, view.rootElement));
+            runners.Insert(0, new AwesomeLayoutRunner(this, view.rootElement));
         }
 
         public void OnViewRemoved(UIView view) {

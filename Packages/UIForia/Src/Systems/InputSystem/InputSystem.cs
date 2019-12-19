@@ -38,9 +38,7 @@ namespace UIForia.Systems {
         public bool DebugMouseUpThisFrame => m_MouseState.isLeftMouseUpThisFrame;
 #endif
 
-        private List<UIElement> m_AllElementsThisFrame;
         private List<UIElement> m_ElementsLastFrame;
-        private List<UIElement> m_AllElementsLastFrame;
 
         // temporary hack for the building system, this should be formalized and use ElementRef instead
         public IReadOnlyList<UIElement> ElementsThisFrame => m_ElementsLastFrame;
@@ -94,8 +92,6 @@ namespace UIForia.Systems {
             this.m_EnteredElements = new List<UIElement>();
             this.m_ExitedElements = new List<UIElement>();
             this.m_ActiveElements = new List<UIElement>();
-            this.m_AllElementsThisFrame = new List<UIElement>();
-            this.m_AllElementsLastFrame = new List<UIElement>();
 
             this.m_MouseHandlerMap = new Dictionary<int, MouseHandlerGroup>();
             this.m_DragCreatorMap = new Dictionary<int, DragCreatorGroup>();
@@ -294,6 +290,8 @@ namespace UIForia.Systems {
             LightList<UIElement> queryResults = (LightList<UIElement>) m_LayoutSystem.QueryPoint(m_MouseState.mousePosition, LightList<UIElement>.Get());
             
             queryResults.Sort((a, b) => {
+                int viewDepthComparison = b.View.Depth - a.View.Depth;
+                if (viewDepthComparison != 0) return viewDepthComparison;
                 if (b.layoutBox.zIndex != a.layoutBox.zIndex) {
                     return b.layoutBox.zIndex - a.layoutBox.zIndex;
                 }

@@ -33,7 +33,7 @@ style <this> {
     PaddingBottom = 10px;
     LayoutBehavior = Ignored;
     FlexLayoutDirection = Horizontal;
-    FlexLayoutCrossAxisAlignment = End;
+    DistributeExtraSpaceVertical = BeforeContent;
     TextFontAsset = url("Fonts/Gotham-Medium SDF");
     
     [attr:placement="show"] {

@@ -28,8 +28,8 @@ namespace Documentation.Features {
 
         public AnimationData animationData;
 
-        public UITimeMeasurement duration;
-        public UITimeMeasurement delay;
+        public float duration;
+        public float delay;
         public int iterations;
         public EasingFunction timingFunction;
         public AnimationDirection direction;
@@ -51,16 +51,28 @@ namespace Documentation.Features {
         public void ChangeAnimation(string animation) {
             animationData = Application.GetAnimationFromFile("Documentation/Features/AnimationDemo.style", animation);
             animationTask = Application.Animate(animationTarget, animationData);
-            duration = animationData.options.duration ?? new UITimeMeasurement(1, UITimeMeasurementUnit.Seconds);
-            delay = animationData.options.delay ?? new UITimeMeasurement();
+            if (animationData.options.duration.HasValue) {
+                duration = animationData.options.duration.Value.AsMilliseconds();
+            }
+            else {
+                duration = 1000;
+            }
+
+            if (animationData.options.delay.HasValue) {
+                delay = animationData.options.delay.Value.AsMilliseconds();
+            }
+            else {
+                delay = 0;
+            }
+
             iterations = animationData.options.iterations ?? 1;
             timingFunction = animationData.options.timingFunction ?? EasingFunction.Linear;
             direction = animationData.options.direction ?? AnimationDirection.Forward;
         }
 
         public void RunAnimationAgain() {
-            animationData.options.duration = duration;
-            animationData.options.delay = delay;
+            animationData.options.duration = new UITimeMeasurement(duration);
+            animationData.options.delay = new UITimeMeasurement(delay);
             animationData.options.iterations = iterations;
             animationData.options.timingFunction = timingFunction;
             animationData.options.direction = direction;

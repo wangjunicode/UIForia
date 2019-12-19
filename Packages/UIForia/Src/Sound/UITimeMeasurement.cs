@@ -44,5 +44,18 @@ namespace UIForia.Sound {
         public static bool operator !=(UITimeMeasurement a, UITimeMeasurement b) {
             return !(a == b);
         }
+
+        public override string ToString() {
+            switch (unit) {
+                case UITimeMeasurementUnit.Percentage:
+                    return value * 100 + "%";
+                case UITimeMeasurementUnit.Seconds:
+                    return value + "s";
+                default:
+                case UITimeMeasurementUnit.Milliseconds:
+                case UITimeMeasurementUnit.Unset:
+                    return value + "ms";
+            }
+        }
     }
 }

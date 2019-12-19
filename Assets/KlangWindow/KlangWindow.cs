@@ -16,12 +16,21 @@ namespace UI {
     public class KlangWindow : UIElement, IPointerQueryHandler {
 
         public bool isOpen;
-        public bool hideSideBar;
 
         private UIElement titlebarButtons;
         private UIElement runner;
         private UIElement sidebar;
         private UIElement currentSidebarItem;
+
+        public bool hideSideBar;
+
+        public bool Draggable = true;
+
+        public bool DarkTheme;
+
+        public bool OverflowHidden;
+
+        public bool Resizable = true;
 
         public string windowTitle = "Window Title";
 
@@ -30,29 +39,46 @@ namespace UI {
         public event Action onOpen;
         public event Action onClose;
 
-        public override void OnEnable() {
+        private CursorStyle cursorResizeH;
+        private CursorStyle cursorResizeV;
+        private CursorStyle cursorResizeD;
+        private CursorStyle cursorResizeDiagonalTLBR;
+        
+        public override void OnCreate() {
             if (!hideSideBar) {
                 allowedDragSides &= ~(WindowSide.Left);
             }
-            allowedDragSides &= ~(WindowSide.Left);
             runner = FindById("side-bar-runner");
             sidebar = FindById("side-bar");
-            currentSidebarItem = sidebar?.GetChild(1);
-            if (currentSidebarItem != null) {
-                runner?.style.SetTransformPositionY(currentSidebarItem.layoutResult.localPosition.y, StyleState.Normal);
-            }
-            else {
-                runner?.SetEnabled(false);
-            }
+
+            cursorResizeH = new CursorStyle(
+                "resizeH", 
+                Application.ResourceManager.GetTexture("Client/UI/Sprites/Cursors/ui_mouse_cursor_resize_horizontal"),
+                Vector2.zero);
+            cursorResizeV = new CursorStyle(
+                "resizeH", 
+                Application.ResourceManager.GetTexture("Client/UI/Sprites/Cursors/ui_mouse_cursor_resize_vertical"),
+                Vector2.zero);
+            cursorResizeD = new CursorStyle(
+                "resizeH", 
+                Application.ResourceManager.GetTexture("Client/UI/Sprites/Cursors/ui_mouse_cursor_resize_diagonal"),
+                Vector2.zero);
+            cursorResizeDiagonalTLBR = new CursorStyle(
+                "resizeH", 
+                Application.ResourceManager.GetTexture("Client/UI/Sprites/Cursors/ui_mouse_cursor_resize_diagonal_inverse"),
+                Vector2.zero);
+        }
+
+        public override void OnEnable() {
+            SidebarReset();
+            View.RequestFocus();
         }
 
         public void Open() {
-            isOpen = true;
             onOpen?.Invoke();
         }
 
         public void Close() {
-            isOpen = false;
             onClose?.Invoke();
         }
 
@@ -74,9 +100,63 @@ namespace UI {
             }
         }
 
+        [OnMouseMove]
+        public void SetResizeCursor(MouseInputEvent evt) {
+            if (Resizable == false) {
+                return;
+            }
+
+            const float growFactor = 3f;
+
+            Rect screenRect = layoutResult.ScreenRect.Grow(growFactor);
+            Vector2 mouse = evt.MousePosition;
+
+            WindowSide side = 0;
+
+            if ((allowedDragSides & WindowSide.Top) != 0 && MathUtil.Between(mouse.y, layoutResult.ScreenRect.yMin - (growFactor * 2), screenRect.yMin + (growFactor * 2))) {
+                side |= WindowSide.Top;
+                style.SetCursor(cursorResizeV, StyleState.Normal);
+            }
+
+            if ((allowedDragSides & WindowSide.Bottom) != 0 && MathUtil.Between(mouse.y, screenRect.yMax - (growFactor * 2), screenRect.yMax + (growFactor * 2))) {
+                side |= WindowSide.Bottom;
+                style.SetCursor(cursorResizeV, StyleState.Normal);
+            }
+
+            if ((allowedDragSides & WindowSide.Right) != 0 && MathUtil.Between(mouse.x, screenRect.xMax - (growFactor * 2), screenRect.xMax + (growFactor * 2))) {
+                if (side == 0) {
+                    style.SetCursor(cursorResizeH, StyleState.Normal);
+                }
+                else if ((side & WindowSide.Top) != 0) {
+                    style.SetCursor(cursorResizeD, StyleState.Normal);
+                }
+                else {
+                    style.SetCursor(cursorResizeDiagonalTLBR, StyleState.Normal);
+                }
+                side |= WindowSide.Right;
+            }
+
+            if ((allowedDragSides & WindowSide.Left) != 0 && MathUtil.Between(mouse.x, layoutResult.ScreenRect.xMin - (growFactor * 2), screenRect.xMin + (growFactor * 2))) {
+                if (side == 0) {
+                    style.SetCursor(cursorResizeH, StyleState.Normal);
+                }
+                else if ((side & WindowSide.Bottom) != 0) {
+                    style.SetCursor(cursorResizeD, StyleState.Normal);
+                }
+                else {
+                    style.SetCursor(cursorResizeDiagonalTLBR, StyleState.Normal);
+                }
+                side |= WindowSide.Left;
+            }
+
+            if (side == 0) {
+                style.SetCursor(null, StyleState.Normal);
+            }
+        }
+
         [OnDragCreate]
         public DragEvent ResizeWindow(MouseInputEvent evt) {
-            if (!evt.IsMouseLeftDown) {
+            if (Resizable == false) {
                 return null;
             }
 
@@ -104,10 +184,17 @@ namespace UI {
             }
 
             if (side != 0) {
+                evt.StopPropagation();
                 return new WindowResizeEvent(this, side);
             }
 
             return null;
+        }
+
+        public override void HandleUIEvent(UIEvent evt) {
+            if (evt is SideBarActionEvent sideBarActionEvent) {
+                SelectSidebarItem(evt.origin);
+            }
         }
 
         public void SelectSidebarItem(UIElement element) {
@@ -115,9 +202,10 @@ namespace UI {
             options.duration = new UITimeMeasurement(250);
             options.timingFunction = EasingFunction.CubicEaseIn;
 
+            float targetTransformPosY = GetSideBarRunnerTransformY(element);
             if (currentSidebarItem == null) {
                 currentSidebarItem = element;
-                runner?.style.SetTransformPositionY(element.layoutResult.localPosition.y, StyleState.Normal);
+                runner.style.SetTransformPositionY(targetTransformPosY, StyleState.Normal);
             }
 
             if (currentSidebarItem == element) {
@@ -126,10 +214,10 @@ namespace UI {
 
             AnimationKeyFrame[] frames = {
                 new AnimationKeyFrame(0,
-                    StyleProperty.TransformPositionY(currentSidebarItem.layoutResult.localPosition.y)
+                    StyleProperty.TransformPositionY(GetSideBarRunnerTransformY(currentSidebarItem))
                 ),
                 new AnimationKeyFrame(1,
-                    StyleProperty.TransformPositionY(element.layoutResult.localPosition.y)
+                    StyleProperty.TransformPositionY(targetTransformPosY)
                 )
             };
 
@@ -138,23 +226,34 @@ namespace UI {
             Application.Animate(runner, new AnimationData(options, frames));
         }
 
+        private float GetSideBarRunnerTransformY(UIElement sideBarItem) {
+            UIElement parent = sideBarItem.Parent as UIElement;
+            return parent.layoutResult.localPosition.y + sideBarItem.layoutResult.localPosition.y;
+        }
+
         public bool ContainsPoint(Vector2 point) {
             return layoutResult.ScreenRect.Grow(3).ContainOrOverlap(point);
         }
 
-        public DragEvent CreateDrag_TitleBar(MouseInputEvent evt) {
-            if (!evt.IsMouseLeftDown) {
-                return null;
+        private DragEvent CreateDrag_TitleBar(MouseInputEvent evt) {
+
+            DragEvent resizeWindowEvent = ResizeWindow(evt);
+            if (resizeWindowEvent != null) {
+                evt.StopPropagation();
+                return resizeWindowEvent;
             }
             
+            if (Draggable == false) {
+                return null;
+            }
+
             titlebarButtons = titlebarButtons ?? FindById("title-button-group");
             if (evt.Origin.IsAncestorOf(titlebarButtons)) {
                 return null;
             }
 
-            return new WindowDragEvent(this, evt.LeftMouseDownPosition - layoutResult.screenPosition + View.Viewport.position);
+            return new WindowDragEvent(this, evt.MousePosition - layoutResult.screenPosition);
         }
-
 
         public class WindowDragEvent : DragEvent {
 
@@ -166,7 +265,8 @@ namespace UI {
 
             public override void Update() {
                 if (MousePosition.x > 0 && MousePosition.x < Screen.width && MousePosition.y > 0 && MousePosition.y < Screen.height) {
-                    origin.style.SetTransformPosition(MousePosition - offset, StyleState.Normal);
+                    origin.style.SetAlignmentOriginX(MousePosition.x - offset.x, StyleState.Normal);
+                    origin.style.SetAlignmentOriginY(MousePosition.y - offset.y, StyleState.Normal);
                 }
             }
         }
@@ -175,40 +275,43 @@ namespace UI {
 
             private readonly WindowSide windowSide;
             private readonly Size originalSize;
-            private readonly Vector2 originalLocalPosition;
+            private readonly Vector2 originalScreenPosition;
+            private readonly Vector2 originalAlignment;
 
             public WindowResizeEvent(UIElement origin, WindowSide side) : base(origin) {
                 this.windowSide = side;
-                this.originalLocalPosition = origin.layoutResult.localPosition;
+                this.originalScreenPosition = origin.layoutResult.screenPosition;
+                this.originalAlignment = new Vector2(origin.style.AlignmentOriginX.value, origin.style.AlignmentOriginY.value);
                 this.originalSize = origin.layoutResult.actualSize;
             }
 
             public override void Update() {
-                Vector2 localMouse = MousePosition - origin.layoutResult.screenPosition;
-
                 if ((windowSide & WindowSide.Top) != 0) {
-                    float y = origin.layoutResult.localPosition.y + localMouse.y;
-                    float height = originalSize.height + (originalLocalPosition.y - y);
-                    origin.style.SetTransformPositionY(y, StyleState.Normal);
+                    float mouseDeltaY = MousePosition.y - originalScreenPosition.y;
+                    float y = originalAlignment.y + mouseDeltaY;
+                    float height = originalSize.height - mouseDeltaY;
+                    origin.style.SetAlignmentOriginY(y, StyleState.Normal);
                     origin.style.SetPreferredHeight(height, StyleState.Normal);
                 }
 
                 if ((windowSide & WindowSide.Bottom) != 0) {
-                    origin.style.SetPreferredHeight(localMouse.y, StyleState.Normal);
+                    float newHeight = MousePosition.y - originalScreenPosition.y;
+                    origin.style.SetPreferredHeight(newHeight, StyleState.Normal);
                 }
 
                 if ((windowSide & WindowSide.Left) != 0) {
-                    float x = origin.layoutResult.localPosition.x + localMouse.x;
-                    float width = originalSize.width + (originalLocalPosition.x - x);
-                    origin.style.SetTransformPositionX(x, StyleState.Normal);
+                    float mouseDeltaX = MousePosition.x - originalScreenPosition.x;
+                    float x = originalAlignment.x + mouseDeltaX;
+                    float width = originalSize.width - mouseDeltaX;
+                    origin.style.SetAlignmentOriginX(x, StyleState.Normal);
                     origin.style.SetPreferredWidth(width, StyleState.Normal);
                 }
 
                 if ((windowSide & WindowSide.Right) != 0) {
-                    origin.style.SetPreferredWidth(localMouse.x, StyleState.Normal);
+                    float newWidth = MousePosition.x - originalScreenPosition.x;
+                    origin.style.SetPreferredWidth(newWidth, StyleState.Normal);
                 }
             }
-
         }
 
         [Flags]
@@ -221,6 +324,15 @@ namespace UI {
 
         }
 
+        public void SidebarReset() {
+            currentSidebarItem = sidebar?.GetChild(0);
+            if (currentSidebarItem != null) {
+                runner.style.SetTransformPositionY(null, StyleState.Normal);
+            }
+            else {
+                runner.SetEnabled(false);
+            }
+        }
     }
 
 }

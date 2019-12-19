@@ -60,9 +60,9 @@
             <Label>Name: {animationData.name}</Label>
 
             <Label>Duration (in milliseconds)</Label>
-            <InputElement--int style="input" value.read.write="duration" />
+            <InputElement--float style="input" value.read.write="duration" />
             
-            <Label>Delay (in seconds)</Label>
+            <Label>Delay (in milliseconds)</Label>
             <InputElement--float style="input" value.read.write="delay" />
             
             <Label>Iterations (-1 is infinite)</Label>

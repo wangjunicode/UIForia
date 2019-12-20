@@ -5,17 +5,17 @@ namespace UIForia.Editor {
 
     public static class WindowMenuItems {
 
-        [MenuItem("Window/UIForia Hierarchy")]
+        [MenuItem("Window/UIForia/UIForia Hierarchy")]
         private static void UIForiaHierarchy() {
             EditorWindow.GetWindow<UIForiaHierarchyWindow>("UIForia Hierarchy");
         }
 
-        [MenuItem("Window/UIForia Tree Inspector")]
+        [MenuItem("UIForia Dev/UIForia Tree Inspector")]
         private static void UIForiaTreeInspector() {
             EditorWindow.GetWindow<UIForiaTreeDebuggerWindow>("UIForia Tree Inspector");
         }
         
-        [MenuItem("Window/UIForia Inspector")]
+        [MenuItem("Window/UIForia/UIForia Inspector")]
         private static void UIForiaInspector() {
             EditorWindow.GetWindow<UIForiaInspectorWindow>("UIForia Inspector");
         }

@@ -257,7 +257,7 @@ namespace UIForia.Systems {
         public void OnDestroy() { }
 
         public void OnViewAdded(UIView view) {
-            runners.Insert(0, new AwesomeLayoutRunner(this, view.rootElement));
+            runners.Add(new AwesomeLayoutRunner(this, view.rootElement));
         }
 
         public void OnViewRemoved(UIView view) {

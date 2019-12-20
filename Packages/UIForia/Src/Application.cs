@@ -46,10 +46,8 @@ namespace UIForia {
         protected readonly List<ISystem> m_Systems;
 
         public event Action<UIElement> onElementRegistered;
-//        public event Action<UIElement> onElementCreated;
         public event Action<UIElement> onElementDestroyed;
         public event Action<UIElement> onElementEnabled;
-//        public event Action<UIElement> onElementDisabled;
 
         public event Action onWillRefresh;
         public event Action onRefresh;
@@ -78,7 +76,7 @@ namespace UIForia {
         public static readonly UIForiaSettings Settings;
         private ElementPool elementPool;
         private StructStack<ElemRef> elemRefStack;
-        
+
         private Type lastKnownGoodRootElementType;
 
         static Application() {
@@ -206,6 +204,10 @@ namespace UIForia {
 
         public ResourceManager ResourceManager => resourceManager;
 
+        public Rect ScreenRect => new Rect {
+            x = 0, y = 0, width = Width, height = Height
+        };
+    
         public float Width => Screen.width;
         public float Height => Screen.height;
 
@@ -760,6 +762,18 @@ namespace UIForia {
             bool parentEnabled = parent.isEnabled;
 
             UIView view = parent.View;
+
+            /*
+             * It is possible that an element, while being inserted, creates views on its own
+             * during the "current.OnCreate();" method call some lines down. This would
+             * trigger a call to this method and while in the recursive execution of Insert
+             * the elementRefStack would be emptied and at least the view assignment would be
+             * wrong. An element of the default view might create a view, its inserted elements
+             * would be processed in recursion here, finding an elemRefStack that contains
+             * elements from the default view. Well anyway, this is a quick fix.
+             */
+            bool isRecursiveElementCreation = this.elemRefStack.Count > 0;
+            StructStack<ElemRef> elemRefStack = isRecursiveElementCreation ? StructStack<ElemRef>.Get() : this.elemRefStack;
             elemRefStack.Push( new ElemRef() {element = child});
 
             view.BeginAddingElements();
@@ -801,6 +815,11 @@ namespace UIForia {
                     children[i].siblingIndex = i;
                     elemRefStack.Push( new ElemRef() {element = children[i]});
                 }
+            }
+
+            if (isRecursiveElementCreation) {
+                // ...see the lengthy comment above, this is part of that bugfix.
+                StructStack<ElemRef>.Release(ref elemRefStack);
             }
 
             for (int i = 0; i < parent.children.Count; i++) {

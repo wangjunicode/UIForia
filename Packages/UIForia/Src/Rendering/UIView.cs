@@ -8,13 +8,16 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using Application = UIForia.Application;
 
-public class UIViewRootElement : UIElement {
+public class UIViewRootElement : UIElement, IPointerQueryHandler {
 
     public UIViewRootElement() {
         flags |= UIElementFlags.ImplicitElement;
         flags |= UIElementFlags.Created;
     }
 
+    public bool ContainsPoint(Vector2 point) {
+        return false;
+    }
 }
 
 // the idea behind a view is that it is a flat plane that can be oriented in 3d space and show content

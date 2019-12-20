@@ -966,6 +966,13 @@ namespace UIForia.Systems {
 
             for (int i = 1; i < queryableElements.size; i++) {
                 UIElement element = queryableElements.array[i].element;
+                if (element is IPointerQueryHandler pointerQueryHandler) {
+                    if (pointerQueryHandler.ContainsPoint(point)) {
+                        retn.Add(element);
+                    }
+                    continue;
+                }
+
                 LayoutResult layoutResult = element.layoutResult;
 
                 // todo - for some reason the layoutbox can be null. matt, pls fix k thx bye

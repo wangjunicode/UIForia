@@ -6,8 +6,6 @@ using UIForia.AttributeProcessors;
 using UIForia.Bindings;
 using UIForia.Compilers.Style;
 using UIForia.Elements;
-using UIForia.Extensions;
-using UIForia.Layout;
 using UIForia.Parsing.Expression;
 using UIForia.Rendering;
 using UIForia.Routing;
@@ -478,7 +476,6 @@ namespace UIForia {
             m_Views[0].SetSize(Screen.width, Screen.height);
             
             frameId++;
-
         }
 
         /// <summary>

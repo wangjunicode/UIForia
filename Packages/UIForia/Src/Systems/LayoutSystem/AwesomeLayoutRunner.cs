@@ -964,7 +964,7 @@ namespace UIForia.Systems {
                 return;
             }
 
-            for (int i = 1; i < queryableElements.size; i++) {
+            for (int i = 0; i < queryableElements.size; i++) {
                 UIElement element = queryableElements.array[i].element;
                 if (element is IPointerQueryHandler pointerQueryHandler) {
                     if (pointerQueryHandler.ContainsPoint(point)) {

@@ -1,23 +1,18 @@
-using UIForia.Exceptions;
 using UIForia.Parsing.Expressions;
-using UIForia.Templates;
 using UIForia.Util;
 
 namespace UIForia.Parsing {
 
-    public class RootTemplateNode : TemplateNode2 {
+    public class ElementTemplateNode : TemplateNode2 {
 
-        public readonly string filePath;
-        public StructList<UsingDeclaration> usings;
-        public StructList<StyleDefinition> styles;
-        public readonly string fullFilePath;
-
-        public RootTemplateNode(string fullFilePath, string filePath, ProcessedType processedType, StructList<AttributeDefinition2> attributes, in TemplateLineInfo templateLineInfo) : base(null, null, processedType, attributes, templateLineInfo) {
-            this.fullFilePath = fullFilePath;
-            this.filePath = filePath;
-        }
-
+        public string templateId;
         public LightList<SlotNode> slotDefinitionNodes;
+        public TemplateShell templateShell;
+        
+        public ElementTemplateNode(string templateId, TemplateShell templateShell, ProcessedType processedType, StructList<AttributeDefinition2> attributes, in TemplateLineInfo templateLineInfo) : base(null, null, processedType, attributes, in templateLineInfo) {
+            this.templateId = templateId;
+            this.templateShell = templateShell;
+        }
 
         public void AddSlot(SlotNode slotNode) {
             slotDefinitionNodes = slotDefinitionNodes ?? new LightList<SlotNode>(4);

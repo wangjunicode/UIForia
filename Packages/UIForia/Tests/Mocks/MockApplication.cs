@@ -1,11 +1,10 @@
 using System;
+using System.Diagnostics;
 using System.IO;
 using Src.Systems;
-using SVGX;
 using UIForia;
-
+using UIForia.Compilers;
 using UIForia.Elements;
-using UIForia.Rendering;
 using UnityEditor;
 using UnityEngine;
 using Application = UIForia.Application;
@@ -24,6 +23,54 @@ namespace Tests.Mocks {
 
     public class MockApplication : Application {
 
+        public static MockApplication SetupWithSettings<T>(TemplateSettings settings, string appName = null, bool usePreCompiledTemplates = false) where T : UIElement {
+            if (appName == null) {
+                StackTrace stackTrace = new StackTrace();
+                appName = stackTrace.GetFrame(1).GetMethod().Name;
+            }
+
+            CompiledTemplateData compiledTemplates = usePreCompiledTemplates
+                ? TemplateLoader.LoadPrecompiledTemplates(settings)
+                : TemplateLoader.LoadRuntimeTemplates(typeof(T), settings);
+
+            return new MockApplication(compiledTemplates, null);
+        }
+
+
+        public static TemplateSettings GetDefaultSettings(string appName) {
+            TemplateSettings settings = new TemplateSettings();
+            settings.applicationName = appName;
+            settings.templateRoot = "Data";
+            settings.assemblyName = typeof(MockApplication).Assembly.GetName().Name;
+            settings.outputPath = Path.Combine(UnityEngine.Application.dataPath, "..", "Packages", "UIForia", "Tests", "UIForiaGenerated");
+            settings.codeFileExtension = ".generated.xml.cs";
+            settings.preCompiledTemplatePath = "Assets/UIForia_Generated/" + appName;
+            settings.templateResolutionBasePath = Path.Combine(UnityEngine.Application.dataPath, "..", "Packages", "UIForia", "Tests");
+            return settings;
+        }
+        
+        public static MockApplication Setup<T>(string appName = null, bool usePreCompiledTemplates = false) where T : UIElement {
+            if (appName == null) {
+                StackTrace stackTrace = new StackTrace();
+                appName = stackTrace.GetFrame(1).GetMethod().Name;
+            }
+
+            TemplateSettings settings = new TemplateSettings();
+            settings.applicationName = appName;
+            settings.templateRoot = "Data";
+            settings.assemblyName = typeof(MockApplication).Assembly.GetName().Name;
+            settings.outputPath = Path.Combine(UnityEngine.Application.dataPath, "..", "Packages", "UIForia", "Tests", "UIForiaGenerated");
+            settings.codeFileExtension = ".generated.xml.cs";
+            settings.preCompiledTemplatePath = "Assets/UIForia_Generated/" + appName;
+            settings.templateResolutionBasePath = Path.Combine(UnityEngine.Application.dataPath, "..", "Packages", "UIForia", "Tests");
+
+            CompiledTemplateData compiledTemplates = usePreCompiledTemplates
+                ? TemplateLoader.LoadPrecompiledTemplates(settings)
+                : TemplateLoader.LoadRuntimeTemplates(typeof(T), settings);
+
+            return new MockApplication(compiledTemplates, null);
+        }
+
         public MockApplication(CompiledTemplateData templateData, ResourceManager resourceManager) : base(templateData, resourceManager) {
             MockLayoutSystem layoutSystem = new MockLayoutSystem(this);
             MockRenderSystem renderSystem = new MockRenderSystem(null, this);
@@ -37,7 +84,6 @@ namespace Tests.Mocks {
         }
 
         public MockApplication(Type elementType, string template = null, ResourceManager resourceManager = null, bool createView = true) : base(GUID.Generate().ToString(), null, resourceManager) {
-            
             TemplateRootPath = Path.GetFullPath(Path.Combine(UnityEngine.Application.dataPath, "../Packages/UIForia/Tests"));
             MockLayoutSystem layoutSystem = new MockLayoutSystem(this);
             MockRenderSystem renderSystem = new MockRenderSystem(null, this);
@@ -60,11 +106,11 @@ namespace Tests.Mocks {
         public void SetViewportRect(Rect rect) {
             m_Views[0].Viewport = rect;
         }
-        
+
     }
 
     public class MockRenderSystem : VertigoRenderSystem {
-        
+
         public override void OnUpdate() {
             // do nothing
         }

@@ -21,7 +21,7 @@ namespace UIForia.Parsing {
         public SlotType slotType;
         public int compiledSlotId;
 
-        public  SlotNode(RootTemplateNode root, TemplateNode2 parent, ProcessedType processedType, StructList<AttributeDefinition2> attributes, in TemplateLineInfo templateLineInfo, string slotName, SlotType slotType)
+        public  SlotNode(ElementTemplateNode root, TemplateNode2 parent, ProcessedType processedType, StructList<AttributeDefinition2> attributes, in TemplateLineInfo templateLineInfo, string slotName, SlotType slotType)
             : base(root, parent, processedType, attributes, templateLineInfo) {
             this.slotName = slotName;
             this.slotType = slotType;

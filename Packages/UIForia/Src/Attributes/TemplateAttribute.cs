@@ -6,24 +6,56 @@ namespace UIForia.Attributes {
 
         Internal,
         String,
-        File
+        File,
+        DefaultFile
 
     }
     
     [AttributeUsage(AttributeTargets.Class, Inherited = false)]
     public class TemplateAttribute : Attribute {
-        public readonly string template;
+        
+        public string source;
+        public string filePath;
+        public string templateId;
         public readonly TemplateType templateType;
+        public string fullPathId;
+
+        public TemplateAttribute() {
+            this.templateType = TemplateType.DefaultFile;
+            this.templateId = null;
+            this.source = string.Empty;
+            this.fullPathId = null;
+        }
         
-        public TemplateAttribute(TemplateType templateType, string template) {
+        public TemplateAttribute(TemplateType templateType, string sourceOrPath) {
             this.templateType = templateType;
-            this.template = template;
+            this.templateId = null;
+            this.source = string.Empty; // set later 
+            this.fullPathId = string.Empty;
+            
+            switch (templateType) {
+                case TemplateType.String:
+                    this.filePath = "FILE";
+                    this.source = sourceOrPath;
+                    break;
+                case TemplateType.File:
+                case TemplateType.Internal:
+                    this.fullPathId = sourceOrPath;
+                    int idx = sourceOrPath.IndexOf('#');
+                    if (idx < 0) {
+                        this.filePath = sourceOrPath;
+                    }
+                    else {
+                        this.templateId = sourceOrPath.Substring(idx + 1);
+                        this.filePath = sourceOrPath.Substring(0, idx);
+                    }
+                    
+                    break;
+            }
+            
         }
-        
-        public TemplateAttribute(string template) {
-            this.templateType = TemplateType.File;
-            this.template = template;
-        }
-        
+
+        public TemplateAttribute(string source) : this(TemplateType.File, source) {}
+
     }
 }

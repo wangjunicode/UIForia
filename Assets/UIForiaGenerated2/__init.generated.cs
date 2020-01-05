@@ -15,9 +15,9 @@ namespace UIForia.Generated {
 
         public Func<UIElement, TemplateScope, UIElement>[] LoadTemplates() {
             Func<UIElement, TemplateScope, UIElement>[] templates = new Func<UIElement, TemplateScope, UIElement>[3];
-            templates[0] = Template_0066a1c68ecfd7c40a2e071e3abafebd; // Demo/Simple/Simple.xml
-            templates[1] = Template_d0f356faf13096f4ab6400e8e2bb231c; // BuiltInElements/Repeat.xml
-            templates[2] = Template_e4e1820cb4f16c948a2b4249a96ca1c7; // Demo/Simple/ExposeSlot.xml
+            templates[0] = Template_4d47bed5145e6bc4ba9d9e7912676b75; // Demo/Simple/Simple.xml
+            templates[1] = Template_32e24b13bc1791e4e8fd53e909ab7e51; // BuiltInElements/Repeat.xml
+            templates[2] = Template_00844ce891a8b0847a6f78835e457940; // Demo/Simple/ExposeSlot.xml
             return templates;
 
         }
@@ -42,12 +42,13 @@ namespace UIForia.Generated {
         }
 
         public Func<UIElement, TemplateScope, UIElement>[] LoadSlots() {
-            Func<UIElement, TemplateScope, UIElement>[] slots = new Func<UIElement, TemplateScope, UIElement>[5];
-            slots[0] = Slot_Default_slot0_18aa2b24a99ddfe4689751619875dbe6;
-            slots[1] = Slot_Override_Children_3b5318c0173d89348820e9f3a1d5c218;
-            slots[2] = Slot_Extern_slot0_8718c671d3a2748428d382efd67a719f;
-            slots[3] = Slot_Children_Children_661a5fd68f9b313458137bd9a4e75ae2;
-            slots[4] = Slot_Override_Children_d0646c98a2f21e6468fb6ab023a2bc41;
+            Func<UIElement, TemplateScope, UIElement>[] slots = new Func<UIElement, TemplateScope, UIElement>[6];
+            slots[0] = Slot_Default_slot0_2ef2435c1cc29584fbf69395d9e3b213;
+            slots[1] = Slot_Override_Children_4af0bb7b84f96f5488d9388f1d929bcb;
+            slots[2] = Slot_Extern_slot0_b1b0b65b5fde6ab48947b6d44b5d8324;
+            slots[3] = Slot_Children_Children_7bae235a8be17194dae6722ce3522351;
+            slots[4] = Slot_Override_Children_9aa78f1371843cd4d9891de7d978dd28;
+            slots[5] = Slot_Override_slot0_5edceda011da0c442bd591c45a15fb2e;
             return slots;
 
         }
@@ -70,7 +71,7 @@ namespace UIForia.Generated {
                     return new UIForia.Elements.UISlotOverride();
                 case 80:
                     return new UIForia.Elements.UITextElement();
-                case 190:
+                case 203:
                     return new BuiltInElements.Repeat<string>();
 
             }

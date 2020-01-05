@@ -6,7 +6,7 @@ namespace UIForia.Generated {
 
     public partial class UIForiaGeneratedTemplates_GameApp {
         
-        public Func<UIElement, TemplateScope, UIElement> Template_d0f356faf13096f4ab6400e8e2bb231c = (UIForia.Elements.UIElement root, UIForia.Compilers.TemplateScope scope) =>
+        public Func<UIElement, TemplateScope, UIElement> Template_32e24b13bc1791e4e8fd53e909ab7e51 = (UIForia.Elements.UIElement root, UIForia.Compilers.TemplateScope scope) =>
         {
             UIForia.Elements.UIElement targetElement_1;
             UIForia.Elements.UIElement targetElement_2;
@@ -35,7 +35,7 @@ namespace UIForia.Generated {
         
         
         // Slot name="Children" (OverrideBuiltInElements/Repeat.xml)
-        public Func<UIElement, TemplateScope, UIElement> Slot_Override_Children_3b5318c0173d89348820e9f3a1d5c218 = (UIForia.Elements.UIElement root, UIForia.Compilers.TemplateScope scope) =>
+        public Func<UIElement, TemplateScope, UIElement> Slot_Override_Children_4af0bb7b84f96f5488d9388f1d929bcb = (UIForia.Elements.UIElement root, UIForia.Compilers.TemplateScope scope) =>
         {
             UIForia.Elements.UISlotOverride slotRoot;
             UIForia.Elements.UIElement targetElement_1;
@@ -47,12 +47,12 @@ namespace UIForia.Generated {
         };
 
         // Slot name="slot0"
-        public Func<UIElement, TemplateScope, UIElement> Slot_Extern_slot0_8718c671d3a2748428d382efd67a719f = (UIForia.Elements.UIElement root, UIForia.Compilers.TemplateScope scope) =>
+        public Func<UIElement, TemplateScope, UIElement> Slot_Extern_slot0_b1b0b65b5fde6ab48947b6d44b5d8324 = (UIForia.Elements.UIElement root, UIForia.Compilers.TemplateScope scope) =>
         {
-            UIForia.Elements.UISlotDefinition slotRoot;
+            UIForia.Elements.UISlotOverride slotRoot;
             UIForia.Elements.UIElement targetElement_1;
 
-            slotRoot = ((UIForia.Elements.UISlotDefinition)scope.application.CreateElementFromPoolWithType(76, default(UIForia.Elements.UIElement), 1, 0, 1));
+            slotRoot = ((UIForia.Elements.UISlotOverride)scope.application.CreateElementFromPoolWithType(78, default(UIForia.Elements.UIElement), 1, 0, 1));
             // new UIForia.Elements.UITextElement
             targetElement_1 = scope.application.CreateElementFromPoolWithType(80, slotRoot, 0, 0, 1);
             ((UIForia.Elements.UITextElement)targetElement_1).text = "Extern Default content";
@@ -61,12 +61,12 @@ namespace UIForia.Generated {
         };
 
         // Slot name="Children" (ChildrenBuiltInElements/Repeat.xml)
-        public Func<UIElement, TemplateScope, UIElement> Slot_Children_Children_661a5fd68f9b313458137bd9a4e75ae2 = (UIForia.Elements.UIElement root, UIForia.Compilers.TemplateScope scope) =>
+        public Func<UIElement, TemplateScope, UIElement> Slot_Children_Children_7bae235a8be17194dae6722ce3522351 = (UIForia.Elements.UIElement root, UIForia.Compilers.TemplateScope scope) =>
         {
-            UIForia.Elements.UISlotDefinition slotRoot;
+            UIForia.Elements.UISlotOverride slotRoot;
             UIForia.Elements.UIElement targetElement_1;
 
-            slotRoot = ((UIForia.Elements.UISlotDefinition)scope.application.CreateElementFromPoolWithType(76, default(UIForia.Elements.UIElement), 1, 0, 1));
+            slotRoot = ((UIForia.Elements.UISlotOverride)scope.application.CreateElementFromPoolWithType(78, default(UIForia.Elements.UIElement), 1, 0, 1));
             // new UIForia.Elements.UITextElement
             targetElement_1 = scope.application.CreateElementFromPoolWithType(80, slotRoot, 0, 0, 1);
             ((UIForia.Elements.UITextElement)targetElement_1).text = "Default children";

@@ -1,11 +1,8 @@
-using System;
 using System.IO;
 using NUnit.Framework;
 using UIForia;
 using UIForia.Attributes;
-using UIForia.Compilers;
 using UIForia.Elements;
-using UIForia.Exceptions;
 using UIForia.Parsing;
 using Application = UnityEngine.Application;
 
@@ -30,7 +27,7 @@ namespace TemplateParsing_XML {
         [Test]
         public void CollapseTextNode_Simple() {
             TemplateCache cache = new TemplateCache(Setup("App"));
-            RootTemplateNode templateRoot = cache.GetParsedTemplate(TypeProcessor.GetProcessedType(typeof(XMLTemplateParsing_CollapseTextNode_Simple)));
+            ElementTemplateNode templateRoot = cache.GetParsedTemplate(TypeProcessor.GetProcessedType(typeof(XMLTemplateParsing_CollapseTextNode_Simple)));
 
             Assert.AreEqual(1, templateRoot.ChildCount);
 
@@ -46,7 +43,7 @@ namespace TemplateParsing_XML {
         [Test]
         public void CollapseTextNode_Complex() {
             TemplateCache cache = new TemplateCache(Setup("App"));
-            RootTemplateNode templateRoot = cache.GetParsedTemplate(TypeProcessor.GetProcessedType(typeof(XMLTemplateParsing_CollapseTextNode_Complex)));
+            ElementTemplateNode templateRoot = cache.GetParsedTemplate(TypeProcessor.GetProcessedType(typeof(XMLTemplateParsing_CollapseTextNode_Complex)));
 
             Assert.AreEqual(1, templateRoot.ChildCount);
 
@@ -67,7 +64,7 @@ namespace TemplateParsing_XML {
         [Test]
         public void DefineSlot() {
             TemplateCache cache = new TemplateCache(Setup("App"));
-            RootTemplateNode templateRoot = cache.GetParsedTemplate(TypeProcessor.GetProcessedType(typeof(XMLTemplateParsing_DefineSlot)));
+            ElementTemplateNode templateRoot = cache.GetParsedTemplate(TypeProcessor.GetProcessedType(typeof(XMLTemplateParsing_DefineSlot)));
 
             Assert.AreEqual(1, templateRoot.ChildCount);
 
@@ -102,7 +99,7 @@ namespace TemplateParsing_XML {
         public void OverrideSlot() {
             ProcessedType processedType = TypeProcessor.GetProcessedType(typeof(XMLTemplateParsing_OverrideSlot));
             TemplateCache cache = new TemplateCache(Setup("App"));
-            RootTemplateNode templateRoot = cache.GetParsedTemplate(processedType);
+            ElementTemplateNode templateRoot = cache.GetParsedTemplate(processedType);
 
             Assert.AreEqual(3, templateRoot.ChildCount);
 
@@ -110,8 +107,9 @@ namespace TemplateParsing_XML {
             AssertTrimmedText("Hello After", templateRoot[2]);
 
             ExpandedTemplateNode expandedTemplateNode = AssertAndReturn<ExpandedTemplateNode>(templateRoot[1]);
-            SlotOverrideNode overrideNode = AssertAndReturn<SlotOverrideNode>(expandedTemplateNode.slotOverrideNodes[0]);
+            SlotNode overrideNode = AssertAndReturn<SlotNode>(expandedTemplateNode.slotOverrideNodes[0]);
             Assert.AreEqual("my-slot", overrideNode.slotName);
+            Assert.AreEqual(SlotType.Override, overrideNode.slotType);
             AssertTrimmedText("Hello Between", overrideNode[0]);
         }
 
@@ -125,7 +123,7 @@ namespace TemplateParsing_XML {
         public void ExpandedTemplate() {
             ProcessedType processedType = TypeProcessor.GetProcessedType(typeof(XMLTemplateParsing_ExpandTemplate));
             TemplateCache cache = new TemplateCache(Setup("App"));
-            RootTemplateNode templateRoot = cache.GetParsedTemplate(processedType);
+            ElementTemplateNode templateRoot = cache.GetParsedTemplate(processedType);
 
             Assert.AreEqual(3, templateRoot.ChildCount);
 
@@ -133,8 +131,8 @@ namespace TemplateParsing_XML {
 
             ExpandedTemplateNode expandedTemplate = AssertAndReturn<ExpandedTemplateNode>(templateRoot[1]);
 
-            RootTemplateNode expandedRoot = expandedTemplate.expandedRoot;
-            AssertTrimmedText("I am expanded!", expandedRoot[0]);
+            ElementTemplateNode expandedTemplateRoot = expandedTemplate.expandedRoot;
+            AssertTrimmedText("I am expanded!", expandedTemplateRoot[0]);
 
             AssertAndReturn<TextNode>(templateRoot[2]);
         }

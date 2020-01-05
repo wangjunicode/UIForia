@@ -9,11 +9,11 @@ namespace UIForia.Compilers {
         public TemplateNode root;
         public StructList<UsingDeclaration> usings;
         public StructList<StyleDefinition> styles;
+        public LightList<TemplateNode> templates;
         public string fileName;
-        public bool extends;
 
-        public int GetStyleId(int i) {
-            return 0;
+        public TemplateNode GetTemplate(string templateId) {
+            throw new System.NotImplementedException();
         }
 
     }

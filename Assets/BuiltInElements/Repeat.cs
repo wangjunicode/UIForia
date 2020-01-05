@@ -9,8 +9,6 @@ namespace BuiltInElements {
 
     public class SlotElement : UIContainerElement {
 
-        
-
     }
 
     [Template("BuiltInElements/Repeat.xml")]

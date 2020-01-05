@@ -4,13 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Xml;
 using System.Xml.Linq;
+using UIForia.Attributes;
 using UIForia.Elements;
 using UIForia.Exceptions;
 using UIForia.Parsing.Expressions;
 using UIForia.Templates;
 using UIForia.Text;
 using UIForia.Util;
-using UnityEngine;
+using UnityEngine.Assertions;
 
 namespace UIForia.Parsing {
 
@@ -40,10 +41,12 @@ namespace UIForia.Parsing {
 
         private readonly XmlParserContext parserContext;
         private readonly TemplateCache templateCache;
+        private readonly Dictionary<string, TemplateShell> parsedFiles;
 
         public XMLTemplateParser2(TemplateCache templateCache, bool outputComments = true) {
             this.templateCache = templateCache;
             this.outputComments = outputComments;
+            this.parsedFiles = new Dictionary<string, TemplateShell>(37);
             XmlNamespaceManager nameSpaceManager = new XmlNamespaceManager(new NameTable());
             nameSpaceManager.AddNamespace("attr", "attr");
             nameSpaceManager.AddNamespace("slot", "slot");
@@ -59,54 +62,87 @@ namespace UIForia.Parsing {
             this.parserContext = new XmlParserContext(null, nameSpaceManager, null, XmlSpace.None);
         }
 
-        internal RootTemplateNode Parse(RootTemplateNode rootNode, string template, string filePath, ProcessedType processedType) {
-            XElement root = XElement.Load(new XmlTextReader(template, XmlNodeType.Element, parserContext));
+        // first time we get a file parse request we need to create the shell 
+        // then, as more templates from that shell are requested, return them bit by bit
+
+        private TemplateShell ParseOuterShell(TemplateAttribute templateAttribute) {
+            
+            XElement root = XElement.Load(new XmlTextReader(templateAttribute.source, XmlNodeType.Element, parserContext), LoadOptions.SetLineInfo | LoadOptions.PreserveWhitespace);
+
             root.MergeTextNodes();
+
+            TemplateShell retn = new TemplateShell(templateAttribute.filePath);
 
             IEnumerable<XElement> styleElements = root.GetChildren("Style");
             IEnumerable<XElement> usingElements = root.GetChildren("Using");
             IEnumerable<XElement> contentElements = root.GetChildren("Contents");
 
-            StructList<UsingDeclaration> usings = StructList<UsingDeclaration>.Get();
-            StructList<StyleDefinition> styles = StructList<StyleDefinition>.Get();
-
-            LightList<string> namespaces = LightList<string>.Get();
-
             foreach (XElement usingElement in usingElements) {
-                usings.Add(ParseUsing(usingElement));
-            }
-
-            for (int i = 0; i < usings.Count; i++) {
-                namespaces.Add(usings[i].namespaceName);
+                retn.usings.Add(ParseUsing(usingElement));
             }
 
             foreach (XElement styleElement in styleElements) {
-                styles.Add(ParseStyleSheet(filePath, styleElement));
+                retn.styles.Add(ParseStyleSheet(templateAttribute.filePath, styleElement));
             }
 
-            if (contentElements.Count() != 1) {
-                Debug.Log(processedType.rawType + " has invalid content");
+            XElement[] array = contentElements.ToArray();
+
+            if (array.Length == 0) { }
+            else {
+                foreach (XElement contentElement in array) {
+                    XAttribute attr = contentElement.GetAttribute("id");
+
+                    string templateId = null;
+
+                    if (attr != null) {
+                        templateId = attr.Value.Trim();
+                    }
+
+                    if (retn.HasContentNode(templateId)) {
+                        throw new ArgumentException("Multiple templates found with id: " + templateId);
+                    }
+
+                    retn.unprocessedContentNodes.Add(new RawTemplateContent() {
+                        templateId = templateId,
+                        content = contentElement
+                    });
+                }
             }
 
-            XElement contentElement = contentElements.First();
-            IXmlLineInfo xmlLineInfo = contentElement;
-
-            StructList<AttributeDefinition2> attributes = ParseAttributes(contentElement.Attributes());
-
-            rootNode.attributes = attributes;
-            rootNode.lineInfo = new TemplateLineInfo(xmlLineInfo.LineNumber, xmlLineInfo.LinePosition);
-
-            ParseChildren(rootNode, rootNode, contentElement.Nodes(), namespaces);
-
-            rootNode.usings = usings;
-            rootNode.styles = styles;
-
-            LightList<string>.Release(ref namespaces);
-
-            return rootNode;
+            return retn;
         }
 
-        private TemplateNode2 ParseElementTag(RootTemplateNode root, TemplateNode2 parent, string namespacePath, string tagName, LightList<string> namespaces, StructList<AttributeDefinition2> attributes, in TemplateLineInfo templateLineInfo) {
+        internal ElementTemplateNode Parse(ProcessedType processedType) {
+            TemplateAttribute templateAttr = processedType.templateAttr;
+
+            string filePath = templateAttr.filePath;
+
+            if (parsedFiles.TryGetValue(filePath, out TemplateShell rootNode)) {
+                return ParseInnerTemplate(rootNode, processedType);
+            }
+
+            TemplateShell shell = ParseOuterShell(templateAttr);
+
+            return ParseInnerTemplate(shell, processedType);
+            
+        }
+
+        private ElementTemplateNode ParseInnerTemplate(TemplateShell shell, ProcessedType processedType) {
+            XElement root = shell.GetElementTemplateContent(processedType.templateAttr.templateId);
+            
+            Assert.IsNotNull(root);
+            
+            IXmlLineInfo xmlLineInfo = root;
+            
+            StructList<AttributeDefinition2> attributes = ParseAttributes(root.Attributes());
+            ElementTemplateNode templateNode = new ElementTemplateNode(processedType.templateAttr.templateId, shell, processedType, attributes,  new TemplateLineInfo(xmlLineInfo.LineNumber, xmlLineInfo.LinePosition));
+
+            ParseChildren(templateNode, templateNode, root.Nodes());
+
+            return templateNode;
+        }
+
+        private TemplateNode2 ParseElementTag(ElementTemplateNode templateRoot, TemplateNode2 parent, string namespacePath, string tagName, StructList<AttributeDefinition2> attributes, in TemplateLineInfo templateLineInfo) {
             ProcessedType processedType = null;
             TemplateNode2 node = null;
 
@@ -116,15 +152,15 @@ namespace UIForia.Parsing {
             else {
                 if (string.Equals(tagName, "Children", StringComparison.Ordinal)) {
                     processedType = TypeProcessor.GetProcessedType(typeof(UIChildrenElement));
-                    node = new ChildrenNode(root, parent, processedType, attributes, templateLineInfo);
-                    root.AddSlot((SlotNode) node);
+                    node = new ChildrenNode(templateRoot, parent, processedType, attributes, templateLineInfo);
+                    templateRoot.AddSlot((SlotNode) node);
                     parent.AddChild(node);
                     return node;
                 }
                 else if (string.Equals(tagName, "Slot", StringComparison.Ordinal)) {
                     processedType = TypeProcessor.GetProcessedType(typeof(UISlotOverride));
-                                        string slotName = GetSlotName(attributes);
-                    node = new SlotNode(root, parent, processedType, attributes, templateLineInfo, slotName, SlotType.Override);
+                    string slotName = GetSlotName(attributes);
+                    node = new SlotNode(templateRoot, parent, processedType, attributes, templateLineInfo, slotName, SlotType.Override);
 
                     if (!(parent is ExpandedTemplateNode expanded)) {
                         throw ParseException.InvalidSlotOverride(parent.originalString, node.originalString);
@@ -139,8 +175,8 @@ namespace UIForia.Parsing {
                 else if (string.Equals(tagName, "DefineSlot", StringComparison.Ordinal)) {
                     processedType = TypeProcessor.GetProcessedType(typeof(UISlotDefinition));
                     string slotName = GetSlotName(attributes);
-                    node = new SlotNode(root, parent, processedType, attributes, templateLineInfo, slotName, SlotType.Default);
-                    root.AddSlot((SlotNode) node);
+                    node = new SlotNode(templateRoot, parent, processedType, attributes, templateLineInfo, slotName, SlotType.Default);
+                    templateRoot.AddSlot((SlotNode) node);
                     parent.AddChild(node);
                     return node;
                 }
@@ -156,8 +192,8 @@ namespace UIForia.Parsing {
                     string slotAlias = GetSlotAlias(slotName, attributes);
                     // root.ValidateExternSlot(slotName, slotAlias);
 
-                    node = new SlotNode(root, parent, processedType, attributes, templateLineInfo, slotName, SlotType.Extern);
-                    root.AddSlot((SlotNode) node);
+                    node = new SlotNode(templateRoot, parent, processedType, attributes, templateLineInfo, slotName, SlotType.Extern);
+                    templateRoot.AddSlot((SlotNode) node);
                     parent.AddChild(node);
                     return node;
                 }
@@ -177,20 +213,20 @@ namespace UIForia.Parsing {
 //            }
 
             if (typeof(UIContainerElement).IsAssignableFrom(processedType.rawType)) {
-                node = new ContainerNode(root, parent, processedType, attributes, templateLineInfo);
+                node = new ContainerNode(templateRoot, parent, processedType, attributes, templateLineInfo);
             }
             else if (typeof(UITextElement).IsAssignableFrom(processedType.rawType)) {
-                node = new TextNode(root, parent, string.Empty, processedType, attributes, templateLineInfo);
+                node = new TextNode(templateRoot, parent, string.Empty, processedType, attributes, templateLineInfo);
             }
             else if (typeof(UITextSpanElement).IsAssignableFrom(processedType.rawType)) {
                 throw new NotImplementedException();
             }
             else if (typeof(UITerminalElement).IsAssignableFrom(processedType.rawType)) {
-                node = new TerminalNode(root, parent, processedType, attributes, templateLineInfo);
+                node = new TerminalNode(templateRoot, parent, processedType, attributes, templateLineInfo);
             }
             else if (typeof(UIElement).IsAssignableFrom(processedType.rawType)) {
-                RootTemplateNode expanded = templateCache.GetParsedTemplate(processedType);
-                node = new ExpandedTemplateNode(expanded, root, parent, processedType, attributes, templateLineInfo);
+                ElementTemplateNode expanded = templateCache.GetParsedTemplate(processedType);
+                node = new ExpandedTemplateNode(expanded, templateRoot, parent, processedType, attributes, templateLineInfo);
             }
 
             if (node == null) {
@@ -231,25 +267,25 @@ namespace UIForia.Parsing {
             return slotName;
         }
 
-        private static void CreateOrUpdateTextNode(RootTemplateNode root, TemplateNode2 parent, string textContent, in TemplateLineInfo templateLineInfo) {
+        private static void CreateOrUpdateTextNode(ElementTemplateNode templateRoot, TemplateNode2 parent, string textContent, in TemplateLineInfo templateLineInfo) {
             if (parent is TextNode textParent) {
                 if (parent.ChildCount == 0) {
                     TextTemplateProcessor.ProcessTextExpressions(textContent, textParent.textExpressionList);
                 }
                 else {
-                    TextNode node = new TextNode(root, parent, textContent, TypeProcessor.GetProcessedType(typeof(UITextElement)), null, templateLineInfo);
+                    TextNode node = new TextNode(templateRoot, parent, textContent, TypeProcessor.GetProcessedType(typeof(UITextElement)), null, templateLineInfo);
                     TextTemplateProcessor.ProcessTextExpressions(textContent, node.textExpressionList);
                     parent.AddChild(node);
                 }
             }
             else {
-                TextNode node = new TextNode(root, parent, textContent, TypeProcessor.GetProcessedType(typeof(UITextElement)), null, templateLineInfo);
+                TextNode node = new TextNode(templateRoot, parent, textContent, TypeProcessor.GetProcessedType(typeof(UITextElement)), null, templateLineInfo);
                 TextTemplateProcessor.ProcessTextExpressions(textContent, node.textExpressionList);
                 parent.AddChild(node);
             }
         }
 
-        private void ParseChildren(RootTemplateNode root, TemplateNode2 parent, IEnumerable<XNode> nodes, LightList<string> namespaces) {
+        private void ParseChildren(ElementTemplateNode templateRoot, TemplateNode2 parent, IEnumerable<XNode> nodes) {
             string textContext = string.Empty;
             foreach (XNode node in nodes) {
                 switch (node.NodeType) {
@@ -270,7 +306,7 @@ namespace UIForia.Parsing {
 
                         if (textContext.Length > 0) {
                             IXmlLineInfo textLineInfo = element.PreviousNode;
-                            CreateOrUpdateTextNode(root, parent, textContext, new TemplateLineInfo(textLineInfo.LineNumber, textLineInfo.LinePosition));
+                            CreateOrUpdateTextNode(templateRoot, parent, textContext, new TemplateLineInfo(textLineInfo.LineNumber, textLineInfo.LinePosition));
                             textContext = string.Empty;
                         }
 
@@ -281,9 +317,9 @@ namespace UIForia.Parsing {
                         StructList<AttributeDefinition2> attributes = ParseAttributes(element.Attributes());
 
                         IXmlLineInfo lineInfo = element;
-                        TemplateNode2 p = ParseElementTag(root, parent, namespaceName, tagName, namespaces, attributes, new TemplateLineInfo(lineInfo.LineNumber, lineInfo.LinePosition));
+                        TemplateNode2 p = ParseElementTag(templateRoot, parent, namespaceName, tagName, attributes, new TemplateLineInfo(lineInfo.LineNumber, lineInfo.LinePosition));
 
-                        ParseChildren(root, p, element.Nodes(), namespaces);
+                        ParseChildren(templateRoot, p, element.Nodes());
 
                         continue;
                     }
@@ -296,7 +332,7 @@ namespace UIForia.Parsing {
             }
 
             if (textContext.Length != 0) {
-                CreateOrUpdateTextNode(root, parent, textContext, parent.lineInfo); // todo -- line info probably wrong
+                CreateOrUpdateTextNode(templateRoot, parent, textContext, parent.lineInfo); // todo -- line info probably wrong
             }
         }
 

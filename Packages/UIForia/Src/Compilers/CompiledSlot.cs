@@ -14,7 +14,7 @@ namespace UIForia.Compilers {
         public LambdaExpression templateFn;
 
         public string GetVariableName() {
-            return $"Slot_{slotType}_{slotName}_{guid}";
+            return $"Slot_{slotType}_{slotId}_{guid}";
         }
 
         public string GetComment() {

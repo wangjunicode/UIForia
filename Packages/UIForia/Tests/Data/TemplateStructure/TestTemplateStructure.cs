@@ -11,7 +11,7 @@ namespace TemplateStructure {
 
     public class TestTemplateStructure {
 
-        private bool usePreCompiledTemplates = false;
+        private bool usePreCompiledTemplates = true;
 
         public MockApplication Setup<T>(string appName = null) {
             if (appName == null) {
@@ -23,10 +23,12 @@ namespace TemplateStructure {
             settings.applicationName = appName;
             settings.assemblyName = GetType().Assembly.GetName().Name;
             settings.outputPath = Path.Combine(UnityEngine.Application.dataPath, "..", "Packages", "UIForia", "Tests", "UIForiaGenerated");
-            settings.codeFileExtension = ".generated.xml.cs";
+            settings.codeFileExtension = "generated.xml.cs";
             settings.preCompiledTemplatePath = "Assets/UIForia_Generated/" + appName;
             settings.templateResolutionBasePath = Path.Combine(UnityEngine.Application.dataPath, "..", "Packages", "UIForia", "Tests");
 
+            TemplateCodeGenerator.Generate(typeof(T), settings);
+            
             CompiledTemplateData compiledTemplates = usePreCompiledTemplates
                 ? TemplateLoader.LoadPrecompiledTemplates(settings)
                 : TemplateLoader.LoadRuntimeTemplates(typeof(T), settings);

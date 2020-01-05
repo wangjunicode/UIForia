@@ -178,7 +178,7 @@ namespace UIForia.Compilers {
 
             TemplateAST ast = null;
 
-            TemplateDefinition templateDefinition = GetTemplateSource(processedType);
+            TemplateDefinition templateDefinition = GetTemplateDefinition(processedType);
 
             if (templateDefinition.language == TemplateLanguage.XML) {
                 ast = xmlTemplateParser.Parse(templateDefinition.contents, templateDefinition.filePath, processedType);
@@ -189,7 +189,7 @@ namespace UIForia.Compilers {
 
             compilationStack.Push(processedType.rawType);
 
-            CompiledTemplate compiledTemplate = Compile(ast);
+            CompiledTemplate compiledTemplate = Compile(ast, ast.GetTemplate(templateDefinition.templateId));
 
             compilationStack.Pop();
 
@@ -198,87 +198,92 @@ namespace UIForia.Compilers {
             return compiledTemplate;
         }
 
-        private TemplateDefinition GetTemplateSource(ProcessedType processedType) {
-            TemplateAttribute templateAttr = processedType.templateAttr;
-
-            switch (templateAttr.templateType) {
-                case TemplateType.Internal: {
-                    string templatePath = settings.GetInternalTemplatePath(templateAttr.template);
-                    string file = settings.TryReadFile(templatePath);
-
-                    if (file == null) {
-                        throw new TemplateParseException(settings.templateResolutionBasePath, $"Cannot find template in (internal) path {templatePath}.");
-                    }
-
-                    return new TemplateDefinition() {
-                        contents = file,
-                        filePath = templateAttr.templateType == TemplateType.File ? processedType.rawType.AssemblyQualifiedName : templateAttr.template,
-                        language = TemplateLanguage.XML
-                    };
-                }
-
-                case TemplateType.File: {
-                    string templatePath = settings.GetTemplatePath(templateAttr.template);
-                    string file = settings.TryReadFile(templatePath);
-                    if (file == null) {
-                        throw new TemplateParseException(settings.templateResolutionBasePath, $"Cannot find template in path {templatePath}.");
-                    }
-
-                    return new TemplateDefinition() {
-                        contents = file,
-                        filePath = templateAttr.template,
-                        language = TemplateLanguage.XML
-                    };
-                }
-
-                default:
-                    return new TemplateDefinition() {
-                        contents = templateAttr.template,
-                        filePath = "NONE", // todo make unique
-                        language = TemplateLanguage.XML
-                    };
-            }
+        private TemplateDefinition GetTemplateDefinition(ProcessedType processedType) {
+            return default;
+//            TemplateAttribute templateAttr = processedType.templateAttr;
+//            string templateId = templateAttr.GetTemplateId();
+//
+//            switch (templateAttr.templateType) {
+//                case TemplateType.Internal: {
+//                    string templatePath = settings.GetInternalTemplatePath(templateAttr.sourceOrPath);
+//                    string file = settings.TryReadFile(templatePath);
+//
+//                    if (file == null) {
+//                        throw new TemplateParseException(settings.templateResolutionBasePath, $"Cannot find template in (internal) path {templatePath}.");
+//                    }
+//
+//                    return new TemplateDefinition() {
+//                        contents = file,
+//                        templateId = templateId,
+//                        filePath = templateAttr.templateType == TemplateType.File ? processedType.rawType.AssemblyQualifiedName : templateAttr.sourceOrPath,
+//                        language = TemplateLanguage.XML
+//                    };
+//                }
+//
+//                case TemplateType.File: {
+//                    string templatePath = settings.GetTemplatePath(templateAttr.sourceOrPath);
+//                    string file = settings.TryReadFile(templatePath);
+//                    if (file == null) {
+//                        throw new TemplateParseException(settings.templateResolutionBasePath, $"Cannot find template in path {templatePath}.");
+//                    }
+//
+//                    return new TemplateDefinition() {
+//                        contents = file,
+//                        templateId = templateId,
+//                        filePath = templateAttr.sourceOrPath,
+//                        language = TemplateLanguage.XML
+//                    };
+//                }
+//
+//                default:
+//                    return new TemplateDefinition() {
+//                        contents = templateAttr.sourceOrPath,
+//                        templateId = templateId,
+//                        filePath = "NONE", // todo make unique
+//                        language = TemplateLanguage.XML
+//                    };
+//            }
         }
 
-        private CompiledTemplate CompileRootTemplate(TemplateAST ast) {
-            ProcessedType processedType = ast.root.processedType;
+//        private CompiledTemplate CompileRootTemplate(TemplateAST ast) {
+//            ProcessedType processedType = ast.root.processedType;
+//
+//            TemplateDefinition templateDefinition = GetTemplateSource(processedType);
+//
+//            if (compilationStack.Contains(processedType.rawType)) {
+//                string recursion = "";
+//                for (int i = 0; i < compilationStack.Count; i++) {
+//                    recursion += compilationStack.PeekAtUnchecked(i);
+//                    if (i != compilationStack.Count) {
+//                        recursion += " -> ";
+//                    }
+//                }
+//
+//                throw new CompileException("Template Recursion detected: " + recursion);
+//            }
+//
+//            compilationStack.Push(processedType.rawType);
+//
+//            if (templateDefinition.language == TemplateLanguage.XML) {
+//                ast = xmlTemplateParser.Parse(templateDefinition.contents, templateDefinition.filePath, processedType);
+//            }
+//            else {
+//                throw new NotImplementedException("Only XML templates are currently supported");
+//            }
+//
+//            CompiledTemplate compiledTemplate = Compile(ast);
+//
+//            TemplateNode.Release(ref ast.root);
+//
+//            compilationStack.Pop();
+//
+//            templateMap[processedType.rawType] = compiledTemplate;
+//
+//            return compiledTemplate;
+//        }
 
-            TemplateDefinition templateDefinition = GetTemplateSource(processedType);
 
-            if (compilationStack.Contains(processedType.rawType)) {
-                string recursion = "";
-                for (int i = 0; i < compilationStack.Count; i++) {
-                    recursion += compilationStack.PeekAtUnchecked(i);
-                    if (i != compilationStack.Count) {
-                        recursion += " -> ";
-                    }
-                }
-
-                throw new CompileException("Template Recursion detected: " + recursion);
-            }
-
-            compilationStack.Push(processedType.rawType);
-
-            if (templateDefinition.language == TemplateLanguage.XML) {
-                ast = xmlTemplateParser.Parse(templateDefinition.contents, templateDefinition.filePath, processedType);
-            }
-            else {
-                throw new NotImplementedException("Only XML templates are currently supported");
-            }
-
-            CompiledTemplate compiledTemplate = Compile(ast);
-
-            TemplateNode.Release(ref ast.root);
-
-            compilationStack.Pop();
-
-            templateMap[processedType.rawType] = compiledTemplate;
-
-            return compiledTemplate;
-        }
-
-
-        private CompiledTemplate Compile(TemplateAST ast) {
+        private CompiledTemplate Compile(TemplateAST ast, TemplateNode rootTemplate) {
             CompiledTemplate retn = templateData.CreateTemplate(ast.fileName);
 
             LightList<string> namespaces = LightList<string>.Get();
@@ -288,7 +293,7 @@ namespace UIForia.Compilers {
                 }
             }
 
-            ProcessedType processedType = ast.root.processedType;
+            ProcessedType processedType = rootTemplate.processedType;
             ParameterExpression rootParam = Expression.Parameter(typeof(UIElement), "root");
             ParameterExpression scopeParam = Expression.Parameter(typeof(TemplateScope), "scope");
 

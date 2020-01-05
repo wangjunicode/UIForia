@@ -48,5 +48,9 @@ namespace UIForia.Exceptions {
             return new ParseException(fileName + $" -> A slot with the name {slotName} does not exist to override at line: " + templateLineInfo);
         }
 
+        public static ParseException DefaultFilePathNotFound(ProcessedType processedType, string xmlPath) {
+            return new ParseException($"Unable to find default template for type {processedType.rawType}. Searched using default resolver at paths: \n[{xmlPath}]");
+        }
+
     }
 }

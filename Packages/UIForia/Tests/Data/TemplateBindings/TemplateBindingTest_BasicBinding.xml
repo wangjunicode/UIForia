@@ -1,0 +1,9 @@
+<UITemplate>
+    
+    <Contents>
+        
+        <InnerElement intVal="outerIntVal"/>
+        
+    </Contents>
+    
+</UITemplate>

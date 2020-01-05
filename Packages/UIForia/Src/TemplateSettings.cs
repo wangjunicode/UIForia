@@ -13,6 +13,8 @@ namespace UIForia {
         public string preCompiledTemplatePath;
         public string templateResolutionBasePath;
         public string applicationName;
+        public string templateRoot;
+        public Func<Type, string, string> filePathResolver;
         
         public TemplateSettings() {
             this.applicationName = "DefaultApplication";
@@ -46,6 +48,10 @@ namespace UIForia {
 
         public string GetTemplatePath(string templateAttrTemplate) {
             return Path.GetFullPath(Path.Combine(templateResolutionBasePath, templateAttrTemplate)); 
+        }
+
+        public string ResolveDefaultPathToElement(string path) {
+            return path;
         }
 
     }

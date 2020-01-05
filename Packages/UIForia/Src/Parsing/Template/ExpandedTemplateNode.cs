@@ -7,10 +7,10 @@ namespace UIForia.Parsing {
 
     public class ExpandedTemplateNode : TemplateNode2 {
 
-        public readonly RootTemplateNode expandedRoot;
+        public readonly ElementTemplateNode expandedRoot;
         public LightList<SlotNode> slotOverrideNodes;
 
-        public ExpandedTemplateNode(RootTemplateNode expandedRoot, RootTemplateNode root, TemplateNode2 parent, ProcessedType processedType, StructList<AttributeDefinition2> attributes, in TemplateLineInfo templateLineInfo) : base(root, parent, processedType, attributes, templateLineInfo) {
+        public ExpandedTemplateNode(ElementTemplateNode expandedRoot, ElementTemplateNode elementRoot, TemplateNode2 parent, ProcessedType processedType, StructList<AttributeDefinition2> attributes, in TemplateLineInfo templateLineInfo) : base(expandedRoot, parent, processedType, attributes, templateLineInfo) {
             this.expandedRoot = expandedRoot;
         }
 
@@ -22,7 +22,7 @@ namespace UIForia.Parsing {
         private SlotNode FindOrCreateSlotOverride(string slotName) {
             if (slotOverrideNodes == null) {
                 slotOverrideNodes = new LightList<SlotNode>(4);
-                SlotNode slot = new SlotNode(root, null, TypeProcessor.GetProcessedType(typeof(UISlotOverride)), attributes, lineInfo, slotName, SlotType.Override);
+                SlotNode slot = new SlotNode(elementRoot, null, TypeProcessor.GetProcessedType(typeof(UISlotOverride)), attributes, lineInfo, slotName, SlotType.Override);
 
                 slotOverrideNodes.Add(slot);
                 return slot;
@@ -34,7 +34,7 @@ namespace UIForia.Parsing {
                     }
                 }
 
-                SlotNode slot = new SlotNode(root, null, TypeProcessor.GetProcessedType(typeof(UISlotOverride)), attributes, lineInfo, slotName, SlotType.Override);
+                SlotNode slot = new SlotNode(elementRoot, null, TypeProcessor.GetProcessedType(typeof(UISlotOverride)), attributes, lineInfo, slotName, SlotType.Override);
 
                 slotOverrideNodes.Add(slot);
                 return slot;
@@ -54,7 +54,7 @@ namespace UIForia.Parsing {
 
         public void ValidateSlot(string slotName, in TemplateLineInfo lineInfo) {
             if (expandedRoot.slotDefinitionNodes == null || expandedRoot.slotDefinitionNodes.size == 0) {
-                throw ParseException.SlotNotFound(root.filePath, slotName, lineInfo);
+                throw ParseException.SlotNotFound(elementRoot.templateShell.filePath, slotName, lineInfo);
             }
             else {
                 LightList<SlotNode> slotDefinitions = expandedRoot.slotDefinitionNodes;
@@ -65,7 +65,7 @@ namespace UIForia.Parsing {
                 }
             }
 
-            throw ParseException.SlotNotFound(root.filePath, slotName, lineInfo);
+            throw ParseException.SlotNotFound(elementRoot.templateShell.filePath, slotName, lineInfo);
         }
 
     }

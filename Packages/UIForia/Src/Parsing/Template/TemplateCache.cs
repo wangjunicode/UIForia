@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using UIForia.Attributes;
 using UIForia.Exceptions;
 
@@ -9,49 +11,92 @@ namespace UIForia.Parsing {
 
         private readonly TemplateSettings settings;
         private readonly XMLTemplateParser2 xmlTemplateParser;
-        private readonly Dictionary<string, RootTemplateNode> templateMap;
+        private readonly Dictionary<string, ElementTemplateNode> templateMap;
 
         public TemplateCache(TemplateSettings settings) {
             this.settings = settings;
             this.xmlTemplateParser = new XMLTemplateParser2(this);
-            this.templateMap = new Dictionary<string, RootTemplateNode>(37);
+            this.templateMap = new Dictionary<string, ElementTemplateNode>(37);
         }
 
-        public RootTemplateNode GetParsedTemplate(Type type) {
+        public string ResolveDefaultFilePath(ProcessedType processedType) {
+            if (settings.filePathResolver != null) {
+                return settings.filePathResolver(processedType.rawType, processedType.templateAttr.templateId);
+            }
+
+            // expected is templateroot/typename/typename.xml if template id == null
+            // or templateroot/typename/typename/typename.xml#templateid
+            string namespaceName = processedType.rawType.Namespace;
+ 
+            if (namespaceName != null && namespaceName.Contains(".")) {
+                namespaceName = namespaceName.Replace(".", Path.PathSeparator.ToString());
+            }
+
+            string basePath = null;
+            
+            if (namespaceName == null) {
+                basePath = Path.Combine(settings.templateRoot, processedType.rawType.Name, processedType.rawType.Name);
+            }
+            else {
+                basePath = Path.Combine(settings.templateRoot, namespaceName, processedType.rawType.Name, processedType.rawType.Name);
+            }
+            
+            // todo -- support more extensions
+            string xmlPath = Path.GetFullPath(Path.Combine(settings.templateResolutionBasePath, basePath + ".xml"));
+            
+            if (File.Exists(xmlPath)) {
+                basePath += ".xml";
+            }
+            else {
+                throw ParseException.DefaultFilePathNotFound(processedType, xmlPath);
+            }
+            
+            return basePath;
+        }
+
+        public ElementTemplateNode GetParsedTemplate(Type type) {
             return GetParsedTemplate(TypeProcessor.GetProcessedType(type));
         }
 
-        public RootTemplateNode GetParsedTemplate(ProcessedType processedType) {
-            RootTemplateNode retn = null;
+        public ElementTemplateNode GetParsedTemplate(ProcessedType processedType) {
+            ElementTemplateNode retn = null;
             TemplateAttribute templateAttr = processedType.templateAttr;
-            string fullFilePath = GetTemplateFilePath(processedType);
 
-            if (templateMap.TryGetValue(templateAttr.template, out retn)) {
+            if (templateAttr.fullPathId == null && templateAttr.templateType == TemplateType.DefaultFile) {
+                templateAttr.filePath = ResolveDefaultFilePath(processedType);
+                templateAttr.fullPathId = templateAttr.templateId == null
+                    ? templateAttr.filePath
+                    : templateAttr.filePath + "#" + templateAttr.templateId;
+            }
+
+            Debug.Assert(templateAttr.fullPathId != null, "templateAttr.fullPathId != null");
+            
+            if (templateMap.TryGetValue(templateAttr.fullPathId, out retn)) {
                 return retn;
             }
 
-            TemplateDefinition templateDefinition = GetTemplateSource(processedType);
+            TemplateDefinition templateDefinition = GetTemplateDefinition(processedType);
 
-            
-            RootTemplateNode rootNode = new RootTemplateNode(fullFilePath, templateAttr.template, processedType, null, default);
+            templateAttr.source = templateDefinition.contents;
 
-            retn = xmlTemplateParser.Parse(rootNode, templateDefinition.contents, fullFilePath, processedType);
+            retn = xmlTemplateParser.Parse(processedType);
 
-            templateMap.Add(templateDefinition.filePath, retn);
+            templateMap.Add(templateAttr.fullPathId, retn);
 
             return retn;
         }
 
-        public string GetTemplateFilePath(ProcessedType processedType) {
-            TemplateAttribute templateAttr = processedType.templateAttr;
-            switch (templateAttr.templateType) {
-
+        private string ResolveTemplateFilePath(TemplateType templateType, string filepath) {
+            switch (templateType) {
+                case TemplateType.DefaultFile: {
+                    return settings.GetTemplatePath(filepath);
+                }
                 case TemplateType.Internal: {
-                    return settings.GetInternalTemplatePath(templateAttr.template);
+                    return settings.GetInternalTemplatePath(filepath);
                 }
 
                 case TemplateType.File: {
-                    return settings.GetTemplatePath(templateAttr.template);
+                    return settings.GetTemplatePath(filepath);
                 }
 
                 default:
@@ -59,10 +104,10 @@ namespace UIForia.Parsing {
             }
         }
 
-        private TemplateDefinition GetTemplateSource(ProcessedType processedType) {
+        private TemplateDefinition GetTemplateDefinition(ProcessedType processedType) {
             TemplateAttribute templateAttr = processedType.templateAttr;
 
-            string templatePath = GetTemplateFilePath(processedType);
+            string templatePath = ResolveTemplateFilePath(templateAttr.templateType, templateAttr.filePath);
 
             switch (templateAttr.templateType) {
                 case TemplateType.Internal: {
@@ -74,11 +119,12 @@ namespace UIForia.Parsing {
 
                     return new TemplateDefinition() {
                         contents = file,
-                        filePath = templateAttr.templateType == TemplateType.File ? processedType.rawType.AssemblyQualifiedName : templateAttr.template,
+                        filePath = templateAttr.templateType == TemplateType.File ? processedType.rawType.AssemblyQualifiedName : templateAttr.filePath,
                         language = TemplateLanguage.XML
                     };
                 }
 
+                case TemplateType.DefaultFile: 
                 case TemplateType.File: {
                     string file = settings.TryReadFile(templatePath);
                     if (file == null) {
@@ -87,14 +133,14 @@ namespace UIForia.Parsing {
 
                     return new TemplateDefinition() {
                         contents = file,
-                        filePath = templateAttr.template,
+                        filePath = templateAttr.filePath,
                         language = TemplateLanguage.XML
                     };
                 }
 
                 default:
                     return new TemplateDefinition() {
-                        contents = templateAttr.template,
+                        contents = templateAttr.source,
                         filePath = templatePath,
                         language = TemplateLanguage.XML
                     };

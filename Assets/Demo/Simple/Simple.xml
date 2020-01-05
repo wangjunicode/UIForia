@@ -12,6 +12,9 @@
             <Panel>
                 Children!
             </Panel>
+            <Slot slot:name="slot0">
+                Text here
+            </Slot>
         </Repeat>
         
         <Div style="box box-black">

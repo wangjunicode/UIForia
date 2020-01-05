@@ -126,26 +126,26 @@ namespace UIForia.Compilers {
                 return retn;
             }
 
-            RootTemplateNode rootTemplateNode = templateCache.GetParsedTemplate(processedType);
+            ElementTemplateNode templateRootNode = templateCache.GetParsedTemplate(processedType);
 
-            CompiledTemplate compiledTemplate = Compile(rootTemplateNode);
+            CompiledTemplate compiledTemplate = Compile(templateRootNode);
 
             templateMap[processedType.rawType] = compiledTemplate;
 
             return compiledTemplate;
         }
 
-        private CompiledTemplate Compile(RootTemplateNode rootTemplateNode) {
-            CompiledTemplate retn = templateData.CreateTemplate(rootTemplateNode.filePath);
+        private CompiledTemplate Compile(ElementTemplateNode templateRootNode) {
+            CompiledTemplate retn = templateData.CreateTemplate(templateRootNode.templateShell.filePath);
             LightList<string> namespaces = LightList<string>.Get();
 
-            if (rootTemplateNode.usings != null) {
-                for (int i = 0; i < rootTemplateNode.usings.size; i++) {
-                    namespaces.Add(rootTemplateNode.usings[i].namespaceName);
+            if (templateRootNode.templateShell.usings != null) {
+                for (int i = 0; i < templateRootNode.templateShell.usings.size; i++) {
+                    namespaces.Add(templateRootNode.templateShell.usings[i].namespaceName);
                 }
             }
 
-            ProcessedType processedType = rootTemplateNode.processedType;
+            ProcessedType processedType = templateRootNode.processedType;
 
             ParameterExpression rootParam = Expression.Parameter(typeof(UIElement), "root");
             ParameterExpression scopeParam = Expression.Parameter(typeof(TemplateScope), "scope");
@@ -159,8 +159,8 @@ namespace UIForia.Compilers {
             ctx.compiledTemplate = retn;
             ctx.Initialize(rootParam);
 
-            for (int i = 0; i < rootTemplateNode.styles.size; i++) {
-                ref StyleDefinition styleDef = ref rootTemplateNode.styles.array[i];
+            for (int i = 0; i < templateRootNode.templateShell.styles.size; i++) {
+                ref StyleDefinition styleDef = ref templateRootNode.templateShell.styles.array[i];
 
                 StyleSheet sheet = templateData.ImportStyleSheet(styleDef);
 
@@ -176,7 +176,7 @@ namespace UIForia.Compilers {
                 Expression createRootExpression = ExpressionFactory.CallInstanceUnchecked(ctx.applicationExpr, s_CreateFromPool,
                     Expression.Constant(processedType.id),
                     Expression.Default(typeof(UIElement)), // root has no parent
-                    Expression.Constant(rootTemplateNode.ChildCount),
+                    Expression.Constant(templateRootNode.ChildCount),
                     Expression.Constant(0), //ast.root.GetAttributeCount()),
                     Expression.Constant(ctx.compiledTemplate.templateId)
                 );
@@ -187,7 +187,7 @@ namespace UIForia.Compilers {
                 ctx.IfEqualsNull(ctx.rootParam, ctx.PopBlock());
             }
 
-            VisitChildren(ctx, rootTemplateNode);
+            VisitChildren(ctx, templateRootNode);
             ctx.Return(ctx.rootParam);
             LightList<string>.Release(ref namespaces);
             retn.templateFn = Expression.Lambda(ctx.Finalize(typeof(UIElement)), rootParam, scopeParam);
@@ -407,7 +407,7 @@ namespace UIForia.Compilers {
 
                 MemberExpression arrayAccess = Expression.MakeMemberAccess(slotUsageExpr, s_SlotUsageList_Array);
 
-                LightList<SlotNode> acceptedSlots = expandedTemplateNode.root.slotDefinitionNodes;
+                LightList<SlotNode> acceptedSlots = expandedTemplateNode.elementRoot.slotDefinitionNodes;
 
                 for (int i = 0; i < slotOverrides.size; i++) {
                     int slotId = CompileSlotOverride(ctx, slotOverrides.array[i]);
@@ -429,7 +429,7 @@ namespace UIForia.Compilers {
                             continue;
                         }
 
-                        if (expandedTemplateNode.root.HasSlotExternOverride(acceptedSlots.array[i].slotName, out SlotNode externNode)) {
+                        if (expandedTemplateNode.elementRoot.HasSlotExternOverride(acceptedSlots.array[i].slotName, out SlotNode externNode)) {
                             ctx.AddStatement(Expression.Call(
                                 ctx.templateScope,
                                 s_TemplateScope_ForwardSlotDataWithFallback,
@@ -486,7 +486,7 @@ namespace UIForia.Compilers {
             AttributeDefinition2[] attributes = templateNode.attributes.array;
             s_TypeResolver.Reset();
 
-            s_TypeResolver.SetSignature(new Parameter(templateNode.root.processedType.rawType, "__root", ParameterFlags.NeverNull));
+            s_TypeResolver.SetSignature(new Parameter(templateNode.elementRoot.processedType.rawType, "__root", ParameterFlags.NeverNull));
             s_TypeResolver.SetImplicitContext(s_TypeResolver.GetParameter("__root"));
 
             for (int i = 0; i < templateNode.attributes.size; i++) {

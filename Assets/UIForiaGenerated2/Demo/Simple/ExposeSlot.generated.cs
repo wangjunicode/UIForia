@@ -6,7 +6,7 @@ namespace UIForia.Generated {
 
     public partial class UIForiaGeneratedTemplates_GameApp {
         
-        public Func<UIElement, TemplateScope, UIElement> Template_e4e1820cb4f16c948a2b4249a96ca1c7 = (UIForia.Elements.UIElement root, UIForia.Compilers.TemplateScope scope) =>
+        public Func<UIElement, TemplateScope, UIElement> Template_00844ce891a8b0847a6f78835e457940 = (UIForia.Elements.UIElement root, UIForia.Compilers.TemplateScope scope) =>
         {
             UIForia.Elements.UIElement targetElement_1;
             UIForia.Elements.UIElement targetElement_2;
@@ -30,12 +30,12 @@ namespace UIForia.Generated {
         
         
         // Slot name="slot0" (Default)
-        public Func<UIElement, TemplateScope, UIElement> Slot_Default_slot0_18aa2b24a99ddfe4689751619875dbe6 = (UIForia.Elements.UIElement root, UIForia.Compilers.TemplateScope scope) =>
+        public Func<UIElement, TemplateScope, UIElement> Slot_Default_slot0_2ef2435c1cc29584fbf69395d9e3b213 = (UIForia.Elements.UIElement root, UIForia.Compilers.TemplateScope scope) =>
         {
-            UIForia.Elements.UISlotDefinition slotRoot;
+            UIForia.Elements.UISlotOverride slotRoot;
             UIForia.Elements.UIElement targetElement_1;
 
-            slotRoot = ((UIForia.Elements.UISlotDefinition)scope.application.CreateElementFromPoolWithType(76, default(UIForia.Elements.UIElement), 1, 0, 2));
+            slotRoot = ((UIForia.Elements.UISlotOverride)scope.application.CreateElementFromPoolWithType(78, default(UIForia.Elements.UIElement), 1, 0, 2));
             // new UIForia.Elements.UITextElement
             targetElement_1 = scope.application.CreateElementFromPoolWithType(80, slotRoot, 0, 0, 2);
             ((UIForia.Elements.UITextElement)targetElement_1).text = "I am default exposed content";

@@ -149,6 +149,11 @@ namespace UIForia.Parsing {
                 }
             }
 
+            // if no template attribute is defined, assume the default scheme
+            if (templateAttr == null) {
+                templateAttr = new TemplateAttribute(TemplateType.DefaultFile, null);
+            }
+
             return tagName;
         }
 

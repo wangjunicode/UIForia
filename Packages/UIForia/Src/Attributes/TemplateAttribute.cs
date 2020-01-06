@@ -10,10 +10,10 @@ namespace UIForia.Attributes {
         DefaultFile
 
     }
-    
+
     [AttributeUsage(AttributeTargets.Class, Inherited = false)]
     public class TemplateAttribute : Attribute {
-        
+
         public string source;
         public string filePath;
         public string templateId;
@@ -26,14 +26,16 @@ namespace UIForia.Attributes {
             this.source = string.Empty;
             this.fullPathId = null;
         }
-        
+
         public TemplateAttribute(TemplateType templateType, string sourceOrPath) {
             this.templateType = templateType;
             this.templateId = null;
             this.source = string.Empty; // set later 
-            this.fullPathId = string.Empty;
-            
+            this.fullPathId = null;
+
             switch (templateType) {
+                case TemplateType.DefaultFile:
+                    break;
                 case TemplateType.String:
                     this.filePath = "FILE";
                     this.source = sourceOrPath;
@@ -49,13 +51,13 @@ namespace UIForia.Attributes {
                         this.templateId = sourceOrPath.Substring(idx + 1);
                         this.filePath = sourceOrPath.Substring(0, idx);
                     }
-                    
+
                     break;
             }
-            
         }
 
-        public TemplateAttribute(string source) : this(TemplateType.File, source) {}
+        public TemplateAttribute(string source) : this(TemplateType.File, source) { }
 
     }
+
 }

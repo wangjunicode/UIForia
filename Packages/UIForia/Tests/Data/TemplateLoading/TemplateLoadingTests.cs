@@ -1,5 +1,5 @@
-using System.IO;
 using NUnit.Framework;
+using Tests;
 using Tests.Mocks;
 using UIForia;
 using UIForia.Attributes;
@@ -37,21 +37,42 @@ namespace TemplateLoading {
 
         [Template]
         public class DefaultPathElement : UIElement { }
-        
+
+
         [Test]
         public void ResolveUsingDefaultPath() {
             MockApplication app = MockApplication.Setup<DefaultPathElement>();
             Assert.IsInstanceOf<DefaultPathElement>(app.RootElement);
         }
 
+        public class DefaultPathElementNoAttr : UIElement { }
+
+        [Test]
+        public void ResolveUsingDefaultPathNoAttr() {
+            MockApplication app = MockApplication.Setup<DefaultPathElementNoAttr>();
+            Assert.IsInstanceOf<DefaultPathElementNoAttr>(app.RootElement);
+            UITextElement textElement = TestUtils.AssertInstanceOfAndReturn<UITextElement>(app.RootElement[0]);
+            Assert.AreEqual("Default Path! No Attr", textElement.text.Trim());
+        }
+
+        public class DefaultPathElementNoAttrNotFound : UIElement { }
+
+          [Test]
+        public void Canno() {
+            MockApplication app = MockApplication.Setup<DefaultPathElementNoAttr>();
+            Assert.IsInstanceOf<DefaultPathElementNoAttr>(app.RootElement);
+            UITextElement textElement = TestUtils.AssertInstanceOfAndReturn<UITextElement>(app.RootElement[0]);
+            Assert.AreEqual("Default Path! No Attr", textElement.text.Trim());
+        }
+
         public TemplateSettings GetSettings<T>(string defaultPath) {
-            
             TemplateSettings retn = MockApplication.GetDefaultSettings(defaultPath);
-            
+
             retn.filePathResolver = (type, s) => "Data/TemplateLoading/TemplateLoadingTest_" + type.Name + ".xml";
-            
+
             return retn;
         }
+
     }
 
 }

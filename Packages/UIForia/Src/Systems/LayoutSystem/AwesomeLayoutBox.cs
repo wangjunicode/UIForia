@@ -734,7 +734,7 @@ namespace UIForia.Systems {
                 return;
             }
 
-            flags &= ~LayoutBoxFlags.RequireAlignmentHorizontal;
+         //   flags &= ~LayoutBoxFlags.RequireAlignmentHorizontal;
         }
 
         public void UpdateRequiresVerticalAlignment() {
@@ -761,7 +761,7 @@ namespace UIForia.Systems {
                 return;
             }
 
-            flags &= ~LayoutBoxFlags.RequireAlignmentVertical;
+            // flags &= ~LayoutBoxFlags.RequireAlignmentVertical;
         }
 
         public void Enable() {

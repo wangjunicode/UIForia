@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using UIForia.Layout;
 using UIForia.Rendering;
 using UIForia.Util;
@@ -6,6 +7,7 @@ using UnityEngine;
 
 namespace UIForia.Systems {
 
+    [DebuggerDisplay("{element.ToString()} | Flex")]
     public class AwesomeFlexLayoutBox : AwesomeLayoutBox {
 
         private StructList<FlexItem> items;
@@ -280,6 +282,9 @@ namespace UIForia.Systems {
                     item.layoutBox.ApplyLayoutHorizontal(x, alignedPosition, item.widthData, item.baseWidth, item.availableSize, fit, frameId);
                     offset += item.widthData.marginStart + item.widthData.marginEnd + gap;
                 }
+
+                flags |= LayoutBoxFlags.RequireLayoutVertical;
+                cachedContentHeight = -1;
             }
         }
 

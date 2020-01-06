@@ -45,7 +45,9 @@
     
     <Contents style="scrollview">
 
-        <Children x-id="scroll-root"/>
+        <Div>
+            <Children x-id="scroll-root" />
+        </Div>
 
         <Group onMouseClick="OnClickVertical($event)" onMouseHover="OnHoverVertical($event)" x-id="scroll-track-vertical" style="scroll-track-vertical">
             <Div onDragCreate.capture="OnCreateVerticalDrag($event)" x-id="scroll-handle-vertical" style="scroll-handle-vertical"/>

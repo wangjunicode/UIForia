@@ -2,8 +2,6 @@ using System;
 using System.Diagnostics;
 using UIForia.Elements;
 using UIForia.Layout;
-using UIForia.Systems;
-using Unity.Mathematics;
 using UnityEngine;
 
 namespace UIForia.Util {
@@ -66,8 +64,7 @@ namespace UIForia.Util {
 
                     return output;
                 }
-
-
+                
                 default:
                     throw new ArgumentOutOfRangeException(nameof(target), target, null);
             }

@@ -606,7 +606,6 @@ namespace UIForia.Systems {
         private void PerformLayoutStepHorizontal(AwesomeLayoutBox rootBox) {
             boxRefStack.Push(new BoxRef() {box = rootBox});
 
-
             // Resolve all widths first, then process heights. These operations cannot be interleaved for we can't be sure
             // that widths are final before heights are computed, this is critical for the system to work.
 

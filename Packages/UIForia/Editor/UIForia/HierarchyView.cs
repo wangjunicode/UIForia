@@ -153,6 +153,9 @@ public class HierarchyView : TreeView {
         s_Content.text = item.element.GetDisplayName();
 
         if (showLayoutStats) {
+            
+            s_Content.text += $"w: {item.element.layoutBox.cacheHit}, {item.element.layoutBox.cacheMiss}";
+
 //            if (item.element.layoutBox != null) {
 //                FastLayoutBox.LayoutBoxMetrics metrics = item.element.layoutBox.metrics;
 //                string wMetrics = $"w: {metrics.contentWidthCacheHit}, {metrics.contentWidthCacheMiss}";

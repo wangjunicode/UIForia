@@ -21,6 +21,10 @@ namespace UIForia.Systems {
         public LayoutBoxFlags flags;
         public float cachedContentWidth;
         public float cachedContentHeight;
+        internal int cacheMiss;
+        internal int cacheHit;
+        public float cachedBlockWidth;
+        public float cachedBlockHeight;
 
         public int childCount;
         public UIElement element;
@@ -278,11 +282,22 @@ namespace UIForia.Systems {
             // todo -- this cached value is only valid if the current block size is the same as when the size was computed
             // probably makes sense to hold at least 2 versions of content cache, 1 for baseline one for 2nd pass (ie fit)
             if (cachedContentWidth >= 0) {
-                width = cachedContentWidth; // todo -- might not need to resolve size for padding / border in this case
+                float blockSize = ComputeBlockWidth(1);
+                if (Math.Abs(blockSize - cachedBlockWidth) < Mathf.Epsilon) {
+                    width = cachedContentWidth; // todo -- might not need to resolve size for padding / border in this case
+                    cacheHit++;
+                }
+                else {
+                    cacheMiss++;
+                    cachedContentWidth = ComputeContentWidth();
+                    cachedBlockWidth = blockSize;
+                    width = cachedContentWidth;
+                }
             }
             else {
                 cachedContentWidth = ComputeContentWidth();
                 width = cachedContentWidth;
+                cacheMiss++;
             }
 
             float baseVal = width;
@@ -294,6 +309,47 @@ namespace UIForia.Systems {
             baseVal += MeasurementUtil.ResolveFixedSize(width, viewSize.x, viewSize.y, emSize, element.style.PaddingRight);
             baseVal += MeasurementUtil.ResolveFixedSize(width, viewSize.x, viewSize.y, emSize, element.style.BorderRight);
             baseVal += MeasurementUtil.ResolveFixedSize(width, viewSize.x, viewSize.y, emSize, element.style.BorderLeft);
+
+            if (baseVal < 0) baseVal = 0;
+
+            float retn = factor * baseVal;
+
+            return retn > 0 ? retn : 0;
+        }
+        
+        public float GetContentHeight(float factor) {
+            float height = 0;
+
+            // todo -- this cached value is only valid if the current block size is the same as when the size was computed
+            // probably makes sense to hold at least 2 versions of content cache, 1 for baseline one for 2nd pass (ie fit)
+            if (cachedContentHeight >= 0) {
+                float blockSize = ComputeBlockHeight(1);
+                if (Math.Abs(blockSize - cachedBlockHeight) < Mathf.Epsilon) {
+                    height = cachedContentHeight; // todo -- might not need to resolve size for padding / border in this case
+                    cacheHit++;
+                }
+                else {
+                    cacheMiss++;
+                    cachedContentHeight = ComputeContentHeight();
+                    cachedBlockHeight = blockSize;
+                    height = cachedContentHeight;
+                }
+            }
+            else {
+                cachedContentHeight = ComputeContentHeight();
+                height = cachedContentHeight;
+                cacheMiss++;
+            }
+
+            float baseVal = height;
+            // todo -- try not to fuck with style here
+            // todo -- view and em size
+            Vector2 viewSize = element.View.Viewport.size;
+            float emSize = element.style.GetResolvedFontSize();
+            baseVal += MeasurementUtil.ResolveFixedSize(height, viewSize.x, viewSize.y, emSize, element.style.PaddingTop);
+            baseVal += MeasurementUtil.ResolveFixedSize(height, viewSize.x, viewSize.y, emSize, element.style.PaddingBottom);
+            baseVal += MeasurementUtil.ResolveFixedSize(height, viewSize.x, viewSize.y, emSize, element.style.BorderTop);
+            baseVal += MeasurementUtil.ResolveFixedSize(height, viewSize.x, viewSize.y, emSize, element.style.BorderBottom);
 
             if (baseVal < 0) baseVal = 0;
 
@@ -347,13 +403,14 @@ namespace UIForia.Systems {
 
             return 0;
         }
-
+        
         public virtual float GetIntrinsicPreferredWidth() {
             float width = 0;
 
             // todo -- this cached value is only valid if the current block size is the same as when the size was computed
             // probably makes sense to hold at least 2 versions of content cache, 1 for baseline one for 2nd pass (ie fit)
             if (cachedContentWidth >= 0) {
+               
                 width = cachedContentWidth; // todo -- might not need to resolve size for padding / border in this case
             }
             else {
@@ -410,7 +467,7 @@ namespace UIForia.Systems {
             return Math.Max(0, (element.View.Viewport.width - paddingBorder) * value);
         }
 
-        protected float ComputeBlockWidth(float value) {
+        internal float ComputeBlockWidth(float value) {
             if ((flags & LayoutBoxFlags.Ignored) != 0) {
                 LayoutResult parentResult = element.layoutResult.layoutParent;
                 return Math.Max(0, parentResult.actualSize.width * value);
@@ -475,7 +532,7 @@ namespace UIForia.Systems {
             return Math.Max(0, (element.View.Viewport.height - paddingBorder) * value);
         }
 
-        protected float ComputeBlockHeight(float value) {
+        internal float ComputeBlockHeight(float value) {
             AwesomeLayoutBox ptr = parent;
 
             // ignored elements can use the output size of their parent since it has been resolved already
@@ -506,26 +563,7 @@ namespace UIForia.Systems {
 
             switch (measurement.unit) {
                 case UIMeasurementUnit.Content: {
-                    float height = 0;
-
-                    if (cachedContentHeight >= 0) {
-                        height = cachedContentHeight;
-                    }
-                    else {
-                        height = cachedContentHeight = ComputeContentHeight();
-                    }
-
-                    float baseVal = height;
-                    Vector2 viewSize = element.View.Viewport.size;
-                    float emSize = element.style.GetResolvedFontSize(); // todo -- optimize this
-                    baseVal += MeasurementUtil.ResolveFixedSize(height, viewSize.x, viewSize.y, emSize, element.style.PaddingTop);
-                    baseVal += MeasurementUtil.ResolveFixedSize(height, viewSize.x, viewSize.y, emSize, element.style.PaddingBottom);
-                    baseVal += MeasurementUtil.ResolveFixedSize(height, viewSize.x, viewSize.y, emSize, element.style.BorderTop);
-                    baseVal += MeasurementUtil.ResolveFixedSize(height, viewSize.x, viewSize.y, emSize, element.style.BorderBottom);
-
-                    if (baseVal < 0) baseVal = 0;
-                    float retn = measurement.value * baseVal;
-                    return retn > 0 ? retn : 0;
+                    return GetContentHeight(measurement.value);
                 }
                 case UIMeasurementUnit.FitContent:
                     throw new NotImplementedException();
@@ -662,11 +700,13 @@ namespace UIForia.Systems {
 
         public void MarkForLayoutHorizontal(int frameId = -1) {
             flags |= LayoutBoxFlags.RequireLayoutHorizontal;
+            cachedContentWidth = -1;
             MarkContentParentsHorizontalDirty(frameId, LayoutReason.StyleSizeChanged);
         }
         
         public void MarkForLayoutVertical(int frameId = -1) {
-            flags |= LayoutBoxFlags.RequireAlignmentVertical;
+            flags |= LayoutBoxFlags.RequireLayoutVertical;
+            cachedContentHeight = -1;
             MarkContentParentsVerticalDirty(frameId, LayoutReason.StyleSizeChanged);
         }
         
@@ -818,6 +858,51 @@ namespace UIForia.Systems {
             // }
         }
 
+        internal UIElement GetBlockWidthProvider() {
+            if ((flags & LayoutBoxFlags.Ignored) != 0) {
+                LayoutResult parentResult = element.layoutResult.layoutParent;
+                return parentResult.element;
+            }
+
+            AwesomeLayoutBox ptr = parent;
+
+            while (ptr != null) {
+                if (ptr.CanProvideHorizontalBlockSize(this, out float blockSize)) {
+                    return ptr.element;
+                }
+
+                if ((ptr.flags & LayoutBoxFlags.WidthBlockProvider) != 0) {
+                    return ptr.element;
+                }
+
+                ptr = ptr.parent;
+            }
+
+            return element.View.RootElement;
+        }
+
+        internal UIElement GetBlockHeightProvider() {
+            if ((flags & LayoutBoxFlags.Ignored) != 0) {
+                LayoutResult parentResult = element.layoutResult.layoutParent;
+                return parentResult.element;
+            }
+
+            AwesomeLayoutBox ptr = parent;
+
+            while (ptr != null) {
+                if (ptr.CanProvideVerticalBlockSize(this, out float blockSize)) {
+                    return ptr.element;
+                }
+
+                if ((ptr.flags & LayoutBoxFlags.HeightBlockProvider) != 0) {
+                    return ptr.element;
+                }
+
+                ptr = ptr.parent;
+            }
+
+            return element.View.RootElement;
+        }
     }
 
 }

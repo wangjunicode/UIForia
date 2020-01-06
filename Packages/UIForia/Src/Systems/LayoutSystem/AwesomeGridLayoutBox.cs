@@ -126,7 +126,7 @@ namespace UIForia.Systems {
                                 return false;
                             }
 
-                            blockSize += track.resolvedBaseSize; // todo -- min is probably wrong, should be base
+                            blockSize += track.resolvedBaseSize; 
                         }
 
                         deferredList = deferredList ?? new StructList<int>();
@@ -211,7 +211,7 @@ namespace UIForia.Systems {
                                 return false;
                             }
 
-                            blockSize += track.resolvedBaseSize; // todo -- min is probably wrong, should be base
+                            blockSize += track.resolvedBaseSize;
                         }
 
                         deferredList = deferredList ?? new StructList<int>();

@@ -2,7 +2,6 @@ using UIForia.Attributes;
 using UIForia.Layout;
 using UIForia.Rendering;
 using UIForia.UIInput;
-using UIForia.Util;
 using UnityEngine;
 
 namespace UIForia.Elements {
@@ -48,10 +47,13 @@ namespace UIForia.Elements {
           
             overflowSize = childrenElement.layoutResult.ComputeOverflowSize();
 
-            if (previousChildrenSize != default && (int) previousChildrenSize.height > (int) overflowSize.height && (int) (overflowSize.height + childrenElement.style.TransformPositionY.value - layoutResult.ActualHeight) < 0) {
+            if (previousChildrenSize != default && (int) previousChildrenSize.height > (int) overflowSize.height 
+                                                && (int) (overflowSize.height + childrenElement.parent.style.AlignmentOriginY.value - layoutResult.ActualHeight) < 0) {
                 ScrollToVerticalPercent(0);
             }
-            if (previousChildrenSize != default && (int) previousChildrenSize.width > (int) overflowSize.width && (int) (overflowSize.width + childrenElement.style.TransformPositionX.value - layoutResult.ActualWidth) < 0) {
+            if (previousChildrenSize != default && 
+                (int) previousChildrenSize.width > (int) overflowSize.width &&
+                (int) (overflowSize.width + childrenElement.parent.style.AlignmentOriginX.value - layoutResult.ActualWidth) < 0) {
                 ScrollToHorizontalPercent(0);
             }
 
@@ -124,8 +126,12 @@ namespace UIForia.Elements {
                 pageSize = -pageSize;
             }
 
-            float offset = handleTop / GetMaxWidth() + pageSize;
-            ScrollToVerticalPercent(offset);
+            if (handleTop == 0) {
+                ScrollToVerticalPercent(0);
+            }
+            else {
+                ScrollToVerticalPercent(handleTop / GetMaxHeight() + pageSize);
+            }
         }
 
         private void ScrollPageTowardsX(float x) {
@@ -136,8 +142,12 @@ namespace UIForia.Elements {
                 pageSize = -pageSize;
             }
 
-            float offset = handleLeft / GetMaxWidth() + pageSize;
-            ScrollToHorizontalPercent(offset);
+            if (handleLeft == 0) {
+                ScrollToVerticalPercent(0);
+            }
+            else {
+                ScrollToHorizontalPercent(handleLeft / GetMaxWidth() + pageSize);
+            }
         }
 
         [OnDragCreate(EventPhase.Capture)]
@@ -203,7 +213,9 @@ namespace UIForia.Elements {
 
             verticalHandle.style.SetAlignmentOffsetY(new OffsetMeasurement(-percentage, OffsetMeasurementUnit.Percent), StyleState.Normal);
             verticalHandle.style.SetAlignmentOriginY(new OffsetMeasurement(percentage, OffsetMeasurementUnit.Percent), StyleState.Normal);
-            childrenElement.style.SetAlignmentOffsetY(new OffsetMeasurement(-percentage * scrollPixels), StyleState.Normal);
+            childrenElement.parent.style.SetAlignmentOriginY(new OffsetMeasurement(-percentage * scrollPixels), StyleState.Normal);
+            
+            UnityEngine.Debug.Log($"pixels: {-percentage * scrollPixels} and percent: {-percentage}");
         }
 
         public void ScrollToHorizontalPercent(float percentage) {
@@ -217,7 +229,7 @@ namespace UIForia.Elements {
 
             horizontalHandle.style.SetAlignmentOffsetX(new OffsetMeasurement(-percentage, OffsetMeasurementUnit.Percent), StyleState.Normal);
             horizontalHandle.style.SetAlignmentOriginX(new OffsetMeasurement(percentage, OffsetMeasurementUnit.Percent), StyleState.Normal);
-            childrenElement.style.SetTransformPositionX(new OffsetMeasurement(-percentage * scrollPixels), StyleState.Normal);
+            childrenElement.parent.style.SetAlignmentOriginX(new OffsetMeasurement(-percentage * scrollPixels), StyleState.Normal);
         }
         
         public void ScrollElementIntoView(UIElement element) {
@@ -229,8 +241,8 @@ namespace UIForia.Elements {
             float trackHeight = layoutResult.ActualHeight;
             float scrollViewHeight = childrenElement.GetChild(0).layoutResult.AllocatedHeight;
             float minY = layoutResult.localPosition.y;
-            if (elementBottom + childrenElement.style.TransformPositionY.value <= trackHeight
-                && localPositionY + childrenElement.style.TransformPositionY.value >= 0) {
+            if (elementBottom + childrenElement.parent.style.AlignmentOriginY.value <= trackHeight
+                && localPositionY + childrenElement.parent.style.AlignmentOriginY.value >= 0) {
                 return;
             }
 

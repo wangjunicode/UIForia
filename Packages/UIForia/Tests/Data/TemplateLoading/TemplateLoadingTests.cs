@@ -4,6 +4,7 @@ using Tests.Mocks;
 using UIForia;
 using UIForia.Attributes;
 using UIForia.Elements;
+using UIForia.Exceptions;
 
 namespace TemplateLoading {
 
@@ -57,12 +58,9 @@ namespace TemplateLoading {
 
         public class DefaultPathElementNoAttrNotFound : UIElement { }
 
-          [Test]
-        public void Canno() {
-            MockApplication app = MockApplication.Setup<DefaultPathElementNoAttr>();
-            Assert.IsInstanceOf<DefaultPathElementNoAttr>(app.RootElement);
-            UITextElement textElement = TestUtils.AssertInstanceOfAndReturn<UITextElement>(app.RootElement[0]);
-            Assert.AreEqual("Default Path! No Attr", textElement.text.Trim());
+        [Test]
+        public void ThrowWhenDefaultNotFound() {
+            TemplateNotFoundException ex = Assert.Throws<TemplateNotFoundException>(() => { MockApplication.Setup<DefaultPathElementNoAttrNotFound>(); });
         }
 
         public TemplateSettings GetSettings<T>(string defaultPath) {

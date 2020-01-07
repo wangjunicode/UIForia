@@ -156,6 +156,22 @@ namespace UIForia.Compilers {
             variables.Add(param);
             return param;
         }
+        
+        public ParameterExpression GetVariable<T>(string name) {
+            for (int i = 0; i < variables.size; i++) {
+                if (variables[i].Name == name) {
+                    if (variables[i].Type != typeof(T)) {
+                        throw new CompileException("Variable already taken: " + name);
+                    }
+
+                    return variables[i];
+                }
+            }
+
+            ParameterExpression param = Expression.Parameter(typeof(T), name);
+            variables.Add(param);
+            return param;
+        }
 
         public void PopScope() {
             currentDepth--;

@@ -48,7 +48,7 @@ namespace UIForia.Parsing {
                 basePath += ".xml";
             }
             else {
-                throw ParseException.DefaultFilePathNotFound(processedType, xmlPath);
+                throw new TemplateNotFoundException(processedType, xmlPath);
             }
             
             return basePath;

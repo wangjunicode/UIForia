@@ -394,8 +394,33 @@ namespace UIForia.Compilers {
 
             Expression slotUsageExpr = Expression.Default(typeof(StructList<SlotUsage>));
 
+            // need to pass down any slots from this scope into the inner scope of expanded template
+            // two cases this could be.
+            // 1. we have an override
+            // 2. we do not have an override
+            
+            // in the case of extern slots, if no override is provided in the outermost scope
+            // we need to use the default that was defined in the inner one. 
+            // this likely means the inner calls slot forwarding only with defaults?
+            
+            // Outer
+                // if has override for an accepted slot
+                // scope.ForwardSlot("slot-name", -1);
+                
+            // Extern 1
+                // scope.ForwardSlot("slot-name", extern1.defaultId || -1);
+                
+            // Extern 2
+                // scope.ForwardSlot("slot-name", extern2.defaultId || -1);
+                
+            // Inner
+                // scope.CreateSlot("slot-name", inner.defaultId || -1);
+                // if -1 either do nothing or create a dummy empty slot element
+          
+                
+                
             if (expandedTemplateNode.slotOverrideNodes != null && expandedTemplateNode.slotOverrideNodes.size > 0) {
-                slotUsageExpr = ctx.GetVariable(typeof(StructList<SlotUsage>), "slotUsage");
+                slotUsageExpr = ctx.GetVariable<StructList<SlotUsage>>("slotUsage");
 
                 LightList<SlotNode> slotOverrides = expandedTemplateNode.slotOverrideNodes;
 

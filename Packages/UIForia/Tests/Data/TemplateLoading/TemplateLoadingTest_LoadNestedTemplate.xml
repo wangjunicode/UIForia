@@ -1,6 +1,4 @@
 <UITemplate>
-
-    <Using element="path/to/element" tagName="Element"/>
     
     <Contents id="outer">
 
@@ -10,24 +8,6 @@
 
     <Contents id="inner">
         <Text>Hello from inner</Text>
-        
-        <Element intVal="52"/>
     </Contents>
-    
-    <Element>
-        
-        class Element : UIElement {
-        
-            [Required] public int intVal = 5;
-        
-        }
-        
-        <Field name="intVal" type="int" initialValue="5" required="true"/>
-        
-        <Contents>
-            {intVal}
-        </Contents>
-        
-    </Element>
     
 </UITemplate>

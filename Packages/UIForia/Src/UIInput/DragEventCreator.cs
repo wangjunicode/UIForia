@@ -16,7 +16,7 @@ namespace UIForia.UIInput {
             this.eventPhase = eventPhase;
         }
 
-        public abstract DragEvent Invoke(object target, ExpressionContext context, MouseInputEvent evt);
+        public abstract DragEvent Invoke(object target, ExpressionContext context, MouseInputEvent evt, EventPhase phase);
 
         public int CompareTo(DragEventCreator other) {
             int modifierResult = CompareModifiers(other);
@@ -25,8 +25,9 @@ namespace UIForia.UIInput {
             return 1;
         }
 
-        protected bool ShouldRun(MouseInputEvent evt) {
+        protected bool ShouldRun(MouseInputEvent evt, EventPhase phase) {
             // if all required modifiers are present these should be equal
+            if (phase != eventPhase) return false;
             return (requiredModifiers & evt.modifiers) == requiredModifiers;
         }
 
@@ -47,8 +48,8 @@ namespace UIForia.UIInput {
             this.expression = expression;
         }
 
-        public override DragEvent Invoke(object target, ExpressionContext context, MouseInputEvent evt) {
-            return ShouldRun(evt) ? expression.Evaluate(context) : null;
+        public override DragEvent Invoke(object target, ExpressionContext context, MouseInputEvent evt, EventPhase phase) {
+            return ShouldRun(evt, phase) ? expression.Evaluate(context) : null;
         }
 
     }
@@ -62,8 +63,8 @@ namespace UIForia.UIInput {
             this.handler = handler;
         }
 
-        public override DragEvent Invoke(object target, ExpressionContext context, MouseInputEvent evt) {
-            return ShouldRun(evt) ? handler((T) target) : null;
+        public override DragEvent Invoke(object target, ExpressionContext context, MouseInputEvent evt, EventPhase phase) {
+            return ShouldRun(evt, phase) ? handler((T) target) : null;
         }
 
     }
@@ -79,8 +80,8 @@ namespace UIForia.UIInput {
             this.handler = handler;
         }
 
-        public override DragEvent Invoke(object target, ExpressionContext context, MouseInputEvent evt) {
-            return ShouldRun(evt) ? handler((T) target, evt) : null;
+        public override DragEvent Invoke(object target, ExpressionContext context, MouseInputEvent evt, EventPhase phase) {
+            return ShouldRun(evt, phase) ? handler((T) target, evt) : null;
         }
 
     }

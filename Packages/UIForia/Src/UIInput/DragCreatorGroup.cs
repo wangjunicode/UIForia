@@ -12,9 +12,9 @@ namespace UIForia.UIInput {
             this.creators = creators;
         }
 
-        public DragEvent TryCreateEvent(object target, MouseInputEvent mouseEvent) {
+        public DragEvent TryCreateEvent(object target, MouseInputEvent mouseEvent, EventPhase phase) {
             for (int i = 0; i < creators.Length; i++) {
-                DragEvent evt = creators[i].Invoke(target, context, mouseEvent);
+                DragEvent evt = creators[i].Invoke(target, context, mouseEvent, phase);
                 if (evt != null) {
                     return evt;
                 }

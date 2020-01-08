@@ -33,6 +33,9 @@ namespace UIForia.Elements {
 
         private Size previousChildrenSize;
 
+        private float scrollPercentageX;
+        private float scrollPercentageY;
+
         public override void OnEnable() {
             childrenElement = FindById("scroll-root");
             verticalHandle = FindById("scroll-handle-vertical");
@@ -47,14 +50,11 @@ namespace UIForia.Elements {
           
             overflowSize = childrenElement.layoutResult.ComputeOverflowSize();
 
-            if (previousChildrenSize != default && (int) previousChildrenSize.height > (int) overflowSize.height 
-                                                && (int) (overflowSize.height + childrenElement.parent.style.AlignmentOriginY.value - layoutResult.ActualHeight) < 0) {
-                ScrollToVerticalPercent(0);
+            if (previousChildrenSize != default && (int) previousChildrenSize.height > (int) overflowSize.height) {
+                ScrollToVerticalPercent(scrollPercentageY);
             }
-            if (previousChildrenSize != default && 
-                (int) previousChildrenSize.width > (int) overflowSize.width &&
-                (int) (overflowSize.width + childrenElement.parent.style.AlignmentOriginX.value - layoutResult.ActualWidth) < 0) {
-                ScrollToHorizontalPercent(0);
+            if (previousChildrenSize != default && (int) previousChildrenSize.width > (int) overflowSize.width) {
+                ScrollToHorizontalPercent(scrollPercentageX);
             }
 
             previousChildrenSize = overflowSize;
@@ -207,15 +207,13 @@ namespace UIForia.Elements {
                 return;
             }
 
-            percentage = Mathf.Clamp01(percentage);
+            scrollPercentageY = Mathf.Clamp01(percentage);
             lastScrollVerticalTimestamp = Time.realtimeSinceStartup;
             float scrollPixels = overflowSize.height - layoutResult.ContentHeight;
 
-            verticalHandle.style.SetAlignmentOffsetY(new OffsetMeasurement(-percentage, OffsetMeasurementUnit.Percent), StyleState.Normal);
-            verticalHandle.style.SetAlignmentOriginY(new OffsetMeasurement(percentage, OffsetMeasurementUnit.Percent), StyleState.Normal);
-            childrenElement.parent.style.SetAlignmentOriginY(new OffsetMeasurement(-percentage * scrollPixels), StyleState.Normal);
-            
-            UnityEngine.Debug.Log($"pixels: {-percentage * scrollPixels} and percent: {-percentage}");
+            verticalHandle.style.SetAlignmentOffsetY(new OffsetMeasurement(-scrollPercentageY, OffsetMeasurementUnit.Percent), StyleState.Normal);
+            verticalHandle.style.SetAlignmentOriginY(new OffsetMeasurement(scrollPercentageY, OffsetMeasurementUnit.Percent), StyleState.Normal);
+            childrenElement.style.SetAlignmentOriginY(new OffsetMeasurement(-scrollPercentageY * scrollPixels), StyleState.Normal);
         }
 
         public void ScrollToHorizontalPercent(float percentage) {
@@ -224,12 +222,12 @@ namespace UIForia.Elements {
             }
 
             lastScrollHorizontalTimestamp = Time.realtimeSinceStartup;
-            percentage = Mathf.Clamp01(percentage);
+            scrollPercentageX = Mathf.Clamp01(percentage);
             float scrollPixels = overflowSize.width - layoutResult.ContentWidth;
 
-            horizontalHandle.style.SetAlignmentOffsetX(new OffsetMeasurement(-percentage, OffsetMeasurementUnit.Percent), StyleState.Normal);
-            horizontalHandle.style.SetAlignmentOriginX(new OffsetMeasurement(percentage, OffsetMeasurementUnit.Percent), StyleState.Normal);
-            childrenElement.parent.style.SetAlignmentOriginX(new OffsetMeasurement(-percentage * scrollPixels), StyleState.Normal);
+            horizontalHandle.style.SetAlignmentOffsetX(new OffsetMeasurement(-scrollPercentageX, OffsetMeasurementUnit.Percent), StyleState.Normal);
+            horizontalHandle.style.SetAlignmentOriginX(new OffsetMeasurement(scrollPercentageX, OffsetMeasurementUnit.Percent), StyleState.Normal);
+            childrenElement.style.SetAlignmentOriginX(new OffsetMeasurement(-scrollPercentageX * scrollPixels), StyleState.Normal);
         }
         
         public void ScrollElementIntoView(UIElement element) {
@@ -241,8 +239,8 @@ namespace UIForia.Elements {
             float trackHeight = layoutResult.ActualHeight;
             float scrollViewHeight = childrenElement.GetChild(0).layoutResult.AllocatedHeight;
             float minY = layoutResult.localPosition.y;
-            if (elementBottom + childrenElement.parent.style.AlignmentOriginY.value <= trackHeight
-                && localPositionY + childrenElement.parent.style.AlignmentOriginY.value >= 0) {
+            if (elementBottom + childrenElement.style.AlignmentOriginY.value <= trackHeight
+                && localPositionY + childrenElement.style.AlignmentOriginY.value >= 0) {
                 return;
             }
 

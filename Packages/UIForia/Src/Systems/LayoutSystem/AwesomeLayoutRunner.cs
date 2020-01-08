@@ -270,7 +270,12 @@ namespace UIForia.Systems {
 
                 if ((layoutBox.flags & LayoutBoxFlags.Clipper) != 0) {
                     layoutBox.clipData = layoutBox.clipData ?? new ClipData(layoutBox.element);
-                    layoutBox.clipData.parent = clipStack.size != 0 ? clipStack.array[clipStack.size - 1] : screenClipper;
+                    if (layoutBox.element.style.ClipBehavior == ClipBehavior.Never) {
+                        layoutBox.clipData.parent = screenClipper;
+                    }
+                    else {
+                        layoutBox.clipData.parent = clipStack.size != 0 ? clipStack.array[clipStack.size - 1] : screenClipper;
+                    }
                     layoutBox.clipData.clipList.Clear();
                     clipStack.Push(layoutBox.clipData);
                     clipperList.Add(layoutBox.clipData);
@@ -363,7 +368,12 @@ namespace UIForia.Systems {
 
             if (isClipper) {
                 layoutBox.clipData = layoutBox.clipData ?? new ClipData(layoutBox.element);
-                layoutBox.clipData.parent = clipStack.size != 0 ? clipStack.array[clipStack.size - 1] : screenClipper;
+                if (layoutBox.element.style.ClipBehavior == ClipBehavior.Never) {
+                    layoutBox.clipData.parent = screenClipper;
+                }
+                else {
+                    layoutBox.clipData.parent = clipStack.size != 0 ? clipStack.array[clipStack.size - 1] : screenClipper;
+                }
                 layoutBox.clipData.clipList.Clear();
                 clipStack.Push(layoutBox.clipData);
                 clipperList.Add(layoutBox.clipData);
@@ -996,6 +1006,10 @@ namespace UIForia.Systems {
                     continue;
                 }
 
+                if (layoutResult.actualSize.width == 0 || layoutResult.actualSize.height == 0) {
+                    continue;
+                }
+                
                 if (PolygonUtil.PointInOrientedBounds(point, layoutResult.orientedBounds)) {
                     // todo -- make this property look up not slow
                     if (element.style.Visibility == Visibility.Hidden) {

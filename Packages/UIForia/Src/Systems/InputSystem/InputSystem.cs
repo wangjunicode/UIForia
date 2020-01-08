@@ -58,7 +58,8 @@ namespace UIForia.Systems {
         private readonly List<UIElement> m_ActiveElements;
         private readonly List<UIElement> m_EnteredElements;
         private readonly List<UIElement> m_MouseDownElements;
-
+        private readonly LightList<UIElement> hoveredElements;
+        
         private readonly Dictionary<KeyCode, KeyState> m_KeyStates;
         private readonly Dictionary<int, MouseHandlerGroup> m_MouseHandlerMap;
         private readonly Dictionary<int, DragHandlerGroup> m_DragHandlerMap;
@@ -108,6 +109,7 @@ namespace UIForia.Systems {
             this.m_DragEventCaptureList = new List<ValueTuple<DragEventHandler, UIElement, ExpressionContext>>();
             this.m_FocusedElement = null;
             this.focusables = new List<IFocusable>();
+            this.hoveredElements = new LightList<UIElement>(16);
         }
 
         public DragEvent CurrentDragEvent => m_CurrentDragEvent;
@@ -321,14 +323,46 @@ namespace UIForia.Systems {
                 }
             }
 
+            bool didMouseMove = m_MouseState.DidMove;
+
+            if (didMouseMove) {
+                for (int i = 0; i < hoveredElements.size; i++) {
+                    
+                    UIElement element = hoveredElements.array[i];
+                    
+                    if ((element.flags & UIElementFlags.EnabledFlagSet) != UIElementFlags.EnabledFlagSet) {
+                        hoveredElements.RemoveAt(i--);
+                        continue;
+                    }
+
+                    if (!queryResults.Contains(element)) {
+                        hoveredElements.RemoveAt(i--);
+                        element.style.ExitState(StyleState.Hover);
+                    }
+
+                }
+
+                for (int i = 0; i < queryResults.Count; i++) {
+                    
+                    UIElement element = queryResults.array[i];
+
+                    if ((element.style.currentState & StyleState.Hover) == 0) {
+                        hoveredElements.Add(element);
+                        element.style.EnterState(StyleState.Hover);
+                    }
+                    
+                }
+                
+            }
+            
             for (int i = 0; i < queryResults.Count; i++) {
+                
                 UIElement element = queryResults[i];
 
                 m_ElementsThisFrame.Add(element);
 
                 if (!m_ElementsLastFrame.Contains(element)) {
                     m_EnteredElements.Add(element);
-                    element.style?.EnterState(StyleState.Hover);
                 }
 
                 if (IsMouseLeftDownThisFrame) {
@@ -340,7 +374,6 @@ namespace UIForia.Systems {
             for (int i = 0; i < m_ElementsLastFrame.Count; i++) {
                 if (!m_ElementsThisFrame.Contains(m_ElementsLastFrame[i])) {
                     m_ExitedElements.Add(m_ElementsLastFrame[i]);
-                    m_ElementsLastFrame[i].style?.ExitState(StyleState.Hover);
                 }
             }
 
@@ -461,10 +494,32 @@ namespace UIForia.Systems {
                     continue;
                 }
 
-//                if (element.layoutResult.HasScrollbarVertical || element.layoutResult.HasScrollbarHorizontal) {
-//                    Scrollbar scrollbar = Application.GetCustomScrollbar(element.style.Scrollbar);
-//                    m_CurrentDragEvent = scrollbar.CreateDragEvent(element, mouseEvent);
-//                }
+                if (m_CurrentDragEvent == null) {
+                    DragCreatorGroup dragCreatorGroup;
+                    if (!m_DragCreatorMap.TryGetValue(element.id, out dragCreatorGroup)) {
+                        continue;
+                    }
+                    
+                    m_CurrentDragEvent = dragCreatorGroup.TryCreateEvent(element, mouseEvent, EventPhase.Bubble);
+                    if (m_CurrentDragEvent == null) {
+                        continue;
+                    }
+                    
+                    m_CurrentDragEvent.StartTime = Time.realtimeSinceStartup;
+                    m_CurrentDragEvent.DragStartPosition = MousePosition;
+
+                    UpdateDrag(true);
+                    return;
+                }
+             
+            }
+            
+            for (int i = m_MouseDownElements.Count -1; i >= 0; i--) {
+                UIElement element = m_MouseDownElements[i];
+                
+                if (element.isDestroyed || element.isDisabled) {
+                    continue;
+                }
 
                 if (m_CurrentDragEvent == null) {
                     DragCreatorGroup dragCreatorGroup;
@@ -474,7 +529,7 @@ namespace UIForia.Systems {
 
                     // todo -- figure out if these should respect propagation
 
-                    m_CurrentDragEvent = dragCreatorGroup.TryCreateEvent(element, mouseEvent);
+                    m_CurrentDragEvent = dragCreatorGroup.TryCreateEvent(element, mouseEvent, EventPhase.Capture);
                     if (m_CurrentDragEvent == null) {
                         continue;
                     }

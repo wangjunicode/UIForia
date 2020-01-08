@@ -746,7 +746,7 @@ namespace UIForia.Systems {
                 item.layoutBox.GetWidths(ref item.widthData);
                 item.baseWidth = item.widthData.Clamped;
 
-                SpaceDistributionUtil.GetAlignmentOffsets(adjustedWidth - item.baseWidth - item.widthData.marginStart - item.widthData.marginEnd, 1, alignment,
+                SpaceDistributionUtil.GetAlignmentOffsets(adjustedWidth - item.baseWidth - (item.widthData.marginStart + item.widthData.marginEnd), 1, alignment,
                     out float offset, out spacerSize);
 
                 float x = inset + offset;
@@ -756,7 +756,7 @@ namespace UIForia.Systems {
                 float originOffset = (x - inset) + availableWidth * itemAlignment;
                 float alignedPosition = originBase + originOffset + (item.baseWidth * -itemAlignment);
 
-                item.layoutBox.ApplyLayoutHorizontal(x, alignedPosition, item.widthData, item.baseWidth, availableWidth, fit, frameId);
+                item.layoutBox.ApplyLayoutHorizontal(x + item.widthData.marginStart, alignedPosition, item.widthData, item.baseWidth, availableWidth, fit, frameId);
             }
         }
 

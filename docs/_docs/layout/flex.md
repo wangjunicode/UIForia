@@ -6,113 +6,35 @@ tags:
 layout: page
 ---
 
+# The Flex LayoutType
+`Flex` is the default `LayoutType`. It lays out elements in one dimension, which you can define to be
+either the `Horizontal` or `Vertical` axis:
 
-#  FlexBox
-Flexbox is a one-dimensional layout mode, which was designed with a flexible and consistent layout for different screen sizes. 
+```
+style flex-horizontal {
+    FlexLayoutDirection = Horizontal;
+}
 
-Flexbox is described as one-dimensional since you can only utilize one dimension at a time — either a column or a row. If you wish to use a two-dimensional layout, a grid layout will provide the option of using both rows and columns.
+style flex-vertical {
+    FlexLayoutDirection = Vertical;
+}
+```
 
+There's no need to specify the `LayoutType = Flex` as it is the default anyway.
 
----------------------------------------------------------------
-
-## Flex Container
-Although flexbox is set as the default layout, you would set `LayoutType` to `flex` in the parent element which holds the children in your XML.  
-  
-### `LayoutType = Flex`
-
-## FlexLayoutDirection
- `FlexLayoutDirection`  sets the direction in which your elements are laid out. There are four possible values:
-
-* `Row` aligns elements from left to right.
-* `Column` aligns elements from top to bottom.
-* `Horizontal` aligns elements horizontally. 
-* `Vertical` aligns elements vertically. 
-
-## Main Axis and Cross Axis
-The layout will be structured according to the main axis and the cross axis. The main axis will be defined by `FlexLayoutDirection`, and the cross axis is set perpendicular to it. 
-
-
-## `FlexMainAxisAlignment`
-Defines how to align children within the main axis.   
-  
-Although flexbox is set as the default layout, you would set `LayoutType` to `flex` in the parent element which holds the children in your XML.
-
-  
-* `Start` aligns children at the start of the container's main axis.     
-<br/><br/>             
-* `End` aligns children at the end of the container's main axis.   
-<br/><br/>       
-* `Center` aligns children at the center of the container's main axis.  
-<br/><br/>         
-* `SpaceBetween` aligns children with an equal amount of space between them across the container's main axis.  
-<br/><br/>        
-* `SpaceAround` aligns children with equal space between them, where space is allocated to the beginning of the first child and the end of the last child across the container's main axis.  
-
-
-
+### `FlexLayoutDirection: LayoutDirection`
+ `FlexLayoutDirection` sets the direction in which your elements are laid out. There are two possible values:
  
-```
-style flex-start {
-    FlexLayoutMainAxisAlignment = Start;
-}
+* `Vertical`, which is also the default `FlexLayoutDirection`, places the elements children in a vertical track. 
+* `Horizontal` will place every child of your element in one horizontal track. Horizontal flex elements may also wrap.
 
-style flex-end {
-    FlexLayoutMainAxisAlignment = End;
-}
+Children of a flex layout element, we call them items, are placed inside a virtual track in the direction you chose.
+In order to fill up all the space that is available to the track you can use the `FlexItemGrow` and `FlexItemShrink` 
+properties.
 
-style flex-center {
-    FlexLayoutMainAxisAlignment = Center;
-}
-
-style flex-space-between {
-    FlexLayoutMainAxisAlignment = SpaceBetween;
-}
-
-style flex-space-around {
-    FlexLayoutMainAxisAlignment = SpaceAround;
-}
-```
-
-![flex-align](/assets/img/flex-alignment.png)
-
-    
-#### `FlexCrossAxisAlignment`     
-The cross axis is set perpendicular to the main axis. If your main axis is set to `FlexLayoutDirection` = Column, the cross axis runs along the rows.
-  
-* `Start` aligns children at the start of the container's cross axis.     
-<br/><br/>             
-* `End` aligns children at the end of the container's cross axis.
-<br/><br/>       
-* `Center` aligns children at the center of the container's cross axis.
-<br/><br/>         
-* `SpaceBetween` aligns children with an equal amount of space between them across the container's cross axis.
-<br/><br/>        
-* `SpaceAround` aligns children with equal space between them, where space is allocated to the beginning of the first child and the end of the last child, across the container's cross axis.
-<br/><br/>  
-* `Stretch` distributes children to take up the entire space in the cross axis.
-     
-#### `FlexItemSelfAlignment`  
-Elements can override how they are laid out on the cross axis with this property. 
-* `Start` aligns children at the start of the container's cross axis.     
-<br/><br/>             
-* `End` aligns children at the end of the container's cross axis.
-<br/><br/>       
-* `Center` aligns children at the center of the container's cross axis.
-<br/><br/>         
-* `SpaceBetween` aligns children with an equal amount of space between them across the container's cross axis.
-<br/><br/>        
-* `SpaceAround` aligns children with equal space between them, where space is allocated to the beginning of the first child and the end of the last child, across the container's cross axis.  
-<br/><br/> 
-* `Stretch` distributes children to take up the entire space in the cross axis.
-
-<br/>
-
----------------------------------------------------------------
-
-  
-    
-#### `FlexItemGrow : int`    
-When there is remaining space, defines what ratio of that extra space the element will get  
+### `FlexItemGrow: int`
+If the flex element provides more space than is used by its items you might want to distribute that extra
+space among one or more of them. The grow value defines the ratio of the extra space the item will consume.  
 
 ```
 style flex-grow-1 {
@@ -122,7 +44,6 @@ style flex-grow-1 {
 style flex-grow-2 {
     FlexItemGrow = 2;
 }
-
 
 style flex-item {
     PreferredSize = 50px 1cnt;
@@ -135,9 +56,20 @@ style flex-item {
 ```
 
 ![flex-align](/assets/img/flex-grow.png)
-  
-#### `FlexItemShrink : int`   
- When there is not enough space to fit all elements, define what ratio of that extra space gets deducted from the element  
-  
-#### `FlexLayoutWrap : LayoutWrap`   
-Defines whether flex items area forced on a single line or multiple lines in the flexbox container  
+
+In the example above the item with the style group `flex-grow-2` takes up twice the amount of extra
+space than the item with the style group `flex-grow-1`.
+
+### `FlexItemShrink: int`   
+If the element's track size becomes bigger than the element's preferred size the shrink property may be
+applied to one or more items to reduce their size based on the same proportion method as described for growing them.
+
+Combining both, `FlexItemGrow` and `FlexItemShrink`, will be useful in many place where you want to take up all the 
+available space but not more than that.
+
+
+### `FlexLayoutWrap: LayoutWrap`
+Wrapping can only be used if the `FlexLayoutDirection = Horizontal`. Possible values are `None` (default) and `WrapHorizontal`.
+Vertical layouts cannot be wrapped as it would be too computationally expensive to figure out the correct dimensions of the tracks.
+
+

@@ -2,12 +2,14 @@ import "Documentation/Documentation.style" as theme;
 
 style <this> {
    // FlexLayoutDirection = Horizontal;
+   DistributeExtraSpace = AroundContent;
+   PreferredSize = 1pca;
 }
 
 style constrain {
 //   BackgroundColor = yellow;
 //   BackgroundImage = url(image);
-    PreferredSize = 600px, 300px;    
+    PreferredSize = 600px 300px;    
     FlexLayoutDirection = Vertical;
    // Overflow = Hidden;
 }
@@ -289,16 +291,14 @@ style g1 {
 
 style fit {
     FlexLayoutDirection = Horizontal;
-    FlexLayoutCrossAxisAlignment = Center;
     BackgroundColor = white;
     PreferredSize = 500px;
 }
 
 style fit-vertical {
-    FlexLayoutCrossAxisAlignment = End;
     BackgroundColor = white;
-    PreferredSize = 600px;
-     MarginBottom = 10px;
+    PreferredSize = 200px;
+    Padding = 10px;
 }
 
 style item-fill {
@@ -317,7 +317,7 @@ style item-grow {
 
 style item-dont-grow {
     PreferredWidth = 120px;
-    LayoutFitHorizontal = Grow;
+//    LayoutFitHorizontal = Grow;
 }
 
 style h-item-fill {
@@ -340,9 +340,9 @@ style h-item-dont-grow {
 }
 
 style group1 {
-    PreferredSize = 100px 100px;
+    PreferredSize = 80px;
     BackgroundColor = rgba(0, 120, 0, 200);
-    Margin = 5px 10px 10px 5px;
+    Margin = 10px;
 //    Border = 5x;
 //    BorderColor = black;
 }
@@ -352,6 +352,11 @@ style group2 {
     BackgroundColor = rgb(77, 101, 20);
     Margin = 5px;
     
+}
+
+style fill-and-grow {
+//    LayoutFitHorizontal = Grow;
+    FlexItemGrow = 1;
 }
 
 style x-align {

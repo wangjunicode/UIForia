@@ -5,103 +5,19 @@
 
     <Contents>
 
-        <ScrollView style="demo-container">
-            <Group style="container fit-vertical ">
-                <Group style="group1 item-shrink color1 x-align" />
-                <Group style="group1 item-fill color1" />
-                <Group style="group1 item-grow color1" />
-                <Group style="group1 item-dont-grow color1" />
+            <Group style="fit-vertical">
+                <Group style="group1 fill-and-grow" />
             </Group>
 
-            <Group style="fit container">
-                <Group style="group1 h-item-shrink  color2" />
-                <Group style="group1 h-item-fill color2" />
-                <Group style="group1 h-item-grow color2"/>
-                <Group style="group1 h-item-dont-grow color2" />
-            </Group>
+<!--            <Group style="fit container">-->
+<!--                <Group style="group1 h-item-shrink color2" />-->
+<!--                <Group style="group1 h-item-fill color2" />-->
+<!--                <Group style="group1 h-item-grow color2"/>-->
+<!--                <Group style="group1 h-item-dont-grow color2" />-->
+<!--            </Group>-->
 
 
 
-            <!--            <Group style="stack-vertical container g1">-->
-            <!--                <Group style="group1 color3" />-->
-            <!--                <Group style="group1 color3" />-->
-            <!--                <Group style="group1 color3" />-->
-            <!--            </Group>-->
-
-            <!--            <Group style="stack-horizontal container">-->
-            <!--                <Group style="group1  color4" />-->
-            <!--                <Group style="group1 y-align  color4" />-->
-            <!--                <Group style="group1  color4" />-->
-            <!--            </Group>-->
-
-
-            <!--            <Group style="fit container">-->
-            <!--                <Group style="group1 h-item-shrink  color2" />-->
-            <!--                <Group style="group1 h-item-fill color2" />-->
-            <!--                <Group style="group1 h-item-grow color2"/>-->
-            <!--                <Group style="group1 h-item-dont-grow color2" />-->
-            <!--            </Group>-->
-
-            <!--            <Group style=" stack-horizontal container">-->
-            <!--                <Group style="group1  color4" />-->
-            <!--                <Group style="group1 y-align  color4" />-->
-            <!--                <Group style="group1  color4" />-->
-            <!--            </Group>-->
-
-            <!--            <Group style="content-size-box-horizontal-wrap">-->
-            <!--                <Group style="group-big color3" />-->
-            <!--                <Group style="group2 color3" />-->
-            <!--                <Group style="group2 color3" />-->
-            <!--                <Group style="group2 color3 g1" />-->
-            <!--                <Group style="group2 color3" />-->
-            <!--                <Group style="group-big color3" />-->
-            <!--                <Group style="group2 color3" />-->
-            <!--                <Group style="group2 color3" />-->
-            <!--                <Group style="groupA color3">-->
-            <!--                    <Group style="group3 color1" />-->
-            <!--                    <Group style="group3 color2" />-->
-            <!--                    <Group style="group3 color4" />-->
-            <!--                </Group>-->
-            <!--                <Group style="groupA color3">-->
-            <!--                    <Group style="group3 color1" />-->
-            <!--                    <Group style="group3 color2" />-->
-            <!--                    <Group style="group3 color4" />-->
-            <!--                </Group>-->
-            <!--                <Group style="group2 color3" />-->
-            <!--                <Group style="group2 color3" />-->
-            <!--                <Group style="group2 color3" />-->
-            <!--                <Group style="group2 color3" />-->
-            <!--                <Group style="group2 color3" />-->
-            <!--                <Group style="group2 color3" />-->
-            <!--                <Group style="group2 color3" />-->
-            <!--                <Group style="group2 color3" />-->
-            <!--                <Group style="group2 color3" />-->
-            <!--                <Group style="group2 color3" />-->
-            <!--            </Group>-->
-
-            <!--            <Group style="content-size-box-vertical-wrap no-clip">-->
-            <!--                <Group style="group2 color3" />-->
-            <!--                <Group style="group2 color3" />-->
-            <!--                <Group style="group2 color3" />-->
-            <!--                <Group style="group2 color3" />-->
-            <!--                <Group style="group2 color3" />-->
-            <!--                <Group style="group2 color3" />-->
-            <!--                <Group style="group2 color3" />-->
-            <!--                <Group style="group2 color3" />-->
-            <!--                <Group style="group2 color3" />-->
-            <!--                <Group style="group2 color3" />-->
-            <!--                <Group style="group2 color3" />-->
-            <!--                <Group style="group2 color3" />-->
-            <!--                <Group style="group2 color3" />-->
-            <!--                <Group style="group2 color3" />-->
-            <!--                <Group style="group2 color3" />-->
-            <!--                <Group style="group2 color3" />-->
-            <!--                <Group style="group2 color3" />-->
-
-            <!--            </Group>-->
-
-
-        </ScrollView>
 <!--        <Div style="flex-demo">-->
 <!--            <Heading3>Flex-Start</Heading3>-->
 <!--            <Group style="flex-demo-content flex-start horizontal">-->
@@ -167,7 +83,7 @@
 <!--            </Div>-->
 <!--        </Div>-->
         
-        <Div style="flex-demo">
+<!--        <Div style="flex-demo">-->
 <!--            <Heading3>Very tricky flex layout</Heading3>-->
 <!--            <Div style="flex-demo-content">-->
 <!--                <Div style="flex-demo-content-child1">-->
@@ -179,17 +95,17 @@
 <!--            </Div>-->
 <!--            -->
 <!--            <Heading3>Hover over a child to trigger a content size change. Should affect the parent</Heading3>-->
-            <Div style="flex-parent">
-                <Div style="flex-content-child-grow">
-                    <Div style="flex-item-grow">Item 1</Div>
-                </Div>
-                <Div x-check-me="check-me" style="flex-content-child-grow">
-                    <Div style="flex-item-grow">Item 1</Div>
-                </Div>
-                <Div style="flex-content-child-grow">
-                    <Div style="flex-item-grow">Item 1</Div>
-                </Div>
-            </Div>
-        </Div>
+<!--            <Div style="flex-parent">-->
+<!--                <Div style="flex-content-child-grow">-->
+<!--                    <Div style="flex-item-grow">Item 1</Div>-->
+<!--                </Div>-->
+<!--                <Div x-check-me="check-me" style="flex-content-child-grow">-->
+<!--                    <Div style="flex-item-grow">Item 1</Div>-->
+<!--                </Div>-->
+<!--                <Div style="flex-content-child-grow">-->
+<!--                    <Div style="flex-item-grow">Item 1</Div>-->
+<!--                </Div>-->
+<!--            </Div>-->
+<!--        </Div>-->
     </Contents>
 </UITemplate>

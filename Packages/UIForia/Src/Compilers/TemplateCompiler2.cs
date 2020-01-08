@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 using UIForia.Compilers.Style;
 using UIForia.Elements;
@@ -12,16 +13,32 @@ using UIForia.Rendering;
 using UIForia.Systems;
 using UIForia.Templates;
 using UIForia.Text;
+using UIForia.UIInput;
 using UIForia.Util;
+using UnityEngine;
 
 namespace UIForia.Compilers {
 
     public class TemplateCompiler2 {
 
+        private const string k_InputEventAliasName = "$evt";
+        private const string k_InputEventParameterName = "__evt";
+        private const string k_InputHandlerVarName = "__inputHandler";
+        private const string k_CastElement = "__castElement";
+        private const string k_CastRoot = "__castRoot";
+        private static readonly char[] s_StyleSeparator = new char[] {' '};
+
+        private readonly LightStack<ContextVarAliasResolver> resolvers;
+        private StructStack<ContextVariableDefinition> contextVarStack;
+
+        private readonly LinqCompiler enabledCompiler;
+        private readonly LinqCompiler createdCompiler;
+        private readonly LinqCompiler updateCompiler;
         private CompiledTemplateData templateData;
         private Dictionary<Type, CompiledTemplate> templateMap;
         private TemplateCache templateCache;
         private int contextId;
+        private int NextContextId => contextId++;
 
         private static readonly MethodInfo s_CreateFromPool = typeof(Application).GetMethod(nameof(Application.CreateElementFromPoolWithType));
         private static readonly MethodInfo s_BindingNodePool_Get = typeof(LinqBindingNode).GetMethod("Get", BindingFlags.Static | BindingFlags.Public);
@@ -88,12 +105,28 @@ namespace UIForia.Compilers {
             this.templateCache = new TemplateCache(settings);
             this.templateMap = new Dictionary<Type, CompiledTemplate>();
             this.templateData = new CompiledTemplateData(settings);
+            this.updateCompiler = new LinqCompiler();
+            this.createdCompiler = new LinqCompiler();
+            this.enabledCompiler = new LinqCompiler();
+            this.resolvers = new LightStack<ContextVarAliasResolver>();
+            this.contextVarStack = new StructStack<ContextVariableDefinition>();
+
+            resolvers.EnsureCapacity(8);
+            resolvers.size = 3;
+            resolvers.array[0] = default;
+            resolvers.array[1] = default;
+            resolvers.array[2] = default;
+            Func<string, LinqCompiler, Expression> resolveAlias = ResolveAlias;
+
+            this.createdCompiler.resolveAlias = resolveAlias;
+            this.enabledCompiler.resolveAlias = resolveAlias;
+            this.updateCompiler.resolveAlias = resolveAlias;
         }
 
         public static CompiledTemplateData CompileTemplates(Type appRootType, TemplateSettings templateSettings) {
             TemplateCompiler2 instance = new TemplateCompiler2(templateSettings);
 
-            CompiledTemplateData compiledTemplateData = instance.CompileRoot(appRootType);
+              CompiledTemplateData compiledTemplateData = instance.CompileRoot(appRootType);
 
             return compiledTemplateData;
         }
@@ -136,7 +169,7 @@ namespace UIForia.Compilers {
         }
 
         private CompiledTemplate Compile(ElementTemplateNode templateRootNode) {
-            CompiledTemplate retn = templateData.CreateTemplate(templateRootNode.templateShell.filePath);
+            CompiledTemplate retn = templateData.CreateTemplate(templateRootNode.templateShell.filePath, templateRootNode.templateName);
             LightList<string> namespaces = LightList<string>.Get();
 
             if (templateRootNode.templateShell.usings != null) {
@@ -150,7 +183,7 @@ namespace UIForia.Compilers {
             ParameterExpression rootParam = Expression.Parameter(typeof(UIElement), "root");
             ParameterExpression scopeParam = Expression.Parameter(typeof(TemplateScope), "scope");
 
-            CompilationContext ctx = new CompilationContext();
+            CompilationContext ctx = new CompilationContext(templateRootNode);
             ctx.rootType = processedType;
             ctx.rootParam = rootParam;
             ctx.templateScope = scopeParam;
@@ -187,6 +220,7 @@ namespace UIForia.Compilers {
                 ctx.IfEqualsNull(ctx.rootParam, ctx.PopBlock());
             }
 
+            ctx.templateRootNode = templateRootNode;
             VisitChildren(ctx, templateRootNode);
             ctx.Return(ctx.rootParam);
             LightList<string>.Release(ref namespaces);
@@ -250,12 +284,12 @@ namespace UIForia.Compilers {
         private Expression CompileTerminalNode(CompilationContext ctx, TerminalNode terminalNode) {
             throw new NotImplementedException();
         }
-
+        
         private Expression CompileSlotDefinition(CompilationContext parentContext, SlotNode slotNode) {
             // we want to try to resolve the slot name. if we can't fall back, if fallback id is -1 then don't add a child
             CompiledSlot compiledSlot = templateData.CreateSlot(parentContext.compiledTemplate.filePath, slotNode.slotName, slotNode.slotType);
             slotNode.compiledSlotId = compiledSlot.slotId;
-            
+
             Expression nodeExpr = parentContext.ElementExpr;
 
             Expression slotNameExpr = Expression.Constant(slotNode.slotName);
@@ -273,7 +307,7 @@ namespace UIForia.Compilers {
             ParameterExpression rootParam = Expression.Parameter(typeof(UIElement), "root");
             ParameterExpression scopeParam = Expression.Parameter(typeof(TemplateScope), "scope");
 
-            CompilationContext ctx = new CompilationContext();
+            CompilationContext ctx = new CompilationContext(parentContext.templateRootNode);
 
             ParameterExpression slotRootParam = ctx.GetVariable(typeof(UISlotOverride), "slotRoot");
             ctx.rootType = parentContext.rootType;
@@ -306,11 +340,11 @@ namespace UIForia.Compilers {
         private int CompileSlotOverride(CompilationContext parentContext, SlotNode slotOverrideNode) {
             CompiledSlot compiledSlot = templateData.CreateSlot(parentContext.compiledTemplate.filePath, slotOverrideNode.slotName, SlotType.Override);
             slotOverrideNode.compiledSlotId = compiledSlot.slotId;
-            
+
             ParameterExpression rootParam = Expression.Parameter(typeof(UIElement), "root");
             ParameterExpression scopeParam = Expression.Parameter(typeof(TemplateScope), "scope");
 
-            CompilationContext ctx = new CompilationContext();
+            CompilationContext ctx = new CompilationContext(parentContext.templateRootNode);
 
             ParameterExpression slotRootParam = ctx.GetVariable(typeof(UISlotOverride), "slotRoot");
             ctx.rootType = parentContext.rootType;
@@ -394,48 +428,40 @@ namespace UIForia.Compilers {
 
             Expression slotUsageExpr = Expression.Default(typeof(StructList<SlotUsage>));
 
+            // for every template we will hydrate we need to fill in the slot usage list
+            // there are 2 ways this happens: 1. we forward an existing input slot, 2. we add an entry to the input list
+            // the template knows what it's input slots are. 
+
             // need to pass down any slots from this scope into the inner scope of expanded template
             // two cases this could be.
             // 1. we have an override
             // 2. we do not have an override
-            
+
             // in the case of extern slots, if no override is provided in the outermost scope
             // we need to use the default that was defined in the inner one. 
             // this likely means the inner calls slot forwarding only with defaults?
-            
-            // Outer
-                // if has override for an accepted slot
-                // scope.ForwardSlot("slot-name", -1);
-                
-            // Extern 1
-                // scope.ForwardSlot("slot-name", extern1.defaultId || -1);
-                
-            // Extern 2
-                // scope.ForwardSlot("slot-name", extern2.defaultId || -1);
-                
-            // Inner
-                // scope.CreateSlot("slot-name", inner.defaultId || -1);
-                // if -1 either do nothing or create a dummy empty slot element
-          
-                
-                
-            if (expandedTemplateNode.slotOverrideNodes != null && expandedTemplateNode.slotOverrideNodes.size > 0) {
-                slotUsageExpr = ctx.GetVariable<StructList<SlotUsage>>("slotUsage");
 
+            bool hasOuterSlot = expandedTemplateNode.slotOverrideNodes != null && expandedTemplateNode.slotOverrideNodes.size > 0;
+            LightList<SlotNode> accepted = expandedTemplateNode.expandedRoot.slotDefinitionNodes;
+            LightList<SlotNode> inputSlots = ctx.templateRootNode.slotDefinitionNodes;
+            bool needsRelease = false;
+
+            if (hasOuterSlot) {
                 LightList<SlotNode> slotOverrides = expandedTemplateNode.slotOverrideNodes;
 
-                // find potentially exposed slots here
-                // find defined slots in target template
-                // for each slot usage that is not children
+                slotUsageExpr = ctx.GetVariable<StructList<SlotUsage>>("slotUsage");
 
+                needsRelease = true;
                 ctx.Assign(slotUsageExpr, Expression.Call(null, s_SlotUsageList_PreSize, Expression.Constant(slotOverrides.size)));
 
-                MemberExpression arrayAccess = Expression.MakeMemberAccess(slotUsageExpr, s_SlotUsageList_Array);
-
-                LightList<SlotNode> acceptedSlots = expandedTemplateNode.elementRoot.slotDefinitionNodes;
-
                 for (int i = 0; i < slotOverrides.size; i++) {
+                    if (!expandedTemplateNode.expandedRoot.DefinesSlot(slotOverrides.array[i].slotName)) {
+                        throw CompileException.UnmatchedSlot(slotOverrides.array[i].slotName, slotOverrides.array[i].elementRoot.templateShell.filePath);
+                    }
+
                     int slotId = CompileSlotOverride(ctx, slotOverrides.array[i]);
+
+                    MemberExpression arrayAccess = Expression.MakeMemberAccess(slotUsageExpr, s_SlotUsageList_Array);
 
                     IndexExpression arrayIndex = Expression.ArrayAccess(arrayAccess, Expression.Constant(i));
 
@@ -447,32 +473,30 @@ namespace UIForia.Compilers {
                         ctx.rootParam
                     ));
                 }
+            }
 
-                if (acceptedSlots != null) {
-                    for (int i = 0; i < acceptedSlots.size; i++) {
-                        if (acceptedSlots.array[i].slotType == SlotType.Children) {
-                            continue;
-                        }
+            if (inputSlots != null && accepted != null) {
+                if (!hasOuterSlot) {
+                    slotUsageExpr = ctx.GetVariable<StructList<SlotUsage>>("slotUsage");
+                    ctx.Assign(slotUsageExpr, Expression.Call(null, s_SlotUsageList_PreSize, Expression.Constant(accepted.size)));
+                    needsRelease = true;
+                }
 
-                        if (expandedTemplateNode.elementRoot.HasSlotExternOverride(acceptedSlots.array[i].slotName, out SlotNode externNode)) {
-                            ctx.AddStatement(Expression.Call(
-                                ctx.templateScope,
-                                s_TemplateScope_ForwardSlotDataWithFallback,
-                                Expression.Constant(acceptedSlots.array[i].slotName),
-                                slotUsageExpr,
-                                ctx.rootParam, 
-                                Expression.Constant(externNode.compiledSlotId))
-                            );
-                        }
-                        else {
-                            ctx.AddStatement(ExpressionFactory.CallInstanceUnchecked(
-                                ctx.templateScope,
-                                s_TemplateScope_ForwardSlotData,
-                                Expression.Constant(acceptedSlots.array[i].slotName),
-                                slotUsageExpr)
-                            );
-                        }
-                    }
+                for (int i = 0; i < accepted.size; i++) {
+                    SlotNode match = GetMatchingInputSlotNode(inputSlots, accepted.array[i]);
+
+                    if (match == null) continue;
+
+                    int slotId = CompileSlotOverride(ctx, match);
+
+                    ctx.AddStatement(Expression.Call(
+                        ctx.templateScope,
+                        s_TemplateScope_ForwardSlotDataWithFallback,
+                        Expression.Constant(accepted.array[i].slotName),
+                        slotUsageExpr,
+                        ctx.rootParam,
+                        Expression.Constant(slotId))
+                    );
                 }
             }
 
@@ -480,13 +504,789 @@ namespace UIForia.Compilers {
 
             ctx.AddStatement(ExpressionFactory.CallInstanceUnchecked(ctx.applicationExpr, s_Application_HydrateTemplate, Expression.Constant(expandedTemplate.templateId), nodeExpr, templateScopeCtor));
 
-            if (expandedTemplateNode.slotOverrideNodes != null && expandedTemplateNode.slotOverrideNodes.size > 0) {
+            if (needsRelease) {
                 ctx.AddStatement(ExpressionFactory.CallInstanceUnchecked(slotUsageExpr, s_SlotUsageList_Release));
             }
 
-            // VisitChildren(ctx, expandedTemplateNode);
+            CompileElementData(expandedTemplateNode, ctx);
 
             return nodeExpr;
+        }
+
+        private void InitializeCompilers(Type rootType, Type elementType) {
+            updateCompiler.Reset();
+            enabledCompiler.Reset();
+            createdCompiler.Reset();
+
+            Parameter p0 = new Parameter(typeof(UIElement), "__root", ParameterFlags.NeverNull);
+            Parameter p1 = new Parameter(typeof(UIElement), "__element", ParameterFlags.NeverNull);
+
+            updateCompiler.SetSignature(p0, p1);
+            enabledCompiler.SetSignature(p0, p1);
+            createdCompiler.SetSignature(p0, p1);
+
+            // todo -- each compiler needs to handle namespaces and alias resolvers 
+            Parameter elementParameter = new Parameter(elementType, k_CastElement, ParameterFlags.NeverNull);
+            Parameter rootParameter = new Parameter(rootType, k_CastRoot, ParameterFlags.NeverNull);
+
+            updateCompiler.AddVariableUnchecked(elementParameter, ExpressionFactory.Convert(updateCompiler.GetParameter("__element"), elementType));
+            updateCompiler.AddVariableUnchecked(rootParameter, ExpressionFactory.Convert(updateCompiler.GetParameter("__root"), rootType));
+            enabledCompiler.AddVariableUnchecked(elementParameter, ExpressionFactory.Convert(enabledCompiler.GetParameter("__element"), elementType));
+            enabledCompiler.AddVariableUnchecked(rootParameter, ExpressionFactory.Convert(enabledCompiler.GetParameter("__root"), rootType));
+            createdCompiler.AddVariableUnchecked(elementParameter, ExpressionFactory.Convert(createdCompiler.GetParameter("__element"), elementType));
+            createdCompiler.AddVariableUnchecked(rootParameter, ExpressionFactory.Convert(createdCompiler.GetParameter("__root"), rootType));
+
+            resolvers.array[0] = new ContextVarAliasResolver("$element", elementType, -1, AliasResolverType.Element);
+            resolvers.array[1] = new ContextVarAliasResolver("$parent", elementType, -2, AliasResolverType.Parent);
+            resolvers.array[2] = new ContextVarAliasResolver("$root", elementType, -3, AliasResolverType.Root);
+        }
+
+        private void CompileElementData(TemplateNode2 templateNode, CompilationContext ctx) {
+            int count = 0;
+
+            if (templateNode.attributes != null) {
+                count = templateNode.attributes.size;
+            }
+
+            InitializeCompilers(ctx.templateRootNode.ElementType, templateNode.processedType.rawType);
+            int updateBindingCount = 0;
+            int enabledBindingCount = 0;
+            int createdBindingCount = 0;
+
+            StructList<AttributeDefinition2> perFrameStyles = null;
+            StructList<DynamicStyleData> dynamicStyleData = null;
+            StructList<AttributeDefinition2> inputList = null;
+
+            // todo -- handle nested access <Element thing.value.x="144f" keydown="" key-filter:keydown.keyup.withfocus="[allDown(shift, c, k), NoneOf()]"/>
+            // todo -- handle .read.write bindings
+            // todo -- handle styles
+            // todo -- handle input callbacks
+            // todo -- handle context variables
+
+            for (int i = 0; i < count; i++) {
+                // ReSharper disable once PossibleNullReferenceException
+                ref AttributeDefinition2 attr = ref templateNode.attributes.array[i];
+                switch (attr.type) {
+                    case AttributeType.Slot:
+                        break;
+                    case AttributeType.Context:
+                    case AttributeType.ContextVariable: {
+                        createdBindingCount++;
+
+                        // todo -- error if context has this name in current hierarchy already for this template
+                        ctx.PushContextVariable(attr.key);
+                        createdCompiler.SetImplicitContext(createdCompiler.GetVariable(k_CastRoot));
+                        Type expressionType = createdCompiler.GetExpressionType(attr.value);
+
+                        Type type = ReflectionUtil.CreateGenericType(typeof(ContextVariable<>), expressionType);
+                        ReflectionUtil.TypeArray2[0] = typeof(int);
+                        ReflectionUtil.TypeArray2[1] = typeof(string);
+                        ConstructorInfo ctor = type.GetConstructor(ReflectionUtil.TypeArray2);
+                        int aliasId = NextContextId;
+                        Expression contextVariable = Expression.New(ctor, Expression.Constant(aliasId), Expression.Constant(attr.key));
+                        Expression access = Expression.MakeMemberAccess(createdCompiler.GetVariable(k_CastElement), s_Element_BindingNode);
+                        Expression createVariable = ExpressionFactory.CallInstanceUnchecked(access, s_LinqBindingNode_CreateLocalContextVariable, contextVariable);
+
+                        createdCompiler.RawExpression(createVariable);
+
+                        PushContextVarAliasResolver(aliasId, attr.key, expressionType);
+
+                        if ((attr.flags & AttributeFlags.Const) != 0) {
+                            // already incremented created count
+                            CompileAssignContextVariable(createdCompiler, attr, ctx, type);
+                        }
+                        else if ((attr.flags & AttributeFlags.EnableOnly) != 0) {
+                            enabledBindingCount++;
+                            CompileAssignContextVariable(enabledCompiler, attr, ctx, type);
+                        }
+                        else {
+                            updateBindingCount++;
+                            CompileAssignContextVariable(updateCompiler, attr, ctx, type);
+                        }
+
+                        break;
+                    }
+                    case AttributeType.Alias: {
+                        break;
+                    }
+                    case AttributeType.Property: {
+                        if (ReflectionUtil.IsEvent(templateNode.ElementType, attr.key, out EventInfo eventInfo)) {
+                            createdBindingCount++;
+                            CompileEventBinding(createdCompiler, attr, eventInfo);
+                            continue;
+                        }
+
+                        if ((attr.flags & AttributeFlags.Const) != 0) {
+                            createdBindingCount++;
+                            CompilePropertyBinding(createdCompiler, templateNode, attr);
+                        }
+                        else if ((attr.flags & AttributeFlags.EnableOnly) != 0) {
+                            enabledBindingCount++;
+                            CompilePropertyBinding(enabledCompiler, templateNode, attr);
+                        }
+                        else {
+                            updateBindingCount++;
+                            CompilePropertyBinding(updateCompiler, templateNode, attr);
+                        }
+
+                        break;
+                    }
+
+                    case AttributeType.Style: {
+                        if ((attr.flags & AttributeFlags.StyleProperty) == 0) {
+                            StructList<TextExpression> list = StructList<TextExpression>.Get();
+                            TextTemplateProcessor.ProcessTextExpressions(attr.value, list);
+
+                            if (TextTemplateProcessor.TextExpressionIsConstant(list)) {
+                                createdBindingCount++;
+
+                                string[] parts = attr.value.Split(' ');
+
+                                ParameterExpression styleList = createdCompiler.AddVariable(new Parameter<LightList<UIStyleGroupContainer>>("styleList"), ExpressionFactory.CallStaticUnchecked(s_LightList_UIStyleGroupContainer_PreSize, Expression.Constant(parts.Length)));
+
+                                Expression styleListArray = Expression.MakeMemberAccess(styleList, s_LightList_UIStyleGroupContainer_Array);
+
+                                for (int p = 0; p < parts.Length; p++) {
+                                    int styleId = ctx.ResolveStyleName(parts[p]);
+                                    IndexExpression arrayIndex = Expression.ArrayAccess(styleListArray, Expression.Constant(p));
+                                    createdCompiler.Comment(parts[p]);
+                                    MemberExpression metaData = Expression.Field(createdCompiler.GetParameter("__element"), s_UIElement_TemplateMetaData);
+                                    MethodCallExpression expr = ExpressionFactory.CallInstanceUnchecked(metaData, s_TemplateMetaData_GetStyleById, Expression.Constant(styleId));
+                                    createdCompiler.RawExpression(Expression.Assign(arrayIndex, expr));
+                                }
+
+                                MemberExpression style = Expression.Field(createdCompiler.GetParameter("__element"), s_UIElement_StyleSet);
+                                MethodCallExpression initStyle = ExpressionFactory.CallInstanceUnchecked(style, s_StyleSet_InternalInitialize, styleList);
+                                createdCompiler.RawExpression(initStyle);
+
+                                list.QuickRelease();
+                            }
+                            else {
+                                dynamicStyleData = StructList<DynamicStyleData>.Get();
+                                for (int s = 0; s < list.size; s++) {
+                                    ref TextExpression expr = ref list.array[s];
+                                    if (expr.isExpression) {
+                                        Type type = updateCompiler.GetExpressionType(expr.text);
+                                        // todo -- handle list types
+                                        if (type != typeof(string) && !typeof(IList<string>).IsAssignableFrom(type) && !typeof(IList<UIStyleGroupContainer>).IsAssignableFrom(type)) {
+                                            throw new CompileException("Invalid dynamic style type: " + type);
+                                        }
+
+                                        dynamicStyleData.Add(new DynamicStyleData(expr.text, type, false));
+                                    }
+                                    else {
+                                        string[] parts = expr.text.Split(s_StyleSeparator, StringSplitOptions.RemoveEmptyEntries);
+
+                                        foreach (string p in parts) {
+                                            dynamicStyleData.Add(new DynamicStyleData(p, typeof(UIStyleGroupContainer), true));
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        else {
+                            // this is an instance style, todo -- handle .once etc
+                            throw new NotImplementedException();
+                        }
+
+                        break;
+                    }
+
+                    case AttributeType.Attribute: {
+                        if ((attr.flags & AttributeFlags.Const) != 0) {
+                            continue; // todo -- make part of created instead? 
+                        }
+                        else if ((attr.flags & AttributeFlags.EnableOnly) != 0) {
+                            enabledBindingCount++;
+                            CompileAttributeBinding(enabledCompiler, templateNode, attr);
+                        }
+                        else {
+                            updateBindingCount++;
+                            CompileAttributeBinding(updateCompiler, templateNode, attr);
+                        }
+
+                        break;
+                    }
+                    case AttributeType.Event: {
+                        break;
+                    }
+                    case AttributeType.Conditional: {
+                        if ((attr.flags & AttributeFlags.Const) != 0) {
+                            createdBindingCount++;
+                            CompileConditionalBinding(createdCompiler, templateNode, attr);
+                        }
+                        else if ((attr.flags & AttributeFlags.EnableOnly) != 0) {
+                            enabledBindingCount++;
+                            CompileConditionalBinding(enabledCompiler, templateNode, attr);
+                        }
+                        else {
+                            updateBindingCount++;
+                            CompileConditionalBinding(updateCompiler, templateNode, attr);
+                        }
+
+                        break;
+                    }
+                    case AttributeType.Key:
+                    case AttributeType.Touch:
+                    case AttributeType.Controller:
+                    case AttributeType.Mouse: {
+                        inputList = inputList ?? StructList<AttributeDefinition2>.Get();
+                        inputList.Add(attr);
+                        break;
+                    }
+
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
+
+            if (templateNode.processedType.requiresUpdateFn) {
+                updateBindingCount++;
+                // todo change this to not require OnUpdate to be virtual
+                updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(updateCompiler.GetVariable(k_CastElement), s_UIElement_OnUpdate));
+            }
+
+            CompileTextBinding(templateNode);
+
+            // if we have style bindings they need to run after Update() is called (or where it would have been called if it would have been present)
+            if (dynamicStyleData != null) {
+                updateBindingCount++;
+
+                // todo -- to handle array case we can't use PreSize, need to call Add on the list since size will be dynamic
+                ParameterExpression styleList = updateCompiler.AddVariable(
+                    new Parameter<LightList<UIStyleGroupContainer>>("styleList", ParameterFlags.NeverNull),
+                    ExpressionFactory.CallStaticUnchecked(s_LightList_UIStyleGroupContainer_PreSize, Expression.Constant(dynamicStyleData.size))
+                );
+
+                Expression styleListArray = Expression.MakeMemberAccess(styleList, s_LightList_UIStyleGroupContainer_Array);
+
+                for (int s = 0; s < dynamicStyleData.size; s++) {
+                    IndexExpression arrayIndex = Expression.ArrayAccess(styleListArray, Expression.Constant(s));
+                    ref DynamicStyleData data = ref dynamicStyleData.array[s];
+
+                    updateCompiler.Comment(data.text);
+
+                    if (data.isConstant) {
+                        int styleId = ctx.ResolveStyleName(data.text);
+                        // todo use expression
+                        updateCompiler.Assign(arrayIndex, $"__element.{nameof(UIElement.templateMetaData)}.GetStyleById({styleId})", false);
+                    }
+                    else {
+                        Type type = data.returnType;
+                        if (type == typeof(string)) {
+                            // todo -- don't allocate w/ aliases, use char array where possible
+                            // todo use expression
+                            updateCompiler.Assign(arrayIndex, $"__element.{nameof(UIElement.templateMetaData)}.{nameof(TemplateMetaData.ResolveStyleByName)}({data.text})", false);
+                        }
+                    }
+                }
+
+                updateCompiler.SetNullCheckingEnabled(false); // todo use expression
+                updateCompiler.Statement($"__element.style.{nameof(UIStyleSet.SetBaseStyles)}({styleList.Name})");
+                updateCompiler.SetNullCheckingEnabled(true);
+            }
+
+            if (perFrameStyles != null) {
+                for (int i = 0; i < perFrameStyles.size; i++) {
+                    ref AttributeDefinition2 attr = ref perFrameStyles.array[i];
+                    // instance property
+                    if ((attr.flags & AttributeFlags.StyleProperty) != 0) {
+                        throw new NotImplementedException();
+                        // var property = new StyleProperty(StylePropertyId.XXX, expr(root, element));
+                        // if(!StyleProperty.IsEqual(element.style.state?.XXX, property) {
+                        //    element.style.state.SetProperty(XXX, property);
+                        // }
+                    }
+                    else {
+                        // if any part return type is an array -> handle that differently
+                        // for each part (deduplicated)
+
+                        StructList<TextExpression> list = StructList<TextExpression>.Get();
+                        TextTemplateProcessor.ProcessTextExpressions(attr.value, list);
+                    }
+                }
+
+                perFrameStyles.QuickRelease();
+            }
+
+            if (inputList != null) {
+                createdBindingCount++;
+                // todo -- if element already has event handlers (from template internals or from c#) we need to grow that list (not yet implemented)
+                createdCompiler.Assign(createdCompiler.Value(k_CastElement + "." + nameof(UIElement.inputHandlers)), Expression.New(typeof(InputHandlerGroup)));
+
+                for (int i = 0; i < inputList.size; i++) {
+                    switch (inputList.array[i].type) {
+                        case AttributeType.Mouse:
+                            CompileMouseInputBinding(createdCompiler, inputList.array[i]);
+                            break;
+                        case AttributeType.Key:
+                            CompileKeyboardInputBinding(createdCompiler, inputList.array[i]);
+                            break;
+                    }
+                }
+
+                inputList.QuickRelease();
+            }
+
+            int createdBindingId = -1;
+            int enabledBindingId = -1;
+            int updateBindingId = -1;
+
+            if (createdBindingCount > 0) {
+                CompiledBinding createdBinding = templateData.AddBinding(templateNode, CompiledBindingType.OnCreate);
+                createdBinding.bindingFn = createdCompiler.BuildLambda();
+                createdBindingId = createdBinding.bindingId;
+            }
+
+            if (enabledBindingCount > 0) {
+                CompiledBinding enabledBinding = templateData.AddBinding(templateNode, CompiledBindingType.OnEnable);
+                enabledBinding.bindingFn = enabledCompiler.BuildLambda();
+                enabledBindingId = enabledBinding.bindingId;
+            }
+
+            if (updateBindingCount > 0) {
+                CompiledBinding updateBinding = templateData.AddBinding(templateNode, CompiledBindingType.OnUpdate);
+                updateBinding.bindingFn = updateCompiler.BuildLambda();
+                updateBindingId = updateBinding.bindingId;
+            }
+
+            // create binding node if needed
+            if (updateCompiler.HasStatements || createdCompiler.HasStatements || enabledCompiler.HasStatements) {
+                // scope.application.BindingNodePool.Get(root, element);
+                ctx.AddStatement(ExpressionFactory.CallStaticUnchecked(s_BindingNodePool_Get,
+                        ctx.applicationExpr,
+                        ctx.rootParam,
+                        ctx.ElementExpr,
+                        ctx.ContextExpr,
+                        Expression.Constant(createdBindingId),
+                        Expression.Constant(enabledBindingId),
+                        Expression.Constant(updateBindingId)
+                    )
+                );
+            }
+        }
+
+        private void CompileTextBinding(TemplateNode2 templateNode) {
+            if (!(templateNode is TextNode textNode)) return;
+
+            if (textNode.textExpressionList != null && textNode.textExpressionList.size > 0 && !textNode.IsTextConstant()) {
+                updateCompiler.AddNamespace("UIForia.Util");
+                updateCompiler.AddNamespace("UIForia.Text");
+
+                updateCompiler.SetImplicitContext(updateCompiler.GetVariable(k_CastRoot));
+                StructList<TextExpression> expressionParts = textNode.textExpressionList;
+
+                for (int i = 0; i < expressionParts.size; i++) {
+                    // text joiner
+                    // convert text expression outputs to an array 
+                    // output = ["text", expression, "here"].Join();
+                    // later -> visit any non const expressions and break apart by top level string-to-string + operator
+
+                    if (expressionParts[i].isExpression) {
+                        Expression val = updateCompiler.Value(expressionParts[i].text);
+                        MethodCallExpression toString = ExpressionFactory.CallInstanceUnchecked(val, val.Type.GetMethod("ToString", Type.EmptyTypes));
+                        updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, s_StringBuilder_AppendString, toString));
+//                        updateCompiler.Statement($"TextUtil.StringBuilder.Append({expressionParts[i].text})");
+                    }
+                    else {
+                        updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, s_StringBuilder_AppendString, Expression.Constant(expressionParts[i].text)));
+                    }
+                }
+
+                Expression e = ExpressionFactory.Convert(updateCompiler.GetVariable(k_CastElement), typeof(UITextElement));
+                updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(e, s_TextElement_SetText, s_StringBuilderToString));
+                updateCompiler.RawExpression(s_StringBuilderClear);
+            }
+        }
+
+        public static void CompileAssignContextVariable(LinqCompiler compiler, in AttributeDefinition2 attr, CompilationContext ctx, Type contextVarType) {
+            //ContextVariable<T> ctxVar = (ContextVariable<T>)__castElement.bindingNode.GetContextVariable(id);
+            //ctxVar.value = expression;
+            compiler.SetImplicitContext(compiler.GetVariable(k_CastRoot));
+            // todo -- convert to generic call: __castElement.bindingNode.SetContextVariable<string>(id, "hello")
+            // need to use var method = type.GetMethod("name").MakeGenericMethod(type);
+            Expression access = Expression.MakeMemberAccess(compiler.GetVariable(k_CastElement), s_Element_BindingNode);
+            Expression call = ExpressionFactory.CallInstanceUnchecked(access, s_LinqBindingNode_GetLocalContextVariable, Expression.Constant(attr.key)); // todo -- maybe resolve by id instead
+            Expression cast = Expression.Convert(call, contextVarType);
+            ParameterExpression target = compiler.AddVariable(contextVarType, $"ctxVar_{attr.key}");
+            compiler.Assign(target, cast);
+            compiler.Assign($"ctxVar_{attr.key}.value", compiler.Value(attr.value), false);
+        }
+
+        private void CompileKeyboardInputBinding(LinqCompiler compiler, in AttributeDefinition2 attr) {
+            LightList<Parameter> parameters = LightList<Parameter>.Get();
+            parameters.Add(new Parameter<GenericInputEvent>(k_InputEventParameterName, ParameterFlags.NeverNull | ParameterFlags.NeverOutOfBounds));
+
+            resolvers.Push(new ContextVarAliasResolver(k_InputEventAliasName, typeof(KeyboardInputEvent), NextContextId, AliasResolverType.KeyEvent));
+
+            compiler.SetImplicitContext(compiler.GetVariable(k_CastRoot));
+
+            // todo -- eliminate generated closure by passing in template root and element from input system
+            LinqCompiler closure = compiler.CreateClosure(parameters, typeof(void));
+
+            closure.Statement(attr.value);
+            LambdaExpression lambda = closure.BuildLambda();
+
+            Expression target = Expression.Field(compiler.GetVariable(k_CastElement), s_UIElement_inputHandlerGroup);
+
+            InputEventType evtType = 0;
+            KeyboardModifiers modifiers = KeyboardModifiers.None;
+            EventPhase eventPhase = EventPhase.Bubble;
+
+            bool requireFocus = false;
+
+            string evtTypeName = attr.key;
+
+            if (attr.key.Contains(".")) {
+                evtTypeName = attr.key.Substring(0, attr.key.IndexOf('.'));
+                bool isCapture = attr.key.Contains(".capture");
+                bool isShift = attr.key.Contains(".shift");
+                bool isControl = attr.key.Contains(".ctrl") || attr.key.Contains(".control");
+                bool isCommand = attr.key.Contains(".cmd") || attr.key.Contains(".command");
+                bool isAlt = attr.key.Contains(".alt");
+
+                requireFocus = attr.key.Contains(".focus");
+
+                if (isShift) {
+                    modifiers |= KeyboardModifiers.Shift;
+                }
+
+                if (isControl) {
+                    modifiers |= KeyboardModifiers.Control;
+                }
+
+                if (isCommand) {
+                    modifiers |= KeyboardModifiers.Command;
+                }
+
+                if (isAlt) {
+                    modifiers |= KeyboardModifiers.Alt;
+                }
+
+                if (isCapture) {
+                    eventPhase = EventPhase.Capture;
+                }
+            }
+
+            switch (evtTypeName) {
+                case "down":
+                    evtType = InputEventType.KeyDown;
+                    break;
+                case "up":
+                    evtType = InputEventType.KeyUp;
+                    break;
+                case "helddown":
+                    evtType = InputEventType.KeyHeldDown;
+                    break;
+                default:
+                    throw new CompileException("Invalid keyboard event in template: " + attr.key);
+            }
+
+            MethodCallExpression expression = ExpressionFactory.CallInstanceUnchecked(target, s_InputHandlerGroup_AddKeyboardEvent,
+                Expression.Constant(evtType),
+                Expression.Constant(modifiers),
+                Expression.Constant(requireFocus),
+                Expression.Constant(eventPhase),
+                Expression.Constant(KeyCodeUtil.AnyKey),
+                Expression.Constant('\0'),
+                lambda
+            );
+
+            compiler.RawExpression(expression);
+
+            closure.Release();
+            LightList<Parameter>.Release(ref parameters);
+            resolvers.Pop();
+        }
+
+        private void CompileMouseInputBinding(LinqCompiler compiler, in AttributeDefinition2 attr) {
+            // 1 list of event handler typeof(Action<InputEvent>);
+            // input call appropriate conversion fn from input event before resolving $evt
+
+            LightList<Parameter> parameters = LightList<Parameter>.Get();
+            parameters.Add(new Parameter<GenericInputEvent>(k_InputEventParameterName, ParameterFlags.NeverNull | ParameterFlags.NeverOutOfBounds));
+
+            resolvers.Push(new ContextVarAliasResolver(k_InputEventAliasName, typeof(MouseInputEvent), NextContextId, AliasResolverType.MouseEvent));
+
+            compiler.SetImplicitContext(compiler.GetVariable(k_CastRoot));
+            // todo -- eliminate generated closure by passing in template root and element from input system
+            LinqCompiler closure = compiler.CreateClosure(parameters, typeof(void));
+
+            closure.Statement(attr.value);
+            LambdaExpression lambda = closure.BuildLambda();
+
+            Expression target = Expression.Field(compiler.GetVariable(k_CastElement), s_UIElement_inputHandlerGroup);
+
+            InputEventType evtType = 0;
+            KeyboardModifiers modifiers = KeyboardModifiers.None;
+            EventPhase eventPhase = EventPhase.Bubble;
+
+            bool requireFocus = false;
+
+            string evtTypeName = attr.key;
+
+            if (attr.key.Contains(".")) {
+                evtTypeName = attr.key.Substring(0, attr.key.IndexOf('.'));
+                bool isCapture = attr.key.Contains(".capture");
+                bool isShift = attr.key.Contains(".shift");
+                bool isControl = attr.key.Contains(".ctrl") || attr.key.Contains(".control");
+                bool isCommand = attr.key.Contains(".cmd") || attr.key.Contains(".command");
+                bool isAlt = attr.key.Contains(".alt");
+
+                requireFocus = attr.key.Contains(".focus");
+
+                if (isShift) {
+                    modifiers |= KeyboardModifiers.Shift;
+                }
+
+                if (isControl) {
+                    modifiers |= KeyboardModifiers.Control;
+                }
+
+                if (isCommand) {
+                    modifiers |= KeyboardModifiers.Command;
+                }
+
+                if (isAlt) {
+                    modifiers |= KeyboardModifiers.Alt;
+                }
+
+                if (isCapture) {
+                    eventPhase = EventPhase.Capture;
+                }
+            }
+
+            switch (evtTypeName) {
+                case "click":
+                    evtType = InputEventType.MouseClick;
+                    break;
+                case "down":
+                    evtType = InputEventType.MouseDown;
+                    break;
+                case "up":
+                    evtType = InputEventType.MouseUp;
+                    break;
+                case "enter":
+                    evtType = InputEventType.MouseEnter;
+                    break;
+                case "exit":
+                    evtType = InputEventType.MouseExit;
+                    break;
+                case "helddown":
+                    evtType = InputEventType.MouseHeldDown;
+                    break;
+                case "move":
+                    evtType = InputEventType.MouseMove;
+                    break;
+                case "hover":
+                    evtType = InputEventType.MouseHover;
+                    break;
+                case "scroll":
+                    evtType = InputEventType.MouseScroll;
+                    break;
+                case "context":
+                    evtType = InputEventType.MouseContext;
+                    break;
+                default:
+                    throw new CompileException("Invalid mouse event in template: " + attr.key);
+            }
+
+            MethodCallExpression expression = ExpressionFactory.CallInstanceUnchecked(target, s_InputHandlerGroup_AddMouseEvent,
+                Expression.Constant(evtType),
+                Expression.Constant(modifiers),
+                Expression.Constant(requireFocus),
+                Expression.Constant(eventPhase),
+                lambda
+            );
+
+            compiler.RawExpression(expression);
+
+            closure.Release();
+            LightList<Parameter>.Release(ref parameters);
+            resolvers.Pop();
+        }
+
+
+        private static void CompileEventBinding(LinqCompiler compiler, in AttributeDefinition2 attr, EventInfo eventInfo) {
+            bool hasReturnType = ReflectionUtil.IsFunc(eventInfo.EventHandlerType);
+            Type[] eventHandlerTypes = eventInfo.EventHandlerType.GetGenericArguments();
+            Type returnType = hasReturnType ? eventHandlerTypes[eventHandlerTypes.Length - 1] : null;
+
+            int parameterCount = eventHandlerTypes.Length;
+            if (hasReturnType) {
+                parameterCount--;
+            }
+
+            compiler.SetImplicitContext(compiler.GetVariable(k_CastRoot));
+            LightList<Parameter> parameters = LightList<Parameter>.Get();
+
+            IEnumerable<AliasGenericParameterAttribute> attrNameAliases = eventInfo.GetCustomAttributes<AliasGenericParameterAttribute>();
+            for (int i = 0; i < parameterCount; i++) {
+                string argName = "arg" + i;
+                foreach (AliasGenericParameterAttribute a in attrNameAliases) {
+                    if (a.parameterIndex == i) {
+                        argName = a.aliasName;
+                        break;
+                    }
+                }
+
+                parameters.Add(new Parameter(eventHandlerTypes[i], argName));
+            }
+
+            LinqCompiler closure = compiler.CreateClosure(parameters, returnType);
+            LightList<Parameter>.Release(ref parameters);
+            closure.Statement(attr.value);
+            LambdaExpression lambda = closure.BuildLambda();
+            ParameterExpression evtFn = compiler.AddVariable(lambda.Type, "evtFn");
+            compiler.Assign(evtFn, lambda);
+            compiler.CallStatic(s_EventUtil_Subscribe, compiler.GetVariable(k_CastElement), Expression.Constant(attr.key), evtFn);
+            closure.Release();
+        }
+
+        private static void CompileConditionalBinding(LinqCompiler compiler, TemplateNode2 templateNode, in AttributeDefinition2 attr) {
+            // cannot have more than 1 conditional    
+            try {
+                ParameterExpression castElement = compiler.GetVariable(k_CastElement);
+
+                compiler.BeginIsolatedSection();
+                if ((attr.flags & AttributeFlags.RootContext) != 0) {
+                    compiler.SetImplicitContext(compiler.GetVariable(k_CastElement));
+                }
+                else {
+                    compiler.SetImplicitContext(compiler.GetVariable(k_CastRoot));
+                }
+
+                compiler.Statement($"{k_CastElement}.SetEnabled({attr.value})");
+                compiler.CommentNewLineBefore($"if=\"{attr.value}\"");
+
+                // if(!element.isEnabled) return
+                compiler.IfEqual(Expression.MakeMemberAccess(castElement, s_Element_IsEnabled), Expression.Constant(false), () => { compiler.Return(); });
+            }
+            catch (Exception e) {
+                compiler.EndIsolatedSection();
+                Debug.LogError(e);
+            }
+
+            compiler.EndIsolatedSection();
+        }
+
+        private static void CompileAttributeBinding(LinqCompiler compiler, TemplateNode2 templateNode, in AttributeDefinition2 attr) {
+            // __castElement.SetAttribute("attribute-name", computedValue);
+            compiler.CommentNewLineBefore($"{attr.key}=\"{attr.value}\"");
+            if ((attr.flags & AttributeFlags.RootContext) != 0) {
+                compiler.SetImplicitContext(compiler.GetVariable(k_CastElement));
+            }
+            else {
+                compiler.SetImplicitContext(compiler.GetVariable(k_CastRoot));
+            }
+
+            ParameterExpression element = compiler.GetVariable(k_CastElement);
+            Expression value = compiler.Value(attr.StrippedValue);
+            ExpressionFactory.CallInstanceUnchecked(element, s_UIElement_SetAttribute, Expression.Constant(attr.key), value);
+        }
+        
+        private static bool IsConstant(Expression n) {
+            while (true) {
+                switch (n) {
+                    case DefaultExpression _:
+                    case ConstantExpression _:
+                        return true;
+                    case ConditionalExpression conditionalExpression:
+                        return IsConstant(conditionalExpression.Test) && IsConstant(conditionalExpression.IfTrue) && IsConstant(conditionalExpression.IfFalse);
+                    case UnaryExpression unary:
+                        n = unary.Operand;
+                        continue;
+                    case BinaryExpression binaryExpression:
+                        return IsConstant(binaryExpression.Left) && IsConstant(binaryExpression.Right);
+                }
+
+                return false;
+            }
+        }
+
+        private static void CompilePropertyBinding(LinqCompiler compiler, TemplateNode2 templateNode, in AttributeDefinition2 attributeDefinition) {
+            LHSStatementChain left = null;
+            Expression right = null;
+            ParameterExpression castElement = compiler.GetVariable(k_CastElement);
+            ParameterExpression castRoot = compiler.GetVariable(k_CastRoot);
+            compiler.CommentNewLineBefore($"{attributeDefinition.key}=\"{attributeDefinition.value}\"");
+            compiler.BeginIsolatedSection();
+            try {
+                compiler.SetImplicitContext(castElement);
+                left = compiler.AssignableStatement(attributeDefinition.key);
+            }
+            catch (Exception e) {
+                compiler.EndIsolatedSection();
+                Debug.LogError(e);
+                return;
+            }
+
+            //castElement.value = root.value
+            compiler.SetImplicitContext(castRoot);
+
+            Expression accessor = compiler.AccessorStatement(left.targetExpression.Type, attributeDefinition.value);
+
+            if (accessor is ConstantExpression) {
+                right = accessor;
+            }
+            else {
+                right = compiler.AddVariable(left.targetExpression.Type, "__right");
+                compiler.Assign(right, accessor);
+            }
+
+            // todo -- I can figure out if a value is constant using IsConstant(expr), use this information to push the expression onto the const compiler
+            
+            StructList<ProcessedType.PropertyChangeHandlerDesc> changeHandlers = StructList<ProcessedType.PropertyChangeHandlerDesc>.Get();
+            templateNode.processedType.GetChangeHandlers(attributeDefinition.key, changeHandlers);
+
+            bool isProperty = ReflectionUtil.IsProperty(castElement.Type, attributeDefinition.key);
+
+            // if there is a change handler or the member is a property we need to check for changes
+            // otherwise field values can be assigned w/o checking
+            if (changeHandlers.size > 0 || isProperty) {
+                compiler.IfNotEqual(left, right, () => {
+                    compiler.Assign(left, right);
+                    for (int j = 0; j < changeHandlers.size; j++) {
+                        compiler.Statement($"{k_CastElement}.{changeHandlers[j].methodInfo.Name}()");
+                    }
+                });
+            }
+            else {
+                compiler.Assign(left, right);
+            }
+
+            compiler.EndIsolatedSection();
+            changeHandlers.Release();
+        }
+
+        private void PushContextVarAliasResolver(int id, string name, Type type) {
+            resolvers.Push(new ContextVarAliasResolver(name, type, id, AliasResolverType.ContextVariable));
+        }
+
+        private void PopAliasResolver() {
+            resolvers.Pop();
+        }
+
+        private Expression ResolveAlias(string aliasName, LinqCompiler compiler) {
+            for (int i = 0; i < resolvers.size; i++) {
+                ContextVarAliasResolver resolver = resolvers.PeekAtUnchecked(i);
+                if (resolver.name == aliasName) {
+                    return resolver.Resolve(compiler);
+                }
+            }
+
+            return null;
+        }
+
+        private SlotNode GetMatchingInputSlotNode(LightList<SlotNode> inputSlots, SlotNode accepted) {
+            for (int i = 0; i < inputSlots.size; i++) {
+                // todo -- handle aliasing
+                if (inputSlots.array[i].slotName == accepted.slotName) {
+                    return inputSlots.array[i];
+                }
+            }
+
+            return null;
         }
 
         private static Expression CreateElement(CompilationContext ctx, TemplateNode2 node) {
@@ -516,7 +1316,6 @@ namespace UIForia.Compilers {
 
             for (int i = 0; i < templateNode.attributes.size; i++) {
                 if (attributes[i].type == AttributeType.Property && attributes[i].key == attr.propertyName) {
-                    
                     if (attributes[i].value.Trim() == "default" || attributes[i].value.Trim() == "null") {
                         throw CompileException.UnresolvableGenericElement(processedType, attributes[i].value);
                     }
@@ -536,6 +1335,90 @@ namespace UIForia.Compilers {
             }
 
             throw CompileException.UnresolvedGenericElement(processedType);
+        }
+
+        private struct DynamicStyleData {
+
+            public readonly bool isConstant;
+            public readonly Type returnType;
+            public string text;
+
+            public DynamicStyleData(string text, Type returnType, bool isConstant) {
+                this.text = text;
+                this.returnType = returnType;
+                this.isConstant = isConstant;
+            }
+
+        }
+
+        internal enum AliasResolverType {
+
+            MouseEvent,
+            KeyEvent,
+            TouchEvent,
+            Element,
+            Parent,
+            ContextVariable,
+            ControllerEvent,
+
+            Root
+
+        }
+
+        internal struct ContextVarAliasResolver {
+
+            public string name;
+            public string strippedName;
+            public Type type;
+            public int id;
+            public AliasResolverType resolverType;
+
+            public ContextVarAliasResolver(string name, Type type, int id, AliasResolverType resolverType) {
+                this.name = name[0] == '$' ? name : '$' + name;
+                this.strippedName = name.Substring(0);
+                this.type = type;
+                this.id = id;
+                this.resolverType = resolverType;
+            }
+
+            public Expression Resolve(LinqCompiler compiler) {
+                switch (resolverType) {
+                    case AliasResolverType.MouseEvent:
+                        return compiler.Value(k_InputEventParameterName + "." + nameof(GenericInputEvent.AsMouseInputEvent));
+
+                    case AliasResolverType.KeyEvent:
+                        return compiler.Value(k_InputEventParameterName + "." + nameof(GenericInputEvent.AsKeyInputEvent));
+
+                    case AliasResolverType.TouchEvent:
+                    case AliasResolverType.ControllerEvent:
+                        throw new NotImplementedException();
+
+                    case AliasResolverType.Element:
+                        return compiler.GetVariable(k_CastElement);
+
+                    case AliasResolverType.Root:
+                        return compiler.GetVariable(k_CastRoot);
+
+                    case AliasResolverType.Parent: // todo -- use expressions
+                        return compiler.Value(k_CastElement + ".parent");
+
+                    case AliasResolverType.ContextVariable: {
+                        ParameterExpression el = compiler.GetVariable(k_CastElement);
+                        Expression access = Expression.MakeMemberAccess(el, s_Element_BindingNode);
+                        Expression call = ExpressionFactory.CallInstanceUnchecked(access, s_LinqBindingNode_GetContextVariable, Expression.Constant(id));
+                        Type contextVarType = ReflectionUtil.CreateGenericType(typeof(ContextVariable<>), type);
+
+                        UnaryExpression convert = Expression.Convert(call, contextVarType);
+                        ParameterExpression variable = compiler.AddVariable(type, $"ctxvar_{strippedName}");
+
+                        compiler.Assign(variable, Expression.MakeMemberAccess(convert, contextVarType.GetField("value")));
+                        return variable;
+                    }
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
+
         }
 
     }

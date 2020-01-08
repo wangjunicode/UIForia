@@ -284,7 +284,7 @@ namespace UIForia.Compilers {
 
 
         private CompiledTemplate Compile(TemplateAST ast, TemplateNode rootTemplate) {
-            CompiledTemplate retn = templateData.CreateTemplate(ast.fileName);
+            CompiledTemplate retn = templateData.CreateTemplate(ast.fileName, null);
 
             LightList<string> namespaces = LightList<string>.Get();
             if (ast.usings != null) {
@@ -297,7 +297,7 @@ namespace UIForia.Compilers {
             ParameterExpression rootParam = Expression.Parameter(typeof(UIElement), "root");
             ParameterExpression scopeParam = Expression.Parameter(typeof(TemplateScope), "scope");
 
-            CompilationContext ctx = new CompilationContext();
+            CompilationContext ctx = new CompilationContext(null);
             ctx.rootType = processedType;
             ctx.rootParam = rootParam;
             ctx.templateScope = scopeParam;
@@ -969,23 +969,23 @@ namespace UIForia.Compilers {
             int enabledBindingId = -1;
             int updateBindingId = -1;
 
-            if (createdBindingCount > 0) {
-                CompiledBinding createdBinding = templateData.AddBinding(templateNode, CompiledBindingType.OnCreate);
-                createdBinding.bindingFn = createdCompiler.BuildLambda();
-                createdBindingId = createdBinding.bindingId;
-            }
-
-            if (enabledBindingCount > 0) {
-                CompiledBinding enabledBinding = templateData.AddBinding(templateNode, CompiledBindingType.OnEnable);
-                enabledBinding.bindingFn = enabledCompiler.BuildLambda();
-                enabledBindingId = enabledBinding.bindingId;
-            }
-
-            if (updateBindingCount > 0) {
-                CompiledBinding updateBinding = templateData.AddBinding(templateNode, CompiledBindingType.OnUpdate);
-                updateBinding.bindingFn = updateCompiler.BuildLambda();
-                updateBindingId = updateBinding.bindingId;
-            }
+            // if (createdBindingCount > 0) {
+            //     CompiledBinding createdBinding = templateData.AddBinding(templateNode, CompiledBindingType.OnCreate);
+            //     createdBinding.bindingFn = createdCompiler.BuildLambda();
+            //     createdBindingId = createdBinding.bindingId;
+            // }
+            //
+            // if (enabledBindingCount > 0) {
+            //     CompiledBinding enabledBinding = templateData.AddBinding(templateNode, CompiledBindingType.OnEnable);
+            //     enabledBinding.bindingFn = enabledCompiler.BuildLambda();
+            //     enabledBindingId = enabledBinding.bindingId;
+            // }
+            //
+            // if (updateBindingCount > 0) {
+            //     CompiledBinding updateBinding = templateData.AddBinding(templateNode, CompiledBindingType.OnUpdate);
+            //     updateBinding.bindingFn = updateCompiler.BuildLambda();
+            //     updateBindingId = updateBinding.bindingId;
+            // }
 
             // create binding node if needed
             if (updateBindingCount + createdBindingCount + enabledBindingCount > 0) {
@@ -1550,7 +1550,7 @@ namespace UIForia.Compilers {
             LightList<string> namespaces = LightList<string>.Get();
 
             // todo -- use parent context for style & imports n stuff
-            CompilationContext ctx = new CompilationContext();
+            CompilationContext ctx = new CompilationContext(null);
             ParameterExpression slotRootParam = ctx.GetVariable(typeof(UISlotOverride), "slotRoot");
             ctx.rootType = parentCtx.rootType;
             ctx.rootParam = slotRootParam;

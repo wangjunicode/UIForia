@@ -1,3 +1,4 @@
+using System;
 using UIForia.Parsing.Expressions;
 using UIForia.Util;
 
@@ -31,6 +32,7 @@ namespace UIForia.Parsing {
         public TemplateNode2 this[int i] => children?.array[i];
 
         public int ChildCount => children?.size ?? 0;
+        public Type ElementType => processedType.rawType;
 
         public int GetAttributeCount() {
             if (attributes == null) {

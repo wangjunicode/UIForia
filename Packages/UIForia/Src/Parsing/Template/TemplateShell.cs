@@ -29,7 +29,7 @@ namespace UIForia.Parsing {
 
         public ElementTemplateNode GetElementTemplate(string templateId) {
             for (int i = 0; i < elementNodes.size; i++) {
-                if (elementNodes.array[i].templateId == templateId) {
+                if (elementNodes.array[i].templateName == templateId) {
                     return elementNodes.array[i];
                 }
             }

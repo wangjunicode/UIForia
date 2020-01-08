@@ -36,12 +36,14 @@ namespace UIForia.Compilers {
         private static readonly MethodInfo s_CommentNewLineBefore = typeof(ExpressionUtil).GetMethod(nameof(ExpressionUtil.CommentNewLineBefore), BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);
         private static readonly MethodInfo s_CommentNewLineAfter = typeof(ExpressionUtil).GetMethod(nameof(ExpressionUtil.CommentNewLineAfter), BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);
         private static readonly char[] s_SplitChar = {'.'};
+        public ElementTemplateNode templateRootNode;
 
-        public CompilationContext() {
+        public CompilationContext(ElementTemplateNode templateRootNode) {
             this.outputComments = true;
             this.variables = new LightList<ParameterExpression>();
             this.statementStacks = new LightStack<LightList<Expression>>();
             this.hierarchyStack = new LightStack<ParameterExpression>();
+            this.templateRootNode = templateRootNode;
         }
 
         public ParameterExpression ParentExpr => hierarchyStack.PeekAtUnchecked(hierarchyStack.Count - 2);

@@ -27,11 +27,13 @@ namespace UIForia {
             string path = templateSettings.outputPath;
             string extension = "." + templateSettings.codeFileExtension;
 
-            if (Directory.Exists(path)) {
-                Directory.Delete(path, true);
+            string appPath = Path.Combine(path, templateSettings.applicationName);
+            
+            if (Directory.Exists(appPath)) {
+                Directory.Delete(appPath, true);
             }
 
-            Directory.CreateDirectory(path);
+            Directory.CreateDirectory(appPath);
 
             GenerateStyleCode(compiledTemplateData);
 
@@ -184,7 +186,20 @@ namespace UIForia {
             TemplateSettings templateSettings = compiledTemplateData.templateSettings;
 
             for (int i = 0; i < compiledTemplateData.compiledTemplates.size; i++) {
-                string file = Path.Combine(path, Path.ChangeExtension(compiledTemplateData.compiledTemplates.array[i].filePath, extension));
+                CompiledTemplate compiled = compiledTemplateData.compiledTemplates.array[i];
+
+                string file = compiled.filePath;
+                
+                if (!string.IsNullOrEmpty(compiled.templateName)) {
+                    file = Path.ChangeExtension(file, "");
+                    file = file.Substring(0, file.Length - 1);
+                    file += "__" + compiled.templateName;
+                    file = Path.Combine(path, Path.ChangeExtension(file, extension));
+                }
+                else {
+                    file = Path.Combine(path, Path.ChangeExtension(file, extension));
+                }
+
                 Directory.CreateDirectory(Path.GetDirectoryName(file));
 
                 string bindingCode = string.Empty;
@@ -198,7 +213,8 @@ namespace UIForia {
                 // todo -- optimize search or sort by file name at least
                 for (int b = 0; b < compiledBindings.size; b++) {
                     CompiledBinding binding = compiledBindings[b];
-                    if (binding.filePath == compiledTemplate.filePath) {
+                    if (binding.filePath == compiledTemplate.filePath && binding.templateName == compiled.templateName) {
+                        bindingCode += $"// binding id = {binding.bindingId}";
                         bindingCode += $"\n{s_Indent8}public Action<UIElement, UIElement> Binding_{compiledBindings.array[b].bindingType}_{binding.guid} = ";
                         bindingCode += binding.bindingFn.ToTemplateBodyFunction();
                         bindingCode += "\n";

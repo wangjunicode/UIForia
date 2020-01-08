@@ -29,6 +29,8 @@ namespace UIForia.Compilers {
             else if (slotType == SlotType.Children) {
                 retn += " (Children" + filePath + ")";
             }
+
+            retn += " id = " + slotId;
             return retn;
         }
 

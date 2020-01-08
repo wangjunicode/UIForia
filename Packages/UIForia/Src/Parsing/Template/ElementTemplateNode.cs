@@ -5,12 +5,12 @@ namespace UIForia.Parsing {
 
     public class ElementTemplateNode : TemplateNode2 {
 
-        public string templateId;
+        public string templateName;
         public LightList<SlotNode> slotDefinitionNodes;
         public TemplateShell templateShell;
-        
-        public ElementTemplateNode(string templateId, TemplateShell templateShell, ProcessedType processedType, StructList<AttributeDefinition2> attributes, in TemplateLineInfo templateLineInfo) : base(null, null, processedType, attributes, in templateLineInfo) {
-            this.templateId = templateId;
+
+        public ElementTemplateNode(string templateName, TemplateShell templateShell, ProcessedType processedType, StructList<AttributeDefinition2> attributes, in TemplateLineInfo templateLineInfo) : base(null, null, processedType, attributes, in templateLineInfo) {
+            this.templateName = templateName;
             this.templateShell = templateShell;
         }
 
@@ -24,7 +24,6 @@ namespace UIForia.Parsing {
 
             slotDefinitionNodes.Add(slotNode);
         }
-
 
         public bool HasSlotExternOverride(string slotName, out SlotNode slotNode) {
             if (slotDefinitionNodes == null || slotDefinitionNodes.size == 0) {
@@ -40,6 +39,23 @@ namespace UIForia.Parsing {
             }
 
             slotNode = null;
+            return false;
+        }
+
+        public bool DefinesSlot(string slotName) {
+            if (slotDefinitionNodes == null || slotDefinitionNodes.size == 0) {
+                // slotNode = null;
+                return false;
+            }
+
+            for (int i = 0; i < slotDefinitionNodes.size; i++) {
+                if (slotDefinitionNodes.array[i].slotName == slotName) {
+                    //  slotNode = slotDefinitionNodes.array[i];
+                    return true;
+                }
+            }
+
+            //  slotNode = null;
             return false;
         }
 

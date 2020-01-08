@@ -1,4 +1,3 @@
-using System;
 using UIForia.Parsing.Expressions;
 using UIForia.Util;
 
@@ -10,7 +9,6 @@ namespace UIForia.Parsing {
         Children,
         Extern,
         Template,
-
         Override
 
     }
@@ -23,6 +21,7 @@ namespace UIForia.Parsing {
 
         public  SlotNode(ElementTemplateNode root, TemplateNode2 parent, ProcessedType processedType, StructList<AttributeDefinition2> attributes, in TemplateLineInfo templateLineInfo, string slotName, SlotType slotType)
             : base(root, parent, processedType, attributes, templateLineInfo) {
+            this.compiledSlotId = -1;
             this.slotName = slotName;
             this.slotType = slotType;
         }

@@ -1,6 +1,4 @@
-using System.Collections.Generic;
 using System.Linq.Expressions;
-using UIForia.Exceptions;
 using UIForia.Parsing;
 using UIForia.Parsing.Expressions;
 using UIForia.Util;
@@ -19,6 +17,7 @@ namespace UIForia.Compilers {
         public GUID guid;
         public TemplateMetaData templateMetaData;
         public StructStack<ContextVariableDefinition> contextStack;
+        public string templateName;
 
         public bool TryGetSlotData(string slotName, out SlotDefinition slotDefinition) {
             if (slotDefinitions == null) {

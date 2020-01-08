@@ -68,6 +68,8 @@ namespace UIForia.Compilers {
             [DebuggerStepThrough] get { return blockStack.PeekUnchecked(); }
         }
 
+        public bool HasStatements => true; // todo -- optimize
+
         internal string GetUniqueVariableName(string name) {
             if (parent != null) {
                 return parent.GetUniqueVariableName(name);

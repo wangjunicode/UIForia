@@ -37,13 +37,14 @@ namespace UIForia {
             this.styleImporter = new StyleSheetImporter(templateSettings.templateResolutionBasePath);
         }
 
-        public CompiledTemplate CreateTemplate(string filePath) {
+        public CompiledTemplate CreateTemplate(string filePath, string templateName) {
             CompiledTemplate compiledTemplate = new CompiledTemplate();
             compiledTemplate.filePath = filePath;
             compiledTemplate.guid = GUID.Generate();
             compiledTemplate.templateId = compiledTemplates.size;
             compiledTemplates.Add(compiledTemplate);
             compiledTemplate.templateMetaData = new TemplateMetaData(compiledTemplate.templateId, filePath, null, null);
+            compiledTemplate.templateName = templateName;
             return compiledTemplate;
         }
 
@@ -58,13 +59,14 @@ namespace UIForia {
             return compiledSlot;
         }
         
-        public CompiledBinding AddBinding(TemplateNode templateNode, CompiledBindingType bindingType) {
+        public CompiledBinding AddBinding(TemplateNode2 templateNode, CompiledBindingType bindingType) {
             CompiledBinding binding = new CompiledBinding();
-            binding.filePath = templateNode.astRoot.fileName;
+            binding.filePath = templateNode.elementRoot.templateShell.filePath;
             binding.bindingType = bindingType;
             binding.elementTag = templateNode.originalString;
             binding.bindingId = compiledBindings.size;
             binding.guid = GUID.Generate().ToString();
+            binding.templateName = templateNode.elementRoot.templateName;
             compiledBindings.Add(binding);
             return binding;
         }

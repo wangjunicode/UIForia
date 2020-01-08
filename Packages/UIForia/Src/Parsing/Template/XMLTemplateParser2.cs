@@ -66,7 +66,6 @@ namespace UIForia.Parsing {
         // then, as more templates from that shell are requested, return them bit by bit
 
         private TemplateShell ParseOuterShell(TemplateAttribute templateAttribute) {
-            
             XElement root = XElement.Load(new XmlTextReader(templateAttribute.source, XmlNodeType.Element, parserContext), LoadOptions.SetLineInfo | LoadOptions.PreserveWhitespace);
 
             root.MergeTextNodes();
@@ -124,21 +123,24 @@ namespace UIForia.Parsing {
             TemplateShell shell = ParseOuterShell(templateAttr);
 
             return ParseInnerTemplate(shell, processedType);
-            
         }
 
         private ElementTemplateNode ParseInnerTemplate(TemplateShell shell, ProcessedType processedType) {
             XElement root = shell.GetElementTemplateContent(processedType.templateAttr.templateId);
-            
-            Assert.IsNotNull(root);
-            
+
+            if (root == null) {
+                throw new TemplateNotFoundException(processedType.templateAttr.filePath, processedType.templateAttr.templateId);
+            }
+
             IXmlLineInfo xmlLineInfo = root;
-            
+
             StructList<AttributeDefinition2> attributes = ParseAttributes(root.Attributes());
-            ElementTemplateNode templateNode = new ElementTemplateNode(processedType.templateAttr.templateId, shell, processedType, attributes,  new TemplateLineInfo(xmlLineInfo.LineNumber, xmlLineInfo.LinePosition));
+            ElementTemplateNode templateNode = new ElementTemplateNode(processedType.templateAttr.templateId, shell, processedType, attributes, new TemplateLineInfo(xmlLineInfo.LineNumber, xmlLineInfo.LinePosition));
 
             ParseChildren(templateNode, templateNode, root.Nodes());
 
+            shell.elementNodes.Add(templateNode);
+            
             return templateNode;
         }
 
@@ -173,7 +175,7 @@ namespace UIForia.Parsing {
                     return node;
                 }
                 else if (string.Equals(tagName, "DefineSlot", StringComparison.Ordinal)) {
-                    processedType = TypeProcessor.GetProcessedType(typeof(UISlotDefinition));
+                    processedType = TypeProcessor.GetProcessedType(typeof(UISlotOverride));
                     string slotName = GetSlotName(attributes);
                     node = new SlotNode(templateRoot, parent, processedType, attributes, templateLineInfo, slotName, SlotType.Default);
                     templateRoot.AddSlot((SlotNode) node);
@@ -181,21 +183,25 @@ namespace UIForia.Parsing {
                     return node;
                 }
                 else if (string.Equals(tagName, "ExternSlot", StringComparison.Ordinal)) {
-                    processedType = TypeProcessor.GetProcessedType(typeof(UISlotDefinition));
+                    processedType = TypeProcessor.GetProcessedType(typeof(UISlotOverride));
 
                     if (!(parent is ExpandedTemplateNode expanded)) {
                         throw ParseException.InvalidSlotOverride(parent.originalString, node.originalString);
                     }
 
+                    // when forwarding slots we need to tell the exposer that it accepts a slot, and the 
+                    
                     // todo -- error check
                     string slotName = GetSlotName(attributes);
                     string slotAlias = GetSlotAlias(slotName, attributes);
-                    // root.ValidateExternSlot(slotName, slotAlias);
 
-                    node = new SlotNode(templateRoot, parent, processedType, attributes, templateLineInfo, slotName, SlotType.Extern);
-                    templateRoot.AddSlot((SlotNode) node);
-                    parent.AddChild(node);
-                    return node;
+                    SlotNode slotNode = new SlotNode(templateRoot, parent, processedType, attributes, templateLineInfo, slotName, SlotType.Extern);
+                    
+                    // expanded.ValidateSlot((slotNode).slotName, templateLineInfo);
+                    
+                    templateRoot.AddSlot(slotNode);
+
+                    return slotNode;
                 }
 
                 processedType = TypeProcessor.ResolveTagName(tagName, null);
@@ -349,8 +355,9 @@ namespace UIForia.Parsing {
                 AttributeFlags flags = 0;
 
                 // todo -- not valid everywhere
-                if (name.Contains(".once")) {
+                if (name.Contains(".once") || name.Contains(".const")) {
                     name = name.Replace(".once", "");
+                    name = name.Replace(".const", "");
                     flags |= AttributeFlags.Const;
                 }
 

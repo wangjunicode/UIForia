@@ -12,6 +12,7 @@ namespace UIForia.Compilers {
         public string guid;
         public LambdaExpression bindingFn;
         public CompiledBindingType bindingType;
+        public string templateName;
 
     }
 

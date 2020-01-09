@@ -15,6 +15,12 @@ using Debug = UnityEngine.Debug;
 
 namespace UIForia.Compilers {
 
+    public interface ITypeWrapper {
+
+        Expression Wrap(Type targetType, Expression input);
+
+    }
+
     public class LinqCompiler {
 
         // todo -- event / delegate subscription
@@ -53,6 +59,7 @@ namespace UIForia.Compilers {
         private int id;
         public Func<string, LinqCompiler, Expression> resolveAlias;
         private Action<LinqCompiler, Expression> nullCheckHandler;
+        private ITypeWrapper typeWrapper;
 
         public LinqCompiler() {
             this.parameters = new StructList<Parameter>();
@@ -410,6 +417,10 @@ namespace UIForia.Compilers {
 
         public Expression Statement(string input) {
             return AddStatement(Visit(ExpressionParser.Parse(input)));
+        }
+
+        public Expression Statement(ASTNode input) {
+            return AddStatement(Visit(input));
         }
 
         public Expression RawExpression(Expression expression) {
@@ -1899,13 +1910,46 @@ namespace UIForia.Compilers {
             }
         }
 
+        public Expression TypeMatchStatement(Type targetType, ASTNode node) {
+            return null;
+        }
+
+        public Expression TypeWrapStatement(ITypeWrapper typeWrapper, Type targetType, string input) {
+            this.typeWrapper = typeWrapper;
+            Expression retn = VisitUnchecked(targetType, ExpressionParser.Parse(input));
+
+            if (targetType != retn.Type) {
+                try {
+                    retn = Expression.Convert(retn, targetType);
+                }
+                catch (InvalidOperationException) {
+                    Expression wrapped = typeWrapper?.Wrap(targetType, retn);
+                    if (wrapped != null && wrapped.Type == targetType) {
+                        return wrapped;
+                    }
+
+                    typeWrapper = null;
+                    throw CompileException.InvalidTargetType(targetType, retn.Type);
+                }
+            }
+
+            typeWrapper = null;
+            return retn;
+        }
+
         private Expression Visit(Type targetType, ASTNode node) {
             Expression retn = VisitUnchecked(targetType, node);
+
             if (targetType != null && retn.Type != targetType) {
                 try {
                     retn = Expression.Convert(retn, targetType);
                 }
                 catch (InvalidOperationException) {
+                    Expression wrapped = typeWrapper?.Wrap(targetType, retn);
+                    if (wrapped != null && wrapped.Type == targetType) {
+                        return wrapped;
+                    }
+
                     throw CompileException.InvalidTargetType(targetType, retn.Type);
                 }
             }
@@ -2376,7 +2420,7 @@ namespace UIForia.Compilers {
 //                    Debug.Log("Method found");
 //                }
 //            }
-            
+
             throw CompileException.UnresolvedIdentifier(identifierNode.name);
         }
 
@@ -2666,6 +2710,11 @@ namespace UIForia.Compilers {
             compiler.SetOutOfBoundsCheckingEnabled(true);
             s_CompilerPool.Release(compiler);
             return expr.Type;
+        }
+
+        public void SetNamespaces(IList<string> namespaceList) {
+            namespaces.Clear();
+            namespaces.AddRange(namespaceList);
         }
 
     }

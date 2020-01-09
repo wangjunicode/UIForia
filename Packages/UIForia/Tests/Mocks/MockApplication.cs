@@ -5,6 +5,7 @@ using Src.Systems;
 using UIForia;
 using UIForia.Compilers;
 using UIForia.Elements;
+using UIForia.UIInput;
 using UnityEditor;
 using UnityEngine;
 using Application = UIForia.Application;

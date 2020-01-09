@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 using UIForia.Exceptions;
 using UIForia.Parsing.Expressions.AstNodes;
@@ -16,6 +17,7 @@ namespace UIForia.Parsing.Expressions {
 
         private static readonly StringBuilder s_StringBuilder = new StringBuilder(128);
 
+        [DebuggerStepThrough]
         public static ASTNode Parse(string input) {
             return new ExpressionParser().ParseInternal(input);
         }

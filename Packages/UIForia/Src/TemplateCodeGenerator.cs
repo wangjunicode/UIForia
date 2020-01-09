@@ -27,28 +27,26 @@ namespace UIForia {
             string path = templateSettings.outputPath;
             string extension = "." + templateSettings.codeFileExtension;
 
-            string appPath = Path.Combine(path, templateSettings.applicationName);
-            
-            if (Directory.Exists(appPath)) {
-                Directory.Delete(appPath, true);
+            if (Directory.Exists(path)) {
+                Directory.Delete(path, true);
             }
 
-            Directory.CreateDirectory(appPath);
+            Directory.CreateDirectory(path);
 
-            GenerateStyleCode(compiledTemplateData);
+            string styleFilePaths = GenerateStyleCode(compiledTemplateData);
 
             GenerateTemplateCode(path, extension, compiledTemplateData);
-            
-            GenerateInitCode(path, extension, compiledTemplateData);
+
+            GenerateInitCode(path, extension, compiledTemplateData, styleFilePaths);
 
             return true;
         }
 
-        private static void GenerateInitCode(string path, string extension, CompiledTemplateData compiledTemplateData) {
+        private static void GenerateInitCode(string path, string extension, CompiledTemplateData compiledTemplateData, string styleFilePaths) {
             string template = TemplateConstants.InitSource;
             template = template.Replace("::APPNAME::", compiledTemplateData.templateSettings.StrippedApplicationName);
             template = template.Replace("::TEMPLATE_CODE::", GenerateTemplateLoadCode(compiledTemplateData));
-            template = template.Replace("::STYLE_FILE_PATHS::", GenerateStylePathCode(compiledTemplateData));
+            template = template.Replace("::STYLE_FILE_PATHS::", styleFilePaths);
             template = template.Replace("::TEMPLATE_META_CODE::", GenerateTemplateMetaDataCode(compiledTemplateData));
             template = template.Replace("::SLOT_CODE::", GenerateSlotCode(compiledTemplateData));
             template = template.Replace("::BINDING_CODE::", GenerateBindingCode(compiledTemplateData));
@@ -63,10 +61,6 @@ namespace UIForia {
 
             File.WriteAllText(initPath, template);
             AssetDatabase.Refresh();
-        }
-
-        public static string GenerateStylePathCode(CompiledTemplateData compiledTemplateData) {
-            return string.Empty;
         }
 
         private static string GenerateTemplateLoadCode(CompiledTemplateData compiledTemplateData) {
@@ -89,13 +83,35 @@ namespace UIForia {
 
             builder.AppendLine($"{s_Indent12}{nameof(TemplateMetaData)}[] templateData = new {nameof(TemplateMetaData)}[{compiledTemplates.size}];");
             builder.AppendLine($"{s_Indent12}{nameof(TemplateMetaData)} template;");
+            builder.AppendLine($"{s_Indent12}{nameof(StyleSheetReference)}[] styleSheetRefs;");
 
             for (int i = 0; i < compiledTemplates.size; i++) {
-                builder.AppendLine($"{s_Indent12}template = new {nameof(TemplateMetaData)}({compiledTemplates[i].templateId}, @\"{compiledTemplates[i].filePath}\", styleMap, null);");
-                // todo -- reference style ids
-                // todo -- maybe other references?
-                // referencedStyles[0] = new StyleReference(styleSheets[4], "alias");
-                // referencedStyles[1] = new StyleReference(styleSheets[5], "alias");
+                TemplateMetaData meta = compiledTemplates[i].templateMetaData;
+
+                if (meta.styleReferences != null && meta.styleReferences.Length > 0) {
+                    builder.Append(s_Indent12);
+                    builder.Append("styleSheetRefs = new StyleSheetReference[");
+                    builder.Append(meta.styleReferences.Length);
+                    builder.AppendLine("];");
+                    
+                    for (int j = 0; j < meta.styleReferences.Length; j++) {
+                        StyleSheetReference sheetReference = meta.styleReferences[j];
+                        builder.Append(s_Indent12);
+                        builder.Append("styleSheetRefs[");
+                        builder.Append(j);
+                        builder.Append("] = new StyleSheetReference(");
+                        builder.Append(sheetReference.alias ?? "null");
+                        builder.Append(", sheetMap[@\"");
+                        builder.Append(sheetReference.styleSheet.path);
+                        builder.AppendLine("\"]);");
+                    }
+                    
+                    builder.AppendLine($"{s_Indent12}template = new {nameof(TemplateMetaData)}({compiledTemplates[i].templateId}, @\"{compiledTemplates[i].filePath}\", styleMap, styleSheetRefs);");
+                }
+                else {
+                    builder.AppendLine($"{s_Indent12}template = new {nameof(TemplateMetaData)}({compiledTemplates[i].templateId}, @\"{compiledTemplates[i].filePath}\", styleMap, null);");
+                }
+                
                 builder.AppendLine($"{s_Indent12}templateData[{i}] = template;");
             }
 
@@ -132,7 +148,7 @@ namespace UIForia {
             return builder.ToString();
         }
 
-        private static void GenerateStyleCode(CompiledTemplateData compiledTemplateData) {
+        private static string GenerateStyleCode(CompiledTemplateData compiledTemplateData) {
             StyleSheet[] sheets = compiledTemplateData.styleImporter.GetImportedStyleSheets();
 
             string styleFilePathArray = "";
@@ -158,6 +174,8 @@ namespace UIForia {
                     File.WriteAllText(filepath, sheets[i].source);
                 }
             }
+
+            return styleFilePathArray;
         }
 
         private static string GenerateElementConstructors() {
@@ -189,7 +207,7 @@ namespace UIForia {
                 CompiledTemplate compiled = compiledTemplateData.compiledTemplates.array[i];
 
                 string file = compiled.filePath;
-                
+
                 if (!string.IsNullOrEmpty(compiled.templateName)) {
                     file = Path.ChangeExtension(file, "");
                     file = file.Substring(0, file.Length - 1);

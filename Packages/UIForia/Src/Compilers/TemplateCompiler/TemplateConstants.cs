@@ -3,6 +3,8 @@ namespace UIForia.Compilers {
     public class TemplateConstants {
 
         public const string InitSource = @"using System;
+using System;
+using System.Collections.Generic;
 using UIForia.Compilers;
 using UIForia.Elements;
 using UIForia.Compilers.Style;
@@ -21,7 +23,7 @@ namespace UIForia.Generated {
 ::TEMPLATE_CODE::
         }
 
-        public TemplateMetaData[] LoadTemplateMetaData(UIStyleGroupContainer[] styleMap) {
+        public TemplateMetaData[] LoadTemplateMetaData(Dictionary<string, StyleSheet> sheetMap, UIStyleGroupContainer[] styleMap) {
 ::TEMPLATE_META_CODE::
         }
 

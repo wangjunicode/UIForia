@@ -961,7 +961,7 @@ namespace UIForia.Systems {
                 return;
             }
 
-            for (int i = 1; i < queryableElements.size; i++) {
+            for (int i = 0; i < queryableElements.size; i++) {
                 UIElement element = queryableElements.array[i].element;
                 LayoutResult layoutResult = element.layoutResult;
 

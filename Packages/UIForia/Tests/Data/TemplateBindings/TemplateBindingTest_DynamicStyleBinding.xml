@@ -1,0 +1,26 @@
+<UITemplate>
+    
+    <Style>
+        style style-1 { BackgroundColor = Green; }
+        
+        style style-2 {}
+        
+        style dynamicStyle {}
+        
+        style list-1 {}
+        
+        style list-2 {}
+        
+    </Style>
+    
+    <Contents>
+
+        <Div style="style-1 style-2 {useDynamic ? 'dynamicStyle' : GetStyleList()}"/>
+        
+        <Div style="{'style' + 1} style-2 {useDynamic ? dynamicStyleReference}"/>
+        
+<!--        <Div style="static-1 static-2 {useDynamic ? ['dynamicStyle', 'other-style', actualStyleReference] : GetStyleList()}"/>-->
+        
+    </Contents>
+    
+</UITemplate>

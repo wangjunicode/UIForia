@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UIForia.Compilers;
 using UIForia.Compilers.Style;
 using UIForia.Elements;
@@ -13,7 +14,7 @@ namespace UIForia {
         
         Action<UIElement, UIElement>[] LoadBindings();
 
-        TemplateMetaData[] LoadTemplateMetaData(UIStyleGroupContainer[] styleListArray);
+        TemplateMetaData[] LoadTemplateMetaData(Dictionary<string, StyleSheet> sheetMap, UIStyleGroupContainer[] styleListArray);
 
         string[] StyleFilePaths { get; }
 

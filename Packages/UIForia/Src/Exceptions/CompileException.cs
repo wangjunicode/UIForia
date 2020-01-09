@@ -4,8 +4,10 @@ using System.Linq.Expressions;
 using System.Reflection;
 using UIForia.Compilers;
 using UIForia.Parsing;
+using UIForia.Parsing.Expressions;
 using UIForia.Parsing.Expressions.AstNodes;
 using UIForia.Parsing.Style.AstNodes;
+using UIForia.Text;
 
 namespace UIForia.Exceptions {
 
@@ -209,6 +211,14 @@ namespace UIForia.Exceptions {
 
         public static CompileException UnmatchedSlot(string slotName, string path) {
             return new CompileException($"Unable to find a matching slot with the name {slotName} in template {path}");
+        }
+
+        public static CompileException InvalidInputHandlerLambda(in AttributeDefinition2 attr, int signatureSize) {
+            return new CompileException($"Input handler lambda is invalid. Expected 0 or 1 arguments for handler {attr.value} but found {signatureSize}");
+        }
+
+        public static CompileException UnknownStyleState(string templateShellFilePath, LineInfo lineInfo, string s) {
+            return new CompileException($"file: {templateShellFilePath}{lineInfo}\nUnable to handle style state declaration '{s}' Expected 'active', 'focus', or 'hover'");
         }
 
     }

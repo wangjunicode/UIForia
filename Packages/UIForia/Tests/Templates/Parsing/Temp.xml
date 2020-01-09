@@ -1,22 +1,22 @@
-<?xml version="1.0" encoding="utf-8"?>
-
-
 <UITemplate>
-    
-    <Import path="./thing" as="blah"/>
-    <Import path="./other/thing" as="thing"/>
-    
-    <Contents> 
-        dafeaf
-        afea
-        
-        <!--comment-->
-        
-        faea
 
-        <Repeat list="{mylist[i]}">
-            text
-        </Repeat>
+    <Style>
+        
+        style m {
+            PreferredSize = 100px;
+        }
+        
+    </Style>
+    
+    <Contents>
+
+        <Div style="m" mouse:down="HandleMouseClick_NoParams()" mouse:enter="HandleMouseEnter()"/>
+        
+        <Div style="m" mouse:down="HandleMouseClick_EvtParam($evt)"/>
+        
+        <Div style="m" mouse:down="HandleMouseClick_MixedParams($evt, 36)"/>
+        
+        <Div style="m" mouse:down="HandleMouseClick_NoEvtParam('string goes here', 35)"/>
         
     </Contents>
     

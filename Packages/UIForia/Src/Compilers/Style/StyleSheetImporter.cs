@@ -69,21 +69,22 @@ namespace UIForia.Compilers.Style {
             return sheet;
         }
 
-        public StyleSheet ImportStyleSheetFromString(string id, string literalTemplate) {
-            if (id != null && cachedStyleSheets.TryGetValue(id, out StyleSheet sheet)) {
+        public StyleSheet ImportStyleSheetFromString(string path, string literalTemplate) {
+            if (path != null && cachedStyleSheets.TryGetValue(path, out StyleSheet sheet)) {
                 return sheet;
             }
 
             try {
-                StyleSheet styleSheet = compiler.Compile(id, StyleParser.Parse(literalTemplate));
-                if (id != null) {
-                    cachedStyleSheets.Add(id, styleSheet);
+                StyleSheet styleSheet = compiler.Compile(path, StyleParser.Parse(literalTemplate));
+                if (path != null) {
+                    cachedStyleSheets.Add(path, styleSheet);
                 }
 
+                styleSheet.path = path;
                 return styleSheet;
             }
             catch (ParseException ex) {
-                ex.SetFileName(id);
+                ex.SetFileName(path);
                 throw;
             }
         }

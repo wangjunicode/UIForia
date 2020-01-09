@@ -36,9 +36,7 @@ namespace UIForia.Systems {
         public bool DebugMouseUpThisFrame => m_MouseState.isLeftMouseUpThisFrame;
 #endif
 
-        private List<UIElement> m_AllElementsThisFrame;
         private List<UIElement> m_ElementsLastFrame;
-        private List<UIElement> m_AllElementsLastFrame;
 
         // temporary hack for the building system, this should be formalized and use ElementRef instead
         public IReadOnlyList<UIElement> ElementsThisFrame => m_ElementsLastFrame;
@@ -60,9 +58,7 @@ namespace UIForia.Systems {
         private readonly List<UIElement> m_MouseDownElements;
 
         private readonly Dictionary<KeyCode, KeyState> m_KeyStates;
-      //  private readonly Dictionary<int, DragHandlerGroup> m_DragHandlerMap;
         private readonly Dictionary<int, DragCreatorGroup> m_DragCreatorMap;
-//        private readonly SkipTree<KeyboardEventTreeNode> m_KeyboardEventTree;
 
         private readonly LightList<KeyCode> m_DownThisFrame;
         private readonly LightList<KeyCode> m_UpThisFrame;
@@ -70,7 +66,6 @@ namespace UIForia.Systems {
 
         private readonly EventPropagator m_EventPropagator;
         private readonly List<ValueTuple<Action<GenericInputEvent>, UIElement>> m_MouseEventCaptureList;
-       // private readonly List<ValueTuple<DragEventHandler, UIElement>> m_DragEventCaptureList;
         private static readonly Event s_Event = new Event();
 
         public KeyboardModifiers KeyboardModifiers => modifiersThisFrame;
@@ -91,8 +86,6 @@ namespace UIForia.Systems {
             this.m_EnteredElements = new List<UIElement>();
             this.m_ExitedElements = new List<UIElement>();
             this.m_ActiveElements = new List<UIElement>();
-            this.m_AllElementsThisFrame = new List<UIElement>();
-            this.m_AllElementsLastFrame = new List<UIElement>();
 
             this.m_DragCreatorMap = new Dictionary<int, DragCreatorGroup>();
          //   this.m_DragHandlerMap = new Dictionary<int, DragHandlerGroup>();
@@ -729,6 +722,7 @@ namespace UIForia.Systems {
             }
 
             if (m_FocusedElement == null) {
+                
 //                m_KeyboardEventTree.ConditionalTraversePreOrder(keyEvent, (item, evt) => {
 //                    if (evt.stopPropagation) return false;
 //
@@ -755,7 +749,7 @@ namespace UIForia.Systems {
                 // KeyboardEventTreeNode focusedNode = m_KeyboardEventTree.GetItem(m_FocusedElement);
               //  if (focusedNode == null) {
                     // actually this is totally fine since any element can implement IFocusable without accepting keyboard input
-                    return;
+                    // return;
                // }
 
                // IReadOnlyList<KeyboardEventHandler> handlers = focusedNode.handlers;
@@ -808,8 +802,7 @@ namespace UIForia.Systems {
                 KeyCode keyCode = s_Event.keyCode;
                 char character = s_Event.character;
 
-                // need to check this on osx, according to stackoverflow OSX and Windows might handle
-                // sending key events differently
+                // need to check this on osx, according to stackoverflow OSX and Windows might handle sending key events differently
 
                 if (s_Event.rawType == EventType.ExecuteCommand || s_Event.rawType == EventType.ValidateCommand) {
                     switch (s_Event.commandName) {
@@ -826,10 +819,8 @@ namespace UIForia.Systems {
                             ProcessKeyEvent(EventType.KeyDown, KeyCode.V, 'v');
                             continue;
                         case "SoftDelete":
-                            Debug.Log("Delete");
                             continue;
                         case "Duplicate":
-                            Debug.Log("Duplicate");
                             continue;
                         case "Find":
                             continue;

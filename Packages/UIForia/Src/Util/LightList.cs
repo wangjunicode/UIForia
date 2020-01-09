@@ -102,6 +102,16 @@ namespace UIForia.Util {
             array[size] = item;
             size++;
         }
+        
+         public T AddReturn(T item) {
+            if (size + 1 > array.Length) {
+                System.Array.Resize(ref array, (size + 1) * 2);
+            }
+
+            array[size] = item;
+            size++;
+            return item;
+         }
 
         [DebuggerStepThrough]
         public void AddRange(IEnumerable<T> collection) {

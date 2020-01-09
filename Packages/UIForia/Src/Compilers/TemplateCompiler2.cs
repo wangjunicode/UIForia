@@ -2,13 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Text;
 using UIForia.Compilers.Style;
 using UIForia.Elements;
 using UIForia.Exceptions;
 using UIForia.Parsing;
 using UIForia.Parsing.Expressions;
+using UIForia.Parsing.Expressions.AstNodes;
 using UIForia.Rendering;
 using UIForia.Systems;
 using UIForia.Templates;
@@ -26,7 +26,7 @@ namespace UIForia.Compilers {
         private const string k_InputHandlerVarName = "__inputHandler";
         private const string k_CastElement = "__castElement";
         private const string k_CastRoot = "__castRoot";
-        private static readonly char[] s_StyleSeparator = new char[] {' '};
+        private static readonly char[] s_StyleSeparator = {' '};
 
         private readonly LightStack<ContextVarAliasResolver> resolvers;
         private StructStack<ContextVariableDefinition> contextVarStack;
@@ -39,6 +39,8 @@ namespace UIForia.Compilers {
         private TemplateCache templateCache;
         private int contextId;
         private int NextContextId => contextId++;
+
+        private static readonly DynamicStyleListTypeWrapper s_DynamicStyleListTypeWrapper = new DynamicStyleListTypeWrapper();
 
         private static readonly MethodInfo s_CreateFromPool = typeof(Application).GetMethod(nameof(Application.CreateElementFromPoolWithType));
         private static readonly MethodInfo s_BindingNodePool_Get = typeof(LinqBindingNode).GetMethod("Get", BindingFlags.Static | BindingFlags.Public);
@@ -68,12 +70,17 @@ namespace UIForia.Compilers {
         private static readonly FieldInfo s_UIElement_TemplateMetaData = typeof(UIElement).GetField(nameof(UIElement.templateMetaData), BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
         private static readonly MethodInfo s_UIElement_OnUpdate = typeof(UIElement).GetMethod(nameof(UIElement.OnUpdate), BindingFlags.Instance | BindingFlags.Public);
         private static readonly MethodInfo s_UIElement_SetAttribute = typeof(UIElement).GetMethod(nameof(UIElement.SetAttribute), BindingFlags.Instance | BindingFlags.Public);
+        private static readonly MethodInfo s_UIElement_SetEnabled = typeof(UIElement).GetMethod(nameof(UIElement.SetEnabled), BindingFlags.Instance | BindingFlags.Public);
 
         private static readonly MethodInfo s_StyleSet_InternalInitialize = typeof(UIStyleSet).GetMethod(nameof(UIStyleSet.internal_Initialize), BindingFlags.Instance | BindingFlags.Public);
+        private static readonly MethodInfo s_StyleSet_SetBaseStyles = typeof(UIStyleSet).GetMethod(nameof(UIStyleSet.SetBaseStyles), BindingFlags.Instance | BindingFlags.Public);
 
         private static readonly MethodInfo s_TemplateMetaData_GetStyleById = typeof(TemplateMetaData).GetMethod(nameof(TemplateMetaData.GetStyleById), BindingFlags.Instance | BindingFlags.Public);
 
         private static readonly MethodInfo s_LightList_UIStyleGroupContainer_PreSize = typeof(LightList<UIStyleGroupContainer>).GetMethod(nameof(LightList<UIStyleGroupContainer>.PreSize), BindingFlags.Public | BindingFlags.Static);
+        private static readonly MethodInfo s_LightList_UIStyleGroupContainer_Get = typeof(LightList<UIStyleGroupContainer>).GetMethod(nameof(LightList<UIStyleGroupContainer>.Get), BindingFlags.Public | BindingFlags.Static);
+        private static readonly MethodInfo s_LightList_UIStyleGroupContainer_Release = typeof(LightList<UIStyleGroupContainer>).GetMethod(nameof(LightList<UIStyleGroupContainer>.Release), BindingFlags.Public | BindingFlags.Instance);
+        private static readonly MethodInfo s_LightList_UIStyleGroupContainer_Add = typeof(LightList<UIStyleGroupContainer>).GetMethod(nameof(LightList<UIStyleGroupContainer>.Add), BindingFlags.Public | BindingFlags.Instance);
         private static readonly MethodInfo s_LightList_UIStyle_Release = typeof(LightList<UIStyleGroupContainer>).GetMethod(nameof(LightList<UIStyleGroupContainer>.Release), BindingFlags.Public | BindingFlags.Instance);
         private static readonly FieldInfo s_LightList_UIStyleGroupContainer_Array = typeof(LightList<UIStyleGroupContainer>).GetField(nameof(LightList<UIStyleGroupContainer>.array), BindingFlags.Public | BindingFlags.Instance);
 
@@ -94,12 +101,16 @@ namespace UIForia.Compilers {
 
         private static readonly MethodInfo s_EventUtil_Subscribe = typeof(EventUtil).GetMethod(nameof(EventUtil.Subscribe));
 
+        private static readonly MethodInfo s_DynamicStyleList_Flatten = typeof(DynamicStyleList).GetMethod(nameof(DynamicStyleList.Flatten));
+
         private static readonly Expression s_StringBuilderExpr = Expression.Field(null, typeof(TextUtil), "StringBuilder");
         private static readonly Expression s_StringBuilderClear = ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, typeof(StringBuilder).GetMethod("Clear"));
         private static readonly Expression s_StringBuilderToString = ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, typeof(StringBuilder).GetMethod("ToString", Type.EmptyTypes));
-        private static readonly MethodInfo s_StringBuilder_AppendString = typeof(StringBuilder).GetMethod("Append", new Type[] {typeof(string)});
+        private static readonly MethodInfo s_StringBuilder_AppendString = typeof(StringBuilder).GetMethod("Append", new[] {typeof(string)});
 
         private static readonly LinqCompiler s_TypeResolver = new LinqCompiler();
+        private static readonly PropertyInfo s_GenericInputEvent_AsKeyInputEvent = typeof(GenericInputEvent).GetProperty(nameof(GenericInputEvent.AsKeyInputEvent));
+        private static readonly PropertyInfo s_GenericInputEvent_AsMouseInputEvent = typeof(GenericInputEvent).GetProperty(nameof(GenericInputEvent.AsMouseInputEvent));
 
         public TemplateCompiler2(TemplateSettings settings) {
             this.templateCache = new TemplateCache(settings);
@@ -126,7 +137,7 @@ namespace UIForia.Compilers {
         public static CompiledTemplateData CompileTemplates(Type appRootType, TemplateSettings templateSettings) {
             TemplateCompiler2 instance = new TemplateCompiler2(templateSettings);
 
-              CompiledTemplateData compiledTemplateData = instance.CompileRoot(appRootType);
+            CompiledTemplateData compiledTemplateData = instance.CompileRoot(appRootType);
 
             return compiledTemplateData;
         }
@@ -184,6 +195,7 @@ namespace UIForia.Compilers {
             ParameterExpression scopeParam = Expression.Parameter(typeof(TemplateScope), "scope");
 
             CompilationContext ctx = new CompilationContext(templateRootNode);
+            ctx.namespaces = namespaces;
             ctx.rootType = processedType;
             ctx.rootParam = rootParam;
             ctx.templateScope = scopeParam;
@@ -202,6 +214,10 @@ namespace UIForia.Compilers {
                 }
             }
 
+            if (ctx.styleSheets != null && ctx.styleSheets.size > 0) {
+                retn.templateMetaData.styleReferences = ctx.styleSheets.ToArray();
+            }
+            
             if (!processedType.IsUnresolvedGeneric) {
                 ctx.PushBlock();
 
@@ -284,7 +300,7 @@ namespace UIForia.Compilers {
         private Expression CompileTerminalNode(CompilationContext ctx, TerminalNode terminalNode) {
             throw new NotImplementedException();
         }
-        
+
         private Expression CompileSlotDefinition(CompilationContext parentContext, SlotNode slotNode) {
             // we want to try to resolve the slot name. if we can't fall back, if fallback id is -1 then don't add a child
             CompiledSlot compiledSlot = templateData.CreateSlot(parentContext.compiledTemplate.filePath, slotNode.slotName, slotNode.slotType);
@@ -389,10 +405,10 @@ namespace UIForia.Compilers {
                 }
             }
 
+            CompileElementData(textNode, ctx);
+
             VisitChildren(ctx, textNode);
 
-//            OutputAttributes(ctx, templateNode);
-//            CompileElementData(templateNode, ctx);
 
             return nodeExpr;
         }
@@ -407,8 +423,7 @@ namespace UIForia.Compilers {
 
             VisitChildren(ctx, containerNode);
 
-//            OutputAttributes(ctx, templateNode);
-//            CompileElementData(templateNode, ctx);
+            CompileElementData(containerNode, ctx);
 
             return nodeExpr;
         }
@@ -513,11 +528,14 @@ namespace UIForia.Compilers {
             return nodeExpr;
         }
 
-        private void InitializeCompilers(Type rootType, Type elementType) {
+        private void InitializeCompilers(LightList<string> namespaces, Type rootType, Type elementType) {
             updateCompiler.Reset();
             enabledCompiler.Reset();
             createdCompiler.Reset();
 
+            updateCompiler.SetNamespaces(namespaces);
+            enabledCompiler.SetNamespaces(namespaces);
+            createdCompiler.SetNamespaces(namespaces);
             Parameter p0 = new Parameter(typeof(UIElement), "__root", ParameterFlags.NeverNull);
             Parameter p1 = new Parameter(typeof(UIElement), "__element", ParameterFlags.NeverNull);
 
@@ -541,6 +559,30 @@ namespace UIForia.Compilers {
             resolvers.array[2] = new ContextVarAliasResolver("$root", elementType, -3, AliasResolverType.Root);
         }
 
+        private static void OutputAttributes(CompilationContext ctx, TemplateNode2 template) {
+            if (template.GetAttributeCount() > 0) {
+                int attrIdx = 0;
+
+                for (int i = 0; i < template.attributes.size; i++) {
+                    ref AttributeDefinition2 attr = ref template.attributes.array[i];
+
+                    if (template.attributes[i].type == AttributeType.Attribute) {
+                        // targetElement_x.attributeList.array[x] = new ElementAttribute("key", "value"); will be empty string for attributes that are bound
+                        MemberExpression listAccess = Expression.MakeMemberAccess(ctx.ElementExpr, s_ElementAttributeList);
+                        MemberExpression arrayAccess = Expression.MakeMemberAccess(listAccess, s_StructList_ElementAttr_Array);
+                        IndexExpression arrayIndex = Expression.ArrayAccess(arrayAccess, Expression.Constant(attrIdx++));
+
+                        if ((attr.flags & AttributeFlags.Const) != 0) {
+                            ctx.Assign(arrayIndex, Expression.New(s_ElementAttributeCtor, Expression.Constant(attr.key), Expression.Constant(attr.value)));
+                        }
+                        else {
+                            ctx.Assign(arrayIndex, Expression.New(s_ElementAttributeCtor, Expression.Constant(attr.key), Expression.Constant(string.Empty)));
+                        }
+                    }
+                }
+            }
+        }
+
         private void CompileElementData(TemplateNode2 templateNode, CompilationContext ctx) {
             int count = 0;
 
@@ -548,7 +590,10 @@ namespace UIForia.Compilers {
                 count = templateNode.attributes.size;
             }
 
-            InitializeCompilers(ctx.templateRootNode.ElementType, templateNode.processedType.rawType);
+            OutputAttributes(ctx, templateNode);
+
+            InitializeCompilers(ctx.namespaces, ctx.templateRootNode.ElementType, templateNode.processedType.rawType);
+
             int updateBindingCount = 0;
             int enabledBindingCount = 0;
             int createdBindingCount = 0;
@@ -559,8 +604,6 @@ namespace UIForia.Compilers {
 
             // todo -- handle nested access <Element thing.value.x="144f" keydown="" key-filter:keydown.keyup.withfocus="[allDown(shift, c, k), NoneOf()]"/>
             // todo -- handle .read.write bindings
-            // todo -- handle styles
-            // todo -- handle input callbacks
             // todo -- handle context variables
 
             for (int i = 0; i < count; i++) {
@@ -666,36 +709,39 @@ namespace UIForia.Compilers {
                                 for (int s = 0; s < list.size; s++) {
                                     ref TextExpression expr = ref list.array[s];
                                     if (expr.isExpression) {
-                                        Type type = updateCompiler.GetExpressionType(expr.text);
-                                        // todo -- handle list types
-                                        if (type != typeof(string) && !typeof(IList<string>).IsAssignableFrom(type) && !typeof(IList<UIStyleGroupContainer>).IsAssignableFrom(type)) {
-                                            throw new CompileException("Invalid dynamic style type: " + type);
-                                        }
+                                        // updateCompiler.SetImplicitContext(updateCompiler.GetVariable(k_CastRoot));
+                                        // Type type = updateCompiler.GetExpressionType(expr.text);
+                                        // // todo -- handle list types
+                                        // if (type != typeof(string) && !typeof(IList<string>).IsAssignableFrom(type) && !typeof(IList<UIStyleGroupContainer>).IsAssignableFrom(type)) {
+                                        //     throw new CompileException("Invalid dynamic style type: " + type);
+                                        // }
 
-                                        dynamicStyleData.Add(new DynamicStyleData(expr.text, type, false));
+                                        dynamicStyleData.Add(new DynamicStyleData(expr.text, typeof(string), false));
                                     }
                                     else {
                                         string[] parts = expr.text.Split(s_StyleSeparator, StringSplitOptions.RemoveEmptyEntries);
 
-                                        foreach (string p in parts) {
-                                            dynamicStyleData.Add(new DynamicStyleData(p, typeof(UIStyleGroupContainer), true));
+                                        for (int index = 0; index < parts.Length; index++) {
+                                            dynamicStyleData.Add(new DynamicStyleData(parts[index], typeof(UIStyleGroupContainer), true));
                                         }
                                     }
                                 }
                             }
                         }
                         else {
-                            // this is an instance style, todo -- handle .once etc
-                            throw new NotImplementedException();
+                            // instance style
+                            // for the moment assume no shorthands or syntax sugar, pure c#
+                            // style.backgroundColor = Color.red;
+
+                            updateBindingCount++;
+                            CompileStyleBinding(updateCompiler, templateNode, attr);
                         }
 
                         break;
                     }
 
                     case AttributeType.Attribute: {
-                        if ((attr.flags & AttributeFlags.Const) != 0) {
-                            continue; // todo -- make part of created instead? 
-                        }
+                        if ((attr.flags & AttributeFlags.Const) != 0) { }
                         else if ((attr.flags & AttributeFlags.EnableOnly) != 0) {
                             enabledBindingCount++;
                             CompileAttributeBinding(enabledCompiler, templateNode, attr);
@@ -749,42 +795,7 @@ namespace UIForia.Compilers {
             CompileTextBinding(templateNode);
 
             // if we have style bindings they need to run after Update() is called (or where it would have been called if it would have been present)
-            if (dynamicStyleData != null) {
-                updateBindingCount++;
-
-                // todo -- to handle array case we can't use PreSize, need to call Add on the list since size will be dynamic
-                ParameterExpression styleList = updateCompiler.AddVariable(
-                    new Parameter<LightList<UIStyleGroupContainer>>("styleList", ParameterFlags.NeverNull),
-                    ExpressionFactory.CallStaticUnchecked(s_LightList_UIStyleGroupContainer_PreSize, Expression.Constant(dynamicStyleData.size))
-                );
-
-                Expression styleListArray = Expression.MakeMemberAccess(styleList, s_LightList_UIStyleGroupContainer_Array);
-
-                for (int s = 0; s < dynamicStyleData.size; s++) {
-                    IndexExpression arrayIndex = Expression.ArrayAccess(styleListArray, Expression.Constant(s));
-                    ref DynamicStyleData data = ref dynamicStyleData.array[s];
-
-                    updateCompiler.Comment(data.text);
-
-                    if (data.isConstant) {
-                        int styleId = ctx.ResolveStyleName(data.text);
-                        // todo use expression
-                        updateCompiler.Assign(arrayIndex, $"__element.{nameof(UIElement.templateMetaData)}.GetStyleById({styleId})", false);
-                    }
-                    else {
-                        Type type = data.returnType;
-                        if (type == typeof(string)) {
-                            // todo -- don't allocate w/ aliases, use char array where possible
-                            // todo use expression
-                            updateCompiler.Assign(arrayIndex, $"__element.{nameof(UIElement.templateMetaData)}.{nameof(TemplateMetaData.ResolveStyleByName)}({data.text})", false);
-                        }
-                    }
-                }
-
-                updateCompiler.SetNullCheckingEnabled(false); // todo use expression
-                updateCompiler.Statement($"__element.style.{nameof(UIStyleSet.SetBaseStyles)}({styleList.Name})");
-                updateCompiler.SetNullCheckingEnabled(true);
-            }
+            updateBindingCount = CompileDynamicStyleData(ctx, dynamicStyleData, updateBindingCount);
 
             if (perFrameStyles != null) {
                 for (int i = 0; i < perFrameStyles.size; i++) {
@@ -866,6 +877,59 @@ namespace UIForia.Compilers {
             }
         }
 
+
+        private int CompileDynamicStyleData(CompilationContext ctx, StructList<DynamicStyleData> dynamicStyleData, int updateBindingCount) {
+            if (dynamicStyleData == null) {
+                return updateBindingCount;
+            }
+
+            ParameterExpression castElement = updateCompiler.GetVariable(k_CastElement);
+
+            updateBindingCount++;
+
+            // todo -- to handle array case we can't use PreSize, need to call Add on the list since size will be dynamic
+            ParameterExpression styleList = updateCompiler.AddVariable(
+                new Parameter<LightList<UIStyleGroupContainer>>("styleList", ParameterFlags.NeverNull),
+                ExpressionFactory.CallStaticUnchecked(s_LightList_UIStyleGroupContainer_Get)
+            );
+
+            Expression templateContext = Expression.Field(castElement, s_UIElement_TemplateMetaData);
+
+            updateCompiler.SetImplicitContext(updateCompiler.GetVariable(k_CastRoot));
+
+            for (int s = 0; s < dynamicStyleData.size; s++) {
+                ref DynamicStyleData data = ref dynamicStyleData.array[s];
+
+                updateCompiler.Comment(data.text);
+
+                if (data.isConstant) {
+                    int styleId = ctx.ResolveStyleName(data.text);
+
+                    Expression staticStyle = ExpressionFactory.CallInstanceUnchecked(templateContext, s_TemplateMetaData_GetStyleById, Expression.Constant(styleId));
+                    MethodCallExpression addCall = ExpressionFactory.CallInstanceUnchecked(styleList, s_LightList_UIStyleGroupContainer_Add, staticStyle);
+                    updateCompiler.RawExpression(addCall);
+                }
+                else {
+                    s_DynamicStyleListTypeWrapper.styleList = styleList;
+
+                    Expression dynamicStyleList = updateCompiler.TypeWrapStatement(s_DynamicStyleListTypeWrapper, typeof(DynamicStyleList), data.text);
+
+                    updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(dynamicStyleList, s_DynamicStyleList_Flatten, templateContext, styleList));
+                }
+            }
+
+            updateCompiler.SetNullCheckingEnabled(false);
+
+            MemberExpression style = Expression.Field(castElement, s_UIElement_StyleSet);
+
+            updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(style, s_StyleSet_SetBaseStyles, styleList));
+            updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(styleList, s_LightList_UIStyleGroupContainer_Release));
+            
+            updateCompiler.SetNullCheckingEnabled(true);
+
+            return updateBindingCount;
+        }
+
         private void CompileTextBinding(TemplateNode2 templateNode) {
             if (!(templateNode is TextNode textNode)) return;
 
@@ -922,9 +986,42 @@ namespace UIForia.Compilers {
             compiler.SetImplicitContext(compiler.GetVariable(k_CastRoot));
 
             // todo -- eliminate generated closure by passing in template root and element from input system
-            LinqCompiler closure = compiler.CreateClosure(parameters, typeof(void));
+            LinqCompiler closure = null;
 
-            closure.Statement(attr.value);
+            ASTNode astNode = ExpressionParser.Parse(attr.value);
+            if (astNode.type == ASTNodeType.LambdaExpression) {
+                LambdaExpressionNode n = (LambdaExpressionNode) astNode;
+
+                if (n.signature.size == 0) {
+                    parameters.Add(new Parameter<GenericInputEvent>(k_InputEventParameterName, ParameterFlags.NeverNull | ParameterFlags.NeverOutOfBounds));
+                    closure = compiler.CreateClosure(parameters, typeof(void));
+                    closure.Statement(n.body);
+                }
+                else if (n.signature.size == 1) {
+                    LambdaArgument signature = n.signature.array[0];
+
+                    if (signature.type != null) {
+                        Debug.LogWarning("Input handler lambda should not define a type");
+                    }
+
+                    Parameter parameter = parameters.AddReturn(new Parameter<GenericInputEvent>(k_InputEventParameterName, ParameterFlags.NeverNull | ParameterFlags.NeverOutOfBounds));
+                    closure = compiler.CreateClosure(parameters, typeof(void));
+                    ParameterExpression variable = closure.AddVariable(typeof(KeyboardInputEvent), signature.identifier);
+                    PropertyInfo property = s_GenericInputEvent_AsKeyInputEvent;
+                    closure.Assign(variable, Expression.Property(parameter.expression, property));
+                    closure.Statement(n.body);
+                }
+                else {
+                    throw CompileException.InvalidInputHandlerLambda(attr, n.signature.size);
+                }
+            }
+            else {
+                parameters.Add(new Parameter<GenericInputEvent>(k_InputEventParameterName, ParameterFlags.NeverNull | ParameterFlags.NeverOutOfBounds));
+                closure = compiler.CreateClosure(parameters, typeof(void));
+                closure.Statement(attr.value);
+                LightList<Parameter>.Release(ref parameters);
+            }
+
             LambdaExpression lambda = closure.BuildLambda();
 
             Expression target = Expression.Field(compiler.GetVariable(k_CastElement), s_UIElement_inputHandlerGroup);
@@ -1003,16 +1100,47 @@ namespace UIForia.Compilers {
             // 1 list of event handler typeof(Action<InputEvent>);
             // input call appropriate conversion fn from input event before resolving $evt
 
-            LightList<Parameter> parameters = LightList<Parameter>.Get();
-            parameters.Add(new Parameter<GenericInputEvent>(k_InputEventParameterName, ParameterFlags.NeverNull | ParameterFlags.NeverOutOfBounds));
+            // todo -- eliminate generated closure by passing in template root and element from input system and doing casting as normal in the callback
 
             resolvers.Push(new ContextVarAliasResolver(k_InputEventAliasName, typeof(MouseInputEvent), NextContextId, AliasResolverType.MouseEvent));
 
             compiler.SetImplicitContext(compiler.GetVariable(k_CastRoot));
-            // todo -- eliminate generated closure by passing in template root and element from input system
-            LinqCompiler closure = compiler.CreateClosure(parameters, typeof(void));
+            LinqCompiler closure = null;
+            LightList<Parameter> parameters = LightList<Parameter>.Get();
 
-            closure.Statement(attr.value);
+            ASTNode astNode = ExpressionParser.Parse(attr.value);
+            if (astNode.type == ASTNodeType.LambdaExpression) {
+                LambdaExpressionNode n = (LambdaExpressionNode) astNode;
+
+                if (n.signature.size == 0) {
+                    parameters.Add(new Parameter<GenericInputEvent>(k_InputEventParameterName, ParameterFlags.NeverNull | ParameterFlags.NeverOutOfBounds));
+                    closure = compiler.CreateClosure(parameters, typeof(void));
+                    closure.Statement(n.body);
+                }
+                else if (n.signature.size == 1) {
+                    LambdaArgument signature = n.signature.array[0];
+
+                    if (signature.type != null) {
+                        Debug.LogWarning("Input handler lambda should not define a type");
+                    }
+
+                    Parameter parameter = parameters.AddReturn(new Parameter<GenericInputEvent>(k_InputEventParameterName, ParameterFlags.NeverNull | ParameterFlags.NeverOutOfBounds));
+                    closure = compiler.CreateClosure(parameters, typeof(void));
+                    ParameterExpression variable = closure.AddVariable(typeof(MouseInputEvent), signature.identifier);
+                    closure.Assign(variable, Expression.Property(parameter.expression, s_GenericInputEvent_AsMouseInputEvent));
+                    closure.Statement(n.body);
+                }
+                else {
+                    throw CompileException.InvalidInputHandlerLambda(attr, n.signature.size);
+                }
+            }
+            else {
+                parameters.Add(new Parameter<GenericInputEvent>(k_InputEventParameterName, ParameterFlags.NeverNull | ParameterFlags.NeverOutOfBounds));
+                closure = compiler.CreateClosure(parameters, typeof(void));
+                closure.Statement(attr.value);
+                LightList<Parameter>.Release(ref parameters);
+            }
+
             LambdaExpression lambda = closure.BuildLambda();
 
             Expression target = Expression.Field(compiler.GetVariable(k_CastElement), s_UIElement_inputHandlerGroup);
@@ -1102,7 +1230,6 @@ namespace UIForia.Compilers {
             compiler.RawExpression(expression);
 
             closure.Release();
-            LightList<Parameter>.Release(ref parameters);
             resolvers.Pop();
         }
 
@@ -1150,13 +1277,14 @@ namespace UIForia.Compilers {
 
                 compiler.BeginIsolatedSection();
                 if ((attr.flags & AttributeFlags.RootContext) != 0) {
-                    compiler.SetImplicitContext(compiler.GetVariable(k_CastElement));
+                    compiler.SetImplicitContext(castElement);
                 }
                 else {
                     compiler.SetImplicitContext(compiler.GetVariable(k_CastRoot));
                 }
 
-                compiler.Statement($"{k_CastElement}.SetEnabled({attr.value})");
+                MethodCallExpression setEnabled = ExpressionFactory.CallInstanceUnchecked(castElement, s_UIElement_SetEnabled, compiler.Value(attr.value));
+                compiler.RawExpression(setEnabled);
                 compiler.CommentNewLineBefore($"if=\"{attr.value}\"");
 
                 // if(!element.isEnabled) return
@@ -1182,9 +1310,13 @@ namespace UIForia.Compilers {
 
             ParameterExpression element = compiler.GetVariable(k_CastElement);
             Expression value = compiler.Value(attr.StrippedValue);
-            ExpressionFactory.CallInstanceUnchecked(element, s_UIElement_SetAttribute, Expression.Constant(attr.key), value);
+            if (value.Type != typeof(string)) {
+                value = ExpressionFactory.CallInstanceUnchecked(value, value.Type.GetMethod("ToString", Type.EmptyTypes));
+            }
+
+            compiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(element, s_UIElement_SetAttribute, Expression.Constant(attr.key), value));
         }
-        
+
         private static bool IsConstant(Expression n) {
             while (true) {
                 switch (n) {
@@ -1202,6 +1334,62 @@ namespace UIForia.Compilers {
 
                 return false;
             }
+        }
+
+        private static void CompileStyleBinding(LinqCompiler compiler, TemplateNode2 templateNode, in AttributeDefinition2 attributeDefinition) {
+            ParameterExpression castElement = compiler.GetVariable(k_CastElement);
+            ParameterExpression castRoot = compiler.GetVariable(k_CastRoot);
+
+
+            StyleState styleState = StyleState.Normal;
+
+            string key = attributeDefinition.key;
+            if (key.Contains(".")) {
+                if (key.StartsWith("hover.")) {
+                    styleState = StyleState.Hover;
+                    key = key.Substring("hover.".Length);
+                }
+                else if (key.StartsWith("focus.")) {
+                    styleState = StyleState.Focused;
+                    key = key.Substring("focus.".Length);
+                }
+                else if (key.StartsWith("active.")) {
+                    styleState = StyleState.Focused;
+                    key = key.Substring("active.".Length);
+                }
+                else {
+                    throw CompileException.UnknownStyleState(templateNode.elementRoot.templateShell.filePath, new LineInfo(attributeDefinition.line, attributeDefinition.column), key.Split('.')[0]);
+                }
+            }
+
+            MemberExpression field = Expression.Field(castElement, s_UIElement_StyleSet);
+
+            compiler.BeginIsolatedSection();
+
+            compiler.SetImplicitContext(castRoot);
+
+            compiler.CommentNewLineBefore($"style.{attributeDefinition.key}=\"{attributeDefinition.value}\"");
+
+            Expression value = compiler.Value(attributeDefinition.value);
+            MethodInfo method = typeof(UIStyleSet).GetMethod("Set" + key);
+            ParameterInfo[] parameters = method.GetParameters();
+
+            if (!char.IsUpper(key[0])) {
+                char[] keyChars = key.ToCharArray();
+                keyChars[0] = char.ToUpper(keyChars[0]);
+                key = new string(keyChars);
+            }
+
+            // hack! for some reason because the type can be by ref (via in) it doesn't report as a generic type
+            if (parameters[0].ParameterType.FullName.Contains("System.Nullable")) {
+                if (!value.Type.IsNullableType()) {
+                    value = ExpressionFactory.Convert(value, ReflectionUtil.CreateGenericType(typeof(Nullable<>), value.Type));
+                }
+            }
+
+            compiler.RawExpression(Expression.Call(field, method, value, Expression.Constant(styleState)));
+
+            compiler.EndIsolatedSection();
         }
 
         private static void CompilePropertyBinding(LinqCompiler compiler, TemplateNode2 templateNode, in AttributeDefinition2 attributeDefinition) {
@@ -1235,7 +1423,7 @@ namespace UIForia.Compilers {
             }
 
             // todo -- I can figure out if a value is constant using IsConstant(expr), use this information to push the expression onto the const compiler
-            
+
             StructList<ProcessedType.PropertyChangeHandlerDesc> changeHandlers = StructList<ProcessedType.PropertyChangeHandlerDesc>.Get();
             templateNode.processedType.GetChangeHandlers(attributeDefinition.key, changeHandlers);
 
@@ -1417,6 +1605,44 @@ namespace UIForia.Compilers {
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
+            }
+
+        }
+
+        public class DynamicStyleListTypeWrapper : ITypeWrapper {
+
+            public ParameterExpression styleList;
+
+            private static readonly ConstructorInfo s_StringCtor = typeof(DynamicStyleList).GetConstructor(new[] {typeof(string)});
+            private static readonly ConstructorInfo s_StringListCtor = typeof(DynamicStyleList).GetConstructor(new[] {typeof(IList<string>)});
+            private static readonly ConstructorInfo s_StyleRefCtor = typeof(DynamicStyleList).GetConstructor(new[] {typeof(UIStyleGroupContainer)});
+            private static readonly ConstructorInfo s_StyleRefListCtor = typeof(DynamicStyleList).GetConstructor(new[] {typeof(IList<UIStyleGroupContainer>)});
+            private static readonly ConstructorInfo s_CharArrayCtor = typeof(DynamicStyleList).GetConstructor(new[] {typeof(char[])});
+
+            public Expression Wrap(Type targetType, Expression input) {
+                if (targetType != typeof(DynamicStyleList)) {
+                    return null;
+                }
+
+                Type inputType = input.Type;
+
+                if (inputType == typeof(string)) {
+                    return Expression.New(s_StringCtor, input);
+                }
+                else if (inputType == typeof(char[])) {
+                    return Expression.New(s_CharArrayCtor, input);
+                }
+                else if (typeof(IList<string>).IsAssignableFrom(inputType)) {
+                    return Expression.New(s_StringListCtor, input);
+                }
+                else if (inputType == typeof(UIStyleGroupContainer)) {
+                    return Expression.New(s_StyleRefCtor, input);
+                }
+                else if (typeof(IList<UIStyleGroupContainer>).IsAssignableFrom(inputType)) {
+                    return Expression.New(s_StyleRefListCtor, input);
+                }
+
+                return null;
             }
 
         }

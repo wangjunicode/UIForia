@@ -1,11 +1,10 @@
 using UIForia.Animation;
-using UIForia.Rendering;
 
 namespace UIForia.Compilers.Style {
 
     public class StyleSheet {
 
-        internal string path;
+        public string path;
         internal string source;
         internal readonly int id;
         internal readonly StyleConstant[] constants;
@@ -18,7 +17,7 @@ namespace UIForia.Compilers.Style {
             this.styleGroupContainers = styleGroupContainers;
             this.animations = animations;
         }
-        
+
         internal StyleSheet(int id, StyleConstant[] constants, UIStyleGroupContainer[] styleGroupContainers, AnimationData[] animations) {
             this.id = id;
             this.constants = constants;
@@ -31,6 +30,7 @@ namespace UIForia.Compilers.Style {
                 retn = default;
                 return false;
             }
+
             for (int i = 0; i < animations.Length; i++) {
                 if (animations[i].name == name) {
                     retn = animations[i];
@@ -71,7 +71,7 @@ namespace UIForia.Compilers.Style {
                 retn = null;
                 return false;
             }
-            
+
             for (int i = 0; i < styleGroupContainers.Length; i++) {
                 UIStyleGroupContainer container = styleGroupContainers[i];
                 if (container.name == name) {

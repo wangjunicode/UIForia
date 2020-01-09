@@ -1,32 +1,24 @@
 <UITemplate>
 
     <Style>
-
-        style container {
-            FlexLayoutDirection = Horizontal;
-            PreferredSize = 600px;
-            BackgroundColor = Yellow;
-            FlexLayoutWrap = WrapHorizontal;
-        }
-
-        style child {
-            PreferredSize = 200px 100px;
+        
+        style m {
+            PreferredSize = 100px;
             BackgroundColor = red;
         }
         
-        style grow {
-            FlexItemGrow = 1;
-            BackgroundColor = green;
-            PreferredSize = 300px 100px;
-        }
-        
     </Style>
+    
+    <Contents>
 
-    <Contents style="container">
-        <Group style='child'/>
-        <Group style='child'/>
-        <Group style='grow'/>
-        <Group style='child'/>
-        <Group style='child'/>
+        <Div style="m" mouse:down="HandleMouseClick_NoParams()"/>
+        
+        <Div style="m" mouse:down="HandleMouseClick_EvtParam($evt)"/>
+        
+        <Div style="m" mouse:down="HandleMouseClick_MixedParams($evt, 36)"/>
+        
+        <Div style="m" mouse:down="HandleMouseClick_NoEvtParam('string goes here', 35)"/>
+        
     </Contents>
+    
 </UITemplate>

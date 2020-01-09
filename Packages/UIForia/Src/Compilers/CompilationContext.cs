@@ -28,7 +28,7 @@ namespace UIForia.Compilers {
         private int currentDepth;
         private int maxDepth;
         private int bindingNodeCount;
-        private StructList<StyleSheetLookup> styleSheets;
+        public StructList<StyleSheetReference> styleSheets;
 
         private readonly LightStack<ParameterExpression> hierarchyStack;
         
@@ -37,6 +37,7 @@ namespace UIForia.Compilers {
         private static readonly MethodInfo s_CommentNewLineAfter = typeof(ExpressionUtil).GetMethod(nameof(ExpressionUtil.CommentNewLineAfter), BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);
         private static readonly char[] s_SplitChar = {'.'};
         public ElementTemplateNode templateRootNode;
+        public LightList<string> namespaces;
 
         public CompilationContext(ElementTemplateNode templateRootNode) {
             this.outputComments = true;
@@ -57,7 +58,7 @@ namespace UIForia.Compilers {
         }
 
         public void AddStyleSheet(string alias, StyleSheet styleSheet) {
-            styleSheets = styleSheets ?? new StructList<StyleSheetLookup>();
+            styleSheets = styleSheets ?? new StructList<StyleSheetReference>();
 
             if (!string.IsNullOrEmpty(alias)) {
                 for (int i = 0; i < styleSheets.size; i++) {
@@ -67,19 +68,12 @@ namespace UIForia.Compilers {
                 }
             }
 
-            styleSheets.Add(new StyleSheetLookup() {
+            styleSheets.Add(new StyleSheetReference() {
                 alias = alias,
                 styleSheet = styleSheet
             });
+            
         }
-
-        private struct StyleSheetLookup {
-
-            public string alias;
-            public StyleSheet styleSheet;
-
-        }
-
 
         public int ResolveStyleName(string name) {
             if (styleSheets == null) return -1;
@@ -232,7 +226,9 @@ namespace UIForia.Compilers {
             }
         }
 
-        public void PushContextVariable(string aliasName) { }
+        public void PushContextVariable(string aliasName) {
+            throw new NotImplementedException("PushContextVariable");
+        }
 
     }
 

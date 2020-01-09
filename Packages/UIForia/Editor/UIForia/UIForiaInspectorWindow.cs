@@ -331,22 +331,22 @@ namespace UIForia.Editor {
 
         private void DrawStyleGroup(UIStyleGroup group) {
             if (group.normal.style != null) {
-                DrawStyle(s_Content.text + " [Normal]", group.normal.style);
+                DrawStyle(group.name + " [Normal]", group.normal.style);
                 DrawRunCommands(group.normal.runCommands);
             }
 
             if (group.hover.style != default) {
-                DrawStyle(s_Content.text + " [Hover]", group.hover.style);
+                DrawStyle(group.name + " [Hover]", group.hover.style);
                 DrawRunCommands(group.hover.runCommands);
             }
 
             if (group.focused.style != default) {
-                DrawStyle(s_Content.text + " [Focus]", group.focused.style);
+                DrawStyle(group.name + " [Focus]", group.focused.style);
                 DrawRunCommands(group.focused.runCommands);
             }
 
             if (group.active.style != default) {
-                DrawStyle(s_Content.text + " [Active]", group.active.style);
+                DrawStyle(group.name + " [Active]", group.active.style);
                 DrawRunCommands(group.active.runCommands);
             }
         }

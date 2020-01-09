@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using SVGX;
@@ -21,7 +22,7 @@ namespace UIForia.Editor {
         public const string k_InspectedAppKey = "UIForia.Inspector.ApplicationName";
 
         private int tab;
-        public static readonly string[] s_TabNames = {"Hierarchy", "Settings"};
+        public static readonly string[] s_TabNames = {"Hierarchy", "Settings", "Metrics"};
 
         private Color contentColor = new Color32(140, 182, 193, 175);
         private Color allocatedContentColor = new Color32(90, 212, 193, 175);
@@ -214,6 +215,9 @@ namespace UIForia.Editor {
                     break;
                 case 1:
                     DrawSettings();
+                    break;
+                case 2:
+                    DrawMetrics();
                     break;
             }
 
@@ -476,6 +480,45 @@ namespace UIForia.Editor {
                 }
                 
                 ctx.DrawPath(path);
+            }
+        }
+
+        private void DrawMetrics() {
+            if (s_SelectedApplication != null) {
+                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.PrefixLabel("Layout: ");
+                EditorGUILayout.LabelField(s_SelectedApplication.layoutTimer.Elapsed.TotalMilliseconds.ToString("F3"));
+                EditorGUILayout.EndHorizontal();
+                
+                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.PrefixLabel("Bindings: ");
+                EditorGUILayout.LabelField(s_SelectedApplication.bindingTimer.Elapsed.TotalMilliseconds.ToString("F3"));
+                EditorGUILayout.EndHorizontal();
+                
+                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.PrefixLabel("Rendering: ");
+                EditorGUILayout.LabelField(s_SelectedApplication.renderTimer.Elapsed.TotalMilliseconds.ToString("F3"));
+                EditorGUILayout.EndHorizontal();
+
+                int totalElements = 0;
+                int enabledElements = 0;
+                int disableElements = 0;
+                s_SelectedApplication.GetElementCount(out totalElements, out enabledElements, out disableElements);
+                
+                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.PrefixLabel("Element count: ");
+                EditorGUILayout.LabelField(totalElements.ToString());
+                EditorGUILayout.EndHorizontal();
+                
+                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.PrefixLabel("Enabled element count: ");
+                EditorGUILayout.LabelField(enabledElements.ToString());
+                EditorGUILayout.EndHorizontal();
+                
+                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.PrefixLabel("Disabled element count: ");
+                EditorGUILayout.LabelField(disableElements.ToString());
+                EditorGUILayout.EndHorizontal();
             }
         }
 

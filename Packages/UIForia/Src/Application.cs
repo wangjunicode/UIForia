@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Src.Systems;
 using UIForia.Animation;
 using UIForia.AttributeProcessors;
@@ -16,12 +17,14 @@ using UIForia.Util;
 using UnityEngine;
 
 namespace UIForia {
-
     public abstract class Application {
-
 #if UNITY_EDITOR
         public static List<Application> Applications = new List<Application>();
 #endif
+
+        internal Stopwatch layoutTimer = new Stopwatch();
+        internal Stopwatch renderTimer = new Stopwatch();
+        internal Stopwatch bindingTimer = new Stopwatch();
 
         public readonly string id;
         private static int ElementIdGenerator;
@@ -171,7 +174,8 @@ namespace UIForia {
                     }
 
                     if (s_CustomPainters.ContainsKey(paintAttr.name)) {
-                        throw new Exception($"Failed to register a custom painter with the name {paintAttr.name} from type {type.FullName} because it was already registered.");
+                        throw new Exception(
+                            $"Failed to register a custom painter with the name {paintAttr.name} from type {type.FullName} because it was already registered.");
                     }
 
                     s_CustomPainters.Add(paintAttr.name, type);
@@ -205,7 +209,7 @@ namespace UIForia {
         public Rect ScreenRect => new Rect {
             x = 0, y = 0, width = Width, height = Height
         };
-    
+
         public float Width => Screen.width;
         public float Height => Screen.height;
 
@@ -448,10 +452,12 @@ namespace UIForia {
         }
 
         public void Update() {
-            
             m_InputSystem.OnUpdate();
 
+            bindingTimer.Reset();
+            bindingTimer.Start();
             m_BindingSystem.OnUpdate();
+            bindingTimer.Stop();
 
             m_StyleSystem.OnUpdate();
 
@@ -461,20 +467,24 @@ namespace UIForia {
 
             m_RoutingSystem.OnUpdate();
 
-//            SetTraversalIndex();
-
+            layoutTimer.Reset();
+            layoutTimer.Start();
             m_LayoutSystem.OnUpdate();
+            layoutTimer.Stop();
 
             m_BeforeUpdateTaskSystem.OnUpdate();
 
+            renderTimer.Reset();
+            renderTimer.Start();
             m_RenderSystem.OnUpdate();
+            renderTimer.Stop();
 
             m_AfterUpdateTaskSystem.OnUpdate();
 
             onUpdate?.Invoke();
 
             m_Views[0].SetSize(Screen.width, Screen.height);
-            
+
             frameId++;
         }
 
@@ -579,7 +589,7 @@ namespace UIForia {
             for (int i = 0; i < m_Systems.Count; i++) {
                 m_Systems[i].OnElementEnabled(element);
             }
-            
+
             StructStack<ElemRef>.Release(ref stack);
 
             onElementEnabled?.Invoke(element);
@@ -655,7 +665,7 @@ namespace UIForia {
             }
 
             StructStack<ElemRef>.Release(ref stack);
-            
+
             for (int i = 0; i < m_Systems.Count; i++) {
                 m_Systems[i].OnElementDisabled(element);
             }
@@ -700,18 +710,6 @@ namespace UIForia {
         public static bool HasCustomPainter(string name) {
             return s_CustomPainters.ContainsKey(name);
         }
-
-        public static ISVGXElementPainter GetCustomPainter(string name) {
-            return null; //s_CustomPainters.GetOrDefault(name);
-        }
-
-//        public static Scrollbar GetCustomScrollbar(string name) {
-//            if (string.IsNullOrEmpty(name)) {
-//                return s_Scrollbars["UIForia.Default"];
-//            }
-//
-//            return s_Scrollbars.GetOrDefault(name);
-//        }
 
         public AnimationTask Animate(UIElement element, AnimationData animation) {
             return m_AnimationSystem.Animate(element, ref animation);
@@ -771,7 +769,7 @@ namespace UIForia {
              */
             bool isRecursiveElementCreation = this.elemRefStack.Count > 0;
             StructStack<ElemRef> elemRefStack = isRecursiveElementCreation ? StructStack<ElemRef>.Get() : this.elemRefStack;
-            elemRefStack.Push( new ElemRef() {element = child});
+            elemRefStack.Push(new ElemRef() {element = child});
 
             view.BeginAddingElements();
 
@@ -810,7 +808,7 @@ namespace UIForia {
                 // reverse this?
                 for (int i = 0; i < childCount; i++) {
                     children[i].siblingIndex = i;
-                    elemRefStack.Push( new ElemRef() {element = children[i]});
+                    elemRefStack.Push(new ElemRef() {element = children[i]});
                 }
             }
 
@@ -847,6 +845,33 @@ namespace UIForia {
             onViewsSorted?.Invoke(m_Views.ToArray());
         }
 
-    }
+        internal void GetElementCount(out int totalElementCount, out int enabledElementCount, out int disabledElementCount) {
+            LightStack<UIElement> stack = LightStack<UIElement>.Get();
+            totalElementCount = 0;
+            enabledElementCount = 0;
+            
+            for (int i = 0; i < m_Views.Count; i++) {
+                stack.Push(m_Views[i].RootElement);
 
+                while (stack.size > 0) {
+                    totalElementCount++;
+                    UIElement element = stack.PopUnchecked();
+
+                    if (element.isEnabled) {
+                        enabledElementCount++;
+                    }
+                    
+                    if (element.children == null) continue;
+                    
+                    for (int j = 0; j < element.children.size; j++) {
+                        stack.Push(element.children.array[j]);
+                    }
+                }
+            }
+
+            disabledElementCount = totalElementCount - enabledElementCount;
+            LightStack<UIElement>.Release(ref stack);
+        }
+        
+    }
 }

@@ -38,6 +38,14 @@ namespace UIForia.Systems {
         public int traversalIndex;
         public int zIndex;
 
+        public OffsetMeasurement transformPositionX;
+        public OffsetMeasurement transformPositionY;
+        public float transformScaleX;
+        public float transformScaleY;
+        public float transformRotation;
+        public UIFixedLength transformPivotX;
+        public UIFixedLength transformPivotY;
+
         public void Initialize(UIElement element, int frameId) {
             this.element = element;
             OnInitialize();
@@ -820,6 +828,14 @@ namespace UIForia.Systems {
 
             zIndex = element.style.ZIndex;
 
+            transformRotation = element.style.TransformRotation;
+            transformPositionX = element.style.TransformPositionX;
+            transformPositionY = element.style.TransformPositionY;
+            transformPivotX = element.style.TransformPivotX;
+            transformPivotY = element.style.TransformPivotY;
+            transformScaleX = element.style.TransformScaleX;
+            transformScaleY = element.style.TransformScaleY;
+            
             clipBehavior = element.style.ClipBehavior;
             UpdateBlockProviderWidth();
             UpdateBlockProviderHeight();

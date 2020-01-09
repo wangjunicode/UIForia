@@ -659,8 +659,8 @@ namespace UIForia.Systems {
                 }
 
                 if ((layoutBox.element.flags & UIElementFlags.LayoutTransformNotIdentity) != 0) {
-                    float x = MeasurementUtil.ResolveOffsetMeasurement(layoutBox.element, viewWidth, viewHeight, layoutBox.element.style.TransformPositionX, layoutBox.finalWidth);
-                    float y = MeasurementUtil.ResolveOffsetMeasurement(layoutBox.element, viewWidth, viewHeight, layoutBox.element.style.TransformPositionY, layoutBox.finalHeight);
+                    float x = MeasurementUtil.ResolveOffsetMeasurement(layoutBox.element, viewWidth, viewHeight, layoutBox.transformPositionX, layoutBox.finalWidth);
+                    float y = MeasurementUtil.ResolveOffsetMeasurement(layoutBox.element, viewWidth, viewHeight, layoutBox.transformPositionY, layoutBox.finalHeight);
                     if (!Mathf.Approximately(x, layoutBox.transformX) || !Mathf.Approximately(y, layoutBox.transformY)) {
                         layoutBox.transformX = x;
                         layoutBox.transformY = y;
@@ -742,18 +742,18 @@ namespace UIForia.Systems {
                         ref SVGXMatrix localMatrix = ref result.localMatrix;
 
                         // todo -- only need to do this if transform is not identity
-                        float x = MeasurementUtil.ResolveOffsetMeasurement(currentElement, viewWidth, viewHeight, currentElement.style.TransformPositionX, currentBox.finalWidth);
-                        float y = MeasurementUtil.ResolveOffsetMeasurement(currentElement, viewWidth, viewHeight, currentElement.style.TransformPositionY, currentBox.finalHeight);
+                        float x = MeasurementUtil.ResolveOffsetMeasurement(currentElement, viewWidth, viewHeight, currentBox.transformPositionX, currentBox.finalWidth);
+                        float y = MeasurementUtil.ResolveOffsetMeasurement(currentElement, viewWidth, viewHeight, currentBox.transformPositionY, currentBox.finalHeight);
 
                         // todo -- em size
-                        float px = MeasurementUtil.ResolveFixedSize(result.actualSize.width, viewWidth, viewHeight, 0, currentElement.style.TransformPivotX);
-                        float py = MeasurementUtil.ResolveFixedSize(result.actualSize.height, viewWidth, viewHeight, 0, currentElement.style.TransformPivotY);
+                        float px = MeasurementUtil.ResolveFixedSize(result.actualSize.width, viewWidth, viewHeight, 0, currentBox.transformPivotX);
+                        float py = MeasurementUtil.ResolveFixedSize(result.actualSize.height, viewWidth, viewHeight, 0, currentBox.transformPivotY);
 
-                        float rotation = currentElement.style.TransformRotation * Mathf.Deg2Rad;
+                        float rotation = currentBox.transformRotation * Mathf.Deg2Rad;
                         float ca = Mathf.Cos(rotation);
                         float sa = Mathf.Sin(rotation);
-                        float scaleX = currentElement.style.TransformScaleX;
-                        float scaleY = currentElement.style.TransformScaleY;
+                        float scaleX = currentBox.transformScaleX;
+                        float scaleY = currentBox.transformScaleY;
 
                         localMatrix.m0 = ca * scaleX;
                         localMatrix.m1 = sa * scaleX;

@@ -20,7 +20,7 @@ namespace UIForia {
 
         public TemplateMetaData[] templateMetaData;
         public Func<UIElement, TemplateScope, UIElement>[] templates;
-        public Func<UIElement, TemplateScope, UIElement>[] slots;
+        public Func<UIElement, UIElement, TemplateScope, UIElement>[] slots;
         public Action<UIElement, UIElement>[] bindings;
         public UIStyleGroupContainer[] styles;
         
@@ -48,9 +48,10 @@ namespace UIForia {
             return compiledTemplate;
         }
 
-        public CompiledSlot CreateSlot(string filePath, string slotName, SlotType slotType) {
+        public CompiledSlot CreateSlot(string filePath, string templateName, string slotName, SlotType slotType) {
             CompiledSlot compiledSlot = new CompiledSlot();
             compiledSlot.filePath = filePath;
+            compiledSlot.templateName = templateName;
             compiledSlot.slotName = slotName;
             compiledSlot.slotType = slotType;
             compiledSlot.guid = GUID.Generate();

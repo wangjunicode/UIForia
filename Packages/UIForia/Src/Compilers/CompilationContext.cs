@@ -50,7 +50,7 @@ namespace UIForia.Compilers {
         public ParameterExpression ParentExpr => hierarchyStack.PeekAtUnchecked(hierarchyStack.Count - 2);
         public ParameterExpression ElementExpr => hierarchyStack.PeekUnchecked();
 
-        public Expression ContextExpr => Expression.Default(typeof(UIElement));
+        public Expression ContextExpr; // => Expression.Default(typeof(UIElement));
 
         public void Initialize(ParameterExpression parent) {
             hierarchyStack.Push(parent);

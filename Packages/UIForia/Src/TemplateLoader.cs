@@ -20,7 +20,7 @@ namespace UIForia.Compilers {
 
             Func<UIElement, TemplateScope, UIElement>[] templates = new Func<UIElement, TemplateScope, UIElement>[compiledTemplateData.compiledTemplates.size];
             Action<UIElement, UIElement>[] bindings = new Action<UIElement, UIElement>[compiledTemplateData.compiledBindings.size];
-            Func<UIElement, TemplateScope, UIElement>[] slots = new Func<UIElement, TemplateScope, UIElement>[compiledTemplateData.compiledSlots.size];
+            Func<UIElement, UIElement, TemplateScope, UIElement>[] slots = new Func<UIElement, UIElement, TemplateScope, UIElement>[compiledTemplateData.compiledSlots.size];
             TemplateMetaData[] templateMetaData = new TemplateMetaData[compiledTemplateData.compiledTemplates.size];
 
             for (int i = 0; i < templates.Length; i++) {
@@ -28,7 +28,7 @@ namespace UIForia.Compilers {
             }
 
             for (int i = 0; i < slots.Length; i++) {
-                slots[i] = (Func<UIElement, TemplateScope, UIElement>) compiledTemplateData.compiledSlots[i].templateFn.Compile();
+                slots[i] = (Func<UIElement, UIElement, TemplateScope, UIElement>) compiledTemplateData.compiledSlots[i].templateFn.Compile();
             }
 
             for (int i = 0; i < bindings.Length; i++) {
@@ -97,20 +97,18 @@ namespace UIForia.Compilers {
 
                 LightList<UIStyleGroupContainer> styleList = new LightList<UIStyleGroupContainer>(128);
                 Dictionary<string, StyleSheet> styleSheetMap = new Dictionary<string, StyleSheet>(128);
-                
+
                 string streamingAssetPath = Path.Combine(UnityEngine.Application.dataPath, "StreamingAssets", "UIForia", compiledTemplateData.templateSettings.StrippedApplicationName);
 
                 for (int i = 0; i < files.Length; i++) {
-                    
                     StyleSheet sheet = compiledTemplateData.styleImporter.ImportStyleSheetFromFile(files[i]);
                     styleList.EnsureAdditionalCapacity(sheet.styleGroupContainers.Length);
-                    
+
                     for (int j = 0; j < sheet.styleGroupContainers.Length; j++) {
                         styleList.array[styleList.size++] = sheet.styleGroupContainers[j];
                     }
-                    
+
                     styleSheetMap.Add(sheet.path.Substring(streamingAssetPath.Length + 1), sheet);
-                    
                 }
 
                 compiledTemplateData.templates = loader.LoadTemplates();

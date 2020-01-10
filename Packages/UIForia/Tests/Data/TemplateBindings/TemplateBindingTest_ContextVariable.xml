@@ -1,0 +1,28 @@
+<UITemplate>
+    
+    <Contents>
+
+        <Div ctx:myVar="5 * 5">
+            answer = {$myVar}
+            
+            <TemplateBindingTest_ContextVariable_SlotExposer>
+                <Slot slot:name="some-slot">
+                    
+                    <Text id="text-el">
+                        slot answer is = {$myVar * 2}
+                    </Text>
+                    
+                </Slot>
+            </TemplateBindingTest_ContextVariable_SlotExposer>
+            
+        </Div>
+        
+    </Contents>
+    
+    <Contents id="slotexposer">
+        <DefineSlot slot:name="some-slot">
+            Default
+        </DefineSlot>
+    </Contents>
+    
+</UITemplate>

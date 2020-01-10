@@ -31,7 +31,7 @@ namespace UIForia.Generated {
 ::BINDING_CODE::
         }
 
-        public Func<UIElement, TemplateScope, UIElement>[] LoadSlots() {
+        public Func<UIElement, UIElement, TemplateScope, UIElement>[] LoadSlots() {
 ::SLOT_CODE::
         }
 

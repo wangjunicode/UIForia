@@ -306,7 +306,7 @@ namespace TemplateBinding {
             public bool useDynamic;
 
             public UIStyleGroupContainer dynamicStyleReference;
-            
+
             public string[] styleList;
 
             public string[] GetStyleList() {
@@ -358,7 +358,7 @@ namespace TemplateBinding {
 
         [Template("Data/TemplateBindings/TemplateBindingTest_UnresolvedDynamicStyle.xml")]
         public class TemplateBindingTest_UnresolvedDynamicStyle : UIElement {
-            
+
             public int val;
 
         }
@@ -384,7 +384,30 @@ namespace TemplateBinding {
             d0Styles = d0.style.GetBaseStyles();
             Assert.AreEqual(1, d0Styles.Count);
             Assert.AreEqual(e.templateMetaData.ResolveStyleByName("style-2"), d0Styles[0]);
-           
+        }
+
+        [Template("Data/TemplateBindings/TemplateBindingTest_ContextVariable.xml")]
+        public class TemplateBindingTest_ContextVariable : UIElement { }
+
+        [Template("Data/TemplateBindings/TemplateBindingTest_ContextVariable.xml#slotexposer")]
+        public class TemplateBindingTest_ContextVariable_SlotExposer : UIElement { }
+
+        [Test]
+        public void ContextVariableBinding() {
+            MockApplication app = Setup<TemplateBindingTest_ContextVariable>();
+            TemplateBindingTest_ContextVariable e = (TemplateBindingTest_ContextVariable) app.RootElement;
+
+            app.Update();
+            
+            UITextElement textElement = app.RootElement[0][0] as UITextElement;
+
+            Assert.AreEqual("answer = 25", textElement.text.Trim());
+
+            UIElement nested = e["text-el"];
+            Assert.NotNull(nested);
+            
+            UITextElement nestedTextEl = nested as UITextElement;
+            Assert.AreEqual("slot answer is = 50", nestedTextEl.text.Trim());
         }
 
     }

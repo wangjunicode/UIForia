@@ -84,10 +84,8 @@ namespace UIForia.Compilers {
         private static readonly MethodInfo s_LightList_UIStyle_Release = typeof(LightList<UIStyleGroupContainer>).GetMethod(nameof(LightList<UIStyleGroupContainer>.Release), BindingFlags.Public | BindingFlags.Instance);
         private static readonly FieldInfo s_LightList_UIStyleGroupContainer_Array = typeof(LightList<UIStyleGroupContainer>).GetField(nameof(LightList<UIStyleGroupContainer>.array), BindingFlags.Public | BindingFlags.Instance);
 
-        private static readonly MethodInfo s_Application_CreateSlot = typeof(Application).GetMethod(nameof(Application.CreateSlot), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
         private static readonly MethodInfo s_Application_CreateSlot2 = typeof(Application).GetMethod(nameof(Application.CreateSlot2), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
         private static readonly MethodInfo s_Application_HydrateTemplate = typeof(Application).GetMethod(nameof(Application.HydrateTemplate), BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance);
-        private static readonly MethodInfo s_Application_s_ResolveSlotId = typeof(Application).GetMethod(nameof(Application.ResolveSlotId), BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);
 
         private static readonly MethodInfo s_InputHandlerGroup_AddMouseEvent = typeof(InputHandlerGroup).GetMethod(nameof(InputHandlerGroup.AddMouseEvent));
         private static readonly MethodInfo s_InputHandlerGroup_AddKeyboardEvent = typeof(InputHandlerGroup).GetMethod(nameof(InputHandlerGroup.AddKeyboardEvent));
@@ -103,10 +101,11 @@ namespace UIForia.Compilers {
 
         private static readonly MethodInfo s_DynamicStyleList_Flatten = typeof(DynamicStyleList).GetMethod(nameof(DynamicStyleList.Flatten));
 
-        private static readonly Expression s_StringBuilderExpr = Expression.Field(null, typeof(TextUtil), "StringBuilder");
-        private static readonly Expression s_StringBuilderClear = ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, typeof(StringBuilder).GetMethod("Clear"));
-        private static readonly Expression s_StringBuilderToString = ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, typeof(StringBuilder).GetMethod("ToString", Type.EmptyTypes));
-        private static readonly MethodInfo s_StringBuilder_AppendString = typeof(StringBuilder).GetMethod("Append", new[] {typeof(string)});
+        private static readonly Expression s_StringBuilderExpr = Expression.Field(null, typeof(StringUtil), nameof(StringUtil.s_CharStringBuilder));
+        private static readonly Expression s_StringBuilderClear = ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, typeof(CharStringBuilder).GetMethod("Clear"));
+        private static readonly Expression s_StringBuilderToString = ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, typeof(CharStringBuilder).GetMethod("ToString", Type.EmptyTypes));
+        private static readonly MethodInfo s_StringBuilder_AppendString = typeof(CharStringBuilder).GetMethod(nameof(CharStringBuilder.Append), new[] {typeof(string)});
+        private static readonly MethodInfo s_StringBuilder_AppendCharacter = typeof(CharStringBuilder).GetMethod(nameof(CharStringBuilder.Append), new[] {typeof(char)});
 
         private static readonly LinqCompiler s_TypeResolver = new LinqCompiler();
         private static readonly PropertyInfo s_GenericInputEvent_AsKeyInputEvent = typeof(GenericInputEvent).GetProperty(nameof(GenericInputEvent.AsKeyInputEvent));
@@ -202,6 +201,8 @@ namespace UIForia.Compilers {
             ctx.elementType = processedType;
             ctx.applicationExpr = Expression.Field(scopeParam, s_TemplateScope_ApplicationField);
             ctx.compiledTemplate = retn;
+            ctx.ContextExpr = rootParam;
+
             ctx.Initialize(rootParam);
 
             for (int i = 0; i < templateRootNode.templateShell.styles.size; i++) {
@@ -217,7 +218,7 @@ namespace UIForia.Compilers {
             if (ctx.styleSheets != null && ctx.styleSheets.size > 0) {
                 retn.templateMetaData.styleReferences = ctx.styleSheets.ToArray();
             }
-            
+
             if (!processedType.IsUnresolvedGeneric) {
                 ctx.PushBlock();
 
@@ -303,7 +304,7 @@ namespace UIForia.Compilers {
 
         private Expression CompileSlotDefinition(CompilationContext parentContext, SlotNode slotNode) {
             // we want to try to resolve the slot name. if we can't fall back, if fallback id is -1 then don't add a child
-            CompiledSlot compiledSlot = templateData.CreateSlot(parentContext.compiledTemplate.filePath, slotNode.slotName, slotNode.slotType);
+            CompiledSlot compiledSlot = templateData.CreateSlot(parentContext.compiledTemplate.filePath, parentContext.compiledTemplate.templateName, slotNode.slotName, slotNode.slotType);
             slotNode.compiledSlotId = compiledSlot.slotId;
 
             Expression nodeExpr = parentContext.ElementExpr;
@@ -321,6 +322,7 @@ namespace UIForia.Compilers {
             ));
 
             ParameterExpression rootParam = Expression.Parameter(typeof(UIElement), "root");
+            ParameterExpression parentParam = Expression.Parameter(typeof(UIElement), "parent");
             ParameterExpression scopeParam = Expression.Parameter(typeof(TemplateScope), "scope");
 
             CompilationContext ctx = new CompilationContext(parentContext.templateRootNode);
@@ -333,6 +335,7 @@ namespace UIForia.Compilers {
             ctx.applicationExpr = Expression.Field(scopeParam, s_TemplateScope_ApplicationField);
             ctx.Initialize(slotRootParam);
             ctx.compiledTemplate = parentContext.compiledTemplate; // todo -- might be wrong
+            ctx.ContextExpr = rootParam;
 
             Expression createRootExpression = Expression.Call(ctx.applicationExpr, s_CreateFromPool,
                 Expression.Constant(TypeProcessor.GetProcessedType(typeof(UISlotOverride)).id),
@@ -348,16 +351,17 @@ namespace UIForia.Compilers {
 
             ctx.Return(slotRootParam);
 
-            compiledSlot.templateFn = Expression.Lambda(ctx.Finalize(typeof(UIElement)), rootParam, scopeParam);
+            compiledSlot.templateFn = Expression.Lambda(ctx.Finalize(typeof(UIElement)), rootParam, parentParam, scopeParam);
 
             return nodeExpr;
         }
 
         private int CompileSlotOverride(CompilationContext parentContext, SlotNode slotOverrideNode) {
-            CompiledSlot compiledSlot = templateData.CreateSlot(parentContext.compiledTemplate.filePath, slotOverrideNode.slotName, SlotType.Override);
+            CompiledSlot compiledSlot = templateData.CreateSlot(parentContext.compiledTemplate.filePath, parentContext.compiledTemplate.templateName, slotOverrideNode.slotName, SlotType.Override);
             slotOverrideNode.compiledSlotId = compiledSlot.slotId;
 
             ParameterExpression rootParam = Expression.Parameter(typeof(UIElement), "root");
+            ParameterExpression parentParam = Expression.Parameter(typeof(UIElement), "parent");
             ParameterExpression scopeParam = Expression.Parameter(typeof(TemplateScope), "scope");
 
             CompilationContext ctx = new CompilationContext(parentContext.templateRootNode);
@@ -368,12 +372,13 @@ namespace UIForia.Compilers {
             ctx.templateScope = scopeParam;
             ctx.elementType = slotOverrideNode.processedType;
             ctx.applicationExpr = Expression.Field(scopeParam, s_TemplateScope_ApplicationField);
-            ctx.Initialize(slotRootParam);
             ctx.compiledTemplate = parentContext.compiledTemplate;
+            ctx.ContextExpr = rootParam;
+            ctx.Initialize(slotRootParam);
 
             Expression createRootExpression = Expression.Call(ctx.applicationExpr, s_CreateFromPool,
                 Expression.Constant(TypeProcessor.GetProcessedType(typeof(UISlotOverride)).id),
-                Expression.Default(typeof(UIElement)), // todo -- parent is null, fix this
+                parentParam,
                 Expression.Constant(slotOverrideNode.ChildCount),
                 Expression.Constant(slotOverrideNode.GetAttributeCount()),
                 Expression.Constant(parentContext.compiledTemplate.templateId)
@@ -385,7 +390,7 @@ namespace UIForia.Compilers {
 
             ctx.Return(slotRootParam);
 
-            compiledSlot.templateFn = Expression.Lambda(ctx.Finalize(typeof(UIElement)), rootParam, scopeParam);
+            compiledSlot.templateFn = Expression.Lambda(ctx.Finalize(typeof(UIElement)), rootParam, parentParam, scopeParam);
 
             return compiledSlot.slotId;
         }
@@ -409,7 +414,6 @@ namespace UIForia.Compilers {
 
             VisitChildren(ctx, textNode);
 
-
             return nodeExpr;
         }
 
@@ -421,9 +425,9 @@ namespace UIForia.Compilers {
 
             ctx.Assign(nodeExpr, CreateElement(ctx, containerNode));
 
-            VisitChildren(ctx, containerNode);
-
             CompileElementData(containerNode, ctx);
+
+            VisitChildren(ctx, containerNode);
 
             return nodeExpr;
         }
@@ -617,7 +621,7 @@ namespace UIForia.Compilers {
                         createdBindingCount++;
 
                         // todo -- error if context has this name in current hierarchy already for this template
-                        ctx.PushContextVariable(attr.key);
+                        // ctx.PushContextVariable(attr.key);
                         createdCompiler.SetImplicitContext(createdCompiler.GetVariable(k_CastRoot));
                         Type expressionType = createdCompiler.GetExpressionType(attr.value);
 
@@ -792,7 +796,7 @@ namespace UIForia.Compilers {
                 updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(updateCompiler.GetVariable(k_CastElement), s_UIElement_OnUpdate));
             }
 
-            CompileTextBinding(templateNode);
+            updateBindingCount = CompileTextBinding(templateNode, updateBindingCount);
 
             // if we have style bindings they need to run after Update() is called (or where it would have been called if it would have been present)
             updateBindingCount = CompileDynamicStyleData(ctx, dynamicStyleData, updateBindingCount);
@@ -924,43 +928,58 @@ namespace UIForia.Compilers {
 
             updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(style, s_StyleSet_SetBaseStyles, styleList));
             updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(styleList, s_LightList_UIStyleGroupContainer_Release));
-            
+
             updateCompiler.SetNullCheckingEnabled(true);
 
             return updateBindingCount;
         }
 
-        private void CompileTextBinding(TemplateNode2 templateNode) {
-            if (!(templateNode is TextNode textNode)) return;
+
+        private int CompileTextBinding(TemplateNode2 templateNode, int bindingCount) {
+            if (!(templateNode is TextNode textNode)) {
+                return bindingCount;
+            }
 
             if (textNode.textExpressionList != null && textNode.textExpressionList.size > 0 && !textNode.IsTextConstant()) {
                 updateCompiler.AddNamespace("UIForia.Util");
                 updateCompiler.AddNamespace("UIForia.Text");
-
+                bindingCount++;
                 updateCompiler.SetImplicitContext(updateCompiler.GetVariable(k_CastRoot));
                 StructList<TextExpression> expressionParts = textNode.textExpressionList;
 
+                MemberExpression textValueExpr = Expression.Field(updateCompiler.GetVariable(k_CastElement), s_TextElement_Text);
+                
                 for (int i = 0; i < expressionParts.size; i++) {
-                    // text joiner
-                    // convert text expression outputs to an array 
-                    // output = ["text", expression, "here"].Join();
-                    // later -> visit any non const expressions and break apart by top level string-to-string + operator
-
                     if (expressionParts[i].isExpression) {
                         Expression val = updateCompiler.Value(expressionParts[i].text);
-                        MethodCallExpression toString = ExpressionFactory.CallInstanceUnchecked(val, val.Type.GetMethod("ToString", Type.EmptyTypes));
-                        updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, s_StringBuilder_AppendString, toString));
-//                        updateCompiler.Statement($"TextUtil.StringBuilder.Append({expressionParts[i].text})");
+                        if (val.Type == typeof(string)) {
+                            updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, s_StringBuilder_AppendString, val));
+                        }
+                        else if (val.Type == typeof(char)) {
+                            updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, s_StringBuilder_AppendCharacter, val));
+                        }
+                        else {
+                            MethodCallExpression toString = ExpressionFactory.CallInstanceUnchecked(val, val.Type.GetMethod("ToString", Type.EmptyTypes));
+                            updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, s_StringBuilder_AppendString, toString));
+                        }
                     }
                     else {
                         updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, s_StringBuilder_AppendString, Expression.Constant(expressionParts[i].text)));
                     }
                 }
 
-                Expression e = ExpressionFactory.Convert(updateCompiler.GetVariable(k_CastElement), typeof(UITextElement));
-                updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(e, s_TextElement_SetText, s_StringBuilderToString));
+                Expression e = updateCompiler.GetVariable(k_CastElement);
+                Expression condition = ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, typeof(CharStringBuilder).GetMethod(nameof(CharStringBuilder.EqualsString), new [] { typeof(string)}), textValueExpr);
+                condition = Expression.Equal(condition, Expression.Constant(false));
+                ConditionalExpression ifCheck = Expression.IfThen(condition, Expression.Block(ExpressionFactory.CallInstanceUnchecked(e, s_TextElement_SetText, s_StringBuilderToString)));
+                
+                // updateCompiler.RawExpression(ExpressionFactory.CallStaticUnchecked(typeof(CharStringBuilder).GetMethod("CompareStringBuilder_String"), s_StringBuilderExpr, s_TextElement_Text));
+                // updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(e, s_TextElement_SetText, s_StringBuilderToString));
+                updateCompiler.RawExpression(ifCheck);
                 updateCompiler.RawExpression(s_StringBuilderClear);
             }
+
+            return bindingCount;
         }
 
         public static void CompileAssignContextVariable(LinqCompiler compiler, in AttributeDefinition2 attr, CompilationContext ctx, Type contextVarType) {

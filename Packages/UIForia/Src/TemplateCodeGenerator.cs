@@ -125,7 +125,7 @@ namespace UIForia {
 
             LightList<CompiledSlot> compiledSlots = compiledTemplateData.compiledSlots;
 
-            builder.AppendLine($"{s_Indent12}Func<UIElement, TemplateScope, UIElement>[] slots = new Func<{nameof(UIElement)}, {nameof(TemplateScope)}, {nameof(UIElement)}>[{compiledSlots.size}];");
+            builder.AppendLine($"{s_Indent12}Func<UIElement, UIElement, TemplateScope, UIElement>[] slots = new Func<UIElement, UIElement, TemplateScope, UIElement>[{compiledSlots.size}];");
 
             for (int i = 0; i < compiledSlots.size; i++) {
                 builder.AppendLine($"{s_Indent12}slots[{i}] = {compiledSlots.array[i].GetVariableName()};");
@@ -138,7 +138,7 @@ namespace UIForia {
         private static string GenerateBindingCode(CompiledTemplateData compiledTemplateData) {
             StringBuilder builder = new StringBuilder(2048);
             LightList<CompiledBinding> compiledBindings = compiledTemplateData.compiledBindings;
-            builder.AppendLine($"{s_Indent12}Action<UIElement, UIElement>[] bindings = new Action<{nameof(UIElement)}, {nameof(UIElement)}>[{compiledBindings.size}];");
+            builder.AppendLine($"{s_Indent12}Action<UIElement, UIElement>[] bindings = new Action<UIElement, UIElement>[{compiledBindings.size}];");
 
             for (int i = 0; i < compiledBindings.size; i++) {
                 builder.AppendLine($"{s_Indent12}bindings[{i}] = Binding_{compiledBindings.array[i].bindingType}_{compiledBindings.array[i].guid};");
@@ -242,9 +242,10 @@ namespace UIForia {
                 // todo -- optimize search or sort by file name at least
                 for (int s = 0; s < compiledSlots.size; s++) {
                     CompiledSlot compiledSlot = compiledSlots[s];
-                    if (compiledSlot.filePath == compiledTemplate.filePath) {
+                    
+                    if (compiledSlot.filePath == compiledTemplate.filePath && compiledSlot.templateName == compiled.templateName) {
                         slotCode += $"\n{s_Indent8}// {compiledSlot.GetComment()}";
-                        slotCode += $"\n{s_Indent8}public Func<UIElement, TemplateScope, UIElement> {compiledSlot.GetVariableName()} = ";
+                        slotCode += $"\n{s_Indent8}public Func<UIElement, UIElement, TemplateScope, UIElement> {compiledSlot.GetVariableName()} = ";
                         slotCode += compiledSlot.templateFn.ToTemplateBodyFunction();
                         slotCode += "\n";
                     }

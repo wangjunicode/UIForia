@@ -10,7 +10,7 @@ namespace UIForia {
 
         Func<UIElement, TemplateScope, UIElement>[] LoadTemplates();
         
-        Func<UIElement, TemplateScope, UIElement>[] LoadSlots();
+        Func<UIElement, UIElement, TemplateScope, UIElement>[] LoadSlots();
         
         Action<UIElement, UIElement>[] LoadBindings();
 

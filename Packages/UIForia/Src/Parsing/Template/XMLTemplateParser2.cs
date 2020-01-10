@@ -351,6 +351,10 @@ namespace UIForia.Parsing {
                 int line = ((IXmlLineInfo) attr).LineNumber;
                 int column = ((IXmlLineInfo) attr).LinePosition;
 
+                if (name == "id" && string.IsNullOrEmpty(prefix)) {
+                    prefix = "attr";
+                }
+                
                 AttributeType attributeType = AttributeType.Property;
                 AttributeFlags flags = 0;
 

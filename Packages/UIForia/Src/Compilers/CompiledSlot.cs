@@ -12,6 +12,7 @@ namespace UIForia.Compilers {
         public string slotName;
         public SlotType slotType;
         public LambdaExpression templateFn;
+        public string templateName;
 
         public string GetVariableName() {
             return $"Slot_{slotType}_{slotId}_{guid}";

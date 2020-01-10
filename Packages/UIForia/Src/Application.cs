@@ -13,6 +13,7 @@ using UIForia.Systems;
 using UIForia.Systems.Input;
 using UIForia.Util;
 using UnityEngine;
+using UnityEngine.Assertions;
 
 namespace UIForia {
 
@@ -855,21 +856,18 @@ namespace UIForia {
 
         // might be the same as HydrateTemplate really but with templateId not hard coded
         public UIElement CreateSlot(int templateId, UIElement root, UIElement parent, TemplateScope scope) {
-            // todo -- something needs to create the slot root element, either here or in the slot function
-            UIElement retn = templateData.slots[templateId](root, scope);
-            retn.parent = parent;
-            retn.View = parent?.View;
-            return retn;
+           throw new NotImplementedException("Deprecate");
         }
 
         public UIElement CreateSlot2(string slotName, TemplateScope scope, int defaultSlotId, UIElement root, UIElement parent) {
-            int slotId = ResolveSlotId(slotName, scope.slotInputs, defaultSlotId);
-            UIElement retn = templateData.slots[slotId](root, scope);
-            retn.bindingNode = new LinqBindingNode();
-            retn.bindingNode.innerContext = root;
-            retn.bindingNode.outerContext = root;
-            retn.parent = parent;
-            retn.View = parent?.View;
+            int slotId = ResolveSlotId(slotName, scope.slotInputs, defaultSlotId, out UIElement contextRoot);
+            if (contextRoot == null) {
+                Assert.AreEqual(slotId, defaultSlotId);
+                contextRoot = root;
+            }
+            UIElement retn = templateData.slots[slotId](contextRoot, parent, scope);
+            // retn.bindingNode = new LinqBindingNode();
+            retn.View = parent.View;
             return retn;
         }
 
@@ -905,17 +903,20 @@ namespace UIForia {
             return CreateElementFromPool(typeId, parent, childCount, attrCount, originTemplateId);
         }
 
-        public static int ResolveSlotId(string slotName, StructList<SlotUsage> slotList, int defaultId) {
+        public static int ResolveSlotId(string slotName, StructList<SlotUsage> slotList, int defaultId, out UIElement contextRoot) {
             if (slotList == null) {
+                contextRoot = null;
                 return defaultId;
             }
 
             for (int i = 0; i < slotList.size; i++) {
                 if (slotList.array[i].slotName == slotName) {
+                    contextRoot = slotList.array[i].outerContext;
                     return slotList.array[i].slotId;
                 }
             }
 
+            contextRoot = null;
             return defaultId;
         }
 
@@ -925,13 +926,14 @@ namespace UIForia {
         }
 
         public void AddTemplateChildren(SlotTemplateElement slotTemplateElement, int templateId, int count) {
+            throw new Exception("Verify this");
             if (templateId < 0) return;
 
             TemplateScope scope = new TemplateScope(this, null);
 
             for (int i = 0; i < count; i++) {
                 UIElement root = slotTemplateElement.bindingNode.root;
-                UIElement child = templateData.slots[templateId](root, scope);
+                UIElement child = templateData.slots[templateId](root, root, scope);
                 InsertChild(slotTemplateElement, child, (uint) slotTemplateElement.children.Count);
             }
         }

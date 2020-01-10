@@ -1544,7 +1544,7 @@ namespace UIForia.Compilers {
 
         private CompiledSlot CompileSlot(TemplateNode templateNode, CompilationContext parentCtx, CompiledTemplate template, SlotDefinition slotDefinition = default) {
             // want a fresh set of variables but keep the style / file / binding data / etc contexts
-            CompiledSlot retn = templateData.CreateSlot(templateNode.astRoot.fileName, templateNode.GetSlotName(), templateNode.slotType);
+            CompiledSlot retn = null;//templateData.CreateSlot(templateNode.astRoot.fileName, templateNode.templateNode.GetSlotName(), templateNode.slotType);
             ParameterExpression rootParam = Expression.Parameter(typeof(UIElement), "root");
             ParameterExpression scopeParam = Expression.Parameter(typeof(TemplateScope), "scope");
             LightList<string> namespaces = LightList<string>.Get();

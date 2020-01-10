@@ -29,13 +29,11 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using UIForia.Compilers;
 using UIForia.Extensions;
 using UIForia.Util;
-using UnityEngine;
 
 namespace Mono.Linq.Expressions {
 
@@ -1019,7 +1017,14 @@ namespace Mono.Linq.Expressions {
             }
             
             if (node.Object != null) {
-                Visit(node.Object);
+                if (node.Object is BinaryExpression || node.Object is UnaryExpression) {
+                    WriteToken("(");
+                    Visit(node.Object);
+                    WriteToken(")");
+                }
+                else {
+                    Visit(node.Object);
+                }
             }
             else {
                 VisitType(method.DeclaringType);

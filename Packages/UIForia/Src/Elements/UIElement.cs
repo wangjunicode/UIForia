@@ -3,12 +3,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using JetBrains.Annotations;
 using UIForia.Compilers;
-using UIForia.Elements.Routing;
 using UIForia.Layout;
 using UIForia.Rendering;
-using UIForia.Routing;
 using UIForia.Systems;
-using UIForia.Templates;
 using UIForia.UIInput;
 using UIForia.Util;
 using UnityEngine;
@@ -28,7 +25,7 @@ namespace UIForia.Elements {
             public Action<GenericInputEvent> handler;
 
         }
-        
+
         public InputEventType handledEvents;
         public LightList<HandlerData> eventHandlers;
 
@@ -48,10 +45,10 @@ namespace UIForia.Elements {
                 handler = handler
             });
         }
-        
+
         public void AddKeyboardEvent(InputEventType eventType, KeyboardModifiers modifiers, bool requiresFocus, EventPhase phase, KeyCode keyCode, char character, Action<GenericInputEvent> handler) {
             handledEvents |= eventType;
-             eventHandlers.Add(new HandlerData() {
+            eventHandlers.Add(new HandlerData() {
                 eventType = eventType,
                 eventPhase = phase,
                 keyCode = keyCode,
@@ -134,12 +131,12 @@ namespace UIForia.Elements {
         public InputHandlerGroup inputHandlers; // todo -- internal with accessor
 
         public LightList<UIElement> children; // todo -- replace w/ linked list & child count
-        
+
         internal UIElementFlags flags;
         internal UIElement parent;
 
         public LayoutResult layoutResult;
-        
+
         internal AwesomeLayoutBox layoutBox;
         internal RenderBox renderBox;
         public UIStyleSet style; // todo -- make internal with accessor
@@ -162,7 +159,7 @@ namespace UIForia.Elements {
         protected internal UIElement() { }
 
         public Application Application => View.application;
-        
+
 
         public int depth { get; internal set; }
         public int siblingIndex { get; internal set; }
@@ -279,29 +276,32 @@ namespace UIForia.Elements {
 
         [PublicAPI]
         public T FindById<T>(string elementId) where T : UIElement {
-            Stack<UIElement> elementStack = StackPool<UIElement>.Get();
+            LightStack<UIElement> elementStack = LightStack<UIElement>.Get();
             elementStack.Push(this);
-            while (elementStack.Count > 0) {
-                UIElement element = elementStack.Pop();
+            while (elementStack.size > 0) {
+                UIElement element = elementStack.array[--elementStack.size];
+
                 if (element.children == null) {
                     continue;
                 }
 
-                for (int i = 0; i < element.children.Count; i++) {
-                    if (element.children[i].GetAttribute("id") == elementId) {
-                        bool isSameElement = false; //element.children[i].templateContext.rootObject == this;
-                        // special case for slots: if the child belongs to the parent and is also a slot definition we can assume the slot originated also from this element
-//                        bool isSlotDefinitionId = element.children[i].templateContext.currentObject is UISlotDefinition slotDefinition && slotDefinition.templateContext.rootObject == parent;
-//                        if (isSlotDefinitionId || isSameElement) {
-//                            return element.children[i] as T;
-//                        }
+                elementStack.EnsureAdditionalCapacity(element.children.size);
+
+                for (int i = 0; i < element.children.size; i++) {
+                    UIElement child = element.children.array[i];
+
+                    if (child.templateMetaData == element.templateMetaData) {
+                        if (child is T castChild && child.GetAttribute("id") == elementId) {
+                            LightStack<UIElement>.Release(ref elementStack);
+                            return castChild;
+                        }
                     }
 
-                    elementStack.Push(element.children[i]);
+                    elementStack.array[elementStack.size++] = child;
                 }
             }
 
-            StackPool<UIElement>.Release(elementStack);
+            LightStack<UIElement>.Release(ref elementStack);
 
             return null;
         }

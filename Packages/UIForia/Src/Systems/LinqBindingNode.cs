@@ -34,8 +34,6 @@ namespace UIForia.Systems {
 
     public class LinqBindingNode {
 
-        public UIElement slotRootContext;
-        
         internal UIElement root;
         internal UIElement element;
         internal int lastTickedFrame;
@@ -47,8 +45,6 @@ namespace UIForia.Systems {
         internal ContextVariable localVariable;
         internal ContextVariableReference resolvedVariable;
         internal LinqBindingNode parent;
-        public UIElement innerContext;
-        public UIElement outerContext;
 
         public void CreateLocalContextVariable(ContextVariable variable) {
             if (localVariable == null) {
@@ -115,9 +111,8 @@ namespace UIForia.Systems {
         [UsedImplicitly] // called from template functions, 
         public static LinqBindingNode Get(Application application, UIElement rootElement, UIElement element, UIElement slotRootContext, int createdId, int enabledId, int updatedId) {
             LinqBindingNode node = new LinqBindingNode(); // todo -- pool
-            node.root = rootElement;
+            node.root = slotRootContext;
             node.element = element;
-            node.slotRootContext = slotRootContext;
             element.bindingNode = node;
             
             UIElement ptr = element.parent;

@@ -17,10 +17,6 @@
 
         <Div style="style-1 style-2 {useDynamic ? 'dynamicStyle' : GetStyleList()}"/>
         
-        <Div style="{'style' + 1} style-2 {useDynamic ? dynamicStyleReference}"/>
-        
-<!--        <Div style="static-1 static-2 {useDynamic ? ['dynamicStyle', 'other-style', actualStyleReference] : GetStyleList()}"/>-->
-        
     </Contents>
     
 </UITemplate>

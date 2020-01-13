@@ -854,6 +854,12 @@ namespace UIForia.Compilers {
                 }
 
                 inputList.QuickRelease();
+                // Application.InputSystem.RegisterKeyboardHandler(element);
+                ParameterExpression elementVar = createdCompiler.GetVariable(k_CastElement);
+                MemberExpression app = Expression.Property(elementVar, typeof(UIElement).GetProperty(nameof(UIElement.Application)));
+                MemberExpression inputSystem = Expression.Property(app, typeof(Application).GetProperty(nameof(Application.InputSystem)));
+                MethodInfo method = typeof(InputSystem).GetMethod(nameof(InputSystem.RegisterKeyboardHandler));
+                createdCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(inputSystem, method, elementVar));
             }
 
             int createdBindingId = -1;

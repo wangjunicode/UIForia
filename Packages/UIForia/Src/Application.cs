@@ -19,6 +19,22 @@ using UnityEngine.Assertions;
 
 namespace UIForia {
 
+    /// <summary>
+    /// Don't ever use this if you're not a UIForia Dev!
+    /// </summary>
+    public class UIForiaInternalApplicationSetupProxy {
+
+        private Application application;
+
+        public UIForiaInternalApplicationSetupProxy(Application application) {
+            this.application = application;
+        }
+
+        public void CallInternalApiToSetupThings(UIElement element) {
+            
+        }
+    }
+
     public abstract class Application {
 
 #if UNITY_EDITOR
@@ -34,7 +50,6 @@ namespace UIForia {
         public static int NextElementId => ElementIdGenerator++;
         private string templateRootPath;
 
-        //  protected readonly BindingSystem m_BindingSystem;
         protected readonly IStyleSystem m_StyleSystem;
         protected ILayoutSystem m_LayoutSystem;
         protected IRenderSystem m_RenderSystem;
@@ -46,7 +61,6 @@ namespace UIForia {
 
         protected ResourceManager resourceManager;
 
-        public readonly StyleSheetImporter styleImporter;
         private readonly IntMap<UIElement> elementMap;
         protected readonly List<ISystem> m_Systems;
 
@@ -344,7 +358,6 @@ namespace UIForia {
             onUpdate = null;
 
             elementMap.Clear();
-            styleImporter.Reset();
             resourceManager.Reset();
 
             m_AfterUpdateTaskSystem.OnReset();
@@ -736,38 +749,7 @@ namespace UIForia {
         }
 
         public AnimationData GetAnimationFromFile(string fileName, string animationName) {
-            AnimationData data;
-            styleImporter.ImportStyleSheetFromFile(fileName).TryGetAnimationData(animationName, out data);
-            return data;
-        }
-
-        internal void InsertChild(UIElement parent, CompiledTemplate template, int index) {
-//            UIElement ptr = parent;
-//            LinqBindingNode bindingNode = null;
-//
-//            while (ptr != null) {
-//                bindingNode = ptr.bindingNode;
-//
-//                if (bindingNode != null) {
-//                    break;
-//                }
-//
-//                ptr = ptr.parent;
-//            }
-//
-//            TemplateScope2 templateScope = new TemplateScope2(this, null);
-//            UIElement root = elementPool.Get(template.elementType);
-//            root.siblingIndex = index;
-//
-//            if (parent.isEnabled) {
-//                root.flags |= UIElementFlags.AncestorEnabled;
-//            }
-//
-//            root.depth = parent.depth + 1;
-//            root.View = parent.View;
-//            template.Create(root, templateScope);
-//
-//            parent.children.Insert(index, root);
+            throw new NotImplementedException("Re design this not to use style importer");
         }
 
         internal void InsertChild(UIElement parent, UIElement child, uint index) {

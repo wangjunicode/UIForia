@@ -225,7 +225,7 @@ namespace TemplateBinding {
             MockApplication app = Setup<TemplateBindingTest_MouseBindingBinding>();
             TemplateBindingTest_MouseBindingBinding e = (TemplateBindingTest_MouseBindingBinding) app.RootElement;
 
-            throw new NotImplementedException("Keyboard input needs a re-write");
+          //  throw new NotImplementedException("Keyboard input needs a re-write");
             // app.Update();
             //
             // app.InputSystem.MouseDown(new Vector2(50, 50));

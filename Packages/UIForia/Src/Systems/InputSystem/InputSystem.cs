@@ -57,7 +57,7 @@ namespace UIForia.Systems {
         private readonly List<UIElement> m_EnteredElements;
         private readonly List<UIElement> m_MouseDownElements;
         private readonly LightList<UIElement> hoveredElements;
-        
+
         private readonly Dictionary<KeyCode, KeyState> m_KeyStates;
         private readonly Dictionary<int, DragCreatorGroup> m_DragCreatorMap;
 
@@ -70,6 +70,8 @@ namespace UIForia.Systems {
         private static readonly Event s_Event = new Event();
 
         public KeyboardModifiers KeyboardModifiers => modifiersThisFrame;
+
+        private readonly SkipTree<UIElement> m_KeyboardEventTree;
 
         private LightList<KeyboardEventHandlerInvocation> lateHandlers = new LightList<KeyboardEventHandlerInvocation>();
         private LightList<UIEvent> lateTriggers = new LightList<UIEvent>();
@@ -89,17 +91,17 @@ namespace UIForia.Systems {
             this.m_ActiveElements = new List<UIElement>();
 
             this.m_DragCreatorMap = new Dictionary<int, DragCreatorGroup>();
-         //   this.m_DragHandlerMap = new Dictionary<int, DragHandlerGroup>();
+            //   this.m_DragHandlerMap = new Dictionary<int, DragHandlerGroup>();
 
             this.m_PressedKeys = new LightList<PressedKey>(16);
             this.m_UpThisFrame = new LightList<KeyCode>();
             this.m_DownThisFrame = new LightList<KeyCode>();
             this.m_KeyStates = new Dictionary<KeyCode, KeyState>();
-//            this.m_KeyboardEventTree = new SkipTree<KeyboardEventTreeNode>();
+            this.m_KeyboardEventTree = new SkipTree<UIElement>();
 
             this.m_EventPropagator = new EventPropagator();
             this.m_MouseEventCaptureList = new List<ValueTuple<Action<GenericInputEvent>, UIElement>>();
-           // this.m_DragEventCaptureList = new List<ValueTuple<DragEventHandler, UIElement>>();
+            // this.m_DragEventCaptureList = new List<ValueTuple<DragEventHandler, UIElement>>();
             this.m_FocusedElement = null;
             this.focusables = new List<IFocusable>();
             this.hoveredElements = new LightList<UIElement>(16);
@@ -284,16 +286,17 @@ namespace UIForia.Systems {
             // if not dragging only attempt intersections with elements who have hover state (if mouse is present) or drag create or mouse / touch interactions
 
             LightList<UIElement> queryResults = (LightList<UIElement>) m_LayoutSystem.QueryPoint(m_MouseState.mousePosition, LightList<UIElement>.Get());
-                
+
             queryResults.Sort((a, b) => {
                 int viewDepthComparison = b.View.Depth - a.View.Depth;
                 if (viewDepthComparison != 0) return viewDepthComparison;
                 if (b.layoutBox.zIndex != a.layoutBox.zIndex) {
                     return b.layoutBox.zIndex - a.layoutBox.zIndex;
                 }
+
                 return b.layoutBox.traversalIndex - a.layoutBox.traversalIndex;
             });
-            
+
             if (!IsDragging) {
                 LightList<UIElement> ancestorElements = LightList<UIElement>.Get();
 
@@ -321,9 +324,8 @@ namespace UIForia.Systems {
 
             if (didMouseMove) {
                 for (int i = 0; i < hoveredElements.size; i++) {
-                    
                     UIElement element = hoveredElements.array[i];
-                    
+
                     if ((element.flags & UIElementFlags.EnabledFlagSet) != UIElementFlags.EnabledFlagSet) {
                         hoveredElements.RemoveAt(i--);
                         continue;
@@ -333,24 +335,19 @@ namespace UIForia.Systems {
                         hoveredElements.RemoveAt(i--);
                         element.style.ExitState(StyleState.Hover);
                     }
-
                 }
 
                 for (int i = 0; i < queryResults.Count; i++) {
-                    
                     UIElement element = queryResults.array[i];
 
                     if ((element.style.currentState & StyleState.Hover) == 0) {
                         hoveredElements.Add(element);
                         element.style.EnterState(StyleState.Hover);
                     }
-                    
                 }
-                
             }
-            
+
             for (int i = 0; i < queryResults.Count; i++) {
-                
                 UIElement element = queryResults[i];
 
                 m_ElementsThisFrame.Add(element);
@@ -493,6 +490,7 @@ namespace UIForia.Systems {
                     if (!m_DragCreatorMap.TryGetValue(element.id, out dragCreatorGroup)) {
                         continue;
                     }
+
                     throw new NotImplementedException("Re-implement drag input");
                     // m_CurrentDragEvent = dragCreatorGroup.TryCreateEvent(element, mouseEvent, EventPhase.Bubble);
                     // if (m_CurrentDragEvent == null) {
@@ -505,12 +503,11 @@ namespace UIForia.Systems {
                     // UpdateDrag(true);
                     // return;
                 }
-             
             }
-            
-            for (int i = m_MouseDownElements.Count -1; i >= 0; i--) {
+
+            for (int i = m_MouseDownElements.Count - 1; i >= 0; i--) {
                 UIElement element = m_MouseDownElements[i];
-                
+
                 if (element.isDestroyed || element.isDisabled) {
                     continue;
                 }
@@ -689,53 +686,7 @@ namespace UIForia.Systems {
             }
         }
 
-        public void OnElementCreated(UIElement element) {
-            return;
-//            UITemplate template = element.OriginTemplate;
-//
-//            if (template == null) return;
-//
-//            MouseEventHandler[] mouseHandlers = template.mouseEventHandlers;
-//            DragEventCreator[] dragEventCreators = template.dragEventCreators;
-//            DragEventHandler[] dragEventHandlers = template.dragEventHandlers;
-//            KeyboardEventHandler[] keyboardHandlers = template.keyboardEventHandlers;
-//
-//            if (mouseHandlers != null && mouseHandlers.Length > 0) {
-//                InputEventType handledEvents = 0;
-//
-//                for (int i = 0; i < mouseHandlers.Length; i++) {
-//                    handledEvents |= mouseHandlers[i].eventType;
-//                }
-//
-//                m_MouseHandlerMap[element.id] = new MouseHandlerGroup(element.templateContext, mouseHandlers, handledEvents);
-//            }
-//
-//            if (dragEventHandlers != null && dragEventHandlers.Length > 0) {
-//                InputEventType handledEvents = 0;
-//
-//                for (int i = 0; i < dragEventHandlers.Length; i++) {
-//                    handledEvents |= dragEventHandlers[i].eventType;
-//                }
-//
-//                m_DragHandlerMap[element.id] = new DragHandlerGroup(element.templateContext, dragEventHandlers, handledEvents);
-//            }
-//
-//            if (keyboardHandlers != null && keyboardHandlers.Length > 0) {
-//                m_KeyboardEventTree.AddItem(new KeyboardEventTreeNode(element, keyboardHandlers));
-//            }
-//
-//            if (dragEventCreators != null && dragEventCreators.Length > 0) {
-//                m_DragCreatorMap[element.id] = new DragCreatorGroup(element.templateContext, dragEventCreators);
-//            }
-//
-//            if (element.children == null) {
-//                return;
-//            }
-//
-//            for (int i = 0; i < element.children.Count; i++) {
-//                OnElementCreated(element.children[i]);
-//            }
-        }
+        public void OnElementCreated(UIElement element) { }
 
         public void OnAttributeSet(UIElement element, string attributeName, string currentValue, string attributeValue) { }
 
@@ -765,6 +716,13 @@ namespace UIForia.Systems {
             return KeyState.Up;
         }
 
+        public void RegisterKeyboardHandler(UIElement element) {
+            const InputEventType keyEvents = InputEventType.KeyDown | InputEventType.KeyUp | InputEventType.KeyHeldDown;
+            if (element.inputHandlers != null && (element.inputHandlers.handledEvents & keyEvents) != 0) {
+                m_KeyboardEventTree.AddItem(element);
+            }
+        }
+
         protected void ProcessKeyboardEvent(KeyCode keyCode, InputEventType eventType, char character, KeyboardModifiers modifiers) {
             KeyboardInputEvent keyEvent = new KeyboardInputEvent(eventType, keyCode, character, modifiers, m_FocusedElement != null);
             m_CurrentKeyboardEvent = keyEvent;
@@ -779,60 +737,53 @@ namespace UIForia.Systems {
                 m_PressedKeys.Remove(keyCode, (pressed, c) => pressed.keyCode == c);
             }
 
+            GenericInputEvent genericEvt = new GenericInputEvent(eventType, modifiers, m_EventPropagator, character, keyCode, m_FocusedElement != null);
+
             if (m_FocusedElement == null) {
-                
-//                m_KeyboardEventTree.ConditionalTraversePreOrder(keyEvent, (item, evt) => {
-//                    if (evt.stopPropagation) return false;
-//
-//                    UIElement element = (UIElement) item.Element;
-//                    if (element.isDestroyed || element.isDisabled) {
-//                        return false;
-//                    }
-//
-//                  //  IReadOnlyList<KeyboardEventHandler> handlers = item.handlers;
-//                   // for (int i = 0; i < handlers.Count; i++) {
-//                   //     if (evt.stopPropagationImmediately) break;
-//                   //     throw new NotImplementedException();
-//                        // InvokeHandler(handlers[i], item.Element, default, evt);
-//                  //  }
-//
-//                    if (evt.stopPropagationImmediately) {
-//                        evt.StopPropagation();
-//                    }
-//
-//                    return !evt.stopPropagation;
-//                });
+                m_KeyboardEventTree.ConditionalTraversePreOrder(keyEvent, (item, evt) => {
+                    if (evt.stopPropagation) return false;
+
+                    UIElement element = (UIElement) item.Element;
+                    if (element.isDestroyed || element.isDisabled) {
+                        return false;
+                    }
+
+                    InputHandlerGroup inputHandlerGroup = element.inputHandlers;
+
+                    for (int i = 0; i < inputHandlerGroup.eventHandlers.size; i++) {
+                        if (evt.stopPropagationImmediately) break;
+                        InputHandlerGroup.HandlerData handler = inputHandlerGroup.eventHandlers.array[i];
+                        if (handler.eventType == eventType) {
+                            handler.handler.Invoke(genericEvt);
+                        }
+                    }
+
+                    if (evt.stopPropagationImmediately) {
+                        evt.StopPropagation();
+                    }
+
+                    return !evt.stopPropagation;
+                });
             }
             else {
-                // KeyboardEventTreeNode focusedNode = m_KeyboardEventTree.GetItem(m_FocusedElement);
-              //  if (focusedNode == null) {
-                    // actually this is totally fine since any element can implement IFocusable without accepting keyboard input
-                    // return;
-               // }
+                // todo -- this should probably bubble the key event up
+                UIElement element = m_FocusedElement;
 
-               // IReadOnlyList<KeyboardEventHandler> handlers = focusedNode.handlers;
-//                ExpressionContext context = ((UIElement) focusedNode.Element).templateContext;
-             //   for (int i = 0; i < handlers.Count; i++) {
-             //       if (keyEvent.stopPropagationImmediately) break;
-              //      throw new NotImplementedException();
-//                    InvokeHandler(handlers[i], focusedNode.Element, keyEvent);
-             //   }
+                InputHandlerGroup inputHandlerGroup = element.inputHandlers;
+                if (inputHandlerGroup == null) {
+                    return;
+                }
+
+                for (int i = 0; i < inputHandlerGroup.eventHandlers.size; i++) {
+                    if (m_EventPropagator.shouldStopPropagation) break;
+                    InputHandlerGroup.HandlerData handler = inputHandlerGroup.eventHandlers.array[i];
+                    if (handler.eventType == eventType) {
+                        handler.handler.Invoke(genericEvt);
+                    }
+                }
+                
             }
         }
-
-//        private void InvokeHandler(KeyboardEventHandler handler, IHierarchical target, KeyboardInputEvent keyEvent) {
-//            if (handler.keyEventPhase == KeyEventPhase.Late) {
-//                lateHandlers.Add(new KeyboardEventHandlerInvocation {
-//                    handler = handler,
-//                    target = target,
-//                    evt = keyEvent
-//                });
-//            }
-//            else {
-//                throw new NotImplementedException();
-////                handler.Invoke(target, keyEvent);
-//            }
-//        }
 
         private void ProcessKeyboardEvents() {
             for (int i = 0; i < m_UpThisFrame.Count; i++) {
@@ -1087,10 +1038,10 @@ namespace UIForia.Systems {
                 }
 
                 LightList<InputHandlerGroup.HandlerData> handlers = element.inputHandlers.eventHandlers;
-                
+
                 for (int j = 0; j < handlers.size; j++) {
                     var handler = handlers.array[j];
-                    
+
                     if (handler.eventType != eventType) {
                         continue;
                     }

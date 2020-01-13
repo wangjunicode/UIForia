@@ -13,6 +13,7 @@ namespace UIForia.Systems {
         KeyboardInputEvent CurrentKeyboardEvent { get; }
         IReadOnlyList<UIElement> ElementsThisFrame { get; }
         void OnLateUpdate();
+        void RegisterKeyboardHandler(UIElement element);
         
 #if UNITY_EDITOR
         List<UIElement> DebugElementsThisFrame { get; }

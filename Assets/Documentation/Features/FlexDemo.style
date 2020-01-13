@@ -142,43 +142,43 @@ style clip-nested {
 
 style special-text {
     TextColor = White;
-    TextFontAsset = @theme.fontDigitalDreamFat;
+    //TextFontAsset = @theme.fontDigitalDreamFat;
 }
 
-style img1 {
-    PreferredSize = 100px;
-    BackgroundImage = url(icon_1);
-}
-
-style img2 {
-    PreferredSize = 100px;
-    BackgroundImage = url(icon_2);
-}
-
-style img3 {
-    PreferredSize = 100px;
-    BackgroundImage = url(icon_3);
-}
-
-style img4 {
-    PreferredSize = 100px;
-    BackgroundImage = url(icon_4);
-}
-
-style img5 {
-    PreferredSize = 100px;
-    BackgroundImage = url(icon_5);
-}
-
-style img6 {
-    PreferredSize = 100px;
-    BackgroundImage = url(icon_6);
-}
-
-style img7 {
-    PreferredSize = 100px;
-    BackgroundImage = url(icon_7);
-}
+//style img1 {
+//    PreferredSize = 100px;
+//    BackgroundImage = url(icon_1);
+//}
+//
+//style img2 {
+//    PreferredSize = 100px;
+//    BackgroundImage = url(icon_2);
+//}
+//
+//style img3 {
+//    PreferredSize = 100px;
+//    BackgroundImage = url(icon_3);
+//}
+//
+//style img4 {
+//    PreferredSize = 100px;
+//    BackgroundImage = url(icon_4);
+//}
+//
+//style img5 {
+//    PreferredSize = 100px;
+//    BackgroundImage = url(icon_5);
+//}
+//
+//style img6 {
+//    PreferredSize = 100px;
+//    BackgroundImage = url(icon_6);
+//}
+//
+//style img7 {
+//    PreferredSize = 100px;
+//    BackgroundImage = url(icon_7);
+//}
 
 style flex-parent {
     PreferredSize = 600px;

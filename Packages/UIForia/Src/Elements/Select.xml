@@ -32,11 +32,11 @@
             FlexLayoutDirection = Horizontal;
             BackgroundColor = clear;
             LayoutFitHorizontal = Grow;
+            ClipBehavior = Normal;
             [hover] {
                 MinWidth = 1cnt;
                 TextColor = white;
                 BackgroundColor = #006d82;
-                ClipBehavior = Never;
             }
         }
         
@@ -71,6 +71,7 @@
             MaxHeight = 400px;
             Padding = 8px 0;
             ZIndex = 20;
+            ClipBehavior = Never;
         }
         
         style transclude {
@@ -149,7 +150,7 @@
             <Div style="chevron-down"/>
         </Group>
 
-        <ScrollView onMouseClick="SelectElement($event)" style="select-options" x-id="option-list">
+        <ScrollView onMouseClick="SelectElement($event)" style="select-options" x-id="option-list" scrollSpeed="10">
             <Children x-id="option-children" style="transclude" x-type="template">
                 <Group style="select-option">
                     <Image src="selectedElementIcon" style="selected-element-icon" if="DisplaySelectedIcon($option__internal)" />

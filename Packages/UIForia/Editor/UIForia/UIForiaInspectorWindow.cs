@@ -7,6 +7,7 @@ using UIForia.Elements;
 using UIForia.Layout;
 using UIForia.Layout.LayoutTypes;
 using UIForia.Rendering;
+using UIForia.Systems;
 using UIForia.Text;
 using UIForia.Util;
 using UnityEditor;
@@ -19,24 +20,13 @@ namespace UIForia.Editor {
 
         private UIElement selectedElement;
         private Vector2 scrollPosition;
-        private bool drawDebugBox;
         private Color overlayColor;
         private Vector3 drawPos;
         private float overlayBorderSize;
         private Color overlayBorderColor;
 
-        private Color contentColor = new Color32(140, 182, 193, 175);
-        private Color allocatedContentColor = new Color32(90, 212, 193, 175);
-        private Color borderColor = new Color32(253, 221, 155, 175);
-        private Color marginColor = new Color32(249, 204, 157, 175);
-        private Color paddingColor = new Color32(196, 208, 139, 175);
-        private Color allocatedSpaceColor = Color.red;
-        private Color descenderColor = Color.blue;
-        private Color outlineColor = new Color32(196, 208, 139, 175);
         private Material lineMaterial;
         private Mesh baselineMesh;
-        private bool showTextBaseline;
-        private bool showTextDescender;
 
         private readonly Dictionary<UIStyle, bool> m_ExpandedMap = new Dictionary<UIStyle, bool>();
         private static readonly GUIContent s_Content = new GUIContent();
@@ -49,7 +39,7 @@ namespace UIForia.Editor {
         private int tab;
         private Application app;
 
-        public static readonly string[] s_TabNames = {"Element", "Applied Styles", "Computed Style", "Settings"};
+        public static readonly string[] s_TabNames = {"Element", "Applied Styles", "Computed Style"};
 
         public void Update() {
             if (!EditorApplication.isPlaying) {
@@ -57,15 +47,7 @@ namespace UIForia.Editor {
             }
 
             if (app != UIForiaHierarchyWindow.s_SelectedApplication) {
-                if (app != null) {
-                    app.RenderSystem.DrawDebugOverlay2 -= DrawDebugOverlay;
-                }
-
                 app = UIForiaHierarchyWindow.s_SelectedApplication;
-                if (app != null) {
-                    app.RenderSystem.DrawDebugOverlay2 += DrawDebugOverlay;
-                }
-
                 m_ExpandedMap.Clear();
             }
 
@@ -80,33 +62,6 @@ namespace UIForia.Editor {
 
         private void OnEnable() {
             searchField = new SearchField();
-            if (!ColorUtility.TryParseHtmlString(EditorPrefs.GetString("UIForia.Inspector.ContentColor"), out contentColor)) {
-                contentColor = new Color32(140, 182, 193, 175);
-            }
-
-            if (!ColorUtility.TryParseHtmlString(EditorPrefs.GetString("UIForia.Inspector.BorderColor"), out borderColor)) {
-                borderColor = new Color32(253, 221, 155, 175);
-            }
-
-            if (!ColorUtility.TryParseHtmlString(EditorPrefs.GetString("UIForia.Inspector.PaddingColor"), out paddingColor)) {
-                paddingColor = new Color32(253, 221, 155, 175);
-            }
-
-            if (!ColorUtility.TryParseHtmlString(EditorPrefs.GetString("UIForia.Inspector.MarginColor"), out marginColor)) {
-                marginColor = new Color32(253, 221, 155, 175);
-            }
-
-            if (!ColorUtility.TryParseHtmlString(EditorPrefs.GetString("UIForia.Inspector.AllocatedSpaceColor"), out allocatedSpaceColor)) {
-                allocatedSpaceColor = Color.red;
-            }
-
-            if (!ColorUtility.TryParseHtmlString(EditorPrefs.GetString("UIForia.Inspector.DescenderColor"), out descenderColor)) {
-                descenderColor = Color.blue;
-            }
-
-            showTextBaseline = EditorPrefs.GetBool("UIForia.Inspector.ShowTextBaseline", false);
-            showTextDescender = EditorPrefs.GetBool("UIForia.Inspector.ShowTextDescender", false);
-            drawDebugBox = EditorPrefs.GetBool("UIForia.Inspector.DrawDebugBox", true);
         }
 
         private void DrawComputedStyle() {
@@ -115,19 +70,12 @@ namespace UIForia.Editor {
             UIStyleSet style = selectedElement.style;
 
             bool isSet = (selectedElement.flags & UIElementFlags.DebugLayout) != 0;
-            if (GUILayout.Toggle(isSet, "Debug Layout")) {
+            if (EditorGUILayout.ToggleLeft("Debug Layout", isSet)) {
                 selectedElement.flags |= UIElementFlags.DebugLayout;
             }
             else {
                 selectedElement.flags &= ~UIElementFlags.DebugLayout;
             }
-//            
-//            DrawLabel("Cache Value width0", selectedElement.layoutBox.widthCache.width0.ToString());
-//            DrawLabel("Cache Value width1", selectedElement.layoutBox.widthCache.width1.ToString());
-//            DrawLabel("Cache Value width2", selectedElement.layoutBox.widthCache.width2.ToString());
-//            DrawLabel("Cache Value height0", selectedElement.layoutBox.widthCache.height0.ToString());
-//            DrawLabel("Cache Value height1", selectedElement.layoutBox.widthCache.height1.ToString());
-//            DrawLabel("Cache Value height2", selectedElement.layoutBox.widthCache.height2.ToString());
 
             GUILayout.BeginHorizontal();
             DrawStyleStateButton("Hover", StyleState.Hover);
@@ -139,8 +87,8 @@ namespace UIForia.Editor {
             GUILayout.EndHorizontal();
 
             EditorGUILayout.BeginHorizontal();
-            showAllComputedStyles = EditorGUILayout.Toggle("Show All", showAllComputedStyles);
-            showComputedSources = EditorGUILayout.Toggle("Show Sources", showComputedSources);
+            showAllComputedStyles = EditorGUILayout.ToggleLeft("Show All", showAllComputedStyles);
+            showComputedSources = EditorGUILayout.ToggleLeft("Show Sources", showComputedSources);
             EditorGUILayout.EndHorizontal();
 
             GUILayout.Space(4);
@@ -235,263 +183,6 @@ namespace UIForia.Editor {
             }
         }
 
-        private Path2D path = new Path2D();
-
-        private void DrawHorizontalDotted(float y, in Color color) {
-            path.BeginPath();
-            path.SetStrokeWidth(2);
-            path.SetStroke(color);
-            float x = 0;
-            while (x < Screen.width + 5) {
-                path.MoveTo(x, y);
-                path.LineTo(x + 5, y);
-                x += 8;
-            }
-
-            path.EndPath();
-            path.Stroke();
-        }
-
-        private void DrawVerticalDotted(float x, in Color color) {
-            path.BeginPath();
-            path.SetStrokeWidth(2);
-            path.SetStroke(color);
-            float y = 0;
-            while (y < Screen.height + 5) {
-                path.MoveTo(x, y);
-                path.LineTo(x, y + 5);
-                y += 8;
-            }
-
-            path.EndPath();
-            path.Stroke();
-        }
-
-        private void DrawDebugOverlay(RenderContext ctx) {
-            if (!drawDebugBox) return;
-            // path.DisableScissorRect();
-
-            path.Clear();
-            path.SetFillOpacity(1);
-            path.SetStrokeOpacity(1);
-
-            if (selectedElement != null && selectedElement.isEnabled) {
-                // RenderData data = drawList.Find((d) => d.element == selectedElement);
-                //if (data == null) {
-                //    return;
-                //}
-
-                LayoutResult result = selectedElement.layoutResult;
-
-                //Vector3 renderPosition = data.renderPosition;
-                //renderPosition.z = 5;
-
-                OffsetRect padding = selectedElement.layoutResult.padding;
-                OffsetRect border = selectedElement.layoutResult.border;
-                OffsetRect margin = selectedElement.layoutResult.margin;
-
-                float width = result.actualSize.width;
-                float height = result.actualSize.height;
-
-                Size renderSize = new Size(width + margin.left + margin.right, height + margin.top + margin.bottom);
-
-                float x = result.screenPosition.x;
-                float y = result.screenPosition.y;
-
-                // ctx.DisableScissorRect();
-
-                float allocatedX = result.allocatedPosition.x;
-                float allocatedY = result.allocatedPosition.y;
-                float allocatedW = result.allocatedSize.width;
-                float allocatedH = result.allocatedSize.height;
-
-                path.SetFill(allocatedSpaceColor);
-                path.BeginPath();
-                path.Rect(allocatedX, allocatedY, allocatedW, allocatedH);
-                path.Fill();
-
-                path.SetFill(contentColor);
-                float contentX = (result.screenPosition.x) + border.left + padding.left;
-                float contentY = (result.screenPosition.y) + border.top + padding.top;
-                float contentWidth = result.actualSize.width - border.Horizontal - padding.Horizontal;
-                float contentHeight = result.actualSize.height - border.Vertical - padding.Vertical;
-                // float actualWidth = result.allocatedSize.width - border.Horizontal - padding.Horizontal;
-                // float allocatedHeight = result.allocatedSize.height - border.Vertical - padding.Vertical;
-                path.BeginPath();
-                path.Rect(contentX, contentY, contentWidth, contentHeight);
-                path.Fill();
-
-                path.SetFill(allocatedContentColor);
-                path.BeginPath();
-                path.Rect(contentX, contentY, contentWidth, contentHeight);
-                path.Fill();
-                float paddingHorizontalWidth = width - padding.Horizontal - border.left;
-                float paddingVerticalHeight = height - border.Vertical;
-
-                path.SetFill(paddingColor);
-                if (padding.top > 0) {
-                    path.BeginPath();
-                    path.Rect(x + padding.left + border.left, y + border.top, paddingHorizontalWidth, padding.top);
-                    path.Fill();
-                }
-
-                if (padding.right > 0) {
-                    path.BeginPath();
-                    path.Rect(x + width - padding.right - border.right, y + border.top, padding.right, paddingVerticalHeight);
-                    path.Fill();
-                }
-
-                if (padding.left > 0) {
-                    path.BeginPath();
-                    path.Rect(x + border.left, y + border.top, padding.left, paddingVerticalHeight);
-                    path.Fill();
-                }
-
-                if (padding.bottom > 0) {
-                    path.BeginPath();
-                    path.Rect(x + border.left + padding.left, y - border.top + height - padding.bottom, paddingHorizontalWidth, padding.bottom);
-                    path.Fill();
-                }
-
-                path.SetFill(borderColor);
-
-                if (border.top > 0) {
-                    path.BeginPath();
-                    path.Rect(x + border.left, y, width - border.Horizontal, border.top);
-                    path.Fill();
-                }
-
-                if (border.right > 0) {
-                    path.BeginPath();
-                    path.Rect(x + width - border.right, y, border.right, height);
-                    path.Fill();
-                }
-
-                if (border.left > 0) {
-                    path.BeginPath();
-                    path.Rect(x, y, border.left, height);
-                    path.Fill();
-                }
-
-                if (border.bottom > 0) {
-                    path.BeginPath();
-                    path.Rect(x + border.left, y + height - border.bottom, width - border.Horizontal, border.bottom);
-                    path.Fill();
-                }
-
-                path.SetFill(marginColor);
-                if (margin.left > 0) {
-                    path.BeginPath();
-                    path.Rect(x - margin.left, y, margin.left, height);
-                    path.Fill();
-                }
-
-                if (margin.right > 0) {
-                    path.BeginPath();
-                    path.Rect(x + width, y, margin.right, height);
-                    path.Fill();
-                }
-
-                if (margin.top > 0) {
-                    path.BeginPath();
-                    path.Rect(x - margin.left, y - margin.top, width + margin.Horizontal, margin.top);
-                    path.Fill();
-                }
-
-                if (margin.bottom > 0) {
-                    path.BeginPath();
-                    path.Rect(x - margin.left, y + height, width + margin.Horizontal, margin.bottom);
-                    path.Fill();
-                }
-
-                DrawHorizontalDotted(contentY, contentColor);
-                DrawHorizontalDotted(contentY + contentHeight, contentColor);
-                DrawVerticalDotted(contentX, contentColor);
-                DrawVerticalDotted(contentX + contentWidth, contentColor);
-
-                ctx.DrawPath(path);
-
-//                Rect contentRect = selectedElement.layoutResult.ContentRect;
-//
-//                path.SetTransform(SVGXMatrix.TRS(selectedElement.layoutResult.screenPosition + selectedElement.layoutResult.ContentRect.min, 0, Vector2.one).ToMatrix4x4());
-//                path.BeginPath();
-//                path.SetStrokeWidth(1);
-//                path.SetStroke(Color.black);
-//
-//                StructList<GridTrack> rows = layoutBox.GetRowTracks();
-//                StructList<GridTrack> cols = layoutBox.GetColTracks();
-//
-//                for (int i = 0; i < rows.Count; i++) {
-//                    path.MoveTo(0, rows[i].position);
-//                    path.LineTo(contentRect.width, rows[i].position);
-//                }
-//
-//                for (int i = 0; i < cols.Count; i++) {
-//                    path.MoveTo(cols[i].position, 0);
-//                    path.LineTo(cols[i].position, contentRect.height);
-//                }
-//
-//                path.Stroke();
-            }
-        }
-
-        private void DrawSettings() {
-            bool newShowBaseLine = EditorGUILayout.Toggle("Show Text Baseline", showTextBaseline);
-            bool newShowDescenderLine = EditorGUILayout.Toggle("Show Text Descender", showTextDescender);
-
-            drawDebugBox = EditorGUILayout.Toggle("Draw Debug Box", drawDebugBox);
-
-            Color newContentColor = EditorGUILayout.ColorField("Content Color", contentColor);
-            Color newPaddingColor = EditorGUILayout.ColorField("Padding Color", paddingColor);
-            Color newBorderColor = EditorGUILayout.ColorField("Border Color", borderColor);
-            Color newMarginColor = EditorGUILayout.ColorField("Margin Color", marginColor);
-
-            Color newBaseLineColor = EditorGUILayout.ColorField("Allocated Space Color", allocatedSpaceColor);
-            Color newDescenderColor = EditorGUILayout.ColorField("Text Descender Color", descenderColor);
-
-            if (newContentColor != contentColor) {
-                contentColor = newContentColor;
-                EditorPrefs.SetString("UIForia.Inspector.ContentColor", "#" + ColorUtility.ToHtmlStringRGBA(contentColor));
-            }
-
-            if (newPaddingColor != paddingColor) {
-                paddingColor = newPaddingColor;
-                EditorPrefs.SetString("UIForia.Inspector.PaddingColor", "#" + ColorUtility.ToHtmlStringRGBA(paddingColor));
-            }
-
-            if (newBorderColor != borderColor) {
-                borderColor = newBorderColor;
-                EditorPrefs.SetString("UIForia.Inspector.BorderColor", "#" + ColorUtility.ToHtmlStringRGBA(borderColor));
-            }
-
-            if (marginColor != newMarginColor) {
-                marginColor = newMarginColor;
-                EditorPrefs.SetString("UIForia.Inspector.MarginColor", "#" + ColorUtility.ToHtmlStringRGBA(marginColor));
-            }
-
-            if (allocatedSpaceColor != newBaseLineColor) {
-                allocatedSpaceColor = newBaseLineColor;
-                EditorPrefs.SetString("UIForia.Inspector.AllocatedSpaceColor", "#" + ColorUtility.ToHtmlStringRGBA(allocatedSpaceColor));
-            }
-
-            if (descenderColor != newDescenderColor) {
-                descenderColor = newDescenderColor;
-                EditorPrefs.SetString("UIForia.Inspector.DescenderColor", ColorUtility.ToHtmlStringRGBA(descenderColor));
-            }
-
-            if (newShowBaseLine != showTextBaseline) {
-                showTextBaseline = newShowBaseLine;
-                EditorPrefs.SetBool("UIForia.Inspector.ShowTextBaseline", showTextBaseline);
-            }
-
-            if (newShowDescenderLine != showTextDescender) {
-                showTextDescender = newShowDescenderLine;
-                EditorPrefs.SetBool("UIForia.Inspector.ShowTextDescender", showTextDescender);
-            }
-
-            EditorPrefs.SetBool("UIForia.Inspector.DrawDebugBox", drawDebugBox);
-        }
-
         private static void DrawLabel(string label, string value) {
             GUILayout.BeginHorizontal();
             EditorGUILayout.PrefixLabel(label);
@@ -553,6 +244,9 @@ namespace UIForia.Editor {
             DrawMeasurement(selectedElement.style.GetComputedStyleProperty(StylePropertyId.PreferredWidth), false);
             DrawMeasurement(selectedElement.style.GetComputedStyleProperty(StylePropertyId.PreferredHeight), false);
 
+            DrawLabel("Block Width Provider:", selectedElement.layoutBox.GetBlockWidthProvider() + " size: " + selectedElement.layoutBox.ComputeBlockWidth(1));
+            DrawLabel("Block Height Provider:", selectedElement.layoutBox.GetBlockHeightProvider() + " size: " + selectedElement.layoutBox.ComputeBlockHeight(1));
+            
             GUILayout.Space(16);
 
             OffsetRect margin = selectedElement.layoutResult.margin;
@@ -584,7 +278,7 @@ namespace UIForia.Editor {
         private void DrawStyleStateButton(string name, StyleState styleState) {
             bool isInState = selectedElement.style.IsInState(styleState);
             s_Content.text = "Force " + name;
-            bool toggle = EditorGUILayout.Toggle(s_Content, isInState);
+            bool toggle = EditorGUILayout.ToggleLeft(s_Content, isInState);
             if (!isInState && toggle) {
                 selectedElement.style.EnterState(styleState);
             }
@@ -637,22 +331,22 @@ namespace UIForia.Editor {
 
         private void DrawStyleGroup(UIStyleGroup group) {
             if (group.normal.style != null) {
-                DrawStyle(s_Content.text + " [Normal]", group.normal.style);
+                DrawStyle(group.name + " [Normal]", group.normal.style);
                 DrawRunCommands(group.normal.runCommands);
             }
 
             if (group.hover.style != default) {
-                DrawStyle(s_Content.text + " [Hover]", group.hover.style);
+                DrawStyle(group.name + " [Hover]", group.hover.style);
                 DrawRunCommands(group.hover.runCommands);
             }
 
             if (group.focused.style != default) {
-                DrawStyle(s_Content.text + " [Focus]", group.focused.style);
+                DrawStyle(group.name + " [Focus]", group.focused.style);
                 DrawRunCommands(group.focused.runCommands);
             }
 
             if (group.active.style != default) {
-                DrawStyle(s_Content.text + " [Active]", group.active.style);
+                DrawStyle(group.name + " [Active]", group.active.style);
                 DrawRunCommands(group.active.runCommands);
             }
         }
@@ -721,9 +415,6 @@ namespace UIForia.Editor {
                     break;
                 case 2:
                     DrawComputedStyle();
-                    break;
-                case 3:
-                    DrawSettings();
                     break;
             }
 

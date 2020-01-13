@@ -44,75 +44,6 @@ namespace UIForia.Animation {
         }
 
         private void AddKeyFrame(float time, StyleKeyFrameValue property) {
-            if (property.IsCalculated) {
-                //StyleTokenizer.Tokenize();
-                //AnimationParser.Parse();
-                switch (property.propertyId) {
-                    case StylePropertyId.TransformPivotX:
-                    case StylePropertyId.TransformPositionX:
-                    case StylePropertyId.PaddingLeft:
-                    case StylePropertyId.PaddingRight:
-                    case StylePropertyId.BorderLeft:
-                    case StylePropertyId.BorderRight:
-                    case StylePropertyId.MarginLeft:
-                    case StylePropertyId.MarginRight: {
-                        UIFixedLength val = target.style.GetComputedStyleProperty(property.propertyId).AsUIFixedLength;
-                        // expressionCompiler.SetAliasResolver(new VariableResolver<UIFixedLength>("startVal", ResolveFixedWidth(target, target.View.Viewport, val)));
-                        break;
-                    }
-
-                    case StylePropertyId.TransformPivotY:
-                    case StylePropertyId.TransformPositionY:
-                    case StylePropertyId.PaddingTop:
-                    case StylePropertyId.PaddingBottom:
-                    case StylePropertyId.BorderTop:
-                    case StylePropertyId.BorderBottom:
-                    case StylePropertyId.MarginTop:
-                    case StylePropertyId.MarginBottom: {
-                        UIFixedLength val = target.style.GetComputedStyleProperty(property.propertyId).AsUIFixedLength;
-                       //  expressionCompiler.SetAliasResolver(new VariableResolver<UIFixedLength>("startVal", ResolveFixedHeight(target, target.View.Viewport, val)));
-                        break;
-                    }
-
-                    case StylePropertyId.PreferredWidth:
-                    case StylePropertyId.MinWidth:
-                    case StylePropertyId.MaxWidth: {
-                        UIMeasurement val = target.style.GetComputedStyleProperty(property.propertyId).AsUIMeasurement;
-                      //  expressionCompiler.SetAliasResolver(new VariableResolver<UIMeasurement>("startVal", ResolveWidthMeasurement(target, target.View.Viewport, val)));
-                        break;
-                    }
-
-                    case StylePropertyId.PreferredHeight:
-                    case StylePropertyId.MinHeight:
-                    case StylePropertyId.MaxHeight: {
-                        UIMeasurement val = target.style.GetComputedStyleProperty(property.propertyId).AsUIMeasurement;
-                      //  expressionCompiler.SetAliasResolver(new VariableResolver<UIMeasurement>("startVal", ResolveHeightMeasurement(target, target.View.Viewport, val)));
-                        break;
-                    }
-
-                    case StylePropertyId.Opacity:
-                    case StylePropertyId.TransformScaleX:
-                    case StylePropertyId.TransformScaleY:
-                    case StylePropertyId.TransformRotation:
-                    case StylePropertyId.GridLayoutColGap:
-                    case StylePropertyId.GridLayoutRowGap: {
-                       // expressionCompiler.SetAliasResolver(new VariableResolver<float>("startVal", target.style.GetComputedStyleProperty(property.propertyId).AsFloat));
-                        break;
-                    }
-
-                    case StylePropertyId.BackgroundColor:
-                    case StylePropertyId.TextColor: {
-                        throw new NotImplementedException();
-                    }
-
-                    default:
-                        if (StyleUtil.CanAnimate(property.propertyId)) {
-                            throw new NotImplementedException(property.propertyId + " can be animated but is not implemented");
-                        }
-
-                        throw new InvalidArgumentException(property.propertyId + " is not a supported animation property");
-                }
-            }
 
             for (int i = 0; i < processedFrameGroups.Count; i++) {
                 if (processedFrameGroups[i].propertyId == property.propertyId) {
@@ -134,23 +65,14 @@ namespace UIForia.Animation {
                 return UITaskResult.Cancelled;
             }
             
-            if (animationData.options.delay > status.elapsedTotalTime) {
+            AnimationOptions options = animationData.options;
+            float delay = options.delay?.AsSeconds() ?? 0; 
+            if (delay > status.elapsedTotalTime) {
                 return UITaskResult.Running;
             }
-
-            float elapsedIterationTime = status.elapsedIterationTime - animationData.options.delay ?? 0f;
-
-            Rect viewport = target.View.Viewport;
-
-            AnimationOptions options = animationData.options;
-
-            float duration = options.duration.Value * 0.001f;
-            float iterationTime = duration;
-
-            if (options.iterations.Value > 0) {
-                iterationTime /= options.iterations.Value;
-            }
-
+            
+            float duration = options.duration?.AsSeconds() ?? 1;
+            float elapsedIterationTime = status.elapsedIterationTime - delay;
             float progress = Mathf.Clamp01(elapsedIterationTime / duration);
 
             status.iterationProgress = progress;
@@ -163,6 +85,7 @@ namespace UIForia.Animation {
                 targetProgress = 1 - targetProgress;
             }
 
+            Rect viewport = target.View.Viewport;
             ProcessedKeyFrameGroup[] groups = processedFrameGroups.array;
             ProcessedKeyFrame next = default;
             for (int i = 0; i < processedFrameGroups.Count; i++) {

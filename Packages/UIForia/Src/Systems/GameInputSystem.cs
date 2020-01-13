@@ -9,7 +9,6 @@ namespace UIForia.Systems.Input {
         private int clickCount;
         private float lastMouseDownTime;
         private Vector2 lastMouseDownPosition;
-        private const float k_ClickThreshold = 0.33f;
         
         protected override MouseState GetMouseState() {
             MouseState retn = new MouseState();
@@ -51,18 +50,12 @@ namespace UIForia.Systems.Input {
                 lastMouseDownPosition = retn.leftMouseButtonState.downPosition;
             }
             else if (retn.isLeftMouseUpThisFrame) {
-                if (now - lastMouseDownTime <= k_ClickThreshold) {
-                    if (Vector2.Distance(lastMouseDownPosition, retn.mousePosition) <= 3f) {
-                        clickCount++;
-                        didClick = true;
-                    }
+                if (Vector2.Distance(lastMouseDownPosition, retn.mousePosition) <= 3f) {
+                    clickCount++;
+                    didClick = true;
                 }
                 
                 retn.leftMouseButtonState.downPosition = new Vector2(-1, -1);
-            }
-
-            if (now - lastMouseDownTime > k_ClickThreshold) {
-                clickCount = 0;
             }
 
             retn.isSingleClick = didClick && clickCount == 1;

@@ -53,10 +53,10 @@ namespace UIForia.Systems {
     public class AwesomeGridLayoutBox : AwesomeLayoutBox {
 
         private bool placementDirty;
-        private readonly StructList<GridTrack> colTrackList;
-        private readonly StructList<GridTrack> rowTrackList;
-        private readonly StructList<GridPlacement> placementList;
-        private static readonly StructList<GridRegion> s_OccupiedAreas = new StructList<GridRegion>(32);
+        internal readonly StructList<GridTrack> colTrackList;
+        internal readonly StructList<GridTrack> rowTrackList;
+        internal readonly StructList<GridPlacement> placementList;
+        internal static readonly StructList<GridRegion> s_OccupiedAreas = new StructList<GridRegion>(32);
         private StructList<int> deferredList;
         private bool finalSizeResolutionMode;
 
@@ -126,7 +126,7 @@ namespace UIForia.Systems {
                                 return false;
                             }
 
-                            blockSize += track.resolvedBaseSize; // todo -- min is probably wrong, should be base
+                            blockSize += track.resolvedBaseSize; 
                         }
 
                         deferredList = deferredList ?? new StructList<int>();
@@ -211,7 +211,7 @@ namespace UIForia.Systems {
                                 return false;
                             }
 
-                            blockSize += track.resolvedBaseSize; // todo -- min is probably wrong, should be base
+                            blockSize += track.resolvedBaseSize;
                         }
 
                         deferredList = deferredList ?? new StructList<int>();

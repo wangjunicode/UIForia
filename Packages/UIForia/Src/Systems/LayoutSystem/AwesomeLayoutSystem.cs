@@ -22,6 +22,11 @@ namespace UIForia.Systems {
             for (int i = 0; i < application.m_Views.Count; i++) {
                 runners.Add(new AwesomeLayoutRunner(this, application.m_Views[i].dummyRoot));
             }
+            
+            application.onViewsSorted += uiViews => {
+                runners.Sort((a, b) => 
+                    Array.IndexOf(uiViews, b.rootElement.View) - Array.IndexOf(uiViews, a.rootElement.View));
+            };
 
             application.StyleSystem.onStylePropertyChanged += HandleStylePropertyChanged;
         }
@@ -151,13 +156,59 @@ namespace UIForia.Systems {
                     case StylePropertyId.LayoutBehavior:
                         element.flags |= UIElementFlags.LayoutTypeOrBehaviorDirty;
                         break;
-                    case StylePropertyId.TransformRotation:
-                    case StylePropertyId.TransformPositionX:
-                    case StylePropertyId.TransformPositionY:
-                    case StylePropertyId.TransformScaleX:
-                    case StylePropertyId.TransformScaleY:
-                    case StylePropertyId.TransformPivotX:
+                    case StylePropertyId.TransformRotation: {
+                        if (element.layoutBox != null) {
+                            element.layoutBox.transformRotation = property.AsFloat;
+                        }
+
+                        updateTransform = true;
+                        break;
+                    }
+                    case StylePropertyId.TransformPositionX: {
+                        if (element.layoutBox != null) {
+                            element.layoutBox.transformPositionX = property.AsOffsetMeasurement;
+                        }
+
+                        updateTransform = true;
+                        break;
+                    }
+                    case StylePropertyId.TransformPositionY: {
+                        if (element.layoutBox != null) {
+                            element.layoutBox.transformPositionY = property.AsOffsetMeasurement;
+                        }
+
+                        updateTransform = true;
+                        break;
+                    }
+                    case StylePropertyId.TransformScaleX: {
+                        if (element.layoutBox != null) {
+                            element.layoutBox.transformScaleX = property.AsFloat;
+                        }
+
+                        updateTransform = true;
+                        break;
+                    }
+                    case StylePropertyId.TransformScaleY: {
+                        if (element.layoutBox != null) {
+                            element.layoutBox.transformScaleY = property.AsFloat;
+                        }
+
+                        updateTransform = true;
+                        break;
+                    }
+                    case StylePropertyId.TransformPivotX: {
+                        if (element.layoutBox != null) {
+                            element.layoutBox.transformPivotX = property.AsUIFixedLength;
+                        }
+
+                        updateTransform = true;
+                        break;
+                    }
                     case StylePropertyId.TransformPivotY:
+                        if (element.layoutBox != null) {
+                            element.layoutBox.transformPivotY = property.AsUIFixedLength;
+                        }
+
                         updateTransform = true;
                         break;
 

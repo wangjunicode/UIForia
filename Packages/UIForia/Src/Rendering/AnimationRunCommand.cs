@@ -20,6 +20,9 @@ namespace UIForia.Rendering {
                 case RunAction.Pause:
                     element.Application.PauseAnimation(element, animationData);
                     break;
+                case RunAction.Resume:
+                    element.Application.ResumeAnimation(element, animationData);
+                    break;
                 case RunAction.Stop:
                     element.Application.StopAnimation(element, animationData);
                     break;

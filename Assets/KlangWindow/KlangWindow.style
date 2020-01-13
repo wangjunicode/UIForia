@@ -44,18 +44,49 @@ animation restore {
     }
 }
 
+animation enter-button {
+    [options] {
+        duration = 200;
+        timingFunction = CubicEaseIn;
+    }
+    [keyframes] {
+        100% { PreferredSize = 16px 4px; }
+    }
+}
+
+animation exit-button {
+    [options] {
+        duration = 200;
+        timingFunction = CubicEaseIn;
+    }
+    [keyframes] {
+        100% { PreferredSize = 0; }
+    }
+}
+
+style window-very-large {
+    PreferredSize = 1440px 900px;
+}
+
+style window-large {
+    PreferredSize = 800px 600px;
+}
+
+style window-vertical-large {
+    PreferredSize = 500px 800px;
+}
+
+style window-small {
+    PreferredSize = 500px 300px;
+}
 
 style window-container {
     PreferredSize = 600px 400px;
-    GridLayoutColTemplate = 1mx, 1fr;
-    GridLayoutRowTemplate = 64px, 1fr;
-    GridLayoutDirection = Horizontal;
-    GridLayoutRowAlignment = Grow;
-    GridLayoutColAlignment = Fit;
-    LayoutType = Grid; 
-    LayoutBehavior = Ignored;
-    AlignmentTargetX = Parent;
-    AlignmentTargetY = Parent;
+    CornerBevelBottomRight = 20px;
+    AlignX = 80px Parent;
+    AlignY = 80px Parent;
+    FlexLayoutDirection = Horizontal;
+
     [attr:minmax="maximize"] {
         [enter] run animation(maximize);
     }
@@ -67,26 +98,30 @@ style window-container {
     }
 }
 
+style main-content {
+    FlexItemShrink = 1;
+    LayoutFit = Fill;
+}
+
 style title-bar {
-    BackgroundColor = Black;
+    BackgroundColor = black;
     PreferredHeight = 64px;
-    TextColor = White;
+    TextColor = white;
     TextFontAsset = @theme.fontGothamBold;
     TextTransform = UpperCase;
-    FlexLayoutDirection = Row;
-    FlexLayoutCrossAxisAlignment = Center;
+    FlexLayoutDirection = Horizontal;
+    AlignItemsVertical = Center;
+    DistributeExtraSpaceHorizontal = BetweenContent;
     TextFontSize = 1.1em;
-    FlexLayoutMainAxisAlignment = SpaceBetween;
     PaddingLeft = 1em;
     PaddingRight = 1em;
-    GridItemX = 1;
-    GridItemY = 0;
+    LayoutFitHorizontal = Fill;
 }
 
 style side-bar-runner {
-    PreferredWidth = 8px;
-    PreferredHeight = 48px;
+    PreferredSize = 8px 48px;
     LayoutBehavior = Ignored;
+    TransformPositionY = 62px;
 }
 
 style side-bar-runner-display {
@@ -97,15 +132,15 @@ style side-bar-runner-display {
 
 style side-bar-slot {
     PreferredWidth = 76px;
-    FlexLayoutCrossAxisAlignment = End;
+    DistributeExtraSpaceHorizontal = BeforeContent;
+    BackgroundColor = black;
+    MarginTop = 64px;
+    PaddingBottom = 20px;
 }
 
-style colony-info-sidebar {
-    BackgroundColor = Black;   
-    GridItemX = 0;
-    GridItemY = 0;
-    PaddingTop = 64px;
-    PaddingBottom = 20px;
+style side-bar-container {
+    BackgroundColor = black;
+    //AlignX = -76px 0% Parent;
 }
 
 style title-buttons {
@@ -113,19 +148,29 @@ style title-buttons {
 }
 
 style title-button {
-    LayoutType = Stack;
+//    LayoutType = Stack;
     PreferredSize = 24px;
     Border = 2px;
     BorderRadius = 50%;
     MarginRight = 10px;
 }
 
+style title-button-part {
+    AlignX = 50% Parent;
+    AlignY = 50% Parent;
+    BackgroundColor = black;
+    [attr:hovered="true"] {
+        [enter] run animation(enter-button);
+        [exit] run animation(exit-button);
+    } 
+}
+
 style left-leg {
-    TransformRotation = 45;
+    TransformRotation = -45;
 }
 
 style right-leg {
-    TransformRotation = -45;
+    TransformRotation = 45;
 }
 
 style minus-bar {
@@ -141,59 +186,27 @@ style vertical {
     TransformRotation = 90;
 }
 
+style close-button {
+    PreferredSize = 24px;
+    Border = 2px;
+    BorderRadius = 50%;
+    BorderColor = #F3514E;
+    [hover] {
+        BackgroundColor = #F3514E;
+    }
+}
+
 style body {
-    GridItemX = 1;
-    GridItemY = 1;
     BackgroundColor = White;
     CornerBevelBottomRight = 20px;
-    LayoutType = Grid;
-    GridLayoutColTemplate = 1fr, 1mn;
-    GridLayoutRowTemplate = 1mx;
+    PreferredSize = 1pca;
+    FlexItemShrink = 1;
+    Overflow = Scroll;
+    FlexItemShrink = 1;
+    LayoutFit = Fill;
 }
 
-style body-sidebar {
-    PreferredWidth = 300px;
-    PreferredHeight = 1pca;
-    BackgroundColor = #F2F2F2;
-}
-
-style colony-info-body {
-    Padding = 2em;
-    PreferredWidth = 1pca;
-    PreferredHeight = 1pca;
-}
-
-style colony-info-head-section {
-    FlexLayoutDirection = Column;
-    FlexItemGrow = 1;
-}
-
-style colony-info-header-text {
-//    FlexItemGrow = 1;
-    LayoutType = Grid;
-//    PreferredWidth = 800px;
-    GridLayoutColTemplate = 1fr 1fr;
-    GridLayoutRowAutoSize = 1mx;
-    Padding = 1em;
-    TextFontSize = 1.1em;
-    TextFontAsset = @theme.fontGothamNarrowMedium;
-    GridLayoutRowGap = 8;
-}
-
-style colony-name {
-    TextFontSize = 3em;
-    GridItemX = 0;
-    GridItemWidth = 2;
-    GridItemY = 0;
-    MarginBottom = 0.25em;
-}
-
-style quote-container {
-    PreferredWidth = 1pca;
-}
-
-style quote {
-    PreferredWidth = 1pca;
-    BackgroundColor = #F2F2F2;
-    Padding = 0.5em;
+style body-dark {
+    BackgroundColor = rgba(0, 0, 0, 220);
+    TextColor = white;
 }

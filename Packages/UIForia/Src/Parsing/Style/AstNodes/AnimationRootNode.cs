@@ -2,6 +2,18 @@ using UIForia.Util;
 
 namespace UIForia.Parsing.Style.AstNodes {
 
+    internal static partial class StyleASTNodeFactory {
+            
+        internal static readonly ObjectPool<AnimationRootNode> s_AnimationRootNodePool = new ObjectPool<AnimationRootNode>();
+        
+        internal static AnimationRootNode AnimationRootNode(string animName) {
+            AnimationRootNode retn = s_AnimationRootNodePool.Get();
+            retn.animName = animName;
+            retn.type = StyleASTNodeType.AnimationDeclaration;
+            return retn;
+        }
+    }
+
     public class AnimationRootNode : StyleASTNode {
 
         public string animName;
@@ -9,11 +21,6 @@ namespace UIForia.Parsing.Style.AstNodes {
         public LightList<VariableDefinitionNode> variableNodes;
         public LightList<AnimationOptionNode> optionNodes;
         public LightList<KeyFrameNode> keyframeNodes;
-            
-        public AnimationRootNode(string animName) {
-            this.animName = animName;
-            type = StyleASTNodeType.AnimationDeclaration;
-        }
 
         public void AddVariableNode(VariableDefinitionNode node) {
             variableNodes = variableNodes ?? new LightList<VariableDefinitionNode>(4);
@@ -54,6 +61,8 @@ namespace UIForia.Parsing.Style.AstNodes {
                 keyframeNodes.Clear();
                 LightList<KeyFrameNode>.Release(ref keyframeNodes);
             }
+            
+            StyleASTNodeFactory.s_AnimationRootNodePool.Release(this);
         }
 
     }

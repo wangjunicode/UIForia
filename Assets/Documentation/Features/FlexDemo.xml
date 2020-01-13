@@ -3,22 +3,34 @@
 
     <Style path="Documentation/Features/FlexDemo.style"/>
 
-    <Contents style="container">
+    <Contents>
 
-        <Div style="flex-demo">
-            <Heading3>Flex-Start</Heading3>
-            <Group style="flex-demo-content flex-start col">
-                <Div style="flex-item">Item 1</Div>
-                <Div style="flex-item">Item 2</Div>
-                <Div style="flex-item">Item 3</Div>
-                <Div style="flex-item">Item 4</Div>
-                <Div style="flex-item">Item 5</Div>
+            <Group style="fit-vertical">
+                <Group style="group1 fill-and-grow" />
             </Group>
-        </Div>
+
+<!--            <Group style="fit container">-->
+<!--                <Group style="group1 h-item-shrink color2" />-->
+<!--                <Group style="group1 h-item-fill color2" />-->
+<!--                <Group style="group1 h-item-grow color2"/>-->
+<!--                <Group style="group1 h-item-dont-grow color2" />-->
+<!--            </Group>-->
+
+
 
 <!--        <Div style="flex-demo">-->
+<!--            <Heading3>Flex-Start</Heading3>-->
+<!--            <Group style="flex-demo-content flex-start horizontal">-->
+<!--                <Div style="flex-item">Item 1</Div>-->
+<!--                <Div style="flex-item">Item 2</Div>-->
+<!--                <Div style="flex-item">Item 3</Div>-->
+<!--                <Div style="flex-item">Item 4</Div>-->
+<!--                <Div style="flex-item">Item 5</Div>-->
+<!--            </Group>-->
+<!--        </Div>-->
+<!--        <Div style="flex-demo">-->
 <!--            <Heading3>Flex-End</Heading3>-->
-<!--            <Div style="flex-demo-content flex-end col">-->
+<!--            <Div style="flex-demo-content flex-end horizontal">-->
 <!--                <Div style="flex-item">Item 1</Div>-->
 <!--                <Div style="flex-item">Item 2</Div>-->
 <!--                <Div style="flex-item">Item 3</Div>-->
@@ -29,7 +41,7 @@
 
 <!--        <Div style="flex-demo">-->
 <!--            <Heading3>Flex-Center</Heading3>-->
-<!--            <Div style="flex-demo-content flex-center col">-->
+<!--            <Div style="flex-demo-content flex-center horizontal">-->
 <!--                <Div style="flex-item">Item 1</Div>-->
 <!--                <Div style="flex-item">Item 2</Div>-->
 <!--                <Div style="flex-item">Item 3</Div>-->
@@ -40,7 +52,7 @@
 
 <!--        <Div style="flex-demo">-->
 <!--            <Heading3>Flex-Space-Between</Heading3>-->
-<!--            <Div style="flex-demo-content flex-space-between col">-->
+<!--            <Div style="flex-demo-content flex-space-between horizontal">-->
 <!--                <Div style="flex-item">Item 1</Div>-->
 <!--                <Div style="flex-item">Item 2</Div>-->
 <!--                <Div style="flex-item">Item 3</Div>-->
@@ -51,7 +63,7 @@
 
 <!--        <Div style="flex-demo">-->
 <!--            <Heading3>Flex-Space-Around</Heading3>-->
-<!--            <Div style="flex-demo-content flex-space-around col">-->
+<!--            <Div style="flex-demo-content flex-space-around horizontal">-->
 <!--                <Div style="flex-item">Item 1</Div>-->
 <!--                <Div style="flex-item">Item 2</Div>-->
 <!--                <Div style="flex-item">Item 3</Div>-->
@@ -62,7 +74,7 @@
 
 <!--        <Div style="flex-demo">-->
 <!--            <Heading3>Flex-Grow</Heading3>-->
-<!--            <Div style="flex-demo-content flex-stretch col">-->
+<!--            <Div style="flex-demo-content flex-stretch horizontal">-->
 <!--                <Div style="flex-item">Grow 0</Div>-->
 <!--                <Div style="flex-item flex-grow-1">Grow 1</Div>-->
 <!--                <Div style="flex-item flex-grow-2">Grow 2</Div>-->
@@ -71,5 +83,29 @@
 <!--            </Div>-->
 <!--        </Div>-->
         
+<!--        <Div style="flex-demo">-->
+<!--            <Heading3>Very tricky flex layout</Heading3>-->
+<!--            <Div style="flex-demo-content">-->
+<!--                <Div style="flex-demo-content-child1">-->
+<!--                    <Div style="flex-item">Item 1</Div>-->
+<!--                </Div>-->
+<!--                <Div style="flex-demo-content-child">-->
+<!--                    <Div style="flex-item">Item 1</Div>-->
+<!--                </Div>-->
+<!--            </Div>-->
+<!--            -->
+<!--            <Heading3>Hover over a child to trigger a content size change. Should affect the parent</Heading3>-->
+<!--            <Div style="flex-parent">-->
+<!--                <Div style="flex-content-child-grow">-->
+<!--                    <Div style="flex-item-grow">Item 1</Div>-->
+<!--                </Div>-->
+<!--                <Div x-check-me="check-me" style="flex-content-child-grow">-->
+<!--                    <Div style="flex-item-grow">Item 1</Div>-->
+<!--                </Div>-->
+<!--                <Div style="flex-content-child-grow">-->
+<!--                    <Div style="flex-item-grow">Item 1</Div>-->
+<!--                </Div>-->
+<!--            </Div>-->
+<!--        </Div>-->
     </Contents>
 </UITemplate>

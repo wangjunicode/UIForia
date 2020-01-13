@@ -27,7 +27,7 @@ namespace UIForia.Rendering {
         }
 
         public override void Enable() {
-            throw new System.NotImplementedException();
+            
         }
 
     }

@@ -35,9 +35,9 @@ style <this> {
     TextFontAsset = @theme.fontGothamBold;
     Cursor = @theme.cursorDefault;   
     // default alignment: off screen
-    // AlignX = 100% Parent;
-    // AlignY = 200% 100%;
-    // AlignmentTargetY = Parent;
+    AlignX = 100% Parent;
+    AlignY = 200% 100%;
+    AlignmentTargetY = Parent;
     // drop shadow
     ShadowColor = black;
     ShadowIntensity = 150;

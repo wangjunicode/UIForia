@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Src.Systems;
 using UIForia.Animation;
 using UIForia.Compilers;
@@ -9,6 +10,7 @@ using UIForia.Layout;
 using UIForia.Parsing;
 using UIForia.Rendering;
 using UIForia.Routing;
+using UIForia.Sound;
 using UIForia.Systems;
 using UIForia.Systems.Input;
 using UIForia.Util;
@@ -23,6 +25,10 @@ namespace UIForia {
         public static List<Application> Applications = new List<Application>();
 #endif
 
+        internal Stopwatch layoutTimer = new Stopwatch();
+        internal Stopwatch renderTimer = new Stopwatch();
+        internal Stopwatch bindingTimer = new Stopwatch();
+
         public readonly string id;
         private static int ElementIdGenerator;
         public static int NextElementId => ElementIdGenerator++;
@@ -35,6 +41,7 @@ namespace UIForia {
         protected IInputSystem m_InputSystem;
         protected RoutingSystem m_RoutingSystem;
         protected AnimationSystem m_AnimationSystem;
+        protected UISoundSystem m_UISoundSystem;
         protected LinqBindingSystem linqBindingSystem;
 
         protected ResourceManager resourceManager;
@@ -49,7 +56,6 @@ namespace UIForia {
         public event Action<UIElement> onElementDestroyed;
 
         public event Action<UIElement> onElementEnabled;
-//        public event Action<UIElement> onElementDisabled;
 
         public event Action onWillRefresh;
         public event Action onRefresh;
@@ -75,7 +81,6 @@ namespace UIForia {
 
         public static readonly UIForiaSettings Settings;
         private ElementPool elementPool;
-        private StructStack<ElemRef> elemRefStack;
 
         private Type lastKnownGoodRootElementType;
 
@@ -102,7 +107,6 @@ namespace UIForia {
 
             this.m_Systems = new List<ISystem>();
             this.m_Views = new List<UIView>();
-            this.elemRefStack = new StructStack<ElemRef>(32);
 
             m_StyleSystem = new StyleSystem();
             m_LayoutSystem = new AwesomeLayoutSystem(this);
@@ -167,7 +171,6 @@ namespace UIForia {
         protected Application(string id, string templateRootPath = null, ResourceManager resourceManager = null) {
             this.id = id;
             this.templateRootPath = templateRootPath;
-            this.elemRefStack = new StructStack<ElemRef>(32);
             // todo -- exceptions in constructors aren't good practice
             if (s_ApplicationList.Find(id, (app, _id) => app.id == _id) != null) {
                 throw new Exception($"Applications must have a unique id. Id {id} was already taken.");
@@ -189,6 +192,7 @@ namespace UIForia {
             m_RoutingSystem = new RoutingSystem();
             m_AnimationSystem = new AnimationSystem();
             linqBindingSystem = new LinqBindingSystem();
+            m_UISoundSystem = new UISoundSystem();
 
             elementMap = new IntMap<UIElement>();
 
@@ -218,7 +222,8 @@ namespace UIForia {
                     }
 
                     if (s_CustomPainters.ContainsKey(paintAttr.name)) {
-                        throw new Exception($"Failed to register a custom painter with the name {paintAttr.name} from type {type.FullName} because it was already registered.");
+                        throw new Exception(
+                            $"Failed to register a custom painter with the name {paintAttr.name} from type {type.FullName} because it was already registered.");
                     }
 
                     s_CustomPainters.Add(paintAttr.name, type);
@@ -242,11 +247,16 @@ namespace UIForia {
         public ILayoutSystem LayoutSystem => m_LayoutSystem;
         public IInputSystem InputSystem => m_InputSystem;
         public RoutingSystem RoutingSystem => m_RoutingSystem;
+        public UISoundSystem SoundSystem => m_UISoundSystem;
 
         public Camera Camera { get; private set; }
 
         public LinqBindingSystem LinqBindingSystem => linqBindingSystem;
         public ResourceManager ResourceManager => resourceManager;
+
+        public Rect ScreenRect => new Rect {
+            x = 0, y = 0, width = Width, height = Height
+        };
 
         public float Width => Screen.width;
         public float Height => Screen.height;
@@ -458,27 +468,12 @@ namespace UIForia {
         }
 
         public void Update() {
-//            TemplateSettings settings = new TemplateSettings();
-//            settings.applicationName = frameId.ToString();
-//            settings.assemblyName = "Assembly-CSharp";
-//            settings.outputPath = Path.Combine(UnityEngine.Application.dataPath, "UIForiaGenerated");
-//            settings.codeFileExtension = "generated.cs";
-//            settings.preCompiledTemplatePath = "Assets/UIForia_Generated/" + frameId;
-//            settings.templateResolutionBasePath = Path.Combine(UnityEngine.Application.dataPath);
-//            TemplateCompiler compiler = new TemplateCompiler(settings);
-//
-//            CompiledTemplateData compiledOutput = new RuntimeTemplateData(settings);
-//
-//            Debug.Log("Starting");
-//            Stopwatch watch = new Stopwatch();
-//            watch.Start();
-//            compiler.CompileTemplates(m_Views[0].RootElement.GetType(), compiledOutput);
-//            watch.Stop();
-//            Debug.Log("loaded app in " + watch.ElapsedMilliseconds);
-//            
             m_InputSystem.OnUpdate();
 
+            bindingTimer.Reset();
+            bindingTimer.Start();
             linqBindingSystem.OnUpdate();
+            bindingTimer.Stop();
 
             m_StyleSystem.OnUpdate();
 
@@ -488,11 +483,17 @@ namespace UIForia {
 
             m_RoutingSystem.OnUpdate();
 
+            layoutTimer.Reset();
+            layoutTimer.Start();
             m_LayoutSystem.OnUpdate();
+            layoutTimer.Stop();
 
             m_BeforeUpdateTaskSystem.OnUpdate();
 
+            renderTimer.Reset();
+            renderTimer.Start();
             m_RenderSystem.OnUpdate();
+            renderTimer.Stop();
 
             m_AfterUpdateTaskSystem.OnUpdate();
 
@@ -789,6 +790,8 @@ namespace UIForia {
             bool parentEnabled = parent.isEnabled;
 
             UIView view = parent.View;
+
+            StructStack<ElemRef> elemRefStack = StructStack<ElemRef>.Get();
             elemRefStack.Push(new ElemRef() {element = child});
 
             while (elemRefStack.Count > 0) {
@@ -832,11 +835,17 @@ namespace UIForia {
                 parent.children.array[i].siblingIndex = i;
             }
 
+            for (int i = 0; i < parent.children.Count; i++) {
+                parent.children[i].siblingIndex = i;
+            }
+
             if (parentEnabled && child.isEnabled) {
                 child.enableStateChangedFrameId = frameId;
                 child.flags &= ~UIElementFlags.Enabled;
                 DoEnableElement(child);
             }
+
+            StructStack<ElemRef>.Release(ref elemRefStack);
         }
 
         public void SortViews() {
@@ -854,9 +863,37 @@ namespace UIForia {
             onViewsSorted?.Invoke(m_Views.ToArray());
         }
 
+        internal void GetElementCount(out int totalElementCount, out int enabledElementCount, out int disabledElementCount) {
+            LightStack<UIElement> stack = LightStack<UIElement>.Get();
+            totalElementCount = 0;
+            enabledElementCount = 0;
+
+            for (int i = 0; i < m_Views.Count; i++) {
+                stack.Push(m_Views[i].RootElement);
+
+                while (stack.size > 0) {
+                    totalElementCount++;
+                    UIElement element = stack.PopUnchecked();
+
+                    if (element.isEnabled) {
+                        enabledElementCount++;
+                    }
+
+                    if (element.children == null) continue;
+
+                    for (int j = 0; j < element.children.size; j++) {
+                        stack.Push(element.children.array[j]);
+                    }
+                }
+            }
+
+            disabledElementCount = totalElementCount - enabledElementCount;
+            LightStack<UIElement>.Release(ref stack);
+        }
+
         // might be the same as HydrateTemplate really but with templateId not hard coded
         public UIElement CreateSlot(int templateId, UIElement root, UIElement parent, TemplateScope scope) {
-           throw new NotImplementedException("Deprecate");
+            throw new NotImplementedException("Deprecate");
         }
 
         public UIElement CreateSlot2(string slotName, TemplateScope scope, int defaultSlotId, UIElement root, UIElement parent) {
@@ -865,6 +902,7 @@ namespace UIForia {
                 Assert.AreEqual(slotId, defaultSlotId);
                 contextRoot = root;
             }
+
             UIElement retn = templateData.slots[slotId](contextRoot, parent, scope);
             // retn.bindingNode = new LinqBindingNode();
             retn.View = parent.View;

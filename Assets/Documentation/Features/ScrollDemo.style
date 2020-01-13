@@ -9,6 +9,8 @@ style level-0 {
     PreferredSize = 400px;
     BackgroundColor = red;
     FlexLayoutDirection = Horizontal;
+    AlignX = 20px View;
+    AlignY = 20px View;
 }
 
 style <Text> {

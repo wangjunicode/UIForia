@@ -1,4 +1,5 @@
-﻿using SVGX;
+﻿using System;
+using SVGX;
 using UIForia.Elements;
 using UIForia.Rendering;
 using UIForia.Systems;
@@ -83,10 +84,34 @@ namespace UIForia.Layout {
             UIElement[] children = element.children.array;
             int childCount = element.children.size;
 
+            if (childCount == 0) {
+                return new Size();
+            } 
+
+            StructStack<ElemRef> stack = StructStack<ElemRef>.Get();
+            if (stack.size + childCount >= stack.array.Length) {
+                Array.Resize(ref stack.array, stack.size + childCount);
+            }
+
             for (int i = 0; i < childCount; i++) {
-                UIElement child = children[i];
+                stack.array[stack.size++].element = children[i];
+            }
+
+            while (stack.size > 0) {
+                UIElement child = stack.array[--stack.size].element;
 
                 if (child.isDisabled) {
+                    continue;
+                }
+
+                if (child.style.LayoutBehavior == LayoutBehavior.TranscludeChildren) {
+                    if (stack.size + child.children.size >= stack.array.Length) {
+                        Array.Resize(ref stack.array, stack.size + child.children.size);
+                    }
+
+                    for (int i = 0; i < child.children.size; i++) {
+                        stack.array[stack.size++].element = child.children[i];
+                    }
                     continue;
                 }
 
@@ -97,6 +122,8 @@ namespace UIForia.Layout {
                 if (screenRect.xMax + childMargin.right > maxX) maxX = screenRect.xMax + childMargin.right;
                 if (screenRect.yMax + childMargin.bottom > maxY) maxY = screenRect.yMax + childMargin.bottom;
             }
+
+            StructStack<ElemRef>.Release(ref stack);
 
             return new Size(maxX - minX, (maxY - minY));
             

@@ -270,7 +270,12 @@ namespace UIForia.Systems {
 
                 if ((layoutBox.flags & LayoutBoxFlags.Clipper) != 0) {
                     layoutBox.clipData = layoutBox.clipData ?? new ClipData(layoutBox.element);
-                    layoutBox.clipData.parent = clipStack.size != 0 ? clipStack.array[clipStack.size - 1] : screenClipper;
+                    if (layoutBox.element.style.ClipBehavior == ClipBehavior.Never) {
+                        layoutBox.clipData.parent = screenClipper;
+                    }
+                    else {
+                        layoutBox.clipData.parent = clipStack.size != 0 ? clipStack.array[clipStack.size - 1] : screenClipper;
+                    }
                     layoutBox.clipData.clipList.Clear();
                     clipStack.Push(layoutBox.clipData);
                     clipperList.Add(layoutBox.clipData);
@@ -312,6 +317,9 @@ namespace UIForia.Systems {
                     else if (childEnabled) {
                         // if child was previously enabled, it will definitely have a layout box
                         needsGather ^= (child.layoutBox.flags & LayoutBoxFlags.TypeOrBehaviorChanged) != 0;
+                        if (elemRefStack.array.Length <= elemRefStack.size) {
+                            elemRefStack.EnsureAdditionalCapacity(childCount);
+                        }
                         elemRefStack.array[elemRefStack.size++].element = childArray[i];
                     }
                 }
@@ -360,7 +368,12 @@ namespace UIForia.Systems {
 
             if (isClipper) {
                 layoutBox.clipData = layoutBox.clipData ?? new ClipData(layoutBox.element);
-                layoutBox.clipData.parent = clipStack.size != 0 ? clipStack.array[clipStack.size - 1] : screenClipper;
+                if (layoutBox.element.style.ClipBehavior == ClipBehavior.Never) {
+                    layoutBox.clipData.parent = screenClipper;
+                }
+                else {
+                    layoutBox.clipData.parent = clipStack.size != 0 ? clipStack.array[clipStack.size - 1] : screenClipper;
+                }
                 layoutBox.clipData.clipList.Clear();
                 clipStack.Push(layoutBox.clipData);
                 clipperList.Add(layoutBox.clipData);
@@ -603,7 +616,6 @@ namespace UIForia.Systems {
         private void PerformLayoutStepHorizontal(AwesomeLayoutBox rootBox) {
             boxRefStack.Push(new BoxRef() {box = rootBox});
 
-
             // Resolve all widths first, then process heights. These operations cannot be interleaved for we can't be sure
             // that widths are final before heights are computed, this is critical for the system to work.
 
@@ -647,8 +659,8 @@ namespace UIForia.Systems {
                 }
 
                 if ((layoutBox.element.flags & UIElementFlags.LayoutTransformNotIdentity) != 0) {
-                    float x = MeasurementUtil.ResolveOffsetMeasurement(layoutBox.element, viewWidth, viewHeight, layoutBox.element.style.TransformPositionX, layoutBox.finalWidth);
-                    float y = MeasurementUtil.ResolveOffsetMeasurement(layoutBox.element, viewWidth, viewHeight, layoutBox.element.style.TransformPositionY, layoutBox.finalHeight);
+                    float x = MeasurementUtil.ResolveOffsetMeasurement(layoutBox.element, viewWidth, viewHeight, layoutBox.transformPositionX, layoutBox.finalWidth);
+                    float y = MeasurementUtil.ResolveOffsetMeasurement(layoutBox.element, viewWidth, viewHeight, layoutBox.transformPositionY, layoutBox.finalHeight);
                     if (!Mathf.Approximately(x, layoutBox.transformX) || !Mathf.Approximately(y, layoutBox.transformY)) {
                         layoutBox.transformX = x;
                         layoutBox.transformY = y;
@@ -730,18 +742,18 @@ namespace UIForia.Systems {
                         ref SVGXMatrix localMatrix = ref result.localMatrix;
 
                         // todo -- only need to do this if transform is not identity
-                        float x = MeasurementUtil.ResolveOffsetMeasurement(currentElement, viewWidth, viewHeight, currentElement.style.TransformPositionX, currentBox.finalWidth);
-                        float y = MeasurementUtil.ResolveOffsetMeasurement(currentElement, viewWidth, viewHeight, currentElement.style.TransformPositionY, currentBox.finalHeight);
+                        float x = MeasurementUtil.ResolveOffsetMeasurement(currentElement, viewWidth, viewHeight, currentBox.transformPositionX, currentBox.finalWidth);
+                        float y = MeasurementUtil.ResolveOffsetMeasurement(currentElement, viewWidth, viewHeight, currentBox.transformPositionY, currentBox.finalHeight);
 
                         // todo -- em size
-                        float px = MeasurementUtil.ResolveFixedSize(result.actualSize.width, viewWidth, viewHeight, 0, currentElement.style.TransformPivotX);
-                        float py = MeasurementUtil.ResolveFixedSize(result.actualSize.height, viewWidth, viewHeight, 0, currentElement.style.TransformPivotY);
+                        float px = MeasurementUtil.ResolveFixedSize(result.actualSize.width, viewWidth, viewHeight, 0, currentBox.transformPivotX);
+                        float py = MeasurementUtil.ResolveFixedSize(result.actualSize.height, viewWidth, viewHeight, 0, currentBox.transformPivotY);
 
-                        float rotation = currentElement.style.TransformRotation * Mathf.Deg2Rad;
+                        float rotation = currentBox.transformRotation * Mathf.Deg2Rad;
                         float ca = Mathf.Cos(rotation);
                         float sa = Mathf.Sin(rotation);
-                        float scaleX = currentElement.style.TransformScaleX;
-                        float scaleY = currentElement.style.TransformScaleY;
+                        float scaleX = currentBox.transformScaleX;
+                        float scaleY = currentBox.transformScaleY;
 
                         localMatrix.m0 = ca * scaleX;
                         localMatrix.m1 = sa * scaleX;
@@ -963,9 +975,17 @@ namespace UIForia.Systems {
 
             for (int i = 0; i < queryableElements.size; i++) {
                 UIElement element = queryableElements.array[i].element;
+                if (element is IPointerQueryHandler pointerQueryHandler) {
+                    if (pointerQueryHandler.ContainsPoint(point)) {
+                        retn.Add(element);
+                    }
+                    continue;
+                }
+
                 LayoutResult layoutResult = element.layoutResult;
 
-                if (layoutResult.isCulled) {
+                // todo - for some reason the layoutbox can be null. matt, pls fix k thx bye
+                if (layoutResult.isCulled || element.layoutBox == null) {
                     continue;
                 }
 
@@ -986,6 +1006,10 @@ namespace UIForia.Systems {
                     continue;
                 }
 
+                if (layoutResult.actualSize.width == 0 || layoutResult.actualSize.height == 0) {
+                    continue;
+                }
+                
                 if (PolygonUtil.PointInOrientedBounds(point, layoutResult.orientedBounds)) {
                     // todo -- make this property look up not slow
                     if (element.style.Visibility == Visibility.Hidden) {

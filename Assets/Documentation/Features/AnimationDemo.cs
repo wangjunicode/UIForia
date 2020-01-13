@@ -3,6 +3,7 @@ using UIForia.Animation;
 using UIForia.Attributes;
 using UIForia.Elements;
 using UIForia.Rendering;
+using UIForia.Sound;
 using UIForia.Systems;
 using UIForia.Util;
 
@@ -27,7 +28,7 @@ namespace Documentation.Features {
 
         public AnimationData animationData;
 
-        public int duration;
+        public float duration;
         public float delay;
         public int iterations;
         public EasingFunction timingFunction;
@@ -50,16 +51,28 @@ namespace Documentation.Features {
         public void ChangeAnimation(string animation) {
             animationData = Application.GetAnimationFromFile("Documentation/Features/AnimationDemo.style", animation);
             animationTask = Application.Animate(animationTarget, animationData);
-            duration = animationData.options.duration ?? 1000;
-            delay = animationData.options.delay ?? 0f;
+            if (animationData.options.duration.HasValue) {
+                duration = animationData.options.duration.Value.AsMilliseconds();
+            }
+            else {
+                duration = 1000;
+            }
+
+            if (animationData.options.delay.HasValue) {
+                delay = animationData.options.delay.Value.AsMilliseconds();
+            }
+            else {
+                delay = 0;
+            }
+
             iterations = animationData.options.iterations ?? 1;
             timingFunction = animationData.options.timingFunction ?? EasingFunction.Linear;
             direction = animationData.options.direction ?? AnimationDirection.Forward;
         }
 
         public void RunAnimationAgain() {
-            animationData.options.duration = duration;
-            animationData.options.delay = delay;
+            animationData.options.duration = new UITimeMeasurement(duration);
+            animationData.options.delay = new UITimeMeasurement(delay);
             animationData.options.iterations = iterations;
             animationData.options.timingFunction = timingFunction;
             animationData.options.direction = direction;

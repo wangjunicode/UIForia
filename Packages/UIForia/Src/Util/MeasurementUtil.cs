@@ -2,8 +2,6 @@ using System;
 using System.Diagnostics;
 using UIForia.Elements;
 using UIForia.Layout;
-using UIForia.Systems;
-using Unity.Mathematics;
 using UnityEngine;
 
 namespace UIForia.Util {
@@ -37,19 +35,36 @@ namespace UIForia.Util {
                     // todo handle transclusion
                     return 0;
 
-                case AlignmentTarget.View:
-                    return viewportX;
-
-                case AlignmentTarget.Screen:
-                    LayoutResult ptr = result.layoutParent;
-                    float output = 0;
+                case AlignmentTarget.View: {
+                    LayoutResult ptr = result.element.parent.layoutResult;
+                    float output = viewportX;
                     while (ptr != null) {
                         output -= ptr.alignedPosition.x;
-                        ptr = ptr.layoutParent;
+                        if (ptr.element.parent == null) {
+                            return output;
+                        }
+
+                        ptr = ptr.element.parent.layoutResult;
                     }
 
                     return output;
+                }
 
+                case AlignmentTarget.Screen: {
+                    LayoutResult ptr = result.element.parent.layoutResult;
+                    float output = 0;
+                    while (ptr != null) {
+                        output -= ptr.alignedPosition.x;
+                        if (ptr.element.parent == null) {
+                            return output;
+                        }
+
+                        ptr = ptr.element.parent.layoutResult;
+                    }
+
+                    return output;
+                }
+                
                 default:
                     throw new ArgumentOutOfRangeException(nameof(target), target, null);
             }
@@ -80,18 +95,35 @@ namespace UIForia.Util {
                 case AlignmentTarget.TemplateContentArea:
                     throw new NotImplementedException();
 
-                case AlignmentTarget.View:
-                    return viewportY;
-
-                case AlignmentTarget.Screen:
-                    LayoutResult ptr = result.layoutParent;
-                    float output = 0;
+                case AlignmentTarget.View: {
+                    LayoutResult ptr = result.element.parent.layoutResult;
+                    float output = viewportY;
                     while (ptr != null) {
                         output -= ptr.alignedPosition.y;
-                        ptr = ptr.layoutParent;
+                        if (ptr.element.parent == null) {
+                            return output;
+                        }
+
+                        ptr = ptr.element.parent.layoutResult;
                     }
 
                     return output;
+                }
+
+                case AlignmentTarget.Screen: {
+                    LayoutResult ptr = result.element.parent.layoutResult;
+                    float output = 0;
+                    while (ptr != null) {
+                        output -= ptr.alignedPosition.y;
+                        if (ptr.element.parent == null) {
+                            return output;
+                        }
+
+                        ptr = ptr.element.parent.layoutResult;
+                    }
+
+                    return output;
+                }
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(target), target, null);

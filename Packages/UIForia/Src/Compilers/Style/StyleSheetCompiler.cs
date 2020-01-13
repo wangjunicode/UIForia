@@ -5,6 +5,7 @@ using UIForia.Exceptions;
 using UIForia.Parsing.Style;
 using UIForia.Parsing.Style.AstNodes;
 using UIForia.Rendering;
+using UIForia.Sound;
 using UIForia.Util;
 
 namespace UIForia.Compilers.Style {
@@ -50,14 +51,19 @@ namespace UIForia.Compilers.Style {
 
             int containerCount = 0;
             int animationCount = 0;
-
+            int soundCount = 0;
+            
             for (int index = 0; index < rootNodes.Count; index++) {
                 switch (rootNodes[index]) {
                     case StyleRootNode _:
                         containerCount++;
                         break;
                     case AnimationRootNode _:
+                    case SpriteSheetNode _:
                         animationCount++;
+                        break;
+                    case SoundRootNode _:
+                        soundCount++;
                         break;
                 }
             }
@@ -70,21 +76,33 @@ namespace UIForia.Compilers.Style {
                     : ArrayPool<UIStyleGroupContainer>.Empty,
                 animationCount > 0
                     ? new AnimationData[animationCount]
-                    : ArrayPool<AnimationData>.Empty
+                    : ArrayPool<AnimationData>.Empty,
+                soundCount > 0
+                    ? new UISoundData[soundCount]
+                    : ArrayPool<UISoundData>.Empty
             );
 
             int containerIndex = 0;
             int animationIndex = 0;
+            int soundIndex = 0;
 
             for (int index = 0; index < rootNodes.Count; index++) {
                 switch (rootNodes[index]) {
                     // we sorted the root nodes so all animations run first
-                    case AnimationRootNode animNode:
-                        styleSheet.animations[animationIndex] = CompileAnimation(animNode);
+                    case SpriteSheetNode spriteSheetNode:
+                        styleSheet.animations[animationIndex] = CompileSpriteSheetAnimation(spriteSheetNode, styleSheet.animations, styleSheet.sounds);
                         animationIndex++;
                         break;
+                    case AnimationRootNode animNode:
+                        styleSheet.animations[animationIndex] = CompileAnimation(animNode, styleSheet.animations, styleSheet.sounds);
+                        animationIndex++;
+                        break;
+                    case SoundRootNode soundRootNode:
+                        styleSheet.sounds[soundIndex] = CompileSound(soundRootNode);
+                        soundIndex++;
+                        break;
                     case StyleRootNode styleRoot:
-                        styleSheet.styleGroupContainers[containerIndex] = CompileStyleGroup(styleRoot, styleSheet.animations);
+                        styleSheet.styleGroupContainers[containerIndex] = CompileStyleGroup(styleRoot, styleSheet.animations, styleSheet.sounds);
                         containerIndex++;
                         break;
                 }
@@ -94,16 +112,33 @@ namespace UIForia.Compilers.Style {
             return styleSheet;
         }
 
-        private AnimationData CompileAnimation(AnimationRootNode animNode) {
+        private AnimationData CompileSpriteSheetAnimation(SpriteSheetNode node, AnimationData[] styleSheetAnimations, UISoundData[] uiSoundData) {
+            AnimationData data = new AnimationData();
+            data.name = node.identifier;
+            data.fileName = context.fileName;
+            data.animationType = AnimationType.SpriteSheet;
+            data.options = CompileSpriteSheetOptions(node);
+            return data;
+        }
+
+        private AnimationData CompileAnimation(AnimationRootNode animNode, AnimationData[] styleSheetAnimations, UISoundData[] uiSoundData) {
             AnimationData data = new AnimationData();
             data.name = animNode.animName;
             data.fileName = context.fileName;
-            data.frames = CompileKeyFrames(animNode);
+            data.animationType = AnimationType.KeyFrame;
+            data.frames = CompileKeyFrames(animNode, styleSheetAnimations, uiSoundData);
             data.options = CompileAnimationOptions(animNode);
             return data;
         }
 
-        private AnimationKeyFrame[] CompileKeyFrames(AnimationRootNode animNode) {
+        private UISoundData CompileSound(SoundRootNode soundRootNode) {
+            UISoundData data = CompileSoundProperties(soundRootNode);
+            data.name = soundRootNode.identifier;
+            data.styleSheetFileName = context.fileName;
+            return data;
+        }
+
+        private AnimationKeyFrame[] CompileKeyFrames(AnimationRootNode animNode, AnimationData[] styleSheetAnimations, UISoundData[] uiSoundData) {
             if (animNode.keyframeNodes == null) {
                 // todo throw error or log warning?
                 return new AnimationKeyFrame[0];
@@ -120,8 +155,19 @@ namespace UIForia.Compilers.Style {
                 KeyFrameNode keyFrameNode = animNode.keyframeNodes[i];
 
                 for (int j = 0; j < keyFrameNode.children.Count; j++) {
-                    PropertyNode propertyNode = (PropertyNode) keyFrameNode.children[j];
-                    StylePropertyMappers.MapProperty(s_ScratchStyle, propertyNode, context);
+                    StyleASTNode keyFrameProperty = keyFrameNode.children[j];
+                    if (keyFrameProperty is PropertyNode propertyNode) {
+                        StylePropertyMappers.MapProperty(s_ScratchStyle, propertyNode, context);
+                    }
+                    else if (keyFrameProperty is RunNode runNode) {
+                        //
+                        // if (runNode.command is AnimationCommandNode animationCommandNode) {
+                        //     MapAnimationRunCommand(styleSheetAnimations, animationCommandNode);
+                        // } else if (runNode.command is SoundCommandNode soundCommandNode) {
+                        //     MapSoundRunCommand(uiSoundData, soundCommandNode);
+                        // }
+                        // break;
+                    }
                 }
 
                 int count = s_ScratchStyle.PropertyCount;
@@ -162,52 +208,150 @@ namespace UIForia.Compilers.Style {
                 string optionName = optionNodes[i].optionName;
                 StyleASTNode value = optionNodes[i].value;
 
-                if (optionName == nameof(AnimationOptions.duration)) {
-                    options.duration = (int) StylePropertyMappers.MapNumber(value, context);
-                }
-                else if (optionName == nameof(AnimationOptions.iterations)) {
-                    if (value is StyleIdentifierNode identifierNode) {
-                        if (identifierNode.name.ToLower() == "infinite") {
-                            options.iterations = -1;
-                        }
-                    }
-                    else if (value is StyleLiteralNode) {
-                        options.iterations = (int) StylePropertyMappers.MapNumber(value, context);
-                    }
-                }
-                else if (optionName == nameof(AnimationOptions.loopTime)) {
-                    options.loopTime = StylePropertyMappers.MapNumber(value, context);
-                }
-                else if (optionName == nameof(AnimationOptions.delay)) {
-                    options.delay = StylePropertyMappers.MapNumber(value, context);
-                }
-                else if (optionName == nameof(AnimationOptions.direction)) {
-                    options.direction = StylePropertyMappers.MapEnum<AnimationDirection>(value, context);
-                }
-                else if (optionName == nameof(AnimationOptions.loopType)) {
-                    options.loopType = StylePropertyMappers.MapEnum<AnimationLoopType>(value, context);
-                }
-                else if (optionName == nameof(AnimationOptions.playbackType)) {
-                    options.playbackType = StylePropertyMappers.MapEnum<AnimationPlaybackType>(value, context);
-                }
-                else if (optionName == nameof(AnimationOptions.forwardStartDelay)) {
-                    options.forwardStartDelay = (int) StylePropertyMappers.MapNumber(value, context);
-                }
-                else if (optionName == nameof(AnimationOptions.reverseStartDelay)) {
-                    options.reverseStartDelay = (int) StylePropertyMappers.MapNumber(value, context);
-                }
-                else if (optionName == nameof(AnimationOptions.timingFunction)) {
-                    options.timingFunction = StylePropertyMappers.MapEnum<EasingFunction>(value, context);
-                }
-                else {
-                    throw new CompileException(optionNodes[i], "Invalid option argument for animation");
+                switch (optionName) {
+                    case nameof(AnimationOptions.duration):
+                        options.duration = StylePropertyMappers.MapUITimeMeasurement(value, context);
+                        break;
+                    case nameof(AnimationOptions.iterations):
+                        options.iterations = (int) StylePropertyMappers.MapNumberOrInfinite(value, context);
+                        break;
+                    case nameof(AnimationOptions.loopTime):
+                        options.loopTime = StylePropertyMappers.MapNumber(value, context);
+                        break;
+                    case nameof(AnimationOptions.delay):
+                        options.delay = StylePropertyMappers.MapUITimeMeasurement(value, context);
+                        break;
+                    case nameof(AnimationOptions.direction):
+                        options.direction = StylePropertyMappers.MapEnum<AnimationDirection>(value, context);
+                        break;
+                    case nameof(AnimationOptions.loopType):
+                        options.loopType = StylePropertyMappers.MapEnum<AnimationLoopType>(value, context);
+                        break;
+                    case nameof(AnimationOptions.forwardStartDelay):
+                        options.forwardStartDelay = (int)StylePropertyMappers.MapNumber(value, context);
+                        break;
+                    case nameof(AnimationOptions.reverseStartDelay):
+                        options.reverseStartDelay = (int)StylePropertyMappers.MapNumber(value, context);
+                        break;
+                    case nameof(AnimationOptions.timingFunction):
+                        options.timingFunction = StylePropertyMappers.MapEnum<EasingFunction>(value, context);
+                        break;
+                    default:
+                        throw new CompileException(optionNodes[i], "Invalid option argument for animation");
                 }
             }
 
             return options;
         }
 
-        private UIStyleGroupContainer CompileStyleGroup(StyleRootNode styleRoot, AnimationData[] styleSheetAnimations) {
+        private AnimationOptions CompileSpriteSheetOptions(SpriteSheetNode node) {
+            AnimationOptions options = new AnimationOptions();
+
+            LightList<StyleASTNode> spriteSheetProperties = node.children;
+            if (spriteSheetProperties == null) {
+                return options;
+            }
+
+            for (int i = 0; i < spriteSheetProperties.Count; i++) {
+                if (spriteSheetProperties[i] is PropertyNode property) {
+                    string optionName = property.identifier;
+                    StyleASTNode value = property.children[0];
+
+                    switch (optionName) {
+                        case nameof(AnimationOptions.iterations):
+                            options.iterations = (int)StylePropertyMappers.MapNumberOrInfinite(value, context);
+                            break;
+                        case nameof(AnimationOptions.delay):
+                            options.delay = StylePropertyMappers.MapUITimeMeasurement(value, context);
+                            break;
+                        case nameof(AnimationOptions.duration):
+                            options.duration = StylePropertyMappers.MapUITimeMeasurement(value, context);
+                            break;
+                        case nameof(AnimationOptions.loopType):
+                            options.loopType = StylePropertyMappers.MapEnum<AnimationLoopType>(value, context);
+                            break;
+                        case nameof(AnimationOptions.direction):
+                            options.direction = StylePropertyMappers.MapEnum<AnimationDirection>(value, context);
+                            break;
+                        case nameof(AnimationOptions.forwardStartDelay):
+                            options.forwardStartDelay = (int)StylePropertyMappers.MapNumber(value, context);
+                            break;
+                        case nameof(AnimationOptions.reverseStartDelay):
+                            options.reverseStartDelay = (int)StylePropertyMappers.MapNumber(value, context);
+                            break;
+                        case nameof(AnimationOptions.fps):
+                            options.fps = (int)StylePropertyMappers.MapNumber(value, context);
+                            break;
+                        case nameof(AnimationOptions.startFrame):
+                            options.startFrame = (int)StylePropertyMappers.MapNumber(value, context);
+                            break;
+                        case nameof(AnimationOptions.endFrame):
+                            options.endFrame = (int)StylePropertyMappers.MapNumber(value, context);
+                            break;
+                        case nameof(AnimationOptions.pathPrefix):
+                            options.pathPrefix = StylePropertyMappers.MapString(value, context);
+                            break;
+
+                        default:
+                            throw new CompileException(property, "Invalid option argument for animation");
+                    }
+                }
+                else {
+                    throw new CompileException(spriteSheetProperties[i], "Invalid option argument for animation");
+                }
+            }
+
+            return options;
+        }
+
+        private UISoundData CompileSoundProperties(SoundRootNode soundRootNode) {
+            UISoundData soundData = new UISoundData();
+            // set defaults
+            soundData.duration = new UITimeMeasurement(1, UITimeMeasurementUnit.Percentage);
+            soundData.pitch = 1;
+            soundData.iterations = 1;
+            soundData.tempo = 1;
+
+            for (int i = 0; i < soundRootNode.children.Count; i++) {
+                StyleASTNode property = soundRootNode.children[i];
+                if (property is SoundPropertyNode soundPropertyNode) {
+                    StyleASTNode value = soundPropertyNode.value;
+                    switch (soundPropertyNode.name) {
+                        case nameof(UISoundData.asset):
+                            soundData.asset = StylePropertyMappers.MapString(value, context);
+                            break;
+                        case nameof(UISoundData.duration):
+                            soundData.duration = StylePropertyMappers.MapUITimeMeasurement(value, context);
+                            break;
+                        case nameof(UISoundData.iterations):
+                            soundData.iterations = (int) StylePropertyMappers.MapNumberOrInfinite(value, context);
+                            break;
+                        case nameof(UISoundData.pitch):
+                            soundData.pitch = StylePropertyMappers.MapNumber(value, context);
+                            break;
+                        case nameof(UISoundData.pitchRange):
+                            soundData.pitchRange = StylePropertyMappers.MapFloatRange(value, context);
+                            break;
+                        case nameof(UISoundData.tempo):
+                            soundData.tempo = StylePropertyMappers.MapNumber(value, context);
+                            break;
+                        case nameof(UISoundData.volume):
+                            soundData.volume = StylePropertyMappers.MapNumber(value, context);
+                            break;
+                        case nameof(UISoundData.mixerGroup):
+                            soundData.mixerGroup = StylePropertyMappers.MapString(value, context);
+                            break;
+                    }
+                }
+                else {
+                    throw new CompileException(property, "Expected a sound property.");
+                }
+            }
+
+            return soundData;
+        }
+
+        private UIStyleGroupContainer CompileStyleGroup(StyleRootNode styleRoot, AnimationData[] styleSheetAnimations, UISoundData[] uiSoundData) {
             UIStyleGroup defaultGroup = new UIStyleGroup();
             defaultGroup.normal = UIStyleRunCommand.CreateInstance();
             defaultGroup.name = styleRoot.identifier ?? styleRoot.tagName;
@@ -217,14 +361,12 @@ namespace UIForia.Compilers.Style {
             
             scratchGroupList.Add(defaultGroup);
 
-            CompileStyleGroups(styleRoot, styleType, scratchGroupList, defaultGroup, styleSheetAnimations);
+            CompileStyleGroups(styleRoot, styleType, scratchGroupList, defaultGroup, styleSheetAnimations, uiSoundData);
 
             return new UIStyleGroupContainer(styleSheetImporter.NextStyleGroupId, defaultGroup.name, styleType, scratchGroupList.ToArray());
         }
-        
-        
-        private void CompileStyleGroups(StyleNodeContainer root, StyleType styleType, LightList<UIStyleGroup> groups, UIStyleGroup targetGroup, AnimationData[] styleSheetAnimations) {
 
+        private void CompileStyleGroups(StyleNodeContainer root, StyleType styleType, LightList<UIStyleGroup> groups, UIStyleGroup targetGroup, AnimationData[] styleSheetAnimations, UISoundData[] uiSoundData) {
             for (int index = 0; index < root.children.Count; index++) {
                 StyleASTNode node = root.children[index];
                 switch (node) {
@@ -243,37 +385,40 @@ namespace UIForia.Compilers.Style {
                         attributeGroup.rule = MapAttributeContainerToRule(attribute);
                         attributeGroup.styleType = styleType;
                         groups.Add(attributeGroup);
-                        CompileStyleGroups(attribute, styleType, groups, attributeGroup, styleSheetAnimations);
+                        CompileStyleGroups(attribute, styleType, groups, attributeGroup, styleSheetAnimations, uiSoundData);
 
                         break;
                     case RunNode runNode:
-                        if (runNode.commmand is AnimationCommandNode animationCommandNode) {
-                            UIStyleRunCommand cmd = new UIStyleRunCommand() {
+                        UIStyleRunCommand cmd = new UIStyleRunCommand() {
                                 style = targetGroup.normal.style,
                                 runCommands = targetGroup.normal.runCommands ?? new LightList<IRunCommand>(4)
-                            };
-                            MapAnimationCommand(styleSheetAnimations, cmd, animationCommandNode);
-                            targetGroup.normal = cmd;
-                        }
+                        };
 
+                        if (runNode.command is AnimationCommandNode animationCommandNode) {
+                            MapAnimationCommand(styleSheetAnimations, cmd, animationCommandNode);
+                        } else if (runNode.command is SoundCommandNode soundCommandNode) {
+                            MapSoundCommand(uiSoundData, cmd, soundCommandNode);
+                        }
+                        
+                        targetGroup.normal = cmd;
                         break;
                     case StyleStateContainer styleContainer:
                         if (styleContainer.identifier == "hover") {
                             UIStyleRunCommand uiStyleRunCommand = targetGroup.hover;
                             uiStyleRunCommand.style = uiStyleRunCommand.style ?? new UIStyle();
-                            MapProperties(styleSheetAnimations, ref uiStyleRunCommand, styleContainer.children);
+                            MapProperties(styleSheetAnimations, uiSoundData, ref uiStyleRunCommand, styleContainer.children);
                             targetGroup.hover = uiStyleRunCommand;
                         }
                         else if (styleContainer.identifier == "focus") {
                             UIStyleRunCommand uiStyleRunCommand = targetGroup.focused;
                             uiStyleRunCommand.style = uiStyleRunCommand.style ?? new UIStyle();
-                            MapProperties(styleSheetAnimations, ref uiStyleRunCommand, styleContainer.children);
+                            MapProperties(styleSheetAnimations, uiSoundData, ref uiStyleRunCommand, styleContainer.children);
                             targetGroup.focused = uiStyleRunCommand;
                         }
                         else if (styleContainer.identifier == "active") {
                             UIStyleRunCommand uiStyleRunCommand = targetGroup.active;
                             uiStyleRunCommand.style = uiStyleRunCommand.style ?? new UIStyle();
-                            MapProperties(styleSheetAnimations, ref uiStyleRunCommand, styleContainer.children);
+                            MapProperties(styleSheetAnimations, uiSoundData, ref uiStyleRunCommand, styleContainer.children);
                             targetGroup.active = uiStyleRunCommand;
                         }
                         else throw new CompileException(styleContainer, $"Unknown style state '{styleContainer.identifier}'. Please use [hover], [focus] or [active] instead.");
@@ -286,12 +431,26 @@ namespace UIForia.Compilers.Style {
         }
 
         private void MapAnimationCommand(AnimationData[] styleSheetAnimations, UIStyleRunCommand cmd, AnimationCommandNode animationCommandNode) {
-            cmd.runCommands.Add(new AnimationRunCommand(animationCommandNode.isExit, animationCommandNode.runAction) {
-                animationData = FindAnimationData(styleSheetAnimations, animationCommandNode.animationName),
-            });
+            cmd.runCommands.Add(MapAnimationRunCommand(styleSheetAnimations, animationCommandNode));
         }
 
-        private AnimationData FindAnimationData(AnimationData[] animations, StyleASTNode animationName) {
+        private AnimationRunCommand MapAnimationRunCommand(AnimationData[] styleSheetAnimations, AnimationCommandNode animationCommandNode) {
+            return new AnimationRunCommand(animationCommandNode.isExit, animationCommandNode.runAction) {
+                    animationData = FindAnimationData(styleSheetAnimations, animationCommandNode.animationName),
+            };
+        }
+
+        private void MapSoundCommand(UISoundData[] soundData, UIStyleRunCommand cmd, SoundCommandNode soundCommandNode) {
+            cmd.runCommands.Add(MapSoundRunCommand(soundData, soundCommandNode));
+        }
+
+        private SoundRunCommand MapSoundRunCommand(UISoundData[] soundData, SoundCommandNode soundCommandNode) {
+            return new SoundRunCommand(soundCommandNode.isExit, soundCommandNode.runAction) {
+                    soundData = FindSoundData(soundData, soundCommandNode.name),
+            };
+        }
+
+        private AnimationData FindAnimationData(in AnimationData[] animations, StyleASTNode animationName) {
             for (int index = 0; index < animations.Length; index++) {
                 AnimationData animation = animations[index];
                 StyleASTNode value = context.GetValueForReference(animationName);
@@ -301,14 +460,31 @@ namespace UIForia.Compilers.Style {
                     }
                 }
                 else {
-                    throw new CompileException(animationName, "Could not find an animation with that name or reference.");
+                    throw new CompileException(animationName, $"Could not find an animation with that name or reference: {animationName}");
                 }
             }
 
-            throw new CompileException(animationName, "Could not find an animation with that name or reference.");
+            throw new CompileException(animationName, $"Could not find an animation with that name or reference: {animationName}");
         }
 
-        private void MapProperties(AnimationData[] animations, ref UIStyleRunCommand targetStyle, LightList<StyleASTNode> styleContainerChildren) {
+        private UISoundData FindSoundData(in UISoundData[] soundData, StyleASTNode name) {
+            for (int index = 0; index < soundData.Length; index++) {
+                UISoundData sound = soundData[index];
+                StyleASTNode value = context.GetValueForReference(name);
+                if (value is StyleIdentifierNode identifier) {
+                    if (sound.name == identifier.name) {
+                        return sound;
+                    }
+                }
+                else {
+                    throw new CompileException(name, $"Could not find an sound with that name or reference: {name}");
+                }
+            }
+
+            throw new CompileException(name, $"Could not find an sound with that name or reference: {name}");
+        }
+
+        private void MapProperties(AnimationData[] animations, UISoundData[] soundData, ref UIStyleRunCommand targetStyle, LightList<StyleASTNode> styleContainerChildren) {
             for (int i = 0; i < styleContainerChildren.Count; i++) {
                 StyleASTNode node = styleContainerChildren[i];
                 switch (node) {
@@ -316,12 +492,14 @@ namespace UIForia.Compilers.Style {
                         // add to normal ui style set
                         StylePropertyMappers.MapProperty(targetStyle.style, propertyNode, context);
                         break;
-                    case RunNode runNode:
-                        if (runNode.commmand is AnimationCommandNode animationCommandNode) {
-                            targetStyle.runCommands = targetStyle.runCommands ?? new LightList<IRunCommand>(4);
+                    case RunNode runNode :
+                        targetStyle.runCommands = targetStyle.runCommands ?? new LightList<IRunCommand>(4);
+                        if (runNode.command is AnimationCommandNode animationCommandNode) {
                             MapAnimationCommand(animations, targetStyle, animationCommandNode);
                         }
-
+                        else if (runNode.command is SoundCommandNode soundCommandNode) {
+                            MapSoundCommand(soundData, targetStyle, soundCommandNode);
+                        }
                         break;
                     default:
                         throw new CompileException(node, $"You cannot have a {node} at this level.");

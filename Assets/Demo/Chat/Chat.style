@@ -6,29 +6,28 @@ style <this> {
 }
 
 style chat-window {
-    PreferredSize = 1024px 600px;
+    PreferredSize = 512px 300px;
     MinWidth = 1024px;
     MinHeight = 600px;
-    TransformPosition = 0.05vw 0.05vh;
+    AlignX = 50px Parent;
+    AlignY = 50px Parent;
 }
 
 style chat-body {
     LayoutType = Grid;
     GridLayoutColTemplate = 1mx 1fr;
-    Padding = 20px;
     PreferredSize = 1pca;
 }
 
 style chat-nav {
-    PreferredSize = 300px 1pca;
+    PreferredSize = 220px 1pca;
     BackgroundColor = @theme.lightestGrey;
     Padding = 10px;
 }
 
 style chat-nav-header {
     FlexLayoutDirection = Horizontal;
-    FlexLayoutMainAxisAlignment = SpaceBetween;
-    FlexLayoutCrossAxisAlignment = Center;
+    DistributeExtraSpace = BetweenContent CenterContent;
     PreferredWidth = 1pca;
     Margin = 0 0 10px 0;
     Padding = 0 3px 0 10px;
@@ -52,7 +51,7 @@ style expander {
 style current-chat {
     PreferredSize = 1pca 40px;
     FlexLayoutDirection = Horizontal;
-    FlexLayoutCrossAxisAlignment = Center;
+    DistributeExtraSpaceVertical = CenterContent;
     BorderRadius = 4px;
     Padding = 0 10px;
  
@@ -68,20 +67,19 @@ style user-icon {
 
 style status {
     PreferredSize = 25px;
-    FlexLayoutCrossAxisAlignment = Center;
-    FlexLayoutMainAxisAlignment = Center;
+    DistributeExtraSpace = CenterContent;
     PaddingRight = 10px;
     AlignX = 100% Parent;
 }
 
 style online {
-    PreferredSize = 10px;
+    PreferredSize = 20px;
     BackgroundColor = rgb(2, 209, 116);
     BorderRadius = 50%;
 }
 
 style offline {
-    PreferredSize = 10px;
+    PreferredSize = 20px;
     BackgroundColor = @theme.lighterGrey;
     BorderRadius = 50%;
 }
@@ -93,19 +91,19 @@ style unread {
     TextFontAsset = @theme.fontGothamBold;
     TextFontSize = 12px;
     BorderRadius = 50%;
-    FlexLayoutCrossAxisAlignment = Center;
-    FlexLayoutMainAxisAlignment = Center;
+    DistributeExtraSpace = CenterContent;
 }
 
 style chat-messages {
     MarginLeft = 20px;
     LayoutFitHorizontal = Fill;
+    Padding = 10px 20px 20px 10px;
 }
 
 style <Heading1> {
     TextFontSize = 1.1em;
     TextColor = @theme.darkGrey;
-    Margin = 0 0 20px 0;
+    Margin = 0 0 20px 0; 
 }
 
 style message {
@@ -122,7 +120,7 @@ style message-content {
 
 style message-info-line {
     FlexLayoutDirection = Horizontal;
-    FlexLayoutCrossAxisAlignment = Center;
+    DistributeExtraSpaceVertical = CenterContent;
     MarginBottom = 10px;
 }
 
@@ -131,7 +129,10 @@ style user-icon-message {
     MarginRight = 20px;
 }
 
-style text { LayoutFitHorizontal = Fill; }
+style text {
+    LayoutFitHorizontal = Fill;
+    MaxWidth = 1pca;
+}
 
 style name {
     TextFontAsset = @theme.fontGothamBold;
@@ -153,16 +154,18 @@ style fill-container {
 }
 
 style message-scroll-view {
-    LayoutFitHorizontal = Fill;
-    PreferredHeight = 0;
+    LayoutFit = Fill;
+    FlexItemShrink = 1;
+    MarginBottom = 10px;
 }
 
 style input-container {
     Padding = 0 20px;
+    PreferredHeight = 50px;
     BorderRadius = 4px;
     BackgroundColor = @theme.lightestGrey;
     FlexLayoutDirection = Horizontal;
-    FlexLayoutCrossAxisAlignment = Center;
+    DistributeExtraSpaceVertical = CenterContent;
     LayoutFitHorizontal = Fill;
     AlignY = 100% Parent;
 }
@@ -170,7 +173,7 @@ style input-container {
 style message-input {
     Border = 0;
     TextFontSize = 1em;
-    Padding = 20px 0;
+    Padding = 10px 0;
     Margin = 0;
     BackgroundColor = @theme.lightestGrey;
     PreferredSize = 0 1cnt;

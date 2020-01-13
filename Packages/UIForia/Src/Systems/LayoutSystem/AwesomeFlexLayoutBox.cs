@@ -1,13 +1,12 @@
-using System;
+using System.Diagnostics;
 using UIForia.Layout;
 using UIForia.Rendering;
 using UIForia.Util;
 using UnityEngine;
 
 namespace UIForia.Systems {
-
+    [DebuggerDisplay("{element.ToString()} | Flex")]
     public class AwesomeFlexLayoutBox : AwesomeLayoutBox {
-
         private StructList<FlexItem> items;
         private LayoutDirection direction;
         private StructList<Track> wrappedTracks;
@@ -280,6 +279,8 @@ namespace UIForia.Systems {
                     item.layoutBox.ApplyLayoutHorizontal(x, alignedPosition, item.widthData, item.baseWidth, item.availableSize, fit, frameId);
                     offset += item.widthData.marginStart + item.widthData.marginEnd + gap;
                 }
+
+                MarkForLayoutVertical(frameId);
             }
         }
 
@@ -528,7 +529,6 @@ namespace UIForia.Systems {
         }
 
         protected override float ResolveAutoWidth(AwesomeLayoutBox child, float factor) {
-            
             if (direction == LayoutDirection.Vertical) {
                 return child.ComputeBlockContentWidth(factor);
             }
@@ -644,7 +644,8 @@ namespace UIForia.Systems {
                 item.layoutBox.GetHeights(ref item.heightData);
                 item.baseHeight = item.heightData.Clamped;
                 float offset = 0;
-                SpaceDistributionUtil.GetAlignmentOffsets(adjustedHeight - (item.baseHeight + item.heightData.marginStart + item.heightData.marginEnd), 1, alignment, out offset, out _);
+                SpaceDistributionUtil.GetAlignmentOffsets(adjustedHeight - (item.baseHeight + item.heightData.marginStart + item.heightData.marginEnd), 1,
+                    alignment, out offset, out _);
 
                 float y = inset + offset + item.heightData.marginStart;
                 float allocatedHeight = adjustedHeight - (item.heightData.marginStart + item.heightData.marginEnd);
@@ -723,8 +724,8 @@ namespace UIForia.Systems {
             float contentStartX = paddingBorderHorizontalStart;
             LayoutFit fit = LayoutFit.Grow;
 
-                fit = element.style.FitItemsHorizontal;
-            
+            fit = element.style.FitItemsHorizontal;
+
             float adjustedWidth = finalWidth - (paddingBorderHorizontalStart + paddingBorderHorizontalEnd);
 
             float inset = paddingBorderHorizontalStart;
@@ -744,7 +745,8 @@ namespace UIForia.Systems {
                 item.layoutBox.GetWidths(ref item.widthData);
                 item.baseWidth = item.widthData.Clamped;
 
-                SpaceDistributionUtil.GetAlignmentOffsets(adjustedWidth - item.baseWidth - item.widthData.marginStart - item.widthData.marginEnd, 1, alignment, out float offset, out spacerSize);
+                SpaceDistributionUtil.GetAlignmentOffsets(adjustedWidth - item.baseWidth - (item.widthData.marginStart + item.widthData.marginEnd), 1, alignment,
+                    out float offset, out spacerSize);
 
                 float x = inset + offset;
 
@@ -753,8 +755,7 @@ namespace UIForia.Systems {
                 float originOffset = (x - inset) + availableWidth * itemAlignment;
                 float alignedPosition = originBase + originOffset + (item.baseWidth * -itemAlignment);
 
-                item.layoutBox.ApplyLayoutHorizontal(x, alignedPosition, item.widthData, item.baseWidth, availableWidth, fit, frameId);
-
+                item.layoutBox.ApplyLayoutHorizontal(x + item.widthData.marginStart, alignedPosition, item.widthData, item.baseWidth, availableWidth, fit, frameId);
             }
         }
 
@@ -821,7 +822,6 @@ namespace UIForia.Systems {
         }
 
         private struct FlexItem {
-
             public AwesomeLayoutBox layoutBox;
             public LayoutSize widthData;
             public LayoutSize heightData;
@@ -832,11 +832,9 @@ namespace UIForia.Systems {
             public float availableSize;
             public byte grew;
             public byte shrunk;
-
         }
 
         private struct Track {
-
             public int endIndex;
             public int startIndex;
             public float remaining;
@@ -850,9 +848,6 @@ namespace UIForia.Systems {
             }
 
             public bool IsEmpty => startIndex == endIndex;
-
         }
-
     }
-
 }

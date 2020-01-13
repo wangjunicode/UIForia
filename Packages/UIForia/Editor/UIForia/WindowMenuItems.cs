@@ -5,12 +5,12 @@ namespace UIForia.Editor {
 
     public static class WindowMenuItems {
 
-        [MenuItem("Window/UIForia Hierarchy")]
+        [MenuItem("Window/UIForia/UIForia Hierarchy")]
         private static void UIForiaHierarchy() {
             EditorWindow.GetWindow<UIForiaHierarchyWindow>("UIForia Hierarchy");
         }
-        
-        [MenuItem("Window/UIForia Inspector")]
+
+        [MenuItem("Window/UIForia/UIForia Inspector")]
         private static void UIForiaInspector() {
             EditorWindow.GetWindow<UIForiaInspectorWindow>("UIForia Inspector");
         }
@@ -21,13 +21,6 @@ namespace UIForia.Editor {
                 Application.RefreshAll();
             }
         }
-        
-        [MenuItem("UIForia/Pre Compile Templates %t")]
-        public static void CompileTemplates() {
-            // for now compiles all templates, probably don't want this in the future
-//            Application.BuildTemplates(typeof());
-        }
-        
     }
 
 }

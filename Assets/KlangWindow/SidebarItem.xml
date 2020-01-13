@@ -12,11 +12,16 @@
             PreferredSize = 48px;
         }
         
+        style label {
+            TextFontSize = 0.65em;
+            TextColor = white;
+        }
     </Style>
     
     <Contents style="side-bar-item">
         
         <Image style="side-bar-icon" src="icon"/>
+        <Text style="label">{tooltip}</Text>
         
     </Contents>
     

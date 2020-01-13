@@ -1,4 +1,6 @@
 using UIForia.Animation;
+using UIForia.Rendering;
+using UIForia.Sound;
 
 namespace UIForia.Compilers.Style {
 
@@ -10,19 +12,21 @@ namespace UIForia.Compilers.Style {
         internal readonly StyleConstant[] constants;
         internal readonly AnimationData[] animations;
         internal readonly UIStyleGroupContainer[] styleGroupContainers;
-
-        internal StyleSheet(StyleConstant[] constants, UIStyleGroupContainer[] styleGroupContainers, AnimationData[] animations) {
+        internal UISoundData[] sounds;
+        
+        internal StyleSheet(StyleConstant[] constants, UIStyleGroupContainer[] styleGroupContainers, AnimationData[] animations, UISoundData[] sounds) {
             this.id = 0;
             this.constants = constants;
             this.styleGroupContainers = styleGroupContainers;
             this.animations = animations;
         }
 
-        internal StyleSheet(int id, StyleConstant[] constants, UIStyleGroupContainer[] styleGroupContainers, AnimationData[] animations) {
+        internal StyleSheet(int id, StyleConstant[] constants, UIStyleGroupContainer[] styleGroupContainers, AnimationData[] animations, UISoundData[] sounds) {
             this.id = id;
             this.constants = constants;
             this.styleGroupContainers = styleGroupContainers;
             this.animations = animations;
+            this.sounds = sounds;
         }
 
         public bool TryGetAnimationData(string name, out AnimationData retn) {

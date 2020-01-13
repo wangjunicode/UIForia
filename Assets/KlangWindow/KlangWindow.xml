@@ -2,55 +2,53 @@
 <UITemplate>
 
     <Style path="KlangWindow/KlangWindow.style"/>
-    <Style path="KlangWindow/WindowTitleButton.style" alias="WindowTitleButton"/>
 
     <Contents style="window-container">
-        <Group style="colony-info-sidebar" if="!hideSideBar">
+
+        <Group style="side-bar-container default-shadow" if="!hideSideBar">
 
             <Slot x-id="side-bar" style="side-bar-slot" name="KlangWindow.Sidebar">
-
-                <Group x-id="side-bar-runner" style="side-bar-runner">
-                    <Group style="side-bar-runner-display"/>
-                </Group>
 
                 <SidebarItem icon="'SpriteSettingOverwrite/ui_icon_traits_unfocused'" tooltip="'Tooltip Here'" onMouseClick="SelectSidebarItem($element)"/>
                 <SidebarItem icon="'SpriteSettingOverwrite/ui_icon_traits_unfocused'" onMouseClick="SelectSidebarItem($element)"/>
                 <SidebarItem icon="'SpriteSettingOverwrite/ui_icon_traits_unfocused'" onMouseClick="SelectSidebarItem($element)"/>
 
             </Slot>
+
+            <Group x-id="side-bar-runner" style="side-bar-runner">
+                <Group style="side-bar-runner-display"/>
+            </Group>
         </Group>
 
-        <Group style="title-bar" onDragCreate="CreateDrag_TitleBar($event)">
+        <Div style="default-shadow main-content">
+            <Group style="title-bar" onDragCreate="CreateDrag_TitleBar($event)">
 
-            <Slot name="KlangWindow.Titlebar" x-id="drag-box">
-                <Heading3>
-                    {windowTitle}
-                </Heading3>
-            </Slot>
+                <Slot name="KlangWindow.Titlebar" x-id="drag-box">
+                    <Heading3>
+                        {windowTitle}
+                    </Heading3>
+                </Slot>
 
-            <Slot name="KlangWindow.TitlebarButtons" x-id="title-button-group" style="title-buttons">
-                <WindowTitleButton style="title-button maximize-button" x-variant="green" onMouseClick="Maximize()">
-                    <Div style="horizontal title-button-part" />
-                    <Div style="vertical title-button-part" />
-                </WindowTitleButton>
-                <WindowTitleButton style="title-button minimize-button" x-variant="yellow" onMouseClick="Minimize()">
-                    <Div style="minus-bar title-button-part" />
-                </WindowTitleButton>
-                <WindowTitleButton style="title-button close-button" x-variant="red" onMouseClick="Close()">
-                    <Div style="left-leg title-button-part" />
-                    <Div style="right-leg title-button-part" />
-                </WindowTitleButton>
-            </Slot>
+                <Slot name="KlangWindow.TitlebarButtons" x-id="title-button-group" style="title-buttons">
+                    <WindowTitleButton if="Resizable" style="title-button maximize-button" x-variant="green" onMouseClick="Maximize()">
+                        <Div style="horizontal title-button-part"/>
+                        <Div style="vertical title-button-part"/>
+                    </WindowTitleButton>
+                    <WindowTitleButton if="Resizable" style="title-button minimize-button" x-variant="yellow" onMouseClick="Minimize()">
+                        <Div style="minus-bar title-button-part"/>
+                    </WindowTitleButton>
+                    <WindowTitleButton style="title-button close-button" x-variant="red" onMouseClick="Close()">
+                        <Div style="left-leg title-button-part"/>
+                        <Div style="right-leg title-button-part"/>
+                    </WindowTitleButton>
+                </Slot>
 
-        </Group>
+            </Group>
 
-        <Group style="body" x-id="body">
-            <ScrollView>
-                <Group style="body-main">
-                    <Children />
-                </Group>
+            <ScrollView style="['body', DarkTheme ? 'body-dark' : '']">
+                <Children/>
             </ScrollView>
-        </Group>
+        </Div>
 
     </Contents>
 

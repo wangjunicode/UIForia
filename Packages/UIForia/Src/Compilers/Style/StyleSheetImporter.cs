@@ -59,7 +59,7 @@ namespace UIForia.Compilers.Style {
                 }
             }
             catch (ParseException ex) {
-                cachedStyleSheets.Add(path, new StyleSheet(null, null, null)); // don't reparse failed styles
+                cachedStyleSheets.Add(path, new StyleSheet(null, null, null, null)); // don't reparse failed styles
                 ex.SetFileName(path);
                 throw;
             }

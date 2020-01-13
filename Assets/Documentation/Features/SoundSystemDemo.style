@@ -1,0 +1,53 @@
+import "Documentation/Documentation.style" as theme;
+
+sound ping {
+    Asset = "Sounds/ping";
+    Duration = 1s;
+    Volume = 0.5;
+    Pitch = 1.4;
+}
+
+sound pong {
+    Asset = "Sounds/ping";
+    Duration = 3s;
+    Volume = 0.6;
+    Pitch = 0.2;
+}
+
+sound title-song {
+    Asset = "Sounds/title-song";
+    Duration = 3s;
+    Volume = 0.6;
+    Pitch = 0.2;
+}
+
+//animation fade-in {
+//    [keyframes] {
+//        0% { Opacity = 0; }
+//        50% { run sound(title-song); }
+//        100% { Opacity = 1; }
+//    }
+//}
+
+style container {
+//    run animation(fade-in);
+}
+
+style <Paragraph> {
+    MaxWidth = 800px;
+    MarginBottom = 10px;
+}
+
+style ping-button {
+    [hover] {
+        [enter] run sound(ping);
+        [exit] stop sound(ping);
+    }
+}
+
+style pong-button {
+    [hover] {
+        [enter] run sound(pong);
+        [exit] stop sound(pong);
+    }
+}

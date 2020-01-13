@@ -1,0 +1,20 @@
+<UITemplate>
+    <Style path="Documentation/Features/SoundSystemDemo.style"/>
+    <Style src="Documentation/Documentation.style" alias="theme"/>
+    <Contents style="container">
+        <Heading1>Sound System Demo</Heading1>
+        <Paragraph>
+            Here we'll demo the stylable sounds... without playing actual sound (for now).
+        </Paragraph>
+        <Paragraph>
+            Hover the two buttons to see the current sound change. This just demonstrates the integration
+            of stylable sounds and the SoundSystem event callbacks.
+        </Paragraph>
+        <Group style="button-container">
+            <Button style="button ping-button">Ping Button</Button>
+            <Button style="button pong-button">Pong Button</Button>
+        </Group>
+
+        <Div>Current Sound {currentSound.name}</Div>
+    </Contents>
+</UITemplate>

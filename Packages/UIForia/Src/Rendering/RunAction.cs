@@ -1,7 +1,8 @@
 namespace UIForia.Rendering  {
     public enum RunAction {
-        Run, 
-        Pause, 
+        Run,
+        Pause,
+        Resume,
         Stop,
     }
 }

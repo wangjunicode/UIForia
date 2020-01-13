@@ -2612,6 +2612,20 @@ public class TestLinqCompiler {
         }", compiler.Print());
     }
 
+    
+    [Test]
+    public void CompileStatement_ParenMethodCall() {
+        LinqCompiler compiler = new LinqCompiler();
+        compiler.SetSignature<string>();
+        StaticThing.value = 10;
+        compiler.Statement("(5 + 8).ToString()");
+        compiler.Log();
+        Func<string> fn = compiler.Compile<Func<string>>();
+        string str = fn();
+
+        Assert.AreEqual("13", str);
+    }
+    
     public void AssertStringsEqual(string a, string b) {
         string[] splitA = a.Trim().Split('\n');
         string[] splitB = b.Trim().Split('\n');

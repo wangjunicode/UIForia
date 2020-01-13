@@ -237,6 +237,7 @@ namespace UIForia.Parsing.Expressions.AstNodes {
     public class ParenNode : ASTNode {
 
         public ASTNode expression;
+        public MemberAccessExpressionNode accessExpression;
 
         public ParenNode() {
             type = ASTNodeType.Paren;
@@ -244,6 +245,7 @@ namespace UIForia.Parsing.Expressions.AstNodes {
 
         public override void Release() {
             expression?.Release();
+            accessExpression?.Release();
             s_ParenPool.Release(this);
         }
 

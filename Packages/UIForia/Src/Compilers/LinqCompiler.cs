@@ -1900,18 +1900,24 @@ namespace UIForia.Compilers {
 
                 case ASTNodeType.Paren:
                     ParenNode parenNode = (ParenNode) node;
-                    return Visit(parenNode.expression);
-
+                    Expression parenExpr = Visit(parenNode.expression);
+                    if (parenNode.accessExpression != null) {
+                        ParameterExpression variable = AddVariable(parenExpr.Type, "__parenVal");
+                        Assign(variable, parenExpr);
+                        int start = 0;
+                        LightList<ProcessedPart> processedParts = ProcessASTParts(parenNode.accessExpression.parts);
+                        return VisitAccessExpressionParts(variable, processedParts, ref start);
+                    }
+                    else {
+                        return parenExpr;
+                    }
+                
                 case ASTNodeType.LambdaExpression:
                     return VisitLambda(targetType, (LambdaExpressionNode) node);
 
                 default:
                     throw new ArgumentOutOfRangeException();
             }
-        }
-
-        public Expression TypeMatchStatement(Type targetType, ASTNode node) {
-            return null;
         }
 
         public Expression TypeWrapStatement(ITypeWrapper typeWrapper, Type targetType, string input) {

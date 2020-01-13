@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using UIForia.Text;
+using ZFormat;
 
 namespace UIForia.Util {
 
@@ -20,7 +21,7 @@ namespace UIForia.Util {
         public void Clear() {
             size = 0;
         }
-        
+
         public CharStringBuilder Append(string str) {
             int strLength = str.Length;
 
@@ -40,6 +41,76 @@ namespace UIForia.Util {
             }
 
             return this;
+        }
+        
+        public CharStringBuilder Append(short val) {
+            ZNumberFormatter.Instance.NumberToChars(val);
+            Append(ZNumberFormatter.Instance.Chars, ZNumberFormatter.Instance.Count);
+            return this;
+        }
+
+        public CharStringBuilder Append(int val) {
+            ZNumberFormatter.Instance.NumberToChars(val);
+            Append(ZNumberFormatter.Instance.Chars, ZNumberFormatter.Instance.Count);
+            return this;
+        }
+
+        public CharStringBuilder Append(long val) {
+            ZNumberFormatter.Instance.NumberToChars(val);
+            Append(ZNumberFormatter.Instance.Chars, ZNumberFormatter.Instance.Count);
+            return this;
+        }
+
+        public CharStringBuilder Append(ushort val) {
+            ZNumberFormatter.Instance.NumberToChars(val);
+            Append(ZNumberFormatter.Instance.Chars, ZNumberFormatter.Instance.Count);
+            return this;
+        }
+
+        public CharStringBuilder Append(uint val) {
+            ZNumberFormatter.Instance.NumberToChars(val);
+            Append(ZNumberFormatter.Instance.Chars, ZNumberFormatter.Instance.Count);
+            return this;
+        }
+
+        public CharStringBuilder Append(ulong val) {
+            ZNumberFormatter.Instance.NumberToChars(val);
+            Append(ZNumberFormatter.Instance.Chars, ZNumberFormatter.Instance.Count);
+            return this;
+        }
+
+        public CharStringBuilder Append(float val) {
+            ZNumberFormatter.Instance.NumberToChars(val);
+            Append(ZNumberFormatter.Instance.Chars, ZNumberFormatter.Instance.Count);
+            return this;
+        }
+
+        public CharStringBuilder Append(double val) {
+            ZNumberFormatter.Instance.NumberToChars(val);
+            Append(ZNumberFormatter.Instance.Chars, ZNumberFormatter.Instance.Count);
+            return this;
+        }
+
+        public CharStringBuilder Append(decimal val) {
+            Append(val.ToString());
+            return this;
+        }
+
+
+        public CharStringBuilder Append(byte val) {
+            ZNumberFormatter.Instance.NumberToChars(val);
+            Append(ZNumberFormatter.Instance.Chars, ZNumberFormatter.Instance.Count);
+            return this;
+        }
+
+        public CharStringBuilder Append(sbyte val) {
+            ZNumberFormatter.Instance.NumberToChars(val);
+            Append(ZNumberFormatter.Instance.Chars, ZNumberFormatter.Instance.Count);
+            return this;
+        }
+
+        public CharStringBuilder Append(bool val) {
+            return Append(val ? "true" : "false");
         }
 
         public CharStringBuilder Append(char str) {
@@ -73,30 +144,30 @@ namespace UIForia.Util {
             return this;
         }
 
-        public int LongToCharBuffer(long value, int startIdx, ref char[] buffer) {
-            int addedCharacters = 0;
-            // convert value to characters, save number of characters used in 'addedCharacters'
-            return startIdx + addedCharacters;
+        public CharStringBuilder Append(char[] str, int count) {
+            return Append(str, 0, count);
         }
 
-        public int IntToCharBuffer(int value, int startIdx, ref char[] buffer) {
-            int addedCharacters = 0;
-            // convert value to characters, save number of characters used in 'addedCharacters'
-            return startIdx + addedCharacters;
-        }
+        public CharStringBuilder Append(char[] str, int start, int end) {
+            int strLength = end - start;
 
-        public int FloatToCharBuffer(float value, int startIdx, ref char[] buffer, int places = 3) {
-            int addedCharacters = 0;
-            // places is how many decimal points to use. Low precision is fine
-            // convert value to characters, save number of characters used in 'addedCharacters'
-            return startIdx + addedCharacters;
-        }
+            if (size + strLength >= characters.Length) {
+                Array.Resize(ref characters, (size + strLength) * 2);
+            }
 
-        public int DoubleToCharBuffer(double value, int startIdx, ref char[] buffer, int places = 3) {
-            int addedCharacters = 0;
-            // places is how many decimal points to use. Low precision is fine
-            // convert value to characters, save number of characters used in 'addedCharacters'
-            return startIdx + addedCharacters;
+            unsafe {
+                fixed (char* smem = str) {
+                    fixed (char* dmem = characters) {
+                        byte* d = (byte*) (dmem + size);
+                        byte* s = (byte*) (smem + start);
+                        Buffer.MemoryCopy((byte*) s, d, strLength * 2, strLength * 2);
+                    }
+                }
+
+                size += strLength;
+            }
+
+            return this;
         }
 
         public override string ToString() {
@@ -104,7 +175,6 @@ namespace UIForia.Util {
         }
 
         public unsafe bool EqualsString(string str) {
-            
             if (str == null || size != str.Length) {
                 return false;
             }

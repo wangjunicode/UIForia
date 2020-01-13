@@ -190,12 +190,12 @@ namespace UIForia.Parsing.Expressions {
                     operatorNode = ASTNode.OperatorNode(OperatorType.TernarySelection);
                     operatorNode.WithLocation(tokenStream.Previous);
                     return true;
-                
+
                 case ExpressionTokenType.Coalesce:
                     operatorNode = ASTNode.OperatorNode(OperatorType.Coalesce);
                     operatorNode.WithLocation(tokenStream.Previous);
                     return true;
-                
+
                 case ExpressionTokenType.Elvis:
                     operatorNode = ASTNode.OperatorNode(OperatorType.Elvis);
                     operatorNode.WithLocation(tokenStream.Previous);
@@ -246,32 +246,30 @@ namespace UIForia.Parsing.Expressions {
                 }
 
                 if (tokenStream.Current == ExpressionTokenType.QuestionMark && !tokenStream.NextTokenIs(ExpressionTokenType.QuestionMark)) {
-                    
                     while (operatorStack.Count != 0) {
                         OperatorNode opNode = operatorStack.Pop();
                         opNode.right = expressionStack.Pop();
                         opNode.left = expressionStack.Pop();
                         expressionStack.Push(opNode);
                     }
-                    
+
                     OperatorNode condition = ASTNode.OperatorNode(OperatorType.TernaryCondition);
                     OperatorNode selection = ASTNode.OperatorNode(OperatorType.TernarySelection);
-                    
+
                     condition.WithLocation(tokenStream.Previous);
                     tokenStream.Advance();
                     int idx = tokenStream.FindMatchingTernaryColon();
 
                     if (idx != -1) {
-                        
                         TokenStream stream = tokenStream.AdvanceAndReturnSubStream(idx);
-                        
+
                         // parse the left side of the : operator
                         ExpressionParser parser = new ExpressionParser(stream);
                         ASTNode leftNode = parser.ParseLoop();
                         parser.Release();
 
                         tokenStream.Advance(); // step over colon
-                        
+
                         ExpressionParser parserRight = new ExpressionParser(tokenStream);
                         ASTNode rightNode = parserRight.ParseLoop();
                         tokenStream.Set(parserRight.tokenStream.CurrentIndex);
@@ -279,30 +277,29 @@ namespace UIForia.Parsing.Expressions {
 
                         selection.left = leftNode;
                         selection.right = rightNode;
-                        
-                        condition.left =  expressionStack.Pop();
+
+                        condition.left = expressionStack.Pop();
                         condition.right = selection;
-                    
+
                         expressionStack.Push(condition);
                     }
                     else {
-                        
                         // read to end use implicit default value for left hand side
-                        
+
                         ExpressionParser parserLeft = new ExpressionParser(tokenStream);
                         ASTNode leftNode = parserLeft.ParseLoop();
                         tokenStream.Set(parserLeft.tokenStream.CurrentIndex);
                         parserLeft.Release(false);
-                        
+
                         selection.left = leftNode;
                         selection.right = ASTNode.DefaultLiteralNode("default");
-                        
-                        condition.left =  expressionStack.Pop();
+
+                        condition.left = expressionStack.Pop();
                         condition.right = selection;
-                    
+
                         expressionStack.Push(condition);
                     }
-                    
+
                     continue;
                 }
 
@@ -721,13 +718,13 @@ namespace UIForia.Parsing.Expressions {
                         continue;
                     }
                 }
-                else if (tokenStream.Current == ExpressionTokenType.ArrayAccessOpen || tokenStream.Current == ExpressionTokenType.QuestionMark && tokenStream.NextTokenIs(ExpressionTokenType.ArrayAccessOpen) ) {
+                else if (tokenStream.Current == ExpressionTokenType.ArrayAccessOpen || tokenStream.Current == ExpressionTokenType.QuestionMark && tokenStream.NextTokenIs(ExpressionTokenType.ArrayAccessOpen)) {
                     bool isElvis = false;
                     if (tokenStream.Current == ExpressionTokenType.QuestionMark) {
                         isElvis = true;
                         tokenStream.Advance();
                     }
-                    
+
                     int advance = tokenStream.FindMatchingIndex(ExpressionTokenType.ArrayAccessOpen, ExpressionTokenType.ArrayAccessClose);
                     if (advance == -1) {
                         Abort("Unmatched array bracket");
@@ -803,8 +800,107 @@ namespace UIForia.Parsing.Expressions {
                 retn = ASTNode.ParenNode(retn);
             }
 
+            ASTNode access = null;
+
+            if (ParseParenAccessExpression(ref access)) {
+                
+                ParenNode parenNode = (ParenNode) retn;
+                parenNode.accessExpression = (MemberAccessExpressionNode)access;
+
+            }
+            
             subParser.Release();
             return true;
+        }
+
+        private bool ParseParenAccessExpression(ref ASTNode retn) {
+            
+            // string identifier = tokenStream.Current.value;
+            // tokenStream.Save();
+            // tokenStream.Advance();
+            
+            LightList<ASTNode> parts = LightList<ASTNode>.Get();
+            
+            while (tokenStream.HasMoreTokens) {
+                if (tokenStream.Current == ExpressionTokenType.Dot || tokenStream.Current == ExpressionTokenType.Elvis) {
+                    if (tokenStream.Next != ExpressionTokenType.Identifier) {
+                        break;
+                    }
+
+                    tokenStream.Advance();
+                    parts.Add(ASTNode.DotAccessNode(tokenStream.Current.value, tokenStream.Previous == ExpressionTokenType.Elvis));
+                    tokenStream.Advance();
+                    if (tokenStream.HasMoreTokens) {
+                        continue;
+                    }
+                }
+                else if (tokenStream.Current == ExpressionTokenType.ArrayAccessOpen || tokenStream.Current == ExpressionTokenType.QuestionMark && tokenStream.NextTokenIs(ExpressionTokenType.ArrayAccessOpen)) {
+                    bool isElvis = false;
+                    if (tokenStream.Current == ExpressionTokenType.QuestionMark) {
+                        isElvis = true;
+                        tokenStream.Advance();
+                    }
+
+                    int advance = tokenStream.FindMatchingIndex(ExpressionTokenType.ArrayAccessOpen, ExpressionTokenType.ArrayAccessClose);
+                    if (advance == -1) {
+                        Abort("Unmatched array bracket");
+                    }
+
+                    ExpressionParser subParser = CreateSubParser(advance);
+                    parts.Add(ASTNode.IndexExpressionNode(subParser.ParseLoop(), isElvis));
+                    subParser.Release();
+                    if (tokenStream.HasMoreTokens) {
+                        continue;
+                    }
+                }
+                else if (tokenStream.Current == ExpressionTokenType.ParenOpen) {
+                    LightList<ASTNode> parameters = null;
+
+                    if (!ParseListExpression(ref parameters, ExpressionTokenType.ParenOpen, ExpressionTokenType.ParenClose)) {
+                        Abort();
+                    }
+
+                    parts.Add(ASTNode.InvokeNode(parameters));
+                    if (tokenStream.HasMoreTokens) {
+                        continue;
+                    }
+                }
+
+                else if (tokenStream.Current == ExpressionTokenType.LessThan) {
+                    // shortcut the << operator since we can't have a << in a generic type node. List<<string>> is invalid for example
+                    if (tokenStream.HasMoreTokens && tokenStream.Next == ExpressionTokenType.LessThan) {
+                        tokenStream.Restore();
+                        LightList<ASTNode>.Release(ref parts);
+                        return false;
+                    }
+
+                    TypeLookup typePath = new TypeLookup();
+
+                    if (!(ParseTypePathGenerics(ref typePath))) {
+                        tokenStream.Restore();
+                        LightList<ASTNode>.Release(ref parts);
+                        return false;
+                    }
+
+                    parts.Add(ASTNode.GenericTypePath(typePath));
+                    if (tokenStream.HasMoreTokens) {
+                        continue;
+                    }
+                }
+
+                if (parts.Count == 0) {
+                    tokenStream.Restore();
+                    LightList<ASTNode>.Release(ref parts);
+                    return false;
+                }
+
+                retn = ASTNode.MemberAccessExpressionNode("__parens__", parts).WithLocation(tokenStream.Peek());
+                return true;
+            }
+
+            ReleaseList(parts);
+            tokenStream.Restore();
+            return false;
         }
 
         private bool ParseNewExpression(ref ASTNode retn) {

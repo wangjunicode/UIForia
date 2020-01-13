@@ -988,4 +988,16 @@ public class ExpressionParserTests {
         Assert.AreEqual("default", AssertInstanceOfAndReturn<LiteralNode>(outerSelection.right).rawValue);
     }
 
+    [Test]
+    public void Parse_MethodChainExpression() {
+        ASTNode root = ExpressionParser.Parse(("Method()().Property"));
+
+    }
+    
+    [Test]
+    public void Parse_ParenExpression_DotAccess() {
+        ASTNode root = ExpressionParser.Parse(("(5 + 8).ToString()"));
+
+    }
+
 }

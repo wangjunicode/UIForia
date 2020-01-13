@@ -25,7 +25,7 @@ namespace UIForia.Elements {
                 }
             }
             
-            Router gameRouter = Application.RoutingSystem.FindRouter("game");
+            Router gameRouter = application.RoutingSystem.FindRouter("game");
             gameRouter.GoTo(path);
 
             ListPool<ElementAttribute>.Release(ref attrs);
@@ -41,7 +41,7 @@ namespace UIForia.Elements {
 
         [OnMouseClick]
         public void GoBack() {
-            Router gameRouter = Application.RoutingSystem.FindRouter("game");
+            Router gameRouter = application.RoutingSystem.FindRouter("game");
             gameRouter.GoBack();
         }
 

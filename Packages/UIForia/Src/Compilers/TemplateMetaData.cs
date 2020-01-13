@@ -36,10 +36,9 @@ namespace UIForia.Compilers {
             this.filePath = filePath;
             this.styleReferences = styleReferences;
             this.styleMap = styleMap;
-            BuildSearchMap();
         }
 
-        private void BuildSearchMap() {
+        internal void BuildSearchMap() {
             if (styleReferences == null) {
                 searchMap = s_EmptySearchMap;
                 return;

@@ -22,7 +22,7 @@ namespace UIForia.Elements {
             int oldCount = ChildCount;
 
             if (count > oldCount) {
-                Application.AddTemplateChildren(this, templateId, count - oldCount);
+                application.AddTemplateChildren(this, templateId, count - oldCount);
                 if (onSlotCreated != null) {
                     for (int i = oldCount; i < count; i++) {
                         onSlotCreated.Invoke(); // todo -- argument

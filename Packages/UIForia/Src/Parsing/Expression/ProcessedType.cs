@@ -67,7 +67,7 @@ namespace UIForia.Parsing {
 
         public void GetChangeHandlers(string memberName, StructList<PropertyChangeHandlerDesc> retn) {
             if (methods == null) {
-                var candidates = ReflectionUtil.GetInstanceMethods(rawType);
+                MethodInfo[] candidates = ReflectionUtil.GetInstanceMethods(rawType);
                 for (int i = 0; i < candidates.Length; i++) {
                     IEnumerable<OnPropertyChanged> attrs = candidates[i].GetCustomAttributes<OnPropertyChanged>();
                     methods = methods ?? new StructList<PropertyChangeHandlerDesc>();

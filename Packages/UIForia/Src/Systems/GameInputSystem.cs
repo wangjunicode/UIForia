@@ -24,13 +24,13 @@ namespace UIForia.Systems.Input {
             retn.rightMouseButtonState.isUpThisFrame = UnityEngine.Input.GetMouseButtonUp(1);
             retn.middleMouseButtonState.isUpThisFrame = UnityEngine.Input.GetMouseButtonUp(2);
             
-            retn.leftMouseButtonState.downPosition = m_MouseState.leftMouseButtonState.downPosition;
-            retn.rightMouseButtonState.downPosition = m_MouseState.rightMouseButtonState.downPosition;
-            retn.middleMouseButtonState.downPosition = m_MouseState.middleMouseButtonState.downPosition;
+            retn.leftMouseButtonState.downPosition = mouseState.leftMouseButtonState.downPosition;
+            retn.rightMouseButtonState.downPosition = mouseState.rightMouseButtonState.downPosition;
+            retn.middleMouseButtonState.downPosition = mouseState.middleMouseButtonState.downPosition;
             
-            retn.leftMouseButtonState.isDrag = m_MouseState.leftMouseButtonState.isDrag;
-            retn.rightMouseButtonState.isDrag = m_MouseState.rightMouseButtonState.isDrag;
-            retn.middleMouseButtonState.isDrag = m_MouseState.middleMouseButtonState.isDrag;
+            retn.leftMouseButtonState.isDrag = mouseState.leftMouseButtonState.isDrag;
+            retn.rightMouseButtonState.isDrag = mouseState.rightMouseButtonState.isDrag;
+            retn.middleMouseButtonState.isDrag = mouseState.middleMouseButtonState.isDrag;
             retn.mousePosition = ConvertMousePosition(UnityEngine.Input.mousePosition);
             float now = Time.unscaledTime;
 
@@ -63,7 +63,7 @@ namespace UIForia.Systems.Input {
             retn.isTripleClick = didClick && clickCount == 3;
             retn.clickCount = clickCount;
             retn.scrollDelta = UnityEngine.Input.mouseScrollDelta;
-            retn.previousMousePosition = m_MouseState.mousePosition;
+            retn.previousMousePosition = mouseState.mousePosition;
 
             return retn;
         }

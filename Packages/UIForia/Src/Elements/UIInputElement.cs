@@ -453,13 +453,13 @@ namespace UIForia.Elements {
         public override void OnCreate() {
             text = text ?? string.Empty;
             style.SetPainter("UIForia::Input", StyleState.Normal);
-            Application.InputSystem.RegisterFocusable(this);
+            application.InputSystem.RegisterFocusable(this);
         }
 
         public override void OnEnable() {
             textElement = FindById<UITextElement>("input-element-text");
             if (autofocus) {
-                Application.InputSystem.RequestFocus(this);
+                application.InputSystem.RequestFocus(this);
             }
 
             if (string.IsNullOrEmpty(m_placeholder)) {
@@ -487,7 +487,7 @@ namespace UIForia.Elements {
 
         public override void OnDestroy() {
             Blur();
-            Application.InputSystem.UnRegisterFocusable(this);
+            application.InputSystem.UnRegisterFocusable(this);
         }
 
         public override void OnDisable() {
@@ -771,7 +771,7 @@ namespace UIForia.Elements {
             if (evt.IsMouseRightDown) return null;
 
             if (!hasFocus) {
-                Application.InputSystem.RequestFocus(this);
+                application.InputSystem.RequestFocus(this);
             }
             TextSelectDragEvent retn = new TextSelectDragEvent(this);
             Vector2 mouseDownPosition = evt.LeftMouseDownPosition - layoutResult.screenPosition - layoutResult.ContentRect.position + textScroll;

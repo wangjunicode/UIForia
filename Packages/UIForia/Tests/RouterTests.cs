@@ -32,7 +32,7 @@ public class RouterTests {
         Assert.IsInstanceOf<UIGroupElement>(uiElement1);
         Assert.IsInstanceOf<UIGroupElement>(uiElement2);
         
-        Router router = app.RootElement.Application.RoutingSystem.FindRouter("game");
+        Router router = app.RootElement.application.RoutingSystem.FindRouter("game");
         string id = router.GetParameter("id");
         
         Assert.True(uiElement1.isEnabled);
@@ -66,7 +66,7 @@ public class RouterTests {
         Assert.IsInstanceOf<UIGroupElement>(uiElement1);
         Assert.IsInstanceOf<UIGroupElement>(uiElement2);
         
-        Router router = app.RootElement.Application.RoutingSystem.FindRouter("game");
+        Router router = app.RootElement.application.RoutingSystem.FindRouter("game");
         string id = router.GetParameter("id");
         
         Assert.True(uiElement1.isEnabled);
@@ -81,7 +81,7 @@ public class RouterTests {
         app.Update();
         
         var uiElement1 = app.RootElement.GetChild(0).GetChild(0);
-        Router router = app.RootElement.Application.RoutingSystem.FindRouter("game");
+        Router router = app.RootElement.application.RoutingSystem.FindRouter("game");
         router.GoTo("/user/2/something/23");
         
         app.Update();
@@ -145,7 +145,7 @@ public class RouterTests {
         var friendsElement = app.RootElement.GetChild(0).FindById<UIElement>("friends");
         
         // starting at faq1 and go to users friends
-        app.RootElement.Application.RoutingSystem.FindRouter("game").GoTo("/user/1/friends");
+        app.RootElement.application.RoutingSystem.FindRouter("game").GoTo("/user/1/friends");
         app.Update();
         
         Assert.True(helpElement.isDisabled);
@@ -157,7 +157,7 @@ public class RouterTests {
         Assert.True(friendsElement.isEnabled);
         
         // let's go back 
-        app.RootElement.Application.RoutingSystem.FindRouter("game").GoBack();
+        app.RootElement.application.RoutingSystem.FindRouter("game").GoBack();
         app.Update();
         Assert.True(helpElement.isEnabled);
         Assert.True(faqRoute1.isEnabled);
@@ -198,8 +198,8 @@ public class RouterTests {
         Assert.True(chatWithMatt.isEnabled);
         Assert.True(chatWithChristian.isDisabled);
 
-        var gameRouter = app.RootElement.Application.RoutingSystem.FindRouter("game");
-        var chatRouter = app.RootElement.Application.RoutingSystem.FindRouter("chat");
+        var gameRouter = app.RootElement.application.RoutingSystem.FindRouter("game");
+        var chatRouter = app.RootElement.application.RoutingSystem.FindRouter("chat");
         
         gameRouter.GoTo("/user/12/friends");
         chatRouter.GoTo("/chat/christian");

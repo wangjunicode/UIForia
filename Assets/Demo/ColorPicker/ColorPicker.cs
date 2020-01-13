@@ -18,11 +18,11 @@ namespace Demo.ColorPicker {
 
         [OnMouseClick]
         public void OpenColorPalette() {
-            Application.InputSystem.RequestFocus(this);
+            application.InputSystem.RequestFocus(this);
         }
 
         public void SelectColor(Color color) {
-            Application.InputSystem.ReleaseFocus(this);
+            application.InputSystem.ReleaseFocus(this);
             selectedColor = color;
             style.SetBackgroundColor(color, StyleState.Normal);
         }

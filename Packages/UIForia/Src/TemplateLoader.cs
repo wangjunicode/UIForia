@@ -16,7 +16,7 @@ namespace UIForia.Compilers {
     public static class TemplateLoader {
 
         public static CompiledTemplateData LoadRuntimeTemplates(Type type, TemplateSettings templateSettings) {
-            CompiledTemplateData compiledTemplateData = TemplateCompiler2.CompileTemplates(type, templateSettings);
+            CompiledTemplateData compiledTemplateData = TemplateCompiler.CompileTemplates(type, templateSettings);
 
             Func<UIElement, TemplateScope, UIElement>[] templates = new Func<UIElement, TemplateScope, UIElement>[compiledTemplateData.compiledTemplates.size];
             Action<UIElement, UIElement>[] bindings = new Action<UIElement, UIElement>[compiledTemplateData.compiledBindings.size];
@@ -56,6 +56,7 @@ namespace UIForia.Compilers {
             for (int i = 0; i < templateMetaData.Length; i++) {
                 templateMetaData[i] = compiledTemplateData.compiledTemplates[i].templateMetaData;
                 templateMetaData[i].styleMap = styleList.array;
+                templateMetaData[i].BuildSearchMap();
             }
 
             Dictionary<int, Func<UIElement>> constructorFnMap = new Dictionary<int, Func<UIElement>>(37);

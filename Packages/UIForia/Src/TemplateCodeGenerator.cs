@@ -22,7 +22,7 @@ namespace UIForia {
         private StyleSheetImporter styleSheetImporter;
 
         public static bool Generate(Type type, TemplateSettings templateSettings) {
-            CompiledTemplateData compiledTemplateData = TemplateCompiler2.CompileTemplates(type, templateSettings);
+            CompiledTemplateData compiledTemplateData = TemplateCompiler.CompileTemplates(type, templateSettings);
 
             string path = templateSettings.outputPath;
             string extension = "." + templateSettings.codeFileExtension;

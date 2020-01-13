@@ -13,7 +13,7 @@ namespace Documentation.DocumentationElements {
         public string href;
 
         public override void OnUpdate() {
-            if (Application.RoutingSystem.FindRouter("demo").CurrentUrl == href) {
+            if (application.RoutingSystem.FindRouter("demo").CurrentUrl == href) {
                 style.SetBackgroundColor(highlight, StyleState.Normal);
                 style.SetTextColor(Color.white, StyleState.Normal);
                 style.SetTextColor(Color.black, StyleState.Hover);
@@ -26,7 +26,7 @@ namespace Documentation.DocumentationElements {
 
         [OnMouseClick()]
         public void OnClick() {
-            Application.RoutingSystem.FindRouter("demo").GoTo(href);
+            application.RoutingSystem.FindRouter("demo").GoTo(href);
         }
     }
 }

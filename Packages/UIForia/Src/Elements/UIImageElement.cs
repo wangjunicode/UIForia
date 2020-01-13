@@ -22,7 +22,7 @@ namespace UIForia.Elements {
         [OnPropertyChanged(nameof(texture))]
         public void OnSrcChanged(string name) {
             if (src != null) {
-                texture = Application.ResourceManager.GetTexture(src);
+                texture = application.ResourceManager.GetTexture(src);
             }
             style.SetBackgroundImage(texture, StyleState.Normal);
             if (Width > 0) {

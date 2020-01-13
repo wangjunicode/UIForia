@@ -49,8 +49,8 @@ namespace Documentation.Features {
         }
 
         public void ChangeAnimation(string animation) {
-            animationData = Application.GetAnimationFromFile("Documentation/Features/AnimationDemo.style", animation);
-            animationTask = Application.Animate(animationTarget, animationData);
+            animationData = application.GetAnimationFromFile("Documentation/Features/AnimationDemo.style", animation);
+            animationTask = application.Animate(animationTarget, animationData);
             if (animationData.options.duration.HasValue) {
                 duration = animationData.options.duration.Value.AsMilliseconds();
             }
@@ -77,19 +77,19 @@ namespace Documentation.Features {
             animationData.options.timingFunction = timingFunction;
             animationData.options.direction = direction;
             
-            animationTask = Application.Animate(animationTarget, animationData);
+            animationTask = application.Animate(animationTarget, animationData);
         }
 
         public void PauseAnimation() {
-            Application.PauseAnimation(animationTarget, animationData);   
+            application.PauseAnimation(animationTarget, animationData);   
         }
 
         public void ResumeAnimation() {
-            Application.ResumeAnimation(animationTarget, animationData);
+            application.ResumeAnimation(animationTarget, animationData);
         }
 
         public void StopAnimation() {
-            Application.StopAnimation(animationTarget, animationData);
+            application.StopAnimation(animationTarget, animationData);
         }
     }
 

@@ -26,7 +26,7 @@ namespace Klang.Seed.Client.UI.UIForia {
             if (path == null) {
                 return;
             }
-            Router gameRouter = Application.RoutingSystem.FindRouterInHierarchy(this);
+            Router gameRouter = application.RoutingSystem.FindRouterInHierarchy(this);
             if (gameRouter == null) {
                 return;
             }
@@ -45,7 +45,7 @@ namespace Klang.Seed.Client.UI.UIForia {
                 return;
             }
 
-            Router gameRouter = Application.RoutingSystem.FindRouterInHierarchy(this);
+            Router gameRouter = application.RoutingSystem.FindRouterInHierarchy(this);
             if (gameRouter == null) {
                 return;
             }
@@ -77,7 +77,7 @@ namespace Klang.Seed.Client.UI.UIForia {
         [OnMouseClick]
         public void OnClick(MouseInputEvent evt) {
 
-            Router gameRouter = Application.RoutingSystem.FindRouterInHierarchy(this);
+            Router gameRouter = application.RoutingSystem.FindRouterInHierarchy(this);
             if (gameRouter == null) {
                 return;
             }

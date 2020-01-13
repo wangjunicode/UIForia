@@ -30,7 +30,7 @@ namespace Demo {
                 });
 
                 message = "";
-                Application.RegisterAfterUpdateTask(new ScrollTask(FindById<ScrollView>("scrollview"), 1));
+                application.RegisterAfterUpdateTask(new ScrollTask(FindById<ScrollView>("scrollview"), 1));
             }
         }
 

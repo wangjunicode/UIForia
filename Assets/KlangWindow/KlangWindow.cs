@@ -53,19 +53,19 @@ namespace UI {
 
             cursorResizeH = new CursorStyle(
                 "resizeH", 
-                Application.ResourceManager.GetTexture("Client/UI/Sprites/Cursors/ui_mouse_cursor_resize_horizontal"),
+                application.ResourceManager.GetTexture("Client/UI/Sprites/Cursors/ui_mouse_cursor_resize_horizontal"),
                 Vector2.zero);
             cursorResizeV = new CursorStyle(
                 "resizeH", 
-                Application.ResourceManager.GetTexture("Client/UI/Sprites/Cursors/ui_mouse_cursor_resize_vertical"),
+                application.ResourceManager.GetTexture("Client/UI/Sprites/Cursors/ui_mouse_cursor_resize_vertical"),
                 Vector2.zero);
             cursorResizeD = new CursorStyle(
                 "resizeH", 
-                Application.ResourceManager.GetTexture("Client/UI/Sprites/Cursors/ui_mouse_cursor_resize_diagonal"),
+                application.ResourceManager.GetTexture("Client/UI/Sprites/Cursors/ui_mouse_cursor_resize_diagonal"),
                 Vector2.zero);
             cursorResizeDiagonalTLBR = new CursorStyle(
                 "resizeH", 
-                Application.ResourceManager.GetTexture("Client/UI/Sprites/Cursors/ui_mouse_cursor_resize_diagonal_inverse"),
+                application.ResourceManager.GetTexture("Client/UI/Sprites/Cursors/ui_mouse_cursor_resize_diagonal_inverse"),
                 Vector2.zero);
         }
 
@@ -223,7 +223,7 @@ namespace UI {
 
             currentSidebarItem = element;
 
-            Application.Animate(runner, new AnimationData(options, frames));
+            application.Animate(runner, new AnimationData(options, frames));
         }
 
         private float GetSideBarRunnerTransformY(UIElement sideBarItem) {

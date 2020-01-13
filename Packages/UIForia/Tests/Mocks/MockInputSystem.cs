@@ -1,6 +1,7 @@
 using JetBrains.Annotations;
 using UIForia.Systems;
 using UIForia.Systems.Input;
+using UIForia.UIInput;
 using UnityEngine;
 
 namespace Tests.Mocks {
@@ -11,7 +12,7 @@ namespace Tests.Mocks {
             : base(layoutSystem) { }
 
         public void SetMouseState(MouseState mouseState) {
-            m_MouseState = mouseState;
+            base.mouseState = mouseState;
         }
 
         // for the debugger, rider struggles w/ partial classes
@@ -21,47 +22,52 @@ namespace Tests.Mocks {
         }
         
         protected override MouseState GetMouseState() {
-            return m_MouseState;
+            return mouseState;
         }
 
+        public void SetKeyDown(char character, KeyboardModifiers modifiers = 0) {
+            ProcessKeyboardEvent(0, InputEventType.KeyDown, character, modifiers);
+        }
+
+        public void SetKeyUp(char character, KeyboardModifiers modifiers = 0) {
+            ProcessKeyboardEvent(0, InputEventType.KeyUp, character, modifiers);
+        }
+        
         public void SetMousePosition(Vector2 position) {
-            m_MouseState.previousMousePosition = m_MouseState.mousePosition;
-            m_MouseState.mousePosition = position;
+            mouseState.previousMousePosition = mouseState.mousePosition;
+            mouseState.mousePosition = position;
         }
 
         public void MouseDragMove(Vector2 position) {
-            m_MouseState.leftMouseButtonState.isDown = true;
-            m_MouseState.leftMouseButtonState.isDownThisFrame = false;
-            m_MouseState.leftMouseButtonState.isUpThisFrame = false;
-            m_MouseState.previousMousePosition = m_MouseState.mousePosition;
-            m_MouseState.mousePosition = position;
+            mouseState.leftMouseButtonState.isDown = true;
+            mouseState.leftMouseButtonState.isDownThisFrame = false;
+            mouseState.leftMouseButtonState.isUpThisFrame = false;
+            mouseState.previousMousePosition = mouseState.mousePosition;
+            mouseState.mousePosition = position;
         }
         
         public void MouseDown(Vector2 position) {
-            m_MouseState.leftMouseButtonState.isDown = true;
-            m_MouseState.leftMouseButtonState.isDownThisFrame = true;
-            m_MouseState.leftMouseButtonState.isUpThisFrame = false;
-            m_MouseState.previousMousePosition = m_MouseState.mousePosition;
-            m_MouseState.mousePosition = position;
-            m_MouseState.leftMouseButtonState.downPosition = position;
+            mouseState.leftMouseButtonState.isDown = true;
+            mouseState.leftMouseButtonState.isDownThisFrame = true;
+            mouseState.leftMouseButtonState.isUpThisFrame = false;
+            mouseState.previousMousePosition = mouseState.mousePosition;
+            mouseState.mousePosition = position;
+            mouseState.leftMouseButtonState.downPosition = position;
         }
 
         public void MouseUp() {
-            m_MouseState.leftMouseButtonState.isDown = false;
-            m_MouseState.leftMouseButtonState.isDownThisFrame = false;
-            m_MouseState.leftMouseButtonState.isUpThisFrame = true;
-            m_MouseState.leftMouseButtonState.downPosition = new Vector2(-1, -1);
+            mouseState.leftMouseButtonState.isDown = false;
+            mouseState.leftMouseButtonState.isDownThisFrame = false;
+            mouseState.leftMouseButtonState.isUpThisFrame = true;
+            mouseState.leftMouseButtonState.downPosition = new Vector2(-1, -1);
         }
 
         public void ClearClickState() {
-            m_MouseState.leftMouseButtonState.isDown = false;
-            m_MouseState.leftMouseButtonState.isDownThisFrame = false;
-            m_MouseState.leftMouseButtonState.isUpThisFrame = false;
-            m_MouseState.leftMouseButtonState.downPosition = new Vector2(-1, -1);
+            mouseState.leftMouseButtonState.isDown = false;
+            mouseState.leftMouseButtonState.isDownThisFrame = false;
+            mouseState.leftMouseButtonState.isUpThisFrame = false;
+            mouseState.leftMouseButtonState.downPosition = new Vector2(-1, -1);
         }
-
-        public void MouseMove(Vector2 position) {
-            
-        }
+        
     }
 }

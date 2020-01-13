@@ -4,10 +4,8 @@ using System.Diagnostics;
 using Src.Systems;
 using UIForia.Animation;
 using UIForia.Compilers;
-using UIForia.Compilers.Style;
 using UIForia.Elements;
 using UIForia.Layout;
-using UIForia.Parsing;
 using UIForia.Rendering;
 using UIForia.Routing;
 using UIForia.Sound;
@@ -50,14 +48,14 @@ namespace UIForia {
         public static int NextElementId => ElementIdGenerator++;
         private string templateRootPath;
 
-        protected readonly IStyleSystem m_StyleSystem;
-        protected ILayoutSystem m_LayoutSystem;
-        protected IRenderSystem m_RenderSystem;
-        protected IInputSystem m_InputSystem;
-        protected RoutingSystem m_RoutingSystem;
-        protected AnimationSystem m_AnimationSystem;
-        protected UISoundSystem m_UISoundSystem;
-        protected LinqBindingSystem linqBindingSystem;
+        internal readonly IStyleSystem m_StyleSystem;
+        internal ILayoutSystem m_LayoutSystem;
+        internal IRenderSystem m_RenderSystem;
+        internal IInputSystem m_InputSystem;
+        internal RoutingSystem m_RoutingSystem;
+        internal AnimationSystem m_AnimationSystem;
+        internal UISoundSystem m_UISoundSystem;
+        internal LinqBindingSystem linqBindingSystem;
 
         protected ResourceManager resourceManager;
 
@@ -66,7 +64,6 @@ namespace UIForia {
 
         public event Action<UIElement> onElementRegistered;
 
-//        public event Action<UIElement> onElementCreated;
         public event Action<UIElement> onElementDestroyed;
 
         public event Action<UIElement> onElementEnabled;
@@ -148,10 +145,11 @@ namespace UIForia {
 #endif
 
             templateData = compiledTemplateData;
-
+            UIView view = null;
+            
             UIElement rootElement = templateData.templates[0].Invoke(null, new TemplateScope(this, null));
 
-            UIView view = new UIView(this, "Default", rootElement, Matrix4x4.identity, new Size(Screen.width, Screen.height));
+            view = new UIView(this, "Default", rootElement, Matrix4x4.identity, new Size(Screen.width, Screen.height));
 
             m_Views.Add(view);
 
@@ -453,7 +451,6 @@ namespace UIForia {
                 for (int i = 0; i < toInternalDestroy.Count; i++) {
                     view.ElementDestroyed(toInternalDestroy[i]);
                     toInternalDestroy[i].InternalDestroy();
-                    elementPool.Release(toInternalDestroy[i]);
                     elementMap.Remove(toInternalDestroy[i].id);
                 }
             }
@@ -873,11 +870,6 @@ namespace UIForia {
             LightStack<UIElement>.Release(ref stack);
         }
 
-        // might be the same as HydrateTemplate really but with templateId not hard coded
-        public UIElement CreateSlot(int templateId, UIElement root, UIElement parent, TemplateScope scope) {
-            throw new NotImplementedException("Deprecate");
-        }
-
         public UIElement CreateSlot2(string slotName, TemplateScope scope, int defaultSlotId, UIElement root, UIElement parent) {
             int slotId = ResolveSlotId(slotName, scope.slotInputs, defaultSlotId, out UIElement contextRoot);
             if (contextRoot == null) {
@@ -886,7 +878,6 @@ namespace UIForia {
             }
 
             UIElement retn = templateData.slots[slotId](contextRoot, parent, scope);
-            // retn.bindingNode = new LinqBindingNode();
             retn.View = parent.View;
             return retn;
         }
@@ -899,6 +890,10 @@ namespace UIForia {
         public UIElement CreateElementFromPool(int typeId, UIElement parent, int childCount, int attributeCount, int originTemplateId) {
             // children get assigned in the template function but we need to setup the list here
             UIElement retn = templateData.ConstructElement(typeId);
+            retn.application = this;
+            
+            //retn.View = application.activeView;
+            
             retn.templateMetaData = templateData.templateMetaData[originTemplateId];
             retn.id = NextElementId;
             retn.style = new UIStyleSet(retn);
@@ -915,7 +910,7 @@ namespace UIForia {
             }
 
             retn.parent = parent;
-            retn.View = parent?.View;
+            
             return retn;
         }
 

@@ -113,7 +113,7 @@ namespace Src.Systems {
         public void GatherBoxDataParallel() {
             UIElement root = view.dummyRoot;
 
-            int frameId = root.Application.frameId;
+            int frameId = root.application.frameId;
 
             int idx = 0;
 

@@ -86,7 +86,7 @@ namespace UIForia.Systems {
         }
 
         public void RunLayout() {
-            frameId = rootElement.Application.frameId;
+            frameId = rootElement.application.frameId;
 
             if (rootElement.isDisabled) {
                 return;

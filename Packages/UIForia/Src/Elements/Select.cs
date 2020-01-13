@@ -147,7 +147,7 @@ namespace UIForia.Elements {
             childrenElement = FindById<UIChildrenElement>("option-children");
             optionList = FindById<UIElement>("option-list");
 
-            Application.InputSystem.RegisterFocusable(this);
+            application.InputSystem.RegisterFocusable(this);
 //
 //            UIElement potentialClippingParent = parent;
 //            while (clippingElement == null) {
@@ -210,6 +210,12 @@ namespace UIForia.Elements {
             onIndexChanged?.Invoke(selectedIndex);
         }
 
+        // [UInject]
+        // private IFocusManager focusManager;
+        
+        // [UIForia.Inject]
+        // private IFocusManager focusManager;
+        
         [OnKeyDownWithFocus()]
         public void OnKeyDownNavigate(KeyboardInputEvent evt) {
 
@@ -358,11 +364,11 @@ namespace UIForia.Elements {
             }
 
             if (selecting) {
-                Application.InputSystem.ReleaseFocus(this);
+                application.InputSystem.ReleaseFocus(this);
                 selecting = false;
             }
             else {
-                Application.InputSystem.RequestFocus(this);
+                application.InputSystem.RequestFocus(this);
                 selecting = true;
             }
 
@@ -422,7 +428,7 @@ namespace UIForia.Elements {
         }
 
         private void OnClear() {
-            Application.DestroyChildren(childrenElement);
+            application.DestroyChildren(childrenElement);
         }
 
         private void OnRemove(ISelectOption<T> selectOption, int index) {

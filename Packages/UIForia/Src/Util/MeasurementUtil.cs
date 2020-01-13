@@ -163,7 +163,7 @@ namespace UIForia.Util {
                     return viewportWidth;
 
                 case AlignmentTarget.Screen:
-                    return layoutResult.element.Application.Width;
+                    return layoutResult.element.application.Width;
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(target), target, null);
@@ -202,7 +202,7 @@ namespace UIForia.Util {
                     return viewportHeight;
 
                 case AlignmentTarget.Screen:
-                    return result.element.Application.Height;
+                    return result.element.application.Height;
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(target), target, null);

@@ -16,7 +16,7 @@ namespace Documentation.Features {
             Vector2 position = layoutResult.screenPosition;
             
             windowCount++;
-            UIView view = Application.CreateView<KlangWindow>("Window " + windowCount, new Size(Application.Width, Application.Height));
+            UIView view = application.CreateView<KlangWindow>("Window " + windowCount, new Size(application.Width, application.Height));
             view.focusOnMouseDown = true;
 
             ((KlangWindow) view.RootElement.GetChild(0)).onClose += () => {

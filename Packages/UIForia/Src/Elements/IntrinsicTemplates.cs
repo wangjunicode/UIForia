@@ -74,7 +74,7 @@ namespace UIForia.Elements {
         public void OnClick() {
             UIElement forEl = parent.FindById(forElement);
             if (forEl is IFocusable focusable) {
-                Application.InputSystem.RequestFocus(focusable);
+                application.InputSystem.RequestFocus(focusable);
             }
         }
 

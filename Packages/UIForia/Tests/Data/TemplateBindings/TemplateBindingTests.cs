@@ -9,7 +9,6 @@ using UIForia.Attributes;
 using UIForia.Compilers;
 using UIForia.Compilers.Style;
 using UIForia.Elements;
-using UIForia.Rendering;
 using UIForia.UIInput;
 using UnityEngine;
 
@@ -17,8 +16,8 @@ namespace TemplateBinding {
 
     public class TemplateBindingTests {
 
-        private bool usePreCompiledTemplates = true;
-        private bool generateCode = true;
+        private bool usePreCompiledTemplates = false;
+        private bool generateCode = false;
 
         public MockApplication Setup<T>(string appName = null) {
             if (appName == null) {
@@ -225,13 +224,13 @@ namespace TemplateBinding {
             MockApplication app = Setup<TemplateBindingTest_MouseBindingBinding>();
             TemplateBindingTest_MouseBindingBinding e = (TemplateBindingTest_MouseBindingBinding) app.RootElement;
 
-          //  throw new NotImplementedException("Keyboard input needs a re-write");
+          throw new NotImplementedException("Keyboard input needs a re-write");
             // app.Update();
-            //
-            // app.InputSystem.MouseDown(new Vector2(50, 50));
-            //
+
+            // app.InputSystem.SetKeyDown('a');
+            
             // app.Update();
-            //
+            
             // Assert.AreEqual("No Params Was Called", e.output_NoParams);
             //
             // app.Update();

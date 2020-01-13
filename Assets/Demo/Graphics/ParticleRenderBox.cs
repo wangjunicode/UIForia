@@ -42,7 +42,7 @@ namespace Demo.Graphics {
                 data.system.Simulate(Time.unscaledDeltaTime, false, false, true);
                 data.renderer.BakeMesh(data.mesh);
                 // Matrix4x4 mat = element.layoutResult.matrix.ToMatrix4x4();
-                Vector2 mouse = element.Application.InputSystem.MousePosition;
+                Vector2 mouse = element.application.InputSystem.MousePosition;
                 Matrix4x4 mat = Matrix4x4.Translate(new Vector3(mouse.x, -mouse.y, -50));
                 ctx.DrawMesh(data.mesh, data.renderer.material, mat);
             }

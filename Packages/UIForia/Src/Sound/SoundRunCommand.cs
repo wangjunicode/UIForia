@@ -15,16 +15,16 @@ namespace UIForia.Sound {
         public void Run(UIElement element) {
             switch (RunAction) {
                 case RunAction.Run:
-                    element.Application.SoundSystem.PlaySound(element, soundData);
+                    element.application.SoundSystem.PlaySound(element, soundData);
                     break;
                 case RunAction.Pause:
-                    element.Application.SoundSystem.PauseSound(element, soundData);
+                    element.application.SoundSystem.PauseSound(element, soundData);
                     break;
                 case RunAction.Resume:
-                    element.Application.SoundSystem.SoundResumed(element, soundData);
+                    element.application.SoundSystem.SoundResumed(element, soundData);
                     break;
                 case RunAction.Stop:
-                    element.Application.SoundSystem.StopSound(element, soundData);
+                    element.application.SoundSystem.StopSound(element, soundData);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

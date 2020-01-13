@@ -10,8 +10,8 @@ namespace Documentation.Features {
         public UISoundData currentSound;
         
         public override void OnCreate() {
-            Application.SoundSystem.onSoundPlayed += evt => { currentSound = evt.SoundData; };
-            Application.SoundSystem.onSoundStopped += evt => { currentSound = default; };
+            application.SoundSystem.onSoundPlayed += evt => { currentSound = evt.SoundData; };
+            application.SoundSystem.onSoundStopped += evt => { currentSound = default; };
         }
     }
 }

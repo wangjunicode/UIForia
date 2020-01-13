@@ -85,8 +85,8 @@ namespace UIForia.Elements {
         internal UIElementFlags flags;
         internal UIElement parent;
 
+        // todo -- maybe move a lot of this data to an internal representation of UIElement
         public LayoutResult layoutResult;
-
         internal AwesomeLayoutBox layoutBox;
         internal RenderBox renderBox;
         public UIStyleSet style; // todo -- make internal with accessor
@@ -94,27 +94,16 @@ namespace UIForia.Elements {
 
         internal int enableStateChangedFrameId;
         public StructList<ElementAttribute> attributes;
+        public TemplateMetaData templateMetaData; // todo - internal / private / whatever
 
         public UIView View { get; internal set; }
-
-//        protected internal UIElement() {
-//            this.id = Application.NextElementId;
-//            this.style = new UIStyleSet(this);
-//            this.layoutResult = new LayoutResult(this);
-//            this.flags = UIElementFlags.Enabled | UIElementFlags.Alive | UIElementFlags.DefaultLayoutDirty;
-//            this.children = LightList<UIElement>.Get();
-//        }
+        public Application application { get; internal set; }
+        public int depth { get; internal set; }
+        public int siblingIndex { get; internal set; }
+        
 //        
         // not actually used since we get elements from the pool as uninitialized
         protected internal UIElement() { }
-
-        public Application Application => View.application;
-
-
-        public int depth { get; internal set; }
-        public int siblingIndex { get; internal set; }
-
-        public TemplateMetaData templateMetaData; // todo - internal / private / whatever
 
         public IInputProvider Input => View.application.InputSystem; // todo -- remove
 
@@ -183,7 +172,7 @@ namespace UIForia.Elements {
                 children.Add(element);
             }
             else {
-                Application.InsertChild(this, element, (uint) children.Count);
+                application.InsertChild(this, element, (uint) children.Count);
             }
 
             return element;
@@ -346,14 +335,14 @@ namespace UIForia.Elements {
                     else {
                         string oldValue = attrs[i].value;
                         attrs[i] = new ElementAttribute(name, value);
-                        Application.OnAttributeSet(this, name, value, oldValue);
+                        application.OnAttributeSet(this, name, value, oldValue);
                         return;
                     }
                 }
             }
 
             attributes.Add(new ElementAttribute(name, value));
-            Application.OnAttributeSet(this, name, value, null);
+            application.OnAttributeSet(this, name, value, null);
         }
 
         public bool TryGetAttribute(string key, out string value) {
@@ -437,23 +426,7 @@ namespace UIForia.Elements {
 
             return false;
         }
-
-        internal UIElementTypeData GetTypeData() {
-            UIElementTypeData typeData = default;
-            Type elementType = GetType();
-            if (s_TypeDataMap.TryGetValue(elementType, out typeData)) {
-                return typeData;
-            }
-            else {
-                typeData.requiresUpdate = ReflectionUtil.IsOverride(elementType.GetMethod(nameof(OnUpdate)));
-                //typeData.attributes = elementType.GetCustomAttributes();
-                s_TypeDataMap[elementType] = typeData;
-                return typeData;
-            }
-        }
-
-        private static readonly Dictionary<Type, UIElementTypeData> s_TypeDataMap = new Dictionary<Type, UIElementTypeData>();
-
+        
         public UIElement this[int i] {
             get { return GetChild(i); }
         }
@@ -462,13 +435,13 @@ namespace UIForia.Elements {
             get { return FindById(id); }
         }
 
-        internal struct UIElementTypeData {
+        public ElementAnimator Animator => new ElementAnimator(application.m_AnimationSystem, this);
+        
+        public IInputSystem InputSystem => application.m_InputSystem;
 
-            public bool requiresUpdate;
-            // public Attribute[] attributes;
+        // element.animator.Stop();
 
-        }
-
+        
     }
 
 }

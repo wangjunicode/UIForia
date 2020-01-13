@@ -67,6 +67,7 @@ public class UIView {
         this.Viewport = new Rect(0, 0, size.width, size.height);
         this.visibleElements = new LightList<UIElement>(32);
         this.dummyRoot = new UIViewRootElement();
+        this.dummyRoot.application = application;
         this.dummyRoot.flags |= UIElementFlags.EnabledFlagSet;
         this.dummyRoot.style = new UIStyleSet(dummyRoot);
         this.dummyRoot.layoutResult = new LayoutResult(dummyRoot);
@@ -75,44 +76,6 @@ public class UIView {
         this.dummyRoot.AddChild(element);
         this.sizeChanged = true;
     }
-    
-//    internal UIView(int id, string name, Application app, Rect viewportRect, int depth, Type elementType, string template = null) {
-//        this.id = id;
-//        this.name = name;
-//        this.application = app;
-//        this.Viewport = viewportRect;
-//        this.Depth = depth;
-//        this.m_Template = template;
-//        this.m_ElementType = elementType;
-//        this.position = viewportRect.position;
-//        this.visibleElements = new LightList<UIElement>(32);
-//        this.dummyRoot = new UIViewRootElement();
-//        this.dummyRoot.flags |= UIElementFlags.Enabled;
-//        this.dummyRoot.flags |= UIElementFlags.AncestorEnabled;
-//        this.dummyRoot.View = this;
-//        this.sizeChanged = true;
-//    }
-
-//    internal UIView(Application application) {
-//        this.id = 0;
-//        this.name = "Default";
-//        this.application = application;
-//        this.visibleElements = new LightList<UIElement>(32);
-//        this.dummyRoot = (UIViewRootElement) application.CreateElementFromPoolWithType(typeof(UIViewRootElement), null, 0, 0, 0);
-//        this.dummyRoot.flags |= UIElementFlags.Enabled;
-//        this.dummyRoot.flags |= UIElementFlags.AncestorEnabled;
-//        this.dummyRoot.View = this;
-//        this.sizeChanged = true;
-//    }
-//
-//    public UIElement AddChild(UIElement element) {
-//        application.InsertChild(dummyRoot, element, (uint) dummyRoot.children.Count);
-//        return element;
-//    }
-//
-//    public int GetElementCount() {
-//        return elementCount;
-//    }
 
     public void Destroy() {
         application.RemoveView(this);

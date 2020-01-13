@@ -20,7 +20,7 @@ namespace UIForia.Animation {
                 throw new RuntimeException($"SpriteSheetAnimations must define a startFrame. File: {animationData.fileName}>{animationData.name}");
             }
             for (int i = animationData.options.startFrame.Value; i <= animationData.options.endFrame; i++) {
-                frames.Add(target.Application.ResourceManager.GetTexture(animationData.options.pathPrefix + i));
+                frames.Add(target.application.ResourceManager.GetTexture(animationData.options.pathPrefix + i));
             }
         }
 

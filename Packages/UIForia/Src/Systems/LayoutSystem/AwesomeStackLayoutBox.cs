@@ -10,7 +10,7 @@ namespace UIForia.Systems {
     public class AwesomeStackLayoutBox : AwesomeLayoutBox {
 
         protected override float ComputeContentWidth() {
-            return GetIntrinsicPreferredWidth();
+            return GetIntrinsicPreferredWidth2();
         }
 
         protected override float ComputeContentHeight() {
@@ -27,16 +27,15 @@ namespace UIForia.Systems {
             return retn;
         }
 
-        public override float GetIntrinsicPreferredWidth() {
+        public float GetIntrinsicPreferredWidth2() {
             AwesomeLayoutBox ptr = firstChild;
             float retn = 0f;
             
             while (ptr != null) {
                 LayoutSize size = default;
                 ptr.GetWidths(ref size);
-                float width = ptr.GetIntrinsicPreferredWidth();
                 // todo clamp to min/max?
-                float clampedWidth = width + size.marginStart + size.marginEnd;
+                float clampedWidth = size.Clamped + size.marginStart + size.marginEnd;
                 if (clampedWidth > retn) retn = clampedWidth;
                 ptr = ptr.nextSibling;
             }

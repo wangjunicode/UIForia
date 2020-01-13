@@ -1,10 +1,6 @@
-using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 using System.Reflection;
 using SVGX;
-using UIForia.Animation;
 using UIForia.Elements;
 using UIForia.Layout;
 using UIForia.Rendering;
@@ -134,14 +130,6 @@ namespace UIForia.Editor {
                     IList<int> selectedIds = new List<int>(s_SelectedApplication.InputSystem.DebugElementsThisFrame.Count);
 
                     int selectIdx = 0;
-                    // todo -- removed depth traversal index, this need to be updated
-//                    for (int i = s_SelectedApplication.InputSystem.DebugElementsThisFrame.Count - 1; i >= 0; i--) {
-//                        if (s_SelectedApplication.InputSystem.DebugElementsThisFrame[i].depthTraversalIndex > maxT) {
-//                            maxT = s_SelectedApplication.InputSystem.DebugElementsThisFrame[i].depthTraversalIndex;
-//                            selectIdx = i;
-//                        }
-//                        selectedIds.Add(s_SelectedApplication.InputSystem.DebugElementsThisFrame[i].id);
-//                    }
 
                     s_SelectedElementId = s_SelectedApplication.InputSystem.DebugElementsThisFrame[selectIdx].id;
                     selectedIds.Add(s_SelectedElementId);
@@ -160,10 +148,8 @@ namespace UIForia.Editor {
             Application oldApp = Application.Find(inspectedAppId);
 
             if (oldApp != null) {
-               // oldApp.onElementCreated -= Refresh;
                 oldApp.onElementDestroyed -= Refresh;
                 oldApp.onViewAdded -= Refresh;
-             //   oldApp.onElementDisabled -= Refresh;
                 oldApp.onElementEnabled -= Refresh;
                 oldApp.onRefresh -= OnRefresh;
             }
@@ -181,10 +167,8 @@ namespace UIForia.Editor {
                 treeView = new HierarchyView(app.GetViews(), state);
                 treeView.onSelectionChanged += OnElementSelectionChanged;
 
-            //   app.onElementCreated += Refresh;
                 app.onElementDestroyed += Refresh;
                 app.onViewAdded += Refresh;
-             //   app.onElementDisabled += Refresh;
                 app.onElementEnabled += Refresh;
                 app.onRefresh += OnRefresh;
             }
@@ -322,15 +306,8 @@ namespace UIForia.Editor {
             var selectedElement = s_SelectedApplication.GetElement(s_SelectedElementId);
 
             if (selectedElement != null && selectedElement.isEnabled) {
-                // RenderData data = drawList.Find((d) => d.element == selectedElement);
-                //if (data == null) {
-                //    return;
-                //}
 
                 LayoutResult result = selectedElement.layoutResult;
-
-                //Vector3 renderPosition = data.renderPosition;
-                //renderPosition.z = 5;
 
                 OffsetRect padding = selectedElement.layoutResult.padding;
                 OffsetRect border = selectedElement.layoutResult.border;
@@ -339,12 +316,8 @@ namespace UIForia.Editor {
                 float width = result.actualSize.width;
                 float height = result.actualSize.height;
 
-                Size renderSize = new Size(width + margin.left + margin.right, height + margin.top + margin.bottom);
-
                 float x = result.screenPosition.x;
                 float y = result.screenPosition.y;
-
-                // ctx.DisableScissorRect();
 
                 // allocatedX and Y: still not correct but closer to reality, mostly
                 float allocatedX = result.ScreenRect.x;

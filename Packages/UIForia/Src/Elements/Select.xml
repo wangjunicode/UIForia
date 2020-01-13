@@ -14,13 +14,15 @@
             BorderColor = #B2B2B2;
             PaddingRight = 32px;
             PaddingLeft = 16px;
+            Overflow = Hidden;
             [hover] {
                 BorderColor = #00B5D9;
             }
             [attr:disabled] {
-                Opacity = 0.4;
+                BorderColor = rgba(178, 178, 178, 102);
+                TextColor = rgba(0, 0, 0, 102);
                 [hover] {
-                    BorderColor = #B2B2B2;
+                    BorderColor = rgba(178, 178, 178, 102);
                 }
             }
         }
@@ -117,6 +119,9 @@
         style select-display {
             TextColor = black;
             MarginRight = 16px;
+            [attr:disabled] {
+                TextColor = rgba(0, 0, 0, 102);
+            }
         }
         
         style select-placeholder {
@@ -150,7 +155,7 @@
             <Div style="chevron-down"/>
         </Group>
 
-        <ScrollView onMouseClick="SelectElement($event)" style="select-options" x-id="option-list" scrollSpeed="10">
+        <ScrollView onMouseClick="SelectElement($event)" style="select-options" x-id="option-list" scrollSpeed="scrollSpeed" disableOverflowX="disableOverflowX" disableOverflowY="disableOverflowY">
             <Children x-id="option-children" style="transclude" x-type="template">
                 <Group style="select-option">
                     <Image src="selectedElementIcon" style="selected-element-icon" if="DisplaySelectedIcon($option__internal)" />

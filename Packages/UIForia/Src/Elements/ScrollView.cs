@@ -51,10 +51,10 @@ namespace UIForia.Elements {
             overflowSize = childrenElement.layoutResult.ComputeOverflowSize();
 
             if (previousChildrenSize != default && (int) previousChildrenSize.height > (int) overflowSize.height) {
-                ScrollToVerticalPercent(scrollPercentageY);
+                ScrollToVerticalPercent(0);
             }
             if (previousChildrenSize != default && (int) previousChildrenSize.width > (int) overflowSize.width) {
-                ScrollToHorizontalPercent(scrollPercentageX);
+                ScrollToHorizontalPercent(0);
             }
 
             previousChildrenSize = overflowSize;

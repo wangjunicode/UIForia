@@ -530,7 +530,7 @@ namespace UIForia.Systems {
 
         protected override float ResolveAutoWidth(AwesomeLayoutBox child, float factor) {
             if (direction == LayoutDirection.Vertical) {
-                return child.ComputeBlockContentWidth(factor);
+                return child.ComputeBlockContentAreaWidth(factor);
             }
 
             return child.GetContentWidth(factor);

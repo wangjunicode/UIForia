@@ -136,7 +136,7 @@ namespace UIForia {
             m_StyleSystem = new StyleSystem();
             m_BindingSystem = new BindingSystem();
             m_LayoutSystem = new AwesomeLayoutSystem(this);
-            m_InputSystem = new GameInputSystem(m_LayoutSystem);
+            m_InputSystem = new GameInputSystem(m_LayoutSystem, new KeyboardInputManager());
             m_RenderSystem = new VertigoRenderSystem(Camera.current, this);
             //       m_RenderSystem = new SVGXRenderSystem(this, null, m_LayoutSystem);
             m_RoutingSystem = new RoutingSystem();

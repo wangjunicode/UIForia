@@ -6,9 +6,8 @@ using UnityEngine;
 namespace Tests.Mocks {
 
     public class MockInputSystem : InputSystem {
-
-        public MockInputSystem(ILayoutSystem layoutSystem)
-            : base(layoutSystem) { }
+        
+        public MockInputSystem(ILayoutSystem layoutSystem) : base(layoutSystem, new MockKeyboardInputManager()) { }
 
         public void SetMouseState(MouseState mouseState) {
             m_MouseState = mouseState;
@@ -62,6 +61,23 @@ namespace Tests.Mocks {
 
         public void MouseMove(Vector2 position) {
             
+        }
+    }
+
+    public class MockKeyboardInputManager : KeyboardInputManager {
+
+        public KeyboardInputState inputState;
+
+        public MockKeyboardInputManager() {
+            inputState = new KeyboardInputState();
+        }
+
+        public void ResetInputState() {
+            inputState = new KeyboardInputState();
+        }
+
+        public override KeyboardInputState UpdateKeyboardInputState() {
+            return inputState;
         }
     }
 }

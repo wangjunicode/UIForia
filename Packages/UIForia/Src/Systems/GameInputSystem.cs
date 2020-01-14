@@ -4,7 +4,7 @@ namespace UIForia.Systems.Input {
 
     public class GameInputSystem : InputSystem {
 
-        public GameInputSystem(ILayoutSystem layoutSystem) : base(layoutSystem) { }
+        public GameInputSystem(ILayoutSystem layoutSystem, KeyboardInputManager keyboardInputManager) : base(layoutSystem, keyboardInputManager) { }
 
         private int clickCount;
         private float lastMouseDownTime;

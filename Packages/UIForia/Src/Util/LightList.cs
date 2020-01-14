@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using UIForia.Parsing;
 using UnityEngine;
 
 namespace UIForia.Util {
@@ -574,6 +575,12 @@ namespace UIForia.Util {
                 current = default(T);
             }
 
+        }
+
+        public LightList<T> Clone() {
+            T[] clone = new T[size];
+            System.Array.Copy(array, 0, clone, 0, size);
+            return new LightList<T>(clone);
         }
 
     }

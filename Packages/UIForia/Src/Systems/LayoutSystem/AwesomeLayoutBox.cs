@@ -405,7 +405,7 @@ namespace UIForia.Systems {
                 }
                 case UIMeasurementUnit.Percentage:
                 case UIMeasurementUnit.ParentContentArea: {
-                    return ComputeBlockContentWidth(measurement.value);
+                    return ComputeBlockContentAreaWidth(measurement.value);
                 }
             }
 
@@ -444,7 +444,7 @@ namespace UIForia.Systems {
             return retn > 0 ? retn : 0;
         }
 
-        public float ComputeBlockContentWidth(float value) {
+        public float ComputeBlockContentAreaWidth(float value) {
             AwesomeLayoutBox ptr = parent;
             float paddingBorder = 0;
 

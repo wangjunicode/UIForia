@@ -40,11 +40,11 @@ namespace UIForia.Elements {
                     return;
                 }
 
-                UIElement child = View.application.CreateElement(data.ElementType);
-                if (child != null) {
-                    ((IDynamicElement)child).SetData(data);
-                    AddChild(child);
-                }
+                // UIElement child = View.application.CreateElement(data.ElementType);
+                // if (child != null) {
+                //     ((IDynamicElement)child).SetData(data);
+                //     AddChild(child);
+                // }
             }
 
 

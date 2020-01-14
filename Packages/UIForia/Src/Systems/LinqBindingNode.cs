@@ -21,6 +21,12 @@ namespace UIForia.Systems {
             this.id = id;
             this.name = name;
         }
+        
+        public ContextVariable(int id, string name, T value) {
+            this.id = id;
+            this.name = name;
+            this.value = value;
+        }
 
     }
 
@@ -37,7 +43,7 @@ namespace UIForia.Systems {
         internal UIElement root;
         internal UIElement element;
         internal int lastTickedFrame;
-
+        
         internal Action<UIElement, UIElement> createdBinding;
         internal Action<UIElement, UIElement> enabledBinding;
         internal Action<UIElement, UIElement> updateBindings;
@@ -45,6 +51,8 @@ namespace UIForia.Systems {
         internal ContextVariable localVariable;
         internal ContextVariableReference resolvedVariable;
         internal LinqBindingNode parent;
+        protected ContextVariable repeatVar;
+
 
         public void CreateLocalContextVariable(ContextVariable variable) {
             if (localVariable == null) {
@@ -139,6 +147,39 @@ namespace UIForia.Systems {
             }
 
             return node;
+        }
+
+        public void SetRepeatItem<T>(int itemIndex, string name, T t) {
+            if (repeatVar == null) {
+                repeatVar = new ContextVariable<T>(itemIndex, name, t);
+            }
+            else {
+                ContextVariable<T> castVar = (ContextVariable<T>) repeatVar;
+                castVar.value = t;
+            }
+        }
+
+        public ContextVariable<T> GetRepeatItem<T>(int id) {
+            return (ContextVariable<T>)GetContextVariable(8);
+        }
+        
+        public ContextVariable GetRepeatVariable<T>(int id, string name) {
+
+            LinqBindingNode ptr = parent;
+            
+            // todo -- only search in template id?
+            
+            while (ptr != null) {
+                if (ptr.repeatVar != null) {
+                    if (ptr.repeatVar.id == id) {
+                        return ptr.repeatVar;
+                    }
+                }
+                ptr = ptr.parent;
+            }
+
+            return null;
+
         }
 
     }

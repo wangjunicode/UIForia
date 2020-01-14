@@ -3,12 +3,12 @@ using UIForia.Util;
 
 namespace UIForia.Parsing {
 
-    public class TextNode : TemplateNode2 {
+    public class TextNode : TemplateNode {
 
         public readonly string rawTextContent;
         public readonly StructList<TextExpression> textExpressionList;
 
-        public TextNode(ElementTemplateNode root, TemplateNode2 parent, string content, ProcessedType processedType, StructList<AttributeDefinition2> attributes, in TemplateLineInfo templateLineInfo)
+        public TextNode(ElementTemplateNode root, TemplateNode parent, string content, ProcessedType processedType, StructList<AttributeDefinition2> attributes, in TemplateLineInfo templateLineInfo)
             : base(root, parent, processedType, attributes, templateLineInfo) {
             this.textExpressionList = new StructList<TextExpression>(3);
             this.rawTextContent = content;

@@ -1,0 +1,39 @@
+<UITemplate>
+
+    <Contents id="repeat_count">
+
+        <Repeat count="count">
+            repeat me {$index}
+        </Repeat>
+
+    </Contents>
+
+    <Contents id="repeat_list">
+
+        <Repeat list="data">
+            repeat me {$item}
+        </Repeat>
+
+    </Contents>
+
+</UITemplate>
+
+        <!--  <RepeatRange list="options" start="0" end="10" keyFn="(i) => i.val">-->
+
+        <!--        </RepeatRange>-->
+
+        <!--        <RepeatPaged list="data" currentPage="" pageSize="10">-->
+
+        <!--            <Div mix="AddHandler, RemoveHandler">-->
+
+        <!--            </Div>-->
+
+        <!--        </RepeatPaged>-->
+
+        <!--        <RepeatCount count="options.Count">-->
+        <!--            <Children alias:item="option"/>-->
+        <!--        </RepeatCount>-->
+
+        <!--        <Repeat>-->
+
+        <!--        </Repeat>-->

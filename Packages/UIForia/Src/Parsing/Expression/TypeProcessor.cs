@@ -80,6 +80,19 @@ namespace UIForia.Parsing {
                                 ProcessedType processedType = new ProcessedType(currentType, templateAttr, tagName);
                                 processedType.IsUnresolvedGeneric = true;
                                 s_GenericMap.Add(tagName, processedType);
+                                typeMap[currentType] = processedType;
+
+                                if (!s_NamespaceMap.TryGetValue(currentType.Namespace ?? "null", out LightList<Assembly> namespaceList)) {
+                                    namespaceList = new LightList<Assembly>(2);
+                                    s_NamespaceMap.Add(currentType.Namespace ?? "null", namespaceList);
+                                }
+
+
+                                if (!namespaceList.Contains(assembly)) {
+                                    namespaceList.Add(assembly);
+                                }
+
+                                continue;
                             }
                         }
 
@@ -366,6 +379,7 @@ namespace UIForia.Parsing {
             if (retn != null) {
                 retn.references++;
             }
+
             return retn;
         }
 
@@ -463,7 +477,7 @@ namespace UIForia.Parsing {
             if (retn != null) {
                 retn.references++;
             }
-            
+
             return retn;
         }
 

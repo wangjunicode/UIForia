@@ -60,7 +60,7 @@ namespace UIForia {
             return compiledSlot;
         }
         
-        public CompiledBinding AddBinding(TemplateNode2 templateNode, CompiledBindingType bindingType) {
+        public CompiledBinding AddBinding(TemplateNode templateNode, CompiledBindingType bindingType) {
             CompiledBinding binding = new CompiledBinding();
             binding.filePath = templateNode.elementRoot.templateShell.filePath;
             binding.bindingType = bindingType;

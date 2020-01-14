@@ -275,7 +275,7 @@ namespace UIForia.Systems {
                     return ComputeBlockWidth(cellSize.value);
 
                 case GridTemplateUnit.ParentContentArea:
-                    return ComputeBlockContentWidth(cellSize.value);
+                    return ComputeBlockContentAreaWidth(cellSize.value);
 
                 case GridTemplateUnit.Em:
                     return element.style.GetResolvedFontSize() * cellSize.value;
@@ -293,7 +293,7 @@ namespace UIForia.Systems {
                         return w * cellSize.value;
                     }
                     else {
-                        return ComputeBlockContentWidth(cellSize.value);
+                        return ComputeBlockContentAreaWidth(cellSize.value);
                     }
                 }
                 case GridTemplateUnit.MinContent:

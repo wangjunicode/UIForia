@@ -96,6 +96,7 @@ namespace UIForia.Compilers {
         private static readonly MethodInfo s_LinqBindingNode_CreateLocalContextVariable = typeof(LinqBindingNode).GetMethod(nameof(LinqBindingNode.CreateLocalContextVariable));
         private static readonly MethodInfo s_LinqBindingNode_GetLocalContextVariable = typeof(LinqBindingNode).GetMethod(nameof(LinqBindingNode.GetLocalContextVariable));
         private static readonly MethodInfo s_LinqBindingNode_GetContextVariable = typeof(LinqBindingNode).GetMethod(nameof(LinqBindingNode.GetContextVariable));
+        private static readonly MethodInfo s_LinqBindingNode_GetRepeatItem = typeof(LinqBindingNode).GetMethod(nameof(LinqBindingNode.GetRepeatItem));
 
         private static readonly MethodInfo s_EventUtil_Subscribe = typeof(EventUtil).GetMethod(nameof(EventUtil.Subscribe));
 
@@ -258,7 +259,7 @@ namespace UIForia.Compilers {
             return retn;
         }
 
-        private void VisitChildren(CompilationContext ctx, TemplateNode2 templateNode) {
+        private void VisitChildren(CompilationContext ctx, TemplateNode templateNode) {
             if (templateNode.ChildCount == 0) {
                 return;
             }
@@ -282,14 +283,16 @@ namespace UIForia.Compilers {
             ctx.PopScope();
         }
 
-        private Expression Visit(CompilationContext ctx, TemplateNode2 templateNode) {
+        private Expression Visit(CompilationContext ctx, TemplateNode templateNode) {
+            if (templateNode is RepeatNode repeatNode) {
+                return CompileRepeatNode(ctx, repeatNode);
+            }
+
             if (templateNode.processedType.IsUnresolvedGeneric) {
                 templateNode.processedType = ResolveGenericElementType(templateNode);
             }
 
-            ProcessedType processedType = templateNode.processedType;
-            ctx.elementType = processedType; // replace w/ stack push of (processedType, variableExpression)?
-            // ctx.CommentNewLineBefore(templateNode.originalString ?? "");
+            ctx.elementType = templateNode.processedType;
 
             switch (templateNode) {
                 case TextNode textNode:
@@ -309,6 +312,110 @@ namespace UIForia.Compilers {
             }
 
             return null;
+        }
+
+        public static readonly string[] repeatPropertyValues = {"list", "start", "end", "count", "page", "pageSize"};
+
+        private Expression CompileRepeatNode(CompilationContext ctx, RepeatNode repeatNode) {
+            if (repeatNode.HasProperty("count")) {
+                if (repeatNode.HasProperty("list") || repeatNode.HasProperty("start") || repeatNode.HasProperty("end") || repeatNode.HasProperty("page") || repeatNode.HasProperty("pageSize")) {
+                    throw CompileException.UnresolvedRepeatType("count", "list", "start", "page", "pageSize");
+                }
+
+                return CompileRepeatCount(ctx, repeatNode);
+            }
+            else if (repeatNode.HasProperty("list")) {
+                if (repeatNode.HasProperty("count") || repeatNode.HasProperty("start") || repeatNode.HasProperty("end") || repeatNode.HasProperty("page") || repeatNode.HasProperty("pageSize")) {
+                    throw CompileException.UnresolvedRepeatType("count", "start", "end", "page", "pageSize");
+                }
+
+                return CompileRepeatList(ctx, repeatNode);
+            }
+            else if (repeatNode.HasProperty("page") || repeatNode.HasProperty("pageSize")) { }
+
+            throw new NotImplementedException();
+        }
+
+        private Expression CompileRepeatCount(CompilationContext ctx, RepeatNode repeatNode) {
+            ParameterExpression nodeExpr = ctx.ElementExpr;
+
+            repeatNode.processedType = TypeProcessor.GetProcessedType(typeof(UIRepeatCountElement));
+
+            ctx.Comment("new " + TypeNameGenerator.GetTypeName(typeof(UIRepeatCountElement)));
+            ctx.Assign(nodeExpr, ExpressionFactory.CallInstanceUnchecked(ctx.applicationExpr, s_CreateFromPool,
+                Expression.Constant(repeatNode.processedType.id),
+                ctx.ParentExpr,
+                Expression.Constant(0),
+                Expression.Constant(repeatNode.GetAttributeCount()),
+                Expression.Constant(ctx.compiledTemplate.templateId)
+            ));
+
+            MemberExpression templateSpawnIdField = Expression.Field(ExpressionFactory.Convert(nodeExpr, typeof(UIRepeatElement)), typeof(UIRepeatElement).GetField(nameof(UIRepeatElement.templateSpawnId)));
+            MemberExpression templateRootContext = Expression.Field(ExpressionFactory.Convert(nodeExpr, typeof(UIRepeatElement)), typeof(UIRepeatElement).GetField(nameof(UIRepeatElement.templateContextRoot)));
+            MemberExpression scopeVar = Expression.Field(ExpressionFactory.Convert(nodeExpr, typeof(UIRepeatElement)), typeof(UIRepeatElement).GetField(nameof(UIRepeatElement.scope)));
+            MemberExpression indexVarIdField = Expression.Field(ExpressionFactory.Convert(nodeExpr, typeof(UIRepeatElement)), typeof(UIRepeatElement).GetField(nameof(UIRepeatElement.indexVarId)));
+
+            CompileElementData(repeatNode, ctx);
+
+            int spawnId = CompileChildrenAsTemplate(ctx, repeatNode, out int indexVarId);
+
+            ctx.Assign(templateSpawnIdField, Expression.Constant(spawnId));
+            ctx.Assign(templateRootContext, ctx.rootParam);
+            ctx.Assign(scopeVar, ctx.templateScope);
+            ctx.Assign(indexVarIdField, Expression.Constant(indexVarId));
+
+            return nodeExpr;
+        }
+
+        private Expression CompileRepeatList(CompilationContext ctx, RepeatNode repeatNode) {
+            ParameterExpression nodeExpr = ctx.ElementExpr;
+
+            repeatNode.processedType = TypeProcessor.GetProcessedType(typeof(UIRepeatElement<>));
+            repeatNode.processedType = ResolveGenericElementType(repeatNode);
+
+            ctx.Comment("new " + TypeNameGenerator.GetTypeName(typeof(UIRepeatCountElement)));
+            ctx.Assign(nodeExpr, ExpressionFactory.CallInstanceUnchecked(ctx.applicationExpr, s_CreateFromPool,
+                Expression.Constant(repeatNode.processedType.id),
+                ctx.ParentExpr,
+                Expression.Constant(0),
+                Expression.Constant(repeatNode.GetAttributeCount()),
+                Expression.Constant(ctx.compiledTemplate.templateId)
+            ));
+
+            MemberExpression templateSpawnIdField = Expression.Field(ExpressionFactory.Convert(nodeExpr, typeof(UIRepeatElement)), typeof(UIRepeatElement).GetField(nameof(UIRepeatElement.templateSpawnId)));
+            MemberExpression templateRootContext = Expression.Field(ExpressionFactory.Convert(nodeExpr, typeof(UIRepeatElement)), typeof(UIRepeatElement).GetField(nameof(UIRepeatElement.templateContextRoot)));
+            MemberExpression scopeVar = Expression.Field(ExpressionFactory.Convert(nodeExpr, typeof(UIRepeatElement)), typeof(UIRepeatElement).GetField(nameof(UIRepeatElement.scope)));
+            MemberExpression indexVarIdField = Expression.Field(ExpressionFactory.Convert(nodeExpr, typeof(UIRepeatElement)), typeof(UIRepeatElement).GetField(nameof(UIRepeatElement.indexVarId)));
+
+            int itemId = 8;
+            
+            Type itemType = repeatNode.processedType.rawType.GetGenericArguments()[0];
+            
+            CompileElementData(repeatNode, ctx);
+
+            resolvers.Push(new ContextVarAliasResolver("item", itemType, itemId, AliasResolverType.RepeatItem));
+
+            int spawnId = CompileChildrenAsTemplate(ctx, repeatNode, out int indexVarId);
+
+            PopAliasResolver();
+
+            ctx.Assign(templateSpawnIdField, Expression.Constant(spawnId));
+            ctx.Assign(templateRootContext, ctx.rootParam);
+            ctx.Assign(scopeVar, ctx.templateScope);
+            ctx.Assign(indexVarIdField, Expression.Constant(indexVarId));
+
+            return nodeExpr;
+        }
+
+        private int CompileChildrenAsTemplate(CompilationContext ctx, RepeatNode node, out int indexVarId) {
+            if (node.ChildCount == 1) {
+                return CompileRepeatTemplate(ctx, node, out indexVarId);
+            }
+            else {
+                // todo -- insert a dummy node to wrap the child
+                indexVarId = -1;
+                return -999999;
+            }
         }
 
         private Expression CompileTerminalNode(CompilationContext ctx, TerminalNode terminalNode) {
@@ -369,7 +476,43 @@ namespace UIForia.Compilers {
             return nodeExpr;
         }
 
-        private int CompileSlotOverride(CompilationContext parentContext, SlotNode slotOverrideNode) {
+        private int CompileRepeatTemplate(CompilationContext parentContext, RepeatNode repeatNode, out int indexVarId) {
+            TemplateNode templateNode = repeatNode.children[0];
+
+            CompiledSlot compiledSlot = templateData.CreateSlot(parentContext.compiledTemplate.filePath, parentContext.compiledTemplate.templateName, "__template__", SlotType.Template);
+
+            ParameterExpression rootParam = Expression.Parameter(typeof(UIElement), "root");
+            ParameterExpression parentParam = Expression.Parameter(typeof(UIElement), "parent");
+            ParameterExpression scopeParam = Expression.Parameter(typeof(TemplateScope), "scope");
+
+            CompilationContext ctx = new CompilationContext(parentContext.templateRootNode);
+
+            indexVarId = NextContextId;
+
+            PushContextVarAliasResolver(indexVarId, "index", typeof(int));
+            resolvers.Push(new ContextVarAliasResolver("item", repeatNode.processedType.rawType.GetGenericArguments()[0], 8, AliasResolverType.RepeatItem));
+
+            ctx.rootType = parentContext.rootType;
+            ctx.rootParam = rootParam;
+            ctx.templateScope = scopeParam;
+            ctx.elementType = templateNode.processedType;
+            ctx.applicationExpr = Expression.Field(scopeParam, s_TemplateScope_ApplicationField);
+            ctx.compiledTemplate = parentContext.compiledTemplate;
+            ctx.ContextExpr = rootParam;
+            ctx.Initialize(parentParam);
+
+            ctx.PushScope();
+
+            ctx.Return(Visit(ctx, templateNode));
+
+            compiledSlot.templateFn = Expression.Lambda(ctx.Finalize(typeof(UIElement)), rootParam, parentParam, scopeParam);
+
+            return compiledSlot.slotId;
+        }
+
+        private int CompileSlotOverride(CompilationContext parentContext, SlotNode slotOverrideNode, Type type = null) {
+            if (type == null) type = typeof(UISlotOverride);
+
             CompiledSlot compiledSlot = templateData.CreateSlot(parentContext.compiledTemplate.filePath, parentContext.compiledTemplate.templateName, slotOverrideNode.slotName, SlotType.Override);
             slotOverrideNode.compiledSlotId = compiledSlot.slotId;
 
@@ -379,7 +522,7 @@ namespace UIForia.Compilers {
 
             CompilationContext ctx = new CompilationContext(parentContext.templateRootNode);
 
-            ParameterExpression slotRootParam = ctx.GetVariable(typeof(UISlotOverride), "slotRoot");
+            ParameterExpression slotRootParam = ctx.GetVariable(type, "slotRoot");
             ctx.rootType = parentContext.rootType;
             ctx.rootParam = slotRootParam;
             ctx.templateScope = scopeParam;
@@ -390,14 +533,14 @@ namespace UIForia.Compilers {
             ctx.Initialize(slotRootParam);
 
             Expression createRootExpression = Expression.Call(ctx.applicationExpr, s_CreateFromPool,
-                Expression.Constant(TypeProcessor.GetProcessedType(typeof(UISlotOverride)).id),
+                Expression.Constant(TypeProcessor.GetProcessedType(type).id),
                 parentParam,
                 Expression.Constant(slotOverrideNode.ChildCount),
                 Expression.Constant(slotOverrideNode.GetAttributeCount()),
                 Expression.Constant(parentContext.compiledTemplate.templateId)
             );
 
-            ctx.Assign(slotRootParam, Expression.Convert(createRootExpression, typeof(UISlotOverride)));
+            ctx.Assign(slotRootParam, Expression.Convert(createRootExpression, type));
 
             VisitChildren(ctx, slotOverrideNode);
 
@@ -576,7 +719,7 @@ namespace UIForia.Compilers {
             resolvers.array[2] = new ContextVarAliasResolver("$root", elementType, -3, AliasResolverType.Root);
         }
 
-        private static void OutputAttributes(CompilationContext ctx, TemplateNode2 template) {
+        private static void OutputAttributes(CompilationContext ctx, TemplateNode template) {
             if (template.GetAttributeCount() > 0) {
                 int attrIdx = 0;
 
@@ -600,7 +743,7 @@ namespace UIForia.Compilers {
             }
         }
 
-        private void CompileElementData(TemplateNode2 templateNode, CompilationContext ctx) {
+        private void CompileElementData(TemplateNode templateNode, CompilationContext ctx) {
             int count = 0;
 
             if (templateNode.attributes != null) {
@@ -954,7 +1097,7 @@ namespace UIForia.Compilers {
         }
 
 
-        private int CompileTextBinding(TemplateNode2 templateNode, int bindingCount) {
+        private int CompileTextBinding(TemplateNode templateNode, int bindingCount) {
             if (!(templateNode is TextNode textNode)) {
                 return bindingCount;
             }
@@ -967,7 +1110,7 @@ namespace UIForia.Compilers {
                 StructList<TextExpression> expressionParts = textNode.textExpressionList;
 
                 MemberExpression textValueExpr = Expression.Field(updateCompiler.GetVariable(k_CastElement), s_TextElement_Text);
-                
+
                 for (int i = 0; i < expressionParts.size; i++) {
                     if (expressionParts[i].isExpression) {
                         Expression val = updateCompiler.Value(expressionParts[i].text);
@@ -1352,7 +1495,7 @@ namespace UIForia.Compilers {
             closure.Release();
         }
 
-        private static void CompileConditionalBinding(LinqCompiler compiler, TemplateNode2 templateNode, in AttributeDefinition2 attr) {
+        private static void CompileConditionalBinding(LinqCompiler compiler, TemplateNode templateNode, in AttributeDefinition2 attr) {
             // cannot have more than 1 conditional    
             try {
                 ParameterExpression castElement = compiler.GetVariable(k_CastElement);
@@ -1380,7 +1523,7 @@ namespace UIForia.Compilers {
             compiler.EndIsolatedSection();
         }
 
-        private static void CompileAttributeBinding(LinqCompiler compiler, TemplateNode2 templateNode, in AttributeDefinition2 attr) {
+        private static void CompileAttributeBinding(LinqCompiler compiler, TemplateNode templateNode, in AttributeDefinition2 attr) {
             // __castElement.SetAttribute("attribute-name", computedValue);
             compiler.CommentNewLineBefore($"{attr.key}=\"{attr.value}\"");
             if ((attr.flags & AttributeFlags.RootContext) != 0) {
@@ -1418,7 +1561,7 @@ namespace UIForia.Compilers {
             }
         }
 
-        private static void CompileStyleBinding(LinqCompiler compiler, TemplateNode2 templateNode, in AttributeDefinition2 attributeDefinition) {
+        private static void CompileStyleBinding(LinqCompiler compiler, TemplateNode templateNode, in AttributeDefinition2 attributeDefinition) {
             ParameterExpression castElement = compiler.GetVariable(k_CastElement);
             ParameterExpression castRoot = compiler.GetVariable(k_CastRoot);
 
@@ -1474,7 +1617,7 @@ namespace UIForia.Compilers {
             compiler.EndIsolatedSection();
         }
 
-        private static void CompilePropertyBinding(LinqCompiler compiler, TemplateNode2 templateNode, in AttributeDefinition2 attributeDefinition) {
+        private static void CompilePropertyBinding(LinqCompiler compiler, TemplateNode templateNode, in AttributeDefinition2 attributeDefinition) {
             LHSStatementChain left = null;
             Expression right = null;
             ParameterExpression castElement = compiler.GetVariable(k_CastElement);
@@ -1514,10 +1657,24 @@ namespace UIForia.Compilers {
             // if there is a change handler or the member is a property we need to check for changes
             // otherwise field values can be assigned w/o checking
             if (changeHandlers.size > 0 || isProperty) {
+                ParameterExpression old = compiler.AddVariable(left.targetExpression.Type, "__oldVal");
+                compiler.RawExpression(Expression.Assign(old, left.targetExpression));
                 compiler.IfNotEqual(left, right, () => {
                     compiler.Assign(left, right);
                     for (int j = 0; j < changeHandlers.size; j++) {
-                        compiler.Statement($"{k_CastElement}.{changeHandlers[j].methodInfo.Name}()");
+                        MethodInfo methodInfo = changeHandlers.array[j].methodInfo;
+                        ParameterInfo[] parameters = methodInfo.GetParameters();
+
+                        if (parameters.Length == 0) {
+                            compiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(castElement, methodInfo));
+                            continue;
+                        }
+                        else if (parameters.Length == 1 && parameters[0].ParameterType == right.Type) {
+                            compiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(castElement, methodInfo, old));
+                            continue;
+                        }
+
+                        throw CompileException.UnresolvedPropertyChangeHandler(methodInfo.Name, right.Type);
                     }
                 });
             }
@@ -1530,6 +1687,10 @@ namespace UIForia.Compilers {
         }
 
         private void PushContextVarAliasResolver(int id, string name, Type type) {
+            resolvers.Push(new ContextVarAliasResolver(name, type, id, AliasResolverType.ContextVariable));
+        }
+
+        private void PushRepeatContextVarAliasResolver(int id, string name, Type type) {
             resolvers.Push(new ContextVarAliasResolver(name, type, id, AliasResolverType.ContextVariable));
         }
 
@@ -1559,7 +1720,7 @@ namespace UIForia.Compilers {
             return null;
         }
 
-        private static Expression CreateElement(CompilationContext ctx, TemplateNode2 node) {
+        private static Expression CreateElement(CompilationContext ctx, TemplateNode node) {
             return ExpressionFactory.CallInstanceUnchecked(ctx.applicationExpr, s_CreateFromPool,
                 Expression.Constant(node.processedType.id),
                 ctx.ParentExpr,
@@ -1569,7 +1730,7 @@ namespace UIForia.Compilers {
             );
         }
 
-        private static ProcessedType ResolveGenericElementType(TemplateNode2 templateNode) {
+        private static ProcessedType ResolveGenericElementType(TemplateNode templateNode) {
             ProcessedType processedType = templateNode.processedType;
 
             GenericElementTypeResolvedByAttribute attr = processedType.rawType.GetCustomAttribute<GenericElementTypeResolvedByAttribute>();
@@ -1631,7 +1792,11 @@ namespace UIForia.Compilers {
             ContextVariable,
             ControllerEvent,
 
-            Root
+            Root,
+
+            RepeatItem,
+
+            RepeatIndex
 
         }
 
@@ -1679,11 +1844,40 @@ namespace UIForia.Compilers {
                         Type contextVarType = ReflectionUtil.CreateGenericType(typeof(ContextVariable<>), type);
 
                         UnaryExpression convert = Expression.Convert(call, contextVarType);
-                        ParameterExpression variable = compiler.AddVariable(type, $"ctxvar_{strippedName}");
+                        ParameterExpression variable = compiler.AddVariable(type, "ctxvar_" + strippedName);
 
                         compiler.Assign(variable, Expression.MakeMemberAccess(convert, contextVarType.GetField("value")));
                         return variable;
                     }
+                    case AliasResolverType.RepeatItem: {
+                        compiler.Comment(name);
+                        //var repeat_item_name = element.bindingNode.GetRepeatItem<T>(id).value;
+                        ParameterExpression el = compiler.GetVariable(k_CastElement);
+                        Expression access = Expression.MakeMemberAccess(el, s_Element_BindingNode);
+
+                        ReflectionUtil.TypeArray1[0] = type;
+                        MethodInfo getItem = s_LinqBindingNode_GetRepeatItem.MakeGenericMethod(ReflectionUtil.TypeArray1);
+                        Expression call = ExpressionFactory.CallInstanceUnchecked(access, getItem, Expression.Constant(id));
+                        Type contextVarType = ReflectionUtil.CreateGenericType(typeof(ContextVariable<>), type);
+
+                        UnaryExpression convert = Expression.Convert(call, contextVarType);
+                        ParameterExpression variable = compiler.AddVariable(type, "repeat_item_" + strippedName);
+
+                        compiler.Assign(variable, Expression.MakeMemberAccess(convert, contextVarType.GetField(nameof(ContextVariable<int>.value))));
+                        return variable;
+                    }
+                    case AliasResolverType.RepeatIndex: {
+                        ParameterExpression el = compiler.GetVariable(k_CastElement);
+                        Expression access = Expression.MakeMemberAccess(el, s_Element_BindingNode);
+                        Expression call = ExpressionFactory.CallInstanceUnchecked(access, s_LinqBindingNode_GetContextVariable, Expression.Constant(id));
+
+                        UnaryExpression convert = Expression.Convert(call, typeof(ContextVariable<int>));
+                        ParameterExpression variable = compiler.AddVariable(type, "ctxvar_" + strippedName);
+
+                        compiler.Assign(variable, Expression.MakeMemberAccess(convert, typeof(ContextVariable<int>).GetField(nameof(ContextVariable<int>.value))));
+                        return variable;
+                    }
+
                     default:
                         throw new ArgumentOutOfRangeException();
                 }

@@ -11,7 +11,6 @@ using UIForia.Parsing.Expressions;
 using UIForia.Templates;
 using UIForia.Text;
 using UIForia.Util;
-using UnityEngine.Assertions;
 
 namespace UIForia.Parsing {
 
@@ -35,7 +34,7 @@ namespace UIForia.Parsing {
     // <Shadow:
     // elements can start & end with : so we can have anonymous elements
 
-    public class XMLTemplateParser2 {
+    public class XMLTemplateParser {
 
         internal readonly bool outputComments;
 
@@ -43,7 +42,7 @@ namespace UIForia.Parsing {
         private readonly TemplateCache templateCache;
         private readonly Dictionary<string, TemplateShell> parsedFiles;
 
-        public XMLTemplateParser2(TemplateCache templateCache, bool outputComments = true) {
+        public XMLTemplateParser(TemplateCache templateCache, bool outputComments = true) {
             this.templateCache = templateCache;
             this.outputComments = outputComments;
             this.parsedFiles = new Dictionary<string, TemplateShell>(37);
@@ -140,19 +139,25 @@ namespace UIForia.Parsing {
             ParseChildren(templateNode, templateNode, root.Nodes());
 
             shell.elementNodes.Add(templateNode);
-            
+
             return templateNode;
         }
 
-        private TemplateNode2 ParseElementTag(ElementTemplateNode templateRoot, TemplateNode2 parent, string namespacePath, string tagName, StructList<AttributeDefinition2> attributes, in TemplateLineInfo templateLineInfo) {
+        private TemplateNode ParseElementTag(ElementTemplateNode templateRoot, TemplateNode parent, string namespacePath, string tagName, StructList<AttributeDefinition2> attributes, in TemplateLineInfo templateLineInfo) {
             ProcessedType processedType = null;
-            TemplateNode2 node = null;
+            TemplateNode node = null;
 
             if (namespacePath.Length > 0) {
                 throw new NotImplementedException("Element namespace resolution not yet implemented");
             }
             else {
-                if (string.Equals(tagName, "Children", StringComparison.Ordinal)) {
+                if (string.Equals(tagName, "Repeat", StringComparison.Ordinal)) {
+                    processedType = null;//TypeProcessor.GetProcessedType(typeof(UIRepeatElement<>));
+                    node = new RepeatNode(templateRoot, parent, processedType, attributes, templateLineInfo);
+                    parent.AddChild(node);
+                    return node;
+                }
+                else if (string.Equals(tagName, "Children", StringComparison.Ordinal)) {
                     processedType = TypeProcessor.GetProcessedType(typeof(UIChildrenElement));
                     node = new ChildrenNode(templateRoot, parent, processedType, attributes, templateLineInfo);
                     templateRoot.AddSlot((SlotNode) node);
@@ -190,15 +195,15 @@ namespace UIForia.Parsing {
                     }
 
                     // when forwarding slots we need to tell the exposer that it accepts a slot, and the 
-                    
+
                     // todo -- error check
                     string slotName = GetSlotName(attributes);
                     string slotAlias = GetSlotAlias(slotName, attributes);
 
                     SlotNode slotNode = new SlotNode(templateRoot, parent, processedType, attributes, templateLineInfo, slotName, SlotType.Extern);
-                    
+
                     // expanded.ValidateSlot((slotNode).slotName, templateLineInfo);
-                    
+
                     templateRoot.AddSlot(slotNode);
 
                     return slotNode;
@@ -273,7 +278,7 @@ namespace UIForia.Parsing {
             return slotName;
         }
 
-        private static void CreateOrUpdateTextNode(ElementTemplateNode templateRoot, TemplateNode2 parent, string textContent, in TemplateLineInfo templateLineInfo) {
+        private static void CreateOrUpdateTextNode(ElementTemplateNode templateRoot, TemplateNode parent, string textContent, in TemplateLineInfo templateLineInfo) {
             if (parent is TextNode textParent) {
                 if (parent.ChildCount == 0) {
                     TextTemplateProcessor.ProcessTextExpressions(textContent, textParent.textExpressionList);
@@ -291,7 +296,7 @@ namespace UIForia.Parsing {
             }
         }
 
-        private void ParseChildren(ElementTemplateNode templateRoot, TemplateNode2 parent, IEnumerable<XNode> nodes) {
+        private void ParseChildren(ElementTemplateNode templateRoot, TemplateNode parent, IEnumerable<XNode> nodes) {
             string textContext = string.Empty;
             foreach (XNode node in nodes) {
                 switch (node.NodeType) {
@@ -323,7 +328,7 @@ namespace UIForia.Parsing {
                         StructList<AttributeDefinition2> attributes = ParseAttributes(element.Attributes());
 
                         IXmlLineInfo lineInfo = element;
-                        TemplateNode2 p = ParseElementTag(templateRoot, parent, namespaceName, tagName, attributes, new TemplateLineInfo(lineInfo.LineNumber, lineInfo.LinePosition));
+                        TemplateNode p = ParseElementTag(templateRoot, parent, namespaceName, tagName, attributes, new TemplateLineInfo(lineInfo.LineNumber, lineInfo.LinePosition));
 
                         ParseChildren(templateRoot, p, element.Nodes());
 
@@ -354,7 +359,7 @@ namespace UIForia.Parsing {
                 if (name == "id" && string.IsNullOrEmpty(prefix)) {
                     prefix = "attr";
                 }
-                
+
                 AttributeType attributeType = AttributeType.Property;
                 AttributeFlags flags = 0;
 
@@ -468,7 +473,7 @@ namespace UIForia.Parsing {
             return attributes;
         }
 
-        private void BuildOriginalString(TemplateNode2 templateNode, string elementName) {
+        private void BuildOriginalString(TemplateNode templateNode, string elementName) {
             if (!outputComments) return;
 
             string attrString = string.Empty;

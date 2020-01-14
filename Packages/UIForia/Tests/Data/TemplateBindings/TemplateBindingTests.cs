@@ -16,8 +16,8 @@ namespace TemplateBinding {
 
     public class TemplateBindingTests {
 
-        private bool usePreCompiledTemplates = false;
-        private bool generateCode = false;
+        private bool usePreCompiledTemplates = true;
+        private bool generateCode = true;
 
         public MockApplication Setup<T>(string appName = null) {
             if (appName == null) {
@@ -224,13 +224,13 @@ namespace TemplateBinding {
             MockApplication app = Setup<TemplateBindingTest_MouseBindingBinding>();
             TemplateBindingTest_MouseBindingBinding e = (TemplateBindingTest_MouseBindingBinding) app.RootElement;
 
-          throw new NotImplementedException("Keyboard input needs a re-write");
+            throw new NotImplementedException("Keyboard input needs a re-write");
             // app.Update();
 
             // app.InputSystem.SetKeyDown('a');
-            
+
             // app.Update();
-            
+
             // Assert.AreEqual("No Params Was Called", e.output_NoParams);
             //
             // app.Update();
@@ -397,16 +397,105 @@ namespace TemplateBinding {
             TemplateBindingTest_ContextVariable e = (TemplateBindingTest_ContextVariable) app.RootElement;
 
             app.Update();
-            
+
             UITextElement textElement = app.RootElement[0][0] as UITextElement;
 
             Assert.AreEqual("answer = 25", textElement.text.Trim());
 
             UIElement nested = e["text-el"];
             Assert.NotNull(nested);
-            
+
             UITextElement nestedTextEl = nested as UITextElement;
             Assert.AreEqual("slot answer is = 50", nestedTextEl.text.Trim());
+        }
+
+        [Template("Data/TemplateBindings/TemplateBindingTest_RepeatTemplate.xml#repeat_count")]
+        public class TemplateBindingTest_RepeatCount : UIElement {
+
+            public int count;
+
+        }
+
+        [Test]
+        public void RepeatCount() {
+            MockApplication app = Setup<TemplateBindingTest_RepeatCount>();
+            TemplateBindingTest_RepeatCount e = (TemplateBindingTest_RepeatCount) app.RootElement;
+
+            e.count = 5;
+
+            app.Update();
+
+            string GetText(UIElement element) {
+                UITextElement textEl = element as UITextElement;
+                return textEl.text.Trim();
+            }
+
+            Assert.AreEqual(5, e[0].children.size);
+            Assert.AreEqual("repeat me 0", GetText(e[0][0]));
+            Assert.AreEqual("repeat me 1", GetText(e[0][1]));
+            Assert.AreEqual("repeat me 2", GetText(e[0][2]));
+            Assert.AreEqual("repeat me 3", GetText(e[0][3]));
+            Assert.AreEqual("repeat me 4", GetText(e[0][4]));
+
+            e.count = 7;
+
+            var e0 = e[0][0];
+            var e1 = e[0][1];
+            var e2 = e[0][2];
+            var e3 = e[0][3];
+            var e4 = e[0][4];
+
+            app.Update();
+
+            Assert.AreEqual(7, e[0].children.size);
+            Assert.AreEqual("repeat me 0", GetText(e[0][0]));
+            Assert.AreEqual("repeat me 1", GetText(e[0][1]));
+            Assert.AreEqual("repeat me 2", GetText(e[0][2]));
+            Assert.AreEqual("repeat me 3", GetText(e[0][3]));
+            Assert.AreEqual("repeat me 4", GetText(e[0][4]));
+            Assert.AreEqual("repeat me 5", GetText(e[0][5]));
+            Assert.AreEqual("repeat me 6", GetText(e[0][6]));
+
+            Assert.AreEqual(e0, e[0][0]);
+            Assert.AreEqual(e1, e[0][1]);
+            Assert.AreEqual(e2, e[0][2]);
+            Assert.AreEqual(e3, e[0][3]);
+            Assert.AreEqual(e4, e[0][4]);
+
+            e.count = 2;
+
+            app.Update();
+
+            Assert.AreEqual(2, e[0].children.size);
+            Assert.AreEqual("repeat me 0", GetText(e[0][0]));
+            Assert.AreEqual("repeat me 1", GetText(e[0][1]));
+            Assert.AreEqual(e0, e[0][0]);
+            Assert.AreEqual(e1, e[0][1]);
+        }
+
+        [Template("Data/TemplateBindings/TemplateBindingTest_RepeatTemplate.xml#repeat_list")]
+        public class TemplateBindingTest_RepeatList_Struct : UIElement {
+
+            public IList<Vector3> data;
+
+        }
+
+        [Test]
+        public void RepeatList_Struct() {
+            MockApplication app = Setup<TemplateBindingTest_RepeatList_Struct>();
+            TemplateBindingTest_RepeatList_Struct e = (TemplateBindingTest_RepeatList_Struct) app.RootElement;
+
+            e.data = new [] {
+                Vector3.zero,
+                Vector3.one,
+                Vector3.forward,
+                Vector3.back
+            };
+
+            app.Update();
+
+            Assert.AreEqual(4, e[0].children.size);
+            
         }
 
     }

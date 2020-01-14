@@ -1,8 +1,6 @@
 using System;
-using System.Collections.Generic;
 using UIForia.Attributes;
 using UIForia.Rendering;
-using UIForia.Templates;
 using UIForia.UIInput;
 using UIForia.Util;
 using UnityEngine;
@@ -47,13 +45,12 @@ namespace UIForia.Elements {
 
         public bool disabled;
 
+        public float scrollSpeed = 10;
         public bool disableOverflowX;
         public bool disableOverflowY;
 
-        private UIElement clippingElement;
-
         public RepeatableList<ISelectOption<T>> options;
-//        private RepeatableList<ISelectOption<T>> previousOptions;
+        private RepeatableList<ISelectOption<T>> previousOptions;
         private Action<ISelectOption<T>, int> onInsert;
         private Action<ISelectOption<T>, int> onRemove;
         private Action onClear;
@@ -70,20 +67,19 @@ namespace UIForia.Elements {
 
         [OnPropertyChanged(nameof(options))]
         private void OnSelectionChanged(string propertyName) {
-//            if (previousOptions != options) {
-//                if (previousOptions != null) {
-//                    previousOptions.onItemInserted -= onInsert;
-//                    options.onItemRemoved -= onRemove;
-//                    options.onClear -= onClear;
-//                }
-//            }
+            if (previousOptions != options) {
+                if (previousOptions != null) {
+                    previousOptions.onItemInserted -= onInsert;
+                    options.onItemRemoved -= onRemove;
+                    options.onClear -= onClear;
+                }
+            }
 
             if (options != null) {
                 options.onItemInserted += onInsert;
                 options.onItemRemoved += onRemove;
                 options.onClear += onClear;
                 for (int i = 0; i < options.Count; i++) {
-                    // todo -- remove this and bake into repeat
                     childrenElement.AddChild(childrenElement.InstantiateTemplate());
                 }
 
@@ -147,25 +143,26 @@ namespace UIForia.Elements {
             childrenElement = FindById<UIChildrenElement>("option-children");
             optionList = FindById<UIElement>("option-list");
 
-            application.InputSystem.RegisterFocusable(this);
-//
-//            UIElement potentialClippingParent = parent;
-//            while (clippingElement == null) {
-//                if (potentialClippingParent == View.RootElement || potentialClippingParent.style.OverflowY != Overflow.Visible) {
-//                    clippingElement = potentialClippingParent;
-//                }
-//
-//                potentialClippingParent = potentialClippingParent.parent;
-//            }
-
-            if (disabled) {
-                SetAttribute("disabled", disabledAttributeValue);
-               // DisableAllChildren(this);
-            } else if (GetAttribute("disabled") != null) {
-              //  DisableAllChildren(this);
-            }
+           // Application.InputSystem.RegisterFocusable(this);
         }
 
+        public override void OnUpdate() {
+
+            if (!disabled && HasAttribute("disabled")) {
+                SetAttribute("disabled", null);
+                EnableAllChildren(this);
+            }
+            else if (disabled && !HasAttribute("disabled")) {
+                SetAttribute("disabled", disabledAttributeValue);
+                DisableAllChildren(this);
+            }
+
+            if (selecting) {
+                AdjustOptionPosition();
+            }
+            optionList.style.SetVisibility(selecting ? Visibility.Visible : Visibility.Hidden, StyleState.Normal);
+        }
+        
         private void DisableAllChildren(UIElement element) {
             for (int index = 0; index < element.children.Count; index++) {
                 UIElement child = element.children[index];
@@ -173,33 +170,16 @@ namespace UIForia.Elements {
                     child.SetAttribute("disabled", disabledAttributeValue);
                     DisableAllChildren(child);
                 }
-            }
+            }    
         }
         private void EnableAllChildren(UIElement element) {
             for (int index = 0; index < element.children.Count; index++) {
                 UIElement child = element.children[index];
                 if (child.GetAttribute("disabled") == disabledAttributeValue) {
                     child.SetAttribute("disabled", null);
-                    DisableAllChildren(child);
+                    EnableAllChildren(child);
                 }
             }
-        }
-
-        public override void OnUpdate() {
-
-            if (!disabled && HasAttribute("disabled")) {
-                SetAttribute("disabled", null);
-                //EnableAllChildren(this);
-            }
-            else if (disabled && !HasAttribute("disabled")) {
-                SetAttribute("disabled", disabledAttributeValue);
-//                DisableAllChildren(this);
-            }
-
-            if (selecting) {
-                AdjustOptionPosition();
-            }
-            optionList.style.SetVisibility(selecting ? Visibility.Visible : Visibility.Hidden, StyleState.Normal);
         }
 
         private void SetSelectedValue(int index) {
@@ -210,12 +190,6 @@ namespace UIForia.Elements {
             onIndexChanged?.Invoke(selectedIndex);
         }
 
-        // [UInject]
-        // private IFocusManager focusManager;
-        
-        // [UIForia.Inject]
-        // private IFocusManager focusManager;
-        
         [OnKeyDownWithFocus()]
         public void OnKeyDownNavigate(KeyboardInputEvent evt) {
 
@@ -364,11 +338,11 @@ namespace UIForia.Elements {
             }
 
             if (selecting) {
-                application.InputSystem.ReleaseFocus(this);
+                // Application.InputSystem.ReleaseFocus(this);
                 selecting = false;
             }
             else {
-                application.InputSystem.RequestFocus(this);
+               // Application.InputSystem.RequestFocus(this);
                 selecting = true;
             }
 
@@ -376,7 +350,8 @@ namespace UIForia.Elements {
             evt.Consume();
         }
 
-        public void AdjustOptionPosition() {
+        public void AdjustOptionPosition() {            
+            // todo -- bring the position adjustment back
 //            float offset = 0;
 //            float maxOffset = layoutResult.screenPosition.y - clippingElement.layoutResult.screenPosition.y;
 //            float minOffset = optionList.layoutResult.screenPosition.y - optionList.style.TransformPositionY.value + optionList.layoutResult.AllocatedHeight - (clippingElement.layoutResult.screenPosition.y + clippingElement.layoutResult.AllocatedHeight);
@@ -405,7 +380,7 @@ namespace UIForia.Elements {
             evt.StopPropagation();
             evt.Consume();
         }
-        
+
         public bool Focus() {
             return GetAttribute("disabled") == null;
         }
@@ -428,7 +403,7 @@ namespace UIForia.Elements {
         }
 
         private void OnClear() {
-            application.DestroyChildren(childrenElement);
+           // Application.DestroyChildren(childrenElement);
         }
 
         private void OnRemove(ISelectOption<T> selectOption, int index) {

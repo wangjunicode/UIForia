@@ -5,9 +5,14 @@ tags:
  - layout
 layout: page
 ---
-# Grid
-Grid is a 2-dimensional system, which allows for both columns and rows, unlike flexbox which is 1-dimensional (rows or columns).
+# The Grid LayoutType
+With the `Grid` `LayoutType` you can configure a two-dimensional layout structure that consists
+of rows and columns. It supports a variety of sizing types, from pixels to fractional remaining space,
+has shorthands commands for growing and shrinking tracks, and methods to repeat track configuration 
+patterns.
 
+Use grids only if you actually need them, i.e. grids with only one column or one row may be 
+more represented more efficiently with a [flex layout](/docs/layout/flex). 
 
 ## Auto Size
 `auto` in a grid will always default to content size. Use `LayoutFit` on your grid items to fit into the cell space.

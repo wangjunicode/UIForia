@@ -28,9 +28,8 @@ namespace UIForia {
             this.application = application;
         }
 
-        public void CallInternalApiToSetupThings(UIElement element) {
-            
-        }
+        public void CallInternalApiToSetupThings(UIElement element) { }
+
     }
 
     public abstract class Application {
@@ -146,7 +145,7 @@ namespace UIForia {
 
             templateData = compiledTemplateData;
             UIView view = null;
-            
+
             UIElement rootElement = templateData.templates[0].Invoke(null, new TemplateScope(this, null));
 
             view = new UIView(this, "Default", rootElement, Matrix4x4.identity, new Size(Screen.width, Screen.height));
@@ -278,33 +277,7 @@ namespace UIForia {
             Camera = camera;
             RenderSystem.SetCamera(camera);
         }
-
-        private int nextViewId = 0;
-
-//        public UIView CreateView(string name, Rect rect, Type type, string template = null) {
-//            UIView view = GetView(name);
-//
-//            if (view == null) {
-//                view = new UIView(nextViewId++, name, this, rect, m_Views.Count, type, template);
-//                m_Views.Add(view);
-//
-//                for (int i = 0; i < m_Systems.Count; i++) {
-//                    m_Systems[i].OnViewAdded(view);
-//                }
-//
-//                onViewAdded?.Invoke(view);
-//            }
-//            else {
-//                if (view.RootElement.GetChild(0).GetType() != type) {
-//                    throw new Exception($"A view named {name} with another root type ({view.RootElement.GetChild(0).GetType()}) already exists.");
-//                }
-//
-//                view.Viewport = rect;
-//            }
-//
-//            return view;
-//        }
-
+        
         public UIView RemoveView(UIView view) {
             if (!m_Views.Remove(view)) return null;
 
@@ -315,21 +288,6 @@ namespace UIForia {
             onViewRemoved?.Invoke(view);
             DestroyElement(view.dummyRoot);
             return view;
-        }
-
-        public UIElement CreateElement(Type type) {
-            throw new NotImplementedException();
-//            if (type == null) {
-//                return null;
-//            }
-//
-//            return templateParser.GetParsedTemplate(type)?.Create();
-        }
-
-        public T CreateElement<T>() where T : UIElement {
-            throw new NotImplementedException();
-
-//            return templateParser.GetParsedTemplate(typeof(T))?.Create() as T;
         }
 
         public void Refresh() {
@@ -750,21 +708,9 @@ namespace UIForia {
         }
 
         internal void InsertChild(UIElement parent, UIElement child, uint index) {
-            if (child.parent != null) {
-                throw new NotImplementedException("Reparenting is not supported");
-            }
-
-            bool hasView = child.View != null;
-
-            // we don't know the hierarchy at this point.
-            // could be made up of a mix of elements in various states
-
+            
             child.parent = parent;
             parent.children.Insert((int) index, child);
-
-            if (hasView) {
-                throw new NotImplementedException("Changing views is not supported");
-            }
 
             bool parentEnabled = parent.isEnabled;
 
@@ -882,6 +828,12 @@ namespace UIForia {
             return retn;
         }
 
+        public UIElement CreateTemplate(int templateSpawnId, UIElement contextRoot, UIElement parent, TemplateScope scope) {
+            UIElement retn = templateData.slots[templateSpawnId](contextRoot, parent, scope);
+            retn.View = parent.View;
+            return retn;
+        }
+
         // todo -- override that accepts an index into an array instead of a type, to save a dictionary lookup
         // todo -- don't create a list for every type, maybe a single pool list w/ sorting & a jump search or similar
         // todo -- register element in type map for selectors, might need to support subclass matching ie <KlangButton> and <OtherButton> with matching on <Button>
@@ -891,9 +843,9 @@ namespace UIForia {
             // children get assigned in the template function but we need to setup the list here
             UIElement retn = templateData.ConstructElement(typeId);
             retn.application = this;
-            
+
             //retn.View = application.activeView;
-            
+
             retn.templateMetaData = templateData.templateMetaData[originTemplateId];
             retn.id = NextElementId;
             retn.style = new UIStyleSet(retn);
@@ -910,7 +862,7 @@ namespace UIForia {
             }
 
             retn.parent = parent;
-            
+
             return retn;
         }
 

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using UIForia.Compilers;
@@ -8,6 +9,7 @@ using UIForia.Parsing.Expressions;
 using UIForia.Parsing.Expressions.AstNodes;
 using UIForia.Parsing.Style.AstNodes;
 using UIForia.Text;
+using UIForia.Util;
 
 namespace UIForia.Exceptions {
 
@@ -219,6 +221,14 @@ namespace UIForia.Exceptions {
 
         public static CompileException UnknownStyleState(string templateShellFilePath, LineInfo lineInfo, string s) {
             return new CompileException($"file: {templateShellFilePath}{lineInfo}\nUnable to handle style state declaration '{s}' Expected 'active', 'focus', or 'hover'");
+        }
+
+        public static CompileException UnresolvedRepeatType(string provided, params string[] others) {
+            return new CompileException("Unable to determine repeat type: " + provided + " was provided but is not legal in combination with " + StringUtil.ListToString((IList<string>)others));
+        }
+
+        public static CompileException UnresolvedPropertyChangeHandler(string methodInfoName, Type propertyType) {
+            return new CompileException($"Unable to use {methodInfoName} as a property change handler. Please be sure the signature either accepts no arguments or only 1 argument with a type matching the type of the property it is bound to: {propertyType}");
         }
 
     }

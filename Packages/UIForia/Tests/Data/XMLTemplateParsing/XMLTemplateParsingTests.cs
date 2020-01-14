@@ -137,22 +137,22 @@ namespace TemplateParsing_XML {
             AssertAndReturn<TextNode>(templateRoot[2]);
         }
 
-        private static void AssertText(string expected, TemplateNode2 templateNode) {
+        private static void AssertText(string expected, TemplateNode templateNode) {
             TextNode textNode = AssertAndReturn<TextNode>(templateNode);
             Assert.AreEqual(expected, textNode.rawTextContent);
         }
 
-        private static void AssertTrimmedText(string expected, TemplateNode2 templateNode) {
+        private static void AssertTrimmedText(string expected, TemplateNode templateNode) {
             TextNode textNode = AssertAndReturn<TextNode>(templateNode);
             Assert.AreEqual(expected, textNode.rawTextContent.Trim());
         }
 
-        private static T AssertAndReturn<T>(object b) where T : TemplateNode2 {
+        private static T AssertAndReturn<T>(object b) where T : TemplateNode {
             Assert.IsInstanceOf<T>(b);
             return (T) b;
         }
 
-        private static T AssertAndReturn<T>(string tagName, object b) where T : TemplateNode2 {
+        private static T AssertAndReturn<T>(string tagName, object b) where T : TemplateNode {
             Assert.IsInstanceOf<T>(b);
             T a = (T) b;
             if (!string.IsNullOrEmpty(a.namespaceName)) {

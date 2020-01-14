@@ -71,6 +71,8 @@ namespace BuiltInElements {
                     key = key
                 };
                 
+                // elements[i].bindingNode.SetContext<T>("item", value);
+                
             }
 
         }

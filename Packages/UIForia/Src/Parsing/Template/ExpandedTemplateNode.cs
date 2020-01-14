@@ -5,16 +5,23 @@ using UIForia.Util;
 
 namespace UIForia.Parsing {
 
-    public class ExpandedTemplateNode : TemplateNode2 {
+    public class RepeatNode : TemplateNode {
+
+        public RepeatNode(ElementTemplateNode elementRoot, TemplateNode parent, ProcessedType processedType, StructList<AttributeDefinition2> attributes, in TemplateLineInfo templateLineInfo) : base(elementRoot, parent, processedType, attributes, in templateLineInfo) { }
+
+
+    }
+
+    public class ExpandedTemplateNode : TemplateNode {
 
         public readonly ElementTemplateNode expandedRoot;
         public LightList<SlotNode> slotOverrideNodes;
 
-        public ExpandedTemplateNode(ElementTemplateNode expandedRoot, ElementTemplateNode elementRoot, TemplateNode2 parent, ProcessedType processedType, StructList<AttributeDefinition2> attributes, in TemplateLineInfo templateLineInfo) : base(expandedRoot, parent, processedType, attributes, templateLineInfo) {
+        public ExpandedTemplateNode(ElementTemplateNode expandedRoot, ElementTemplateNode elementRoot, TemplateNode parent, ProcessedType processedType, StructList<AttributeDefinition2> attributes, in TemplateLineInfo templateLineInfo) : base(expandedRoot, parent, processedType, attributes, templateLineInfo) {
             this.expandedRoot = expandedRoot;
         }
 
-        public override void AddChild(TemplateNode2 child) {
+        public override void AddChild(TemplateNode child) {
             SlotNode childrenSlot = FindOrCreateSlotOverride("Children");
             childrenSlot.AddChild(child);
         }

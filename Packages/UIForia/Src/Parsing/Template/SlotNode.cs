@@ -13,13 +13,13 @@ namespace UIForia.Parsing {
 
     }
     
-    public class SlotNode : TemplateNode2 {
+    public class SlotNode : TemplateNode {
 
         public string slotName;
         public SlotType slotType;
         public int compiledSlotId;
 
-        public  SlotNode(ElementTemplateNode root, TemplateNode2 parent, ProcessedType processedType, StructList<AttributeDefinition2> attributes, in TemplateLineInfo templateLineInfo, string slotName, SlotType slotType)
+        public  SlotNode(ElementTemplateNode root, TemplateNode parent, ProcessedType processedType, StructList<AttributeDefinition2> attributes, in TemplateLineInfo templateLineInfo, string slotName, SlotType slotType)
             : base(root, parent, processedType, attributes, templateLineInfo) {
             this.compiledSlotId = -1;
             this.slotName = slotName;

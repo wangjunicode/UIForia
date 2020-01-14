@@ -3,7 +3,7 @@ using UIForia.Util;
 
 namespace UIForia.Parsing {
 
-    public class ElementTemplateNode : TemplateNode2 {
+    public class ElementTemplateNode : TemplateNode {
 
         public string templateName;
         public LightList<SlotNode> slotDefinitionNodes;

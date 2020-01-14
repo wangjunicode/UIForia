@@ -10,12 +10,12 @@ namespace UIForia.Parsing {
     public class TemplateCache {
 
         private readonly TemplateSettings settings;
-        private readonly XMLTemplateParser2 xmlTemplateParser;
+        private readonly XMLTemplateParser xmlTemplateParser;
         private readonly Dictionary<string, ElementTemplateNode> templateMap;
 
         public TemplateCache(TemplateSettings settings) {
             this.settings = settings;
-            this.xmlTemplateParser = new XMLTemplateParser2(this);
+            this.xmlTemplateParser = new XMLTemplateParser(this);
             this.templateMap = new Dictionary<string, ElementTemplateNode>(37);
         }
 

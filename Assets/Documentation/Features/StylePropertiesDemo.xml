@@ -54,5 +54,13 @@
             </Div>
         </Group>
 
+        <Group style="section">
+            <Heading2>Pointer-Events</Heading2>
+            <Div style="pointer-demo">
+                
+                <Div style="pointer-none">Can't touch this</Div>
+                
+            </Div>
+        </Group>
     </Contents>
 </UITemplate>

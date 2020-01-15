@@ -1,10 +1,10 @@
 using UIForia.Layout;
 using UIForia.Layout.LayoutTypes;
-using UIForia.Bindings.StyleBindings;
 using System.Collections.Generic;
 using UnityEngine;
 using UIForia.Util;
 using UIForia.Text;
+using UIForia.UIInput;
 using FontStyle = UIForia.Text.FontStyle;
 using TextAlignment = UIForia.Text.TextAlignment;
 
@@ -22,6 +22,7 @@ namespace UIForia.Rendering {
 		public const Overflow OverflowY = UIForia.Rendering.Overflow.Visible;
 		public const ClipBehavior ClipBehavior = UIForia.Layout.ClipBehavior.Normal;
 		public const ClipBounds ClipBounds = UIForia.Rendering.ClipBounds.BorderBox;
+		public const PointerEvents PointerEvents = UIForia.UIInput.PointerEvents.Normal;
 		public static readonly Color BackgroundColor = new Color(-1f, -1f, -1f, -1f);
 		public static readonly Color BackgroundTint = new Color(-1f, -1f, -1f, -1f);
 		public static readonly UIFixedLength BackgroundImageOffsetX = new UIFixedLength(0f, UIFixedUnit.Pixel);
@@ -165,6 +166,8 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.ClipBehavior, (int)UIForia.Layout.ClipBehavior.Normal);
 				case StylePropertyId.ClipBounds:
 					 return new StyleProperty(StylePropertyId.ClipBounds, (int)UIForia.Rendering.ClipBounds.BorderBox);
+				case StylePropertyId.PointerEvents:
+					 return new StyleProperty(StylePropertyId.PointerEvents, (int)UIForia.UIInput.PointerEvents.Normal);
 				case StylePropertyId.BackgroundColor:
 					 return new StyleProperty(StylePropertyId.BackgroundColor, new Color(-1f, -1f, -1f, -1f));
 				case StylePropertyId.BackgroundTint:

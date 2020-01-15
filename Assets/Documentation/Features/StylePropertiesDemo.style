@@ -22,3 +22,20 @@ style simple-border {
     PreferredSize = 80px;
     DistributeExtraSpace = CenterContent;
 }
+
+style pointer-demo {
+    PreferredSize = 200px;
+    BackgroundColor = red;
+    [hover] {
+        BackgroundColor = green;
+    }
+}
+
+style pointer-none {
+    PreferredSize = 1cnt 50px;
+    PointerEvents = None;
+    BackgroundColor = yellow;
+    [hover] {
+        BackgroundColor = white;
+    }
+}

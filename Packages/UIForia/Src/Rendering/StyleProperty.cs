@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 using UIForia.Layout;
 using UIForia.Layout.LayoutTypes;
 using UIForia.Text;
-using UIForia.Util;
+using UIForia.UIInput;
 using UnityEngine;
 using FontStyle = UIForia.Text.FontStyle;
 using TextAlignment = UIForia.Text.TextAlignment;
@@ -336,6 +336,7 @@ namespace UIForia.Rendering {
         public LayoutFit AsLayoutFit => (LayoutFit) int0;
         public BackgroundFit AsBackgroundFit => (BackgroundFit) int0;
         public ClipBounds AsClipBounds => (ClipBounds) int0;
+        public PointerEvents AsPointerEvents => (PointerEvents) int0;
 
         public AlignmentTarget AsAlignmentTarget => (AlignmentTarget) int0;
         public AlignmentDirection AsAlignmentDirection => (AlignmentDirection)int0;

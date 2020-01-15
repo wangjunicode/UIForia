@@ -1,15 +1,16 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using TMPro;
 using UIForia.Layout;
 using UIForia.Layout.LayoutTypes;
 using UIForia.Rendering;
-using UIForia.Systems;
 using UIForia.Text;
+using UIForia.UIInput;
 using UIForia.Util;
 using UnityEditor;
 using UnityEngine;
+using FontStyle = UIForia.Text.FontStyle;
+using TextAlignment = UIForia.Text.TextAlignment;
 
 namespace UIForia.Editor {
 
@@ -35,6 +36,8 @@ namespace UIForia.Editor {
             new PropertyGenerator<Overflow>(StylePropertyId.OverflowY, Overflow.Visible),
             new PropertyGenerator<ClipBehavior>(StylePropertyId.ClipBehavior, ClipBehavior.Normal, InheritanceType.Inherited),
             new PropertyGenerator<ClipBounds>(StylePropertyId.ClipBounds, ClipBounds.BorderBox, InheritanceType.Inherited),
+
+            new PropertyGenerator<PointerEvents>(StylePropertyId.PointerEvents, PointerEvents.Normal, InheritanceType.Inherited),
 
             // Background
             new AnimatedPropertyGenerator<Color>(StylePropertyId.BackgroundColor, ColorUtil.UnsetValue),
@@ -148,8 +151,8 @@ namespace UIForia.Editor {
             new AnimatedPropertyGenerator<Color>(StylePropertyId.TextColor, Color.black, InheritanceType.Inherited),
             new PropertyGenerator<FontAsset>(StylePropertyId.TextFontAsset, FontAsset.defaultFontAsset, InheritanceType.Inherited, "FontAsset.defaultFontAsset"),
             new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.TextFontSize, 18, InheritanceType.Inherited),
-            new PropertyGenerator<Text.FontStyle>(StylePropertyId.TextFontStyle, Text.FontStyle.Normal, InheritanceType.Inherited),
-            new PropertyGenerator<Text.TextAlignment>(StylePropertyId.TextAlignment, Text.TextAlignment.Left, InheritanceType.Inherited),
+            new PropertyGenerator<FontStyle>(StylePropertyId.TextFontStyle, FontStyle.Normal, InheritanceType.Inherited),
+            new PropertyGenerator<TextAlignment>(StylePropertyId.TextAlignment, TextAlignment.Left, InheritanceType.Inherited),
             new AnimatedPropertyGenerator<float>(StylePropertyId.TextOutlineWidth, 0, InheritanceType.Inherited),
             new AnimatedPropertyGenerator<Color>(StylePropertyId.TextOutlineColor, Color.black, InheritanceType.Inherited),
             new AnimatedPropertyGenerator<Color>(StylePropertyId.CaretColor, Color.black, InheritanceType.Inherited),
@@ -169,7 +172,7 @@ namespace UIForia.Editor {
             new AnimatedPropertyGenerator<float>(StylePropertyId.TextFaceDilate, 0f, InheritanceType.Inherited),
             new PropertyGenerator<UnderlayType>(StylePropertyId.TextUnderlayType, UnderlayType.Unset, InheritanceType.Inherited),
             new PropertyGenerator<TextTransform>(StylePropertyId.TextTransform, TextTransform.None, InheritanceType.Inherited),
-            new PropertyGenerator<UIForia.Text.WhitespaceMode>(StylePropertyId.TextWhitespaceMode, WhitespaceMode.CollapseWhitespace | WhitespaceMode.Trim, InheritanceType.Inherited),
+            new PropertyGenerator<WhitespaceMode>(StylePropertyId.TextWhitespaceMode, WhitespaceMode.CollapseWhitespace | WhitespaceMode.Trim, InheritanceType.Inherited),
 
             // Transform
             new AnimatedPropertyGenerator<OffsetMeasurement>(StylePropertyId.TransformPositionX, new OffsetMeasurement(0)),
@@ -347,11 +350,11 @@ __REPLACE_StyleBindingCompiler_DoCompile
 
             string code = @"using UIForia.Layout;
 using UIForia.Layout.LayoutTypes;
-using UIForia.Bindings.StyleBindings;
 using System.Collections.Generic;
 using UnityEngine;
 using UIForia.Util;
 using UIForia.Text;
+using UIForia.UIInput;
 using FontStyle = UIForia.Text.FontStyle;
 using TextAlignment = UIForia.Text.TextAlignment;
 

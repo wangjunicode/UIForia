@@ -9,6 +9,7 @@ using UIForia.Attributes;
 using UIForia.Compilers;
 using UIForia.Compilers.Style;
 using UIForia.Elements;
+using UIForia.Exceptions;
 using UIForia.UIInput;
 using UnityEngine;
 
@@ -409,6 +410,84 @@ namespace TemplateBinding {
             Assert.AreEqual("slot answer is = 50", nestedTextEl.text.Trim());
         }
 
+        [Template("Data/TemplateBindings/TemplateBindingTest_LocalContextVariable.xml#out_of_scope")]
+        public class TemplateBindingTest_ContextVariableOutOfScope : UIElement { }
+
+        [Test]
+        public void LocalContextVariable() {
+            CompileException exception = Assert.Throws<CompileException>(() => { Setup<TemplateBindingTest_ContextVariableOutOfScope>(nameof(TemplateBindingTest_ContextVariableOutOfScope)); });
+            Assert.AreEqual(CompileException.UnknownAlias("cvar0").Message, exception.Message);
+        }
+
+        [Template("Data/TemplateBindings/TemplateBindingTest_LocalContextVariable.xml#use_alias")]
+        public class TemplateBindingTest_ContextVariable_UseAlias : UIElement { }
+
+        [Test]
+        public void ContextVariable_UseAlias() {
+            MockApplication app = Setup<TemplateBindingTest_ContextVariable_UseAlias>();
+            TemplateBindingTest_ContextVariable_UseAlias e = (TemplateBindingTest_ContextVariable_UseAlias) app.RootElement;
+
+            app.Update();
+
+            Assert.AreEqual("var 0", GetText(e["outer"][0]));
+            Assert.AreEqual("var 0", GetText(e["nested"][0]));
+        }
+
+        [Template("Data/TemplateBindings/TemplateBindingTest_LocalContextVariable.xml#use_alias_out_of_scope")]
+        public class TemplateBindingTest_ContextVariable_UseAliasOutOfScope : UIElement { }
+
+        [Test]
+        public void ContextVariable_UseAliasOutOfScope() {
+            CompileException exception = Assert.Throws<CompileException>(() => Setup<TemplateBindingTest_ContextVariable_UseAliasOutOfScope>());
+            Assert.AreEqual(CompileException.UnknownAlias("custom").Message, exception.Message);
+        }
+
+        [Template("Data/TemplateBindings/TemplateBindingTest_LocalContextVariable.xml#use_alias_on_own_context")]
+        public class TemplateBindingTest_ContextVariable_UseAliasOnOwnContext : UIElement { }
+
+        [Test]
+        public void ContextVariable_UseAliasOnOwnContext() {
+            CompileException exception = Assert.Throws<CompileException>(() => Setup<TemplateBindingTest_ContextVariable_UseAliasOnOwnContext>());
+            Assert.AreEqual(CompileException.UnknownAlias("custom").Message, exception.Message);
+        }
+
+        [Template("Data/TemplateBindings/TemplateBindingTest_LocalContextVariable.xml#not_exposed_inner")]
+        public class TemplateBindingTest_ContextVariable_NonExposed_NotAvailable_Inner : UIElement { }
+
+        [Template("Data/TemplateBindings/TemplateBindingTest_LocalContextVariable.xml#not_exposed_outer")]
+        public class TemplateBindingTest_ContextVariable_NonExposed_NotAvailable_Outer : UIElement { }
+
+        [Test]
+        public void ContextVariable_NonExposed_NotAvailable() {
+            CompileException exception = Assert.Throws<CompileException>(() => Setup<TemplateBindingTest_ContextVariable_NonExposed_NotAvailable_Outer>(nameof(TemplateBindingTest_ContextVariable_NonExposed_NotAvailable_Outer)));
+            Assert.AreEqual(CompileException.UnknownAlias("thing").Message, exception.Message);
+        }
+
+        [Template("Data/TemplateBindings/TemplateBindingTest_LocalContextVariable.xml#expose_context_var_slotted_outer")]
+        public class TemplateBindingTest_ContextVariable_Expose_Slotted_Outer : UIElement {
+
+            public string value = "val";
+
+        }
+
+        [Template("Data/TemplateBindings/TemplateBindingTest_LocalContextVariable.xml#expose_context_var_slotted_inner")]
+        public class TemplateBindingTest_ContextVariable_Expose_Slotted_Inner : UIElement {
+
+            public string variable0 = "var 0";
+            public string variable1 = "var 1";
+
+        }
+
+        [Test]
+        public void ContextVariable_Expose_Slotted() {
+            MockApplication app = Setup<TemplateBindingTest_ContextVariable_Expose_Slotted_Outer>();
+            TemplateBindingTest_ContextVariable_Expose_Slotted_Outer e = (TemplateBindingTest_ContextVariable_Expose_Slotted_Outer) app.RootElement;
+
+            app.Update();
+            
+            Assert.AreEqual("var 0 + var 1", GetText(e["text"]));
+        }
+
         [Template("Data/TemplateBindings/TemplateBindingTest_RepeatTemplate.xml#repeat_count")]
         public class TemplateBindingTest_RepeatCount : UIElement {
 
@@ -424,11 +503,6 @@ namespace TemplateBinding {
             e.count = 5;
 
             app.Update();
-
-            string GetText(UIElement element) {
-                UITextElement textEl = element as UITextElement;
-                return textEl.text.Trim();
-            }
 
             Assert.AreEqual(5, e[0].children.size);
             Assert.AreEqual("repeat me 0", GetText(e[0][0]));
@@ -485,7 +559,7 @@ namespace TemplateBinding {
             MockApplication app = Setup<TemplateBindingTest_RepeatList_Struct>();
             TemplateBindingTest_RepeatList_Struct e = (TemplateBindingTest_RepeatList_Struct) app.RootElement;
 
-            e.data = new [] {
+            e.data = new[] {
                 Vector3.zero,
                 Vector3.one,
                 Vector3.forward,
@@ -495,7 +569,11 @@ namespace TemplateBinding {
             app.Update();
 
             Assert.AreEqual(4, e[0].children.size);
-            
+        }
+
+        string GetText(UIElement element) {
+            UITextElement textEl = element as UITextElement;
+            return textEl.text.Trim();
         }
 
     }

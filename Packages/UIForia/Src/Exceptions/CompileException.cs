@@ -231,6 +231,10 @@ namespace UIForia.Exceptions {
             return new CompileException($"Unable to use {methodInfoName} as a property change handler. Please be sure the signature either accepts no arguments or only 1 argument with a type matching the type of the property it is bound to: {propertyType}");
         }
 
+        public static CompileException UnknownAlias(string aliasName) {
+            return new CompileException($"Unknown alias {aliasName}");
+        }
+
     }
 
     public static class CompileExceptions {

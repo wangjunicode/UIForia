@@ -42,6 +42,8 @@ namespace UIForia.Systems {
 
         internal UIElement root;
         internal UIElement element;
+        public UIElement innerContext;
+
         internal int lastTickedFrame;
         
         internal Action<UIElement, UIElement> createdBinding;
@@ -117,10 +119,11 @@ namespace UIForia.Systems {
         }
         
         [UsedImplicitly] // called from template functions, 
-        public static LinqBindingNode Get(Application application, UIElement rootElement, UIElement element, UIElement slotRootContext, int createdId, int enabledId, int updatedId) {
+        public static LinqBindingNode Get(Application application, UIElement rootElement, UIElement element, UIElement innerContext, int createdId, int enabledId, int updatedId) {
             LinqBindingNode node = new LinqBindingNode(); // todo -- pool
-            node.root = slotRootContext;
+            node.root = rootElement;
             node.element = element;
+            node.innerContext = innerContext;
             element.bindingNode = node;
             
             UIElement ptr = element.parent;

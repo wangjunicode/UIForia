@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using UIForia.Compilers;
 using UnityEngine;
 
 namespace UIForia.Util {
@@ -14,9 +15,8 @@ namespace UIForia.Util {
         public T[] Stack => array;
 
         public T Previous => PeekAtUnchecked(size - 1);
-        
-        [ThreadStatic]
-        private static LightList<LightStack<T>> s_Pool;
+
+        [ThreadStatic] private static LightList<LightStack<T>> s_Pool;
 
         [DebuggerStepThrough]
         public LightStack(int capacity = 8) {
@@ -102,7 +102,7 @@ namespace UIForia.Util {
             s_Pool = s_Pool ?? new LightList<LightStack<T>>(4);
             s_Pool.Add(this);
         }
-        
+
         [DebuggerStepThrough]
         public static void Release(ref LightStack<T> toPool) {
             Array.Clear(toPool.array, 0, toPool.size);
@@ -142,6 +142,12 @@ namespace UIForia.Util {
             cloneTarget.EnsureCapacity(size);
             Array.Copy(array, 0, cloneTarget.array, 0, size);
             cloneTarget.size = size;
+            return cloneTarget;
+        }
+
+        public T[] ToArray() {
+            T[] cloneTarget = new T[size];
+            Array.Copy(array, 0, cloneTarget, 0, size);
             return cloneTarget;
         }
 

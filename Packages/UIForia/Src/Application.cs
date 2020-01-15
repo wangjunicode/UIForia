@@ -823,6 +823,7 @@ namespace UIForia {
                 contextRoot = root;
             }
 
+            scope.innerSlotContext = root;
             UIElement retn = templateData.slots[slotId](contextRoot, parent, scope);
             retn.View = parent.View;
             return retn;

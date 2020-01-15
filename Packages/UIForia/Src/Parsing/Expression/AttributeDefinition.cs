@@ -19,7 +19,9 @@ namespace UIForia.Parsing.Expressions {
         Controller = 1 << 10,
         Touch = 1 << 11,
         Slot = 1 << 12,
-        SlotContext = 1 << 13
+        SlotContext = 1 << 13,
+
+        Expose
 
     }
 

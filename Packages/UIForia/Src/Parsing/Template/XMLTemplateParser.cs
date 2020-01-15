@@ -48,6 +48,8 @@ namespace UIForia.Parsing {
             this.parsedFiles = new Dictionary<string, TemplateShell>(37);
             XmlNamespaceManager nameSpaceManager = new XmlNamespaceManager(new NameTable());
             nameSpaceManager.AddNamespace("attr", "attr");
+            nameSpaceManager.AddNamespace("alias", "alias");
+            nameSpaceManager.AddNamespace("expose", "expose");
             nameSpaceManager.AddNamespace("slot", "slot");
             nameSpaceManager.AddNamespace("evt", "evt");
             nameSpaceManager.AddNamespace("style", "style");
@@ -429,6 +431,9 @@ namespace UIForia.Parsing {
                             break;
                         case "ctx":
                             attributeType = AttributeType.Context;
+                            break;
+                        case "expose":
+                            attributeType = AttributeType.Expose;
                             break;
                         case "ctxvar":
                             attributeType = AttributeType.ContextVariable;

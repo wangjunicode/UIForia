@@ -4,15 +4,17 @@ using UIForia.Util;
 
 namespace UIForia.Compilers {
 
-    public readonly struct TemplateScope {
+    public struct TemplateScope {
 
         public readonly Application application;
         public readonly StructList<SlotUsage> slotInputs;
-
+        public UIElement innerSlotContext;
+        
         [DebuggerStepThrough]
         public TemplateScope(Application application, StructList<SlotUsage> slotInputs) {
             this.application = application;
             this.slotInputs = slotInputs;
+            this.innerSlotContext = null;
         }
 
         public void ForwardSlotUsage(string slotName, StructList<SlotUsage> slotList) {

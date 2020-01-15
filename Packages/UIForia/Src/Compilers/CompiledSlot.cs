@@ -1,5 +1,7 @@
+using System;
 using System.Linq.Expressions;
 using UIForia.Parsing;
+using UIForia.Parsing.Expressions;
 using UnityEditor;
 
 namespace UIForia.Compilers {
@@ -13,7 +15,10 @@ namespace UIForia.Compilers {
         public SlotType slotType;
         public LambdaExpression templateFn;
         public string templateName;
-
+        public Type rootElementType;
+        public ScopedContextVariable[] scopedVariables;
+        public AttributeDefinition2[] exposedAttributes;
+        
         public string GetVariableName() {
             return $"Slot_{slotType}_{slotId}_{guid}";
         }

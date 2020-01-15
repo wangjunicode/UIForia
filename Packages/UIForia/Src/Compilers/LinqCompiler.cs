@@ -1459,6 +1459,7 @@ namespace UIForia.Compilers {
 
 
         private Expression ResolveAlias(string aliasName) {
+            aliasName = aliasName.Substring(1);
             if (resolveAlias == null) {
                 if (parent.resolveAlias != null) {
                     Expression resolvedAlias = parent.resolveAlias(aliasName, this);

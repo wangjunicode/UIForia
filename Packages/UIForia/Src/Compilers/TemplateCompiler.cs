@@ -22,14 +22,13 @@ namespace UIForia.Compilers {
     public class TemplateCompiler {
 
         private const string k_InputEventAliasName = "$evt";
-        private const string k_InputEventParameterName = "__evt";
+        internal const string k_InputEventParameterName = "__evt";
         private const string k_InputHandlerVarName = "__inputHandler";
-        private const string k_CastElement = "__castElement";
-        private const string k_CastRoot = "__castRoot";
+        internal const string k_CastElement = "__castElement";
+        internal const string k_CastRoot = "__castRoot";
         private static readonly char[] s_StyleSeparator = {' '};
 
         private readonly LightStack<ContextVarAliasResolver> resolvers;
-        private StructStack<ContextVariableDefinition> contextVarStack;
 
         private readonly LinqCompiler enabledCompiler;
         private readonly LinqCompiler createdCompiler;
@@ -37,8 +36,10 @@ namespace UIForia.Compilers {
         private CompiledTemplateData templateData;
         private Dictionary<Type, CompiledTemplate> templateMap;
         private TemplateCache templateCache;
-        private int contextId;
+        private int contextId = 1;
         private int NextContextId => contextId++;
+
+        private LightStack<LightStack<ContextVariableDefinition>> contextStack;
 
         private static readonly DynamicStyleListTypeWrapper s_DynamicStyleListTypeWrapper = new DynamicStyleListTypeWrapper();
 
@@ -91,12 +92,12 @@ namespace UIForia.Compilers {
         private static readonly MethodInfo s_InputHandlerGroup_AddKeyboardEvent = typeof(InputHandlerGroup).GetMethod(nameof(InputHandlerGroup.AddKeyboardEvent));
 
         private static readonly PropertyInfo s_Element_IsEnabled = typeof(UIElement).GetProperty(nameof(UIElement.isEnabled));
-        private static readonly FieldInfo s_Element_BindingNode = typeof(UIElement).GetField(nameof(UIElement.bindingNode));
+        internal static readonly FieldInfo s_Element_BindingNode = typeof(UIElement).GetField(nameof(UIElement.bindingNode));
 
         private static readonly MethodInfo s_LinqBindingNode_CreateLocalContextVariable = typeof(LinqBindingNode).GetMethod(nameof(LinqBindingNode.CreateLocalContextVariable));
         private static readonly MethodInfo s_LinqBindingNode_GetLocalContextVariable = typeof(LinqBindingNode).GetMethod(nameof(LinqBindingNode.GetLocalContextVariable));
-        private static readonly MethodInfo s_LinqBindingNode_GetContextVariable = typeof(LinqBindingNode).GetMethod(nameof(LinqBindingNode.GetContextVariable));
-        private static readonly MethodInfo s_LinqBindingNode_GetRepeatItem = typeof(LinqBindingNode).GetMethod(nameof(LinqBindingNode.GetRepeatItem));
+        internal static readonly MethodInfo s_LinqBindingNode_GetContextVariable = typeof(LinqBindingNode).GetMethod(nameof(LinqBindingNode.GetContextVariable));
+        internal static readonly MethodInfo s_LinqBindingNode_GetRepeatItem = typeof(LinqBindingNode).GetMethod(nameof(LinqBindingNode.GetRepeatItem));
 
         private static readonly MethodInfo s_EventUtil_Subscribe = typeof(EventUtil).GetMethod(nameof(EventUtil.Subscribe));
 
@@ -133,7 +134,6 @@ namespace UIForia.Compilers {
             this.createdCompiler = new LinqCompiler();
             this.enabledCompiler = new LinqCompiler();
             this.resolvers = new LightStack<ContextVarAliasResolver>();
-            this.contextVarStack = new StructStack<ContextVariableDefinition>();
 
             resolvers.EnsureCapacity(8);
             resolvers.size = 3;
@@ -145,6 +145,8 @@ namespace UIForia.Compilers {
             this.createdCompiler.resolveAlias = resolveAlias;
             this.enabledCompiler.resolveAlias = resolveAlias;
             this.updateCompiler.resolveAlias = resolveAlias;
+
+            this.contextStack = new LightStack<LightStack<ContextVariableDefinition>>();
         }
 
         public static CompiledTemplateData CompileTemplates(Type appRootType, TemplateSettings templateSettings) {
@@ -179,6 +181,8 @@ namespace UIForia.Compilers {
         }
 
         private CompiledTemplate GetCompiledTemplate(ProcessedType processedType) {
+            // todo -- if this is a generic or unresolved generic we need to re-process it using concrete types (not sure if that's happening now)
+
             if (templateMap.TryGetValue(processedType.rawType, out CompiledTemplate retn)) {
                 return retn;
             }
@@ -196,6 +200,7 @@ namespace UIForia.Compilers {
             CompiledTemplate retn = templateData.CreateTemplate(templateRootNode.templateShell.filePath, templateRootNode.templateName);
             LightList<string> namespaces = LightList<string>.Get();
 
+            contextStack.Push(new LightStack<ContextVariableDefinition>());
             if (templateRootNode.templateShell.usings != null) {
                 for (int i = 0; i < templateRootNode.templateShell.usings.size; i++) {
                     namespaces.Add(templateRootNode.templateShell.usings[i].namespaceName);
@@ -241,7 +246,7 @@ namespace UIForia.Compilers {
                     Expression.Constant(processedType.id),
                     Expression.Default(typeof(UIElement)), // root has no parent
                     Expression.Constant(templateRootNode.ChildCount),
-                    Expression.Constant(0), //ast.root.GetAttributeCount()),
+                    Expression.Constant(0),
                     Expression.Constant(ctx.compiledTemplate.templateId)
                 );
 
@@ -256,6 +261,7 @@ namespace UIForia.Compilers {
             ctx.Return(ctx.rootParam);
             LightList<string>.Release(ref namespaces);
             retn.templateFn = Expression.Lambda(ctx.Finalize(typeof(UIElement)), rootParam, scopeParam);
+            contextStack.Pop();
             return retn;
         }
 
@@ -270,14 +276,10 @@ namespace UIForia.Compilers {
 
             Expression parentChildListArray = Expression.Field(parentChildList, s_LightList_Element_Array);
 
-            // childList[idx] = Visit()
             for (int i = 0; i < templateNode.ChildCount; i++) {
                 Expression visit = Visit(ctx, templateNode[i]);
-                // will be null for stored templates
-                if (visit != null) {
-                    // childList.array[i] = targetElement_x;
-                    ctx.Assign(Expression.ArrayAccess(parentChildListArray, Expression.Constant(i)), visit);
-                }
+                // childList.array[i] = targetElement_x;
+                ctx.Assign(Expression.ArrayAccess(parentChildListArray, Expression.Constant(i)), visit);
             }
 
             ctx.PopScope();
@@ -387,17 +389,17 @@ namespace UIForia.Compilers {
             MemberExpression scopeVar = Expression.Field(ExpressionFactory.Convert(nodeExpr, typeof(UIRepeatElement)), typeof(UIRepeatElement).GetField(nameof(UIRepeatElement.scope)));
             MemberExpression indexVarIdField = Expression.Field(ExpressionFactory.Convert(nodeExpr, typeof(UIRepeatElement)), typeof(UIRepeatElement).GetField(nameof(UIRepeatElement.indexVarId)));
 
-            int itemId = 8;
-            
+            int itemId = 8; // todo -- fix this
+
             Type itemType = repeatNode.processedType.rawType.GetGenericArguments()[0];
-            
+
             CompileElementData(repeatNode, ctx);
 
-            resolvers.Push(new ContextVarAliasResolver("item", itemType, itemId, AliasResolverType.RepeatItem));
+            // resolvers.Push(new ContextVarAliasResolver("item", itemType, itemId, AliasResolverType.RepeatItem));
 
             int spawnId = CompileChildrenAsTemplate(ctx, repeatNode, out int indexVarId);
 
-            PopAliasResolver();
+            // PopAliasResolver();
 
             ctx.Assign(templateSpawnIdField, Expression.Constant(spawnId));
             ctx.Assign(templateRootContext, ctx.rootParam);
@@ -422,10 +424,29 @@ namespace UIForia.Compilers {
             throw new NotImplementedException();
         }
 
+        private ScopedContextVariable[] CloneContextStack() {
+            LightStack<ContextVariableDefinition> stack = contextStack.Peek();
+            ScopedContextVariable[] clone = new ScopedContextVariable[stack.size];
+            for (int i = 0; i < stack.size; i++) {
+                clone[i] = new ScopedContextVariable() {
+                    name = stack.array[i].GetName(),
+                    id = stack.array[i].id,
+                    type = stack.array[i].type
+                };
+            }
+
+            return clone;
+        }
+
         private Expression CompileSlotDefinition(CompilationContext parentContext, SlotNode slotNode) {
             // we want to try to resolve the slot name. if we can't fall back, if fallback id is -1 then don't add a child
             CompiledSlot compiledSlot = templateData.CreateSlot(parentContext.compiledTemplate.filePath, parentContext.compiledTemplate.templateName, slotNode.slotName, slotNode.slotType);
-            slotNode.compiledSlotId = compiledSlot.slotId;
+            compiledSlot.rootElementType = parentContext.rootType.rawType;
+
+            slotNode.compiledSlot = compiledSlot;
+
+            compiledSlot.scopedVariables = CloneContextStack();
+            compiledSlot.exposedAttributes = slotNode.GetAttributes(AttributeType.Expose);
 
             Expression nodeExpr = parentContext.ElementExpr;
 
@@ -489,7 +510,7 @@ namespace UIForia.Compilers {
 
             indexVarId = NextContextId;
 
-            PushContextVarAliasResolver(indexVarId, "index", typeof(int));
+            // PushContextVarAliasResolver(indexVarId, "index", typeof(int));
             resolvers.Push(new ContextVarAliasResolver("item", repeatNode.processedType.rawType.GetGenericArguments()[0], 8, AliasResolverType.RepeatItem));
 
             ctx.rootType = parentContext.rootType;
@@ -510,11 +531,10 @@ namespace UIForia.Compilers {
             return compiledSlot.slotId;
         }
 
-        private int CompileSlotOverride(CompilationContext parentContext, SlotNode slotOverrideNode, Type type = null) {
+        private int CompileSlotOverride(CompilationContext parentContext, SlotNode slotOverrideNode, CompiledSlot definition, Type type = null) {
             if (type == null) type = typeof(UISlotOverride);
 
             CompiledSlot compiledSlot = templateData.CreateSlot(parentContext.compiledTemplate.filePath, parentContext.compiledTemplate.templateName, slotOverrideNode.slotName, SlotType.Override);
-            slotOverrideNode.compiledSlotId = compiledSlot.slotId;
 
             ParameterExpression rootParam = Expression.Parameter(typeof(UIElement), "root");
             ParameterExpression parentParam = Expression.Parameter(typeof(UIElement), "parent");
@@ -524,7 +544,7 @@ namespace UIForia.Compilers {
 
             ParameterExpression slotRootParam = ctx.GetVariable(type, "slotRoot");
             ctx.rootType = parentContext.rootType;
-            ctx.rootParam = slotRootParam;
+            ctx.rootParam = rootParam;
             ctx.templateScope = scopeParam;
             ctx.elementType = slotOverrideNode.processedType;
             ctx.applicationExpr = Expression.Field(scopeParam, s_TemplateScope_ApplicationField);
@@ -542,7 +562,12 @@ namespace UIForia.Compilers {
 
             ctx.Assign(slotRootParam, Expression.Convert(createRootExpression, type));
 
-            VisitChildren(ctx, slotOverrideNode);
+            ExposedVariableData exposedVariableData = new ExposedVariableData();
+            exposedVariableData.rootType = definition.rootElementType;
+            exposedVariableData.scopedVariables = definition.scopedVariables;
+            exposedVariableData.exposedAttrs = definition.exposedAttributes ?? new AttributeDefinition2[0];
+
+            ProcessAttrsAndVisitChildren(ctx, slotOverrideNode, exposedVariableData);
 
             ctx.Return(slotRootParam);
 
@@ -566,11 +591,62 @@ namespace UIForia.Compilers {
                 }
             }
 
-            CompileElementData(textNode, ctx);
-
-            VisitChildren(ctx, textNode);
+            ProcessAttrsAndVisitChildren(ctx, textNode);
 
             return nodeExpr;
+        }
+
+        private void ProcessAttrsAndVisitChildren(CompilationContext ctx, TemplateNode node, ExposedVariableData exposedVariableData = null) {
+            StructList<ContextAliasActions> contextMods = CompileElementData(node, ctx, exposedVariableData);
+
+            VisitChildren(ctx, node);
+
+            UndoContextMods(contextMods);
+        }
+
+        private enum ModType {
+
+            Alias,
+            Context
+
+        }
+
+        private struct ContextAliasActions {
+
+            public ModType modType;
+            public string name;
+
+        }
+
+        private void UndoContextMods(StructList<ContextAliasActions> mods) {
+            if (mods == null || mods.size == 0) {
+                return;
+            }
+
+            for (int i = 0; i < mods.size; i++) {
+                ContextAliasActions mod = mods.array[i];
+                if (mod.modType == ModType.Alias) {
+                    ContextVariableDefinition definition = FindContextByName(mod.name);
+                    // remove from name list
+                    // assert is first
+                    definition.nameList.RemoveLast();
+                }
+                else {
+                    contextStack.Peek().Pop();
+                }
+            }
+        }
+
+        private ContextVariableDefinition FindContextByName(string name) {
+            LightStack<ContextVariableDefinition> stack = contextStack.Peek();
+            for (int j = stack.size - 1; j >= 0; j--) {
+                ContextVariableDefinition definition = stack.array[j];
+                if (definition.GetName() == name) {
+                    return definition;
+                }
+            }
+
+            return null;
         }
 
         private Expression CompileContainerNode(CompilationContext ctx, ContainerNode containerNode) {
@@ -581,9 +657,7 @@ namespace UIForia.Compilers {
 
             ctx.Assign(nodeExpr, CreateElement(ctx, containerNode));
 
-            CompileElementData(containerNode, ctx);
-
-            VisitChildren(ctx, containerNode);
+            ProcessAttrsAndVisitChildren(ctx, containerNode);
 
             return nodeExpr;
         }
@@ -630,11 +704,13 @@ namespace UIForia.Compilers {
                 ctx.Assign(slotUsageExpr, Expression.Call(null, s_SlotUsageList_PreSize, Expression.Constant(slotOverrides.size)));
 
                 for (int i = 0; i < slotOverrides.size; i++) {
-                    if (!expandedTemplateNode.expandedRoot.DefinesSlot(slotOverrides.array[i].slotName)) {
+                    SlotNode definition;
+
+                    if (!expandedTemplateNode.expandedRoot.DefinesSlot(slotOverrides.array[i].slotName, out definition)) {
                         throw CompileException.UnmatchedSlot(slotOverrides.array[i].slotName, slotOverrides.array[i].elementRoot.templateShell.filePath);
                     }
 
-                    int slotId = CompileSlotOverride(ctx, slotOverrides.array[i]);
+                    int slotId = CompileSlotOverride(ctx, slotOverrides.array[i], definition.compiledSlot);
 
                     MemberExpression arrayAccess = Expression.MakeMemberAccess(slotUsageExpr, s_SlotUsageList_Array);
 
@@ -662,7 +738,7 @@ namespace UIForia.Compilers {
 
                     if (match == null) continue;
 
-                    int slotId = CompileSlotOverride(ctx, match);
+                    int slotId = CompileSlotOverride(ctx, match, null); // todo -- see what to replace null with
 
                     ctx.AddStatement(Expression.Call(
                         ctx.templateScope,
@@ -743,7 +819,7 @@ namespace UIForia.Compilers {
             }
         }
 
-        private void CompileElementData(TemplateNode templateNode, CompilationContext ctx) {
+        private StructList<ContextAliasActions> CompileElementData(TemplateNode templateNode, CompilationContext ctx, ExposedVariableData exposedData = null) {
             int count = 0;
 
             if (templateNode.attributes != null) {
@@ -761,55 +837,147 @@ namespace UIForia.Compilers {
             StructList<AttributeDefinition2> perFrameStyles = null;
             StructList<DynamicStyleData> dynamicStyleData = null;
             StructList<AttributeDefinition2> inputList = null;
+            StructList<ContextAliasActions> contextModifications = null;
 
             // todo -- handle nested access <Element thing.value.x="144f" keydown="" key-filter:keydown.keyup.withfocus="[allDown(shift, c, k), NoneOf()]"/>
             // todo -- handle .read.write bindings
-            // todo -- handle context variables
+
+            if (exposedData != null) {
+                ParameterExpression innerSlotContext = createdCompiler.AddVariable(exposedData.rootType, "__innerContext");
+                ParameterExpression element = createdCompiler.GetVariable(k_CastElement);
+                MemberExpression bindingNode = Expression.Field(element, s_Element_BindingNode);
+                MemberExpression innerContext = Expression.Field(bindingNode, typeof(LinqBindingNode).GetField(nameof(LinqBindingNode.innerContext)));
+                createdCompiler.Assign(innerSlotContext, Expression.Convert(innerContext, exposedData.rootType));
+                createdCompiler.SetImplicitContext(innerSlotContext);
+
+                for (int i = 0; i < exposedData.scopedVariables.Length; i++) {
+                    ScopedContextVariable exposed = exposedData.scopedVariables[i];
+                    contextStack.Peek().Push(new ContextVariableDefinition() {
+                        id = exposed.id,
+                        name = exposed.name,
+                        type = exposed.type,
+                        variableType = AliasResolverType.ContextVariable
+                    });
+                }
+                
+                for (int i = 0; i < exposedData.exposedAttrs.Length; i++) {
+                    ref AttributeDefinition2 attr = ref exposedData.exposedAttrs[i];
+                    // bindingNode.CreateContextVariable<string>(id);
+                    ContextVariableDefinition variableDefinition = new ContextVariableDefinition();
+
+                    Type expressionType = createdCompiler.GetExpressionType(attr.value);
+
+                    variableDefinition.name = attr.key;
+                    variableDefinition.id = NextContextId;
+                    variableDefinition.type = expressionType;
+                    variableDefinition.variableType = AliasResolverType.ContextVariable;
+
+                    contextStack.Peek().Push(variableDefinition);
+
+                    Type type = ReflectionUtil.CreateGenericType(typeof(ContextVariable<>), expressionType);
+                    ReflectionUtil.TypeArray2[0] = typeof(int);
+                    ReflectionUtil.TypeArray2[1] = typeof(string);
+                    ConstructorInfo ctor = type.GetConstructor(ReflectionUtil.TypeArray2);
+
+                    Expression contextVariable = Expression.New(ctor, Expression.Constant(variableDefinition.id), Expression.Constant(attr.key));
+                    Expression access = Expression.MakeMemberAccess(createdCompiler.GetVariable(k_CastElement), s_Element_BindingNode);
+                    Expression createVariable = ExpressionFactory.CallInstanceUnchecked(access, s_LinqBindingNode_CreateLocalContextVariable, contextVariable);
+
+                    createdCompiler.RawExpression(createVariable);
+                }
+
+                // updateCompiler.Assign(innerSlotContext, Expression.Convert(innerContext, exposedData.rootType));
+                // updateCompiler.SetImplicitContext(innerSlotContext);
+
+                createdBindingCount++;
+                // updateBindingCount++;
+
+
+                for (int i = 0; i < exposedData.scopedVariables.Length; i++) {
+                    contextStack.Peek().Pop();
+                }
+            }
+
+            for (int i = 0; i < count; i++) {
+                ref AttributeDefinition2 attr = ref templateNode.attributes.array[i];
+                if (attr.type != AttributeType.Alias) {
+                    continue;
+                }
+
+                contextModifications = contextModifications ?? StructList<ContextAliasActions>.Get();
+                contextModifications.Add(new ContextAliasActions() {
+                    modType = ModType.Alias,
+                    name = attr.key
+                });
+
+                ContextVariableDefinition contextVar = FindContextByName(attr.value.Trim());
+
+                if (contextVar == null) {
+                    throw CompileException.UnknownAlias(attr.key);
+                }
+
+                contextVar.PushAlias(attr.key);
+            }
 
             for (int i = 0; i < count; i++) {
                 // ReSharper disable once PossibleNullReferenceException
                 ref AttributeDefinition2 attr = ref templateNode.attributes.array[i];
                 switch (attr.type) {
+                    case AttributeType.Alias:
                     case AttributeType.Slot:
                         break;
                     case AttributeType.Context:
                     case AttributeType.ContextVariable: {
-                        createdBindingCount++;
+                        if (attr.key == "element" || attr.key == "parent" || attr.key == "root") {
+                            throw new CompileException($"`{attr.key} is a reserved name and cannot be used as a context variable name");
+                        }
 
-                        // todo -- error if context has this name in current hierarchy already for this template
-                        // ctx.PushContextVariable(attr.key);
+                        createdBindingCount++;
                         createdCompiler.SetImplicitContext(createdCompiler.GetVariable(k_CastRoot));
                         Type expressionType = createdCompiler.GetExpressionType(attr.value);
+
+                        contextModifications = contextModifications ?? StructList<ContextAliasActions>.Get();
+
+                        contextModifications.Add(new ContextAliasActions() {
+                            modType = ModType.Context,
+                            name = attr.key
+                        });
+
+                        LightStack<ContextVariableDefinition> ctxStack = contextStack.Peek();
+
+                        ContextVariableDefinition variableDefinition = new ContextVariableDefinition();
+
+                        variableDefinition.name = attr.key;
+                        variableDefinition.id = NextContextId;
+                        variableDefinition.type = expressionType;
+                        variableDefinition.variableType = AliasResolverType.ContextVariable;
+
+                        ctxStack.Push(variableDefinition);
 
                         Type type = ReflectionUtil.CreateGenericType(typeof(ContextVariable<>), expressionType);
                         ReflectionUtil.TypeArray2[0] = typeof(int);
                         ReflectionUtil.TypeArray2[1] = typeof(string);
                         ConstructorInfo ctor = type.GetConstructor(ReflectionUtil.TypeArray2);
-                        int aliasId = NextContextId;
-                        Expression contextVariable = Expression.New(ctor, Expression.Constant(aliasId), Expression.Constant(attr.key));
+
+                        Expression contextVariable = Expression.New(ctor, Expression.Constant(variableDefinition.id), Expression.Constant(attr.key));
                         Expression access = Expression.MakeMemberAccess(createdCompiler.GetVariable(k_CastElement), s_Element_BindingNode);
                         Expression createVariable = ExpressionFactory.CallInstanceUnchecked(access, s_LinqBindingNode_CreateLocalContextVariable, contextVariable);
 
                         createdCompiler.RawExpression(createVariable);
 
-                        PushContextVarAliasResolver(aliasId, attr.key, expressionType);
-
                         if ((attr.flags & AttributeFlags.Const) != 0) {
                             // already incremented created count
-                            CompileAssignContextVariable(createdCompiler, attr, ctx, type);
+                            CompileAssignContextVariable(createdCompiler, attr, ctx, type, variableDefinition.id);
                         }
                         else if ((attr.flags & AttributeFlags.EnableOnly) != 0) {
                             enabledBindingCount++;
-                            CompileAssignContextVariable(enabledCompiler, attr, ctx, type);
+                            CompileAssignContextVariable(enabledCompiler, attr, ctx, type, variableDefinition.id);
                         }
                         else {
                             updateBindingCount++;
-                            CompileAssignContextVariable(updateCompiler, attr, ctx, type);
+                            CompileAssignContextVariable(updateCompiler, attr, ctx, type, variableDefinition.id);
                         }
 
-                        break;
-                    }
-                    case AttributeType.Alias: {
                         break;
                     }
                     case AttributeType.Property: {
@@ -869,13 +1037,6 @@ namespace UIForia.Compilers {
                                 for (int s = 0; s < list.size; s++) {
                                     ref TextExpression expr = ref list.array[s];
                                     if (expr.isExpression) {
-                                        // updateCompiler.SetImplicitContext(updateCompiler.GetVariable(k_CastRoot));
-                                        // Type type = updateCompiler.GetExpressionType(expr.text);
-                                        // // todo -- handle list types
-                                        // if (type != typeof(string) && !typeof(IList<string>).IsAssignableFrom(type) && !typeof(IList<UIStyleGroupContainer>).IsAssignableFrom(type)) {
-                                        //     throw new CompileException("Invalid dynamic style type: " + type);
-                                        // }
-
                                         dynamicStyleData.Add(new DynamicStyleData(expr.text, typeof(string), false));
                                     }
                                     else {
@@ -911,6 +1072,10 @@ namespace UIForia.Compilers {
                             CompileAttributeBinding(updateCompiler, templateNode, attr);
                         }
 
+                        break;
+                    }
+                    case AttributeType.Expose: {
+                        // 
                         break;
                     }
                     case AttributeType.Event: {
@@ -1041,6 +1206,8 @@ namespace UIForia.Compilers {
                     )
                 );
             }
+
+            return contextModifications;
         }
 
 
@@ -1188,14 +1355,15 @@ namespace UIForia.Compilers {
         }
 
 
-        public static void CompileAssignContextVariable(LinqCompiler compiler, in AttributeDefinition2 attr, CompilationContext ctx, Type contextVarType) {
+        public static void CompileAssignContextVariable(LinqCompiler compiler, in AttributeDefinition2 attr, CompilationContext ctx, Type contextVarType, int varId) {
             //ContextVariable<T> ctxVar = (ContextVariable<T>)__castElement.bindingNode.GetContextVariable(id);
             //ctxVar.value = expression;
             compiler.SetImplicitContext(compiler.GetVariable(k_CastRoot));
             // todo -- convert to generic call: __castElement.bindingNode.SetContextVariable<string>(id, "hello")
             // need to use var method = type.GetMethod("name").MakeGenericMethod(type);
             Expression access = Expression.MakeMemberAccess(compiler.GetVariable(k_CastElement), s_Element_BindingNode);
-            Expression call = ExpressionFactory.CallInstanceUnchecked(access, s_LinqBindingNode_GetLocalContextVariable, Expression.Constant(attr.key)); // todo -- maybe resolve by id instead
+            compiler.Comment(attr.key);
+            Expression call = ExpressionFactory.CallInstanceUnchecked(access, s_LinqBindingNode_GetContextVariable, Expression.Constant(varId));
             Expression cast = Expression.Convert(call, contextVarType);
             ParameterExpression target = compiler.AddVariable(contextVarType, $"ctxVar_{attr.key}");
             compiler.Assign(target, cast);
@@ -1458,7 +1626,6 @@ namespace UIForia.Compilers {
             resolvers.Pop();
         }
 
-
         private static void CompileEventBinding(LinqCompiler compiler, in AttributeDefinition2 attr, EventInfo eventInfo) {
             bool hasReturnType = ReflectionUtil.IsFunc(eventInfo.EventHandlerType);
             Type[] eventHandlerTypes = eventInfo.EventHandlerType.GetGenericArguments();
@@ -1686,27 +1853,20 @@ namespace UIForia.Compilers {
             changeHandlers.Release();
         }
 
-        private void PushContextVarAliasResolver(int id, string name, Type type) {
-            resolvers.Push(new ContextVarAliasResolver(name, type, id, AliasResolverType.ContextVariable));
-        }
-
-        private void PushRepeatContextVarAliasResolver(int id, string name, Type type) {
-            resolvers.Push(new ContextVarAliasResolver(name, type, id, AliasResolverType.ContextVariable));
-        }
-
-        private void PopAliasResolver() {
-            resolvers.Pop();
-        }
-
         private Expression ResolveAlias(string aliasName, LinqCompiler compiler) {
-            for (int i = 0; i < resolvers.size; i++) {
-                ContextVarAliasResolver resolver = resolvers.PeekAtUnchecked(i);
-                if (resolver.name == aliasName) {
-                    return resolver.Resolve(compiler);
-                }
+            if (aliasName == "element") { }
+
+            if (aliasName == "parent") { }
+
+            if (aliasName == "root") { }
+
+            ContextVariableDefinition contextVar = FindContextByName(aliasName);
+
+            if (contextVar != null) {
+                return contextVar.Resolve(compiler);
             }
 
-            return null;
+            throw CompileException.UnknownAlias(aliasName);
         }
 
         private SlotNode GetMatchingInputSlotNode(LightList<SlotNode> inputSlots, SlotNode accepted) {
@@ -1778,147 +1938,6 @@ namespace UIForia.Compilers {
                 this.text = text;
                 this.returnType = returnType;
                 this.isConstant = isConstant;
-            }
-
-        }
-
-        internal enum AliasResolverType {
-
-            MouseEvent,
-            KeyEvent,
-            TouchEvent,
-            Element,
-            Parent,
-            ContextVariable,
-            ControllerEvent,
-
-            Root,
-
-            RepeatItem,
-
-            RepeatIndex
-
-        }
-
-        internal struct ContextVarAliasResolver {
-
-            public string name;
-            public string strippedName;
-            public Type type;
-            public int id;
-            public AliasResolverType resolverType;
-
-            public ContextVarAliasResolver(string name, Type type, int id, AliasResolverType resolverType) {
-                this.name = name[0] == '$' ? name : '$' + name;
-                this.strippedName = name.Substring(0);
-                this.type = type;
-                this.id = id;
-                this.resolverType = resolverType;
-            }
-
-            public Expression Resolve(LinqCompiler compiler) {
-                switch (resolverType) {
-                    case AliasResolverType.MouseEvent:
-                        return compiler.Value(k_InputEventParameterName + "." + nameof(GenericInputEvent.AsMouseInputEvent));
-
-                    case AliasResolverType.KeyEvent:
-                        return compiler.Value(k_InputEventParameterName + "." + nameof(GenericInputEvent.AsKeyInputEvent));
-
-                    case AliasResolverType.TouchEvent:
-                    case AliasResolverType.ControllerEvent:
-                        throw new NotImplementedException();
-
-                    case AliasResolverType.Element:
-                        return compiler.GetVariable(k_CastElement);
-
-                    case AliasResolverType.Root:
-                        return compiler.GetVariable(k_CastRoot);
-
-                    case AliasResolverType.Parent: // todo -- use expressions
-                        return compiler.Value(k_CastElement + ".parent");
-
-                    case AliasResolverType.ContextVariable: {
-                        ParameterExpression el = compiler.GetVariable(k_CastElement);
-                        Expression access = Expression.MakeMemberAccess(el, s_Element_BindingNode);
-                        Expression call = ExpressionFactory.CallInstanceUnchecked(access, s_LinqBindingNode_GetContextVariable, Expression.Constant(id));
-                        Type contextVarType = ReflectionUtil.CreateGenericType(typeof(ContextVariable<>), type);
-
-                        UnaryExpression convert = Expression.Convert(call, contextVarType);
-                        ParameterExpression variable = compiler.AddVariable(type, "ctxvar_" + strippedName);
-
-                        compiler.Assign(variable, Expression.MakeMemberAccess(convert, contextVarType.GetField("value")));
-                        return variable;
-                    }
-                    case AliasResolverType.RepeatItem: {
-                        compiler.Comment(name);
-                        //var repeat_item_name = element.bindingNode.GetRepeatItem<T>(id).value;
-                        ParameterExpression el = compiler.GetVariable(k_CastElement);
-                        Expression access = Expression.MakeMemberAccess(el, s_Element_BindingNode);
-
-                        ReflectionUtil.TypeArray1[0] = type;
-                        MethodInfo getItem = s_LinqBindingNode_GetRepeatItem.MakeGenericMethod(ReflectionUtil.TypeArray1);
-                        Expression call = ExpressionFactory.CallInstanceUnchecked(access, getItem, Expression.Constant(id));
-                        Type contextVarType = ReflectionUtil.CreateGenericType(typeof(ContextVariable<>), type);
-
-                        UnaryExpression convert = Expression.Convert(call, contextVarType);
-                        ParameterExpression variable = compiler.AddVariable(type, "repeat_item_" + strippedName);
-
-                        compiler.Assign(variable, Expression.MakeMemberAccess(convert, contextVarType.GetField(nameof(ContextVariable<int>.value))));
-                        return variable;
-                    }
-                    case AliasResolverType.RepeatIndex: {
-                        ParameterExpression el = compiler.GetVariable(k_CastElement);
-                        Expression access = Expression.MakeMemberAccess(el, s_Element_BindingNode);
-                        Expression call = ExpressionFactory.CallInstanceUnchecked(access, s_LinqBindingNode_GetContextVariable, Expression.Constant(id));
-
-                        UnaryExpression convert = Expression.Convert(call, typeof(ContextVariable<int>));
-                        ParameterExpression variable = compiler.AddVariable(type, "ctxvar_" + strippedName);
-
-                        compiler.Assign(variable, Expression.MakeMemberAccess(convert, typeof(ContextVariable<int>).GetField(nameof(ContextVariable<int>.value))));
-                        return variable;
-                    }
-
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-            }
-
-        }
-
-        public class DynamicStyleListTypeWrapper : ITypeWrapper {
-
-            public ParameterExpression styleList;
-
-            private static readonly ConstructorInfo s_StringCtor = typeof(DynamicStyleList).GetConstructor(new[] {typeof(string)});
-            private static readonly ConstructorInfo s_StringListCtor = typeof(DynamicStyleList).GetConstructor(new[] {typeof(IList<string>)});
-            private static readonly ConstructorInfo s_StyleRefCtor = typeof(DynamicStyleList).GetConstructor(new[] {typeof(UIStyleGroupContainer)});
-            private static readonly ConstructorInfo s_StyleRefListCtor = typeof(DynamicStyleList).GetConstructor(new[] {typeof(IList<UIStyleGroupContainer>)});
-            private static readonly ConstructorInfo s_CharArrayCtor = typeof(DynamicStyleList).GetConstructor(new[] {typeof(char[])});
-
-            public Expression Wrap(Type targetType, Expression input) {
-                if (targetType != typeof(DynamicStyleList)) {
-                    return null;
-                }
-
-                Type inputType = input.Type;
-
-                if (inputType == typeof(string)) {
-                    return Expression.New(s_StringCtor, input);
-                }
-                else if (inputType == typeof(char[])) {
-                    return Expression.New(s_CharArrayCtor, input);
-                }
-                else if (typeof(IList<string>).IsAssignableFrom(inputType)) {
-                    return Expression.New(s_StringListCtor, input);
-                }
-                else if (inputType == typeof(UIStyleGroupContainer)) {
-                    return Expression.New(s_StyleRefCtor, input);
-                }
-                else if (typeof(IList<UIStyleGroupContainer>).IsAssignableFrom(inputType)) {
-                    return Expression.New(s_StyleRefListCtor, input);
-                }
-
-                return null;
             }
 
         }

@@ -12,7 +12,6 @@ namespace UIForia.Compilers {
         public string slotName;
         public short slotId;
         public SlotType slotType;
-        public StructStack<ContextVariableDefinition> contextVariables;
         
         public byte parentSlotId_0;
         public byte parentSlotId_1;
@@ -20,9 +19,8 @@ namespace UIForia.Compilers {
         public byte parentSlotId_3;
         public StructList<AttributeDefinition2> contextAttributes;
 
-        public SlotDefinition(string slotName, StructStack<ContextVariableDefinition> contextVariables, SlotType slotType) {
+        public SlotDefinition(string slotName, SlotType slotType) {
             this.slotName = slotName;
-            this.contextVariables = contextVariables;
             this.slotId = -1;
             this.parentSlotId_0 = k_UnassignedParent;
             this.parentSlotId_1 = k_UnassignedParent;

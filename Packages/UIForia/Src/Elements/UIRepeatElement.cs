@@ -6,6 +6,7 @@ using UIForia.Extensions;
 using UIForia.Parsing;
 using UIForia.Systems;
 using UIForia.Util;
+using UnityEditorInternal.Profiling.Memory.Experimental;
 
 namespace UIForia.Elements {
 
@@ -102,7 +103,7 @@ namespace UIForia.Elements {
         public IList<T> list;
         private IList<T> previousList;
         private int previousSize;
-        public Func<T, T, RepeatItemKey> keyFn;
+        public Func<T, RepeatItemKey> keyFn;
         private bool skipUpdate;
 
         private T[] listClone;
@@ -142,12 +143,41 @@ namespace UIForia.Elements {
             // CloneList();
         }
 
-        private void UpdateWithKeyFunc() { }
+        private RepeatIndex[] keys;
+
+        private struct RepeatIndex {
+
+            public UIElement element;
+            public RepeatItemKey key;
+
+        }
+        
+        private void UpdateWithKeyFunc() {
+            for (int i = 0; i < children.size; i++) {
+                RepeatItemKey key = keyFn(list[i]);
+                // for each item in the list, compute a key for it
+                // key should be unique but maybe we don't enforce this
+
+                // for each key we compute, if we had that key before we need to get the element and insert it at that index
+
+                // children[i] = GetElementForKey(key);
+                
+                if (keys[i].key != key) {
+                    keys[i].key = key;
+                    keys[i].element = children[i];
+                }        
+                
+            }
+
+            for (int i = 0; i < children.size; i++) {
+                children.array[i].bindingNode.SetRepeatItem(8, "item", list[i]);
+            }
+        }
 
         private void UpdateWithoutKeyFunc() {
             for (int i = 0; i < children.size; i++) {
-                children.array[i].bindingNode.SetRepeatItem(5, "item", list[i]);
-            }            
+                children.array[i].bindingNode.SetRepeatItem(8, "item", list[i]);
+            }
         }
 
         private void CloneList() {

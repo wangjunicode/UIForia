@@ -7,32 +7,39 @@ using UIForia.Util;
 
 namespace UIForia.Compilers {
 
-    public class ContextVariableDefinition {
+    public enum AliasResolverType {
 
-        public int id;
-        public Type type;
+        MouseEvent,
+        KeyEvent,
+        TouchEvent,
+        Element,
+        Parent,
+        ContextVariable,
+        ControllerEvent,
+        Root,
+        RepeatItem,
+        RepeatIndex
+
+    }
+
+    internal struct ContextVarAliasResolver {
+
         public string name;
-        public bool isExposed;
-        public LightList<string> nameList;
-        public AliasResolverType variableType;
+        public string strippedName;
+        public Type type;
+        public int id;
+        public AliasResolverType resolverType;
 
-        public void PushAlias(string alias) {
-            if (nameList == null) {
-                nameList = new LightList<string>(4);
-            }
-            nameList.Add(alias);
-        }
-        
-        public string GetName() {
-            if (nameList != null && nameList.size > 0) {
-                return nameList.Last;
-            }
-
-            return name;
+        public ContextVarAliasResolver(string name, Type type, int id, AliasResolverType resolverType) {
+            this.name = name[0] == '$' ? name : '$' + name;
+            this.strippedName = name.Substring(0);
+            this.type = type;
+            this.id = id;
+            this.resolverType = resolverType;
         }
 
         public Expression Resolve(LinqCompiler compiler) {
-            switch (variableType) {
+            switch (resolverType) {
                 case AliasResolverType.MouseEvent:
                     return compiler.Value(TemplateCompiler.k_InputEventParameterName + "." + nameof(GenericInputEvent.AsMouseInputEvent));
 
@@ -59,7 +66,7 @@ namespace UIForia.Compilers {
                     Type contextVarType = ReflectionUtil.CreateGenericType(typeof(ContextVariable<>), type);
 
                     UnaryExpression convert = Expression.Convert(call, contextVarType);
-                    ParameterExpression variable = compiler.AddVariable(type, "ctxvar_" + GetName());
+                    ParameterExpression variable = compiler.AddVariable(type, "ctxvar_" + strippedName);
 
                     compiler.Assign(variable, Expression.MakeMemberAccess(convert, contextVarType.GetField("value")));
                     return variable;
@@ -76,7 +83,7 @@ namespace UIForia.Compilers {
                     Type contextVarType = ReflectionUtil.CreateGenericType(typeof(ContextVariable<>), type);
 
                     UnaryExpression convert = Expression.Convert(call, contextVarType);
-                    ParameterExpression variable = compiler.AddVariable(type, "repeat_item_" + GetName());
+                    ParameterExpression variable = compiler.AddVariable(type, "repeat_item_" + strippedName);
 
                     compiler.Assign(variable, Expression.MakeMemberAccess(convert, contextVarType.GetField(nameof(ContextVariable<int>.value))));
                     return variable;
@@ -87,7 +94,7 @@ namespace UIForia.Compilers {
                     Expression call = ExpressionFactory.CallInstanceUnchecked(access, TemplateCompiler.s_LinqBindingNode_GetContextVariable, Expression.Constant(id));
 
                     UnaryExpression convert = Expression.Convert(call, typeof(ContextVariable<int>));
-                    ParameterExpression variable = compiler.AddVariable(type, "ctxvar_" + GetName());
+                    ParameterExpression variable = compiler.AddVariable(type, "ctxvar_" + strippedName);
 
                     compiler.Assign(variable, Expression.MakeMemberAccess(convert, typeof(ContextVariable<int>).GetField(nameof(ContextVariable<int>.value))));
                     return variable;
@@ -97,7 +104,7 @@ namespace UIForia.Compilers {
                     throw new ArgumentOutOfRangeException();
             }
         }
-        
+
     }
 
 }

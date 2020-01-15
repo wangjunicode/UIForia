@@ -42,20 +42,20 @@ namespace UIForia.Parsing {
             return false;
         }
 
-        public bool DefinesSlot(string slotName) {
+        public bool DefinesSlot(string slotName, out SlotNode slotNode) {
             if (slotDefinitionNodes == null || slotDefinitionNodes.size == 0) {
-                // slotNode = null;
+                slotNode = null;
                 return false;
             }
 
             for (int i = 0; i < slotDefinitionNodes.size; i++) {
                 if (slotDefinitionNodes.array[i].slotName == slotName) {
-                    //  slotNode = slotDefinitionNodes.array[i];
+                    slotNode = slotDefinitionNodes.array[i];
                     return true;
                 }
             }
 
-            //  slotNode = null;
+            slotNode = null;
             return false;
         }
 

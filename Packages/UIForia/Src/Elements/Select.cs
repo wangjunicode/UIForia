@@ -60,7 +60,7 @@ namespace UIForia.Elements {
 
         public bool selecting = false;
         internal UIChildrenElement childrenElement;
-        internal UIElement optionList;
+        internal ScrollView optionList;
 
         [WriteBinding(nameof(selectedValue))]
         public event Action<T> onValueChanged;
@@ -144,7 +144,7 @@ namespace UIForia.Elements {
             onClear = OnClear;
             onRemove = OnRemove;
             childrenElement = FindById<UIChildrenElement>("option-children");
-            optionList = FindById<UIElement>("option-list");
+            optionList = FindById<ScrollView>("option-list");
 
             Application.InputSystem.RegisterFocusable(this);
         }
@@ -310,28 +310,7 @@ namespace UIForia.Elements {
             }
             UIElement element = childrenElement.children[keyboardNavigationIndex];
             element.style.EnterState(StyleState.Hover);
-            float localPositionY = element.layoutResult.localPosition.y;
-            float elementHeight = element.layoutResult.ActualHeight;
-            float elementBottom = localPositionY + elementHeight;
-
-            float trackHeight = optionList.layoutResult.ActualHeight;
-            float scrollViewHeight = optionList.layoutResult.AllocatedHeight;
-            float minY = childrenElement.children[0].layoutResult.localPosition.y;
-            
-            if (localPositionY >= 0 && elementBottom < scrollViewHeight) {
-                return;
-            }
-
-            if (localPositionY < 0) {
-                // scrolls up to the upper edge of the element
-                float normalizedScrollY = (localPositionY - minY) / (trackHeight - scrollViewHeight);
-                element.TriggerEvent(new UIScrollEvent(0, normalizedScrollY));
-            }
-            else {
-                // scrolls down but keeps the element at the lower edge of the scrollView
-                float normalizedScrollY = (elementBottom - scrollViewHeight - minY) / (trackHeight - scrollViewHeight);
-                element.TriggerEvent(new UIScrollEvent(0, normalizedScrollY));
-            }
+            optionList.ScrollElementIntoView(element);
         }
 
         [OnMouseClick()]
@@ -351,6 +330,13 @@ namespace UIForia.Elements {
 
             evt.StopPropagation();
             evt.Consume();
+        }
+
+        [OnMouseMove()]
+        public void OnMouseMove() {
+            if (keyboardNavigationIndex > 0) {
+                childrenElement.children[keyboardNavigationIndex].style.ExitState(StyleState.Hover);
+            }
         }
 
         public void AdjustOptionPosition() {            

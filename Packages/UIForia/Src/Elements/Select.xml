@@ -157,7 +157,7 @@
 
         <ScrollView onMouseClick="SelectElement($event)" style="select-options" x-id="option-list" scrollSpeed="scrollSpeed" disableOverflowX="disableOverflowX" disableOverflowY="disableOverflowY">
             <Children x-id="option-children" style="transclude" x-type="template">
-                <Group style="select-option">
+                <Group style="select-option" onMouseMove="OnMouseMove()">
                     <Image src="selectedElementIcon" style="selected-element-icon" if="DisplaySelectedIcon($option__internal)" />
                     <Div style="select-label">{$option__internal.Label}</Div>
                 </Group>

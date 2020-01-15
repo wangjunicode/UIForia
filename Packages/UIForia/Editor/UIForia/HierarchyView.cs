@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using UIForia.Editor;
 using UIForia.Elements;
 using UIForia.Layout;
-using UIForia.Layout.LayoutTypes;
 using UIForia.Rendering;
 using UIForia.Util;
 using UnityEditor.IMGUI.Controls;

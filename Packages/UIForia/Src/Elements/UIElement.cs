@@ -11,7 +11,6 @@ using UIForia.Systems;
 using UIForia.Templates;
 using UIForia.UIInput;
 using UIForia.Util;
-using UnityEngine;
 
 namespace UIForia.Elements {
 
@@ -84,7 +83,7 @@ namespace UIForia.Elements {
         public readonly UIStyleSet style;
 
         internal LightList<UIElement> children; // todo -- replace w/ linked list & child count
-//        internal LayoutHistory layoutHistory;
+        //        internal LayoutHistory layoutHistory;
 
         public ExpressionContext templateContext; // todo -- can probably be moved to binding system
         
@@ -143,7 +142,7 @@ namespace UIForia.Elements {
         public bool isSelfDisabled => (flags & UIElementFlags.Enabled) == 0;
 
         public bool isEnabled => (flags & UIElementFlags.EnabledFlagSet) == (UIElementFlags.EnabledFlagSet);
-            //!isDestroyed && (flags & UIElementFlags.SelfAndAncestorEnabled) == UIElementFlags.SelfAndAncestorEnabled;
+        //!isDestroyed && (flags & UIElementFlags.SelfAndAncestorEnabled) == UIElementFlags.SelfAndAncestorEnabled;
 
         public bool isDisabled => (flags & UIElementFlags.EnabledFlagSet) != (UIElementFlags.EnabledFlagSet);
         

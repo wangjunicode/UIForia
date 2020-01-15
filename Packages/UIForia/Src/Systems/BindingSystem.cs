@@ -2,9 +2,9 @@
 using UIForia.Bindings;
 using UIForia.Elements;
 using UIForia.Expressions;
+using UIForia.Rendering;
 using UIForia.Templates;
 using UIForia.Util;
-using UnityEngine;
 
 namespace UIForia.Systems {
 

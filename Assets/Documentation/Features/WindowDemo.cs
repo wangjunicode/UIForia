@@ -1,6 +1,7 @@
 using UI;
 using UIForia.Attributes;
 using UIForia.Elements;
+using UIForia.Rendering;
 using UnityEngine;
 
 namespace Documentation.Features {

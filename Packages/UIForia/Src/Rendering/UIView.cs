@@ -1,13 +1,13 @@
 using System;
 using UIForia.Elements;
 using UIForia.Layout;
-using UIForia.Rendering;
 using UIForia.Templates;
 using UIForia.Util;
 using UnityEngine;
 using UnityEngine.Rendering;
-using Application = UIForia.Application;
 
+namespace UIForia.Rendering {
+    
 public class UIViewRootElement : UIElement, IPointerQueryHandler {
 
     public UIViewRootElement() {
@@ -225,4 +225,6 @@ public class UIView {
 
         return false;
     }
+}
+
 }

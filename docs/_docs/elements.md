@@ -185,7 +185,7 @@ The InputElement supports generic typed values. It's one of the basic form eleme
 
 Custom formatting / serialization might be necessary if you have number fields with very unique needs.
 The defaults will work well for most basic cases but might not be what you want if you're trying to display
-numbers with a super high precision.  
+numbers with a super high precision.
 
 ### Examples
 
@@ -206,6 +206,54 @@ is a shorthand for the generic version:
 
 ## Select
 
+| Parameter           | Required | Type                             | Supports Write Binding | Description                                                                                                                              |
+|:--------------------|:---------|:---------------------------------|:-----------------------|:-----------------------------------------------------------------------------------------------------------------------------------------|
+| selectedValue       |          | T                                | yes                    | Sets the selected value. The `selectedIndex` will be figured out automatically                                                           |
+| onValueChanged      |          | `Action<T>`                      | *                      | Gets executed when the select changes the selectedValue.                                                                                 |
+| selectedIndex       |          | int                              | yes                    | You can bind to the selectedIndex in addition or as an alternative to seletedValue.                                                      |
+| onIndexChanged      |          | `Action<int>`                    | *                      | Gets executed when the selected value changes and thus the selectedIndex with it.                                                        |
+| defaultValue        |          | T                                |                        | Will be used if the `selectedValue` is null or unset.                                                                                    |
+| options             | yes      | RepeatableList<ISelectOption<T>> |                        | The backing data for the select element.                                                                                                 |
+| selectedElementIcon |          | string                           |                        | Defaults to `"icons/ui_icon_popover_checkmark@2x"`; it's the little icon that gets drawn next to the selected value in the options list. |
+| disabled            |          | bool                             |                        | Disables the select element                                                                                                              |
+| scrollSpeed         |          | float                            |                        | Default: 10                                                                                                                              |
+| disableOverflowX    |          | bool                             |                        | Disables horizontal scrolling                                                                                                            |
+| disableOverflowY    |          | bool                             |                        | Disables vertical scrolling                                                                                                              |
+
+## Write Bindings
+<span class="badge badge-info">A more detailed article around bindings will come later!</span>
+
+As seen in `InputElement` and `Select` you can opt-in to write bindings for some of their parameters.
+That allows for automatic write-back into your custom element's property. By default all property bindings
+are read bindings. Element properties can be configured with binding options.
+
+These two examples are the same for instance, since `.read` is implicitly added for every property binding:
+``` xml
+<InputElement--string value.read.write="name" placeholder="'Enter your name'" />
+<InputElement--string value.read.write="name" placeholder.read="'Enter your name'" />
+```
+
+That roughly translates to: 
+- read the value bound to the placeholder parameter value every frame and store the (static) value into the input's placeholder property.
+
+For the value field it would be
+- read the value of the property `name` from your backing class and store its value in the value parameter of the input element
+- if the `value` changes due to some action inside of the input element write that change back to `name`  
+
+
+## Custom Generic Types for InputElement or Select
+ 
+When using custom generic types make sure you import it in your template `<Using namespace="your.name.space" />`:
+``` xml
+<UITemplate>
+    <Using namespace="your.name.space" />
+    <Using namespace="UIForia.Animation" />
+    <Contents>
+        <InputElement--CustomType value.read.write="myval" />
+        <Select--AnimationDirection options="directions" selectedValue.read.write="direction" />
+    </Contents>
+</UITemplate>
+```
 
 ## ScrollView
 Use this element if you want to define a fixed size area that may have children occupying more than that space.

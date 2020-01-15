@@ -55,10 +55,21 @@
         </Group>
 
         <Group style="section">
+            <Heading2>Corner Bevels</Heading2>
+            <Div style="bevel-demo">
+                
+                This box has different bevels on each corner.
+                
+            </Div>
+        </Group>
+
+        <Group style="section">
             <Heading2>Pointer-Events</Heading2>
             <Div style="pointer-demo">
                 
                 <Div style="pointer-none">Can't touch this</Div>
+                
+                The yellow box has a hover state that you will be unable to trigger!
                 
             </Div>
         </Group>

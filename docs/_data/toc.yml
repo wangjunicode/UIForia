@@ -59,6 +59,8 @@
       url: "docs/sound"
     - title: "Editor Tools"
       url: "docs/tools"
+    - title: "Types"
+      url: "docs/types"
     - title: "Misc"
       url: "docs/misc"
       children:

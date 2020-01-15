@@ -2,44 +2,150 @@
 id: StyleProperties
 title: Style Properties
 layout: page
-
+tags:
+  - uiforia
+  - style
 ---
-**Background**  
-[`BackgroundColor`](#backgroundcolor--color)  
-[`BackgroundTint`](#BackgroundTint--color)  
-[`BackgroundImageOffset`](#backgroundimageoffset--uifixedlength)  
-[`BackgroundImageRotation`](#backgroundimagerotation--uifixedlength)  
-[`BackgroundImage`](#backgroundimage--texture2d)  
-[`BackgroundImageOffsetX`](#backgroundimageoffsetx--uifixedlength)  
-[`BackgroundImageOffsetY`](#backgroundimageoffsety---uifixedlength)  
-[`BackgroundImageScaleX`](#backgroundimagescalex--uifixedlength)  
-[`BackgroundImageScaleY`](#backgroundimagescaley--uifixedlength)  
-[`BackgroundImageTileX`](#backgroundimagetilex--uifixedlength)  
-[`BackgroundImageTileY`](#backgroundimagetiley--uifixedlength)  
 
-**Border**  
-[`Border`](#border--uifixedlength)  
-[`BorderRight`](#borderright--uifixedlength)  
-[`BorderLeft`](#borderleft--uifixedlength)  
-[`BorderTop`](#bordertop--uifixedlength)  
-[`BorderBottom`](#borderbottom--uifixedlength)  
-[`BorderColor`](#bordercolor--color)  
-[`BorderColorTop`](#bordercolortop--color)   
-[`BorderColorBottom`](#bordercolorbottom--color)    
-[`BorderColorLeft`](#bordercolorleft--color)    
-[`BorderColorRight`](#bordercolorright--color)    
-[`BorderRadius`](#borderradius--uifixedlength)  
-[`BorderRadiusBottom`](#borderradiusbottom--uifixedlength)  
-[`BorderRadiusTop`](#borderradiustop--uifixedlength)  
-[`BorderRadiusLeft`](#borderradiusleft--uifixedlength)  
-[`BorderRadiusRight`](#borderradiusright--uifixedlength)  
+# Style Properties  
 
-[`CornerBevelTopLeft`](#cornerbeveltopleft--uifixedlength)  
-[`CornerBevelTopRight`](#cornerbeveltopright--uifixedlength)  
-[`CornerBevelBottomLeft`](#cornerbevelbottomleft--uifixedlength)  
-[`CornerBevelBottomRight`](#cornerbevelbottomright--uifixedlength)  
+## Clipping and Overflow
+### `Overflow`, `OverflowX` and `OverflowY` : [Overflow](/docs/types#overflow)
+   Overflow denotes how content that spills outside of a containing box is treated.
+   The options are
+   * `Hidden` Never show overflowing content
+   * `Visible` (default) Always show overflowing content
+   * `Scroll` Hide overflowing content and create a scroll bar
+   
+   Overflow can be set independently on the X and Y axes:
+  
+````C#
+ style MyStyle {
+    OverflowX = Hidden;  // set x axis to hidden
+    OverflowY = Visible; // set y axis to hidden
+    Overflow = Scroll; // Set both axes to scroll
+} 
+````
 
-**Layout**  
+### `ClipBehavior` : [ClipBehavior](/docs/types#clipbehavior)
+
+### `ClipBounds` : [ClipBounds](/docs/types#clipbounds)
+
+### `PointerEvents` : [PointerEvents](/docs/types#pointerevents)
+
+## Background
+### `BackgroundColor` : [Color](/docs/misc#list-of-all-supported-colors)
+Background Color paints the background of the element. It will accept color values in the following forms:
+* `rgba(byte, byte, byte, byte)` 
+* `rgb(byte, byte, byte)` 
+* `#AABBCCDD` (hex form by channel r, g, b, a)
+* any of the following color names: `black`, `blue`, `clear`, `cyan`, `gray`, `grey`, `green`, `magenta`, `red`, `white`, `yellow`
+
+### `BackgroundTint` : [Color](/docs/misc#list-of-all-supported-colors) 
+Tints the background image without affecting the background color. Accepts a color value.
+
+### `BackgroundImageOffset` : [UIFixedLength](style-units#uifixedlength) 
+Offset the texture coordinates used for the background image
+````c#
+style MyStyle {
+    BackgroundImageOffsetX = 10; // set for x axis
+    BackgroundImageOffsetY = 10; // set for y axis
+    BackgroundImageOffset = 32; // set for both axes
+}
+````  
+
+### `BackgroundImageScale` : [UIFixedLength](style-units#uifixedlength) 
+Scale the texture coordinates used for the background image. Used to tile the image if not part of a sprite sheet
+```` c#
+style MyStyle {
+    BackgroundImageScaleX = 2.3; // set for x axis
+    BackgroundImageScaleY = 1.4; // set for y axis
+    BackgroundImageScale = 0.5; // set for both axes
+}
+````
+
+### `BackgroundImageRotation` : [UIFixedLength](style-units#uifixedlength) 
+Rotate the texture coordinates used for the background image, in degrees.
+````c#
+style MyStyle {
+    BackgroundImageRotation = 45;
+}
+````
+  
+### `BackgroundImageTileX` : [UIFixedLength](style-units#uifixedlength)
+Renders an image on a Tilemap's x-axis ([see Unity Tilemap](https://docs.unity3d.com/Manual/class-Tilemap.html))  
+
+### `BackgroundImageTileY : Texture` 
+Renders an image on a Tilemap's y-axis ([see Unity Tilemap](https://docs.unity3d.com/Manual/class-Tilemap.html))
+
+## Border  
+
+### `Border` : [UIFixedLength](style-units#uifixedlength) 
+Sets the border size on an element. Supports the 1-4 parameter shorthand for setting top, right, bottom and left values.
+
+``` Border = 1px; // sets a 1px border on all sides ```  
+``` Border = 5px 1px; // sets a 5px border top and bottom and a 1px border left and right ```
+
+### `BorderTop` : [UIFixedLength](style-units#uifixedlength)
+Sets a border size at the top of an element.  
+
+### `BorderRight` : [UIFixedLength](style-units#uifixedlength)
+Sets a border size on the right-side of an element.
+    
+### `BorderBottom` : [UIFixedLength](style-units#uifixedlength)
+Sets a border size on the bottom of an element.
+
+### `BorderLeft` : [UIFixedLength](style-units#uifixedlength)
+Sets the border size on the left side of an element.
+    
+### `BorderColor` : [Color](/docs/misc#list-of-all-supported-colors)
+Sets the color of the border for all sides. Also supports the 1-4 value shorthand.
+Note: without setting a color there wouldn't be a visible border!
+``` c#
+Border = red green rgba(200, 200, 0, 255) #facabf; // to set a different color on every side
+```
+
+#### `BorderColorTop` : [Color](/docs/misc#list-of-all-supported-colors)
+#### `BorderColorRight` : [Color](/docs/misc#list-of-all-supported-colors)
+#### `BorderColorBottom` : [Color](/docs/misc#list-of-all-supported-colors)
+#### `BorderColorLeft` : [Color](/docs/misc#list-of-all-supported-colors)
+
+### `BorderRadius` : [UIFixedLength](style-units#uifixedlength) 
+Makes the border round on the corners. Supports the 1-4 property shorthand.
+```
+BorderRadius = 10px 50%; // top-left and bottom-right: 10px; bottom-left and top-right: 50% of the element size.
+```
+
+#### `BorderRadiusTopLeft` : [UIFixedLength](style-units#uifixedlength) 
+#### `BorderRadiusTopRight` : [UIFixedLength](style-units#uifixedlength) 
+#### `BorderRadiusBottomRight` : [UIFixedLength](style-units#uifixedlength) 
+#### `BorderRadiusBottomLeft` : [UIFixedLength](style-units#uifixedlength) 
+
+### Corner Bevels
+Cuts off a corner in a 45 degree angle. The size you define is the length of the cutout from the corner. 
+#### `CornerBevelTopLeft` : [UIFixedLength](style-units#uifixedlength) 
+#### `CornerBevelTopRight` : [UIFixedLength](style-units#uifixedlength) 
+#### `CornerBevelBottomLeft` : [UIFixedLength](style-units#uifixedlength) 
+#### `CornerBevelBottomRight` : [UIFixedLength](style-units#uifixedlength) 
+
+## Alignments
+There's an [extensive guide around alignments](/docs/alignments) for more details.
+
+### `AlignmentTarget` : [AlignmentTarget](/docs/types#alignmenttarget)
+Shorthand to set `AlignmentTargetX` and `AlignmentTargetY` to the same value.
+### `AlignmentTargetX` : [AlignmentTarget](/docs/types#alignmenttarget)
+### `AlignmentTargetY` : [AlignmentTarget](/docs/types#alignmenttarget)
+### `AlignmentDirectionX` : [AlignmentDirection](/docs/types#alignmentdirection)
+### `AlignmentDirectionY` : [AlignmentDirection](/docs/types#alignmentdirection)
+### `AlignmentOriginX` : [OffsetMeasurement](/docs/style/style-units#offsetmeasurement)
+### `AlignmentOriginY` : [OffsetMeasurement](/docs/style/style-units#offsetmeasurement)
+### `AlignmentOffsetX` : [OffsetMeasurement](/docs/style/style-units#offsetmeasurement)
+### `AlignmentOffsetY` : [OffsetMeasurement](/docs/style/style-units#offsetmeasurement)
+
+### `AlignX`
+### `AlignY`
+
+## Layout  
 [`LayoutType`](#layouttype--layouttype)   
 [`LayoutBehavior`](#layoutbehavior--layoutbehavior)     
 [`Layer`](#layer)  
@@ -65,15 +171,12 @@ layout: page
 [`PaddingTop`](#paddingtop--uifixedlength)  
 [`PaddingBottom`](#paddingbottom--uifixedlength)  
 [`PaddingLeft`](#paddingleft--uifixedlength)  
-[`PaddingRight`](#paddingright--uifixedlength)  
-[`Visibility`](#visibility--visibility)  
+[`PaddingRight`](#paddingright--uifixedlength)
+[`Visibility`](#visibility--visibility)
 [`ZIndex`](#zindex--int)  
 
-**FlexBox**  
-[`FlexLayoutDirection`](#flexlayoutdirection--layoutdirection)  
-[`FlexMainAxisAlignment`](#flexmainaxisalignment--mainaxisalignment)  
-[`FlexCrossAxisAlignment`](#flexcrossaxisalignment--crossaxisalignment)  
-[`FlexItemSelfAlignment`](#flexitemselfalignment--crossaxisalignment)  
+**FlexBox**
+[`FlexLayoutDirection`](#flexlayoutdirection--layoutdirection)
 [`FlexItemGrow`](#flexitemgrow--int)  
 [`FlexItemShrink`](#flexitemshrink--int)  
 [`FlexLayoutWrap`](#flexlayoutwrap--layoutwrap)  
@@ -96,22 +199,10 @@ layout: page
 [`GridLayoutRowGap`](#gridlayoutrowgap--float)    
 [`GridLayoutMainAxisAutoSize`](#gridlayoutmainaxisautosize--gridtracksize)    
 [`GridLayoutDensity`](#gridlayoutdensity--gridlayoutdensity)    
-
-**Anchor**  
-[`AnchorTarget`](#anchortarget--anchortarget)    
-[`AnchorTop`](#anchortop--uifixedlength)    
-[`AnchorBottom`](#anchorbottom--uifixedlength)    
-[`AnchorLeft`](#anchorleft--uifixedlength)    
-[`AnchorRight`](#anchorright--float)    
-  
+ 
 [`Cursor`](#cursor--cu)   
-[`Scrollbar`](#scrollbar--string)    
-[`ScrollbarColor`](#scrollbarcolor--color)    
-[`ScrollbarSize`](#scrollbarsize--uimeasurement)  
-
   
 [`Painter`](#painter--string)    
-
   
 **Shadow**  
 [`ShadowType`](#shadowtype--shadowtype)    
@@ -165,158 +256,6 @@ layout: page
 
 
 
-## Style Properties  
-
-### Overflow
-   Overflow denotes how content that spills outside of a containing box is treated.
-   The options are
-   * `Hidden` Never show overflowing content
-   * `Visible` (default) Always show overflowing content
-   * `Scroll` Hide overflowing content and create a scroll bar
-   
-   Overflow can be set independently on the X and Y axes.
-  
-````C#
- style MyStyle {
-    OverflowX = Hidden;  // set x axis to hidden
-    OverflowY = Visible; // set y axis to hidden
-    Overflow = Scroll; // Set both axes to scroll
-}
-
- 
-
- 
-````
-
-### Background   
-
-#### `BackgroundColor` : [Color](/docs/misc#list-of-all-supported-colors) 
-Background Color paints the background of the element. It will accept color values in the following forms:
-* `rgba(byte, byte, byte, byte)` 
-* `rgb(byte, byte, byte)` 
-* `#AABBCCDD` (hex form by channel r, g, b, a)
-* any of the following color names: `black`, `blue`, `clear`, `cyan`, `gray`, `grey`, `green`, `magenta`, `red`, `white`, `yellow`
-
-#### `BackgroundTint` : [Color](/docs/misc#list-of-all-supported-colors) 
-Tints the background image without affecting the background color. Accepts a color value.
-
-#### `BackgroundImageOffset` : [UIFixedLength](style-units#uifixedlength) 
-Offset the texture coordinates used for the background image
-````c#
-style MyStyle {
-     BackgroundImageOffsetX = 10; // set for x axis
-     BackgroundImageOffsetY = 10; // set for y axis
-     BackgroundImageOffset = 32; // set for both axes
-}
-````
-
-
-#### `BackgroundImageScale` : [UIFixedLength](style-units#uifixedlength) 
-Scale the texture coordinates used for the background image. Used to tile the image if not part of a sprite sheet
-````c#
-style MyStyle {
-     BackgroundImageScaleX = 2.3; // set for x axis
-     BackgroundImageScaleY = 1.4; // set for y axis
-     BackgroundImageScale = 0.5; // set for both axes
-}
-````
-#### `BackgroundImageRotation` : [UIFixedLength](style-units#uifixedlength) 
-Rotate the texture coordinates used for the background image, in degrees.
-````c#
-style MyStyle {
-     BackgroundImageRotation = 45;
-}
-````
-
-#### `BackgroundImage` : [Texture2D](/docs/misc#types)
-Sets the background image used.
-````c#
-style MyStyle {
-     BackgroundImage = url("path/to/texture"); // set a texture
-     BackgroundImage = url("path/to/sprite/atlas", "spriteName"); // set a texture from a sprte atlas
-}
-````
-
-
-#### `BackgroundImageOffsetX` : [UIFixedLength](style-units#uifixedlength)
-Offsets the texture coordinates (x-axis) used for the background image.
-
-#### `BackgroundImageOffsetY ` : [UIFixedLength](style-units#uifixedlength)
-Offsets the texture coordinates (y-axis) used for the background image.
-                     
-#### `BackgroundImageScaleX` : [UIFixedLength](style-units#uifixedlength)
-Scales the background image by its x-axis.
-  
-#### `BackgroundImageScaleY` : [UIFixedLength](style-units#uifixedlength)
-Scales the background image by its y-axis.
-  
-#### `BackgroundImageTileX` : [UIFixedLength](style-units#uifixedlength)
-Renders an image on a Tilemap's x-axis (https://docs.unity3d.com/Manual/class-Tilemap.html)  
-
-`BackgroundImageTileY : Texture` 
-Renders an image on a Tilemap's y-axis (https://docs.unity3d.com/Manual/class-Tilemap.html)
-
-
-### Border
-  
-#### `Border` : [UIFixedLength](style-units#uifixedlength) 
-Sets the border size on an element.
-
-#### `BorderRight` : [UIFixedLength](style-units#uifixedlength)
-Sets a border size on the right-side of an element. 
-
-#### `BorderLeft` : [UIFixedLength](style-units#uifixedlength)
-Sets the border size on the left side of an element.
-
-  
-#### `BorderTop` : [UIFixedLength](style-units#uifixedlength)
-Sets a border size at the top of an element.  
-
-    
-#### `BorderBottom` : [UIFixedLength](style-units#uifixedlength)
-Sets a border size on the bottom of an element.
-    
-#### `BorderColor` : [Color](/docs/misc#list-of-all-supported-colors)
-Sets the color of the border.  
-  
-#### `BorderColorBottom` : [Color](/docs/misc#list-of-all-supported-colors)
-Sets the color of the border on the bottom of an element.
-  
-#### `BorderColorLeft` : [Color](/docs/misc#list-of-all-supported-colors)
-Sets the color of the border on the left
-
-#### `BorderColorRight` : [Color](/docs/misc#list-of-all-supported-colors)
-Sets the color of the border on the right element.
-  
-#### `BorderColorTop` : [Color](/docs/misc#list-of-all-supported-colors) 
-Sets the color of the border on the top element.
-   
-
-#### `BorderRadius` : [UIFixedLength](style-units#uifixedlength) 
-Sets a rounded border to an element.
-   
-#### `BorderRadiusBottom` : [UIFixedLength](style-units#uifixedlength) 
-Sets a rounded border to the bottom element.
-   
-#### `BorderRadiusLeft` : [UIFixedLength](style-units#uifixedlength) 
-Sets a rounded border on the left-side of an element.
-   
-#### `BorderRadiusRight` : [UIFixedLength](style-units#uifixedlength) 
-Sets a rounded border on the right-side of an element.  
-
-#### `BorderRadiusTop` : [UIFixedLength](style-units#uifixedlength) 
-Sets a rounded border at the top of an element.
-
-#### `CornerBevelTopLeft` : [UIFixedLength](style-units#uifixedlength) 
-
-
-```
-Border = 4px //sets border around element to 4 pixels
-BorderColor = Red; 
-
-BorderTop = 2px; // sets the border only at the top to 2 px
-
-```
 
 ### Layout
 
@@ -472,7 +411,7 @@ Although flexbox is set as the default layout, you would set `LayoutType` to `fl
 <br/><br/>        
 * `SpaceAround` aligns children with equal space between them, where space is allocated to the beginning of the first child and the end of the last child across the container's main axis.  
 
-![flex-align](assets/flex-alignment.png)
+![flex-align](assets/img/flex-alignment.png)
 
     
 #### `FlexCrossAxisAlignment` : [CrossAxisAlignment](/docs/misc#types)  
@@ -604,28 +543,6 @@ Place grid items in empty spaces based on their size
 
 `GridLayoutDensity` = Dense;
 
-<br/>
-
--------------------------
-  
-### Anchor  
-Locks elements to specified areas. 
-
-
-#### `AnchorTarget` : [AnchorTarget](/docs/misc#types)
-Set the anchor to `Parent`, `ParentContentArea`, `Viewport`, or `Screen`. 
-     
-#### `AnchorTop` : [UIFixedLength](style-units#uifixedlength)   
-Sets an anchor at the top of an element.
-     
-#### `AnchorBottom` : [UIFixedLength](style-units#uifixedlength)   
-Sets an anchor at the element's bottom.  
-    
-#### `AnchorLeft` : [UIFixedLength](style-units#uifixedlength)   
-Sets an anchor on the left-side of an element.
-      
-#### `AnchorRight` : [UIFixedLength](style-units#uifixedlength)   
-Sets an anchor on the right-side of an element. 
 
 ```
 
@@ -644,19 +561,6 @@ Cursor specifies the cursor displayed when the mouse pointer is over an element.
 #### `Painter` : string
 Allows you to draw graphics. More information on Painter can be found [here](Painter.md)
 
-### Scrollbar : string
-Scrollbar implements a scrollbar within an element. Accepts Painter or a custom class 
-
-#### `ScrollbarColor : [Color](/docs/misc#list-of-all-supported-colors) 
-Sets the color of the scrollbar.
-
-```
-ScrollBarColor =  red;
-ScrollBarColor = rgba(220, 20, 60, 255);
-```
-
-#### `ScrollbarSize` : [UIMeasurement](style-units#uimeasurement) 
-Sets the size of the scrollbar 
 
 ### Shadow 
 #### `ShadowType` : [ShadowType](/docs/misc#types)
@@ -679,9 +583,6 @@ Sets the softness of the shadow on the y-axis.
 
 Soft shadow will wrap around the object, whereas a hard shadow will produce a shadow with a sharper edge.  
   
-
-
-<br/>
 
 -------------------------
 ### Text
@@ -751,8 +652,6 @@ Sets the shadow type of the text
 * `TitleCase`
 
 #### `TextWhitespaceMode` : [UIForia.Text.WhitespaceMode](/docs/misc#types)
-
-<br/>
 
 -------------------------
 ### Transform

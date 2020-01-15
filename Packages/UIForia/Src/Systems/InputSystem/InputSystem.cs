@@ -903,12 +903,15 @@ namespace UIForia.Systems {
 
                 RunMouseEvents(m_ElementsThisFrame, InputEventType.MouseDown);
             }
-            else if (m_MouseState.isLeftMouseUpThisFrame || m_MouseState.isRightMouseUpThisFrame || m_MouseState.isMiddleMouseUpThisFrame) {
+            else if (m_MouseState.isLeftMouseUpThisFrame || m_MouseState.isMiddleMouseUpThisFrame) {
                 RunMouseEvents(m_ElementsThisFrame, InputEventType.MouseUp);
                 if (m_MouseState.clickCount > 0) {
                     RunMouseEvents(m_ElementsThisFrame, InputEventType.MouseClick);
                 }
-                else if (!m_MouseState.isLeftMouseDown && !m_MouseState.isMiddleMouseDown) {
+            }
+            else if (m_MouseState.isRightMouseUpThisFrame) {
+                RunMouseEvents(m_ElementsThisFrame, InputEventType.MouseUp);
+                if (!m_MouseState.isLeftMouseDown && !m_MouseState.isMiddleMouseDown) {
                     RunMouseEvents(m_ElementsThisFrame, InputEventType.MouseContext);
                 }
             }

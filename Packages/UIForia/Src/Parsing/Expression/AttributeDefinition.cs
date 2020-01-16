@@ -21,7 +21,9 @@ namespace UIForia.Parsing.Expressions {
         Slot = 1 << 12,
         SlotContext = 1 << 13,
 
-        Expose
+        Expose = 1 << 14,
+
+        ImplicitVariable = 1 << 15
 
     }
 

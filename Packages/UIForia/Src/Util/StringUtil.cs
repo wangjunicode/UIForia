@@ -10,7 +10,8 @@ namespace UIForia.Util {
 
         public int size;
         public char[] characters;
-
+        public Stack<CharStringBuilder> builderStack;
+        
         private static char[] s_Scratch = new char[256];
 
         public CharStringBuilder(int capacity = 32) {
@@ -18,11 +19,24 @@ namespace UIForia.Util {
             this.characters = new char[Math.Max(8, capacity)];
         }
 
+        public CharStringBuilder PushBuilder() {
+            builderStack = builderStack ?? new Stack<CharStringBuilder>();
+            // todo -- pool
+            CharStringBuilder builder = new CharStringBuilder();
+            builderStack.Push(builder);
+            return builder;
+        }
+
+        public CharStringBuilder PopBuilder() {
+            return builderStack.Pop();
+        }
+
         public void Clear() {
             size = 0;
         }
 
         public CharStringBuilder Append(string str) {
+            if (str == null) return this;
             int strLength = str.Length;
 
             if (size + strLength >= characters.Length) {
@@ -114,6 +128,7 @@ namespace UIForia.Util {
         }
 
         public CharStringBuilder Append(char str) {
+            if (str == '\0') return this;
             if (size + 1 >= characters.Length) {
                 Array.Resize(ref characters, (size + 1) * 2);
             }
@@ -124,6 +139,9 @@ namespace UIForia.Util {
         }
 
         public CharStringBuilder Append(char[] str) {
+            if (str == null || str.Length == 0) {
+                return this;
+            }
             int strLength = str.Length;
 
             if (size + strLength >= characters.Length) {
@@ -149,6 +167,7 @@ namespace UIForia.Util {
         }
 
         public CharStringBuilder Append(char[] str, int start, int end) {
+            if (str == null || end - start <= 0) return this;
             int strLength = end - start;
 
             if (size + strLength >= characters.Length) {

@@ -62,7 +62,7 @@ namespace UIForia.Compilers {
             Dictionary<int, Func<UIElement>> constructorFnMap = new Dictionary<int, Func<UIElement>>(37);
 
             foreach (KeyValuePair<Type, ProcessedType> kvp in TypeProcessor.typeMap) {
-                if (kvp.Key.IsAbstract || kvp.Value.references == 0) {
+                if (kvp.Key.IsAbstract || kvp.Value.references == 0 || kvp.Value.id < 0) {
                     continue;
                 }
 

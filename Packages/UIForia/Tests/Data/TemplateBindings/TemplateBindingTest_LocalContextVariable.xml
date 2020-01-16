@@ -59,18 +59,27 @@
 
         <TemplateBindingTest_ContextVariable_Expose_Slotted_Inner>
             <Text attr:id="text">
-                {value}
-<!--                {$variable0} + {$variable1}-->
+                {$variable0} + {$variable1}
             </Text>
         </TemplateBindingTest_ContextVariable_Expose_Slotted_Inner>
+
+    </Contents>
+
+    <Contents id="expose_context_out_of_scope">
+
+        <TemplateBindingTest_ContextVariable_Expose_Slotted_Inner>
+            <Text attr:id="text">
+                {$variable0} + {$variable1}
+            </Text>
+        </TemplateBindingTest_ContextVariable_Expose_Slotted_Inner>
+        {$variable0}
 
     </Contents>
 
     <Contents id="expose_context_var_slotted_inner">
 
         <Div ctx:variable2="'hello'">
-            <Children/>
-<!--            <Children expose:variable0="variable0" expose:variable1="variable1 + $variable2"/>-->
+            <Children expose:variable0="variable0" expose:variable1="variable1 + $variable2"/>
         </Div>
 
     </Contents>

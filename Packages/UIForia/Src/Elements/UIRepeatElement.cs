@@ -54,19 +54,20 @@ namespace UIForia.Elements {
 
     }
 
-    public class UIRepeatElement : UIElement {
+    public abstract class UIRepeatElement : UIElement {
 
         public int templateSpawnId;
         public int indexVarId;
         public UIElement templateContextRoot;
         public TemplateScope scope;
+        public int itemVarId;
 
         protected void CreateFromRange(int start, int end) {
             for (int i = start; i < end; i++) {
                 UIElement child = application.CreateTemplate(templateSpawnId, templateContextRoot, this, scope);
                 application.InsertChild(this, child, (uint) i);
-                ContextVariable<int> variable = new ContextVariable<int>(indexVarId, "index", i);
-                children[i].bindingNode.CreateLocalContextVariable(variable);
+                ContextVariable<int> indexVariable = new ContextVariable<int>(indexVarId, "index", i);
+                children[i].bindingNode.CreateLocalContextVariable(indexVariable);
             }
         }
 
@@ -78,7 +79,7 @@ namespace UIForia.Elements {
 
     }
 
-    public class UIRepeatCountElement : UIRepeatElement {
+    public sealed class UIRepeatCountElement : UIRepeatElement {
 
         public int count;
 
@@ -98,7 +99,7 @@ namespace UIForia.Elements {
     }
 
     [GenericElementTypeResolvedBy(nameof(list))]
-    public class UIRepeatElement<T> : UIRepeatElement {
+    public sealed class UIRepeatElement<T> : UIRepeatElement {
 
         public IList<T> list;
         private IList<T> previousList;

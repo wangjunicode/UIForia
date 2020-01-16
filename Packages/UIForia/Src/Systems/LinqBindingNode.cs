@@ -163,7 +163,7 @@ namespace UIForia.Systems {
         }
 
         public ContextVariable<T> GetRepeatItem<T>(int id) {
-            return (ContextVariable<T>)GetContextVariable(8);
+            return (ContextVariable<T>)GetContextVariable(id);
         }
         
         public ContextVariable GetRepeatVariable<T>(int id, string name) {

@@ -75,10 +75,9 @@ namespace UIForia.Compilers {
                     Expression call = ExpressionFactory.CallInstanceUnchecked(access, getItem, Expression.Constant(id));
                     Type contextVarType = ReflectionUtil.CreateGenericType(typeof(ContextVariable<>), type);
 
-                    UnaryExpression convert = Expression.Convert(call, contextVarType);
                     ParameterExpression variable = compiler.AddVariable(type, "repeat_item_" + GetName());
 
-                    compiler.Assign(variable, Expression.MakeMemberAccess(convert, contextVarType.GetField(nameof(ContextVariable<int>.value))));
+                    compiler.Assign(variable, Expression.MakeMemberAccess(call, contextVarType.GetField(nameof(ContextVariable<int>.value))));
                     return variable;
                 }
                 case AliasResolverType.RepeatIndex: {

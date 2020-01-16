@@ -485,9 +485,24 @@ namespace TemplateBinding {
 
             app.Update();
             
-            Assert.AreEqual("var 0 + var 1", GetText(e["text"]));
+            Assert.AreEqual("var 0 + var 1hello", GetText(e["text"]));
         }
 
+         [Template("Data/TemplateBindings/TemplateBindingTest_LocalContextVariable.xml#expose_context_out_of_scope")]
+        public class TemplateBindingTest_ContextVariable_Expose_OutOfScope : UIElement {
+
+            public string value = "val";
+
+        }
+        
+        [Test]
+        public void ContextVariable_Expose_OutOfScope() {
+
+            CompileException exception = Assert.Throws<CompileException>(() => Setup<TemplateBindingTest_ContextVariable_Expose_OutOfScope>());
+            Assert.AreEqual(CompileException.UnknownAlias("variable0").Message, exception.Message);
+            
+        }
+        
         [Template("Data/TemplateBindings/TemplateBindingTest_RepeatTemplate.xml#repeat_count")]
         public class TemplateBindingTest_RepeatCount : UIElement {
 
@@ -569,6 +584,7 @@ namespace TemplateBinding {
             app.Update();
 
             Assert.AreEqual(4, e[0].children.size);
+            Assert.AreEqual("repeat me " + Vector3.zero.ToString(), GetText(e[0][0]));
         }
 
         string GetText(UIElement element) {

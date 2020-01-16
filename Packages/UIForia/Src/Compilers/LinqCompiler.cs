@@ -351,6 +351,28 @@ namespace UIForia.Compilers {
                 throw CompileException.NoStatementsRootBlock();
             }
 
+            for (int i = 0; i < statements.Count - 1; i++) {
+                if (statements[i].NodeType == ExpressionType.Assign) {
+                    BinaryExpression assignment = (BinaryExpression) statements[i];
+                    if (assignment.Left.Type == typeof(string)) {
+                        if (assignment.Right.NodeType == ExpressionType.Call) {
+                            MethodCallExpression callExpression = assignment.Right as MethodCallExpression;
+                        }
+                    }
+                }
+            }
+
+            if (statements[statements.size - 1].NodeType == ExpressionType.Call) {
+                Expression statement = statements[statements.size - 1];
+                if (statement is MethodCallExpression methodCallExpression) {
+                    if (methodCallExpression.Type == typeof(string)) {
+                        if (methodCallExpression.Method.Name == nameof(string.Concat)) {
+                            Debug.Log("yep");
+                        }
+                    }
+                }
+            }
+
             if (returnLabel == null) {
                 int assignmentCount = 0;
                 int lastRetnAssignment = -1;
@@ -852,8 +874,7 @@ namespace UIForia.Compilers {
 
             return Expression.MakeMemberAccess(head, propertyInfo);
         }
-
-
+        
         private Expression MakeMethodCall(Expression head, LightList<MethodInfo> methodInfos, LightList<ASTNode> arguments) {
             Expression[] args = new Expression[arguments.Count];
 
@@ -1912,7 +1933,7 @@ namespace UIForia.Compilers {
                     else {
                         return parenExpr;
                     }
-                
+
                 case ASTNodeType.LambdaExpression:
                     return VisitLambda(targetType, (LambdaExpressionNode) node);
 
@@ -2051,7 +2072,18 @@ namespace UIForia.Compilers {
                             string rightStr = (string) rightConst.Value;
                             return Expression.Constant(leftStr + rightStr);
                         }
-
+                        
+                        // if(useCustomConcat && !hasActiveConcat) { concatStack.Push().Append().Append() }
+                        // string var = builder.Pop().ToString();
+                        
+                        // if (stringBuilderExpr != null) {
+                        //     stringBuilderExpr.Peek().Append().Append();
+                        //     Expression expr = AddStatement(stringBuilderExpr)
+                        //     AddStatement(Expression.Call(stringBuilderExpr, "Append", left));
+                        //     AddStatement(Expression.Call(stringBuilderExpr, "Append", right));
+                        //     return stringBuilderExpr;
+                        // }
+                        
                         return Expression.Call(StringConcat2, left, right);
                     }
                     else if (leftIsString) {
@@ -2219,7 +2251,6 @@ namespace UIForia.Compilers {
                 AddStatement(Expression.Assign(ternaryVariable, right));
 
                 BlockExpression failBlock = PopBlock();
-
 
                 AddStatement(Expression.IfThenElse(ternaryCondition, passBlock, failBlock));
 

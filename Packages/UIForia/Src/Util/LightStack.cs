@@ -151,6 +151,29 @@ namespace UIForia.Util {
             return cloneTarget;
         }
 
+        public void RemoveWhere<U>(U closureData, Func<U, T, bool> callback) {
+            for (int i = 0; i < size; i++) {
+                if (callback(closureData, array[i])) {
+                    RemoveAt(i);
+                    return;
+                }
+            }
+        }
+        
+        public void RemoveAt(int index) {
+            if ((uint) index >= (uint) size) return;
+            if (index == size - 1) {
+                array[--size] = default;
+            }
+            else {
+                for (int j = index; j < size - 1; j++) {
+                    array[j] = array[j + 1];
+                }
+
+                array[--size] = default(T);
+            }
+        }
+
     }
 
 }

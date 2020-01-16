@@ -2611,7 +2611,6 @@ public class TestLinqCompiler {
             TestLinqCompiler.StaticThing.Increment();
         }", compiler.Print());
     }
-
     
     [Test]
     public void CompileStatement_ParenMethodCall() {
@@ -2624,6 +2623,17 @@ public class TestLinqCompiler {
         string str = fn();
 
         Assert.AreEqual("13", str);
+    }
+    
+    [Test]
+    public void CompileStatement_CollapseStringConcat() {
+        LinqCompiler compiler = new LinqCompiler();
+        compiler.SetSignature<string>(new Parameter<string>("val"));
+        compiler.Statement("'str' + val + 'yep'");
+        compiler.Log();
+        Func<string, string> fn = compiler.Compile<Func<string, string>>();
+        string str = fn("ing");
+        Assert.AreEqual("string", str);
     }
     
     public void AssertStringsEqual(string a, string b) {

@@ -3,11 +3,11 @@ using System;
 namespace UIForia.Attributes {
 
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
-    public class OnPropertyChanged : Attribute {
+    public class OnPropertySynchronized : Attribute {
 
         public readonly string propertyName;
 
-        public OnPropertyChanged(string propertyName) {
+        public OnPropertySynchronized(string propertyName) {
             this.propertyName = propertyName;
         }
 

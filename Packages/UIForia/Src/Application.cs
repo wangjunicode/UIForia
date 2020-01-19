@@ -58,7 +58,6 @@ namespace UIForia {
 
         protected ResourceManager resourceManager;
 
-        private readonly IntMap<UIElement> elementMap;
         protected readonly List<ISystem> m_Systems;
 
         public event Action<UIElement> onElementRegistered;
@@ -125,8 +124,6 @@ namespace UIForia {
             m_RoutingSystem = new RoutingSystem();
             m_AnimationSystem = new AnimationSystem();
             linqBindingSystem = new LinqBindingSystem();
-
-            elementMap = new IntMap<UIElement>();
 
             m_Systems.Add(m_StyleSystem);
             m_Systems.Add(linqBindingSystem);
@@ -205,8 +202,6 @@ namespace UIForia {
             linqBindingSystem = new LinqBindingSystem();
             m_UISoundSystem = new UISoundSystem();
 
-            elementMap = new IntMap<UIElement>();
-
             m_Systems.Add(m_StyleSystem);
             m_Systems.Add(linqBindingSystem);
             m_Systems.Add(m_RoutingSystem);
@@ -272,12 +267,11 @@ namespace UIForia {
         public float Width => Screen.width;
         public float Height => Screen.height;
 
-
         public void SetCamera(Camera camera) {
             Camera = camera;
             RenderSystem.SetCamera(camera);
         }
-        
+
         public UIView RemoveView(UIView view) {
             if (!m_Views.Remove(view)) return null;
 
@@ -313,7 +307,6 @@ namespace UIForia {
             onReady = null;
             onUpdate = null;
 
-            elementMap.Clear();
             resourceManager.Reset();
 
             m_AfterUpdateTaskSystem.OnReset();
@@ -404,13 +397,8 @@ namespace UIForia {
                 m_Systems[i].OnElementDestroyed(element);
             }
 
-            if (toInternalDestroy.Count > 0) {
-                UIView view = toInternalDestroy[0].View;
-                for (int i = 0; i < toInternalDestroy.Count; i++) {
-                    view.ElementDestroyed(toInternalDestroy[i]);
-                    toInternalDestroy[i].InternalDestroy();
-                    elementMap.Remove(toInternalDestroy[i].id);
-                }
+            for (int i = 0; i < toInternalDestroy.size; i++) {
+                toInternalDestroy[i].InternalDestroy();
             }
 
             LightList<UIElement>.Release(ref toInternalDestroy);
@@ -435,22 +423,54 @@ namespace UIForia {
             element.children.QuickClear();
         }
 
+        // Triggered events fire immediately
+        // Application Update future state
+        //
+        // Normal binding update for all elements
+        // Input system update()
+        // sync properties are written back to targets. these will invoke OnPropertySynchronized() if provided (just like OnPropertyChanged, but explicitly for `sync` write backs)
+        // late update bindings & OnLateUpdate()
+        // animation system update
+        // OnFrameCompleted()
+        // style system update -> triggers OnStylePropertyChanged handlers
+        // user code finished here
+        //
+        // buffer changes from style system for render & layout thread to pick up (future state)
+        //
+        // render layout thread -> 
+        // read buffered changes
+        //     layout
+        //     render
+        //     join with user thread
+        //     pause user thread
+        // write layoutResult changes back to elements
+        // maybe invoke render/layout callbacks if we support this
+        // OnCulled()
+        // OnLayoutChanged()
+        // OnSizeChanged()
+        // etc
+        // continue user thread
+
         public void Update() {
-            m_InputSystem.OnUpdate();
 
             bindingTimer.Reset();
             bindingTimer.Start();
             linqBindingSystem.OnUpdate();
             bindingTimer.Stop();
 
-            m_StyleSystem.OnUpdate();
+            m_InputSystem.OnUpdate();
+
+            linqBindingSystem.OnLateUpdate();
 
             m_AnimationSystem.OnUpdate();
 
-            m_InputSystem.OnLateUpdate();
+            m_RoutingSystem.OnUpdate(); // todo -- remove
 
-            m_RoutingSystem.OnUpdate();
+            linqBindingSystem.OnFrameCompleted();
 
+            m_StyleSystem.OnUpdate(); // buffer changes here
+
+            // todo -- read changed data into layout/render thread
             layoutTimer.Reset();
             layoutTimer.Start();
             m_LayoutSystem.OnUpdate();
@@ -507,7 +527,6 @@ namespace UIForia {
             if ((element.flags & UIElementFlags.SelfAndAncestorEnabled) != UIElementFlags.SelfAndAncestorEnabled) {
                 return;
             }
-
 
             StructStack<ElemRef> stack = StructStack<ElemRef>.Get();
             // if element is now enabled we need to walk it's children
@@ -644,7 +663,29 @@ namespace UIForia {
         }
 
         public UIElement GetElement(int elementId) {
-            return elementMap.GetOrDefault(elementId);
+            LightStack<UIElement> stack = LightStack<UIElement>.Get();
+
+            for (int i = 0; i < m_Views.Count; i++) {
+                stack.Push(m_Views[i].RootElement);
+
+                while (stack.size > 0) {
+                    UIElement element = stack.PopUnchecked();
+
+                    if (element.id == elementId) {
+                        LightStack<UIElement>.Release(ref stack);
+                        return element;
+                    }
+
+                    if (element.children == null) continue;
+
+                    for (int j = 0; j < element.children.size; j++) {
+                        stack.Push(element.children.array[j]);
+                    }
+                }
+            }
+
+            LightStack<UIElement>.Release(ref stack);
+            return null;
         }
 
         public void OnAttributeSet(UIElement element, string attributeName, string currentValue, string previousValue) {
@@ -707,8 +748,59 @@ namespace UIForia {
             throw new NotImplementedException("Re design this not to use style importer");
         }
 
+        internal void InitializeElement(UIElement child) {
+            bool parentEnabled = child.parent.isEnabled;
+
+            UIView view = child.parent.View;
+
+            StructStack<ElemRef> elemRefStack = StructStack<ElemRef>.Get();
+            elemRefStack.Push(new ElemRef() {element = child});
+
+            while (elemRefStack.size > 0) {
+                UIElement current = elemRefStack.array[--elemRefStack.size].element;
+
+                current.depth = current.parent.depth + 1;
+
+                current.View = view;
+
+                if (current.parent.isEnabled) {
+                    current.flags |= UIElementFlags.AncestorEnabled;
+                }
+                else {
+                    current.flags &= ~UIElementFlags.AncestorEnabled;
+                }
+
+                if ((current.flags & UIElementFlags.Created) == 0) {
+                    current.flags |= UIElementFlags.Created;
+//                    current.style.Initialize();
+                    for (int i = 0; i < m_Systems.Count; i++) {
+                        m_Systems[i].OnElementCreated(current);
+                    }
+
+                    onElementRegistered?.Invoke(current);
+                    current.OnCreate();
+                }
+
+                UIElement[] children = current.children.array;
+                int childCount = current.children.size;
+                // reverse this?
+                for (int i = 0; i < childCount; i++) {
+                    children[i].siblingIndex = i;
+                    elemRefStack.Push(new ElemRef() {element = children[i]});
+                }
+            }
+
+            if (parentEnabled && child.isEnabled) {
+                child.enableStateChangedFrameId = frameId;
+                child.flags &= ~UIElementFlags.Enabled;
+                DoEnableElement(child);
+            }
+
+            StructStack<ElemRef>.Release(ref elemRefStack);
+        }
+
         internal void InsertChild(UIElement parent, UIElement child, uint index) {
-            
+
             child.parent = parent;
             parent.children.Insert((int) index, child);
 
@@ -733,8 +825,6 @@ namespace UIForia {
                     current.flags &= ~UIElementFlags.AncestorEnabled;
                 }
 
-                elementMap[current.id] = current;
-
                 if ((current.flags & UIElementFlags.Created) == 0) {
                     current.flags |= UIElementFlags.Created;
 //                    current.style.Initialize();
@@ -744,7 +834,6 @@ namespace UIForia {
 
                     onElementRegistered?.Invoke(current);
                     current.OnCreate();
-                    view.ElementRegistered(current);
                 }
 
                 UIElement[] children = current.children.array;
@@ -758,10 +847,6 @@ namespace UIForia {
 
             for (int i = 0; i < parent.children.size; i++) {
                 parent.children.array[i].siblingIndex = i;
-            }
-
-            for (int i = 0; i < parent.children.Count; i++) {
-                parent.children[i].siblingIndex = i;
             }
 
             if (parentEnabled && child.isEnabled) {

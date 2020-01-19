@@ -51,13 +51,13 @@ namespace UIForia.Parsing {
             nameSpaceManager.AddNamespace("alias", "alias");
             nameSpaceManager.AddNamespace("expose", "expose");
             nameSpaceManager.AddNamespace("slot", "slot");
+            nameSpaceManager.AddNamespace("late", "late");
+            nameSpaceManager.AddNamespace("var", "var");
             nameSpaceManager.AddNamespace("evt", "evt");
             nameSpaceManager.AddNamespace("style", "style");
             nameSpaceManager.AddNamespace("ctx", "ctx");
-            nameSpaceManager.AddNamespace("ctxvar", "ctxvar");
             nameSpaceManager.AddNamespace("mouse", "mouse");
             nameSpaceManager.AddNamespace("key", "key");
-            nameSpaceManager.AddNamespace("touch", "touch");
             nameSpaceManager.AddNamespace("touch", "touch");
             nameSpaceManager.AddNamespace("controller", "controller");
             this.parserContext = new XmlParserContext(null, nameSpaceManager, null, XmlSpace.None);
@@ -432,11 +432,19 @@ namespace UIForia.Parsing {
                         case "ctx":
                             attributeType = AttributeType.Context;
                             break;
+                        case "var":
+                            attributeType = AttributeType.ContextVariable;
+                            break;
+                        case "late":
+                            attributeType = AttributeType.Property;
+                            flags |= AttributeFlags.Binding | AttributeFlags.LateBinding;
+                            break;
+                        case "sync":
+                            attributeType = AttributeType.SyncProperty;
+                            flags |= AttributeFlags.Binding | AttributeFlags.LateBinding;
+                            break;
                         case "expose":
                             attributeType = AttributeType.Expose;
-                            break;
-                        case "ctxvar":
-                            attributeType = AttributeType.ContextVariable;
                             break;
                         case "alias":
                             attributeType = AttributeType.Alias;

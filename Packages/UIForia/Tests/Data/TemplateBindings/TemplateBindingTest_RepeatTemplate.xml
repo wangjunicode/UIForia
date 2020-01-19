@@ -16,6 +16,14 @@
 
     </Contents>
 
+    <Contents id="repeat_list_key_fn">
+
+        <Repeat list="data" keyFn="(e) => (long)e.x">
+            repeat me {(long)$item.x}
+        </Repeat>
+
+    </Contents>
+
 </UITemplate>
 
         <!--  <RepeatRange list="options" start="0" end="10" keyFn="(i) => i.val">-->

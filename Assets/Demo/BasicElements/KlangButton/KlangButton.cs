@@ -60,7 +60,7 @@ namespace Klang.Seed.Client.UI.UIForia {
 
         public void Paint(ImmediateRenderContext ctx, in SVGXMatrix matrix) {
             ctx.SetTransform(matrix);
-            SVGXRenderSystem.PaintElement(ctx, this);
+       //     SVGXRenderSystem.PaintElement(ctx, this);
 
             ctx.BeginPath();
             ctx.MoveTo(0, layoutResult.ActualHeight);

@@ -8,46 +8,8 @@ using UIForia.Util;
 using UnityEngine;
 
 namespace UIForia.Systems {
-
-    public class KeyboardState {
-
-        private readonly Dictionary<KeyCode, KeyState> m_KeyStates;
-
-
-        public void Update() { }
-
-        public virtual bool IsKeyDown(KeyCode keyCode) {
-            return (GetKeyState(keyCode) & KeyState.Down) != 0;
-        }
-
-        public virtual bool IsKeyDownThisFrame(KeyCode keyCode) {
-            return (GetKeyState(keyCode) & KeyState.DownThisFrame) != 0;
-        }
-
-        public virtual bool IsKeyUp(KeyCode keyCode) {
-            KeyState state = GetKeyState(keyCode);
-            return (state == KeyState.Up || (state & KeyState.UpThisFrame) != 0);
-        }
-
-        public virtual bool IsKeyUpThisFrame(KeyCode keyCode) {
-            return (GetKeyState(keyCode) & KeyState.UpThisFrame) != 0;
-        }
-
-        public virtual KeyState GetKeyState(KeyCode keyCode) {
-            KeyState state;
-            if (m_KeyStates.TryGetValue(keyCode, out state)) {
-                return state;
-            }
-
-            return KeyState.Up;
-        }
-
-    }
-
     public abstract class InputSystem : IInputSystem {
-
         private struct PressedKey {
-
             public readonly KeyCode keyCode;
             public readonly char character;
 
@@ -55,7 +17,6 @@ namespace UIForia.Systems {
                 this.keyCode = keyCode;
                 this.character = character;
             }
-
         }
 
         public event Action<IFocusable> onFocusChanged;
@@ -63,6 +24,8 @@ namespace UIForia.Systems {
         private const float k_DragThreshold = 5f;
 
         private readonly ILayoutSystem m_LayoutSystem;
+
+        protected readonly KeyboardInputManager keyboardInputManager;
 
         private List<UIElement> m_ElementsThisFrame;
 
@@ -83,7 +46,7 @@ namespace UIForia.Systems {
         private KeyboardModifiers modifiersThisFrame;
 
         protected MouseState mouseState;
-        protected KeyboardState keyboardState;
+        protected KeyboardInputState m_KeyboardState;
 
         private readonly List<UIElement> m_ExitedElements;
         private readonly List<UIElement> m_ActiveElements;
@@ -106,14 +69,16 @@ namespace UIForia.Systems {
 
         private readonly SkipTree<UIElement> m_KeyboardEventTree;
 
-        private LightList<KeyboardEventHandlerInvocation> lateHandlers = new LightList<KeyboardEventHandlerInvocation>();
+        private LightList<KeyboardEventHandlerInvocation>
+            lateHandlers = new LightList<KeyboardEventHandlerInvocation>();
+
         private LightList<UIEvent> lateTriggers = new LightList<UIEvent>();
 
         private List<IFocusable> focusables;
 
         private int focusableIndex;
 
-        protected InputSystem(ILayoutSystem layoutSystem) {
+        protected InputSystem(ILayoutSystem layoutSystem, KeyboardInputManager keyboardInputManager = null) {
             this.m_LayoutSystem = layoutSystem;
 
             this.m_MouseDownElements = new List<UIElement>();
@@ -131,7 +96,7 @@ namespace UIForia.Systems {
             this.m_DownThisFrame = new LightList<KeyCode>();
             this.m_KeyStates = new Dictionary<KeyCode, KeyState>();
             this.m_KeyboardEventTree = new SkipTree<UIElement>();
-
+            this.keyboardInputManager = keyboardInputManager ?? new KeyboardInputManager();
             this.m_EventPropagator = new EventPropagator();
             this.m_MouseEventCaptureList = new List<ValueTuple<Action<GenericInputEvent>, UIElement>>();
             // this.m_DragEventCaptureList = new List<ValueTuple<DragEventHandler, UIElement>>();
@@ -239,6 +204,7 @@ namespace UIForia.Systems {
 
         public virtual void OnUpdate() {
             mouseState = GetMouseState();
+            m_KeyboardState = keyboardInputManager.UpdateKeyboardInputState();
 
             ProcessKeyboardEvents();
             ProcessMouseInput();
@@ -304,6 +270,27 @@ namespace UIForia.Systems {
             lateTriggers.Clear();
         }
 
+        private void ProcessKeyboardEvents() {
+            StructList<KeyCodeState> keyCodeStates = m_KeyboardState.GetKeyCodeStates();
+            for (int i = 0; i < keyCodeStates.size; i++) {
+                KeyCodeState keyCodeState = keyCodeStates[i];
+
+                InputEventType inputEventType;
+                if (keyCodeState.keyState == KeyState.DownThisFrame) {
+                    inputEventType = InputEventType.KeyDown;
+                }
+                else if (keyCodeState.keyState == KeyState.Down) {
+                    inputEventType = InputEventType.KeyHeldDown;
+                }
+                else {
+                    inputEventType = InputEventType.KeyUp;
+                }
+
+                ProcessKeyboardEvent(keyCodeState.keyCode, inputEventType, keyCodeState.character,
+                    m_KeyboardState.modifiersThisFrame);
+            }
+        }
+
         private void ProcessMouseInput() {
             // if element does not have state requested -> hover flag, drag listener, pointer events = none, don't add
             // buckets feel like a lot of overhead
@@ -316,7 +303,8 @@ namespace UIForia.Systems {
             // if dragging only attempt intersections with elements who have drag responders
             // if not dragging only attempt intersections with elements who have hover state (if mouse is present) or drag create or mouse / touch interactions
 
-            LightList<UIElement> queryResults = (LightList<UIElement>) m_LayoutSystem.QueryPoint(mouseState.mousePosition, LightList<UIElement>.Get());
+            LightList<UIElement> queryResults =
+                (LightList<UIElement>) m_LayoutSystem.QueryPoint(mouseState.mousePosition, LightList<UIElement>.Get());
 
             queryResults.Sort((a, b) => {
                 int viewDepthComparison = b.View.Depth - a.View.Depth;
@@ -484,7 +472,8 @@ namespace UIForia.Systems {
                 RunDragEvent(m_ExitedElements, InputEventType.DragExit);
                 RunDragEvent(m_EnteredElements, InputEventType.DragEnter);
                 m_CurrentDragEvent.Update();
-                RunDragEvent(m_ElementsThisFrame, mouseState.DidMove ? InputEventType.DragMove : InputEventType.DragHover);
+                RunDragEvent(m_ElementsThisFrame,
+                    mouseState.DidMove ? InputEventType.DragMove : InputEventType.DragHover);
             }
 
             if (m_CurrentDragEvent.IsCanceled) {
@@ -718,7 +707,8 @@ namespace UIForia.Systems {
 
         public void OnElementCreated(UIElement element) { }
 
-        public void OnAttributeSet(UIElement element, string attributeName, string currentValue, string attributeValue) { }
+        public void OnAttributeSet(UIElement element, string attributeName, string currentValue,
+            string attributeValue) { }
 
         public virtual bool IsKeyDown(KeyCode keyCode) {
             return (GetKeyState(keyCode) & KeyState.Down) != 0;
@@ -753,364 +743,34 @@ namespace UIForia.Systems {
             }
         }
 
+        // todo -- i think this is wrong, check this again
         protected void ProcessKeyboardEvent(KeyCode keyCode, InputEventType eventType, char character, KeyboardModifiers modifiers) {
-            // KeyboardInputEvent keyEvent = new KeyboardInputEvent(eventType, keyCode, character, modifiers, m_FocusedElement != null);
-
-            if (eventType == InputEventType.KeyDown) {
-                if (UnityEngine.Input.GetKeyDown(keyCode)) {
-                    m_PressedKeys.Add(new PressedKey(keyCode, character));
-                }
-            }
-            else if (eventType == InputEventType.KeyUp) {
-                m_PressedKeys.Remove(character, (pressed, c) => pressed.character == c);
-                m_PressedKeys.Remove(keyCode, (pressed, c) => pressed.keyCode == c);
-            }
-
-            GenericInputEvent genericEvt = new GenericInputEvent(eventType, modifiers, m_EventPropagator, character, keyCode, m_FocusedElement != null);
-
+            GenericInputEvent keyEvent = new GenericInputEvent(eventType, modifiers, m_EventPropagator, character, keyCode, m_FocusedElement != null);
             if (m_FocusedElement == null) {
-                m_KeyboardEventTree.ConditionalTraversePreOrder(genericEvt, (item, evt) => {
-                    if (evt.propagator.shouldStopPropagation) return false;
+                m_KeyboardEventTree.ConditionalTraversePreOrder(keyEvent, (item, evt) => {
+                    if (m_EventPropagator.shouldStopPropagation) return false;
 
                     UIElement element = (UIElement) item.Element;
                     if (element.isDestroyed || element.isDisabled) {
                         return false;
                     }
 
-                    InputHandlerGroup inputHandlerGroup = element.inputHandlers;
+                    InputHandlerGroup evtHandlerGroup = item.inputHandlers;
 
-                    for (int i = 0; i < inputHandlerGroup.eventHandlers.size; i++) {
-                        if (evt.propagator.shouldStopPropagation) break;
-                        InputHandlerGroup.HandlerData handler = inputHandlerGroup.eventHandlers.array[i];
-                        if (handler.eventType == evt.type) {
-                            handler.handler.Invoke(evt);
-                        }
+                    for (int i = 0; i < evtHandlerGroup.eventHandlers.size; i++) {
+                        if (m_EventPropagator.shouldStopPropagation) break;
+                        evtHandlerGroup.eventHandlers[i].handler.Invoke(keyEvent);
                     }
 
-                    if (evt.propagator.shouldStopPropagation) {
-                        // evt.StopPropagation();
-                    }
-
-                    return !evt.propagator.shouldStopPropagation;
+                    return !m_EventPropagator.shouldStopPropagation;
                 });
             }
             else {
-                // todo -- this should probably bubble the key event up
-                UIElement element = m_FocusedElement;
-
-                InputHandlerGroup inputHandlerGroup = element.inputHandlers;
-                if (inputHandlerGroup == null) {
-                    return;
-                }
-
-                for (int i = 0; i < inputHandlerGroup.eventHandlers.size; i++) {
+                InputHandlerGroup evtHandlerGroup = m_FocusedElement.inputHandlers;
+                for (int i = 0; i < evtHandlerGroup.eventHandlers.size; i++) {
                     if (m_EventPropagator.shouldStopPropagation) break;
-                    InputHandlerGroup.HandlerData handler = inputHandlerGroup.eventHandlers.array[i];
-                    if (handler.eventType == eventType) {
-                        handler.handler.Invoke(genericEvt);
-                    }
+                    evtHandlerGroup.eventHandlers[i].handler.Invoke(keyEvent);
                 }
-            }
-        }
-
-        public struct RawKeyEvent {
-
-            public KeyCode keyCode;
-            public char character;
-            public EventType eventType;
-            public bool isKeyEvent;
-
-        }
-
-        protected virtual void GetKeyEvents(StructList<RawKeyEvent> list) {
-            while (Event.PopEvent(s_Event)) {
-                KeyCode keyCode = s_Event.keyCode;
-                char character = s_Event.character;
-
-                // need to check this on osx, according to stackoverflow OSX and Windows might handle sending key events differently
-
-                if (s_Event.rawType == EventType.ExecuteCommand || s_Event.rawType == EventType.ValidateCommand) {
-                    switch (s_Event.commandName) {
-                        case "SelectAll":
-                            //ProcessKeyEvent(EventType.KeyDown, KeyCode.A, 'a');
-                            list.Add(new RawKeyEvent() {
-                                keyCode = KeyCode.A,
-                                character = 'a',
-                                eventType = EventType.KeyDown,
-                                isKeyEvent = true
-                            });
-                            continue;
-                        case "Copy":
-                            // ProcessKeyEvent(EventType.KeyDown, KeyCode.C, 'c');
-                            list.Add(new RawKeyEvent() {
-                                keyCode = KeyCode.C,
-                                character = 'c',
-                                eventType = EventType.KeyDown,
-                                isKeyEvent = true
-                            });
-                            continue;
-                        case "Cut":
-                            //ProcessKeyEvent(EventType.KeyDown, KeyCode.X, 'x');
-                            list.Add(new RawKeyEvent() {
-                                keyCode = KeyCode.X,
-                                character = 'x',
-                                eventType = EventType.KeyDown,
-                                isKeyEvent = true
-                            });
-                            continue;
-                        case "Paste":
-                            ProcessKeyEvent(EventType.KeyDown, KeyCode.V, 'v');
-                            list.Add(new RawKeyEvent() {
-                                keyCode = KeyCode.V,
-                                character = 'v',
-                                eventType = EventType.KeyDown,
-                                isKeyEvent = true
-                            });
-                            continue;
-                        case "SoftDelete":
-                            continue;
-                        case "Duplicate":
-                            continue;
-                        case "Find":
-                            continue;
-                    }
-                }
-
-                if (keyCode == KeyCode.None && character != '\0') {
-                    if (s_Event.rawType == EventType.KeyDown) {
-                         ProcessKeyboardEvent(keyCode, InputEventType.KeyDown, character, modifiersThisFrame);
-                        list.Add(new RawKeyEvent() {
-                            keyCode = keyCode,
-                            character = character,
-                            eventType = EventType.KeyDown,
-                            isKeyEvent = false
-                        });
-                        continue;
-                    }
-
-                    if (s_Event.rawType == EventType.KeyUp) {
-                        // ProcessKeyboardEvent(keyCode, InputEventType.KeyUp, character, modifiersThisFrame);
-                        list.Add(new RawKeyEvent() {
-                            keyCode = keyCode,
-                            character = character,
-                            eventType = EventType.KeyUp,
-                            isKeyEvent = false
-                        });
-                        continue;
-                    }
-                }
-
-                // ProcessKeyEvent(s_Event.rawType, s_Event.keyCode, s_Event.character);
-
-                list.Add(new RawKeyEvent() {
-                    keyCode = s_Event.keyCode,
-                    character = s_Event.character,
-                    eventType = s_Event.rawType,
-                    isKeyEvent = true
-                });
-            }
-        }
-
-        private void ProcessKeyboardEventList() {
-            StructList<RawKeyEvent> list = StructList<RawKeyEvent>.Get();
-            GetKeyEvents(list);
-            for (int i = 0; i < list.size; i++) {
-                ref RawKeyEvent keyEvent = ref list.array[i];
-                if (keyEvent.isKeyEvent) {
-                    ProcessKeyEvent(keyEvent.eventType, keyEvent.keyCode, keyEvent.character);
-                }
-                else {
-                    ProcessKeyboardEvent(keyEvent.keyCode, keyEvent.eventType == EventType.KeyUp ? InputEventType.KeyUp : InputEventType.KeyDown, keyEvent.character, modifiersThisFrame);
-                }
-            }
-
-            StructList<RawKeyEvent>.Release(ref list);
-        }
-
-        private void ProcessKeyboardEvents() {
-
-            return;
-            
-            // for (int i = 0; i < m_UpThisFrame.Count; i++) {
-            //     m_KeyStates[m_UpThisFrame[i]] = KeyState.UpNotThisFrame;
-            // }
-            //
-            // for (int i = 0; i < m_DownThisFrame.Count; i++) {
-            //     m_KeyStates[m_DownThisFrame[i]] = KeyState.DownNotThisFrame;
-            // }
-            //
-            // m_DownThisFrame.Clear();
-            // m_UpThisFrame.Clear();
-            //
-            // HandleShiftKey(KeyCode.LeftShift);
-            // HandleShiftKey(KeyCode.RightShift);
-            //
-            // ProcessKeyEventList();
-            //
-            // for (int i = 0; i < m_PressedKeys.Count; i++) {
-            //     if (!m_DownThisFrame.Contains(m_PressedKeys[i].keyCode, (k, p) => k != p)) {
-            //         if (UnityEngine.Input.GetKey(m_PressedKeys[i].keyCode)) {
-            //             ProcessKeyboardEvent(m_PressedKeys[i].keyCode, InputEventType.KeyHeldDown, m_PressedKeys[i].character, modifiersThisFrame);
-            //         }
-            //         else {
-            //             m_PressedKeys.Remove(m_PressedKeys[i].keyCode, ((pressed, code) => pressed.keyCode == code));
-            //         }
-            //     }
-            // }
-        }
-
-        private void ProcessKeyEvent(EventType evtType, KeyCode keyCode, char character) {
-            switch (evtType) {
-                case EventType.KeyDown:
-                    if (m_KeyStates.ContainsKey(keyCode)) {
-                        KeyState state = m_KeyStates[keyCode];
-                        if ((state & KeyState.Down) == 0) {
-                            m_DownThisFrame.Add(keyCode);
-                            m_KeyStates[keyCode] = KeyState.DownThisFrame;
-                            ProcessKeyboardEvent(keyCode, InputEventType.KeyDown, character, modifiersThisFrame);
-                        }
-                    }
-                    else {
-                        m_DownThisFrame.Add(keyCode);
-                        m_KeyStates[keyCode] = KeyState.DownThisFrame;
-                        ProcessKeyboardEvent(keyCode, InputEventType.KeyDown, character, modifiersThisFrame);
-                    }
-
-                    HandleModifierDown(keyCode);
-                    break;
-
-                case EventType.KeyUp:
-                    m_UpThisFrame.Add(keyCode);
-
-                    m_PressedKeys.Remove(character, (pressed, c) => pressed.character == c);
-
-                    m_KeyStates[keyCode] = KeyState.UpThisFrame;
-                    ProcessKeyboardEvent(keyCode, InputEventType.KeyUp, character, modifiersThisFrame);
-                    HandleModifierUp(keyCode);
-                    break;
-            }
-        }
-
-        private void HandleShiftKey(KeyCode code) {
-            bool wasDown = IsKeyDown(code);
-            bool isDown = UnityEngine.Input.GetKey(code);
-            if ((wasDown && !isDown) || UnityEngine.Input.GetKeyUp(code)) {
-                m_KeyStates[code] = KeyState.UpThisFrame;
-                m_UpThisFrame.Add(code);
-                ProcessKeyboardEvent(code, InputEventType.KeyUp, '\0', modifiersThisFrame);
-            }
-            else if (UnityEngine.Input.GetKeyDown(code)) {
-                m_KeyStates[code] = KeyState.DownThisFrame;
-                m_DownThisFrame.Add(code);
-                ProcessKeyboardEvent(code, InputEventType.KeyDown, '\0', modifiersThisFrame);
-            }
-            else if (isDown) {
-                m_KeyStates[code] = KeyState.Down;
-            }
-            else {
-                m_KeyStates[code] = KeyState.Up;
-            }
-        }
-
-        private void HandleModifierDown(KeyCode keyCode) {
-            switch (keyCode) {
-                case KeyCode.LeftAlt:
-                case KeyCode.RightAlt:
-                    modifiersThisFrame |= KeyboardModifiers.Alt;
-                    break;
-                case KeyCode.LeftControl:
-                case KeyCode.RightControl:
-                    modifiersThisFrame |= KeyboardModifiers.Control;
-                    break;
-                case KeyCode.LeftCommand:
-                case KeyCode.RightCommand:
-                    modifiersThisFrame |= KeyboardModifiers.Command;
-                    break;
-                case KeyCode.LeftWindows:
-                case KeyCode.RightWindows:
-                    modifiersThisFrame |= KeyboardModifiers.Windows;
-                    break;
-                case KeyCode.LeftShift:
-                case KeyCode.RightShift:
-                    modifiersThisFrame |= KeyboardModifiers.Shift;
-                    break;
-                case KeyCode.Numlock:
-                    modifiersThisFrame |= KeyboardModifiers.NumLock;
-                    break;
-                case KeyCode.CapsLock:
-                    modifiersThisFrame |= KeyboardModifiers.CapsLock;
-                    break;
-            }
-        }
-
-        private void HandleModifierUp(KeyCode keyCode) {
-            switch (keyCode) {
-                case KeyCode.LeftAlt:
-                    if (!UnityEngine.Input.GetKey(KeyCode.RightAlt)) {
-                        modifiersThisFrame &= ~KeyboardModifiers.Alt;
-                    }
-
-                    break;
-                case KeyCode.RightAlt:
-                    if (!UnityEngine.Input.GetKey(KeyCode.LeftAlt)) {
-                        modifiersThisFrame &= ~KeyboardModifiers.Alt;
-                    }
-
-                    break;
-                case KeyCode.LeftControl:
-                    if (!UnityEngine.Input.GetKey(KeyCode.RightControl)) {
-                        modifiersThisFrame &= ~KeyboardModifiers.Control;
-                    }
-
-                    break;
-                case KeyCode.RightControl:
-                    if (!UnityEngine.Input.GetKey(KeyCode.LeftControl)) {
-                        modifiersThisFrame &= ~KeyboardModifiers.Control;
-                    }
-
-                    break;
-                case KeyCode.LeftCommand:
-                    if (!UnityEngine.Input.GetKey(KeyCode.RightCommand)) {
-                        modifiersThisFrame &= ~KeyboardModifiers.Command;
-                    }
-
-                    break;
-                case KeyCode.RightCommand:
-                    if (!UnityEngine.Input.GetKey(KeyCode.LeftCommand)) {
-                        modifiersThisFrame &= ~KeyboardModifiers.Command;
-                    }
-
-                    break;
-                case KeyCode.LeftWindows:
-                    if (!UnityEngine.Input.GetKey(KeyCode.RightWindows)) {
-                        modifiersThisFrame &= ~KeyboardModifiers.Windows;
-                    }
-
-                    break;
-                case KeyCode.RightWindows:
-                    if (!UnityEngine.Input.GetKey(KeyCode.LeftWindows)) {
-                        modifiersThisFrame &= ~KeyboardModifiers.Windows;
-                    }
-
-                    break;
-                case KeyCode.LeftShift:
-                    if (!UnityEngine.Input.GetKey(KeyCode.RightShift)) {
-                        modifiersThisFrame &= ~KeyboardModifiers.Shift;
-                    }
-
-                    break;
-                case KeyCode.RightShift:
-                    if (!UnityEngine.Input.GetKey(KeyCode.LeftShift)) {
-                        modifiersThisFrame &= ~KeyboardModifiers.Shift;
-                    }
-
-                    break;
-                case KeyCode.Numlock:
-                    modifiersThisFrame &= ~KeyboardModifiers.NumLock;
-                    break;
-                case KeyCode.CapsLock:
-                    modifiersThisFrame &= ~KeyboardModifiers.CapsLock;
-                    break;
             }
         }
 
@@ -1145,7 +805,8 @@ namespace UIForia.Systems {
                     }
 
                     if ((handlerData.modifiers & modifiersThisFrame) == handlerData.modifiers) {
-                        handlerData.handler.Invoke(new GenericInputEvent(eventType, modifiersThisFrame, m_EventPropagator, '\0', default, element == m_FocusedElement));
+                        handlerData.handler.Invoke(new GenericInputEvent(eventType, modifiersThisFrame,
+                            m_EventPropagator, '\0', default, element == m_FocusedElement));
                     }
 //                    handler.Invoke(element, mouseHandlerGroup.context, mouseEvent);
 
@@ -1164,7 +825,8 @@ namespace UIForia.Systems {
                 Action<GenericInputEvent> handler = m_MouseEventCaptureList[i].Item1;
                 UIElement element = m_MouseEventCaptureList[i].Item2;
 
-                handler.Invoke(new GenericInputEvent(eventType, modifiersThisFrame, m_EventPropagator, '\0', default, element == m_FocusedElement));
+                handler.Invoke(new GenericInputEvent(eventType, modifiersThisFrame, m_EventPropagator, '\0', default,
+                    element == m_FocusedElement));
 
                 if (m_EventPropagator.shouldStopPropagation) {
                     m_MouseEventCaptureList.Clear();
@@ -1183,7 +845,8 @@ namespace UIForia.Systems {
                 RunMouseEvents(m_ElementsThisFrame, InputEventType.MouseScroll);
             }
 
-            if (mouseState.isLeftMouseDownThisFrame || mouseState.isRightMouseDownThisFrame || mouseState.isMiddleMouseDownThisFrame) {
+            if (mouseState.isLeftMouseDownThisFrame || mouseState.isRightMouseDownThisFrame ||
+                mouseState.isMiddleMouseDownThisFrame) {
                 HandleBlur();
 
                 if (m_ElementsThisFrame.Count > 0 && m_ElementsThisFrame[0].View.RequestFocus()) {
@@ -1192,7 +855,8 @@ namespace UIForia.Systems {
 
                 RunMouseEvents(m_ElementsThisFrame, InputEventType.MouseDown);
             }
-            else if (mouseState.isLeftMouseUpThisFrame || mouseState.isRightMouseUpThisFrame || mouseState.isMiddleMouseUpThisFrame) {
+            else if (mouseState.isLeftMouseUpThisFrame || mouseState.isRightMouseUpThisFrame ||
+                     mouseState.isMiddleMouseUpThisFrame) {
                 RunMouseEvents(m_ElementsThisFrame, InputEventType.MouseUp);
                 if (mouseState.clickCount > 0) {
                     RunMouseEvents(m_ElementsThisFrame, InputEventType.MouseClick);
@@ -1205,7 +869,8 @@ namespace UIForia.Systems {
                 RunMouseEvents(m_ElementsThisFrame, InputEventType.MouseHeldDown);
             }
 
-            RunMouseEvents(m_ElementsThisFrame, mouseState.DidMove ? InputEventType.MouseMove : InputEventType.MouseHover);
+            RunMouseEvents(m_ElementsThisFrame,
+                mouseState.DidMove ? InputEventType.MouseMove : InputEventType.MouseHover);
         }
 
         private void HandleBlur() {
@@ -1229,13 +894,9 @@ namespace UIForia.Systems {
 
             ReleaseFocus((IFocusable) m_FocusedElement);
         }
-
     }
 
     public struct KeyboardEventHandlerInvocation {
-
         public KeyboardInputEvent evt { get; set; }
-
     }
-
 }

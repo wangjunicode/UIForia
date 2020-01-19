@@ -99,8 +99,17 @@ namespace UIForia.Elements {
         public UIView View { get; internal set; }
         public Application application { get; internal set; }
         public int depth { get; internal set; }
-        public int siblingIndex { get; internal set; }
-        
+        private int _siblingIndex;
+
+        public int siblingIndex {
+            get => _siblingIndex;
+            internal set {
+                if (_siblingIndex == value) return;
+                _siblingIndex = value;
+                flags |= UIElementFlags.IndexChanged;
+            }
+        }
+
 //        
         // not actually used since we get elements from the pool as uninitialized
         protected internal UIElement() { }
@@ -179,6 +188,15 @@ namespace UIForia.Elements {
         }
 
         public void TriggerEvent(UIEvent evt) {
+            evt.origin = this;
+            UIElement ptr = this;
+            while (evt.IsPropagating() && ptr != null) {
+                ptr.HandleUIEvent(evt);
+                ptr = ptr.parent;
+            }
+        }
+
+        public void TriggerEvent<T>(T evt) where T : UIEvent {
             evt.origin = this;
             UIElement ptr = this;
             while (evt.IsPropagating() && ptr != null) {
@@ -279,7 +297,6 @@ namespace UIForia.Elements {
                 if (children[i] is T) {
                     retn.Add((T) children[i]);
                 }
-
 
                 if (children[i] is UIChildrenElement) {
                     continue;
@@ -426,7 +443,7 @@ namespace UIForia.Elements {
 
             return false;
         }
-        
+
         public UIElement this[int i] {
             get { return GetChild(i); }
         }
@@ -436,12 +453,11 @@ namespace UIForia.Elements {
         }
 
         public ElementAnimator Animator => new ElementAnimator(application.m_AnimationSystem, this);
-        
+
         public IInputSystem InputSystem => application.m_InputSystem;
 
         // element.animator.Stop();
 
-        
     }
 
 }

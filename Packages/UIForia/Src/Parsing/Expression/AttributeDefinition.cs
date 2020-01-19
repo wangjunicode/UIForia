@@ -4,7 +4,7 @@ using System.Diagnostics;
 namespace UIForia.Parsing.Expressions {
 
     [Flags]
-    public enum AttributeType : ushort {
+    public enum AttributeType {
 
         Context = 1 << 0,
         ContextVariable = 1 << 1,
@@ -23,8 +23,8 @@ namespace UIForia.Parsing.Expressions {
 
         Expose = 1 << 14,
 
-        ImplicitVariable = 1 << 15
-
+        ImplicitVariable = 1 << 15,
+        SyncProperty = 1 << 16
     }
 
     [Flags]
@@ -35,8 +35,8 @@ namespace UIForia.Parsing.Expressions {
         EnableOnly = 1 << 2,
         RootContext = 1 << 3,
         StyleProperty = 1 << 4,
-        UseSlotRootContext = 1 << 5
-
+        UseSlotRootContext = 1 << 5,
+        LateBinding
     }
     
     [DebuggerDisplay("{key}={value}")]

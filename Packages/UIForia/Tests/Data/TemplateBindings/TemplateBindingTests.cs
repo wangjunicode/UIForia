@@ -98,7 +98,6 @@ namespace TemplateBinding {
             Assert.AreEqual(25, outer.GetValue());
         }
 
-
         [Template("Data/TemplateBindings/TemplateBindingTest_AttributeBinding.xml")]
         public class TemplateBindingTest_AttributeBinding : UIElement {
 
@@ -254,7 +253,6 @@ namespace TemplateBinding {
             //
             // Assert.AreEqual("NoEvtParam was called str = string goes here param = 250", e.output_NoEvtParam);
         }
-
 
         [Template("Data/TemplateBindings/TemplateBindingTest_ConditionalBinding.xml")]
         public class TemplateBindingTest_ConditionalBinding : UIElement {
@@ -484,25 +482,25 @@ namespace TemplateBinding {
             TemplateBindingTest_ContextVariable_Expose_Slotted_Outer e = (TemplateBindingTest_ContextVariable_Expose_Slotted_Outer) app.RootElement;
 
             app.Update();
-            
+
             Assert.AreEqual("var 0 + var 1hello", GetText(e["text"]));
         }
 
-         [Template("Data/TemplateBindings/TemplateBindingTest_LocalContextVariable.xml#expose_context_out_of_scope")]
+        [Template("Data/TemplateBindings/TemplateBindingTest_LocalContextVariable.xml#expose_context_out_of_scope")]
         public class TemplateBindingTest_ContextVariable_Expose_OutOfScope : UIElement {
 
             public string value = "val";
 
         }
-        
+
         [Test]
         public void ContextVariable_Expose_OutOfScope() {
 
             CompileException exception = Assert.Throws<CompileException>(() => Setup<TemplateBindingTest_ContextVariable_Expose_OutOfScope>());
             Assert.AreEqual(CompileException.UnknownAlias("variable0").Message, exception.Message);
-            
+
         }
-        
+
         [Template("Data/TemplateBindings/TemplateBindingTest_RepeatTemplate.xml#repeat_count")]
         public class TemplateBindingTest_RepeatCount : UIElement {
 
@@ -563,16 +561,16 @@ namespace TemplateBinding {
         }
 
         [Template("Data/TemplateBindings/TemplateBindingTest_RepeatTemplate.xml#repeat_list")]
-        public class TemplateBindingTest_RepeatList_Struct : UIElement {
+        public class TemplateBindingTest_RepeatList : UIElement {
 
             public IList<Vector3> data;
 
         }
 
         [Test]
-        public void RepeatList_Struct() {
-            MockApplication app = Setup<TemplateBindingTest_RepeatList_Struct>();
-            TemplateBindingTest_RepeatList_Struct e = (TemplateBindingTest_RepeatList_Struct) app.RootElement;
+        public void RepeatList_ArrayData() {
+            MockApplication app = Setup<TemplateBindingTest_RepeatList>();
+            TemplateBindingTest_RepeatList e = (TemplateBindingTest_RepeatList) app.RootElement;
 
             e.data = new[] {
                 Vector3.zero,
@@ -584,7 +582,183 @@ namespace TemplateBinding {
             app.Update();
 
             Assert.AreEqual(4, e[0].children.size);
-            Assert.AreEqual("repeat me " + Vector3.zero.ToString(), GetText(e[0][0]));
+            Assert.AreEqual("repeat me " + Vector3.zero, GetText(e[0][0]));
+            Assert.AreEqual("repeat me " + Vector3.one, GetText(e[0][1]));
+            Assert.AreEqual("repeat me " + Vector3.forward, GetText(e[0][2]));
+            Assert.AreEqual("repeat me " + Vector3.back, GetText(e[0][3]));
+
+            UIElement c0 = e[0][0];
+            UIElement c1 = e[0][1];
+            UIElement c2 = e[0][2];
+            UIElement c3 = e[0][3];
+
+            e.data = new[] {
+                Vector3.zero,
+                Vector3.one,
+                Vector3.forward,
+                Vector3.back,
+                Vector3.left
+            };
+
+            app.Update();
+
+            Assert.AreEqual(5, e[0].children.size);
+            Assert.AreEqual("repeat me " + Vector3.zero, GetText(e[0][0]));
+            Assert.AreEqual("repeat me " + Vector3.one, GetText(e[0][1]));
+            Assert.AreEqual("repeat me " + Vector3.forward, GetText(e[0][2]));
+            Assert.AreEqual("repeat me " + Vector3.back, GetText(e[0][3]));
+            Assert.AreEqual("repeat me " + Vector3.left, GetText(e[0][4]));
+            Assert.AreEqual(c0, e[0][0]);
+            Assert.AreEqual(c1, e[0][1]);
+            Assert.AreEqual(c2, e[0][2]);
+            Assert.AreEqual(c3, e[0][3]);
+
+            e.data = new[] {
+                Vector3.zero,
+                Vector3.one,
+            };
+
+            app.Update();
+
+            Assert.AreEqual(2, e[0].children.size);
+            Assert.AreEqual("repeat me " + Vector3.zero, GetText(e[0][0]));
+            Assert.AreEqual("repeat me " + Vector3.one, GetText(e[0][1]));
+            Assert.AreEqual(c0, e[0][0]);
+            Assert.AreEqual(c1, e[0][1]);
+        }
+
+        [Test]
+        public void RepeatList_ListData() {
+            MockApplication app = Setup<TemplateBindingTest_RepeatList>();
+            TemplateBindingTest_RepeatList e = (TemplateBindingTest_RepeatList) app.RootElement;
+
+            e.data = new List<Vector3>(new[] {
+                Vector3.zero,
+                Vector3.one,
+                Vector3.forward,
+                Vector3.back
+            });
+
+            app.Update();
+
+            Assert.AreEqual(4, e[0].children.size);
+            Assert.AreEqual("repeat me " + Vector3.zero, GetText(e[0][0]));
+            Assert.AreEqual("repeat me " + Vector3.one, GetText(e[0][1]));
+            Assert.AreEqual("repeat me " + Vector3.forward, GetText(e[0][2]));
+            Assert.AreEqual("repeat me " + Vector3.back, GetText(e[0][3]));
+
+            UIElement c0 = e[0][0];
+            UIElement c1 = e[0][1];
+            UIElement c2 = e[0][2];
+            UIElement c3 = e[0][3];
+
+            e.data.Add(Vector3.left);
+
+            app.Update();
+
+            Assert.AreEqual(5, e[0].children.size);
+            Assert.AreEqual("repeat me " + Vector3.zero, GetText(e[0][0]));
+            Assert.AreEqual("repeat me " + Vector3.one, GetText(e[0][1]));
+            Assert.AreEqual("repeat me " + Vector3.forward, GetText(e[0][2]));
+            Assert.AreEqual("repeat me " + Vector3.back, GetText(e[0][3]));
+            Assert.AreEqual("repeat me " + Vector3.left, GetText(e[0][4]));
+            Assert.AreEqual(c0, e[0][0]);
+            Assert.AreEqual(c1, e[0][1]);
+            Assert.AreEqual(c2, e[0][2]);
+            Assert.AreEqual(c3, e[0][3]);
+
+            e.data.RemoveAt(e.data.Count - 1);
+            e.data.RemoveAt(e.data.Count - 1);
+            e.data.RemoveAt(e.data.Count - 1);
+
+            app.Update();
+
+            Assert.AreEqual(2, e[0].children.size);
+            Assert.AreEqual("repeat me " + Vector3.zero, GetText(e[0][0]));
+            Assert.AreEqual("repeat me " + Vector3.one, GetText(e[0][1]));
+            Assert.AreEqual(c0, e[0][0]);
+            Assert.AreEqual(c1, e[0][1]);
+
+            e.data.Clear();
+
+            app.Update();
+
+            Assert.AreEqual(0, e[0].children.size);
+
+        }
+
+        [Template("Data/TemplateBindings/TemplateBindingTest_RepeatTemplate.xml#repeat_list_key_fn")]
+        public class TemplateBindingTest_RepeatList_Key : UIElement {
+
+            public IList<Vector3> data;
+
+        }
+
+        [Test]
+        public void RepeatList_KeyFn() {
+            MockApplication app = Setup<TemplateBindingTest_RepeatList_Key>();
+            TemplateBindingTest_RepeatList_Key e = (TemplateBindingTest_RepeatList_Key) app.RootElement;
+
+            e.data = new List<Vector3>(new[] {
+                new Vector3(1, 0, 0),
+                new Vector3(2, 0, 0),
+                new Vector3(3, 0, 0),
+            });
+
+            app.Update();
+
+            Assert.AreEqual(3, e[0].children.size);
+            Assert.AreEqual("repeat me 1", GetText(e[0][0]));
+            Assert.AreEqual("repeat me 2", GetText(e[0][1]));
+            Assert.AreEqual("repeat me 3", GetText(e[0][2]));
+
+            UIElement c0 = e[0][0];
+            UIElement c1 = e[0][1];
+            UIElement c2 = e[0][2];
+
+            e.data.Insert(1, new Vector3(4, 0, 0));
+
+            app.Update();
+
+            Assert.AreEqual(4, e[0].children.size);
+            Assert.AreEqual("repeat me 1", GetText(e[0][0]));
+            Assert.AreEqual("repeat me 4", GetText(e[0][1]));
+            Assert.AreEqual("repeat me 2", GetText(e[0][2]));
+            Assert.AreEqual("repeat me 3", GetText(e[0][3]));
+
+            Assert.AreEqual(c0, e[0][0]);
+            Assert.AreEqual(c1, e[0][2]);
+            Assert.AreEqual(c2, e[0][3]);
+
+            UIElement c3 = e[0][1];
+
+            e.data.RemoveAt(2);
+
+            app.Update();
+
+            Assert.AreEqual(3, e[0].children.size);
+            Assert.AreEqual("repeat me 1", GetText(e[0][0]));
+            Assert.AreEqual("repeat me 4", GetText(e[0][1]));
+            Assert.AreEqual("repeat me 3", GetText(e[0][2]));
+
+            Assert.AreEqual(c0, e[0][0]);
+            Assert.AreEqual(c3, e[0][1]);
+            Assert.AreEqual(c2, e[0][2]);
+
+            // reorder data
+            e.data.RemoveAt(1);
+            e.data.Add(new Vector3(4, 0, 0));
+            
+            app.Update();
+            
+            Assert.AreEqual(3, e[0].children.size);
+            Assert.AreEqual("repeat me 1", GetText(e[0][0]));
+            Assert.AreEqual("repeat me 3", GetText(e[0][1]));
+            Assert.AreEqual("repeat me 4", GetText(e[0][2]));
+
+            Assert.AreEqual(c0, e[0][0]);
+            Assert.AreEqual(c2, e[0][1]);
+            Assert.AreEqual(c3, e[0][2]);
         }
 
         string GetText(UIElement element) {

@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
+using JetBrains.Annotations;
 using UIForia.Attributes;
 using UIForia.Compilers;
 using UIForia.Extensions;
@@ -7,6 +9,7 @@ using UIForia.Parsing;
 using UIForia.Systems;
 using UIForia.Util;
 using UnityEditorInternal.Profiling.Memory.Experimental;
+using UnityEngine;
 
 namespace UIForia.Elements {
 
@@ -62,14 +65,7 @@ namespace UIForia.Elements {
         public TemplateScope scope;
         public int itemVarId;
 
-        protected void CreateFromRange(int start, int end) {
-            for (int i = start; i < end; i++) {
-                UIElement child = application.CreateTemplate(templateSpawnId, templateContextRoot, this, scope);
-                application.InsertChild(this, child, (uint) i);
-                ContextVariable<int> indexVariable = new ContextVariable<int>(indexVarId, "index", i);
-                children[i].bindingNode.CreateLocalContextVariable(indexVariable);
-            }
-        }
+        protected void CreateFromRange(int start, int end) { }
 
         protected void DestroyAll() {
             while (children.size > 0) {
@@ -98,6 +94,13 @@ namespace UIForia.Elements {
 
     }
 
+    internal struct RepeatIndex {
+
+        public UIElement element;
+        public RepeatItemKey key;
+
+    }
+
     [GenericElementTypeResolvedBy(nameof(list))]
     public sealed class UIRepeatElement<T> : UIRepeatElement {
 
@@ -107,106 +110,148 @@ namespace UIForia.Elements {
         public Func<T, RepeatItemKey> keyFn;
         private bool skipUpdate;
 
-        private T[] listClone;
+        private int prevRangeStart;
+        private int prevRangeEnd;
 
-
-        [OnPropertyChanged(nameof(list))]
-        public void OnListChanged(IList<T> oldList) {
-            skipUpdate = true;
-            // can skip update when list changed (I think this is safe, confirm!)
-            if (oldList == null) {
-                CreateFromRange(0, list.Count);
-                for (int i = 0; i < children.size; i++) {
-                    ContextVariable<T> variable = new ContextVariable<T>(8, "item", list[i]);
-                    children[i].bindingNode.CreateLocalContextVariable(variable);
-                }
-            }
-            else if (list == null) {
-                DestroyAll();
-            }
-            else { }
-        }
-
-        public override void OnUpdate() {
-            if (skipUpdate) {
-                skipUpdate = false;
-                // CloneList();
-                return;
-            }
-
-            if (keyFn == null) {
-                UpdateWithoutKeyFunc();
-            }
-            else {
-                UpdateWithKeyFunc();
-            }
-
-            // CloneList();
-        }
-
+        [UsedImplicitly] public int start;
+        [UsedImplicitly] public int end = int.MaxValue;
         private RepeatIndex[] keys;
 
-        private struct RepeatIndex {
+        public override void OnUpdate() {
 
-            public UIElement element;
-            public RepeatItemKey key;
+            int rangeStart = start;
+            int rangeEnd = end;
+            int listCount = list?.Count ?? 0;
 
+            if (rangeStart < 0) rangeStart = 0;
+            if (rangeEnd < rangeStart) rangeEnd = rangeStart;
+
+            if (rangeStart >= listCount) rangeStart = listCount;
+
+            if (rangeEnd < rangeStart) rangeEnd = rangeStart;
+            if (rangeEnd > listCount) rangeEnd = listCount;
+
+            if (keyFn == null) {
+                UpdateWithoutKeyFunc(rangeStart, rangeEnd);
+            }
+            else {
+                UpdateWithKeyFunc(rangeStart, rangeEnd);
+            }
+
+            prevRangeStart = rangeStart;
+            prevRangeEnd = rangeEnd;
         }
-        
-        private void UpdateWithKeyFunc() {
-            for (int i = 0; i < children.size; i++) {
+
+        private StructList<RepeatIndex> availableChildren;
+        private StructList<RepeatIndex> lastFrameChildren;
+        private LightList<UIElement> childrenSwapList;
+
+        private void UpdateWithKeyFunc(int rangeStart, int rangeEnd) {
+            // build list of children
+            // element registers for a key
+            // for each key in range
+            // find element
+            // if element doesnt exist
+            // create it
+            // if old element no longer referenced, delete it
+
+            lastFrameChildren = lastFrameChildren ?? new StructList<RepeatIndex>(rangeEnd - rangeStart);
+            availableChildren = availableChildren ?? new StructList<RepeatIndex>();
+
+            availableChildren.AddRange(lastFrameChildren);
+            lastFrameChildren.Clear();
+
+            for (int i = rangeStart; i < rangeEnd; i++) {
                 RepeatItemKey key = keyFn(list[i]);
-                // for each item in the list, compute a key for it
-                // key should be unique but maybe we don't enforce this
 
-                // for each key we compute, if we had that key before we need to get the element and insert it at that index
+                // find old child who has key == key last frame
+                RepeatIndex keypair = default;
+                keypair.key = key;
 
-                // children[i] = GetElementForKey(key);
-                
-                if (keys[i].key != key) {
-                    keys[i].key = key;
-                    keys[i].element = children[i];
-                }        
-                
-            }
+                for (int j = 0; j < availableChildren.size; j++) {
+                    ref RepeatItemKey childKey = ref availableChildren.array[j].key;
 
-            for (int i = 0; i < children.size; i++) {
-                children.array[i].bindingNode.SetRepeatItem(8, "item", list[i]);
-            }
-        }
-
-        private void UpdateWithoutKeyFunc() {
-            for (int i = 0; i < children.size; i++) {
-                children.array[i].bindingNode.SetRepeatItem(8, "item", list[i]);
-            }
-        }
-
-        private void CloneList() {
-            if (listClone == null) {
-                listClone = new T[list.Count];
-            }
-
-            if (listClone.Length < list.Count) {
-                listClone = new T[list.Count];
-            }
-
-            switch (list) {
-                case T[] array:
-                    Array.Copy(array, 0, listClone, 0, array.Length);
-                    break;
-                case List<T> actualList: {
-                    T[] a = actualList.GetArray();
-                    Array.Copy(a, 0, listClone, 0, actualList.Count);
-                    break;
-                }
-                default: {
-                    for (int i = 0; i < list.Count; i++) {
-                        listClone[i] = list[i];
+                    if (childKey.keyLong == key.keyLong && string.Equals(childKey.keyString, key.keyString, StringComparison.Ordinal)) {
+                        keypair.element = availableChildren.array[j].element;
+                        availableChildren.SwapRemoveAt(j);
+                        break;
                     }
 
-                    break;
                 }
+
+                if (keypair.element == null) {
+                    UIElement child = application.CreateTemplate(templateSpawnId, templateContextRoot, this, scope);
+                    application.InitializeElement(child);
+                    ContextVariable<int> indexVariable = new ContextVariable<int>(indexVarId, "index", default);
+                    ContextVariable<T> itemVariable = new ContextVariable<T>(itemVarId, "item", default);
+                    child.bindingNode.CreateLocalContextVariable(itemVariable);
+                    child.bindingNode.CreateLocalContextVariable(indexVariable);
+                    keypair.element = child;
+                }
+
+                lastFrameChildren.Add(keypair);
+
             }
+
+            while (availableChildren.size > 0) {
+                // set parent to null avoids child reshuffle
+                availableChildren.array[availableChildren.size - 1].element.parent = null;
+                availableChildren.array[availableChildren.size - 1].element.Destroy();
+                availableChildren.size--;
+            }
+
+            children.Clear();
+
+            children.EnsureCapacity(lastFrameChildren.size);
+            children.size = lastFrameChildren.size;
+
+            for (int i = 0; i < lastFrameChildren.size; i++) {
+                UIElement child = lastFrameChildren.array[i].element;
+                child.siblingIndex = i;
+                children.array[i] = child;
+                ((ContextVariable<T>) child.bindingNode.GetContextVariable(itemVarId)).value = list[rangeStart + i];
+                ((ContextVariable<int>) child.bindingNode.GetContextVariable(indexVarId)).value = rangeStart + i;
+            }
+        }
+
+        private void UpdateWithoutKeyFunc(int rangeStart, int rangeEnd) {
+            if (prevRangeStart != rangeStart || prevRangeEnd != rangeEnd) {
+
+                int prevCount = prevRangeEnd - prevRangeStart;
+                int currCount = rangeEnd - rangeStart;
+
+                // todo -- add option to 'orphan' child on remove
+
+                if (currCount > prevCount) {
+                    // first create and add children
+                    int diff = currCount - prevCount;
+                    for (int i = 0; i < diff; i++) {
+
+                        UIElement child = application.CreateTemplate(templateSpawnId, templateContextRoot, this, scope);
+                        application.InsertChild(this, child, (uint) (prevCount + i));
+
+                        ContextVariable<int> indexVariable = new ContextVariable<int>(indexVarId, "index", default);
+                        ContextVariable<T> itemVariable = new ContextVariable<T>(itemVarId, "item", default);
+
+                        children.array[prevCount + i].bindingNode.CreateLocalContextVariable(itemVariable);
+                        children.array[prevCount + i].bindingNode.CreateLocalContextVariable(indexVariable);
+
+                    }
+                }
+                else {
+                    int diff = prevCount - currCount;
+                    for (int i = 0; i < diff; i++) {
+                        children.array[children.size - 1].Destroy();
+                    }
+                }
+
+            }
+
+            for (int i = 0; i < children.size; i++) {
+                ((ContextVariable<T>) children.array[i].bindingNode.GetContextVariable(itemVarId)).value = list[rangeStart + i];
+                ((ContextVariable<int>) children.array[i].bindingNode.GetContextVariable(indexVarId)).value = rangeStart + i;
+            }
+
         }
 
     }

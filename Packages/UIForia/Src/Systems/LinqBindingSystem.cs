@@ -33,17 +33,77 @@ namespace UIForia.Systems {
                 currentElement = stack.array[--stack.size];
 
                 // if current element is destroyed or disabled, bail out
-                if (!currentElement.isEnabled) {
+                if ((currentElement.flags & UIElementFlags.EnabledFlagSet) != UIElementFlags.EnabledFlagSet) {
                     continue;
                 }
 
                 iteratorIndex = 0;
+                
+                // input problem with syncing: input happens, needs to be propagated & bubbled
 
+                // buffered?
+                
+                // input system reads and marks each element event log to process
+                // each event gets a propagator
+                // element gets list of events for frame
+                // if event was handled
+                // 2nd pass for sync?
+                // pass per input event?
+                
+                // sync fires after update, but need to process input after reading, before own update
+                // need to parent update -> read value -> read input -> run bindings -> sync back
+                // dont want user to define anything for this to work
+                // input capture is the issue, not sure when captured event  needs to be handled
+                
+                // e
+                //     e
+                //         e
+                // sync -> write var to bindingNode
+                // -> read from bindingNode -> apply changes -> write to actual property
+                // input runs & invokes callbacks
+                // if a single element is an event source we can crawl back up tree and return 
+                // <parent>
+                //    <middle>
+                //      <child sync:val="parent.strVal"/> ->  trigger event()
+                //          <child1 sync:val="val"/>
+                
+                // normal update (read)
+                // input
+                // triggered events
+                // late update() -> sync here?
+                // on sync property changed 
+                // animate
+                // style update
+                // on frame complete
+                // render data gather
+                // buffer changes
+                // yield
+                
+                // other thread -> 
+                    // layout
+                    // render
+                
                 while (iteratorIndex != currentElement.children.size) {
                     UIElement child = currentElement.children.array[iteratorIndex];
                     if (child.bindingNode != null && child.bindingNode.lastTickedFrame != currentFrameId) {
                         child.bindingNode.lastTickedFrame = currentFrameId;
-                        child.bindingNode.updateBindings?.Invoke(child.bindingNode.root, child.bindingNode.element);
+                        
+                        // if ((child.flags & pendingInput) != 0 {
+                        //
+                        // }
+                        
+                        child.bindingNode.updateBindings?.Invoke(child.bindingNode.root, child);
+                        
+                        // if ((child.flags & animating) != 0) {
+                        //     // child.Animator.Update();
+                        // }
+                        //
+                        // if ((child.flags & styleUpdates) != 0 && handlesStyleUpdates) {
+                        //    child.OnStylePropertiesChanged();
+                        // }
+
+                        // child.bindingNode.syncBinding?.Invoke(child.bindingNode.root, child);
+
                     }
 
                     iteratorIndex++;
@@ -95,6 +155,12 @@ namespace UIForia.Systems {
         }
 
         public void OnAttributeSet(UIElement element, string attributeName, string currentValue, string previousValue) { }
+
+        public void OnLateUpdate() {
+        }
+
+        public void OnFrameCompleted() {
+        }
 
     }
 

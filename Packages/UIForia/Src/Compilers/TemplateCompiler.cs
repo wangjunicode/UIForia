@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Text;
 using UIForia.Compilers.Style;
 using UIForia.Elements;
 using UIForia.Exceptions;
@@ -18,6 +17,35 @@ using UIForia.Util;
 using UnityEngine;
 
 namespace UIForia.Compilers {
+
+    public class RepeatKeyFnTypeWrapper : ITypeWrapper {
+
+        private static readonly ConstructorInfo s_StringCtor = typeof(RepeatItemKey).GetConstructor(new[] {typeof(string)});
+        private static readonly ConstructorInfo s_LongCtor = typeof(RepeatItemKey).GetConstructor(new[] {typeof(long)});
+        private static readonly ConstructorInfo s_IntCtor = typeof(RepeatItemKey).GetConstructor(new[] {typeof(int)});
+
+        public Expression Wrap(Type targetType, Expression input) {
+            if (targetType != typeof(RepeatItemKey)) {
+                return null;
+            }
+
+            Type inputType = input.Type;
+            if (inputType == typeof(string)) {
+                return Expression.New(s_StringCtor, input);
+            }
+
+            if (inputType == typeof(int)) {
+                return Expression.New(s_IntCtor, input);
+            }
+
+            if (inputType == typeof(long)) {
+                return Expression.New(s_LongCtor, input);
+            }
+
+            return null;
+        }
+
+    }
 
     public class TemplateCompiler {
 
@@ -42,6 +70,7 @@ namespace UIForia.Compilers {
         private LightStack<LightStack<ContextVariableDefinition>> contextStack;
 
         private static readonly DynamicStyleListTypeWrapper s_DynamicStyleListTypeWrapper = new DynamicStyleListTypeWrapper();
+        private static readonly RepeatKeyFnTypeWrapper s_RepeatKeyFnTypeWrapper = new RepeatKeyFnTypeWrapper();
 
         private static readonly MethodInfo s_CreateFromPool = typeof(Application).GetMethod(nameof(Application.CreateElementFromPoolWithType));
         private static readonly MethodInfo s_BindingNodePool_Get = typeof(LinqBindingNode).GetMethod("Get", BindingFlags.Static | BindingFlags.Public);
@@ -953,6 +982,7 @@ namespace UIForia.Compilers {
                     case AttributeType.Alias:
                     case AttributeType.Slot:
                         break;
+
                     case AttributeType.Context:
                     case AttributeType.ContextVariable: {
                         if (attr.key == "element" || attr.key == "parent" || attr.key == "root") {
@@ -1010,6 +1040,7 @@ namespace UIForia.Compilers {
 
                         break;
                     }
+
                     case AttributeType.Property: {
                         if (ReflectionUtil.IsEvent(templateNode.ElementType, attr.key, out EventInfo eventInfo)) {
                             createdBindingCount++;
@@ -1043,7 +1074,8 @@ namespace UIForia.Compilers {
 
                                 string[] parts = attr.value.Split(' ');
 
-                                ParameterExpression styleList = createdCompiler.AddVariable(new Parameter<LightList<UIStyleGroupContainer>>("styleList"), ExpressionFactory.CallStaticUnchecked(s_LightList_UIStyleGroupContainer_PreSize, Expression.Constant(parts.Length)));
+                                ParameterExpression styleList = createdCompiler.AddVariable(new Parameter<LightList<UIStyleGroupContainer>>("styleList"),
+                                    ExpressionFactory.CallStaticUnchecked(s_LightList_UIStyleGroupContainer_PreSize, Expression.Constant(parts.Length)));
 
                                 Expression styleListArray = Expression.MakeMemberAccess(styleList, s_LightList_UIStyleGroupContainer_Array);
 
@@ -1104,13 +1136,16 @@ namespace UIForia.Compilers {
 
                         break;
                     }
+
                     case AttributeType.Expose: {
                         // 
                         break;
                     }
+
                     case AttributeType.Event: {
                         break;
                     }
+
                     case AttributeType.Conditional: {
                         if ((attr.flags & AttributeFlags.Const) != 0) {
                             createdBindingCount++;
@@ -1127,6 +1162,7 @@ namespace UIForia.Compilers {
 
                         break;
                     }
+
                     case AttributeType.Key:
                     case AttributeType.Touch:
                     case AttributeType.Controller:
@@ -1185,6 +1221,7 @@ namespace UIForia.Compilers {
                         case AttributeType.Mouse:
                             CompileMouseInputBinding(createdCompiler, inputList.array[i]);
                             break;
+
                         case AttributeType.Key:
                             CompileKeyboardInputBinding(createdCompiler, inputList.array[i]);
                             break;
@@ -1240,7 +1277,6 @@ namespace UIForia.Compilers {
             return contextModifications;
         }
 
-
         private int CompileDynamicStyleData(CompilationContext ctx, StructList<DynamicStyleData> dynamicStyleData, int updateBindingCount) {
             if (dynamicStyleData == null) {
                 return updateBindingCount;
@@ -1293,7 +1329,6 @@ namespace UIForia.Compilers {
             return updateBindingCount;
         }
 
-
         private int CompileTextBinding(TemplateNode templateNode, int bindingCount) {
             if (!(templateNode is TextNode textNode)) {
                 return bindingCount;
@@ -1315,42 +1350,55 @@ namespace UIForia.Compilers {
                             case TypeCode.Boolean:
                                 updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, s_StringBuilder_AppendBool, val));
                                 break;
+
                             case TypeCode.Byte:
                                 updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, s_StringBuilder_AppendByte, val));
                                 break;
+
                             case TypeCode.Char:
                                 updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, s_StringBuilder_AppendChar, val));
                                 break;
+
                             case TypeCode.Decimal:
                                 updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, s_StringBuilder_AppendDecimal, val));
                                 break;
+
                             case TypeCode.Double:
                                 updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, s_StringBuilder_AppendDouble, val));
                                 break;
+
                             case TypeCode.Int16:
                                 updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, s_StringBuilder_AppendInt16, val));
                                 break;
+
                             case TypeCode.Int32:
                                 updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, s_StringBuilder_AppendInt32, val));
                                 break;
+
                             case TypeCode.Int64:
                                 updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, s_StringBuilder_AppendInt64, val));
                                 break;
+
                             case TypeCode.SByte:
                                 updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, s_StringBuilder_AppendSByte, val));
                                 break;
+
                             case TypeCode.Single:
                                 updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, s_StringBuilder_AppendFloat, val));
                                 break;
+
                             case TypeCode.String:
                                 updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, s_StringBuilder_AppendString, val));
                                 break;
+
                             case TypeCode.UInt16:
                                 updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, s_StringBuilder_AppendUInt16, val));
                                 break;
+
                             case TypeCode.UInt32:
                                 updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, s_StringBuilder_AppendUInt32, val));
                                 break;
+
                             case TypeCode.UInt64:
                                 updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, s_StringBuilder_AppendUInt64, val));
                                 break;
@@ -1393,7 +1441,7 @@ namespace UIForia.Compilers {
             Expression Clear();
 
         }
-        
+
         public static void CompileAssignContextVariable(LinqCompiler compiler, in AttributeDefinition2 attr, Type contextVarType, int varId, Type expressionType = null) {
             //ContextVariable<T> ctxVar = (ContextVariable<T>)__castElement.bindingNode.GetContextVariable(id);
             //ctxVar.value = expression;
@@ -1545,12 +1593,15 @@ namespace UIForia.Compilers {
                 case "down":
                     evtType = InputEventType.KeyDown;
                     break;
+
                 case "up":
                     evtType = InputEventType.KeyUp;
                     break;
+
                 case "helddown":
                     evtType = InputEventType.KeyHeldDown;
                     break;
+
                 default:
                     throw new CompileException("Invalid keyboard event in template: " + attr.key);
             }
@@ -1671,33 +1722,43 @@ namespace UIForia.Compilers {
                 case "click":
                     evtType = InputEventType.MouseClick;
                     break;
+
                 case "down":
                     evtType = InputEventType.MouseDown;
                     break;
+
                 case "up":
                     evtType = InputEventType.MouseUp;
                     break;
+
                 case "enter":
                     evtType = InputEventType.MouseEnter;
                     break;
+
                 case "exit":
                     evtType = InputEventType.MouseExit;
                     break;
+
                 case "helddown":
                     evtType = InputEventType.MouseHeldDown;
                     break;
+
                 case "move":
                     evtType = InputEventType.MouseMove;
                     break;
+
                 case "hover":
                     evtType = InputEventType.MouseHover;
                     break;
+
                 case "scroll":
                     evtType = InputEventType.MouseScroll;
                     break;
+
                 case "context":
                     evtType = InputEventType.MouseContext;
                     break;
+
                 default:
                     throw new CompileException("Invalid mouse event in template: " + attr.key);
             }
@@ -1805,11 +1866,14 @@ namespace UIForia.Compilers {
                     case DefaultExpression _:
                     case ConstantExpression _:
                         return true;
+
                     case ConditionalExpression conditionalExpression:
                         return IsConstant(conditionalExpression.Test) && IsConstant(conditionalExpression.IfTrue) && IsConstant(conditionalExpression.IfFalse);
+
                     case UnaryExpression unary:
                         n = unary.Operand;
                         continue;
+
                     case BinaryExpression binaryExpression:
                         return IsConstant(binaryExpression.Left) && IsConstant(binaryExpression.Right);
                 }
@@ -1821,7 +1885,6 @@ namespace UIForia.Compilers {
         private static void CompileStyleBinding(LinqCompiler compiler, TemplateNode templateNode, in AttributeDefinition2 attributeDefinition) {
             ParameterExpression castElement = compiler.GetVariable(k_CastElement);
             ParameterExpression castRoot = compiler.GetVariable(k_CastRoot);
-
 
             StyleState styleState = StyleState.Normal;
 
@@ -1874,8 +1937,18 @@ namespace UIForia.Compilers {
             compiler.EndIsolatedSection();
         }
 
-        private static void CompilePropertyBinding(LinqCompiler compiler, TemplateNode templateNode, in AttributeDefinition2 attributeDefinition) {
-            LHSStatementChain left = null;
+        private bool HasTypeWrapper(Type type, out ITypeWrapper typeWrapper) {
+            if (type == typeof(RepeatItemKey)) {
+                typeWrapper = s_RepeatKeyFnTypeWrapper;
+                return true;
+            }
+
+            typeWrapper = null;
+            return false;
+        }
+
+        private void CompilePropertyBinding(LinqCompiler compiler, TemplateNode templateNode, in AttributeDefinition2 attributeDefinition) {
+            LHSStatementChain left;
             Expression right = null;
             ParameterExpression castElement = compiler.GetVariable(k_CastElement);
             ParameterExpression castRoot = compiler.GetVariable(k_CastRoot);
@@ -1894,14 +1967,24 @@ namespace UIForia.Compilers {
             //castElement.value = root.value
             compiler.SetImplicitContext(castRoot);
 
-            Expression accessor = compiler.AccessorStatement(left.targetExpression.Type, attributeDefinition.value);
-
-            if (accessor is ConstantExpression) {
-                right = accessor;
+            if (ReflectionUtil.IsFunc(left.targetExpression.Type)) {
+                Type[] generics = left.targetExpression.Type.GetGenericArguments();
+                Type target = generics[generics.Length - 1];
+                if (HasTypeWrapper(target, out ITypeWrapper wrapper)) {
+                    right = compiler.TypeWrapStatement(wrapper, left.targetExpression.Type, attributeDefinition.value);
+                }
             }
-            else {
-                right = compiler.AddVariable(left.targetExpression.Type, "__right");
-                compiler.Assign(right, accessor);
+
+            if (right == null) {
+                Expression accessor = compiler.AccessorStatement(left.targetExpression.Type, attributeDefinition.value);
+
+                if (accessor is ConstantExpression) {
+                    right = accessor;
+                }
+                else {
+                    right = compiler.AddVariable(left.targetExpression.Type, "__right");
+                    compiler.Assign(right, accessor);
+                }
             }
 
             // todo -- I can figure out if a value is constant using IsConstant(expr), use this information to push the expression onto the const compiler

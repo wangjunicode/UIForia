@@ -488,6 +488,7 @@ namespace UIForia.Compilers {
             }
 
             Expression returnVal = Visit(returnType, ast);
+
             AddStatement(Expression.Assign(returnVar, returnVal));
         }
 
@@ -1942,9 +1943,9 @@ namespace UIForia.Compilers {
             }
         }
 
-        public Expression TypeWrapStatement(ITypeWrapper typeWrapper, Type targetType, string input) {
-            this.typeWrapper = typeWrapper;
-            Expression retn = VisitUnchecked(targetType, ExpressionParser.Parse(input));
+        public Expression TypeWrapStatement(ITypeWrapper wrapper, Type targetType, ASTNode ast) {
+            this.typeWrapper = wrapper;
+            Expression retn = VisitUnchecked(targetType, ast);
 
             if (targetType != retn.Type) {
                 try {
@@ -1956,13 +1957,17 @@ namespace UIForia.Compilers {
                         return wrapped;
                     }
 
-                    typeWrapper = null;
+                    this.typeWrapper = null;
                     throw CompileException.InvalidTargetType(targetType, retn.Type);
                 }
             }
 
-            typeWrapper = null;
+            this.typeWrapper = null;
             return retn;
+        }
+
+        public Expression TypeWrapStatement(ITypeWrapper typeWrapper, Type targetType, string input) {
+            return TypeWrapStatement(typeWrapper, targetType, ExpressionParser.Parse(input));
         }
 
         private Expression Visit(Type targetType, ASTNode node) {
@@ -2298,7 +2303,8 @@ namespace UIForia.Compilers {
 
             nested.parent = this;
             nested.id = GetNextCompilerId();
-
+            nested.typeWrapper = typeWrapper;
+            
             if (targetType == null) {
                 throw new NotImplementedException("LambdaExpressions are only valid when they have a target type set.");
             }
@@ -2306,13 +2312,17 @@ namespace UIForia.Compilers {
             Type[] arguments = targetType.GetGenericArguments();
 
             if (ReflectionUtil.IsAction(targetType)) {
-                if (lambda.signature.size != arguments.Length) { }
+                if (lambda.signature.size != arguments.Length) {
+                    throw new Exception("invalid lambda");
+                }
 
                 nested.returnType = typeof(void);
             }
             else {
                 nested.returnType = arguments[arguments.Length - 1];
-                if (lambda.signature.size != arguments.Length - 1) { }
+                if (lambda.signature.size != arguments.Length - 1) {
+                    throw new Exception("invalid lambda");
+                }
             }
 
             if (lambda.signature.size > 0) {
@@ -2331,6 +2341,7 @@ namespace UIForia.Compilers {
                 }
             }
 
+      
             nested.Return(lambda.body);
 
             LambdaExpression retn = nested.BuildLambda();

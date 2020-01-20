@@ -37,6 +37,10 @@ namespace UIForia.Systems.Input {
 
             bool didClick = false;
 
+            if (clickCount > 0 && now - lastMouseDownTime > k_ClickThreshold) {
+                clickCount = 0;
+            }
+
             if (retn.isRightMouseDownThisFrame) {
                 retn.rightMouseButtonState.downPosition = retn.mousePosition;
             }
@@ -59,10 +63,6 @@ namespace UIForia.Systems.Input {
                 }
 
                 retn.leftMouseButtonState.downPosition = new Vector2(-1, -1);
-            }
-
-            if (clickCount > 1 && now - lastMouseDownTime > k_ClickThreshold) {
-                clickCount = 0;
             }
 
             retn.isSingleClick = didClick && clickCount == 1;

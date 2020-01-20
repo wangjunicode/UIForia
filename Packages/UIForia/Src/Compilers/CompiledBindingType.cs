@@ -2,7 +2,7 @@ namespace UIForia.Compilers {
 
     public enum CompiledBindingType {
 
-        OnCreate, OnEnable, OnUpdate
+        OnCreate, OnEnable, OnUpdate, OnLateUpdate
 
     }
 

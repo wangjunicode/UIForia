@@ -495,10 +495,8 @@ namespace TemplateBinding {
 
         [Test]
         public void ContextVariable_Expose_OutOfScope() {
-
             CompileException exception = Assert.Throws<CompileException>(() => Setup<TemplateBindingTest_ContextVariable_Expose_OutOfScope>());
             Assert.AreEqual(CompileException.UnknownAlias("variable0").Message, exception.Message);
-
         }
 
         [Template("Data/TemplateBindings/TemplateBindingTest_RepeatTemplate.xml#repeat_count")]
@@ -684,7 +682,6 @@ namespace TemplateBinding {
             app.Update();
 
             Assert.AreEqual(0, e[0].children.size);
-
         }
 
         [Template("Data/TemplateBindings/TemplateBindingTest_RepeatTemplate.xml#repeat_list_key_fn")]
@@ -748,9 +745,9 @@ namespace TemplateBinding {
             // reorder data
             e.data.RemoveAt(1);
             e.data.Add(new Vector3(4, 0, 0));
-            
+
             app.Update();
-            
+
             Assert.AreEqual(3, e[0].children.size);
             Assert.AreEqual("repeat me 1", GetText(e[0][0]));
             Assert.AreEqual("repeat me 3", GetText(e[0][1]));
@@ -759,6 +756,47 @@ namespace TemplateBinding {
             Assert.AreEqual(c0, e[0][0]);
             Assert.AreEqual(c2, e[0][1]);
             Assert.AreEqual(c3, e[0][2]);
+        }
+
+        [Template("Data/TemplateBindings/TemplateBindingTest_SyncBinding.xml#sync")]
+        public class TemplateBindingTest_SyncBinding_Sync : UIElement {
+
+            public string syncedValue;
+
+            public void OnPropertiesChanged() {
+                
+            }
+
+            public void OnValueSynchronized() {
+                
+            }
+
+        }
+
+        [Template("Data/TemplateBindings/TemplateBindingTest_SyncBinding.xml#fake_input")]
+        public class TemplateBindingTest_SyncBinding_FakeInput : UIElement {
+
+            public string value;
+            
+            public override void OnUpdate() {
+                value = value + "__afterSync";
+            }
+            
+        }
+
+        [Test]
+        public void SyncBinding_Sync() {
+            MockApplication app = Setup<TemplateBindingTest_SyncBinding_Sync>();
+            TemplateBindingTest_SyncBinding_Sync e = (TemplateBindingTest_SyncBinding_Sync) app.RootElement;
+            TemplateBindingTest_SyncBinding_FakeInput child = (TemplateBindingTest_SyncBinding_FakeInput) e[0];
+            
+            e.syncedValue = "synced";
+            
+            app.Update();
+            
+            Assert.AreEqual("synced__afterSync", child.value);
+            Assert.AreEqual("synced__afterSync", e.syncedValue);
+            
         }
 
         string GetText(UIElement element) {

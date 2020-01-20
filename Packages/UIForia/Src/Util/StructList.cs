@@ -527,6 +527,7 @@ namespace UIForia.Util {
             if (toPool.isInPool) return;
             toPool.isInPool = true;
             s_Pool.Add(toPool);
+            toPool = null;
         }
 
         public void Insert(int index, in T item) {

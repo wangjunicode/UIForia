@@ -87,7 +87,7 @@ namespace UIForia.Compilers {
                     name = split[1];
                 }
 
-                throw new CompileException("Invalid style alias: " + name);
+                // throw new CompileException("Invalid style alias: " + alias);
             }
 
             if (alias != string.Empty) {

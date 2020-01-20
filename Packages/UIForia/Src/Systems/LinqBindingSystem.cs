@@ -17,7 +17,7 @@ namespace UIForia.Systems {
 
         public void OnReset() { }
 
-        public void OnUpdate() {
+        public void OnUpdate_ElementStack() {
             currentFrameId++;
             // update can cause add, remove, move, enable, destroy, disable of children
             // need to be resilient of these changes so a child doesn't get update skipped and doesn't get multiple updates
@@ -38,62 +38,18 @@ namespace UIForia.Systems {
                 }
 
                 iteratorIndex = 0;
-                
-                // input problem with syncing: input happens, needs to be propagated & bubbled
 
-                // buffered?
-                
-                // input system reads and marks each element event log to process
-                // each event gets a propagator
-                // element gets list of events for frame
-                // if event was handled
-                // 2nd pass for sync?
-                // pass per input event?
-                
-                // sync fires after update, but need to process input after reading, before own update
-                // need to parent update -> read value -> read input -> run bindings -> sync back
-                // dont want user to define anything for this to work
-                // input capture is the issue, not sure when captured event  needs to be handled
-                
-                // e
-                //     e
-                //         e
-                // sync -> write var to bindingNode
-                // -> read from bindingNode -> apply changes -> write to actual property
-                // input runs & invokes callbacks
-                // if a single element is an event source we can crawl back up tree and return 
-                // <parent>
-                //    <middle>
-                //      <child sync:val="parent.strVal"/> ->  trigger event()
-                //          <child1 sync:val="val"/>
-                
-                // normal update (read)
-                // input
-                // triggered events
-                // late update() -> sync here?
-                // on sync property changed 
-                // animate
-                // style update
-                // on frame complete
-                // render data gather
-                // buffer changes
-                // yield
-                
-                // other thread -> 
-                    // layout
-                    // render
-                
                 while (iteratorIndex != currentElement.children.size) {
                     UIElement child = currentElement.children.array[iteratorIndex];
                     if (child.bindingNode != null && child.bindingNode.lastTickedFrame != currentFrameId) {
                         child.bindingNode.lastTickedFrame = currentFrameId;
-                        
+
                         // if ((child.flags & pendingInput) != 0 {
                         //
                         // }
-                        
+
                         child.bindingNode.updateBindings?.Invoke(child.bindingNode.root, child);
-                        
+
                         // if ((child.flags & animating) != 0) {
                         //     // child.Animator.Update();
                         // }
@@ -103,23 +59,87 @@ namespace UIForia.Systems {
                         // }
 
                         // child.bindingNode.syncBinding?.Invoke(child.bindingNode.root, child);
-
                     }
 
                     iteratorIndex++;
                 }
 
-                stack.EnsureAdditionalCapacity(currentElement.children.size);
                 int childCount = currentElement.children.size;
-                
+
                 if (stack.size + childCount >= stack.array.Length) {
                     Array.Resize(ref stack.array, stack.size + childCount + 16);
                 }
-                
+
                 for (int i = childCount - 1; i >= 0; i--) {
                     stack.array[stack.size++] = currentElement.children.array[i];
                 }
             }
+
+            LightStack<UIElement>.Release(ref stack);
+        }
+
+        private ElemRef[] elemRefStack = new ElemRef[16];
+        
+        public void OnUpdate_ElementRefStack() {
+            currentFrameId++;
+            // update can cause add, remove, move, enable, destroy, disable of children
+            // need to be resilient of these changes so a child doesn't get update skipped and doesn't get multiple updates
+            // whenever child is effected, if currently iterating element's children, restart, save state on binding nodes as to last frame they were ticked
+            
+            int size = 0;
+            
+            if (rootNodes.size >= elemRefStack.Length) {
+                elemRefStack = new ElemRef[rootNodes.size + 16];
+            }
+            
+            for (int i = rootNodes.size - 1; i >= 0; i--) {
+                elemRefStack[size++].element = rootNodes.array[i];
+            }
+
+            ElemRef[] stack = elemRefStack;
+            
+            while (size != 0) {
+                currentElement = stack[--size].element;
+
+                // if current element is destroyed or disabled, bail out
+                if ((currentElement.flags & UIElementFlags.EnabledFlagSet) != UIElementFlags.EnabledFlagSet) {
+                    continue;
+                }
+
+                iteratorIndex = 0;
+
+                // todo -- these might need to be fields
+                int target = currentElement.children.size;
+                UIElement[] elementChildren = currentElement.children.array;
+
+                while (iteratorIndex != target) {
+                    UIElement child = elementChildren[iteratorIndex];
+                    LinqBindingNode bindingNode = child.bindingNode;
+                    
+                    if (bindingNode != null && bindingNode.lastTickedFrame != currentFrameId) {
+                        bindingNode.lastTickedFrame = currentFrameId;
+                        bindingNode.updateBindings?.Invoke(bindingNode.root, child);
+                    }
+
+                    iteratorIndex++;
+                }
+
+                int childCount = target; //currentElement.children.size;
+
+                if (size + childCount >= stack.Length) {
+                    Array.Resize(ref elemRefStack, size + childCount + 16);
+                    stack = elemRefStack;
+                }
+
+                for (int i = childCount - 1; i >= 0; i--) {
+                    stack[size++].element = elementChildren[i];
+                }
+            }
+
+        }
+
+        public void OnUpdate() {
+            OnUpdate_ElementRefStack();
         }
 
         public void OnDestroy() { }
@@ -156,11 +176,9 @@ namespace UIForia.Systems {
 
         public void OnAttributeSet(UIElement element, string attributeName, string currentValue, string previousValue) { }
 
-        public void OnLateUpdate() {
-        }
+        public void OnLateUpdate() { }
 
-        public void OnFrameCompleted() {
-        }
+        public void OnFrameCompleted() { }
 
     }
 

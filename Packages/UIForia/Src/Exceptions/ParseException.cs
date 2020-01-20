@@ -52,5 +52,9 @@ namespace UIForia.Exceptions {
             return new ParseException($"Unable to find default template for type {processedType.rawType}. Searched using default resolver at paths: \n[{xmlPath}]");
         }
 
+        public static ParseException UnresolvedTagName(string fileName, in TemplateLineInfo templateLineInfo, string unresolvedTagName) {
+            return new ParseException($"Error parsing {fileName} -> Unable to resolve tag name: <{unresolvedTagName}> at line {templateLineInfo}");
+        }
+
     }
 }

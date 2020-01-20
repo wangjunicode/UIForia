@@ -1,15 +1,11 @@
 using System;
 using System.Collections.Generic;
-using System.Linq.Expressions;
 using JetBrains.Annotations;
 using UIForia.Attributes;
 using UIForia.Compilers;
-using UIForia.Extensions;
 using UIForia.Parsing;
 using UIForia.Systems;
 using UIForia.Util;
-using UnityEditorInternal.Profiling.Memory.Experimental;
-using UnityEngine;
 
 namespace UIForia.Elements {
 
@@ -18,16 +14,19 @@ namespace UIForia.Elements {
         public readonly string keyString;
         public readonly long keyLong;
 
+        [UsedImplicitly]
         public RepeatItemKey(long keyLong) {
             this.keyString = null;
             this.keyLong = keyLong;
         }
 
+        [UsedImplicitly]
         public RepeatItemKey(int keyInt) {
             this.keyString = null;
             this.keyLong = keyInt;
         }
 
+        [UsedImplicitly]
         public RepeatItemKey(string keyString) {
             this.keyLong = 0;
             this.keyString = keyString;
@@ -65,14 +64,6 @@ namespace UIForia.Elements {
         public TemplateScope scope;
         public int itemVarId;
 
-        protected void CreateFromRange(int start, int end) { }
-
-        protected void DestroyAll() {
-            while (children.size > 0) {
-                children.Last.Destroy();
-            }
-        }
-
     }
 
     public sealed class UIRepeatCountElement : UIRepeatElement {
@@ -80,14 +71,24 @@ namespace UIForia.Elements {
         public int count;
 
         [OnPropertyChanged(nameof(count))]
-        public void OnCountChanged(int oldCount) {
-            if (count > oldCount) {
-                CreateFromRange(oldCount, count);
+        public void OnCountChanged(int prevCount) {
+            if (count > prevCount) {
+                // first create and add children
+                int diff = count - prevCount;
+                for (int i = 0; i < diff; i++) {
+                    UIElement child = application.CreateTemplate(templateSpawnId, templateContextRoot, this, scope);
+
+                    application.InsertChild(this, child, (uint) (prevCount + i));
+
+                    ContextVariable<int> indexVariable = new ContextVariable<int>(indexVarId, "index", prevCount + i);
+
+                    child.bindingNode.CreateLocalContextVariable(indexVariable);
+                }
             }
             else {
-                int diff = oldCount - count;
+                int diff = prevCount - count;
                 for (int i = 0; i < diff; i++) {
-                    children.Last.Destroy();
+                    children.array[children.size - 1].Destroy();
                 }
             }
         }
@@ -118,7 +119,6 @@ namespace UIForia.Elements {
         private RepeatIndex[] keys;
 
         public override void OnUpdate() {
-
             int rangeStart = start;
             int rangeEnd = end;
             int listCount = list?.Count ?? 0;
@@ -176,7 +176,6 @@ namespace UIForia.Elements {
                         availableChildren.SwapRemoveAt(j);
                         break;
                     }
-
                 }
 
                 if (keypair.element == null) {
@@ -190,7 +189,6 @@ namespace UIForia.Elements {
                 }
 
                 lastFrameChildren.Add(keypair);
-
             }
 
             while (availableChildren.size > 0) {
@@ -216,7 +214,6 @@ namespace UIForia.Elements {
 
         private void UpdateWithoutKeyFunc(int rangeStart, int rangeEnd) {
             if (prevRangeStart != rangeStart || prevRangeEnd != rangeEnd) {
-
                 int prevCount = prevRangeEnd - prevRangeStart;
                 int currCount = rangeEnd - rangeStart;
 
@@ -226,16 +223,14 @@ namespace UIForia.Elements {
                     // first create and add children
                     int diff = currCount - prevCount;
                     for (int i = 0; i < diff; i++) {
-
                         UIElement child = application.CreateTemplate(templateSpawnId, templateContextRoot, this, scope);
                         application.InsertChild(this, child, (uint) (prevCount + i));
 
                         ContextVariable<int> indexVariable = new ContextVariable<int>(indexVarId, "index", default);
                         ContextVariable<T> itemVariable = new ContextVariable<T>(itemVarId, "item", default);
 
-                        children.array[prevCount + i].bindingNode.CreateLocalContextVariable(itemVariable);
-                        children.array[prevCount + i].bindingNode.CreateLocalContextVariable(indexVariable);
-
+                        child.bindingNode.CreateLocalContextVariable(itemVariable);
+                        child.bindingNode.CreateLocalContextVariable(indexVariable);
                     }
                 }
                 else {
@@ -244,14 +239,26 @@ namespace UIForia.Elements {
                         children.array[children.size - 1].Destroy();
                     }
                 }
-
             }
 
             for (int i = 0; i < children.size; i++) {
-                ((ContextVariable<T>) children.array[i].bindingNode.GetContextVariable(itemVarId)).value = list[rangeStart + i];
-                ((ContextVariable<int>) children.array[i].bindingNode.GetContextVariable(indexVarId)).value = rangeStart + i;
-            }
+                UIElement child = children.array[i];
+                ContextVariable ptr = child.bindingNode.localVariable;
+                
+                while (ptr != null) {
+                    
+                    if (ptr.id == itemVarId) {
+                        ((ContextVariable<T>) ptr).value = list[rangeStart + i];
+                    }
 
+                    if (ptr.id == indexVarId) {
+                        ((ContextVariable<int>) ptr).value = rangeStart + i;
+                    }
+
+                    ptr = ptr.next;
+                }
+                
+            }
         }
 
     }

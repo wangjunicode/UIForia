@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Documentation.DocumentationElements;
 using UIForia.Attributes;
 using UIForia.Elements;
@@ -8,10 +9,10 @@ namespace UnityEngine {
     [Template("Documentation/Features/RepeatALot.xml")]
     public class RepeatALot : UIElement {
 
-        public RepeatableList<PlayerData> players;
+        public List<PlayerData> players;
 
         public override void OnCreate() {
-            players = new RepeatableList<PlayerData>();
+            players = new List<PlayerData>();
             
             for (int i = 0; i < 10; i++) {
                 
@@ -25,9 +26,9 @@ namespace UnityEngine {
             }
         }
 
-        private RepeatableList<PlayerData> MakeFriends(int friendCount, int parentId) {
+        private List<PlayerData> MakeFriends(int friendCount, int parentId) {
 
-            var friends = new RepeatableList<PlayerData>();
+            var friends = new List<PlayerData>();
 
             for (int i = 0; i < friendCount; i++) {
                 int id = 1000 * (parentId + 1) + i;

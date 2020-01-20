@@ -6,7 +6,7 @@ namespace UIForia.Parsing.Expressions {
     [Flags]
     public enum AttributeType {
 
-        Context = 1 << 0,
+        Context = 1,
         ContextVariable = 1 << 1,
         Alias = 1 << 2,
         Property = 1 << 3,
@@ -23,36 +23,36 @@ namespace UIForia.Parsing.Expressions {
 
         Expose = 1 << 14,
 
-        ImplicitVariable = 1 << 15,
-        SyncProperty = 1 << 16
+        ImplicitVariable = 1 << 15
+                           
     }
 
     [Flags]
     public enum AttributeFlags : ushort {
 
-        Binding = 1 << 0,
         Const = 1 << 1,
         EnableOnly = 1 << 2,
         RootContext = 1 << 3,
         StyleProperty = 1 << 4,
-        UseSlotRootContext = 1 << 5,
-        LateBinding
+        LateBinding = 1 << 5,
+        Sync = 1 << 6
+
     }
     
+    
+    // Todo -- remove
     [DebuggerDisplay("{key}={value}")]
     public class AttributeDefinition {
 
         internal bool isCompiled;
         public readonly string key;
         public readonly string value;
-        public readonly bool isRealAttribute;
         public int line;
         public int column;
 
         public AttributeDefinition(string key, string value, int line = -1, int column = -1) {
             this.key = key.Trim();
             this.value = value.Trim();
-            this.isRealAttribute = key.StartsWith("x-");
             this.line = line;
             this.column = column;
         }

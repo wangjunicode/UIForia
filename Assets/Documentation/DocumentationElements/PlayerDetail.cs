@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UIForia.Attributes;
 using UIForia.Elements;
 using UIForia.Util;
@@ -7,7 +8,7 @@ namespace Documentation.DocumentationElements {
     public class PlayerData {
         public int id;
         public string name;
-        public RepeatableList<PlayerData> friends;
+        public List<PlayerData> friends;
         public bool Active;
         public bool Visible;
     }

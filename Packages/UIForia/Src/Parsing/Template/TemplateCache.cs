@@ -78,10 +78,14 @@ namespace UIForia.Parsing {
             TemplateDefinition templateDefinition = GetTemplateDefinition(processedType);
 
             templateAttr.source = templateDefinition.contents;
+            
+            TemplateShell shell = xmlTemplateParser.GetOuterTemplateShell(templateAttr);
+            
+            ElementTemplateNode templateNode = new ElementTemplateNode(templateAttr.templateId, shell, processedType, null, default); //, attributes, new TemplateLineInfo(xmlLineInfo.LineNumber, xmlLineInfo.LinePosition));
 
-            retn = xmlTemplateParser.Parse(processedType);
-
-            templateMap.Add(templateAttr.fullPathId, retn);
+            templateMap[templateAttr.fullPathId] = templateNode;
+            
+            retn = xmlTemplateParser.Parse(templateNode, processedType);
 
             return retn;
         }

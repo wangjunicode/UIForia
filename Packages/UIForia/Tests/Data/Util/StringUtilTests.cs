@@ -13,8 +13,19 @@ namespace Util {
             builder.Append("content");
             builder.Append("-");
             builder.Append("content");
-            Assert.AreEqual("content-content-content", builder.ToString());
+            builder.Append("superlongstringhereohmygoshthisislong");
+            Assert.AreEqual("content-content-contentsuperlongstringhereohmygoshthisislong", builder.ToString());
         }
+
+         [Test]
+        public void StringUtil_RangeEquals() {
+            string a = "--hello--";
+            string b = "hello";
+            
+            Assert.IsTrue(StringUtil.EqualsRangeUnsafe(a.ToCharArray(), 2, b.ToCharArray(), 0, b.Length));
+            
+        }
+
 
     }
 

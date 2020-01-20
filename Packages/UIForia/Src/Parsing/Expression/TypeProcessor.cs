@@ -435,30 +435,7 @@ namespace UIForia.Parsing {
                 return processedType;
             }
 
-//            if (tagName.Contains("--")) {
-//                string[] nameParts = tagName.Split(s_GenericSplitter, StringSplitOptions.RemoveEmptyEntries);
-//                string genericTagName = nameParts[0] + "`1"; // todo support more than 1 level generics
-//                ProcessedType genericProcessedType = templateTypeMap.GetOrDefault(genericTagName);
-//
-//                if (!genericProcessedType.rawType.IsGenericType) {
-//                    throw new Exception($"Tried to make an element with tag {tagName} but {nameParts[0]} is not a generic element type");
-//                }
-//
-//                Type genericType = ResolveType(new TypeLookup(nameParts[1]), namespaces);
-//
-//                if (genericType == null) {
-//                    throw new Exception($"Tried to make an element with tag {tagName} but {nameParts[1]} could not be resolved");
-//                }
-//
-//                Type elementType = ReflectionUtil.CreateGenericType(genericProcessedType.rawType, genericType);
-//                ProcessedType retn = new ProcessedType(elementType, genericProcessedType.templateAttr);
-//                retn.id = typeMap.Count;
-//                templateTypeMap[tagName] = retn;
-//                typeMap[retn.rawType] = retn;
-//                return retn;
-//            }
-
-            throw new Exception("Unable to resolve tag name: " + tagName);
+            return null;
         }
 
         public static bool IsNamespace(string toCheck) {

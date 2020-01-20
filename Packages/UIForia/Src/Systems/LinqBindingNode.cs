@@ -78,9 +78,8 @@ namespace UIForia.Systems {
         
         internal ContextVariable localVariable;
         internal LinqBindingNode parent;
-        internal ContextVariable repeatVar;
 
-        internal void CreateLocalContextVariable(ContextVariable variable) {
+        public void CreateLocalContextVariable(ContextVariable variable) {
             if (localVariable == null) {
                 localVariable = variable;
                 return;
@@ -156,7 +155,7 @@ namespace UIForia.Systems {
         }
         
         [UsedImplicitly] // called from template functions, 
-        public static LinqBindingNode Get(Application application, UIElement rootElement, UIElement element, UIElement innerContext, int createdId, int enabledId, int updatedId) {
+        public static LinqBindingNode Get(Application application, UIElement rootElement, UIElement element, UIElement innerContext, int createdId, int enabledId, int updatedId, int lateId) {
             LinqBindingNode node = new LinqBindingNode(); // todo -- pool
             node.root = rootElement;
             node.element = element;
@@ -187,9 +186,6 @@ namespace UIForia.Systems {
                 node.updateBindings = application.templateData.bindings[updatedId];
             }
             
-            // todo -- add late binding id
-            int lateId = -1;
-
             if (lateId != -1) {
                 node.lateBindings = application.templateData.bindings[lateId];
             }
@@ -197,39 +193,19 @@ namespace UIForia.Systems {
             return node;
         }
 
-        public void SetRepeatItem<T>(int itemIndex, string name, T t) {
-            if (repeatVar == null) {
-                repeatVar = new ContextVariable<T>(itemIndex, name, t);
-            }
-            else {
-                ContextVariable<T> castVar = (ContextVariable<T>) repeatVar;
-                castVar.value = t;
-            }
-        }
-
         public ContextVariable<T> GetRepeatItem<T>(int id) {
-            return (ContextVariable<T>)GetContextVariable(id);
-        }
-        
-        public ContextVariable GetRepeatVariable<T>(int id, string name) {
-
-            LinqBindingNode ptr = parent;
-            
-            // todo -- only search in template id?
-            
+            ContextVariable ptr = localVariable; 
             while (ptr != null) {
-                if (ptr.repeatVar != null) {
-                    if (ptr.repeatVar.id == id) {
-                        return ptr.repeatVar;
-                    }
+                if (ptr.id == id) {
+                    return (ContextVariable<T>) ptr;
                 }
-                ptr = ptr.parent;
+
+                ptr = ptr.next;
             }
 
             return null;
-
         }
-
+        
     }
 
 }

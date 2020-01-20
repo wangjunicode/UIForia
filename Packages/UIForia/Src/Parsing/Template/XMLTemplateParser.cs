@@ -52,6 +52,7 @@ namespace UIForia.Parsing {
             nameSpaceManager.AddNamespace("expose", "expose");
             nameSpaceManager.AddNamespace("slot", "slot");
             nameSpaceManager.AddNamespace("late", "late");
+            nameSpaceManager.AddNamespace("sync", "sync");
             nameSpaceManager.AddNamespace("var", "var");
             nameSpaceManager.AddNamespace("evt", "evt");
             nameSpaceManager.AddNamespace("style", "style");
@@ -112,21 +113,29 @@ namespace UIForia.Parsing {
             return retn;
         }
 
-        internal ElementTemplateNode Parse(ProcessedType processedType) {
+        internal ElementTemplateNode Parse(ElementTemplateNode templateNode, ProcessedType processedType) {
             TemplateAttribute templateAttr = processedType.templateAttr;
 
             string filePath = templateAttr.filePath;
 
             if (parsedFiles.TryGetValue(filePath, out TemplateShell rootNode)) {
-                return ParseInnerTemplate(rootNode, processedType);
+                return ParseInnerTemplate(templateNode, rootNode, processedType);
             }
 
             TemplateShell shell = ParseOuterShell(templateAttr);
 
-            return ParseInnerTemplate(shell, processedType);
+            return ParseInnerTemplate(templateNode, shell, processedType);
         }
 
-        private ElementTemplateNode ParseInnerTemplate(TemplateShell shell, ProcessedType processedType) {
+        internal TemplateShell GetOuterTemplateShell(TemplateAttribute templateAttr) {
+            if (parsedFiles.TryGetValue(templateAttr.filePath, out TemplateShell rootNode)) {
+                return rootNode;
+            }
+
+            return ParseOuterShell(templateAttr);
+        }
+
+        private ElementTemplateNode ParseInnerTemplate(ElementTemplateNode templateNode, TemplateShell shell, ProcessedType processedType) {
             XElement root = shell.GetElementTemplateContent(processedType.templateAttr.templateId);
 
             if (root == null) {
@@ -136,7 +145,9 @@ namespace UIForia.Parsing {
             IXmlLineInfo xmlLineInfo = root;
 
             StructList<AttributeDefinition2> attributes = ParseAttributes(root.Attributes());
-            ElementTemplateNode templateNode = new ElementTemplateNode(processedType.templateAttr.templateId, shell, processedType, attributes, new TemplateLineInfo(xmlLineInfo.LineNumber, xmlLineInfo.LinePosition));
+            // ElementTemplateNode templateNode = new ElementTemplateNode(processedType.templateAttr.templateId, shell, processedType, attributes, new TemplateLineInfo(xmlLineInfo.LineNumber, xmlLineInfo.LinePosition));
+            templateNode.attributes = attributes;
+            templateNode.lineInfo = new TemplateLineInfo(xmlLineInfo.LineNumber, xmlLineInfo.LinePosition);
 
             ParseChildren(templateNode, templateNode, root.Nodes());
 
@@ -154,7 +165,7 @@ namespace UIForia.Parsing {
             }
             else {
                 if (string.Equals(tagName, "Repeat", StringComparison.Ordinal)) {
-                    processedType = null;//TypeProcessor.GetProcessedType(typeof(UIRepeatElement<>));
+                    processedType = null; //TypeProcessor.GetProcessedType(typeof(UIRepeatElement<>));
                     node = new RepeatNode(templateRoot, parent, processedType, attributes, templateLineInfo);
                     parent.AddChild(node);
                     return node;
@@ -215,7 +226,7 @@ namespace UIForia.Parsing {
             }
 
             if (processedType == null) {
-                throw new ParseException("Unresolved tag name: " + tagName);
+                throw ParseException.UnresolvedTagName(templateRoot.templateShell.filePath, templateLineInfo, tagName);
             }
 
             processedType.ValidateAttributes(attributes);
@@ -371,6 +382,11 @@ namespace UIForia.Parsing {
                     name = name.Replace(".const", "");
                     flags |= AttributeFlags.Const;
                 }
+                
+                if (name.Contains(".read.write")) {
+                    name = name.Replace(".read.write", "");
+                    prefix = "sync";
+                }
 
                 if (name == "if") {
                     attributeType = AttributeType.Conditional;
@@ -437,11 +453,11 @@ namespace UIForia.Parsing {
                             break;
                         case "late":
                             attributeType = AttributeType.Property;
-                            flags |= AttributeFlags.Binding | AttributeFlags.LateBinding;
+                            flags |= AttributeFlags.LateBinding;
                             break;
                         case "sync":
-                            attributeType = AttributeType.SyncProperty;
-                            flags |= AttributeFlags.Binding | AttributeFlags.LateBinding;
+                            attributeType = AttributeType.Property;
+                            flags |= AttributeFlags.Sync | AttributeFlags.LateBinding;
                             break;
                         case "expose":
                             attributeType = AttributeType.Expose;

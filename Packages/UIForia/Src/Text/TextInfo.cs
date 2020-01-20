@@ -64,7 +64,35 @@ namespace UIForia.Text {
             rootSpan.textStyle = style;
             rootSpan.SetText(content);
         }
-        
+
+        public bool EqualsRawCharacters(char[] cmp, int length) {
+            int totalSize = 0;
+
+            for (int i = 0; i < spanList.size; i++) {
+                int size = spanList.array[i].rawContentSize;
+                totalSize += size;
+            }
+
+            if (totalSize != length) {
+                return false;
+            }
+
+            int rangeStart = 0;
+            int rangeEnd = length;
+            
+            for (int i = 0; i < spanList.size; i++) {
+                int size = spanList.array[i].rawContentSize;
+                char[] rawChars = spanList.array[i].rawContent;
+                if (!StringUtil.EqualsRangeUnsafe(cmp, rangeStart, rawChars, 0, size)) {
+                    return false;
+                }
+
+                rangeStart += size;
+            }
+
+            return true;
+        }
+
         public void ForceLayout() {
             requiresLayout = true;
         }
@@ -591,7 +619,7 @@ namespace UIForia.Text {
         }
 
         private static readonly StringBuilder s_StringBuilder = new StringBuilder(128);
-        
+
         public string GetSelectedString(SelectionRange selectionRange) {
             // todo -- not at all optimized, searches every character right now and adds 1 by 1
             int idx = 0;
@@ -604,9 +632,11 @@ namespace UIForia.Text {
                     if (idx >= min && idx < max) {
                         s_StringBuilder.Append((char) charInfos[c].character);
                     }
+
                     idx++;
                 }
             }
+
             string retn = s_StringBuilder.ToString();
             s_StringBuilder.Clear();
             return retn;
@@ -639,9 +669,9 @@ namespace UIForia.Text {
             if (IsFirstOnLine(characterIdx)) {
                 return characterIdx;
             }
-            
+
             StructList<CharInfo> charInfoList = rootSpan.charInfoList;
-            
+
             int lineIndex = charInfoList.array[characterIdx].lineIndex;
             LineInfo lineInfo = lineInfoList.array[lineIndex];
 
@@ -656,15 +686,15 @@ namespace UIForia.Text {
 
             return characterIdx;
         }
-        
+
         private int GetNextWordEdge(int characterIdx) {
             if (IsLastOnLine(characterIdx)) {
                 // one more for the right edge
                 return characterIdx + 1;
             }
-            
+
             StructList<CharInfo> charInfoList = rootSpan.charInfoList;
-            
+
             int lineIndex = charInfoList.array[characterIdx].lineIndex;
             LineInfo lineInfo = lineInfoList.array[lineIndex];
 
@@ -703,6 +733,7 @@ namespace UIForia.Text {
                 if (lineInfoList.size == 0) {
                     return new Vector2(2, 0);
                 }
+
                 return new Vector2(charInfoList.array[charCount - 1].MaxX, lineInfoList.array[lineInfoList.size - 1].y);
             }
 
@@ -738,6 +769,7 @@ namespace UIForia.Text {
             if (lineInfoList.size == 0) {
                 return 0;
             }
+
             LineInfo lineInfo = lineInfoList.array[lineIndex];
 
             int closestIndex = lineInfo.globalCharacterStartIndex;
@@ -840,7 +872,7 @@ namespace UIForia.Text {
             if (lineIndex < 0) {
                 return default;
             }
-            
+
             LineInfo lineInfo = lineInfoList[lineIndex];
             return new Rect(lineInfo.x, lineInfo.y, lineInfo.width, lineInfo.height);
         }
@@ -850,7 +882,6 @@ namespace UIForia.Text {
         }
 
         public SelectionRange SelectWordAtPoint(Vector2 point) {
-            
             int nearestLine = FindNearestLine(point);
             if (nearestLine < 0) {
                 return default;
@@ -862,7 +893,6 @@ namespace UIForia.Text {
             LineInfo line = lineInfoList.array[nearestLine];
 
             for (int lineSpanIdx = line.spanStart; lineSpanIdx < line.spanEnd; lineSpanIdx++) {
-
                 WordInfo[] wordInfos = spanList[lineSpanIdx].wordInfoList.array;
                 float wordX = line.x;
                 for (int i = line.wordStart; i < line.wordStart + line.wordCount; i++) {
@@ -905,7 +935,7 @@ namespace UIForia.Text {
                 return new SelectionRange(
                     charEndIdx + 1,
                     charStartIdx
-                );            
+                );
             }
 
             return new SelectionRange(
@@ -919,6 +949,7 @@ namespace UIForia.Text {
             if (idx < 0) {
                 return default;
             }
+
             return new SelectionRange(
                 lineInfoList.array[idx].globalCharacterEndIndex + 1, // might be wrong for multi line
                 lineInfoList.array[idx].globalCharacterStartIndex
@@ -1044,6 +1075,7 @@ namespace UIForia.Text {
 
             return new SelectionRange(lineInfoList.array[lineInfoList.size - 1].globalCharacterEndIndex);
         }
-        
+
     }
+
 }

@@ -6004,6 +6004,28 @@ input[type=button].btn-block {
     text-decoration: none;
     background-color: #292830
 }
+.api-button {
+    position: relative;
+    background-color: lightblue;
+    border: 0;
+    padding: 5px 10px;
+}
+
+.api-button:before {
+    content: "Property type: ";
+}
+.api-button a {
+    padding-left: 5px;
+}
+.api-button a:before {
+    content: "";
+    background: url("../img/link.svg");
+    display: inline-block;
+    position: relative;
+    width: 15px;
+    height: 15px;
+    margin-right: 5px;
+}
 
 .jumbotron {
     padding: 2rem 1rem;

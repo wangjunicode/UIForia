@@ -58,3 +58,32 @@ See a description of our [box model](/docs/layout/#box-model) for more informati
 |:------|:-----------------------------------------------------------------------------------------------|
 | Start | the default; starts offset / origin at the start of the axis.                                  |
 | End   | Start offset / origin alignment from the end of the axis; from bottom to top or right to left. |
+
+## Cursor
+`C#`: UIForia.Rendering.CursorStyle
+
+
+
+## URL
+Written as `Property = url("path/to/your/asset");`.
+Depending on the property the `C#` API may expect different types:
+### `UnityEngine.Texture2D` 
+- `BackgroundImage`
+- `Cursor`
+
+### `UIForia.FontAsset`
+- `TextFontAsset`
+
+### `UIForia.FontStyle`
+- `TextFontStyle`
+
+## Primitives
+### `int`
+Only the basic integer notation is supported, which means no underscore delimiter in 
+int property values like `1_000`. 
+
+### `float`
+Same as with int there's no underscore delimiter. The trailing `f` is not required.
+
+### `string`
+They have to be on a single line and be surrounded by quotation marks `"string"` 

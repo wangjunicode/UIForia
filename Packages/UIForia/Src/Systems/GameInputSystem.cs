@@ -9,7 +9,8 @@ namespace UIForia.Systems.Input {
         private int clickCount;
         private float lastMouseDownTime;
         private Vector2 lastMouseDownPosition;
-        
+        private const float k_ClickThreshold = 0.33f;
+
         protected override MouseState GetMouseState() {
             MouseState retn = new MouseState();
             retn.leftMouseButtonState.isDown = UnityEngine.Input.GetMouseButton(0);
@@ -50,12 +51,18 @@ namespace UIForia.Systems.Input {
                 lastMouseDownPosition = retn.leftMouseButtonState.downPosition;
             }
             else if (retn.isLeftMouseUpThisFrame) {
-                if (Vector2.Distance(lastMouseDownPosition, retn.mousePosition) <= 3f) {
-                    clickCount++;
-                    didClick = true;
+                if (clickCount == 0 || now - lastMouseDownTime <= k_ClickThreshold) {
+                    if (Vector2.Distance(lastMouseDownPosition, retn.mousePosition) <= 3f) {
+                        clickCount++;
+                        didClick = true;
+                    }
                 }
-                
+
                 retn.leftMouseButtonState.downPosition = new Vector2(-1, -1);
+            }
+
+            if (clickCount > 1 && now - lastMouseDownTime > k_ClickThreshold) {
+                clickCount = 0;
             }
 
             retn.isSingleClick = didClick && clickCount == 1;
@@ -69,14 +76,7 @@ namespace UIForia.Systems.Input {
         }
 
         private static Vector2 ConvertMousePosition(Vector2 position) {
-            // todo -- HACK I have no idea why but unity reports the mouse position as 4 pixels different in the editor but apparently not in 4k res
-#if UNITY_EDITOR
             return new Vector2(position.x, Screen.height - position.y);
-#else
-            return new Vector2(position.x, Screen.height - position.y);
-#endif
         }
-
     }
-
 }

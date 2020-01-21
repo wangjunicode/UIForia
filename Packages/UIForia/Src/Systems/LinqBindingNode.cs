@@ -69,7 +69,8 @@ namespace UIForia.Systems {
         public UIElement element;
         public UIElement innerContext;
 
-        internal int lastTickedFrame;
+        internal uint lastBeforeUpdateFrame;
+        internal uint lastAfterUpdateFrame;
         
         internal Action<UIElement, UIElement> createdBinding;
         internal Action<UIElement, UIElement> enabledBinding;
@@ -78,6 +79,7 @@ namespace UIForia.Systems {
         
         internal ContextVariable localVariable;
         internal LinqBindingNode parent;
+        public ulong iterationId;
 
         public void CreateLocalContextVariable(ContextVariable variable) {
             if (localVariable == null) {

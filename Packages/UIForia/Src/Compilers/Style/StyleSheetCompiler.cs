@@ -14,7 +14,7 @@ namespace UIForia.Compilers.Style {
 
         private StyleCompileContext context;
         private readonly StyleSheetImporter styleSheetImporter;
-        
+
         private LightList<UIStyleGroup> scratchGroupList;
 
         private static readonly UIStyle s_ScratchStyle = new UIStyle();
@@ -27,12 +27,14 @@ namespace UIForia.Compilers.Style {
         public StyleSheet Compile(string filePath, string contents) {
             return Compile(filePath, StyleParser.Parse(contents));
         }
-        
+
         // todo -- deprecate, use other method
         public StyleSheet Compile(string filePath, LightList<StyleASTNode> rootNodes) {
             try {
-                context = new StyleCompileContext(); // todo resolve constants. should be done a per file level, should store all used constants without needing to later reference other files
-                //StyleCompileContext.Create(styleSheetImporter); //new StyleSheetConstantImporter(styleSheetImporter).CreateContext(rootNodes);
+                context = new StyleSheetConstantImporter(styleSheetImporter).CreateContext(rootNodes);
+
+                //       context = new StyleCompileContext(); // todo resolve constants. should be done a per file level, should store all used constants without needing to later reference other files
+                // StyleCompileContext.Create(styleSheetImporter) //new StyleSheetConstantImporter(styleSheetImporter).CreateContext(rootNodes);
             }
             catch (CompileException e) {
                 e.SetFileName(filePath);
@@ -52,7 +54,7 @@ namespace UIForia.Compilers.Style {
             int containerCount = 0;
             int animationCount = 0;
             int soundCount = 0;
-            
+
             for (int index = 0; index < rootNodes.Count; index++) {
                 switch (rootNodes[index]) {
                     case StyleRootNode _:
@@ -176,7 +178,7 @@ namespace UIForia.Compilers.Style {
                 for (int j = 0; j < count; j++) {
                     keyValues[j] = new StyleKeyFrameValue(s_ScratchStyle[j]);
                 }
-    
+
                 keyValues.size = count;
 
                 for (int keyframeIndex = 0; keyframeIndex < keyFrameNode.keyframes.Count; keyframeIndex++) {
@@ -228,10 +230,10 @@ namespace UIForia.Compilers.Style {
                         options.loopType = StylePropertyMappers.MapEnum<AnimationLoopType>(value, context);
                         break;
                     case nameof(AnimationOptions.forwardStartDelay):
-                        options.forwardStartDelay = (int)StylePropertyMappers.MapNumber(value, context);
+                        options.forwardStartDelay = (int) StylePropertyMappers.MapNumber(value, context);
                         break;
                     case nameof(AnimationOptions.reverseStartDelay):
-                        options.reverseStartDelay = (int)StylePropertyMappers.MapNumber(value, context);
+                        options.reverseStartDelay = (int) StylePropertyMappers.MapNumber(value, context);
                         break;
                     case nameof(AnimationOptions.timingFunction):
                         options.timingFunction = StylePropertyMappers.MapEnum<EasingFunction>(value, context);
@@ -259,7 +261,7 @@ namespace UIForia.Compilers.Style {
 
                     switch (optionName) {
                         case nameof(AnimationOptions.iterations):
-                            options.iterations = (int)StylePropertyMappers.MapNumberOrInfinite(value, context);
+                            options.iterations = (int) StylePropertyMappers.MapNumberOrInfinite(value, context);
                             break;
                         case nameof(AnimationOptions.delay):
                             options.delay = StylePropertyMappers.MapUITimeMeasurement(value, context);
@@ -274,19 +276,19 @@ namespace UIForia.Compilers.Style {
                             options.direction = StylePropertyMappers.MapEnum<AnimationDirection>(value, context);
                             break;
                         case nameof(AnimationOptions.forwardStartDelay):
-                            options.forwardStartDelay = (int)StylePropertyMappers.MapNumber(value, context);
+                            options.forwardStartDelay = (int) StylePropertyMappers.MapNumber(value, context);
                             break;
                         case nameof(AnimationOptions.reverseStartDelay):
-                            options.reverseStartDelay = (int)StylePropertyMappers.MapNumber(value, context);
+                            options.reverseStartDelay = (int) StylePropertyMappers.MapNumber(value, context);
                             break;
                         case nameof(AnimationOptions.fps):
-                            options.fps = (int)StylePropertyMappers.MapNumber(value, context);
+                            options.fps = (int) StylePropertyMappers.MapNumber(value, context);
                             break;
                         case nameof(AnimationOptions.startFrame):
-                            options.startFrame = (int)StylePropertyMappers.MapNumber(value, context);
+                            options.startFrame = (int) StylePropertyMappers.MapNumber(value, context);
                             break;
                         case nameof(AnimationOptions.endFrame):
-                            options.endFrame = (int)StylePropertyMappers.MapNumber(value, context);
+                            options.endFrame = (int) StylePropertyMappers.MapNumber(value, context);
                             break;
                         case nameof(AnimationOptions.pathPrefix):
                             options.pathPrefix = StylePropertyMappers.MapString(value, context);
@@ -358,7 +360,7 @@ namespace UIForia.Compilers.Style {
             StyleType styleType = styleRoot.tagName != null ? StyleType.Implicit : StyleType.Shared;
 
             scratchGroupList.size = 0;
-            
+
             scratchGroupList.Add(defaultGroup);
 
             CompileStyleGroups(styleRoot, styleType, scratchGroupList, defaultGroup, styleSheetAnimations, uiSoundData);
@@ -390,16 +392,17 @@ namespace UIForia.Compilers.Style {
                         break;
                     case RunNode runNode:
                         UIStyleRunCommand cmd = new UIStyleRunCommand() {
-                                style = targetGroup.normal.style,
-                                runCommands = targetGroup.normal.runCommands ?? new LightList<IRunCommand>(4)
+                            style = targetGroup.normal.style,
+                            runCommands = targetGroup.normal.runCommands ?? new LightList<IRunCommand>(4)
                         };
 
                         if (runNode.command is AnimationCommandNode animationCommandNode) {
                             MapAnimationCommand(styleSheetAnimations, cmd, animationCommandNode);
-                        } else if (runNode.command is SoundCommandNode soundCommandNode) {
+                        }
+                        else if (runNode.command is SoundCommandNode soundCommandNode) {
                             MapSoundCommand(uiSoundData, cmd, soundCommandNode);
                         }
-                        
+
                         targetGroup.normal = cmd;
                         break;
                     case StyleStateContainer styleContainer:
@@ -436,7 +439,7 @@ namespace UIForia.Compilers.Style {
 
         private AnimationRunCommand MapAnimationRunCommand(AnimationData[] styleSheetAnimations, AnimationCommandNode animationCommandNode) {
             return new AnimationRunCommand(animationCommandNode.isExit, animationCommandNode.runAction) {
-                    animationData = FindAnimationData(styleSheetAnimations, animationCommandNode.animationName),
+                animationData = FindAnimationData(styleSheetAnimations, animationCommandNode.animationName),
             };
         }
 
@@ -446,7 +449,7 @@ namespace UIForia.Compilers.Style {
 
         private SoundRunCommand MapSoundRunCommand(UISoundData[] soundData, SoundCommandNode soundCommandNode) {
             return new SoundRunCommand(soundCommandNode.isExit, soundCommandNode.runAction) {
-                    soundData = FindSoundData(soundData, soundCommandNode.name),
+                soundData = FindSoundData(soundData, soundCommandNode.name),
             };
         }
 
@@ -492,7 +495,7 @@ namespace UIForia.Compilers.Style {
                         // add to normal ui style set
                         StylePropertyMappers.MapProperty(targetStyle.style, propertyNode, context);
                         break;
-                    case RunNode runNode :
+                    case RunNode runNode:
                         targetStyle.runCommands = targetStyle.runCommands ?? new LightList<IRunCommand>(4);
                         if (runNode.command is AnimationCommandNode animationCommandNode) {
                             MapAnimationCommand(animations, targetStyle, animationCommandNode);
@@ -500,6 +503,7 @@ namespace UIForia.Compilers.Style {
                         else if (runNode.command is SoundCommandNode soundCommandNode) {
                             MapSoundCommand(soundData, targetStyle, soundCommandNode);
                         }
+
                         break;
                     default:
                         throw new CompileException(node, $"You cannot have a {node} at this level.");

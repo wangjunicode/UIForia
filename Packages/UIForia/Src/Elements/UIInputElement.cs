@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Text;
 using JetBrains.Annotations;
 using UIForia.Attributes;
+using UIForia.Parsing;
 using UIForia.Rendering;
 using UIForia.Text;
 using UIForia.UIInput;
@@ -172,6 +173,8 @@ namespace UIForia.Elements {
     }
 
     // todo use StructList<char> instead of string to alloc less
+    
+    [GenericElementTypeResolvedBy(nameof(value))]
     [Template(TemplateType.Internal, "Elements/InputElement.xml")]
     public class InputElement<T> : UIInputElement where T : IEquatable<T> {
 

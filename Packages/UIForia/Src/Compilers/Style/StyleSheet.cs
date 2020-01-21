@@ -13,7 +13,7 @@ namespace UIForia.Compilers.Style {
         internal readonly AnimationData[] animations;
         internal readonly UIStyleGroupContainer[] styleGroupContainers;
         internal UISoundData[] sounds;
-        
+
         internal StyleSheet(StyleConstant[] constants, UIStyleGroupContainer[] styleGroupContainers, AnimationData[] animations, UISoundData[] sounds) {
             this.id = 0;
             this.constants = constants;
@@ -96,6 +96,20 @@ namespace UIForia.Compilers.Style {
             }
 
             return null;
+        }
+
+        public bool TryResolveStyleByTagName(string tagName, out int id) {
+            for (int i = 0; i < styleGroupContainers.Length; i++) {
+                if (styleGroupContainers[i].styleType == StyleType.Implicit) {
+                    if (styleGroupContainers[i].name == tagName) {
+                        id = styleGroupContainers[i].id;
+                        return true;
+                    }
+                }
+            }
+
+            id = -1;
+            return false;
         }
 
     }

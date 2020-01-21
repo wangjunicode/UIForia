@@ -1,5 +1,6 @@
 using System;
 using UIForia.Attributes;
+using UIForia.Parsing;
 using UIForia.Rendering;
 using UIForia.UIInput;
 using UIForia.Util;
@@ -27,6 +28,7 @@ namespace UIForia.Elements {
     }
 
     [Template(TemplateType.Internal, "Elements/Select.xml")]
+    [GenericElementTypeResolvedBy(nameof(selectedValue))]
     public class Select<T> : UIElement, IFocusable {
 
         private const string disabledAttributeValue = "select-disabled";
@@ -172,6 +174,7 @@ namespace UIForia.Elements {
                 }
             }    
         }
+        
         private void EnableAllChildren(UIElement element) {
             for (int index = 0; index < element.children.Count; index++) {
                 UIElement child = element.children[index];

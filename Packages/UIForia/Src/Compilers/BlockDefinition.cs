@@ -17,6 +17,9 @@ namespace UIForia.Compilers {
             this.statements = LightList<Expression>.Get();
         }
 
+        public bool HasStatements => statements.Count > 0;
+        public int StatementCount => statements.size;
+
         public ParameterExpression AddInternalVariable(Type type, string name = null) {
             
             if (string.IsNullOrEmpty(name) || string.IsNullOrWhiteSpace(name)) {

@@ -31,7 +31,7 @@ namespace UIForia.Compilers {
         public StructList<StyleSheetReference> styleSheets;
 
         private readonly LightStack<ParameterExpression> hierarchyStack;
-        
+
         private static readonly MethodInfo s_Comment = typeof(ExpressionUtil).GetMethod(nameof(ExpressionUtil.Comment), BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);
         private static readonly MethodInfo s_CommentNewLineBefore = typeof(ExpressionUtil).GetMethod(nameof(ExpressionUtil.CommentNewLineBefore), BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);
         private static readonly MethodInfo s_CommentNewLineAfter = typeof(ExpressionUtil).GetMethod(nameof(ExpressionUtil.CommentNewLineAfter), BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);
@@ -72,7 +72,50 @@ namespace UIForia.Compilers {
                 alias = alias,
                 styleSheet = styleSheet
             });
-            
+        }
+
+        public int ResolveStyleNameWithFile(string name, out string file) {
+            if (styleSheets == null) {
+                file = null;
+                return -1;
+            }
+
+            string alias = string.Empty;
+
+            if (name.Contains(".")) {
+                string[] split = name.Split(s_SplitChar, StringSplitOptions.RemoveEmptyEntries);
+                if (split.Length == 2) {
+                    alias = split[0];
+                    name = split[1];
+                }
+            }
+
+            if (alias != string.Empty) {
+                for (int i = 0; i < styleSheets.size; i++) {
+                    if (styleSheets.array[i].alias == alias) {
+                        StyleSheet sheet = styleSheets.array[i].styleSheet;
+                        for (int j = 0; j < sheet.styleGroupContainers.Length; j++) {
+                            UIStyleGroupContainer styleGroupContainer = sheet.styleGroupContainers[j];
+                            if (styleGroupContainer.name == name) {
+                                file = sheet.path + ":" + name;
+                                return styleGroupContainer.id;
+                            }
+                        }
+                    }
+                }
+            }
+            else {
+                for (int i = 0; i < styleSheets.size; i++) {
+                    StyleSheet sheet = styleSheets.array[i].styleSheet;
+                    if (sheet.TryResolveStyleName(name, out UIStyleGroupContainer retn)) {
+                        file = sheet.path + ":" + name;
+                        return retn.id;
+                    }
+                }
+            }
+
+            file = null;
+            return -1;
         }
 
         public int ResolveStyleName(string name) {
@@ -152,7 +195,7 @@ namespace UIForia.Compilers {
             variables.Add(param);
             return param;
         }
-        
+
         public ParameterExpression GetVariable<T>(string name) {
             for (int i = 0; i < variables.size; i++) {
                 if (variables[i].Name == name) {

@@ -431,8 +431,8 @@ namespace UIForia {
         // sync properties are written back to targets. these will invoke OnPropertySynchronized() if provided (just like OnPropertyChanged, but explicitly for `sync` write backs)
         // late update bindings & OnLateUpdate()
         // animation system update
-        // OnFrameCompleted()
         // style system update -> triggers OnStylePropertyChanged handlers
+        // OnFrameCompleted()
         // user code finished here
         //
         // buffer changes from style system for render & layout thread to pick up (future state)
@@ -451,22 +451,79 @@ namespace UIForia {
         // etc
         // continue user thread
 
+        private LightList<UIElement> activeBuffer = new LightList<UIElement>(32);
+        private LightList<UIElement> queuedBuffer = new LightList<UIElement>(32);
+
         public void Update() {
+            // OnEnable()
+            // get pending queue, enqueue
+            // adding 1 element many times to the queue is fine
+            // invoke enable callback immediately or deferred?
 
-            bindingTimer.Reset();
-            bindingTimer.Start();
-            linqBindingSystem.OnUpdate();
-            bindingTimer.Stop();
+            // m_InputSystem.ReadInput();
+            bool loop = true;
+            bool firstRun = true;
+            
+            activeBuffer.Clear();
 
-            m_InputSystem.OnUpdate();
+            for (int i = 0; i < m_Views.Count; i++) {
+                activeBuffer.Add(m_Views[i].RootElement);
+            }
 
-            linqBindingSystem.OnLateUpdate();
+            linqBindingSystem.BeginFrame();
+            
+            
+            // enable element
+            // it gets an update
+            // it gets disabled
+            // it gets enabled
+            // now what? need to be lateUpdated?
+            while (loop) {
 
+                // bindings
+                // OnBindingsUpdated()
+                linqBindingSystem.BeforeUpdate(activeBuffer); // normal bindings + OnBeforeUpdate call 
+
+                if (firstRun) {
+                    m_InputSystem.OnUpdate();
+                    firstRun = false;
+                } 
+
+                // late bindings?
+                // onChange()
+                // sync
+                linqBindingSystem.AfterUpdate(activeBuffer); // on update call + write back 'sync' & onChange
+
+                // m_AnimationSystem.OnUpdate(activeBuffer);
+
+                // AfterUpdate()
+                // linqBindingSystem.AfterUpdate(activeBuffer); // after update call
+
+                if (queuedBuffer.size == 0) {
+                    break;
+                }
+
+                LightList<UIElement> tmp = activeBuffer;
+                activeBuffer = queuedBuffer;
+                queuedBuffer = tmp;
+                activeBuffer.Clear();
+                // sort queued buffer by depth?
+            }
+
+            // bindingTimer.Reset();
+            // bindingTimer.Start();
+            // linqBindingSystem.OnUpdate();
+            // bindingTimer.Stop();
+            //
+            // m_InputSystem.OnUpdate();
+            //
+            // linqBindingSystem.OnLateUpdate();
+            //
             m_AnimationSystem.OnUpdate();
-
-            m_RoutingSystem.OnUpdate(); // todo -- remove
-
-            linqBindingSystem.OnFrameCompleted();
+            //
+            // m_RoutingSystem.OnUpdate(); // todo -- remove
+            //
+            // linqBindingSystem.OnFrameCompleted();
 
             m_StyleSystem.OnUpdate(); // buffer changes here
 
@@ -528,6 +585,8 @@ namespace UIForia {
                 return;
             }
 
+            queuedBuffer.Add(element);
+            
             StructStack<ElemRef> stack = StructStack<ElemRef>.Get();
             // if element is now enabled we need to walk it's children
             // and set enabled ancestor flags until we find a self-disabled child
@@ -800,7 +859,6 @@ namespace UIForia {
         }
 
         internal void InsertChild(UIElement parent, UIElement child, uint index) {
-
             child.parent = parent;
             parent.children.Insert((int) index, child);
 

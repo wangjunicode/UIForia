@@ -2,40 +2,8 @@
 
     <Contents id="sync">
 
-        <TemplateBindingTest_SyncBinding_FakeInput sync:value="syncedValue[4].x" value.onChange="" value.onWrite="HandleSyncChange($value, $oldValue)"/>
+        <TemplateBindingTest_SyncBinding_FakeInput sync:value="syncedValue"/>
         
-        <TemplateBindingTest_SyncBinding_FakeInput sync:value="syncedValue[4].x" value.onChange="" value.onWrite="HandleSyncChange($value, $oldValue)"/>
-        
-        <TemplateBindingTest_SyncBinding_FakeInput sync:value="syncedValue[4].x" value.onChange="HandleSyncChange($value, $oldValue)"/>
-
-        UpdateBinding() => {
-            read from parent
-            maybe call Update()
-        }
-        
-        LateUpdateBinding() => {
-            maybe write to parent
-            bool changed = syncValue[4].x != this.value;
-            var oldValue = parent.syncValue[4].x;
-            parent.value = value;
-            if(changed) {
-                changehandler.Invoke(oldValue, value);
-            }
-            // on change is called before LateUpdate if the expression value is not the same as it is in the parent
-            maybe call onChange
-
-            maybe call LateUpdate() 
-        }
-        
-        // normal bindings
-        //  do bindings
-        //  on property changed
-        //  on update
-        // inputs
-        // late binding
-        //  write back
-        //  on change
-        //  on late update
     </Contents>
 
     <Contents id="fake_input">

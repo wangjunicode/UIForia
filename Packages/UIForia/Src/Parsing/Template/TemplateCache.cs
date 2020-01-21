@@ -72,6 +72,7 @@ namespace UIForia.Parsing {
             Debug.Assert(templateAttr.fullPathId != null, "templateAttr.fullPathId != null");
             
             if (templateMap.TryGetValue(templateAttr.fullPathId, out retn)) {
+                // todo -- generics have the same template nodes, need to clone them if type is not matched!!!!
                 return retn;
             }
 

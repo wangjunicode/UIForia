@@ -1,0 +1,9 @@
+<UITemplate>
+    
+    <Contents id="test1">
+
+        <LifeCycleElement value="'hello'"/>
+        
+    </Contents>
+    
+</UITemplate>

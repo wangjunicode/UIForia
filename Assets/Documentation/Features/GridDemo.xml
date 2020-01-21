@@ -12,8 +12,8 @@
 
                 <Div style="grid5x5">
 
-                    <Group style="wide">Cell 1</Group>
-                    <Group style="middle">Cell 2</Group>
+                    <Group>Cell 1</Group>
+                    <Group>Cell 2</Group>
                     <Group>Cell 3</Group>
                     <Group>Cell 4</Group>
                     <Group>Cell 5</Group>

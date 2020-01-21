@@ -9,7 +9,9 @@ namespace UIForia.Systems.Input {
         private int clickCount;
         private float lastMouseDownTime;
         private Vector2 lastMouseDownPosition;
-        private const float k_ClickThreshold = 0.33f;
+        private const float k_clickThresholdSeconds = 0.33f;
+        private const float k_clickDistanceThreshold = 3f;
+        private Vector2 unsetDownPosition = new Vector2(-1, -1);
 
         protected override MouseState GetMouseState() {
             MouseState retn = new MouseState();
@@ -37,7 +39,7 @@ namespace UIForia.Systems.Input {
 
             bool didClick = false;
 
-            if (clickCount > 0 && now - lastMouseDownTime > k_ClickThreshold) {
+            if (clickCount > 0 && now - lastMouseDownTime > k_clickThresholdSeconds) {
                 clickCount = 0;
             }
 
@@ -55,14 +57,14 @@ namespace UIForia.Systems.Input {
                 lastMouseDownPosition = retn.leftMouseButtonState.downPosition;
             }
             else if (retn.isLeftMouseUpThisFrame) {
-                if (clickCount == 0 || now - lastMouseDownTime <= k_ClickThreshold) {
-                    if (Vector2.Distance(lastMouseDownPosition, retn.mousePosition) <= 3f) {
+                if (clickCount == 0 || now - lastMouseDownTime <= k_clickThresholdSeconds) {
+                    if (Vector2.Distance(lastMouseDownPosition, retn.mousePosition) <= k_clickDistanceThreshold) {
                         clickCount++;
                         didClick = true;
                     }
                 }
 
-                retn.leftMouseButtonState.downPosition = new Vector2(-1, -1);
+                retn.leftMouseButtonState.downPosition = unsetDownPosition;
             }
 
             retn.isSingleClick = didClick && clickCount == 1;

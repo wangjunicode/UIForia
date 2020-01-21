@@ -9,7 +9,7 @@ namespace UIForia {
         public Type type;
         public string typeName;
         public new Camera camera;
-        private Application application;
+        public Application application;
 
         public void Start() {
             type = Type.GetType(typeName);

@@ -42,12 +42,13 @@
         </Group>
 
         <Label>Two inputs that copy each other's values. The first input has autofocus enabled. It will gain focus every time it is enabled.</Label>
+        <Input value.read.write="tv" style="input" />
         <Input value.read.write="tv" autofocus="true" style="input" />
         <Input value.read.write="tv" style="input" />
         <Text style="text mb20">{tv}</Text>
         
         <Label forElement="'input1'">Some label</Label>
-        <Input x-id="input1" value.read.write="rwValue" onKeyUp.late="Autocomplete($event)" placeholder="'Some value please'" style="input" />
+        <Input x-id="input1" value.read.write="rwValue" onKeyUp="Autocomplete($event)" placeholder="'Some value please'" style="input" />
         <Input x-disabled="disabled" placeholder="'cannot focus the disabled one'" style="input" />
 
         <Label forElement="'input2'">Another label</Label>

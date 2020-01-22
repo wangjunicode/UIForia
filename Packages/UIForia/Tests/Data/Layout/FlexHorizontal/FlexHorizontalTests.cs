@@ -15,8 +15,8 @@ namespace Layout {
 
         [Test]
         public void DistributeSpaceHorizontal_Default() {
-            MockApplication app = new MockApplication(typeof(FlexHorizontal_DistributeSpaceHorizontal));
-            FlexHorizontal_DistributeSpaceHorizontal root = (FlexHorizontal_DistributeSpaceHorizontal) app.RootElement.GetChild(0);
+            MockApplication app = MockApplication.Setup<FlexHorizontal_DistributeSpaceHorizontal>();
+            FlexHorizontal_DistributeSpaceHorizontal root = (FlexHorizontal_DistributeSpaceHorizontal) app.RootElement;
 
             app.Update();
 
@@ -27,8 +27,8 @@ namespace Layout {
 
         [Test]
         public void DistributeSpaceHorizontal_AfterContent() {
-            MockApplication app = new MockApplication(typeof(FlexHorizontal_DistributeSpaceHorizontal));
-            FlexHorizontal_DistributeSpaceHorizontal root = (FlexHorizontal_DistributeSpaceHorizontal) app.RootElement.GetChild(0);
+            MockApplication app = MockApplication.Setup<FlexHorizontal_DistributeSpaceHorizontal>();
+            FlexHorizontal_DistributeSpaceHorizontal root = (FlexHorizontal_DistributeSpaceHorizontal) app.RootElement;
             root.style.SetDistributeExtraSpaceHorizontal(SpaceDistribution.AfterContent, StyleState.Normal);
             app.Update();
 
@@ -39,8 +39,8 @@ namespace Layout {
 
         [Test]
         public void DistributeSpaceHorizontal_CenterContent() {
-            MockApplication app = new MockApplication(typeof(FlexHorizontal_DistributeSpaceHorizontal));
-            FlexHorizontal_DistributeSpaceHorizontal root = (FlexHorizontal_DistributeSpaceHorizontal) app.RootElement.GetChild(0);
+            MockApplication app = MockApplication.Setup<FlexHorizontal_DistributeSpaceHorizontal>();
+            FlexHorizontal_DistributeSpaceHorizontal root = (FlexHorizontal_DistributeSpaceHorizontal) app.RootElement;
 
             root.style.SetDistributeExtraSpaceHorizontal(SpaceDistribution.CenterContent, StyleState.Normal);
 
@@ -54,8 +54,8 @@ namespace Layout {
 
         [Test]
         public void DistributeSpaceHorizontal_BeforeContent() {
-            MockApplication app = new MockApplication(typeof(FlexHorizontal_DistributeSpaceHorizontal));
-            FlexHorizontal_DistributeSpaceHorizontal root = (FlexHorizontal_DistributeSpaceHorizontal) app.RootElement.GetChild(0);
+            MockApplication app = MockApplication.Setup<FlexHorizontal_DistributeSpaceHorizontal>();
+            FlexHorizontal_DistributeSpaceHorizontal root = (FlexHorizontal_DistributeSpaceHorizontal) app.RootElement;
 
             root.style.SetDistributeExtraSpaceHorizontal(SpaceDistribution.BeforeContent, StyleState.Normal);
             app.Update();
@@ -67,8 +67,8 @@ namespace Layout {
 
         [Test]
         public void DistributeSpaceHorizontal_AroundContent() {
-            MockApplication app = new MockApplication(typeof(FlexHorizontal_DistributeSpaceHorizontal));
-            FlexHorizontal_DistributeSpaceHorizontal root = (FlexHorizontal_DistributeSpaceHorizontal) app.RootElement.GetChild(0);
+            MockApplication app = MockApplication.Setup<FlexHorizontal_DistributeSpaceHorizontal>();
+            FlexHorizontal_DistributeSpaceHorizontal root = (FlexHorizontal_DistributeSpaceHorizontal) app.RootElement;
 
             // makes math cleaner
             root.style.SetPreferredWidth(600f, StyleState.Normal);
@@ -83,8 +83,8 @@ namespace Layout {
 
         [Test]
         public void DistributeSpaceHorizontal_BetweenContent() {
-            MockApplication app = new MockApplication(typeof(FlexHorizontal_DistributeSpaceHorizontal));
-            FlexHorizontal_DistributeSpaceHorizontal root = (FlexHorizontal_DistributeSpaceHorizontal) app.RootElement.GetChild(0);
+            MockApplication app = MockApplication.Setup<FlexHorizontal_DistributeSpaceHorizontal>();
+            FlexHorizontal_DistributeSpaceHorizontal root = (FlexHorizontal_DistributeSpaceHorizontal) app.RootElement;
 
             // makes math cleaner
             root.style.SetPreferredWidth(600f, StyleState.Normal);
@@ -102,8 +102,8 @@ namespace Layout {
 
         [Test]
         public void GrowUnconstrained() {
-            MockApplication app = new MockApplication(typeof(FlexHorizontal_GrowUnconstrained));
-            FlexHorizontal_GrowUnconstrained root = (FlexHorizontal_GrowUnconstrained) app.RootElement.GetChild(0);
+            MockApplication app = MockApplication.Setup<FlexHorizontal_GrowUnconstrained>();
+            FlexHorizontal_GrowUnconstrained root = (FlexHorizontal_GrowUnconstrained) app.RootElement;
 
             app.Update();
 
@@ -117,8 +117,8 @@ namespace Layout {
 
         [Test]
         public void GrowConstrained() {
-            MockApplication app = new MockApplication(typeof(FlexHorizontal_GrowConstrained));
-            FlexHorizontal_GrowConstrained root = (FlexHorizontal_GrowConstrained) app.RootElement.GetChild(0);
+            MockApplication app = MockApplication.Setup<FlexHorizontal_GrowConstrained>();
+            FlexHorizontal_GrowConstrained root = (FlexHorizontal_GrowConstrained) app.RootElement;
 
             app.Update();
 
@@ -132,8 +132,8 @@ namespace Layout {
 
         [Test]
         public void GrowWithExtraSpace() {
-            MockApplication app = new MockApplication(typeof(FlexHorizontal_GrowWithExtraSpace));
-            FlexHorizontal_GrowWithExtraSpace root = (FlexHorizontal_GrowWithExtraSpace) app.RootElement.GetChild(0);
+            MockApplication app = MockApplication.Setup<FlexHorizontal_GrowWithExtraSpace>();
+            FlexHorizontal_GrowWithExtraSpace root = (FlexHorizontal_GrowWithExtraSpace) app.RootElement;
 
             app.Update();
 
@@ -148,8 +148,8 @@ namespace Layout {
 
         [Test]
         public void RespectMarginHorizontal() {
-            MockApplication app = new MockApplication(typeof(FlexHorizontal_RespectMarginHorizontal));
-            FlexHorizontal_RespectMarginHorizontal root = (FlexHorizontal_RespectMarginHorizontal) app.RootElement.GetChild(0);
+            MockApplication app = MockApplication.Setup<FlexHorizontal_RespectMarginHorizontal>();
+            FlexHorizontal_RespectMarginHorizontal root = (FlexHorizontal_RespectMarginHorizontal) app.RootElement;
 
             app.Update();
 
@@ -163,8 +163,8 @@ namespace Layout {
 
         [Test]
         public void ShrinkUnconstrained() {
-            MockApplication app = new MockApplication(typeof(FlexHorizontal_ShrinkUnconstrained));
-            FlexHorizontal_ShrinkUnconstrained root = (FlexHorizontal_ShrinkUnconstrained) app.RootElement.GetChild(0);
+            MockApplication app = MockApplication.Setup<FlexHorizontal_ShrinkUnconstrained>();
+            FlexHorizontal_ShrinkUnconstrained root = (FlexHorizontal_ShrinkUnconstrained) app.RootElement;
 
             app.Update();
 
@@ -178,8 +178,8 @@ namespace Layout {
 
         [Test]
         public void ShrinkConstrained() {
-            MockApplication app = new MockApplication(typeof(FlexHorizontal_ShrinkConstrained));
-            FlexHorizontal_ShrinkConstrained root = (FlexHorizontal_ShrinkConstrained) app.RootElement.GetChild(0);
+            MockApplication app = MockApplication.Setup<FlexHorizontal_ShrinkConstrained>();
+            FlexHorizontal_ShrinkConstrained root = (FlexHorizontal_ShrinkConstrained) app.RootElement;
 
             app.Update();
 
@@ -193,8 +193,8 @@ namespace Layout {
 
         [Test]
         public void ShrinkWithOverflow() {
-            MockApplication app = new MockApplication(typeof(FlexHorizontal_ShrinkWithOverflow));
-            FlexHorizontal_ShrinkWithOverflow root = (FlexHorizontal_ShrinkWithOverflow) app.RootElement.GetChild(0);
+            MockApplication app = MockApplication.Setup<FlexHorizontal_ShrinkWithOverflow>();
+            FlexHorizontal_ShrinkWithOverflow root = (FlexHorizontal_ShrinkWithOverflow) app.RootElement;
 
             app.Update();
 

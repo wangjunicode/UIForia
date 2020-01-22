@@ -1106,8 +1106,8 @@ style xyz {
         StyleSheet styleSheet = NewStyleSheetCompiler().Compile("test", nodes);
         Assert.AreEqual(1, styleSheet.animations.Length);
         AnimationData animationData = styleSheet.animations[0];
-        Assert.AreEqual(1000, animationData.options.delay);
-        Assert.AreEqual(3000, animationData.options.duration);
+        Assert.AreEqual(new UITimeMeasurement(1000), animationData.options.delay);
+        Assert.AreEqual(new UITimeMeasurement(3000), animationData.options.duration);
         Assert.AreEqual(EasingFunction.SineEaseOut, animationData.options.timingFunction);
     }
     

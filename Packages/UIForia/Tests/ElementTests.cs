@@ -58,7 +58,7 @@ public class ElementTests {
     [Test]
     public void ProperDepth() {
         MockApplication app = new MockApplication(typeof(DepthThing));
-        DepthThing root = (DepthThing) app.RootElement.GetChild(0);
+        DepthThing root = (DepthThing) app.RootElement;
         Assert.AreEqual(1, root.depth);
         Assert.AreEqual(2, root.g1.depth);
         Assert.AreEqual(3, root.g1_1.depth);
@@ -70,7 +70,7 @@ public class ElementTests {
     [Test]
     public void ProperDepthNested() {
         MockApplication app = new MockApplication(typeof(DepthThing));
-        DepthThing root = (DepthThing) app.RootElement.GetChild(0);
+        DepthThing root = (DepthThing) app.RootElement;
         DepthThingChild child = root.FindFirstByType<DepthThingChild>();
         Assert.AreEqual(2, child.depth);
         Assert.AreEqual(3, child.FindById("g1").depth);
@@ -83,7 +83,7 @@ public class ElementTests {
     [Test]
     public void ProperSiblingIndex() {
         MockApplication app = new MockApplication(typeof(DepthThing));
-        DepthThing root = (DepthThing) app.RootElement.GetChild(0);
+        DepthThing root = (DepthThing) app.RootElement;
         Assert.AreEqual(0, root.siblingIndex);
         Assert.AreEqual(0, root.g1.siblingIndex);
         Assert.AreEqual(0, root.g1_1.siblingIndex);
@@ -123,7 +123,7 @@ public class ElementTests {
             </UITemplate>
         ";
         MockApplication app = new MockApplication(typeof(GenericWrapper), template);
-        Assert.IsInstanceOf<GenericThing<int>>(app.RootElement.GetChild(0).GetChild(0));
+        Assert.IsInstanceOf<GenericThing<int>>(app.RootElement.GetChild(0));
     }
     
 }

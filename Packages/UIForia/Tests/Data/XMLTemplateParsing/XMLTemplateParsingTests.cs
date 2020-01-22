@@ -27,11 +27,11 @@ namespace TemplateParsing_XML {
         [Test]
         public void CollapseTextNode_Simple() {
             TemplateCache cache = new TemplateCache(Setup("App"));
-            ElementTemplateNode templateRoot = cache.GetParsedTemplate(TypeProcessor.GetProcessedType(typeof(XMLTemplateParsing_CollapseTextNode_Simple)));
+            TemplateRootNode templateRootRoot = cache.GetParsedTemplate(TypeProcessor.GetProcessedType(typeof(XMLTemplateParsing_CollapseTextNode_Simple)));
 
-            Assert.AreEqual(1, templateRoot.ChildCount);
+            Assert.AreEqual(1, templateRootRoot.ChildCount);
 
-            ContainerNode child = AssertAndReturn<ContainerNode>(templateRoot[0]);
+            ContainerNode child = AssertAndReturn<ContainerNode>(templateRootRoot[0]);
             TextNode text = AssertAndReturn<TextNode>(child[0]);
 
             Assert.AreEqual("Hello Templates", text.textExpressionList[0].text);
@@ -43,11 +43,11 @@ namespace TemplateParsing_XML {
         [Test]
         public void CollapseTextNode_Complex() {
             TemplateCache cache = new TemplateCache(Setup("App"));
-            ElementTemplateNode templateRoot = cache.GetParsedTemplate(TypeProcessor.GetProcessedType(typeof(XMLTemplateParsing_CollapseTextNode_Complex)));
+            TemplateRootNode templateRootRoot = cache.GetParsedTemplate(TypeProcessor.GetProcessedType(typeof(XMLTemplateParsing_CollapseTextNode_Complex)));
 
-            Assert.AreEqual(1, templateRoot.ChildCount);
+            Assert.AreEqual(1, templateRootRoot.ChildCount);
 
-            ContainerNode child = AssertAndReturn<ContainerNode>(templateRoot[0]);
+            ContainerNode child = AssertAndReturn<ContainerNode>(templateRootRoot[0]);
             TextNode text = AssertAndReturn<TextNode>(child[0]);
 
             Assert.AreEqual(2, text.ChildCount);
@@ -64,11 +64,11 @@ namespace TemplateParsing_XML {
         [Test]
         public void DefineSlot() {
             TemplateCache cache = new TemplateCache(Setup("App"));
-            ElementTemplateNode templateRoot = cache.GetParsedTemplate(TypeProcessor.GetProcessedType(typeof(XMLTemplateParsing_DefineSlot)));
+            TemplateRootNode templateRootRoot = cache.GetParsedTemplate(TypeProcessor.GetProcessedType(typeof(XMLTemplateParsing_DefineSlot)));
 
-            Assert.AreEqual(1, templateRoot.ChildCount);
+            Assert.AreEqual(1, templateRootRoot.ChildCount);
 
-            ContainerNode child = AssertAndReturn<ContainerNode>("Div", templateRoot[0]);
+            ContainerNode child = AssertAndReturn<ContainerNode>("Div", templateRootRoot[0]);
             SlotNode node = AssertAndReturn<SlotNode>(child[0]);
 
             Assert.AreEqual("my-slot", node.slotName);
@@ -99,14 +99,14 @@ namespace TemplateParsing_XML {
         public void OverrideSlot() {
             ProcessedType processedType = TypeProcessor.GetProcessedType(typeof(XMLTemplateParsing_OverrideSlot));
             TemplateCache cache = new TemplateCache(Setup("App"));
-            ElementTemplateNode templateRoot = cache.GetParsedTemplate(processedType);
+            TemplateRootNode templateRootRoot = cache.GetParsedTemplate(processedType);
 
-            Assert.AreEqual(3, templateRoot.ChildCount);
+            Assert.AreEqual(3, templateRootRoot.ChildCount);
 
-            AssertTrimmedText("Hello Before", templateRoot[0]);
-            AssertTrimmedText("Hello After", templateRoot[2]);
+            AssertTrimmedText("Hello Before", templateRootRoot[0]);
+            AssertTrimmedText("Hello After", templateRootRoot[2]);
 
-            ExpandedTemplateNode expandedTemplateNode = AssertAndReturn<ExpandedTemplateNode>(templateRoot[1]);
+            ExpandedTemplateNode expandedTemplateNode = AssertAndReturn<ExpandedTemplateNode>(templateRootRoot[1]);
             SlotNode overrideNode = AssertAndReturn<SlotNode>(expandedTemplateNode.slotOverrideNodes[0]);
             Assert.AreEqual("my-slot", overrideNode.slotName);
             Assert.AreEqual(SlotType.Override, overrideNode.slotType);
@@ -123,18 +123,17 @@ namespace TemplateParsing_XML {
         public void ExpandedTemplate() {
             ProcessedType processedType = TypeProcessor.GetProcessedType(typeof(XMLTemplateParsing_ExpandTemplate));
             TemplateCache cache = new TemplateCache(Setup("App"));
-            ElementTemplateNode templateRoot = cache.GetParsedTemplate(processedType);
+            TemplateRootNode templateRootRoot = cache.GetParsedTemplate(processedType);
 
-            Assert.AreEqual(3, templateRoot.ChildCount);
+            Assert.AreEqual(3, templateRootRoot.ChildCount);
 
-            AssertAndReturn<TextNode>(templateRoot[0]);
+            AssertAndReturn<TextNode>(templateRootRoot[0]);
 
-            ExpandedTemplateNode expandedTemplate = AssertAndReturn<ExpandedTemplateNode>(templateRoot[1]);
+            ExpandedTemplateNode expandedTemplate = AssertAndReturn<ExpandedTemplateNode>(templateRootRoot[1]);
 
-            ElementTemplateNode expandedTemplateRoot = expandedTemplate.expandedRoot;
-            AssertTrimmedText("I am expanded!", expandedTemplateRoot[0]);
+            Assert.AreEqual(typeof(XMLTemplateParsing_ExpandedTemplateChild), expandedTemplate.processedType.rawType);
 
-            AssertAndReturn<TextNode>(templateRoot[2]);
+            AssertAndReturn<TextNode>(templateRootRoot[2]);
         }
 
         private static void AssertText(string expected, TemplateNode templateNode) {

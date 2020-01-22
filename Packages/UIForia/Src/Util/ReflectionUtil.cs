@@ -176,11 +176,10 @@ namespace UIForia.Util {
             if (s_StaticMethodCache.TryGet(type, out MethodInfo[] v)) {
                 return v;
             }
-            else {
-                MethodInfo[] methods = type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
-                s_StaticMethodCache.Add(type, methods);
-                return methods;
-            }
+
+            MethodInfo[] methods = type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
+            s_StaticMethodCache.Add(type, methods);
+            return methods;
         }
 //        
 //        public static void GetPublicStaticMethods(Type type, LightList<MethodInfo> retn) {
@@ -214,10 +213,10 @@ namespace UIForia.Util {
         }
 
         public static bool HasStaticMethod(Type type, string methodName, LightList<MethodInfo> retn) {
-            MethodInfo[] methods = GetInstanceMethods(type);
+            MethodInfo[] methods = GetStaticMethods(type);
 
             for (int i = 0; i < methods.Length; i++) {
-                if (methods[i].IsStatic && methods[i].Name == methodName) {
+                if (methods[i].Name == methodName) {
                     retn.Add(methods[i]);
                 }
             }

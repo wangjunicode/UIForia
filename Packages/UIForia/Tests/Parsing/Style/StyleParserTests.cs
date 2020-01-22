@@ -472,7 +472,6 @@ style s { BrokenUrl = url() }
                     reverseStartDelay = 1;
                     direction = forward;
                     timingFunction = linear;
-                    playbackType = parallel;
                 }
             }
         ");
@@ -514,10 +513,7 @@ style s { BrokenUrl = url() }
         AnimationOptionNode opt8 = rootNode.optionNodes[8];
         Assert.AreEqual("timingFunction", opt8.optionName);
         Assert.AreEqual(StyleASTNodeType.Identifier, opt8.value.type);
-
-        AnimationOptionNode opt9 = rootNode.optionNodes[9];
-        Assert.AreEqual("playbackType", opt9.optionName);
-        Assert.AreEqual(StyleASTNodeType.Identifier, opt9.value.type);
+        
     }
 
     [Test]

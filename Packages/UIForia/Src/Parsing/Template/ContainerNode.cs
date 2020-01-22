@@ -6,7 +6,7 @@ namespace UIForia.Parsing {
 
     public class ContainerNode : TemplateNode {
 
-        public ContainerNode(ElementTemplateNode root, TemplateNode parent, ProcessedType processedType, StructList<AttributeDefinition2> attributes, in TemplateLineInfo templateLineInfo) : base(root, parent, processedType, attributes, templateLineInfo) { }
+        public ContainerNode(TemplateRootNode root, TemplateNode parent, ProcessedType processedType, StructList<AttributeDefinition2> attributes, in TemplateLineInfo templateLineInfo) : base(root, parent, processedType, attributes, templateLineInfo) { }
 
     }
 

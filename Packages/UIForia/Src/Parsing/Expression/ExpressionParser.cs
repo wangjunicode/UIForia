@@ -820,6 +820,7 @@ namespace UIForia.Parsing.Expressions {
             // tokenStream.Advance();
             
             LightList<ASTNode> parts = LightList<ASTNode>.Get();
+            tokenStream.Save();
             
             while (tokenStream.HasMoreTokens) {
                 if (tokenStream.Current == ExpressionTokenType.Dot || tokenStream.Current == ExpressionTokenType.Elvis) {

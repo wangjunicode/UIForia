@@ -235,22 +235,11 @@ namespace UIForia.Exceptions {
             return new CompileException($"Unknown alias {aliasName}");
         }
 
-    }
-
-    public static class CompileExceptions {
-
-        public static CompileException TooManyArgumentsException(string methodName, int argumentCount) {
-            return new CompileException($"Expressions only support functions with up to 4 arguments. {methodName} is supplying {argumentCount} ");
-        }
-
-        public static CompileException MethodNotFound(Type definingType, string identifier, List<Expression> arguments = null) {
-            return new CompileException($"Type {definingType} does not define a method '{identifier}' with matching signature");
-        }
-
-        public static Exception FieldOrPropertyNotFound(Type definingType, string propertyName) {
-            return new CompileException($"Type {definingType} does not define a property or field with the name {propertyName}");
+        public static CompileException DuplicateResolvedGenericArgument(string tagName, string argName, Type original, Type duplicate) {
+            return new CompileException($"When attempting to resolve generic element tag {tagName}, {argName} was resolved first to {original} and later to {duplicate}. Ensure multiple usages of {argName} resolve to the same type.");
         }
 
     }
+    
 
 }

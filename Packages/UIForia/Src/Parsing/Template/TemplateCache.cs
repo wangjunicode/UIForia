@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using UIForia.Attributes;
 using UIForia.Exceptions;
+using UIForia.Util;
 
 namespace UIForia.Parsing {
 
@@ -11,12 +12,12 @@ namespace UIForia.Parsing {
 
         private readonly TemplateSettings settings;
         private readonly XMLTemplateParser xmlTemplateParser;
-        private readonly Dictionary<string, ElementTemplateNode> templateMap;
+        private readonly Dictionary<string, LightList<TemplateRootNode>> templateMap;
 
         public TemplateCache(TemplateSettings settings) {
             this.settings = settings;
-            this.xmlTemplateParser = new XMLTemplateParser(this);
-            this.templateMap = new Dictionary<string, ElementTemplateNode>(37);
+            this.xmlTemplateParser = new XMLTemplateParser();
+            this.templateMap = new Dictionary<string, LightList<TemplateRootNode>>(37);
         }
 
         public string ResolveDefaultFilePath(ProcessedType processedType) {
@@ -54,12 +55,7 @@ namespace UIForia.Parsing {
             return basePath;
         }
 
-        public ElementTemplateNode GetParsedTemplate(Type type) {
-            return GetParsedTemplate(TypeProcessor.GetProcessedType(type));
-        }
-
-        public ElementTemplateNode GetParsedTemplate(ProcessedType processedType) {
-            ElementTemplateNode retn = null;
+        public TemplateRootNode GetParsedTemplate(ProcessedType processedType) {
             TemplateAttribute templateAttr = processedType.templateAttr;
 
             if (templateAttr.fullPathId == null && templateAttr.templateType == TemplateType.DefaultFile) {
@@ -71,10 +67,25 @@ namespace UIForia.Parsing {
 
             Debug.Assert(templateAttr.fullPathId != null, "templateAttr.fullPathId != null");
             
-            if (templateMap.TryGetValue(templateAttr.fullPathId, out retn)) {
-                // todo -- generics have the same template nodes, need to clone them if type is not matched!!!!
+            if (templateMap.TryGetValue(templateAttr.fullPathId, out LightList<TemplateRootNode> list)) {
+
+                for (int i = 0; i < list.size; i++) {
+                    
+                    if (list.array[i].processedType.rawType == processedType.rawType) {
+                        return list.array[i];
+                    }     
+                    
+                }
+
+                TemplateRootNode retn = list[0].Clone(processedType);
+                list.Add(retn);
                 return retn;
+
             }
+
+            list = new LightList<TemplateRootNode>(2);
+            
+            templateMap[templateAttr.fullPathId] = list;
 
             TemplateDefinition templateDefinition = GetTemplateDefinition(processedType);
 
@@ -82,13 +93,13 @@ namespace UIForia.Parsing {
             
             TemplateShell shell = xmlTemplateParser.GetOuterTemplateShell(templateAttr);
             
-            ElementTemplateNode templateNode = new ElementTemplateNode(templateAttr.templateId, shell, processedType, null, default); //, attributes, new TemplateLineInfo(xmlLineInfo.LineNumber, xmlLineInfo.LinePosition));
+            TemplateRootNode templateRootNode = new TemplateRootNode(templateAttr.templateId, shell, processedType, null, default); //, attributes, new TemplateLineInfo(xmlLineInfo.LineNumber, xmlLineInfo.LinePosition));
 
-            templateMap[templateAttr.fullPathId] = templateNode;
-            
-            retn = xmlTemplateParser.Parse(templateNode, processedType);
+            list.Add(templateRootNode);
 
-            return retn;
+            xmlTemplateParser.Parse(templateRootNode, processedType);
+
+            return templateRootNode;
         }
 
         private string ResolveTemplateFilePath(TemplateType templateType, string filepath) {

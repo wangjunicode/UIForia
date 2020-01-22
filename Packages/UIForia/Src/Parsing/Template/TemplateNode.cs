@@ -8,7 +8,7 @@ namespace UIForia.Parsing {
 
         public StructList<AttributeDefinition2> attributes;
         public LightList<TemplateNode> children;
-        public ElementTemplateNode elementRoot;
+        public TemplateRootNode root;
         public TemplateNode parent;
         public ProcessedType processedType;
         public string originalString;
@@ -16,8 +16,8 @@ namespace UIForia.Parsing {
         public string namespaceName;
         public TemplateLineInfo lineInfo;
 
-        protected TemplateNode(ElementTemplateNode elementRoot, TemplateNode parent, ProcessedType processedType, StructList<AttributeDefinition2> attributes, in TemplateLineInfo templateLineInfo) {
-            this.elementRoot = elementRoot;
+        protected TemplateNode(TemplateRootNode root, TemplateNode parent, ProcessedType processedType, StructList<AttributeDefinition2> attributes, in TemplateLineInfo templateLineInfo) {
+            this.root = root;
             this.parent = parent;
             this.attributes = attributes;
             this.processedType = processedType;
@@ -28,7 +28,6 @@ namespace UIForia.Parsing {
             children = children ?? new LightList<TemplateNode>();
             children.Add(child);
         }
-
 
         public bool HasAttribute(string attr) {
             if (attributes == null) return false;

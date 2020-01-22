@@ -283,17 +283,38 @@ namespace UIForia.Util {
         }
 
         public static StructList<T> GetMinSize(int minCapacity) {
+            
             if (minCapacity < 1) minCapacity = 4;
-            StructList<T> retn = s_Pool.Count > 0 ? s_Pool.RemoveLast() : new StructList<T>(minCapacity * 2);
-            retn.isInPool = false;
 
-            if (retn.array.Length < minCapacity) {
-                T[] array = retn.array;
-                System.Array.Resize(ref array, minCapacity);
-                retn.array = array;
+            if (s_Pool.size == 0) {
+                return new StructList<T>(minCapacity) {isInPool = false};
+            }
+            
+            for (int i = 0; i < s_Pool.size; i++) {
+                    
+                StructList<T> list = s_Pool.array[i];
+                    
+                if (list.array.Length < minCapacity) {
+                    continue;
+                }
+                    
+                if (s_Pool.size == 1) {
+                    s_Pool.array[i] = null;    
+                }
+                else {
+                    s_Pool.array[i] = s_Pool.array[s_Pool.size - 1];
+                    s_Pool.array[s_Pool.size - 1] = null;    
+                }
+
+                s_Pool.size -= 1;
+                        
+                list.isInPool = false;
+                
+                return list;
             }
 
-            return retn;
+            return new StructList<T>(minCapacity) {isInPool = false};;
+            
         }
         
         public static StructList<T> PreSize(int size) {
@@ -302,9 +323,7 @@ namespace UIForia.Util {
             return list;
         }
 
-        public static int swapCalls = 0;
         private static void SwapIfGreater(T[] keys, IComparer<T> comparer, int a, int b) {
-            swapCalls++;
             if (a == b || comparer.Compare(keys[a], keys[b]) <= 0)
                 return;
             T key = keys[a];

@@ -11,6 +11,7 @@ using Debug = UnityEngine.Debug;
 
 namespace UIForia.Parsing {
 
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
     public class GenericElementTypeResolvedByAttribute : Attribute {
 
         public readonly string propertyName;
@@ -20,6 +21,9 @@ namespace UIForia.Parsing {
         }
 
     }
+    
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
+    public class ResolveGenericTemplateArguments : Attribute { }
 
     public static class TypeProcessor {
 
@@ -79,7 +83,15 @@ namespace UIForia.Parsing {
 
                                 ProcessedType processedType = new ProcessedType(currentType, templateAttr, tagName);
                                 processedType.IsUnresolvedGeneric = true;
-                                s_GenericMap.Add(tagName, processedType);
+                                try {
+                                    s_GenericMap.Add(tagName, processedType);
+                                }
+                                catch (Exception e) {
+                                    Debug.LogError($"UIForia does not support multiple elements with the same tag name. Tried to register type {processedType.rawType} for `{tagName}` " +
+                                                   $"but this tag name was already taken by type {s_GenericMap[tagName].rawType}. For generic overload types with multiple arguments you need to supply a unique [TagName] attribute");
+                                    continue;
+                                }
+
                                 typeMap[currentType] = processedType;
 
                                 if (!s_NamespaceMap.TryGetValue(currentType.Namespace ?? "null", out LightList<Assembly> namespaceList)) {

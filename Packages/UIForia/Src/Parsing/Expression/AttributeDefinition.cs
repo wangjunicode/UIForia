@@ -32,7 +32,6 @@ namespace UIForia.Parsing.Expressions {
 
         Const = 1 << 1,
         EnableOnly = 1 << 2,
-        RootContext = 1 << 3,
         StyleProperty = 1 << 4,
         LateBinding = 1 << 5,
         Sync = 1 << 6

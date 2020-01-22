@@ -15,8 +15,8 @@ namespace Layout {
 
         [Test]
         public void RowSize_MinContent() {
-            MockApplication mockView = new MockApplication(typeof(GridLayout_RowSize_MinContent));
-            GridLayout_RowSize_MinContent root = (GridLayout_RowSize_MinContent) mockView.RootElement.GetChild(0);
+            MockApplication mockView = MockApplication.Setup<GridLayout_RowSize_MinContent>();
+            GridLayout_RowSize_MinContent root = (GridLayout_RowSize_MinContent) mockView.RootElement;
 
             mockView.Update();
 
@@ -33,8 +33,8 @@ namespace Layout {
 
         [Test]
         public void ColSize_MaxContent() {
-            MockApplication mockView = new MockApplication(typeof(GridLayout_ColSizeMaxContent));
-            GridLayout_ColSizeMaxContent root = (GridLayout_ColSizeMaxContent) mockView.RootElement.GetChild(0);
+            MockApplication mockView = MockApplication.Setup<GridLayout_ColSizeMaxContent>();
+            GridLayout_ColSizeMaxContent root = (GridLayout_ColSizeMaxContent) mockView.RootElement;
 
             mockView.Update();
 
@@ -52,8 +52,8 @@ namespace Layout {
 
         [Test]
         public void ColSize_MinContent() {
-            MockApplication mockView = new MockApplication(typeof(GridLayout_ColSizeMinContent));
-            GridLayout_ColSizeMinContent root = (GridLayout_ColSizeMinContent) mockView.RootElement.GetChild(0);
+            MockApplication mockView = MockApplication.Setup<GridLayout_ColSizeMinContent>();
+            GridLayout_ColSizeMinContent root = (GridLayout_ColSizeMinContent) mockView.RootElement;
 
             mockView.Update();
 
@@ -70,9 +70,9 @@ namespace Layout {
 
         [Test]
         public void GrowToMaxSize_NoFractions() {
-            MockApplication mockView = new MockApplication(typeof(GridLayout_GrowToMaxSize));
+            MockApplication mockView = MockApplication.Setup<GridLayout_GrowToMaxSize>();
             mockView.Update();
-            GridLayout_GrowToMaxSize root = (GridLayout_GrowToMaxSize) mockView.RootElement.GetChild(0);
+            GridLayout_GrowToMaxSize root = (GridLayout_GrowToMaxSize) mockView.RootElement;
             Assert.AreEqual(1000, root.layoutResult.actualSize.width);
 
             Assert.AreEqual(0, root[0].layoutResult.allocatedPosition.x);
@@ -85,8 +85,8 @@ namespace Layout {
 
         [Test]
         public void GrowToMaxSize_Fractions() {
-            MockApplication mockView = new MockApplication(typeof(GridLayout_GrowToMaxSize_Fractional));
-            GridLayout_GrowToMaxSize_Fractional root = (GridLayout_GrowToMaxSize_Fractional) mockView.RootElement.GetChild(0);
+            MockApplication mockView = MockApplication.Setup<GridLayout_GrowToMaxSize_Fractional>();
+            GridLayout_GrowToMaxSize_Fractional root = (GridLayout_GrowToMaxSize_Fractional) mockView.RootElement;
 
             mockView.Update();
 
@@ -102,15 +102,14 @@ namespace Layout {
             Assert.AreEqual(200, root[2].layoutResult.allocatedSize.width);
         }
 
-
         [Template("Data/Layout/Grid/GridLayout_ResolveMaxContentTrackSize.xml")]
         public class GridLayout_ResolveMaxContentTrackSize : UIElement { }
 
         [Test]
         public void ResolveMaxContentTrackSize() {
-            MockApplication mockView = new MockApplication(typeof(GridLayout_ResolveMaxContentTrackSize));
+            MockApplication mockView = MockApplication.Setup<GridLayout_ResolveMaxContentTrackSize>();
             mockView.Update();
-            GridLayout_ResolveMaxContentTrackSize root = (GridLayout_ResolveMaxContentTrackSize) mockView.RootElement.GetChild(0);
+            GridLayout_ResolveMaxContentTrackSize root = (GridLayout_ResolveMaxContentTrackSize) mockView.RootElement;
             Assert.AreEqual(300, root.layoutResult.actualSize.width);
 
             Assert.AreEqual(0, root[0].layoutResult.allocatedPosition.x);
@@ -120,8 +119,8 @@ namespace Layout {
 
         [Test]
         public void ResolveMaxContentTrackSize_WithColGap() {
-            MockApplication mockView = new MockApplication(typeof(GridLayout_ResolveMaxContentTrackSize));
-            GridLayout_ResolveMaxContentTrackSize root = (GridLayout_ResolveMaxContentTrackSize) mockView.RootElement.GetChild(0);
+            MockApplication mockView = MockApplication.Setup<GridLayout_ResolveMaxContentTrackSize>();
+            GridLayout_ResolveMaxContentTrackSize root = (GridLayout_ResolveMaxContentTrackSize) mockView.RootElement;
             root.style.SetGridLayoutColGap(10, StyleState.Normal);
             mockView.Update();
             Assert.AreEqual(320, root.layoutResult.actualSize.width);
@@ -132,8 +131,8 @@ namespace Layout {
 //
 //        [Test]
 //        public void ColCollapseMaxSizeContribution() {
-//            MockApplication mockView = new MockApplication(typeof(GridLayout_ColCollapseMaxSizeContribution));
-//            GridLayout_ColCollapseMaxSizeContribution root = (GridLayout_ColCollapseMaxSizeContribution) mockView.RootElement.GetChild(0);
+//            MockApplication mockView = MockApplication.Setup<GridLayout_ColCollapseMaxSizeContribution>();
+//            GridLayout_ColCollapseMaxSizeContribution root = (GridLayout_ColCollapseMaxSizeContribution) mockView.RootElement;
 //
 //            mockView.Update();
 //
@@ -150,8 +149,8 @@ namespace Layout {
 
         [Test]
         public void ColMaxSizeContribution_NotCollapsed() {
-            MockApplication mockView = new MockApplication(typeof(GridLayout_ColMaxSizeContribution_NotCollapsed));
-            GridLayout_ColMaxSizeContribution_NotCollapsed root = (GridLayout_ColMaxSizeContribution_NotCollapsed) mockView.RootElement.GetChild(0);
+            MockApplication mockView = MockApplication.Setup<GridLayout_ColMaxSizeContribution_NotCollapsed>();
+            GridLayout_ColMaxSizeContribution_NotCollapsed root = (GridLayout_ColMaxSizeContribution_NotCollapsed) mockView.RootElement;
 
             mockView.Update();
 
@@ -169,8 +168,8 @@ namespace Layout {
 
         [Test]
         public void ExplicitPlaced_Flex() {
-            MockApplication<GridLayout_ExplicitPlaced_Flex> mockView = new MockApplication<GridLayout_ExplicitPlaced_Flex>();
-            GridLayout_ExplicitPlaced_Flex root = mockView.GetRootElement();
+            MockApplication mockView = MockApplication.Setup<GridLayout_ExplicitPlaced_Flex>();
+            GridLayout_ExplicitPlaced_Flex root = mockView.RootElement as GridLayout_ExplicitPlaced_Flex;
 
             mockView.Update();
 
@@ -184,8 +183,8 @@ namespace Layout {
 
         [Test]
         public void ImplicitRowPlaced3x2() {
-            MockApplication<GridLayout_ImplicitRowUnplaced3x2> mockView = new MockApplication<GridLayout_ImplicitRowUnplaced3x2>();
-            GridLayout_ImplicitRowUnplaced3x2 root = mockView.GetRootElement();
+            MockApplication mockView = MockApplication.Setup<GridLayout_ImplicitRowUnplaced3x2>();
+            GridLayout_ImplicitRowUnplaced3x2 root = mockView.RootElement as GridLayout_ImplicitRowUnplaced3x2;
 
             mockView.Update();
 
@@ -202,8 +201,8 @@ namespace Layout {
 
         [Test]
         public void ImplicitColUnplaced3x2() {
-            MockApplication<GridLayout_ImplicitColUnplaced3x2> mockView = new MockApplication<GridLayout_ImplicitColUnplaced3x2>();
-            GridLayout_ImplicitColUnplaced3x2 root = mockView.GetRootElement();
+            MockApplication mockView = MockApplication.Setup<GridLayout_ImplicitColUnplaced3x2>();
+            GridLayout_ImplicitColUnplaced3x2 root = mockView.RootElement as GridLayout_ImplicitColUnplaced3x2;
 
             mockView.Update();
 
@@ -220,8 +219,8 @@ namespace Layout {
 
         [Test]
         public void AssignBasicPlacements() {
-            MockApplication mockView = new MockApplication(typeof(GridLayout_AssignBasicPlacements));
-            GridLayout_AssignBasicPlacements root = (GridLayout_AssignBasicPlacements) mockView.RootElement.GetChild(0);
+            MockApplication mockView = MockApplication.Setup<GridLayout_AssignBasicPlacements>();
+            GridLayout_AssignBasicPlacements root = (GridLayout_AssignBasicPlacements) mockView.RootElement;
 
             mockView.Update();
 
@@ -243,8 +242,8 @@ namespace Layout {
 
         [Test]
         public void VerticalSparse() {
-            MockApplication mockView = new MockApplication(typeof(GridLayout_VerticalSparse));
-            GridLayout_VerticalSparse root = (GridLayout_VerticalSparse) mockView.RootElement.GetChild(0);
+            MockApplication mockView = MockApplication.Setup<GridLayout_VerticalSparse>();
+            GridLayout_VerticalSparse root = (GridLayout_VerticalSparse) mockView.RootElement;
 
             mockView.Update();
 
@@ -260,8 +259,8 @@ namespace Layout {
 
         [Test]
         public void VerticalDense() {
-            MockApplication mockView = new MockApplication(typeof(GridLayout_VerticalDense));
-            GridLayout_VerticalDense root = (GridLayout_VerticalDense) mockView.RootElement.GetChild(0);
+            MockApplication mockView = MockApplication.Setup<GridLayout_VerticalDense>();
+            GridLayout_VerticalDense root = (GridLayout_VerticalDense) mockView.RootElement;
 
             mockView.Update();
 
@@ -277,8 +276,8 @@ namespace Layout {
 
         [Test]
         public void HorizontalSparse() {
-            MockApplication mockView = new MockApplication(typeof(GridLayout_HorizontalSparse));
-            GridLayout_HorizontalSparse root = (GridLayout_HorizontalSparse) mockView.RootElement.GetChild(0);
+            MockApplication mockView = MockApplication.Setup<GridLayout_HorizontalSparse>();
+            GridLayout_HorizontalSparse root = (GridLayout_HorizontalSparse) mockView.RootElement;
 
             mockView.Update();
 
@@ -294,8 +293,8 @@ namespace Layout {
 
         [Test]
         public void HorizontalDense() {
-            MockApplication mockView = new MockApplication(typeof(GridLayout_HorizontalDense));
-            GridLayout_HorizontalDense root = (GridLayout_HorizontalDense) mockView.RootElement.GetChild(0);
+            MockApplication mockView = MockApplication.Setup<GridLayout_HorizontalDense>();
+            GridLayout_HorizontalDense root = (GridLayout_HorizontalDense) mockView.RootElement;
 
             mockView.Update();
 
@@ -311,8 +310,8 @@ namespace Layout {
 
         [Test]
         public void Margin_OffsetFromLayoutBox() {
-            MockApplication mockView = new MockApplication(typeof(GridLayout_Margin_OffsetFromLayoutBox));
-            GridLayout_Margin_OffsetFromLayoutBox root = (GridLayout_Margin_OffsetFromLayoutBox) mockView.RootElement.GetChild(0);
+            MockApplication mockView = MockApplication.Setup<GridLayout_Margin_OffsetFromLayoutBox>();
+            GridLayout_Margin_OffsetFromLayoutBox root = (GridLayout_Margin_OffsetFromLayoutBox) mockView.RootElement;
 
             mockView.Update();
 
@@ -330,8 +329,8 @@ namespace Layout {
 
         [Test]
         public void RowLocked_ColumnFlow() {
-            MockApplication mockView = new MockApplication(typeof(GridLayout_RowLocked_ColumnFlow));
-            GridLayout_RowLocked_ColumnFlow root = (GridLayout_RowLocked_ColumnFlow) mockView.RootElement.GetChild(0);
+            MockApplication mockView = MockApplication.Setup<GridLayout_RowLocked_ColumnFlow>();
+            GridLayout_RowLocked_ColumnFlow root = (GridLayout_RowLocked_ColumnFlow) mockView.RootElement;
 
             mockView.Update();
 
@@ -348,8 +347,8 @@ namespace Layout {
 
         [Test]
         public void GapUsage() {
-            MockApplication mockView = new MockApplication(typeof(GridLayout_GapUsage));
-            GridLayout_GapUsage root = (GridLayout_GapUsage) mockView.RootElement.GetChild(0);
+            MockApplication mockView = MockApplication.Setup<GridLayout_GapUsage>();
+            GridLayout_GapUsage root = (GridLayout_GapUsage) mockView.RootElement;
 
             mockView.Update();
 
@@ -366,8 +365,8 @@ namespace Layout {
 
         [Test]
         public void MixImplicitExplicit() {
-            MockApplication mockView = new MockApplication(typeof(GridLayout_MixImplicitExplicit));
-            GridLayout_MixImplicitExplicit root = (GridLayout_MixImplicitExplicit) mockView.RootElement.GetChild(0);
+            MockApplication mockView = MockApplication.Setup<GridLayout_MixImplicitExplicit>();
+            GridLayout_MixImplicitExplicit root = (GridLayout_MixImplicitExplicit) mockView.RootElement;
 
             mockView.Update();
 
@@ -385,8 +384,8 @@ namespace Layout {
 
         [Test]
         public void ExplicitPlaced_MinWidth() {
-            MockApplication mockView = new MockApplication(typeof(GridLayout_ExplicitPlaced_MinWidth));
-            GridLayout_ExplicitPlaced_MinWidth root = (GridLayout_ExplicitPlaced_MinWidth) mockView.RootElement.GetChild(0);
+            MockApplication mockView = MockApplication.Setup<GridLayout_ExplicitPlaced_MinWidth>();
+            GridLayout_ExplicitPlaced_MinWidth root = (GridLayout_ExplicitPlaced_MinWidth) mockView.RootElement;
 
             mockView.Update();
 
@@ -403,8 +402,8 @@ namespace Layout {
 
         [Test]
         public void HorizontalBlockSize() {
-            MockApplication mockView = new MockApplication(typeof(GridLayout_HorizontalBlockSize));
-            GridLayout_HorizontalBlockSize root = (GridLayout_HorizontalBlockSize) mockView.RootElement.GetChild(0);
+            MockApplication mockView = MockApplication.Setup<GridLayout_HorizontalBlockSize>();
+            GridLayout_HorizontalBlockSize root = (GridLayout_HorizontalBlockSize) mockView.RootElement;
 
             mockView.Update();
 
@@ -421,8 +420,8 @@ namespace Layout {
 
         [Test]
         public void VerticalBlockSize() {
-            MockApplication mockView = new MockApplication(typeof(GridLayout_VerticalBlockSize));
-            GridLayout_VerticalBlockSize root = (GridLayout_VerticalBlockSize) mockView.RootElement.GetChild(0);
+            MockApplication mockView = MockApplication.Setup<GridLayout_VerticalBlockSize>();
+            GridLayout_VerticalBlockSize root = (GridLayout_VerticalBlockSize) mockView.RootElement;
 
             mockView.Update();
 
@@ -439,8 +438,8 @@ namespace Layout {
 
         [Test]
         public void Align() {
-            MockApplication mockView = new MockApplication(typeof(GridLayout_Align));
-            GridLayout_Align root = (GridLayout_Align) mockView.RootElement.GetChild(0);
+            MockApplication mockView = MockApplication.Setup<GridLayout_Align>();
+            GridLayout_Align root = (GridLayout_Align) mockView.RootElement;
 
             mockView.Update();
 

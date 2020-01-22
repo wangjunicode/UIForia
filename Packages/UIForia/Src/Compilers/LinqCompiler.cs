@@ -31,6 +31,9 @@ namespace UIForia.Compilers {
         private static readonly ObjectPool<LinqCompiler> s_CompilerPool = new ObjectPool<LinqCompiler>(null, (c) => c.Reset());
         private static readonly ObjectPool<BlockDefinition2> s_BlockPool = new ObjectPool<BlockDefinition2>((b) => b.Spawn(), (b) => b.Release());
 
+        private static int NextId => _nextId++;
+        private static int _nextId = 1;
+        
         private static readonly MethodInfo StringConcat2 = typeof(string).GetMethod(
             nameof(string.Concat),
             ReflectionUtil.SetTempTypeArray(typeof(string), typeof(string))
@@ -47,6 +50,7 @@ namespace UIForia.Compilers {
         private readonly LightStack<LabelTarget> labelStack;
         private int sectionCount = 0;
         private bool outputComments = true;
+        internal bool addingStatements;
 
         private Type returnType;
         private LabelTarget returnLabel;
@@ -62,6 +66,7 @@ namespace UIForia.Compilers {
         private ITypeWrapper typeWrapper;
 
         public LinqCompiler() {
+            this.addingStatements = true;
             this.parameters = new StructList<Parameter>();
             this.blockStack = new LightStack<BlockDefinition2>();
             this.namespaces = new LightList<string>();
@@ -72,7 +77,7 @@ namespace UIForia.Compilers {
         }
 
         private BlockDefinition2 currentBlock {
-            [DebuggerStepThrough] get { return blockStack.PeekUnchecked(); }
+            [DebuggerStepThrough] get => blockStack.PeekUnchecked();
         }
 
         public bool HasStatements => blockStack.PeekAtUnchecked(0).HasStatements;
@@ -274,7 +279,10 @@ namespace UIForia.Compilers {
 
         // helpful for debugging to see exactly where a statement was added from
         private Expression AddStatement(Expression expression) {
-            currentBlock.AddStatement(expression);
+            if (addingStatements) {
+                currentBlock.AddStatement(expression);
+            }
+
             return expression;
         }
 
@@ -325,9 +333,14 @@ namespace UIForia.Compilers {
                 type = parameterExpression.Type
             };
         }
-
+        
         public ParameterExpression AddVariable(Type type, string name) {
-            return currentBlock.AddInternalVariable(type, name);
+            if (addingStatements) {
+                return currentBlock.AddInternalVariable(type, name);
+            }
+            else {
+                return Expression.Parameter(type, "__" + NextId);
+            }
         }
 
         public void Log() {
@@ -523,9 +536,11 @@ namespace UIForia.Compilers {
 
         public void Assign(LHSStatementChain left, RHSStatementChain right) {
             if (left.isSimpleAssignment) {
-                currentBlock.AddStatement(
-                    Expression.Assign(left.targetExpression, right.OutputExpression)
-                );
+                if (addingStatements) {
+                    currentBlock.AddStatement(
+                        Expression.Assign(left.targetExpression, right.OutputExpression)
+                    );
+                }
             }
             else {
                 LHSAssignment[] assignments = left.assignments.array;
@@ -1684,6 +1699,8 @@ namespace UIForia.Compilers {
                 return head;
             }
 
+            EnsureReturnLabel();
+
             Expression indexer = indexExpression;
 
             if (!(indexExpression is ParameterExpression) && !(indexExpression is ConstantExpression)) {
@@ -1702,7 +1719,7 @@ namespace UIForia.Compilers {
                 head = newHead;
             }
 
-            Expression lengthExpr = null;
+            Expression lengthExpr;
 
             if (head.Type.IsArray) {
                 lengthExpr = Expression.ArrayLength(head);
@@ -1731,9 +1748,7 @@ namespace UIForia.Compilers {
             currentBlock.AddStatement(expr);
             return head;
         }
-
-        public void AddLabelTarget() { }
-
+        
         private bool RequiresNullCheck(Expression head) {
             if (!shouldNullCheck || !head.Type.IsClass) {
                 return false;
@@ -1801,18 +1816,15 @@ namespace UIForia.Compilers {
                 if (val != null) {
                     return Expression.Return(returnLabel, val);
                 }
-                else {
-                    if (returnType == typeof(void)) {
-                        return Expression.Goto(labelStack.PeekUnchecked(), Expression.Default(returnType), returnType);
-                    }
-                    else {
-                        return Expression.Return(returnLabel, Expression.Default(returnType));
-                    }
+
+                if (returnType == typeof(void)) {
+                    return Expression.Goto(labelStack.PeekUnchecked(), Expression.Default(returnType), returnType);
                 }
+
+                return Expression.Return(returnLabel, Expression.Default(returnType));
             }
-            else {
-                return Expression.Goto(labelStack.PeekUnchecked(), Expression.Default(returnType), returnType);
-            }
+
+            return Expression.Goto(labelStack.PeekUnchecked(), Expression.Default(returnType), returnType);
         }
 
         private Expression ReturnValue(Expression val) {
@@ -2300,7 +2312,7 @@ namespace UIForia.Compilers {
         private Expression VisitLambda(Type targetType, LambdaExpressionNode lambda) {
             // assume a target type for now, I think its an error not to have one anyway
 
-            LinqCompiler nested = s_CompilerPool.Get();
+            LinqCompiler nested = CreateNested();
 
             nested.parent = this;
             nested.id = GetNextCompilerId();
@@ -2346,12 +2358,16 @@ namespace UIForia.Compilers {
             nested.Return(lambda.body);
 
             LambdaExpression retn = nested.BuildLambda();
-            s_CompilerPool.Release(nested);
+            nested.Release();
             return retn;
         }
 
+        protected virtual LinqCompiler CreateNested() {
+            return s_CompilerPool.Get();
+        }
+        
         public LinqCompiler CreateClosure(IList<Parameter> parameters, Type retnType) {
-            LinqCompiler nested = s_CompilerPool.Get();
+            LinqCompiler nested = CreateNested();
             nested.parameters.Clear();
             nested.parameters.AddRange(parameters);
 
@@ -2742,23 +2758,22 @@ namespace UIForia.Compilers {
             RawExpression(ExpressionFactory.CallStaticUnchecked(methodInfo, p0, p1, p2));
         }
 
-        public void Release() {
+        public virtual void Release() {
             s_CompilerPool.Release(this);
         }
 
-        // todo -- not the most elegant way to do this but it works
         public Type GetExpressionType(string expression) {
-            LinqCompiler compiler = s_CompilerPool.Get();
-            compiler.parent = this;
-            compiler.SetNullCheckingEnabled(false);
-            compiler.SetOutOfBoundsCheckingEnabled(false);
-            compiler.SetImplicitContext(implicitContext, ParameterFlags.NeverNull);
-            compiler.parent = this;
-            compiler.id = GetNextCompilerId();
-            Expression expr = compiler.Statement(expression);
-            compiler.SetNullCheckingEnabled(true);
-            compiler.SetOutOfBoundsCheckingEnabled(true);
-            s_CompilerPool.Release(compiler);
+
+            bool wasAddingStatements = addingStatements;
+            addingStatements = false;
+            bool wasNullChecking = shouldNullCheck;
+            bool wasBoundsChecking = shouldBoundsCheck;
+            SetNullCheckingEnabled(false);
+            SetOutOfBoundsCheckingEnabled(false);
+            Expression expr = Statement(expression);
+            SetNullCheckingEnabled(wasNullChecking);
+            SetOutOfBoundsCheckingEnabled(wasBoundsChecking);
+            addingStatements = wasAddingStatements;
             return expr.Type;
         }
 

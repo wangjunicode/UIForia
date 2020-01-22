@@ -15,8 +15,8 @@ namespace Layout {
 
         [Test]
         public void DistributeSpaceVertical_Default() {
-            MockApplication app = new MockApplication(typeof(FlexVertical_DistributeSpaceVertical));
-            FlexVertical_DistributeSpaceVertical root = (FlexVertical_DistributeSpaceVertical) app.RootElement.GetChild(0);
+            MockApplication app = MockApplication.Setup<FlexVertical_DistributeSpaceVertical>();
+            FlexVertical_DistributeSpaceVertical root = (FlexVertical_DistributeSpaceVertical) app.RootElement;
 
             app.Update();
 
@@ -27,8 +27,8 @@ namespace Layout {
 
         [Test]
         public void DistributeSpaceVertical_AfterContent() {
-            MockApplication app = new MockApplication(typeof(FlexVertical_DistributeSpaceVertical));
-            FlexVertical_DistributeSpaceVertical root = (FlexVertical_DistributeSpaceVertical) app.RootElement.GetChild(0);
+            MockApplication app = MockApplication.Setup<FlexVertical_DistributeSpaceVertical>();
+            FlexVertical_DistributeSpaceVertical root = (FlexVertical_DistributeSpaceVertical) app.RootElement;
             root.style.SetDistributeExtraSpaceVertical(SpaceDistribution.AfterContent, StyleState.Normal);
             app.Update();
 
@@ -39,8 +39,8 @@ namespace Layout {
 
         [Test]
         public void DistributeSpaceVertical_CenterContent() {
-            MockApplication app = new MockApplication(typeof(FlexVertical_DistributeSpaceVertical));
-            FlexVertical_DistributeSpaceVertical root = (FlexVertical_DistributeSpaceVertical) app.RootElement.GetChild(0);
+            MockApplication app = MockApplication.Setup<FlexVertical_DistributeSpaceVertical>();
+            FlexVertical_DistributeSpaceVertical root = (FlexVertical_DistributeSpaceVertical) app.RootElement;
 
             root.style.SetDistributeExtraSpaceVertical(SpaceDistribution.CenterContent, StyleState.Normal);
 
@@ -54,8 +54,8 @@ namespace Layout {
 
         [Test]
         public void DistributeSpaceVertical_BeforeContent() {
-            MockApplication app = new MockApplication(typeof(FlexVertical_DistributeSpaceVertical));
-            FlexVertical_DistributeSpaceVertical root = (FlexVertical_DistributeSpaceVertical) app.RootElement.GetChild(0);
+            MockApplication app = MockApplication.Setup<FlexVertical_DistributeSpaceVertical>();
+            FlexVertical_DistributeSpaceVertical root = (FlexVertical_DistributeSpaceVertical) app.RootElement;
 
             root.style.SetDistributeExtraSpaceVertical(SpaceDistribution.BeforeContent, StyleState.Normal);
             app.Update();
@@ -67,8 +67,8 @@ namespace Layout {
 
         [Test]
         public void DistributeSpaceVertical_AroundContent() {
-            MockApplication app = new MockApplication(typeof(FlexVertical_DistributeSpaceVertical));
-            FlexVertical_DistributeSpaceVertical root = (FlexVertical_DistributeSpaceVertical) app.RootElement.GetChild(0);
+            MockApplication app = MockApplication.Setup<FlexVertical_DistributeSpaceVertical>();
+            FlexVertical_DistributeSpaceVertical root = (FlexVertical_DistributeSpaceVertical) app.RootElement;
 
             // makes math cleaner
             root.style.SetPreferredHeight(600f, StyleState.Normal);
@@ -83,8 +83,8 @@ namespace Layout {
 
         [Test]
         public void DistributeSpaceVertical_BetweenContent() {
-            MockApplication app = new MockApplication(typeof(FlexVertical_DistributeSpaceVertical));
-            FlexVertical_DistributeSpaceVertical root = (FlexVertical_DistributeSpaceVertical) app.RootElement.GetChild(0);
+            MockApplication app = MockApplication.Setup<FlexVertical_DistributeSpaceVertical>();
+            FlexVertical_DistributeSpaceVertical root = (FlexVertical_DistributeSpaceVertical) app.RootElement;
 
             root.style.SetPreferredHeight(600f, StyleState.Normal);
             root.style.SetDistributeExtraSpaceVertical(SpaceDistribution.BetweenContent, StyleState.Normal);
@@ -101,8 +101,8 @@ namespace Layout {
 
         [Test]
         public void GrowUnconstrained() {
-            MockApplication app = new MockApplication(typeof(FlexVertical_GrowUnconstrained));
-            FlexVertical_GrowUnconstrained root = (FlexVertical_GrowUnconstrained) app.RootElement.GetChild(0);
+            MockApplication app = MockApplication.Setup<FlexVertical_GrowUnconstrained>();
+            FlexVertical_GrowUnconstrained root = (FlexVertical_GrowUnconstrained) app.RootElement;
 
             app.Update();
 
@@ -116,8 +116,8 @@ namespace Layout {
 
         [Test]
         public void GrowConstrained() {
-            MockApplication app = new MockApplication(typeof(FlexVertical_GrowConstrained));
-            FlexVertical_GrowConstrained root = (FlexVertical_GrowConstrained) app.RootElement.GetChild(0);
+            MockApplication app = MockApplication.Setup<FlexVertical_GrowConstrained>();
+            FlexVertical_GrowConstrained root = (FlexVertical_GrowConstrained) app.RootElement;
 
             app.Update();
 
@@ -131,8 +131,8 @@ namespace Layout {
 
         [Test]
         public void GrowWithExtraSpace() {
-            MockApplication app = new MockApplication(typeof(FlexVertical_GrowWithExtraSpace));
-            FlexVertical_GrowWithExtraSpace root = (FlexVertical_GrowWithExtraSpace) app.RootElement.GetChild(0);
+            MockApplication app = MockApplication.Setup<FlexVertical_GrowWithExtraSpace>();
+            FlexVertical_GrowWithExtraSpace root = (FlexVertical_GrowWithExtraSpace) app.RootElement;
 
             app.Update();
 
@@ -147,8 +147,8 @@ namespace Layout {
 
         [Test]
         public void RespectMarginVertical() {
-            MockApplication app = new MockApplication(typeof(FlexVertical_RespectMarginVertical));
-            FlexVertical_RespectMarginVertical root = (FlexVertical_RespectMarginVertical) app.RootElement.GetChild(0);
+            MockApplication app = MockApplication.Setup<FlexVertical_RespectMarginVertical>();
+            FlexVertical_RespectMarginVertical root = (FlexVertical_RespectMarginVertical) app.RootElement;
 
             app.Update();
 
@@ -162,8 +162,8 @@ namespace Layout {
 
         [Test]
         public void ShrinkUnconstrained() {
-            MockApplication app = new MockApplication(typeof(FlexVertical_ShrinkUnconstrained));
-            FlexVertical_ShrinkUnconstrained root = (FlexVertical_ShrinkUnconstrained) app.RootElement.GetChild(0);
+            MockApplication app = MockApplication.Setup<FlexVertical_ShrinkUnconstrained>();
+            FlexVertical_ShrinkUnconstrained root = (FlexVertical_ShrinkUnconstrained) app.RootElement;
 
             app.Update();
 
@@ -177,8 +177,8 @@ namespace Layout {
 
         [Test]
         public void ShrinkConstrained() {
-            MockApplication app = new MockApplication(typeof(FlexVertical_ShrinkConstrained));
-            FlexVertical_ShrinkConstrained root = (FlexVertical_ShrinkConstrained) app.RootElement.GetChild(0);
+            MockApplication app = MockApplication.Setup<FlexVertical_ShrinkConstrained>();
+            FlexVertical_ShrinkConstrained root = (FlexVertical_ShrinkConstrained) app.RootElement;
 
             app.Update();
 
@@ -192,8 +192,8 @@ namespace Layout {
 
         [Test]
         public void ShrinkWithOverflow() {
-            MockApplication app = new MockApplication(typeof(FlexVertical_ShrinkWithOverflow));
-            FlexVertical_ShrinkWithOverflow root = (FlexVertical_ShrinkWithOverflow) app.RootElement.GetChild(0);
+            MockApplication app = MockApplication.Setup<FlexVertical_ShrinkWithOverflow>();
+            FlexVertical_ShrinkWithOverflow root = (FlexVertical_ShrinkWithOverflow) app.RootElement;
 
             app.Update();
 

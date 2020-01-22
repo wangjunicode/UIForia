@@ -11,7 +11,7 @@ namespace UIForia.Compilers {
         private LightList<Expression> statements;
         public LinqCompiler compiler;
         public int blockId;
-        
+
         public BlockDefinition2() {
             this.variables = StructList<Parameter>.Get();
             this.statements = LightList<Expression>.Get();
@@ -21,15 +21,15 @@ namespace UIForia.Compilers {
         public int StatementCount => statements.size;
 
         public ParameterExpression AddInternalVariable(Type type, string name = null) {
-            
+
             if (string.IsNullOrEmpty(name) || string.IsNullOrWhiteSpace(name)) {
                 name = "_var$";
             }
 
             variables = variables ?? new StructList<Parameter>();
-            
+
             ParameterExpression retn = Expression.Parameter(type, compiler.GetUniqueVariableName(name));
-            
+
             variables.Add(new Parameter() {
                 name = retn.Name,
                 type = retn.Type,
@@ -42,7 +42,7 @@ namespace UIForia.Compilers {
         public LightList<Expression> GetStatements() {
             return statements;
         }
-        
+
         public ParameterExpression[] GetVariables() {
             ParameterExpression[] retn = new ParameterExpression[variables.size];
             for (int i = 0; i < retn.Length; i++) {
@@ -53,13 +53,16 @@ namespace UIForia.Compilers {
         }
 
         public Expression AddStatement(Expression statement) {
-            statements.Add(statement);
+            if (compiler.addingStatements) {
+                statements.Add(statement);
+            }
+
             return statement;
         }
 
         public Parameter? ResolveVariable(string variableName) {
             if (variables == null) return default;
-            
+
             for (int i = 0; i < variables.Count; i++) {
                 if (variables[i].name == variableName) {
                     return variables[i];

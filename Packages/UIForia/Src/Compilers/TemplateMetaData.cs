@@ -36,6 +36,7 @@ namespace UIForia.Compilers {
             this.filePath = filePath;
             this.styleReferences = styleReferences;
             this.styleMap = styleMap;
+            BuildSearchMap();
         }
 
         internal void BuildSearchMap() {
@@ -88,13 +89,15 @@ namespace UIForia.Compilers {
         }
 
         public UIStyleGroupContainer ResolveStyleByName(string name) {
-            if (string.IsNullOrEmpty(name)) return null;
-            int idx = BinarySearch(name);
-            if (idx >= 0) {
-                return searchMap[idx].container;
+            
+            if (string.IsNullOrEmpty(name) || searchMap == null) {
+                return null;
             }
+            
+            int idx = BinarySearch(name);
+            
+            return idx >= 0 ? searchMap[idx].container : null;
 
-            return null;
         }
 
         public UIStyleGroupContainer ResolveStyleByName(char[] name) {

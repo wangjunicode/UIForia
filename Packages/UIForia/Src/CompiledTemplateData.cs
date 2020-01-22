@@ -62,12 +62,13 @@ namespace UIForia {
         
         public CompiledBinding AddBinding(TemplateNode templateNode, CompiledBindingType bindingType) {
             CompiledBinding binding = new CompiledBinding();
-            binding.filePath = templateNode.elementRoot.templateShell.filePath;
+            TemplateRootNode root = templateNode as TemplateRootNode ?? templateNode.root;
+            binding.filePath = root.templateShell.filePath;
             binding.bindingType = bindingType;
             binding.elementTag = templateNode.originalString;
             binding.bindingId = compiledBindings.size;
             binding.guid = GUID.Generate().ToString();
-            binding.templateName = templateNode.elementRoot.templateName;
+            binding.templateName = root.templateName;
             compiledBindings.Add(binding);
             return binding;
         }

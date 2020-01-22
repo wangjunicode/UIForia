@@ -10,13 +10,13 @@ namespace Layout {
 
     public class StackLayoutTests {
 
-        [Template("Data/Layout/Stack/Stack_ComputeContentSize")]
+        [Template("Data/Layout/Stack/Stack_ComputeContentSize.xml")]
         public class Stack_ComputeContentSize : UIElement { }
 
         [Test]
         public void ComputeContentSize() {
-            MockApplication mockView = new MockApplication(typeof(Stack_ComputeContentSize));
-            Stack_ComputeContentSize root = (Stack_ComputeContentSize) mockView.RootElement.GetChild(0);
+            MockApplication mockView = MockApplication.Setup<Stack_ComputeContentSize>();
+            Stack_ComputeContentSize root = (Stack_ComputeContentSize) mockView.RootElement;
 
             mockView.Update();
 
@@ -30,13 +30,13 @@ namespace Layout {
             Assert.AreEqual(new Rect(0, 0, 50, 50), root[2].layoutResult.LocalRect);
         }
 
-        [Template("Data/Layout/Stack/Stack_AlignItems")]
+        [Template("Data/Layout/Stack/Stack_AlignItems.xml")]
         public class Stack_AlignItems : UIElement { }
 
         [Test]
         public void AlignItems() {
-            MockApplication mockView = new MockApplication(typeof(Stack_AlignItems));
-            Stack_AlignItems root = (Stack_AlignItems) mockView.RootElement.GetChild(0);
+            MockApplication mockView = MockApplication.Setup<Stack_AlignItems>();
+            Stack_AlignItems root = (Stack_AlignItems) mockView.RootElement;
 
             root.style.SetAlignItemsHorizontal(ItemAlignment.Center, StyleState.Normal);
             root.style.SetAlignItemsVertical(ItemAlignment.Center, StyleState.Normal);

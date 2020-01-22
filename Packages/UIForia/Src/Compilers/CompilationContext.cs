@@ -13,18 +13,15 @@ namespace UIForia.Compilers {
 
         public bool outputComments;
         public ProcessedType rootType;
-        public ProcessedType elementType;
         public CompiledTemplate compiledTemplate;
 
-        public LightList<ParameterExpression> variables;
-        public LightStack<LightList<Expression>> statementStacks;
+        private readonly LightList<ParameterExpression> variables;
+        private readonly LightStack<LightList<Expression>> statementStacks;
 
         public Expression rootParam;
         public Expression templateScope;
         public Expression applicationExpr;
-        private Expression slotUsage;
-        private ParameterExpression slotUsageListVar;
-
+        
         private int currentDepth;
         private int maxDepth;
         private int bindingNodeCount;
@@ -36,10 +33,10 @@ namespace UIForia.Compilers {
         private static readonly MethodInfo s_CommentNewLineBefore = typeof(ExpressionUtil).GetMethod(nameof(ExpressionUtil.CommentNewLineBefore), BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);
         private static readonly MethodInfo s_CommentNewLineAfter = typeof(ExpressionUtil).GetMethod(nameof(ExpressionUtil.CommentNewLineAfter), BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);
         private static readonly char[] s_SplitChar = {'.'};
-        public ElementTemplateNode templateRootNode;
+        public TemplateRootNode templateRootNode;
         public LightList<string> namespaces;
 
-        public CompilationContext(ElementTemplateNode templateRootNode) {
+        public CompilationContext(TemplateRootNode templateRootNode) {
             this.outputComments = true;
             this.variables = new LightList<ParameterExpression>();
             this.statementStacks = new LightStack<LightList<Expression>>();

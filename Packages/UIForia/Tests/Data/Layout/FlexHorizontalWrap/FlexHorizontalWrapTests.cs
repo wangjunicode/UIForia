@@ -15,8 +15,8 @@ namespace Layout {
 
         [Test]
         public void NoWrap() {
-            MockApplication app = new MockApplication(typeof(FlexHorizontalWrap_NoWrap));
-            FlexHorizontalWrap_NoWrap root = (FlexHorizontalWrap_NoWrap) app.RootElement.GetChild(0);
+            MockApplication app = MockApplication.Setup<FlexHorizontalWrap_NoWrap>();
+            FlexHorizontalWrap_NoWrap root = (FlexHorizontalWrap_NoWrap) app.RootElement;
 
             app.Update();
 
@@ -29,8 +29,8 @@ namespace Layout {
 
         [Test]
         public void WrapWhenTrackFull() {
-            MockApplication app = new MockApplication(typeof(FlexHorizontalWrap_WrapWhenTrackFull));
-            FlexHorizontalWrap_WrapWhenTrackFull root = (FlexHorizontalWrap_WrapWhenTrackFull) app.RootElement.GetChild(0);
+            MockApplication app = MockApplication.Setup<FlexHorizontalWrap_WrapWhenTrackFull>();
+            FlexHorizontalWrap_WrapWhenTrackFull root = (FlexHorizontalWrap_WrapWhenTrackFull) app.RootElement;
 
             app.Update();
 
@@ -45,8 +45,8 @@ namespace Layout {
 
         [Test]
         public void WrapWhenItemTooBig() {
-            MockApplication app = new MockApplication(typeof(FlexHorizontalWrap_WrapWhenItemTooBig));
-            FlexHorizontalWrap_WrapWhenItemTooBig root = (FlexHorizontalWrap_WrapWhenItemTooBig) app.RootElement.GetChild(0);
+            MockApplication app = MockApplication.Setup<FlexHorizontalWrap_WrapWhenItemTooBig>();
+            FlexHorizontalWrap_WrapWhenItemTooBig root = (FlexHorizontalWrap_WrapWhenItemTooBig) app.RootElement;
 
             app.Update();
 
@@ -61,8 +61,8 @@ namespace Layout {
 
         [Test]
         public void WrapWhenItemOverflows() {
-            MockApplication app = new MockApplication(typeof(FlexHorizontalWrap_WrapWhenItemOverflows));
-            FlexHorizontalWrap_WrapWhenItemOverflows root = (FlexHorizontalWrap_WrapWhenItemOverflows) app.RootElement.GetChild(0);
+            MockApplication app = MockApplication.Setup<FlexHorizontalWrap_WrapWhenItemOverflows>();
+            FlexHorizontalWrap_WrapWhenItemOverflows root = (FlexHorizontalWrap_WrapWhenItemOverflows) app.RootElement;
 
             app.Update();
 
@@ -77,8 +77,8 @@ namespace Layout {
 
         [Test]
         public void GrowInTrack() {
-            MockApplication app = new MockApplication(typeof(FlexHorizontalWrap_GrowInTrack));
-            FlexHorizontalWrap_GrowInTrack root = (FlexHorizontalWrap_GrowInTrack) app.RootElement.GetChild(0);
+            MockApplication app = MockApplication.Setup<FlexHorizontalWrap_GrowInTrack>();
+            FlexHorizontalWrap_GrowInTrack root = (FlexHorizontalWrap_GrowInTrack) app.RootElement;
 
             app.Update();
 
@@ -94,8 +94,8 @@ namespace Layout {
 
         [Test]
         public void ShrinkInTrack() {
-            MockApplication app = new MockApplication(typeof(FlexHorizontalWrap_ShrinkInTrack));
-            FlexHorizontalWrap_ShrinkInTrack root = (FlexHorizontalWrap_ShrinkInTrack) app.RootElement.GetChild(0);
+            MockApplication app = MockApplication.Setup<FlexHorizontalWrap_ShrinkInTrack>();
+            FlexHorizontalWrap_ShrinkInTrack root = (FlexHorizontalWrap_ShrinkInTrack) app.RootElement;
 
             app.Update();
 
@@ -111,8 +111,8 @@ namespace Layout {
 
         [Test]
         public void DistributeSpaceInTrack() {
-            MockApplication app = new MockApplication(typeof(FlexHorizontalWrap_DistributeSpaceInTrack));
-            FlexHorizontalWrap_DistributeSpaceInTrack root = (FlexHorizontalWrap_DistributeSpaceInTrack) app.RootElement.GetChild(0);
+            MockApplication app = MockApplication.Setup<FlexHorizontalWrap_DistributeSpaceInTrack>();
+            FlexHorizontalWrap_DistributeSpaceInTrack root = (FlexHorizontalWrap_DistributeSpaceInTrack) app.RootElement;
 
             root.style.SetDistributeExtraSpaceHorizontal(SpaceDistribution.AfterContent, StyleState.Normal);
             app.Update();
@@ -165,8 +165,8 @@ namespace Layout {
 
         [Test]
         public void DistributeSpaceBetweenTracks() {
-            MockApplication app = new MockApplication(typeof(FlexHorizontalWap_DistributeSpaceBetweenTracks));
-            FlexHorizontalWap_DistributeSpaceBetweenTracks root = (FlexHorizontalWap_DistributeSpaceBetweenTracks) app.RootElement.GetChild(0);
+            MockApplication app = MockApplication.Setup<FlexHorizontalWap_DistributeSpaceBetweenTracks>();
+            FlexHorizontalWap_DistributeSpaceBetweenTracks root = (FlexHorizontalWap_DistributeSpaceBetweenTracks) app.RootElement;
 
             root.style.SetDistributeExtraSpaceVertical(SpaceDistribution.AfterContent, StyleState.Normal);
             app.Update();

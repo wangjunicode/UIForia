@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using NUnit.Framework;
 using Tests;
 using Tests.Mocks;
@@ -5,6 +6,7 @@ using UIForia;
 using UIForia.Attributes;
 using UIForia.Elements;
 using UIForia.Exceptions;
+using UIForia.Parsing;
 
 namespace TemplateLoading {
 
@@ -63,6 +65,50 @@ namespace TemplateLoading {
             TemplateNotFoundException ex = Assert.Throws<TemplateNotFoundException>(() => { MockApplication.Setup<DefaultPathElementNoAttrNotFound>(); });
         }
 
+        [Template("Data/TemplateLoading/TemplateLoadingTest_LoadGeneric.xml")]
+        public class TemplateLoadingTest_LoadGenericOuter : UIElement { }
+
+        [GenericElementTypeResolvedBy(nameof(value))]
+        [Template("Data/TemplateLoading/TemplateLoadingTest_LoadGeneric.xml#generic")]
+        public class TemplateLoadingTest_Generic<T> : UIElement {
+
+            public T value;
+
+        }
+
+        [Template("Data/TemplateLoading/TemplateLoadingTest_LoadGeneric.xml#generic")]
+        public class TemplateLoadingTest_Generic2<T, U> : UIElement {
+
+            public T value0;
+            public U value1;
+            
+           // [ResolveGenericTemplateArguments]
+            public Dictionary<T, U> dictionary;
+
+        }
+        
+        public class TemplateLoadingTest_Generic3<T, U, V> : UIElement {
+
+            [ResolveGenericTemplateArguments]
+            public U value1;
+            
+            [ResolveGenericTemplateArguments]
+            public Dictionary<T, U> dictionary;
+
+        }
+        
+        [Test]
+        public void DistinctGenericTemplates() {
+            MockApplication app = MockApplication.Setup<TemplateLoadingTest_LoadGenericOuter>();
+            TemplateLoadingTest_LoadGenericOuter e = (TemplateLoadingTest_LoadGenericOuter) app.RootElement;
+            
+            app.Update();
+            
+            Assert.AreEqual("0.5", GetText(e[0][0]));
+            Assert.AreEqual("7", GetText(e[1][0]));
+            Assert.AreEqual("str", GetText(e[2][0]));
+        }
+        
         public TemplateSettings GetSettings<T>(string defaultPath) {
             TemplateSettings retn = MockApplication.GetDefaultSettings(defaultPath);
 
@@ -71,6 +117,10 @@ namespace TemplateLoading {
             return retn;
         }
 
+        string GetText(UIElement element) {
+            UITextElement textEl = element as UITextElement;
+            return textEl.text.Trim();
+        }
     }
 
 }

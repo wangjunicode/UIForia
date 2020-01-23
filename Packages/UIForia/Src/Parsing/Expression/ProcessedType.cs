@@ -34,6 +34,7 @@ namespace UIForia.Parsing {
         private static readonly FieldInfo s_rawCtorFnRef;
         public int id;
         public int references;
+        public bool requiresBeforePropertyUpdates;
 
         static ProcessedType() {
             s_Compiler = new LinqCompiler();
@@ -46,6 +47,7 @@ namespace UIForia.Parsing {
             this.templateAttr = templateAttr;
             this.tagName = tagName;
             this.requiresUpdateFn = ReflectionUtil.IsOverride(rawType.GetMethod(nameof(UIElement.OnUpdate)));
+            this.requiresBeforePropertyUpdates = ReflectionUtil.IsOverride(rawType.GetMethod(nameof(UIElement.OnBeforePropertyBindings)));
 
             // CompileClear(rawType);
             this.requiresTemplateExpansion = (
@@ -189,7 +191,7 @@ namespace UIForia.Parsing {
             s_Compiler.Reset();
         }
 
-        public void ValidateAttributes(StructList<AttributeDefinition2> attributes) {
+        public void ValidateAttributes(StructList<AttributeDefinition> attributes) {
             
         }
 

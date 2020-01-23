@@ -36,7 +36,7 @@ public class StyleBindingTests {
         Texture2D tex1 = new Texture2D(1, 1);
         ResourceManager resourceManager = new ResourceManager();
         resourceManager.AddTexture("path/to/tex1", tex1);
-        MockApplication view = new MockApplication(typeof(StyleTestThing), template, resourceManager);
+        MockApplication view = null;
         StyleTestThing root = (StyleTestThing) view.RootElement.GetChild(0);
         view.Update();
         UIElement panel = root.FindFirstByType<UIElement>();
@@ -55,7 +55,7 @@ public class StyleBindingTests {
         Texture2D tex1 = new Texture2D(1, 1);
         ResourceManager resourceManager = new ResourceManager();
         resourceManager.AddTexture("path/to/tex1", tex1);
-        MockApplication view = new MockApplication(typeof(StyleTestThing), template, resourceManager);
+        MockApplication view = null;
         StyleTestThing root = (StyleTestThing) view.RootElement.GetChild(0);
         root.textureName = "tex1";
         view.Update();
@@ -82,7 +82,7 @@ public class StyleBindingTests {
         font1.name = "new font";
         ResourceManager resourceManager = new ResourceManager();
         resourceManager.AddFont("path/to/font1", font1);
-        MockApplication view = new MockApplication(typeof(StyleTestThing), template, resourceManager);
+        MockApplication view = null;
         StyleTestThing root = (StyleTestThing) view.RootElement.GetChild(0);
         UIElement panel = root.FindFirstByType<UIElement>();
         view.Update();
@@ -105,7 +105,7 @@ public class StyleBindingTests {
         font1.name = "new font";
         ResourceManager resourceManager = new ResourceManager();
         resourceManager.AddFont("path/to/font1", font1);
-        MockApplication view = new MockApplication(typeof(StyleTestThing), template, resourceManager);
+        MockApplication view = null;
         StyleTestThing root = (StyleTestThing) view.RootElement.GetChild(0);
         root.fontName = "font1";
         view.Update();

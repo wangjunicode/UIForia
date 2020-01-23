@@ -10,7 +10,7 @@ namespace UIForia.Parsing {
         
         public LightList<SlotNode> slotDefinitionNodes;
 
-        public TemplateRootNode(string templateName, TemplateShell templateShell, ProcessedType processedType, StructList<AttributeDefinition2> attributes, in TemplateLineInfo templateLineInfo) : base(null, null, processedType, attributes, in templateLineInfo) {
+        public TemplateRootNode(string templateName, TemplateShell templateShell, ProcessedType processedType, StructList<AttributeDefinition> attributes, in TemplateLineInfo templateLineInfo) : base(null, null, processedType, attributes, in templateLineInfo) {
             this.templateName = templateName;
             this.templateShell = templateShell;
         }

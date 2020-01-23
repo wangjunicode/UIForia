@@ -1,0 +1,11 @@
+<UITemplate>
+    <Style>style MyMargin { MarginTop = 100px; }</Style>
+    <Contents>
+        <Group x-id='group1'>
+            <Group x-id='group2'/>
+        </Group>
+        <Group x-id='group3'/>
+        <Group x-id='group4'/>
+        <Group x-id='dynamic' style='[marginStyle]'/>
+    </Contents>
+</UITemplate>

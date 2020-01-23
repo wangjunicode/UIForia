@@ -89,10 +89,7 @@ namespace UIForia {
         private readonly UITaskSystem m_AfterUpdateTaskSystem;
 
         public static readonly UIForiaSettings Settings;
-        private ElementPool elementPool;
-
-        private Type lastKnownGoodRootElementType;
-
+        
         static Application() {
             ArrayPool<UIElement>.SetMaxPoolSize(64);
             s_ApplicationList = new LightList<Application>();
@@ -109,9 +106,7 @@ namespace UIForia {
         protected Application(CompiledTemplateData compiledTemplateData, ResourceManager resourceManager) {
             TemplateSettings templateSettings = compiledTemplateData.templateSettings;
             id = templateSettings.applicationName;
-
-            this.elementPool = new ElementPool();
-
+            
             this.resourceManager = resourceManager ?? new ResourceManager();
 
             this.m_Systems = new List<ISystem>();
@@ -185,9 +180,7 @@ namespace UIForia {
             }
 
             s_ApplicationList.Add(this);
-
-            this.elementPool = new ElementPool();
-
+            
             this.resourceManager = resourceManager ?? new ResourceManager();
 
             this.m_Systems = new List<ISystem>();
@@ -237,17 +230,6 @@ namespace UIForia {
             }
         }
 
-        public string TemplateRootPath {
-            get {
-                if (templateRootPath == null) {
-                    return string.Empty; // UnityEngine.Application.dataPath;
-                }
-
-                return templateRootPath;
-            }
-            set { templateRootPath = value; }
-        }
-
         public IStyleSystem StyleSystem => m_StyleSystem;
         public IRenderSystem RenderSystem => m_RenderSystem;
         public ILayoutSystem LayoutSystem => m_LayoutSystem;
@@ -257,7 +239,6 @@ namespace UIForia {
 
         public Camera Camera { get; private set; }
 
-        public LinqBindingSystem LinqBindingSystem => linqBindingSystem;
         public ResourceManager ResourceManager => resourceManager;
 
         public Rect ScreenRect => new Rect {
@@ -298,7 +279,7 @@ namespace UIForia {
             if (m_Views.Count > 0) {
                 m_Views.Sort((v1, v2) => v1.id.CompareTo(v2.id));
                 Type type = m_Views[0].RootElement.GetChild(0).GetType();
-                lastKnownGoodRootElementType = type;
+                // lastKnownGoodRootElementType = type;
                 for (int i = m_Views.Count - 1; i >= 0; i--) {
                     m_Views[i].Destroy();
                 }
@@ -314,11 +295,11 @@ namespace UIForia {
 
             throw new NotImplementedException("Need to re-implement refresh()");
             // CreateView("Default View", new Rect(0, 0, Width, Height), lastKnownGoodRootElementType);
-
-            onRefresh?.Invoke();
-            onNextRefresh?.Invoke();
-            onNextRefresh = null;
-            onReady?.Invoke();
+            //
+            // onRefresh?.Invoke();
+            // onNextRefresh?.Invoke();
+            // onNextRefresh = null;
+            // onReady?.Invoke();
         }
 
         public void Destroy() {
@@ -543,8 +524,6 @@ namespace UIForia {
             m_AfterUpdateTaskSystem.OnUpdate();
 
             onUpdate?.Invoke();
-
-            m_Views[0].SetSize(Screen.width, Screen.height);
 
             frameId++;
         }

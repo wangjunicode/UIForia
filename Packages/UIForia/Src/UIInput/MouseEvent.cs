@@ -1,16 +1,7 @@
-﻿using System;
-using UIForia.Elements;
+﻿using UIForia.Elements;
 using UnityEngine;
 
 namespace UIForia.UIInput {
-
-    public struct GenericInputEventHandler {
-
-        public readonly InputEventType type;
-        public readonly KeyboardModifiers modifiers;
-        public readonly Action<GenericInputEvent> handler;
-
-    }
 
     public struct MouseInputEvent {
 

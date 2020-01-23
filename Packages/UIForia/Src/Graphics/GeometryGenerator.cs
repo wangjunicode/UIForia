@@ -79,205 +79,7 @@ namespace Vertigo {
                 triangleEnd = triangleStart + triangleCount
             };
         }
-
-
-        // todo -- remove this entirely
-        public static RangeInt FillSDF(ShapeGenerator shapeGenerator, RangeInt shapeRange, GeometryCache retn) {
-            throw new NotImplementedException();
-//            if (retn == null) return default;
-//
-//            int shapeStart = shapeRange.start;
-//            int shapeEnd = shapeRange.end;
-//
-//            ShapeGenerator.ShapeDef[] shapes = shapeGenerator.shapeList.array;
-//            int geometryShapeStart = retn.shapeCount;
-//            int geometryShapeCount = 0;
-//
-//            for (int i = shapeStart; i < shapeEnd; i++) {
-//                ShapeGenerator.ShapeDef shape = shapes[i];
-//
-//                switch (shapes[i].shapeType) {
-//                    case ShapeType.Unset:
-//                        break;
-//
-//                    case ShapeType.Circle:
-//                    case ShapeType.Ellipse:
-//                    case ShapeType.Rect:
-//                    case ShapeType.RoundedRect: {
-//                        // todo we can generate better fitting geometry for everything but a rect
-//
-//                        Vector2 pos = shape.p0;
-//                        Vector2 wh = shape.p1;
-//
-//                        retn.EnsureAdditionalCapacity(4, 6);
-//                        float borderRadiusTopLeft = shape.p2.x;
-//                        float borderRadiusTopRight = shape.p2.y;
-//                        float borderRadiusBottomLeft = shape.p3.x;
-//                        float borderRadiusBottomRight = shape.p3.y;
-//
-//                        byte b0 = 0;
-//                        byte b1 = 0;
-//                        byte b2 = 0;
-//                        byte b3 = 0;
-//                        if (shape.shapeType == ShapeType.Circle) {
-//                            // 250 decodes to 0.5 in the shader
-//                            b0 = 250;
-//                            b1 = 250;
-//                            b2 = 250;
-//                            b3 = 250;
-//                        }
-//                        else if (shape.shapeType == ShapeType.Ellipse) {
-//                            b0 = 250;
-//                            b1 = 250;
-//                            b2 = 250;
-//                            b3 = 250;
-//                        }
-//                        else if (shape.shapeType == ShapeType.RoundedRect) {
-//                            b0 = (byte) (((borderRadiusTopLeft * 1000)) * 0.5f);
-//                            b1 = (byte) (((borderRadiusTopRight * 1000)) * 0.5f);
-//                            b2 = (byte) (((borderRadiusBottomLeft * 1000)) * 0.5f);
-//                            b3 = (byte) (((borderRadiusBottomRight * 1000)) * 0.5f);
-//                        }
-//
-//                        //float borderRadii = VertigoUtil.ColorToFloat(new Color(borderRadiusTopLeft, borderRadiusTopRight, borderRadiusBottomLeft, borderRadiusBottomRight));
-//                        float borderRadii = VertigoUtil.BytesToFloat(b0, b1, b2, b3); //new Color(borderRadiusTopLeft, borderRadiusTopRight, borderRadiusBottomLeft, borderRadiusBottomRight));
-//                        int vertIdx = retn.vertexCount;
-//                        int triangleIdx = retn.triangleCount;
-//
-//                        float metaData = VertigoUtil.BytesToFloat((byte) shape.shapeType, (byte) GeometryType.SignedDistance, 0, 0);
-//
-//                        Vector3[] positions = retn.positions.array;
-//                        Vector4[] texCoord0 = retn.texCoord0.array;
-//                        Vector4[] texCoord1 = retn.texCoord1.array;
-//                        int[] triangles = retn.triangles.array;
-//
-//                        float packedSize = VertigoUtil.PackSizeVector(wh);
-//
-//                        Vector2 p0 = new Vector2(pos.x, -pos.y);
-//                        Vector2 p1 = new Vector2(pos.x + wh.x, -pos.y);
-//                        Vector2 p2 = new Vector2(pos.x + wh.x, -(pos.y + wh.y));
-//                        Vector2 p3 = new Vector2(pos.x, -(pos.y + wh.y));
-//
-//                        Vector4 uv0 = new Vector4(0, 1, wh.x, wh.y);
-//                        Vector4 uv1 = new Vector4(1, 1, wh.x, wh.y);
-//                        Vector4 uv2 = new Vector4(1, 0, wh.x, wh.y);
-//                        Vector4 uv3 = new Vector4(0, 0, wh.x, wh.y);
-//
-//                        float packedUV0 = VertigoUtil.Vector2ToFloat(uv0);
-//                        float packedUV1 = VertigoUtil.Vector2ToFloat(uv1);
-//                        float packedUV2 = VertigoUtil.Vector2ToFloat(uv2);
-//                        float packedUV3 = VertigoUtil.Vector2ToFloat(uv3);
-//
-//                        positions[vertIdx + 0] = p0;
-//                        positions[vertIdx + 1] = p1;
-//                        positions[vertIdx + 2] = p2;
-//                        positions[vertIdx + 3] = p3;
-//
-//                        texCoord0[vertIdx + 0] = uv0;
-//                        texCoord0[vertIdx + 1] = uv1;
-//                        texCoord0[vertIdx + 2] = uv2;
-//                        texCoord0[vertIdx + 3] = uv3;
-//
-//                        texCoord1[vertIdx + 0] = new Vector4(borderRadii, metaData, packedSize, packedUV0);
-//                        texCoord1[vertIdx + 1] = new Vector4(borderRadii, metaData, packedSize, packedUV1);
-//                        texCoord1[vertIdx + 2] = new Vector4(borderRadii, metaData, packedSize, packedUV2);
-//                        texCoord1[vertIdx + 3] = new Vector4(borderRadii, metaData, packedSize, packedUV3);
-//
-//                        triangles[triangleIdx + 0] = vertIdx + 0;
-//                        triangles[triangleIdx + 1] = vertIdx + 1;
-//                        triangles[triangleIdx + 2] = vertIdx + 2;
-//                        triangles[triangleIdx + 3] = vertIdx + 2;
-//                        triangles[triangleIdx + 4] = vertIdx + 3;
-//                        triangles[triangleIdx + 5] = vertIdx + 0;
-//
-//                        retn.triangleCount += 4;
-//                        retn.vertexCount += 6;
-//
-//                        retn.shapes.Add(new GeometryShape() {
-//                            geometryType = GeometryType.SignedDistance,
-//                            shapeType = shape.shapeType,
-//                            vertexStart = vertIdx,
-//                            vertexCount = 4,
-//                            triangleStart = triangleIdx,
-//                            triangleCount = 6
-//                        });
-//
-//                        break;
-//                    }
-//
-//                    case ShapeType.Path:
-//                        break;
-//                    case ShapeType.Triangle:
-//                        break;
-//                    case ShapeType.ClosedPath:
-//                        break;
-//                    case ShapeType.Polygon:
-//                        break;
-//
-//                    case ShapeType.Rhombus: {
-//                        retn.EnsureAdditionalCapacity(4, 6);
-//
-//                        Vector2 pos = shape.p0;
-//                        Vector2 wh = shape.p1;
-//
-//                        Vector4 uv0 = new Vector4(0, 1, wh.x, wh.y);
-//                        Vector4 uv1 = new Vector4(1, 1, wh.x, wh.y);
-//                        Vector4 uv2 = new Vector4(1, 0, wh.x, wh.y);
-//                        Vector4 uv3 = new Vector4(0, 0, wh.x, wh.y);
-//
-//                        int startVert = retn.vertexCount;
-//                        int startTriangle = retn.triangleCount;
-//                        Vector3[] positions = retn.positions.array;
-//                        Vector4[] texCoord0 = retn.texCoord0.array;
-//                        int[] triangles = retn.triangles.array;
-//
-//                        Vector2 p0 = new Vector2(pos.x, -pos.y);
-//                        Vector2 p1 = new Vector2(pos.x + wh.x, -pos.y);
-//                        Vector2 p2 = new Vector2(pos.x + wh.x, -(pos.y + wh.y));
-//                        Vector2 p3 = new Vector2(pos.x, -(pos.y + wh.y));
-//
-//                        positions[startVert + 0] = p0;
-//                        positions[startVert + 1] = p1;
-//                        positions[startVert + 2] = p2;
-//                        positions[startVert + 3] = p3;
-//
-//                        texCoord0[startVert + 0] = uv0;
-//                        texCoord0[startVert + 1] = uv1;
-//                        texCoord0[startVert + 2] = uv2;
-//                        texCoord0[startVert + 3] = uv3;
-//
-//                        retn.shapes.Add(new GeometryShape() {
-//                            shapeType = ShapeType.Rhombus,
-//                            geometryType = GeometryType.SignedDistance,
-//                            vertexStart = startVert,
-//                            vertexCount = 4,
-//                            triangleStart = startTriangle,
-//                            triangleCount = 6
-//                        });
-//
-//                        triangles[startTriangle + 0] = startVert + 0;
-//                        triangles[startTriangle + 1] = startVert + 1;
-//                        triangles[startTriangle + 2] = startVert + 2;
-//                        triangles[startTriangle + 3] = startVert + 2;
-//                        triangles[startTriangle + 4] = startVert + 3;
-//                        triangles[startTriangle + 5] = startVert + 0;
-//
-//                        retn.triangleCount += 4;
-//                        retn.vertexCount += 6;
-//                        geometryShapeCount++;
-//                        break;
-//                    }
-//
-//                    case ShapeType.Sprite:
-//                        break;
-//                    default:
-//                        throw new ArgumentOutOfRangeException();
-//                }
-//            }
-//
-//            return new RangeInt(geometryShapeStart, geometryShapeCount);
-        }
-
+        
         public static GeometryRange FillDecoratedRect(in GeometryData data, Vector2 position, float width, float height, in CornerDefinition cornerDefinition) {
             data.positionList.EnsureAdditionalCapacity(9);
             data.texCoordList0.EnsureAdditionalCapacity(9);
@@ -501,59 +303,7 @@ namespace Vertigo {
                 triangleEnd = startTriangle + 24
             };
         }
-
-        public static int FillRect(GeometryCache retn, float x, float y, float width, float height) {
-            retn.EnsureAdditionalCapacity(4, 6);
-
-            Vector3 p0 = new Vector3(x, -y);
-            Vector3 p1 = new Vector3(x + width, -y);
-            Vector3 p2 = new Vector3(x + width, -(y + height));
-            Vector3 p3 = new Vector3(x, -(y + height));
-
-            Vector4 uv0 = new Vector4(0, 1);
-            Vector4 uv1 = new Vector4(1, 1);
-            Vector4 uv2 = new Vector4(1, 0);
-            Vector4 uv3 = new Vector4(0, 0);
-
-            int startVert = retn.vertexCount;
-            int startTriangle = retn.triangleCount;
-
-            Vector3[] positions = retn.positions.array;
-            Vector4[] texCoord0 = retn.texCoord0.array;
-            int[] triangles = retn.triangles.array;
-
-            positions[startVert + 0] = p0;
-            positions[startVert + 1] = p1;
-            positions[startVert + 2] = p2;
-            positions[startVert + 3] = p3;
-
-            texCoord0[startVert + 0] = uv0;
-            texCoord0[startVert + 1] = uv1;
-            texCoord0[startVert + 2] = uv2;
-            texCoord0[startVert + 3] = uv3;
-
-            retn.shapes.Add(new GeometryShape() {
-                geometryType = GeometryType.Physical,
-                shapeType = ShapeType.Rect,
-                vertexStart = startVert,
-                vertexCount = 4,
-                triangleStart = startTriangle,
-                triangleCount = 6
-            });
-
-            triangles[startTriangle + 0] = startVert + 0;
-            triangles[startTriangle + 1] = startVert + 1;
-            triangles[startTriangle + 2] = startVert + 2;
-            triangles[startTriangle + 3] = startVert + 2;
-            triangles[startTriangle + 4] = startVert + 3;
-            triangles[startTriangle + 5] = startVert + 0;
-
-            retn.vertexCount += 4;
-            retn.triangleCount += 6;
-
-            return 0;
-        }
-
+        
         public struct PathData {
 
             public Rect bounds;
@@ -770,74 +520,6 @@ namespace Vertigo {
                 triangleStart = startTriangle,
                 triangleEnd = startTriangle + 3
             };
-        }
-
-        public static RangeInt Fill(ShapeGenerator shapeGenerator, RangeInt shapeRange, ShapeMode shapeMode, GeometryCache retn) {
-            if (retn == null) {
-                return default;
-            }
-
-            if (shapeMode == ShapeMode.SDF) {
-                return FillSDF(shapeGenerator, shapeRange, retn);
-            }
-
-            int shapeStart = shapeRange.start;
-            int shapeEnd = shapeRange.end;
-
-            ShapeGenerator.ShapeDef[] shapes = shapeGenerator.shapeList.array;
-            int geometryShapeStart = retn.shapeCount;
-            int geometryShapeCount = 0;
-            for (int i = shapeStart; i < shapeEnd; i++) {
-                ShapeGenerator.ShapeDef shape = shapes[i];
-
-                switch (shapes[i].shapeType) {
-                    case ShapeType.Rect: {
-//                        float x = shape.p0.x;
-//                        float y = shape.p0.y;
-//                        float width = shape.p1.x;
-//                        float height = shape.p1.y;
-//
-//                        FillRect(retn, x, y, width, height);
-                        geometryShapeCount++;
-                        break;
-                    }
-
-                    case ShapeType.RoundedRect:
-                        throw new NotImplementedException();
-
-                    case ShapeType.Circle: {
-//                        FillRegularPolygon(retn, ShapeType.Circle, shape.p0, shape.p1.x, shape.p1.x, (int) shape.p2.x);
-                        geometryShapeCount++;
-                        break;
-                    }
-
-                    case ShapeType.Ellipse: {
-                        // FillRegularPolygon(retn, ShapeType.Ellipse, shape.p0, shape.p1.x, shape.p1.y, (int) shape.p2.x);
-                        geometryShapeCount++;
-                        break;
-                    }
-
-                    case ShapeType.Polygon: {
-                        geometryShapeCount++;
-                        break;
-                    }
-
-                    case ShapeType.Rhombus: {
-                        break;
-                    }
-
-                    case ShapeType.Path:
-                    case ShapeType.ClosedPath: {
-                        break;
-                    }
-
-                    case ShapeType.Triangle: {
-                        break;
-                    }
-                }
-            }
-
-            return new RangeInt(geometryShapeStart, geometryShapeCount);
         }
 
         private static float PercentOfRange(float v, float bottom, float top) {
@@ -1682,478 +1364,79 @@ namespace Vertigo {
         }
 
 
-        public static void FillSprite(Sprite sprite, Rect rect, GeometryCache retn) {
-            VertigoUtil.SpriteData spriteData = VertigoUtil.GetSpriteData(sprite);
-            Vector2[] vertices = spriteData.vertices;
-            Vector2[] texCoords = spriteData.uvs;
-            ushort[] spriteTriangles = spriteData.triangles;
-
-            retn.EnsureAdditionalCapacity(vertices.Length, spriteData.triangles.Length);
-            Vector3[] positions = retn.positions.array;
-            Vector4[] texCoord0 = retn.texCoord0.array;
-            int[] triangles = retn.triangles.array;
-            int vertexStart = retn.vertexCount;
-            int triangleStart = retn.triangleCount;
-            int vertIdx = retn.vertexCount;
-            int triIdx = retn.triangleCount;
-            Vector2 pivot = sprite.pivot;
-            float ppi = sprite.pixelsPerUnit;
-
-            for (int i = 0; i < vertices.Length; i++) {
-                positions[vertIdx].x = pivot.x - (vertices[i].x * ppi);
-                positions[vertIdx].y = (vertices[i].y * ppi) - pivot.y;
-                texCoord0[vertIdx].x = texCoords[i].x;
-                texCoord0[vertIdx].y = texCoords[i].y;
-                vertIdx++;
-            }
-
-            if (rect != default) {
-                vertIdx = vertexStart;
-                float minX = float.MaxValue;
-                float minY = float.MaxValue;
-                float maxX = float.MinValue;
-                float maxY = float.MinValue;
-                for (int i = 0; i < vertices.Length; i++) {
-                    float x = positions[vertIdx].x;
-                    float y = -positions[vertIdx].y;
-                    if (x < minX) minX = x;
-                    if (x > maxX) maxX = x;
-                    if (y < minY) minY = y;
-                    if (y > maxY) maxY = y;
-                    vertIdx++;
-                }
-
-                float boundsWidth = maxX - minX;
-                float boundsHeight = maxY - minY;
-                float baseX = rect.x;
-                float baseY = rect.y;
-                float targetWidth = rect.width;
-                float targetHeight = rect.height;
-                vertIdx = vertexStart;
-
-                for (int i = 0; i < vertices.Length; i++) {
-                    float x = positions[vertIdx].x;
-                    float y = positions[vertIdx].y;
-                    float percentX = PercentOfRange(x, minX, boundsWidth);
-                    float percentY = PercentOfRange(y, minY, boundsHeight);
-                    positions[vertIdx].x = baseX + (percentX * targetWidth);
-                    positions[vertIdx].y = (percentY * targetHeight) - baseY;
-                    vertIdx++;
-                }
-            }
-
-            for (int i = 0; i < spriteTriangles.Length; i++) {
-                triangles[triIdx++] = vertexStart + spriteTriangles[i];
-            }
-
-            retn.shapes.Add(new GeometryShape() {
-                shapeType = ShapeType.Sprite,
-                geometryType = GeometryType.Physical,
-                vertexStart = vertexStart,
-                vertexCount = vertIdx - vertexStart,
-                triangleStart = triangleStart,
-                triangleCount = triIdx - triangleStart
-            });
-        }
-
-
-        /*private static void determine_t_r(double w, ref double t, ref double R) {
-            //efficiency: can cache one set of w,t,R values
-            // i.e. when a polyline is of uniform thickness, the same w is passed in repeatedly
-            double f = w - (int) (w);
-
-            if (w >= 0.0 && w < 1.0) {
-                t = 0.05;
-                R = 0.768; //R=0.48+0.32*f;
-            }
-            else if (w >= 1.0 && w < 2.0) {
-                t = 0.05 + f * 0.33;
-                R = 0.768 + 0.312 * f;
-            }
-            else if (w >= 2.0 && w < 3.0) {
-                t = 0.38 + f * 0.58;
-                R = 1.08;
-            }
-            else if (w >= 3.0 && w < 4.0) {
-                t = 0.96 + f * 0.48;
-                R = 1.08;
-            }
-            else if (w >= 4.0 && w < 5.0) {
-                t = 1.44 + f * 0.46;
-                R = 1.08;
-            }
-            else if (w >= 5.0 && w < 6.0) {
-                t = 1.9 + f * 0.6;
-                R = 1.08;
-            }
-            else if (w >= 6.0) {
-                double ff = w - 6.0;
-                t = 2.5 + ff * 0.50;
-                R = 1.08;
-            }
-
-            //PPI correction
-            //double PPI_correction = vaser_standard_PPI / vaser_actual_PPI;
-            //const double up_bound = 1.6; //max value of w to receive correction
-            //const double start_falloff = 1.0;
-            //if ( w>0.0 && w<up_bound)
-            //{	//here we gracefully apply the correction
-            //    // so that the effect of correction diminishes starting from w=start_falloff
-            //    //   and completely disappears when w=up_bound
-            //    double correction = 1.0 + (PPI_correction-1.0)*(up_bound-w)/(up_bound-start_falloff);
-            //    t *= PPI_correction;
-            //    R *= PPI_correction;
-            //} 
-        }
-
-        private static void MakeTRC(Vector2 P1, Vector2 P2, out Vector2 T, out Vector2 R, out Vector2 C, float w, in polyline_opt opt, ref float rr, ref float tt, ref float dist, bool seg_mode = false) {
-            float t = 1.0f;
-            float r = 0.0f;
-
-            Vector2 DP = P2 - P1;
-
-            //calculate t,r
-            determine_t_r(w, t, r);
-
-            if (opt.feather && !opt.no_feather_at_core && opt.feathering != 1.0) {
-                r *= opt.feathering;
-            }
-            else if (seg_mode) {
-                //TODO: handle correctly for hori/vert segments in a polyline
-                if (Point::negligible(DP.x) && P1.x == (int) P1.x) {
-                    if (w > 0.0 && w <= 1.0) {
-                        t = 0.5f;
-                        r = 0.0f;
-                        P2.x = P1.x = (int) P1.x + 0.5f;
-                    }
-                }
-                else if (Point::negligible(DP.y) && P1.y == (int) P1.y) {
-                    if (w > 0.0 && w <= 1.0) {
-                        t = 0.5f;
-                        r = 0.0f;
-                        P2.y = P1.y = (int) P1.y + 0.5f;
-                    }
-                }
-            }
-
-            //output t,r
-            if (tt != 0) tt = t;
-            if (rr != 0) rr = r;
-
-            //calculate T,R,C
-            float len = DP.magnitude;
-            DP.Normalize();
-            if (dist != 0) dist = len;
-            if (C) C = DP;
-            DP.perpen();
-
-            if (T) *T = DP * t;
-            if (R) *R = DP * r;
-        }
-
-        public struct LineOptions { }
-
-        const int TS_core_fade = 0; //default
-        const int TS_core = 1;
-        const int TS_outer_fade = 2;
-        const int TS_inner_fade = 3;
-        const int PLJ_miter = 0; //default
-        const int PLJ_bevel = 1;
-
-        const int PLJ_round = 2;
-
-        //for polyline_opt.cap
-        const int PLC_butt = 0; //default
-        const int PLC_round = 1;
-        const int PLC_square = 2;
-        const int PLC_rect = 3;
-        const int PLC_both = 0; //default
-        const int PLC_first = 10;
-        const int PLC_last = 20;
-        const int PLC_none = 30;
-
-        public struct tessellator_opt {
-
-            //set the whole structure to 0 will give default options
-            public bool triangulation;
-            public char parts; //use TS_xx
-            public bool tessellate_only;
-            public object holder; //used as (VASErin::vertex_array_holder*) if tessellate_only is true
-
-        }
-
-        public struct polyline_inopt {
-
-            public bool const_color;
-            public bool const_weight;
-            public bool no_cap_first;
-            public bool no_cap_last;
-            public bool join_first;
-            public bool join_last;
-            public float[] segment_length; //array of length of each segment
-
-        }
-
-        public struct polyline_opt {
-
-            public tessellator_opt[] tess;
-            public int joint; //use PLJ_xx
-            public int cap; //use PLC_xx
-            public bool feather;
-            public float feathering;
-            public bool no_feather_at_cap;
-            public bool no_feather_at_core;
-
-        }
-
-        const float cri_segment_approx = 1.6f;
-
-        private static readonly float cos_a = Mathf.Cos(15 * (Mathf.PI / 180f));
-        private static readonly float cos_b = Mathf.Cos(10 * (Mathf.PI / 180f));
-        private static readonly float cos_c = Mathf.Cos(25 * (Mathf.PI / 180f));
-
-        static void poly_point_inter(StructList<ShapeGenerator.PathPoint> pointList, Color[] colors, float[] weights, out Vector2 p, out Color c, out float w, int at, float t) {
-            // can probably be done using else case only
-            if (t == 0.0) {
-                p = pointList[at].position;
-                c = colors[at];
-                w = weights[at];
-            }
-            else if (t == 1.0) {
-                p = pointList[at + 1].position;
-                c = colors[at + 1];
-                w = weights[at + 1];
-            }
-            else {
-                p = (pointList[at].position + pointList[at + 1].position) * t;
-                c = Color.Lerp(colors[at], colors[at + 1], t);
-                w = (weights[at] + weights[at + 1]) * t;
-            }
-        }
-
-//the struct to hold info for anchor_late() to perform triangluation
-        struct st_polyline {
-
-            //for all joints
-            Vector2 vP; //vector to intersection point
-
-            Vector2 vR; //fading vector at sharp end
-            //all vP,vR are outward
-
-            //for djoint==PLJ_bevel
-            Vector2 T; //core thickness of a line
-            Vector2 R; //fading edge of a line
-            Vector2 bR; //out stepping vector, same direction as cap
-
-            Vector2 T1, R1; //alternate vectors, same direction as T21
-            //all T,R,T1,R1 are outward
-
-            //for djoint==PLJ_round
-            float t, r;
-
-            //for degeneration case
-            bool degenT; //core degenerated
-            bool degenR; //fade degenerated
-            bool pre_full; //draw the preceding segment in full
-            Vector2 PT, PR;
-            float pt; //parameter at intersection
-            bool R_full_degen;
-
-            int djoint; //determined joint
-            // e.g. originally a joint is PLJ_miter. but it is smaller than critical angle, should then set djoint to PLJ_bevel
-
-        };
-
-//the struct to hold memory for the working of anchor()
-        struct st_anchor {
-
-            public Vector2 p0; //point
-            public Vector2 p1; //point
-            public Vector2 p2; //point
-            public Color c0;
-            public Color c1;
-            public Color c2;
-            public float w0;
-            public float w1;
-            public float w2;
-
-            public Vector2 capStart;
-            public Vector2 capEnd;
-
-            public st_polyline sl0;
-            public st_polyline sl1;
-            public st_polyline sl2;
-
-            object vah;
-
-        };
-
-        static void polyline_exact(StructList<ShapeGenerator.PathPoint> pointList, Color[] colors, float[] weights, RangeInt range, polyline_opt opt, in polyline_inopt? inopt) {
-            bool cap_first = !inopt?.no_cap_first ?? true;
-            bool cap_last = !inopt?.no_cap_last ?? true;
-
-            bool join_first = inopt.HasValue && inopt.Value.join_first;
-            bool join_last = inopt.HasValue && inopt.Value.join_last;
-
-            Color color = inopt.Value.const_color ? Color.white : Color.black;
-            float weight = inopt.Value.const_weight ? 5 : 10;
-
-            Vector2 mid_l, mid_n; //the last and the next mid point
-            Color c_l, c_n;
-            float w_l, w_n;
-
-            //init for the first anchor
-            poly_point_inter(pointList, colors, weights, out mid_l, out c_l, out w_l, 0, join_first ? 0.5f : 0);
-
-            st_anchor SA = default;
-
-            if (pointList.size == 2) {
-                SA.p0 = pointList[range.start + 0].position;
-                SA.p1 = pointList[range.start + 1].position;
-                SA.c0 = colors[range.start + 0];
-                SA.c1 = colors[range.start + 1];
-                SA.w0 = weights[range.start + 0];
-                SA.w1 = weights[range.start + 1];
-                segment(SA, opt, cap_first, cap_last);
-            }
-            else
-                for (int i = range.start + 1; i < range.length - 1; i++) {
-                    if (i == range.end - 2 && !join_last) {
-                        poly_point_inter(pointList, colors, weights, out mid_n, out c_n, out w_n, i, 1.0f);
-                    }
-                    else {
-                        poly_point_inter(pointList, colors, weights, out mid_n, out c_n, out w_n, i, 0.5f);
-                    }
-
-                    SA.p0 = mid_l;
-                    SA.c0 = c_l;
-                    SA.w0 = w_l;
-                    SA.p2 = mid_n;
-                    SA.c2 = c_n;
-                    SA.w2 = w_n;
-
-                    SA.p1 = pointList[i].position;
-                    SA.c1 = colors[i];
-                    SA.w1 = weights[i];
-
-                    anchor(SA, opt, i == 1 && cap_first, i == range.length - 2 && cap_last);
-
-                    mid_l = mid_n;
-                    c_l = c_n;
-                    w_l = w_n;
-                }
-
-            //draw or not
-//            if (opt && opt->tess && opt->tess->tessellate_only && opt->tess->holder)
-//                (*(vertex_array_holder*) opt->tess->holder).push(SA.vah);
-//            else
-//                SA.vah.draw();
-//            //draw triangles
-//            if (opt && opt->tess && opt->tess->triangulation)
-//                SA.vah.draw_triangles();
-        }
-
-        static void polyline_range(StructList<ShapeGenerator.PathPoint> pointList, float[] weights, Color[] colors, RangeInt range, in polyline_opt? opt, in polyline_inopt? in_options, int from, int to, bool approx) {
-            polyline_inopt inopt = default;
-
-            if (in_options != null) inopt = in_options.Value;
-
-            if (from > 0) from -= 1;
-
-            inopt.join_first = from != 0;
-            inopt.join_last = to != (range.length - 1);
-            inopt.no_cap_first = inopt.no_cap_first || inopt.join_first;
-            inopt.no_cap_last = inopt.no_cap_last || inopt.join_last;
-
-            if (approx) {
-                //polyline_approx(P + from, C + (inopt.const_color ? 0 : from), W + (inopt.const_weight ? 0 : from), to - from + 1, opt, inopt);
-            }
-            else {
-//                C + (inopt.const_color ? 0 : from)
-                range = new RangeInt(to, from);
-//                polyline_exact ( P+from, C+(inopt.const_color?0:from), W+(inopt.const_weight?0:from), to-from+1, opt, &inopt);
-
-                //W + (inopt.const_weight ? 0 : from);
-                polyline_exact(pointList, weights, colors, range, opt, inopt);
-            }
-        }
-
-        public static GeometryRange PolyLine(in GeometryData data, StructList<ShapeGenerator.PathPoint> pointList, float[] weights, Color[] colors, RangeInt range, polyline_opt opt, polyline_inopt inopt) {
-            if (opt.cap >= 10) {
-                int dec = (opt.cap / 10) * 10;
-                if (dec == PLC_first || dec == PLC_none) {
-                    inopt.no_cap_last = true;
-                }
-
-                if (dec == PLC_last || dec == PLC_none) {
-                    inopt.no_cap_first = true;
-                }
-
-                opt.cap -= dec;
-            }
-
-            // make point list contain colors and weights too
-            if (inopt.const_weight && weights[0] < cri_segment_approx) {
-                polyline_exact(pointList, colors, weights, opt, inopt);
-                return default;
-            }
-
-            int A = 0, B = 0;
-            bool on = false;
-
-            for (int i = range.start + 1; i < range.length - 1; i++) {
-                Vector2 V1 = pointList[i].position - pointList[i - 1].position;
-                Vector2 V2 = pointList[i + 1].position - pointList[i].position;
-                float len = 0.0f;
-
-                if (inopt.segment_length != null) {
-                    V1 /= inopt.segment_length[i];
-                    V2 /= inopt.segment_length[i + 1];
-                    len += (inopt.segment_length[i] + inopt.segment_length[i + 1]) * 0.5f;
-                }
-                else {
-                    len += V1.magnitude * 0.5f;
-                    len += V2.magnitude * 0.5f;
-                    V1.Normalize();
-                    V2.Normalize();
-                }
-
-                float costho = V1.x * V2.x + V1.y * V2.y;
-                //float angle = acos(costho)*180/vaser_pi;
-
-
-                float weight = weights[inopt.const_weight ? 0 : i];
-
-                bool approx = (weight < 7 && costho > cos_a) ||
-                              (costho > cos_b) || //when the angle difference at an anchor is smaller than a critical degree, do polyline approximation
-                              (len < weight && costho > cos_c);
-
-                if (approx && !on) {
-                    A = i;
-                    if (A == 1) A = 0;
-                    on = true;
-                    if (A > 1) {
-                        polyline_range(pointList, colors, weights, opt, inopt, B, A, false);
-                    }
-                }
-                else if (!approx && on) {
-                    B = i;
-                    on = false;
-                    polyline_range(pointList, colors, weights, opt, inopt, A, B, true);
-                }
-            }
-
-            if (on && B < pointList.size - 1) {
-                B = pointList.size - 1;
-                polyline_range(pointList, colors, weights, opt, inopt, A, B, true);
-            }
-            else if (!on && A < pointList.size - 1) {
-                A = pointList.size - 1;
-                polyline_range(pointList, colors, weights, opt, inopt, B, A, false);
-            }
-
-            return new GeometryRange() { };
-        }*/
+        // public static void FillSprite(Sprite sprite, Rect rect, GeometryCache retn) {
+        //     VertigoUtil.SpriteData spriteData = VertigoUtil.GetSpriteData(sprite);
+        //     Vector2[] vertices = spriteData.vertices;
+        //     Vector2[] texCoords = spriteData.uvs;
+        //     ushort[] spriteTriangles = spriteData.triangles;
+        //
+        //     retn.EnsureAdditionalCapacity(vertices.Length, spriteData.triangles.Length);
+        //     Vector3[] positions = retn.positions.array;
+        //     Vector4[] texCoord0 = retn.texCoord0.array;
+        //     int[] triangles = retn.triangles.array;
+        //     int vertexStart = retn.vertexCount;
+        //     int triangleStart = retn.triangleCount;
+        //     int vertIdx = retn.vertexCount;
+        //     int triIdx = retn.triangleCount;
+        //     Vector2 pivot = sprite.pivot;
+        //     float ppi = sprite.pixelsPerUnit;
+        //
+        //     for (int i = 0; i < vertices.Length; i++) {
+        //         positions[vertIdx].x = pivot.x - (vertices[i].x * ppi);
+        //         positions[vertIdx].y = (vertices[i].y * ppi) - pivot.y;
+        //         texCoord0[vertIdx].x = texCoords[i].x;
+        //         texCoord0[vertIdx].y = texCoords[i].y;
+        //         vertIdx++;
+        //     }
+        //
+        //     if (rect != default) {
+        //         vertIdx = vertexStart;
+        //         float minX = float.MaxValue;
+        //         float minY = float.MaxValue;
+        //         float maxX = float.MinValue;
+        //         float maxY = float.MinValue;
+        //         for (int i = 0; i < vertices.Length; i++) {
+        //             float x = positions[vertIdx].x;
+        //             float y = -positions[vertIdx].y;
+        //             if (x < minX) minX = x;
+        //             if (x > maxX) maxX = x;
+        //             if (y < minY) minY = y;
+        //             if (y > maxY) maxY = y;
+        //             vertIdx++;
+        //         }
+        //
+        //         float boundsWidth = maxX - minX;
+        //         float boundsHeight = maxY - minY;
+        //         float baseX = rect.x;
+        //         float baseY = rect.y;
+        //         float targetWidth = rect.width;
+        //         float targetHeight = rect.height;
+        //         vertIdx = vertexStart;
+        //
+        //         for (int i = 0; i < vertices.Length; i++) {
+        //             float x = positions[vertIdx].x;
+        //             float y = positions[vertIdx].y;
+        //             float percentX = PercentOfRange(x, minX, boundsWidth);
+        //             float percentY = PercentOfRange(y, minY, boundsHeight);
+        //             positions[vertIdx].x = baseX + (percentX * targetWidth);
+        //             positions[vertIdx].y = (percentY * targetHeight) - baseY;
+        //             vertIdx++;
+        //         }
+        //     }
+        //
+        //     for (int i = 0; i < spriteTriangles.Length; i++) {
+        //         triangles[triIdx++] = vertexStart + spriteTriangles[i];
+        //     }
+        //
+        //     retn.shapes.Add(new GeometryShape() {
+        //         shapeType = ShapeType.Sprite,
+        //         geometryType = GeometryType.Physical,
+        //         vertexStart = vertexStart,
+        //         vertexCount = vertIdx - vertexStart,
+        //         triangleStart = triangleStart,
+        //         triangleCount = triIdx - triangleStart
+        //     });
+        // }
 
     }
 

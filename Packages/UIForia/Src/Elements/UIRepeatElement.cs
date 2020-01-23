@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using JetBrains.Annotations;
 using UIForia.Attributes;
 using UIForia.Compilers;
-using UIForia.Parsing;
 using UIForia.Systems;
 using UIForia.Util;
 
@@ -102,7 +101,6 @@ namespace UIForia.Elements {
 
     }
 
-    [GenericElementTypeResolvedBy(nameof(list))]
     public sealed class UIRepeatElement<T> : UIRepeatElement {
 
         public IList<T> list;

@@ -9,10 +9,7 @@ namespace UIForia.UIInput {
         Down = 1 << 0,
         DownThisFrame = Down | (1 << 2),
         UpThisFrame = Up | (1 << 3),
-
-        UpNotThisFrame = Up,
-        DownNotThisFrame = Down
-
+        
     }
 
 }

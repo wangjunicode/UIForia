@@ -58,7 +58,7 @@ namespace UIForia.Compilers {
 
                 case AliasResolverType.ContextVariable: {
                     ParameterExpression el = compiler.GetElement();
-                    Expression access = Expression.MakeMemberAccess(el, TemplateCompiler.s_Element_BindingNode);
+                    Expression access = Expression.MakeMemberAccess(el, TemplateCompiler.s_UIElement_BindingNode);
                     Expression call = ExpressionFactory.CallInstanceUnchecked(access, TemplateCompiler.s_LinqBindingNode_GetContextVariable, Expression.Constant(id));
                     Type contextVarType = ReflectionUtil.CreateGenericType(typeof(ContextVariable<>), type);
 
@@ -72,7 +72,7 @@ namespace UIForia.Compilers {
                     compiler.Comment(name);
                     //var repeat_item_name = element.bindingNode.GetRepeatItem<T>(id).value;
                     ParameterExpression el = compiler.GetCastElement();
-                    Expression access = Expression.MakeMemberAccess(el, TemplateCompiler.s_Element_BindingNode);
+                    Expression access = Expression.MakeMemberAccess(el, TemplateCompiler.s_UIElement_BindingNode);
 
                     ReflectionUtil.TypeArray1[0] = type;
                     MethodInfo getItem = TemplateCompiler.s_LinqBindingNode_GetRepeatItem.MakeGenericMethod(ReflectionUtil.TypeArray1);
@@ -86,7 +86,7 @@ namespace UIForia.Compilers {
                 }
                 case AliasResolverType.RepeatIndex: {
                     ParameterExpression el = compiler.GetElement();
-                    Expression access = Expression.MakeMemberAccess(el, TemplateCompiler.s_Element_BindingNode);
+                    Expression access = Expression.MakeMemberAccess(el, TemplateCompiler.s_UIElement_BindingNode);
                     Expression call = ExpressionFactory.CallInstanceUnchecked(access, TemplateCompiler.s_LinqBindingNode_GetContextVariable, Expression.Constant(id));
 
                     UnaryExpression convert = Expression.Convert(call, typeof(ContextVariable<int>));

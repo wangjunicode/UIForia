@@ -1,5 +1,7 @@
 using System;
 using System.Linq.Expressions;
+using System.Reflection;
+using UIForia.Elements;
 using UIForia.Util;
 
 namespace UIForia.Compilers {
@@ -7,17 +9,20 @@ namespace UIForia.Compilers {
     public class UIForiaLinqCompiler : LinqCompiler {
 
         private static readonly LightList<UIForiaLinqCompiler> s_CompilerPool = new LightList<UIForiaLinqCompiler>();
-        
+
         private ParameterExpression elementParameter;
         private ParameterExpression rootParameter;
         private ParameterExpression castElementParameter;
         private ParameterExpression castRootParameter;
+        private MemberExpression inputHandlerGroup;
 
         private Type elementType;
         private Type rootElementType;
 
         private const string k_CastElement = "__castElement";
         private const string k_CastRoot = "__castRoot";
+        
+        private static readonly FieldInfo s_UIElement_InputHandlerGroup = typeof(UIElement).GetField(nameof(UIElement.inputHandlers), BindingFlags.Instance | BindingFlags.Public);
 
         public void Setup(Type rootElementType, Type elementType) {
             this.rootElementType = rootElementType;
@@ -26,6 +31,16 @@ namespace UIForia.Compilers {
             rootParameter = null;
             castElementParameter = null;
             castRootParameter = null;
+            inputHandlerGroup = null;
+        }
+
+        public MemberExpression GetInputHandlerGroup() {
+            if (inputHandlerGroup == null) {
+                inputHandlerGroup = Expression.Field(GetElement(), s_UIElement_InputHandlerGroup);
+                Assign(inputHandlerGroup, Expression.New(typeof(InputHandlerGroup)));
+            }
+
+            return inputHandlerGroup;
         }
 
         public ParameterExpression GetElement() {

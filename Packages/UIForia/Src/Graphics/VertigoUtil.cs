@@ -1,8 +1,5 @@
-using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using UIForia.Util;
-using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.U2D;
 
@@ -27,24 +24,6 @@ public static class VertigoUtil {
 
     }
 
-    [StructLayout(LayoutKind.Explicit)]
-    public struct UIntFloatUnion {
-
-        [FieldOffset(0)] public float asFloat;
-        [FieldOffset(0)] public uint asInt;
-
-        public UIntFloatUnion(uint v) {
-            this.asFloat = 0;
-            this.asInt = v;
-        }
-        
-        public UIntFloatUnion(float v) {
-            this.asInt = 0;
-            this.asFloat = v;
-        }
-
-    }
-
     public static float BytesToFloat(byte b0, byte b1, byte b2, byte b3) {
         int color = b0 | b1 << 8 | b2 << 16 | b3 << 24;
         Union color2Float;
@@ -52,21 +31,6 @@ public static class VertigoUtil {
         color2Float.asInt = color;
         // as float get int back -> broken
         return color2Float.asFloat;
-    }
-
-    public static unsafe float ColorToFloatUint(Color32 c) {
-        uint color = (uint) (c.r | c.g << 8 | c.b << 16 | c.a << 24);
-        UnionByte b = default;
-        b.b0 = c.r;
-        b.b1 = c.g;
-        b.b2 = c.b;
-        b.b3 = c.a;
-        return b.asFloat;
- //       return *(iRef);
-//        UIntFloatUnion union;
-//        union.asFloat = 0;
-//        union.asInt = color;
-//        return union.asFloat;
     }
 
     public static float ColorToFloat(Color c) {

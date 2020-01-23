@@ -13,7 +13,9 @@ namespace UIForia.Compilers {
 
         public bool outputComments;
         public ProcessedType rootType;
+        
         public CompiledTemplate compiledTemplate;
+        public CompiledTemplate innerTemplate; // used when expanding a template to get a reference to the inner template that was expanded
 
         private readonly LightList<ParameterExpression> variables;
         private readonly LightStack<LightList<Expression>> statementStacks;
@@ -127,7 +129,6 @@ namespace UIForia.Compilers {
                     name = split[1];
                 }
 
-                // throw new CompileException("Invalid style alias: " + alias);
             }
 
             if (alias != string.Empty) {

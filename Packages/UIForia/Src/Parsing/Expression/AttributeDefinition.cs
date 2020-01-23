@@ -7,7 +7,6 @@ namespace UIForia.Parsing.Expressions {
     public enum AttributeType {
 
         Context = 1,
-        ContextVariable = 1 << 1,
         Alias = 1 << 2,
         Property = 1 << 3,
         Style = 1 << 4,
@@ -19,10 +18,8 @@ namespace UIForia.Parsing.Expressions {
         Controller = 1 << 10,
         Touch = 1 << 11,
         Slot = 1 << 12,
-        SlotContext = 1 << 13,
-
+        InstanceStyle = 1 << 13,
         Expose = 1 << 14,
-
         ImplicitVariable = 1 << 15
                            
     }
@@ -32,34 +29,19 @@ namespace UIForia.Parsing.Expressions {
 
         Const = 1 << 1,
         EnableOnly = 1 << 2,
-        StyleProperty = 1 << 4,
-        LateBinding = 1 << 5,
-        Sync = 1 << 6
+        InnerContext = 1 << 3,
+        Sync = 1 << 4,
+        OnChange = 1 << 5,
+
+        StyleStateHover = 1 << 6,
+        StyleStateFocus = 1 << 7,
+        StyleStateActive = 1 << 8
 
     }
     
     
-    // Todo -- remove
-    [DebuggerDisplay("{key}={value}")]
-    public class AttributeDefinition {
-
-        internal bool isCompiled;
-        public readonly string key;
-        public readonly string value;
-        public int line;
-        public int column;
-
-        public AttributeDefinition(string key, string value, int line = -1, int column = -1) {
-            this.key = key.Trim();
-            this.value = value.Trim();
-            this.line = line;
-            this.column = column;
-        }
-
-    }
-
     [DebuggerDisplay("type={type} {key}={value}")]
-    public struct AttributeDefinition2 {
+    public struct AttributeDefinition {
 
         public readonly string key;
         public readonly string value;
@@ -69,7 +51,7 @@ namespace UIForia.Parsing.Expressions {
         public AttributeType type;
         public AttributeFlags flags;
 
-        public AttributeDefinition2(string rawValue, AttributeType type, AttributeFlags flags,  string key, string value, int line = -1, int column = -1) {
+        public AttributeDefinition(string rawValue, AttributeType type, AttributeFlags flags,  string key, string value, int line = -1, int column = -1) {
             this.rawValue = rawValue;
             this.type = type;
             this.flags = flags;

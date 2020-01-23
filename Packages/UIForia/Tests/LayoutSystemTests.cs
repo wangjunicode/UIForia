@@ -41,7 +41,7 @@ public class LayoutSystemTests {
 
     [Test]
     public void Works() {
-        MockApplication app = new MockApplication(typeof(LayoutTestThing));
+        MockApplication app = MockApplication.Setup<LayoutTestThing>();
         app.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
         LayoutTestThing root = (LayoutTestThing) app.RootElement.GetChild(0);
         app.Update();
@@ -58,7 +58,7 @@ public class LayoutSystemTests {
 
     [Test]
     public void Updates() {
-        MockApplication app = new MockApplication(typeof(LayoutTestThing));
+        MockApplication app = MockApplication.Setup<LayoutTestThing>();
         app.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
         LayoutTestThing root = (LayoutTestThing) app.RootElement.GetChild(0);
         app.Update();
@@ -101,7 +101,7 @@ public class LayoutSystemTests {
             </Contents>
         </UITemplate>
         ";
-        MockApplication app = new MockApplication(typeof(LayoutTestThing), template);
+        MockApplication app = MockApplication.Setup<LayoutTestThing>();
         LayoutTestThing root = (LayoutTestThing) app.RootElement.GetChild(0);
         app.Update();
         Assert.AreEqual(new Rect(0, 100, 300, 50), root.child1.layoutResult.AllocatedRect);
@@ -125,7 +125,7 @@ public class LayoutSystemTests {
             </Contents>
         </UITemplate>
         ";
-        MockApplication app = new MockApplication(typeof(LayoutTestThing), template);
+        MockApplication app = MockApplication.Setup<LayoutTestThing>();
         LayoutTestThing root = (LayoutTestThing) app.RootElement.GetChild(0);
         app.Update();
         Assert.AreEqual(new Rect(0, 100, 300, 50), root.child1.layoutResult.AllocatedRect);
@@ -152,7 +152,7 @@ public class LayoutSystemTests {
             </Contents>
         </UITemplate>
         ";
-        MockApplication app = new MockApplication(typeof(LayoutTestThing), template);
+        MockApplication app = MockApplication.Setup<LayoutTestThing>();
         LayoutTestThing root = (LayoutTestThing) app.RootElement.GetChild(0);
         app.Update();
         Assert.AreEqual(new Rect(0, 100, 400, 50), root.child1.layoutResult.AllocatedRect);
@@ -182,7 +182,7 @@ public class LayoutSystemTests {
             </Contents>
         </UITemplate>
         ";
-        MockApplication app = new MockApplication(typeof(LayoutTestThing), template);
+        MockApplication app = MockApplication.Setup<LayoutTestThing>();
         LayoutTestThing root = (LayoutTestThing) app.RootElement.GetChild(0);
 
         app.Update();
@@ -212,7 +212,7 @@ public class LayoutSystemTests {
             </Contents>
         </UITemplate>
         ";
-        MockApplication app = new MockApplication(typeof(LayoutTestThing), template);
+        MockApplication app = MockApplication.Setup<LayoutTestThing>();
         LayoutTestThing root = (LayoutTestThing) app.RootElement.GetChild(0);
 
         app.Update();
@@ -243,7 +243,7 @@ public class LayoutSystemTests {
             </Contents>
         </UITemplate>
         ";
-        MockApplication app = new MockApplication(typeof(LayoutTestThing), template);
+        MockApplication app = MockApplication.Setup<LayoutTestThing>();
         app.Update();
         LayoutTestThing root = (LayoutTestThing) app.RootElement.GetChild(0);
         Assert.IsFalse(root.child1.FindById("nested-child-1").isEnabled);
@@ -274,7 +274,7 @@ public class LayoutSystemTests {
             </Contents>
         </UITemplate>
         ";
-        MockApplication app = new MockApplication(typeof(LayoutTestThing), template);
+        MockApplication app = MockApplication.Setup<LayoutTestThing>();
         app.Update();
         LayoutTestThing root = (LayoutTestThing) app.RootElement.GetChild(0);
 
@@ -307,7 +307,7 @@ public class LayoutSystemTests {
             </Contents>
         </UITemplate>
         ";
-        MockApplication app = new MockApplication(typeof(LayoutTestThing), template);
+        MockApplication app = MockApplication.Setup<LayoutTestThing>();
 
         LayoutTestThing root = (LayoutTestThing) app.RootElement.GetChild(0);
         UIElement nestedChild1 = root.child1.FindById("nested-child-1");
@@ -337,7 +337,7 @@ public class LayoutSystemTests {
             </Contents>
         </UITemplate>
         ";
-        MockApplication app = new MockApplication(typeof(LayoutTestThing), template);
+        MockApplication app = MockApplication.Setup<LayoutTestThing>();
         LayoutTestThing root = (LayoutTestThing) app.RootElement;
         root.style.SetOverflowX(Overflow.Hidden, StyleState.Normal);
         app.SetViewportRect(new Rect(0, 0, 400, 400));
@@ -369,7 +369,7 @@ public class LayoutSystemTests {
             </Contents>
         </UITemplate>
         ";
-        MockApplication app = new MockApplication(typeof(LayoutTestThing), template);
+        MockApplication app = MockApplication.Setup<LayoutTestThing>();
         LayoutTestThing root = (LayoutTestThing) app.RootElement;
         root.style.SetOverflowX(Overflow.Hidden, StyleState.Normal);
         root.style.SetOverflowY(Overflow.Hidden, StyleState.Normal);
@@ -395,7 +395,7 @@ public class LayoutSystemTests {
             </Contents>
         </UITemplate>
         ";
-        MockApplication app = new MockApplication(typeof(LayoutTestThing), template);
+        MockApplication app = MockApplication.Setup<LayoutTestThing>();
         LayoutTestThing root = (LayoutTestThing) app.RootElement;
         root.style.SetOverflowX(Overflow.Hidden, StyleState.Normal);
         root.style.SetOverflowY(Overflow.Hidden, StyleState.Normal);
@@ -426,7 +426,7 @@ public class LayoutSystemTests {
             </Contents>
         </UITemplate>
         ";
-        MockApplication app = new MockApplication(typeof(LayoutTestThing), template);
+        MockApplication app = MockApplication.Setup<LayoutTestThing>();
         LayoutTestThing root = (LayoutTestThing) app.RootElement;
         app.SetViewportRect(new Rect(0, 0, 400, 400));
 
@@ -467,7 +467,7 @@ public class LayoutSystemTests {
             </Contents>
         </UITemplate>
         ";
-        MockApplication app = new MockApplication(typeof(LayoutTestThing), template);
+        MockApplication app = MockApplication.Setup<LayoutTestThing>();
         LayoutTestThing root = (LayoutTestThing) app.RootElement;
         app.SetViewportRect(new Rect(0, 0, 400, 400));
 
@@ -493,7 +493,7 @@ public class LayoutSystemTests {
             </Contents>
         </UITemplate>
         ";
-        MockApplication app = new MockApplication(typeof(LayoutTestThing), template);
+        MockApplication app = MockApplication.Setup<LayoutTestThing>();
         LayoutTestThing root = (LayoutTestThing) app.RootElement;
         app.SetViewportRect(new Rect(0, 0, 400, 400));
 
@@ -545,7 +545,7 @@ public class LayoutSystemTests {
             </Contents>
         </UITemplate>
         ";
-        MockApplication app = new MockApplication(typeof(LayoutTestThing), template);
+        MockApplication app = MockApplication.Setup<LayoutTestThing>();
         LayoutTestThing root = (LayoutTestThing) app.RootElement;
         app.SetViewportRect(new Rect(0, 0, 400, 400));
 

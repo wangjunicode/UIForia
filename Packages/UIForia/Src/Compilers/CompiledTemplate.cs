@@ -14,7 +14,7 @@ namespace UIForia.Compilers {
         public LambdaExpression templateFn;
         public TemplateMetaData templateMetaData;
         internal ProcessedType elementType;
-        internal AttributeDefinition2[] attributes;
+        internal AttributeDefinition[] attributes;
 
     }
 

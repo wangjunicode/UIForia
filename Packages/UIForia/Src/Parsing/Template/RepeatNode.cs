@@ -5,7 +5,7 @@ namespace UIForia.Parsing {
 
     public class RepeatNode : TemplateNode {
 
-        public RepeatNode(TemplateRootNode root, TemplateNode parent, ProcessedType processedType, StructList<AttributeDefinition2> attributes, in TemplateLineInfo templateLineInfo) : base(root, parent, processedType, attributes, in templateLineInfo) { }
+        public RepeatNode(TemplateRootNode root, TemplateNode parent, ProcessedType processedType, StructList<AttributeDefinition> attributes, in TemplateLineInfo templateLineInfo) : base(root, parent, processedType, attributes, in templateLineInfo) { }
 
         public string GetItemVariableName() {
             if (attributes == null) {
@@ -13,7 +13,7 @@ namespace UIForia.Parsing {
             }
 
             for (int i = 0; i < attributes.size; i++) {
-                ref AttributeDefinition2 attr = ref attributes.array[i];
+                ref AttributeDefinition attr = ref attributes.array[i];
                 if (attr.type == AttributeType.ImplicitVariable) {
                     if (attr.key == "item") {
                         return attr.value.Trim();
@@ -30,7 +30,7 @@ namespace UIForia.Parsing {
             }
 
             for (int i = 0; i < attributes.size; i++) {
-                ref AttributeDefinition2 attr = ref attributes.array[i];
+                ref AttributeDefinition attr = ref attributes.array[i];
                 if (attr.type == AttributeType.ImplicitVariable) {
                     if (attr.key == "index") {
                         return attr.value.Trim();

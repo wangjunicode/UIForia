@@ -4,7 +4,6 @@
         
         style m {
             PreferredSize = 100px;
-            BackgroundColor = red;
         }
         
     </Style>
@@ -15,9 +14,15 @@
         
         <Div style="m" mouse:down="HandleMouseClick_EvtParam($evt)"/>
         
-        <Div style="m" mouse:down="HandleMouseClick_MixedParams($evt, 36)"/>
+        <Div style="m" mouse:down="HandleMouseClick_MixedParams($evt, $evt.MousePosition.x * 5)"/>
         
-        <Div style="m" mouse:down="HandleMouseClick_NoEvtParam('string goes here', 35)"/>
+        <Div style="m" mouse:down="HandleMouseClick_NoEvtParam('string goes here', $evt.MousePosition.x * 5)"/>
+        
+        <Div style="m" mouse:down="(evt) => SetValue(evt.MousePosition.y)"/>
+        
+        <Div style="m" mouse:down="() => SetValue($evt.MousePosition.y)"/>
+        
+<!--        <TemplateBindingTest_ThingWithMouseHandler style="m" attr:id="mousedownthing"/>-->
         
     </Contents>
     

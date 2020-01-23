@@ -10,7 +10,7 @@ namespace UIForia.Parsing {
         public TemplateRootNode expandedRoot;
         public LightList<SlotNode> slotOverrideNodes;
 
-        public ExpandedTemplateNode(TemplateRootNode root, TemplateNode parent, ProcessedType processedType, StructList<AttributeDefinition2> attributes, in TemplateLineInfo templateLineInfo) 
+        public ExpandedTemplateNode(TemplateRootNode root, TemplateNode parent, ProcessedType processedType, StructList<AttributeDefinition> attributes, in TemplateLineInfo templateLineInfo) 
             : base(root, parent, processedType, attributes, templateLineInfo) { }
 
         public override void AddChild(TemplateNode child) {

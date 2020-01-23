@@ -21,13 +21,13 @@ namespace UIForia.Parsing {
 
         public CompiledSlot compiledSlot;
 
-        public SlotNode(TemplateRootNode root, TemplateNode parent, ProcessedType processedType, StructList<AttributeDefinition2> attributes, in TemplateLineInfo templateLineInfo, string slotName, SlotType slotType)
+        public SlotNode(TemplateRootNode root, TemplateNode parent, ProcessedType processedType, StructList<AttributeDefinition> attributes, in TemplateLineInfo templateLineInfo, string slotName, SlotType slotType)
             : base(root, parent, processedType, attributes, templateLineInfo) {
             this.slotName = slotName;
             this.slotType = slotType;
         }
         
-        public AttributeDefinition2[] GetAttributes(AttributeType expose) {
+        public AttributeDefinition[] GetAttributes(AttributeType expose) {
             if (attributes == null) {
                 return null;
             }
@@ -41,7 +41,7 @@ namespace UIForia.Parsing {
 
             if (cnt == 0) return null;
             int idx = 0;
-            AttributeDefinition2[] retn = new AttributeDefinition2[cnt];
+            AttributeDefinition[] retn = new AttributeDefinition[cnt];
             for (int i = 0; i < attributes.size; i++) {
                 if (attributes.array[i].type == expose) {
                     retn[idx++] = attributes.array[i];

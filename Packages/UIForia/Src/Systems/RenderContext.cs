@@ -1,19 +1,42 @@
 using System;
-using System.Collections.Generic;
 using Src.Systems;
 using SVGX;
+using UIForia.Extensions;
 using UIForia.Layout;
 using UIForia.Rendering.Vertigo;
 using UIForia.Text;
 using UIForia.Util;
 using UnityEngine;
-using UnityEngine.Assertions;
 using UnityEngine.Rendering;
-using Object = System.Object;
-using PooledMesh = UIForia.Rendering.Vertigo.PooledMesh;
+using Object = UnityEngine.Object;
 
 namespace UIForia.Rendering {
 
+     internal struct SVGXDrawCall {
+
+        public int styleIdx;
+        public Material material;
+        public GeometryRange geometryRange;
+        
+        public readonly DrawCallType type;
+        public readonly int transformIdx;
+        public readonly RangeInt shapeRange;
+        public RangeInt objectRange;
+        public int renderStateId;
+
+        public SVGXDrawCall(DrawCallType type, int styleIdx, int transformIdx, in RangeInt shapeRange) {
+            this.type = type;
+            this.renderStateId = -1;
+            this.shapeRange = shapeRange;
+            this.transformIdx = transformIdx;
+            this.styleIdx = styleIdx;
+            this.material = null;
+            this.geometryRange = default;
+            this.objectRange = default;
+        }
+
+    }
+    
     public struct FontData {
 
         public FontAsset fontAsset;
@@ -106,6 +129,9 @@ namespace UIForia.Rendering {
         }
 
         internal RenderContext(UIForiaSettings settings) {
+            // todo -- use atlas size form settings
+            int atlasWidth = 1024;
+            int atlasHeight = 1024;
             this.pendingBatches = new StructList<Batch>();
             this.uiforiaMeshPool = new MeshPool();
             this.uiforiaMaterialPool = new UIForiaMaterialPool(settings.batchedMaterial);
@@ -120,12 +146,12 @@ namespace UIForia.Rendering {
             this.fixedRenderStateList = new StructList<FixedRenderState>();
             this.clipContext = new ClipContext(settings);
             this.pathMaterialPool = new UIForiaMaterialPool(settings.sdfPathMaterial);
-            this.textAtlas = new RenderTexture(Screen.width, Screen.height, 0, RenderTextureFormat.DefaultHDR);
-            this.spriteAtlas = new RenderTexture(Screen.width, Screen.height, 0, RenderTextureFormat.DefaultHDR);
+            this.textAtlas = new RenderTexture(atlasWidth, atlasHeight, 0, RenderTextureFormat.DefaultHDR);
+            this.spriteAtlas = new RenderTexture(atlasWidth, atlasHeight, 0, RenderTextureFormat.DefaultHDR);
             this.spriteAtlas.name = "UIForia Sprite Atlas";
             this.textAtlas.name = "UIForia Text Atlas";
             this.spriteAtlasMaterial = settings.spriteAtlasMaterial;
-            this.texturePacker = new TexturePacker(Screen.width, Screen.height);
+            this.texturePacker = new TexturePacker(atlasWidth, atlasHeight);
             this.propertyBlock = new MaterialPropertyBlock();
             this.meshesToRelease = new LightList<PooledMesh>();
         }
@@ -564,7 +590,7 @@ namespace UIForia.Rendering {
         public void PushClip(Rect clipRect) {
             // todo -- transform
             if (clipStack.size > 0) {
-                clipRect = Extensions.RectExtensions.Intersect(clipStack.array[clipStack.size - 1], clipRect);
+                clipRect = RectExtensions.Intersect(clipStack.array[clipStack.size - 1], clipRect);
             }
 
             clipStack.Push(clipRect);
@@ -622,17 +648,19 @@ namespace UIForia.Rendering {
             // todo -- do not allocate
 
             if (packer == null) {
-                packer = new SimpleRectPacker(Screen.width, Screen.height, 5);
+                packer = new SimpleRectPacker(1024, 1024, 5);
 
                 if (!packer.TryPackRect((int) size.width, (int) size.height, out rect)) {
                     throw new Exception($"Cannot fit size {size} in a render texture. Max texture size is {s_MaxTextureSize}");
                 }
 
-                renderTexture = RenderTexture.GetTemporary(Screen.width, Screen.height, defaultRTDepth, RenderTextureFormat.DefaultHDR);
-                scratchTextures.Add(new ScratchRenderTexture() {
-                    packer = packer,
-                    renderTexture = renderTexture
-                });
+                // todo -- dont use screen width / height
+                throw new NotImplementedException();
+                // renderTexture = RenderTexture.GetTemporary(Screen.width, Screen.height, defaultRTDepth, RenderTextureFormat.DefaultHDR);
+                // scratchTextures.Add(new ScratchRenderTexture() {
+                    // packer = packer,
+                    // renderTexture = renderTexture
+                // });
             }
 
             renderCommandList.Add(new RenderOperation() {
@@ -914,10 +942,10 @@ namespace UIForia.Rendering {
             Clear();
             clipContext?.Destroy();
             clipContext = null;
-            UnityEngine.Object.Destroy(spriteAtlas);
-            UnityEngine.Object.Destroy(spriteAtlasMaterial);
-            UnityEngine.Object.Destroy(textAtlas);
-            UnityEngine.Object.Destroy(pingPongTexture);
+            Object.Destroy(spriteAtlas);
+            Object.Destroy(spriteAtlasMaterial);
+            Object.Destroy(textAtlas);
+            Object.Destroy(pingPongTexture);
 
             for (int i = 0; i < meshesToRelease.size; i++) {
                 meshesToRelease[i].Release();
@@ -961,7 +989,7 @@ namespace UIForia.Rendering {
             int vertexAdjustment = 0;
 
             for (int i = 0; i < path.drawCallList.size; i++) {
-                ref SVGXDrawCall2 drawCall = ref path.drawCallList.array[i];
+                ref SVGXDrawCall drawCall = ref path.drawCallList.array[i];
 
                 if (drawCall.material != null) {
                     continue;

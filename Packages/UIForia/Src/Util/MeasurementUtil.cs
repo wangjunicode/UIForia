@@ -304,10 +304,10 @@ namespace UIForia.Util {
 //                    return box.ResolveLayoutParent().contentSize.height * measurement.value;
 
                 case OffsetMeasurementUnit.ScreenWidth:
-                    return Screen.width * measurement.value;
+                    return element.application.Width * measurement.value;
 
                 case OffsetMeasurementUnit.ScreenHeight:
-                    return Screen.height * measurement.value;
+                    return element.application.Height * measurement.value;
 
                 case OffsetMeasurementUnit.Percent:
                     return percentageRelativeVal * measurement.value;

@@ -41,10 +41,10 @@ namespace UIForia.Rendering {
 
         private ClipMaterialPool clipMaterialPool;
         private StructList<ClipBatch> batchesToRender;
-        private readonly SimpleRectPacker maskPackerR = new SimpleRectPacker(Screen.width, Screen.height, 0);
-        private readonly SimpleRectPacker maskPackerG = new SimpleRectPacker(Screen.width, Screen.height, 0);
-        private readonly SimpleRectPacker maskPackerB = new SimpleRectPacker(Screen.width, Screen.height, 0);
-        private readonly SimpleRectPacker maskPackerA = new SimpleRectPacker(Screen.width, Screen.height, 0);
+        private readonly SimpleRectPacker maskPackerR =  new SimpleRectPacker(1024, 1024, 0);
+        private readonly SimpleRectPacker maskPackerG =  new SimpleRectPacker(1024, 1024, 0);
+        private readonly SimpleRectPacker maskPackerB =  new SimpleRectPacker(1024, 1024, 0);
+        private readonly SimpleRectPacker maskPackerA =  new SimpleRectPacker(1024, 1024, 0);
         private RenderTexture clipTexture;
         private RenderTexture countTexture;
 
@@ -346,7 +346,7 @@ namespace UIForia.Rendering {
             return clipBatch;
         }
 
-        private bool BatchCanHandleShape(in ClipBatch batch, in SVGXDrawCall2 drawCall) {
+        private bool BatchCanHandleShape(in ClipBatch batch, in SVGXDrawCall drawCall) {
             return true;
         }
 
@@ -358,7 +358,7 @@ namespace UIForia.Rendering {
             int vertexAdjustment = 0;
 
             for (int drawCallIndex = 0; drawCallIndex < path.drawCallList.size; drawCallIndex++) {
-                ref SVGXDrawCall2 drawCall = ref path.drawCallList.array[drawCallIndex];
+                ref SVGXDrawCall drawCall = ref path.drawCallList.array[drawCallIndex];
 
                 if (!BatchCanHandleShape(clipBatch, drawCall)) {
                     // handle batch breaking here    

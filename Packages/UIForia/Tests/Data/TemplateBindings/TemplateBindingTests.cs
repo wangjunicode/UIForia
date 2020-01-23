@@ -12,6 +12,7 @@ using UIForia.Elements;
 using UIForia.Exceptions;
 using UIForia.UIInput;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 namespace TemplateBinding {
 
@@ -128,6 +129,7 @@ namespace TemplateBinding {
             public string output_EvtParam;
             public string output_MixedParams;
             public string output_NoEvtParam;
+            public string output_anonWithEvt;
 
             public void HandleMouseClick_NoParams() {
                 output_NoParams = "No Params Was Called";
@@ -149,6 +151,24 @@ namespace TemplateBinding {
 
             public void SetValue(float value) {
                 output_value = value;
+                Debug.Log("Down");
+            }
+
+        }
+
+        public class TemplateBindingTest_ThingWithMouseHandler : UIContainerElement {
+
+            public string downNoParam;
+            public string downParam;
+
+            [OnMouseDown]
+            public void HandleMouseDown_NoParam() {
+                downNoParam = "was down";
+            }
+
+            [OnMouseDown]
+            public void HandleMouseDown_Param(MouseInputEvent evt) {
+                downParam = "down " + evt.MousePosition.y;
             }
 
         }
@@ -157,7 +177,8 @@ namespace TemplateBinding {
         public void MouseHandlerBinding() {
             MockApplication app = Setup<TemplateBindingTest_MouseBindingBinding>();
             TemplateBindingTest_MouseBindingBinding e = (TemplateBindingTest_MouseBindingBinding) app.RootElement;
-
+            app.SetViewportRect(new Rect(0, 0, 1000, 1000));
+            
             app.Update();
 
             app.InputSystem.MouseDown(new Vector2(50, 50));
@@ -185,6 +206,26 @@ namespace TemplateBinding {
             app.Update();
 
             Assert.AreEqual("NoEvtParam was called str = string goes here param = 250", e.output_NoEvtParam);
+
+            app.InputSystem.MouseDown(new Vector2(50, 450));
+
+            app.Update();
+
+            TemplateBindingTest_ThingWithMouseHandler thing = e["mousedownthing"] as TemplateBindingTest_ThingWithMouseHandler;
+            Assert.AreEqual("was down", thing.downNoParam);
+            Assert.AreEqual("down 450", thing.downParam);
+
+            app.InputSystem.MouseDown(new Vector2(50, 550));
+
+            app.Update();
+
+            Assert.AreEqual(550, e.output_value);
+
+            app.InputSystem.MouseDown(new Vector2(50, 650));
+
+            app.Update();
+
+            Assert.AreEqual(650, e.output_value);
         }
 
         [Template("Data/TemplateBindings/TemplateBindingTest_KeyboardBinding.xml")]
@@ -763,13 +804,9 @@ namespace TemplateBinding {
 
             public string syncedValue;
 
-            public void OnPropertiesChanged() {
-                
-            }
+            public void OnPropertiesChanged() { }
 
-            public void OnValueSynchronized() {
-                
-            }
+            public void OnValueSynchronized() { }
 
         }
 
@@ -777,11 +814,11 @@ namespace TemplateBinding {
         public class TemplateBindingTest_SyncBinding_FakeInput : UIElement {
 
             public string value;
-            
+
             public override void OnUpdate() {
                 value = value + "__afterSync";
             }
-            
+
         }
 
         [Test]
@@ -789,14 +826,13 @@ namespace TemplateBinding {
             MockApplication app = Setup<TemplateBindingTest_SyncBinding_Sync>();
             TemplateBindingTest_SyncBinding_Sync e = (TemplateBindingTest_SyncBinding_Sync) app.RootElement;
             TemplateBindingTest_SyncBinding_FakeInput child = (TemplateBindingTest_SyncBinding_FakeInput) e[0];
-            
+
             e.syncedValue = "synced";
-            
+
             app.Update();
-            
+
             Assert.AreEqual("synced__afterSync", child.value);
             Assert.AreEqual("synced__afterSync", e.syncedValue);
-            
         }
 
         string GetText(UIElement element) {

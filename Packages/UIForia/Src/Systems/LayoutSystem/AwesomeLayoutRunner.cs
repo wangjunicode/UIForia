@@ -97,10 +97,13 @@ namespace UIForia.Systems {
             queryableElements.Clear();
             ignoredList.Clear();
 
+            float screenWidth = rootElement.application.Width;
+            float screenHeight = rootElement.application.Height;
+            
             screenClipper.orientedBounds.p0 = new Vector2(0, 0);
-            screenClipper.orientedBounds.p1 = new Vector2(Screen.width, 0);
-            screenClipper.orientedBounds.p2 = new Vector2(Screen.width, Screen.height);
-            screenClipper.orientedBounds.p3 = new Vector2(0, Screen.height);
+            screenClipper.orientedBounds.p1 = new Vector2(screenWidth, 0);
+            screenClipper.orientedBounds.p2 = new Vector2(screenWidth, screenHeight);
+            screenClipper.orientedBounds.p3 = new Vector2(0, screenHeight);
 
             screenClipper.intersected.array[0] = screenClipper.orientedBounds.p0;
             screenClipper.intersected.array[1] = screenClipper.orientedBounds.p1;
@@ -115,9 +118,9 @@ namespace UIForia.Systems {
             viewClipper.parent = screenClipper;
 
             viewClipper.orientedBounds.p0 = new Vector2(0, 0);
-            viewClipper.orientedBounds.p1 = new Vector2(Screen.width, 0);
-            viewClipper.orientedBounds.p2 = new Vector2(Screen.width, Screen.height);
-            viewClipper.orientedBounds.p3 = new Vector2(0, Screen.height);
+            viewClipper.orientedBounds.p1 = new Vector2(screenWidth, 0);
+            viewClipper.orientedBounds.p2 = new Vector2(screenWidth, screenHeight);
+            viewClipper.orientedBounds.p3 = new Vector2(0, screenHeight);
 
             viewClipper.intersected.array[0] = viewClipper.orientedBounds.p0;
             viewClipper.intersected.array[1] = viewClipper.orientedBounds.p1;
@@ -957,19 +960,22 @@ namespace UIForia.Systems {
             LightList<AwesomeLayoutBox>.Release(ref childList);
         }
 
-        public enum QueryFilter {
-
-            Hover,
-            MouseHandler,
-            DragHandler,
-            TouchHandler
-
-        }
-
-        public void QueryPoint(Vector2 point, QueryFilter filter, IList<UIElement> retn) { }
+        // public enum QueryFilter {
+        //
+        //     Hover,
+        //     MouseHandler,
+        //     DragHandler,
+        //     TouchHandler
+        //
+        // }
+        //
+        // public void QueryPoint(Vector2 point, QueryFilter filter, IList<UIElement> retn) { }
 
         public void QueryPoint(Vector2 point, IList<UIElement> retn) {
-            if (!new Rect(0, 0, Screen.width, Screen.height).Contains(point) || rootElement.isDisabled) {
+            
+            Application app = rootElement.application;
+            
+            if (!new Rect(0, 0, app.Width, app.Height).Contains(point) || rootElement.isDisabled) {
                 return;
             }
 

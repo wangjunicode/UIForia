@@ -56,7 +56,7 @@ public class ElementQueryTests {
 
     [Test]
     public void Query_FindById() {
-        MockApplication app = new MockApplication(typeof(FindTestThing));
+        MockApplication app = MockApplication.Setup<FindTestThing>();
 
         FindTestThing root = (FindTestThing) app.RootElement.GetChild(0);
         Assert.IsInstanceOf<UIElement>(root.target);
@@ -64,7 +64,7 @@ public class ElementQueryTests {
 
     [Test]
     public void Query_FindById_SearchChildren() {
-        MockApplication app = new MockApplication(typeof(FindTestThing));
+        MockApplication app = MockApplication.Setup<FindTestThing>();
 
         FindTestThing root = (FindTestThing) app.RootElement.GetChild(0);
         Assert.IsNotNull(root.findMe);
@@ -72,7 +72,7 @@ public class ElementQueryTests {
 
     [Test]
     public void Query_FindById_FromChild() {
-        MockApplication app = new MockApplication(typeof(FindTestThing));
+        MockApplication app = MockApplication.Setup<FindTestThing>();
         FindTestThing root = (FindTestThing) app.RootElement.GetChild(0);
         Assert.IsNotNull(root.child.childThing);
     }

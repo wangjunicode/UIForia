@@ -74,7 +74,6 @@ namespace Src.Systems {
             renderOwners[0].CreateRenderBox(element);
         }
 
-        public event Action<ImmediateRenderContext> DrawDebugOverlay;
         public event Action<RenderContext> DrawDebugOverlay2;
 
         public void OnReset() {

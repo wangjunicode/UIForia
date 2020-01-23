@@ -40,6 +40,7 @@ namespace UIForia.Compilers {
         }
 
         internal void BuildSearchMap() {
+            if (searchMap != null) return;
             if (styleReferences == null) {
                 searchMap = s_EmptySearchMap;
                 return;
@@ -89,15 +90,53 @@ namespace UIForia.Compilers {
         }
 
         public UIStyleGroupContainer ResolveStyleByName(string name) {
-            
             if (string.IsNullOrEmpty(name) || searchMap == null) {
                 return null;
             }
-            
-            int idx = BinarySearch(name);
-            
-            return idx >= 0 ? searchMap[idx].container : null;
 
+            int idx = BinarySearch(name);
+
+            return idx >= 0 ? searchMap[idx].container : null;
+        }
+
+        private static readonly char[] s_SplitChar = {'.'};
+
+        public int ResolveStyleNameSlow(string name) {
+            if (styleReferences == null) return -1;
+
+            string alias = string.Empty;
+
+            if (name.Contains(".")) {
+                string[] split = name.Split(s_SplitChar, StringSplitOptions.RemoveEmptyEntries);
+                if (split.Length == 2) {
+                    alias = split[0];
+                    name = split[1];
+                }
+            }
+
+            if (alias != string.Empty) {
+                for (int i = 0; i < styleReferences.Length; i++) {
+                    if (styleReferences[i].alias == alias) {
+                        StyleSheet sheet = styleReferences[i].styleSheet;
+                        for (int j = 0; j < sheet.styleGroupContainers.Length; j++) {
+                            UIStyleGroupContainer styleGroupContainer = sheet.styleGroupContainers[j];
+                            if (styleGroupContainer.name == name) {
+                                return styleGroupContainer.id;
+                            }
+                        }
+                    }
+                }
+            }
+            else {
+                for (int i = 0; i < styleReferences.Length; i++) {
+                    StyleSheet sheet = styleReferences[i].styleSheet;
+                    if (sheet.TryResolveStyleName(name, out UIStyleGroupContainer retn)) {
+                        return retn.id;
+                    }
+                }
+            }
+
+            return -1;
         }
 
         public UIStyleGroupContainer ResolveStyleByName(char[] name) {

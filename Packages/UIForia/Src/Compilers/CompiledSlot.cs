@@ -17,7 +17,7 @@ namespace UIForia.Compilers {
         public string templateName;
         public Type rootElementType;
         public ScopedContextVariable[] scopedVariables;
-        public AttributeDefinition2[] exposedAttributes;
+        public AttributeDefinition[] exposedAttributes;
         
         public string GetVariableName() {
             return $"Slot_{slotType}_{slotId}_{guid}";

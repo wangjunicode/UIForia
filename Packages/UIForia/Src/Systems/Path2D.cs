@@ -17,7 +17,7 @@ namespace UIForia.Rendering {
         // this class should be as light as possible since we probably have a bunch of them
         internal GeometryData geometry;
         internal readonly StructList<Matrix4x4> transforms; // can remove and check for null and use identity
-        internal readonly StructList<SVGXDrawCall2> drawCallList; // can probably remove this list and bake into object data
+        internal readonly StructList<SVGXDrawCall> drawCallList; // can probably remove this list and bake into object data
         internal readonly StructList<ObjectData> objectDataList;
 
         internal StructList<SVGXFillStyle> fillStyles;
@@ -40,7 +40,7 @@ namespace UIForia.Rendering {
         public Path2D() {
             // can i get rid of draw call list and use object data instead?
             this.geometry = GeometryData.Create();
-            this.drawCallList = new StructList<SVGXDrawCall2>(4);
+            this.drawCallList = new StructList<SVGXDrawCall>(4);
             this.transforms = new StructList<Matrix4x4>(4);
             this.objectDataList = new StructList<ObjectData>(4);
             this.fillStyles = null;
@@ -132,7 +132,7 @@ namespace UIForia.Rendering {
                 transforms.Add(currentMatrix); // don't add if we didnt change it
             }
 
-            drawCallList.Add(new SVGXDrawCall2(DrawCallType.StandardStroke, styleIdx, transforms.size - 1, currentShapeRange));
+            drawCallList.Add(new SVGXDrawCall(DrawCallType.StandardStroke, styleIdx, transforms.size - 1, currentShapeRange));
         }
 
         public void Fill(FillMode fillMode = FillMode.Normal) {
@@ -151,7 +151,7 @@ namespace UIForia.Rendering {
                 drawCallType = DrawCallType.ShadowFill;
             }
 
-            SVGXDrawCall2 drawCall = new SVGXDrawCall2(drawCallType, styleIdx, transforms.size - 1, currentShapeRange);
+            SVGXDrawCall drawCall = new SVGXDrawCall(drawCallType, styleIdx, transforms.size - 1, currentShapeRange);
 
             if (renderStateChanged) {
                 renderStateChanged = false;
@@ -178,11 +178,11 @@ namespace UIForia.Rendering {
         internal void UpdateGeometry() {
             geometry.Clear(); // todo -- can be optimized for adding / updating only
 
-            SVGXDrawCall2[] drawCalls = drawCallList.array;
+            SVGXDrawCall[] drawCalls = drawCallList.array;
             int rangeStart = 0;
 
             for (int i = 0; i < drawCallList.size; i++) {
-                ref SVGXDrawCall2 drawCall = ref drawCalls[i];
+                ref SVGXDrawCall drawCall = ref drawCalls[i];
 
                 GeometryRange range = new GeometryRange(geometry.positionList.size, 0, geometry.triangleList.size, 0);
                 RangeInt objectRange = new RangeInt();

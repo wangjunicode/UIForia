@@ -29,6 +29,23 @@ public class TestLinqCompiler {
 
     }
 
+    public class AttributeDefinition {
+
+        internal bool isCompiled;
+        public readonly string key;
+        public readonly string value;
+        public int line;
+        public int column;
+
+        public AttributeDefinition(string key, string value, int line = -1, int column = -1) {
+            this.key = key.Trim();
+            this.value = value.Trim();
+            this.line = line;
+            this.column = column;
+        }
+
+    }
+
     private class LinqThing {
 
         public float floatValue;
@@ -127,14 +144,9 @@ public class TestLinqCompiler {
 
     private static readonly Type LinqType = typeof(LinqThing);
 
-    public abstract class LinqBinding {
-        
-    }
+    public abstract class LinqBinding { }
 
-    public class ReadBinding : LinqBinding {
-
-
-    }
+    public class ReadBinding : LinqBinding { }
 
     // if no listeners and field or auto prop then just assign, no need to check
 
@@ -2611,7 +2623,7 @@ public class TestLinqCompiler {
             TestLinqCompiler.StaticThing.Increment();
         }", compiler.Print());
     }
-    
+
     [Test]
     public void CompileStatement_ParenMethodCall() {
         LinqCompiler compiler = new LinqCompiler();
@@ -2624,7 +2636,7 @@ public class TestLinqCompiler {
 
         Assert.AreEqual("13", str);
     }
-    
+
     [Test]
     public void CompileStatement_CollapseStringConcat() {
         LinqCompiler compiler = new LinqCompiler();
@@ -2635,7 +2647,7 @@ public class TestLinqCompiler {
         string str = fn("ing");
         Assert.AreEqual("string", str);
     }
-    
+
     public void AssertStringsEqual(string a, string b) {
         string[] splitA = a.Trim().Split('\n');
         string[] splitB = b.Trim().Split('\n');

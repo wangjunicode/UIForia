@@ -215,12 +215,12 @@ namespace UIForia.Exceptions {
             return new CompileException($"Unable to find a matching slot with the name {slotName} in template {path}");
         }
 
-        public static CompileException InvalidInputHandlerLambda(in AttributeDefinition2 attr, int signatureSize) {
+        public static CompileException InvalidInputHandlerLambda(in AttributeDefinition attr, int signatureSize) {
             return new CompileException($"Input handler lambda is invalid. Expected 0 or 1 arguments for handler {attr.value} but found {signatureSize}");
         }
 
-        public static CompileException UnknownStyleState(string templateShellFilePath, LineInfo lineInfo, string s) {
-            return new CompileException($"file: {templateShellFilePath}{lineInfo}\nUnable to handle style state declaration '{s}' Expected 'active', 'focus', or 'hover'");
+        public static CompileException UnknownStyleState(in AttributeNodeDebugData data, string s) {
+            return new CompileException($"file: {data.fileName}{data.lineInfo}\nUnable to handle style state declaration '{s}' Expected 'active', 'focus', or 'hover'");
         }
 
         public static CompileException UnresolvedRepeatType(string provided, params string[] others) {
@@ -237,6 +237,14 @@ namespace UIForia.Exceptions {
 
         public static CompileException DuplicateResolvedGenericArgument(string tagName, string argName, Type original, Type duplicate) {
             return new CompileException($"When attempting to resolve generic element tag {tagName}, {argName} was resolved first to {original} and later to {duplicate}. Ensure multiple usages of {argName} resolve to the same type.");
+        }
+
+        public static CompileException MultipleConditionalBindings(TemplateNodeDebugData data) {
+            return new CompileException($"Encountered multiple conditional bindings (if) on element {data.tagName} in file: {data.fileName} {data.lineInfo}. Only one conditional binding is permitted per element");
+        }
+
+        public static CompileException UnknownStyleMapping() {
+            return new CompileException($"Unknown style mapping");
         }
 
     }

@@ -303,8 +303,7 @@ namespace UIForia.Systems {
             // if dragging only attempt intersections with elements who have drag responders
             // if not dragging only attempt intersections with elements who have hover state (if mouse is present) or drag create or mouse / touch interactions
 
-            LightList<UIElement> queryResults =
-                (LightList<UIElement>) m_LayoutSystem.QueryPoint(mouseState.mousePosition, LightList<UIElement>.Get());
+            LightList<UIElement> queryResults = (LightList<UIElement>) m_LayoutSystem.QueryPoint(mouseState.mousePosition, LightList<UIElement>.Get());
 
             queryResults.Sort((a, b) => {
                 int viewDepthComparison = b.View.Depth - a.View.Depth;
@@ -845,8 +844,7 @@ namespace UIForia.Systems {
                 RunMouseEvents(m_ElementsThisFrame, InputEventType.MouseScroll);
             }
 
-            if (mouseState.isLeftMouseDownThisFrame || mouseState.isRightMouseDownThisFrame ||
-                mouseState.isMiddleMouseDownThisFrame) {
+            if (mouseState.isLeftMouseDownThisFrame || mouseState.isRightMouseDownThisFrame || mouseState.isMiddleMouseDownThisFrame) {
                 HandleBlur();
 
                 if (m_ElementsThisFrame.Count > 0 && m_ElementsThisFrame[0].View.RequestFocus()) {
@@ -855,8 +853,7 @@ namespace UIForia.Systems {
 
                 RunMouseEvents(m_ElementsThisFrame, InputEventType.MouseDown);
             }
-            else if (mouseState.isLeftMouseUpThisFrame || mouseState.isRightMouseUpThisFrame ||
-                     mouseState.isMiddleMouseUpThisFrame) {
+            else if (mouseState.isLeftMouseUpThisFrame || mouseState.isRightMouseUpThisFrame || mouseState.isMiddleMouseUpThisFrame) {
                 RunMouseEvents(m_ElementsThisFrame, InputEventType.MouseUp);
                 if (mouseState.clickCount > 0) {
                     RunMouseEvents(m_ElementsThisFrame, InputEventType.MouseClick);

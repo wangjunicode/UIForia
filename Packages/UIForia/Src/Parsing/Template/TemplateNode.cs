@@ -1,12 +1,37 @@
 using System;
 using UIForia.Parsing.Expressions;
+using UIForia.Text;
 using UIForia.Util;
 
 namespace UIForia.Parsing {
 
+    public struct TemplateNodeDebugData {
+
+        public string fileName;
+        public string tagName;
+        public TemplateLineInfo lineInfo;
+
+    }
+
+    public struct AttributeNodeDebugData {
+
+        public string fileName;
+        public string tagName;
+        public string content;
+        public TemplateLineInfo lineInfo;
+
+        public AttributeNodeDebugData(string fileName, string tagName, TemplateLineInfo lineInfo, string content) {
+            this.fileName = fileName;
+            this.tagName = tagName;
+            this.lineInfo = lineInfo;
+            this.content = content;
+        }
+    }
+    
+        
     public abstract class TemplateNode {
 
-        public StructList<AttributeDefinition2> attributes;
+        public StructList<AttributeDefinition> attributes;
         public LightList<TemplateNode> children;
         public TemplateRootNode root;
         public TemplateNode parent;
@@ -16,7 +41,7 @@ namespace UIForia.Parsing {
         public string namespaceName;
         public TemplateLineInfo lineInfo;
 
-        protected TemplateNode(TemplateRootNode root, TemplateNode parent, ProcessedType processedType, StructList<AttributeDefinition2> attributes, in TemplateLineInfo templateLineInfo) {
+        protected TemplateNode(TemplateRootNode root, TemplateNode parent, ProcessedType processedType, StructList<AttributeDefinition> attributes, in TemplateLineInfo templateLineInfo) {
             this.root = root;
             this.parent = parent;
             this.attributes = attributes;
@@ -29,19 +54,6 @@ namespace UIForia.Parsing {
             children.Add(child);
         }
 
-        public bool HasAttribute(string attr) {
-            if (attributes == null) return false;
-            for (int i = 0; i < attributes.size; i++) {
-                if (attributes.array[i].type == AttributeType.Attribute) {
-                    if (attributes.array[i].key == attr) {
-                        return true;
-                    }
-                }
-            }
-
-            return false;
-        }
-        
         public bool HasProperty(string attr) {
             if (attributes == null) return false;
             for (int i = 0; i < attributes.size; i++) {
@@ -59,21 +71,13 @@ namespace UIForia.Parsing {
 
         public int ChildCount => children?.size ?? 0;
         public Type ElementType => processedType.rawType;
+        
+        public TemplateNodeDebugData TemplateNodeDebugData => new TemplateNodeDebugData() {
+            lineInfo = lineInfo,
+            tagName = tagName,
+            fileName = root.templateShell.filePath
+        };
 
-        public int GetAttributeCount() {
-            if (attributes == null) {
-                return 0;
-            }
-
-            int attrCnt = 0;
-            for (int i = 0; i < attributes.size; i++) {
-                if (attributes.array[i].type == AttributeType.Attribute) {
-                    attrCnt++;
-                }
-            }
-
-            return attrCnt;
-        }
 
     }
 

@@ -134,6 +134,10 @@ namespace UIForia.Elements {
         public virtual void OnCreate() { }
 
         public virtual void OnUpdate() { }
+        
+        public virtual void OnBeforePropertyBindings() { }
+        
+        public virtual void OnAfterPropertyBindings() { }
 
         public virtual void OnEnable() { }
 

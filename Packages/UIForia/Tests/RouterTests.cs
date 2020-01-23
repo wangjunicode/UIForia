@@ -23,7 +23,7 @@ public class RouterTests {
    
     [Test]
     public void ParseDefaultRouteWithParameter() {
-        MockApplication app = new MockApplication(typeof(ParsersRouterNestedThing));
+        MockApplication app = MockApplication.Setup<ParsersRouterNestedThing>();
         app.Update();
         
         var uiElement1 = app.RootElement.GetChild(0).GetChild(0);
@@ -57,7 +57,7 @@ public class RouterTests {
    
     [Test]
     public void DeeplyNestedRoutersShouldWork() {
-        MockApplication app = new MockApplication(typeof(DeeplyNestedRouters));
+        MockApplication app = MockApplication.Setup<DeeplyNestedRouters>();
         app.Update();
         
         var uiElement1 = app.RootElement.GetChild(0).GetChild(0);
@@ -77,7 +77,7 @@ public class RouterTests {
 
     [Test]
     public void ParseInnerRouteWithParameter() {
-        MockApplication app = new MockApplication(typeof(ParsersRouterNestedThing));
+        MockApplication app = MockApplication.Setup<ParsersRouterNestedThing>();
         app.Update();
         
         var uiElement1 = app.RootElement.GetChild(0).GetChild(0);
@@ -117,7 +117,7 @@ public class RouterTests {
 
     [Test]
     public void ParseInnerRouteWithDefaultAttribute() {
-        MockApplication app = new MockApplication(typeof(RoutesWithDefaults));
+        MockApplication app = MockApplication.Setup<RoutesWithDefaults>();
         app.Update();
        
         var helpElement = app.RootElement.GetChild(0).FindById<UIGroupElement>("help");
@@ -135,7 +135,7 @@ public class RouterTests {
     
     [Test]
     public void GoBackAndForwards() {
-        MockApplication app = new MockApplication(typeof(RoutesWithDefaults));
+        MockApplication app = MockApplication.Setup<RoutesWithDefaults>();
         app.Update();
        
         var helpElement = app.RootElement.GetChild(0).FindById<UIGroupElement>("help");
@@ -185,7 +185,7 @@ public class RouterTests {
     
     [Test]
     public void NavigateDifferentRouters() {
-        MockApplication app = new MockApplication(typeof(GameViewWithLotsOfRouters));
+        MockApplication app = MockApplication.Setup<GameViewWithLotsOfRouters>();
         app.Update();
        
         var characterDetail = app.RootElement.GetChild(0).FindById<UIDivElement>("characterDetail");

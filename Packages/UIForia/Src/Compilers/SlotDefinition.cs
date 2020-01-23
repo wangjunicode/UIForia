@@ -17,7 +17,7 @@ namespace UIForia.Compilers {
         public byte parentSlotId_1;
         public byte parentSlotId_2;
         public byte parentSlotId_3;
-        public StructList<AttributeDefinition2> contextAttributes;
+        public StructList<AttributeDefinition> contextAttributes;
 
         public SlotDefinition(string slotName, SlotType slotType) {
             this.slotName = slotName;

@@ -1,8 +1,5 @@
 using System;
-using System.Runtime.InteropServices;
-using UIForia.Rendering;
 using UIForia.Util;
-using Unity.Mathematics;
 using UnityEngine;
 
 namespace Vertigo {

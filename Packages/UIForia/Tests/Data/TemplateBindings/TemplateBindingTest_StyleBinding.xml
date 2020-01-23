@@ -5,7 +5,7 @@
     
     <Contents>
 
-        <Div style.BackgroundColor="Color.red" style.hover.TransformPositionX="new OffsetMeasurement(53, OffsetMeasurementUnit.ViewportWidth)"/>
+        <Div style:backgroundColor="Color.red" style:hover.TransformPositionX="new OffsetMeasurement(53, OffsetMeasurementUnit.ViewportWidth)"/>
         
     </Contents>
     

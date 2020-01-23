@@ -57,7 +57,7 @@ public class ElementTests {
 
     [Test]
     public void ProperDepth() {
-        MockApplication app = new MockApplication(typeof(DepthThing));
+        MockApplication app = MockApplication.Setup<DepthThing>();
         DepthThing root = (DepthThing) app.RootElement;
         Assert.AreEqual(1, root.depth);
         Assert.AreEqual(2, root.g1.depth);
@@ -69,7 +69,7 @@ public class ElementTests {
     
     [Test]
     public void ProperDepthNested() {
-        MockApplication app = new MockApplication(typeof(DepthThing));
+        MockApplication app = MockApplication.Setup<DepthThing>();
         DepthThing root = (DepthThing) app.RootElement;
         DepthThingChild child = root.FindFirstByType<DepthThingChild>();
         Assert.AreEqual(2, child.depth);
@@ -82,7 +82,7 @@ public class ElementTests {
     
     [Test]
     public void ProperSiblingIndex() {
-        MockApplication app = new MockApplication(typeof(DepthThing));
+        MockApplication app = MockApplication.Setup<DepthThing>();
         DepthThing root = (DepthThing) app.RootElement;
         Assert.AreEqual(0, root.siblingIndex);
         Assert.AreEqual(0, root.g1.siblingIndex);
@@ -90,40 +90,6 @@ public class ElementTests {
         Assert.AreEqual(1, root.g2.siblingIndex);
         Assert.AreEqual(0, root.g2_1.siblingIndex);
         Assert.AreEqual(1, root.g2_2.siblingIndex);
-    }
-
-    [Template(TemplateType.String, @"
-    <UITemplate>
-        <Contents>
-           <GenericThing--int/>
-        </Contents>
-    </UITemplate>
-    ")]
-    public class GenericWrapper : UIElement {}
-    
-    [Template(TemplateType.String, @"
-    <UITemplate>
-        <Contents>
-           
-        </Contents>
-    </UITemplate>
-    ")]
-    public class GenericThing<T> : UIElement {
-
-
-    }
-    
-    [Test]
-    public void HandleGenericElementTypes() {
-        string template = @"
-            <UITemplate>
-                <Contents>
-                    <GenericThing--int/>
-                </Contents>
-            </UITemplate>
-        ";
-        MockApplication app = new MockApplication(typeof(GenericWrapper), template);
-        Assert.IsInstanceOf<GenericThing<int>>(app.RootElement.GetChild(0));
     }
     
 }

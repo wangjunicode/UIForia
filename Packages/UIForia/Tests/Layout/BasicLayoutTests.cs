@@ -12,7 +12,7 @@ public class BasicLayoutTests {
     [Test]
     public void GathersDirtyData() {
         
-        MockApplication app = new MockApplication(typeof(BasicLayoutTest_GathersDirtyData));
+        MockApplication app = MockApplication.Setup<BasicLayoutTest_GathersDirtyData>();
         
         UIElement viewRoot = app.RootElement;
         BasicLayoutTest_GathersDirtyData root = app.RootElement.children[0] as BasicLayoutTest_GathersDirtyData;
@@ -44,7 +44,7 @@ public class BasicLayoutTests {
     [Test]
     public void RunWidthLayout() {
         
-        MockApplication app = new MockApplication(typeof(BasicLayoutTest_GathersDirtyData));
+        MockApplication app = MockApplication.Setup<BasicLayoutTest_GathersDirtyData>();
         
         BasicLayoutTest_GathersDirtyData root = app.RootElement.children[0] as BasicLayoutTest_GathersDirtyData;
 
@@ -81,8 +81,7 @@ public class BasicLayoutTests {
     [Test]
     public void HandleEnableDisableElementWithContentAncestor() {
         
-        MockApplication app = new MockApplication(typeof(BasicLayoutTest_ContentAncestor));
-        
+        MockApplication app = MockApplication.Setup<BasicLayoutTest_ContentAncestor>();
         BasicLayoutTest_ContentAncestor root = app.RootElement.children[0] as BasicLayoutTest_ContentAncestor;
 
         app.Update();
@@ -113,7 +112,7 @@ public class BasicLayoutTests {
     [Test]
     public void RespondToBlockSizeChange() {
         
-        MockApplication app = new MockApplication(typeof(BasicLayoutTest_BlockSizeChanges));
+        MockApplication app = MockApplication.Setup<BasicLayoutTest_BlockSizeChanges>();
         
         UIElement viewRoot = app.RootElement;
 
@@ -157,7 +156,7 @@ public class BasicLayoutTests {
     [Test]
     public void UseViewBlockSize() {
         
-        MockApplication app = new MockApplication(typeof(BasicLayoutTest_BlockSizeChanges));
+        MockApplication app = MockApplication.Setup<BasicLayoutTest_BlockSizeChanges>();
         
         UIElement viewRoot = app.RootElement;
 

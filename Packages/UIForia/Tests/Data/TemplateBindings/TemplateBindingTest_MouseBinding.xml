@@ -18,6 +18,8 @@
         
         <Div style="m" mouse:down="HandleMouseClick_NoEvtParam('string goes here', $evt.MousePosition.x * 5)"/>
         
+        <TemplateBindingTest_ThingWithMouseHandler style="m" attr:id="mousedownthing"/>
+        
         <Div style="m" mouse:down="(evt) => SetValue(evt.MousePosition.y)"/>
         
         <Div style="m" mouse:down="() => SetValue($evt.MousePosition.y)"/>

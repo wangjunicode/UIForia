@@ -64,10 +64,10 @@ public class InputSystem_DragTests {
 
     [Test]
     public void DragCreate_CreateFromAnnotation() {
-        MockApplication testView = new MockApplication(typeof(DragTestThing));
+        MockApplication testView = MockApplication.Setup<DragTestThing>();
         testView.Update();
         testView.SetViewportRect(new Rect(0, 0, 1000, 1000));
-        DragTestThing root = (DragTestThing) testView.RootElement.GetChild(0);
+        DragTestThing root = (DragTestThing) testView.RootElement;
         root.ignoreChildDrag = true;
         testView.InputSystem.MouseDown(new Vector2(20, 20));
         testView.Update();
@@ -83,7 +83,7 @@ public class InputSystem_DragTests {
 
     [Test]
     public void DragCreate_CreateFromChildTemplate() {
-        MockApplication testView = new MockApplication(typeof(DragTestThing));
+        MockApplication testView = MockApplication.Setup<DragTestThing>();
         testView.Update();
         testView.SetViewportRect(new Rect(0, 0, 1000, 1000));
 
@@ -101,14 +101,14 @@ public class InputSystem_DragTests {
 
     [Test]
     public void DragCreate_MustReturnDragEvent() {
-        var exception = Assert.Throws<Exception>(() => { new MockApplication(typeof(FailDragTestThing)); });
+        var exception = Assert.Throws<Exception>(() => { MockApplication.Setup<FailDragTestThing>(); });
         /*
          * Unfortunately some broken state is left if the application crashes because of an exception.
          * The next thing that renders will be rendered incorrectly but clears some of that mysterious broken state
          * so that the next rendering will be correct again... So until we find out how and what to reset after this
          * test we just start another non-broken TestThing so the next test isn't affected.
          */
-        new MockApplication(typeof(DragTestThing));
+        MockApplication.Setup<DragTestThing>();
         Assert.AreEqual($"Methods annotated with {nameof(OnDragCreateAttribute)} must return an instance of {nameof(DragEvent)}", exception.Message);
     }
 
@@ -172,10 +172,10 @@ public class InputSystem_DragTests {
 
     [Test]
     public void DragEnter_Fires() {
-        MockApplication testView = new MockApplication(typeof(DragHandlerTestThing));
+        MockApplication testView = MockApplication.Setup<DragHandlerTestThing>();
         testView.Update();
         testView.SetViewportRect(new Rect(0, 0, 1000, 1000));
-        DragHandlerTestThing root = (DragHandlerTestThing) testView.RootElement.GetChild(0);
+        DragHandlerTestThing root = (DragHandlerTestThing) testView.RootElement;
         testView.Update();
 
         Assert.AreEqual(0, root.dragList.Count);
@@ -197,10 +197,10 @@ public class InputSystem_DragTests {
 
     [Test]
     public void DragEnter_DoesNotFireAgainForSamePosition() {
-        MockApplication testView = new MockApplication(typeof(DragHandlerTestThing));
+        MockApplication testView = MockApplication.Setup<DragHandlerTestThing>();
         testView.Update();
         testView.SetViewportRect(new Rect(0, 0, 1000, 1000));
-        DragHandlerTestThing root = (DragHandlerTestThing) testView.RootElement.GetChild(0);
+        DragHandlerTestThing root = (DragHandlerTestThing) testView.RootElement;
         testView.Update();
 
         Assert.AreEqual(0, root.dragList.Count);
@@ -220,10 +220,10 @@ public class InputSystem_DragTests {
 
     [Test]
     public void DragEnter_DoesNotFireAgainForPositionSameElement() {
-        MockApplication testView = new MockApplication(typeof(DragHandlerTestThing));
+        MockApplication testView = MockApplication.Setup<DragHandlerTestThing>();
         testView.Update();
         testView.SetViewportRect(new Rect(0, 0, 1000, 1000));
-        DragHandlerTestThing root = (DragHandlerTestThing) testView.RootElement.GetChild(0);
+        DragHandlerTestThing root = (DragHandlerTestThing) testView.RootElement;
         testView.Update();
 
         Assert.AreEqual(0, root.dragList.Count);
@@ -243,10 +243,10 @@ public class InputSystem_DragTests {
 
     [Test]
     public void DragEnter_FiresForNewElement() {
-        MockApplication testView = new MockApplication(typeof(DragHandlerTestThing));
+        MockApplication testView = MockApplication.Setup<DragHandlerTestThing>();
         testView.Update();
         testView.SetViewportRect(new Rect(0, 0, 1000, 1000));
-        DragHandlerTestThing root = (DragHandlerTestThing) testView.RootElement.GetChild(0);
+        DragHandlerTestThing root = (DragHandlerTestThing) testView.RootElement;
         testView.Update();
 
         Assert.AreEqual(0, root.dragList.Count);
@@ -267,10 +267,10 @@ public class InputSystem_DragTests {
 
     [Test]
     public void DragEnter_FiresForReEnteringElement() {
-        MockApplication testView = new MockApplication(typeof(DragHandlerTestThing));
+        MockApplication testView = MockApplication.Setup<DragHandlerTestThing>();
         testView.Update();
         testView.SetViewportRect(new Rect(0, 0, 1000, 1000));
-        DragHandlerTestThing root = (DragHandlerTestThing) testView.RootElement.GetChild(0);
+        DragHandlerTestThing root = (DragHandlerTestThing) testView.RootElement;
 
         Assert.AreEqual(0, root.dragList.Count);
         root.ignoreExit = true;
@@ -293,10 +293,10 @@ public class InputSystem_DragTests {
 
     [Test]
     public void DragExit_FiresAndPropagates() {
-        MockApplication testView = new MockApplication(typeof(DragHandlerTestThing));
+        MockApplication testView = MockApplication.Setup<DragHandlerTestThing>();
         testView.Update();
         testView.SetViewportRect(new Rect(0, 0, 1000, 1000));
-        DragHandlerTestThing root = (DragHandlerTestThing) testView.RootElement.GetChild(0);
+        DragHandlerTestThing root = (DragHandlerTestThing) testView.RootElement;
 
         testView.InputSystem.MouseDown(new Vector2(10, 10));
         testView.Update();
@@ -316,10 +316,10 @@ public class InputSystem_DragTests {
 
     [Test]
     public void DragExit_FireOnlyForExitedElement() {
-        MockApplication testView = new MockApplication(typeof(DragHandlerTestThing));
+        MockApplication testView = MockApplication.Setup<DragHandlerTestThing>();
         testView.Update();
         testView.SetViewportRect(new Rect(0, 0, 1000, 1000));
-        DragHandlerTestThing root = (DragHandlerTestThing) testView.RootElement.GetChild(0);
+        DragHandlerTestThing root = (DragHandlerTestThing) testView.RootElement;
 
         testView.InputSystem.MouseDown(new Vector2(10, 10));
         testView.Update();
@@ -339,10 +339,10 @@ public class InputSystem_DragTests {
 
     [Test]
     public void DragExit_FireAgainWhenReenteredElement() {
-        MockApplication testView = new MockApplication(typeof(DragHandlerTestThing));
+        MockApplication testView = MockApplication.Setup<DragHandlerTestThing>();
         testView.Update();
         testView.SetViewportRect(new Rect(0, 0, 1000, 1000));
-        DragHandlerTestThing root = (DragHandlerTestThing) testView.RootElement.GetChild(0);
+        DragHandlerTestThing root = (DragHandlerTestThing) testView.RootElement;
 
         testView.InputSystem.MouseDown(new Vector2(10, 10));
         testView.Update();
@@ -403,10 +403,10 @@ public class InputSystem_DragTests {
 
     [Test]
     public void DragMove_FiresAndPropagates() {
-        MockApplication testView = new MockApplication(typeof(DragHandlerTestThing_Move));
+        MockApplication testView = MockApplication.Setup<DragHandlerTestThing_Move>();
         testView.Update();
         testView.SetViewportRect(new Rect(0, 0, 1000, 1000));
-        DragHandlerTestThing_Move root = (DragHandlerTestThing_Move) testView.RootElement.GetChild(0);
+        DragHandlerTestThing_Move root = (DragHandlerTestThing_Move) testView.RootElement;
 
         testView.InputSystem.MouseDown(new Vector2(10, 10));
         testView.Update();
@@ -424,10 +424,10 @@ public class InputSystem_DragTests {
 
     [Test]
     public void DragMove_FiresAgainWhenMovedAndContains() {
-        MockApplication testView = new MockApplication(typeof(DragHandlerTestThing_Move));
+        MockApplication testView = MockApplication.Setup<DragHandlerTestThing_Move>();
         testView.Update();
         testView.SetViewportRect(new Rect(0, 0, 1000, 1000));
-        DragHandlerTestThing_Move root = (DragHandlerTestThing_Move) testView.RootElement.GetChild(0);
+        DragHandlerTestThing_Move root = (DragHandlerTestThing_Move) testView.RootElement;
 
         testView.InputSystem.MouseDown(new Vector2(10, 10));
         testView.Update();
@@ -446,10 +446,10 @@ public class InputSystem_DragTests {
 
     [Test]
     public void DragMove_DoesNotFireAgainWhenNotMovedAndContains() {
-        MockApplication testView = new MockApplication(typeof(DragHandlerTestThing_Move));
+        MockApplication testView = MockApplication.Setup<DragHandlerTestThing_Move>();
         testView.Update();
         testView.SetViewportRect(new Rect(0, 0, 1000, 1000));
-        DragHandlerTestThing_Move root = (DragHandlerTestThing_Move) testView.RootElement.GetChild(0);
+        DragHandlerTestThing_Move root = (DragHandlerTestThing_Move) testView.RootElement;
 
         testView.InputSystem.MouseDown(new Vector2(10, 10));
         testView.Update();
@@ -509,10 +509,10 @@ public class InputSystem_DragTests {
 
     [Test]
     public void DragMove_FiresAndPropagatesWithDragEvent() {
-        MockApplication testView = new MockApplication(typeof(DragHandlerTestThing_MoveWithDragEvent));
+        MockApplication testView = MockApplication.Setup<DragHandlerTestThing_MoveWithDragEvent>();
         testView.Update();
         testView.SetViewportRect(new Rect(0, 0, 1000, 1000));
-        DragHandlerTestThing_MoveWithDragEvent root = (DragHandlerTestThing_MoveWithDragEvent) testView.RootElement.GetChild(0);
+        DragHandlerTestThing_MoveWithDragEvent root = (DragHandlerTestThing_MoveWithDragEvent) testView.RootElement;
 
         testView.InputSystem.MouseDown(new Vector2(10, 10));
         testView.Update();

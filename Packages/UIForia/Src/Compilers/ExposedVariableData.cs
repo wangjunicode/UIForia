@@ -8,7 +8,7 @@ namespace UIForia.Compilers {
 
         public Type rootType;
         public ScopedContextVariable[] scopedVariables;
-        public AttributeDefinition2[] exposedAttrs;
+        public AttributeDefinition[] exposedAttrs;
 
     }
 

@@ -1,3 +1,4 @@
+using System;
 using NUnit.Framework;
 using Src.Systems;
 using Tests.Mocks;
@@ -48,7 +49,8 @@ public class RenderOwnerTests {
             </Contents>
         </UITemplate>
         ";
-        MockApplication app = new MockApplication(typeof(LayoutSystemTests.LayoutTestThing), template);
+        throw new NotImplementedException("Upgrade this");
+        MockApplication app = MockApplication.Setup<LayoutSystemTests.LayoutTestThing>();
         LayoutSystemTests.LayoutTestThing root = (LayoutSystemTests.LayoutTestThing) app.RootElement.GetChild(0);
 
         app.Update();
@@ -147,7 +149,9 @@ public class RenderOwnerTests {
             </Contents>
         </UITemplate>
         ";
-        MockApplication app = new MockApplication(typeof(LayoutSystemTests.LayoutTestThing), template);
+                throw new NotImplementedException("Upgrade this");
+
+        MockApplication app = MockApplication.Setup<LayoutSystemTests.LayoutTestThing>();
         LayoutSystemTests.LayoutTestThing root = (LayoutSystemTests.LayoutTestThing) app.RootElement.GetChild(0);
 
         app.Update();

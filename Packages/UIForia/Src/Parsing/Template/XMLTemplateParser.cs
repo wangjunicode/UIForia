@@ -11,6 +11,7 @@ using UIForia.Parsing.Expressions;
 using UIForia.Templates;
 using UIForia.Text;
 using UIForia.Util;
+using UnityEngine;
 
 namespace UIForia.Parsing {
 
@@ -36,20 +37,16 @@ namespace UIForia.Parsing {
 
     public class XMLTemplateParser {
 
-        internal readonly bool outputComments;
-
         private readonly XmlParserContext parserContext;
         private readonly Dictionary<string, TemplateShell> parsedFiles;
 
         public XMLTemplateParser(bool outputComments = true) {
-            this.outputComments = outputComments;
             this.parsedFiles = new Dictionary<string, TemplateShell>(37);
             XmlNamespaceManager nameSpaceManager = new XmlNamespaceManager(new NameTable());
             nameSpaceManager.AddNamespace("attr", "attr");
             nameSpaceManager.AddNamespace("alias", "alias");
             nameSpaceManager.AddNamespace("expose", "expose");
             nameSpaceManager.AddNamespace("slot", "slot");
-            nameSpaceManager.AddNamespace("late", "late");
             nameSpaceManager.AddNamespace("sync", "sync");
             nameSpaceManager.AddNamespace("var", "var");
             nameSpaceManager.AddNamespace("evt", "evt");
@@ -86,27 +83,26 @@ namespace UIForia.Parsing {
 
             XElement[] array = contentElements.ToArray();
 
-            if (array.Length == 0) { }
-            else {
-                foreach (XElement contentElement in array) {
-                    XAttribute attr = contentElement.GetAttribute("id");
 
-                    string templateId = null;
+            foreach (XElement contentElement in array) {
+                XAttribute attr = contentElement.GetAttribute("id");
 
-                    if (attr != null) {
-                        templateId = attr.Value.Trim();
-                    }
+                string templateId = null;
 
-                    if (retn.HasContentNode(templateId)) {
-                        throw new ArgumentException("Multiple templates found with id: " + templateId);
-                    }
-
-                    retn.unprocessedContentNodes.Add(new RawTemplateContent() {
-                        templateId = templateId,
-                        content = contentElement
-                    });
+                if (attr != null) {
+                    templateId = attr.Value.Trim();
                 }
+
+                if (retn.HasContentNode(templateId)) {
+                    throw new ArgumentException("Multiple templates found with id: " + templateId);
+                }
+
+                retn.unprocessedContentNodes.Add(new RawTemplateContent() {
+                    templateId = templateId,
+                    content = contentElement
+                });
             }
+
 
             return retn;
         }
@@ -142,16 +138,42 @@ namespace UIForia.Parsing {
 
             IXmlLineInfo xmlLineInfo = root;
 
-            StructList<AttributeDefinition2> attributes = ParseAttributes(root.Attributes());
+            StructList<AttributeDefinition> attributes = ParseAttributes(shell.filePath, "Contents", root.Attributes());
             // ElementTemplateNode templateNode = new ElementTemplateNode(processedType.templateAttr.templateId, shell, processedType, attributes, new TemplateLineInfo(xmlLineInfo.LineNumber, xmlLineInfo.LinePosition));
-            templateRootNode.attributes = attributes;
+            templateRootNode.attributes = ValidateRootAttributes(shell.filePath, attributes);
             templateRootNode.lineInfo = new TemplateLineInfo(xmlLineInfo.LineNumber, xmlLineInfo.LinePosition);
 
             ParseChildren(templateRootNode, templateRootNode, root.Nodes());
-            
         }
 
-        private TemplateNode ParseElementTag(TemplateRootNode templateRootRoot, TemplateNode parent, string namespacePath, string tagName, StructList<AttributeDefinition2> attributes, in TemplateLineInfo templateLineInfo) {
+        private StructList<AttributeDefinition> ValidateRootAttributes(string fileName, StructList<AttributeDefinition> attributes) {
+            if (attributes == null) return null;
+
+            for (int i = 0; i < attributes.size; i++) {
+                ref AttributeDefinition attr = ref attributes.array[i];
+
+                // contents should remove `id` attr
+                if (attr.type == AttributeType.Attribute && attr.key == "id") {
+                    attributes.RemoveAt(i--);
+                    continue;
+                }
+
+                if (attr.type == AttributeType.Conditional) {
+                    Debug.LogError($"<Contents> cannot contain conditional bindings. Ignoring {attr.rawValue} in file {fileName} line {attr.line}");
+                    attributes.RemoveAt(i--);
+                    continue;
+                }
+
+                if (attr.type == AttributeType.Property) {
+                    Debug.LogError($"<Contents> cannot contain property bindings. Ignoring {attr.rawValue} in file {fileName} line {attr.line}");
+                    attributes.RemoveAt(i--);
+                }
+            }
+
+            return attributes;
+        }
+
+        private TemplateNode ParseElementTag(TemplateRootNode templateRootRoot, TemplateNode parent, string namespacePath, string tagName, StructList<AttributeDefinition> attributes, in TemplateLineInfo templateLineInfo) {
             ProcessedType processedType = null;
             TemplateNode node = null;
 
@@ -183,9 +205,9 @@ namespace UIForia.Parsing {
                 }
 
                 expanded.AddSlotOverride((SlotNode) node);
-                
+
                 processedType.ValidateAttributes(attributes);
-                
+
                 return node;
             }
 
@@ -256,7 +278,7 @@ namespace UIForia.Parsing {
             return node;
         }
 
-        private static string GetSlotName(StructList<AttributeDefinition2> attributes) {
+        private static string GetSlotName(StructList<AttributeDefinition> attributes) {
             if (attributes == null) return null;
             for (int i = 0; i < attributes.size; i++) {
                 if (attributes.array[i].type == AttributeType.Slot && string.Equals(attributes.array[i].key, "name", StringComparison.Ordinal)) {
@@ -269,7 +291,7 @@ namespace UIForia.Parsing {
             return null;
         }
 
-        private static string GetSlotAlias(string slotName, StructList<AttributeDefinition2> attributes) {
+        private static string GetSlotAlias(string slotName, StructList<AttributeDefinition> attributes) {
             if (attributes == null) return slotName;
             for (int i = 0; i < attributes.size; i++) {
                 if (attributes.array[i].type == AttributeType.Slot && string.Equals(attributes.array[i].key, "alias", StringComparison.Ordinal)) {
@@ -300,7 +322,7 @@ namespace UIForia.Parsing {
             }
         }
 
-        private void ParseChildren(TemplateRootNode templateRootRoot, TemplateNode parent, IEnumerable<XNode> nodes) {
+        private void ParseChildren(TemplateRootNode templateRoot, TemplateNode parent, IEnumerable<XNode> nodes) {
             string textContext = string.Empty;
             foreach (XNode node in nodes) {
                 switch (node.NodeType) {
@@ -321,7 +343,7 @@ namespace UIForia.Parsing {
 
                         if (textContext.Length > 0) {
                             IXmlLineInfo textLineInfo = element.PreviousNode;
-                            CreateOrUpdateTextNode(templateRootRoot, parent, textContext, new TemplateLineInfo(textLineInfo.LineNumber, textLineInfo.LinePosition));
+                            CreateOrUpdateTextNode(templateRoot, parent, textContext, new TemplateLineInfo(textLineInfo.LineNumber, textLineInfo.LinePosition));
                             textContext = string.Empty;
                         }
 
@@ -329,12 +351,12 @@ namespace UIForia.Parsing {
                         string tagName = element.Name.LocalName;
                         string namespaceName = element.Name.NamespaceName;
 
-                        StructList<AttributeDefinition2> attributes = ParseAttributes(element.Attributes());
+                        StructList<AttributeDefinition> attributes = ParseAttributes(templateRoot.templateShell.filePath, tagName, element.Attributes());
 
                         IXmlLineInfo lineInfo = element;
-                        TemplateNode p = ParseElementTag(templateRootRoot, parent, namespaceName, tagName, attributes, new TemplateLineInfo(lineInfo.LineNumber, lineInfo.LinePosition));
+                        TemplateNode p = ParseElementTag(templateRoot, parent, namespaceName, tagName, attributes, new TemplateLineInfo(lineInfo.LineNumber, lineInfo.LinePosition));
 
-                        ParseChildren(templateRootRoot, p, element.Nodes());
+                        ParseChildren(templateRoot, p, element.Nodes());
 
                         continue;
                     }
@@ -347,12 +369,12 @@ namespace UIForia.Parsing {
             }
 
             if (textContext.Length != 0) {
-                CreateOrUpdateTextNode(templateRootRoot, parent, textContext, parent.lineInfo); // todo -- line info probably wrong
+                CreateOrUpdateTextNode(templateRoot, parent, textContext, parent.lineInfo); // todo -- line info probably wrong
             }
         }
 
-        private static StructList<AttributeDefinition2> ParseAttributes(IEnumerable<XAttribute> xmlAttributes) {
-            StructList<AttributeDefinition2> attributes = StructList<AttributeDefinition2>.GetMinSize(4);
+        private static StructList<AttributeDefinition> ParseAttributes(string fileName, string tagName, IEnumerable<XAttribute> xmlAttributes) {
+            StructList<AttributeDefinition> attributes = StructList<AttributeDefinition>.GetMinSize(4);
             foreach (XAttribute attr in xmlAttributes) {
                 string prefix = attr.Name.NamespaceName;
                 string name = attr.Name.LocalName.Trim();
@@ -367,13 +389,21 @@ namespace UIForia.Parsing {
                 AttributeType attributeType = AttributeType.Property;
                 AttributeFlags flags = 0;
 
+                // once:if=""
+                // enable:if=""
                 // todo -- not valid everywhere
                 if (name.Contains(".once") || name.Contains(".const")) {
                     name = name.Replace(".once", "");
                     name = name.Replace(".const", "");
                     flags |= AttributeFlags.Const;
                 }
-                
+
+                // todo -- validate this syntax
+                if (name.Contains(".enable")) {
+                    name = name.Replace(".enable", "");
+                    flags |= AttributeFlags.EnableOnly;
+                }
+
                 if (name.Contains(".read.write")) {
                     name = name.Replace(".read.write", "");
                     prefix = "sync";
@@ -388,9 +418,8 @@ namespace UIForia.Parsing {
                         name = "style";
                     }
                     else if (attr.Name.LocalName.StartsWith("style.")) {
-                        attributeType = AttributeType.Style;
+                        attributeType = AttributeType.InstanceStyle;
                         name = attr.Name.LocalName.Substring("style.".Length);
-                        flags |= AttributeFlags.StyleProperty;
                     }
                     else if (attr.Name.LocalName.StartsWith("x-")) {
                         attributeType = AttributeType.Attribute;
@@ -414,10 +443,6 @@ namespace UIForia.Parsing {
                             attributeType = AttributeType.Slot;
                             break;
                         }
-                        case "slotctx": {
-                            attributeType = AttributeType.SlotContext;
-                            break;
-                        }
                         case "mouse":
                             attributeType = AttributeType.Mouse;
                             break;
@@ -431,30 +456,67 @@ namespace UIForia.Parsing {
                             attributeType = AttributeType.Controller;
                             break;
                         case "style":
-                            attributeType = AttributeType.Style;
+                            attributeType = AttributeType.InstanceStyle;
+                            if (name.Contains(".")) {
+                                if (name.StartsWith("hover.")) {
+                                    flags |= AttributeFlags.StyleStateHover;
+                                    name = name.Substring("hover.".Length);
+                                }
+                                else if (name.StartsWith("focus.")) {
+                                    flags |= AttributeFlags.StyleStateFocus;
+                                    name = name.Substring("focus.".Length);
+                                }
+                                else if (name.StartsWith("active.")) {
+                                    flags |= AttributeFlags.StyleStateActive;
+                                    name = name.Substring("active.".Length);
+                                }
+                                else {
+                                    throw CompileException.UnknownStyleState(new AttributeNodeDebugData(fileName, tagName, new TemplateLineInfo(line, column), attr.ToString()), name.Split('.')[0]);
+                                }
+                            }
+
                             break;
                         case "evt":
                             attributeType = AttributeType.Event;
                             break;
                         case "ctx":
+
                             attributeType = AttributeType.Context;
+
+                            if (name == "element" || name == "parent" || name == "root" || name == "evt") {
+                                throw new ParseException($"`{name} is a reserved name and cannot be used as a context variable name");
+                            }
+
                             break;
                         case "var":
-                            attributeType = AttributeType.ContextVariable;
+                            attributeType = AttributeType.ImplicitVariable;
+
+                            if (name == "element" || name == "parent" || name == "root" || name == "evt") {
+                                throw new ParseException($"`{name} is a reserved name and cannot be used as a context variable name");
+                            }
+
                             break;
-                        case "late":
-                            attributeType = AttributeType.Property;
-                            flags |= AttributeFlags.LateBinding;
-                            break;
+                        // case "late":
+                        //     attributeType = AttributeType.Property;
+                        //     flags |= AttributeFlags.LateBinding;
+                        //     break;
                         case "sync":
                             attributeType = AttributeType.Property;
-                            flags |= AttributeFlags.Sync | AttributeFlags.LateBinding;
+                            flags |= AttributeFlags.Sync;
                             break;
                         case "expose":
                             attributeType = AttributeType.Expose;
+                            if (name == "element" || name == "parent" || name == "root" || name == "evt") {
+                                throw new ParseException($"`{name} is a reserved name and cannot be used as a context variable name");
+                            }
+
                             break;
                         case "alias":
                             attributeType = AttributeType.Alias;
+                            if (name == "element" || name == "parent" || name == "root" || name == "evt") {
+                                throw new ParseException($"`{name} is a reserved name and cannot be used as a context variable name");
+                            }
+
                             break;
 
                         default:
@@ -482,17 +544,16 @@ namespace UIForia.Parsing {
                     TextUtil.StringBuilder.Clear();
                 }
 
-                // todo -- set flag properly
-                attributes.Add(new AttributeDefinition2(raw, attributeType, flags, name, attr.Value, line, column));
+                attributes.Add(new AttributeDefinition(raw, attributeType, flags, name, attr.Value, line, column));
             }
 
             if (attributes.size == 0) {
-                StructList<AttributeDefinition2>.Release(ref attributes);
+                StructList<AttributeDefinition>.Release(ref attributes);
             }
 
             return attributes;
         }
-        
+
 
         private static bool Escape(string input, ref int ptr, out char result) {
             // xml parser might already do this for us
@@ -524,7 +585,7 @@ namespace UIForia.Parsing {
             result = match;
             return true;
         }
-        
+
         private UsingDeclaration ParseUsing(XElement element) {
             XAttribute namespaceAttr = element.GetAttribute("namespace");
             if (namespaceAttr == null) {
@@ -568,7 +629,7 @@ namespace UIForia.Parsing {
                 alias = aliasAttr.Value.Trim();
             }
 
-// if we have a body, expect import path to be null
+            // if we have a body, expect import path to be null
             if (!string.IsNullOrEmpty(rawText) && !string.IsNullOrWhiteSpace(rawText)) {
                 if (importPathAttr != null && !string.IsNullOrEmpty(importPathAttr.Value)) {
                     throw new TemplateParseException(styleElement, "Expected 'path' or 'src' to be null when a body is provided to a style tag");
@@ -577,7 +638,7 @@ namespace UIForia.Parsing {
                 return new StyleDefinition(alias, templateId + ".style", rawText);
             }
 
-// if we have no body then expect path to be set
+            // if we have no body then expect path to be set
             if (importPathAttr == null || string.IsNullOrEmpty(importPathAttr.Value)) {
                 throw new TemplateParseException(styleElement, "Expected 'path' or 'src' to be provided when a body is not provided in a style tag");
             }

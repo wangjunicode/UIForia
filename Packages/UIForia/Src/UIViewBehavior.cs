@@ -34,6 +34,7 @@ namespace UIForia {
             // 1. creates the application
             
             TemplateSettings settings = GetTemplateSettings();
+            settings.resourceManager = new ResourceManager();
             
             CompiledTemplateData compiledTemplates = usePreCompiledTemplates
                 ? TemplateLoader.LoadPrecompiledTemplates(settings)

@@ -15,6 +15,7 @@ namespace UIForia.Compilers {
         public string name;
         public bool isExposed;
         public LightList<string> nameList;
+        public Type contextVarType;
         public AliasResolverType variableType;
 
         private static readonly FieldInfo s_UIElement_Parent = typeof(UIElement).GetField(nameof(UIElement.parent));

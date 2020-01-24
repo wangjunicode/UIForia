@@ -9,8 +9,6 @@ namespace UIForia.Compilers {
 
     public class DynamicStyleListTypeWrapper : ITypeWrapper {
 
-        public ParameterExpression styleList;
-
         private static readonly ConstructorInfo s_StringCtor = typeof(DynamicStyleList).GetConstructor(new[] {typeof(string)});
         private static readonly ConstructorInfo s_StringListCtor = typeof(DynamicStyleList).GetConstructor(new[] {typeof(IList<string>)});
         private static readonly ConstructorInfo s_StyleRefCtor = typeof(DynamicStyleList).GetConstructor(new[] {typeof(UIStyleGroupContainer)});

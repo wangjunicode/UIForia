@@ -52,7 +52,7 @@ namespace UIForia.Compilers {
                 }
             }
 
-            return outerAttributes;
+            return output;
         }
 
         private static int ContainsAttr(in AttributeDefinition a, StructList<AttributeDefinition> list) {

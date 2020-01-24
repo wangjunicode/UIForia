@@ -16,22 +16,7 @@ using UnityEngine;
 using UnityEngine.Assertions;
 
 namespace UIForia {
-
-    /// <summary>
-    /// Don't ever use this if you're not a UIForia Dev!
-    /// </summary>
-    public class UIForiaInternalApplicationSetupProxy {
-
-        private Application application;
-
-        public UIForiaInternalApplicationSetupProxy(Application application) {
-            this.application = application;
-        }
-
-        public void CallInternalApiToSetupThings(UIElement element) { }
-
-    }
-
+    
     public abstract class Application {
 
 #if UNITY_EDITOR
@@ -45,8 +30,8 @@ namespace UIForia {
         public readonly string id;
         private static int ElementIdGenerator;
         public static int NextElementId => ElementIdGenerator++;
-        private string templateRootPath;
-
+        private int width;
+        private int height;
         internal readonly IStyleSystem m_StyleSystem;
         internal ILayoutSystem m_LayoutSystem;
         internal IRenderSystem m_RenderSystem;
@@ -66,7 +51,6 @@ namespace UIForia {
 
         public event Action<UIElement> onElementEnabled;
 
-        public event Action onWillRefresh;
         public event Action onRefresh;
         public event Action onUpdate;
         public event Action onReady;
@@ -74,7 +58,6 @@ namespace UIForia {
         public event Action onNextRefresh;
         public event Action<UIView> onViewAdded;
         public event Action<UIView[]> onViewsSorted;
-        public event Action<UIView> onViewRemoved;
 
         internal CompiledTemplateData templateData;
 
@@ -112,6 +95,9 @@ namespace UIForia {
             this.m_Systems = new List<ISystem>();
             this.m_Views = new List<UIView>();
 
+            this.width = Screen.width;
+            this.height = Screen.height;
+            
             m_StyleSystem = new StyleSystem();
             m_LayoutSystem = new AwesomeLayoutSystem(this);
             m_InputSystem = new GameInputSystem(m_LayoutSystem);
@@ -171,46 +157,6 @@ namespace UIForia {
             return CreateView<T>(name, size, Matrix4x4.identity);
         }
 
-        protected Application(string id, string templateRootPath = null, ResourceManager resourceManager = null) {
-            this.id = id;
-            this.templateRootPath = templateRootPath;
-            // todo -- exceptions in constructors aren't good practice
-            if (s_ApplicationList.Find(id, (app, _id) => app.id == _id) != null) {
-                throw new Exception($"Applications must have a unique id. Id {id} was already taken.");
-            }
-
-            s_ApplicationList.Add(this);
-            
-            this.resourceManager = resourceManager ?? new ResourceManager();
-
-            this.m_Systems = new List<ISystem>();
-            this.m_Views = new List<UIView>();
-
-            m_StyleSystem = new StyleSystem();
-            m_LayoutSystem = new AwesomeLayoutSystem(this);
-            m_InputSystem = new GameInputSystem(m_LayoutSystem);
-            m_RenderSystem = new VertigoRenderSystem(Camera.current, this);
-            m_RoutingSystem = new RoutingSystem();
-            m_AnimationSystem = new AnimationSystem();
-            linqBindingSystem = new LinqBindingSystem();
-            m_UISoundSystem = new UISoundSystem();
-
-            m_Systems.Add(m_StyleSystem);
-            m_Systems.Add(linqBindingSystem);
-            m_Systems.Add(m_RoutingSystem);
-            m_Systems.Add(m_InputSystem);
-            m_Systems.Add(m_AnimationSystem);
-            m_Systems.Add(m_LayoutSystem);
-            m_Systems.Add(m_RenderSystem);
-
-            m_BeforeUpdateTaskSystem = new UITaskSystem();
-            m_AfterUpdateTaskSystem = new UITaskSystem();
-
-#if UNITY_EDITOR
-            Applications.Add(this);
-#endif
-        }
-
         internal static void ProcessClassAttributes(Type type, Attribute[] attrs) {
             for (var i = 0; i < attrs.Length; i++) {
                 Attribute attr = attrs[i];
@@ -241,12 +187,13 @@ namespace UIForia {
 
         public ResourceManager ResourceManager => resourceManager;
 
-        public Rect ScreenRect => new Rect {
-            x = 0, y = 0, width = Width, height = Height
-        };
-
-        public float Width => Screen.width;
-        public float Height => Screen.height;
+        public void SetScreenSize(int width, int height) {
+            this.width = width;
+            this.height = height;
+        }
+        
+        public float Width => width;
+        public float Height => height;
 
         public void SetCamera(Camera camera) {
             Camera = camera;
@@ -260,13 +207,11 @@ namespace UIForia {
                 m_Systems[i].OnViewRemoved(view);
             }
 
-            onViewRemoved?.Invoke(view);
             DestroyElement(view.dummyRoot);
             return view;
         }
 
         public void Refresh() {
-            onWillRefresh?.Invoke();
 
             // kill all but the first view
 
@@ -957,26 +902,19 @@ namespace UIForia {
             return retn;
         }
 
-        // todo -- override that accepts an index into an array instead of a type, to save a dictionary lookup
-        // todo -- don't create a list for every type, maybe a single pool list w/ sorting & a jump search or similar
-        // todo -- register element in type map for selectors, might need to support subclass matching ie <KlangButton> and <OtherButton> with matching on <Button>
-        // todo -- make children a linked list instead
         /// Returns the shell of a UI Element, space is allocated for children but no child data is associated yet, only a parent, view, and depth
         public UIElement CreateElementFromPool(int typeId, UIElement parent, int childCount, int attributeCount, int originTemplateId) {
             // children get assigned in the template function but we need to setup the list here
             UIElement retn = templateData.ConstructElement(typeId);
             retn.application = this;
-
-            //retn.View = application.activeView;
-
+            
             retn.templateMetaData = templateData.templateMetaData[originTemplateId];
             retn.id = NextElementId;
             retn.style = new UIStyleSet(retn);
             retn.layoutResult = new LayoutResult(retn);
             retn.flags = UIElementFlags.Enabled | UIElementFlags.Alive;
 
-            retn.children = LightList<UIElement>.Get();
-            retn.children.EnsureCapacity(childCount);
+            retn.children = LightList<UIElement>.GetMinSize(childCount);
             retn.children.size = childCount;
 
             if (attributeCount > 0) {
@@ -989,6 +927,10 @@ namespace UIForia {
             return retn;
         }
 
+        public TemplateMetaData GetTemplateMetaData(int metaDataId) {
+            return templateData.templateMetaData[metaDataId];
+        }
+        
         public UIElement CreateElementFromPoolWithType(int typeId, UIElement parent, int childCount, int attrCount, int originTemplateId) {
             return CreateElementFromPool(typeId, parent, childCount, attrCount, originTemplateId);
         }

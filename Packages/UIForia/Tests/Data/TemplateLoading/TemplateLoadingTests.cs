@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.IO;
 using NUnit.Framework;
 using Tests;
 using Tests.Mocks;
@@ -81,34 +82,41 @@ namespace TemplateLoading {
 
             public T value0;
             public U value1;
-            
-           // [ResolveGenericTemplateArguments]
+
+            // [ResolveGenericTemplateArguments]
             public Dictionary<T, U> dictionary;
 
         }
-        
+
         public class TemplateLoadingTest_Generic3<T, U, V> : UIElement {
 
-            [ResolveGenericTemplateArguments]
-            public U value1;
-            
-            [ResolveGenericTemplateArguments]
-            public Dictionary<T, U> dictionary;
+            [ResolveGenericTemplateArguments] public U value1;
+
+            [ResolveGenericTemplateArguments] public Dictionary<T, U> dictionary;
 
         }
-        
+
         [Test]
         public void DistinctGenericTemplates() {
             MockApplication app = MockApplication.Setup<TemplateLoadingTest_LoadGenericOuter>();
+            TemplateSettings settings = new TemplateSettings();
+            settings.applicationName = "DistinctGenericTemplates";
+            settings.assemblyName = GetType().Assembly.GetName().Name;
+            settings.outputPath = Path.Combine(UnityEngine.Application.dataPath, "..", "Packages", "UIForia", "Tests", "UIForiaGenerated");
+            settings.codeFileExtension = "generated.xml.cs";
+            settings.preCompiledTemplatePath = "Assets/UIForia_Generated/DistinctGenericTemplates";
+            settings.templateResolutionBasePath = Path.Combine(UnityEngine.Application.dataPath, "..", "Packages", "UIForia", "Tests");
+            TemplateCodeGenerator.Generate(typeof(TemplateLoadingTest_LoadGenericOuter), settings);
+
             TemplateLoadingTest_LoadGenericOuter e = (TemplateLoadingTest_LoadGenericOuter) app.RootElement;
-            
+
             app.Update();
-            
+
             Assert.AreEqual("0.5", GetText(e[0][0]));
             Assert.AreEqual("7", GetText(e[1][0]));
             Assert.AreEqual("str", GetText(e[2][0]));
         }
-        
+
         public TemplateSettings GetSettings<T>(string defaultPath) {
             TemplateSettings retn = MockApplication.GetDefaultSettings(defaultPath);
 
@@ -121,6 +129,7 @@ namespace TemplateLoading {
             UITextElement textEl = element as UITextElement;
             return textEl.text.Trim();
         }
+
     }
 
 }

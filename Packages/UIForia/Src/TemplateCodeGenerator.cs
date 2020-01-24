@@ -93,7 +93,7 @@ namespace UIForia {
                     builder.Append("styleSheetRefs = new StyleSheetReference[");
                     builder.Append(meta.styleReferences.Length);
                     builder.AppendLine("];");
-                    
+
                     for (int j = 0; j < meta.styleReferences.Length; j++) {
                         StyleSheetReference sheetReference = meta.styleReferences[j];
                         builder.Append(s_Indent12);
@@ -105,13 +105,14 @@ namespace UIForia {
                         builder.Append(sheetReference.styleSheet.path);
                         builder.AppendLine("\"]);");
                     }
-                    
+
                     builder.AppendLine($"{s_Indent12}template = new {nameof(TemplateMetaData)}({compiledTemplates[i].templateId}, @\"{compiledTemplates[i].filePath}\", styleMap, styleSheetRefs);");
                 }
                 else {
                     builder.AppendLine($"{s_Indent12}template = new {nameof(TemplateMetaData)}({compiledTemplates[i].templateId}, @\"{compiledTemplates[i].filePath}\", styleMap, null);");
                 }
-                
+
+                builder.AppendLine($"{s_Indent12}template.BuildSearchMap();");
                 builder.AppendLine($"{s_Indent12}templateData[{i}] = template;");
             }
 
@@ -200,6 +201,8 @@ namespace UIForia {
             return builder.ToString();
         }
 
+        private static int genericCounter = 0;
+
         private static void GenerateTemplateCode(string path, string extension, CompiledTemplateData compiledTemplateData) {
             TemplateSettings templateSettings = compiledTemplateData.templateSettings;
 
@@ -207,6 +210,14 @@ namespace UIForia {
                 CompiledTemplate compiled = compiledTemplateData.compiledTemplates.array[i];
 
                 string file = compiled.filePath;
+
+                bool isGeneric = false;
+                if (compiled.elementType.rawType.IsGenericType) {
+                    isGeneric = true;
+                    file = Path.ChangeExtension(file, "");
+                    file = file.Substring(0, file.Length - 1);
+                    file += "__" + (genericCounter++);
+                }
 
                 if (!string.IsNullOrEmpty(compiled.templateName)) {
                     file = Path.ChangeExtension(file, "");
@@ -231,6 +242,7 @@ namespace UIForia {
                 // todo -- optimize search or sort by file name at least
                 for (int b = 0; b < compiledBindings.size; b++) {
                     CompiledBinding binding = compiledBindings[b];
+                    // todo -- needs to be unique by generic type. probably need an actual back reference & compare
                     if (binding.filePath == compiledTemplate.filePath && binding.templateName == compiled.templateName) {
                         bindingCode += $"// binding id = {binding.bindingId}";
                         bindingCode += $"\n{s_Indent8}public Action<UIElement, UIElement> Binding_{compiledBindings.array[b].bindingType}_{binding.guid} = ";
@@ -242,7 +254,7 @@ namespace UIForia {
                 // todo -- optimize search or sort by file name at least
                 for (int s = 0; s < compiledSlots.size; s++) {
                     CompiledSlot compiledSlot = compiledSlots[s];
-                    
+
                     if (compiledSlot.filePath == compiledTemplate.filePath && compiledSlot.templateName == compiled.templateName) {
                         slotCode += $"\n{s_Indent8}// {compiledSlot.GetComment()}";
                         slotCode += $"\n{s_Indent8}public Func<UIElement, UIElement, TemplateScope, UIElement> {compiledSlot.GetVariableName()} = ";

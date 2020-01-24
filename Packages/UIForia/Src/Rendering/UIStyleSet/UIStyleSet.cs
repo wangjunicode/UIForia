@@ -197,7 +197,6 @@ namespace UIForia.Rendering {
 
         public void internal_Initialize(LightList<UIStyleGroupContainer> baseStyles) {
             SetBaseStyles(baseStyles);
-            LightList<UIStyleGroupContainer>.Release(ref baseStyles);
         }
 
         internal void Initialize() {

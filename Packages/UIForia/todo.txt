@@ -1,0 +1,18 @@
+
+Template Compiler
+    Support Multi Child Repeat
+    Support exposed slots
+    Support [Required] attribute 
+    
+Expression Compiler
+    Support List Initialization
+    Support object initializers
+    
+Linq Compiler
+    Better support for type wrapped statements
+    Support object initializers
+    Support list initializers
+    
+XML Parser
+    Validate attributes
+    

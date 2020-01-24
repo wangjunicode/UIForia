@@ -14,6 +14,7 @@ namespace UIForia {
         public string templateResolutionBasePath;
         public string applicationName;
         public string templateRoot;
+        public ResourceManager resourceManager;
         public Func<Type, string, string> filePathResolver;
         
         public TemplateSettings() {

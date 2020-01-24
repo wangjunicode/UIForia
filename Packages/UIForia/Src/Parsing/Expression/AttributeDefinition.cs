@@ -20,8 +20,9 @@ namespace UIForia.Parsing.Expressions {
         Slot = 1 << 12,
         InstanceStyle = 1 << 13,
         Expose = 1 << 14,
-        ImplicitVariable = 1 << 15
-                           
+        ImplicitVariable = 1 << 15,
+        ChangeHandler = 1 << 16
+  
     }
 
     [Flags]

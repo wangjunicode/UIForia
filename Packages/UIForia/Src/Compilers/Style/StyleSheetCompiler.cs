@@ -14,13 +14,15 @@ namespace UIForia.Compilers.Style {
 
         private StyleCompileContext context;
         private readonly StyleSheetImporter styleSheetImporter;
-
+        private ResourceManager resourceManager;
+        
         private LightList<UIStyleGroup> scratchGroupList;
 
         private static readonly UIStyle s_ScratchStyle = new UIStyle();
 
-        public StyleSheetCompiler(StyleSheetImporter styleSheetImporter) {
+        public StyleSheetCompiler(StyleSheetImporter styleSheetImporter, ResourceManager resourceManager = null) {
             this.styleSheetImporter = styleSheetImporter;
+            this.resourceManager = resourceManager;
             this.scratchGroupList = new LightList<UIStyleGroup>(32);
         }
 
@@ -32,7 +34,8 @@ namespace UIForia.Compilers.Style {
         public StyleSheet Compile(string filePath, LightList<StyleASTNode> rootNodes) {
             try {
                 context = new StyleSheetConstantImporter(styleSheetImporter).CreateContext(rootNodes);
-
+                context.resourceManager = resourceManager;
+                
                 //       context = new StyleCompileContext(); // todo resolve constants. should be done a per file level, should store all used constants without needing to later reference other files
                 // StyleCompileContext.Create(styleSheetImporter) //new StyleSheetConstantImporter(styleSheetImporter).CreateContext(rootNodes);
             }

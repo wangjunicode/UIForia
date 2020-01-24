@@ -22,7 +22,7 @@ namespace UIForia.Compilers {
         public int id;
         public string filePath;
         public int usages;
-        public StyleSheetReference[] styleReferences; // dictionary? sorted by name? trie?
+        public StyleSheetReference[] styleReferences;
 
         public CompiledTemplateData compiledTemplateData;
         internal UIStyleGroupContainer[] styleMap;
@@ -30,16 +30,16 @@ namespace UIForia.Compilers {
         private IndexedStyleRef[] searchMap;
 
         private static readonly IndexedStyleRef[] s_EmptySearchMap = { };
+        private static readonly char[] s_SplitChar = {'.'};
 
         public TemplateMetaData(int id, string filePath, UIStyleGroupContainer[] styleMap, StyleSheetReference[] styleReferences) {
             this.id = id;
             this.filePath = filePath;
             this.styleReferences = styleReferences;
             this.styleMap = styleMap;
-            BuildSearchMap();
         }
 
-        internal void BuildSearchMap() {
+        public void BuildSearchMap() {
             if (searchMap != null) return;
             if (styleReferences == null) {
                 searchMap = s_EmptySearchMap;
@@ -99,44 +99,47 @@ namespace UIForia.Compilers {
             return idx >= 0 ? searchMap[idx].container : null;
         }
 
-        private static readonly char[] s_SplitChar = {'.'};
 
         public int ResolveStyleNameSlow(string name) {
             if (styleReferences == null) return -1;
 
-            string alias = string.Empty;
+            BuildSearchMap();
 
-            if (name.Contains(".")) {
-                string[] split = name.Split(s_SplitChar, StringSplitOptions.RemoveEmptyEntries);
-                if (split.Length == 2) {
-                    alias = split[0];
-                    name = split[1];
-                }
-            }
+            return BinarySearch(name);
 
-            if (alias != string.Empty) {
-                for (int i = 0; i < styleReferences.Length; i++) {
-                    if (styleReferences[i].alias == alias) {
-                        StyleSheet sheet = styleReferences[i].styleSheet;
-                        for (int j = 0; j < sheet.styleGroupContainers.Length; j++) {
-                            UIStyleGroupContainer styleGroupContainer = sheet.styleGroupContainers[j];
-                            if (styleGroupContainer.name == name) {
-                                return styleGroupContainer.id;
-                            }
-                        }
-                    }
-                }
-            }
-            else {
-                for (int i = 0; i < styleReferences.Length; i++) {
-                    StyleSheet sheet = styleReferences[i].styleSheet;
-                    if (sheet.TryResolveStyleName(name, out UIStyleGroupContainer retn)) {
-                        return retn.id;
-                    }
-                }
-            }
-
-            return -1;
+            // string alias = string.Empty;
+            //
+            // if (name.Contains(".")) {
+            //     string[] split = name.Split(s_SplitChar, StringSplitOptions.RemoveEmptyEntries);
+            //     if (split.Length == 2) {
+            //         alias = split[0];
+            //         name = split[1];
+            //     }
+            // }
+            //
+            // if (alias != string.Empty) {
+            //     for (int i = 0; i < styleReferences.Length; i++) {
+            //         if (styleReferences[i].alias == alias) {
+            //             StyleSheet sheet = styleReferences[i].styleSheet;
+            //             for (int j = 0; j < sheet.styleGroupContainers.Length; j++) {
+            //                 UIStyleGroupContainer styleGroupContainer = sheet.styleGroupContainers[j];
+            //                 if (styleGroupContainer.name == name) {
+            //                     return i;
+            //                 }
+            //             }
+            //         }
+            //     }
+            // }
+            // else {
+            //     for (int i = 0; i < styleReferences.Length; i++) {
+            //         StyleSheet sheet = styleReferences[i].styleSheet;
+            //         if (sheet.TryResolveStyleName(name, out UIStyleGroupContainer retn)) {
+            //             return i;
+            //         }
+            //     }
+            // }
+            //
+            // return -1;
         }
 
         public UIStyleGroupContainer ResolveStyleByName(char[] name) {
@@ -209,7 +212,7 @@ namespace UIForia.Compilers {
         }
 
         public UIStyleGroupContainer GetStyleById(int styleId) {
-            return styleMap[styleId];
+            return searchMap[styleId].container;
         }
 
     }

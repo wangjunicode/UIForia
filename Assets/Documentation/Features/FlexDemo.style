@@ -1,6 +1,6 @@
 import "Documentation/Documentation.style" as theme;
 
-style <this> {
+style container {
    // FlexLayoutDirection = Horizontal;
    DistributeExtraSpace = AroundContent;
    PreferredSize = 1pca;

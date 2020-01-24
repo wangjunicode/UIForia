@@ -151,7 +151,6 @@ namespace TemplateBinding {
 
             public void SetValue(float value) {
                 output_value = value;
-                Debug.Log("Down");
             }
 
         }
@@ -177,8 +176,8 @@ namespace TemplateBinding {
         public void MouseHandlerBinding() {
             MockApplication app = Setup<TemplateBindingTest_MouseBindingBinding>();
             TemplateBindingTest_MouseBindingBinding e = (TemplateBindingTest_MouseBindingBinding) app.RootElement;
-            app.SetViewportRect(new Rect(0, 0, 1000, 1000));
-            
+            app.SetScreenSize(1000, 1000);
+
             app.Update();
 
             app.InputSystem.MouseDown(new Vector2(50, 50));
@@ -835,7 +834,164 @@ namespace TemplateBinding {
             Assert.AreEqual("synced__afterSync", e.syncedValue);
         }
 
-        string GetText(UIElement element) {
+
+        [Template("Data/TemplateBindings/TemplateBindingTest_InnerContext.xml")]
+        public class TemplateBindingTest_InnerContext_Outer : UIElement { }
+
+
+        [Template("Data/TemplateBindings/TemplateBindingTest_InnerContext.xml#dynamic_styled")]
+        public class TemplateBindingTest_InnerContext_Inner : UIElement {
+
+            public string dynamicFromInner;
+
+        }
+
+        [Test]
+        public void InnerContext_Styled() {
+            MockApplication app = Setup<TemplateBindingTest_InnerContext_Outer>();
+            TemplateBindingTest_InnerContext_Outer e = (TemplateBindingTest_InnerContext_Outer) app.RootElement;
+            TemplateBindingTest_InnerContext_Inner child = (TemplateBindingTest_InnerContext_Inner) e[0];
+
+            child.dynamicFromInner = "one";
+
+            app.Update();
+
+            List<UIStyleGroupContainer> styles = child.style.GetBaseStyles();
+
+            Assert.AreEqual(2, styles.Count);
+            Assert.AreEqual("one", styles[0].name);
+            Assert.AreEqual("from-outer", styles[1].name);
+
+            child.dynamicFromInner = "two";
+
+            app.Update();
+            styles = child.style.GetBaseStyles();
+            Assert.AreEqual(2, styles.Count);
+            Assert.AreEqual("two", styles[0].name);
+            Assert.AreEqual("from-outer", styles[1].name);
+        }
+
+        [Template("Data/TemplateBindings/TemplateBindingTest_OnChange.xml")]
+        public class TemplateBindingTest_OnChange_Outer : UIElement {
+
+            public string myValue;
+            public string myValueAfterChange;
+
+            public void HandleChange() {
+                myValueAfterChange = myValue + " changed";
+            }
+
+        }
+
+
+        public class TemplateBindingTest_OnChange_Inner : UIContainerElement {
+
+            public string value;
+
+            public override void OnAfterPropertyBindings() {
+                value += "__changed";
+            }
+
+        }
+
+        [Test]
+        public void OnChange() {
+            MockApplication app = Setup<TemplateBindingTest_OnChange_Outer>();
+            TemplateBindingTest_OnChange_Outer e = (TemplateBindingTest_OnChange_Outer) app.RootElement;
+            TemplateBindingTest_OnChange_Inner child = (TemplateBindingTest_OnChange_Inner) e[0];
+
+            e.myValue = "baseVal";
+
+            app.Update();
+
+            Assert.AreEqual("baseVal changed", e.myValueAfterChange);
+        }
+
+        [Template("Data/TemplateBindings/TemplateBindingTest_OnChange.xml#with_old_value")]
+        public class TemplateBindingTest_OnChange_WithOldValue : UIElement {
+
+            public string myValue;
+            public string oldValue;
+
+            public void HandleChange(string oldValue) {
+                this.oldValue = oldValue;
+            }
+
+        }
+
+
+        [Test]
+        public void OnChange_WithOldValue() {
+            MockApplication app = Setup<TemplateBindingTest_OnChange_WithOldValue>();
+            TemplateBindingTest_OnChange_WithOldValue e = (TemplateBindingTest_OnChange_WithOldValue) app.RootElement;
+            TemplateBindingTest_OnChange_Inner child = (TemplateBindingTest_OnChange_Inner) e[0];
+
+            e.myValue = "baseVal";
+
+            app.Update();
+
+            Assert.AreEqual("baseVal__changed", child.value);
+            Assert.AreEqual("baseVal", e.oldValue);
+        }
+
+
+        [Template("Data/TemplateBindings/TemplateBindingTest_OnChange.xml#with_new_value")]
+        public class TemplateBindingTest_OnChange_WithNewValue : UIElement {
+
+            public string myValue;
+            public string newValue;
+
+            public void HandleChange(string newValue) {
+                this.newValue = newValue;
+            }
+
+        }
+
+        [Test]
+        public void OnChange_WithNewValue() {
+            MockApplication app = Setup<TemplateBindingTest_OnChange_WithNewValue>();
+            TemplateBindingTest_OnChange_WithNewValue e = (TemplateBindingTest_OnChange_WithNewValue) app.RootElement;
+            TemplateBindingTest_OnChange_Inner child = (TemplateBindingTest_OnChange_Inner) e[0];
+
+            e.myValue = "baseVal";
+
+            app.Update();
+
+            Assert.AreEqual("baseVal__changed", child.value);
+            Assert.AreEqual("baseVal__changed", e.newValue);
+        }
+
+        [Template("Data/TemplateBindings/TemplateBindingTest_OnChange.xml#with_sync")]
+        public class TemplateBindingTest_OnChange_WithSync : UIElement {
+
+            public string myValue;
+            public string newValue;
+            public string oldValue;
+
+            public void HandleChange(string newValue, string oldValue) {
+                this.newValue = newValue;
+                this.oldValue = oldValue;
+            }
+
+        }
+
+        [Test]
+        public void OnChange_WithSync() {
+            MockApplication app = Setup<TemplateBindingTest_OnChange_WithSync>();
+            TemplateBindingTest_OnChange_WithSync e = (TemplateBindingTest_OnChange_WithSync) app.RootElement;
+            TemplateBindingTest_OnChange_Inner child = (TemplateBindingTest_OnChange_Inner) e[0];
+
+            e.myValue = "baseVal";
+
+            app.Update();
+
+            Assert.AreEqual("baseVal__changed", e.myValue);
+            Assert.AreEqual("baseVal__changed", child.value);
+            Assert.AreEqual("baseVal__changed", e.newValue);
+            Assert.AreEqual("baseVal", e.oldValue);
+        }
+
+        public static string GetText(UIElement element) {
             UITextElement textEl = element as UITextElement;
             return textEl.text.Trim();
         }

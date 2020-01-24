@@ -20,9 +20,6 @@ namespace UIForia.Compilers.Style {
 
     public static class StylePropertyMappers {
 
-        public const string k_RepeatFit = "fit";
-        public const string k_RepeatFill = "fill";
-
         private static readonly Dictionary<string, Action<UIStyle, PropertyNode, StyleCompileContext>> mappers
             = new Dictionary<string, Action<UIStyle, PropertyNode, StyleCompileContext>> {
                 // Overflow

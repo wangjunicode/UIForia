@@ -3,7 +3,7 @@
 
     <Style path="Documentation/Features/FlexDemo.style"/>
 
-    <Contents>
+    <Contents style="container">
 
             <Group style="fit-vertical">
                 <Group style="group1 fill-and-grow" />

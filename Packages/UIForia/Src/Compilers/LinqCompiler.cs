@@ -33,7 +33,7 @@ namespace UIForia.Compilers {
 
         private static int NextId => _nextId++;
         private static int _nextId = 1;
-        
+
         private static readonly MethodInfo StringConcat2 = typeof(string).GetMethod(
             nameof(string.Concat),
             ReflectionUtil.SetTempTypeArray(typeof(string), typeof(string))
@@ -333,7 +333,7 @@ namespace UIForia.Compilers {
                 type = parameterExpression.Type
             };
         }
-        
+
         public ParameterExpression AddVariable(Type type, string name) {
             if (addingStatements) {
                 return currentBlock.AddInternalVariable(type, name);
@@ -645,12 +645,12 @@ namespace UIForia.Compilers {
             currentBlock.AddStatement(Expression.IfThen(condition, trueExpr));
         }
 
-        public void IfNotEqual(LHSStatementChain left, Expression right, Action body) {
+        public void IfNotEqual(Expression left, Expression right, Action body) {
             Debug.Assert(left != null);
             Debug.Assert(right != null);
             Debug.Assert(body != null);
 
-            Expression condition = Expression.NotEqual(left.targetExpression, right);
+            Expression condition = Expression.NotEqual(left, right);
 
             PushBlock();
 
@@ -659,6 +659,10 @@ namespace UIForia.Compilers {
             BlockExpression bodyBlock = PopBlock();
 
             currentBlock.AddStatement(Expression.IfThen(condition, bodyBlock));
+        }
+
+        public void IfNotEqual(LHSStatementChain left, Expression right, Action body) {
+            IfNotEqual(left.targetExpression, right, body);
         }
 
         public void IfNotEqual<T>(LHSStatementChain left, Expression right, Action<T> body, T ctx) {
@@ -891,7 +895,7 @@ namespace UIForia.Compilers {
 
             return Expression.MakeMemberAccess(head, propertyInfo);
         }
-        
+
         private Expression MakeMethodCall(Expression head, LightList<MethodInfo> methodInfos, LightList<ASTNode> arguments) {
             Expression[] args = new Expression[arguments.Count];
 
@@ -1748,7 +1752,7 @@ namespace UIForia.Compilers {
             currentBlock.AddStatement(expr);
             return head;
         }
-        
+
         private bool RequiresNullCheck(Expression head) {
             if (!shouldNullCheck || !head.Type.IsClass) {
                 return false;
@@ -2090,10 +2094,10 @@ namespace UIForia.Compilers {
                             string rightStr = (string) rightConst.Value;
                             return Expression.Constant(leftStr + rightStr);
                         }
-                        
+
                         // if(useCustomConcat && !hasActiveConcat) { concatStack.Push().Append().Append() }
                         // string var = builder.Pop().ToString();
-                        
+
                         // if (stringBuilderExpr != null) {
                         //     stringBuilderExpr.Peek().Append().Append();
                         //     Expression expr = AddStatement(stringBuilderExpr)
@@ -2101,7 +2105,7 @@ namespace UIForia.Compilers {
                         //     AddStatement(Expression.Call(stringBuilderExpr, "Append", right));
                         //     return stringBuilderExpr;
                         // }
-                        
+
                         return Expression.Call(StringConcat2, left, right);
                     }
                     else if (leftIsString) {
@@ -2317,7 +2321,7 @@ namespace UIForia.Compilers {
             nested.parent = this;
             nested.id = GetNextCompilerId();
             nested.typeWrapper = typeWrapper;
-            
+
             if (targetType == null) {
                 throw new NotImplementedException("LambdaExpressions are only valid when they have a target type set.");
             }
@@ -2354,7 +2358,7 @@ namespace UIForia.Compilers {
                 }
             }
 
-      
+
             nested.Return(lambda.body);
 
             LambdaExpression retn = nested.BuildLambda();
@@ -2365,7 +2369,7 @@ namespace UIForia.Compilers {
         protected virtual LinqCompiler CreateNested() {
             return s_CompilerPool.Get();
         }
-        
+
         public LinqCompiler CreateClosure(IList<Parameter> parameters, Type retnType) {
             LinqCompiler nested = CreateNested();
             nested.parameters.Clear();
@@ -2763,7 +2767,6 @@ namespace UIForia.Compilers {
         }
 
         public Type GetExpressionType(string expression) {
-
             bool wasAddingStatements = addingStatements;
             addingStatements = false;
             bool wasNullChecking = shouldNullCheck;

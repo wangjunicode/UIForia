@@ -11,7 +11,8 @@ namespace UIForia.Compilers {
         ControllerEvent,
         Root,
         RepeatItem,
-        RepeatIndex
+        RepeatIndex,
+        ChangeHandlerStorage
 
     }
 

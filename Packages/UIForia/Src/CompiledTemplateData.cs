@@ -22,19 +22,16 @@ namespace UIForia {
         public Func<UIElement, TemplateScope, UIElement>[] templates;
         public Func<UIElement, UIElement, TemplateScope, UIElement>[] slots;
         public Action<UIElement, UIElement>[] bindings;
-        public UIStyleGroupContainer[] styles;
         
         public readonly Dictionary<Type, int> templateTypeMap = new Dictionary<Type, int>();
         public TemplateSettings templateSettings;
 
-//        public abstract void LoadTemplates();
-        
         public CompiledTemplateData(TemplateSettings templateSettings) {
             this.templateSettings = templateSettings;
             this.compiledSlots = new LightList<CompiledSlot>();
             this.compiledTemplates = new LightList<CompiledTemplate>(128);
             this.compiledBindings = new LightList<CompiledBinding>(128);
-            this.styleImporter = new StyleSheetImporter(templateSettings.templateResolutionBasePath);
+            this.styleImporter = new StyleSheetImporter(templateSettings.templateResolutionBasePath, templateSettings.resourceManager);
         }
 
         public CompiledTemplate CreateTemplate(string filePath, string templateName) {

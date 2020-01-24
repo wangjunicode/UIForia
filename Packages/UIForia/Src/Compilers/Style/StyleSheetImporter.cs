@@ -4,7 +4,6 @@ using System.IO;
 using UIForia.Exceptions;
 using UIForia.Parsing.Style;
 using UIForia.Templates;
-using UIForia.Util;
 
 namespace UIForia.Compilers.Style {
 
@@ -15,10 +14,10 @@ namespace UIForia.Compilers.Style {
         private readonly Dictionary<string, StyleSheet> cachedStyleSheets;
         private readonly StyleSheetCompiler compiler;
         private int importedStyleGroupCount;
-
-        public StyleSheetImporter(string basePath) {
+        
+        public StyleSheetImporter(string basePath, ResourceManager resourceManager = null) {
             this.basePath = basePath;
-            this.compiler = new StyleSheetCompiler(this);
+            this.compiler = new StyleSheetCompiler(this, resourceManager);
             this.currentlyImportingStylesheets = new List<string>();
             this.cachedStyleSheets = new Dictionary<string, StyleSheet>();
         }

@@ -51,6 +51,7 @@ namespace UIForia.Parsing {
             nameSpaceManager.AddNamespace("var", "var");
             nameSpaceManager.AddNamespace("evt", "evt");
             nameSpaceManager.AddNamespace("style", "style");
+            nameSpaceManager.AddNamespace("onChange", "onChange");
             nameSpaceManager.AddNamespace("ctx", "ctx");
             nameSpaceManager.AddNamespace("mouse", "mouse");
             nameSpaceManager.AddNamespace("key", "key");
@@ -449,6 +450,11 @@ namespace UIForia.Parsing {
                         case "key":
                             attributeType = AttributeType.Key;
                             break;
+                        
+                        case "onChange":
+                            attributeType = AttributeType.ChangeHandler;
+                            break;
+                        
                         case "touch":
                             attributeType = AttributeType.Touch;
                             break;

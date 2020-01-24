@@ -15,7 +15,8 @@ namespace UIForia.Compilers.Style {
         public Dictionary<string, LightList<StyleConstant>> importedStyleConstants;
         public Dictionary<string, StyleConstant> constantsWithReferences;
         public LightList<StyleConstant> constants;
-        
+        public ResourceManager resourceManager;
+
         public StyleCompileContext() {
             this.importedStyleConstants = new Dictionary<string, LightList<StyleConstant>>();
             this.constantsWithReferences = new Dictionary<string, StyleConstant>();

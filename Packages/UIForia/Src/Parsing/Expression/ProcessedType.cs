@@ -35,6 +35,7 @@ namespace UIForia.Parsing {
         public int id;
         public int references;
         public bool requiresBeforePropertyUpdates;
+        public bool requiresAfterPropertyUpdates;
 
         static ProcessedType() {
             s_Compiler = new LinqCompiler();
@@ -48,6 +49,7 @@ namespace UIForia.Parsing {
             this.tagName = tagName;
             this.requiresUpdateFn = ReflectionUtil.IsOverride(rawType.GetMethod(nameof(UIElement.OnUpdate)));
             this.requiresBeforePropertyUpdates = ReflectionUtil.IsOverride(rawType.GetMethod(nameof(UIElement.OnBeforePropertyBindings)));
+            this.requiresAfterPropertyUpdates = ReflectionUtil.IsOverride(rawType.GetMethod(nameof(UIElement.OnAfterPropertyBindings)));
 
             // CompileClear(rawType);
             this.requiresTemplateExpansion = (

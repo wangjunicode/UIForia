@@ -37,7 +37,7 @@ namespace UIForia {
 
         public override bool Equals(object obj) {
             if (ReferenceEquals(null, obj)) return false;
-            return obj is UIFixedLength && Equals((UIFixedLength) obj);
+            return obj is UIFixedLength length && Equals(length);
         }
 
         public override int GetHashCode() {

@@ -101,7 +101,7 @@ namespace UIForia.Rendering {
 
         public override bool Equals(object obj) {
             if (ReferenceEquals(null, obj)) return false;
-            return obj is BorderRadius && Equals((BorderRadius) obj);
+            return obj is BorderRadius radius && Equals(radius);
         }
 
         public override int GetHashCode() {

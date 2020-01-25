@@ -41,7 +41,7 @@ namespace UIForia.Systems {
 
         public int ActiveTaskCount => thisFrame.Count;
 
-        internal void OnReset() {
+        internal void OnDestroy() {
             thisFrame.QuickClear();
             nextFrame.QuickClear();
         }

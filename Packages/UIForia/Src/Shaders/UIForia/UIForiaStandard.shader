@@ -109,8 +109,8 @@ Shader "UIForia/Standard"
              
                 
                 if(shapeType != ShapeType_Text) {
-                     o.vertex = UIForiaPixelSnap(o.vertex); // pixel snap is bad for text rendering
-                     // o.vertex = UnityPixelSnap(o.vertex); // pixel snap is bad for text rendering
+                     // o.vertex = UIForiaPixelSnap(o.vertex); // pixel snap is bad for text rendering
+                    //  o.vertex = UnityPixelSnap(o.vertex); // pixel snap is bad for text rendering
                     o.texCoord1 = float4(size.x, size.y, Vert_BorderRadii, objectIndex);
                     o.texCoord2 = float4(shapeType, colorMode, 0, 0);
                     o.texCoord3 = _MiscData[objectIndex];

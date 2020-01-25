@@ -497,7 +497,7 @@ namespace UIForia.Util {
 
         public static LightList<T> GetMinSize(int minSize) {
             for (int i = 0; i < s_LightListPool.Count; i++) {
-                if (s_LightListPool[i].Capacity >= minSize) {
+                if (s_LightListPool[i].array.Length >= minSize) {
                     LightList<T> retn = s_LightListPool[i];
                     s_LightListPool.RemoveAt(i);
                     retn.isPooled = false;
@@ -505,7 +505,7 @@ namespace UIForia.Util {
                 }
             }
 
-            return new LightList<T>(Mathf.Min(8, minSize));
+            return new LightList<T>(minSize);
         }
 
         public static LightList<T> PreSize(int size) {

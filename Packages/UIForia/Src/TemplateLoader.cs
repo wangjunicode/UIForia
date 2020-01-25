@@ -90,6 +90,8 @@ namespace UIForia.Compilers {
 
             CompiledTemplateData compiledTemplateData = new CompiledTemplateData(templateSettings);
 
+            compiledTemplateData.styleImporter.importResolutionPath = Path.Combine(UnityEngine.Application.dataPath, "StreamingAssets", "UIForia", compiledTemplateData.templateSettings.StrippedApplicationName);
+
             try {
                 ITemplateLoader loader = (ITemplateLoader) Activator.CreateInstance(type);
                 string[] files = loader.StyleFilePaths;

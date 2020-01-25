@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using UIForia.Compilers;
 using UIForia.Elements;
 using UnityEngine;
 
@@ -16,8 +15,9 @@ namespace UIForia {
 
         [HideInInspector] public string applicationName = "Game App 2";
 
-        public TemplateSettings GetTemplateSettings() {
+        public TemplateSettings GetTemplateSettings(Type type) {
             TemplateSettings settings = new TemplateSettings();
+            settings.rootType = type;
             settings.applicationName = applicationName;
             settings.assemblyName = "Assembly-CSharp";
             settings.outputPath = Path.Combine(UnityEngine.Application.dataPath, "UIForiaGenerated2");
@@ -31,17 +31,12 @@ namespace UIForia {
             type = Type.GetType(typeName);
             if (type == null) return;
             
-            // 1. creates the application
+            TemplateSettings settings = GetTemplateSettings(type);
+
+            application = usePreCompiledTemplates 
+                ? GameApplication.CreateFromPrecompiledTemplates(settings, camera, DoDependencyInjection) 
+                : GameApplication.CreateFromRuntimeTemplates(settings, camera, DoDependencyInjection);
             
-            TemplateSettings settings = GetTemplateSettings();
-            settings.resourceManager = new ResourceManager();
-            
-            CompiledTemplateData compiledTemplates = usePreCompiledTemplates
-                ? TemplateLoader.LoadPrecompiledTemplates(settings)
-                : TemplateLoader.LoadRuntimeTemplates(type, settings);
-            
-            application = GameApplication.Create(compiledTemplates, camera);
-            application.onElementRegistered += DoDependencyInjection;
         }
 
         // optional!
@@ -51,7 +46,6 @@ namespace UIForia {
 
         private void Update() {
             if (type == null) return;
-            // 2. update the application every frame
             application?.Update();
         }
 

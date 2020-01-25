@@ -2,9 +2,7 @@
     <Contents>
 
         <TemplateBindingTest_OnChange_Inner value="myValue" onChange:value="HandleChange()"/>
-
-        <!--        <TemplateBindingTest_OnChange_Inner value="myValue" onChange:value="() => HandleChange($newValue)"/>-->
-
+        
     </Contents>
 
     <Contents id="with_old_value">
@@ -24,11 +22,6 @@
         <TemplateBindingTest_OnChange_Inner sync:value="myValue" onChange:value="HandleChange($newValue, $oldValue)"/>
 
     </Contents>
-
-    <Contents id="with_sync">
-
-        <TemplateBindingTest_OnChange_Inner onChange:value="HandleChange($newValue, $oldValue)"/>
-
-    </Contents>
+    
 
 </UITemplate>

@@ -19,9 +19,9 @@ namespace UIForia.Systems {
             this.application = application;
             this.runners = new LightList<AwesomeLayoutRunner>();
 
-            for (int i = 0; i < application.m_Views.Count; i++) {
-                runners.Add(new AwesomeLayoutRunner(this, application.m_Views[i].dummyRoot));
-            }
+            // for (int i = 0; i < application.views.Count; i++) {
+            //     runners.Add(new AwesomeLayoutRunner(this, application.views[i].dummyRoot));
+            // }
             
             application.onViewsSorted += uiViews => {
                 runners.Sort((a, b) => 

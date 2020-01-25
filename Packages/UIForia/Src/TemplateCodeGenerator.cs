@@ -216,17 +216,27 @@ namespace UIForia {
                     isGeneric = true;
                     file = Path.ChangeExtension(file, "");
                     file = file.Substring(0, file.Length - 1);
-                    file += "__" + (genericCounter++);
-                }
-
-                if (!string.IsNullOrEmpty(compiled.templateName)) {
-                    file = Path.ChangeExtension(file, "");
-                    file = file.Substring(0, file.Length - 1);
-                    file += "__" + compiled.templateName;
-                    file = Path.Combine(path, Path.ChangeExtension(file, extension));
+                  
+                    if (!string.IsNullOrEmpty(compiled.templateName)) {
+                        file += "__" + compiled.templateName;
+                    }
+                    
+                    string typeName = compiled.elementType.rawType.ToString();
+                    int start = typeName.IndexOf('[');
+                    file += typeName.Substring(start);
+                    file = Path.Combine(path, file + extension);
                 }
                 else {
-                    file = Path.Combine(path, Path.ChangeExtension(file, extension));
+
+                    if (!string.IsNullOrEmpty(compiled.templateName)) {
+                        file = Path.ChangeExtension(file, "");
+                        file = file.Substring(0, file.Length - 1);
+                        file += "__" + compiled.templateName;
+                        file = Path.Combine(path, Path.ChangeExtension(file, extension));
+                    }
+                    else {
+                        file = Path.Combine(path, Path.ChangeExtension(file, extension));
+                    }
                 }
 
                 Directory.CreateDirectory(Path.GetDirectoryName(file));
@@ -236,30 +246,30 @@ namespace UIForia {
 
                 CompiledTemplate compiledTemplate = compiledTemplateData.compiledTemplates[i];
 
-                LightList<CompiledBinding> compiledBindings = compiledTemplateData.compiledBindings;
-                LightList<CompiledSlot> compiledSlots = compiledTemplateData.compiledSlots;
+                LightList<CompiledBinding> compiledBindings = compiledTemplate.bindings;
+                LightList<CompiledSlot> compiledSlots = compiledTemplate.slots;
 
-                // todo -- optimize search or sort by file name at least
-                for (int b = 0; b < compiledBindings.size; b++) {
-                    CompiledBinding binding = compiledBindings[b];
-                    // todo -- needs to be unique by generic type. probably need an actual back reference & compare
-                    if (binding.filePath == compiledTemplate.filePath && binding.templateName == compiled.templateName) {
+                if (compiledBindings != null) {
+                    for (int b = 0; b < compiledBindings.size; b++) {
+                        CompiledBinding binding = compiledBindings[b];
                         bindingCode += $"// binding id = {binding.bindingId}";
                         bindingCode += $"\n{s_Indent8}public Action<UIElement, UIElement> Binding_{compiledBindings.array[b].bindingType}_{binding.guid} = ";
                         bindingCode += binding.bindingFn.ToTemplateBodyFunction();
                         bindingCode += "\n";
+                        //  }
                     }
                 }
 
-                // todo -- optimize search or sort by file name at least
-                for (int s = 0; s < compiledSlots.size; s++) {
-                    CompiledSlot compiledSlot = compiledSlots[s];
+                if (compiledSlots != null) {
+                    for (int s = 0; s < compiledSlots.size; s++) {
+                        CompiledSlot compiledSlot = compiledSlots[s];
 
-                    if (compiledSlot.filePath == compiledTemplate.filePath && compiledSlot.templateName == compiled.templateName) {
-                        slotCode += $"\n{s_Indent8}// {compiledSlot.GetComment()}";
-                        slotCode += $"\n{s_Indent8}public Func<UIElement, UIElement, TemplateScope, UIElement> {compiledSlot.GetVariableName()} = ";
-                        slotCode += compiledSlot.templateFn.ToTemplateBodyFunction();
-                        slotCode += "\n";
+                        if (compiledSlot.filePath == compiledTemplate.filePath && compiledSlot.templateName == compiled.templateName) {
+                            slotCode += $"\n{s_Indent8}// {compiledSlot.GetComment()}";
+                            slotCode += $"\n{s_Indent8}public Func<UIElement, UIElement, TemplateScope, UIElement> {compiledSlot.GetVariableName()} = ";
+                            slotCode += compiledSlot.templateFn.ToTemplateBodyFunction();
+                            slotCode += "\n";
+                        }
                     }
                 }
 

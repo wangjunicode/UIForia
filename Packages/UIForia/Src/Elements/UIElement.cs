@@ -456,9 +456,9 @@ namespace UIForia.Elements {
             get { return FindById(id); }
         }
 
-        public ElementAnimator Animator => new ElementAnimator(application.m_AnimationSystem, this);
+        public ElementAnimator Animator => new ElementAnimator(application.animationSystem, this);
 
-        public IInputSystem InputSystem => application.m_InputSystem;
+        public IInputSystem InputSystem => application.inputSystem;
 
         // element.animator.Stop();
 

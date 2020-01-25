@@ -12,12 +12,12 @@ using Object = UnityEngine.Object;
 
 namespace UIForia.Rendering {
 
-     internal struct SVGXDrawCall {
+    internal struct SVGXDrawCall {
 
         public int styleIdx;
         public Material material;
         public GeometryRange geometryRange;
-        
+
         public readonly DrawCallType type;
         public readonly int transformIdx;
         public readonly RangeInt shapeRange;
@@ -36,7 +36,7 @@ namespace UIForia.Rendering {
         }
 
     }
-    
+
     public struct FontData {
 
         public FontAsset fontAsset;
@@ -334,14 +334,14 @@ namespace UIForia.Rendering {
                 //      cool, render and move on
                 // else if result == AtlasResult.TextureTooLarge
                 //      nope, can't be atlased, break batch but don't start a new atlas
-                
+
                 // Vector4 uvRect = default;
                 // if(textureAtlas.Reference(geometry.mainTexture, out uvRect)) {
                 //     remap uvs = true;
                 // }
                 // else
                 // break batch
-                
+
                 // todo -- if UVs are transformed don't use sprite atlas
 //                if (texturePacker.TryPackTexture(geometry.mainTexture, out uvs)) {
 //                    texture = spriteAtlas;
@@ -358,7 +358,7 @@ namespace UIForia.Rendering {
             currentBatch.uiforiaData.mainTexture = !ReferenceEquals(texture, null) ? texture : currentBatch.uiforiaData.mainTexture;
 
             // todo -- optimize these adds, fix out of bounds 
-            
+
             // if (currentBatch.uiforiaData.colors.size + 1 >= currentBatch.uiforiaData.colors.array.Length) {
             //     
             //     Array.Resize(ref currentBatch.uiforiaData.colors.array, (currentBatch.uiforiaData.colors.size + 1) * 2);
@@ -369,12 +369,12 @@ namespace UIForia.Rendering {
             //     Array.Resize(ref currentBatch.uiforiaData.clipUVs.array, (currentBatch.uiforiaData.clipUVs.size + 1) * 2);
             //     Array.Resize(ref currentBatch.uiforiaData.clipRects.array, (currentBatch.uiforiaData.clipRects.size + 1) * 2);
             // }
-            
+
             currentBatch.uiforiaData.colors.Add(geometry.packedColors);
             currentBatch.uiforiaData.objectData0.Add(geometry.objectData);
             currentBatch.uiforiaData.objectData1.Add(geometry.miscData);
             currentBatch.uiforiaData.cornerData.Add(geometry.cornerData);
-            
+
             // currentBatch.uiforiaData.colors.array[currentBatch.uiforiaData.colors.size++] = geometry.packedColors;
             // currentBatch.uiforiaData.objectData0.array[currentBatch.uiforiaData.objectData0.size++] = geometry.objectData;
             // currentBatch.uiforiaData.objectData1.array[currentBatch.uiforiaData.objectData1.size++] = geometry.miscData;
@@ -658,8 +658,8 @@ namespace UIForia.Rendering {
                 throw new NotImplementedException();
                 // renderTexture = RenderTexture.GetTemporary(Screen.width, Screen.height, defaultRTDepth, RenderTextureFormat.DefaultHDR);
                 // scratchTextures.Add(new ScratchRenderTexture() {
-                    // packer = packer,
-                    // renderTexture = renderTexture
+                // packer = packer,
+                // renderTexture = renderTexture
                 // });
             }
 
@@ -942,11 +942,11 @@ namespace UIForia.Rendering {
             Clear();
             clipContext?.Destroy();
             clipContext = null;
-            Object.Destroy(spriteAtlas);
-            Object.Destroy(spriteAtlasMaterial);
-            Object.Destroy(textAtlas);
-            Object.Destroy(pingPongTexture);
-
+#if UNITY_EDITOR
+            Object.DestroyImmediate(spriteAtlas);
+            Object.DestroyImmediate(textAtlas);
+            Object.DestroyImmediate(pingPongTexture);
+#endif
             for (int i = 0; i < meshesToRelease.size; i++) {
                 meshesToRelease[i].Release();
             }

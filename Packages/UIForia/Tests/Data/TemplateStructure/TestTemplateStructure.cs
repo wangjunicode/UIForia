@@ -36,7 +36,7 @@ namespace TemplateStructure {
                 ? TemplateLoader.LoadPrecompiledTemplates(settings)
                 : TemplateLoader.LoadRuntimeTemplates(typeof(T), settings);
 
-            return new MockApplication(compiledTemplates, null);
+            return null; //new MockApplication(compiledTemplates, null);
         }
 
         [Template("Data/TemplateStructure/SlotOverride/TemplateStructure_SlotOverride_Main.xml")]
@@ -47,7 +47,7 @@ namespace TemplateStructure {
 
         [Test]
         public void TemplateStructure_SlotOverride_UseOverride() {
-            MockApplication app = Setup<TemplateStructure_SlotOverride_Main>();
+            MockApplication app = MockApplication.Setup<TemplateStructure_SlotOverride_Main>();
 
             Assert.IsInstanceOf<TemplateStructure_SlotOverride_Expand>(app.RootElement[0]);
             Assert.IsInstanceOf<UISlotOverride>(app.RootElement[0][0]);
@@ -64,7 +64,7 @@ namespace TemplateStructure {
 
         [Test]
         public void TemplateStructure_SlotOverride_UseDefault() {
-            MockApplication app = Setup<TemplateStructure_SlotOverrideDefault_Main>();
+            MockApplication app = MockApplication.Setup<TemplateStructure_SlotOverrideDefault_Main>();
             Assert.IsInstanceOf<TemplateStructure_SlotOverrideDefault_Expand>(app.RootElement[0]);
             Assert.IsInstanceOf<UITextElement>(app.RootElement[0][0][0]);
             UITextElement textElement = (UITextElement) app.RootElement[0][0][0];
@@ -82,7 +82,7 @@ namespace TemplateStructure {
 
         [Test]
         public void TemplateStructure_SlotOverrideExtern_OuterOverride() {
-            MockApplication app = Setup<TemplateStructure_SlotOverrideExternOuterOverride_Main>();
+            MockApplication app = MockApplication.Setup<TemplateStructure_SlotOverrideExternOuterOverride_Main>();
             Assert.IsInstanceOf<TemplateStructure_SlotOverrideExternOuterOverride_Exposer>(app.RootElement[0]);
             Assert.IsInstanceOf<TemplateStructure_SlotOverrideExternOuterOverride_Definer>(app.RootElement[0][0]);
             Assert.IsInstanceOf<UISlotOverride>(app.RootElement[0][0][0]);
@@ -103,7 +103,7 @@ namespace TemplateStructure {
 
         [Test]
         public void TemplateStructure_SlotOverride_Extern_ExternDefault() {
-            MockApplication app = Setup<TemplateStructure_SlotOverride_Extern_ExternDefault_Main>();
+            MockApplication app = MockApplication.Setup<TemplateStructure_SlotOverride_Extern_ExternDefault_Main>();
             Assert.IsInstanceOf<TemplateStructure_SlotOverride_Extern_ExternDefault_Exposer>(app.RootElement[0]);
             Assert.IsInstanceOf<TemplateStructure_SlotOverride_Extern_ExternDefault_Definer>(app.RootElement[0][0]);
             Assert.IsInstanceOf<UISlotOverride>(app.RootElement[0][0][0]);
@@ -123,7 +123,7 @@ namespace TemplateStructure {
 
         [Test]
         public void TemplateStructure_SlotOverride_Extern_DefinerDefault() {
-            MockApplication app = Setup<TemplateStructure_SlotOverride_Extern_DefinerDefault_Main>();
+            MockApplication app = MockApplication.Setup<TemplateStructure_SlotOverride_Extern_DefinerDefault_Main>();
             Assert.IsInstanceOf<TemplateStructure_SlotOverride_Extern_DefinerDefault_Exposer>(app.RootElement[0]);
             Assert.IsInstanceOf<TemplateStructure_SlotOverride_Extern_DefinerDefault_Definer>(app.RootElement[0][0]);
             Assert.IsInstanceOf<UISlotOverride>(app.RootElement[0][0][0]);

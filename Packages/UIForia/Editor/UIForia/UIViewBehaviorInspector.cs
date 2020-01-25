@@ -80,7 +80,7 @@ namespace UIForia.Editor {
             
             if (GUILayout.Button("Generate Code")) {
                 
-                TemplateCodeGenerator.Generate(behavior.type, behavior.GetTemplateSettings());
+                TemplateCodeGenerator.Generate(behavior.type, behavior.GetTemplateSettings(behavior.type));
                 
 //                TemplateCompiler compiler = new TemplateCompiler(settings);
 //                

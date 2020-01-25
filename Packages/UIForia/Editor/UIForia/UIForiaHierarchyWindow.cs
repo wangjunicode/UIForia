@@ -149,9 +149,9 @@ namespace UIForia.Editor {
 
             if (oldApp != null) {
                 oldApp.onElementDestroyed -= Refresh;
-                oldApp.onViewAdded -= Refresh;
+               // oldApp.onViewAdded -= Refresh;
                 oldApp.onElementEnabled -= Refresh;
-                oldApp.onRefresh -= OnRefresh;
+                //oldApp.onRefresh -= OnRefresh;
             }
 
             treeView?.Destroy();
@@ -168,9 +168,9 @@ namespace UIForia.Editor {
                 treeView.onSelectionChanged += OnElementSelectionChanged;
 
                 app.onElementDestroyed += Refresh;
-                app.onViewAdded += Refresh;
+                //app.onViewAdded += Refresh;
                 app.onElementEnabled += Refresh;
-                app.onRefresh += OnRefresh;
+                //app.onRefresh += OnRefresh;
             }
             
             if (s_SelectedApplication != null) {

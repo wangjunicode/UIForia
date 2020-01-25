@@ -448,6 +448,8 @@ namespace UIForia.Compilers {
             CompiledSlot compiledSlot = templateData.CreateSlot(parentContext.compiledTemplate.filePath, parentContext.compiledTemplate.templateName, slotNode.slotName, slotNode.slotType);
             compiledSlot.rootElementType = parentContext.rootType.rawType;
 
+            parentContext.compiledTemplate.AddSlot(compiledSlot);
+            
             slotNode.compiledSlot = compiledSlot;
 
             compiledSlot.scopedVariables = CloneContextStack();
@@ -513,6 +515,8 @@ namespace UIForia.Compilers {
 
             CompiledSlot compiledSlot = templateData.CreateSlot(parentContext.compiledTemplate.filePath, parentContext.compiledTemplate.templateName, "__template__", SlotType.Template);
 
+            parentContext.compiledTemplate.AddSlot(compiledSlot);
+            
             ParameterExpression rootParam = Expression.Parameter(typeof(UIElement), "root");
             ParameterExpression parentParam = Expression.Parameter(typeof(UIElement), "parent");
             ParameterExpression scopeParam = Expression.Parameter(typeof(TemplateScope), "scope");
@@ -567,6 +571,8 @@ namespace UIForia.Compilers {
 
             CompiledSlot compiledSlot = templateData.CreateSlot(parentContext.compiledTemplate.filePath, parentContext.compiledTemplate.templateName, slotOverrideNode.slotName, SlotType.Override);
 
+            parentContext.compiledTemplate.AddSlot(compiledSlot);
+            
             ParameterExpression rootParam = Expression.Parameter(typeof(UIElement), "root");
             ParameterExpression parentParam = Expression.Parameter(typeof(UIElement), "parent");
             ParameterExpression scopeParam = Expression.Parameter(typeof(TemplateScope), "scope");
@@ -1406,9 +1412,7 @@ namespace UIForia.Compilers {
         }
 
         private void CompileStaticSharedStyles(CompilationContext ctx, StructList<TextExpression> list, int innerContextSplit, LightList<StyleRefInfo> styleIds) {
-            
             for (int i = 0; i < list.size; i++) {
-                
                 bool fromInnerContext = i < innerContextSplit;
 
                 string text = list.array[i].text;
@@ -1431,7 +1435,7 @@ namespace UIForia.Compilers {
                     }
                 }
             }
-            
+
             ParameterExpression styleList = ctx.GetVariable<LightList<UIStyleGroupContainer>>("styleList");
             ctx.Assign(styleList, ExpressionFactory.CallStaticUnchecked(s_LightList_UIStyleGroupContainer_PreSize, Expression.Constant(styleIds.size)));
             Expression styleListArray = Expression.MakeMemberAccess(styleList, s_LightList_UIStyleGroupContainer_Array);
@@ -1530,7 +1534,7 @@ namespace UIForia.Compilers {
             }
 
             MemberExpression styleSet = Expression.Field(updateCompiler.GetElement(), s_UIElement_StyleSet);
-            MethodCallExpression setBaseStyles = ExpressionFactory.CallInstanceUnchecked(styleSet, s_StyleSet_SetBaseStyles, styleList);
+            MethodCallExpression setBaseStyles = ExpressionFactory.CallInstanceUnchecked(styleSet, s_StyleSet_SetBaseStyles, updateStyleList);
 
             updateCompiler.RawExpression(setBaseStyles);
             updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(updateStyleList, s_LightList_UIStyleGroupContainer_Release));
@@ -1634,24 +1638,28 @@ namespace UIForia.Compilers {
                 CompiledBinding createdBinding = templateData.AddBinding(templateNode, CompiledBindingType.OnCreate);
                 createdBinding.bindingFn = createdCompiler.BuildLambda();
                 createdBindingId = createdBinding.bindingId;
+                ctx.compiledTemplate.AddBinding(createdBinding);
             }
 
             if (enabledCompiler.StatementCount > 0) {
                 CompiledBinding enabledBinding = templateData.AddBinding(templateNode, CompiledBindingType.OnEnable);
                 enabledBinding.bindingFn = enabledCompiler.BuildLambda();
                 enabledBindingId = enabledBinding.bindingId;
+                ctx.compiledTemplate.AddBinding(enabledBinding);
             }
 
             if (updateCompiler.StatementCount > 0) {
                 CompiledBinding updateBinding = templateData.AddBinding(templateNode, CompiledBindingType.OnUpdate);
                 updateBinding.bindingFn = updateCompiler.BuildLambda();
                 updateBindingId = updateBinding.bindingId;
+                ctx.compiledTemplate.AddBinding(updateBinding);
             }
 
             if (lateCompiler.StatementCount > 0) {
                 CompiledBinding lateBinding = templateData.AddBinding(templateNode, CompiledBindingType.OnLateUpdate);
                 lateBinding.bindingFn = lateCompiler.BuildLambda();
                 lateBindingId = lateBinding.bindingId;
+                ctx.compiledTemplate.AddBinding(lateBinding);
             }
 
             // create binding node if needed

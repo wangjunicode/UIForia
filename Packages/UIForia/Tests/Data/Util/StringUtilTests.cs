@@ -17,16 +17,20 @@ namespace Util {
             Assert.AreEqual("content-content-contentsuperlongstringhereohmygoshthisislong", builder.ToString());
         }
 
-         [Test]
+        [Test]
         public void StringUtil_RangeEquals() {
             string a = "--hello--";
             string b = "hello";
-            
+
             Assert.IsTrue(StringUtil.EqualsRangeUnsafe(a.ToCharArray(), 2, b.ToCharArray(), 0, b.Length));
-            
         }
 
-
+        [Test]
+        public void StringUtil_FindMatchingIndex() {
+            string input = "hello[this[is] more]here";
+            int idx = StringUtil.FindMatchingIndex(input, '[', ']');
+            Assert.AreEqual(input.Length - 4, idx);
+        }
     }
 
 }

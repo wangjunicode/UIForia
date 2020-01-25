@@ -3,7 +3,7 @@ import "Documentation/Documentation.style" as theme;
 style container {
     PreferredSize = 1cnt;
     Padding = 50px;
-    run animation(fadeIn);
+    // run animation(fadeIn);
 }
 
 style button-container {

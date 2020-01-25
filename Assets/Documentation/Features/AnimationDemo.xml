@@ -9,7 +9,7 @@
     <Contents style="container">
             <Div>Animation Task Status: {animationTask.state}</Div>
 
-        <Heading2>Click on an animation type to see the result</Heading2>
+<!--        <Heading2>Click on an animation type to see the result</Heading2>-->
         <Group style="button-container">
             <Div style="button" mouse:click="ChangeAnimation('bounce')">Bounce</Div>
             <Div style="button" mouse:click="ChangeAnimation('flash')">Flash</Div>

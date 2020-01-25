@@ -6,20 +6,19 @@ using NUnit.Framework;
 using Tests.Mocks;
 using UIForia;
 using UIForia.Attributes;
-using UIForia.Compilers;
 using UIForia.Compilers.Style;
 using UIForia.Elements;
 using UIForia.Exceptions;
 using UIForia.UIInput;
 using UnityEngine;
-using Debug = UnityEngine.Debug;
+using Application = UnityEngine.Application;
 
 namespace TemplateBinding {
 
     public class TemplateBindingTests {
 
-        private bool usePreCompiledTemplates = true;
-        private bool generateCode = true;
+        private bool usePreCompiledTemplates = false;
+        private bool generateCode = false;
 
         public MockApplication Setup<T>(string appName = null) {
             if (appName == null) {
@@ -28,22 +27,23 @@ namespace TemplateBinding {
             }
 
             TemplateSettings settings = new TemplateSettings();
+            settings.rootType = typeof(T);
             settings.applicationName = appName;
             settings.assemblyName = GetType().Assembly.GetName().Name;
-            settings.outputPath = Path.Combine(UnityEngine.Application.dataPath, "..", "Packages", "UIForia", "Tests", "UIForiaGenerated");
+            settings.outputPath = Path.Combine(Application.dataPath, "..", "Packages", "UIForia", "Tests", "UIForiaGenerated");
             settings.codeFileExtension = "generated.xml.cs";
             settings.preCompiledTemplatePath = "Assets/UIForia_Generated/" + appName;
-            settings.templateResolutionBasePath = Path.Combine(UnityEngine.Application.dataPath, "..", "Packages", "UIForia", "Tests");
+            settings.templateResolutionBasePath = Path.Combine(Application.dataPath, "..", "Packages", "UIForia", "Tests");
 
             if (generateCode) {
                 TemplateCodeGenerator.Generate(typeof(T), settings);
             }
 
-            CompiledTemplateData compiledTemplates = usePreCompiledTemplates
-                ? TemplateLoader.LoadPrecompiledTemplates(settings)
-                : TemplateLoader.LoadRuntimeTemplates(typeof(T), settings);
+            // CompiledTemplateData compiledTemplates = usePreCompiledTemplates
+            //     ? TemplateLoader.LoadPrecompiledTemplates(settings)
+            //     : TemplateLoader.LoadRuntimeTemplates(typeof(T), settings);
 
-            return new MockApplication(compiledTemplates, null);
+            return MockApplication.Setup(settings, usePreCompiledTemplates);
         }
 
         [Template("Data/TemplateBindings/TemplateBindingTest_BasicBinding.xml")]
@@ -111,7 +111,7 @@ namespace TemplateBinding {
             MockApplication app = Setup<TemplateBindingTest_AttributeBinding>();
 
             TemplateBindingTest_AttributeBinding outer = (TemplateBindingTest_AttributeBinding) app.RootElement;
-            UIElement inner = app.RootElement[0];
+            UIElement inner = outer[0];
 
             Assert.AreEqual("attr-value", inner.GetAttribute("someAttr"));
             Assert.AreEqual("", inner.GetAttribute("dynamicAttr"));

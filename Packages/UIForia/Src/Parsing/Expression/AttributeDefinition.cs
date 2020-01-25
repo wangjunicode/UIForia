@@ -21,8 +21,9 @@ namespace UIForia.Parsing.Expressions {
         InstanceStyle = 1 << 13,
         Expose = 1 << 14,
         ImplicitVariable = 1 << 15,
-        ChangeHandler = 1 << 16
-  
+        ChangeHandler = 1 << 16,
+        Drag = 1 << 17
+
     }
 
     [Flags]

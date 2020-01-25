@@ -53,6 +53,7 @@ namespace UIForia.Parsing {
             nameSpaceManager.AddNamespace("style", "style");
             nameSpaceManager.AddNamespace("onChange", "onChange");
             nameSpaceManager.AddNamespace("ctx", "ctx");
+            nameSpaceManager.AddNamespace("drag", "drag");
             nameSpaceManager.AddNamespace("mouse", "mouse");
             nameSpaceManager.AddNamespace("key", "key");
             nameSpaceManager.AddNamespace("touch", "touch");
@@ -447,8 +448,13 @@ namespace UIForia.Parsing {
                         case "mouse":
                             attributeType = AttributeType.Mouse;
                             break;
+                        
                         case "key":
                             attributeType = AttributeType.Key;
+                            break;
+                        
+                        case "drag":
+                            attributeType = AttributeType.Drag;
                             break;
                         
                         case "onChange":
@@ -458,9 +464,11 @@ namespace UIForia.Parsing {
                         case "touch":
                             attributeType = AttributeType.Touch;
                             break;
+                        
                         case "controller":
                             attributeType = AttributeType.Controller;
                             break;
+                        
                         case "style":
                             attributeType = AttributeType.InstanceStyle;
                             if (name.Contains(".")) {
@@ -482,9 +490,11 @@ namespace UIForia.Parsing {
                             }
 
                             break;
+                        
                         case "evt":
                             attributeType = AttributeType.Event;
                             break;
+                        
                         case "ctx":
 
                             attributeType = AttributeType.Context;
@@ -494,6 +504,7 @@ namespace UIForia.Parsing {
                             }
 
                             break;
+                        
                         case "var":
                             attributeType = AttributeType.ImplicitVariable;
 
@@ -510,6 +521,7 @@ namespace UIForia.Parsing {
                             attributeType = AttributeType.Property;
                             flags |= AttributeFlags.Sync;
                             break;
+                        
                         case "expose":
                             attributeType = AttributeType.Expose;
                             if (name == "element" || name == "parent" || name == "root" || name == "evt") {
@@ -517,6 +529,7 @@ namespace UIForia.Parsing {
                             }
 
                             break;
+                        
                         case "alias":
                             attributeType = AttributeType.Alias;
                             if (name == "element" || name == "parent" || name == "root" || name == "evt") {

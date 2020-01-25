@@ -24,6 +24,19 @@
 
     </Contents>
 
+    <Contents id="repeat_multi_child">
+
+        <Repeat list="data" keyFn="(e) => (long)e.x">
+            <Div>
+                repeat me {(long)$item.x}
+            </Div>
+            <Div>
+                {$item.z}
+            </Div>
+        </Repeat>
+
+    </Contents>
+
 </UITemplate>
 
         <!--  <RepeatRange list="options" start="0" end="10" keyFn="(i) => i.val">-->

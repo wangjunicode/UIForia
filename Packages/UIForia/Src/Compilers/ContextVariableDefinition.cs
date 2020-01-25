@@ -48,25 +48,29 @@ namespace UIForia.Compilers {
                 case AliasResolverType.ControllerEvent:
                     throw new NotImplementedException();
 
+                case AliasResolverType.DragEvent:
+                case AliasResolverType.DragCreateMouseEvent:
+                    return compiler.GetParameter(TemplateCompiler.k_InputEventParameterName);
+                
                 case AliasResolverType.Element:
                     return compiler.GetCastElement();
 
                 case AliasResolverType.Root:
                     return compiler.GetCastRoot();
 
-                case AliasResolverType.Parent: // todo -- use expressions
+                case AliasResolverType.Parent:
                     return Expression.Field(compiler.GetElement(), s_UIElement_Parent);
 
                 case AliasResolverType.ContextVariable: {
                     ParameterExpression el = compiler.GetElement();
                     Expression access = Expression.MakeMemberAccess(el, TemplateCompiler.s_UIElement_BindingNode);
                     Expression call = ExpressionFactory.CallInstanceUnchecked(access, TemplateCompiler.s_LinqBindingNode_GetContextVariable, Expression.Constant(id));
-                    Type contextVarType = ReflectionUtil.CreateGenericType(typeof(ContextVariable<>), type);
+                    Type varType = ReflectionUtil.CreateGenericType(typeof(ContextVariable<>), type);
 
-                    UnaryExpression convert = Expression.Convert(call, contextVarType);
+                    UnaryExpression convert = Expression.Convert(call, varType);
                     ParameterExpression variable = compiler.AddVariable(type, "ctxvar_" + GetName());
 
-                    compiler.Assign(variable, Expression.MakeMemberAccess(convert, contextVarType.GetField("value")));
+                    compiler.Assign(variable, Expression.MakeMemberAccess(convert, varType.GetField("value")));
                     return variable;
                 }
                 case AliasResolverType.RepeatItem: {
@@ -78,11 +82,11 @@ namespace UIForia.Compilers {
                     ReflectionUtil.TypeArray1[0] = type;
                     MethodInfo getItem = TemplateCompiler.s_LinqBindingNode_GetRepeatItem.MakeGenericMethod(ReflectionUtil.TypeArray1);
                     Expression call = ExpressionFactory.CallInstanceUnchecked(access, getItem, Expression.Constant(id));
-                    Type contextVarType = ReflectionUtil.CreateGenericType(typeof(ContextVariable<>), type);
+                    Type varType = ReflectionUtil.CreateGenericType(typeof(ContextVariable<>), type);
 
                     ParameterExpression variable = compiler.AddVariable(type, "repeat_item_" + GetName());
 
-                    compiler.Assign(variable, Expression.MakeMemberAccess(call, contextVarType.GetField(nameof(ContextVariable<int>.value))));
+                    compiler.Assign(variable, Expression.MakeMemberAccess(call, varType.GetField(nameof(ContextVariable<int>.value))));
                     return variable;
                 }
                 case AliasResolverType.RepeatIndex: {

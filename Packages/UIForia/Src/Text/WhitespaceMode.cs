@@ -5,6 +5,7 @@ namespace UIForia.Text {
     [Flags]
     public enum WhitespaceMode {
 
+        Unset = 0,
         CollapseWhitespace = 1 << 0,
         PreserveNewLines = 1 << 1,
         TrimStart = 1 << 2,

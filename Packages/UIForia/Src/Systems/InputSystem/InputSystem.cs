@@ -8,8 +8,11 @@ using UIForia.Util;
 using UnityEngine;
 
 namespace UIForia.Systems {
+
     public abstract class InputSystem : IInputSystem {
+
         private struct PressedKey {
+
             public readonly KeyCode keyCode;
             public readonly char character;
 
@@ -17,6 +20,7 @@ namespace UIForia.Systems {
                 this.keyCode = keyCode;
                 this.character = character;
             }
+
         }
 
         public event Action<IFocusable> onFocusChanged;
@@ -51,15 +55,11 @@ namespace UIForia.Systems {
         private readonly List<UIElement> m_ExitedElements;
         private readonly List<UIElement> m_ActiveElements;
         private readonly List<UIElement> m_EnteredElements;
-        private readonly List<UIElement> m_MouseDownElements;
+        private readonly LightList<UIElement> m_MouseDownElements;
         private readonly LightList<UIElement> hoveredElements;
 
         private readonly Dictionary<KeyCode, KeyState> m_KeyStates;
         private readonly Dictionary<int, DragCreatorGroup> m_DragCreatorMap;
-
-        private readonly LightList<KeyCode> m_DownThisFrame;
-        private readonly LightList<KeyCode> m_UpThisFrame;
-        private readonly LightList<PressedKey> m_PressedKeys;
 
         private readonly EventPropagator m_EventPropagator;
         private readonly List<ValueTuple<Action<GenericInputEvent>, UIElement>> m_MouseEventCaptureList;
@@ -81,7 +81,7 @@ namespace UIForia.Systems {
         protected InputSystem(ILayoutSystem layoutSystem, KeyboardInputManager keyboardInputManager = null) {
             this.m_LayoutSystem = layoutSystem;
 
-            this.m_MouseDownElements = new List<UIElement>();
+            this.m_MouseDownElements = new LightList<UIElement>();
             this.m_ElementsThisFrame = new List<UIElement>();
             this.m_ElementsLastFrame = new List<UIElement>();
             this.m_EnteredElements = new List<UIElement>();
@@ -91,9 +91,9 @@ namespace UIForia.Systems {
             this.m_DragCreatorMap = new Dictionary<int, DragCreatorGroup>();
             //   this.m_DragHandlerMap = new Dictionary<int, DragHandlerGroup>();
 
-            this.m_PressedKeys = new LightList<PressedKey>(16);
-            this.m_UpThisFrame = new LightList<KeyCode>();
-            this.m_DownThisFrame = new LightList<KeyCode>();
+            // this.m_PressedKeys = new LightList<PressedKey>(16);
+            // this.m_UpThisFrame = new LightList<KeyCode>();
+            // this.m_DownThisFrame = new LightList<KeyCode>();
             this.m_KeyStates = new Dictionary<KeyCode, KeyState>();
             this.m_KeyboardEventTree = new SkipTree<UIElement>();
             this.keyboardInputManager = keyboardInputManager ?? new KeyboardInputManager();
@@ -485,72 +485,52 @@ namespace UIForia.Systems {
         }
 
         private void BeginDrag() {
+            
+            if (m_CurrentDragEvent != null) {
+                return;
+            }
+
+            if (m_MouseDownElements.size == 0) {
+                return;
+            }
+
             mouseState.leftMouseButtonState.isDrag = mouseState.isLeftMouseDown;
             mouseState.rightMouseButtonState.isDrag = mouseState.isRightMouseDown;
             mouseState.middleMouseButtonState.isDrag = mouseState.isMiddleMouseDown;
 
             IsDragging = true;
             m_EventPropagator.Reset(mouseState);
-            // MouseInputEvent mouseEvent = new MouseInputEvent(m_EventPropagator, InputEventType.DragCreate, modifiersThisFrame);
+            MouseInputEvent mouseEvent = new MouseInputEvent(m_EventPropagator, InputEventType.DragCreate, modifiersThisFrame);
 
-            if (m_MouseDownElements.Count == 0) return;
-
-            m_EventPropagator.origin = m_MouseDownElements[0];
+            m_EventPropagator.origin = m_MouseDownElements.array[0];
 
             for (int i = 0; i < m_MouseDownElements.Count; i++) {
                 UIElement element = m_MouseDownElements[i];
-                if (element.isDestroyed || element.isDisabled) {
+
+                if (element.isDestroyed || element.isDisabled || element.inputHandlers == null) {
                     continue;
                 }
 
-                if (m_CurrentDragEvent == null) {
-                    DragCreatorGroup dragCreatorGroup;
-                    if (!m_DragCreatorMap.TryGetValue(element.id, out dragCreatorGroup)) {
-                        continue;
-                    }
-
-                    throw new NotImplementedException("Re-implement drag input");
-                    // m_CurrentDragEvent = dragCreatorGroup.TryCreateEvent(element, mouseEvent, EventPhase.Bubble);
-                    // if (m_CurrentDragEvent == null) {
-                    //     continue;
-                    // }
-                    //
-                    // m_CurrentDragEvent.StartTime = Time.realtimeSinceStartup;
-                    // m_CurrentDragEvent.DragStartPosition = MousePosition;
-                    //
-                    // UpdateDrag(true);
-                    // return;
-                }
-            }
-
-            for (int i = m_MouseDownElements.Count - 1; i >= 0; i--) {
-                UIElement element = m_MouseDownElements[i];
-
-                if (element.isDestroyed || element.isDisabled) {
+                if ((element.inputHandlers.handledEvents & InputEventType.DragCreate) == 0) {
                     continue;
                 }
 
-                if (m_CurrentDragEvent == null) {
-                    DragCreatorGroup dragCreatorGroup;
-                    if (!m_DragCreatorMap.TryGetValue(element.id, out dragCreatorGroup)) {
-                        continue;
+                for (int creatorIndex = 0; creatorIndex < element.inputHandlers.dragCreators.size; creatorIndex++) {
+                    InputHandlerGroup.DragCreatorData data = element.inputHandlers.dragCreators.array[creatorIndex];
+
+                    m_CurrentDragEvent = data.handler.Invoke(mouseEvent);
+
+                    if (m_CurrentDragEvent != null) {
+                        m_CurrentDragEvent.StartTime = Time.realtimeSinceStartup;
+                        m_CurrentDragEvent.DragStartPosition = MousePosition;
+
+                        UpdateDrag(true);
+                        return;
                     }
-
-                    // todo -- figure out if these should respect propagation
-                    throw new NotImplementedException("Re-implement drag input");
-
-                    // m_CurrentDragEvent = dragCreatorGroup.TryCreateEvent(element, mouseEvent, EventPhase.Capture);
-                    // if (m_CurrentDragEvent == null) {
-                    //     continue;
-                    // }
                 }
-
-                m_CurrentDragEvent.StartTime = Time.realtimeSinceStartup;
-                m_CurrentDragEvent.DragStartPosition = MousePosition;
-
-                UpdateDrag(true);
-                return;
             }
+
+            // todo -- capture phase
         }
 
         private void EndDrag(InputEventType evtType) {
@@ -891,9 +871,13 @@ namespace UIForia.Systems {
 
             ReleaseFocus((IFocusable) m_FocusedElement);
         }
+
     }
 
     public struct KeyboardEventHandlerInvocation {
+
         public KeyboardInputEvent evt { get; set; }
+
     }
+
 }

@@ -9,6 +9,7 @@ using UIForia.Parsing.Expressions;
 using UIForia.Parsing.Expressions.AstNodes;
 using UIForia.Parsing.Style.AstNodes;
 using UIForia.Text;
+using UIForia.UIInput;
 using UIForia.Util;
 
 namespace UIForia.Exceptions {
@@ -245,6 +246,18 @@ namespace UIForia.Exceptions {
 
         public static CompileException UnknownStyleMapping() {
             return new CompileException($"Unknown style mapping");
+        }
+
+        public static CompileException InvalidInputAnnotation(string methodName, Type type, Type annotationType, Type expectedParameterType, Type actualParameterType) {
+           return new CompileException($"Method {methodName} in type {type.Name} is annotated with {annotationType.Name} which expects 0 or 1 arguments of type {expectedParameterType} but was declared with {actualParameterType} which is invalid");
+        }
+
+        public static CompileException TooManyInputAnnotationArguments(string methodName, Type type, Type annotationType, Type expectedParameterType, int parameterCount) {
+            return new CompileException($"Method {methodName} in type {type.Name} is annotated with {annotationType.Name} which expects 0 or 1 arguments of type {expectedParameterType} but was declared with {parameterCount} arguments which is invalid");
+        }
+        
+        public static CompileException InvalidDragCreatorAnnotationReturnType(string methodName, Type type, Type returnType) {
+            return new CompileException($"Method {methodName} in type {type.Name} is annotated with {nameof(OnDragCreateAttribute)} which expects a return type assignable to {nameof(DragEvent)}. The method returns {returnType} which is invalid");
         }
 
     }

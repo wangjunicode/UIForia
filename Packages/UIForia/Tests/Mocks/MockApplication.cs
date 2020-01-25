@@ -14,6 +14,9 @@ namespace Tests.Mocks {
 
     public class MockApplication : Application {
 
+        public static bool s_GenerateCode;
+        public static bool s_UsePreCompiledTemplates;
+
         protected MockApplication(bool isPreCompiled, TemplateSettings templateData, ResourceManager resourceManager, Action<UIElement> onRegister) : base(isPreCompiled, templateData, resourceManager, onRegister) { }
 
         protected override void CreateSystems() {
@@ -33,13 +36,13 @@ namespace Tests.Mocks {
             settings.templateRoot = "Data";
             settings.assemblyName = typeof(MockApplication).Assembly.GetName().Name;
             settings.outputPath = Path.Combine(UnityEngine.Application.dataPath, "..", "Packages", "UIForia", "Tests", "UIForiaGenerated");
-            settings.codeFileExtension = ".generated.xml.cs";
+            settings.codeFileExtension = "generated.xml.cs";
             settings.preCompiledTemplatePath = "Assets/UIForia_Generated/" + appName;
             settings.templateResolutionBasePath = Path.Combine(UnityEngine.Application.dataPath, "..", "Packages", "UIForia", "Tests");
             return settings;
         }
 
-        public static MockApplication Setup<T>(string appName = null, bool usePreCompiledTemplates = false) where T : UIElement {
+        public static MockApplication Setup<T>(string appName = null) where T : UIElement {
             if (appName == null) {
                 StackTrace stackTrace = new StackTrace();
                 appName = stackTrace.GetFrame(1).GetMethod().Name;
@@ -55,7 +58,11 @@ namespace Tests.Mocks {
             settings.templateResolutionBasePath = Path.Combine(UnityEngine.Application.dataPath, "..", "Packages", "UIForia", "Tests");
             settings.rootType = typeof(T);
 
-            MockApplication app = new MockApplication(usePreCompiledTemplates, settings, null, null);
+            if (s_GenerateCode) {
+                TemplateCodeGenerator.Generate(typeof(T), settings);
+            }
+
+            MockApplication app = new MockApplication(s_UsePreCompiledTemplates, settings, null, null);
             app.Initialize();
             return app;
         }

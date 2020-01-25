@@ -2375,7 +2375,7 @@ namespace UIForia.Compilers {
             nested.parameters.Clear();
             nested.parameters.AddRange(parameters);
 
-            returnType = retnType ?? typeof(void);
+            nested.returnType = retnType ?? typeof(void);
             nested.SetImplicitContext(implicitContext, ParameterFlags.NeverNull);
             nested.parent = this;
             nested.id = GetNextCompilerId();

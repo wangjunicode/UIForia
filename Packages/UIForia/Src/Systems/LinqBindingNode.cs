@@ -196,16 +196,17 @@ namespace UIForia.Systems {
         }
 
         public ContextVariable<T> GetRepeatItem<T>(int id) {
-            ContextVariable ptr = localVariable; 
-            while (ptr != null) {
-                if (ptr.id == id) {
-                    return (ContextVariable<T>) ptr;
-                }
+            return (ContextVariable<T>) GetContextVariable(id);
+            // ContextVariable ptr = localVariable; 
+            // while (ptr != null) {
+                // if (ptr.id == id) {
+                    // return (ContextVariable<T>) ptr;
+                // }
 
-                ptr = ptr.next;
-            }
+                // ptr = ptr.next;
+            // }
 
-            return null;
+            // return null;
         }
         
     }

@@ -25,7 +25,10 @@ namespace UIForia {
             CompiledTemplateData compiledTemplateData = TemplateCompiler.CompileTemplates(type, templateSettings);
 
             string path = templateSettings.outputPath;
-            string extension = "." + templateSettings.codeFileExtension;
+            string extension = templateSettings.codeFileExtension;
+            if (extension[0] != '.') {
+                extension = "." + extension;
+            }
 
             if (Directory.Exists(path)) {
                 Directory.Delete(path, true);

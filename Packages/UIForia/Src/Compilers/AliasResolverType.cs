@@ -12,7 +12,11 @@ namespace UIForia.Compilers {
         Root,
         RepeatItem,
         RepeatIndex,
-        ChangeHandlerStorage
+        ChangeHandlerStorage,
+
+        DragCreateMouseEvent,
+
+        DragEvent
 
     }
 

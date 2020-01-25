@@ -91,7 +91,6 @@ namespace TemplateStructure {
             Assert.AreEqual("Override from outer layer", textElement.GetText().Trim());
         }
 
-
         [Template("Data/TemplateStructure/SlotOverride_Extern_ExternDefault/TemplateStructure_SlotOverride_Extern_ExternDefault_Main.xml")]
         public class TemplateStructure_SlotOverride_Extern_ExternDefault_Main : UIElement { }
 

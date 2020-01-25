@@ -17,8 +17,8 @@ namespace TemplateBinding {
 
     public class TemplateBindingTests {
 
-        private bool usePreCompiledTemplates = false;
-        private bool generateCode = false;
+        private bool usePreCompiledTemplates = true;
+        private bool generateCode = true;
 
         public MockApplication Setup<T>(string appName = null) {
             if (appName == null) {
@@ -38,10 +38,6 @@ namespace TemplateBinding {
             if (generateCode) {
                 TemplateCodeGenerator.Generate(typeof(T), settings);
             }
-
-            // CompiledTemplateData compiledTemplates = usePreCompiledTemplates
-            //     ? TemplateLoader.LoadPrecompiledTemplates(settings)
-            //     : TemplateLoader.LoadRuntimeTemplates(typeof(T), settings);
 
             return MockApplication.Setup(settings, usePreCompiledTemplates);
         }
@@ -798,14 +794,32 @@ namespace TemplateBinding {
             Assert.AreEqual(c3, e[0][2]);
         }
 
+        [Template("Data/TemplateBindings/TemplateBindingTest_RepeatTemplate.xml#repeat_multi_child")]
+        public class TemplateBindingTest_RepeatMultiChild : UIElement {
+
+            public IList<Vector3> data;
+
+        }
+
+        [Test]
+        public void RepeatMultiChild() {
+            MockApplication app = Setup<TemplateBindingTest_RepeatMultiChild>();
+            TemplateBindingTest_RepeatMultiChild e = (TemplateBindingTest_RepeatMultiChild) app.RootElement;
+            e.data = new [] {new Vector3(1, 2, 3), new Vector3(4, 5, 6)};
+            
+            app.Update();
+            
+            Assert.AreEqual(2, e[0].ChildCount);
+            Assert.AreEqual("repeat me 1", GetText(e[0][0][0][0]));
+            Assert.AreEqual("3", GetText(e[0][0][1][0]));
+            Assert.AreEqual("repeat me 4", GetText(e[0][1][0][0]));
+            Assert.AreEqual("6", GetText(e[0][1][1][0]));
+        }
+
         [Template("Data/TemplateBindings/TemplateBindingTest_SyncBinding.xml#sync")]
         public class TemplateBindingTest_SyncBinding_Sync : UIElement {
 
             public string syncedValue;
-
-            public void OnPropertiesChanged() { }
-
-            public void OnValueSynchronized() { }
 
         }
 

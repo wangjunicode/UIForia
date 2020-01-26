@@ -18,7 +18,7 @@
     
     <Contents style="checkbox">
         
-        <Group style="checkbox-check" style.backgroundColor="isChecked ? checkedColor : uncheckedColor"/>
+        <Group style="checkbox-check" style:backgroundColor="isChecked ? checkedColor : uncheckedColor"/>
         
     </Contents>
     

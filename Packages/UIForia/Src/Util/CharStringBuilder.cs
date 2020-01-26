@@ -35,11 +35,45 @@ namespace UIForia.Util {
         }
 
         public CharStringBuilder Append(string str) {
-            if (str == null) return this;
+            // was previously  AppendCharacterRange(strMem, 0, str.Length); return this;
+            // but profiling showed it was decently faster to inline this since its called very frequently
+
+            if (str == null || str.Length == 0) return this;
 
             unsafe {
-                fixed (char* strMem = str) {
-                    AppendCharacterRange(strMem, 0, str.Length);
+                fixed (char* smem = str) {
+                    int strLength = str.Length;
+
+                    if (size + strLength >= characters.Length) {
+                        Array.Resize(ref characters, (size + strLength) * 2);
+                    }
+
+                    fixed (char* dmem = characters) {
+                        char* d = (dmem + size);
+                        char* s = (smem);
+                        int length = strLength;
+
+                        // while we can treat our data as a long, do that (4 = size of 4 characters (16 bits))
+                        for (; length >= 4; length -= 4) {
+                            *(long*) d = *(long*) s;
+                            s += 4;
+                            d += 4;
+                        }
+
+                        // while we can treat our data as ints, do that (2 = size of 2 characters (16 bits))
+                        for (; length > 0; length -= 2) {
+                            *(int*) d = *(int*) s;
+                            s += 2;
+                            d += 2;
+                        }
+
+                        // if we have an odd input length, just assign the last one
+                        if (length == 1) {
+                            *d = *s;
+                        }
+                    }
+
+                    size += strLength;
                 }
             }
 
@@ -82,15 +116,43 @@ namespace UIForia.Util {
             size += strLength;
         }
 
-
         public CharStringBuilder Append(short val) {
             ZNumberFormatter.Instance.NumberToChars(val);
             Append(ZNumberFormatter.Instance.Chars, ZNumberFormatter.Instance.Count);
             return this;
         }
 
-        public CharStringBuilder Append(int val) {
-            FastIntegerToString(val);
+        public CharStringBuilder Append(int value) {
+            int digitCount = DigitsInInt(value);
+
+            if (size + digitCount >= characters.Length) {
+                Array.Resize(ref characters, size + digitCount);
+            }
+
+            if (value < 0) {
+                value = -value;
+                characters[size++] = '-';
+            }
+
+            if (value >= 100000000) {
+                // ZFormat.ZNumberFormatter.Instance.NumberToChars(value);
+                //  Append(ZNumberFormatter.Instance.Chars, ZNumberFormatter.Instance.Count);
+                //this.NumberToChars((string) null, value, znfi);
+
+                AppendIntegerDigits((uint) value);
+
+                return this;
+            }
+
+            if (value >= 10000) {
+                int val = value / 10000;
+                FastAppendDigits(val, false);
+                FastAppendDigits(value - val * 10000, true);
+            }
+            else {
+                FastAppendDigits(value, false);
+            }
+
             return this;
         }
 

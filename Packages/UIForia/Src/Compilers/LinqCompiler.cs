@@ -450,6 +450,10 @@ namespace UIForia.Compilers {
         public Expression Value(string input) {
             return Visit(ExpressionParser.Parse(input));
         }
+        
+        public Expression TypedValue(Type targetType, string input) {
+            return Visit(targetType, ExpressionParser.Parse(input));
+        }
 
         public Expression Statement(string input) {
             return AddStatement(Visit(ExpressionParser.Parse(input)));

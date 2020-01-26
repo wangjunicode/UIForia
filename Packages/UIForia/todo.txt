@@ -7,14 +7,8 @@ Template Compiler
     Support triggered event natively
     Support Focus / Blur
     
-Expression Compiler
-    Support List Initialization
-    Support object initializers
-    
 Linq Compiler
-    Better support for type wrapped statements
-    Support object initializers
-    Support list initializers
+    [feature] Better support for type wrapped statements
     
 XML Parser
     Validate attributes

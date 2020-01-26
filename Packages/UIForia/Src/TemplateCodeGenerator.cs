@@ -103,7 +103,7 @@ namespace UIForia {
                         builder.Append("styleSheetRefs[");
                         builder.Append(j);
                         builder.Append("] = new StyleSheetReference(");
-                        builder.Append(sheetReference.alias ?? "null");
+                        builder.Append(sheetReference.alias == null ? "null" : "\"" + sheetReference.alias + "\"");
                         builder.Append(", sheetMap[@\"");
                         builder.Append(sheetReference.styleSheet.path);
                         builder.AppendLine("\"]);");

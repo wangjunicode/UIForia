@@ -183,7 +183,11 @@ namespace UIForia.Compilers {
                 throw new ArgumentException();
             }
 
-            GetCompiledTemplate(TypeProcessor.GetProcessedType(appRootType));
+            ProcessedType appRoot = TypeProcessor.GetProcessedType(appRootType);
+
+            TemplateRootNode templateRootNode = templateCache.GetParsedTemplate(appRoot);
+
+            Compile(templateRootNode, true);
 
             return templateData;
         }
@@ -200,7 +204,7 @@ namespace UIForia.Compilers {
             return compiledTemplate;
         }
 
-        private CompiledTemplate Compile(TemplateRootNode templateRootNode) {
+        private CompiledTemplate Compile(TemplateRootNode templateRootNode, bool isRoot = false) {
             CompiledTemplate retn = templateData.CreateTemplate(templateRootNode.templateShell.filePath, templateRootNode.templateName);
             LightList<string> namespaces = LightList<string>.Get();
 
@@ -265,7 +269,10 @@ namespace UIForia.Compilers {
             templateMap[processedType.rawType] = retn;
             ctx.templateRootNode = templateRootNode;
 
+            // we dont want to visit root stuff in all cases
+            // todo -- figure this out, for example we dont want to do styles here for root unless its the app root since it will be overridden at is usage site anyway
             ProcessAttrsAndVisitChildren(ctx, templateRootNode);
+
             // VisitChildren(ctx, templateRootNode);
             // UndoContextMods(mods);
 
@@ -958,6 +965,11 @@ namespace UIForia.Compilers {
 
             StructList<ChangeHandlerDefinition> changeHandlerDefinitions = null;
 
+            bool isRootTemplate = ctx.templateRootNode == templateNode;
+
+            // for template roots (which are not the app root!) we dont want to generate bindings in their own template definition functions
+            // instead we let the usage site do that for us. We still need to provide context variables to our template, probably in a dry-run fashion.
+
             try {
                 GatherChangeHandlers(attributes, ref changeHandlerDefinitions);
 
@@ -983,15 +995,13 @@ namespace UIForia.Compilers {
 
                 CompileAttributeBindings(attributes);
 
-                CompileInstanceStyleBindings(ctx.templateRootNode == templateNode, attributes);
+                CompileInstanceStyleBindings(isRootTemplate, attributes);
 
                 CompileStyleBindings(ctx, templateNode.tagName, attributes);
 
                 // CompileAfterStyleBindings();
 
                 CompileInputHandlers(templateNode.processedType, attributes);
-
-                // CompileSyncWriteback();
 
                 CompileCheckChangeHandlers(changeHandlerDefinitions);
 
@@ -1379,22 +1389,18 @@ namespace UIForia.Compilers {
             for (int i = 0; i < attributes.size; i++) {
                 ref AttributeDefinition attr = ref attributes.array[i];
                 if (attr.type == AttributeType.InstanceStyle) {
-                    if (isRoot) {
-                        // maybe disallow instance bindings
-                    }
-
                     CompileInstanceStyleBinding(updateCompiler, attr);
                 }
             }
         }
 
         private void CompileStyleBindings(CompilationContext ctx, string tagName, StructList<AttributeDefinition> attributes) {
-            if (attributes == null) return;
-
             StyleSheetReference[] styleRefs = ctx.compiledTemplate.templateMetaData.styleReferences;
 
             LightList<StyleRefInfo> styleIds = LightList<StyleRefInfo>.Get();
 
+            tagName = tagName ?? "this"; // todo -- not sure if this is correct, kinda want to kill <this> styles anyway
+            
             if (styleRefs != null) {
                 for (int i = 0; i < styleRefs.Length; i++) {
                     if (styleRefs[i].styleSheet.TryResolveStyleByTagName(tagName, out int id)) {
@@ -1419,20 +1425,22 @@ namespace UIForia.Compilers {
 
             int innerContextSplit = -1;
 
-            for (int i = 0; i < attributes.size; i++) {
-                ref AttributeDefinition attr = ref attributes.array[i];
+            if (attributes != null) {
+                for (int i = 0; i < attributes.size; i++) {
+                    ref AttributeDefinition attr = ref attributes.array[i];
 
-                if (attr.type != AttributeType.Style) {
-                    continue;
-                }
+                    if (attr.type != AttributeType.Style) {
+                        continue;
+                    }
 
-                TextTemplateProcessor.ProcessTextExpressions(attr.value, list);
+                    TextTemplateProcessor.ProcessTextExpressions(attr.value, list);
 
-                // should only ever be max 2 style nodes, 1 for inner context, 1 for outer
+                    // should only ever be max 2 style nodes, 1 for inner context, 1 for outer
 
-                if ((attr.flags & AttributeFlags.InnerContext) != 0) {
-                    Assert.IsTrue(innerContextSplit == -1);
-                    innerContextSplit = i;
+                    if ((attr.flags & AttributeFlags.InnerContext) != 0) {
+                        Assert.IsTrue(innerContextSplit == -1);
+                        innerContextSplit = i;
+                    }
                 }
             }
 
@@ -1448,7 +1456,7 @@ namespace UIForia.Compilers {
 
         private void CompileStaticSharedStyles(CompilationContext ctx, StructList<TextExpression> list, int innerContextSplit, LightList<StyleRefInfo> styleIds) {
             for (int i = 0; i < list.size; i++) {
-                bool fromInnerContext = i < innerContextSplit;
+                bool fromInnerContext = i <= innerContextSplit;
 
                 string text = list.array[i].text;
                 string[] splitStyles = text.Split(s_StyleSeparator);
@@ -1474,20 +1482,26 @@ namespace UIForia.Compilers {
             ParameterExpression styleList = ctx.GetVariable<LightList<UIStyleGroupContainer>>("styleList");
             ctx.Assign(styleList, ExpressionFactory.CallStaticUnchecked(s_LightList_UIStyleGroupContainer_PreSize, Expression.Constant(styleIds.size)));
             Expression styleListArray = Expression.MakeMemberAccess(styleList, s_LightList_UIStyleGroupContainer_Array);
-            MemberExpression metaData = Expression.Field(ctx.ElementExpr, s_UIElement_TemplateMetaData);
+            //  MemberExpression metaData = Expression.Field(ctx.ElementExpr, s_UIElement_TemplateMetaData);
             MemberExpression bindingNode = Expression.Field(createdCompiler.GetElement(), s_UIElement_BindingNode);
-            MemberExpression innerMetaData = Expression.Field(bindingNode, s_LinqBindingNode_InnerContext);
+            //    MemberExpression innerMetaData = Expression.Field(bindingNode, s_LinqBindingNode_InnerContext);
 
             for (int i = 0; i < styleIds.size; i++) {
                 ref StyleRefInfo styleRefInfo = ref styleIds.array[i];
 
                 IndexExpression arrayIndex = Expression.ArrayAccess(styleListArray, Expression.Constant(i));
 
-                ctx.Comment(styleRefInfo.styleName);
 
-                MemberExpression target = styleRefInfo.fromInnerContext ? innerMetaData : metaData;
+                // MemberExpression target = styleRefInfo.fromInnerContext ? innerMetaData : metaData;
 
-                MethodCallExpression expr = ExpressionFactory.CallInstanceUnchecked(target, s_TemplateMetaData_GetStyleById, Expression.Constant(styleRefInfo.styleId));
+                // Expression app = Expression.Property(ctx.applicationExpr)
+                MethodInfo method = typeof(Application).GetMethod(nameof(Application.GetTemplateMetaData));
+                int metaDataId = styleRefInfo.fromInnerContext ? ctx.innerTemplate.templateId : ctx.compiledTemplate.templateId;
+
+                ctx.Comment(styleRefInfo.styleName + " (from template " + (styleRefInfo.fromInnerContext ? ctx.innerTemplate.filePath : ctx.compiledTemplate.filePath) + ")");
+
+                MethodCallExpression call = ExpressionFactory.CallInstanceUnchecked(ctx.applicationExpr, method, Expression.Constant(metaDataId));
+                MethodCallExpression expr = ExpressionFactory.CallInstanceUnchecked(call, s_TemplateMetaData_GetStyleById, Expression.Constant(styleRefInfo.styleId));
 
                 ctx.Assign(arrayIndex, expr);
             }
@@ -2269,8 +2283,6 @@ namespace UIForia.Compilers {
 
             compiler.CommentNewLineBefore($"style.{attributeDefinition.key}=\"{attributeDefinition.value}\"");
 
-            Expression value = compiler.Value(attributeDefinition.value);
-
             // todo -- check if constant and pick different compiler
             // Debug.Log(attributeDefinition.key + ExpressionUtil.IsConstant(value));
 
@@ -2288,13 +2300,23 @@ namespace UIForia.Compilers {
 
             ParameterInfo[] parameters = method.GetParameters();
 
-            // hack! for some reason because the type can be by ref (via in) it doesn't report as a generic type
-            if (parameters[0].ParameterType.FullName.Contains("System.Nullable")) {
-                if (!value.Type.IsNullableType()) {
-                    Type targetType = parameters[0].ParameterType.GetGenericArguments()[0];
-                    value = Expression.Convert(value, ReflectionUtil.CreateGenericType(typeof(Nullable<>), targetType));
-                }
+            Type targetType = parameters[0].ParameterType;
+
+            if (targetType.IsByRef) {
+                targetType = targetType.GetElementType();
             }
+
+            Expression value = compiler.TypedValue(targetType, attributeDefinition.value);
+
+            // hack! for some reason because the type can be by ref (via in) it doesn't report as a generic type
+            // if (parameters[0].ParameterType.FullName.Contains("System.Nullable")) {
+            //     if (!value.Type.IsNullableType()) {
+            //         Type targetType = parameters[0].ParameterType.GetGenericArguments()[0];
+            //         value = Expression.Convert(value, ReflectionUtil.CreateGenericType(typeof(Nullable<>), targetType));
+            //     }
+            // }
+
+            // compiler.Value(attributeDefinition.value);
 
             compiler.RawExpression(Expression.Call(field, method, value, Expression.Constant(styleState)));
 

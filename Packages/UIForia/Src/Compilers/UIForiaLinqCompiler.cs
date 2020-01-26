@@ -21,6 +21,7 @@ namespace UIForia.Compilers {
 
         private const string k_CastElement = "__castElement";
         private const string k_CastRoot = "__castRoot";
+        private UIForiaLinqCompiler parent;
         
         private static readonly FieldInfo s_UIElement_InputHandlerGroup = typeof(UIElement).GetField(nameof(UIElement.inputHandlers), BindingFlags.Instance | BindingFlags.Public);
 
@@ -34,6 +35,10 @@ namespace UIForia.Compilers {
             inputHandlerGroup = null;
         }
 
+        protected override void SetupClosure(LinqCompiler p) {
+            this.parent = p as UIForiaLinqCompiler;
+        }
+
         public MemberExpression GetInputHandlerGroup() {
             if (inputHandlerGroup == null) {
                 inputHandlerGroup = Expression.Field(GetElement(), s_UIElement_InputHandlerGroup);
@@ -45,6 +50,7 @@ namespace UIForia.Compilers {
 
         public ParameterExpression GetElement() {
             if (elementParameter == null) {
+                if (parent != null) return parent.GetElement();
                 elementParameter = GetParameter("__element");
             }
 
@@ -61,6 +67,7 @@ namespace UIForia.Compilers {
 
         public ParameterExpression GetCastElement() {
             if (castElementParameter == null) {
+                if (parent != null) return parent.GetCastElement();
                 Parameter p = new Parameter(elementType, k_CastElement, ParameterFlags.NeverNull);
                 castElementParameter = AddVariableUnchecked(p, ExpressionFactory.Convert(GetElement(), elementType));
             }

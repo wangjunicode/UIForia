@@ -17,8 +17,8 @@ namespace TemplateBinding {
 
     public class TemplateBindingTests {
 
-        private bool usePreCompiledTemplates = true;
-        private bool generateCode = true;
+        private bool usePreCompiledTemplates = false;
+        private bool generateCode = false;
 
         public MockApplication Setup<T>(string appName = null) {
             if (appName == null) {
@@ -450,7 +450,7 @@ namespace TemplateBinding {
         [Test]
         public void LocalContextVariable() {
             CompileException exception = Assert.Throws<CompileException>(() => { Setup<TemplateBindingTest_ContextVariableOutOfScope>(nameof(TemplateBindingTest_ContextVariableOutOfScope)); });
-            Assert.AreEqual(CompileException.UnknownAlias("cvar0").Message, exception.Message);
+            Assert.IsTrue(exception.Message.Contains(CompileException.UnknownAlias("cvar0").Message));
         }
 
         [Template("Data/TemplateBindings/TemplateBindingTest_LocalContextVariable.xml#use_alias")]
@@ -473,7 +473,7 @@ namespace TemplateBinding {
         [Test]
         public void ContextVariable_UseAliasOutOfScope() {
             CompileException exception = Assert.Throws<CompileException>(() => Setup<TemplateBindingTest_ContextVariable_UseAliasOutOfScope>());
-            Assert.AreEqual(CompileException.UnknownAlias("custom").Message, exception.Message);
+            Assert.IsTrue(exception.Message.Contains(CompileException.UnknownAlias("custom").Message));
         }
 
         [Template("Data/TemplateBindings/TemplateBindingTest_LocalContextVariable.xml#use_alias_on_own_context")]
@@ -482,7 +482,7 @@ namespace TemplateBinding {
         [Test]
         public void ContextVariable_UseAliasOnOwnContext() {
             CompileException exception = Assert.Throws<CompileException>(() => Setup<TemplateBindingTest_ContextVariable_UseAliasOnOwnContext>());
-            Assert.AreEqual(CompileException.UnknownAlias("custom").Message, exception.Message);
+            Assert.IsTrue(exception.Message.Contains(CompileException.UnknownAlias("custom").Message));
         }
 
         [Template("Data/TemplateBindings/TemplateBindingTest_LocalContextVariable.xml#not_exposed_inner")]
@@ -494,7 +494,7 @@ namespace TemplateBinding {
         [Test]
         public void ContextVariable_NonExposed_NotAvailable() {
             CompileException exception = Assert.Throws<CompileException>(() => Setup<TemplateBindingTest_ContextVariable_NonExposed_NotAvailable_Outer>(nameof(TemplateBindingTest_ContextVariable_NonExposed_NotAvailable_Outer)));
-            Assert.AreEqual(CompileException.UnknownAlias("thing").Message, exception.Message);
+            Assert.IsTrue(exception.Message.Contains(CompileException.UnknownAlias("thing").Message));
         }
 
         [Template("Data/TemplateBindings/TemplateBindingTest_LocalContextVariable.xml#expose_context_var_slotted_outer")]
@@ -532,7 +532,7 @@ namespace TemplateBinding {
         [Test]
         public void ContextVariable_Expose_OutOfScope() {
             CompileException exception = Assert.Throws<CompileException>(() => Setup<TemplateBindingTest_ContextVariable_Expose_OutOfScope>());
-            Assert.AreEqual(CompileException.UnknownAlias("variable0").Message, exception.Message);
+            Assert.IsTrue(exception.Message.Contains(CompileException.UnknownAlias("variable0").Message));
         }
 
         [Template("Data/TemplateBindings/TemplateBindingTest_RepeatTemplate.xml#repeat_count")]

@@ -6,6 +6,7 @@ using UIForia.Systems.Input;
 using UIForia.UIInput;
 using UIForia.Util;
 using UnityEngine;
+using Debug = System.Diagnostics.Debug;
 
 namespace UIForia.Systems {
 
@@ -62,7 +63,7 @@ namespace UIForia.Systems {
         private readonly Dictionary<int, DragCreatorGroup> m_DragCreatorMap;
 
         private readonly EventPropagator m_EventPropagator;
-        private readonly List<ValueTuple<Action<GenericInputEvent>, UIElement>> m_MouseEventCaptureList;
+        private readonly List<ValueTuple<object, UIElement>> m_MouseEventCaptureList;
         private static readonly Event s_Event = new Event();
 
         public KeyboardModifiers KeyboardModifiers => modifiersThisFrame;
@@ -98,7 +99,7 @@ namespace UIForia.Systems {
             this.m_KeyboardEventTree = new SkipTree<UIElement>();
             this.keyboardInputManager = keyboardInputManager ?? new KeyboardInputManager();
             this.m_EventPropagator = new EventPropagator();
-            this.m_MouseEventCaptureList = new List<ValueTuple<Action<GenericInputEvent>, UIElement>>();
+            this.m_MouseEventCaptureList = new List<ValueTuple<object, UIElement>>();
             // this.m_DragEventCaptureList = new List<ValueTuple<DragEventHandler, UIElement>>();
             this.m_FocusedElement = null;
             this.focusables = new List<IFocusable>();
@@ -485,7 +486,7 @@ namespace UIForia.Systems {
         }
 
         private void BeginDrag() {
-            
+
             if (m_CurrentDragEvent != null) {
                 return;
             }
@@ -577,81 +578,84 @@ namespace UIForia.Systems {
 
             m_EventPropagator.Reset(mouseState);
 
+            LightList<Action<DragEvent>> captureList = LightList<Action<DragEvent>>.Get();
+
             for (int i = 0; i < elements.Count; i++) {
                 UIElement element = elements[i];
                 if (element.isDestroyed || element.isDisabled) {
                     continue;
                 }
 
-//                DragHandlerGroup dragHandlerGroup;
-//
-//                if (!m_DragHandlerMap.TryGetValue(element.id, out dragHandlerGroup)) {
-//                    continue;
-//                }
-//
-//                if ((dragHandlerGroup.handledEvents & eventType) == 0) {
-//                    continue;
-//                }
-//
-//                DragEventHandler[] handlers = dragHandlerGroup.handlers;
-//
-//                for (int j = 0; j < handlers.Length; j++) {
-//                    DragEventHandler handler = handlers[j];
-//                    if (handler.eventType != eventType) {
-//                        continue;
-//                    }
-//
-//                    if (handler.eventPhase != EventPhase.Bubble) {
-//                        m_DragEventCaptureList.Add(ValueTuple.Create(handler, element));
-//                        continue;
-//                    }
-//
-//                    CurrentDragEvent.target = element;
-//                    handler.Invoke(element, dragHandlerGroup.context, m_CurrentDragEvent);
-//                    CurrentDragEvent.target = null;
-//
-//                    if (m_CurrentDragEvent.IsCanceled || m_EventPropagator.shouldStopPropagation) {
-//                        break;
-//                    }
-//                }
-//
-//                if (m_EventPropagator.shouldStopPropagation) {
-//                    break;
-//                }
-//
-//                if (m_CurrentDragEvent.IsCanceled || m_EventPropagator.shouldStopPropagation) {
-//                    m_DragEventCaptureList.Clear();
-//                    return;
-//                }
+                if (element.inputHandlers == null) {
+                    continue;
+                }
+
+                if ((element.inputHandlers.handledEvents & eventType) == 0) {
+                    continue;
+                }
+
+                for (int j = 0; j < element.inputHandlers.eventHandlers.size; j++) {
+
+                    ref InputHandlerGroup.HandlerData handler = ref element.inputHandlers.eventHandlers.array[j];
+
+                    if (handler.eventType != eventType) {
+                        continue;
+                    }
+
+                    Action<DragEvent> castHandler = (Action<DragEvent>) handler.handlerFn;
+
+                    if (handler.eventPhase != EventPhase.Bubble) {
+                        captureList.Add(castHandler);
+                        continue;
+                    }
+
+                    CurrentDragEvent.target = element;
+                    castHandler.Invoke(m_CurrentDragEvent);
+
+                    if (m_CurrentDragEvent.IsCanceled || m_EventPropagator.shouldStopPropagation) {
+                        break;
+                    }
+
+                }
+
+                if (m_CurrentDragEvent.IsCanceled || m_EventPropagator.shouldStopPropagation) {
+                    captureList.Release();
+                    return;
+                }
+
             }
 
-//            for (int i = 0; i < m_DragEventCaptureList.Count; i++) {
-//                DragEventHandler handler = m_DragEventCaptureList[i].Item1;
-//                UIElement element = m_DragEventCaptureList[i].Item2;
-//
-//                throw new NotImplementedException();
-//              //  handler.Invoke(element, m_CurrentDragEvent);
-//
-//                if (m_EventPropagator.shouldStopPropagation) {
-//                    m_DragEventCaptureList.Clear();
-//                    return;
-//                }
-//            }
-//
-//            m_DragEventCaptureList.Clear();
+            for (int i = 0; i < captureList.size; i++) {
+                if (m_CurrentDragEvent.IsCanceled || m_EventPropagator.shouldStopPropagation) {
+                    break;
+                }
+
+                captureList.array[i].Invoke(m_CurrentDragEvent);
+            }
+
+            captureList.Release();
+
         }
 
         public void OnReset() {
             // don't clear key states
             m_FocusedElement = null;
+
             focusables.Clear();
+
             focusableIndex = -1;
+
             m_ElementsLastFrame.Clear();
+
             m_ElementsThisFrame.Clear();
+
             m_MouseDownElements.Clear();
+
 //            m_KeyboardEventTree.Clear();
             m_DragCreatorMap.Clear();
+
             m_CurrentDragEvent = null;
+
             IsDragging = false;
         }
 
@@ -671,8 +675,11 @@ namespace UIForia.Systems {
             BlurOnDisableOrDestroy();
 
             m_ElementsLastFrame.Remove(element);
+
             m_ElementsThisFrame.Remove(element);
+
             m_MouseDownElements.Remove(element);
+
 //            m_KeyboardEventTree.RemoveHierarchy(element);
             // todo -- clear child handlers
             m_DragCreatorMap.Remove(element.id);
@@ -738,17 +745,22 @@ namespace UIForia.Systems {
 
                     for (int i = 0; i < evtHandlerGroup.eventHandlers.size; i++) {
                         if (m_EventPropagator.shouldStopPropagation) break;
-                        evtHandlerGroup.eventHandlers[i].handler.Invoke(keyEvent);
+                        Action<GenericInputEvent> keyHandler = evtHandlerGroup.eventHandlers[i].handlerFn as Action<GenericInputEvent>;
+                        Debug.Assert(keyHandler != null, nameof(keyHandler) + " != null");
+                        keyHandler.Invoke(keyEvent);
                     }
 
                     return !m_EventPropagator.shouldStopPropagation;
                 });
             }
+
             else {
                 InputHandlerGroup evtHandlerGroup = m_FocusedElement.inputHandlers;
                 for (int i = 0; i < evtHandlerGroup.eventHandlers.size; i++) {
                     if (m_EventPropagator.shouldStopPropagation) break;
-                    evtHandlerGroup.eventHandlers[i].handler.Invoke(keyEvent);
+                    Action<GenericInputEvent> keyHandler = evtHandlerGroup.eventHandlers[i].handlerFn as Action<GenericInputEvent>;
+                    Debug.Assert(keyHandler != null, nameof(keyHandler) + " != null");
+                    keyHandler.Invoke(keyEvent);
                 }
             }
         }
@@ -757,9 +769,11 @@ namespace UIForia.Systems {
             if (elements.Count == 0) return;
 
             m_EventPropagator.Reset(mouseState);
-            m_EventPropagator.origin = elements[0];
 
-            for (int i = 0; i < elements.Count; i++) {
+            m_EventPropagator.origin = elements[0];
+            for (int i = 0;
+                i < elements.Count;
+                i++) {
                 UIElement element = elements[i];
                 if (element.isDestroyed || element.isDisabled) {
                     continue;
@@ -779,15 +793,15 @@ namespace UIForia.Systems {
                     }
 
                     if (handlerData.eventPhase != EventPhase.Bubble) {
-                        m_MouseEventCaptureList.Add(ValueTuple.Create(handlerData.handler, element));
+                        m_MouseEventCaptureList.Add(ValueTuple.Create(handlerData.handlerFn, element));
                         continue;
                     }
 
                     if ((handlerData.modifiers & modifiersThisFrame) == handlerData.modifiers) {
-                        handlerData.handler.Invoke(new GenericInputEvent(eventType, modifiersThisFrame,
-                            m_EventPropagator, '\0', default, element == m_FocusedElement));
+                        Action<GenericInputEvent> handler = handlerData.handlerFn as Action<GenericInputEvent>;
+                        Debug.Assert(handler != null, nameof(handler) + " != null");
+                        handler.Invoke(new GenericInputEvent(eventType, modifiersThisFrame, m_EventPropagator, '\0', default, element == m_FocusedElement));
                     }
-//                    handler.Invoke(element, mouseHandlerGroup.context, mouseEvent);
 
                     if (m_EventPropagator.shouldStopPropagation) {
                         break;
@@ -801,7 +815,7 @@ namespace UIForia.Systems {
             }
 
             for (int i = 0; i < m_MouseEventCaptureList.Count; i++) {
-                Action<GenericInputEvent> handler = m_MouseEventCaptureList[i].Item1;
+                Action<GenericInputEvent> handler = (Action<GenericInputEvent>) m_MouseEventCaptureList[i].Item1;
                 UIElement element = m_MouseEventCaptureList[i].Item2;
 
                 handler.Invoke(new GenericInputEvent(eventType, modifiersThisFrame, m_EventPropagator, '\0', default,
@@ -818,8 +832,8 @@ namespace UIForia.Systems {
 
         private void ProcessMouseEvents() {
             RunMouseEvents(m_ExitedElements, InputEventType.MouseExit);
-            RunMouseEvents(m_EnteredElements, InputEventType.MouseEnter);
 
+            RunMouseEvents(m_EnteredElements, InputEventType.MouseEnter);
             if (mouseState.scrollDelta != Vector2.zero) {
                 RunMouseEvents(m_ElementsThisFrame, InputEventType.MouseScroll);
             }

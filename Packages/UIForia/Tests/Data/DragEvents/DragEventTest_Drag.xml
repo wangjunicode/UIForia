@@ -7,6 +7,7 @@
         }
         
     </Style>
+    
     <Contents id="drag_create_method">
 
         <Group drag:create="CreateDragFromChild($evt, 0)" style:preferredWidth='100f' style:preferredHeight='100f'/>

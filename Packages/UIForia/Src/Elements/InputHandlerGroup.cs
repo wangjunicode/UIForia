@@ -34,13 +34,22 @@ namespace UIForia.Elements {
                 character = '\0',
                 requireFocus = requiresFocus,
                 modifiers = modifiers,
-                handler = handler
+                handlerFn = handler
             });
         }
 
-        // todo -- event handler might need to be strongly typed
-        public void AddDragEvent(InputEventType eventType, KeyboardModifiers modifiers, bool requiresFocus, EventPhase phase, Action<GenericInputEvent> handler) {
-            AddMouseEvent(eventType, modifiers, requiresFocus, phase, handler);
+        public void AddDragEvent(InputEventType eventType, KeyboardModifiers modifiers, bool requiresFocus, EventPhase phase, Action<DragEvent> handler) {
+            handledEvents |= eventType;
+            eventHandlers = eventHandlers ?? new LightList<HandlerData>(2);
+            eventHandlers.Add(new HandlerData() {
+                eventType = eventType,
+                eventPhase = phase,
+                keyCode = 0,
+                character = '\0',
+                requireFocus = requiresFocus,
+                modifiers = modifiers,
+                handlerFn = handler
+            });
         }
 
         public void AddKeyboardEvent(InputEventType eventType, KeyboardModifiers modifiers, bool requiresFocus, EventPhase phase, KeyCode keyCode, char character, Action<GenericInputEvent> handler) {
@@ -52,7 +61,7 @@ namespace UIForia.Elements {
                 character = character,
                 requireFocus = requiresFocus,
                 modifiers = modifiers,
-                handler = handler
+                handlerFn = handler
             });
         }
 
@@ -64,7 +73,7 @@ namespace UIForia.Elements {
             public char character;
             public bool requireFocus;
             public EventPhase eventPhase;
-            public Action<GenericInputEvent> handler;
+            public object handlerFn;//Action<GenericInputEvent> handler;
 
         }
 

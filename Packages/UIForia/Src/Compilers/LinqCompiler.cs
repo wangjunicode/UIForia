@@ -2370,8 +2370,11 @@ namespace UIForia.Compilers {
             return s_CompilerPool.Get();
         }
 
+        protected virtual void SetupClosure(LinqCompiler parent) { }
+
         public LinqCompiler CreateClosure(IList<Parameter> parameters, Type retnType) {
             LinqCompiler nested = CreateNested();
+            nested.SetupClosure(this);
             nested.parameters.Clear();
             nested.parameters.AddRange(parameters);
 

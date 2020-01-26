@@ -782,7 +782,7 @@ namespace UIForia {
             StructStack<ElemRef> elemRefStack = StructStack<ElemRef>.Get();
             elemRefStack.Push(new ElemRef() {element = child});
 
-            while (elemRefStack.Count > 0) {
+            while (elemRefStack.size > 0) {
                 UIElement current = elemRefStack.Pop().element;
 
                 current.depth = current.parent.depth + 1;

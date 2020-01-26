@@ -3,6 +3,7 @@ using NUnit.Framework;
 using UIForia;
 using UIForia.Attributes;
 using UIForia.Elements;
+using UIForia.Exceptions;
 using UIForia.Parsing;
 using Application = UnityEngine.Application;
 
@@ -134,6 +135,31 @@ namespace TemplateParsing_XML {
             Assert.AreEqual(typeof(XMLTemplateParsing_ExpandedTemplateChild), expandedTemplate.processedType.rawType);
 
             AssertAndReturn<TextNode>(templateRootRoot[2]);
+        }
+
+        [Template("Data/XMLTemplateParsing/XMLTemplateParsing_Namespaces.xml")]
+        public class XMLTemplateParsing_Namespace : UIElement { }
+
+        [Test]
+        public void ParseNamespace() {
+            ProcessedType processedType = TypeProcessor.GetProcessedType(typeof(XMLTemplateParsing_Namespace));
+            TemplateCache cache = new TemplateCache(Setup("App"));
+            TemplateRootNode templateRoot = cache.GetParsedTemplate(processedType);
+
+            Assert.AreEqual(typeof(UIDivElement), templateRoot.children[0].processedType.rawType);
+        }
+
+        [Template("Data/XMLTemplateParsing/XMLTemplateParsing_Namespaces.xml#unknown")]
+        public class XMLTemplateParsing_Namespace_Unknown : UIElement { }
+
+        [Test]
+        public void ParseNamespace_NotThere() {
+            ParseException exception = Assert.Throws<ParseException>(() => {
+                ProcessedType processedType = TypeProcessor.GetProcessedType(typeof(XMLTemplateParsing_Namespace_Unknown));
+                TemplateCache cache = new TemplateCache(Setup("App"));
+                cache.GetParsedTemplate(processedType);
+            });
+            Assert.IsTrue(exception.Message.Contains(ParseException.UnresolvedTagName("Data/XMLTemplateParsing/XMLTemplateParsing_Namespaces.xml", new TemplateLineInfo(11, 10), "NotHere:Div").Message));
         }
 
         private static void AssertText(string expected, TemplateNode templateNode) {

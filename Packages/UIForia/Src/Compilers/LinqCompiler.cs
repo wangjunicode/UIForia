@@ -1928,6 +1928,7 @@ namespace UIForia.Compilers {
                     return VisitDirectCast((UnaryExpressionNode) node);
 
                 case ASTNodeType.ListInitializer:
+                    // this might just not make sense as a feature
                     // [] if not used as a return value then use pooling for the array 
                     // [1, 2, 3].Contains(myValue)
                     // repeat list="[1, 2, 3]"

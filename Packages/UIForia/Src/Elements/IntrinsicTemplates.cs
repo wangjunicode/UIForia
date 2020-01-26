@@ -6,8 +6,6 @@ namespace UIForia.Elements {
     [TemplateTagName("Group")]
     public class UIGroupElement : UIContainerElement {
 
- 
-
         public override string GetDisplayName() {
             return "Group";
         }
@@ -17,7 +15,6 @@ namespace UIForia.Elements {
     [TemplateTagName("Panel")]
     public class UIPanelElement : UIContainerElement {
 
-      
         public override string GetDisplayName() {
             return "Panel";
         }
@@ -26,8 +23,6 @@ namespace UIForia.Elements {
 
     [TemplateTagName("Section")]
     public class UISectionElement : UIContainerElement {
-        
-       
 
         public override string GetDisplayName() {
             return "Section";
@@ -37,7 +32,6 @@ namespace UIForia.Elements {
 
     [TemplateTagName("Div")]
     public class UIDivElement : UIContainerElement {
-
 
         public override string GetDisplayName() {
             return "Div";
@@ -56,8 +50,6 @@ namespace UIForia.Elements {
 
     [TemplateTagName("Footer")]
     public class UIFooterElement : UIContainerElement {
-        
-  
 
         public override string GetDisplayName() {
             return "Footer";
@@ -113,7 +105,7 @@ namespace UIForia.Elements {
 
     [TemplateTagName("Heading3")]
     public class UIHeading3Element : UITextElement {
-        
+
         public override string GetDisplayName() {
             return "Heading3";
         }
@@ -122,7 +114,6 @@ namespace UIForia.Elements {
 
     [TemplateTagName("Heading4")]
     public class UIHeading4Element : UITextElement {
-        
 
         public override string GetDisplayName() {
             return "Heading4";
@@ -133,7 +124,6 @@ namespace UIForia.Elements {
     [TemplateTagName("Heading5")]
     public class UIHeading5Element : UITextElement {
 
-
         public override string GetDisplayName() {
             return "Heading5";
         }
@@ -142,10 +132,11 @@ namespace UIForia.Elements {
 
     [TemplateTagName("Heading6")]
     public class UIHeading6Element : UITextElement {
-        
+
         public override string GetDisplayName() {
             return "Heading6";
         }
 
     }
+
 }

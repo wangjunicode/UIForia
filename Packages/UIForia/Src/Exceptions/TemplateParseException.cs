@@ -68,7 +68,7 @@ namespace UIForia.Exceptions {
                                                    + $"\nloadTemplatesFromStreamingAssets: {Application.Settings.loadTemplatesFromStreamingAssets}"
                                                    + (node != default ? $"\n\tNode:\n\t\t{node}" : string.Empty);
 
-        public static TemplateParseException UnmatchedSlotName(string fileName, Type type, string slotName, IList<string> availableSlotNames) {
+        public static TemplateParseException UnmatchedSlotName(string fileName, Type type, string slotName, IReadOnlyList<string> availableSlotNames) {
             string listString = StringUtil.ListToString(availableSlotNames);
             return new TemplateParseException(fileName, $"Unmatched slot name '{slotName}' for template {type}. Possible slot names are: {listString}");
         }

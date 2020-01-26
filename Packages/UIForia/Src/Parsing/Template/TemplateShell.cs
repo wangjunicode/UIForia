@@ -17,11 +17,13 @@ namespace UIForia.Parsing {
         public StructList<UsingDeclaration> usings;
         public StructList<StyleDefinition> styles;
         public StructList<RawTemplateContent> unprocessedContentNodes;
+        public LightList<string> referencedNamespaces;
 
         public TemplateShell(string filePath) {
             this.filePath = filePath;
             this.usings = new StructList<UsingDeclaration>(2);
             this.styles = new StructList<StyleDefinition>(2);
+            this.referencedNamespaces = new LightList<string>(4);
             this.unprocessedContentNodes = new StructList<RawTemplateContent>(2);
         }
         

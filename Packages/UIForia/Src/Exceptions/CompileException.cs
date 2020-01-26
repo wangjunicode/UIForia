@@ -225,7 +225,7 @@ namespace UIForia.Exceptions {
         }
 
         public static CompileException UnresolvedRepeatType(string provided, params string[] others) {
-            return new CompileException("Unable to determine repeat type: " + provided + " was provided but is not legal in combination with " + StringUtil.ListToString((IList<string>)others));
+            return new CompileException("Unable to determine repeat type: " + provided + " was provided but is not legal in combination with " + StringUtil.ListToString(others));
         }
 
         public static CompileException UnresolvedPropertyChangeHandler(string methodInfoName, Type propertyType) {

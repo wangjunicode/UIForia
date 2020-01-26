@@ -5,7 +5,6 @@ namespace UIForia.Attributes {
     public enum TemplateType {
 
         Internal,
-        String,
         File,
         DefaultFile
 
@@ -35,10 +34,6 @@ namespace UIForia.Attributes {
 
             switch (templateType) {
                 case TemplateType.DefaultFile:
-                    break;
-                case TemplateType.String:
-                    this.filePath = "FILE";
-                    this.source = sourceOrPath;
                     break;
                 case TemplateType.File:
                 case TemplateType.Internal:

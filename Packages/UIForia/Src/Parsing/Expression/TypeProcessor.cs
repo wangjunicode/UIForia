@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using UIForia.Attributes;
 using UIForia.Elements;
+using UIForia.Exceptions;
 using UIForia.Extensions;
 using UIForia.Util;
 using Debug = UnityEngine.Debug;
@@ -21,16 +22,23 @@ namespace UIForia.Parsing {
         }
 
     }
-    
+
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
     public class ResolveGenericTemplateArguments : Attribute { }
 
     public static class TypeProcessor {
 
+        internal struct TypeList {
+
+            public ProcessedType mainType;
+            public ProcessedType[] types;
+
+        }
+
         public static bool processedTypes;
         private static readonly LightList<ProcessedType> templateTypes = new LightList<ProcessedType>(64);
         public static readonly Dictionary<Type, ProcessedType> typeMap = new Dictionary<Type, ProcessedType>();
-        public static readonly Dictionary<string, ProcessedType> templateTypeMap = new Dictionary<string, ProcessedType>();
+        internal static readonly Dictionary<string, TypeList> templateTypeMap = new Dictionary<string, TypeList>();
         public static readonly Dictionary<string, LightList<Assembly>> s_NamespaceMap = new Dictionary<string, LightList<Assembly>>();
         public static readonly Dictionary<string, ProcessedType> s_GenericMap = new Dictionary<string, ProcessedType>();
 
@@ -72,7 +80,6 @@ namespace UIForia.Parsing {
                             continue;
                         }
 
-//
                         if (!filteredOut && currentType.IsClass && currentType.Name[0] != '<' && currentType.IsGenericTypeDefinition) {
                             if (currentType.IsSubclassOf(typeof(UIElement))) {
                                 Attribute[] attrs = Attribute.GetCustomAttributes(currentType, false);
@@ -99,7 +106,6 @@ namespace UIForia.Parsing {
                                     s_NamespaceMap.Add(currentType.Namespace ?? "null", namespaceList);
                                 }
 
-
                                 if (!namespaceList.Contains(assembly)) {
                                     namespaceList.Add(assembly);
                                 }
@@ -117,16 +123,31 @@ namespace UIForia.Parsing {
 
                                 ProcessedType processedType = new ProcessedType(currentType, templateAttr, tagName);
 
-                                processedType.CreateCtor();
                                 if (templateAttr != null) {
                                     templateTypes.Add(processedType);
                                 }
 
-                                if (templateTypeMap.ContainsKey(tagName)) {
-                                    Debug.Log($"Tried to add template key `{tagName}` from type {currentType} but it was already defined by {templateTypeMap.GetOrDefault(tagName).rawType}");
+                                // if (templateTypeMap.ContainsKey(tagName)) {
+                                //     Debug.Log($"Tried to add template key `{tagName}` from type {currentType} but it was already defined by {templateTypeMap.GetOrDefault(tagName).rawType}");
+                                // }
+
+                                if (templateTypeMap.TryGetValue(tagName, out TypeList typeList)) {
+                                    if (typeList.types != null) {
+                                        Array.Resize(ref typeList.types, typeList.types.Length + 1);
+                                        typeList.types[typeList.types.Length - 1] = processedType;
+                                    }
+                                    else {
+                                        typeList.types = new ProcessedType[2];
+                                        typeList.types[0] = typeList.mainType;
+                                        typeList.types[1] = processedType;
+                                    }
+                                }
+                                else {
+                                    typeList.mainType = processedType;
+                                    templateTypeMap[tagName] = typeList;
                                 }
 
-                                templateTypeMap.Add(tagName, processedType);
+                                // templateTypeMap.Add(tagName, processedType);
                                 processedType.id = typeMap.Count;
                                 typeMap[currentType] = processedType;
                             }
@@ -431,16 +452,70 @@ namespace UIForia.Parsing {
             return templateTypes;
         }
 
-        private static readonly char[] s_GenericSplitter = {'-', '-'};
+        private static readonly List<string> EmptyNamespaceList = new List<string>();
 
-        public static ProcessedType ResolveTagName(string tagName, IReadOnlyList<string> namespaces) {
+
+        // Namespace resolution
+        //    if there is only one element with a name then no namespace is needed
+        //    if there are multiple elements with a name
+        //        namespace is required in order to match the correct one
+        //    using declarations can provide implicit namespaces
+        public static ProcessedType ResolveTagName(string tagName, string namespacePrefix, IReadOnlyList<string> namespaces) {
             FilterAssemblies();
 
-            ProcessedType retnType = null;
+            namespaces = namespaces ?? EmptyNamespaceList;
 
-            if (templateTypeMap.TryGetValue(tagName, out retnType)) {
-                retnType.references++;
-                return retnType;
+            if (string.IsNullOrEmpty(namespacePrefix)) namespacePrefix = null;
+            if (string.IsNullOrWhiteSpace(namespacePrefix)) namespacePrefix = null;
+
+            if (templateTypeMap.TryGetValue(tagName, out TypeList typeList)) {
+                // if this is null we resolve using just the tag name
+                if (namespacePrefix == null) {
+                    // if only one type has this tag name we can safely return it
+                    if (typeList.types == null) {
+                        return typeList.mainType.Reference();
+                    }
+
+                    // if there are multiple tags with this name, we need to search our namespaces 
+                    // if only one match is found, we can return it. If multiple are found, throw
+                    // and ambiguous reference exception
+                    LightList<ProcessedType> resultList = LightList<ProcessedType>.Get();
+                    for (int i = 0; i < namespaces.Count; i++) {
+                        for (int j = 0; j < typeList.types.Length; j++) {
+                            string namespaceName = namespaces[i];
+                            ProcessedType testType = typeList.types[j];
+                            if (namespaceName == testType.namespaceName) {
+                                resultList.Add(testType);
+                            }
+                        }
+                    }
+
+                    if (resultList.size == 1) {
+                        ProcessedType retn = resultList[0];
+                        resultList.Release();
+                        return retn.Reference();
+                    }
+
+                    List<string> list = resultList.Select((s) => s.namespaceName).ToList();
+                    throw new ParseException("Ambiguous TagName reference: " + tagName + ". References found in namespaces " + StringUtil.ListToString(list, ", "));
+                }
+
+                if (typeList.types == null) {
+                    if (namespacePrefix == typeList.mainType.namespaceName) {
+                        return typeList.mainType.Reference();
+                    }
+                }
+                else {
+                    // if prefix is not null we can only return a match for that namespace
+                    for (int j = 0; j < typeList.types.Length; j++) {
+                        ProcessedType testType = typeList.types[j];
+                        if (namespacePrefix == testType.namespaceName) {
+                            return testType.Reference();
+                        }
+                    }
+                }
+
+                return null;
             }
 
             if (s_GenericMap.TryGetValue(tagName, out ProcessedType processedType)) {

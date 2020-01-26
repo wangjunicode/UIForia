@@ -1398,6 +1398,7 @@ namespace UIForia.Compilers {
             if (styleRefs != null) {
                 for (int i = 0; i < styleRefs.Length; i++) {
                     if (styleRefs[i].styleSheet.TryResolveStyleByTagName(tagName, out int id)) {
+                        id = ctx.compiledTemplate.templateMetaData.ResolveStyleByIdSlow(id);
                         styleIds.Add(new StyleRefInfo() {styleId = id, styleName = "implicit:<" + tagName + ">"});
                     }
                 }
@@ -1408,6 +1409,7 @@ namespace UIForia.Compilers {
             if (styleRefs != null) {
                 for (int i = 0; i < styleRefs.Length; i++) {
                     if (styleRefs[i].styleSheet.TryResolveStyleByTagName(tagName, out int id)) {
+                        id = ctx.innerTemplate.templateMetaData.ResolveStyleByIdSlow(id);
                         styleIds.Add(new StyleRefInfo() {styleId = id, styleName = "implicit:<" + tagName + ">", fromInnerContext = true});
                     }
                 }
@@ -1434,13 +1436,11 @@ namespace UIForia.Compilers {
                 }
             }
 
-            if (list.size > 0) {
-                if (TextTemplateProcessor.TextExpressionIsConstant(list)) {
-                    CompileStaticSharedStyles(ctx, list, innerContextSplit, styleIds);
-                }
-                else {
-                    CompileDynamicSharedStyles(ctx, list, innerContextSplit, styleIds);
-                }
+            if (TextTemplateProcessor.TextExpressionIsConstant(list)) {
+                CompileStaticSharedStyles(ctx, list, innerContextSplit, styleIds);
+            }
+            else {
+                CompileDynamicSharedStyles(ctx, list, innerContextSplit, styleIds);
             }
 
             list.Release();
@@ -2069,7 +2069,6 @@ namespace UIForia.Compilers {
         }
 
         private void CompileDragEventBinding(in AttributeDefinition attr, in InputHandlerDescriptor descriptor) {
-
             contextStack.Peek().Push(new ContextVariableDefinition() {
                 id = NextContextId,
                 name = "evt",

@@ -340,10 +340,6 @@ namespace UIForia.Systems {
             return retn;
         }
 
-        public LightList<UIElement> GetVisibleElements(LightList<UIElement> retn = null) {
-            return default;
-        }
-
         public AwesomeLayoutRunner GetLayoutRunner(UIElement viewRoot) {
             for (int i = 0; i < runners.size; i++) {
                 if (runners.array[i].rootElement == viewRoot) {

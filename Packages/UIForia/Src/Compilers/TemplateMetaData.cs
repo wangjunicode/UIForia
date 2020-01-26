@@ -215,6 +215,15 @@ namespace UIForia.Compilers {
             return searchMap[styleId].container;
         }
 
+        public int ResolveStyleByIdSlow(int id) {
+            BuildSearchMap();
+            for (int i = 0; i < searchMap.Length; i++) {
+                if (searchMap[i].container.id == id) return i;
+            }
+
+            return -1;
+        }
+
     }
 
 }

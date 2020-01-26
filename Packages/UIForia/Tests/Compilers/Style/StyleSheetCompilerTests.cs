@@ -1,5 +1,5 @@
+using System.IO;
 using NUnit.Framework;
-using Tests.Mocks;
 using UIForia;
 using UIForia.Animation;
 using UIForia.Compilers.Style;
@@ -8,10 +8,10 @@ using UIForia.Layout.LayoutTypes;
 using UIForia.Parsing.Style;
 using UIForia.Parsing.Style.AstNodes;
 using UIForia.Rendering;
-using UIForia.Systems;
 using UIForia.Sound;
 using UIForia.Util;
 using UnityEngine;
+using Application = UnityEngine.Application;
 using FontStyle = UIForia.Text.FontStyle;
 using TextAlignment = UIForia.Text.TextAlignment;
 
@@ -19,7 +19,8 @@ using TextAlignment = UIForia.Text.TextAlignment;
 public class StyleSheetCompilerTests {
 
     public static StyleSheetCompiler NewStyleSheetCompiler() {
-        return new StyleSheetCompiler(new StyleSheetImporter("might-be-wrong"));
+        string path = Path.Combine(Application.dataPath, "..", "Packages", "UIForia", "Tests");
+        return new StyleSheetCompiler(new StyleSheetImporter(path), new ResourceManager());
     }
 
     [Test]

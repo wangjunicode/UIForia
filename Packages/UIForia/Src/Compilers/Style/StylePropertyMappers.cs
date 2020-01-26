@@ -831,7 +831,6 @@ namespace UIForia.Compilers.Style {
                             GridCellSize secondArgSize = MapGridCellSize(arg1, context);
 
                             if (functionNode.children.Count == 2) {
-                                
                                 if (secondArgSize.unit == GridTemplateUnit.FractionalRemaining) {
                                     cellDefinition.growFactor = (int) secondArgSize.value;
                                     cellDefinition.growLimit = new GridCellSize(float.MaxValue, GridTemplateUnit.Pixel);
@@ -1335,7 +1334,7 @@ namespace UIForia.Compilers.Style {
 
             throw new CompileException(context.fileName, value, $"Cannot parse value, expected a numeric literal or measurement {value}.");
         }
-        
+
         internal static UITimeMeasurementUnit MapUITimeMeasurementUnit(UnitNode unitNode, StyleCompileContext context) {
             if (unitNode == null) return UITimeMeasurementUnit.Milliseconds;
 
@@ -1376,9 +1375,8 @@ namespace UIForia.Compilers.Style {
                     if (assetInfo.SpriteName != null) {
                         throw new CompileException(urlNode, "SpriteAtlas access is coming soon!");
                     }
-        
-                    //throw new NotImplementedException("Todo -- implement TextureAsset wrapper around Texture2D for async loading and non compile time resolution");
-                    return null;//new TextureAsset(assetInfocontext.GetTexture(assetInfo.Path);
+
+                    return context.resourceManager.GetTexture(assetInfo.Path);
                 case StyleLiteralNode literalNode:
                     string value = literalNode.rawValue;
                     if (value == "unset" || value == "default" || value == "null") {
@@ -1399,11 +1397,8 @@ namespace UIForia.Compilers.Style {
                     if (assetInfo.SpriteName != null) {
                         throw new CompileException(urlNode, "SpriteAtlas access is coming soon!");
                     }
-                    return null;
 
-//                    return context.resourceManager?.GetFont(assetInfo.Path);
-                    throw new NotImplementedException("Todo -- implement FontAsset wrapper around TMP_FontAsset for async loading and runtime time resolution");
-                // return ResourceManager.GetFont(TransformUrlNode(urlNode, context));
+                    return context.resourceManager?.GetFont(assetInfo.Path);
                 case StyleLiteralNode literalNode:
                     string value = literalNode.rawValue;
                     if (value == "unset" || value == "default" || value == "null") {

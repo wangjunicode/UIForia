@@ -10,13 +10,33 @@ using UIForia.Compilers;
 using UIForia.Elements;
 using UIForia.Exceptions;
 using UIForia.Extensions;
-using UIForia.Parsing.Expressions;
 using UIForia.Parsing.Expressions.AstNodes;
 using UIForia.Test.NamespaceTest.SomeNamespace;
 using UnityEngine;
-using Expression = System.Linq.Expressions.Expression;
 
-[TestFixture]
+
+// todo -- test bad enum values
+// todo -- test bad constant values
+// todo -- test missing fields & properties
+// todo -- test missing type paths
+// todo -- test valid type path with invalid generic
+// todo -- test non public fields
+// todo -- test non public properties
+// todo -- test non public static fields & properties
+// todo -- test splat operator
+// todo -- test alias identifiers
+// todo -- test alias methods
+// todo -- test alias indexers
+// todo -- test alias constructors
+// todo -- test alias splat
+// todo -- test alias list initializer
+// todo -- test initializer syntax { x: 4 }
+// todo -- test out of bounds handler
+// todo -- test elvis with objects
+// todo -- test elvis with methods call chains
+// todo -- expressions should not be null checked again unless assigned to after last null check
+
+
 public class TestLinqCompiler {
 
     private class ExpressionErrorLogger {
@@ -2357,45 +2377,12 @@ public class TestLinqCompiler {
     }
 
 
-    // todo -- test bad enum values
-    // todo -- test bad constant values
-    // todo -- test missing fields & properties
-    // todo -- test missing type paths
-    // todo -- test valid type path with invalid generic
-    // todo -- test non public fields
-    // todo -- test non public properties
-    // todo -- test non public static fields & properties
-    // todo -- test list initializer
-    // todo -- test splat operator
-    // todo -- test alias identifiers
-    // todo -- test alias methods
-    // todo -- test alias indexers
-    // todo -- test alias constructors
-    // todo -- test alias splat
-    // todo -- test alias list initializer
-    // todo -- test initializer syntax { x: 4 }
-    // todo -- test out of bounds handler
-    // todo -- test elvis with objects
-    // todo -- test elvis with methods call chains
-    // todo -- expressions should not be null checked again unless assigned to after last null check
-
-    [Test]
-    public void CompileListInitializer() {
-        LinqCompiler compiler = new LinqCompiler();
-        compiler.SetSignature<int[]>();
-
-        compiler.Return("[1, 2, 3]");
-
-        // var x = new ValueContainer<T>();
-        // ...props (if type and name match for input object, pass to target assignment, for public & non-readonly properties & fields)
-    }
-
-    [Test]
-    public void CompileObjectInitializer() {
-        LinqCompiler compiler = new LinqCompiler();
-        compiler.SetSignature<int[]>();
-        compiler.Return("{x = 4, y = 13, z = 'str'}");
-    }
+    // [Test]
+    // public void CompileObjectInitializer() {
+        // LinqCompiler compiler = new LinqCompiler();
+        // compiler.SetSignature<int[]>();
+        // compiler.Return("{x = 4, y = 13, z = 'str'}");
+    // }
 
     [Test]
     public void CompileMethodCallChain_NoArgs() {
@@ -2635,17 +2622,6 @@ public class TestLinqCompiler {
         string str = fn();
 
         Assert.AreEqual("13", str);
-    }
-
-    [Test]
-    public void CompileStatement_CollapseStringConcat() {
-        LinqCompiler compiler = new LinqCompiler();
-        compiler.SetSignature<string>(new Parameter<string>("val"));
-        compiler.Statement("'str' + val + 'yep'");
-        compiler.Log();
-        Func<string, string> fn = compiler.Compile<Func<string, string>>();
-        string str = fn("ing");
-        Assert.AreEqual("string", str);
     }
 
     public void AssertStringsEqual(string a, string b) {

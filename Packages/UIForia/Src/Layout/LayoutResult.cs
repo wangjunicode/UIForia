@@ -21,15 +21,11 @@ namespace UIForia.Layout {
         public Size actualSize;
         public Size allocatedSize;
 
-        public int zIndex;
-        public Rect clipRect;
         public float rotation;
-        public CullResult cullState;
 
         public OffsetRect border;
         public OffsetRect padding;
         public OffsetRect margin;
-        public ResolvedBorderRadius borderRadius;
 
         public SVGXMatrix matrix;
         public SVGXMatrix localMatrix;

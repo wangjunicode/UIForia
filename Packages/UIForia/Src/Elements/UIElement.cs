@@ -248,15 +248,16 @@ namespace UIForia.Elements {
 
                 elementStack.EnsureAdditionalCapacity(element.children.size);
 
-                for (int i = 0; i < element.children.size; i++) {
+                for (int i = element.children.size - 1; i >= 0; i--) {
                     UIElement child = element.children.array[i];
 
-                    if (child.templateMetaData == element.templateMetaData) {
+                    // todo -- need to figure out if we should descend into children. probably want to scrap this whole method and do something better with selectors
+                    // if (child.templateMetaData == element.templateMetaData) {
                         if (child is T castChild && child.GetAttribute("id") == elementId) {
                             LightStack<UIElement>.Release(ref elementStack);
                             return castChild;
                         }
-                    }
+                    // }
 
                     elementStack.array[elementStack.size++] = child;
                 }

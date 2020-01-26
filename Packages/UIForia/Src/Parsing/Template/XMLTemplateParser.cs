@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Xml;
 using System.Xml.Linq;
+using JetBrains.Annotations;
 using UIForia.Attributes;
 using UIForia.Elements;
 using UIForia.Exceptions;
@@ -40,9 +41,19 @@ namespace UIForia.Parsing {
         private readonly XmlParserContext parserContext;
         private readonly Dictionary<string, TemplateShell> parsedFiles;
 
-        public XMLTemplateParser(bool outputComments = true) {
+        private class CustomNamespaceReader : XmlNamespaceManager {
+
+            public CustomNamespaceReader([NotNull] XmlNameTable nameTable) : base(nameTable) { }
+
+            public override string LookupNamespace(string prefix) {
+                return prefix;
+            }
+
+        }
+
+        public XMLTemplateParser() {
             this.parsedFiles = new Dictionary<string, TemplateShell>(37);
-            XmlNamespaceManager nameSpaceManager = new XmlNamespaceManager(new NameTable());
+            XmlNamespaceManager nameSpaceManager = new CustomNamespaceReader(new NameTable());
             nameSpaceManager.AddNamespace("attr", "attr");
             nameSpaceManager.AddNamespace("alias", "alias");
             nameSpaceManager.AddNamespace("expose", "expose");
@@ -79,12 +90,13 @@ namespace UIForia.Parsing {
                 retn.usings.Add(ParseUsing(usingElement));
             }
 
+            BuildNamespaceListFromUsings(retn.usings, retn.referencedNamespaces);
+
             foreach (XElement styleElement in styleElements) {
                 retn.styles.Add(ParseStyleSheet(templateAttribute.filePath, styleElement));
             }
 
             XElement[] array = contentElements.ToArray();
-
 
             foreach (XElement contentElement in array) {
                 XAttribute attr = contentElement.GetAttribute("id");
@@ -105,7 +117,6 @@ namespace UIForia.Parsing {
                 });
             }
 
-
             return retn;
         }
 
@@ -116,9 +127,12 @@ namespace UIForia.Parsing {
 
             if (parsedFiles.TryGetValue(filePath, out TemplateShell rootNode)) {
                 ParseInnerTemplate(templateRootNode, rootNode, processedType);
+                return;
             }
 
             TemplateShell shell = ParseOuterShell(templateAttr);
+
+            parsedFiles.Add(filePath, shell);
 
             ParseInnerTemplate(templateRootNode, shell, processedType);
         }
@@ -131,6 +145,7 @@ namespace UIForia.Parsing {
             return ParseOuterShell(templateAttr);
         }
 
+        // this might be getting called too many times since im not sure im caching the result
         private void ParseInnerTemplate(TemplateRootNode templateRootNode, TemplateShell shell, ProcessedType processedType) {
             XElement root = shell.GetElementTemplateContent(processedType.templateAttr.templateId);
 
@@ -175,24 +190,30 @@ namespace UIForia.Parsing {
             return attributes;
         }
 
-        private TemplateNode ParseElementTag(TemplateRootNode templateRootRoot, TemplateNode parent, string namespacePath, string tagName, StructList<AttributeDefinition> attributes, in TemplateLineInfo templateLineInfo) {
+        private void BuildNamespaceListFromUsings(StructList<UsingDeclaration> usings, LightList<string> namespaces) {
+            if (usings == null) return;
+            for (int i = 0; i < usings.size; i++) {
+                if (usings.array[i].namespaceName != null) {
+                    namespaces.Add(usings.array[i].namespaceName);
+                }
+            }
+        }
+
+        private TemplateNode ParseElementTag(TemplateRootNode templateRoot, TemplateNode parent, string namespacePath, string tagName, StructList<AttributeDefinition> attributes, in TemplateLineInfo templateLineInfo) {
             ProcessedType processedType = null;
             TemplateNode node = null;
 
-            if (namespacePath.Length > 0) {
-                throw new NotImplementedException("Element namespace resolution not yet implemented");
-            }
 
             if (string.Equals(tagName, "Repeat", StringComparison.Ordinal)) {
-                node = new RepeatNode(templateRootRoot, parent, null, attributes, templateLineInfo);
+                node = new RepeatNode(templateRoot, parent, null, attributes, templateLineInfo);
                 parent.AddChild(node);
                 return node;
             }
 
             if (string.Equals(tagName, "Children", StringComparison.Ordinal)) {
                 processedType = TypeProcessor.GetProcessedType(typeof(UIChildrenElement));
-                node = new ChildrenNode(templateRootRoot, parent, processedType, attributes, templateLineInfo);
-                templateRootRoot.AddSlot((SlotNode) node);
+                node = new ChildrenNode(templateRoot, parent, processedType, attributes, templateLineInfo);
+                templateRoot.AddSlot((SlotNode) node);
                 parent.AddChild(node);
                 return node;
             }
@@ -200,7 +221,7 @@ namespace UIForia.Parsing {
             if (string.Equals(tagName, "Slot", StringComparison.Ordinal)) {
                 processedType = TypeProcessor.GetProcessedType(typeof(UISlotOverride));
                 string slotName = GetSlotName(attributes);
-                node = new SlotNode(templateRootRoot, parent, processedType, attributes, templateLineInfo, slotName, SlotType.Override);
+                node = new SlotNode(templateRoot, parent, processedType, attributes, templateLineInfo, slotName, SlotType.Override);
 
                 if (!(parent is ExpandedTemplateNode expanded)) {
                     throw ParseException.InvalidSlotOverride(parent.originalString, node.originalString);
@@ -216,8 +237,8 @@ namespace UIForia.Parsing {
             if (string.Equals(tagName, "DefineSlot", StringComparison.Ordinal)) {
                 processedType = TypeProcessor.GetProcessedType(typeof(UISlotOverride));
                 string slotName = GetSlotName(attributes);
-                node = new SlotNode(templateRootRoot, parent, processedType, attributes, templateLineInfo, slotName, SlotType.Default);
-                templateRootRoot.AddSlot((SlotNode) node);
+                node = new SlotNode(templateRoot, parent, processedType, attributes, templateLineInfo, slotName, SlotType.Default);
+                templateRoot.AddSlot((SlotNode) node);
                 parent.AddChild(node);
                 return node;
             }
@@ -225,7 +246,7 @@ namespace UIForia.Parsing {
             if (string.Equals(tagName, "ExternSlot", StringComparison.Ordinal)) {
                 processedType = TypeProcessor.GetProcessedType(typeof(UISlotOverride));
 
-                if (!(parent is ExpandedTemplateNode expanded)) {
+                if (!(parent is ExpandedTemplateNode)) {
                     throw ParseException.InvalidSlotOverride(parent.originalString, node.originalString);
                 }
 
@@ -233,39 +254,41 @@ namespace UIForia.Parsing {
 
                 // todo -- error check
                 string slotName = GetSlotName(attributes);
-                string slotAlias = GetSlotAlias(slotName, attributes);
+                // string slotAlias = GetSlotAlias(slotName, attributes);
 
-                SlotNode slotNode = new SlotNode(templateRootRoot, parent, processedType, attributes, templateLineInfo, slotName, SlotType.Extern);
+                SlotNode slotNode = new SlotNode(templateRoot, parent, processedType, attributes, templateLineInfo, slotName, SlotType.Extern);
 
                 // expanded.ValidateSlot((slotNode).slotName, templateLineInfo);
 
-                templateRootRoot.AddSlot(slotNode);
+                templateRoot.AddSlot(slotNode);
 
                 return slotNode;
             }
 
-            processedType = TypeProcessor.ResolveTagName(tagName, null);
+            if (namespacePath == "UIForia") namespacePath = "UIForia.Elements";
+
+            processedType = TypeProcessor.ResolveTagName(tagName, namespacePath, templateRoot.templateShell.referencedNamespaces);
 
             if (processedType == null) {
-                throw ParseException.UnresolvedTagName(templateRootRoot.templateShell.filePath, templateLineInfo, tagName);
+                throw ParseException.UnresolvedTagName(templateRoot.templateShell.filePath, templateLineInfo, namespacePath == null ? tagName : namespacePath + ":" + tagName);
             }
 
             processedType.ValidateAttributes(attributes);
 
             if (typeof(UIContainerElement).IsAssignableFrom(processedType.rawType)) {
-                node = new ContainerNode(templateRootRoot, parent, processedType, attributes, templateLineInfo);
+                node = new ContainerNode(templateRoot, parent, processedType, attributes, templateLineInfo);
             }
             else if (typeof(UITextElement).IsAssignableFrom(processedType.rawType)) {
-                node = new TextNode(templateRootRoot, parent, string.Empty, processedType, attributes, templateLineInfo);
+                node = new TextNode(templateRoot, parent, string.Empty, processedType, attributes, templateLineInfo);
             }
             else if (typeof(UITextSpanElement).IsAssignableFrom(processedType.rawType)) {
                 throw new NotImplementedException();
             }
             else if (typeof(UITerminalElement).IsAssignableFrom(processedType.rawType)) {
-                node = new TerminalNode(templateRootRoot, parent, processedType, attributes, templateLineInfo);
+                node = new TerminalNode(templateRoot, parent, processedType, attributes, templateLineInfo);
             }
             else if (typeof(UIElement).IsAssignableFrom(processedType.rawType)) {
-                node = new ExpandedTemplateNode(templateRootRoot, parent, processedType, attributes, templateLineInfo);
+                node = new ExpandedTemplateNode(templateRoot, parent, processedType, attributes, templateLineInfo);
             }
 
             if (node == null) {
@@ -448,27 +471,27 @@ namespace UIForia.Parsing {
                         case "mouse":
                             attributeType = AttributeType.Mouse;
                             break;
-                        
+
                         case "key":
                             attributeType = AttributeType.Key;
                             break;
-                        
+
                         case "drag":
                             attributeType = AttributeType.Drag;
                             break;
-                        
+
                         case "onChange":
                             attributeType = AttributeType.ChangeHandler;
                             break;
-                        
+
                         case "touch":
                             attributeType = AttributeType.Touch;
                             break;
-                        
+
                         case "controller":
                             attributeType = AttributeType.Controller;
                             break;
-                        
+
                         case "style":
                             attributeType = AttributeType.InstanceStyle;
                             if (name.Contains(".")) {
@@ -490,11 +513,11 @@ namespace UIForia.Parsing {
                             }
 
                             break;
-                        
+
                         case "evt":
                             attributeType = AttributeType.Event;
                             break;
-                        
+
                         case "ctx":
 
                             attributeType = AttributeType.Context;
@@ -504,7 +527,7 @@ namespace UIForia.Parsing {
                             }
 
                             break;
-                        
+
                         case "var":
                             attributeType = AttributeType.ImplicitVariable;
 
@@ -521,7 +544,7 @@ namespace UIForia.Parsing {
                             attributeType = AttributeType.Property;
                             flags |= AttributeFlags.Sync;
                             break;
-                        
+
                         case "expose":
                             attributeType = AttributeType.Expose;
                             if (name == "element" || name == "parent" || name == "root" || name == "evt") {
@@ -529,7 +552,7 @@ namespace UIForia.Parsing {
                             }
 
                             break;
-                        
+
                         case "alias":
                             attributeType = AttributeType.Alias;
                             if (name == "element" || name == "parent" || name == "root" || name == "evt") {

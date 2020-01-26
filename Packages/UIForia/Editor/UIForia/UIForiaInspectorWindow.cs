@@ -219,7 +219,6 @@ namespace UIForia.Editor {
             float labelWidth = EditorGUIUtility.labelWidth;
             EditorGUIUtility.labelWidth = 100;
 
-            Rect clipRect = layoutResult.clipRect;
             Rect contentRect = layoutResult.ContentRect;
 
             DrawLabel("Enabled", selectedElement.isEnabled.ToString());
@@ -232,11 +231,9 @@ namespace UIForia.Editor {
             DrawSizeValue("Actual Size", layoutResult.actualSize);
 
             DrawLabel("Rotation", layoutResult.rotation.ToString());
-            DrawLabel("Clip Rect", $"X: {clipRect.x}, Y: {clipRect.y}, W: {clipRect.width}, H: {clipRect.height}");
             DrawLabel("Content Rect", $"X: {contentRect.x}, Y: {contentRect.y}, W: {contentRect.width}, H: {contentRect.height}");
 
             DrawLabel("Render Layer", selectedElement.style.RenderLayer.ToString());
-            DrawLabel("Z Index", layoutResult.zIndex.ToString());
 
             GUILayout.Space(16);
 

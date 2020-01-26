@@ -106,7 +106,6 @@ namespace TemplateLoading {
             settings.codeFileExtension = "generated.xml.cs";
             settings.preCompiledTemplatePath = "Assets/UIForia_Generated/DistinctGenericTemplates";
             settings.templateResolutionBasePath = Path.Combine(UnityEngine.Application.dataPath, "..", "Packages", "UIForia", "Tests");
-            TemplateCodeGenerator.Generate(typeof(TemplateLoadingTest_LoadGenericOuter), settings);
 
             TemplateLoadingTest_LoadGenericOuter e = (TemplateLoadingTest_LoadGenericOuter) app.RootElement;
 

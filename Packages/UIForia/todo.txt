@@ -3,8 +3,6 @@ Template Compiler
     Support exposed slots (bug)
     Support [Required] attribute 
     Support dictionary repeat
-    Support namespaces
-    Support drag events
     Support keyboard
     Support triggered event natively
     Support Focus / Blur

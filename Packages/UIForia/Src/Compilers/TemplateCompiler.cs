@@ -2380,23 +2380,20 @@ namespace UIForia.Compilers {
 
             ParameterInfo[] parameters = method.GetParameters();
 
-            Type targetType = parameters[0].ParameterType;
-
-            if (targetType.IsByRef) {
-                targetType = targetType.GetElementType();
-            }
-
-            Expression value = compiler.TypedValue(targetType, attributeDefinition.value);
+            Expression value = compiler.Value(attributeDefinition.value);
 
             // hack! for some reason because the type can be by ref (via in) it doesn't report as a generic type
-            // if (parameters[0].ParameterType.FullName.Contains("System.Nullable")) {
-            //     if (!value.Type.IsNullableType()) {
-            //         Type targetType = parameters[0].ParameterType.GetGenericArguments()[0];
-            //         value = Expression.Convert(value, ReflectionUtil.CreateGenericType(typeof(Nullable<>), targetType));
-            //     }
-            // }
+            if (parameters[0].ParameterType.FullName.Contains("System.Nullable")) {
+                if (!value.Type.IsNullableType()) {
+                    Type targetType = parameters[0].ParameterType.GetGenericArguments()[0];
+                    
+                    if (targetType.IsByRef) {
+                        targetType = targetType.GetElementType();
+                    }
 
-            // compiler.Value(attributeDefinition.value);
+                    value = Expression.Convert(value, ReflectionUtil.CreateGenericType(typeof(Nullable<>), targetType));
+                }
+            }
 
             compiler.RawExpression(Expression.Call(field, method, value, Expression.Constant(styleState)));
 
@@ -2697,8 +2694,7 @@ namespace UIForia.Compilers {
                 for (int i = 0; i < fieldArgs.Length; i++) {
                     string genericName = fieldArgs[i].Name;
                     int typeIndex = GetTypeIndex(arguments, genericName);
-                   
-                     
+
 
                     return typeIndex;
                 }
@@ -2727,7 +2723,7 @@ namespace UIForia.Compilers {
                         int typeIndex = GetTypeIndex(arguments, genericName);
 
                         if (typeIndex == -1) {
-                           // typeIndex = TypeRecurse(fieldArgs[a]);
+                            // typeIndex = TypeRecurse(fieldArgs[a]);
                         }
 
                         Assert.IsTrue(typeIndex != -1);

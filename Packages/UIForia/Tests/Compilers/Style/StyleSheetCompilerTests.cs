@@ -20,7 +20,7 @@ public class StyleSheetCompilerTests {
 
     public static StyleSheetCompiler NewStyleSheetCompiler() {
         string path = Path.Combine(Application.dataPath, "..", "Packages", "UIForia", "Tests");
-        return new StyleSheetCompiler(new StyleSheetImporter(path), new ResourceManager());
+        return new StyleSheetCompiler(new StyleSheetImporter(path,  new ResourceManager()), new ResourceManager());
     }
 
     [Test]

@@ -16,7 +16,7 @@ public class StyleSheetConstantImporterTests {
         nodes.Add(StyleASTNodeFactory.ExportNode(StyleASTNodeFactory.ConstNode("thing0", StyleASTNodeFactory.StringLiteralNode("someVal"))));
         nodes.Add(StyleASTNodeFactory.ExportNode(StyleASTNodeFactory.ConstNode("number", StyleASTNodeFactory.NumericLiteralNode("1"))));
 
-        var context = new StyleSheetConstantImporter(new StyleSheetImporter(null)).CreateContext(nodes);
+        var context = new StyleSheetConstantImporter(new StyleSheetImporter(null, null)).CreateContext(nodes);
 
         Assert.AreEqual(3, context.constants.Count);
         Assert.AreEqual("col0", context.constants[0].name);
@@ -37,7 +37,7 @@ public class StyleSheetConstantImporterTests {
         var stringValue = StyleASTNodeFactory.StringLiteralNode("you win!");
         nodes.Add(StyleASTNodeFactory.ExportNode(StyleASTNodeFactory.ConstNode("z", stringValue)));
 
-        var context = new StyleSheetConstantImporter(new StyleSheetImporter(null)).CreateContext(nodes);
+        var context = new StyleSheetConstantImporter(new StyleSheetImporter(null, null)).CreateContext(nodes);
 
         Assert.AreEqual(3, context.constants.Count);
         
@@ -61,7 +61,7 @@ public class StyleSheetConstantImporterTests {
         LightList<StyleASTNode> nodes = new LightList<StyleASTNode>();
         nodes.Add(StyleASTNodeFactory.ImportNode("importedThing", "Data/Styles/ImportFromMe.style"));
         string basepath = Path.Combine(Application.dataPath, "..", "Packages", "UIForia", "Tests");
-        StyleCompileContext context = new StyleSheetConstantImporter(new StyleSheetImporter(basepath)).CreateContext(nodes);
+        StyleCompileContext context = new StyleSheetConstantImporter(new StyleSheetImporter(basepath, null)).CreateContext(nodes);
         Assert.AreEqual(1, context.importedStyleConstants.Count);
         Assert.AreEqual(1, context.importedStyleConstants["importedThing"].Count);
         Assert.AreEqual("colorRed", context.importedStyleConstants["importedThing"][0].name);

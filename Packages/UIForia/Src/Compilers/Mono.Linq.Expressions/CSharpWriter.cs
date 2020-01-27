@@ -368,6 +368,7 @@ namespace Mono.Linq.Expressions {
         }
 
         private bool lastWasComment = false;
+
         void VisitBlockExpressions(BlockExpression node) {
             for (int i = 0; i < node.Expressions.Count; i++) {
                 var expression = node.Expressions[i];
@@ -922,9 +923,33 @@ namespace Mono.Linq.Expressions {
                 case TypeCode.Boolean:
                     return ((bool) value) ? "true" : "false";
 
-                case TypeCode.Char:
-                    return "'" + ((char) value) + "'";
+                case TypeCode.Char: {
+                    char c = (char) value;
+                    switch (c) {
+                        case '\0':
+                            return @"'\0'";
+                        case '\n':
+                            return @"'\n'";
+                        case '\t':
+                            return @"'\t'";
+                        case '\'':
+                            return @"'\'";
+                        case '\"':
+                            return @"'\""''";
+                        case '\a':
+                            return @"'\a'";
+                        case '\b':
+                            return @"'\b'";
+                        case '\f':
+                            return @"'\f'";
+                        case '\r':
+                            return @"'\r'";
+                        case '\v':
+                            return @"'\v";
+                        default: return $"'{c}'";
+                    }
 
+                }
                 case TypeCode.String:
                     return "\"" + ((string) value) + "\"";
 
@@ -978,7 +1003,7 @@ namespace Mono.Linq.Expressions {
         private static MethodInfo s_CommentNewLineAfter = typeof(ExpressionUtil).GetMethod(nameof(ExpressionUtil.CommentNewLineAfter), BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);
 
         private static MethodInfo s_SubscribeEvent = typeof(EventUtil).GetMethod("Subscribe");
-        
+
         protected override Expression VisitMethodCall(MethodCallExpression node) {
             MethodInfo method = node.Method;
 
@@ -1015,7 +1040,7 @@ namespace Mono.Linq.Expressions {
                 WriteToken($"{targetName}.{eventName} += {handlerName}");
                 return null;
             }
-            
+
             if (node.Object != null) {
                 if (node.Object is BinaryExpression || node.Object is UnaryExpression) {
                     WriteToken("(");

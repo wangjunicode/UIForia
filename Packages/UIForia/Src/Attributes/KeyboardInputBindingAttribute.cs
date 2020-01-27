@@ -11,9 +11,9 @@ namespace UIForia.Attributes {
         public readonly KeyboardModifiers modifiers;
         public readonly InputEventType eventType;
         public readonly bool requiresFocus;
-        public readonly KeyEventPhase keyEventPhase;
+        public readonly EventPhase keyEventPhase;
 
-        protected KeyboardInputBindingAttribute(KeyCode key, char character, KeyboardModifiers modifiers, InputEventType eventType, bool requiresFocusKeyEventPhase, KeyEventPhase keyEventPhase) {
+        protected KeyboardInputBindingAttribute(KeyCode key, char character, KeyboardModifiers modifiers, InputEventType eventType, bool requiresFocusKeyEventPhase, EventPhase keyEventPhase) {
             this.key = key;
             this.character = character;
             this.modifiers = modifiers;

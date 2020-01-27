@@ -204,11 +204,11 @@ namespace UIForia.Compilers {
             return compiledTemplate;
         }
 
-        private CompiledTemplate Compile(TemplateRootNode templateRootNode, bool isRoot = false) {
-            CompiledTemplate retn = templateData.CreateTemplate(templateRootNode.templateShell.filePath, templateRootNode.templateName);
-            LightList<string> namespaces = LightList<string>.Get();
+        private CompilationContext CompileTemplateMetaData(TemplateRootNode templateRootNode) {
+            CompiledTemplate compiledTemplate = templateData.CreateTemplate(templateRootNode.templateShell.filePath, templateRootNode.templateName);
 
-            contextStack.Push(new LightStack<ContextVariableDefinition>());
+            LightList<string> namespaces = new LightList<string>(4);
+
             if (templateRootNode.templateShell.usings != null) {
                 for (int i = 0; i < templateRootNode.templateShell.usings.size; i++) {
                     namespaces.Add(templateRootNode.templateShell.usings[i].namespaceName);
@@ -220,7 +220,7 @@ namespace UIForia.Compilers {
             ParameterExpression rootParam = Expression.Parameter(typeof(UIElement), "root");
             ParameterExpression scopeParam = Expression.Parameter(typeof(TemplateScope), "scope");
 
-            retn.elementType = processedType;
+            compiledTemplate.elementType = processedType;
 
             CompilationContext ctx = new CompilationContext(templateRootNode) {
                 namespaces = namespaces,
@@ -228,7 +228,7 @@ namespace UIForia.Compilers {
                 rootParam = rootParam,
                 templateScope = scopeParam,
                 applicationExpr = Expression.Field(scopeParam, s_TemplateScope_ApplicationField),
-                compiledTemplate = retn,
+                compiledTemplate = compiledTemplate,
                 ContextExpr = rootParam
             };
 
@@ -245,13 +245,23 @@ namespace UIForia.Compilers {
             }
 
             if (ctx.styleSheets != null && ctx.styleSheets.size > 0) {
-                retn.templateMetaData.styleReferences = ctx.styleSheets.ToArray();
+                compiledTemplate.templateMetaData.styleReferences = ctx.styleSheets.ToArray();
             }
 
-            if (!processedType.IsUnresolvedGeneric) {
-                ctx.PushBlock();
+            templateMap[processedType.rawType] = compiledTemplate;
 
+            return ctx;
+        }
+
+        private CompiledTemplate Compile(TemplateRootNode templateRootNode, bool isRoot = false) {
+            CompilationContext ctx = CompileTemplateMetaData(templateRootNode);
+            contextStack.Push(new LightStack<ContextVariableDefinition>());
+
+            ProcessedType processedType = templateRootNode.processedType;
+
+            if (isRoot) {
                 ctx.Comment("new " + TypeNameGenerator.GetTypeName(processedType.rawType));
+
                 Expression createRootExpression = ExpressionFactory.CallInstanceUnchecked(ctx.applicationExpr, s_CreateFromPool,
                     Expression.Constant(processedType.id),
                     Expression.Default(typeof(UIElement)), // root has no parent
@@ -259,28 +269,20 @@ namespace UIForia.Compilers {
                     Expression.Constant(CountRealAttributes(templateRootNode.attributes)),
                     Expression.Constant(ctx.compiledTemplate.templateId)
                 );
-
-                // root = templateScope.application.CreateFromPool<Type>(attrCount, childCount);
                 ctx.Assign(ctx.rootParam, createRootExpression);
-
-                ctx.IfEqualsNull(ctx.rootParam, ctx.PopBlock());
+                ProcessAttrsAndVisitChildren(ctx, templateRootNode);
+            }
+            else {
+                // todo -- should push context 
+                VisitChildren(ctx, templateRootNode);
             }
 
-            templateMap[processedType.rawType] = retn;
             ctx.templateRootNode = templateRootNode;
 
-            // we dont want to visit root stuff in all cases
-            // todo -- figure this out, for example we dont want to do styles here for root unless its the app root since it will be overridden at is usage site anyway
-            ProcessAttrsAndVisitChildren(ctx, templateRootNode);
-
-            // VisitChildren(ctx, templateRootNode);
-            // UndoContextMods(mods);
-
             ctx.Return(ctx.rootParam);
-            LightList<string>.Release(ref namespaces);
-            retn.templateFn = Expression.Lambda(ctx.Finalize(typeof(UIElement)), rootParam, scopeParam);
+            ctx.compiledTemplate.templateFn = Expression.Lambda(ctx.Finalize(typeof(UIElement)), (ParameterExpression) ctx.rootParam, (ParameterExpression) ctx.templateScope);
             contextStack.Pop();
-            return retn;
+            return ctx.compiledTemplate;
         }
 
         private void VisitChildren(CompilationContext ctx, TemplateNode templateNode) {
@@ -926,15 +928,6 @@ namespace UIForia.Compilers {
 
         }
 
-        // Binding order
-        // - conditional
-        // - BeforePropertyUpdates() -- if declared
-        // - properties & context vars, in declared order 
-        // - AfterPropertyUpdates() -- currently called Update()
-        // - attributes
-        // - styles
-        // - AfterBindings()
-        // - sync & change
 
         private struct ChangeHandlerDefinition {
 
@@ -959,6 +952,17 @@ namespace UIForia.Compilers {
                 }
             }
         }
+
+
+        // Binding order
+        // - conditional
+        // - BeforePropertyUpdates() -- if declared
+        // - properties & context vars, in declared order 
+        // - AfterPropertyUpdates() -- currently called Update()
+        // - attributes
+        // - styles
+        // - AfterBindings()
+        // - sync & change
 
         private StructList<ContextAliasActions> CompileBindings(CompilationContext ctx, TemplateNode templateNode, StructList<AttributeDefinition> attributes, ExposedVariableData exposedVariableData = null) {
             StructList<ContextAliasActions> contextModifications = null;
@@ -1400,7 +1404,7 @@ namespace UIForia.Compilers {
             LightList<StyleRefInfo> styleIds = LightList<StyleRefInfo>.Get();
 
             tagName = tagName ?? "this"; // todo -- not sure if this is correct, kinda want to kill <this> styles anyway
-            
+
             if (styleRefs != null) {
                 for (int i = 0; i < styleRefs.Length; i++) {
                     if (styleRefs[i].styleSheet.TryResolveStyleByTagName(tagName, out int id)) {
@@ -1597,74 +1601,151 @@ namespace UIForia.Compilers {
             updateCompiler.SetNullCheckingEnabled(true);
         }
 
-        // todo -- finish this
+        private void CompileMouseHandlerFromAttribute(in InputHandler handler) {
+            LightList<Parameter> parameters = LightList<Parameter>.Get();
+
+            parameters.Add(new Parameter<GenericInputEvent>(k_InputEventParameterName, ParameterFlags.NeverNull | ParameterFlags.NeverOutOfBounds));
+            LinqCompiler closure = createdCompiler.CreateClosure(parameters, typeof(void));
+
+            if (handler.useEventParameter) {
+                Expression toMouseEvent = Expression.Property(parameters[0].expression, s_GenericInputEvent_AsMouseInputEvent);
+                closure.RawExpression(ExpressionFactory.CallInstanceUnchecked(createdCompiler.GetCastElement(), handler.methodInfo, toMouseEvent));
+            }
+            else {
+                closure.RawExpression(ExpressionFactory.CallInstanceUnchecked(createdCompiler.GetCastElement(), handler.methodInfo));
+            }
+
+            LambdaExpression lambda = closure.BuildLambda();
+
+            MethodCallExpression expression = ExpressionFactory.CallInstanceUnchecked(createdCompiler.GetInputHandlerGroup(), s_InputHandlerGroup_AddMouseEvent,
+                Expression.Constant(handler.descriptor.handlerType),
+                Expression.Constant(handler.descriptor.modifiers),
+                Expression.Constant(handler.descriptor.requiresFocus),
+                Expression.Constant(handler.descriptor.eventPhase),
+                lambda
+            );
+
+            createdCompiler.RawExpression(expression);
+            closure.Release();
+            parameters.Release();
+        }
+
+        private void CompileKeyboardHandlerFromAttribute(in InputHandler handler) {
+            LightList<Parameter> parameters = LightList<Parameter>.Get();
+
+            parameters.Add(new Parameter<GenericInputEvent>(k_InputEventParameterName, ParameterFlags.NeverNull | ParameterFlags.NeverOutOfBounds));
+            LinqCompiler closure = createdCompiler.CreateClosure(parameters, typeof(void));
+
+            if (handler.useEventParameter) {
+                Expression toMouseEvent = Expression.Property(parameters[0].expression, s_GenericInputEvent_AsKeyInputEvent);
+                closure.RawExpression(ExpressionFactory.CallInstanceUnchecked(createdCompiler.GetCastElement(), handler.methodInfo, toMouseEvent));
+            }
+            else {
+                closure.RawExpression(ExpressionFactory.CallInstanceUnchecked(createdCompiler.GetCastElement(), handler.methodInfo));
+            }
+
+            LambdaExpression lambda = closure.BuildLambda();
+
+            MethodCallExpression expression = ExpressionFactory.CallInstanceUnchecked(createdCompiler.GetInputHandlerGroup(), s_InputHandlerGroup_AddKeyboardEvent,
+                Expression.Constant(handler.descriptor.handlerType),
+                Expression.Constant(handler.descriptor.modifiers),
+                Expression.Constant(handler.descriptor.requiresFocus),
+                Expression.Constant(handler.descriptor.eventPhase),
+                Expression.Constant(handler.keyCode),
+                Expression.Constant(handler.character),
+                lambda
+            );
+
+            createdCompiler.RawExpression(expression);
+            closure.Release();
+            parameters.Release();
+        }
+
+        private void CompileDragHandlerFromAttribute(in InputHandler handler) {
+            LightList<Parameter> parameters = LightList<Parameter>.Get();
+
+            parameters.Add(new Parameter<GenericInputEvent>(k_InputEventParameterName, ParameterFlags.NeverNull | ParameterFlags.NeverOutOfBounds));
+            LinqCompiler closure = createdCompiler.CreateClosure(parameters, typeof(void));
+
+            if (handler.useEventParameter) {
+                closure.RawExpression(ExpressionFactory.CallInstanceUnchecked(createdCompiler.GetCastElement(), handler.methodInfo, parameters[0].expression));
+            }
+            else {
+                closure.RawExpression(ExpressionFactory.CallInstanceUnchecked(createdCompiler.GetCastElement(), handler.methodInfo));
+            }
+
+            LambdaExpression lambda = closure.BuildLambda();
+
+            MethodCallExpression expression = ExpressionFactory.CallInstanceUnchecked(createdCompiler.GetInputHandlerGroup(), s_InputHandlerGroup_AddDragEvent,
+                Expression.Constant(handler.descriptor.handlerType),
+                Expression.Constant(handler.descriptor.modifiers),
+                Expression.Constant(handler.descriptor.requiresFocus),
+                Expression.Constant(handler.descriptor.eventPhase),
+                lambda
+            );
+
+            createdCompiler.RawExpression(expression);
+            closure.Release();
+            parameters.Release();
+        }
+
+        private void CompileDragCreateFromAttribute(in InputHandler handler) {
+            LightList<Parameter> parameters = LightList<Parameter>.Get();
+
+            parameters.Add(new Parameter<MouseInputEvent>(k_InputEventParameterName, ParameterFlags.NeverNull | ParameterFlags.NeverOutOfBounds));
+
+            LinqCompiler closure = createdCompiler.CreateClosure(parameters, typeof(DragEvent));
+
+            if (handler.useEventParameter) {
+                closure.RawExpression(ExpressionFactory.CallInstanceUnchecked(createdCompiler.GetCastElement(), handler.methodInfo, parameters[0].expression));
+            }
+            else {
+                closure.RawExpression(ExpressionFactory.CallInstanceUnchecked(createdCompiler.GetCastElement(), handler.methodInfo));
+            }
+
+            LambdaExpression lambda = closure.BuildLambda();
+
+            MethodCallExpression expression = ExpressionFactory.CallInstanceUnchecked(createdCompiler.GetInputHandlerGroup(), s_InputHandlerGroup_AddDragCreator,
+                Expression.Constant(handler.descriptor.modifiers),
+                Expression.Constant(handler.descriptor.requiresFocus),
+                Expression.Constant(handler.descriptor.eventPhase),
+                lambda
+            );
+
+            createdCompiler.RawExpression(expression);
+            closure.Release();
+            parameters.Release();
+        }
+
+
         private void CompileInputHandlers(ProcessedType processedType, StructList<AttributeDefinition> attributes) {
             StructList<InputHandler> handlers = InputCompiler.CompileInputAnnotations(processedType.rawType);
+
+            const InputEventType k_KeyboardType = InputEventType.KeyDown | InputEventType.KeyUp | InputEventType.KeyHeldDown;
+            const InputEventType k_DragType = InputEventType.DragCancel | InputEventType.DragDrop | InputEventType.DragEnter | InputEventType.DragEnter | InputEventType.DragExit | InputEventType.DragHover | InputEventType.DragMove;
 
             bool hasHandlers = false;
 
             if (handlers != null) {
                 hasHandlers = true;
 
-                LightList<Parameter> parameters = LightList<Parameter>.Get();
 
                 for (int i = 0; i < handlers.size; i++) {
                     ref InputHandler handler = ref handlers.array[i];
 
-                    parameters.Clear();
-
                     if (handler.descriptor.handlerType == InputEventType.DragCreate) {
-                        parameters.Add(new Parameter<MouseInputEvent>(k_InputEventParameterName, ParameterFlags.NeverNull | ParameterFlags.NeverOutOfBounds));
-
-                        LinqCompiler closure = createdCompiler.CreateClosure(parameters, typeof(DragEvent));
-
-                        if (handler.useEventParameter) {
-                            closure.RawExpression(ExpressionFactory.CallInstanceUnchecked(createdCompiler.GetCastElement(), handler.methodInfo, parameters[0].expression));
-                        }
-                        else {
-                            closure.RawExpression(ExpressionFactory.CallInstanceUnchecked(createdCompiler.GetCastElement(), handler.methodInfo));
-                        }
-
-                        LambdaExpression lambda = closure.BuildLambda();
-
-                        MethodCallExpression expression = ExpressionFactory.CallInstanceUnchecked(createdCompiler.GetInputHandlerGroup(), s_InputHandlerGroup_AddDragCreator,
-                            Expression.Constant(handler.descriptor.modifiers),
-                            Expression.Constant(handler.descriptor.requiresFocus),
-                            Expression.Constant(handler.descriptor.eventPhase),
-                            lambda
-                        );
-
-                        createdCompiler.RawExpression(expression);
-                        closure.Release();
+                        CompileDragCreateFromAttribute(handler);
+                    }
+                    else if ((handler.descriptor.handlerType & k_DragType) != 0) {
+                        CompileDragHandlerFromAttribute(handler);
+                    }
+                    else if ((handler.descriptor.handlerType & k_KeyboardType) != 0) {
+                        CompileKeyboardHandlerFromAttribute(handler);
                     }
                     else {
-                        parameters.Add(new Parameter<GenericInputEvent>(k_InputEventParameterName, ParameterFlags.NeverNull | ParameterFlags.NeverOutOfBounds));
-                        LinqCompiler closure = createdCompiler.CreateClosure(parameters, typeof(void));
-
-                        if (handler.useEventParameter) {
-                            Expression toMouseEvent = Expression.Property(parameters[0].expression, s_GenericInputEvent_AsMouseInputEvent);
-                            closure.RawExpression(ExpressionFactory.CallInstanceUnchecked(createdCompiler.GetCastElement(), handler.methodInfo, toMouseEvent));
-                        }
-                        else {
-                            closure.RawExpression(ExpressionFactory.CallInstanceUnchecked(createdCompiler.GetCastElement(), handler.methodInfo));
-                        }
-
-                        LambdaExpression lambda = closure.BuildLambda();
-
-                        MethodCallExpression expression = ExpressionFactory.CallInstanceUnchecked(createdCompiler.GetInputHandlerGroup(), s_InputHandlerGroup_AddMouseEvent,
-                            Expression.Constant(handler.descriptor.handlerType),
-                            Expression.Constant(handler.descriptor.modifiers),
-                            Expression.Constant(handler.descriptor.requiresFocus),
-                            Expression.Constant(handler.descriptor.eventPhase),
-                            lambda
-                        );
-
-                        createdCompiler.RawExpression(expression);
-                        closure.Release();
+                        CompileMouseHandlerFromAttribute(handler);
                     }
                 }
-
-                LightList<Parameter>.Release(ref parameters);
             }
 
             const AttributeType k_InputType = AttributeType.Controller | AttributeType.Mouse | AttributeType.Key | AttributeType.Touch | AttributeType.Drag;
@@ -1697,13 +1778,12 @@ namespace UIForia.Compilers {
                 return;
             }
 
-            // inputList.QuickRelease();
             // Application.InputSystem.RegisterKeyboardHandler(element);
-            // ParameterExpression elementVar = createdCompiler.GetElement();
-            // MemberExpression app = Expression.Property(elementVar, typeof(UIElement).GetProperty(nameof(UIElement.application)));
-            // MemberExpression inputSystem = Expression.Property(app, typeof(Application).GetProperty(nameof(Application.InputSystem)));
-            // MethodInfo method = typeof(InputSystem).GetMethod(nameof(InputSystem.RegisterKeyboardHandler));
-            // createdCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(inputSystem, method, elementVar));
+            ParameterExpression elementVar = createdCompiler.GetElement();
+            MemberExpression app = Expression.Property(elementVar, typeof(UIElement).GetProperty(nameof(UIElement.application)));
+            MemberExpression inputSystem = Expression.Property(app, typeof(Application).GetProperty(nameof(Application.InputSystem)));
+            MethodInfo method = typeof(InputSystem).GetMethod(nameof(InputSystem.RegisterKeyboardHandler));
+            createdCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(inputSystem, method, elementVar));
         }
 
         private void BuildBindings(CompilationContext ctx, TemplateNode templateNode) {
@@ -2612,6 +2692,20 @@ namespace UIForia.Compilers {
                 return -1;
             }
 
+            int TypeRecurse(Type checkType) {
+                Type[] fieldArgs = checkType.GetGenericArguments();
+                for (int i = 0; i < fieldArgs.Length; i++) {
+                    string genericName = fieldArgs[i].Name;
+                    int typeIndex = GetTypeIndex(arguments, genericName);
+                   
+                     
+
+                    return typeIndex;
+                }
+
+                return -1;
+            }
+
             void HandleType(Type inputType, in AttributeDefinition attr) {
                 if (!inputType.ContainsGenericParameters) {
                     return;
@@ -2623,14 +2717,19 @@ namespace UIForia.Compilers {
                     }
 
                     Type type = typeResolver.GetExpressionType(attr.value);
-                    Type[] fieldArgs = inputType.GetGenericArguments();
                     Type[] typeArgs = type.GetGenericArguments();
+                    Type[] fieldArgs = inputType.GetGenericArguments();
 
                     Assert.AreEqual(fieldArgs.Length, typeArgs.Length);
 
                     for (int a = 0; a < fieldArgs.Length; a++) {
                         string genericName = fieldArgs[a].Name;
                         int typeIndex = GetTypeIndex(arguments, genericName);
+
+                        if (typeIndex == -1) {
+                           // typeIndex = TypeRecurse(fieldArgs[a]);
+                        }
+
                         Assert.IsTrue(typeIndex != -1);
 
                         if (resolvedTypes[typeIndex] != null) {

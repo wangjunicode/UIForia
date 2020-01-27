@@ -53,10 +53,10 @@ using UIForia.Elements;
 namespace UIForia.Generated {
 
     public partial class UIForiaGeneratedTemplates_::APPNAME:: {
-        
+        // ::TEMPLATE_COMMENT::
         public Func<UIElement, TemplateScope, UIElement> Template_::GUID:: = ::CODE:: 
-        ::BINDINGS::
-        ::SLOTS::
+::BINDINGS::
+::SLOTS::
     }
 
 }

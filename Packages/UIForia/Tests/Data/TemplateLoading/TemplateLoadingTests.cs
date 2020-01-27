@@ -116,14 +116,6 @@ namespace TemplateLoading {
             Assert.AreEqual("str", GetText(e[2][0]));
         }
 
-        public TemplateSettings GetSettings<T>(string defaultPath) {
-            TemplateSettings retn = MockApplication.GetDefaultSettings(defaultPath);
-
-            retn.filePathResolver = (type, s) => "Data/TemplateLoading/TemplateLoadingTest_" + type.Name + ".xml";
-
-            return retn;
-        }
-
         string GetText(UIElement element) {
             UITextElement textEl = element as UITextElement;
             return textEl.text.Trim();

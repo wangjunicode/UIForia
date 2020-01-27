@@ -22,6 +22,7 @@ namespace UIForia {
         private StyleSheetImporter styleSheetImporter;
 
         public static bool Generate(Type type, TemplateSettings templateSettings) {
+            templateSettings.resourceManager = new ResourceManager();
             CompiledTemplateData compiledTemplateData = TemplateCompiler.CompileTemplates(type, templateSettings);
 
             string path = templateSettings.outputPath;
@@ -204,8 +205,6 @@ namespace UIForia {
             return builder.ToString();
         }
 
-        private static int genericCounter = 0;
-
         private static void GenerateTemplateCode(string path, string extension, CompiledTemplateData compiledTemplateData) {
             TemplateSettings templateSettings = compiledTemplateData.templateSettings;
 
@@ -214,9 +213,7 @@ namespace UIForia {
 
                 string file = compiled.filePath;
 
-                bool isGeneric = false;
                 if (compiled.elementType.rawType.IsGenericType) {
-                    isGeneric = true;
                     file = Path.ChangeExtension(file, "");
                     file = file.Substring(0, file.Length - 1);
                   
@@ -255,11 +252,10 @@ namespace UIForia {
                 if (compiledBindings != null) {
                     for (int b = 0; b < compiledBindings.size; b++) {
                         CompiledBinding binding = compiledBindings[b];
-                        bindingCode += $"// binding id = {binding.bindingId}";
+                        bindingCode += $"\n{s_Indent8}// binding id = {binding.bindingId}";
                         bindingCode += $"\n{s_Indent8}public Action<UIElement, UIElement> Binding_{compiledBindings.array[b].bindingType}_{binding.guid} = ";
                         bindingCode += binding.bindingFn.ToTemplateBodyFunction();
                         bindingCode += "\n";
-                        //  }
                     }
                 }
 
@@ -278,6 +274,7 @@ namespace UIForia {
 
                 string templateBody = compiledTemplate.templateFn.ToTemplateBodyFunction();
                 string template = TemplateConstants.TemplateSource;
+                template = template.Replace("::TEMPLATE_COMMENT::", compiledTemplate.templateMetaData.filePath);
                 template = template.Replace("::GUID::", compiledTemplate.guid.ToString());
                 template = template.Replace("::CODE::", templateBody);
                 template = template.Replace("::BINDINGS::", bindingCode);

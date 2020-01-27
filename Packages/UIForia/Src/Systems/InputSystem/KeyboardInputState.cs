@@ -9,6 +9,7 @@ namespace UIForia.Systems.Input {
         public char character;
         public KeyCode keyCode;
         public KeyState keyState;
+
     }
 
     public class KeyboardInputState {
@@ -56,9 +57,9 @@ namespace UIForia.Systems.Input {
                 }
             }
 
-            m_KeyStates.Add(new KeyCodeState {keyCode = keyCode, keyState = keyState });
+            m_KeyStates.Add(new KeyCodeState {keyCode = keyCode, keyState = keyState});
         }
-        
+
         public void SetKeyState(char character, KeyState keyState) {
             for (int i = 0; i < m_KeyStates.size; i++) {
                 KeyCodeState mKeyState = m_KeyStates[i];
@@ -68,7 +69,7 @@ namespace UIForia.Systems.Input {
                 }
             }
 
-            m_KeyStates.Add(new KeyCodeState {character = character, keyState = keyState });
+            m_KeyStates.Add(new KeyCodeState {character = character, keyState = keyState});
         }
 
         public void CleanupForThisFrame() {
@@ -76,7 +77,8 @@ namespace UIForia.Systems.Input {
                 ref KeyCodeState mKeyState = ref m_KeyStates.array[i];
                 if (mKeyState.keyState == KeyState.Up || (mKeyState.keyState & KeyState.UpThisFrame) != 0) {
                     m_KeyStates.RemoveAt(i);
-                } else if ((mKeyState.keyState & KeyState.DownThisFrame) != 0) {
+                }
+                else if ((mKeyState.keyState & KeyState.DownThisFrame) != 0) {
                     if (UnityEngine.Input.GetKey(mKeyState.keyCode)) {
                         mKeyState.keyState = KeyState.Down;
                     }
@@ -120,5 +122,7 @@ namespace UIForia.Systems.Input {
         public bool IsKeyUpThisFrame(char character) {
             return (GetKeyState(character) & KeyState.UpThisFrame) != 0;
         }
+
     }
+
 }

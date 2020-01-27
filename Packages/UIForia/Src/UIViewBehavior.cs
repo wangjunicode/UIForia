@@ -38,7 +38,7 @@ namespace UIForia {
                 : GameApplication.CreateFromRuntimeTemplates(settings, camera, DoDependencyInjection);
             
         }
-
+ 
         // optional!
         private void DoDependencyInjection(UIElement element) {
             // DiContainer.Inject(element);

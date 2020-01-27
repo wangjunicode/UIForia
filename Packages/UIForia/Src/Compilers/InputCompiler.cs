@@ -5,6 +5,7 @@ using UIForia.Attributes;
 using UIForia.Exceptions;
 using UIForia.UIInput;
 using UIForia.Util;
+using UnityEngine;
 
 namespace UIForia.Compilers {
 
@@ -24,17 +25,12 @@ namespace UIForia.Compilers {
         public InputHandlerDescriptor descriptor;
         public MethodInfo methodInfo;
         public bool useEventParameter;
+        public KeyCode keyCode;
+        public char character;
         public Type parameterType;
 
     }
-
-    public struct DragDescriptor {
-
-        public InputEventType eventType;
-        public InputHandlerDescriptor descriptor;
-
-    }
-
+    
     public static class InputCompiler {
 
         private static readonly Dictionary<Type, StructList<InputHandler>> s_Cache = new Dictionary<Type, StructList<InputHandler>>();
@@ -168,7 +164,7 @@ namespace UIForia.Compilers {
 
                 GetMouseEventHandlers(methodInfo, parameters, customAttributes, handlers);
 
-                // GetKeyboardEventHandlers(methodInfo, handlers);
+                GetKeyboardEventHandlers(methodInfo, parameters, customAttributes, handlers);
 
                 GetDragCreators(methodInfo, parameters, customAttributes, handlers);
             }
@@ -220,6 +216,33 @@ namespace UIForia.Compilers {
             }
         }
 
+        private static void GetKeyboardEventHandlers(MethodInfo methodInfo, ParameterInfo[] parameters, object[] customAttributes, StructList<InputHandler> handlers) {
+            for (int i = 0; i < customAttributes.Length; i++) {
+                KeyboardInputBindingAttribute attr = customAttributes[i] as KeyboardInputBindingAttribute;
+
+                if (attr == null) {
+                    continue;
+                }
+
+                if (parameters.Length > 1 || (parameters.Length > 1 && parameters[0].ParameterType != typeof(KeyboardInputEvent))) {
+                    throw new Exception("Method with attribute " + customAttributes.GetType().Name + " must take 0 arguments or 1 argument of type " + nameof(KeyboardInputEvent));
+                }
+
+                handlers.Add(new InputHandler() {
+                    descriptor = new InputHandlerDescriptor() {
+                        eventPhase = attr.keyEventPhase,
+                        modifiers = attr.modifiers,
+                        requiresFocus = false,
+                        handlerType = attr.eventType
+                    },
+                    keyCode = attr.key,
+                    character = attr.character,
+                    methodInfo = methodInfo,
+                    useEventParameter = parameters.Length == 1
+                });
+            }
+        }
+        
         private static void GetMouseEventHandlers(MethodInfo methodInfo, ParameterInfo[] parameters, object[] customAttributes, StructList<InputHandler> handlers) {
             for (int i = 0; i < customAttributes.Length; i++) {
                 MouseEventHandlerAttribute attr = customAttributes[i] as MouseEventHandlerAttribute;

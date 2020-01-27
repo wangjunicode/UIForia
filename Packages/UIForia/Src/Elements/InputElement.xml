@@ -41,9 +41,9 @@
     <Contents style="input">
         <Text x-id="input-element-text" style="input-element-text"/>
 
-        <DefineSlot slot:name="placeholder" style="placeholder-slot" if="ShowPlaceholder">
-            <Text style="placeholder" x-id="placeholder-text">{placeholder}</Text>
-        </DefineSlot>
+<!--        <DefineSlot slot:name="placeholder" style="placeholder-slot" if="ShowPlaceholder">-->
+<!--            <Text style="placeholder" x-id="placeholder-text">{placeholder}</Text>-->
+<!--        </DefineSlot>-->
     </Contents>
 
 </UITemplate>

@@ -16,7 +16,7 @@ namespace UIForia.Compilers.Style {
         private int importedStyleGroupCount;
         public string importResolutionPath; // hack for now that can handle reading imports from streaming assets
 
-        public StyleSheetImporter(string basePath, ResourceManager resourceManager = null) {
+        public StyleSheetImporter(string basePath, ResourceManager resourceManager) {
             this.basePath = basePath;
             this.compiler = new StyleSheetCompiler(this, resourceManager);
             this.cachedStyleSheets = new Dictionary<string, StyleSheet>();
@@ -73,14 +73,12 @@ namespace UIForia.Compilers.Style {
         }
 
         public AnimationData GetAnimation(string fileName, string animationName) {
-            var sheet = cachedStyleSheets[fileName];
-            if (sheet == null) {
-                return default;
+            if (cachedStyleSheets.TryGetValue(fileName, out StyleSheet sheet)) {
+                sheet.TryGetAnimationData(animationName, out AnimationData retn);
+                return retn;
             }
 
-            sheet.TryGetAnimationData(animationName, out AnimationData retn);
-
-            return retn;
+            return default;
         }
 
         public StyleSheet[] GetImportedStyleSheets() {

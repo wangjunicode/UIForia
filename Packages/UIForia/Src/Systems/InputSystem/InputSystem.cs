@@ -287,8 +287,7 @@ namespace UIForia.Systems {
                     inputEventType = InputEventType.KeyUp;
                 }
 
-                ProcessKeyboardEvent(keyCodeState.keyCode, inputEventType, keyCodeState.character,
-                    m_KeyboardState.modifiersThisFrame);
+                ProcessKeyboardEvent(keyCodeState.keyCode, inputEventType, keyCodeState.character, m_KeyboardState.modifiersThisFrame);
             }
         }
 
@@ -486,7 +485,6 @@ namespace UIForia.Systems {
         }
 
         private void BeginDrag() {
-
             if (m_CurrentDragEvent != null) {
                 return;
             }
@@ -595,7 +593,6 @@ namespace UIForia.Systems {
                 }
 
                 for (int j = 0; j < element.inputHandlers.eventHandlers.size; j++) {
-
                     ref InputHandlerGroup.HandlerData handler = ref element.inputHandlers.eventHandlers.array[j];
 
                     if (handler.eventType != eventType) {
@@ -615,14 +612,12 @@ namespace UIForia.Systems {
                     if (m_CurrentDragEvent.IsCanceled || m_EventPropagator.shouldStopPropagation) {
                         break;
                     }
-
                 }
 
                 if (m_CurrentDragEvent.IsCanceled || m_EventPropagator.shouldStopPropagation) {
                     captureList.Release();
                     return;
                 }
-
             }
 
             for (int i = 0; i < captureList.size; i++) {
@@ -634,7 +629,6 @@ namespace UIForia.Systems {
             }
 
             captureList.Release();
-
         }
 
         public void OnReset() {
@@ -729,12 +723,12 @@ namespace UIForia.Systems {
             }
         }
 
-        // todo -- i think this is wrong, check this again
         protected void ProcessKeyboardEvent(KeyCode keyCode, InputEventType eventType, char character, KeyboardModifiers modifiers) {
             GenericInputEvent keyEvent = new GenericInputEvent(eventType, modifiers, m_EventPropagator, character, keyCode, m_FocusedElement != null);
+
             if (m_FocusedElement == null) {
                 m_KeyboardEventTree.ConditionalTraversePreOrder(keyEvent, (item, evt) => {
-                    if (m_EventPropagator.shouldStopPropagation) return false;
+                    if (evt.propagator.shouldStopPropagation) return false;
 
                     UIElement element = (UIElement) item.Element;
                     if (element.isDestroyed || element.isDisabled) {
@@ -744,13 +738,18 @@ namespace UIForia.Systems {
                     InputHandlerGroup evtHandlerGroup = item.inputHandlers;
 
                     for (int i = 0; i < evtHandlerGroup.eventHandlers.size; i++) {
-                        if (m_EventPropagator.shouldStopPropagation) break;
-                        Action<GenericInputEvent> keyHandler = evtHandlerGroup.eventHandlers[i].handlerFn as Action<GenericInputEvent>;
+                        if (evt.propagator.shouldStopPropagation) break;
+                        ref InputHandlerGroup.HandlerData handler = ref evtHandlerGroup.eventHandlers.array[i];
+                        if (handler.eventType != evt.type) {
+                            continue;
+                        }
+
+                        Action<GenericInputEvent> keyHandler = handler.handlerFn as Action<GenericInputEvent>;
                         Debug.Assert(keyHandler != null, nameof(keyHandler) + " != null");
-                        keyHandler.Invoke(keyEvent);
+                        keyHandler.Invoke(evt);
                     }
 
-                    return !m_EventPropagator.shouldStopPropagation;
+                    return !evt.propagator.shouldStopPropagation;
                 });
             }
 
@@ -758,6 +757,11 @@ namespace UIForia.Systems {
                 InputHandlerGroup evtHandlerGroup = m_FocusedElement.inputHandlers;
                 for (int i = 0; i < evtHandlerGroup.eventHandlers.size; i++) {
                     if (m_EventPropagator.shouldStopPropagation) break;
+                    ref InputHandlerGroup.HandlerData handler = ref evtHandlerGroup.eventHandlers.array[i];
+                    if (handler.eventType != keyEvent.type) {
+                        continue;
+                    }
+
                     Action<GenericInputEvent> keyHandler = evtHandlerGroup.eventHandlers[i].handlerFn as Action<GenericInputEvent>;
                     Debug.Assert(keyHandler != null, nameof(keyHandler) + " != null");
                     keyHandler.Invoke(keyEvent);

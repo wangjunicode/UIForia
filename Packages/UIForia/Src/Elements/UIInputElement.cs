@@ -503,7 +503,7 @@ namespace UIForia.Elements {
 
         [UsedImplicitly]
         [OnMouseClick]
-        protected void OnMouseClick(MouseInputEvent evt) {
+        public void OnMouseClick(MouseInputEvent evt) {
             bool hadFocus = hasFocus;
 
             if (evt.IsConsumed || (!hasFocus && !Input.RequestFocus(this))) {
@@ -534,7 +534,7 @@ namespace UIForia.Elements {
 
         [UsedImplicitly]
         [OnKeyDownWithFocus]
-        protected void EnterText(KeyboardInputEvent evt) {
+        public void EnterText(KeyboardInputEvent evt) {
             if (evt.ctrl) {
                 return;
             }
@@ -592,7 +592,7 @@ namespace UIForia.Elements {
 
         [UsedImplicitly]
         [OnKeyDownWithFocus(KeyCode.Home)]
-        protected void HandleHome(KeyboardInputEvent evt) {
+        public void HandleHome(KeyboardInputEvent evt) {
             evt.StopPropagation();
             if (HasDisabledAttr()) return;
             selectionRange = textElement.textInfo.MoveToStartOfLine(selectionRange, evt.shift);
@@ -602,7 +602,7 @@ namespace UIForia.Elements {
 
         [UsedImplicitly]
         [OnKeyDownWithFocus(KeyCode.End)]
-        protected void HandleEnd(KeyboardInputEvent evt) {
+        public void HandleEnd(KeyboardInputEvent evt) {
             evt.StopPropagation();
             if (HasDisabledAttr()) return;
             selectionRange = textElement.textInfo.MoveToEndOfLine(selectionRange, evt.shift);
@@ -612,7 +612,7 @@ namespace UIForia.Elements {
 
         [UsedImplicitly]
         [OnKeyDownWithFocus(KeyCode.Backspace)]
-        protected void HandleBackspace(KeyboardInputEvent evt) {
+        public void HandleBackspace(KeyboardInputEvent evt) {
             evt.StopPropagation();
             if (HasDisabledAttr()) return;
             keyLockTimestamp = Time.unscaledTime;
@@ -623,7 +623,7 @@ namespace UIForia.Elements {
 
         [UsedImplicitly]
         [OnKeyHeldDownWithFocus(KeyCode.Backspace)]
-        protected void HandleBackspaceHeld(KeyboardInputEvent evt) {
+        public void HandleBackspaceHeld(KeyboardInputEvent evt) {
             evt.StopPropagation();
             if (!CanTriggerHeldKey()) return;
             timestamp = Time.unscaledTime;
@@ -634,7 +634,7 @@ namespace UIForia.Elements {
 
         [UsedImplicitly]
         [OnKeyHeldDownWithFocus(KeyCode.Delete)]
-        protected void HandleDeleteHeld(KeyboardInputEvent evt) {
+        public void HandleDeleteHeld(KeyboardInputEvent evt) {
             evt.StopPropagation();
             if (!CanTriggerHeldKey()) return;
             timestamp = Time.unscaledTime;
@@ -645,7 +645,7 @@ namespace UIForia.Elements {
 
         [UsedImplicitly]
         [OnKeyDownWithFocus(KeyCode.Delete)]
-        protected void HandleDelete(KeyboardInputEvent evt) {
+        public void HandleDelete(KeyboardInputEvent evt) {
             evt.StopPropagation();
             if (HasDisabledAttr()) return;
             keyLockTimestamp = Time.unscaledTime;
@@ -659,7 +659,7 @@ namespace UIForia.Elements {
 
         [UsedImplicitly]
         [OnKeyHeldDownWithFocus(KeyCode.LeftArrow)]
-        protected void HandleLeftArrowHeld(KeyboardInputEvent evt) {
+        public void HandleLeftArrowHeld(KeyboardInputEvent evt) {
             evt.StopPropagation();
             if (!CanTriggerHeldKey()) return;
 
@@ -671,7 +671,7 @@ namespace UIForia.Elements {
 
         [UsedImplicitly]
         [OnKeyDownWithFocus(KeyCode.LeftArrow)]
-        protected void HandleLeftArrowDown(KeyboardInputEvent evt) {
+        public void HandleLeftArrowDown(KeyboardInputEvent evt) {
             evt.StopPropagation();
 
             if (HasDisabledAttr()) return;
@@ -684,7 +684,7 @@ namespace UIForia.Elements {
 
         [UsedImplicitly]
         [OnKeyHeldDownWithFocus(KeyCode.RightArrow)]
-        protected void HandleRightArrowHeld(KeyboardInputEvent evt) {
+        public void HandleRightArrowHeld(KeyboardInputEvent evt) {
             evt.StopPropagation();
 
             if (!CanTriggerHeldKey()) return;
@@ -698,7 +698,7 @@ namespace UIForia.Elements {
 
         [UsedImplicitly]
         [OnKeyDownWithFocus(KeyCode.RightArrow)]
-        protected void HandleRightArrow(KeyboardInputEvent evt) {
+        public void HandleRightArrow(KeyboardInputEvent evt) {
             evt.StopPropagation();
 
             if (HasDisabledAttr()) return;
@@ -712,7 +712,7 @@ namespace UIForia.Elements {
 
         [UsedImplicitly]
         [OnKeyDownWithFocus(KeyCode.C, KeyboardModifiers.Control)]
-        protected void HandleCopy(KeyboardInputEvent evt) {
+        public void HandleCopy(KeyboardInputEvent evt) {
             if (evt.onlyControl && selectionRange.HasSelection) {
                 clipboard = textElement.textInfo.GetSelectedString(selectionRange);
                 evt.StopPropagation();
@@ -721,7 +721,7 @@ namespace UIForia.Elements {
 
         [UsedImplicitly]
         [OnKeyDownWithFocus(KeyCode.X, KeyboardModifiers.Control)]
-        protected void HandleCut(KeyboardInputEvent evt) {
+        public void HandleCut(KeyboardInputEvent evt) {
             if (GetAttribute("disabled") != null) return;
             if (evt.onlyControl && selectionRange.HasSelection) {
                 clipboard = textElement.textInfo.GetSelectedString(selectionRange);
@@ -732,7 +732,7 @@ namespace UIForia.Elements {
 
         [UsedImplicitly]
         [OnKeyDownWithFocus(KeyCode.V, KeyboardModifiers.Control)]
-        protected void HandlePaste(KeyboardInputEvent evt) {
+        public void HandlePaste(KeyboardInputEvent evt) {
             if (GetAttribute("disabled") != null) return;
             if (evt.onlyControl) {
                 HandleCharactersEntered(clipboard);
@@ -742,7 +742,7 @@ namespace UIForia.Elements {
 
         [UsedImplicitly]
         [OnKeyDownWithFocus(KeyCode.A, KeyboardModifiers.Control)]
-        protected void HandleSelectAll(KeyboardInputEvent evt) {
+        public void HandleSelectAll(KeyboardInputEvent evt) {
             if (GetAttribute("disabled") != null) return;
             if (evt.onlyControl) {
                 selectionRange = new SelectionRange(0, int.MaxValue);
@@ -770,7 +770,7 @@ namespace UIForia.Elements {
 
         [UsedImplicitly]
         [OnDragCreate]
-        protected TextSelectDragEvent CreateDragEvent(MouseInputEvent evt) {
+        public TextSelectDragEvent CreateDragEvent(MouseInputEvent evt) {
             if (evt.IsMouseRightDown) return null;
 
             if (!hasFocus) {
@@ -813,7 +813,7 @@ namespace UIForia.Elements {
             onBlur?.Invoke(new BlurEvent());
         }
 
-        protected class TextSelectDragEvent : DragEvent {
+        public class TextSelectDragEvent : DragEvent {
 
             protected readonly UIInputElement _uiInputElement;
 

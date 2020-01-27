@@ -20,7 +20,7 @@ namespace UIForia.Compilers.Style {
 
         private static readonly UIStyle s_ScratchStyle = new UIStyle();
 
-        public StyleSheetCompiler(StyleSheetImporter styleSheetImporter, ResourceManager resourceManager = null) {
+        public StyleSheetCompiler(StyleSheetImporter styleSheetImporter, ResourceManager resourceManager) {
             this.styleSheetImporter = styleSheetImporter;
             this.resourceManager = resourceManager;
             this.scratchGroupList = new LightList<UIStyleGroup>(32);

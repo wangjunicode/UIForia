@@ -1378,7 +1378,7 @@ namespace UIForia.Compilers.Style {
                         throw new CompileException(urlNode, "SpriteAtlas access is coming soon!");
                     }
 
-                    return context.resourceManager.GetTexture(assetInfo.Path);
+                    return context.resourceManager?.GetTexture(assetInfo.Path);
                 case StyleLiteralNode literalNode:
                     string value = literalNode.rawValue;
                     if (value == "unset" || value == "default" || value == "null") {

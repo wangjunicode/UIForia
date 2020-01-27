@@ -894,7 +894,7 @@ namespace UIForia.Compilers {
             lateCompiler.Setup(rootType, elementType);
         }
 
-        private static void InitializeAttributes(CompilationContext ctx, TemplateNode template, StructList<AttributeDefinition> attributes) {
+        private static void InitializeAttributes(CompilationContext ctx, StructList<AttributeDefinition> attributes) {
             if (attributes == null) return;
 
             int attrIdx = 0;
@@ -902,7 +902,7 @@ namespace UIForia.Compilers {
             for (int i = 0; i < attributes.size; i++) {
                 ref AttributeDefinition attr = ref attributes.array[i];
 
-                if (template.attributes[i].type == AttributeType.Attribute) {
+                if (attr.type == AttributeType.Attribute) {
                     // targetElement_x.attributeList.array[x] = new ElementAttribute("key", "value"); will be empty string for attributes that are bound
                     MemberExpression listAccess = Expression.MakeMemberAccess(ctx.ElementExpr, s_ElementAttributeList);
                     MemberExpression arrayAccess = Expression.MakeMemberAccess(listAccess, s_StructList_ElementAttr_Array);
@@ -975,7 +975,7 @@ namespace UIForia.Compilers {
 
                 InitializeCompilers(ctx.namespaces, ctx.templateRootNode.ElementType, templateNode.processedType.rawType);
 
-                InitializeAttributes(ctx, templateNode, attributes);
+                InitializeAttributes(ctx, attributes);
 
                 CompileExposedData(exposedVariableData, ref contextModifications);
 
@@ -2594,7 +2594,7 @@ namespace UIForia.Compilers {
 
             for (int i = 0; i < arguments.Length; i++) {
                 if (resolvedTypes[i] == null) {
-                    throw CompileException.UnresolvedGenericElement(processedType);
+                    throw CompileException.UnresolvedGenericElement(processedType, templateNode.TemplateNodeDebugData);
                 }
             }
 

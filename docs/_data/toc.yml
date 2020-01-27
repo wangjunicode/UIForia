@@ -28,8 +28,6 @@
           url: "docs/style"
         - title: "Style Properties"
           url: "docs/style/style-properties"
-        - title: "Units - %, px, vw etc."
-          url: "docs/style/style-units"
     - title: "Built-in elements"
       url: "docs/elements"
       children:

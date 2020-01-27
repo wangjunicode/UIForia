@@ -13,28 +13,7 @@ tags:
 # Alignments
 Alignments change the position of elements after they have been laid out. You can adjust an element's
 position by absolute `px`, relative `%` and more. Here's a list of all units:
-
-| OffsetMeasurementUnit | Description                                                                                                             |
-|----------------------:|:------------------------------------------------------------------------------------------------------------------------|
-|                    px | just plain pixels                                                                                                       |
-|                    em | the current font-size                                                                                                   |
-|                     w | the **actual width** of the element, contains the element's margin                                                      |
-|                     h | the **actual height** of the element, contains the element's margin                                                     |
-|                   alw | the **allocated width**, which the element could grow into                                                              |
-|                   alh | the **allocated height**, which the element could grow into                                                             |
-|                    cw | the element's **content width**, which is the space the element's children take up **excluding** their **margin**       |
-|                    ch | the element's **content height**, which is the space the element's children take up **excluding** their **margin**      |
-|                   caw | the element's **content area width**, which is the space the element's children take up **including** their **margin**  |
-|                   cah | the element's **content area height**, which is the space the element's children take up **including** their **margin** |
-|                    pw | the width of the parent, **includes** its **padding** and **border**                                                    |
-|                    ph | the height of the parent, **includes** its **padding** and **border**                                                   |
-|                  pcaw | the width of the parent's content area, **excludes** its **padding** and **border**                                     |
-|                  pcah | the height of the parent's content area, **excludes** its **padding** and **border**                                    |
-|                    vw | the width of the view the element is in                                                                                 |
-|                    vh | the height of the view the element is in                                                                                |
-|                    sw | the application's screen width                                                                                          |
-|                    sh | the application's screen height                                                                                         |
-|                     % | a value between 0 and 100, relative to the property it is used for                                                      |
+{% include offsetmeasurements.md %}
 
 Except for `px` and `%` all units expect the fractional notation. `0.5w` is 50% of the actual width for example.
 
@@ -46,16 +25,7 @@ to try out a live demo. You'll find it under the menu item `Alignment Demo`.
 AlignmentTarget[X|Y] = *AlignmentTarget ...
 ```
  
-The AlignmentTarget properties define the box, which the AlignmentOrigin will be relative to.
-Here's a list currently supported targets:
-
-|   AlignmentTarget | Description                                                                                                     |
-|------------------:|:----------------------------------------------------------------------------------------------------------------|
-|         LayoutBox | (default) The origin will be relative to the element's [layout box](/docs/layout/#layoutbox-and-allocated-size) |
-|            Parent | the parent's box includes the parent's border and padding                                                       |
-| ParentContentArea | the parent's content area is the space inside the padding, the [content box](/docs/layout/#box-model)           |
-|              View | the element's parent view                                                                                       |
-|            Screen | the application's available screen space                                                                        |
+{% include alignment-target.md %}
 
 Just setting the target will move the element to the origin of the targeted box. X and Y targets may be different and
 will be calculated independently. Setting the AlignmentTarget of an element and all its children to `Parent` will make

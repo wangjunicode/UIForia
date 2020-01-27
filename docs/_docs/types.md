@@ -43,14 +43,7 @@ See a description of our [box model](/docs/layout/#box-model) for more informati
 | None   | Opt out of input detection; will fire no hover, click or any other mouse / touch event. Applies to all children as well. |
 
 ## AlignmentTarget
-
-| value             | description                                                                            |
-|:------------------|:---------------------------------------------------------------------------------------|
-| LayoutBox         | the default; target the layout box that has been assigned to the element by its parent |
-| Parent            | Target the parent's layout box.                                                        |
-| ParentContentArea | Target the parent's [content box](/docs/layout/#box-model).                            |
-| View              | Target the view. Does not affect parent transforms!                                    |
-| Screen            | Target the screen. Does not affect parent transforms!                                  |
+{% include alignment-target.md %}
 
 ## AlignmentDirection
 
@@ -86,4 +79,38 @@ int property values like `1_000`.
 Same as with int there's no underscore delimiter. The trailing `f` is not required.
 
 ### `string`
-They have to be on a single line and be surrounded by quotation marks `"string"` 
+They have to be on a single line and be surrounded by quotation marks `"string"`
+
+## Units
+### UIMeasurement 
+Used for things that need to measured and can relate to other element sizes.
+ * `Pixel`  in style sheets: `px` -- one device pixel
+ * `ParentContentArea` in style sheets: `pca` The measure of the parents size minus it's padding and border
+ * `ParentSize` in style sheets: `psz` The total measure of the parent's size
+ * `Em` in style sheets: `em` the em size of the current font applied to the element
+ * `Content` in style sheets: `cnt` the size of the element's content
+ * `ViewWidth` in style sheets: `vw` the width of the root element in the element's hierarchy
+ * `ViewHeight` in style sheets: `vh` the height of the root element in the element's hierarchy
+ 
+### UIFixedLength
+Used for tings that have lengths relative to an element.
+ * `Pixel`  in style sheets: `px` -- one device pixel
+ * `Percent` in style sheets: `%` the percentage of an element's size on the related axis
+ * `ViewWidth` in style sheets: `vw` the width of the root element in the element's hierarchy
+ * `ViewHeight` in style sheets: `vh` the height of the root element in the element's hierarchy
+ * `Em` in style sheets: `em` the em size of the current font applied to the element
+
+### GridTemplate
+Used for defining grid layouts.
+ * `Pixel`  in style sheets: `px` -- one device pixel
+ * `MaxContent` in style sheets: `mx` the max of the sizes of all elements in a given row or column
+ * `MinContent` in style sheets: `mn` the min of the sizes of all elements in a given row or column
+ * `ViewWidth` in style sheets: `vw` the width of the root element in the element's hierarchy
+ * `ViewHeight` in style sheets: `vh` the height of the root element in the element's hierarchy
+ * `Em` in style sheets: `em` the em size of the current font applied to the element
+ * `FractionalRemaining` in style sheets: `fr` a fractional portion of the unallocated space in a row or column
+ * `ParentContentArea` in style sheets: `pca` The measure of the parents size minus it's padding and border
+ * `ParentSize` in style sheets: `psz` The total measure of the parent's size
+
+### OffsetMeasurement
+{% include offsetmeasurements.md %} 

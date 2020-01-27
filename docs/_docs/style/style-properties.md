@@ -29,7 +29,7 @@ This is how the values are mapped to the sides:
     - left
 
 Properties expect different types as values, so throughout this document you'll find quick links
-to their type definitions like these: <button class="api-button">[UIFixedLength](style-units#uifixedlength)</button>
+to their type definitions like these: <button class="api-button">[UIFixedLength](/docs/types#uifixedlength)</button>
 If there are big differences to their `C#` counterpart both notations will be described in the type definition.
 Enum types map 1:1 to style property values, so you'll only find a table that lists all values
 like we did for [Overflow](/docs/types#overflow).
@@ -88,7 +88,7 @@ Tints the background image without affecting the background color. Accepts a col
 Apply this property to `<Image>` elements to tint your image.
 
 ### `BackgroundImageOffset`
-<button class="api-button">[UIFixedLength](style-units#uifixedlength)</button>
+<button class="api-button">[UIFixedLength](/docs/types#uifixedlength)</button>
  
 Offset the texture coordinates used for the background image
 ````c#
@@ -100,7 +100,7 @@ style MyStyle {
 ````  
 
 ### `BackgroundImageScale`
-<button class="api-button">[UIFixedLength](style-units#uifixedlength)</button>
+<button class="api-button">[UIFixedLength](/docs/types#uifixedlength)</button>
  
 Scale the texture coordinates used for the background image. Used to tile the image if not part of a sprite sheet
 ```` c#
@@ -112,7 +112,7 @@ style MyStyle {
 ````
 
 ### `BackgroundImageRotation`
-<button class="api-button">[UIFixedLength](style-units#uifixedlength)</button>
+<button class="api-button">[UIFixedLength](/docs/types#uifixedlength)</button>
  
 Rotate the texture coordinates used for the background image, in degrees.
 ````c#
@@ -129,7 +129,7 @@ Renders an image on a Tilemap's x- or y-axis ([see Unity Tilemap](https://docs.u
 ## Border  
 
 ### `Border`
-<button class="api-button">[UIFixedLength](style-units#uifixedlength)</button>
+<button class="api-button">[UIFixedLength](/docs/types#uifixedlength)</button>
  
 Sets the border size on an element. Supports the 1-4 parameter shorthand for setting top, right, bottom and left values.
 
@@ -137,16 +137,16 @@ Sets the border size on an element. Supports the 1-4 parameter shorthand for set
 ``` Border = 5px 1px; // sets a 5px border top and bottom and a 1px border left and right ```
 
 ### `BorderTop`
-<button class="api-button">[UIFixedLength](style-units#uifixedlength)</button>
+<button class="api-button">[UIFixedLength](/docs/types#uifixedlength)</button>
 
 ### `BorderRight`
-<button class="api-button">[UIFixedLength](style-units#uifixedlength)</button>
+<button class="api-button">[UIFixedLength](/docs/types#uifixedlength)</button>
 
 ### `BorderBottom`
-<button class="api-button">[UIFixedLength](style-units#uifixedlength)</button>
+<button class="api-button">[UIFixedLength](/docs/types#uifixedlength)</button>
 
 ### `BorderLeft`
-<button class="api-button">[UIFixedLength](style-units#uifixedlength)</button>
+<button class="api-button">[UIFixedLength](/docs/types#uifixedlength)</button>
 
 ### `BorderColor` : [Color](/docs/misc#list-of-all-supported-colors)
 Sets the color of the border for all sides. Also supports the 1-4 value shorthand.
@@ -161,7 +161,7 @@ Border = red green rgba(200, 200, 0, 255) #facabf; // to set a different color o
 #### `BorderColorLeft` : [Color](/docs/misc#list-of-all-supported-colors)
 
 ### `BorderRadius`
-<button class="api-button">[UIFixedLength](style-units#uifixedlength)</button>
+<button class="api-button">[UIFixedLength](/docs/types#uifixedlength)</button>
  
 Makes the border round on the corners. Supports the 1-4 property shorthand.
 ```
@@ -169,32 +169,32 @@ BorderRadius = 10px 50%; // top-left and bottom-right: 10px; bottom-left and top
 ```
 
 #### `BorderRadiusTopLeft`
-<button class="api-button">[UIFixedLength](style-units#uifixedlength)</button>
+<button class="api-button">[UIFixedLength](/docs/types#uifixedlength)</button>
  
 #### `BorderRadiusTopRight`
-<button class="api-button">[UIFixedLength](style-units#uifixedlength)</button>
+<button class="api-button">[UIFixedLength](/docs/types#uifixedlength)</button>
  
 #### `BorderRadiusBottomRight`
-<button class="api-button">[UIFixedLength](style-units#uifixedlength)</button>
+<button class="api-button">[UIFixedLength](/docs/types#uifixedlength)</button>
  
 #### `BorderRadiusBottomLeft`
-<button class="api-button">[UIFixedLength](style-units#uifixedlength)</button>
+<button class="api-button">[UIFixedLength](/docs/types#uifixedlength)</button>
  
 
 ### Corner Bevels
 Cuts off a corner in a 45 degree angle. The size you define is the length of the cutout from the corner.
  
 #### `CornerBevelTopLeft`
-<button class="api-button">[UIFixedLength](style-units#uifixedlength)</button>
+<button class="api-button">[UIFixedLength](/docs/types#uifixedlength)</button>
  
 #### `CornerBevelTopRight`
-<button class="api-button">[UIFixedLength](style-units#uifixedlength)</button>
+<button class="api-button">[UIFixedLength](/docs/types#uifixedlength)</button>
  
 #### `CornerBevelBottomLeft`
-<button class="api-button">[UIFixedLength](style-units#uifixedlength)</button>
+<button class="api-button">[UIFixedLength](/docs/types#uifixedlength)</button>
  
 #### `CornerBevelBottomRight`
-<button class="api-button">[UIFixedLength](style-units#uifixedlength)</button>
+<button class="api-button">[UIFixedLength](/docs/types#uifixedlength)</button>
  
 
 ## Alignments
@@ -204,19 +204,30 @@ There's an [extensive guide around alignments](/docs/alignments) for more detail
 Shorthand to set `AlignmentTargetX` and `AlignmentTargetY` to the same value.
 ### `AlignmentTargetX` : [AlignmentTarget](/docs/types#alignmenttarget)
 ### `AlignmentTargetY` : [AlignmentTarget](/docs/types#alignmenttarget)
+
 ### `AlignmentDirectionX` : [AlignmentDirection](/docs/types#alignmentdirection)
 ### `AlignmentDirectionY` : [AlignmentDirection](/docs/types#alignmentdirection)
-### `AlignmentOriginX` : [OffsetMeasurement](/docs/style/style-units#offsetmeasurement)
-### `AlignmentOriginY` : [OffsetMeasurement](/docs/style/style-units#offsetmeasurement)
-### `AlignmentOffsetX` : [OffsetMeasurement](/docs/style/style-units#offsetmeasurement)
-### `AlignmentOffsetY` : [OffsetMeasurement](/docs/style/style-units#offsetmeasurement)
+
+### `AlignmentOriginX` : [OffsetMeasurement](/docs/types#offsetmeasurement)
+### `AlignmentOriginY` : [OffsetMeasurement](/docs/types#offsetmeasurement)
+
+### `AlignmentOffsetX` : [OffsetMeasurement](/docs/types#offsetmeasurement)
+### `AlignmentOffsetY` : [OffsetMeasurement](/docs/types#offsetmeasurement)
 
 ### `AlignX`
+Shorthand to set all the horizontal alignment properties at once:
+`AlignX = AlignmentOriginX [AlignmentOffsetX] [AlignmentTargetX] [AlignmentDirectionX]`
+
 ### `AlignY`
+Shorthand to set all the vertical alignment properties at once:
+`AlignY = AlignmentOriginY [AlignmentOffsetY] [AlignmentTargetY] [AlignmentDirectionY]`
 
 ## Layout
 
-### `Layer` 
+### LayoutFit
+
+### LayoutFitHorizontal
+### LayoutFitVertical
 
 ### `LayoutBehavior` : [LayoutBehavior](structs.md)
 Set to `Ignored` to ignore the parent element's style 
@@ -224,27 +235,22 @@ Set to `Ignored` to ignore the parent element's style
 ### `LayoutType` : [LayoutType](structs.md)
 `Grid` or `Flex`  
 
-#### `Margin` : [UIMeasurement](style-units#uimeasurement) 
-Sets space around elements, outside of any defined borders.   
+### `Margin` : [UIMeasurement](/docs/types#uimeasurement) 
+1-4 parameter shorthand. Sets space around elements, outside of any defined borders.   
 
-#### `MarginTop` : [UIMeasurement](style-units#uimeasurement) 
+### `MarginTop` : [UIMeasurement](/docs/types#uimeasurement) 
 Sets the margin at the top.  
 
-#### `MarginBottom` : [UIMeasurement](style-units#uimeasurement) 
+### `MarginBottom` : [UIMeasurement](/docs/types#uimeasurement) 
 Sets the margin at the bottom.  
 
-#### `MarginLeft` : [UIMeasurement](style-units#uimeasurement) 
+### `MarginLeft` : [UIMeasurement](/docs/types#uimeasurement) 
 Sets the margin on the left.
   
-#### `MarginRight` : [UIMeasurement](style-units#uimeasurement) 
+### `MarginRight` : [UIMeasurement](/docs/types#uimeasurement) 
 Sets the margin on the right.    
-
-
-------------
   
-### Size
-  
-#### `PreferredSize` : [UIMeasurement](style-units#uimeasurement) 
+#### `PreferredSize` : [UIMeasurement](/docs/types#uimeasurement) 
 Sets the preferred size. 
 ```
 PreferredSize = 300px, 1cnt;  
@@ -253,24 +259,24 @@ PreferredSize = 1pca, 1.5em;
 sets the height to 1pca(parent's size minus its padding and border) and the width to 1.5em(size of current font applied to element)  
 ```
 
-#### `PreferredHeight` : [UIMeasurement](style-units#uimeasurement) 
+#### `PreferredHeight` : [UIMeasurement](/docs/types#uimeasurement) 
 Sets the preferred height.  
 
-#### `PreferredWidth` : [UIMeasurement](style-units#uimeasurement) 
+#### `PreferredWidth` : [UIMeasurement](/docs/types#uimeasurement) 
 Sets the preferred width.
  
-#### `MaxHeight` : [UIMeasurement](style-units#uimeasurement) 
+#### `MaxHeight` : [UIMeasurement](/docs/types#uimeasurement) 
 Sets the maximum height of an element.   
 
-#### `MaxWidth` : [UIMeasurement](style-units#uimeasurement)  
+#### `MaxWidth` : [UIMeasurement](/docs/types#uimeasurement)  
 Sets the maximum width of an element.   
   
 If the content is larger than the maximum height, it will overflow. 
    
-#### `MinHeight` : [UIMeasurement](style-units#uimeasurement)   
+#### `MinHeight` : [UIMeasurement](/docs/types#uimeasurement)   
 Sets the minimum height of an element. 
 
-#### `MinWidth` : [UIMeasurement](style-units#uimeasurement)  
+#### `MinWidth` : [UIMeasurement](/docs/types#uimeasurement)  
 Sets the minimum width of an element 
   
 If the content is smaller than the minimum height, the minimum height will be applied.
@@ -299,7 +305,7 @@ Opacity will automatically apply to the parent's child elements unless specified
 
 
 #### `Padding`
-<button class="api-button">[UIFixedLength](style-units#uifixedlength)</button>
+<button class="api-button">[UIFixedLength](/docs/types#uifixedlength)</button>
    
 Sets the padding of an element 
 ```
@@ -309,22 +315,22 @@ Padding = 5px, 6px // top and bottom padding are 5 px, right and left padding ar
 ```
   
 #### `PaddingTop`
-<button class="api-button">[UIFixedLength](style-units#uifixedlength)</button>
+<button class="api-button">[UIFixedLength](/docs/types#uifixedlength)</button>
    
 Sets the padding at the top of the element.
   
 #### `PaddingBottom`
-<button class="api-button">[UIFixedLength](style-units#uifixedlength)</button>
+<button class="api-button">[UIFixedLength](/docs/types#uifixedlength)</button>
  
 Sets the padding at the bottom of the element.
   
 #### `PaddingLeft`
-<button class="api-button">[UIFixedLength](style-units#uifixedlength)</button>
+<button class="api-button">[UIFixedLength](/docs/types#uifixedlength)</button>
   
 Sets the padding on the left side of the element.
   
 #### `PaddingRight`
-<button class="api-button">[UIFixedLength](style-units#uifixedlength)</button>
+<button class="api-button">[UIFixedLength](/docs/types#uifixedlength)</button>
  
 Sets the padding on the right side of an element.
   
@@ -498,7 +504,7 @@ Sets the specified font.
 `TextFontAsset = url("Fonts/Burbank");`
 
 #### `TextFontSize`
-<button class="api-button">[UIFixedLength](style-units#uifixedlength)</button>
+<button class="api-button">[UIFixedLength](/docs/types#uifixedlength)</button>
 
 Sets the size of the font  
 `TextFontSize = 10px;`
@@ -568,17 +574,17 @@ Transform can be used to rotate, scale, pivot, or position an element by overwri
 #### `TransformBehaviorY` : [TransformBehavior](/docs/misc#types)
 
 #### `TransformPivot`
-<button class="api-button">[UIFixedLength](style-units#uifixedlength)</button>
+<button class="api-button">[UIFixedLength](/docs/types#uifixedlength)</button>
 
 
 #### `TransformPivotX`
-<button class="api-button">[UIFixedLength](style-units#uifixedlength)</button>
+<button class="api-button">[UIFixedLength](/docs/types#uifixedlength)</button>
 
      
 `TransformPivotX = 1,1`
   
 #### `TransformPivotY`
-<button class="api-button">[UIFixedLength](style-units#uifixedlength)</button>
+<button class="api-button">[UIFixedLength](/docs/types#uifixedlength)</button>
 
 
 #### `TransformPosition` : [TransformOffset](/docs/misc#types)

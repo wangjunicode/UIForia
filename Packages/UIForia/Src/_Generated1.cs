@@ -61,6 +61,13 @@ namespace UIForia.Rendering {
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ClipBounds, (int)value), state); }
         }
         
+        public UIForia.UIInput.PointerEvents PointerEvents {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.PointerEvents, state).AsPointerEvents; }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.PointerEvents, (int)value), state); }
+        }
+        
         public UnityEngine.Color BackgroundColor {
             [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.BackgroundColor, state).AsColor; }
@@ -988,6 +995,13 @@ namespace UIForia.Rendering {
             get { return (UIForia.Rendering.ClipBounds)FindEnumProperty(StylePropertyId.ClipBounds); }
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.ClipBounds, (int)value)); }
+        }
+            
+        public UIForia.UIInput.PointerEvents PointerEvents {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return (UIForia.UIInput.PointerEvents)FindEnumProperty(StylePropertyId.PointerEvents); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.PointerEvents, (int)value)); }
         }
             
         public UnityEngine.Color BackgroundColor {
@@ -1938,6 +1952,16 @@ namespace UIForia.Rendering {
                     if (propertyMap.TryGetValue((int) StylePropertyId.ClipBounds, out property)) return property.AsClipBounds;
                     if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.ClipBounds), out property)) return property.AsClipBounds;
                     return DefaultStyleValues_Generated.ClipBounds;
+                }
+            }
+
+            public UIForia.UIInput.PointerEvents PointerEvents { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.PointerEvents, out property)) return property.AsPointerEvents;
+                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.PointerEvents), out property)) return property.AsPointerEvents;
+                    return DefaultStyleValues_Generated.PointerEvents;
                 }
             }
 
@@ -3149,6 +3173,14 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.ClipBounds, state).AsClipBounds;
         }
         
+        public void SetPointerEvents(in UIForia.UIInput.PointerEvents? value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.PointerEvents, (int)value), state);
+        }
+
+        public UIForia.UIInput.PointerEvents GetPointerEvents(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.PointerEvents, state).AsPointerEvents;
+        }
+        
         public void SetBackgroundColor(in UnityEngine.Color? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.BackgroundColor, value), state);
         }
@@ -4160,6 +4192,8 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.ClipBehavior, (int)ClipBehavior);
 				case StylePropertyId.ClipBounds:
 					 return new StyleProperty(StylePropertyId.ClipBounds, (int)ClipBounds);
+				case StylePropertyId.PointerEvents:
+					 return new StyleProperty(StylePropertyId.PointerEvents, (int)PointerEvents);
 				case StylePropertyId.BackgroundColor:
 					 return new StyleProperty(StylePropertyId.BackgroundColor, BackgroundColor);
 				case StylePropertyId.BackgroundTint:
@@ -4521,6 +4555,7 @@ namespace UIForia.Rendering {
                     case StylePropertyId.Opacity: return true;
                     case StylePropertyId.ClipBehavior: return true;
                     case StylePropertyId.ClipBounds: return true;
+                    case StylePropertyId.PointerEvents: return true;
                     case StylePropertyId.TextColor: return true;
                     case StylePropertyId.TextFontAsset: return true;
                     case StylePropertyId.TextFontSize: return true;

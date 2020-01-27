@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Documentation {
     
-    [Template("Documentation/Features/InputDemo")]
+    [Template("Documentation/Features/InputDemo.xml")]
     public class InputDemo : UIElement {
         
         public string tv = "my string to read my string to read my string to read my string to read my string to read";

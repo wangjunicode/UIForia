@@ -200,8 +200,8 @@ namespace UIForia.Exceptions {
             return new CompileException($"Unable to find a field or property called `{fieldOrPropertyName}` on type {type}");
         }
 
-        public static CompileException UnresolvedGenericElement(ProcessedType processedType) {
-            return new CompileException($"Unable to resolve the concrete type for " + processedType.rawType);
+        public static CompileException UnresolvedGenericElement(ProcessedType processedType, TemplateNodeDebugData data) {
+            return new CompileException($"Unable to resolve the concrete type for " + processedType.rawType + $"\n\nFailed parsing {data.tagName} at {data.fileName}:{data.lineInfo}\n");
         }
 
         public static CompileException GenericElementMissingResolver(ProcessedType processedType) {

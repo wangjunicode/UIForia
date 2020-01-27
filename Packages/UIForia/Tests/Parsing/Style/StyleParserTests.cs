@@ -530,12 +530,12 @@ style s { BrokenUrl = url() }
         AnimationRootNode rootNode = nodes[0] as AnimationRootNode;
 
         KeyFrameNode keyFrameNode0 = rootNode.keyframeNodes[0];
-        Assert.AreEqual("0", keyFrameNode0.identifier);
+        Assert.AreEqual(0, keyFrameNode0.keyframes[0]);
         Assert.AreEqual(1, keyFrameNode0.children.Count);
         Assert.AreEqual(StyleASTNodeType.Property, keyFrameNode0.children[0].type);
 
         KeyFrameNode keyFrameNode1 = rootNode.keyframeNodes[1];
-        Assert.AreEqual("100", keyFrameNode1.identifier);
+        Assert.AreEqual(100, keyFrameNode1.keyframes[0]);
         Assert.AreEqual(1, keyFrameNode1.children.Count);
         Assert.AreEqual(StyleASTNodeType.Property, keyFrameNode1.children[0].type);
     }
@@ -563,18 +563,18 @@ style s { BrokenUrl = url() }
         AnimationRootNode rootNode = nodes[0] as AnimationRootNode;
 
         KeyFrameNode keyFrameNode0 = rootNode.keyframeNodes[0];
-        Assert.AreEqual("0", keyFrameNode0.identifier);
+        Assert.AreEqual(0, keyFrameNode0.keyframes[0]);
         Assert.AreEqual(2, keyFrameNode0.children.Count);
         Assert.AreEqual(StyleASTNodeType.Property, keyFrameNode0.children[0].type);
         Assert.AreEqual(StyleASTNodeType.Property, keyFrameNode0.children[1].type);
 
         KeyFrameNode keyFrameNode1 = rootNode.keyframeNodes[1];
-        Assert.AreEqual("50", keyFrameNode1.identifier);
+        Assert.AreEqual(50, keyFrameNode1.keyframes[0]);
         Assert.AreEqual(1, keyFrameNode1.children.Count);
         Assert.AreEqual(StyleASTNodeType.Property, keyFrameNode1.children[0].type);
 
         KeyFrameNode keyFrameNode2 = rootNode.keyframeNodes[2];
-        Assert.AreEqual("100", keyFrameNode2.identifier);
+        Assert.AreEqual(100, keyFrameNode2.keyframes[0]);
         Assert.AreEqual(2, keyFrameNode2.children.Count);
         Assert.AreEqual(StyleASTNodeType.Property, keyFrameNode2.children[0].type);
         Assert.AreEqual(StyleASTNodeType.Property, keyFrameNode2.children[1].type);

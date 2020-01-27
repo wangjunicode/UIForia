@@ -7,8 +7,8 @@ layout: page
 ---
 
 # The Flex LayoutType
-`Flex` is the default `LayoutType`. It lays out elements in one dimension, which you can define to be
-either the `Horizontal` or `Vertical` axis:
+`Flex` is the default `LayoutType`. It lays out elements on an axis in one direction, which you can define to be
+either from left to right on the `Horizontal` or top to bottom on the `Vertical` axis.
 
 ```
 style flex-horizontal {
@@ -31,6 +31,8 @@ There's no need to specify the `LayoutType = Flex` as it is the default anyway.
 Children of a flex layout element, we call them items, are placed inside a virtual track in the direction you chose.
 In order to fill up all the space that is available to the track you can use the `FlexItemGrow` and `FlexItemShrink` 
 properties.
+
+The natural layout flow is top to bottom and left to right. If you want to change that use the [alignment style properties](/docs/alignments).
 
 ### `FlexItemGrow: int`
 If the flex element provides more space than is used by its items you might want to distribute that extra

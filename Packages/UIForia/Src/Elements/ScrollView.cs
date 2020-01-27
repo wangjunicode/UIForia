@@ -233,11 +233,21 @@ namespace UIForia.Elements {
         public void ScrollElementIntoView(UIElement element) {
 
             float localPositionY = element.layoutResult.localPosition.y;
+            UIElement ptr = element.parent;
+            while (ptr != childrenElement) {
+                if (ptr == null) {
+                    // maybe throw an exception. cannot scroll something into view that's not a child
+                    return;
+                }
+
+                localPositionY += ptr.layoutResult.localPosition.y;
+                ptr = ptr.parent;
+            }
+
             float elementHeight = element.layoutResult.ActualHeight;
             float elementBottom = localPositionY + elementHeight;
 
-            float trackHeight = layoutResult.ActualHeight;
-            float scrollViewHeight = childrenElement.GetChild(0).layoutResult.AllocatedHeight;
+            float trackHeight = layoutResult.ContentHeight;
             float minY = layoutResult.localPosition.y;
             if (elementBottom + childrenElement.style.AlignmentOriginY.value <= trackHeight
                 && localPositionY + childrenElement.style.AlignmentOriginY.value >= 0) {
@@ -246,11 +256,11 @@ namespace UIForia.Elements {
 
             if (localPositionY < 0) {
                 // scrolls up to the upper edge of the element
-                ScrollToVerticalPercent((localPositionY - minY) / (trackHeight - scrollViewHeight));
+                ScrollToVerticalPercent((localPositionY - minY) / (trackHeight - overflowSize.height));
             }
             else {
                 // scrolls down but keeps the element at the lower edge of the scrollView
-                ScrollToVerticalPercent((elementBottom - trackHeight - minY) / (scrollViewHeight - trackHeight));
+                ScrollToVerticalPercent((elementBottom - trackHeight - minY) / (overflowSize.height - trackHeight));
             }
         }
 

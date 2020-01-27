@@ -1,146 +1,144 @@
 using System;
 using UIForia.Elements;
 using UIForia.Layout;
-using UIForia.Rendering;
-using UIForia.Templates;
 using UIForia.Util;
 using UnityEngine;
-using Application = UIForia.Application;
 
-public class UIViewRootElement : UIElement, IPointerQueryHandler {
+namespace UIForia.Rendering {
 
-    public UIViewRootElement() {
-        flags |= UIElementFlags.ImplicitElement;
-        flags |= UIElementFlags.Created;
-    }
+    public class UIViewRootElement : UIElement, IPointerQueryHandler {
 
-    public bool ContainsPoint(Vector2 point) {
-        return false;
-    }
-}
+        public UIViewRootElement() {
+            flags |= UIElementFlags.ImplicitElement;
+            flags |= UIElementFlags.Created;
+        }
 
-// the idea behind a view is that it is a flat plane that can be oriented in 3d space and show content
-public class UIView {
-
-    public event Action<UIElement> onElementCreated;
-    public event Action<UIElement> onElementReady;
-    public event Action<UIElement> onElementRegistered;
-    public event Action<UIElement> onElementDestroyed;
-    public event Action<UIElement> onElementHierarchyEnabled;
-    public event Action<UIElement> onElementHierarchyDisabled;
-
-    private readonly Type m_ElementType;
-    private readonly string m_Template;
-
-    public int Depth { get; set; }
-
-    public Rect Viewport { get; set; }
-
-    public UIElement RootElement {
-        get {
-            return dummyRoot[0];
+        public bool ContainsPoint(Vector2 point) {
+            return false;
         }
     }
 
-    public float ScaleFactor { get; set; } = 1f;
+    // the idea behind a view is that it is a flat plane that can be oriented in 3d space and show content
+    public class UIView {
 
-    internal Matrix4x4 matrix;
+        public event Action<UIElement> onElementCreated;
+        public event Action<UIElement> onElementReady;
+        public event Action<UIElement> onElementRegistered;
+        public event Action<UIElement> onElementDestroyed;
+        public event Action<UIElement> onElementHierarchyEnabled;
+        public event Action<UIElement> onElementHierarchyDisabled;
 
-    internal Vector3 position;
+        private readonly Type m_ElementType;
+        private readonly string m_Template;
 
-    public readonly int id;
-    public readonly Application application;
-    public readonly string name;
-    public RenderTexture renderTexture;
+        public int Depth { get; set; }
 
-    internal LightList<UIElement> visibleElements;
-    internal UIViewRootElement dummyRoot;
-    private int elementCount;
+        public Rect Viewport { get; set; }
 
-    public bool focusOnMouseDown;
-    public bool sizeChanged;
-    
-    internal UIView(Application application, string name, UIElement element, Matrix4x4 matrix, Size size) {
-        this.name = name;
-        this.application = application;
-        this.matrix = matrix;
-        this.Viewport = new Rect(0, 0, size.width, size.height);
-        this.visibleElements = new LightList<UIElement>(32);
-        this.dummyRoot = new UIViewRootElement();
-        this.dummyRoot.application = application;
-        this.dummyRoot.flags |= UIElementFlags.EnabledFlagSet;
-        this.dummyRoot.style = new UIStyleSet(dummyRoot);
-        this.dummyRoot.layoutResult = new LayoutResult(dummyRoot);
-        this.dummyRoot.View = this;
-        this.dummyRoot.children = new LightList<UIElement>(1);
-        this.dummyRoot.AddChild(element);
-        this.sizeChanged = true;
-    }
-
-    public void Destroy() {
-        application.RemoveView(this);
-    }
-
-    internal void ElementRegistered(UIElement element) {
-        elementCount++;
-        onElementRegistered?.Invoke(element);
-    }
-
-    internal void ElementCreated(UIElement element) {
-        onElementCreated?.Invoke(element);
-    }
-
-    internal void ElementDestroyed(UIElement element) {
-        elementCount--;
-        onElementDestroyed?.Invoke(element);
-    }
-
-    internal void ElementReady(UIElement element) {
-        onElementReady?.Invoke(element);
-    }
-
-    internal void ElementHierarchyEnabled(UIElement element) {
-        onElementHierarchyEnabled?.Invoke(element);
-    }
-
-    internal void ElementHierarchyDisabled(UIElement element) {
-        onElementHierarchyDisabled?.Invoke(element);
-    }
-
-    public void SetPosition(Vector2 position) {
-        if (position != Viewport.position) {
-            sizeChanged = true;
+        public UIElement RootElement {
+            get { return dummyRoot[0]; }
         }
 
-        Viewport = new Rect(position.x, position.y, Viewport.width, Viewport.height);
-    }
+        public float ScaleFactor { get; set; } = 1f;
 
-    public void SetSize(int width, int height) {
-        if (width != Viewport.width || height != Viewport.height) {
-            sizeChanged = true;
+        internal Matrix4x4 matrix;
+
+        internal Vector3 position;
+
+        public readonly int id;
+        public readonly Application application;
+        public readonly string name;
+        public RenderTexture renderTexture;
+
+        internal LightList<UIElement> visibleElements;
+        internal UIViewRootElement dummyRoot;
+        private int elementCount;
+
+        public bool focusOnMouseDown;
+        public bool sizeChanged;
+
+        internal UIView(Application application, string name, UIElement element, Matrix4x4 matrix, Size size) {
+            this.name = name;
+            this.application = application;
+            this.matrix = matrix;
+            this.Viewport = new Rect(0, 0, size.width, size.height);
+            this.visibleElements = new LightList<UIElement>(32);
+            this.dummyRoot = new UIViewRootElement();
+            this.dummyRoot.application = application;
+            this.dummyRoot.flags |= UIElementFlags.EnabledFlagSet;
+            this.dummyRoot.style = new UIStyleSet(dummyRoot);
+            this.dummyRoot.layoutResult = new LayoutResult(dummyRoot);
+            this.dummyRoot.View = this;
+            this.dummyRoot.children = new LightList<UIElement>(1);
+            this.dummyRoot.AddChild(element);
+            this.sizeChanged = true;
         }
 
-        Viewport = new Rect(Viewport.x, Viewport.y, width, height);
-    }
-    
-    
-    /// <returns>true in case the depth has been changed in order to get focus</returns>
-    public bool RequestFocus() {
-        var views = application.GetViews();
-        if (focusOnMouseDown && Depth < views.Length - 1) {
-            for (var index = 0; index < views.Length; index++) {
-                UIView view = views[index];
-                if (view.Depth > Depth) {
-                    view.Depth--;
-                }
+        public void Destroy() {
+            application.RemoveView(this);
+        }
+
+        internal void ElementRegistered(UIElement element) {
+            elementCount++;
+            onElementRegistered?.Invoke(element);
+        }
+
+        internal void ElementCreated(UIElement element) {
+            onElementCreated?.Invoke(element);
+        }
+
+        internal void ElementDestroyed(UIElement element) {
+            elementCount--;
+            onElementDestroyed?.Invoke(element);
+        }
+
+        internal void ElementReady(UIElement element) {
+            onElementReady?.Invoke(element);
+        }
+
+        internal void ElementHierarchyEnabled(UIElement element) {
+            onElementHierarchyEnabled?.Invoke(element);
+        }
+
+        internal void ElementHierarchyDisabled(UIElement element) {
+            onElementHierarchyDisabled?.Invoke(element);
+        }
+
+        public void SetPosition(Vector2 position) {
+            if (position != Viewport.position) {
+                sizeChanged = true;
             }
 
-            Depth = views.Length - 1;
-            application.SortViews();
-            return true;
+            Viewport = new Rect(position.x, position.y, Viewport.width, Viewport.height);
         }
 
-        return false;
+        public void SetSize(int width, int height) {
+            if (width != Viewport.width || height != Viewport.height) {
+                sizeChanged = true;
+            }
+
+            Viewport = new Rect(Viewport.x, Viewport.y, width, height);
+        }
+
+        /// <returns>true in case the depth has been changed in order to get focus</returns>
+        public bool RequestFocus() {
+            var views = application.GetViews();
+            if (focusOnMouseDown && Depth < views.Length - 1) {
+                for (var index = 0; index < views.Length; index++) {
+                    UIView view = views[index];
+                    if (view.Depth > Depth) {
+                        view.Depth--;
+                    }
+                }
+
+                Depth = views.Length - 1;
+                application.SortViews();
+                return true;
+            }
+
+            return false;
+        }
+
     }
 
 }

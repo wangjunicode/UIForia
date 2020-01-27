@@ -42,30 +42,31 @@
         </Group>
 
         <Label>Two inputs that copy each other's values. The first input has autofocus enabled. It will gain focus every time it is enabled.</Label>
-        <Input value.read.write="tv" autofocus="true" style="input" />
-        <Input value.read.write="tv" style="input" />
+        <InputElement sync:value="tv" style="input" />
+        <InputElement sync:value="tv" autofocus="true" style="input" />
+        <InputElement sync:value="tv" style="input" />
         <Text style="text mb20">{tv}</Text>
         
         <Label forElement="'input1'">Some label</Label>
-        <Input x-id="input1" value.read.write="rwValue" onKeyUp.late="Autocomplete($event)" placeholder="'Some value please'" style="input" />
-        <Input x-disabled="disabled" placeholder="'cannot focus the disabled one'" style="input" />
+        <InputElement x-id="input1" sync:value="rwValue"  placeholder="'Some value please'" style="input" />
+        <InputElement attr:disabled="disabled" value.once="''" placeholder="'cannot focus the disabled one'" style="input" />
 
         <Label forElement="'input2'">Another label</Label>
-        <Input x-id="input2" value.write="regularValue" style="input" />
+        <InputElement x-id="input2" sync:value="regularValue" style="input" />
 
         <Label>Float value Input, value is {floatValue}. MaxLength=6.</Label>
-        <InputElement--float value.read.write="floatValue" MaxLength="6" style="input"/>
+        <InputElement sync:value="floatValue" MaxLength="6" style="input"/>
 
         <Label>Double value Input, value is {doubleValue}. MaxLength=12.</Label>
-        <InputElement--double value.read.write="doubleValue" MaxLength="12" style="input"/>
+        <InputElement sync:value="doubleValue" MaxLength="12" style="input"/>
         
         <Group>
             <Heading1>Here be the autocomplete result:</Heading1>
-            <Repeat list="autocompleteList">
-                
-                <Div>{$item}</Div>
-                
-            </Repeat>
+<!--            <Repeat list="autocompleteList">-->
+<!--                -->
+<!--                <Div>{$item}</Div>-->
+<!--                -->
+<!--            </Repeat>-->
         </Group>
     </Contents>
 

@@ -98,7 +98,7 @@ namespace UIForia {
         protected virtual void CreateSystems() {
             styleSystem = new StyleSystem();
             layoutSystem = new AwesomeLayoutSystem(this);
-            inputSystem = new GameInputSystem(layoutSystem);
+            inputSystem = new GameInputSystem(layoutSystem, new KeyboardInputManager());
             renderSystem = new VertigoRenderSystem(Camera ?? Camera.current, this);
             routingSystem = new RoutingSystem();
             animationSystem = new AnimationSystem();

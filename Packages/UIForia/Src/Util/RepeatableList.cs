@@ -93,7 +93,8 @@ namespace UIForia.Util {
             }
 
             if (Count > list.Count) {
-                RemoveRange(Count, Count - list.Count);
+                int sizeDifference = Count - list.Count;
+                RemoveRange(Count - sizeDifference, sizeDifference);
             }
         }
 

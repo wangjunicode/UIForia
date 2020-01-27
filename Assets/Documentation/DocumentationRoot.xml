@@ -33,7 +33,7 @@
 
             </ScrollView>
 
-            <ScrollView style="demo-panel" x-router="demo" x-defaultRoute="/AnimationDemo">
+            <ScrollView style="demo-panel" x-router="demo" x-defaultRoute="/index">
 
                 <Group x-route="/index">
                     <Heading1>UIForia Documentation</Heading1>

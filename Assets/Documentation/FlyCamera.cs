@@ -1,6 +1,7 @@
 using UIForia;
 using UnityEngine;
 using System;
+using System.IO;
 using Application = UIForia.Application;
 
 namespace Documentation {
@@ -27,8 +28,20 @@ namespace Documentation {
         private float totalRun = 1.0f;
         public bool before;
         
+        public TemplateSettings GetTemplateSettings(Type type) {
+            TemplateSettings settings = new TemplateSettings();
+            settings.rootType = type;
+            settings.applicationName = "Game App";
+            settings.assemblyName = "Assembly-CSharp";
+            settings.outputPath = Path.Combine(UnityEngine.Application.dataPath, "UIForiaGenerated2");
+            settings.codeFileExtension = "generated.cs";
+            settings.preCompiledTemplatePath = "Assets/UIForia_Generated2/" + settings.applicationName;
+            settings.templateResolutionBasePath = Path.Combine(UnityEngine.Application.dataPath);
+            return settings;
+        }
+
         public void Start() {
-            application = GameApplication.Create<WorldRoot>( "Game App", camera);
+            application = GameApplication.CreateFromRuntimeTemplates( GetTemplateSettings(typeof(WorldRoot)), camera, null);
         }
 
         void Update() {

@@ -12,18 +12,6 @@ namespace UIForia.Systems {
 
     public abstract class InputSystem : IInputSystem {
 
-        private struct PressedKey {
-
-            public readonly KeyCode keyCode;
-            public readonly char character;
-
-            public PressedKey(KeyCode keyCode, char character) {
-                this.keyCode = keyCode;
-                this.character = character;
-            }
-
-        }
-
         public event Action<IFocusable> onFocusChanged;
 
         private const float k_DragThreshold = 5f;

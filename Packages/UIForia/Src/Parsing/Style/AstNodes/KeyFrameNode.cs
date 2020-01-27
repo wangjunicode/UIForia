@@ -15,7 +15,7 @@ namespace UIForia.Parsing.Style.AstNodes {
         }
     }
 
-    public class KeyFrameNode : StyleRootNode {
+    public class KeyFrameNode : StyleNodeContainer {
         public List<int> keyframes;
 
         public override void Release() {

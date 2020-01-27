@@ -35,7 +35,7 @@ Used for defining grid layouts.
  * `ParentContentArea` in style sheets: `pca` The measure of the parents size minus it's padding and border
  * `ParentSize` in style sheets: `psz` The total measure of the parent's size
 
-### Transform
+### OffsetMeasurement
 Units for defining how an element's position can be transformed.
  * `Pixel` in style sheets: `px` -- one device pixel
  * `ActualWidth` in style sheets: `w` the actual width of the element, regardless of space allocated for the element

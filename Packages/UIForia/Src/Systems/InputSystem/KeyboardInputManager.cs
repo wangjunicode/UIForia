@@ -18,14 +18,10 @@ namespace UIForia.Systems.Input {
 
             HandleShiftKey(KeyCode.LeftShift);
             HandleShiftKey(KeyCode.RightShift);
-            
+
             UpdateModifier(keyboardInputState.IsKeyDown(KeyCode.LeftShift) || keyboardInputState.IsKeyDown(KeyCode.RightShift), KeyboardModifiers.Shift);
             UpdateModifier(keyboardInputState.IsKeyDown(KeyCode.LeftAlt) || keyboardInputState.IsKeyDown(KeyCode.RightAlt), KeyboardModifiers.Alt);
-            UpdateModifier(keyboardInputState.IsKeyDown(KeyCode.LeftCommand) || 
-                           keyboardInputState.IsKeyDown(KeyCode.RightCommand) || 
-                           keyboardInputState.IsKeyDown(KeyCode.LeftApple) || 
-                           keyboardInputState.IsKeyDown(KeyCode.RightApple),
-                    KeyboardModifiers.Command);
+            UpdateModifier(keyboardInputState.IsKeyDown(KeyCode.LeftCommand) || keyboardInputState.IsKeyDown(KeyCode.RightCommand) || keyboardInputState.IsKeyDown(KeyCode.LeftApple) || keyboardInputState.IsKeyDown(KeyCode.RightApple), KeyboardModifiers.Command);
 
             UpdateModifier(keyboardInputState.IsKeyDown(KeyCode.LeftControl) || keyboardInputState.IsKeyDown(KeyCode.RightControl), KeyboardModifiers.Control);
             UpdateModifier(keyboardInputState.IsKeyDown(KeyCode.CapsLock), KeyboardModifiers.CapsLock);

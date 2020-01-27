@@ -6,9 +6,7 @@ namespace UIForia.UIInput {
     public interface IInputProvider {
 
         KeyState GetKeyState(KeyCode keyCode);
-        
-        KeyboardModifiers KeyboardModifiers { get; }
-        
+
         bool IsKeyDown(KeyCode keyCode);
         bool IsKeyDownThisFrame(KeyCode keyCode);
         bool IsKeyUp(KeyCode keyCode);

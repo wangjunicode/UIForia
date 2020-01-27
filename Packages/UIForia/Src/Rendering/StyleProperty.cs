@@ -335,6 +335,7 @@ namespace UIForia.Rendering {
         public LayoutFit AsLayoutFit => (LayoutFit) int0;
         public BackgroundFit AsBackgroundFit => (BackgroundFit) int0;
         public ClipBounds AsClipBounds => (ClipBounds) int0;
+        public PointerEvents AsPointerEvents => (PointerEvents) int0;
 
         public AlignmentTarget AsAlignmentTarget => (AlignmentTarget) int0;
         public AlignmentDirection AsAlignmentDirection => (AlignmentDirection)int0;

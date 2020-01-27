@@ -1,18 +1,19 @@
 using System;
 using System.Collections.Generic;
-using SVGX;
 using TMPro;
 using UIForia.Compilers.Style;
 using UIForia.Elements;
 using UIForia.Layout;
 using UIForia.Layout.LayoutTypes;
 using UIForia.Rendering;
-using UIForia.Systems;
 using UIForia.Text;
+using UIForia.UIInput;
 using UIForia.Util;
 using UnityEditor;
 using UnityEditor.IMGUI.Controls;
 using UnityEngine;
+using FontStyle = UIForia.Text.FontStyle;
+using TextAlignment = UIForia.Text.TextAlignment;
 
 namespace UIForia.Editor {
 
@@ -631,11 +632,11 @@ namespace UIForia.Editor {
 
                 case StylePropertyId.TextFontStyle:
                     // todo -- this needs to be an EnumFlags popup
-                    return DrawEnumWithValue<Text.FontStyle>(property, isEditable);
+                    return DrawEnumWithValue<FontStyle>(property, isEditable);
                 //                    return DrawEnum<Text.FontStyle>(property, isEditable);
 
                 case StylePropertyId.TextAlignment:
-                    return DrawEnumWithValue<Text.TextAlignment>(property, isEditable);
+                    return DrawEnumWithValue<TextAlignment>(property, isEditable);
 
                 case StylePropertyId.TextWhitespaceMode:
                     return DrawEnumWithValue<WhitespaceMode>(property, isEditable);
@@ -683,6 +684,9 @@ namespace UIForia.Editor {
 
                 case StylePropertyId.ClipBounds:
                     return DrawEnumWithValue<ClipBounds>(property, isEditable);
+
+                case StylePropertyId.PointerEvents:
+                    return DrawEnumWithValue<PointerEvents>(property, isEditable);
 
                 default:
                     Debug.Log(property.propertyId.ToString() + " has no inspector");

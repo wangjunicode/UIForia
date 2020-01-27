@@ -22,3 +22,32 @@ style simple-border {
     PreferredSize = 80px;
     DistributeExtraSpace = CenterContent;
 }
+
+style bevel-demo {
+    CornerBevelBottomLeft = 10px;
+    CornerBevelBottomRight = 20px;
+    CornerBevelTopLeft = 24px;
+    CornerBevelTopRight = 15px;
+    BackgroundColor = rgb(222, 130, 189);
+    PreferredSize = 1cnt 100px;
+    Padding = 20px;
+}
+
+style pointer-demo {
+    Padding = 20px;
+    PreferredSize = 1cnt 200px;
+    BackgroundColor = white;
+    [hover] {
+        BackgroundColor = green;
+    }
+}
+
+style pointer-none {
+    PreferredSize = 1cnt 50px;
+    Padding = 20px;
+    PointerEvents = None;
+    BackgroundColor = yellow;
+    [hover] {
+        BackgroundColor = white;
+    }
+}

@@ -9,6 +9,7 @@ using UIForia.Rendering;
 using UIForia.Systems;
 using UIForia.Sound;
 using UIForia.Text;
+using UIForia.UIInput;
 using UIForia.Util;
 using UnityEngine;
 using FontStyle = UIForia.Text.FontStyle;
@@ -28,6 +29,7 @@ namespace UIForia.Compilers.Style {
                 {"overflowy", (targetStyle, property, context) => targetStyle.OverflowY = MapEnum<Overflow>(property.children[0], context)},
                 {"clipbehavior", (targetStyle, property, context) => targetStyle.ClipBehavior = MapEnum<ClipBehavior>(property.children[0], context)},
                 {"clipbounds", (targetStyle, property, context) => targetStyle.ClipBounds = MapEnum<ClipBounds>(property.children[0], context)},
+                {"pointerevents", (targetStyle, property, context) => targetStyle.PointerEvents = MapEnum<PointerEvents>(property.children[0], context)},
 
                 // Alignment
                 {"alignmenttargetx", (targetStyle, property, context) => targetStyle.AlignmentTargetX = MapEnum<AlignmentTarget>(property.children[0], context)},

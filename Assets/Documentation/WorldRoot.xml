@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UITemplate>
+    
+    <Style>
+        style x { TextFontSize = 64; }
+    </Style>
+    
+    <Contents>
+        <WorldContainer style="x" worldPosition="position">hallo</WorldContainer>
+    </Contents>
+</UITemplate>

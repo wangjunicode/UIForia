@@ -6,19 +6,28 @@
         <Heading1>Wowzers MMO Menu</Heading1>
         
         <!-- todo: input does not work because the bindings clear the value every frame -->
-        <InputElement sync:value="characterName" />
+        <Group style="char-info">
+            <Label>Character Name</Label>
+            <InputElement sync:value="characterName" />
+        </Group>
+
+        Hello, mighty {characterName}!
         
         <Group style="character">
             
-            <Div style="head slot"/>
-            <Div style="body slot"/>
-            <Div style="left-arm slot"/>
-            <Div style="right-arm slot"/>
-            <Div style="legs slot"/>
-            <Div style="shoes slot"/>
-            <Div style="accessories slot"/>
-            <Div style="quick slot"/>
-            
+            <Div style="slot head" />
+            <Div style="slot body" />
+            <Div style="slot left-arm" />
+            <Div style="slot right-arm" />
+            <Div style="slot legs" />
+            <Div style="slot shoes" />
+            <Div style="slot accessories" />
+            <Div style="slot quick" />
+
         </Group>
+
+        <Repeat list="inventoryItems" style="inventory">
+            <Div style="slot inventory-item">{$item.id}</Div>
+        </Repeat>
     </Contents>
 </UITemplate>

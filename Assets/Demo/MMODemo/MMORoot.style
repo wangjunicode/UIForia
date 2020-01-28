@@ -3,8 +3,20 @@ style menu-screen {
     PreferredSize = 1pca;
 }
 
+style char-info {
+    Margin = 20px;
+}
+
+style <InputElement<String>> {
+    PreferredWidth = 200px;
+}
+
+style <Heading1> {
+    TextColor = red;
+}
+
 style character {
-    BorderRadius = 90px;
+    BorderRadius = 40px;
     PreferredSize = 200px 400px;
     ShadowColor = peachpuff;
     AlignX = 5% Screen;
@@ -29,6 +41,51 @@ style head {
 
 style body {
     PreferredSize = 60px 170px;
-    AlignY = 60px 0px Parent;
+    AlignY = 70px 0px Parent;
     AlignX = Center Parent;
+}
+
+style left-arm {
+    PreferredSize = 30px 150px;
+    AlignY = 120px 0px Parent;
+    AlignX = 10px Parent;
+}
+
+style right-arm {
+    PreferredSize = 30px 150px;
+    AlignY = 120px 0px Parent;
+    AlignX = 10px 0px Parent End;
+}
+
+style legs {
+    PreferredSize = 60px 100px;
+    AlignY = 50px 0px Parent End;
+    AlignX = Center Parent;
+}
+
+style shoes {
+    PreferredSize = 90px 30px;
+    AlignY = 5px 0px Parent End;
+    AlignX = Center Parent;
+}
+
+style accessories {
+    PreferredSize = 20px;
+    AlignY = 30px 0px Parent;
+    AlignX = 30px 0px Parent End;
+}
+
+style quick {
+    PreferredSize = 20px;
+    AlignY = 300px 0px Parent;
+    AlignX = 15px 0px Parent End;
+}
+
+style inventory {
+    FlexLayoutDirection = Horizontal;
+}
+
+style inventory-item {
+    PreferredSize = 40px;
+    DistributeExtraSpace = CenterContent;
 }

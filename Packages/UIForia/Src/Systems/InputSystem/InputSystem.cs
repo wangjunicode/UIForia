@@ -713,7 +713,7 @@ namespace UIForia.Systems {
 
         protected void ProcessKeyboardEvent(KeyCode keyCode, InputEventType eventType, char character, KeyboardModifiers modifiers) {
             GenericInputEvent keyEvent = new GenericInputEvent(eventType, modifiers, m_EventPropagator, character, keyCode, m_FocusedElement != null);
-
+            KeyboardInputEvent keyInputEvent = keyEvent.AsKeyInputEvent;
             if (m_FocusedElement == null) {
                 m_KeyboardEventTree.ConditionalTraversePreOrder(keyEvent, (item, evt) => {
                     if (evt.propagator.shouldStopPropagation) return false;
@@ -728,7 +728,7 @@ namespace UIForia.Systems {
                     for (int i = 0; i < evtHandlerGroup.eventHandlers.size; i++) {
                         if (evt.propagator.shouldStopPropagation) break;
                         ref InputHandlerGroup.HandlerData handler = ref evtHandlerGroup.eventHandlers.array[i];
-                        if (handler.eventType != evt.type) {
+                        if (!ShouldRun(handler, keyInputEvent)) {
                             continue;
                         }
 
@@ -746,17 +746,30 @@ namespace UIForia.Systems {
                 for (int i = 0; i < evtHandlerGroup.eventHandlers.size; i++) {
                     if (m_EventPropagator.shouldStopPropagation) break;
                     ref InputHandlerGroup.HandlerData handler = ref evtHandlerGroup.eventHandlers.array[i];
-                    if (handler.eventType != keyEvent.type) {
+                    if (!ShouldRun(handler, keyInputEvent)) {
                         continue;
                     }
-
+                    
                     Action<GenericInputEvent> keyHandler = evtHandlerGroup.eventHandlers[i].handlerFn as Action<GenericInputEvent>;
                     Debug.Assert(keyHandler != null, nameof(keyHandler) + " != null");
                     keyHandler.Invoke(keyEvent);
                 }
             }
         }
+        protected bool ShouldRun(in InputHandlerGroup.HandlerData handlerData, in KeyboardInputEvent evt) {
+            if (evt.type != handlerData.eventType) return false;
 
+            if (handlerData.requireFocus && !evt.isFocused) return false;
+
+            if (handlerData.character != '\0' && (handlerData.character != evt.character)) return false;
+
+            if (evt.keyCode != handlerData.keyCode && handlerData.keyCode != KeyCodeUtil.AnyKey) {
+                return false;
+            }
+
+            // if all required modifiers are present these should be equal
+            return (handlerData.modifiers & evt.modifiers) == handlerData.modifiers;
+        }
         private void RunMouseEvents(List<UIElement> elements, InputEventType eventType) {
             if (elements.Count == 0) return;
 

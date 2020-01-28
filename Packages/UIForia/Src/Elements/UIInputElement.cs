@@ -395,7 +395,7 @@ namespace UIForia.Elements {
                         maxX += contentRect.x;
                         rect.y += contentRect.y;
                         float x = Mathf.Max(minX, contentRect.x);
-                        float cursorToContentEnd = contentRect.width - x;
+                        float cursorToContentEnd = contentRect.width;
                         float cursorToMax = maxX - x;
                         path.Rect(x, rect.y, Mathf.Min(cursorToContentEnd, cursorToMax), rect.height);
                     }

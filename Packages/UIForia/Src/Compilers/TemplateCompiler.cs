@@ -1968,16 +1968,22 @@ namespace UIForia.Compilers {
         }
 
         private void CompileKeyboardInputBinding(UIForiaLinqCompiler compiler, in AttributeDefinition attr) {
-            LightList<Parameter> parameters = LightList<Parameter>.Get();
-            parameters.Add(new Parameter<GenericInputEvent>(k_InputEventParameterName, ParameterFlags.NeverNull | ParameterFlags.NeverOutOfBounds));
+            // 1 list of event handler typeof(Action<InputEvent>);
+            // input call appropriate conversion fn from input event before resolving $evt
 
-            // todo -- handle this
-            // resolvers.Push(new ContextVarAliasResolver(k_InputEventAliasName, typeof(KeyboardInputEvent), NextContextId, AliasResolverType.KeyEvent));
+            // todo -- eliminate generated closure by passing in template root and element from input system and doing casting as normal in the callback
 
-            compiler.SetImplicitContext(compiler.GetCastRoot());
+            contextStack.Peek().Push(new ContextVariableDefinition() {
+                id = NextContextId,
+                name = k_InputEventAliasName,
+                type = typeof(KeyboardInputEvent),
+                variableType = AliasResolverType.KeyEvent
+            });
 
-            // todo -- eliminate generated closure by passing in template root and element from input system
+            SetImplicitContext(compiler, attr);
+
             LinqCompiler closure = null;
+            LightList<Parameter> parameters = LightList<Parameter>.Get();
 
             ASTNode astNode = ExpressionParser.Parse(attr.value);
             if (astNode.type == ASTNodeType.LambdaExpression) {
@@ -1998,8 +2004,7 @@ namespace UIForia.Compilers {
                     Parameter parameter = parameters.AddReturn(new Parameter<GenericInputEvent>(k_InputEventParameterName, ParameterFlags.NeverNull | ParameterFlags.NeverOutOfBounds));
                     closure = compiler.CreateClosure(parameters, typeof(void));
                     ParameterExpression variable = closure.AddVariable(typeof(KeyboardInputEvent), signature.identifier);
-                    PropertyInfo property = s_GenericInputEvent_AsKeyInputEvent;
-                    closure.Assign(variable, Expression.Property(parameter.expression, property));
+                    closure.Assign(variable, Expression.Property(parameter.expression, s_GenericInputEvent_AsKeyInputEvent));
                     closure.Statement(n.body);
                 }
                 else {
@@ -2015,69 +2020,13 @@ namespace UIForia.Compilers {
 
             LambdaExpression lambda = closure.BuildLambda();
 
-            Expression target = Expression.Field(compiler.GetCastElement(), s_UIElement_inputHandlerGroup);
+            InputHandlerDescriptor descriptor = InputCompiler.ParseKeyboardDescriptor(attr.key);
 
-            InputEventType evtType = 0;
-            KeyboardModifiers modifiers = KeyboardModifiers.None;
-            EventPhase eventPhase = EventPhase.Bubble;
-
-            bool requireFocus = false;
-
-            string evtTypeName = attr.key;
-
-            if (attr.key.Contains(".")) {
-                evtTypeName = attr.key.Substring(0, attr.key.IndexOf('.'));
-                bool isCapture = attr.key.Contains(".capture");
-                bool isShift = attr.key.Contains(".shift");
-                bool isControl = attr.key.Contains(".ctrl") || attr.key.Contains(".control");
-                bool isCommand = attr.key.Contains(".cmd") || attr.key.Contains(".command");
-                bool isAlt = attr.key.Contains(".alt");
-
-                requireFocus = attr.key.Contains(".focus");
-
-                if (isShift) {
-                    modifiers |= KeyboardModifiers.Shift;
-                }
-
-                if (isControl) {
-                    modifiers |= KeyboardModifiers.Control;
-                }
-
-                if (isCommand) {
-                    modifiers |= KeyboardModifiers.Command;
-                }
-
-                if (isAlt) {
-                    modifiers |= KeyboardModifiers.Alt;
-                }
-
-                if (isCapture) {
-                    eventPhase = EventPhase.Capture;
-                }
-            }
-
-            switch (evtTypeName) {
-                case "down":
-                    evtType = InputEventType.KeyDown;
-                    break;
-
-                case "up":
-                    evtType = InputEventType.KeyUp;
-                    break;
-
-                case "helddown":
-                    evtType = InputEventType.KeyHeldDown;
-                    break;
-
-                default:
-                    throw new CompileException("Invalid keyboard event in template: " + attr.key);
-            }
-
-            MethodCallExpression expression = ExpressionFactory.CallInstanceUnchecked(target, s_InputHandlerGroup_AddKeyboardEvent,
-                Expression.Constant(evtType),
-                Expression.Constant(modifiers),
-                Expression.Constant(requireFocus),
-                Expression.Constant(eventPhase),
+            MethodCallExpression expression = ExpressionFactory.CallInstanceUnchecked(compiler.GetInputHandlerGroup(), s_InputHandlerGroup_AddKeyboardEvent,
+                Expression.Constant(descriptor.handlerType),
+                Expression.Constant(descriptor.modifiers),
+                Expression.Constant(descriptor.requiresFocus),
+                Expression.Constant(descriptor.eventPhase),
                 Expression.Constant(KeyCodeUtil.AnyKey),
                 Expression.Constant('\0'),
                 lambda
@@ -2086,7 +2035,7 @@ namespace UIForia.Compilers {
             compiler.RawExpression(expression);
 
             closure.Release();
-            LightList<Parameter>.Release(ref parameters);
+            contextStack.Peek().Pop();
         }
 
         private void CompileDragBinding(UIForiaLinqCompiler compiler, in AttributeDefinition attr) {
@@ -2681,14 +2630,12 @@ namespace UIForia.Compilers {
 
                 if (ReflectionUtil.IsField(generic, attr.key, out FieldInfo fieldInfo)) {
                     if (fieldInfo.FieldType.IsGenericParameter || fieldInfo.FieldType.IsGenericType || fieldInfo.FieldType.IsConstructedGenericType) {
-                        Type type = typeResolver.GetExpressionType(attr.value);
-                        HandleType(type, fieldInfo.FieldType, attr);
+                        HandleType(fieldInfo.FieldType, attr);
                     }
                 }
                 else if (ReflectionUtil.IsProperty(generic, attr.key, out PropertyInfo propertyInfo)) {
                     if (propertyInfo.PropertyType.IsGenericParameter || propertyInfo.PropertyType.IsGenericType || propertyInfo.PropertyType.IsConstructedGenericType) {
-                        Type type = typeResolver.GetExpressionType(attr.value);
-                        HandleType(type, propertyInfo.PropertyType, attr);
+                        HandleType(propertyInfo.PropertyType, attr);
                     }
                 }
             }
@@ -2713,16 +2660,19 @@ namespace UIForia.Compilers {
                 return -1;
             }
 
-            void HandleType(Type expressionType, Type inputType, in AttributeDefinition attr) {
+            void HandleType(Type inputType, in AttributeDefinition attr) {
                 if (!inputType.ContainsGenericParameters) {
                     return;
                 }
 
                 if (inputType.IsConstructedGenericType) {
+                    
                     if (ReflectionUtil.IsAction(inputType) || ReflectionUtil.IsFunc(inputType)) {
                         return;
                     }
 
+                    Type expressionType = typeResolver.GetExpressionType(attr.value);
+                    
                     Type[] typeArgs = expressionType.GetGenericArguments();
                     Type[] fieldArgs = inputType.GetGenericArguments();
 

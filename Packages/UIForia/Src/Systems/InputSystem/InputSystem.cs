@@ -757,7 +757,7 @@ namespace UIForia.Systems {
             }
         }
         protected bool ShouldRun(in InputHandlerGroup.HandlerData handlerData, in KeyboardInputEvent evt) {
-            if (evt.type != handlerData.eventType) return false;
+            if (evt.eventType != handlerData.eventType) return false;
 
             if (handlerData.requireFocus && !evt.isFocused) return false;
 
@@ -770,6 +770,7 @@ namespace UIForia.Systems {
             // if all required modifiers are present these should be equal
             return (handlerData.modifiers & evt.modifiers) == handlerData.modifiers;
         }
+        
         private void RunMouseEvents(List<UIElement> elements, InputEventType eventType) {
             if (elements.Count == 0) return;
 

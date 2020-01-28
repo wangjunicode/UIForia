@@ -224,7 +224,7 @@ namespace TemplateBinding {
             Assert.AreEqual(650, e.output_value);
         }
 
-        [Template("Data/TemplateBindings/TemplateBindingTest_KeyboardBinding.xml")]
+        [Template("Data/TemplateBindings/TemplateBindingTest_KeyboardInput.xml")]
         public class TemplateBindingTest_KeyboardBinding : UIElement {
 
             public string output_NoParams;
@@ -248,47 +248,63 @@ namespace TemplateBinding {
                 output_NoEvtParam = $"NoEvtParam was called str = {str} param = {param}";
             }
 
-            public float output_value;
+            public char output_value;
+            public char output_value2;
 
-            public void SetValue(float value) {
+            public void SetValue(char value) {
                 output_value = value;
             }
 
+            public void SetValue2(char value) {
+                output_value2 = value;
+            }
         }
 
         [Test]
         public void KeyboardHandlerBinding() {
-            MockApplication app = Setup<TemplateBindingTest_MouseBindingBinding>();
-            TemplateBindingTest_MouseBindingBinding e = (TemplateBindingTest_MouseBindingBinding) app.RootElement;
+            
+            MockApplication app = MockApplication.Setup<TemplateBindingTest_KeyboardBinding>();
+            TemplateBindingTest_KeyboardBinding e = (TemplateBindingTest_KeyboardBinding) app.RootElement;
 
-            throw new NotImplementedException("Keyboard input needs a re-write");
-            // app.Update();
+            app.Update();
 
-            // app.InputSystem.SetKeyDown('a');
+            app.InputSystem.mockKeyboardManager.inputState.SetKeyState('a', KeyState.DownThisFrame);
 
-            // app.Update();
+            app.Update();
 
-            // Assert.AreEqual("No Params Was Called", e.output_NoParams);
-            //
-            // app.Update();
-            //
-            // app.InputSystem.KeyDown('a');
-            //
-            // app.Update();
-            //
-            // Assert.AreEqual("EvtParam was called 50, 150", e.output_EvtParam);
-            //
-            // app.InputSystem.MouseDown(new Vector2(50, 250));
-            //
-            // app.Update();
-            //
-            // Assert.AreEqual("MixedParams was called 50, 250 param = 250", e.output_MixedParams);
-            //
-            // app.InputSystem.MouseDown(new Vector2(50, 350));
-            //
-            // app.Update();
-            //
-            // Assert.AreEqual("NoEvtParam was called str = string goes here param = 250", e.output_NoEvtParam);
+            Assert.AreEqual("No Params Was Called", e.output_NoParams);
+
+            app.Update();
+
+            app.InputSystem.mockKeyboardManager.inputState.SetKeyState('b', KeyState.DownThisFrame);
+
+            app.Update();
+
+            Assert.AreEqual("EvtParam was called b", e.output_EvtParam);
+
+            app.InputSystem.mockKeyboardManager.inputState.SetKeyState('c', KeyState.DownThisFrame);
+
+            app.Update();
+
+            Assert.AreEqual("MixedParams was called c param = 5", e.output_MixedParams);
+
+            app.InputSystem.mockKeyboardManager.inputState.SetKeyState('d', KeyState.DownThisFrame);
+
+            app.Update();
+
+            Assert.AreEqual($"NoEvtParam was called str = string goes here param = {(int) 'd'}", e.output_NoEvtParam);
+
+            app.InputSystem.mockKeyboardManager.inputState.SetKeyState('e', KeyState.DownThisFrame);
+
+            app.Update();
+
+            Assert.AreEqual('e', e.output_value);
+
+            app.InputSystem.mockKeyboardManager.inputState.SetKeyState('f', KeyState.DownThisFrame);
+
+            app.Update();
+
+            Assert.AreEqual('f', e.output_value2);
         }
 
         [Template("Data/TemplateBindings/TemplateBindingTest_ConditionalBinding.xml")]
@@ -1022,7 +1038,6 @@ namespace TemplateBinding {
             public ISelectOption<TType0> option;
 
             public TType0 val;
-
 
         }
 

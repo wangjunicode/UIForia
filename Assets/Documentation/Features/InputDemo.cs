@@ -39,7 +39,7 @@ namespace Documentation {
 
         public override void OnCreate() {
             autocompleteList = new RepeatableList<string>();
-            Autocomplete(null);
+            Autocomplete(default);
         }
 
         public override void HandleUIEvent(UIEvent evt) {

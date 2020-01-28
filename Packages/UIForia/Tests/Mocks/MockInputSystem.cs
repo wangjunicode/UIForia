@@ -11,8 +11,10 @@ namespace Tests.Mocks {
         public MockInputSystem(ILayoutSystem layoutSystem) : base(layoutSystem, new MockKeyboardInputManager()) { }
 
         public void SetMouseState(MouseState mouseState) {
-            base.mouseState = mouseState;
+            this.mouseState = mouseState;
         }
+
+        public MockKeyboardInputManager mockKeyboardManager => (MockKeyboardInputManager)keyboardInputManager;
 
         // for the debugger, rider struggles w/ partial classes
         [UsedImplicitly]

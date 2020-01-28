@@ -2,18 +2,22 @@
 
 namespace UIForia.UIInput {
 
-    public class KeyboardInputEvent : InputEvent {
+    public struct KeyboardInputEvent  {
 
         public readonly bool isFocused;
         public readonly KeyCode keyCode;
         public readonly KeyboardModifiers modifiers;
         public readonly char character;
-        
-        public KeyboardInputEvent(InputEventType type, KeyCode keyCode, char character, KeyboardModifiers modifiers, bool isFocused) : base(type) {
+        public InputEventType eventType;
+
+        public KeyboardInputEvent(InputEventType type, KeyCode keyCode, char character, KeyboardModifiers modifiers, bool isFocused) {
+            this.eventType = type;
             this.keyCode = keyCode;
             this.modifiers = modifiers;
             this.character = character;
             this.isFocused = isFocused;
+            this.stopPropagation = false;
+            this.stopPropagationImmediately = false;
         }
 
         public void StopPropagation() {

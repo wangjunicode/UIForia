@@ -30,7 +30,7 @@ namespace UIForia.Compilers {
         public Type parameterType;
 
     }
-    
+
     public static class InputCompiler {
 
         private static readonly Dictionary<Type, StructList<InputHandler>> s_Cache = new Dictionary<Type, StructList<InputHandler>>();
@@ -44,6 +44,15 @@ namespace UIForia.Compilers {
 
             return retn;
         }
+
+        public static InputHandlerDescriptor ParseKeyboardDescriptor(string input) {
+            InputHandlerDescriptor retn = ParseDescriptor(input);
+
+            retn.handlerType = ParseKeyboardInputEventType(retn.eventName);
+
+            return retn;
+        }
+
 
         public static InputHandlerDescriptor ParseDragDescriptor(string input) {
             InputHandlerDescriptor retn = ParseDescriptor(input);
@@ -103,6 +112,20 @@ namespace UIForia.Compilers {
             return retn;
         }
 
+        private static InputEventType ParseKeyboardInputEventType(string input) {
+            switch (input) {
+                case "down":
+                    return InputEventType.KeyDown;
+                case "up":
+                    return InputEventType.KeyUp;
+                case "helddown":
+                case "held":
+                    return InputEventType.KeyHeldDown;
+            }
+
+            throw new CompileException("Invalid keyboard event in template: " + input);
+        }
+
         private static InputEventType ParseMouseInputEventType(string input) {
             switch (input) {
                 case "click":
@@ -153,7 +176,6 @@ namespace UIForia.Compilers {
             for (int i = 0; i < methods.Length; i++) {
                 MethodInfo methodInfo = methods[i];
 
-
                 object[] customAttributes = methodInfo.GetCustomAttributes(true);
 
                 if (customAttributes.Length == 0) {
@@ -201,7 +223,7 @@ namespace UIForia.Compilers {
                 if (!typeof(DragEvent).IsAssignableFrom(methodInfo.ReturnType)) {
                     throw CompileException.InvalidDragCreatorAnnotationReturnType(methodInfo.Name, methodInfo.DeclaringType, methodInfo.ReturnType);
                 }
-                
+
                 handlers.Add(new InputHandler() {
                     descriptor = new InputHandlerDescriptor() {
                         eventPhase = attr.phase,
@@ -242,7 +264,7 @@ namespace UIForia.Compilers {
                 });
             }
         }
-        
+
         private static void GetMouseEventHandlers(MethodInfo methodInfo, ParameterInfo[] parameters, object[] customAttributes, StructList<InputHandler> handlers) {
             for (int i = 0; i < customAttributes.Length; i++) {
                 MouseEventHandlerAttribute attr = customAttributes[i] as MouseEventHandlerAttribute;

@@ -54,6 +54,7 @@ namespace UIForia.Elements {
 
         public void AddKeyboardEvent(InputEventType eventType, KeyboardModifiers modifiers, bool requiresFocus, EventPhase phase, KeyCode keyCode, char character, Action<GenericInputEvent> handler) {
             handledEvents |= eventType;
+            eventHandlers = eventHandlers ?? new LightList<HandlerData>(2);
             eventHandlers.Add(new HandlerData() {
                 eventType = eventType,
                 eventPhase = phase,
@@ -73,7 +74,7 @@ namespace UIForia.Elements {
             public char character;
             public bool requireFocus;
             public EventPhase eventPhase;
-            public object handlerFn;//Action<GenericInputEvent> handler;
+            public object handlerFn; //Action<GenericInputEvent> handler;
 
         }
 

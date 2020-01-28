@@ -1,5 +1,5 @@
 <UITemplate>
-
+    
     <Contents id="out_of_scope">
 
         <Div ctx:cvar0="'var 0'">

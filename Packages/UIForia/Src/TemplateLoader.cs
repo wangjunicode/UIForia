@@ -92,42 +92,37 @@ namespace UIForia.Compilers {
 
             compiledTemplateData.styleImporter.importResolutionPath = Path.Combine(UnityEngine.Application.dataPath, "StreamingAssets", "UIForia", compiledTemplateData.templateSettings.StrippedApplicationName);
 
-            try {
-                ITemplateLoader loader = (ITemplateLoader) Activator.CreateInstance(type);
-                string[] files = loader.StyleFilePaths;
+            ITemplateLoader loader = (ITemplateLoader) Activator.CreateInstance(type);
+            string[] files = loader.StyleFilePaths;
 
-                compiledTemplateData.styleImporter.Reset(); // reset because in testing we will already have parsed files, nuke these
+            compiledTemplateData.styleImporter.Reset(); // reset because in testing we will already have parsed files, nuke these
 
-                LightList<UIStyleGroupContainer> styleList = new LightList<UIStyleGroupContainer>(128);
-                Dictionary<string, StyleSheet> styleSheetMap = new Dictionary<string, StyleSheet>(128);
+            LightList<UIStyleGroupContainer> styleList = new LightList<UIStyleGroupContainer>(128);
+            Dictionary<string, StyleSheet> styleSheetMap = new Dictionary<string, StyleSheet>(128);
 
-                string streamingAssetPath = Path.Combine(UnityEngine.Application.dataPath, "StreamingAssets", "UIForia", compiledTemplateData.templateSettings.StrippedApplicationName);
+            string streamingAssetPath = Path.Combine(UnityEngine.Application.dataPath, "StreamingAssets", "UIForia", compiledTemplateData.templateSettings.StrippedApplicationName);
 
-                for (int i = 0; i < files.Length; i++) {
-                    StyleSheet sheet = compiledTemplateData.styleImporter.ImportStyleSheetFromFile(files[i]);
-                    styleList.EnsureAdditionalCapacity(sheet.styleGroupContainers.Length);
+            for (int i = 0; i < files.Length; i++) {
+                StyleSheet sheet = compiledTemplateData.styleImporter.ImportStyleSheetFromFile(files[i]);
+                styleList.EnsureAdditionalCapacity(sheet.styleGroupContainers.Length);
 
-                    for (int j = 0; j < sheet.styleGroupContainers.Length; j++) {
-                        styleList.array[styleList.size++] = sheet.styleGroupContainers[j];
-                    }
-
-                    styleSheetMap.Add(sheet.path.Substring(streamingAssetPath.Length + 1), sheet);
+                for (int j = 0; j < sheet.styleGroupContainers.Length; j++) {
+                    styleList.array[styleList.size++] = sheet.styleGroupContainers[j];
                 }
 
-                compiledTemplateData.templates = loader.LoadTemplates();
-                compiledTemplateData.slots = loader.LoadSlots();
-                compiledTemplateData.bindings = loader.LoadBindings();
-                compiledTemplateData.templateMetaData = loader.LoadTemplateMetaData(styleSheetMap, styleList.array);
-
-                for (int i = 0; i < compiledTemplateData.templateMetaData.Length; i++) {
-                    compiledTemplateData.templateMetaData[i].compiledTemplateData = compiledTemplateData;
-                }
-
-                compiledTemplateData.constructElement = loader.ConstructElement;
+                styleSheetMap.Add(sheet.path.Substring(streamingAssetPath.Length + 1), sheet);
             }
-            catch (Exception e) {
-                throw e;
+
+            compiledTemplateData.templates = loader.LoadTemplates();
+            compiledTemplateData.slots = loader.LoadSlots();
+            compiledTemplateData.bindings = loader.LoadBindings();
+            compiledTemplateData.templateMetaData = loader.LoadTemplateMetaData(styleSheetMap, styleList.array);
+
+            for (int i = 0; i < compiledTemplateData.templateMetaData.Length; i++) {
+                compiledTemplateData.templateMetaData[i].compiledTemplateData = compiledTemplateData;
             }
+
+            compiledTemplateData.constructElement = loader.ConstructElement;
 
             return compiledTemplateData;
         }

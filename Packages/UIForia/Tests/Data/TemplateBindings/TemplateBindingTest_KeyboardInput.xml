@@ -20,7 +20,7 @@
         
         <Div style="m" key:down="(evt) => SetValue(evt.character)"/>
         
-        <Div style="m" key:down="() => SetValue2($evt.character)"/>
+        <Div style="m" key:down="() => SetValue2($event.character)"/>
         
     </Contents>
     

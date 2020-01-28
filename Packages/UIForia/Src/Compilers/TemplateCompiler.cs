@@ -2386,7 +2386,7 @@ namespace UIForia.Compilers {
             if (parameters[0].ParameterType.FullName.Contains("System.Nullable")) {
                 if (!value.Type.IsNullableType()) {
                     Type targetType = parameters[0].ParameterType.GetGenericArguments()[0];
-                    
+
                     if (targetType.IsByRef) {
                         targetType = targetType.GetElementType();
                     }
@@ -2639,6 +2639,24 @@ namespace UIForia.Compilers {
             );
         }
 
+        private struct GenericTypeFlat { }
+
+        private void FlattenGenericTypeString(string input) {
+            int ptr = input.IndexOf('[');
+
+            StructList<GenericTypeFlat> flattened = new StructList<GenericTypeFlat>();
+
+            for (; ptr < input.Length; ptr++) {
+                char current = input[ptr];
+
+                if (current == '[') { }
+                else if (current == ']') {
+                    // List[List[string]], List[string], string
+                }
+            }
+        }
+
+
         private ProcessedType ResolveGenericElementType(Type rootType, TemplateNode templateNode) {
             ProcessedType processedType = templateNode.processedType;
 
@@ -2662,10 +2680,16 @@ namespace UIForia.Compilers {
                 if (attr.type != AttributeType.Property) continue;
 
                 if (ReflectionUtil.IsField(generic, attr.key, out FieldInfo fieldInfo)) {
-                    HandleType(fieldInfo.FieldType, attr);
+                    if (fieldInfo.FieldType.IsGenericParameter || fieldInfo.FieldType.IsGenericType || fieldInfo.FieldType.IsConstructedGenericType) {
+                        Type type = typeResolver.GetExpressionType(attr.value);
+                        HandleType(type, fieldInfo.FieldType, attr);
+                    }
                 }
                 else if (ReflectionUtil.IsProperty(generic, attr.key, out PropertyInfo propertyInfo)) {
-                    HandleType(propertyInfo.PropertyType, attr);
+                    if (propertyInfo.PropertyType.IsGenericParameter || propertyInfo.PropertyType.IsGenericType || propertyInfo.PropertyType.IsConstructedGenericType) {
+                        Type type = typeResolver.GetExpressionType(attr.value);
+                        HandleType(type, propertyInfo.PropertyType, attr);
+                    }
                 }
             }
 
@@ -2689,20 +2713,7 @@ namespace UIForia.Compilers {
                 return -1;
             }
 
-            int TypeRecurse(Type checkType) {
-                Type[] fieldArgs = checkType.GetGenericArguments();
-                for (int i = 0; i < fieldArgs.Length; i++) {
-                    string genericName = fieldArgs[i].Name;
-                    int typeIndex = GetTypeIndex(arguments, genericName);
-
-
-                    return typeIndex;
-                }
-
-                return -1;
-            }
-
-            void HandleType(Type inputType, in AttributeDefinition attr) {
+            void HandleType(Type expressionType, Type inputType, in AttributeDefinition attr) {
                 if (!inputType.ContainsGenericParameters) {
                     return;
                 }
@@ -2712,8 +2723,7 @@ namespace UIForia.Compilers {
                         return;
                     }
 
-                    Type type = typeResolver.GetExpressionType(attr.value);
-                    Type[] typeArgs = type.GetGenericArguments();
+                    Type[] typeArgs = expressionType.GetGenericArguments();
                     Type[] fieldArgs = inputType.GetGenericArguments();
 
                     Assert.AreEqual(fieldArgs.Length, typeArgs.Length);
@@ -2721,10 +2731,6 @@ namespace UIForia.Compilers {
                     for (int a = 0; a < fieldArgs.Length; a++) {
                         string genericName = fieldArgs[a].Name;
                         int typeIndex = GetTypeIndex(arguments, genericName);
-
-                        if (typeIndex == -1) {
-                            // typeIndex = TypeRecurse(fieldArgs[a]);
-                        }
 
                         Assert.IsTrue(typeIndex != -1);
 

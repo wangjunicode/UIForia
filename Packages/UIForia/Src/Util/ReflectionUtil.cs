@@ -202,7 +202,7 @@ namespace UIForia.Util {
 
         public static bool HasInstanceMethod(Type type, string methodName, LightList<MethodInfo> retn) {
             MethodInfo[] methods = GetInstanceMethods(type);
-            
+
             for (int i = 0; i < methods.Length; i++) {
                 if (methods[i].Name == methodName) {
                     retn.Add(methods[i]);
@@ -1158,7 +1158,6 @@ namespace UIForia.Util {
                     retn.Add(infos[i]);
                 }
             }
-            
         }
 
         public static bool IsConstantField(Type rootType, string fieldName) {
@@ -1419,6 +1418,28 @@ namespace UIForia.Util {
             return false;
         }
 
+        public static void GetGenericArgs(Type type, LightList<string> output) {
+            if (!type.IsGenericType) return;
+            if (type.IsConstructedGenericType) {
+                Type[] args = type.GetGenericArguments();
+                for (int i = 0; i < args.Length; i++) {
+                    output.Add(args[i].Name);
+                    GetGenericArgs(args[i], output);
+                }
+            }
+        }
+
+        public static void GetGenericArgs(Type type, LightList<Type> output) {
+            if (!type.IsGenericType) return;
+            if (type.IsConstructedGenericType) {
+                Type[] args = type.GetGenericArguments();
+                output.AddRange(args);
+                for (int i = 0; i < args.Length; i++) {
+                    GetGenericArgs(args[i], output);
+                }
+            }
+        }
+
     }
 
     public struct MethodDescriptor {
@@ -1521,7 +1542,6 @@ namespace UIForia.Util {
         }
 
     }
-
 
     public struct GenericArguments {
 

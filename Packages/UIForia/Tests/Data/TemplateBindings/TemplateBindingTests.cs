@@ -10,6 +10,7 @@ using UIForia.Compilers.Style;
 using UIForia.Elements;
 using UIForia.Exceptions;
 using UIForia.UIInput;
+using UIForia.Util;
 using UnityEngine;
 using Application = UnityEngine.Application;
 
@@ -805,10 +806,10 @@ namespace TemplateBinding {
         public void RepeatMultiChild() {
             MockApplication app = Setup<TemplateBindingTest_RepeatMultiChild>();
             TemplateBindingTest_RepeatMultiChild e = (TemplateBindingTest_RepeatMultiChild) app.RootElement;
-            e.data = new [] {new Vector3(1, 2, 3), new Vector3(4, 5, 6)};
-            
+            e.data = new[] {new Vector3(1, 2, 3), new Vector3(4, 5, 6)};
+
             app.Update();
-            
+
             Assert.AreEqual(2, e[0].ChildCount);
             Assert.AreEqual("repeat me 1", GetText(e[0][0][0][0]));
             Assert.AreEqual("3", GetText(e[0][0][1][0]));
@@ -1003,6 +1004,35 @@ namespace TemplateBinding {
             Assert.AreEqual("baseVal__changed", child.value);
             Assert.AreEqual("baseVal__changed", e.newValue);
             Assert.AreEqual("baseVal", e.oldValue);
+        }
+
+        [Template("Data/TemplateBindings/TemplateBindingTest_ResolveGenericType.xml")]
+        public class TemplateBindingTest_ResolveGeneric_Outer : UIElement {
+
+            public LightList<ISelectOption<string>> list;
+            public ISelectOption<ISelectOption<string>> option;
+
+        }
+
+        [Template("Data/TemplateBindings/TemplateBindingTest_ResolveGeneric.xml")]
+        public class TemplateBindingTest_ResolveGeneric_Inner1<TType0> : UIContainerElement {
+
+            public LightList<TType0> list;
+
+            public ISelectOption<TType0> option;
+
+            public TType0 val;
+
+
+        }
+
+        [Test]
+        public void ResolveGeneric() {
+            MockApplication app = Setup<TemplateBindingTest_ResolveGeneric_Outer>();
+            TemplateBindingTest_ResolveGeneric_Outer e = (TemplateBindingTest_ResolveGeneric_Outer) app.RootElement;
+            Assert.IsInstanceOf<TemplateBindingTest_ResolveGeneric_Inner1<ISelectOption<string>>>(e[0]);
+            Assert.IsInstanceOf<TemplateBindingTest_ResolveGeneric_Inner1<ISelectOption<string>>>(e[1]);
+            Assert.IsInstanceOf<TemplateBindingTest_ResolveGeneric_Inner1<float>>(e[2]);
         }
 
         public static string GetText(UIElement element) {

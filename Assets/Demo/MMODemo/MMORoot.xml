@@ -15,7 +15,7 @@
         
         <Group style="character">
             
-            <Div style="slot head" />
+            <Div style="slot head" drag:drop="DropItem(__evt)">{headSlot}</Div>
             <Div style="slot body" />
             <Div style="slot left-arm" />
             <Div style="slot right-arm" />
@@ -27,7 +27,9 @@
         </Group>
 
         <Repeat list="inventoryItems" style="inventory">
-            <Div style="slot inventory-item">{$item.id}</Div>
+            <Div style="slot inventory-item">
+                <Div drag:create="StartDragInventoryItem($element, $item)">{$item.id}</Div>
+            </Div>
         </Repeat>
     </Contents>
 </UITemplate>

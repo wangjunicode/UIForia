@@ -112,6 +112,7 @@
 
         style chevron-up {
             MarginTop = 1px;
+            MarginBottom = 4px;
             PreferredSize = 10px 6px;
             BackgroundImage = url("UIForia/icons/ui_selectbox_up_chevron@2x");
         }

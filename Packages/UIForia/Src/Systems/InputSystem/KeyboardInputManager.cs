@@ -109,9 +109,6 @@ namespace UIForia.Systems.Input {
             else if (isDown) {
                 keyboardInputState.SetKeyState(code, KeyState.Down);
             }
-            else {
-                keyboardInputState.SetKeyState(code, KeyState.Up);
-            }
         }
 
         private void HandleModifierDown(KeyCode keyCode) {

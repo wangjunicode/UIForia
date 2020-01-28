@@ -10,14 +10,14 @@
         
         <Group style="character">
             
-            <Div style="head slot"></Div>
-            <Div style="body slot"></Div>
-            <Div style="left-arm slot"></Div>
-            <Div style="right-arm slot"></Div>
-            <Div style="legs slot"></Div>
-            <Div style="shoes slot"></Div>
-            <Div style="accessories slot"></Div>
-            <Div style="quick slot"></Div>
+            <Div style="head slot"/>
+            <Div style="body slot"/>
+            <Div style="left-arm slot"/>
+            <Div style="right-arm slot"/>
+            <Div style="legs slot"/>
+            <Div style="shoes slot"/>
+            <Div style="accessories slot"/>
+            <Div style="quick slot"/>
             
         </Group>
     </Contents>

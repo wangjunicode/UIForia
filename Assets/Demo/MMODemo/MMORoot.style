@@ -16,10 +16,19 @@ style slot {
     Border = 1px;
     BorderRadius = 2px;
     PreferredSize = 20px;
+    [hover] {
+        BackgroundColor = lightcyan;
+    }
 }
 
 style head {
     PreferredSize = 40px;
-    
+    AlignY = 20px 0px Parent;
+    AlignX = Center Parent;
 }
 
+style body {
+    PreferredSize = 60px 170px;
+    AlignY = 60px 0px Parent;
+    AlignX = Center Parent;
+}

@@ -373,7 +373,7 @@ namespace UIForia.Compilers {
             MemberExpression scopeVar = Expression.Field(ExpressionFactory.Convert(nodeExpr, typeof(UIRepeatElement)), typeof(UIRepeatElement).GetField(nameof(UIRepeatElement.scope)));
             MemberExpression indexVarIdField = Expression.Field(ExpressionFactory.Convert(nodeExpr, typeof(UIRepeatElement)), typeof(UIRepeatElement).GetField(nameof(UIRepeatElement.indexVarId)));
 
-            StructList<ContextAliasActions> mods = CompileBindings(ctx, repeatNode, repeatNode.attributes);
+            StructList<ContextAliasActions> mods = CompileBindings(ctx, repeatNode, repeatNode.attributes).contextModifications;
 
             int spawnId = CompileChildrenAsTemplate(ctx, repeatNode, RepeatType.Count, out int _, out int indexVarId);
 
@@ -408,11 +408,11 @@ namespace UIForia.Compilers {
             MemberExpression itemVarIdField = Expression.Field(ExpressionFactory.Convert(nodeExpr, typeof(UIRepeatElement)), typeof(UIRepeatElement).GetField(nameof(UIRepeatElement.itemVarId)));
             MemberExpression indexVarIdField = Expression.Field(ExpressionFactory.Convert(nodeExpr, typeof(UIRepeatElement)), typeof(UIRepeatElement).GetField(nameof(UIRepeatElement.indexVarId)));
 
-            StructList<ContextAliasActions> modifications = CompileBindings(ctx, repeatNode, repeatNode.attributes);
+            BindingOutput bindingOutput = CompileBindings(ctx, repeatNode, repeatNode.attributes);
 
             int spawnId = CompileChildrenAsTemplate(ctx, repeatNode, RepeatType.List, out int itemVarId, out int indexVarId);
 
-            UndoContextMods(modifications);
+            UndoContextMods(bindingOutput.contextModifications);
 
             ctx.Assign(templateSpawnIdField, Expression.Constant(spawnId));
             ctx.Assign(templateRootContext, ctx.rootParam);
@@ -669,7 +669,7 @@ namespace UIForia.Compilers {
         }
 
         private void ProcessAttrsAndVisitChildren(CompilationContext ctx, TemplateNode node, ExposedVariableData exposedVariableData = null) {
-            StructList<ContextAliasActions> contextMods = CompileBindings(ctx, node, node.attributes, exposedVariableData);
+            StructList<ContextAliasActions> contextMods = CompileBindings(ctx, node, node.attributes, exposedVariableData).contextModifications;
 
             VisitChildren(ctx, node);
 
@@ -964,13 +964,20 @@ namespace UIForia.Compilers {
         // - AfterBindings()
         // - sync & change
 
-        private StructList<ContextAliasActions> CompileBindings(CompilationContext ctx, TemplateNode templateNode, StructList<AttributeDefinition> attributes, ExposedVariableData exposedVariableData = null) {
+        private struct BindingOutput {
+            public bool hasBindingNode;
+            public StructList<ContextAliasActions> contextModifications;
+        }
+        
+        private BindingOutput CompileBindings(CompilationContext ctx, TemplateNode templateNode, StructList<AttributeDefinition> attributes, ExposedVariableData exposedVariableData = null) {
             StructList<ContextAliasActions> contextModifications = null;
 
             StructList<ChangeHandlerDefinition> changeHandlerDefinitions = null;
 
             bool isRootTemplate = ctx.templateRootNode == templateNode;
 
+            BindingOutput retn = default;
+            
             // for template roots (which are not the app root!) we dont want to generate bindings in their own template definition functions
             // instead we let the usage site do that for us. We still need to provide context variables to our template, probably in a dry-run fashion.
 
@@ -1009,7 +1016,7 @@ namespace UIForia.Compilers {
 
                 CompileCheckChangeHandlers(changeHandlerDefinitions);
 
-                BuildBindings(ctx, templateNode);
+                retn.hasBindingNode = BuildBindings(ctx, templateNode);
 
                 changeHandlerDefinitions?.Release();
             }
@@ -1018,7 +1025,8 @@ namespace UIForia.Compilers {
                 throw;
             }
 
-            return contextModifications;
+            retn.contextModifications = contextModifications;
+            return retn;
         }
 
         private void CompileCheckChangeHandlers(StructList<ChangeHandlerDefinition> changeHandlers) {
@@ -1786,7 +1794,7 @@ namespace UIForia.Compilers {
             createdCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(inputSystem, method, elementVar));
         }
 
-        private void BuildBindings(CompilationContext ctx, TemplateNode templateNode) {
+        private bool BuildBindings(CompilationContext ctx, TemplateNode templateNode) {
             int createdBindingId = -1;
             int enabledBindingId = -1;
             int updateBindingId = -1;
@@ -1822,8 +1830,12 @@ namespace UIForia.Compilers {
                 ctx.compiledTemplate.AddBinding(lateBinding);
             }
 
+ 
+            
             // create binding node if needed
-            if (createdBindingId >= 0 || updateBindingId >= 0 || enabledBindingId >= 0 || lateBindingId >= 0) {
+            // todo -- some nodes like repeat children always need a binding node created. 
+            // most nodes without bindings do not
+            //if (createdBindingId >= 0 || updateBindingId >= 0 || enabledBindingId >= 0 || lateBindingId >= 0) {
                 // scope.application.BindingNodePool.Get(root, element);
                 ctx.AddStatement(ExpressionFactory.CallStaticUnchecked(s_BindingNodePool_Get,
                         ctx.applicationExpr,
@@ -1836,7 +1848,10 @@ namespace UIForia.Compilers {
                         Expression.Constant(lateBindingId)
                     )
                 );
-            }
+                return true;
+         //   }
+
+         //   return false;
         }
 
         private MethodCallExpression CreateLocalContextVariableExpression(ContextVariableDefinition definition, out Type contextVarType) {

@@ -174,7 +174,6 @@ namespace UIForia.Elements {
 
     // todo use StructList<char> instead of string to alloc less
     
-    [GenericElementTypeResolvedBy(nameof(value))]
     [Template(TemplateType.Internal, "Elements/InputElement.xml")]
     public class InputElement<T> : UIInputElement where T : IEquatable<T> {
 
@@ -205,7 +204,7 @@ namespace UIForia.Elements {
         }
 
         [OnPropertyChanged(nameof(value))]
-        protected void OnInputValueChanged(string name) {
+        public void OnInputValueChanged(string name) {
             string oldText = text;
             text = serializer.Serialize(value) ?? string.Empty;
 

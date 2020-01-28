@@ -21,7 +21,7 @@ namespace UIForia.UIInput {
             this.isFocused = isFocused;
         }
 
-        public MouseInputEvent AsMouseInputEvent => new MouseInputEvent(propagator, type, modifiers);
+        public MouseInputEvent AsMouseInputEvent => new MouseInputEvent(propagator, type, modifiers, isFocused);
 
         public KeyboardInputEvent AsKeyInputEvent => new KeyboardInputEvent(type, keyCode, character, modifiers, isFocused);
 

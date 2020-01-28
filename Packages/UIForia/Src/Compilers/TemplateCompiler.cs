@@ -34,6 +34,7 @@ namespace UIForia.Compilers {
 
         private Expression changeHandlerCurrentValue;
         private Expression changeHandlerPreviousValue;
+        private Expression currentEvent;
 
         private readonly CompiledTemplateData templateData;
         private readonly Dictionary<Type, CompiledTemplate> templateMap;
@@ -965,10 +966,12 @@ namespace UIForia.Compilers {
         // - sync & change
 
         private struct BindingOutput {
+
             public bool hasBindingNode;
             public StructList<ContextAliasActions> contextModifications;
+
         }
-        
+
         private BindingOutput CompileBindings(CompilationContext ctx, TemplateNode templateNode, StructList<AttributeDefinition> attributes, ExposedVariableData exposedVariableData = null) {
             StructList<ContextAliasActions> contextModifications = null;
 
@@ -977,7 +980,7 @@ namespace UIForia.Compilers {
             bool isRootTemplate = ctx.templateRootNode == templateNode;
 
             BindingOutput retn = default;
-            
+
             // for template roots (which are not the app root!) we dont want to generate bindings in their own template definition functions
             // instead we let the usage site do that for us. We still need to provide context variables to our template, probably in a dry-run fashion.
 
@@ -1612,12 +1615,14 @@ namespace UIForia.Compilers {
         private void CompileMouseHandlerFromAttribute(in InputHandler handler) {
             LightList<Parameter> parameters = LightList<Parameter>.Get();
 
-            parameters.Add(new Parameter<GenericInputEvent>(k_InputEventParameterName, ParameterFlags.NeverNull | ParameterFlags.NeverOutOfBounds));
+            parameters.Add(new Parameter<MouseInputEvent>(k_InputEventParameterName, ParameterFlags.NeverNull | ParameterFlags.NeverOutOfBounds));
             LinqCompiler closure = createdCompiler.CreateClosure(parameters, typeof(void));
 
+            currentEvent = parameters[0];
+
             if (handler.useEventParameter) {
-                Expression toMouseEvent = Expression.Property(parameters[0].expression, s_GenericInputEvent_AsMouseInputEvent);
-                closure.RawExpression(ExpressionFactory.CallInstanceUnchecked(createdCompiler.GetCastElement(), handler.methodInfo, toMouseEvent));
+                // Expression toMouseEvent = Expression.Property(parameters[0].expression, s_GenericInputEvent_AsMouseInputEvent);
+                closure.RawExpression(ExpressionFactory.CallInstanceUnchecked(createdCompiler.GetCastElement(), handler.methodInfo, currentEvent));
             }
             else {
                 closure.RawExpression(ExpressionFactory.CallInstanceUnchecked(createdCompiler.GetCastElement(), handler.methodInfo));
@@ -1830,28 +1835,27 @@ namespace UIForia.Compilers {
                 ctx.compiledTemplate.AddBinding(lateBinding);
             }
 
- 
-            
+
             // create binding node if needed
             // todo -- some nodes like repeat children always need a binding node created. 
             // most nodes without bindings do not
             //if (createdBindingId >= 0 || updateBindingId >= 0 || enabledBindingId >= 0 || lateBindingId >= 0) {
-                // scope.application.BindingNodePool.Get(root, element);
-                ctx.AddStatement(ExpressionFactory.CallStaticUnchecked(s_BindingNodePool_Get,
-                        ctx.applicationExpr,
-                        ctx.rootParam,
-                        ctx.ElementExpr,
-                        ctx.ContextExpr,
-                        Expression.Constant(createdBindingId),
-                        Expression.Constant(enabledBindingId),
-                        Expression.Constant(updateBindingId),
-                        Expression.Constant(lateBindingId)
-                    )
-                );
-                return true;
-         //   }
+            // scope.application.BindingNodePool.Get(root, element);
+            ctx.AddStatement(ExpressionFactory.CallStaticUnchecked(s_BindingNodePool_Get,
+                    ctx.applicationExpr,
+                    ctx.rootParam,
+                    ctx.ElementExpr,
+                    ctx.ContextExpr,
+                    Expression.Constant(createdBindingId),
+                    Expression.Constant(enabledBindingId),
+                    Expression.Constant(updateBindingId),
+                    Expression.Constant(lateBindingId)
+                )
+            );
+            return true;
+            //   }
 
-         //   return false;
+            //   return false;
         }
 
         private MethodCallExpression CreateLocalContextVariableExpression(ContextVariableDefinition definition, out Type contextVarType) {
@@ -2181,7 +2185,8 @@ namespace UIForia.Compilers {
                 LambdaExpressionNode n = (LambdaExpressionNode) astNode;
 
                 if (n.signature.size == 0) {
-                    parameters.Add(new Parameter<GenericInputEvent>(k_InputEventParameterName, ParameterFlags.NeverNull | ParameterFlags.NeverOutOfBounds));
+                    currentEvent = parameters.AddReturn(new Parameter<MouseInputEvent>(k_InputEventParameterName, ParameterFlags.NeverNull | ParameterFlags.NeverOutOfBounds));
+
                     closure = compiler.CreateClosure(parameters, typeof(void));
                     closure.Statement(n.body);
                 }
@@ -2192,10 +2197,11 @@ namespace UIForia.Compilers {
                         Debug.LogWarning("Input handler lambda should not define a type");
                     }
 
-                    Parameter parameter = parameters.AddReturn(new Parameter<GenericInputEvent>(k_InputEventParameterName, ParameterFlags.NeverNull | ParameterFlags.NeverOutOfBounds));
+                    Parameter parameter = parameters.AddReturn(new Parameter<MouseInputEvent>(signature.identifier, ParameterFlags.NeverNull | ParameterFlags.NeverOutOfBounds));
+                    currentEvent = parameter;
                     closure = compiler.CreateClosure(parameters, typeof(void));
-                    ParameterExpression variable = closure.AddVariable(typeof(MouseInputEvent), signature.identifier);
-                    closure.Assign(variable, Expression.Property(parameter.expression, s_GenericInputEvent_AsMouseInputEvent));
+                    // ParameterExpression variable = closure.AddVariable(typeof(MouseInputEvent), signature.identifier);
+                    // closure.Assign(variable, Expression.Property(parameter.expression, s_GenericInputEvent_AsMouseInputEvent));
                     closure.Statement(n.body);
                 }
                 else {
@@ -2203,7 +2209,8 @@ namespace UIForia.Compilers {
                 }
             }
             else {
-                parameters.Add(new Parameter<GenericInputEvent>(k_InputEventParameterName, ParameterFlags.NeverNull | ParameterFlags.NeverOutOfBounds));
+                currentEvent = parameters.AddReturn(new Parameter<MouseInputEvent>(k_InputEventParameterName, ParameterFlags.NeverNull | ParameterFlags.NeverOutOfBounds));
+
                 closure = compiler.CreateClosure(parameters, typeof(void));
                 closure.Statement(attr.value);
                 LightList<Parameter>.Release(ref parameters);
@@ -2569,6 +2576,22 @@ namespace UIForia.Compilers {
                 return Expression.Field(c.GetElement(), s_UIElement_Parent);
             }
 
+            if (aliasName == "evt") {
+                if (currentEvent == null) {
+                    throw new CompileException("Invalid use of $evt, this alias is only available when used inside of an event handler");
+                }
+
+                return currentEvent;
+            }
+
+            if (aliasName == "event") {
+                if (currentEvent == null) {
+                    throw new CompileException("Invalid use of $event, this alias is only available when used inside of an event handler");
+                }
+
+                return currentEvent;
+            }
+
             if (aliasName == "root" || aliasName == "this") {
                 return ((UIForiaLinqCompiler) compiler).GetCastRoot();
             }
@@ -2601,23 +2624,6 @@ namespace UIForia.Compilers {
                 Expression.Constant(CountRealAttributes(node.attributes)),
                 Expression.Constant(ctx.compiledTemplate.templateId)
             );
-        }
-
-        private struct GenericTypeFlat { }
-
-        private void FlattenGenericTypeString(string input) {
-            int ptr = input.IndexOf('[');
-
-            StructList<GenericTypeFlat> flattened = new StructList<GenericTypeFlat>();
-
-            for (; ptr < input.Length; ptr++) {
-                char current = input[ptr];
-
-                if (current == '[') { }
-                else if (current == ']') {
-                    // List[List[string]], List[string], string
-                }
-            }
         }
 
 
@@ -2681,13 +2687,12 @@ namespace UIForia.Compilers {
                 }
 
                 if (inputType.IsConstructedGenericType) {
-                    
                     if (ReflectionUtil.IsAction(inputType) || ReflectionUtil.IsFunc(inputType)) {
                         return;
                     }
 
                     Type expressionType = typeResolver.GetExpressionType(attr.value);
-                    
+
                     Type[] typeArgs = expressionType.GetGenericArguments();
                     Type[] fieldArgs = inputType.GetGenericArguments();
 

@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using UIForia.Compilers;
 using UIForia.Elements;
 using UIForia.Compilers.Style;
-
+#pragma warning disable 0164
 namespace UIForia.Generated {
 
     public partial class UIForiaGeneratedTemplates_::APPNAME:: : ITemplateLoader {
@@ -60,6 +60,8 @@ namespace UIForia.Generated {
     }
 
 }
+#pragma warning enable 0164
+
                 ";
 
     }

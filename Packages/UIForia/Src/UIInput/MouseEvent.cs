@@ -10,7 +10,7 @@ namespace UIForia.UIInput {
 
         private readonly EventPropagator source;
 
-        public MouseInputEvent(EventPropagator source, InputEventType type, KeyboardModifiers modifiers) {
+        public MouseInputEvent(EventPropagator source, InputEventType type, KeyboardModifiers modifiers, bool isFocused) {
             this.source = source;
             this.type = type;
             this.modifiers = modifiers;

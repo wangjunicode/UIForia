@@ -487,7 +487,7 @@ namespace UIForia.Systems {
 
             IsDragging = true;
             m_EventPropagator.Reset(mouseState);
-            MouseInputEvent mouseEvent = new MouseInputEvent(m_EventPropagator, InputEventType.DragCreate, modifiersThisFrame);
+            MouseInputEvent mouseEvent = new MouseInputEvent(m_EventPropagator, InputEventType.DragCreate, modifiersThisFrame, false);
 
             m_EventPropagator.origin = m_MouseDownElements.array[0];
 
@@ -749,13 +749,14 @@ namespace UIForia.Systems {
                     if (!ShouldRun(handler, keyInputEvent)) {
                         continue;
                     }
-                    
+
                     Action<GenericInputEvent> keyHandler = evtHandlerGroup.eventHandlers[i].handlerFn as Action<GenericInputEvent>;
                     Debug.Assert(keyHandler != null, nameof(keyHandler) + " != null");
                     keyHandler.Invoke(keyEvent);
                 }
             }
         }
+
         protected bool ShouldRun(in InputHandlerGroup.HandlerData handlerData, in KeyboardInputEvent evt) {
             if (evt.eventType != handlerData.eventType) return false;
 
@@ -770,7 +771,7 @@ namespace UIForia.Systems {
             // if all required modifiers are present these should be equal
             return (handlerData.modifiers & evt.modifiers) == handlerData.modifiers;
         }
-        
+
         private void RunMouseEvents(List<UIElement> elements, InputEventType eventType) {
             if (elements.Count == 0) return;
 
@@ -804,9 +805,9 @@ namespace UIForia.Systems {
                     }
 
                     if ((handlerData.modifiers & modifiersThisFrame) == handlerData.modifiers) {
-                        Action<GenericInputEvent> handler = handlerData.handlerFn as Action<GenericInputEvent>;
+                        Action<MouseInputEvent> handler = handlerData.handlerFn as Action<MouseInputEvent>;
                         Debug.Assert(handler != null, nameof(handler) + " != null");
-                        handler.Invoke(new GenericInputEvent(eventType, modifiersThisFrame, m_EventPropagator, '\0', default, element == m_FocusedElement));
+                        handler.Invoke(new MouseInputEvent(m_EventPropagator, eventType, modifiersThisFrame, element == m_FocusedElement));
                     }
 
                     if (m_EventPropagator.shouldStopPropagation) {
@@ -821,11 +822,11 @@ namespace UIForia.Systems {
             }
 
             for (int i = 0; i < m_MouseEventCaptureList.Count; i++) {
-                Action<GenericInputEvent> handler = (Action<GenericInputEvent>) m_MouseEventCaptureList[i].Item1;
+                Action<MouseInputEvent> handler = (Action<MouseInputEvent>) m_MouseEventCaptureList[i].Item1;
                 UIElement element = m_MouseEventCaptureList[i].Item2;
 
-                handler.Invoke(new GenericInputEvent(eventType, modifiersThisFrame, m_EventPropagator, '\0', default,
-                    element == m_FocusedElement));
+                handler.Invoke(new MouseInputEvent(m_EventPropagator, eventType, modifiersThisFrame, element == m_FocusedElement));
+
 
                 if (m_EventPropagator.shouldStopPropagation) {
                     m_MouseEventCaptureList.Clear();
@@ -868,8 +869,7 @@ namespace UIForia.Systems {
             else if (mouseState.isLeftMouseDown || mouseState.isRightMouseDown || mouseState.isMiddleMouseDown) {
                 RunMouseEvents(m_ElementsThisFrame, InputEventType.MouseHeldDown);
             }
-            
-            
+
 
             RunMouseEvents(m_ElementsThisFrame,
                 mouseState.DidMove ? InputEventType.MouseMove : InputEventType.MouseHover);

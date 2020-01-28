@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UITemplate>
+    <Style src="Demo/MMODemo/MMORoot.style" />
+    <Contents style="menu-screen">
+        
+        <Heading1>Wowzers MMO Menu</Heading1>
+        
+        <!-- todo: input does not work because the bindings clear the value every frame -->
+        <InputElement sync:value="characterName" />
+        
+        <Group style="character">
+            
+            <Div style="head slot"></Div>
+            <Div style="body slot"></Div>
+            <Div style="left-arm slot"></Div>
+            <Div style="right-arm slot"></Div>
+            <Div style="legs slot"></Div>
+            <Div style="shoes slot"></Div>
+            <Div style="accessories slot"></Div>
+            <Div style="quick slot"></Div>
+            
+        </Group>
+    </Contents>
+</UITemplate>

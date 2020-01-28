@@ -1,0 +1,25 @@
+style menu-screen {
+    BackgroundColor = lavender;
+    PreferredSize = 1pca;
+}
+
+style character {
+    BorderRadius = 90px;
+    PreferredSize = 200px 400px;
+    ShadowColor = peachpuff;
+    AlignX = 5% Screen;
+}
+
+style slot {
+    BackgroundColor = papayawhip;
+    BorderColor = thistle;
+    Border = 1px;
+    BorderRadius = 2px;
+    PreferredSize = 20px;
+}
+
+style head {
+    PreferredSize = 40px;
+    
+}
+

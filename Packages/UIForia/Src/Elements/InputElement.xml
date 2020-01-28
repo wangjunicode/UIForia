@@ -21,6 +21,7 @@
             TextWhitespaceMode = NoWrap;
             MinHeight = 1em;
             AlignY = 50% ParentContentArea;
+            Margin = 0 20px;
         }
 
         style placeholder {
